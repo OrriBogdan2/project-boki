@@ -52,3 +52,5 @@ DROP|={'glacione_card','glacione_card3','klaxada_card','klaxada_card3'}
 DROP-={'v2a_glaivyx','v2b_glaivyx','v2a_ringrove','v2b_ringrove'}
 DROP-={'glaivyx_clean_card','glaivyx_clean_portrait','glaivyx_clean_v2pilot','glaivyx_clean_sheet'}  # owner 17:55: tone down the slime
 DROP-={'fam_ringrove_a','fam_ringrove_b'}  # owner 17:57: Ringrove to match Mycroll
+DROP-={'v2g_ringrove_tilt'}  # owner 19:53
+DROP-={'v2g_glaivyx_white'}  # owner 19:53

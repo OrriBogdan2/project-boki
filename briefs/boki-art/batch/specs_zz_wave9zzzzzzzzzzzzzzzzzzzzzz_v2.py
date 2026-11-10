@@ -179,3 +179,43 @@ for _t,_ref,_r in (('a','briefs/boki-art/cards/Sporcupine.jpg',4),('b',_LM['Spor
     _FAM('Sporcupine','mid',_ref,'prowling forward, head low, quills raised',_SPB,_t,_r)
 for _t,_ref,_r in (('a','briefs/boki-art/cards/Ringrove.jpg',4),('b',_LM['Ringrove']['sheet'],3)):
     _FAM('Ringrove','final',_ref,'planted and sitting tall, its mushroom tiers towering over its back',_RGB,_t,_r)
+
+# ===== 19:56 ET 11-09: owner gave me full pick control (19:51). Owner notes on round 8b, 19:53-19:55 =====
+_O='briefs/boki-art/batch/out/'
+_PD={p[0]:p for p in _PILOT}
+_EDIT="Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: "
+# Glaivyx: the no-slime V2 is "great", only lighter inner fur
+SPECS.append({'id':'v2g_glaivyx_white','name':'Glaivyx V2 (white inner fur)','refs':[_O+'glaivyx_clean_v2pilot_2.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"make its light fur almost white: the inner ears, the pale part of its face and muzzle, its chest ruff and the pale fur on its belly and legs become a soft clean white with only a faint lilac tint in the shade. The dark plum fur, the green blade and spikes and everything else stay exactly the same. Do not add anything else."})
+# Ringrove (live card fam_ringrove_a_2): look at the camera with a tilted head, a signature expression
+SPECS.append({'id':'v2g_ringrove_tilt','name':'Ringrove (head tilt to camera)','refs':['briefs/boki-art/cards/Ringrove.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"turn its head to look straight at the viewer and tilt it clearly to one side, about 20 degrees, like a curious, friendly bear sizing you up, with a small knowing smile. Its body, mushroom caps, colours and everything else stay exactly the same. Do not add anything else."})
+# Cindermaw: starting to circle you (pose from the sheet, style from its V2 card)
+def _POSE(id_,n,sheet,v2card,pose,runs):
+    SPECS.append({'id':id_,'name':n+' (V2 new pose)','refs':[sheet,v2card],'runs':runs,'aspect':'1:1','size':'2K',
+      'prompt':("POSE FIRST: "+pose+" "
+        "Draw one single character illustration of "+n+". Image 1 shows it from four sides: use it to understand its body from every angle. "
+        "Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. "
+        +FRAME_V2)})
+_POSE('v2p_cindermaw_circle','Cindermaw',_LM['Cindermaw']['sheet'],_O+'v2a_cindermaw_2.jpg',
+  "it is starting to circle the viewer like a predator: its body is side-on, walking slowly in a curve, one front paw lifted mid-step, shoulders low and head lower, and its skull head is turned to stare straight at the viewer.",4)
+# Glassolotl: other directions and poses
+for _k,_p in (('left',"swimming through the air facing LEFT, body in a long S-curve, tail fin trailing behind, looking ahead."),
+              ('rear',"sitting up on its hind legs facing the viewer, front paws raised and curled, tail wrapped round its feet, head tilted, cheeky smile."),
+              ('back',"walking away to the right and looking back over its shoulder at the viewer, tail fin swishing."),
+              ('pounce',"crouched low facing the viewer, ready to pounce, front legs spread, tail fin raised high behind.")):
+    _POSE('v2p_glassolotl_'+_k,'Glassolotl',_LM['Glassolotl']['sheet'],_O+'v2a2_glassolotl_3.jpg',_p,2)
+# Chandelotl: other colour schemes on the V2 card
+for _k,_c in (('mint',"mint green and soft lilac: a pale mint body, lilac and white candy stripes, mint and lilac chevrons, lilac gills, a pale lilac crystal hood"),
+              ('gold',"white and warm gold: a creamy white body, gold and white stripes, gold chevrons, peach gills, a pale gold crystal hood"),
+              ('night',"deep navy and silver: a deep navy body, silver and pale blue stripes, silver chevrons, pale blue gills, a silvery ice-blue crystal hood"),
+              ('coral',"coral and teal: a coral-orange body, coral, cream and teal stripes, teal chevrons, coral-pink gills, a pale teal crystal hood"),
+              ('amethyst',"dark plum and amethyst: a dark plum body, amethyst and pink stripes, amethyst chevrons, pink gills, a pale violet crystal hood")):
+    SPECS.append({'id':'v2c_chandelotl_'+_k,'name':'Chandelotl colour scheme: '+_k,'refs':[_O+'v2a_chandelotl_1.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':_EDIT+"recolour it to a new colour scheme, "+_c+". Its eye colour, the line style, every shape, stripe and crystal stay exactly the same; only the colours change. Do not add anything else."})
+# V2 stage B for the 7 pilot Boki the owner did not flag: sheet + portrait from the picked V2 card
+_V2PICK={'Vespyx':'v2a_vespyx_1','Coolatee':'v2b_coolatee_1','Rimink':'v2a_rimink_2','Lockatara':'v2a_lockatara_1','Lurklet':'v2a_lurklet_3','Sarcobra':'v2a_sarcobra_2','Aurostag':'v2a_aurostag_1'}
+for _n,_s in _V2PICK.items():
+    _r=_PD[_n]; _st,_ar,_dk,_fu,_co,_ct=_r[1],_r[2],_r[3],_r[4],_r[7],_r[8]
+    SPECS.append({'id':'v2s_'+_n.lower(),'name':_n+' (V2 sheet)','refs':[_LM[_n]['sheet'],_O+_s+'.jpg'],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_co,_ct)})
+    SPECS.append({'id':'v2p_'+_n.lower(),'name':_n+' (V2 portrait)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_O+_s+'.jpg'],'runs':3,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_co,_ct,_dk,_fu)})

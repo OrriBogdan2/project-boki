@@ -21889,6 +21889,311 @@
     "prompt": "Single character illustration of one Boki: Ringrove, the creature in image 1, redrawn so it clearly belongs to the same family as image 2 (Mycroll, its baby form) and looks drawn by the same artist. Image 1 is its design: keep its animal, body plan, pose, size and signature parts. Draw it once, in this pose: planted and sitting tall, its mushroom tiers towering over its back. Image 2 is the family and the style: use its exact colours and finish. Family colours: warm brown spines and back, cream face, muzzle and belly, mint-green mushroom caps with round cream spots and soft lavender gills underneath, teal eyes, a dark brown nose. Draw it in image 2's clean style: a bold clean dark brown outline, flat colours with one simple shade, a smooth cute face with big teal eyes and a friendly look, no scruffy fur strands, no realistic texture. It is the grown-up form of image 2, bigger and tougher, so its face is a little more serious than image 2's, with plain cheeks and no blush. It is a big bear-like final form: its back carries three big tiers of mint mushroom caps growing from mossy brown hide, its muzzle is simple and rounded like image 2's, its forelegs are plain brown fur. One creature, whole body in frame with a small margin, plain flat pale grey background (#E8E8EE), no ground, no shadow, no text. Draw no part of image 2's creature."
   },
   {
+    "id": "v2g_glaivyx_white",
+    "name": "Glaivyx V2 (white inner fur)",
+    "refs": [
+      "briefs/boki-art/batch/out/glaivyx_clean_v2pilot_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: make its light fur almost white: the inner ears, the pale part of its face and muzzle, its chest ruff and the pale fur on its belly and legs become a soft clean white with only a faint lilac tint in the shade. The dark plum fur, the green blade and spikes and everything else stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "v2g_ringrove_tilt",
+    "name": "Ringrove (head tilt to camera)",
+    "refs": [
+      "briefs/boki-art/cards/Ringrove.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn its head to look straight at the viewer and tilt it clearly to one side, about 20 degrees, like a curious, friendly bear sizing you up, with a small knowing smile. Its body, mushroom caps, colours and everything else stay exactly the same. Do not add anything else."
+  },
+  {
+    "id": "v2p_cindermaw_circle",
+    "name": "Cindermaw (V2 new pose)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Cindermaw.jpg",
+      "briefs/boki-art/batch/out/v2a_cindermaw_2.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: it is starting to circle the viewer like a predator: its body is side-on, walking slowly in a curve, one front paw lifted mid-step, shoulders low and head lower, and its skull head is turned to stare straight at the viewer. Draw one single character illustration of Cindermaw. Image 1 shows it from four sides: use it to understand its body from every angle. Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2p_glassolotl_left",
+    "name": "Glassolotl (V2 new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glassolotl.jpg",
+      "briefs/boki-art/batch/out/v2a2_glassolotl_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: swimming through the air facing LEFT, body in a long S-curve, tail fin trailing behind, looking ahead. Draw one single character illustration of Glassolotl. Image 1 shows it from four sides: use it to understand its body from every angle. Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2p_glassolotl_rear",
+    "name": "Glassolotl (V2 new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glassolotl.jpg",
+      "briefs/boki-art/batch/out/v2a2_glassolotl_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: sitting up on its hind legs facing the viewer, front paws raised and curled, tail wrapped round its feet, head tilted, cheeky smile. Draw one single character illustration of Glassolotl. Image 1 shows it from four sides: use it to understand its body from every angle. Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2p_glassolotl_back",
+    "name": "Glassolotl (V2 new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glassolotl.jpg",
+      "briefs/boki-art/batch/out/v2a2_glassolotl_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: walking away to the right and looking back over its shoulder at the viewer, tail fin swishing. Draw one single character illustration of Glassolotl. Image 1 shows it from four sides: use it to understand its body from every angle. Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2p_glassolotl_pounce",
+    "name": "Glassolotl (V2 new pose)",
+    "refs": [
+      "briefs/boki-art/evolutions/Glassolotl.jpg",
+      "briefs/boki-art/batch/out/v2a2_glassolotl_3.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: crouched low facing the viewer, ready to pounce, front legs spread, tail fin raised high behind. Draw one single character illustration of Glassolotl. Image 1 shows it from four sides: use it to understand its body from every angle. Image 2 is the same creature in the final art style, and it is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 2 is drawn, only in the new pose. Draw it once. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2c_chandelotl_mint",
+    "name": "Chandelotl colour scheme: mint",
+    "refs": [
+      "briefs/boki-art/batch/out/v2a_chandelotl_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it to a new colour scheme, mint green and soft lilac: a pale mint body, lilac and white candy stripes, mint and lilac chevrons, lilac gills, a pale lilac crystal hood. Its eye colour, the line style, every shape, stripe and crystal stay exactly the same; only the colours change. Do not add anything else."
+  },
+  {
+    "id": "v2c_chandelotl_gold",
+    "name": "Chandelotl colour scheme: gold",
+    "refs": [
+      "briefs/boki-art/batch/out/v2a_chandelotl_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it to a new colour scheme, white and warm gold: a creamy white body, gold and white stripes, gold chevrons, peach gills, a pale gold crystal hood. Its eye colour, the line style, every shape, stripe and crystal stay exactly the same; only the colours change. Do not add anything else."
+  },
+  {
+    "id": "v2c_chandelotl_night",
+    "name": "Chandelotl colour scheme: night",
+    "refs": [
+      "briefs/boki-art/batch/out/v2a_chandelotl_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it to a new colour scheme, deep navy and silver: a deep navy body, silver and pale blue stripes, silver chevrons, pale blue gills, a silvery ice-blue crystal hood. Its eye colour, the line style, every shape, stripe and crystal stay exactly the same; only the colours change. Do not add anything else."
+  },
+  {
+    "id": "v2c_chandelotl_coral",
+    "name": "Chandelotl colour scheme: coral",
+    "refs": [
+      "briefs/boki-art/batch/out/v2a_chandelotl_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it to a new colour scheme, coral and teal: a coral-orange body, coral, cream and teal stripes, teal chevrons, coral-pink gills, a pale teal crystal hood. Its eye colour, the line style, every shape, stripe and crystal stay exactly the same; only the colours change. Do not add anything else."
+  },
+  {
+    "id": "v2c_chandelotl_amethyst",
+    "name": "Chandelotl colour scheme: amethyst",
+    "refs": [
+      "briefs/boki-art/batch/out/v2a_chandelotl_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: recolour it to a new colour scheme, dark plum and amethyst: a dark plum body, amethyst and pink stripes, amethyst chevrons, pink gills, a pale violet crystal hood. Its eye colour, the line style, every shape, stripe and crystal stay exactly the same; only the colours change. Do not add anything else."
+  },
+  {
+    "id": "v2s_vespyx",
+    "name": "Vespyx (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Vespyx.jpg",
+      "briefs/boki-art/batch/out/v2a_vespyx_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Vespyx. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: plum-purple fur, pale lilac chest, muzzle and inner ears, darker plum ear tips and paws, a dark plum segmented tail, one lime-green venom bead, lime-green eyes. Parts, the same in every view: four legs, two ears, one tail with the same number of segments as image 1, ending in one venom bead. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_vespyx",
+    "name": "Vespyx (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Vespyx.jpg",
+      "briefs/boki-art/batch/out/v2a_vespyx_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Vespyx. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: plum-purple fur, pale lilac chest, muzzle and inner ears, darker plum ear tips and paws, a dark plum segmented tail, one lime-green venom bead, lime-green eyes. Parts: four legs, two ears, one tail with the same number of segments as image 1, ending in one venom bead. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_coolatee",
+    "name": "Coolatee (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Coolatee.jpg",
+      "briefs/boki-art/batch/out/v2b_coolatee_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Coolatee. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: creamy white body, pale ice-blue crystals on its back, green eyes, dark grey nose. Parts, the same in every view: two front flippers, two hind flippers, one cluster of ice crystals on its back. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_coolatee",
+    "name": "Coolatee (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Coolatee.jpg",
+      "briefs/boki-art/batch/out/v2b_coolatee_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Coolatee. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: creamy white body, pale ice-blue crystals on its back, green eyes, dark grey nose. Parts: two front flippers, two hind flippers, one cluster of ice crystals on its back. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_rimink",
+    "name": "Rimink (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/evolutions/Rimink.jpg",
+      "briefs/boki-art/batch/out/v2a_rimink_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Rimink. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: white fur, a navy-black stripe down its chest and a navy-black tail tip, pale ice-blue crystals along its back and legs, dark blue eyes. Parts, the same in every view: four legs ending in ice hooves, one long tail with a navy brush tip, about 12 crystals along its back. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_rimink",
+    "name": "Rimink (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Rimink.jpg",
+      "briefs/boki-art/batch/out/v2a_rimink_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Rimink. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: white fur, a navy-black stripe down its chest and a navy-black tail tip, pale ice-blue crystals along its back and legs, dark blue eyes. Parts: four legs ending in ice hooves, one long tail with a navy brush tip, about 12 crystals along its back. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: narrow almond eyes tilted up at the outer corners, a coloured iris and one crisp white highlight; the flat upper lid works as the brow; a cool, knowing smirk. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_lockatara",
+    "name": "Lockatara (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lockatara.jpg",
+      "briefs/boki-art/batch/out/v2a_lockatara_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Lockatara. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: olive-green scaly body, grey-steel back spikes and key tail tip, a brass dial on its shoulder, a brass keyhole plate on its brow, green eyes. Parts, the same in every view: four legs, one tail ending in one key bit, one row of spikes along its back, one dial, one keyhole. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_lockatara",
+    "name": "Lockatara (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Lockatara.jpg",
+      "briefs/boki-art/batch/out/v2a_lockatara_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Lockatara. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: olive-green scaly body, grey-steel back spikes and key tail tip, a brass dial on its shoulder, a brass keyhole plate on its brow, green eyes. Parts: four legs, one tail ending in one key bit, one row of spikes along its back, one dial, one keyhole. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: small eyes set deep under a heavy, straight brow ridge, a coloured iris and one small crisp white highlight; a wide jaw with an underbite, tusks or bared teeth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_lurklet",
+    "name": "Lurklet (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Lurklet.jpg",
+      "briefs/boki-art/batch/out/v2a_lurklet_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Lurklet. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: near-black purple body, a lilac lure bulb on a stalk, lilac rings round its belly, big purple eyes, a lilac wispy tail tip. Parts, the same in every view: two arms, two legs, one lure stalk with one bulb, one tail. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_lurklet",
+    "name": "Lurklet (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Lurklet.jpg",
+      "briefs/boki-art/batch/out/v2a_lurklet_3.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Lurklet. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: near-black purple body, a lilac lure bulb on a stalk, lilac rings round its belly, big purple eyes, a lilac wispy tail tip. Parts: two arms, two legs, one lure stalk with one bulb, one tail. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. This creature is dark, and it must stay dark: its dark areas stay near black, as dark as in image 1. On the dark areas the second tone is a lighter one: one hard-edged lit shape on the upper left, a little lighter than the dark base, and the inner lines on dark areas are drawn in that lighter tone so they show. Keep a strong split between its dark, middle and light areas. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_sarcobra",
+    "name": "Sarcobra (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Sarcobra.jpg",
+      "briefs/boki-art/batch/out/v2a_sarcobra_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Sarcobra. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: near-black coils with a dark belly, a gold hood and gold wings with blue-purple feather tips, a blue-purple stripe on its head, golden-yellow eyes. Parts, the same in every view: one snake body in coils, one hood, two wings with three rows of big feathers each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_sarcobra",
+    "name": "Sarcobra (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Sarcobra.jpg",
+      "briefs/boki-art/batch/out/v2a_sarcobra_2.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Sarcobra. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: near-black coils with a dark belly, a gold hood and gold wings with blue-purple feather tips, a blue-purple stripe on its head, golden-yellow eyes. Parts: one snake body in coils, one hood, two wings with three rows of big feathers each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. This creature is dark, and it must stay dark: its dark areas stay near black, as dark as in image 1. On the dark areas the second tone is a lighter one: one hard-edged lit shape on the upper left, a little lighter than the dark base, and the inner lines on dark areas are drawn in that lighter tone so they show. Keep a strong split between its dark, middle and light areas. Face: calm, level, half-lidded eyes with a coloured iris and one crisp white highlight; a long straight brow; a closed, composed mouth; quiet power. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_aurostag",
+    "name": "Aurostag (V2 sheet)",
+    "refs": [
+      "briefs/boki-art/turnarounds/Aurostag.jpg",
+      "briefs/boki-art/batch/out/v2a_aurostag_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Redraw the turnaround sheet in image 1 as a clean flat model sheet of Aurostag. Image 1 is the layout and the design: keep exactly its four views in one single row (front, three-quarter, side, back), their order, poses, scale and spacing, and every part of the creature. Image 2 is the same creature in the final art style, and it is the truth for colours, eyes, face and part counts: every view must agree with image 2 and with the other views. Colours: deep navy-blue body, a flowing aurora pattern in purple and teal on its body, teal-to-lilac crystal antlers, blue eyes. Parts, the same in every view: four legs, two antlers. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using the base colours of image 2, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. All four views are the same height with the feet on one invisible baseline; the front, side and back are true front, side and back views. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_aurostag",
+    "name": "Aurostag (V2 portrait)",
+    "refs": [
+      "briefs/boki-art/portraits/light/Aurostag.jpg",
+      "briefs/boki-art/batch/out/v2a_aurostag_1.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Redraw the creature portrait in image 1: Aurostag. Image 1 is the pose: keep its pose, view and framing. Image 2 is the same creature in the final art style, and it is the truth for design, colours, eyes, face, part counts and finish: draw image 1's pose exactly the way image 2 is drawn. Colours: deep navy-blue body, a flowing aurora pattern in purple and teal on its body, teal-to-lilac crystal antlers, blue eyes. Parts: four legs, two antlers. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. This creature is dark, and it must stay dark: its dark areas stay near black, as dark as in image 1. On the dark areas the second tone is a lighter one: one hard-edged lit shape on the upper left, a little lighter than the dark base, and the inner lines on dark areas are drawn in that lighter tone so they show. Keep a strong split between its dark, middle and light areas. Face: calm, level, half-lidded eyes with a coloured iris and one crisp white highlight; a long straight brow; a closed, composed mouth; quiet power. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
