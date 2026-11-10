@@ -104520,5 +104520,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px_b_jerbit_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px_a_jerbit",
+    "name": "Jerbit (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_jerbit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_pinguin",
+    "name": "Pinguin (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_pinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_vespyx",
+    "name": "Vespyx (pixel sprite test a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_a_vespyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_pinguin",
+    "name": "Pinguin (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_a_vespyx",
+    "name": "Vespyx (pixel sprite test a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_a_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_jerbit",
+    "name": "Jerbit (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_jerbit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_mycroll",
+    "name": "Mycroll (pixel sprite test b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px_b_mycroll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px_b_prismander",
+    "name": "Prismander (pixel sprite test b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px_b_prismander_1.jpg",
+    "ok": true
   }
 ]
