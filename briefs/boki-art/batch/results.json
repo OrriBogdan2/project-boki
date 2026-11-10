@@ -89169,5 +89169,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fp_sandwidow_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fp_hourachnid",
+    "name": "Hourachnid female (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fp_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fp_hourachnid",
+    "name": "Hourachnid female (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fp_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_pavonazar",
+    "name": "Pavonazar female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_pavonazar_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_hourachnid",
+    "name": "Hourachnid female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_hourachnid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_pavonazar",
+    "name": "Pavonazar female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fs_pavonazar_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_hourachnid",
+    "name": "Hourachnid female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fs_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fs_hourachnid",
+    "name": "Hourachnid female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fs_hourachnid_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fv3_voltalon",
+    "name": "Voltalon female (in her line's colours)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fv3_voltalon_4.jpg",
+    "ok": true
   }
 ]
