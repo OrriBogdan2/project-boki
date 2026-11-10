@@ -12,11 +12,11 @@ extends RefCounted
 ## and there in Glasswater after the hop; once Glasswater holds the cap, the next move is refused; one
 ## that would thrive in Glasswater waits at the pad asking and E sends it; setting one down on the pad
 ## opens its cards. With --shots-dir=<dir> (needs a renderer) it also saves hub.png, the whole hub, and
-## hub_horizon_day.png and _night.png: the hub with its island silhouettes, three lit and two in mist.
+## hub_horizon_day.png and _night.png: the hub at arrival zoom with its five zone islands, three lit, two in mist.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 const SHOT_ZOOM := 1.5    # camera zoom for the hub shot (0.8 close .. 1.6 wide)
-const HORIZON_ZOOM := 3.0 # camera zoom for the horizon shots: pulled back to take in the sky islands
+const FRAME_MARGIN := 0.92  # an island counts as in frame with its middle this far from the centre (1 = the edge)
 const SHOT_WAIT_S := 1.5  # s for the ink wipe to clear and the minder to set off before the shot
 
 var bad := 0
@@ -273,6 +273,22 @@ func _horizon_part(hub, open_ids: Array) -> void:
 		ok(lit == (top.s > zone_col.s * 0.6), "%s's island reads %s" % [id, "lit" if lit else "grey in mist"])
 	ok(follows, "the islands follow Save.d zones (open: %s)" % ", ".join(open_ids))
 	ok(mats.size() == (2 if open_ids.size() < isles.size() else 1), "islands share one material per state")
+	# seen as you arrive: the hub's own camera (arrival zoom, on the landing spot) takes in every island
+	hub.cam.zoom_to = hub.HOME_ZOOM
+	hub.cam.zoom = hub.HOME_ZOOM
+	hub.cam.snap(HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF)
+	var seen := isles.filter(func(n): return _in_frame(hub.cam, n.global_position))
+	ok(seen.size() == isles.size(), "at arrival zoom %d of %d islands are in frame" % [seen.size(), isles.size()])
+
+## Whether `p` shows on a 16:9 screen (inside FRAME_MARGIN of its edges) through `cam`'s lens. The
+## headless viewport is square, so the screen point is rescaled to 16:9 at the same height (Godot keeps
+## the vertical lens and widens the view sideways).
+func _in_frame(cam: Camera3D, p: Vector3) -> bool:
+	if cam.is_position_behind(p):
+		return false
+	var size := cam.get_viewport().get_visible_rect().size
+	var s := (cam.unproject_position(p) - size * 0.5) / (size * 0.5)
+	return absf(s.x * (size.x / size.y) / (16.0 / 9.0)) < FRAME_MARGIN and absf(s.y) < FRAME_MARGIN
 
 ## Opening a zone lights its island the next time the hub loads.
 func _reload_part(m: Node) -> void:
@@ -285,9 +301,9 @@ func _reload_part(m: Node) -> void:
 	if hub != null:
 		_horizon_part(hub, [GardenZones.start(), "glasswater", "cinderstep"])      # glasswater: opened by _move_part
 		hub.day_t = 0.5
-		await _hub_shot(m, hub, "hub_horizon_day.png", HORIZON_ZOOM)
+		await _hub_shot(m, hub, "hub_horizon_day.png", hub.HOME_ZOOM, true)
 		hub.day_t = 0.97
-		await _hub_shot(m, hub, "hub_horizon_night.png", HORIZON_ZOOM)
+		await _hub_shot(m, hub, "hub_horizon_night.png", hub.HOME_ZOOM, true)
 	Content.rules("farm_build")["base_mode"] = false
 
 func _texts(n: Node) -> String:
@@ -297,7 +313,7 @@ func _texts(n: Node) -> String:
 	return out
 
 ## hub.png in --shots-dir, when one is given: the whole hub from above, for review by eye.
-func _hub_shot(m: Node, hub, file: String, zoom: float) -> void:
+func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shots-dir="): dir = a.substr(12)
@@ -306,7 +322,7 @@ func _hub_shot(m: Node, hub, file: String, zoom: float) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	hub.cam.zoom_to = zoom
 	hub.cam.zoom = zoom
-	hub.cam.snap(HubWaystone.HUB_AT)
+	hub.cam.snap(HubWaystone.HUB_AT + (HubWaystone.ARRIVE_OFF if arrival else Vector3.ZERO))
 	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
 	hub.prompt_box.visible = false
 	await m.get_tree().process_frame

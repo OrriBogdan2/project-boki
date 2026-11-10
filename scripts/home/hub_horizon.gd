@@ -1,19 +1,20 @@
 class_name HubHorizon
 extends RefCounted
 ## The five zone islands on the hub's horizon (briefs/design/GARDEN.md 10.1, step 9): low-poly
-## silhouettes floating in the sky round the hub, so it promises places to go. An open zone's island
+## islands floating in the void round the hub, so it promises places to go. An open zone's island
 ## is lit, warm and in the zone's colour; a locked one is grey in mist. Which is which is read from
 ## Save.d["zones"] when the hub loads, so opening a zone lights its island the next time you arrive.
 ## One mesh per island and one shared material per state: five draw calls in all (10.6 allows five).
 
-const RING_R := 40.0       # m from the hub's middle to each island
-const ARC := 3.6           # rad of sky the five spread over, centred on the far side (north, -z)
-const RISE := -7.0         # m from the hub's ground (below: the camera looks down); odd islands add RISE_STEP
-const RISE_STEP := -4.0
-const TOP_R := 8.0         # m, an island's top radius
-const DEPTH := 7.0         # m, how far its rocky underside hangs
+## Where each island floats: [degrees round from north (east +), metres out from the hub's middle, metres
+## below its ground]. The home camera looks down from the south, so at the arrival zoom the hub's north rim
+## is the top of the screen and its south rim the bottom: the islands hang in the corners and at the sides,
+## in the void beside the hub, where you see them the moment you arrive (garden_zones_check asserts it).
+const SLOTS := [[-122.0, 16.0, 7.0], [-56.0, 16.5, 5.0], [60.0, 16.5, 5.5], [120.0, 16.0, 7.5], [-92.0, 17.5, 9.5]]
+const TOP_R := 4.0         # m, an island's top radius
+const DEPTH := 4.5         # m, how far its rocky underside hangs
 const SIDES := 7           # corners of the low-poly outline
-const HILL := 2.5          # m the middle of an island's top rises, so it reads as land, not a plate
+const HILL := 1.4          # m the middle of an island's top rises, so it reads as land, not a plate
 const LIT_GLOW := 0.2      # how much a lit island glows (shader glow 0..1)
 const LIT_WARM := 0.15     # how far a lit island's colours warm toward sunlight (0 none .. 1 all)
 const MIST := 0.85         # how far a locked island's colours wash toward grey mist (0 none .. 1 all)
@@ -27,13 +28,14 @@ static var _mats := {}      # open (bool) -> the one material that state shares
 static func place(parent: Node3D, middle: Vector3) -> void:
 	var ids := GardenZones.ids()
 	for i in ids.size():
-		var a := PI + (float(i) / float(ids.size() - 1) - 0.5) * ARC
+		var slot: Array = SLOTS[i % SLOTS.size()]
+		var a := deg_to_rad(float(slot[0]))
 		var open := GardenZones.is_open(ids[i])
 		var mi := MeshInstance3D.new()
 		mi.name = "Horizon_%s" % ids[i]
 		mi.mesh = island_mesh(i, Color(String(GardenZones.info(ids[i])["colour"])), open)
 		mi.material_override = _mat(open)
-		mi.position = middle + Vector3(sin(a) * RING_R, RISE + RISE_STEP * float(i % 2), -cos(a) * RING_R)
+		mi.position = middle + Vector3(sin(a) * float(slot[1]), -float(slot[2]), -cos(a) * float(slot[1]))
 		mi.set_meta("open", open)
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		parent.add_child(mi)
