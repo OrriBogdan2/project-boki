@@ -99,5 +99,11 @@
 			"reason": "The source plants him through the guard: no jump until the counter has struck.",
 			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
 		}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:18); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
+		"rmb": {"h": "push", "v": "slow", "ours": "the Meteor Drop: slides to the cursor disc (5 m at most) in a 0.2 s hang, then slams straight down", "source": "Data: Obsidian Slam is the RMB while airborne, 'strike down' (supervive_kits.md:22); footage 0261-0288: up to the top, about 0.2 s there, then a steep drive down onto the cursor disc (hero-ref/juggernaut.md:276-283)", "verdict": "match"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:27); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:28); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"}
 	}
 }

@@ -25,5 +25,11 @@
 	},
 	"into_jump": {
 		"rmb": {"mode": "lock", "reason": "Owner item 31 and the source: he holds his height from the throw to the end of the reel, and the source grounds him while he reels (only the dash works).", "source": "Owner note (item 31): 'from the hook's cast until it finishes, Grimble holds his current height'. Footage card (0127): 'you GROUNDED while reeling'; wiki fine print: only the dash and the air dash can be used while Abyssal Grasp pulls. Ours: no jump from the throw to the miss or the end of the reel (CastHold, KitStatus grounded); the barge works throughout."}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:56); no cast from the air in the footage (hero-ref/dredge.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "hover", "ours": "the hand flies while his height holds and the jump's speed carries (a standstill drifts at 20%)", "source": "Footage f121-123: keeps moving, body planted (dredge.md 'Reel parity'); the air not shown. Owner playtest 11-10 (ext/dredge-rmb f9b5d2002): a jump back with the hand keeps its speed", "verdict": "owner 11-10"},
+		"e": {"h": "zero", "v": "drop", "ours": "the Anchor Drop drives him straight down", "source": "Data: slam fist down (supervive_kits.md:60); whether it drives him down from the air is not shown (hero-ref/dredge.md:244)", "verdict": "[?]"},
+		"x": {"h": "slow", "v": "fall", "ours": "the charge's 30% walk brakes the jump's speed (the kit steers as on the ground)", "source": "Data: two waves, no move speed (supervive_kits.md:61); footage: cast on the ground only", "verdict": "[?]"}
 	}
 }

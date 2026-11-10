@@ -22,5 +22,11 @@
 		"e": {"mode": "fire", "source": "Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is."},
 		"x": {"mode": "fire", "source": "Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
+	},
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:48); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:49); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:51); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:52); no cast from the air in the footage (hero-ref/venator.md)", "verdict": "[?]"}
 	}
 }
