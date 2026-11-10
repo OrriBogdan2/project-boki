@@ -100768,5 +100768,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_rampartoad_r4_3.jpg",
     "ok": true
+  },
+  {
+    "id": "new_pinguin_final",
+    "name": "new_pinguin_final",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_pinguin_final_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_pinguin_mid",
+    "name": "new_pinguin_mid",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/new_pinguin_mid_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_pinguin_final",
+    "name": "new_pinguin_final",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/new_pinguin_final_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_mid",
+    "name": "new_sawshark_mid",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_sawshark_mid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_mid",
+    "name": "new_sawshark_mid",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_sawshark_mid_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_mid",
+    "name": "new_sawshark_mid",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/new_sawshark_mid_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_final",
+    "name": "new_sawshark_final",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_sawshark_final_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_sawshark_final",
+    "name": "new_sawshark_final",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_sawshark_final_2.jpg",
+    "ok": true
   }
 ]
