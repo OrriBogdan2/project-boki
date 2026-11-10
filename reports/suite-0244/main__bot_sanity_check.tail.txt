@@ -1,0 +1,60 @@
+       [0] _states (res://scripts/ui/ui_theme.gd:55)
+       [1] _buttons (res://scripts/ui/ui_theme.gd:78)
+       [2] build (res://scripts/ui/ui_theme.gd:16)
+       [3] theme (res://scripts/ui/ui.gd:67)
+       [4] install (res://scripts/ui/ui.gd:73)
+       [5] _ready (res://scripts/core/game.gd:19)
+LIFE 47 stomp start Thelek on Violkor
+LIFE 49 stomp end Thelek (done)
+LIFE 49 box Violkor value 63 at (93.0, 3.0, 89.0)
+LIFE 50 stomp start Vaeldax on Gremon
+LIFE 51 stomp start Thelek on Gremon
+LIFE 52 stomp end Vaeldax (missed)
+LIFE 53 box Gremon value 42 at (93.0, 3.0, 86.0)
+LIFE 53 stomp end Thelek (gone)
+LIFE 72 stomp start Vrozri on Thelek
+LIFE 74 stomp end Vrozri (missed)
+LIFE 77 stomp start Vrozri on Thelek
+LIFE 77 Thelek stomped out
+LIFE 77 box Thelek value 178 at (125.0, 3.0, 94.0)
+LIFE 77 stomp end Vrozri (gone)
+LIFE 105 box revive Thelek by Vaeldax
+SANITY seed 3: 0 flagged windows over 150s
+LIFE 90 stomp start Wevyn on Saild
+LIFE 93 stomp end Wevyn (done)
+LIFE 93 box Saild value 99 at (159.0, 3.0, 78.0)
+LIFE 96 wisp revive Hunter
+LIFE 110 wisp revive Hunter
+LIFE 118 box revive Saild by Gratha
+LIFE 120 wisp revive Hunter
+LIFE 122 wisp revive Wevyn
+SANITY seed 5: 0 flagged windows over 150s
+LIFE 34 stomp start Celkax on Hunter
+LIFE 34 stomp end Celkax (broken)
+LIFE 39 wisp revive Hunter
+LIFE 51 wisp revive Hunter
+LIFE 59 wisp revive Bosko
+LIFE 66 box Celkax value 27 at (95.0, 3.0, 93.0)
+LIFE 66 box Maintar value 54 at (94.0, 3.0, 94.0)
+LIFE 66 box Maishis value 169 at (96.0, 3.0, 98.0)
+LIFE 69 stomp start Kraldyn on Himor
+LIFE 70 box Hunter value 24 at (92.0, 3.0, 94.0)
+LIFE 70 box Bosko value 20 at (93.0, 3.0, 94.0)
+LIFE 70 box Himor value 35 at (87.0, 3.0, 107.0)
+LIFE 70 stomp end Kraldyn (gone)
+SANITY seed 9: 0 flagged windows over 150s
+SANITY worst window: turn 20.9 rad, flips 2, jumps 3, dashes 4, ring 1.5s
+SANITY done, failures: 0
+ERROR: Texture with GL ID of 30: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 31: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 32: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 33: leaked 5460 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 36 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+[suite-cache] result reused (fingerprint 7d0d58c98ad9, stored 2026-11-09T23:58:33Z)

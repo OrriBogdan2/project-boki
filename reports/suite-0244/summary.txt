@@ -1,0 +1,32 @@
+flags: 224
+NEW-RED: 8  WORSE: 20  FIXED: 0  red on merge: 48
+cached: 8
+WORSE --abyss-check main=0/2436 merge=0/2730
+WORSE --air-control-check main=124/0 merge=0/24
+NEW-RED --boss-check main=0/0 merge=1/5
+NEW-RED --bot-sanity-check main=0/0 merge=1/0
+WORSE --demo-check main=124/0 merge=0/2
+WORSE --displace-net-check main=1/2 merge=1/3
+WORSE --feel-golden-check main=124/0 merge=0/84
+WORSE --glider-heat-check main=0/2436 merge=0/2730
+WORSE --hatch-check main=0/7 merge=0/12
+WORSE --hit-shape-check main=124/0 merge=1/1
+NEW-RED --hob-check main=0/0 merge=1/2
+NEW-RED --move-feel-check main=0/0 merge=0/4
+NEW-RED --music-leave-check main=0/0 merge=1/2
+WORSE --new-player-flow-check main=124/0 merge=1/1
+WORSE --online-displace-check main=124/0 merge=1/3
+WORSE --perf-budget-check main=124/0 merge=1/1
+NEW-RED --prematch-check main=0/0 merge=0/1
+WORSE --raising-check main=124/0 merge=0/21
+WORSE --remote-anim-check main=124/0 merge=1/2
+WORSE --remote-smooth-check main=124/0 merge=1/2
+WORSE --revive-net-check main=124/0 merge=1/2
+WORSE --sting-check main=124/0 merge=1/6
+WORSE --stretch-check main=124/0 merge=124/432
+NEW-RED --swim-check main=0/0 merge=0/109
+WORSE --toy-check main=124/0 merge=124/6
+WORSE --ttk-check main=124/0 merge=1/22
+NEW-RED --wallmove-check main=0/0 merge=0/1
+WORSE --warm-stamp-check main=124/0 merge=1/1
+DONE

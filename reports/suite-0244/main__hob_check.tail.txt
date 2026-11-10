@@ -1,0 +1,60 @@
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:72)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:164)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:118)
+         [3] finish (res://scripts/match/shroud_tailor.gd:102)
+         [4] dress (res://scripts/match/shrouds.gd:73)
+         [5] dress (res://scripts/match/unmasked.gd:266)
+         [6] _hunter (res://scripts/match/models.gd:810)
+         [7] hunter (res://scripts/match/models.gd:626)
+         [8] _ready_rest (res://scripts/home/home.gd:403)
+         [9] _ready (res://scripts/home/home.gd:178)
+         [10] _hb_home (res://scripts/main.gd:3952)
+         [11] _new_farm (res://tools/hob_check.gd:65)
+         [12] _first_arrival (res://tools/hob_check.gd:70)
+         [13] run (res://tools/hob_check.gd:40)
+         [14] run (res://tools/check_registry.gd:172)
+         [15] _ready (res://scripts/main.gd:357)
+HOBCHECK ok   Hob is a person standing by the market stall
+HOBCHECK ok   his name shows over him
+HOBCHECK ok   the first goal: meet him (1/12  Hob is calling you over at the market stall: walk up and press F.)
+HOBCHECK ok   after the first expedition no second Mask is owned yet
+HOBCHECK ok   first arrival: the camera swings over to him while he waves and calls 'Hey! Over here!'
+HOBCHECK ok   then it comes back to you, once
+HOBCHECK ok   walking up to him: 'Talk to Hob (2 new blueprints)'
+HOBCHECK ok   interact opens the talk box (you stand still)
+HOBCHECK ok   his portrait, his name and his first line
+HOBCHECK ok   line by line; on the stall line he points at it
+HOBCHECK ok   and the camera looks over there
+HOBCHECK ok   after the last line: met, his name tag gone
+HOBCHECK ok   the next goal is the axe
+HOBCHECK ok   later he explains the step you're on: 'Walk up to a tree and hold F to chop. The house takes 10 wood · 6 stone: keep chopping and mining until the bar at the top shows it.'
+HOBCHECK ok   Esc ends the talk
+HOBCHECK ok   no Mask talk before the house is down
+HOBCHECK ok   with the house down he has a '!' for you
+HOBCHECK ok   "By the way... I see you found a Vex Relic."
+HOBCHECK ok   "Could I interest you in another?"
+HOBCHECK ok   the offer shows exactly Kael, Cinder and Meeko (["juggernaut", "ashwick", "tender"])
+HOBCHECK ok   each with its portrait, name and title
+HOBCHECK ok   and a one-line role
+HOBCHECK ok   one clip plays: the Relic in focus (Meeko)
+HOBCHECK ok   the Goals card, the goal line and the world prompts step aside
+HOBCHECK ok   the pick fits a 1280x720 screen ([P: (281.0, 117.0), S: (718.0, 553.0)])
+HOBCHECK ok   taking Meeko opens her and nothing else (["gunslinger", "tender"])
+HOBCHECK ok   the short Mask moment plays (you stand still)
+HOBCHECK ok   then the farm again: no reveal pops up
+HOBCHECK ok   and no more offer
+HOBCHECK ok   and the Goals card and the goal line are back
+HOBCHECK ok   with no farm tutorial the offer is there at once
+HOBCHECK ok   'Not now' keeps the offer
+HOBCHECK ok   a save that already has its second Mask keeps it and is not offered another
+HOBCHECK DONE, failures: 0
+WARNING: 1 RID of type "CanvasItem" was leaked.
+     at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2690)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+[suite-cache] result reused (fingerprint 4e46e89c5aaa, stored 2026-11-09T18:52:15Z)

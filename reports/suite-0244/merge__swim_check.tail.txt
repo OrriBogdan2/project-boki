@@ -1,0 +1,60 @@
+          at: _move_player (res://scripts/home/home.gd:1298)
+          GDScript backtrace (most recent call first):
+              [0] _move_player (res://scripts/home/home.gd:1298)
+              [1] run (res://tools/swim_check.gd:48)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: _move_player (res://scripts/home/home.gd:1298)
+          GDScript backtrace (most recent call first):
+              [0] _move_player (res://scripts/home/home.gd:1298)
+              [1] run (res://tools/swim_check.gd:48)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: _move_player (res://scripts/home/home.gd:1298)
+          GDScript backtrace (most recent call first):
+              [0] _move_player (res://scripts/home/home.gd:1298)
+              [1] run (res://tools/swim_check.gd:48)
+SWIM ok   walking in, the edge is shallow and slows you (3.1 m/s wading vs 4.5 dry)
+SWIM ok   the middle is deep: you swim, slower again (2.6 m/s), sunk in to the shoulders
+SWIM ok   no dash while swimming
+SWIM ok   Space kicks you up out of deep water (a jump from swimming)
+SWIM ok   and you climb out the far side onto dry ground ((33.43333, 0.0, 41.28807))
+SWIM FAIL a Boki can go in after you (the pond doesn't stop it)
+SWIM DONE, failures: 1
+ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneGLES321GeometryInstanceGLES3E
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 3 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 3 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 3 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 3 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: 3 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+ERROR: Texture with GL ID of 33: leaked 17108 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 34: leaked 8554 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Texture with GL ID of 35: leaked 17108 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:77)
+ERROR: Buffer with GL ID of 43: leaked 781200 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 44: leaked 468720 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 45: leaked 97200 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 46: leaked 58320 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 272: leaked 18400 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 273: leaked 3680 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 274: leaked 7776 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: 1 RID allocations of type 'N17RendererSceneCull8InstanceE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 13 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

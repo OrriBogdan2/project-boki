@@ -1,0 +1,60 @@
+
+ERROR: A type associated with a built-in class cannot be marked as a variation of another type (variation: "OptionButton", base: "Button").
+   at: set_type_variation (scene/resources/theme.cpp:1239)
+   GDScript backtrace (most recent call first):
+       [0] _states (res://scripts/ui/ui_theme.gd:55)
+       [1] _buttons (res://scripts/ui/ui_theme.gd:78)
+       [2] build (res://scripts/ui/ui_theme.gd:16)
+       [3] theme (res://scripts/ui/ui.gd:67)
+       [4] install (res://scripts/ui/ui.gd:73)
+       [5] _ready (res://scripts/core/game.gd:19)
+HATCH ok   the egg hatches all the way through (15.6 s)
+HATCH ok   the shell is gone 0.90 s after the pop (want under 1 s)
+HATCH ok   the whole hop-look-face-bounce beat takes 2.14 s (want under 2.5 s)
+HATCH ok   the Boki hops (0.43 m of height)
+HATCH ok   it looks around before it finds you
+HATCH ok   then it looks right at you (off by 0.00 rad)
+HATCH ok   no ring bursts round the egg (0)
+HATCH ok   only a few flakes of shell, no sparkle showers (5 bursts, largest 6)
+HATCH ok   no light rays, flash or fanfare
+HATCH ok   it can't be named before it has met you
+HATCH ok   nothing flashes white ([])
+HATCH FAIL after it looks at you, you can name it (16.8 s)
+HATCH ok   it faces you (off by 0.00 rad)
+HATCH ok   quiet words: "Vespyx" / "It's looking at you. It knows your face now."
+HATCH ok   a shimmer is a faint sparkle in its coat
+HATCH ok   no gold rarity text on its card (0)
+HATCH ok   a rare one gets a line of provenance
+HATCH FAIL Name it hands over to naming
+HATCH ok   the eggs come before any Relic (stage pick)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:72)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:164)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:118)
+         [3] finish (res://scripts/match/shroud_tailor.gd:102)
+         [4] dress (res://scripts/match/shrouds.gd:73)
+         [5] dress (res://scripts/match/unmasked.gd:266)
+         [6] _hunter (res://scripts/match/models.gd:810)
+         [7] hunter (res://scripts/match/models.gd:626)
+         [8] _ready (res://scripts/ui/mask_moment.gd:58)
+         [9] _mask_moment (res://scripts/ui/hatch.gd:759)
+         [10] _finish (res://scripts/ui/hatch.gd:742)
+         [11] _first_mask (res://tools/hatch_check.gd:135)
+HATCH ok   naming the Boki leads into the Relic moment, not the match
+HATCH ok   your first Relic is Vex, with your new Boki (gunslinger)
+HATCH FAIL Vex's Relic drifts in from the crystal and waits by your face
+HATCH ok   your Boki stands beside you
+SCRIPT ERROR: Cannot call method 'get_children' on a null value.
+          at: _texts (res://tools/hatch_check.gd:186)
+          GDScript backtrace (most recent call first):
+              [0] _texts (res://tools/hatch_check.gd:186)
+              [1] _first_mask (res://tools/hatch_check.gd:152)
+HATCH FAIL one button: Put on the Relic, with the interact key ([])
+HATCH FAIL the Relic goes on and you become Vex
+SCRIPT ERROR: Cannot call method 'find_children' on a null value.
+          at: _first_mask (res://tools/hatch_check.gd:165)
+          GDScript backtrace (most recent call first):
+              [0] _first_mask (res://tools/hatch_check.gd:165)
+HATCH CHECK DONE, failures: 5

@@ -1,0 +1,60 @@
+PREMATCH ok   no pick before picking starts
+PREMATCH ok   offline you pick first
+PREMATCH ok   a turn is 10 seconds
+PREMATCH ok   an open Hunter can be picked on your turn
+PREMATCH ok   a Hunter that isn't open is refused
+PREMATCH ok   you can change your mind until the turn runs out
+PREMATCH ok   once your turn runs out both bots pick at once and the picks lock
+PREMATCH ok   no two on the squad play the same Hunter (["gunslinger", "bulwark", "mage"])
+PREMATCH ok   a taken Hunter names who took it
+PREMATCH ok   after the lock hold the match loads, exactly once (1)
+PREMATCH ok   the match starts with the picks, yours saved
+PREMATCH ok   a turn that runs out gives you a random open Hunter (bulwark)
+PREMATCH ok   the pick order is the same on every client (["1", "2", "3"])
+PREMATCH ok   picking waits until everyone loads (1/4)
+PREMATCH ok   a player's load is counted once
+PREMATCH ok   with everyone loaded the first turn starts
+PREMATCH ok   a teammate's pick off their turn is refused
+PREMATCH ok   a live pick shows, the turn goes on
+PREMATCH ok   a final pick ends the turn
+PREMATCH ok   the first pick is taken
+PREMATCH ok   you can't take a squadmate's Hunter
+PREMATCH ok   every squad pick is unique, a gone teammate picked for at once (["gunslinger", "bulwark", "dredge"])
+PREMATCH ok   a teammate whose final pick never comes is picked for after the grace
+PREMATCH ok   a teammate can't take a taken Hunter
+PREMATCH ok   the roster carries the picks, the rival may mirror
+PREMATCH ok   a bot filling a squad skips Hunters the squad already has (dolm)
+PREMATCH ok   with nothing taken the pick is unchanged
+PREMATCH ok   on by default: an expedition gets the lobby
+PREMATCH ok   lobby_enabled off: no lobby, the plain loading screen
+PREMATCH ok   tutorial never gets the lobby
+PREMATCH ok   training never gets the lobby
+PREMATCH ok   arena never gets the lobby
+PREMATCH ok   duel never gets the lobby
+PREMATCH ok   demo_match never gets the lobby
+PREMATCH ok   autoplay never gets the lobby
+PREMATCH ok   a one-team match (training) never gets the lobby
+PREMATCH ok   a duo is dealt one bot mate
+PREMATCH ok   mates are dealt once
+PREMATCH ok   solo has no mates
+PREMATCH ok   the loading screen's squad is you first, then your mate
+PREMATCH ok   a chat line is trimmed and one line
+PREMATCH ok   a chat line is capped at 140 characters
+PREMATCH ok   without a transport the hook only tracks talking
+PREMATCH ok   a transport gets push-to-talk changes
+PREMATCH ok   the screen shows every Hunter
+PREMATCH ok   the screen shows your squad
+PREMATCH ok   the banner says it's your turn (YOUR TURN)
+PREMATCH ok   the turn counts down from 0:10 (0:10)
+PREMATCH ok   each card is name + role word, shut ones have a padlock, hover has stats and quest
+PREMATCH ok   no hold-to-talk without a voice transport and a human squadmate
+PREMATCH FAIL every element sits inside the screen's safe margin (["GridContainer at [P: (28.0, 364.0), S: (1218.0, 452.0)]", "PanelContainer at [P: (28.0, 596.0), S: (296.0, 104.0)]"])
+PREMATCH ok   the chat is one 'Enter to chat' line until a message comes
+PREMATCH ok   Enter opens the input in place of the line
+PREMATCH ok   a fresh turn: plain digits
+PREMATCH ok   the last seconds of your turn turn the digits red
+PREMATCH ok   a sent chat line shows in the log
+PREMATCH ok   the first message opens the log and the input folds back
+PREMATCH ok   once the squad has picked the banner says so
+PREMATCH ok   the note names the pick
+PREMATCH DONE, failures: 1

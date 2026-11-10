@@ -1,0 +1,60 @@
+       [2] build (res://scripts/ui/ui_theme.gd:20)
+       [3] theme (res://scripts/ui/ui.gd:74)
+       [4] install (res://scripts/ui/ui.gd:80)
+       [5] _ready (res://scripts/core/game.gd:19)
+TOY ok   the ball, post and tub are in the Base category, each training a Care stat
+TOY ok   base_mode is off in the shipped rules
+TOY FAIL three toys stand on the island
+TOY ok   flying and rock leans weigh the post up
+TOY ok   ice and water leans weigh the tub up (a lean on the record beats the species)
+TOY ok   base_mode off: nobody plays with the toys
+SCRIPT ERROR: Invalid assignment of property or key 'visible' with value of type 'bool' on a base object of type 'Nil'.
+          at: HomeBuild._enter (res://scripts/home/home_build.gd:1013)
+          GDScript backtrace (most recent call first):
+              [0] _enter (res://scripts/home/home_build.gd:1013)
+              [1] toggle (res://scripts/home/home_build.gd:997)
+              [2] run (res://tools/toy_check.gd:75)
+              [3] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid call. Nonexistent function 'add_child' in base 'Nil'.
+          at: HomeBuild._open_ui (res://scripts/home/home_build.gd:1942)
+          GDScript backtrace (most recent call first):
+              [0] _open_ui (res://scripts/home/home_build.gd:1942)
+              [1] _build_bar (res://scripts/home/home_build.gd:1922)
+              [2] toggle (res://scripts/home/home_build.gd:999)
+              [3] run (res://tools/toy_check.gd:75)
+              [4] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Cannot call method 'get_visible_rect' on a null value.
+          at: BuildCatalog._fill_tiles (res://scripts/ui/build_catalog.gd:163)
+          GDScript backtrace (most recent call first):
+              [0] _fill_tiles (res://scripts/ui/build_catalog.gd:163)
+              [1] refresh (res://scripts/ui/build_catalog.gd:121)
+              [2] _build_bar (res://scripts/home/home_build.gd:1923)
+              [3] toggle (res://scripts/home/home_build.gd:999)
+              [4] run (res://tools/toy_check.gd:75)
+              [5] _hb_home (res://scripts/main.gd:3978)
+TOY ok   base_mode on: the build bar has a Base tab
+TOY ok   and it offers the ball, post and tub
+SCRIPT ERROR: Invalid access to property or key 'zoom_to' on a base object of type 'Nil'.
+          at: HomeBuild.toggle (res://scripts/home/home_build.gd:989)
+          GDScript backtrace (most recent call first):
+              [0] toggle (res://scripts/home/home_build.gd:989)
+              [1] run (res://tools/toy_check.gd:79)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access of index '0' on a base object of type: 'Array'.
+          at: run (res://tools/toy_check.gd:80)
+          GDScript backtrace (most recent call first):
+              [0] run (res://tools/toy_check.gd:80)
+              [1] _hb_home (res://scripts/main.gd:3978)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:72)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:164)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:118)
+         [3] finish (res://scripts/match/shroud_tailor.gd:102)
+         [4] dress (res://scripts/match/shrouds.gd:73)
+         [5] dress (res://scripts/match/unmasked.gd:266)
+         [6] _hunter (res://scripts/match/models.gd:808)
+         [7] hunter (res://scripts/match/models.gd:624)
+         [8] _ready_rest (res://scripts/home/home.gd:410)
+         [9] _slice (res://scripts/home/home.gd:694)

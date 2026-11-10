@@ -1,0 +1,60 @@
+BOSS ok   the bars are back down and the ward glows over the walls
+BOSS ok   sealed: walking at the gate or being flung over the wall keeps you inside
+BOSS ok   sealed: a rival can't get in (7.8m from the middle)
+BOSS ok   bots: sealed in they fight it (["lair_fight"]); a sealed lair isn't a goal from outside (["lair_camp"])
+BOSS ok   wiped: the seal breaks, The Stone Colossus heals (1200 -> 1500) and sleeps
+BOSS ok   the seal times out after 90s: it drops and the boss resets
+BOSS ok   unsealed: you walk out through the gate (8.1m from the middle)
+BOSS FAIL The Stone Colossus wakes when you walk in and seals you both in
+BOSS ok   The Stone Colossus: phase 2 at 66%, phase 3 at 33% (shrugs off hits while it roars), enraged after 75s
+BOSS ok   The Stone Colossus used 3 attacks: ["slam", "boulders", "phase"]
+BOSS ok   The Stone Colossus falls: the gate stays shut (opens in 0:20), the lever lit, the updraft blowing
+BOSS ok   after the kill: walking at the shut gate keeps you in
+BOSS ok   The Stone Colossus's loot: 3 things, all good (["vest 3", "brand_void", "Crown Shard"]), an Epic+ piece of gear and a Brand upgrade, the egg 4.1m from the pile
+BOSS ok   the lever: 'F: Open the gate'; pulled 1.9s after the kill, the gate opens and the updraft dies down
+BOSS ok   after the kill you walk out through the gate (1.0s)
+BOSS ok   The Stone Colossus falls: a Rare Cairn Egg on the ground (on everyone's map), an Epic+ weapon, +265 XP
+BOSS FAIL Stormcoil, the Sky Serpent wakes when you walk in and seals you both in
+BOSS ok   Stormcoil, the Sky Serpent: phase 2 at 66%, phase 3 at 33% (shrugs off hits while it roars), enraged after 75s
+BOSS ok   Stormcoil, the Sky Serpent used 4 attacks: ["dash", "storm", "phase", "static"]
+BOSS ok   Stormcoil, the Sky Serpent falls: the gate stays shut (opens in 0:20), the lever lit, the updraft blowing
+BOSS ok   after the kill: walking at the shut gate keeps you in
+BOSS ok   Stormcoil, the Sky Serpent's loot: 3 things, all good (["skyhook 4", "brand_fire", "Crown Shard"]), an Epic+ piece of gear and a Brand upgrade, the egg 4.1m from the pile
+BOSS ok   the updraft refuses outsiders: no lift over it (0.00m), shoved off and out (8.1m from the middle)
+BOSS ok   the updraft: lifts you 12.4m over the floor, over the wall and away (11.5m behind the lair's middle, landed true) while the gate stays shut
+BOSS ok   nobody at the lever: the gate opens by itself 20.0s after the kill, the updraft dies down
+BOSS ok   after the kill you walk out through the gate (0.0s)
+BOSS ok   Stormcoil, the Sky Serpent falls: a Rare Storm Egg on the ground (on everyone's map), an Epic+ weapon, +285 XP
+BOSS FAIL The Brood Mother wakes when you walk in and seals you both in
+BOSS ok   The Brood Mother: phase 2 at 66%, phase 3 at 33% (shrugs off hits while it roars), enraged after 75s
+BOSS ok   The Brood Mother used 4 attacks: ["lob", "spit", "phase", "burrow"]
+BOSS ok   The Brood Mother falls: the gate stays shut (opens in 0:20), the lever lit, the updraft blowing
+BOSS ok   after the kill: walking at the shut gate keeps you in
+BOSS ok   The Brood Mother's loot: 3 things, all good (["gale_mantle 3", "brand_fire", "Boki Idol"]), an Epic+ piece of gear and a Brand upgrade, the egg 3.8m from the pile
+BOSS FAIL bots after the kill: no one at the gate, pull the lever ([]); rivals camping it, the updraft ([])
+BOSS FAIL a bot rides the updraft out with rivals at the gate (16.0s, 7.6m from the gate, the gate still shut)
+BOSS ok   after the kill you walk out through the gate (1.0s)
+BOSS ok   The Brood Mother falls: a Rare Hive Egg on the ground (on everyone's map), an Epic+ weapon, +284 XP
+BOSS ok   full pack: the egg opens the swap window
+BOSS ok   the Rare Egg is in the pack (["Sky Pearl", "Rare Cairn Egg"])
+BOSS ok   picking it up shows the carrier to everyone for a few seconds
+BOSS ok   dead: the egg is in your deathbox
+BOSS ok   smart loot takes the egg first, even from a full pack
+BOSS ok   extract: a Cairn Egg goes to the Incubator [{ "sp": "cairnback", "boss": "colossus", "id": "re106784148_1", "slot": 0, "m0": 1, "heat": 0.0, "t": 1794321944.69239 }]
+BOSS ok   home: it goes straight into the Incubator's cradle (the breeding nest stays free)
+BOSS ok   hatch: a rare Cairnback (cairnback)
+BOSS ok   rare species (["cairnback", "hivara", "zephyrak"]) only come from eggs
+BOSS ok   every glide, wind and bridge route lands on the island it leads to (0 of 35 don't: [])
+BOSS ok   a bot walked up and opened Stormcrown Eyrie in 97s (3 misses)
+BOSS ok   a rival squad walks into The Sunken Forge: sealed in with The Stone Colossus, you outside
+BOSS ok   the fight is heard by everyone outside within 150m (you, your mate, a rival 54m off) but not 191m away, nor by those inside
+BOSS ok   outside: a ping on the lair (boss icon on the map), 'The Stone Colossus fight at The Sunken Forge', the beam over the lair, the seal's clock over the gate ('The Sunken Forge / THE STONE COLOSSUS FIGHT  ·  1:30')
+BOSS ok   bots that heard it may camp the gate (odds 0.50 with the squad up, 0.29 hurt; ["lair_camp"]); not when leaving, nor if they never heard it
+BOSS ok   the boss falls: everyone near hears it ('The Stone Colossus has fallen at The Sunken Forge'), the clock over the gate: 'The Sunken Forge / The Stone Colossus has fallen  ·  gate opens 0:20'
+BOSS ok   bots sealed in: with a rival camping the gate one rides the updraft out (4.1s); with nobody there the other pulls the lever (1.0s)
+BOSS ok   a generated map: 2 lair(s), 1 live (["colossus", "serpent"])
+BOSSCHECK done, failures: 5
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 22 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

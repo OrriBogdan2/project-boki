@@ -1,0 +1,60 @@
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: _move_player (res://scripts/home/home.gd:1298)
+          GDScript backtrace (most recent call first):
+              [0] _move_player (res://scripts/home/home.gd:1298)
+              [1] _parity (res://tools/air_control_check.gd:296)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: _move_player (res://scripts/home/home.gd:1298)
+          GDScript backtrace (most recent call first):
+              [0] _move_player (res://scripts/home/home.gd:1298)
+              [1] _parity (res://tools/air_control_check.gd:296)
+SCRIPT ERROR: Invalid assignment of property or key 'position' with value of type 'Vector3' on a base object of type 'Nil'.
+          at: _move_player (res://scripts/home/home.gd:1298)
+          GDScript backtrace (most recent call first):
+              [0] _move_player (res://scripts/home/home.gd:1298)
+              [1] _parity (res://tools/air_control_check.gd:296)
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:72)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:164)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:118)
+         [3] finish (res://scripts/match/shroud_tailor.gd:102)
+         [4] dress (res://scripts/match/shrouds.gd:73)
+         [5] dress (res://scripts/match/unmasked.gd:266)
+         [6] _hunter (res://scripts/match/models.gd:808)
+         [7] hunter (res://scripts/match/models.gd:624)
+         [8] _ready_rest (res://scripts/home/home.gd:410)
+         [9] _slice (res://scripts/home/home.gd:694)
+ACHECK ok   farm = Training Area: Lace's dash vx every 0.05s (farm 11.20 11.20 11.20 11.20 11.20 11.20 11.20 11.20 10.91 10.10 | match 11.20 11.20 11.20 11.20 11.20 11.20 11.20 11.20 10.91 10.10)
+ACHECK FAIL farm = Training Area: air vx every 0.1s holding D from a 3 m/s backward drift (farm 4.50 4.55 4.55 4.55 4.55 4.55 | match 2.00 4.55 4.55 5.00 5.00 5.00)
+ACHECK FAIL farm = Training Area: a fresh glide press opens it that step (farm -1, match 18)
+ACHECK note reach m (jump > Shift / Shift > jump): archer 5.2/5.6, juggernaut 6.6/8.1, gunslinger 6.8/9.3, bulwark 10.2/10.8, ashwick 11.6/8.3, tender 16.8/9.7, dolm 4.8/2.6, dredge 6.7/6.3, rimewright 5.2/8.1, mage 8.7/15.7, thief 9.4/7.0, ostra 9.8/1.1, gil 12.9/8.5
+ACHECK ok   Sable's jump > Shift reach 9.4 m is within 1.5x the cast's median 8.7 m
+ACHECK DONE, failures: 2
+ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneGLES323GeometryInstanceSurfaceE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneGLES321GeometryInstanceGLES3E
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)
+ERROR: 1 RID allocations of type 'N5GLES34MeshE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 2 shaders of type SceneShaderGLES3 were never freed
+   at: ~ShaderGLES3 (drivers/gles3/shader_gles3.cpp:836)
+ERROR: 2 RID allocations of type 'N5GLES38MaterialE' were leaked at exit.
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+WARNING: Leaked instance dependency: Bug - did not call instance_notify_deleted when freeing.
+     at: ~Dependency (servers/rendering/storage/utilities.cpp:56)
+ERROR: 2 RID allocations of type 'N5GLES36ShaderE' were leaked at exit.
+ERROR: Buffer with GL ID of 5603: leaked 18400 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 5604: leaked 3680 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: Buffer with GL ID of 5605: leaked 7776 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:108)
+ERROR: 1 RID allocations of type 'N17RendererSceneCull8InstanceE' were leaked at exit.
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 47 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

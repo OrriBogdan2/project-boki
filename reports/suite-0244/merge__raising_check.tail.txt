@@ -1,0 +1,60 @@
+          GDScript backtrace (most recent call first):
+              [0] _meals_lean (res://tools/raising_check.gd:73)
+              [1] run (res://tools/raising_check.gd:154)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+SCRIPT ERROR: Invalid access to property or key 'rec' on a base object of type 'Dictionary'.
+          at: _pet_kin (res://scripts/home/home.gd:2822)
+          GDScript backtrace (most recent call first):
+              [0] _pet_kin (res://scripts/home/home.gd:2822)
+              [1] run (res://tools/raising_check.gd:158)
+              [2] _hb_home (res://scripts/main.gd:3978)
+RAISING FAIL a week of farm days of care, no expedition: Friendly (trust 46)
+RAISING FAIL reaching Close plays its moment: ""
+SCRIPT ERROR: Cannot call method 'get_children' on a null value.
+          at: _close_panel (res://scripts/home/home.gd:2503)
+          GDScript backtrace (most recent call first):
+              [0] _close_panel (res://scripts/home/home.gd:2503)
+              [1] run (res://tools/raising_check.gd:167)
+              [2] _hb_home (res://scripts/main.gd:3978)
+RAISING ok   and only once
+RAISING DONE, failures: 7
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 7 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

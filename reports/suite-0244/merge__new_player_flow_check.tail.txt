@@ -1,0 +1,56 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: A type associated with a built-in class cannot be marked as a variation of another type (variation: "OptionButton", base: "Button").
+   at: set_type_variation (scene/resources/theme.cpp:1239)
+   GDScript backtrace (most recent call first):
+       [0] _states (res://scripts/ui/ui_theme.gd:72)
+       [1] _buttons (res://scripts/ui/ui_theme.gd:95)
+       [2] build (res://scripts/ui/ui_theme.gd:20)
+       [3] theme (res://scripts/ui/ui.gd:74)
+       [4] install (res://scripts/ui/ui.gd:80)
+       [5] _ready (res://scripts/core/game.gd:19)
+NPF ok   the prologue opens
+NPF the prologue runs 37 s if watched
+NPF ok   the skipped prologue lands on the hatch (10.8 s)
+NPF ok   and is remembered as seen
+NPF ok   the hatch opens on its card (0.0 s)
+NPF ok   there is a way forward: 'Choose your Boki'
+WARNING: The "SurfaceTool.generate_lod()" method is deprecated. Consider using "ImporterMesh.generate_lods()" instead.
+     at: generate_lod (scene/resources/surface_tool.cpp:1312)
+     GDScript backtrace (most recent call first):
+         [0] reduce (res://scripts/match/empty_slim.gd:72)
+         [1] _bake_tone (res://scripts/match/shroud_tailor.gd:164)
+         [2] _bake (res://scripts/match/shroud_tailor.gd:118)
+         [3] finish (res://scripts/match/shroud_tailor.gd:102)
+         [4] dress (res://scripts/match/shrouds.gd:73)
+         [5] dress (res://scripts/match/unmasked.gd:266)
+         [6] _hunter (res://scripts/match/models.gd:808)
+         [7] hunter (res://scripts/match/models.gd:624)
+         [8] _rebuild_preview (res://scripts/ui/hatch.gd:492)
+         [9] _show_create (res://scripts/ui/hatch.gd:404)
+         [10] _end_intro (res://scripts/ui/hatch.gd:351)
+         [11] <anonymous lambda> (res://scripts/ui/ui.gd:176)
+         [12] _press (res://tools/new_player_flow_check.gd:86)
+         [13] _hatch (res://tools/new_player_flow_check.gd:133)
+         [14] run (res://tools/new_player_flow_check.gd:37)
+         [15] _prologue (res://tools/new_player_flow_check.gd:126)
+         [16] _wait (res://tools/new_player_flow_check.gd:73)
+NPF ok   then you make yourself (0.0 s)
+NPF ok   with a Random button as well
+NPF ok   there is a way forward: 'Looks good'
+NPF ok   then the eggs (0.0 s)
+NPF ok   there is a way forward: 'This one'
+NPF ok   choosing an egg offers 'Hatch it'
+NPF ok   there is a way forward: 'Hatch it'
+NPF ok   the egg waits for knocks (0.0 s)
+NPF STALLED in 'hatch: egg pick and knocks' on screen @Node3D@1805:<Node3D#801900599583>
+NPF FAIL seven knocks hatch it (60.1 s)
+NPF TIMES (s): prologue 12.7, hatch: card and look 0.2, hatch: egg pick and knocks 73.2
+NPF DONE, failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 1 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

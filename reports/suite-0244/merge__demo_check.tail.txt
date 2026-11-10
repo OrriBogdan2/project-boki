@@ -1,0 +1,60 @@
+       [0] <anonymous lambda> (res://scripts/match/warm_up.gd:58)
+       [1] _batches (res://scripts/match/warm_up.gd:307)
+SCRIPT ERROR: Invalid access to property or key 'want' on a base object of type 'Nil'.
+          at: <anonymous lambda> (res://scripts/main.gd:811)
+          GDScript backtrace (most recent call first):
+              [0] <anonymous lambda> (res://scripts/main.gd:811)
+              [1] <anonymous lambda> (res://scripts/match/warm_up.gd:58)
+              [2] _batches (res://scripts/match/warm_up.gd:307)
+DEMOCHECK ok   care: boots and runs 3 s
+DEMOCHECK ok   care: demo save never written, overlays hidden
+DEMOCHECK ok   care: six grown Boki, hungry only in care
+DEMOCHECK ok   care: tools unlocked
+DEMOCHECK ok   tier2: the flag names the preset
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:124)
+       [1] _shapes (res://scripts/match/boki_dna.gd:80)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:399)
+       [4] kin (res://scripts/match/models.gd:2086)
+       [5] init_kin (res://scripts/match/kin.gd:159)
+       [6] make_hunter (res://scripts/match/match.gd:580)
+       [7] make_bot (res://scripts/match/match.gd:783)
+       [8] _spawn_hunters (res://scripts/match/match.gd:761)
+       [9] _slice (res://scripts/match/match.gd:181)
+ERROR: Index p_bone = -1 is out of bounds (bone_size = 27).
+   at: get_bone_global_rest (scene/3d/skeleton_3d.cpp:791)
+   GDScript backtrace (most recent call first):
+       [0] _stick (res://scripts/match/boki_dna.gd:124)
+       [1] _shapes (res://scripts/match/boki_dna.gd:81)
+       [2] wear (res://scripts/match/boki_dna.gd:27)
+       [3] dress (res://scripts/core/unique.gd:399)
+       [4] kin (res://scripts/match/models.gd:2086)
+       [5] init_kin (res://scripts/match/kin.gd:159)
+       [6] make_hunter (res://scripts/match/match.gd:580)
+       [7] make_bot (res://scripts/match/match.gd:783)
+       [8] _spawn_hunters (res://scripts/match/match.gd:761)
+       [9] _slice (res://scripts/match/match.gd:181)
+DEMO drop: drizzle_d leads to (81.3, 1.6, 168.7) (lair to uplink 43m)
+DEMOCHECK ok   tier2: boots and runs 3 s
+DEMOCHECK ok   tier2: demo save never written, overlays hidden
+DEMOCHECK ok   tier2: --hunter=mage picked
+DEMOCHECK ok   tier2: the full bot lobby (20)
+WARNING: --demo=nope: unknown preset (use one of farm, match, training, care, tier2)
+     at: push_warning (core/variant/variant_utility.cpp:1034)
+     GDScript backtrace (most recent call first):
+         [0] name_in (res://scripts/core/demo.gd:22)
+         [1] run (res://tools/demo_check.gd:56)
+         [2] _boot (res://tools/demo_check.gd:35)
+         [3] _wait (res://tools/demo_check.gd:18)
+DEMOCHECK ok   an unknown preset is ignored
+DEMOCHECK ok   the player's own save file is untouched
+DEMO CHECK DONE, failures: 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 45 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
+ERROR: Pages in use exist at exit in PagedAllocator: N7Variant5Pools12BucketMediumE
+   at: ~PagedAllocator (./core/templates/paged_allocator.h:169)

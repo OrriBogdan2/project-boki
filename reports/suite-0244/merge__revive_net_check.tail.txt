@@ -1,0 +1,24 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: A type associated with a built-in class cannot be marked as a variation of another type (variation: "OptionButton", base: "Button").
+   at: set_type_variation (scene/resources/theme.cpp:1239)
+   GDScript backtrace (most recent call first):
+       [0] _states (res://scripts/ui/ui_theme.gd:72)
+       [1] _buttons (res://scripts/ui/ui_theme.gd:95)
+       [2] build (res://scripts/ui/ui_theme.gd:20)
+       [3] theme (res://scripts/ui/ui.gd:74)
+       [4] install (res://scripts/ui/ui.gd:80)
+       [5] _ready (res://scripts/core/game.gd:19)
+relay: listening on 8048, up to 120 players, version 0.24.4, Discord check OFF
+RVNET ok   the relay listens on 8048  
+relay: 811273228 joined as Hunter (1 online)
+RVNET ok   the host is on the relay as 811273228  
+RVNET FAIL the guest joins the relay  
+SCRIPT ERROR: Trying to call an async function without "await".
+          at: _host (res://tools/revive_net_check.gd:71)
+          GDScript backtrace (most recent call first):
+              [0] _host (res://tools/revive_net_check.gd:71)
+RVNET DONE, 3 checks, failures: 1

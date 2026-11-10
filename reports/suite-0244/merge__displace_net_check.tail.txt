@@ -1,0 +1,33 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: A type associated with a built-in class cannot be marked as a variation of another type (variation: "OptionButton", base: "Button").
+   at: set_type_variation (scene/resources/theme.cpp:1239)
+   GDScript backtrace (most recent call first):
+       [0] _states (res://scripts/ui/ui_theme.gd:72)
+       [1] _buttons (res://scripts/ui/ui_theme.gd:95)
+       [2] build (res://scripts/ui/ui_theme.gd:20)
+       [3] theme (res://scripts/ui/ui.gd:74)
+       [4] install (res://scripts/ui/ui.gd:80)
+       [5] _ready (res://scripts/core/game.gd:19)
+ERROR: Couldn't create an ENet host.
+   at: _create (modules/enet/enet_connection.cpp:318)
+   GDScript backtrace (most recent call first):
+       [0] start (res://scripts/server/relay.gd:47)
+       [1] _host_up (res://tools/displace_net_check.gd:68)
+       [2] _host (res://tools/displace_net_check.gd:97)
+       [3] run (res://tools/displace_net_check.gd:57)
+       [4] run (res://tools/check_registry.gd:284)
+       [5] _ready (res://scripts/main.gd:360)
+relay: couldn't listen on port 7978 (error 20)
+DISPNET FAIL the relay listens on 7978  
+DISPNET ok   the host is on the relay as 1135369149  
+DISPNET FAIL the guest joins the relay  
+SCRIPT ERROR: Trying to call an async function without "await".
+          at: _host (res://tools/displace_net_check.gd:99)
+          GDScript backtrace (most recent call first):
+              [0] _host (res://tools/displace_net_check.gd:99)
+              [1] _host_up (res://tools/displace_net_check.gd:82)
+DISPNET DONE, 3 checks, failures: 2

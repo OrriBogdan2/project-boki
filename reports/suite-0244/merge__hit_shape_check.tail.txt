@@ -1,0 +1,60 @@
+HSROW|tender|lmb|1|shot|14.9|0.4|0|14.9|0.0|0|
+HSROW|tender|rmb|0|grid|0.0|0.0|0|0.0|0.0|0|
+HSROW|tender|e|0|grid|0.0|0.0|0|9.0|0.0|0|
+HSROW|tender|x|0|grid|0.0|0.0|0|12.6|0.0|0|
+HSROW|tender|dash|0|grid|0.0|0.0|0|3.6|0.0|0|
+HSCHECK ok   tender: at least one input hurt a dummy (1 did)
+HSROW|dolm|lmb|8|grid|1.8|1.5|90|13.6|0.0|120|reach -87%, arc -25%
+HSROW|dolm|lmb_hold|16|grid|5.0|2.5|37|13.6|0.0|120|reach -63%, arc -69%
+HSROW|dolm|rmb|48|grid+w|5.4|3.5|67|0.0|0.0|0|
+HSROW|dolm|rmb_hold|42|grid+w|5.5|3.5|67|0.0|0.0|0|
+HSROW|dolm|e|0|grid|0.0|0.0|0|3.4|0.0|0|
+HSROW|dolm|x|0|grid|0.0|0.0|0|12.0|0.0|0|
+HSROW|dolm|dash|0|grid|0.0|0.0|0|2.8|0.0|0|
+HSCHECK ok   dolm: at least one input hurt a dummy (4 did)
+HSROW|dredge|lmb|1|shot|16.7|0.3|0|7.8|0.0|0|reach +113%
+HSROW|dredge|rmb|1|shot|11.5|0.5|0|11.5|0.0|0|
+HSROW|dredge|e|12|grid|2.9|2.5|62|0.0|0.0|110|arc -44%
+HSROW|dredge|x|1|shot|5.0|0.9|0|5.9|0.0|0|reach -15%
+HSROW|dredge|dash|0|grid|0.0|0.0|0|3.2|0.0|0|
+HSCHECK ok   dredge: at least one input hurt a dummy (4 did)
+HSROW|rimewright|lmb|1|shot|14.3|0.5|0|12.4|0.0|0|reach +15%
+HSROW|rimewright|rmb|12|grid|2.5|1.5|67|0.0|0.0|0|
+HSROW|rimewright|rmb_hold|11|grid|2.5|1.5|67|0.0|0.0|0|
+HSROW|rimewright|e|31|grid|6.3|2.5|41|1.8|0.0|0|reach +249%
+HSROW|rimewright|x|27|grid+w|6.8|3.5|37|0.0|0.0|0|
+HSROW|rimewright|dash|13|grid+w|6.4|3.5|37|0.0|0.0|0|
+HSCHECK ok   rimewright: at least one input hurt a dummy (6 did)
+HSROW|mage|lmb|16|grid+w|6.8|3.5|37|16.1|0.0|0|reach -58%
+HSROW|mage|rmb|7|grid+w|6.4|3.5|37|0.0|0.0|0|
+HSROW|mage|rmb_hold|2|shot|13.0|0.4|0|0.0|0.0|0|
+HSROW|mage|e|0|grid|0.0|0.0|0|11.0|0.0|0|
+HSROW|mage|x|0|grid|0.0|0.0|0|14.4|0.0|0|
+HSROW|mage|dash|39|grid+r|7.3|2.5|33|9.8|0.9|0|width +182%
+HSROW|mage|dash_hold|38|grid+r|7.3|2.5|33|9.8|0.9|0|width +182%
+HSCHECK ok   mage: at least one input hurt a dummy (5 did)
+HSROW|thief|lmb|1|shot|9.9|0.3|0|10.5|0.0|0|
+HSROW|thief|rmb|2|grid|0.9|0.5|0|0.0|0.0|0|
+HSROW|thief|e|1|shot|14.0|0.4|0|14.0|0.0|0|
+HSROW|thief|x|43|grid+w|5.5|3.5|67|5.4|0.0|0|
+HSROW|thief|dash|6|grid|4.4|2.5|62|4.5|0.0|0|
+HSCHECK ok   thief: at least one input hurt a dummy (5 did)
+HSROW|ostra|lmb|1|shot|15.2|0.6|0|15.2|0.0|0|
+HSROW|ostra|rmb|1|shot|13.0|0.7|0|0.0|0.0|0|
+HSROW|ostra|e|0|grid|0.0|0.0|0|9.0|0.0|0|
+HSROW|ostra|x|17|grid+wr|7.5|3.5|32|10.0|0.0|0|
+HSROW|ostra|dash|0|grid|0.0|0.0|0|12.0|0.0|0|
+HSCHECK ok   ostra: at least one input hurt a dummy (3 did)
+HSROW|gil|lmb|1|grid|0.8|0.0|0|3.1|0.0|50|reach -75%, arc -100%
+HSROW|gil|rmb|0|grid|0.0|0.0|0|8.0|0.0|0|
+HSROW|gil|rmb_hold|0|grid|0.0|0.0|0|8.0|0.0|0|
+HSROW|gil|e|16|grid+w|2.3|3.5|127|11.0|2.2|0|reach -79%
+HSROW|gil|x|62|grid+wr|7.5|3.5|44|14.0|3.6|0|
+HSROW|gil|dash|34|grid+w|6.9|3.5|44|6.0|0.0|0|reach +15%
+HSCHECK ok   gil: at least one input hurt a dummy (4 did)
+HSCHECK FAIL the run took 84.0 s (budget 60)
+HIT SHAPE CHECK DONE, failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 40 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

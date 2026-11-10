@@ -1,0 +1,39 @@
+Godot Engine v4.6.2.stable.official.71f334935 - https://godotengine.org
+WARNING: Could not set V-Sync mode, as changing V-Sync mode is not supported by the graphics driver.
+     at: set_use_vsync (platform/linuxbsd/x11/gl_manager_x11.cpp:364)
+OpenGL API 4.5 (Core Profile) Mesa 26.0.8-1ubuntu0.3 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 21.1.8, 256 bits)
+
+ERROR: A type associated with a built-in class cannot be marked as a variation of another type (variation: "OptionButton", base: "Button").
+   at: set_type_variation (scene/resources/theme.cpp:1239)
+   GDScript backtrace (most recent call first):
+       [0] _states (res://scripts/ui/ui_theme.gd:72)
+       [1] _buttons (res://scripts/ui/ui_theme.gd:95)
+       [2] build (res://scripts/ui/ui_theme.gd:20)
+       [3] theme (res://scripts/ui/ui.gd:74)
+       [4] install (res://scripts/ui/ui.gd:80)
+       [5] _ready (res://scripts/core/game.gd:19)
+BENCH match build (ms): world.terrain 2195, build.generate 1453, build.hunters 1208, world.walls 1097, build.spawns 993, build.hud 777
+LIFE 26 wisp revive Hexagon_Hank
+BENCH hitch t=46.82 1426 ms (script 44.3), new nodes: {  }
+LIFE 50 stomp start Hunter on Hexagon_Hank
+LIFE 52 stomp end Hunter (done)
+LIFE 52 box Hexagon_Hank value 157 at (98.0, 3.0, 86.0)
+LIFE 56 box sleepyfox_ value 160 at (107.0, 3.0, 85.0)
+LIFE 58 stomp start spoonfed on st4rfish
+LIFE 58 stomp start Hunter on st4rfish
+BENCH match: 1862 frames, wall avg 227.7 ms, p99 354.8 ms (1% low 1.2 fps)
+BENCH match cpu: match script avg 44.36 ms p99 91.47 ms, process 261.69 ms, hud 8.57 ms, render cpu 149.99 ms, gpu 150.03 ms
+BENCH match scene: draws 753, tris 290k, objects 1907, nodes 6760, emitters 119, lights 6, shadowed 0
+BENCH match memory: textures 362 MB, buffers 121 MB
+BENCH emitting particles (48): @Node3D/@CPUParticles3D 12, Match/@CPUParticles3D 12, @Node3D/Aura 6, Fx/@CPUParticles3D 5, Air/@CPUParticles3D 3, RaidFx/@CPUParticles3D 2, Landmark_ring/@CPUParticles3D 1, Landmark_statue/@CPUParticles3D 1, Landmark_chimney/@CPUParticles3D 1, Landmark_spire/@CPUParti
+BENCH match step sections (ms per frame): hunters 10.00, bots 8.52, kins 6.05, mobs 3.35, separate 1.93, interact 1.39, pickups 1.08, lairs 0.96, rest 0.74, shots 0.64
+BENCH heaviest meshes (name: instances, total tris k, shadow casters): Match/@Node3D: 647, 347.0k, 59, @Node3D/Body: 291, 292.3k, 0, Body/Lid: 96, 254.6k, 0, @Node3D/LockTag: 130, 69.0k, 0, Body/Lock: 130, 69.0k, 0, Walls_5_: 5, 66.2k, 5, World/Deco: 38, 64.7k, 8, @Node3D/Key: 105, 60.2k, 0, @Node3D
+BUDGET PASS draw calls: worst 1189, limit 1500
+BUDGET PASS triangles: worst 497998, limit 1500000
+BUDGET PASS shadow lights: worst 0, limit 2
+BUDGET FAIL frame ms: worst 1426, limit 50
+BUDGET DONE, quality very_low, failures: 1
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 18 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)
