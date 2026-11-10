@@ -61,6 +61,14 @@ func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	ok("mode: cursor past range clamps to range", is_equal_approx(AimMode.dist(P, 12.0), 12.0))
 	_aim(P, 0.4)
 	ok("mode: point-blank still travels the minimum", is_equal_approx(AimMode.dist(P, 12.0), AimMode.MIN_D))
+	var near := AimMode.place(P, 12.0)
+	var dx := near.x - P.pos.x
+	ok("place: a zone at a 0.4 m cursor lands there, not 1.5 m out", absf(dx - 0.4) < 0.01, "%.2f" % dx)
+	AimKit.circle(P, "pl", {"r": 1.0})
+	var mark: Vector2 = AimKit.entry(P, "pl")["at"]
+	ok("place: the default circle marker sits at the cursor too", absf(mark.x - P.pos.x - 0.4) < 0.01)
+	_aim(P, 20.0)
+	ok("place: past range clamps to range", absf(AimMode.place(P, 12.0).x - P.pos.x - 12.0) < 0.01)
 	_aim(P, 5.0)
 	ok("mode: max = always the full range", is_equal_approx(AimMode.dist(P, 12.0, AimMode.MAX), 12.0))
 	var pt := AimMode.point(P, 12.0)
