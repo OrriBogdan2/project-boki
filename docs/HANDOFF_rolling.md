@@ -132,8 +132,7 @@ The feature is behind the match option `rolling`. The default fixed-length match
 | Session length | 1800 s |
 | No new waves | last 480 s (after 22:00) |
 | Wave gap | 120-180 s (9-10 waves a session) |
-| Wave size | 6-12 hunters: 2-4 trios, 3-6 duos or 6-12 solos. The fuller the map, the smaller the wave (`POP.y - 4 - pop`, clamped) |
-| Population target | 24-40 hunters (`POP`). What it counts is `POP_MODE`: `"at_once"` (default, the roadmap's "at any moment": each wave tops the map up) or `"total"` (24-40 join over the whole session, shared over the waves). Per match: `opts.rolling_pop` / `--rolling-pop=at_once\|total`. **Owner question, see below.** |
+| Wave size | The fixed format (11-08): 10 trios per session in all, shared evenly over the waves (`Rolling.wave_share`, rounding up from the opening wave), about one squad a wave; a late wave with no share flies no ship |
 | Level floor | min(5, 1 + floor(sess_t / 240)). The points are auto-spent in the archetype's order, for the player too |
 | Catch-up XP | **+0.3x per level under the median, capped at x1.6** (was +0.5x, x2; tuned from the sim, see below). The median is over hunters on the ground |
 | Bounty | posted at ≥3 levels over the median and level ≥5; cleared once the hunter is less than 2 levels over the median; 45 s cooldown after a claim |
@@ -221,7 +220,7 @@ gives way when the wave line needs the room (it overlapped WAVE INCOMING).
 
 ## Open questions for the owner
 
-1. **"24-40 hunters": on the map at once, or in total over the session?** The code reads it as at once
+1. *(Settled 11-08: 10 trios in total over the session; `POP`, `POP_MODE` and `--rolling-pop` are gone.)* **"24-40 hunters": on the map at once, or in total over the session?** The code reads it as at once
    (the roadmap's wording). One constant switches it: `Rolling.POP_MODE = "total"` (or
    `--rolling-pop=total` per match).
 2. With bots, the map holds 7-21 hunters at once, not 24-40, because they knock each other out in 1-4

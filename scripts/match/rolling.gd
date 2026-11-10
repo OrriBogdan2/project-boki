@@ -5,8 +5,10 @@ extends RefCounted
 ## default until the owner switches it.
 ##
 ## A session runs SESSION seconds whatever happens. Squads arrive in drop waves every 2-3 minutes,
-## each wave a small group (2-4 squads) on its own skyship pass over the quieter side of the map,
-## until CUTOFF before the end. You join whichever wave the matchmaker gives you (offline: a random
+## each wave on its own skyship pass over the quieter side of the map, until CUTOFF before the end.
+## A session is the expedition's fixed format, Data.SQUADS trios in all (the owner's call), spread
+## evenly over the waves (about one squad a wave; a wave with no share flies no ship).
+## You join whichever wave the matchmaker gives you (offline: a random
 ## one, or opts "join_wave" / "join_at"); you don't pick when. At 30:00 the session ends for everyone:
 ## anyone still out there is lost (Match._update_rules).
 ##
@@ -28,13 +30,6 @@ extends RefCounted
 const SESSION := 1800.0            # the session: 30 minutes
 const CUTOFF := 480.0              # no new squads in the last 8 minutes
 const GAP := Vector2(120.0, 180.0) # seconds between drop waves
-const WAVE_HUNTERS := Vector2i(6, 12)   # hunters a wave brings: 2-4 trios (solos and duos: the same headcount)
-const POP := Vector2i(24, 40)      # the hunter target (see POP_MODE for what it counts)
-## What POP counts (open owner question: the brief says "24-40 hunters"):
-##   "at_once": hunters on the map at any moment (the roadmap's reading, the default): each wave tops the map up;
-##   "total":   hunters who join over the whole session: each wave takes a share of what's left of the budget.
-## Overridden per match by opts "rolling_pop" (--rolling-pop=at_once|total).
-const POP_MODE := "at_once"
 const FLOOR_EVERY := 240.0         # +1 level floor every 4 minutes into the session
 const FLOOR_MAX := 5               # ... up to 5, so the R (level 6) is always earned in the run
 const CATCHUP_PER_LV := 0.3        # x1.3 one level under the median, x1.6 two or more under (was 0.5 / x2:
@@ -55,10 +50,7 @@ const LAND_CROWD_R := 30.0
 
 var m: Match
 var rng := RandomNumberGenerator.new()
-var size := 1                      # hunters per squad
-var pop_mode := POP_MODE           # what the POP target counts (POP_MODE)
-var pop_budget := 0                # "total" mode: hunters the session brings in all (rolled from POP)
-var pop_joined := 0                # "total" mode: hunters who've boarded a wave so far (any wave)
+var size := Data.SQUAD_SIZE        # hunters per squad
 var waves: Array = []              # {i, t (session), n (squads), state, ship, teams, hunters, landed}
 var join_i := 0
 var t0 := 0.0                      # session time your wave set off
@@ -115,56 +107,44 @@ static func enabled(o: Dictionary) -> bool:
 static func floor_at(sess_t: float) -> int:
 	return mini(FLOOR_MAX, 1 + int(floor(maxf(0.0, sess_t) / FLOOR_EVERY)))
 
-## How many hunters the next wave brings, for this many already out there.
-static func wave_hunters(pop: int) -> int:
-	return clampi(POP.y - 4 - pop, WAVE_HUNTERS.x, WAVE_HUNTERS.y)
-
-static func squads_for(pop: int, squad_size: int) -> int:
-	var n := int(round(float(wave_hunters(pop)) / float(maxi(1, squad_size))))
-	return clampi(n, 2 if squad_size >= 3 else 3, 12)
-
-## "total" mode: squads for the next wave, sharing what's left of the session's budget over the
-## waves still to come (at least one squad a wave).
-static func squads_total(budget: int, joined: int, waves_left: int, squad_size: int) -> int:
-	var left := maxi(0, budget - joined)
-	var n := int(round(float(left) / float(maxi(1, waves_left)) / float(maxi(1, squad_size))))
-	return clampi(n, 1, 12)
-
-## Squads for wave i, whichever way POP is read (pop: hunters out there right now).
-func wave_squads(i: int, pop: int) -> int:
-	var n := squads_total(pop_budget, pop_joined, waves.size() - i, size) if pop_mode == "total" else squads_for(pop, size)
-	pop_joined += n * size
-	return n
+## Squads wave i of n_waves brings: Data.SQUADS shared out evenly, rounding up from the start, so
+## the opening wave always flies and only a late wave can have no share. The shares add up to Data.SQUADS.
+static func wave_share(i: int, n_waves: int) -> int:
+	return ((i + 1) * Data.SQUADS + n_waves - 1) / n_waves - (i * Data.SQUADS + n_waves - 1) / n_waves
 
 # ------------------------------------------------------------------ the plan
 ## Rolls the session (once, before anything is built): when the waves come, which one you're in, and
 ## who's already out there. Sets the match's clock and length and how big your wave is.
 func plan(o: Dictionary) -> void:
 	rng.seed = int(m.seed_val) * 7919 + 17
-	size = maxi(1, int(o.get("squad", 1)))
-	pop_mode = String(o.get("rolling_pop", POP_MODE))
-	if pop_mode == "total":
-		pop_budget = rng.randi_range(POP.x, POP.y)     # (only rolled in this mode: the default's dice stay as they were)
 	var t := 0.0
 	while t <= SESSION - CUTOFF + 0.01:
 		waves.append({"i": waves.size(), "t": t, "n": 0, "state": "planned", "ship": {}, "teams": [], "hunters": 0, "landed": 0})
 		t += rng.randf_range(GAP.x, GAP.y)
+	for w in waves:
+		w["n"] = wave_share(int(w["i"]), waves.size())
+		if int(w["n"]) == 0: w["state"] = "done"      # (no share of the session's squads: no ship)
+	var flown: Array = waves.filter(func(w): return int(w["n"]) > 0)
+	# you only ever join a wave that brings squads
 	if o.has("join_wave"):
-		join_i = clampi(int(o["join_wave"]), 0, waves.size() - 1)
+		join_i = int(flown[-1]["i"])
+		for w in flown:
+			if int(w["i"]) >= int(o["join_wave"]):
+				join_i = int(w["i"])
+				break
 	elif o.has("join_at"):
-		join_i = 0
-		for w in waves:
+		join_i = int(flown[0]["i"])
+		for w in flown:
 			if float(w["t"]) <= float(o["join_at"]) + 0.01: join_i = int(w["i"])
 	else:
-		join_i = rng.randi_range(0, waves.size() - 1)
+		join_i = int(flown[rng.randi_range(0, flown.size() - 1)]["i"])
 	t0 = float(waves[join_i]["t"])
 	m.sess_t0 = t0
 	m.length = SESSION - t0
 	_model_before()
-	var pop := _model_alive_at(t0)
 	var mine: Dictionary = waves[join_i]
-	mine["n"] = wave_squads(join_i, pop)
 	mine["state"] = "flying"
+	o["squad"] = size
 	o["teams"] = int(mine["n"])
 	o["total"] = int(mine["n"]) * size
 	next_team = int(mine["n"])
@@ -183,8 +163,8 @@ func _model_before() -> void:
 		if int(w["i"]) >= join_i:
 			break
 		var tw := float(w["t"])
-		var n := wave_squads(int(w["i"]), _model_alive_at(tw))
-		w["n"] = n; w["hunters"] = n * size; w["landed"] = n * size; w["state"] = "done"
+		var n := int(w["n"])
+		w["hunters"] = n * size; w["landed"] = n * size; w["state"] = "done"
 		for _s in n:
 			var t_land := tw + rng.randf_range(14.0, 30.0)
 			var stay := rng.randf_range(STAY.x, STAY.y)
@@ -426,12 +406,11 @@ func _wave_in_air(w: Dictionary) -> bool:
 
 func _launch(w: Dictionary) -> void:
 	var pop := alive_count()
-	var n := wave_squads(int(w["i"]), pop)
+	var n := int(w["n"])
 	var s := new_ship(m.time)
 	s["wave"] = int(w["i"])
 	m.ships.append(s)
 	w["ship"] = s
-	w["n"] = n
 	w["state"] = "flying"
 	var spots := spots_along(s, n)
 	for k in n:

@@ -3373,7 +3373,7 @@ func _open_expedition() -> void:
 		right.add_child(tc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
+	right.add_child(UI.label("%d squads of %d" % [Data.SQUADS, Data.SQUAD_SIZE], UI.T_SMALL, UI.MUTED))
 	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
 	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
 	var rolling_on: bool = Save.d.get("exp_rolling", false)
@@ -3504,9 +3504,8 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
+	# the one format: 10 trios (your squadmates and every other squad are bots)
+	var o := Data.squad_opts()
 	if Save.d.get("exp_rolling", false):
 		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
 	o["tier"] = exp_tier

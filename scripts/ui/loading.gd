@@ -102,12 +102,10 @@ func setup(opts: Dictionary) -> void:
 		title = "Training Grounds"; sub = "Dummies, ledges and boosters. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
-		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
-		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
-		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
-		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
+		var squads := "%d squads of %d" % [int(opts.get("teams", Data.SQUADS)), int(opts.get("squad", Data.SQUAD_SIZE))]
+		mode_line = "%s  •  skyship drop" % squads
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
-		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
+		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % squads
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
 		if opts.get("rolling", false):
