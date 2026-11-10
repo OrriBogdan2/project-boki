@@ -30,14 +30,14 @@ Script ms per frame (match step): pets 18.2 / 18.1, wisps 15.6. Triangles 438k /
   229-263). It is not a wisp problem.
 - **The worst frames are spawns.** The hitches name nodes entering the tree in one frame: a summoned Boki building its
   rig (60 MeshInstance3D in one frame at t=50 s), chest and fight props. The wisp run's worst frame (323 ms) is in the
-  first 3 s of the match, a one-off load. A summon builds a full Boki rig on the first press: pool or prewarm it before
-  wisps become the default, or the first summon in a match hitches by 100 ms or more.
+  first 3 s of the match, a one-off load. These look like Boki rigs being built (Body, Flex, Eye nodes x4); if it is the summon, prewarm
+  or pool the rig before wisps become the default. Not confirmed here.
 
 ## Recommendation
-Switch the default to wisps. They do not cost more than pets on any number measured (mean, p95, script, draws), they
-cut the script time, and they remove the 30-Boki walking rigs from the world. The over-50 ms frames belong to the
+Switch the default to wisps. They do not cost more than pets on any number measured (mean, p95, script, draws), and they
+cut the script time (nodes fall only 4 %). The over-50 ms frames belong to the
 30-Hunter load itself and to rig building, so file them as perf work, not as a reason to hold wisps. Before the
-flip: prewarm the summon rig, and repeat this bench on the 4090 pods (Forward+) and the PC 4070 SUPER, where the
+flip: look at the rig-building hitches, and repeat this bench on the 4090 pods (Forward+) and the PC 4070 SUPER, where the
 frame time is GPU-bound rather than CPU-bound as it is here.
 
 Not covered: only one GPU class finished in time (rp2-1 did not return before the report); readability playtest is
