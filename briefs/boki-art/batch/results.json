@@ -98752,5 +98752,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/epic_siegephant_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "epic_glaciammoth_b",
+    "name": "Glaciammoth (legendary epic pass b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_glaciammoth_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_glaciammoth_a",
+    "name": "Glaciammoth (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_glaciammoth_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_glaciammoth_a",
+    "name": "Glaciammoth (legendary epic pass a)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/epic_glaciammoth_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_siegephant_a",
+    "name": "Siegephant (legendary epic pass a)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_siegephant_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_glaciammoth_b",
+    "name": "Glaciammoth (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_glaciammoth_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "epic_siegephant_b",
+    "name": "Siegephant (legendary epic pass b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/epic_siegephant_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_cloverhare_a",
+    "name": "Cute legendary concept: cloverhare a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_cloverhare_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_wishwren_a",
+    "name": "Cute legendary concept: wishwren a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_wishwren_a_1.jpg",
+    "ok": true
   }
 ]
