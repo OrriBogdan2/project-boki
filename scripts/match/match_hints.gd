@@ -40,6 +40,15 @@ func tick(dt: float) -> void:
 		if _due(String(id), p, r):
 			FirstTimeHint.show(id, _say)
 			return      # one at a time
+	if KinMerge.can_cast(p):
+		FirstTimeHint.show("fuse", _say)
+
+## Your Fuse just ended: the first time, one line on the rest timer (a surge or a lost Boki has none).
+func fuse_ended() -> void:
+	FirstTimeHint.mark("fuse")
+	var k: Kin = m.player.kin if m.player != null else null
+	if m.hud != null and k != null and k.rest_t > 0.0:
+		FirstTimeHint.show("fuse_rest", _say)
 
 func _say(line: String) -> void:
 	_last = line

@@ -1,5 +1,5 @@
 {
- "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration).",
+ "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match: shown in a match by MatchHints; farm: on the farm by FarmHints; bond: the first Fuse (the key when the bond is full, the rest timer when it ends), by MatchHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v12 -> v13 migration).",
  "match": {
   "exdash": "Too far? Jump, then press {dash} in mid-air",
   "crouch": "Hold {crouch} to crouch and see farther",
@@ -20,6 +20,10 @@
   "sell": "Sell crops at the Market for gems",
   "hob": "Hob the builder is at the stall: press {interact} to talk"
  },
+ "bond": {
+  "fuse": "Bond full! Press {ultimate} to Fuse with {boki}",
+  "fuse_rest": "{boki} rests a few seconds after a Fuse: its card counts it down"
+ },
  "when": {
   "exdash": "you are in the air over the void",
   "crouch": "a while into a match, standing on open ground",
@@ -36,7 +40,9 @@
   "task": "the house stands and no Boki has a job",
   "buy": "you are out of seeds",
   "sell": "you hold a crop",
-  "hob": "the tutorial is over and you have not talked to Hob"
+  "hob": "the tutorial is over and you have not talked to Hob",
+  "fuse": "your bond is full and the Fuse key would work (your first Fuse, ever)",
+  "fuse_rest": "your first Fuse ends and your Boki lands to rest"
  },
  "near_m": 6.0,
  "outpost_m": 14.0,

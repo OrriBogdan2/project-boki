@@ -2,14 +2,15 @@ class_name FirstTimeHint
 extends RefCounted
 ## One-time contextual hints: one short line the first time something matters (a chest key in hand, a
 ## skill point, a house short of stone), then never again on that save. They took over the tutorial
-## steps that were cut. The words are content/rules/hints.json ("match" and "farm" groups); which ones
+## steps that were cut, and the first Fuse. The words are content/rules/hints.json ("match", "farm" and
+## "bond" groups); which ones
 ## a save has had is Save.d.tutorial.hints {id: true}. Callers decide when (MatchHints, FarmHints) and
 ## how to show it (a match toast, a farm toast); this only makes sure it happens once and words it.
 
 static func rules() -> Dictionary:
 	return Content.rules("hints")
 
-## Every hint id of a group ("match" or "farm").
+## Every hint id of a group ("match", "farm" or "bond").
 static func ids(group: String) -> Array:
 	return (rules().get(group, {}) as Dictionary).keys()
 
@@ -31,13 +32,13 @@ static func mark(id: String) -> void:
 ## The hint's line with the player's own keys and Boki name ("" for an unknown id).
 static func text(id: String) -> String:
 	var raw := ""
-	for g in ["match", "farm"]:
+	for g in ["match", "farm", "bond"]:
 		raw = String((rules()[g] as Dictionary).get(id, raw))
 	if raw.contains("{rank}"):
 		raw = raw.replace("{rank}", TutorialText.rank_combo())
 	if raw.contains("{boki}"):
 		raw = raw.replace("{boki}", String(Save.active_kin().get("name", "your Boki")))
-	for action in ["dash", "crouch", "interact", "throw", "secondary", "build"]:
+	for action in ["dash", "crouch", "interact", "throw", "secondary", "build", "ultimate"]:
 		raw = raw.replace("{%s}" % action, Settings.key_cap(action))
 	return raw
 
@@ -60,7 +61,8 @@ static func migrate(data: Dictionary) -> void:
 	var ft = tut.get("ft")
 	var ft_done: bool = typeof(ft) == TYPE_DICTIONARY and bool(ft.get("done", false))
 	var farm_over: bool = bool(tut.get("day1_done", false)) or ft_done
-	for group in [["match", bool(tut.get("match", false))], ["farm", farm_over]]:
+	var bond_known: bool = bool(tut.get("ult", false))      # the old bond-full tip showed only on a full bond
+	for group in [["match", bool(tut.get("match", false))], ["farm", farm_over], ["bond", bond_known]]:
 		if group[1]:
 			for id in ids(String(group[0])):
 				seen[id] = true
