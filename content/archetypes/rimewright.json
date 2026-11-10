@@ -21,6 +21,7 @@
 	"fantasy": "A rink-keeper from the high frosts. She runs the fight on the ice: homing darts, a spear that chills where it lands, and a sliding wall of ice that shoves foes where she wants them.",
 	"silhouette": "tall frost-white rabbit ears (one upright, one folded), a long white-to-ice braid, a long candy-striped ice spear, on glowing blade skates",
 	"card": {
+		"role_word": "Controller",
 		"role": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"loop": "Ice controller: homing darts, a freezing spear and a sliding ice wall.",
 		"lmb": "Ice Dart: hold for a barrage of slow darts that curve onto the foe at your cursor; every fifth to seventh is a large one.",
