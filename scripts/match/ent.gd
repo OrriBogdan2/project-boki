@@ -25,6 +25,7 @@ var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
 var burn_by: Ent = null
+var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses on it, DotLook)
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
@@ -323,10 +324,13 @@ func tick_status(dt: float) -> void:
 	if blight_t > 0.0: blight_t -= dt
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
+		var ticked := int(burn_t * 4.0) != int((burn_t + dt) * 4.0)
+		if ticked:
+			dot_tick_at = m.time
 		if not remote:
 			hp -= burn_dps * dt
-			if int(burn_t * 4.0) != int((burn_t + dt) * 4.0):
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, Color("ff9a4a"), false)
+			if ticked:
+				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, DotLook.COL, false)
 			if hp <= 0.0:
 				_on_zero(burn_by, {"src": "burn"})
 
@@ -350,6 +354,21 @@ func net_follow(dt: float) -> void:
 var lod_dt := 0.0       # frame time a far-away entity's visuals skipped (Match renders it less often)
 var _flash_set := -1.0
 var _flash_n := -1
+var _flash_hot := false
+## Puts the body's tint on its materials: the hit flash (white) or, when nothing hit it, the DoT tint (DotLook).
+func show_flash(hit: float) -> void:
+	var dot := DotLook.amount(self, Settings.quality() == "low")
+	var hot := hit <= 0.0 and dot > 0.0
+	var f := maxf(hit, dot)
+	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
+	if f != _flash_set or mats.size() != _flash_n or hot != _flash_hot:
+		_flash_set = f
+		_flash_n = mats.size()
+		_flash_hot = hot
+		for mt in mats:
+			mt.set_shader_parameter("flash", f)
+			mt.set_shader_parameter("flash_color", DotLook.COL if hot else Color.WHITE)
+
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.
 var flinch := Vector3.ZERO
@@ -366,10 +385,4 @@ func render(delta: float, alpha: float) -> void:
 		flinch = Vector3.ZERO
 		position = _held
 	squash = maxf(0.0, squash - delta * 2.5)
-	var f := clampf(flash_t / 0.12, 0.0, 1.0)
-	# (only when it changes: most frames nothing is flashing, and every set is a render-server call)
-	if f != _flash_set or mats.size() != _flash_n:
-		_flash_set = f
-		_flash_n = mats.size()
-		for mt in mats:
-			mt.set_shader_parameter("flash", f)
+	show_flash(clampf(flash_t / 0.12, 0.0, 1.0))
