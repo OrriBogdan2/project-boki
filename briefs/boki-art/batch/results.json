@@ -105780,5 +105780,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/on_dreadnoyak_d1_3.jpg",
     "ok": true
+  },
+  {
+    "id": "saw3_b",
+    "name": "Sawright (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/saw3_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "saw3_b",
+    "name": "Sawright (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/saw3_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "saw3_a",
+    "name": "Sawright (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/saw3_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "saw3_c",
+    "name": "Sawright (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/saw3_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "saw3_c",
+    "name": "Sawright (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/saw3_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "saw3_a",
+    "name": "Sawright (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/saw3_a_2.jpg",
+    "ok": true
   }
 ]
