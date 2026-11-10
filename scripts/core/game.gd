@@ -77,6 +77,7 @@ func _setup_input() -> void:
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
+	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
@@ -295,6 +296,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
 	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
+	Unmasked.migrate(Save.d)       # a mastery level reached shows on you at home (MasteryLook)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()
