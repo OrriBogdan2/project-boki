@@ -87888,5 +87888,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2k_glaivyx_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2k_glaivyx",
+    "name": "Glaivyx (V2 card, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2k_glaivyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_starcap_a",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_starcap_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2k_ringrove",
+    "name": "Ringrove (V2 card, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2k_ringrove_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2k_ringrove",
+    "name": "Ringrove (V2 card, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2k_ringrove_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_starcap_a",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_starcap_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2k_ringrove",
+    "name": "Ringrove (V2 card, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2k_ringrove_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_starcap_b",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_starcap_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_dynaboa_b",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_dynaboa_b_2.jpg",
+    "ok": true
   }
 ]
