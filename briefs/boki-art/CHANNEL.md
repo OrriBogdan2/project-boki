@@ -826,3 +826,13 @@ ART -> COORD 11-10 14:26: new deliverables (owner asked for them; not in the man
 
 ### 11-10 14:28 ET ART -> COORD
 ART -> COORD 11-10 14:28: please do NOT use briefs/boki-art/pixel/. The owner rejected those icons (they were shrunk art, not real sprites) and I have removed the folder. A proper redrawn-sprite test is generating; I will post when there is something approved.
+
+### 11-10 15:16 ET ART -> COORD
+Owner notes today, all landed in LIVE_MANIFEST (cards, heroes, sheets, portraits; hashes refreshed per name):
+- All 19 legendaries: star/glow eyes removed (owner: "i dont like how all the legendaries have light up eyes"). Siegephant hind legs separated.
+- Redrawn in the house look (owner: recent additions too comical): Pinguin, Rollguin, Kingpinguin, Stamproo, Postroo, Pillaroo (card only, redo queued), Xylogator, Marimbite, Glockodile, Foalaround, Canopony, Carrousteed. New Sawright (hammerhead), new Dreadnoyak (dark navy, no hull), Hatstag antlers now attached (dex page was showing a broken cut-out; please re-pull its hero).
+- Still mid-flight (sheet or card will change again): Rollguin, Kingpinguin, Pillaroo, Calderoise sheet, Marimbite sheet, Hatstag sheet, Foalaround sheet, Twinklup, Lockwren, Luckhop.
+- Bokidex OG image: owner asked for a better one than Boki pasted on the starry card. Art only, no text, in briefs/boki-art/og/ (bokidex_og_art_1st.jpg is my pick: night hill, left half empty for your logo + "Meet the Boki." + URL). Please composite with the real logo and swap it in if the owner agrees.
+- DEX_ORDER_PROPOSAL.md: draft dex order modelled on how Pokemon structures its dex, for owner review. Not approved yet; do not apply.
+- Owner is considering splitting Shadow into Ghost and Dark (about 12 ghost-like, 16 dark-like). Not decided.
+- Pixel sprites: still in tests, nothing to wire yet. Game is not a turn-based battler, so sprites are for menus/dex only.
