@@ -54,6 +54,7 @@ func _ready() -> void:
 	grid.columns = maxi(1, int((get_viewport_rect().size.x - 72.0 - 24.0 - SIDE_W) / (HeroGrid.CARD_W + 12.0)))
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # (so the cards' expand flags have room to use)
 	sc.add_child(grid)
 	var side_col := UI.vbox(12)
 	side_col.custom_minimum_size = Vector2(SIDE_W, 0)
