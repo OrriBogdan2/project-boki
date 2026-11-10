@@ -312,3 +312,18 @@ _B1POSE={'Gongrowl':"knuckle-walking forward on all fours, head low, glaring up 
  'Bastling':"waving one claw happily"}
 for _n,_s in _B1PICK.items():
     _r=_B1D[_n]; V2SHEET_NEW(_n,_O+_s+'.jpg',_r[6],_r[7]); V2PORT_NEW(_n,_O+_s+'.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_B1POSE[_n])
+
+# 20:12 ET 11-09: METHOD TEST against anchor bleed. Image 2 = style_refs/v2/style_board.png: nine close-up patches cut from the six anchors
+# (an eye, chitin, scales, a claw, ice crystals, white fur, black coils, feathers, dark fur), some rotated, so there is no whole creature to copy.
+SRB='briefs/boki-art/style_refs/v2/style_board.png'
+_BOARD=("Image 2 is a board of nine close-up samples cut from other drawings in the target art style. Use it only for the finish: the line weight and colour, "
+        "the flat colour fills with one hard-edged shade, the eye finish and the amount of detail. It contains no creature to draw: never copy any shape, part, colour or object from it. ")
+def RS_CARD_BOARD(name,stage,arch,cols,counts,dark=False,furry=False,fix=''):
+    p=RS_CARD(name,stage,arch,cols,counts,dark,furry,fix)
+    return p.replace("Image 2 is the style guide only: match its line, flat shading, eye finish and amount of detail exactly, but never copy its creature, face, colours or pose. ",_BOARD)
+for _n in ('Barostorm','Chimelop','Maulangler','Bastling','Barrelmander'):
+    _r=_B1D[_n]
+    SPECS.append({'id':'v2t_'+_n.lower(),'name':_n+' (V2 card, style-board test)','refs':['briefs/boki-art/'+_r[1],SRB],'runs':3,'aspect':'1:1','size':'2K',
+                  'prompt':RS_CARD_BOARD(_n,_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_r[8])})
+SPECS.append({'id':'v2t_mycroll','name':'Mycroll (V2 card, style-board test)','refs':['briefs/boki-art/cards/Mycroll.jpg',SRB],'runs':3,'aspect':'1:1','size':'2K',
+  'prompt':RS_CARD_BOARD('Mycroll','baby','cute',"brown spiky back, cream face and belly, mint mushroom caps with cream spots, teal eyes, dark brown nose","four legs, two ears, three big and four small mushroom caps, one mushroom tail tip",False,True,"")})
