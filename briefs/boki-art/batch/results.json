@@ -104247,5 +104247,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_sloggoth_r7_1.jpg",
     "ok": true
+  },
+  {
+    "id": "nodrip_chainipede",
+    "name": "Chainipede (no venom drips)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/nodrip_chainipede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bonsolith_r8",
+    "name": "Bonsolith (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_bonsolith_r8_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "nodrip_chainipede",
+    "name": "Chainipede (no venom drips)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/nodrip_chainipede_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "nodrip_chainipede",
+    "name": "Chainipede (no venom drips)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/nodrip_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_terrasloth_r8",
+    "name": "Terrasloth (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_terrasloth_r8_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_terrasloth_r8",
+    "name": "Terrasloth (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_terrasloth_r8_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_terrasloth_r8",
+    "name": "Terrasloth (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_terrasloth_r8_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_mortarfly_r8",
+    "name": "Mortarfly (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_mortarfly_r8_1.jpg",
+    "ok": true
   }
 ]
