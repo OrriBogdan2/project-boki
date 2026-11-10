@@ -272,7 +272,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 	if not KnockWall.behind(m, t, dir, float(res_def().get("crush_reach", 1.5))):
 		return
 	crushed_at[t.get_instance_id()] = m.time
-	var pd: Dictionary = d["passive"]
+	var pd: Dictionary = res_def()
 	var tgt := t
 	m.later(0.02, func():
 		if not is_instance_valid(h) or not is_instance_valid(tgt) or tgt.dead: return
