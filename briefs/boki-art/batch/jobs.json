@@ -22506,6 +22506,61 @@
     "prompt": "Redraw the creature in image 1 as one single character illustration: Bastling. Image 1 is the design and the pose: keep exactly the same creature, body plan, proportions, pose, view, facing direction, face, markings and signature parts. Add nothing, remove nothing, move nothing. Ignore how image 1 is painted: its soft shading, gloss, highlights, glow and texture are not to be copied. Its colours must not change: rusty brown crab shell, pale grey barnacles, big green eyes. Its parts, counted, must match image 1: eight legs, two claws, one shell. Image 2 is the style guide only: match its line, flat shading, eye finish and amount of detail exactly, but never copy its creature, face, colours or pose. Change ONLY how it is drawn. Image 2 shows a different creature, used only as a style guide: draw no part of it anywhere, no body, tail, limbs, stripes or crystals from it. The image contains exactly one creature, the one from image 1, and nothing behind or beside it. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. Effects: at most one small effect, attached to the body and drawn as flat hard-edged shapes. Anything that glows is simply the brightest flat colour on the creature with a lighter flat shape inside it; the air around the creature is empty. One construction cleanup is allowed, and nothing else about the design changes: no bands on its claws; the plates are its own shell Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
   },
   {
+    "id": "fem_arcestrel",
+    "name": "Arcestrel (female look)",
+    "refs": [
+      "briefs/boki-art/cards/Arcestrel.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn it into the female kestrel: a slightly bigger body, warmer brown plumage with fine dark barring across the wings and back, a shorter crest, and softer, less saturated accent colours. Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."
+  },
+  {
+    "id": "fem_hourachnid",
+    "name": "Hourachnid (female look)",
+    "refs": [
+      "briefs/boki-art/cards/Hourachnid.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn it into the female spider: a bigger, rounder abdomen, the hourglass marking larger and brighter, slightly longer legs, and a calmer face. Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."
+  },
+  {
+    "id": "fem_pavonazar",
+    "name": "Pavonazar (female look)",
+    "refs": [
+      "briefs/boki-art/cards/Pavonazar.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn it into the female, like a peahen: a shorter, rounder tail train with fewer eye-spots, softer muted green and bronze plumage, and the same crest a little smaller. Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."
+  },
+  {
+    "id": "fem_gongrowl",
+    "name": "Gongrowl (female look)",
+    "refs": [
+      "briefs/boki-art/cards/Gongrowl.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn it into the female gorilla: a slimmer build with narrower shoulders, no grey on its shoulders, a smaller chest gong, a shorter bronze crest and a calmer, focused face. Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."
+  },
+  {
+    "id": "fem_furnacowary",
+    "name": "Furnacowary (female look)",
+    "refs": [
+      "briefs/boki-art/cards/Furnacowary.jpg"
+    ],
+    "runs": 4,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: turn it into the female cassowary: a slightly bigger body, a taller bronze casque, and brighter fire glowing between the ribs. Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

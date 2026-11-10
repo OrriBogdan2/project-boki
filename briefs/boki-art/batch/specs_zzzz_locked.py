@@ -55,3 +55,4 @@ DROP-={'fam_ringrove_a','fam_ringrove_b'}  # owner 17:57: Ringrove to match Mycr
 DROP-={'v2g_ringrove_tilt'}  # owner 19:53
 DROP-={'v2g_glaivyx_white'}  # owner 19:53
 DROP-={'v2a_'+_r[0].lower() for _r in _B1}  # V2 batch 1, owner gave full control 19:51
+DROP-={'fem_arcestrel','fem_hourachnid','fem_pavonazar','fem_gongrowl','fem_furnacowary'}

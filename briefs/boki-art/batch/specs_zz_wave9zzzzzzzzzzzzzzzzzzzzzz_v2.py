@@ -253,3 +253,14 @@ _B1=[ # name, image1, stage, arch, dark, furry, cols, counts, fix
 for _n,_i,_st,_ar,_dk,_fu,_co,_ct,_fx in _B1:
     SPECS.append({'id':'v2a_'+_n.lower(),'name':_n+' (V2 card, batch 1)','refs':['briefs/boki-art/'+_i,SRV2%_ar],'runs':3,'aspect':'1:1','size':'2K',
                   'prompt':RS_CARD(_n,_st,_ar,_co,_ct,_dk,_fu,_fx).replace("Change ONLY how it is drawn. ","Change ONLY how it is drawn. "+_ONE)})
+
+# 19:58 ET 11-09: female looks still missing (babies skipped by design): Arcestrel, Hourachnid, Pavonazar, plus Gongrowl and Furnacowary
+# again because their male design changed today. Edit of the live card, so species, pose and style stay the same.
+_FEM={'Arcestrel':"the female kestrel: a slightly bigger body, warmer brown plumage with fine dark barring across the wings and back, a shorter crest, and softer, less saturated accent colours",
+      'Hourachnid':"the female spider: a bigger, rounder abdomen, the hourglass marking larger and brighter, slightly longer legs, and a calmer face",
+      'Pavonazar':"the female, like a peahen: a shorter, rounder tail train with fewer eye-spots, softer muted green and bronze plumage, and the same crest a little smaller",
+      'Gongrowl':"the female gorilla: a slimmer build with narrower shoulders, no grey on its shoulders, a smaller chest gong, a shorter bronze crest and a calmer, focused face",
+      'Furnacowary':"the female cassowary: a slightly bigger body, a taller bronze casque, and brighter fire glowing between the ribs"}
+for _n,_d in _FEM.items():
+    SPECS.append({'id':'fem_'+_n.lower(),'name':_n+' (female look)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+      'prompt':_EDIT+"turn it into "+_d+". Everything that defines the species stays: its signature parts, body plan, face, eye colour and type, so it reads instantly as the same creature. Same pose, view and plain background. Do not add anything else."})
