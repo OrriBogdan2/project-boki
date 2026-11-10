@@ -133,6 +133,7 @@ func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
 	card.custom_minimum_size = Vector2(HeroGrid.CARD_W, 0)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # the row's cards share the width left by the squad column
 	var row := UI.hbox(10)
 	card.add_child(row)
 	row.add_child(ClassCard.portrait(ak))
@@ -140,7 +141,7 @@ func _tile(ak: String) -> PanelContainer:
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # the text fits the card, never widens it
 	row.add_child(col)
-	var nm := UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big)
+	var nm := UI.label(HunterViewer.display_name(ak), 17, Arch.color(ak) if open else UI.FAINT, UI.big)
 	nm.clip_text = true
 	col.add_child(nm)
 	col.add_child(UI.para(HunterViewer.stat_line(ak), 12, UI.MUTED))
