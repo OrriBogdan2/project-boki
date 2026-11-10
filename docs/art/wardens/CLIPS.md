@@ -25,6 +25,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
   a glider turn (25 deg at full steer) and the dive's nose-down pitch, about the rig's hips as the rig takes it, so the
   glider stays in the hands. A Boki riding on you sits on the torso you see (`WardenGlb.shown_torso`, the hips bone back
   through the retarget), not the hidden rig's. `--glide-bank-check` asserts it on every Hero; `--glide-shots` films it.
+  Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
+  the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `act` (DECISIONS 2026-11-09, the garden): home verb (HunterVerbs: `pat`, `feed`, `cheer`) -> clip (`pet` 1.3 s, `give` 1.0 s, `cheer` 0.8 s, as long as HunterVerbs.LENGTH). Seeked to the state's `act_t`; a verb with no entry stays on the procedural rig. Vex, Kael, Lace (hem), Cinder: tools/art1/gardenkit.py holds the shared timing, each hero's `*_clips.py` (Kael: `kael_garden.py`) the poses and attitude; `glb_add_clips.py` copies them onto the shipped glb.
