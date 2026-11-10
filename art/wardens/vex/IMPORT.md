@@ -1,14 +1,15 @@
 # Vex (gunslinger): import note, v2 design (2026-11-06)
 
-`vex.glb`: the owner's locked v2 redesign (briefs/art-refs/vex_v2/: index.md, master_sheet, turnaround), on the shared armature, under 15k
-triangles (10.7k), six material slots, one 2048 atlas plus its normal map, hand-keyed clips (docs/art/wardens/CLIPS.md, content/rules/warden_anim/vex.json).
+`vex.glb`: the owner's locked v2 redesign (briefs/art-refs/vex_v2/: index.md, master_sheet, turnaround), on the shared armature, the hero LOD
+at 67.7k triangles (docs/art/wardens/HUNTER_REGEN.md), six material slots, one 4096 atlas plus its normal map (PNG, imported at 2048,
+`normal_k` 0.6), hand-keyed clips (docs/art/wardens/CLIPS.md, content/rules/warden_anim/vex.json).
 Raw files in ~/meshy/vex_v2 (never in git); the Meshy tasks and credits are in docs/art/wardens/PIPELINE.md.
 
     python3 -I tools/meshy/meshy_task.py edit ...      # body views: bald, minigun and coin chain out; head views from a head sheet; prompts in ~/meshy/vex_v2/edit.sh
     python3 -I tools/meshy/meshy_task.py create ~/meshy/vex_v2/runA in/front.png in/left.png in/back.png --texture-refs in/*.png
     python3 -I tools/meshy/meshy_task.py create ~/meshy/vex_v2/hrunA hin/front.png hin/left.png hin/back.png hin/tq.png --pose ""
     godot --headless -- --warden-rig-json --warden=gunslinger     # after any body change
-    ~/meshy/vex_v2/build.sh [source|shape]                         # tools/art1/vex_source, vex_headscan, vex_finish, vex_clips
+    ~/meshy/vex_v2/hr/build.sh 70k 44000 24000 9000 4096 source head finish clips   # tools/art1/vex_source, vex_headscan, vex_finish, vex_clips
 
 Anatomy (owner): her right forearm IS the minigun from the elbow down, no hand. `upper_arm.R` is her own arm in the jacket sleeve; `forearm.R`
 carries the whole gun rigid (hand.R follows it, unskinned), so aim = arm pose: the brass cuff over the elbow, the receiver with its side boss,
