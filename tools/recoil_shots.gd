@@ -4,7 +4,6 @@ extends "res://tools/idle_shots.gd"
 ## frames f000 (aiming, before the shot) to f005 (0.15 s on), the same clip held still; "before" runs with the
 ## recoil data removed. Views side and front (3/4). Needs a renderer.
 
-const VIEWS := {"side": 90.0, "front": 155.0}     # model yaw, degrees
 const AIMED := {"gunslinger": "gunslinger_lmb", "thief": "thf_lmb_r", "dredge": "dr_shot"}     # the clip held up
 const AT := [-1.0, 0.0, 0.03, 0.06, 0.09, 0.15]     # s from the shot (-1: before it)
 
