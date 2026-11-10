@@ -77003,5 +77003,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_scopeleon_on_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_bastling",
+    "name": "Bastling (tide colours like the new Bastionpet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_bastling_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bastling",
+    "name": "Bastling (tide colours like the new Bastionpet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_bastling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_bastling",
+    "name": "Bastling (tide colours like the new Bastionpet)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_bastling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_crofthollow",
+    "name": "Crofthollow (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on2_crofthollow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_crofthollow",
+    "name": "Crofthollow (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on2_crofthollow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_crofthollow",
+    "name": "Crofthollow (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on2_crofthollow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_pagoguana",
+    "name": "Pagoguana (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on2_pagoguana_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on2_pagoguana",
+    "name": "Pagoguana (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on2_pagoguana_3.jpg",
+    "ok": true
   }
 ]
