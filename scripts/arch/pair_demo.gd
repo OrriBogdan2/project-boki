@@ -189,6 +189,8 @@ const SHOTS := {
 	"pair_ostra_seed_hit": ["os_pop", 2.1, -4.5],
 	"pair_ostra_swollen_key": ["os_empower", 0.8, -4.2],
 	"pair_ostra_seed_full": ["os_seed", 5.2, -4.5], "pair_ostra_seed_collapse": ["os_seed", 7.56, -4.5],
+	# the pop marker at the match zoom: full size (x3.5), then the last 2s of the window ("E NOW")
+	"pair_ostra_seed_mark": ["os_seed", 7.2, -2.5], "pair_ostra_seed_now": ["os_seed", 15.6, -2.5],
 	"pair_breah_spine_tele": ["br_spine", 0.58, -3.0], "pair_breah_spine_key": ["br_spine", 0.82, -3.0],
 	"pair_breah_spine_hit": ["br_spine", 1.45, -3.0],
 	"pair_ostra_well_tele": ["os_well", 1.0, -2.5], "pair_ostra_well_key": ["os_well", 1.56, -2.5],

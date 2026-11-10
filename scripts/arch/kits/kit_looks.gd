@@ -299,6 +299,7 @@ func _build_bomb(n: Node3D) -> void:
 	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	tag.no_depth_test = true
 	tag.render_priority = 10
+	tag.outline_render_priority = 9      # (default -1: the drum's glass would draw over the outline)
 	n.add_child(tag)
 
 ## Ostra's Nightwell, radius 1 (scaled to the well): a dark violet disc, four spiral arms of light turning
