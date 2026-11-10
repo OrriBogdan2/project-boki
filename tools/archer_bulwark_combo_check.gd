@@ -1067,7 +1067,7 @@ func _bulwark_combos() -> void:
 		"Mate",
 		"idle",
 		{},
-		P.pos + Vector3(0, 0, 2.7),
+		P.pos + Vector3(0, 0, 1.8),
 		{"arch": "none"}
 	)
 	T.teleport(home + Vector3(0, 0, -5.0))
