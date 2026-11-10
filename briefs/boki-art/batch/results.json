@@ -83653,5 +83653,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_anchorbill_1.jpg",
     "ok": true
+  },
+  {
+    "id": "on_briarlynx_big",
+    "name": "Briarlynx (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_briarlynx_big_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_briarlynx_big",
+    "name": "Briarlynx (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_briarlynx_big_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_anchorbill",
+    "name": "Anchorbill (owner note: a pup of Anchorhorn, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_anchorbill_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_zephyrak",
+    "name": "Zephyrak (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_zephyrak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_anchorbill",
+    "name": "Anchorbill (owner note: a pup of Anchorhorn, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_anchorbill_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_anchorbill",
+    "name": "Anchorbill (owner note: a pup of Anchorhorn, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_anchorbill_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_zephyrak",
+    "name": "Zephyrak (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_zephyrak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_briarlynx_big",
+    "name": "Briarlynx (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_briarlynx_big_3.jpg",
+    "ok": true
   }
 ]
