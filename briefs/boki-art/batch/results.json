@@ -101538,5 +101538,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/mark_calderoise_s_2.jpg",
     "ok": true
+  },
+  {
+    "id": "mark_palloth_h",
+    "name": "Palloth (legendary mark h)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_palloth_h_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_palloth_s",
+    "name": "Palloth (legendary mark s)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_palloth_s_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_palloth_h",
+    "name": "Palloth (legendary mark h)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/mark_palloth_h_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "mark_palloth_s",
+    "name": "Palloth (legendary mark s)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/mark_palloth_s_2.jpg",
+    "ok": true
   }
 ]
