@@ -238,6 +238,10 @@ func _emit(at: Vector3, col: Color, amount: int, speed: float, life: float, grav
 func dust(at: Vector3, n := 8) -> void:
 	_emit(at + Vector3(0, 0.1, 0), Color(0.82, 0.8, 0.72, 0.9), n, 2.2, 0.45, 2.0, 1.3, Vector3.UP, 80.0)
 
+## A thin smoke puff drifting behind `dir` (an overheated glider's trail). Like dust, not a burst.
+func smoke(at: Vector3, dir: Vector3) -> void:
+	_emit(at, Color(0.3, 0.3, 0.33, 0.5), 3, 0.8, 0.9, -0.6, 0.55, dir, 14.0)
+
 ## The shared dash cue: a dust puff where it sets off (the after-images follow in Hunter.render). No ring or
 ## burst: those are kept for blasts that do something.
 func dash_trail(h) -> void:

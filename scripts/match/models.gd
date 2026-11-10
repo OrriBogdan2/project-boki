@@ -820,6 +820,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var glider := Node3D.new(); glider.name = "Glider"; glider.position = Vector3(0, 0.62, 0.12); glider.visible = false
 	torso.add_child(glider)
 	var canopy := MeshInstance3D.new()
+	canopy.name = "Canopy"
 	var gskin := String(lk["glider"])
 	canopy.mesh = Gliders.mesh(gskin, team_col, hero_col)
 	canopy.material_override = vtoon_outlined()
