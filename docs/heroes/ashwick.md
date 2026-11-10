@@ -120,6 +120,7 @@ so nothing was built. In flight means extra polish on an unmerged branch; the ro
 ## Ultimate on X: Flue Flight
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
 carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows the owner's data (more damage, speed and a shield).
+- Look (parity, Nov 9): the carpet is drawn as wide as it burns (`trail_w` 1.8m, asserted in `--ashwick-combo-check`), a thick red-orange band with a thin dark crust at the rim and a hot yellow-orange line inside it that cools to char over its 5.2s (the body darkens but stays orange) (`shaders/ld_lava.gdshader`); no carpet over the abyss. Gameplay unchanged.
 - Numbers keep the source's ratios: cooldown 32s against the cloak's 10.5s (source 25s : 8.3s); the carpet ticks far below the
   hose (about 1/6 of its damage a second, as in the footage), and its value is the slow and the Ignite build-up.
 - Bond: an enemy hunter the carpet burns fills the Boki bond (a hit; a knock or a kill counts higher), the best event of the cast
@@ -321,3 +322,13 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## v2 re-audit (Nov 9: models-v2 and Kael v2 merged)
+Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`, retargeted clips; briefs/DECISIONS.md 2026-11-07 parity first). Before: the Nov 8 strips in [ANIM_QUALITY_AUDIT.md](../art/ANIM_QUALITY_AUDIT.md) (`../art/anim_audit/ashwick.jpg`). After: rows idle, walk, run, attack 1, attack 2, 8 frames each:
+
+![ashwick v2 strips](../art/anim_audit/v2_ashwick.jpg)
+
+- Gait: run slide 12 %, arms against the legs +0.80, bob 9.1 cm: unchanged from Nov 8. Both attacks still hold an arm out to the side 92-96 % of the clip (T-pose): not fixed (our own idea, see the report).
+- Palms: the muzzles are the palms (`weapon_muzzle` right, `weapon_muzzle_l` left); both sit within 0.06 m of the hand bones in `lance` and `shot`.
+- Idle to walk first-pose gap 0.38 body heights, unchanged (blend-covered).
+- Timing: Cinder's move timing table is on the unmerged `ext/anim-time-cinder*` branches (it conflicts with this one in `warden_clips.gd` and `cinder.json`, so it was not re-run here); `--ashwick-combo-check` on the v2 clips passes (119 checks, 0 failures).

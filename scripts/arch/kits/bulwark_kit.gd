@@ -268,7 +268,8 @@ func ult_running() -> bool:
 ## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
-		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
+		# it takes the hit (and turns it into Guard) as it does a shot
+		m.verbs.absorb(wall, dmg, by.pos + Vector3.UP)
 		o = o.duplicate(); o.erase("kb"); o.erase("lift")
 		return [0.0, o]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
@@ -310,7 +311,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 		dir = h.aim_dir()
 	if m.time - float(crushed_at.get(t.get_instance_id(), -9.0)) < 0.6:
 		return
-	if not terrain_behind(t, dir, float(res_def().get("crush_reach", 1.5))):
+	if not KnockWall.behind(m, t, dir, float(res_def().get("crush_reach", 1.5))):
 		return
 	crushed_at[t.get_instance_id()] = m.time
 	var rd := res_def()
@@ -824,7 +825,7 @@ func _spin_hit(wd: Vector2) -> void:
 		cd["rmb"] = 0.0
 	h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
-	fx.smash_ring(h.pos)
+	fx.smash_ring(h.pos, r)
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
 	net_ring(h.pos, r, Color("ff7a3a"))
