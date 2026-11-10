@@ -75253,5 +75253,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/c_pinline_seal_final_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2t_pinster",
+    "name": "Pinster (V2 card, style board)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2t_pinster_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_pinster",
+    "name": "Pinster (V2 card, style board)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_pinster_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_pinster",
+    "name": "Pinster (V2 card, style board)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_pinster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_bullpole",
+    "name": "Bullpole (V2 card, style board)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_bullpole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_tiltster",
+    "name": "Tiltster (V2 card, style board)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2t_tiltster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_bullpole",
+    "name": "Bullpole (V2 card, style board)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2t_bullpole_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_tiltster",
+    "name": "Tiltster (V2 card, style board)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2t_tiltster_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_tiltster",
+    "name": "Tiltster (V2 card, style board)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2t_tiltster_3.jpg",
+    "ok": true
   }
 ]
