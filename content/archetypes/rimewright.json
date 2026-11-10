@@ -146,21 +146,11 @@
 		"kin",
 		"gear"
 	],
-	"rank3": {
-		"sec": "the spear's detonation hits 45% harder",
-		"dash": "a Skate over the Abyss lays ice underfoot that holds for 5s",
-		"kin": "the wall is 40 points tougher"
-	},
-	"rank2": {
-		"sec": "Rank 2: cooldown 10.2s -> 9.2s, damage +15%.",
-		"dash": "Rank 2: recharge 13s -> 11s.",
-		"kin": "Rank 2: cooldown 17s -> 15.3s, wall strength +15%."
-	},
-	"rank_next": {
-		"sec": "Rank 3: cooldown 10.2s -> 8.2s, damage +30%; the detonation hits 45% harder.",
-		"dash": "Rank 3: recharge 13s -> 9.1s; a Skate over the Abyss lays ice underfoot that holds for 5s.",
-		"kin": "Rank 3: cooldown 17s -> 13.6s, wall strength +30%; +40 wall strength."
-	},
+	"rank_cd": {"sec": [1, 0.8542, 0.7083], "dash": [1, 0.8846, 0.7692], "kin": [1, 0.875, 0.75]},
+	"rank_dmg": {"sec": [1, 1.15, 1.3], "dash": [1, 1, 1], "kin": [1, 1, 1]},
+	"rank3": {"sec": "the spear's detonation hits 45% harder", "dash": "a Skate over the Abyss lays ice underfoot that holds for 5s", "kin": "the wall is 40 points tougher"},
+	"rank2": {"sec": "Rank 2: cooldown 10.2s -> 8.7s, damage +15%.", "dash": "Rank 2: recharge 13s -> 11.5s.", "kin": "Rank 2: cooldown 17s -> 14.9s."},
+	"rank_next": {"sec": "Rank 3: cooldown 10.2s -> 7.2s, damage +30%; the detonation hits 45% harder.", "dash": "Rank 3: recharge 13s -> 10s; a Skate over the Abyss lays ice underfoot that holds for 5s.", "kin": "Rank 3: cooldown 17s -> 12.8s; the wall is 40 points tougher."},
 	"tells": {
 		"half": "a frost glow on foes that grows with each dart",
 		"full": "at 8 darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
