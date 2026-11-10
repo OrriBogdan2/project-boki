@@ -1095,7 +1095,8 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", _puppet_state())
+	var on_you := state == "shoulder" and not beside
+	model.set_meta("kstate", _puppet_state(on_you))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
@@ -1160,8 +1161,8 @@ func render(delta: float, alpha: float) -> void:
 	KinDowned.scoop_pose(self)
 
 ## The "kstate" meta the puppets read (KinPuppet, BokiRig).
-func _puppet_state() -> String:
-	if state == "shoulder" and not beside:
+func _puppet_state(on_you: bool) -> String:
+	if on_you:
 		return "perch"
 	if state == "downed":
 		return "faint"
