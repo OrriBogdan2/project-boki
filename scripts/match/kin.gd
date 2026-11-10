@@ -24,6 +24,9 @@ var speed := 6.5
 var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
+## s between looks for a foe while it has none (tuning.json "perf"; a beat under a reaction time)
+static var RETARGET_S := float(Content.rules("tuning")["perf"]["boki_retarget_s"])
+var look_at_t := 0.0            # match time of its next look for a foe
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
 ## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
@@ -171,8 +174,9 @@ func t(k: String) -> float:
 func is_wild() -> bool:
 	return owner_h == null
 
+const HITTABLE_STATES := ["active", "flying", "returning", "reviving", "wild"]     # (a const: hittable runs hundreds of times a step)
 func hittable() -> bool:
-	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
+	return not dead and state in HITTABLE_STATES and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
@@ -587,8 +591,12 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	# (direct lines, not set()/get() by name: 30 Boki tick these every step)
+	atk_cd = maxf(0.0, atk_cd - dt)
+	lunge_t = maxf(0.0, lunge_t - dt)
+	throw_cd = maxf(0.0, throw_cd - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	rest_t = maxf(0.0, rest_t - dt)
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
@@ -780,13 +788,15 @@ func _sim_fly_home(dt: float) -> void:
 			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 
 func walkable_to(p: Vector3) -> bool:
+	if absf(p.y - pos.y) >= 2.0:
+		return false
 	var d := Vector2(p.x - pos.x, p.z - pos.z)
 	var n := int(d.length() / 0.6) + 1
 	for i in range(1, n + 1):
 		var q := Vector2(pos.x, pos.z) + d * (float(i) / n)
 		if m.world.is_void(q.x, q.y):
 			return false
-	return absf(p.y - pos.y) < 2.0
+	return true
 
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):
@@ -822,7 +832,9 @@ func _sim_active(dt: float) -> void:
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
-			target = brain.pick_target()
+			target = brain.pick_target() if m.time >= look_at_t else null
+			if target == null and m.time >= look_at_t:
+				look_at_t = m.time + RETARGET_S * rng.randf_range(0.75, 1.25)    # nothing to fight: look again soon
 	var wish := Vector2.ZERO
 	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if root_t > 0.0 or stun_t > 0.0:

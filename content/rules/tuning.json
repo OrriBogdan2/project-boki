@@ -29,5 +29,13 @@
 		"ult_up_min_mps": 1.0,
 		"ult_up_bonus_mps": 2.2,
 		"chain_lunge_deg": 25.0
+	},
+	"perf": {
+		"bot_replan_s": 0.1,
+		"boki_retarget_s": 0.2,
+		"hero_anim_near_m": 48.0,
+		"hero_anim_far_every": 2,
+		"hero_anim_off_every": 4,
+		"bot_belt_s": 0.1
 	}
 }
