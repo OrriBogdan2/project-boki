@@ -497,6 +497,46 @@ func _archer_combos() -> void:
 		K.spirit.snap_backs == sn0 + 1 and P.pos.x < bx,
 		"x %.1f (rock %d, entry %.1f)" % [P.pos.x, bx, K.spirit.entry.x]
 	)
+	# Phase Walk crosses a raised-platform wall (data, supervive_kits.md:78): a wall two terraces high and
+	# two tiles thick, west of her, that a plain walk stops at; she walks through at her own floor
+	var wx := int(home.x) - 4
+	var wl: PackedByteArray = W.level
+	for dz in range(-2, 3):
+		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv + 2
+	W.level = wl
+	step(m, 0.5)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	step(m, 1.5, func(): P.inp["move"] = Vector2(-1, 0))
+	var plain_x := P.pos.x
+	P.teleport(home)
+	P.dashes = P.max_dashes()
+	K.res = 80.0
+	P.inp["move"] = Vector2(-1, 0)
+	P.do_dash()
+	var in1 := K.spirit.passed
+	step(m, 1.1, func(): P.inp["move"] = Vector2(-1, 0))
+	P.inp["move"] = Vector2.ZERO
+	ok(
+		"combo pin: Spirit Walk passes a raised terrace wall that stops a plain walk",
+		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and absf(P.pos.y - home.y) < 0.1,
+		"plain x %.1f, spirit x %.1f y %+.2f (wall %d..%d) inside %d"
+			% [plain_x, P.pos.x, P.pos.y - home.y, wx - 1, wx + 1, K.spirit.passed - in1]
+	)
+	# ending inside the terrace puts her back on her side, at the floor she left
+	P.teleport(Vector3(wx + 0.5, home.y, home.z))
+	step(m, 0.05)
+	var sn1 := K.spirit.snap_backs
+	K.spirit.end("time")
+	ok(
+		"combo pin: Spirit Walk ending inside a terrace = back to the entry",
+		K.spirit.snap_backs == sn1 + 1 and absf(P.pos.y - home.y) < 0.1
+			and W.ground_at(P.pos.x, P.pos.z) <= home.y + 0.1,
+		"x %.1f y %+.2f entry %s" % [P.pos.x, P.pos.y - home.y, K.spirit.entry]
+	)
+	for dz in range(-2, 3):
+		for dx in 2: wl[W.idx(wx - dx, int(home.z) + dz)] = lv
+	W.level = wl
 	# damage ends it
 	P.teleport(home)
 	P.dashes = P.max_dashes()
