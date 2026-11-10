@@ -103288,5 +103288,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/glom_honey_f_1.jpg",
     "ok": true
+  },
+  {
+    "id": "glom_paint_f",
+    "name": "Glomworth (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_paint_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_honey_f",
+    "name": "Glomworth (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_honey_f_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_paint_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_paint_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_paint_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glom_paint_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_custard_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glom_custard_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glom_honey_b",
+    "name": "Glomwort (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glom_honey_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_blotlet",
+    "name": "Blotlet (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/alt_blotlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "alt_kingpinguin",
+    "name": "Kingpinguin (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/alt_kingpinguin_1.jpg",
+    "ok": true
   }
 ]
