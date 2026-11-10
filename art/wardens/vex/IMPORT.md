@@ -16,10 +16,13 @@ six barrels on `gatling` (spins), the ammo drum under the receiver, the ribbed b
 forearm and hand are brass machine parts, rigid per bone, with the gold coin on `coin`. The stickers, the trousers' green splatter and tally marks,
 the shoulder tattoos and freckles are texture. The gold coin hip chain is rigid on `hips`.
 
-v2 has no launcher tube: the `launcher` bone stays for the clip set and carries no mesh; `launcher_muzzle` sits on its pivot (the swing leaves
-it in place) at the drum's mouth, the same spot as `launcher_fire` on `forearm.R`. The Burr Charge leaves from there.
+v2 has no launcher tube: the `launcher` bone stays for the clip set and carries no mesh (the clips no longer swing it); `launcher_muzzle`
+and `launcher_fire` stay at the drum's mouth but nothing leaves from them now. Coin Blast (the flicked coin) and Palm Lance (the charge and
+beam) leave from `palm_emitter` on `hand.L`, 4 cm to the palm side and 7.5 cm along the hand from the wrist (tools/art1/vex_finish.py).
+The game reads that point as the `palm` anchor in content/vfx/gunslinger.json (`hand.L` plus the same offset, off the skeleton's live
+pose: the empty's BoneAttachment3D lags the clip); --gunslinger-combo-check holds the two together.
 
-FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_muzzle`, `launcher_fire`, `anchor_gatling_root`, `anchor_sleeve_mouth`
+FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `palm_emitter`, `launcher_muzzle`, `launcher_fire`, `anchor_gatling_root`, `anchor_sleeve_mouth`
 (the cuff's top), `anchor_grenade_drum`, `anchor_eye_glow` (= `anchor_lens`: her mechanical left eye; nothing glows there), `anchor_spine`,
 `anchor_coin`, `anchor_left_hand`, `anchor_pack` (her left shoulder blade), `anchor_chest`, `anchor_head_top`.
 

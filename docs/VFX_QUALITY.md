@@ -66,7 +66,7 @@ Still open (shared, not done here):
   orbs and the Grounded shackle.
 - Nine kits are data-driven (`content/vfx/`: archer, ashwick, dolm, gunslinger, juggernaut, mage (LMB, RMB, E, X), ostra (RMB, E, X),
   rimewright, tender). The rest draw with
-  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`); Vex still uses `vv_fx` for her slide echoes, the Burr Charge's cone and smear, and the Dazed swirl. Moving each to `HeroVfx` data is
+  `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`); Vex still uses `vv_fx` for her slide echoes, the Coin Blast's smear and the Dazed swirl. Moving each to `HeroVfx` data is
   how a kit reaches the bar. Tenzo's punch, boulder and launched-rock bursts (`dolm_kit`) still draw `Fx` rings.
 - **Opaque zone fills** (seen in the strips): Vex's X scorch (`VvFx.disc`, fixed on ext/vfx-gunslinger), Motley's well dome, Meeko's seed and
   ult discs (fixed on ext/vfx-tender: `care_disc` `glow`) and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit

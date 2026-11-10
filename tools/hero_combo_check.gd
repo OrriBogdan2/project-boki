@@ -640,7 +640,7 @@ func _mage() -> void:
 	fails += ac.fails
 
 # ------------------------------------------------------------------ Vex
-## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the
+## Items 144 and 144b: the Palm Lance's aim locks at the press and turns at a capped rate, so a flick across the
 ## screen moves the beam at most cap x charge time while a small adjustment still lands; the camera push-out
 ## scales with the aim distance (none close in, the full 25% at the 18 m range).
 func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
@@ -662,13 +662,13 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 		return [held, cursor]
 	var mid_deg: float = float(charge.call(Vector3(8, 0, 0), Vector3(-8, 0, 0), 0.2)[0])
 	var flick_deg := rad_to_deg(absf(K.needle_dir.angle_to(east)))
-	ok("Longneedle: the line shows the lagging aim, not the cursor, through the charge",
+	ok("Palm Lance: the line shows the lagging aim, not the cursor, through the charge",
 			mid_deg > 5.0 and mid_deg < cap_deg * 0.6, "%.1f deg after 0.2 s" % mid_deg)
-	ok("Longneedle: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
+	ok("Palm Lance: a 180-degree flick at the press moves the beam at most %.0f degrees" % cap_deg,
 			K.needle.is_empty() and flick_deg <= cap_deg + 2.0 and flick_deg >= cap_deg * 0.7, "%.1f deg" % flick_deg)
 	var cursor: Vector2 = charge.call(Vector3(8, 0, 0), Vector3(8, 0, 2), 0.2)[1]
 	var nudge_deg := rad_to_deg(absf(K.needle_dir.angle_to(cursor)))
-	ok("Longneedle: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
+	ok("Palm Lance: a small tracking adjustment still lands on the cursor", nudge_deg <= 1.0,
 			"%.2f deg off" % nudge_deg)
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
@@ -682,11 +682,11 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 		ac.step(m, 0.4)
 		return out
 	var near: Array = push.call(3.0)
-	ok("Longneedle: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
+	ok("Palm Lance: an aim at 3 m leaves the camera alone", float(near[0]) < 0.005 and float(near[1]) < 0.05,
 			"zoom %.3f, pan %.2f m" % near)
 	var mid: Array = push.call(11.0)
 	var far: Array = push.call(18.0)
-	ok("Longneedle: the push-out ramps with the aim distance, the full 25% at 18 m",
+	ok("Palm Lance: the push-out ramps with the aim distance, the full 25% at 18 m",
 			float(mid[0]) > 0.05 and float(mid[0]) < 0.2 and absf(float(far[0]) - float(ed["view_zoom"])) < 0.005
 			and float(far[1]) > 1.0,
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
@@ -700,7 +700,6 @@ func _gunslinger() -> void:
 	var T2: Hunter = r[3]
 	var home: Vector3 = r[4]
 	var K: GunslingerKit = P.ak
-	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
 	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
@@ -746,82 +745,16 @@ func _gunslinger() -> void:
 			"%s, %d in flight" % [K.anim_id, K.burrs.size()])
 	P.inp["sec_hold"] = false
 	m.step(DT)
-	# 3a. a direct hit: the foe on the line is hurt and Dazed on the spot, the charge is spent, no cone
+	# 3a. a hit: the foe on the line is hurt and Dazed on the spot, the charge is spent
 	ac.step(m, 0.2)
-	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
-			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
-			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
+	ok("RMB hit: damage + Dazed, the charge is spent, a small green burst",
+			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.fizzles == 0 and K.burrs.is_empty()
+			and int(HeroVfx.of(m).plays.get("rmb_hit", 0)) == 1,
+			"took %.1f hits %d fizzles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.fizzles, K.burrs.size()])
 	var rifle := {"src": "shot"}
 	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
-	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	T.teleport(home + Vector3(4, 0, 6))
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	P.teleport(home)
-	ac.step(m, 0.1)
-	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
-	ac.tap(m, P)
-	ac.step(m, 0.5)
-	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB: sticks on the ground at the lane's end",
-			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
-			"at %.1f" % (_flat(b0.get("pos", home), home)))
-	var cone_id := ("burr%d" % (b0["node"] as Node3D).get_instance_id()) if not b0.is_empty() else ""
-	var ce := AimKit.entry(P, cone_id)
-	ok("RMB: the cone shows back toward you, for everyone",
-			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
-	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
-			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
-			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
-	ac.fresh(T)
-	T.teleport(home + Vector3(8, 0, 0))
-	ac.step(m, 0.05)
-	var tx := T.pos.x
-	ac.step(m, 1.0)
-	ok("RMB ground cone: damage + Dazed + shoved toward you",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and T.pos.x < tx - 1.5,
-			"took %.0f moved %.1f" % [ac.dmg(T), T.pos.x - tx])
-	ok("RMB: 0.9s fuse", is_equal_approx(float(bd["fuse"]), 0.9))
-	# 4. on a wall: sticks, the cone back out, a hunter shoved into more terrain is stunned (no cooldown shave)
-	ac.fresh(T)
-	KitStatus.clear_rattled(T)
-	P.teleport(home)
-	T.teleport(home + Vector3(7.0, 0, 1.5))
-	ac.step(m, 0.1)
-	T.inv_t = 0.0
-	for z in range(-3, 4):
-		_wall(m, home + Vector3(9.5, 0, z))
-	for z in [1, 2]:
-		_wall(m, home + Vector3(5.5, 0, z))
-	P.inp["aim"] = home + Vector3(9.5, 0.9, 0.0)
-	K.cd["rmb"] = 0.0
-	K.ch_rmb = 1.0
-	var ws0 := K.wall_slams
-	ac.fresh(T2)
-	KitStatus.clear_rattled(T2)
-	T2.teleport(home + Vector3(7.0, 0, -1.5))
-	ac.step(m, 0.1)
-	T2.inv_t = 0.0
-	ac.tap(m, P)
-	ac.step(m, 0.5)
-	var bw: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
-	ok("RMB on a wall: sticks to the wall", not bw.is_empty() and bool(bw["wall"]), str(bw.get("pos", "")))
-	ac.step(m, 1.1)
-	ok("RMB wall cone: a second foe in the cone is hurt and Dazed too",
-			KitStatus.rattled(T2) and ac.dmg(T2) >= 12.0, "took %.0f at %s" % [ac.dmg(T2), str(T2.pos - home)])
-	ok("RMB wall cone: hits, Dazes, shoves into terrain = stun, the cooldown is not shaved",
-			ac.dmg(T) >= 12.0 and KitStatus.rattled(T) and K.wall_slams == ws0 + 1 and float(K.cd["rmb"]) > 6.5 * 0.7,
-			"took %.0f slams %d cd %.1f" % [ac.dmg(T), K.wall_slams - ws0, float(K.cd["rmb"])])
-	var longer := KitStatus.rattled_left(T) - KitStatus.rattled_left(T2)
-	ok("RMB wall slam: the walled foe is Dazed longer (the data), 0.6s past the cone's Daze",
-			absf(longer - float(bd["wall_daze"])) < 0.1, "%.2f s longer" % longer)
-	for z in range(-3, 4):
-		_unwall(m, home + Vector3(9.5, 0, z))
-	for z in [1, 2]:
-		_unwall(m, home + Vector3(5.5, 0, z))
-	# 5. Longneedle: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
+	_coin_misses(m, P, K, T, T2, home)
+	# 5. Palm Lance: stand still, a full-width line narrowing over 0.6s, the beam at 0.6, recoil back a step
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	T.teleport(home + Vector3(8, 0, 0))
@@ -832,23 +765,23 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.05)
 	var w1: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: you stand still to charge", K.move_k() <= 0.001)
+	ok("Palm Lance: you stand still to charge", K.move_k() <= 0.001)
 	ac.step(m, 0.45)
 	var w2: float = float(AimKit.entry(P, "e").get("width", 0.0))
-	ok("Longneedle: the line narrows over the cast (18m)",
+	ok("Palm Lance: the line narrows over the cast (18m)",
 			w1 > 0.8 and w2 < w1 * 0.4 and absf(float(AimKit.entry(P, "e").get("len", 0.0)) - 18.0) < 0.01,
 			"%.2f -> %.2f" % [w1, w2])
-	ok("Longneedle: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
+	ok("Palm Lance: the line starts at the width of the beam that hits (%.2f m)" % K.beam_width(),
 			w1 <= K.beam_width() + 0.001 and w1 > K.beam_width() * 0.85, "%.2f" % w1)
-	ok("Longneedle: nothing before 0.6s", ac.dmg(T) < 0.5)
+	ok("Palm Lance: nothing before 0.6s", ac.dmg(T) < 0.5)
 	var px := P.pos.x
 	ac.step(m, 0.4)
-	ok("Longneedle: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
-	ok("Longneedle: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
+	ok("Palm Lance: fires at 0.6s", ac.dmg(T) >= 30.0, "took %.0f" % ac.dmg(T))
+	ok("Palm Lance: the recoil shoves you back", P.pos.x < px - 0.4, "%.2f" % (P.pos.x - px))
 	var needle_looks := HeroVfx.of(m).plays
-	ok("Longneedle: it charges, fires and hits as its own needle (HeroVfx e_charge, e_fire, e_hit)",
+	ok("Palm Lance: it charges, fires and hits as its own needle (HeroVfx e_charge, e_fire, e_hit)",
 			["e_charge", "e_fire", "e_hit"].all(func(mv): return int(needle_looks.get(mv, 0)) >= 1))
-	ok("Longneedle hit takes 20% off its cooldown (not 30% before rank 3)",
+	ok("Palm Lance hit takes 20% off its cooldown (not 30% before rank 3)",
 			float(K.cd["e"]) < 8.9 and float(K.cd["e"]) > 7.7, "%.2f" % float(K.cd["e"]))
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
@@ -859,7 +792,7 @@ func _gunslinger() -> void:
 	var sk0 := K.skewers
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 36.0 * 1.15)
+	ok("Palm Lance on a Dazed hunter: +20% and Skewered", K.skewers == sk0 + 1 and ac.dmg(T) >= 36.0 * 1.15)
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
@@ -869,7 +802,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("Longneedle passes through a wall", ac.dmg(T) >= 30.0)
+	ok("Palm Lance passes through a wall", ac.dmg(T) >= 30.0)
 	for zz in [-1, 0, 1]: _unwall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
 	ac.fresh(T)
@@ -880,7 +813,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.3)
 	P.stun_t = 0.5
 	ac.step(m, 0.2)
-	ok("Longneedle: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
+	ok("Palm Lance: a stun cancels the charge", K.needle.is_empty() and ac.dmg(T) < 0.5)
 	P.stun_t = 0.0
 	_gunslinger_needle_aim(m, P, K, home)
 	# 6. Slipstep: goes where you move (not the aim), you fire through a tap too
@@ -938,7 +871,7 @@ func _gunslinger() -> void:
 	ok("dash table: a shot tapped mid-slide fires at once", P.shot_n == n_gd + 1, "%d -> %d" % [n_gd, P.shot_n])
 	ac.fresh(T)
 	P.ak.use_e()
-	ok("dash table: E (Longneedle) starts mid-slide", not K.needle.is_empty())
+	ok("dash table: E (Palm Lance) starts mid-slide", not K.needle.is_empty())
 	P.inp["move"] = Vector2.ZERO
 	ac.step(m, 0.8)
 	var gk: Array = (HunterAnim.km_def("gunslinger_dash")["keys"] as Array)
@@ -989,9 +922,9 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle hits everyone in its line (two)", ac.dmg(T) >= 30.0 and ac.dmg(T2) >= 30.0)
+	ok("small: Palm Lance hits everyone in its line (two)", ac.dmg(T) >= 30.0 and ac.dmg(T2) >= 30.0)
 	var cd_two := float(K.cd["e"])
-	ok("small: Longneedle at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
+	ok("small: Palm Lance at rank 1 cuts its cooldown once however many it hits (20%)", cd_two > 7.7, "%.2f" % cd_two)
 	P.slot_lv["kin"] = 3
 	ac.fresh(T)
 	ac.fresh(T2)
@@ -1005,7 +938,7 @@ func _gunslinger() -> void:
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
-	ok("small: Longneedle at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
+	ok("small: Palm Lance at rank 3 takes 30% per hunter hit (two hits: 60% off its 11.5s cooldown)",
 			float(K.cd["e"]) < 11.5 * 0.5, "%.2f" % float(K.cd["e"]))
 	P.slot_lv["kin"] = 1
 	# upgrade parity (docs/heroes/gunslinger.md): the source's tier II / III+IV numbers per slot
@@ -1019,18 +952,18 @@ func _gunslinger() -> void:
 			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin") / K.power("sec"),
 		])
-	ok("upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3",
+	ok("upgrade parity: Coin Blast cooldown 6.5 -> 5.4 -> 4.3",
 			near.call(up[0][0], 6.5) and near.call(up[1][0], 5.4) and near.call(up[2][0], 4.3), str(up))
 	ok("upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3",
 			near.call(up[0][1], 8.5) and near.call(up[1][1], 7.4) and near.call(up[2][1], 6.3), str(up))
-	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
+	ok("upgrade parity: Palm Lance cooldown stays 11.5 and damage +20% / +40%",
 			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
 	T2.teleport(home + Vector3(30, 0, 0))
-	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Burr Charge
+	# 7. Hot Streak: a knock gives Slipstep back; rank 3 resets the Coin Blast
 	P.slot_lv["sec"] = 3
 	P.dashes = 0.0
 	K.cd["rmb"] = 5.0
@@ -1041,13 +974,13 @@ func _gunslinger() -> void:
 	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
 	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
 			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
-	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
+	ok("Knock at rank 3: Coin Blast resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)
 	T.downed = false
 	T.hp = T.max_hp
 	P.slot_lv["sec"] = 1
 	VPARITY.new(self).run(m, P, K, T, home)
 	VTIME.new(self).run(m, P, K, T, home)
-	# 8. a Boki merge mid-hold: the Longneedle charge goes with nothing fired
+	# 8. a Boki merge mid-hold: the Palm Lance charge goes with nothing fired
 	ac.fresh(T)
 	P.teleport(home)
 	T.teleport(home + Vector3(5, 0, 0))
@@ -1057,13 +990,63 @@ func _gunslinger() -> void:
 	P.ak.use_e()
 	ac.step(m, 0.2)
 	var needle_before: bool = not K.needle.is_empty()
-	ok("merge hold: the Longneedle is charging before the merge", needle_before)
+	ok("merge hold: the Palm Lance is charging before the merge", needle_before)
 	var sk1 := K.skewers
 	ok("merge hold: a merge is under way", ac.merge_now(P))
 	ac.step(m, 0.1)
 	var took1: float = ac.dmg(T)
 	ac.step(m, 1.3)
-	ok("merge hold: the Longneedle charge is dropped, no shot mid-merge",
+	ok("merge hold: the Palm Lance charge is dropped, no shot mid-merge",
 			K.needle.is_empty() and K.e_t == 0.0 and K.skewers == sk1 and ac.dmg(T) == took1)
 	await ac.done(m)
 	fails += ac.fails
+
+## Owner 11-08 item 12: only a hit counts. The lane's end and a wall are a quiet fizzle: no damage, no Daze, no area,
+## nothing left behind, no reset or refund. A monster on the line is a hit like a Hunter.
+func _coin_misses(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, T2: Hunter, home: Vector3) -> void:
+	ac.fresh(T)
+	ac.fresh(T2)
+	KitStatus.clear_rattled(T)
+	T.teleport(home + Vector3(10.5, 0, 1.8))        # just off the lane's end: the old blast would have caught it
+	T2.teleport(home + Vector3(8.0, 0, -2.0))
+	P.teleport(home)
+	ac.step(m, 0.1)
+	P.inp["aim"] = home + Vector3(2.0, 0.9, 0)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	var fizzles0 := K.fizzles
+	var hits0 := K.direct_hits
+	var puffs0 := int(HeroVfx.of(m).plays.get("rmb_fizzle", 0))
+	ac.tap(m, P)
+	ac.step(m, 1.5)
+	var quiet: bool = ac.dmg(T) == 0.0 and ac.dmg(T2) == 0.0 and not KitStatus.rattled(T) and not KitStatus.rattled(T2)
+	ok("RMB at the lane's end: a quiet fizzle, no damage, no Daze, nothing left",
+			K.fizzles == fizzles0 + 1 and K.direct_hits == hits0 and quiet and K.burrs.is_empty()
+			and int(HeroVfx.of(m).plays.get("rmb_fizzle", 0)) == puffs0 + 1,
+			"fizzles %d took %.0f / %.0f" % [K.fizzles - fizzles0, ac.dmg(T), ac.dmg(T2)])
+	ok("RMB miss: no reset or refund", not K.rmb_ready() and float(K.cd["rmb"]) > 6.5 * 0.5,
+			"charges %.2f cd %.1f" % [K.ch_rmb, float(K.cd["rmb"])])
+	# a wall: the coin stops on it; the foe behind it is untouched
+	ac.fresh(T)
+	T.teleport(home + Vector3(8.0, 0, 0))
+	for z in range(-2, 3):
+		_wall(m, home + Vector3(5.5, 0, z))
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	ac.aim_at(P, T.pos)
+	ac.tap(m, P)
+	ac.step(m, 1.0)
+	ok("RMB on a wall: a fizzle, the foe behind it untouched",
+			K.fizzles == fizzles0 + 2 and ac.dmg(T) == 0.0 and not KitStatus.rattled(T) and K.burrs.is_empty(),
+			"fizzles %d took %.0f" % [K.fizzles - fizzles0, ac.dmg(T)])
+	for z in range(-2, 3):
+		_unwall(m, home + Vector3(5.5, 0, z))
+	# a monster on the line is a foe the coin strikes (it picks from Match.foes_of: Hunters, Boki and monsters)
+	T.teleport(home + Vector3(30, 0, 8))
+	var mob: Mob = m.spawn_mob("brute", home + Vector3(5.0, 0, 0))
+	var lane_y := Vector3(0, 1.3, 0)
+	var struck := K._burr_victim(home + lane_y, mob.pos + Vector3(2.0, 0, 0) + lane_y)
+	ok("RMB: a monster on the line is struck like a Hunter", struck == mob, str(struck))
+	m.mobs.erase(mob)
+	mob.queue_free()
+	ac.step(m, 0.1)

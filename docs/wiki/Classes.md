@@ -51,7 +51,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 
 | Hunter | Health / dashes | Weapons | Passive | Dash | RMB | E | R |
 |---|---|---|---|---|---|---|---|
-| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Burr Charge | Longneedle | none (Boki Fusion) |
+| [the Hired Gun](Class-Hired-Gun.md) | 145 / 1 | Quill Rifle | Hot Streak | Slipstep | Coin Blast | Palm Lance | none (Boki Fusion) |
 | [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [the Unbroken](Class-Unbroken.md) | 193 / 2 | Greatsword | Rage | Rampage | Smash | Warchain | none (Boki Fusion) |

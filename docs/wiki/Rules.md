@@ -812,6 +812,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | hunger_gate | {"_note": "The 'too hungry to go' panel: HungerGate.", "poll_s": 0.4} |
 | kael | {"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.", "tap_dmg_k": 0.6, "tap_range_k": 0.8, "tap_windup_s": 0.45, "tap_cooldown_s": 1.2, "ult_carry_k": 0.8, "ult_carry_decay_per_s": 1.6, "ult_up_min_mps": 1.0, "ult_up_bonus_mps": 2.2, "chain_lunge_deg": 25.0} |
 | perf | {"bot_replan_s": 0.1, "boki_retarget_s": 0.2, "actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0}, "anim_far_every": 2, "anim_off_every": 10, "hero_anim_near_m": 48.0, "hero_anim_far_every": 2, "hero_anim_off_every": 4, "bot_belt_s": 0.1} |
+| vex | {"_note": "Vex's feel (GunslingerKit, GunslingerUlt). R: the Cinderfall fire beat and shake.", "x_fire_s": 0.2, "x_shake": 0.35, "x_shake_per_hit": 0.15, "x_shake_centre": 0.3} |
+| clip_warp | {"_note": "WardenClips: a kit move's clip retimed with no rebake, per art name and kit move: [s into the move, s into the clip] knots.", "vex": {"gunslinger_x": [[0.0, 0.0], [0.2, 0.1], [0.24, 0.14], [0.46, 0.3], [0.9, 0.6]], "gunslinger_rmb": [[0.0, 0.0], [0.045, 0.07], [0.16, 0.2], [0.38, 0.5]]}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
