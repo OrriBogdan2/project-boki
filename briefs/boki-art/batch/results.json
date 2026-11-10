@@ -73972,5 +73972,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2x_barrelmander_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_anvilbrock",
+    "name": "Anvilbrock (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_anvilbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_anvilbrock",
+    "name": "Anvilbrock (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_anvilbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_anvilbrock",
+    "name": "Anvilbrock (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_anvilbrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_anvilbrock",
+    "name": "Anvilbrock (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_anvilbrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_anvilbrock",
+    "name": "Anvilbrock (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_anvilbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_anvilbrock",
+    "name": "Anvilbrock (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_anvilbrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_forgebrock",
+    "name": "Forgebrock (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_forgebrock",
+    "name": "Forgebrock (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_forgebrock_2.jpg",
+    "ok": true
   }
 ]
