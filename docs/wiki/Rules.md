@@ -534,6 +534,24 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | empty_f | {"gait": {"knee": 0.14, "lean": 0.02, "width": 0.07}, "leg": "r", "pose": {"spine": -0.04, "tilt": 0.12, "twist": 0.08, "hip": 0.07, "knee": 0.0, "free_leg": [0.2, 0.3], "head": [0.04, 0.1, -0.1], "arm_l": [0.04, 0.06, 0.02]}, "idle": {"breath": 2.2, "breath_amp": 0.9, "shift": 8.0, "fidget": {"every": 7.0, "dur": 1.4, "wave": 1, "head": [0.0, 0.3, 0.0], "body": [0.0, 0.08, 0.04]}}} |
 | empty_m | {"gait": {"knee": 0.18, "lean": 0.04, "width": 0.12}, "leg": "l", "pose": {"spine": 0.04, "tilt": 0.02, "twist": 0.04, "hip": 0.02, "knee": 0.04, "spread": 0.05, "free_leg": [0.06, 0.08], "head": [0.02, 0.0, 0.0], "arm_l": [0.0, 0.0, 0.0]}, "idle": {"breath": 2.0, "breath_amp": 1.0, "shift": 10.0, "fidget": {"every": 8.0, "dur": 1.4, "wave": 1, "head": [0.0, -0.3, 0.0], "body": [0.04, 0.0, 0.0]}}} |
 
+## warden_stride (`content/rules/warden_stride.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Run start and stop poses per Hero art (WardenStride). lean_deg: the forward lean of a start from standing, gone once the speed is built. settle_deg: the weight shifted back over the stop slide. step_s: seconds the second foot takes to step in after the slide. arc_m: how high a stepping foot lifts. Heavier Heroes (Kael, Albert, Tenzo) lean less, settle deeper and step slower. |
+| default | {"lean_deg": 9.0, "settle_deg": 5.0, "step_s": 0.2, "arc_m": 0.1} |
+| kael | {"lean_deg": 6.0, "settle_deg": 9.0, "step_s": 0.28, "arc_m": 0.07} |
+| breaker | {"lean_deg": 5.0, "settle_deg": 10.0, "step_s": 0.3, "arc_m": 0.06} |
+| tarek | {"lean_deg": 6.0, "settle_deg": 9.0, "step_s": 0.28, "arc_m": 0.07} |
+| dredge | {"lean_deg": 7.0, "settle_deg": 7.0, "step_s": 0.24, "arc_m": 0.08} |
+| ostra | {"lean_deg": 8.0, "settle_deg": 6.0, "step_s": 0.22, "arc_m": 0.09} |
+| vex | {"lean_deg": 11.0, "settle_deg": 4.0, "step_s": 0.17, "arc_m": 0.12} |
+| claire | {"lean_deg": 12.0, "settle_deg": 3.5, "step_s": 0.16, "arc_m": 0.13} |
+| sable | {"lean_deg": 12.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.12} |
+| pip | {"lean_deg": 10.0, "settle_deg": 4.0, "step_s": 0.16, "arc_m": 0.11} |
+
 ## weapon_path (`content/rules/weapon_path.json`)
 
 

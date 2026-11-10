@@ -77,6 +77,7 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var stride: WardenStride
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -101,6 +102,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	var c := WardenClips.new()
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
+	c.stride = WardenStride.make(model, sk, art_name)
 	return c
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -384,6 +386,7 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
+	stride.step(dt, s, self)
 	_out(dt)
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
