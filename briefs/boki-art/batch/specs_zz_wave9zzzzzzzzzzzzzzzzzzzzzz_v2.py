@@ -1904,3 +1904,12 @@ _SFIX={'Aurostag':"All four views show the long aurora curtains of its mane.",'C
 for _n in ('Aurostag','Cometail','Gambitfin','Lanternlong','Lunink','Sirencada','Stormit','Glomwort','Rampartoad','Rimefang','Rimekit','Sloggoth','Tesselamb','Geysirbara','Dynaboa','Glaciammoth','Hourachnid','Polyshroom','Kayak','Kintsuwyrm','Chandelapi'):
     V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_f1'; SPECS[-1]['runs']=3
     SPECS[-1]['prompt']+=_NOGHOST+" No ground line, floor or shadow band under the views. "+_SFIX.get(_n,'')
+
+# 11-10 round e4. Promoted 23 sheets (f1/e3), Rollguin + Kingpinguin without neck bands, Hatstag portrait. Left: 6 stale turnarounds.
+for _a in (('Rollguin','mid','cute',0,1,"standing up, round as a ball, flippers on its belly"),('Kingpinguin','final','tough',0,1,"marching forward, chest out, plumes streaming")):
+    SETOF(*_a,'e4')
+# Ghost row every time for these four: instead of a new sheet, EDIT the best try and only erase the faded copies.
+_GCLEAN=("Edit image 1: it is a character sheet with one row of four views of a creature, but above that row there are faded, blurry, partial duplicate copies. Erase every faded or partial copy completely and fill those areas with the same plain pale grey background. "
+ "Keep the four sharp full views in the main row exactly as they are: same drawing, same positions, same colours. Result: exactly four creatures in one row on a plain background, nothing else.")
+for _n,_s in (('Sirencada','v2s_sirencada_f1_1'),('Rampartoad','v2s_rampartoad_f1_1'),('Rimefang','v2s_rimefang_f1_2'),('Glaciammoth','v2s_glaciammoth_f1_2')):
+    SPECS.append({'id':'gclean_'+_n.lower(),'name':_n+' (sheet: erase ghost row)','refs':['briefs/boki-art/batch/out/'+_s+'.jpg'],'runs':2,'aspect':'16:9','size':'2K','prompt':_GCLEAN})

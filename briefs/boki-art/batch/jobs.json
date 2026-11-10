@@ -42058,6 +42058,94 @@
     "prompt": "Clean flat model sheet of exactly the creature in image 1: Chandelapi. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. No ground line, floor or shadow band under the views. Four separate views with clear gaps, no smoke joining them, all four standing in the same neutral pose."
   },
   {
+    "id": "v2s_rollguin_e4",
+    "name": "Rollguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Rollguin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Rollguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_rollguin_e4",
+    "name": "Rollguin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Rollguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: standing up, round as a ball, flippers on its belly. Official encyclopedia portrait of exactly the creature in image 1: Rollguin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: big round eyes set low and wide apart, each with a coloured iris, a dark pupil, one large crisp white highlight and one small one; tiny brows or none; a small mouth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: two small flat pink ovals with hard edges. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "v2s_kingpinguin_e4",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 3,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Kingpinguin. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2p_kingpinguin_e4",
+    "name": "Kingpinguin (V2 portrait from card)",
+    "refs": [
+      "briefs/boki-art/cards/Kingpinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "POSE FIRST: marching forward, chest out, plumes streaming. Official encyclopedia portrait of exactly the creature in image 1: Kingpinguin. Image 1 is the truth for its design, colours, eyes, face, part counts, line and flat shading: draw it exactly the way image 1 is drawn, in this new pose, a natural three-quarter view with a clear silhouette. Colours: exactly the colours of image 1, each part keeping its own colour. Parts: every part image 1 shows, the same number of each. Rendering: flat cel-shaded 2D game art, like a hand-inked model sheet coloured with flat fills. Every colour area is one flat fill plus exactly one hard-edged shade shape in a darker, slightly cooler tone of the same colour. The shade shapes are large, simple and connected, and sit on the lower right of each form, because the single light comes from the top left. Matte finish everywhere. The only crisp highlights are one white highlight in each eye and one highlight shape on anything truly wet or glassy (slime, venom, polished gems, glass); metal shows one flat lighter band. No gradients, no airbrush, no soft blending, no glossy shine on fur, skin, feathers or scales, no surface texture, no sparkles, no glow halo. Line: a bold, clean inked outline in three weights: the outer silhouette line is very heavy and bold, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Detail budget: detail lives in three places only: the face, the signature part and one pattern. Every other area is a quiet, plain flat shape. Repeated things are drawn few and large: fur as a few big clumps along its edges, and scales, facets, rivets, spots and crystals as a handful of big shapes. Nothing is drawn smaller than the highlight in its eye. Its fur is drawn as big clumps: the edge between the two fur tones is a row of large pointed clumps, with a few more clump shapes at the mane, shoulders, elbows, haunches and tail, and plain flat fur between them. Face: small eyes set deep under a heavy, straight brow ridge, a coloured iris and one small crisp white highlight; a wide jaw with an underbite, tusks or bared teeth. Keep this species' own expression from image 1. The eyes are the most finished, most contrasty spot in the image, and the face is drawn as flat and simplified as the body. Cheeks: plain, the same flat colour as the rest of the face: no blush, no pink cheek marks. The air around the creature is empty: nothing drifts, sparks or trails. Framing: exactly one creature, whole body in frame, centred, with about 8 percent empty margin on every side. Background: one perfectly flat pale grey (#E8E8EE) from edge to edge and nothing else: no gradient, no floor, no cast shadow, no contact shadow, no reflection, no halo, no text. Crisp clean edges all round so it can be cut out. "
+  },
+  {
+    "id": "gclean_sirencada",
+    "name": "Sirencada (sheet: erase ghost row)",
+    "refs": [
+      "briefs/boki-art/batch/out/v2s_sirencada_f1_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1: it is a character sheet with one row of four views of a creature, but above that row there are faded, blurry, partial duplicate copies. Erase every faded or partial copy completely and fill those areas with the same plain pale grey background. Keep the four sharp full views in the main row exactly as they are: same drawing, same positions, same colours. Result: exactly four creatures in one row on a plain background, nothing else."
+  },
+  {
+    "id": "gclean_rampartoad",
+    "name": "Rampartoad (sheet: erase ghost row)",
+    "refs": [
+      "briefs/boki-art/batch/out/v2s_rampartoad_f1_1.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1: it is a character sheet with one row of four views of a creature, but above that row there are faded, blurry, partial duplicate copies. Erase every faded or partial copy completely and fill those areas with the same plain pale grey background. Keep the four sharp full views in the main row exactly as they are: same drawing, same positions, same colours. Result: exactly four creatures in one row on a plain background, nothing else."
+  },
+  {
+    "id": "gclean_rimefang",
+    "name": "Rimefang (sheet: erase ghost row)",
+    "refs": [
+      "briefs/boki-art/batch/out/v2s_rimefang_f1_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1: it is a character sheet with one row of four views of a creature, but above that row there are faded, blurry, partial duplicate copies. Erase every faded or partial copy completely and fill those areas with the same plain pale grey background. Keep the four sharp full views in the main row exactly as they are: same drawing, same positions, same colours. Result: exactly four creatures in one row on a plain background, nothing else."
+  },
+  {
+    "id": "gclean_glaciammoth",
+    "name": "Glaciammoth (sheet: erase ghost row)",
+    "refs": [
+      "briefs/boki-art/batch/out/v2s_glaciammoth_f1_2.jpg"
+    ],
+    "runs": 2,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Edit image 1: it is a character sheet with one row of four views of a creature, but above that row there are faded, blurry, partial duplicate copies. Erase every faded or partial copy completely and fill those areas with the same plain pale grey background. Keep the four sharp full views in the main row exactly as they are: same drawing, same positions, same colours. Result: exactly four creatures in one row on a plain background, nothing else."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
