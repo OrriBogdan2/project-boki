@@ -1,6 +1,10 @@
 extends Node3D
 ## Tooling: the authored expedition map from straight above (or at an angle), with its place names.
-## Run with -- --map-overview [--map-angle] --shot=out.png --frames=N
+## Run with -- --map-overview [--map-angle [--map-yaw=<deg>]] --shot=out.png --frames=N
+## (--map-yaw: the side the slanted view looks from, degrees from the south toward the east; default 0)
+
+const ANGLE_BACK := 0.75    # map sides out from the middle, for the slanted view
+const ANGLE_UP := 0.55      # map sides up, for the slanted view
 
 func _ready() -> void:
 	var env := WorldEnvironment.new()
@@ -38,11 +42,15 @@ func _ready() -> void:
 		add_child(m)
 	var cam := Camera3D.new()
 	if "--map-angle" in OS.get_cmdline_user_args():
-		cam.position = Vector3(112, 24, 141); cam.rotation = Vector3(-0.95, 0, 0); cam.fov = 42
+		# the whole map at a slant from ANGLE_BACK map sides out, ANGLE_UP up, looking from the --map-yaw side
+		var mid := Vector3(w.w * 0.5, 0, w.h * 0.5)
+		var from := Vector3(sin(_yaw()), 0, cos(_yaw())) * w.w * ANGLE_BACK + Vector3(0, w.w * ANGLE_UP, 0)
+		cam.position = mid + from; cam.fov = 50
+		cam.look_at_from_position(cam.position, mid)
 	else:
 		cam.projection = Camera3D.PROJECTION_ORTHOGONAL; cam.size = w.w + 6.0     # the whole map and a 3 m margin
 		cam.position = Vector3(w.w * 0.5, 120, w.h * 0.5); cam.rotation = Vector3(-PI / 2, 0, 0)
-	cam.far = 400.0
+	cam.far = w.w * 3.0
 	add_child(cam)
 	cam.make_current()
 	for a in OS.get_cmdline_user_args():
@@ -84,6 +92,11 @@ func _save(path: String) -> void:
 	var img := get_viewport().get_texture().get_image()
 	if img:
 		img.save_png(path)
+
+func _yaw() -> float:
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--map-yaw="): return deg_to_rad(float(String(a).substr(10)))
+	return 0.0
 
 ## --map=<id> picks the layout (default: the expedition map, World.layout_for_tier(0)).
 func _map_id() -> String:
