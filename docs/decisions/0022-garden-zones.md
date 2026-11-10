@@ -26,3 +26,8 @@ The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays
 later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
 Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
 (`KinBox.farm_room`) counts each zone on its own.
+
+Hub hints (GARDEN.md 10): the hub shows three first-time hints through the message lane (`HubHints`, rules in
+`garden_zones.json` "hub_hints"): the Waystone ring, the nest corner and a sleeping zone's two keys, one at a
+time, once per save in `Save.d["tutorial"]["hub_hints"]` (an existing free-form dict, so no migration).
+The garden tutorial's closing Waystone hint stays its own. `--hub-hints-check` covers it.

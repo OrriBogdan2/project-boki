@@ -14,6 +14,20 @@
 	"ask_chance_doc": "Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load).",
 	"ask_s": 25.0,
 	"ask_s_doc": "Seconds it waits at the pad with its bubble before it gives up and wanders off.",
+	"hub_hints": {
+		"start_s": 1.5,
+		"start_s_doc": "Seconds after you arrive in the hub before its first hint can show.",
+		"gap_s": 8.0,
+		"gap_s_doc": "Seconds between two hub hints: one at a time, each longer than its 6 s on screen.",
+		"near_m": 6.0,
+		"near_m_doc": "Metres from the place a hint is about (the Waystone, the nest corner) at which it shows.",
+		"list": [
+			{"id": "waystone", "at": "waystone", "text": "The Waystone: step on the ring and press {interact} to travel."},
+			{"id": "nest", "at": "nest", "text": "The nest corner: pair two Boki here, hatch eggs and pass on gifts."},
+			{"id": "keys", "at": "waystone", "needs": "waystone", "locked": true, "text": "A dark stone needs two keys: a Wayseed and a Boki leaning its way. Its card shows both."}
+		],
+		"list_doc": "First-time hints, in order, each once per save (Save.d tutorial hub_hints): id, at (waystone or nest), needs (a hint seen first), locked (only while a zone sleeps), text."
+	},
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
 		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"},

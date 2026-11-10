@@ -51,6 +51,7 @@ var visit: Dictionary = {}     # when visiting someone: their island snapshot (s
 var visit_id := ""
 var zone := ""               # the garden zone shown (GardenZones; "" the start zone, "hub" the hub)
 var hway: HubWaystone = null  # the Waystone or a zone's return pad (hub_waystone.gd), base_mode only
+var hhints: HubHints = null   # the hub's first-time hints (hub_hints.gd)
 var petted := {}
 var arrivals: ArrivalQueue = null   # the arrival modals, one at a time (arrival_queue.gd)
 var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd), base_mode only
@@ -408,6 +409,7 @@ func _ready_rest() -> void:
 	if FarmUnlocks.base_mode() and not _visiting():
 		hway = HubWaystone.new(self)
 		hway.place()
+		if zone == GardenZones.HUB: hhints = HubHints.new(self)
 	if visit.is_empty():
 		rack_node = _glider_rack()
 		rack_node.position = spots["rack"]
@@ -1048,6 +1050,7 @@ func _process(delta: float) -> void:
 	_move_player(d)
 	_move_kin(d)
 	if guide: guide.tick(d)
+	if hhints: hhints.tick(d)
 	if key_row and visit.is_empty(): key_row.tick()
 	_care_tick(d)
 	if hecon: hecon.tick(d)
