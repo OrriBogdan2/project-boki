@@ -73741,5 +73741,19 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/fem_furnacowary_2.jpg",
     "ok": true
+  },
+  {
+    "id": "fem_furnacowary",
+    "name": "Furnacowary (female look)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fem_furnacowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "fem_furnacowary",
+    "name": "Furnacowary (female look)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/fem_furnacowary_4.jpg",
+    "ok": true
   }
 ]
