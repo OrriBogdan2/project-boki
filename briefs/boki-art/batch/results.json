@@ -76023,5 +76023,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/on_effigoon_3.jpg",
     "ok": true
+  },
+  {
+    "id": "on_pyrraven",
+    "name": "Pyrraven (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_pyrraven_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthollow",
+    "name": "Crofthollow (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_crofthollow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_pyrraven",
+    "name": "Pyrraven (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_pyrraven_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_loafhopper",
+    "name": "Loafhopper (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_loafhopper_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dreadnoyak",
+    "name": "Dreadnoyak (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_dreadnoyak_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_loafhopper",
+    "name": "Loafhopper (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_loafhopper_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthollow",
+    "name": "Crofthollow (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_crofthollow_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_parrywhal",
+    "name": "Parrywhal (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_parrywhal_1.jpg",
+    "ok": true
   }
 ]
