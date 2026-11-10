@@ -1,16 +1,15 @@
 {
-	"desc": "The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Short, one prompt at a time, not skippable on a new save (owner, Nov 3 DECISIONS.md). Every owner-confirmable choice is under 'options' so it is a one-line change.",
+	"desc": "The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Five steps, one prompt at a time, with a Skip always on show (owner, Nov 8: shorter tutorials; skipping loses nothing: the house goes up, the starter food and the end gems are given). What the cut steps taught (stone, hammer, a job, the Market, Hob) is a one-time hint now (FirstTimeHint, content/rules/hints.json 'farm'). Every owner-confirmable choice is under 'options' so it is a one-line change.",
 	"options": {
 		"tracker_replaces_day1": true,
 		"player_swing": true,
 		"crop_stage_s": 6,
 		"end_gems": 30,
-		"skippable": false,
+		"skippable": true,
 		"house_cost_in": "farm_build.json build.house (wood and stone, spent as it goes up, and swings of labour)",
-		"free_order": true,
-		"market_gems": true
+		"free_order": true
 	},
-	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30). free_order: after the house is down feed, crop and the rest can come in any order (meeting Hob comes first: he calls you over) (false: strictly in the listed order). skippable: shows a Skip button (the owner says the farm tutorial cannot be skipped on a new save). market_gems: the buy step tops the gems up to one seed's price so nobody gets stuck.",
+	"options_doc": "tracker_replaces_day1: the top-right card is the Goals tracker. player_swing: holding the interact key near a site hammers (hold it: a hammer beat every HunterTool.TOOLS.hammer.period seconds), so one Boki is enough. end_gems: the one reward at the end (the old +5 each and +30); a skip gets it too. free_order: after the house is down feed and crop can come in either order (false: strictly in the listed order). skippable: shows a Skip button beside the hint line (owner, Nov 8: always).",
 	"house_spot": {
 		"from": "landing",
 		"x": 0.0,
@@ -23,9 +22,7 @@
 	"steps": [
 		{
 			"id": "chop",
-			"needs": [
-				"hob"
-			],
+			"needs": [],
 			"title": "Chop trees for the house",
 			"hints": {
 				"go": "Hold {interact} at a tree to chop wood for the house."
@@ -35,33 +32,16 @@
 			}
 		},
 		{
-			"id": "stone",
+			"id": "house",
 			"needs": [
 				"chop"
 			],
-			"title": "Mine rocks for the house",
-			"hints": {
-				"go": "Rocks give stone. Hold {interact} at a rock to mine it with your pickaxe."
-			},
-			"world": {
-				"go": "Mine this rock"
-			},
-			"gets": "stone"
-		},
-		{
-			"id": "house",
-			"needs": [
-				"chop",
-				"stone"
-			],
 			"title": "Place your house",
 			"hints": {
-				"place": "Press {build}, choose House, then click the marked spot.",
-				"wait": "Hold {interact} at the house to hammer it up."
+				"place": "Press {build}, pick House and click the marked spot ({house_cost})."
 			},
 			"world": {
-				"place": "Your house goes here",
-				"wait": "Building..."
+				"place": "Your house goes here"
 			},
 			"spot": {
 				"place": {
@@ -70,39 +50,6 @@
 					"click": "Click here"
 				}
 			}
-		},
-		{
-			"id": "hammer",
-			"needs": [
-				"house"
-			],
-			"title": "Swing a hammer",
-			"hints": {
-				"go": "Hold {interact} at the house to build."
-			},
-			"world": {
-				"go": "Help build"
-			}
-		},
-		{
-			"id": "task",
-			"needs": [
-				"house"
-			],
-			"title": "Give your Boki a job",
-			"hints": {
-				"go": "Click {boki}, or press {details} beside it, to open its page.",
-				"page": "Pick a job here: try '{job}'."
-			},
-			"world": {
-				"go": "Your Boki"
-			},
-			"spot": {
-				"go": {
-					"world": true
-				}
-			},
-			"after_built": true
 		},
 		{
 			"id": "feed",
@@ -161,58 +108,6 @@
 			]
 		},
 		{
-			"id": "buy",
-			"needs": [
-				"house"
-			],
-			"title": "Buy a seed",
-			"hints": {
-				"stall": "Press {interact} at the stall and buy one seed.",
-				"bar": "Click Market below and buy one seed."
-			},
-			"world": {
-				"stall": "Market stall",
-				"bar": ""
-			},
-			"spot": {
-				"bar": {
-					"hub": "shop"
-				}
-			}
-		},
-		{
-			"id": "sell",
-			"needs": [
-				"crop",
-				"buy"
-			],
-			"title": "Sell a crop",
-			"hints": {
-				"stall": "Press {interact} at the stall and sell your crop.",
-				"bar": "Click Market below and sell your crop."
-			},
-			"world": {
-				"stall": "Sell here",
-				"bar": ""
-			},
-			"spot": {
-				"bar": {
-					"hub": "shop"
-				}
-			}
-		},
-		{
-			"id": "hob",
-			"needs": [],
-			"title": "Meet the builder",
-			"hints": {
-				"go": "Hob is calling: walk up and press {interact}."
-			},
-			"world": {
-				"go": "Talk to Hob"
-			}
-		},
-		{
 			"id": "expedition",
 			"needs_all": true,
 			"title": "Head out",
@@ -238,10 +133,9 @@
 		},
 		"per_source_doc": "At most this many rows from each source, so the top five are not all Hunter challenges. Order inside a source: closest to done first; ready-to-claim rows lead everything."
 	},
-	"gems_toast": "Hob gives you %d gems to buy seeds",
 	"picked_say": {
 		"go": "Off to work!",
 		"wait": "Ready when there's work!"
 	},
-	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; waits: hint stages that are only waiting (the next open step is shown meanwhile); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
 }

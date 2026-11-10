@@ -2,9 +2,9 @@ class_name FarmGuide
 extends RefCounted
 ## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot
 ## (GoalTracker), and while the tutorial runs, one prompt in the world over what to do next and one
-## line reminding you of the current goal, with a Skip button (Hob explains each step face to face:
-## HobTalk). The rules are FarmTutorial; none of it shows when
-## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
+## line reminding you of the current goal, with a Skip button always on show (Hob explains each step face to
+## face: HobTalk). The rules are FarmTutorial; the one-time hints for what the steps no longer teach are
+## FarmHints. None of it shows when visiting. Skipping puts the house up, so a skipper isn't stuck.
 
 const PLACE_RINGS := 24       # tiles out from the suggested spot that the search for free ground goes
 const PLACE_STEPS := 24.0     # tries round each ring
@@ -24,7 +24,7 @@ var asking := false
 var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
 var tree_t := 0.0
 var tree_at := Vector3.INF
-var tab_for := ""
+var hints: FarmHints
 var tree_what := ""
 var _cells: Array = []   # place_cells()'s answer, and what it was for
 var _cells_sig := ""
@@ -32,6 +32,7 @@ var done_seen := -1     # steps done when last looked at (-1: not yet), to tick 
 
 func _init(home) -> void:
 	h = home
+	hints = FarmHints.new(home)
 
 func build_ui() -> void:
 	if h.root_ui == null:
@@ -81,15 +82,6 @@ func _poll() -> void:
 		FarmTutorial.detect()
 		if FarmTutorial.current() == "feed":
 			FarmTutorial.give_food()
-		var cur := FarmTutorial.current()
-		if (cur == "buy" or cur == "sell") and cur != tab_for:
-			tab_for = cur      # the market opens on the tab the step wants
-			h.hmk.vendor_tab = "Seeds" if cur == "buy" else "Sell"
-		if cur == "buy":
-			var gave := FarmTutorial.give_seed_gems()
-			if gave > 0:
-				h._toast(String(FarmTutorial.rules()["gems_toast"]) % gave)
-				h._refresh_top()
 	var st := FarmTutorial.state()
 	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
@@ -102,6 +94,8 @@ func _poll() -> void:
 		_refresh_hint()
 	FarmSpotlight.sync(h, quiet)
 	_tick_off_done()
+	if not quiet:
+		hints.poll()
 
 ## A green "Done!" on the goal line for a moment when a step has just been finished.
 func _tick_off_done() -> void:
@@ -132,8 +126,6 @@ func _refresh_hint() -> void:
 		_make_hint()
 		hint_box.visible = not quiet
 	var s := FarmTutorial.hint_text(id)
-	if id == "house" and FarmTutorial.stage(id) == "wait":
-		s = "%s (%s)" % [s, _site_progress()]
 	var grow := FarmCropGuide.growing()
 	if not grow.is_empty() and id != "crop":
 		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
@@ -153,12 +145,6 @@ func _clear_hint() -> void:
 	if is_instance_valid(marker):
 		marker.queue_free()
 	marker = null
-
-func _site_progress() -> String:
-	var e := FarmHob.house_entry()
-	if e.is_empty() or not FarmSites.has_site(e):
-		return "done"
-	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
 
 func _make_hint() -> void:
 	hint_box = UI.card(Color(UI.NIGHT, 0.9), 10, 14)
@@ -193,14 +179,17 @@ func _skip_buttons() -> void:
 		asking = false
 		_skip_buttons(), 0))
 
-## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
-## needs handed over so it can still be built.
+## Skips the tutorial, losing nothing a player needs: the starter food and the end gems (FarmTutorial.skip),
+## and the house put down and standing (no materials or swings asked; the starting tools are on every new save).
 func skip() -> void:
 	asking = false
-	FarmTutorial.skip()
+	var gems := FarmTutorial.skip()
 	if FarmHob.house_entry().is_empty():
 		place_house()
-		FarmSites.refund(FarmSites.build_cost("house"))
+	if FarmSites.finish(FarmHob.house_entry()) and h.hb:
+		h.hb.apply(false)
+	if gems > 0:
+		h._toast(String(FarmTutorial.rules()["done_toast"]).replace("{gems}", str(gems)))
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
@@ -278,16 +267,9 @@ func target(id: String) -> Vector3:
 	match id:
 		"chop":
 			return _nearest_wild("tree")
-		"stone":
-			return _nearest_wild("rock")
-		"buy", "sell":
-			var stalls := HomeLayout.fixtures(Save.d, "stall")
-			return HomeLayout.deco_center(stalls[0]) if not stalls.is_empty() else Vector3.INF
 		"house":
 			var e := FarmHob.house_entry()
 			return house_spot() if e.is_empty() else HomeLayout.deco_center(e)
-		"hammer":
-			return HomeLayout.deco_center(FarmHob.house_entry())
 		"feed":
 			var fs := Econ.feeders()
 			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
@@ -296,11 +278,6 @@ func target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
-		"task":
-			var ke: Dictionary = h._kin_entry(Save.active_kin())
-			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
-		"hob":
-			return h.hob.pos
 		"expedition":
 			return h.spots["portal"]
 	return Vector3.INF

@@ -13,7 +13,8 @@ extends RefCounted
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_waves, hob_3_dialogue_box,
-## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_7_mask_moment, hob_8_mask_name.
+## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks,
+## hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
 
 const SECOND := ["juggernaut", "ashwick", "tender"]    # owner order, class_unlock.json second_picks
 
@@ -74,9 +75,8 @@ func _first_arrival() -> void:
 	ok(hob.node is HobModel and Vector2(hob.node.position.x - stall.x, hob.node.position.z - stall.z).length() < 4.0,
 			"Hob is a person standing by the market stall")
 	ok(hob.node.tag.visible and hob.node.tag.text == FarmBuilder.full_name(), "his name shows over him")
-	ok(FarmTutorial.current() == "hob" and home.guide.hint_lbl.text.contains("Hob")
-			and not home.guide.hint_lbl.text.contains("Hob:"),
-			"the first goal: meet him (%s)" % home.guide.hint_lbl.text)
+	ok(FarmTutorial.current() == "chop" and not home.guide.hint_lbl.text.contains("Hob:"),
+			"the first goal is chopping; meeting him is a one-time hint (%s)" % home.guide.hint_lbl.text)
 	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["gunslinger"],
 			"after the first expedition no second Mask is owned yet")
 	# 2. the first arrival: no camera move
@@ -131,10 +131,10 @@ func _first_arrival() -> void:
 		if hob.chat.talking():
 			box.advance()
 	await _frames(3)
-	ok(not hob.chat.talking() and home.panel_open == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
+	ok(not hob.chat.talking() and home.panel_open == "" and FirstTimeHint.seen("hob") and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
 	ok(FarmTutorial.current() == "chop" and is_equal_approx(home.cam.zoom_to, home.HOME_ZOOM),
-			"the next goal is chopping (you start with the axe), and the camera eased back")
+			"the goal is still chopping (you start with the axe), and the camera eased back")
 	await _frames(40)
 	hob.talk()
 	await _frames(2)
@@ -147,7 +147,6 @@ func _first_arrival() -> void:
 func _offer() -> void:
 	var hob: FarmHob = home.hob
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "no Relic talk before the house is down")
-	FarmTutorial.mark("axe")
 	FarmTutorial.mark("chop")
 	Work.add_mat("wood", 10)
 	home.guide.place_house()
