@@ -13,6 +13,7 @@
 	"signature": "shotgun",
 	"resource": {"id": "salvage", "name": "Salvage", "max": 10, "kind": "stacks", "per_stack": 0.025, "back_k": 0.5, "heal_knock": 0.16, "col": "#e0b040"},
 	"passive": {"name": "Salvage", "desc": "Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health."},
+	"gun": {"armor_k": 0.66, "src": "supervive.wiki.gg/wiki/Kingpin: 66% increased damage to Armor when fired without spread"},
 	"dash": {"id": "barge", "name": "Barge", "icon": "dash2", "col": "#f0d070", "cd": 10.0,
 		"dist": 3.2, "time": 0.16, "gap": 0.22, "hit_kb": 4.0, "lock_t": 0.8, "lock_deg": 35.0, "cut": 0.25, "air_k": 1.35, "air": {"cd": 12.5, "rank_cut": 2.0},
 		"desc": "A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees."},
