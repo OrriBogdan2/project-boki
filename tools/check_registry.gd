@@ -62,6 +62,7 @@ const CHECKS := {
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],      # Bokidex quirks, sex ratios
 	"--boki-react-check": ["res://tools/boki_react_check.gd", "boki_react_check", null],      # a Boki flinches when hit
+	"--hp-regen-check": ["res://tools/hp_regen_check.gd", "hp_regen_check", null],
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],      # level-up / ready: one body glow, no ring
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
