@@ -232,3 +232,5 @@ Glassolotl
 Chandelotl
 Cindermaw
 Effigeetle
+Glaivyx
+Ringrove

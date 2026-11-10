@@ -846,3 +846,28 @@ for _k,_d in (('pastel',"recolour it in soft pastels: pale pink body, soft rose 
               ('frost',"recolour it in winter tones: a white body, ice-blue and silver-grey stripes, a clear pale blue crystal hood, soft pink gills"),
               ('candy',"keep its red, white and green candy stripes but make the red a softer cherry-pink and the green a pale mint, with a pinker body and a pearl-white hood")):
     SPECS.append({'id':'opt_chandelotl_'+_k,'name':'Chandelotl/Crystalotl (colour '+_k+')','refs':['briefs/boki-art/cards/Chandelotl.jpg'],'runs':1,'aspect':'1:1','size':'2K','prompt':_EDIT+_d+". Nothing else changes: the same pose, shapes, stripes layout, face and line."})
+
+# ===== 03:25 ET 11-10 picks. Cards live: Glaivyx (v2g_glaivyx_white_2, the white inner fur the owner asked for), Ringrove (v2g_ringrove_tilt2_1, head tilt),
+# option winners Starcap (opt a_1: Polyshroom grown up with a star cap), Dynaboa (a_1: bigger, maned), Wickapi (a_1: house-style calf), Forgebrock (a_1: bare paws).
+# Options NOT taken (owner to judge): Galleotter, Buckleron, Tiltster, Coolatee. Female V2 cards live for 12; Voltalon female redone below.
+_LAST={'Glaivyx':('final','sleek',0,1,"prowling forward low, blade tail arched over its back"),'Ringrove':('final','majestic',0,1,"sitting upright, head tilted, looking at the viewer"),
+ 'Starcap':('mid','cute',0,0,"drifting forward, tentacle gills swaying, sleepy eyes on the viewer"),'Dynaboa':('final','tough',0,1,"mid-leap off its spring legs, fins spread, mane flying"),
+ 'Wickapi':('baby','cute',1,1,"sitting with its striped legs folded, head tilted, candle flame wobbling"),'Forgebrock':('final','tough',0,1,"standing on all fours, head low, forge chest glowing, about to charge")}
+for _n,(_st,_ar,_dk,_fu,_pose) in _LAST.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_last'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_last'; SPECS[_n0+1]['runs']=2
+SPECS[:]=[s for s in SPECS if s['id'] not in ('v2s_forgebrock_rd','v2p_forgebrock_rd')]
+# Female sheets + portraits from the picked female V2 cards (ids fs_/fp_).
+_FEMPOSE={'Arcestrel':"standing alert on one leg, head turned to the viewer",'Eclipsowl':"sitting like a sphinx, wings folded, calm",'Furnacowary':"standing tall, head turned to the viewer",'Gongibbon':"hanging by one arm, looking at the viewer",
+ 'Gongrowl':"sitting, one fist on the ground, calm and watchful",'Kestrike':"perched, head tilted, wings tucked",'Lunowl':"perched with wings folded down like a cloak",'Murmurling':"hopping forward, beak open in song",
+ 'Murmuron':"perched with wings half folded, head high",'Sandwidow':"creeping forward, front legs raised",'Hourachnid':"standing tall on its legs, facing the viewer",'Pavonazar':"walking, head high, tail trailing"}
+for _n,_pose in _FEMPOSE.items():
+    _st,_ar,_dk,_fu=_FEMST[_n]; _cd='briefs/boki-art/cards/'+_n+'_female.jpg'; _n0=len(SPECS)
+    V2SHEET_NEW(_n+' female',_cd,_GC,_GN); V2PORT_NEW(_n+' female',_cd,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose)
+    SPECS[_n0]['id']='fs_'+_n.lower(); SPECS[_n0+1]['id']='fp_'+_n.lower(); SPECS[_n0+1]['runs']=2
+# OWNER 03:00: "Voltalon female looks cool but disconnected from the line". Her line is Kestrike > Arcestrel (rust-red and slate-blue kestrels):
+# the female keeps the male's body and takes her colours from the female Arcestrel (image 2), not a new teal and gold scheme.
+SPECS.append({'id':'fv3_voltalon','name':'Voltalon female (in her line\'s colours)','refs':['briefs/boki-art/cards/Voltalon.jpg','briefs/boki-art/cards/Arcestrel_female.jpg'],'runs':4,'aspect':'1:1','size':'2K',
+  'prompt':("Draw the FEMALE of the creature in image 1 as one single character illustration. Image 1 is the male: keep exactly its species, body plan, pose, view, antler crest and the way it is drawn. "
+   "Image 2 is the female of her younger form, and it gives ONLY her colours: warm sandy brown plumage and hide with fine dark brown barring, a cream chest, soft slate-blue on the wings, and a smaller, paler crest. "
+   "So she is the same thunder-raptor as image 1 in those warmer, quieter colours, with a slightly bigger body and a shorter crest. No teal, no gold. "+STYLE_V2('final','tough',False,False)+FRAME_V2)})

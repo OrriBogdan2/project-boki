@@ -73,3 +73,4 @@ DROP|={'chimelop_card','portrait_stance3_chimelop','stance_chimelop'}
 DROP|={'jerbit_card','jerbolt_card','dynaboa_card','bastling_card'}  # new V2 Boki: no auto card jobs
 DROP-={'v2k_glaivyx','v2k_ringrove'}  # 11-10: straight V2 cards for the last two starters-line finals
 DROP|={'fem_eclipsowl','fem_gongibbon','fem_kestrike','fem_lunowl','fem_murmurling','fem_murmuron','fem_sandwidow','fem_voltalon'}  # 11-10: duplicate ids of the fv2_ female jobs
+DROP-={'v2s_glaivyx_last','v2p_glaivyx_last','v2s_ringrove_last','v2p_ringrove_last'}

@@ -41,7 +41,7 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "card": "briefs/boki-art/cards/Arcestrel_female.jpg",
-   "note": "card only; female sheet follows with the V2 pass"
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Barokat": {
@@ -459,7 +459,8 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "sheet": "briefs/boki-art/evolutions/Eclipsowl_female.jpg",
-   "card": "briefs/boki-art/cards/Eclipsowl_female.jpg"
+   "card": "briefs/boki-art/cards/Eclipsowl_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Effigeetle": {
@@ -564,9 +565,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Forgebrock.png",
   "hash": {
    "sheet": "3bb121eb57d7",
-   "card": "cc362df9cdf3",
+   "card": "4ecb0b41c8a3",
    "portrait": "55801b9d53a6",
-   "hero": "6139a2f1bc9a"
+   "hero": "f1e139e5e2fe"
   }
  },
  "Frigatee": {
@@ -600,7 +601,7 @@
   "female": {
    "sheet": "briefs/boki-art/evolutions/Furnacowary_female.jpg",
    "card": "briefs/boki-art/cards/Furnacowary_female.jpg",
-   "note": "card only; female sheet follows with the V2 pass"
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Galleotter": {
@@ -691,9 +692,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaivyx.png",
   "hash": {
    "sheet": "e44892705180",
-   "card": "c5ecf340e312",
+   "card": "fc3b7125116c",
    "portrait": "0bcf1ad64dda",
-   "hero": "5c54cb73cdce"
+   "hero": "bc45f3f718c5"
   },
   "display_name": "Sabryx"
  },
@@ -777,7 +778,9 @@
   },
   "sex_forms": true,
   "female": {
-   "sheet": "briefs/boki-art/evolutions/Gongibbon_female.jpg"
+   "sheet": "briefs/boki-art/evolutions/Gongibbon_female.jpg",
+   "card": "briefs/boki-art/cards/Gongibbon_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -797,7 +800,7 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "card": "briefs/boki-art/cards/Gongrowl_female.jpg",
-   "note": "card only; female sheet follows with the V2 pass"
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Grainspin": {
@@ -987,7 +990,9 @@
   },
   "sex_forms": true,
   "female": {
-   "sheet": "briefs/boki-art/evolutions/Kestrike_female.jpg"
+   "sheet": "briefs/boki-art/evolutions/Kestrike_female.jpg",
+   "card": "briefs/boki-art/cards/Kestrike_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -1162,7 +1167,9 @@
   },
   "sex_forms": true,
   "female": {
-   "sheet": "briefs/boki-art/evolutions/Lunowl_female.jpg"
+   "sheet": "briefs/boki-art/evolutions/Lunowl_female.jpg",
+   "card": "briefs/boki-art/cards/Lunowl_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -1353,7 +1360,8 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "sheet": "briefs/boki-art/evolutions/Murmurling_female.jpg",
-   "card": "briefs/boki-art/cards/Murmurling_female.jpg"
+   "card": "briefs/boki-art/cards/Murmurling_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Mycroll": {
@@ -1708,9 +1716,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Ringrove.png",
   "hash": {
    "sheet": "015d675ce171",
-   "card": "e281d56211da",
+   "card": "70600fc29e2e",
    "portrait": "7b864da3e561",
-   "hero": "2e17642e35be"
+   "hero": "25d8afdcbfad"
   }
  },
  "Rippmink": {
@@ -1742,7 +1750,8 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "sheet": "briefs/boki-art/evolutions/Sandwidow_female.jpg",
-   "card": "briefs/boki-art/cards/Sandwidow_female.jpg"
+   "card": "briefs/boki-art/cards/Sandwidow_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Sarcobra": {
@@ -1924,9 +1933,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Starcap.png",
   "hash": {
    "sheet": "028f1dafde78",
-   "card": "7b38013dd7cf",
+   "card": "409bec883de6",
    "portrait": "6c422d65755a",
-   "hero": "feb30eaebc62"
+   "hero": "3c18fec2e1eb"
   }
  },
  "Stormit": {
@@ -2213,9 +2222,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Wickapi.png",
   "hash": {
    "sheet": "90d9e53329e7",
-   "card": "9d6f9c8518e1",
+   "card": "617f9de47ff7",
    "portrait": "774695875e57",
-   "hero": "62cc8cd3e95f"
+   "hero": "ef50ecbed008"
   }
  },
  "Wyrmink": {
@@ -2503,7 +2512,8 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "sheet": "briefs/boki-art/evolutions/Murmuron_female.jpg",
-   "card": "briefs/boki-art/cards/Murmuron_female.jpg"
+   "card": "briefs/boki-art/cards/Murmuron_female.jpg",
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Spanglin": {
@@ -2719,7 +2729,7 @@
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)",
   "female": {
    "card": "briefs/boki-art/cards/Hourachnid_female.jpg",
-   "note": "card only; female sheet follows with the V2 pass"
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Meteorab": {
@@ -2791,7 +2801,7 @@
   "legendary_tier": "minor",
   "female": {
    "card": "briefs/boki-art/cards/Pavonazar_female.jpg",
-   "note": "card only; female sheet follows with the V2 pass"
+   "note": "V2 card; female sheet + portrait follow"
   }
  },
  "Pinster": {
@@ -3177,9 +3187,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dynaboa.png",
   "hash": {
    "sheet": "a534e13ee90e",
-   "card": "2dfc9a3f657e",
+   "card": "8a14969f4703",
    "portrait": "83e33d0b9826",
-   "hero": "94e8f6d7da0d"
+   "hero": "900dfb4232d6"
   }
  },
  "Bastling": {
