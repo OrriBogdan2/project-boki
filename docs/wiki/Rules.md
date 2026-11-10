@@ -844,15 +844,6 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
 
-## minigames (`content/rules/minigames.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | The garden minigames the title's 'Play with your Boki' picker can list (MinigameHub). member = the Home variable holding the game (unset on a base that doesn't have it, so it is not listed); node = the game's fixture on it (post, stump, basket, log), placed only beside a Training post, so a game without one is not listed either; rule = the one line shown under the name. Each game exposes use(). |
-| games | [{"id": "race", "name": "The Dash", "member": "hrace", "node": "post", "rule": "Cheer your Boki on with three timed presses; the fastest one home wins."}, {"id": "shove", "name": "Stump Shove", "member": "hshove", "node": "stump", "rule": "Two Boki push a stump; Power against Guard decides who tips it."}, {"id": "seek", "name": "Seek", "member": "hseek", "node": "basket", "rule": "Sniff the scent basket, then follow your Boki's nose to the hidden find."}, {"id": "volley", "name": "Spark Volley", "member": "hvolley", "node": "log_node", "rule": "Bat a spark across the log; Speed and Focus win the point."}] |
-
 ## mystery_egg (`content/rules/mystery_egg.json`)
 
 
