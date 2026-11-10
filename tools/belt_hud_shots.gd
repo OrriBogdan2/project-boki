@@ -23,8 +23,10 @@ func run(main_node: Node) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var m := Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 4107, "no_drop": true})
+	await m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 4107, "no_drop": true})
 	m.set_process(false)
+	if main.fade:
+		await main.fade.reveal(0.01)
 	var P: Hunter = m.player
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "tonic", 5)
@@ -36,6 +38,7 @@ func run(main_node: Node) -> void:
 	UtilityBelt.use_id(P, "twin_gate")
 	P.belt[3]["cd"] = 3.0
 	m.step(Match.DT * 20)
+	await _frames(20)
 	for sz in SIZES:
 		main.get_window().size = sz
 		await _frames(8)
