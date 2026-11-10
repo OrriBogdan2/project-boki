@@ -98920,5 +98920,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/idea_kindlewren_2.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_rimeshrew",
+    "name": "Rimeshrew (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_rimeshrew_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_kindlewren",
+    "name": "Kindlewren (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_kindlewren_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_embrook",
+    "name": "Embrook (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_embrook_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimefang",
+    "name": "Rimefang (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_rimefang_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimefang",
+    "name": "Rimefang (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_rimefang_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_kindlewren",
+    "name": "Kindlewren (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/idea_kindlewren_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_rimefang",
+    "name": "Rimefang (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_rimefang_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_embrook",
+    "name": "Embrook (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_embrook_3.jpg",
+    "ok": true
   }
 ]
