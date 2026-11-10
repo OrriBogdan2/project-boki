@@ -104058,5 +104058,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2s_snapler_fix5_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_spirevark_fix5",
+    "name": "Spirevark (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_spirevark_fix5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_snapler_fix5",
+    "name": "Snapler (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_snapler_fix5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pagoguana_fix5",
+    "name": "Pagoguana (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pagoguana_fix5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_snapler_fix5",
+    "name": "Snapler (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_snapler_fix5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pagoguana_fix5",
+    "name": "Pagoguana (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_pagoguana_fix5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pagoguana_fix5",
+    "name": "Pagoguana (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pagoguana_fix5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glomwort_r7",
+    "name": "Glomwort (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glomwort_r7_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_spirevark_fix5",
+    "name": "Spirevark (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_spirevark_fix5_2.jpg",
+    "ok": true
   }
 ]
