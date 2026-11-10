@@ -1,0 +1,1 @@
+Sparkle kit VFX pass, each file: top = before (origin/main d255acbee), bottom = after (b4ae48640); tools/vv_shots.gd --vv-hero=mage on the GPU, match zoom, half size. Not for merge. The ult strip: before job did not finish; after-only at jobq 20261110-022718-17388.
