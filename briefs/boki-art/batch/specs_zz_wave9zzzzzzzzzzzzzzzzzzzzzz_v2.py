@@ -970,3 +970,7 @@ for _n,_who in (('Canvastross',"the final form"),('Jibbatross',"the middle form"
       'prompt':("Redraw the bird in image 1 exactly as it is: the same body, wings, pose, view, colours, markings, line and flat shading. Change only its FACE, so it is clearly "+_who+" of the chick in image 2: "
         "give it that chick's face grown up: the same grumpy, unimpressed half-lidded eyes with heavy upper lids, the same big hooked orange-yellow beak, and the same wispy windswept white tuft on its head. "
         "Its head keeps the size and angle it has in image 1. Nothing else changes. One bird only. "+FRAME_V2)})
+
+# 05:55 ET 11-10 OWNER: "Oarter needs a new position because it's the same as Galleotter" (both prowl on all fours, facing left).
+ON_POSE('Oarter',_LM['Oarter']['sheet'],'mid','sleek',False,True,"mid-dive, swimming through the air facing RIGHT: body stretched long in a smooth arc, front paws tucked to its chest, its big oar-shaped tail swept up behind it like a paddle mid-stroke, a cheeky grin back at the viewer.","dark brown fur with a tan throat and belly, a row of small oar-shaped spines along its back, a broad tan oar tail, blue eyes")
+SPECS[-1]['id']='on_oarter_dive'; SPECS[-1]['runs']=4
