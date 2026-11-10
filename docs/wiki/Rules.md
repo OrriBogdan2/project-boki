@@ -105,6 +105,18 @@ How the bond meter fills (it gates the Merge). All values are fractions of a ful
 | debris | {"wood": {"colors": ["a07448", "6a4a30", "c9a070"], "sound": "break_wood", "pitch": 1.0}, "clay": {"colors": ["c9825a", "a8826a", "e8c07a"], "sound": "break_clay", "pitch": 1.0}, "metal": {"colors": ["44404a", "c8483a", "d8b44a"], "sound": "break_metal", "pitch": 1.0}} |
 | kinds | {"crate": {"weight": 0.45, "material": "wood", "chunks": 14, "loot": {"gems": [2, 4], "gem_base": 2, "tonic": 0.3, "armor": 0.4, "armor_amount": 25, "table": "crate"}}, "pot": {"weight": 0.3, "material": "clay", "chunks": 12, "loot": {"gems": [1, 2], "gem_base": 2, "seed": 0.2}}, "barrel": {"weight": 0.13, "material": "wood", "chunks": 16, "loot": {"gems": [1, 3], "gem_base": 2, "tonic": 0.15}}, "keg": {"weight": 0.12, "material": "metal", "chunks": 18, "loot": {}, "explosive": {"radius": 2.6, "damage": 22.0, "knockback": 10.0, "lift": 7.5, "fuse": 0.45, "chain_fuse": 0.22, "edge_falloff": 0.5, "height": 2.0, "color": "ff7a3a"}}} |
 
+## camera (`content/rules/camera.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The match camera (CamRig, scripts/match/cam.gd). styles: the Settings 'Camera' presets: pitch in degrees down from level, dist m back from the focus, fov the vertical lens in degrees, rise m the view aims above the focus. follow: the Settings 'Camera follow' cursor lean: [deadzone, share or maxzone, cap m, ease 1/s, quadratic easing]; supervive reads the cursor's distance from you in metres (deadzone m, share of the distance past it), the others its distance from the screen centre (-1..1). lean_edge_m: metres the cursor lean and an aimed cast keep between you and the screen's edge. source: the bands docs/MOVEMENT_FEEL.md 'Camera framing vs the source' measured from the source footage; --cam-framing-check holds the supervive style inside them. |
+| styles | {"supervive": {"pitch": 66.0, "dist": 23.0, "fov": 32.0, "rise": 1.2, "name": "Supervive"}, "supervive_wide": {"pitch": 65.0, "dist": 20.5, "fov": 35.0, "rise": 0.0, "name": "Supervive (wider lens)"}, "high": {"pitch": 70.0, "dist": 27.0, "fov": 36.0, "name": "Top-down"}, "classic": {"pitch": 57.0, "dist": 32.2, "fov": 28.0, "name": "Classic (flat, far)"}, "low": {"pitch": 50.0, "dist": 23.0, "fov": 42.0, "name": "Low (more horizon)"}} |
+| follow | {"supervive": [1.4, 0.42, 7.5, 6.0, false], "standard": [0.2, 0.8, 6.0, 7.0, true], "dynamic": [0.1, 0.9, 10.0, 10.0, false], "locked": [0.0, 0.0, 0.0, 0.0, false]} |
+| lean_edge_m | 1.5 |
+| source | {"pitch_deg": [64.0, 67.0], "fov_deg": [25.0, 34.0], "feet_below_pct": [3.0, 4.0]} |
+
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
