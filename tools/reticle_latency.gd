@@ -29,11 +29,11 @@ var rig := Node.new()
 var ret_lag := PackedFloat32Array()
 var aim_lag := PackedFloat32Array()
 
-func _arg(name: String, def: String) -> String:
+func _arg(key: String, fallback: String) -> String:
 	for a in OS.get_cmdline_user_args():
-		if a.begins_with(name + "="):
-			return a.substr(name.length() + 1)
-	return def
+		if a.begins_with(key + "="):
+			return a.substr(key.length() + 1)
+	return fallback
 
 func _centre() -> Vector2:
 	return Vector2(VIEW) * 0.5
@@ -64,9 +64,10 @@ func run(main_node: Node) -> void:
 	Settings.set_v("reticle_outline", false)
 	Settings.set_v("reticle_alpha", 1.0)
 	Settings.set_v("reticle_col", "pink")
-	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true, "training": true, "god": true}
+	var o := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true, "training": true,
+		"god": true}
 	Game.goto("match", o)
-	while not (main.current is Match and (main.current as Match).is_processing() and (main.current as Match).hud != null):
+	while not (main.current is Match and main.current.is_processing() and main.current.hud != null):
 		await main.get_tree().process_frame
 	m = main.current
 	rig.process_priority = -1000
@@ -136,7 +137,8 @@ func _report() -> void:
 	var r := _stats(ret_lag)
 	var a := _stats(aim_lag)
 	var frame_ms := 1000.0 / float(fps)
-	print("LATENCY fps=%d vsync=%s speed=%.0fpx/s measured_fps=%.1f" % [fps, "on" if vsync else "off", speed, Engine.get_frames_per_second()])
+	print("LATENCY fps=%d vsync=%s speed=%.0fpx/s measured_fps=%.1f" % [fps, "on" if vsync else "off", speed,
+		Engine.get_frames_per_second()])
 	print("LATENCY reticle  mean %.2f  p95 %.2f frames (%.1f ms)  n=%d" % [r[0], r[1], r[0] * frame_ms, r[2]])
 	print("LATENCY aim      mean %.2f  p95 %.2f frames (%.1f ms)  n=%d" % [a[0], a[1], a[0] * frame_ms, a[2]])
 	bad = bad or r[2] == 0 or a[2] == 0

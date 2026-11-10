@@ -3707,6 +3707,7 @@ func _process(delta: float) -> void:
 	elif player:
 		cam.follow(cam.focus, delta, false)
 	_vprof("camera")
+	AimFrame.refresh(self)      # the aim drawn this frame comes from the camera drawn this frame
 	_update_aim(alpha)
 	_vprof("aim")
 	for pd in world.pads:
@@ -3751,9 +3752,7 @@ func _gather_input() -> void:
 			if d < bd: bd = d; best = sp
 		if best != Vector3.INF and bd > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
-	player.inp["aim"] = _mouse_aim()
-	player.inp["aim_ray"] = cam.mouse_ray()
-	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
+	AimFrame.read(self)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
 	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
