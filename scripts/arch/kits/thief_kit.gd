@@ -517,7 +517,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	var t := float(dd["time"])
 	_swoosh(dir)
 	m.later(t * 0.5, func(): if is_instance_valid(h): _swoosh(dir))
-	m.sfx("thief_dash", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])

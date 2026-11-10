@@ -6,6 +6,7 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
+##   7. dash_air per Hunter and the no-charge tick
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ## Reads the files only; never touches the save.
@@ -32,6 +33,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	_dash_air()
 	_fallback()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -133,6 +135,21 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## 7. Every Hunter's dash has an air variant that HeroSfx picks with no floor under it, and the no-charge tick exists.
+func _dash_air() -> void:
+	var h := Hunter.new()
+	var picked := {}
+	for arch in Arch.ids():
+		h.arch = arch
+		h.grounded = false
+		picked[arch] = HeroSfx.dash_name(h)
+		h.grounded = true
+		picked[arch] += " " + HeroSfx.dash_name(h)
+	h.free()
+	var wrong := Arch.ids().filter(func(a): return picked[a] != "%s_dash_air %s_dash" % [a, a])
+	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
+	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 
 func _takes(sname: String) -> Array:
 	var out := []
