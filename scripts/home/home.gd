@@ -4270,6 +4270,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if Data.CROPS.has(f):
 		for af in Evo.AFF:
 			if Evo.AFF[af]["food"] == f: Evo.add(rec, af, 6.0)
+	if res.get("learned", false): _toast("%s: %s" % [Care.food_name(f), FoodJournal.effect(f)])
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
@@ -5061,14 +5062,11 @@ func _open_feed(rec: Dictionary) -> void:
 		v.add_child(row)
 	for f in Care.FOODS:
 		var n := int(Save.d["items"].get(f, 0))
-		if n > 0: row_for.call(f, n, Care.FOODS[f]["desc"])
+		if n > 0: row_for.call(f, n, FoodJournal.line(f))
 	for f in Data.CROPS:
 		var n := int(Save.d["crops"].get(f, 0))
 		if n > 0:
-			var aff := ""
-			for af in Evo.AFF:
-				if Evo.AFF[af]["food"] == f: aff = "Grows it %s. " % String(Evo.AFF[af]["name"]).to_lower()
-			row_for.call(f, n, aff + "Fills it up.")
+			row_for.call(f, n, FoodJournal.line(f))
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
