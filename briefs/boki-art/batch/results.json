@@ -73013,5 +73013,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_sarcobra_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_sarcobra",
+    "name": "Sarcobra (V2 portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_sarcobra_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_sarcobra",
+    "name": "Sarcobra (V2 portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_aurostag",
+    "name": "Aurostag (V2 sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_aurostag",
+    "name": "Aurostag (V2 sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_aurostag_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_aurostag",
+    "name": "Aurostag (V2 sheet)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_aurostag",
+    "name": "Aurostag (V2 portrait)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_aurostag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_aurostag",
+    "name": "Aurostag (V2 portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_aurostag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_aurostag",
+    "name": "Aurostag (V2 portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_aurostag_3.jpg",
+    "ok": true
   }
 ]
