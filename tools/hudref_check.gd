@@ -115,10 +115,12 @@ func run(main_node: Node) -> void:
 	for i in 60:            # vision refreshes every 0.05s and line of sight can lag a few frames headless
 		await main.get_tree().process_frame
 		sw = String(_shown(hud, sl).get("word", ""))
-		if sw == "SLOWED":
+		if sw == "STUNNED":
 			break
 	var why := "slow %.2f, unseen %s, drawn %s" % [sl.slow_t, sl.unseen, not _shown(hud, sl).is_empty()]
-	ok(sw == "SLOWED", "a slowed rival's plate says SLOWED over the bar ('%s', %s)" % [sw, why])
+	var slowed := HudPlate.statuses(sl).any(func(x: Array) -> bool: return x[2] == "SLOWED")
+	# (HudRefDemo holds the whole CC row on this rival, so the worst, STUNNED, leads the plate)
+	ok(sw == "STUNNED" and slowed, "a stunned and slowed rival's plate leads with STUNNED ('%s', %s)" % [sw, why])
 	m.knock(foes[0], P, {})
 	await main.get_tree().process_frame
 	ok(float(_state(hud, foes[0]).get("burst", 0.0)) > 0.0, "going down pops the knock burst over them")
