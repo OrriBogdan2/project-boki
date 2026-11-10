@@ -143,3 +143,33 @@ static func rise_time(depth: float) -> float:
 ## Speed onto a ledge you climb (m/s), from a hunter's run speed.
 static func mantle_launch(run_speed: float) -> float:
 	return maxf(run_speed * mantle_launch_keep, mantle_launch_min)
+
+## Where a body wanting to be at p ends up once it's pushed straight out of every barrier that blocks
+## it (a Tenzo rock, a raised wall; Verbs.wall_blocks), as World.push_out_blocks does for rock tiles:
+## you slide along the face and round the end instead of stopping. x, y: the spot; z: the highest top
+## it was pushed off (0 for none), for the wall kick and the caster's climb (StoneStand).
+static func push_out_walls(h: Hunter, p: Vector2) -> Vector3:
+	var top := 0.0
+	for w in h.m.world.dyn_walls:
+		var wt := Verbs.wall_top(w, h.pos.y)
+		if wt <= 0.0:
+			continue
+		var reach := Verbs.wall_reach(w, h.r)
+		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
+		var d := p - c
+		if d.length_squared() >= reach * reach:
+			continue
+		if d.length_squared() < 1e-8:
+			d = Vector2(h.pos.x, h.pos.z) - c      # (dead on its line: back out the side you came from)
+		# out to a skin past the reach: a body sliding along the face then stays clear of it, where a float's
+		# rounding would otherwise push it a hair with a random normal and eat its speed
+		p = c + d.normalized() * (reach + World.BLOCK_SKIN)
+		top = maxf(top, wt)
+	return Vector3(p.x, p.y, top)
+
+## The keys' velocity against the wall the last step's walk pressed into (n: out of it, zero for
+## none): its part into the wall is dropped, so the whole run-up goes along the face and you slide at
+## the tangent part of your speed from the first step (a dash's hand-over into the run included).
+static func along_wall(wish: Vector2, n: Vector2) -> Vector2:
+	var into := wish.dot(n)
+	return wish - n * into if into < 0.0 else wish

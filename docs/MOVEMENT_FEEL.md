@@ -124,6 +124,7 @@ Other checks:
   - Main caught 2141 of 2400 (89.2%).
   - Movefeel catches 1578 of 1600 (98.6%) with the keys pushing in (0/45 degrees), target 95%.
   - Steering mostly along the wall (65 degrees) it catches 691 of 800 (86.4%), target 70%. The ledge rise follows your keys, so sliding along a short rim can carry you off its end. Before the rise reworked the mantle, the scripted mantle caught all 2400.
+- `--wall-slide-check` (tools/wall_slide_check.gd, decision 0022): Sable, Vex and Kael run at 15, 45 and 75 degrees into a straight Hollow Crown cliff, three prop corners (a rock, a built wall, a camp crate) and a placed Tenzo rock off the grid, and ground-dash into the cliff, 1 s each against the same run on open ground. Targets [source]: the speed along the wall never under 90% of the reference's, and never more than 2 still steps in a row. Main failed 11 of 54 (every Tenzo-rock run: stopped 44-51 steps at 45/75 degrees; Sable's 45/75-degree dashes at 88%); now 0 of 54. In the air a dash into a wall is the wall bounce's, not this check's.
 - `--mantle-check` (tools/mantle_check.gd): checks the ledge rise, steering and the fling, plus that ledges you don't push into never grab you (see below).
 - `--obstacle-check` (tools/obstacle_slide_check.gd, from branch `stuckfix`): walks round, away from and past every tree and rock cluster on the training map and an expedition island.
   - Main 3b800a0: a hunter hugging a 3-tile rock cluster on the expedition island is pinned on a corner for 823 steps (13.7s).
