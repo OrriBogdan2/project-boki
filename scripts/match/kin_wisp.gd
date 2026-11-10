@@ -37,6 +37,12 @@ static func set_wisp(k: Kin, on: bool) -> void:
 	if k.summon:
 		k.summon.popped(on)
 
+## A merge ended (KinMerge.end): the Boki is a wisp on its hunter's shoulder again, its summon cooldown as it was.
+static func rewisp(k: Kin) -> void:
+	set_wisp(k, true)
+	k.stow()
+	k.scale = Vector3.ONE
+
 ## The step of a wisp's body. True when it handled it (the caller skips the walking state machine and the AI).
 static func ride(k: Kin) -> bool:
 	if not k.wisp:

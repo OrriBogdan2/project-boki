@@ -8,6 +8,9 @@ extends RefCounted
 ##     (Kin.merge_leap, hitting what is in its way). Boki DOWNED: R does nothing ("Rescue it to merge") and the
 ##     full meter is kept. No Boki at all (none brought, lost, dead, benched): a weak surge
 ##     (MergeForm.surge_spec), so a full meter is never wasted
+##   - Boki riding as a wisp (KinWisp, decision 0046): R works from the wisp. It blooms into the Boki and leaps into
+##     you; a summoned Boki is taken in the same way (its window is over, KinSummon.fused); when the merge ends the
+##     Boki is a wisp again. The merge never adds to or resets a summon cooldown
 ##   - phase "xform": ~0.7s, invulnerable, the Boki leaps into you and the form pops in (MergeXform)
 ##   - phase "live": for the form's duration you keep your own hero's abilities and the form augments them
 ##     (MergeAugment), C is off, and R again (after a short lock) fires the form's ultimate, which ends the merge.
@@ -19,7 +22,7 @@ extends RefCounted
 ##     pumped and rests release_rest_s (MergeRelease, docs/decisions/0004). Then the spent window, or the rest if longer.
 ##   - while merged the total damage bonus from stats is at most merge_forms.json damage_cap (cap_damage).
 ## No tiers: a form is identical for everyone (only its shield and speed baseline follow your weight class).
-## State lives on the hunter: Hunter.merge_st {def, t, T, k, giant, pulse, form, surge, phase, xt, kit, contact, from, shell, shell_max} and merge_cd.
+## State lives on the hunter: Hunter.merge_st {def, t, T, k, giant, pulse, form, surge, phase, xt, kit, contact, from, wisp, shell, shell_max} and merge_cd.
 
 static func def_for(k: Ent) -> MergeSpec:
 	if k == null or not (k is Kin):
@@ -126,6 +129,11 @@ static func cast(h: Hunter) -> bool:
 	for bb in h.m.bubbles.duplicate():
 		if bb["ent"] == k:
 			h.m.bubbles.erase(bb)          # (a line it said a moment ago does not hang over the merge)
+	var wisp: bool = k.wisp or (k.summon != null and k.summon.out())
+	var from := k.global_position if k.wisp and k.is_inside_tree() else k.pos      # (a wisp leaps from where it orbits)
+	if wisp:
+		k.summon.fused()
+		KinWisp.set_wisp(k, false)          # (the full Boki fuses: the form and the giant mount need its body)
 	var form := MergeForm.for_boki(k)
 	var giant := k.carry_style() == "mount" and not MergeForm.has_kit(form)
 	var timers: Array = []
@@ -133,7 +141,7 @@ static func cast(h: Hunter) -> bool:
 		timers.append(float(pl["every"]))
 	var xs := float(MergeForm.data()["xform_s"])
 	h.merge_st = {"def": ms, "t": ms.duration, "T": ms.duration, "giant": giant, "pulse": timers, "form": form, "surge": false,
-		"phase": "xform", "xt": xs, "kit": MergeKit.new(h, form), "contact": false, "from": k.pos}
+		"phase": "xform", "xt": xs, "kit": MergeKit.new(h, form), "contact": false, "from": from, "wisp": wisp}
 	k.merge_in(giant)
 	h._refresh_kin_stats()
 	h.inv_t = maxf(h.inv_t, xs)
@@ -263,14 +271,19 @@ static func end(h: Hunter, why := "time") -> void:
 	if k and is_instance_valid(k) and not k.dead and not st.get("surge", false):
 		if not h.downed and not h.out:
 			KinExec.run_stages(ms.on_end, _cx(h, k, ms))
-		if released and not h.out and not h.extracted and not h.downed:
+		var wisp: bool = st.get("wisp", false)
+		if wisp:
+			KinWisp.rewisp(k)          # (no pop-out and no rest: it is a wisp; the hunter still gets the afterglow)
+			if released and not h.out and not h.extracted and not h.downed:
+				MergeRelease.afterglow(h)
+		elif released and not h.out and not h.extracted and not h.downed:
 			k.land_pumped(rest)
 			MergeRelease.afterglow(h)
 		elif k.state == "fused" and MergeForm.has_kit(form) and not h.out and not h.extracted:
 			k.merge_pop()
 		else:
 			k.merge_out()
-		if timed_out:
+		if timed_out and not wisp:
 			k.rest_t = rest       # (ran out of time: it rests longer than after a release)
 	h.m.on_merge_end(h, why)
 

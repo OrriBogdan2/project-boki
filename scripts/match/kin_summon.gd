@@ -75,6 +75,15 @@ func burst() -> void:
 	k.vel = Vector3.ZERO
 	left = dur
 
+## R fused the Boki into its hunter (KinMerge): a window still running is over, with the full cooldown of
+## sending it back early. A wisp's cooldown is left as it is: the merge is a separate resource.
+func fused() -> void:
+	if out():
+		left = 0.0
+		shrink = 0.0
+		cd = cd_base
+		cd_full = cd_base
+
 ## The window is over (timer or sent back early): the shrink starts.
 func end() -> void:
 	left = 0.0
