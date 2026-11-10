@@ -147,6 +147,28 @@ def lay_kept(old, kept, body, tex):
     body[:] = np.where(top[..., 3:] > 0.5, top, body)
 
 
+def bake_emit(high, low, tex):
+    """The master's emission map (Meshy's glow: Albert's cracks) onto the low mesh's UVs, as bake_colour does the base colour
+    (after it: its Emission nodes and selection); None if the master has none."""
+    bsdf = next(n for n in high.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
+    if not bsdf.inputs["Emission Color"].links:
+        return None
+    src = bsdf.inputs["Emission Color"].links[0].from_node.image
+    for m in high.data.materials:
+        nt = m.node_tree
+        t = next(n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src)
+        nt.links.new(t.outputs["Color"], next(n for n in nt.nodes if n.type == "EMISSION").inputs["Color"])
+    img = bpy.data.images.new("emit", tex, tex, alpha=False)
+    nt = low.data.materials[0].node_tree
+    node = nt.nodes.new("ShaderNodeTexImage")
+    node.image = img
+    nt.nodes.active = node
+    select([high, low], low)
+    bpy.ops.object.bake(type="EMIT", use_selected_to_active=True, cage_extrusion=CAGE, max_ray_distance=RAY, margin=MARGIN_PX,
+                        margin_type="EXTEND", use_clear=True)
+    return img
+
+
 def bake():
     """Step 1: WORK/bake.blend (Low in the master's frame, Kept in the game's, the atlas packed) and WORK/game.glb."""
     os.makedirs(WORK, exist_ok=True)
@@ -177,6 +199,13 @@ def bake():
     bpy.ops.object.mode_set(mode="OBJECT")
     tex = int(SPEC.get("tex", 2048))
     img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX)
+    emit = bake_emit(high, low, tex) if SPEC.get("emit") else None
+    if emit:        # (the kept parts' texels stay black: they don't glow)
+        emit.filepath_raw = os.path.join(WORK, "emit.png")
+        emit.file_format = "PNG"
+        emit.save()
+        emit.pack()
+        emit.use_fake_user = True
     body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
     if kept.data.polygons:      # the kept parts: the old atlas onto their new UVs, on an image of their own, laid over the body's
         lay_kept(old, kept, body, tex)
@@ -481,40 +510,56 @@ def smooth_weights(low, W, passes):
     return W
 
 
-def move_bones(arm, kept):
+def move_bones(arm, kept, T, K):
     """`move_bones` {bone: offset}: the bone's rest (and the kept parts on it) moves by the offset; its translation keys lose
     the offset in proportion to how far each goes toward the largest one, so the clips still end where they did (the junk
-    ball hides in the new body at rest and still grows round him in a dash)."""
-    for name, d in SPEC.get("move_bones", {}).items():
-        d = Vector(d)
-        b = arm.data.bones[name]
-        dl = b.matrix_local.to_3x3().inverted() @ d
-        path = 'pose.bones["%s"].location' % name
-        curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
-        keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
-                for cs in curves if len(cs) == 3]
-        far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max())
-        top = far[np.linalg.norm(far, axis=1).argmax()]
-        for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
-            if len(cs) != 3:
-                continue
-            cs = sorted(cs, key=lambda c: c.array_index)
-            loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
-            frac = loc @ top / float(top @ top)
-            for i, fc in enumerate(cs):
-                for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
-                    kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    ball hides in the new body at rest and still grows round him in a dash). {bone: {"to": point, "chain": [bones]}}: the
+    bone's head onto a master point (through the fit) and its chain by the same offset, the keys as they were (Albert's fish
+    onto the master's mast)."""
+    for name, spec in SPEC.get("move_bones", {}).items():
+        bones, fix = [name], not isinstance(spec, dict)
+        if fix:
+            d = Vector(spec)
+        else:
+            p = np.array([spec["to"]], float)
+            d = Vector(fit(p, fit_weights(arm, p), T, K)[0]) - arm.data.bones[name].head_local
+            bones += spec.get("chain", [])
+        rest = {bn: (arm.data.bones[bn].head_local.copy(), arm.data.bones[bn].tail_local.copy()) for bn in bones}
+        for bn in bones:
+            move_bone(arm, kept, bn, d, fix)
         select([arm], arm)
         bpy.ops.object.mode_set(mode="EDIT")
-        eb = arm.data.edit_bones[name]
-        eb.head += d
-        eb.tail += d
+        for bn, (h, t) in rest.items():     # (from the rest as it was: a connected child follows its parent's tail)
+            arm.data.edit_bones[bn].head = h + d
+            arm.data.edit_bones[bn].tail = t + d
         bpy.ops.object.mode_set(mode="OBJECT")
+
+
+def move_bone(arm, kept, name, d, fix):
+    """One bone's keys (corrected if `fix`) and kept parts."""
+    b = arm.data.bones[name]
+    dl = b.matrix_local.to_3x3().inverted() @ d
+    path = 'pose.bones["%s"].location' % name
+    curves = [[fc for fc in act.fcurves if fc.data_path == path] for act in bpy.data.actions]
+    keys = [np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in sorted(cs, key=lambda c: c.array_index)])
+            for cs in curves if len(cs) == 3]
+    far = max((k.T for k in keys), key=lambda t: np.linalg.norm(t, axis=1).max()) if keys and fix else np.zeros((1, 3))
+    top = far[np.linalg.norm(far, axis=1).argmax()]
+    for cs in curves if top @ top > 1e-12 else []:     # keys all at rest (Sparkle's gum only scales): nothing to correct
+        if len(cs) != 3:
+            continue
+        cs = sorted(cs, key=lambda c: c.array_index)
+        loc = np.array([[kp.co[1] for kp in fc.keyframe_points] for fc in cs]).T
+        frac = loc @ top / float(top @ top)
+        for i, fc in enumerate(cs):
+            for kp, v in zip(fc.keyframe_points, loc[:, i] - frac * dl[i]):
+                kp.co[1] = kp.handle_left[1] = kp.handle_right[1] = v
+    if name in kept.vertex_groups:
         gi = kept.vertex_groups[name].index
         for v in kept.data.vertices:
             if any(g.group == gi and g.weight > 0.5 for g in v.groups):
                 v.co += d
-        print("moved", name, tuple(d), "keys", len(keys), flush=True)
+    print("moved", name, tuple(round(x, 3) for x in d), "keys", len(keys), flush=True)
 
 
 # ----------------------------------------------------- step 4: slots, ink room, anchors
@@ -556,6 +601,26 @@ def tri_slots(ob, img, top_bone, P):
     return out
 
 
+def screen_uvs(low, slots, P):
+    """`screen` {slot, centre, r}: that slot's triangles (Albert's porthole glass) get their own UVs, the disc of radius r round
+    the centre (master points) on 0..1, his right at u 1 and up at v 1, for shaders/warden_mood.gdshader to draw the face on."""
+    scr = SPEC.get("screen")
+    if not scr:
+        return
+    me = low.data
+    c, r = np.array(scr["centre"], float), float(scr["r"])
+    lv = np.empty(len(me.loops), np.int32)
+    me.loops.foreach_get("vertex_index", lv)
+    uv = np.empty(len(me.loops) * 2, F)
+    me.uv_layers["UVMap"].data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    sel = np.repeat(np.array(slots[:len(me.polygons)]) == scr["slot"], 3)
+    q = P[lv[sel]] - c
+    uv[sel] = np.stack([0.5 + q[:, 0] / (2 * r), 0.5 + q[:, 2] / (2 * r)], 1)
+    me.uv_layers["UVMap"].data.foreach_set("uv", uv.ravel())
+    print("screen", int(sel.sum() // 3), "triangles", flush=True)
+
+
 def move_anchors(arm, T, K):
     """The spec's anchors, through the fit (their own segment weights), in the rest pose."""
     names = [n for n in SPEC.get("anchors", {}) if n in bpy.data.objects]
@@ -592,8 +657,9 @@ def main():
     P = P[o]
     gr = dict(zip(names, smooth_weights(low, W, int(SPEC.get("smooth", 0))).T))
     top = set_groups(low, gr)
-    move_bones(arm, kept)
+    move_bones(arm, kept, T, K)
     slots = list(tri_slots(low, img, top, P)) + (kept["slots"].split(",") if kept["slots"] else [])
+    screen_uvs(low, slots, P)
     room = SPEC.get("room", {})
     vals = [room.get(b, room.get("*", 0.7)) for b in top]
     gname = {g.index: g.name for g in kept.vertex_groups}
@@ -620,6 +686,11 @@ def main():
         t.image = img
         m.node_tree.links.new(t.outputs[0], b.inputs[0])
         b.inputs["Roughness"].default_value = 0.8
+        if "emit" in bpy.data.images:       # (the glTF emissive texture: WardenGlb's emit layer, in the archetype's glow colour)
+            e = m.node_tree.nodes.new("ShaderNodeTexImage")
+            e.image = bpy.data.images["emit"]
+            m.node_tree.links.new(e.outputs[0], b.inputs["Emission Color"])
+            b.inputs["Emission Strength"].default_value = 1.0
         me.materials.append(m)
     me.polygons.foreach_set("material_index", np.array([names.index(s) for s in slots], np.int32))
     ntri = sum(len(p.vertices) - 2 for p in me.polygons)

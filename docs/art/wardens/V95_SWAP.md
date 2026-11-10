@@ -18,7 +18,11 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    parts the scan fused that the clips swing apart), `slots` (toon slots by the paint's hue/sat/value, a bone or
    a box; first match wins), `room` (ink room per bone), `anchors` (moved through the same fit), `keep` (bones
    whose old parts stay, with their old paint: Grimble's junk ball) and `move_bones` (such a bone's rest moved,
-   its clips' translation keys corrected so they end where they did). The budget: `tris` + the kept parts +
+   its clips' translation keys corrected so they end where they did; or `{"to": master point, "chain": [bones]}`:
+   the bone's head goes to that point and the chain moves with it, keys untouched: Albert's fish and its spring
+   chain onto the mast it hangs from), `emit` (bake the master's emission map too: glTF emissive, which WardenGlb
+   tints to the archetype's model_glow) and `screen` (`{"slot", "centre", "r"}`: that slot's triangles get a flat
+   disc UV, u = 0.5 + dx/2r, v = 0.5 + dz/2r, for a shader face such as warden_mood's). The budget: `tris` + the kept parts +
    skin_relax's caps <= 15k (RIG_CONTRACT.md).
 3. **Swap**: `blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB`. The first run
    bakes (bake_warden.py's low mesh, UVs and Cycles bake, ~10 min) into WORK/bake.blend and copies the game .glb
@@ -30,6 +34,14 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
+
+## Albert (Mossy, the Breaker, bulwark): swapped 2026-11-10
+`art/wardens/src/breaker_v95.json`: the appeal3 face master (body only) onto breaker.glb; k 1 (the rig is as wide as he
+is, much shorter: the torso squashes ~0.76), masts and sails on `hips`, the fish and its spring chain moved to his
+left mast (`move_bones` "to"/"chain"), the cracks from the emission map (`emit`), the porthole glass a flat disc for
+warden_mood's face (`screen`). `relax` with no cuts: with cuts it took 5.4k of 13.8k triangles (the rigid-piece clips
+swing the shoulders and hips hard); left without cuts the worst edge is 7.7x (shoulders, hips; 2.6k edges over 1.3).
+Shots: docs/shots/albert-appeal/.
 
 ## Status (2026-11-10): Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
