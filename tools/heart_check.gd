@@ -66,18 +66,21 @@ func run(main: Node) -> void:
 	ok(not w.is_void(H.site.x, H.site.z) and not w.is_void(H.gate.x, H.gate.z),
 		"the Heart and the Gate stand on ground")
 	var gd := Vector2(H.gate.x - H.site.x, H.gate.z - H.site.z).length()
-	ok(gd > 8.0 and gd < float(rl["gate_dist"]) + 6.0, "the Gate is near the Heart but not on it (%.0f m)" % gd)
+	ok(gd > 8.0 and gd < float(rl["gate_dist"]) * H.ways_scale + 6.0,
+		"the Gate is near the Heart but not on it (%.0f m)" % gd)
 	var m2 := _match(main, 7302)
-	ok(m2.heart.site != H.site or m2.heart.gate != H.gate, "another match can pick another site")
+	ok(m2.heart.site == H.site and m2.heart.gate != H.gate,
+		"the Heart keeps the map's site; another match seeds another Gate")
 	m2.queue_free()
 	var p: Hunter = m.player
 	# ---- the tide
 	ok(Heart.tide_r(m) == 0.0, "no tide before it starts")
 	m.time = 5000.0
-	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"])), "the tide has closed to its smallest ring")
+	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale),
+		"the tide has closed to its smallest ring")
 	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * 0.5 - m.sess_t0
 	var half := Heart.tide_r(m)
-	ok(half < float(rl["tide_r0"]) and half > float(rl["tide_r1"]),
+	ok(half < float(rl["tide_r0"]) * H.ways_scale and half > float(rl["tide_r1"]) * H.ways_scale,
 		"halfway the ring is between its two sizes (%.0f m)" % half)
 	var far := H.site + Vector3(half + 60.0, 0, 0)
 	ok(Heart.tide_boost(m, H.site) == 0.0 and Heart.tide_boost(m, far) > 0.0,

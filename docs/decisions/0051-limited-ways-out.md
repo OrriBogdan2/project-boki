@@ -31,3 +31,9 @@ heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.g
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
 No save change. Checks: --heart-check (early seat), new --heart-seats-check (squad take, final, order, rush, Net).
+
+Map (spec task 6, section 8): each map authors `"heart": [x, z]` (the Throne / vault crown) and two uplink
+outposts; the 305 m Hollow Crown also carries `"ways_scale": 1.412` (SIZE / 216), which stretches the tide radii,
+gate_dist and the map bands (heart.json "map"), never times. Heart.setup puts the Heart on that site and seeds the
+Gate angle among spots gate_clear from both outposts. tools/ways_out_sites.py (both generators) and
+--ways-out-map-check enforce the bands from the same heart.json numbers.

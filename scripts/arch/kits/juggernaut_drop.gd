@@ -3,19 +3,20 @@ extends RefCounted
 ## Kael's airborne Smash, the Meteor Drop (`rmb.drop` in content/archetypes/juggernaut.json; the source's air
 ## slam, briefs/hero-ref/juggernaut.md "Air Slam" and "Jump and landing": ~0.85s airborne, ~0.5s recovery).
 ## Press in the air: a short hang at the top while he gathers (the blade hauled overhead, a tuck and a half
-## flip) as he slides over a landing marker everyone sees at the clamped cursor, then a straight vertical slam
-## down onto it with flame streaks, a heavy landing (a crouch, a crack in the ground, a shock ring the size of
-## the stun, dust and debris, a shake and a deep boom), and a recovery rising from the crouch. Owned by
+## flip) over a landing marker everyone sees on the ground right under him, then he drives straight down onto it
+## with flame streaks (no travel sideways: owner playtest 11-10), a heavy landing (a crouch, a crack in the ground,
+## a shock ring the size of the stun, dust and debris, a shake and a deep boom) that knocks everyone in it down
+## and spikes anyone airborne to the ground (Displace.spike), and a recovery rising from the crouch. Owned by
 ## JuggernautKit.
 
 const PURPLE := Color("b06aff")       # the landing marker (the damage area)
 const CORE := Color("ff5ad8")         # its centre ring: the stun area, and the shock ring on impact
-const CLOSE := 0.25                   # share of the dive that closes any gap to the spot left by an air dash
+const SPIKE_OVER := 0.3               # m over the landing a foe counts as airborne (spiked down, not only knocked down)
 
 var k: JuggernautKit
 var phase := ""                       # "" | hang | dive | recover
 var t := 0.0                          # s into the phase
-var land := Vector3.ZERO              # where it lands (locked on the press)
+var land := Vector3.ZERO              # where it lands: the ground under him (locked when the dive starts)
 var from := Vector3.ZERO              # where the dive starts
 var dive_t := 0.0                     # s the dive takes
 var pressed_at := 0.0
@@ -26,6 +27,7 @@ var phases: Array = []                # the phases the last one went through
 var last_air := 0.0                   # s from the press to the impact
 var last_recover := 0.0               # s the last recovery ran
 var last_shock_r := 0.0               # m, the shock ring drawn on impact
+var spiked := 0                       # airborne foes the landings spiked to the ground
 
 func _init(kit: JuggernautKit) -> void:
 	k = kit
@@ -50,13 +52,9 @@ func move_k() -> float:
 				if t >= planted else 0.0
 	return 1.0
 
-## Where a Meteor Drop would land now: the cursor, clamped to the reach from under you, on open ground.
+## Where a Meteor Drop would land now: the ground straight under him.
 func point() -> Vector3:
-	var h := k.h
-	var at := AimMode.point(h, float(data().get("reach", 5.0)), AimMode.CURSOR, 0.0)
-	if k.m.world.is_void(at.x, at.z) or k.m.world.is_block(at.x, at.z):
-		at = Vector3(h.pos.x, at.y, h.pos.z)
-	return k.ground(at)
+	return k.ground(k.h.pos)
 
 ## The press (the slot is already spent): the hang begins over the marker.
 func start() -> void:
@@ -104,18 +102,16 @@ func tick(dt: float) -> void:
 				last_recover = t
 				phase = ""
 
-## The gather at the top: held in the air (a touch of lift), sliding over the spot so the slam comes straight down,
-## the marker filling. An air dash in it carries him on (the gather keeps its time), and the dive closes what's left
-## at its very start.
+## The gather at the top: held in the air (a touch of lift), the marker under him filling. An air dash in it
+## carries him on (the gather keeps its time) and the marker with him: the dive comes down where it left him.
 func _tick_hang(dt: float) -> void:
 	var h := k.h
 	var hang := float(data()["hang"])
+	land = point()
 	_marker(0.5 * minf(t / hang, 1.0))
 	HeroVfx.of(k.m).hold(h, "drop_gather", minf(t / hang, 1.0))
 	if h.roll_t > 0.0:
 		return
-	var over := clampf(dt / maxf(hang - t, dt), 0.0, 1.0)
-	h.teleport(Vector3(lerpf(h.pos.x, land.x, over), h.pos.y, lerpf(h.pos.z, land.z, over)))
 	h.vel = Vector3(0.0, 0.6 * (1.0 - t / hang) + Hunter.H_GRAV * dt, 0.0)
 	if t >= hang:
 		var dd := data()
@@ -125,15 +121,14 @@ func _tick_hang(dt: float) -> void:
 		from = h.pos
 		var span := from.distance_to(land)
 		dive_t = clampf(span / float(dd["dive_speed"]), float(dd["dive_t"][0]), float(dd["dive_t"][1]))
-		k.vfx("drop_dive", h.pos, Vector2(land.x - from.x, land.z - from.z).normalized())
+		k.vfx("drop_dive", h.pos, h.aim_dir())
 
 ## The dive: straight down onto the marker, accelerating (seen all the way, not a teleport), flame streaks rising
 ## off him.
 func _tick_dive() -> void:
 	var h := k.h
 	var u := clampf(t / dive_t, 0.0, 1.0)
-	var e := clampf(u / CLOSE, 0.0, 1.0)         # over the spot already, unless an air dash took him off it
-	var at := Vector3(lerpf(from.x, land.x, e), lerpf(from.y, land.y, u * u), lerpf(from.z, land.z, e))
+	var at := Vector3(from.x, lerpf(from.y, land.y, u * u), from.z)
 	h.vel = Vector3.ZERO
 	h.teleport(at)
 	_marker(0.5 + 0.5 * u)
@@ -159,18 +154,23 @@ func _impact() -> void:
 	_hit(h.pos)
 	_impact_fx(h.pos)
 
+## The landing burst: everyone in it is knocked down (a short stun) and anyone off the ground is spiked down to it;
+## the core takes more and stays down longer.
 func _hit(at: Vector3) -> void:
 	var dd := data()
 	var stg := k.stage("rmb", {"delivery": {"type": "burst", "origin": "caster", "radius": float(dd["radius"])},
-		"effects": [{"type": "damage", "amount": float(dd["dmg"]) * k.smash_k()},
-				{"type": "slow", "duration": float(dd["slow_t"]), "strength": float(dd["slow"])}]})
+		"effects": [{"type": "damage", "amount": float(dd["dmg"]) * k.smash_k()}]})
 	k.run_own(stg, k.cx("rmb", "meteor_drop", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f) or f.dead: return
-		if stunned_at(f.pos, f.r, at):
-			f.hurt(float(dd["dmg"]) * k.smash_k() * float(dd["core_k"]) * k.power("sec"), k.h,
-					{"src": "abil", "ab": "utility", "tags": ["utility", "meteor_core"], "stun": float(dd["stun"]),
-							"dr": true})
-			k.m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED", k.res_col(), false)}))
+		var core := stunned_at(f.pos, f.r, at)
+		if f.pos.y > at.y + SPIKE_OVER or (f is Hunter and (f as Hunter).gliding):
+			k.m.displace.spike(f, -float(dd["spike_vy"]), k.h)
+			spiked += 1
+		var extra := float(dd["dmg"]) * k.smash_k() * float(dd["core_k"]) * k.power("sec") if core else 1.0
+		var tag := "meteor_core" if core else "meteor_down"
+		f.hurt(extra, k.h, {"src": "abil", "ab": "utility", "tags": ["utility", tag],
+				"stun": float(dd["stun"] if core else dd["down"]), "dr": true})
+		k.m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED" if core else "SLAMMED", k.res_col(), false)}))
 
 ## True when a body of radius `r` at `p` touches the stun core (the ring drawn on impact) of a slam at `at`.
 func stunned_at(p: Vector3, r: float, at: Vector3) -> bool:

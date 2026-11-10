@@ -117,9 +117,12 @@ func _early(main: Node) -> void:
 	_put(m2, p2, H2.site + Vector3(1, 0, 0))
 	H2._pick(p2)
 	_put(m2, p2, H2.gate)
-	_put(m2, far2, H2.gate + Vector3(float(rl["gate_take_r"]) + 4.0, 0, 0))
+	# toward the Heart: the Gate stands near its island's rim, so a step straight out can be over the void
+	var inward := (H2.site - H2.gate).normalized()
+	_put(m2, far2, H2.gate + inward * (float(rl["gate_take_r"]) + 4.0))
 	H2._gate_done(p2)
-	ok(p2.extracted and not far2.extracted, "a squadmate past %.0f m stays in the match" % float(rl["gate_take_r"]))
+	ok(p2.extracted and not far2.extracted and far2.flat_dist(H2.gate) > float(rl["gate_take_r"]),
+		"a squadmate %.1f m from the Gate stays in the match" % far2.flat_dist(H2.gate))
 	m2.queue_free()
 	# the rest of the order on the first match: WAITING > FINAL at final_s > DONE when the ring fills
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != p.team)[0]

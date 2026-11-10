@@ -232,30 +232,37 @@ func tick(dt: float) -> void:
 	for c in cands:
 		if not c["taken"] and c["active"]:
 			c["taken"] = _is_taken(c)
-	var teams := {}
+	var teams := {}                  # team -> its hunters on the ground (one pass, not one per spot)
 	for h in m.hunters:
 		if h.out or h.extracted or h.riding:
 			continue
-		teams[h.team] = true
+		if not teams.has(h.team): teams[h.team] = []
+		teams[h.team].append(h)
 	for c in cands:
 		var known: Dictionary = c["known"]
 		for t in teams:
 			if known.has(t):
 				continue
-			if _team_sees(int(t), c["pos"]):
+			if _team_sees(int(t), teams[t], c["pos"]):
 				known[t] = true
 				if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
 					var def: Dictionary = cats.get(c["cat"], {})
 					if not def.get("announce", false):
 						m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
 
-func _team_sees(team: int, p: Vector3) -> bool:
-	for h in m.hunters:
-		if h.team != team or h.out or h.extracted or h.riding:
-			continue
+## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
+## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map
+## made spots x squads x hunters the biggest step spike.
+const SIGHT_BOUND_K := 1.25 * 1.5    # sneak range bonus x headroom for sight gear
+func _team_sees(team: int, members: Array, p: Vector3) -> bool:
+	var dmin := INF
+	for h: Hunter in members:
 		var d := Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 		if d < (DROP_REVEAL_R if h.dropping else REVEAL_R):
 			return true
+		dmin = minf(dmin, d)
+	if dmin > (Match.VIEW_RANGE + 2.0) * maxf(m.sight_k, 1.0) * SIGHT_BOUND_K:
+		return false
 	return m.sees(team, p + Vector3(0, 0.4, 0))
 
 func _is_taken(c: Dictionary) -> bool:
