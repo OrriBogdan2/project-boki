@@ -97310,5 +97310,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/rv_crofthollow_c_2.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_rampartoad_b",
+    "name": "Rampartoad (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_rampartoad_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_a",
+    "name": "Chuggamus (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rampartoad_c",
+    "name": "Rampartoad (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_rampartoad_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rampartoad_b",
+    "name": "Rampartoad (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_rampartoad_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_b",
+    "name": "Chuggamus (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_crofthollow_c",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_crofthollow_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_c",
+    "name": "Chuggamus (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_chuggamus_a",
+    "name": "Chuggamus (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_chuggamus_a_2.jpg",
+    "ok": true
   }
 ]
