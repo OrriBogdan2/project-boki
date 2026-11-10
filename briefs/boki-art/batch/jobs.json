@@ -39806,6 +39806,402 @@
     "prompt": "Redraw the creature in image 1 as a retro handheld RPG monster sprite. Image 2 shows the exact pixel art style to match: big chunky square pixels, the whole creature only about 48 pixels tall, a dark one-pixel outline, flat colours with one shade tone, at most 12 colours, no anti-aliasing, no gradients, no dithering, no glow. Do not copy the creatures in image 2, only their pixel size and style. This is a redesign for small size, not a shrunken copy: simplify the creature to its 3 or 4 most recognisable features, make the head and eyes a little larger, drop small patterns and thin details, keep its main colours. Every part belongs to its body; add no clothing, scarf, hat or held item. Three-quarter view facing left, whole body in frame, centred, filling most of the image. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines."
   },
   {
+    "id": "px5_vespyx",
+    "name": "Vespyx (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_vespyx",
+    "name": "Vespyx (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_vespyx",
+    "name": "Vespyx (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Vespyx.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_mycroll",
+    "name": "Mycroll (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_mycroll",
+    "name": "Mycroll (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_mycroll",
+    "name": "Mycroll (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Mycroll.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_prismander",
+    "name": "Prismander (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_prismander",
+    "name": "Prismander (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_prismander",
+    "name": "Prismander (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Prismander.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_ermink",
+    "name": "Ermink (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Ermink.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_ermink",
+    "name": "Ermink (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Ermink.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_ermink",
+    "name": "Ermink (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Ermink.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_pinguin",
+    "name": "Pinguin (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Pinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_pinguin",
+    "name": "Pinguin (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Pinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_pinguin",
+    "name": "Pinguin (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Pinguin.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_jerbit",
+    "name": "Jerbit (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Jerbit.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_jerbit",
+    "name": "Jerbit (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Jerbit.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_jerbit",
+    "name": "Jerbit (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Jerbit.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_kitlet",
+    "name": "Kitlet (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Kitlet.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_kitlet",
+    "name": "Kitlet (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Kitlet.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_kitlet",
+    "name": "Kitlet (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Kitlet.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_xylogator",
+    "name": "Xylogator (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Xylogator.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_xylogator",
+    "name": "Xylogator (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Xylogator.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_xylogator",
+    "name": "Xylogator (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Xylogator.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_sarcobra",
+    "name": "Sarcobra (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Sarcobra.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_sarcobra",
+    "name": "Sarcobra (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Sarcobra.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_sarcobra",
+    "name": "Sarcobra (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Sarcobra.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_calderoise",
+    "name": "Calderoise (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_calderoise",
+    "name": "Calderoise (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_calderoise",
+    "name": "Calderoise (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Calderoise.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_aurostag",
+    "name": "Aurostag (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Aurostag.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_aurostag",
+    "name": "Aurostag (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Aurostag.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_aurostag",
+    "name": "Aurostag (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Aurostag.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px5_chainipede",
+    "name": "Chainipede (pixel sprite style 5)",
+    "refs": [
+      "briefs/boki-art/cards/Chainipede.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px6_chainipede",
+    "name": "Chainipede (pixel sprite style 6)",
+    "refs": [
+      "briefs/boki-art/cards/Chainipede.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, no anti-aliasing blur, no gradients, no dithering, no glow. Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px7_chainipede",
+    "name": "Chainipede (pixel sprite style 7)",
+    "refs": [
+      "briefs/boki-art/cards/Chainipede.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. Side-on or three-quarter view facing left, centred. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

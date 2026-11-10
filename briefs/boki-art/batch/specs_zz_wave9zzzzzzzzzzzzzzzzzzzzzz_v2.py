@@ -1729,3 +1729,27 @@ _PXC=("Redraw the creature in image 1 as a retro handheld RPG monster sprite. Im
  "Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines.")
 for _n in ('Vespyx','Mycroll','Prismander','Ermink','Pinguin','Jerbit','Kitlet','Xylogator','Sarcobra','Calderoise','Aurostag','Chainipede','Lockatara','Chuggamus','Palloth','Hydrangor'):
     SPECS.append({'id':'px_c_'+_n.lower(),'name':_n+' (pixel sprite test c)','refs':['briefs/boki-art/cards/'+_n+'.jpg','briefs/boki-art/style_refs/pixel_sprite_ref_v1.png'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PXC})
+
+# 11-10 pixel sprite test, round 3: owner picked reference styles 5/6 (DS-era battle sprite) and 7 (menu icon).
+_PXTAIL=(" Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. "
+ "Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only.")
+_PX5=("Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2008 Nintendo DS monster-collecting RPG. "
+ "The sprite is drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a clearly visible block. "
+ "Dark coloured one-pixel outline (a dark shade of the local colour, black only in the darkest places), about 15 colours in total, "
+ "each colour area has a base tone, one shadow tone and a small highlight, clean clusters of pixels, no anti-aliasing blur, no gradients, no dithering, no glow. "
+ "Redesign it for this size like a sprite artist would: bold clear silhouette, slightly larger head and eyes, keep the 4 or 5 features that make it recognisable, drop tiny patterns and thin lines. "
+ "Lively three-quarter front pose facing left, whole body in frame, centred, filling most of the image.")
+_PX6=("Redraw the creature in image 1 as a hand-pixelled front battle sprite from a 2010 Nintendo DS monster-collecting RPG. "
+ "The sprite is drawn on a 96 by 96 pixel canvas and shown enlarged with crisp square pixels, each sprite pixel a visible block. "
+ "Dark coloured one-pixel outline, about 16 colours in total, each colour area has a base tone, a shadow tone and a highlight, careful pixel clusters, "
+ "no anti-aliasing blur, no gradients, no dithering, no glow. "
+ "Keep the full design and its signature parts but simplify small patterns so every detail is at least two pixels wide; bold clear silhouette. "
+ "Dynamic three-quarter front pose facing left, whole body in frame, centred, filling most of the image.")
+_PX7=("Redraw the creature in image 1 as a tiny party-menu icon sprite from a classic handheld monster-collecting RPG. "
+ "The icon is drawn on a 32 by 32 pixel canvas and shown hugely enlarged, so every sprite pixel is a big obvious square block about 30 screen pixels wide; the whole creature is only about 26 blocks tall. "
+ "Dark outline one block thick, at most 8 flat colours, no shading beyond one darker tone, no anti-aliasing, no gradients, no dithering. "
+ "Extreme simplification: just the head and body shape, two-block eyes, and the one or two features that identify it; no small patterns at all. Big head, tiny body. "
+ "Side-on or three-quarter view facing left, centred.")
+for _n in ('Vespyx','Mycroll','Prismander','Ermink','Pinguin','Jerbit','Kitlet','Xylogator','Sarcobra','Calderoise','Aurostag','Chainipede'):
+    for _k,_p in (('5',_PX5),('6',_PX6),('7',_PX7)):
+        SPECS.append({'id':'px'+_k+'_'+_n.lower(),'name':_n+' (pixel sprite style '+_k+')','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_p+_PXTAIL})
