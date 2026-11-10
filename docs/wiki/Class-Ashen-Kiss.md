@@ -1,4 +1,4 @@
-# The Ashen Kiss
+# Mad Pyromancer
 
 A flue sweep in a sooty top hat with a bellows pack. Hoses foes down with fire until they Flash over, rams them
 head first, and hits back harder after every knock.
@@ -8,9 +8,9 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Class title | the Ashen Kiss |
+| Class title | Mad Pyromancer |
 | Base character | Cinder, female |
-| Personality | Malgrave's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead, and now fire answers her bare hands. She served the throne for years, and she wants it for herself. She is not mad, just certain. |
+| Personality | A salamander-folk alchemist with charcoal skin split by glowing magma, fin ears, hair of living fire and a long burning tail. She wears cracked goggles, a corset and a shredded apron, hauls a tank of liquid fire on her back, and she is delighted by every fire she starts. |
 
 <!-- /gen:profile -->
 
@@ -48,8 +48,8 @@ head first, and hits back harder after every knock.
 |---|---|
 | Body | 193 health, 4.4 m/s, 2 dash charges |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The court alchemist. Pours fire from her bare hands until foes blaze, rams them head first, and hits back harder after every knock. |
-| Silhouette | the horns, the ember-tipped hair, the obsidian shards and the long flame-tipped tail |
+| Fantasy | The flue sweep. Hoses foes down with fire until they blaze, rams them head first, and hits back harder after every knock. |
+| Silhouette | the blazing hair, the copper tank of fire on her back and the long burning tail |
 | Resource | Char (max 31) |
 
 ### Kit card
@@ -63,8 +63,8 @@ What the in-game kit card (K) says.
 | Dash: Soot Ram | Ram head first the way you move (or at the cursor with Dash-to-cursor on); you stop on the first foe with a fiery hit. 2 charges. |
 | RMB: Cinder Shot | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
 | E: Furnace Cloak | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
-| Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your stream of fire is off while you fly. |
-| Weapon: Torch Lance | Hold to pour fire from your hand 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
+| Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your lance is off while you fly. |
+| Weapon: Torch Lance | Hold to hose fire 7m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
 ### Abilities in full
 
@@ -78,7 +78,7 @@ What the in-game kit card (K) says.
 
 **Furnace Cloak (E, 10.5s cooldown).** On the press, a blast of heat round you (4.5m, the ring shows its edge): 7 damage, 16 Char and Anti-Heal for 3s, and foes in sight are dragged toward you (walls stop them). Hit anyone and you wear a swirling 3s shield of 6.4% health plus 5.1% per foe. A knock resets it.
 
-**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the stream of fire does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
+**Flue Flight (hunter ultimate, from level 6, 36s cooldown).** Lift off in a ring of embers and fly 1.8s toward the cursor, steering as you aim (up to 120 degrees a second). A 1.8m lava carpet forms under you and lasts 5.2s: 4.5 damage a second, a 30% slow, and 4 Char every 0.3s (Ablaze in about 2.4s). Press the ultimate again to land early. The Cinder Shot and the Furnace Cloak work mid-flight, but the lance does not (the key is ignored until you land), and a knockback (or Shift) speeds you up. The carpet never forms over the abyss. 36s.
 
 ### Ranks
 
@@ -86,10 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 7s -> 6.3s, damage +15%. | cooldown 7s -> 5.6s, damage +30%; a second charge. |
-| Dash (Shift) | recharge 9s -> 7.65s per charge. | recharge 9s -> 6.3s, damage +30% and +4.3; a hit gives +16% speed and a shield of 11.6% health for 2s. |
-| E | cooldown 10.5s -> 9.45s, damage and shield +15%. | cooldown 10.5s -> 8.4s, damage and shield +30%, and the shield +30% more. |
-| R (ultimate) | Flue Flight cooldown 36s -> 24s. The Merge lasts 30% longer. | Flue Flight cooldown 36s -> 24s, trail damage 4.5 -> 5.62. |
+| RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.7s, damage +50%; a second charge. |
+| Dash (Shift) | recharge 9s -> 8.25s per charge. | recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s. |
+| E | cooldown 10.5s -> 8.9s, damage and shield +25%. | cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
 

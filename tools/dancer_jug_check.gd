@@ -465,6 +465,26 @@ func juggernaut(a) -> void:
 			and absf(float(smash_ks[2]) - 1.4) < 0.001 and absf(float(chain_ks[1]) - 0.875) < 0.001
 			and absf(float(chain_ks[2]) - 0.625) < 0.001 and absf(air_r1 - 7.2) < 0.001 and absf(air_r3 - 4.8) < 0.001,
 			"%s %s %.1f %.1f" % [smash_ks, chain_ks, air_r1, air_r3])
+	var close := func(a: float, b: float) -> bool: return absf(a - b) < 0.05
+	var jc := []
+	var kin_p1 := K.power("kin")
+	for rk in [1, 2, 3]:
+		P.slot_lv["dash"] = rk
+		P.slot_lv["sec"] = rk
+		P.slot_lv["kin"] = rk
+		jc.append([
+			float(K.dash_def()["cd"]) * K.dash_k(), float(K.rmb_def()["cooldown"]) * K.cd_k("sec"),
+			float(K.e_def()["cooldown"]) * K.cd_k("kin"), K.power("kin") / kin_p1,
+		])
+	P.slot_lv["dash"] = 1
+	P.slot_lv["sec"] = 1
+	P.slot_lv["kin"] = 1
+	A.ok("upgrade parity: Rampage recharge 10.4 -> 8.8 -> 6.4 (source -1.6s, then -2.4s more)",
+			close.call(jc[0][0], 10.4) and close.call(jc[1][0], 8.8) and close.call(jc[2][0], 6.4), str(jc))
+	A.ok("upgrade parity: Warchain cooldown 12.8 -> 11.2 -> 8.0, no damage step (the source has none)",
+			close.call(jc[1][2], 11.2) and close.call(jc[2][2], 8.0) and close.call(jc[2][3], 1.0), str(jc))
+	A.ok("upgrade parity: Smash keeps its 2s cooldown at every rank (only damage and the Meteor Drop change)",
+			close.call(jc[1][1], 2.0) and close.call(jc[2][1], 2.0), str(jc))
 	# Rage (Blazing Spirit): damage fills it; nothing below full; Enraged gives damage, dash and ability haste
 	K.res = 0.0
 	K.enraged_t = 0.0
