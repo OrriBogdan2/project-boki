@@ -20,6 +20,7 @@ var k: Kin
 var dur := 10.0       # s: this species' window
 var cd_base := 60.0   # s: this species' cooldown
 var left := 0.0       # s of the window left (0: a wisp, or shrinking)
+var win := 0.0        # s: the window it started with (the most `left` seen), for SummonRing
 var shrink := 0.0     # s of the shrink back left
 var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again

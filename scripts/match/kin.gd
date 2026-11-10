@@ -1076,6 +1076,7 @@ func render(delta: float, alpha: float) -> void:
 	KinDowned.render(self, delta)
 	if model:
 		SideRings.kin(self)
+		SummonRing.tick(self)
 	if not model or KinWisp.render(self):
 		return
 	var body: Node3D = model.get_node("Body")

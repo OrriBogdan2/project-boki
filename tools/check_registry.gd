@@ -246,6 +246,8 @@ const CHECKS := {
 	"--summon-band-check": ["res://tools/summon_band_check.gd", "summon_band_check", null],      # decision 0042
 	"--summon-side-shots": ["res://tools/summon_side_shots.gd", "summon_side_shots", null],      # --shots-dir=<dir>
 	"--summon-side-check": ["res://tools/summon_side_check.gd", "summon_side_check", null],  # side-colour rings
+	"--summon-ring-shots": ["res://tools/summon_ring_shots.gd", "summon_ring_shots", null],      # --shots-dir=<dir>
+	"--summon-ring-check": ["res://tools/summon_ring_check.gd", "summon_ring_check", null],  # time-left ring
 	"--stolen-hud-check": ["res://tools/stolen_hud_check.gd", "stolen_hud_check", null],      # --shots-dir=<dir>
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # --shots-dir=<dir>
