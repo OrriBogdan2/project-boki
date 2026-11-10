@@ -95567,5 +95567,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/det_grammite_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/det_grammite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/det_grammite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_checkmare_b",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_checkmare_a",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_1.jpg",
+    "ok": true
   }
 ]
