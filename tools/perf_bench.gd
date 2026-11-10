@@ -121,6 +121,13 @@ func _farm(part: String, params: Dictionary) -> void:
 	Game.goto("home", params)
 	for i in 30:
 		await main.get_tree().process_frame
+	await _frames(part)
+	if part == "hub":      # same scene, horizon hidden: the islands' own cost (GARDEN 10.7 step 9)
+		for n in Game.main.current.get_children():
+			if String(n.name).begins_with("Horizon_"): n.visible = false
+		await _frames("hub_bare")
+
+func _frames(part: String) -> void:
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0
