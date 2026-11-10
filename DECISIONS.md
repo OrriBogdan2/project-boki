@@ -1,0 +1,5 @@
+- 2026-11-10 (owner, ~7:40 PM EST): **Garden-first home ("approachable to a Chao Garden player").** Home is about RAISING your Boki, not building/farming:
+  - Core loop at home: pet, feed, play, give it things that change it (looks/stats/abilities), train it at home. Original systems and names only; Chao Garden is a feel reference, no IP.
+  - No resource collection in the tutorial or at the start. The farm tutorial no longer teaches axe/chop/mine/house/hammer/jobs/sell; it teaches meet, pet, feed, play, give an item, train, head out.
+  - Building and farming UNLOCK LATER (after a few matches, default 3). Before that they are optional: the player can still farm if they want, but nothing requires it.
+  - This supersedes the "Farm tutorial (can't be skipped)" steps under Farm and onboarding. The Hob/builder stays for later.
