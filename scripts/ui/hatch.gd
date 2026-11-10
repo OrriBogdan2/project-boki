@@ -749,14 +749,18 @@ func _mask_moment(then: Callable) -> void:
 	stage = "mask"
 	_clear_bottom()
 	top_box.visible = false
-	var holder := CenterContainer.new()
+	var holder := ColorRect.new()      # (the island dimmed behind the cards)
+	holder.color = Color(0.02, 0.01, 0.05, 0.55)
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var centre := CenterContainer.new()
+	centre.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	holder.add_child(centre)
 	var picked := func(id: String):
 		holder.queue_free()
 		_put_on_first(id, then)
 	var offer := HobOffer.new(ClassUnlock.starters(), FarmBuilder.rules()["talk"], "starter_title",
 			func(id): return ClassUnlock.choose_starters([id]), picked)
-	holder.add_child(offer.build())
+	centre.add_child(offer.build())
 	ui.add_child(holder)
 
 func _put_on_first(first: String, then: Callable) -> void:

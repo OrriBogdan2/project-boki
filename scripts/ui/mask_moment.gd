@@ -189,8 +189,10 @@ func _process(dt: float) -> void:
 	cam.look_at(_look)
 	var dim := lerpf(1.0, DIM, clampf(_t / 1.5, 0.0, 1.0))
 	for pair in _lights:
+		if not is_instance_valid(pair[0]):      # (the island may free its lights before the beat ends)
+			continue
 		var light := pair[0] as Light3D
-		if is_instance_valid(light) and not light.get_parent() is MaskRelic:
+		if not light.get_parent() is MaskRelic:
 			light.light_energy = float(pair[1]) * dim
 	if _env:
 		_env.ambient_light_energy = _env_energy.x * dim
