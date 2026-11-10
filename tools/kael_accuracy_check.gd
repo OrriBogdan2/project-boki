@@ -18,6 +18,7 @@ func run(a) -> void:
 	await short_dash()
 	await slam_combo()
 	await pull_waits()
+	await rmb_steer()
 
 func _rig() -> Dictionary:
 	var r := A.setup("juggernaut", 6.0)
@@ -381,4 +382,41 @@ func pull_waits() -> void:
 	m.step(A.DT)
 	A.ok("jug E in the Slam's wind-up: the Slam lands where it was, then the pull goes", kept and W.pulling(),
 			"kept %s %s" % [kept, W.state])
+	await A.done(m)
+
+# ------------------------------------------------------------------ RMB held: the aim stays his
+## Holds RMB aimed north, turns the cursor east mid-hold and lets go: he faces east and the Lunge goes east,
+## free and with the Warchain hooked to a foe in the north (only a hold aimed down the chain is a Chain Lunge).
+func rmb_steer() -> void:
+	var g := _rig()
+	var m: Match = g["m"]
+	var P: Hunter = g["P"]
+	var K: JuggernautKit = g["K"]
+	var T: Hunter = g["T"]
+	var home: Vector3 = g["home"]
+	var held := func(): P.inp["sec_hold"] = true
+	for hooked in [false, true]:
+		_fresh(m, P, K, home)
+		T.teleport(home + Vector3(0, 0, -6.0))
+		A.fresh(T)
+		A.aim_at(P, T.pos)
+		if hooked:
+			K.use_e()
+			A.step(m, 0.3)
+		var on_chain := K.warchain.hooked()
+		var lunges := K.chain_lunges
+		held.call()
+		K.press_rmb()
+		A.step(m, 0.4, held)
+		A.aim_at(P, home + Vector3(8.0, 0, 0))
+		A.step(m, 0.55, held)
+		var facing := Vector2(-sin(P.face), -cos(P.face))
+		P.inp["sec_hold"] = false
+		m.step(A.DT)
+		var dir: Vector2 = K.lunge.get("dir", Vector2.ZERO)
+		A.ok("jug rmb steer (%s): re-aimed east mid-hold, he faces east and the Lunge goes east" % (
+				"chain hooked north" if hooked else "free"),
+				on_chain == hooked and facing.dot(Vector2(1, 0)) > 0.97 and dir.dot(Vector2(1, 0)) > 0.97
+				and K.chain_lunges == lunges,
+				"hooked %s facing %s lunge %s chain lunges %d" % [on_chain, facing, dir, K.chain_lunges - lunges])
 	await A.done(m)
