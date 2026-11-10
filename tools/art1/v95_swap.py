@@ -74,8 +74,9 @@ def import_game(path):
     return next(o for o in new if o.type == "ARMATURE"), max(meshes, key=lambda o: len(o.data.vertices))
 
 
-def kept_parts(old, bones):
-    """A copy of the old mesh's faces whose vertices ride mostly `bones`, unparented, its UVs as layer "old"."""
+def kept_parts(old, bones, slots):
+    """A copy of the old mesh's faces whose vertices ride mostly `bones` (and, given `slots`, whose material is one of those
+    slots: Claire's spear without the glove on the same hand bone), unparented, its UVs as layer "old"."""
     ob = old.copy()
     ob.data = old.data.copy()
     ob.name = "Kept"
@@ -90,6 +91,9 @@ def kept_parts(old, bones):
     bm.from_mesh(ob.data)
     bm.verts.ensure_lookup_table()
     bmesh.ops.delete(bm, geom=[bm.verts[i] for i in drop], context="VERTS")
+    if slots:
+        mats = ob.data.materials
+        bmesh.ops.delete(bm, geom=[f for f in bm.faces if mats[f.material_index].name.split("-")[0] not in slots], context="FACES")
     bm.to_mesh(ob.data)
     bm.free()
     ob.data.uv_layers[0].name = "old"
@@ -164,7 +168,7 @@ def bake():
     BW.unwrap(low, hd, float(SPEC.get("head_uv", 2.0)), float(SPEC.get("uv_margin", 0.0008)), float(SPEC.get("uv_angle", 66.0)),
               int(SPEC.get("uv_smooth", 30)))
     arm, old = import_game(game)
-    kept = kept_parts(old, SPEC.get("keep", []))
+    kept = kept_parts(old, SPEC.get("keep", []), SPEC.get("keep_slots", []))
     d_low, _ = uv_density(low)
     d_kept, uv = uv_density(kept)
     kept.data.uv_layers["UVMap"].data.foreach_set("uv", (uv * np.sqrt(d_low * KEPT_DENSITY / max(d_kept, 1e-12))).ravel())
