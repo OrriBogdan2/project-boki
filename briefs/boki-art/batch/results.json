@@ -74028,5 +74028,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_forgebrock_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_forgebrock",
+    "name": "Forgebrock (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_forgebrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_forgebrock",
+    "name": "Forgebrock (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_forgebrock_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_forgebrock",
+    "name": "Forgebrock (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_forgebrock_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_forgebrock",
+    "name": "Forgebrock (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_furnacowary",
+    "name": "Furnacowary (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_furnacowary_3.jpg",
+    "ok": true
   }
 ]
