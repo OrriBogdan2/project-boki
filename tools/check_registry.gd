@@ -50,7 +50,6 @@ const CHECKS := {
 	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
 	"--music-combat-check": ["res://tools/music_combat_check.gd", "music_combat_check", null],
 	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
-	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],      # draw calls, tris, shadow lights, frame ms
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	"--far-ranges-check": ["res://tools/far_ranges_check.gd", "far_ranges_check", null],      # visibility ranges and far cliffs
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],  # draws, tris, shadows, ms
@@ -231,7 +230,6 @@ const CHECKS := {
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],      # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
-	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],      # 2 games, relay, docs/decisions/0018
 	"--remote-anim-check": ["res://tools/remote_anim_check.gd", "remote_anim_check", null],     # 2 games, relay
 	"--online-displace-check": ["res://tools/online_displace_check.gd", "online_displace_check", null],     # + a server, delay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],     # 2 games, laggy relay
