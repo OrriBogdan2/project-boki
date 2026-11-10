@@ -175,8 +175,8 @@ func _recall() -> void:
 	ok(k.state == "flying_home", "G tap with the Boki away calls it back (state %s)" % k.state)
 	var landed_d := [-1.0]
 	run_for(1.2, func():
-		if float(landed_d[0]) < 0.0 and k.state == "active": landed_d[0] = k.flat_dist(P))
-	ok(k.state == "active" and float(landed_d[0]) >= 0.0 and float(landed_d[0]) < 3.5, "it leaps back to your side, not onto the shoulder (state %s, %.1fm at landing)" % [k.state, float(landed_d[0])])
+		if float(landed_d[0]) < 0.0 and k.state == "wisp": landed_d[0] = k.flat_dist(P))
+	ok(k.state == "wisp" and float(landed_d[0]) >= 0.0 and float(landed_d[0]) < 3.5, "it leaps back and lands as a wisp on you (state %s, %.1fm at landing)" % [k.state, float(landed_d[0])])
 	ok(int(tags_seen.get("recall", 0)) >= 1 and (not is_instance_valid(mb) or mb.hp < hp0), "the leap home hit what was on its path (recall hits %d)" % int(tags_seen.get("recall", 0)))
 
 # ------------------------------------------------------------------ 3. Guard and Follow
@@ -235,6 +235,7 @@ func _downed() -> void:
 	ok(k.state == "downed" and k.flat_dist(P) < float(KinWisp.rules()["orbit_r"]) + 0.3, "it falls back to you as a wisp (%.2fm from you)" % k.flat_dist(P))
 	ok(KinWisp.is_wisp(k), "...a dim wisp")
 	ok(not KinCommand.cast_c(P), "no ability cast while down")
+	P.ult = 1.0
 	ok(not KinMerge.can_cast(P) and not KinMerge.boki_with_you(P) and KinMerge.plan(P) == "down", "no Merge with it while down")
 	ok(not k.ready_to_fight() and not P.kin_carry_on(), "it can't be summoned and lends no carry passives while down")
 	ok(BokiHud.squad_downed(m).has(k), "it is marked for your squad (HUD / minimap / full map)")
@@ -359,7 +360,7 @@ func _surge() -> void:
 	P.ult = 1.0
 	ok(KinMerge.plan(P) == "down", "with the Boki down, R does nothing but say so (plan '%s')" % KinMerge.plan(P))
 	ok(not KinMerge.press(P) and not KinMerge.active(P) and P.ult >= 1.0, "...the full meter is kept (%.2f)" % P.ult)
-	ok(KinMerge.deny_text(P).begins_with("Rescue "), "...and says what to do ('%s')" % KinMerge.deny_text(P))
+	ok(KinMerge.deny_text(P).contains("dim wisp"), "...and says what to do ('%s')" % KinMerge.deny_text(P))
 	run_for(2.0)
 	ok(P.ult >= 1.0 and k.state == "downed", "the meter stays full while it is down")
 	# no Boki with you at all (benched): the weak surge

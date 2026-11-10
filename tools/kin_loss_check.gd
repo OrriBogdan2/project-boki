@@ -348,6 +348,8 @@ func _review2() -> void:
 		"B1. an early guard event waits for the copy"
 	)
 	# M2: a copy that stands up again can be scanned again
+	var pk := m.give_kin(owner_h, real)
+	pk.remote = true
 	pk.net_t = m.time
 	var it: Array = m._ser(pk)
 	it[13] = 0.0
