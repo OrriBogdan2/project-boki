@@ -81973,5 +81973,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2c_kitlet_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_galleotter",
+    "name": "Galleotter (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_galleotter_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kitlet",
+    "name": "Kitlet (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_kitlet_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_galleotter",
+    "name": "Galleotter (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_galleotter_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_parasolth",
+    "name": "Parasolth (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_parasolth_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kitlet",
+    "name": "Kitlet (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_oarter",
+    "name": "Oarter (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_oarter_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_galleotter",
+    "name": "Galleotter (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_galleotter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_dragonkite",
+    "name": "Dragonkite (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_dragonkite_2.jpg",
+    "ok": true
   }
 ]
