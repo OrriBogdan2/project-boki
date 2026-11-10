@@ -21,7 +21,6 @@ const STAND_OPEN := {
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
-	"dolm:stance": "0.8 s long (a bounce, not a stance)",
 }
 
 var bad := 0
