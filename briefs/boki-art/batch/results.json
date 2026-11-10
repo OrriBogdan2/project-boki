@@ -96582,5 +96582,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/rv_furnacowary_b_1.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_dynaboa_a",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_dynaboa_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_starcap_b",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_starcap_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_medushroom_b",
+    "name": "Medushroom (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_medushroom_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_medushroom_a",
+    "name": "Medushroom (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_medushroom_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_dynaboa_b",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_dynaboa_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_starcap_c",
+    "name": "Starcap (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_starcap_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_furnacowary_c",
+    "name": "Furnacowary (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_furnacowary_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_dynaboa_c",
+    "name": "Dynaboa (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_dynaboa_c_1.jpg",
+    "ok": true
   }
 ]
