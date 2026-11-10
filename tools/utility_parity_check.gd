@@ -284,6 +284,14 @@ func _lamp_sickness(m: Match, P: Hunter, ally: Hunter) -> void:
 	ally.hp = 10.0
 	ally.heal(40.0)
 	ok(absf(ally.hp - 40.0) < 0.5, "...which cuts healing by a quarter (10 + 40 gives %.0f)" % ally.hp)
+	ok(HudPlate.statuses(ally).any(func(x): return x[0] == "heart" and float(x[3]) > 0.0),
+			"...shown on the plate and the squad row as a status with its seconds left")
+	var row: Array = ["lv", 3, "sk", snappedf(ally.sick_t, 0.1)]
+	ally.sick_t = 0.0
+	HunterNet.apply(ally, row)
+	ok(absf(ally.sick_t - float(row[3])) < 0.01 and ally.lvl == 3, "...and rides the hunter snapshot")
+	_steps(m, 12.0)
+	ok(ally.sick_t <= 0.0 and HudPlate.statuses(ally).is_empty(), "...gone after the 12 s")
 	ally.team = team
 
 func _tonic(m: Match, P: Hunter) -> void:

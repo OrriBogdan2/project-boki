@@ -153,7 +153,8 @@ The rest of the Nov 9 list, each number in the item's JSON `src` field (source n
 - Toss Satchel: a body in the air within 4 m above the pack is thrown up (14 m/s) and the pack is used up.
 - Thorn Wall: you are rooted 2 s and the wall rises when the root ends.
 - Revive sickness: 12 s after any beacon revive (Hearth Lamp included) now cuts healing by a quarter as
-  well as damage (`sickness_heal` in Life).
+  well as damage (`sickness_heal` in Life). It is a status on the plate and the squad row (heart icon, seconds
+  left) and rides the hunter snapshot (`sk` pair in HunterNet, Net.VERSION 0.26.1).
 - Tonic: lifts anti-heal (blight) before its heal, so the heal is whole.
 - Bounty Banner: each knock the squad makes takes 15 s off the timer (the source gives no number; assists
   and kills count only through the knock).
