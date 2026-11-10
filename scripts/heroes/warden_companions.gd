@@ -16,6 +16,7 @@ extends RefCounted
 ##     right), "bob_period", "bob_phase", "bone": the bone it was skinned to, "anchors": [empties that ride it]}]
 ## Cosmetic only; nothing here touches a kit (the FX empties on the sun follow it, so a shot leaves the sun).
 
+const PREFIX := "Companion_"   # node name of each cut-out part
 const SNAP := 1.5      # m: a centre further than this from where it should be (a respawn) jumps there
 
 static var _cut := {}        # mesh -> {body mesh, parts: {id: [mesh, rest centre]}}: one cut per .glb
@@ -74,7 +75,7 @@ static func detach(glb: Node3D, sk: Skeleton3D, data: Dictionary) -> WardenCompa
 		var at: Array = p["at"]
 		part.rest = Vector3(at[0], at[1], at[2])
 		part.node = MeshInstance3D.new()
-		part.node.name = "Companion_" + part.id
+		part.node.name = PREFIX + part.id
 		part.node.mesh = pc[0]
 		part.node.position = part.rest
 		part.node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON

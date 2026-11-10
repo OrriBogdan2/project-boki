@@ -212,7 +212,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.add_child(glb)
 	var sync := Sync.new()
 	sync.name = "Sync"
-	sync.companions = WardenCompanions.detach(glb, skel, WardenClips.data(art(arch)))     # (before the toon pass and the moods)
+	# (before the toon pass and the moods)
+	sync.companions = WardenCompanions.detach(glb, skel, WardenClips.data(art(arch)))
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))

@@ -21,7 +21,8 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	holder = Node3D.new()
 	main.add_child(holder)
-	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "", PlayerLook.neutral(), "tender")
+	var m := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
+		PlayerLook.neutral(), "tender")
 	holder.add_child(m)
 	var sync := m.get_node_or_null("Warden/Sync")
 	ok(sync != null and sync.get("companions") != null, "Meeko's model has floating companions")
@@ -60,7 +61,8 @@ func _cut(m: Node3D, wc: WardenCompanions) -> void:
 	ok(left.is_empty(), "no companion surface is left in the skinned body (%s)" % str(left))
 	for p in wc.parts:
 		var part := p as WardenCompanions.Part
-		ok(part.node != null and part.node.skin == null and part.node.get_parent() == wc.skel and part.node.mesh.get_surface_count() >= 2,
+		ok(part.node != null and part.node.skin == null and part.node.get_parent() == wc.skel
+				and part.node.mesh.get_surface_count() >= 2,
 				"%s is an unskinned mesh of its own, not on a shoulder bone" % part.id)
 		var face := false
 		for si in part.node.mesh.get_surface_count():
@@ -114,7 +116,8 @@ func _orbit(m: Node3D, sync: Node, wc: WardenCompanions, cfg: Dictionary) -> voi
 				first.append(ang)
 			last = ang
 			ys[k].append(q.y)
-	ok(worst_fit < 0.12, "each sits on the circle (ellipse %.2f x %.2f m) within %.0f%%" % [r[0], r[1], worst_fit * 100.0])
+	ok(worst_fit < 0.12, "each sits on the circle (ellipse %.2f x %.2f m) within %.0f%%"
+			% [r[0], r[1], worst_fit * 100.0])
 	var want := TAU * 2.0 * float(cfg.get("dir", 1))
 	ok(absf(turned[0] - want) < 0.5 and absf(turned[1] - want) < 0.5,
 			"both go twice round in two periods (%.1f and %.1f rad, want %.1f)" % [turned[0], turned[1], want])
@@ -134,13 +137,15 @@ func _orbit(m: Node3D, sync: Node, wc: WardenCompanions, cfg: Dictionary) -> voi
 	ok(lo > 0.05 and hi < 0.11, "a little vertical bob, %.3f to %.3f m each way (0.05 to 0.11)" % [lo, hi])
 	ok(float(cfg["bob"]) <= 0.1 and float(cfg["bob"]) >= 0.06, "data bob %.2f m is in 0.06 to 0.1" % float(cfg["bob"]))
 	ok(wc.parts[0].bob_period != wc.parts[1].bob_period and absf(wc.parts[0].bob_period - float(cfg["period"])) > 0.3,
-			"the bob runs at its own frequencies (%.1f s and %.1f s) not the turn's" % [wc.parts[0].bob_period, wc.parts[1].bob_period])
+			"the bob runs at its own frequencies (%.1f s and %.1f s) not the turn's"
+			% [wc.parts[0].bob_period, wc.parts[1].bob_period])
 	var smin := 99.0
 	var smax := -99.0
 	for s in speeds[0]:
 		smin = minf(smin, absf(s))
 		smax = maxf(smax, absf(s))
-	ok(smax / maxf(smin, 0.001) > 1.1, "the turn's speed breathes (%.2f to %.2f rad/s), not a constant spin" % [smin, smax])
+	ok(smax / maxf(smin, 0.001) > 1.1,
+			"the turn's speed breathes (%.2f to %.2f rad/s), not a constant spin" % [smin, smax])
 	ok(absf(cx) < 0.1, "the circle is centred on her (mean x %.3f m)" % cx)
 	await m.get_tree().process_frame
 
@@ -184,7 +189,8 @@ func _clearance(m: Node3D, wc: WardenCompanions, cfg: Dictionary) -> void:
 					if d < worst:
 						worst = d
 						who = part.id
-	ok(worst >= floor_gap, "the companions stay %.3f m (needs %.3f) clear of her body, head and wings round the whole circle (%s closest)" % [worst, floor_gap, who])
+	ok(worst >= floor_gap, ("the companions stay %.3f m (needs %.3f) clear of her body, head and wings"
+			+ " round the whole circle (%s closest)") % [worst, floor_gap, who])
 
 func _put(p: Vector3) -> void:
 	var k := Vector3i(floori(p.x / CELL), floori(p.y / CELL), floori(p.z / CELL))
@@ -224,11 +230,14 @@ func _trail(m: Node3D, sync: Node, wc: WardenCompanions, cfg: Dictionary) -> voi
 			worst = gap.length()
 			side = gap.x
 	ok(side > 0.0 and worst > 0.03, "running at 5 m/s the circle trails behind her (%.2f m)" % worst)
-	ok(worst <= float(cfg["trail_max"]) * sc * 1.05, "and never further behind than its limit (%.2f of %.2f m)" % [worst, float(cfg["trail_max"]) * sc])
+	var lim := float(cfg["trail_max"]) * sc
+	ok(worst <= lim * 1.05, "and never further behind than its limit (%.2f of %.2f m)" % [worst, lim])
 	var lag_now := _lag(m, wc)
 	for i in 90:
 		sync.call("_process", DT)
-	ok(_lag(m, wc) < 0.05 and _lag(m, wc) < lag_now, "standing again it catches up (%.3f m behind, from %.3f)" % [_lag(m, wc), lag_now])
+	var lag_end := _lag(m, wc)
+	ok(lag_end < 0.05 and lag_end < lag_now, "standing again it catches up (%.3f m behind, from %.3f)"
+			% [lag_end, lag_now])
 	ok(base != wc.centre, "the centre moved with her")
 	await m.get_tree().process_frame
 

@@ -3,7 +3,7 @@
 	"skinned_weapon": true,
 	"companions": {
 		"doc": "Meeko's sun and raincloud float round her on a mostly horizontal circle (scripts/heroes/warden_companions.gd): cut out of the body mesh at load, each on its own pivot instead of a shoulder bone. Metres, seconds, degrees; 'at' is the circle's centre in skeleton space, radius [side, front-back], phase 0 = her right.",
-		"bone": "hips", "at": [0.0, 1.0, 0.3], "radius": [0.7, 0.95], "period": 4.0, "dir": 1,
+		"bone": "hips", "at": [0.0, 1.0, 0.2], "radius": [1.05, 1.0], "period": 4.0, "dir": 1,
 		"wobble": [0.25, 5.3], "bob": 0.07, "lag": 7.0, "trail_max": 0.25, "face": "forward",
 		"sway_deg": 8.0, "lean_deg": 5.0, "clear_min": 0.01,
 		"list": [

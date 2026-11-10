@@ -23,7 +23,8 @@ func run(main: Node) -> void:
 	main.get_viewport().size = Vector2i(frame_px, frame_px)
 	DirAccess.make_dir_recursive_absolute(out)
 	_stage(main)
-	var model := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "", PlayerLook.neutral(), "tender")
+	var model := Models.hunter(Arch.weight("tender"), Data.TEAM_COLORS[0], Arch.signature("tender"), "",
+		PlayerLook.neutral(), "tender")
 	model.set_meta("anim_seed", 1)
 	holder.add_child(model)
 	model.rotation.y = deg_to_rad(yaw)
@@ -35,7 +36,10 @@ func run(main: Node) -> void:
 	var sync := model.get_node("Warden/Sync")
 	sync.set_process(false)
 	cam.fov = 30.0
-	var views := {"front": [Vector3(0, 1.9, 4.6), Vector3(0, 1.05, 0)], "above": [Vector3(0, 4.0, 3.2), Vector3(0, 1.0, 0)]}
+	var views := {
+		"front": [Vector3(0, 1.9, 4.6), Vector3(0, 1.05, 0)],
+		"above": [Vector3(0, 4.0, 3.2), Vector3(0, 1.0, 0)],
+	}
 	for view in views:
 		cam.position = views[view][0]
 		cam.look_at(views[view][1])
