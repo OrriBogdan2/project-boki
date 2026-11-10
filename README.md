@@ -136,7 +136,7 @@ Boki (the Boki grammar, `content/*_v2`, see `docs/KIN_GRAMMAR.md`), abilities, w
 ## Project layout
 
 ```
-content/         kin (kin_v2, abilities_v2, merges_v2, evolution_v2), abilities, weapons, classes, combos, rules (JSON, no code needed)
+content/         kin (kin_v2, abilities_v2, merges_v2, evolution_v2), hunter_abilities, weapons, classes, combos, rules (JSON, no code needed)
 scripts/combat/  the combat systems: CombatBus signals, AbilityRunner, Effects, KinTactics (kin AI), Bond, Combos, Ultimate, Fields
 scripts/core/    data.gd (all tuning), save.gd, game.gd, ransom.gd, sfx.gd, bridge.gd, net.gd, social.gd, evo.gd
 scripts/match/   match.gd, world.gd, hunter.gd, kin.gd, mob.gd, bot.gd, fx.gd, cam.gd, models.gd
