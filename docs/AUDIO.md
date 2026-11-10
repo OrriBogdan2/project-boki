@@ -45,3 +45,9 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## Where the ears are
+- Positional sounds (the SFX pool and keyed loops) are `AudioStreamPlayer3D`s that only pan: the distance curve stays ours (`Sfx._distance_db`), attenuation is off. UI sounds (no position) sit on the listener, centred.
+- The `AudioListener3D` (`Sfx.ears`) is on the followed Hunter (the watched teammate in spectate, you in the farm and interiors), turned with the camera's yaw, as top-down games do: a shot left of the Hunter on screen pans left. `CamRig.follow` sets it each frame (`Sfx.set_ears`), not the cursor-led camera focus.
+- `Sfx.hear_range` is 32 m: a fight 25 m off screen is about -16 dB (on screen at 10 m: -7 dB), through the muffled bus past 9 m.
+- `--listener-check` asserts the placement, the pan sign at several camera yaws and in spectate, and the curve.
