@@ -42,7 +42,7 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if WardenClips.data(art_name).is_empty():
+		if not WardenClips.data(art_name).has("loco"):      # (no clips yet, as Gil: the rig's poses drive it)
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
