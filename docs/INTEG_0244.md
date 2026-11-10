@@ -47,3 +47,26 @@ It ran on ec7bccf3b + gil-hunter-art, which is this branch before the 070137 job
 The 070137 job's READY line lists the other open reds it measured on this head: title 10, wallmove 3, capture 2, warden-glb 2, boki-wisp 1, and move-feel ledge and felt-dash rows.
 
 An alternative version of this job's work is on ext/release-integ-0244-a4alt (997038187). It has a different bot take-off fix (turn for the landing before jumping) and dredge check timing helpers. It is kept for reference only; this head's dredge-hook2 and glide fixes cover the same reds.
+
+## Release fix (ext/release-integ-0244-fix)
+
+The coordinator's gate against main d255acbee found these reds on 2e277c342. Each one was traced to the commit that brought it in.
+
+| Check | Before | After | Commit and cause | What was done |
+|---|---|---|---|---|
+| dredge-combo | 1 | 0 | grimble-v95's `v95_swap.py` re-export dropped the last frame of `dr_blast` (2.07 s vs the kit's 2.10 s Brass Broadside). A regression. | 466f2d6ec: clip padded to 2.1 s; the script fixes the frame range before export |
+| title | 12 + rc 124 | 8, rc 0 (main 10) | 666ba8d8f (ext/tg-text) renamed the Arena to Training Grounds; the check still wanted "Arena". The stalled run was the same. | 66a8912fe: the check wants "Training Grounds". The 8 left are the xvfb baseline main has too |
+| warden-glb | 2 | 0 (main 1) | Pip's companions draw from the mood atlas (`WardenMood.ATLAS_SHADER`, 66402808c, on main); reading its absent `use_tex` was a script error on main, and 7bcbcf5d7 made it a reported fail. A gap exposed, not a regression. | b6de0681a: skipped like the glass `FACE_SHADER` (neither is a toon surface) |
+| move-feel ledge (5 rows) | 5 | 0 | fbf2e50d0 (lace-phasewalk-verify): a Spirit-Walking hunter climbs a ledge face grounded, with no mantle. The felt-dash rows dash as Lace first, and nothing counted `Hunter.spirit_t` down after a reclass. A real bug: a Training Grounds swap mid Phase Walk left the next hunter ghosting terrain for good. | Lace's kit ends the walk in `teardown()` |
+| wallmove | 3 | 1 | The per-Hunter rows are new with wallkick-all (bee700ed6, merged at bd9462672; main runs only the old wallmove check). The harness let one case's Spirit Walk run into the next, and `_at_wall()` counted a ghost inside the wall, or a thief standing on its top, as at the wall. | b6de0681a: each case starts with no Spirit Walk; through or over the wall is not at it |
+| move-feel felt dash (4 rows) | 4 | 4 | The rows are new at 61fafbe3f (feel-dash-scale-source). That branch came off main without dash-curve, glide-fixes or sparkle-dash. | Known gaps, below |
+
+Known gaps (none of them a regression: main has no such rows, and changing the rows or the kits would need an owner call):
+
+- **wallmove, rimewright `bounce:sig@0.45/0.80`.** Her E is the Rink Wall (74447a97b, on main). It erupts and slides along her aim, and the harness aims at the test wall. She meets her own ice wall side-on (normal (0,-1), into-speed below the bounce minimum), so she never reaches the test wall at an angle. Possible fix: aim the bounce cases along the wall, or add the case to `COMMITS` with this reason. Neither was done here, since both loosen the case.
+- **felt dash, archer ground 0.400 s vs 0.27 s.** The source footage says 0.27 s. tuning.json `dash_speed {archer: 0.7}` is the owner's "slower, lower dash" (item 9, 6503f4fa8): 0.27 / 0.7 = 0.386 s, plus one step. The owner call and the footage row disagree.
+- **felt dash, thief air 5.19 m / 0.217 s vs 8.4 m / 0.95 s.** Item 183 (glide-fixes, bdb7703bd) made her air cartwheel the ground one, ending where she lands. The kit retires the sheet's 8.4 m air cartwheel because it "flew far past the cast". The row predates that call.
+- **felt dash, mage ground 5.29 m / 0.167 s vs 7.5 m / 0.216 s.** The row's 7.5 m is the item 70 lane. The owner's 11-10 playtest (754d177a0, sparkle-dash) cut the lane to 5.6–9.75 m. Even with the row moved to 5.6 m, the streak measures 5.5% short (the run lands on its ring). That needs the owner to pick the number.
+- **felt dash, dredge air 3.99 m vs 3.672 m.** `_air_barge` (unchanged from main) gives a 0.184 s roll at a flat speed. Hunter `_physics` runs the last partial step at full speed in the air (only a ground dash hands over through `HunterMove.dash_exit`), so 12 steps × 19.96 m/s / 60 = 3.99 m. Every air dash shares this, so a fix belongs in the movement code, not in a release fix.
+
+Re-run on this head (xvfb, `LP_NUM_THREADS=2`): wallmove 1, move-feel 4, warden-glb 0, title 8 (rc 0), dredge-combo 0, capture 0, boki-wisp 0, archer-combo 0 (Lace's kit changed). `tools/health.py --strict` OK.
