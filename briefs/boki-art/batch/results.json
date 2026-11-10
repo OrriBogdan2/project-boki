@@ -90870,5 +90870,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/pose_prowyak_3.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_latchling",
+    "name": "Latchling (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_latchling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_rampartoad",
+    "name": "Rampartoad (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_rampartoad_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_fawngus",
+    "name": "Fawngus (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_fawngus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_bastling",
+    "name": "Bastling (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_bastling_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_fawngus",
+    "name": "Fawngus (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_fawngus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_prowyak",
+    "name": "Prowyak (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_furnacowary",
+    "name": "Furnacowary (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose_furnacowary_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_furnacowary",
+    "name": "Furnacowary (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_furnacowary_2.jpg",
+    "ok": true
   }
 ]
