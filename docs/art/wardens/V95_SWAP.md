@@ -17,7 +17,9 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    onto one bone, minus leg capsules and boxes; a later region wins), `detach` (bone pairs cut apart and capped:
    parts the scan fused that the clips swing apart), `slots` (toon slots by the paint's hue/sat/value, a bone or
    a box; first match wins), `room` (ink room per bone), `anchors` (moved through the same fit), `keep` (bones
-   whose old parts stay, with their old paint: Grimble's junk ball) and `move_bones` (such a bone's rest moved,
+   whose old parts stay, with their old paint: Grimble's junk ball), `keep_mats` (old faces kept by material: Kael's
+   skinned sword), `anchor_bones` (`{anchor: bone}` puts a moved anchor on another bone: Kael's arm blooms onto the
+   master's cursed left arm) and `move_bones` (such a bone's rest moved,
    its clips' translation keys corrected so they end where they did). The budget: `tris` + the kept parts +
    skin_relax's caps <= 15k (RIG_CONTRACT.md).
 3. **Swap**: `blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB`. The first run
