@@ -963,3 +963,10 @@ for _k,_pose in (('a',"curled into its ring shape and seen from the SIDE, lying 
     _n0=len(SPECS); V2PORT_NEW('Terrasloth','briefs/boki-art/cards/Terrasloth.jpg','mid','cute',_GC,_GN,False,False,_pose)
     SPECS[_n0]['id']='v2p_terrasloth_side_'+_k; SPECS[_n0]['runs']=2
     SPECS[_n0]['prompt']=SPECS[_n0]['prompt'].replace("with about 8 percent empty margin on every side","small in the frame, with about 20 percent empty margin on every side")
+
+# 05:45 ET 11-10 OWNER: "Canvastross should borrow his face look from his T1 evo" (Kerchick: grumpy half-lidded eyes, big hooked orange beak, wispy head tuft).
+for _n,_who in (('Canvastross',"the final form"),('Jibbatross',"the middle form")):
+    SPECS.append({'id':'face_'+_n.lower(),'name':_n+' (Kerchick\'s face)','refs':['briefs/boki-art/cards/'+_n+'.jpg','briefs/boki-art/cards/Kerchick.jpg'],'runs':4 if _n=='Canvastross' else 3,'aspect':'1:1','size':'2K',
+      'prompt':("Redraw the bird in image 1 exactly as it is: the same body, wings, pose, view, colours, markings, line and flat shading. Change only its FACE, so it is clearly "+_who+" of the chick in image 2: "
+        "give it that chick's face grown up: the same grumpy, unimpressed half-lidded eyes with heavy upper lids, the same big hooked orange-yellow beak, and the same wispy windswept white tuft on its head. "
+        "Its head keeps the size and angle it has in image 1. Nothing else changes. One bird only. "+FRAME_V2)})
