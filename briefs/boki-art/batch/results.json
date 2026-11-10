@@ -97590,5 +97590,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/leg_volcano_c_2.jpg",
     "ok": true
+  },
+  {
+    "id": "leg_hourowl_c",
+    "name": "Legendary concept: hourowl c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_hourowl_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_volcano_b",
+    "name": "Legendary concept: volcano b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_volcano_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_hourowl_c",
+    "name": "Legendary concept: hourowl c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_hourowl_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_volcano_b",
+    "name": "Legendary concept: volcano b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_volcano_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_volcano_c",
+    "name": "Legendary concept: volcano c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_volcano_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_volcano_a",
+    "name": "Legendary concept: volcano a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_volcano_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_volcano_a",
+    "name": "Legendary concept: volcano a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/leg_volcano_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "leg_comet_b",
+    "name": "Legendary concept: comet b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/leg_comet_b_2.jpg",
+    "ok": true
   }
 ]
