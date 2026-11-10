@@ -4,14 +4,14 @@ extends RefCounted
 ## colours (its shiny colours when it shimmers), with one or two silhouette features from its model data
 ## (ears, horns, fins, a tail tip), a quick bouncy idle and a sparkle trail. Round = Hunter (WispLook),
 ## critter = Boki. Only the look: build() makes the node and pose() bounces it; who carries it and when is
-## the wisp prototype's job. Every wisp is one mesh on one shared material plus TRAIL_AMOUNT sparkles.
+## the wisp prototype's job. Every wisp is one mesh on one shared material plus TRAIL_AMOUNT sparkles. The
+## sparkles' motion and colour are the wearer's BokiWispCosmetics; the body never changes with them.
 
 const SHADER := preload("res://shaders/boki_wisp.gdshader")
 const DOT_SHADER := preload("res://shaders/fx_dot.gdshader")      # the soft round dots Fx bursts use
 const BODY_RADIUS := 0.15     # m; the head-and-body blob, about a third of a Boki's height
 const EYE_COL := Color("1c1a26")
 const TRAIL_AMOUNT := 24      # sparkles alive per wisp: ten wisps stay under 300
-const TRAIL_LIFE := 0.6       # s a sparkle lives
 const TRAIL_LIGHTEN := 0.35   # sparkles are the glow colour lifted, so dark glows still twinkle
 const HOP_HZ := 2.2           # hops per second: quick, never the slow bob of a Hunter Wisp
 const HOP_HEIGHT := 0.1       # m at the top of a hop
@@ -110,8 +110,9 @@ static var _dot_mat: ShaderMaterial
 static var _unit_arrays := {}
 
 ## The wisp of a species: a node with "Body" (the critter mesh) and "Trail" (its sparkles). rec is the
-## Boki's save record ({} for a plain one); "shimmer" gives the shiny colours.
-static func build(species: String, rec := {}) -> Node3D:
+## Boki's save record ({} for a plain one); "shimmer" gives the shiny colours. worn is BokiWispCosmetics.worn
+## ({} for the defaults).
+static func build(species: String, rec := {}, worn := {}) -> Node3D:
 	var cols := {
 		"body": Shiny.col(species, rec, "color"),
 		"belly": Shiny.col(species, rec, "belly"),
@@ -129,7 +130,9 @@ static func build(species: String, rec := {}) -> Node3D:
 	body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	body.set_instance_shader_parameter("rim_col", cols["glow"])
 	root.add_child(body)
-	root.add_child(_trail((cols["glow"] as Color).lightened(TRAIL_LIGHTEN)))
+	if worn.is_empty():
+		worn = BokiWispCosmetics.worn(null)
+	root.add_child(_trail(BokiWispCosmetics.sparkle_colour(worn, cols["glow"], TRAIL_LIGHTEN), worn["trail"]))
 	root.set_meta("phase", randf())
 	return root
 
@@ -222,21 +225,21 @@ static func _unit(shape: String) -> Array:
 	return _unit_arrays[shape]
 
 ## Sparkles shed where the wisp has been (world space), twinkling out.
-static func _trail(col: Color) -> CPUParticles3D:
+static func _trail(col: Color, style: Dictionary) -> CPUParticles3D:
 	var p := CPUParticles3D.new()
 	p.name = "Trail"
 	p.amount = TRAIL_AMOUNT
-	p.lifetime = TRAIL_LIFE
+	p.lifetime = style["life"]
 	p.local_coords = false
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 	p.emission_sphere_radius = BODY_RADIUS * 0.5
 	p.direction = Vector3.UP
 	p.spread = 180.0
 	p.initial_velocity_min = 0.0
-	p.initial_velocity_max = 0.12
-	p.gravity = Vector3(0, -0.25, 0)
-	p.scale_amount_min = 0.025
-	p.scale_amount_max = 0.055
+	p.initial_velocity_max = style["speed"]
+	p.gravity = Vector3(style["gravity"][0], style["gravity"][1], style["gravity"][2])
+	p.scale_amount_min = style["size"][0]
+	p.scale_amount_max = style["size"][1]
 	p.color = col
 	p.color_ramp = _twinkle()
 	var quad := QuadMesh.new()

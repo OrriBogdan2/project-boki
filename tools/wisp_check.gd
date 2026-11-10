@@ -206,7 +206,8 @@ func _boki_wisps() -> void:
 	k.render(DT, 1.0)
 	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
 	var high := k.global_position.y - p.position.y
-	var orbit: bool = absf(flat - KinWisp.ORBIT_R) < 0.05 and high > 1.0 and high < 2.0
+	var radius: float = BokiWispCosmetics.worn(p)["orbit"]["radius"]
+	var orbit: bool = absf(flat - radius) < 0.05 and high > 1.0 and high < 2.0
 	ok(orbit, "...orbiting at shoulder height (%.2f m out, %.2f m up)" % [flat, high])
 	var other: Kin = owned.filter(func(x: Kin): return x != k)[0]
 	var snap := KinNet.kin_extra(k)

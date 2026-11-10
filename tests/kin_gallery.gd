@@ -3,7 +3,8 @@ extends Node3D
 ## tests/kin_gallery.tscn and press F6 to look at them (or to check a new kin you added in content/kin),
 ## or start the game with -- --kin-gallery (how GPU jobs run it).
 ## --kin-wisps: the Model Room's Boki wisps (BokiWispLook), each bouncing over its Boki, for the
-## WISP_ROOM species; add --kin-shiny for their shiny colours. Use with --shot / --frames.
+## WISP_ROOM species; add --kin-shiny for their shiny colours, --kin-cosmetics to give each a different
+## trail and sparkle colour (BokiWispCosmetics). Use with --shot / --frames.
 
 ## The starters, the mystery egg's Ermink, and six more with a spread of ears, horns, crests and tails.
 const WISP_ROOM := ["cindle", "puddlet", "burrlet", "ermink", "zapple", "wisplet", "pebbit", "kestrike",
@@ -58,7 +59,7 @@ func _ready() -> void:
 		l.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		add_child(l)
 		if show_wisps:
-			_add_wisp(String(ids[i]), rec, k)
+			_add_wisp(String(ids[i]), rec, k, i)
 	_camera(close, ids.size() if show_wisps else 0)
 	set_process(show_wisps)
 
@@ -94,8 +95,13 @@ func _stage() -> void:
 	ground.material_override = Models.toon(Color("5f8d45"), false)
 	add_child(ground)
 
-func _add_wisp(species: String, rec: Dictionary, kin: Node3D) -> void:
-	var w := BokiWispLook.build(species, rec)
+func _add_wisp(species: String, rec: Dictionary, kin: Node3D, nth: int) -> void:
+	var worn := BokiWispCosmetics.worn(null)
+	if "--kin-cosmetics" in OS.get_cmdline_user_args():
+		for line in ["trail", "sparkle"]:
+			var opts := BokiWispCosmetics.options(line)
+			worn[line] = opts.values()[(nth + (nth / opts.size() if line == "sparkle" else 0)) % opts.size()]
+	var w := BokiWispLook.build(species, rec, worn)
 	w.position = kin.position + Vector3(0, WISP_ABOVE, 0)
 	w.rotation.y = kin.rotation.y
 	w.scale = Vector3.ONE * WISP_SHOW_SCALE

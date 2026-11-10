@@ -10,8 +10,6 @@ extends RefCounted
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
 const SHOULDER_Y := 1.45      # m above the hunter's feet when their rig has no shoulder bone
-const ORBIT_R := 0.6          # m from the hunter's middle
-const ORBIT_HZ := 0.35        # laps per second: quick enough to read as alive, slow enough to read as a shape
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
 ## setting. Never in the tutorial: it teaches the walking Boki's orders.
@@ -23,7 +21,9 @@ static func mode(m: Node) -> bool:
 
 ## Its model: the wisp look while a wisp, else the walking Boki.
 static func look(k: Kin) -> Node3D:
-	return BokiWispLook.build(k.species, k.rec) if k.wisp else Models.kin(k.species, k.rec)
+	if not k.wisp:
+		return Models.kin(k.species, k.rec)
+	return BokiWispLook.build(k.species, k.rec, BokiWispCosmetics.worn(k.owner_h))
 
 ## Turn it into a wisp or back (a snapshot, or a wisp left behind), swapping the model once.
 static func set_wisp(k: Kin, on: bool) -> void:
@@ -65,9 +65,17 @@ static func render(k: Kin) -> bool:
 		k.ring.visible = false
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
-	var a: float = TAU * (k.m.time * ORBIT_HZ + float(k.model.get_meta("phase", 0.0)))
-	k.global_position = Vector3(o.position.x + cos(a) * ORBIT_R, y, o.position.z + sin(a) * ORBIT_R)
+	var orbit: Dictionary = BokiWispCosmetics.worn(o)["orbit"]
+	var a: float = TAU * (k.m.time * orbit["hz"] + float(k.model.get_meta("phase", 0.0)))
+	k.global_position = orbit_spot(orbit, a, o.position, y)
 	k.model.rotation.y = atan2(sin(a), -cos(a))
 	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
 	return true
+
+## Where a wisp is at orbit angle a (rad) round a hunter standing at `centre`, its shoulder `y` high. The orbit
+## style (BokiWispCosmetics) gives the radius in metres, a constant rise and a wave of `waves` dips a lap.
+static func orbit_spot(orbit: Dictionary, a: float, centre: Vector3, y: float) -> Vector3:
+	var r: float = orbit["radius"]
+	var lift: float = float(orbit["rise"]) + float(orbit["wave"]) * sin(a * int(orbit["waves"]))
+	return Vector3(centre.x + cos(a) * r, y + lift, centre.z + sin(a) * r)

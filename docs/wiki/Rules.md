@@ -95,6 +95,17 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 | wheel | {"deadzone_px": 30, "pop_s": 0.14, "radius_px": 92} |
 | charge_impact | {"radius_k": 1.35, "stun_add": 0.3, "kb_k": 1.4} |
 
+## boki_wisp_cosmetics (`content/rules/boki_wisp_cosmetics.json`)
+
+The Boki wisp's cosmetic line: a trail, a sparkle colour and an orbit style (never the outline).
+
+| Setting | Value |
+|---|---|
+| _doc | Boki wisp cosmetics (DECISIONS 2026-11-09, docs/decisions/0038-boki-wisp-proto.md): a second line beside the Hunter Wisp looks. Three picks, each an id in Save.d['look']['boki_wisp'][line]. They only change the sparkles and the orbit, never the critter outline (BokiWispLook's body) and never the sparkle count. Add an option = add an entry. Sizes in metres, times in seconds. Sparkle 'own' = the Boki's glow colour lifted; otherwise a hex string. |
+| trail | {"default": "stardust", "options": {"stardust": {"name": "Stardust", "desc": "Sparkles drift down where it has been.", "life": 0.6, "speed": 0.12, "gravity": [0, -0.25, 0], "size": [0.025, 0.055]}, "ember_rise": {"name": "Ember Rise", "desc": "Sparkles float up like warm ash.", "life": 0.8, "speed": 0.08, "gravity": [0, 0.35, 0], "size": [0.02, 0.05]}, "dew_drizzle": {"name": "Dew Drizzle", "desc": "Quick little drops that fall straight down.", "life": 0.45, "speed": 0.03, "gravity": [0, -1.1, 0], "size": [0.02, 0.04]}, "comet_tail": {"name": "Comet Tail", "desc": "A long, tight tail of larger sparks.", "life": 1.0, "speed": 0.0, "gravity": [0, 0, 0], "size": [0.04, 0.07]}}} |
+| sparkle | {"default": "own", "options": {"own": {"name": "Own Glow", "desc": "The sparkles take your Boki's glow colour.", "color": "own"}, "sunbeam": {"name": "Sunbeam", "desc": "Warm gold sparkles.", "color": "ffd86a"}, "rosewater": {"name": "Rosewater", "desc": "Soft pink sparkles.", "color": "ff9ec7"}, "seafoam": {"name": "Seafoam", "desc": "Cool mint sparkles.", "color": "8ff0d0"}}} |
+| orbit | {"default": "shoulder_loop", "options": {"shoulder_loop": {"name": "Shoulder Loop", "desc": "A steady lap at shoulder height.", "radius": 0.6, "hz": 0.35, "rise": 0.0, "wave": 0.0, "waves": 0}, "halo_loop": {"name": "Halo Loop", "desc": "A wide, slow lap above your head.", "radius": 0.75, "hz": 0.25, "rise": 0.35, "wave": 0.0, "waves": 0}, "weave": {"name": "Weave", "desc": "Dips and climbs three times a lap.", "radius": 0.65, "hz": 0.4, "rise": 0.1, "wave": 0.2, "waves": 3}}} |
+
 ## Bond meter (`content/rules/bond.json`)
 
 How the bond meter fills (it gates the Merge). All values are fractions of a full meter. Your Boki's hits mark the foe for mark_s seconds, and your own hits on a marked foe fill the meter marked_factor times faster. (Every point of damage you or your Boki deal also adds 1/320, see Match.on_damage.)

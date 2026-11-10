@@ -63,6 +63,7 @@ static func _fill(home: Node, id: String, viewer: HunterViewer) -> void:
 		c.queue_free()
 	details.add_child(ClassCard.mastery_list(id, LEFT_W))
 	details.add_child(_glider_pick(home, id))
+	details.add_child(WispPick.pick(home, id, LEFT_W))
 	acts.add_child(_actions(home, id, viewer))
 
 ## Every Hunter: ready ones first, then open, in progress and locked; each group in the usual order.
