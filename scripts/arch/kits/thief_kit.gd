@@ -128,6 +128,13 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 
+func combo_read(t: Ent) -> Dictionary:
+	var n := marks_on(t)
+	if n <= 0:
+		return {}
+	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
+			"total": float(res_def()["dur"])}
+
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
 func _on_marks(t: Ent, had: int, c: int) -> void:
 	if had < pip_count() and c >= pip_count():
@@ -554,6 +561,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## snap on her.
 func _primed_hit(t: Ent) -> void:
 	primed_hits += 1
+	if marks_on(t) > 0:
+		ComboMark.payoff(m, h, t)
 	add_mark(t, int(dash_def()["prime_marks"]), true)
 	h.dashes = h.max_dashes()
 	h.ex_cd = 0.0
