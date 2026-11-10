@@ -1310,6 +1310,7 @@ func _move_player(d: float) -> void:
 		want = atan2(-hv.x, -hv.y)
 	if tw.active(): want = tw.face_from(ppos)      # working: face the target
 	pface = rotate_toward(pface, want, HunterMove.turn_rate * d)
+	mover.face(pface)
 	player.basis = cam.char_basis(pface, player.scale)     # leaned toward the camera, as in a match
 	player.basis = water.tilt(player.basis, hv.length())      # swimming: tipped into a stroke
 	if p_anim == null or p_anim.model != player:

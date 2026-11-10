@@ -311,6 +311,8 @@ The full table of every movement quantity against the source is [MOVEMENT_PARITY
 
 `--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
 
+- **Town and interior on `FarmStep`, facing blended** (decision 0049). Both walked on the frame time with their own constants (town speed 5.0, jump 8.5 at gravity 26; room speed 4.2, an exponential ease). They now step in `Match.DT` steps with the hero's row (`speed`, `accel`, the walking brake, `turn_rate`) and the town jumps with `Hunter.JUMP_V` and `H_GRAV`, coyote time and the buffer included. The farm, town and room draw their facing between the last two steps' facings. `--move-rate-check` gained town and room rows (run, stop, jump, graces) and a facing assert: through a reversal at 144 fps no frame turns the drawn facing by more than `turn_rate` allows in that frame.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
