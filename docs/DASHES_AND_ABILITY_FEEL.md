@@ -513,7 +513,9 @@ global `freeze_frame()`. Online (it's disabled there today, since `net_on` skips
 while their hurtboxes keep updating (Sakurai's rule), only on the clients of the two players
 involved, plus a softer 50% version for the kin owner.
 
-| Tier | Trigger (derived from the parts) | Attacker | Target | ≈ frames @60 |
+Every hit has one of three weights (`ImpactWeight`, numbers in `content/rules/impact_weight.json`):
+
+| Weight | What | Hold (struck body) | Attacker (melee only) | Shake on the struck player |
 |---|---|---|---|---|
 | T0 | damage ticks, zone ticks, slow-only, reveal, buffs | 0 | 0 (a 40ms hit flash only) | 0 |
 | T1 | a single hit under 8% of target max HP, no CC | 0 | 25ms (melee: both) | 1-2 |
@@ -522,7 +524,13 @@ involved, plus a softer 50% version for the kin owner.
 | T4 | payoff: spike, wall slam, `exploit` triggering, knock (downing) | 70ms | 90ms | 5-6 |
 | T5 | merge or bonded R start (caster); a knock on a full-HP-bar burst | 100ms (no slow-mo: see the knock moment below) | — | 6 |
 
-Rules:
+- A Hunter's hit takes its ability's weight from the rules' `hunters` table (arch -> lmb / rmb / dash / e / x,
+  or a kit's own hit tag such as Tenzo's `rock`). The hit's `ab` tag names the ability; an untagged shot is the
+  LMB. `--impact-weight-check` asserts every damaging ability of all 13 Hunters has a weight.
+- A payoff (`payoff`, `spiked`, `exploit`) lands one weight heavier. Anything else (a Boki, a monster, the world)
+  is light, or solid when it stuns, roots, lifts, knocks 8+ m/s or deals 8%+ of max HP.
+- No weight: ticks (`tick`, burns, falls, heat), monster hits, and slow-only touches under the solid line.
+- Heavy stays under one 10 fps frame (100ms), the longest hold in the reference footage.
 
 - Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
   tier (multi-hit rule). Echoes (`repeat`) use half.
@@ -555,7 +563,8 @@ Your own abilities, dashes, landings and hits never shake or kick your camera: i
 hit-stop, flashes, sparks, debris, sound and the target's reaction. The only shake left is a big thing
 that happens TO you (a boss slam, a heavy ult or landing on or near you), through one door,
 `Shake.incoming_big(m, at, power, cause)` (scripts/match/shake.gd): at most 0.15 s, falling off over 14 m,
-never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off).
+never for whoever caused it, scaled by Settings "Screen shake" (0-100%, default 30%; 0 = off), at most one
+started per 0.5s in a team fight. A heavy hit (5.4) on you is one such big thing.
 `--shake-check` asserts it for all 12 hunters. HUD hurt-direction indicators carry the "from where".
 
 ### 5.6 Sound layering
