@@ -73755,5 +73755,54 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/fem_furnacowary_4.jpg",
     "ok": true
+  },
+  {
+    "id": "v2g_ringrove_tilt2",
+    "name": "Ringrove (strong head tilt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2g_ringrove_tilt2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_ringrove_tilt2",
+    "name": "Ringrove (strong head tilt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2g_ringrove_tilt2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glassolotl_left2",
+    "name": "Glassolotl (V2 new pose)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_glassolotl_left2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_ringrove_tilt2",
+    "name": "Ringrove (strong head tilt)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2g_ringrove_tilt2_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glassolotl_left2",
+    "name": "Glassolotl (V2 new pose)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_glassolotl_left2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2g_ringrove_tilt2",
+    "name": "Ringrove (strong head tilt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2g_ringrove_tilt2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glassolotl_left2",
+    "name": "Glassolotl (V2 new pose)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_glassolotl_left2_3.jpg",
+    "ok": true
   }
 ]
