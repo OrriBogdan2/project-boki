@@ -150,6 +150,7 @@ Other checks:
   - For 0.6s after you let go you keep the glide's speed and steering.
   - The first 0.3s of an abyss lift (the "rapid upward impulse" [wiki]) heats at 0.4x a level glide (was 1x; lowered with the shorter glider so feathering still beats holding). Holding the lift past that costs the full 4x. So short lift taps that coast on the impulse are the skilled, efficient way across.
   - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
+- **Space in a dash, Shift in a jump's rise, both on one step:** per Hunter in docs/heroes/dash_interactions.md ("Space and Shift together", rows in `content/dash_flow/<id>.json` `dash_jump`, asserted by `--dash-jump-check`). The source settles only Shift in the rise (Shiv, Elluna: the air dash goes at once, flat), which ours matches; the rest are [?].
 - **Dash into glide** (`glide_handoff(dir, speed)`, `_take_glide_handoff()`):
   - The Shift dash's end and a jump out of a dash register the burst. If the glider opens within 0.3s, heading within about 70° of the burst, it starts at 60% of the burst's speed (max 14 m/s). That speed bleeds off slowly.
   - The burst reads clearly: a loud whoosh, a burst of air, a dense streak trail with afterimages while you stay well above cruise, and a brief camera pull-back (`CamRig.pull_back`).
