@@ -1939,3 +1939,8 @@ for _n,_x in (('Glaciatee',"Its body is a clean pale ice blue, the mane lightly 
               ('Druzemole',"Body a lighter warm grey; crystals flat lilac with one lighter facet each."),('Meteorab',"Rock plates a lighter warm charcoal brown so the shapes read; keep the glowing cracks."),
               ('Bulwartoad',"Shell flat iron brown with a few simple rust patches, no painterly texture; skin a brighter olive."),('Torpecone',"Flat lavender-grey body, no airbrushed gradients."),('Blastopuff',"Body a lighter slate so the face reads; keep the yellow cracks and spines.")):
     RV_EDIT(_n,'light',_LIGHT+_x,runs=2)
+
+# 11-10 round e5. Only Glaciammoth and Rampartoad turnarounds left stale (ghost row on every sheet try and on the erase edit). Plain sheet prompt,
+# more tries, plus a square 2x2 layout try that I can re-lay into a row.
+for _n in ('Glaciammoth','Rampartoad'):
+    V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_g5'; SPECS[-1]['runs']=5

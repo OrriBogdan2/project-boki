@@ -42368,6 +42368,28 @@
     "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only, not the design. It is shaded too heavily and its outlines are too dark and thick for the rest of the set. Redraw it with the same shapes, pose and colours but a lighter flat cel finish: each colour area is one clean flat base colour with only ONE soft-edged shade tone that is just slightly darker than the base and covers no more than a fifth of the area; remove the large dark shadow masses, the deep blue or grey shadows and any gradients or metallic rendering. Outlines are thinner and drawn in a medium-dark shade of the local colour (for example mid blue on pale blue, warm brown on tan), never near-black or navy. Overall the creature looks brighter, cleaner and lighter. Body a lighter slate so the face reads; keep the yellow cracks and spines."
   },
   {
+    "id": "v2s_glaciammoth_g5",
+    "name": "Glaciammoth (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Glaciammoth.jpg"
+    ],
+    "runs": 5,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Glaciammoth. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
+    "id": "v2s_rampartoad_g5",
+    "name": "Rampartoad (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Rampartoad.jpg"
+    ],
+    "runs": 5,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Rampartoad. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

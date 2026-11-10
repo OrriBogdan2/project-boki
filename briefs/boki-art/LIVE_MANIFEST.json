@@ -137,11 +137,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hash": {
    "sheet": "9791d095e9e3",
-   "card": "d781761ca786",
-   "portrait": "12df9819bd7b",
-   "hero": "d6d03e06e1d5"
+   "card": "2b8671b8bb0f",
+   "portrait": "853dad4b35e9",
+   "hero": "b47c81aa184f"
   },
-  "sheet_for_card": "d781761ca786"
+  "sheet_for_card": "2b8671b8bb0f"
  },
  "Blossmink": {
   "sheet": "briefs/boki-art/evolutions/Blossmink.jpg",
@@ -1323,11 +1323,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Malletary.png",
   "hash": {
    "sheet": "3b4897b14f1c",
-   "card": "e82008a41a46",
-   "portrait": "ec26cdee7d78",
-   "hero": "d3d10bfe96b1"
+   "card": "faa25d75cd71",
+   "portrait": "dc652899be3b",
+   "hero": "2ddcc91517c6"
   },
-  "sheet_for_card": "e82008a41a46"
+  "sheet_for_card": "faa25d75cd71"
  },
  "Maracoil": {
   "sheet": "briefs/boki-art/turnarounds/Maracoil.jpg",
@@ -1905,11 +1905,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Rippmink.png",
   "hash": {
    "sheet": "cf4bc45c1f5c",
-   "card": "382ccad8d18a",
-   "portrait": "44840da1c881",
-   "hero": "39f7c5e89f19"
+   "card": "12a82dded2b8",
+   "portrait": "b8d434407734",
+   "hero": "a4b593469f87"
   },
-  "sheet_for_card": "382ccad8d18a"
+  "sheet_for_card": "12a82dded2b8"
  },
  "Sandwidow": {
   "sheet": "briefs/boki-art/turnarounds/Sandwidow.jpg",
@@ -2302,11 +2302,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Torpecone.png",
   "hash": {
    "sheet": "a92234e1a3c8",
-   "card": "42cd255b1ef7",
-   "portrait": "7e356b87f2fd",
-   "hero": "071b5eec7bb5"
+   "card": "03efcdb18b2e",
+   "portrait": "d858dcdee291",
+   "hero": "7c5d0b1f4df7"
   },
-  "sheet_for_card": "42cd255b1ef7"
+  "sheet_for_card": "03efcdb18b2e"
  },
  "Truffapir": {
   "sheet": "briefs/boki-art/turnarounds/Truffapir.jpg",
@@ -2595,12 +2595,12 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Rimefang.png",
   "sheet": "briefs/boki-art/turnarounds/Rimefang.jpg",
   "hash": {
-   "sheet": "67216cc59bdb",
+   "sheet": "96a2f1ec5d49",
    "card": "47094da4cf3f",
    "portrait": "031f4d8a8ad1",
    "hero": "66ef6598d8e9"
   },
-  "sheet_for_card": null
+  "sheet_for_card": "47094da4cf3f"
  },
  "Rimekit": {
   "sheet": "briefs/boki-art/turnarounds/Rimekit.jpg",
@@ -2812,12 +2812,12 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Druzemole.png",
   "hash": {
    "sheet": "ce12be27ad12",
-   "card": "744c7e6efd3b",
-   "portrait": "470e175917d2",
-   "hero": "7fbf0981bcf4"
+   "card": "aff7881ecb7e",
+   "portrait": "e2e12b0102ee",
+   "hero": "62e249d71f87"
   },
   "display_name": "Gemole",
-  "sheet_for_card": "744c7e6efd3b"
+  "sheet_for_card": "aff7881ecb7e"
  },
  "Scythant": {
   "sheet": "briefs/boki-art/turnarounds/Scythant.jpg",
@@ -2897,11 +2897,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Bulwartoad.png",
   "hash": {
    "sheet": "d9a3ef2d8ad5",
-   "card": "41d3e2bb7063",
-   "portrait": "93e6855e049e",
-   "hero": "06944cafe561"
+   "card": "74931649dc5e",
+   "portrait": "bb12850b4dfa",
+   "hero": "b2e62668aac0"
   },
-  "sheet_for_card": "41d3e2bb7063"
+  "sheet_for_card": "74931649dc5e"
  },
  "Chainipede": {
   "sheet": "briefs/boki-art/turnarounds/Chainipede.jpg",
@@ -3010,11 +3010,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Meteorab.png",
   "hash": {
    "sheet": "b09334fe5155",
-   "card": "9870bc558eec",
-   "portrait": "63644afe1e1c",
-   "hero": "b726acfaca7a"
+   "card": "6f1bddc52eb6",
+   "portrait": "8143912b2e12",
+   "hero": "ce8baa8a9973"
   },
-  "sheet_for_card": "9870bc558eec"
+  "sheet_for_card": "6f1bddc52eb6"
  },
  "Mumblet": {
   "sheet": "briefs/boki-art/turnarounds/Mumblet.jpg",
@@ -3096,11 +3096,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Pinster.png",
   "hash": {
    "sheet": "37fd74b0e93c",
-   "card": "3b47c41339e0",
-   "portrait": "1702338cad68",
-   "hero": "803652534b09"
+   "card": "07327f778fb5",
+   "portrait": "780f08ac9ced",
+   "hero": "6b81158059c8"
   },
-  "sheet_for_card": "3b47c41339e0"
+  "sheet_for_card": "07327f778fb5"
  },
  "Pocketpus": {
   "sheet": "briefs/boki-art/turnarounds/Pocketpus.jpg",
@@ -3442,12 +3442,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Sirencada.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Sirencada.png",
   "hash": {
-   "sheet": "c6756dd6edae",
+   "sheet": "0af1a2e3fe98",
    "card": "b20d23593ed1",
    "portrait": "968d370f07bd",
    "hero": "e3a316ed663d"
   },
-  "sheet_for_card": null
+  "sheet_for_card": "b20d23593ed1"
  },
  "Chimelop": {
   "sheet": "briefs/boki-art/turnarounds/Chimelop.jpg",
@@ -3556,11 +3556,11 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciatee.png",
   "hash": {
    "sheet": "9386330f2763",
-   "card": "5579745883ad",
-   "portrait": "e71bfa27ee3f",
-   "hero": "78bd61866907"
+   "card": "20198d50c988",
+   "portrait": "05ed70f87acb",
+   "hero": "573da12205b5"
   },
-  "sheet_for_card": "5579745883ad"
+  "sheet_for_card": "20198d50c988"
  },
  "Cometail": {
   "sheet": "briefs/boki-art/turnarounds/Cometail.jpg",
@@ -3716,11 +3716,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Rollguin.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Rollguin.png",
   "hash": {
-   "sheet": "3b5c4b23259f",
+   "sheet": "07f9183600dd",
    "card": "d88773432edc",
-   "portrait": "a8129949c8ee",
+   "portrait": "6db1ad13be96",
    "hero": "2f9bbaefe89e"
-  }
+  },
+  "sheet_for_card": "d88773432edc"
  },
  "Kingpinguin": {
   "sheet": "briefs/boki-art/turnarounds/Kingpinguin.jpg",
@@ -3729,11 +3730,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hash": {
-   "sheet": "e878bd3e011d",
+   "sheet": "9e4875f49c9b",
    "card": "2fa0ef4d4362",
-   "portrait": "9f8aba0a183f",
+   "portrait": "47d25d18ae64",
    "hero": "320ac8e63e47"
-  }
+  },
+  "sheet_for_card": "2fa0ef4d4362"
  },
  "Filefin": {
   "sheet": "briefs/boki-art/turnarounds/Filefin.jpg",
