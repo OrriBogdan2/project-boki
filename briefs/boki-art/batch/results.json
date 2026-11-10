@@ -108874,5 +108874,19 @@
     "run": 5,
     "file": "briefs/boki-art/batch/out/v2s_rampartoad_g5_5.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_glaciammoth_g5",
+    "name": "Glaciammoth (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glaciammoth_g5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rampartoad_g5",
+    "name": "Rampartoad (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_rampartoad_g5_1.jpg",
+    "ok": true
   }
 ]
