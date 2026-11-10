@@ -1,21 +1,24 @@
 extends RefCounted
 ## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then a farm run. Every frame is
+## on the map, a fight: two rivals and a monster pack brought to you), then a farm run, then the base demo (BaseDemo plus two Boki: 6 Boki, toys, snacks, an egg) with a Dash run at
+## BASE_RACE_AT. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
 const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
+const BASE_RACE_AT := 10.0          # s into the base part: the Dash starts
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
 var main: Node
 var secs := 60.0
 var farm_secs := 20.0
+var base_secs := 60.0
 var out_path := ""
 var rows := PackedStringArray()
 var hud_us := 0
@@ -28,6 +31,7 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
+		if a.begins_with("--bench-base="): base_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
@@ -38,6 +42,7 @@ func run(main_node: Node) -> void:
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
 	await _match()
 	await _farm()
+	await _base()
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
@@ -130,6 +135,35 @@ func _farm() -> void:
 		fl.append(_frame("farm", fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
 	_summary("farm", fl)
+	_meshes()
+
+## The base demo played for base_secs: the garden's Boki on their own (toys, snacks, naps) and a Dash.
+func _base() -> void:
+	var d := BaseDemo.save()
+	for spec in [["burrlet", "Bean"], ["pebbit", "Gran"]]:
+		var rec := Save.new_kin(spec[0], spec[1])
+		Care.ensure(rec)
+		d["roster"].append(rec)
+	Game.goto("home")
+	for i in 30:
+		await main.get_tree().process_frame
+	var home = main.current
+	BaseDemo.new().stage(home)
+	var fl: Array = []
+	var last := Time.get_ticks_usec()
+	var t := 0.0
+	var raced := false
+	while t < base_secs:
+		if not raced and t >= BASE_RACE_AT:
+			home.hrace.use()
+			raced = true
+		await main.get_tree().process_frame
+		var now := Time.get_ticks_usec()
+		fl.append(_frame("base", fl.size(), (now - last) / 1000.0, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		last = now
+		t += DT
+	print("BENCH base race ran: %s" % (home.hrace.run != null or home.hrace.card_t > 0.0))
+	_summary("base", fl)
 	_meshes()
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
