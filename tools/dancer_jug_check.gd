@@ -672,6 +672,24 @@ func juggernaut(a) -> void:
 			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
 	A.ok("juggernaut RMB: short cooldown (2s)",
 			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
+	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
+	# his plain runs (briefs/hero-ref/juggernaut.md, locomotion; docs/MOVEMENT_FEEL.md)
+	A.step(m, 1.0)
+	P.teleport(home)
+	var run_v := _walk_v(m, P, func(): pass)
+	P.teleport(home)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	var hold_v := _walk_v(m, P, func(): P.inp["sec_hold"] = true)
+	var hold_k := K.move_k()
+	P.inp["sec_hold"] = false
+	m.step(A.DT)
+	A.step(m, 3.5)
+	A.ok("juggernaut RMB hold: he walks at 80% while the Lunge charges",
+			is_equal_approx(hold_k, 0.8) and absf(hold_v / run_v - 0.8) < 0.05,
+			"move_k %.2f, %.2f of %.2f m/s" % [hold_k, hold_v, run_v])
 	# hold: the charged Lunge into the first foe; a miss doubles the cooldown
 	P.teleport(home)
 	A.fresh(T)
@@ -924,6 +942,18 @@ func juggernaut(a) -> void:
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
 
 # ------------------------------------------------------------------ combinations (--kit-combo-check)
+
+## His mean ground speed walking north for 0.4 s after a 0.4 s run-up, `each` called every step.
+func _walk_v(m: Match, P: Hunter, each: Callable) -> float:
+	var walk := func():
+		each.call()
+		P.inp["move"] = Vector2(0, -1)
+	A.step(m, 0.4, walk)
+	var z0 := P.pos.z
+	A.step(m, 0.4, walk)
+	P.inp["move"] = Vector2.ZERO
+	return (z0 - P.pos.z) / 0.4
+
 func combos(a) -> void:
 	A = a
 	# ---- Juggernaut
