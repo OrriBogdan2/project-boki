@@ -105,7 +105,7 @@ pass above.
 
 - Model about 0.95 of a medium (`body.size` 1.11 on the light build); hit radius 0.384 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.15 m (`body.plate`; read by the HUD through `Arch.plate_y`).
-- Runs pitched far forward (about 0.57 rad at a run).
+- Runs pitched far forward (about 0.57 rad at a run), the stride at the sheet's ~2.3 Hz (Animation timing).
 - Ground Cartwheel: 4.5 m in 0.48 s with the measured speed curve; the long (air) dash is the same sideways cartwheel
   carried flat on its speed for 8.4 m over 0.95 s, ending where she lands (both off the global dash feel). From a jump it
   empowers the next bolt too (the source's Quickflip does; its dash -> LMB row in content/dash_flow/thief.json).
@@ -197,6 +197,40 @@ Cartwheel: a tucked flick, the star turned over by 0.34, then carried flat and s
 `thf_land` (touching down from it: a low crouch for 0.1s), `thf_bola` (whirl overhead through the 0.4s lane, sling at
 0.42), `thf_knife` (a spin into a side-arm throw, released at 0.12), `thf_arrive`, `thf_encore` (X: blades raised as the
 ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats that loop, a fling on each: two side flings, a pirouette, two low sweeps, a twirl back with the crossbows overhead; the legs are a stance, so walking she keeps walking)
+
+## Animation timing (Nov 10: parity pass against the 5 fps footage)
+Measured through `WardenClips` (sable.glb clips seeked to the kit's own move clock, `kmove_t`; blend in 0.1 s, out to
+locomotion 0.16 s) in `--thief-combo-check` (tools/thief_anim_time_check.gd, its `TIME` lines). "Hit" is the release
+key, "end" when the blend out is done. Source times from briefs/hero-ref/dancer.md (one frame = 0.2 s).
+
+| Move | Source (s) | Ours before (start / hit / end) | Ours after | Status |
+|---|---|---|---|---|
+| `thf_lmb_r` `thf_lmb_l` | one arm whip a shot, a hit every 2-3 frames against the 0.45 card | 0.02 / shot key 0 / settled 0.26; held: a bolt every 0.467 (frame steps of 0.45), hands alternating | same | matches |
+| `thf_primed` | one frame of the glint, nothing to time | V 0.04 / recoil 0.24 / 0.55 | same | no source |
+| `thf_bola` | lane 0.4-0.6 s, then a whirl overhead and a sling with a lunge | 0.00 / thrown 0.42 on the clip's sling key 0.42 / 0.90 | same | matches |
+| `thf_knife` | thrown within a frame (0222 -> 0223) | 0.00 / release 0.13 on the clip key / 0.63 | same | matches |
+| `thf_arrive` (recast) | blink inside one frame (< 0.2 s) | there after 0.02 s | same | matches |
+| `thf_arrive` (forced return) | no auto-teleport seen in 5 s | on the window's end, a cartwheel in flight cut | same | no source (asserted as built) |
+| `thf_vault_*` | crouch 0.05, over the top 0.25-0.3, landing crouch, up by 0.45-0.5; 3.9-5.4 m | dash 0.48, clip 0.48 on it (push-off 0.1, turn 0.3, land 0.36) / out 0.63; 4.5 m | same | matches |
+| `thf_exdash` (flip) | 304.0-304.25 (0.25 s) | tuck 0.05, flip 0.08 -> 0.34 (0.26 s), then held flat | same | matches |
+| Air Cartwheel (carry) | lands ~0.5 s after the jump; 8.4 m over ~0.95 s, no float | dashed 0.1 s after a jump: 9.8 m, touchdown 1.22 s after the press (the 0.95 s carry holds her height, then 0.27 s of fall) | same | mismatch, not fixed here (below) |
+| `thf_land` | crouch ~0.1, up in ~0.05 | on the touchdown frame (1.23 vs 1.22), crouch 0.1, up by 0.18 | same | matches |
+| `thf_encore` `thf_encore_dance` | ring grows ~0.4 s, a blade about every 0.2 s for 2 s | cast on the press; beats 10 from 0.42 every 0.200; dance from 0.42 on the beat's clock; over 2.42 | same | matches |
+| `mf_xform` | - | - | same | no source |
+| Run cadence | ~2.3 Hz (4.5 steps/s) | 1.63 Hz at 4.65 m/s (`loco.run_speed` 4.6 against the 0.62 s run clip) | 2.26 Hz (`run_speed` 3.25; with haste the 1.5 rate cap holds it at 2.42) | fixed; asserted |
+
+The run fix is data only (content/rules/warden_anim/sable.json `loco.run_speed`, the speed the run clip plays at 1x):
+the planted foot also slides less. Alternative if the unmerged per-hero `loco.cadence` key in `WardenClips._loco`
+lands: set the cadence there and put `run_speed` back.
+
+The air carry: ours keeps her height for the whole 0.95 s and then falls, so she lands ~0.8 s later than the source
+and 1.4 m further. ext/move-dash-gaps-0244 already reworks the air Vault (no `air_dist`/`air_time`, the speed
+carried on to the landing), so it is left to that branch; the check asserts only the landing hand-off.
+
+Clip re-keys (tools/art1/sable_clips.py): none needed.
+
+Suggestions (ours, not built): the forced return is skipped when she is stunned or downed as the window ends, and the
+dagger is lost; holding the step until she is free would read better.
 
 ## Look and sound (all ours)
 

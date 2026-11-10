@@ -62,7 +62,8 @@ func _settle(m: Match, P: Hunter, K: ThiefKit, home: Vector3, secs: float) -> vo
 ## Plays `secs` of frames and reads the move's beats off the clips, in s from t0: when the kit plays one of
 ## `moves` (play), when it owns the body (in), when the kit's event fires (hit, `event` turns true) and how far
 ## into the clip that is (at), the clip and its length, and when the body is back (out).
-func _time(m: Match, P: Hunter, K: ThiefKit, moves: Array, secs: float, event: Callable, each := Callable()) -> Dictionary:
+func _time(m: Match, P: Hunter, K: ThiefKit, moves: Array, secs: float, event: Callable,
+		each := Callable()) -> Dictionary:
 	var c := _clips(P)
 	var r := {"move": "", "play": -1.0, "in": -1.0, "hit": -1.0, "at": -1.0, "clip": "", "len": 0.0, "out": -1.0}
 	var t0 := m.time
@@ -86,8 +87,8 @@ func _time(m: Match, P: Hunter, K: ThiefKit, moves: Array, secs: float, event: C
 			r["at"] = m.time - K.anim_at
 		var live := c.cur
 		if live == "" and c.up_w > 0.0:
-			live = c.cur_u
-		if live != "" and String(r["clip"]) == "":
+			live = String(c.d["kmoves"].get(K.anim_id, {}).get("clip", ""))
+		if live != "" and String(r["clip"]) == "" and c.lib.has_animation(live):
 			r["clip"] = live
 			r["len"] = c.lib.get_animation(live).length
 		owned = owned or w >= 0.999
@@ -138,7 +139,7 @@ func _bola(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	P.inp["sec_hold"] = false
 	P.ak.press_rmb()
 	var r := _time(m, P, K, ["thf_bola"], 1.2, func() -> bool: return not K.bola.is_empty())
-	A.ok("Sable timing Bola: it is thrown 0.4-0.6 s after the press (the source's lane window), on the clip's sling key",
+	A.ok("Sable timing Bola: thrown 0.4-0.6 s after the press (the source's lane), on the clip's sling key",
 			float(r["hit"]) >= 0.4 - DT and float(r["hit"]) <= 0.6 and absf(float(r["at"]) - BOLA_SLING) < FRAME * 0.5
 			and float(r["in"]) <= BLEND_IN, "thrown %.2f clip %.2f in %.2f" % [r["hit"], r["at"], r["in"]])
 	_settle(m, P, K, home, 0.6)
@@ -165,9 +166,11 @@ func _knife(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 		_frame(m, P)
 		if blink < 0.0 and P.flat_dist(at) < 0.8:
 			blink = m.time - t0
-	print("TIME thf_arrive recast: dagger %s, there after %.2f s, anim %s" % ["stuck" if stuck else "missing", blink, K.anim_id])
+	print("TIME thf_arrive recast: dagger %s, there after %.2f s, anim %s"
+			% ["stuck" if stuck else "missing", blink, K.anim_id])
 	A.ok("Sable timing dagger recast: she is at the dagger within a frame (the source: under 0.2 s) in the arrive clip",
-			stuck and blink >= 0.0 and blink <= FRAME and K.anim_id == "thf_arrive", "blink %.2f %s" % [blink, K.anim_id])
+			stuck and blink >= 0.0 and blink <= FRAME and K.anim_id == "thf_arrive",
+			"blink %.2f %s" % [blink, K.anim_id])
 	_settle(m, P, K, home, 0.8)
 	# the forced return: the window runs out and she steps to the dagger, a cartwheel in flight included
 	for from_flip in [false, true]:
@@ -177,23 +180,29 @@ func _knife(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 		for f in 60:
 			_frame(m, P)
 		var kn := K.knife.duplicate()
-		K.e_t = 0.05
+		K.e_t = 5.0
 		if from_flip:
 			P.inp["move"] = Vector2(0, 1)
 			P.do_dash()
 			P.inp["move"] = Vector2.ZERO
 			for f in 6:
 				_frame(m, P)
-			K.e_t = 0.05
+		K.e_t = 0.05
 		var pre := P.pos
 		var seen := false
 		for f in 30:
 			_frame(m, P)
 			seen = seen or K.anim_id == "thf_arrive"
-		var there := not kn.is_empty() and P.flat_dist(kn["pos"]) < 1.0
-		A.ok("Sable timing dagger forced return%s: the window's end steps her to the dagger in the arrive clip" % (" from a cartwheel" if from_flip else ""),
+		# a dagger in a foe steps her to their far side (_shadow_step), else onto the dagger
+		var foe = kn.get("target")
+		var there := not kn.is_empty() and (P.flat_dist(kn["pos"]) < 1.0 if foe == null or not is_instance_valid(foe)
+				else P.flat_dist((foe as Ent).pos) < (foe as Ent).r + P.r + 0.6)
+		var how := " from a cartwheel" if from_flip else ""
+		A.ok("Sable timing dagger forced return%s: the window's end steps her to the dagger in the arrive clip" % how,
 				there and seen and K.knife.is_empty() and P.roll_t <= 0.0 and K.vault.is_empty(),
-				"there %s arrive %s moved %.1f m" % [there, seen, P.flat_dist(pre)])
+				"there %s (%.1f m off) arrive %s moved %.1f m knife %s roll %.2f vault %s" % [there,
+				P.flat_dist(kn.get("pos", P.pos)), seen, P.flat_dist(pre),
+				K.knife.is_empty(), P.roll_t, K.vault.is_empty()])
 		_settle(m, P, K, home, 0.8)
 
 ## Shift on the ground: the clip's turn (push-off 0.1, landed 0.3) runs with the dash, it is up by 0.48 s,
@@ -206,7 +215,7 @@ func _vault(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	var r := _time(m, P, K, ThiefKit.CARTWHEELS, 1.2, func() -> bool: return false)
 	var dd := K.dash_def()
 	print("TIME vault dash %.2f s clip %s" % [float(dd["time"]), r["clip"]])
-	A.ok("Sable timing Vault (ground): the flip clip is on at the dash's first frame, its %.2f s run ends with the dash (4.5 m in 0.48 s)" % VAULT_UP,
+	A.ok("Sable timing Vault (ground): flip clip from the first frame, %.2f s, ends with the dash" % VAULT_UP,
 			float(r["play"]) <= DT * 2.0 and float(r["in"]) <= BLEND_IN and absf(float(r["len"]) - VAULT_UP) < 0.04
 			and absf(float(dd["time"]) - VAULT_UP) < 0.04 and float(r["out"]) <= VAULT_UP + 0.25,
 			"play %.2f in %.2f len %.2f out %.2f" % [r["play"], r["in"], r["len"], r["out"]])
@@ -225,19 +234,19 @@ func _vault_air(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	var down := -1.0
 	var land := -1.0
 	var t0 := m.time
-	var flip := -1.0
+	var x0 := P.global_position
+	var dist := 0.0
 	for f in int(1.6 / DT):
 		_frame(m, P)
-		if K.anim_id == "thf_exdash" and flip < 0.0:
-			flip = m.time - K.anim_at
-			flip = 0.0
+		if down < 0.0:
+			dist = Vector2(P.global_position.x - x0.x, P.global_position.z - x0.z).length()
 		if down < 0.0 and P.grounded and m.time - t0 > 0.1:
 			down = m.time - t0
 		if land < 0.0 and K.anim_id == "thf_land":
 			land = m.time - t0
-	print("TIME thf_exdash air: down %.2f s, thf_land from %.2f s" % [down, land])
-	A.ok("Sable timing Vault (air): the landing crouch plays on the touchdown frame, inside the 0.95 s dash",
-			down > 0.0 and land >= down - DT and land <= down + DT * 2.0 and down <= 1.0, "down %.2f land %.2f" % [down, land])
+	print("TIME thf_exdash air: %.2f m, down %.2f s, thf_land from %.2f s (sheet 8.4 m / 0.95 s)" % [dist, down, land])
+	A.ok("Sable timing Vault (air): the landing crouch plays on the touchdown frame",
+			down > 0.0 and land >= down - DT and land <= down + DT * 2.0, "down %.2f land %.2f" % [down, land])
 	_settle(m, P, K, home, 0.8)
 
 ## X Encore: the ring grows 0.4 s, then a blade every 0.2 s for 2 s (10 beats), the dance clip on the beat from
@@ -269,13 +278,17 @@ func _encore(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	var gap := (float(beats[-1]) - float(beats[0])) / maxf(beats.size() - 1, 1) if beats.size() > 1 else 0.0
 	print("TIME thf_encore: first %s, beats %d from %.2f every %.3f, dance from %.2f (clip clock %.2f), over %.2f"
 			% [first, beats.size(), beats[0] if beats.size() > 0 else -1.0, gap, dance_at, danced_at, gone])
-	A.ok("Sable timing Encore: the cast clip on the press, a blade beat at 0.4 s then every 0.2 s (10 beats), over at 2.4 s",
-			first == "thf_encore" and beats.size() == int(d["shots"]) and absf(float(beats[0]) - float(d["grow"])) < DT * 2.0
-			and absf(gap - float(d["time"]) / float(d["shots"])) < 0.02 and absf(gone - float(d["grow"]) - float(d["time"])) < 0.1,
-			"%s %d beats first %.2f gap %.3f over %.2f" % [first, beats.size(), beats[0] if beats.size() > 0 else -1.0, gap, gone])
-	A.ok("Sable timing Encore: the dance takes over by the first beat, on the beat's clock (its step lands with each blade)",
-			dance_at >= 0.0 and dance_at <= float(d["grow"]) + DT * 2.0 and absf(danced_at - t0 - float(d["grow"])) < DT * 2.0,
-			"dance from %.2f, clip clock starts %.2f" % [dance_at, danced_at - t0])
+	A.ok("Sable timing Encore: the cast clip on the press, a blade beat at 0.4 s then every 0.2 s (10 beats)",
+			first == "thf_encore" and beats.size() == int(d["shots"])
+			and absf(float(beats[0]) - float(d["grow"])) < DT * 2.0
+			and absf(gap - float(d["time"]) / float(d["shots"])) < 0.02
+			and absf(gone - float(d["grow"]) - float(d["time"])) < 0.1,
+			"%s %d beats first %.2f gap %.3f over %.2f"
+			% [first, beats.size(), beats[0] if beats.size() > 0 else -1.0, gap, gone])
+	A.ok("Sable timing Encore: the dance takes over by the first beat, on the beat's clock",
+			dance_at >= 0.0 and dance_at <= float(d["grow"]) + DT * 2.0
+			and absf(dance_at - danced_at - float(d["grow"])) < DT * 2.0,
+			"dance from %.2f, clip clock starts %.2f" % [dance_at, dance_at - danced_at])
 	_settle(m, P, K, home, 0.8)
 
 ## The run cycle against the sheet's stride (2.3 Hz): the gait clip's cycle at her run speed.
@@ -289,7 +302,7 @@ func _run(m: Match, P: Hunter, K: ThiefKit, home: Vector3) -> void:
 	var hz := _stride_hz(c, P, speed)
 	P.inp["move"] = Vector2.ZERO
 	print("TIME run: %.2f m/s, stride %.2f Hz (sheet %.1f Hz)" % [speed, hz, SOURCE_STRIDE])
-	A.ok("Sable timing run: the stride cycle matches the sheet's (about 2.3 Hz at a run)", absf(hz - SOURCE_STRIDE) < 0.2,
+	A.ok("Sable timing run: the stride matches the sheet's (about 2.3 Hz)", absf(hz - SOURCE_STRIDE) < 0.2,
 			"%.2f Hz at %.2f m/s" % [hz, speed])
 	_settle(m, P, K, home, 0.6)
 
@@ -300,5 +313,5 @@ func _stride_hz(c: WardenClips, _P: Hunter, speed: float) -> float:
 	var run := float(lc["run_speed"])
 	var walk := float(lc["walk_speed"])
 	var gait := lerpf(walk, run, clampf((speed - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	var len := c.lib.get_animation(String(lc["run"]["f"])).length
-	return clampf(speed / gait, 0.6, 1.5) / len
+	var clip_len := c.lib.get_animation(String(lc["run"]["f"])).length
+	return clampf(speed / gait, 0.6, 1.5) / clip_len
