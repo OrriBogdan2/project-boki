@@ -73,6 +73,17 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | X | tap (level 6) | Faultline: planted 0.4 s with the hammer overhead while a 16 m lane of four cells, 4 m long and 4.5 m wide, shows to everyone; the slam sends the fissure racing down the lane, striking each foe on it once (4, stun 0.5), then the ground erupts cell by cell (0.15 s apart) and throws each foe once (18, slowed 50% for 1.5 s). A wall or ledge stops it; it runs on over a drop or the abyss (drawn at his height). A glowing scar stays 10 s and slows foes on it 20%. A stun in the wind-up interrupts it (cooldown back to 8 s). He is planted only for the wind-up and the slam (0.6 s); from there he walks at full speed while the lane erupts where it was cast. Cooldown 40 s (0.8 x the data's 50 s) | Earthshatter / Abyssalbreaker: a fissure down a lane, a small first hit with a brief stun, cascading eruptions with a heavy slow, blocked by walls, a lingering crack | Lane 2.5 bh wide and 8.9 bh long, as the sheet. Eruption 1.5x the throw (source 1.2x) |
 | R | - | the Boki Merge | - | R is the Merge for every hero. No slot held a folded Earthshatter, so nothing is unfolded |
 
+## Kit VFX pass (content/vfx/bulwark.json, HeroVfx, docs/HERO_VFX.md)
+Source polish, our gold and ember look. Every look is a pooled HeroVfx layer inside the particle budget, anchored on the v2 model's own empties (`anchor_hammer_head`, `anchor_hammer_grip`, `anchor_shield_face`) with Gun-space and body fallbacks. Checked: `--hero-vfx-check`, the "vfx" rows of `--bulwark-combo-check`, strips from `--hero-vfx-reel --reel-hero=bulwark` (tools/vfx_reel/bulwark.gd, docs/parity_reel/albert_kit).
+| Moment | Look | Matches |
+|---|---|---|
+| Throw and recall | `throw`: an ember ribbon follows the hammer head the whole flight; `plant`: grit and a dust puff where it lands, the gold beacon stays (source, gameplay); `catch`: a few embers at the grip | the flight path, no glow quad or flash |
+| Charged swing, hold | `charge`: motes gather on the head from the glint (0.6 s), more with the charge; `full`: one flare and four stars on the head at full | the owner's whirl (item 59), the source glint |
+| Charged swing, release | `swing`: one flame sweep in front of him, 180 degrees out to the hit's reach (asserted equal to `smash_arc`), the head's ribbon, a dust puff; `hit`: dust on the foe and debris along the knock, `hit_trail` embers as it flies | the hit shape, a short burn-off (0.28 s) |
+| Shield Charge, Shield Slam | `charge_go`: a ribbon off the shield face and sparks along the dash (a flare on the shield when Guard is full); `slam`: a sweep over the cone's own 100 degrees (asserted equal to the data), grit off the shield | the cone, no ground ring |
+| Crushed (a foe into a wall) | `crush`: a ring of stars at the foe's head and a dust puff | the source's stars (1 s) |
+Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, the lane and eruption).
+
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
 - The perfect window starts at full charge and lasts 0.18 s (owner default); held past it the swing is a normal one; nothing goes off until he lets go (the sheet shows a 2.6 s hold). Let go in the air, a normal swing takes no step (he keeps his speed) and a perfect one still launches him (owner #51: "pair it together").
