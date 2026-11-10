@@ -523,14 +523,6 @@ Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.
 | verbs_doc | Journal verb by use; an item's own verb wins. |
 | items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}, {"id": "fourfold_bun", "name": "Fourfold Bun", "family": "stat", "use": "eaten", "effect": {"kind": "stat_all", "n": 1}, "sources": ["Mixing Bowl: any two different bites"]}, {"id": "bramble_honey", "name": "Bramble Honey", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["grass", "bug", "spore"], "share": 0.5, "hold_days": 7}, "sources": ["Bramblebank golden ripening", "Mixing Bowl: 3 snacks of one type"]}, {"id": "glassdew", "name": "Glassdew", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["water", "ice", "crystal"], "share": 0.5, "hold_days": 7}, "sources": ["Glasswater ripening", "Glint Fishing", "Mixing Bowl: 3 snacks of one type"]}, {"id": "cinderbrittle", "name": "Cinderbrittle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["fire", "rock", "steel", "dragon"], "share": 0.5, "hold_days": 7}, "sources": ["Cinderstep ripening", "Tumble cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "hush_truffle", "name": "Hush Truffle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["dark", "psychic", "poison"], "share": 0.5, "hold_days": 7}, "sources": ["Hushwood ripening", "Lantern Match", "Mixing Bowl: 3 snacks of one type"]}, {"id": "windfloss", "name": "Windfloss", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["flying", "electric", "fairy", "sound"], "share": 0.5, "hold_days": 7}, "sources": ["Kitewind ripening", "Echo Steps cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "dare_pepper", "name": "Dare Pepper", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "bravery", "by": 0.04}, "sources": ["Cinderstep patch"]}, {"id": "lullwort_tea", "name": "Lullwort Tea", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "temper", "by": -0.04}, "sources": ["Glasswater patch"]}, {"id": "peekbox", "name": "Peekbox", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "curiosity", "by": 0.04}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "twinbun", "name": "Twinbun", "family": "personality", "use": "eaten", "effect": {"kind": "twin", "trait": "loyalty", "by": 0.04, "bond": 0.1}, "sources": ["Bramblebank patch", "Mixing Bowl: 2 sweet buns"]}] |
 
-## garden_recipes (`content/rules/garden_recipes.json`)
-
-The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out.
-
-| Setting | Value |
-|---|---|
-| recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
-
 ## garden_prizes (`content/rules/garden_prizes.json`)
 
 Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).
@@ -543,6 +535,14 @@ Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/de
 | week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
 | cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
 | games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}} |
+
+## garden_recipes (`content/rules/garden_recipes.json`)
+
+The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out.
+
+| Setting | Value |
+|---|---|
+| recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
 
 ## garden_trust (`content/rules/garden_trust.json`)
 
@@ -562,7 +562,7 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 
 ## garden_zones (`content/rules/garden_zones.json`)
 
-The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from).
+The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel, clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind, shore = tiles the crystals and reeds crowd the channel).
 
 | Setting | Value |
 |---|---|
@@ -580,7 +580,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
 | ask_s | 25 |
 | ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
-| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "build": {"theme": "glasswater", "seed": 4207, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
 | budget | {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7} |
 | budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=<id> prints each against these. |
 | wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
@@ -598,6 +598,69 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}], "chest": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}]} |
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
+
+## glint_fishing (`content/rules/glint_fishing.json`)
+
+Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fishing.gd). Solo with your partner on a rock in a zone that has a spot. Five casts: hold interact to swing the cast out and back, release on a glint, wait, press when your Boki's ears go up, then hold and release to keep the line's tension in the band until the glint is landed. Units: seconds, metres, tension 0-1, stats 0-100 points, joy and trust 0-100.
+
+| Setting | Value |
+|---|---|
+| casts | 5 |
+| spots | {"glasswater": {"at": [48.5, 31.5], "toward": [-1.0, 0.0], "sign": [48.6, 33.4]}} |
+| spots_doc | A zone's rock (GardenZones.here): at = where your Boki stands, tiles; toward = the cast direction over the water (garden_zones.json build.shallow); sign = the post listing what is biting today. |
+| glints | 3 |
+| glints_doc | Glints on the water for each cast, each with its catch rolled before you aim. |
+| near_m | 1.5 |
+| far_m | 7 |
+| spread_m | 0.5 |
+| spread_doc | A glint sits up to this far to either side of the cast line (only the distance out counts for the cast). |
+| swing_s | 1.4 |
+| swing_doc | Seconds of holding for the cast to swing from near_m to far_m; it swings back and forth while you hold. |
+| aim_m | 0.6 |
+| aim_doc | A cast that lands this close to a glint takes it; further from every glint it plops into empty water and the cast is spent. |
+| wait_s | [3.0, 7.0] |
+| wait_doc | Seconds from the cast landing to the bite (a uniform roll). |
+| warn_s | [0.3, 0.8] |
+| warn_doc | Seconds the ears are up before the bite: at Focus 0 and at Focus 100 (linear). A press before the ears go up spooks the glint. |
+| late_s | 0.25 |
+| late_doc | Seconds after the bite the hook still sets; later and it got away. |
+| band | [0.1, 0.22] |
+| band_doc | Half the width of the good tension band (centred on 0.5) at Power 0 and at Power 100 (linear). |
+| rise | 0.9 |
+| fall | 0.7 |
+| rise_doc | Tension per second while you hold (rise) and while you let go (fall). |
+| pull | 0.55 |
+| pull_doc | Tension per second the glint drags at its strongest: a swell that changes pace, plus a jolt now and then. |
+| pull_s | [1.2, 2.4] |
+| pull_s_doc | Seconds per swell of the pull (a roll each swell). |
+| jolt | 0.25 |
+| jolt_doc | Chance per swell of a jolt: the tension jumps by pull times 0.4 at once. |
+| rare_pull | 1.35 |
+| rare_pull_doc | A rare glint pulls this many times harder. |
+| land_s | 6 |
+| land_doc | Seconds inside the band to land it. |
+| slip_s | 1.5 |
+| slip_doc | Seconds outside the band in a row before the line slips and the glint is gone. |
+| show_s | 1.6 |
+| show_doc | Seconds the landed or lost glint shows before the next cast. |
+| max_s | 180 |
+| max_doc | A session still going after this many seconds ends after the cast in hand. |
+| rare | 0.15 |
+| rare_doc | Chance a glint is rare (it glows gold and pays from the rare list). |
+| water_rare | 2 |
+| water_rare_doc | A Boki whose leading lean is Water (Evo.lean) sees rare glints this many times as often. |
+| sign_n | 3 |
+| sign_doc | How many of the common catches bite each garden day; the day number picks them (the same all day). |
+| day_s | 86400 |
+| common | [{"kind": "snack", "id": "tidebloom", "w": 30}, {"kind": "snack", "id": "frostdrop", "w": 25}, {"kind": "snack", "id": "geodecandy", "w": 20}, {"kind": "item", "id": "glassdew", "w": 15}, {"kind": "item", "id": "rinse_melon", "w": 10}] |
+| rare_list | [{"kind": "item", "id": "hushpearl", "w": 6}, {"kind": "item", "id": "mistbloom", "w": 3}, {"kind": "item", "id": "lullaby_shell", "w": 1}] |
+| lists_doc | What glints pay, banked like a garden prize (GardenPrizes.bank): kind item = a garden_items.json id, kind snack = a Data.CROPS food. An entry whose item is not in the catalog yet is left out (it never bites). |
+| energy | 8 |
+| joy | 2 |
+| joy_doc | Joy your Boki gets for each glint landed. |
+| trust | 1 |
+| trust_doc | Trust for the session when at least one glint was landed. |
+| card_s | 6 |
 
 ## hunter_move (`content/rules/hunter_move.json`)
 

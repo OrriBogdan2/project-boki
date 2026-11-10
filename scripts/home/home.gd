@@ -57,6 +57,7 @@ var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd),
 var hshove: BaseShove = null     # the Stump Shove's stump (base_shove.gd), base_mode only
 var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode only
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
+var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
@@ -164,6 +165,7 @@ func _ready() -> void:
 		hshove = BaseShove.new(self)
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
+		hfish = GlintFishing.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -353,6 +355,7 @@ func _ready_rest() -> void:
 	if hshove: hshove.place()
 	if hseek: hseek.place()
 	if hvolley: hvolley.place()
+	if hfish: hfish.place()
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
@@ -1057,6 +1060,7 @@ func _process(delta: float) -> void:
 	if hshove: hshove.tick(d)
 	if hseek: hseek.tick(d)
 	if hvolley: hvolley.tick(d)
+	if hfish: hfish.tick(d)
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
@@ -2056,6 +2060,7 @@ func _find_interact() -> void:
 	if hshove and best.is_empty(): best = hshove.find(p2)
 	if hseek and best.is_empty(): best = hseek.find(p2)
 	if hvolley and best.is_empty(): best = hvolley.find(p2)
+	if hfish and best.is_empty(): best = hfish.find(p2)
 	if hway and best.is_empty(): best = hway.find(p2)
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
@@ -2208,6 +2213,7 @@ func _label_for(it: Dictionary) -> String:
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
+		"fishing": return hfish.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2247,6 +2253,7 @@ func _use(it: Dictionary) -> void:
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
+		"fishing": hfish.use()
 		"waystone": hway.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
@@ -2275,7 +2282,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if (hrace and hrace.input(event)) or (hshove and hshove.input(event)) or (hseek and hseek.input(event)) \
-			or (hvolley and hvolley.input(event)):
+			or (hvolley and hvolley.input(event)) or (hfish and hfish.input(event)):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
@@ -4853,7 +4860,8 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	# which parent it takes after is settled now, so the egg can wear that element's name and colour
 	var esp: String = rec["species"] if randf() < 0.5 else ok["species"]
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
-	rec["bred_t"] = Time.get_unix_time_from_system(); ok["bred_t"] = rec["bred_t"]
+	rec["bred_t"] = Time.get_unix_time_from_system()
+	ok["bred_t"] = rec["bred_t"]
 	Save.d["egg"]["gift"] = Mentor.take_gift()      # a retired mentor's gift for this egg ({} if none)
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
 	Save.remember(ok, "egg", "had an egg with %s" % rec["name"], 2.0)
