@@ -109497,5 +109497,12 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/drop_up2_2.jpg",
     "ok": true
+  },
+  {
+    "id": "drop_up2",
+    "name": "Site drop splash, from below, accuracy pass",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/drop_up2_1.jpg",
+    "ok": true
   }
 ]
