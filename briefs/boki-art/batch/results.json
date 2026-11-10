@@ -99312,5 +99312,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/idea_hatstag_1.jpg",
     "ok": true
+  },
+  {
+    "id": "idea_fawngus",
+    "name": "Fawngus (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_fawngus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_zephyrak",
+    "name": "Zephyrak (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_zephyrak_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_hatstag",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/idea_hatstag_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "line_glassolotl",
+    "name": "Glassolotl (line weight to match the roster)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/line_glassolotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "evo_pebblamb_c",
+    "name": "Pebblamb evolution c",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/evo_pebblamb_c_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "idea_hatstag",
+    "name": "Hatstag (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/idea_hatstag_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "line_glassolotl",
+    "name": "Glassolotl (line weight to match the roster)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/line_glassolotl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "evo_pebblamb_c",
+    "name": "Pebblamb evolution c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/evo_pebblamb_c_1.jpg",
+    "ok": true
   }
 ]
