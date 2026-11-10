@@ -36,6 +36,13 @@ func _setup() -> void:
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
 
+## Swapped off her mid Phase Walk (Training Grounds, a hero swap): the walk ends with her kit, else
+## Hunter.spirit_t would never tick down and the next hunter would ghost through terrain for good.
+func teardown() -> void:
+	if spirit:
+		spirit.end("merge")
+	super()
+
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
 		_arrow_hit(t)
