@@ -662,7 +662,7 @@ func open_inventory() -> void:
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
-					cell.call(GardenItems.item_name(id), "×%d" % held, "Shapes a Boki: feed it from its card.", UI.GOLD)
+					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
 				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))

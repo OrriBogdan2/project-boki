@@ -39,7 +39,7 @@ func run(m: Node) -> void:
 	_rules()
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
-	for id in GardenItems.ids():
+	for id in GardenItems.ids().filter(GardenItems.fed):
 		ok(used.get(id, 0) > 0, "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 12 and fine, "12 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 16 and fine, "16 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():

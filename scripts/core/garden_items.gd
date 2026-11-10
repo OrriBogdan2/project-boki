@@ -48,6 +48,8 @@ static func preview(rec: Dictionary, id: String) -> Dictionary:
 		"token": return _token(rec, String(e["aff"]))
 		"stay": return _stay(rec)
 		"rinse": return _rinse(rec)
+		"nest": return _no("goes in the Nesting Nook with a pair")
+		"down": return _down(rec, int(e["trust"]))
 		_: return _loose(rec, int(e["n"]))
 
 ## Does it: returns the preview it followed. Not usable (ok false) changes nothing.
@@ -64,6 +66,8 @@ static func apply(rec: Dictionary, id: String) -> Dictionary:
 			if key.begins_with("stats."): rec["stats"][key.substr(6)] = after
 			else: rec[key] = after.duplicate(true) if typeof(after) in [TYPE_ARRAY, TYPE_DICTIONARY] else after
 	var it := item(id)
+	if String(it["effect"]["kind"]) == "down":
+		Save.remember(rec, "down", NestItems.take_memory())
 	var verb := String(it.get("verb", rules()["verbs"][it["use"]]))
 	CareJournal.note(rec, "%s %s: %s" % [verb, it["name"], pv["text"]])
 	return pv
@@ -129,6 +133,16 @@ static func _token_id(aff: String) -> String:
 			return String(it["id"])
 	return ""
 
+## False for items that are not fed (nest items are placed in the Nook).
+static func fed(id: String) -> bool:
+	return String(item(id)["effect"]["kind"]) != "nest"
+
+## The line the items list shows under an item in the bag.
+static func bag_hint(id: String) -> String:
+	if fed(id):
+		return "Shapes a Boki: feed it from its card."
+	return "Goes in the Nesting Nook with a pair."
+
 ## The path an item's token pushes toward ("" for other items).
 static func aff_of(id: String) -> String:
 	return String(item(id)["effect"].get("aff", ""))
@@ -142,6 +156,14 @@ static func _rinse(rec: Dictionary) -> Dictionary:
 	if Care.lean_total(rec) <= 0.0:
 		return _no("no lean to rinse off")
 	return _yes("lean cleared; the grown parts stay", {"lean": [rec["lean"].duplicate(), {}]})
+
+static func _down(rec: Dictionary, n: int) -> Dictionary:
+	var now := float(rec["trust"])
+	var gain := minf(float(n), 100.0 - now)
+	if gain <= 0.0:
+		return _no("trust is already full")
+	var text := "trust +%d (%d to %d): %s" % [int(gain), int(now), int(now + gain), NestItems.memory_line()]
+	return _yes(text, {"trust": [now, now + gain]})
 
 static func _loose(rec: Dictionary, n: int) -> Dictionary:
 	var best := "power"

@@ -4800,6 +4800,7 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
 	NookRules.preview(dv, a, b)
+	NestItemRows.add(dv, a, b, _open_nook)
 	var br := UI.hbox(8)
 	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
 	dv.add_child(br)
@@ -4829,6 +4830,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_t"] = Time.get_unix_time_from_system(); ok["bred_t"] = rec["bred_t"]
 	Save.d["egg"]["gift"] = Mentor.take_gift()      # a retired mentor's gift for this egg ({} if none)
+	NestItems.lay(Save.d["egg"], rec, ok)      # placed nest items go on the egg and are used up
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
 	Save.remember(ok, "egg", "had an egg with %s" % rec["name"], 2.0)
 	Save.save_game()
@@ -4923,8 +4925,9 @@ func _hatch_nest_egg() -> void:
 		_refresh_nest()
 		return
 	var rng := RandomNumberGenerator.new(); rng.randomize()
-	var baby := Care.hatch_rare(egg, rng) if rare else Care.breed(a, b, rng, _egg_species())
+	var baby := Care.hatch_rare(egg, rng) if rare else Care.breed(a, b, rng, _egg_species(), NestItems.inherit_n(egg))
 	Mentor.apply(baby, egg.get("gift", {}))
+	if not rare: NestItems.hatched(baby, egg, a, b)
 	Save.d["egg"] = {}
 	_hatch_play(baby, rare, String(egg.get("boss", "")), NEST_AT, nest.get_node("Shell") if is_instance_valid(nest) else null)
 
@@ -4955,6 +4958,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	else:
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)
 	Progress.add("hatched")
+	NestItems.drop_down(baby)
 	Save.d["roster"].append(baby)
 	Save.register(baby)           # its serial, you as its trainer, and "hatched" in the log
 	KinBox.route_new(baby)        # a repeat of a kind already on the farm goes to the Kin Burrow (unless it's rare)
