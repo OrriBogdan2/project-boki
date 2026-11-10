@@ -110232,5 +110232,19 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px8_kestrike_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px8_kestrike",
+    "name": "Kestrike (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_kestrike_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px8_zephyrak",
+    "name": "Zephyrak (pixel sprite 80, simplified)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px8_zephyrak_2.jpg",
+    "ok": true
   }
 ]
