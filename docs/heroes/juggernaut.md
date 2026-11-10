@@ -21,6 +21,15 @@ docs/wiki/Inspirations.md.
 - **Not reproduced:** mana, climbing double-height walls, dodges building Rage, Volcanic Rebuke sending a
   knocked hunter straight to the deathbox, the turn lock after RMB into the dash.
 
+## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
+Source: Brall, `Upg:` lines. Slots the source gives no cooldown or damage upgrade read 1.0 from `rank_cd` / `rank_dmg`.
+
+| Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
+|---|---|---|---|
+| RMB Smash | +20% damage x2; Meteor Drop rests 2.4s less at IV | cooldown 1.8s / 1.6s, damage +15% / +30% on top of Smash +20% / +40%; drop 7.2s / 4.8s | cooldown 2s flat, Smash damage +20% / +40%; drop 7.2s / 4.8s |
+| Space Rampage | -1.6s recharge x2 (a 3rd charge), tier IV: a dodged shot feeds Rage | 8.8s / 7.3s (the old text said 9s -> 7.6s) | 8.8s / 6.4s; 3rd charge at 2, dodge feeds Rage at 3 |
+| E Warchain | -1.6s cooldown x2, tier IV: -3.2s more | 11.2s / 8.0s in play (the text said 9.5s -> 8.3s / 5.9s), damage +15% / +30% | 11.2s / 8.0s, damage unchanged (source has none) |
+
 ## Scaling
 
 Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam 52, Spin 54, Flame Step 18
