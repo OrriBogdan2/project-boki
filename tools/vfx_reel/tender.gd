@@ -3,7 +3,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## Hearthlight on her and thrown (its heals rising as stars, the bloom), and Hearth Call's tether to its end.
 
 func parts() -> Array:
-	return ["lmb", "dash", "rmb", "e", "r"]
+	return ["lmb", "hold", "dash", "rmb", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(6.0)

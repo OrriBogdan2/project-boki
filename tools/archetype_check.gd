@@ -64,6 +64,46 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
 
+## Item 183: with a charge in hand, a hero's air dash is its ground dash: the same kit move and clip, the same reach
+## (within 5%), one charge spent and the long-dash slot (ex_cd) untouched. `home` is open ground; the match is
+## left with the hunter back at home.
+func air_dash_is_ground(m: Match, P: Hunter, home: Vector3) -> void:
+	var parked := {}
+	for h in m.hunters:
+		if h != P:
+			parked[h] = h.pos
+			h.teleport(h.pos + Vector3(0, 0, 60))     # a dummy in the lane would stop the ground run short
+	var ground := _dash_run(m, P, home, false)
+	var air := _dash_run(m, P, home, true)
+	for h in parked:
+		h.teleport(parked[h])
+	var label := "item 183 %s: its air dash is its ground dash (%s, reach %.2f vs %.2f)"
+	ok(label % [P.arch, ground["anim"], air["reach"], ground["reach"]],
+		air["anim"] == ground["anim"] and air["spent"] == ground["spent"] and air["spent"] > 0.5 and air["ex_cd"] == 0.0
+		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"], str([ground, air]))
+	P.teleport(home)
+
+func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
+	P.teleport(home + Vector3(0, 40.0 if air else 0.0, 0))
+	P.grounded = not air
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	var from := P.pos
+	var charges := P.dashes
+	P.do_dash()
+	var out := {"anim": P.ak.anim_id, "spent": charges - P.dashes, "ex_cd": P.ex_cd, "reach": 0.0}
+	var t := 0.0
+	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
+		m.step(DT)
+		t += DT
+		out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+	P.inp["move"] = Vector2.ZERO
+	return out
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
@@ -128,6 +168,7 @@ func run(main_node: Node) -> void:
 		return
 	_controls()
 	_data()
+	_health()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -141,6 +182,29 @@ func run(main_node: Node) -> void:
 	_feel()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Max health as a share of the roster average against the source's Base HP rows
+## (briefs/supervive-data/supervive_physics.md, docs/KIT_PARITY.md "Health"): no Hunter off by
+## more than 1.25x either way. The scales differ, so only the ratio is compared.
+const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
+		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+func _health() -> void:
+	var ids := Arch.ids()
+	var ours := {}
+	var sum_o := 0.0
+	var sum_s := 0.0
+	for a in ids:
+		ours[a] = float(Data.CLASSES[Arch.weight(a)]["hp"])
+		sum_o += ours[a]
+		sum_s += float(SOURCE_HP.get(a, 0))
+	ok("health: every Hunter has a source Base HP row", ids.all(func(x): return SOURCE_HP.has(x)), str(ids))
+	var off: Array = []
+	for a in ids:
+		if not SOURCE_HP.has(a): continue
+		var ratio: float = (ours[a] / (sum_o / ids.size())) / (float(SOURCE_HP[a]) / (sum_s / ids.size()))
+		if ratio > 1.25 or ratio < 0.8: off.append("%s %.3f" % [a, ratio])
+	ok("health: max health share of roster average within 1.25x of the source", off.is_empty(), str(off))
 
 # ------------------------------------------------------------------ controls and data
 func _has_key(action: String, key: int) -> bool:
@@ -164,13 +228,14 @@ func _controls() -> void:
 
 func _data() -> void:
 	# rank previews: always the NEXT rank first (rank 2 at rank 1), then rank 3's special; every
-	# ability of every archetype has a concrete rank 2
+	# ability of every archetype has a concrete rank 2: a cooldown "a -> b" or a damage "+N%" (the source's
+	# upgrade numbers, rank_cd / rank_dmg: many are damage only)
 	var rk_ok := true
 	for a in Arch.ids():
 		for sl in ["sec", "dash", "kin", "ult"]:
 			if sl == "ult" and not Arch.def(a).has("r"): continue      # Sparkle and Vex have no R (Boki Merge owns it)
 			var r2 := String(Arch.def(a).get("rank2", {}).get(sl, ""))
-			if not (r2.contains("->") and r2.length() > 20): rk_ok = false
+			if not (r2.begins_with("Rank 2: ") and (r2.contains("->") or r2.contains("%"))): rk_ok = false
 	ok("ranks: every ability has a concrete rank 2", rk_ok)
 	var n1 := Arch.next_ranks("archer", "sec", 1); var n2 := Arch.next_ranks("archer", "sec", 2); var n3 := Arch.next_ranks("archer", "sec", 3)
 	ok("ranks: next rank first (2 at 1, 3 at 2, none at max)", n1.size() == 2 and n1[0][0] == "Rank 2" and n1[1][0] == "Rank 3" and n2.size() == 1 and n2[0][0] == "Rank 3" and n3.is_empty(), str(n1))

@@ -54,7 +54,7 @@ func build() -> Control:
 
 func _card(id: String, i: int) -> PanelContainer:
 	var col := Arch.color(id)
-	var card := UI.card(Color(0.07, 0.065, 0.1, 0.96), 12)
+	var card := UI.card(Color(UI.NIGHT, 0.96), 12)
 	card.custom_minimum_size.x = CARD_W
 	card.set_meta("mask_card", id)
 	card.mouse_filter = Control.MOUSE_FILTER_STOP

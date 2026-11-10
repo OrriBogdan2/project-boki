@@ -21,7 +21,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `tips` | Gameplay > Combat | `hud.gd` | renamed "Tips during expeditions" |
 | `kin_chatter` | Gameplay > Boki | `kin_companion.gd` | renamed "How much your Boki talks" |
 | `mod_mode` | Gameplay > Admin (admin only) | `game.gd` | |
-| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the 90 s pre-match lobby before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
+| `lobby_enabled` | Gameplay > Admin (admin only) | `prematch.gd`, `game.gd` | on by default: the 30 s pre-match lobby before each expedition; off shows the plain loading screen (docs/decisions/0019-prematch-lobby.md) |
 | `bot_diff` | Admin tools page | `match.gd`, `duel.gd` | the duplicate row in Gameplay is gone: the Admin tools page already sets it |
 | `cast_on_press` | Controls > How keys behave | `match.gd` | moved from Gameplay: it's about how a key press acts |
 | `dash_to_cursor` | Controls > How keys behave | `hunter.gd` | moved from Gameplay |
