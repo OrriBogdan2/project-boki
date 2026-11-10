@@ -5,6 +5,7 @@
   glider_snap     the canopy filling as it opens: a cloth crack and a soft thud of air
   glider_wind     loop: air rushing past the canopy; the game pitches and levels it with glide speed
   glider_dive     the Ctrl plunge: the canopy folds and a rush climbs into a whoosh
+  glider_hiss     loop: a thin steam hiss as the glider's heat runs out; the game raises it toward overheat
   glider_crackle  the glider catching fire (overheat): a hiss of sparks and pops
   glider_burn     loop: the overheated canopy burning, low roar with pops
   glider_fold     the canopy folding shut on landing or when you let go
@@ -77,6 +78,11 @@ def burn():
     return roar * 1.2 + pops + hpf(noise(d), 2500) * 0.08
 
 
+def hiss():
+    d = 1.2
+    return lpf(hpf(noise(d), 2200), 4500) * wobble(d, 9, 0.35) + bpf(noise(d), 1200, 3000) * 0.15
+
+
 def fold():
     d = 0.4
     swish = sweep_noise(d, 2400, 500, 0.45) * shape(d, 0.02, 0.05, 0.3)
@@ -88,6 +94,7 @@ def build():
     S.save_cat('glider_snap', snap(), 'cast')
     S.save_loop('glider_wind', wind(), 'loop')
     S.save_cat('glider_dive', dive(), 'cast')
+    S.save_loop('glider_hiss', hiss(), 'loop')
     S.save_cat('glider_crackle', crackle(), 'fire')
     S.save_loop('glider_burn', burn(), 'loop')
     S.save_cat('glider_fold', fold(), 'dash')

@@ -84,7 +84,7 @@ func _glider(h: Hunter, who: String) -> void:
 	h.glide_fuel = 1.0
 	_set_speed(h, 0.0, 0.0)
 	g.tick(h)
-	for cue in ["glider_snap", "glider_dive", "glider_crackle", "glider_fold"]:
+	for cue in ["glider_snap", "glider_dive", "glider_crackle", "glider_fold", "glider_hiss"]:
 		ok(Sfx.ensure(cue), "%s: %s is a sound on file" % [who, cue])
 	h.gliding = true
 	_once(g, h, "glider_snap", who + " glider: opening plays the snap once")
@@ -103,6 +103,16 @@ func _glider(h: Hunter, who: String) -> void:
 	h.glide_dive.on = false
 	_set_speed(h, 6.0, -5.0)
 	g.tick(h)
+	var hiss := "glider_hiss%d" % h.get_instance_id()
+	h.glide_fuel = 0.3
+	g.tick(h)
+	var faint := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
+	h.glide_fuel = 0.05
+	g.tick(h)
+	var near := float(Sfx.loops[hiss]["vol"]) if Sfx.loop_on(hiss) else 0.0
+	var swelled := faint != 0.0 and near > faint
+	ok(h.remote or swelled, "%s glider: the heat hiss swells toward overheat (%.1f -> %.1f dB)" % [who, faint, near])
+	ok(not h.remote or not Sfx.loop_on(hiss), "another player's glider: no heat hiss (the heat is not synced)")
 	h.glide_fuel = 0.0
 	g.net_hot = true
 	_once(g, h, "glider_crackle", who + " glider: overheating plays the crackle once")
@@ -114,7 +124,8 @@ func _glider(h: Hunter, who: String) -> void:
 	h.gliding = false
 	_once(g, h, "glider_fold", who + " glider: folding plays the fold once")
 	await main.get_tree().create_timer(0.5).timeout
-	ok(not Sfx.loop_on(wind) and not Sfx.loop_on(burn), "%s glider: both loops stop once the glider is folded" % who)
+	var running := Sfx.loop_on(wind) or Sfx.loop_on(burn) or Sfx.loop_on(hiss)
+	ok(not running, "%s glider: all loops stop once the glider is folded" % who)
 
 func _set_speed(h: Hunter, flat: float, vy: float) -> void:
 	h.vel = Vector3(flat, vy, 0)

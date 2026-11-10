@@ -1,10 +1,11 @@
 class_name GliderSfx
 extends RefCounted
 ## One hunter's glider sounds (tools/gen_sfx_glider.py, content/sfx/glider.json): a snap as the canopy
-## opens, a wind loop that pitches and swells with speed, a whoosh as the Ctrl dive starts, a crackle and a
-## burn loop while it overheats, a fold as it closes. Ticked once a frame for every hunter, yours and
-## everyone else's (theirs are positional and quieter, driven by the synced glide flag, velocity and the
-## overheat bit), so each cue fires once on the change of state, never every frame.
+## opens, a wind loop that pitches and swells with speed, a whoosh as the Ctrl dive starts, a hiss that
+## swells as the heat runs out, a crackle and a burn loop while it overheats, a fold as it closes.
+## Ticked once a frame for every hunter, yours and everyone else's (theirs are positional and quieter,
+## driven by the synced glide flag, velocity and the overheat bit), so each cue fires once on the change
+## of state, never every frame.
 
 const SNAP_DB := -6.0           # dB: under the skin's own open sound, which stays
 const FOLD_DB := -8.0           # dB
@@ -15,6 +16,8 @@ const WIND_QUIET_DB := -24.0    # dB, loop at a standstill...
 const WIND_LOUD_DB := -9.0      # dB, ...and at the dive's full speed
 const WIND_LOW := 0.7           # pitch at a standstill...
 const WIND_HIGH := 1.6          # ...and at the dive's full speed
+const HISS_FROM := 0.35         # heat left (1 cool, 0 overheated) below which the hiss starts
+const HISS_DB := -12.0          # dB, loop, at the point of overheating
 const OTHERS_DB := -6.0         # dB under yours for another player's glider
 const DIVE_VY_MIN := 18.0       # m/s of fall that counts as the plunge for another player (no dive flag is sent)
 
@@ -46,5 +49,8 @@ func tick(h: Hunter) -> void:
 		var k := clampf(v.length() / HunterMove.dive_vy, 0.0, 1.0)
 		var vol := lerpf(WIND_QUIET_DB, WIND_LOUD_DB, k) + trim
 		Sfx.loop_hold("glider_wind%d" % id, "glider_wind", h.pos, vol, lerpf(WIND_LOW, WIND_HIGH, k))
+	if gliding and not burning and not h.remote and h.glide_fuel < HISS_FROM:
+		var hiss_db := lerpf(HISS_DB, HISS_DB - 18.0, h.glide_fuel / HISS_FROM) + trim
+		Sfx.loop_hold("glider_hiss%d" % id, "glider_hiss", h.pos, hiss_db)
 	if burning:
 		Sfx.loop_hold("glider_burn%d" % id, "glider_burn", h.pos, BURN_DB + trim)
