@@ -153,11 +153,22 @@ func _expedition(first: bool) -> void:
 func _heartspark() -> void:
 	var ht: Heart = m.heart
 	ok(ht != null and ht.site != Vector3.INF, "the match has a Heart")
+	# The carrier is shown to everyone, so rival bots came for the player and could knock them into the
+	# void (p.out: no hint after that, and the rest of the run failed on some seeds of bot play). The check
+	# is about the hint lines, so the rivals stand still and the player is held here for these moments.
+	var bots: Array = m.hunters.filter(func(h): return h != p and h.ctrl == "bot")
+	for h in bots:
+		h.ctrl = "idle"
+		h.inp["move"] = Vector2.ZERO
+	_anchor = p.pos
 	_check("spark", "the Heartspark is charged", _moment(_charged), "spark")
 	_check("carry", "you take the Heartspark", _moment(ht._pick.bind(p)), "carry")
 	_check("heart-again", "dropped and taken again", _moment(_drop_and_take), "")
 	ht.carrier = null
 	ht.state = "charging"
+	_anchor = Vector3.INF
+	for h in bots:
+		h.ctrl = "bot"
 
 func _charged() -> void:
 	m.heart.spark_pos = m.heart.site
