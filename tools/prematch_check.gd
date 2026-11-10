@@ -126,7 +126,8 @@ func _screen(main: Node) -> void:
 	view._send_chat()
 	await main.get_tree().process_frame
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
-	ok(view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible, "the first message opens the log and the input folds back")
+	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
+	ok(log_open, "the first message opens the log and the input folds back")
 	view.pm.left = 0.0
 	view.set_process(false)
 	view.queue_free()
@@ -143,7 +144,8 @@ func _declutter(view: Control, cards: Array) -> void:
 		var shut := not ClassUnlock.is_open(ak)
 		open += 0 if shut else 1
 		var plain: bool = texts == [HeroTitle.base_name(ak), String(Arch.def(ak)["card"]["role_word"])]
-		var tip_ok: bool = card.tooltip_text.contains("health") and (not shut or card.tooltip_text.begins_with("Locked: " + ClassUnlock.requirement(ak)))
+		var quest := "Locked: " + ClassUnlock.requirement(ak)
+		var tip_ok: bool = card.tooltip_text.contains("health") and (not shut or card.tooltip_text.begins_with(quest))
 		plain_ok = plain_ok and plain and lock == shut and tip_ok
 	ok(open == 2 and plain_ok, "each card is name + role word, shut ones have a padlock, hover has stats and the quest")
 	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
@@ -152,5 +154,6 @@ func _declutter(view: Control, cards: Array) -> void:
 	var panel := VBoxContainer.new()
 	HunterPickRow.add(view, panel)
 	var exp_cards: Array = panel.get_child(panel.get_child_count() - 1).get_children()
-	ok(exp_cards.size() == cards.size() and exp_cards[0].get_meta("arch") == cards[0].get_meta("arch"), "the expedition panel shows the same picker")
+	var same: bool = exp_cards.size() == cards.size() and exp_cards[0].get_meta("arch") == cards[0].get_meta("arch")
+	ok(same, "the expedition panel shows the same picker")
 	panel.free()

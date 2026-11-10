@@ -18,7 +18,8 @@ class Padlock extends Control:
 
 ## The grid: one card per Hunter, `picked` lit, `choose` called with the Hunter id on a click. `note` adds a
 ## word after the role of the picked card (e.g. "locked in").
-static func grid(picked: String, choose: Callable, columns: int, card_w: float, portrait_px: float, note := "") -> GridContainer:
+static func grid(picked: String, choose: Callable, columns: int, card_w: float, portrait_px: float,
+		note := "") -> GridContainer:
 	var g := GridContainer.new()
 	g.columns = columns
 	g.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -28,7 +29,8 @@ static func grid(picked: String, choose: Callable, columns: int, card_w: float, 
 		g.add_child(card(String(ak), ak == picked, choose, card_w, portrait_px, note if ak == picked else ""))
 	return g
 
-static func card(ak: String, on: bool, choose: Callable, card_w: float, portrait_px: float, note := "") -> PanelContainer:
+static func card(ak: String, on: bool, choose: Callable, card_w: float, portrait_px: float,
+		note := "") -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var c := UI.tile_card(on, func(): choose.call(ak), 8, Arch.color(ak))
 	c.custom_minimum_size = Vector2(card_w, 0)
@@ -43,7 +45,10 @@ static func card(ak: String, on: bool, choose: Callable, card_w: float, portrait
 	row.add_child(col)
 	col.add_child(UI.label(HeroTitle.base_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big))
 	var role := String(Arch.def(ak)["card"]["role_word"])
-	col.add_child(UI.label(role + ("  ·  " + note if note != "" else ""), 12, UI.GOOD if note != "" else UI.MUTED))
+	if note == "":
+		col.add_child(UI.label(role, 12, UI.MUTED))
+	else:
+		col.add_child(UI.label(role + "  ·  " + note, 12, UI.GOOD))
 	c.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak)
 	if not open:
 		row.add_child(Padlock.new())

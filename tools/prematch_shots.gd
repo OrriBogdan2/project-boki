@@ -10,7 +10,8 @@ const MOMENTS := [["full", 30.0], ["chat", 30.0], ["locked", 0.0]]
 func outside(node: Node, area: Rect2) -> Array:
 	var bad: Array = []
 	for c in node.find_children("*", "Control", true, false):
-		if c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0 and not area.encloses(c.get_global_rect()):
+		var shown: bool = c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0
+		if shown and not area.encloses(c.get_global_rect()):
 			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
 	return bad
 
