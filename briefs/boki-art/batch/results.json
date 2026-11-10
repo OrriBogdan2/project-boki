@@ -73461,5 +73461,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2a_maulangler_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2a_maulangler",
+    "name": "Maulangler (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_maulangler_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_sporcupine",
+    "name": "Sporcupine (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_sporcupine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_snapler",
+    "name": "Snapler (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_snapler_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_sporcupine",
+    "name": "Sporcupine (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_sporcupine_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_sporcupine",
+    "name": "Sporcupine (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_sporcupine_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_snapler",
+    "name": "Snapler (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_snapler_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_snapler",
+    "name": "Snapler (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_snapler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_critwom",
+    "name": "Critwom (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_critwom_1.jpg",
+    "ok": true
   }
 ]
