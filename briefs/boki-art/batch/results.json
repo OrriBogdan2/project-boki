@@ -73237,5 +73237,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2a_anvilbrock_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2a_siegephant",
+    "name": "Siegephant (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_siegephant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_siegephant",
+    "name": "Siegephant (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_siegephant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_siegephant",
+    "name": "Siegephant (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_siegephant_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_tiltster",
+    "name": "Tiltster (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_tiltster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_chuggamus",
+    "name": "Chuggamus (V2 card, batch 1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2a_chuggamus_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_chuggamus",
+    "name": "Chuggamus (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_chuggamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_chuggamus",
+    "name": "Chuggamus (V2 card, batch 1)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2a_chuggamus_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2a_barrelmander",
+    "name": "Barrelmander (V2 card, batch 1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2a_barrelmander_1.jpg",
+    "ok": true
   }
 ]
