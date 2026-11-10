@@ -12,6 +12,7 @@ const CHECKS := {
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
 	"--burrow-check": ["res://tools/burrow_check.gd", "burrow_check", null],
+	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--tutorial-text-check": ["res://tools/tutorial_text_check.gd", "tutorial_text_check", null],
