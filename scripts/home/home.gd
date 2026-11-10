@@ -1693,7 +1693,7 @@ func _open_rack() -> void:
 		tc.custom_minimum_size = Vector2(150, 0)
 		var tv := UI.vbox(1); tc.add_child(tv)
 		var nl := UI.label(String(sk["name"]), UI.T_BODY, UI.INK if owned else UI.MUTED, UI.semi)
-		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		tv.add_child(nl)
 		var st := "Equipped" if Gliders.equipped() == sid else ("Owned" if owned else ("Earned" if sk.has("unlock") else "%d gems" % int(sk["cost"])))
 		tv.add_child(UI.label(st, 12, UI.GOOD if Gliders.equipped() == sid else (UI.MUTED if owned else (UI.FAINT if sk.has("unlock") else UI.GOLD))))
@@ -2733,7 +2733,7 @@ func _challenge_card(c: Array, ready: bool) -> Control:
 	var hr := UI.hbox(10); card.add_child(hr)
 	var lv := UI.vbox(4); lv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var nm := UI.label(String(c[1]), UI.T_BODY, UI.INK if not donec else UI.MUTED, UI.semi)
-	nm.clip_text = true
+	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	lv.add_child(nm)
 	var pr := UI.hbox(8)
 	var cur := mini(Progress.stat(c[3]), int(c[4]))
@@ -2939,7 +2939,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])
 			l.autowrap_mode = TextServer.AUTOWRAP_OFF
-			l.clip_text = true
+			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 			l.tooltip_text = String(ln[0])
 			l.mouse_filter = Control.MOUSE_FILTER_PASS
@@ -3420,7 +3420,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		var sp: Dictionary = Data.KIN[rec["species"]]
 		var nl := UI.label(Data.kin_title(String(rec["name"]), String(sp["name"])), 17, UI.INK, UI.big)
 		nl.autowrap_mode = TextServer.AUTOWRAP_OFF
-		nl.clip_text = true
+		nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		info.add_child(nl)
 		var sl := UI.label("%s  ·  level %d  ·  trust %d%s" % [label_t, int(rec.get("level", 1)), int(rec["trust"]), "  ·  asleep in the Boki Burrow: comes out to go with you" if KinBox.is_boxed(rec) else ""], 12, Color("cdb8ff") if KinBox.is_boxed(rec) else UI.MUTED)
 		sl.autowrap_mode = TextServer.AUTOWRAP_OFF
@@ -3433,7 +3433,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		var keys := "auto" if key == "active" else ("swap in with %s" % Settings.key_cap("swap_kin"))
 		var al := UI.label("%s  ·  %s  ·  bond: %s" % [keys, ", ".join(names), ud.display_name if ud else "-"], 12, UI.MUTED)
 		al.autowrap_mode = TextServer.AUTOWRAP_OFF
-		al.clip_text = true
+		al.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		al.tooltip_text = al.text
 		al.mouse_filter = Control.MOUSE_FILTER_PASS
 		info.add_child(al)
@@ -4655,7 +4655,7 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 	tv.add_child(nm)
 	var spl := UI.label(Evo.form_name(o), 11, UI.MUTED)
 	spl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	spl.clip_text = true
+	spl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tv.add_child(spl)
 	var st := UI.hbox(6)
 	st.alignment = BoxContainer.ALIGNMENT_CENTER

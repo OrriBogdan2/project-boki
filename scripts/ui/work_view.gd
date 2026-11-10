@@ -142,7 +142,7 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	var row := UI.hbox(8)
 	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(dl)
 	row.add_child(pin_menu(h, rec, reopen))
@@ -295,7 +295,7 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	nv.custom_minimum_size.x = 150
 	var nl := UI.label(String(rec["name"]), UI.T_BODY, Shiny.body(rec).lerp(UI.INK, 0.5), UI.semi)
 	nl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nl.clip_text = true
+	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(nl)
 	nv.add_child(UI.label("%s · Lv %d" % [Data.KIN[rec["species"]]["name"], int(rec["level"])], 12, UI.MUTED))
 	r.add_child(nv)
@@ -309,7 +309,7 @@ static func _kin_row(h: Node, w: Dictionary) -> Control:
 	var el := String(w["el"])
 	var dl := UI.label(String(w["text"]), 13, Work.col_of(el).lerp(UI.INK, 0.4) if el != "" else UI.MUTED, UI.semi if el != "" else null)
 	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.clip_text = true
+	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	dv.add_child(dl)
 	var mood := ""
 	if rec.get("overworked", false): mood = "Overworked: needs a rest"

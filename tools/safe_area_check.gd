@@ -1,11 +1,12 @@
 extends RefCounted
 ## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
 ## 2560x1080 ultrawide, 1024x640), and at 720p and 1080p again at Text size 125% and 150%
-## (Settings.TEXT_SIZES). At each, no text is clipped (SafeArea.clipped), every group (a registered HUD panel, or a top-level control of a
-## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
-## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
+## (Settings.TEXT_SIZES). At each, no text is clipped (SafeArea.clipped), every group (a registered HUD panel,
+## or a top-level control of a screen) sits inside SafeArea's margin and no two groups of one screen overlap.
+## The match HUD is read from SafeArea's registry; the pick (prematch), pause, results, farm HUD, expedition
+## panel, settings, inventory and Field Book from their controls.
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
-## and size (<dir>/<W>x<H>_<screen>.png) and a contact sheet of them.
+## and size (<dir>/<W>x<H>_<text %>_<screen>.png) and a contact sheet of them.
 
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080),
 		Vector2i(1024, 640)]
@@ -71,7 +72,8 @@ func _judge(screen: String, win: Vector2i, groups: Dictionary, sz: Vector2, root
 			what % [tag, groups.size(), int(SafeArea.MARGIN), sz, problems.slice(0, 4)])
 	if shots != "":
 		await _frames(2)
-		main.get_viewport().get_texture().get_image().save_png("%s/%dx%d_%d_%s.png" % [shots, win.x, win.y, int(text_k * 100.0), screen])
+		var file := "%s/%dx%d_%d_%s.png" % [shots, win.x, win.y, int(text_k * 100.0), screen]
+		main.get_viewport().get_texture().get_image().save_png(file)
 
 func _hud() -> void:
 	m = Match.new()

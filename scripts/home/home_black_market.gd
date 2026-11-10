@@ -125,7 +125,7 @@ func _rare_card(e: Dictionary) -> Control:
 	nv.add_child(top)
 	var sub := UI.label("Hatches a rare Boki on the Incubator" if egg else Goods.desc_of(key), 12, UI.MUTED)
 	sub.autowrap_mode = TextServer.AUTOWRAP_OFF
-	sub.clip_text = true
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	nv.add_child(sub)
 	hr.add_child(nv)

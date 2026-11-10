@@ -816,7 +816,7 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 		head.add_child(bb)
 	var tcol := vbox(2); tcol.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var t := title(title_txt, T_TITLE, INK)
-	t.clip_text = true
+	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tcol.add_child(t)
 	var sub := label("", T_SMALL + 1, MUTED)
