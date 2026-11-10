@@ -90,6 +90,9 @@ func _preset(m: Match, preset: String, cap: int) -> void:
 	var high := int(Settings.QUALITY["high"]["mob_cap"])
 	m.opts["autoplay"] = true
 	ok(m.mob_cap.limit() == high, "%s: a bot run uses the High cap (%d)" % [preset, high])
+	m.opts["client_cap"] = true
+	ok(m.mob_cap.limit() == cap, "%s: a client_cap bot run (--perf-bench) keeps its own cap (%d)" % [preset, cap])
+	m.opts.erase("client_cap")
 	m.opts.erase("autoplay")
 	Settings.v["quality"] = "ultra"
 	m.mob_cap.tick(1.0)

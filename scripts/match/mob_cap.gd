@@ -16,9 +16,11 @@ var _t := 0.0
 func _init(match_node: Match) -> void:
 	m = match_node
 
-## The cap that applies to this match.
+## The cap that applies to this match. A "client_cap" match (--perf-bench) keeps the preset's own cap
+## even with bots playing, since it measures what this client's preset costs.
 func limit() -> int:
-	var preset := "high" if Net.online() or m.opts.get("autoplay", false) else Settings.quality()
+	var fair: bool = Net.online() or (m.opts.get("autoplay", false) and not m.opts.get("client_cap", false))
+	var preset := "high" if fair else Settings.quality()
 	return int(Settings.QUALITY[preset]["mob_cap"])
 
 func tick(dt: float) -> void:
