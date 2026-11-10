@@ -2609,7 +2609,6 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
 	if credit == player:
-		if tut: tut.kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)

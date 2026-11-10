@@ -94,13 +94,25 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if best == null:
 		return
 	p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
-	if p.flat_dist(best) > 3.0: goto.call(best.pos)
-	if sid in ["shoot", "fight"]: p.inp["fire"] = true
+	var melee: bool = p.wpn.get("melee", false)
+	if p.flat_dist(best) > (1.6 if melee else 3.0): goto.call(best.pos)
+	if sid in ["shoot", "fight"]: p.inp["fire"] = _fire_key(m)
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
 		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
 	elif sid == "fight" and p.kin and p.kin.state in ["shoulder", "active"]:
 		p.kin.throw_to(best.pos)
+
+## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
+## tapped (a hold would charge it), a gun is held.
+static func _fire_key(m: Match) -> bool:
+	var p := m.player
+	var st: Array = p.wpn.get("draw", [])
+	if not st.is_empty():
+		return p.draw_t < float((st[0] as Array)[0]) + 0.05
+	if p.wpn.get("melee", false):
+		return fmod(m.time, 0.5) < 0.1
+	return true
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
 static func _rmb(m: Match, tu: Tutorial) -> void:
