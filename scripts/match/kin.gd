@@ -37,6 +37,8 @@ var path_goal := Vector2i.ZERO
 var path_t := 0.0
 var path_searches := 0          # A* searches it has run (a check counts them)
 var stuck_t := 0.0                # seconds without progress (KinFollow.watch_stuck)
+var guard_side := 1.0             # a big Boki on the Return order: the flank it guards (+1 right, -1 left)
+var beside := false               # ...and it is at that flank now (state "shoulder", not on you)
 var steady_t := 0.0               # carried by traversal: seconds you have been steady on the ground
 var gap_at := -9.0                # when need_carry last searched for a way across, and what it found
 var gap_v := false
@@ -185,6 +187,11 @@ func carry_style() -> String:
 ## over a glide or a drop, gives nothing (docs/decisions/0002).
 func carried() -> bool:
 	return not dead and state == "shoulder" and settle >= 1.0 and cmd == "return"
+
+## Too big to sit on you (body mass over follow.shoulder_max_mass): on the Return order it guards at
+## your side instead (KinFollow.guard_tick), never under or in you.
+func big() -> bool:
+	return ks != null and ks.mass > KinFollow._r("shoulder_max_mass")
 
 ## Walking at your side under the Follow order, close enough to count as "with you" (the death-box rules).
 func with_owner() -> bool:
@@ -337,7 +344,7 @@ func recall() -> void:
 			return
 		fly = {}
 		if cmd == "return":
-			KinFollow.leap(self, owner_h.pos + Vector3(0, 1.5, 0), "shoulder", true)
+			KinFollow.leap(self, KinFollow.onto(self), "shoulder", true)
 		else:
 			KinFollow.leap(self, KinFollow.side_spot(self), "side", true)
 		throw_cd = float(Content.rules("kin_ai").get("recall_cooldown", 1.0))
@@ -357,7 +364,8 @@ func command_skill(p: Vector3, slot := "k1") -> void:
 
 ## Uses ability k1 (E) or k2 (the auto active) at a spot. Out on the field the kin casts it itself.
 ## Carried (shoulder, perch, mount) or merged it never leaves you: it lends you the ability and you
-## perform it. A from:owner ability always works on its hunter, wherever the kin is.
+## perform it, except a dash, leap or blink: a carried Boki jumps off and does that one itself, so a
+## Boki never moves you (DECISIONS 2026-11-06). A from:owner ability always works on its hunter.
 ## Locked slots (run levels) never cast, by the player, a bot or the kin's own AI.
 func use_ability(slot: String, p: Vector3, auto := false) -> bool:
 	if runner == null or not runner.is_ready(slot) or not ready_to_fight() or not slot_open(slot):
@@ -376,8 +384,10 @@ func use_ability(slot: String, p: Vector3, auto := false) -> bool:
 	if carried_now:
 		if auto or owner_h == null:
 			return false        # a riding kin never acts on its own
-		_cast(slot, p, auto, owner_h, pw * (1.0 if merged else 0.85))
-		return true
+		if merged or not KinExec.moves_caster(def):
+			_cast(slot, p, auto, owner_h, pw * (1.0 if merged else 0.85))
+			return true
+		KinFollow.drop_beside(self)
 	if state in ["returning", "flying_home"]:
 		state = "active"
 		fly = {}
@@ -637,21 +647,23 @@ func sim(dt: float) -> void:
 
 ## Where its speech bubble sits.
 func bubble_at() -> Vector3:
-	if state == "shoulder" and owner_h:
+	if state == "shoulder" and owner_h and not beside:
 		return owner_h.position + Vector3(0, 2.3, 0)
 	return position + Vector3(0, 1.2, 0)
 
 ## Where it is for the eye (on you counts as your shoulder), for tests and callers that care.
 func seen_pos() -> Vector3:
-	if state == "shoulder" and owner_h:
+	if state == "shoulder" and owner_h and not beside:
 		return owner_h.pos + Vector3(0, 1.5, 0)
 	return pos
 
 func _sim_shoulder(dt: float) -> void:
 	if owner_h.out or owner_h.extracted:
 		return
-	pos = owner_h.pos + Vector3(0, 1.5, 0)
-	prev = pos
+	beside = big() and cmd == "return" and giant.is_empty() and KinFollow.guard_tick(self, dt)
+	if not beside:
+		pos = owner_h.pos + Vector3(0, 1.5, 0)
+		prev = pos
 	settle = minf(1.0, settle + dt / 1.0)
 	if owner_h.downed:
 		_consider_revive(dt)
@@ -754,7 +766,7 @@ func _sim_fly_home(dt: float) -> void:
 	if side:
 		fly["to"] = KinFollow.side_spot(self)
 	else:
-		fly["to"] = owner_h.pos + Vector3(0, 1.5, 0)
+		fly["to"] = KinFollow.onto(self)
 	var k := clampf(fly["t"] / fly["dur"], 0.0, 1.0)
 	var was := pos
 	pos = (fly["from"] as Vector3).lerp(fly["to"], k) + Vector3(0, sin(k * PI) * float(fly.get("height", 1.4)), 0)
@@ -1083,17 +1095,18 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
-	model.set_meta("kstate", "perch" if state == "shoulder" else ("attack" if lunge_t > 0.0 else ""))
+	var on_you := state == "shoulder" and not beside
+	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
 		pose_now = "nudge"
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
-	if state == "shoulder" and owner_h and owner_h.model and carry_style() == "mount" and not owner_h.gliding and (cmd == "return" or not giant.is_empty()):
-		_render_mount(delta, body)       # you ride it (the Return order, or merged); carried over a glide it curls up on your back below
+	if on_you and owner_h and owner_h.model and not giant.is_empty() and not owner_h.gliding:
+		_render_mount(delta, body)       # the giant Fusion form is ridden; carried over a glide it curls up on your back below
 		return
-	if state == "shoulder" and owner_h and owner_h.model and carry_style() != "shoulder":
+	if on_you and owner_h and owner_h.model and carry_style() != "shoulder":
 		# perched on the pack (or a mount curled up into a ball on your back while you glide)
 		var torso: Node3D = owner_h.model.get_node("Rig/Torso")
 		var ball := carry_style() == "mount"
@@ -1103,7 +1116,7 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = absf(sin(hop_ph * 0.5)) * 0.03
 		body.rotation = Vector3(0.0, 0.0, sin(m.time * 2.0) * 0.05) if not ball else Vector3(0.9, 0.0, 0.0)
 		return
-	if state == "shoulder" and owner_h and owner_h.model:
+	if on_you and owner_h and owner_h.model:
 		var sh: Node3D = owner_h.model.get_node("Rig/Torso/Shoulder")
 		global_position = sh.global_position
 		model.rotation.y = owner_h.face

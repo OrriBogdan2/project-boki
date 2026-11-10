@@ -1,9 +1,9 @@
 {
 	"grammar": 1,
-	"id": "moon_swap",
-	"name": "Moon Swap",
-	"short": "Swap",
-	"flavor": "Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.",
+	"id": "moon_mark",
+	"name": "Moon Mark",
+	"short": "Mark",
+	"flavor": "Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.",
 	"theme": "lunar",
 	"tier": 1,
 	"from": "kin",
@@ -31,13 +31,19 @@
 					"amount": 4
 				},
 				{
-					"type": "signature",
-					"id": "swap",
-					"who": "owner"
-				},
-				{
 					"type": "stun",
 					"duration": 0.4
+				},
+				{
+					"type": "mark",
+					"mode": "reveal",
+					"duration": 4
+				},
+				{
+					"type": "mark",
+					"mode": "vulnerable",
+					"duration": 4,
+					"amount": 0.15
 				}
 			]
 		}
