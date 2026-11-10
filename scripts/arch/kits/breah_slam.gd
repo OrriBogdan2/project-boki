@@ -76,6 +76,15 @@ func _tick_hop() -> void:
 	var v := hop_v + (h.inp["move"] as Vector2).limit_length(1.0) * float(sd()["nudge"])
 	h.vel.x = v.x
 	h.vel.z = v.y
+	# the circle stays on the ground to the landing, where the hop will come down (it moves with the nudge)
+	_circle(h.pos + Vector3(v.x, 0, v.y) * h.fly_t, k.dive_k)
+
+## The circle everyone sees: the slam's outer ring and its sweet spot growing with the charge `c`.
+func _circle(at: Vector3, c: float) -> void:
+	var core: Array = sd()["core"]
+	var ring := {"at": at, "r": radius(c), "k": c, "fill": c, "core0": core[0], "core1": core[1]}
+	ring.merge({"all": true, "col": Color("3a7cff"), "col2": Color("d8ecff")})
+	AimKit.sweet(k.h, "rmb", ring)
 
 func hold_tick(t: float) -> void:
 	var h := k.h
@@ -83,13 +92,7 @@ func hold_tick(t: float) -> void:
 		return
 	var c := charge_k(t)
 	if k.anim_id != "breah_crouch" and not leapt: k.play("breah_crouch")
-	AimKit.sweet(
-		h, "rmb",
-		{
-			"at": center(), "r": radius(c), "k": c, "fill": c, "core0": float(sd()["core"][0]),
-			"core1": float(sd()["core"][1]), "all": true, "col": Color("3a7cff"), "col2": Color("d8ecff")
-		}
-	)
+	_circle(center(), c)
 	AimKit.charge(h, c, {"col": DolmKit.COBALT, "col2": Color("d8ecff")})
 	var looks := KitLooks.of(k.m)
 	var dd := h.aim_dir()
@@ -183,6 +186,7 @@ func slam(c: float, at_feet: bool) -> void:
 	var h := k.h
 	var m := k.m
 	var s := sd()
+	AimKit.hide(h, "rmb")
 	var at := h.pos
 	if not at_feet:
 		var pw := HeroZones.walk(m, h.pos, tap_spot(), float(s["reach"]))
