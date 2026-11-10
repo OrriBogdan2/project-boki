@@ -9,6 +9,7 @@ extends RefCounted
 const DT := 1.0 / 30.0
 const HEROES := ["gunslinger", "bulwark", "archer"]      # Vex, Albert, Lace
 const SWEEP := 0.6              # s: the cursor goes through 180 degrees
+const TILE := 300               # px: one frame of a strip
 const SETTLE := 1.0             # s after the cursor stops
 const RING := 8.0               # m: the cursor's distance from the Hero
 const LEAD_MIN := 0.3           # rad: the head turns at least this far ahead of the legs in the sweep
@@ -144,10 +145,10 @@ func _hero(id: String, shots: String) -> void:
 		_judge(id + " walk", await _sweep(m, P, sk, Vector2(0, -1), false, PI))
 		_judge(id + " LMB hold", await _sweep(m, P, sk, Vector2.ZERO, true, 0.0))
 		_dash_off(m, P, sync)
-	if shots != "":
-		await _strip(r, id, shots)
 	m.queue_free()
 	await main.get_tree().process_frame
+	if shots != "":
+		await _strip(id, shots)
 
 ## A full-body clip (the slide) carries its own pose: the layer is off while it owns the body.
 func _dash_off(m: Match, P: Hunter, sync: Node) -> void:
@@ -167,31 +168,36 @@ func _dash_off(m: Match, P: Hunter, sync: Node) -> void:
 	ok(seen > 3 and worst <= OFF_MAX,
 			"gunslinger dash: the layer is off under the full-body clip (%d frames, weight %.2f)" % [seen, worst])
 
-## The sweep from above, six frames side by side.
-func _strip(r: Array, id: String, dir: String) -> void:
-	var m: Match = r[0]
-	var P: Hunter = r[1]
-	var sk := WardenGlb.skeleton(P.model.get_node("Warden"))
-	var cam := Camera3D.new()
-	cam.fov = 28.0
-	m.add_child(cam)
-	cam.current = true
-	cam.global_position = P.pos + Vector3(0, 4.2, 2.6)
-	cam.look_at(P.pos + Vector3(0, 0.8, 0))
-	main.get_viewport().size = Vector2i(300, 300)
+## The sweep from above, six frames side by side: a bare model on a stage, its state fed the cursor's facing.
+func _strip(id: String, dir: String) -> void:
+	var stage = load("res://tools/clip_shots.gd").new()
+	stage._stage(main)
+	var cam: Camera3D = stage.cam
+	cam.fov = 30.0
+	cam.position = Vector3(0, 4.6, 1.3)
+	cam.look_at(Vector3(0, 0.8, 0))
+	var model := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	stage.holder.add_child(model)
+	var sync := model.get_node("Warden/Sync")
+	sync.set_process(false)
+	main.fade.reveal(0.01)
+	main.get_window().size = Vector2i(TILE, TILE)
+	main.get_viewport().size = Vector2i(TILE, TILE)
+	for f in 30:
+		await main.get_tree().process_frame       # (past the title's fade)
 	var tiles := []
-	var every := 4
-	var grab := func(f: int) -> void:
-		if f % every == 0 and f < 6 * every:
+	var sweep_n := int(SWEEP / DT)
+	for f in sweep_n:
+		var face := PI * float(f + 1) / sweep_n
+		model.rotation.y = face
+		model.set_meta(WardenClips.STATE, {"face": face, "grounded": true})
+		sync.call("_process", DT)
+		if f % 3 == 2:
 			await RenderingServer.frame_post_draw
-			tiles.append(main.get_viewport().get_texture().get_image())
-	await _sweep(m, P, sk, Vector2.ZERO, false, 0.0, grab)
-	if tiles.is_empty():
-		return
-	var w := (tiles[0] as Image).get_width()
-	var h := (tiles[0] as Image).get_height()
-	var strip := Image.create(w * tiles.size(), h, false, Image.FORMAT_RGBA8)
+			tiles.append(main.get_tree().root.get_texture().get_image())
+	var strip := Image.create(TILE * tiles.size(), TILE, false, Image.FORMAT_RGBA8)
 	for i in tiles.size():
-		strip.blit_rect(tiles[i], Rect2i(0, 0, w, h), Vector2i(i * w, 0))
+		strip.blit_rect(tiles[i], Rect2i(0, 0, TILE, TILE), Vector2i(i * TILE, 0))
 	DirAccess.make_dir_recursive_absolute(dir)
 	strip.save_png("%s/aim_lead_%s.png" % [dir, id])
+	stage.holder.queue_free()
