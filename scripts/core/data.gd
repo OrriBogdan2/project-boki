@@ -120,7 +120,7 @@ const PERKS := {
 	"satchel": {"name": "Wayfarer's Satchel", "desc": "A deep bag: one more backpack slot.", "icon": "satchel", "col": Color("d9b27a"), "max": 2, "stats": {"pack": 1.0}},
 	"spyglass": {"name": "Brass Spyglass", "desc": "See 12% further through grass and gloom.", "icon": "scanner", "col": Color("ffe08a"), "max": 1, "stats": {"sight": 0.12}},
 	"tinker_roll": {"name": "Tinker's Roll", "desc": "A roll of small tools: reloads 15% faster.", "icon": "medkit", "col": Color("ffb86a"), "max": 1, "stats": {"reload": 0.15}},
-	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Even levels take them in a fixed order (WeaponPath); orbs drop the rest.
+	# weapon upgrades (WeaponUps): they grow the one signature weapon you carry. Orbs and tuning pickups drop them.
 	"hotload": {"name": "Hotload", "desc": "Your weapon hits 10% harder.", "icon": "burst", "col": Color("ff8a6a"), "max": 4, "wup": {"dmg": 0.10}},
 	"deepmag": {"name": "Deep Magazine", "desc": "20% more rounds before a reload.", "icon": "satchel", "col": Color("ffd27a"), "max": 3, "wup": {"mag": 0.20}},
 	"quickfeed": {"name": "Quick Feed", "desc": "Your weapon fires 7% faster.", "icon": "pulse", "col": Color("d07aff"), "max": 3, "wup": {"rate": -0.07}},

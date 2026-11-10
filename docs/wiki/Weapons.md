@@ -32,7 +32,7 @@ Numbers are per shot or swing before any upgrades. Class kits that run their own
 
 ## Weapon upgrades
 
-No weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.
+No weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.
 
 | Upgrade | Effect | Stacks |
 |---|---|---|
