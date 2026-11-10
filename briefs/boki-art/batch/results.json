@@ -84003,5 +84003,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/on_sirencada_big_3.jpg",
     "ok": true
+  },
+  {
+    "id": "on_glassolotl",
+    "name": "Glassolotl (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_glassolotl_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glassolotl",
+    "name": "Glassolotl (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_glassolotl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lunowl_dusk",
+    "name": "Lunowl (owner note: design change, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/on_lunowl_dusk_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lunowl_dusk",
+    "name": "Lunowl (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_lunowl_dusk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glassolotl",
+    "name": "Glassolotl (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_glassolotl_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lunowl_dusk",
+    "name": "Lunowl (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_lunowl_dusk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_lunowl_dusk",
+    "name": "Lunowl (owner note: design change, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_lunowl_dusk_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_glassolotl",
+    "name": "Glassolotl (owner note: new pose, V2)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/on_glassolotl_4.jpg",
+    "ok": true
   }
 ]
