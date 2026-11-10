@@ -506,3 +506,10 @@ SPECS.append({'id':'on_scopeleon','name':'Scopeleon (V2 card, text-only style)',
 SPECS.append({'id':'on_wickapi','name':'Wickapi (V2 card, text-only style)','refs':[_C%'Wickapi'],'runs':3,'aspect':'1:1','size':'2K',
   'prompt':RS_CARD_TEXT('Wickapi','baby','cute',"dark reddish-brown fur, cream-striped legs, a cream wax candle stub on its head with one small purple flame, purple eyes, a purple-black wispy tail","four legs, two big ears, one candle, one tail",True,True,
     "its proportions become a real okapi calf's: longer legs, a longer neck and a smaller head, standing on all four legs")})
+
+# 23:05 ET 11-09: text-only style test = 8 of 8 clean (no tiles, no second creature) and the style holds. It is now the default card route.
+# Picks live: Barostorm (v2t_1 / v2s_1 / v2p_2), Maulangler (v2t_1 / v2s_1 / v2p_1), Barrelmander (v2x_1 / v2s_1 / v2p_3),
+# Jerbit (v2t_2 / v2s_1 / v2p_1), Jerbolt (v2t_4 / v2s_3 / v2p_3). Bastling waits for Bastionpet's new look (owner note).
+for _n,_s,_pose in (('Bullpole','v2n_bullpole_1',"bouncing up off the ground, tail fin flicked to one side, cheerful"),
+                    ('Dynaboa','v2n_dynaboa_1',"planted in a wide stance on its coiled-spring legs, copper fins fanned open, looking down at the viewer")):
+    _r=(_B2D.get(_n) or _B3D[_n]); V2SHEET_NEW(_n,_O+_s+'.jpg',_r[6],_r[7]); V2PORT_NEW(_n,_O+_s+'.jpg',_r[2],_r[3],_r[6],_r[7],_r[4],_r[5],_pose)

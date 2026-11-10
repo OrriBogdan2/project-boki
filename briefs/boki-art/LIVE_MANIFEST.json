@@ -65,10 +65,10 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Barrelmander.png",
   "display_name": "Kegmander",
   "hash": {
-   "sheet": "5ba694b8b910",
-   "card": "65b775bc8119",
-   "portrait": "c1a78763c14d",
-   "hero": "eb33cf78b671"
+   "sheet": "699eba7a6081",
+   "card": "7c2c180a4270",
+   "portrait": "39e7d4299858",
+   "hero": "37c5cf0755cc"
   }
  },
  "Bathilus": {
@@ -1238,10 +1238,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Maulangler.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Maulangler.png",
   "hash": {
-   "sheet": "f1a77bdcb408",
-   "card": "9be4a77faf71",
-   "portrait": "bc53729541ac",
-   "hero": "4690f6733608"
+   "sheet": "6c4229c795b0",
+   "card": "6c6020305324",
+   "portrait": "948cc413cef6",
+   "hero": "35f03d940493"
   }
  },
  "Medushroom": {
@@ -2593,10 +2593,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Barostorm.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Barostorm.png",
   "hash": {
-   "sheet": "47adf98860cb",
-   "card": "d08590a3f88c",
-   "portrait": "38dd6e1ea39b",
-   "hero": "dd6afcb5524b"
+   "sheet": "9bfe71092375",
+   "card": "5cf7f149caad",
+   "portrait": "1cba712286ae",
+   "hero": "fe689847649b"
   }
  },
  "Bonsolith": {
@@ -3142,5 +3142,31 @@
    "hero": "6a53a105ba13"
   },
   "display_name": "Jinglop"
+ },
+ "Jerbit": {
+  "sheet": "briefs/boki-art/turnarounds/Jerbit.jpg",
+  "card": "briefs/boki-art/cards/Jerbit.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Jerbit.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Jerbit.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Jerbit.png",
+  "hash": {
+   "sheet": "79aa673b0b35",
+   "card": "ecbf5a761937",
+   "portrait": "3ebef191c10a",
+   "hero": "04bc7c0d7087"
+  }
+ },
+ "Jerbolt": {
+  "sheet": "briefs/boki-art/turnarounds/Jerbolt.jpg",
+  "card": "briefs/boki-art/cards/Jerbolt.jpg",
+  "portrait": "briefs/boki-art/portraits/light/Jerbolt.jpg",
+  "cutout": "briefs/boki-art/portraits/cutout_v2/Jerbolt.png",
+  "hero": "briefs/boki-art/portraits/cutout_v2/Jerbolt.png",
+  "hash": {
+   "sheet": "cfef48b3c200",
+   "card": "1998693fe1c5",
+   "portrait": "288d9c513487",
+   "hero": "744593d0b63f"
+  }
  }
 }

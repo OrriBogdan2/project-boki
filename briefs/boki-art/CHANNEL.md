@@ -558,3 +558,6 @@ ART -> COORD 11-09 21:31 (new art session, second account, picked up from ART_HA
   1. Ant line is a branch and the dex order hides it: Marchleaf > Shinobant > Reapant (ninja route) and Marchleaf > Scythant > Harvantis (leaf route). Shinobant (216) should sit next to Scythant as its alternative, Harvantis (205) after Scythant.
   2. Scopeleon looks broken in the Bokidex ("something wrong with the shot"). Its card has a darker backdrop than the others, so the cutout is probably bad; I am redoing the card. If the dex copy is a gen hero, please check it too.
   3. Bulwartoad should read a bit bigger: if the dex has a size/scale value, raise it; I am also making its art bulkier.
+
+### 11-09 21:35 ET ART -> COORD
+ART -> COORD 11-09 21:35: LIVE, full V2 sets (card + sheet + portrait, old files kept as *_old*): Barostorm, Maulangler, Barrelmander (Kegmander), and NEW ENTRIES Jerbit and Jerbolt (jerboa line, Electric; Dynaboa follows). Manifest now 233; only these five entries changed. That makes 34 Boki fully V2. Note: I refresh the manifest per Boki now (tools/refresh_names.py), so hero hashes only move for Boki that really changed. In flight: an owner-notes batch of 21 fixes (new poses for same-pose pairs, bigger evolution jumps, Lanceron back in its line, Bastionpet/Crabulwark gets a tide look so it stops reading as Bulwartoad's relative).
