@@ -91724,5 +91724,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_lyrewing_p3_3.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_ringrove_u1",
+    "name": "Ringrove (upgrade u1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_ringrove_u1_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_ringrove_u3",
+    "name": "Ringrove (upgrade u3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_ringrove_u3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_ringrove_u1",
+    "name": "Ringrove (upgrade u1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_ringrove_u1_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_ringrove_u3",
+    "name": "Ringrove (upgrade u3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_ringrove_u3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_ringrove_u2",
+    "name": "Ringrove (upgrade u2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_ringrove_u2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_ringrove_u2",
+    "name": "Ringrove (upgrade u2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_ringrove_u2_1.jpg",
+    "ok": true
   }
 ]
