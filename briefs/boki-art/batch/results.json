@@ -99480,5 +99480,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/new_sawshark_a_1.jpg",
     "ok": true
+  },
+  {
+    "id": "new_xylocroc_b",
+    "name": "New line baby: xylocroc b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_postroo_a",
+    "name": "New line baby: postroo a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_postroo_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_xylocroc_a",
+    "name": "New line baby: xylocroc a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_a",
+    "name": "New line baby: carousel a",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_carousel_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_postroo_b",
+    "name": "New line baby: postroo b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_postroo_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_xylocroc_b",
+    "name": "New line baby: xylocroc b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/new_xylocroc_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_carousel_b",
+    "name": "New line baby: carousel b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_carousel_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "new_postroo_a",
+    "name": "New line baby: postroo a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/new_postroo_a_2.jpg",
+    "ok": true
   }
 ]
