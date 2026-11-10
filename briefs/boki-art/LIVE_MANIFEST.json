@@ -218,9 +218,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Buckleron.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Buckleron.png",
   "hash": {
-   "sheet": "e6a05d9c1ba4",
+   "sheet": "56d61cd5ab6b",
    "card": "b80a47b83922",
-   "portrait": "850cd2225a8b",
+   "portrait": "4f35010a78c5",
    "hero": "1a7da2304146"
   }
  },
@@ -257,9 +257,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Canvastross.png",
   "hash": {
-   "sheet": "c1ab67ffe50e",
+   "sheet": "3049fa7deb0e",
    "card": "36769e75be9a",
-   "portrait": "dd552cd59ed5",
+   "portrait": "51a4b54c94bf",
    "hero": "fd2e5c656018"
   }
  },
@@ -284,9 +284,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Chandelotl.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Chandelotl.png",
   "hash": {
-   "sheet": "5d30addc49f4",
+   "sheet": "126da107d604",
    "card": "802b38e19ea4",
-   "portrait": "bbd1d2e8be03",
+   "portrait": "c0ee21159bdb",
    "hero": "68bc5475e94d"
   },
   "display_name": "Crystalotl"
@@ -391,9 +391,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Dragonkite.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Dragonkite.png",
   "hash": {
-   "sheet": "621df432d7c5",
+   "sheet": "b0ac64fef9cc",
    "card": "9ce94ba3beb8",
-   "portrait": "a41aa387fb3b",
+   "portrait": "8e1ae5a6f950",
    "hero": "f799e972b6e5"
   },
   "display_name": "Kitedrake"
@@ -1167,8 +1167,10 @@
    "card": "briefs/boki-art/cards/Lunowl_female.jpg",
    "hash": {
     "card": "a4ab985b4cc9",
-    "sheet": "242d2d2dd61f"
-   }
+    "sheet": "45302238af04",
+    "portrait": "8aa65103b0b7"
+   },
+   "portrait": "briefs/boki-art/portraits/light/Lunowl_female.jpg"
   },
   "sex_forms_note": "main card/sheet = male look; \"female\" holds the female look when made (babies differ little or not at all)"
  },
@@ -1192,9 +1194,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lyrewing.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Lyrewing.png",
   "hash": {
-   "sheet": "6294e6769eb0",
+   "sheet": "eda4099cfcf2",
    "card": "a63d22380b0a",
-   "portrait": "4dff9d1489ba",
+   "portrait": "15514df1038c",
    "hero": "fc6ecc0528fb"
   }
  },
@@ -1928,9 +1930,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Sporcupine.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Sporcupine.png",
   "hash": {
-   "sheet": "9166d4bda2d7",
+   "sheet": "6f5ee17b7999",
    "card": "9ee9693c4ac4",
-   "portrait": "043ed3663548",
+   "portrait": "536b94cfea37",
    "hero": "78855d843555"
   }
  },
@@ -1993,9 +1995,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hash": {
-   "sheet": "e12915f1edac",
+   "sheet": "380e1186bba3",
    "card": "8a34487ff32b",
-   "portrait": "0b043d5c4f97",
+   "portrait": "d638990affa5",
    "hero": "bf6cd3782d65"
   }
  },
@@ -2531,8 +2533,8 @@
    "portrait": "briefs/boki-art/portraits/light/Murmuron_female.jpg",
    "hash": {
     "card": "1d3d5ad65cb0",
-    "sheet": "7612df27902d",
-    "portrait": "f480dc5ff1db"
+    "sheet": "778ae2af3eea",
+    "portrait": "693b52bf7594"
    }
   }
  },
@@ -2596,10 +2598,10 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Jibbatross.png",
   "hash": {
-   "sheet": "fef62b4bc15c",
-   "card": "01d1d9c233fd",
-   "portrait": "23f0418bdfe9",
-   "hero": "1d10d40e6652"
+   "sheet": "20f2ae7bc9b2",
+   "card": "84c073fca364",
+   "portrait": "b50926533f98",
+   "hero": "7563631106c5"
   },
   "sheet": "briefs/boki-art/turnarounds/Jibbatross.jpg"
  },
@@ -3043,9 +3045,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Siegephant.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Siegephant.png",
   "hash": {
-   "sheet": "7b50f721e0a2",
+   "sheet": "35ec415db659",
    "card": "1c810d231ccc",
-   "portrait": "6b9f6e1782ad",
+   "portrait": "bbd02947d497",
    "hero": "d557ddc7b5fe"
   },
   "legendary_tier": "boss"

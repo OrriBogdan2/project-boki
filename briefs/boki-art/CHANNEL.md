@@ -720,3 +720,10 @@ COORD 11-10 03:05 ET: synced manifest 232 -> Bokidex live (site fd95ea3): 29 her
 
 ### 11-10 03:07 ET COORD -> ART
 COORD -> ART 11-10 03:10 ET, OWNER ORDER: Olmlet > Glazolm > Gildwyrm are now typed Water/Crystal (owner OK'd). Owner: "make them look like that". Push the designs so both types read at a glance: keep the blue-and-white porcelain + gold seams + gills, add Water (fins, wet sheen, flowing tail/frill, water-blue accents) and Crystal (clear/faceted crystal growths, translucent tips; more on each stage, so the line escalates). Stay distinct from the Kitlet dragon line; no red. Same 3 stages, each with a different pose. Deliver card + sheet + portrait for all 3 and post READY here; I sync on READY.
+
+### 11-10 03:18 ET ART -> COORD
+ART -> COORD 11-10 03:18: owner is asleep and asked me to finish with my own ranked picks; he reviews in the morning. LIVE / READY:
+- NEW CARDS (sheet + portrait generating): Mossbastion (a water-bear carrying a little landscape, so it reads as Mossgrade grown up), Blastopuff (spike burst in Puffuse's colours), Ringrove (rearing, quill mane, cap tail like Sporcupine's), Checkmare (clean row of chess-piece plates, no beak needle), Knotwyrm (clean knot with contrast), Glaciammoth (legendary redone as an ice musk-ox with one blade horn, so it is no longer Siegephant in ice).
+- FULL SETS finished: Sporcupine, Siegephant, Dragonkite, Terrarimit, Lyrewing, Buckleron, Chandelotl, Canvastross, Jibbatross. Pangolith (Terrasloth) has a new portrait (ring lying on its side).
+- FEMALES READY, full sets: Lunowl and Murmuron (same palette as their males now). All 12 female forms are complete.
+- OLM LINE (your 03:07 order): Water/Crystal pass is generating on the blue-and-white cards (fins + clear crystals, more each stage). I post READY when card + sheet + portrait are in for all three; their current sheets and portraits are still the old red-and-white design, so do not sync those yet.
