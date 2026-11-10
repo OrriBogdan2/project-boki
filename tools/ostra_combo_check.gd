@@ -99,7 +99,7 @@ func _ostra() -> void:
 	P.inp["fire"] = false
 	var orb: Array = m.shots.filter(func(s): return s["by"] == P)
 	var olen := float(orb[0]["life0"]) * (orb[0]["vel"] as Vector2).length() if not orb.is_empty() else 0.0
-	ok("lmb: a plain orb flies past the cursor to full range (14m)", olen > 12.0, "%.1f m" % olen)
+	ok("lmb: a plain orb flies past the cursor to full range (12.25m)", olen > 11.0 and olen < 13.0, "%.1f m" % olen)
 	ok("lmb: the orb is his own violet teardrop (skin)", KitLooks.of(m).skins_live("orb") >= 1)
 	step(m, 1.0)
 	ok("lmb: ...and hits a foe well past the cursor", dmg(T) > 5.0, "took %.1f" % dmg(T))
@@ -713,8 +713,8 @@ func _hover(m: Match, P: Hunter, T: Hunter, home: Vector3, K: OstraKit) -> void:
 	var speed := drift / (float(ticks[0]) * DT)
 	var fly_slow := float(K.dash_def()["fly_slow"])
 	ok(
-		"item 75: in flight he drifts at dash.fly_slow (0.3) of his run speed",
-		flying and run_speed > 1.0 and absf(fly_slow - 0.3) < 0.001
+		"owner 11-10: in flight he drifts at dash.fly_slow (0.675, owner playtest 11-10) of his run speed",
+		flying and run_speed > 1.0 and absf(fly_slow - 0.675) < 0.001
 			and absf(speed / run_speed - fly_slow) < 0.03,
 		"%.2f of %.2f (data %.2f)" % [speed, run_speed, fly_slow]
 	)
