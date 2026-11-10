@@ -148,7 +148,8 @@ func teardown() -> void:
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
-## The Longneedle's line is near-planted: it turns toward the cursor at "turn_deg_s" at most (cast to shot).
+## The Longneedle's line is near-planted: it turns toward the cursor at its "turn" e row's
+## deg/s at most (cast to shot).
 func aim_lock() -> Vector2:
 	return needle.get("dir", Vector2.ZERO)
 
@@ -601,7 +602,7 @@ func _tick_needle(dt: float) -> void:
 	if h.downed or h.stun_t > 0.0 or Hex.active(h):
 		_end_needle()
 		return
-	var dir := turn_lock(needle["dir"], float(ed["turn_deg_s"]), dt)
+	var dir := turn_lock(needle["dir"], turn_deg_s("e", "early"), dt)
 	needle["dir"] = dir
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes

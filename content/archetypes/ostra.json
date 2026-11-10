@@ -177,6 +177,13 @@
 		"kin": "Rank 3: cooldown 10s -> 8s; the growing seed burns foes inside for 8 a second.",
 		"dash": "Rank 3: recharge 9.5s -> 6.7s; allies beside you or at your landing get a 26 shield for 3s."
 	},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:40 'she turns to the aim'"},
+		"rmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:17 a tap along the aim; no turn limit shown"},
+		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown"},
+		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown"},
+		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248)"}
+	},
 	"tells": {
 		"half": "a ring of teal motes closes around him",
 		"full": "the lantern burns white and his ribbons lift",
