@@ -341,6 +341,28 @@ The projectile looks that ride a shot and the Warchain itself stay in scripts/ar
 Two of our names (Execution Slam, Scorching Spin) had matched the source hero's exactly; they are now the
 Finishing Slam and the Cinder Spin everywhere the player can read them (content, UI, fx words, wiki).
 
+## Ground shapes (telegraph audit)
+
+Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means gameplay, so every one drawn must be the true hit area. `tools/dancer_jug_check.gd` asserts drawn size = hit size, and that the move art in `content/vfx/juggernaut.json` carries no stretched size.
+
+| Ability | Ground shape drawn | Hit | Seen by | Source read | Status |
+|---|---|---|---|---|---|
+| Greatsword (LMB) | sweep arc 175 deg, reach 3.1 m | arc 175, reach 3.1 | everyone | wide slash | fixed: art was 104 deg and 0.86x reach |
+| Searing Wave (LMB hold) | lane growing to 14 m, 1.2 m wide; ring r 1.35 m on her | the wave 0.6 m radius | lane: her screen; ring: her screen | thin ring on the body while charging | lane ok; ring kept (source shows it), it is a charge meter, not an area |
+| Smash tap (RMB) | cone r 4.0 m, 70 deg through the wind-up | slam 4.0 m, 70 deg | everyone | short strike lane | fixed: was a 4 m lane; now the true cone (owner rule over the source's lane) |
+| Smash landing art | scorch + sweep, cone 70 deg | same | everyone | - | fixed: sweep was 74 deg |
+| Smash hold (RMB) lunge | lane growing 4.5-7.5 m, width = body + 0.6 m each side | contact test uses the same width | her screen | lane along the dash | fixed: was 1.3 m against a 2.06 m test; both now share `lunge_w()` |
+| Lunge art | scorch lane, width follows `lunge_w()` | same | everyone | - | fixed: was a fixed 1.3 m |
+| Meteor Drop aim (air) | disc r 2.6 m under the cursor | damage radius 2.6 m | her screen | landing marker | ok, asserted |
+| Meteor Drop marker | disc r 2.6 m filling, core ring 1.2 m | damage 2.6 m, stun core 1.2 m | everyone | magenta disc | ok, asserted |
+| Meteor Drop landing art | scorch r 2.6 m, skirt at the core, shock ring 1.2 m | same | everyone | ground crack + ring | fixed: scorch and skirt were 1.05x and 1.15x |
+| Warchain (E) | chain line to the target; steer reach 3.5 m | hook shot | everyone | chain | not an area; ok |
+| Rampage (dash) | none | along the dash | - | none | fixed: removed a cosmetic 1.1 m scorch lane |
+| Exec outline on wounded foes | red ring under the foe | marks who can be executed | her screen | red outline | kept, a marker not an area |
+| Gilded Riposte (X) guard | lane 3.6 m x 1.8 m, filling over 0.65 s | strip 3.6 x 1.8 from where he stood | everyone | strip ahead | ok |
+
+Decision: the Smash cone follows the owner's rule (true hit shape) where the source drew a short lane.
+
 ## Engine notes
 
 - The Gilded Riposte lives in `scripts/arch/kits/juggernaut_ult.gd` (`JuggernautUlt`, owned by the kit); X
