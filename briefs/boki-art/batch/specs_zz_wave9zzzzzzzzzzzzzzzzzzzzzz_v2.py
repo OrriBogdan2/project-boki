@@ -1029,3 +1029,25 @@ ON_POSE('Sirencada',_LM['Sirencada']['sheet'],'final','tough',False,False,"takin
 SPECS[-1]['id']='on_sirencada_fly'; SPECS[-1]['runs']=4
 ON_POSE('Quivertoad',_LM['Quivertoad']['sheet'],'final','tough',False,False,"reared up on its hind legs facing LEFT, front legs raised, throat puffed out in a huge bellow, the arrow quills on its back fanned out behind it like a peacock tail, tail planted on the ground.","red and green skin with red target rings on its sides, green arrow-shaft quills on its back, small horns, a red tail")
 SPECS[-1]['id']='on_quivertoad_rear'; SPECS[-1]['runs']=4
+
+# ===== 07:15 ET 11-10 OWNER: "their lines are all the same pose, we need to review for this more". POSE REVIEW of every line (strips of all stages
+# side by side): a stage that stands the same way as its neighbour gets a new pose. Stance ladder: babies sit or bounce, middles move, finals are planted.
+# Same design, pose only; 3 runs; ids pose_<name>. Already queued before this pass: Oarter, Ribbonwyrm, Cubbat, Pipwom, Critwom, Sirencada, Quivertoad.
+_KEEPALL="everything image 1 shows, in the same colours"
+for _n,_st,_ar,_dk,_fu,_pose in (
+ ('Rampartoad','mid','tough',0,0,"mid-hop facing RIGHT, back legs kicked out behind it, front legs reaching forward, the stone wall on its back tilted with the jump."),
+ ('Furnacowary','final','tough',1,0,"striding forward toward the viewer on a diagonal, facing LEFT, one big foot raised mid-step, head lowered and thrust forward, firebox chest leading."),
+ ('Prowyak','mid','cute',0,1,"trotting straight toward the viewer in a front three-quarter view, head down so its bony prow leads, shaggy coat swinging, one front hoof lifted."),
+ ('Bastling','baby','cute',0,0,"sitting back on its shell and waving one claw high in the air, other claw on the ground, legs splayed, happy."),
+ ('Canvastross','final','majestic',0,1,"standing planted on the ground facing LEFT, tall and proud, wings folded half open like furled sails, mast feather upright, head turned to the viewer."),
+ ('Latchling','baby','cute',0,0,"sitting on its bottom facing the viewer, front feet together, key tail curled round to the front, looking up."),
+ ('Fawngus','baby','cute',0,1,"lying down with its legs folded under it, head up and tilted, mushroom-cap ears perked."),
+ ('Wickapi','baby','cute',1,1,"sitting on its haunches like a dog, front legs straight, facing RIGHT, head turned to the viewer, candle flame upright."),
+ ('Chandelapi','final','majestic',1,1,"facing the viewer head-on, standing square and planted, head lowered slightly so its chandelier antlers frame its face, flame mane flowing to both sides."),
+ ('Sandwidow','mid','creepy',1,1,"reared up on its back four legs facing LEFT, front four legs raised in a threat display, hourglass tilted back above it."),
+ ('Scarabit','mid','tough',1,0,"rearing up on its back legs facing LEFT, pushing its orbit rings up over its head like a dung beetle rolling a ball, front legs braced."),
+ ('Truffapir','mid','cute',1,0,"head down, snuffling at the ground with its long snout, front legs bent, rump in the air, facing RIGHT, tail up."),
+ ('Gambitfin','mid','sleek',0,0,"mid-leap in an arc facing LEFT, like a knight jumping on a chessboard: body stretched, tail uncoiled and trailing behind, head high."),
+ ('Stormit','mid','cute',0,0,"scuttling sideways toward the LEFT with both claws raised high over its head, legs mid-step, the storm dome on its back tilted."),
+ ('Dynaboa','final','sleek',0,1,"crouched low on all fours facing LEFT, spring legs coiled tight under it, copper fins fanned wide and raised, tail whipping, about to launch.")):
+    _n0=len(SPECS); ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,bool(_dk),bool(_fu),_pose,_KEEPALL); SPECS[_n0]['id']='pose_'+_n.lower()
