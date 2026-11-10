@@ -86,10 +86,12 @@ func _tint(e: Ent, who: String) -> void:
 		lo = minf(lo, a)
 		hi = maxf(hi, a)
 	ok(lo >= DotLook.BASE - 0.001, "%s: the tint never drops under the base %.2f (min %.2f)" % [who, DotLook.BASE, lo])
-	ok(hi <= DotLook.BASE + DotLook.FLICKER + DotLook.PULSE + 0.001, "%s: the tint stays subtle (max %.2f)" % [who, hi])
+	var cap := DotLook.BASE + DotLook.FLICKER + DotLook.PULSE + 0.001
+	ok(hi <= cap, "%s: the tint stays subtle (max %.2f)" % [who, hi])
 	ok(hi - lo >= 0.02, "%s: it flickers (%.2f to %.2f)" % [who, lo, hi])
 	e.show_flash(0.0)
-	ok(_flash(e) > 0.0 and _color(e).is_equal_approx(DotLook.COL), "%s: the body shows the burn colour (flash %.2f)" % [who, _flash(e)])
+	var shown := _flash(e) > 0.0 and _color(e).is_equal_approx(DotLook.COL)
+	ok(shown, "%s: the body shows the burn colour (flash %.2f)" % [who, _flash(e)])
 
 ## The pulse stamp follows the damage tick (4 a second) and the tint peaks on it.
 func _ticks(m: Match, P: Hunter) -> void:
@@ -100,10 +102,12 @@ func _ticks(m: Match, P: Hunter) -> void:
 		if P.dot_tick_at != last:
 			last = P.dot_tick_at
 			n += 1
-			ok(DotLook.amount(P, false) >= DotLook.BASE + DotLook.PULSE * 0.9, "tick %d: the body pulses on the damage tick" % n)
+			var peak := DotLook.BASE + DotLook.PULSE * 0.9
+			ok(DotLook.amount(P, false) >= peak, "tick %d: the body pulses on the damage tick" % n)
 	ok(absi(n - int(2.0 * TICK_RATE)) <= 1, "2 s of burn: %d pulses for %d damage ticks" % [n, int(2.0 * TICK_RATE)])
 	m.time = P.dot_tick_at + DotLook.PULSE_S
-	ok(DotLook.amount(P, false) <= DotLook.BASE + DotLook.FLICKER + 0.001, "the pulse has faded %.1f s after the tick" % DotLook.PULSE_S)
+	var calm := DotLook.BASE + DotLook.FLICKER + 0.001
+	ok(DotLook.amount(P, false) <= calm, "the pulse has faded %.1f s after the tick" % DotLook.PULSE_S)
 
 func _hit_wins(main: Node, m: Match, P: Hunter) -> void:
 	P.flash_t = 0.12
