@@ -1,9 +1,10 @@
 class_name ClassUnlock
 extends RefCounted
 ## Relic unlocks and mastery (docs/decisions/0005; internally Hunters, archetypes and the save key "classes").
-## A new save wears Vex first (the one starter, taken before the egg pick) and plays the tutorial as Vex. After
-## the first finished expedition (the tutorial) it picks 1 of 3 as the second Relic: Kael, Cinder or Meeko
-## ("second_picks"). Every other Relic opens through its own challenge (content/rules/class_unlock.json "unlock"),
+## A new save picks 1 of 3 starters (Lace, Kael or Vex; after naming the first Boki) and plays the tutorial as
+## it. After the first finished expedition (the tutorial) it picks 1 of 3 as the second Relic: Kael, Cinder or
+## Meeko ("second_picks", minus one already taken). A starter not taken opens then too. Every other Relic opens
+## through its own challenge (content/rules/class_unlock.json "unlock"),
 ## counted across every expedition whoever you play. A done challenge never opens a Hunter by itself: it is
 ## unlocked by holding the button on the Relics screen (HoldUnlock calls unlock()). Each Hunter also has
 ## mastery goals, counted only while you play it; each one done is a mastery level and a cosmetic reward.
@@ -96,7 +97,7 @@ static func is_open(id: String) -> bool:
 static func open_ids() -> Array:
 	return Arch.ids().filter(func(a): return is_open(a))
 
-# ---- the starter pick (Vex), then the second Relic: 1 of 3 after the first expedition
+# ---- the starter pick (Lace, Kael or Vex), then the second Relic: 1 of 3 after the first expedition
 static func starters() -> Array:
 	return (rules().get("starters", []) as Array).filter(func(a): return Arch.exists(String(a)))
 
@@ -111,7 +112,7 @@ static func picks() -> Array:
 	return (state().get("picks", []) as Array).duplicate()
 
 ## Makes the starter pick (once): exactly picks_needed() different starters. Anything else is refused.
-## The other starters wait in "bonus" for the first finished expedition.
+## The other starters wait in "bonus" for the first finished expedition (unless the second pick offers them).
 static func choose_starters(ids: Array) -> bool:
 	if not needs_starters() or ids.size() != picks_needed():
 		return false
@@ -124,7 +125,7 @@ static func choose_starters(ids: Array) -> bool:
 	var c := state()
 	c["picks"] = unique.duplicate()
 	c["open"] = unique.duplicate()
-	c["bonus"] = starters().filter(func(a): return not unique.has(a))
+	c["bonus"] = starters().filter(func(a): return not unique.has(a) and not second_picks().has(a))
 	c["second"] = second_picks().filter(func(a): return not unique.has(a))
 	c["seen"] = c["open"].duplicate()
 	c["reveal"] = []
@@ -166,10 +167,10 @@ static func open_bonus() -> Array:
 	c["fresh"] = ids.duplicate()
 	return ids
 
-## "Vex and Kael are open now" for starters opened and not yet announced ("" when none); marks them told.
+## "Lace and Vex are open now" for starters opened and not yet announced ("" when none); marks them told.
 static func take_fresh() -> String:
 	var c := state()
-	var names: Array = (c.get("fresh", []) as Array).map(func(a): return Arch.name_of(String(a)))
+	var names: Array = (c.get("fresh", []) as Array).map(func(a): return HeroTitle.base_name(String(a)))
 	if names.is_empty():
 		return ""
 	c["fresh"] = []

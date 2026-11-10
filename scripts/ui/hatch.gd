@@ -743,13 +743,23 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 		return
 	_head_out(tutorial)
 
-## Your first Relic, in the world: Vex drifts to you and you put her on (MaskMoment), then `then`.
+## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
+## put it on in the world (MaskMoment), then `then`.
 func _mask_moment(then: Callable) -> void:
 	stage = "mask"
 	_clear_bottom()
 	top_box.visible = false
-	var first := String(ClassUnlock.starters()[0])
-	ClassUnlock.choose_starters([first])
+	var holder := CenterContainer.new()
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var picked := func(id: String):
+		holder.queue_free()
+		_put_on_first(id, then)
+	var offer := HobOffer.new(ClassUnlock.starters(), FarmBuilder.rules()["talk"], "starter_title",
+			func(id): return ClassUnlock.choose_starters([id]), picked)
+	holder.add_child(offer.build())
+	ui.add_child(holder)
+
+func _put_on_first(first: String, then: Callable) -> void:
 	Save.d["arch"] = first
 	Save.d["cls"] = Arch.weight(first)
 	Save.d["weapon"] = Arch.signature(first)

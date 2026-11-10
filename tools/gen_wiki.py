@@ -282,7 +282,7 @@ def gen_classes():
         for g in cu["mastery"].get(aid, []):
             m_rows.append([the(ARCH[aid]["title"]), g["text"], num(g["target"]), "%s: %s" % (kinds.get(g["reward"]["kind"], g["reward"]["kind"]), g["reward"]["name"])])
     starters = ", ".join(the(ARCH[a]["title"]) for a in cu["starters"] if a in ARCH)
-    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) before the egg pick and plays the tutorial as it. The other starters open after your first expedition. " % (cu["starter_picks"], len(cu["starters"]), starters)
+    unlock = "### How Hunters unlock\n\nA new save picks %d of %d starters (%s) after naming your first Boki and plays the tutorial as it. After your first expedition the other starters open, and you pick a second Relic from Kael, Cinder and Meeko (whichever you do not hold). " % (cu["starter_picks"], len(cu["starters"]), starters)
     unlock += "Every other Hunter opens through its own challenge, counted across all your expeditions whoever you play. A done challenge never opens a Hunter by itself: you hold the button on the Hunters screen for %s, and letting go early cancels it. " % secs(cu.get("hold_s", 1.6))
     unlock += "Tiers: easy is %s, medium %s, hard %s. Locked Hunters stay playable in the Arena and the Training Grounds, and saves from before Hunter unlocks keep every Hunter they had.\n\n" % (cu["tiers"]["easy"], cu["tiers"]["medium"], cu["tiers"]["hard"])
     unlock += table(["Hunter", "Tier", "Challenge", "Target"], cu_rows)

@@ -9,31 +9,37 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 
 | Hero | Pair | Source | Ours |
 |---|---|---|---|
-| gunslinger | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |
-| gunslinger | ground dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | ground dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | ground dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | ground dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | air dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | air dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | air dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | air dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | air dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| gunslinger | LMB -> dash | Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88). | the dash goes, the ability keeps running |
-| gunslinger | RMB -> dash | Not shown in the data or footage. Ours: the Burr Charge is a tap (owner, sync89), already thrown, so Shift slides at once. | the dash goes, the ability keeps running |
-| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. | the dash goes, the ability keeps running |
-| gunslinger | ult (X) -> dash | Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once. | the dash goes, the ability keeps running |
-| gunslinger | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
-| gunslinger | jump -> LMB |  | fires mid-jump (default) |
-| gunslinger | jump -> RMB |  | fires mid-jump (default) |
-| gunslinger | jump -> E |  | fires mid-jump (default) |
-| gunslinger | jump -> ult (X) |  | fires mid-jump (default) |
-| gunslinger | jump -> Q glove |  | fires mid-jump (default) |
-| gunslinger | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| gunslinger | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| gunslinger | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| gunslinger | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
-| gunslinger | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | ground dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
+| archer | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
+| archer | ground dash -> ult (X) | Primal Forces can be cast in the walk | fires mid-dash |
+| archer | ground dash -> Q glove |  | fires mid-dash |
+| archer | air dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> RMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> E | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> ult (X) | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| archer | air dash -> Q glove |  | fires mid-dash |
+| archer | LMB -> dash | Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on. | the dash goes, the ability keeps running |
+| archer | RMB -> dash |  | the kit's own handling (no row yet) |
+| archer | E -> dash |  | the kit's own handling (no row yet) |
+| archer | ult (X) -> dash |  | the kit's own handling (no row yet) |
+| archer | Q glove -> dash |  | the kit's own handling (no row yet) |
+| archer | jump -> LMB |  | fires mid-jump (default) |
+| archer | jump -> RMB |  | fires mid-jump (default) |
+| archer | jump -> E |  | fires mid-jump (default) |
+| archer | jump -> ult (X) |  | fires mid-jump (default) |
+| archer | jump -> Q glove |  | fires mid-jump (default) |
+| archer | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| archer | hold LMB through a ground dash |  | the hold carries through and lets go there |
+| archer | hold LMB through an air dash |  | the hold carries through and lets go there |
+| archer | hold LMB through a jump |  | the hold carries through and lets go there |
+| archer | hold RMB through a ground dash |  | the hold carries through and lets go there |
+| archer | hold RMB through an air dash |  | the hold carries through and lets go there |
+| archer | hold RMB through a jump |  | the hold carries through and lets go there |
 | juggernaut | ground dash -> LMB | Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends. | buffered to the dash's end |
 | juggernaut | ground dash -> RMB | Data: no rule for RMB inside Flame Step (the patch only restricts turning after RMB into Shift); footage: no RMB inside a dash. Ours: the Smash starts mid-dash (the Slam's wind-up, the Lunge's charge) and the drive carries him into it. | fires mid-dash; dash momentum carries |
 | juggernaut | ground dash -> E | Data: the chain is a thrown hook with no movement lock; footage 0301-0366 shows no dash with it. Ours: the throw goes mid-dash, the drive goes on. | fires mid-dash |
@@ -65,6 +71,60 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | juggernaut | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | juggernaut | hold RMB through an air dash |  | the hold carries through and lets go there |
 | juggernaut | hold RMB through a jump |  | the hold carries through and lets go there |
+| gunslinger | ground dash -> LMB | Footage briefs/hero-ref/venator.md:88 ('fires the rifle during the slide', 0149-0151), :90 and :308 (slides up-left while firing up-right; 'he can fire throughout'), :189 ('fires during any slide'). | fires mid-dash |
+| gunslinger | ground dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | ground dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | ground dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | ground dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> RMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> E | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> ult (X) | Not determinable. Data (briefs/supervive-data/supervive_kits.md:50) silent; the footage shows only the rifle during the slide; air not shown (briefs/hero-ref/venator.md:311-312). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | air dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gunslinger | LMB -> dash | Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88). | the dash goes, the ability keeps running |
+| gunslinger | RMB -> dash | Not shown in the data or footage. Ours: the Burr Charge is a tap (owner, sync89), already thrown, so Shift slides at once. | the dash goes, the ability keeps running |
+| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. | the dash goes, the ability keeps running |
+| gunslinger | ult (X) -> dash | Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once. | the dash goes, the ability keeps running |
+| gunslinger | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
+| gunslinger | jump -> LMB |  | fires mid-jump (default) |
+| gunslinger | jump -> RMB |  | fires mid-jump (default) |
+| gunslinger | jump -> E |  | fires mid-jump (default) |
+| gunslinger | jump -> ult (X) |  | fires mid-jump (default) |
+| gunslinger | jump -> Q glove |  | fires mid-jump (default) |
+| gunslinger | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| gunslinger | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| gunslinger | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| gunslinger | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| gunslinger | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | ground dash -> LMB | data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair) | buffered to the dash's end |
+| bulwark | ground dash -> RMB | data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash) | fires mid-dash |
+| bulwark | ground dash -> E | data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair) | fires mid-dash |
+| bulwark | ground dash -> ult (X) | data: Abyssalbreaker sends a fissure from where he stands; footage f25-f31: he is planted for the slam. It ends the dash where he is (no footage of the pair) | cancels the dash |
+| bulwark | ground dash -> Q glove | gloves are our own (no source) | fires mid-dash |
+| bulwark | air dash -> LMB | footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends | buffered to the dash's end |
+| bulwark | air dash -> RMB | no air dash in the footage; as the ground dash | fires mid-dash |
+| bulwark | air dash -> E | no air dash in the footage; as the ground dash | fires mid-dash |
+| bulwark | air dash -> ult (X) | no air dash in the footage; as the ground dash, the slam plants him where he is | cancels the dash |
+| bulwark | air dash -> Q glove | gloves are our own (no source) | fires mid-dash |
+| bulwark | LMB -> dash | wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown. Owner item 51 overrides the ending: the short plain dash goes on a full charge (with the charge kept the reduced cooldown has no reason left) and the swing keeps charging through it (hold.lmb.ground); in the swing's step or the perfect launch, Shift goes at once | the dash goes, the ability keeps running; variant: short |
+| bulwark | RMB -> dash | data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it | the dash goes, the ability keeps running; variant: charge |
+| bulwark | E -> dash | data: Regen Field stays round the hammer; the dash doesn't touch it | the dash goes, the ability keeps running |
+| bulwark | ult (X) -> dash | Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: Oath planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts. | **exception:** the dash waits for the ability (planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant) |
+| bulwark | Q glove -> dash | gloves are our own (no source) | the dash goes, the ability keeps running |
+| bulwark | jump -> LMB |  | fires mid-jump (default) |
+| bulwark | jump -> RMB |  | fires mid-jump (default) |
+| bulwark | jump -> E |  | fires mid-jump (default) |
+| bulwark | jump -> ult (X) |  | fires mid-jump (default) |
+| bulwark | jump -> Q glove |  | fires mid-jump (default) |
+| bulwark | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | E -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+| bulwark | hold LMB through a ground dash | Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it | the hold carries through and lets go there |
+| bulwark | hold LMB through an air dash | Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is) | the hold carries through and lets go there |
+| bulwark | hold LMB through a jump |  | the hold carries through and lets go there |
+| bulwark | hold LMB through a mantle | Owner item 30; the source has no mantle rule. | **exception:** the move ends the hold (owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)) |
 | ashwick | ground dash -> LMB | Not determinable. Data (briefs/supervive-data/supervive_kits.md:42) silent on presses in Pyro Pounce; the footage shows no press inside the bash (briefs/hero-ref/linwick.md:267-276, frames 0143-0144, 0159-0161); air not shown (linwick.md:278-279). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | ashwick | ground dash -> RMB | Data: Embry Bolt has no dash rule. Footage: never cast from the bash; the ram is one committed head-first beat with the arms swept back. Ours: the bolt goes the step the ram ends or hits, from where he stands. | buffered to the dash's end |
 | ashwick | ground dash -> E | Data: Heat Shield pulls in nearby foes; the kit's engage is bash in, then spin. Footage: not shown from a bash. Ours: E pressed in the ram goes the step it stops on the foe (pull and shield right at the impact) or ends. | buffered to the dash's end |
@@ -155,37 +215,6 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | dolm | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | dolm | hold RMB through an air dash |  | the hold carries through and lets go there |
 | dolm | hold RMB through a jump |  | the hold carries through and lets go there |
-| archer | ground dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | ground dash -> RMB | Impaling Shot can be started in the walk | fires mid-dash |
-| archer | ground dash -> E | Rain of Arrows can be cast in the walk | fires mid-dash |
-| archer | ground dash -> ult (X) | Primal Forces can be cast in the walk | fires mid-dash |
-| archer | ground dash -> Q glove |  | fires mid-dash |
-| archer | air dash -> LMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> RMB | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> E | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> ult (X) | Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
-| archer | air dash -> Q glove |  | fires mid-dash |
-| archer | LMB -> dash | Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on. | the dash goes, the ability keeps running |
-| archer | RMB -> dash |  | the kit's own handling (no row yet) |
-| archer | E -> dash |  | the kit's own handling (no row yet) |
-| archer | ult (X) -> dash |  | the kit's own handling (no row yet) |
-| archer | Q glove -> dash |  | the kit's own handling (no row yet) |
-| archer | jump -> LMB |  | fires mid-jump (default) |
-| archer | jump -> RMB |  | fires mid-jump (default) |
-| archer | jump -> E |  | fires mid-jump (default) |
-| archer | jump -> ult (X) |  | fires mid-jump (default) |
-| archer | jump -> Q glove |  | fires mid-jump (default) |
-| archer | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| archer | hold LMB through a ground dash |  | the hold carries through and lets go there |
-| archer | hold LMB through an air dash |  | the hold carries through and lets go there |
-| archer | hold LMB through a jump |  | the hold carries through and lets go there |
-| archer | hold RMB through a ground dash |  | the hold carries through and lets go there |
-| archer | hold RMB through an air dash |  | the hold carries through and lets go there |
-| archer | hold RMB through a jump |  | the hold carries through and lets go there |
 | dredge | ground dash -> LMB | Not determinable. Brute Dash is a ~0.12 s near-blink (briefs/hero-ref/dredge.md:303); by 493.45-493.6 s he is turning, then aiming and walking (dredge.md:296, 306): no press inside it is visible. Air: not shown (dredge.md:310-312). Data (briefs/supervive-data/supervive_kits.md:58-59) silent. Kept: held to the dash's end (owner 18:20 UTC fallback). | buffered to the dash's end |
 | dredge | ground dash -> RMB | Data: Abyssal Grasp has no dash lock. Footage: not shown from a dash. Ours: the arm is thrown from the lunge (its range counts from where he is). | fires mid-dash |
 | dredge | ground dash -> E | Data: Primal Slam has no dash lock; the dash-into-slam close-in is the hero's engage. Footage: not shown from a dash. Ours: the planted wind-up starts at once and the lunge finishes under it. | fires mid-dash |
@@ -267,35 +296,6 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | mage | hold RMB through a ground dash |  | the hold carries through and lets go there |
 | mage | hold RMB through an air dash |  | the hold carries through and lets go there |
 | mage | hold RMB through a jump |  | the hold carries through and lets go there |
-| bulwark | ground dash -> LMB | data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair) | buffered to the dash's end |
-| bulwark | ground dash -> RMB | data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash) | fires mid-dash |
-| bulwark | ground dash -> E | data: Regen Field drops round the hammer wherever it is and doesn't move him, so it goes mid-dash (no footage of the pair) | fires mid-dash |
-| bulwark | ground dash -> ult (X) | data: Abyssalbreaker sends a fissure from where he stands; footage f25-f31: he is planted for the slam. It ends the dash where he is (no footage of the pair) | cancels the dash |
-| bulwark | ground dash -> Q glove | gloves are our own (no source) | fires mid-dash |
-| bulwark | air dash -> LMB | footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends | buffered to the dash's end |
-| bulwark | air dash -> RMB | no air dash in the footage; as the ground dash | fires mid-dash |
-| bulwark | air dash -> E | no air dash in the footage; as the ground dash | fires mid-dash |
-| bulwark | air dash -> ult (X) | no air dash in the footage; as the ground dash, the slam plants him where he is | cancels the dash |
-| bulwark | air dash -> Q glove | gloves are our own (no source) | fires mid-dash |
-| bulwark | LMB -> dash | wiki (Spin Dash): Shift while charging the Hammer Smash ends it in a short dash without the spin, on a reduced cooldown. Owner item 51 overrides the ending: the short plain dash goes on a full charge (with the charge kept the reduced cooldown has no reason left) and the swing keeps charging through it (hold.lmb.ground); in the swing's step or the perfect launch, Shift goes at once | the dash goes, the ability keeps running; variant: short |
-| bulwark | RMB -> dash | data: Brightshield + Shift is the Shield Bash (6 s, its own cooldown), the shield briefly invulnerable; the aegis stays up through it | the dash goes, the ability keeps running; variant: charge |
-| bulwark | E -> dash | data: Regen Field stays round the hammer; the dash doesn't touch it | the dash goes, the ability keeps running |
-| bulwark | ult (X) -> dash | Owner item 48 (root only during the wind-up + slam, free after); footage f25-f31: Oath planted through the wind-up and slam. The data is silent on Shift in the cast. Shift pressed there goes the moment the plant ends; it is free while the lane erupts. | **exception:** the dash waits for the ability (planted for the wind-up and the slam (~0.6 s): a dash would move him off the plant) |
-| bulwark | Q glove -> dash | gloves are our own (no source) | the dash goes, the ability keeps running |
-| bulwark | jump -> LMB |  | fires mid-jump (default) |
-| bulwark | jump -> RMB |  | fires mid-jump (default) |
-| bulwark | jump -> E |  | fires mid-jump (default) |
-| bulwark | jump -> ult (X) |  | fires mid-jump (default) |
-| bulwark | jump -> Q glove |  | fires mid-jump (default) |
-| bulwark | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| bulwark | hold LMB through a ground dash | Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it | the hold carries through and lets go there |
-| bulwark | hold LMB through an air dash | Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is) | the hold carries through and lets go there |
-| bulwark | hold LMB through a jump |  | the hold carries through and lets go there |
-| bulwark | hold LMB through a mantle | Owner item 30; the source has no mantle rule. | **exception:** the move ends the hold (owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)) |
 | thief | ground dash -> LMB | Data: Quickflip dashes and empowers the next Arcslinger (+214 damage); landing it resets Quickflip. Footage 0193: the Cartwheel and the empowered shot leave on the same frame, so the bolt goes mid-flip. | fires mid-dash; variant: empowered |
 | thief | ground dash -> RMB | Data says nothing on casting during Quickflip. Footage never shows Trickshot mid-flip; kept firing: the 0.4s lane starts mid-flip and the throw lands after it. | fires mid-dash |
 | thief | ground dash -> E | Data: Farstep Dagger has no dash rule. Footage never shows it mid-flip. Ours: the throw goes mid-flip; the recast blink ends the cartwheel (she arrives standing). | fires mid-dash |

@@ -95,7 +95,9 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		return
 	p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
 	if p.flat_dist(best) > 3.0: goto.call(best.pos)
-	if sid in ["shoot", "fight"]: p.inp["fire"] = true
+	if sid in ["shoot", "fight"]:
+		var held: bool = p.wpn.has("draw") or p.wpn.has("charge_time")      # (a bow or a charged blade acts on release: tap it)
+		p.inp["fire"] = fmod(m.time, 0.6) < 0.1 if held else true
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
 		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
