@@ -104002,5 +104002,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/sty_pinster_2.jpg",
     "ok": true
+  },
+  {
+    "id": "sty_mortarfly",
+    "name": "Mortarfly (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sty_mortarfly_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_bonsolith",
+    "name": "Bonsolith (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sty_bonsolith_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_bonsolith",
+    "name": "Bonsolith (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sty_bonsolith_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_mortarfly",
+    "name": "Mortarfly (alt)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sty_mortarfly_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_bonsolith",
+    "name": "Bonsolith (alt)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sty_bonsolith_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "sty_mortarfly",
+    "name": "Mortarfly (alt)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sty_mortarfly_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_spirevark_fix5",
+    "name": "Spirevark (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_spirevark_fix5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_snapler_fix5",
+    "name": "Snapler (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_snapler_fix5_1.jpg",
+    "ok": true
   }
 ]
