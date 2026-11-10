@@ -138,13 +138,16 @@ func _tile(ak: String) -> PanelContainer:
 	row.add_child(ClassCard.portrait(ak))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # the text fits the card, never widens it
 	row.add_child(col)
-	col.add_child(UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big))
-	col.add_child(UI.label(HunterViewer.stat_line(ak), 12, UI.MUTED))
+	var nm := UI.label(HunterViewer.display_name(ak), 18, Arch.color(ak) if open else UI.FAINT, UI.big)
+	nm.clip_text = true
+	col.add_child(nm)
+	col.add_child(UI.para(HunterViewer.stat_line(ak), 12, UI.MUTED))
 	if ak == pm.pick:
 		col.add_child(UI.label("Locked in" if pm.locked else "Your pick", 12, UI.GOOD, UI.semi))
 	elif not open:
-		col.add_child(UI.label("Locked: " + ClassUnlock.requirement(ak), 12, UI.FAINT, UI.semi))
+		col.add_child(UI.para("Locked: " + ClassUnlock.requirement(ak), 12, UI.FAINT))
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	card.tooltip_text = ClassCard.kit_tip(ak)
 	card.set_meta("arch", ak)
