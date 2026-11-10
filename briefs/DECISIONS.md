@@ -2,6 +2,13 @@
 Every agent reads this before building. If a brief, spec or older note disagrees, THIS file wins. Owner playtest notes in OWNER_REVIEW_*.md override the SUPERVIVE game data, which overrides footage.
 Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "DECISION?". Newest decisions at the bottom of each section.
 
+
+## 2026-11-10 ~12:50 PM EST: 3D priority = mobs + lair bosses before new Boki (owner)
+Owner: "i would prio monsters and bosses over new boki, but aim for all of them". 0.24.4 moved to 11-11, so the extra day goes to 3D.
+- Order: 7 enemy mobs + 3 lair bosses (colossus, serpent, brood) get turnaround sheets now (Mac Vertex runner), owner approves sheets, then Meshy image-to-3D. New Boki after, still in batches of 30.
+- This message counts as the owner OK for mob/boss 2D sheet gens. Meshy for each creature still waits for its sheet approval.
+- Job: 20261110-173011-a4 (ext/mob-boss-sheets). Backlog: lair-boss animation and camp clear times raised to priority 30.
+
 ## Priorities
 - Order: briefs/PRIORITIES.md. P0 land and stabilise, P1 onboarding, P2 one great match (Boki as the star), P3 cohesion and look (art bible, style pass, then the AI 3D prototype), P4 breadth. Frozen: farm-builder depth, maps beyond tier 2. (Black Market extras unfrozen Nov 3.)
 
