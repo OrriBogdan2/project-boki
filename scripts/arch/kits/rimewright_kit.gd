@@ -386,7 +386,7 @@ func _begin_skate() -> void:
 	if not h.grounded:
 		h.vel.y = -float(dash_def().get("air_fall", 1.5))
 	play("tm_skate_go" if h.grounded else "tm_skate_air")
-	m.sfx("rimewright_dash", h.pos, -3.0, 1.0)
+	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0, 1.0)
 	vfx("skate_go", null, dir)          # ice kicked back off the pushing blade (no ring: a dash never bursts)
 
 func _tick_rinkrun(dt: float) -> void:
