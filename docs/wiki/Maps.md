@@ -10,7 +10,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 | The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | Training Grounds | `content/maps/training.json` | 100 x 100 | 5 | The Training Grounds, the one practice space (title screen, the Expedition menu, the farm's Esc menu). |
-| First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
+| First Flight | `content/maps/tutorial.json` | 80 x 80 | 4 | The tutorial course, short (owner, Nov 8). |
 
 ## The Hollow Crown
 
@@ -139,7 +139,7 @@ The Training Grounds, the one practice space (title screen, the Expedition menu,
 
 ## First Flight
 
-The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge (jump plus air dash), a long wind crossing to glide, a low lookout rise, one step up (crouch to scout the range island), a range island for the fights and the chest, and the walled outpost isle. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from, pos for the rest. No rocks, no hazards, nothing random.
+The tutorial course, short (owner, Nov 8): a landing meadow, a dash gap to a small isle, a wind crossing to glide to the range island (the fights and the chest), and the walled outpost isle over a bridge. 'course' holds each step's stop: at = the marker's spot, pad = the glowing edge to leave from. No rocks, no hazards, nothing random.
 
 ### Islands
 
@@ -147,14 +147,12 @@ The tutorial course, one island per skill: a landing meadow, a dash gap, a ledge
 |---|---|---|---|---|---|
 | Landing Meadow | grove | Meadow | quiet | 0 |  |
 | Dash Isle | grove | Meadow | quiet | 0 |  |
-| Ledge Isle | grove | Meadow | quiet | 0 |  |
-| Lookout Isle | grove | Meadow | quiet | 0 |  |
 | Training Range | grove | Meadow | quiet | 0 |  |
 | Gate Isle | grove | Meadow | quiet | 0 |  |
 
 **Exits:** 1 uplink outposts.
 
-**Getting around:** 2 bridges, 1 wind roads.
+**Getting around:** 1 bridges, 1 wind roads.
 
 
 
