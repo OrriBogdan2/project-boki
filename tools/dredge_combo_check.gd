@@ -37,6 +37,15 @@ func run(main_node: Node) -> void:
 
 ## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
 ## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
+## Steps until the Abyssal Hand has caught or missed, then 0.1 s more (a caught foe's reel under way): the 0.2 s
+## coil-back and the flight (rmb.windup, rmb.speed) outlast one fixed wait, and a hand still out refuses a throw.
+func _until_landed(m: Match, K: DredgeKit) -> void:
+	var t := 0.0
+	while K.flying and t < 2.0:
+		ak.step(m, ak.DT)
+		t += ak.DT
+	ak.step(m, 0.1)
+
 func _hook_hold() -> void:
 	var r: Array = ak.setup("dredge", 6.0, "", false)
 	var m: Match = r[0]
@@ -61,7 +70,7 @@ func _hook_hold() -> void:
 		"hook hold: while the hook flies out he walks at 15-25% speed",
 		K.flying and k >= 0.15 and k <= 0.25, "%.2f of %.1f m/s" % [k, walk]
 	)
-	ak.step(m, 0.5)
+	_until_landed(m, K)
 	P.inp["move"] = Vector2.ZERO
 	# mid-air, a hook that misses: no fall while it flies, gravity the moment it ends
 	K.cd["rmb"] = 0.0
@@ -104,7 +113,7 @@ func _hook_hold() -> void:
 		K.flying and P.flat_dist(k0) > 0.6 and absf(P.pos.y - k0.y) <= 0.05,
 		"shoved %.2f m, height %+.3f" % [P.flat_dist(k0), P.pos.y - k0.y]
 	)
-	ak.step(m, 0.6)
+	_until_landed(m, K)
 	# mid-air, a hook that catches: held from the throw to the end of the reel
 	P.teleport(home + Vector3(0, 1.0, 0))
 	P.vel = Vector3.ZERO
@@ -427,7 +436,7 @@ func _all() -> void:
 	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
-	ak.step(m, 0.3)
+	_until_landed(m, K)
 	var d0 := P.flat_dist(T)
 	ok(
 		"abyssal hand: hooks the first foe, reel begins",
@@ -517,7 +526,7 @@ func _all() -> void:
 		W.level[W.idx(hx + 4, hz + dz)] = lv + 4
 	var g0 := K.grapples
 	ak.tap(m, P)
-	ak.step(m, 0.5)
+	_until_landed(m, K)
 	ok(
 		"cliff: the hook pierces a cliff face and hooks the foe behind it",
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
@@ -573,7 +582,7 @@ func _all() -> void:
 	# --- the reel has weight: walking sideways while reeling swings the body round you
 	reset.call()
 	ak.tap(m, P)
-	ak.step(m, 0.25)
+	_until_landed(m, K)
 	var start := T.pos
 	var dev := 0.0
 	var p_start := P.pos
@@ -885,7 +894,7 @@ func _all() -> void:
 	P.slot_lv["sec"] = 3
 	P.slot_lv["dash"] = 3
 	ak.tap(m, P)
-	ak.step(m, 0.3)
+	_until_landed(m, K)
 	ok(
 		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
 		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
@@ -912,7 +921,7 @@ func _all() -> void:
 	# --- a Boki merge that starts mid-reel / mid-wind-up ends them: the rope goes, no Anchor slam, no landing hit
 	reset.call()
 	ak.tap(m, P)
-	ak.step(m, 0.3)
+	_until_landed(m, K)
 	var reeling: bool = not K.pull.is_empty()
 	ok("merge hold: the reel is under way before the merge", reeling, "pull %s" % reeling)
 	var rope: Node3D = K.pull.get("node")
