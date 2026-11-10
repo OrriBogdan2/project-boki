@@ -1,11 +1,13 @@
 extends RefCounted
 ## --farm-tutorial-check: Hob the builder, the guided farm tutorial and the Goals tracker
-## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> for screenshots.
+## (docs/decisions/0011-farm-builder-tutorial.md). Also --farm-hob-shots=<dir> and --farm-spot-shots=<dir>: screenshots.
 ##   1. Hob: the starter set, blueprints drawn up on talking, the toast once, the spread over levels
 ##      2-5, hidden tabs and the footer line, a v7 save keeps what it could build
 ##   2. the tutorial: steps in order, free order with the house first, skip, the one reward, old saves
 ##   3. the Goals tracker: at most 5 rows, none of the tutorial, sorted, hidden when empty
-##   4. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
+##   4. the spotlight (FarmSpotlight) and the Boki page: one beat per target, clickable, fades; "Not set";
+##      Done (not Feed) is the page's filled button until the trough step
+##   5. in the world: Hob stands by the house and is talked to, the house is a free site that Boki
 ##      and the player build, save and load mid-build, skipping still puts the house down
 ## Never touches the real save.
 
@@ -46,6 +48,9 @@ func run(m: Node, mode := "") -> void:
 	main = m
 	Save.no_write = true
 	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--farm-spot-shots="):
+			await load("res://tools/farm_spot_shots.gd").new().run(m, String(a).substr(18))
+			return
 		if String(a).begins_with("--farm-hob-shots="):
 			await load("res://tools/farm_hob_shots.gd").new().run(m, String(a).substr(17))
 			return
@@ -53,6 +58,7 @@ func run(m: Node, mode := "") -> void:
 	_tutorial_rules()
 	_tracker_rules()
 	await _world()
+	await _spotlight()
 	await _farm2()
 	print("FTUT DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -313,6 +319,101 @@ func _tracker_rules() -> void:
 			"with nothing left to work towards the card is hidden")
 
 # ------------------------------------------------------------------ 4. in the world
+# ------------------------------------------------------------------ 4. the spotlight
+func _spotlight() -> void:
+	FarmSpotlight.reset()
+	Save.d = _new_save()
+	var lay := HomeLayout.ensure(Save.d)
+	_stats()
+	_add_house(lay)
+	FarmTutorial.mark("hob")
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "task" and FarmTutorial.spot("task") == {"world": true},
+			"the job step asks for the spotlight on the Boki in the world")
+	var by_id := {}
+	for st in FarmTutorial.steps():
+		by_id[st["id"]] = st
+	ok(FarmTutorial.stage("task") == "go" and by_id["buy"]["spot"]["bar"] == {"hub": "shop"}
+			and by_id["house"]["spot"]["place"] == {"hub": "build"}, "the Market bar and build menu steps too")
+	var spots_named := FarmTutorial.steps().filter(func(st): return st.has("spot")).all(func(st):
+		return (st["spot"] as Dictionary).keys().all(func(k): return (st["hints"] as Dictionary).has(k)))
+	ok(spots_named, "every spot is on a stage the step really has")
+	var home = await _ready_home()
+	home.guide.tick(0.6)
+	ok(FarmSpotlight.showing() and FarmSpotlight.in_beat(), "entering the job step opens the spotlight beat")
+	var node := FarmSpotlight._node
+	await main.get_tree().process_frame
+	ok(node.mouse_filter == Control.MOUSE_FILTER_STOP, "game clicks are held during the beat only")
+	ok(node._holes.size() == 1 and node._holes[0].size.x >= FarmSpotlight.BOKI_MIN_PX,
+			"the cut-out is round the Boki (%d holes)" % node._holes.size())
+	ok(node._card != null and node._card.get_child(0).text.contains("Click"), "the hint text is beside it")
+	await main.get_tree().create_timer(FarmSpotlight.BEAT_S + FarmSpotlight.EASE_S + 0.3).timeout
+	ok(FarmSpotlight.showing() and not FarmSpotlight.in_beat(), "after the beat it stays up (a vignette, a soft ring)")
+	var blocking := [node].filter(func(c): return c.mouse_filter == Control.MOUSE_FILTER_STOP)
+	for c in node.find_children("*", "Control", true, false):
+		if (c as Control).mouse_filter == Control.MOUSE_FILTER_STOP:
+			blocking.append(c)
+	ok(blocking.is_empty(), "nothing in it takes a click once the beat is over: the target stays clickable")
+	var dim: float = node._mat.get_shader_parameter("dim")
+	ok(is_equal_approx(dim, FarmSpotlight.DIM_VIGNETTE), "the dark has faded to the light vignette (%.2f)" % dim)
+	home._open_kin(Save.active_kin())      # what clicking the Boki does
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(not FarmSpotlight.showing(), "opening the page puts the spotlight away")
+	ok(home.panel_open != "" and FarmTaskGuide.page_up(), "the Boki page is up with the job dropdown")
+	await _page_rules(home)
+	home._close_panel()
+	home.guide.tick(0.6)
+	ok(FarmSpotlight.showing() and not FarmSpotlight.in_beat() and not FarmSpotlight._node.beat,
+			"closing the page without a job brings back only the soft ring: the beat is once")
+	FarmTutorial.event("task")
+	home.guide.tick(0.6)
+	ok(not FarmSpotlight.showing() or FarmSpotlight._node.spec != {"world": true},
+			"the job step done: its spotlight is gone")
+	ok(home.guide.hint_box.get_child(0).get_child(0).text.contains("Done"), "a tick says Done! on the goal line")
+	home.queue_free()
+	await main.get_tree().process_frame
+	FarmSpotlight.reset()
+
+## The open Boki page: "Not set" in orange, Feed not the filled button, then Done once a job is picked.
+func _page_rules(home) -> void:
+	var drop: OptionButton = FarmTaskGuide._drop
+	ok(drop.get_item_text(0) == "Not set" and drop.has_theme_color_override("font_color"),
+			"an unset job reads Not set, in a colour that asks to be chosen")
+	var feed := _page_button(home, "Feed")
+	ok(feed != null and feed.theme_type_variation != "Primary" and _page_button(home, "Done") == null,
+			"before a job is set Feed is an ordinary button and nothing on the page is filled")
+	var rec: Dictionary = Save.active_kin()
+	var jobs := Work.list(rec)
+	var picked := drop.item_count - 1
+	drop.select(picked)
+	drop.item_selected.emit(picked)
+	await main.get_tree().process_frame
+	ok(FarmTutorial.did("task") and Work.pin(rec) != "",
+			"picking a job sets it and finishes the step")
+	var k: Dictionary = home._kin_entry(rec)
+	var said := String((k["say"] as Label3D).text) if k.has("say") else ""
+	ok(FarmTutorial.rules()["picked_say"].values().has(said), "and the Boki says in the world that it's off to work")
+	var done := _page_button(home, "Done")
+	ok(done != null and done.theme_type_variation == "Primary" and done.get_node_or_null(FarmTaskGuide.PULSE) != null,
+			"then Done is the filled, ringed button")
+	feed = _page_button(home, "Feed")
+	ok(feed != null and feed.theme_type_variation != "Primary", "and Feed is still not the loud one")
+	FarmTutorial.mark("feed")
+	home._open_kin(rec)
+	await main.get_tree().process_frame
+	feed = _page_button(home, "Feed")
+	ok(feed != null and feed.theme_type_variation == "Primary", "after the trough step Feed is the main button again")
+	FarmTutorial.state()["did"].erase("feed")
+	FarmTutorial.state()["did"].erase("task")      # back to before the pick, for the checks that follow
+	Work.set_pin(rec, "")
+
+func _page_button(home, label: String) -> Button:
+	for b in home.panel_host.find_children("*", "Button", true, false):
+		if String(b.text) == label and not b.is_queued_for_deletion():
+			return b
+	return null
+
 func _sim(home, hw: HomeWork, secs: float, until := Callable()) -> int:
 	var ticks := 0
 	for i in int(secs / 0.05):
