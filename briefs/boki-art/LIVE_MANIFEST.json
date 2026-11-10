@@ -126,9 +126,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hash": {
-   "sheet": "fe0bacab88b9",
+   "sheet": "9791d095e9e3",
    "card": "2dc8c1b82047",
-   "portrait": "40446b19a535",
+   "portrait": "12df9819bd7b",
    "hero": "378bfbf05b15"
   }
  },
@@ -657,9 +657,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Glaciammoth.png",
   "hash": {
-   "sheet": "a201b4c31c14",
+   "sheet": "a7cc98ff7953",
    "card": "7fd2a64f6c37",
-   "portrait": "fb1467bfc649",
+   "portrait": "3e01396e0c29",
    "hero": "be8a20470e93"
   },
   "legendary_tier": "boss"
@@ -699,9 +699,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Glazolm.png",
   "hash": {
    "sheet": "f9068d029cbc",
-   "card": "4030a6f358e8",
+   "card": "73d675a7c443",
    "portrait": "0e102f7aaf8b",
-   "hero": "75d875023faf"
+   "hero": "e4b8ea2fc1d8"
   }
  },
  "Glintmole": {
@@ -1013,9 +1013,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Kintsuwyrm.png",
   "hash": {
    "sheet": "4b0dd61292cb",
-   "card": "5e59fa3c7983",
+   "card": "df478409b2e6",
    "portrait": "8df5fd945a7c",
-   "hero": "87efe59f2443"
+   "hero": "36061041d175"
   },
   "display_name": "Gildwyrm"
  },
@@ -1039,9 +1039,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Knotwyrm.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Knotwyrm.png",
   "hash": {
-   "sheet": "7c8c6d5d8b0e",
+   "sheet": "cb49cdda6d76",
    "card": "0f1333040402",
-   "portrait": "6fa954f56501",
+   "portrait": "d8d3e16306b7",
    "hero": "fb155c93e8ac"
   }
  },
@@ -1449,9 +1449,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Olmlet.png",
   "hash": {
    "sheet": "7213870ddd18",
-   "card": "1a909762adc9",
+   "card": "960781068f69",
    "portrait": "bb41ddf3cbdd",
-   "hero": "fd6eb08dbd33"
+   "hero": "b8dbfe3cd131"
   }
  },
  "Orbitle": {
@@ -1721,9 +1721,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Ringrove.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Ringrove.png",
   "hash": {
-   "sheet": "57712165b99b",
+   "sheet": "9200bad2e1bc",
    "card": "335496b540dc",
-   "portrait": "048677c26bd0",
+   "portrait": "540cd66230a4",
    "hero": "6ab0894c35f7"
   }
  },
@@ -2360,9 +2360,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png",
   "display_name": "Mosstodon",
   "hash": {
-   "sheet": "8e22dfb09e3e",
+   "sheet": "13186a201f82",
    "card": "25cd3147099f",
-   "portrait": "78c5e6aa7043",
+   "portrait": "92cd69670970",
    "hero": "d932b7db18cb"
   }
  },
@@ -2952,9 +2952,9 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Checkmare.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Checkmare.png",
   "hash": {
-   "sheet": "c5dbd039916a",
+   "sheet": "04cb4cf898fc",
    "card": "0a9a8dbeb01e",
-   "portrait": "99b65ab0e07c",
+   "portrait": "e12dcd9bd338",
    "hero": "7d99d78c96be"
   }
  },

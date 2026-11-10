@@ -1130,3 +1130,9 @@ for _n,_d in (('Olmlet',"add a small soft water-blue fin along its back and tail
               ('Kintsuwyrm',"add a tall flowing water-blue sail fin from neck to tail and a broad fan tail, and big clear faceted crystal clusters on its shoulders, back and tail tip, with crystal-tipped gills")):
     SPECS.append({'id':'wc_'+_n.lower(),'name':_n+' (Water/Crystal read)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'2K',
       'prompt':_EDIT+_d+". The crystals are a handful of large flat-shaded facets with one highlight each; the fins are flat shapes. Its blue-and-white porcelain pattern, gold seams, gills, face and pose stay the same. No red."})
+
+# 10:20 ET 11-10: olm line Water/Crystal cards live (wc_*_2 each: fins + clear crystals, more each stage). Sheets + portraits from them.
+for _n,(_st,_ar,_pose) in {'Olmlet':('baby','cute',"swimming forward through the air, little fin rippling, looking at the viewer"),'Glazolm':('mid','pretty',"rearing up with its fin frill spread like a fan, gills flared"),
+                           'Kintsuwyrm':('final','majestic',"coiled high like a fountain, sail fin raised, crystals catching the light, looking down at the viewer")}.items():
+    _n0=len(SPECS); V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,False,False,_pose)
+    SPECS[_n0]['id']='v2s_'+_n.lower()+'_wc'; SPECS[_n0+1]['id']='v2p_'+_n.lower()+'_wc'; SPECS[_n0+1]['runs']=2
