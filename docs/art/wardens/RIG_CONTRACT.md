@@ -180,15 +180,19 @@ slots at most ±35% per channel from the Warden's own colours. Bone names may co
 The armature and its meshes sit at the .glb's origin (no offset on the scene root), so skeleton space is model space.
 
 ## Budget and checks
-- **At most 15k triangles per Warden, weapon included** (owner item 94; `--warden-glb-check` holds it). A Meshy
-  bake (30–50k) goes through `tools/blender/decimate_warden.py` (one collapse ratio for every part over 400
-  triangles; the armature, rest pose, anchors, weights and materials are untouched). The import generates
-  LODs (`meshes/generate_lods=true`), which the quality preset's LOD threshold uses. What 25k and 40k would
-  look like and cost, measured on Vex and Cinder: [DETAIL_PILOT.md](DETAIL_PILOT.md).
-- Textures: at most 2048² (`process/size_limit=2048`), VRAM-compressed (`compress/mode=2`, high quality:
-  BPTC on desktop), mipmapped; one atlas per Warden where possible; no more than 8 material slots.
-  A hand-made model may be flat-painted instead (one colour a material, no atlas) or use a 2048² atlas with
-  its ageing painted in (Dredge); slots, not materials, count (Dredge's ten materials use four).
+- **The hero LOD: 60–80k triangles per Warden, weapon included, at most 80k** (owner 11-10, after the
+  [DETAIL_PILOT.md](DETAIL_PILOT.md) GPU numbers; `--warden-glb-check` holds the cap). Each Hunter's build sets
+  its budgets by part (face, hands, head, body); the armature, rest pose, anchors, weights and materials do not
+  change with them. The import generates the lower LODs (`meshes/generate_lods=true`), which the quality
+  preset's LOD threshold uses; Cinder and Kael keep them off until their rebuild (LODs eat thin hair cards).
+  Progress per Hunter: [HUNTER_REGEN.md](HUNTER_REGEN.md).
+- Textures: the atlas up to 4096², the normal map baked at the atlas's size and imported at 2048²
+  (`process/size_limit=2048`: 4096² would be 21 MB of video memory a Hunter for detail the 80k mesh already
+  carries), the normal map's strength ×0.6 under the toon ramp (`"painted": {"normal_k": 0.6}` in
+  `warden_look.json`). VRAM-compressed (`compress/mode=2`, high quality: BPTC on desktop), mipmapped; one atlas
+  per Warden where possible; no more than 8 material slots. A hand-made model may be flat-painted instead (one
+  colour a material, no atlas) or use a 2048² atlas with its ageing painted in (Dredge); slots, not materials,
+  count (Dredge's ten materials use four).
 - `--warden-glb-check`: the bone table covers every part HunterAnim binds; a Warden without a .glb builds the
   procedural model (the fallback); a .glb present loads with the contract armature, every kit move of every
   table retargets exactly and each keyed channel moves its bones, the anchors ride bone attachments, every
