@@ -523,6 +523,23 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 | food_by_element | {"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap", "lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint", "spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"} |
 | _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
 
+## garden_zones (`content/rules/garden_zones.json`)
+
+The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from).
+
+| Setting | Value |
+|---|---|
+| start | bramblebank |
+| start_doc | The zone open from the start and the home of every Boki in an older save. |
+| lean_key | 12 |
+| lean_key_doc | Lean points (of Evo.LEAN_FULL 24) a Boki needs in one of a zone's types to wake it: about two meals. |
+| hop_fade_s | 0.5 |
+| hop_fade_s_doc | Seconds the Waystone lights up and fades before the zone loads under the ink wipe. |
+| hop_max_s | 2 |
+| hop_max_s_doc | Seconds from pressing E to having control in the zone (--load-check=hop judges it). |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
+| wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
+
 ## gear (`content/rules/gear.json`)
 
 
