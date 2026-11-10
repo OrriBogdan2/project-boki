@@ -83,7 +83,7 @@ func _throw(P: Hunter, hud) -> void:
 	ok(not hud.slot_text.has("throw"), "G ready: no countdown")
 
 
-## The bar with several slots cooling at once (E 7.5 s, X 12.3 s, the dash recharging, G 0.4 s), a 720p crop.
+## The bar with E, X, the dash and G all cooling at once; the bottom 200 px of the 720p frame.
 func _shot(P: Hunter, hud) -> void:
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
@@ -92,6 +92,9 @@ func _shot(P: Hunter, hud) -> void:
 	if dir == "":
 		return
 	DirAccess.make_dir_recursive_absolute(dir)
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
 	P.ak.cd["e"] = 7.5
 	P.ak.cd["x"] = 12.3
 	P.dashes = 0.5
@@ -101,9 +104,7 @@ func _shot(P: Hunter, hud) -> void:
 		await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
 	var sz := img.get_size()
-	var bar := Rect2i(sz.x / 2 - 330, sz.y - 150, 660, 150).intersection(Rect2i(Vector2i.ZERO, sz))
+	var bar := Rect2i(0, sz.y - 200, sz.x, 200)
 	img.save_png(dir.path_join("cooldown_text_full.png"))
-	var crop := img.get_region(bar)
-	crop.resize(crop.get_width() * 2, crop.get_height() * 2, Image.INTERPOLATE_BILINEAR)
-	crop.save_png(dir.path_join("cooldown_text_bar.png"))
+	img.get_region(bar).save_png(dir.path_join("cooldown_text_bar.png"))
 	print("COOLDOWNTEXT shots in ", dir, " (", sz, ")")
