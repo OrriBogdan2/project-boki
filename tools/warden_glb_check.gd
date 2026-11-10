@@ -37,6 +37,8 @@ const OWN_MOTION := 0.05       # rad: two Wardens' idle or run joint angles diff
 const TRIS_MAX := 15000         # the game budget (RIG_CONTRACT "Budget"): tools/blender/decimate_warden.py
 ## Over the budget until an art pass: Kael's mane (14.5k of hair cards) breaks when decimated, so it is kept whole.
 const TRIS_OVER := {"juggernaut": 24000}
+## Pieces (by material) that must ride only these bones, per art: Ravel's lit strings on her raised hand, her lids.
+const RIDES := {"hem": {"glow-thread": ["hand.R"], "skin-lid": ["lid.R", "lid.L"]}}
 
 var bad := 0
 var n := 0
@@ -96,6 +98,7 @@ func run(main: Node) -> void:
 		_shield(a)
 		_springs(a)
 		_orbits(a)
+		_rides(a)
 		_own_look(a)
 		await _halo(main, a)
 	_stones_look()
@@ -399,6 +402,36 @@ func _orbits(a: String) -> void:
 			"%s: %d orbit props circle their bone (each moved at least %.3f m in 1s, radius kept to %.4f m)"
 			% [a, before.size(), moved, drift])
 	m.free()
+
+## The pieces in RIDES are in the .glb and every vertex of them is weighted only to their bones.
+func _rides(a: String) -> void:
+	var want: Dictionary = RIDES.get(WardenGlb.art(a), {})
+	if want.is_empty():
+		return
+	var m := _model(a)
+	var found := {}
+	for mi: MeshInstance3D in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
+		for si in mi.mesh.get_surface_count():
+			var src := mi.mesh.surface_get_material(si)
+			var mat := String(src.resource_name) if src else ""
+			if want.has(mat) and mi.skin != null:
+				found[mat] = _bones_of(mi, si).all(func(b): return b in want[mat])
+	ok(found.size() == want.size() and found.values().all(func(v): return v),
+			"%s: %s are in the .glb and ride only their bones (found %s)" % [a, str(want), str(found)])
+	m.free()
+
+## The bones a skinned surface's vertices carry weight on.
+func _bones_of(mi: MeshInstance3D, si: int) -> Array:
+	var arr := mi.mesh.surface_get_arrays(si)
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_BONES]
+	var w: PackedFloat32Array = arr[Mesh.ARRAY_WEIGHTS]
+	var sk := mi.get_node(mi.skeleton) as Skeleton3D
+	var out := {}
+	for i in idx.size():
+		if w[i] > 0.01:
+			var bi := mi.skin.get_bind_bone(idx[i])
+			out[mi.skin.get_bind_name(idx[i]) if bi < 0 else sk.get_bone_name(bi)] = true
+	return out.keys()
 
 ## A model's own look (content/rules/warden_look.json) reaches its surfaces: every surface of a slot it names
 ## carries that slot's values. (No entry: nothing to check.)
