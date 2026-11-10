@@ -101160,5 +101160,33 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_twinklup_r5_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_briarlynx_r5",
+    "name": "Briarlynx (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_briarlynx_r5_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_briarlynx_r5",
+    "name": "Briarlynx (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_briarlynx_r5_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_twinklup_r5",
+    "name": "Twinklup (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_twinklup_r5_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_tesselamb_r5",
+    "name": "Tesselamb (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_tesselamb_r5_2.jpg",
+    "ok": true
   }
 ]
