@@ -96400,5 +96400,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/kite_ribbonwyrm_r3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_ribbonwyrm_kite",
+    "name": "Ribbonwyrm (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_ribbonwyrm_kite_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_dragonkite_kite",
+    "name": "Dragonkite (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_dragonkite_kite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ribbonwyrm_kite",
+    "name": "Ribbonwyrm (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_ribbonwyrm_kite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_ribbonwyrm_kite",
+    "name": "Ribbonwyrm (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_ribbonwyrm_kite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_ribbonwyrm_kite",
+    "name": "Ribbonwyrm (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_ribbonwyrm_kite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dragonkite_kite",
+    "name": "Dragonkite (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_dragonkite_kite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dragonkite_kite",
+    "name": "Dragonkite (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_dragonkite_kite_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dragonkite_kite",
+    "name": "Dragonkite (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_dragonkite_kite_2.jpg",
+    "ok": true
   }
 ]
