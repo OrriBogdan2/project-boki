@@ -7,7 +7,7 @@
 		"shield_face": {"nodes": ["anchor_shield_face"], "bone": "hand.L", "off": [0.0, 0.0, 0.0], "body": [-0.3, 1.1, 0.7]}
 	},
 	"moves": {
-		"throw": {"fx": [{"p": "ribbon", "follow": true, "at": "hammer_head", "life": 0.6, "tail": 0.2, "size": 0.36, "c": "ember", "c2": "hot"}]},
+		"throw": {"fx": [{"p": "ribbon", "follow": true, "at": "hammer_head", "life": 0.6, "tail": 0.25, "size": 0.5, "c": "ember", "c2": "hot"}]},
 
 		"plant": {"fx": [{"p": "chunk", "n": 7, "way": "up", "speed": 3.2, "spread": 0.6, "grav": 14.0, "life": 0.55, "size": 0.1, "radius": 0.4, "c": "iron"},
 				{"p": "smoke", "n": 4, "way": "up", "speed": 0.9, "spread": 0.8, "grav": -0.4, "life": 0.7, "size": 0.55, "radius": 0.4, "c": "dust", "near": true}]},
@@ -19,7 +19,7 @@
 		"full": {"fx": [{"p": "flare", "at": "hammer_head", "size": 1.5, "life": 0.12, "grow": 1.4, "c": "main", "c2": "hot"},
 				{"p": "star", "at": "hammer_head", "n": 4, "speed": 1.6, "spread": 1.0, "grav": 0.0, "drag": 2.0, "life": 0.4, "size": 0.14, "radius": 0.1, "c": "hot", "c2": "main"}]},
 
-		"swing": {"fx": [{"p": "sweep", "at": "h", "y": 0.55, "size": "r", "arc": 180, "life": 0.2, "c": "ember", "c2": "hot", "c3": "red"},
+		"swing": {"fx": [{"p": "sweep", "at": "h", "y": 0.55, "size": "r", "arc": 180, "life": 0.28, "c": "ember", "c2": "hot", "c3": "red"},
 				{"p": "ribbon", "at": "hammer_head", "life": 0.2, "tail": 0.14, "size": 0.5, "c": "ember", "c2": "hot"},
 				{"p": "smoke", "fwd": 1.6, "y": 0.2, "n": 5, "n_k": 0.8, "way": "up", "speed": 1.2, "spread": 0.9, "grav": -0.5, "life": 0.6, "size": 0.6, "radius": 0.9, "c": "dust", "near": true}]},
 
@@ -30,7 +30,7 @@
 		"charge_go": {"fx": [{"p": "ribbon", "at": "shield_face", "life": "t", "tail": 0.25, "size": 0.55, "c": "main", "c2": "hot"},
 				{"p": "ember", "y": 0.3, "shape": "line", "len": "len", "radius": 0.6, "way": "along", "n": 12, "speed": 1.6, "spread": 0.5, "grav": 2.0, "life": 0.5, "burst": 0.5, "size": 0.05, "c": "main", "c2": "hot"},
 				{"p": "flare", "at": "shield_face", "size": 1.0, "life": 0.15, "c": "main", "c2": "hot", "when": "armed"}]},
-		"slam": {"fx": [{"p": "sweep", "at": "h", "y": 0.35, "size": "r", "arc": 100, "life": 0.22, "c": "ember", "c2": "hot", "c3": "red"},
+		"slam": {"fx": [{"p": "sweep", "at": "h", "y": 0.35, "size": "r", "arc": 100, "life": 0.28, "c": "ember", "c2": "hot", "c3": "red"},
 				{"p": "flare", "at": "shield_face", "size": 1.3, "life": 0.1, "c": "ember", "c2": "hot"},
 				{"p": "chunk", "at": "shield_face", "way": "fwd", "n": 8, "speed": 6.0, "spread": 0.45, "grav": 14.0, "life": 0.45, "size": 0.09, "radius": 0.3, "c": "plate"}]},
 

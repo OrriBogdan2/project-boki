@@ -6,8 +6,17 @@ extends "res://tools/hero_vfx_reel.gd"
 func parts() -> Array:
 	return ["throw", "charge", "shield", "bash", "wall", "dash", "e", "r"]
 
+## Each part starts with the hammer in his hand and the shield down (the last part may have left it out).
+func _hand() -> void:
+	P.ak.set("mace", {})
+	P.ak.set("lock_t", 0.0)
+	P.ak.fx.hammer_hide()
+	P.ak.fx.in_hand(true)
+	P.ak.cancel_hold()
+
 func _part_throw() -> void:
 	await _reset(8.0)
+	_hand()
 	var tap := func(t: float):
 		P.inp["fire"] = _at(t, 0.2) or _at(t, 1.5)
 		_aim(home + Vector3(6.0, 0, 0))
@@ -17,6 +26,7 @@ func _part_throw() -> void:
 
 func _part_charge() -> void:
 	await _reset(2.4)
+	_hand()
 	var swing := func(t: float):
 		P.inp["fire"] = t > 0.2 and t < 1.7
 		_aim(T.pos)
@@ -26,6 +36,7 @@ func _part_charge() -> void:
 
 func _part_shield() -> void:
 	await _reset(6.0)
+	_hand()
 	var guard := func(t: float):
 		P.inp["sec_hold"] = t > 0.2
 		if _at(t, 0.2):
@@ -41,6 +52,7 @@ func _part_shield() -> void:
 
 func _part_bash() -> void:
 	await _reset(5.0)
+	_hand()
 	P.ak.res = 50.0          # (a full Guard: the charge ends in a Shield Slam)
 	var charge := func(t: float):
 		P.inp["sec_hold"] = t > 0.2
@@ -60,6 +72,7 @@ func _part_bash() -> void:
 func _part_wall() -> void:
 	var rock := _rock()
 	await _reset(7.0)
+	_hand()
 	P.teleport(rock - Vector3(3.3, 0, 0))
 	T.teleport(rock - Vector3(1.2, 0, 0))
 	var swing := func(t: float):
