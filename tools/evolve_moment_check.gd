@@ -18,7 +18,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node, mode: String = "check") -> void:
 	Save.no_write = true
-	var stage := _stage(main)
+	var stage := _stage(main, mode == "shots")
 	if mode == "shots":
 		await _shots(main, stage)
 	else:
@@ -26,9 +26,22 @@ func run(main: Node, mode: String = "check") -> void:
 	main.get_tree().quit(bad)
 
 ## A bare stage: ground, light, camera, an Fx.
-func _stage(main: Node) -> Dictionary:
+func _stage(main: Node, rendered: bool) -> Dictionary:
 	var host := Node3D.new()
-	main.add_child(host)
+	var vp: SubViewport = null
+	if rendered:
+		vp = SubViewport.new()
+		vp.size = Vector2i(CROP * 2, CROP * 2)
+		vp.own_world_3d = true
+		vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		main.add_child(vp)
+		var env := WorldEnvironment.new()
+		env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"),
+			"horizon": Color("ffd2a8"), "stars": 0.0})
+		vp.add_child(env)
+		vp.add_child(host)
+	else:
+		main.add_child(host)
 	var cam := Camera3D.new()
 	host.add_child(cam)
 	cam.position = Vector3(0, 3.2, 5.0)
@@ -47,7 +60,7 @@ func _stage(main: Node) -> Dictionary:
 	host.add_child(ground)
 	var fx := Fx.new()
 	host.add_child(fx)
-	return {"host": host, "cam": cam, "fx": fx}
+	return {"host": host, "cam": cam, "fx": fx, "vp": vp}
 
 func _species_of(type: String) -> String:
 	for spk in Data.KIN:
@@ -189,7 +202,7 @@ func _shots(main: Node, stage: Dictionary) -> void:
 			m.step(t)
 			for f in 3:
 				await RenderingServer.frame_post_draw
-			var img: Image = main.get_viewport().get_texture().get_image()
+			var img: Image = (stage["vp"] as SubViewport).get_texture().get_image()
 			var c: Vector2 = (stage["cam"] as Camera3D).unproject_position(Vector3(0, 0.6, 0))
 			sheet.blit_rect(img, Rect2i(int(c.x) - CROP / 2, int(c.y) - CROP / 2, CROP, CROP), Vector2i(CROP * i, 0))
 		sheet.save_png("%s/evolve_%s_%s.png" % [dir, type, spk])
