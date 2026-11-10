@@ -109315,5 +109315,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/on_furnacowary_gh_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_bellowlet_gh",
+    "name": "Bellowlet (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_bellowlet_gh_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_bellowlet_gh",
+    "name": "Bellowlet (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_bellowlet_gh_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_furnacowary_gh",
+    "name": "Furnacowary (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_furnacowary_gh_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_furnacowary_gh",
+    "name": "Furnacowary (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_furnacowary_gh_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_bellowlet_gh",
+    "name": "Bellowlet (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_bellowlet_gh_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary_gh",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_gh_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary_gh",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_gh_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_furnacowary_gh",
+    "name": "Furnacowary (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_furnacowary_gh_1.jpg",
+    "ok": true
   }
 ]
