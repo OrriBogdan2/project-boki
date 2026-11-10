@@ -95,6 +95,7 @@ class Run:
 	var cheered := 0                # marks cheered for (or missed), 0..3
 	var cheer_mult := 1.0           # your last cheer, for the backed Boki's next stretch
 	var bumped := {}                # "i-j-stretch": rivals already bumped there
+	var duo := {}                   # runner index -> duo friend's index it handed off cleanly with
 
 	func _init(runners: Array, back: int, r: RandomNumberGenerator) -> void:
 		R = BaseRace.rules()
@@ -120,6 +121,10 @@ class Run:
 			p *= cheer_mult
 			cheer_mult = 1.0
 			cheered = maxi(cheered, int(stretch[i]))      # a mark passed with no press is a miss
+		var mate := _duo_mate(i) if int(stretch[i]) > 0 else -1
+		if mate >= 0:
+			p *= float(BaseDuo.rules()["handoff_pace"])
+			duo[i] = mate
 		pace[i] = p
 
 	## One press a mark, while your Boki runs the stretch before it.
@@ -141,6 +146,13 @@ class Run:
 
 	func friends(i: int, j: int) -> bool:
 		return BaseRace.bond(recs[i], recs[j]) >= float(R["friend_at"])
+
+	## A duo friend running alongside runner i (-1 if none): the hand-off into the next stretch is clean.
+	func _duo_mate(i: int) -> int:
+		for j in recs.size():
+			if j != i and _running(j) and _gap(i, j) < float(R["friend_near"]) and BaseDuo.friends(recs[i], recs[j]):
+				return j
+		return -1
 
 	func rivals(i: int, j: int) -> bool:
 		return BaseRace.bond(recs[i], recs[j]) <= float(R["rival_at"])
@@ -206,6 +218,8 @@ static func settle(run: Run) -> Dictionary:
 		var close := float(run.done_t[order[n]]) - float(run.done_t[order[n - 1]]) < float(R["close_s"])
 		if close and bond(a, b) > float(R["rival_at"]) and not (a == win and b == lose):
 			nudge_bond(a, b, float(R["friend_step"]))
+	for i in run.duo:
+		BaseDuo.note_first(run.recs[i], run.recs[run.duo[i]], "handed off cleanly with")
 	var backed_won: bool = order[0] == run.backed
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems

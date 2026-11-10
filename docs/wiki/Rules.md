@@ -60,6 +60,21 @@ Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with far
 | words | {"bravery": ["braver", "shyer"], "loyalty": ["more loyal", "more independent"], "temper": ["hotter-tempered", "calmer"], "curiosity": ["more curious", "more settled"]} |
 | words_doc | per trait: [line when it rises, line when it falls], written as 'is getting <word>' in the Boki's journal. |
 
+## base_duo (`content/rules/base_duo.json`)
+
+Duo bonus for friends (GARDEN_MODERN.md section 5 rank 4, scripts/home/base_duo.gd): two Boki whose bond is at least friend_at do better together. Joy is a 0-100 need, pace a multiplier, times are seconds.
+
+| Setting | Value |
+|---|---|
+| friend_at | 0.6 |
+| friend_at_doc | bond (-1..1, rec['bonds']) at or above which a pair is a duo; below it no bonus. |
+| nap_joy | 6 |
+| nap_joy_doc | extra joy a Boki gets on waking from a nap it spent beside a duo friend (a nap alone gives +4 in home.gd). |
+| nap_min_s | 8 |
+| nap_min_s_doc | s beside the friend, asleep, for the nap to count as shared. |
+| handoff_pace | 1.06 |
+| handoff_pace_doc | Dash: a runner that starts a new stretch with a duo friend alongside (within base_race friend_near) hands off cleanly and runs it at this times the pace. |
+
 ## base_life (`content/rules/base_life.json`)
 
 Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json base_mode on, every farm Boki runs one state machine (Roam, Eat, Nap, Play, PlayWith, Watch, React, Mentor, Chore) and keeps rec['bonds'] = {uid: -1..1}. Times are seconds, distances metres (tiles), bond changes are per event unless they say per second.
