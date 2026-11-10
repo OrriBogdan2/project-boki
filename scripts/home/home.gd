@@ -4267,9 +4267,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	if res["full"] and not res["ok"]:
 		_say(k, BokiLines.say(rec, "full"))
 		return
-	if Data.CROPS.has(f):
-		for af in Evo.AFF:
-			if Evo.AFF[af]["food"] == f: Evo.add(rec, af, 6.0)
+	Evo.food_lean(rec, f)
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")

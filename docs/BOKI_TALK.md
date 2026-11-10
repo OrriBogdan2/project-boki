@@ -26,7 +26,7 @@ To add lines, add them to the trigger's list. `--boki-lines-check` fails a line 
 | Where | Trigger | Fired by |
 |---|---|---|
 | Farm | `greet`, `greet_cold` | walking up to it or opening a talk (`Home._greeting`) |
-| Farm | `petted`, `fed`, `fed_fav`, `fed_no`, `full`, `brushed`, `bath_fav`, `bath_grump`, `nap`, `trained`, `train_miss` | the care actions in `home.gd` |
+| Farm | `petted`, `fed`, `fed_fav`, `fed_no`, `huff` (a rival at the feeding bowl), `full`, `brushed`, `bath_fav`, `bath_grump`, `nap`, `trained`, `train_miss` | the care actions in `home.gd` |
 | Farm | `want_food`, `want_energy`, `want_clean`, `want_joy` | a low need (greeting, `FarmChatter`, too tired to train, starving, overworked) |
 | Farm | `crop_ready`, `crop_watered`, `building`, `working`, `rain`, `night`, `chat` (+ the friend's `chat_reply`), `new_boki` | `FarmChatter` (`scripts/home/farm_chatter.gd`) |
 | Farm | `hatched` | a Boki hatching |

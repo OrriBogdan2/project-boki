@@ -77,6 +77,8 @@ static func eligible(id: String) -> bool:
 
 ## May it be built now? Anything with a requirement also needs Hob to have drawn it up (FarmBuilder).
 static func open(id: String) -> bool:
+	if HomeLayout.CATALOG.get(id, {}).get("base", false) and not HomeLayout.base_mode():
+		return false
 	if not gated():
 		return true
 	var need := need_of(id)

@@ -44,6 +44,16 @@ static func add(rec: Dictionary, aff: String, n: float) -> void:
 	ensure(rec)
 	rec["aff"][aff] = float(rec["aff"].get(aff, 0.0)) + n
 
+## Food leans a Boki: a crop that is an affinity's food adds this much to it.
+const FOOD_LEAN := 6.0
+
+## Feeding a crop leans the Boki toward the affinity that crop belongs to (hand feeding and the feeding bowl).
+static func food_lean(rec: Dictionary, food: String) -> void:
+	if not Data.CROPS.has(food):
+		return
+	for af in AFF:
+		if AFF[af]["food"] == food: add(rec, af, FOOD_LEAN)
+
 ## The affinity that wins right now: what it's been doing plus its personality.
 static func leading(rec: Dictionary) -> String:
 	ensure(rec)

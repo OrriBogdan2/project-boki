@@ -338,6 +338,28 @@
 				]
 			}
 		},
+		"huff": {
+			"direct": true,
+			"feel": "angry",
+			"word": "Huff",
+			"acts": [
+				"(huffs and squares up)",
+				"(glares across the bowl)",
+				"(puffs out its chest)",
+				"(stamps a paw)"
+			],
+			"lines": {
+				"_": [
+					"Hmph. I was here first.",
+					"Don't you dare.",
+					"Back off, that's mine.",
+					"Hmph!",
+					"Watch it.",
+					"You again?",
+					"Go on, try me."
+				]
+			}
+		},
 		"full": {
 			"direct": true,
 			"feel": "content",
