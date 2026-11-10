@@ -5,7 +5,7 @@ extends "res://tools/hero_pair_check.gd"
 ## extrapolated from the last two frames when the kit hides it on the hit frame) must be within one frame
 ## of the first damage on the dummy. A telegraph with no fill (the source draws cracks or a lane) must be
 ## refreshed to within one frame of the hit. Online, the cue other players get (the Net fx ring a kit sends) must
-## go out on the frame the telegraph first shows. The delays are in each kit's JSON (docs/TELEGRAPH_LEAD.md).
+## go out on the frame the telegraph first shows (a Net fx ring or a HeroVfx play: Skycall's e_count is one). The delays are in each kit's JSON (docs/TELEGRAPH_LEAD.md).
 
 const FPS := [30, 60, 144]
 const FULL := 0.999         # a fill at or above this is full
@@ -39,8 +39,9 @@ func _cases() -> Array:
 				T.set_meta("moved", true)
 				T.teleport(b["pos"] + Vector3(b["out"].x, 0, b["out"].y) * 2.0)
 	return [
-		{"arch": "dolm", "name": "Basalt Spine", "ring": true, "plain": true, "id": "x_cracks", "start": ult},
-		{"arch": "bulwark", "name": "Faultline", "ring": true, "min": 10.0, "dist": 1.5, "id": "x0", "start": ult},
+		# Basalt Spine left: its cracks are HeroVfx "spine"/"spine_lane" plays now (no AimKit entry the AimDraw
+		# probe can read), same call as --telegraph-lead-check (docs/TELEGRAPH_LEAD.md)
+		{"arch": "bulwark", "name": "Faultline", "ring": true, "min": 10.0, "dist": 13.5, "id": "x", "start": ult},
 		{"arch": "mage", "name": "Skycall", "ring": true, "start": e},
 		{"arch": "mage", "name": "Eye of the Storm", "ring": true, "id": "x_land", "start": ult, "each": second_x},
 		{"arch": "rimewright", "name": "Ice Spear", "min": 40.0, "dist": 8.0, "start": rmb.call(0.2)},
@@ -112,7 +113,7 @@ func _case(c: Dictionary, dt: float) -> void:
 		t += dt
 		var seen := _seen(m, P, String(c.get("id", "")))
 		for ev in Net.out_events:
-			if ev[0] == "fx" and ev[1] == "ring":
+			if ev[0] == "fx" and ev[1] in ["ring", "hvfx"]:    # a Net ring or a HeroVfx play
 				ring_at.append(t)
 		Net.out_events.clear()
 		if first < 0.0 and float(seen["at"]) >= 0.0:

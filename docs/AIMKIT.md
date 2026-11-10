@@ -203,7 +203,7 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
   its delay, read from the same timer that fires the damage, and the damage step runs before the telegraph is
   drawn so a fill reaches 1 on the frame the hit lands (never off a frame count). A kit that hides the telegraph
   on the hit frame is fine: the last drawn frame is one step short of full. The cue other players get (the Net fx
-  ring) goes out on the cast frame. `--telegraph-sync-check` casts each hit at 30, 60 and 144 fps and asserts
+  ring, or a HeroVfx play such as Skycall's e_count) goes out on the cast frame. `--telegraph-sync-check` casts each hit at 30, 60 and 144 fps and asserts
   fill end within one frame of the damage. The delays come from the kit JSON:
 
 | Hero | Hit | Delay (JSON) | Telegraph |
@@ -217,8 +217,8 @@ at 26 px, outside the HUD's 22 px ammo ring and inside its 30 px resource arc.
 | Motley | Nightwell | `x.tell` 1.0 s | dome fill; the first catch now lands on the frame it completes (was one frame later) |
 | Kael | Finishing Slam, Meteor Drop | `rmb.windup` 0.6 s, `rmb.drop.hang` 0.2 s | lane / marker fill |
 | Grimble | Anchor slam | `e.windup` 0.38 s | cone fill |
-| Albert | Faultline | `x.windup` 0.4 s + `x.lead` 0.2 s | cell fills on the frame its slab hits (was drawn a step before) |
-| Tenzo | Basalt Spine (X) | `x.tell` 0.2 s | cracks, no fill in the source; they end with the first rise |
+| Albert | Faultline | `x.windup` 0.4 s + `x.lead` 0.2 s | one lane (`x`) whose fill reaches each cell on the frame its slab hits; checked in the last cell (13.5 m), where the fill hits 1 |
+| Tenzo | Basalt Spine (X) | `x.tell` 0.2 s | cracks are HeroVfx plays now (no AimKit entry): not in the check, as in `--telegraph-lead-check` |
 | Lace | Hail Wall | `e.tell` 0.35 s | arc, no fill in the source; it runs out with the tell |
 
 Not covered: Tenzo's Quakefall (its circle is the charge, not a countdown; ext/vfx-telegraph-lead keeps it up
