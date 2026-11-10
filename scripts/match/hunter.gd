@@ -19,7 +19,7 @@ const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
 const GLIDE_GRAV := 14.0
 const GLIDE_ENGAGE := 0.1        # scripted input only (checks, demos): hold glide this long in the air and it opens. A player's keys never hold-open it (glide_press_only)
-                                 # (the dedicated glide button, Mouse 5, opens it at once)
+                                 # (the optional glide button opens it at once)
 ## The abyss lift [wiki: "a rapid upward impulse to ground level, then a rapid deceleration"], scaled
 ## by how deep you are (owner: "pull you up faster based on how low in the abyss you are"): a gentle
 ## lift just under the lip, a hard surge from deep down. See abyss_lift_vy (the match and home both use it).

@@ -41,7 +41,7 @@ Current binds are in `scripts/core/game.gd` `_setup_input()`.
 | LMB | weapon fire | weapon fire (unchanged) |
 | RMB | the weapon's own utility (9 different abilities, one per weapon) | the **archetype's RMB**, tied to firing, with contextual variants (tap, hold, airborne, during E, resource full). Both weapons of an archetype share the verb |
 | Shift | class dodge (phase step, roll, shoulder charge) | the **archetype dash** (charges from weight) |
-| Space / Mouse 5 | jump / glide | unchanged |
+| Space | jump / glide | unchanged |
 | Q | active glove (`gear1`) | **unchanged**: gloves stay the run's loot layer, so Q is still the glove |
 | E | the kin's ability (`signature`) | the **archetype's E** (usually utility). The kin's old E becomes the kin's **infusion source** (§4) |
 | G / middle mouse | throw / recall the kin | unchanged (the kin keeps its throw, and casts its own ability itself) |

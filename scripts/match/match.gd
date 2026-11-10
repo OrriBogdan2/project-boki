@@ -3380,12 +3380,13 @@ func _gather_input() -> void:
 		player.inp["move"] = Vector2.ZERO
 	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
 		pending_input["throw"] = true
+	KinKeys.poll(player, paused or map_up or on_panel)       # the quick order keys (attack, come back, hold)
 	player.inp["interact"] = Input.is_action_pressed("interact")
 	if lairs and not lairs.puzzle_of(player).is_empty():
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
 		player.inp["interact"] = player.inp["interact"] or (player.inp["fire"] and not (hud and hud.mouse_on_ui())) or pad
 		player.inp["fire"] = false
-	# a second Space press (or Mouse 5/4) in the air, held, glides; Space held from the jump never does
+	# a second Space press (or the glide key, if set) in the air, held, glides; Space held from the jump never does
 	player.inp["glide_press_only"] = true
 	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
 	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) a fresh press opens the glider with no wait
@@ -4476,7 +4477,7 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
+const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air and hold to glide", "jump"],
 	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
 	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
 	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
