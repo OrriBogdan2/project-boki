@@ -9,7 +9,7 @@ const LATE := 0.03               # s after the beat the bot presses (inside ever
 const DROP_EVERY := 5            # the bot leaves out every this many of your beats
 const STILL_AT := 12.0           # s into the dance the still is saved
 const ZOOM := 0.45               # the home camera's zoom on the stones (distance multiplier: closer)
-const VIEW := Vector3(0, 0, -1.9)  # m from the stones' middle to where you stand: behind, clear of other fixtures
+const VIEW := Vector3(0, 0, 0.8)  # m from the stones' middle to the (hidden) player the camera follows
 
 var main: Node
 var dir := "/tmp/media"
@@ -74,6 +74,7 @@ func _stage() -> EchoSteps:
 		k.erase("indoors")
 	h.ppos = es.middle.position + VIEW
 	h.player.position = h.ppos
+	h.player.visible = false
 	h.cam.zoom_to = ZOOM
 	h.cam.zoom = ZOOM
 	h.cam.snap(es.middle.position)
