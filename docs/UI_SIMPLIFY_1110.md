@@ -4,8 +4,9 @@ Owner order 11-10: simplify the whole UI from a player's point of view. Every me
 overlay and popup was read twice, as a first-time player ("what do I need to see and do here?") and
 as a returning one ("what is in my way every time?"). The Void & Masks look stays (torn violet
 panels, neon edge, parchment tabs, the one magenta ticket), but there is less of it: only the panel
-is torn, cards inside it are plain, the speckle and runes are half as dense. Branch `ext/ui-simplify`
-on top of `ext/ui-void-masks`. Before/after: `/home/boki/art-review/ui-simplify-1110/` (`before/`,
+is torn, cards inside it are plain, the speckle and runes are half as dense. Branch `ext/ui-simplify`,
+rebased onto `ext/ui-void-masks-v3` (the "before" shots are `ext/ui-void-masks`, the branch this
+pass started from; v3's chunkier frames landed in parallel). Before/after: `/home/boki/art-review/ui-simplify-1110/` (`before/`,
 `after/`, `before_after.jpg`), taken with `--void-ui-shots` (extended for this pass with the
 inventory, the pre-match lobby, the match HUD and the results).
 
@@ -39,9 +40,10 @@ and quit. Match: Resume, (Change Hunter), Settings, Leave match.
 
 **Hatch intro card, egg pick.** One line and one ticket each. No change.
 
-**A new Boki's reveal.** The name was on screen twice: a big title over the scene and the parchment
-tab on the card. *Changed:* only the card names it; the line over the scene is just "It's looking at
-you. It knows your face now."
+**A new Boki's reveal.** On `ext/ui-void-masks` the name was on screen twice: a big title over the
+scene and the parchment tab on the card. This pass cut the title; the parallel v3 pass then rebuilt
+the reveal as one big card with the Boki in its void window and the name as a banner on it, which
+has the name once already, so v3's reveal is kept as is.
 
 **Welcome home modal.** Two short lines and Let's go. No change.
 
@@ -102,14 +104,14 @@ strange headline).
 
 - `UI.card()` is a plain rounded frame again. Panels, buttons, tabs, tiles, tooltips and popups keep
   the torn edge; a list of cards inside a torn panel no longer reads as boxes in boxes.
-- The panel's speckle and runes run at half density (`UiTheme._panels`, grain 0.5).
+- The panel's blotches, speckle and runes run at half density (`UiTheme._panels`, grain 0.5).
 - Subtitles only where the title alone doesn't say what the screen is for.
 
 ## Cut
 
 Title version label; Demo match (for players); the Save files subtitle and "Start a new story
 here"; the Camera tab (now a group) and the Demo tab (for players); the Esc menu subtitle and its
-Controls and Save files buttons; the reveal's second name; zero-count farm chips; WASD and Space
+Controls and Save files buttons; zero-count farm chips; WASD and Space
 hints at home; the Seeds / Crops / Furniture tabs (one Farm tab); the Market subtitle; the Black
 Market's long subtitle; four paragraphs of Burrow help; the lobby eyebrow and half its hint; the
 loading screen's lore line; the results' name line and small-stats row; the kit panel's descriptions
