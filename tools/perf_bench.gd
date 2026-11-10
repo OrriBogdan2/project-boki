@@ -7,6 +7,8 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60 (0 skips the match)] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-theme=ridge]  the farm part becomes a "zone" part: the demo base on that zone theme (BaseDemo.ZONE_TOYS)
+##   [--bench-zone=cinderstep]  the farm part becomes a "zone" part: that built zone itself with six Boki out, judged
+##   against the budget in content/rules/garden_zones.json (GARDEN.md 10.6)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -19,6 +21,7 @@ var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
 var theme := ""
+var zone := ""
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -32,6 +35,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
 		if a.begins_with("--bench-theme="): theme = a.substr(14)
+		if a.begins_with("--bench-zone="): zone = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -122,7 +126,9 @@ func _bring_fight(m: Match) -> void:
 func _farm() -> void:
 	if theme != "":
 		Save.d = BaseDemo.save(theme)
-	Game.goto("home")
+	if zone != "":
+		_zone_save()
+	Game.goto("home", {"zone": zone} if zone != "" else {})
 	for i in 30:
 		await main.get_tree().process_frame
 	if theme != "":
@@ -134,7 +140,7 @@ func _farm() -> void:
 		BaseDemo.new().stage(home)
 		for i in 30:
 			await main.get_tree().process_frame
-	var part := "farm" if theme == "" else "zone"
+	var part := "farm" if theme == "" and zone == "" else "zone"
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0
@@ -146,7 +152,33 @@ func _farm() -> void:
 		fl.append(_frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
 	_summary(part, fl)
+	if zone != "":
+		_budget(fl)
 	_meshes()
+
+## The demo base's four Boki living in the zone, with the zone open.
+func _zone_save() -> void:
+	Save.d = BaseDemo.save()
+	Save.d["zones"][zone] = {"open": true}
+	for rec in Save.d["roster"]:
+		rec["zone"] = zone
+
+## Judges the zone part against garden_zones.json "budget": the frame's draw calls, objects, nodes, emitting
+## particle systems and the frame itself (the Medium and up number, or the weak one on Low and Very Low).
+func _budget(fl: Array) -> void:
+	var B: Dictionary = GardenZones.rules()["budget"]
+	var weak: bool = Settings.quality() in ["low", "very_low"]
+	var emitting := 0
+	for cls in ["GPUParticles3D", "CPUParticles3D"]:
+		emitting += main.get_tree().root.find_children("*", cls, true, false).filter(func(n): return n.emitting).size()
+	var lines := {"draws": _avg(fl, "draws"), "objects": _avg(fl, "objs"), "nodes": _avg(fl, "nodes"),
+		"emitters": emitting, "frame_ms": _avg(fl, "wall")}
+	var over: Array = []
+	for k in lines:
+		var cap := float(B["frame_ms_weak" if weak and k == "frame_ms" else k])
+		print("BENCH %s budget %s: %.1f of %.1f %s" % [zone, k, lines[k], cap, "ok" if lines[k] <= cap else "OVER"])
+		if lines[k] > cap: over.append(k)
+	print("BENCH %s budget: %s" % [zone, "ok" if over.is_empty() else "OVER " + ", ".join(over)])
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,

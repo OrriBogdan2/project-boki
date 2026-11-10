@@ -7,11 +7,11 @@ extends RefCounted
 
 const SEARCH_R := 14        # tiles out from the landing
 
-## Places the stall if the island has none. True if the layout changed.
+## Places the stall if the island has none (not in a zone with its own island). True if the layout changed.
 static func ensure(home) -> bool:
 	var d: Dictionary = home._d()
 	var lay := HomeLayout.of(d)
-	if not HomeLayout.fs(d) or HomeLayout.count_of("market_stall", d) > 0:
+	if not HomeLayout.fs(d) or HomeLayout.count_of("market_stall", d) > 0 or not GardenZones.own_layout().is_empty():
 		return false
 	var spot := _spot(home.hb)
 	if spot.is_empty():

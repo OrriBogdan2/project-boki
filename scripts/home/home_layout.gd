@@ -33,6 +33,8 @@ const THEMES := {
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	"cinderstep": {"name": "Cinderstep", "gems": 0, "zone": true, "region": 3, "style": "ember",
+		"top": "a85a3c", "top2": "8a4630", "side": "5e3430", "deep": "2a1618", "leaf": "e0743a"},
 	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
 		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
@@ -48,6 +50,7 @@ const CATALOG := {
 	"hedge": {"name": "Hedge", "cat": "Fences", "gems": 5, "line": true, "block": true},
 	"path_stone": {"name": "Stone path", "cat": "Paths", "gems": 2, "brush": "path", "col": "b1a796"},
 	"path_dirt": {"name": "Dirt path", "cat": "Paths", "gems": 1, "brush": "path", "col": "9c7a52"},
+	"path_ember": {"name": "Ember slate", "cat": "Paths", "gems": 2, "brush": "path", "col": "6e3a2e"},
 	"path_wood": {"name": "Boardwalk", "cat": "Paths", "gems": 2, "brush": "path", "col": "8a6242"},
 	"path_clear": {"name": "Grass (clear)", "cat": "Paths", "gems": 0, "brush": "clear"},
 	"clear_wild": {"name": "Clear the wild", "cat": "Island", "gems": 3, "brush": "wild"},
@@ -257,6 +260,8 @@ static func ensure(d: Dictionary) -> Dictionary:
 	return L
 
 static func of(d: Dictionary) -> Dictionary:
+	if GardenZones.here != "" and is_same(d, Save.d) and not GardenZones.own_layout().is_empty():
+		return GardenZones.own_layout()
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 
@@ -899,7 +904,7 @@ static func open_up_fs(world: World, start: Vector2i, wild_t: Dictionary) -> Dic
 ## Feeders left out over what used to be ground (the Orchard Isle moved when the islands grew)
 ## go back to open ground near the pot.
 static func rescue_feeders(world: World) -> void:
-	var fs: Array = Save.d.get("feeders", [])
+	var fs: Array = Econ.feeders()
 	for f in fs:
 		var x := float(f.get("x", 0.0)); var z := float(f.get("z", 0.0))
 		if not world.inb(int(floor(x)), int(floor(z))) or world.is_void(x, z) or world.kind[world.idx(int(floor(x)), int(floor(z)))] != World.T_GROUND:

@@ -110,3 +110,35 @@ static func leaner(id: String) -> Dictionary:
 ## The two keys of a locked zone: {"seed": have the Wayseed, "lean": have a Boki leaning toward it}.
 static func keys_for(id: String) -> Dictionary:
 	return {"seed": int(Save.d.get("items", {}).get(wayseed(id), 0)) > 0, "lean": not leaner(id).is_empty()}
+
+## Home calls this as a zone loads: `here` is the zone shown, and a zone with a "build" has its own island
+## (Save.d["zones"][id]["layout"]), made and furnished from its data the first time (garden_zones.json build_doc).
+static func enter(id: String) -> void:
+	here = id
+	var build: Dictionary = info(id).get("build", {})
+	if build.is_empty() or not Save.d.has("zones"):
+		return
+	var z: Dictionary = Save.d["zones"].get(id, {})
+	Save.d["zones"][id] = z
+	if typeof(z.get("layout")) != TYPE_DICTIONARY:
+		z["layout"] = _island(id, build)
+	HomeLayout.ensure(z)
+
+## The layout of the zone shown when it has its own island, else {} (the start zone keeps Save.d["layout"]).
+static func own_layout() -> Dictionary:
+	return Save.d.get("zones", {}).get(here, {}).get("layout", {})
+
+static func _island(id: String, build: Dictionary) -> Dictionary:
+	var L := HomeLayout.fresh()
+	L["seed"] = int(build["seed"])
+	L["sk"] = HomeLayout.fs_scale(int(L["seed"]))
+	L.merge({"fs": 1, "fb": 1, "made": true, "theme": id, "themes": [id]}, true)
+	var land := Vector2i(HomeLayout.LANDING.x, HomeLayout.LANDING.z)
+	for p in build["props"]:
+		var at := land + Vector2i(int(p[1]), int(p[2]))
+		(L["deco"] as Array).append({"u": HomeLayout._next_uid(L), "id": String(p[0]), "x": at.x, "z": at.y, "r": 0})
+	var ledge: Array = build["ledge"]
+	for x in range(land.x + int(ledge[0]), land.x + int(ledge[2]) + 1):
+		for z in range(land.y + int(ledge[1]), land.y + int(ledge[3]) + 1):
+			L["paths"][HomeLayout.key(x, z)] = "path_ember"
+	return L

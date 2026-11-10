@@ -13,7 +13,7 @@ const WANT_DIST := 0.5         # m: a goal farther than this is a wish to move
 const OVERLAP_K := 0.6         # of the two body radii: closer than this is overlapping
 const CAST := ["zapple", "burrlet", "cindle", "pebbit", "lodestick", "marchleaf"]
 const SEED := 5
-const THEMES := ["meadow", "ridge"]     # the start garden and Kitewind Ridge (GARDEN.md 10.2)
+const THEMES := ["meadow", "ridge", "cinderstep"]     # the start garden, Kitewind Ridge and Cinderstep (GARDEN.md 10.2)
 
 var bad := 0
 var main: Node
@@ -40,16 +40,34 @@ func _save(theme: String) -> void:
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	d["gems"] = 1000
 	HomeLayout.new_fs(d, SEED)
-	HomeLayout.ensure(d)["theme"] = theme
+	if GardenZones.info(theme).has("build"):
+		d["zones"][theme] = {"open": true}      # a built zone: all six live there and the real zone loads
+		for rec in d["roster"]:
+			rec["zone"] = theme
+	else:
+		HomeLayout.ensure(d)["theme"] = theme
 	Save.d = d
 
+## The Home on the save: a built zone loads as it does through the Waystone, else the start garden with a theme.
+func _load(theme: String):
+	if not GardenZones.info(theme).has("build"):
+		return await main._hb_home()
+	var hm: Node = load("res://scripts/home/home.gd").new()
+	hm.zone = theme
+	main.add_child(hm)
+	main.current = hm
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	return hm
+
 ## Every plaything and the house on the built farm, round the landing.
-func _stage() -> void:
+func _stage(theme: String) -> void:
 	var land := HomeLayout.LANDING
-	for id in Content.rules("toys")["toys"]:
-		ok(not home.hg.demo_place(id, land + Vector3(0, 0, 3.0)).is_empty(), "%s placed" % id)
-	ok(not home.hg.demo_place("house", land + Vector3(6.0, 0, -4.0)).is_empty(), "house placed")
-	home._sync_fixtures()
+	if not GardenZones.info(theme).has("build"):      # (a built zone brings its own)
+		for id in Content.rules("toys")["toys"]:
+			ok(not home.hg.demo_place(id, land + Vector3(0, 0, 3.0)).is_empty(), "%s placed" % id)
+		ok(not home.hg.demo_place("house", land + Vector3(6.0, 0, -4.0)).is_empty(), "house placed")
+		home._sync_fixtures()
 	home.ppos = land + Vector3(0, 0, 1.0)
 	home.player.position = home.ppos
 	for k in home.kins:
@@ -142,9 +160,9 @@ func _sweep(theme: String) -> void:
 	logged.clear()
 	overlaps = 0
 	_save(theme)
-	home = await main._hb_home()
+	home = await _load(theme)
 	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, CAST.size()])
-	_stage()
+	_stage(theme)
 	var cases := 0
 	var t := 0.0
 	while t < SIM_SECS:

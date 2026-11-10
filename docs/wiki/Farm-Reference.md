@@ -50,6 +50,7 @@ Everything you can place in build mode (B), from `HomeLayout.CATALOG`. Costs are
 |---|---|---|---|
 | Stone path | 2 gems | 1x1 |  |
 | Dirt path | 1 gems | 1x1 |  |
+| Ember slate | 2 gems | 1x1 |  |
 | Boardwalk | 2 gems | 1x1 |  |
 | Grass (clear) | 0 gems | 1x1 |  |
 | River | 2 gems | 1x1 | Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself. |

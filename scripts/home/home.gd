@@ -118,7 +118,7 @@ var weather_t := 40.0
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if zone == GardenZones.HUB: visit = HubLayout.island()
-	GardenZones.here = zone
+	GardenZones.enter(zone)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)

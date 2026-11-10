@@ -225,7 +225,10 @@ static func ensure_min() -> void:
 
 # ------------------------------------------------------------------ feeders
 static func feeders() -> Array:
-	return Save.d.get("feeders", [])
+	var own := GardenZones.own_layout()      # a zone with its own island keeps its own troughs
+	if own.is_empty():
+		return Save.d.get("feeders", [])
+	return own.get_or_add("feeders", [])
 
 static func fdef(f: Dictionary) -> Dictionary:
 	return FEEDERS.get(String(f.get("kind", "trough")), FEEDERS["trough"])
