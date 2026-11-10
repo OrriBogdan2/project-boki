@@ -5,7 +5,7 @@
  "sounds": {
   "garden_start": "boki", "garden_lap": "ui", "garden_cheer": "ui", "garden_miss": "ui", "garden_finish": "boki",
   "garden_crowd": "boki", "garden_strain": "loop", "garden_creak": "step", "garden_thud": "impact",
-  "garden_win": "boki", "garden_sulk": "boki"
+  "garden_win": "boki", "garden_sulk": "boki", "garden_hop": "boki", "garden_wake": "boki"
  },
  "signature": [],
  "replaces": [],

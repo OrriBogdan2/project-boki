@@ -525,7 +525,7 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 
 ## garden_zones (`content/rules/garden_zones.json`)
 
-The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from).
+The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) wayseed_from (where the card says the Wayseed comes from) and, optionally, clock (the time of day its ambience stays at, 0..1).
 
 | Setting | Value |
 |---|---|
@@ -543,7 +543,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
 | ask_s | 25 |
 | ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
-| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "clock": 0.7}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
 | wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
 
 ## gear (`content/rules/gear.json`)
