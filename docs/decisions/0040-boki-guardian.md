@@ -23,6 +23,13 @@ Readable: a white ground ring pulses round the Hunter Wisp and the Boki HUD ring
 Stealing is not built yet: `KinGuardian.protecting(h)` is the hook; a downed Hunter's wisps scatter only while
 it is false (window ended, guardian beaten, or the Hunter is out).
 
+Motion (`KinGuardStance`): it lands facing the nearest threat to the Hunter Wisp, stands low and wide with ears up
+(the "stance" pose, one row per body plan, drawn on the Flex node by KinPuppet and BokiRig, no new rig or clips)
+while it is not striking or moving, turns to its target (or the nearest foe within 14 m) at ~12/s, fights with
+its normal attack clip, and ends with the summon's own shrink into the wisp. `--guardian-stance-check` (a species
+per body plan) and `--guardian-stance-shots` (GPU strips for quad, biped, flyer) cover it. Online, only the
+owner's game turns it; a remote copy shows the snapshot's heading.
+
 ## Consequences
 - Net.VERSION 0.29.0: kin snapshot index 28 = the guardian flag (KinNet).
 - kin.gd +2 lines (damage), match.gd +1. `--wisp-guardian-check` covers it.

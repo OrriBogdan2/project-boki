@@ -80,6 +80,8 @@ func burst(window := dur, guard := false) -> void:
 	k.vel = Vector3.ZERO
 	left = window
 	guardian = guard
+	if guard:
+		KinGuardStance.land(k)
 
 ## The window is over (timer or sent back early): the shrink starts.
 func end() -> void:
@@ -104,6 +106,8 @@ func tick(dt: float) -> void:
 	if guardian and (o == null or o.out or not o.downed):
 		guardian = false          # revived or gone: it finishes the window beside you as a plain summon
 	if left > 0.0:
+		if guardian:
+			KinGuardStance.track(k, dt)
 		left -= dt
 		if left <= 0.0:
 			end()

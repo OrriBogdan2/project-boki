@@ -141,7 +141,8 @@ const CLIP_FACE := {
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
-const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
+const POSE_FACE := {"growl": "angry", "guard": "focus", "stance": "focus", "whine": "sad", "nudge": "sad",
+	"comfort": "happy"}
 
 static var enabled := true
 
@@ -161,6 +162,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _stance := 0.0             # 0..1: how far into the guardian stance (KinGuardStance) it stands
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -249,16 +251,19 @@ func _process(dt: float) -> void:
 	player.active = seen
 	if not seen:
 		return
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll stays.
-func _keep_flex() -> void:
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = Vector3.ZERO
-	flex.scale = Vector3(girth, 1.0, lerpf(1.0, girth, 0.5))
+	var st := KinGuardStance.row(String(KinPuppet.BODY.get(species, "blob")))
+	_stance = lerpf(_stance, 1.0 if String(root.get_meta("pose", "")) == "stance" else 0.0, 1.0 - exp(-10.0 * dt))
+	flex.rotation = Vector3(float(st["rx"]) * _stance, 0.0, 0.0)
+	flex.scale = Vector3(girth * lerpf(1.0, float(st["sx"]), _stance), lerpf(1.0, float(st["sy"]), _stance),
+		lerpf(1.0, girth, 0.5) * lerpf(1.0, float(st["sz"]), _stance))
 	flex.position = Vector3(0, _flex_y, 0)
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:

@@ -151,6 +151,8 @@ const CHECKS := {
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],   # decision 0040
+	"--guardian-stance-check": ["res://tools/guardian_stance_check.gd", "guardian_stance_check", null],
+	"--guardian-stance-shots": ["res://tools/guardian_stance_shots.gd", "guardian_stance_shots", null],      # --shots-dir=<dir>
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]

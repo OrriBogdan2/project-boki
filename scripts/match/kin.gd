@@ -1104,6 +1104,8 @@ func render(delta: float, alpha: float) -> void:
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
 		pose_now = "nudge"
+	if pose_now == "" and KinGuardStance.holding(self):
+		pose_now = "stance"
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
 	if state == "shoulder" and owner_h and owner_h.model and carry_style() == "mount" and not owner_h.gliding and (cmd == "return" or not giant.is_empty()):
