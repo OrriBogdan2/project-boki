@@ -203,8 +203,8 @@ func _tick_weapon() -> void:
 		var hand := hand_pos(true)
 		KitLooks.of(m).hold_on("os_charge", "mote", h, hand, lerpf(GLOW_SIZE.x, GLOW_SIZE.y, charge), col)
 		if charge >= KitLooks.ORB_HELD_K:      # the void orb is ready: magenta motes and smoke drawn into his hand
-			m.fx.burst(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
-			m.fx.burst(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
+			m.fx.debris(hand, Color(TRADE_EDGE, 0.8), 1, -2.5, 0.25, 0.0, 0.7)
+			m.fx.debris(hand, SMOKE, 1, -1.5, 0.35, 0.0, 1.0)
 
 ## The next orb's charge from the time since the last shot: 0 until lmb.charge_from (the fire rate, so held
 ## fire stays plain orbs), then a straight build to 1 at lmb.idle.
