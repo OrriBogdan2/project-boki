@@ -892,6 +892,14 @@ func _bulwark_combos() -> void:
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
+	var hv := HeroVfx.of(m)
+	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
+	var sweep_arc := func(move: String) -> float:
+		return float(vmoves[move]["fx"].filter(func(l): return l["p"] == "sweep")[0]["arc"])
+	ok("bjorn vfx: the release plays the swing, its crescent drawn at the hit's arc",
+		int(hv.plays.get("swing", 0)) == 1
+		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
+		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -913,6 +921,9 @@ func _bulwark_combos() -> void:
 		mid == 0.0 and K.spins == sp0 + 1 and dmg(T) >= 18.0 and dmg(T) <= 30.0,
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
+	var spin_r := float(K.dash_def().get("spin_r", 2.2))
+	ok("combo bjorn: the spin ring is drawn out to the hit radius",
+		absf(K.fx.swirl_r - spin_r) < 0.01, "%.2f" % K.fx.swirl_r)
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true
@@ -1110,6 +1121,10 @@ func _bulwark_combos() -> void:
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
 		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
 	)
+	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
+		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
+		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
+		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()

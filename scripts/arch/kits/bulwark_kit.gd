@@ -324,7 +324,7 @@ func _try_crush(t: Ent, dir: Vector2) -> void:
 			"stun": crush_stun, "dr": true})
 		payoff_fx(tgt.pos, "CRUSHED", res_col(), "pay_slam", dir, tgt)
 		if not anim_id in ["bul_smash", "bul_charge"]: play("bul_crush")
-		m.fx.dust(tgt.pos, 14))
+		vfx("crush", tgt.pos, dir))
 
 # ------------------------------------------------------------------ LMB: the mace (throw / Crushing Blow)
 func _wk() -> float:
@@ -436,12 +436,14 @@ func _hold_tell() -> void:
 	var rate: Array = lmb_def()["spin_turns"]
 	spin += TAU * lerpf(float(rate[0]), float(rate[1]), k) * Match.DT
 	fx.hold(lmb_t, k, launch.in_window(lmb_t), spin)
+	if fx.glint_k >= 0.0:
+		HeroVfx.of(m).hold(h, "charge", k)
 	AimKit.charge(h, k, {"col": Color("ffc94a"), "col2": Color("fff1c0"), "flare": false})
 	if floori(spin / TAU) > floori(was / TAU):
 		m.sfx("bjorn_spin", h.pos, -9.0 if h.is_local() else -13.0, lerpf(0.9, 1.25, k))
 	if k >= 0.99 and not flared:
 		flared = true
-		fx.full_flare()
+		vfx("full", h.pos, h.aim_dir())
 		AimKit.flare(h, {"col2": Color("fff1c0")})
 		m.sfx("bjorn_glint", h.pos, -3.0 if h.is_local() else -8.0)
 		m.sfx("click", h.pos, -2.0 if h.is_local() else -9.0, 1.6)
@@ -481,8 +483,7 @@ func _smash() -> void:
 		launch.start(dv)
 	else:
 		_carry(dv, k)
-	fx.slam(dv, k)
-	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
+	vfx("swing", h.pos, dv, {"r": float(md["smash_reach"]), "k": k})
 	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
 		_impact_trail(f, dv, k)
 		if perfect:
@@ -507,11 +508,11 @@ func _carry(dv: Vector2, k: float) -> void:
 
 ## A foe the slam caught: a white dust puff on them, then a debris trail as they fly back.
 func _impact_trail(f: Ent, dv: Vector2, k: float) -> void:
-	m.fx.burst(f.pos + Vector3(0, 0.9, 0), Color.WHITE, 10, 4.0, 0.3, 3.0, 1.1)
+	vfx("hit", f.pos, dv)
 	for i in 3:
 		m.later(0.06 * (i + 1), func():
 			if is_instance_valid(f) and not f.dead:
-				m.fx.burst(f.pos + Vector3(0, 0.4, 0), Color("c86a4a"), 4, 2.0 + k * 2.0, 0.35, 8.0, 0.8, Vector3(-dv.x, 0.6, -dv.y), 50.0))
+				vfx("hit_trail", f.pos, dv, {"k": k}))
 
 ## s the hammer stays in his hand after the throw starts (sheet 0033-0034: about one frame of wind-up; with
 ## the step it's queued on it leaves ~0.12 s after the press, as the arm comes through in bul_throw)
@@ -572,6 +573,7 @@ func _recall() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
 	mace["hit"] = {}
+	HeroVfx.of(m).trail(h, "throw", fx.hammer)
 	m.sfx("bjorn_recall", mace["pos"], -4.0)
 	CombatBus.ability_used.emit(h, id + "_recall", "primary")       # a press with the hammer out is the recall
 
@@ -596,6 +598,7 @@ func _tick_mace(dt: float) -> void:
 			if float(mace["t"]) >= THROW_WIND:
 				mace["st"] = "fly"
 				fx.in_hand(false)
+				HeroVfx.of(m).trail(h, "throw", fx.hammer)
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt
@@ -618,7 +621,7 @@ func _tick_mace(dt: float) -> void:
 					mace["st"] = "ground"; mace["t"] = 0.0
 					throw_d = Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
 					fx.hammer_plant(Vector3(p.x, gy, p.z), atan2(-dir.x, -dir.y))
-					m.fx.dust(p, 8)
+					vfx("plant", p, h.aim_dir())
 					m.sfx("bjorn_plant", p, -3.0)
 		"ground":
 			mace["t"] = float(mace["t"]) + dt
@@ -652,8 +655,7 @@ func _catch(quiet := false) -> void:
 	if quiet:
 		return
 	m.sfx("bjorn_catch", h.pos, -6.0)
-	m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("ffb04a"), 8, 2.5, 0.25)
-	m.fx.flash(h.pos + Vector3(0, 1.0, 0), Color("ffb04a"), 0.5, 0.06)
+	vfx("catch", h.pos)
 
 # ------------------------------------------------------------------ RMB: Shield (hold to block)
 ## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).
@@ -733,7 +735,7 @@ func _shield_slam() -> void:
 	knock_until = m.time + 0.2
 	var stg := stage("rmb", {"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
 	run(stg, cx("rmb", "shield_slam", aim(), {"no_floor": true, "hit_extra": {"heavy": true}}))
-	fx.bash(h.pos, dv, float(sl["radius"]), true)
+	vfx("slam", h.pos, dv, {"r": float(sl["radius"])})
 	m.sfx("bjorn_bash", h.pos, -1.0, 0.85)
 
 func fire_ok_rmb() -> bool:
@@ -772,9 +774,10 @@ func on_dash(use_ex: bool) -> bool:
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
 		front_t = t_felt + 0.15
 		knock_until = m.time + t_felt + 0.1
-		if full_ready():
+		var armed := full_ready()
+		vfx("charge_go", h.pos, h.aim_dir(), {"t": t_felt, "len": dist, "armed": armed})
+		if armed:
 			res -= float(res_def().get("slam", 50.0))
-			m.fx.flash(h.pos + Vector3(h.aim_dir().x * 0.8, 1.0, h.aim_dir().y * 0.8), res_col(), 0.9, t_felt)
 			m.later(t_felt, func(): if is_instance_valid(h) and not h.downed and not KinMerge.active(h): _shield_slam())
 		st["last_dash"] = "charge"
 		play("bul_charge")
@@ -826,7 +829,7 @@ func _spin_hit(wd: Vector2) -> void:
 	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
 		h.glide_cd = maxf(h.glide_cd, WINDDOWN)
 	h._strike(float(dd["whirl_dmg"]) * h.wup_dmg * power("dash") / maxf(0.01, m.dmg_mult(h)), r, 360.0, float(dd["whirl_kb"]), {"heavy": true})
-	fx.smash_ring(h.pos)
+	fx.smash_ring(h.pos, r)
 	m.fx.dust(h.pos, 10)
 	m.sfx("bjorn_whirl", h.pos, -2.0)
 	net_ring(h.pos, r, Color("ff7a3a"))

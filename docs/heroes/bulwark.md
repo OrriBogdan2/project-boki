@@ -114,6 +114,17 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 | RMB lowered | Not shown | Free the step it drops | n/a |
 | E cast (column 1 s, then zone) | Green column falls on the planted hammer; body not described | Free at full speed, faces the cursor | unmeasured, no data to change |
 
+## Kit VFX pass (content/vfx/bulwark.json, HeroVfx, docs/HERO_VFX.md)
+Source polish, our gold and ember look. Every look is a pooled HeroVfx layer inside the particle budget, anchored on the v2 model's own empties (`anchor_hammer_head`, `anchor_hammer_grip`, `anchor_shield_face`) with Gun-space and body fallbacks. Checked: `--hero-vfx-check`, the "vfx" rows of `--bulwark-combo-check`, strips from `--hero-vfx-reel --reel-hero=bulwark` (tools/vfx_reel/bulwark.gd, docs/parity_reel/albert_kit).
+| Moment | Look | Matches |
+|---|---|---|
+| Throw and recall | `throw`: an ember ribbon follows the hammer head the whole flight; `plant`: grit and a dust puff where it lands, the gold beacon stays (source, gameplay); `catch`: a few embers at the grip | the flight path, no glow quad or flash |
+| Charged swing, hold | `charge`: motes gather on the head from the glint (0.6 s), more with the charge; `full`: one flare and four stars on the head at full | the owner's whirl (item 59), the source glint |
+| Charged swing, release | `swing`: one flame sweep in front of him, 180 degrees out to the hit's reach (asserted equal to `smash_arc`), the head's ribbon, a dust puff; `hit`: dust on the foe and debris along the knock, `hit_trail` embers as it flies | the hit shape, a short burn-off (0.28 s) |
+| Shield Charge, Shield Slam | `charge_go`: a ribbon off the shield face and sparks along the dash (a flare on the shield when Guard is full); `slam`: a sweep over the cone's own 100 degrees (asserted equal to the data), grit off the shield | the cone, no ground ring |
+| Crushed (a foe into a wall) | `crush`: a ring of stars at the foe's head and a dust puff | the source's stars (1 s) |
+Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, the lane and eruption).
+
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
 - The perfect window starts at full charge and lasts 0.18 s (owner default); held past it the swing is a normal one; nothing goes off until he lets go (the sheet shows a 2.6 s hold). Let go in the air, a normal swing takes no step (he keeps his speed) and a perfect one still launches him (owner #51: "pair it together").
@@ -236,7 +247,7 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 - Telegraphs and cursor: `AimKit.charge` / `flare` during the spin, `AimKit.circle` "e" (all) while Mending Ground comes down.
 - Sounds: `tools/gen_sfx_breaker.py` writes `audio/bjorn_*.wav` and `bulwark_*`.
 - Merge: `_drop_holds()` drops the spin (`lmb_t`, `h.mel_hold`, the spinning hammer and glint), lowers the aegis, and drops the Faultline wind-up (`BjornUlt.phase == "wind"`).
-- Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: `cast_ult` returns `HeroUlt.press(self, _start_ult)` behind main's `HunterKeys.ult_pressed`), `scripts/arch/kits/bjorn_ult.gd` (BjornUlt: the lane, the slam, the eruptions, the scar, pooled basalt spikes, seams, streak and scar). Data: `content/archetypes/bulwark.json` `x`. Sounds: `bjorn_ult_wind`, `bjorn_ult_slam`, `bjorn_ult_rumble`, `bjorn_ult_crackle`. Telegraph: one AimKit `lane` per cell (`x0`..`x3`, `all`).
+- Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: `cast_ult` returns `HeroUlt.press(self, _start_ult)` behind main's `HunterKeys.ult_pressed`), `scripts/arch/kits/bjorn_ult.gd` (BjornUlt: one outlined lane with a glowing crack, the slam, pooled light columns and seams per cell, the streak, the crack left as the scar; the stun stars over each foe struck). Data: `content/archetypes/bulwark.json` `x`. Sounds: `bjorn_ult_wind`, `bjorn_ult_slam`, `bjorn_ult_rumble`, `bjorn_ult_crackle`. Telegraph: one AimKit `lane` per cell (`x0`..`x3`, `all`).
 - No Net shape change.
 
 ## Payoff
