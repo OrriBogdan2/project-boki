@@ -47,4 +47,4 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
 ## Ready cues
-- `ready_ult` (R back), `ready_boki` (Boki ability back) and `ready_dash` (a charge back after all were spent) are three short, quiet UI sounds in the ui set. `ReadyCues.watch` (called from `HudSlot.ab_slot`) plays each once, only on the local hunter's own bar, at `QUIET_DB` so they stay under combat music; none in the first 5 s of a match or while downed. `--ready-cue-check` covers it.
+- `ready_ult` (R back), `ready_boki` (Boki ability back, or with Boki as wisps the summon back: `BokiHud.summon_ring`, the wisp brightens with a small sparkle) and `ready_dash` (a charge back after all were spent) are three short, quiet UI sounds in the ui set. `ReadyCues.watch` (called from `HudSlot.ab_slot`) plays each once, only on the local hunter's own bar, at `QUIET_DB` so they stay under combat music; none in the first 5 s of a match or while downed. `--ready-cue-check` covers it.

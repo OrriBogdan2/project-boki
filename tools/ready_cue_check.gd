@@ -3,7 +3,9 @@ extends RefCounted
 ## the ultimate (R), the Boki's ability and a dash charge after all were spent each fire their cue exactly
 ## once when the cooldown ends (CombatBus.ready_cue and the sound); not for a dash charge coming back while
 ## another is left, not on first sight, not in the first 5 s of a match, not while downed; a cooldown running
-## on a teammate or an enemy never cues; and every cue sound is quiet. Never touches the save.
+## on a teammate or an enemy never cues; and every cue sound is quiet.
+## With Boki as wisps, the summon (KinSummon, via BokiHud.summon_ring) cues once when its cooldown ends,
+## and the wisp brightens. Never touches the save.
 
 var bad := 0
 var main: Node
@@ -50,6 +52,7 @@ func run(main_node: Node) -> void:
 	await _cycle(m, P)
 	await _gates(m, P)
 	await _others(m, P)
+	await _summon(m, P)
 	_quiet()
 	print("READY CUE CHECK DONE, failures: ", bad)
 	m.queue_free()
@@ -148,3 +151,35 @@ func _quiet() -> void:
 	for sname in ReadyCues.CUE_OF.values():
 		var loaded: bool = Sfx.streams.has(sname) or Sfx.streams.is_empty()
 		ok(ReadyCues.QUIET_DB <= -6.0 and loaded, "%s is loaded, played quietly" % sname)
+
+## Boki as wisps: the summon's cooldown ending cues ready_boki once and the wisp goes from dim to bright;
+## a summon out (no cooldown yet) never cues; a teammate's summon never cues.
+func _summon(m: Match, P: Hunter) -> void:
+	var k: Kin = P.kin
+	KinWisp.set_wisp(k, true)
+	var s := k.summon
+	ok(k.wisp and s != null, "the Boki rides as a wisp with a summon")
+	s.left = 5.0
+	await _drawn(m.hud)
+	var n := _count("ready_boki")
+	s.left = 0.0
+	await _drawn(m.hud)
+	ok(_count("ready_boki") == n, "a summon ending without a cooldown doesn't cue")
+	s.cd = 6.0
+	s.cd_full = 6.0
+	s.render()
+	var body := k.model.get_node("Body") as GeometryInstance3D
+	var dimmed := float(body.get_instance_shader_parameter("dim"))
+	await _cooldown(m, func(c): s.cd = 6.0 if c else 0.0, "ready_boki", "Boki summon")
+	s.render()
+	ok(dimmed < 1.0 and is_equal_approx(float(body.get_instance_shader_parameter("dim")), 1.0),
+		"the wisp is dim on cooldown (%.2f) and bright when ready" % dimmed)
+	n = cues.size()
+	for o in m.hunters:
+		if o != P and o.team == P.team and o.kin and o.kin.summon:
+			KinWisp.set_wisp(o.kin, true)
+			o.kin.summon.cd = 5.0
+			await _drawn(m.hud)
+			o.kin.summon.cd = 0.0
+			await _drawn(m.hud)
+	ok(cues.size() == n, "a teammate's summon never cues")

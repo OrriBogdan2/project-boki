@@ -108,6 +108,8 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 		return
 	var s := k.summon
 	var col: Color = k.sp.get("glow", k.sp["color"])
+	if p == H.m.player and ReadyCues.watch(H, "summon", s.cd <= 0.0 and not s.out(), s.cd) and k.wisp:
+		H.m.fx.burst(k.global_position, col, 8, 1.5)      # the wisp brightens (BokiWispLook.dim) with a little sparkle
 	var rr := r.grow(SUMMON_GROW)
 	var at := r.position + Vector2(2, -2)
 	if s.out():
