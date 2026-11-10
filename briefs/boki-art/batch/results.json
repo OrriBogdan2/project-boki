@@ -78816,5 +78816,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_gloamshell_b2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_druzemole_b2",
+    "name": "Druzemole (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_druzemole_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_druzemole_b2",
+    "name": "Druzemole (V2 sheet, batch 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_druzemole_b2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_gloamshell_b2",
+    "name": "Gloamshell (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_gloamshell_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_druzemole_b2",
+    "name": "Druzemole (V2 portrait, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_druzemole_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_gloamshell_b2",
+    "name": "Gloamshell (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_gloamshell_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glomworth_b2",
+    "name": "Glomworth (V2 sheet, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_glomworth_b2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_glomworth_b2",
+    "name": "Glomworth (V2 sheet, batch 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_glomworth_b2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_glomwort_b2",
+    "name": "Glomwort (V2 portrait, batch 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_glomwort_b2_1.jpg",
+    "ok": true
   }
 ]
