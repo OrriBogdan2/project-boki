@@ -92319,5 +92319,2973 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_canvastross_r_1.jpg",
     "ok": true
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_a",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_a",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_b",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_b",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_a",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_a",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_b",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_b",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/det_grammite_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/det_grammite_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/det_grammite_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m1",
+    "name": "Snapler (middle-stage rework m1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m1",
+    "name": "Snapler (middle-stage rework m1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m2",
+    "name": "Snapler (middle-stage rework m2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m2",
+    "name": "Snapler (middle-stage rework m2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m3",
+    "name": "Snapler (middle-stage rework m3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m3",
+    "name": "Snapler (middle-stage rework m3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y1",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_wickapi_y3",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_a",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_a",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_spirevark_b",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_frigatee_b",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_a",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "cool_glaciatee_b",
+    "name": "Glaciatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_glaciatee_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "sea_canvastross",
+    "name": "Canvastross (sea read)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/sea_canvastross_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_mothlet",
+    "name": "Mothlet female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_mothlet_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "fv3_grainspin",
+    "name": "Grainspin female (V2 card, round 2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/fv3_grainspin_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_pipwom_sit",
+    "name": "Pipwom (owner note: new pose, V2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/pose2_pipwom_sit_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_a",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_a",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_b",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dragonkite_b",
+    "name": "Dragonkite (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dragonkite_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_a",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_a_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_a",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_a_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_b",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_b_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_checkmare_b",
+    "name": "Checkmare (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_checkmare_b_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/det_grammite_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/det_grammite_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_grammite",
+    "name": "Grammite (more detail)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/det_grammite_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "det_dobsabre",
+    "name": "Dobsabre (a little simpler)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/det_dobsabre_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "eye_scopeleon",
+    "name": "Scopeleon (squinting)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/eye_scopeleon_3.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m1",
+    "name": "Snapler (middle-stage rework m1)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m1_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m1",
+    "name": "Snapler (middle-stage rework m1)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m1_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m2",
+    "name": "Snapler (middle-stage rework m2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m2_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m2",
+    "name": "Snapler (middle-stage rework m2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m2_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m3",
+    "name": "Snapler (middle-stage rework m3)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m3_1.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "opt_snapler_m3",
+    "name": "Snapler (middle-stage rework m3)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_snapler_m3_2.jpg",
+    "ok": false,
+    "error": "Reauthentication is needed. Please run `gcloud auth application-default login` to reauthenticate."
+  },
+  {
+    "id": "pose2_dribbara_a",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_a_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_spirevark_a",
+    "name": "Spirevark (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_spirevark_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_frigatee_a",
+    "name": "Frigatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_frigatee_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "cool_coolatee_b",
+    "name": "Coolatee (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/cool_coolatee_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_dribbara_b",
+    "name": "Dribbara (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose2_dribbara_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_wickapi_y2",
+    "name": "Wickapi (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_wickapi_y2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose2_chandelapi_b",
+    "name": "Chandelapi (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose2_chandelapi_b_1.jpg",
+    "ok": true
   }
 ]
