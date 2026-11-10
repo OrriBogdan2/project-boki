@@ -82645,5 +82645,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2c_glazolm_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2c_glazolm",
+    "name": "Glazolm (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_glazolm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kintsuwyrm",
+    "name": "Kintsuwyrm (V2 card, batch 4, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2c_kintsuwyrm_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kintsuwyrm",
+    "name": "Kintsuwyrm (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_kintsuwyrm_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_glazolm",
+    "name": "Glazolm (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_glazolm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_olmlet",
+    "name": "Olmlet (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_olmlet_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_kintsuwyrm",
+    "name": "Kintsuwyrm (V2 card, batch 4, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2c_kintsuwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_sandwidow",
+    "name": "Sandwidow (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_sandwidow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2c_grainspin",
+    "name": "Grainspin (V2 card, batch 4, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2c_grainspin_2.jpg",
+    "ok": true
   }
 ]
