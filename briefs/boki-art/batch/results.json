@@ -75827,5 +75827,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2p_jerbolt_3.jpg",
     "ok": true
+  },
+  {
+    "id": "v2n_bullpole",
+    "name": "Bullpole (V2 card, text-only style)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2n_bullpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_jerbolt",
+    "name": "Jerbolt (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_jerbolt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2n_bullpole",
+    "name": "Bullpole (V2 card, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2n_bullpole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2n_bullpole",
+    "name": "Bullpole (V2 card, text-only style)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2n_bullpole_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_jerbolt",
+    "name": "Jerbolt (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_jerbolt_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_jerbolt",
+    "name": "Jerbolt (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_jerbolt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2n_dynaboa",
+    "name": "Dynaboa (V2 card, text-only style)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2n_dynaboa_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2n_dynaboa",
+    "name": "Dynaboa (V2 card, text-only style)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2n_dynaboa_4.jpg",
+    "ok": true
   }
 ]
