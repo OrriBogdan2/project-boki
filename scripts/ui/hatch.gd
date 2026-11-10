@@ -400,7 +400,7 @@ func _show_create() -> void:
 	for r in Unmasked.ROWS.size():
 		var row: Array = Unmasked.ROWS[r]
 		if r == 0 or r == Unmasked.HOLLOW_ROW:
-			v.add_child(UI.label("Body" if r == 0 else "The hollow", 12, UI.ACCENT, UI.caps))
+			v.add_child(UI.section("Body" if r == 0 else "The hollow"))
 		var key: String = row[0]
 		var opts: Array = row[2]
 		var hr := UI.hbox(8)

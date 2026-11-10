@@ -473,7 +473,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 func _group(v: VBoxContainer, txt: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(4))
-	v.add_child(UI.section(txt, UI.FAINT.lightened(0.2)))
+	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
 func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
@@ -636,7 +636,7 @@ func open_inventory() -> void:
 		c.custom_minimum_size = Vector2(222, 0)
 		var cv := UI.vbox(6); c.add_child(cv)
 		var top := UI.hbox(10)
-		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0, UI.R_CTRL)
+		var dot := UI.badge(icon if icon != "" else String(icon_of.get(inv_tab, "gem")), col, 36.0)
 		top.add_child(dot)
 		var tc := UI.vbox(0); tc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var tl := UI.label(title_txt, UI.T_BODY, UI.INK, UI.semi); tl.clip_text = true

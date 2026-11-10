@@ -214,15 +214,15 @@ func _vendor_card(g: Array) -> Control:
 	var is_open := Progress.unlocked(key)
 	var cost: int = g[3]
 	var col: Color = Color(g[4])
-	var card := UI.card(UI.CARD if is_open else Color(0.1, 0.11, 0.15, 0.9), 10, 12)
+	var card := UI.card(UI.CARD if is_open else Color(UI.NIGHT_HI, 0.9), 10, 12)
 	card.custom_minimum_size = Vector2(404, 0)
 	card.tooltip_text = String(g[2]) + ("" if is_open else "\n" + Progress.req_text(key))
 	var hr := UI.hbox(10)
 	card.add_child(hr)
 	var icons := {"seed": "seed", "food": "heart", "tonic": "tonic", "acc": "paw", "furn": "home", "plots": "seed",
 		"coals": "dash", "incub_slot": "egg", "tool": "hammer"}
-	var sw := UI.badge("lock", UI.FAINT, 32.0, UI.R_CTRL)
-	if is_open: sw = UI.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0, UI.R_CTRL)
+	var sw := UI.badge("lock", UI.FAINT, 32.0)
+	if is_open: sw = UI.badge(String(icons.get(key.split(":")[0], "gem")), col, 32.0)
 	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(sw)
 	var nv := UI.vbox(0)
