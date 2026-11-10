@@ -143,6 +143,8 @@ func _strip(dir: String, zc: int) -> void:
 	home.ppos = Vector3(x, 0, zc + 7.5)
 	home.player.position = home.ppos
 	home.set_process(true)
+	if main.fade:
+		await main.fade.reveal(0.05)      # the boot splash stays up when a check builds the farm by hand
 	var frames: Array = []
 	var gap := 50
 	for i in gap * FRAMES:
