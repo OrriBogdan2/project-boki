@@ -8,7 +8,7 @@ extends Node3D
 const POOL := 6                 # decals alive at once
 const LIFE := 0.6               # s from stamp to gone
 const HOLD := 0.3               # s the crack stays full strength before it fades
-const SIZE := 1.3               # m, the quad's side
+const SIZE := 1.8               # m, the quad's side
 const LEAN := 0.7071          # sin 45: the quad's top edge sits on the wall at the contact point
 const LIFT := 0.04              # m off the wall, so the quad is not inside it
 const DEDUPE := 0.5             # s: a second source stunning the same body on the same wall is the same stun
@@ -106,7 +106,7 @@ static func _rim_of(by: Node) -> Color:
 		return Arch.color((h as Hunter).arch)
 	return NEUTRAL_RIM
 
-## Cracks running out of the middle: R is the crack, G a one-pixel halo around it.
+## Cracks running out of the middle: R is the crack (3 px wide), G a halo one pixel wider on each side.
 static func _crack_tex() -> ImageTexture:
 	if _tex != null:
 		return _tex
@@ -120,11 +120,13 @@ static func _crack_tex() -> ImageTexture:
 		for s in int(TEX * rng.randf_range(0.28, 0.46)):
 			dir = dir.rotated(rng.randf_range(-0.35, 0.35))
 			p += dir
-			for o: Vector2i in [Vector2i.ZERO, Vector2i(1, 0), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(0, -1)]:
-				var px: Vector2i = Vector2i(p) + o
-				if px.x < 0 or px.y < 0 or px.x >= TEX or px.y >= TEX:
-					continue
-				var old := img.get_pixelv(px)
-				img.set_pixelv(px, Color(1.0 if o == Vector2i.ZERO else old.r, 1.0, 0, 1.0))
+			for oy in range(-2, 3):
+				for ox in range(-2, 3):
+					var px := Vector2i(p) + Vector2i(ox, oy)
+					var reach := absi(ox) + absi(oy)
+					if reach > 2 or px.x < 0 or px.y < 0 or px.x >= TEX or px.y >= TEX:
+						continue
+					var old := img.get_pixelv(px)
+					img.set_pixelv(px, Color(1.0 if reach <= 1 else old.r, 1.0, 0, 1.0))
 	_tex = ImageTexture.create_from_image(img)
 	return _tex
