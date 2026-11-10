@@ -699,6 +699,19 @@ def _combo_rows(hero, f):
                              _combo_ours(held[move], HOLD_MODE, "keep")])
     return rows
 
+MANTLE_INPUTS = [("lmb", "LMB"), ("rmb", "RMB"), ("e", "E"), ("x", "R (ult)"), ("dash", "dash (Shift)"), ("jump", "jump")]
+MANTLE_MODE = {"fire": "fires mid-climb, the rise goes on", "buffer": "buffered to the top"}
+
+def _mantle_rows():
+    """The press-in-a-mantle rows every hero shares (content/rules/mantle_press.json); [?] where the source is silent."""
+    rules = load_json(os.path.join(ROOT, "content", "rules", "mantle_press.json"))
+    rows = []
+    for key, label in MANTLE_INPUTS:
+        row = rules.get(key, {})
+        ours = MANTLE_MODE[row.get("mode", "buffer")] + ("" if row.get("seen") else " [?]")
+        rows.append(["mantle -> %s" % label, row.get("source", ""), ours])
+    return rows
+
 def _dash_ours(row, modes):
     out = modes[row.get("mode", "buffer")]
     if row.get("carry"):
@@ -736,6 +749,10 @@ def gen_dash_flow():
             "ability combines with Shift and jump unless its row is an exception, which carries a reason. A held slot "
             "with no hold row keeps through every move.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
+    body += ("\n\n## A press during a mantle (every hero)\n\nOne row per input for all heroes, read from "
+             "`content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't "
+             "show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.\n\n")
+    body += table(["Pair", "Source", "Ours"], _mantle_rows())
     write("dash_interactions.md", "%s\n# Dash, jump and ability interactions\n\n_Generated from `content/dash_flow`._\n\n%s"
           % (NOTE, body), os.path.join(ROOT, "docs", "heroes"))
 

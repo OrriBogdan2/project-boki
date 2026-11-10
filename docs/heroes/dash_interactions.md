@@ -346,3 +346,16 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ostra | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | ostra | ult (X) -> jump | Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once. | **exception:** the move is refused while it runs (owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once) |
 | ostra | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
+
+## A press during a mantle (every hero)
+
+One row per input for all heroes, read from `content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.
+
+| Pair | Source | Ours |
+|---|---|---|
+| mantle -> LMB | Not shown inside a rise. Closest: sv_joule_1v4.mp4 9.20-9.27 s (briefs/supervive-data/MANTLE_185b.md): a hunter tops a low rim and stands firing ~0.07 s later, a shot at the top, not one in the rise. | buffered to the top [?] |
+| mantle -> RMB | Not shown: no RMB inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> E | Not shown: no E inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> R (ult) | Not shown: no ultimate inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> dash (Shift) | Footage owner_mantle_clip.mp4 17.9-18.6 s (briefs/supervive-data/MANTLE_185b.md): a dash at an abyss rim goes over it and onto the grass at dash-trail speed, no stop. Data: the mantle is a suction force and a Z impulse during the fall (supervive_physics.md, Mantle), with no state that ends a dash. | fires mid-climb, the rise goes on |
+| mantle -> jump | Owner's account of the source (docs/MOVEMENT_FEEL.md, Ledges): 'a well-timed input or jump gives a better fling. The game never takes control.' Ours: the fling (Hunter._ledge_fling). | fires mid-climb, the rise goes on |
