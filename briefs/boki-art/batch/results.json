@@ -75414,5 +75414,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/c_jerboa_baby_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2x_bullpole",
+    "name": "Bullpole (V2 card, remove board tiles)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2x_bullpole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pinster",
+    "name": "Pinster (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_pinster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2x_bullpole",
+    "name": "Bullpole (V2 card, remove board tiles)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2x_bullpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_dynaboa",
+    "name": "Dynaboa (V2 card, style board)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2t_dynaboa_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2t_jerbit",
+    "name": "Jerbit (V2 card, style board)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2t_jerbit_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pinster",
+    "name": "Pinster (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_pinster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pinster",
+    "name": "Pinster (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_pinster_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_pinster",
+    "name": "Pinster (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_pinster_2.jpg",
+    "ok": true
   }
 ]
