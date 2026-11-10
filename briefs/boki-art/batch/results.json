@@ -103456,5 +103456,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/alt_sawright_pose_3.jpg",
     "ok": true
+  },
+  {
+    "id": "canopony_card",
+    "name": "Canopony (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/canopony_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "canopony_card",
+    "name": "Canopony (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/canopony_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "carrousteed_card",
+    "name": "Carrousteed (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/carrousteed_card_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "foalaround_card",
+    "name": "Foalaround (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/foalaround_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "carrousteed_card",
+    "name": "Carrousteed (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/carrousteed_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glockodile_card",
+    "name": "Glockodile (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/glockodile_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "postroo_card",
+    "name": "Postroo (hero card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/postroo_card_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "glockodile_card",
+    "name": "Glockodile (hero card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/glockodile_card_2.jpg",
+    "ok": true
   }
 ]
