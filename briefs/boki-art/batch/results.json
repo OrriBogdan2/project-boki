@@ -72789,5 +72789,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_vespyx_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_vespyx",
+    "name": "Vespyx (V2 sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_vespyx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_coolatee",
+    "name": "Coolatee (V2 sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_coolatee_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vespyx",
+    "name": "Vespyx (V2 portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_coolatee",
+    "name": "Coolatee (V2 sheet)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_coolatee_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_vespyx",
+    "name": "Vespyx (V2 portrait)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_vespyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_coolatee",
+    "name": "Coolatee (V2 sheet)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_coolatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_vespyx",
+    "name": "Vespyx (V2 sheet)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_vespyx_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_coolatee",
+    "name": "Coolatee (V2 portrait)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_coolatee_1.jpg",
+    "ok": true
   }
 ]
