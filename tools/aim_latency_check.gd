@@ -40,7 +40,9 @@ func run(main: Node) -> void:
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
-		if h != P: h.teleport(Vector3(-500, 50, -500)); h.out = true
+		if h != P:
+			h.teleport(Vector3(-500, 50, -500))
+			h.out = true
 	if P.kin: (P.kin as Kin).stow()
 	P.ctrl = "local"
 	P.teleport(m.world.spawns[0])
@@ -51,7 +53,7 @@ func run(main: Node) -> void:
 	print("AIM LATENCY CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
-func _case(name: String, hz: int, win: Vector2i, ui: float) -> void:
+func _case(label: String, hz: int, win: Vector2i, ui: float) -> void:
 	root.size = win
 	Settings.v["ui_scale"] = ui
 	Settings.apply("ui_scale")
@@ -59,19 +61,18 @@ func _case(name: String, hz: int, win: Vector2i, ui: float) -> void:
 	var dt := 1.0 / hz
 	var allow := int(floor(hz / 60.0))        # frames in one physics tick
 	var centre := Vector2(win) * 0.5 / cs      # canvas px
-	print("AIMLAG %s window %s content scale %.3f canvas %s" % [name, str(win), cs, str(root.get_visible_rect().size)])
+	print("AIMLAG %s window %s content scale %.3f canvas %s" % [label, str(win), cs, str(root.get_visible_rect().size)])
 	_mouse(centre, cs)
 	for i in SETTLE_FRAMES: m._process(dt)
 	# a small move: the view stays put, so this is the cursor-to-aim path alone
 	var r := _watch(centre + Vector2(STATIC_PX, 0), cs, dt)
-	_rec(name, "reticle_frames", r["reticle"], allow)
-	_rec(name, "aim_frames", r["aim"], allow)
+	_rec(label, "reticle_frames", r["reticle"], allow)
+	_rec(label, "aim_frames", r["aim"], allow)
 	for i in SETTLE_FRAMES: m._process(dt)
 	# a big move: the camera leans after the cursor for a while; the aim must keep up with the view
 	r = _watch(centre + Vector2(PAN_PX, 0), cs, dt)
-	_rec(name, "aim_frames_panning", r["aim"], allow)
-	_rec(name, "aim_stale_frames_panning", r["stale"], allow)
-	print("AIMLAG %s aim_vs_cursor_px_panning = %.2f px on the move's frame (the view's own motion that frame)" % [name, r["gap0"]])
+	_rec(label, "aim_frames_panning", r["stale"], allow)
+	print("AIMLAG %s aim_vs_cursor_px_panning = %.2f px on the move's frame" % [label, r["gap0"]])
 	_mouse(centre, cs)
 	for i in SETTLE_FRAMES: m._process(dt)
 
@@ -86,7 +87,7 @@ func _mouse(to: Vector2, cs: float) -> void:
 ## Moves the mouse, then steps WATCH frames: {reticle: first frame the HUD's crosshair draws under the cursor,
 ## aim: first frame the aim point projects onto the cursor through the camera as drawn that frame,
 ## stale: the most frames the aim point lagged the camera over the watch (0 none, 1 read before the
-## camera moved, 99 older), gap0: px between the aim point and the cursor on the move's own frame}.
+## camera moved that frame, 99 older), gap0: px between the aim point and the cursor on the move's own frame}.
 func _watch(to: Vector2, cs: float, dt: float) -> Dictionary:
 	_mouse(to, cs)
 	var out := {"reticle": 99, "aim": 99, "stale": 0, "gap0": 0.0}
@@ -102,7 +103,11 @@ func _watch(to: Vector2, cs: float, dt: float) -> Dictionary:
 			out["gap0"] = m.cam.unproject_position(P.inp["aim"]).distance_to(mouse)
 		if out["aim"] == 99 and gap_now <= TOL_PX:
 			out["aim"] = k
-		var stale := 0 if gap_now <= TOL_PX else (1 if gap_prev <= TOL_PX else 99)
+		var stale := 99
+		if gap_now <= TOL_PX:
+			stale = 0
+		elif gap_prev <= TOL_PX:
+			stale = 1
 		out["stale"] = maxi(int(out["stale"]), stale)
 	return out
 
