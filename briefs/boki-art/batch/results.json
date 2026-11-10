@@ -88581,5 +88581,33 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_prismander_a_2.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_chandelotl_berry",
+    "name": "Chandelotl/Crystalotl (colour berry)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_chandelotl_berry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_prismander_b",
+    "name": "Prismander (softer colours b)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_prismander_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_prismander_b",
+    "name": "Prismander (softer colours b)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_prismander_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_chandelotl_candy",
+    "name": "Chandelotl/Crystalotl (colour candy)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_chandelotl_candy_1.jpg",
+    "ok": true
   }
 ]
