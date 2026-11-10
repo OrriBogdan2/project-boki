@@ -117,7 +117,7 @@ static func _pill_extras(h, r: Rect2, tu: Tutorial) -> void:
 static func _intro(h, sz: Vector2, tu: Tutorial) -> void:
 	h.c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0, 0, 0, 0.5 * clampf(1.0 - (tu.intro_t - 1.6) / 0.4, 0.0, 1.0)))
 	var r: Rect2 = lanes(sz)["intro"]
-	h._panel(r, Color(0.06, 0.08, 0.12, 0.94), 18)
+	HudStyle.torn_panel(h.c, r)
 	var cx := r.get_center().x
 	h._ctext(Vector2(cx, r.position.y + r.size.y * 0.34), "TRAINING RUN", int(sz.y * 0.032), MINT, h.big)
 	var y := r.position.y
