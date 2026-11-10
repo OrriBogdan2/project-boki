@@ -55,3 +55,20 @@ Everything below is live; old files are kept as `*_old*`, so any of it can be pu
 | Poses (22) | see CHANNEL 03:38 and `tools/../batch` ids `pose_*`, `on_*` | | | Latchling kept its old pose (the sitting ones lost its latch). |
 
 Not done, for the owner: Parrywhal/Coolatee-type Pokemon checks are by eye only; Kestrike and Pavonazar females still use their own colour scheme (flagged, not changed); Stormit's sheet needs a manual look; the 20 re-posed Boki keep their old portraits (portrait pose differs from the card on purpose).
+
+## Second full review, 11-10 afternoon (owner: "review everything and see if any can be improved")
+Options rendered as `rv_*`; nothing is live. My ranking (1st / 2nd / 3rd):
+| Boki | Problem | 1st | 2nd | 3rd |
+|---|---|---|---|---|
+| Starcap | Unrelated to Polyshroom | `rv_starcap_a_2` | `b_1` | `a_1` |
+| Medushroom | Unrelated palette (purple/tan) | `rv_medushroom_a_1` | `b_2` | `c_1` |
+| Dynaboa | Fins read as planks; smaller than Jerbolt | `rv_dynaboa_a_1` | `c_1` | `b_1` |
+| Furnacowary | Bellowlet again, bigger | `rv_furnacowary_a_1` | `c_1` | `b_2` |
+| Hydrangor | Ultra legendary that reads mid-tier | `rv_hydrangor_b_1` | `c_2` | `a_2` |
+| Fizzlet | No tie to the cloud ostriches | `rv_fizzlet_cloud_3` | `1` | `2` |
+| Thunderstrich | Same stance as Boltstrich | `rv_thunderstrich_run_3` | `2` | `1` |
+| Voltalon | Navy/black in a rust-red line | `rv_voltalon_family_1` | `3` | `2` |
+| Phonodrake | Dark red in a tan line | `rv_phonodrake_family_2` | `1` | `3` |
+| Pickadactyl | Brown; its baby is blue and amber | `rv_pickadactyl_family_1` | `2` | `3` |
+| Forgebrock | Fists read as iron gauntlets | `rv_forgebrock_paws_1` | `2` | `3` |
+Looked at and left alone: Moatpole > Rampartoad (plain but distinct), Crofthorn > Crofthollow, Teapotamus > Chuggamus (barrel body reads built), Rattlebub > Maracoil, Lanterloris > Glowris, Sandwidow (dark middle is the sex-form line).
