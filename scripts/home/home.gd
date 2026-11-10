@@ -55,6 +55,7 @@ var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd),
 var hshove: BaseShove = null     # the Stump Shove's stump (base_shove.gd), base_mode only
 var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode only
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
+var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -154,6 +155,7 @@ func _ready() -> void:
 		hshove = BaseShove.new(self)
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
+		hecho = EchoSteps.new(self)
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -299,6 +301,7 @@ func _sync_fixtures() -> void:
 	if hshove: hshove.place()
 	if hseek: hseek.place()
 	if hvolley: hvolley.place()
+	if hecho: hecho.place()
 	if is_instance_valid(nest): nest.position = NEST_AT
 	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
 	if str(_plot_spots(cap)) != _fx_sig:
@@ -343,6 +346,7 @@ func _ready_rest() -> void:
 	if hshove: hshove.place()
 	if hseek: hseek.place()
 	if hvolley: hvolley.place()
+	if hecho: hecho.place()
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
@@ -1042,6 +1046,7 @@ func _process(delta: float) -> void:
 	if hshove: hshove.tick(d)
 	if hseek: hseek.tick(d)
 	if hvolley: hvolley.tick(d)
+	if hecho: hecho.tick(d)
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
@@ -1190,7 +1195,8 @@ func _move_player(d: float) -> void:
 		_climb_step(d)
 		return
 	var mv := Vector2.ZERO
-	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
+	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() \
+			and not (hecho and hecho.run)
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
@@ -2036,6 +2042,7 @@ func _find_interact() -> void:
 	if hshove and best.is_empty(): best = hshove.find(p2)
 	if hseek and best.is_empty(): best = hseek.find(p2)
 	if hvolley and best.is_empty(): best = hvolley.find(p2)
+	if hecho and best.is_empty(): best = hecho.find(p2)
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
 		if not hb.is_empty(): best = hb
@@ -2186,6 +2193,7 @@ func _label_for(it: Dictionary) -> String:
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
+		"echo": return hecho.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2225,6 +2233,7 @@ func _use(it: Dictionary) -> void:
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
+		"echo": hecho.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -2252,7 +2261,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 	if (hrace and hrace.input(event)) or (hshove and hshove.input(event)) or (hseek and hseek.input(event)) \
-			or (hvolley and hvolley.input(event)):
+			or (hvolley and hvolley.input(event)) or (hecho and hecho.input(event)):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():
