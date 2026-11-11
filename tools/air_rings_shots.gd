@@ -1,6 +1,6 @@
 extends RefCounted
 ## --air-rings-shots --shots-dir=<dir>: stills for reading the air rings (docs/AIR_RINGS.md), GPU:
-##   glide_match   gliding on the Kestrel Line at the match camera, the next rings ahead
+##   glide_match   gliding along the longest lane at the match camera, the next rings ahead
 ##   glide_far     the lane's take-off at the match camera: the first ring and the ones after it
 ##   lift_match    on the ground beside a lift ring at the match camera
 ##   skydive_lane  Cam.skydive high over the lane, heading along it
@@ -24,14 +24,14 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
-	var lane: Array = m.air_rings.list.filter(func(rg): return int(rg["lane"]) == 0)
+	var lane := _longest_lane()
 	var lift: Dictionary = m.air_rings.list.filter(func(rg): return rg["lift"])[0]
 	var dir2: Vector2 = lane[0]["dir"]
 	var fwd := Vector3(dir2.x, 0, dir2.y)
 	await _glide(lane[1]["pos"] - fwd * 4.0, fwd)
-	await _take("glide_match", "gliding past ring 2 of the Kestrel Line, match camera")
+	await _take("glide_match", "gliding past ring 2 of the longest lane, match camera")
 	await _glide(lane[0]["pos"] - fwd * 6.0, fwd)
-	await _take("glide_far", "at the take-off of the Kestrel Line, match camera")
+	await _take("glide_far", "at the take-off of the longest lane, match camera")
 	await _stand(lift["pos"] + Vector3(4, -lift["pos"].y, 0))
 	await _take("lift_match", "on the ground beside a lift ring, match camera")
 	await _sky(lane[1]["pos"] - fwd * 10.0, fwd)
@@ -44,6 +44,15 @@ func run(main_node: Node) -> void:
 	f.close()
 	print("AIRRINGSSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
+
+## The rings of the lane with the most rings, in order from its take-off.
+func _longest_lane() -> Array:
+	var best: Array = []
+	for i in m.air_rings.lanes.size():
+		var rings: Array = m.air_rings.list.filter(func(rg): return int(rg["lane"]) == i)
+		if rings.size() > best.size():
+			best = rings
+	return best
 
 func _setup() -> void:
 	Save.no_write = true
