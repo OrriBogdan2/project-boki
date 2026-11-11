@@ -16,6 +16,7 @@ extends RefCounted
 ## "MCHECK DONE, failures: N".
 
 const DT := Match.DT
+const RIM_GAP := 0.1      # m from the rim face: source air control (decision 0020) steers little
 var bad := 0
 var m: Match
 var w: World
@@ -81,18 +82,24 @@ func _rims() -> void:
 					var open_below := true
 					for dd in [1.1, 1.6, 2.2, 2.8, 3.4]:
 						if not w.is_void(g.x + d.x * dd + d.y * 0.4, g.z + d.y * dd + d.x * 0.4) or not w.is_void(g.x + d.x * dd - d.y * 0.4, g.z + d.y * dd - d.x * 0.4): open_below = false
+					# (and a real rim: flat ground for 4 m behind it, not a ledge under a higher terrace, where
+					# the float rightly carries you up onto the terrace; the 2x Hollow Crown has such ledges)
+					for dd in [1.0, 2.0, 3.0, 4.0]:
+						var back := w.ground_at(g.x - d.x * dd, g.z - d.y * dd)
+						if absf(back - w.ground_at(g.x, g.z)) > 0.3: open_below = false
 					if w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) and not w.is_void(g.x, g.z) and k % 12 == trial and rim_ok and open_below:
 						at = g; dir = d; break
 				if at != Vector3.INF: break
 			if at == Vector3.INF: continue
 			tried += 1
 			var top := w.ground_at(at.x, at.z)
-			# hanging in the air just off the edge, 2.5m below the lip, pushing back toward the island
+			# hanging in the air against the face, 2.5m below the lip, pushing back toward the island
 			# (the side of an island catches you up to Hunter.MANTLE_REACH_ABYSS below its lip; see --abyss-check)
 			var edge_x := at.x; var edge_z := at.z
 			while not w.is_void(edge_x + dir.x * 0.25, edge_z + dir.y * 0.25):
 				edge_x += dir.x * 0.25; edge_z += dir.y * 0.25
-			_reset(Vector3(edge_x + dir.x * (h.r + 0.6), top - 2.5, edge_z + dir.y * (h.r + 0.6)), Vector3(0, -2.0, 0))
+			var gap := h.r + RIM_GAP
+			_reset(Vector3(edge_x + dir.x * gap, top - 2.5, edge_z + dir.y * gap), Vector3(0, -2.0, 0))
 			h.downed = downed_case
 			h.last_gy = top
 			var t := 0.0; var floated := false; var landed := false; var t_m := 0.0

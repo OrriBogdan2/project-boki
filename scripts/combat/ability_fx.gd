@@ -2,7 +2,7 @@ class_name AbilityFx
 extends RefCounted
 ## How abilities look and sound, keyed by how they're delivered (the tell) and by what they do (the
 ## impact category), so any ability gets the same language without its data naming a sound or an
-## effect: a gun's right click (content/abilities), a Boki's ability, and the archetype kits (their
+## effect: a gun's right click (content/hunter_abilities), a Boki's ability, and the archetype kits (their
 ## Feel module can take its tell and impact rows from tell_row / impact_row). Presentation only:
 ## nothing in the simulation reads anything here.
 ##

@@ -1,19 +1,22 @@
 extends RefCounted
-## --hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>] (under xvfb with a renderer): every move in a Hero's data
-## (or, with no Hero given, one of every layer kind) played side by side at the match camera, captured a few times
-## through their lives: <dir>/gallery_<arch>_<n>.png. For tuning a palette and checking a new look reads.
+## --hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>] [--gallery-moves=a,b] (under xvfb with a renderer): every
+## move in a Hero's data, or just the named ones (with no Hero given, one of every layer kind), played side by side at
+## the match camera, captured a few times through their lives: <dir>/gallery_<arch>_<n>.png. For tuning a palette and
+## checking a new look reads.
 
 const SLOW := 0.05             # Engine.time_scale while capturing
 const GAP := 3.2               # m between moves
 const PER_ROW := 6
-const SHOTS := [0.08, 0.2, 0.4, 0.8]    # s after the moves start
+const SHOTS := [0.05, 0.12, 0.2, 0.3, 0.45, 0.65, 0.9, 1.3]    # s after the moves start
 
 func run(main: Node) -> void:
 	var dir := ""
 	var arch := ""
+	var picked: PackedStringArray = []
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
 		if String(a).begins_with("--reel-hero="): arch = String(a).substr(12)
+		if String(a).begins_with("--gallery-moves="): picked = String(a).substr(16).split(",")
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var m := Match.new()
@@ -36,8 +39,10 @@ func run(main: Node) -> void:
 		tag = "kinds"
 		HeroVfx.set_data(P.arch, _every_kind())
 	var moves: Array = (HeroVfx.data(P.arch).get("moves", {}) as Dictionary).keys()
+	if not picked.is_empty():
+		moves = moves.filter(func(mv: String) -> bool: return mv in picked)
 	var V := HeroVfx.of(m)
-	var base := P.pos + Vector3(-GAP * (PER_ROW - 1) * 0.5, 0, -2.0)
+	var base := P.pos + Vector3(-GAP * (mini(moves.size(), PER_ROW) - 1) * 0.5, 0, -2.0)
 	var rows := int(ceil(moves.size() / float(PER_ROW)))
 	m.cam.snap(P.pos + Vector3(0, 0, GAP * (rows - 1) * 0.5 - 2.0))
 	Sfx.listener = P.pos

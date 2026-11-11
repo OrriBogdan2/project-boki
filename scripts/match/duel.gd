@@ -307,7 +307,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	v.add_child(UI.label("B opens this menu  ·  Backspace resets the round  ·  Esc leaves the room", 13, UI.MUTED))
 
 ## Pick the Boki you duel with: the same list as the Arena menu (yours, or a loaner of any species
-## that never reaches your roster; the training area has no way out).
+## that never reaches your roster; the Training Grounds has no way out).
 func _kin_row(v: VBoxContainer) -> HBoxContainer:
 	var P: Hunter = m.player
 	var opts: Array = m.arena._kin_choices()
