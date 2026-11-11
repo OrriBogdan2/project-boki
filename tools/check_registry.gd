@@ -268,6 +268,8 @@ const CHECKS := {
 	"--tut-first-capture-check": ["res://tools/tut_first_capture_check.gd", "tut_first_capture_check", null],      # the first-time capture hint
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],      # one voice
 	"--tutorial-check": ["res://tools/tutorial_check.gd", "tutorial_check", null],  # =<arch>: any first Relic
+	# ADVISORY: pace flags (a beat over 45 s, a 5 s wait) never fail it; only a stall in the run does
+	"--tutorial-pace-check": ["res://tools/tutorial_pace_check.gd", "tutorial_pace_check", null],
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment
 	# no span without a prompt or a marker
 	"--tutorial-dead-air-check": ["res://tools/tutorial_dead_air_check.gd", "tutorial_dead_air_check", null],
