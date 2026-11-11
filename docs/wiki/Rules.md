@@ -631,6 +631,20 @@ The Dash, the first Boki-vs-Boki race (scripts/home/base_race.gd, briefs/design/
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## sfx_voices (`content/rules/sfx_voices.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Voice budget of the Sfx pool (docs/AUDIO.md, decision 2026-11-08: a 30-player expedition is ~60 animated characters). cap: most one-shot voices sounding at once on each bus, a new sound past it steals the lowest-priority voice or is dropped. own_m: a sound this close to the listener is your own (your Hunter, your Boki, a hit on you) and is never stolen. keep: cues that are never stolen wherever they play (warnings, recasts, your hurt). cheap: name fragments of footsteps and Boki chatter, the first to go when they are far. |
+| cap | {"SFX": 12, "SFXFar": 4} |
+| cap_unit | voices per bus (pool size is Sfx.POOL = 24) |
+| own_m | 2 |
+| own_m_unit | metres from the listener |
+| keep | ["warn", "recall", "hurt", "reset_a", "reset_b", "reset_c", "ab_ready", "knock_confirm"] |
+| cheap | ["step", "kin_", "kinhit", "boki_"] |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Units: seconds, tiles, 0..1 trait values, joy points.

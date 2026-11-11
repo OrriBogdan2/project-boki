@@ -49,7 +49,7 @@ const CHECKS := {
 	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
-	"--sfx-fight-bench": ["res://tools/sfx_fight_bench.gd", "sfx_fight_bench", null],      # voices and audio cpu in a 30-player fight
+	"--sfx-fight-bench": ["res://tools/sfx_fight_bench.gd", "sfx_fight_bench", null],      # voices, audio cpu
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
