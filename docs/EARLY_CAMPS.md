@@ -51,10 +51,26 @@ The 13 reds of the sweep:
 ## GPU runs (jobq, `--needs gpu`)
 GPU workers restarted under most jobs for hours ("lost after 3 attempts"); results below are from the runs that completed.
 
-GPU_RESULTS
+`--perf-bench` (60 s busy expedition, 1920x1080, medium quality, RTX 4070 SUPER on pc-MRROBOTO, the same worker for both runs; a first base run on an Apple M5 is not comparable and is not used):
+
+| | `ext/early-base` 0f023137a | this branch | Limit | Result |
+|---|---|---|---|---|
+| Match average frame | 26.8 ms | 26.3 ms | within +0.5 ms | pass (-0.5) |
+| Match p99 | 53.0 ms | 48.2 ms | within +3 ms | pass (-4.8) |
+| Draw calls | 933 | 856 | under 1,500 | pass |
+| Emitting particle nodes | 76 | 72 | | the bench has no Hard Landing |
+| Hitches over 100 ms | 0 | 1 (166 ms at 2.5 s: the first hero effect build, nothing from the drop) | | noise, not a regression |
+
+Three squads Hard Landing in view: `--drop-feel-check` on a GPU (Apple M5, mac-Naruto-Founder, medium quality, job 20261111-103559-06704): 9 Hard Landings in one second, **252 particles at most (under 4,000), worst frame 13.3 ms (limit 50; 11.9 ms the second before)**. `--perf-bench` itself has no landing scenario, so this check is the "no frame over 50 ms" gate.
+
 
 ## Shots
-SHOTS
+`jobq submit --needs gpu -- --region-shots --shots-dir=shots` (RTX 4070 SUPER, pc-MRROBOTO), saved as JPEG under `docs/shots/early-camps-0244/`:
+- `drop_map.jpg`: the drop map with the 28 camps, the region lines ("N camps: to level L"), the hot zone's ring and legend row.
+- `dive_smoke.jpg`: mid-dive above the cloud layer (the sheet at 60 m) with the camps' smoke columns, orange in the hot zone.
+- `hard_landing.jpg`: a Hard Landing on the hot zone's camp: the 6 m ring, the Puffbomb and Brute hit for 30.
+- `minimap_cleared.png` (the minimap beside a cleared camp): **not saved.** The run that did complete showed the planning map open over the HUD (the shot's `set_process(true)` reopened it); the fix is in `tools/region_shots.gd`, but every GPU job since then was lost with its worker or sat in the queue for more than 40 minutes. Re-run `jobq submit --needs gpu --tree <tree> --out shots -- --region-shots --shots-dir=shots` and copy `minimap_cleared.png` over.
+
 
 ## Pace table
 Not produced: `--camp-pace-check` and the bots-by-level and levels-core work (pace curve, catch-up bonuses, the XP bar, level on nameplates, 300 boss pay) are not in this branch. `ext/early-levels-core`, `ext/early-camps-bots` are not on origin. The XP bar (`ext/ui-xp-tracker`) and the level gap badge (`ext/ui-level-gap`) are separate READY branches, not merged here. So the spec's pace targets (section 2.5, level 4 at 2:00 and so on) are untested.
