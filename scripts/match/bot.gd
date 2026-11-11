@@ -688,7 +688,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			reach = maxf(reach, BotSquad.ASSIST_REACH)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
 			continue
-		if not provoked and o != a["tgt"] and BotSquad.outnumbered(m, h, a, o, d):
+		if not provoked and o != a.get("tgt") and BotSquad.outnumbered(m, h, a, o, d):
 			continue      # alone against more: don't start it (one already on is fought, BotRetreat backs out)
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
@@ -725,7 +725,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or randf() < 0.5):
 				best = k; break
-	if best != a["tgt"]:
+	if best != a.get("tgt"):
 		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	a["tgt"] = best
 	if best:
