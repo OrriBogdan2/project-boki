@@ -154,7 +154,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
-| Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
+| Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | re-scored 11-11 (ext/vfx-albert-ivory-arcs): LMB whirl trail, release crescent and Shield Slam fan now his ivory. Left: the aegis plates render orange-red (hue 15-20); the 360 Smash swirl is red-orange |
 | Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
@@ -174,7 +174,8 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
 3. Vex LMB and hold: a wider, brighter tracer at match zoom.
 4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
-5. Albert: ivory swing arcs for LMB/RMB.
+5. Done (ext/vfx-albert-ivory-arcs): Albert's LMB and RMB arcs in ivory. The strip is `docs/art/vfx_rescore/bulwark_arcs_before_after.jpg`
+   (jobq 20261111-213523-28011 before, 20261111-215537-24801 after, match zoom).
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
