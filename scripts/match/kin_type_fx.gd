@@ -51,7 +51,7 @@ const LOOKS := {
 
 ## The accent for a cast by a Boki of `type`, at `at` (its feet), toward `dir` (flat cast direction).
 ## An unknown type (a Boki with no type) plays nothing.
-static func play(fx: Fx, type: String, at: Vector3, dir: Vector2) -> void:
+static func play(fx: Fx, type: String, at: Vector3, dir: Vector2, rings := true) -> void:
 	var look: Dictionary = LOOKS.get(type, {})
 	if look.is_empty():
 		return
@@ -67,5 +67,20 @@ static func play(fx: Fx, type: String, at: Vector3, dir: Vector2) -> void:
 		var way := heading if s.has("fwd") else Vector3.UP
 		fx.spark(chest, way, col, int(s["n"]), float(s["speed"]), float(s["spread"]), float(s["life"]),
 			float(s["grav"]), float(s["size"]))
-	for r: Array in look.get("rings", []):
+	for r: Array in look.get("rings", []) if rings else []:
 		fx.ring(at, float(r[0]), col, float(r[1]))
+
+## A Fusion moment (enter, release, afterglow) in the type's look, for everyone to read: the type's accent at the
+## chest plus a light column rising from the body (no ground ring, no burst). A type whose accent is only rings
+## (Sound) rises as streaks instead.
+static func fusion(fx: Fx, type: String, at: Vector3, glow: Color, height: float) -> void:
+	var look: Dictionary = LOOKS.get(type, {})
+	var col := Color(String(look.get("col", glow.to_html(false))))
+	var chest := at + Vector3(0, 0.8, 0)
+	if look.has("dots") or look.has("streaks"):
+		play(fx, type, at, Vector2.ZERO, false)
+		# (twice: from the match camera one cast's worth is faint)
+		play(fx, type, at + Vector3(0, 0.6, 0), Vector2.ZERO, false)
+	else:
+		fx.spark(chest, Vector3.UP, col, 6, 5.0, 40.0, 0.5, -2.0, 3.0)
+	fx.beam(at, at + Vector3(0, height, 0), col, 1.2, 0.6)
