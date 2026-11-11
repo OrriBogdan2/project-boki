@@ -3,7 +3,7 @@ extends RefCounted
 ## The second Boki's row (portrait, health, passive, the swap key's cap with a cooling ring) and the carry-out row
 ## (the claimed Boki, an empty outline while you scan, STOLEN once a rival looted it) appear only while used; equal
 ## passives of the lead and the second count once; no hunter holds more than wisp_max wisps; every row fits the
-## screen and none overlaps the next. At 1280x720 and on an ultrawide the same rows fit (run with --resolution).
+## screen and none overlaps the next. At 1280x720 and on an ultrawide the same rows fit (run with --res=WxH).
 ## With --shots-dir=<dir> (real renderer) it saves the HUD as <dir>/<WxH>_NN_<state>.png. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
@@ -26,6 +26,9 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--res="):
+			var wh := String(a).substr(6).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	m = Match.new()
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 78, "no_drop": true, "demo_kin": "cindle",
