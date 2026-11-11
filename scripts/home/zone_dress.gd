@@ -2,7 +2,7 @@ class_name ZoneDress
 extends RefCounted
 ## What a built zone (ZoneLayout) puts on its ground besides the layout's own things: the shallows
 ## (one translucent sheet over the channel the tiles say, if it has one) and a scatter: Flora crystal
-## stacks, reeds and pebbles, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
+## stacks, reeds, pebbles, mushrooms (they glow on a gloom island), ferns and flowers, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
 ## The scatter is MultiMesh, one batch per kind and shape, and every instance of a kind shares one
 ## cached Flora material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
 ## Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
@@ -13,7 +13,7 @@ const SHEET_COLOUR := Color(0.36, 0.78, 0.86, 0.55)
 const KEEP_OUT := 2.2          # m round the landing, the pad and a zone's stump that scatter stays away from
 const TRIES := 40              # spots tried per prop before giving up on it
 const SHAPES := 1              # Flora shapes used per kind (one batch each)
-const KINDS_FLORA := ["crystal", "reed", "pebble"]
+const KINDS_FLORA := ["crystal", "reed", "pebble", "mushroom", "fern", "flower"]
 const SHORE := ["crystal", "reed"]     # kinds that crowd the shallows' edge
 ## Slab kinds, one unit box scaled per instance and lit by Flora's shared rock material (the box has no
 ## vertex colours, so each instance's colour is its whole colour; alpha 0 glows day and night). size: m
@@ -31,7 +31,8 @@ static func place(h) -> void:
 		return
 	for br in h.bridges.values():
 		for part in ["node", "sign", "label"]:
-			br[part].visible = false          # the side isles' bridge stubs and signs belong to Bramblebank
+			if br.has(part):                  # a retired side isle has no sign or label (base_mode)
+				br[part].visible = false      # the side isles' bridge stubs and signs belong to Bramblebank
 	var B: Dictionary = GardenZones.info(h.zone)["build"]
 	var shallow := Rect2()
 	if B.has("shallow"):

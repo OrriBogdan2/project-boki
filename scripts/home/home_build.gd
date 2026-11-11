@@ -306,6 +306,8 @@ func _apply_theme() -> void:
 		isl["region_fixed"] = int(t.get("region", 0))
 		if t.get("own_ground", false):
 			isl["biome_colors"] = own
+		if t.has("style"):
+			isl["biome"] = t["style"]
 
 func _apply_paint() -> void:
 	var w: World = h.world
