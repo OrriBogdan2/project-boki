@@ -193,6 +193,13 @@ static func _aim_point(caster: Node, ctx: Dictionary) -> Vector3:
 		return a
 	return caster.pos
 
+## An effect's own sound ("sfx", "pitch" in its JSON; "" is silence) or the stock one for its type.
+static func snd(m: Node, e: Dictionary, stock: String, at: Vector3, vol: float, pitch := 1.0) -> void:
+	if e.has("sfx"):
+		m.sfx(String(e["sfx"]), at, 0.0, float(e.get("pitch", 1.0)))
+	elif stock != "":
+		m.sfx(stock, at, vol, pitch)
+
 static func _where(e: Dictionary, caster: Node, ctx: Dictionary, default := "self") -> Vector3:
 	if ctx.has("at_fixed") and String(e.get("at", default)) in ["self", "here"]:
 		return ctx["at_fixed"]
@@ -307,7 +314,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var r := float(e.get("radius", 2.0))
 			m.fx.ring(at, r, col, 0.3)
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
-			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
+			snd(m, e, "boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
@@ -363,6 +370,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var at := _where(e, caster, ctx)
 			var r := float(e.get("radius", 4.0))
 			m.fx.ring(at, r, col, 0.4)
+			snd(m, e, "", at, 0.0)
 			for f in m.foes_of(caster.team):
 				var rel := Vector2(at.x - f.pos.x, at.z - f.pos.z)
 				if rel.length() < r + f.r and rel.length() > 0.4 and absf(f.pos.y - at.y) < 2.5:
@@ -418,6 +426,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					best = Vector3(p.x, m.world.ground_at(p.x, p.z), p.z); break
 				k -= 0.5
 			m.fx.burst(caster.pos + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
+			snd(m, e, "", caster.pos, 0.0)
 			caster.teleport(best)
 			m.fx.burst(best + Vector3(0, 0.8, 0), col, 14, 3.0, 0.3)
 		"launch":
@@ -497,7 +506,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				(mover as Hunter).glide_cd = 0.0
 			elif mover is Kin:
 				(mover as Kin).start_leap(dest, {"time": tt, "height": 0.6}, ctx)
-			m.sfx("whoosh", mover.pos, -2.0, 1.4)
+			snd(m, e, "whoosh", mover.pos, -2.0, 1.4)
 		"swap":
 			var who: Node = owner_of(caster) if String(e.get("who", "self")) == "owner" else caster
 			var tgt = ctx.get("target", null)
@@ -596,7 +605,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 				if t is Hunter:
 					(t as Hunter).cloak_t = maxf((t as Hunter).cloak_t, float(e.get("time", 2.0)))
 					m.fx.burst(t.pos + Vector3(0, 0.9, 0), col, 14, 3.0, 0.4)
-			m.sfx("cloak", caster.pos, -3.0)
+			snd(m, e, "cloak", caster.pos, -3.0)
 		"reveal":
 			var rad := float(e.get("radius", 18.0))
 			var c0: Vector3 = owner_of(caster).pos
@@ -664,7 +673,7 @@ static func _yank(e: Dictionary, caster: Node, ctx: Dictionary, m: Node) -> void
 			v.hurt(maxf(0.1, float(e.get("dmg", 0.0)) * _power(caster, ctx)), caster, o)
 		m.fx.word(v.pos + Vector3(0, 2.0, 0), "HOOKED", col, false)
 	if not victims.is_empty():
-		m.sfx("grab", anchor.pos, -1.0, 1.1)
+		snd(m, e, "grab", anchor.pos, -1.0, 1.1)
 
 ## A line of eruptions running out along the aim, one after another (a fissure). Each foe is hit once.
 static func _fissure(e: Dictionary, caster: Node, ctx: Dictionary, m: Node, pw: float, col: Color) -> void:
@@ -699,6 +708,6 @@ static func _fissure(e: Dictionary, caster: Node, ctx: Dictionary, m: Node, pw: 
 				var side := Vector2(-d.y, d.x)
 				if Vector2(f.pos.x - at.x, f.pos.z - at.z).dot(side) < 0.0: side = -side
 				f.hurt(float(e.get("dmg", 12.0)) * pw, caster, _hit_opts(e, ctx, (side * 0.4 + d * 0.6).normalized() * float(e.get("kb", 0.0)), caster))
-			if i % 2 == 0: m.sfx("thump", at, -6.0, 1.2)
+			if i % 2 == 0: snd(m, e, "thump", at, -6.0, 1.2)
 		if i == 0: go.call()
 		else: m.later(every * i, go)

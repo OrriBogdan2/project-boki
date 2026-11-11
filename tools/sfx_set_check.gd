@@ -62,6 +62,7 @@ func run(main: Node) -> void:
 	_boki_cues()
 	_boki_wired()
 	_fusion_cues()
+	_gloves()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -404,6 +405,32 @@ func _boki_wired() -> void:
 	for cue in wired:
 		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
 		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
+## 7. Every sound a glove names in its content (cast, an effect's "sfx" / "hit_sfx") exists, and at least the
+## first four gloves (Blink, Barrier, Hook, Rocket) have their own.
+func _gloves() -> void:
+	var names := {}
+	var own := []
+	for id in Gear.ALL:
+		var g: Dictionary = Gear.ALL[id]
+		if g.has("sfx"):
+			own.append(id)
+		_glove_names(g, names)
+	var silent := names.keys().filter(func(n): return not Sfx.ensure(String(n)))
+	ok(silent.is_empty(), "gloves: every named sound exists (silent: %s)" % [silent])
+	var first := ["blink", "barrier", "grapple", "rocket"]
+	var have_first: bool = first.all(func(id): return own.has(id))
+	ok(have_first, "gloves: Blink, Barrier, Hook and Rocket have their own sounds (%d do)" % own.size())
+
+func _glove_names(node, names: Dictionary) -> void:
+	if node is Dictionary:
+		for k in node:
+			if k in ["sfx", "hit_sfx", "cast"] and node[k] is String and node[k] != "":
+				names[node[k]] = true
+			else:
+				_glove_names(node[k], names)
+	elif node is Array:
+		for v in node:
+			_glove_names(v, names)
 
 func _takes(sname: String) -> Array:
 	var out := []
