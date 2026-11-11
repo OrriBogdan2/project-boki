@@ -76,7 +76,7 @@ func _plays_out() -> void:
 		m.queue_free()
 		return
 	ok(not m.hud.visible and not m.hud.map_open(), "the HUD and the drop map wait for it")
-	ok(is_equal_approx(m.skydrop.plan_len, DropSquad.PLAN_T + SquadIntro.INTRO_T), "the plan is padded by the intro")
+	ok(is_equal_approx(m.skydrop.plan_len, DropFeel.plan_s + SquadIntro.INTRO_T), "the plan is padded by the intro")
 	var squad: Array = m.intro.squad
 	ok(squad.size() == 3, "the whole squad is in it (%d)" % squad.size())
 	_tick(m, 0.2)
@@ -125,12 +125,12 @@ func _skips() -> void:
 		return
 	_tick(m, SquadIntro.SKIP_AFTER + 0.1)
 	ok(m.intro.skip(_key()) and not m.intro.running(), "a key after %.1f s skips it" % SquadIntro.SKIP_AFTER)
-	ok(absf(m.skydrop.plan_t - DropSquad.PLAN_T) < 0.1, "the plan gives the rest back (%.2f s left)" % m.skydrop.plan_t)
+	ok(absf(m.skydrop.plan_t - DropFeel.plan_s) < 0.1, "the plan gives the rest back (%.2f s left)" % m.skydrop.plan_t)
 	ok(m.hud.visible and m.hud.map_open(), "the skip opens the drop map")
 	m.queue_free()
 	await main.get_tree().process_frame
 	m = await _start(true)
-	var again := m.intro == null and is_equal_approx(m.skydrop.plan_len, DropSquad.PLAN_T)
+	var again := m.intro == null and is_equal_approx(m.skydrop.plan_len, DropFeel.plan_s)
 	ok(again, "the same lineup again is not shown twice")
 	m.queue_free()
 	await main.get_tree().process_frame

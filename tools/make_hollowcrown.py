@@ -279,8 +279,8 @@ for _iid, _more in MORE.items():
 # camps of a region stand 30-70 m apart, 14 m off a train halt and 20 m off a lair gate, vault and way-out seat.
 CAMPS = {
     "crown": [[99, 94, "heavy"], [104, 129, "heavy"], [133, 104, "heavy"], [126, 128, "normal"]],
-    "frostgate": [[117, 57, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
-    "cinder": [[60, 109, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
+    "frostgate": [[130, 59, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
+    "cinder": [[61, 86, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
     "storm": [[157, 117, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
     "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
     "lark": [[40, 42, "normal"], [50, 20, "light"], [27, 22, "light"]],
