@@ -24,6 +24,12 @@ var speed := 6.5
 var atk_cd := 0.0
 var lunge_t := 0.0
 var target: Ent = null
+## s between looks for a foe while it has none (tuning.json "perf"; a beat under a reaction time)
+static var RETARGET_S := float(Content.rules("tuning")["perf"]["boki_retarget_s"])
+var look_at_t := 0.0            # match time of its next look for a foe
+var pace_dt := 0.0              # sim time a far, calm Boki skipped (KinPace)
+var plan_t := -1.0              # match time of a calm Boki's last walk plan (KinPace)
+var idle_wish := Vector2.ZERO   # its last walk plan
 var chase_stall := 0.0          # seconds spent chasing a target without getting any closer (a ledge, a wall in the way)
 ## Where you threw it: it holds that spot (guarding it) until there's a reason to come back
 ## (you recall it, you go out of leash range, you glide off, it gets hurt). INF when not holding.
@@ -97,6 +103,8 @@ var lost_uid := ""
 var lost_owner: Ent = null         # the hunter it was lost from (they get it back if revived first)
 var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
+var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
+var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
 static var XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 
 func init_kin(match_node: Node, id: String, species_id: String, record: Dictionary, owner_hunter: Hunter) -> void:
@@ -156,7 +164,9 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 	brain = KinTactics.new(self)
 	if owner_h:
 		comp = KinCompanion.new(self)
-	set_model(Models.kin(species, rec))
+	wisp = owner_h != null and KinWisp.mode(match_node)
+	summon = KinSummon.new(self) if owner_h else null
+	set_model(KinWisp.look(self))
 	ring = MeshInstance3D.new()
 	ring.mesh = Models.flat_quad(1.0)
 	var tc: Color = Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()] if team >= 0 else Color("e8f4ff")
@@ -171,8 +181,9 @@ func t(k: String) -> float:
 func is_wild() -> bool:
 	return owner_h == null
 
+const HITTABLE_STATES := ["active", "flying", "returning", "reviving", "wild"]     # (a const: hittable runs hundreds of times a step)
 func hittable() -> bool:
-	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
+	return not dead and state in HITTABLE_STATES and not (state == "flying" and fly.get("leap", false))
 
 func mass() -> float:
 	var g := float(giant.get("scale", 1.0)) if not giant.is_empty() else 1.0
@@ -213,6 +224,8 @@ func slot_open(_slot: String) -> bool:
 
 ## Can its abilities and ultimate be used right now?
 func ready_to_fight() -> bool:
+	if wisp:
+		return false          # (a wisp casts nothing: KinWisp)
 	return not dead and rest_t <= 0.0 and state not in ["downed", "reviving", "bench", "wild", "dazed", "away"]
 
 ## Resting after the merge ultimate (docs/decisions/0004)?
@@ -262,7 +275,7 @@ func bark(cat: String) -> void:
 
 # ------------------------------------------------------------------ owner commands
 func throw_to(p: Vector3, slot := "") -> void:
-	if dead or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
+	if dead or wisp or hesitate_t > 0.0 or throw_cd > 0.0 or rest_t > 0.0:
 		return
 	if state == "active":
 		if slot == "":
@@ -581,14 +594,21 @@ func sim(dt: float) -> void:
 	prev = pos
 	if dead:
 		return
+	dt = KinPace.step(self, dt)
+	if dt == 0.0:
+		return
 	if state == "away":
 		# your hunter is dead and waiting on a revive: the kin keeps out of sight until then
 		if owner_h: pos = owner_h.pos; prev = pos
 		return
 	tick_status(dt)
 	var was_rest := rest_t > 0.0
-	for k in ["atk_cd", "lunge_t", "throw_cd", "haste_t", "rest_t"]:
-		set(k, maxf(0.0, get(k) - dt))
+	# (direct lines, not set()/get() by name: 30 Boki tick these every step)
+	atk_cd = maxf(0.0, atk_cd - dt)
+	lunge_t = maxf(0.0, lunge_t - dt)
+	throw_cd = maxf(0.0, throw_cd - dt)
+	haste_t = maxf(0.0, haste_t - dt)
+	rest_t = maxf(0.0, rest_t - dt)
 	if was_rest and rest_t <= 0.0 and owner_h:
 		m.fx.ring(owner_h.pos, 1.6, Color(sp["color"], 0.8), 0.3)
 		m.sfx("kin_happy", owner_h.pos, -8.0, Unique.voice(rec))
@@ -598,6 +618,12 @@ func sim(dt: float) -> void:
 		if shield_t <= 0.0: shield = 0.0
 	if runner:
 		runner.tick(dt)
+	if summon and not remote:
+		summon.tick(dt)
+	if KinWisp.ride(self):
+		if not remote:
+			KinRegen.tick(self, dt)
+		return
 	if remote:
 		if state != "shoulder":
 			net_follow(dt)
@@ -780,13 +806,15 @@ func _sim_fly_home(dt: float) -> void:
 			owner_h.m.fx.burst(pos, sp["color"], 8, 2.0)     # (the merge was lost on the way: it just lands)
 
 func walkable_to(p: Vector3) -> bool:
+	if absf(p.y - pos.y) >= 2.0:
+		return false
 	var d := Vector2(p.x - pos.x, p.z - pos.z)
 	var n := int(d.length() / 0.6) + 1
 	for i in range(1, n + 1):
 		var q := Vector2(pos.x, pos.z) + d * (float(i) / n)
 		if m.world.is_void(q.x, q.y):
 			return false
-	return absf(p.y - pos.y) < 2.0
+	return true
 
 func _sim_active(dt: float) -> void:
 	if owner_h and (owner_h.out or owner_h.extracted):
@@ -822,7 +850,9 @@ func _sim_active(dt: float) -> void:
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
-			target = brain.pick_target()
+			target = brain.pick_target() if m.time >= look_at_t else null
+			if target == null and m.time >= look_at_t:
+				look_at_t = m.time + RETARGET_S * rng.randf_range(0.75, 1.25)    # nothing to fight: look again soon
 	var wish := Vector2.ZERO
 	var spd := speed * slow_mult(0.6) * (1.3 if haste_t > 0.0 else 1.0)
 	if root_t > 0.0 or stun_t > 0.0:
@@ -852,7 +882,10 @@ func _sim_active(dt: float) -> void:
 			fire_trigger("on_hit", {"at": tp})
 	elif owner_h:
 		# no fight for it: back to your side like a teammate (or its guard spot); it hops onto you if you glide off
-		wish = KinFollow.idle(self, dt, spd)
+		var plan_dt := KinPace.plan_dt(self, dt)
+		if plan_dt > 0.0:
+			idle_wish = KinFollow.idle(self, plan_dt, spd)
+		wish = idle_wish
 		if state != "active":
 			return
 		if root_t > 0.0 or stun_t > 0.0:
@@ -908,6 +941,8 @@ func _hop_on() -> void:
 
 func go_down(fell := false) -> void:
 	_end_merge("downed")
+	if summon and summon.knocked():
+		return
 	KinDowned.begin(self, fell)
 	if owner_h:
 		note("fainted", "went down in a fight" if not fell else "fell off the island", -0.5)
@@ -1030,7 +1065,7 @@ func _sim_dazed(dt: float) -> void:
 		catch_prog = 0.0
 
 func hurt(d: float, by: Ent, opts := {}) -> float:
-	if state in ["dazed", "bench", "fused", "downed"]:
+	if state in ["dazed", "bench", "fused", "downed"] or wisp:
 		return 0.0
 	if is_wild() and by and by is Hunter:
 		angry_at = by
@@ -1052,7 +1087,7 @@ func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	KinDowned.render(self, delta)
-	if not model:
+	if not model or KinWisp.render(self):
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")

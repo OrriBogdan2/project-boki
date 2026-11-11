@@ -104,7 +104,16 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
+	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
+		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
+		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
+			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
+	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
+		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
+		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
+			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
+const STRIDE_DEFAULT := [0.6, 1.2]     # [walk, run] for a species not measured yet (a mid-size Boki)
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.80, 1.60],
@@ -203,6 +212,9 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var lod: AnimLod.Gate
+var _ink_pass: ShaderMaterial         # the coat's ink outline pass
+var _ink_on: Material                 # the pass it hangs from (the coat, or its marks)
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -263,6 +275,7 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL     # advanced by AnimLod
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -294,7 +307,10 @@ func seek(at: float) -> void:
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
 
 func _process(dt: float) -> void:
-	if manual or dt <= 0.0:
+	if dt <= 0.0:
+		return
+	if manual:
+		player.advance(dt)
 		return
 	var seen := root.is_visible_in_tree()
 	player.active = seen
@@ -302,9 +318,18 @@ func _process(dt: float) -> void:
 		return
 	_flinch.update(root, dt)
 	_keep_flex()
+	if lod == null:
+		lod = AnimLod.Gate.new(flex)
+	var was_near := lod.near
+	dt = lod.step(root.global_position, get_viewport(), dt)
+	if lod.near != was_near and _ink_on:
+		_ink_on.next_pass = _ink_pass if lod.near else null       # far or off screen: no ink outline pass
+	if dt == 0.0:
+		return
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
+	player.advance(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
@@ -347,7 +372,8 @@ func _pick_clip(dt: float) -> void:
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
-	var stride: float = (STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0] * model.global_basis.z.length()
+	var sp: Array = STRIDE.get(species, STRIDE_DEFAULT)
+	var stride: float = sp[1 if want == "run" else 0] * model.global_basis.z.length()
 	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
 
 func _start_shot(which: String) -> void:
@@ -452,7 +478,9 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
 	if id == "boki_coat":
 		_coat = m
-		m.next_pass = _ink()
+		_ink_pass = _ink()
+		_ink_on = m
+		m.next_pass = _ink_pass
 	mats.append(m)
 	return m
 
@@ -512,6 +540,7 @@ func _copy_coat() -> void:
 		marks.set_shader_parameter(k, body.get_shader_parameter(k))
 	marks.next_pass = _coat.next_pass
 	_coat.next_pass = marks
+	_ink_on = marks
 
 ## How far a colour has moved from the species' own (white: not at all), to multiply a painted atlas with.
 static func _tint(now: Color, base: Color) -> Color:

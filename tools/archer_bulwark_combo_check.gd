@@ -17,6 +17,8 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var atime = load("res://tools/bjorn_anim_time_check.gd").new()
+	atime.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
@@ -28,8 +30,9 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails
+		await atime.anim_time()
+	n += ult.n + own.n + launch.n + tall.n + atime.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + atime.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -321,6 +324,14 @@ func _archer_combos() -> void:
 		) < 0.3 and bool(AimKit.entry(P, "e").get("all", false)),
 		str(AimKit.entry(P, "e").get("radius"))
 	)
+	var arc := AimKit.entry(P, "e")
+	ok(
+		"telegraph == hit: the Hail Wall arc is the rain's own arc (drawn radius, degrees and thickness == hit)",
+		absf(float(arc.get("radius", 0.0)) - float(K.rain.get("radius", -1.0))) < 0.01
+			and absf(float(arc.get("deg", 0.0)) - K._arc_deg()) < 0.01
+			and absf(float(arc.get("thick", 0.0)) - float(K.e_def()["width"])) < 0.01,
+		str(arc.get("radius"))
+	)
 	ok("archer anim: Hail Wall plays arc_hail", K.anim_id == "arc_hail", K.anim_id)
 	step(m, 1.6)
 	ok(
@@ -343,6 +354,41 @@ func _archer_combos() -> void:
 		K.cremations == cr0 + 1,
 		"cremations %d" % (K.cremations - cr0)
 	)
+	step(m, 3.5)
+	# Hail Wall vs Wisps (source parity): a rival Wisp on the arc loses down_hp per tick (no slow); an ally's does not
+	fresh(T)
+	fresh(T2)
+	K.cd["e"] = 0.0
+	P.teleport(home)
+	aim_at(P, home + Vector3(5.0, 0, 0))
+	T.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(45.0)))
+	T2.teleport(home + Vector3(5.0, 0, 0).rotated(Vector3.UP, deg_to_rad(-45.0)))
+	var t2_team := T2.team
+	T2.team = P.team
+	for w in [T, T2]:
+		w.downed = true
+		w.hp = 0.0
+		w.down_hp = float(Data.MATCH["down_hp"])
+	var hp_foe := T.hp
+	P.ak.use_e()
+	step(m, 1.6)
+	var bled: float = float(Data.MATCH["down_hp"]) - T2.down_hp
+	var drained: float = float(Data.MATCH["down_hp"]) - T.down_hp
+	ok(
+		"pin E: a rival Wisp in the wall loses down_hp each tick (est 5 x 2.5 a tick), an ally's only bleeds",
+		drained >= bled + 2.0 * float(K.e_def()["dmg"]) * ArcherKit.WISP_DRAIN_K and bled > 0.0,
+		"rival %.1f ally %.1f" % [drained, bled]
+	)
+	ok(
+		"pin E: the wall does not slow, burn or damage a Wisp",
+		T.slow_t <= 0.0 and T.blight_t <= 0.0 and T.hp == hp_foe and T.downed,
+		"slow %.2f hp %.1f" % [T.slow_t, T.hp]
+	)
+	for w in [T, T2]:
+		w.downed = false
+		w.hp = w.max_hp
+		w.down_hp = 0.0
+	T2.team = t2_team
 	step(m, 3.5)
 	# the Heavy Shot is hold only (data: Heartpiercer): one charge, 16 s, a tap looses nothing and costs nothing
 	fresh(T)
@@ -804,10 +850,12 @@ func _bulwark_combos() -> void:
 	ok("bjorn: tap again calls it back", K.mace.is_empty())
 	K.cd["e"] = 0.0
 	aim_at(P, home + Vector3(-5.0, 0, 0))
+	var calls0 := int(HeroVfx.of(m).plays.get("mend_call", 0))
 	P.ak.use_e()
 	ok(
 		"bjorn E: with the hammer in hand it comes down on him, the column and circle shown",
-		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5 and K.fx.column.visible,
+		Vector2(K.mend["pos"].x - P.pos.x, K.mend["pos"].z - P.pos.z).length() < 0.5
+		and int(HeroVfx.of(m).plays.get("mend_call", 0)) == calls0 + 1,
 		"mend %s" % str(K.mend.get("pos"))
 	)
 	step(m, 0.1)
@@ -913,6 +961,9 @@ func _bulwark_combos() -> void:
 		mid == 0.0 and K.spins == sp0 + 1 and dmg(T) >= 18.0 and dmg(T) <= 30.0,
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
+	var spin_r := float(K.dash_def().get("spin_r", 2.2))
+	ok("combo bjorn: the spin ring is drawn out to the hit radius",
+		absf(K.fx.swirl_r - spin_r) < 0.01, "%.2f" % K.fx.swirl_r)
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true

@@ -161,14 +161,14 @@ static func bridge(
 	return n
 
 # ------------------------------------------------------------------ the seed (visual; the caster's game runs the rules)
-## The seed: a dark indigo glass drum on the ground with a slow violet swirl (shaders/void_glass),
+## The seed: a near-black glass drum on the ground with a slow sea-teal swirl (shaders/void_glass),
 ## growing to its full width, with a teal rim ring. Ostra's own shape; no other zone looks like it.
 static func seed_visual(m: Node, sid: String, at: Vector3, rmax: float, grow: float, col: Color) -> Node3D:
 	var n := Node3D.new()
 	var core := MeshInstance3D.new()
 	core.name = "Core"
 	core.mesh = Models.cyl(1.0, 1.0, 1.0, 28)
-	core.material_override = KitLooks.glass_mat(Color("1a0636"), Color("7a5cff"), 0.8, 0.55)
+	core.material_override = KitLooks.glass_mat(Color("06100f"), Color("2ee6c0"), 0.8, 0.55)
 	core.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	core.position = Vector3(0, 0.5, 0)
 	n.add_child(core)

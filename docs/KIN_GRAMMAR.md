@@ -77,7 +77,7 @@ files (one per kind of mistake) and should always print errors. Phase 3 builds t
 	"name": "Stinger Hook",
 	"short": "Hook",
 	"flavor": "Vespyx lashes its tail and reels in whatever it stings.",
-	"theme": "venom",
+	"theme": "poison",
 	"tier": 1,
 	"from": "kin",
 	"range": 8,
@@ -335,7 +335,8 @@ point when the hunter has an archetype (the E slot is the archetype's); it has o
 
 `KinLib.owner_bonus` turns the owner points into numbers: `owner_max_hp` (health, added to max
 health for the run), `owner_armor` (armor wears that much slower), `owner_shield` (a small shield
-that refills 5 s out of a fight, soaking first), `owner_regen` (health per second), and
+that refills 5 s out of a fight, soaking first; content/rules/boki_system.json "regen" owner_shield_*),
+`owner_regen` (health per second; Hunters have no regen of their own, as in the source), and
 `owner_move_speed`. They count while it's your kin for the run, carried or not.
 
 ### Readability

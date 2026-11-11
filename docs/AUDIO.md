@@ -26,9 +26,13 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 | ui | -22 | menus and HUD |
 | step | -23 | footsteps |
 
+## Monsters
+`content/sfx/mobs.json` (`tools/gen_sfx_mobs.py`): `mdie_<kind>` is each voiced kind's death in its `v_<kind>` family (bosses use the Watcher's, pitched by body; a Shrubling keeps `die_small`), `mstag_open` ticks when a stagger window opens and `mstag_hit` lands the stagger. `MobSfx` (scripts/match/mob_sfx.gd) plays them at the monster and caps a pack dying at once to 3 death cues per 200 ms across kinds. `--mob-sfx-check` asserts the kind -> cue map and the cap.
+
 ## Names
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
+- Mob and boss attacks (`content/sfx/mob.json`, `tools/gen_sfx_mob.py`) play by kind, never a Boki `k_*` cue: `mob_<kind>_atk` as the mob strikes, `mob_<kind>_hit` where it lands (`Mob._snd`; a spitter's or sentinel's shot carries `"snd"` and plays it on the hit), `boss_<kind>_tell` from the start of each boss telegraph (`Boss._begin`), swelling to the strike, plus `boss_slam|throw|boulder|spit|glob`. `--sfx-set-check` fails if `mob.gd` or `boss.gd` plays a `k_` name.
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
 
 ## Sound sets (`content/sfx/<group>.json`)
@@ -44,6 +48,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
+- **Squad cues** (`Sfx.CUES`: `knock_confirm` when you or a squadmate down a rival Hunter, `elim_confirm` when one is finished; wired in `Juice.knock` / `Juice.kill`): played flat (not positional) on their own voice, so footsteps and the combat crowd never steal or thin them. Rivals' kills, friendly knocks and mobs play nothing. `--knock-sfx-check`.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
 ## Ultimate cast cues

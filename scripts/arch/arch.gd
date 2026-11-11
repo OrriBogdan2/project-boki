@@ -73,15 +73,19 @@ static func of_save() -> String:
 	return fix(String(Save.d.get("arch", "")), Data.class_of_save())
 
 ## A bot's archetype from a key (its id and the match seed): its own random stream, so picking one
-## never shifts the match's (seeded maps, loot and tests stay as they were).
-static func pick_for(cls: String, key: String) -> String:
+## never shifts the match's (seeded maps, loot and tests stay as they were). `only`, when it holds
+## any of the class, narrows the choice to those (DemoQuick's showcase lobby).
+static func pick_for(cls: String, key: String, only: Array = []) -> String:
 	var r := RandomNumberGenerator.new()
 	r.seed = hash(key)
-	return pick(cls, r)
+	return pick(cls, r, only)
 
-## A random archetype of a class (bots).
-static func pick(cls: String, rng: RandomNumberGenerator) -> String:
+## A random archetype of a class (bots), from `only` when it holds any of the class.
+static func pick(cls: String, rng: RandomNumberGenerator, only: Array = []) -> String:
 	var opts := of_class(cls)
+	var picked := opts.filter(func(a): return a in only)
+	if not picked.is_empty():
+		opts = picked
 	if opts.is_empty():
 		return default_for(cls)
 	return String(opts[rng.randi_range(0, opts.size() - 1)])

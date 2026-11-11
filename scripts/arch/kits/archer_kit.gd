@@ -213,6 +213,10 @@ func rmb_hold_tick(t: float) -> void:
 		m.sfx("pin_heavy_draw", h.pos, -6.0 if h.is_local() else -10.0)
 		_heavy_tele()
 
+## [est] down_hp a rival Wisp loses per point of Hail Wall tick damage. The source drain is unknown; this is the
+## same multiplier a stomp puts on the bleed (Life.R stomp_mult), so a wall tick (5) takes 12.5 of the 100 pool.
+const WISP_DRAIN_K := 2.5
+
 ## The Heavy Shot held: a thick orchid bar out of the bow that
 ## grows to 2 body heights, the cursor ring filling (AimKit; own player). Reaching full flashes the bow and
 ## plays the taut-thread cue once.
@@ -300,7 +304,7 @@ func _pin(a: Vector3, k: float) -> void:
 			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
-		if _wall_behind(f, dir, float(pd["wall"])):
+		if KnockWall.behind(m, f, dir, float(pd["wall"])):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
@@ -318,16 +322,6 @@ func _pin(a: Vector3, k: float) -> void:
 	# layers the orchid body, sweep and sparks round it), and a screen kick along the shot
 	fx.fletch_burst(draw.bow_at(), 1.4 + 0.8 * k, PinFx.PALE, 0.06, 0.06, 1.0, 5.0)
 	heavy_kicks += 1
-
-func _wall_behind(f: Ent, dir: Vector2, reach: float) -> bool:
-	var g0: float = f.pos.y
-	var k := 0.4
-	while k <= reach:
-		var q := f.pos + Vector3(dir.x, 0, dir.y) * k
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > g0 + 0.8:
-			return true
-		k += 0.3
-	return false
 
 # ------------------------------------------------------------------ E: Hail Wall
 ## A wall of falling arrows on a curved arc round you (hero sheet: Rain of Arrows): centred on your aim at
@@ -400,6 +394,9 @@ func _tick_rain(dt: float) -> void:
 	for f in inside:
 		KinExec.apply_foe(stg.effects, f, cx("e", "hail_wall", f.pos, {"at": f.pos}), f.pos, stg)
 		if "blight_t" in f: f.set("blight_t", maxf(float(f.get("blight_t")), float(ed["blight"])))
+	for w in m.hunters:     # rival Wisps in the wall lose down_hp (no slow, no burn: they are not hit)
+		if w.downed and w.team != h.team and w.hittable() and _in_rain(w):
+			w.hurt(float(ed["dmg"]) * WISP_DRAIN_K, h, {"src": "wisp"})
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

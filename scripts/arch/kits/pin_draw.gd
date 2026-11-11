@@ -121,7 +121,6 @@ func tick() -> void:
 		if was < s.y and t >= s.y:
 			k.m.sfx("pin_super", h.pos, -3.0 if h.is_local() else -7.0)
 			h.flash_t = 0.12           # the whole body flashes once
-			k.net_ring(h.pos, 1.3, k.res_col())
 		if was < over_t() and t >= over_t():
 			k.m.sfx("pin_overdraw", h.pos, -10.0, 0.9)
 			k.play("arc_over")

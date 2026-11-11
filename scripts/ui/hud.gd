@@ -9,6 +9,7 @@ var cursor: Control
 var big: Font = preload("res://fonts/LilitaOne-Regular.ttf")
 var body: Font = preload("res://fonts/Rubik.ttf")
 var hit_t := 0.0
+var buffs := BuffStack.new()     # the stack of what is on you, right edge
 var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break and knock state
 var hit_crit := false
 var hurt_t := 0.0
@@ -302,6 +303,7 @@ func _draw_all() -> void:
 		_draw_hurt_dirs(sz)
 		if not p.riding:
 			_draw_kit(sz, p)
+			buffs.draw(self, p, sz)       # after the kit tips so they never cover it
 		elif not map_open():
 			_draw_ship_prompt(sz)
 		if p.dropping and not map_open():
@@ -335,6 +337,7 @@ func _draw_world_labels() -> void:
 	var cam := m.cam
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
+	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -347,7 +350,7 @@ func _draw_world_labels() -> void:
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
-		if cam.is_position_behind(h.position):
+		if cam.is_position_behind(h.position) or HudPlate.hidden(m.player, h):
 			continue
 		var sp := LabelCull.at(self, _head(h, HudPlate.plate_offset(h)))
 		if not sp.is_finite():
@@ -528,15 +531,13 @@ func _draw_top(sz: Vector2) -> void:
 	if m.duel:
 		_draw_duel(sz)
 		return
-	if m.opts.get("arena", false):
-		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
 		if Record.clean():
 			return      # (recording: no training banner or checklist)
-		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
-		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
-		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
-		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
+		if not m.opts.get("arena", false):      # (the Grounds draw their own key line: scripts/match/arena.gd)
+			_panel(Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54)), Color(0.06, 0.07, 0.1, 0.88), 12)
+			_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
+			_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
 		# the checklist: only what's left (up to six), with a count; H folds it away
 		var all_rows: Array = m.train_rows()
 		var left: Array = all_rows.filter(func(t): return not m.train.has(t[0]))
@@ -701,6 +702,7 @@ func _draw_minimap(sz: Vector2) -> void:
 		_draw_map_lairs(inner, to_map, on_map, riding)
 	ReviveHud.minimap(self, inner, to_map, on_map)
 	if m.biomes: m.biomes.hot.minimap(self, to_map, on_map)
+	HeartHud.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -714,24 +716,6 @@ func _draw_minimap(sz: Vector2) -> void:
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
 		c.draw_circle(to_map.call(m.ship_pos()), 5.0, GOLD)
-	if m.rolling:
-		# the other drop waves' skyships (amber), and hunters with a bounty on them (seen by everyone)
-		for ws in m.ships:
-			if ws.get("gone", false) or ws.get("node") == null:
-				continue
-			var wp: Vector2 = to_map.call(m.ship_pos_of(ws))
-			if on_map.call(wp, 3.0):
-				var wa: Vector2 = to_map.call(ws["a"]); var wb: Vector2 = to_map.call(ws["b"])
-				c.draw_line(wa, wb, Color(1.0, 0.72, 0.35, 0.3), 1.5, true)
-				c.draw_circle(wp, 4.5, Color("ffb64a"))
-			else:
-				_edge_arrow(inner, inner.get_center(), wp, Color("ffb64a"))
-		for h in m.hunters:
-			if m.player and h.team == m.player.team or not h.has_meta("bounty") or h.out or h.extracted:
-				continue
-			var bp: Vector2 = to_map.call(h.pos)
-			if on_map.call(bp, 3.0): bounty_marker(c, bp, 0.85)
-			else: _edge_arrow(inner, inner.get_center(), bp, Color("ffb64a"))
 	if m.tut and m.tut.target != Vector3.INF:
 		var tv: Vector2 = to_map.call(m.tut.target)
 		if on_map.call(tv, 4.0): c.draw_arc(tv, 6.0, 0, TAU, 16, Color("8fe3c8"), 2.5, true)
@@ -843,20 +827,6 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.sight_k < 0.99:
 		var st := "SIGHT %d%%" % int(round(m.sight_k * 100.0))
 		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
-	if m.rolling:
-		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
-
-## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
-func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
-	var amber := Color("ffb64a")
-	var ph := fmod(m.time * 1.2, 1.0)
-	cv.draw_arc(p, (6.0 + ph * 7.0) * k, 0, TAU, 20, Color(amber, 1.0 - ph), 2.0, true)
-	cv.draw_circle(p, 6.5 * k, Color(0, 0, 0, 0.65))
-	cv.draw_arc(p, 5.0 * k, 0, TAU, 18, amber, 2.0, true)
-	cv.draw_circle(p, 2.0 * k, amber)
-	for i in 4:
-		var a := PI * 0.5 * i
-		cv.draw_line(p + Vector2(cos(a), sin(a)) * 3.5 * k, p + Vector2(cos(a), sin(a)) * 8.0 * k, amber, 1.5, true)
 
 var mm_circ := Vector3.ZERO    # the round minimap: centre x, y and radius (0 while it's the square overview)
 func _mm_has(inner: Rect2, v: Vector2, pad := 0.0) -> bool:
@@ -1606,10 +1576,6 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 	if not sp.is_finite():
 		return
 	plates.draw(self, sp, h, _np_show_name(sp, h))
-	if m.rolling and h.has_meta("bounty"):
-		# a bounty: a target over the plate and what knocking them is worth
-		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
-		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
 	if not h.downed:
 		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
@@ -1889,6 +1855,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"chest": prog = it["chest"]["prog"]
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
+			"heart": prog = float(it.get("prog", 0.0))
 		var s: String = it["label"]
 		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))

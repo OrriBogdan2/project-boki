@@ -203,12 +203,14 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
+	_narrow(glb, float(Arch.body(arch).get("bulk", 1.0)))
 	var sync := Sync.new()
 	sync.name = "Sync"
+	# (before the toon pass and the moods)
+	sync.companions = WardenCompanions.detach(glb, skel, WardenClips.data(art(arch)))
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
-	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
 	_lights(glb, look(art(arch)))
@@ -248,6 +250,14 @@ static func misfits(arch: String) -> Array:
 		if not bad.is_empty():
 			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
 	return _misfits[p]
+
+## The body's "bulk" (Mossy 0.8): the model's meshes are narrowed on x and z, not the root, which would shear
+## the blade turning in the hand.
+static func _narrow(glb: Node3D, bulk: float) -> void:
+	if bulk == 1.0:
+		return
+	for mi in glb.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).scale = Vector3(bulk, 1.0, bulk)
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
@@ -920,6 +930,7 @@ class Sync extends Node:
 	var springs := Springs.new()  # the spring_ bone chains (braids) swinging on top
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
+	var aim: WardenAim            # the body's pitch across terrace heights (WardenAim)
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
@@ -931,10 +942,10 @@ class Sync extends Node:
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
+	var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
-	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -972,6 +983,7 @@ class Sync extends Node:
 			hide_out.append(WardenSkeleton.find(skel, String(b)))
 		clips = WardenClips.make(root, glb, skel, art_name)
 		sway = WardenSway.make(root, skel, dd.get("sway", {}))
+		aim = WardenAim.make(root, skel, String((dd.get("blade", {}) as Dictionary).get("bone", "")))
 		if clips:
 			_look_pose()
 			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
@@ -997,7 +1009,14 @@ class Sync extends Node:
 			WardenGlb._skinned_weapon(root)
 			WardenGlb._hide_shield(root)
 
+	var lod: AnimLod.Gate
+
 	func _process(dt: float) -> void:
+		if lod == null:
+			lod = AnimLod.Gate.new(root)
+		dt = lod.step(root.global_position, get_viewport(), dt)
+		if dt == 0.0:
+			return
 		_keep_one_weapon()
 		if clips:
 			_play(dt)
@@ -1007,6 +1026,8 @@ class Sync extends Node:
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		if companions:
+			companions.step(dt)     # (before the blade: the sun's FX points ride it)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
@@ -1067,6 +1088,7 @@ class Sync extends Node:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
 		if sway:
 			sway.step(dt)
+		aim.step(1.0 - w)
 		if w < 1.0:
 			var inv := skel.global_transform
 			for h in hand_nodes:
@@ -1077,8 +1099,6 @@ class Sync extends Node:
 	func apply_blade() -> void:
 		if blade_tip == null or blade_root == null or gun == null or not gun.is_inside_tree():
 			return
-		if square_blade:
-			_square_blade()
 		# (from the bone, not the attachment nodes: those update after the skeleton does, a frame late)
 		var hand := skel.global_transform * skel.get_bone_global_pose(blade_bone)
 		var a := skel.global_transform * skel.get_bone_global_pose(blade_root_bone) * blade_root.position
@@ -1089,16 +1109,6 @@ class Sync extends Node:
 		gun.global_transform = Transform3D(Basis.looking_at(b - a, up), a)
 		if muzzle:
 			muzzle.global_position = b
-
-	## A root scaled on x and z only (body "bulk": Mossy) shears a blade turning in the hand, which then stretches
-	## and shrinks. The blade bone's world basis is made square again at the skeleton's height scale (its size along
-	## the root's up axis, which the shear leaves alone), so it never builds on last frame's pose. A bone pose cannot
-	## hold a shear, so a little is left (under 2 cm on Mossy's blade, --clip-check).
-	func _square_blade() -> void:
-		var pose := skel.get_bone_global_pose(blade_bone)
-		var k := (skel.global_basis.transposed() * root.global_basis.y.normalized()).length()
-		pose.basis = skel.global_basis.inverse() * ((skel.global_basis * pose.basis).orthonormalized() * k)
-		skel.set_bone_global_pose(blade_bone, pose)
 
 ## Hanging pieces on bone chains (RIG_CONTRACT "Spring chains"): bones named spring_<name>_<i>, each the next
 ## one's parent, the first a child of a contract bone (a braid hangs from the head). Each chain is a rope of its

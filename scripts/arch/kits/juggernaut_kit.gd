@@ -29,6 +29,8 @@ const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
+const CHAIN_RESET := 1.0               # s idle after a slash before the chain starts over on the right: the
+                                       # footage still alternates across 4-frame gaps at 5 fps (0.6-1.0 s)
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -39,7 +41,7 @@ var lmb_buf := 0.0
 var bot_wave_t := 0.0
 var slash_n := 0
 var slash_at := -9.0
-var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the press), pinned (to dir: E went)}
+var slam_w := {}               # the overhead strike winding up: {t, t0 (s), dk (damage k), rk (reach k)}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
@@ -67,6 +69,7 @@ func _setup() -> void:
 	warchain = JuggernautChain.new(self)
 	meteor = JuggernautDrop.new(self)
 	cd["air"] = 0.0             # the Meteor Drop's own cooldown slot
+	cd["tap"] = 0.0             # the tap strike's own short cooldown (used while the Smash rests)
 
 func full_ready() -> bool:
 	return false               # no resource-full Smash: Enraged buffs everything instead
@@ -360,7 +363,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 	return true
 
 ## The Searing Wave charging: its lane on the ground grows as long and as wide as the wave it would throw now,
-## going gold-hot at full, and the cursor ring fills.
+## going gold-hot at full, and the charge ring fills round his body (the source's thin white arc round the hero
+## while the blast charges; hero-ref juggernaut item 8), flaring at full.
 func _wave_preview() -> void:
 	var ld := lmb_def()
 	var k := wave_k()
@@ -368,7 +372,7 @@ func _wave_preview() -> void:
 			"width": lerpf(float(ld["wave_size"][0]), float(ld["wave_size"][1]), k) * 2.0, "k": k, "fill": k,
 			"col": WAVE_RED, "col_full": WAVE_FULL}
 	AimKit.lane(h, "lmb", lane)
-	AimKit.charge(h, k, {"col": WAVE_RED, "col2": WAVE_FULL})
+	AimKit.charge(h, k, {"col": Color.WHITE, "col2": WAVE_FULL, "at": "body"})
 	HeroVfx.of(m).hold(h, "wave_charge", k)
 
 ## The Searing Wave charge waits out what stops the blade, rather than ending: a dash its hold row keeps it through.
@@ -382,7 +386,7 @@ func _slash() -> void:
 	h.mel_hold = 0.0
 	h.fire_cd = float(ld["rate"])
 	# quick slashes, alternating right-to-left and back (no heavier third: each is the same cut)
-	if m.time - slash_at > 0.8: slash_n = 0
+	if m.time - slash_at > CHAIN_RESET: slash_n = 0
 	slash_at = m.time
 	h.combo_i = slash_n % 2 + 1
 	play("jug_slash_r" if slash_n % 2 == 0 else "jug_slash_l")
@@ -562,10 +566,10 @@ func rmb_hold_tick(t: float) -> void:
 	var feel := float(dash_feel()["dist"])        # the lane shows the fling travel() really makes
 	var lane := {"len": float(ld["dist"][1]) * feel, "len0": float(ld["dist"][0]) * feel, "k": k, "fill": k,
 			"width": lunge_w(), "col": LUNGE_RED, "col_full": LUNGE_FULL, "tip": true}
-	if _aims_down_chain():
-		var to := warchain.to_anchor()
-		lane["dir"] = to
-		lane["len"] = to.length()
+	if warchain.hooked() and _along_chain():
+		var to := warchain.anchor - h.pos
+		lane["dir"] = Vector2(to.x, to.z)
+		lane["len"] = Vector2(to.x, to.z).length()
 		lane["len0"] = lane["len"]
 	AimKit.lane(h, "rmb", lane)
 	AimKit.charge(h, k, {"col": LUNGE_RED, "col2": LUNGE_FULL})
@@ -697,71 +701,92 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	var spin: bool = c.get("e", false)
 	var dropping: bool = c.get("air", false) and not spin
+	var held: bool = c.get("hold", false)
+	if not spin and not dropping and not held and ch_rmb < 1.0:
+		_tap_strike()               # the Smash rests: a tap is still an overhead strike, lighter, on its own cooldown
+		return
 	if dropping:
 		if not spend_air(): return
 	elif not spend_rmb():
 		return
 	if spin:
 		_spin()                     # in the Warchain's pull, or just arrived
-	elif _aims_down_chain() and c.get("hold", false) and not c.get("air", false):
-		_chain_lunge(lunge_k(float(c.get("t", 0.0))))      # charged while tethered: along the chain
+	elif warchain.hooked() and held and not c.get("air", false) and _along_chain():
+		_chain_lunge(lunge_k(float(c.get("t", 0.0))))      # charged while tethered, aimed down the chain
 	elif dropping:
 		meteor.start()
-	elif c.get("hold", false):
+	elif held:
 		var held_t := float(c.get("t", 0.0))
 		_lunge(lunge_k(held_t), perfect_window(held_t) >= 0)
 	else:
-		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
-		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
-		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
-		vfx("slam_tell")
+		_start_slam(1.0, 1.0, float(rmb_def()["windup"]))
+
+## The overhead forward strike's wind-up: aim freely (everyone sees the strike lane); `dk`/`rk` scale damage and reach.
+func _start_slam(dk: float, rk: float, windup: float) -> void:
+	slam_w = {"t": windup, "t0": windup, "dk": dk, "rk": rk}
+	play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
+	vfx("slam_tell")
+
+## A tap with the Smash resting: the lighter strike (content/rules/tuning.json "kael"), no charge spent.
+func _tap_strike() -> void:
+	if float(cd["tap"]) > 0.0:
+		h._ab_feedback("sec", "deny")
+		return
+	var tn := Tuning.of("kael")
+	cd["tap"] = float(tn["tap_cooldown_s"])
+	h._ab_feedback("sec", "cast")
+	_start_slam(float(tn["tap_dmg_k"]), float(tn["tap_range_k"]), float(tn["tap_windup_s"]))
+
+## Aim within kael.chain_lunge_deg of the chain: the charged release runs down it; any other yaw is a free Lunge.
+func _along_chain() -> bool:
+	var to := warchain.to_anchor()
+	return absf(rad_to_deg(h.aim_dir().angle_to(to))) <= float(Tuning.of("kael")["chain_lunge_deg"])
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
 		return
-	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
+	# the magenta strike cone ahead of him, the hit's own shape, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
-	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
-	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
-			"all": true}
-	if pin != Vector2.ZERO:
-		cone["dir"] = pin
+	var wk := 1.0 - clampf(float(slam_w["t"]) / float(slam_w["t0"]), 0.0, 1.0)
+	var cone := {"len": float(sl["radius"]) * float(slam_w["rk"]), "deg": float(sl["angle"]), "inner": 0.0,
+			"fill": wk, "col": SLASH_OUT, "all": true}
 	AimKit.cone(h, "slam", cone)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
+		var tap: Dictionary = slam_w
 		slam_w = {}
-		_slam(pin)
+		_slam(float(tap["dk"]), float(tap["rk"]))
 
 ## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
 ## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
-func _slam(pin := Vector2.ZERO) -> void:
+func _slam(dk: float, rk: float) -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
-	var dd := h.aim_dir() if pin == Vector2.ZERO else pin
-	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()},
+	var dd := h.aim_dir()      # live: the strike goes where the cursor is at the blow, whatever E is doing
+	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k() * dk},
 			{"type": "push", "strength": float(sl["push"]), "from": "caster"}]
 	var stg := stage("rmb",
-			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+			{"delivery": {"type": "cone", "radius": float(sl["radius"]) * rk, "angle": float(sl["angle"])},
+					"effects": effs})
 	var from := h.pos
 	var paid := {}
-	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
+	var at := aim()
 	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
-			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
+			f.hurt(float(sl["dmg"]) * smash_k() * dk * float(sl["low_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
 		var sw: Array = sl["sweet"]
-		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
+		var in_band := to.length() >= float(sw[0]) * rk and to.length() <= float(sw[1]) * rk + f.r
 		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
 		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
 			# the data's "edge hits do more": the far tip lands sweet_k harder
-			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["sweet_k"]) * power("sec"), h,
+			f.hurt(float(sl["dmg"]) * smash_k() * dk * float(sl["sweet_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "sweet"], "melee": true})
 		if sweet and not paid.has("x"):
 			paid["x"] = true
@@ -824,15 +849,6 @@ func _tick_lunge() -> void:
 			return                  # down the chain to a wall: it went where it was sent
 		cd["rmb"] = float(cd["rmb"]) * float(ld["miss_k"])        # struck nothing: the cooldown doubles
 		m.fx.word(h.pos + Vector3(0, 2.2, 0), "MISS", Color("c0b0a0"), false)
-
-## Hooked, with the aim within lunge.chain_deg of the chain: a held Smash goes down it. Aimed elsewhere it is a
-## plain Lunge along the aim, so the chain never takes the hold's direction from him.
-func _aims_down_chain() -> bool:
-	if not warchain.hooked():
-		return false
-	var to := warchain.to_anchor()
-	var off := absf(h.aim_dir().angle_to(to))
-	return to.length() > 0.05 and off <= deg_to_rad(float(rmb_def()["lunge"]["chain_deg"]))
 
 ## Charged while tethered and let go: the Lunge runs along the chain to its end (the foe it holds, or
 ## the wall), harder and with a short stun on the foe; the chain is spent.
@@ -961,8 +977,6 @@ func combo_marks(out: Array) -> void:
 			out.append(RecastCue.mark(f, 0, left, reset_t, "SLAMMED", true))
 
 func use_e() -> void:
-	if not slam_w.is_empty() and warchain.state == "ready":
-		slam_w["pinned"] = true        # the cursor moved on to the throw: the Slam goes where it was started
 	if warchain.hooked() and riposte.move_k() <= 0.0 and not super.busy():
 		riposte.pull_through()         # owner 113.7: the held chain hauls him in, the ult's strike on the way
 		return

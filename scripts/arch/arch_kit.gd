@@ -19,6 +19,7 @@ var cd := {"rmb": 0.0, "e": 0.0, "r": 0.0, "x": 0.0}
 var ch_rmb := 1.0              # RMB charges
 var rmb_down := false          # RMB held since its press
 var rmb_t := 0.0
+var exit_ease := {}            # DashExit: a no-carry dash easing down to run speed {t, cap, ease}
 var rmb_ctx := {}              # what the press saw (airborne, in E...)
 var e_t := 0.0                 # E's window left (0 = not up)
 const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (DECISIONS 2026-11-08 two-step abilities)
@@ -86,8 +87,9 @@ func rank(slot: String) -> int:
 
 ## A hero's own multiplier for one slot at its rank: JSON `<table>` {slot: [rank 1, rank 2, rank 3]}
 ## (rank_dmg, rank_cd, rank_shield; the source's upgrades, see docs/heroes). `shared` when the hero has no row.
-func rank_k(table: String, slot: String, shared: float) -> float:
-	var row: Array = d.get(table, {}).get(slot, [])
+## `key` names the row when it is not the slot's (rank_cd.air follows the dash rank).
+func rank_k(table: String, slot: String, shared: float, key := "") -> float:
+	var row: Array = d.get(table, {}).get(key if key != "" else slot, [])
 	return float(row[clampi(rank(slot) - 1, 0, row.size() - 1)]) if not row.is_empty() else shared
 
 ## The hero's rank damage (rank_dmg, else +15% a rank: Effects.level_k) on top of the hunter's own damage
@@ -158,6 +160,8 @@ func locks_glide() -> bool: return false            # a move AirLimits can't see
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
 ## Does this kit have the class long dash (Shift in the air)? The HUD shows its segment only then.
 func has_long_dash() -> bool: return true
+## How this kit's dash hands its speed on: {} = the shared carry; {"cap", "ease"} = none (see DashExit).
+func dash_exit() -> Dictionary: return {}
 func on_deal(_t: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_take(_by: Ent, _dmg: float, _o: Dictionary) -> void: pass
 func on_block(_dmg: float, _by) -> void: pass
@@ -194,7 +198,7 @@ func tick(dt: float) -> void:
 	if not h.wpn.get("ammo", true):
 		h.ammo = int(h.wpn["mag"])        # a weapon with no ammo (Data.weapon_stats): nothing ever runs dry
 	var rate := 1.0 + h.gear_stat("cdr")
-	for k in cd.keys():
+	for k in cd:      # (the dictionary itself, not keys(): no array built per step)
 		cd[k] = maxf(0.0, float(cd[k]) - dt * rate)
 		if cd_off and not (k == "r" and not fuse.is_empty()): cd[k] = 0.0
 	if cd_off:
@@ -206,7 +210,7 @@ func tick(dt: float) -> void:
 		ch_rmb = minf(mx, ch_rmb + 1.0)
 		if ch_rmb < mx:
 			cd["rmb"] = float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")
-	for k in bot_hold.keys():
+	for k in bot_hold:
 		bot_hold[k] = maxf(0.0, float(bot_hold[k]) - dt)
 	if rmb_down:
 		if held("rmb") and not h.downed and h.stun_t <= 0.0:
@@ -228,6 +232,7 @@ func tick(dt: float) -> void:
 			_r_end()
 	res_wait = maxf(0.0, res_wait - dt)
 	_tick_knocks()
+	DashExit.settle(h, dt)
 	_tick(dt)
 	if not curved.is_empty(): _tick_curve(dt)
 	_tells(dt)
@@ -497,10 +502,11 @@ func _bond_tell() -> void:
 	m.sfx("bond", h.pos, -2.0, 1.2)
 
 # ------------------------------------------------------------------ dash helpers
-## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
+## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's;
+## a hero's `rank_cd.air` row shortens it by dash rank.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD))) * rank_k("rank_cd", "dash", 1.0, "air")
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:
@@ -1185,13 +1191,4 @@ func _charge_release() -> void:
 	if k > 0.5:
 		m.fx.burst(h.pos + Vector3(h.aim_dir().x * 0.7, 1.0, h.aim_dir().y * 0.7), charge_color(), int(6 + 14 * k), 3.0 + 5.0 * k, 0.3, 0.0, 1.0, Vector3(h.aim_dir().x, 0.1, h.aim_dir().y), 35.0)
 
-## Terrain (a wall, a rock, a ledge face) within `reach` behind `t` along `dir`.
-func terrain_behind(t: Ent, dir: Vector2, reach: float) -> bool:
-	var k := 0.3
-	while k <= reach:
-		var q := t.pos + Vector3(dir.x, 0, dir.y) * (t.r + k)
-		if m.world.is_block(q.x, q.z) or m.world.ground_at(q.x, q.z) > t.pos.y + 0.8:
-			return true
-		k += 0.3
-	return false
 

@@ -52,6 +52,7 @@ var visit_id := ""
 var petted := {}
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
+var photo: HomePhoto = null         # photo mode (home_photo.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
@@ -162,6 +163,7 @@ func _ready() -> void:
 	HomeLayout.make_world(world, int(lay["grow"]), int(lay.get("seed", 0)), float(lay.get("sk", 1.0)) if fs else 0.0)
 	await _slice()
 	hb = HomeBuild.new(self)
+	photo = HomePhoto.new(self)
 	hg = HomeGather.new(self)
 	hw = HomeWork.new(self)
 	toys = HomeToys.new(self)
@@ -920,26 +922,30 @@ func _spawn_kin() -> void:
 	var ri := 0
 	var farm_kin := _farm_kin()          # kin asleep in the Kin Burrow stay there
 	for rec in farm_kin:
-		var n := Models.kin(rec["species"], rec)
-		add_child(n)
 		var isl: int = 0 if rec["uid"] == _d().get("active", "") else open_isles[ri % open_isles.size()]
 		ri += 1
 		# somewhere open, not wedged against a building and not on top of another kin
 		var taken: Array = kins.map(func(o): return o["pos"])
 		taken.append(ppos)
-		var at := world.free_spot_near(world.random_ground(isl), taken, 1.3)
-		n.position = at
-		var lbl := Label3D.new()
-		lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
-		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
-		lbl.position.y = 1.25; lbl.visible = false
-		n.add_child(lbl)
-		var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
+		var kd := _add_kin(rec, world.free_spot_near(world.random_ground(isl), taken, 1.3))
 		var ri2: int = farm_kin.find(rec)
 		if isl == 0 and ri2 >= 0 and ri2 < 6:
 			kd["bed"] = Vector3(32.9 + (ri2 % 3) * 1.6, 0, 27.2 + (ri2 / 3) * 1.6)
-		kins.append(kd)
 	if hb and hb.astar: hb.assign_beds()
+
+## One Boki out on the island at a spot: its model, its emote bubble and its walking state.
+func _add_kin(rec: Dictionary, at: Vector3) -> Dictionary:
+	var n := Models.kin(rec["species"], rec)
+	add_child(n)
+	n.position = at
+	var lbl := Label3D.new()
+	lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
+	lbl.position.y = 1.25; lbl.visible = false
+	n.add_child(lbl)
+	var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
+	kins.append(kd)
+	return kd
 
 # ------------------------------------------------------------------ loop
 ## Sun, sky, lamps and the occasional rain shower.
@@ -1002,6 +1008,9 @@ func _update_sky(d: float) -> void:
 
 func _process(delta: float) -> void:
 	var d := minf(delta, 0.05)
+	if photo and photo.active:
+		photo.tick(d)
+		return
 	farm_t -= delta
 	if farm_t <= 0.0:
 		farm_t = 1.0
@@ -1440,6 +1449,7 @@ func _move_kin(d: float) -> void:
 			# being petted or talked to: it stays put and looks at you
 			k["hold_t"] = hold - d
 			k["goal"] = pos
+		if k.has("burrow_t") and BurrowSwap.step(self, k, d): continue      # through the Burrow door
 		var wish := Vector2.ZERO
 		var goal: Vector3 = k["goal"]
 		if goal != Vector3.INF:
@@ -2206,7 +2216,7 @@ func _use(it: Dictionary) -> void:
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
-		"burrow": _open_burrow()
+		"burrow": BurrowPanel.open(self)
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":
@@ -2221,6 +2231,10 @@ func open_job_board(tab := "") -> void:
 	WorkView.open(self)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if photo and photo.active:
+		if photo.input(event):
+			get_viewport().set_input_as_handled()
+		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
 			get_viewport().set_input_as_handled()
@@ -2451,6 +2465,7 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 		var old_sc := _panel_scroll()
 		if old_sc: keep_scroll = old_sc.scroll_vertical
 	_close_panel()
+	get_viewport().gui_release_focus()      # a clicked build tile kept the focus and took Enter from the panel
 	var pb := UI.scroll_panel(title_txt, width, _close_panel, "Close", scroll)
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
@@ -3372,15 +3387,7 @@ func _open_expedition() -> void:
 		right.add_child(tc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
-	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
-	var rolling_on: bool = Save.d.get("exp_rolling", false)
-	var stabs := UI.tabs(["Fixed match", "Rolling session"], "Rolling session" if rolling_on else "Fixed match", func(nm): Save.d["exp_rolling"] = nm == "Rolling session"; _open_expedition(), {}, 150)
-	for tb in stabs.get_child(0).get_children():
-		tb.tooltip_text = "Everyone drops together; the islands fall after about 10 minutes" if String(tb.get_meta("tab")) == "Fixed match" else "A 30-minute session already under way: you drop in with the next wave, wherever it's at"
-	right.add_child(stabs)
-	right.add_child(UI.label("30 minutes, waves every 2-3 minutes; late arrivals start at a higher level" if rolling_on else "Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+	right.add_child(UI.label("%d squads of %d" % [Data.SQUADS, Data.SQUAD_SIZE], UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3392,7 +3399,7 @@ func _open_expedition() -> void:
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
-	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
+	fl.add_child(UI.ghost("Training Grounds", _start_training, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
@@ -3465,23 +3472,16 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 	row.add_child(next_b)
 	return card
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the title screen's too): nothing can hurt you and nothing you do there counts.
 func _start_training() -> void:
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:
-	var weak := hecon.refuse_reason()
-	if weak != "":
-		var wv := _new_panel("Too hungry to go", 560)
-		var wl := UI.label(weak, 15, UI.INK); wl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		wv.add_child(wl)
-		var wr := UI.hbox(10)
-		wr.add_child(UI.primary("Feed it", func(): _open_feed(Save.active_kin()), 160))
-		wr.add_child(UI.button("Back", _open_expedition, 140))
-		wv.add_child(wr)
+	if hecon.partner_too_weak():
+		_new_panel("Too hungry to go", 560).add_child(HungerGate.new(self, _confirm_start, _open_expedition))
 		return
 	var td: Dictionary = Data.TIERS[exp_tier]
 	if not KinLoss.at_risk(exp_tier):
@@ -3510,11 +3510,8 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
-	if Save.d.get("exp_rolling", false):
-		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
+	# the one format: 10 trios (your squadmates and every other squad are bots)
+	var o := Data.squad_opts()
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
@@ -5109,8 +5106,8 @@ func _personality(rec: Dictionary) -> Dictionary:
 	var h := absi(String(rec.get("uid", rec.get("name", ""))).hash())
 	var typ := String(Data.KIN.get(rec.get("species", ""), {}).get("type", ""))
 	# [hop rate, hop height, pace]: heavy kinds plod, light ones skip
-	var gait: Array = {"gravity": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "lunar": [4.5, 0.2, 0.95],
-		"prism": [11.0, 0.09, 1.12], "venom": [9.5, 0.05, 1.06], "echo": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
+	var gait: Array = {"psychic": [5.5, 0.06, 0.82], "spore": [7.0, 0.11, 0.9], "fairy": [4.5, 0.2, 0.95],
+		"crystal": [11.0, 0.09, 1.12], "poison": [9.5, 0.05, 1.06], "sound": [8.0, 0.16, 1.0]}.get(typ, [9.0, 0.14, 1.0])
 	var quirks := ["spin", "sniff", "hop", "sit", "look", "wiggle"]
 	return {
 		"speed": float(gait[2]) * lerpf(0.86, 1.18, (brave + hot) * 0.5) * (0.94 + float(h % 13) * 0.01),
