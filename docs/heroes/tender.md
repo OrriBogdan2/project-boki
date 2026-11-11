@@ -235,3 +235,13 @@ Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follo
 | Ability | Source (data > wiki > footage) | Ours | Assert (`--tender-combo-check`) |
 |---|---|---|---|
 | Hearthlight (E recast) | [wiki Elluna's Moonlight Blessing] "thrown to target location"; nothing about the abyss | the toss lands at the cursor (9 m reach) over the abyss and stays its full time at his height; the cooldown runs | `abyss: ...` rows of tools/abyss_cast.gd (`tender()`) |
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Burrseed (Darkside Binding) | Data: a shot that deals damage on hit, then roots the target and nearby enemies after a delay. | Sticks to the first foe (hunter, Boki or monster), passes allies, ends on walls; the root bursts round the stuck foe. Matches. |
+| E Hearthlight (Moonlight Blessing) | Data: reactivate to throw the zone to the target; it attaches to any ally it passes through. | The thrown light flies to the cursor, passes foes and walls, and latches onto the first ally it passes. Matches. |
+| Shift Relay Step | Data (Lunar Dash): a plain dash. | Passes through teammates; hits nobody. Matches. |

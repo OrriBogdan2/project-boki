@@ -215,3 +215,13 @@ Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follo
 | Ability | Source (data > wiki > footage) | Ours | Assert (`--rimewright-combo-check`) |
 |---|---|---|---|
 | Rink Wall (E), Rimelock (X) | [wiki Celeste] and footage: nothing stated for the wall or the ult over an edge (only Skate: ice islands) | the wall erupts at its reach point, or a metre ahead if that point is over the abyss; it slides on the island and stops at the lip; from the lip itself it still forms over the abyss. Rimelock is round her: the rink opens and chills a foe hanging over the abyss. Neither refunds | `abyss: ...` rows of tools/abyss_cast.gd (`rimewright()`) |
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Ice Spear (Cryo Spear) | Data and footage briefs/hero-ref/tamsin.md:51: lands at the cursor, then a slow zone and a delayed blast. Whether a foe in the path stops it is not shown. | Not determinable: flies to the cursor, lands early on the first foe (hunter, Boki or monster) or wall, passes allies. Kept. |
+| E Rink Wall (Frozen Barricade) | Data and footage: a sliding wall that blocks shots and shoves foes. | Placed wall: see the placed-walls job. |
+| X Rimelock (Chilling Finale) | Data: a zone round her. | An area round her; no shot. Matches. |

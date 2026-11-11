@@ -367,3 +367,12 @@ LMB projectile speed, max range, spread or bloom, and whether it stops at the cu
 Fixed (asserted): Grimble fan 20 deg and bloom cap +10 (`--dredge-combo-check`); Meeko ember range 13 m (`--care-combo-check`).
 
 Suggestions, not built: Albert throw max 9 m to about 12.6 m (7 bh, the farthest seen); measure Tenzo's and Tamsin's stop at the cursor with a near-cursor dummy; Meeko's Empowered range follows the new 13 m (x1.4 = 18.2 m).
+
+## Ability shot and lane rules (job ext/parity-ability-pierce)
+
+PARITY FIRST (owner decision 2026-11-07): for every ability projectile and lane (not LMB) of the 12 kits, the source says what it stops on; where it is silent, ours stays. The per-ability tables are the last section of each `docs/heroes/<id>.md`. The rules every shot shares (`Match._update_shots`, `_shot_targets`, `foes_of`):
+
+- A shot stops on the first enemy hunter, enemy Boki or monster it touches, and passes allied hunters and Boki. It stops on terrain, rocks, domes and breakable props (which it smashes). A `pierce` shot (a `hitset`) hits each thing once and flies on; a `pierce_break` shot (only Starpiercer) also flies on through props. A lob sails over everyone and everything and lands where it was aimed.
+- An instant lane (Longneedle, Faultline, Wirerun) goes through `Match.foes_of(team)`: enemy hunters that are not downed, enemy Boki that are not wild, and monsters.
+- Placed walls (Tenzo's rocks, Neve's ice) are the placed-walls job's: what they block is not restated.
+- Audit result: every row already matched the data and footage or is source-silent (kept) except Starpiercer on breakable props, now fixed (`pin ult prop`, `--archer-combo-check`).

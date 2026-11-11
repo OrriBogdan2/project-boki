@@ -293,3 +293,13 @@ Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follo
 | Ability | Source (data > wiki > footage) | Ours | Assert (`--dredge-combo-check`) |
 |---|---|---|---|
 | Anchor Drop (E) | [wiki Kingpin Primal Slam]: "the downward force is not applied if Kingpin is over the abyss"; edge not stated | cast from the lip, the cone is cast anyway (it is round him, not at the cursor) and hits a foe hanging over the abyss (double at rank 3); over the abyss there is no downward push (existing rows) | `abyss: ...` rows of tools/abyss_cast.gd (`dredge()`) |
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Abyssal Hand (Grasp) | Data: pierces terrain, pulls in the first target hit, enemy or ally. Footage briefs/hero-ref/dredge.md:25, :168: the first enemy, through a rock pillar. | Flies over rocks, props and cliffs; stops on the first foe or ally (hunter, Boki or monster) and reels it in; placed walls still stop it (placed-walls job). Matches (`abyssal hand: hooks the first foe`). |
+| X Brass Broadside (Kaiju Blast) | Data: two waves of slugs, anti-heal. Footage dredge.md:263: two fans of 6 orbs; whether an orb passes a foe is not shown. | Not determinable: each of the 12 slugs stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Kept. |
+| Shift Barge (Brute Dash) | Data and footage: a dash that hits nobody. | Hits nobody. Matches. |
