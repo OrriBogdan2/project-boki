@@ -83,7 +83,8 @@ func run(main: Node) -> void:
 			var sz := float(Arch.body(a)["size"])
 			ok(sz <= SIZE_MAX[a], "%s: body size %.3f is trimmed (max %.2f)" % [a, sz, SIZE_MAX[a]])
 			var per := HudPlate.plate_offset(h) / sz
-			ok(absf(per - PLATE_PER_SIZE[a]) < 0.02, "%s: nameplate %.2f per size (want %.2f)" % [a, per, PLATE_PER_SIZE[a]])
+			var want: float = PLATE_PER_SIZE[a]
+			ok(absf(per - want) < 0.02, "%s: nameplate %.2f per size (want %.2f)" % [a, per, want])
 		if hr < lo:
 			lo = hr
 			lo_a = a
