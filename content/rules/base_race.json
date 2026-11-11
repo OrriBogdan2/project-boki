@@ -39,7 +39,7 @@
 	"win_joy": 15.0,
 	"win_trust": 3.0,
 	"lose_joy": -10.0,
-	"gems_win": 6,
+	"gems_win": 14,
 	"gems_ran": 2,
 	"gems_doc": "Gems to you when your backed Boki wins, or for any other race.",
 	"rival_step": 0.15,
