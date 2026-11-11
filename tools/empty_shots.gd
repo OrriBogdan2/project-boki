@@ -88,7 +88,7 @@ func _eggs(tree: SceneTree) -> void:
 
 ## What a new player sees: the hatch card, the creator with its first rows, then with More looks... open.
 func _first_screens(tree: SceneTree) -> void:
-	_fresh()
+	Save.d = Save.fresh()
 	var hx = load("res://scripts/ui/hatch.gd").new()
 	main.add_child(hx)
 	await _shot(tree, "hatch_card", 2.0)
