@@ -956,6 +956,11 @@ func net_ring(at: Vector3, r: float, col: Color) -> void:
 	if m.net_on and not h.remote:
 		m.net_fx(["ring", m._r(at.x), m._r(at.y), m._r(at.z), r, col.to_html(false)])
 
+## A status word over the hunter (the kit's own fx.word), shown in the other players' games too.
+func net_word(at: Vector3, txt: String, col: Color) -> void:
+	if m.net_on and not h.remote:
+		m.net_fx(["word", m._r(at.x), m._r(at.y), m._r(at.z), txt, col.to_html(false)])
+
 func net_bolt(a: Vector3, b: Vector3, col: Color) -> void:
 	if m.net_on and not h.remote:
 		m.net_fx(["bolt", m._r(a.x), m._r(a.y), m._r(a.z), m._r(b.x), m._r(b.y), m._r(b.z), col.to_html(false)])
