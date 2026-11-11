@@ -408,6 +408,8 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | tide_start_s | 90 |
 | tide_close_s | 510 |
 | _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |
+| tide_next_s | 60 |
+| _tide_next_s | the dashed ring on the maps is where the tide will be this many seconds from now |
 | tide_r0 | 130 |
 | tide_r1 | 34 |
 | tide_boost | 0.55 |

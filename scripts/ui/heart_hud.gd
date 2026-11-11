@@ -8,7 +8,7 @@ extends RefCounted
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
 
 const TIDE_COL := Color(0.75, 0.2, 0.35, 0.8)
-const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)
+const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)    # the dashed ring the tide closes to next
 const TINT_COL := Color(0.55, 0.05, 0.22)
 const HIT_S := 0.8              # seconds a tide hit's red pulse lasts on the screen edge
 const DASHES := 48
