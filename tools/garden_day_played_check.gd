@@ -237,7 +237,7 @@ func _zone_move(bb) -> void:
 	ok(bb.hway.send(k, "cinderstep") == "", "Moss is sent to Cinderstep")
 	Engine.time_scale = TIME_SCALE
 	var t := 0.0
-	while bb.kins.has(k) and t < float(GardenZones.rules()["walk_s"]) + 4.0:
+	while bb.kins.has(k) and t < float(GardenZones.rules()["walk_s"]) * 2.0:
 		await main.get_tree().process_frame
 		t += main.get_process_delta_time()
 	Engine.time_scale = 1.0
@@ -302,7 +302,8 @@ func _away(cs) -> void:
 	var text := _labels(bb.root_ui)
 	ok(bb.panel_open == "While you were away", "the away card opens (%s)" % bb.panel_open)
 	await _grab("away_card")
-	print("GDAY card: ", text.left(400))
+	print("GDAY card: ", text.substr(maxi(0, text.find("While you were away")), 900))
+	ok("Moss trained" not in text, "Moss lives in Cinderstep: it does not train at Bramblebank's toys while away")
 	ok("starv" not in text.to_lower() and "lost" not in text.to_lower(), "the card never says lost or starved")
 	ok((Save.d["roster"] as Array).size() == n, "nobody left the roster during the gap")
 	var worst := 100.0
