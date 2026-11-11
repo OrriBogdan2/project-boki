@@ -17,8 +17,11 @@ air rings lay readable air routes between regions and up to high ground. Code: `
   at `lift_vy` and opens the glider (it stays open until you land), the updraft under it carries you over the
   plateau's rim, and you glide onto the top.
 
-Both give a whoosh, a ring flash and the "rings" stat (the Ring Runner challenge). Rings are the same on every
-peer; each peer runs them for the hunters it moves, so nothing new is synced.
+Both give a ring flash, the "rings" stat (the Ring Runner challenge) and their own sound (AirRingSfx,
+docs/AUDIO.md): a glide ring's pass steps up a note with each ring of a run along its lane, a lift ring swells
+as it takes you up, and every ring hums quietly so you can find it. Yours play at full level, other Hunters'
+at the ring, quieter. Rings are the same on every peer; each peer runs them for the hunters it moves, so
+nothing new is synced (for the hunters another peer moves it plays only the pass's sound).
 
 ## Map data (content/maps/hollowcrown.json, written by tools/make_hollowcrown.py)
 Re-placing the routes for a new layout means editing two lists in the generator, nothing in code:
