@@ -102,3 +102,10 @@ few points as noise until more seeds run.
 - Kiting by the rival's range (a shotgun bot backing off from a sniper's reach, closing on a shotgun's).
 - Zone sense, dodging, Boki and camp choice are on the open branches named in the table; merge those
   before re-measuring rows 7, 8 and 10.
+
+## Relation to `ext/bots-human-1111`
+An earlier job on this task pushed `ext/bots-human-1111` (e88b9dfa8, no READY, ended without a result) with
+its own `BotSquad`/`BotRetreat` under the same names. This branch replaces it: it is leaner, adds the
+Heart rotation (that branch left 0-3 of 30 extracting as open) and its checks have been run against base.
+Worth taking from that branch later if wanted: its `--bh-plain` A/B probe and per-tier tables, the "don't
+start a fight outnumbered" rule, and basing to a mate past 55 m.
