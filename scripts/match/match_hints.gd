@@ -54,10 +54,6 @@ func _say(line: String) -> void:
 	_last = line
 	m.hud.toast(line, COL)
 
-func _say(line: String) -> void:
-	_last = line
-	m.hud.toast(line, COL)
-
 func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 	match id:
 		"exdash": return _void_t >= float(r["void_s"])

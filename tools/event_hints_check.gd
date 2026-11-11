@@ -54,7 +54,8 @@ func _expedition(first: bool) -> void:
 	var tag := "first" if first else "second"
 	# the drop map, before the ship sets off: the hot zone is on it
 	_start({"plan_t": 6.0})
-	ok(m.biomes != null and m.biomes.hot.hot >= 0 and m.skydrop != null and m.skydrop.planning, "%s: the drop map is up with a hot zone" % tag)
+	var hot_up: bool = m.biomes != null and m.biomes.hot.hot >= 0
+	ok(hot_up and m.skydrop != null and m.skydrop.planning, "%s: the drop map is up with a hot zone" % tag)
 	_moment("hotzone", want, tag, func(): return m.skydrop.planning)
 	# on the ground (no ship this time): the first Heartspark charging, then the tide closing
 	_start({"no_drop": true})
