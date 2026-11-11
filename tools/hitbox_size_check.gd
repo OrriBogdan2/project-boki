@@ -6,8 +6,8 @@ extends RefCounted
 
 var bad := 0
 const BAND := Vector2(0.85, 1.15)
-# Kael and Albert were trimmed ~7% (owner, 11-11): body size stays under SIZE_MAX, and the nameplate keeps
-# its height per unit of size (PLATE_PER_SIZE m), so it rides over the smaller model as before.
+# Kael and Albert: body size stays under SIZE_MAX (a smaller cast member), and the nameplate keeps its
+# height per unit of size (PLATE_PER_SIZE m) so it rides over the model.
 const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.87}
 const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.3}
 
@@ -83,7 +83,7 @@ func run(main: Node) -> void:
 			var sz := float(Arch.body(a)["size"])
 			ok(sz <= SIZE_MAX[a], "%s: body size %.3f is trimmed (max %.2f)" % [a, sz, SIZE_MAX[a]])
 			var per := HudPlate.plate_offset(h) / sz
-			ok(absf(per - PLATE_PER_SIZE[a]) < 0.02, "%s: nameplate %.2f m = %.2f per size (%.2f)" % [a, HudPlate.plate_offset(h), per, PLATE_PER_SIZE[a]])
+			ok(absf(per - PLATE_PER_SIZE[a]) < 0.02, "%s: nameplate %.2f per size (want %.2f)" % [a, per, PLATE_PER_SIZE[a]])
 		if hr < lo:
 			lo = hr
 			lo_a = a
