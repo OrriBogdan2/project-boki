@@ -36,6 +36,7 @@ const ARROW_WING := 28.0     # px the arrow's back corners stand to each side
 const ARROW_BACK := 12.0     # px the arrow's back stands behind the anchor
 const LABEL_BACK := 62.0     # px behind the anchor the label is centred
 const LABEL_FS := 22
+const UNDER_MSG_A := 0.2     # how much of an edge marker shows while a message in the lane covers it
 
 ## Where the edge arrow for screen direction `d` is anchored: the edge of the play area round the middle.
 static func edge_point(sz: Vector2, d: Vector2) -> Vector2:

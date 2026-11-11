@@ -896,13 +896,17 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		var back := edge - d * MarkerDir.ARROW_BACK
 		var wing := perp * MarkerDir.ARROW_WING
 		var tip := edge + d * MarkerDir.ARROW_TIP
-		c.draw_colored_polygon(PackedVector2Array([tip, back + wing, back - wing]), Color(0, 0, 0, 0.5))
-		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		var line := "%s  %dm" % [label, dist]
 		var lr := MarkerDir.label_rect(edge, d, TextCache.width(big, line, MarkerDir.LABEL_FS), sz)
-		_ctext(MarkerDir.label_base(lr), line, MarkerDir.LABEL_FS, col, big)
-		SafeArea.note_as("waypoint", MarkerDir.arrow_rect(edge, d))
-		SafeArea.note_as("waypoint", lr)
+		var ar := MarkerDir.arrow_rect(edge, d)
+		var under := msgs.visible and msgs.rects().any(func(r: Rect2): return r.intersects(ar) or r.intersects(lr))
+		var a := MarkerDir.UNDER_MSG_A if under else 1.0      # (a message over it: it steps back, like the lairs' boards)
+		c.draw_colored_polygon(PackedVector2Array([tip, back + wing, back - wing]), Color(0, 0, 0, 0.5 * a))
+		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), Color(col, col.a * a))
+		_ctext(MarkerDir.label_base(lr), line, MarkerDir.LABEL_FS, Color(col, col.a * a), big)
+		var grp := "waypoint_faded" if under else "waypoint"
+		SafeArea.note_as(grp, ar)
+		SafeArea.note_as(grp, lr)
 
 ## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
 ## when not; a pulsing ring while it's going.

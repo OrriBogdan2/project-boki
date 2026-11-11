@@ -97,7 +97,8 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
   uplink far off (edge marker), the last way out (alive, and dead with the "Ways out left" line), the Gate prompt,
   and out past the Blight ring. The Gate prompt names the Gate, so it has no marker. Edge markers (`MarkerDir`)
   sit right of the squad column and above the prompt row, their label kept inside the margin; the check sweeps 16
-  directions with the longest label. A marker floats over a toast for the toast's 2 s; that is not counted.
+  directions with the longest label. While a message in the lane covers a marker it fades to `MarkerDir.UNDER_MSG_A`
+  (like the lairs' name boards); the check lets a faded marker sit under the lane and nothing else.
 
 ## Looting with a full inventory
 

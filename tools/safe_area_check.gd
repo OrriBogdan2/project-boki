@@ -94,7 +94,17 @@ func _hud_at(win: Vector2i, sz: Vector2, screen: String, with_toasts := true) ->
 	SafeArea.recording = false
 	if with_toasts and not m.hud.map_open():      # (the full map hides the lane)
 		SafeArea.seen["toasts"] = m.hud.msgs.rects()
-	await _judge(screen, win, SafeArea.seen.duplicate(), sz)
+	var groups := SafeArea.seen.duplicate()
+	var faded: Array = groups.get("waypoint_faded", [])
+	groups.erase("waypoint_faded")
+	if not faded.is_empty():      # (an edge marker faded under a message: it may sit under the lane, nothing else)
+		var rest := groups.duplicate()
+		rest.erase("toasts")
+		rest["waypoint_faded"] = faded
+		var bad := SafeArea.problems(rest, sz)
+		ok(bad.is_empty(), "%dx%d %s: the faded edge marker stays in the margin, off everything but the lane %s"
+				% [win.x, win.y, screen, bad.slice(0, 4)])
+	await _judge(screen, win, groups, sz)
 
 # ------------------------------------------------------------------ the Ways Out widgets
 const WAYS_STATES := ["locked", "unlocked", "quest_racing", "uplink_far", "last_way_out", "last_way_out_dead",
@@ -102,7 +112,6 @@ const WAYS_STATES := ["locked", "unlocked", "quest_racing", "uplink_far", "last_
 const WAYS_GROUP := {"locked": "ways_strip", "unlocked": "waypoint", "quest_racing": "exit_status",
 		"uplink_far": "waypoint", "last_way_out": "ways_strip", "last_way_out_dead": "ways_line",
 		"gate_prompt": "gate_prompt", "outside_ring": "blight_line"}
-const MARKER_STATES := ["unlocked", "uplink_far"]      # a marker floats over a toast for its 2 s: not counted
 const EDGE_ANGLES := 16
 const BELT := ["vitals", "abilities", "weapon", "gear", "kin"]      # what a marker's box must stay off
 
@@ -112,8 +121,10 @@ func _ways_out() -> void:
 		var prompt: Array = []
 		for st: String in WAYS_STATES:
 			_ways_set(st)
-			await _hud_at(win, sz, "ways_" + st, st not in MARKER_STATES)
-			ok(SafeArea.seen.has(WAYS_GROUP[st]), "%dx%d ways_%s: draws its %s" % [win.x, win.y, st, WAYS_GROUP[st]])
+			await _hud_at(win, sz, "ways_" + st)
+			var g: String = WAYS_GROUP[st]
+			var drew := SafeArea.seen.has(g) or (g == "waypoint" and SafeArea.seen.has("waypoint_faded"))
+			ok(drew, "%dx%d ways_%s: draws its %s" % [win.x, win.y, st, WAYS_GROUP[st]])
 			if st == "gate_prompt":
 				prompt = SafeArea.seen["gate_prompt"] + SafeArea.seen["gate_stay"]
 		_ways_set("locked")
