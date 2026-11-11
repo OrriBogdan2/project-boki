@@ -5,7 +5,7 @@
 	"gender": "female",
 	"personality": "Malgrave's court alchemist, ordered to distil the Wyrm's blood into fire. She drank it instead, and now fire answers her bare hands.\nShe served the throne for years, and she wants it for herself. She is not mad, just certain.",
 	"weight": "heavy",
-	"body": {"size": 1.208, "head": 0.62, "legs": 1.85, "torso": 0.9, "neck": -0.02, "build": 0.82, "shoulder": 0.88, "hit_r": 0.376},
+	"body": {"size": 1.208, "head": 0.62, "legs": 1.85, "torso": 0.9, "neck": -0.02, "build": 0.82, "shoulder": 0.88, "hit_r": 0.419, "hit_h": 2.01, "body_r": 0.376},
 	"color": "#ff7a1a",
 	"clip": {"lines": {"dash": "Ram head first into the first foe.", "lmb": "Pour fire from your hand 6m ahead.", "rmb": "A cinder that slows and spreads the burn.", "e": "A heat blast drags foes in and shields you.", "x": "Fly, laying a burning lava carpet."}, "fx": {"lmb": "spray", "x": "dash"}},
 	"fantasy": "The court alchemist. Pours fire from her bare hands until foes blaze, rams them head first, and hits back harder after every knock.",
@@ -44,5 +44,13 @@
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/linwick.md:89 self-centred ring; no turn limit shown"},
 		"x": {"early": 120.0, "late": 120.0, "source": "briefs/hero-ref/linwick.md:208 and :235 the flight steers toward the cursor with a capped turn rate (the trails curve; the rate is not measured: ours 120 deg/s)"},
 		"x_recast": {"early": 120.0, "late": "free", "source": "briefs/hero-ref/linwick.md:235 'X again lands early'; on the ground he turns freely again"}
+	},
+	"src": {
+		"lmb": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] [F] [O] (owner item 11) (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

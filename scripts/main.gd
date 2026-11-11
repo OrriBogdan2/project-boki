@@ -3313,9 +3313,9 @@ func _drop_check() -> void:
 	var v1 := Vector2(P.vel.x, P.vel.z)
 	print("DCHECK separate=%s at %.1fm up: solo=%s follow=%s, velocity %s -> %s (steering %s)" % [sep, alt0, P.drop_solo, P.drop_follow, str(v0.snapped(Vector2(0.1, 0.1))), str(v1.snapped(Vector2(0.1, 0.1))), str(want.snapped(Vector2(0.01, 0.01)))])
 	if not sep or P.drop_follow != null or not P.drop_solo or v1.normalized().dot(want) < 0.7: ok = false; print("DCHECK FAIL separate")
-	# everyone lands
+	# everyone lands (ext/drop-parity: a 70 m start takes 18-22 s, so the last squads land well after you)
 	t = 0.0
-	while t < 20.0 and m.hunters.any(func(x): return x.dropping or x.riding):
+	while t < 30.0 and m.hunters.any(func(x): return x.dropping or x.riding):
 		m.step(Match.DT); t += Match.DT
 	print("DCHECK landed after %.1fs more; squad on ground %s" % [t, str(m.hunters.filter(func(x): return x.team == P.team).map(func(x): return [x.pname, x.grounded, x.pos.snapped(Vector3(1, 1, 1))]))])
 	if m.hunters.any(func(x): return x.dropping or x.riding): ok = false; print("DCHECK FAIL someone never landed")

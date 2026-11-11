@@ -22,7 +22,7 @@
 		},
 		"x": "Nightwell: from level 6, open a well at the cursor that stuns everything inside for 3.5s and draws it to the middle."
 	},
-	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.412},
+	"body": {"size": 0.9, "build": 0.65, "legs": 1.8, "hit_r": 0.434, "hit_h": 2.217, "body_r": 0.412},
 	"signature": "tether_lantern",
 	"no_hold": true,
 	"resource": {
@@ -61,6 +61,7 @@
 		"time_swollen": 1.25,
 		"radius": 1.5,
 		"ally_shield": 26.0,
+		"ally_shield_t": 3.0,
 		"ally_r": 3.0,
 		"desc": "Hold Shift to see both ends, let go (or tap) to lob a lantern to the cursor, up to 12m (past that, at 12m toward it), over ground, walls or the abyss. You hover at your height until it lands, even over the abyss, drifting at 68% speed, with a sigil marking each end. 1.8s later you are there, keeping your height, and everyone in its 1.5m circle (foes, allies and Boki) is sent to where you are when it lands, each keeping its place in the circle. Swollen: 1.25s.",
 		"lob": 4.5,
@@ -122,7 +123,7 @@
 		"dmg_max_k": 3.5,
 		"burn": 8.2,
 		"burn_every": 0.5,
-		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. Left unpopped 10s at full size, it fizzles out harmlessly. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
+		"desc": "Drop a seed up to 9m away at the cursor (on ground, short of walls). It swells for 6.5s up to 3.2m wide, a light column rising when it is nearly full, and waits there for you: press E again (from 0.3s) to pop it. It stays at full size until you pop it. Damage 12.5 up to 3.5 times that by how long it grew. Swollen: larger and quicker.",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -132,14 +133,13 @@
 		"grow_swollen_k": 0.75,
 		"min_recast": 0.3,
 		"drop": 0.25,
-		"tell_k": 0.68,
-		"hold_full": 10.0
+		"tell_k": 0.68
 	},
 	"x": {
 		"name": "Nightwell",
 		"short": "Well",
 		"icon": "blaze_mantle",
-		"col": "#b06bff",
+		"col": "#2ee6c0",
 		"cooldown": 70.0,
 		"range": 10.0,
 		"tell": 1.0,
@@ -179,5 +179,13 @@
 		"e": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:97 placed at the cursor; no turn limit shown"},
 		"e_recast": {"early": "free", "late": "free", "source": "briefs/hero-ref/ostra.md:19 recast detonates; no turn limit shown"},
 		"x": {"early": "free", "late": "locked", "source": "briefs/hero-ref/ostra.md:224-229 a hand thrust, then tendrils reach from him to the dome through the 1.0 s telegraph: held toward it; 'acting freely' once it opens (ult_0050, :248)"}
+	},
+	"src": {
+		"lmb": "[D] [O] (owner items 60, data overruled) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] [O] (owner item 40) (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

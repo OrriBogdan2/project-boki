@@ -344,8 +344,6 @@ func empowered_k() -> float:
 func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "arc_bolts":
 		return false
-	if KinMerge.active(h):
-		return true
 	if held and not _fire_was:
 		bolt_buf = float(h.wpn.get("rate", 0.45))
 	else:

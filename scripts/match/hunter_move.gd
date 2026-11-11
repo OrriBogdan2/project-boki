@@ -220,7 +220,7 @@ static func push_out_walls(h: Hunter, p: Vector2) -> Vector3:
 		var wt := Verbs.wall_top(w, h.pos.y)
 		if wt <= 0.0:
 			continue
-		var reach := Verbs.wall_reach(w, h.r)
+		var reach := Verbs.wall_reach(w, h.hull_r())
 		var c := Geometry2D.get_closest_point_to_segment(p, w["a"], w["b"])
 		var d := p - c
 		if d.length_squared() >= reach * reach:

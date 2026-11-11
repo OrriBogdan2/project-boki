@@ -29,8 +29,8 @@ const KNOCK_MIN := 2.5       # m/s (after mass and resist): a shove this fast is
 
 ## What a hit's options carry beyond the fixed hit fields (Match.net_send_hit), so a knock on a body another
 ## game owns lands the same there: its wall-slam stun, steer, weight, diminishing returns, burn time, slow
-## strength and Blight. Numbers only (heavy and dr travel as 1).
-const HIT_EXTRAS := ["kbi", "wallstun", "heavy", "dr", "slow_k", "burn_for", "blight"]
+## strength, Blight and a Riposte's straight-to-the-deathbox knock. Numbers only (heavy, dr and box travel as 1).
+const HIT_EXTRAS := ["kbi", "wallstun", "heavy", "dr", "slow_k", "burn_for", "blight", "box"]
 
 ## Tests read what would go out over Net without a connection.
 static var capture := false
@@ -188,8 +188,8 @@ func _step(rec: Dictionary, e: Ent, dt: float) -> String:
 func _toward(e: Ent, dir: Vector2, step: float) -> String:
 	var nx := e.pos.x + dir.x * step
 	var nz := e.pos.z + dir.y * step
-	var bx: float = m.world.occupy(nx, e.pos.z, e.r, e.pos.y, false)
-	var bz: float = m.world.occupy(e.pos.x, nz, e.r, e.pos.y, false)
+	var bx: float = m.world.occupy(nx, e.pos.z, e.hull_r(), e.pos.y, false)
+	var bz: float = m.world.occupy(e.pos.x, nz, e.hull_r(), e.pos.y, false)
 	if bx == 0.0: e.pos.x = nx
 	if bz == 0.0: e.pos.z = nz
 	return "walled" if bx != 0.0 and bz != 0.0 else ""
@@ -223,7 +223,7 @@ func _drag(rec: Dictionary, fe: Ent, dir: Vector2, dist: float) -> float:
 		var nx := fe.pos.x + dir.x * s
 		var nz := fe.pos.z + dir.y * s
 		var gy: float = W.ground_at(nx, nz)
-		if not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.r, fe.pos.y) > 0.0:
+		if not W.dyn_walls.is_empty() and Verbs.wall_blocks(W.dyn_walls, nx, nz, fe.hull_r(), fe.pos.y) > 0.0:
 			break
 		var face: float = W.ground_at(nx + dir.x * fe.r, nz + dir.y * fe.r)
 		# a body already falling into the abyss isn't saved
@@ -231,7 +231,7 @@ func _drag(rec: Dictionary, fe: Ent, dir: Vector2, dist: float) -> float:
 		if standing and face > World.VOID + 1.0 and face - fe.pos.y > CLIFF:
 			fe.pos.y = face + 0.5          # hauled up a cliff face
 			fe.vel.y = maxf(fe.vel.y, 5.0)
-		if W.occupy(nx, nz, fe.r, fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
+		if W.occupy(nx, nz, fe.hull_r(), fe.pos.y, false) != 0.0 and gy > World.VOID + 1.0:
 			# a rock or a prop in the way: haul the body up and over it to the first clear spot beyond
 			var k := _over(fe, dir, W, s)
 			if k <= 0.0:
@@ -255,7 +255,7 @@ func _over(fe: Ent, dir: Vector2, W: World, from: float) -> float:
 		var qy: float = W.ground_at(qx, qz)
 		if qy - fe.pos.y > CLIFF:
 			return 0.0
-		if W.occupy(qx, qz, fe.r, maxf(fe.pos.y, qy), false) == 0.0:
+		if W.occupy(qx, qz, fe.hull_r(), maxf(fe.pos.y, qy), false) == 0.0:
 			fe.pos = Vector3(qx, maxf(fe.pos.y, qy) + 0.5, qz)
 			fe.vel.y = maxf(fe.vel.y, 5.0)
 			return k
@@ -314,7 +314,7 @@ static func apply_hit_extra(o: Dictionary, x) -> void:
 		return
 	for k in HIT_EXTRAS:
 		if (x as Dictionary).has(k):
-			o[k] = float(x[k]) if k not in ["heavy", "dr"] else float(x[k]) > 0.0
+			o[k] = float(x[k]) if k not in ["heavy", "dr", "box"] else float(x[k]) > 0.0
 func _send(x: Array) -> void:
 	var e := ["disp"] + x
 	if capture:

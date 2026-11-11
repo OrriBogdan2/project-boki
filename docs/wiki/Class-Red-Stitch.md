@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Hawk Sense (passive).** Rivals under half health are seen through cover within 22m. A jump while facing a wall up to twice your height climbs it, no extra key.
 
-**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
+**Spirit Walk (dash, Shift, 9.5s cooldown).** A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and ledge faces don't stop you (you pass a ledge at your own height; walking off one still drops you); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.
 
 **Heavy Shot (RMB, 16s cooldown).**
 

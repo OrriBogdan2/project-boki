@@ -115,7 +115,7 @@ static func tick(h: Hunter, dt: float) -> void:
 			if h.drink_t <= 0.0:
 				h.drink_t = 0.0
 				if UtilityBelt.take(h, "tonic", 1) > 0:
-					h.heal(channel("tonic", "heal") * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
+					h.heal(channel("tonic", "heal") * (1.0 + h.gear_stat("tonic")))
 					h.m.sfx("heal", h.pos, -2.0)
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("8ff0a0"), 14, 2.5, 0.5, -3.0)
 	if h.kit_t > 0.0:

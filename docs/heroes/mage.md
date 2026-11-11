@@ -15,7 +15,7 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal and h
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
 bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
 source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
-bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
+bolts, ours 1.7); Wirerun pass 20 (1.7 bolts; was 10 before the audit), doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
 source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because
@@ -33,6 +33,20 @@ upgrade in our kit (the source's R: +50% impact damage -7.5s, then -7.5s; our X 
 | RMB Storm Rod | +20% damage, -1s x2; tier IV +50% damage | 7.2s / 6.4s, damage +15% / +30%, then x1.5 on top (x1.95) | 7.2s / 6.4s, damage +20% / +90% (+40%, +50% on top) |
 | Shift Wirerun | -0.75s x2; tier IV +100% non-passive dash damage | 7.2s / 6.4s, damage +15% / +30% on the Blowout and run | 7.3s / 6.7s; no shared damage step; the run's own hit x2 at 3 (Blowout unchanged) |
 | E Skycall | +25% x2; tier IV -3s | 9.5s / 5.4s (3s off the shared 8.4s), damage +15% / +30% | 10.5s / 7.9s (a quarter off, the source's 3 of 12), damage +25% / +50% |
+## Ranks: tier table (source: Joule)
+On level-up the player picks the slot to rank (bots follow `order`); rank 3 is the max and folds the source's tiers III
+and IV together, as docs/heroes/bulwark.md does. [D] game data (supervive_kits.md, `Upg:` lines), [S] the hero sheet.
+Cooldown and damage steps live in `rank_cd` / `rank_dmg` in the JSON (the shared -10% / +15% step no longer
+applies); cooldown cuts keep the source's fraction of its own cooldown; damage steps add up. LMB and the passive take no
+ranks in the source or ours. R is left to decision 0022.
+
+| Slot | [D] tier II | [D] tier III | [D] tier IV | Ours rank 2 | Ours rank 3 (III + IV, the max) | Max bonus in code |
+|---|---|---|---|---|---|---|
+| LMB bolt | none | none | none | - | - | - |
+| RMB Storm Rod (8s; [D] 10s) | +20% damage, -1s | +20% damage, -1s | +50% damage | 7.2s, damage +20% | 6.4s, damage +90% (+40%, then +50%) | `rank_dmg.sec` |
+| Shift Wirerun (8s; [D] 9s) | -0.75s | -0.75s | +100% non-passive dash damage | 7.3s | 6.7s; the run's own hit x2 (the Blowout does not grow) | `dash.rank3_mult` (`run_rank_k`) |
+| E Skycall (10.5s; [D] 12s) | +25% damage | +25% damage | -3s cooldown | 10.5s, damage +25% | 7.9s (a quarter off: 3 of 12), damage +50% | `rank_cd.kin` |
+| Passive Static | none | none | none | - | - | - |
 
 ## Parity pass (owner 18:45: animation and ability parity, LMB first)
 Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md at 5 fps. Asserted in `--mage-combo-check`
@@ -47,7 +61,7 @@ Source vs ours per slot; [data] = the game data, [footage] = hero-ref/vireo.md a
 | RMB spear | hold, summoned spear by the shoulder, body flash at full, overarm throw; fixed lane [footage] | Storm Rod: the same beats, fixed 13 m lane | matches |
 | E Lightning Strike | place, then pick the pull direction; 0.8 s countdown; Grounded slide [footage] | Skycall: place, hold and drag, release (audit: was a 0.3 s flick), 0.8 s countdown, slide and Grounded 1.5 s | matches |
 | Shift Surge | hold crouch, a streak at a constant ~32 m/s (ours: 40 m/s, owner item 70), an arrival burst [footage] | Wirerun: the same; **the arrival ring and spark spray and the press flash are gone** (owner: no rings or bursts on dashes; the hits are along the way), a dust puff instead | owner rule over footage |
-| X Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
+| R Eye of the Storm | launch, hang, reactivate to crash at the cursor [footage] | Kitefall: the same | matches |
 
 ## Footage gaps, Nov 9 re-check
 The ranked gap list of briefs/hero-ref/vireo.md (section 5, rows 1 to 17) against main d255acbee. Status: closed (code or
@@ -96,21 +110,24 @@ reason. Asserts: `--mage-combo-check` (`Skycall ...`, `small: ...`, `Kitefall (d
 | Shift pass damage 10 vs ~20 (MED) | (b) | 20 (1.7 bolts, the data's ratio); asserted |
 | LMB pierce invented (MED) | (b) | removed; a bolt stops on the first foe (asserted) |
 | LMB cadence / aim / anim (-) | (a) | parity f99f03c7 |
-| Dash -> LMB / X rows (MED) | (a) | a10d678a (buffer, with source text) |
+| Dash -> LMB / R rows (MED) | (a) | a10d678a (buffer, with source text) |
 | Shift input / feel, Shift reset (-) | (a) | matches the owner; the orb-reset question is closed (owner rule: only a full-Static foe resets) |
 | Passive: reset cue on Live, knock heal (LOW) | (b) | the misleading reset cue and the knock heal are gone |
-| RMB / E / X self-shake (LOW/MED) | (c) | ext/no-shake owns item 50 |
-| X Static spread (MED) | (b) | the highest Static among the foes the strike hits goes to every foe it hits, then the ult's own stack (owner item 72); asserted |
+| RMB / E / R self-shake (LOW/MED) | (c) | ext/no-shake owns item 50 |
+| R Static spread (MED) | (b) | the highest Static among the foes the strike hits goes to every foe it hits, then the ult's own stack (owner item 72); asserted |
 
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |
 |---|---|---|---|---|---|---|
 | LMB Coilcaster (finger gun) | hold, 0.8s per bolt | max range (13 m) past the cursor, `"aim": "max"` | a jagged bolt from the fingertip, left hand then right; stops on the first foe (data); 1 Static per hit | a thin line through the cursor to full range with an arrow tick (always up) | `mage_lmb_l` / `mage_lmb_r`: twist, arm flung out, snap, settle | `vv_bolt` |
 | RMB Storm Rod | hold, release (full at 1.0s, throws itself at 1.2s, 0.33s minimum) | max range, a fixed 13 m lane | summons a copper rod; the throw knocks the first foe back about 1 bh (stun on a wall or another foe), 1 Static, leaves a charge orb at the impact at once | double-rail lane with chevrons for the whole hold; cursor charge ring; a white body flash and flare at full | `mage_rmb_hold` (rod by the shoulder), `mage_rmb` (overarm) | `vv_rod_summon`, `vv_rod_full`, `vv_rod_throw` |
-| Shift Wirerun | hold, release (full at 0.6s, auto at 0.9s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that carries the drift; every foe crossed takes 10, a 4-Static foe takes double and Blowout, Wirerun back at once (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); air press with no charge: `mage_dash_ex` tumble | `vv_surge_charge`, `vv_surge_go` |
+| Shift Wirerun | hold, release (full at 0.6s, auto at 0.9s) | direction from the cursor, length from the charge only | the charge is spent on the press; while held you can't steer, you keep your height and your momentum drifts you; release: a lightning streak (shots pass through) that carries the drift; every foe crossed takes 20, a 4-Static foe takes double and Blowout, Wirerun back at once; a run that came back (Blowout or orb, used within 5s) goes 1.5x further and charges in 0.45s (the only early reset) | rails to max range, a big ticked end ring with a star sliding out (everyone sees the ring); cursor charge ring | `mage_dash` (crouch), `mage_dash_go` (stretched streak), `mage_dash_land` (re-form, overshoot); air press with no charge: `mage_dash_ex` tumble | `vv_surge_charge`, `vv_surge_go` |
 | E Skycall | press, hold and drag, release (data) | at the cursor (11 m) | drops a circle; while E is held (up to 1 s) the drag follows the cursor from the circle (toward you pulls in, away throws out; a tap = away); the release commits it, then 0.8s countdown; lightning: 20, 1 Static (data), everyone inside slid about 3.4 m along the ground that way (peak 6.2 m/s, easing to a stop over 1.1 s) and Grounded 1.5s; flings orbs (steals a rival's) | ticked circle with a rim chevron + a drag arrow during the flick; then a dark violet disc with a crackling copper rim and a narrowing pillar (everyone sees it) | `mage_e` (one-arm sweep, snap down) | `vv_sky_place`, `vv_sky_count`, `vv_sky_strike` |
 | Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
-| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| R Kitefall (ultimate, level 6) | press, then press again (R or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
+| X | | | Fuse with your Boki (the Boki system's key, see below) | | | |
+| Passive Static | | | hits add Static (4 max, 4.5s); a marker over the head shows pips and the count, with sparks on the body that grow per stack; the 4th calls a sky bolt (Live); the data passive text says a knock heals 15%, but `on_knock` only blows gum: that heal is removed (audit) | marker, sky bolt, arcs to the ground while Live | `mage_live` (finger flicked to the sky) | `vv_static_full`, `hero_blowout` |
+| X Kitefall (ultimate, level 6) | press, then press again (X or LMB) | the cursor, clamped inside a 14.4 m (8 bh) ring round the take-off | a 0.3 s crouch, then straight up 5 m and hangs invulnerable (shots pass through, no damage) up to 1.7 s, the camera pulled back; the second press (from 0.25 s into the hang) or the hover running out strikes down at the cursor in 0.2 s: 22, a knockback (about 1 bh), 1 Static to everyone within 2.7 m (if any has Static, all take the highest count among them first); landing on an enemy hunter fills the Boki bond; she is free to attack at once; 42 s cooldown | a gold range ring with ticks round the take-off (everyone sees it) over a dark violet disc with a gold rim, gold crackle on the rim; a small gold crown (ticked ring and star) at the landing spot (hers); a filled gold landing circle for 0.2 s before the strike (everyone); then a sky-to-ground gold pillar, two shock rings, a spark spray, and copper-gold crackle at her feet for 0.5 s | `mage_x` (crouch, squash), `mage_x_air` (stretched up, then arms flung wide), `mage_x_dive` (head first, fists down), `mage_x_land` (one knee and a fist, up into the stance) | `vv_ult_rise`, `vv_ult_hum`, `vv_ult_slam` |
 | R / T | | | the Boki Merge (the Boki system's key, see below) | | | |
 
 Charge orb: hovers 4s and adds Static to nobody (owner item 74). Walking over it, a Wirerun through it, or Skycall dragging it toward her within 9 m (it flies to her), picks it up and gives Wirerun back (owner items 71/74); any other Skycall fling is 6 m.
@@ -197,9 +214,9 @@ Asserted by the `Kitefall move` / `Kitefall end` / `Kitefall abyss` / `Kitefall 
 | Abyss | no cast over the void; a cursor over it (or in a wall) backs off toward the take-off to the nearest ground | ours ([F] silent) |
 
 ## Ultimate choice
-X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
-reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no
-slot changes. R reloads and the Boki Merge is on its own key (T by default).
+R is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
+reference sheet's "Ultimate (on R)" section. It was never folded into another slot during the kit pass, so no
+slot changes. Fuse is on X.
 
 ## Engine notes
 - Kit `scripts/arch/kits/mage_kit.gd`; pooled looks `scripts/arch/kits/vv_fx.gd` + `shaders/vv_fx.gdshader`;
@@ -207,7 +224,7 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
   coil `scripts/match/hero_arms_vv.gd`; sounds `tools/gen_sfx_ryzz.py` listed in `VVSfx.NAMES` and content/sfx/mage.json.
 - Telegraphs and cursor states through AimKit (docs/AIMKIT.md). No Net change.
 - Kitefall: `scripts/arch/kits/mage_ult.gd` (MageUlt), on the shared ult base `scripts/arch/hero_ult.gd` (HeroUlt: the
-  cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). X reaches
+  cooldown in `cd["x"]`, the recast, one bond id per cast, KinBond.from_ult on a land). R reaches
   it through main's HunterKeys.ult_pressed (the level gate) and `MageKit.cast_ult()`; numbers in `mage.json` `x`.
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
   Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
