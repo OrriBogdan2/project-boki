@@ -13,7 +13,8 @@ extends RefCounted
 ##   strike: the heel lands this far ahead of the hip; hip [strike, flat, lift]: hip height over the ground at the
 ##   strike, with the foot flat (FLAT_U of the stance) and from the push-off on (RISE_U; the boot has no ankle, so
 ##   the body rises onto the toe to push off and comes down again in the air); swing: how high the swinging foot's
-##   arc goes (it kicks up fast behind, so the leg can reach it as the body moves on).
+##   arc goes (it kicks up fast behind, so the leg can reach it as the body moves on); crouch: how far all those hip
+##   heights come down crouched (the planted legs are solved with the bend in them, so a crouched foot stays put).
 
 const THIGH := Vector3(0.0, -FootPlant.KNEE, 0.0)
 const SOLE: Array = FootPlant.SOLE
@@ -64,6 +65,8 @@ var _stance := 0.37
 var _strike := -0.08
 var _hip: Array = [0.43, 0.445, 0.485]
 var _swing := 0.1
+var _crouch := 0.07          # m: the hips this much lower at a full crouch
+var _down := 0.0             # m: the hips' crouch drop this frame
 var _splay := 0.03           # m: the foot lands this far out from under the hip
 var _clock := 0.0
 var _was_on := false
@@ -83,6 +86,7 @@ func _init(legs_node: Node3D, gait: Dictionary) -> void:
 	_strike = float(gait.get("strike", _strike))
 	_hip = gait.get("hip", _hip)
 	_swing = float(gait.get("swing", _swing))
+	_crouch = float(gait.get("crouch", _crouch))
 	_splay = FootPlant.HIP * sin(float(gait.get("width", 0.1)) * 0.6)
 	_hold_reach = _hip_h(0.0)
 	for leg in [left, right]:
@@ -96,11 +100,12 @@ func _hip_h(u: float) -> float:
 	return lerpf(float(_hip[1]), float(_hip[2]), smoothstep(FLAT_U, RISE_U, u))
 
 ## Advances the legs a frame: `on` while the feet have ground under them, `moving` as HunterAnim sees it, `vel` the
-## body's world velocity, `own` HunterAnim's own legs [hl, hr, kl, kr, wl, wr] these blend over. Reads the legs'
-## world transform (last frame's hips).
-func step(dt: float, on: bool, moving: bool, vel: Vector3, own: Array) -> void:
+## body's world velocity, `own` HunterAnim's own legs [hl, hr, kl, kr, wl, wr] these blend over, `crouch` 0..1.
+## Reads the legs' world transform (last frame's hips).
+func step(dt: float, on: bool, moving: bool, vel: Vector3, own: Array, crouch: float) -> void:
 	_clock += dt
 	landed = false
+	_down = _crouch * crouch
 	var rate := ON_RATE if on else OFF_RATE
 	gait_k = move_toward(gait_k, 1.0 if on else 0.0, dt * rate)
 	_move_k = move_toward(_move_k, 1.0 if moving else 0.0, dt * MOVE_RATE)
@@ -123,7 +128,7 @@ func step(dt: float, on: bool, moving: bool, vel: Vector3, own: Array) -> void:
 				_fly_from = _hold_reach
 				_fly_len = maxf(left_fly, dt)
 			var f := clampf(1.0 - left_fly / _fly_len, 0.0, 1.0)
-			_hold_reach = lerpf(_fly_from, _hip_h(0.0 if dir > 0.0 else 1.0), f * f * (3.0 - 2.0 * f))
+			_hold_reach = lerpf(_fly_from, _hip_h(0.0 if dir > 0.0 else 1.0) - _down, f * f * (3.0 - 2.0 * f))
 			_hip_now = _hold_reach
 		else:
 			_fly_len = 0.0
@@ -184,7 +189,7 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 	var a := inv * leg.anchor
 	leg.u = (a.z - _strike) / _stance
 	var target := Vector3(a.x, 0.0, a.z)
-	var hip_h := lerpf(float(_hip[1]), _hip_h(leg.u), _move_k)      # standing: the flat-footed height
+	var hip_h := lerpf(float(_hip[1]), _hip_h(leg.u), _move_k) - _down      # standing: the flat-footed height
 	while _too_far(leg, a, hip_h) and leg.contact < SOLE.size() - 1:
 		leg.contact += 1      # the heel comes up: the boot rolls on to the next sole point
 	var done := (dir > 0.0 and leg.u >= 1.0) or (dir < 0.0 and leg.u <= 0.0)
@@ -230,6 +235,7 @@ static func dir_of(xf: Transform3D, vel: Vector3) -> float:
 func _swing_frame(leg: Leg, dt: float, dir: float, xf: Transform3D, inv: Transform3D, vel: Vector3) -> void:
 	leg.swing_t += dt
 	var w := clampf(leg.swing_t / leg.swing_dur, 0.0, 1.0)
+	var late := maxf(leg.swing_t / leg.swing_dur - 1.0, 0.0)      # the landing frame's overshoot past the swing
 	var land_z := _strike if dir > 0.0 else _strike + _stance
 	var land := Vector2(leg.pivot.x + leg.side * _splay, lerpf(STAND_Z, land_z, _move_k))
 	var brake := LAND_T / leg.swing_dur
@@ -238,6 +244,7 @@ func _swing_frame(leg: Leg, dt: float, dir: float, xf: Transform3D, inv: Transfo
 	var s := (1.0 + over) * smoothstep(0.0, 1.0 - brake, w)
 	if w > 1.0 - brake:
 		s = 1.0 + over - pace / (2.0 * brake) * (w - 1.0 + brake) * (w - 1.0 + brake)
+	s -= pace * late      # still against the ground through the overshoot, not carried a frame with the body
 	var at := Vector2(lerpf(leg.from.x, land.x, smoothstep(0.0, 1.0, w)), lerpf(leg.from.y, land.y, s))
 	var arc := _swing * lerpf(STAND_LIFT, 1.0, _move_k) * sin(PI * pow(w, lerpf(1.0, KICK, _move_k)))
 	var depth := _hip_now - arc
