@@ -203,6 +203,7 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	await _check_gear_reveal(P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -275,6 +276,32 @@ func _check_deny(P: Hunter) -> void:
 		"E on cooldown pressed mid-dash stays buffered through DashFlow.BUFFER_S and raises no deny")
 	P.stun_t = 0.0
 	flow.held.clear()
+
+## 8. Empty gear slots stay hidden: only filled ones are drawn (the belt shows all its slots, BeltHud); holding
+## the info key shows all the gear slots and one plain line per item.
+func _check_gear_reveal(P: Hunter) -> void:
+	var hud = P.m.hud
+	P.gear = Gear.empty_slots()
+	P.belt = UtilityBelt.empty()
+	await hud.panels.draw
+	await main.get_tree().process_frame
+	var spots := func(prefix: String) -> int:
+		return hud.hover_spots.filter(func(x): return String(x[1]).begins_with(prefix)).size()
+	ok(spots.call("gslot:") == 0, "a new hunter: no gear slots drawn")
+	var armor: String = Gear.ids_for(2)[0]
+	P.gear[2] = {"id": armor, "rar": 0}
+	await hud.panels.draw
+	await main.get_tree().process_frame
+	ok(GearPanel.shown(P) == [2] and spots.call("gslot:") == 1, "one armor piece: only the armor slot is drawn")
+	Input.action_press("scores")
+	var held := GearPanel.shown(P).size() == Gear.SLOTS.size()
+	var line := GearPanel._card_line(P, 2)
+	var empty_line := GearPanel._card_line(P, 0)
+	Input.action_release("scores")
+	ok(held and line.contains(Gear.desc_of(armor, 0)) and empty_line == "Glove 1: empty",
+		"holding the info key: every gear slot and a plain line per item ('%s' / '%s')" % [line, empty_line])
+	P.gear = Gear.empty_slots()
+	P.belt = UtilityBelt.empty()
 
 ## What the last frame drew on this hunter's plate (HudPlate.shown), or {} if nothing.
 func _shown(hud, h: Hunter) -> Dictionary:
