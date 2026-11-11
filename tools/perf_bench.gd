@@ -1,11 +1,14 @@
 extends RefCounted
 ## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then a farm run. Every frame is
+## on the map, a fight: two rivals and a monster pack brought to you), then a farm run and a hub run. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
+##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
+##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -13,10 +16,17 @@ const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fil
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
+const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
+const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
+const LIFE_STEPS := 100          # 10 Hz base_life steps timed for the script line (10 s of base life)
+const NavCheck := preload("res://tools/garden_nav_check.gd")
+
 var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var zone := ""
+var failed := false      # a budget line said FAIL: the exit code carries it
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -29,6 +39,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-zone="): zone = a.substr(13)
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -37,13 +48,18 @@ func run(main_node: Node) -> void:
 	RenderingServer.viewport_set_measure_render_time(vp, true)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
 	await _match()
-	await _farm()
+	await _farm("farm", {})
+	await _farm("hub", {"zone": GardenZones.HUB})
+	var zones: Array = [zone] if zone != "" else []
+	if zone == "all": zones = GardenZones.built()
+	for id in zones:
+		await _zone(id)
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
-	main.get_tree().quit()
+	main.get_tree().quit(1 if failed else 0)
 
 func _match() -> void:
 	var o := Match.demo_opts()
@@ -115,10 +131,21 @@ func _bring_fight(m: Match) -> void:
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
-func _farm() -> void:
-	Game.goto("home")
+func _farm(part: String, params: Dictionary) -> void:
+	if part == "hub": Content.rules("farm_build")["base_mode"] = true      # the hub only exists in base mode
+	var was = main.current
+	Game.goto("home", params)
+	while main.current == was or main.current.get("root_ui") == null or main.fade.covered:
+		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
+	await _frames(part)
+	if part == "hub":      # same scene, horizon hidden: the islands' own cost (GARDEN 10.7 step 9)
+		for n in Game.main.current.get_children():
+			if String(n.name).begins_with("Horizon_"): n.visible = false
+		await _frames("hub_bare")
+
+func _frames(part: String) -> void:
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0
@@ -127,10 +154,75 @@ func _farm() -> void:
 		var now := Time.get_ticks_usec()
 		var wall := (now - last) / 1000.0
 		last = now
-		fl.append(_frame("farm", fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
+		fl.append(_frame(part, fl.size(), wall, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0))
 		t += DT
-	_summary("farm", fl)
+	_summary(part, fl)
 	_meshes()
+	if part != "farm" and part != "hub_bare":
+		await _budget(part, fl)
+
+## A garden zone with nine Boki out (GARDEN.md 10.6: 6 residents, the partner, 2 visitors), as a farm part.
+func _zone(id: String) -> void:
+	var nav := NavCheck.new()
+	nav.main = main
+	nav.zone = "" if id == GardenZones.start() else id
+	FarmUnlocks.rules()["base_mode"] = true
+	nav._save()
+	for i in BOKI_OUT - Save.d["roster"].size():
+		var rec := Save.new_kin(VISITORS[i % VISITORS.size()], "V%d" % i)
+		Care.ensure(rec)
+		rec["zone"] = id
+		Save.d["roster"].append(rec)
+	await _farm("zone_" + id, {"zone": id})
+
+## A part against GARDEN.md 10.6 (the hub against its own column). Draws and objects are the scene itself: the
+## screen UI (a quarter to a half of a frame's draws, the same in every scene) is hidden for a few frames and
+## read then. Nodes and the emitting particle systems are the whole tree's; the frame is the average of the run;
+## base_life is the cost of one 10 Hz step with every Boki out, timed apart from the frame.
+func _budget(part: String, fl: Array) -> void:
+	var B: Dictionary = GardenZones.rules()["budget_hub" if part == "hub" else "budget"]
+	var emit := 0
+	for cls in ["GPUParticles3D", "CPUParticles3D"]:
+		var all := main.get_tree().root.find_children("*", cls, true, false)
+		emit += all.filter(func(n): return n.emitting and n.is_visible_in_tree()).size()
+	var home = main.current
+	home.root_ui.visible = false
+	for cl in home.find_children("*", "CanvasLayer", true, false):
+		cl.visible = false
+	for i in 8:
+		await main.get_tree().process_frame
+	var got := {"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+		"objects": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
+		"nodes": _peak(fl, "nodes"), "emitters": emit, "frame_ms": _avg(fl, "wall"), "base_life_ms": _life_ms(home)}
+	if Settings.quality() == "low": B = B.merged({"frame_ms": B["frame_ms_low"]}, true)
+	print("BENCH %s boki out: %d, draws with the UI: %.0f" % [part, home.kins.size(), _avg(fl, "draws")])
+	var held: Dictionary = GardenZones.rules()["ratchet"].get(Settings.quality(), {}).get(part, {})
+	var bad := false
+	for k in got:
+		var over: bool = float(got[k]) > float(B[k])
+		var limit: float = float(held.get(k, B[k]))      # a measured ceiling stands in until the target is met
+		var good: bool = float(got[k]) <= limit
+		bad = bad or not good
+		var verdict := "ok"
+		if not good: verdict = "FAIL (past the held %.1f)" % limit
+		elif over: verdict = "over target, held at %.1f" % limit
+		print("BENCH budget %s %s: %.2f of %.1f %s" % [part, k, got[k], B[k], verdict])
+	failed = failed or bad
+	print("BENCH budget %s: %s" % [part, "FAIL" if bad else "ok"])
+
+## ms per 10 Hz BaseLife step with the home's Boki out (0 where the home has no base life, like the hub).
+func _life_ms(home) -> float:
+	if home.life == null:
+		return 0.0
+	var t0 := Time.get_ticks_usec()
+	for i in LIFE_STEPS:
+		home.life.step(1.0 / 10.0)
+	return (Time.get_ticks_usec() - t0) / 1000.0 / LIFE_STEPS
+
+func _peak(fl: Array, key: String) -> float:
+	var m := 0.0
+	for f in fl: m = maxf(m, float(f[key]))
+	return m
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,

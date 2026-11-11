@@ -41,5 +41,7 @@
 	"gems_win": 4,
 	"gems_ran": 1,
 	"gems_doc": "Gems to you when your backed Boki wins, or for any other bout.",
-	"card_s": 6.0
+	"card_s": 6.0,
+	"spots": {"cinderstep": [38.5, 30.5]},
+	"spots_doc": "A zone's own stump (GardenZones.here): where it stands, tiles x and z. It needs no Training post; the zone's scatter keeps clear of it."
 }

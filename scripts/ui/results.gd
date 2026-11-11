@@ -97,7 +97,7 @@ func show_result(r: Dictionary) -> void:
 			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
 			if not to_box.is_empty():
 				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
-					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm().size(), KinBox.farm_cap()]], Color("cdb8ff")))
+					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
 	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
 	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
 	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()

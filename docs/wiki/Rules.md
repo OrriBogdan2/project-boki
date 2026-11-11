@@ -154,6 +154,9 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
 | train | {"great": 2, "good": 1, "dojo": 1, "happy_at": 60.0, "happy_mult": 1.25, "min_food": 12.0, "food": 6.0, "joy_great": 4.0, "joy_else": -2.0} |
 | train_doc | The Training post's solo lap (base_race.gd solo): Speed points per cheer grade (a miss is 0), +dojo per cheer that was not a miss with a Dojo built, x happy_mult at joy >= happy_at; the Boki needs min_food Full to start and spends food and the race's energy; joy moves by joy_great with any great cheer, else joy_else. Capped by level (Care.stat_cap). |
+| twists | [{"id": "sprint", "name": "Sprint week", "note": "Straights are quicker", "mult": {"straight": 1.3}}, {"id": "mud", "name": "Mud week", "note": "The climb is heavy going", "mult": {"climb": 0.8}}, {"id": "high_tide", "name": "High tide", "note": "The water runs deep and slow", "mult": {"water": 0.75}}, {"id": "gusty", "name": "Gusty week", "note": "Jumps carry further", "mult": {"jump": 1.3}}, {"id": "wild", "name": "Wild week", "note": "Anyone can win: wobble doubles", "wobble": 0.2}] |
+| twists_doc | This week's rule, picked by the real week number (unix days / 7) mod the list, no server. 'mult' multiplies everyone's pace on that stretch kind; 'wobble' replaces the usual wobble. |
+| week_s | 604800 |
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
 
@@ -239,6 +242,8 @@ Stump Shove, the Boki base's second minigame (briefs/design/GARDEN.md section 5.
 | gems_ran | 1 |
 | gems_doc | Gems to you when your backed Boki wins, or for any other bout. |
 | card_s | 6 |
+| spots | {"cinderstep": [38.5, 30.5]} |
+| spots_doc | A zone's own stump (GardenZones.here): where it stands, tiles x and z. It needs no Training post; the zone's scatter keeps clear of it. |
 
 ## base_volley (`content/rules/base_volley.json`)
 
@@ -277,6 +282,8 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | gems_ran | 1 |
 | gems_doc | Gems to you when your backed Boki wins, or for any other match. |
 | card_s | 6 |
+| courts | {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}} |
+| courts_doc | A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post. |
 
 ## boki_lines (`content/rules/boki_lines.json`)
 
@@ -520,8 +527,36 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 | hour_s | 12.5 |
 | say | {"pet": "%s loved the scratches: trust up", "food": "%s loves %s: trust up", "win": "%s won with you: trust up"} |
 | default_food | kibble |
-| food_by_element | {"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap", "lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint", "spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"} |
+| food_by_element | {"ember": "emberberry", "frost": "frostdrop", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "pebblenut", "gravity": "ironcrisp", "titan": "scalepepper", "shadow": "duskplum", "lunar": "mindmint", "venom": "pricklepear", "echo": "chimebun", "prism": "geodecandy", "spore": "glowcap", "swarm": "sapjelly", "tempest": "tonicbrew"} |
 | _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
+
+## garden_zones (`content/rules/garden_zones.json`)
+
+The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).
+
+| Setting | Value |
+|---|---|
+| start | bramblebank |
+| start_doc | The zone open from the start and the home of every Boki in an older save. |
+| lean_key | 12 |
+| lean_key_doc | Lean points (of Evo.LEAN_FULL 24) a Boki needs in one of a zone's types to wake it: about two meals. |
+| hop_fade_s | 0.5 |
+| hop_fade_s_doc | Seconds the Waystone lights up and fades before the zone loads under the ink wipe. |
+| hop_max_s | 2 |
+| hop_max_s_doc | Seconds from pressing E to having control in the zone (--load-check=hop judges it). |
+| walk_s | 12 |
+| walk_s_doc | Seconds a Boki you sent has to reach the return pad before it blinks out where it is. |
+| ask_chance | 0.06 |
+| ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
+| ask_s | 25 |
+| ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
+| budget | {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5} |
+| budget_hub | {"draws": 200, "objects": 500, "nodes": 2000, "emitters": 6, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 0.5} |
+| ratchet | {"medium": {"hub": {"draws": 720, "objects": 720, "frame_ms": 16.7}, "zone_bramblebank": {"draws": 770, "objects": 770, "frame_ms": 16.7}, "zone_glasswater": {"draws": 395, "objects": 420, "frame_ms": 16.7}, "zone_cinderstep": {"draws": 540, "objects": 550, "frame_ms": 19.5}}, "low": {"hub": {"draws": 370, "objects": 370}}} |
+| ratchet_doc | Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one. |
+| budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column. |
+| wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
 
 ## gear (`content/rules/gear.json`)
 
@@ -610,7 +645,7 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 | marks | 3 |
 | marks_doc | Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part. |
 | types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "tail_long"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "spikes"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "crest"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
-| foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric"} |
+| foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric", "chimebun": "sound", "frostdrop": "ice", "pebblenut": "rock", "scalepepper": "dragon", "duskplum": "dark", "pricklepear": "poison", "sapjelly": "bug", "ironcrisp": "steel", "geodecandy": "crystal"} |
 
 ## level_growth (`content/rules/level_growth.json`)
 
@@ -764,10 +799,24 @@ The garden's one snack patch (scripts/home/snack_patch.gd, base_mode only; GARDE
 |---|---|
 | snacks | ["emberberry", "tidebloom", "sunroot", "puffcorn"] |
 | snacks_doc | Four Data.CROPS foods, one per lean element (lean.json foods): Fire, Water, Grass, Flying. Each one is yielded once per ripening. |
+| zone_snacks | {"bramblebank": ["kibble", "sweetbun", "sunroot", "sapjelly", "glowcap"], "glasswater": ["tidebloom", "frostdrop", "geodecandy"], "cinderstep": ["emberberry", "pebblenut", "ironcrisp", "scalepepper"], "hushwood": ["duskplum", "mindmint", "pricklepear"], "ridge": ["puffcorn", "tonicbrew", "starfruit", "chimebun"]} |
+| zone_snacks_doc | Each zone's snack list, the foods of its group's types (GARDEN.md 10.2): Bramblebank normal, grass, bug, spore; Glasswater water, ice, crystal; Cinderstep fire, rock, steel, dragon; Hushwood dark, psychic, poison; Kitewind (theme ridge) flying, electric, fairy, sound. Every food in lean.json is in exactly one list (--lean-snacks-check). A patch on a theme with a list grows that list; the key is the home_layout THEMES id. |
 | grow_secs | 480 |
 | grow_secs_doc | Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time. |
 | reach | 0.35 |
 | reach_doc | Tiles beyond the patch's edge from which your feet pick the snacks. |
+| rotate_doc | Until the zones are built (only ridge is), the start garden's patch grows its four snacks and one more every ripening: the next food, in the order of the zone lists, that is not one of its four. rot on the patch's deco entry counts the ripenings. |
+
+## snacks (`content/rules/snacks.json`)
+
+Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in Care.FOODS). Care.FOODS adds these to the stall foods at load (Care._foods): name, desc, the numbers of a meal (food, joy) and price. The icon colour is the type's tint in lean.json (types[type].tint) and the type itself is lean.json foods[id], so a meal leans a Boki exactly as the existing type snacks do (Evo.eat: one FOOD_AFF for every food).
+
+| Setting | Value |
+|---|---|
+| food | 16 |
+| joy | 8 |
+| price | 16 |
+| foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
 
 ## toys (`content/rules/toys.json`)
 

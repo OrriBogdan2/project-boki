@@ -9,7 +9,9 @@ extends RefCounted
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
-## nap in a pile; rivals stare and huff.
+## nap in a pile; rivals stare and huff. A Boki that would thrive in another open zone sometimes goes
+## and waits at the return pad with a bubble: it looks at the pad (HubWaystone.pad) the way it comes
+## to look at a newcomer, and E on it sends it (HubWaystone.answer); ignored, it wanders off.
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
@@ -41,6 +43,7 @@ var night := false
 var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
+var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
 
 func _init(home) -> void:
 	h = home
@@ -114,6 +117,8 @@ func step(d: float) -> void:
 			_seen[uid] = true
 	for k in h.kins:
 		_tick(k, dt)
+	if h.hway:
+		h.hway.step(dt)
 
 ## Separation scale for two Boki (home.gd _separate_kin): napping friends lie close in a pile.
 func pile(a: Dictionary, b: Dictionary) -> float:
@@ -166,6 +171,8 @@ func choose(k: Dictionary) -> void:
 		if bond(rec, o["rec"]) <= float(R["rival_at"]) and randf() < 0.3 + float(traits.get("temper", 0.5)) * 0.5:
 			_watch(k, o, "rival")
 			return
+	if _ask(k):
+		return
 	if randf() < float(R["chore_chance"]) and _chore(k):
 		return
 	var mate := _mate(k, near)
@@ -276,6 +283,8 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 		k["goal"] = k["pos"]
 		(k["node"] as Node3D).rotation.y = atan2(-to.x, -to.y)
 	var cap := float(R["max"]["watch" if m.is_in(S.WATCH) else "react"])
+	if h.hway and is_same(at, h.hway.pad):
+		cap = float(k["life_for"])      # an ask at the pad waits its whole time
 	if m.since >= minf(float(k["life_for"]), cap):
 		m.go(S.ROAM, "looked")
 
@@ -355,6 +364,23 @@ func _watch(k: Dictionary, o: Dictionary, why: String) -> void:
 	k["t"] = float(k["life_for"])
 	_huff(k)
 
+## It would thrive in another open zone: now and then (once per load) it goes to wait at the pad.
+func _ask(k: Dictionary) -> bool:
+	var uid := String(k["rec"]["uid"])
+	var Z := GardenZones.rules()
+	if h.hway == null or _asked.has(uid):
+		return false
+	var id := GardenZones.wants(k["rec"])
+	if id == "" or randf() >= float(Z["ask_chance"]) or not machine(k).go(S.REACT, "ask"):
+		return false
+	_asked[uid] = true
+	k["life_at"] = h.hway.pad
+	k["life_for"] = float(Z["ask_s"])
+	k["t"] = float(k["life_for"])
+	var line := "%s keeps looking at %s (%s: send it)"
+	h._say(k, line % [k["rec"]["name"], GardenZones.info(id)["name"], Settings.key_cap("interact")], k["life_for"])
+	return true
+
 ## A new Boki on the base: the ones near by come over to have a look.
 func _arrived(k: Dictionary) -> void:
 	for o in _near(k):
@@ -372,7 +398,8 @@ func _awake(k: Dictionary) -> bool:
 ## The farm's own drivers have this Boki (it was called, is held, works, bathes, is indoors or leaping).
 static func _taken(k: Dictionary) -> bool:
 	return k.get("busy", false) or k.has("called_t") or k.has("indoors") or k.has("leap") or k.has("job") \
-		or k.has("fetch") or k.has("bath") or k.get("nap_go", false) or float(k.get("hold_t", 0.0)) > 0.0
+		or k.has("fetch") or k.has("bath") or k.has("zone_go") or k.get("nap_go", false) \
+		or float(k.get("hold_t", 0.0)) > 0.0
 
 static func _dist(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()
@@ -390,7 +417,7 @@ func _mate(k: Dictionary, near: Array) -> Dictionary:
 	for o in near:
 		var b := bond(k["rec"], o["rec"])
 		var score := b + randf() * 0.6
-		if b > float(R["rival_at"]) and (o["life"] as Fsm).is_in(S.ROAM) and score > top:
+		if b > float(R["rival_at"]) and (o["life"] as Fsm).is_in(S.ROAM) and not o.has("play") and score > top:
 			top = score
 			best = o
 	return best

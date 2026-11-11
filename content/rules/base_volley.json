@@ -30,5 +30,7 @@
 	"gems_win": 4,
 	"gems_ran": 1,
 	"gems_doc": "Gems to you when your backed Boki wins, or for any other match.",
-	"card_s": 6.0
+	"card_s": 6.0,
+	"courts": {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}},
+	"courts_doc": "A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post."
 }

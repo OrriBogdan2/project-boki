@@ -49,6 +49,7 @@ static var pending_toast := ""
 var popped := -1                       # uid of the deco just placed (its node gets the pop)
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
 
+const CUT_WIDTH := 0.5    # m: clear room either side of a corner-cutting shortcut, so a Boki never clips a corner
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
 
 func _init(home) -> void:
@@ -267,6 +268,8 @@ func _reserve() -> void:
 		rs.call(36, 37, 40, 41)      # the portal and its sign
 		rs.call(33, 39, 35, 41)      # the glider rack
 		rs.call(41, 40, 43, 41)      # the ferry
+		if h.zone == GardenZones.HUB:
+			for rc in HubLayout.CLEAR: rs.callv(rc)      # the Waystone and the games board
 		rs.call(int(HomeLayout.LANDING.x) - 2, int(HomeLayout.LANDING.z) - 2, int(HomeLayout.LANDING.x) + 1, int(HomeLayout.LANDING.z) + 1)
 		for k in Data.ISLES:
 			var sg: Vector2 = HomeLayout.isle_bridge(h.world, k)["sign"]
@@ -293,11 +296,16 @@ func _reserve() -> void:
 func _apply_theme() -> void:
 	var t: Dictionary = HomeLayout.THEMES.get(String(L().get("theme", "meadow")), HomeLayout.THEMES["meadow"])
 	var b: Dictionary = BASE_BIOME.duplicate()
+	var own := {}
 	for k in ["top", "top2", "side", "deep", "leaf"]:
-		if t.has(k): b[k] = Color(String(t[k]))
+		if t.has(k):
+			b[k] = Color(String(t[k]))
+			own[k] = t[k]
 	h.world.biome = b
 	for isl in h.world.islands:
 		isl["region_fixed"] = int(t.get("region", 0))
+		if t.get("own_ground", false):
+			isl["biome_colors"] = own
 
 func _apply_paint() -> void:
 	var w: World = h.world
@@ -677,10 +685,10 @@ func _solid_at(x: float, z: float) -> bool:
 	return not w.inb(ix, iz) or w.kind[w.idx(ix, iz)] != World.T_GROUND
 
 ## Nothing solid along the way (with a kin's width either side).
-func clear_line(a: Vector2, b: Vector2) -> bool:
+func clear_line(a: Vector2, b: Vector2, width := 0.28) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.3) + 1
-	var side := Vector2(-d.y, d.x).normalized() * 0.28 if d.length() > 0.001 else Vector2.ZERO
+	var side := Vector2(-d.y, d.x).normalized() * width if d.length() > 0.001 else Vector2.ZERO
 	for i in range(1, n + 1):
 		var p := a + d * (float(i) / n)
 		if _solid_at(p.x, p.y) or _solid_at(p.x + side.x, p.y + side.y) or _solid_at(p.x - side.x, p.y - side.y):
@@ -715,7 +723,7 @@ func steer(k: Dictionary, pos: Vector3, goal: Vector3) -> Vector3:
 	while not pts.is_empty() and pp.distance_to(pts[0]) < 0.45:
 		pts.pop_front()
 	# cut corners the grid doesn't need: skip ahead while the next-but-one point is in plain sight
-	if pts.size() > 1 and clear_line(pp, pts[1]):
+	if pts.size() > 1 and clear_line(pp, pts[1], CUT_WIDTH):
 		pts.pop_front()
 	if pts.is_empty():
 		return goal
@@ -981,7 +989,7 @@ func reset_layout() -> void:
 
 # ------------------------------------------------------------------ build mode on / off
 func can_build() -> bool:
-	return h.visit.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
+	return not h._visiting() and ZoneLayout.live.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
 
 func toggle() -> void:
 	if active:
@@ -995,7 +1003,7 @@ func toggle() -> void:
 		return
 	if not can_build():
 		return
-	cat = "Buildings"      # B always opens on Buildings
+	cat = _tabs()[0]      # B always opens on the first tab
 	_enter()
 	Sfx.play("ui_open", null, -8.0)
 	_build_bar()
@@ -1064,6 +1072,8 @@ func pick_up_at(c: Vector2i) -> void:
 ## Takes the piece an occupancy tag names into the hand, to move it.
 func pick_up_tag(tag: String) -> void:
 	_close_menu()
+	if h.zone == GardenZones.HUB and not (tag.begins_with("d:") and _dressing(tag)):
+		return
 	if tag.begins_with("b:"):
 		take_building(tag.substr(2))
 	elif tag.begins_with("f:"):
@@ -1079,6 +1089,11 @@ func pick_up_tag(tag: String) -> void:
 		_make_ghost()
 		_build_bar()
 		Sfx.play("click")
+
+## Is the piece a tag names Garden decoration (the only thing you may move in the hub)?
+func _dressing(tag: String) -> bool:
+	var e := _deco_by_uid(int(tag.substr(2)))
+	return not e.is_empty() and String(HomeLayout.CATALOG[String(e["id"])]["cat"]) == "Garden"
 
 ## Starts an upgrade of the building with this deco uid (the Upgrades tab).
 func upgrade(uid: int) -> bool:
@@ -1951,6 +1966,8 @@ func _open_ui() -> void:
 
 func _tabs() -> Array:
 	var out: Array = []
+	if h.zone == GardenZones.HUB:
+		return ["Garden"]      # the hub's fixtures stay where they are: you only dress it (HubLayout)
 	if FarmUnlocks.base_mode():
 		return ["Buildings", "Base", "Garden", "Island"]
 	for ct in HomeLayout.CATS:
