@@ -202,6 +202,8 @@ var mine: Array = []           # your three kin entries, in leg order
 var visitors: Array = []       # the visiting team's {rec, node} entries, in leg order
 var anchor := {}               # your Boki the prize and cup go to: your partner when it runs
 var bar: TimingBar = null
+var heard := [0, 0]            # hand-offs sounded so far, per team
+var crossed := [false, false]  # each team's finish sounded
 
 func _init(dash: BaseRace) -> void:
 	race = dash
@@ -276,7 +278,9 @@ func use() -> void:
 	bar.open(h.root_ui, "Press %s before each mark to hand off" % Settings.key_cap("interact"))
 	_bar_label("")
 	_place_runners()
-	Sfx.play("garden_start", race.start, BaseRace.GARDEN_DB)
+	heard = [0, 0]
+	crossed = [false, false]
+	GardenSfx.countdown(h, race.start)
 
 func _bar_label(last: String) -> void:
 	var to: String = run.teams[0][mini(run.grades.size() + 1, 2)]["name"]
@@ -295,7 +299,7 @@ func input(event: InputEvent) -> bool:
 		var r := bar.press()
 		run.press(r)
 		var k: Dictionary = mine[run.leg[0]]
-		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", k["pos"], BaseRace.GARDEN_DB)
+		GardenSfx.crowd(r, k["pos"])
 		h._emote(k, {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
 	return true
@@ -306,8 +310,24 @@ func tick(d: float) -> void:
 	run.step(d)
 	bar.step(d)
 	_place_runners()
+	_hear()
 	if run.over():
 		_end(true)
+
+## Sounds for what happened this step, per team: a clean pass (no more lost than a good press) or a fumble at the
+## runner taking the baton, and the tape when its last runner is home.
+func _hear() -> void:
+	var clean_s := float(rules()["handoff"]["good"])
+	for team in 2:
+		var ents: Array = mine if team == 0 else visitors
+		var lost: Array = run.lost[team]
+		while int(heard[team]) < lost.size():
+			var s := float(lost[heard[team]])
+			heard[team] = int(heard[team]) + 1
+			GardenSfx.cue("relay_handoff" if s <= clean_s else "relay_fumble", ents[heard[team]]["pos"])
+		if float(run.done_t[team]) >= 0.0 and not crossed[team]:
+			crossed[team] = true
+			GardenSfx.cue("relay_finish", ents[-1]["pos"])
 
 func _place_runners() -> void:
 	var st: Array = BaseRace.rules()["stretches"]
@@ -346,7 +366,8 @@ func _end(finished: bool) -> void:
 	if finished:
 		_card(res)
 		var k: Dictionary = h._kin_entry(anchor)
-		Sfx.play("garden_win" if res["won"] else "garden_sulk", k["pos"], BaseRace.GARDEN_DB)
+		var pair: Array = [k, visitors[-1]] if res["won"] else [visitors[-1], k]
+		GardenSfx.fanfare(h, pair[0], pair[1])
 		for m in mine:
 			h._emote(m, "♥" if res["won"] else "…", true)
 		Save.save_game()

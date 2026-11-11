@@ -1,4 +1,5 @@
-"""Garden minigame sounds (GARDEN.md 5, docs/AUDIO.md): the Dash, Stump Shove, Seek and Spark Volley. Run from tools/.
+"""Garden minigame sounds (GARDEN.md 5, GARDEN_MODERN.md 4.2, docs/AUDIO.md): the Dash, Stump Shove, Seek, Spark
+Volley, Tumble, Echo Steps, the Show Ring and the Relay Cup. Run from tools/.
 
 Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Boki chirps, no hard hits.
   garden_count     a countdown tick (twice)             garden_go           the third beat, bright
@@ -10,6 +11,14 @@ Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Bok
   garden_win_small / _medium / _large    the winner's fanfare, higher and quicker for a small Boki, fuller for a large
   garden_sulk_small / _medium / _large   the loser's huff, a squeaky puff down to a deep sigh
   garden_sniff     a loop: quick little sniffs for Seek garden_bat   the seed hit over the Volley log
+  tumble_clash_rush / _brace / _dodge   the exchange landing, by the move that decided it: a body bump, a padded
+                   block, a whoosh past and a skid      tumble_push   paws scuffing back across the ring
+  tumble_ringout   a roll over the ring's edge, a bounce and the crowd's "ooh"
+  echo_hit         a tiny glass sparkle over the stone's note   echo_miss   a muffled off-key stone and a low buzz
+  echo_streak      a quick rising sparkle run on every few hits in a row (the stone notes stay generated in game)
+  show_reveal      a wood-block roll, three judge cards flipped and a chime   show_crowd   paw-pat applause and cheers
+  relay_handoff    a paw slap and a baton tick, a happy chirp   relay_fumble   the baton dropped: clatter and an "eep"
+  relay_finish     the tape swish and three rising bells, one for each leg
 Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd.
 """
 import numpy as np
@@ -154,6 +163,127 @@ def bat(i):
     return B.soft(mix(wood_tick(520 * j(i, 0.06), 0.08), 0.5 * pluck(1568 * j(i, 0.03), 0.18, 0.05)), 5000)
 
 
+# ---------------------------------------------------------------- tumble
+def scuff(d=0.16, lo=300, hi=1600):
+    """A paw dragged on packed dirt: low grainy noise that fades out."""
+    return bpf(noise(d), lo, hi) * S.shape(d, 0.01, 0.0, d * 0.8)
+
+
+def clash_rush(i):
+    """Rush decided it: two small bodies bump, a soft low thump, fur and a grunt."""
+    body = S.sweep(150 * j(i, 0.06), 60, 0.3) * env(N(0.3), 0.002, 0.09)
+    fur = lpf(noise(0.12), 2200) * env(N(0.12), 0.002, 0.03) * 0.5
+    grunt = 0.35 * B.vowel(240 * j(i, 0.05), 200, 0.18, 'uh', 1.25)
+    return B.soft(mix(body, fur, at(grunt, 0.02)), 2600)
+
+
+def clash_brace(i):
+    """Brace decided it: a charge stopped on a guard, a padded thock and a held breath."""
+    thock = mix(wood_tick(230 * j(i, 0.05), 0.14), 0.6 * S.sweep(110, 80, 0.2) * env(N(0.2), 0.002, 0.06))
+    breath = bpf(noise(0.25), 500, 1800) * S.shape(0.25, 0.03, 0.05, 0.15) * 0.3
+    return B.soft(mix(thock, at(breath, 0.03)), 2400)
+
+
+def clash_dodge(i):
+    """Dodge decided it: a quick whoosh past, a light skid and a pleased squeak."""
+    d = 0.3
+    whoosh = bpf(noise(d), 700, 3200) * S.shape(d, 0.12, 0.0, 0.16) * 0.8
+    squeak = 0.35 * B.squeak(1150 * j(i, 0.05), 0.09, 0.2)
+    return B.soft(mix(whoosh, at(scuff(0.14, 900, 2800), 0.16), at(squeak, 0.2)), 4200)
+
+
+def push(i):
+    """The loser pushed back along the ring: two or three scuffs, each softer than the last."""
+    parts = [at(scuff(0.15, 280 * j(i + k, 0.08), 1500), 0.13 * k) * (0.9 - 0.25 * k) for k in range(3)]
+    return B.soft(B.room(mix(*parts), 0.25), 2200)
+
+
+def ringout(i):
+    """Out of the ring: a short tumble of thumps, one bounce, and the crowd's rising "ooh"."""
+    rolls = [at(S.sweep(130 - 15 * k, 70, 0.16) * env(N(0.16), 0.002, 0.05), 0.09 * k) * (1.0 - 0.18 * k)
+             for k in range(4)]
+    bounce = at(0.6 * S.sweep(160, 90, 0.2) * env(N(0.2), 0.002, 0.06), 0.5)
+    ooh = [at(mix(B.squeak(f * j(i + k, 0.05), 0.35, 0.05, 0.03, 0.1), 0.3 * S.sweep(f, f * 1.25, 0.35)), 0.3 + 0.05 * k)
+           * 0.35 for k, f in enumerate([620, 700, 780])]
+    return B.soft(B.room(mix(*rolls, bounce, *ooh), 0.4), 3200)
+
+
+# ---------------------------------------------------------------- echo steps
+def glint(f, d=0.14):
+    """A tiny glassy ping: two inharmonic partials, very short."""
+    t = S.T(d); n = N(d)
+    return (np.sin(2 * np.pi * f * t) + 0.5 * np.sin(2 * np.pi * f * 2.76 * t)) * env(n, 0.001, d * 0.25)
+
+
+def echo_hit(i):
+    """A step on the beat: a sparkle above the stone's note (the notes are G-B-D-G, so this sits at G7 and D8)."""
+    return B.soft(mix(glint(3136 * j(i, 0.01)), at(0.4 * glint(4699 * j(i, 0.01), 0.1), 0.02)), 9000)
+
+
+def echo_miss(i):
+    """A wrong or missed step: a muffled, detuned stone and a short low buzz under it."""
+    d = 0.35; t = S.T(d); n = N(d)
+    stone = (np.sin(2 * np.pi * 208 * j(i, 0.03) * t) + 0.6 * np.sin(2 * np.pi * 221 * t)) * env(n, 0.003, 0.08)
+    buzz = lpf(np.sign(np.sin(2 * np.pi * 98 * t)), 700) * env(n, 0.005, 0.06) * 0.25
+    return B.soft(mix(stone, buzz, 0.3 * wood_tick(170, 0.1)), 1800)
+
+
+def echo_streak(i):
+    """A streak: a quick rising run of four glints in G major and a soft bell under the last."""
+    fs = [1568, 1976, 2349, 3136]
+    parts = [at(glint(f * j(i, 0.01), 0.18), 0.06 * k) * (0.6 + 0.1 * k) for k, f in enumerate(fs)]
+    return B.soft(B.room(mix(*parts, at(0.4 * S.chime(1568, 0.5, 0.25), 0.18)), 0.4), 9000)
+
+
+# ---------------------------------------------------------------- show ring
+def card_flip(d=0.07):
+    """A judge's card turned over: a dry paper snap."""
+    return hpf(noise(d), 2400) * env(N(d), 0.001, 0.012)
+
+
+def reveal(i):
+    """The judges show their cards: a wood-block roll that swells, three card flips and a chime."""
+    roll = mix(*[at(wood_tick(480 + 40 * (k % 2), 0.05) * (0.25 + 0.05 * k), 0.045 * k) for k in range(14)])
+    flips = mix(*[at(0.8 * card_flip(), 0.7 + 0.12 * k) for k in range(3)])
+    return B.soft(B.room(mix(roll, flips, at(0.7 * S.chime(1319, 0.8, 0.3), 1.08)), 0.4), 7000)
+
+
+def crowd_cheer(i):
+    """The garden crowd answers the cards: a patter of little paw pats and a spray of chirps, about 1.6 s."""
+    d = 1.6; n = N(d); pats = np.zeros(n)
+    for _ in range(70):
+        t0 = S.rng.uniform(0, d - 0.05)
+        g = 0.4 + 0.6 * np.sin(np.pi * t0 / d)
+        pat = bpf(noise(0.03), 900, 3600) * env(N(0.03), 0.001, 0.006) * g * S.rng.uniform(0.4, 1.0)
+        k = N(t0); pats[k:k + len(pat)] += pat[:n - k]
+    chirps = [at(chirp(f * j(i + k, 0.06), 0.1, i + k), S.rng.uniform(0.05, 1.2)) * S.rng.uniform(0.3, 0.6)
+              for k, f in enumerate([900, 1060, 980, 1180, 1240, 1020, 1120])]
+    return B.soft(B.room(mix(pats, *chirps), 0.5), 6000)
+
+
+# ---------------------------------------------------------------- relay
+def handoff(i):
+    """A clean hand-off: a paw slap on paw, a light baton tick and a happy chirp."""
+    slap = bpf(noise(0.06), 1200, 4500) * env(N(0.06), 0.001, 0.01)
+    return B.soft(mix(slap, at(0.6 * wood_tick(700 * j(i, 0.04), 0.06), 0.015),
+                      at(0.45 * chirp(1200 * j(i, 0.04), 0.1, i), 0.05)), 5500)
+
+
+def fumble(i):
+    """A fumbled hand-off: the baton hits the ground and bounces, quicker each time, and an "eep" slides down."""
+    bounces = [at(wood_tick(620 * j(i + k, 0.08), 0.07) * 0.9 ** k, sum(0.16 * 0.7 ** m for m in range(k)))
+               for k in range(5)]
+    eep = 0.4 * mix(B.squeak(1100 * j(i, 0.05), 0.22, -0.35, 0.02, 0.1), 0.3 * S.sweep(1100, 760, 0.22))
+    return B.soft(B.room(mix(*bounces, eep), 0.3), 4800)
+
+
+def relay_finish(i):
+    """A team home: the tape swish and three rising bells, one for each leg."""
+    swish = hpf(noise(0.25), 2500) * S.shape(0.25, 0.1, 0.0, 0.15) * 0.5
+    bells = [at(S.chime(f, 0.6, 0.25) * 0.6, 0.1 + 0.11 * k) for k, f in enumerate([988, 1319, 1568])]
+    return B.soft(B.room(mix(swish, *bells), 0.4), 6500)
+
+
 def main():
     S.takes_cat('garden_count', count, 1, 'boki')
     S.takes_cat('garden_go', go, 1, 'boki')
@@ -171,6 +301,18 @@ def main():
         S.takes_cat('garden_sulk_' + size, sulk(f), 2, 'boki')
     S.save_loop('garden_sniff', sniff(), 'loop')
     S.takes_cat('garden_bat', bat, 2, 'ui')
+    for move, fn in [('rush', clash_rush), ('brace', clash_brace), ('dodge', clash_dodge)]:
+        S.takes_cat('tumble_clash_' + move, fn, 2, 'impact' if move != 'dodge' else 'boki')
+    S.takes_cat('tumble_push', push, 2, 'step')
+    S.takes_cat('tumble_ringout', ringout, 1, 'impact')
+    S.takes_cat('echo_hit', echo_hit, 2, 'ui')
+    S.takes_cat('echo_miss', echo_miss, 2, 'ui')
+    S.takes_cat('echo_streak', echo_streak, 1, 'ui')
+    S.takes_cat('show_reveal', reveal, 0, 'ui')
+    S.takes_cat('show_crowd', crowd_cheer, 1, 'boki')
+    S.takes_cat('relay_handoff', handoff, 2, 'boki')
+    S.takes_cat('relay_fumble', fumble, 2, 'boki')
+    S.takes_cat('relay_finish', relay_finish, 1, 'boki')
 
 
 if __name__ == '__main__':

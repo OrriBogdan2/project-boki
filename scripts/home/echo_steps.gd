@@ -382,7 +382,7 @@ func use() -> void:
 	hops = [[_spot(YOU), _spot(YOU), 0.0], [_spot(RIVAL), _spot(RIVAL), 0.0]]
 	_sound_up()
 	_open_readout()
-	Sfx.play("garden_start", null, float(rules()["cue_db"]))
+	GardenSfx.cue("garden_go", null)
 
 ## The notes and the bed: generated once a dance; the bed's position is the dance's clock.
 func _sound_up() -> void:
@@ -465,12 +465,14 @@ func _show(e: Array, now: float) -> void:
 			if e[0] == "fixed":
 				h._emote(dancers[side], "!", true)
 		"hit":
+			GardenSfx.cue("echo_hit", null)
 			if not dancers[side].is_empty() and run.streak[side] % int(rules()["cheer_every"]) == 0:
+				GardenSfx.cue("echo_streak", null)
 				h._emote(dancers[side], "♪", true)
 		"kept":
 			h._emote(dancers[side], "♫", true)
 		"miss":
-			Sfx.play("garden_miss", null, float(rules()["miss_db"]))
+			GardenSfx.cue("echo_miss", null)
 			if not dancers[side].is_empty():
 				h._emote(dancers[side], "?", true)
 	lbl.text = _line()
@@ -556,7 +558,7 @@ func _end(finished: bool) -> void:
 	if is_instance_valid(readout):
 		readout.queue_free()
 	if finished:
-		Sfx.play("garden_finish", null, float(rules()["cue_db"]))
+		GardenSfx.cue("garden_finish", null)
 		_card(res)
 		if res.has("win"):
 			h._emote(h._kin_entry(res["win"]), "♥", true)

@@ -352,7 +352,7 @@ func use() -> void:
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, week)
 	board.text = board_text(week)
 	_enter()
-	Sfx.play("garden_start", stage.position, BaseRace.GARDEN_DB)
+	GardenSfx.countdown(h, stage.position)
 
 func _shown() -> Dictionary:
 	return pair[run.backed]
@@ -379,8 +379,7 @@ func input(event: InputEvent) -> bool:
 	return true
 
 func _cheer(grade: String) -> void:
-	Sfx.play("garden_miss" if grade == "miss" else "garden_cheer", _shown()["pos"], BaseRace.GARDEN_DB,
-			0.04, 1.2 if grade == "great" else 1.0)
+	GardenSfx.crowd(grade, _shown()["pos"])
 	h._emote(_shown(), {"great": "★", "good": "♪", "miss": "?"}[grade], true)
 
 func tick(d: float) -> void:
@@ -428,6 +427,7 @@ func _enter() -> void:
 			_lay_walk()
 		Run.Phase.JUDGE:
 			_round_card(_judge_rows())
+			GardenSfx.reveal(h, stage.position)
 	_place_pair(0.0)
 
 func _look_rows(rec: Dictionary) -> Array:
@@ -552,7 +552,7 @@ func _end(finished: bool) -> void:
 		card.queue_free()
 	if finished:
 		_card(res)
-		BaseRace.result_sounds(h, res)
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
