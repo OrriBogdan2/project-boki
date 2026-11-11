@@ -190,6 +190,10 @@ func _interrupts() -> void:
 		P.inp["dash"] = false
 		if why == "jump":
 			ok(P.grounded and P.jump_at < 0.0, "...and that press does not also hop")
+			var bot: Hunter = m.hunters[1]
+			bot.ctrl = "bot"
+			bot.inp["jump"] = true          # (a bot hops when it thinks it is stuck, and a scan roots it)
+			ok(Capture.hunter_stop(bot) == "", "...but a bot's hop never cancels its own scan")
 		P.inp["jump"] = false
 		if why == "damage" or why == "nudge":
 			ok(Capture.active(P) and k.scan_by == P, "%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage"))
