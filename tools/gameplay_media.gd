@@ -4,9 +4,9 @@ extends RefCounted
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
-##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off; --media-fight=<a,b,c/d,e,f>
-##                   picks the archetypes (yours first), --media-zoom=<z> the camera (1.0: the match camera's own, the
-##                   combat-clarity films in docs/COMBAT_CLARITY.md)
+##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off;
+##                   --media-fight=<a,b,c/d,e,f> picks the archetypes (yours first), --media-zoom=<z> the camera
+##                   (1.0: the match camera's own, the combat-clarity films in docs/COMBAT_CLARITY.md)
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
 ##   3 extraction    the squad holds an uplink's yard as it finishes charging, then rides the lift out
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)

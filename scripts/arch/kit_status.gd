@@ -30,7 +30,8 @@ static func grounded_left(e: Ent) -> float:
 	return maxf(0.0, float(e.get_meta("gnd_until")) - float(e.m.time)) if grounded(e) else 0.0
 
 ## Puts `kind` on `e` for `secs` (refreshes a running one). `send`: tell the other games when the
-## body belongs to one of them. `toast`: the player's toast reads this (what Grounded takes away from a Dredge reeling, say).
+## body belongs to one of them. `toast`: the player's toast reads this (what Grounded takes away from a Dredge
+## reeling, say).
 static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
 	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
 		return

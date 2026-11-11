@@ -39,9 +39,11 @@ static func tick(h: Hunter, delta: float) -> void:
 	var t := Color.TRANSPARENT
 	var hz := 0.0
 	if stun:
-		t = Color(STUN_COL, CC_K); hz = STUN_HZ
+		t = Color(STUN_COL, CC_K)
+		hz = STUN_HZ
 	elif root:
-		t = Color(ROOT_COL, CC_K); hz = ROOT_HZ
+		t = Color(ROOT_COL, CC_K)
+		hz = ROOT_HZ
 	elif slow:
 		t = Color(SLOW_COL, SLOW_K)
 	else:

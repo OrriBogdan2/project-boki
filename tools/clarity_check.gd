@@ -139,7 +139,8 @@ func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
 	ok(a.b > c.b and a != c, "a teammate's look leans cool (%s)" % a)
 	ok(f.r >= c.r and f.g < c.g, "a rival's look leans hostile (%s)" % f)
 	var look := Oomph.shot_look(m, foe, c, 0.2)
-	ok(_same(look[2], SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))), "a rival's shot carries the hostile halo")
+	var halo := SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))
+	ok(_same(look[2], halo), "a rival's shot carries the hostile halo")
 
 ## Crowd control on a body, on the body: the props show while it lasts, the tint pulses its colour, all gone after;
 ## a cast glints the caster in their signature colour and fades.
