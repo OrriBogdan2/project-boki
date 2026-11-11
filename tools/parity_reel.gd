@@ -269,12 +269,13 @@ func _p_dash_air() -> void:
 		P.inp["dash"] = _in(t, 0.55)
 	await _travel("Jump, then dash in the air", 3.0, dash)
 
-## Owner 11-11: dash one way, then straight back at once, on the ground and in the air (a turn costs the speed you
+## Dash one way, then straight back at once, on the ground and in the air (a turn costs the speed you
 ## carry, TurnCost). Charges are refilled at each press so every dash goes.
 func _p_dash_back() -> void:
 	var dash := func(t: float) -> void:
 		var back := (t >= 0.6 and t < 1.1) or t >= 2.45
-		P.inp["move"] = Vector2.ZERO if t >= 3.4 else (Vector2(-1, 0) if back else Vector2(1, 0))
+		var way := -1.0 if back else 1.0
+		P.inp["move"] = Vector2.ZERO if t >= 3.4 else Vector2(way, 0)
 		P.inp["jump"] = _in(t, 1.8)
 		P.inp["dash"] = _in(t, 0.3) or _in(t, 0.75) or _in(t, 1.2) or _in(t, 2.1) or _in(t, 2.6)
 		if P.inp["dash"]:

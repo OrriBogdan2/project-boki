@@ -1,7 +1,7 @@
 class_name TurnCost
 extends RefCounted
-## What a sharp turn costs a chained move (owner playtest 11-11, docs/decisions/0083). A dash, rush or kit
-## step that starts while you carry speed over your run speed keeps only the part of it along its own heading:
+## What a sharp turn costs a chained move (docs/decisions/0083). A dash, rush or kit step that starts while you
+## carry speed over your run speed keeps only the part of it along its own heading:
 ## the same way is free, square across or straight back costs it all. The cost is `loss` (0..1): the move
 ## starts at (1 - loss) of its speed and builds back to it over `recover` seconds, and an air move hands over
 ## only (1 - loss) of the speed above the run when it ends. The speed you carry is your velocity now, or the
@@ -37,8 +37,9 @@ func start(hv: Vector2, dir: Vector2, run: float, now: float) -> void:
 ## lasts). Remembers it as it goes, since a kit may cut its move short itself.
 func step(hv: Vector2, dt: float, now: float) -> Vector2:
 	peak = maxf(peak, hv.length())
-	last_v = hv.normalized() * peak
-	last_at = now
+	if peak > 0.0:     # a standing wind-up (Kael's) is not a move to remember
+		last_v = hv.normalized() * peak
+		last_at = now
 	if ramp_t <= 0.0:
 		return hv
 	var k := 1.0 - loss * ramp_t / recover

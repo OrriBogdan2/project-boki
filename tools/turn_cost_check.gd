@@ -1,9 +1,10 @@
 extends RefCounted
-## --turn-cost-check[=<arch>]: a chained dash that turns back loses speed, one that goes on the same way keeps it, for every
-## hunter (owner playtest 11-11, scripts/match/turn_cost.gd). On the ground a dash pressed the moment the last one
-## ends goes at least SAME_KEEP of a fresh dash's distance the same way and at most REV_KEEP of it straight back;
-## in the air a dash straight back hands over no more than the run speed (+ RUN_SLACK), the same way at least
-## SAME_KEEP of a fresh air dash's carry. A hunter whose second press is not a new dash (a recast) is skipped.
+## --turn-cost-check[=<arch>]: a chained dash that turns back loses speed, one that goes on the same way
+## keeps it, for every hunter (scripts/match/turn_cost.gd, docs/decisions/0083). On the ground a dash pressed the
+## moment the last one ends goes at least SAME_KEEP of a fresh dash's distance the same way and at most
+## REV_KEEP of it straight back; in the air a dash straight back hands over no more than the run speed
+## (+ RUN_SLACK), the same way at least SAME_KEEP of a fresh air dash's carry. A hunter whose second press is
+## not a new dash (a recast) is skipped.
 
 const SAME_KEEP := 0.95
 const REV_KEEP := 0.9
@@ -132,17 +133,23 @@ func run(main: Node) -> void:
 			print("TURNCOST skip %s: the second press is not a new dash" % arch)
 		else:
 			var f: float = fresh["dist"]
-			ok(float(same["dist"]) >= f * SAME_KEEP, "%s ground: fresh %.2f m, same way %.2f m" % [arch, f, same["dist"]])
-			ok(float(back["dist"]) <= f * REV_KEEP, "%s ground: fresh %.2f m, straight back %.2f m" % [arch, f, back["dist"]])
+			var same_d: float = same["dist"]
+			var back_d: float = back["dist"]
+			ok(same_d >= f * SAME_KEEP, "%s ground: fresh %.2f m, same way %.2f m" % [arch, f, same_d])
+			ok(back_d <= f * REV_KEEP, "%s ground: fresh %.2f m, straight back %.2f m" % [arch, f, back_d])
 		var fresh_air := _fresh(m, home, true)
 		var same_air := _chain(m, home, Vector2(1, 0), true)
 		var back_air := _chain(m, home, Vector2(-1, 0), true)
-		if fresh_air.is_empty() or same_air.is_empty() or back_air.is_empty() or float(fresh_air["carry"]) <= run_speed + RUN_SLACK:
+		var no_air := fresh_air.is_empty() or same_air.is_empty() or back_air.is_empty()
+		if no_air or float(fresh_air["carry"]) <= run_speed + RUN_SLACK:
 			print("TURNCOST skip %s air: no second air dash or no carry to lose" % arch)
 		else:
 			var c: float = fresh_air["carry"]
-			ok(float(same_air["carry"]) >= c * SAME_KEEP, "%s air: fresh carry %.1f m/s, same way %.1f" % [arch, c, same_air["carry"]])
-			ok(float(back_air["carry"]) <= run_speed + RUN_SLACK, "%s air: run %.1f m/s, straight back carries %.1f" % [arch, run_speed, back_air["carry"]])
+			var same_c: float = same_air["carry"]
+			var back_c: float = back_air["carry"]
+			ok(same_c >= c * SAME_KEEP, "%s air: fresh carry %.1f m/s, same way %.1f" % [arch, c, same_c])
+			ok(back_c <= run_speed + RUN_SLACK,
+				"%s air: run %.1f m/s, straight back carries %.1f" % [arch, run_speed, back_c])
 		m.queue_free()
 		await main.get_tree().process_frame
 	print("TURNCOST DONE, failures: %d" % bad)
