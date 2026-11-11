@@ -94,7 +94,7 @@
   ]
  },
  "relax": {
-  "CUTS": 0
+  "CAP_LAST": true
  },
  "past_wrist": {
   "R": "hand.R",
