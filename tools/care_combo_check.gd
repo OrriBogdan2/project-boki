@@ -1690,6 +1690,10 @@ func rimewright() -> void:
 			and K.anim_id == "tm_wall"
 			and AimKit.shown(P, "e")
 			and bool(AimKit.entry(P, "e").get("all", false)))
+	var shove_t := float(KMovesCare.MOVES["tm_wall"]["keys"][2][0])
+	var tell_t := float(K.e_def()["tell"])
+	ok("tm E: the palm shove lands as the wall erupts (the move's 'out' key = the tell)",
+			absf(shove_t - tell_t) < 0.01, "shove %.2f s, tell %.2f s" % [shove_t, tell_t])
 	step(m, 0.25)
 	var w0: Dictionary = K.wall.get("w", {})
 	var mid0 := ((w0.get("a", Vector2.ZERO) as Vector2) + (w0.get("b", Vector2.ZERO) as Vector2)) * 0.5
