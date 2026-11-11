@@ -118,7 +118,7 @@ func _tick_hang(dt: float) -> void:
 	HeroVfx.of(k.m).hold(h, "drop_gather", minf(t / hang, 1.0))
 	if h.roll_t > 0.0:
 		return
-	h.vel = Vector3(0.0, Hunter.H_GRAV * dt, 0.0)
+	h.vel = Vector3(0.0, Loco.gravity * dt, 0.0)
 	if t >= hang:
 		var dd := data()
 		phase = "dive"

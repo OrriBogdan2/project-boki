@@ -407,7 +407,7 @@ func _home(main: Node) -> void:
 				hm.ppos = Vector3(e["ex"] + dir.x * 0.8, 0, e["ez"] + dir.y * 0.8)
 				hm.py = top - depth; hm.pvy = -2.0; hm.pvel = Vector3.ZERO; hm.gliding = false; hm.dash_t = 0.0
 				hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dir.x, 0, dir.y) * 3.0
-				if dash: hm.start_dash(-dir, Hunter.DASH_SPEED, Hunter.DASH_TIME)
+				if dash: hm.start_dash(-dir, Loco.dash_speed_base, Loco.dash_time)
 				var low: float = hm.py; var did_climb := false; var back := false
 				for i in 240:
 					_press(-dir)

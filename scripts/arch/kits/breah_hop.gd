@@ -244,7 +244,7 @@ func _kick() -> void:
 
 ## Rock Hop falls at its own leap_grav: the pull on top of gravity.
 func _pull() -> float:
-	return maxf(0.0, float(dd().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
+	return maxf(0.0, float(dd().get("leap_grav", Loco.gravity)) - Loco.gravity)
 
 func _tick_air(dt: float) -> void:
 	var t := float(st["t"])

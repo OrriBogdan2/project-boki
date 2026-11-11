@@ -36,6 +36,18 @@ static var glide_catch := 0.0
 static var glide_max := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
+static var jump_v := 0.0
+static var gravity := 0.0
+static var glide_speed := 0.0
+static var glide_sink := 0.0
+static var ledge_air_accel := 0.0
+static var dash_speed_base := 0.0
+static var dash_time := 0.0
+static var dash_regen := 0.0
+static var ex_dash_cd := 0.0
+static var dash_buffer := 0.0
+static var ex_time_mul := 0.0
+static var ex_dist := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -64,7 +76,21 @@ static func load_tuning() -> bool:
 	glide_catch = g["catch"]
 	glide_max = g["max"]
 	carry_drag = T["glide_carry"]["carry_drag"]
-	dash_jump_keep = T["dash"]["jump_keep"]
+	var h: Dictionary = T["hunter"]
+	jump_v = h["jump_v"]
+	gravity = h["gravity"]
+	glide_speed = h["glide_speed"]
+	glide_sink = h["glide_sink"]
+	ledge_air_accel = h["ledge_air_accel"]
+	var d: Dictionary = T["dash"]
+	dash_jump_keep = d["jump_keep"]
+	dash_speed_base = d["speed"]
+	dash_time = d["time"]
+	dash_regen = d["regen"]
+	ex_dash_cd = d["ex_cd"]
+	dash_buffer = d["buffer"]
+	ex_time_mul = d["ex_time_mul"]
+	ex_dist = d["ex_dist"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).

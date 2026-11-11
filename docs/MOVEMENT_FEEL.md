@@ -253,7 +253,7 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 ## Physics pass: SUPERVIVE's game data (`physics76`)
 
-Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in SUPERVIVE_DATA.md.
+Tunables are in `content/rules/tuning.json` (`physics`, `hunter`, `dash`), read by `HunterMove`; values and sources are in SUPERVIVE_DATA.md.
 
 - **Gravity** 30 (x1.2 falling) → 14.7 m/s², one gravity. **Jump** 9 → 6.8 m/s (the data's 7.5 would let jump + mantle top four terraces). **Wall kick** rise 0.9 → 0.8m, so jump + kick + mantle still tops 4 terraces and not 5.
 - **Fall cap** 10 → 12 m/s, easing to 10 m/s from 1m to 16.5m under the lip. **Point of no return** 13 → 17.5m under the lip: about 1.9s of falling to save yourself (was ~1.4s).

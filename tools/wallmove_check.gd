@@ -421,7 +421,7 @@ func _one_kick(wl: Dictionary) -> void:
 	var v1 := h.vel.y
 	m.step(DT)
 	m.step(DT)
-	var arc := h.vel.y < v1 - Hunter.H_GRAV * DT * 1.5
+	var arc := h.vel.y < v1 - Loco.gravity * DT * 1.5
 	ok(not h.gliding and arc, "a kick folds the glider while you rise (vy %.1f to %.1f)" % [v1, h.vel.y])
 
 ## Ledge tiles that are blocked (rocks, trees) are never mantled onto.

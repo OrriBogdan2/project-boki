@@ -19,7 +19,7 @@ const KICK_AWAY := 0.4          # keys this far away from the wall (dot) push of
 const KICK_KEYS_MIN := 0.3      # stick deflection that counts as pressing a direction
 const KICK_PUSH := 7.5          # m/s away from the wall for a push-off
 const KICK_SLIDE_KEEP := 0.6    # share of the speed along the wall a push-off keeps
-const KICK_PUSH_JUMP := 0.9     # share of JUMP_V a push-off jumps with
+const KICK_PUSH_JUMP := 0.9     # share of Loco.jump_v a push-off jumps with
 const KICK_VOL := -5.0          # dB: the scuff
 const KICK_PITCH_MIN := 0.85    # each hop's scuff a little different
 const KICK_PITCH_MAX := 1.2
@@ -55,13 +55,13 @@ func try_kick(h: Hunter) -> bool:
 	var toward := keys.normalized().dot(h.wall_n) if keys.length() >= KICK_KEYS_MIN else -1.0
 	if toward > KICK_AWAY:
 		var push := h.wall_n * KICK_PUSH + Vector2(h.vel.x, h.vel.z).slide(h.wall_n) * KICK_SLIDE_KEEP
-		h.vel = Vector3(push.x, Hunter.JUMP_V * KICK_PUSH_JUMP, push.y)
+		h.vel = Vector3(push.x, Loco.jump_v * KICK_PUSH_JUMP, push.y)
 	else:
-		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Hunter.H_GRAV) + KICK_RISE
-		h.vel.y = sqrt(2.0 * Hunter.H_GRAV * rise)
+		var rise := pow(maxf(h.vel.y, 0.0), 2.0) / (2.0 * Loco.gravity) + KICK_RISE
+		h.vel.y = sqrt(2.0 * Loco.gravity * rise)
 	h.wall_touch_t = 0.0
 	# no glider until the rise is done, so a held jump keeps the kick's height
-	h.glide_cd = maxf(h.glide_cd, h.vel.y / Hunter.H_GRAV)
+	h.glide_cd = maxf(h.glide_cd, h.vel.y / Loco.gravity)
 	h.stats["wall_kicks"] = int(h.stats.get("wall_kicks", 0)) + 1
 	var pitch := randf_range(KICK_PITCH_MIN, KICK_PITCH_MAX)
 	scuff(h.m, h.pos, pitch)

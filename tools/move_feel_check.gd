@@ -226,6 +226,7 @@ func run(main: Node) -> void:
 	_dash_exit()
 	_dash_curves()
 	_plain_dash()
+	_moved_values()
 	_kit_dashes()
 	_abyss_updraft()
 	_feather()
@@ -450,7 +451,7 @@ func _glide() -> void:
 	_steps(60)
 	P.inp["jump"] = true
 	var tc := -1.0
-	var sink: float = Hunter.GLIDE_SINK
+	var sink: float = Loco.glide_sink
 	for i in 90:
 		P.inp["glide"] = true
 		m.step(DT)
@@ -926,7 +927,7 @@ func _feather() -> void:
 		P.last_gy = lip
 		P.air_t = 1.0
 		P.gliding = true
-		P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+		P.vel = Vector3(-Loco.glide_speed, 0.0, 0.0)
 		var x0 := P.pos.x
 		var holding := true
 		for i in 60 * 60:
@@ -1269,3 +1270,53 @@ func _e2e() -> void:
 	rec("render_lag_m", absf(P.pos.x - P.position.x))
 	Input.action_release("right")
 	for i in 10: m._process(DT)
+
+# ---------------------------------------------------------------- moved numbers
+## The numbers that moved into content/rules/tuning.json (feel-tuning-consts): each against the constant it replaced,
+## and one scripted run, jump, dash and glide whose every step's position and velocity hashes to the value recorded
+## on the code before the move.
+const OLD_VALUES := {
+	"jump_v": 6.8, "gravity": 14.7, "glide_speed": 5.0, "glide_sink": 1.4, "ledge_air_accel": 40.0,
+	"dash_speed": 19.0, "dash_time": 0.19, "dash_regen": 2.2, "ex_dash_cd": 12.5, "dash_buffer": 0.18,
+	"ex_time_mul": 1.45, "ex_dist": 5.0,
+}
+const OLD_TRACE_HASH := 3115338930
+
+func _moved_values() -> void:
+	var now := {
+		"jump_v": Loco.jump_v, "gravity": Loco.gravity, "glide_speed": Loco.glide_speed, "glide_sink": Loco.glide_sink,
+		"ledge_air_accel": Loco.ledge_air_accel, "dash_speed": Loco.dash_speed_base, "dash_time": Loco.dash_time,
+		"dash_regen": Loco.dash_regen, "ex_dash_cd": Loco.ex_dash_cd, "dash_buffer": Loco.dash_buffer,
+		"ex_time_mul": Loco.ex_time_mul, "ex_dist": Loco.ex_dist,
+	}
+	for k in OLD_VALUES:
+		var same := is_equal_approx(float(now[k]), OLD_VALUES[k])
+		ok(same, "tuning.json %s = %s (was %s)" % [k, str(now[k]), str(OLD_VALUES[k])])
+	var trace := _trace()
+	ok(trace == OLD_TRACE_HASH, "the run, jump, dash, glide trace is unchanged (%d, was %d)" % [trace, OLD_TRACE_HASH])
+
+func _row() -> String:
+	return "%.6f %.6f %.6f %.6f %.6f %.6f;" % [P.pos.x, P.pos.y, P.pos.z, P.vel.x, P.vel.y, P.vel.z]
+
+func _trace() -> int:
+	var log := ""
+	_reset(flat)
+	P.set_arch("")
+	var legs := [["", 60], ["jump", 50], ["dash", 40]]
+	for leg in legs:
+		P.inp["move"] = Vector2(1, 0)
+		if leg[0] != "": P.inp[leg[0]] = true
+		for i in int(leg[1]):
+			m.step(DT)
+			if leg[0] != "": P.inp[leg[0]] = false
+			log += _row()
+	_glide_at(30.0)
+	P.inp["jump"] = true
+	for i in 150:
+		P.inp["glide"] = true
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = i == 90
+		m.step(DT)
+		log += _row()
+	_clear_inp()
+	return log.hash()

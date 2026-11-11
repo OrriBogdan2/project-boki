@@ -48,7 +48,7 @@ func tap_spot() -> Vector3:
 	var d := k.h.aim_dir()
 	return k.h.pos + Vector3(d.x, 0, d.y) * float(sd()["reach"])
 
-func _flight(up: float) -> float: return 2.0 * up / Hunter.H_GRAV
+func _flight(up: float) -> float: return 2.0 * up / Loco.gravity
 
 func move_k() -> float:
 	return float(sd()["walk_k"]) if charging() else 1.0

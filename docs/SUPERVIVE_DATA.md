@@ -14,7 +14,7 @@ The owner read these straight from the installed game (config files, curve table
 
 | Setting | Game value | In metres | Used here? |
 |---|---|---|---|
-| Gravity | -1470 uu/s² | -14.7 m/s² | **Yes**: `Hunter.H_GRAV`, one gravity up and down (match and home) |
+| Gravity | -1470 uu/s² | -14.7 m/s² | **Yes**: `Loco.gravity`, one gravity up and down (match and home) |
 | Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Partly: 6.8 m/s (1.5 m, 0.9 s in the air), so jump + mantle stays under our 4-terrace walls (the wall kick tops those) |
 | Air control | 0.015 | almost no steering mid-jump | Translated: keys steer at 0.3x ground accel (`physics.air_control`), a reverse takes ~0.5 s; ledge rises still steer crisply |
 | Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |

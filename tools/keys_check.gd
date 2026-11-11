@@ -336,7 +336,7 @@ func _shrubling() -> void:
 		P.teleport(_ground_near(m, S.pos + Vector3(4.0, 0, 0)))      # the hunter keeps pace
 	ok("damage makes it flee", seen_flee, "moved %.1f m" % S.pos.distance_to(home))
 	ok("faster than a hunter on foot", peak > P.base_speed + 0.2, "%.2f vs %.2f" % [peak, P.base_speed])
-	ok("slower than a dash", peak < Hunter.DASH_SPEED * 0.5, "%.2f vs %.1f" % [peak, Hunter.DASH_SPEED])
+	ok("slower than a dash", peak < Loco.dash_speed_base * 0.5, "%.2f vs %.1f" % [peak, Loco.dash_speed_base])
 	# the hunter gives up: it dives and is a bush again
 	P.teleport(_ground_near(m, S.pos + Vector3(60.0, 0, 0)))
 	step(m, 14.0)

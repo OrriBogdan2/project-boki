@@ -334,7 +334,7 @@ func in_dash() -> bool:
 func dash_vy(dt: float) -> float:
 	if rinkrun.is_empty() and not _rime_carrying():
 		return 0.0
-	return maxf(h.vel.y - Hunter.H_GRAV * dt, -float(dash_def().get("air_fall", 1.5)))
+	return maxf(h.vel.y - Loco.gravity * dt, -float(dash_def().get("air_fall", 1.5)))
 
 ## Sealed in Rimelock she is a statue: her facing stays as it was on the cast frame (item 65).
 func face_locked() -> bool:
@@ -444,7 +444,7 @@ func _tick_rinkrun(dt: float) -> void:
 ## glide rules (item 62), and the shared press can't open a glider while the skate runs. Near the ground the press
 ## stays the shared buffered jump.
 func _glide_pressed() -> bool:
-	if not bool(h.inp.get("jump", false)) or h.grounded or h.vel.y >= Hunter.JUMP_V - 0.01:
+	if not bool(h.inp.get("jump", false)) or h.grounded or h.vel.y >= Loco.jump_v - 0.01:
 		return false
 	return h.over_void() or h.pos.y - h.ground() > 0.9
 

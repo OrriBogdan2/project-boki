@@ -43,7 +43,6 @@ const FORE := 0.235
 const REACH := UPPER + FORE
 const WEAPON_SLACK := 0.02     # m: the trigger hand may sit this far off its grip before the weapon is pulled to it
 const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go about the hips
-const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
 const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
@@ -509,8 +508,8 @@ static func _spring(x: float, v: float, want: float, k: float, damp: float, dt: 
 ## How long a jump still has before it lands, from the vertical speed and the height above the ground.
 static func _time_left(vy: float, h: float) -> float:
 	var up := maxf(vy, 0.0)
-	var peak := h + up * up / (2.0 * G_UP)
-	return up / G_UP + peak / 7.5 + 0.08
+	var peak := h + up * up / (2.0 * Loco.gravity)
+	return up / Loco.gravity + peak / 7.5 + 0.08
 
 ## Ease-in-out for spins: slow start, fast middle, a soft finish.
 static func _spin_e(p: float) -> float:

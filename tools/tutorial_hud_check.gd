@@ -169,7 +169,7 @@ func _under_banner() -> int:
 ## From each stop to the next on the same island, plain walking: no step up taller than half a jump.
 func _reach() -> void:
 	var tu: Tutorial = m.tut
-	var jump_apex := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
+	var jump_apex := Loco.jump_v * Loco.jump_v / (2.0 * Loco.gravity)
 	var order := ["land", "move", "dash", "exdash", "glide", "crouch", "pickup", "yard", "chest"]
 	var worst := 0.0
 	var worst_at := ""

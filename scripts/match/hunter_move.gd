@@ -2,10 +2,11 @@ class_name HunterMove
 extends RefCounted
 ## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
-## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+## ([game data]: SUPERVIVE's movement settings, uu converted to metres). The shared numbers are the "physics" section
+## of content/rules/tuning.json; the per-hunter rows are content/rules/hunter_move.json.
 
 static var _rules: Dictionary = _load()
-static var _phys: Dictionary = _rules["physics"]
+static var _phys: Dictionary = _load_physics()
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]
@@ -33,7 +34,15 @@ static func _load() -> Dictionary:
 	assert(parsed is Dictionary, "content/rules/hunter_move.json did not parse")
 	return parsed
 
+## The "physics" section of tuning.json, read from the file: Loco may not have loaded when this class initialises.
+static func _load_physics() -> Dictionary:
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/tuning.json"))
+	assert(parsed is Dictionary, "content/rules/tuning.json did not parse")
+	return parsed["physics"]
+
 static func rules() -> Dictionary:
+	if _rules.is_empty():      # a static initialiser elsewhere (GlideSpike's) can ask before this class's own has run
+		_rules = _load()
 	return _rules
 
 ## This archetype's movement row (the default row for none or an unknown id).
@@ -117,8 +126,8 @@ static func fall_cap(h: Hunter) -> float:
 static func rise_vy(vy: float, left: float, k: float, deep_max: float, dt: float) -> float:
 	var cap := mantle_vy_cap * k
 	if left > Hunter.MANTLE_REACH:
-		return minf(sqrt(cap * cap + 2.0 * Hunter.H_GRAV * left), deep_max * k)
-	vy -= Hunter.H_GRAV * dt
+		return minf(sqrt(cap * cap + 2.0 * Loco.gravity * left), deep_max * k)
+	vy -= Loco.gravity * dt
 	if vy < cap:
 		vy = minf(vy + mantle_pull * dt, cap)
 	return vy
@@ -128,7 +137,7 @@ static func rise_vy(vy: float, left: float, k: float, deep_max: float, dt: float
 static func rise_time(depth: float) -> float:
 	var band := minf(depth, Hunter.MANTLE_REACH)
 	var c2 := mantle_vy_cap * mantle_vy_cap
-	var deep := (sqrt(c2 + 2.0 * Hunter.H_GRAV * depth) - sqrt(c2 + 2.0 * Hunter.H_GRAV * band)) / Hunter.H_GRAV
+	var deep := (sqrt(c2 + 2.0 * Loco.gravity * depth) - sqrt(c2 + 2.0 * Loco.gravity * band)) / Loco.gravity
 	return deep + band / mantle_vy_cap
 
 ## Speed onto a ledge you climb (m/s), from a hunter's run speed.

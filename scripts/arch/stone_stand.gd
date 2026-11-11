@@ -81,7 +81,7 @@ static func climb(h: Hunter, blk: float) -> bool:
 	var into := Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"]) - p2
 	if into.length() < 0.01 or (h.inp["move"] as Vector2).dot(into.normalized()) < 0.3:
 		return false
-	h.vel.y = RISE_V if rise > SETTLE else sqrt(2.0 * Hunter.H_GRAV * (rise + SETTLE_OVER))
+	h.vel.y = RISE_V if rise > SETTLE else sqrt(2.0 * Loco.gravity * (rise + SETTLE_OVER))
 	h.grounded = false
 	var push := into.normalized() * h.base_speed * CARRY_K      # her walk carries on as she rises: no hard stop
 	h.vel.x = push.x

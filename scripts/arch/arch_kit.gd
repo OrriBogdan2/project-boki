@@ -503,7 +503,7 @@ func _bond_tell() -> void:
 ## s the long (air) dash takes to come back: the hero's own `dash.air.cd` when its data has one, else the class's.
 func long_dash_cd() -> float:
 	var air: Dictionary = dash_def().get("air", {})
-	return float(air.get("cd", h.cdat.get("ex_cd", Hunter.EX_DASH_CD)))
+	return float(air.get("cd", h.cdat.get("ex_cd", Loco.ex_dash_cd)))
 
 ## Spends a dash charge (or the long air dash). False when neither is there.
 func spend_dash(use_ex: bool) -> bool:

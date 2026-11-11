@@ -25,8 +25,6 @@ var spawn := ""             # set when coming back out of a building: start at i
 var py := 0.0               # height of a jump
 var farm_t := 0.0
 var pvy := 0.0
-const JUMP_V := Hunter.JUMP_V
-const GRAV := Hunter.H_GRAV
 var pface := 0.0
 var walk_ph := 0.0
 var house_node: Node3D
@@ -1098,7 +1096,7 @@ var lfl := {}
 var _mv := Vector2.ZERO
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
-## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
+## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Loco.ex_dash_cd).
 ## The key hints sit centred at the bottom, and on a 1280-wide window
 ## they ran under the hub's buttons (Settings covered the start of each): slide one right of the hub
 ## when it would overlap, centred in the room that's left.
@@ -1120,8 +1118,9 @@ func _dodge() -> Dictionary:
 	var ck := Data.class_of_save()
 	var dd := Content.class_dodge(ck)
 	var cdat: Dictionary = Data.CLASSES.get(ck, {})
-	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Hunter.DASH_REGEN, "speed": Hunter.DASH_SPEED, "time": Hunter.DASH_TIME,
-		"ex_cd": float(cdat.get("ex_cd", Hunter.EX_DASH_CD)), "ex_time": float(cdat.get("ex_time", Hunter.DASH_TIME * 1.45)), "ex_dist": float(cdat.get("ex_dist", 5.0))}
+	var out := {"charges": float(cdat.get("dashes", 2)), "cd": Loco.dash_regen, "speed": Loco.dash_speed_base, "time": Loco.dash_time,
+		"ex_cd": float(cdat.get("ex_cd", Loco.ex_dash_cd)), "ex_dist": float(cdat.get("ex_dist", Loco.ex_dist)),
+		"ex_time": float(cdat.get("ex_time", Loco.dash_time * Loco.ex_time_mul))}
 	if dd:
 		out["charges"] = dd.charges; out["cd"] = dd.cooldown
 		for e in dd.effects:
@@ -1203,7 +1202,7 @@ func _move_player(d: float) -> void:
 		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")))
 		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
 	elif gliding:
-		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
+		hv = Loco.glide_step(hv, mv * Loco.glide_speed, Loco.glide_speed, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	elif mv.length() > 0.001:
@@ -1246,7 +1245,7 @@ func _move_player(d: float) -> void:
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
 	var jump_now := can_act and Input.is_action_just_pressed("jump")
 	if jump_now and not air:
-		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
+		pvy = water.breach(Loco.jump_v) if water.swimming else Loco.jump_v      # from deep water: a kick up and out
 		air = true
 		if dash_t > 0.0:      # out of a dash, as in a match: the dash ends, the jump carries Loco.dash_jump_keep of it
 			dash_t = 0.0
@@ -1270,9 +1269,9 @@ func _move_player(d: float) -> void:
 			# (the match's lift: Hunter.abyss_lift_vy). The farm never had it: you only sank
 			pvy = Hunter.abyss_lift_vy(pvy, _abyss_lip() - py, d)
 		elif gliding and pvy <= 0.0:
-			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Loco.glide_catch * d)
+			pvy = move_toward(pvy, -Loco.glide_sink, Loco.glide_catch * d)
 		else:
-			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
+			pvy = maxf(pvy - Loco.gravity * d, -HunterMove.fall_max)
 		py += pvy * d
 		if gh > World.VOID + 1.0 and py <= gh:
 			lfl = {}
@@ -1293,7 +1292,7 @@ func _move_player(d: float) -> void:
 	var st := Loco.S.DASHING if dash_t > 0.0 else (Loco.S.GLIDING if gliding else (Loco.S.AIRBORNE if air else Loco.S.GROUNDED))
 	loco.go(Loco.S.MANTLING if not lfl.is_empty() else st)
 	loco.tick(d)
-	Loco.report(loco, hv, pvy if air else 0.0, Hunter.GLIDE_SPEED if gliding else run)
+	Loco.report(loco, hv, pvy if air else 0.0, Loco.glide_speed if gliding else run)
 	_glider_look()
 	player.position = ppos + Vector3(0, py - water.drop_y(), 0)
 	# face the mouse; with the mouse outside the window, face where you're walking
@@ -1557,7 +1556,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		var spd := Hunter.FLING_SPEED if timed else SPEED
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
+		pvy = sqrt(2.0 * Loco.gravity * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
 		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
 		return true
 	if left <= 0.0:
