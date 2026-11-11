@@ -1318,7 +1318,7 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
-	var jump_now := can_act and Input.is_action_just_pressed("jump")
+	var jump_now := can_act and Input.is_action_just_pressed("jump") and not (hkite and hkite.flying())
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
@@ -2925,7 +2925,7 @@ func _kin_act(k: Dictionary) -> void:
 		"brush": _care_brush(rec)
 		_: _pet_kin(k)
 
-## Farm XP for a kin (GardenXp); a form or mutation it earns plays out as soon as nothing is open.
+## Farm XP for a kin (GardenXp): a form or mutation it earns plays out as soon as nothing is open.
 func _garden_xp(rec: Dictionary, action: String, love: bool, points := 0) -> void:
 	GardenXp.give(rec, action, love, points)
 	_play_evolutions.call_deferred()
@@ -4623,8 +4623,8 @@ func _finish_training() -> void:
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
-	_garden_xp(rec, "drill", false, pts)
 	if gained > 0: CareJournal.note(rec, "trained %s at the yard: +%d" % [String(Care.STATS[stat]["name"]).to_lower(), gained])
+	_garden_xp(rec, "drill", false, pts)
 	if Care.care_day(rec, "trained"):
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
 	Save.save_game()

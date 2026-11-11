@@ -29,6 +29,15 @@ static func strength(rec: Dictionary) -> int:
 		total += int(rec["stats"].get(s, 0))
 	return total
 
+## A visiting rival for `rec`: a copy whose stats are rec's times `ratio` (rounded up, so its strength is
+## at least ratio times rec's and the win counts for a cup round of that min_ratio).
+static func rival(rec: Dictionary, ratio: float) -> Dictionary:
+	var r := rec.duplicate(true)
+	r["uid"] = "rival"
+	for s in Care.STATS:
+		r["stats"][s] = ceili(float(rec["stats"].get(s, 0)) * ratio)
+	return r
+
 ## The strongest of `recs` other than `mine`: the rival a race is judged against.
 static func strongest(recs: Array, mine: Dictionary) -> Dictionary:
 	var best: Dictionary = {}
