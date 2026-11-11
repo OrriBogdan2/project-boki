@@ -115,7 +115,8 @@ func _thrust() -> void:
 	h.combo_i = i + 1
 	h._lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
-	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2, "own_look": true})
+	var how := {"heavy": i == 2, "own_look": true}
+	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), how)
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
 	play(THRUSTS[i])
 	var o := {"len": float(ld["reach"][i])}
@@ -132,7 +133,8 @@ func _tide_tick(dt: float) -> void:
 	lmb_t += dt
 	var k := tide_k()
 	var td: Dictionary = lmb_def()["tide"]
-	AimKit.lane(h, "lmb", {"len": float(td["dist"][1]) + float(td["reach"]), "len0": float(td["dist"][0]) + float(td["reach"]),
+	var reach := float(td["reach"])
+	AimKit.lane(h, "lmb", {"len": float(td["dist"][1]) + reach, "len0": float(td["dist"][0]) + reach,
 			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col()})
 	AimKit.charge(h, k, {"col": col_of(lmb_def()), "col2": res_col()})
 	HeroVfx.of(m).hold(h, "tide_charge", k)

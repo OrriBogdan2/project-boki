@@ -312,7 +312,8 @@ func _wave() -> void:
 		top["stun"] >= 0.9 and top["slow"] >= 2.5 and absf(top["k"] - 0.5) < 0.05,
 		"stun %.2f slow %.2f k %.2f" % [top["stun"], top["slow"], top["k"]])
 	ok("Tidal Wave: lands with a shield and is hittable again",
-		K.anim_id != "gil_surf" and int(HeroVfx.of(m).plays.get("wave_land", 0)) > 0 and P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
+		K.anim_id != "gil_surf" and int(HeroVfx.of(m).plays.get("wave_land", 0)) > 0
+		and P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
 	_wave_way(Vector2(-1, 0))
