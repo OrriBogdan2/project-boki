@@ -91,6 +91,7 @@ func fresh() -> Dictionary:
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
+		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
