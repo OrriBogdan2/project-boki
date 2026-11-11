@@ -12,7 +12,6 @@ static var brake_friction: float = _phys["ground_friction"] * _phys["braking_fri
 static var braking_substep: float = _phys["braking_substep"]      # s, the longest sub-step of a brake
 static var brake_stop_speed: float = _phys["brake_stop_speed"]    # m/s, a brake leaving less stops dead
 static var min_tick: float = _phys["min_tick"]                    # s, the shortest sub-step braked
-static var turn_friction: float = _phys["turn_friction"]     # 1/s: UE GroundFriction, how fast held keys bend the walk
 static var dash_exit_run: float = _phys["dash_exit_run"]
 static var fall_max: float = _phys["fall_cap"]
 static var abyss_fall_max: float = _phys["abyss_fall_cap"]
@@ -44,8 +43,6 @@ static var pad_vy: float = _phys["pad_vy"]
 static var pad_clear: float = _phys["pad_clear"]
 static var updraft_vy: float = _phys["updraft_vy"]
 const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
-
-const OVER_RUN := 1.01     # UE IsExceedingMaxSpeed: speed past 1.01x the wanted speed counts as over it
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -118,19 +115,6 @@ static func follows_floor(h: Hunter, g: float, travel: float) -> bool:
 		return false
 	h.step_vis += h.pos.y - g
 	return true
-
-## Ground velocity after a step with keys held, UE's walking CalcVelocity: turn_friction (a share per
-## second) bends the velocity toward the keys at its current speed, the accel adds on, and the speed caps
-## at the wanted speed. A reversal sheds speed at 2 x turn_friction plus the accel; a 90-degree cut arcs
-## round at run speed. Over the wanted speed by UE's 1% slack (a kit step, a knock) the walking brake sheds it.
-static func walk(hv: Vector2, wish: Vector2, accel: float, grip: float, dt: float) -> Vector2:
-	var run := wish.length()
-	var s := hv.length()
-	if s > run * OVER_RUN:
-		return Loco.accel_to(hv, wish, accel, 0.0, brake_rate(s) * grip, dt)
-	var dir := wish / run
-	var bent := hv - (hv - dir * s) * minf(turn_friction * grip * dt, 1.0)
-	return (bent + dir * accel * dt).limit_length(run)
 
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.
