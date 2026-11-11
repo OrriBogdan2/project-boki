@@ -28,6 +28,7 @@ func run(main_node: Node, who: String) -> void:
 		await _growth()
 		await ults.mage()
 		await load("res://tools/ryzz_items_check.gd").new().run(self, ac)
+		await load("res://tools/mage_glide_cancel_check.gd").new().run(self, ac)
 		var parity = load("res://tools/parity_pvb.gd").new()
 		parity.main = main
 		await parity.vireo()
