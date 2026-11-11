@@ -1,11 +1,11 @@
 extends RefCounted
 ## --hawk-sense-shots: review screenshots of Lace's Hawk Sense (HawkSense) in a live match (xvfb with a
 ## renderer), into --shots-dir=<dir>. A rival stands just behind a boulder (the map's rock mesh, solid in the
-## map data), seen from Lace's camera 6 m to the south: at full health they are hidden; under the health line
+## map data), seen from Lace's camera 5 m to the south: at full health they are hidden; under the health line
 ## they are revealed and their outline in Lace's colour shows through the rock. Each as the full frame and a
 ## 3x crop round the rock. Never touches the save.
 
-const BACK := 6               # tiles south of the rock Lace stands (the camera looks north over her)
+const BACK := 5               # tiles south of the rock Lace stands (the camera looks north over her)
 const ROCK_SIZE := 1.6         # the boulder's scale (the map's run 0.8 to 2.2)
 const CROP := Vector2i(220, 160)   # px round the rock, scaled 3x
 
@@ -34,17 +34,13 @@ func run(main_node: Node) -> void:
 		mb.visible = false
 	var P := m.player
 	var foe: Hunter = m.hunters.filter(func(o): return o.team != P.team)[0]
-	foe.ctrl = "idle"
 	var rock := _rock_near(P.pos)
 	print("HAWKSHOTS rock at %s" % rock)
 	P.teleport(rock + Vector3(0, 0, BACK))
 	P.vel = Vector3.ZERO
-	foe.teleport(rock + Vector3(0, 0, -1.0))
-	foe.face = 0.0
 	P.inp["aim"] = rock + Vector3(0, 0.9, 0)
 	for label in ["healthy", "injured"]:
-		foe.hp = foe.max_hp * (1.0 if label == "healthy" else 0.4)
-		var img := await _frame()
+		var img := await _frame(foe, rock + Vector3(0, 0, -1.0), 1.0 if label == "healthy" else 0.4)
 		var sensed := (P.ak as ArcherKit).sense.senses(foe)
 		print("HAWKSHOTS %s: sensed %s, drawn %s, hidden by sight %s" % [label, sensed, foe.visible, foe.unseen])
 		img.save_png(dir.path_join("hawk_%s.png" % label))
@@ -76,8 +72,13 @@ func _open(p: Vector3) -> bool:
 	var i := m.world.idx(int(p.x), int(p.z))
 	return m.world.kind[i] == World.T_GROUND and absf(m.world.ground_at(p.x, p.z) - p.y) < 0.3
 
-## About a second of live frames, then the frame as an image.
-func _frame() -> Image:
+## About a second of live frames with `foe` held at `spot` and `hp_k` of their health (a bot walks off and
+## fights back), then the frame as an image.
+func _frame(foe: Hunter, spot: Vector3, hp_k: float) -> Image:
 	for i in 60:
+		foe.ctrl = "idle"
+		foe.teleport(spot)
+		foe.face = 0.0
+		foe.hp = foe.max_hp * hp_k
 		await main.get_tree().process_frame
 	return main.get_viewport().get_texture().get_image()
