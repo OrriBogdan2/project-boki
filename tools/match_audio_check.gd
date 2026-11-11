@@ -6,6 +6,9 @@ extends RefCounted
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel),
 ## and movement sounds (MoveSfx): a remote Hunter's footstep plays placed at it (panned), an enemy's louder than yours,
 ## quieter in a fight, out to the step reach and silent past it or while crouched; landings are placed.
+## Water (WaterSfx): a Hunter's and a Boki's landing splash, dash spray and wading loop (louder and higher
+## the faster) play on the map's water and none of them on dry ground; back on the farm, a swim stroke
+## plays in a pond's deep water and not on land.
 
 var main: Node
 var fails := 0
@@ -33,6 +36,7 @@ func run(main_node: Node) -> void:
 		main.get_tree().quit(1)
 		return
 	_footsteps(m, P)
+	_water(m, P, k)
 	var key := "rescue%d" % k.get_instance_id()
 	# the Boki goes down beside you and you run into it: the rescue's hum starts and follows the carry
 	k.pos = P.pos + Vector3(0.6, 0, 0)
@@ -62,6 +66,7 @@ func run(main_node: Node) -> void:
 		for i in 6:
 			await main.get_tree().process_frame
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
+	_strokes(main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
@@ -102,6 +107,97 @@ func _footsteps(m: Match, P: Hunter) -> void:
 	var kael := MoveSfx.pitch("juggernaut")
 	var neve := MoveSfx.pitch("rimewright")
 	ok(kael < neve, "height: Kael (2.05 m) sounds lower than Neve (1.56 m): %.2f vs %.2f" % [kael, neve])
+
+func _water(m: Match, P: Hunter, k: Kin) -> void:
+	var wet := _water_spot(m)
+	var dry := P.pos
+	ok(wet != Vector3.INF and WaterSfx.wet(m, wet), "setup: the map has water to wade in (%s)" % wet)
+	ok(not WaterSfx.wet(m, dry), "setup: the Hunter's spawn is dry ground")
+	if wet == Vector3.INF:
+		return
+	var splash := "water_land_" + StepSurface.weight_of(P)
+	var boki_splash := "water_land_" + WaterSfx.kin_weight(k)
+	P.grounded = true
+	P.unseen = false
+	P.crouch = false
+	k.state = "active"
+	k.fly = {}
+	k.grounded = true
+	for spot: Vector3 in [wet, dry]:
+		var on := "on water" if spot == wet else "on dry ground"
+		var want := spot == wet
+		var got := _water_heard(P, spot, func(): MoveSfx.land(P, -8.0))
+		ok((got == [splash]) == want, "a Hunter landing %s: %s" % [on, got])
+		got = _water_heard(P, spot, func(): P.dash_with({"speed": 0.01, "time": 0.01}))
+		ok((got == ["water_dash"]) == want, "a Hunter dashing %s: %s" % [on, got])
+		got = _water_heard(k, spot, func(): _leap(m, k, spot))
+		ok((got == [boki_splash]) == want, "a Boki landing from a leap %s: %s" % [on, got])
+		got = _water_heard(k, spot, func(): k.start_rush(Vector2(1, 0), {"distance": 0.5}, {}))
+		ok((got == ["water_dash"]) == want, "a Boki charging %s: %s" % [on, got])
+		k.fly = {}
+		k.state = "active"
+		var loop := "holds its loop" if want else "has no loop"
+		var hunter_wades := _wade_vol(P, P, spot, 1.0, func(): WaterSfx.wade(P)) != -INF
+		ok(hunter_wades == want, "a Hunter wading %s %s" % [on, loop])
+		var boki_wades := _wade_vol(P, k, spot, 1.0, func(): WaterSfx.kin_wade(k)) != -INF
+		ok(boki_wades == want, "a Boki wading %s %s" % [on, loop])
+	P.roll_t = 0.0
+	var run := _wade_vol(P, P, wet, 1.0, func(): WaterSfx.wade(P))
+	var run_pitch: float = Sfx.loops[WaterSfx.wade_key(P.get_instance_id())]["p"].pitch_scale
+	var walk := _wade_vol(P, P, wet, 0.4, func(): WaterSfx.wade(P))
+	var walk_pitch: float = Sfx.loops[WaterSfx.wade_key(P.get_instance_id())]["p"].pitch_scale
+	ok(run > walk and run_pitch > walk_pitch, "the wading loop follows speed: run %.1f dB x%.2f, walk %.1f dB x%.2f"
+			% [run, run_pitch, walk, walk_pitch])
+	ok(_wade_vol(P, P, wet, 0.0, func(): WaterSfx.wade(P)) == -INF, "...and is silent standing still in water")
+	Sfx.loop_stop(WaterSfx.wade_key(P.get_instance_id()))
+
+## The first tile of the map's first "water" surface, or INF if it has none.
+func _water_spot(m: Match) -> Vector3:
+	for tag: Dictionary in World.load_layout(m.world.layout_id).get("surfaces", []):
+		if tag["kind"] == "water":
+			var b: Array = tag["rect"]
+			var x := floorf((float(b[0]) + float(b[2])) * 0.5) + 0.5
+			var z := floorf((float(b[1]) + float(b[3])) * 0.5) + 0.5
+			return Vector3(x, m.world.ground_at(x, z), z)
+	return Vector3.INF
+
+## The water sounds `make` plays with `who` (a Hunter or a Boki) at `at` and the listener there.
+func _water_heard(who: Ent, at: Vector3, make: Callable) -> Array:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	Sfx.listener = at
+	var home := who.pos
+	who.pos = at
+	make.call()
+	who.pos = home
+	return Sfx.last_played.keys().filter(func(n: String): return n.begins_with("water_"))
+
+## A Boki's short leap from beside `at` onto it, stepped until it lands.
+func _leap(m: Match, k: Kin, at: Vector3) -> void:
+	k.pos = at + Vector3(0.8, 0, 0)
+	k.start_leap(at, {"time": 0.05, "height": 0.2}, {})
+	_step(m, 0.1)
+
+## The level of `who`'s wading loop after `make` with it at `at` moving at `k` of its run speed (-INF: none).
+func _wade_vol(P: Hunter, who: Ent, at: Vector3, k: float, make: Callable) -> float:
+	var key := WaterSfx.wade_key(who.get_instance_id())
+	Sfx.loop_stop(key)
+	var run := P.base_speed if who == P else (who as Kin).speed
+	who.vel = Vector3(run * k, 0, 0)
+	_water_heard(who, at, make)
+	who.vel = Vector3.ZERO
+	return float(Sfx.loops[key]["vol"]) if Sfx.loop_on(key) else -INF
+
+## The farm's pond: a swim stroke in deep water, none on land.
+func _strokes(home: Node) -> void:
+	var w: HomeWater = home.water
+	for deep in [true, false]:
+		Sfx.last_played.clear()
+		w.stroke_t = 0.0
+		w.step(2 if deep else 0, 0.016, Vector2(1, 0), false)
+		var where := "in deep water" if deep else "on land"
+		var heard: Array = Sfx.last_played.keys()
+		ok(heard.has("water_stroke") == deep, "a swim stroke on the farm %s (%s)" % [where, heard])
 
 ## The voice e's footstep starts with e standing `off` from P (null if none).
 func _step_of(P: Hunter, e: Hunter, off: Vector3):

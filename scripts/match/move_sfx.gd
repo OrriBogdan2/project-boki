@@ -36,9 +36,10 @@ static func footstep(h: Hunter) -> void:
 	var vol := StepSurface.vol_db(h, surf, level(h, float(rules()["step_db"])))
 	Sfx.play(StepSurface.cue(h, surf), h.pos, vol, 0.08, pitch(h.arch), float(rules()["step_reach_m"]))
 
-## A landing at `vol_db`: the weight class's thud with the ground's step under it.
+## A landing at `vol_db`: the weight class's thud with the ground's step under it, a splash in water.
 static func land(h: Hunter, vol_db: float) -> void:
 	_weighted(h, "land", vol_db, 1.0)
+	WaterSfx.land(h, vol_db)
 
 ## A jump's push at `vol_db` (`pitch_mul` for the air jump's higher one): the class's jump, the ground's step under it.
 static func jump(h: Hunter, vol_db: float, pitch_mul := 1.0) -> void:

@@ -461,6 +461,7 @@ func start_rush(d: Vector2, e: Dictionary, ctx: Dictionary) -> void:
 		k -= 0.5
 	fly = {"from": pos, "to": to, "t": 0.0, "dur": maxf(0.08, pos.distance_to(to) / float(e.get("speed", 22.0))), "hit": {}, "rush": true, "e": e, "ctx": ctx}
 	state = "flying"
+	WaterSfx.kin_dash(self)
 
 ## A jump onto a spot (a grammar leap): untouchable in the air, then its landing.
 func start_leap(to: Vector3, e: Dictionary, ctx: Dictionary) -> void:
@@ -725,6 +726,8 @@ func _sim_fly(dt: float) -> void:
 			grounded = true
 		vel = Vector3.ZERO
 		state = "active"
+		if grounded and not rush:
+			WaterSfx.kin_land(self)
 		if thrown:
 			KinStrike.land(self, hit_set, charged)       # a thrown Boki staggers what it lands on (a charging mount harder)
 		if not land.is_empty():
@@ -870,6 +873,7 @@ func _ground_move(wish: Vector2, dt: float) -> void:
 	body_vertical(dt)
 	if grounded and not m.world.is_void(pos.x, pos.z):
 		last_safe = pos
+	WaterSfx.kin_wade(self)
 	if hv.length() > 0.3:
 		face = lerp_angle(face, atan2(-hv.x, -hv.y), minf(1.0, dt * 12.0))
 

@@ -440,6 +440,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | pitch_min | 0.8 |
 | pitch_max | 1.2 |
 | height_m | {"juggernaut": 2.05, "rimewright": 1.56, "bulwark": 2.4, "dredge": 2.37, "ostra": 1.89, "ashwick": 1.86, "gunslinger": 1.74, "dolm": 1.74, "mage": 1.73, "archer": 1.71, "thief": 1.57, "tender": 0.96} |
+| water | {"_doc": "WaterSfx in shallow water (StepSurface \"water\"): splash_db a landing's splash relative to the landing; dash_db a dash's spray; wade_db the wading loop at a walk's edge (the first value, at wade_min_k of run speed) and at full run speed (the second); wade_pitch the loop's pitch at those two speeds; kin_db added for a Boki (smaller than a Hunter). Swimming exists only in the farm's ponds: stroke_db a stroke there (HomeWater).", "splash_db": 2.0, "dash_db": -9.0, "wade_db": [-24.0, -14.0], "wade_pitch": [0.85, 1.15], "wade_min_k": 0.15, "kin_db": -3.0, "stroke_db": -13.0} |
 
 ## perk_orbs (`content/rules/perk_orbs.json`)
 

@@ -4,7 +4,7 @@ extends Node
 ## across the map stays soft. The SFX bus has a gentle compressor, a touch of room reverb and a
 ## limiter, so a crowd of sounds blends together instead of piling up into peaks.
 
-const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
+const NAMES := ["splash", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
 	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
 	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop",
 	"swipe", "cleave", "charge", "k_venom", "k_spore", "k_gravity", "k_prism", "k_lunar", "k_echo",
@@ -484,7 +484,7 @@ var loops := {}               # key -> {p: AudioStreamPlayer, pos, vol, reach}
 func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 0.0) -> void:
 	if loops.has(key):
 		return
-	var st = streams.get(sname)
+	var st = streams.get(sname) if ensure(sname) else null
 	if st is Array: st = (st as Array)[0]
 	var p := AudioStreamPlayer.new()
 	p.bus = "SFX"
@@ -521,12 +521,14 @@ func loop_stop(key: String) -> void:
 		tw.tween_property(p, "volume_db", -60.0, 0.12)
 		tw.tween_callback(p.queue_free)
 
-## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum): if the
-## calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
+## A loop that lasts only while its owner keeps asking for it, once per tick (a Boki rescue's hum, wading):
+## if the calls stop (the channel ends any way, or its node is freed mid-channel) it stops within HOLD_MS.
+## Each call sets its place, level and pitch.
 const HOLD_MS := 250
 func loop_hold(key: String, sname: String, pos = null, vol_db := 0.0, pitch := 1.0) -> void:
 	loop_start(key, sname, pos, vol_db)
 	loops[key]["held"] = Time.get_ticks_msec()
+	loops[key]["vol"] = vol_db
 	loop_set(key, pos, pitch)
 
 func _drop_stale_holds() -> void:
