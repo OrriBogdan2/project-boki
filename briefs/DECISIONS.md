@@ -550,3 +550,9 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 ## 2026-11-11 ~12 AM EST owner: ship 0.24.4 now, the big changes follow in 0.24.5
 - Overrides 2026-11-10 "0.24.4 holds": ship what is gated now (ext/release-integ-0244c 23cc281bd, docs/GATE_0244.md) so the owner can play it.
 - 0.24.5: Limited Ways Out (Heart + quest exits, open extraction removed), the Chao-style garden core, ext/meeko-orbit, ext/albert-appeal, the appeal4 candidates (Cinder, Sable).
+
+## Owner 2026-11-11 (playtest of 0.24.4): modes + incubator
+- **Rolling sessions removed as a player option** (the option in the menu goes; the mode code can stay behind a dev flag).
+- **Solos are back** (supersedes "No duo or solo extraction" above for solos only): 20 hunters (20 solos, bots fill). Trios stay 10 squads x 3 = 30 hunters.
+- **Map size follows player count:** solos play a compressed map; trios get a bigger map allowance. Every map starts with part of it already inside the Blight/zone (play space starts smaller than the full map); solos start with a smaller play space than trios.
+- **Incubator does not hatch instantly.** Coordinator call: an egg takes 20 minutes of play time (garden or matches, not wall-clock while closed) to hatch, visible as progress on the egg itself, no pop-ups. Tunable in data. The Chao-style garden core (0.24.5) may restyle this; the slow hatch stays.
