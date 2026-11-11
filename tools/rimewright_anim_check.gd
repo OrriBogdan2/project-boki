@@ -82,7 +82,7 @@ func _spear() -> void:
 	P.inp["sec_hold"] = false
 	_line("tm_spear", _event(m, K, "tm_spear", func(): return K.stats["spears"] >= 1), "the spear leaves her palms")
 	var t := 0.0
-	while K.zones.is_empty() and t < 2.0:
+	while K.spear.zones.is_empty() and t < 2.0:
 		step(m, DT)
 		t += DT
 	var landed := m.time

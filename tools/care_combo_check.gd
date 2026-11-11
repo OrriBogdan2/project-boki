@@ -684,7 +684,7 @@ func _spear_travel() -> void:
 		P.inp["sec_hold"] = false
 		var t := 0.0
 		var start := Vector3.INF
-		while K.zones.is_empty() and t < 2.0:
+		while K.spear.zones.is_empty() and t < 2.0:
 			step(m, 1.0 / 60.0)
 			t += 1.0 / 60.0
 			var mine := _mine(m, P)
@@ -720,7 +720,7 @@ func _spear_rank3() -> void:
 		T.teleport(P.pos + Vector3(5.0, 0, 0))
 		step(m, 0.05)
 		var t0 := T.hp
-		K._detonate(P.pos + Vector3(5.0, 0, 0))
+		K.spear.detonate(P.pos + Vector3(5.0, 0, 0))
 		hits[rank_n] = t0 - T.hp
 		rim[rank_n] = 10000.0 - edge.hp
 		await _free(m)
@@ -1599,18 +1599,19 @@ func rimewright() -> void:
 	step(m, 0.3)
 	var ring: Dictionary = AimKit.entry(P, "rmb")
 	var ra: Vector2 = ring.get("at", Vector2.ZERO)
-	var chest := P.position + Vector3(P.aim_dir().x * RimewrightKit.SPEAR_AHEAD, RimewrightKit.SPEAR_Y,
-			P.aim_dir().y * RimewrightKit.SPEAR_AHEAD)
+	var chest := P.position + Vector3(P.aim_dir().x * RimeSpear.AHEAD, RimeSpear.CHEST_Y,
+			P.aim_dir().y * RimeSpear.AHEAD)
 	ok(
 			"tm RMB: held, the landing ring sits on the cursor; she gathers the spear between her palms at her chest",
 			AimKit.shown(P, "rmb") and ra.distance_to(Vector2(cur.x, cur.z)) < 0.2 and K.anim_id == "tm_spear_aim"
-				and K.lk().showing("spear_prop") and K._spear_at(0.0).distance_to(chest) < 0.01)
+				and K.lk().showing("spear_prop") and K.spear.pos_at(0.0).distance_to(chest) < 0.01)
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
 	step(m, 1.0 / 60.0)
 	ok(
 			"tm RMB: let go, the push starts (no throw wind-up): the spear on her palms, nothing at the target",
-			K.lk().showing("spear_prop") and _mine(m, P).is_empty() and K.zones.is_empty() and K.anim_id == "tm_spear")
+			(K.lk().showing("spear_prop") and _mine(m, P).is_empty() and K.spear.zones.is_empty()
+					and K.anim_id == "tm_spear"))
 	var thrown := {}
 	var waited := 1.0 / 60.0
 	while thrown.is_empty() and waited < 0.5:
@@ -1625,13 +1626,13 @@ func rimewright() -> void:
 	var off_her := Vector2(from.x - P.pos.x, from.z - P.pos.z).length()
 	ok(
 			"tm RMB: the push: the spear emerges from her (within 1 m, chest height) as the palms extend (0.1 s)",
-			not thrown.is_empty() and absf(waited - RimewrightKit.PUSH_T) < 0.04 and off_her < 1.0
+			not thrown.is_empty() and absf(waited - RimeSpear.PUSH_T) < 0.04 and off_her < 1.0
 				and from.y - P.pos.y > 0.8 and absf(spd - float(ld["speed"])) < 0.01
 				and not K.lk().showing("spear_prop"),
 			"after %.2f s, %.2f m out at %.2f m up, %.1f m/s" % [waited, off_her, from.y - P.pos.y, spd])
 	var flight := 0.0
 	var hp_fly := T.hp
-	while K.zones.is_empty() and flight < 1.5:
+	while K.spear.zones.is_empty() and flight < 1.5:
 		step(m, 1.0 / 60.0)
 		flight += 1.0 / 60.0
 	var landed := hp_fly - T.hp
@@ -1643,10 +1644,10 @@ func rimewright() -> void:
 			"tm RMB: the landing hits a small area (game data: 156 in a small AoE + slow): 18 within 1.2 m",
 			absf(landed - float(ld["dmg"]) * K.power("sec")) < 0.5 and float(ld["impact_r"]) <= 1.5,
 			"%.1f" % landed)
-	var zat: Vector3 = K.zones[0]["at"] if not K.zones.is_empty() else Vector3.INF
+	var zat: Vector3 = K.spear.zones[0]["at"] if not K.spear.zones.is_empty() else Vector3.INF
 	ok(
 			"tm RMB: the spear lands at the cursor and leaves a slow zone",
-			not K.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0,
+			not K.spear.zones.is_empty() and Vector2(zat.x - cur.x, zat.z - cur.z).length() < 1.0,
 			"off %.2f" % Vector2(zat.x - cur.x, zat.z - cur.z).length())
 	step(m, 0.2)
 	ok(
@@ -1788,7 +1789,7 @@ func rimewright() -> void:
 	P.inp["sig"] = true
 	step(m, 0.02)
 	P.inp["sig"] = false
-	var all_up := K.rinkrunning() and K.spear_aim and not K.wall_cast.is_empty()
+	var all_up := K.rinkrunning() and K.spear.aiming and not K.wall_cast.is_empty()
 	K.drop_holds()
 	P.inp["sec"] = false
 	P.inp["sec_hold"] = false
@@ -1798,9 +1799,9 @@ func rimewright() -> void:
 			"tm merge: drop_holds ends the skate, the spear aim and the wall's tell (no throw, no wall)",
 			all_up
 			and not K.rinkrunning()
-			and not K.spear_aim
+			and not K.spear.aiming
 			and K.wall_cast.is_empty()
 			and K.wall.is_empty()
-			and K.zones.is_empty()
+			and K.spear.zones.is_empty()
 			and not AimKit.shown(P, "rmb"))
 	await _free(m)

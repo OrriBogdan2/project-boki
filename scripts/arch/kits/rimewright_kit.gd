@@ -25,10 +25,7 @@ var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp
 var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
 var wall_cast := {}            # the wall's 0.2 s tell before it erupts: {t, dir, travel}
 var ice: IceBody = null        # her body as ice while sealed in Rimelock
-var spear_aim := false         # RMB held: the landing ring and the raised spear are up
-var throw_t := -1.0            # s left of the push before the spear leaves her palms (-1: none)
-var zones: Array = []          # landed spears: {at, left, total, id}
-var zone_n := 0
+var spear: RimeSpear          # RMB, the Ice Spear: its aim, push, landing zones and detonation
 var splinter_log := 0          # Shatters fired (tests)
 var look: CareLook
 var stats := {      # counters for the checks
@@ -44,15 +41,11 @@ const FROST_EVERY := 3         # ice plates between two frost patches left on th
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
-const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
-const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
-const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
-const SPEAR_Y := 1.05          # m: the height of her palms at the chest
-const SPEAR_FORM_T := 0.3      # s of holding RMB for the spear to grow to full size between her palms
 const CARRY_T := 0.5           # s a skate out of Rimelock holds its push-off speed before easing to the skate's
 
 func _setup() -> void:
 	res = 0.0
+	spear = RimeSpear.new(self)
 
 func lk() -> CareLook:
 	if look == null:
@@ -167,11 +160,11 @@ func _tick(dt: float) -> void:
 				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
 				{"r": 0.7 + 0.08 * n, "a": 0.15 + 0.75 * float(n) / 8.0})
 	_tick_darts(dt)
-	_tick_throw(dt)
+	spear.tick_throw(dt)
 	_tick_rinkrun(dt)
 	_tick_wall_cast(dt)
 	_tick_wall(dt)
-	_tick_zones(dt)
+	spear.tick_zones(dt)
 	_tick_rime(dt)
 	if ice != null:
 		ice.tick(dt)
@@ -257,7 +250,7 @@ func _heavy_k(key: String, heavy: bool) -> float:
 
 ## A dart's own flick (a large one flings both hands); none while the spear is held between her palms.
 func _play_dart(heavy: bool, side: float) -> void:
-	if spear_aim:
+	if spear.aiming:
 		return
 	if heavy:
 		play("tm_dart_heavy")
@@ -474,13 +467,7 @@ func _drop_holds() -> void:
 		_rime_clear()
 	if not rinkrun.is_empty():
 		_rinkrun_end()
-	if spear_aim or rmb_down:
-		spear_aim = false
-		rmb_down = false
-		if anim_id == "tm_spear_aim": anim_id = ""
-		lk().drop("spear_prop")
-	if throw_t >= 0.0:
-		_drop_throw()
+	spear.drop()
 	wall_cast = {}
 
 ## Ends the skate; `into_rime` hands it straight to the Rimelock statue's slide (no stop, no spray).
@@ -543,159 +530,10 @@ func _lay_slabs(dt: float) -> void:
 	if int(rinkrun["frost"]) % FROST_EVERY == 0:
 		vfx("skate_frost", h.position, h.roll_dir)       # a frost patch that lingers, then melts
 
-# ------------------------------------------------------------------ RMB: Ice Spear
+# ------------------------------------------------------------------ RMB: Ice Spear (RimeSpear)
 func rmb_charge_full() -> float: return 0.0
-
-## Held: the landing ring at the cursor (clamped to range); she draws both palms in to her chest and the
-## spear forms between them, pointing at the cursor.
-func rmb_hold_tick(t: float) -> void:
-	if not rmb_ready() or busy():
-		return
-	var ld: Dictionary = rmb_def()["lance"]
-	AimKit.circle(
-			h, "rmb",
-			{
-				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
-				"col": Color("dffcff")})
-	if not spear_aim:
-		spear_aim = true
-		play("tm_spear_aim")
-		m.sfx("rime_spear_aim", h.pos, -6.0, 1.0)
-	HeroVfx.of(m).hold(h, "spear_aim")
-	_hold_spear(lerpf(0.45, 1.0, clampf(t / SPEAR_FORM_T, 0.0, 1.0)), -0.25)
-
-## The ice spear between her palms at `grown` of its size, `ahead` m further out than her chest (the push
-## drives it out), along the aim.
-func _hold_spear(grown: float, ahead: float) -> void:
-	var dir := h.aim_dir()
-	var at := _spear_at(ahead)
-	var facing := Basis.looking_at(Vector3(dir.x, 0.0, dir.y), Vector3.UP)
-	var xf := Transform3D(facing.scaled(Vector3.ONE * grown), at)
-	lk().keep("spear_prop", "spear", at, {"xf": xf})
-
-## Where the spear sits in front of her chest, `ahead` m further along the aim.
-func _spear_at(ahead: float) -> Vector3:
-	var dir := h.aim_dir() * (SPEAR_AHEAD + ahead)
-	return h.position + Vector3(dir.x, SPEAR_Y, dir.y)
-
-## RMB let go: both palms drive forward (PUSH_T later the spear leaves them). A push, not a throw: no arm
-## drawn back, no release flick.
-func fire_rmb(c: Dictionary) -> void:
-	last_variant = String(c["variant"])
-	spear_aim = false
-	AimKit.hide(h, "rmb")
-	if not spend_rmb():
-		lk().drop("spear_prop")
-		if anim_id == "tm_spear_aim": anim_id = ""
-		return
-	throw_t = PUSH_T
-	play("tm_spear")
-	m.sfx("rime_spear_aim", h.pos, -4.0, 0.8)
-
-## The push: the spear rides out on her palms until they are fully extended. A stun or the seal drops it.
-func _tick_throw(dt: float) -> void:
-	if throw_t < 0.0:
-		return
-	if busy() or not rime.is_empty():
-		_drop_throw()
-		return
-	throw_t -= dt
-	_hold_spear(1.0, -0.25 * throw_t / PUSH_T)
-	if throw_t <= 0.0:
-		throw_t = -1.0
-		_release_spear()
-
-func _drop_throw() -> void:
-	throw_t = -1.0
-	lk().drop("spear_prop")
-
-## The spear leaves her palms and drives out low and fast to the cursor (clamped to its range): the further
-## the target, the longer it travels (distance / speed). It lands only when it gets there; a foe in the way
-## takes the small hit and it lands there.
-func _release_spear() -> void:
-	lk().drop("spear_prop")
-	var ld: Dictionary = rmb_def()["lance"]
-	var dir := h.aim_dir()
-	var start := _spear_at(0.0)
-	var spd := float(ld["speed"])
-	var dist := AimMode.dist(h, float(ld["range"]))
-	var on_land := func(_s: Dictionary, at: Vector3, _e: Ent, _why: String): _spear_land(at)
-	var extra := {"src": "abil", "ab": "utility", "tracer": 1.4, "kb": 0.0, "kx": on_land}
-	# the spear itself does no damage on the way: its hit is the landing's small area (_spear_land)
-	m.spawn_shot(
-			h, start, dir * spd, 0.0, dist / spd, float(ld["hit_r"]) * 0.5,
-			col_of(rmb_def()), extra)
-	var s := lk().last_shot()
-	var land_y: float = ground(start + Vector3(dir.x, 0, dir.y) * dist).y + 0.1
-	lk().skin(s, "spear", {"dist": dist, "y": land_y, "h": SPEAR_ARC})
-	if not s.is_empty():
-		HeroVfx.of(m).trail(h, "spear_trail", s["node"])
-	stats["spears"] += 1
-	m.sfx("rime_lance", h.pos, 0.0, 1.0)
-	vfx("spear_push", null, dir)
-
-## The spear lands: shards burst up, the slow zone (its real radius) spreads with a spinning crystal and a
-## chill puff; 1.8 s later it detonates.
-func _spear_land(at0: Vector3) -> void:
-	var ld: Dictionary = rmb_def()["lance"]
-	var at := ground(at0)
-	zone_n += 1
-	zones.append({"at": at, "left": float(ld["delay"]), "total": float(ld["delay"]), "id": zone_n})
-	lk().burst("spikes", at, {"r": 1.1, "dur": 0.35})
-	vfx("spear_land", at, null, {"r": float(ld["zone_r"])})        # shards, a frosted ground and the chill puff
-	m.sfx("rime_zone", at, -1.0, 0.85)
-	m.sfx("rimewright_chime", at, -5.0, 0.9)          # the spinning crystal
-	# the landing hit (the source's small area): foes right where it lands take it and a short slow
-	for f in foes_in(at, float(ld["impact_r"])):
-		f.hurt(
-				float(ld["dmg"]) * power("sec"), h,
-				{"src": "abil", "ab": "utility", "tags": ["utility", "lance"], "slow": 0.6, "slow_k": 0.35})
-		add_chill(f)
-
-func _tick_zones(dt: float) -> void:
-	var ld: Dictionary = rmb_def()["lance"]
-	for z in zones.duplicate():
-		z["left"] = float(z["left"]) - dt
-		var at: Vector3 = z["at"]
-		var k := 1.0 - float(z["left"]) / maxf(0.01, float(z["total"]))
-		var key := "zone%d" % int(z["id"])
-		lk().keep(
-				key, "zone", at,
-				{
-					"r": float(ld["zone_r"]), "col": Color("7fd8ff"), "rim": Color("e8ffff"), "fill": 0.8,
-					"sweep": k, "pattern": 2.0, "spin": m.time * 0.6, "a": 0.9})
-		AimKit.circle(
-				h, key,
-				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": Color("bff7ef")})
-		for f in foes_in(at, float(ld["zone_r"])):
-			f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, float(ld["zone_slow"]))
-			f.slow_t = maxf(f.slow_t, 0.2)
-			add_chill(f)
-		if float(z["left"]) <= 0.0:
-			zones.erase(z)
-			lk().drop(key)
-			AimKit.hide(h, key)
-			_detonate(at)
-
-func _detonate(at: Vector3) -> void:
-	var ld: Dictionary = rmb_def()["lance"]
-	var rr := float(ld["burst_r"])
-	var blast_k := float(ld.get("r3_dmg_k", 1.45)) if rank("sec") >= 3 else 1.0
-	stats["detonations"] += 1
-	# the big hit: a full-size starburst of ice spikes, a flash, shards thrown high, frost, mist, a glassy shatter
-	lk().burst("spikes", at, {"r": rr * 0.95, "dur": 0.6})
-	vfx("spear_burst", at, null, {"r": rr})
-	m.sfx("rime_burst", at, 1.0, 0.9)
-	m.sfx("rime_splinter", at, -3.0, 0.75)
-	Shake.incoming_big(m, at, 0.6, h)
-	play_soft("tm_clench")
-	for f in foes_in(at, rr):
-		f.hurt(
-				float(ld["burst_dmg"]) * power("sec") * blast_k, h,
-				{
-					"src": "abil", "ab": "utility", "tags": ["utility", "lance"], "slow": 0.8, "slow_k": 0.3,
-					"payoff": true})
-		lk().burst("shell", f.pos, {"dur": float(ld["encase_t"]), "ent": f})
+func rmb_hold_tick(t: float) -> void: spear.hold_tick(t)
+func fire_rmb(c: Dictionary) -> void: spear.fire(c)
 
 # ------------------------------------------------------------------ E: Rink Wall
 ## E: a 0.2 s tell (a sparkle at her feet, and everyone sees the path), then the wall erupts.
@@ -881,9 +719,8 @@ func _e_end() -> void:
 func teardown() -> void:
 	super.teardown()
 	rinkrun = {}
-	throw_t = -1.0
+	spear.teardown()
 	rime = {}
-	zones.clear()
 	if look != null:
 		look.teardown()
 		look = null
@@ -923,10 +760,7 @@ func _start_rime() -> bool:
 	if not rinkrun.is_empty():
 		carry = {"v": h.roll_speed, "dir": rinkrun["dir"]}
 		_rinkrun_end(true)
-	if spear_aim or rmb_down:
-		spear_aim = false
-		rmb_down = false
-		AimKit.hide(h, "rmb")
+	spear.drop_aim()
 	rime = {"t": 0.0, "at": h.pos, "slow": {}, "creak": 0.6, "carry": carry, "face": h.face}
 	stats["rimes"] += 1
 	icb().freeze(float(x_def()["snap_t"]))
