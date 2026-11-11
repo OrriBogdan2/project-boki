@@ -156,6 +156,8 @@ func _tour() -> void:
 	if dir.is_relative_path():
 		dir = ProjectSettings.globalize_path("res://").path_join(dir)
 	DirAccess.make_dir_recursive_absolute(dir.path_join("frames"))
+	if main.fade != null:
+		main.fade.reveal(0.05)
 	Save.d["gliders"] = ["sunset", "moth"]
 	var steps := {30: ["try", "gender:0"], 50: ["pick", "gender", 0], 70: ["try", "height:2"], 85: ["untry"],
 		100: ["tab", "Hollow"], 130: ["try", "glow:2"], 145: ["try", "glow:3"], 160: ["pick", "glow", 3],
