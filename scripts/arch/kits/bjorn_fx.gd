@@ -5,9 +5,10 @@ extends Node3D
 ## colour on bright grass.
 ## - the thrown hammer (tumbling; trail, plant and catch: content/vfx/bulwark.json), planted head-down in the
 ##   ground under an upright gold beacon with rising chevrons
-## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a
-##   gold-orange trail behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while the
-##   perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the release
+## - the held swing: the hammer whirled round him at arm's length, flat over his shoulder, with a trail in
+##   his ivory (Arch.color) behind its head, a gold glint on the head from 0.6 s that grows, burning white-hot while
+##   the perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the
+##   release
 ## - the dash's gold chevron wake (his own after-image); the 360 Smash's ring is HeroVfx's ("spin")
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
 ## - his aegis: a wall of forged plates (two rows, riveted, ribbed, a rim and a hammer boss) leaning out
@@ -38,12 +39,11 @@ const ORBIT_TILT := 0.12
 const WHIRL_IN := 0.12
 ## the whirl's trail ribbon: inner and outer radius (m at scale 1), how far past the head's circle its outer
 ## edge runs, how far it reaches back behind the head (rad; the arc runs from there to the head, so the streak's
-## bright end rides the hammer), its colour, and its strength at the slowest turn rate and how much the fastest adds
+## bright end rides the hammer), and its strength at the slowest turn rate and how much the fastest adds
 const ORBIT_IN := 0.3
 const ORBIT_OUT := 1.35
 const ORBIT_PAST := 1.25
 const ORBIT_ARC := 3.4
-const ORBIT_COL := Color(1.0, 0.56, 0.1)
 const ORBIT_POWER := 3.4
 const ORBIT_FAST := 1.4
 ## the planted hammer's size, and its lean off vertical (rad)
@@ -108,7 +108,7 @@ func _ready() -> void:
 	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
-	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
+	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", Arch.color(h.arch), true))
 	_build_aegis()
 	var wake_mesh := KitMeshes.band(0.35, 0.8, -1.3, 1.3, 14)
 	for i in WAKE_POOL:
