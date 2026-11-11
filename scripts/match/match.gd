@@ -1791,7 +1791,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
-			XpRules.pay_squad(self, credit, XpRules.knock_xp(h))
+			XpRules.pay_squad(self, credit, XpRules.knock_xp(h, credit))
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
@@ -5388,7 +5388,7 @@ func _net_ev(x, from: String) -> void:
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
-				if by is Hunter and by.team != who.team: XpRules.pay_squad(self, by, XpRules.knock_xp(who))
+				if by is Hunter and by.team != who.team: XpRules.pay_squad(self, by, XpRules.knock_xp(who, by))
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)

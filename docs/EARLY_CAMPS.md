@@ -5,7 +5,7 @@ Gate job 20261111-093019-a1 (rpc4). Base `origin/ext/early-base` 0f023137a, whic
 
 ## What is in
 - **Camps** (`scripts/match/camps.gd`, `content/rules/camps.json`): 28 camps on the 2x Hollow Crown (12 Small, 9 Camp, 7 Great, 79 monsters), one size up in the hot zone. One bundle on the last kill, to the squad that lands it; one comeback, one size up. Replaces `Match._spawn_mobs` and the rolling copy.
-- **XP is a kill reward** (`content/rules/xp.json`, `XpRules`): no passive XP, no level XP for damage (Hunter damage still builds armor), each monster pays on its death to the last hit's squad and squadmates within 30 m (a stealer takes it), knock 40 + 15 x the victim's level.
+- **XP is a kill reward** (`content/rules/xp.json`, `XpRules`): no passive XP, no level XP for damage (Hunter damage still builds armor), each monster pays on its death to the last hit's squad and squadmates within 30 m (a stealer takes it), knock 32 + 12 x the victim's level, bent by the level gap (ext/early-camps-bots).
 - **Camps on the maps**: drop map region lines ("N camps: to level L"), hot-zone line, legend row, minimap icons, cleared and returning states, smoke columns from the air, first-match guide lines.
 - **The drop**: 110 m ship, faster dive you hold, dive view, cloud layer, wind streaks, team ribbons, soft landing without rings.
 - **Hard Landing**: the dive key held to the ground staggers and hurts monsters in 6 m (never Hunters), ring, dust, debris, crack, boom.
@@ -14,10 +14,10 @@ Gate job 20261111-093019-a1 (rpc4). Base `origin/ext/early-base` 0f023137a, whic
 | Thing | Value | File |
 |---|---|---|
 | Small / Camp / Great / Chief | 2 / 3 / 4 / 4 monsters; armor 25 / 50 / 50 / 50; perk orb 0 / 50% / always / always; Great gear +0, Chief gear +1 rarity | `camps.json` |
-| Monster XP | Skitter, Puffbomb, Spitter 30; Sentinel 50; Brute 100; Chief's Brute 170; stray 8 | `xp.json` |
-| Camp XP (sum) | Small 60, Camp 110, Great 190, Chief 260 | derived |
+| Monster XP | Skitter, Puffbomb, Spitter 36; Sentinel 60; Brute 90; Chief's Brute 150; stray 8 (spec 30/50/100/170, tuned by `--camp-pace-check`) | `xp.json` |
+| Camp XP (sum) | Small 72, Camp 132, Great 198, Chief 258 | derived |
 | First clear per region | rim 230, mid 360, Crown 680 | derived |
-| Share radius, knock | 30 m; 40 + 15 x level | `xp.json` |
+| Share radius, knock | 30 m; 32 + 12 x level, +30 a level the victim is above, half 2+ below | `xp.json` |
 | Comeback | 150 s after the clear, one size up, nobody within 30 m, safe for 60 s, none after 7:00 (420 s), 85 camp monsters at most | `camps.json` |
 | Ship | 110 m high, 14 m/s, plan phase 12 s | `drop.json` |
 | Launch | 18 m/s, lift 8 m/s, locked 2.5 s | `drop.json` |
@@ -36,7 +36,7 @@ Owner calls built as the spec defaults: 110 m ship, Hard Landing hits monsters o
 | `--camps-check` | 0 failures |
 | `--camp-layout-check` | pass |
 | `--camp-map-check` | pass |
-| `--camp-pace-check` | **does not exist**: it belongs to the bots task (`ext/early-camps-bots`), which is not on origin; no pace table |
+| `--camp-pace-check` | green on ext/early-camps-bots (5 seeds, 10 bot trios): average L3.59 at 2:30, no level 6 before 2:30 in 5/5, median L6.7 at 5:15, top 2.0 over the median at 4:00, camps 89% of early XP. Bot runs are not deterministic per seed: earlier runs of the same build missed by 0.03 levels or 0.3 of gap |
 | `--drop-feel-check` | pass (also on a GPU, below) |
 | `--drop-launch-check` | pass |
 | `--hot-zone-check` | pass |
@@ -69,7 +69,7 @@ Three squads Hard Landing in view: `--drop-feel-check` on a GPU (Apple M5, mac-N
 - `drop_map.jpg`: the drop map with the 28 camps, the region lines ("N camps: to level L"), the hot zone's ring and legend row.
 - `dive_smoke.jpg`: mid-dive above the cloud layer (the sheet at 60 m) with the camps' smoke columns, orange in the hot zone.
 - `hard_landing.jpg`: a Hard Landing on the hot zone's camp: the 6 m ring, the Puffbomb and Brute hit for 30.
-- `minimap_cleared.png` (the minimap beside a cleared camp): **not saved.** The two runs that completed showed the full map open over the HUD, because the tool called `open_map(false)` (which opens it) where it needed `close_map()`. That is fixed in `tools/region_shots.gd` but the fix is unverified: the rerun sat in the GPU queue for over an hour. Run `jobq submit --needs gpu --tree <tree> --out shots -- --region-shots --shots-dir=shots` and copy `minimap_cleared.png` over.
+- `minimap_cleared.png` (the minimap beside a cleared camp): **not saved.** The run that did complete showed the planning map open over the HUD (the shot's `set_process(true)` reopened it); the fix is in `tools/region_shots.gd`, but every GPU job since then was lost with its worker or sat in the queue for more than 40 minutes. Re-run `jobq submit --needs gpu --tree <tree> --out shots -- --region-shots --shots-dir=shots` and copy `minimap_cleared.png` over.
 
 
 ## Pace table

@@ -64,6 +64,8 @@ func pick_target() -> Ent:
 			continue
 		if not f.hittable() or Shrubling.hidden(f):
 			continue      # (a disguised Shrubling is not given away by its Boki)
+		if BotCamps.kin_leaves(k.m, own, f):
+			continue      # (a bot's Boki leaves rivals alone in the camp opening unless they hit first)
 		if float(k.ignore_until.get(f, -1.0)) > k.m.time:
 			continue      # it gave up on this one a moment ago (couldn't reach it)
 		var d := k.flat_dist(f)

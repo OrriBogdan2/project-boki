@@ -155,7 +155,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 
 | Setting | Value |
 |---|---|
-| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. |
+| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. bots (scripts/match/bot_camps.gd): ring_great: a region (bar the Crown, round the Heart) with this many Great Camps is a mid region, with fewer a rim region; ping: the camp size a bot leader pings in each ring; crown_pick: chance a leader tries the Crown (at most one bot squad per match); camp_until_s: bots stop camping at this match time (s); safe_s: a camp is worth walking to while the spot is safe this long (s); blight_r: a camp with a Blight Warden this near is left (m); stuck_s (s) and stuck_m (m): a leader walking to a camp that has not come stuck_m closer in stuck_s strikes it off and takes the region it stands in; fight_r: a camp is skipped while a squad with a higher total level is within this of it (m); keep_r: in the opening a bot this far from its leader walks back to them before the next camp (m); roam_r, roam_over_pace: with its own region cleared in the opening, a squad no more than roam_over_pace levels over the pace level (XpRules.pace_level) takes a live camp this near in a region no other bot squad holds (m); hold_level, hold_margin (XP): in the opening a squad leaves a camp, and its monsters, whose XP would bring someone within hold_margin of this level (no ultimate before 2:30, spec 2.5); detour_r (m) and detour_below: after camp_until_s a squad whose best level is under detour_below walks to a returning camp within detour_r. avoid_gap: a bot starts no fight with a squad this many levels above its own unless that squad is fighting someone else. |
 | kind_size | {"light": "small", "normal": "camp", "heavy": "great", "chief": "chief"} |
 | sizes | [{"id": "small", "name": "Small Camp", "n": 2, "armor": 25, "orb": 0.0}, {"id": "camp", "name": "Camp", "n": 3, "big": "sentinel", "armor": 50, "orb": 0.5}, {"id": "great", "name": "Great Camp", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 0}, {"id": "chief", "name": "Camp Chief", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 1, "big_rar": 1}] |
 | small | ["skitter", "spitter", "bomber"] |
@@ -165,6 +165,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | back_until_s | 420 |
 | max_mobs | 85 |
 | spread | 1.8 |
+| bots | {"ring_great": 1, "ping": {"rim": "small", "mid": "camp", "crown": "camp"}, "crown_pick": 0.2, "camp_until_s": 150.0, "safe_s": 60.0, "blight_r": 40.0, "fight_r": 30.0, "keep_r": 25.0, "roam_r": 200.0, "roam_over_pace": 2, "hold_level": 6, "hold_margin": 60.0, "stuck_s": 10.0, "stuck_m": 3.0, "detour_r": 60.0, "detour_below": 5, "avoid_gap": 2} |
 
 ## capture (`content/rules/capture.json`)
 
@@ -810,11 +811,12 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 
 | Setting | Value |
 |---|---|
-| _doc | Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd. |
+| _doc | Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level, plus per_level_above for each level the victim is above the knocker, times below_k when the victim is below_gap or more levels under the knocker. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd. pace_at_s[i]: the match second from which the pace level is i + 1 (the level a squad that plays camps and objectives well has then; bots farm at or below it). |
 | share_r | 30 |
-| knock | {"base": 40, "per_level": 15} |
-| camp_mob | {"skitter": 30, "bomber": 30, "spitter": 30, "sentinel": 50, "brute": 100, "chief": 170} |
+| knock | {"base": 32, "per_level": 12, "per_level_above": 30, "below_gap": 2, "below_k": 0.5} |
+| camp_mob | {"skitter": 36, "bomber": 36, "spitter": 36, "sentinel": 60, "brute": 90, "chief": 150} |
 | stray | 8 |
+| pace_at_s | [0, 45, 105, 165, 240, 315, 400, 490, 600] |
 
 ## Combos
 

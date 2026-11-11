@@ -8,7 +8,9 @@ extends RefCounted
 ## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
 ## touches the save.
 
-const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
+# spec 6.3 (60, 110, 190, 260) as tuned by --camp-pace-check (decision 0048): the small monsters and
+# the Sentinel +20%, the Brute -10%, the Chief -12%
+const SIZE_XP := {"small": 72.0, "camp": 132.0, "great": 198.0, "chief": 258.0}
 
 var bad := 0
 
@@ -72,7 +74,7 @@ func _spawn(m: Match) -> void:
 			chief_ok = chief_ok and (c["mobs"] as Array).filter(func(mb): return mb.has_meta("chief")).size() == 1
 	ok(sized, "each camp has its size's monster count and starts LIVE")
 	ok(tagged, "camp monsters carry their camp's id")
-	ok(xp_ok, "a camp's monsters add up to its size's XP (small 60, camp 110, great 190, chief 260)")
+	ok(xp_ok, "a camp's monsters add up to its size's XP (small 72, camp 132, great 198, chief 258)")
 	ok(chief_ok, "a Camp Chief has one Chief Brute, a rarity tier up")
 	ok(seen.size() >= 2, "the map has several camp sizes (%s)" % ", ".join(seen.keys()))
 	var L := C.list()
@@ -103,8 +105,18 @@ func _xp(m: Match) -> void:
 	mb.hurt(1e6, P)
 	ok(absf(P.xp - xs[0] - 8.0) < 0.01 and absf(near.xp - xs[1] - 8.0) < 0.01, "a stray kill pays 8 to the killer and a teammate 10 m away")
 	ok(absf(far.xp - xs[2]) < 0.001 and absf(rival.xp - xs[3]) < 0.001, "not to a teammate 40 m away, nor a rival")
-	var kx := XpRules.knock_xp(rival)
-	ok(kx == 40.0 + 15.0 * rival.lvl, "a knock pays 40 + 15 x the victim's level (%d)" % int(kx))
+	var lv := [P.lvl, rival.lvl]
+	rival.lvl = P.lvl
+	# (spec 40 + 15 x the level, -20% by --camp-pace-check)
+	var even := XpRules.knock_xp(rival, P)
+	ok(even == 32.0 + 12.0 * rival.lvl, "a knock pays 32 + 12 x the victim's level at an even level")
+	rival.lvl = P.lvl + 2
+	ok(XpRules.knock_xp(rival, P) == 32.0 + 12.0 * rival.lvl + 60.0, "a victim 2 levels up pays 30 more a level")
+	rival.lvl = lv[1]
+	P.lvl = rival.lvl + 2
+	ok(XpRules.knock_xp(rival, P) == (32.0 + 12.0 * rival.lvl) * 0.5, "a victim 2 levels down pays half")
+	P.lvl = lv[0]
+	var kx := XpRules.knock_xp(rival, P)
 	xs = [P.xp, near.xp, far.xp]
 	rival.pos = P.pos + Vector3(3, 0, 0)
 	m.knock(rival, P, {})
