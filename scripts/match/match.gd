@@ -1440,7 +1440,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				hint("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -2430,7 +2430,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		sfx("warn", mb.pos, -10.0, 1.5)
-		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
+		hint("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -5670,7 +5670,8 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 				bd = dd; best = Vector3(q.x, gy, q.z)
 	return best
 
-func _tip(key: String, text: String) -> void:
+## A hint the player sees once per save (its key is kept in Save.d["tutorial"]).
+func hint(key: String, text: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]
 	if seen.get(key, false) or hud == null:
 		return
@@ -5685,17 +5686,17 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	hint("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			hint("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
-			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			hint("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: hint("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+			hint("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	var k: Kin = player.kin
 	if k == null:
 		return
@@ -5705,20 +5706,20 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
+			hint("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		hint("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
+		hint("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
 		match String(interact["x"]["kind"]):
-			"dock": _tip("exit_dock", "Call the skiff at the horn, hold out, board before it leaves")
-			"hatch": _tip("exit_hatch", "A Rift Key opens this hatch (%s)  ·  three can drop through" % Settings.key_cap("interact"))
-			"outpost": _tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
+			"dock": hint("exit_dock", "Call the skiff at the horn, hold out, board before it leaves")
+			"hatch": hint("exit_hatch", "A Rift Key opens this hatch (%s)  ·  three can drop through" % Settings.key_cap("interact"))
+			"outpost": hint("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:
-		_tip("down", "Down  ·  a trusting Boki may pick you up")
+		hint("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands

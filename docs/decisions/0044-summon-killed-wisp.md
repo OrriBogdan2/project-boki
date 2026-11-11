@@ -22,6 +22,9 @@ Option 2, in `KinSummon.killed(by)` (replaces the old `knocked()`; `Kin.go_down`
 - Monster, fall or no killer: plain cooldown, goes home even if the owner is down (`back_home`), no reveal.
 - A thief's stolen summon killed: loose again where it fell, anyone may grab it.
 Damage alone never ends the window (unchanged).
+- The first time your own summon is killed in a save, one hint (`Match.hint`, key "summon_killed" in
+  `Save.d["tutorial"]`, only with Tips on): "Your Boki is a wisp again; summon it once the cooldown ends (C)",
+  the key from `Settings.key_cap("summon")`.
 
 ## Consequences
 - Net.VERSION 0.31.0: kcmd "wkill" (owner's id, extra = the killer's team) pings that squad's minimap; the wisp

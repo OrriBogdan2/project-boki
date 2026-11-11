@@ -4,7 +4,8 @@ extends RefCounted
 ## cooldown, the wisp flies home at home_speed, its owner is revealed for reveal_s and pinged on the killer squad's
 ## minimap. A monster's kill: plain cooldown, no reveal. The owner downed: a rival's kill leaves a loose wisp
 ## where it fell, a monster's sends it home. Online: the "wkill" event pings only the killer's squad and the kin
-## snapshot shows the wisp. Prints PASS/FAIL.
+## snapshot shows the wisp. The hint: the first time your own summon is killed in a save, one hint names the
+## Summon key; never for a rival's summon, never twice, and not with tips off. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -27,6 +28,7 @@ func run(main_node: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 	_frames(0.3)
 	_death()
+	_hint()
 	m.queue_free()
 	print("SUMMONDEATH %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -116,3 +118,38 @@ func _death() -> void:
 	KinNet.apply_kin(other, row + KinNet.kin_extra(k))
 	ok(other.wisp and other.summon.left == 0.0 and absf(other.summon.cd - k.summon.cd) < 0.11,
 		"online: the snapshot shows the killed summon as a resting wisp")
+
+## Hints with this text in the message lane, on show or merged into one line ("text  x2").
+func _hinted(text: String) -> int:
+	var n := 0
+	for line in m.hud.msgs.texts():
+		if line == text:
+			n += 1
+		elif line.begins_with(text):
+			n += 2
+	return n
+
+## The first-kill hint, through Match.hint: once per save, for the local player's own summon only.
+func _hint() -> void:
+	var p: Hunter = m.player
+	var f: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team and h.kin != null)[0]
+	var seen: Dictionary = Save.d["tutorial"]
+	var want := KinSummon.KILLED_HINT % Settings.key_cap("summon")
+	ok(m.hud != null and want.contains("(%s)" % Settings.key_cap("summon")) and Settings.key_cap("summon") != "?",
+		"hint: the text names the Summon key (%s)" % want)
+	seen.erase("summon_killed")
+	Settings.v["tips"] = false
+	var k := _summoned(p)
+	k.hurt(k.max_hp * 5.0, f)
+	ok(k.wisp and not seen.has("summon_killed") and _hinted(want) == 0, "hint: none with tips off")
+	Settings.v["tips"] = true
+	k = _summoned(f)
+	k.hurt(k.max_hp * 5.0, p)
+	ok(not seen.has("summon_killed") and _hinted(want) == 0, "hint: none when a rival's summon is killed")
+	k = _summoned(p)
+	m.hud.msgs.clear()          # (the match's own lines would keep the hint waiting for a row)
+	k.hurt(k.max_hp * 5.0, f)
+	ok(seen.get("summon_killed", false) and _hinted(want) == 1, "hint: your summon killed, the first time: the hint")
+	k = _summoned(p)
+	k.hurt(k.max_hp * 5.0, f)
+	ok(_hinted(want) == 1, "hint: once per save, the next kill shows no second one")
