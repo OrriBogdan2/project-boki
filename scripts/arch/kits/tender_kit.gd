@@ -400,7 +400,7 @@ func _throw_seed() -> void:
 	lk().skin(s, "burr")
 	if not s.is_empty():
 		HeroVfx.of(m).trail(h, "seed_trail", s["node"])
-	vfx("seed_cast", null, dir)          # the cast flare from her lantern
+	vfx("seed_cast", start, dir)         # the cast flare where the seed leaves her hands, not on her
 	m.sfx("tend_seed", h.pos, -2.0, 1.0)
 
 ## The Burrseed's burst radius: rank 3 doubles it (the source's detonation-radius upgrade).

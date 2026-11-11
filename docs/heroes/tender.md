@@ -131,9 +131,10 @@ Owner: "it's like 0.2-0.5 too slow, check Elluna"; and nothing should start at h
 | Contact to root (`seed.build`) | 2.0 s | owner 11-10 | unchanged |
 | Press to root, foe at 8 m | about 3.3 s | | about 2.9 s |
 | At her feet during the wind-up | a 1.4 m violet and gold ring for the whole wind-up | nothing at her feet; a flare at the hand on the cast frame | nothing; the lane and the hand's gathering stars stay |
+| The cast flare | a 0.7 m lilac flare growing 1.2x for 0.18 s at the `lantern` anchor, which since the sun rework rides the sun on her shoulder: a white bloom over her body as she throws (the game-camera reel, frames 129-140) | a flare on the cast frame | half the size (0.35), where the seed leaves her hands |
 | Where the seed appears | 0.6 m ahead, 0.95 m up: its 0.34 m halo overlapped her body, above her hands | from the hand, out along the lane | 0.8 m ahead at hand height, 0.72 m (`SEED_OUT`, `SEED_UP`) |
 
-0.6 s takes 0.4 s off (inside the owner's 0.2-0.5) and sits at the top of the source's cast range. Alternatives not taken: 0.45 s (the source median) or 0.35 s (ext/meeko-rmb-orbit-1108, never merged). The model's `seed_aim` clip (1.0 s long) plays over the wind-up (`"fit": 0.6` in content/rules/warden_anim/pip.json). Asserted in `--tender-combo-check`: "mm RMB: not a hold ..., the wind-up is 0.5-0.65 s ...", "mm RMB: nothing drawn at her feet during the wind-up", "mm RMB: the seed leaves from her hands, out in front at hand height, not on her".
+0.6 s takes 0.4 s off (inside the owner's 0.2-0.5) and sits at the top of the source's cast range. Alternatives not taken: 0.45 s (the source median) or 0.35 s (ext/meeko-rmb-orbit-1108, never merged). The model's `seed_aim` clip (1.0 s long) plays over the wind-up (`"fit": 0.6` in content/rules/warden_anim/pip.json). Asserted in `--tender-combo-check`: "mm RMB: not a hold ..., the wind-up is 0.5-0.65 s ...", "mm RMB: nothing drawn at her feet during the wind-up", "mm RMB: the seed leaves from her hands, out in front at hand height, not on her", "mm RMB: the cast flare plays where the seed leaves (no body anchor), small".
 
 ## Combinations
 | Interaction | Implemented in | Check (`--tender-combo-check` unless noted) |

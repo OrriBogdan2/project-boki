@@ -913,6 +913,11 @@ func tender() -> void:
 			"mm RMB: the seed leaves from her hands, out in front at hand height, not on her",
 			P.flat_dist(from) >= 0.7 and from.y - P.pos.y < 0.8,
 			"%.2f m out, %.2f m up" % [P.flat_dist(from), from.y - P.pos.y])
+	var cast_fx: Array = HeroVfx.data("tender")["moves"]["seed_cast"]["fx"]
+	ok(
+			"mm RMB: the cast flare plays where the seed leaves (no body anchor), small",
+			cast_fx.all(func(l): return not l.has("at"))
+			and cast_fx.all(func(l): return String(l["p"]) != "flare" or float(l["size"]) <= 0.4))
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:
