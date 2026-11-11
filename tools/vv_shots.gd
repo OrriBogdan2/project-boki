@@ -149,6 +149,7 @@ func _go(secs: float, each := Callable(), marks: Array = [], lead := 3.5) -> voi
 		m.cam.snap(cam_at if cam_at != Vector3.ZERO else P.pos + Vector3(lead, 0, 0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		m.render_shots(1.0)      # (the stock rounds a kit's trail follows move as in a match)
 		await main.get_tree().process_frame
 		while not todo.is_empty() and t0 >= float(todo[0][0]):
 			var mk: Array = todo.pop_front()
