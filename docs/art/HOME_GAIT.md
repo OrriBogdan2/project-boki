@@ -41,8 +41,8 @@ second apart at 5 m/s past floor posts every half metre).
   the leg cannot reach with the earlier point.
   The knee is bisected between the folded boot and the straight leg, on the leg node's own z scale (a woman's legs
   are 0.9, Unmasked._shape; `FootPlant.at`), and the leg's reach, the sole's length on the ground and the hip drop
-  (`FootPlant.reach`) use that scale too. Before this, every woman's standing feet were 2.1 to 2.8 cm high
-  (--unmasked-check, rows for the four worst).
+  (`FootPlant.reach`) use that scale too (--unmasked-check: every body, plus a row each for the four women's bodies
+  that stood 2.1 to 2.8 cm high when the scale was left out).
 - **Hips**: at the rig's size 0.43 m at the strike, 0.445 m flat-footed (by 30 % of the stance), 0.485 m from the
   push-off (70 %) on: the body rises onto the toe because there is no ankle, and comes down again in the air.
 - **Swing**: the lowest sole point (the toe as it leaves, the heel as it lands) travels in the body's frame from
