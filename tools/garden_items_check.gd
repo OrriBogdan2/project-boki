@@ -105,12 +105,17 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = 4
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 4 grows a form")
+	# evolve.json: Cindle grows into Vespox at its line level, and Vespox has no art yet, so it waits (art gate)
+	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])
+	var waits := rec.duplicate(true)
+	ok(Evo.next_for(waits, "level") == "vespox" and Evo.try_evolve(waits, "level").is_empty()
+			and waits["species"] == "cindle", "at its level it waits for Vespox's art")
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
-	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
+	var ev := Evo.on_level(rec)
+	ok(off and not rec["stay"] and not ev.is_empty() and ev.get("kind", "") != "form" and rec["species"] == "cindle"
+			and Evo.next_for(rec, "level") == "vespox", "taken off, it grows again but waits for Vespox's art")
 	_aura(rec)
 
 ## Glowmoss Sprig: a worn aura, one at a time, looks only; the model grows a GardenAura that glows at night.
