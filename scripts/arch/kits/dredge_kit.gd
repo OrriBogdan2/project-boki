@@ -32,9 +32,8 @@ const SLUG_CORE := Color("ffd0ec")
 const SLUG_REST := Color("7a4aff")     # a slug hanging at its stop line: solid violet, dark core
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # seafoam: the anchor's rim, its ring and its stun
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
-const ARM_THICK := 0.7                 # m, the stretched arm's girth at the shoulder end
-const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the arm swells on each
-const SNAP_T := 0.14                   # s the stretched arm takes to snap back to his shoulder after a miss or the reel
+const GHOST_THICK := 0.45              # m: the arm's silhouette where it runs through rock
+const GHOST_STEP := 0.4                # m between the samples that find the stretch of arm inside rock
 const DRIP_T := 0.07                   # s between sludge drips off the stretched arm
 const DIVE_ANCHOR_UP := 3.4            # m from the anchor's base to its ring: the ring rides at his feet
 const IDLE_T := 0.7                    # s after the last shot the spread cone folds back to one aim line
@@ -47,8 +46,7 @@ var hook_aloft := false        # the hand left mid-jump: the air steers and his 
 var flying := false             # hold: the hook is in the air (from the coil-back on)
 var coil := 0.0                 # hold: the coil-back before the arm shoots out (`rmb.windup`): time left
 var hook_sd := {}               # the hook's shot while it flies
-var snap_t := 0.0               # the arm snapping back: time left
-var snap_tip := Vector3.ZERO    # ... and where the hook was when it began
+var arm_tip := Vector3.INF      # where his hand reaches this step (the model's WardenReach.TIP); INF: home
 var drip_at := 0.0              # the next sludge drip
 var hauled := 0                 # (tests) times a reeled body was hauled over a rock
 var scoop: Array = []           # wisps (downed hunters) the hook scooped up on its way, reeled in with the catch
@@ -94,25 +92,14 @@ func rd() -> Dictionary: return res_def()
 static func reeling(hn: Hunter) -> bool:
 	return hn.ak is DredgeKit and not (hn.ak as DredgeKit).pull.is_empty()
 
-## Where the stretched arm grows from: his right wrist, the root of bone `hook` (anchor_claw and anchor_hook_tip
-## hang off its attachment; the model's hook is shrunk into it while the arm is out).
-func _hand() -> Vector3:
-	var claw := WardenGlb.anchor(h.model, "anchor_claw") if h.model else null
-	if claw and claw.is_inside_tree():
-		var wrist := claw.get_parent() as BoneAttachment3D
-		var sk := wrist.get_parent() as Skeleton3D if wrist else null
-		if sk == null:
-			return claw.global_position
-		# off the bone itself: the attachment only catches up at the frame's end
-		return sk.global_transform * sk.get_bone_global_pose(sk.find_bone(wrist.bone_name)).origin
+## His right shoulder, where the reaching arm starts (the model's upper_arm.R; a point at his shoulder without one).
+func _shoulder() -> Vector3:
+	var sk := WardenGlb.skeleton(h.model.get_node_or_null("Warden")) if h.model else null
+	var bi := sk.find_bone("upper_arm.R") if sk else -1
+	if bi >= 0:
+		return sk.global_transform * sk.get_bone_global_pose(bi).origin
 	var d2 := h.aim_dir()
-	var f := Vector3(d2.x, 0, d2.y)
-	return h.pos + Vector3(0, 1.15, 0) + f * 0.45 - f.cross(Vector3.UP) * 0.25
-
-## Where the snapping-back hook lands: the model's hook tip at rest (anchor_hook_tip), where his hook shows again.
-func _hook_rest() -> Vector3:
-	var tip := WardenGlb.anchor(h.model, "anchor_hook_tip") if h.model else null
-	return tip.global_position if tip and tip.is_inside_tree() else _hand()
+	return h.pos + Vector3(0, 1.4, 0) - Vector3(d2.x, 0, d2.y).cross(Vector3.UP) * 0.3
 
 # ------------------------------------------------------------------ passive: Salvage
 func add_stack(n: int) -> void:
@@ -210,7 +197,6 @@ func _tick(dt: float) -> void:
 	if not dive.is_empty(): _tick_dive(dt)
 	if coil > 0.0: _tick_coil(dt)
 	if flying: _tick_hook()
-	if snap_t > 0.0: _tick_snap(dt)
 	if not pull.is_empty(): _tick_pull(dt)
 	_tick_hook_hold()
 	broadside.tick(dt)
@@ -304,13 +290,13 @@ func _tick_looks(dt: float) -> void:
 			Color("1a5a6a"), 0.6
 		)
 
-## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the hook: while the kit's arm is stretched out
-## the model's hook shrinks into his wrist (hide_while_chain), so the one hook on screen is the arm's end.
+## Grimble's 3D model: a hit knocks coins off the hoard. His arm IS the Abyssal Hand: the model's own right arm
+## reaches to `arm_tip` (WardenReach), so the hand that grabs is his slime hand and bone crescent.
 func _tick_model(_dt: float) -> void:
-	if h.model == null:
-		return
-	h.model.set_meta(WardenGlb.CHAIN_OUT, flying or not pull.is_empty() or snap_t > 0.0)
-	coins.tick(h, m.time, tells_visible())
+	if h.model:
+		h.model.set_meta(WardenReach.TIP, arm_tip)
+		coins.tick(h, m.time, tells_visible())
+	arm_tip = Vector3.INF
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
 func fire_rmb(c: Dictionary) -> void:
@@ -360,7 +346,7 @@ func _launch_hook() -> void:
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
-				_snap_back(at)
+				_let_go(at)
 				fx.orb(at, ARM_COL, BONE, 0.6, 0.15)
 				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
 	if m.shots.size() > n0:
@@ -372,7 +358,7 @@ func _launch_hook() -> void:
 			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
 			hook_sd["node"] = null
 
-## The hook in flight: the arm stretched from his forearm to the bone hook, drawn through rocks. It also
+## The hook in flight: his arm stretched out to it. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.
 func _tick_hook() -> void:
 	if hook_sd.is_empty():
@@ -391,34 +377,37 @@ func _tick_hook() -> void:
 			hook_sd["life"] = 0.0
 			_grab(o, true)
 			return
+	_reach(p)
+
+## His arm reaches to `tip` this step (the model lays it there, _tick_model), a sludge drip off it now and then; where
+## it runs through rock or a cliff its silhouette is drawn on top, so the hand reads behind cover.
+func _reach(tip: Vector3) -> void:
+	arm_tip = tip
 	if not tells_visible():
 		return
-	_draw_arm(p, ARM_THICK)
-
-## The stretched arm this step: the flesh from his forearm to the bone hook at `tip` (reaching away from him), and
-## a sludge drip off it now and then.
-func _draw_arm(tip: Vector3, thick: float) -> void:
-	var id := h.get_instance_id()
-	var from := _hand()
-	var out := tip - from
-	fx.arm("arm%d" % id, from, tip, ARM_COL, thick)
-	fx.place("hook%d" % id, "hook", tip, ARM_COL, BONE, 1.0, atan2(-out.x, -out.z))
+	var from := _shoulder()
+	var span := _in_rock(from, tip)
+	if not span.is_empty():
+		fx.arm("arm%d" % h.get_instance_id(), span[0], span[1], SLUDGE, GHOST_THICK)
 	if m.time >= drip_at:
 		drip_at = m.time + DRIP_T
 		m.fx.burst(from.lerp(tip, randf()), SLUDGE, 2, 0.4, 0.7, 10.0, 0.9, Vector3.DOWN, 40.0)
 
-## The arm snaps back to his shoulder after a miss or the end of the reel, with a splash of sludge at the hook.
-func _snap_back(tip: Vector3) -> void:
-	snap_t = SNAP_T
-	snap_tip = tip
-	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
+## The stretch of the line a..b inside terrain (a cliff, or a rock or prop block): [first, last] point, or [].
+func _in_rock(a: Vector3, b: Vector3) -> Array:
+	var n := ceili(a.distance_to(b) / GHOST_STEP)
+	var span: Array = []
+	for i in n + 1:
+		var p := a.lerp(b, float(i) / maxf(n, 1))
+		var gp: float = m.world.ground_at(p.x, p.z)
+		if gp > p.y or (m.world.is_block(p.x, p.z) and gp + World.BLOCK_H > p.y):
+			span = [p, p] if span.is_empty() else [span[0], p]
+	return span
 
-func _tick_snap(dt: float) -> void:
-	snap_t = maxf(0.0, snap_t - dt)
-	if not tells_visible():
-		return
-	var k := 1.0 - snap_t / SNAP_T
-	_draw_arm(snap_tip.lerp(_hook_rest(), k * k), ARM_THICK * (1.0 - 0.4 * k))
+## The arm lets go after a miss or the end of the reel (the hand comes home down the line, WardenReach), with a
+## splash of sludge where it let go.
+func _let_go(tip: Vector3) -> void:
+	m.fx.burst(tip, SLUDGE, 8, 3.0, 0.5, 10.0)
 
 func _grab(f: Ent, ally := false) -> void:
 	flying = false
@@ -477,8 +466,7 @@ func _tick_pull(_dt: float) -> void:
 		_end_pull(false)
 		return
 	var fe := f as Ent
-	if tells_visible():
-		_draw_arm(fe.pos + Vector3(0, 0.95, 0), _arm_thick())
+	_reach(fe.pos + Vector3(0, 0.95, 0))
 	for w in scoop.duplicate():
 		if not is_instance_valid(w) or not (w as Hunter).downed or (w as Hunter).out:
 			scoop.erase(w)
@@ -499,18 +487,13 @@ func _tick_hook_hold() -> void:
 	if hook_hold != null and not h.grounded:
 		hook_hold.tick(m.world)
 
-## The arm's thickness while reeling: it swells on each hand-over-hand haul.
-func _arm_thick() -> float:
-	var since := fposmod(m.time - anim_at - 0.18, HAUL_T)
-	return ARM_THICK * (1.0 + 0.3 * (1.0 - smoothstep(0.0, 0.12, since)))
-
 func _end_pull(arrived: bool) -> void:
 	var f = pull.get("t")
 	var ally: bool = pull.get("ally", false)
 	var wisp: bool = pull.get("wisp", false)
 	var tow: Dictionary = pull.get("tow", {})
 	if is_instance_valid(f):
-		_snap_back((f as Ent).pos + Vector3(0, 0.95, 0))
+		_let_go((f as Ent).pos + Vector3(0, 0.95, 0))
 	hauled += int(tow.get("hauled", 0))
 	m.displace.stop(tow)
 	for rec in pull.get("scoop", []):

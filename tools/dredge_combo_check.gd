@@ -449,7 +449,12 @@ func _all() -> void:
 		KitStatus.grounded(P) and T.stun_t > 0.0 and K.fx.shown("chain%d" % P.get_instance_id()),
 		"gnd %s stun %.2f" % [KitStatus.grounded(P), T.stun_t]
 	)
-	ok("reel: the stretched arm is drawn (through rocks)", K.fx.arm_shown("arm%d" % P.get_instance_id()))
+	var reach_to: Vector3 = P.model.get_meta(WardenReach.TIP, Vector3.INF) if P.model else Vector3.INF
+	ok(
+		"reel: his own arm reaches to the foe (the model's reach tip on it)",
+		reach_to.distance_to(T.pos + Vector3(0, 0.95, 0)) < 0.5, "tip %s foe %s" % [reach_to, T.pos]
+	)
+	ok("reel: in the open no through-rock silhouette is drawn", not K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	# --- during the reel: RMB, E and the gun are locked, the barge works
 	var ch0 := K.ch_rmb
 	K.ch_rmb = 1.0
@@ -533,6 +538,7 @@ func _all() -> void:
 		K.grapples == g0 + 1 and ak.dmg(T) >= 5.0 and P.flat_dist(T) < 7.5,
 		"grapples +%d dist %.1f took %.1f" % [K.grapples - g0, P.flat_dist(T), ak.dmg(T)]
 	)
+	ok("cliff: the stretch of arm inside the cliff is drawn through it", K.fx.arm_shown("arm%d" % P.get_instance_id()))
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
 	# a cliff face in the reel's path: the foe is hauled over it

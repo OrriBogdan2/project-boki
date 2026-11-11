@@ -7,9 +7,8 @@ extends Node3D
 ## - flame(id, parts)      the Torch Lance hose: pooled camera-facing puffs the kit simulates (immediate style)
 ## - ride(sd, kind, ...)   a projectile look riding on a shot: "cinder" (Cinder Shot), "slug" (scattergun)
 ## - place(id, kind, ...)  immediate-style looks the kit refreshes every step: "skull", "swirl", "chain",
-##                         "pip", "spiral", "pilot", "anchor", "glow", "hook" (the bone hook); stop calling
-##                         and they hide
-## - arm(id, a, b)         Grimble's stretched arm (purple flesh, a bone ridge), drawn through walls
+##                         "pip", "spiral", "pilot", "anchor", "glow"; stop calling and they hide
+## - arm(id, a, b)         the silhouette of Grimble's stretched arm where it runs through rock, drawn through walls
 ## - one-shots: sunburst, scorch, crescent, wave, dot, lava, orb, anchor_drop, puff, wisp, volley
 ##   (a Broadside slug)
 ##
@@ -46,11 +45,8 @@ const VOLLEY_HALO := 0.8
 const VOLLEY_SMEAR := 1.1
 const VOLLEY_WIDTH := 0.55
 const CINDER_HALO := Color("6a5aff")
-const HOOK_R := 0.42          # m, the bone hook's curl
-const HOOK_BITS := 7          # pieces of the curl
 const ARM_SIDES := 6          # faces round the stretched arm
 const ARM_STEP := 0.3          # m between the arm's rings
-const ARM_BONE_FROM := 0.78   # how far along the arm (0..1) its flesh starts turning to bone
 const ANCHOR_IRON := Color("3a3f48")
 const ANCHOR_RIM := Color("5cffd8")     # seafoam: "harbour", and it stands off yellow-green grass
 const ANCHOR_DROP := 3.2       # m the anchor falls from (times its scale)
@@ -232,29 +228,6 @@ func _anchor_node() -> Node3D:
 	for sx in [-1.0, 1.0]:
 		add.call(Models.box(1.3, 0.3, 0.3), Vector3(0.62 * sx, 0.55, 0), Vector3(0, 0, -0.62 * sx))
 		add.call(Models.box(0.34, 0.5, 0.34), Vector3(1.2 * sx, 1.0, 0), Vector3(0, 0, 0.3 * sx))
-	return n
-
-## Grimble's bone hook, the end of the stretched arm: a knuckle, the jagged hook curling to one side, a short split
-## prong on the other and two spurs on top, drawn through walls like the arm (-z is the way it reaches).
-func _hook_node(_col: Color) -> Node3D:
-	var n := Node3D.new()
-	var mt := ShaderMaterial.new()
-	mt.shader = ARM_SHADER
-	var bit := func(from: Vector3, to: Vector3, r0: float, r1: float) -> void:
-		var mi := _mi(Models.cyl(r1, r0, from.distance_to(to), 6), mt)
-		mi.transform = Transform3D(
-			Basis.looking_at(from.direction_to(to), Vector3.UP) * Basis(Vector3.RIGHT, -PI / 2), (from + to) * 0.5)
-		n.add_child(mi)
-	bit.call(Vector3(0, 0, 0.2), Vector3(0, 0, -0.12), 0.24, 0.2)
-	var prev := Vector3(0, 0, -0.1)
-	for i in HOOK_BITS:
-		var phi := 1.25 * PI * float(i + 1) / HOOK_BITS
-		var at := Vector3(HOOK_R * (1.0 - cos(phi)), 0.06 * phi, -0.1 - HOOK_R * sin(phi))
-		bit.call(prev, at, lerpf(0.17, 0.02, float(i) / HOOK_BITS), lerpf(0.17, 0.02, float(i + 1) / HOOK_BITS))
-		prev = at
-	bit.call(Vector3(-0.1, 0, -0.1), Vector3(-0.3, 0.02, -0.62), 0.11, 0.015)
-	bit.call(Vector3(0.05, 0.14, 0.12), Vector3(0.1, 0.4, 0.0), 0.07, 0.01)
-	bit.call(Vector3(-0.06, 0.15, 0.0), Vector3(-0.12, 0.38, -0.14), 0.06, 0.01)
 	return n
 
 # ------------------------------------------------------------------ the hose
@@ -468,7 +441,6 @@ func _build_place(kind: String, col: Color, col2: Color) -> Node3D:
 		"spiral": return _mi(_quad_mesh(), _mat(M_SPIRAL, col, col2, true))
 		"pilot", "glow": return _mi(_quad_mesh(), _mat(M_ORB, col, col2, true))
 		"anchor": return _anchor_node()
-		"hook": return _hook_node(col)
 		"skull": return _skull_node(col, col2)
 	return Node3D.new()
 
@@ -590,9 +562,8 @@ func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> 
 		var sp := clampf(vel.length() / 20.0, 0.15, 1.0)
 		tr.scale = Vector3(width, width, trail * sp)
 
-## Grimble's arm stretched from a to b this step: a tube of purple flesh, thick at the shoulder end, thin and
-## sinewy between, swelling at the forearm and turning to bone at the hook; it sags a little and its flesh
-## pulses (seen through walls). Stop calling and it goes.
+## The stretch of Grimble's arm from a to b that runs through rock, this step: a tube of dark flesh seen through
+## the rock (his own arm, WardenReach, is hidden there). Stop calling and it goes.
 func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 	var e: Dictionary = arms.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
@@ -624,17 +595,14 @@ func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 	var rings: Array = []
 	for i in n + 1:
 		var k := float(i) / n
-		var r := thick * 0.5 * lerpf(1.0, 0.5, sin(minf(k * 1.6, 1.0) * PI * 0.5))     # thick shoulder to thin sinew
-		r *= 1.0 + 0.55 * smoothstep(0.7, 1.0, k)                                      # the forearm swells at the hook
-		r *= 1.0 + 0.1 * sin(k * length * 4.0 - float(m.time) * 9.0)                   # the flesh pulses
-		rings.append([a.lerp(b, k) + Vector3.UP * sin(k * PI) * length * 0.035, r, k])
+		var r := thick * 0.5 * (1.0 + 0.1 * sin(k * length * 4.0 - float(m.time) * 9.0))     # the flesh pulses
+		rings.append([a.lerp(b, k), r, k])
 	for j in ARM_SIDES:
 		var ang0 := TAU * j / ARM_SIDES
 		var ang1 := TAU * (j + 1) / ARM_SIDES
 		im2.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
 		for ring: Array in rings:
 			var k: float = ring[2]
-			im2.surface_set_color(Color(1, 1, 1, smoothstep(ARM_BONE_FROM, 1.0, k)))
 			for ang: float in [ang0, ang1]:
 				var dir := side * cos(ang) + up * sin(ang)
 				im2.surface_set_normal(dir)
@@ -642,8 +610,9 @@ func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 				im2.surface_add_vertex((ring[0] as Vector3) + dir * float(ring[1]))
 		im2.surface_end()
 
+## (tests) the arm `id` was drawn this step or the one before.
 func arm_shown(id: String) -> bool:
-	return arms.has(id) and is_instance_valid(arms[id]["node"]) and (arms[id]["node"] as Node3D).visible
+	return arms.has(id) and m.time - float(arms[id]["t"]) <= KEEP
 
 # ------------------------------------------------------------------ per step
 var _tracked_at := -1.0
