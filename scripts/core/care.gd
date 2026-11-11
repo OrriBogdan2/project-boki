@@ -276,6 +276,13 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0, help :=
 static func ailing(rec: Dictionary) -> bool:
 	return starve_h(rec) >= STARVE["weak"]
 
+## How fast it gets about (care.json ailing_pace): 1.0 well, slower weak, slower still sick.
+static func pace(rec: Dictionary) -> float:
+	var P: Dictionary = Content.rules("care").get("ailing_pace", {})
+	var h := starve_h(rec)
+	if h >= STARVE["sick"]: return float(P.get("sick", 0.5))
+	return float(P.get("weak", 0.7)) if h >= STARVE["weak"] else 1.0
+
 ## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
 ## a Boki left alone for weeks still recovers with a few meals and a day of care.
 static func starve_cap() -> float:

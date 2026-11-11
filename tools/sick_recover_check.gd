@@ -31,6 +31,7 @@ func run(m: Node) -> void:
 	ok(pal_s > 0.0 and pal_s < fed_s, "...a friend close speeds it up (%.1f h)" % (pal_s / 3600.0))
 	ok(all_s > 0.0 and all_s < nap_s and all_s < pal_s, "...both together faster still (%.1f h)" % (all_s / 3600.0))
 	_friend(base.duplicate(true))
+	_look(base.duplicate(true))
 	_medicine(base.duplicate(true))
 	print("SICK DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
@@ -76,6 +77,28 @@ func _friend(r: Dictionary) -> void:
 	ok(KinAiling.friend_near([k, near], k) and not KinAiling.friend_near([k, far], k)
 			and not KinAiling.friend_near([k, inside], k), "a friend counts only when close and outdoors")
 	ok(not KinAiling.friend_near([near, k], near), "...and only for a weak or sick Boki")
+
+## The look: a sick Boki walks slower, leans forward and hops low; well again, it straightens and perks up.
+func _look(r: Dictionary) -> void:
+	var weak := r.duplicate(true)
+	weak["starve"] = Care.STARVE["weak"] * 3600.0 + 1.0
+	var P: Dictionary = Content.rules("care")["ailing_pace"]
+	ok(Care.pace(r) == float(P["sick"]) and Care.pace(weak) == float(P["weak"])
+			and Care.pace(Save.new_kin("cindle", "Fine")) == 1.0, "care.json ailing_pace: sick < weak < well")
+	var n := Node3D.new()
+	var body := Node3D.new()
+	body.name = "Body"
+	n.add_child(body)
+	var k := {"rec": r, "pos": Vector3.ZERO}
+	body.position.y = 0.2
+	for i in 60:
+		KinAiling.pose(k, n, 1.0 / 60.0)
+	ok(body.rotation.x > KinAiling.DROOP_SICK * 0.9 and body.position.y < 0.2, "...a sick one droops and hops low")
+	r.erase("starve")
+	for i in 120:
+		KinAiling.pose(k, n, 1.0 / 60.0)
+	ok(body.rotation.x == 0.0 and not k.has("droop"), "...well again, it stands straight")
+	n.free()
 
 func _medicine(r: Dictionary) -> void:
 	r["likes"]["hates"] = "kibble"
