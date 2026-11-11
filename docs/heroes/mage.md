@@ -183,6 +183,19 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
   with a little lift (the sources say knockback, not knock-up). A Boki merge mid-cast drops her where she took
   off with no strike.
 
+## Kitefall movement, settled (Nov 10)
+Trust order: [O] owner > [D] data > [W] wiki > [F] footage (hero-ref/vireo.md, ult frames at 10 fps). The data says only
+"launch into the air ... reactivate to crash down at target location" [D]. Nothing changed: every number below matched.
+Asserted by the `Kitefall move` / `Kitefall end` / `Kitefall abyss` / `Kitefall ledge` rows of `--mage-combo-check`.
+
+| What | Ours | Source |
+|---|---|---|
+| Steering | none: WASD never moves her in the crouch or the hang (straight up over the take-off); the cursor only places the landing, clamped in the 14.4 m ring | [F] f28-f46, [D] "target location" |
+| Speed curve | 0.3 s crouch, 0.3 s eased rise to 5 m, a hang of up to 1.7 s, then a 0.2 s drop that speeds up (u^2) onto the spot | [F] f28-f31 crouch, airborne 1.6-2.0 s, f47-f49 marker to impact |
+| End | no momentum (planar speed 0 on the strike); she is free on the strike frame (walks, LMB) | [F] f51 a normal shot right after |
+| Ledges | a landing on a higher or lower terrace lands on its top (the cursor ray meets the ground) | ours |
+| Abyss | no cast over the void; a cursor over it (or in a wall) backs off toward the take-off to the nearest ground | ours ([F] silent) |
+
 ## Ultimate choice
 X is her own ultimate, Kitefall (owner decision, SERVER_UPDATE6): the source's Eye of the Storm, built from the
 reference sheet's "Ultimate (on X)" section. It was never folded into another slot during the kit pass, so no

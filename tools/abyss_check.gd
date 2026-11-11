@@ -69,6 +69,7 @@ func _reset(at: Vector3, v: Vector3) -> void:
 	h.gliding = false; h.glide_fuel = 1.0; h.glide_cd = 0.0; h.knock_t = 0.0; h.fly_t = 0.0
 	h.stun_t = 0.0; h.kb_t = -9.0; h.mantle_cd = 0.0; h.shot_down = false; h.air_t = 0.0
 	h.inp["move"] = Vector2.ZERO; h.inp["glide"] = false; h.inp["jump"] = false; h.inp["dash"] = false
+	h.inp["glide_btn"] = false
 	h.hp = h.max_hp
 
 ## The lip the abyss is measured from beside a rim at p: the lowest island ground around it.
@@ -247,6 +248,7 @@ func run(main: Node) -> void:
 		h.last_gy = top; h.air_t = 1.0
 		var r := _run(4.0, func(_t):
 			h.inp["glide"] = true
+			h.inp["glide_btn"] = true     # (the glide button: a held Space never opens it)
 			h.inp["move"] = -dir)
 		gl_n += 1
 		if not r["fell"] and h.grounded and absf(h.pos.y - top) < 0.6: gl_ok += 1
