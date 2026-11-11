@@ -13,6 +13,7 @@ extends RefCounted
 
 const BOB_HEIGHT := 0.12      # m: the lantern's bob
 const TOAST_COL := Color("ffd27a")
+const HINT_AFTER_LAND := 30.0  # s after landing before the first-shop hint may show (the drop settles first)
 
 static func list(m) -> Array:
 	return _st(m)["list"]
@@ -69,6 +70,13 @@ static func prompt(m, h) -> Dictionary:
 	var verb := "close" if open else "shop at %s  ·  %s" % [th["name"], String(th["tag"]).to_lower()]
 	return {"kind": "shop", "vendor": v, "label": "Press %s to %s" % [Settings.key_cap("interact"), verb],
 		"col": Color(String(th["col"]))}
+
+## The first-shop hint line for Match._tip ("shop", once per save), or "" while it is not due: a
+## vendor is in reach and HINT_AFTER_LAND s have passed since the hunter landed.
+static func first_hint(m, h) -> String:
+	if String(m.interact.get("kind", "")) != "shop" or m.time - float(h.get_meta("landed_t", 0.0)) < HINT_AFTER_LAND:
+		return ""
+	return "A shop: spend gems on tools for this run. Press %s." % Settings.key_cap("interact")
 
 ## The use key at a vendor: opens the panel, or closes it.
 static func use(m, h, best: Dictionary) -> void:

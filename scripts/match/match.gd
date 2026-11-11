@@ -6053,7 +6053,7 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 
 func _tip(key: String, text: String) -> void:
 	var seen: Dictionary = Save.d["tutorial"]
-	if seen.get(key, false) or hud == null:
+	if text == "" or seen.get(key, false) or hud == null:
 		return
 	seen[key] = true
 	hud.tip(text)
@@ -6077,6 +6077,7 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	_tip("shop", Shops.first_hint(self, player))
 	var k: Kin = player.kin
 	if k == null:
 		return
