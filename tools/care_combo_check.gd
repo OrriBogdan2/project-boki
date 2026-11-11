@@ -30,6 +30,7 @@ func _skate_feel() -> void:
 	var K: RimewrightKit = P.ak
 	sc.aim_at(P, T.pos)
 	var spans := {}
+	var stops := 0
 	for hold_t in [0.3, 1.2]:
 		P.dashes = 1.0
 		P.inp["move"] = Vector2(1, 0)
@@ -42,11 +43,13 @@ func _skate_feel() -> void:
 		P.inp["dash_down"] = false
 		step(m, 0.05)
 		spans[hold_t] = P.dashes - before
+		stops += int(P.grounded and not K.rinkrunning() and K.anim_id == "tm_skate_stop")
 		step(m, 0.4)
 	ok(
 			"tm Shift: the shorter the skate, the more of the charge comes back",
 			float(spans[0.3]) > float(spans[1.2]) + 0.15,
 			"0.3 s: +%.2f, 1.2 s: +%.2f" % [float(spans[0.3]), float(spans[1.2])])
+	ok("tm Shift: letting go on the ground stops with a hockey stop", stops == 2, "%d of 2 skates" % stops)
 	P.dashes = 1.0
 	P.inp["move"] = Vector2(1, 0)
 	P.inp["dash"] = true
@@ -1675,9 +1678,11 @@ func rimewright() -> void:
 			"at %.1f from the start" % (P.pos.x - float(hx)))
 	P.inp["dash_down"] = false
 	step(m, 0.1)
+	# decision 0046: the braced stop is a ground pose; let go in the air she keeps going like any air dash
 	ok(
-			"tm Shift: letting go stops with a hockey stop and refunds part of the charge",
-			not K.rinkrunning() and P.dashes > 0.05 and K.anim_id == "tm_skate_stop", "dashes %.2f" % P.dashes)
+			"tm Shift: letting go in the air ends the skate and refunds part of the charge, with no hockey stop",
+			not K.rinkrunning() and not P.grounded and P.dashes > 0.05 and K.anim_id != "tm_skate_stop",
+			"dashes %.2f pose '%s'" % [P.dashes, K.anim_id])
 	await _free(m)
 	await _skate_feel()
 	await _skate_only()
