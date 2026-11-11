@@ -10,6 +10,7 @@ const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
+const STRIKES := preload("res://tools/clip_strike_check.gd")   # her clip strikes on the kit's releases (anim timing)
 var A: AKCheck
 
 ## Standalone: one hero's sections (both for "all"). Prints AKCHECK lines like --archetype-check.
@@ -358,6 +359,9 @@ func thief(a) -> void:
 	await DFEEL.new().run(A, m, P, K, T, home)
 	DPARITY.new().run(A, m, P, K, T, home)
 	DLOOP.new().run(A, m, P, K, T, T2, home)
+	STRIKES.new().run(A, A.main, "thief", {"thf_lmb_r": 0.0, "thf_lmb_l": 0.0, "thf_primed": 0.0,
+			"thf_bola": float(K.rmb_def()["bola"]["cast"]), "thf_knife": ThiefKit.KNIFE_OUT},
+			{"thf_bola": 0.2})        # (the bolas are raised overhead in the first frames; the sling is the throw)
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
