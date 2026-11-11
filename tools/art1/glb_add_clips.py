@@ -1,5 +1,6 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
 with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
+A bone whose rest the target moved (a v95 swap's move_bones) keeps the target's rest: its track is left out, and it must sit still at the source's rest.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
 import json
 import struct
@@ -27,6 +28,24 @@ def write(path, j, bin_):
         f.write(js)
         f.write(struct.pack("<I4s", len(bin_), b"BIN\0"))
         f.write(bin_)
+
+
+REST = {"translation": [0.0, 0.0, 0.0], "rotation": [0.0, 0.0, 0.0, 1.0], "scale": [1.0, 1.0, 1.0]}
+SAME = 1e-3     # rest values this close are the same rest
+
+
+def near(a, b, rot):
+    """the same value (a rotation also as its negated quaternion)"""
+    return max(abs(x - y) for x, y in zip(a, b)) < SAME or (rot and max(abs(x + y) for x, y in zip(a, b)) < SAME)
+
+
+def held(sj, sb, acc, rest, rot):
+    """every key of the float accessor sits at rest"""
+    ac = sj["accessors"][acc]
+    n = len(rest)
+    at = sj["bufferViews"][ac["bufferView"]].get("byteOffset", 0) + ac.get("byteOffset", 0)
+    keys = struct.unpack_from("<%df" % (ac["count"] * n), sb, at)
+    return all(near(keys[i:i + n], rest, rot) for i in range(0, len(keys), n))
 
 
 def add(tj, tb, sj, sb, wanted):
@@ -60,6 +79,13 @@ def add(tj, tb, sj, sb, wanted):
             if nm not in names:
                 raise SystemExit("%s: no node %s in the target" % (a["name"], nm))
             sm = a["samplers"][ch["sampler"]]
+            path = ch["target"]["path"]
+            if path in REST:
+                was = sj["nodes"][ch["target"]["node"]].get(path, REST[path])
+                if not near(was, tj["nodes"][names[nm]].get(path, REST[path]), path == "rotation"):
+                    if not held(sj, sb, sm["output"], was, path == "rotation"):
+                        raise SystemExit("%s: %s moves, and the target moved its rest" % (a["name"], nm))
+                    continue
             new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"]), "interpolation": sm.get("interpolation", "LINEAR")})
             new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": {"node": names[nm], "path": ch["target"]["path"]}})
         tj["animations"].append(new)
