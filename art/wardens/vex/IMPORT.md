@@ -1,5 +1,7 @@
 # Vex (gunslinger): import note
 
+**Skin stretch (2026-11-11):** vex.glb's body weights are re-solved by tools/art1/glb_reweigh.py (`band`, docs/art/wardens/STRETCH.md): worst 7.59 -> 5.18 (x). Clips, anchors, guns and coin unchanged.
+
 ## v95 swap, appeal3 body b (2026-11-10, ext/vex-appeal-b): the current vex.glb
 
 The mesh is the v95 master in the owner's appeal3 look, body variant b (owner pick 11-10: fuller bust, waist 3% narrower,

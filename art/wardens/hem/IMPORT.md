@@ -1,5 +1,7 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
+**Skin stretch (2026-11-11):** hem.glb's body weights are re-solved by tools/art1/glb_reweigh.py (`part`, docs/art/wardens/STRETCH.md): worst 10.36 -> 6.62; the bow arm's inner elbow is still over Grimble's band in the archery clips. Clips, anchors, bow and arrow unchanged.
+
 `hem.glb`: the owner's pick (11-10), Lace v95 r2 appeal3 `cand_b.glb` (the slimmer body; its face is the appeal3 face, one mesh), swapped
 onto Hem's own skeleton, 48 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/hem_v95.json`.
 Raw files in ~/meshy/v95/lace/r2/appeal3 (never in git); the spec reads `lace_v95_b_body.glb`, which is `cand_b.glb` without its

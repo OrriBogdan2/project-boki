@@ -1,5 +1,7 @@
 # Kael (juggernaut): import note, v95 swap of Kael appeal3, body c (2026-11-10)
 
+**Skin stretch (2026-11-11):** kael.glb's body weights are re-solved by tools/art1/glb_reweigh.py (`band`, docs/art/wardens/STRETCH.md): worst 7.94 -> 4.81 (haul_wind). Clips, anchors and the sword unchanged; unused old clip data dropped (6.6 -> 3.6 MB).
+
 `kael.glb`: the owner's pick (11-10), Kael v95 r2 appeal3 `cand_c.glb` (body variant c with the new appeal3 face:
 waist taper, arms and shawl 5 cm in per side), swapped onto juggernaut's own skeleton, clips and anchors by
 `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/kael_v95.json`. Raw files in
