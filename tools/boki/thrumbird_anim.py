@@ -140,7 +140,9 @@ def flight(t, seconds, pitch, lift, tail):
 
 
 def walk(t):
-    return flight(t, WALK_S, -0.22, 0.28, 0.15)
+    """A stroll drifts on from the hover nearly as it hangs (pitch near idle's): the rig's short crossfade from idle
+    would snap a forward lean in, the head swinging from the feet. Only the run dives."""
+    return flight(t, WALK_S, 0.06, 0.28, 0.15)
 
 
 def run(t):
