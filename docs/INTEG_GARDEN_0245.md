@@ -101,6 +101,11 @@ Red: the zone ratchets in garden_zones.json were held from M5 numbers on the zon
 inside budget everywhere. Not loosened: a draw pass or a new hold is the owner's call.
 
 ## Follow-ups (not built here)
+- origin/main moved during the build: d255acbee -> 88b06b9e7 (the 0.24.4 release, 894 commits). This candidate is
+  on d255acbee. A trial merge of 88b06b9e7 conflicts in 30 files / 54 blocks (save.gd versions, base_race and
+  race_check vs garden-race-main on main, fsm, care, evo, home.gd, kin_voice/kin_companion, sfx_set_check,
+  check_registry, perf_bench, Hunter glbs). The resolutions in ext/garden-integrated-rebased b1102554e and
+  ext/garden-voice-ambience-rebased 405870580 were made against that line and are the reference.
 - Port Hushwood (lantern-zone-hub) and Kitewind (ridge) to `build` entries in garden_zones.json, then Kite Tow.
 - The away overflow pays the start garden's four snacks even on a zone island (`GardenAway._patch_overflow`).
 - Two decision notes share 0022 (garden-zones, sleepovers) as on their branches.
