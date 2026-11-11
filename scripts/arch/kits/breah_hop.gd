@@ -240,7 +240,6 @@ func _kick() -> void:
 	k.play("breah_hop")
 	m.fx.dust(h.pos, 6)
 	m.sfx("br_leap", h.pos, -3.0, 1.0)
-	Feel.dash_sound(m, k.id, h.pos, h)
 
 ## Rock Hop falls at its own leap_grav: the pull on top of gravity.
 func _pull() -> float:

@@ -229,12 +229,6 @@ static func impact_row(cat: String) -> Array:
 const CATEGORY_IMPACT := {"damage": ["thump", 1.0], "control": ["zap", 0.8], "sustain": ["heal", 1.1], "shield": ["shield", 1.2], "utility": ["ping", 1.3]}
 ## Layer 4, the kin theme's sweetener.
 const SWEETENER := {"venom": "k_venom", "spore": "k_spore", "gravity": "k_gravity", "prism": "k_prism", "lunar": "k_lunar", "echo": "k_echo"}
-## Each archetype's dash sound: [[sound, pitch, delay]...].
-const DASH_SOUND := {
-	"thief": [["swipe", 1.7, 0.0]], "archer": [["throw", 1.4, 0.0], ["whoosh", 1.3, 0.12]], "mage": [["portal", 1.7, 0.0]],
-	"gunslinger": [["dash", 1.1, 0.0], ["reload", 1.6, 0.08]], "juggernaut": [["charge", 0.6, 0.0]], "bulwark": [["shield", 0.7, 0.0], ["whoosh", 0.7, 0.05]],
-	"dolm": [["thump", 0.6, 0.0], ["charge", 0.8, 0.04]], "ostra": [["swap", 1.3, 0.0], ["hover", 1.6, 0.05]],
-}
 const MAX_VOICES := 4
 static var _voices := {}       # event key -> voices started this frame
 
@@ -276,18 +270,6 @@ static func sound(m: Node, layer: String, what: String, at: Vector3, by: Ent = n
 		"sweet": vol -= 6.0
 		"impact": vol -= 3.0
 	m.sfx(String(row[0]), at, vol - 4.0, float(row[1]))
-
-## The dash's own sound per archetype (plus the kin's sweetener, played by the rider). A Hunter with its
-## own <arch>_dash (HeroSfx, played with the dash itself) needs none of these shared layers.
-static func dash_sound(m: Node, arch: String, at: Vector3, by: Ent) -> void:
-	if by is Hunter and HeroSfx.of(by as Hunter, "dash", "") != "":
-		return
-	for s in DASH_SOUND.get(arch, [["dash", 1.0, 0.0]]):
-		var sn := String(s[0]); var pt := float(s[1]); var dl := float(s[2])
-		if dl <= 0.0:
-			m.sfx(sn, at, -5.0 if by == m.player else -9.0, pt)
-		else:
-			m.later(dl, func(): if is_instance_valid(m): m.sfx(sn, at, -6.0 if by == m.player else -10.0, pt))
 
 ## A whole ability event: tell (delivery), impact (category) and the kin's sweetener.
 static func cast_sound(m: Node, delivery: String, cat: String, at: Vector3, by: Ent, theme := "") -> void:
