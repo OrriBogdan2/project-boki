@@ -186,6 +186,7 @@ const CHECKS := {
 	"--dummy-move-shots": ["res://tools/dummy_move_shots.gd", "dummy_move_shots", null],      # (GPU)
 	"--training-area-shots": ["res://tools/training_area_shots.gd", "training_area_shots", null],      # every Hunter in the Training Area + flyover (GPU)
 	"--practice-ranks-shot": ["res://tools/practice_ranks_shot.gd", "practice_ranks_shot", null],
+	"--jump-land-shots": ["res://tools/jump_land_shots.gd", "jump_land_shots", null],      # the plain jump, match camera
 	"--lineup-shot": ["res://tools/lineup_shot.gd", "lineup_shot", null],      # all 12 Hunters in a row, true scale
 	"--anim-audit": ["res://tools/anim_audit.gd", "anim_audit", null],      # gait gate
 	"--anim-shots": ["res://tools/anim_shots.gd", "anim_shots", null],      # walk, run, idle, attacks
