@@ -120,6 +120,8 @@ Heals, shields, knock heals and Anti-Heal are tabulated in [HEAL_PARITY.md](HEAL
 | Passive | Punching rocks grants Shield [D] | Molten Guard, built; charge scaling ours | match |
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48 clips) | match on coverage; hand polish pending `ext/anim-hand-tenzo` f44d76294 |
 | Flow | Silent | Dash→LMB, →RMB, air LMB `fire` (4e788af65); 6 `keep` rows unsourced `[?]` | match; sources open |
+| Passive | Punching rocks grants Shield [D] | Built; shield 18 flat (the data has no number); punch 10.6 flat, no charge scaling (removed 11-09) | match |
+| Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
 
 ## Grimble (`dredge`, source Kingpin)
 
@@ -135,6 +137,11 @@ Heals, shields, knock heals and Anti-Heal are tabulated in [HEAL_PARITY.md](HEAL
 | Dash | One every 7 s; own air slot 12.5 s [D] | Barge: 3 chained shoves, cd 10. Air pounce 35% further, 3.7 m with the dash feel applied once, **own 12.5 s slot, 2 s less per rank** | differ (owner): 3 charges, cd 10 vs 7. Air slot closed `0a5b33f48`, double scale closed `2f24ae36b` |
 | Passive | Stacks of max HP [D] | Salvage 10, +2.5% each, lose 1 on down, knock heals 16%; hits on a back +50% (ours) | match; back bonus ours |
 | Anim | Footage poses | 13 moves plus the fusion move, all on `dredge.glb` (40 clips); hook-arm v2 model `315cdf2af` | match on coverage |
+| E | Slam, stun, dunk, 12 s [D] | Windup .38, r 3, stun 1.1, cd 7, no Grounded (removed 11-09, the source dunk is the abyss bonus) | match; **0.58x cd** |
+| R | Two waves, 36 s [D] | Charge 1.1, 2 waves, cd 21 | match; **0.58x cd** |
+| Dash | One every 7 s; own air slot 12.5 s [D] | 3 chained, cd 10, air shares slot, air range scaled twice (3.1 m, single 3.7 m) | differ (owner); air slot missing (gap 13) |
+| Passive | Stacks of max HP [D] | Salvage 10, +2.5%, lose 1 on down | match |
+| Anim | Footage poses | 13 moves, all on `dredge.glb` (40) | match on coverage |
 
 ## Neve (`rimewright`, source Celeste)
 
