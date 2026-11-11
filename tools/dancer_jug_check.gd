@@ -651,7 +651,7 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut move art: slash arc %.0f, slam cone %.0f, true sizes" % [lm["arc"], sl["angle"]],
 			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
 			and is_equal_approx(float(mv["slam_hit"]["fx"][0]["arc"]), float(sl["angle"]))
-			and is_equal_approx(float(mv["slam_hit"]["fx"][1]["arc"]), float(sl["angle"]))
+			and is_equal_approx(float(_fx(mv["slam_hit"], "sweep")["arc"]), float(sl["angle"]))
 			and not mv["slash"]["fx"][0].has("size_x") and not mv["drop_hit"]["fx"][0].has("size_x")
 			and not mv["drop_hit"]["fx"][1].has("size_x")
 			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
@@ -1346,3 +1346,10 @@ func merge_holds() -> void:
 	A.step(m, 0.8)
 	A.ok("merge hold jug: the dive is dropped, no slam lands", not JK.meteor.running() and JK.meteor.drops == 0)
 	await A.done(m)
+
+## The first fx of kind `p` in a move (its index moves as layers are added).
+func _fx(move: Dictionary, p: String) -> Dictionary:
+	for fx in move["fx"]:
+		if fx["p"] == p:
+			return fx
+	return {}
