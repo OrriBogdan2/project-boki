@@ -249,6 +249,7 @@ Seconds from the input at 60 Hz, printed as `AKTIME` lines by `tools/bjorn_anim_
 Suggestions, not built (parity first): the recall catch lands at 0.17 s, before the clip's catch key (0.3 s); the ult streak `lead` is 0.2 s against about 0.4 s in the footage.
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
 | LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.15 s after the press, as the arm comes through |

@@ -19,7 +19,7 @@ const NO_SEAT := ["palm"]
 const PREFIX := {"bulwark": "bul_", "archer": "arc_", "gunslinger": "gunslinger_", "mage": "mage_", "thief": "thf_",
 	"dolm": "breah_", "ostra": "ostra_", "rimewright": "tm_", "ashwick": "as_", "juggernaut": "jug", "dredge": "dr_",
 	"tender": "mm_"}
-const MOVE_TABLES := [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+const MOVE_TABLES := [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 	KMovesCare.MOVES, KMovesPair.MOVES]
 
 var bad := 0
