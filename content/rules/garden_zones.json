@@ -56,7 +56,11 @@
 				"clear": [12, 14, 66, 58],
 				"scatter": {"seed": 23, "terrace": 16, "crack": 44}}},
 		"hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"]},
-		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"]}
+		"ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"],
+			"build": {"theme": "ridge", "seed": 5521, "sk": 0.85,
+				"deco": [["toy_vent", 41, 33, 0], ["snack_patch", 43, 38, 0]],
+				"clear": [20, 22, 58, 48],
+				"scatter": {"seed": 31}}}
 	},
 	"lair_biomes_doc": "A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists).",
 	"budget": {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5},
