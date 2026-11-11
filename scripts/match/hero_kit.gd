@@ -6,7 +6,7 @@ class_name HeroKit
 ## the roots of locks, under brims and inside hoods); the hunter's toon materials multiply it in
 ## (toon.gdshader `vertex_ao`). Meshes are cached by key, so a crowd of hunters costs one build.
 
-static var _cache := {}
+static var _cache := MeshCache.new()
 
 ## The six archetypes, two per weight class (docs/ARCHETYPES.md). Until the archetype system exists
 ## each class wears its default; any of the six can be asked for (galleries, the creator preview).
@@ -66,7 +66,7 @@ static func _fn_normal(fn: Callable, u: float, v: float, sgn: float) -> Vector3:
 ## A smooth patch from fn(u, v) -> Vector3, u and v in 0..1 (cols x rows quads). ao(u, v) -> 0..1.
 static func surf(key: String, fn: Callable, cols: int, rows: int, ao := Callable(), sgn := 1.0) -> ArrayMesh:
 	if key != "" and _cache.has(key):
-		return _cache[key]
+		return _cache.mesh(key)
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var cs := PackedColorArray(); var idx: Array = []
 	for j in rows + 1:
 		var v := float(j) / rows
@@ -80,7 +80,7 @@ static func surf(key: String, fn: Callable, cols: int, rows: int, ao := Callable
 			var a0 := j * (cols + 1) + i
 			Models._quad(verts, norms, idx, a0, a0 + 1, a0 + cols + 2, a0 + cols + 1)
 	var am := _commit(verts, norms, uvs, cs, idx)
-	if key != "": _cache[key] = am
+	if key != "": _cache.put(key, am)
 	return am
 
 ## A sheet of cloth or plate with real thickness: fn is the outer face; the inner face sits `thick`
@@ -88,7 +88,7 @@ static func surf(key: String, fn: Callable, cols: int, rows: int, ao := Callable
 ## closed_u: the patch wraps round (a skirt), so only its top and bottom edges get a rim.
 static func shell(key: String, fn: Callable, cols: int, rows: int, thick: float, ao := Callable(), closed_u := false, sgn := 1.0, inner_ao := 0.55) -> ArrayMesh:
 	if key != "" and _cache.has(key):
-		return _cache[key]
+		return _cache.mesh(key)
 	var verts := PackedVector3Array(); var norms := PackedVector3Array(); var uvs := PackedVector2Array(); var cs := PackedColorArray(); var idx: Array = []
 	var W := cols + 1
 	var outer: Array = []
@@ -141,7 +141,7 @@ static func shell(key: String, fn: Callable, cols: int, rows: int, thick: float,
 			var a0 := base + m * 2
 			Models._quad(verts, norms, idx, a0, a0 + 2, a0 + 3, a0 + 1)
 	var am := _commit(verts, norms, uvs, cs, idx)
-	if key != "": _cache[key] = am
+	if key != "": _cache.put(key, am)
 	return am
 
 ## Catmull-Rom through 3D points, `sub` steps per span.
@@ -162,7 +162,7 @@ static func curve3(pts: Array, sub := 4) -> Array:
 ## side; ao runs from `ao_root` at the start to 1 at the tip.
 static func loft(key: String, pts: Array, wid: Array, seg := 12, up := Vector3.UP, ao_root := 0.7, sub := 4) -> ArrayMesh:
 	if key != "" and _cache.has(key):
-		return _cache[key]
+		return _cache.mesh(key)
 	var sp := curve3(pts, sub)
 	var n := sp.size()
 	var ws: Array = []
@@ -213,7 +213,7 @@ static func loft(key: String, pts: Array, wid: Array, seg := 12, up := Vector3.U
 			if fn.dot(t) > 0.0: idx.append_array([tri[0], tri[2], tri[1]])
 			else: idx.append_array(tri)
 	var am := _commit(verts, norms, uvs, cs, idx)
-	if key != "": _cache[key] = am
+	if key != "": _cache.put(key, am)
 	return am
 
 ## Puts a mesh on a node (the same as Models.part).
