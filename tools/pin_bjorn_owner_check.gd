@@ -517,6 +517,16 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 		"booped %d moved %.2f hp %.0f/%.0f" % [K.boop.booped, moved, T.hp, T.max_hp])
 	ok("bjorn boop: behind the aegis LMB never throws or swings",
 		K.throws == throws0 and K.lmb_t < 0.0 and not K.wall.is_empty())
+	# walked into: a foe pressed between him and the aegis face is booped too
+	T.teleport(home + Vector3(0.8, 0, 0))
+	K.boop.ready_at = 0.0
+	var x1 := T.pos.x
+	P.inp["fire"] = true
+	step(m, 0.05, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	P.inp["fire"] = false
+	step(m, 0.45, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
+	ok("bjorn boop: a foe he walked into (inside the aegis face) is shoved too",
+		K.boop.boops == 2 and T.pos.x - x1 >= float(bd["push"]) - 0.1, "moved %.2f" % (T.pos.x - x1))
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the wall is gone", not K.fx.aegis.visible)

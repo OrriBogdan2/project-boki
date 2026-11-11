@@ -138,13 +138,14 @@ func _p_rmb() -> void:
 func _p_idle() -> void:
 	await _seg("Idle", 3.0, func(_t: float) -> void: pass)
 
-## RMB held walking into the dummy and leaning on it, then LMB with RMB still held (Albert: no push, then the boop).
+## RMB held walking into the dummy (4 m off) and leaning on it, then LMB with RMB still held (Albert: no push,
+## then the boop).
 func _p_rmb_walk_lmb() -> void:
 	await _seg("RMB held, walk into the dummy; then LMB", 6.0, func(t: float) -> void:
 		P.inp["sec"] = _in(t, 0.2)
 		P.inp["sec_hold"] = _in(t, 0.2, 5.6)
 		P.inp["move"] = Vector2(1, 0) if _in(t, 0.5, 3.5) else Vector2.ZERO
-		P.inp["fire"] = _in(t, 4.4))
+		P.inp["fire"] = _in(t, 4.4), 4.0)
 
 func _p_e() -> void:
 	await _seg("E, then the recast", 4.0, func(t: float) -> void:
