@@ -7,13 +7,19 @@ extends RefCounted
 ## Bot.think calls `move` in a fight and `goal` when it picks where to walk; BotBelt asks
 ## `can_drink` before a tonic with a rival close.
 ## The tier still decides how good a bot is at it: an Easy bot notices it is in trouble about half
-## the time and late (32% health, 52% when outnumbered), an Expert every time and early (44%, 64%).
+## the time and late (32% health, 52% when outnumbered, or under 1.1 s from down at the rate the hits
+## come in), an Expert every time and early (44%, 64%, 2.4 s).
 
 const LOW_BASE := 0.26         # health share where the least skilled bot starts to think of leaving
 const LOW_SKILL := 0.2         # ...more of it per point of skill (an expert leaves at about 44%)
 const ODDS_ADD := 0.2          # ...and more again with more rivals than squad around: under focus fire
                                # the last third of a health bar lasts about a second
 const OK_GAIN := 0.25          # health share above that mark where a bot counts itself fit again
+const SEE_BASE := 0.8          # seconds to down at the current damage rate where the least skilled bot
+const SEE_SKILL := 1.6         # ...sees the fight is lost (more per point of skill: an expert 2.4 s). A
+                               # player leaves on focus fire coming in, not once the bar is a sliver
+const RATE_S := 0.6            # seconds the damage rate is smoothed over
+const OUT_MIN_S := 2.0         # seconds a bot that left on the damage rate stays out before it re-thinks
 const NOTICE_BASE := 0.3       # chance a bot with no ability sense notices it should leave...
 const NOTICE_ABIL := 0.7       # ...and how much the tier's "abil" adds (expert: always)
 const WINNING := 0.6           # the rival's health under this share of ours: finish it instead
@@ -38,12 +44,14 @@ static func low_mark(m, h: Hunter, a: Dictionary) -> float:
 static func wants_out(m, h: Hunter, a: Dictionary) -> bool:
 	var frac: float = h.hp / h.max_hp
 	var low := low_mark(m, h, a)
-	if frac >= low + OK_GAIN or not BotSquad.on(m):
+	var doomed := down_in(m, h, a) < SEE_BASE + SEE_SKILL * float(a.get("skill", 0.5))
+	var settled: bool = m.time - float(a.get("rt_t0", -99.0)) > OUT_MIN_S
+	if (frac >= low + OK_GAIN and not doomed and settled) or not BotSquad.on(m):
 		a.erase("rt_wise")
 		a.erase("rt_t0")
 		return false
 	if not a.has("rt_wise"):
-		if frac >= low:
+		if frac >= low and not doomed:
 			return false
 		var abil := float((a.get("diff", {}) as Dictionary).get("abil", 0.7))
 		a["rt_wise"] = randf() < NOTICE_BASE + NOTICE_ABIL * abil
@@ -51,6 +59,20 @@ static func wants_out(m, h: Hunter, a: Dictionary) -> bool:
 	if a["rt_wise"] and m.time - float(a["rt_t0"]) > GIVE_UP_S:
 		a["rt_wise"] = false
 	return a["rt_wise"]
+
+## Seconds until this bot is down if the hits keep coming as they have this last moment (INF when
+## nothing is landing). Health and armor together, the damage rate smoothed over RATE_S.
+static func down_in(m, h: Hunter, a: Dictionary) -> float:
+	var left: float = h.hp + h.armor
+	var gap: float = m.time - float(a.get("rt_at", m.time))
+	var rate := float(a.get("rt_rate", 0.0))
+	if gap > 0.0:
+		var lost := maxf(float(a.get("rt_left", left)) - left, 0.0)
+		rate = lerpf(rate, lost / gap, minf(gap / RATE_S, 1.0))
+	a["rt_left"] = left
+	a["rt_at"] = m.time
+	a["rt_rate"] = rate
+	return left / rate if rate > 0.5 else INF
 
 ## In a fight with `foe`: is the bot backing out of it right now? (Not when the rival is nearly
 ## done, and not with nothing to drink and nobody to run to: then it is better to trade.)

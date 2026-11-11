@@ -692,7 +692,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue      # alone against more: leave it (a rival who starts it is still fought)
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
-		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
+		var s: float = 20.0 - d + (BotSquad.held(m, a) if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
 		if o == called:
 			s += BotSquad.FOCUS      # shoot what the squad is shooting
 		if s > bs: bs = s; best = o
@@ -723,6 +723,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or randf() < 0.5):
 				best = k; break
+	if best != a["tgt"]:
+		a["tgt_t"] = m.time      # (a fresh pick is held a moment, BotSquad.held)
 	a["tgt"] = best
 	if best:
 		return

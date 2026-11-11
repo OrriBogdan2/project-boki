@@ -15,7 +15,11 @@ const CALM_S := 4.0            # seconds since the last hit before a bot stands 
 const ASSIST_BASE := 18.0      # metres from which the least skilled bot notices a squadmate's fight
 const ASSIST_SKILL := 22.0     # ...more per point of skill (an expert: about 38 m)
 const ASSIST_REACH := 12.0     # metres: the least reach onto a rival who is fighting a squadmate
-const FOCUS := 8.0             # target score added for the rival the squad has called (a held target scores 6)
+const FOCUS := 8.0             # target score added for the rival the squad has called (see HELD)
+const HELD := 6.0              # target score added for the rival a bot is already shooting...
+const HELD_FRESH := 14.0       # ...and for the first HOLD_S after it picked them: a player sticks with a
+                               # pick for a few seconds (with HELD alone bots flipped 7 times a fight minute)
+const HOLD_S := 2.5            # seconds a fresh pick counts as HELD_FRESH
 const FIGHT_FRESH_S := 3.0     # seconds a landed hit keeps two hunters "in a fight"
 const HELP_HP := 0.35          # health share under which a bot leaves the helping to others
 const CROWD_M := 12.0          # metres round a rival that count as its side of a fight
@@ -103,6 +107,12 @@ static func called(m, h: Hunter, fighting: Array) -> Hunter:
 			if player:
 				break
 	return pick
+
+## The target score the rival a bot is already shooting gets (Bot._choose; tgt_t is when it was picked).
+static func held(m, a: Dictionary) -> float:
+	if on(m) and m.time - float(a.get("tgt_t", -9.0)) < HOLD_S:
+		return HELD_FRESH
+	return HELD
 
 ## How many more rivals than squad (this bot included) stand within SIDE_M of this bot.
 static func odds(m, h: Hunter) -> int:
