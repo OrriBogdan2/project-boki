@@ -11,6 +11,7 @@ var n := 0
 
 const WATCHED := ["dash", "exdash", "crouch", "gkey", "rank", "shoot", "sig", "utility", "throw", "key", "chest",
 		"uplink", "fight"]
+const GUARD := 24000      # ticks of 2 sim steps (800 s): gkey and rank alone wait ~170 s, so 6000 never reached key
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -32,7 +33,7 @@ func run(main_node: Node) -> void:
 	var seen := {}
 	var times := [0.4, 1.2, 2.5, 4.0, 6.0, 9.0, 13.0, 18.0]
 	var guard := 0
-	while guard < 6000 and m.tut.step < 24 and not m.player.extracted:
+	while guard < GUARD and m.tut.step < 24 and not m.player.extracted:
 		guard += 1
 		TutorialDrive.drive(m)
 		for i in 2:

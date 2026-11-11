@@ -1076,7 +1076,7 @@ func _clear_spot(at: Vector3) -> Vector3:
 	return Vector3(p.x, maxf(p.y, world.ground_at(p.x, p.z)), p.z)
 
 func _spawn_chests() -> void:
-	for cs in world.chest_spots:
+	for cs in [] if tut else KeyChest.thin(world.chest_spots):      # the tutorial's one chest is its chest step's
 		await _slice()
 		add_chest(cs["pos"])
 	for sp in world.shrine_spots:
