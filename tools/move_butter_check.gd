@@ -103,6 +103,9 @@ func run(main_node: Node) -> void:
 	if shots != "":
 		DirAccess.make_dir_recursive_absolute(shots.path_join("frames"))
 		await w.build_meshes()
+		var fade = main.get("fade")       # (the boot curtain: lifted, or every frame is the splash)
+		if fade != null:
+			await fade.reveal(0.01)
 	sync = P.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	clips = sync.clips if sync else null
 	if clips == null:
