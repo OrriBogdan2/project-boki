@@ -24,6 +24,27 @@ def ease(x):
     return x * x * (3 - 2 * x)
 
 
+def sweep(t, n=1.0, ph=0.0, amp=0.0):
+    """A paw's swing round the hip, -1 back .. 1 forward, a sine's size and pace but its stance a straight line: the
+    planted paw goes back at one speed (a sine's would be quickest mid-stance). The swing stays the sine's ease.
+    `amp` (rad, the swing's size) bends the line so the paw's ground speed, not its angle, is the steady one."""
+    u = (n * t + ph) % 1.0
+    if not 0.25 <= u < 0.75:
+        return math.sin(TAU * u)
+    line = 2.0 - 4.0 * u
+    return math.asin(line * math.sin(amp)) / amp if amp else line
+
+
+def lseq(t, keys):
+    """keys: (t, value), straight lines between (seq eases each leg, so a stance keyed with it stutters)."""
+    if t <= keys[0][0]:
+        return keys[0][1]
+    for (t0, v0), (t1, v1) in zip(keys, keys[1:]):
+        if t <= t1:
+            return v0 + (v1 - v0) * (t - t0) / max(t1 - t0, 1e-6)
+    return keys[-1][1]
+
+
 def seq(t, keys):
     """keys: (t, value), eased between. Values may be numbers."""
     if t <= keys[0][0]:
@@ -99,19 +120,20 @@ def walk(t):
     return trot(t, 0.5, 0.012, 0.0, 0.0)
 
 
-def run(t):
-    """A bounding gallop: the spine bunches and stretches, ears pinned, tail streaming back."""
+def run(t, swing=s, reach=1.0):
+    """A bounding gallop: the spine bunches and stretches, ears pinned, tail streaming back. `swing` shapes a paw's
+    sweep round the hip: s, or sweep for a steady stance; `reach` lengthens the legs' swing."""
     p = {}
     fr = s(t, 1, 0.0)
     hi = s(t, 1, 0.5)
     for sd, sx in SIDES:
         off = 0.05 if sd == "R" else 0.0
-        a = s(t, 1, off)
-        b = s(t, 1, 0.42 + off)
-        add(p, "fleg1." + sd, rx=a * 0.95)
+        a = swing(t, 1, off)
+        b = swing(t, 1, 0.42 + off)
+        add(p, "fleg1." + sd, rx=a * 0.95 * reach)
         add(p, "fleg2." + sd, rx=-max(0.0, -c(t, 1, off)) * 0.9)
         add(p, "fpaw." + sd, rx=-a * 0.45)
-        add(p, "hleg1." + sd, rx=b * 0.85)
+        add(p, "hleg1." + sd, rx=b * 0.85 * reach)
         add(p, "hleg2." + sd, rx=max(0.0, -c(t, 1, 0.42 + off)) * 0.8)
         add(p, "hpaw." + sd, rx=-b * 0.4)
         add(p, "arm." + sd, rx=-0.25, rz=-sx * 0.2)

@@ -3,7 +3,7 @@ import math
 
 import boki_clips
 import lunowl
-from boki_clips import add, s, seq
+from boki_clips import add, s, seq, sweep
 from lunowl import SIDES, TAIL_PTS, antenna_pts, on_wing, streamer_pts, v3
 
 LOOK_UP = 0.22     # its face is already a flat disc to the front: a little tilt up is enough for the high cameras
@@ -126,7 +126,7 @@ def waddle(t, roll, lift, step):
     add(p, "head", rz=-sw * roll * 0.7)
     p["root_at"] = (0, abs(s(t, 1)) * 0.014 - 0.004, 0)
     for sd, ph in (("L", 0.0), ("R", 0.5)):
-        a = s(t, 1, ph)
+        a = sweep(t, 1, ph)
         legs(p, sd, a * step, max(0.0, s(t, 1, ph + 0.25)) * lift)
     tufts(p, 0.08, 0.03)
     feelers(p, t * 2, 0.08, 0.1)
@@ -134,7 +134,7 @@ def waddle(t, roll, lift, step):
 
 
 def walk(t):
-    p = waddle(t, 0.14, 0.7, 0.42)
+    p = waddle(t, 0.14, 0.7, 0.52)
     flap(p, t, 2, 0.05, -0.08)
     return p
 

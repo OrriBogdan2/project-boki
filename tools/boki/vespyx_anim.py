@@ -1,7 +1,7 @@
 """Vespyx's skeleton and the clips that are its own: pincers, and tools in the tail."""
 import boki_clips
 import vespyx
-from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
+from boki_clips import LOOK_UP, add, ear_pose, s, seq, sweep, tail_wave, TAU
 from boki_clips import SHARED, idle
 from vespyx import SIDES, STING_C, TAIL_PTS
 
@@ -182,8 +182,14 @@ def mine(t):
     return p
 
 
+def run(t):
+    """The shared gallop with a steady stance: the planted paw goes back at one speed."""
+    return boki_clips.run(t, lambda t, n, ph: sweep(t, n, ph, 1.2), 1.5)
+
+
 CLIPS = dict(SHARED)
 CLIPS.update({
+    "run": (0.44, True, run),
     "attack": (0.8, False, attack),
     "ability": (1.1, False, ability),
     "sleep": (3.4, True, sleep),

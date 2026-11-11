@@ -107,7 +107,7 @@ const FRAME := {
 }
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
-	"cindle": [0.80, 1.60],
+	"cindle": [0.80, 1.37],
 	"puddlet": [0.58, 1.15],
 	"burrlet": [0.50, 1.02],
 	"glintmole": [0.49, 1.04],
@@ -115,18 +115,18 @@ const STRIDE := {
 	"zephyrak": [1.50, 2.90],
 	"pebbit": [0.48, 1.10],
 	"cairnback": [0.29, 0.90],
-	"wisplet": [0.45, 0.42],
+	"wisplet": [0.43, 0.42],
 	"gloamshell": [1.50, 2.90],
 	"selenfin": [1.50, 2.90],
-	"zapple": [0.75, 1.74],
+	"zapple": [0.63, 1.49],
 	"hivara": [0.63, 1.42],
 	"caecilith": [0.14, 0.35],
 	"glomwort": [1.50, 2.90],
 	"kestrike": [0.30, 0.42],
 	"kindlewren": [0.39, 0.50],
-	"lodestick": [0.22, 0.62],
+	"lodestick": [0.19, 0.60],
 	"marchleaf": [0.51, 2.02],
-	"mossgrade": [0.12, 0.74],
+	"mossgrade": [0.12, 0.72],
 	"nettlynx": [0.54, 1.07],
 	"thrumbird": [1.50, 2.90],
 }

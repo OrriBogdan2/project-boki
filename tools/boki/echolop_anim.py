@@ -3,7 +3,7 @@ import math
 
 import boki_clips
 import echolop
-from boki_clips import LOOK_UP, add, s, seq
+from boki_clips import LOOK_UP, add, lseq, s, seq
 from echolop import EAR_PTS, SIDES, TAIL_PTS, WING_UV, mirror, wing_at
 
 boki_clips.TAIL_N = 2
@@ -111,7 +111,17 @@ def idle(t):
     return p
 
 
-FORE = [(0, -0.5), (0.15, -0.3), (0.45, 0.75), (0.68, 0.3), (0.85, -0.5), (1, -0.5)]
+FORE = [(0.08, -0.55), (0.15, -0.35), (0.45, 0.8), (0.68, 0.55)]      # the forepaw's swing; its stance runs 0.68 to 1.08
+HIND = [(0.08, -0.7), (0.3, -0.5), (0.5, 0.4), (0.68, 0.65)]          # the hind foot's, down at the same time as the forepaw
+
+
+def paw_at(t, swing, down, up, lo, hi):
+    """A paw's swing about the hip, eased through `swing`; while it is down (t from `down` round to `up`, wrapping)
+    it goes back in a straight line from `lo` to `hi`, so the planted paw moves at the ground's speed."""
+    t = t if t >= swing[0][0] else t + 1.0
+    if t < down:
+        return seq(t, swing)
+    return lseq(t, [(down, lo), (up, hi)])
 TRAIL = [(0, -0.3), (0.2, 0.5), (0.6, 0.6), (0.8, -0.5), (1, -0.3)]      # the ears' lag behind a leap
 
 
@@ -130,10 +140,10 @@ def bound(t, height, reach, stretch):
     add(p, "spine", rx=stretch * push * 0.25)
     add(p, "neck", rx=-pitch * 0.5)
     add(p, "head", rx=LOOK_UP * 0.6 - pitch * 0.5)
-    hind = seq(t, [(0, 0.2), (0.12, -0.9), (0.3, -0.6), (0.55, 0.5), (0.8, 0.8), (1, 0.2)])
+    hind = paw_at(t, HIND, 0.68, 1.08, 0.65, -0.7)
     for sd, sx in SIDES:
         off = 0.04 if sd == "R" else 0.0
-        f = seq((t - off) % 1.0, FORE)
+        f = paw_at((t - off) % 1.0, FORE, 0.68, 1.08, 0.55, -0.55)
         add(p, "fleg1." + sd, rx=f * reach)
         add(p, "fleg2." + sd, rx=-max(0.0, f) * 0.6 * reach)
         add(p, "fpaw." + sd, rx=-f * 0.4)
