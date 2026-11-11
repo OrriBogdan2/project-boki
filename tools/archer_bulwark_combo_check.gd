@@ -21,6 +21,8 @@ func run(main_node: Node) -> void:
 	launch.main = main_node
 	var atime = load("res://tools/bjorn_anim_time_check.gd").new()
 	atime.main = main_node
+	if both:
+		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await _ally("archer")
