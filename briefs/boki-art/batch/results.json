@@ -112577,5 +112577,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/v2s_malletary_rc_4.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_lunowl_rc",
+    "name": "Lunowl (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_lunowl_rc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lunowl_female_rc",
+    "name": "Lunowl_female (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_lunowl_female_rc_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_meteorab_rc",
+    "name": "Meteorab (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_meteorab_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_malletary_rc",
+    "name": "Malletary (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_malletary_rc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lunowl_female_rc",
+    "name": "Lunowl_female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_lunowl_female_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_voltmink_rc",
+    "name": "Voltmink (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_voltmink_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_lunowl_rc",
+    "name": "Lunowl (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_lunowl_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_blastopuff_rc",
+    "name": "Blastopuff (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_blastopuff_rc_2.jpg",
+    "ok": true
   }
 ]
