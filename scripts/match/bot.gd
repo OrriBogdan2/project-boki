@@ -51,6 +51,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	var inp := h.inp
 	inp["fire"] = false
 	inp["interact"] = false
+	inp["crouch"] = false
 	if h.downed:
 		_crawl(m, h)
 		return
@@ -64,7 +65,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		var land: Vector3 = a.get("land", h.pos)
 		var to := Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		# too far to glide to from this height: settle for the closest island spot in reach
-		var reach := maxf(0.0, (h.pos.y + 1.0) / Hunter.DROP_FALL * Hunter.DROP_SPEED)
+		var reach := maxf(0.0, (h.pos.y + 1.0) / DropFeel.canopy_fall * DropFeel.canopy_speed)
 		if to.length() > reach * 0.85 and not a.get("retarget", false):
 			a["retarget"] = true
 			var best := land; var bd := 1e9
@@ -78,6 +79,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			land = best
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
+		inp["crouch"] = DropSquad.bot_dive(m, h, to)
 		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:

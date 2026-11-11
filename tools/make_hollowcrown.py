@@ -210,7 +210,7 @@ islands = [
          rocks=rocks((178, 15, 180, 16), (190, 14, 191, 15)),
          landings=[[180, 36], [196, 30], [172, 28]],
          chests=[[185, 15], [198, 34]], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
-         wardens=[[182, 19]],
+         wardens=[[192, 19]],
          areas=[[184, 15, "The Lookout"]]),
     # Duskmoor: the ruined chapel on a raised floor (lv 2), its broken walls the cover, with the stone
     # ring beside it as the landmark. Relics turn up in the ruins; the skiff dock is the way out.
@@ -264,8 +264,8 @@ MORE = {
                   wild=[[90, 176]], breakables=[[124, 154, "crate"], [125, 154, "pot"]], wardens=[[130, 158]]),
     "lark": dict(chests=[[44, 18]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
     "highwatch": dict(chests=[[172, 30]], landings=[[200, 34], [186, 28]],
-                      breakables=[[200, 32, "keg"]]),
-    "duskmoor": dict(chests=[[194, 192]], landings=[[176, 172], [176, 200]]),
+                      breakables=[[200, 32, "keg"]], rocks=[[177, 33, 178, 33], [196, 41, 197, 41]]),   # the yard camps' cover
+    "duskmoor": dict(chests=[[194, 192]], landings=[[176, 172], [176, 200]], rocks=[[178, 177, 179, 177]]),  # camp cover
     "saltmere": dict(chests=[[20, 196]], landings=[[14, 180], [40, 180]]),
 }
 for _iid, _more in MORE.items():
@@ -279,12 +279,12 @@ CAMPS = {
     "crown": [[99, 94, "heavy"], [104, 129, "heavy"], [133, 104, "heavy"], [126, 128, "normal"]],
     "frostgate": [[117, 57, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
     "cinder": [[60, 109, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
-    "storm": [[157, 118, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
+    "storm": [[157, 117, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
     "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
-    "lark": [[40, 42, "normal"], [50, 22, "light"], [28, 23, "light"]],
+    "lark": [[40, 42, "normal"], [50, 20, "light"], [27, 22, "light"]],
     "saltmere": [[41, 178, "normal"], [16, 172, "light"], [31, 201, "light"]],
-    "highwatch": [[173, 37, "normal"], [200, 39, "light"], [176, 14, "light"]],
-    "duskmoor": [[174, 172, "normal"], [172, 195, "light"], [197, 169, "light"]],
+    "highwatch": [[174, 37, "normal"], [200, 38, "light"], [181, 14, "light"]],
+    "duskmoor": [[175, 173, "normal"], [172, 195, "light"], [197, 169, "light"]],
 }
 for _iid, _camps in CAMPS.items(): BY[_iid]["camps"] = _camps
 

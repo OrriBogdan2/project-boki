@@ -326,8 +326,8 @@ func new_ship(t_start: float) -> Dictionary:
 			if sc < bs: bs = sc; best_a = ang; best_o = float(off)
 	var dir3 := Vector3(cos(best_a), 0, sin(best_a))
 	var side3 := Vector3(-dir3.z, 0, dir3.x)
-	var cc := Vector3(ctr.x, Match.SHIP_Y, ctr.y) + side3 * best_o * W.w
-	var s := {"a": cc - dir3 * half, "b": cc + dir3 * half, "dur": 2.0 * half / Match.SHIP_SPEED, "ride": (half + 34.0) / Match.SHIP_SPEED, "dir": dir3, "t0": t_start}
+	var cc := Vector3(ctr.x, DropFeel.ship_height, ctr.y) + side3 * best_o * W.w
+	var s := {"a": cc - dir3 * half, "b": cc + dir3 * half, "dur": 2.0 * half / DropFeel.ship_speed, "ride": (half + 34.0) / DropFeel.ship_speed, "dir": dir3, "t0": t_start}
 	var n := Models.skyship()
 	n.rotation.y = atan2(-dir3.x, -dir3.z)
 	n.position = s["a"]

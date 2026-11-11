@@ -830,10 +830,6 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 70.0      # item 163: a high start, a long readable glide down
-const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship in frame (item 163)
-const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
-const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
@@ -844,11 +840,12 @@ func _setup_ship() -> void:
 		if ship.is_empty(): ship = rolling.new_ship(0.0)
 		return
 	var ang := rng.randf() * TAU
-	var c := Vector3(world.w / 2.0 + rng.randf_range(-10, 10), SHIP_Y, world.h / 2.0 + rng.randf_range(-10, 10))
+	var c := Vector3(world.w / 2.0 + rng.randf_range(-10, 10), 0, world.h / 2.0 + rng.randf_range(-10, 10))
+	c.y = DropFeel.ship_height
 	var dir := Vector3(cos(ang), 0, sin(ang))
 	var half := world.w * 0.6
 	# "ride" is the last moment to jump: still over the islands on the far side
-	ship = {"a": c - dir * half, "b": c + dir * half, "dur": 2.0 * half / SHIP_SPEED, "ride": (half + 34.0) / SHIP_SPEED, "dir": dir}
+	ship = {"a": c - dir * half, "b": c + dir * half, "dur": 2.0 * half / DropFeel.ship_speed, "ride": (half + 34.0) / DropFeel.ship_speed, "dir": dir}
 	var n := Models.skyship()
 	n.rotation.y = atan2(-dir.x, -dir.z)
 	add_child(n)
@@ -983,9 +980,9 @@ func spawn_mob(kk: String, at: Vector3) -> Mob:
 	ents_by_id[mb.nid] = mb
 	return mb
 
-## Gunfire and explosions you can't see show up on the minimap as sound pings.
+## Gunfire and explosions you can't see show up on the minimap as sound pings, from up to `reach` metres.
 var sound_pings: Array = []    # {pos, t, kind, key}
-func note_sound(by, at: Vector3, kind: String) -> void:
+func note_sound(by, at: Vector3, kind: String, reach := 48.0) -> void:
 	if blight:
 		blight.noise(at, kind, by)       # the Blight hunts by noise
 	if player == null or player.out:
@@ -993,7 +990,7 @@ func note_sound(by, at: Vector3, kind: String) -> void:
 	if by is Ent and (by as Ent).team == player.team:
 		return
 	var d := Vector2(at.x - player.pos.x, at.z - player.pos.z).length()
-	if d > 48.0 or (by is Hunter and not (by as Hunter).unseen and d < 20.0):
+	if d > reach or (by is Hunter and not (by as Hunter).unseen and d < 20.0):
 		return
 	var key: String = (by as Ent).nid if by is Ent else str(at.snapped(Vector3(4, 4, 4)))
 	for sp in sound_pings:
@@ -3195,6 +3192,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	DropView.tick(self, delta)       # your way down: the dive view, the cloud sheet, wind streaks
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3203,7 +3201,7 @@ func _process(delta: float) -> void:
 		cam.yaw_to = atan2(-sd.x, -sd.z)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
-		cam.zoom_to = RIDE_CAM_DIST / cam.dist
+		cam.zoom_to = DropFeel.ride_cam_dist / cam.dist
 		if time < 0.5:
 			# boarding: start already behind the ship rather than swinging through it
 			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
@@ -3217,7 +3215,7 @@ func _process(delta: float) -> void:
 			cam.yaw_to = atan2(-hd.x, -hd.y)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
-		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
+		cam.zoom_to = DropFeel.launch_cam_dist / cam.dist
 		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
@@ -3225,7 +3223,7 @@ func _process(delta: float) -> void:
 		if player.dropping:
 			# the drop: looking down over your shoulder, pulled back while you're high up
 			var gy: float = world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else 0.0
-			var hk := clampf((player.pos.y - gy) / SHIP_Y, 0.0, 1.0)
+			var hk := clampf((player.pos.y - gy) / DropFeel.ship_height, 0.0, 1.0)
 			cam.zoom_to = lerpf(1.05, 1.7, hk)
 			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
 		else:
@@ -5523,6 +5521,7 @@ func _net_ev(x, from: String) -> void:
 				if String(x[2]) == "tune" and Data.PERKS.has(String(x[7])): spawn_tune(String(x[7]), wat, String(x[1]), false)
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"campclr": Camps.show_clear(self, int(x[1]), int(x[2]), int(x[3]))
+		HardLanding.NET_EVENT: HardLanding.on_net(self, x)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
 		"wtake":
