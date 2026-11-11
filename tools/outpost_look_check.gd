@@ -126,7 +126,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	ok(true, "the minimap glyph draws neutral, charging and lit")
 	holder.queue_free()
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	await main.get_tree().process_frame
 	print("OUTPOST LOOK CHECK DONE, failures: ", bad)

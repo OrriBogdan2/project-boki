@@ -46,7 +46,7 @@ func run(main_node: Node) -> void:
 	P.dashes = 0.3
 	P.ex_cd = 6.0
 	await _grab("match_0_charges", bar)
-	m.over = true
+	m.flow.finish("check done")
 	m.queue_free()
 	await main.get_tree().process_frame
 	Save.d = Save.fresh()
