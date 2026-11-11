@@ -93,6 +93,7 @@ static func go_home(k: Kin) -> void:
 	k.back_home = true
 	_ride_with(k, k.home_h)
 	k.stow()
+	StolenHome.back(k)
 	k.m.fx.ring(k.home_h.pos, 1.2, Color(k.sp.get("glow", k.sp["color"]), 0.8), 0.3)
 
 static func _ride_with(k: Kin, h: Hunter) -> void:
@@ -146,7 +147,9 @@ static func _grabbed(k: Kin, h: Hunter) -> void:
 	k.m.fx.ring(h.pos, 1.4, Color(glow, 0.8), 0.3)
 	k.m.sfx("kin_happy", h.pos, -6.0, Unique.voice(k.rec))
 	if h == k.home_h:
+		k.remove_meta("thief")
 		return
+	k.set_meta("thief", h.pname)
 	k.m.add_feed("%s grabbed %s's %s" % [h.pname, k.home_h.pname, k.rec.get("name", "Boki")])
 	if h == k.m.player:
 		Care.dex_mark(k.species, "echo")

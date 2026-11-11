@@ -27,3 +27,7 @@ loose rule, bots grabbing, echo hatch odds, extraction bonus, HUD icons (ext/ui-
 - Net.VERSION 0.30.0: kin snapshot 28-30 = loose s, carrier id, stolen summon used; kcmd "wgrab"/"wsum" ask the
   Boki's own game. Clashes with ext/wisp-guardian's index 28 / 0.29.0: renumber on merge.
 - match.gd +3 (interact, match end), hunter.gd +2. `--wisp-steal-check` covers it; `--passive-stack-check` covers the Q8 stacking (own 100 %, stolen 50 %, clamp at the carry cap, 2 stolen, passives leave on escape or match end).
+- Homecoming (StolenHome, DECISIONS 2026-11-09): a wisp a thief held that goes home gives its owner's Boki one
+  `stolen_home` kin event ("was stolen by Rook, but she came home when the match ended"), which Game._kin_after folds into
+  its memory and journal (so the "While you were away" card shows it); in the garden its friends come to greet it through
+  BaseLife's React state. No reward, no penalty, no Net or save change.

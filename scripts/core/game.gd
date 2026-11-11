@@ -321,6 +321,8 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 		if counts[kind] > 1:
 			txt += " (%d times)" % counts[kind]
 		Save.remember(k, kind, txt)
+		if kind == "stolen_home":
+			StolenHome.came_back(k, txt)
 	# the moment it'll bring up when you get home (a back_<kind> line, BokiLines), the biggest one first
 	for kind in ["carried_out", "boss_kill", "revived", "stood_over", "comforted", "knock_together", "escaped"]:
 		if counts.has(kind):

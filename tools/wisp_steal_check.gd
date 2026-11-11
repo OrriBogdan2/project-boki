@@ -27,6 +27,7 @@ func run(main_node: Node) -> void:
 		h.inp["move"] = Vector2.ZERO
 	_frames(0.3)
 	_steal()
+	_back_home()
 	m.queue_free()
 	print("WISPSTEAL %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -143,3 +144,40 @@ func _steal() -> void:
 	row[KinNet.KIN_AT + 10] = ""
 	KinNet.apply_kin(fk, row)
 	ok(fk.owner_h == f, "...and an empty carrier sends it home")
+
+## Your own Boki stolen and sent home at match end (StolenHome): one event with the thief's name and he/she, once;
+## taking it back yourself, or a wisp nobody took, gives none.
+func _back_home() -> void:
+	var p: Hunter = m.player
+	var pk: Kin = p.kin
+	var f: Hunter = m.hunters.filter(func(h: Hunter): return h.team != p.team and h.kin != null)[0]
+	pk.events.clear()
+	m.revive_hunter(p, null)
+	m.revive_hunter(f, null)
+	_frames(0.1)
+	m.knock(p, f, {})
+	_frames(0.1)
+	ok(KinSteal.loose(pk) and pk.events.is_empty(), "back home: your wisp breaks loose, nothing is written yet")
+	ok(KinSteal.grab(pk, f) and KinSteal.stolen(pk), "...a rival grabs it")
+	KinSteal.match_end(m)
+	var evs: Array = pk.events.filter(func(e): return e["kind"] == "stolen_home")
+	var words := String(evs[0]["text"]) if evs.size() == 1 else ""
+	var pron := StolenHome.pronoun(pk.rec)
+	var named := words.contains(f.pname) and words.contains(" %s came home" % pron)
+	ok(evs.size() == 1 and named and not words.contains(" it "),
+		"match end: one stolen_home event naming the thief, with '%s': '%s'" % [pron, words])
+	ok(not KinSteal.taken(pk) and pk.owner_h == p, "...and the Boki is back on its own Hunter")
+	KinSteal.match_end(m)
+	ok(pk.events.filter(func(e): return e["kind"] == "stolen_home").size() == 1, "...a second match_end adds nothing")
+	m.revive_hunter(p, null)
+	_frames(0.1)
+	m.knock(p, f, {})
+	_frames(0.1)
+	pk.events.clear()
+	ok(KinSteal.grab(pk, f), "again: stolen by a rival")
+	m.revive_hunter(p, null)
+	m.knock(f, p, {})
+	_frames(0.1)
+	ok(KinSteal.grab(pk, p) and pk.owner_h == p, "...and taken back by its own Hunter")
+	KinSteal.match_end(m)
+	ok(pk.events.is_empty(), "taking it back yourself writes no homecoming")

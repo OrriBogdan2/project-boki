@@ -44,6 +44,37 @@ func _gather(home, at: Vector3) -> void:
 		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 
+## Pip was stolen as a wisp and went home at match end: the results fold it into his or her memory and journal
+## (the "While you were away" card), and only the friend (Moss) comes to greet, in React; nobody else does.
+func _stolen_home(home) -> void:
+	var pip: Dictionary = home.kins.filter(func(k): return k["rec"]["name"] == "Pip")[0]
+	var moss: Dictionary = home.kins.filter(func(k): return k["rec"]["name"] == "Moss")[0]
+	var ash: Dictionary = home.kins.filter(func(k): return k["rec"]["name"] == "Ash")[0]
+	BaseLife.add_bond(moss["rec"], pip["rec"], 1.0)
+	ash["rec"]["bonds"] = {}
+	_gather(home, pip["pos"])
+	for k in home.kins:
+		home.life.machine(k).state = BaseLife.S.ROAM      # (it is night here: they were all napping)
+		k.erase("nap_t")
+	var words := StolenHome.line(pip["rec"], "Rook")
+	var run := {"uid": pip["rec"]["uid"], "trust": 50.0, "stats": {},
+		"events": [{"kind": "stolen_home", "text": words, "trust": 0.0}]}
+	Game.apply_result({"extracted": true, "kin_runs": [run]})
+	var mem: Array = pip["rec"]["memory"]
+	var pron := StolenHome.pronoun(pip["rec"])
+	var said := mem.any(func(e): return String(e["text"]) == words)
+	ok(said and words.contains("%s came home" % pron) and not words.contains(" it "),
+		"a stolen Boki that came home: Pip's memory says '%s'" % words)
+	var card: Array = CareJournal.arrival([]).filter(
+		func(l): return String(l).contains("Pip") and String(l).contains("Rook"))
+	ok(card.size() == 1, "...and the 'While you were away' card has a line for it (%s)" % [card])
+	ok(StolenHome.pending == [pip["rec"]["uid"]], "...the greeting waits for the garden")
+	StolenHome.arrive(home)
+	var greeted: bool = home.life.machine(moss).is_in(BaseLife.S.REACT) and moss.get("life_at") == pip
+	ok(greeted, "...its friend Moss comes over to greet (React)")
+	ok(not home.life.machine(ash).is_in(BaseLife.S.REACT) and StolenHome.pending.is_empty(),
+		"...Ash, no friend, stays out of it, and the greeting is taken once")
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -118,6 +149,7 @@ func run(m: Node) -> void:
 	ok(pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames])
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
+	_stolen_home(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

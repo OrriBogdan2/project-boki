@@ -125,7 +125,7 @@ func step(d: float) -> void:
 		var uid := String(k["rec"]["uid"])
 		if not _seen.has(uid):
 			if not first_look:
-				_arrived(k)
+				arrived(k)
 			_seen[uid] = true
 	for k in h.kins:
 		_tick(k, dt)
@@ -401,9 +401,11 @@ func _ask(k: Dictionary) -> bool:
 	h._say(k, line % [k["rec"]["name"], GardenZones.info(id)["name"], Settings.key_cap("interact")], k["life_for"])
 	return true
 
-## A new Boki on the base: the ones near by come over to have a look.
-func _arrived(k: Dictionary) -> void:
+## A new Boki on the base, or one back from a thief (`friends_only`): the ones near by come over to look.
+func arrived(k: Dictionary, friends_only := false) -> void:
 	for o in _near(k):
+		if friends_only and regard(o, k, float(R["parent_weight"])) < float(R["friend_at"]):
+			continue
 		if machine(o).can(S.REACT) and machine(o).go(S.REACT, "newcomer"):
 			o["life_at"] = k
 			o["life_for"] = float(R["max"]["react"])
