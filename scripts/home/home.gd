@@ -5094,22 +5094,15 @@ func _name_baby(baby: Dictionary) -> void:
 		var bl := UI.label("Sent to the Boki Burrow (%s): you already have a %s out on the farm. Swap it out any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Boki Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
 		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(bl)
-	var row := UI.hbox(8)
-	var ne := LineEdit.new(); ne.text = String(baby["name"]); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(ne)
-	v.add_child(row)
-	var picks := UI.hbox(6)
-	var pool: Array = Data.KIN_NAMES.duplicate(); pool.shuffle()
-	for nm in pool.slice(0, 4):
-		var n2: String = nm
-		picks.add_child(UI.button(n2, func(): ne.text = n2))
-	v.add_child(picks)
-	ne.text = String(baby["name"])
-	v.add_child(UI.primary("Welcome home", func():
-		var was_name := String(baby["name"])
-		baby["name"] = ne.text.strip_edges() if ne.text.strip_edges() != "" else String(baby["name"])
-		if String(baby["name"]) != was_name: Save.log_event("renamed", baby, {"from": was_name})
+	var was_name := String(baby["name"])
+	var step := NameStep.new(baby["species"])      # (closing the panel keeps the suggestion)
+	v.add_child(step)
+	step.named.connect(func(nm: String, kept: bool):
+		baby["name"] = nm
+		if nm != was_name: Save.log_event("renamed", baby, {"from": was_name})
 		Save.save_game()
+		if not kept:
+			return
 		_close_panel()
 		var old := _kin_entry(baby)
 		var spot: Vector3 = old["pos"] if not old.is_empty() else NEST_AT + Vector3(0.8, 0, 0.6)
@@ -5118,7 +5111,7 @@ func _name_baby(baby: Dictionary) -> void:
 		if not ke.is_empty():
 			ke["pos"] = spot
 			(ke["node"] as Node3D).position = ke["pos"]
-			_say(ke, BokiLines.say(baby, "hatched")), 220))
+			_say(ke, BokiLines.say(baby, "hatched")))
 
 # ---- what it wears
 func _open_wear(rec: Dictionary) -> void:

@@ -1167,6 +1167,17 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## kin_names (`content/rules/kin_names.json`)
+
+Naming a new Boki (scripts/core/kin_names.gd, scripts/ui/name_step.gd). The suggested name is a root from the species' own name (its first syllable, from content/kin) plus one of the endings. Typed names are checked against rude: any of these letters inside the name (case and spaces ignored) and the name is not kept.
+
+| Setting | Value |
+|---|---|
+| endings | ["y", "ie", "o", "a", "i", "et", "in", "le", "kin", "bit", "bo", "ly", "ny", "by", "bun", "bean", "dot", "nip", "puff", "let", "pip", "drop", "wick", "bell", "sprout"] |
+| max_len | 14 |
+| max_len_doc | Letters a name may have (the text box stops there). |
+| rude | ["fuck", "fuk", "phuck", "shit", "cunt", "twat", "wank", "slut", "whore", "bitch", "bastard", "nigg", "niga", "fag", "rape", "nazi", "hitler", "kkk", "porn", "dick", "cock", "penis", "vagina", "anal", "anus", "retard", "spic", "kike", "gook", "tits", "boob", "piss", "arse", "asshole", "sex", "dildo", "jizz", "cum"] |
+
 ## kit_parity (`content/rules/kit_parity.json`)
 
 
