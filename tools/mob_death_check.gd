@@ -29,6 +29,8 @@ func run(main: Node) -> void:
 	for mb in m.mobs:
 		if not mb is Boss: mb.queue_free()
 	m.mobs.assign(m.mobs.filter(func(x): return x is Boss))      # (the lair bosses stay for _boss)
+	if m.biomes:
+		m.biomes.hazards.clear()      # (a lightning rod's strike is a burst too; fx.radial must count deaths only)
 	for o in m.hunters:
 		if o != m.player: o.ctrl = "idle"
 	_sizes()
