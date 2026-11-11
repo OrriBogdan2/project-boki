@@ -70,10 +70,10 @@ func try_kick(h: Hunter) -> bool:
 	h.m.fx.dust(_fx_at(h), KICK_DUST)
 	return true
 
-## The hop's sound: a footstep on stone, at `pitch`. Played in every game (Match "fx" "whop").
+## The hop's sound at `pitch` (every game plays it): a push in the kicker's weight class, else a stone step.
 static func scuff(m: Match, at: Vector3, pitch: float) -> void:
 	scuffs += 1
-	m.sfx("step_stone", at, KICK_VOL, pitch)
+	HeroSfx.kick(m, at, pitch, KICK_VOL)
 
 ## Touching a wall (the last 0.2 s), or facing one (keys, else your aim) within FACE_REACH: sets wall_n to its normal.
 func _at_wall(h: Hunter) -> bool:

@@ -817,7 +817,7 @@ func do_jump() -> void:
 		jump_at = m.time
 		grounded = false
 		coyote = 0.0
-		m.sfx("jump", pos, -6.0)
+		HeroSfx.move(m, self, "jump", "jump", -6.0)
 		m.fx.dust(pos, 2)                   # (movefeel) a little kick of dust off the ground
 		return
 	if air_jumps < int(owner_stat("extra_jumps")) and not gliding:
@@ -825,7 +825,7 @@ func do_jump() -> void:
 		air_jumps += 1
 		vel.y = JUMP_V
 		m.fx.dust(pos, 4)
-		m.sfx("jump", pos, -4.0, 1.2)
+		HeroSfx.move(m, self, "jump", "jump", -4.0, 1.2)
 		return
 	if wall_moves.try_kick(self):
 		return
@@ -933,6 +933,8 @@ func _glider_sfx(which: String) -> void:
 		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
 	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
+	if which == "open":
+		m.sfx(HeroSfx.weighted(self, "glide_open", ""), pos, vol)
 
 ## The class's dodge (Shift), as described by its ability data: a dash, plus anything else in its
 ## effect list (the heavy class's charge shoves people).
@@ -2323,13 +2325,13 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 6)
 				squash = 0.15
 				land_t = 0.2
-				MoveSfx.land(self, -10.0)
+				MoveSfx.land(self, maxf(HeroSfx.land_db(-fv), -12.0))
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
 				# and a soft thud; no lockout, you keep moving the same step
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
-				MoveSfx.land(self, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
+				MoveSfx.land(self, HeroSfx.land_db(-fv) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
 				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
@@ -2745,7 +2747,7 @@ func _ledge_fling() -> void:
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
-	m.sfx("jump", pos, -6.0)
+	HeroSfx.move(m, self, "jump", "jump", -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
 		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
