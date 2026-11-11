@@ -274,7 +274,10 @@ func _replay(slot: String) -> void:
 			_replaying = true
 			HunterKeys.ult_pressed(h)
 			_replaying = false
-		"dash", "jump":
-			h.inp[slot] = true
+		"dash":
+			if not h.inp["dash"]:
+				h.do_dash()        # route runs after this step's Shift (same-frame rule): a held one dashes here
+		"jump":
+			h.inp["jump"] = true
 		_:
 			h.inp[KEY_OF[slot]] = true
