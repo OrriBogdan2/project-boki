@@ -19,7 +19,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
     share of frames with an arm raised 60 degrees or more and sideways (T-pose).
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
-  move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
+  move speed, so a sliding foot slides against them. `--aim-runs=60,130` adds runs that many degrees off the facing
+  (the aim twist). The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
   counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
