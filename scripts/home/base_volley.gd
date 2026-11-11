@@ -79,9 +79,11 @@ class Run:
 	var last_miss := -1             # the side that dropped the last seed, -1 before the first point
 	var rally := 0                  # hits since the serve
 	var hits := 0                   # hits in the whole match (the seed bat sound)
+	var to_win: int                 # points that win it: the rules', or this week's format
 
-	func _init(pair: Array, back: int, r: RandomNumberGenerator) -> void:
+	func _init(pair: Array, back: int, r: RandomNumberGenerator, tw := {}) -> void:
 		R = BaseVolley.rules()
+		to_win = int(tw.get("to_win", R["to_win"]))
 		recs = pair
 		backed = back
 		rng = r
@@ -129,7 +131,7 @@ class Run:
 					go(S.DONE if _finished() else S.SERVE)
 
 	func _finished() -> bool:
-		return maxi(score[0], score[1]) >= int(R["to_win"]) or t >= float(R["max_s"])
+		return maxi(score[0], score[1]) >= to_win or t >= float(R["max_s"])
 
 	## side hits the seed to the other side; your call makes the backed Boki's hit a spike.
 	func _hit(side: int) -> void:
@@ -254,7 +256,7 @@ func use() -> void:
 	for k in pair:
 		k["busy"] = true
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
-	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
+	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new(), BaseRace.tweak("volley"))
 	run.rng.randomize()
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to call a spike" % Settings.key_cap("interact"))
@@ -338,7 +340,7 @@ func _end(finished: bool) -> void:
 	bar.close()
 	seed_node.visible = false
 	if finished:
-		_card(res)
+		_card(res, h.hrace.pin(res["win"], "volley"))
 		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
@@ -346,7 +348,7 @@ func _end(finished: bool) -> void:
 	run = null
 	pair = []
 
-func _card(res: Dictionary) -> void:
+func _card(res: Dictionary, pinned: bool) -> void:
 	var win: Dictionary = res["win"]
 	var lose: Dictionary = res["lose"]
 	var why := " for backing the winner" if res["backed_won"] else ""
@@ -356,5 +358,5 @@ func _card(res: Dictionary) -> void:
 		["%s wins Spark Volley, %d to %d!" % [win["name"], res["score"][0], res["score"][1]], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost Spark Volley to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + GardenPrizes.rows(res["prize"], 14))
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])
