@@ -4,6 +4,8 @@ extends RefCounted
 ## health bar under it, so a squad sees whose Boki is down. It sits on the corner of the teammate's portrait and
 ## tints for a downed Boki (red), a resting one (blue) and an owner who is a wisp (violet). Online, a teammate's
 ## Boki is the Kin the snapshot already updates (hp, state, rest seconds), so it reads that and adds no net traffic.
+## A teammate who carries stolen wisps (KinSteal) also wears a small count badge in the portrait's top corner,
+## in the thief's side ring colour.
 
 const ROW_STEP := 66.0         # px between squad rows (Hud._draw_squad)
 const ROW_X := 16.0            # px: squad row's left edge
@@ -20,6 +22,8 @@ const TINT_ALPHA := 0.45       # how strongly a tint covers the icon
 static var shown := {}
 ## hunter nid -> the level chip's number on that row
 static var levels := {}
+## hunter nid -> how many stolen wisps the badge on their row says
+static var stolen_shown := {}
 
 ## The icon's state for a teammate's Boki: "down", "rest", "wisp" (its owner is down) or "".
 static func state_of(h: Hunter, k: Kin) -> String:
@@ -32,6 +36,7 @@ static func state_of(h: Hunter, k: Kin) -> String:
 static func draw(hud, p: Hunter) -> void:
 	shown.clear()
 	levels.clear()
+	stolen_shown.clear()
 	var y: float = hud.mm_bottom + 10.0
 	for h in hud.m.hunters:
 		if h == p or h.team != p.team:
@@ -43,6 +48,10 @@ static func draw(hud, p: Hunter) -> void:
 			levels[h.nid] = h.lvl
 		if k != null and not h.out and not h.extracted:
 			_icon(hud, Vector2(ROW_X + PORTRAIT_END - ICON, y + ROW_DROP - ICON - BAR_H), h, k)
+		var n := KinSteal.count(h)
+		if n > 0 and not h.out and not h.extracted:
+			stolen_shown[h.nid] = n
+			HudStyle.count_badge(hud.c, Vector2(ROW_X + PORTRAIT_END - 4.0, y + 8.0), n, HudStyle.ALLY)
 		y += ROW_STEP
 
 static func _icon(hud, at: Vector2, h: Hunter, k: Kin) -> void:
