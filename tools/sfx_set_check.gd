@@ -28,6 +28,7 @@ extends RefCounted
 ##  18. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
 ##  19. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
 ##      drops, and stops on a heal, a down or out
+##   7. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -36,6 +37,9 @@ const REACH_MIN := 5.0         # m: below this a sound would not carry past its 
 const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+
+## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
+const WIRED := {"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"]}   # (the Boki ones: _boki_wired)
 
 var bad := 0
 var levels := {}
@@ -56,6 +60,7 @@ func run(main: Node) -> void:
 	print("SFXSET %d sound sets" % sets)
 	_dash_air()
 	_cue_table()
+	_wired()
 	_fallback()
 	_ult_cues()
 	_garden_names()
@@ -306,6 +311,22 @@ func _fusion_cues() -> void:
 			missing.append(c)
 	ok(missing.is_empty() and cues.size() >= 16,
 		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+## Each sound in WIRED is in a set and its script(s) play it by name.
+func _wired() -> void:
+	var listed := {}
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if f.ends_with(".json"):
+			var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+			if d is Dictionary:
+				listed.merge(d.get("sounds", {}))
+	var unplayed := []
+	for sname in WIRED:
+		if not listed.has(sname) or not Sfx.ensure(sname):
+			unplayed.append(sname + " (no set or file)")
+		for f in WIRED[sname]:
+			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
+				unplayed.append("%s not in %s" % [sname, f])
+	ok(unplayed.is_empty(), "%d warning sounds are wired %s" % [WIRED.size(), unplayed])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
