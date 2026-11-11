@@ -301,6 +301,26 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## Knock distance: one knock moves every Hunter the same (`--move-feel-check`, `knock_*`)
+
+Source: every Hunter has Mass 100 in the game data (briefs/supervive-data/PHYSICS_PARITY.md, row "Mass"), so a knock moves every Hunter the same distance. supervive_kits.md gives no knock distances (its tooltips say "Knockback" with no number), and no footage measures a knock per Hunter, so the only sourced rule is "equal". Ours used to divide every knock by a per-class `mass` (light 0.85, medium 1.0, heavy 1.35, `Data.CLASSES`). That field and the division in `Hunter.impulse` are gone. No owner note keeps per-class mass (DECISIONS.md has none). Hunters now use `Ent.mass()` 1.0 like every default body; Boki, mobs and bosses keep their own mass.
+
+| Hunter | Class | Mass before | Mass now |
+|---|---|---|---|
+| Lace, Sparkle, Neve, Sable | light | 0.85 | none (the source's 100 for all) |
+| Tenzo, Vex, Motley, Meeko | medium | 1.0 | none |
+| Cinder, Albert, Grimble, Kael | heavy | 1.35 | none |
+
+Measured slide on flat ground, no input, 1.5 s after the knock, through `Displace.knock` / `Displace.spike` (the synced path). The knock speed is the kit's data number:
+
+| Reference knock (data) | Light before | Medium before | Heavy before | Every class now |
+|---|---|---|---|---|
+| Kael Finishing Slam, push 6 (juggernaut.json `rmb.slam.push`) | 1.97 m | 1.63 m | 0.93 m | 1.63 m |
+| Albert Shield Charge, shove 11 (bulwark.json `dash.charge_kb`) | 5.08 m | 3.93 m | 2.43 m | 3.93 m |
+| Grimble Anchor Drop (a downward spike -16 m/s, Grounded) | 0 m | 0 m | 0 m | 0 m |
+
+The check asserts each distance (Kael 1.55-1.70 m, Albert 3.85-4.00 m: our numbers, since the source has none) and that light, medium and heavy are within 0.01 m of each other (`knock_class_spread_m`), and that no class carries `mass`. The Net message is unchanged (`["disp", "kb", ...]` still sends the raw knock), so `Net.VERSION` stays. A pre-change client would still divide knocks on its own Hunter by class mass.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
