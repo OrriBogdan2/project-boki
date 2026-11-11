@@ -637,6 +637,16 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
 | archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
 
+## drop_poses (`content/rules/drop_poses.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The drop's two shared body poses (WardenDropPose), worn by every Hero over its clips or rig. Directions are in the body's own frame: [out, up, front] for a limb (out mirrored to each side; up toward the head; front the chest's side), [up, front] for the body line (hips to head) and the head's crown, in the frame of the Hero facing ahead. fade: s the pose takes to come on or go (skydive: open is the ease into the glider-open clip). lean, pitch: deg the skydive banks at full sideways steer and tips at full forward steer. |
+| ride | {"fade": 0.2, "body": [1.0, 0.2], "head": [1.0, 0.3], "upper_arm": [0.55, 0.15, 1.0], "forearm": [-0.7, 0.15, 1.0], "thigh": [0.25, -0.75, 0.6], "shin": [0.05, -1.0, -0.35]} |
+| skydive | {"fade": 0.25, "open": 0.35, "body": [0.3, 1.0], "head": [0.75, -0.7], "upper_arm": [1.0, 0.35, -0.15], "forearm": [0.3, 1.0, -0.2], "thigh": [0.45, -1.0, -0.15], "shin": [0.25, -0.55, -0.9], "lean": 28.0, "pitch": 14.0} |
+
 ## equal (`content/rules/equal.json`)
 
 

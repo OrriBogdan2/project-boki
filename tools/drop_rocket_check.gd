@@ -98,7 +98,8 @@ func _seats(r: DropRocket) -> void:
 		ok(h.visible and out > HULL_R and out < HULL_R + 1.0,
 				"%s rides on show, clinging on %.2f m from the rocket's axis" % [h.pname, out])
 		for f in feet:
-			ok(at.distance_to(f) > SEAT_GAP_M, "%s has a seat of their own (%.2f m to the next)" % [h.pname, at.distance_to(f)])
+			var gap := at.distance_to(f)
+			ok(gap > SEAT_GAP_M, "%s has a seat of their own (%.2f m to the next)" % [h.pname, gap])
 		feet.append(at)
 
 ## Flat distance from where you jump out to where you come down (or drop below the islands).

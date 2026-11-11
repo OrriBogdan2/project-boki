@@ -958,8 +958,8 @@ class Sync extends Node:
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
 		springs.setup(skel)
-		orbits.setup(skel)
-		drop_pose = WardenDropPose.make(root, skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
+		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
+		drop_pose = WardenDropPose.make(root, skel)
 
 	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
 	func use_clips(glb: Node3D, art_name: String) -> void:

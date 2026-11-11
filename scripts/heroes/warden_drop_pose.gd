@@ -1,6 +1,6 @@
 class_name WardenDropPose
 extends RefCounted
-## The drop's two shared body poses (owner 11-11, docs/decisions/0061-rocket-drop.md), worn by every Hero over
+## The drop's two shared body poses (docs/decisions/0061-rocket-drop.md), worn by every Hero over
 ## its clips or its rig: "ride", braced and holding on aboard the squad rocket (DropRocket.seat), and "skydive",
 ## belly to the ground with the arms and legs spread, banking with the steer, which eases off into the glider-open
 ## clip when the canopy opens. One pose set for all, content/rules/drop_poses.json: the body line and each limb are
@@ -70,7 +70,8 @@ func step(dt: float) -> void:
 	var dive: Dictionary = poses()["skydive"]
 	var diving := bool(s.get("skydive", false))
 	ride_w = move_toward(ride_w, 1.0 if bool(s.get("rocket", false)) else 0.0, dt / float(ride["fade"]))
-	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / float(dive["fade" if diving else "open"]))
+	var dive_fade := float(dive["fade"]) if diving else float(dive["open"])
+	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / dive_fade)
 	if ride_w > 0.0:
 		_apply(ride, ride_w, Quaternion.IDENTITY)
 	if dive_w <= 0.0:

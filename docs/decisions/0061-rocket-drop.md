@@ -12,7 +12,7 @@ Owner 11-11: the drop showed all three hunters jumping out of the ship and glidi
 2. A rocket per squad launched from the skyship (`DropRocket`), riders stay `riding` inside it; jump-out reuses the existing dive and glider.
 
 ## Decision
-Option 2. The skyship, the planning phase and the leader stay; the launch replaces the jump. The rocket is one small object per squad: its riders keep `riding` (hidden, not hittable) and follow its position. The free fall and the glider are the drop's existing dive and canopy (`Hunter.DIVE_FALL` 13 m/s vs the rocket's 24 m/s). With no keys over the abyss the rocket heads for the nearest island. `SHIP_Y` 70 -> 100 m.
+Option 2. The skyship, the planning phase and the leader stay; the launch replaces the jump. The rocket is one small object per squad: its riders keep `riding` (not hittable) and follow its position, drawn clinging on to the hull in the shared ride pose (amended 2026-11-11, ext/anim-skydive: they were hidden). The free fall and the glider are the drop's existing dive and canopy (`Hunter.DIVE_FALL` 13 m/s vs the rocket's 24 m/s). With no keys over the abyss the rocket heads for the nearest island. `SHIP_Y` 70 -> 100 m.
 
 ## Consequences
 - New `scripts/match/drop_rocket.gd`; `DropSquad` loses the formation (slots, follow, separate); `DropLaunch` and `--drop-launch-check` are deleted; `--drop-rocket-check` added.
