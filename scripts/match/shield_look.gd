@@ -4,17 +4,16 @@ extends RefCounted
 ## Boki moves, a Fuse release). The Hunter's own ink outline turns into a thicker line in their side colour
 ## (SideColor): a crisp shell that hugs the body, no bubble, nothing in front of it, no particles, no extra
 ## draw calls (the outline pass is swapped, not added). The amount is on the nameplate as a pale bar past
-## health (HudPlate). When a hit breaks the shield before it runs out it pops with one quick ring and flash.
+## health (HudPlate). When a hit breaks the shield before it runs out its shell cracks and sheds shards (ShieldBreak).
 ## Materials only change when the shield goes up or down, never per frame.
 
 const META := "shield_rim"       # on the Hunter: the colour shown, or absent while no shield is up
 const INK_WIDTH_K := 2.6        # the shield outline is this much wider than the model's own ink
-const POP_RING := 1.1            # m: radius of the break ring
-const POP_S := 0.22              # s: how long the break ring lasts
 
 static var _inks := {}           # [the model's own ink material, colour] -> its shield version (shared)
 
-## Every frame, on every Hunter: puts the rim on while a shield is up, takes it off (and pops) when not.
+## Every frame, on every Hunter: puts the rim on while a shield is up, takes it off when not (and, in the game that
+## owns the body, cracks it when a hit took it before it ran out).
 static func tick(h: Hunter) -> void:
 	var up := h.shield > 0.0 and not h.downed and not h.out
 	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.25) if up else Color.BLACK
@@ -26,8 +25,9 @@ static func tick(h: Hunter) -> void:
 		_rim_on(h, col)
 	else:
 		_rim_off(h)
-		if h.shield_t > 0.0:
-			_pop(h)
+		if h.shield_t > 0.0 and h.shield <= 0.0 and not h.remote:
+			ShieldBreak.body(h)
+			h.m.sfx("ab_shield_hit", h.pos, -8.0, 1.3)
 
 ## Whether the shield rim is on `h`.
 static func shown(h: Hunter) -> bool:
@@ -101,9 +101,3 @@ static func _ink(own: ShaderMaterial, col: Color) -> ShaderMaterial:
 
 static func _rim_mats(h: Hunter) -> Variant:
 	return h.get_meta("shield_rim_mats") if h.has_meta("shield_rim_mats") else null
-
-static func _pop(h: Hunter) -> void:
-	var col := SideColor.of(h.m, h).lerp(Color.WHITE, 0.5)
-	h.m.fx.ring(h.pos + Vector3(0, 0.9, 0), POP_RING, col, POP_S)
-	h.m.fx.flash(h.pos + Vector3(0, 1.0, 0), col, 0.5, 0.08)
-	h.m.sfx("ab_shield_hit", h.pos, -8.0, 1.3)
