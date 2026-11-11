@@ -651,12 +651,12 @@ func _all() -> void:
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("sec") / pb1, K.power("kin") / pc1,
 			K.rank_k("rank_shield", "kin", 1.0),
 		])
-	ok("upgrade parity: Cinderbolt cooldown 7 -> 5.8 -> 4.7 and damage +25% / +50%",
-			near.call(up[1][0], 5.8) and near.call(up[2][0], 4.7)
+	ok("upgrade parity: Cinderbolt cooldown 9 -> 7.5 -> 6 and damage +25% / +50%",
+			near.call(up[1][0], 7.5) and near.call(up[2][0], 6.0)
 			and near.call(up[1][3], 1.25) and near.call(up[2][3], 1.5), str(up))
 	ok("upgrade parity: Ram recharge 9 -> 8.25 -> 7.5", near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5), str(up))
-	ok("upgrade parity: Furnace Cloak cooldown 10.5 -> 8.9 -> 7.3, damage +25% / +50%, shield +25% / +80%",
-			near.call(up[1][2], 8.9) and near.call(up[2][2], 7.3) and near.call(up[1][4], 1.25)
+	ok("upgrade parity: Furnace Cloak cooldown 13 -> 11 -> 9, damage +25% / +50%, shield +25% / +80%",
+			near.call(up[1][2], 11.0) and near.call(up[2][2], 9.0) and near.call(up[1][4], 1.25)
 			and near.call(up[2][4], 1.5) and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.8), str(up))
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1

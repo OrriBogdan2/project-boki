@@ -265,7 +265,7 @@ func bjorn() -> void:
 	K.ult._glow_crack()
 	ok("bjorn ult telegraph: the crack glows brighter as the slam nears",
 		heat1 > heat0 + 0.2, "%.2f -> %.2f" % [heat0, heat1])
-	ok("bjorn ult cooldown: 40 s from the cast (0.8 x the data's 50 s)",
+	ok("bjorn ult cooldown: 50 s from the cast (the data's)",
 		absf(float(K.cd["x"]) - float(xd["cooldown"])) < 0.2,
 		"%.1f" % float(K.cd["x"]))
 	ok("bjorn ult bond: nothing for the cast alone", best(P) <= 0.0 and P.ult < 0.05, "%.3f" % P.ult)

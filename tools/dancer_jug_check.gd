@@ -143,14 +143,14 @@ func thief(a) -> void:
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
 	P.slot_lv["kin"] = 1
-	A.ok("upgrade parity: Bola damage +50% from rank 2 and the cooldown 7 -> 4.8 only at rank 3",
+	A.ok("upgrade parity: Bola damage +50% from rank 2 and the cooldown 13 -> 9 only at rank 3",
 			absf(float(tp[1][1]) / float(tp[0][1]) - 1.5) < 0.01
 			and absf(float(tp[2][1]) / float(tp[0][1]) - 1.5) < 0.01
-			and absf(float(tp[1][0]) - 7.0) < 0.01 and absf(float(tp[2][0]) - 4.85) < 0.05, str(tp))
-	A.ok("upgrade parity: Vault recharge stays 4.5 (the source has no Quickflip cooldown upgrade)",
-			absf(float(tp[1][2]) - 4.5) < 0.01 and absf(float(tp[2][2]) - 4.5) < 0.01, str(tp))
-	A.ok("upgrade parity: Shadow Knife cooldown 15 -> 10.7 from rank 2 (the source's -8s of 28), no damage step",
-			absf(float(tp[1][3]) - 10.71) < 0.05 and absf(float(tp[2][3]) - 10.71) < 0.05
+			and absf(float(tp[1][0]) - 13.0) < 0.01 and absf(float(tp[2][0]) - 9.0) < 0.05, str(tp))
+	A.ok("upgrade parity: Vault recharge stays 5 (the source has no Quickflip cooldown upgrade)",
+			absf(float(tp[1][2]) - 5.0) < 0.01 and absf(float(tp[2][2]) - 5.0) < 0.01, str(tp))
+	A.ok("upgrade parity: Shadow Knife cooldown 28 -> 20 from rank 2 (the source's -8s), no damage step",
+			absf(float(tp[1][3]) - 20.0) < 0.05 and absf(float(tp[2][3]) - 20.0) < 0.05
 			and absf(float(tp[2][4]) / float(tp[0][4]) - 1.0) < 0.01, str(tp))
 	# Vault: a cartwheel, speed, the next bolt empowered; it lands for 3.5x and the Vault comes back
 	A.fresh(T)
@@ -573,12 +573,12 @@ func juggernaut(a) -> void:
 	P.slot_lv["dash"] = 1
 	P.slot_lv["sec"] = 1
 	P.slot_lv["kin"] = 1
-	A.ok("upgrade parity: Rampage recharge 10.4 -> 8.8 -> 6.4 (source -1.6s, then -2.4s more)",
-			close.call(jc[0][0], 10.4) and close.call(jc[1][0], 8.8) and close.call(jc[2][0], 6.4), str(jc))
-	A.ok("upgrade parity: Warchain cooldown 12.8 -> 11.2 -> 8.0, no damage step (the source has none)",
-			close.call(jc[1][2], 11.2) and close.call(jc[2][2], 8.0) and close.call(jc[2][3], 1.0), str(jc))
-	A.ok("upgrade parity: Smash keeps its 2s cooldown at every rank (only damage and the Meteor Drop change)",
-			close.call(jc[1][1], 2.0) and close.call(jc[2][1], 2.0), str(jc))
+	A.ok("upgrade parity: Rampage recharge 13 -> 11 -> 8 (source -2s, then -3s more)",
+			close.call(jc[0][0], 13.0) and close.call(jc[1][0], 11.0) and close.call(jc[2][0], 8.0), str(jc))
+	A.ok("upgrade parity: Warchain cooldown 16 -> 14 -> 10, no damage step (the source has none)",
+			close.call(jc[1][2], 14.0) and close.call(jc[2][2], 10.0) and close.call(jc[2][3], 1.0), str(jc))
+	A.ok("upgrade parity: Smash keeps its 2.5s cooldown at every rank (only damage and the Meteor Drop change)",
+			close.call(jc[1][1], 2.5) and close.call(jc[2][1], 2.5), str(jc))
 	# Rage (Blazing Spirit): damage fills it; nothing below full; Enraged gives damage, dash and ability haste
 	K.res = 0.0
 	K.enraged_t = 0.0
