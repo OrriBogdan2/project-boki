@@ -4,8 +4,9 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her stuck Burr Charge
-## shows (the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
+## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her Burr Charge shows
+## stuck on a wall (a row of rock tiles 4 m out on the host only; the "cone" fx, Net 0.24.5): the guest's copy must
+## draw it as long as the host's.
 ## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -73,8 +74,13 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	cone_len = 0.0
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
+	var rocks := what == "gunslinger rmb"      # only a wall gives the cone
+	if rocks:
+		_rocks(World.T_BLOCK)
 	await _press(key, held)
 	await _run(SETTLE)
+	if rocks:
+		_rocks(World.T_GROUND)
 	var mine := log_rows.duplicate()
 	replies.clear()
 	Net.lobby_emit("ra", {"c": "log"})
@@ -96,6 +102,12 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 		bad += 1
 	n += 1
 	print("%s %s  %d moves, worst lag %.2f s" % [tag, what, cmp["moves"], cmp["lag"]])
+
+## Three tiles 4 m out on the cast line (+x of the hunter), set to `kind`.
+func _rocks(kind: int) -> void:
+	var W := m.world
+	for dz in [-1, 0, 1]:
+		W.kind[W.idx(int(floor(m.player.pos.x + 4.0)), int(floor(m.player.pos.z)) + dz)] = kind
 
 ## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
 func _press(key: String, held: bool) -> void:
