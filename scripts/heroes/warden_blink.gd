@@ -69,7 +69,7 @@ func _due() -> void:
 
 ## True when the camera is within the far-camera distance of the head (and the model is shown).
 func near() -> bool:
-	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	var cam: Camera3D = get_viewport().get_camera_3d() if is_inside_tree() else null
 	if cam == null or head < 0 or not skel.is_visible_in_tree():
 		return false
 	var at := skel.global_transform * skel.get_bone_global_pose(head).origin

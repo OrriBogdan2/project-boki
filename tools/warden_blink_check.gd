@@ -110,8 +110,9 @@ func _hero(id: String) -> void:
 		var open_end := false
 		while blink.is_processing() and frames < 120:
 			sync._process(DT)
-			var clip_pose: Array = blink.lids.map(func(l): return [sk.get_bone_pose_rotation(int(l[0])),
-					sk.get_bone_pose_position(int(l[0]))])
+			var clip_pose: Array = []
+			for l in blink.lids:
+				clip_pose.append([sk.get_bone_pose_rotation(int(l[0])), sk.get_bone_pose_position(int(l[0]))])
 			blink._process(DT)
 			frames += 1
 			var all_shut: bool = blink.lids.all(func(l): return off_closed(sk, l) < TOL)
@@ -119,14 +120,21 @@ func _hero(id: String) -> void:
 				shut += 1
 			was_shut = all_shut
 			if not blink.is_processing():
-				open_end = range(blink.lids.size()).all(func(i): return sk.get_bone_pose_rotation(int(blink.lids[i][0]))
-						.is_equal_approx(clip_pose[i][0]) and sk.get_bone_pose_position(int(blink.lids[i][0]))
-						.is_equal_approx(clip_pose[i][1]))
-		var want_t := WardenBlink.SHUT_T * times + WardenBlink.GAP_T * (times - 1)
+				open_end = _at_clip(sk, blink.lids, clip_pose)
+		var want_t: float = WardenBlink.SHUT_T * times + WardenBlink.GAP_T * (times - 1)
 		ok(shut == times and open_end and absf(frames * DT - want_t) < 2.5 * DT,
 				"%s: %d blink(s) shut %d times, fully open after %.2f s (want %.2f)" % [art_name, times, shut,
 				frames * DT, want_t])
 	m.free()
+
+## Every lid back on the clip's own pose (rotation, position) once the blink is over.
+static func _at_clip(sk: Skeleton3D, lids: Array, clip_pose: Array) -> bool:
+	for i in lids.size():
+		var bi := int(lids[i][0])
+		if not sk.get_bone_pose_rotation(bi).is_equal_approx(clip_pose[i][0]) \
+				or not sk.get_bone_pose_position(bi).is_equal_approx(clip_pose[i][1]):
+			return false
+	return true
 
 ## The blink's closed pose is the deepest the art's own clips shut each lid.
 func _deepest(art_name: String, sk: Skeleton3D, lib: AnimationLibrary, blink: WardenBlink) -> void:
