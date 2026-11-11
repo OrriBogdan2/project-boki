@@ -40,6 +40,33 @@ func _shown(h: Hunter) -> int:
 			n += 1
 	return n
 
+## Running one way while aiming another (+X): the legs turn to the run, the torso stays on the aim. Within the limit
+## the legs turn the way he runs (the sign of his run off the aim); beyond it they turn round and run backwards, so
+## the turn flips sign and shrinks, and never exceeds WardenClips.TWIST_MAX.
+func _twist(m: Match, P: Hunter, T: Hunter, home: Vector3) -> void:
+	var c := _clips(P)
+	for deg in [0.0, 60.0, -60.0, 130.0, -130.0, 180.0]:
+		var run_dir := Vector2(1, 0).rotated(deg_to_rad(deg))
+		for f in 50:
+			T.teleport(home + Vector3(30.0, 0, 0))
+			A.aim_at(P, P.pos + Vector3(8.0, 0, 0))
+			P.inp["move"] = run_dir
+			_frame(m, [P])
+		var rel := wrapf(atan2(-P.vel.x, -P.vel.z) - P.face, -PI, PI)
+		var turn := c.head_turn
+		var back: bool = absf(rel) > WardenClips.TWIST_MAX
+		var want := rel - signf(rel) * PI if back else rel
+		ok(absf(turn) <= WardenClips.TWIST_MAX + 0.01 and absf(turn - want) < 0.15 and c.twist_back == back,
+				"run %d deg off the aim: legs turn %.2f rad (want %.2f, %s), limit %.2f" % [deg, turn, want,
+				"backwards" if c.twist_back else "forwards", WardenClips.TWIST_MAX])
+		if absf(deg) == 60.0 or absf(deg) == 130.0:
+			ok(signf(turn) == signf(rel) * (-1.0 if back else 1.0),
+					"the turn's sign: %.2f for a run %.2f rad off the aim" % [turn, rel])
+	P.inp["move"] = Vector2.ZERO
+	for f in 40:
+		_frame(m, [P])
+	ok(absf(c.head_turn) < 0.05, "the legs unwind when he stops (%.2f rad)" % c.head_turn)
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	A = load("res://tools/archetype_check.gd").new()
@@ -86,6 +113,7 @@ func run(main: Node) -> void:
 	ok(frames > 0 and worst <= AIM_OFF, "the cannon stays on the aim through the slide (worst %.2f rad)" % worst)
 	for f in 60:
 		_frame(m, [P])
+	_twist(m, P, T, home)
 	# RMB tap: the fixed firing point is found and sits ahead of her on the aim, right at the press
 	var fire := WardenGlb.anchor(P.model, "launcher_fire")
 	ok(fire != null and WardenGlb.anchor(P.model, "launcher_muzzle") != null, "the launcher's two FX points are found")

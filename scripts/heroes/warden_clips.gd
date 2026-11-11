@@ -29,6 +29,8 @@ const HEADING_MIN := 2.0     # m/s: slower than this has no heading to lean into
 const HEADING_MAX := 1.4     # rad: the most the root turns off the facing
 const LEGS_MAX := 1.75       # rad: the most the legs turn off the aim ("legs_heading")
 const HEADING_RATE := 14.0   # 1/s: how fast it turns
+const TWIST_MAX := 1.6       # rad (~92 deg): the most the torso twists off the legs running a way other than the aim
+const TWIST_HYST := 0.2      # rad: running backwards holds until the run is this far inside the limit
 const WEAPON_K := "weapon_k"  # root meta: the skinned weapon's size over its rest (the whirl)
 const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
@@ -68,6 +70,9 @@ var hit_seen := 99.0
 var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
+var twist_on := false        # "loco.aim_twist": the legs run the way he goes, the torso stays on the aim
+var twist_goal := 0.0        # rad the legs turn off the aim this frame (0 when he is not running)
+var twist_back := false      # past the twist limit the legs turn round and run backwards
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -140,6 +145,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
+	twist_on = bool((d["loco"] as Dictionary).get("aim_twist", false))
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
@@ -464,6 +470,9 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
 		var most := LEGS_MAX if legs_only else float(want.get("turn_max", HEADING_MAX))
 		goal = clampf(goal, -most, most)
+	elif twist_on:
+		legs_only = true
+		goal = twist_goal * (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w)
 	head_turn = lerp_angle(head_turn, goal, 1.0 - exp(-dt * HEADING_RATE))
 	legs_was = legs_only or (legs_was and absf(head_turn) >= 0.002)     # (it unwinds the same way after the slide)
 	if absf(head_turn) < 0.002:
@@ -475,6 +484,18 @@ func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: floa
 	if legs_only or legs_was:
 		var hb := WardenSkeleton.find(skel, "hips")
 		skel.set_bone_pose_rotation(hb, was.inverse() * turn.inverse() * was * skel.get_bone_pose_rotation(hb))
+
+## The source's run-and-aim: the legs play the run forward and turn to where he goes while the torso stays on the aim,
+## up to TWIST_MAX; beyond it the legs turn round and run backwards, so the torso never twists much past 90 degrees.
+## Returns the loco blend goal (forward or back at run strength `k`) and sets `twist_goal` for _turn_to_heading.
+func _aim_twist(flat: Vector2, face: float, k: float) -> Vector2:
+	if k <= 0.0:
+		twist_goal = 0.0
+		return Vector2.ZERO
+	var rel := wrapf(atan2(-flat.x, -flat.y) - face, -PI, PI)
+	twist_back = absf(rel) > (TWIST_MAX - TWIST_HYST if twist_back else TWIST_MAX)
+	twist_goal = rel - signf(rel) * PI if twist_back else rel
+	return Vector2(0.0, -k if twist_back else k)
 
 func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
@@ -493,6 +514,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	if twist_on:
+		goal = _aim_twist(flat, face, k)
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
 	var rate := gait.plan(spd, lc)
