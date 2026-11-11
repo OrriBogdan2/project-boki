@@ -21,12 +21,12 @@ static func steps() -> Array:
 const KEYS := {"land": "move", "dash": "dash", "exdash": "dash", "crouch": "crouch", "wallkick": "jump",
 	"glove": "interact", "shoot": "fire", "kin": "signature", "sec": "secondary", "gkey": "throw", "hook": "gear1",
 	"ult": "ultimate", "uplink": "interact", "pick_sec": "secondary", "pick_dash": "dash", "pick_kin": "signature",
-	"pick_ult": "ultimate"}
+	"pick_ult": "ultimate", "summon": "summon", "steal": "interact"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"land": "land", "dash": "dash", "exdash": "exdash", "glide": "glide", "wallkick": "crouch",
 	"glove": "yard"}
 const GAP_STEPS := ["dash", "exdash", "glide"]      # leave from the glowing pad on one island, land on the next
-const FOE_STEPS := ["sec", "shoot", "gkey", "kin", "hook", "ult"]     # the marker is the camp's nearest monster
+const FOE_STEPS := ["sec", "shoot", "gkey", "summon", "kin", "hook", "ult"]     # the marker: the camp's nearest monster
 const WALK_LEAD := ["crouch", "glove", "wayout", "uplink", "extract"]
 ## The kit key (ArchKit clip lines and card) each step's ability words come from.
 const KIT_KEY := {"pick_sec": "rmb", "sec": "rmb", "pick_dash": "dash", "dash": "dash", "pick_kin": "e",
@@ -83,12 +83,14 @@ var rmb_t_prev := 0.0
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
+var wb: TutorialWisp         # the Boki-wisp steps (wisp, summon, steal), with Boki wisps on
 
 func _init(match_node: Match) -> void:
 	m = match_node
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
 	camps = TutorialCamps.new(self)
+	wb = TutorialWisp.new(self, match_node)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -152,7 +154,8 @@ func id() -> String:
 
 ## Whether this hunter's kit has the thing a step teaches.
 func applies(sid: String) -> bool:
-	return sid != "gkey" or m.player.kin != null
+	var w := wb.applies(sid)
+	return w == 1 if w >= 0 else sid != "gkey" or m.player.kin != null
 
 ## Called by Match every step.
 func update(dt: float) -> void:
@@ -181,6 +184,7 @@ func update(dt: float) -> void:
 	camps.update()
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
+	wb.tick()
 	if got != got_seen:
 		got_seen = got
 		_refresh(p)          # (each move that lands is ready again at once)
@@ -237,6 +241,7 @@ func _quicken(p: Hunter, dt: float) -> void:
 		p.gear_cd[i] = maxf(0.0, float(p.gear_cd[i]) - extra)
 	for r in _runners(p):
 		r.tick(extra)
+	wb.quicken(extra)
 
 ## Every move is ready: on a new step, a retry (respawn) and each time the step's action lands.
 func _refresh(p: Hunter) -> void:
@@ -245,6 +250,7 @@ func _refresh(p: Hunter) -> void:
 	p.sig_cd = 0.0
 	for r in _runners(p):
 		r.reset()
+	wb.ready()
 
 func _runners(p: Hunter) -> Array:
 	var out: Array = []
@@ -281,6 +287,8 @@ func _enter() -> void:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "":
 		camps.reach(int(TutorialCamps.PICK_LVL[slot]))      # (its point is always there to spend)
+	if sid in TutorialWisp.STEPS:
+		wb.enter(sid)
 	match sid:
 		"sec", "gkey", "kin", "hook", "ult":
 			camps.spawn(sid)
@@ -331,6 +339,8 @@ func _is_done(sid: String, dt: float) -> bool:
 	var slot := TutorialCamps.pick_slot(sid)
 	if slot != "":
 		return int(p.slot_lv[slot]) > 0
+	if sid in TutorialWisp.STEPS:
+		return wb.done(sid, dt)
 	match sid:
 		"land": return not p.dropping
 		"points": return t >= POINTS_T or int(p.slot_lv["sec"]) > 0
@@ -459,7 +469,8 @@ func goal(sid: String) -> Vector3:
 		"glove":
 			var wp := ground_item()
 			return wp["pos"] if not wp.is_empty() else stop("pickup")
-		"sec", "shoot", "gkey", "kin", "hook", "ult":
+		"steal": return wb.goal(sid)
+		"sec", "shoot", "gkey", "summon", "kin", "hook", "ult":
 			var best := camps.nearest("sentinel" if sid == "hook" else "")
 			if best == null:
 				best = camps.nearest()
@@ -561,6 +572,8 @@ func _words() -> void:
 		line = String(alt["shoot_" + shoot_kind])
 	elif sid == "sec" and rmb_has_hold():
 		line = String(alt["sec_hold"])
+	elif wb.alt(sid) != "":
+		line = String(alt[wb.alt(sid)])
 	text = _fill(line)
 	need = int(Content.rules("tutorial")["need"].get(sid, 0))
 	if sid == "sec" and rmb_has_hold():
@@ -604,6 +617,8 @@ func _fill(txt: String) -> String:
 	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
 	txt = txt.replace("%Q", Settings.key_cap("gear1")).replace("%L", kit_line(key))
+	txt = txt.replace("%C", Settings.key_cap("summon")).replace("%F", Settings.key_cap("interact"))
+	txt = txt.replace("%P", KinText.carry(p.kin.ks) if p.kin else "")
 	return txt.replace("%A", an).replace("%s", kname)
 
 ## The kit's own words for one of its keys (rmb, dash, e, lmb, r): its clip line, else its card's first

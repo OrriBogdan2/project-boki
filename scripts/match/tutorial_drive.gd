@@ -63,8 +63,13 @@ static func drive(m: Match) -> void:
 			if not wp.is_empty():
 				goto.call(wp["pos"])
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
-		"sec", "shoot", "gkey", "kin", "hook", "ult":
+		"sec", "shoot", "gkey", "summon", "kin", "hook", "ult":
 			_fight(m, tu, goto)
+		"steal":
+			var at := tu.goal("steal")
+			if at != Vector3.INF:
+				goto.call(at, 1.0)
+				p.inp["interact"] = Vector2(at.x - p.pos.x, at.z - p.pos.z).length() < 1.6
 		"ranks":
 			for slot in ["sec", "dash", "kin"]:
 				p.level_slot(slot)
@@ -100,6 +105,11 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
 			p.inp["fire"] = tu.flag and _fire_key(m)
+		"summon":
+			var s: KinSummon = p.kin.summon if p.kin else null
+			if s and not s.out() and s.cd <= 0.0 and tu.t > 1.0:
+				KinSummon.press(p)       # (as the Summon key does; again each time its ring fills)
+			p.inp["fire"] = tu.wb.seen_out and _fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 			p.inp["fire"] = tu.flag and _fire_key(m)

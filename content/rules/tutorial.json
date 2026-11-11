@@ -1,5 +1,5 @@
 {
- "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down; camp_hp replaces hp for the camps, so their kills come quickly). fight_foes: the last fight's monsters per starter (the ult step). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat.",
+ "doc": "The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %C the Summon key, %P the Boki's carry power, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down; camp_hp replaces hp for the camps, so their kills come quickly). fight_foes: the last fight's monsters per starter (the ult step). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. The wisp, summon and steal steps run only with Boki wisps on (scripts/match/tutorial_wisp.gd): wisp and summon then come after shoot on the open meadow, with a camp of their own that pays no XP (pick_kin tops the level up), gkey is skipped and steal comes before wayout. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat.",
  "steps": [
   [
    "land",
@@ -20,6 +20,14 @@
   [
    "shoot",
    "Now shoot them down"
+  ],
+  [
+   "wisp",
+   "%s rides with you as a wisp"
+  ],
+  [
+   "summon",
+   "Tap %C to summon %s"
   ],
   [
    "pick_dash",
@@ -78,6 +86,10 @@
    "Spend your spare points"
   ],
   [
+   "steal",
+   "Round wisp: a Hunter. Critter wisp: a Boki"
+  ],
+  [
    "wayout",
    "Few ways out: reach the Uplink"
   ],
@@ -111,12 +123,18 @@
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
   "wayout": "A match has only a few ways out. This one is the Uplink at the outpost.",
   "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!",
-  "defend": "Stay inside the circle. Step out and the capture slips back!"
+  "defend": "Stay inside the circle. Step out and the capture slips back!",
+  "wisp": "While it rides, its carry power is yours. %P.",
+  "summon": "Summoned, %s fights for a few seconds, then turns back into a wisp and rests. Its ring fills until you can summon it again. Tap %C while it is out to call it back early.",
+  "steal": "A downed Hunter's Boki wisp breaks loose. Steal it: it rides with you at half power and gives you one summon. It goes home after the match, and nothing of yours is lost."
  },
  "alt": {
   "sec_hold": "Tap, then hold, to use %A",
   "shoot_draw": "Hold to draw, let go to loose",
-  "shoot_melee": "Step in and swing at them"
+  "shoot_melee": "Step in and swing at them",
+  "summon_out": "%s fights for a few seconds",
+  "summon_rest": "%s rests: summon again when its ring fills",
+  "steal_grab": "Hold %F on its Boki wisp to steal it"
  },
  "need": {},
  "cds": 0.25,
@@ -169,7 +187,8 @@
   "wayout": "Uplink",
   "uplink": "Uplink",
   "defend": "Outpost",
-  "extract": "Lift"
+  "extract": "Lift",
+  "steal": "Boki wisp"
  },
  "camps": {
   "sec": {
@@ -185,6 +204,13 @@
     "skitter"
    ],
    "to": 3
+  },
+  "summon": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 0
   },
   "kin": {
    "foes": [
