@@ -31,3 +31,14 @@ dead end. The check fails above 2.0x.
 
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
+
+## A new Boki from the Shelter (base_mode)
+
+DECISIONS 2026-11-11: the Shelter always has strays, so adopting is a moment at home, built from what
+exists. The new Boki steps out at the zone's pad (the stone, `HubWaystone.pad`); the Boki near by come to
+look (`BaseLife._arrived` and `ComeLook`) and the first to reach it keeps "was there the day <name> arrived".
+It is shy for its first farm day (`BaseShy`, `base_life.json` "shy": 300 s of farm time, the length of one day):
+it keeps to the island's edge, joins no tag and no toy and is nobody's play mate, then cheers up and goes to
+join in. `rec["shy_s"]` holds the time left; a Boki without it is settled, so old saves need no migration.
+Default taken: the shy day runs only while its zone is loaded. The alternative is real time, which would let a
+closed game cure it. Checked by `--base-stray-check`.

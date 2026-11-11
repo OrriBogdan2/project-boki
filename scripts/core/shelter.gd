@@ -103,6 +103,7 @@ static func adopt(id: String) -> Dictionary:
 	else:
 		Save.remember(rec, "adopted", "was raised by %s, then found a new home with you" % giver, 1.0)
 	Care.ensure(rec)
+	BaseShy.start(rec)
 	Save.d["roster"].append(rec)
 	if Save.kin(str(Save.d.get("active", ""))).is_empty():
 		Save.d["active"] = rec["uid"]
