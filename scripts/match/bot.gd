@@ -768,7 +768,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			goal = yg[0]; gk = "yard"
 	# a squadmate is in a fight within earshot: go and help
 	if goal == Vector3.INF:
-		goal = BotSquad.assist_goal(h, helping)
+		goal = BotSquad.assist_goal(h, a, helping)
 		if goal != Vector3.INF:
 			gk = "assist"
 	# a rival's deathbox revive humming within earshot: go and stop it

@@ -24,9 +24,10 @@ const CLOSE_M := 6.0           # a rival this close is fought whatever the odds
 const ODDS_SKILL := 0.45       # skill from which one extra rival is enough to hold back (below: two)
 
 ## Off for a match started with "bot_plain": bots as they were without squad play or retreats
-## (the bot-human check measures both ways from one build).
+## (the bot-human check measures both ways from one build). Off in the duel room too: one against
+## one with nowhere to go, a bot there fights it out (and --bot-kit-use counts what it presses).
 static func on(m) -> bool:
-	return not m.opts.get("bot_plain", false)
+	return not (m.opts.get("bot_plain", false) or m.opts.get("duel", false))
 
 static func up(o: Hunter) -> bool:
 	return not (o.out or o.downed or o.extracted or o.riding or o.dropping)
@@ -113,18 +114,21 @@ static func odds(m, h: Hunter) -> int:
 	return k
 
 ## Where to run to help: the nearest rival a squadmate is fighting (Bot._choose targets it once it
-## is in reach and in sight), or INF. A badly hurt bot stays out of it.
-static func assist_goal(h: Hunter, fighting: Array) -> Vector3:
+## is in reach and in sight), or INF. A badly hurt bot stays out of it. The bot keeps to the rival
+## it set off for while that fight lasts: with two fights either side it turned round every think.
+static func assist_goal(h: Hunter, a: Dictionary, fighting: Array) -> Vector3:
 	if fighting.is_empty() or h.hp < h.max_hp * HELP_HP:
+		a.erase("assist")
 		return Vector3.INF
-	var best := Vector3.INF
-	var bd := 1e9
+	var held = a.get("assist")
+	if is_instance_valid(held) and fighting.has(held):
+		return held.pos
+	var best: Hunter = fighting[0]
 	for f in fighting:
-		var d := h.flat_dist(f)
-		if d < bd:
-			bd = d
-			best = f.pos
-	return best
+		if h.flat_dist(f) < h.flat_dist(best):
+			best = f
+	a["assist"] = best
+	return best.pos
 
 ## Would starting on rival `o` be a fight against more than we have here? Counted the way a player
 ## reads it: hunters on their feet round the rival against those round us.
