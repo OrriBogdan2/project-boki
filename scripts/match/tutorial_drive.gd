@@ -55,9 +55,21 @@ static func drive(m: Match) -> void:
 				p.inp["interact"] = int(m.time * 30.0) % 2 == 0     # (a tap per item: one press, one pickup)
 		"shoot", "sig", "utility", "throw", "kin1", "fight":
 			_fight(m, tu, goto)
+			var ks: KinSummon = p.kin.summon if p.kin else null
+			if sid == "fight" and tu.wb.on() and ks and ks.cd <= 0.0 and not ks.out():
+				KinSummon.press(p)       # (with wisps on, the Boki fights when summoned)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)
+		"summon":
+			var s: KinSummon = p.kin.summon if p.kin else null
+			if s and not tu.wb.seen_out and not s.out() and s.cd <= 0.0 and tu.t > 1.0:
+				KinSummon.press(p)       # (as the Summon key does on the fixed step)
+		"steal":
+			var at := tu.goal("steal")
+			if at != Vector3.INF:
+				goto.call(at, 1.0)
+				p.inp["interact"] = Vector2(at.x - p.pos.x, at.z - p.pos.z).length() < 1.6
 		"rank":
 			p.level_slot("kin")
 		"key":

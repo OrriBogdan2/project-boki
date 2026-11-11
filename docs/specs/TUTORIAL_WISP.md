@@ -52,3 +52,13 @@ A check (`--tutorial --tut-test`) must reach `extract` with `last_step` printing
 - `KinWisp.mode` returns false when `tut` is set ("never in the tutorial"); beats 2-7 need it true and the wisp shown in tutorial.
 - `Tutorial` needs the decoy and the new ids in `_is_done`, `applies`, `_enter` (as the cut steps do); `TutorialText` gets `%s`-style tokens it already has.
 - Net-neutral wiring only; the god files may not grow (AGENTS.md section 2). New logic goes in a `scripts/match/tutorial_wisp.gd`.
+
+## Built (ext/tut-wisp-beats, 2026-11-11)
+Folded into three steps in `scripts/match/tutorial_wisp.gd` (`TutorialWisp`), shown only with Boki wisps on (`KinWisp.mode`, which
+the tutorial now follows); they take the places of `gkey`, `throw`, `orders`, `kin1`, so a wisp player sees 21 steps, not 22:
+- `wisp` (after pickup): beats 1-2, "%s rides with you as a wisp", detail names the carry power (`%P` = `KinText.carry`). 3 s.
+- `summon` (after utility): beats 3-5, "Tap %C to summon %s" -> "%s fights for a few seconds" -> "%s rests: summon again when its
+  ring fills". Window capped at 6 s here; self-summons at 20 s; the summon is ready again on each step start like every cooldown.
+- `steal` (after fight): beats 6-7, a downed decoy rival Hunter (round wisp) with its loose Boki wisp: "Round wisp: a Hunter. Critter
+  wisp: a Boki" -> "Hold %F on its Boki wisp to steal it". The wisp comes to you at 14 s; the decoy stays down; match end sends it home.
+Not built: the stolen wisp's one summon (Q6 still open), a separate cooldown step. Check: `--tutorial-wisp-check`.

@@ -17,12 +17,14 @@ static func steps() -> Array:
 
 const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "crouch": "crouch",
 	"pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary", "throw": "throw",
-	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
+	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw", "summon": "summon",
+	"steal": "interact"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "exdash", "glide": "glide",
 	"crouch": "crouch", "pickup": "yard"}
 const GAP_STEPS := ["dash", "exdash", "glide"]      # leave from the glowing pad on one island, land on the next
-const FOE_STEPS := ["gkey", "shoot", "sig", "utility", "throw", "kin1", "fight"]     # the marker is the nearest monster
+# the marker is the nearest monster
+const FOE_STEPS := ["gkey", "summon", "shoot", "sig", "utility", "throw", "kin1", "fight"]
 const WALK_LEAD := ["move", "crouch", "pickup", "key", "chest", "goexit", "uplink", "extract"]
 
 const CARD_T := 1.5        # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
@@ -78,11 +80,13 @@ var rmb_t_prev := 0.0
 var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
+var wb: TutorialWisp         # the Boki-wisp steps (wisp, summon, steal), with Boki wisps on
 
 func _init(match_node: Match) -> void:
 	m = match_node
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
+	wb = TutorialWisp.new(self, match_node)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -153,6 +157,9 @@ func id() -> String:
 ## Whether this hunter's kit has the thing a step teaches.
 func applies(sid: String) -> bool:
 	var p := m.player
+	var w := wb.applies(sid)
+	if w >= 0:
+		return w == 1
 	match sid:
 		"sig": return p.ak != null or (p.kin != null and p.kin.runner != null and p.kin.runner.has_slot("k1"))
 		"utility": return p.ak != null or (p.runner != null and p.runner.has_slot("utility"))
@@ -188,6 +195,7 @@ func update(dt: float) -> void:
 	var sid := id()
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
+	wb.tick()
 	if got != got_seen:
 		got_seen = got
 		_refresh(p)          # (each move that lands is ready again at once)
@@ -229,6 +237,7 @@ func _quicken(p: Hunter, dt: float) -> void:
 	p.sig_cd = maxf(0.0, p.sig_cd - extra)
 	for r in _runners(p):
 		r.tick(extra)
+	wb.quicken(extra)
 
 ## Every move is ready: on a new step, a retry (respawn) and each time the step's action lands.
 func _refresh(p: Hunter) -> void:
@@ -237,6 +246,7 @@ func _refresh(p: Hunter) -> void:
 	p.sig_cd = 0.0
 	for r in _runners(p):
 		r.reset()
+	wb.ready()
 
 func _runners(p: Hunter) -> Array:
 	var out: Array = []
@@ -271,6 +281,8 @@ func _enter() -> void:
 	need_back = false
 	used0 = p.used.duplicate()
 	skills0 = p.kin.st_skills if p.kin else 0
+	if sid in TutorialWisp.STEPS:
+		wb.enter(sid)
 	match sid:
 		"pickup":
 			var at := stop("pickup")
@@ -371,6 +383,8 @@ func spot(dist: float, ang0: float) -> Vector3:
 func _is_done(sid: String, dt: float) -> bool:
 	var p := m.player
 	var near := func(r: float) -> bool: return p.grounded and _dist(stop(sid)) < r
+	if sid in TutorialWisp.STEPS:
+		return wb.done(sid, dt)
 	match sid:
 		"land": return not p.dropping
 		"move":
@@ -504,7 +518,8 @@ func goal(sid: String) -> Vector3:
 		"pickup":
 			var wp := ground_item()
 			return wp["pos"] if not wp.is_empty() else stop("pickup")
-		"gkey", "shoot", "sig", "utility", "throw", "kin1", "fight":
+		"steal": return wb.goal(sid)
+		"gkey", "summon", "shoot", "sig", "utility", "throw", "kin1", "fight":
 			var best: Ent = null
 			var bd := 1e9
 			for mb in m.mobs:
@@ -621,6 +636,8 @@ func _words() -> void:
 		line = String(alt["throw_back"])
 	elif sid == "throw" and need_back:
 		line = String(alt["throw_send"])
+	elif wb.alt(sid) != "":
+		line = String(alt[wb.alt(sid)])
 	text = _fill(line)
 	need = int(Content.rules("tutorial")["need"].get(sid, 0))
 	if sid == "utility" and rmb_has_hold():
@@ -667,6 +684,8 @@ func _fill(txt: String) -> String:
 		kname = String(p.kin.rec.get("name", kname))
 	txt = txt.replace("%J", Settings.key_cap("jump")).replace("%G", Settings.key_cap("glide"))
 	txt = txt.replace("%E", Settings.key_cap("signature")).replace("%T", Settings.key_cap("throw"))
+	txt = txt.replace("%C", Settings.key_cap("summon")).replace("%F", Settings.key_cap("interact"))
+	txt = txt.replace("%P", KinText.carry(p.kin.ks) if p.kin else "")
 	return txt.replace("%A", an).replace("%s", kname)
 
 func _wasd() -> String:
