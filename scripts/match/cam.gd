@@ -47,9 +47,11 @@ const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting
 const FOLLOW_Y := 3.5
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
-const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
+const GLIDE_LEAD_EASE := 6.0  # 1/s: the lean's spring (critically damped), so it eases in and out with no kick at
+                              # the glider opening or closing (a plain lerp started at full speed)
 var lead_vel := Vector3.ZERO
 var lead_off := Vector3.ZERO
+var lead_v := Vector3.ZERO    # m/s: how fast lead_off moves
 
 ## An aimed cast's wider view (item 68): cast_view() asks for it every step of the cast. It eases in and out over
 ## about 0.2 s, no shake. Only the casting player's camera ever hears about it.
@@ -199,7 +201,9 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
 	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
-	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
+	var lead_to := (lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX)
+	lead_v += ((lead_to - lead_off) * GLIDE_LEAD_EASE * GLIDE_LEAD_EASE - lead_v * 2.0 * GLIDE_LEAD_EASE) * delta
+	lead_off += lead_v * delta
 	_tick_cast(delta)
 	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
 	zoom = lerpf(zoom, zoom_to, 1.0 - exp(-float(rr[3]) * delta))
