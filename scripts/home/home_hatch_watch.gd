@@ -91,10 +91,11 @@ func _pick(egg: Dictionary) -> void:
 		k["watch"] = h.NEST_AT + Vector3(cos(a), 0.0, sin(a)) * RING_R
 		for busy_key in ["chase", "task", "fetch"]:
 			k.erase(busy_key)
+		h.hw.drop(k)      # a farm job (watering, sowing...) is put down: the hatch is worth stopping for
 		h._emote(k, "!")
 
 func _can_watch(k: Dictionary, nest_isle: int, parents: Array) -> bool:
-	if k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("job") or k.has("bath") or k.has("called_t"):
+	if k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("bath") or k.has("called_t"):
 		return false
 	if h.world.island_of(k["pos"].x, k["pos"].z) != nest_isle:
 		return false
