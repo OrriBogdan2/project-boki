@@ -10,8 +10,8 @@ const FOLLOW_SLACK := 1.2    # m she lets you drift before she walks after you
 const STRAFE_HZ := 0.9       # rad/s of a strafing rival's side-to-side
 const WILD_AHEAD := 5.0      # m in front of you the wild Boki turns up
 const WILD_HP := 0.3         # of its health the wild Boki arrives with (two or three hits)
-const KEEP_R := 12.0         # m from the ring's centre: past this a hunter is in or over the wall
-const BACK_R := 11.3         # m from the centre such a hunter is put back at
+const KEEP_R := 12.9         # m from the ring's centre: past this a hunter is in or over the wall (its tiles start ~12)
+const BACK_R := 11.5         # m from the centre such a hunter is put back at
 
 var tu: DuoTutorial
 var m: Match
