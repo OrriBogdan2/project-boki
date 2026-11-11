@@ -2,44 +2,25 @@ class_name UtilityUse
 extends RefCounted
 ## What each belt item does when you press its key (UtilityBelt holds the charges). Item data is in
 ## content/utility/*.json; "use" picks the behaviour:
-##   drink   a tonic: a short, open channel, then a heal (drink_time, drink_heal: the item's "channel" data, or
-##           its "time" and "heal" share of your health); Deep Draught, Lostway Scroll (warp) and Omen Draught
-##           (omen) are drinks too (UtilityMore.drank)
-##   repair  an armor kit: the same channel, then armor to full (all in the item's "channel" data)
+##   drink   a tonic: a short, open channel ("time" s, moving at "move" of your speed), then "heal_hp"
+##           health (flat), or "heal" of your max (default 40%); Deep Draught, Lostway Scroll (warp) and
+##           Omen Draught (omen) are drinks too (UtilityMore.drank)
+##   repair  an armor kit: the same channel, then "repair" of your armor by armor tier (a list, Common
+##           first; the last entry serves the tiers past it)
 ##   mend    heal 40 and 20 armor at once
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
-##   key     a chest key: open the locked chest beside you, or ping the nearest one (BeltKeys)
+##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
 ##   fx      run the item's "effects" list through Effects (haste, shield, ...)
 ##   field pilfer lamp ember   the source utilities (UtilityMore); pad and scan take their numbers from the item
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
 
+const DRINK_HEAL := 0.4         # of max health, for a drink with no number of its own
+const CHANNEL_TIME := 1.0       # s, for a drink or repair with no "time" (the source heals "after 1s")
 const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
-
-## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
-static func channel(id: String, key: String) -> float:
-	return float((UtilityBelt.def(id).get("channel", {}) as Dictionary).get(key, 1.0))
-
-## Seconds a drink takes: its "channel" time (the tonic), else its own "time".
-static func drink_time(id: String) -> float:
-	var d := UtilityBelt.def(id)
-	return channel(id, "time") if d.has("channel") else float(d.get("time", 1.0))
-
-## Health a drink gives back before perks: the tonic's flat "channel" heal, else its "heal" share of your health.
-static func drink_heal(h: Hunter, id: String) -> float:
-	var d := UtilityBelt.def(id)
-	if d.has("channel"):
-		return channel(id, "heal")
-	return h.max_hp * float(d.get("heal", 0.0))
-
-## The speed multiplier for a hunter who is drinking or repairing (1.0 otherwise).
-static func channel_move(h: Hunter) -> float:
-	if h.drink_t > 0.0:
-		return channel("tonic", "move")
-	return channel("armor_kit", "move") if h.kit_t > 0.0 else 1.0
 
 static func use_of(id: String) -> String:
 	return String(UtilityBelt.def(id).get("use", "fx"))
@@ -47,7 +28,7 @@ static func use_of(id: String) -> String:
 ## Is there anything for this item to do right now? (A tonic at full health buzzes instead.)
 static func can_use(h: Hunter, id: String) -> bool:
 	match use_of(id):
-		"drink": return drink_heal(h, id) <= 0.0 or h.hp < h.max_hp - 0.5
+		"drink": return heal_of(h, id) <= 0.0 or h.hp < h.max_hp - 0.5
 		"repair": return h.armor < h.max_armor - 0.5
 		"mend": return h.hp < h.max_hp - 0.5 or h.armor < h.max_armor - 0.5
 		"ember", "field": return UtilityMore.can_use(h, id)
@@ -64,7 +45,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		"drink":
 			h._fold_for_action()
 			h.drink_id = id
-			h.drink_len = drink_time(id)
+			h.drink_len = float(d.get("time", CHANNEL_TIME))
 			h.drink_t = h.drink_len
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
@@ -72,7 +53,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			return true
 		"repair":
 			h._fold_for_action()
-			h.kit_t = channel(id, "time")
+			h.kit_len = float(d.get("time", CHANNEL_TIME))
+			h.kit_t = h.kit_len
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
@@ -108,6 +90,26 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		h.belt[i]["cd"] = float(d.get("cd", 0.0))
 	return true
 
+## What a drink heals before perks and gear: its flat "heal_hp", else "heal" of max health.
+static func heal_of(h: Hunter, id: String) -> float:
+	var d := UtilityBelt.def(id)
+	if d.has("heal_hp"):
+		return float(d["heal_hp"])
+	return h.max_hp * float(d.get("heal", DRINK_HEAL))
+
+## How much of the armor a kit puts back on this hunter: the kit's "repair" list by armor tier.
+static func repair_frac(h: Hunter) -> float:
+	var r: Array = UtilityBelt.def("armor_kit").get("repair", [1.0])
+	return float(r[clampi(h.armor_tier, 0, r.size() - 1)])
+
+## Speed while using an item: the drink's or the kit's "move" (1.0 is no slow). The hunter's speed line.
+static func channel_move(h: Hunter) -> float:
+	if h.drink_t > 0.0:
+		return float(UtilityBelt.def(h.drink_id).get("move", 1.0))
+	if h.kit_t > 0.0:
+		return float(UtilityBelt.def("armor_kit").get("move", 1.0))
+	return 1.0
+
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
 static func tick(h: Hunter, dt: float) -> void:
@@ -120,9 +122,9 @@ static func tick(h: Hunter, dt: float) -> void:
 				h.drink_t = 0.0
 				var dd := UtilityBelt.def(h.drink_id)
 				if UtilityBelt.take(h, h.drink_id, 1) > 0:
-					var amt := drink_heal(h, h.drink_id)
-					if amt > 0.0:
-						h.heal(amt * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
+					var amount := heal_of(h, h.drink_id)
+					if amount > 0.0:
+						h.heal(amount * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
 					UtilityMore.drank(h, dd)
 					h.m.sfx("heal", h.pos, -2.0)
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color(dd.get("col", Color("8ff0a0"))), 14, 2.5, 0.5, -3.0)
@@ -134,6 +136,6 @@ static func tick(h: Hunter, dt: float) -> void:
 			if h.kit_t <= 0.0:
 				h.kit_t = 0.0
 				if UtilityBelt.take(h, "armor_kit", 1) > 0:
-					h.armor = h.max_armor
+					h.armor = minf(h.max_armor, h.armor + h.max_armor * repair_frac(h))
 					h.m.sfx("shield", h.pos, -2.0, 1.2)
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("dfe9f7"), 16, 2.5, 0.5, -3.0)

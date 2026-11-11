@@ -13,7 +13,9 @@
   1
  ],
  "price": 40,
- "desc": "A long, slow drink that restores all your health. You are open and slowed for 5s, and a hit spills it.",
+ "desc": "A long, slow drink that restores all your health. You crawl at 40% speed for 5s, open to hits, and a hit spills it.",
  "time": 5.0,
- "heal": 1.0
+ "heal": 1.0,
+ "move": 0.4,
+ "src": "docs/SOURCE_UTILITIES.md: 5 s, 60% slow, full restore, stack 1"
 }

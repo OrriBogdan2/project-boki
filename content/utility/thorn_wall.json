@@ -6,7 +6,7 @@
  "col": "7fd06a",
  "use": "fx",
  "cd": 3.0,
- "max": 5,
+ "max": 10,
  "bring": [
   1,
   2,
@@ -29,5 +29,6 @@
     "slow": 1.0
    }
   }
- ]
+ ],
+ "src": "docs/SOURCE_UTILITIES.md: stack 10"
 }

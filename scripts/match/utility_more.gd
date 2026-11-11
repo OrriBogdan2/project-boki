@@ -6,7 +6,8 @@ extends RefCounted
 ##   field   a patch on the ground built on Fields.add_kx; "field" picks it:
 ##             gate    two gates, one where you aim and one at your feet; later everyone in each swaps
 ##             seed    stand in it "hold" seconds and you are thrown to a random spot
-##             banner  you show to every rival for "time" s; live through it and the squad returns, plus "reward" gems
+##             banner  you show to every rival for "time" s; live through it and the squad returns, plus "reward" gems;
+##                     knocked, you go straight out and whoever knocked you takes the gems
 ##             ward    shows every rival within "r" while it hangs
 ##             pack    the first body to step in heals "heal" of its health over "hold" s (a hit stops it)
 ##   pilfer  raccoons take "take" of the gems of every rival hunter within "r" of the aim
@@ -97,6 +98,7 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 	match String(d.get("field", "")):
 		"gate":
 			var b := h.pos
+			h.set_meta("gate_end", m.time + time)      # BeltHud shows the countdown while the gates are open
 			var tick := func(_p, _z): pass
 			m.fields.add_kx(h, at, r, time, 1.0, col, tick, func(_p): _swap(m, at, b, r), null, "")
 			m.fields.add_kx(h, b, r, time, 1.0, col, tick, Callable(), null, "")
@@ -112,7 +114,7 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 			h.reveal_t = maxf(h.reveal_t, time)
 			m.fx.word(h.pos + Vector3(0, 2.4, 0), "MOST WANTED", col)
 			m.add_feed("%s shows themselves to everyone" % h.pname)
-			m.fields.add_kx(h, h.pos, 1.0, time, 1.0, col, func(_p, _z): pass,
+			m.fields.add_kx(h, h.pos, 1.0, time, 0.2, col, func(_p, z): _banner_tick(m, h, d, z),
 				func(_p): _banner_end(m, h, d, key, t0), h, "")
 		"ward":
 			m.fields.add_kx(h, at, 0.6, time, 0.5, col, func(p, _z): _ward_tick(m, h.team, p, r),
@@ -166,6 +168,20 @@ static func _seed_tick(m: Node, at: Vector3, r: float, hold: float, held: Dictio
 	for k in held.keys():
 		if not inside.any(func(x): return x.nid == k):
 			held.erase(k)
+
+## Knocked under the banner: out at once (no wisp, no spare life) and the knocker pockets the bounty.
+static func _banner_tick(m: Node, h: Hunter, d: Dictionary, z: Dictionary) -> void:
+	if not h.downed or h.out:
+		return
+	var by = h.last_hit_by
+	if by is Kin and by.owner_h:
+		by = by.owner_h
+	if by is Hunter and by.team != h.team:
+		by.gems += int(d.get("reward", 0))
+		m.fx.word(by.pos + Vector3(0, 2.4, 0), "+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
+		m.add_feed("%s claims the bounty on %s" % [by.pname, h.pname])
+	m.eliminate(h, h.last_hit_by, "bounty", true)
+	z["t"] = 0.0
 
 static func _banner_end(m: Node, h: Hunter, d: Dictionary, key: String, t0: float) -> void:
 	m.remove_meta(key)

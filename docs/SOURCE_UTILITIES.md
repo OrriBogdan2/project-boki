@@ -122,6 +122,26 @@ deviations:
 - Online, gates, seeds and pilfer move only the bodies this game owns, like the spring pads.
 - Each shop sells a fixed list (`sells` in content/rules/shops.json), the same every match.
 
+## Built Nov 9 (ext/utility-parity)
+
+Behaviour brought in line with the source, each number in the item's JSON `src` field:
+
+- Six belt slots: 1 and 2 pinned to the tonic and the armor kit (`slot` in their JSON), 3 to 6 open.
+  Pinned items stack to 8. The home belt picks the open slots only (`UtilityBelt.free_slot`).
+- Tonic: 1.0 s drink, no slow, a flat 42 health (`heal_hp`; the source's 300 over our HP ratio).
+- Armor kit: 1.6 s at 45% speed, repairs 80 / 40 / 30% of the armor bar by armor tier (`repair`).
+- Deep Draught slows you to 40% for its 5 s. Thorn Wall stacks to 10.
+- Skyfall Charge: 5 s fuse, a lethal blast (690) then a 3 s fire patch on the spot.
+- Bounty Banner: knocked under it you are out at once (no wisp, no spare life) and the knocker
+  pockets the reward.
+- Blight Flask: a 40 s patch that blights (healing in it barely takes) besides burning and slowing.
+- Checked by `--utility-parity-check` (banner, skyfall, blight) and `--equal-check` (slots, tonic, kit).
+
+Still ours, on purpose or for lack of a system: Twin Gate auto-swaps (no second press), Lostway has
+no circle to aim for, Thorn Wall does not root, Lantern cannot be picked back up, the fan has no HP,
+Pilfer has no 1.5 s channel and no vault loot, smoke does not cloak the team, Skyfall never hurts
+allies or beacons, prices and bring caps follow our economy.
+
 ## Sources
 
 - [W-x] wiki pages, `https://supervive.wiki.gg/wiki/<Page>` (raw wikitext read Nov 8 2026): Consumables, Powers, Shops, World_objects, Anywhere_But_Here, Vive_Brew, Portable_Armor_Repair, Hypervive, Pocket_UAV, Jump_Pad, Emergency_Platform_(Power), Deployable_Fan, Two-Way_Teleporter_(Power), Most_Wanted, Mobile_Respawn_Beacon, Tactical_Nuke_(Power), Mass_Heist, Basecamp, Ethereal_Smoke, EMP_Grenade, Death_Circle_Grenade, Scan_Grenade, Spike_Wall, Prophet's_Potion, Vive_Packs, Gold_Key, Evil_Key, Tome_of_Knowledge, Codex_of_Mass_Enlightenment, Little_Cook_(Power), Chonker_Cannon, Snowball_(Power), Present!_(Power), Tree_Costume_(Power), Money_Tree_Seeds, The_Breach, Hot_Zone, Vaults, Supply_Drops, Train, Skysharks.
