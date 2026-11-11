@@ -14,7 +14,8 @@ const LENGTH := {"feed": 1.0, "pat": 1.3, "toss": 0.8, "cheer": 0.8}
 const TOSS_RELEASE := 0.5            # s into the toss when the ball leaves the hand
 const STAND := Vector4(0.12, -0.22, 0.12, -0.22)      # legs at rest
 const HANG := Vector3(0.0, -0.42, -0.04)      # a relaxed free hand, from its shoulder
-const SQUAT_MAX := 0.17      # m (legs' rest size): the deepest the hips go (deeper, a folded leg can't keep a splayed foot)
+# m (legs' rest size): the deepest the hips go (deeper, a folded leg can't keep a splayed foot)
+const SQUAT_MAX := 0.17
 const SQUAT_DEFAULT := {"feed": 0.16, "pat": 0.12}     # m: with no Boki to aim at
 const LEG := 0.445           # m: thigh + shin, for legs() on a body without planted feet
 const REACH_K := 0.7         # of the arm's reach: how far down the hand goes before the knees bend for it

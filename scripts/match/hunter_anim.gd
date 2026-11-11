@@ -847,7 +847,8 @@ func update(dt: float, s: Dictionary) -> void:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01 and not (gait != null and HunterVerbs.ACTS.has(act_kind)):      # the Empty squats on its planted feet
+	# (the Empty squats for a garden move on its planted feet instead)
+	if act_k > 0.01 and not (gait != null and HunterVerbs.ACTS.has(act_kind)):
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -1726,7 +1727,8 @@ func _aim_verb(box: AABB) -> void:
 	if not model.is_inside_tree():
 		act_aim = Vector3.INF
 		return
-	act_aim = HunterVerbs.aim(act_kind, box, model.global_position, model.to_global(Vector3(0.0, sh_y + REACH * arm_k * 0.4, 0.0)).y)
+	var top := model.to_global(Vector3(0.0, sh_y + REACH * arm_k * 0.4, 0.0)).y      # the highest the hand pats
+	act_aim = HunterVerbs.aim(act_kind, box, model.global_position, top)
 	act_need = -1.0
 	if act_aim != Vector3.INF:
 		var drop := sh_y - REACH * arm_k * HunterVerbs.REACH_K - model.to_local(act_aim).y
