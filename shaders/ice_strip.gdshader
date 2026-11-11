@@ -11,6 +11,8 @@ uniform float now = 0.0;          // match time, set once a step
 varying vec3 plate;
 void vertex() {
 	plate = INSTANCE_CUSTOM.xyz;
+	float k = clamp((now - plate.x) / plate.y, 0.0, 1.0);
+	VERTEX.xz *= mix(0.6, 1.0, clamp(k * 15.0, 0.0, 1.0));    // frozen in under the blade at once
 }
 void fragment() {
 	float k = clamp((now - plate.x) / plate.y, 0.0, 1.0);

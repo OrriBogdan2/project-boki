@@ -41,7 +41,7 @@ var ult_look: UltLook
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
 const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
-const SLAB_CAP := 56           # plates the strip holds: SLAB_LIFE over SLAB_GAP at 60 Hz (50), with a little spare
+const SLAB_CAP := 24           # plates the strip holds; the 25th reuses the oldest (the trail's length while skating)
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
 const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)

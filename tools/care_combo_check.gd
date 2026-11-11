@@ -153,6 +153,12 @@ func _skate_only() -> void:
 	step(m, 0.7)
 	var slabs := K.lk().ice_strip(RimewrightKit.SLAB_CAP).live_count(m.time)
 	ok("tm Shift: ice plates form under her while she skates", slabs >= 5, "%d plates" % slabs)
+	step(m, 0.8)
+	var strip := K.lk().ice_strip(RimewrightKit.SLAB_CAP)
+	ok(
+			"tm Shift: the trail is 24 plates long while she skates (a new plate reuses the oldest)",
+			strip.laid > RimewrightKit.SLAB_CAP and strip.live_count(m.time) == 24,
+			"%d laid, %d showing" % [strip.laid, strip.live_count(m.time)])
 	P.inp["dash_down"] = false
 	await _free(m)
 

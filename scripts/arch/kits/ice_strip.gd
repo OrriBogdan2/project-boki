@@ -17,7 +17,7 @@ var born := PackedFloat32Array()    # s of match time each instance was laid at 
 var last_t := -1.0e9                # match time the newest plate was laid at
 var life := 3.0                     # s a plate stays (set by the first lay)
 
-## `cap` plates at most (the life over the gap between two plates, with a little spare).
+## `cap` plates at most: past that a new plate reuses the oldest.
 func _init(parent: Node3D, cap: int) -> void:
 	mat.shader = SHADER
 	var quad := PlaneMesh.new()
