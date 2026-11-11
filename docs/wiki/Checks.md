@@ -69,6 +69,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |
+| `--hatch-sfx-check` | Each hatch stage plays its sound once and in order (wobble ticks, first crack, bigger crack, pop, first chirp per starter type); the black mystery egg uses its own darker set and none of the plain ones |
 | `--economy-check` | Full backpack swaps, smart loot, extracting fills the armory, feeders feed (also while away), starving to a grave, the Soul Shrine |
 | `--work-check` | Boki at work: knacks, mutation bonuses, old saves, jobs from the farm's state, priorities and pins, real output |
 | `--farm-start-check` | A new save's farm start: placing the essentials, chopping and mining, materials paying for buildings, assigned Boki working, old saves |

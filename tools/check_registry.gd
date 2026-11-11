@@ -229,6 +229,7 @@ const CHECKS := {
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
 	"--home-hatch-check": ["res://tools/home_hatch_check.gd", "home_hatch_check", null],      # the nest egg's hatch at home: wobble, watchers, skip
+	"--hatch-sfx-check": ["res://tools/hatch_sfx_check.gd", "hatch_sfx_check", null],      # hatch stage sounds, mystery egg
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],

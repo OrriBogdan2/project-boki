@@ -96,7 +96,7 @@ func _ready() -> void:
 		if d.get("mystery", false):
 			holder.add_child(MysteryEgg.new())
 			MysteryEgg.hideout(self, MYSTERY_AT)
-			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS
+			egg.shell_col = MysteryEgg.SHELL; egg.spot_col = MysteryEgg.SPOTS; egg.mystery = true
 		else:
 			holder.add_child(_nest())
 		egg.hop_out = 0.35
