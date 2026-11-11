@@ -93,7 +93,7 @@ func _fill() -> void:
 	var box_list := _box_list(items)
 	var you_list := _you_list(p)
 	cols.add_child(_column("In the box", null, box_list))
-	cols.add_child(_column(_you_title(p, items), _pack_count(p), you_list))
+	cols.add_child(_column(_you_title(items), _pack_count(p), you_list))
 	v.add_child(_foot())
 	# both lists are in the tree now, so their rows can be measured: one height for both, scrolling past cap
 	var cap := maxf(ROW_H * 3.0, get_viewport_rect().size.y - RESERVED_H)
@@ -160,7 +160,7 @@ func _box_list(items: Array) -> VBoxContainer:
 		var rows: Array = items.filter(func(it): return _group_of(it) == g)
 		if rows.is_empty():
 			continue
-		rows.sort_custom(func(a, c): return bool(a["upgrade"]) and not bool(c["upgrade"]))
+		rows = rows.filter(func(it): return it["upgrade"]) + rows.filter(func(it): return not it["upgrade"])
 		list.add_child(UI.label(String(GROUPS[g][0]), 11, MUTED, UI.caps))
 		for it in rows:
 			list.add_child(_box_row(it))
@@ -188,14 +188,14 @@ func _box_row(it: Dictionary) -> PanelContainer:
 		verb = "Wear"
 	elif not fit and not LootFull.holdable(it):
 		verb = "Full"
-	var take := func(): take(it)
-	var rp := _row(String(it["icon"]), it["col"], String(it["name"]), "UPGRADE" if up else "", GOOD, verb, take, up)
+	var on_take := func(): take(it)
+	var rp := _row(String(it["icon"]), it["col"], String(it["name"]), "UPGRADE" if up else "", GOOD, verb, on_take, up)
 	if held or not fit:
 		LootHold.mark_full(rp)
 	var gear_it := InvText.box_gear(_b, it)
 	var lines := func(): return InvText.compare(p, gear_it) if not gear_it.is_empty() \
 		else [[String(it["name"]), it["col"]], [String(it["sub"]), INK]]
-	_tip.attach(rp, lines, func(): _hover = take, func(): _hover = Callable())
+	_tip.attach(rp, lines, func(): _hover = on_take, func(): _hover = Callable())
 	return rp
 
 ## A click on a box row's button (public: the checks and screenshots press rows). A thing with no room
@@ -217,7 +217,7 @@ func _take_all() -> void:
 		_on_close.call()
 
 # ------------------------------------------------------------------ your column
-func _you_title(p: Hunter, items: Array) -> String:
+func _you_title(items: Array) -> String:
 	if _held < 0:
 		return "You"
 	for it in items:
