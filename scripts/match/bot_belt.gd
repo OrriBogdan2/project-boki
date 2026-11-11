@@ -2,7 +2,7 @@ class_name BotBelt
 extends RefCounted
 ## How a bot uses its utility belt (UtilityBelt): the same keys a player presses (inp util1..3), at
 ## the moments a player would. Called once a step from Bot.think with the bot's mind `a`.
-##   tonic       hurt (under 45% health), with ground under it
+##   tonic       hurt (under 45% health), with ground under it and no rival close (backed off first)
 ##   armor kit   armor mostly gone (under 30%) and nobody close
 ##   mending kit hurt (under 55%) in a fight
 ##   smoke       hurt and a rival close: hide and slip away
@@ -10,8 +10,10 @@ extends RefCounted
 ##   swift       hurt and a rival close (to get away), or a long chase
 ##   seeker      now and then, with no target, to see what is around
 ## Spring pads are for players (a bot has no use for a launch it did not plan).
+## Bot.think calls this in fights too; there, easier bots take longer to reach for an item (abil).
 
 const SCAN_GAP := 40.0          # seconds between a bot's seeker flares
+const FIGHT_REACH := 3.0        # 1/s at full abil: how readily a bot reaches for its belt mid-fight
 
 static func think(m, h: Hunter, a: Dictionary, inp: Dictionary) -> void:
 	if h.drink_t > 0.0 or h.kit_t > 0.0 or h.downed or h.out or h.dropping:
@@ -20,7 +22,9 @@ static func think(m, h: Hunter, a: Dictionary, inp: Dictionary) -> void:
 	var tgt = a.get("tgt", null)
 	var near: bool = tgt != null and is_instance_valid(tgt) and tgt is Hunter and h.flat_dist(tgt) < 14.0
 	var frac: float = h.hp / h.max_hp
-	if grounded and frac < 0.45 and _press(h, inp, "tonic"):
+	if near and randf() > float((a.get("diff", {}) as Dictionary).get("abil", 0.7)) * FIGHT_REACH * Match.DT:
+		return
+	if grounded and frac < 0.45 and not near and _press(h, inp, "tonic"):
 		return
 	if grounded and h.armor < h.max_armor * 0.3 and not near and _press(h, inp, "armor_kit"):
 		return

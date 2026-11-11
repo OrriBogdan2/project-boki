@@ -302,6 +302,19 @@ func _broadcast() -> void:
 			spark_pos.x, spark_pos.y, spark_pos.z])
 
 # ------------------------------------------------------------------ the final seat: the Heart ring
+const BOT_LEAD_S := 40.0         # s before the ring opens that bots set off for it (a squad rotates in ahead)
+
+## Where a bot goes for the final seat: its own spot in the Heart ring, from BOT_LEAD_S before the ring
+## opens until the seat is used. INF otherwise.
+func bot_spot(h: Hunter) -> Vector3:
+	if site == Vector3.INF or state == S.DONE or (state != S.FINAL and m.sess_time() < r("final_s") - BOT_LEAD_S):
+		return Vector3.INF
+	var ang := float(hash(h.nid) % 8) / 8.0 * TAU
+	var q := site + Vector3(cos(ang), 0, sin(ang)) * r("final_r") * 0.5
+	if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+		return site
+	return Vector3(q.x, m.world.ground_at(q.x, q.z), q.z)
+
 func in_ring(h: Hunter) -> bool:
 	return not h.out and not h.extracted and h.flat_dist(site) <= r("final_r") and absf(h.pos.y - site.y) < RING_DY
 
