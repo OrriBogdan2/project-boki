@@ -2345,3 +2345,11 @@ for _n,_st,_ar,_sig in (('Pinguin','baby','cute',"a small penguin chick: its red
                         ('Kingpinguin','final','tough',"a large emperor-like penguin standing tall, the ten white-and-red bowling-pin plumes fanned behind its head, three bowling-ball finger-hole markings on its belly")):
     for _k,_d in (('a',"Keep this exact design and pose; change only the finish."),('b',"Redraw it as a more natural penguin with the same colours and signature: "+_sig+"."),('c',"Redraw it as a more natural penguin, a new calm pose, with this signature built into its body: "+_sig+".")):
         ON_CHANGE(_n,_C%_n,_st,_ar,False,False,_d+_PEN,runs=2,tag='_pen'+_k)
+
+# 11-11 OWNER: "is Bullsfrog really small because of that position?" Yes: the long flat side-on leap fills the width, so the body is ~1/3 of the frame
+# height on the card, portrait and dex hero. Compact poses that still read as the archer frog, and do not repeat Bullpole's crouch. 4 x 2.
+for _k,_p in (('diag',"leaping diagonally UP toward the viewer in three-quarter view, legs tucked under its body, mouth open with the tongue arrow shot forward, filling the frame"),
+              ('land',"landing from a jump: front feet planted wide, back legs still raised behind it, chest low, tongue arrow flicked out to the side, compact and filling the frame"),
+              ('bow',"standing up on its back legs like an archer, body upright, front feet drawn back as if pulling a bowstring, its long tongue pulled taut like an arrow ready to fire"),
+              ('coil',"coiled tight to spring, seen from the front three-quarter facing RIGHT, back legs folded under like loaded springs, head up, tongue tip just showing")):
+    ON_POSE('Bullsfrog',_LM['Bullsfrog']['sheet'],'mid','sleek',False,False,_p); SPECS[-1]['id']='pose_bullsfrog_'+_k; SPECS[-1]['runs']=2
