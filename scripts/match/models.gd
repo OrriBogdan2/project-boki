@@ -2644,7 +2644,8 @@ static func deathbox(col: Color) -> Node3D:
 ## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
 ## shrines (blessing, teal), chest keys (brass), eggs (warm gold), revive beacons (mint). Loot is
 ## gold / rarity coloured with a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "ckey": Color("f2c84a"), "egg": Color("ffc04a"), "revive": Color("6ae8a0")}
+const ICON_COLS := {"bless": Color("5fd0b0"), "ckey": Color("f2c84a"), "egg": Color("ffc04a"),
+	"revive": Color("6ae8a0")}
 static var _icon_tex := {}
 
 ## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?

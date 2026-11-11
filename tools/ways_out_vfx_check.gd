@@ -198,7 +198,9 @@ func _quest(main: Node) -> void:
 	# the tide: a seat far from the Heart late in the match is covered, whatever it was
 	m.time = Heart.r("tide_start_s") + Heart.r("tide_close_s") - m.sess_t0
 	# (the outpost that is not the Uplink seat, lit for the test: the seat itself was taken above)
-	var o: Dictionary = m.exits.of_kind("outpost").filter(func(o2): return not o2.get("tut", false) and not o2.get("seat", false))[0]
+	var others := m.exits.of_kind("outpost").filter(
+		func(o2): return not o2.get("tut", false) and not o2.get("seat", false))
+	var o: Dictionary = others[0]
 	o["dark"] = false
 	var far: Vector3 = o["pos"]
 	var rd: Dictionary = WaysOutLook.uplink(m, o)
