@@ -1,16 +1,16 @@
 extends RefCounted
 ## --warden-clips-check: the hand-keyed clips (ART-1, scripts/heroes/warden_clips.gd, content/rules/warden_clips.json),
-## per Hunter that has a block: every clip it names is in the .glb; every kit move of the Hunter is mapped, and each
-## clip is as long as the kit's move; the blend tree plays them (a move changes the pose, kit time drives it); the
-## locomotion blends (a run moves the feet); the skinned weapon stays on its bone through every move and only one
-## weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it; the budget holds.
+## per Hunter that has a block: the .glb matches its data (tools/clip_data.gd: every clip it names is there, every kit
+## move is mapped, each clip fits its move and hold window); the blend tree plays them (a move changes the pose, kit
+## time drives it); the locomotion blends (a run moves the feet); the skinned weapon stays on its bone through every
+## move and only one weapon is drawn; it hides when the kit takes it out of the hand and its FX anchors stay on it;
+## the budget holds.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
 const MAX_TRIS := 15000         # S1: weapon and shield included
 const GRIP_TOL := 0.03          # m: the weapon's bone stays this close to where the hand holds it
-const PREFIX := {"breaker": ["bulwark", "bul_"]}
-const SKIP := ["bul_smash_late"]
+const ClipData := preload("res://tools/clip_data.gd")
 
 var bad := 0
 var holder: Node3D
@@ -24,13 +24,12 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
-	for art_name in PREFIX:
-		_hunter(String(art_name), String(PREFIX[art_name][0]), String(PREFIX[art_name][1]))
+	_hunter("breaker", "bulwark")
 	_companions()
 	print("WARDEN_CLIPS_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-func _hunter(art_name: String, id: String, prefix: String) -> void:
+func _hunter(art_name: String, id: String) -> void:
 	var cfg := WardenClips.data(art_name)
 	ok(not cfg.is_empty(), "%s has a clips block" % art_name)
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
@@ -45,42 +44,9 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	if clips == null:
 		m.free()
 		return
-	# the names
+	for r in ClipData.rows(id, cfg, lib):
+		ok(r[0], r[1])
 	var moves: Dictionary = cfg["kmoves"]
-	var want: Array = []
-	for k in moves:
-		want.append(String((moves[k] as Dictionary)["clip"]))
-	var lc: Dictionary = cfg["loco"]
-	want.append_array([lc["idle"], lc["stance"], cfg["land"]["clip"], cfg["weapon_out"]["clip"]])
-	want.append_array((lc["walk"] as Dictionary).values())
-	want.append_array((lc["run"] as Dictionary).values())
-	want.append_array([cfg["air"]["rise"], cfg["air"]["fall"], cfg["air"]["glide"]])
-	var sts: Dictionary = cfg["states"]
-	for k in sts:
-		if sts[k] is Dictionary:
-			want.append_array([sts[k]["front"], sts[k]["back"]])
-		elif sts[k] is String:
-			want.append(sts[k])
-	var missing: Array = want.filter(func(c): return not lib.has_animation(String(c)))
-	ok(missing.is_empty(), "%s: all %d clips are in the .glb (missing %s)" % [art_name, want.size(), str(missing)])
-	# every kit move mapped, and long enough for the kit's clock
-	var short: Array = []
-	var unmapped: Array = []
-	for table in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES]:
-		for k in table:
-			if not String(k).begins_with(prefix) or k in SKIP:
-				continue
-			if not moves.has(k):
-				unmapped.append(k)
-				continue
-			var keys: Array = (table[k] as Dictionary)["keys"]
-			var end_t := float((keys[keys.size() - 1] as Array)[0])
-			var cl := String((moves[k] as Dictionary)["clip"])
-			if not (moves[k] as Dictionary).has("hold_from") and lib.has_animation(cl) \
-					and lib.get_animation(cl).length < end_t - 0.04:
-				short.append("%s %.2f < %.2f" % [k, lib.get_animation(cl).length, end_t])
-	ok(unmapped.is_empty(), "%s: every kit move has a clip (%s)" % [art_name, str(unmapped)])
-	ok(short.is_empty(), "%s: each clip lasts its kit move (%s)" % [art_name, str(short)])
 	var an := HunterAnim.new(m)
 	var hand := WardenSkeleton.find(sk, "hand.R")
 	var foot := WardenSkeleton.find(sk, "x_foot.R")
