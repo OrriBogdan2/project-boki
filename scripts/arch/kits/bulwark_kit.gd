@@ -568,6 +568,13 @@ func recast_now(slot_id: String) -> void:
 	else:
 		super(slot_id)
 
+## LMB again calls the hammer back, from the recall lockout on. It waits wherever it lies (left INF) unless the
+## data gives it a lie_t, after which it comes back by itself.
+	if mace.is_empty() or String(mace["st"]) == "back" or m.time - throw_at < float(md.get("recall_lock", 0.25)):
+	if lie <= 0.0:
+		return {"slot": "lmb", "left": INF}
+	return {"slot": "lmb", "left": lie - (float(mace["t"]) if String(mace["st"]) == "ground" else 0.0)}
+
 func _recall() -> void:
 	play("bul_recall")
 	mace["st"] = "back"
