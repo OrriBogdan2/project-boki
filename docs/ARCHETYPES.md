@@ -1237,3 +1237,7 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios, and level-1 cooldowns. A cooldown we scale on purpose stays a row: it FAILs and is listed for the owner (gap 10 in `docs/KIT_PARITY.md`), nothing is loosened to hide it. `value` is the source number, so a FAIL is a real difference.
+- `"owner": "<note>"` marks a row where an owner call overrides the source: `value` is then the owner's number (ours), `evidence` still names the source number it replaces, and the check prints the note.
+- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance. A path may index an array (`rmb.coil.dmg.0`) or start `weapon.` to read the hero's `signature` weapon (`weapon.primary.dmg` is the LMB).
