@@ -347,6 +347,7 @@ const CHECKS := {
 	"--bot-summon-check": ["res://tools/bot_summon_check.gd", "bot_summon_check", null],      # bots press Summon (BotKin.summon)
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
+	"--bot-downed-check": ["res://tools/bot_downed_check.gd", "bot_downed_check", null],      # bots revive, carry, finish (bot_rescue.gd)
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
