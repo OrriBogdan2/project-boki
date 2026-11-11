@@ -46,7 +46,8 @@ func run(m: Node) -> void:
 	var sp := "cindle"
 	var egg := EggHatch.new(sp, spy, 0.32, 0.42, 1.0, {"species": sp})
 	holder.add_child(egg)
-	var seen := {"sim": 0.0, "dt_max": 0.0, "t_pop": -1.0, "t_shell": -1.0, "t_done": -1.0, "ymin": 1e9, "ymax": -1e9, "popped": false, "done": false, "face_err": 9.0, "looked_away": false}
+	var seen := {"sim": 0.0, "dt_max": 0.0, "t_pop": -1.0, "t_shell": -1.0, "t_done": -1.0,
+			"ymin": 1e9, "ymax": -1e9, "popped": false, "done": false, "face_err": 9.0, "looked_away": false}
 	egg.popped.connect(func(k: Node3D):
 		seen["popped"] = true
 		var want := EggHatch._yaw_to(k.global_position, cam.global_position)
@@ -70,12 +71,13 @@ func run(m: Node) -> void:
 				var want2 := EggHatch._yaw_to(egg.kin_node.global_position, cam.global_position)
 				if absf(wrapf(egg.kin_node.rotation.y - want2, -PI, PI)) > 0.8: seen["looked_away"] = true
 		seen["sim"] = float(seen["sim"]) + dt
-	ok(seen["done"], "the egg hatches all the way through (%.1f s, %.1f s real)" % [seen["sim"], (Time.get_ticks_msec() - t0) / 1000.0])
+	var real_s := (Time.get_ticks_msec() - t0) / 1000.0
+	ok(seen["done"], "the egg hatches all the way through (%.1f s, %.1f s real)" % [seen["sim"], real_s])
 	var shell_s: float = float(seen["t_shell"]) - float(seen["t_pop"])
 	ok(seen["t_shell"] > 0.0 and shell_s < 1.0, "the shell is gone %.2f s after the pop (want under 1 s)" % shell_s)
 	var beat_s: float = float(seen["t_done"]) - float(seen["t_pop"])
-	ok(beat_s > 0.0 and beat_s < 2.5, "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s; longest frame %.0f ms)"
-			% [beat_s, float(seen["dt_max"]) * 1000.0])
+	var beat := "the whole hop-look-face-bounce beat takes %.2f s (want under 2.5 s; longest frame %.0f ms)"
+	ok(beat_s > 0.0 and beat_s < 2.5, beat % [beat_s, float(seen["dt_max"]) * 1000.0])
 	ok(float(seen["ymax"]) - float(seen["ymin"]) > 0.15, "the Boki hops (%.2f m of height)" % (float(seen["ymax"]) - float(seen["ymin"])))
 	ok(seen["looked_away"], "it looks around before it finds you")
 	ok(seen["popped"] and float(seen["face_err"]) < 0.25, "then it looks right at you (off by %.2f rad)" % float(seen["face_err"]))
@@ -103,7 +105,8 @@ func run(m: Node) -> void:
 	ok(hot.is_empty(), "nothing flashes white (%s)" % [hot])
 	t0 = Time.get_ticks_msec()
 	var met_s: float = await _wait_for(tree, func(): return rv.met, 15.0)
-	ok(rv.met and not rv.name_btn.disabled, "after it looks at you, you can name it (%.1f s, %.1f s real)" % [met_s, (Time.get_ticks_msec() - t0) / 1000.0])
+	real_s = (Time.get_ticks_msec() - t0) / 1000.0
+	ok(rv.met and not rv.name_btn.disabled, "after it looks at you, you can name it (%.1f s, %.1f s real)" % [met_s, real_s])
 	var face := wrapf(rv.kin.rotation.y + rv.turn.rotation.y - PI, -PI, PI)
 	ok(absf(face) < 0.2, "it faces you (off by %.2f rad)" % face)
 	ok(rv.sub_lbl.text.to_lower().contains("looking at you") and not rv.title_lbl.text.contains("!") and not rv.title_lbl.text.contains("RARE"),
