@@ -342,7 +342,7 @@ spawn_points = {
                                        [30, 180, "Saltmere"], [104, 44, "Frostgate"], [54, 108, "Cinder Steps"],
                                        [184, 108, "Stormbreak"], [120, 182, "Thornwood"], [132, 118, "The Crown"],
                                        [166, 70, "Stormcrown Gaol"]]),
-    "boss": dict(pick=[2, 2], points=[[157, 66, "Stormcrown Eyrie"], [60, 150, "The Sunken Forge"], [127, 172, "The Thornhive"]]),
+    "boss": dict(pick=[3, 3], points=[[157, 66, "Stormcrown Eyrie"], [60, 150, "The Sunken Forge"], [127, 172, "The Thornhive"]]),
 }
 
 # ------------------------------------------------------------------ a tile model, for checks and the preview
