@@ -26,6 +26,24 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 | ui | -22 | menus and HUD |
 | step | -23 | footsteps |
 
+### Loudness audit (`tools/sfx_loudness.py`)
+Measures every sound the game names (the sets in `content/sfx/*.json` and the `Sfx.NAMES`, `Sfx.VOICES`, `SfxKits.NAMES`, `VVSfx.NAMES` tables) and groups them by category; a table sound with no set gets one from `table_cats` in `content/rules/sfx_levels.json`. Its level is the RMS above (averaged over takes) plus the gain the game adds in play (`gain_db` there, and `Sfx.BLAST_DB`). A sound more than 3 dB (`tolerance_db`) from its category's **median** is an outlier: fix it with `gain_db` (data, applied by `Sfx.play` and `loop_start`), never by editing the file, or list it in `outliers_ok` with the reason it stands out on purpose. A positive gain may not push the peak past -1 dBFS. `python3 tools/sfx_loudness.py --check` fails on any other outlier, and `tools/health.py` runs it, so `--strict` fails too. `python3 tools/sfx_loudness.py` prints this table and every outlier.
+
+| category | sounds | median level | target RMS | quietest | loudest | max peak | outliers (accepted) |
+|---|---|---|---|---|---|---|---|
+| impact | 94 | -16.2 | -16.0 | boom -22.9 | train_hit -13.2 | -0.9 | 6 (6) |
+| signature | 35 | -17.0 | -17.0 | archer_thread_twang -17.4 | tender_cheer -17.0 | -1.0 | 0 (0) |
+| fire | 30 | -17.0 | -17.0 | rail -20.9 | ab_rail -16.4 | -1.0 | 1 (1) |
+| grunt | 46 | -18.0 | -18.0 | v_spitter -21.5 | hurt -16.0 | -1.1 | 1 (1) |
+| cast | 123 | -18.0 | -18.0 | swap -21.8 | pay_rage -14.7 | -1.0 | 5 (5) |
+| boki | 31 | -19.0 | -19.0 | grab -22.6 | scan_pop -18.6 | -1.1 | 1 (1) |
+| dash | 36 | -20.0 | -20.0 | jump -23.7 | fall -18.9 | -1.2 | 1 (1) |
+| loop | 10 | -21.0 | -21.0 | glider_burn -21.0 | revive_hum -16.8 | -1.1 | 1 (1) |
+| ui | 26 | -22.0 | -22.0 | reload -24.2 | kill -15.0 | -1.1 | 4 (4) |
+| step | 57 | -23.0 | -23.0 | step0 -23.4 | swim -20.1 | -4.6 | 0 (0) |
+
+The set sounds all sit at their category (`--sfx-set-check` holds them there). The outliers were older table sounds made before the category standard: eight are brought to their median by `gain_db` (charge, cloak, v_glimmer, v_skitter, v_bomber, br_crumble, fuse_hiss, drip); the blast sounds (kept under on purpose), the kill/knock/extract confirm stings and 14 borderline ones (3-4.5 dB, mixed by ear at their call sites) are listed in `outliers_ok`. None of this has been listened to yet.
+
 ## Names
 - A Hunter's own sounds start with its archetype id: `gunslinger_*` (Vex), `archer_*` (Lace), `juggernaut_*` (Kael), `bulwark_*` (Mossy), `ostra_*` (Motley), `ashwick_*` (Cinder), `dredge_*` (Grimble), `rimewright_*` (Neve), `tender_*` (Meeko), `thief_*` (Sable), `mage_*` (Sparkle), `dolm_*` (Tenzo). Older kit sounds keep their names (`vn_*`, `jug_*`, `rime_*`...); a branch that replaces one regenerates that file under its old name.
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_dash_air`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter` and the Thief, Neve and Tenzo kits via `HeroSfx.dash_name`: `_dash_air` when the Hunter has no floor under it, positional for rivals; `tools/gen_sfx_dash.py` makes the air variants from the ground ones, and `dash_empty`, the soft tick of a Shift press with no charge, played by `PressDeny` in place of `ui_deny`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
