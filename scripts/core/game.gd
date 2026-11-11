@@ -263,11 +263,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		if rest > 0.0:
 			hk["trust"] = clampf(float(hk["trust"]) + rest, 0.0, 100.0)
 		if Save.has_building("dojo"):
-			hk["xp"] = int(hk.get("xp", 0)) + 40
-			while int(hk["xp"]) >= 100 * int(hk["level"]):
-				hk["xp"] = int(hk["xp"]) - 100 * int(hk["level"])
-				hk["level"] = int(hk["level"]) + 1
-				_evolve(hk, out)
+			add_xp(hk, 40, out)
 	# records for the trophy hall
 	var stt: Dictionary = d["stats"]
 	stt["kills"] = int(stt.get("kills", 0)) + int(r.get("kills", 0))
@@ -344,14 +340,25 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	var xp := 40 + (40 if won else 0) + int(r.get("knocks", 0)) * 10
 	if not lead: xp = int(xp * 0.7)
 	if treat == "treat_xp": xp = int(xp * 1.5)
-	k["xp"] = int(k.get("xp", 0)) + xp
-	while int(k["xp"]) >= 100 * int(k["level"]):
-		k["xp"] = int(k["xp"]) - 100 * int(k["level"])
-		k["level"] = int(k["level"]) + 1
+	if add_xp(k, xp, out) > 0:
 		out["levelup"] = true
-		_evolve(k, out)
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
+
+## XP a kin needs to go from level `lv` to the next.
+func xp_need(lv: int) -> int:
+	return 100 * lv
+
+## Gives a kin XP, runs each level up's evolution into `out`; returns the levels gained.
+func add_xp(k: Dictionary, xp: int, out: Dictionary) -> int:
+	var gained := 0
+	k["xp"] = int(k.get("xp", 0)) + xp
+	while int(k["xp"]) >= xp_need(int(k["level"])):
+		k["xp"] = int(k["xp"]) - xp_need(int(k["level"]))
+		k["level"] = int(k["level"]) + 1
+		gained += 1
+		_evolve(k, out)
+	return gained
 
 ## A level up can bring a new form or a mutation. The home island plays it when you get back.
 func _evolve(k: Dictionary, out: Dictionary) -> void:

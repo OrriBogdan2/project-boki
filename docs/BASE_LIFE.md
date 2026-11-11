@@ -52,6 +52,11 @@ check: `--base-life-check`.
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
+- Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
+  grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
+  (`rec["lineage"]["nest"]`, written by `NestItems.hatched`). It only reads lineage and the roster: a Boki with none
+  recorded is "wild", a parent you no longer have shows by name, and an owned ancestor opens its card. Check:
+  `--family-tree-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
   toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.

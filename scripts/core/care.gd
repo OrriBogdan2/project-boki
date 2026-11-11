@@ -132,6 +132,10 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 	StatBudget.ensure(rec)
+	if not rec.has("path"):
+		rec["path"] = []           # path tokens it wears (GardenItems)
+		rec["stay"] = false        # wearing a Stayleaf: no new forms
+		rec["loose"] = 0           # points taken out of its stats, waiting to go back in
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
 	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
 		rec.erase(old)              # the old once-per-expedition care stamps (now care_day)
@@ -406,6 +410,8 @@ static func discover(rec: Dictionary, what: String) -> bool:
 ## Feeding. Returns {ok, love, hate, full, text}.
 static func feed(rec: Dictionary, f: String) -> Dictionary:
 	ensure(rec)
+	if GardenItems.has(f):
+		return GardenItems.feed(rec, f)
 	var likes: Dictionary = rec["likes"]
 	var out := {"ok": true, "love": f == likes["food"], "hate": f == likes["hates"], "full": need(rec, "food") >= 92.0, "new": false}
 	if out["hate"]:
