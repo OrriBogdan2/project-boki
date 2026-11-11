@@ -1,8 +1,8 @@
 extends RefCounted
-## --boss-parity-check: a lair boss against the parity rules (docs/CAMP_PARITY.md): the second phase
-## at 66% health (the sourced numbers: none, ours kept), the lair emptying resets it (asleep, full health,
-## phase 0, back in the middle), and the kill XP goes to the last-hit squad (within Lairs.BOSS_XP_SHARE_R),
-## not to a squad that only dealt damage. Never touches the save.
+## --boss-parity-check: a lair boss against the parity table (docs/CAMP_PARITY.md). Its phases start at
+## Boss.PHASE_HP, an empty lair resets it after Boss.LEASH_T (asleep, full health, phase 0, back in the
+## middle), and the last hit's squad takes the kill: the XP (KillXp.BOSS_XP, squadmates near it too), the
+## kill stat and the perk-orb fan, while the squad that only dealt damage gets none. Never touches the save.
 
 var bad := 0
 var m: Match
@@ -36,6 +36,11 @@ func _wake(L: Dictionary, P: Hunter) -> Boss:
 	_run(0.3)
 	return b
 
+func _phase_at(b: Boss, frac: float) -> int:
+	b.hp = b.max_hp * frac
+	_run(0.2)
+	return b.phase
+
 func run(main: Node) -> void:
 	main.set_meta("boss_parity_check", self)
 	Save.no_write = true
@@ -48,7 +53,9 @@ func run(main: Node) -> void:
 	var P: Hunter = m.player
 	P.set_arch("")
 	var C: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
-	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
+	var Q: Hunter = rivals[0]
+	var Q2: Hunter = rivals[1]
 	for h in m.hunters:
 		h.ctrl = "idle" if h != P else "local"
 	for L in m.lairs.list: m.lairs.activate(L)
@@ -56,35 +63,40 @@ func run(main: Node) -> void:
 	for L in m.lairs.list:
 		if String(L["boss"]) == "colossus":
 			F = L
-	# 1. phase at 66% health
+	# 1. the phases start at Boss.PHASE_HP
 	var b := _wake(F, P)
 	ok(not b.dormant and b.phase == 0, "awake in phase 0 at full health")
-	b.hp = b.max_hp * 0.67
-	_run(0.2)
-	ok(b.phase == 0, "phase 0 at 67%% health (%d/%d)" % [int(b.hp), int(b.max_hp)])
-	b.hp = b.max_hp * 0.65
-	_run(0.2)
-	ok(b.phase == 1, "phase 1 at 65% health")
-	# 2. the lair empties: it leashes back, asleep, whole, in the middle
+	ok(_phase_at(b, Boss.PHASE_HP[0] + 0.01) == 0, "phase 0 just above %d%% health" % int(Boss.PHASE_HP[0] * 100))
+	ok(_phase_at(b, Boss.PHASE_HP[0] - 0.01) == 1, "phase 1 just below %d%% health" % int(Boss.PHASE_HP[0] * 100))
+	ok(_phase_at(b, Boss.PHASE_HP[1] - 0.01) == 2, "phase 2 just below %d%% health" % int(Boss.PHASE_HP[1] * 100))
+	# 2. the lair empties: after Boss.LEASH_T it is asleep, whole and back in the middle
 	_spot(P, F["c"] + Vector3(60, 0, 0))
-	_run(13.0)
+	_run(Boss.LEASH_T - 1.0)
+	ok(not b.dormant, "still awake %.0f s after the lair emptied" % (Boss.LEASH_T - 1.0))
+	_run(2.0)
 	var home: float = Vector2(b.pos.x - F["c"].x, b.pos.z - F["c"].z).length()
 	ok(b.dormant and b.phase == 0 and not b.enraged and is_equal_approx(b.hp, b.max_hp) and home < 0.1,
-		"nobody inside for 12 s: asleep, phase 0, full health, home (%.1f m off)" % home)
-	# 3. the last hit's squad takes the XP, the squad that only dealt damage gets none
+		"empty for %.0f s: asleep, phase 0, full health, home (%.1f m off)" % [Boss.LEASH_T, home])
+	# 3. the last hit's squad takes the kill; the squad that dealt the damage gets nothing
 	b = _wake(F, P)
-	_spot(C, F["c"] + Vector3(-F["out"].y, 0, F["out"].x) * 10.0)
+	_spot(C, F["c"] + Vector3(-F["out"].y, 0, F["out"].x) * 3.0)
 	_spot(Q, F["c"] + Vector3(F["out"].x, 0, F["out"].y) * 5.0)
+	_spot(Q2, F["c"] + Vector3(F["out"].y, 0, -F["out"].x) * 10.0)
 	b.stagger_t = 0.0
-	b.hurt(20.0, P, {"src": "shot"})      # P's squad is in the fight (the damage XP it earns is small) ...
-	b.hp = 5.0
-	var p0 := [P.xp, C.xp, Q.xp]
-	var l0 := [P.lvl, C.lvl, Q.lvl]
-	b.hurt(50.0, Q, {"src": "shot"})      # ... Q's squad lands the last hit
-	_run(0.2)
-	var got := func(h: Hunter, i: int) -> bool: return h.xp - p0[i] + 1000.0 * (h.lvl - l0[i]) >= Lairs.BOSS_XP
+	b.hurt(b.hp * 0.95, P, {"src": "shot"})
+	b.stagger_t = 0.0
+	var dealt := float(b.damage_by.get(P.team, 0.0)) / b.max_hp
+	ok(not b.dead and dealt > 0.9, "P's squad has dealt %d%% and it stands" % int(dealt * 100))
+	for h in m.hunters:
+		h.xp = 0.0      # (nothing steps between here and the kill)
+	var orbs0 := PerkOrbs.list(m).size()
+	b.hurt(b.hp + b.max_hp, Q, {"src": "shot"})
 	ok(b.dead and F["cleared_by"] == Q.pname, "the last hitter (%s) is credited the kill" % F["cleared_by"])
-	ok(got.call(Q, 2), "the last-hit squad's hunter got the kill XP")
-	ok(not got.call(P, 0) and not got.call(C, 1), "the squad that fought but not the last hit got no kill XP")
+	ok(is_equal_approx(Q.xp, KillXp.BOSS_XP) and is_equal_approx(Q2.xp, KillXp.BOSS_XP),
+		"the last hitter and a squadmate 10 m off get the %d kill XP (%.1f, %.1f)" % [int(KillXp.BOSS_XP), Q.xp, Q2.xp])
+	ok(P.xp == 0.0 and C.xp == 0.0, "the squad that did the damage gets none (%.1f, %.1f)" % [P.xp, C.xp])
+	ok(int(Q.stats.get("bosses", 0)) == 1 and int(P.stats.get("bosses", 0)) == 0,
+		"the boss kill stat goes to the last hitter")
+	ok(PerkOrbs.list(m).size() > orbs0, "the perk-orb fan dropped (%d orbs)" % (PerkOrbs.list(m).size() - orbs0))
 	print("BOSSPARITY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
