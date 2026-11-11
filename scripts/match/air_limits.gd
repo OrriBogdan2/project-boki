@@ -30,6 +30,16 @@ static func gate_drop(h: Hunter) -> void:
 			h.inp[key] = false
 	h.dash_buf = 0.0
 
+## The glider folds on the step its fall reaches the ground, before that step's presses are read, so a shot, a cast
+## or a dash pressed as you land goes off that step (docs/decisions/0061): a landing never eats a press.
+static func fold_at_touchdown(h: Hunter, dt: float) -> void:
+	if not h.gliding or h.dropping or h.grounded or h.vel.y > 0.0 or h.over_void():
+		return
+	if h.pos.y + h.vel.y * dt <= h.ground():
+		h.gliding = false
+		h.glide_dive.on = false
+		h.m.fx.dust(h.pos, 5)
+
 ## True while an ability or attack animation runs, so the glider can't open yet.
 static func glide_locked(h: Hunter) -> bool:
 	if h.roll_t > 0.0 or not h.charge.is_empty():

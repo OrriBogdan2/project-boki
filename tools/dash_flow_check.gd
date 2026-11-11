@@ -6,7 +6,9 @@ extends RefCounted
 ## Item 51 (docs/decisions/0015-combo-flow.md): every slot against a ground dash, an air dash and a jump, cast
 ## mid-jump (jump rows), the move pressed in its recovery (into_dash / into_jump rows: acts within 0.1 s unless
 ## the row is an exception), and a hold carried through the move and let go there (hold rows). Every exception
-## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist).
+## row needs a reason and a source; the list per hero prints at the end (the hero agents' worklist). Landings
+## (_landings): a dash, a jump and every slot pressed as he lands from a hop, a fall, a glide or a dive is never lost
+## and, from the first step on the ground, acts as soon as it does standing.
 ## It walks DashFlow.SLOTS for every hero, so rows added later are covered. --dash-flow-check=<id>,<id> runs only
 ## those heroes. Never touches the save.
 
@@ -68,6 +70,7 @@ func _hero(main: Node, hero: String, rows: bool) -> int:
 		if rows:
 			_slot(m, hero, slot)
 		_combos(m, hero, slot)
+		_landings(m, hero, slot)
 		m.queue_free()
 		await main.get_tree().process_frame
 	CombatBus.ability_used.disconnect(_on_used)
@@ -294,6 +297,78 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 		"q":
 			return up.call("gear")
 	return false
+
+# ------------------------------------------------------------------ a landing never holds a press
+## [m/s down at touchdown, under the glider]: a plain jump's hop, a terrace fall, a glide's end, a glide dive's
+## (it still lands ~25 m/s after the canopy's catch).
+const LAND_WAYS := {"hop": [6.8, false], "fall": [12.0, false], "glide": [2.5, true], "dive": [25.0, true]}
+## Steps run before the press: 0 the touchdown step (the press is read before the feet land: it may act as its air
+## version, but it is never lost), 1 the first step on the ground, 7 0.1 s into the absorb (the land clip owns the
+## body 0.2-0.4 s standing); from the ground on, it acts as soon as it does standing.
+const LAND_AT := {0: "on the touchdown step of", 1: "on the first step after", 7: "in the absorb of"}
+const LAND_WATCH := 30          # steps a press has to act in
+
+## A dash and a jump (in the first slot's match) and the slot, pressed as he lands and in the absorb after it, act:
+## a landing's absorb is the model's alone, never the keys'.
+func _landings(m: Match, hero: String, slot: String) -> void:
+	var presses: Array = ["dash", "jump", slot] if slot == DashFlow.SLOTS[0] else [slot]
+	for what: String in presses:
+		var stand := _act_steps(m, what, "", 0)
+		if stand < 0:
+			skipped += 1
+			print("DASHFLOW skip %s %s landings: it doesn't go off from a standstill here either" % [hero, what])
+			continue
+		for way: String in LAND_WAYS:
+			for after: int in LAND_AT:
+				var got := _act_steps(m, what, way, after)
+				var in_time := after == 0 or got <= stand
+				ok(got >= 0 and in_time, "%s %s pressed %s a %s landing: acts in %d steps (standing %d)"
+						% [hero, what, LAND_AT[after], way, got, stand])
+
+## Steps from the press until it acts (-1: not within LAND_WATCH): standing (way ""), or landing from `way`, pressed
+## `after` steps into the landing (LAND_AT). Every key is let go after.
+func _act_steps(m: Match, what: String, way: String, after: int) -> int:
+	_ready_up(m)
+	for i in QUIET_MAX:
+		if not AirLimits.glide_locked(hunter):
+			break
+		m.step(Match.DT)       # (the last trial's move still in its keys: a released Smash winds up 0.6 s)
+	if way != "":
+		var v: Array = LAND_WAYS[way]
+		hunter.pos.y += 0.01
+		hunter.grounded = false
+		hunter.gliding = v[1]
+		hunter.vel = Vector3(0, -float(v[0]), 0)
+		_steps(m, after)
+	var before := _snap()
+	match what:
+		"dash":
+			hunter.inp["move"] = Vector2(0, -1)
+			hunter.inp["dash"] = true
+		"jump":
+			hunter.inp["jump"] = true
+		_:
+			_press(what)
+	var got := -1
+	for i in LAND_WATCH:
+		m.step(Match.DT)
+		hunter.inp["fire"] = false
+		if _acted(what, before):
+			got = i + 1
+			break
+	hunter.inp["dash"] = false
+	hunter.inp["jump"] = false
+	if DashFlow.KEY_OF.has(what):
+		hunter.inp[DashFlow.KEY_OF[what]] = false      # (held, the next trial's press would not be a new one)
+	return got
+
+func _acted(what: String, before: Dictionary) -> bool:
+	match what:
+		"dash":
+			return hunter.ak.in_dash() or hunter.roll_t > 0.0
+		"jump":
+			return hunter.vel.y > 0.5 and not hunter.grounded
+	return _went_off(before, what)
 
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)
 const ACT_S := 0.1              # s: owner rule, a jump or Shift out of an ability's recovery acts within this

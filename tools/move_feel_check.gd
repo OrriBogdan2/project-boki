@@ -1113,6 +1113,33 @@ func _landing() -> void:
 		if P.vel.x > 0.5: dead = i + 1; break
 	rec("land_dead_frames", dead)
 	rec("land_squash", sq)
+	_landing_quiet()
+
+## No landing draws a ring or a burst (DECISIONS: none on landings): the hop, a fall, a glide's end, a glide dive,
+## the opening drop's touchdown. Each is [m/s down, under the glider, in the drop, the HunterAnim.land_tier it plays].
+const LANDINGS := [[6.8, false, false, 1], [12.0, false, false, 2], [2.5, true, false, 2], [25.0, true, false, 3],
+		[2.2, true, true, 2]]
+func _landing_quiet() -> void:
+	var biomes := m.biomes
+	m.biomes = null          # (the map's own hazards spark and ring on their own clock)
+	for way: Array in LANDINGS:
+		_reset(flat + Vector3(0, 0.01, 0), false)
+		m.fields.clear()
+		P.xp = 0.0
+		P.vel.y = -float(way[0])
+		P.gliding = way[1]
+		P.dropping = way[2]
+		var radial0: int = m.fx.radial
+		for i in 30:
+			m.step(DT)
+		var tier := HunterAnim.land_tier(float(way[0]), way[1])
+		ok(tier == int(way[3]), "a landing at %.1f m/s plays land tier %d (want %d)" % [float(way[0]), tier, way[3]])
+		var off := " off the glider" if way[1] else ""
+		if way[2]:
+			off = " out of the drop"
+		ok(P.grounded and m.fx.radial == radial0, "a landing at %.1f m/s%s spawns no ring or burst (%d)"
+				% [float(way[0]), off, m.fx.radial - radial0])
+	m.biomes = biomes
 
 # ---------------------------------------------------------------- camera
 func _render_pos() -> Vector3:
