@@ -550,7 +550,7 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			n.add_child(_rider_part("Head", col, col2, 1.0, 1.6))
 			tail_col = CINDER_SMOKE
 		"slug":
-			n.add_child(_rider_part("Head", col, col2, 0.3, 1.0))
+			n.add_child(_rider_part("Head", col, col2, 0.2, 1.0))       # small: a waited volley's pack reads as 7 slugs
 	var tr := _mi(_ribbon_mesh(), _mat(M_COMET, col, tail_col))
 	tr.name = "Trail"
 	n.add_child(tr)
