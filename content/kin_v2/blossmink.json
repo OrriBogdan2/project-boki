@@ -1,0 +1,114 @@
+{
+	"grammar": 1,
+	"id": "blossmink",
+	"name": "Blossmink",
+	"animals": [
+		"Leaf-bristle brush"
+	],
+	"theme": "bloom",
+	"flavor": "Leaf-bristle brush, painted petals and vines.",
+	"colors": {
+		"body": "#c2b2b0",
+		"belly": "#f8efe9",
+		"glow": "#ecb7c3"
+	},
+	"look": {
+		"ears": "leaf",
+		"body": "pear",
+		"tail": "sprout",
+		"feet": "paws",
+		"aura": "leaves"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 6.8,
+			"hop_height": 0.1,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 7,
+		"kin_damage": 1,
+		"kin_speed": 5,
+		"owner_shield": 3,
+		"owner_regen": 4
+	},
+	"personality": {
+		"bravery": 0.29,
+		"loyalty": 0.8,
+		"temper": 0.12,
+		"curiosity": 0.57
+	},
+	"ai": {
+		"aggression": 0.3,
+		"loyalty": 0.9,
+		"caution": 0.6,
+		"role": "support"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Slow Bloom",
+		"passives": [
+			{
+				"stat": "regen",
+				"amount": 2.5
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "root",
+				"duration": 0.8
+			}
+		]
+	},
+	"active": "prism_wall",
+	"auto": "refraction",
+	"merge": "tidal_shell",
+	"evolution": {
+		"root": "Blos",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "dreamy and slow, drawls",
+		"syllables": [
+			"Blos",
+			"smink"
+		]
+	},
+	"egg": {
+		"name": "Blossmink Egg",
+		"temper": "Gentle",
+		"desc": "Something gentle is in here.",
+		"play": "Keeps you alive and patched up."
+	}
+}
