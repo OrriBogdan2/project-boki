@@ -1336,12 +1336,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Maracoil.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Maracoil.png",
   "hash": {
-   "sheet": "48a3c32e5834",
+   "sheet": "9815ceb91710",
    "card": "4316f19ec9ba",
    "portrait": "42f9362eec17",
    "hero": "490191e46cc4"
   },
-  "sheet_for_card": "5fdaabc2c8a6"
+  "sheet_for_card": "4316f19ec9ba"
  },
  "Marchleaf": {
   "sheet": "briefs/boki-art/turnarounds/Marchleaf.jpg",
@@ -3065,7 +3065,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Pavonazar.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Pavonazar.png",
   "hash": {
-   "sheet": "2e12e890ed83",
+   "sheet": "5128cca7dddc",
    "card": "0efda9dfe441",
    "portrait": "c098521b2893",
    "hero": "0f6f27ae2c37"
@@ -3086,7 +3086,7 @@
    "hero": "briefs/boki-art/portraits/cutout_v2/Pavonazar_female.png",
    "cutout": "briefs/boki-art/portraits/cutout_v2/Pavonazar_female.png"
   },
-  "sheet_for_card": "605e9758c385"
+  "sheet_for_card": "0efda9dfe441"
  },
  "Pinster": {
   "sheet": "briefs/boki-art/turnarounds/Pinster.jpg",
@@ -3731,12 +3731,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hash": {
-   "sheet": "9e4875f49c9b",
+   "sheet": "2ebb1b3de196",
    "card": "f8382e405ba2",
    "portrait": "f0b1d6685fc4",
    "hero": "2315baaa88d2"
   },
-  "sheet_for_card": "2fa0ef4d4362",
+  "sheet_for_card": "f8382e405ba2",
   "display_name": "Pipguin"
  },
  "Filefin": {

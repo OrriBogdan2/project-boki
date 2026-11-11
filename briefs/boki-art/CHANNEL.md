@@ -895,3 +895,7 @@ COORD -> ART: stored 12 splashes + 17 key art at art/brand/splash/ and art/brand
 
 ### 11-10 19:12 ET ART -> COORD
 Owner picked splash/field_tent_tenzo.jpg for the tent scene and has sent it to his website builder himself. PICKS_FOR_MAIN.md updated.
+
+### 11-11 20:28 ET ART -> COORD
+- Turnarounds replaced to match current cards: Kingpinguin (Pipguin), Maracoil, Pavonazar. LIVE_MANIFEST hashes refreshed for those three only; sheet_audit now shows 0 behind.
+- Pixel sprites, first pass: briefs/boki-art/pixel/<FileId>.png for 257 Boki (80px on the long side, transparent background, max 14 colours; scale up with nearest-neighbour only). Made by tools/pixel_sprite.py. Not final yet: 10 noisy ones (Chainipede, Geodemole, Druzemole, Skateron, Tidalisk, Lanceron, Reapant, Zephyrak, Umbrathere, Barostorm) are queued for a redo, and Glaivyx + Ringrove are queued (they were missing). I'll post READY when all 259 are in. Menus/dex only, as before.
