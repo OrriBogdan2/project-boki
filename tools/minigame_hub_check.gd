@@ -8,6 +8,8 @@ extends RefCounted
 ##   6. the garden games for real (base_mode on, three Boki, the Training post): the picker lists all
 ##      four; each pick starts that game (and it is put back); a whole Stump Shove bout ends on its
 ##      card and the winner becomes the picker's best Boki
+##   7. past the first day the title lands on the hub island: the picker opens there and every game is
+##      a place to go (the open zone to travel to, sleeping ones locked)
 ##   5. every game this base lists has a card (name, rule, result line) and a pick closes the picker
 ##      and starts it; a stand-in game proves the start path where the base has none
 ## Never touches the real save.
@@ -134,8 +136,8 @@ func _picker() -> void:
 
 const STARTED := {"race": "run", "shove": "run", "volley": "run"}
 
-func _garden() -> void:
-	var rules: Dictionary = FarmUnlocks.rules()
+## A garden save (three Boki, the Training post); day1 true is a player past the first day: the hub is home.
+func _garden_save(day1: bool) -> void:
 	var d := Save.fresh()
 	for i in 3:
 		var k := Save.new_kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i])
@@ -145,10 +147,14 @@ func _garden() -> void:
 		d["roster"].append(k)
 		if i == 0:
 			d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": day1}
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+
+func _garden() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	_garden_save(false)
 	rules["base_mode"] = true
 	var old: Node = main.screen_node()
 	main.show_screen("home", {"play_hub": true})
@@ -186,4 +192,38 @@ func _garden() -> void:
 			t += 0.1
 		var best: String = MinigameHub.summary("shove")
 		ok(sh.run == null and best.begins_with("Best "), "garden: a finished bout reaches the picker (%s)" % best)
+	rules["base_mode"] = false
+	await _hub()
+
+## Past the first day the title entry lands on the hub island, which holds no game: the picker still
+## opens there, and every game is a place to go (open zones to travel to, a sleeping one as locked).
+func _hub() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	_garden_save(true)
+	Save.d["zones"] = GardenZones.fresh()
+	rules["base_mode"] = true
+	var old: Node = main.screen_node()
+	main.show_screen("home", {"play_hub": true})
+	var home: Node = null
+	for f in SETTLE_FRAMES:
+		await main.get_tree().process_frame
+		home = main.screen_node()
+		if home != old and home != null and home.get("panel_open") == MinigameHub.TITLE:
+			break
+	ok(home != old and home.get("panel_open") == MinigameHub.TITLE, "hub: the picker opens on the hub island")
+	var away := MinigameHub.elsewhere(home)
+	var ids: Array = away.map(func(g): return g["id"])
+	var none: bool = MinigameHub.listed(home).is_empty()
+	ok(ids == ["race", "shove", "seek", "volley"] and none, "hub: all four games are places to go (%s)" % [ids])
+	var zones: Array = away.map(func(g): return "%s:%s" % [",".join(g["zones"]), g["open"]])
+	var want := ["bramblebank,ridge:true", "bramblebank,cinderstep:true",
+		"bramblebank,hushwood:true", "bramblebank,glasswater:true"]
+	ok(zones == want, "hub: each game leads first to the open start zone, then the sleeping one (%s)" % [zones])
+	var cards := 0
+	for id in ids:
+		cards += 1 if home.find_child("Game_" + String(id), true, false) != null else 0
+	ok(cards == 4, "hub: each game has a card in the picker (%d)" % cards)
+	Save.d["zones"] = {}      # the start zone asleep too: every game reads locked
+	var shut := MinigameHub.elsewhere(home).filter(func(g): return not g["open"])
+	ok(shut.size() == 4, "hub: with every zone asleep the four games read locked (%d)" % shut.size())
 	rules["base_mode"] = false

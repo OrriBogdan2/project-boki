@@ -715,10 +715,10 @@ func _ready_rest() -> void:
 	if visit.is_empty():
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
-	if not visit.is_empty():
+	if play_hub:
+		MinigameHub.open(self)      # (also on the hub island, which holds no game itself)
+	elif not visit.is_empty():
 		pass
-	elif play_hub:
-		MinigameHub.open(self)
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
