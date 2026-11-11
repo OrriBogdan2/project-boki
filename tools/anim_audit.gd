@@ -100,7 +100,8 @@ func _hero(main: Node, id: String) -> void:
 	row["set_off_at"] = _set_off_at(m, sync, clips)
 	var want := ph * float(row["cfg"]["walk_len"])
 	if absf(float(row["set_off_at"]) - want) > 2.0 * DT:
-		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"], want])
+		print("FAIL %s: setting off starts the walk at %.2f s, not its start_phase %.2f s" % [id, row["set_off_at"],
+				want])
 		bad += 1
 	if id in START_GATE and row["pop"]["idle_walk"] > MAX_START_GAP:
 		print("FAIL %s: the walk starts %.2f body heights from the idle (limit %.2f; nearest phase %.2f: %.2f)" % [id,

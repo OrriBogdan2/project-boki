@@ -21,7 +21,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
+  counter under 0.3 on a Hunter with legs, fails; so does a start gap over 0.25 for the Hunters of
+  [Setting off from a stand](#setting-off-from-a-stand), or a set-off that does not land on the walk's `start_phase`. `ostra` and `rimewright` have no stepping legs and are exempt, and
   are listed below as open.
 
 ## What is wrong with all of them
@@ -179,6 +180,36 @@ posts scroll at the move speed).
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
 
+## Setting off from a stand
+
+The first walk frame popped away from the idle: the walk ring started at its frame 0 (legs apart in a stride) and
+the loco blend reaches it in 3 to 5 frames. Measured as `pop.idle_walk`: the idle's first pose against the first walk
+pose played, worst of hips, head, hands, feet, in body heights. The fix is data, in `loco` of
+content/rules/warden_anim/<art>.json (docs/art/wardens/CLIPS.md), read by WardenClips:
+
+- `start_phase` (0..1): after 0.3 s standing, setting off seeks every walk and run clip there (a seek in front of each
+  ring clip). `--anim-audit` prints the phase nearest the idle as `pop.idle_walk_best`, in 24ths of the cycle.
+- `start_blend` {s, bones}: those bones keep the pose they stood in and ease into the clips over s. Kael's walk trails
+  the greatsword low behind him and Cinder's free hand rides higher than her idle all cycle long (by design in
+  tools/art1/kael_clips.py and cinder_clips.py), so no phase reaches the idle; the arm now eases over 0.3 s, and the
+  keys stay as authored.
+
+| Hunter | start gap before → after | `start_phase` | `start_blend` |
+|---|---|---|---|
+| `gunslinger` (Vex) | 0.29 → 0.20 | 0.83 | |
+| `juggernaut` (Kael) | 0.35 → 0.18 | 0.75 | right arm, 0.3 s |
+| `archer` (Hem) | 0.26 → 0.10 | 0.375 | |
+| `ashwick` (Cinder) | 0.28 → 0.16 | 0.875 | left arm, 0.3 s |
+
+Strips (docs/art/anim_audit/start/<id>.jpg, `--anim-shots` strips `start_raw` and `start`): the idle, then the first
+8 frames of setting off at the walk speed (30 fps); top before (no start data), bottom after. Rendered under xvfb
+(opengl3); GPU job 20261111-193514-25954 renders the same strips.
+
+![juggernaut setting off, before and after](anim_audit/start/juggernaut.jpg)
+
+The `walk_run` number is now read at the start phase on both clips (ashwick 0.22 → 0.32, gunslinger 0.16 → 0.20); a
+walk to run hand-off happens mid-cycle, so that number stays a proxy and is not gated.
+
 ## What is left
 
 Split into backlog items per Hunter (role build):
@@ -190,4 +221,4 @@ Split into backlog items per Hunter (role build):
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
-- Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
+- Idle to walk first-pose gaps over 0.25 (`dredge`, `mage`): the same data, [Setting off from a stand](#setting-off-from-a-stand).
