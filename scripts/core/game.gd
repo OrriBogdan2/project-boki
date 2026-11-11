@@ -204,6 +204,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			continue
 		brought.append(kk)
 		_kin_after(kk, run, won, r, treat, out, ri == 0)
+		BaseLife.returning = FarmUnlocks.base_mode()      # the farm welcomes you back (BaseLife.come_home)
 	# kin you got back from a rival come home as themselves
 	for rec in r.get("caught", []).duplicate():
 		if not won:

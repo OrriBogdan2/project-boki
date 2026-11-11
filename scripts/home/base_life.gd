@@ -16,6 +16,10 @@ extends RefCounted
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
+##
+## Coming home from a run is the React state too: the Boki that are out run to the portal in trust order, greet by
+## trait (bound, wave, shy peek) and go back to what they were doing (come_home). Napping ones sleep on unless trust
+## is high. Only Boki on the portal's island come; the "while you were away" card is untouched.
 
 enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, MENTOR, CHORE, LEAD }
 const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Mentor", "Chore", "Lead"]
@@ -36,7 +40,8 @@ const CATCH := 0.8         # m: a tag lands this close
 const GREET := 2.5         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
-const GRUMPY := 30.0       # joy need below which a Boki naps alone
+const ARRIVED := 0.5       # m: a greeter this close to its spot at the portal has got there
+const GRUMPY := 30.0      # joy need below which a Boki naps alone
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
@@ -46,6 +51,11 @@ var _day_t := -1.0         # the farm's day clock at the last tick (a drop means
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
+var _greeters: Array = []  # {k, at}: Boki still to run to the portal, `at` s of the welcome clock
+var _welcome_t := 0.0      # s since the player came home
+
+## Set by Game when a run ends (and the base is on): the next farm that opens welcomes the player back.
+static var returning := false
 
 func _init(home) -> void:
 	h = home
@@ -121,6 +131,9 @@ func step(d: float) -> void:
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one
 	var first_look := _seen.is_empty()      # the Boki already here when the base loads are not newcomers
+	_welcome_t += dt
+	while not _greeters.is_empty() and float(_greeters[0]["at"]) <= _welcome_t:
+		_home_start(_greeters.pop_front()["k"])
 	for k in h.kins:
 		var uid := String(k["rec"]["uid"])
 		if not _seen.has(uid):
@@ -207,6 +220,9 @@ func choose(k: Dictionary) -> void:
 # ------------------------------------------------------------------ per state
 func _tick(k: Dictionary, dt: float) -> void:
 	var m := machine(k)
+	if k.has("life_home"):
+		_home_tick(k, m, dt)
+		return
 	if _taken(k):
 		return
 	m.tick(dt)
@@ -410,6 +426,94 @@ func _arrived(k: Dictionary) -> void:
 			o["life_for"] = float(R["max"]["react"])
 			o["t"] = float(o["life_for"])
 			h._emote(o, "!")
+
+# ------------------------------------------------------------------ coming home
+## The player is back from a run: every free Boki on the portal's island, highest trust first and one stagger apart,
+## runs to the portal (napping ones only at nap_trust or more). Called once from home.gd when the farm opens.
+func come_home() -> void:
+	if not returning:
+		return
+	returning = false
+	var hr: Dictionary = R["home"]
+	var portal: Vector3 = h.spots["portal"]
+	var isle: int = h.world.island_of(portal.x, portal.z)
+	var crowd: Array = h.kins.filter(func(k): return _comes_home(k, isle, float(hr["nap_trust"])))
+	crowd.sort_custom(func(a, b): return float(a["rec"]["trust"]) > float(b["rec"]["trust"]))
+	_welcome_t = 0.0
+	for i in crowd.size():
+		_greeters.append({"k": crowd[i], "at": float(i) * float(hr["stagger"])})
+
+## A free Boki on the portal's island; a napping one only when it trusts you enough.
+func _comes_home(k: Dictionary, isle: int, nap_trust: float) -> bool:
+	if _taken(k) or h.world.island_of(k["pos"].x, k["pos"].z) != isle:
+		return false
+	return not machine(k).is_in(S.NAP) or float(k["rec"]["trust"]) >= nap_trust
+
+## How this Boki greets: the brave bound in, the shy one peeks from afar, the rest wave.
+func greet_kind(rec: Dictionary) -> String:
+	var bravery := float(rec["traits"].get("bravery", 0.5))
+	if bravery >= float(R["home"]["bound_at"]):
+		return "bound"
+	return "shy" if bravery < float(R["home"]["shy_at"]) else "wave"
+
+func _home_start(k: Dictionary) -> void:
+	var m := machine(k)
+	if _taken(k):
+		return
+	var was := m.state
+	if was == S.NAP:
+		k["nap_t"] = 0.0      # woken by the portal
+	if not m.can(S.REACT):
+		m.go(S.ROAM, "woken" if was == S.NAP else "welcome")
+	if not m.go(S.REACT, "homecoming"):
+		return
+	var kind := greet_kind(k["rec"])
+	var toy = k.get("life_at") if was == S.PLAY else null
+	k["life_home"] = {"phase": "run", "t": 0.0, "was": was, "kind": kind, "toy": toy,
+		"goal": h._seat(k, h.spots["portal"], float(R["home"]["stop"][kind]))}
+	k["life_run"] = true
+	h._emote(k, "!", true)
+
+func _home_tick(k: Dictionary, m: Fsm, dt: float) -> void:
+	var hm: Dictionary = k["life_home"]
+	if _taken(k):      # the farm's own drivers (a whistle, a pet) have it now
+		k.erase("life_home")
+		k.erase("life_run")
+		m.go(S.ROAM, "called")
+		return
+	m.tick(dt)
+	hm["t"] = float(hm["t"]) + dt
+	k["t"] = 1.0       # the farm's think timer waits
+	if hm["phase"] == "run":
+		k["goal"] = hm["goal"]
+		var to := Vector2(hm["goal"].x - k["pos"].x, hm["goal"].z - k["pos"].z)
+		if to.length() < ARRIVED or float(hm["t"]) >= float(R["home"]["run_max"]):
+			hm["phase"] = "greet"
+			hm["t"] = 0.0
+			k.erase("life_run")
+			k["goal"] = k["pos"]
+			_greet_player(k, String(hm["kind"]))
+	elif float(hm["t"]) >= float(R["home"]["greet"]):
+		_home_end(k, m, hm)
+
+## The greeting itself (it turns to you on its own once it stands still).
+func _greet_player(k: Dictionary, kind: String) -> void:
+	match kind:
+		"bound":
+			k["joy_t"] = float(R["home"]["greet"])      # bounces on the spot
+			h._emote(k, "★", true)
+		"wave":
+			h._emote(k, "♥" if float(k["rec"]["trust"]) > 65.0 else "♪", true)
+		_:
+			h._emote(k, "?", true)      # a shy peek from where it stopped
+
+func _home_end(k: Dictionary, m: Fsm, hm: Dictionary) -> void:
+	k.erase("life_home")
+	m.go(S.ROAM, "greeted")
+	if hm["was"] == S.NAP:
+		_nap(k, "back to bed")
+	elif hm["was"] == S.PLAY and m.can(S.PLAY):
+		_play(k, hm["toy"])
 
 # ------------------------------------------------------------------ helpers
 ## Not asleep time: night is for napping, except for nocturnal Boki.

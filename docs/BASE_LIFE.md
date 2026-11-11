@@ -87,3 +87,11 @@ is one number read where it acts: Snug naps (cosy) restore joy while napping (`B
 (`GardenVisitor.chance`), Calm air (quiet) lowers the squabble chance (`BaseLife._clash`). A built zone counts its
 fixed pieces; every other zone counts the save's island. No scores: an effect is on or off. Check:
 `--decor-tags-check`.
+- Toys: placed layout items whose id is in `toys` (today only the Training post; GARDEN.md 9.3 adds more).
+- Coming home (GARDEN.md section 2; `BaseLife.come_home`, check `--homecoming-check`): `Game` sets `BaseLife.returning`
+  when a run ends and the base is on; the next farm that opens runs `come_home()` once. Every free Boki on the
+  portal's island (napping ones only at `home.nap_trust`) goes into React with `life_home` on its kin entry, one
+  `home.stagger` after the one before it, highest trust first. It runs to the portal, then greets by trait (bravery
+  at `bound_at` bounds in, under `shy_at` peeks from afar, else waves) and goes back to what it was doing (Nap
+  naps again, Play returns to its toy, others Roam). A whistle, pet or job ends it early. The "while you were away"
+  card is untouched. Boki on other islands are not sent for.

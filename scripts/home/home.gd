@@ -715,6 +715,7 @@ func _ready_rest() -> void:
 			"Boki in the burrow sleep: they don't get hungry and don't need looking after. Swap them out whenever you like, or expand the cottages for more room."])
 	if visit.is_empty():
 		hecon.show_away()
+		if life: life.come_home()      # back from a run: the Boki run to the portal (BaseLife)
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
 		pass
@@ -1526,7 +1527,7 @@ func _move_kin(d: float) -> void:
 			aim = KinAvoid.around(kins, k, pos, aim, d)
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
-				wish = to.normalized() * (4.4 * float(k.get("call_pace", 1.0)) if (k.has("fetch") or k.has("called_t") or k.has("led")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0)) * wade.speed(k, pos)
+				wish = to.normalized() * (4.4 * float(k.get("call_pace", 1.0)) if (k.has("fetch") or k.has("called_t") or k.has("led") or k.has("life_run")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0)) * wade.speed(k, pos)
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
 		var nx := pos.x + hv.x * d
