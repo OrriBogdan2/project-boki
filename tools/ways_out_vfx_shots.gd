@@ -130,30 +130,35 @@ func _row(id: String, word: String, t: float, at: Vector3, put: Callable, keep :
 		spot = _stand(at, d)
 		await _shoot(id, word, spot.distance_to(Vector3(at.x, spot.y, at.z)))
 
-## The Blight's wall, 8..60 m off: one spot on the island with ground under the wall's 8 m stand, the ring set by
-## the clock.
+## The Blight's wall, 8..60 m off: one spot on the island far enough from the Heart for the closed ring to stand 8 m
+## off it (ground under the wall there preferred), the ring set by the clock.
 func _blight_row() -> void:
 	pin = Callable()
 	var site := m.heart.site
 	var k := m.heart.ways_scale
-	var at := Vector3.INF
-	for rs in range(40, 8, -2):
-		for i in 12:
-			var b := deg_to_rad(35.0 + 30.0 * i)
-			var a := Vector3(sin(b), 0, -cos(b))
-			var g := site + a * rs
-			var wall := site + a * (rs + 10.0)
-			if not m.world.is_void(g.x, g.z) and not m.world.is_void(wall.x, wall.z):
-				at = m.world.free_spot_near(g, [], 1.0, 0.45, 2.0)
-				break
-		if at != Vector3.INF:
-			break
+	var lo := ceili(Heart.r("tide_r1") * k - float(DISTS[0]))
+	var at := _blight_spot(lo, true)
+	if at == Vector3.INF:
+		at = _blight_spot(lo, false)
 	var rs_now := Vector2(at.x - site.x, at.z - site.z).length()
 	for d: float in DISTS:
 		var f := (Heart.r("tide_r0") - (rs_now + d) / k) / (Heart.r("tide_r0") - Heart.r("tide_r1"))
 		t_sess = Heart.r("tide_start_s") + Heart.r("tide_close_s") * f
 		spot = at
 		await _shoot("blight_edge", "Blight edge", d)
+
+## A spot lo..lo+16 m out from the Heart (farthest first, the bearings as _stand's) on ground, with ground under the
+## nearest wall too when `wall`; Vector3.INF when there is none.
+func _blight_spot(lo: int, wall: bool) -> Vector3:
+	for rs in range(lo + 16, lo - 1, -2):
+		for i in 12:
+			var b := deg_to_rad(35.0 + 30.0 * i)
+			var a := Vector3(sin(b), 0, -cos(b))
+			var g := m.heart.site + a * rs
+			var w := m.heart.site + a * (rs + float(DISTS[0]))
+			if not m.world.is_void(g.x, g.z) and not (wall and m.world.is_void(w.x, w.z)):
+				return m.world.free_spot_near(g, [], 1.0, 0.45, 2.0)
+	return Vector3.INF
 
 ## A spot `d` m from `at`, on ground and inside the Blight's ring: the seat ahead and to the right first.
 func _stand(at: Vector3, d: float) -> Vector3:
