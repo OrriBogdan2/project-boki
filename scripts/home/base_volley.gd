@@ -190,6 +190,7 @@ var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
+var cue: GardenCues.VolleyCue = null   # the landing ring and spike flash while a match runs
 
 func _init(home) -> void:
 	h = home
@@ -270,6 +271,7 @@ func use() -> void:
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to call a spike" % Settings.key_cap("interact"))
 	bar.lbl.text = "Call %s's spike" % run.recs[run.backed]["name"]
 	seed_node.visible = true
+	cue = GardenCues.VolleyCue.new(h)
 	_place()
 	GardenSfx.countdown(h, log_node.position)
 
@@ -287,6 +289,7 @@ func input(event: InputEvent) -> bool:
 		run.call_spike(r)
 		GardenSfx.crowd(r, pair[run.backed]["pos"])
 		bar.close()
+		cue.call_flash(pair[run.backed]["pos"])
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
 
@@ -312,6 +315,7 @@ func tick(d: float) -> void:
 		_splash(run.last_miss)
 		h._toast("%s %d : %d %s" % [run.recs[0]["name"], run.score[0], run.score[1], run.recs[1]["name"]])
 	_place()
+	cue.step(d)
 	if run.over():
 		_end(true)
 
@@ -328,6 +332,17 @@ func _place() -> void:
 		pair[i]["pos"] = p
 		BaseRace.act(pair[i], "bat" if _batting(i) else "")
 	seed_node.position = _seed_at()
+	_aim_cue()
+
+## The ring sits where the seed will land, closing in as it comes; hidden when no seed is in the air.
+func _aim_cue() -> void:
+	if run.state != Run.S.FLIGHT:
+		cue.hide_landing()
+		return
+	var land: Vector3 = log_node.position + Vector3(0, 0, _side_z(run.to, 1.0))
+	var g: float = h._ground_h(land.x, land.z)
+	land.y = g if g > -50.0 else 0.0
+	cue.aim(land, 1.0 - clampf(run.fly_t / run.fly_total, 0.0, 1.0), run.hard < 1.0)
 
 ## True while side i hops and bats: the hit it is about to make, and the one it just made.
 func _batting(side: int) -> bool:
@@ -363,6 +378,8 @@ func _end(finished: bool) -> void:
 		BaseRace.act(k, "")
 	bar.close()
 	seed_node.visible = false
+	cue.clear()
+	cue = null
 	if finished:
 		held = BaseRace.hold(h, res)
 		_card(res, h.hrace.pin(res["win"], "volley"))

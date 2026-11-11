@@ -191,8 +191,8 @@ func _ready() -> void:
 		hshow = ShowRing.new(self)
 		hkite = BaseKite.new(self)
 		hlantern = LanternMatch.new(self)
-		# in this order: Tumble's ring needs the stump placed
 		hboard = BaseBoard.new(self)
+		# in this order: Tumble's ring needs the stump placed
 		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hkite, hlantern, hboard]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)

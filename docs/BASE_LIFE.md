@@ -117,3 +117,15 @@ Kite Tow (GARDEN_MODERN.md 4.2 game 7, `scripts/home/base_kite.gd`, `content/rul
   winning any game over its rival, or three days (`BaseLife` day wrap) with both at joy `good_joy` or more, settles
   it: bond back to 0. One journal line each way (CareJournal, on the marker). The grudge key is optional (read
   with `.get`, made on first use), so older saves load as they are and Save.VERSION stays 12.
+- Game cues (`scripts/home/garden_cues.gd`): each garden game builds one small world cue set when it starts and
+  frees it when it ends; nothing goes on the HUD. Dash marks, Shove meter, Seek trail and Volley ring are teal and
+  magenta. The newer four share two pools (`Bursts` rings, `PopCue` labels) and use the Boki's type colour
+  (`GardenCues.type_colour`, the Field Book colour). Echo Steps: on the lead's beat its stone gets a ring; on your
+  beats one ring circles all four stones (it never shows which); a hit flashes bright, a miss dull and shrinking.
+  Tumble: the rival's tell is an icon over its head for the tell's 1.5 s (Rush double chevron toward your Boki,
+  Brace shield, Dodge hoop). Its alpha is the chance the tell is honest and it sways more the less sure it is, so
+  it reads as "probably". Relay Cup: a baton floats over each team's runner, blinking while a fumbled pass is
+  taken, and bursts at the next runner on every hand-off (bright when the pass lost no time). Show Ring: each
+  round's score pops over your Boki as the round ends ("Look 7.4"), and both totals pop after the Bond walk.
+  Check: `--garden-games-vfx-check` (each cue on the frame of its beat, at its spot, in its colour).
+  Clips: `--echo-steps-clip`, `--gameplay-media --media-clip=5` (Tumble), `6` (Relay) and `7` (Show Ring).

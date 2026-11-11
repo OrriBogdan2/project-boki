@@ -157,6 +157,7 @@ var hunt: Hunt = null
 var pair: Array = []           # the home's kin entries: a, b
 var card: Control = null
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
+var cue: GardenCues.SeekCue = null   # the scent trail while a hunt runs
 
 func _init(home) -> void:
 	h = home
@@ -253,6 +254,7 @@ func _hide(at: Vector2) -> void:
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))
 	h.add_child(scent)
+	cue = GardenCues.SeekCue.new(h)
 	GardenSfx.countdown(h, scent.position)
 
 func _walkable(p: Vector2) -> bool:
@@ -282,6 +284,7 @@ func tick(d: float) -> void:
 			_move_pair(d)
 			var near: int = 0 if hunt.pos[0].distance_to(hunt.item) <= hunt.pos[1].distance_to(hunt.item) else 1
 			GardenSfx.sniff(pair[near]["pos"], hunt.pos[near].distance_to(hunt.item))
+			_lay_trails(d)
 			if hunt.over():
 				_end(true)
 		S.RESULT:
@@ -302,6 +305,11 @@ func _move_pair(d: float) -> void:
 		n.rotation.y = lerp_angle(n.rotation.y, want, minf(1.0, TURN * d))
 		pair[i]["pos"] = n.position
 
+## Each hunter's trail runs from the scent toward it, brighter the better its nose (best for night types at night).
+func _lay_trails(d: float) -> void:
+	for i in 2:
+		cue.update(i, hunt.item, hunt.pos[i], right_p(hunt.recs[i], hunt.night), _ground, d)
+
 func _end(finished: bool) -> void:
 	var res := settle(hunt) if finished else {}
 	for k in pair:
@@ -311,6 +319,8 @@ func _end(finished: bool) -> void:
 	if is_instance_valid(scent):
 		scent.queue_free()
 	GardenSfx.sniff_stop()
+	cue.clear()
+	cue = null
 	if finished:
 		held = BaseRace.hold(h, res)
 		go(S.RESULT)

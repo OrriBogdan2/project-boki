@@ -199,6 +199,7 @@ const CHECKS := {
 	# a Boki taking a hit, strips
 	"--boki-flinch-shots": ["res://tools/boki_flinch_shots.gd", "boki_flinch_shots", null],
 	"--garden-motion-shots": ["res://tools/garden_motion_shots.gd", "garden_motion_shots", null],  # strips
+	"--garden-cue-shots": ["res://tools/garden_cue_shots.gd", "garden_cue_shots", null],  # the four games' world cues
 	"--boki-home-shots": ["res://tools/boki_home_shots.gd", "boki_home_shots", null],      # a sheet per home state
 	"--boki-rig-check": ["res://tools/boki_rig_check.gd", "boki_rig_check", null],      # rigged Boki
 	"--boki-anim-audit": ["res://tools/boki_anim_audit.gd", "boki_anim_audit", null],      # rigged Boki gait gate
@@ -301,6 +302,7 @@ const CHECKS := {
 	"--shove-check": ["res://tools/shove_check.gd", "shove_check", null],      # the Stump Shove, GARDEN.md 5.2
 	"--tumble-check": ["res://tools/tumble_check.gd", "tumble_check", null],      # Tumble, GARDEN_MODERN.md 4.2
 	"--kite-check": ["res://tools/kite_check.gd", "kite_check", null],         # Kite Tow part 1, GARDEN_MODERN 4.2
+	"--garden-games-vfx-check": ["res://tools/garden_games_vfx_check.gd", "garden_games_vfx_check", null],
 	"--seek-check": ["res://tools/seek_check.gd", "seek_check", null],      # Seek, GARDEN.md 5.3
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
 	"--decor-tags-check": ["res://tools/decor_tags_check.gd", "decor_tags_check", null],      # GARDEN_MODERN 5 rank 7
