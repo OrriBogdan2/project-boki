@@ -15,6 +15,15 @@ Rebuild (Blender under ulimit -v 12000000; raw files in ~/meshy/tarek_v2):
     blender -b --factory-startup --python tools/meshy/fit_warden.py -- art/wardens/src/tarek_fit.json
     blender -b --factory-startup --python tools/art1/tarek_scan.py -- ~/meshy/tarek_v2/fit.blend WORK
     blender -b WORK/tarek.blend --python tools/art1/tarek_clips.py -- WORK/tarek_anims.blend art/wardens/tarek/tarek.glb
+    G=art/wardens/tarek/tarek.glb; H=~/anim/pilot2-hymotion/out_glb
+    python3 tools/art1/glb_swap.py $G $H/tarek_hy_walk.glb $G hy_walk_s0c:walk_f:loop
+    python3 tools/art1/glb_swap.py $G $H/tarek_hy.glb $G hy_idle_s2:idle:loop
+
+`idle` and `walk_f` are HY-Motion-1.0-Lite text-to-motion clips (pilot 2, 2026-11-10, ~/anim/pilot2-hymotion/REPORT.md),
+retargeted with ~/anim/pilot1/scripts/retarget_v2.py: a wide brawler's guard (3.0 s) and one heavy stride at the 2.2 m/s
+walk gait (1.0 s). glb_swap.py closes both loops. Licence: tencent-hunyuan-community excludes the EU, UK and South Korea
+and needs a separate licence above 1M MAU, so legal signs off before these ship. Revert to the hand-keyed clips by
+skipping the two swap lines.
 
 tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
 --rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.
