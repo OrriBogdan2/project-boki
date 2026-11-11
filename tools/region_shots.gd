@@ -75,7 +75,7 @@ func run(main_node: Node) -> void:
 	await _start(false)
 	m.hud.open_map(true)
 	await _grab("drop_map", 20)
-	m.hud.open_map(false)
+	m.hud.close_map()
 	await _dive()
 	await _hard_landing()
 	await _cleared_minimap()
