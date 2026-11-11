@@ -138,9 +138,10 @@ func _named(dd: Dictionary) -> Array:
 	if not cr.is_empty():
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
-	out.append_array((dd.get("air", {}) as Dictionary).values())
 	out.append_array((dd.get("act", {}) as Dictionary).values())
 	out.append_array((dd.get("emotes", {}) as Dictionary).values())
+	var air: Array = (dd.get("air", {}) as Dictionary).values()
+	out.append_array(air.filter(func(v): return v is String))     # (not its tilts)
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
