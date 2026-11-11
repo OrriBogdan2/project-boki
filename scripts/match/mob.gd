@@ -17,6 +17,7 @@ var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
 var calm_t := 0.0
+var team_hit := {}          # team -> match time of its latest hit that left this alive (XpHints: who was fighting it)
 var death_t := 0.0
 ## Stagger, as in Supervive: elites and bosses open short "staggerable" windows (a purple ring),
 ## always while winding up a slam. Land an ability in one (not a regular shot) and it takes a big
@@ -90,6 +91,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		var real: Ent = by
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
+		team_hit[real.team] = m.time
 		if tgt == null or randf() < 0.4:
 			tgt = real
 			if st == "idle":
