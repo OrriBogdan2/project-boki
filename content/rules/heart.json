@@ -27,7 +27,7 @@
  "final_hold_s": 20.0,
  "_final_hold_s": "one Hunter alone fills the ring in this long; more of the squad fill it faster (Exits.UPLINK_CREW: 3 hold it in about 11 s)",
  "final_drain_s": 20.0,
- "_final_drain_s": "an empty ring drains from full to nothing in this long; a standing rival in it stalls it",
+ "_final_drain_s": "an empty ring drains from full to nothing in this long; a standing rival in it stalls it; with no holder standing in it, a squad alone in it takes it over from nothing",
  "rush_k": 2.0,
  "_rush_k": "the last squad standing: the final seat opens at once and fills this much faster",
  "end_after_final_s": 15.0,

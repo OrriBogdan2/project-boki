@@ -15,7 +15,8 @@ Heart's two seats (spec tasks 1-2); the quest seats, deleting docks/hatches/keys
    Rejected: unlimited Heart exits, and two machines over one Heart.
 2. One state enum on `Heart`: ASLEEP > CHARGING > READY <> CARRIED > WAITING > FINAL > DONE (any pre-final state
    jumps to FINAL at 10:00 or when one squad is left). The Gate takes the carrier's squad within 8 m; the ring
-   fills for a squad alone (Exits.crew_rate), stalls with a standing rival, drains when empty.
+   fills for a squad alone (Exits.crew_rate), stalls with a standing rival, drains when empty; downed Hunters neither hold nor stall it, and with no holder standing in it a squad
+   alone in it takes it over from nothing (spec risk 4: no beaten squad stalls the final to 12:00).
 3. A boss at the Heart for the final. Rejected (spec section 2: perf with 5-8 squads on one island).
 
 ## Decision
