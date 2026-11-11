@@ -13,5 +13,17 @@
  "back_safe_s": 60.0,
  "back_until_s": 420.0,
  "max_mobs": 85,
- "spread": 1.8
+ "spread": 1.8,
+ "bed": {
+  "_doc": "The idle bed you hear from a live camp before you see it (scripts/match/camp_beds.gd; content/sfx/camps.json sets the 35 m it carries). spot_r (m): a monster whose home is this close to a camp spot belongs to that camp. tiers, smallest first: the loop for a camp with at least min monsters up, and its level (dB), so a bigger camp is louder and denser. near_n: camp beds playing at once, the nearest. combat_db: how far the beds sink at the height of a fight (MusicDir.heat). relight_db: the cue as a cleared camp comes back.",
+  "spot_r": 4.0,
+  "tiers": [
+   {"min": 1, "sound": "camp_bed_small", "db": -8.0},
+   {"min": 3, "sound": "camp_bed_camp", "db": -5.0},
+   {"min": 4, "sound": "camp_bed_great", "db": -2.0}
+  ],
+  "near_n": 3,
+  "combat_db": -12.0,
+  "relight_db": -2.0
+ }
 }

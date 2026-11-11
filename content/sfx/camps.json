@@ -1,0 +1,11 @@
+{
+ "group": "camps",
+ "name": "Monster camps",
+ "script": "tools/gen_sfx_camps.py",
+ "sounds": {
+  "camp_bed_small": "loop", "camp_bed_camp": "loop", "camp_bed_great": "loop", "camp_relight": "grunt"
+ },
+ "signature": [],
+ "reach": {"camp_bed_small": 35, "camp_bed_camp": 35, "camp_bed_great": 35, "camp_relight": 35},
+ "loops": ["camp_bed_small", "camp_bed_camp", "camp_bed_great"]
+}

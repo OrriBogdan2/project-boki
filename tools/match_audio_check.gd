@@ -5,6 +5,7 @@ extends RefCounted
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## A live camp's idle bed (CampBeds) playing as the match ends goes with it.
 
 var main: Node
 var fails := 0
@@ -57,6 +58,12 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	# a live camp's idle bed is going as the match ends
+	var spot: Vector3 = m.world.camp_spots[0]["pos"]
+	Sfx.listener = spot + Vector3(0, 0, 8)
+	m.music_dir.beds.tick(m, 0.3, 0.0)
+	var beds := Sfx.loops.keys().filter(func(k): return String(k).begins_with("campbed"))
+	ok(not beds.is_empty(), "a camp 8 m away is heard (%s)" % [beds])
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -67,7 +74,9 @@ func run(main_node: Node) -> void:
 		for i in 6:
 			await main.get_tree().process_frame
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
-	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
+	var ours := func(k): return k == key or k == "boxhum_check" or String(k).begins_with("campbed")
+	var left := Sfx.loops.keys().filter(ours)
+	ok(left.is_empty(), "no keyed match loop is left, camp beds included (%s)" % [left])
 	await main.get_tree().create_timer(SETTLE).timeout
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])

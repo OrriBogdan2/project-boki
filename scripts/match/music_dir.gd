@@ -5,7 +5,8 @@ extends RefCounted
 ## or got hit lately, or a rival is close and in sight), the boss stem inside a woken boss's arena,
 ## and the clock stem while extracting or when the islands are about to fall. Three stingers mark the
 ## run: the last squad standing (you are in it), and the run's end (out, or taken out), each with the
-## stems falling away under it. Reads the match, never changes it.
+## stems falling away under it. Live monster camps nearby are heard through CampBeds. Reads the match,
+## never changes it.
 
 const FIGHT_HOLD := 7.0       # seconds the fight music hangs on after the last shot traded
 const RIVAL_NEAR := 13.0
@@ -16,6 +17,7 @@ var last_done := 0.0
 var started := false
 var ended := false            # the run-end sting has played
 var last_said := false        # the last-squad sting has played
+var beds := CampBeds.new()    # the live camps' idle beds (scripts/match/camp_beds.gd)
 
 func start(m: Match) -> void:
 	if m.tier >= 2:
@@ -78,6 +80,8 @@ func tick(m: Match, dt: float) -> void:
 		return
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
+		if not p.riding and not p.dropping:
+			beds.tick(m, dt, heat)
 	if not started:
 		return
 	var calm := 1.0; var drive := 0.0; var boss := 0.0; var extract := 0.0

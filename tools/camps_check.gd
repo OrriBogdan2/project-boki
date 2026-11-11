@@ -5,8 +5,10 @@ extends RefCounted
 ## standing still or for hurting Hunters (armor only); a kill pays its XP to the last hit's squad
 ## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
-## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
-## touches the save.
+## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. A live camp
+## is heard (CampBeds): its bed fades in from 35 m, louder for a bigger camp, the nearest three at
+## most, sunk under a fight, gone once cleared, and its comeback plays the relight cue. Never touches
+## the save.
 
 const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
 
@@ -34,6 +36,7 @@ func run(main: Node) -> void:
 	_clear(m)
 	_comeback(m)
 	_hot(main)
+	await _beds(main)
 	print("CAMPS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -252,3 +255,78 @@ func _hot(main: Node) -> void:
 			if hot: checked += 1
 		m.queue_free()
 	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
+
+## The camp beds, ticked straight from here with the listener set where the check wants it.
+func _hear(B: CampBeds, m: Match, at: Vector3, heat := 0.0, dt := 0.1) -> void:
+	Sfx.listener = at
+	B._recount_t = 0.0
+	B.tick(m, dt, heat)
+
+func _bed_db(B: CampBeds, i: int) -> float:
+	var key: String = B.spots[i]["key"]
+	return (Sfx.loops[key]["p"] as AudioStreamPlayer).volume_db if Sfx.loop_on(key) else -80.0
+
+func _beds(main: Node) -> void:
+	var m := _match(main, 5)
+	var C: Camps = m.camps
+	var B := CampBeds.new()
+	var big: Dictionary = {}
+	var small: Dictionary = {}
+	for c in C.camps:
+		var sid: String = Camps.size_def(int(c["size"]))["id"]
+		if sid in ["great", "chief"] and big.is_empty(): big = c
+		if sid == "small" and small.is_empty(): small = c
+	ok(not big.is_empty() and not small.is_empty(), "setup: a big camp and a small one")
+	if big.is_empty() or small.is_empty():
+		return
+	var bi := int(big["id"])
+	var si := int(small["id"])
+	var bp: Vector3 = big["pos"]
+	var away := Vector3(0, 0, 1)
+	Sfx.last_played.erase("camp_relight")
+	_hear(B, m, bp + away * 40.0)
+	ok(not B.playing.has(bi) and not Sfx.loop_on(B.spots[bi]["key"]), "a camp 40 m away is not heard yet")
+	_hear(B, m, bp + away * 33.0)
+	var edge := _bed_db(B, bi)
+	_hear(B, m, bp + away * 10.0)
+	var near := _bed_db(B, bi)
+	var fades: bool = B.playing.has(bi) and edge > -80.0 and near > edge + 10.0
+	ok(fades, "it fades in from about 35 m (%.1f dB at 33 m, %.1f at 10 m)" % [edge, near])
+	ok(not Sfx.last_played.has("camp_relight"), "a camp first heard plays no relight cue")
+	_hear(B, m, (small["pos"] as Vector3) + away * 10.0)
+	var small_db := _bed_db(B, si)
+	var dense: bool = B.spots[bi]["sound"] == "camp_bed_great" and B.spots[si]["sound"] == "camp_bed_small"
+	ok(dense and near > small_db + 3.0,
+			"a big camp's bed is denser and louder (%.1f dB) than a small one's (%.1f dB) at 10 m" % [near, small_db])
+	_hear(B, m, bp + away * 10.0, 1.0)
+	var under: float = Sfx.loops[B.spots[bi]["key"]]["vol"]
+	_hear(B, m, bp + away * 10.0)
+	var calm: float = Sfx.loops[B.spots[bi]["key"]]["vol"]
+	ok(under < calm - 6.0, "the beds sink under a fight (%.1f dB, %.1f out of one)" % [under, calm])
+	_cap(m, B, bp)
+	for mb in _camp_mobs(big): mb.hurt(1e6, m.player)
+	_hear(B, m, bp + away * 10.0)
+	await main.get_tree().create_timer(0.4).timeout
+	ok(not B.playing.has(bi) and not Sfx.loop_on(B.spots[bi]["key"]), "a cleared camp's bed stops")
+	_hear(B, m, bp + away * 10.0, 0.0, CampBeds.RELIGHT_GAP_S)
+	for h in m.hunters: h.pos = Vector3(-1e4, 0, -1e4)
+	m.time = float(big["back_t"]) + 1.0
+	_tick(C)
+	_hear(B, m, bp + away * 20.0)
+	var back: bool = big["state"] == Camps.State.RETURNING and B.playing.has(bi) and Sfx.loop_on(B.spots[bi]["key"])
+	ok(back and Sfx.last_played.has("camp_relight"), "its comeback plays the relight cue and the bed returns")
+	m.queue_free()
+
+## With five live camps in reach only the nearest three beds play.
+func _cap(m: Match, B: CampBeds, at: Vector3) -> void:
+	var moved := {}
+	for i in B.spots.size():
+		if int(B.spots[i]["n"]) > 0 and moved.size() < 5:
+			moved[i] = B.spots[i]["pos"]
+			B.spots[i]["pos"] = at + Vector3(4.0 * (moved.size() + 1), 0, 0)
+	_hear(B, m, at)
+	var nearest: Array = moved.keys().slice(0, 3)
+	var on: bool = nearest.all(func(i): return Sfx.loop_on(B.spots[i]["key"]))
+	ok(moved.size() == 5 and B.playing == nearest and on,
+			"five camps in reach: the nearest three play (%s of %s)" % [B.playing, moved.keys()])
+	for i in moved: B.spots[i]["pos"] = moved[i]
