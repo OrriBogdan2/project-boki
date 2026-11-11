@@ -3104,6 +3104,7 @@ func _open_kin(rec: Dictionary) -> void:
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
 			more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 			c2.add_child(more)
+			c2.add_child(UI.ghost("Prizes and cups", func(): PrizeBoard.open(self), 0, "info"))
 		"Growth":
 			var lead := Evo.leading(rec)
 			var lv := int(rec["level"])
@@ -4327,6 +4328,12 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var nm: String = rec["name"]
+	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
+		if res["look"]: _swap_kin_model(k)
+		_toast(res["text"])
+		Save.save_game()
+		_refresh_top()
+		return
 	if res["hate"]:
 		_say(k, BokiLines.say(rec, "fed_no"))
 		if res["new"]: _toast("You found out %s won't eat %s" % [nm, Care.food_name(f)])
@@ -5101,6 +5108,8 @@ func _open_feed(rec: Dictionary) -> void:
 			for af in Evo.AFF:
 				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
+	any = GardenItemRows.add_bag(v, rec, func(id: String): _care_feed(rec, id)) or any
+	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
