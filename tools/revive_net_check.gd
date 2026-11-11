@@ -55,6 +55,7 @@ func _host() -> void:
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
 	guest_pid = CheckChild.start("--revive-net-check=guest --rn-port=%d" % port, dir.path_join("guest.log"))
 	var other := ""
@@ -232,6 +233,8 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
+	if Net.enet:
+		CheckChild.hold(Net.enet.peer, START_S)
 	Net.set_presence({"name": "rn"})
 	return Net.mode == "server"
 

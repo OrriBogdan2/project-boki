@@ -65,6 +65,7 @@ func _host_up() -> Hunter:
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
 	guest_pid = CheckChild.start("%s --dn-port=%d" % [guest_flag, port], dir.path_join("guest.log"))
 	var other := ""
@@ -422,6 +423,8 @@ func _connect() -> bool:
 	var t0 := Time.get_ticks_msec()
 	while Net.mode != "server" and Time.get_ticks_msec() - t0 < 30000:
 		await main.get_tree().create_timer(0.2).timeout
+	if Net.enet:
+		CheckChild.hold(Net.enet.peer, START_S)
 	Net.set_presence({"name": "dn"})
 	return Net.mode == "server"
 

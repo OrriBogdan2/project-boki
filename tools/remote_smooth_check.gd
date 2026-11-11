@@ -97,6 +97,7 @@ func _host() -> void:
 	relay.name = "Relay"
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
+	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the host is on the relay")
 	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d" % dn.port, dir.path_join("guest.log"))
 	var other := ""

@@ -22,6 +22,17 @@ static func _is_free(port: int) -> bool:
 	probe.close()
 	return bound
 
+## Keeps the ENet links of `mp`, those open now and those that join later, through `secs` without an answer.
+## A game that builds its match answers nothing meanwhile, and on a busy box that outlasts ENet's own 5 to
+## 30 s, so the other game was dropped as dead and never got the start message.
+static func hold(mp: ENetMultiplayerPeer, secs: float) -> void:
+	var ms := int(secs * 1000.0)
+	var set_all := func(_id := 0) -> void:
+		for link: ENetPacketPeer in mp.host.get_peers():
+			link.set_timeout(0, ms, ms)
+	set_all.call()
+	mp.peer_connected.connect(set_all)
+
 ## Starts a second headless game of this project with `user_args` and returns its pid. It keeps a user dir
 ## of its own beside `log_path`, so the two games never share a save. The watchdog leaves it alone.
 static func start(user_args: String, log_path: String) -> int:

@@ -55,6 +55,7 @@ func _server() -> void:
 	if relay.start(PackedStringArray(["--port=%d" % relay_port])) != OK:
 		main.get_tree().quit(1)
 		return
+	CheckChild.hold(relay.peer, START_S)
 	relay.api.peer_packet.connect(_tap)
 	FileAccess.open(dir.path_join("server.ready"), FileAccess.WRITE).close()
 	while not FileAccess.file_exists(dir.path_join("stop")):
