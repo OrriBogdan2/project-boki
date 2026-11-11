@@ -31,6 +31,13 @@ func _run(sec: float) -> void:
 		m.step(Match.DT)
 		t += Match.DT
 
+## The node of h's death box (null when it has none).
+func _box_node(h: Hunter) -> Node3D:
+	for b in m.boxes:
+		if b["owner"] == h and b["node"] != null:
+			return b["node"] as Node3D
+	return null
+
 ## Steps and draws (HunterWisp and StompFx run in the draw), for the looks.
 func _look(sec: float) -> void:
 	var t := 0.0
@@ -195,7 +202,10 @@ func _check_finish(at: Vector3) -> void:
 	ok(HunterWisp.collapsing(W) and W.visible, "the finish collapses the wisp, shown though out")
 	ok(radial == 0, "...with no burst or kill column (%d new)" % radial)
 	ok(m.fx.stomp.ring_of(W).get("mode") == "close", "...and the ring closes on it")
+	var box := _box_node(W)
+	ok(box != null and box.scale.x < 0.05, "...its death box waits down under the collapse")
 	_look(0.6)
+	ok(box != null and is_equal_approx(box.scale.x, 1.0), "...then pops up full size")
 	var gone: bool = HunterWisp.node_of(W) == null and not HunterWisp.collapsing(W)
 	ok(gone and m.fx.stomp.ring_of(W).is_empty(), "then the wisp and its ring are gone")
 	ok(m.fx.stomp.get_child_count() == nodes0 and nodes0 == StompFx.POOL * (1 + StompFx.SHARDS),

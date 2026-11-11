@@ -3,7 +3,8 @@ extends Node3D
 ## How a stomp reads to everyone watching (docs/decisions/0061-stomp-lock.md): a pin ring on the ground
 ## round the wisp that tightens on it for the whole Stomp.TIME and squeezes on every slam, so allies see
 ## from afar that someone is being finished. It ends the way the stomp did:
-##   done     the ring closes onto the wisp while its core gutters out (HunterWisp.collapse), no blast
+##   done     the ring closes onto the wisp while its core gutters out (HunterWisp.collapse), no blast;
+##            the death box Life drops on that spot waits under it and pops up once the wisp is gone
 ##   broken   the ring shatters into arcs that fly apart and the wisp bobs free (HunterWisp.bob_free)
 ##   gone     (revived, bled out, extracted) the ring just fades
 ## Stomp.start/end call pin/release on every game, the stomper's own and the ones the "stomp" event
@@ -21,15 +22,16 @@ const COLOR := Color("ff6a5a")  # the stomp's warning red (the STOMP word, the t
 const CLOSE_S := 0.45           # s the ring takes to close on a finished stomp (the Wisp's collapse time)
 const SHATTER_S := 0.4          # s the arcs fly
 const SHATTER_GROW := 2.2       # the arcs end this many times the ring's radius out
+const POP_S := 0.18            # s the held death box takes to pop up after the collapse
 const FADE_S := 0.15            # s a ring takes to fade when the stomp ends any other way
 const LIFT := 0.07              # m above the feet, over the team ring
 
-var _slots: Array = []          # {"ring", "shards", "o": wisp, "s": stomper, "mode", "t", "r": radius now}
+var _slots: Array = []          # {"ring", "shards", "o": wisp, "s": stomper, "mode", "t", "r": radius now, "box"}
 
 func _init() -> void:
 	name = "StompFx"
 	for i in POOL:
-		var slot := {"ring": _make_ring(1.0), "shards": [], "o": null, "s": null, "mode": "", "t": 0.0, "r": 0.0}
+var _slots: Array = []          # {"ring", "shards", "o": wisp, "s": stomper, "mode", "t", "r": radius, "box"}
 		for k in SHARDS:
 			slot["shards"].append(_make_ring(SHARD_ARC))
 		_slots.append(slot)
@@ -80,6 +82,16 @@ func release(o: Hunter, why: String) -> void:
 		_:
 			slot["mode"] = "fade"
 
+## Life put o's death box (node box) where o's Wisp is still collapsing from a finished stomp: keep the
+## box down until the collapse is over, so it never hides it. False when o isn't collapsing under a ring.
+func hold_box(o: Hunter, box: Node3D) -> bool:
+	var slot := _slot_for(o)
+	if slot.is_empty() or slot["mode"] != "close":
+		return false
+	slot["box"] = box
+	box.scale = Vector3.ONE * 0.01
+	return true
+
 ## How hard the wisp o is pressed down right now, 0..1: a hold that grows over the stomp and a squash
 ## at each slam that eases off. 0 when nobody is stomping it. HunterWisp squashes the Wisp by it.
 static func press(o: Hunter) -> float:
@@ -110,7 +122,7 @@ func tick(dt: float) -> void:
 		slot["t"] = float(slot["t"]) + dt
 		match String(slot["mode"]):
 			"pin": _pose_pin(slot, o)
-			"close": _pose_end(slot, o, CLOSE_S, RING_TO * 0.1)
+			"close": _pose_close(slot, o)
 			"fade": _pose_end(slot, o, FADE_S, float(slot["r"]))
 			"shatter": _pose_shatter(slot, o)
 
@@ -132,6 +144,22 @@ func _pose_pin(slot: Dictionary, o: Hunter) -> void:
 	mat.set_shader_parameter("thickness", lerpf(0.12, 0.3, k))
 	mat.set_shader_parameter("wash", 0.3 + 0.5 * slam)
 	mat.set_shader_parameter("color", Color(COLOR.lerp(Color.WHITE, 0.5 * slam), lerpf(0.6, 0.95, k)))
+
+## The ring closes on the collapsing wisp over CLOSE_S, then the held box pops up over POP_S.
+func _pose_close(slot: Dictionary, o: Hunter) -> void:
+	var t := float(slot["t"])
+	if t < CLOSE_S:
+		_pose_end(slot, o, CLOSE_S, RING_TO * 0.1)
+	else:
+		(slot["ring"] as MeshInstance3D).visible = false
+	var box: Variant = slot["box"]
+	if is_instance_valid(box):
+		var k := clampf((t - CLOSE_S) / POP_S, 0.0, 1.0)
+		# ease out with a little overshoot
+		var back := 1.0 + 2.7 * pow(k - 1.0, 3.0) + 1.7 * pow(k - 1.0, 2.0)
+		(box as Node3D).scale = Vector3.ONE * maxf(back, 0.01)
+	if t >= CLOSE_S + POP_S:
+		_hide(slot)
 
 ## Closing (to `to`) or staying put, fading out over `secs`.
 func _pose_end(slot: Dictionary, o: Hunter, secs: float, to: float) -> void:
@@ -173,6 +201,10 @@ func _hide(slot: Dictionary) -> void:
 	slot["mode"] = ""
 	slot["o"] = null
 	slot["s"] = null
+	var box: Variant = slot["box"]
+	if is_instance_valid(box):
+		(box as Node3D).scale = Vector3.ONE      # never leave a held box down
+	slot["box"] = null
 	(slot["ring"] as MeshInstance3D).visible = false
 	for sh in slot["shards"]:
 		(sh as MeshInstance3D).visible = false
