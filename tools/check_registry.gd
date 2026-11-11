@@ -248,7 +248,7 @@ const CHECKS := {
 	"--tip-text-check": ["res://tools/tip_text_check.gd", "tip_text_check", null],  # glide wording: double press
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],      # one voice
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment
-	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],      # trimmed settings: reachable, saved
+	"--settings-trim-check": ["res://tools/settings_trim_check.gd", "settings_trim_check", null],  # rows, saved
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
@@ -279,7 +279,7 @@ const CHECKS := {
 	"--boki-sex-check": ["res://tools/boki_sex_check.gd", "boki_sex_check", null],  # sex 50/50, female looks
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>
-	"--menus-more-shots": ["res://tools/menus_more_shots.gd", "menus_more_shots", null],      # --menus-more-shots=<dir>
+	"--menus-more-shots": ["res://tools/menus_more_shots.gd", "menus_more_shots", null],  # =<dir>
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
