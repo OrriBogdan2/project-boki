@@ -360,6 +360,26 @@ No double buffering: a press is gathered, queued and applied in the same frame's
 
 12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
 
+## Knock distance: one knock moves every Hunter the same (`--move-feel-check`, `knock_*`)
+
+Source: every Hunter has Mass 100 in the game data (briefs/supervive-data/PHYSICS_PARITY.md, row "Mass"), so a knock moves every Hunter the same distance. supervive_kits.md gives no knock distances (its tooltips say "Knockback" with no number), and no footage measures a knock per Hunter, so the only sourced rule is "equal". Ours used to divide every knock by a per-class `mass` (light 0.85, medium 1.0, heavy 1.35, `Data.CLASSES`). That field and the division in `Hunter.impulse` are gone. No owner note keeps per-class mass (DECISIONS.md has none). Hunters now use `Ent.mass()` 1.0 like every default body; Boki, mobs and bosses keep their own mass.
+
+| Hunter | Class | Mass before | Mass now |
+|---|---|---|---|
+| Lace, Sparkle, Neve, Sable | light | 0.85 | none (the source's 100 for all) |
+| Tenzo, Vex, Motley, Meeko | medium | 1.0 | none |
+| Cinder, Albert, Grimble, Kael | heavy | 1.35 | none |
+
+Measured slide on flat ground, no input, 1.5 s after the knock, through `Displace.knock` / `Displace.spike` (the synced path). The knock speed is the kit's data number:
+
+| Reference knock (data) | Light before | Medium before | Heavy before | Every class now |
+|---|---|---|---|---|
+| Kael Finishing Slam, push 6 (juggernaut.json `rmb.slam.push`) | 1.97 m | 1.63 m | 0.93 m | 1.63 m |
+| Albert Shield Charge, shove 11 (bulwark.json `dash.charge_kb`) | 5.08 m | 3.93 m | 2.43 m | 3.93 m |
+| Grimble Anchor Drop (a downward spike -16 m/s, Grounded) | 0 m | 0 m | 0 m | 0 m |
+
+The check asserts each distance (Kael 1.55-1.70 m, Albert 3.85-4.00 m: our numbers, since the source has none) and that light, medium and heavy are within 0.01 m of each other (`knock_class_spread_m`), and that no class carries `mass`. The Net message is unchanged (`["disp", "kb", ...]` still sends the raw knock), so `Net.VERSION` stays. A pre-change client would still divide knocks on its own Hunter by class mass.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
