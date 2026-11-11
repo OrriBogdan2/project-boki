@@ -37,6 +37,7 @@ const CHECKS := {
 	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
 	"--safe-area-check": ["res://tools/safe_area_check.gd", "safe_area_check", "check"],
 	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
+	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--tutorial-text-check": ["res://tools/tutorial_text_check.gd", "tutorial_text_check", null],

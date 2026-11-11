@@ -1258,3 +1258,12 @@ Each hero's height and breadth against the source hero's footage sheet (`briefs/
 | tender | Elluna (mooshmoosh) | 0.70 / 1.0 | 0.60 | 0.340 | 0.340 | at the floor; model 0.6 vs 0.70 is item 108's owner shrink |
 
 `--hitbox-size-check` asserts each `hit_r` equals the value above (Breaker's band top is 1.25 by DECISIONS); `--warden-model-check` freezes the same radii.
+
+## Kit parity lock
+`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
+- **Add a row** for a number in the source: `[D]` evidence from `briefs/supervive-data` (file:line), cooldowns at level 1 included (PARITY FIRST: 1.0x unless the owner says otherwise). A row whose value differs on main FAILS and is listed for a kit fix; it is never loosened.
+- **Owner override:** a row main may not match because the owner said so carries `"owner": "<DECISIONS date and note>"` and `"ours": <the pinned value>`; the check prints OWNER and still fails if ours drifts.
+- **Other files:** `field` and `per` may read another content file as `"weapons/quill_rifle:primary.dmg"` (`content/<file>.json`, then the dotted path); a number in an array is `smash_dmg.0`.
+- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance (12% of the ratio). Oath, Joule, Shiv, Tetra and Void damage is read at level 15 in the data, so only ratios to the same kit's other hit are usable.
+- Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
+- Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
