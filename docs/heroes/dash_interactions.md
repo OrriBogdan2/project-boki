@@ -462,3 +462,16 @@ Every Hunter's air dash is its ground dash or a special one the source has, neve
 | Vex (mage) | Wirerun (cd 8.0 s) | the same Wirerun (7.5 to 13 m by rank, one charge, same clip) | same | vireo.md: one Wirerun, no air variant |
 | Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
 | Void (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
+
+## A press during a mantle (every hero)
+
+One row per input for all heroes, read from `content/rules/mantle_press.json` by `DashFlow` while the hunter rises up a ledge. [?]: the source doesn't show it, so the press waits for the top (never a cancel). Q and any input without a row buffer too.
+
+| Pair | Source | Ours |
+|---|---|---|
+| mantle -> LMB | Not shown inside a rise. Closest: sv_joule_1v4.mp4 9.20-9.27 s (briefs/supervive-data/MANTLE_185b.md): a hunter tops a low rim and stands firing ~0.07 s later, a shot at the top, not one in the rise. | buffered to the top [?] |
+| mantle -> RMB | Not shown: no RMB inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> E | Not shown: no E inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> R (ult) | Not shown: no ultimate inside a mantle in the data (briefs/supervive-data/supervive_physics.md, Mantle) or the hero footage (briefs/hero-ref). | buffered to the top [?] |
+| mantle -> dash (Shift) | Footage owner_mantle_clip.mp4 17.9-18.6 s (briefs/supervive-data/MANTLE_185b.md): a dash at an abyss rim goes over it and onto the grass at dash-trail speed, no stop. Data: the mantle is a suction force and a Z impulse during the fall (supervive_physics.md, Mantle), with no state that ends a dash. | fires mid-climb, the rise goes on |
+| mantle -> jump | Owner's account of the source (docs/MOVEMENT_FEEL.md, Ledges): 'a well-timed input or jump gives a better fling. The game never takes control.' Ours: the fling (Hunter._ledge_fling). | fires mid-climb, the rise goes on |
