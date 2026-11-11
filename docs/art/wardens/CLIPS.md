@@ -14,8 +14,13 @@ Hero live in `tools/art1/` (Kael is the pilot).
   launcher 0.9, cannon 0.55 of her height as on the sheet.
 - `extra_bones`: the Hero's variant bones (RIG_CONTRACT), bone -> parent. Data, not `WardenGlb.EXTRA`, so branches
   don't collide.
-- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds.
-- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
+- `loco`: idle, stance (after `stance_after` s still), walk and run by direction (f, b, l, r), speeds: `walk_speed` and
+  `run_speed` are the ground speeds the rings stand for (the run ring shows from 1.3x the walk's, back under 1.2x);
+  `walk_sole` and `run_sole` are the m/s the forward loops' planted soles run back at, the speed they were authored at.
+  The loops play at the ground speed over that (WardenClips._rate), so a Slow, a haste or a carry keeps the feet
+  planted. A loop under 0.2 of its ring's speed glides (skates, a hover) and plays at the ground over the ring's speed.
+  `--gait-speed-check` measures each sole and fails when a clip changes and its number does not.
+- `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s), `sole` (the sneak's authored speed, as `walk_sole`). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.

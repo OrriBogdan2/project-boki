@@ -23,7 +23,8 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6
+		"run_speed": 4.6,
+		"walk_sole": 1.52, "run_sole": 5.12
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -35,7 +36,7 @@
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 2.42, "sole": 1.83
 	},
 	"air": {
 		"rise": "jump",

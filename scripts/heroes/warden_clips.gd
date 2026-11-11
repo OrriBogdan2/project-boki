@@ -34,6 +34,11 @@ const OUT_RATE := 10.0       # 1/s: the free-arm pose eases in and out
 const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carries it
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
+const WALK_R := 0.45         # the walk ring's radius in the loco space (the run ring's is 1)
+const RUN_FROM := 1.3        # of the walk ring's speed: faster than this shows the run ring...
+const RUN_BACK := 1.2        # ...and slower than this hands back to the walk
+const GLIDE_K := 0.2         # a loop whose sole runs back slower than this of its ring's speed glides (skates, a hover)
+const RATE_MAX := 3.0        # the most a loop is sped up (the first frames off a standstill)
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -54,6 +59,7 @@ var glide_w := 0.0
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
+var on_run := false          # the run ring is showing, not the walk
 var still_t := 0.0
 var stance_w := 0.0
 var was_air := false
@@ -199,7 +205,7 @@ func _build() -> AnimationNodeBlendTree:
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
+		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * WALK_R)
 		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
@@ -419,13 +425,18 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var rt := Vector2(cos(face), -sin(face))
 	var run := float(lc.get("run_speed", 4.6))
 	var walk := float(lc.get("walk_speed", 2.2))
-	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
+	on_run = spd >= walk * (RUN_BACK if on_run else RUN_FROM)
+	var ring := 0.0
+	if spd >= STILL:
+		ring = 1.0 if on_run else WALK_R * minf(spd / walk, 1.0)
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
-	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
+	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * ring
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var gait := lerpf(walk, run, clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
-	_p("loco_rate/scale", clampf(spd / gait, 0.6, 1.5) if spd >= STILL else 1.0)
+	var at := loco_pos.length()
+	var run_w := clampf((at - WALK_R) / (1.0 - WALK_R), 0.0, 1.0)
+	var sole := lerpf(_sole(lc.get("walk_sole", walk), walk), _sole(lc.get("run_sole", run), run), run_w)
+	_p("loco_rate/scale", _rate(spd, sole * minf(at / WALK_R, 1.0)))
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
@@ -492,4 +503,14 @@ func _crouch(s: Dictionary, dt: float) -> void:
 	var pos := Vector2(dir.dot(rt), dir.dot(fw)) * clampf(spd / speed, 0.0, 1.0) if spd >= STILL else Vector2.ZERO
 	crouch_pos = crouch_pos.lerp(pos, 1.0 - exp(-dt * 12.0))
 	_p("crouch_loco/blend_position", crouch_pos)
-	_p("crouch_rate/scale", clampf(spd / speed, 0.7, 1.4) if spd >= STILL else 1.0)
+	_p("crouch_rate/scale", _rate(spd, _sole(cr.get("sole", speed), speed) * minf(crouch_pos.length(), 1.0)))
+
+## The loops' authored speed over the ground (data "walk_sole", "run_sole", crouch "sole": m/s their planted soles run
+## back at). A loop that glides plants nothing, so it plays as if authored at its ring's speed.
+static func _sole(sole: Variant, ring: float) -> float:
+	return float(sole) if float(sole) >= ring * GLIDE_K else ring
+
+## The loops' playback: the ground speed over the speed the blend shown was authored at, so a planted sole stays
+## planted under a Slow, a haste, a carry or a sneak (--gait-speed-check).
+static func _rate(spd: float, sole: float) -> float:
+	return minf(spd / sole, RATE_MAX) if spd >= STILL and sole > 0.01 else 1.0
