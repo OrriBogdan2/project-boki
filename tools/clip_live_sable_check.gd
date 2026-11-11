@@ -35,7 +35,7 @@ func _run(m: Match, P: Hunter, n: int, seen: Dictionary) -> void:
 		if c.cur != "":
 			seen[c.cur] = true
 		if c.up_w > 0.3:
-			seen[String(c._node("anim_u").animation)] = true
+			seen[c.cur_u] = true
 
 ## rad the wing's chain is bent between its first and last links: a twisted wing folds over itself.
 func _wing_bend(h: Hunter) -> float:
