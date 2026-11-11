@@ -5,7 +5,8 @@ extends Node
 ##   1. build-up: the music ducks and the ambience fades, the camera eases in on you, a low swell and a heartbeat
 ##   2. the Mask rises to your face in slow motion while a ghostly porcelain face flickers over yours
 ##   3. a cut to black on contact, and a hard silence
-##   4. flashes of the fallen Hunter (their painted art) and a whisper of their line, in the black
+##   4. the fallen Hunter in the black, on a grey panel of their painted art (about 5 s): their face comes up out of
+##      the dark, then a flash cuts to their pose, held with a whisper of their line while the art pushes in
 ##   5. the snap back: a deep impact, a ripple of light and a small camera push (no shake); with `swap` you stand
 ##      as the Hunter (Unmasked.blend) in a brief pose; their name and title on screen
 ##   6. the music comes back under a sting in the Hunter's key
@@ -24,11 +25,16 @@ const FACE_GAP := 0.27         # m in front of the head where the Mask settles (
 const CAM_BACK := 1.55         # m in front of the face the camera eases toward
 const RIPPLE_M := 7.0          # m: how far the ripple of light runs out over the ground
 const RIPPLE_S := 0.9          # s it takes
+const PANEL_IN_S := 0.6       # s the first memory frame takes to come up out of the black
+const PANEL_PUSH := 0.12       # x: how far each memory frame pushes in (eased out, slowing into the hold)
+const PANEL_DARK := 0.6        # how dark the first frame starts (it brightens over its whole length)
+const CUT_FLASH := 0.45        # alpha of the white flash on the cut to the next memory frame
+const WHISPER_AT_S := 0.4      # s into the memory frames that the whisper starts
 const POSE_S := 0.6            # s: the Hunter's cast pose (HunterAnim's "ult" cast)
 const NAME_IN_S := 0.35        # s after the snap that the name comes in
 const STING_AT_S := 0.25       # s after the snap that the sting starts
 const HAND_BACK_S := 0.5       # s at the end that the camera eases back to the scene's own
-const READ_MIN_S := 2.5        # s: the least a line of the beat's text (whisper, name) stays on screen
+const READ_MIN_S := 3.0        # s: the least a line of the beat's text (whisper, name) stays on screen
 const READ_PER_CHAR_S := 0.06  # s per character, for a line too long to read in READ_MIN_S
 const HOLD_SKIP_S := 1.0       # s of holding a click or interact that skips the rest (DECISIONS 11-11)
 const SOUNDS := {               # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
@@ -97,7 +103,8 @@ func _ready() -> void:
 	_rules = Content.rules(RULES)
 	_times = _rules["short" if short else "full"]
 	var lens: Array = _times["memory_s"]
-	var stretch := maxf(1.0, read_s(_whisper()) / float(lens.reduce(func(a, b): return a + float(b), 0.0)))
+	var whisper_s := WHISPER_AT_S + read_s(_whisper())
+	var stretch := maxf(1.0, whisper_s / float(lens.reduce(func(a, b): return a + float(b), 0.0)))
 	_memory_lens = lens.map(func(s): return float(s) * stretch)
 	_reveal_s = maxf(float(_times["reveal_s"]), NAME_IN_S + read_s(HunterViewer.display_name(id)))
 	_head = (body.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
@@ -315,7 +322,8 @@ func _become_hunter() -> void:
 	body = model
 	_anim = HunterAnim.new(model)
 
-## The fallen Hunter in the black: a few quick frames of their painted art, and their whisper.
+## The fallen Hunter in the black: their face brightens up out of the dark, a flash cuts to their pose, and that
+## is held with their whisper; each frame pushes in, slowing as it goes.
 func _memories() -> void:
 	var lens: Array = _memory_lens
 	var at := 0.0
@@ -330,22 +338,28 @@ func _memories() -> void:
 		_memory_i = i
 		_show_memory(i)
 	var k := (t - at) / float(lens[i])
-	memory.scale = Vector2.ONE * (1.04 + 0.05 * k)
-	memory.modulate.a = minf(1.0, k * 6.0) * (1.0 - smoothstep(0.8, 1.0, k))
+	memory.scale = Vector2.ONE * (1.0 + PANEL_PUSH * sin(k * PI * 0.5))
+	if i == 0:
+		memory.modulate.a = smoothstep(0.0, PANEL_IN_S, t)
+		(memory.material as ShaderMaterial).set_shader_parameter("dark", PANEL_DARK * (1.0 - smoothstep(0.0, 1.0, k)))
+	if whisper_line.text == "" and t >= WHISPER_AT_S:
+		_player("mask_whisper", -4.0).play()
+		whisper_line.text = _whisper()
+		create_tween().tween_property(whisper_line, "modulate:a", 0.85, 0.5).set_trans(Tween.TRANS_SINE)
 
+## Frame i: the face first, the painted pose (the splash) last. A cut after the first comes with a flash and a beat.
 func _show_memory(i: int) -> void:
-	var splash := i != 1
-	var path := Portraits.art_path(id, splash)
+	var path := Portraits.art_path(id, i == _memory_lens.size() - 1)
 	var tex := Portraits.read_soon(path)
 	memory.texture = tex if tex else load(path) as Texture2D
 	memory.visible = true
 	memory.pivot_offset = memory.size * 0.5
-	(memory.material as ShaderMaterial).set_shader_parameter("dark", 0.45 if i == 2 else 0.0)
-	if i == 0:
-		var p := _player("mask_whisper", -4.0)
-		p.play()
-		whisper_line.text = _whisper()
-		create_tween().tween_property(whisper_line, "modulate:a", 0.85, 0.2)
+	if i > 0:
+		memory.modulate.a = 1.0
+		(memory.material as ShaderMaterial).set_shader_parameter("dark", 0.0)
+		white.color.a = CUT_FLASH
+		create_tween().tween_property(white, "color:a", 0.0, 0.3).set_ease(Tween.EASE_OUT)
+		_heart.play()
 
 ## Back in the world, all at once: the impact, a flash and a ripple of light, the camera pushed in a little.
 func _snap_back() -> void:
@@ -431,7 +445,8 @@ func _holding() -> bool:
 	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_action_pressed("interact") \
 			or Input.is_action_pressed("ui_accept")
 
-## A click: on to the next beat (the Mask's approach cuts to the black; a line of text goes early).
+## A click: on to the next beat (the Mask's approach cuts to the black, the face to the held pose; a line of text
+## goes early).
 func next_beat() -> void:
 	match phase:
 		"build", "rise":
@@ -439,7 +454,11 @@ func next_beat() -> void:
 		"black":
 			_next("memory")
 		"memory":
-			_snap_back()
+			var hold_at := float(_memory_lens.slice(0, -1).reduce(func(a, b): return a + float(b), 0.0))
+			if t < hold_at:
+				t = hold_at
+			else:
+				_snap_back()
 		"reveal":
 			_finish()
 

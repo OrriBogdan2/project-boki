@@ -494,13 +494,13 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 
 ## mask_moment (`content/rules/mask_moment.json`)
 
-Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, flashes of the fallen Hunter with a whisper, the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. About 1.8x its first cut (owner 11-11: too fast to read). MaskBeat holds the whisper and the name for at least its reading time (2.5 s, or 0.06 s per character), stretching memory_s and reveal_s if a line needs it. A click moves on a beat; after the first one, holding skips.
+Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, the fallen Hunter on a grey panel of their painted art (their face, then their pose held with a whisper), the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. About 2.3x its first cut, the panel about 5 s (owner 11-11: too fast to read; 'like 5 s, not 1 s'). MaskBeat holds the whisper and the name for at least its reading time (3 s, or 0.06 s per character), stretching memory_s and reveal_s if a line needs it. A click moves on a beat; after the first one, holding skips.
 
 | Setting | Value |
 |---|---|
-| full | {"build_s": 2.0, "rise_s": 2.4, "black_s": 1.0, "memory_s": [0.9, 0.8, 1.0], "reveal_s": 3.0, "push_in": 0.7} |
-| short | {"build_s": 0.9, "rise_s": 1.4, "black_s": 0.7, "memory_s": [2.5], "reveal_s": 2.9, "push_in": 0.6} |
-| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art). reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
+| full | {"build_s": 2.0, "rise_s": 2.4, "black_s": 0.6, "memory_s": [1.4, 3.6], "reveal_s": 3.4, "push_in": 0.7} |
+| short | {"build_s": 0.9, "rise_s": 1.4, "black_s": 0.7, "memory_s": [3.4], "reveal_s": 3.4, "push_in": 0.6} |
+| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art): the face first, the pose (the splash) last, held with the whisper. reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
 | music_duck_db | -30 |
 | heart_gaps_s | [0.62, 0.5, 0.4, 0.32] |
 | punch_fov | 5 |
