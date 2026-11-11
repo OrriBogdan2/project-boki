@@ -68,7 +68,7 @@ in the ability clips), [O] owner notes (MAIN_TO_EXT 17:05-17:12). Asserted in `t
 
 | Slot | Beat | Source | Ours | Status |
 |---|---|---|---|---|
-| LMB tap | animation | [F] 0023-0034: a step into each swing, ~1 frame wind-up and 1 frame swing, alternating right-left; the blade trails behind between swings | `jug_slash_r/_l`: coiled step (0.0), the cut at 0.1, follow-through to 0.24, settled by 0.45; alternating | matches |
+| LMB tap | animation | [F] 0023-0034: a step into each swing, ~1 frame wind-up and 1 frame swing, alternating right-left; the blade trails behind between swings | `jug_slash_r/_l`: coiled step (0.0), the cut at 0.1, follow-through to 0.24, settled by 0.45; alternating. The swing's sound (`jug_slash`: a blade bite, then the swish) plays on the clip's strike, 60 ms after the swing; every third in a run plays the heavier `juggernaut_slash_heavy` (sound only, same damage) | matches |
 | LMB tap | tracking | [F] he walks while swinging; the slash goes toward the aim (some swings look facing-led: unconfirmed) | each slash is aimed at the cursor at the swing; he keeps his full walk | matches (cursor kept: the facing read is unconfirmed) |
 | LMB tap | cadence | [F] swings 0.3-0.4 s apart (0026, 0029, 0033) | one slash per 0.34 s | matches |
 | LMB hold | charge | [F] 0.6-1.0 s, a thin white arc round him (0087); [O] it grows with the hold, shown while charging | tap 0.22 s, full 0.95 s; the ring round him fills, and now a lane on the ground grows as long (7 -> 14 m) and wide as the wave it would throw, gold-hot at full | changed (the preview is new) |

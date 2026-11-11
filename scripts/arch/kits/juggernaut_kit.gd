@@ -389,10 +389,11 @@ func _slash() -> void:
 	lmb_t = -1.0
 	h.mel_hold = 0.0
 	h.fire_cd = float(ld["rate"])
-	# quick slashes, alternating right-to-left and back (no heavier third: each is the same cut)
+	# quick slashes, alternating right-to-left and back; each is the same cut, only the third in a run sounds heavier
 	if m.time - slash_at > 0.8: slash_n = 0
 	slash_at = m.time
 	h.combo_i = slash_n % 2 + 1
+	var third := slash_n % 3 == 2
 	play("jug_slash_r" if slash_n % 2 == 0 else "jug_slash_l")
 	slash_n += 1
 	var keep := h.wpn
@@ -401,9 +402,11 @@ func _slash() -> void:
 	h.wpn["color"] = SLASH_OUT
 	h._strike(float(ld["dmg"]) * _wk() / m.dmg_mult(h), float(ld["reach"]), float(ld["arc"]), float(ld["kb"]), {})
 	h.wpn = keep
-	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip
+	# the swing's arc of flame, sweeping the other way each swing, and a burst on anyone caught at the tip; its
+	# sound on the clip's strike, "k" 1 the third's heavier cut (k is sent on, so other games hear it too)
 	var dv := h.aim_dir()
-	vfx("slash", h.pos, dv, {"flip": slash_n % 2 == 0, "r": float(ld["reach"]), "arc": float(ld["arc"])})
+	vfx("slash", h.pos, dv, {"flip": slash_n % 2 == 0, "r": float(ld["reach"]), "arc": float(ld["arc"]),
+			"k": 1.0 if third else 0.0})
 	for f in foes_in(h.pos, float(ld["reach"]) + 0.4):
 		var to := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z)
 		if to.length() >= float(ld["reach"]) * 0.7 and absf(dv.angle_to(to)) <= deg_to_rad(float(ld["arc"]) * 0.5):

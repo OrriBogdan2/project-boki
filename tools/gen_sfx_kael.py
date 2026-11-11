@@ -100,13 +100,30 @@ def stomp(g=1.0, f0=130):
 
 
 # ------------------------------------------------------------------ LMB: the greatsword
-def slash(i):
-    """A wide greatsword cut: heavy air moved, the hot edge hissing through it, the shackle's chain swinging."""
-    d = 0.42
-    whum = S.sweep(95 + 6 * i, 60, d) * np.sin(np.pi * np.arange(N(d)) / N(d)) ** 2 * 0.35
-    return mix(lpf(swish(d, 170 + 15 * i, 1300 + 120 * i, 3.5), 5000) * 1.3, whum,
-               at(sizzle(0.3, 0.03, 0.08) * 0.2, 0.05),
-               at(links(0.2, (0.0, 0.03, 0.07), g=0.15), 0.12), at(lpf(noise(0.2), 300) * env(N(0.2), 0.03, 0.06), 0.06))
+def bite(heavy):
+    """The blade biting in: a near-instant bright edge and a steel shing over a short chop (lower and fuller
+    on the heavy third swing)."""
+    shing = (1650, 2600) if heavy else (2150, 3350)
+    edge = mix(click(0.002, 3000, 9000, 0.0008) * 2.0, crack(0.1, 2400, 8000, 0.007, 0.0002) * 1.4,
+               ring(shing, 0.3, (0.07, 0.04), (0.13, 0.07), 0.0002))
+    if heavy:
+        chop = mix(kick(140, 48, 0.5, 0.01, 0.09, 3.0) * 0.9, crack(0.35, 220, 2000, 0.035, 0.0003) * 1.3,
+                   sub(70, 38, 0.45, 0.11) * 0.45)
+    else:
+        chop = mix(kick(190, 70, 0.3, 0.006, 0.04, 2.6) * 0.5, crack(0.25, 320, 2600, 0.022, 0.0003) * 1.0)
+    return mix(edge, chop)
+
+
+def slash(i, heavy=False):
+    """A greatsword cut, heard from its strike: the bite leads, then the swish of the follow-through as the
+    tail (heavy air, the hot edge hissing, the shackle's chain swinging). Played on the clip's strike key."""
+    d = 0.5 if heavy else 0.4
+    lo = 0.75 if heavy else 1.0
+    fall = np.exp(-np.arange(N(d)) / N(0.13 if heavy else 0.1))
+    whum = S.sweep((90 + 5 * i) * lo, 50 * lo, d) * fall * (0.45 if heavy else 0.3)
+    air = lpf(swish(d, (1400 + 100 * i) * lo, 180 * lo, 3.5), 5000) * fall ** 0.5 * 1.1
+    return mix(bite(heavy), at(air, 0.004), whum, at(sizzle(0.3, 0.02, 0.08) * 0.2, 0.02),
+               at(links(0.25, (0.0, 0.03, 0.07, 0.12) if heavy else (0.0, 0.03, 0.07), g=0.15), 0.08))
 
 
 def blade_hiss(i):
@@ -318,7 +335,6 @@ def step(surface, i):
 
 
 def build():
-    takes('jug_slash', slash, 3, 'fire')
     takes('juggernaut_blade_hiss', blade_hiss, 2, 'signature')
     save('jug_wave', wave(0), 'cast')
     takes('juggernaut_dash', dash, 2, 'dash')
@@ -344,6 +360,9 @@ def build():
     save('juggernaut_death', death(0), 'grunt')
     for s in ('grass', 'stone', 'wood', 'snow'):
         takes('juggernaut_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
+    S.reseed(4407)       # the LMB swings re-roll on their own
+    takes('jug_slash', slash, 3, 'fire')
+    takes('juggernaut_slash_heavy', lambda i: slash(i, heavy=True), 2, 'fire')
 
 
 if __name__ == '__main__':

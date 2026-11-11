@@ -619,6 +619,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.3)
 	A.ok("juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
 			near >= 7.0 and A.dmg(T) >= near * 1.5 and K.waves == 0, "near %.0f tip %.0f" % [near, A.dmg(T)])
+	_slash_sounds(m, P)
 	A.fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	A.aim_at(P, T.pos)
@@ -962,6 +963,49 @@ func juggernaut(a) -> void:
 	await A.done(m)
 	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
+
+
+const SLASH_SOUNDS := ["jug_slash", "juggernaut_slash_heavy"]
+const SLASH_STRIKE := [0.05, 0.1]       # s after the press: the v2 slash_r/_l clips' strike (fastest hand) in a match
+
+## Kael's LMB swing sounds: a run of three taps plays the cut, the cut, then the heavier third, each on its
+## clip's strike rather than on the press, and every take leads with its bite (a hard edge over the swish).
+func _slash_sounds(m: Match, P: Hunter) -> void:
+	A.step(m, 1.0)
+	var heard: Array = []
+	for f in 72:                        # a tap every 0.4 s (24 frames), past the 0.34 s swing rate
+		P.inp["fire"] = f % 24 == 0
+		Sfx.last_played.clear()          # the check outruns real time: no spacing or stacking across frames
+		Sfx.recent.clear()
+		Sfx.listener = P.pos
+		m.step(A.DT)
+		for s: String in SLASH_SOUNDS:
+			if Sfx.last_played.has(s):
+				heard.append([s, (f % 24) * A.DT])
+	P.inp["fire"] = false
+	var names := heard.map(func(e: Array) -> String: return e[0])
+	var on_strike := heard.all(func(e: Array) -> bool:
+			return float(e[1]) >= SLASH_STRIKE[0] and float(e[1]) <= SLASH_STRIKE[1])
+	A.ok("juggernaut LMB sound: cut, cut, heavier third, each on the clip's strike (not the press)",
+			names == ["jug_slash", "jug_slash", "juggernaut_slash_heavy"] and on_strike, str(heard))
+	var edges: Array = []
+	for take in ["jug_slash", "jug_slash_1", "jug_slash_2", "jug_slash_3", "juggernaut_slash_heavy",
+			"juggernaut_slash_heavy_1", "juggernaut_slash_heavy_2"]:
+		edges.append(_lead_db(take))
+	A.ok("juggernaut LMB sound: every take's loudest moment is its bite in the first 10 ms, 4 dB over the swish after",
+			edges.all(func(e: float) -> bool: return e >= 4.0), str(edges))
+
+## dB the peak of a sound's first 10 ms sits over its peak from 30 ms on (the source wav: 44.1 kHz mono 16-bit).
+func _lead_db(sname: String) -> float:
+	var b := FileAccess.get_file_as_bytes("res://audio/%s.wav" % sname)
+	var head := 0.0
+	var rest := 0.0
+	for i in range(44, b.size() - 1, 2):
+		var v := absf(b.decode_s16(i))
+		var t := float(i - 44) / 2.0 / 44100.0
+		if t < 0.01: head = maxf(head, v)
+		elif t >= 0.03: rest = maxf(rest, v)
+	return linear_to_db(head / maxf(rest, 1.0))
 
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)

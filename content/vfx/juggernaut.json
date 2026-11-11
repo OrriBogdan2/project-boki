@@ -10,7 +10,8 @@
 		"feet": {"nodes": ["anchor_feet"], "body": [0.0, 0.08, 0.0]}
 	},
 	"moves": {
-		"slash": {"sfx": [{"n": "jug_slash", "db": -5, "var": 0.06}],
+		"slash": {"sfx": [{"n": "jug_slash", "db": -5, "var": 0.06, "delay": 0.06, "unless": "k"},
+				{"n": "juggernaut_slash_heavy", "db": -4, "var": 0.04, "delay": 0.06, "when": "k"}],
 			"fx": [{"p": "sweep", "at": "h", "y": 0.95, "size": "r", "arc": 175, "life": 0.24, "c": "magenta", "c2": "hot", "tilt": 8},
 				{"p": "ribbon", "at": "blade_tip", "life": 0.16, "tail": 0.1, "size": 0.26, "c": "magenta", "c2": "hot"},
 				{"p": "ember", "at": "h", "y": 1.0, "fwd": 2.2, "way": "fwd", "n": 8, "speed": 5.0, "spread": 0.6, "grav": 7.0, "life": 0.4, "size": 0.05, "c": "main", "near": true}]},

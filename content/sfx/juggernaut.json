@@ -4,6 +4,7 @@
  "script": "tools/gen_sfx_kael.py",
  "sounds": {
   "jug_slash": "fire",
+  "juggernaut_slash_heavy": "fire",
   "juggernaut_blade_hiss": "signature",
   "jug_wave": "cast",
   "juggernaut_dash": "dash",
