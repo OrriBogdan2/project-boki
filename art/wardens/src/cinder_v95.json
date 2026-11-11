@@ -109,8 +109,8 @@
  },
  "relax": {
   "CUTS": 0,
-  "MAX_ITER": 400,
-  "RINGS": 4
+  "MAX_ITER": 800,
+  "RINGS": 2
  },
  "past_wrist": {
   "R": "hand.R",

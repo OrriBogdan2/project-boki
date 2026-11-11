@@ -12,8 +12,8 @@ const DT := 1.0 / 30.0
 ## Hero -> worst stretch any clip may reach (x rest length): each glb's worst as measured on 2026-11-11 (docs/DEBT.md
 ## "Skin stretch"), for the Heroes not yet under the limit. The slice Hunters were relaxed by tools/art1/glb_relax.py.
 const CEIL := {
-	"bulwark": 14.02, "archer": 6.93, "juggernaut": 6.40, "gunslinger": 3.93, "ostra": 5.46, "mage": 11.77,
-	"dolm": 34.15, "thief": 18.04, "rimewright": 6.62, "ashwick": 5.42, "tender": 6.23, "dredge": 5.27,
+	"bulwark": 14.02, "archer": 5.89, "juggernaut": 6.37, "gunslinger": 3.93, "ostra": 5.46, "mage": 11.77,
+	"dolm": 34.15, "thief": 18.04, "rimewright": 6.62, "ashwick": 5.20, "tender": 6.23, "dredge": 5.27,
 }
 
 var tree: SceneTree

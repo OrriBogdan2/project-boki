@@ -83,19 +83,20 @@ JOINTS_0 and WEIGHTS_0: mesh, clips, anchors and paint stay byte for byte. Run i
 the relaxed weights again). The export splits vertices at UV seams (Vex: 14.6k vertices, 6.5k places); the tool
 welds them for the relax, or the two copies would get different weights and the seam would open, which the check
 cannot see (it measures triangle edges only).
-The four specs now carry `"relax": {"CUTS": 0, "MAX_ITER": 400, "RINGS": 4}` (a later swap re-run uses it too).
+The four specs now carry `"relax": {"CUTS": 0, "MAX_ITER": 800, "RINGS": 2}` (a later swap re-run uses it too; about 10 minutes
+a Hero on rpc4, the four in parallel). Each glb was relaxed once from the 0.24.4 bake (origin/main 88b06b9e7).
 Worst stretch per clip, before -> after (min to max over the clips):
 
 | Hero | before | after |
 |---|---|---|
-| Vex (gunslinger) | 2.46-7.59 | 2.13-3.92 |
-| Cinder (ashwick) | 2.41-6.86 | 2.36-5.41 |
-| Kael (juggernaut) | 3.37-7.94 | 2.67-6.39 |
-| Hem (archer) | 3.46-10.36 | 2.84-6.92 |
+| Vex (gunslinger) | 2.46-7.59 (glide) | 2.38-3.92 |
+| Cinder (ashwick) | 2.41-6.86 (lance_stoke) | 1.97-5.19 |
+| Kael (juggernaut) | 3.37-7.94 (downed) | 2.45-6.36 (death) |
+| Hem (archer) | 3.46-10.36 (hail) | 2.48-5.88 (hail) |
 
 Seen or hidden: of the edges over 1.3x, a ray test from each edge's middle at its worst pose (26 directions,
 hidden when 24 or more hit the body) finds 7-32% enclosed (folds, armpits, crotch) and the rest open to view, so the
 check counts every edge. What is left over 5.3x on Kael and Hem is short (9-16 mm) inner-knee and crotch edges in
 death, downed, emote and hail: the knees touch at rest and bone heat gave each knee some weight from the other leg.
-Weights alone stop there (200 or 400 passes, 2 or 4 rings: the same; taking the other leg's weights away made it
+Kael is over 5.3x in 7 clips (5.37-6.36), Hem in 5 (5.35-5.88). Weights alone stop there (200 to 800 passes, 2 or 4 rings: within 1x; taking the other leg's weights away made it
 worse, Hem 8.6x). A `detach` of the knees in a swap re-run is the next step (docs/DEBT.md "Skin stretch").
