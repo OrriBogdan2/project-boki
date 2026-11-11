@@ -21,6 +21,42 @@ func _boss() -> String:
 		if Data.MOBS[b].has("egg") and Data.KIN.has(String(Data.MOBS[b]["egg"])): return b
 	return ""
 
+## A v13 save file from before the 20-minute hatch (an egg in a cradle with wall-clock stamps and old
+## heat, one more on the shelf) loads and keeps the eggs, cold; the stamps warm nothing, whatever the
+## system clock says; a second load after saving is the same.
+func _old_file_part(sp: String, boss: String) -> void:
+	var old := Save.fresh()
+	old["v"] = 13
+	var stale := Time.get_unix_time_from_system() - 86400.0
+	var cradled := {"sp": sp, "boss": boss, "id": "o1", "slot": 0, "m0": 2, "t": stale, "heat": 900.0}
+	old["incubator"] = {"slots": 5, "t": stale, "coal": 0.0, "eggs": [cradled]}
+	old["rare_eggs"] = [{"sp": sp, "boss": boss, "rare": true, "id": "o2"}]
+	var p := "user://incubator_old_save.json"
+	var f := FileAccess.open(p, FileAccess.WRITE)
+	f.store_string(JSON.stringify(old))
+	f.close()
+	Save.load_from(p)
+	Incubator.ensure()
+	var kept := Incubator.eggs().size() == 2 and Incubator.shelf().is_empty()
+	ok(int(Save.d["v"]) == Save.VERSION and kept and _all_at(0.0), "an old save file with an egg in the cradle loads: both kept, cold")
+	Incubator.tick(300.0)
+	ok(_all_at(0.25), "a day-old clock stamp changes nothing: 300 s of play is a quarter")
+	Save.d["incubator"]["t"] = Time.get_unix_time_from_system() + 3600.0
+	Incubator.ensure()
+	Incubator.tick(60.0)
+	ok(_all_at(0.30), "a clock jump forward changes nothing either: 60 s more is 5 percent")
+	f = FileAccess.open(p, FileAccess.WRITE)
+	f.store_string(JSON.stringify(Save.d))
+	f.close()
+	var saved := JSON.stringify(Save.d["incubator"])
+	Save.load_from(p)
+	Incubator.ensure()
+	var after := JSON.stringify(JSON.parse_string(JSON.stringify(Save.d["incubator"])))
+	var same := JSON.stringify(JSON.parse_string(saved)) == after
+	ok(same, "written back and loaded again, the Incubator is the same")
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(p))
+	Save.d = Save.fresh()
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -160,6 +196,7 @@ func run(m: Node) -> void:
 	Save.d["incubator"] = JSON.parse_string(JSON.stringify(Save.d["incubator"]))
 	Incubator.ensure()
 	ok(_all_at(0.25), "save and load keep the progress")
+	_old_file_part(sp, boss)
 	var old := Save.fresh(); old.erase("incubator"); old.erase("rare_eggs")
 	old["rare_eggs"] = [{"sp": sp, "boss": boss, "rare": true}]
 	Save.d = old
