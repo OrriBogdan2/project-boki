@@ -62,7 +62,7 @@ func _kinds() -> Array:
 
 ## Every row inside the screen, none over another, the right edge on the box's.
 func _fits(what: String) -> void:
-	var sz: Vector2 = m.hud.get_viewport_rect().size
+	var sz: Vector2 = m.hud.get_viewport().get_visible_rect().size
 	var good := true
 	for i in BokiCarry.shown.size():
 		var r: Rect2 = BokiCarry.shown[i]["rect"]
