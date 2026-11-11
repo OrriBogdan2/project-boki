@@ -1,14 +1,15 @@
 extends RefCounted
-## --water-clip: a short clip of the water sounds (WaterSfx) for listening, on the Hollow Crown's
-## Saltmere tide pool at the match camera. Record it with Godot's movie writer on a renderer
-## (jobq --needs gpu): --fixed-fps 60 --write-movie <dir>/water.avi --water-clip. One match step per
-## frame, so sound and picture stay in step. The beats, printed as "WCLIP <s> <what>": walk in from the
-## sand, run across (the wading loop rises with speed), stand still (it stops), a dash (spray), a jump
-## by each weight class (light, medium, heavy splash), the Boki leaps in and charges, and out onto the
-## sand again. Never touches the save.
+## --water-clip --shots-dir=<dir> [--media-size=1280x720]: a short clip of the water sounds (WaterSfx) for
+## listening, on the Hollow Crown's Saltmere tide pool at the match camera, recorded with its audio by
+## tools/gameplay_media.gd's child Godot under the movie writer at 30 fps: <dir>/clip1.avi. Run it on a GPU
+## worker (jobq --needs gpu). The beats, printed as "MEDIA_WATER <s> <what>" with the water sounds heard:
+## walk in from the sand and run across (the wading loop rises with speed), stand still (it stops), a dash
+## (spray), a jump by each weight class (light, medium, heavy splash), the Boki leaps in and charges, and out
+## onto the sand again. (--media-child: the scene alone, no recording.) Never touches the save.
 
 const POOL := Vector2(21.5, 191.5)     # the tide pool's middle tile (content/maps/hollowcrown.json)
 const SHORE_Z := 181.5                 # a sand tile 4.5 m north of the pool's edge
+const STEPS_PER_FRAME := 2             # 60 Hz match steps per 30 fps movie frame (the recorder's rate)
 
 var main: Node
 var m: Match
@@ -17,6 +18,25 @@ var t := 0.0
 
 func run(mn: Node) -> void:
 	main = mn
+	var res := "1280x720"
+	var dir := "/tmp/media"
+	var child := false
+	for a in OS.get_cmdline_user_args():
+		var arg := String(a)
+		child = child or arg == "--media-child"
+		if arg.begins_with("--media-size="):
+			res = arg.substr(13)
+		if arg.begins_with("--shots-dir="):
+			dir = arg.substr(12)
+	if dir.is_relative_path():
+		dir = ProjectSettings.globalize_path("res://").path_join(dir)
+	DirAccess.make_dir_recursive_absolute(dir)
+	if not child:
+		var media = load("res://tools/gameplay_media.gd").new()
+		media.main = main
+		media.dir = dir
+		media._record(res)
+		return
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
@@ -55,7 +75,7 @@ func run(mn: Node) -> void:
 		k.start_rush(Vector2(1, 0), {"distance": 3.0}, {})
 		await _go(Vector2.ZERO, 1.2, "the Boki charges: spray")
 	await _go(Vector2(0, -1), 2.6, "run out onto the sand: the loop stops, sand steps")
-	print("WCLIP DONE %.1f s" % t)
+	print("MEDIA_DONE water %.1f s" % t)
 	main.get_tree().quit()
 
 func _become(arch: String) -> void:
@@ -64,10 +84,10 @@ func _become(arch: String) -> void:
 func _at(p: Vector2) -> Vector3:
 	return Vector3(p.x, m.world.ground_at(p.x, p.y), p.y)
 
-## Holds `move` for `secs` (pressing `press` on the first step), one step and one drawn frame at a time.
+## Holds `move` for `secs` (pressing `press` on the first step), a frame drawn every STEPS_PER_FRAME steps.
 func _go(move: Vector2, secs: float, what: String, press := "") -> void:
 	if what != "":
-		print("WCLIP %.1f %s" % [t, what])
+		print("MEDIA_WATER %.1f %s" % [t, what])
 	var since := Time.get_ticks_msec()
 	var waded := false
 	var n := int(secs / Match.DT)
@@ -78,18 +98,20 @@ func _go(move: Vector2, secs: float, what: String, press := "") -> void:
 		h.inp["jump"] = press == "jump" and i == 0
 		m.step(Match.DT)
 		t += Match.DT
-		await _frame()
+		if i % STEPS_PER_FRAME == STEPS_PER_FRAME - 1:
+			await _frame()
 		waded = waded or Sfx.loop_on(WaterSfx.wade_key(h.get_instance_id()))
 	var heard := []
 	for sname: String in Sfx.last_played:
 		if sname.begins_with("water_") and int(Sfx.last_played[sname]) >= since:
 			heard.append(sname)
-	print("WCLIP     heard %s, wading loop %s" % [heard, "on" if waded else "off"])
+	print("MEDIA_WATER     heard %s, wading loop %s" % [heard, "on" if waded else "off"])
 
 ## Draws one frame without stepping the match again (as tools/mantle_clip.gd).
 func _frame() -> void:
 	m.hitstop = 0.0
 	m.slowmo = 0.0
-	m.acc = Match.DT * 0.999 - DashPace.frame_dt(m, Match.DT)
-	m._process(Match.DT)
+	var span := STEPS_PER_FRAME * Match.DT
+	m.acc = Match.DT * 0.999 - DashPace.frame_dt(m, span)
+	m._process(span)
 	await main.get_tree().process_frame
