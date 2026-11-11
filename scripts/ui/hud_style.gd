@@ -12,7 +12,7 @@ extends RefCounted
 # ------------------------------------------------------------------ colour roles
 const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
-const SHADE := Color(0.03, 0.03, 0.05, 0.86)    # frame backing behind bars and slots
+const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
 const SELF := Color("9be36e")             # your own health (leaf green)
 const ALLY := Color("63c7ff")             # your squad's health (sky blue)
@@ -33,7 +33,7 @@ const HURT := Color("ff6a5a")             # damage you take
 const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
-const KEY_BG := Color(0.04, 0.04, 0.06, 0.95)
+const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
 
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
@@ -128,12 +128,12 @@ static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> v
 ## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
 ## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
 static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") -> void:
-	var edge := Color(1, 1, 1, 0.12)
+	var edge := Color(0.75, 0.6, 1.0, 0.16)
 	if state == "ready":
 		edge = col
 	elif state == "cooling":
 		edge = Color(COOLING, 0.55)
-	c.draw_style_box(box(Color(0.05, 0.06, 0.09, 0.92), SLOT_RAD, edge, 2), r)
+	c.draw_style_box(box(Color(0.07, 0.045, 0.11, 0.92), SLOT_RAD, edge, 2), r)
 	if state == "ready":
 		var gloss := Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42))
 		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), gloss)

@@ -178,3 +178,35 @@ static func tick_bars(hw) -> void:
 		if is_instance_valid(n):
 			set_bar(n, e, float(live.get(int(e["u"]), 0.0)))
 			set_need(n, e)
+
+# ------------------------------------------------------------------ the base's playthings
+static func _piece(n: Node3D, mesh: Mesh, col: String, at: Vector3, nm: String, outline := true,
+		rot := Vector3.ZERO) -> void:
+	Models.part(n, mesh, Models.toon(Color(col), outline), at, Vector3.ONE, rot, nm)
+
+## A ball, a climbing post or a splash tub (HomeToys), from simple parts. The ball is its own child
+## named "Ball" so HomeToys can roll it.
+static func toy(id: String) -> Node3D:
+	var n := Node3D.new()
+	match id:
+		"toy_ball":
+			var ball := Node3D.new()
+			ball.name = "Ball"
+			ball.position = Vector3(0, 0.28, 0)
+			_piece(ball, Models.sphere(0.28), "e0607e", Vector3.ZERO, "Skin")
+			_piece(ball, Models.cyl(0.285, 0.285, 0.07), "f3eee2", Vector3.ZERO, "Band")
+			n.add_child(ball)
+		"toy_post":
+			_piece(n, Models.box(0.9, 0.1, 0.9), "6b4a2e", Vector3(0, 0.05, 0), "Foot")
+			_piece(n, Models.cyl(0.12, 0.14, 1.6), "a8794a", Vector3(0, 0.9, 0), "Pole")
+			for i in 4:
+				_piece(n, Models.cyl(0.16, 0.16, 0.06), "d9bd8a", Vector3(0, 0.35 + i * 0.28, 0), "Rope")
+			_piece(n, Models.box(0.62, 0.08, 0.62), "a8794a", Vector3(0, 1.0, 0), "Step", true, Vector3(0, 0.5, 0))
+			_piece(n, Models.box(0.7, 0.09, 0.7), "6b4a2e", Vector3(0, 1.72, 0), "Perch")
+		"toy_tub":
+			_piece(n, Models.cyl(0.6, 0.55, 0.45, 18), "5a9fb0", Vector3(0, 0.225, 0), "Tub")
+			_piece(n, Models.cyl(0.64, 0.64, 0.05, 18), "f3eee2", Vector3(0, 0.45, 0), "Rim")
+			_piece(n, Models.cyl(0.52, 0.52, 0.03, 18), "8fd0ff", Vector3(0, 0.49, 0), "Water", false)
+			for bp in [Vector3(-0.2, 0.56, 0.1), Vector3(0.15, 0.6, -0.15), Vector3(0.25, 0.55, 0.2)]:
+				_piece(n, Models.sphere(0.07, 8), "e8f6ff", bp, "Bubble", false)
+	return n

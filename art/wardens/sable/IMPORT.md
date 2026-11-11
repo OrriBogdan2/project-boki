@@ -1,4 +1,22 @@
-# Sable (thief) v2: ART-1 build
+# Sable (thief): import note
+
+## v95 swap, appeal3 body b with the bug eyes (2026-11-10, ext/sable-appeal-b): the current sable.glb
+
+The mesh is the owner's pick (11-10): Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes
+(solid grey eyes, one catchlight), `~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb` (pick.txt beside it; one mesh, face included).
+`tools/art1/v95_swap.py` put it on her own skeleton, 47 clips and anchors with `art/wardens/src/sable_v95.json`
+(docs/art/wardens/V95_SWAP.md):
+
+    blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/sable_v95.json WORK art/wardens/sable/sable.glb
+
+13k triangles, one embedded 2048 atlas (Godot extracts it to `sable_atlas.jpg`), no normal map (`sable_normal.jpg` dropped).
+The pistols are fused to her hands in the master: rigid on hand.R / hand.L. The long ears, braid, coat tails and tail feathers
+are weighted by bone heat and the head box. Slots by colour and box (first match wins): metal (pistols), hair, fur (ears, tail
+feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trousers). Shots: docs/shots/sable-appeal-b/.
+Lost against the v2 build below: the antenna, braid, wing and coat-tail spring chains stay in the rig but carry no mesh, the
+hip knives, the procedural pistols and the wing alpha cards.
+
+## Previous build: v2 (2026-11-06)
 
 The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-briefs; its index.md and "Notes for 3D" win). Built by script from sable_v2_turnaround.jpg, with sable_v2_master_sheet.jpg for detail; nothing is hand-edited in Blender.
 
