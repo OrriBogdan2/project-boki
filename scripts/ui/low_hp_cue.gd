@@ -22,6 +22,10 @@ var _glow := 0.0               # 0..1, jumps to 1 on a beat
 static func share(h: Hunter) -> float:
 	return (h.hp + h.armor) / maxf(1.0, h.max_hp + h.max_armor)
 
+## True while this hunter is under the low-health line and the heartbeat is on in Settings.
+static func under_line(h: Hunter) -> bool:
+	return Settings.get_v("low_hp_pulse") and share(h) < float(Content.rules(RULES)["start_share"])
+
 ## Beats a minute at this share: `bpm_start` at the line, `bpm_empty` at 0.
 func bpm(s: float) -> float:
 	var line := float(_rules["start_share"])

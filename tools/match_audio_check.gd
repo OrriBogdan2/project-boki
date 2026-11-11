@@ -62,6 +62,17 @@ func run(main_node: Node) -> void:
 	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
 	_belt_items(m, P)
 	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
+	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
+	m.player.hp = 1.0                    # the low-health line: the milder filter, the heartbeat stays clear
+	m.player.armor = 0.0
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
+	var low := Sfx.muffle_state()
+	ok(low.fx and is_equal_approx(low.db, Sfx.LOW_HP_DB) and is_equal_approx(low.hz, Sfx.LOW_HP_HZ),
+		"under 25%% health: a mild low-pass and duck (%s)" % low)
+	ok(Sfx._bus_for(null, "heartbeat" in Sfx.CLEAR) != "SFXWorld", "...and the heartbeat skips the world bus")
+	m.player.hp = m.player.max_hp
+	m.player.armor = m.player.max_armor
 	await _muffle_step(m, true)
 	var dull := Sfx.muffle_state()
 	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),

@@ -47,8 +47,10 @@ const OCCLUDED_DB := -4.0
 var occlusion := SfxOcclusion.new()
 ## While you are downed or out the world goes dull: the SFXWorld bus (everything but CLEAR) is low-passed and
 ## ducked, ramped in and out. Sounds in CLEAR (pings, the Wisp hum, Boki voices) skip it and stay as they are.
-const CLEAR := ["ping", "wisp_hum", "kin_happy", "kin_unsure", "kin_alert"]
+const CLEAR := ["heartbeat", "ping", "wisp_hum", "kin_happy", "kin_unsure", "kin_alert"]
 const MUFFLE_HZ := 1200.0      # Hz: the low-pass cutoff while muffled
+const LOW_HP_HZ := 3500.0      # Hz: the milder low-pass while under the low-health line (the heartbeat sits in CLEAR)
+const LOW_HP_DB := -2.0        # dB: the duck on the world bus under the low-health line
 const MUFFLE_OPEN_HZ := 20000.0 # Hz: the cutoff the ramp starts from, above hearing
 const MUFFLE_DB := -6.0        # dB: the duck on the world bus while muffled
 const MUFFLE_S := 0.3          # s: ramp in / out
@@ -76,8 +78,9 @@ var amb_name := ""
 var music_bus := 0
 var _duck_fx: AudioEffectAmplify     # the Music bus's ducking stage (see duck)
 var _duck_tw: Tween
+enum Muffle { OFF, LOW_HP, DOWN }   # how dull the world bus is: clear, under the low-health line, downed or out
 var _muffle_tw: Tween
-var _muffle_on := false
+var _muffle := Muffle.OFF
 var _muffle_fx: AudioEffectLowPassFilter
 
 func _ready() -> void:
@@ -271,29 +274,32 @@ func duck(seconds: float, depth_db := -8.0) -> void:
 	tw.tween_interval(seconds)
 	tw.tween_property(_duck_fx, "volume_db", 0.0, 0.8).set_trans(Tween.TRANS_SINE)
 
-## Switches the downed / out muffle on the world bus (one low-pass effect plus a duck), eased over MUFFLE_S.
-## Off is also what a match leaving does (reset_scene_audio).
-func set_muffle(on: bool) -> void:
-	if on == _muffle_on:
+## Sets how dull the world bus is (one low-pass effect plus a duck), eased over MUFFLE_S: DOWN while downed or
+## out, the milder LOW_HP under the low-health line. OFF is also what a match leaving does (reset_scene_audio).
+func set_muffle(level: Muffle) -> void:
+	if level == _muffle:
 		return
-	_muffle_on = on
+	_muffle = level
+	var hz: float = [MUFFLE_OPEN_HZ, LOW_HP_HZ, MUFFLE_HZ][level]
+	var db: float = [0.0, LOW_HP_DB, MUFFLE_DB][level]
 	var bus := AudioServer.get_bus_index("SFXWorld")
 	if _muffle_tw and _muffle_tw.is_valid():
 		_muffle_tw.kill()
-	if on:
+	if level != Muffle.OFF:
 		AudioServer.set_bus_effect_enabled(bus, 0, true)
 	var tw := create_tween().set_parallel(true)
 	_muffle_tw = tw
-	tw.tween_property(_muffle_fx, "cutoff_hz", MUFFLE_HZ if on else MUFFLE_OPEN_HZ, MUFFLE_S)
-	tw.tween_method(func(db: float): AudioServer.set_bus_volume_db(bus, db), AudioServer.get_bus_volume_db(bus),
-		MUFFLE_DB if on else 0.0, MUFFLE_S)
-	if not on:
+	tw.tween_property(_muffle_fx, "cutoff_hz", hz, MUFFLE_S)
+	tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(bus, v), AudioServer.get_bus_volume_db(bus), db,
+		MUFFLE_S)
+	if level == Muffle.OFF:
 		tw.chain().tween_callback(AudioServer.set_bus_effect_enabled.bind(bus, 0, false))
 
 ## Tooling (--match-audio-check): the muffle as the bus has it right now.
 func muffle_state() -> Dictionary:
 	var bus := AudioServer.get_bus_index("SFXWorld")
-	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus), "hz": _muffle_fx.cutoff_hz}
+	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus),
+		"hz": _muffle_fx.cutoff_hz}
 
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
@@ -372,7 +378,7 @@ func reset_scene_audio(fade := 1.2) -> void:
 		music_name = ""
 	if not amb_layers.is_empty():
 		clear_amb_layers(fade)
-	set_muffle(false)
+	set_muffle(Muffle.OFF)
 	for key in loops.keys():
 		loop_stop(key)
 	for p in players:

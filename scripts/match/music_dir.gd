@@ -68,11 +68,17 @@ func last_squad() -> void:
 		last_said = true
 		Sfx.sting("last")
 
+## The world goes dull while you are down or out, and a little dull under the low-health line.
+func _muffle_for(p: Hunter) -> Sfx.Muffle:
+	if p.downed or p.out:
+		return Sfx.Muffle.DOWN
+	return Sfx.Muffle.LOW_HP if LowHpCue.under_line(p) else Sfx.Muffle.OFF
+
 func tick(m: Match, dt: float) -> void:
 	var p: Hunter = m.player
 	if p == null:
 		return
-	Sfx.set_muffle(p.downed or p.out)     # the world goes dull while you are down or out
+	Sfx.set_muffle(_muffle_for(p))
 	if m.result.get("ending", false):
 		if not ended:
 			ended = true
