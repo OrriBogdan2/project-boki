@@ -557,6 +557,20 @@ The dash row fires the press as one sim step: while the check drives frames by h
 frame, a key's "just pressed" never clears, so a real Shift would stay pressed into every later run and
 dash before the keys are read (toward the cursor). The garden has no separate row: it is the same
 expression and the same camera class at yaw 0.
+## Water: shallow edges and deep ponds (parity table, Nov 11)
+
+Only the farm's ponds are water you move through (`scripts/home/home_water.gd`; the edge ring of a pond is shallow, the middle deep). Match maps have no wadeable water: their pools and falls are set dressing and a hunter runs over them at land values. Source side: the game-data dump (`briefs/supervive-data/supervive_physics.md`) overrides no swim or water setting in the movement component (no swim speed, no water speed multiplier, no water physics volume), the kit data and the hero footage notes (`briefs/hero-ref`) never mention crossing water, and no public page we could read gives a water rule. Nothing settles any cell on the source side, so every one is [?] and ours stand. No `hunter_move.json` const and no `--move-feel-check` row was added: the check only takes rows the source settles.
+
+Ours below are the farm's constants (run `SPEED` 5.0 m/s, `JUMP_V` 6.8 m/s, `H_GRAV` 14.7 m/s²; jump height = v²/2g). `--swim-check` reads the speeds through a window that spans the shoreline, so it prints 3.5 wading and 3.3 swimming; the steady values are the products in the table.
+
+| Move | Source, shallow | Source, deep | Ours, shallow (wade) | Ours, deep (swim) |
+|---|---|---|---|---|
+| Run speed | [?] | [?] | 0.68x walk (`WADE_SPEED`): 3.4 m/s | 0.5x walk (`SWIM_SPEED`): 2.5 m/s |
+| Dash length | [?] | [?] | land length (the dash ignores water) | no dash |
+| Jump height | [?] | [?] | land height, 1.57 m | kick up at 0.85x lift (`BREACH_V`): 5.78 m/s, 1.14 m |
+| Glide take-off | [?] | [?] | as on land: a second Space in the air, or hold 0.1 s (`GLIDE_ENGAGE`) | as on land once the kick has you airborne; from the lower apex |
+
+What to do when the source gets a value: put it in `hunter_move.json` as a named const, read it from `HomeWater`, and add a `--move-feel-check` row for it.
 
 ## Not touched
 
