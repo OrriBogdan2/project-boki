@@ -277,13 +277,8 @@
 				"gloss": 0.5,
 				"normal_k": 1.4
 			},
-			"leather-face": {
-				"emit": 1.0,
-				"fres": 0.0,
-				"far_lift": 0.0,
-				"dark_lift": 0.0,
-				"top_light": 0.0,
-				"emit_flicker": 0.12
+			"glow-face": {
+				"dark_lift": 0.0
 			},
 			"glow": {
 				"glow": 0.85,

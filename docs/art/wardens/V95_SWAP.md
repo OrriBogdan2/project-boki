@@ -50,3 +50,21 @@ dredge.glb stays the 11-08 model. Left to do, in order:
 
 Known limits: hanging pieces in the master (lanterns, chains) are rigid on their region's bone (the old spring
 chains stay in the rig, unweighted); the loincloth rides the legs and hips (no skirt colour mask yet).
+
+## Motley (`ostra`, 2026-11-11): the appeal3 master, body b with the new face (`art/wardens/src/ostra_v95.json`)
+New spec keys (v95_swap.py):
+- `drop`: the game .glb's own meshes removed (Motley's old Face, Ruff, Brass, Lining and Wisp: the master has them
+  in one piece); unlisted ones stay (his orbiting cards and fan, with their own textures).
+- a region's `fade` [z0, z1]: the region's bone takes the weight in full at z0 and none at z1 (the spring and the void
+  tail's root between x_box and the hips, so they stretch when he springs up).
+- `move_bones` `turn`: the moved bone's rest also turns about z (degrees): the lid's hinge on the master's diagonal box edge.
+- `normal`: true bakes the master's tangent-space normals (its normal map and the detail the decimation took) onto
+  the atlas UVs as `<id>_normal.jpg` (WardenGlb's `use_nrm`; motley_live_check wants it). Delete WORK/bake.blend to add it.
+
+What it took: the torso's fit capsule (0.30 m) swallows a thin hero's arms and hands (spiky fanned fingers, no
+hand.R weights, the arms on the hips), and bone heat does not recover them; arm regions (`in_segs` round each
+upper arm and forearm, a box past each wrist for the hand) put them back. A per-spec segment radius in the tool would
+be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's points flop out to the sides).
+Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
+Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
+wisp springs stay in the rig, unweighted.
