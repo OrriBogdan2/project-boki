@@ -672,6 +672,40 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 			"11 m zoom %.3f; 18 m zoom %.3f, pan %.2f m" % [mid[0], far[0], far[1]])
 	P.vel = Vector3.ZERO     # (she ends the charges still moving and teleport keeps that: it carried into the Slipstep)
 
+## Her rounds read at match zoom (docs/VFX_QUALITY.md backlog 3): `sd`, a round just fired, rides a tracer in her
+## lime with a deep rim, as wide as her hit; a short star goes off on the rifle's mouth; a held string reuses the
+## pooled nodes. Ends rested, the drum full again.
+func _vex_rounds(m: Match, P: Hunter, sd: Dictionary) -> void:
+	var V := VVFx.of(m)
+	var ride: Array = V.riders.filter(func(rd: Dictionary) -> bool: return rd["sd"] == sd)
+	var mt: ShaderMaterial = null
+	if not ride.is_empty():
+		mt = (ride[0]["node"] as MeshInstance3D).material_override as ShaderMaterial
+	var width := float(ride[0]["width"]) if not ride.is_empty() else 0.0
+	ok("LMB: each round rides a pooled tracer in her lime, rimmed, as wide as her 0.3 m hit",
+			mt != null and String(ride[0]["kind"]) == "tracer" and width >= 0.3
+			and Color(mt.get_shader_parameter("color")).is_equal_approx(Arch.color("gunslinger"))
+			and Color(mt.get_shader_parameter("color3")).a > 0.0, "width %.2f m" % width)
+	var mouth := P.model.get_node_or_null(GunslingerKit.GUN_MUZZLE) as Node3D if P.model else null
+	var stars: Array = V.live.filter(func(e: Dictionary) -> bool: return String(e["kind"]) == "star")
+	var off := INF
+	if mouth and not stars.is_empty():
+		off = (stars[-1]["node"] as Node3D).global_position.distance_to(mouth.global_position)
+	ok("LMB: a short muzzle star on the rifle's mouth (0.1 s at most)",
+			off < 0.2 and float(stars[-1]["dur"]) <= 0.1, "%.2f m off the Muzzle" % off)
+	var frame := V._process.bind(DT)        # its looks end on frames, and a stepped check draws none: one a step
+	var held_string := func() -> void:
+		P.inp["fire"] = true
+		ac.step(m, 0.6, frame)
+		P.inp["fire"] = false
+		ac.step(m, 1.0, frame)
+	held_string.call()
+	var made := V.made
+	var shots := P.shot_n
+	held_string.call()
+	ok("LMB held: a second string makes no new effect nodes (pooled)", P.shot_n - shots >= 4 and V.made == made,
+			"%d rounds, %d new nodes" % [P.shot_n - shots, V.made - made])
+
 func _gunslinger() -> void:
 	var r: Array = ac.setup("gunslinger", 5.0, "", true)
 	var m: Match = r[0]
@@ -683,7 +717,7 @@ func _gunslinger() -> void:
 	var bd: Dictionary = K.rmb_def()["burr"]
 	T2.teleport(home + Vector3(30, 0, 0))
 	ok("Hired Gun: the display name", Arch.name_of("gunslinger") == "The Hired Gun")
-	# 1. LMB: to full range past the cursor, an ember tracer; Dazed = +90%, a gold crit number, no decay
+	# 1. LMB: to full range past the cursor, a green-fire tracer; Dazed = +90%, a gold crit number, no decay
 	P.teleport(home)
 	T.teleport(home + Vector3(30, 0, 8))
 	ac.step(m, 0.1)
@@ -694,7 +728,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
-	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	_vex_rounds(m, P, sd)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
 	ok("Dazed: the rifle does +90%", is_equal_approx(K.outgoing(T, 10.0, o), 19.0))
