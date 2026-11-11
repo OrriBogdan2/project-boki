@@ -10,6 +10,7 @@ var world: World
 var building := false
 var cam: CamRig
 var evolving: EvolveMoment      # the form change in play, while it plays (the camera leans toward it)
+var nesting: NookMoment         # the pairing beat at the Nook, while it plays (any key skips it)
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
@@ -1023,6 +1024,8 @@ func _process(delta: float) -> void:
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	if evolving:
 		focus = evolving.frame(cam, focus, HOME_ZOOM)
+	elif nesting and nesting.running:
+		focus = nesting.frame(cam, focus, HOME_ZOOM)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
 	_see_through()
 	_abyss_tint(d)
@@ -2196,6 +2199,10 @@ func open_job_board(tab := "") -> void:
 	WorkView.open(self)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if nesting and nesting.running and event is InputEventKey and event.pressed:
+		nesting.skip()
+		get_viewport().set_input_as_handled()
+		return
 	if hb and hb.active and panel_open == "" and not Overlay.is_open():
 		if hb.input(event):
 			get_viewport().set_input_as_handled()
@@ -4787,7 +4794,9 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.save_game()
 	_close_panel()
 	_refresh_nest()
-	fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
+	nesting = NookMoment.play(self, fx, kins, [rec["uid"], ok["uid"]], nest, Data.KIN[esp]["color"], Care.unstable_mix(rec, ok))
+	if nesting == null:
+		fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
 	Sfx.play("unlock")
 	_toast("A %s appeared in the Nesting Nook" % Data.egg_name(esp))
 
