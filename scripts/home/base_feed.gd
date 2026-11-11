@@ -39,7 +39,7 @@ static func pantry(rec: Dictionary) -> String:
 	var grown := SnackPatch.snacks(Save.d)
 	if int(crops.get(fav, 0)) > 0 or (grown.has(fav) and Econ.pantry(fav) > 0):
 		return fav
-	for f in grown:
+	for f in grown + SnackPatch.rules()["snacks"]:
 		if Econ.pantry(String(f)) > 0 and String(f) != String(likes.get("hates", "")):
 			return String(f)
 	return ""

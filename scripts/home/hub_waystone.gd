@@ -6,6 +6,9 @@ extends RefCounted
 ## hop_fade_s, then Game.goto("home", {"zone": id}) loads it under the ink wipe and you arrive on its
 ## pad (or beside the Waystone). A locked zone is refused. Your partner comes along: it is out in
 ## every zone (HubLayout keeps it in the hub's snapshot). Tuning: content/rules/garden_zones.json.
+## Boki go through the pad too (GARDEN.md 10.4): one you send ("Move to..." on its card, setting it
+## down on the stone, or E when it waits at the pad asking) walks to the pad and blinks out; it is in
+## the other zone from then on. `pad` is the stone as a look target ({"pos"}) for BaseLife's ask.
 
 const HUB_AT := Vector3(38.5, 0, 31.5)     # the Waystone, the middle of the hub, north of the landing
 const PAD_NEAR := Vector3(40.5, 0, 36.5)   # a zone's return pad goes on open ground nearest this
@@ -15,6 +18,7 @@ const ARRIVE_OFF := Vector3(0, 0, 2.6)      # m from the Waystone to where you a
 var h                          # the Home screen
 var node: Node3D = null        # the Waystone or the return pad
 var hopping := ""              # the zone being travelled to, during the light-up
+var pad := {}                  # the stone as something a Boki can look at: {"pos"}
 
 func _init(home) -> void:
 	h = home
@@ -35,6 +39,7 @@ func place() -> void:
 		node.position = h.world.free_spot_near(PAD_NEAR, [], 1.2, 0.9)
 	node.name = "Waystone"
 	h.add_child(node)
+	pad = {"pos": node.position}
 
 ## Where you stand after a hop: on the pad, or just south of the Waystone. Elsewhere: where you'd be.
 func arrive_at(p: Vector3) -> Vector3:
@@ -70,3 +75,53 @@ func hop(id: String) -> bool:
 
 func _go() -> void:
 	Game.goto("home", {"zone": hopping})
+
+# ------------------------------------------------------------------ moving a Boki to another zone
+## Sends `k` to zone `id`: it walks to the pad (k["zone_go"]; BaseLife leaves it alone meanwhile).
+## Returns "" or why not.
+func send(k: Dictionary, id: String) -> String:
+	var why := GardenZones.why_not(k["rec"], id)
+	if why == "":
+		k["zone_go"] = id
+		k["zone_t"] = float(GardenZones.rules()["walk_s"])
+	return why
+
+## The sent Boki walk on; one at the pad (or out of time) blinks out into its new zone.
+func step(dt: float) -> void:
+	for k in h.kins.filter(func(o): return o.has("zone_go")):
+		k["goal"] = pad["pos"]
+		k["t"] = 1.0       # its think timer never runs out on the way: nothing else re-aims it
+		k["zone_t"] = float(k["zone_t"]) - dt
+		var off := Vector2(k["pos"].x - pad["pos"].x, k["pos"].z - pad["pos"].z).length()
+		if off < REACH or float(k["zone_t"]) <= 0.0:
+			_blink_out(k)
+
+func _blink_out(k: Dictionary) -> void:
+	var id := String(k["zone_go"])
+	k.erase("zone_go")
+	var why := GardenZones.move(k["rec"], id)
+	if why != "":
+		h._toast(why)       # the zone filled up while it walked
+		return
+	var n: Node3D = k["node"]
+	h.fx.burst(n.position + Vector3(0, 0.5, 0), Color(String(GardenZones.info(id)["colour"])), 18, 2.5, 0.6, -1.5)
+	n.queue_free()
+	h.kins.erase(k)
+	Save.save_game()
+	h._toast("%s went to live in %s" % [k["rec"]["name"], GardenZones.info(id)["name"]])
+
+## E on a Boki waiting at the pad (BaseLife's ask): send it where it wants to go. True if it was asking.
+func answer(k: Dictionary) -> bool:
+	var asking: bool = h.life != null and h.life.machine(k).is_in(BaseLife.S.REACT) and is_same(k.get("life_at"), pad)
+	var id := GardenZones.wants(k["rec"]) if asking else ""
+	if id == "":
+		return false
+	var why := send(k, id)
+	if why != "":
+		h._toast(why)
+	return true
+
+## A Boki you set down at `at`: on the stone, the zone list for it opens.
+func dropped(k: Dictionary, at: Vector3) -> void:
+	if node != null and Vector2(at.x - node.position.x, at.z - node.position.z).length() <= REACH:
+		ZoneCards.move_to(h, k)

@@ -3,6 +3,7 @@ extends RefCounted
 ## The Waystone's destination cards (briefs/design/GARDEN.md 10.5): one per zone, plus the hub when
 ## you're in a zone. An open zone's card has its colour, who lives there and how they feel, and
 ## today's game. A locked one is grey and lists its two keys as ticks, and where to get each.
+## The same cards answer "Move to..." for a Boki (move_to): Send, or why it can't go there.
 
 const CARD_W := 150.0       # px, one card's width
 const JOY_HAPPY := 60.0     # joy at or over this reads "happy" on the card
@@ -15,16 +16,43 @@ static func open(h, here: String) -> void:
 	v.add_child(row)
 	if here != GardenZones.HUB:
 		var about := UI.para("The Waystone, the portal and the way to every zone.")
-		row.add_child(_card("The hub", Color("c9c2b2"), [about], func(): h.hway.hop(GardenZones.HUB), "Go"))
+		row.add_child(_card("The hub", Color("c9c2b2"), [about], func(): h.hway.hop(GardenZones.HUB), "Go", true))
 	for id in GardenZones.ids():
 		var z := GardenZones.info(id)
 		if GardenZones.is_open(id):
 			row.add_child(_card(String(z["name"]), Color(String(z["colour"])), _open_lines(id), func(): h.hway.hop(id),
-					"You are here" if id == here else "Go"))
+					"You are here" if id == here else "Go", id != here))
 		else:
 			var lines: Array = key_lines(id).map(func(t): return UI.para(t, 12, UI.MUTED))
 			lines.append(UI.para("Wayseed: " + String(GardenZones.rules()["wayseed_from"]), 11, UI.FAINT))
-			row.add_child(_card(String(z["name"]), UI.FAINT, lines, func(): h.hway.hop(id), "Locked"))
+			row.add_child(_card(String(z["name"]), UI.FAINT, lines, func(): h.hway.hop(id), "Locked", false))
+
+## "Move to..." on a Boki's card: only for one out in this zone, not your partner, with another zone open.
+static func add_move_link(h, row: Control, rec: Dictionary) -> void:
+	var k: Dictionary = h._kin_entry(rec)
+	if h.hway == null or h.life == null or k.is_empty() or GardenZones.is_partner(rec):
+		return
+	if GardenZones.ids().any(func(id): return id != GardenZones.zone_of(rec) and GardenZones.is_open(id)):
+		row.add_child(UI.ghost("Move to...", func(): move_to(h, k), 0, "paw"))
+
+## Where a Boki could move: a card per zone, Send on the ones it can go to, the reason on the rest.
+## Sending closes the panel and it walks to the return pad (HubWaystone.send).
+static func move_to(h, k: Dictionary) -> void:
+	var rec: Dictionary = k["rec"]
+	var v: VBoxContainer = h._new_panel("Move %s to..." % rec["name"], 900.0)
+	var row := UI.hbox(8)
+	v.add_child(row)
+	for id in GardenZones.ids():
+		var z := GardenZones.info(id)
+		var why := GardenZones.why_not(rec, id)
+		var lines: Array = _open_lines(id) if GardenZones.is_open(id) else []
+		if why != "":
+			lines.append(UI.para(why, 12, UI.MUTED))
+		var col := Color(String(z["colour"])) if GardenZones.is_open(id) else UI.FAINT
+		var go := func():
+			h._close_panel()
+			h.hway.send(k, id)
+		row.add_child(_card(String(z["name"]), col, lines, go, "Send" if why == "" else "Can't", why == ""))
 
 ## A locked zone's two keys, ticked when you have them.
 static func key_lines(id: String) -> Array:
@@ -52,7 +80,7 @@ static func _mood(rec: Dictionary) -> String:
 		return "happy"
 	return "sulky" if joy < JOY_LOW else "content"
 
-static func _card(title: String, col: Color, lines: Array, go: Callable, btn: String) -> Control:
+static func _card(title: String, col: Color, lines: Array, go: Callable, btn: String, can: bool) -> Control:
 	var c := UI.card()
 	c.custom_minimum_size.x = CARD_W
 	var v := UI.vbox(6)
@@ -62,6 +90,6 @@ static func _card(title: String, col: Color, lines: Array, go: Callable, btn: St
 		(l as Label).autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(l)
 	var b := UI.button(btn, go, CARD_W - 28.0)
-	b.disabled = btn != "Go"
+	b.disabled = not can
 	v.add_child(b)
 	return c

@@ -23,4 +23,13 @@ stall move to the hub (step 3), a plain `Game.goto("home")` still lands in Bramb
 
 ## Consequences
 The visit snapshot is unchanged (visitors still see Bramblebank). Option 1 stays open: the move is a
-later migration from `layout` to `zones["bramblebank"]["layout"]`.
+later migration from `layout` to `zones["bramblebank"]["layout"]`. Step 5 adds no save keys: a
+Boki moves by changing `rec["zone"]`; only that zone's Boki (and your partner) spawn, and the farm cap
+(`KinBox.farm_room`) counts each zone on its own.
+
+## Step 7c: a zone's own island
+A zone whose `garden_zones.json` entry has a `look` (Hushwood so far) keeps its island at
+`Save.d["zones"][id]["layout"]`, made on the first visit and tidied by `HomeLayout.ensure` like any layout. Old
+saves load unchanged (the key is optional). `HomeLayout.of(Save.d)` hands it out while `GardenZones.here` is that
+zone, so build mode, toys and the snack patch edit it; Home clears `here` when it goes (`_exit_tree`). Its sky
+stays at the look's `sky_t` (`ZoneLook`); the day clock itself keeps running, so the Boki nap by night as ever.

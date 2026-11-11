@@ -22,9 +22,11 @@ static func grant(d: Dictionary) -> void:
 	if FarmUnlocks.base_mode() and HomeLayout.count_of(ID, d) == 0:
 		HomeLayout.of(d)["inv"][ID] = 1
 
-## The four snacks this island's patch grows: its zone theme's own, else the start garden's.
+## The snacks this island's patch grows: the zone's look patch (ZoneLook), else its zone theme's own, else the
+## start garden's four.
 static func snacks(d: Dictionary) -> Array:
-	return rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
+	var by_theme: Array = rules()["zone_snacks"].get(String(HomeLayout.of(d)["theme"]), rules()["snacks"])
+	return ZoneLook.look(GardenZones.current()).get("patch", by_theme)
 
 ## The placed patch's deco entry, or {}.
 static func entry(d: Dictionary) -> Dictionary:

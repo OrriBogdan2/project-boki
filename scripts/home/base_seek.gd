@@ -34,6 +34,10 @@ static func rules() -> Dictionary:
 static func theme(rec: Dictionary) -> String:
 	return String(Data.KIN.get(String(rec.get("species", "")), {}).get("theme", ""))
 
+## Does the hunt run by the night rules: it is night, or this zone's sky never leaves dusk?
+static func is_dark(day_t: float) -> bool:
+	return HomeWork.is_night(day_t) or rules()["night_zones"].has(GardenZones.current())
+
 ## Does the dark favour this Boki (a Spore or Dark type, or a nocturnal species)?
 static func night_type(rec: Dictionary) -> bool:
 	return rules()["night_themes"].has(theme(rec)) or Work.NOCTURNAL.has(String(rec.get("species", "")))
@@ -239,7 +243,7 @@ func _hide(at: Vector2) -> void:
 	go(S.HUNT)
 	for k in pair:
 		k["busy"] = true
-	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, HomeWork.is_night(h.day_t),
+	hunt = Hunt.new([pair[0]["rec"], pair[1]["rec"]], starts, at, is_dark(h.day_t),
 			RandomNumberGenerator.new(), _walkable)
 	hunt.rng.randomize()
 	scent = _glow(Vector3(at.x, _ground(at) + SCENT_R, at.y))

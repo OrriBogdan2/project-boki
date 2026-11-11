@@ -59,6 +59,7 @@ var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
+var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
 var hob: FarmHob = null            # Hob the builder: talks, blueprints, the second Relic, a hammer (farm_hob.gd)
 var guide: FarmGuide = null        # the Goals card and the farm tutorial on screen (farm_guide.gd)
@@ -117,6 +118,7 @@ var weather_t := 40.0
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if zone == GardenZones.HUB: visit = HubLayout.island()
+	GardenZones.here = zone
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
@@ -391,6 +393,7 @@ func _ready_rest() -> void:
 	if building: world.stage_cb = func(_l: String) -> void: pass
 	await world.build_meshes()
 	world.stage_cb = Callable()
+	ZoneLook.dress(self)
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2
@@ -1001,7 +1004,7 @@ func _on_new_track(name: String) -> void:
 func _update_sky(d: float) -> void:
 	_update_music(d)
 	day_t = fmod(day_t + d / DAY_LEN, 1.0)
-	var sun_h := sin((day_t - 0.25) * TAU)            # 1 at noon, -1 at midnight
+	var sun_h := sin((ZoneLook.sky_t(zone, day_t) - 0.25) * TAU)            # 1 at noon, -1 at midnight
 	var light := clampf(sun_h * 1.6 + 0.6, 0.0, 1.0)   # how much daylight (night is short and moonlit)
 	var dusk := clampf(1.0 - absf(sun_h) * 3.0, 0.0, 1.0)
 	weather_t -= d
@@ -1068,6 +1071,8 @@ func _process(delta: float) -> void:
 	_find_interact()
 	if hb and hb.active:
 		return
+	if carry.tick(d, interact, panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()):
+		return
 	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not interact.is_empty():
 		if Input.is_action_just_pressed("interact"):
 			_use(interact)
@@ -1118,6 +1123,7 @@ func _see_through() -> void:
 
 func _exit_tree() -> void:
 	SeeThrough.off()
+	if Game.main == null or Game.main.current == self: GardenZones.here = ""      # no zone's island once Home is gone
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
@@ -1233,7 +1239,7 @@ func _move_player(d: float) -> void:
 		hv = dash_v
 		if dash_t <= 0.0: hv = HunterMove.dash_exit(dash_v, SPEED)
 	else:
-		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air)
+		var spd := Hunter.GLIDE_SPEED * 1.15 if gliding else SPEED * (CROUCH_SPEED if crouching else 1.0) * water.speed_mul(wdep, air) * carry.speed_mul()
 		hv += (mv * spd - hv) * (1.0 - exp(-(14.0 if not air else (4.0 if gliding else 6.0)) * d))
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
@@ -1333,6 +1339,7 @@ func _move_player(d: float) -> void:
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
 	ps.merge(verbs.step(d))
 	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
+	ps.merge(carry.anim_state())
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
 	p_anim.update(d, ps)
@@ -1471,7 +1478,7 @@ func _move_kin(d: float) -> void:
 			aim = KinAvoid.around(kins, k, pos, aim, d)
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
-				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))
+				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t") or k.has("led")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0))
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
 		var nx := pos.x + hv.x * d
@@ -2069,7 +2076,7 @@ func _find_interact() -> void:
 	prompt_box.visible = true
 	var pairs: Array = []
 	if best["kind"] == "kin" and visit.is_empty():
-		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"]]
+		pairs = [[Settings.key_cap("interact"), KinWants.line(best["k"]["rec"], POND_EDGE.x > -100.0)], [Settings.key_cap("play"), "Play fetch"], [Settings.key_cap("talk"), "Talk"], [Settings.key_cap("details"), "Details"], [Settings.key_cap("interact") + " hold", "Pick up"]]
 	else:
 		pairs = [[Settings.key_cap("interact"), _label_for(best)]]
 	# the prompt is keycaps and words, rebuilt only when what it says changes
@@ -2841,6 +2848,7 @@ func _face(at: Vector3) -> void:
 
 ## The interact key on a Boki: do something about what it wants, otherwise pet it.
 func _kin_act(k: Dictionary) -> void:
+	if hway and hway.answer(k): return      # it waits at the pad asking to move: E sends it
 	var rec: Dictionary = k["rec"]
 	match KinWants.action(rec, POND_EDGE.x > -100.0):
 		"feed": _care_feed(rec, KinWants.best_food(rec))
@@ -3183,6 +3191,7 @@ func _open_kin(rec: Dictionary) -> void:
 				Save.save_game()
 				_toast("%s joins your next expedition (%s swaps)" % [rec["name"], Settings.key_cap("swap_kin")])
 				_open_kin(rec)))
+	ZoneCards.add_move_link(self, fl, rec)
 	# the Kin Burrow: put it to sleep there, or wake it and bring it out
 	if KinBox.is_boxed(rec):
 		fl.add_child(UI.ghost("Send to farm", func():
@@ -4030,7 +4039,7 @@ var kinbox_view: KinBoxView = null
 
 ## The kin out on the island being shown (yours: not the ones asleep in the Kin Burrow).
 func _farm_kin() -> Array:
-	return (_d()["roster"] as Array) if not visit.is_empty() else KinBox.farm()
+	return (_d()["roster"] as Array) if not visit.is_empty() else GardenZones.out_here()
 
 func _build_burrow() -> void:
 	burrow_node = KinBurrow.model(KinBox.boxed().size())

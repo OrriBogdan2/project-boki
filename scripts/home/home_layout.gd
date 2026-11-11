@@ -35,6 +35,8 @@ const THEMES := {
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
 	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
 		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
+	"hushwood": {"name": "Hushwood", "gems": 0, "region": 0, "zone": true, "top": "4a6a52", "top2": "3a5848",
+		"side": "4a3d52", "deep": "20202e", "leaf": "6f8f9c"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -254,9 +256,12 @@ static func ensure(d: Dictionary) -> Dictionary:
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
 	SnackPatch.grant(d)
-	return L
+	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
+	var Z := ZoneLook.layout_of(d)       # a zone's own island, while you are in it
+	if not Z.is_empty():
+		return Z
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 

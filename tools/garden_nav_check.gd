@@ -4,6 +4,7 @@ extends RefCounted
 ## has made no progress for 3 s), two Boki sitting on each other for 3 s, and any Boki standing inside the house,
 ## a toy, water or any other block it can't enter. Zero stuck and zero inside is the pass bar; overlaps are printed
 ## and counted (two Boki sharing a toy or a pile may brush), not failed. Never touches the real save.
+## With a zone id (--garden-nav-hushwood) the same sweep runs in that zone, on its own island and playthings.
 
 const SIM_SECS := 600.0        # s of game time (10 in-game minutes)
 const DT := 0.25               # s per step
@@ -28,7 +29,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func _save(theme: String) -> void:
+func _save(theme: String, zone: String) -> void:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
 	for i in CAST.size():
@@ -40,15 +41,21 @@ func _save(theme: String) -> void:
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	d["gems"] = 1000
 	HomeLayout.new_fs(d, SEED)
-	HomeLayout.ensure(d)["theme"] = theme
+	if theme != "":
+		HomeLayout.ensure(d)["theme"] = theme
+	if zone != "":
+		d["zones"][zone] = {"open": true}
+		for rec in d["roster"]:
+			rec["zone"] = zone
 	Save.d = d
 
-## Every plaything and the house on the built farm, round the landing.
-func _stage() -> void:
+## Every plaything and the house on the built farm, round the landing (a zone brings its own).
+func _stage(zone: String) -> void:
 	var land := HomeLayout.LANDING
-	for id in Content.rules("toys")["toys"]:
-		ok(not home.hg.demo_place(id, land + Vector3(0, 0, 3.0)).is_empty(), "%s placed" % id)
-	ok(not home.hg.demo_place("house", land + Vector3(6.0, 0, -4.0)).is_empty(), "house placed")
+	if zone == "":
+		for id in Content.rules("toys")["toys"]:
+			ok(not home.hg.demo_place(id, land + Vector3(0, 0, 3.0)).is_empty(), "%s placed" % id)
+		ok(not home.hg.demo_place("house", land + Vector3(6.0, 0, -4.0)).is_empty(), "house placed")
 	home._sync_fixtures()
 	home.ppos = land + Vector3(0, 0, 1.0)
 	home.player.position = home.ppos
@@ -126,25 +133,39 @@ func _overlaps(t: float) -> int:
 				print("GARDENNAV OVERLAP t=%.0f %s at %s %s / %s" % [t, who, _xz(a["pos"]), _state(a), _state(b)])
 	return found
 
-func run(m: Node) -> void:
+## Home as a hop to `zone` builds it (main._hb_home is the same without the zone).
+func _open(zone: String) -> Node:
+	var hm = load("res://scripts/home/home.gd").new()
+	hm.zone = zone
+	main.add_child(hm)
+	main.current = hm
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	return hm
+
+func run(m: Node, zone := "") -> void:
 	main = m
 	Save.no_write = true
-	for theme in THEMES:
-		await _sweep(theme)
+	if zone != "":
+		await _sweep("", zone)
+	else:
+		for theme in THEMES:
+			await _sweep(theme, "")
 	FarmUnlocks.rules()["base_mode"] = false
 	print("GARDENNAV DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-func _sweep(theme: String) -> void:
+func _sweep(theme: String, zone: String) -> void:
+	var label := zone if zone != "" else theme
 	seed(SEED)
 	track.clear()
 	lap.clear()
 	logged.clear()
 	overlaps = 0
-	_save(theme)
-	home = await main._hb_home()
-	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, CAST.size()])
-	_stage()
+	_save(theme, zone)
+	home = await _open(zone)
+	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [label, home.kins.size()])
+	_stage(zone)
 	var cases := 0
 	var t := 0.0
 	while t < SIM_SECS:
@@ -152,7 +173,7 @@ func _sweep(theme: String) -> void:
 		home._move_kin(DT)
 		t += DT
 		cases += _watch(t)
-	var what := "%s: none stuck or inside a block in %.0f s" % [theme, SIM_SECS]
+	var what := "%s: none stuck or inside a block in %.0f s" % [label, SIM_SECS]
 	ok(cases == 0, "%s (%d cases); %d overlaps" % [what, cases, overlaps])
 	home.queue_free()
 	await main.get_tree().process_frame

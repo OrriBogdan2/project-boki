@@ -953,7 +953,7 @@ func undo_last() -> bool:
 	var s: Dictionary = undo.pop_back()
 	var lay: Dictionary = s["L"]
 	var paint_changed: bool = str(lay["paths"]) != str(L()["paths"]) or str(lay["water"]) != str(L()["water"]) or lay["theme"] != L()["theme"]
-	Save.d["layout"] = lay
+	if not ZoneLook.store(Save.d, lay): Save.d["layout"] = lay
 	Save.d["gems"] = int(s["gems"]); Save.d["scrap"] = int(s["scrap"])
 	if s.has("wood"): Save.d["mats"]["wood"] = int(s["wood"]); Save.d["mats"]["stone"] = int(s["stone"])
 	if s.has("mats"): Save.d["mats"] = (s["mats"] as Dictionary).duplicate(); Save.d["items"]["coals"] = int(s["coals"])

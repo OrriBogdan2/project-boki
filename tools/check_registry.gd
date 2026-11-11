@@ -6,6 +6,7 @@ extends RefCounted
 ## Older checks still hooked inline in main.gd move here in the cleanup pass (docs/DEBT.md).
 
 const CHECKS := {
+	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
@@ -14,6 +15,9 @@ const CHECKS := {
 	"--base-demo-check": ["res://tools/base_demo_check.gd", "base_demo_check", null],      # GARDEN.md 9.8
 	"--garden-nav-check": ["res://tools/garden_nav_check.gd", "garden_nav_check", null],      # GARDEN nav sweep
 	"--ridge-shots": ["res://tools/ridge_shots.gd", "ridge_shots", null],      # Kitewind Ridge, --shots-dir=<dir>
+	"--hushwood-check": ["res://tools/hushwood_check.gd", "hushwood_check", null],      # GARDEN.md 10.7 step 7c
+	"--hushwood-shots": ["res://tools/hushwood_shots.gd", "hushwood_shots", null],      # --shots-dir=<dir>
+	"--garden-nav-hushwood": ["res://tools/garden_nav_check.gd", "garden_nav_check", "hushwood"],      # in a zone
 	"--snack-patch-check": ["res://tools/snack_patch_check.gd", "snack_patch_check", null],      # garden snack patch
 	"--lean-check": ["res://tools/lean_check.gd", "lean_check", null],      # food lean by type (base_mode)
 	"--lean-shots": ["res://tools/lean_shots.gd", "lean_shots", null],      # --shots-dir=<dir>

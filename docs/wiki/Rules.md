@@ -541,6 +541,12 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | hop_fade_s_doc | Seconds the Waystone lights up and fades before the zone loads under the ink wipe. |
 | hop_max_s | 2 |
 | hop_max_s_doc | Seconds from pressing E to having control in the zone (--load-check=hop judges it). |
+| walk_s | 12 |
+| walk_s_doc | Seconds a Boki you sent has to reach the return pad before it blinks out where it is. |
+| ask_chance | 0.06 |
+| ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
+| ask_s | 25 |
+| ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
 | zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
 | wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
 

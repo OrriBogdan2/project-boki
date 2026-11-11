@@ -7,6 +7,7 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60 (0 skips the match)] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-theme=ridge]  the farm part becomes a "zone" part: the demo base on that zone theme (BaseDemo.ZONE_TOYS)
+##   [--bench-zone=<garden zone id>|all]  then a "zone-<id>" part in that garden zone, or in each of them
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -19,6 +20,7 @@ var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
 var theme := ""
+var zones: Array = []    # garden zones to bench after the farm, one part each (GARDEN.md 10.6 budget)
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
@@ -32,6 +34,7 @@ func run(main_node: Node) -> void:
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
 		if a.begins_with("--bench-theme="): theme = a.substr(14)
+		if a.begins_with("--bench-zone="): zones = _zone_ids(a.substr(13))
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = VIEW
@@ -42,6 +45,12 @@ func run(main_node: Node) -> void:
 	if secs > 0.0:
 		await _match()
 	await _farm()
+	for zone in zones:
+		FarmUnlocks.rules()["base_mode"] = true
+		Save.d["zones"][zone] = {"open": true}
+		for rec in Save.d["roster"]:
+			rec["zone"] = zone
+		await _farm("zone-" + zone, {"zone": zone})
 	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
 	if out_path != "":
@@ -119,13 +128,14 @@ func _bring_fight(m: Match) -> void:
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 
-func _farm() -> void:
-	if theme != "":
+func _farm(part := "farm", opts := {}) -> void:
+	if theme != "" and opts.is_empty():
 		Save.d = BaseDemo.save(theme)
-	Game.goto("home")
+		part = "zone"
+	Game.goto("home", opts)
 	for i in 30:
 		await main.get_tree().process_frame
-	if theme != "":
+	if part == "zone":
 		var home = main.current
 		for i in 900:      # the home builds itself over a few frames; its UI comes last
 			if home.root_ui != null and home.hb != null and home.player != null:
@@ -134,7 +144,6 @@ func _farm() -> void:
 		BaseDemo.new().stage(home)
 		for i in 30:
 			await main.get_tree().process_frame
-	var part := "farm" if theme == "" else "zone"
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
 	var t := 0.0
@@ -147,6 +156,10 @@ func _farm() -> void:
 		t += DT
 	_summary(part, fl)
 	_meshes()
+
+## "all" is every garden zone in content/rules/garden_zones.json, else the one id given.
+func _zone_ids(arg: String) -> Array:
+	return GardenZones.rules()["zones"].keys() if arg == "all" else [arg]
 
 func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
