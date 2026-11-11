@@ -1,0 +1,76 @@
+{
+	"doc": "The ONE movement and feel tuning file (owner 11-08), read by scripts/core/locomotion.gd (Loco) for the farm avatar and every match hunter alike. Live: with the movement readout open (F7, or Settings > Controls), saving this file re-reads it within poll_s. Units: m, s, m/s, m/s^2; drags are 1/s (the share of the excess lost per second, exponential). air: accel = how hard WASD pushes in the air; counter = multiplier on accel for the part of your speed going against the keys (a backward drift turns forward in ~0.1 s); side = multiplier for the part going across the keys (bends the arc); drag = how fast speed above your run cap (dash, knock, launch) bleeds in the air; idle_drag = what a jump with no keys loses per second. glide (the pull toward where you steer is [game data], HunterMove.glide_accel): turn / turn_fast = deg/s at cruise and the share kept at the max; brake / brake_deg = pulling back past this angle brakes this hard; drag = how fast speed above cruise bleeds with no keys (back to cruise in ~1.5 s), drag_steer = the same while steering; coast = m/s^2 a let-go under cruise slows; catch = m/s^2 the canopy eases a fall to its sink rate (absorbed, never turned into speed; ours: the source clamps the fall the step the glider opens, HunterMove.glide_start_vy, and its fastest-fall half is locked); max = the fastest a glide carries. glide_carry: per hunter, speed above this carried from Shift into a glide bleeds at carry_drag (on top of drag), so a dash never turns into a long sprint. dash.jump_keep: the share of a ground dash's speed a jump out of it keeps (the rest is air drag's, Loco.air_step; 1 = all of it, a long dash-jump). dash_speed: per hunter, a dash's speed scale (its time stretches so the distance stays); the shape of a dash (ease in, peak, skid) is the hunter's source curve in content/rules/dash_feel.json.",
+	"poll_s": 0.5,
+	"air": {"accel": 32.0, "counter": 2.5, "side": 0.3, "drag": 2.0, "idle_drag": 0.4},
+	"glide": {"turn": 420.0, "turn_fast": 0.45, "brake": 36.0, "brake_deg": 115.0, "drag": 2.0, "drag_steer": 1.4, "coast": 1.4, "catch": 60.0, "max": 15.0},
+	"glide_carry": {"carry_drag": 3.0, "default": 12.0, "archer": 9.0},
+	"dash": {"jump_keep": 0.75},
+	"dash_speed": {"archer": 0.7},
+	"farm_spotlight": {
+		"_note": "The modal placing spotlight (house, trough): FarmSpotlight.",
+		"dim": 0.72,
+		"soft_px": 60.0,
+		"pulse_hz": 1.2,
+		"ramp_s": 0.2,
+		"fade_s": 0.2
+	},
+	"hunger_gate": {
+		"_note": "The 'too hungry to go' panel: HungerGate.",
+		"poll_s": 0.4
+	},
+	"kael": {
+		"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.",
+		"tap_dmg_k": 0.6,
+		"tap_range_k": 0.8,
+		"tap_windup_s": 0.45,
+		"tap_cooldown_s": 1.2,
+		"ult_carry_k": 0.8,
+		"ult_carry_decay_per_s": 1.6,
+		"ult_up_min_mps": 1.0,
+		"ult_up_bonus_mps": 2.2,
+		"chain_lunge_deg": 25.0
+	},
+	"perf": {
+		"bot_replan_s": 0.1,
+		"boki_retarget_s": 0.2,
+		"actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0},
+		"anim_far_every": 2,
+		"anim_off_every": 10,
+		"hero_anim_near_m": 48.0,
+		"hero_anim_far_every": 2,
+		"hero_anim_off_every": 4,
+		"bot_belt_s": 0.1
+	},
+	"vex": {
+		"_note": "Vex's feel (GunslingerKit, GunslingerUlt). R: the Cinderfall fire beat and shake.",
+		"x_fire_s": 0.2,
+		"x_shake": 0.35,
+		"x_shake_per_hit": 0.15,
+		"x_shake_centre": 0.3
+	},
+	"clip_warp": {
+		"_note": "WardenClips: a kit move's clip retimed with no rebake, per art name and kit move: [s into the move, s into the clip] knots.",
+		"vex": {
+			"gunslinger_x": [[0.0, 0.0], [0.2, 0.1], [0.24, 0.14], [0.46, 0.3], [0.9, 0.6]],
+			"gunslinger_rmb": [[0.0, 0.0], [0.045, 0.07], [0.16, 0.2], [0.38, 0.5]]
+		}
+	},
+	"vex_air_dash": {
+		"_note": "Vex's air dash look (GunslingerKit): the lime fire ribbon her body draws through the barrel roll, and the burst of sparks it leaves from. Distance and timing stay her dash data's.",
+		"fire_width_m": 0.34,
+		"fire_life_s": 0.3,
+		"fire_rise_m": 0.9,
+		"fire_col": "b8f03c",
+		"fire_hot_col": "eaffa8",
+		"burst_sparks": 12
+	},
+	"lace": {
+		"_note": "Lace's bow feel (PinDraw, PinNeedle): the perfect-release window after each draw stage, the rim glow on her body and bow while it is open, the payoff pulse on a perfect release, and the Heavy Shot's needle.",
+		"perfect_window_s": 0.35,
+		"perfect_glow_rim": 1.2,
+		"perfect_glow_col": "ffd36a",
+		"perfect_payoff_rim": 2.4,
+		"perfect_payoff_s": 0.16,
+		"needle_len_m": 2.4
+	}
+}

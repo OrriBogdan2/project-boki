@@ -1,5 +1,5 @@
 {
-	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source. window.source: the footage evidence for the buffer window (DashFlow.BUFFER_S), shown in docs/heroes/dash_interactions.md.",
 	"kit_owns": [],
 	"dash": {
 		"ground": {
@@ -10,11 +10,11 @@
 			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
 		},
 		"air": {
-			"lmb": {"mode": "fire", "source": "Not in the data or footage (the source shows no air dash). Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"rmb": {"mode": "fire", "source": "Not in the data or footage. Ours: the charge starts mid-dash; the air dive waits for the dash to end (it holds her height), then plunges to slam."},
+			"lmb": {"mode": "fire", "carry": true, "source": "Item 183: with a charge, the air dash is the same Rock Hop as the ground one (the source has one Landslide, no air variant), so the punch goes off mid-hop and the hop carries on, as on the ground."},
+			"rmb": {"mode": "fire", "carry": true, "source": "Item 183: the same Rock Hop as on the ground, so the charge starts mid-hop and the slam lands where the hop does. With no charge left the shared long dash runs and the dive waits for its end."},
 			"e": {"mode": "buffer", "source": "Card: Rockwave is only castable over ground, so it doesn't go off in the air at all (with or without a dash)."},
-			"x": {"mode": "fire", "source": "Not in the data or footage. The aim is placed at the cursor, so it starts mid-dash."},
-			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-dash like any glove."}
+			"x": {"mode": "fire", "source": "Item 183: the same Rock Hop as on the ground. The aim is placed at the cursor, so it starts mid-hop."},
+			"q": {"mode": "fire", "source": "Not in the data or footage (the glove is ours). It goes off mid-hop like any glove."}
 		}
 	},
 	"into_dash": {
@@ -34,5 +34,6 @@
 			"air": {"mode": "keep"},
 			"jump": {"mode": "keep"}
 		}
-	}
+	},
+	"window": {"source": "Tarek (breah.md 0985-0997, 246-249 s): dash at 0985/0986, the KNOCK beam at 0989-0990; with the RMB hop's own 0.4 s, the RMB press fell within a frame of the dash's end and was kept."}
 }

@@ -64,6 +64,46 @@ func setup(arch: String, dist: float, kin_sp := "", second := false) -> Array:
 func aim_at(P: Hunter, p: Vector3) -> void:
 	P.inp["aim"] = p + Vector3(0, 0.9, 0); P.inp["aim_y"] = p.y
 
+## Item 183: with a charge in hand, a hero's air dash is its ground dash: the same kit move and clip, the same reach
+## (within 5%), one charge spent and the long-dash slot (ex_cd) untouched. `home` is open ground; the match is
+## left with the hunter back at home.
+func air_dash_is_ground(m: Match, P: Hunter, home: Vector3) -> void:
+	var parked := {}
+	for h in m.hunters:
+		if h != P:
+			parked[h] = h.pos
+			h.teleport(h.pos + Vector3(0, 0, 60))     # a dummy in the lane would stop the ground run short
+	var ground := _dash_run(m, P, home, false)
+	var air := _dash_run(m, P, home, true)
+	for h in parked:
+		h.teleport(parked[h])
+	var label := "item 183 %s: its air dash is its ground dash (%s, reach %.2f vs %.2f)"
+	ok(label % [P.arch, ground["anim"], air["reach"], ground["reach"]],
+		air["anim"] == ground["anim"] and air["spent"] == ground["spent"] and air["spent"] > 0.5 and air["ex_cd"] == 0.0
+		and absf(air["reach"] - ground["reach"]) <= 0.05 * ground["reach"], str([ground, air]))
+	P.teleport(home)
+
+func _dash_run(m: Match, P: Hunter, home: Vector3, air: bool) -> Dictionary:
+	P.teleport(home + Vector3(0, 40.0 if air else 0.0, 0))
+	P.grounded = not air
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.dashes = P.max_dashes()
+	P.ex_cd = 0.0
+	aim_at(P, P.pos + Vector3(8, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	var from := P.pos
+	var charges := P.dashes
+	P.do_dash()
+	var out := {"anim": P.ak.anim_id, "spent": charges - P.dashes, "ex_cd": P.ex_cd, "reach": 0.0}
+	var t := 0.0
+	while t < 1.0 and (t < 0.1 or P.roll_t > 0.0):
+		m.step(DT)
+		t += DT
+		out["reach"] = Vector2(P.pos.x - from.x, P.pos.z - from.z).length()
+	P.inp["move"] = Vector2.ZERO
+	return out
+
 func step(m: Match, secs: float, each := Callable()) -> void:
 	var t := 0.0
 	while t < secs:
@@ -128,6 +168,7 @@ func run(main_node: Node) -> void:
 		return
 	_controls()
 	_data()
+	_health()
 	await _thief()
 	await _archer()
 	await _mage()
@@ -141,6 +182,29 @@ func run(main_node: Node) -> void:
 	_feel()
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Max health as a share of the roster average against the source's Base HP rows
+## (briefs/supervive-data/supervive_physics.md, docs/KIT_PARITY.md "Health"): no Hunter off by
+## more than 1.25x either way. The scales differ, so only the ratio is compared.
+const SOURCE_HP := {"gunslinger": 1225, "juggernaut": 1290, "archer": 1100, "ashwick": 1290, "tender": 1290, "dolm": 1290,
+		"dredge": 1445, "rimewright": 1290, "ostra": 1150, "bulwark": 1475, "mage": 1290, "thief": 1290}
+
+func _health() -> void:
+	var ids := Arch.ids()
+	var ours := {}
+	var sum_o := 0.0
+	var sum_s := 0.0
+	for a in ids:
+		ours[a] = float(Data.CLASSES[Arch.weight(a)]["hp"])
+		sum_o += ours[a]
+		sum_s += float(SOURCE_HP.get(a, 0))
+	ok("health: every Hunter has a source Base HP row", ids.all(func(x): return SOURCE_HP.has(x)), str(ids))
+	var off: Array = []
+	for a in ids:
+		if not SOURCE_HP.has(a): continue
+		var ratio: float = (ours[a] / (sum_o / ids.size())) / (float(SOURCE_HP[a]) / (sum_s / ids.size()))
+		if ratio > 1.25 or ratio < 0.8: off.append("%s %.3f" % [a, ratio])
+	ok("health: max health share of roster average within 1.25x of the source", off.is_empty(), str(off))
 
 # ------------------------------------------------------------------ controls and data
 func _has_key(action: String, key: int) -> bool:
@@ -183,7 +247,7 @@ func _data() -> void:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
 		for k in ["dash", "rmb", "e", "resource", "order"]:
-			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
+			if not Arch.def(a).has(k) and not (a == "bulwark" and k == "resource"): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
 	ok("weapons: Sable bolts / Lace bow / Sparkle coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
@@ -389,7 +453,7 @@ func _gunslinger() -> void:
 	K.on_deal(T, 100.0, {"src": "shot"})
 	ok("venator passive: Fever heals 6% off damage", absf(P.hp - hp0 - 6.0) < 0.5, "healed %.1f" % (P.hp - hp0))
 	K.res = 0.0
-	# Burr Charge: thrown at a foe, it goes off on them (damage + Dazed, no cone); walls and the ground give the cone
+	# Coin Blast: thrown at a foe, it goes off on them (damage + Dazed); walls and the lane's end fizzle
 	fresh(T); T2.teleport(home + Vector3(12, 0, 0)); P.teleport(home); T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	tap(m, P)
 	step(m, 1.6)
@@ -398,17 +462,17 @@ func _gunslinger() -> void:
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
 	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
-	# Longneedle: charge, then a piercing beam
+	# Palm Lance: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
-	ok("venator E: Longneedle winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
+	ok("venator E: Palm Lance winds up slowed", not K.needle.is_empty() and K.move_k() < 1.0)
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
 	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
-	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s
+	P.do_dash(); step(m, 0.8)      # the tap skid runs ~0.65s
 	ok("venator dash tap: Slipstep skid", K.last_dash_kind == "step" and P.flat_dist(home) > 1.8, "moved %.1f" % P.flat_dist(home))
 	P.inp["move"] = Vector2.ZERO
 	await done(m)
@@ -424,32 +488,30 @@ func _bulwark() -> void:
 	var home: Vector3 = r[4]
 	var K: BulwarkKit = P.ak
 	ok("bulwark: War Hammer & Aegis", P.wid == "tower_shield")
-	# hold: raise the shield; blocked shots become Guard
-	K.res = 0.0
+	# hold: raise the shield; it blocks shots from the front
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks + Guard, no swing", not K.wall.is_empty() and P.hp >= php and K.res >= 10.0 and not P.can_fire(), "guard %.0f hp %.0f" % [K.res, P.hp])
+	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.can_fire(), "hp %.0f" % P.hp)
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
-	# tap: no Bash (it is Shift behind the shield); at 50 Guard the Shield Charge ends in a Shield Slam
+	# tap: no Bash (it is Shift behind the shield)
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); aim_at(P, T.pos); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0
 	var x0 := T.pos.x
 	tap(m, P)
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
-	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
+	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)
 	step(m, 0.3)
 	ok("bulwark RMB release after block: only lowers", K.wall.is_empty() and K.last_variant == "hold" and dmg(T) <= 0.0 and absf(T.pos.x - x0 - 2.0) < 0.3, "pushed %.1f" % (T.pos.x - x0))
-	K.res = 0.0
 	# Crushed: a Shield Charge into a wall stuns (no heal)
 	var W: World = m.world
 	var lv: int = r[5]
@@ -602,7 +664,7 @@ func _infusion() -> void:
 	var r := setup("thief", 6.0, "cindle")
 	var m: Match = r[0]; var P: Hunter = r[1]; var T: Hunter = r[2]
 	tap(m, P)
-	step(m, 0.8)          # (the Bola's 0.4s wind-up with the lane, then its flight)
+	step(m, 0.8)          # (the Bola's flight)
 	ok("infusion runtime: Bola + poison", T.burn_t > 0.0, "burn %.1f" % T.burn_t)
 	await done(m)
 	r = setup("mage", 5.0, "puddlet")
@@ -625,7 +687,7 @@ func _feel() -> void:
 	var st3 := StageSpec.parse({"delivery": {"type": "leap", "range": 7, "time": 0.5}}, "", GrammarReport.new())
 	ok("feel: leap flight counts", Feel.missing_windup(st3) <= 0.0)
 	# archetype tells meet the floors
-	ok("feel: Skycall and Longneedle show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
+	ok("feel: Skycall and Palm Lance show a lane or ring before they land", float(Arch.def("mage")["e"]["delay"]) >= 0.5 and float(Arch.def("gunslinger")["e"]["charge"]) >= 0.5)
 	ok("feel: Arrow Rain tell >= soft floor", float(Arch.def("archer")["e"]["tell"]) >= Feel.floor_for("soft_cc", "instant"))
 	ok("feel: the Bola and Warchain are projectiles (dodgeable)", String(Arch.def("thief")["rmb"]["delivery"]) == "projectile" and float(Arch.def("thief")["rmb"]["bola"]["speed"]) <= 34.0 and String(Arch.def("juggernaut")["e"]["delivery"]) == "projectile")
 	ok("feel: Wirerun shows its lane while it grows", float(Arch.def("mage")["dash"]["hold"]) >= 0.3)

@@ -53,8 +53,11 @@ func knock(e: Ent, kb: Vector2, lift := -1.0) -> void:
 	else:
 		_send(["kb", e.nid, m._r(kb.x), m._r(kb.y), m._r(lift)])
 
-## Spiked down: it falls at least `vy` (a negative speed) fast, its glider folded (Spike.fall).
-func spike(e: Ent, vy: float) -> void:
+## Spiked down: it falls at least `vy` (a negative speed) fast (Spike.fall, on the game that owns the body); a
+## glider driven down hard enough is spiked out of the air (GlideSpike) and `by` gets the credit here.
+func spike(e: Ent, vy: float, by: Ent) -> void:
+	if GlideSpike.spikes(e, vy):
+		GlideSpike.credit(by)
 	if not e.remote:
 		Spike.fall(e, vy)
 	else:
@@ -81,6 +84,7 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	var rec := {"e": e, "by": by, "p": p, "left": float(p["dur"]), "t": 0.0, "v": Vector2.ZERO, "gone": 0.0,
 		"mirror": e.remote, "hauled": 0}
 	tows.append(rec)
+	if by: DashReset.note(e, by)      # being hauled is crowd control: it counts toward an assist
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
 	elif p.get("unroll", false) and e is Hunter:

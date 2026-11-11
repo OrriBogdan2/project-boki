@@ -6,7 +6,7 @@ extends RefCounted
 ## %N the E ability's name, %X the E ability in
 ## plain words (key included).
 
-## "Press E: Longneedle. Stand still ..." built from the hunter's card text (any Hunter).
+## "Press E: Palm Lance. Stand still ..." built from the hunter's card text (any Hunter).
 static func ability_tip(h: Hunter) -> String:
 	var cap := Settings.key_cap("signature")
 	if h == null or h.ak == null:

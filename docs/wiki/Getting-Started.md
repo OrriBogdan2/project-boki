@@ -10,16 +10,17 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
 
 - **New game / Continue.** A new game starts with a short story, then your first egg.
 - **Arena.** Every Hunter against dummies and a sparring bot. No save needed. See [Arena and training](Arena-and-Training.md).
-- **Demo match** (once you have a save). A ready-made Duos expedition with a bot squadmate, clear
+- **Demo match** (once you have a save). A ready-made expedition with bot squadmates, clear
   weather and no Blight. See [Expeditions](Expeditions.md#the-demo-match).
 - **Play with friends** (when online play is available), **Save files**, **Settings**, **Quit**.
 
 ## Your first hour
 
 1. **The story.** A short animated prologue about how Malgrave, the Wyrm in a queen's shape, broke Solmere. Hold Esc to skip it.
-2. **Your first egg.** Three starter eggs sit on a little island, plus a mystery egg:
-   the Venom Egg (Vespyx), the Prism Egg (Prismander), the Spore Egg (Mycroll), and a Mystery Egg
-   that hides one of the other common species. Pick one, keep it warm until it hatches, and name it.
+2. **Your first egg.** Three starter eggs sit up front on a little island: the Venom Egg (Vespyx),
+   the Prism Egg (Prismander) and the Spore Egg (Mycroll). Look around the back for a black egg in
+   a basket: it can hatch almost any early wild species (rarely a rare one) and is more likely than
+   the starters to hatch with a mutation. Pick one, knock until it hatches, and name it.
 3. **First Flight.** A short tutorial on three small islands: steer your landing, walk, dash, glide,
    long-dash in the air, shoot, use your E, have your Boki use its ability, throw your Boki at a
    monster, open a chest, then start an outpost's uplink and hold its yard until the lift opens.
@@ -27,8 +28,8 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
    build mode (B): the house (90), a crop patch (30) and the cooking pot (20), then the market stall
    when you like. See [The farm](The-Farm.md).
 5. **Your first expedition.** Open **Expedition** from the hub bar (or the signpost by the portal).
-   Pick your Hunter, the Boki you bring, the tier (the Meadow first: your Boki can't be lost there) and
-   a mode: Solo (20 hunters), Duos (10 squads of two) or Trios (7 squads of three).
+   Pick your Hunter, the Boki you bring and the tier (the Meadow first: your Boki can't be lost there).
+   Every expedition is 10 squads of three; bots fill your squad and the rest.
 
 ## Things worth knowing early
 
@@ -39,5 +40,5 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
   locked ability spends a point on it. Your ultimate opens at level 6. See [Classes](Classes.md).
 - **The Meadow is safe for Boki.** The Dusk Isles and the Hollow put the Boki you bring at risk; the
   game warns you. See [Boki](Boki.md#losing-a-boki).
-- **The training area** (from the Expedition menu) has a checklist for every button.
+- **The Training Grounds** (from the Expedition menu) has a checklist for every button.
 - Every key can be rebound in Settings > Controls. See [Controls](Controls.md).

@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "howlop",
+	"name": "Howlop",
+	"theme": "sound",
+	"type2": "dark",
+	"flavor": "Predator bat-hare, sonic fangs.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "zapple",
+		"stage": 2,
+		"from": "zapple"
+	}
+}

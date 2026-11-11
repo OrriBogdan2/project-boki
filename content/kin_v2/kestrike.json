@@ -6,7 +6,8 @@
 		"Kestrel",
 		"Copper lightning rod"
 	],
-	"theme": "storm",
+	"theme": "electric",
+	"type2": "flying",
 	"flavor": "A kestrel with a copper crest that draws lightning. It hangs still in the wind, then strikes like the bolt it caught.",
 	"colors": {
 		"body": "#b5653a",
@@ -119,5 +120,11 @@
 		"temper": "Proud",
 		"desc": "Something proud is in here.",
 		"play": "Fast, darting and always on the move."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "kestrike",
+		"stage": 1,
+		"sex_forms": true
 	}
 }

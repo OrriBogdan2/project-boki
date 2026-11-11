@@ -2,7 +2,7 @@ class_name KinSpec
 extends RefCounted
 ## A kin species in the grammar (content/kin_v2/<id>.json, docs/KIN_GRAMMAR.md): the animals it's
 ## based on, its body and looks, a stat profile that spends exactly KinParts.STAT_BUDGET points,
-## personality and AI weights, how it's carried, what its throw and dodge rider do, its slots
+## personality and AI weights, how it's carried, what its throw does, its slots
 ## (active on E, an optional auto active, the merge) and its evolution paths.
 ## Parsing checks structure; check_refs() then checks it against the abilities, merges and nodes.
 
@@ -10,6 +10,9 @@ var id := ""
 var display_name := ""
 var animals: Array = []
 var theme := "none"
+var type2 := ""              # optional second type, a theme other than the first
+var roster := {}             # art, line, stage, from, ink, sex_forms: its place in the roster (docs/boki/ROSTER.md)
+var data_only := false       # in the roster without a model yet: loaded for the dex, never spawned
 var flavor := ""
 var colors := {}             # body belly glow wing: hex
 var look := {}               # body ears tail feet aura: core model builder ids
@@ -26,7 +29,6 @@ var carry_passives: Array = []
 var carry_on_shot := {}
 var mount := {}
 var throw_effects: Array[PartSpec] = []
-var dodge_rider := {}        # name, as, on_pass: Array[PartSpec], on_start/on_end: Array[StageSpec], modifiers
 var active := ""
 var auto := ""
 var merge := ""
@@ -36,7 +38,13 @@ var voice := {}
 var egg := {}
 var infusion := {}           # optional: what this kin lends archetype sockets (docs/ARCHETYPES.md §4.2); derived when absent
 
-const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "dodge_rider", "active", "auto", "merge", "evolution", "voice", "egg", "infusion"]
+const FIELDS := ["grammar", "id", "name", "animals", "theme", "flavor", "colors", "look", "body", "stats", "personality", "ai", "carry", "throw", "active", "auto", "merge", "evolution", "voice", "egg", "infusion", "type2", "roster"]
+## A data-only species (no model yet) is just its roster entry.
+const STUB_FIELDS := ["grammar", "id", "name", "theme", "type2", "flavor", "roster", "data_only"]
+const STUB_REQUIRED := ["grammar", "id", "name", "theme", "roster", "data_only"]
+const ROSTER_ART := ["locked", "todo", "new"]
+## The nine Inks (market goods ink_<name>): their own names, not type ids (the 11-10 type rename left them).
+const INKS := ["ember", "tide", "bloom", "storm", "frost", "shadow", "lunar", "prism", "wyrm"]
 const REQUIRED := ["grammar", "id", "name", "animals", "colors", "look", "body", "stats", "personality", "ai", "carry", "active", "merge"]
 
 static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
@@ -45,7 +53,13 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	if d.is_empty():
 		return null
 	rep.scan_refs(d, "")
-	rep.keys(d, "", FIELDS, REQUIRED)
+	k.data_only = typeof(d.get("data_only")) == TYPE_BOOL and bool(d["data_only"])
+	if d.has("data_only") and not k.data_only:
+		rep.err("data_only", "is true or left out")
+	if k.data_only:
+		rep.keys(d, "", STUB_FIELDS, STUB_REQUIRED)
+	else:
+		rep.keys(d, "", FIELDS, REQUIRED)
 	AbilitySpec._grammar(d, rep)
 	k.id = rep.ident(d, "id", "")
 	k.display_name = rep.text(d, "name", "", "", true)
@@ -53,6 +67,13 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 	k.theme = rep.text(d, "theme", "", "none")
 	if not KinParts.THEMES.has(k.theme):
 		rep.err("theme", "unknown theme '%s' (themes are cosmetic: %s)" % [k.theme, ", ".join(KinParts.THEMES)])
+	k.type2 = rep.text(d, "type2", "")
+	if k.type2 != "" and (k.type2 in [k.theme, "none"] or not KinParts.THEMES.has(k.type2)):
+		rep.err("type2", "'%s' must be a theme other than the first type" % k.type2)
+	if d.has("roster"):
+		k.roster = _roster(d["roster"], rep)
+	if k.data_only:
+		return k
 	# based on one or two real animals
 	var an := rep.arr(d.get("animals", []), "animals")
 	if d.has("animals") and (an.size() < 1 or an.size() > 2):
@@ -126,8 +147,6 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 			if e:
 				if e.target != "foes": rep.err("throw.effects[%d].target" % i, "a throw lands on a foe")
 				k.throw_effects.append(e)
-	if d.has("dodge_rider"):
-		k.dodge_rider = _rider(d["dodge_rider"], rep)
 	# slots
 	k.active = rep.ident(d, "active", "")
 	k.auto = rep.ident(d, "auto", "", false)
@@ -171,6 +190,19 @@ static func parse(v: Variant, rep: GrammarReport) -> KinSpec:
 		k.infusion = _infusion(d["infusion"], rep)
 	return k
 
+## The roster block: art status, the id of the line's first form, the stage, the form it evolves
+## from, the Ink that picks its branch, and sex_forms (a female look next to the male one).
+static func _roster(v: Variant, rep: GrammarReport) -> Dictionary:
+	var r := rep.obj(v, "roster")
+	rep.keys(r, "roster", ["art", "line", "stage", "from", "ink", "sex_forms"], ["art", "line", "stage"])
+	var out := {"art": rep.choice(r, "art", ROSTER_ART, "roster"), "line": rep.ident(r, "line", "roster"),
+		"stage": int(rep.number(r, "stage", "roster", 1, 3, null, true)), "from": rep.ident(r, "from", "roster", false)}
+	if r.has("ink"):
+		out["ink"] = rep.choice(r, "ink", INKS, "roster")
+	if r.has("sex_forms"):
+		out["sex_forms"] = rep.param(r, "sex_forms", ["bool", null, null, false, "", ""], "roster")
+	return out
+
 ## The optional infusion block: one effect part per socket (hit, ctrl, guard, util), a list of
 ## modifiers in order of preference (mod), and move: blink. Each must sit in its socket's category.
 static func _infusion(v: Variant, rep: GrammarReport) -> Dictionary:
@@ -210,31 +242,10 @@ static func _unit_block(d: Dictionary, key: String, names: Array, rep: GrammarRe
 		out[n] = rep.number(b, n, key, 0.0, 1.0, 0.5)
 	return out
 
-## The class dodge's kin rider: effects on what you dodge through, stages at the start or end,
-## an echo, or the dodge becoming a blink.
-static func _rider(v: Variant, rep: GrammarReport) -> Dictionary:
-	var d := rep.obj(v, "dodge_rider")
-	rep.keys(d, "dodge_rider", ["name", "as", "on_pass", "on_start", "on_end", "modifiers"], ["name"])
-	var out := {"name": rep.text(d, "name", "dodge_rider"), "as": rep.choice(d, "as", ["dash", "blink"], "dodge_rider", "dash"),
-		"on_pass": [], "on_start": MergeSpec._stages(d, "on_start", rep), "on_end": MergeSpec._stages(d, "on_end", rep), "modifiers": []}
-	var effs := rep.arr(d.get("on_pass", []), "dodge_rider.on_pass")
-	for i in effs.size():
-		var e := PartSpec.parse("effect", effs[i], "dodge_rider.on_pass[%d]" % i, rep)
-		if e:
-			if e.is_hard_cc(): rep.err("dodge_rider.on_pass[%d]" % i, "a dodge can't %s what it passes through" % e.type)
-			out["on_pass"].append(e)
-	var mods := rep.arr(d.get("modifiers", []), "dodge_rider.modifiers")
-	for i in mods.size():
-		var m := PartSpec.parse("modifier", mods[i], "dodge_rider.modifiers[%d]" % i, rep)
-		if m:
-			if m.type != "repeat": rep.err("dodge_rider.modifiers[%d]" % i, "a dodge rider can only take repeat, not %s" % m.type)
-			out["modifiers"].append(m)
-	if (out["on_pass"] as Array).is_empty() and (out["on_start"] as Array).is_empty() and (out["on_end"] as Array).is_empty() and (out["modifiers"] as Array).is_empty() and out["as"] == "dash":
-		rep.err("dodge_rider", "does nothing: add on_pass, on_start, on_end, modifiers or as: blink")
-	return out
-
 ## Checks the slots and evolution against the loaded library {abilities, merges, evolution}.
 func check_refs(lib: Dictionary, rep: GrammarReport) -> void:
+	if data_only:
+		return
 	var abil: Dictionary = lib.get("abilities", {})
 	var slots := {}
 	if active != "":

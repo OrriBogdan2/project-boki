@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "reapant",
+	"name": "Reapant",
+	"theme": "bug",
+	"type2": "grass",
+	"flavor": "Queen ant, twin scythe mandibles.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "marchleaf",
+		"stage": 3,
+		"from": "scythant"
+	}
+}

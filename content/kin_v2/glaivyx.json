@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "glaivyx",
+	"name": "Glaivyx",
+	"theme": "poison",
+	"type2": "steel",
+	"flavor": "Armoured bruiser, sting grown into a scythe blade.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "cindle",
+		"stage": 3,
+		"from": "vespox"
+	}
+}

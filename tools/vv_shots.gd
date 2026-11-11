@@ -256,12 +256,12 @@ func _vireo_lmb() -> void:
 	marks.append([0.05,
 			"full",
 			"lmb_fire",
-			"LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet"])
-	marks.append([0.14, "full", "lmb_bolt", "LMB: the jagged teal bolt (about 1.2m) in flight, gold core", _bolt_spot])
+			"LMB release: the arm out, the fingertip crackling with pink arcs, gold sparks at her feet"])
+	marks.append([0.14, "full", "lmb_bolt", "LMB: the jagged pink bolt (about 1.2m) in flight, pale core", _bolt_spot])
 	marks.append([0.3,
 			"full",
 			"lmb_impact",
-			"LMB impact: teal splinters spray back toward her; the Static marker above the HP bar",
+			"LMB impact: pink splinters spray back toward her; the Static marker above the HP bar",
 			_on_target])
 	await _go(1.25, hold_fire, marks)
 	P.inp["fire"] = false
@@ -301,7 +301,7 @@ func _vireo_rmb() -> void:
 	marks.append([0.05,
 			"full",
 			"rmb_summon",
-			"RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring"])
+			"RMB pressed: the copper Storm Rod arrives in her raised hand with a pink crackle and a ring"])
 	marks.append([0.5,
 			"full",
 			"rmb_aim",
@@ -315,12 +315,12 @@ func _vireo_rmb() -> void:
 	throw.append([0.18,
 			"full",
 			"rmb_impact",
-			"RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back",
+			"RMB impact: a gold blast, pink crackle and a shock ring, the target knocked back",
 			_on_target])
 	throw.append([0.75,
 			"full",
 			"rmb_orb",
-			"The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it",
+			"The charge orb: a pale core in a pink shell with spinning bands, short pink arcs crackling off it",
 			_orb_spot])
 	await _go(0.8, Callable(), throw)
 
@@ -336,35 +336,23 @@ func _vireo_dash() -> void:
 	P.do_dash()
 	var hold_d := func(_t: float): P.inp["dash_down"] = true
 	var marks := _strip("anim_dash",
-			"Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival",
-			[0.05, 0.3, 0.6])
-	marks.append([0.25,
+			"Shift: the charging crouch, the streak (her pink after-images), re-forming on arrival",
+			[0.05, 0.45, 0.9])
+	marks.append([0.4,
 			"full",
 			"dash_aim_mid",
 			"Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)"])
-	marks.append([0.6, "full", "dash_aim_full", "Shift held to full: the end ring at 8.5m, past the 3m cursor"])
-	await _go(0.62, hold_d, marks)
+	marks.append([0.9, "full", "dash_aim_full", "Shift held to full: the end ring at 11m, past the 3m cursor"])
+	await _go(0.92, hold_d, marks)
 	P.inp["dash_down"] = false
 	var run := _strip("anim_dash", "", [0.06, 0.42, 0.6])
 	run.append([0.08,
 			"full",
 			"dash_run",
-			"Shift released: a lightning streak, the body a trail of her own gold-teal after-images"])
+			"Shift released: a lightning streak, the body a trail of her own pink after-images"])
 	run.append([0.46, "full", "dash_arrive",
 			"Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way)"])
 	await _go(0.8, Callable(), run, 6.0)
-	# the base air dash (her own variant): a tumble with teal after-images in her silhouette
-	await _reset(6.0, 6.0)
-	P.dashes = 0.0
-	P.do_dash()
-	var ex := _strip("anim_dash_ex",
-			"Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing",
-			[0.02, 0.07, 0.14, 0.22, 0.36, 0.5])
-	ex.append([0.15,
-			"full",
-			"dash_ex",
-			"Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak"])
-	await _go(0.6, Callable(), ex)
 	# the payoff: Wirerun through a Live target
 	await _reset(5.0)
 	K.add_spark(T, 4)
@@ -481,35 +469,29 @@ func _venator_rmb() -> void:
 	var K = P.ak
 	await _reset(6.0)
 	_aim(home + Vector3(3.0, 0, 0))
-	K.press_rmb()
-	var hold_r := func(_t: float): P.inp["sec_hold"] = true
-	var marks := _strip("anim_rmb_hold",
-			"RMB held: the spiked charge drawn low at his left hip, the torso turned a little away, the rifle forward",
-			[0.02, 0.06, 0.12, 0.5])
-	marks.append([0.5,
-			"full",
-			"rmb_aim",
-			"RMB held: the charge low at his hip, a fixed lane with an arrow tip; the target in it marked"])
-	await _go(0.6, hold_r, marks)
-	P.inp["sec_hold"] = false
 	T.teleport(home + Vector3(8.5, 0, 0))
+	K.press_rmb()
 	var throw := _strip("anim_rmb_throw",
-			"RMB throw, the side toss: from the hip, the sidearm flick out at 0.05, across the body, back on the rifle",
-			[0.01, 0.05, 0.13, 0.25, 0.45])
+			"RMB Coin Blast: the cyborg hand cocked, flicked out along the aim at 0.07, follow-through, home",
+			[0.01, 0.04, 0.07, 0.13, 0.25, 0.45])
+	throw.append([0.08,
+			"full",
+			"rmb_release",
+			"RMB release: the big coin leaves her open cyborg palm with a lime spark"])
 	throw.append([0.2,
 			"full",
 			"rmb_flight",
-			"RMB: the bronze spiked charge in flight with its ember smear, past the person",
+			"RMB: the big gold coin with its green-fire rim, flipping in flight",
 			_burr_spot])
 	throw.append([0.75,
 			"full",
 			"rmb_cone",
-			"RMB stuck on the ground: the cone shows back toward him for its fuse (everyone sees it)",
+			"RMB stuck on the ground: the cone shows back toward her for its fuse (everyone sees it)",
 			_burr_spot])
 	throw.append([1.37,
 			"full",
 			"rmb_blast",
-			"RMB blast: the cone front, the target shoved toward him and Dazed (swirl)",
+			"RMB blast: the cone front, the target shoved toward her and Dazed (swirl)",
 			_on_target])
 	await _go(1.6, Callable(), throw, 5.0)
 	# the wall version
@@ -578,7 +560,7 @@ func _venator_owner1103() -> void:
 	K.press_rmb()
 	await _go(0.6, func(_t: float): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
-	var direct_cap := "owner1103: Burr Charge direct hit: damage and DAZED, no cone"
+	var direct_cap := "owner1103: Coin Blast direct hit: damage and DAZED, no cone"
 	var direct := [[0.22, "full", "owner1103_direct_a", direct_cap, _on_target]]
 	direct.append([0.26, "full", "owner1103_direct_b", "owner1103: direct hit, a beat later: DAZED", _on_target])
 	await _go(0.7, Callable(), direct, 5.0)
@@ -612,21 +594,21 @@ func _venator_e() -> void:
 	await _reset(9.0)
 	K.use_e()
 	var marks := _strip("anim_e",
-			"E: braced through the 0.6s cast, the recoil throws the chest back, settle",
+			"E Palm Lance: the cyborg arm raised, palm out, through the 0.6s cast, the recoil, settle",
 			[0.05, 0.3, 0.58, 0.66, 0.8, 1.05])
 	marks.append([0.1,
 			"full",
 			"e_aim_start",
-			"E cast start: a wide ember line full length, the ember orb at the muzzle"])
-	marks.append([0.5, "full", "e_aim_end", "E cast end: narrowed to a thin core, the muzzle orb swollen"])
+			"E cast start: a wide line full length out of the palm, green fire burning in the open palm"])
+	marks.append([0.5, "full", "e_aim_end", "E cast end: narrowed to a thin core, the palm flame swollen"])
 	marks.append([0.68,
 			"full",
 			"e_fire",
-			"E fire: an ember beam with a hot core and bronze edges, the ember muzzle orb, the smoke ring and recoil"])
+			"E fire: the lance leaves the palm, hot core and lime edges, and the recoil"])
 	await _go(1.2, Callable(), marks)
-	# payoff: Longneedle on a Dazed hunter
+	# payoff: Palm Lance on a Dazed hunter
 	await _reset(8.0)
 	KitStatus.apply(T, "rat", 3.0)
 	K.use_e()
-	var skewer := "Payoff: Longneedle through a Dazed hunter at the hit: SKEWERED and the number"
+	var skewer := "Payoff: Palm Lance through a Dazed hunter at the hit: SKEWERED and the number"
 	await _go(0.8, Callable(), [[0.66, "full", "skewer", skewer, _above_target]])

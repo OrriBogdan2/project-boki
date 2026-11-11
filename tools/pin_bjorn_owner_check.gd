@@ -52,6 +52,7 @@ func pin() -> void:
 	_pin_draw_pose(m, P, T, K)
 	_pin_heavy(m, P, T, K, home, lv)
 	_pin_dash(m, P, T, K)
+	_pin_two_charges(m, P, K, home)
 	await done(m)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var bad: int = await flow.combos_of(main, "archer")
@@ -107,13 +108,13 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		"visible %s dot %.2f" % [n.visible, Vector2(along.x, along.z).dot(d)])
 	ok("114 needle: oversized, over 2.5 times a loosed arrow", n.eye.distance_to(n.tip) >= 2.0,
 		"%.2f m" % n.eye.distance_to(n.tip))
-	var eye_ahead := func() -> float:
-		return Vector2(n.eye.x - P.position.x, n.eye.z - P.position.z).dot(d)
-	var eye0: float = eye_ahead.call()
+	var nock := HeroVfx.of(m).anchor_pos(P, "nock")
+	ok("114 needle: its eye rides the bow's nock point (the model's nock anchor), not a body offset",
+		n.eye.distance_to(nock) < 0.01, "eye %s nock %s" % [str(n.eye), str(nock)])
 	var glow0: float = n.shell_mat.get_shader_parameter("color").a
 	var end: Vector3 = n.points[-1]
 	var thread_back := Vector2(end.x - n.eye.x, end.z - n.eye.z).dot(d)
-	ok("114 needle: the red thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
+	ok("114 needle: the orchid thread trails behind the eye", thread_back < -0.8, "%.2f m" % thread_back)
 	var p0 := P.pos
 	step(m, 0.4, hold)
 	var held_v := p0.distance_to(P.pos) / 0.4
@@ -121,12 +122,12 @@ func _pin_114(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 		free_v > 1.0 and absf(held_v / free_v - float(K.rmb_def()["pin"]["hold_move"])) < 0.08,
 		"free %.2f held %.2f" % [free_v, held_v])
 	step(m, 0.6, hold)
-	var eye1: float = eye_ahead.call()
 	var glow1: float = n.shell_mat.get_shader_parameter("color").a
 	var hot: Color = n.steel.get_shader_parameter("albedo")
-	ok("114 needle: it draws back and glows up with the charge, the silver going red-hot",
-		K.heavy_k() >= 0.99 and n.charge >= 0.99 and eye1 < eye0 - 0.2 and glow1 > glow0 + 0.3 and hot.r > hot.b + 0.3,
-		"eye %.2f -> %.2f glow %.2f -> %.2f k %.2f" % [eye0, eye1, glow0, glow1, K.heavy_k()])
+	# (hot toward her orchid thread: the steel loses its green as it heats)
+	ok("114 needle: it glows up with the charge, the silver going orchid-hot",
+		K.heavy_k() >= 0.99 and n.charge >= 0.99 and glow1 > glow0 + 0.3 and hot.g < PinNeedle.SILVER.g - 0.3,
+		"glow %.2f -> %.2f k %.2f" % [glow0, glow1, K.heavy_k()])
 	ok("114 V: none in the Heavy Shot hold or the bow draw", clean and no_vee(m))
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -302,10 +303,10 @@ func _pin_readout(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	m.step(DT)
 	var flash := burst_node(K)
 	var at := flash.global_position if flash != null else Vector3(999, 0, 999)
-	ok("pin readout: the perfect release burst sits on the aim line at the bow, with no cursor star",
-		K.draw.perfect_now and flash != null and off_line(P.pos, d, at) < 0.05
+	ok("pin readout: the perfect release burst sits at the bow's nock point, with no cursor star",
+		K.draw.perfect_now and flash != null and at.distance_to(K.draw.bow_at()) < 0.6
 			and float(AimKit.reticle(P)["perfect"]) == 0.0,
-		"perfect %s off %.3f" % [K.draw.perfect_now, off_line(P.pos, d, at)])
+		"perfect %s off %.3f" % [K.draw.perfect_now, at.distance_to(K.draw.bow_at())])
 	step(m, 1.0)
 
 ## #5: the nock on the press, and one steady pull with no pose pop.
@@ -368,6 +369,9 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	aim_at(P, T.pos)
 	var kicks0 := K.heavy_kicks
 	var pins0 := K.pins
+	var spent0 := 0
+	for c in K.fx.spent:
+		if (c["node"] as Node3D).visible: spent0 += 1
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.8, rmb_at.bind(P, T.pos))
@@ -397,8 +401,8 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 		heavy >= 1 and lmb_kinds == 0 and node != null and not (node.get_node("Core") as Node3D).visible,
 		"heavy %d lmb %d" % [heavy, lmb_kinds])
 	var burst := burst_node(K)
-	ok("pin heavy: a release burst at the bow, on the aim line, wider than the bow cues, with a screen kick",
-		burst != null and off_line(P.pos, d, burst.global_position) < 0.05 and burst.scale.x >= 1.4
+	ok("pin heavy: a release burst at the bow's nock point, wider than the bow cues, with a screen kick",
+		burst != null and burst.global_position.distance_to(K.draw.bow_at()) < 0.6 and burst.scale.x >= 1.4
 			and K.heavy_kicks == kicks0 + 1,
 		"scale %.1f kicks %d" % [burst.scale.x if burst != null else 0.0, K.heavy_kicks - kicks0])
 	var flashed := 0.0
@@ -408,13 +412,13 @@ func _pin_heavy(m: Match, P: Hunter, T: Hunter, K: ArcherKit, home: Vector3, lv:
 	ok("pin heavy: it pins the foe to the wall and the target flashes",
 		K.pins >= pins0 + 1 and T.stun_t > 0.5 and flashed > 0.0, "pins %d stun %.2f flash %.2f" % [K.pins - pins0,
 			T.stun_t, flashed])
-	ok("pin heavy: a stake stays in the wall after the pin", K.fx.staked >= 1, "stakes %d" % K.fx.staked)
-	step(m, 5.0)
+	step(m, 1.0)
 	var standing := 0
 	for c in K.fx.spent:
-		if float(c["t"]) > 0.5 and (c["node"] as Node3D).visible:
+		if (c["node"] as Node3D).visible:
 			standing += 1
-	ok("pin heavy: the stake is still standing 5 s later", standing >= 1, "standing %d" % standing)
+	ok("pin heavy: a wall pin leaves nothing in the wall or on the ground (the owner's 11-08 note)", standing <= spent0,
+		"standing %d, %d before" % [standing, spent0])
 
 func bjorn() -> void:
 	var r := setup("bulwark", 7.0, "", true)
@@ -502,9 +506,12 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
 		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
 	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
-	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
-		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
-		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
+	var dome: MeshInstance3D = K.fx.aegis
+	ok("bjorn shield: the wall is an ivory dome (HeroVfx shell) spanning the wall",
+		dome.visible
+		and (dome.material_override as ShaderMaterial).get_shader_parameter("mode") == HeroVfx.MODES["dome"]
+		and K.fx.aegis_size.x * 2.0 * sin(deg_to_rad(53.0)) >= float(sd["len"]) - 0.1,
+		"radius %.2f" % K.fx.aegis_size.x)
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
@@ -613,15 +620,11 @@ func _bjorn_abyss() -> void:
 	press_x(m, P)
 	step(m, 0.45)
 	var ud: BjornUlt = K.ult
-	var drawn := 0.0
-	var floating := true
-	for i in ud.cells.size():
-		var e := AimKit.entry(P, "x%d" % i)
-		if not e.is_empty():
-			drawn += float(e.get("len", 0.0))
-			var mid := (ud.cells[i] as Vector3) + Vector3(ud.dir.x, 0, ud.dir.y) * ud.cell_len() * 0.5
-			var at_height: bool = absf(float(e.get("y", -999.0)) - ud.origin.y) < 0.05
-			floating = floating and (at_height or W.ground_at(mid.x, mid.z) > World.VOID + 1.0)
+	var lane := AimKit.entry(P, "x")
+	var drawn := float(lane.get("len", 0.0))
+	var mid_lane := ud.origin + Vector3(ud.dir.x, 0, ud.dir.y) * ud.trail_len() * 0.5
+	var floating: bool = absf(float(lane.get("y", -999.0)) - ud.origin.y) < 0.05 \
+		or W.ground_at(mid_lane.x, mid_lane.z) > World.VOID + 1.0
 	var over := 0
 	for i in ud.cells.size():
 		var c: Vector3 = ud.cells[i]
@@ -702,6 +705,47 @@ func _pin_dash(m: Match, P: Hunter, T: Hunter, K: ArcherKit) -> void:
 	step(m, 0.5)
 	ok("pin dash > RMB and E: both start during the dash", rolling and rmb_ok and e_ok, "rmb %s e %s" % [rmb_ok, e_ok])
 	_dash_moves(["pin_roll", "pin_flick"], {"pin_roll": 0.28, "pin_flick": 0.22})
+
+## Owner item 146: Spirit Walk has 2 charges (the HUD slot too); a third press waits for the recharge.
+func _pin_two_charges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
+	step(m, 1.0)
+	K.spirit.end("time")
+	P.dashes = P.max_dashes()
+	P.slot_lv["dash"] = 1
+	var info := P.slot_info("dash")
+	var got := "max %s info %s/%s" % [P.max_dashes(), info["charges"], info["max_charges"]]
+	ok("pin dash: 2 charges, both on the HUD slot (data roll 4 m)",
+		int(P.max_dashes()) == 2 and int(info["charges"]) == 2 and int(info["max_charges"]) == 2
+		and absf(float(K.dash_def()["roll"]) - 4.0) < 0.001, got)
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.inp["move"] = Vector2(-1, 0)
+	P.inp["fire"] = false
+	aim_at(P, home + Vector3(-6, 0, 0))
+	var x0 := P.pos.x
+	P.do_dash()
+	step(m, 0.4)
+	var d1 := x0 - P.pos.x
+	K.spirit.end("time")
+	var left := P.slot_info("dash")
+	P.do_dash()
+	step(m, 0.4)
+	K.spirit.end("time")
+	var both := "left %s dashes %.2f roll %.1f m" % [left["charges"], P.dashes, d1]
+	var roll_m := float(K.dash_def()["roll"]) * float(K.dash_feel()["dist"])      # (the shared dash feel scales it)
+	ok("pin dash: two presses back to back both roll; the first goes its data roll",
+		P.dashes < 0.1 and int(left["charges"]) == 1 and d1 > roll_m * 0.9, both + " want %.1f m" % roll_m)
+	var x1 := P.pos.x
+	P.do_dash()
+	step(m, 0.4)
+	var third := x1 - P.pos.x
+	var waits: bool = not K.spirit.active() and P.dashes < 1.0 and K.st.get("last_dash") == "flick"
+	var seen := "moved %.1f dashes %.2f" % [third, P.dashes]
+	ok("pin dash: the third press is only the shared long dash", waits, seen)
+	step(m, float(K.dash_def()["cd"]) + 0.5, func(): P.inp["move"] = Vector2.ZERO)
+	var back := int(floor(P.dashes + 0.001))
+	ok("pin dash: after the recharge one charge is back", back == 1, "dashes %.2f" % P.dashes)
+	P.inp["move"] = Vector2.ZERO
 
 ## into_dash.x for Mossy: Shift while planted for Faultline isn't lost, it goes when the plant ends.
 func _bjorn_plant_dash(m: Match, P: Hunter, K: BulwarkKit) -> void:

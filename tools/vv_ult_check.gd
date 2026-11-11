@@ -47,6 +47,7 @@ func mage() -> void:
 	var U := K.ult
 	var xd := K.x_def()
 	_gate(m, P, K)
+	Sfx.listener = home          # (the looks draw near the listener: HeroVfx.lod_at)
 	# the press: one cast, the cooldown starts, the crouch
 	T.teleport(home + Vector3(6, 0, 0))
 	T2.teleport(home + Vector3(6.5, 0, 1.2))
@@ -61,13 +62,18 @@ func mage() -> void:
 	var hanging := U.phase() == MageUlt.AIR and P.pos.y > home.y + 3.5
 	ok("Kitefall: launched up and hanging", hanging and K.anim_id == "mage_x_air",
 			"y +%.1f %s" % [P.pos.y - home.y, U.phase()])
+	ac.step(m, 0.1, func(): ac.aim_at(P, T.pos))          # (a beat of the hang: its crackle)
 	var ring := AimKit.entry(P, "x_ring")
 	var ring_r := float(ring.get("r", 0.0))
 	ok("Kitefall: the gold range ring (8 bh) round the take-off, seen by everyone",
 			AimKit.shown(P, "x_ring") and bool(ring.get("all", false)) and absf(ring_r - 8.0 * AimKit.BH) < 0.1,
 			"r %.1f" % float(ring.get("r", 0.0)))
+	var fills := (VVFx.of(m).pools.get("disc", []) as Array).filter(func(n): return (n as Node3D).visible)
+	ok("Kitefall: the range is a ring only, no dark fill over the screen", fills.is_empty(), "%d discs" % fills.size())
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
+	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
+			- float(U.data()["radius"])) < 0.05)
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
@@ -105,7 +111,11 @@ func mage() -> void:
 			is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"]))
 			and P.ult >= float(KinBond.rules()["hit"]) - 0.01,
 			"paid %.2f bar %.2f" % [_paid(P, id), P.ult])
-	ok("Kitefall: free again at once (the attack works, gold crackle at her feet)",
+	var ult_looks := HeroVfx.of(m).plays
+	ok("Kitefall: the call, the launch, the hang and the strike as her own looks (HeroVfx x_*)",
+			["x_cast", "x_rise", "x_hang", "x_strike"].all(func(mv): return int(ult_looks.get(mv, 0)) >= 1),
+			str(ult_looks.keys()))
+	ok("Kitefall: free again at once (the attack works, sparks settling at her feet)",
 			U.phase() == MageUlt.AFTER and K.fire_ok() and K.anim_id == "mage_x_land")
 	ok("Kitefall: on cooldown, a press now does nothing", not HunterKeys.ult_pressed(P) and U.casts == 1)
 	ac.step(m, 0.6)
@@ -406,7 +416,18 @@ func gunslinger() -> void:
 			U.casts == 1 and U.shells.size() == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])))
 	ok("Cinderfall: it lands exactly at the cursor", not s.is_empty() and hc._flat(s["at"], t_at) < 0.1)
 	ok("Cinderfall: the rifle goes straight up (gunslinger_x)", K.anim_id == "gunslinger_x")
-	ac.step(m, 0.5)
+	var fire_s := float(Tuning.of("vex")["x_fire_s"])
+	var flash_early := int(HeroVfx.of(m).plays.get("x_cast", 0))
+	ac.step(m, fire_s + 0.03)
+	ok("Cinderfall 11-08: the green-fire shot waits for her wind-up (x_fire_s), then fires once",
+			flash_early == 0 and int(HeroVfx.of(m).plays.get("x_cast", 0)) == 1, "%d before" % flash_early)
+	var warp: Array = Tuning.of("clip_warp")["vex"]["gunslinger_x"]
+	ok("Cinderfall 11-08: her clip's kick lands on the fire key (clip 0.1 s at x_fire_s), the clip ends by 0.9 s",
+			is_equal_approx(WardenClips._warped(warp, fire_s), 0.1) and WardenClips._warped(warp, 0.9) >= 0.6 - 0.001)
+	var shake := [GunslingerUlt.shake_power(0, 0), GunslingerUlt.shake_power(1, 0), GunslingerUlt.shake_power(2, 1)]
+	ok("Cinderfall 11-08: the landing shake grows with what it hit (edge, then dead centre), capped",
+			shake[0] < shake[1] and shake[1] < shake[2] and shake[2] <= 1.0, str(shake))
+	ac.step(m, 0.5 - fire_s - 0.03)
 	var disc := AimKit.entry(P, "x1")
 	var disc_r := float(disc.get("r", 0))
 	var core_r := float(disc.get("core", 0))
@@ -415,6 +436,8 @@ func gunslinger() -> void:
 			AimKit.shown(P, "x1") and bool(disc.get("all", false)) and absf(disc_r - float(xd["radius"])) < 0.05
 			and absf(core_r - float(xd["core_r"])) < 0.05 and fill > 0.2,
 			"r %.1f core %.1f fill %.2f" % [disc_r, core_r, fill])
+	ok("Cinderfall: the disc is a lit rim over a see-through centre, not a solid sheet (docs/VFX_QUALITY.md)",
+			float(disc.get("alpha", 1.0)) <= 0.5 and int(HeroVfx.of(m).plays.get("x_cast", 0)) >= 1)
 	# he is free the whole time: he walks and the rifle works
 	var p0 := P.pos
 	ac.step(m, 0.4, func(): P.inp["move"] = Vector2(-1, 0))
@@ -428,6 +451,8 @@ func gunslinger() -> void:
 			absf(ac.dmg(T) - base * (1.0 + float(xd["core_k"]))) < 0.5 and absf(ac.dmg(T2) - base) < 0.5
 			and U.last.get("centre", 0) == 1,
 			"centre %.1f edge %.1f (base %.1f)" % [ac.dmg(T), ac.dmg(T2), base])
+	ok("Cinderfall: the shell streaks down and lands as its own look (HeroVfx x_shell, x_impact)",
+			int(HeroVfx.of(m).plays.get("x_shell", 0)) >= 1 and int(HeroVfx.of(m).plays.get("x_impact", 0)) >= 1)
 	var hit_share := float(KinBond.rules()["hit"])
 	ok("Cinderfall: the bond fills once for the impact (a hit)", is_equal_approx(_paid(P, id), hit_share),
 			"paid %.2f" % _paid(P, id))

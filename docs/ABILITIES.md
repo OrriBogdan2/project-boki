@@ -1,6 +1,6 @@
 # Project Boki abilities
 
-Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
+Every ability in an expedition, by slot. All of them are data. Hunter abilities: `content/hunter_abilities/*.json` (class dashes, weapon RMBs) and `content/gear/*.json` (Q gloves), built from the effect verbs in `scripts/combat/effects.gd` and the world verbs in `scripts/combat/verbs.gd` (walls, mirrors, tethers, traps, bridges, yanks, decoys). Kin abilities and merges (E, its auto active and the Merge) are the kin grammar: `content/kin_v2`, `content/abilities_v2`, `content/merges_v2`, run by `scripts/kin/kin_exec.gd` (see docs/KIN_GRAMMAR.md). A new ability is a new JSON file either way.
 
 This file is generated from the JSON by a script; the descriptions are the one-liners players see in the kit panel (K) and on hover.
 
@@ -13,9 +13,9 @@ Every hunter plays one of six archetypes (`content/archetypes/*.json`, run by `s
 | **Thief** | light | Twin Blades | Vault | Marks | Bola | Shadow Knife (18s) | none (X is the Merge) |
 | **Lace** | light | Longbow | Spirit Walk | Hawk Sense | Heavy Shot | Hail Wall (9s) | none (X is the Merge) |
 | **Sparkle** | light | Coilcaster | Wirerun | Sparks | Coilshot | Skycall (12s) | none (X is the Merge) |
-| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Burr Charge | Longneedle (12s) | none (X is the Merge) |
+| **Marlowe** | medium | Quill Rifle | Slipstep | Fever | Coin Blast | Palm Lance (12s) | none (X is the Merge) |
 | **Juggernaut** | heavy | Greatsword | Rampage | Rage | Smash | Warchain (13s) | none (X is the Merge) |
-| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Guard | Aegis | Mending Ground (12s) | none (X is the Merge) |
+| **Mossy** | heavy | War Hammer & Aegis | 360 Smash | Crushed | Aegis | Mending Ground (12s) | none (X is the Merge) |
 
 ### Thief (light)
 
@@ -34,7 +34,7 @@ _The cutpurse duelist. Sticks to one mark, flips past them, never lets go._
 _The warden of high ground. Climbs, reads the field, pins people to walls._
 
 - **Passive: Hawk Sense.** Rivals under half health are seen through cover within 22m. Always on, no meter. A knock heals 18.
-- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you lose 30 Focus and are put back where you went in.
+- **Shift: Spirit Walk** (6s a charge). A quick dodge roll in the direction you move (or aim), then 2.8s as a spirit: rocks, trees, pillars, ability barriers and raised terrain don't stop you (you climb a ledge face and drop off the far side); you move 10% faster. Walking into something leaves a spirit orb there for 4s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends inside a rock, tree or barrier you are put back where you went in; ending in a ledge sets you on top of it.
 - **RMB: Heavy Shot** (16s):
   - hold: Heavy Shot: hold to draw (0.5s to start, full at 1.1s, a rising creak, a ring, a ping at full) and let go to loose it: 16 -> 30 damage, push 6 -> 12, pierces 2; driven into a wall within 3m it hits again (up to 12) and stuns 1.2 (PINNED). A quick tap does nothing and costs nothing.
 - **E: Hail Wall** (9s). Lob a volley: 0.35s later arrows rain for 4.4s on a curved wall 120 degrees wide round you, at the cursor distance (2-9m). Foes inside take 5 every 0.5s, are slowed 35% and burn blue (healing barely takes). A Heavy Shot that knocks a burning foe Cremates them: +10 and a longer burn.
@@ -56,12 +56,12 @@ _The storm-kite runner. Charges you up shot by shot, then runs straight through 
 
 _The burr-and-needle marksman. Tags a foe with a clinging charge, lets the rifle and one long needle of light do the rest, and lives off every hit that lands._
 
-- **Passive: Fever.** Each ability that lands (Burr Charge, its blast, Longneedle) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Burr Charge counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
+- **Passive: Fever.** Each ability that lands (Coin Blast, its blast, Palm Lance) adds a stack, up to 8, lasting 3.5s. Every stack makes your damage heal you for 6%, rifle included. A Coin Blast counts twice, once when it sticks and once when it goes off. Knocking a hunter down heals a quarter of your health and refreshes Slipstep.
 - **Shift: Slipstep** (11.5s a charge). Tap: a quick 3.4m skid. Hold: a 6m low slide you can shoot from; let go early and part of the cooldown comes back. A knock refreshes it.
-- **RMB: Burr Charge** (9s):
+- **RMB: Coin Blast** (9s):
   - tap: Lob a burr 11m. On a hunter or monster it sticks, then pops after 0.7s: 13 damage in 1.9m and Rattled for 1.2s.
-  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Burr Charge's cooldown drops 40%.
-- **E: Longneedle** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
+  - resource full: On a wall it blasts a cone back out: 10 damage, a hard shove, Rattled for 2s; a hunter shoved into more terrain is stunned, and the Coin Blast's cooldown drops 40%.
+- **E: Palm Lance** (12s). Stand and charge for 0.8s (slowed, a lane shows), then fire a needle of light 14m that passes through cover and everything in its line: 36 damage, 20% more on a Rattled foe, and a Rattled hunter hit is Skewered. Hitting a hunter takes 30% off its cooldown.
 - Level-up order (bots too): RMB, Dash, E, RMB, Dash, E, RMB, Dash, E
 
 ### Juggernaut (heavy)
@@ -82,13 +82,12 @@ _The wrecking ball. Burns hotter with every hit, chains you in, and finishes it.
 
 _The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot._
 
-- **Passive: Guard.** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 0.5 (8 damage).
+- **Passive: Crushed.** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 0.5s (8 damage).
 - **Shift: 360 Smash** (9s a charge). 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while spinning up a Crushing Blow: a short plain dash that costs half a charge.
 - **RMB: Aegis** (6s):
   - tap: A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
   - hold: Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
   - in the air: Shield Surf: hold to block from the front while gliding.
-  - resource full: Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
 - **E: Mending Ground** (12s). A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 - Level-up order (bots too): RMB, Dash, E, RMB, E, RMB, Dash, Q
 
@@ -207,7 +206,7 @@ Each kin has one E ability (`active`), an auto active it uses by itself (`auto`)
 
 ### Lunowl (Owl + Luna moth, perch)
 
-- **E: Moon Swap** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches trades places with YOU (stunned 0.4s): pull a rival off a ledge, or step behind them.
+- **E: Moon Mark** (projectile, 10s): Lunowl throws a moon mark 9m. The first foe it touches is stunned 0.4s, then glows in silver for 4s: seen through walls and grass, and takes 15% more damage.
 - **Auto: Moonlift** (burst, 14s): On its own, when you fall into the abyss, Lunowl throws up a column of moonlight that lifts you high and cools your glider.
 - **Throw (C)**: stuns what it hits; also push.
 - **Merge: Eclipse** (7s): Lunowl swells into a living eclipse for 7s that drags foes in and flings them skyward.
@@ -234,7 +233,7 @@ Several verbs appear in more than one element, tuned to fit it:
 - **Wall**: Barrier Glove (stone, blocks shots and bodies both ways), Bracewall (energy, follows your aim, yours pass through), Mass Guard (gravity plate, raised for you when you're shot), Prism Wall (crystal, reflects shots).
 - **Reflect**: Mirror Glove (all-round bubble), Riposte (frontal, parries melee), Refraction (prism, auto when hurt), Prism Wall (reflecting wall).
 - **Slam / knock-up**: Earthshatter (hunter leap), Gravity Slam (kin meteor that pulls in first), Fissure Glove (a line eruption), Vortex Glove (pull then pop).
-- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits), Moon Swap (lunar: trade places).
+- **Blink**: Blink Glove (blink-strike), Shadow Step (appear behind who your knife hits).
 - **Trap / zone**: Tripwire Mine (root + reveal), Puffcap Mines (spore triangle), Spore Patch (spore cloud).
 
 ## Readability

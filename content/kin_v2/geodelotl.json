@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "geodelotl",
+	"name": "Geodelotl",
+	"theme": "crystal",
+	"type2": "rock",
+	"flavor": "Heavy geode hide, crystal tail club.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "puddlet",
+		"stage": 3,
+		"from": "glassolotl"
+	}
+}

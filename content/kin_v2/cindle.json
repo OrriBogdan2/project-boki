@@ -6,7 +6,7 @@
 		"Fox",
 		"Scorpion"
 	],
-	"theme": "venom",
+	"theme": "poison",
 	"flavor": "A sly fox with a scorpion's curled tail. Its sting drips venom that keeps eating at foes after the hit.",
 	"colors": {
 		"body": "#4a2f5c",
@@ -116,5 +116,10 @@
 		"temper": "Bold",
 		"desc": "A dark plum shell beaded with green droplets. It hisses when you lean close. Something bold is in here.",
 		"play": "Darts in, stings hard and poisons. Brave, but quick to anger."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "cindle",
+		"stage": 1
 	}
 }

@@ -6,7 +6,8 @@
 		"Basilisk lizard",
 		"Soap bubble"
 	],
-	"theme": "prism",
+	"theme": "crystal",
+	"type2": "water",
 	"flavor": "A lizard that blows a soap-bubble copy of itself and runs while you pop the bubble. A show-off that startles easily; runs first, poses later.",
 	"colors": {
 		"body": "#5ab8a0",
@@ -66,7 +67,7 @@
 			}
 		]
 	},
-	"active": "moon_swap",
+	"active": "moon_mark",
 	"auto": "refraction",
 	"merge": "tempest",
 	"evolution": {
@@ -110,5 +111,10 @@
 		"temper": "Showy",
 		"desc": "Something showy is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "opalisk",
+		"stage": 1
 	}
 }

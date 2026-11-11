@@ -1,11 +1,12 @@
 class_name Evo
-## Kin evolution. How you raise a kin decides what it grows into, and it never stops growing.
+## Boki evolution (docs/decisions/0024-evolution-rules.md). Data: content/rules/evolve.json.
 ##
-## Every kin builds up four affinities from how it lives: what it eats, what it does in matches
-## and its own personality. Every 4 levels it takes a new form along its strongest affinity, so
-## one Vespyx can become fierce and another steadfast. Between forms, every 4 levels from level 2,
-## it gains a mutation: a new body part (or a bigger version of one it has) with a small perk.
-## There is no cap, and the parts and order differ for every kin.
+## Each species evolves into the next one at its own level, with a Lunar/Ember/... Ink used on it,
+## or by being traded, as its entry in evolve.json says. Where a final form branches by training
+## ("stat"), the higher trained stat at that moment picks it, and on a tie its affinity does.
+## A Boki never evolves into a species that has no data or no model yet: it waits at the level,
+## and evolves once the art exists (catch_up on load). Levels stop at the cap (100).
+## Every 4 levels from level 2 it also gains a mutation: a cosmetic body part, or a bigger one.
 
 const AFF := {
 	"fierce": {"name": "Fierce", "tint": Color("e0503a"), "stat": "dmg", "amt": 0.05,
@@ -16,14 +17,6 @@ const AFF := {
 		"why": "explores and uses its skill", "food": "mindmint", "parts": ["antennae", "spots", "third_eye", "crest"]},
 	"swift": {"name": "Swift", "tint": Color("5ad0e0"), "stat": "speed", "amt": 0.05,
 		"why": "gets thrown around and moves fast", "food": "tidebloom", "parts": ["wings", "tail_long", "fins", "crest"]},
-}
-
-const ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb", "wisplet": "Wisp"}
-const SUFFIX := {
-	"fierce": ["fang", "claw", "maw", "rend", "fury"],
-	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
-	"curious": ["wick", "seer", "mote", "glim", "oracle"],
-	"swift": ["dart", "wing", "gale", "streak", "comet"],
 }
 
 const PART_NAMES := {"horns": "horns", "spikes": "back spikes", "fangs": "fangs", "brow": "an armored brow",
@@ -39,40 +32,172 @@ static func ensure(rec: Dictionary) -> void:
 		rec["forms"] = []          # one affinity per form taken
 	if not rec.has("muts"):
 		rec["muts"] = []           # [{id, lv, aff}]
+	if not rec.has("was"):
+		rec["was"] = []            # the species it evolved from, oldest first
 
 static func add(rec: Dictionary, aff: String, n: float) -> void:
 	ensure(rec)
 	rec["aff"][aff] = float(rec["aff"].get(aff, 0.0)) + n
 
+## Food is the quick lever: a meal of an affinity's food grows that affinity and its lean, the colour
+## it wears from the next meal on. The last few meals decide it: other leans fade as one grows.
+const FOOD_AFF := 6.0         # affinity points one meal of an affinity's food gives (as before)
+const LEAN_FULL := 24.0       # lean points for the full colour: four meals in a row
+const LEAN_FADE := 3.0        # what every other lean loses at each such meal
+const LEAN_TINT := 0.3        # body colour moved toward the lean's tint at full (a form: 0.1 each, 0.35 at most)
+
+## It ate food f: the affinity that food grows ("" for food with none).
+static func eat(rec: Dictionary, f: String) -> String:
+	for af in AFF:
+		if AFF[af]["food"] != f:
+			continue
+		add(rec, af, FOOD_AFF)
+		var ln: Dictionary = rec.get_or_add("lean", {})
+		for other in ln:
+			ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
+		ln[af] = minf(LEAN_FULL, float(ln.get(af, 0.0)) + FOOD_AFF + LEAN_FADE)
+		return af
+	return ""
+
+## [affinity, 0..1]: the colour its meals lean it to and how strongly (["", 0.0] before any).
+static func lean(rec: Dictionary) -> Array:
+	var best := ""
+	var most := 0.0
+	var ln: Dictionary = rec.get("lean", {})
+	for af in ln:
+		if float(ln[af]) > most:
+			most = float(ln[af])
+			best = af
+	return [best, clampf(most / LEAN_FULL, 0.0, 1.0)]
+
 ## The affinity that wins right now: what it's been doing plus its personality.
 static func leading(rec: Dictionary) -> String:
-	ensure(rec)
-	var tr: Dictionary = rec.get("traits", {})
-	var sp: Dictionary = Data.KIN.get(rec.get("species", "cindle"), {})
-	var score := {
-		"fierce": float(rec["aff"]["fierce"]) + (float(tr.get("bravery", 0.5)) + float(tr.get("temper", 0.5))) * 5.0,
-		"steadfast": float(rec["aff"]["steadfast"]) + float(tr.get("loyalty", 0.5)) * 10.0,
-		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
-		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
-	}
+	var score := scores(rec)
 	var best := "fierce"; var bv := -1e9
 	for k in ["fierce", "steadfast", "curious", "swift"]:
 		if score[k] > bv: bv = score[k]; best = k
 	return best
 
-## The name of a kin's current form, e.g. "Cindfang" or "Pudward".
+## Each affinity's weight: what it's been doing plus its personality.
+static func scores(rec: Dictionary) -> Dictionary:
+	ensure(rec)
+	var tr: Dictionary = rec.get("traits", {})
+	var sp: Dictionary = Data.KIN.get(rec.get("species", "cindle"), {})
+	return {
+		"fierce": float(rec["aff"]["fierce"]) + (float(tr.get("bravery", 0.5)) + float(tr.get("temper", 0.5))) * 5.0,
+		"steadfast": float(rec["aff"]["steadfast"]) + float(tr.get("loyalty", 0.5)) * 10.0,
+		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
+		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
+	}
+
+## The affinity that settles a tie between two trained stats in a branching final.
+const STAT_AFF := {"power": "fierce", "guard": "steadfast", "speed": "swift"}
+
+## Which branch a training-branch final takes: the option whose trained stat is higher, a tie by
+## the affinity behind each stat. Options without a "stat" take the first.
+static func pick_branch(rec: Dictionary, fits: Array) -> Dictionary:
+	if not fits[0].has("stat"):
+		return fits[0]
+	var st: Dictionary = rec.get("stats", {})
+	var aff := scores(rec)
+	var best: Dictionary = fits[0]
+	for o in fits.slice(1):
+		var a := int(st.get(String(o["stat"]), 0))
+		var b := int(st.get(String(best["stat"]), 0))
+		if a > b or (a == b and aff[STAT_AFF[o["stat"]]] > aff[STAT_AFF[best["stat"]]]): best = o
+	return best
+
+## The final this Boki leans toward right now, for the Boki screen: {} unless its next form is a
+## training branch, else {id, stat, stats: [[stat, points], ..]} for every branch.
+static func branch_lean(rec: Dictionary) -> Dictionary:
+	var into: Array = _line(rec).get("into", [])
+	if into.size() < 2 or not into[0].has("stat"):
+		return {}
+	var st: Dictionary = rec.get("stats", {})
+	var pts: Array = into.map(func(o): return [String(o["stat"]), int(st.get(String(o["stat"]), 0))])
+	var o := pick_branch(rec, into)
+	return {"id": String(o["id"]), "stat": String(o["stat"]), "stats": pts}
+
+## Its species' entry in evolve.json ({} when it doesn't evolve).
+static func _line(rec: Dictionary) -> Dictionary:
+	return rules()["lines"].get(String(rec.get("species", "")), {})
+
+## The Inks that evolve it and what each makes: [[ink, species], ..] (empty for other lines).
+static func inks_for(rec: Dictionary) -> Array:
+	var out: Array = []
+	for o in _line(rec).get("into", []):
+		if o.has("item"): out.append([String(o["item"]), String(o["id"])])
+	return out
+
+## The name it goes by: its species, or the form name an older save gave it (kept until it evolves).
 static func form_name(rec: Dictionary) -> String:
 	ensure(rec)
-	var sp_id: String = rec.get("species", "cindle")
-	var forms: Array = rec["forms"]
-	if forms.is_empty():
-		return Data.KIN[sp_id]["name"]
-	var last: String = forms[forms.size() - 1]
-	var sfx: Array = SUFFIX[last]
-	return String(ROOTS.get(sp_id, "Kin")) + String(sfx[mini(forms.size() - 1, sfx.size() - 1)]) + ("" if forms.size() <= sfx.size() else " " + _roman(forms.size() - sfx.size() + 1))
+	var old := String(rec.get("form_name", ""))
+	return old if old != "" else String(Data.KIN[rec.get("species", "cindle")]["name"])
 
-static func _roman(n: int) -> String:
-	return ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][clampi(n, 0, 10)] if n <= 10 else str(n)
+static func rules() -> Dictionary:
+	return Content.rules("evolve")
+
+## The highest level a Boki can reach.
+static func cap() -> int:
+	return int(rules()["cap"])
+
+## One level more, never past the cap.
+static func level_up(rec: Dictionary) -> void:
+	rec["level"] = mini(int(rec.get("level", 1)) + 1, cap())
+
+## Can a Boki take this species' shape? It needs data, a model and the rig's framing for it.
+static func has_art(id: String) -> bool:
+	return Data.KIN.has(id) and BokiRig.FRAME.has(id) and ResourceLoader.exists(BokiRig.PATH % [id, id])
+
+## The species this Boki would evolve into by `how` ("level", "item" with an Ink id, or "trade"),
+## art or not; "" when that isn't a way it evolves.
+static func next_for(rec: Dictionary, how: String, item := "") -> String:
+	var line := _line(rec)
+	var fits: Array = []
+	for o in line.get("into", []):
+		match how:
+			"level":
+				var by_level: bool = not o.has("item") and not o.get("trade", false)
+				if by_level and line.has("level") and int(rec.get("level", 1)) >= int(line["level"]):
+					fits.append(o)
+			"item":
+				if String(o.get("item", "")) == item: fits.append(o)
+			"trade":
+				if o.get("trade", false): fits.append(o)
+	return "" if fits.is_empty() else String(pick_branch(rec, fits)["id"])
+
+## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
+static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
+	ensure(rec)
+	var to := next_for(rec, how, item)
+	if to == "" or not has_art(to):
+		return {}
+	var before := form_name(rec)
+	var a := leading(rec)
+	var stat := String(branch_lean(rec).get("stat", "")) if how == "level" else ""
+	rec["was"].append(String(rec["species"]))
+	rec["species"] = to
+	rec["forms"].append(a)       # the next node on its affinity's path (KinLib.nodes_for)
+	rec.erase("form_name")
+	return {"kind": "form", "aff": a, "from": before, "to": form_name(rec), "how": how, "item": item, "stat": stat}
+
+## Uses one Ink from the market goods on it. Returns the event, or {} (and keeps the Ink) if it can't.
+static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
+	if Goods.have("good:" + ink) <= 0:
+		return {}
+	var ev := try_evolve(rec, "item", ink)
+	if not ev.is_empty():
+		Goods.take("good:" + ink)
+		Care.dex_mark(String(rec["species"]), "caught")
+		_queue(rec, ev)
+	return ev
+
+## Queues an evolution on the Boki for the home island to play.
+static func _queue(rec: Dictionary, ev: Dictionary) -> void:
+	ev["text"] = describe(ev, rec)
+	if not rec.has("pending_evo"): rec["pending_evo"] = []
+	rec["pending_evo"].append(ev)
 
 ## Called each time a kin gains a level. Returns what changed, or {} if nothing did.
 static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dictionary:
@@ -80,11 +205,9 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 	var lv := int(rec.get("level", 1))
 	if rng == null:
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))
-	if lv >= 4 and lv % 4 == 0:
-		var a := leading(rec)
-		var before := form_name(rec)
-		rec["forms"].append(a)
-		return {"kind": "form", "aff": a, "from": before, "to": form_name(rec)}
+	var ev := try_evolve(rec, "level")
+	if not ev.is_empty():
+		return ev
 	if lv >= 2 and lv % 4 == 2:
 		var a := leading(rec)
 		# mostly from the leading affinity, sometimes from another one it's been building
@@ -100,10 +223,57 @@ static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dict
 		return {"kind": "mutate", "aff": a, "part": part}
 	return {}
 
+## Boki that reached their level while their next form had no art evolve once it exists (on load).
+## Returns the events; each is also queued on the Boki for the home island to play.
+static func catch_up(roster: Array) -> Array:
+	var out: Array = []
+	for rec in roster:
+		var ev := try_evolve(rec, "level")
+		while not ev.is_empty():
+			_queue(rec, ev)
+			out.append(ev)
+			ev = try_evolve(rec, "level")
+	return out
+
+## The form names version-11 saves gave every 4 levels (e.g. "Cindfang"), so migrate can keep them.
+const V11_ROOTS := {"cindle": "Cind", "puddlet": "Pud", "burrlet": "Burr", "zapple": "Zap", "pebbit": "Peb",
+	"wisplet": "Wisp"}
+const V11_SUFFIX := {
+	"fierce": ["fang", "claw", "maw", "rend", "fury"],
+	"steadfast": ["shell", "ward", "keep", "bulwark", "aegis"],
+	"curious": ["wick", "seer", "mote", "glim", "oracle"],
+	"swift": ["dart", "wing", "gale", "streak", "comet"],
+}
+
+## Save v11 -> v12: levels and forms stay as they are (a level over the cap comes down to it), and
+## each Boki keeps the form name it had. Safe to run twice.
+static func migrate(data: Dictionary) -> void:
+	var recs: Array = (data.get("roster", []) as Array).duplicate()
+	for L in data.get("lost_kin", []):
+		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec")) == TYPE_DICTIONARY: recs.append(L["rec"])
+	for rec in recs:
+		if typeof(rec) != TYPE_DICTIONARY:
+			continue
+		rec["level"] = mini(int(rec.get("level", 1)), cap())
+		if rec.has("was"):
+			continue
+		rec["was"] = []
+		var forms: Array = rec.get("forms", [])
+		if forms.is_empty() or not V11_SUFFIX.has(String(forms[-1])):
+			continue
+		var sfx: Array = V11_SUFFIX[String(forms[-1])]
+		var n := forms.size()
+		var root := String(V11_ROOTS.get(String(rec.get("species", "")), "Kin"))
+		var extra := "" if n <= sfx.size() else " " + _roman(n - sfx.size() + 1)
+		rec["form_name"] = root + String(sfx[mini(n - 1, sfx.size() - 1)]) + extra
+
+static func _roman(n: int) -> String:
+	return ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"][clampi(n, 0, 10)] if n <= 10 else str(n)
+
 ## Gives a generated kin (wild or a bot's) the forms and parts it would have grown by its level.
 static func simulate(rec: Dictionary, rng: RandomNumberGenerator) -> void:
 	ensure(rec)
-	var target := int(rec.get("level", 1))
+	var target := mini(int(rec.get("level", 1)), cap())
 	var bias: String = ["fierce", "steadfast", "curious", "swift"][rng.randi_range(0, 3)]
 	for lv in range(2, target + 1):
 		add(rec, bias, rng.randf_range(2.0, 6.0))
@@ -127,6 +297,11 @@ static func describe(ev: Dictionary, rec: Dictionary) -> String:
 	var a: Dictionary = AFF[ev["aff"]]
 	match String(ev["kind"]):
 		"form":
+			match String(ev.get("how", "level")):
+				"item": return "%s became a %s! The %s did it." % [kname, ev["to"], Goods.name_of("good:" + String(ev["item"]))]
+				"trade": return "%s became a %s on its way to a new keeper!" % [kname, ev["to"]]
+			if String(ev.get("stat", "")) != "":
+				return "%s became a %s! Its %s training decided it." % [kname, ev["to"], Care.STATS[ev["stat"]]["name"]]
 			return "%s became a %s! It grew %s because it %s." % [kname, ev["to"], String(a["name"]).to_lower(), a["why"]]
 		"mutate":
 			return "%s grew %s. (%s)" % [kname, PART_NAMES.get(ev["part"], ev["part"]), _perk(ev["aff"])]
@@ -145,19 +320,21 @@ static func dress(root: Node3D, rec: Dictionary) -> void:
 	ensure(rec)
 	var forms: Array = rec["forms"]
 	var muts: Array = rec["muts"]
-	if forms.is_empty() and muts.is_empty():
+	var ln := lean(rec)
+	if forms.is_empty() and muts.is_empty() and String(ln[0]) == "":
 		return
 	var body: Node3D = root.get_node("Body/Flex") if root.has_node("Body/Flex") else root.get_node("Body")
-	var sp: Dictionary = Data.KIN[rec.get("species", "cindle")]
 	var base: Color = Shiny.body(rec)
 	if forms.size() > 0:
 		var last: String = forms[forms.size() - 1]
 		base = base.lerp(AFF[last]["tint"], minf(0.1 * forms.size(), 0.35))
-		# recolour the body to the form's tint
-		var mats: Array = root.get_meta("mats", [])
-		if mats.size() > 0:
-			(mats[0] as ShaderMaterial).set_shader_parameter("albedo", base)
 		root.set_meta("evo_scale", 1.0 + minf(forms.size() * 0.1, 0.6))
+	if String(ln[0]) != "":
+		base = base.lerp(AFF[ln[0]]["tint"], LEAN_TINT * float(ln[1]))
+	# recolour the body to the form's and the meals' tint
+	var mats: Array = root.get_meta("mats", [])
+	if mats.size() > 0 and (forms.size() > 0 or String(ln[0]) != ""):
+		(mats[0] as ShaderMaterial).set_shader_parameter("albedo", base)
 	if body.has_node("BokiRig"):
 		return         # its grown parts are on the rig (BokiDna)
 	var mats2: Array = root.get_meta("mats", [])

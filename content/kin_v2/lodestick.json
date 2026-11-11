@@ -6,7 +6,8 @@
 		"Stick insect",
 		"Lodestone"
 	],
-	"theme": "gravity",
+	"theme": "psychic",
+	"type2": "dark",
 	"flavor": "A stick insect made of dark lodestone twigs. Things drift toward it, and it drifts toward nothing.",
 	"colors": {
 		"body": "#3c3a50",
@@ -66,7 +67,7 @@
 			}
 		]
 	},
-	"active": "moon_swap",
+	"active": "moon_mark",
 	"auto": "updraft",
 	"merge": "tempest",
 	"evolution": {
@@ -110,5 +111,10 @@
 		"temper": "Still",
 		"desc": "Something still is in here.",
 		"play": "Slippery and full of tricks."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "lodestick",
+		"stage": 1
 	}
 }

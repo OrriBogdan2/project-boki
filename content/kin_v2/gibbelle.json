@@ -6,7 +6,7 @@
 		"Gibbon",
 		"Bronze temple bell"
 	],
-	"theme": "echo",
+	"theme": "sound",
 	"flavor": "A gibbon whose belly is a temple bell; it swings by its arms and clangs itself to stun everyone. Loud, joyful, a show-off; sings when happy and louder when scared.",
 	"colors": {
 		"body": "#8a7a9a",
@@ -113,5 +113,11 @@
 		"temper": "Joyful",
 		"desc": "Something joyful is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "locked",
+		"line": "gibbelle",
+		"stage": 1,
+		"sex_forms": true
 	}
 }

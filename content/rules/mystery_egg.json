@@ -1,0 +1,4 @@
+{
+	"_doc": "The black mystery egg in the hatch scene (MysteryEgg, scripts/ui/mystery_egg.gd). It always hatches Ermink (hatch.gd MYSTERY, briefs/DECISIONS.md 11-08 roster). mutation_mult: the hatchling's roll on Mutations' base odds (x5 is about 1 in 4 with a mutation; the starter eggs don't roll).",
+	"mutation_mult": 5.0
+}

@@ -1,0 +1,15 @@
+{
+	"grammar": 1,
+	"id": "seamwyrm",
+	"name": "Seamwyrm",
+	"theme": "dark",
+	"type2": "dragon",
+	"flavor": "Great dragon-worm, zipper splits open as its jaws.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "zipling",
+		"stage": 3,
+		"from": "caecilith"
+	}
+}

@@ -6,7 +6,8 @@
 		"Tortoise",
 		"Ibex"
 	],
-	"theme": "titan",
+	"theme": "steel",
+	"type2": "rock",
 	"flavor": "A tortoise with an ibex's sweeping horns, carrying a little rune-carved cairn on its shell. Hatched from the Stone Colossus's egg.",
 	"colors": {
 		"body": "#6a6f7a",
@@ -118,5 +119,10 @@
 		"temper": "Ancient",
 		"desc": "Heavy as a millstone and warm as a hearth, with gold runes that glow when you touch it. The Colossus guarded it.",
 		"play": "A wall of stone. Heaves boulders that quake and stun."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "cairnback",
+		"stage": 1
 	}
 }

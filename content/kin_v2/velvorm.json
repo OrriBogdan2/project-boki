@@ -6,7 +6,7 @@
 		"Velvet worm",
 		"Piping bag"
 	],
-	"theme": "venom",
+	"theme": "poison",
 	"flavor": "A velvet-cake worm with icing nozzles for a face; it pipes sticky poison icing that glues your feet down. Looks sweet, hunts like a cat; loves being stroked, hates being ignored.",
 	"colors": {
 		"body": "#6a3a7a",
@@ -114,5 +114,10 @@
 		"temper": "Soft",
 		"desc": "Something soft is in here.",
 		"play": "Pins foes down and breaks up their pushes."
+	},
+	"roster": {
+		"art": "todo",
+		"line": "velvorm",
+		"stage": 1
 	}
 }

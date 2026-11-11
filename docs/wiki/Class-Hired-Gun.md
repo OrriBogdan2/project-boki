@@ -48,8 +48,8 @@ foe and Dazes them, and the rifle and one long needle of light do the rest.
 |---|---|
 | Body | 145 health, 4.4 m/s, 1 dash charge |
 | Signature weapon | Quill Rifle (the only weapon this hunter carries; it grows through upgrades, never swaps) |
-| Fantasy | The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light. |
-| Silhouette | the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle |
+| Fantasy | The ember-rifle skirmisher. Flicks her big coin into a foe to Daze them for her rifle, slides around while still shooting, and finishes with a lance of green fire from her open palm. |
+| Silhouette | the long scarf streaming behind, the bandolier across the chest, the brass cyborg hand and the long-shrouded rifle |
 | Resource | Fever (max 1) |
 
 ### Kit card
@@ -58,26 +58,25 @@ What the in-game kit card (K) says.
 
 | Slot | Card text |
 |---|---|
-| Loop | Mid-range rifleman: Daze a foe with the grenade's cone, then shred them while it lasts. |
+| Loop | Mid-range rifleman: Daze a foe with a coin hit, then shred them while it lasts. |
 | Passive: Hot Streak | Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds. |
 | Dash: Slipstep | Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim. |
-| RMB: Burr Charge | Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it. |
-| E: Longneedle | Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it. |
+| RMB: Coin Blast | Coin Blast: tap to flick your big coin from your cyborg hand along your aim. Only a hit counts: it hurts and Dazes the foe it strikes. A wall or the end of its range is a fizzle. |
+| E: Palm Lance | Palm Lance: raise your open palm and stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it. |
 | Hunter ultimate: Cinderfall | Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall. |
 | Weapon: Quill Rifle | Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers). |
 
 ### Abilities in full
 
-**Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch.
+**Hot Streak (passive).** Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Coin Blast, Palm Lance) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch.
 
-**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
+**Slipstep (dash, Shift, 8.5s cooldown).** Tap: a 4.8m skid on her measured dash curve (a fast start that bleeds off) over about 0.5s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.
 
-**Burr Charge (RMB, 6.5s cooldown).**
+**Coin Blast (RMB, 6.5s cooldown).**
 
-- *Tap:* Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.
-- *Resource full:* Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer.
+- *Tap:* Tap RMB: she flicks the coin from her cyborg hand on the press. It flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes (a Hunter, a Boki or a monster): 22 damage and Dazed 1.4s. A coin that meets a wall or runs out of range just fizzles: no damage, no blast, and the cooldown still runs.
 
-**Longneedle (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core, tracking your aim while your view pulls out along it. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
+**Palm Lance (E, 11.5s cooldown).** Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).
 
 **Cinderfall (hunter ultimate, from level 6, 42s cooldown).** Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not.
 
@@ -87,9 +86,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 6.5s -> 5.9s, damage +15%. | cooldown 6.5s -> 5.2s; resets when you knock a hunter. |
-| Dash (Shift) | recharge 8.5s -> 7.7s. | recharge 8.5s -> 6.8s; +25% speed for 2s when a slide ends. |
-| E | cooldown 11.5s -> 10.4s, damage +20%. | cooldown 11.5s -> 9.2s, damage +40%; every hunter hit takes 30% off the cooldown. |
+| RMB | cooldown 6.5s -> 5.4s. | cooldown 6.5s -> 4.3s; it resets when you knock a hunter. |
+| Dash (Shift) | recharge 8.5s -> 7.4s. | recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends. |
+| E | damage +20%. | damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E.
 

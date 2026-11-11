@@ -1,0 +1,16 @@
+{
+	"grammar": 1,
+	"id": "arcestrel",
+	"name": "Arcestrel",
+	"theme": "electric",
+	"type2": "flying",
+	"flavor": "Falcon with lightning-rod crest and coil talons.",
+	"data_only": true,
+	"roster": {
+		"art": "new",
+		"line": "kestrike",
+		"stage": 2,
+		"from": "kestrike",
+		"sex_forms": true
+	}
+}

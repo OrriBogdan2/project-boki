@@ -44,7 +44,7 @@ that strikes down. A foe hit while **in the air** (off its feet and gliding, or 
 | Damage | +`bonus` (Tenzo 40%, Grimble 0%) | the payoff for catching someone in the air |
 | Fall | at least 20 m/s down (`Spike.FALL_VY`), glider folded | a 2.5m glide is on the ground in ~0.2s |
 | Grounded | 0.8s: no dash, jump or glide | no air-dash or re-glide out of it (the reference's Grounded) |
-| Landing | the glider spike's landing: 0.7s stun, 8 fall damage, dust and ring (`Hunter.SPIKE_STUN`) | one landing for every spike |
+| Landing | the glider spike's landing: 0.7s stun, 8 fall damage, dust and ring (`GlideSpike.land`) | one landing for every spike |
 | Abyss | no extra rule: over the void the fall takes them | the reference's "lethal over the abyss" |
 | Feedback | tier-4 hit stop (`Feel`, already budgeted), a thin pale downward streak, a small SPIKED word, a low knock | kept quiet (owner: less in your face) |
 

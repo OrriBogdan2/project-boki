@@ -6,7 +6,7 @@ shader_type spatial;
 //   0 ARC     a ribbon along UV.x (0 head, 1 tail): a jagged lightning core that re-strikes, a tinted halo
 //   1 PILLAR  an open column (UV.y foot 0 -> top 1): bright rim, climbing bands, narrows with life
 //   2 RING    a flat quad: an expanding ring with radial spark needles (arrival bursts, shock rings)
-//   3 DISC    a flat quad: a dark filled disc, a jagged crackling rim and lightning veins (placed areas)
+//   3 DISC    a flat quad: a dark filled disc (hollow: a glowing centre), a crackling rim and veins
 //   4 STAR    a camera-facing 4-point crackle (fingertip, muzzle, sky-bolt foot)
 //   5 TRACER  a ribbon: a hot needle head and a tail that thins and cools (the rifle rounds)
 //   6 FAN     a flat sector (UV.x across the sector, UV.y from the apex 0 to the rim 1): a blast front
@@ -20,6 +20,8 @@ uniform vec4 color3 : source_color = vec4(0.0, 0.0, 0.0, 0.0);
 uniform float life = 0.0;
 uniform float seed = 0.0;
 uniform float strength = 1.0;
+uniform float hollow = 0.0;   // DISC: 0 a dark fill, 1 only the rim and a glowing centre
+uniform float hold = 0.0;     // DISC: 1 stands at full strength and fades only over its last fifth
 uniform bool billboard = false;
 
 float hash(float x) { return fract(sin(x * 127.1 + seed * 311.7) * 43758.5453); }
@@ -83,8 +85,10 @@ void fragment() {
 		float veins = (1.0 - smoothstep(0.0, 0.05, abs(spoke - 0.5))) * inside * smoothstep(0.15, 0.6, r);
 		veins *= step(0.45, vnoise(ang * 3.0 + tick * 0.7));
 		body = mix(color.rgb, color3.rgb, rim * color3.a);
-		body_a = max(inside * 0.7, rim) * k;
-		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7) * k;
+		float centre = (1.0 - smoothstep(0.0, 0.12, r)) + 0.3 * (1.0 - smoothstep(0.0, 0.3, r));
+		float kd = mix(k, 1.0 - smoothstep(0.8, 1.0, life), hold);
+		body_a = max(inside * 0.7 * (1.0 - hollow), rim) * kd;
+		glow = color2.rgb * (rim * (0.3 + 0.5 * crackle) + veins * 0.7 * (1.0 - hollow) + centre * hollow) * kd;
 	} else if (mode == 4) {
 		vec2 p = uv * 2.0 - 1.0;
 		float r = length(p);
@@ -101,16 +105,6 @@ void fragment() {
 		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
 		body_a = shaft * (1.0 - uv.x) * k;
 		glow = color2.rgb * head * k;
-	} else if (mode == 6) {
-		float front = 0.15 + 0.85 * sqrt(life);
-		float band = 1.0 - smoothstep(0.0, 0.12, abs(uv.y - front));
-		float fill = (1.0 - smoothstep(front - 0.02, front, uv.y)) * 0.45 * k;
-		float spikes = pow(abs(sin(uv.x * 31.4 + seed)), 12.0) * smoothstep(front * 0.5, front, uv.y);
-		spikes *= 1.0 - smoothstep(front, front + 0.1, uv.y);
-		float side = 1.0 - smoothstep(0.0, 0.04, min(uv.x, 1.0 - uv.x));
-		float edge = side * (1.0 - smoothstep(front, front + 0.02, uv.y));
-		body_a = clamp(band + fill + edge * 0.6, 0.0, 1.0) * k;
-		glow = color2.rgb * spikes * 1.5 * k;
 	} else if (mode == 8) {
 		// a hot core, a coloured body, and a shimmering edge band in color3
 		float d = abs(uv.y - 0.5) * 2.0;
