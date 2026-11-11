@@ -187,8 +187,10 @@ func _load(main: Node, seed: int):
 # ------------------------------------------------------------------ the clip
 var _frame := 0
 
-## One rendered frame of the Home running on its own (run with --fixed-fps 30), saved as the next PNG.
-func _grab(dir: String) -> void:
+## One 30 fps step of the Home (its own _process: the player, camera and build mode), rendered and saved
+## as the next PNG.
+func _grab(hm, dir: String) -> void:
+	hm._process(1.0 / 30.0)
 	await tree.process_frame
 	tree.root.get_viewport().get_texture().get_image().save_png("%s/f%04d.png" % [dir, _frame])
 	_frame += 1
@@ -199,7 +201,6 @@ func _media(main: Node, seed: int, dir: String) -> void:
 	if main.get("fade"): main.fade.reveal(0.05)
 	var w: World = hm.world
 	var hb: HomeBuild = hm.hb
-	hm.set_process(true)
 	# 1. a crop patch slid toward the island's water: nothing over it, then the drop and "+growth"
 	var wc := FarmWater.nearest(Save.d, Vector2(HomeLayout.LANDING.x, HomeLayout.LANDING.z))
 	if wc.x >= 0:
@@ -211,7 +212,7 @@ func _media(main: Node, seed: int, dir: String) -> void:
 		hb.take("crop_patch")
 		for fr in 130:
 			hb.debug_m = from.lerp(to, clampf(fr / 80.0, 0.0, 1.0))
-			await _grab(dir)
+			await _grab(hm, dir)
 		hb.debug_m = Vector2.INF
 		hb.toggle()
 	# 2. a running jump onto a ridge, a stop on top, then off the far side
@@ -229,6 +230,6 @@ func _media(main: Node, seed: int, dir: String) -> void:
 			_press(n if not over or top_t > 30 else Vector2.ZERO)
 			if fr == 18: Input.action_press("jump")
 			if fr == 20: Input.action_release("jump")
-			await _grab(dir)
+			await _grab(hm, dir)
 		_press(Vector2.ZERO)
 	print("FCLIMB frames %d in %s" % [_frame, dir])
