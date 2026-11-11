@@ -585,3 +585,9 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 
 ## 2026-11-11 2:50 PM EST — Legendary art (owner)
 - Legendaries must be ICONIC and clearly legendary, just less noisy. Keep each one's signature regalia (Sarcobra pharaoh headdress, Glaciammoth grandeur); remove only clutter (filigree, sparkles, rune patterns, competing glows). The 11-11 stripped-down redo was too simple: not shipped. v3 in meshy/legend-redo3.
+
+## 2026-11-11 owner (combat/UI)
+- Albert stays the biggest hunter, but only by a modest margin (~10-15%). Kael is smaller too.
+- No sweet-spot callouts, floating callout words or keybind letters on world objects (e.g. no E on Sable's dagger). Timers may show as pure visual cues (flash or pulse).
+- Kael RMB is a straight-line thrust with a short forward lunge, not a cone.
+- Kael LMB has no knockback.
