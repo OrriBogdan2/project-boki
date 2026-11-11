@@ -111,7 +111,8 @@ func fire_rmb(c: Dictionary) -> void:
 		at = AimMode.place(h, float(rd["range"]) * (float(rd["hold_range"]) if c.get("hold", false) else 1.0))
 		ft = float(rd["flight"]) + float(rd["flight_per_m"]) * Vector2(at.x - h.pos.x, at.z - h.pos.z).length()
 	last_variant = String(c.get("variant", "tap"))
-	tele_circle(at, float(vd["radius"]), col_of(vd), ft)
+	AimKit.circle(h, "e_land", {"at": at, "r": float(vd["radius"]), "fill": 1.0, "col": col_of(vd), "all": true,
+		"dur": ft})
 	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v})
 	m.sfx("throw", h.pos, -4.0, 1.15)
 
@@ -275,7 +276,8 @@ func _release_spout() -> void:
 	var length := lerpf(float(ed["range"][0]), float(ed["range"][1]), k)
 	var w := lerpf(float(ed["width"][0]), float(ed["width"][1]), k)
 	var spd := lerpf(float(ed["speed"][0]), float(ed["speed"][1]), k)
-	tele_lane(h.pos, dir, length, w, col_of(ed), length / spd)
+	AimKit.lane(h, "e_spout", {"from": h.pos, "dir": dir, "len": length, "width": w, "fill": 1.0, "col": col_of(ed),
+		"all": true, "dur": length / spd})
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
 		"col": col_of(ed), "ab": "k1"})
@@ -320,7 +322,8 @@ func _start_wave() -> bool:
 	var t := float(xd["time"])
 	var length := float(xd["range"])
 	untarget_t = t
-	tele_lane(h.pos, dir, length, float(xd["width"]), col_of(xd), 0.0)
+	AimKit.lane(h, "x_wave", {"from": h.pos, "dir": dir, "len": length, "width": float(xd["width"]), "col": col_of(xd),
+		"all": true, "dur": t})
 	wave = {"p": Vector2(h.pos.x, h.pos.z) - dir * 0.5, "y": h.pos.y, "dir": dir, "left": length + 0.5,
 		"w": float(xd["width"]), "spd": length / t, "hit": {}, "lift": float(xd["lift"]), "stun": float(xd["knockup"]),
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
