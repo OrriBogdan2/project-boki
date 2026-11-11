@@ -16,6 +16,7 @@ extends RefCounted
 ##   BotCamps.goal(m, h) -> Array             [position, kind] for Bot._choose, or [] for none
 ##   BotCamps.hold_burst(m, h, tgt) -> bool   keep the abilities for the prize monster's kill window
 ##   BotCamps.fight_reach(m, h, o, reach, provoked) -> float   how far h reaches for rival o (0: leave it)
+##   BotCamps.boki_leaves(m, k, o) -> bool    a bot's Boki leaves rival o alone (its Hunter would)
 ##   BotCamps.pace_level(t) -> int            the level a squad is asked to have at match time t
 
 static func _rules() -> Dictionary:
@@ -192,24 +193,40 @@ static func _blight_near(m: Match, p: Vector3, r: float) -> bool:
 # ------------------------------------------------------------------ fights
 ## How far bot h reaches for rival Hunter o, from the reach Bot would use (spec 6.8). None for a
 ## squad fight.gap or more levels above ours, unless it was hurt in the last busy_s (it is already
-## in a fight). None while our squad is on a camp and either the opening (home_s) is still running or
-## it is one short of an even level or the ultimate. press_k times further for a squad fight.gap or
-## more below. A rival that hit h is always fought.
+## in a fight). None in the opening (home_s) for a squad with a region of camps, nor later while it
+## is on a camp one short of an even level or the ultimate. press_k times further for a squad
+## fight.gap or more below. A rival that hit h in the last busy_s is always fought (a stray hit long
+## ago is no reason: Hunter.last_hit_by stays set).
 static func fight_reach(m: Match, h: Hunter, o: Hunter, reach: float, provoked: bool) -> float:
 	var mine := _squad(m, h.team)
-	if provoked or m.camps == null or mine.is_empty():
+	if m.camps == null or mine.is_empty():
 		return reach
 	var F: Dictionary = _rules()["fight"]
+	if provoked and m.time - h.hurt_at < float(F["busy_s"]):
+		return reach
 	var theirs := _squad(m, o.team)
 	var gap := _level(theirs) - _level(mine)
 	if gap >= float(F["gap"]) and not theirs.any(func(x): return m.time - x.hurt_at < float(F["busy_s"])):
 		return 0.0
 	var next := int(_level(mine)) + 1
 	var on_camp: bool = m.time - float(mine[0].ai.get("camp_t", -INF)) < float(F["camp_s"])
-	var opening: bool = m.time < float(_rules()["home_s"])
-	if on_camp and (opening or next % 2 == 0 or next == int(Hunter.ULT_AT[0])):
+	if m.time < float(_rules()["home_s"]) and (on_camp or _has_home(m, h.team)):
+		return 0.0
+	if on_camp and (next % 2 == 0 or next == int(Hunter.ULT_AT[0])):
 		return 0.0
 	return reach * (float(F["press_k"]) if gap <= -float(F["gap"]) else 1.0)
+
+static func _has_home(m: Match, team: int) -> bool:
+	return m.skydrop != null and int(m.skydrop.picks.get(team, -1)) >= 0
+
+## A bot's Boki picks rival Hunter o only where its Hunter would fight o (fight_reach): it is the Boki
+## that most often opened a fight between two squads on their camps.
+static func boki_leaves(m: Match, k: Kin, o: Ent) -> bool:
+	var h := k.owner_h
+	if not (o is Hunter) or h == null or h.ctrl != "bot":
+		return false
+	var hit_by := [o, (o as Hunter).kin]
+	return fight_reach(m, h, o, 1.0, h.last_hit_by in hit_by or k.last_hit_by in hit_by) <= 0.0
 
 # ------------------------------------------------------------------ steals
 ## A camp's prize monster: its Brute or Camp Chief (spec 6.6).

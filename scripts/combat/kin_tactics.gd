@@ -69,6 +69,8 @@ func pick_target() -> Ent:
 		var d := k.flat_dist(f)
 		if d > reach:
 			continue
+		if BotCamps.boki_leaves(k.m, k, f):
+			continue      # (a bot's Boki fights the Hunters its Hunter would: spec 6.8)
 		if not k.walkable_to(f.pos):
 			continue
 		var s := -d

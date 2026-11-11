@@ -88,6 +88,7 @@ func _play(main: Node, sd: int) -> Dictionary:
 	while not marks.is_empty() and not m.over:
 		_idle(m)
 		m.step(Match.DT)
+		_trace(m)
 		n += 1
 		if n % FRAME_EVERY == 0: await main.get_tree().process_frame
 		if n % 3600 == 0:
@@ -121,6 +122,29 @@ func _play(main: Node, sd: int) -> Dictionary:
 	await main.get_tree().process_frame
 	print("CAMPPACE ROW ", JSON.stringify(out))
 	return JSON.parse_string(JSON.stringify(out))
+
+var _seen := {}
+func _trace(m: Match) -> void:
+	if m.time > 160.0: return
+	for h in m.hunters:
+		var by = h.last_hit_by
+		if by == null or not is_instance_valid(by): continue
+		var bt := -1
+		var who := "?"
+		var atk = by
+		if by is Hunter: bt = by.team; who = "hunter"
+		elif by is Kin and by.owner_h: bt = by.owner_h.team; who = "kin"; atk = by.owner_h
+		if bt < 0 or bt == h.team: continue
+		var key := "%d>%d" % [by.get_instance_id(), h.get_instance_id()]
+		if _seen.has(key): continue
+		_seen[key] = true
+		var tg = by.target if by is Kin else atk.ai.get("tgt")
+		var tk := "none" if tg == null else ("victim" if tg == h else ("mob" if tg is Mob else ("hunter" if tg is Hunter else "other")))
+		if by is Kin: tk += " kstate=" + String(by.state)
+		var vt = h.ai.get("tgt")
+		var vk := "none" if vt == null else ("atk" if vt == atk else ("mob" if vt is Mob else "x"))
+		print("CPTRACE t=%.0f %s t%d(%s goal=%s tgt=%s) hit t%d(goal=%s tgt=%s) d=%.1f" % [m.time, who, bt, atk.ctrl,
+			atk.ai.get("goal_kind", ""), tk, h.team, h.ai.get("goal_kind", ""), vk, atk.flat_dist(h)])
 
 ## The idle squad stands still once on the ground, its Boki benched (a Boki's kill is its Hunter's).
 func _idle(m: Match) -> void:
