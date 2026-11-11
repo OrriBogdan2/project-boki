@@ -292,6 +292,12 @@ and context-targeted. Six different inputs, so no two archetype dashes play alik
   sound per archetype. The kin's rider adds a theme sweetener.
 - Wind-down: no glider for 0.12s after a ground dash ends, as SUPERVIVE did. Dash → jump is unchanged.
 - Dash buffer (0.18s), rush cancels and the glide → dash → glide chains stay as built (KINFALL_CLASSES.md).
+- One press window for abilities: `press_buffer` in content/rules/tuning.json (0.15s, owner 11-08 "recasts
+  buffered ~0.15s"). An ability pressed that early still goes: held past a dash's end while the hunter can't
+  act, before a two-step's recast arms, before a stun, root or Grounded ends. A kit that needs another window
+  keeps a per-kit override with its source. `--dash-flow-check` asserts 0.1s early goes and 0.2s early doesn't
+  for all three. (The Shift buffer, Hunter.DASH_BUFFER 0.18s, and the jump buffer, 0.12s, are movement presses,
+  not this window.)
 - Distances never grow with rank (ABILITIES.md rule). Ranks cut the recharge only.
 - Protection stays short: at most 0.16s, or partial (shots only, front only). No full-invulnerability dash.
 

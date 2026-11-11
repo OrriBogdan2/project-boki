@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		ok(String(row["mode"]) == r[3], "%s %s dash -> %s is %s in the source" % [r[0], r[1], r[2], r[3]])
 	for hero in _heroes():
 		await check_hero(main, hero)
+	await _one_window(main)
 	_print_exceptions()
 	print("DASHFLOW DONE, failures: %d, skipped: %d" % [bad, skipped])
 	main.get_tree().quit()
@@ -293,6 +294,79 @@ func _went_off(b: Dictionary, slot: String) -> bool:
 			return more.call("used", "x") or more.call("cd", "x") or more.call("cast", "ultimate")
 		"q":
 			return up.call("gear")
+	return false
+
+# ------------------------------------------------------------------ the one press window (tuning.json press_buffer)
+const NEAR_S := 0.1             # s early: inside Loco.press_buffer, so the press goes
+const FAR_S := 0.2              # s early: outside it, so the press is dropped
+
+## Loco.press_buffer by its three uses: Gil's E held past a dash's end while a stun still runs, Gil's E made before
+## a stun ends, and Ostra's early recast before her seed arms. NEAR_S early goes, FAR_S early doesn't.
+func _one_window(main: Node) -> void:
+	CombatBus.ability_used.connect(_on_used)
+	var went := {}
+	var m := _match(main, "gil")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "gil e held past a dash's end"]] = _past_dash(m, lead)
+		went[[lead, "gil e before a stun ends"]] = _before_stun(m, lead)
+	m.queue_free()
+	m = _match(main, "ostra")
+	for lead in [NEAR_S, FAR_S]:
+		went[[lead, "ostra e before the recast arms"]] = _before_recast(m, lead)
+	m.queue_free()
+	await main.get_tree().process_frame
+	CombatBus.ability_used.disconnect(_on_used)
+	for key in went:
+		ok(went[key] == (float(key[0]) < Loco.press_buffer), "one window %.2fs: %s, pressed %.2fs early: %s" % [
+				Loco.press_buffer, key[1], key[0], "went off" if went[key] else "dropped"])
+
+## E pressed as a dash sets off (held for its end), then a stun running `lead` s past that end.
+func _past_dash(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.inp["move"] = Vector2(0, -1)
+	hunter.inp["dash"] = true
+	for i in DASH_WAIT:
+		if hunter.ak.in_dash():
+			break
+		m.step(Match.DT)
+	hunter.inp["dash"] = false
+	var before := _snap()
+	_press("e")
+	while hunter.ak.dash_left() > Match.DT * 1.5:
+		m.step(Match.DT)
+	if _went_off(before, "e") or not hunter.ak.in_dash():
+		return true           # (not held to the dash's end: both leads read "went off" and one fails)
+	hunter.stun_t = lead + hunter.ak.dash_left()
+	return _goes_off(m, before, "e")
+
+func _before_stun(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	hunter.stun_t = lead
+	var before := _snap()
+	_press("e")
+	return _goes_off(m, before, "e")
+
+## Ostra's E plants the seed; E again `lead` s before it arms pops it (or not) within NEAR_S of arming.
+func _before_recast(m: Match, lead: float) -> bool:
+	_ready_up(m)
+	var k := hunter.ak as OstraKit
+	k.use_e()
+	for i in WATCH:
+		if not k.seed.is_empty():
+			break
+		m.step(Match.DT)
+	var min_t := float(k.e_def()["min_recast"])
+	while not k.seed.is_empty() and float(k.seed["t"]) < min_t - lead:
+		m.step(Match.DT)
+	_press("e")
+	_steps(m, ceili((lead + NEAR_S) / Match.DT))
+	return k.seed.is_empty()
+
+func _goes_off(m: Match, before: Dictionary, slot: String) -> bool:
+	for i in WATCH:
+		m.step(Match.DT)
+		if _went_off(before, slot):
+			return true
 	return false
 
 # ------------------------------------------------------------------ combos with Shift and jump (item 51)
