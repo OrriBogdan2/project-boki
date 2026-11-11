@@ -30,7 +30,7 @@ Perks were chosen from a "Pick a perk: 1/2/3" prompt after a chest, shrine, boss
 
 ## Level-up growth (built, owner-approved)
 The owner approved parts 1 and 2 of the proposal below and turned down part 3.
-- **Quiet growth** (`LevelGrowth`, `scripts/match/level_growth.gd`; numbers in `content/rules/level_growth.json`). Every level adds 6% of the class's base max health and 5% ability power for levels 2-6, and half that for levels 7-10 (a total of +42% health and +35% ability power at level 10).
+- **Quiet growth** (`LevelGrowth`, `scripts/match/level_growth.gd`; numbers in `content/rules/level_growth.json`). Every level adds 6% of the class's base max health and 3.9% ability power, the same every level as in the source (+54% health and +35.1% ability power at level 10; until 2026-11-11 it was 5% for levels 2-6 and half from 7, see docs/ABILITIES.md "Level growth").
   - Ability power multiplies ability damage (`ArchKit.power`, `Effects._power`) and ability heals and shields (`Effects._heal_k`). It does not touch the weapon, whose growth is the weapon path.
   - A Boki's own heals don't grow with its hunter's level.
   - Kit code that reads `m.dmg_mult(h)` directly instead of `power()` doesn't grow yet. The hero-kit owners can switch it over.
