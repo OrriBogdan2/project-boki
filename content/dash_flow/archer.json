@@ -2,33 +2,34 @@
 	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
 	"dash": {
 		"ground": {
-			"lmb": {"mode": "fire", "source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"rmb": {"mode": "fire", "source": "Impaling Shot can be started in the walk"},
-			"e": {"mode": "fire", "source": "Rain of Arrows can be cast in the walk"},
-			"x": {"mode": "fire", "source": "Primal Forces can be cast in the walk"},
-			"q": {"mode": "fire"}
+			"lmb": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"e": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"x": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"q": {"mode": "fire", "source": "[?] No source: Q is our glove slot, Myth has none. Ours: it goes mid-roll (owner item 51)."}
 		},
 		"air": {
-			"lmb": {"mode": "fire", "source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"rmb": {"mode": "fire", "source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"e": {"mode": "fire", "source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"x": {"mode": "fire", "source": "Not determinable. The footage study lists 'whether you can shoot during it [Spirit Walk]' as an open question (briefs/hero-ref/pin.md:247); the roll itself is 0.1-0.15 s (pin.md:322-327); air: not shown (pin.md:330-331). Data (briefs/supervive-data/supervive_kits.md:78) says nothing on casts during the roll. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent)."},
-			"q": {"mode": "fire"}
+			"lmb": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). The air roll isn't shown either (pin.md:330-331). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"rmb": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). The air roll isn't shown either (pin.md:330-331). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"e": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). The air roll isn't shown either (pin.md:330-331). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"x": {"mode": "fire", "source": "[?] The source is silent: the data (supervive_kits.md:75, 78) gives Phase Walk as a dodge roll toward the cursor and nothing on casts in it; the footage times the roll (0.27 s, pin.md:322-327) and lists 'whether you can shoot during it' as open (pin.md:247). The air roll isn't shown either (pin.md:330-331). Ours: it goes mid-roll (owner item 51: any ability casts mid-dash where the source is silent)."},
+			"q": {"mode": "fire", "source": "[?] No source: Q is our glove slot, Myth has none. Ours: it goes mid-roll (owner item 51)."}
 		}
 	},
 	"into_dash": {
-		"lmb": {"mode": "fire", "source": "Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on."}
+		"lmb": {"mode": "fire", "source": "Owner item 51 names Lace's draw: it carries through a dash. Neither the data (Myth: Greenwood Bow, Phase Walk) nor the footage (pin.md: Spirit Walk) shows the roll ending a draw, so Shift mid-draw rolls at once and the draw carries on."},
+		"rmb": {"mode": "fire", "source": "[?] Not shown: no frame or card line has Shift during the Heavy Shot's hold (the Heavy Shot frames, pin.md:91-110, have no roll or jump in the hold). Ours: the roll goes at once and the hold carries on (owner item 51: Shift moves out of any ability where the source is silent)."}
 	},
 	"hold": {
 		"lmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Owner item 51 names her draw: it keeps charging through a jump and a Shift dash, and a release in the air keeps her speed. The source shows nothing ending a draw (pin.md:33-48, supervive_kits.md:73)."},
+			"air": {"mode": "keep", "source": "Owner item 51 names her draw: it keeps charging through a jump and a Shift dash, and a release in the air keeps her speed. The source shows nothing ending a draw (pin.md:33-48, supervive_kits.md:73)."},
+			"jump": {"mode": "keep", "source": "Owner item 51 names her draw: it keeps charging through a jump and a Shift dash, and a release in the air keeps her speed. The source shows nothing ending a draw (pin.md:33-48, supervive_kits.md:73)."}
 		},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "[?] Not shown: no Heavy Shot frame has a roll or a jump in the hold (pin.md:91-110); the data says hold and release (supervive_kits.md:74). Ours: the hold carries through (owner item 51: holds and charges keep through a jump and a dash)."},
+			"air": {"mode": "keep", "source": "[?] Not shown: no Heavy Shot frame has a roll or a jump in the hold (pin.md:91-110); the data says hold and release (supervive_kits.md:74). Ours: the hold carries through (owner item 51: holds and charges keep through a jump and a dash)."},
+			"jump": {"mode": "keep", "source": "[?] Not shown: no Heavy Shot frame has a roll or a jump in the hold (pin.md:91-110); the data says hold and release (supervive_kits.md:74). Ours: the hold carries through (owner item 51: holds and charges keep through a jump and a dash)."}
 		}
 	}
 }

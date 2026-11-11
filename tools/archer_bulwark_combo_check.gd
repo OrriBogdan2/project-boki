@@ -17,20 +17,23 @@ func run(main_node: Node) -> void:
 	tall.main = main_node
 	var launch = load("res://tools/bjorn_launch_check.gd").new()
 	launch.main = main_node
+	var cancels = load("res://tools/lace_cancels_check.gd").new()
+	cancels.main = main_node
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
 		await ult.pin()
 		await own.pin()
 		await _spirit_look()
 		await tall.tall()
+		await cancels.cancels()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails
+	n += ult.n + own.n + launch.n + tall.n + cancels.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + cancels.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -334,7 +337,7 @@ func _archer_combos() -> void:
 	step(m, 1.6)
 	ok(
 		"pin E: a foe on the arc 45 degrees off the aim burns, one inside it does not",
-		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
+		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and (K.fx.laces[0]["node"] as Node3D).visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
