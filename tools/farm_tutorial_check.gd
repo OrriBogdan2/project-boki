@@ -884,14 +884,16 @@ func _ripe_gate() -> void:
 	var hint := home.guide.hint_lbl.text as String
 	var plot_lbl: String = home._label_for({"kind": "plot", "arr": "plots", "i": 0})
 	var marker_on: bool = is_instance_valid(home.guide.marker) and home.guide.marker.visible
-	ok(FarmTutorial.current() == "crop" and FarmTutorial.stage("crop") == "grow", "watered: the crop step waits while it grows")
+	ok(FarmTutorial.current() == "crop" and FarmTutorial.stage("crop") == "grow",
+			"watered: the crop step waits while it grows")
 	ok(not hint.to_lower().contains("pick") and not hint.to_lower().contains("ripe"),
 			"growing: the banner neither says to pick it nor counts down ('%s')" % hint)
 	ok(not FarmTutorial.hint_text("crop").to_lower().contains("pick") and not marker_on,
 			"growing: no 'Pick it' for Hob to say and no floating marker over the patch")
 	ok(not plot_lbl.begins_with("Harvest"), "growing: the patch's own prompt is no harvest ('%s')" % plot_lbl)
 	var bar: Label3D = home.guide.crop_lbl
-	ok(bar != null and bar.visible and bar.text.strip_edges() != "" and bar.text.replace("▰", "").replace("▱", "") == "",
+	var wordless: bool = bar != null and bar.text.replace("▰", "").replace("▱", "") == ""
+	ok(bar != null and bar.visible and bar.text.strip_edges() != "" and wordless,
 			"growing: only a wordless growth bar over the patch ('%s')" % (bar.text if bar else "none"))
 	Save.d["plots"][0]["wt"] = Time.get_unix_time_from_system() - FarmCropGuide.stage_time(Data.WATER_TIME) - 1.0
 	home._farm_tick()
@@ -902,7 +904,8 @@ func _ripe_gate() -> void:
 	ok(FarmTutorial.stage("crop") == "pick" and hint.contains("pick it") and marker_on
 			and home.guide.marker.text.begins_with("Pick it") and not home.guide.crop_lbl.visible,
 			"ripe: now 'Pick it' shows, banner and marker, and the bar goes ('%s')" % hint)
-	ok(String(home._label_for({"kind": "plot", "arr": "plots", "i": 0})).begins_with("Harvest"), "and the patch says Harvest")
+	plot_lbl = home._label_for({"kind": "plot", "arr": "plots", "i": 0})
+	ok(plot_lbl.begins_with("Harvest"), "and the patch says Harvest ('%s')" % plot_lbl)
 
 func _note_label(hb) -> Label3D:
 	for c in hb.ghost_cells.get_children():

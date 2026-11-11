@@ -40,7 +40,8 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - **The second Mask** (`HobOffer`): once the house is down (or with no tutorial), he calls you over: "By the
   way... I see you found a Vex Mask. Could I interest you in another?" Exactly the three of
   `ClassUnlock.second_picks` as cards (portrait, name and title, a one-line role from "roles"), one ability clip
-  for the card in focus. Taking one opens it and plays the short Mask moment (`MaskBeat`); "Not now" waits. The
+  for the card in focus (hover only shows it). One click on a card (or Enter / the pad's A on the card in focus) takes it;
+  there is no separate Take button, and a click in the first 0.3 s after the pick opens is ignored. Taking one opens it and plays the short Mask moment (`MaskBeat`); "Not now" waits. The
   portal offer (`MaskOffer`) is gone; saves that already own a second Mask keep it and are never offered one.
 - Checks: `--hob-check` (new, with `--shots-dir=`), `--farm-tutorial-check` updated.
 
@@ -48,7 +49,7 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - **Challenge House** is not given any more (`home.gd` no longer grants it). It is Hob's blueprint after the first expedition (milestone `first_run`: `matches >= 1`), a lot you mark and build for wood and stone (`farm_build.json` "lots": 6 wood, 4 stone; `FarmBuilder.lot_cost`). Saves that already have it keep it. Old Pell's Black Market is untouched.
 - **Crops by the water** (`FarmWater`): a crop patch whose footprint is within 2 tiles of water (pond, painted river, or the island's wild water: all `layout.water`) waters its own plots as tended (`_farm_tick`). The patch tooltip, the plot prompt and the plot panel say so; build mode shows "Near water: waters itself" in green over the patch you are placing (and "No water within 2 tiles" otherwise).
 - **River brush** (`river`, Paths tab, open from the start): the water brush at 2 gems a tile instead of 6, so a channel is cheap. It counts as water everywhere.
-- **Tutorial, 12 steps** (in Hob's voice, one action each): axe (given free), chop, house (mandatory first), hammer, task, mine a rock (pickaxe given free; says what stone is for), feed, crop (marker on the water; grow time never blocks: the next open step is shown meanwhile), buy a seed (Seeds tab; gems topped up to one seed so nobody is stuck), sell a crop (Sell tab; says gems come from selling, expeditions and Goals), meet Hob, head out. The market steps point at the stall when one stands, else at the Market on the bar.
+- **Tutorial, 12 steps** (in Hob's voice, one action each): axe (given free), chop, house (mandatory first), hammer, task, mine a rock (pickaxe given free; says what stone is for), feed, crop (marker on the water; grow time never blocks: the next open step is shown meanwhile; while it grows only a small wordless growth bar shows over the patch, and "Pick it" waits until the crop is ripe), buy a seed (Seeds tab; gems topped up to one seed so nobody is stuck), sell a crop (Sell tab; says gems come from selling, expeditions and Goals), meet Hob, head out. The market steps point at the stall when one stands, else at the Market on the bar.
 - **Save v10** (main's numbering: market is v8, mantle-look v9). Step 8->9 is an empty placeholder for mantle-look; 9->10 is `FarmBuilder.migrate`, which is keyed by its own `farm_builder` field.
 
 ## Round 3 (owner playtest, Nov 8): the spotlight, "Not set", what to do after a job

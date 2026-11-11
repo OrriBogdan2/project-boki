@@ -100,6 +100,19 @@ func _is_screen(file: String) -> bool:
 	return is_instance_valid(main.current) and main.current.get_script() != null \
 		and String(main.current.get_script().resource_path).ends_with(file)
 
+## Waits out HobOffer's misclick guard on the wall clock (game time can run ahead of it after the course).
+func _past_guard() -> void:
+	var until := Time.get_ticks_msec() + int(HobOffer.OPEN_GUARD_S * 1000.0) + 50
+	while Time.get_ticks_msec() < until:
+		await tree.process_frame
+
+## A left mouse press, as a click on a card gives its gui_input.
+func _click() -> InputEventMouseButton:
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_LEFT
+	ev.pressed = true
+	return ev
+
 func _key(action: String) -> InputEventAction:
 	var e := InputEventAction.new()
 	e.action = action
@@ -166,8 +179,8 @@ func _vex_card(hx) -> Control:
 func _relic(hx) -> void:
 	_begin("first Relic")
 	await _wait(func(): return hx.stage == "mask" and _vex_card(hx) != null, "naming leads into the starter pick")
-	_vex_card(hx).mouse_entered.emit()      # (Vex in focus: the Take button takes him, as the tutorial always did)
-	_press(hx, "Take Vex")
+	await _past_guard()
+	_vex_card(hx).gui_input.emit(_click())      # (one click on Vex's card takes him)
 	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
@@ -268,10 +281,12 @@ func _second_relic(home) -> void:
 		await tree.process_frame
 	ok(chat.offer != null, "talking to him, his lines lead to the three Relics")
 	var offer: HobOffer = chat.offer
-	ok(offer.ids.size() == 3 and offer.take_button != null, "three to choose from, with a Take button")
+	ok(offer.ids.size() == 3, "three to choose from")
 	var pick := String(offer.ids[0])
-	offer.take_button.pressed.emit()
-	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(), "taking one opens it (%s)" % pick)
+	await _past_guard()
+	(offer.cards[0] as Control).gui_input.emit(_click())
+	ok(ClassUnlock.open_ids().has(pick) and not ClassUnlock.second_pending(),
+			"one click on a card takes it (%s)" % pick)
 	await tree.create_timer(0.2).timeout
 	ok(HeroGrid.save_pick(pick) and Arch.of_save() == pick, "and it can be worn for the next expedition")
 	home._close_panel()
