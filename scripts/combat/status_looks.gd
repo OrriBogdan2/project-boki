@@ -18,7 +18,10 @@ extends Node3D
 const RULES_PATH := "res://content/rules/status_looks.json"
 const LOD_FAR := 34.0          # m from the camera focus: no status drawn beyond (as HeroVfx)
 const BODIES := ["hunters", "kins", "mobs"]      # the Match lists whose bodies' own timers are read
-const MOB_K := 0.8             # a look's scale on a Boki or a mob (a Hunter's comes from its own scale)
+const MOB_K := 0.8             # a look's scale on a mob (a Hunter's and a Boki's come from their bodies)
+const BODY_TALL := 2.0         # m: the body the data is set on (a Hunter at scale 1)
+const KIN_TALL := 0.8          # m: a Boki at model scale 1 (KinModels)
+const KIN_WIDE := 0.7          # a Boki's width against a Hunter's legs, at model scale 1 and girth 1
 const KEEP := 0.15             # s a keep() outlives its last ask
 
 static var _rules := {}
@@ -151,8 +154,24 @@ func _show(h: Ent, st: String, dt: float) -> void:
 	var n: Node3D = r["n"]
 	n.visible = true
 	n.global_position = h.pos
-	n.scale = Vector3.ONE * (float((h as Hunter).cdat.get("scale", 1.0)) if h is Hunter else MOB_K)
+	var k := body_k(h)
+	var y := float(rules()[st].get("y", 0.0))
+	n.scale = Vector3.ONE * k.x if y > 0.0 else Vector3(k.x, k.y, k.x)
+	(n.get_child(0) as Node3D).position.y = y * k.y / k.x
 	_pose(n, String(r["look"]), float(r["t"]))
+
+## A look's scale on `e`, [across, up]. A Hunter: its own scale both ways. A Boki: its body (model scale, its girth
+## across, KIN_TALL up), so a look wraps a squat Boki, or a giant ridden one, as it wraps a Hunter; a look over
+## the head keeps its shape (scaled across) and sits as high over the Boki's head. A mob: MOB_K.
+static func body_k(e: Ent) -> Vector2:
+	if e is Hunter:
+		var s := float((e as Hunter).cdat.get("scale", 1.0))
+		return Vector2(s, s)
+	var model: Node3D = (e as Kin).model if e is Kin else null
+	if model == null:
+		return Vector2(MOB_K, MOB_K)
+	var g := maxf(model.scale.y, 0.05)
+	return Vector2(g * KIN_WIDE * float(model.get_meta("girth", 1.0)), g * KIN_TALL / BODY_TALL)
 
 # ------------------------------------------------------------------ rigs
 func _take(st: String, d: Dictionary) -> Node3D:

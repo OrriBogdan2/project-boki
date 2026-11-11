@@ -3,10 +3,12 @@ extends RefCounted
 ## scoring "which status, and on whom" (run under xvfb with a renderer). A Hunter carries one status with a clean
 ## Hunter 1.8 m beside it; each status gets a row of 5 crops 0.2 s apart (the ref sheets' 5 fps). One sheet per
 ## ground: status_grass.png (the map's own), status_light.png (a pale floor), status_dark.png (a dark one).
-## <dir>/captions.txt lists the rows.
+## <dir>/captions.txt lists the rows. With --boki the carrier is a summoned Boki (docs/specs/SUMMON_CC.md) beside a
+## clean Hunter, on the crowd control it can take (Grounded applied through KitStatus, so its row stays empty).
 
 const DT := 1.0 / 60.0
 const ROWS := ["none", "stun", "daze", "root", "gnd", "slow", "chill", "burn", "static", "antiheal", "sick"]
+const BOKI_ROWS := ["none", "stun", "root", "gnd", "slow", "daze"]
 const GROUNDS := {"grass": null, "light": Color("d8cfb0"), "dark": Color("2b2824")}
 const FRAMES := 5
 const FRAME_S := 0.2           # s between crops
@@ -15,12 +17,14 @@ const LEAD_S := 0.4            # s the status runs before the first crop
 
 var m: Match
 var main: Node
+var boki: Kin = null
 
 func run(main_node: Node) -> void:
 	main = main_node
 	var dir := ""
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): dir = String(a).substr(12)
+	var with_boki := "--boki" in OS.get_cmdline_user_args()
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	m = Match.new()
@@ -45,6 +49,14 @@ func run(main_node: Node) -> void:
 		if h != F and h != N: h.teleport(base + Vector3(-30, 0, 30))
 	F.teleport(base)
 	N.teleport(base + Vector3(1.8, 0, 0))
+	if with_boki:
+		boki = m.give_kin(N, Save.new_kin("zapple", "Pip"))
+		boki.state = "active"
+		boki.set_meta("summoned", true)
+		F.teleport(base + Vector3(-30, 0, -30))
+	var rows: Array = BOKI_ROWS if with_boki else ROWS
+	var carrier: Ent = boki if with_boki else F
+	var tag := "boki_" if with_boki else ""
 	Sfx.listener = base
 	var floor_mi := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
@@ -57,27 +69,30 @@ func run(main_node: Node) -> void:
 		floor_mi.visible = GROUNDS[g] != null
 		if floor_mi.visible:
 			floor_mi.material_override = DJFx.solid(GROUNDS[g])
-		var sheet := Image.create(CROP * FRAMES, CROP * ROWS.size(), false, Image.FORMAT_RGB8)
-		for r in ROWS.size():
-			var row := await _row(F, String(ROWS[r]), base)
+		var sheet := Image.create(CROP * FRAMES, CROP * rows.size(), false, Image.FORMAT_RGB8)
+		for r in rows.size():
+			var row := await _row(carrier, String(rows[r]), base)
 			for c in FRAMES:
 				sheet.blit_rect(row[c], Rect2i(0, 0, CROP, CROP), Vector2i(c * CROP, r * CROP))
-		sheet.save_png(dir.path_join("status_%s.png" % g))
-		lines.append("status_%s.png: rows top to bottom %s; the left Hunter carries it, the right one is clean"
-			% [g, ", ".join(ROWS)])
+		sheet.save_png(dir.path_join("status_%s%s.png" % [tag, g]))
+		lines.append("status_%s%s.png: rows top to bottom %s; the left %s carries it, the right Hunter is clean"
+			% [tag, g, ", ".join(rows), "Boki" if with_boki else "Hunter"])
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	f.store_string("\n".join(lines) + "\n")
 	print("STATUSSHOTS ", dir)
 	main.get_tree().quit(0)
 
 ## One status on F for LEAD_S, then FRAMES crops FRAME_S apart.
-func _row(F: Hunter, st: String, base: Vector3) -> Array:
+func _row(F: Ent, st: String, base: Vector3) -> Array:
 	var out: Array = []
 	var t := 0.0
 	var next := LEAD_S
 	while out.size() < FRAMES:
 		_hold(F, st)
 		m.step(DT)
+		if boki:
+			boki.teleport(base)
+			boki.render(DT, 1.0)
 		for h in m.hunters: h.render(DT, 1.0)
 		m.cam.snap(base + Vector3(0.9, 0, 0))
 		await main.get_tree().process_frame
@@ -90,16 +105,20 @@ func _row(F: Hunter, st: String, base: Vector3) -> Array:
 	return out
 
 ## Keeps `st` on F the way the game does ("" takes every status off).
-func _hold(F: Hunter, st: String) -> void:
+func _hold(F: Ent, st: String) -> void:
 	F.stun_t = 9.0 if st == "stun" else 0.0
 	F.root_t = 9.0 if st == "root" else 0.0
 	F.slow_t = 9.0 if st == "slow" else 0.0
 	F.burn_t = 9.0 if st == "burn" else 0.0
 	F.burn_dps = 0.0
 	F.blight_t = 9.0 if st == "antiheal" else 0.0
-	F.sick_t = 9.0 if st == "sick" else 0.0
+	if F is Hunter: (F as Hunter).sick_t = 9.0 if st == "sick" else 0.0
 	F.hp = F.max_hp
-	F.set_meta("gnd_until", m.time + 9.0 if st == "gnd" else 0.0)
+	if F is Kin:
+		F.set_meta("gnd_until", 0.0)
+		if st == "gnd": KitStatus.apply(F, "gnd", 9.0)     # (a summoned Boki shrugs it off: SummonCc)
+	else:
+		F.set_meta("gnd_until", m.time + 9.0 if st == "gnd" else 0.0)
 	F.set_meta("rat_until", m.time + 9.0 if st == "daze" else 0.0)
 	if st in ["chill", "static"]:
 		StatusLooks.of(m).keep(F, st)

@@ -6,7 +6,8 @@ extends RefCounted
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
 ## from their anchor, follow it, stream behind a run and are off at Low. And the status looks
-## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that.
+## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that,
+## and a summoned Boki under crowd control wears the same looks as a Hunter, sized to its body.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -60,6 +61,7 @@ func run(main: Node) -> void:
 	_kit(m, V, P)
 	_net(m, V, P)
 	_statuses(m, P)
+	_boki_statuses(m, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
@@ -433,3 +435,88 @@ func _statuses(m: Match, P: Hunter) -> void:
 	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
 	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
 	F.stun_t = 0.0
+
+## The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md) on its body: the Hunter's look, colours and
+## pace, sized to the Boki (over its head, round its body), from the pool; Grounded never lands so shows nothing.
+const BOKI_CC := ["stun", "root", "slow", "daze"]
+
+func _boki_statuses(m: Match, P: Hunter) -> void:
+	var L := StatusLooks.of(m)
+	var F: Hunter = null
+	for h: Hunter in m.hunters:
+		if h != P: F = h
+	var k := m.give_kin(F, Save.new_kin("zapple", "Pip"))
+	k.state = "active"
+	k.set_meta("summoned", true)
+	k.teleport(P.pos + Vector3(-3.0, 0, 0))
+	F.teleport(P.pos + Vector3(3.0, 0, 0))
+	k.render(1.0 / 60.0, 1.0)
+	var kk := StatusLooks.body_k(k)
+	ok(kk.y < kk.x and kk.x < 1.0, "boki status: a look's size comes from the Boki's body (%.2f across, %.2f up)"
+		% [kk.x, kk.y])
+	for st: String in BOKI_CC:
+		_put_cc(m, k, st, true)
+		_put_cc(m, F, st, true)
+		L.tick(0.0)
+		var kr: Dictionary = L.rigs.get("%d/%s" % [k.get_instance_id(), st], {})
+		var fr: Dictionary = L.rigs.get("%d/%s" % [F.get_instance_id(), st], {})
+		ok(L.showing(k, st) and L.showing(F, st), "boki status %s: the look comes up on the summoned Boki" % st)
+		if kr.is_empty() or fr.is_empty():
+			continue
+		ok(_mats(kr["n"]) == _mats(fr["n"]), "boki status %s: in the Hunter's colours" % st)
+		for i in 3:
+			L.tick(0.25)
+		ok(is_equal_approx(float(kr["t"]), float(fr["t"])), "boki status %s: at the Hunter's pace" % st)
+		var y := float(StatusLooks.rules()[st].get("y", 0.0))
+		var body: Node3D = (kr["n"] as Node3D).get_child(0)
+		if y > 0.0:
+			var up := body.global_position.y - k.pos.y
+			ok(up > 0.7 and up < 1.3, "boki status %s: over the Boki's head (%.2f m up, a Hunter's %.2f)"
+				% [st, up, (fr["n"] as Node3D).get_child(0).global_position.y - F.pos.y])
+		else:
+			var n: Node3D = kr["n"]
+			ok(n.scale.y < n.scale.x and n.scale.x < (fr["n"] as Node3D).scale.x,
+				"boki status %s: round its squat body (%.2f across, %.2f up)" % [st, n.scale.x, n.scale.y])
+		_put_cc(m, k, st, false)
+		_put_cc(m, F, st, false)
+		ok(not L.showing(k, st), "boki status %s: the look goes when it ends" % st)
+	k.stun_t = 1.0
+	k.render(1.0 / 60.0, 1.0)
+	ok(k.model.get_meta("dazed") and not k.model.get_meta("starry"),
+		"boki status: a stunned Boki squints but its own stars stay off (one ring of stars, the shared one)")
+	k.stun_t = 0.0
+	KitStatus.apply(k, "gnd", 3.0)
+	ok(not L.showing(k, "gnd"), "boki status: Grounded does not land on a summoned Boki, so no cords")
+	k.remote = true
+	L.from_hit(k, {"stun": 0.5, "root": 0.5})
+	KitStatus.apply(k, "rat", 1.0, 0.0, false)
+	ok(L.showing(k, "stun") and L.showing(k, "root") and L.showing(k, "daze"),
+		"boki status: another game's summoned Boki shows the CC it is sent")
+	m.time += 1.1
+	ok(not L.showing(k, "stun") and not L.showing(k, "daze"), "boki status: ... until it would end")
+	k.remote = false
+	m.kins.erase(k)
+	m.ents_by_id.erase(k.nid)
+	F.kin = null
+	k.queue_free()
+
+## Puts a crowd control kind on `e` the way the game does, or takes it off.
+func _put_cc(m: Match, e: Ent, st: String, on: bool) -> void:
+	var t := 1.5 if on else 0.0
+	match st:
+		"stun": e.stun_t = t
+		"root": e.root_t = t
+		"slow": e.slow_t = t
+		"daze":
+			if on: KitStatus.apply(e, "rat", t)
+			else: m.time += 1.51       # (a Boki's Daze is shown for its length: StatusLooks.put)
+
+## The materials a rig draws with (by colour), to compare two rigs of one status.
+func _mats(n: Node3D) -> Array:
+	var out := {}
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		var mat := mi.material_override as StandardMaterial3D
+		if mat: out[mat.albedo_color.to_html()] = true
+	var keys := out.keys()
+	keys.sort()
+	return keys
