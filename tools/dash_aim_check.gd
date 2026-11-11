@@ -175,7 +175,7 @@ func steady(m: Match, how: String) -> Dictionary:
 		P.fire_cd = 0.0          # a round every frame the gun can, so each frame's camera step is measured
 		m._process(DT)
 		out["cam"] = maxf(float(out["cam"]), was.distance_to(m.cam.global_position))
-		var r: Vector3 = m._mouse_aim()
+		var r: Vector3 = m._mouse_aim(m.get_viewport().get_mouse_position())
 		for s in m.shots:
 			if s["by"] != P or s.has("_seen"):
 				continue
@@ -192,6 +192,7 @@ func steady(m: Match, how: String) -> Dictionary:
 
 func run(main: Node) -> void:
 	Save.no_write = true
+	Save.d["tutorial"][KitDrill.SAVE_KEY] = true      # the drill's top bar sits under the 15 m north cursor and owns the mouse
 	for arch in STEADY:
 		for how in ["dash", "knock"]:
 			var m := _match(main, arch)
