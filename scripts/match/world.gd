@@ -45,8 +45,8 @@ var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed 
 var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
 var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
 var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
-## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
-## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
+## The uplink outposts an authored layout places (see Exits): {kind: "outpost", at: Vector2, walled: bool}.
+## Empty: Exits works them out.
 var exit_defs: Array = []
 ## Boss lairs (see Lairs): walled arenas with one gate, each holding a boss and its Rare Egg.
 ## {id, name, boss, c: Vector2 (centre), half (tiles from the centre to the wall), gate ("n"/"s"/"e"/"w"),
@@ -2473,12 +2473,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		authored_portals.append(_v2(ap))
 	exit_defs.clear()
 	await _slice()
-	for ek in [["docks", "dock"], ["outposts", "outpost"], ["hatches", "hatch"]]:
-		await _slice()
-		for ap in L.get(ek[0], []):
-			authored_portals.append(_v2(ap))
-			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
-				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
+	for ap in L.get("outposts", []):
+		authored_portals.append(_v2(ap))
+		exit_defs.append({"kind": "outpost", "at": _v2(ap), "walled": (ap as Array).size() >= 3 and bool(ap[2])})
 	await _slice()
 	if hand:
 		HandLayout.place_spots(self, defs)
