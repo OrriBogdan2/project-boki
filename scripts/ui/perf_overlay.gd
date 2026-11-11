@@ -3,18 +3,23 @@ extends Label
 ## The frame-rate readout in the top right (Settings > Video > Frame rate). "fps" shows the frame rate;
 ## "full" is the performance overlay: frames per second, frame time and its 1% low,
 ## draw calls, triangles and objects drawn, nodes, and the costliest sections of the match's step
-## (Match.prof, switched on only while this is showing). Text refreshes REFRESH_S apart; the frame
-## times sit in a fixed ring, so nothing is allocated per frame.
+## (Match.prof, switched on only while this is showing), and the hitch log: the last HITCH_KEEP frames
+## over HITCH_MS with what took the time (render and GPU wait, scripts and the step's costliest section,
+## physics). Text refreshes REFRESH_S apart; the frame times sit in a fixed ring, so nothing is allocated
+## per frame (a hitch line is built only on a hitch).
 
 const REFRESH_S := 0.25      # s between text updates
 const RING := 240            # frames kept for the average and the 1% low (about 4 s at 60 fps)
 const TOP_SECTIONS := 4      # match step sections listed
+const HITCH_MS := 33.0       # ms: a frame this long is a hitch (under 30 fps)
+const HITCH_KEEP := 3        # hitches listed, newest first
 
 var _ms := PackedFloat32Array()
 var _i := 0
 var _n := 0
 var _t := 0.0
 var _prof := false
+var _hitches := PackedStringArray()
 
 func _init() -> void:
 	_ms.resize(RING)
@@ -34,6 +39,8 @@ func tick(mode: String, delta: float) -> void:
 	if not visible:
 		return
 	_ms[_i] = delta * 1000.0
+	if _ms[_i] > HITCH_MS and mode == "full":
+		_log_hitch(_ms[_i])
 	_i = (_i + 1) % RING
 	_n = mini(_n + 1, RING)
 	_t -= delta
@@ -61,6 +68,8 @@ func _full() -> String:
 		"script %.1f ms   physics %.1f ms   nodes %d" % [Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 			Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 			int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))]])
+	for hl in _hitches:
+		lines.append(hl)
 	if not Match.prof.is_empty():
 		var ks := Match.prof.keys()
 		ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
@@ -71,3 +80,14 @@ func _full() -> String:
 		lines.append("step ms: " + "  ".join(top))
 		Match.prof.clear()
 	return "\n".join(lines)
+
+## What a slow frame went on: the frame's script and physics time, the match step's costliest section, and the
+## rest (rendering, waiting on the GPU, a shader compiled on first use).
+func _log_hitch(ms: float) -> void:
+	var scr := minf(ms, Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0)
+	var phys := minf(ms - scr, Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0)
+	var top := " (%s %.1f)" % [Match.prof_top, Match.prof_top_us / 1000.0] if Match.prof_top_us > 0 else ""
+	_hitches.insert(0, "hitch %d ms: render %d  script %d%s  physics %d" % [roundi(ms),
+		roundi(maxf(0.0, ms - scr - phys)), roundi(scr), top, roundi(phys)])
+	if _hitches.size() > HITCH_KEEP:
+		_hitches.resize(HITCH_KEEP)

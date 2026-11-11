@@ -7,7 +7,7 @@ extends CanvasLayer
 signal shown
 
 const TIPS := [
-	"Hold Mouse 5 (or Space) in the air to glide. You can open your glider off any booster too.",
+	"Press Space again in the air and hold to glide. You can open your glider off any booster too.",
 	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
 	"Knocked off an edge? Touch the island's side and you float back up onto it.",
 	"Exits open partway through. Stand inside one to fly home with everything you carry.",
@@ -31,7 +31,7 @@ const TIPS := [
 	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
 	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
 	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (hold Mouse 5 or Space) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
+	"Falling all the way into the abyss is death. Glide (press Space again in the air, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
 	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
 	"Dash through a shot at the last moment and you take nothing.",
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
@@ -41,9 +41,9 @@ const TIPS := [
 ]
 ## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
 const LORE := [
-	"Everyone born since the Sundering is born without a face. We call ourselves the Empty.",
+	"Everyone born since the Hollowing is born without a face. We call ourselves the Empty.",
 	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
-	"The Tyrant never aged, and never forgot the hoard. Under the Crown, it was always the Wyrm.",
+	"Malgrave the Beloved never aged, and never forgot her vault. Under the Crown, it was always the Wyrm.",
 	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
 	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
 	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
@@ -99,19 +99,14 @@ func setup(opts: Dictionary) -> void:
 	if opts.get("tutorial", false):
 		title = "First Expedition"; sub = "A short, safe trip with %s to learn the ropes. No rivals out here yet." % String(Save.active_kin().get("name", "your Boki"))
 	elif opts.get("training", false):
-		title = "Training Area"; sub = "Dummies, a range, a movement lane and the duel room. No danger here."
+		title = "Training Grounds"; sub = "Dummies, a range, a movement lane and the duel room. No danger here."
 	else:
 		title = String(T["name"]); sub = String(T["desc"])
-		var teams := int(opts.get("teams", 6)); var squad := int(opts.get("squad", 1))
-		# solo lobbies count hunters ("Solo · 20 squads" read oddly), squad lobbies count squads
-		var count := ("%d hunters" % teams) if squad <= 1 else ("%d squads" % teams)
-		mode_line = "%s  •  %s  •  skyship drop" % [["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)], count]
+		var squads := "%d squads of %d" % [int(opts.get("teams", Data.SQUADS)), int(opts.get("squad", Data.SQUAD_SIZE))]
+		mode_line = "%s  •  skyship drop" % squads
 		if opts.has("net"): mode_line = "Online  •  " + mode_line
-		if opts.get("rolling", false): mode_line = "%s  •  rolling 30-minute session  •  join in progress" % ["Solo", "Duos", "Trios"][clampi(squad - 1, 0, 2)]
 		raid = RaidLook.pick(opts, int(opts.get("seed", 0)))
 		var map_id := String(opts.get("map", World.layout_for_tier(tier)))
-		if opts.get("rolling", false):
-			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
@@ -259,7 +254,7 @@ func _squad_row(p: Vector2, a: float) -> void:
 ## The tip's glass card at a fade step (cached: drawn every frame while loading).
 func _glass(alpha: float) -> UiFrame:
 	if not _glass_at.has(alpha):
-		var g := UI.frame(Color(0.05, 0.045, 0.07, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
+		var g := UI.frame(Color(UI.NIGHT, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
 		_glass_at[alpha] = g
 	return _glass_at[alpha]
 

@@ -25,6 +25,8 @@ func run(main_node: Node) -> void:
 	await _dash_moves()
 	await _glide_wins()
 	await _parity_gun()
+	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
+	await _ranks()
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -141,8 +143,10 @@ func _slam_tell() -> void:
 	var reach := float(ed["radius"])
 	# aim straight along +x; one foe inside the edge of the cone, one just past it (outside the angle)
 	ak.aim_at(P, home + Vector3(5.0, 0, 0))
-	T.teleport(home + Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4))
-	T2.teleport(home + Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4))
+	var in_off := Vector3(cos(half - 0.25), 0, sin(half - 0.25)) * (reach - 0.4)
+	var out_off := Vector3(cos(half + 0.35), 0, sin(half + 0.35)) * (reach - 0.4)
+	T.teleport(home + in_off)
+	T2.teleport(home + out_off)
 	ak.fresh(T)
 	ak.fresh(T2)
 	K.cd["e"] = 0.0
@@ -159,11 +163,16 @@ func _slam_tell() -> void:
 			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
 		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
 	)
-	ak.step(m, 0.3)
+	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
+	while K.wind > 0.03:
+		ak.step(m, ak.DT)
+	T.teleport(P.pos + in_off)
+	T2.teleport(P.pos + out_off)
+	ak.step(m, 0.1)
 	ok(
 		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
-		"inside %.0f, outside %.0f" % [ak.dmg(T), ak.dmg(T2)]
+		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
 	)
 	await ak.done(m)
 
@@ -358,20 +367,35 @@ func _all() -> void:
 		"dredge: heavy, shotgun, 3 barge charges", P.wid == "shotgun" and P.cls == "heavy" and P.max_dashes() >= 3.0,
 		"%s %s" % [P.wid, P.cls]
 	)
-	# --- the scattergun: a shot every 0.5s, a tight fan, the spread's edge lines while firing, one line idle
+	# --- the scattergun: a shot every 0.5s; the spread's edge lines follow the real fan (fan_deg + bloom): each shot
+	# springs them wide, they breathe back in while fire is held, go brass once tight, and fold to one line at rest
 	reset.call()
 	T.teleport(home + Vector3(0, 0, 9.0))
 	ak.aim_at(P, home + Vector3(2.0, 0, 0))
 	var v0: int = K.volleys
-	var cone_seen := false
+	var g: DredgeGun = K.gun
+	var rest := float(P.wpn["fan_deg"])
+	var off := 0.0          # the drawn lines against the real fan, once the kick's spring has settled
+	var narrowed := 0.0     # how far the lines closed between two shots, fire held
+	var peak := 0.0
+	var bloom := 0.0
+	var kicked := 0.0       # the last time the bloom rose (a shot)
 	var tf := 0.0
-	while tf < 1.05:
-		P.inp["fire"] = true
+	var settled := 0.0      # s since the bloom settled after the release (the lines hold IDLE_T before they fold)
+	while tf < 3.0 and settled < 0.15:
+		P.inp["fire"] = tf < 1.05
+		settled = settled + ak.DT if tf >= 1.05 and P.wbloom <= 0.0 else 0.0
 		ak.aim_at(P, home + Vector3(2.0, 0, 0))
 		m.step(ak.DT)
 		tf += ak.DT
-		if AimKit.shown(P, "spread"): cone_seen = true
-	P.inp["fire"] = false
+		var deg := float(AimKit.entry(P, "spread").get("deg", 0.0)) if AimKit.shown(P, "spread") else 0.0
+		peak = maxf(peak, deg)
+		narrowed = maxf(narrowed, peak - deg) if P.inp["fire"] else narrowed
+		if P.wbloom > bloom + 0.5: kicked = tf
+		bloom = P.wbloom
+		if tf - kicked > 0.2 and AimKit.shown(P, "spread"):
+			off = maxf(off, absf(deg - (rest + P.wbloom)))
+		if m.time - g.shot_at < 0.02: peak = deg
 	var cone: Dictionary = AimKit.entry(P, "spread")
 	ok(
 		"gun: a shot every half second",
@@ -379,15 +403,48 @@ func _all() -> void:
 		"volleys %d in 1.05s" % (K.volleys - v0)
 	)
 	ok(
-		"gun: the spread's edge lines lie on the ground out to the slug range",
-		cone_seen and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and float(cone.get("deg", 0.0)) >= 30.0 and float(cone.get("deg", 0.0)) <= 46.0,
-		"len %.1f deg %.0f" % [float(cone.get("len", 0.0)), float(cone.get("deg", 0.0))]
+		"gun: the spread's edge lines lie at the gun's real fan, out to the slug range",
+		AimKit.shown(P, "spread") and absf(float(cone.get("len", 0.0)) - 6.3) < 0.3 and off < 2.0,
+		"len %.1f, %.1f deg off the real fan" % [float(cone.get("len", 0.0)), off]
 	)
+	ok("gun: fire held, the lines breathe back in between shots", narrowed >= 5.0, "closed %.1f deg" % narrowed)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
-	ak.step(m, 1.0)
-	ok("gun: idle, the cone folds into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
+	var col: Color = cone.get("col", Color.BLACK)
+	ok(
+		"gun: let go, the bloom settles to the rest fan and the lines go brass",
+		P.wbloom < 0.01 and absf(float(cone.get("deg", 0.0)) - rest) < 1.0 and col.is_equal_approx(DredgeGun.TIGHT_COL),
+		"bloom %.1f deg %.1f col %s" % [P.wbloom, float(cone.get("deg", 0.0)), col.to_html(false)]
+	)
+	ak.step(m, 0.8)
+	ok("gun: idle, the lines fold into one aim line", AimKit.shown(P, "spread_idle") and not AimKit.shown(P, "spread"))
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
+	# --- a volley fired at zero bloom shreds armor (content gun.armor_k); a spread one does not
+	var wear := []
+	var armor0: float = T.armor
+	var max_armor0: float = T.max_armor
+	for bloom0 in [0.0, 9.0]:
+		reset.call()
+		T.teleport(home + Vector3(0, 0, 1.6))
+		T.max_armor = 50.0
+		T.armor = 50.0
+		var hp0: float = T.hp
+		P.wbloom = bloom0
+		P.ammo = int(P.wpn["mag"])
+		ak.aim_at(P, T.pos)
+		P.inp["fire"] = true
+		ak.step(m, 0.1)
+		P.inp["fire"] = false
+		ak.step(m, 0.5)
+		wear.append([T.max_armor - T.armor, hp0 - T.hp])
+	T.armor = armor0
+	T.max_armor = max_armor0
+	ok(
+		"gun: zero bloom wears armor %.0f%% faster than a spread volley" % (float(K.gun_def()["armor_k"]) * 100.0),
+		K.armor_shreds > 0 and wear[1][1] > 0.0 and wear[0][1] > 0.0
+		and (wear[0][0] / wear[0][1]) > (wear[1][0] / wear[1][1]) * 1.5,
+		"tight armor %.1f hp %.1f, spread armor %.1f hp %.1f" % [wear[0][0], wear[0][1], wear[1][0], wear[1][1]]
+	)
 	# --- Abyssal Hand reels a foe in
 	reset.call()
 	ak.tap(m, P)
@@ -446,8 +503,8 @@ func _all() -> void:
 	var early_dmg: float = ak.dmg(T) - hp0
 	ak.step(m, 0.2)
 	ok(
-		"anchor: planted, the damage lands on the slam frame (~0.38s), not at the cast",
-		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) < 0.3,
+		"anchor: hops ~1 bh forward, the damage lands on the slam frame (~0.38s), not at the cast",
+		early == 0 and early_dmg == 0.0 and K.anchors == 1 and P.flat_dist(at0) > 0.8 and P.flat_dist(at0) < 2.0,
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
@@ -502,6 +559,21 @@ func _all() -> void:
 	)
 	for dz in range(-6, 7):
 		W.level[W.idx(hx + 4, hz + dz)] = lv
+	# --- owner rule (DECISIONS Kits): the Hand passes walls and cliffs, but a placed wall stops it
+	reset.call()
+	var wall_def := {"length": 8.0, "hp": 999.0, "time": 30.0, "block": "all"}
+	var wall: Dictionary = m.verbs.add_wall(T, home + Vector3(4.0, 0, 0), Vector2(-1, 0), wall_def, 1.0)
+	var dm0: float = ak.dmg(T)
+	var gw0 := K.grapples
+	ak.tap(m, P)
+	ak.step(m, 0.6)
+	ok(
+		"placed wall: stops the Abyssal Hand, no hook and no damage behind it",
+		K.pull.is_empty() and ak.dmg(T) <= dm0 and K.grapples == gw0,
+		"grapples +%d took %.1f" % [K.grapples - gw0, ak.dmg(T) - dm0]
+	)
+	m.verbs.walls.erase(wall)
+	if is_instance_valid(wall.get("node")): (wall["node"] as Node).queue_free()
 	# --- rocks: the hook flies over a rock and the foe is dragged over it
 	reset.call()
 	for dz in range(-1, 2):
@@ -604,6 +676,7 @@ func _all() -> void:
 	var q0 := K.quakes
 	P.ak.use_e()
 	var land_seen := false
+	var land_r := 0.0
 	var anchor_seen := false
 	var vy := 0.0
 	var te := 0.0
@@ -611,7 +684,9 @@ func _all() -> void:
 		ak.step(m, ak.DT)
 		te += ak.DT
 		vy = minf(vy, P.vel.y)
-		if AimKit.shown(P, "e_land"): land_seen = true
+		if AimKit.shown(P, "e_land"):
+			land_seen = true
+			land_r = float(AimKit.entry(P, "e_land").get("r", 0.0))
 		if K.fx.shown("dive_anchor%d" % P.get_instance_id()): anchor_seen = true
 	var high: float = ak.dmg(T) - hp0
 	ok(
@@ -619,6 +694,10 @@ func _all() -> void:
 		"vy %.1f drift %.2f" % [vy, P.pos.x - home.x]
 	)
 	ok("air smash: the landing ring shows while you fall, the anchor falls with you", land_seen and anchor_seen)
+	ok(
+		"telegraph == hit: the air smash's landing ring is its quake radius (drawn r == quake_r)",
+		absf(land_r - float(K.e_def()["quake_r"])) < 0.01, "%.2f" % land_r
+	)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
 		K.quakes == q0 + 1 and high > 0.0 and T.stun_t > 0.5, "quakes %d stun %.2f" % [K.quakes - q0, T.stun_t]
@@ -806,7 +885,14 @@ func _all() -> void:
 		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp > mh0 * 0.5 + mh0 * 0.15,
 		"res %.0f maxhp %.1f hp %.1f" % [K.res, P.max_hp, P.hp]
 	)
+	# ours-only heal (the data's Feed the Beast gives max health only): 16% on top of the stack's +2.5%
+	ok("passive: the knock heal is 16% of max health (ours-only, the data has none)",
+		absf(P.hp - (mh0 * 0.525 + P.max_hp * 0.16)) < 0.5, "hp %.1f maxhp %.1f" % [P.hp, P.max_hp])
 	var hp1 := P.hp
+	DashReset.takedown(P, T)
+	ok("passive: with the takedown reset's 5% a knock heals 21% in all, no more",
+		absf(P.hp - (hp1 + P.max_hp * 0.05)) < 0.5, "hp %.1f -> %.1f" % [hp1, P.hp])
+	hp1 = P.hp
 	K.on_knock(T, false)
 	ok("passive: an assist stacks but does not heal", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
 	for i in 12: K.on_knock(T, false)
@@ -891,6 +977,31 @@ func _all() -> void:
 	)
 	m.queue_free()
 	await main.get_tree().process_frame
+
+## Upgrade parity (docs/heroes/dredge.md): per rank [RMB cd, dash recharge, E cd, E power, E stun] against the source's
+## tier II / III+IV numbers.
+func _ranks() -> void:
+	var r: Array = ak.setup("dredge", 9.0, "", false)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var K: DredgeKit = P.ak
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		var cd_e: float = K.e_def()["cooldown"] * K.cd_k("kin")
+		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), P.dash_regen(), cd_e, K.power("kin") / pk, K._stun_t()])
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Abyssal Hand cooldown 12 -> 10.3 -> 8.7 (-2.5s twice on the source's 18)",
+			near.call(up[1][0], 10.33) and near.call(up[2][0], 8.67), str(up))
+	ok("upgrade parity: Barge recharge 10 -> 8.2 -> 6.4 (-1.25s twice on the source's 7)",
+			near.call(up[1][1], 8.21) and near.call(up[2][1], 6.43), str(up))
+	ok("upgrade parity: Anchor cooldown 7 -> 5.5 -> 4.1, damage +20% / +40%, stun +0.1 / +0.4",
+			near.call(up[1][2], 5.54) and near.call(up[2][2], 4.08)
+			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4)
+			and near.call(up[1][4] - up[0][4], 0.1) and near.call(up[2][4] - up[0][4], 0.4), str(up))
+	await ak.done(m)
 
 ## Parity pass (docs/heroes/dredge.md): the hold-to-fire gun against the footage (0040-0080): he walks between
 ## shots (at the shared firing walk), each volley is fanned on the cursor's direction at its shot, the slugs stop
