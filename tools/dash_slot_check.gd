@@ -51,13 +51,18 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(1 if bad > 0 else 0)
 
 ## 1 + 2: pips == charges for every archetype, the recharging pip and the countdown follow the timer.
+var match_rank1 := {}         # arch -> the slot the match draws for it at rank 1 (home must match it)
+
 func _pips_and_timer(m: Match, P: Hunter, hid: int) -> void:
 	for a in Arch.ORDER:
 		P.reclass(Arch.weight(a), a, Arch.signature(a))
 		P.unlock_all()
 		P.dashes = P.max_dashes()
+		match_rank1[a] = DashSlot.of_hunter(P)
 		await _drawn(m.hud)
-		var want := int(Content.class_dodge(Arch.weight(a)).charges) + int(P.ak.extra_dashes() if P.ak else 0.0)
+		var want := int(Content.class_dodge(Arch.weight(a)).charges)
+		if P.ak:
+			want += int(P.ak.extra_dashes()) + int(P.ak.dash_def().get("extra_charges", 0))
 		var air := P.ak == null or P.ak.has_long_dash()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
@@ -134,7 +139,7 @@ func _deny(m: Match, P: Hunter) -> void:
 	m.queue_free()
 	await _frames()
 
-## 5: the farm's slot is the same component fed by the farm's copy of the numbers; the old farm pips are gone.
+## 5: the farm's slot is the same component fed by the same DashState rules; the old farm pips are gone.
 func _home_slot() -> void:
 	Save.d = Save.fresh()
 	var k := Save.new_kin("zapple", "Pip")
@@ -152,14 +157,29 @@ func _home_slot() -> void:
 		home.queue_free()
 		return
 	var hid: int = slot.get_instance_id()
-	var dg: Dictionary = home._dodge()
-	var cap := int(dg["charges"])
-	var regen := float(dg["cd"])
+	# HomeDash: home's dash numbers are the match Hunter's for every hero at rank 1 (one DashState, no mirror)
+	var arch0 = Save.d.get("arch", "")
+	var cls0 = Save.d.get("cls", "medium")
+	for a in Arch.ORDER:
+		Save.d["arch"] = a
+		Save.d["cls"] = Arch.weight(a)
+		var hs := DashSlot.of_state(home.dash_rules())
+		var ms: Dictionary = match_rank1.get(a, {})
+		var same := not ms.is_empty()
+		for key in ["cap", "regen", "air_max", "icon"]:
+			same = same and str(hs[key]) == str(ms.get(key))
+		var mine := [hs["cap"], hs["regen"], hs["air_max"]]
+		ok(same, "HomeDash %s: home %s = match %s" % [a, mine, [ms.get("cap"), ms.get("regen"), ms.get("air_max")]])
+	Save.d["arch"] = arch0
+	Save.d["cls"] = cls0
+	var ds: DashState = home.dash_rules()
+	var cap := int(ds.cap())
+	var regen := ds.regen()
 	home.set_process(false)
 	home.set_physics_process(false)
 	for case in [[float(cap), 0.0], [float(cap - 1) + 0.4, 0.0], [0.0, 3.0]]:
-		home.dash_charges = case[0]
-		home.ex_cd = case[1]
+		home.dash.charges = case[0]
+		home.dash.air_cd = case[1]
 		await _frames()
 		var sh: Dictionary = DashSlot.shown.get(hid, {})
 		var pips: Array = sh.get("pips", [])
@@ -172,8 +192,8 @@ func _home_slot() -> void:
 			"farm at %.1f charges: pips %s, countdown '%s' (%.2fs)" % [float(case[0]), pips, sh.get("text", ""), left])
 		var cap_txt := Settings.key_cap("dash")
 		ok(HudSlot.shown_keys.get("dash", "") == cap_txt, "the farm's slot shows the dash key '%s'" % cap_txt)
-	home.dash_charges = 0.0
-	home.ex_cd = 0.0
+	home.dash.charges = 0.0
+	home.dash.air_cd = 0.0
 	slot.slot_fx.erase("dash")
 	home.dash_t = 0.0
 	slot.deny()
