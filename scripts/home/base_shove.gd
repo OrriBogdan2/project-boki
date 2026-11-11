@@ -127,6 +127,7 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var creaked := false           # the lean creak has played this bout
 
 func _init(home) -> void:
@@ -179,6 +180,7 @@ func label() -> String:
 	return "Start a Stump Shove (back %s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
+	h.hrace.release()
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
 		h._toast("The Stump Shove needs two rested Boki out on the base")
@@ -186,6 +188,7 @@ func use() -> void:
 	pair = ks.slice(0, 2)
 	for k in pair:
 		k["busy"] = true
+		BaseRace.act(k, "push")
 	var back := maxi(0, [pair[0]["rec"], pair[1]["rec"]].find(Save.active_kin()))
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, RandomNumberGenerator.new())
 	run.rng.randomize()
@@ -218,6 +221,9 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
+		if card_t <= 0.0:
+			BaseRace.let_go(held)
+			held = []
 	if run == null:
 		return
 	run.step(d)
@@ -255,6 +261,7 @@ func _end(finished: bool) -> void:
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
+		BaseRace.act(k, "")
 	bar.close()
 	stump.rotation.z = 0.0
 	Sfx.loop_stop("shove_strain")
@@ -265,6 +272,7 @@ func _end(finished: bool) -> void:
 		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
+		held = BaseRace.hold(h, res)
 		Save.save_game()
 	run = null
 	pair = []
