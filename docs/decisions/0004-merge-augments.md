@@ -17,7 +17,7 @@
 - **Augments** (`MergeAugment`, data in `content/merge_forms/<id>.json` under `aug`, fallback forms get one from their type in `content/rules/merge_forms.json`):
   - LMB: a rider on every attack through the existing shot/swing rider path (`Hunter._kin_riders`: chain, pierce, slow, burn, an extra effect list on every Nth attack).
   - RMB and E: when the hero casts one (`CombatBus.ability_used` "secondary" / "kin"), the form adds an effect list in the effect grammar at the same spot and recharges that slot faster. It works on any kit, because it hangs off the cast signal and not off a kit's own code.
-  - Shift: a form dash on top of the hero's own dash (`dash_kind`: sweep = damage along the path, charge = armoured shove, reflect = a short mirror window, trail = the type rider on what you pass, then haste; no dash makes an area burst).
+  - Shift: a form dash on top of the hero's own dash (`dash_kind`: sweep = damage along the path, charge = armoured shove, reflect = a short mirror window, which another game opens on the remote copy when its snapshot starts a dash (the roll bit, `MergeAugment.remote_dash`; no Net change), trail = the type rider on what you pass, then haste; no dash makes an area burst).
   - Stats: a modest passive through `KinMerge.passives` (damage reduction, speed, cooldown rate).
 - **Clarity:** augmented slots get a tint and a Boki-type badge on the HUD, and every add-on has its own ring and word colour. The last 3s of the window warn loudly: the R slot flashes, a rising tick each second, the parts flicker, a screen-edge pulse in the form colour.
 - **Ending:**
