@@ -2,7 +2,8 @@ extends RefCounted
 ## --race-check: the Dash (scripts/home/base_race.gd). 20 headless races of 3 Boki with mixed stats,
 ## leans and moods: the favourite (lowest expected lap time) wins at least 60%. Also: a lean speeds
 ## up its own stretch only, mood matters, good cheers beat missed ones, and settling a race moves
-## joy, trust, gems, memories and (where a record has them) bonds. Never touches the real save.
+## joy, trust, gems, memories and (where a record has them) bonds. Then on a farm: the first walk-up
+## offers a practice lap once (Esc skips; the guided race explains its card). Never touches the real save.
 
 const RACES := 20
 const FAVOURITE_MIN := 0.6      # share of races the favourite must win
@@ -87,5 +88,63 @@ func run(m: Node) -> void:
 	ok(float(rival["bonds"].get(win["uid"], 0.0)) < 0.0, "a loser with bonds leans rival toward the winner")
 	ok(not f.has("bonds"), "a record without bonds isn't given any")
 	ok(String(res["memory"]) != "", "the card has a memory line: %s" % res["memory"])
+	await _first_visit(m)
 	print("RACE CHECK DONE, failures: ", bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
+
+# ---------------------------------------------------------------- 6. the first walk-up offers a practice lap once
+func _first_visit(m: Node) -> void:
+	var d := Save.fresh()
+	for i in 2:
+		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
+		Care.ensure(k)
+		d["roster"].append(k)
+		if i == 0:
+			d["active"] = k["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true}
+	d["layout"] = HomeLayout.fresh()
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	var home = await m._hb_home()
+	var race: BaseRace = home.race
+	for k in home.kins:
+		(k["node"] as Node3D).visible = true
+		k.erase("indoors")
+	race.start()
+	ok(is_instance_valid(race.offer) and race.run.is_empty() and Save.d["tutorial"][BaseRace.FIRST],
+			"first: the first walk-up offers a practice lap instead of starting")
+	var lines: Array = race.offer.find_children("*", "Label", true, false)
+	ok(lines.size() == 2 and (lines[1] as Label).text.contains("gold"), "first: one line about the cheers and the gold")
+	var esc := InputEventAction.new()
+	esc.action = "menu"
+	esc.pressed = true
+	ok(race.input(esc) and race.offer == null and race.run.is_empty(), "first: Esc skips the offer")
+	race.start()
+	ok(race.offer == null and not race.run.is_empty() and not race.guide, "first: after a skip it is a plain race")
+	_finish(race)
+	ok(not _card_text(race).contains("Joy and trust"), "first: a plain race's card has no explainer")
+	Save.d["tutorial"].erase(BaseRace.FIRST)
+	race.start()
+	race._answer(true)
+	ok(not race.run.is_empty() and race.guide, "first: Practice lap starts the guided race")
+	_finish(race)
+	ok(_card_text(race).contains("Joy and trust"), "first: the practice card explains joy, trust and gems")
+	race.start()
+	ok(race.offer == null and not race.run.is_empty() and not race.guide, "first: the offer never comes back")
+	_finish(race)
+	home.queue_free()
+	await m.get_tree().process_frame
+
+## Runs the race out (missing every cheer) and leaves the result card up.
+func _finish(race: BaseRace) -> void:
+	var t := 0.0
+	while not race.run.is_empty() and t < 120.0:
+		race.tick(0.1)
+		t += 0.1
+
+## The result card's labels, joined.
+func _card_text(race: BaseRace) -> String:
+	var out := ""
+	for l in race.card.find_children("*", "Label", true, false):
+		out += (l as Label).text + "\n"
+	return out
