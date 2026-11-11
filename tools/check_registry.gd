@@ -23,8 +23,8 @@ const CHECKS := {
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
-	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP and the 30 m squad share
-	"--steal-tell-check": ["res://tools/steal_tell_check.gd", "steal_tell_check", null],      # boss low-HP steal tell
+	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP, 30 m squad share
+	"--steal-tell-check": ["res://tools/steal_tell_check.gd", "steal_tell_check", null],      # boss low-HP tell
 	"--steal-tell-shots": ["res://tools/steal_tell_shots.gd", "steal_tell_shots", null],      # GPU, --shots-dir=
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore

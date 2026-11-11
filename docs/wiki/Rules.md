@@ -1433,6 +1433,15 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 | price | 16 |
 | foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
 
+## steal_window (`content/rules/steal_window.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The steal window (scripts/ui/steal_tell.gd, docs/HUD.md "Steal window"). at: the share of max health at or under which a lair boss's kill is up for grabs: its health bar pulses gold and squads within KillXp.SHARE_R see the steal mark. The prize cry (StealSfx, ext/sfx-steals) marks the same line. Looks only: no stat or damage changes. |
+| at | 0.25 |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.

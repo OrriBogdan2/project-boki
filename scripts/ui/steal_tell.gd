@@ -7,7 +7,8 @@ extends RefCounted
 ## of it (close enough to be paid for the kill) a small STEAL mark sits by the bar. Every machine reads
 ## it off the health it already sees, so nothing is synced. Looks only: no stat or damage changes.
 
-const COL := Color("ffc93a")      # the window's gold: apart from the bar's red, the stagger's lilac and the chip's white
+## The window's gold: apart from the bar's red, the stagger's lilac and the chip's white.
+const COL := Color("ffc93a")
 const INK := Color(0.05, 0.04, 0.02, 0.9)      # the mark's outline and glyph
 const PULSE_HZ := 2.0             # fill pulses per second
 const MARK_R := 9.0               # px: the mark's diamond, centre to tip
