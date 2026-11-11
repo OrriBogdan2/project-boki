@@ -278,13 +278,12 @@ func _air(id: String) -> void:
 	ok(down.y < 0.0 and down.z < 0.0, "%s: the dive goes head-down, head first (spine y %.2f z %.2f; gliding y %.2f)"
 			% [art_name, down.y, down.z, up.y])
 	var turn := glide.duplicate()
-	for i in 30:
-		turn["face"] = float(turn["face"]) + 5.0 * DT      # a left turn at 5 rad/s
-		_play(m, an, sync, turn, 1)
+	turn["steer_in"] = Vector2(-1, 0)                   # steering left (WardenGlide.lean)
+	_play(m, an, sync, turn, 30)
 	var lean := _spine(m, sk)
 	ok(lean.x < up.x - 0.15, "%s: a glider turn leans it into the turn (spine x %.2f, straight %.2f)" % [art_name,
 			lean.x, up.x])
-	_play(m, an, sync, {"vel": Vector3.ZERO, "face": float(turn["face"]), "grounded": true}, 60)
+	_play(m, an, sync, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true}, 60)
 	ok(w.transform.is_equal_approx(sync.clips.tilt.rest), "%s: on the ground the body is upright again" % art_name)
 	m.free()
 

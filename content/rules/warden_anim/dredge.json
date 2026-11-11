@@ -48,6 +48,11 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
+		"open": "glide_open",
+		"close": "glide_close",
+		"lean_l": "glide_lean_l",
+		"lean_r": "glide_lean_r",
+		"burn": "glide_burn",
 		"dive": "pounce",
 		"dive_at": 0.36,
 		"dive_tilt": 90.0

@@ -3117,6 +3117,8 @@ func _anim_state(stretch: float) -> void:
 	s["grounded"] = grounded and pad.is_empty()
 	s["gliding"] = gliding and not plunging()
 	s["diving"] = plunging()
+	s["steer_in"] = inp.get("move", Vector2.ZERO)      # (WardenGlide leans the glide by it)
+	s["burn"] = glide_fuel <= 0.001                     # overheated: the glide plays the struggle
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()

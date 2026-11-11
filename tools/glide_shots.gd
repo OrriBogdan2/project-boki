@@ -1,7 +1,8 @@
 extends RefCounted
 ## --glide-shots --shots-dir=<dir> [--wardens=a,b] [--size=360]: every Hunter (Arch.ORDER) in a live training match,
-## high up, through one glide: a fall, the glider opening, a straight hold, a turn, the Ctrl dive, the glide catching
-## again, the glider closing into a fall, then a re-open and an air dash handed back to the glider.
+## high up, through one glide: a fall, the glider opening, a straight hold, a turn right and back left, the Ctrl dive,
+## the glide catching again, the overheat struggle, the glider closing into a fall, then a re-open and an air dash
+## handed back to the glider.
 ## <dir>/<arch>/{match,side}/f000.png... at 15 fps: the match camera's angle (zoomed on the Hunter) and a side view.
 ## Prints one GLIDE_SHOT line a frame (phase, glide weight, fall speed, the body's numbers) so a strip reads with them.
 ## Needs a renderer.
@@ -15,7 +16,7 @@ const HEIGHT := 60.0       # m above the ground: room for the dive
 const EVERY := 4           # sim steps (60 Hz) per frame: 15 fps
 ## s: the phases, each to the next one's start
 const PHASES := [["fall", 0.0], ["open", 0.3], ["hold", 0.7], ["turn", 1.4], ["dive", 2.2], ["catch", 3.0],
-	["close", 3.6], ["reopen", 4.2], ["dash", 4.8], ["end", 5.6]]
+	["burn", 3.6], ["close", 4.2], ["reopen", 4.8], ["dash", 5.4], ["end", 6.2]]
 
 var tree: SceneTree
 var cam: Camera3D
@@ -80,11 +81,13 @@ func _hunter(main: Node, arch: String, dir: String) -> void:
 	var end := float(PHASES[-1][1])
 	while t < end:
 		var ph := _phase(t)
-		var turn_k := clampf((t - 1.4) / 0.4, 0.0, 1.0)
-		var mv := Vector2(1, 0).rotated(turn_k * PI * 0.5)      # east, then a quarter turn to the south
+		var turn_k := clampf((t - 1.4) / 0.4, 0.0, 1.0) - clampf((t - 1.8) / 0.4, 0.0, 1.0)
+		var mv := Vector2(1, 0).rotated(turn_k * PI * 0.5)      # east, a quarter turn right to the south, and back
 		h.inp["move"] = mv
 		h.inp["aim"] = h.pos + Vector3(mv.x, 0, mv.y) * 8.0 + Vector3(0, 0.9, 0)
-		var glide: bool = ph in ["open", "hold", "turn", "dive", "catch", "reopen", "dash"]
+		var glide: bool = ph in ["open", "hold", "turn", "dive", "catch", "burn", "reopen", "dash"]
+		if ph == "burn":
+			h.glide_fuel = 0.0          # overheated
 		h.inp["glide"] = glide
 		h.inp["glide_btn"] = glide
 		h.inp["crouch"] = ph == "dive"
