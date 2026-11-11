@@ -93,7 +93,8 @@ func _menu_choice() -> void:
 	box.show_extra(row)
 
 func _show_offer() -> void:
-	offer = HobOffer.new(self)
+	offer = HobOffer.new((ClassUnlock.state().get("second", []) as Array).duplicate(), rules(), "offer_title",
+			ClassUnlock.choose_second, taken, later)
 	box.show_extra(offer.build())
 
 ## The Mask is chosen (HobOffer): he hands it over and the short Mask moment plays.

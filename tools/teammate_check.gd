@@ -115,6 +115,8 @@ func _follow() -> void:
 	P.inp["jump"] = true
 	_walk(P, Vector2(-1, 0), 0.12, watch)
 	P.inp["jump"] = false
+	while P.vel.y > 0.0 and not P.grounded:     # open at the top: the glider opens falling (decision 0027)
+		_walk(P, Vector2(-1, 0), Match.DT, watch)
 	P.inp["glide"] = true
 	_walk(P, Vector2(-1, 0), 1.4, watch)
 	P.inp["glide"] = false
@@ -218,7 +220,7 @@ func _priority() -> void:
 	# the ping went up with it, labelled, for your squad
 	ok(m.pings.any(func(p): return p.get("kin") == k) or cs.size() > 0 and m.pings.size() >= 0, "callouts put up a ping")
 	var pinged := false
-	k.comp.callout("hunter", T.pos, "to the west", T, "")
+	k.comp.callout("hunter", T.pos, T, "")
 	for p in m.pings:
 		if p.get("kin") == k and String(p.get("label", "")) == "Hunter": pinged = true
 	ok(pinged and m.bubbles.any(func(b): return b["ent"] == k), "a callout is a ping with a label plus a speech bubble")

@@ -66,7 +66,7 @@ func _build() -> void:
 	ph.add_child(tabs)
 	ph.add_child(UI.button("›", func(): page = (page + 1) % KinBox.PAGES; renaming = false; refresh(), 34))
 	bc.add_child(ph)
-	var gc := UI.card(Color(0.07, 0.07, 0.12, 0.9), 8, 12)
+	var gc := UI.card(Color(UI.NIGHT, 0.9), 8, 12)
 	UI.set_card_border(gc, Color(Color("bfa6ff"), 0.25), 1)
 	grid = GridContainer.new()
 	grid.columns = COLS

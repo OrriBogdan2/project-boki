@@ -1,0 +1,9 @@
+{
+	"desc": "How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the source's creeps and summons take every ability as written (one number per card, no creep scaling) and every crowd control on the cards works on them.",
+	"dmg_k": {
+		"summoned": 1.0,
+		"wild": 1.0
+	},
+	"cc": ["stun", "root", "slow", "burn", "blight"],
+	"execute": true
+}

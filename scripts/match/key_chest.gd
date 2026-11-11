@@ -22,6 +22,35 @@ static func dress(node: Node3D) -> void:
 		tw.tween_property(fl, "position:y", 1.68, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_property(fl, "position:y", 1.55, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
+## How many of `n` chests a match places (rules chest.keep).
+static func kept(n: int) -> int:
+	return roundi(n * float(ChestLoot.R()["keep"]))
+
+## The map's chest spots a match uses: kept() of them, dropping the most crowded first (the one with
+## the closest neighbour; of a pair, the later). No dice, so every client keeps the same chests.
+static func thin(spots: Array) -> Array:
+	var out := spots.duplicate()
+	var want := kept(spots.size())
+	while out.size() > want:
+		var drop := 0
+		var best := INF
+		for i in out.size():
+			for j in range(i + 1, out.size()):
+				var d: float = (out[i]["pos"] as Vector3).distance_squared_to(out[j]["pos"])
+				if d < best:
+					best = d
+					drop = j
+		out.remove_at(drop)
+	return out
+
+## No chests before the match proper starts: they're hidden while you ride the ship and drop in, and
+## show once you land. Only the view changes; they're built, warmed and counted as before.
+static func show_all(m: Match, on: bool) -> void:
+	for c in m.chests:
+		var n = c.get("node")
+		if n is Node3D and is_instance_valid(n):
+			(n as Node3D).visible = on
+
 ## What the interact prompt says and does beside chest `c` for hunter `h`.
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
 	var k := Settings.key_cap("interact")

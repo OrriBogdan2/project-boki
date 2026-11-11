@@ -1,8 +1,9 @@
-"""Breaker's body from the Meshy scan of the turnaround (ART-1 fine detail): the dense scan and Meshy's remesh of it, both moved from the
-scan's joints to the rig's. The remesh is the game mesh (a decimate tears a scan); albedo and normals are baked onto it from the dense scan.
-  blender -b --factory-startup --python tools/art1/breaker_scan.py -- SCAN.glb RIG.json WORK [tris]
+"""Mossy's body from the Meshy scan of mossy_v2_turnaround (ART-1 fine detail): the dense scan and Meshy's remesh of it, both moved from
+the scan's joints to the rig's. The remesh is the game mesh (a decimate tears a scan); albedo and normals are baked onto it from the dense scan.
+  blender -b --factory-startup --python tools/art1/breaker_scan.py -- SCAN.glb RIG.json WORK RETOPO.glb
+In: WORK/scan_joints.json (joints, hull_c/hull_r and cut_neck, measured on tools/meshy/grid_renders.py renders of the scan).
 Out: WORK/scan_low.npz (the retopo: verts, tris, uvs, bones, weights), WORK/scan_albedo.png, WORK/scan_normal.png.
-The helmet, masts, fish, hammer and shield stay scripted (breaker_art1.py): the turnaround has no clean version of them."""
+The helmet, collar, compass dial, fists, masts, fish, hammer and shield stay scripted (breaker_art1.py)."""
 import json
 import os
 import sys
@@ -27,8 +28,17 @@ def rj(b):
 T = {"hull": (np.array((0, 0, 0.16)), np.array((0, 0, 0.9)))}
 SEG = [("hull", "hull_bot", "hull_top", 0.3, "hips")]
 TJ = {"hull_bot": np.array((0, 0, 0.16)), "hull_top": np.array((0, 0, 0.9))}
-HC = np.array((-0.045, -0.21, -0.015))
-HS = np.array((0.91, 0.89, 0.8))         # the hull, a little squashed, so the straps stay true: 1.1 wide to tall
+HC = np.array(J["hull_c"])                # the scan's hull: centre and half sizes (scan_joints.json, read off the grid renders)
+HR = np.array(J["hull_r"])
+HS = np.array((0.419, 0.392, 0.376)) / HR  # its half sizes on the rig (before the taper)
+WAIST_X, SHOULDER_X, DEPTH_Y = 0.55, 1.0, 0.7    # owner 11-08: slimmer, not a ball: x scale at the hips and at the shoulders, and the depth scale
+
+
+def hull_scale(P):
+    """Per-vert scale of the hull: narrow at the waist, broad at the shoulders (a smoothstep over its height), and shallower front to back."""
+    t = np.clip(((P[:, 2] - HC[2]) / HR[2] * 0.5 + 0.5 - 0.2) / 0.45, 0, 1)
+    t = t * t * (3 - 2 * t)
+    return HS * np.stack((WAIST_X + (SHOULDER_X - WAIST_X) * t, np.full(len(P), DEPTH_Y), np.ones(len(P))), 1)
 for s in "RL":
     TJ["shoulder." + s], TJ["elbow." + s], TJ["wrist." + s] = rj("upper_arm." + s), rj("forearm." + s), rj("hand." + s)
     TJ["hip." + s], TJ["knee." + s] = rj("thigh." + s), rj("shin." + s)
@@ -73,8 +83,8 @@ def fit(P):
         q = P - (a0 + h[:, None] * u)
         D[:, i] = np.linalg.norm(q, axis=1) - rad
         if nm == "hull":
-            D[:, i] = (np.linalg.norm((P - HC) / (0.46, 0.44, 0.47), axis=1) - 1.0) * 0.3
-        if nm[-1] in "RL" and nm != "hull":
+            D[:, i] = (np.linalg.norm((P - HC) / HR, axis=1) - 1.0) * 0.3
+        if nm[-1] in "RL":
             side = 1.0 if nm[-1] == "R" else -1.0
             D[P[:, 0] * side < 0.02, i] = 9.0
     W = np.exp(-(D - D.min(1, keepdims=True)) / 0.012)
@@ -82,7 +92,7 @@ def fit(P):
     Q = np.zeros_like(P)
     for i, (nm, j0, j1, rad, _) in enumerate(SEG):
         if nm == "hull":
-            Q += W[:, i, None] * ((P - HC) * HS + (0, 0, 0.53))
+            Q += W[:, i, None] * ((P - HC) * hull_scale(P) + (0, 0, 0.53))
             continue
         p0, p1, q0, q1 = SJ[j0], SJ[j1], TJ[j0], TJ[j1]
         ln = np.linalg.norm(p1 - p0)
@@ -104,11 +114,11 @@ def fit(P):
 
 def cut_mask(P):
     """What the scripted parts replace: helmet and collar, stumps, the fists past the wrist."""
-    cut = (np.hypot(P[:, 0] - HC[0], (P[:, 1] - HC[1]) * 1.1) < 0.33) & (P[:, 2] > 0.38) | (P[:, 2] > 0.5)
+    neck_r, neck_z, top_z = J["cut_neck"]
+    cut = (np.hypot(P[:, 0] - HC[0], (P[:, 1] - HC[1]) * 1.1) < neck_r) & (P[:, 2] > neck_z) | (P[:, 2] > top_z)
     for sd, sx in (("R", 1.0), ("L", -1.0)):
         u = SJ["wrist." + sd] - SJ["elbow." + sd]
         cut |= (P[:, 0] * sx > 0.4) & (((P - SJ["wrist." + sd]) @ u) > 0.0)
-    cut |= (P[:, 0] < -0.56) & (P[:, 2] > 0.36)      # (the sail scrap the scan kept by his left shoulder)
     return cut
 
 
