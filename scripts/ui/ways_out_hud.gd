@@ -72,15 +72,14 @@ static func _heart_final(m: Match, now: float) -> void:
 		_:
 			_seat(3, St.LOCKED, Heart.r("final_s") - now, -1)
 
-## The squad of the first hunter listed under `key` on any lair ("flown": left by the updraft, "sealed_in": fighting).
+## The squad of the first hunter listed under `key` on the Sealed Lair ("flown": left by the updraft, "sealed_in":
+## fighting). Other lairs are no way out.
 static func _lair_team(m: Match, key: String) -> int:
-	if m.lairs == null:
+	var qs: QuestSeats = m.exits.seats if m.exits else null
+	if qs == null or qs.lair == null:
 		return -1
-	for L in m.lairs.list:
-		var who: Array = L.get(key, [])
-		if not who.is_empty():
-			return (who[0] as Hunter).team
-	return -1
+	var who: Array = qs.lair.ref.get(key, [])
+	return (who[0] as Hunter).team if not who.is_empty() else -1
 
 ## The squad of the first outpost in one of these states.
 static func _uplink_team(m: Match, a: String, b := "") -> int:

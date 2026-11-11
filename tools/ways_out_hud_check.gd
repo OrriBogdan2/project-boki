@@ -73,9 +73,10 @@ func run(main: Node) -> void:
 	m.time = float(q["uplink_open_s"]) + 1.0 - m.sess_t0
 	ok(_st(m, 2) == St.OPEN, "past uplink_open_s the Uplink is open")
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != m.player.team)[0]
-	var L := {"flown": [], "sealed_in": [foe], "state": "awake"}
+	m.exits.seats.build()
+	var L: Dictionary = m.exits.seats.lair.ref      # (only the Sealed Lair is a way out: another lair's fight is not)
+	L["sealed_in"] = [foe]
 	var X := {"kind": "outpost", "state": "charging", "team": m.player.team}
-	m.lairs.list.append(L)
 	m.exits.list.append(X)
 	ok(_st(m, 0) == St.USE and int(WaysOutHud.seats(m)[0]["team"]) == foe.team,
 		"a squad sealed in with a boss: the Lair is in use, in their colour")
@@ -84,7 +85,8 @@ func run(main: Node) -> void:
 	L["flown"] = [foe]
 	X["state"] = "spent"
 	ok(_st(m, 0) == St.TAKEN and _st(m, 2) == St.TAKEN, "ridden out and spent: both taken")
-	m.lairs.list.erase(L)
+	L["flown"] = []
+	L["sealed_in"] = []
 	m.exits.list.erase(X)
 	m.time = float(q["uplink_shut_s"]) + 1.0 - m.sess_t0
 	ok(_st(m, 2) == St.LOST, "past uplink_shut_s unused, the Uplink is lost")
