@@ -117,6 +117,11 @@ What made the menus feel blocky, samey and hard to get through:
   a kin, F pet, V fetch, T talk, C details).
 - **Panels** open over a blurred, dimmed farm; clicking the dimmed area or pressing Esc closes them;
   Enter presses the panel's primary when nothing else has focus.
+- **Results** (after a match, `scripts/ui/results.gd`): the first view shows only what's needed, at most 5
+  groups of one-line labels that fit 1280x720 without scrolling: the outcome and how you left (or where your
+  squad placed and its pay), your Boki, the loot you kept, any Hunter news, and More beside Back to the farm.
+  More holds the match's numbers (foes downed, kills, damage dealt and taken, time, times downed, where,
+  revives) and every note. `--results-first-check` holds it to that.
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
 

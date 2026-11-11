@@ -890,10 +890,9 @@
 "long_line": 1
 },
 "scripts/ui/results.gd": {
-"long_line": 25,
-"nested_ternary": 6,
-"semicolon": 38,
-"shadow": 1
+"long_line": 2,
+"nested_ternary": 1,
+"semicolon": 10
 },
 "scripts/ui/scenery.gd": {
 "long_line": 8,

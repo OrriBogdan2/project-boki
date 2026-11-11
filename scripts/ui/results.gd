@@ -1,5 +1,17 @@
 extends Control
 ## After a match: what you brought home, what your kin thinks, and the way back to the farm.
+## The first view shows only what's needed (briefs/DECISIONS.md 2026-11-08): the outcome and how, your Boki,
+## the loot you kept, any Hunter news, and More next to the way home. The match's numbers and every note are
+## behind More (--results-first-check).
+
+const FOES_TIP := "Enemy hunters you put on the ground this match."      # hover on "Foes downed"
+const SAD := Color("ffb36a")      # trust that went down
+
+var groups: VBoxContainer      # the first view: one child per group
+var more: VBoxContainer        # behind More: the numbers and the notes
+var more_btn: Button
+var home_btn: Button
+var scroll: ScrollContainer
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -10,283 +22,357 @@ func show_result(r: Dictionary) -> void:
 	shown_at = Time.get_ticks_msec()
 	var s := Game.apply_result(r)
 	s["kin_say"] = String(r.get("kin_say", ""))     # what your Boki said as the run ended
-	var bg := ColorRect.new(); bg.color = UI.BG; bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(bg)
+	var bg := ColorRect.new()
+	bg.color = UI.BG
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(bg)
 	_stage(r, s)
 	var won: bool = r.get("extracted", false)
-	# a warm (or cold) wash from the right so the card sits in light
-	var wash := TextureRect.new()
-	var gt := GradientTexture2D.new(); var gr := Gradient.new()
-	gr.set_color(0, Color(0.03, 0.02, 0.07, 0.0)); gr.set_color(1, Color(0.03, 0.02, 0.07, 0.82))
-	gr.set_offset(0, 0.25); gr.set_offset(1, 0.7)
-	gt.gradient = gr; gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(1, 0); gt.width = 256; gt.height = 4
-	wash.texture = gt; wash.stretch_mode = TextureRect.STRETCH_SCALE
-	wash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); wash.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(wash)
-	var center := CenterContainer.new(); center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); add_child(center)
+	add_child(_wash())
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	center.offset_left = 340.0   # leave the left side for the island
-	var panel := UI.sheet(600); center.add_child(panel)
+	add_child(center)
+	var panel := UI.sheet(600)
+	center.add_child(panel)
 	UI.pop_in(panel, 0.1)
 	var outer := UI.vbox(14)
 	panel.add_child(outer)
-	var v := UI.vbox(10)
-	# the details scroll if they're taller than the window; the way home stays below them, always visible
-	var sc := ScrollContainer.new()
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	var pad := MarginContainer.new(); pad.add_theme_constant_override("margin_right", 12)
+	outer.add_child(_scroller())
+	groups.add_child(_outcome(r, s, won))
+	for g in [_boki(s), _loot(s, won), ClassCard.results_strip(s)]:
+		if g != null:
+			groups.add_child(g)
+	_fill_more(r, s)
+	outer.add_child(_bottom(r))
+	home_btn.grab_focus()
+	if won:
+		Sfx.play("bond", null, -6.0, 0.0, 1.0)
+	else:
+		Sfx.play("fall", null, -6.0, 0.0, 0.8)
+
+## A dark wash from the right so the card sits apart from the island.
+func _wash() -> TextureRect:
+	var gr := Gradient.new()
+	gr.set_color(0, Color(0.03, 0.02, 0.07, 0.0))
+	gr.set_color(1, Color(0.03, 0.02, 0.07, 0.82))
+	gr.set_offset(0, 0.25)
+	gr.set_offset(1, 0.7)
+	var gt := GradientTexture2D.new()
+	gt.gradient = gr
+	gt.fill_to = Vector2(1, 0)
+	gt.width = 256
+	gt.height = 4
+	var wash := TextureRect.new()
+	wash.texture = gt
+	wash.stretch_mode = TextureRect.STRETCH_SCALE
+	wash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	wash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return wash
+
+## The first view and More scroll if they're taller than the window; the way home stays below them.
+func _scroller() -> ScrollContainer:
+	scroll = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var pad := MarginContainer.new()
+	pad.add_theme_constant_override("margin_right", 12)
 	pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(pad)
+	var v := UI.vbox(14)
 	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	pad.add_child(v)
-	sc.add_child(pad)
-	outer.add_child(sc)
+	groups = UI.vbox(10)
+	v.add_child(groups)
+	more = UI.vbox(6)
+	more.visible = false
+	v.add_child(more)
+	var sc := scroll      # (a local, so a fit still queued after the screen is gone sees it freed)
 	var fit := func() -> void:
 		if is_instance_valid(sc) and sc.is_inside_tree():
-			sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 200.0)
+			var room := sc.get_viewport_rect().size.y - 200.0
+			sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, room)
 	v.minimum_size_changed.connect(func(): fit.call_deferred())
 	sc.tree_entered.connect(func(): fit.call_deferred())
-	# header: one tag, the outcome with the Hunter's name in it, then how you left or where your squad placed
-	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
+	return scroll
+
+## Made it out or not, then how: the Heart, an exit, or where your squad placed and what that paid.
+func _outcome(r: Dictionary, s: Dictionary, won: bool) -> Control:
+	var head := UI.vbox(4)
 	var hunter := String(Save.d.get("name", "Hunter")).substr(0, 16)
-	var head := UI.vbox(6)
-	tag.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN      # a tag, not a bar across the card
-	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
-	var how := (WaysResult.how_line(r) + ("" if won else "Everything you carried stays out in the islands.")).strip_edges()
-	if how != "":
-		head.add_child(UI.para(how, UI.T_BODY, UI.MUTED))
+	_line(head, WaysResult.how_line(r).strip_edges(), UI.MUTED)
 	if int(s.get("place_gems", 0)) > 0:
-		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
-	if WaysResult.hid_line(r) != "":
-		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
+		_line(head, "Placement pay: %d gems" % int(s["place_gems"]), UI.GOLD)
+	_line(head, WaysResult.hid_line(r), UI.MUTED)
 	if won and s.has("heart"):
-		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
-	v.add_child(head)
-	# the three numbers that matter, big and counting up, on one strip; the rest behind Details
-	var secs := int(r.get("time", 0))
-	var strip := UI.card(Color(0, 0, 0, 0.2), 14, 14)
-	var sh := UI.hbox(0); strip.add_child(sh)
-	var big4 := [["knock", "Foes downed", float(r.get("knocks", 0)), ""], ["burst", "Damage", float(r.get("damage", 0)), ""],
-		["clock", "Time", float(secs), "time"]]
-	for i in big4.size():
-		var t: Array = big4[i]
-		if i > 0:
-			var sep := ColorRect.new(); sep.color = UI.LINE; sep.custom_minimum_size = Vector2(1, 0)
-			sh.add_child(sep)
-		var tile := _stat_tile(t[0], t[1], t[2], t[3], 0.35 + i * 0.08)
-		tile.tooltip_text = String(STAT_TIPS.get(t[0], ""))
-		sh.add_child(tile)
-	v.add_child(strip)
-	var det := UI.vbox(6)      # what is behind the Details toggle
-	det.visible = false
-	det.add_child(_small_stats(r, String(Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]["name"])))
-	if won:
-		var chips: Array = []
-		if int(s["gems"]) > 0:
-			chips.append(["gem", "%d gems" % s["gems"], UI.GOLD])
-		for sd in s["seeds"]:
-			var crop: Dictionary = Data.CROPS[sd]
-			var n := int(s["seeds"][sd])
-			var what := "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"]
-			chips.append(["seed", what, crop["color"]])
-		for k in s["caught"]:
-			var rare := " ".join(Mutations.tags(k))
-			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
-		# a boss's Rare Egg: the best thing you can carry home
-		for it in s.get("haul", []):
-			if Loot.is_rare_egg(it):
-				chips.push_front(["egg", "Brought home a Rare Egg  ·  %s" % Loot.name_of(it), Color("ffd36a")])
-		if not chips.is_empty():
-			v.add_child(UI.section("Brought home"))
-			var flow := HFlowContainer.new()
-			flow.add_theme_constant_override("h_separation", 8); flow.add_theme_constant_override("v_separation", 8)
-			for i in chips.size():
-				var ch := _chip(chips[i][0], chips[i][1], chips[i][2], 0.75 + i * 0.14)
-				if chips[i].size() > 3:
-					# a Boki you brought home: where it went
-					var krec: Dictionary = chips[i][3]
-					var hb: HBoxContainer = ch.get_child(0)
-					hb.add_child(UI.label("·  " + ("Boki Burrow" if KinBox.is_boxed(krec) else "farm"), 13, Color("bfa6ff") if KinBox.is_boxed(krec) else UI.GOOD))
-				flow.add_child(ch)
-			v.add_child(flow)
-			var to_box: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
-			if not to_box.is_empty():
-				v.add_child(_note("Sent to the Boki Burrow: %s. %s" % [", ".join(to_box.map(func(k): return String(k["name"]))),
-					"You already have that kind out on the farm." if to_box.all(func(k): return KinBox.dup_on_farm(k)) else "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]], Color("cdb8ff")))
-	# weapons, gloves and treasure: into the armory, or left behind in your deathbox
-	var haul: Array = s.get("haul", []).filter(func(it): return not Loot.is_rare_egg(it))
-	var eggs_home: int = s.get("haul", []).filter(func(it): return Loot.is_rare_egg(it)).size()
-	if won and eggs_home > 0:
-		v.add_child(_note("Brought home a Rare Egg! It went to the Incubator by the Nesting Nook, to hatch into a rare Boki." if eggs_home == 1 else "Brought home %d Rare Eggs! They went to the Incubator by the Nesting Nook and hatch one at a time." % eggs_home, UI.GOLD))
-	if won and not haul.is_empty():
-		v.add_child(UI.section("Weapons and gloves you found"))
-		if not Save.has_building("armory"):
-			v.add_child(_note("Build an armory on your farm to use them.", UI.MUTED))
-		var hf := HFlowContainer.new()
-		hf.add_theme_constant_override("h_separation", 8); hf.add_theme_constant_override("v_separation", 8)
-		for i in haul.size():
-			var it: Dictionary = haul[i]
-			hf.add_child(_chip(Loot.icon_of(it), Loot.name_of(it) + _fate_note(it), Loot.col_of(it), 0.9 + i * 0.1))
-		v.add_child(hf)
-		if int(s.get("salvage_gems", 0)) > 0:
-			det.add_child(_note("Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]),
-					UI.GOLD))
-		if int(s.get("arm_sold", 0)) > 0:
-			det.add_child(_note("Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD))
-	v.add_child(ClassCard.results_strip(s))
-	var lost_it: Array = s.get("lost_items", [])
-	if not won and not lost_it.is_empty():
-		var names: Array = lost_it.map(func(it): return Loot.name_of(it))
-		v.add_child(_note("Left in your deathbox: %s." % ", ".join(names), Color("ffb0a0")))
-	if s.has("kin"):
-		v.add_child(_kin_card(s, det))
+		_line(head, WaysResult.reward_line(s["heart"]), UI.GOLD)
+	if r.get("tutorial", false):
+		_line(head, "That's the basics. Now come see your home.", UI.ACCENT_HI)
+	return head
+
+## One plain line on the first view; nothing when `txt` is empty.
+func _line(box: Control, txt: String, col: Color) -> void:
+	if txt != "":
+		box.add_child(UI.label(txt, UI.T_BODY, col))
+
+## Your Boki's outcome: the one you took (trust, a level, a new form), then any left behind, taken back,
+## waiting on the farm or let go on credit. Null when there is no Boki news.
+func _boki(s: Dictionary) -> Control:
+	var lines: Array = []      # [text, colour]
+	for ln in s.get("lost_news", []):
+		lines.append([WaysResult.boki_line(ln), UI.BAD if String(ln["fate"]) == "rival" else UI.GOOD])
 	for back in s.get("rescued", []):
-		v.add_child(_note("You took %s back! It's home again, and it won't forget you came for it." % back["name"], UI.GOOD))
-	# kin left behind when you went down, and where they ended up
-	var lost_news: Array = s.get("lost_news", [])
-	if not lost_news.is_empty():
-		var lc := UI.card(Color(0.2, 0.08, 0.09, 0.85))
-		var lv := UI.vbox(6); lc.add_child(lv)
-		lv.add_child(UI.section("Left behind", Color("ffb0a0")))
-		for ln in lost_news:
-			lv.add_child(UI.label(WaysResult.boki_line(ln), 15, UI.BAD if String(ln["fate"]) == "rival" else UI.GOOD))
-		v.add_child(lc)
-	for nw in s.get("ransom_news", []):
-		det.add_child(_note(String(nw), Color("ffd58a")))
-	for line in s.get("market_news", []):
-		det.add_child(_note(String(line), UI.GOLD))
-	if not (s.get("exchange_fills", []) as Array).is_empty():
-		det.add_child(_note("%d of your Exchange offers filled while you were out." % (s["exchange_fills"] as Array).size(), UI.GOLD))
+		lines.append(["You took %s back. It's home again." % back["name"], UI.GOOD])
 	for fe in s.get("floor", []):
 		if String(fe.get("kind", "")) == "stray":
-			v.add_child(_note("A stray %s is waiting on your farm. It's yours." % Data.KIN[String(fe["rec"]["species"])]["name"], UI.GOOD))
+			var sp := String(Data.KIN[String(fe["rec"]["species"])]["name"])
+			lines.append(["A stray %s is waiting on your farm. It's yours." % sp, UI.GOOD])
 	if s.get("kin_stranded", false):
-		v.add_child(_note("With no Boki left at home, %s let one of yours go on credit. It waited a long time and trusts you less now." % Ransom.BROKER, UI.BAD))
-	if int(s.get("vault_gems", 0)) > 0:
-		det.add_child(_note("Your vault kept %d of the gems you dropped." % int(s["vault_gems"]), UI.GOLD))
-	if s["crops_ready"] > 0:
-		det.add_child(_note("%d crop%s ready to harvest on your farm." % [s["crops_ready"], "s" if s["crops_ready"] > 1 else ""], UI.GOOD))
-	v.add_child(_details_toggle(det))
-	v.add_child(det)
-	# the way out stays on screen whatever page the details are on
-	var row := UI.hbox(14)
-	if r.get("tutorial", false):
-		var tl := UI.label("That's the basics. Now come see your home.", UI.T_BODY, UI.ACCENT_HI)
-		tl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(tl)
-	row.add_child(UI.fill())
-	var go := UI.with_key(UI.primary("Go home" if r.get("tutorial", false) else "Back to the farm", func(): Game.goto("home"), 250, "home"), "Enter")
-	row.add_child(go)
-	outer.add_child(row)
-	go.grab_focus()
-	Sfx.play("bond" if won else "fall", null, -6.0, 0.0, 1.0 if won else 0.8)
+		lines.append(["%s let one of your Boki go on credit. It trusts you less." % Ransom.BROKER, UI.BAD])
+	if not s.has("kin") and lines.is_empty():
+		return null
+	var card := UI.card(UI.CARD, 14, 14)
+	var kv := UI.vbox(6)
+	card.add_child(kv)
+	if s.has("kin"):
+		_kin_rows(kv, s)
+	for ln in lines:
+		kv.add_child(UI.label(String(ln[0]), UI.T_BODY, ln[1]))
+	return card
 
-## One line of plain words on hover for the strip tiles that need one (by icon).
-const STAT_TIPS := {"knock": "Enemy hunters you put on the ground this match."}
-
-## One stat on the strip: a number that counts up from zero, with what it is under it.
-func _stat_tile(icon: String, what: String, value: float, fmt: String, delay: float) -> Control:
-	var col := UI.vbox(2)
-	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	col.alignment = BoxContainer.ALIGNMENT_CENTER
-	var num := UI.title("0" if fmt == "" else "0:00", 30)
-	num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col.add_child(num)
-	var lr := UI.hbox(5); lr.alignment = BoxContainer.ALIGNMENT_CENTER
-	lr.add_child(Icons.Glyph.new(icon, Color(1, 0.86, 0.6, 0.8), 13.0))
-	var lab := UI.label(what.to_upper(), 11, UI.MUTED, UI.caps); lab.autowrap_mode = TextServer.AUTOWRAP_OFF
-	lr.add_child(lab)
-	col.add_child(lr)
-	var show := func(x: float) -> void:
-		num.text = ("%d:%02d" % [int(x) / 60, int(x) % 60]) if fmt == "time" else str(int(round(x)))
+## The Boki you took: name and level (or the level it just grew to), trust sliding to where it ended up,
+## and a new form.
+func _kin_rows(kv: VBoxContainer, s: Dictionary) -> void:
+	var k: Dictionary = s["kin"]
+	var sp: Dictionary = Data.KIN.get(String(k.get("species", "")), {})
+	var top := UI.hbox(10)
+	kv.add_child(top)
+	top.add_child(Icons.Glyph.new("paw", sp.get("color", UI.ACCENT), 22.0))
+	top.add_child(UI.title(String(k["name"]), 24, UI.INK))
+	var lvl := UI.label("level %d %s" % [int(k["level"]), String(sp.get("name", ""))], UI.T_BODY, UI.MUTED)
+	if s["levelup"]:
+		lvl.text = "grew to level %d!" % int(k["level"])
+		lvl.add_theme_color_override("font_color", UI.GOLD)
+	lvl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	top.add_child(lvl)
+	var td: float = s.get("trust_delta", 0.0)
+	var trow := UI.hbox(10)
+	kv.add_child(trow)
+	var tl := UI.label("Trust", UI.T_SMALL, UI.MUTED)
+	tl.custom_minimum_size.x = 46
+	trow.add_child(tl)
+	var now := clampf(float(k["trust"]) / 100.0, 0.0, 1.0)
+	var was := clampf((float(k["trust"]) - td) / 100.0, 0.0, 1.0)
+	var bar := Control.new()
+	bar.custom_minimum_size = Vector2(240, 10)
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var frac := {"v": was}
+	var fill_col := UI.GOOD if td >= 0.0 else SAD
+	bar.draw.connect(func():
+		var full := Rect2(Vector2.ZERO, bar.size)
+		bar.draw_rect(full, Color(0, 0, 0, 0.4))
+		bar.draw_rect(Rect2(full.position, Vector2(full.size.x * float(frac["v"]), full.size.y)), fill_col))
+	trow.add_child(bar)
+	var mood := _mood(td)
+	trow.add_child(UI.label(String(mood[0]), UI.T_BODY, mood[1]))
+	var slide := func(x: float) -> void:
+		frac["v"] = x
+		bar.queue_redraw()
 	var tw := create_tween()
-	tw.tween_interval(delay)
-	tw.tween_method(show, 0.0, value, clampf(0.4 + value * 0.01, 0.5, 1.1)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	return col
+	tw.tween_interval(1.0)
+	tw.tween_method(slide, was, now, 0.9).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if s["levelup"]:
+		tw.tween_callback(func():
+			Sfx.play("unlock", null, -4.0)
+			UI.pop_in(lvl))
+	for et in s.get("evo", []):
+		kv.add_child(UI.label(et, UI.T_BODY, Color("c9a0ff")))
+
+## How the Boki feels about you after the run, from the trust change: [words, colour].
+static func _mood(td: float) -> Array:
+	if td > 0.5:
+		return ["trusts you more  (%+d)" % roundi(td), UI.GOOD]
+	if td < -0.5:
+		return ["trusts you less  (%+d)" % roundi(td), SAD]
+	return ["feels the same about you", UI.MUTED]
+
+## The loot you kept as one row of chips. After a loss: that it stays out there, and what your deathbox
+## holds. Null when you made it out with nothing.
+func _loot(s: Dictionary, won: bool) -> Control:
+	var chips := _kept(s) if won else _lost(s)
+	if won and chips.is_empty():
+		return null
+	var box := UI.vbox(8)
+	box.add_child(UI.section("Brought home" if won else "Lost"))
+	if not won:
+		box.add_child(UI.label("Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
+	if not chips.is_empty():
+		box.add_child(_chip_row(chips))
+	var gear := (s.get("haul", []) as Array).any(func(it): return not Loot.is_rare_egg(it))
+	if won and gear and not Save.has_building("armory"):
+		box.add_child(UI.label("Build an armory on your farm to use them.", UI.T_SMALL, UI.MUTED))
+	return box
+
+## Chips that pop in one after another, wrapping onto more rows if they need to.
+func _chip_row(chips: Array) -> HFlowContainer:
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 8)
+	flow.add_theme_constant_override("v_separation", 8)
+	for i in chips.size():
+		var spec: Array = chips[i]
+		var ch := _chip(spec[0], spec[1], spec[2], 0.75 + i * 0.12)
+		var krec: Dictionary = spec[3]
+		if not krec.is_empty():
+			# a Boki you brought home: where it went
+			var boxed := KinBox.is_boxed(krec)
+			var went := UI.label("·  Boki Burrow" if boxed else "·  farm", UI.T_SMALL, UI.GOOD)
+			if boxed:
+				went.add_theme_color_override("font_color", Color("bfa6ff"))
+			(ch.get_child(0) as HBoxContainer).add_child(went)
+		flow.add_child(ch)
+	return flow
+
+## What came home with you as chips, [icon, text, colour, the Boki record or {}]: a Rare Egg first, then
+## gems, seeds, the Boki you caught, weapons and gloves.
+func _kept(s: Dictionary) -> Array:
+	var chips: Array = []
+	var haul: Array = s.get("haul", [])
+	for it in haul.filter(func(e): return Loot.is_rare_egg(e)):
+		chips.append(["egg", Loot.name_of(it), Color("ffd36a"), {}])
+	if int(s["gems"]) > 0:
+		chips.append(["gem", "%d gems" % s["gems"], UI.GOLD, {}])
+	for sd in s["seeds"]:
+		var crop: Dictionary = Data.CROPS[sd]
+		var n := int(s["seeds"][sd])
+		var what := "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"]
+		chips.append(["seed", what, crop["color"], {}])
+	for k in s["caught"]:
+		var sp: Dictionary = Data.KIN[k["species"]]
+		var rare := " ".join(Mutations.tags(k))
+		var what := Data.kin_title(String(k["name"]), String(sp["name"]))
+		if rare != "":
+			what = "%s the %s %s" % [k["name"], rare, sp["name"]]
+		chips.append(["egg", what, sp["color"], k])
+	for it in haul.filter(func(e): return not Loot.is_rare_egg(e)):
+		chips.append([Loot.icon_of(it), Loot.name_of(it) + _fate_note(it), Loot.col_of(it), {}])
+	return chips
+
+## What a loss left in your deathbox, as chips.
+func _lost(s: Dictionary) -> Array:
+	var lost: Array = s.get("lost_items", [])
+	return lost.map(func(it): return [Loot.icon_of(it), Loot.name_of(it), Color("ffb0a0"), {}])
+
+## Behind More: the match's numbers, then what your Boki made of it, then every note.
+func _fill_more(r: Dictionary, s: Dictionary) -> void:
+	more.add_child(UI.section("Your match"))
+	more.add_child(_numbers(r))
+	if s.has("kin"):
+		var k: Dictionary = s["kin"]
+		if String(s.get("trust_why", "")) != "":
+			more.add_child(_note(String(s["trust_why"]), UI.GOOD))
+		if String(s["kin_say"]) != "":
+			more.add_child(_note("%s said: “%s”" % [k["name"], s["kin_say"]], UI.INK))
+		var mem: Array = k["memory"]
+		if not mem.is_empty():
+			more.add_child(_note("Remembers: " + String(mem[-1]["text"]), Color(UI.MUTED, 0.9)))
+	for nt in _notes(s):
+		more.add_child(_note(String(nt[0]), nt[1]))
+
+## The match's numbers as label and value pairs, two pairs to a row.
+func _numbers(r: Dictionary) -> GridContainer:
+	var secs := int(r.get("time", 0))
+	var where := String(Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]["name"])
+	var rows := [["Foes downed", int(r.get("knocks", 0))], ["Kills", int(r.get("kills", 0))],
+		["Damage dealt", int(r.get("damage", 0))], ["Damage taken", int(r.get("taken", 0))],
+		["Time", "%d:%02d" % [secs / 60, secs % 60]], ["Times downed", int(r.get("downs", 0))],
+		["Where", where], ["Revives", int(r.get("revives", 0))]]
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.add_theme_constant_override("h_separation", 16)
+	grid.add_theme_constant_override("v_separation", 4)
+	for row in rows:
+		var what := UI.label(String(row[0]), UI.T_BODY, UI.MUTED)
+		if row[0] == "Foes downed":
+			what.tooltip_text = FOES_TIP
+			what.mouse_filter = Control.MOUSE_FILTER_PASS
+		grid.add_child(what)
+		grid.add_child(UI.label(str(row[1]), UI.T_BODY, UI.INK, UI.semi))
+	return grid
+
+## Every note for More, [text, colour]: where caught Boki and Rare Eggs went, what was salvaged or sold,
+## the ransom, market and Exchange news, the vault, the crops.
+func _notes(s: Dictionary) -> Array:
+	var out: Array = []
+	var boxed: Array = (s["caught"] as Array).filter(func(k): return KinBox.is_boxed(k))
+	if not boxed.is_empty():
+		var why := "You already have that kind out on the farm."
+		if not boxed.all(func(k): return KinBox.dup_on_farm(k)):
+			why = "The farm is full (%d/%d)." % [KinBox.farm_cap() - KinBox.farm_room(), KinBox.farm_cap()]
+		var names := ", ".join(boxed.map(func(k): return String(k["name"])))
+		out.append(["Sent to the Boki Burrow: %s. %s" % [names, why], Color("cdb8ff")])
+	var eggs := (s.get("haul", []) as Array).filter(func(it): return Loot.is_rare_egg(it)).size()
+	if eggs == 1:
+		out.append(["Your Rare Egg went to the Incubator by the Nesting Nook, to hatch into a rare Boki.", UI.GOLD])
+	elif eggs > 1:
+		out.append(["Your %d Rare Eggs went to the Incubator by the Nesting Nook and hatch one at a time." % eggs,
+				UI.GOLD])
+	if int(s.get("salvage_gems", 0)) > 0:
+		out.append(["Armor isn't kept: what you found salvaged for %d gems." % int(s["salvage_gems"]), UI.GOLD])
+	if int(s.get("arm_sold", 0)) > 0:
+		out.append(["Your armory was full: what didn't fit sold for %d gems." % int(s["arm_sold"]), UI.GOLD])
+	for nw in s.get("ransom_news", []):
+		out.append([String(nw), Color("ffd58a")])
+	for line in s.get("market_news", []):
+		out.append([String(line), UI.GOLD])
+	var fills: Array = s.get("exchange_fills", [])
+	if not fills.is_empty():
+		out.append(["%d of your Exchange offers filled while you were out." % fills.size(), UI.GOLD])
+	if int(s.get("vault_gems", 0)) > 0:
+		out.append(["Your vault kept %d of the gems you dropped." % int(s["vault_gems"]), UI.GOLD])
+	var crops := int(s["crops_ready"])
+	if crops > 0:
+		out.append(["%d crop%s ready to harvest on your farm." % [crops, "s" if crops > 1 else ""], UI.GOOD])
+	return out
+
+## Always on screen under the card: More, then the way home.
+func _bottom(r: Dictionary) -> HBoxContainer:
+	var row := UI.hbox(14)
+	more_btn = UI.button("More ▾", _toggle_more)
+	more_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(more_btn)
+	row.add_child(UI.fill())
+	var go_txt := "Go home" if r.get("tutorial", false) else "Back to the farm"
+	home_btn = UI.with_key(UI.primary(go_txt, func(): Game.goto("home"), 250, "home"), "Enter")
+	row.add_child(home_btn)
+	return row
+
+## More opens under the first view and scrolls its first line to the top; pressed again it closes.
+func _toggle_more() -> void:
+	more.visible = not more.visible
+	more_btn.text = "Less ▴" if more.visible else "More ▾"
+	if more.visible:
+		await get_tree().process_frame
+		scroll.scroll_vertical = int(more.global_position.y - groups.global_position.y)
 
 ## One thing you brought home, as a little pill that pops in with a sound.
 func _chip(icon: String, txt: String, col: Color, delay: float) -> Control:
 	var c := UI.card(Color(col, 0.14), 8, 999)
-	var h := UI.hbox(7); c.add_child(h)
+	var h := UI.hbox(7)
+	c.add_child(h)
 	h.add_child(Icons.Glyph.new(icon, col.lightened(0.15), 18.0))
-	var l := UI.label(txt, UI.T_BODY, UI.INK, UI.semi); l.autowrap_mode = TextServer.AUTOWRAP_OFF
+	var l := UI.label(txt, UI.T_BODY, UI.INK, UI.semi)
+	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	h.add_child(l)
 	c.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_interval(delay)
-	tw.tween_callback(func(): Sfx.play("pickup", null, -8.0, 0.08, 1.0 + delay * 0.1); UI.pop_in(c))
+	tw.tween_callback(func():
+		Sfx.play("pickup", null, -8.0, 0.08, 1.0 + delay * 0.1)
+		UI.pop_in(c))
 	return c
 
-## Your kin's card: how it feels about you now (the trust bar slides to where it ended up), and
-## what it will remember about this one.
-func _kin_card(s: Dictionary, det: Control) -> Control:
-	var k: Dictionary = s["kin"]
-	var sp: Dictionary = Data.KIN.get(String(k.get("species", "")), {})
-	var kcol: Color = sp.get("color", UI.ACCENT)
-	var kc := UI.card(UI.CARD, 14, 14)
-	var kv := UI.vbox(7); kc.add_child(kv)
-	var top := UI.hbox(10); kv.add_child(top)
-	top.add_child(Icons.Glyph.new("paw", kcol, 22.0))
-	var nm := UI.title(String(k["name"]), 24, UI.INK); top.add_child(nm)
-	var lvl := UI.label("level %d %s" % [int(k["level"]), String(sp.get("name", ""))], 14, UI.MUTED)
-	lvl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	top.add_child(lvl)
-	var td: float = s.get("trust_delta", 0.0)
-	var mood := "trusts you more" if td > 0.5 else ("trusts you less" if td < -0.5 else "feels the same about you")
-	var trow := UI.hbox(10); kv.add_child(trow)
-	var tl := UI.label("Trust", 13, UI.MUTED); tl.custom_minimum_size.x = 46; trow.add_child(tl)
-	var now := clampf(float(k["trust"]) / 100.0, 0.0, 1.0)
-	var was := clampf((float(k["trust"]) - td) / 100.0, 0.0, 1.0)
-	var bar_box := Control.new(); bar_box.custom_minimum_size = Vector2(240, 10); bar_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var frac := {"v": was}
-	bar_box.draw.connect(func():
-		var r := Rect2(Vector2.ZERO, bar_box.size)
-		bar_box.draw_rect(r, Color(0, 0, 0, 0.4))
-		bar_box.draw_rect(Rect2(r.position, Vector2(r.size.x * float(frac["v"]), r.size.y)), UI.GOOD if td >= 0.0 else Color("ffb36a")))
-	trow.add_child(bar_box)
-	var ml := UI.label("%s  (%+d)" % [mood, int(round(td))] if absf(td) >= 0.5 else mood, 14, UI.GOOD if td > 0.5 else (Color("ffb36a") if td < -0.5 else UI.MUTED))
-	trow.add_child(ml)
-	if String(s.get("trust_why", "")) != "":
-		kv.add_child(UI.label(String(s["trust_why"]), 14, UI.GOOD))
-	if String(s.get("kin_say", "")) != "":
-		var say := UI.label("\u201c%s\u201d" % String(s["kin_say"]), 16, UI.INK)
-		say.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		kv.add_child(say)
-	var tw := create_tween()
-	tw.tween_interval(1.0)
-	tw.tween_method(func(x: float): frac["v"] = x; bar_box.queue_redraw(), was, now, 0.9).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	if s["levelup"]:
-		var lu := UI.label("%s grew to level %d!" % [k["name"], k["level"]], 17, UI.GOLD, UI.big)
-		kv.add_child(lu)
-		tw.tween_callback(func(): Sfx.play("unlock", null, -4.0); UI.pop_in(lu))
-	for et in s.get("evo", []):
-		kv.add_child(UI.label(et, 15, Color("c9a0ff")))
-	var mem: Array = k["memory"]
-	for i in range(maxi(0, mem.size() - 1), mem.size()):
-		det.add_child(_note("Remembers: " + String(mem[i]["text"]), Color(UI.MUTED, 0.9)))
-	return kc
-
-## The numbers that are not on the strip: kills, damage taken, times downed, revives, and the tier.
-func _small_stats(r: Dictionary, tier_name: String) -> Control:
-	var small := HFlowContainer.new()
-	small.add_theme_constant_override("h_separation", 18)
-	for t in [["Where", tier_name], ["Kills", int(r.get("kills", 0))], ["Damage taken", int(r.get("taken", 0))], ["Times downed", int(r.get("downs", 0))], ["Revives", int(r.get("revives", 0))]]:
-		var one := UI.hbox(6)
-		one.add_child(UI.label(String(t[0]), UI.T_SMALL, UI.MUTED))
-		one.add_child(UI.label(str(t[1]), UI.T_SMALL, UI.INK, UI.semi))
-		small.add_child(one)
-	return small
-
-## "Details ▾": shows or hides what is behind it.
-func _details_toggle(det: Control) -> Button:
-	var b := UI.button("Details ▾", Callable(), 0)
-	b.pressed.connect(func():
-		det.visible = not det.visible
-		b.text = "Details ▴" if det.visible else "Details ▾")
-	b.focus_mode = Control.FOCUS_NONE
-	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	return b
-
 func _note(txt: String, col: Color) -> Label:
-	var l := UI.label(txt, 15, col)
+	var l := UI.label(txt, UI.T_BODY, col)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return l
 
