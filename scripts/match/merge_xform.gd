@@ -31,6 +31,7 @@ static func begin(h: Hunter, form: Dictionary) -> void:
 	var sn := _snd(form)
 	spiral(h, col, true)
 	KinTypeFx.fusion(m.fx, type_of(h, form), h.pos, col, ENTER_COLUMN)
+	m.sfx("boki_fuse", h.pos, SOUND_RANGE_DB - 4.0)
 	m.sfx("charge", h.pos, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
 	if h.is_local():
@@ -86,7 +87,7 @@ static func separate(h: Hunter, form: Dictionary, why: String) -> void:
 			m.hud.toast_small("SHELL BROKEN", col)
 	else:
 		KinTypeFx.fusion(m.fx, type_of(h, form), h.pos, col, RELEASE_COLUMN)
-		m.sfx("recall", h.pos, -2.0, 1.3)
+		m.sfx("boki_unfuse", h.pos, -2.0)
 	spiral(h, col, false)
 	KinNet.event(m, "merge_end", h, h.pos, why)
 
@@ -169,6 +170,7 @@ static func on_event(m: Match, at: Vector3, form: Dictionary, h: Hunter) -> void
 	if h != null:
 		spiral(h, col, true)
 	KinTypeFx.fusion(m.fx, String(form.get("type", "")), at, col, ENTER_COLUMN)
+	m.sfx("boki_fuse", at, SOUND_RANGE_DB - 4.0)
 	m.sfx("charge", at, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), at, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
 

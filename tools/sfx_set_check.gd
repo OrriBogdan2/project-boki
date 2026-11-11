@@ -16,12 +16,23 @@ extends RefCounted
 ##   7. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
 ##   7. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
 ##      an unknown species falls back to the generic cues, and no two species share a happy take
+##   7. the warning and Boki-moment sounds are played where they belong (WIRED), are in a set, and exist
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+
+## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
+const WIRED := {
+	"warn_heartbeat": ["match/warn_sfx.gd"], "warn_tick": ["match/warn_sfx.gd"],
+	"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"],
+	"boki_downed": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_revive": ["match/kin_downed.gd", "match/kin_net.gd"],
+	"boki_fuse": ["match/merge_xform.gd"], "boki_unfuse": ["match/merge_xform.gd", "match/kin_net.gd"],
+	"boki_eat": ["home/home.gd"], "boki_sleep": ["home/home.gd", "home/kin_indoors.gd"],
+}
 
 var bad := 0
 var levels := {}
@@ -40,6 +51,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	_wired()
 	_fallback()
 	_ult_cues()
 	_boki_cues()
@@ -261,6 +273,39 @@ func _zero_crossings(data: PackedByteArray) -> int:
 		prev = v
 	return n
 
+## 7. Each sound in WIRED is in a set and its script(s) play it by name; the warning thresholds are sane.
+func _wired() -> void:
+	var listed := {}
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if f.ends_with(".json"):
+			var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+			if d is Dictionary:
+				listed.merge(d.get("sounds", {}))
+	var unplayed := []
+	for sname in WIRED:
+		if not listed.has(sname) or not Sfx.ensure(sname):
+			unplayed.append(sname + " (no set or file)")
+		for f in WIRED[sname]:
+			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
+				unplayed.append("%s not in %s" % [sname, f])
+	ok(unplayed.is_empty(), "%d warning and Boki sounds are wired %s" % [WIRED.size(), unplayed])
+	ok(WarnSfx.LOW_HP > 0.0 and WarnSfx.LOW_HP <= 0.3 and WarnSfx.BEAT_S.y < WarnSfx.BEAT_S.x and WarnSfx.COUNT_S == 5,
+		"the heartbeat is under 30% health, quicker as health falls; the countdown is the last 5 s")
+	_warn_behaviour()
+## The heartbeat starts under LOW_HP, and is silent when healed, downed or at full health.
+func _warn_behaviour() -> void:
+	var h := Hunter.new()
+	h.max_hp = 100.0
+	var seen := []
+	for st in [[100.0, false], [20.0, false], [20.0, true], [0.0, false]]:
+		h.hp = st[0]
+		h.downed = st[1]
+		WarnSfx.beat_in = 0.0
+		WarnSfx.low_hp(h, 0.016)
+		seen.append(WarnSfx.beat_in > 0.0)
+	h.free()
+	WarnSfx.beat_in = 0.0
+	ok(seen == [false, true, false, false], "heartbeat only when hurt and up (full, 20 pct, downed, 0: %s)" % [seen])
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
 	var h := Hunter.new()

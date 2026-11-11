@@ -368,7 +368,7 @@ func shriek(at_h: Ent) -> void:
 func shriek_fx() -> void:
 	shriek_t = m.time
 	m.sfx("v_warden", pos, 2.0, 1.75)
-	m.sfx("k_echo", pos, -2.0, 0.6)
+	m.sfx("blight_rumble", pos, -2.0)
 	m.fx.ring(pos, 6.0, Color("ff5a2a"), 0.6)
 	m.fx.ring(pos, 10.0, Color("ff8a4a"), 0.9)
 	m.fx.burst(pos + Vector3(0, 2.0, 0), BlightModels.EMBER, 26, 5.0, 0.7, -2.0)
