@@ -8,14 +8,15 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 12
+const VERSION := 13
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
-const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
+const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_sexes", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11", 11: "_migrate_11_to_12"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11", 11: "_migrate_11_to_12",
+		12: "_migrate_sexes"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -317,9 +318,9 @@ func _migrate_4_to_5(data: Dictionary) -> void:
 func _migrate_3_to_4(data: Dictionary) -> void:
 	FieldBook.migrate(data)
 
-## v2 -> v3: every Boki's sex, written into its rolls (from its own seed, so it's what it always
-## would have been).
-func _migrate_2_to_3(data: Dictionary) -> void:
+## v2 -> v3, and again v12 -> v13: every Boki's sex, written into its rolls from its own seed and its
+## kind's share (Unique.ensure_sex), so the hatch reveal and he / she text always have one.
+func _migrate_sexes(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		if typeof(r) == TYPE_DICTIONARY: Unique.ensure_sex(r)
 	for L in data.get("lost_kin", []):

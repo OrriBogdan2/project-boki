@@ -41,7 +41,7 @@ static func play(home: Node, k: Dictionary) -> void:
 	var v: VBoxContainer = home._new_panel("%s is now %s" % [rec["name"], rank[1]], 520)
 	v.add_child(UI.label(String(rank[2]), 16, Color("ffb3c6")))
 	var nxt: Array = Care.next_bond(rec)
-	var more := "Keep looking after it and take it along on expeditions."
+	var more := "Keep looking after {him} and take {him} along on expeditions.".format(Unique.pronouns(rec))
 	if not nxt.is_empty():
 		more = "Next: %s at %d trust. %s" % [nxt[1], int(nxt[0]), more]
 	v.add_child(UI.para(more, 13, UI.MUTED))

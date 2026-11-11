@@ -45,6 +45,7 @@ var t := 0.0
 var hatch_t := 0.0
 var warm_step := 0
 var kin_node: Node3D
+var hatched: Dictionary = {}  # the new Boki's record, made as it pops out (so the reveal shows its sex)
 var ui: CanvasLayer
 var root_ui: Control
 var bottom: VBoxContainer
@@ -293,7 +294,7 @@ func _build_ui() -> void:
 	title.add_theme_constant_override("outline_size", 12)
 	title.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.85))
 	top.add_child(title)
-	var sub := UI.label("Every Boki is different. It will remember how you treat it.", 16, Color(1, 0.95, 0.88, 0.9))
+	var sub := UI.label("Every Boki is different, and remembers how you treat them.", 16, Color(1, 0.95, 0.88, 0.9))
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub_lbl = sub
@@ -465,7 +466,7 @@ func _looks_good() -> void:
 	if create_box: create_box.queue_free()
 	create_box = null
 	for e in eggs: (e["holder"] as Node3D).visible = true
-	if sub_lbl: sub_lbl.text = "Every Boki is different. It will remember how you treat it."
+	if sub_lbl: sub_lbl.text = "Every Boki is different, and remembers how you treat them."
 	_top_over(0.5)
 	if edit_only or Save.d.get("tutorial", {}).get("hatched", false):
 		Game.goto("home")
@@ -555,6 +556,8 @@ func _pick(i: int) -> void:
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
 ## inside get stronger. No flashes or bursts: it's a small, close moment (docs/POSITIONING.md).
 const TAPS := 7
+const KNOCK_LINES := ["Knock on the shell", "Something stirs...", "Something knocks back.", "Again, gently.",
+	"The shell bulges.", "Cracks are spreading.", "Nearly.", "Here they come."]      # the title after each knock
 var taps := 0
 func _tap_egg() -> void:
 	if taps >= TAPS or chosen < 0:
@@ -581,18 +584,18 @@ func _tap_egg() -> void:
 	get_tree().create_timer(0.22).timeout.connect(func(): Sfx.play("thump", null, -20.0 + 8.0 * k, 0.05, 1.6 - 0.2 * k))
 	cam_to = Vector3(0, 2.5, 5.4).lerp(Vector3(0, 1.9, 4.2), k)
 	if title:
-		title.text = ["Knock on the shell", "Something stirs...", "It knocks back.", "Again, gently.", "It's pushing.", "It's cracking.", "Nearly.", "Here it comes."][mini(taps, 7)]
+		title.text = KNOCK_LINES[mini(taps, KNOCK_LINES.size() - 1)]
 
 func _start_hatch() -> void:
 	stage = "warm"
 	hatch_t = 0.0
 	_clear_bottom()
-	title.text = "Knock on the shell"
+	title.text = KNOCK_LINES[0]
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)
 	card.custom_minimum_size = Vector2(460, 0)
 	var v := UI.vbox(10); card.add_child(v)
-	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes it a little more, and it knocks back.", 15)
+	var l := UI.label("Knock on the egg: click (or press Space). Every knock wakes the Boki inside a little more, and the knocks come back.", 15)
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(l)
 	warm_bar = Control.new()
@@ -666,14 +669,12 @@ func _process(delta: float) -> void:
 			_clear_bottom()
 			wegg.rotation.z = 0.0
 			wegg.position.y = 0.12
-			wegg.popped.connect(func(k: Node3D):
-				kin_node = k
-				title.text = "It's looking at you.")
+			wegg.popped.connect(_popped)
 			wegg.done.connect(func():
 				stage = "reveal"
 				cam_to = Vector3(0, 2.2, 5.6)
 				# a closer look (its card, and turning it round), then naming
-				var rv := KinReveal.new(egg_defs[chosen]["species"], egg_defs[chosen].get("rec", {}))
+				var rv := KinReveal.new(egg_defs[chosen]["species"], hatched)
 				add_child(rv)
 				if top_box: top_box.visible = false      # (the reveal has its own title; this one showed through it)
 				rv.proceed.connect(func():
@@ -703,9 +704,11 @@ func _show_name() -> void:
 	v.add_child(UI.section("A new Boki", scol))
 	v.add_child(UI.title("Name your %s" % sp["name"], 34))
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(sp_id, "happy"), 22, scol))
-	v.add_child(UI.label("It's %s, and it can only babble for now. Whatever you call it, it'll answer to." % String(sp["voice"]).split(",")[0], 16, UI.MUTED))
+	var pr := Unique.pronouns(hatched)
+	var voice := String(sp["voice"]).split(",")[0]
+	v.add_child(UI.label(("{He}'s %s, and {he} can only babble for now. Whatever you call {him}, {he}'ll answer to." % voice).format(pr), 16, UI.MUTED))
 	var name_row := UI.hbox(8)
-	var nl := UI.label("Its name", 15, UI.MUTED); nl.custom_minimum_size.x = 120
+	var nl := UI.label("{His} name".format(pr), 15, UI.MUTED); nl.custom_minimum_size.x = 120
 	name_row.add_child(nl)
 	var ne := LineEdit.new(); ne.text = Data.default_kin_name(sp_id); ne.max_length = 14; ne.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	name_row.add_child(ne)
@@ -746,10 +749,11 @@ func _show_name() -> void:
 	ne.select_all()
 
 func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
-	var rec := Save.new_kin(sp_id, kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id))
+	if hatched.is_empty():
+		hatched = _hatched_rec(sp_id)
+	var rec := hatched
+	rec["name"] = kname.strip_edges() if kname.strip_edges() != "" else Data.default_kin_name(sp_id)
 	rec["trust"] = 55.0
-	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
-	if not muts.is_empty(): rec["mutations"] = muts
 	Save.remember(rec, "hatched", "hatched from an egg you chose")
 	rec["starter"] = true          # your first kin: it always stays on the farm with you
 	rec["got_t"] = Time.get_unix_time_from_system()
@@ -764,6 +768,19 @@ func _finish(sp_id: String, kname: String, you: String, tutorial: bool) -> void:
 		_mask_moment(func(): _head_out(tutorial))
 		return
 	_head_out(tutorial)
+
+## Out of the shell: the Boki's record is made now, and the title says he or she.
+func _popped(k: Node3D) -> void:
+	kin_node = k
+	hatched = _hatched_rec(egg_defs[chosen]["species"])
+	title.text = "{He}'s looking at you.".format(Unique.pronouns(hatched))
+
+## The new Boki's record, with its egg's mutations: its sex and the rest of its rolls are decided as it hatches.
+func _hatched_rec(sp_id: String) -> Dictionary:
+	var rec := Save.new_kin(sp_id)
+	var muts: Array = egg_defs[chosen].get("rec", {}).get("mutations", []) if chosen >= 0 else []
+	if not muts.is_empty(): rec["mutations"] = muts
+	return rec
 
 ## Your first Relic: pick one of the three starters (Lace, Kael or Vex; HobOffer), then it drifts to you and you
 ## put it on in the world (MaskMoment), then `then`.

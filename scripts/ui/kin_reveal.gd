@@ -3,14 +3,15 @@ extends CanvasLayer
 ## A closer look right after an egg hatches, shared by the first egg and nest eggs. The world
 ## behind dims a little, the Boki sits in a pool of warm light, glancing about; then it turns,
 ## looks right at you, blinks and calls to you in its own voice. After that you can turn it round
-## (drag it, or A/D, the arrow keys or the right stick) and read its card. "Name it" closes this
-## and hands over to whatever naming step the caller has.
+## (drag it, or A/D, the arrow keys or the right stick) and read its card, with its ♀ / ♂ mark by its name and
+## he / she in every line (Unique.pronouns). "Name her" (or him) closes this and hands over to whatever naming
+## step the caller has.
 ##
 ## Intimate and grounded on purpose (docs/POSITIONING.md): no flash, fanfare, light rays, star
 ## bursts or rarity colours. A shimmer shows in the Boki's own coat (and a faint sparkle in it);
 ## where a rare one came from is a line of provenance on the card.
 ##
-##   var rv := KinReveal.new(species_id, rec)     # rec: the kin's save record ({} for a starter)
+##   var rv := KinReveal.new(species_id, rec)     # rec: the kin's save record
 ##   add_child(rv); rv.proceed.connect(func(): _show_name())
 
 signal proceed
@@ -31,6 +32,8 @@ var vpc: SubViewportContainer
 var turn: Node3D             # the turntable the kin sits on (rotate this)
 var kin: Node3D
 var title_lbl: Label
+var title_row: HBoxContainer   # the name and its sex mark, faded in together
+var pr: Dictionary            # its pronouns, for the card's lines (Unique.pronouns)
 var sub_lbl: Label
 var info: PanelContainer
 var name_btn: Button
@@ -55,6 +58,7 @@ func _ready() -> void:
 	col = Shiny.col(species, rec, "color")
 	glow = Shiny.col(species, rec, "glow") if sp.has("glow") or rec.get("shimmer", false) else col
 	rare = bool(rec.get("rare", false)) or Data.is_rare(species)
+	pr = Unique.pronouns(rec)
 	_build()
 	_play_intro()
 
@@ -148,11 +152,15 @@ func _build() -> void:
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_lbl.add_theme_color_override("font_outline_color", Color(0.05, 0.04, 0.05, 0.8))
 	title_lbl.add_theme_constant_override("outline_size", 6)
-	top.add_child(title_lbl)
+	title_row = UI.hbox(10)
+	title_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	title_row.add_child(title_lbl)
+	title_row.add_child(UI.sex_icon(rec, 26.0))
+	top.add_child(title_row)
 	sub_lbl = UI.label("", 16, UI.MUTED)
 	sub_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	top.add_child(sub_lbl)
-	title_lbl.modulate.a = 0.0
+	title_row.modulate.a = 0.0
 	sub_lbl.modulate.a = 0.0
 	# the info card on the right
 	info = _info_card()
@@ -160,7 +168,7 @@ func _build() -> void:
 	root.add_child(info)
 	_place_card.call_deferred()      # once in the tree, so it is sized from its real fonts
 	# the hint under the kin
-	hint = UI.label("Drag to turn it round  ·  A / D", 15, UI.MUTED)
+	hint = UI.label("Drag to turn {him} round  ·  A / D".format(pr), 15, UI.MUTED)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	hint.offset_bottom = -40
 	hint.offset_top = -64
@@ -214,6 +222,7 @@ func _info_card() -> PanelContainer:
 	nm.add_theme_stylebox_override("normal", UI.title_tab())
 	nm.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	head.add_child(nm)
+	head.add_child(UI.sex_icon(rec, 22.0))
 	head.add_child(UI.fill())
 	head.add_child(UI.tag(String(sp.get("type", "")), _bright(col)))
 	v.add_child(head)
@@ -223,22 +232,21 @@ func _info_card() -> PanelContainer:
 		v.add_child(_note(desc + "."))
 	if rare:
 		var boss := String(Data.MOBS.get(String(sp.get("boss", rec.get("from_boss", ""))), {}).get("name", "a lair boss"))
-		v.add_child(_note("Its egg was guarded by %s. Few of its kind are ever seen." % boss))
+		v.add_child(_note(("{His} egg was guarded by %s. Few of {his} kind are ever seen." % boss).format(pr)))
 	if rec.get("shimmer", false):
-		v.add_child(_note("Its coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)))
+		v.add_child(_note(("{His} coat came out in rare colours (about %s)." % Shiny.odds_text(Shiny.WILD)).format(pr)))
 	for mid in Mutations.of(rec):
 		v.add_child(_note("%s: %s" % [Mutations.name_of(mid), Mutations.perk_text(mid)]))
 	if rec.has("parents"):
 		v.add_child(UI.label("Child of %s and %s" % [rec["parents"][0], rec["parents"][1]], 14, UI.MUTED))
 	var who := UI.hbox(8)
 	if Unique.sex(rec) != "":
-		who.add_child(UI.sex_icon(rec, 15.0))
 		who.add_child(UI.label(Unique.sex_name(rec), 15, UI.SEX_COL[Unique.sex(rec)], UI.semi))
 	var bits := PackedStringArray()
 	if rec.has("traits"):
 		bits.append("%s nature" % Care.nature(rec))
 	if not Unique.of(rec).is_empty():
-		bits.append(String(AboutView.HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec))).to_lower())
+		bits.append(AboutView.habit_short(rec).to_lower())
 	if not bits.is_empty():
 		who.add_child(UI.label(("·  " if who.get_child_count() > 0 else "") + "  ·  ".join(bits), 15, UI.INK))
 	if who.get_child_count() > 0:
@@ -249,7 +257,7 @@ func _info_card() -> PanelContainer:
 		v.add_child(UI.section("Moves  ·  hover one"))
 		v.add_child(moves)
 	v.add_child(UI.spacer(6))
-	name_btn = UI.primary("Name it", _go, 360)
+	name_btn = UI.primary("Name {him}".format(pr), _go, 360)
 	name_btn.disabled = true
 	v.add_child(name_btn)
 	return card
@@ -302,9 +310,9 @@ func _play_intro() -> void:
 	moment.tween_callback(func():
 		_play(_cry())
 		title_lbl.text = String(sp["name"])
-		sub_lbl.text = "It's looking at you. It knows your face now."
+		sub_lbl.text = "{He}'s looking at you. {He} knows your face now.".format(pr)
 		var tt := create_tween().set_parallel(true)
-		tt.tween_property(title_lbl, "modulate:a", 1.0, 0.5)
+		tt.tween_property(title_row, "modulate:a", 1.0, 0.5)
 		tt.tween_property(sub_lbl, "modulate:a", 1.0, 0.7).set_delay(0.2))
 	moment.tween_interval(0.8)
 	if body:

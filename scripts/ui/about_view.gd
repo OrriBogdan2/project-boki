@@ -39,7 +39,7 @@ static func coat_note(rec: Dictionary) -> String:
 	match String(d.get("mark", "plain")):
 		"spots": return "Spotted with %s spots" % c
 		"stripes": return "Striped, %s stripes" % c
-		"patches": return "%s patches across its coat" % _cap(c)
+		"patches": return ("%s patches across {his} coat" % _cap(c)).format(Unique.pronouns(rec))
 		"freckles": return "Freckled with %s flecks" % c
 	return "A plain coat, no markings"
 
@@ -149,8 +149,13 @@ class Swatch extends Control:
 		draw_circle(size * 0.5 + Vector2(-1.8, -1.8), 1.6, Color(1, 1, 1, 0.8))
 
 ## Short values for the rows (the long sentences above stay for places that read as prose).
-const HABIT_SHORT := {"tail_chase": "Chases its tail", "head_tilt": "Tilts its head", "hop": "Bouncy", "sway": "Sways",
-	"sneeze": "Sneezy", "stretch": "Big stretcher", "ear_flick": "Flicks its ears", "look_around": "Watchful"}
+const HABIT_SHORT := {"tail_chase": "Chases {his} tail", "head_tilt": "Tilts {his} head", "hop": "Bouncy", "sway": "Sways",
+	"sneeze": "Sneezy", "stretch": "Big stretcher", "ear_flick": "Flicks {his} ears", "look_around": "Watchful"}
+
+## Its habit in a word or two ("Chases her tail").
+static func habit_short(rec: Dictionary) -> String:
+	var quirk := String(Unique.of(rec).get("quirk", ""))
+	return String(HABIT_SHORT.get(quirk, Unique.quirk_name(rec))).format(Unique.pronouns(rec))
 const SIZE_SHORT := {"XS": "very small (rare)", "S": "small", "M": "average", "L": "large", "XL": "very large (rare)"}
 
 static func size_short(rec: Dictionary) -> String:
@@ -182,7 +187,7 @@ static func voice_short(rec: Dictionary) -> String:
 static func birth_short(rec: Dictionary) -> String:
 	var b = Unique.of(rec).get("birth", [])
 	if typeof(b) != TYPE_ARRAY or (b as Array).size() < 2: return ""
-	return "%s on its %s" % [_cap(String(b[0])), String(b[1])]
+	return ("%s on {his} %s" % [_cap(String(b[0])), String(b[1])]).format(Unique.pronouns(rec))
 
 static func food_short(rec: Dictionary) -> String:
 	var likes: Dictionary = rec.get("likes", {}) if typeof(rec.get("likes", null)) == TYPE_DICTIONARY else {}
@@ -218,11 +223,11 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	_row(parent, "Size", size_short(rec), UI.INK, null, "ruler")
 	var ms := Mutations.of(rec).filter(func(m): return String(Mutations.info(m).get("group", "")) == "size")
 	if not ms.is_empty():
-		_row(parent, "", "%s: a size all its own" % Mutations.name_of(String(ms[0])))
+		_row(parent, "", ("%s: a size all {his} own" % Mutations.name_of(String(ms[0]))).format(Unique.pronouns(rec)))
 	_row(parent, "Coat", coat_short(rec), UI.INK, null, "paw")
 	_row(parent, "Eyes", Unique.eye_name(rec), UI.INK, Swatch.new(Unique.eye_col(rec)), "eye")
 	_row(parent, "Build", build_short(rec), UI.INK, null, "jump")
-	_row(parent, "Habit", String(HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec))), UI.INK, null, "dance")
+	_row(parent, "Habit", habit_short(rec), UI.INK, null, "dance")
 	_row(parent, "Voice", voice_short(rec), UI.INK, null, "pulse")
 	var bm := birth_short(rec)
 	if bm != "": _row(parent, "Birthmark", bm, UI.INK, null, "burst")
@@ -253,7 +258,7 @@ static func block(rec: Dictionary, parent: Control, compact := false) -> void:
 		sl.custom_minimum_size.x = 240
 		top.add_child(sl)
 		parent.add_child(top)
-		var l := UI.label("%s  ·  %s eyes  ·  %s" % [coat_short(rec), Unique.eye_name(rec), String(HABIT_SHORT.get(String(Unique.of(rec).get("quirk", "")), Unique.quirk_name(rec)))], 12, UI.MUTED)
+		var l := UI.label("%s  ·  %s eyes  ·  %s" % [coat_short(rec), Unique.eye_name(rec), habit_short(rec)], 12, UI.MUTED)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size.x = 260
 		parent.add_child(l)
@@ -262,8 +267,8 @@ static func block(rec: Dictionary, parent: Control, compact := false) -> void:
 		ol.custom_minimum_size.x = 260
 		parent.add_child(ol)
 		return
-	parent.add_child(UI.section("Who it is"))
+	parent.add_child(UI.section("Who {he} is".format(Unique.pronouns(rec))))
 	looks(rec, parent)
 	parent.add_child(UI.spacer(4))
-	parent.add_child(UI.section("Where it's from"))
+	parent.add_child(UI.section("Where {he}'s from".format(Unique.pronouns(rec))))
 	history(rec, parent)

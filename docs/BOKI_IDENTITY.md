@@ -145,8 +145,12 @@ an XL Vespyx in a match, their rings showing the hitbox). `--normalize-size` set
 case, so `basaltoad` reads `rampartoad`). The Field Book page shows both. A few are real behaviour:
 - `female_share`: the hatch-time sex roll (`BokiQuirks.sex_for`, from the egg's seed, in
   `Save.new_kin` and after `Care.breed` inherits). Hivara and Mossgrade hatch only female,
-  Marchleaf and Lodestick 95% female, Buckleron always male. Every other kind keeps the coin flip,
-  and Boki already hatched keep the sex they have.
+  Marchleaf and Lodestick 95% female, Buckleron always male. Every other kind keeps the coin flip.
+  Save v13 writes it once into every record that has none, by the same share, and puts a single-sex
+  kind right (an older 50/50 roll could make a male Hivara; decision 0060).
+- Text about one Boki says he or she, never "it": `Unique.pronouns(rec)` fills templates like
+  `"{He}'s looking at you"` (keys he, him, his and capitalised); Boki actions in `boki_lines.json` use
+  `{his}` / `{him}`. The hatch reveal shows the ♀ / ♂ mark (`UI.sex_icon`) by the name.
 - `food_rate`: the Rimeshrew's food need drains twice as fast (`Care.tick`).
 - `rain_joy`: joy per minute out in the farm rain (Effigeetle and Frigatee sulk, Mycroll and
   Barrelmander perk up; `Care.tick`, not while asleep or indoors).

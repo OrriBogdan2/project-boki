@@ -11,7 +11,7 @@ static func line(k: Kin, trigger_id: String) -> String:
 		t = "revive_low"
 	var stage := Care.speech(k.rec) if k.rec.size() > 0 else 3
 	var id := String(k.rec.get("uid", "kin%d" % k.get_instance_id()))
-	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, []))
+	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, [])).format(Unique.pronouns(k.rec))
 
 ## Says a trigger's line over the Boki, if it has one to say right now (inside a Fusion it's quiet).
 static func say(m: Match, k: Kin, trigger_id: String) -> void:

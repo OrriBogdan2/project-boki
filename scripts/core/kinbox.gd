@@ -150,7 +150,9 @@ static func free_slot(also_taken := {}, from := 0) -> int:
 ## Why this kin has to stay on the farm, or "".
 static func pinned(rec: Dictionary) -> String:
 	if String(rec.get("uid", "")) == str(Save.d.get("active", "")): return "%s is your partner: partners stay on the farm" % rec.get("name", "It")
-	if rec.get("starter", false): return "%s was your first Boki: it stays on the farm with you" % rec.get("name", "It")
+	if rec.get("starter", false):
+		var first := "%s was your first Boki: {he} stays on the farm with you" % rec.get("name", "It")
+		return first.format(Unique.pronouns(rec))
 	return ""
 
 static func _box(rec: Dictionary, slot: int) -> void:
@@ -230,10 +232,10 @@ static func bring_out(rec: Dictionary) -> Dictionary:
 static func release(rec: Dictionary) -> String:
 	var why := pinned(rec)
 	if why != "": return why
-	if (Save.d["roster"] as Array).size() <= 1: return "It's your only Boki"
+	if (Save.d["roster"] as Array).size() <= 1: return "{He}'s your only Boki".format(Unique.pronouns(rec))
 	var egg: Dictionary = Save.d.get("egg", {})
 	if not egg.is_empty() and (String(egg.get("a", "")) == String(rec["uid"]) or String(egg.get("b", "")) == String(rec["uid"])):
-		return "Its egg is still in the Nesting Nook: wait for it to hatch"
+		return "{His} egg is still in the Nesting Nook: wait for it to hatch".format(Unique.pronouns(rec))
 	Save.d["roster"].erase(rec)
 	Save.log_event("released", rec)
 	if str(Save.d.get("active2", "")) == String(rec.get("uid", "")): Save.d["active2"] = ""

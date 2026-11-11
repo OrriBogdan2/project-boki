@@ -7,7 +7,9 @@ extends RefCounted
 ## gets a plain provenance line. Then the first Relic: after naming the
 ## Boki, a pick of Lace, Kael or Vex (HobOffer), then (MaskMoment) the chosen one's Relic drifts to you, "Put on the
 ## Relic" (the interact key) puts it on and you become that Hunter; a short look at their
-## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). Never touches the real save.
+## ability clips fits a 1280x720 screen (1920x1080 scales to the same layout). A hatched Boki has a sex: the
+## reveal shows its ♀ / ♂ mark by its name, and no hatch line, card or Boki action calls a sexed Boki "it".
+## Never touches the real save.
 
 var bad := 0
 var main: Node
@@ -108,17 +110,75 @@ func run(m: Node) -> void:
 	var labels: Array = rv.info.find_children("*", "Label", true, false)
 	var golden := labels.filter(func(l): return (l as Label).get_theme_color("font_color").is_equal_approx(UI.GOLD))
 	ok(golden.is_empty(), "no gold rarity text on its card (%d)" % golden.size())
-	ok(labels.any(func(l): return (l as Label).text.contains("Its egg was guarded by")), "a rare one gets a line of provenance")
+	ok(labels.any(func(l): return (l as Label).text.contains("egg was guarded by")), "a rare one gets a line of provenance")
 	rv._go()
 	t0 = Time.get_ticks_msec()
 	while not named["go"] and Time.get_ticks_msec() - t0 < 3000:
 		await tree.process_frame
-	ok(named["go"], "Name it hands over to naming")
+	ok(named["go"], "Name her (or him) hands over to naming")
+	await _pronouns(tree)
 	await _first_mask(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
-# ---------------------------------------------------------------- 3. the first Relic
+# ---------------------------------------------------------------- 3. he and she, never "it"
+const IT := "(?i)\\b(it|its|it's|it'll|itself)\\b"
+
+func _pronouns(tree: SceneTree) -> void:
+	var it := RegEx.create_from_string(IT)
+	var said_it := func(texts: Array) -> Array: return texts.filter(func(s): return it.search(String(s)) != null)
+	ok(said_it.call(load("res://scripts/ui/hatch.gd").KNOCK_LINES).is_empty(), "the knock lines never say \"it\"")
+	for sx in ["f", "m"]:
+		var want := "she" if sx == "f" else "he"
+		var rec := Save.new_kin("cindle", "Ember")
+		rec["dna"]["sex"] = sx
+		rec["shimmer"] = true
+		rec["rare"] = true
+		var rv := KinReveal.new("cindle", rec)
+		main.add_child(rv)
+		var t0 := Time.get_ticks_msec()
+		while not rv.met and Time.get_ticks_msec() - t0 < 15000:
+			await tree.process_frame
+		var icon := "female" if sx == "f" else "male"
+		var is_mark := func(d): return d is UI.IconDot and d.id == icon and d.col == UI.SEX_COL[sx]
+		var marks: Array = [rv.title_row, rv.info].map(
+				func(n): return n.find_children("*", "", true, false).filter(is_mark))
+		ok(marks.all(func(m): return m.size() == 1),
+				"%s: the %s mark, in its colour, by the name and on the card" % [want, "♀" if sx == "f" else "♂"])
+		var words := _texts(rv)
+		ok(said_it.call(words).is_empty() and rv.sub_lbl.text.to_lower().begins_with(want + "'s looking at you"),
+				"%s: the reveal says %s, never \"it\" (%s)" % [want, want, str(said_it.call(words))])
+		rv.queue_free()
+		var acts: Array = []
+		for trig in BokiLines.rules()["triggers"].values():
+			for a in trig.get("acts", []):
+				acts.append(String(a).format(Unique.pronouns(rec)))
+		var own := RegEx.create_from_string("(?i)\\b(its|itself)\\b|\\{")
+		var stray: Array = acts.filter(func(a): return own.search(a) != null)
+		var his := "her" if sx == "f" else "his"
+		ok(stray.is_empty(), "%s: the Boki's actions say %s, never \"its\" (%s)" % [want, his, str(stray)])
+		await tree.process_frame
+	var hx = load("res://scripts/ui/hatch.gd").new()      # the first egg: its record is made as it pops out
+	main.add_child(hx)
+	await tree.process_frame
+	hx.chosen = 0
+	hx._popped(Node3D.new())
+	var he := "she" if Unique.sex(hx.hatched) == "f" else "he"
+	hx._show_name()
+	var lines: Array = [hx.title.text] + _texts(hx.bottom)
+	ok(Unique.sex(hx.hatched) != "" and said_it.call(lines).is_empty() and hx.title.text.to_lower().begins_with(he),
+			"the first egg's Boki has a sex as it pops out; the hatch and name card say %s (%s)"
+			% [he, str(said_it.call(lines))])
+	hx._finish(String(hx.egg_defs[0]["species"]), "Ember", "Orri", false)
+	ok(Save.d["roster"][0] == hx.hatched and String(hx.hatched["name"]) == "Ember",
+			"and that same record is the one saved")
+	hx.queue_free()
+	ok(Save.new_kin("hivara", "", 7)["dna"]["sex"] == "f" and Save.new_kin("limpetor", "", 7)["dna"]["sex"] == "m",
+			"a kind that is all one sex keeps it")
+	Save.d = Save.fresh()
+	await tree.process_frame
+
+# ---------------------------------------------------------------- 4. the first Relic
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()
@@ -181,7 +241,7 @@ func _first_mask(tree: SceneTree) -> void:
 	press.pressed = true
 	moment._unhandled_input(press)
 	t0 = Time.get_ticks_msec()
-	while moment.phase != "intro" and Time.get_ticks_msec() - t0 < 12000:
+	while moment.phase != "intro" and Time.get_ticks_msec() - t0 < 20000:
 		await tree.process_frame
 	for i in 6: await tree.process_frame
 	ok(moment.phase == "intro" and String(moment.you.get_meta("arch")) == "gunslinger",

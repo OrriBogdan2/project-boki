@@ -4975,7 +4975,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 
 func _name_baby(baby: Dictionary) -> void:
 	var sp: Dictionary = Data.KIN[baby["species"]]
-	var v := _new_panel("It hatched!", 520)
+	var v := _new_panel("{He} hatched!".format(Unique.pronouns(baby)), 520)
 	v.add_child(UI.label("\"%s\"" % KinSpeak.babble(baby["species"], "happy"), 24, Shiny.body(baby)))
 	var rare_pre := Mutations.prefix(baby)
 	if baby.get("rare", false) or not baby.has("parents"):
@@ -4989,7 +4989,7 @@ func _name_baby(baby: Dictionary) -> void:
 		mr.add_child(mtl)
 		v.add_child(mr)
 	if KinBox.is_boxed(baby):
-		var bl := UI.label("Sent to the Boki Burrow (%s): you already have a %s out on the farm. Swap it out any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Boki Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
+		var bl := UI.label("Sent to the Boki Burrow (%s): you already have a %s out on the farm. Swap them round any time." % [KinBox.page_name(KinBox.page_of(baby)), sp["name"]] if KinBox.dup_on_farm(baby) else "Sent to the Boki Burrow (%s): the farm is full." % KinBox.page_name(KinBox.page_of(baby)), 14, Color("cdb8ff"))
 		bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(bl)
 	var row := UI.hbox(8)

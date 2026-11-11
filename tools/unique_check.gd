@@ -91,6 +91,17 @@ func run(m: Node) -> void:
 	ok(same_rest and r0.has("birth") and r0.has("voice"), "sex is its own hash of the seed: the other rolls are untouched")
 	var old2 := {"v": 2, "roster": [{"uid": "kA", "species": "cindle", "dna": r0b.duplicate()}], "lost_kin": [], "graves": []}
 	ok(Save.migrate(old2) and int(old2["v"]) == Save.VERSION and String(old2["roster"][0]["dna"].get("sex", "")) == r0["sex"], "a v2 save gets every Boki's sex written down (%s)" % r0["sex"])
+	var hiv := Unique.roll(424242)
+	hiv["sex"] = "m"      # (an old 50/50 roll on an all-female kind)
+	var roster12 := [{"uid": "kB", "species": "hivara", "dna": hiv},
+			{"uid": "kC", "species": "cindle", "dna": r0b.duplicate()},
+			{"uid": "kD", "species": "cindle", "dna": r0.duplicate()}]
+	var old12 := {"v": 12, "roster": roster12, "lost_kin": [], "graves": []}
+	var moved := Save.migrate(old12) and int(old12["v"]) == Save.VERSION
+	var sexes: Array = roster12.map(func(r): return String(r["dna"].get("sex", "")))
+	ok(moved and sexes[0] == "f" and sexes[1] == BokiQuirks.sex_for("cindle", 31337) and roster12[2]["dna"] == r0,
+			"v12 -> v13: a Boki with no sex gets one, an all-female kind is put right, the rest keep theirs %s"
+			% str(sexes))
 	var big := Save.new_kin("cindle", "Big", 1); big["dna"]["size"] = 2.6
 	var small := Save.new_kin("cindle", "Small", 2); small["dna"]["size"] = -2.6
 	var bi := Unique.size_info(big); var si := Unique.size_info(small)

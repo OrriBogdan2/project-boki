@@ -44,10 +44,11 @@ static func element_of(species: String) -> String:
 static func say(rec: Dictionary, trigger_id: String, now_s := -1.0) -> String:
 	var species := String(rec.get("species", ""))
 	var id := String(rec.get("uid", species))
-	return line(id, trigger_id, species, Care.speech(rec), now_s)
+	return line(id, trigger_id, species, Care.speech(rec), now_s).format(Unique.pronouns(rec))
 
 ## The line itself: boki_id keys its memory and cooldown; stage is its Care.speech level; extra are
-## its own personal lines (used when they fit the word cap and are one sentence).
+## its own personal lines (used when they fit the word cap and are one sentence). Its actions are
+## templates ("{his}"): fill them with Unique.pronouns.
 static func line(boki_id: String, trigger_id: String, species: String, stage: int, now_s := -1.0,
 		extra: Array = []) -> String:
 	var t := trigger(trigger_id)

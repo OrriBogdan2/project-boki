@@ -326,8 +326,9 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	if _searching() and not KinBox.matches(rec, query, filter):
 		c.modulate = Color(1, 1, 1, 0.22)
 	var tags := Mutations.tags(rec)
-	c.tooltip_text = "%s the %s%s\nLevel %d  ·  trust %d%s\nClick to see it, drag to move, right click to send it %s" % [rec["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(rec),
+	c.tooltip_text = "%s the %s%s\nLevel %d  ·  trust %d%s\nClick to see {him}, drag to move, right click to send {him} %s" % [rec["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(rec),
 		int(rec.get("level", 1)), int(rec.get("trust", 0)), "  ·  your partner" if String(rec["uid"]) == str(Save.d.get("active", "")) else "", "to the burrow" if where == "farm" else "to the farm"]
+	c.tooltip_text = c.tooltip_text.format(Unique.pronouns(rec))
 	var r: Dictionary = rec
 	c.gui_input.connect(func(e: InputEvent):
 		if e is InputEventMouseButton and e.pressed:
@@ -466,7 +467,8 @@ func _build_detail() -> void:
 			_done("%s is your partner%s" % [r["name"], (" (%s went to the burrow to make room)" % swapped["name"]) if not swapped.is_empty() else ""]), 120))
 	if confirm == String(rec["uid"]):
 		var cr := UI.vbox(6)
-		var rcl := UI.label("Let %s go for good? It goes back to the wild and won't come back." % rec["name"], 13, UI.BAD)
+		var gone := "Let %s go for good? {He} goes back to the wild and won't come back." % rec["name"]
+		var rcl := UI.label(gone.format(Unique.pronouns(rec)), 13, UI.BAD)
 		rcl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		rcl.custom_minimum_size.x = 260
 		cr.add_child(rcl)
@@ -479,16 +481,16 @@ func _build_detail() -> void:
 				sel = ""
 				_done("%s went back to the wild. Goodbye, %s" % [nm, nm])
 			else: _fail(why), 130))
-		yr.add_child(UI.button("Keep it", func(): confirm = ""; refresh(), 90))
+		yr.add_child(UI.button("Keep {him}".format(Unique.pronouns(rec)), func(): confirm = ""; refresh(), 90))
 		cr.add_child(yr)
 		detail.add_child(btns)
 		detail.add_child(cr)
 		return
 	var rel := UI.button("Release", func(): confirm = String(r["uid"]); refresh(), 90)
 	var rwhy := KinBox.pinned(rec)
-	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1: rwhy = "It's your only Boki"
+	if rwhy == "" and (Save.d["roster"] as Array).size() <= 1: rwhy = "{He}'s your only Boki".format(Unique.pronouns(rec))
 	rel.disabled = rwhy != ""
-	rel.tooltip_text = rwhy if rwhy != "" else "Let it go back to the wild"
+	rel.tooltip_text = rwhy if rwhy != "" else "Let {him} go back to the wild".format(Unique.pronouns(rec))
 	btns.add_child(rel)
 	detail.add_child(btns)
 

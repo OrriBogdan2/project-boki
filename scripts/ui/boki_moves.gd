@@ -29,7 +29,7 @@ func _init(species: String, rec := {}) -> void:
 			continue
 		var slot := "k1" if i == 0 else "k2"
 		var eff := KinLib.effective(ad, slot, kspec, rec)
-		var lines := [KinText.ability(eff), "%s  ·  %ss cooldown" % [_when(ad, slot), KinText.n(ad.cooldown)]]
+		var lines := [KinText.ability(eff), "%s  ·  %ss cooldown" % [_when(ad, slot, rec), KinText.n(ad.cooldown)]]
 		_add(ad.display_name, KinText.icon(ad), KinText.color(ad).lerp(UI.INK, 0.2), lines, false)
 	var ud := KinLib.merge(String(sp.get("ultimate", "")))
 	if ud:
@@ -47,12 +47,12 @@ func _init(species: String, rec := {}) -> void:
 	tip.add_child(tip_box)
 	add_child(tip)
 
-## When it goes off: its first ability on its own once it is out, the others on their own cue.
-func _when(ad: AbilitySpec, slot: String) -> String:
+## When it goes off: its first ability by itself once it is out, the others on their own cue (KinText).
+func _when(ad: AbilitySpec, slot: String, rec: Dictionary) -> String:
 	if slot == "k1":
-		return "Uses it on its own once you send it out (%s)" % Settings.key_cap("throw")
+		return ("{He} uses it once you send {him} out (%s)" % Settings.key_cap("throw")).format(Unique.pronouns(rec))
 	var w := KinText.when(ad)
-	return w if w != "" else "Uses it on its own"
+	return w if w != "" else "{He} uses it by {him}self".format(Unique.pronouns(rec))
 
 func _add(nm: String, icon: String, col: Color, lines: Array, bond: bool) -> void:
 	var t := PanelContainer.new()

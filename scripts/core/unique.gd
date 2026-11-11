@@ -76,9 +76,9 @@ const VARIANT_NAMES := {"standard": "", "splayed": "Splayed ears", "folded": "Fo
 	"t_tufted": "Tufted tail", "t_kinked": "Kinked tail", "t_bobbed": "Bobbed tail"}
 const QUIRKS := [["tail_chase", 10], ["head_tilt", 16], ["hop", 14], ["sway", 14], ["sneeze", 10], ["stretch", 12],
 	["ear_flick", 12], ["look_around", 12]]
-const QUIRK_NAMES := {"tail_chase": "Chases its tail", "head_tilt": "Tilts its head at things", "hop": "Bounces on the spot",
+const QUIRK_NAMES := {"tail_chase": "Chases {his} tail", "head_tilt": "Tilts {his} head at things", "hop": "Bounces on the spot",
 	"sway": "Sways side to side", "sneeze": "Sneezes now and then", "stretch": "Stretches a lot",
-	"ear_flick": "Flicks its ears", "look_around": "Always looking around"}
+	"ear_flick": "Flicks {his} ears", "look_around": "Always looking around"}
 const BIRTH_SHAPES := [["star", 1], ["heart", 1], ["crescent", 1], ["diamond", 1], ["dot", 1], ["swirl", 1]]
 const BIRTH_PLACES := [["left cheek", 1], ["right cheek", 1], ["brow", 1], ["left flank", 1], ["right flank", 1],
 	["back", 1], ["chest", 1]]
@@ -148,15 +148,32 @@ static func sex(rec: Dictionary) -> String:
 	if d.is_empty():
 		return ""
 	var x := String(d.get("sex", ""))
-	return x if x in ["f", "m"] else sex_for_seed(int(d.get("seed", 0)))
+	return x if x in ["f", "m"] else BokiQuirks.sex_for(String(rec.get("species", "")), int(d.get("seed", 0)))
 
 static func sex_name(rec: Dictionary) -> String:
 	return {"f": "Female", "m": "Male"}.get(sex(rec), "")
 
-## Writes the sex into a record's rolls if they don't have it yet (save migration).
+const PRONOUNS := {"f": ["she", "her", "her"], "m": ["he", "him", "his"], "": ["it", "it", "its"]}
+
+## A Boki's pronouns for a text template: "{He}'s looking at you".format(Unique.pronouns(rec)). Keys he, him,
+## his, and He, Him, His to start a sentence ("it" only for a bare look-only record, which has no sex).
+static func pronouns(rec: Dictionary) -> Dictionary:
+	var words: Array = PRONOUNS[sex(rec)]
+	var out := {}
+	for i in 3:
+		var key: String = PRONOUNS["m"][i]
+		out[key] = words[i]
+		out[key.capitalize()] = String(words[i]).capitalize()
+	return out
+
+## Writes the sex into a record's rolls if they don't have it yet, by its kind's share (save migration). A
+## kind that is all one sex gets that one even over an older 50/50 roll.
 static func ensure_sex(rec: Dictionary) -> void:
-	if typeof(rec.get("dna", null)) == TYPE_DICTIONARY and rec["dna"].has("seed") and not rec["dna"].has("sex"):
-		rec["dna"]["sex"] = sex_for_seed(int(rec["dna"]["seed"]))
+	if typeof(rec.get("dna", null)) != TYPE_DICTIONARY or not rec["dna"].has("seed"):
+		return
+	var share := BokiQuirks.female_share(String(rec.get("species", "")))
+	if not rec["dna"].has("sex") or share == 0.0 or share == 1.0:
+		rec["dna"]["sex"] = BokiQuirks.sex_for(String(rec.get("species", "")), int(rec["dna"]["seed"]))
 
 ## A record's rolls; a record without any (an old save, another player's kin) reads the ones its
 ## id gives, without being changed. {} for a bare look-only record (no uid, no dna).
@@ -324,12 +341,12 @@ static func mark_name(rec: Dictionary) -> String:
 	return "%s (%s)" % [String(MARK_INFO.get(m, {}).get("name", m.capitalize())), String(MARK_COL_NAMES.get(String(d.get("mark_col", "dark")), "dark"))]
 
 static func quirk_name(rec: Dictionary) -> String:
-	return String(QUIRK_NAMES.get(String(of(rec).get("quirk", "")), "None"))
+	return String(QUIRK_NAMES.get(String(of(rec).get("quirk", "")), "None")).format(pronouns(rec))
 
 static func birthmark_text(rec: Dictionary) -> String:
 	var b = of(rec).get("birth", [])
 	if typeof(b) != TYPE_ARRAY or (b as Array).size() < 2: return ""
-	return "a %s-shaped mark on its %s" % [String(b[0]), String(b[1])]
+	return ("a %s-shaped mark on {his} %s" % [String(b[0]), String(b[1])]).format(pronouns(rec))
 
 ## Its shape variants in words ("Folded ears, tufted tail"), "" if both are standard.
 static func shape_text(rec: Dictionary) -> String:
