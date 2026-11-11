@@ -72,6 +72,7 @@ static func stash(m, h, wp: Dictionary) -> bool:
 		_off_ground(m, wp)
 		h.pack.append(it)
 		_told(m, h, "%s  ·  in your pack (%d/%d)" % [Loot.name_of(it), h.pack.size(), h.pack_cap], Loot.col_of(it))
+		_seed_hint(m, h, it)
 		m.sfx(HeroSfx.of(h, "pickup", "pickup"), h.pos, -2.0, 1.1)
 		return true
 	if h == m.player and m.hud:
@@ -99,6 +100,7 @@ static func swap(m, h, i: int, wp: Dictionary) -> void:
 	var it := ground_item(wp)
 	_off_ground(m, wp)
 	h.pack.append(it)
+	_seed_hint(m, h, it)
 	spawn_item(m, out, _near(h))
 	_told(m, h, "Dropped %s for %s" % [Loot.name_of(out), Loot.name_of(it)], Loot.col_of(it))
 	m.sfx("pickup", h.pos, -2.0, 0.95)
@@ -175,6 +177,11 @@ static func drop_from_pack(m, h, i: int) -> void:
 	var it: Dictionary = h.pack[i]
 	h.pack.remove_at(i)
 	spawn_item(m, it, _near(h))
+
+## The first Wayseed you pack tells you what it is (HubHints.seed_in_bag).
+static func _seed_hint(m, h, it: Dictionary) -> void:
+	if h == m.player and Loot.is_wayseed(it):
+		HubHints.seed_in_bag(m.hud)
 
 static func _told(m, h, txt: String, col: Color, small := false) -> void:
 	if h == m.player and m.hud:
