@@ -1,5 +1,5 @@
 {
-	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py; stomp, drink and revive keyed on the v2 rig by tools/art1/kael_v2_clips.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
 	"extra_bones": {
 		"x_breath": "hips"
 	},
@@ -169,7 +169,9 @@
 			"front": "hit_f",
 			"back": "hit_b",
 			"dur": 0.42
-		}
+		},
+		"stomp": "stomp",
+		"drink": "drink"
 	},
 	"flow": [
 		[
@@ -234,15 +236,7 @@
 		]
 	],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
-	"procedural": [
-		"ledge",
-		"mantle",
-		"stomp",
-		"base",
-		"drink",
-		"wade",
-		"swim"
-	],
+	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"upper": [
 		"hips",
 		"head",

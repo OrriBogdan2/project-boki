@@ -61,6 +61,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too. Every Hero lists `wade` and `swim` (water, `HunterSwim`): no clip is keyed for them, so HunterAnim's wading high knees and
   swimming crawl (a flutter kick, a stroke in each hand the kit lets go of, the weapon held as on a run) play on the rig;
   `--clip-check` walks every Hero through a pond (`tools/pond_walk.gd`), `--pond-shots` films it.
+- `states`: downed, reviving (a kneel loop), stomp, drink, dead, stun, emote, hit {front, back, dur}. `stomp` and `drink` are seeked by the state's 0..1 phase (a stomp clip is Life's `stomp_cycle`, 0.7 s, the heel down at 0.7 of it; a drink clip is `Hunter.DRINK_TIME`, 1.1 s, upper body only). tools/art1/actionkit.py shares the three actions; each Hero's clips file gives its ready pose, its free hand and the mouth. Kael v2 has no clips file of his own (his clips are the first Kael's, retargeted): tools/art1/kael_v2_clips.py keys his three on the v2 rig, his ready pose read off his v2 idle, and copies them onto kael.glb. `--clip-check` asserts the lengths.
+- `procedural`: state keys that hand back to the rig (ledges, mantles, bases; stomp and drink for a Hero with no clip). A kit move with no clip does too.
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
