@@ -529,6 +529,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
+			Models.merge_static(n, false, true)      # its plain parts: a mesh per material
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			h.add_child(n)
@@ -562,6 +563,7 @@ func _sync_fences() -> void:
 			if f.get(c + dv, "") == id: links.append(dv)
 		var alone: bool = not (f.get(c + Vector2i(1, 0), "") == id or f.get(c + Vector2i(-1, 0), "") == id or f.get(c + Vector2i(0, 1), "") == id or f.get(c + Vector2i(0, -1), "") == id)
 		_fence_piece(n, id, links, alone)
+		Models.merge_static(n, false, true)      # a post and its rails: one mesh
 
 func _fence_piece(n: Node3D, id: String, links: Array, alone: bool) -> void:
 	match id:
