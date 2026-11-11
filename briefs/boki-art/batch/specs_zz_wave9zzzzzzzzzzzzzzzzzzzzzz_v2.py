@@ -2299,3 +2299,24 @@ OPT('Dribbara','baby','cute',False,True,_C%'Dribbara',[
  "no puddle and no lily pad on its back. A tiny round baby capybara with damp sleek fur, a single big clear water droplet balanced on top of its head, and pale turquoise ripple-ring markings on its sides.",
  "no puddle and no lily pad on its back. A tiny round baby capybara blowing one big clear soap-like water bubble from its mouth, a puff of warm steam rising from its fluffy back."])
 for _s in SPECS[_n0:]: _s['id']+='_bk'
+
+# 11-11 OWNER: Crofthorn > Crofthollow "add something interesting, too boring". Four directions, both stages each so the line reads (2 runs each).
+# Dribbara options "look bad": four fresh ones. Kestrike female portrait glitched (extra wings): simpler pose.
+_CROFT=[('bell',"its throat grows a big copper-coloured dewlap shaped exactly like a cowbell, with a heavy round clapper-like lump inside that swings when it moves; the bell is part of its hide, not hung on it",
+                "a small bud of a copper cowbell-shaped dewlap just starting to form under its chin"),
+        ('wheat',"its long shaggy mane grows into golden wheat-ear tufts like a harvest sheaf over its shoulders, and its tail ends in a heavy knotted club like a threshing flail",
+                 "a short golden wheat-ear fringe over its eyes and a small knotted tail tuft"),
+        ('mill',"its tail ends in four broad stiff fan-shaped sails like a windmill, cream with brown edges, held spread wide and turning",
+                "its tail ends in four small stubby sail-shaped tufts like a tiny windmill"),
+        ('bale',"its shaggy coat grows in big tight rolled round lumps like hay bales on its shoulders and haunches, golden with darker banded fur, so it looks like a walking haystack with a bull's head",
+                "its fluffy coat is rolled into two small round hay-bale lumps on its shoulders")]
+for _k,_fin,_mid in _CROFT:
+    ON_CHANGE('Crofthollow',_C%'Crofthollow','final','tough',False,True,"keep its two big sickle horns and shaggy orange highland-bull body, no cottage, no tree, no rocks or grass on its back, and add this signature: "+_fin+". Standing planted, proud.",runs=2,tag='_x'+_k)
+    ON_CHANGE('Crofthorn',_C%'Crofthorn','mid','tough',False,True,"a younger, smaller shaggy orange highland bull with short curved horn hooks, no rocks or grass on its back, and this signature: "+_mid+". Trotting, curious.",runs=2,tag='_x'+_k)
+for _k,_d in (('splash',"a tiny round baby capybara whose fluffy head tuft sticks up in the shape of a water splash, pale turquoise at the tips, with a few tiny round water drops hovering around the tuft. Sitting, happy, big eyes."),
+              ('drops',"a tiny round baby capybara whose ear tips and tail tuft are shaped like little water drops in pale turquoise, faint ripple-ring markings on its back, blowing one small bubble from its nose. Sitting."),
+              ('float',"a tiny round baby capybara floating on its back, belly up, paws in the air, in a small ring of water ripples drawn as flat turquoise rings around it, a sleepy smile."),
+              ('steam',"a tiny round baby capybara with damp sleek fur, sitting with eyes closed, a small soft puff of warm steam rising from the top of its head like it just had a bath, rosy cheeks.")):
+    ON_CHANGE('Dribbara',_C%'Dribbara','baby','cute',False,True,"no puddle, no lily pad and nothing on its back. "+_d,runs=2,tag='_x'+_k)
+V2PORT_NEW('Kestrike_female','briefs/boki-art/cards/Kestrike_female.jpg','mid','cute',_GC,_GN,False,True,"perched on one foot with BOTH wings folded neatly at her sides, head tilted, looking at the viewer");SPECS[-1]['id']='v2p_kestrike_female_bk3'
+SPECS[-1]['prompt']+=" She has exactly two wings, both folded. One bird only."
