@@ -169,6 +169,18 @@
 			]
 		},
 		{
+			"id": "cup_ribbon",
+			"name": "Cup Ribbon",
+			"family": "path",
+			"use": "worn",
+			"effect": {
+				"kind": "ribbon"
+			},
+			"sources": [
+				"Crown cup"
+			]
+		},
+		{
 			"id": "rinse_melon",
 			"name": "Rinse Melon",
 			"family": "lean",
