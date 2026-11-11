@@ -71,8 +71,8 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false,
-	"util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false,
+	"util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)

@@ -24,8 +24,10 @@ const CHECKS := {
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
 	"--mob-cap-check": ["res://tools/mob_cap_check.gd", "mob_cap_check", null],      # monster activity cap per preset
-	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],      # PvE pacing: 12 hunters vs 3 camps at level 1 and 5
-	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],      # last-hit XP and the 30 m squad share
+	# PvE pacing: 12 hunters vs 3 camps at level 1 and 5
+	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],
+	# last-hit XP and the 30 m squad share
+	"--xp-share-check": ["res://tools/xp_share_check.gd", "xp_share_check", null],
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
@@ -51,14 +53,16 @@ const CHECKS := {
 	"--trait-drift-check": ["res://tools/trait_drift_check.gd", "trait_drift_check", null],      # GARDEN.md 3, lever 3
 	"--baby-parents-check": ["res://tools/baby_parents_check.gd", "baby_parents_check", null],      # GARDEN.md 6
 	"--family-tree-check": ["res://tools/family_tree_check.gd", "family_tree_check", null],      # GARDEN_MODERN 5.8
-	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake in shallow water
+	# splash, spray, wake in shallow water
+	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],      # one movement model
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],      # item 63
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],      # item 33 (1108)
-	"--abyss-fall-check": ["res://tools/abyss_fall_check.gd", "abyss_fall_check", null],      # a walk off the lip vs the source
+	# a walk off the lip vs the source
+	"--abyss-fall-check": ["res://tools/abyss_fall_check.gd", "abyss_fall_check", null],
 	"--abyss-fall-clip": ["res://tools/abyss_fall_clip.gd", "abyss_fall_clip", null],      # --shots-dir=<dir> (GPU)
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
@@ -91,7 +95,8 @@ const CHECKS := {
 	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
-	"--weapon-fire-sfx-check": ["res://tools/weapon_fire_sfx_check.gd", "weapon_fire_sfx_check", null],      # SFX audit row 3
+	# SFX audit row 3
+	"--weapon-fire-sfx-check": ["res://tools/weapon_fire_sfx_check.gd", "weapon_fire_sfx_check", null],
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
 	"--ability-height-check": ["res://tools/ability_height_check.gd", "ability_height_check", null],
@@ -139,7 +144,8 @@ const CHECKS := {
 	"--boki-agency-check": ["res://tools/boki_agency_check.gd", "boki_agency_check", null],      # item 184b
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
-	"--bot-kit-check": ["res://tools/bot_kit_check.gd", "bot_kit_check", null],      # bots use every kit slot (docs/BOT_KIT_USE.md)
+	# bots use every kit slot (docs/BOT_KIT_USE.md)
+	"--bot-kit-check": ["res://tools/bot_kit_check.gd", "bot_kit_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
@@ -154,7 +160,8 @@ const CHECKS := {
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
-	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],      # one reader for ability words
+	# one reader for ability words
+	"--ability-text-check": ["res://tools/ability_text_check.gd", "ability_text_check", null],
 	"--mob-death-check": ["res://tools/mob_death_check.gd", "mob_death_check", null],  # dissolve, stagger, drops
 	"--mob-death-shots": ["res://tools/mob_death_shots.gd", "mob_death_shots", null],      # death strips (GPU)
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
@@ -174,7 +181,8 @@ const CHECKS := {
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
-	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],      # slam impact hold, recovery
+	# slam impact hold, recovery
+	"--slam-follow-check": ["res://tools/slam_follow_check.gd", "slam_follow_check", null],
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
@@ -257,7 +265,8 @@ const CHECKS := {
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
-	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null],      # ability cards = the data
+	# ability cards = the data
+	"--ability-card-check": ["res://tools/ability_card_check.gd", "ability_card_check", null],
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--boss-parity-check": ["res://tools/boss_parity_check.gd", "boss_parity_check", null],  # boss phase, leash, kill
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
@@ -333,7 +342,8 @@ const CHECKS := {
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
-	"--spring-settle-check": ["res://tools/spring_settle_check.gd", "spring_settle_check", null],      # spring chains settle (secondary_motion)
+	# spring chains settle (secondary_motion)
+	"--spring-settle-check": ["res://tools/spring_settle_check.gd", "spring_settle_check", null],
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
@@ -346,12 +356,14 @@ const CHECKS := {
 	"--wisp-rules-check": ["res://tools/wisp_rules_check.gd", "wisp_rules_check", null],      # docs/decisions/0045
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 	"--wisp-hit-rules-check": ["res://tools/wisp_hit_rules_check.gd", "wisp_hit_rules_check", null],
-	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],      # docs/decisions/0044
+	# docs/decisions/0044
+	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
-	"--knock-credit-check": ["res://tools/knock_credit_check.gd", "knock_credit_check", null],      # one knock/assist rule (KnockCredit)
+	# one knock/assist rule (KnockCredit)
+	"--knock-credit-check": ["res://tools/knock_credit_check.gd", "knock_credit_check", null],
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]

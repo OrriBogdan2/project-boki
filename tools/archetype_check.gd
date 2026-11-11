@@ -116,7 +116,9 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
-	T.armor_tier = 0; T.armor_xp = 0.0     # hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	# hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	T.armor_tier = 0
+	T.armor_xp = 0.0
 	T.set_meta("marks", {})
 	T.stacks.clear()
 
@@ -309,7 +311,8 @@ func _archer() -> void:
 	ok("archer passive: no Focus meter (Hawk Sense only)",
 		not K.has_meter() and K.res == 0.0 and K.tell == "", "res %.0f tell %s" % [K.res, K.tell])
 	# Hawk Sense stays: a rival under half health within 22m is seen by her team (numbers: --archer-combo-check)
-	fresh(T); T.hp = T.max_hp * 0.4
+	fresh(T)
+	T.hp = T.max_hp * 0.4
 	step(m, 0.5)
 	ok("archer Hawk Sense: a hurt rival is sensed", ArcherKit.sensed_by(m, P.team, T))
 	fresh(T)
@@ -561,7 +564,8 @@ func _bulwark() -> void:
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s",
+		not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)
