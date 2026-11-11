@@ -512,8 +512,8 @@ func _arrive() -> void:
 	if h.model: h.model.visible = true
 	m.fx.dust(h.pos, 5)           # a quiet arrival: no ring or burst on a dash, the hits are on the way
 	m.sfx("mage_bubble_pop", h.pos, -5.0)     # she snaps back into her body with a pop of her gum
-	if ult.phase() != MageUlt.CROUCH:
-		play("mage_dash_land")      # (a run out of Kitefall's crouch lands in the crouch: it plays that instead)
+	if ult.phase() != MageUlt.CROUCH and h.grounded:
+		play("mage_dash_land")      # (out of Kitefall's crouch it lands in the crouch; off a ledge, the air pose)
 
 func _wire_hit(f: Ent, dmg: float) -> void:
 	if not is_instance_valid(f) or f.dead: return

@@ -90,6 +90,18 @@ static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
 static func dash_rest(dash_v: Vector2, run_v: Vector2, left: float) -> Vector2:
 	return (dash_v - run_v) * maxf(0.0, left)
 
+## A ground dash that runs off a ledge keeps its own course (distance, speed curve) but falls as it goes: the
+## height hold is an air dash's (Hunter.roll_falls, set as the ground goes). It ends in the air with the usual dash
+## exit, so the glider and the air dash are free as it ends, and the kit's ground pose for it is cut there.
+## Source: a dash is how you leave a platform (bCanWalkOffLedges false) and a falling body only sheds
+## FallingLateralFriction; DECISIONS: walking off ledges is always allowed. Called every step.
+static func dash_off_ledge(h: Hunter) -> void:
+	if not h.roll_falls or h.roll_t > 0.0:
+		return
+	h.roll_falls = false
+	if h.ak and not h.grounded:
+		h.ak.on_dash_off_ledge()
+
 ## A dash's speed at u (0..1 through it) against its mean, on a piecewise-linear curve of [u, k] knots
 ## (content/rules/dash_feel.json "curve": mean 1, so the dash still covers its distance).
 static func dash_k(curve: Array, u: float) -> float:
