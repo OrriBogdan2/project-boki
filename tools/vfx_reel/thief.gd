@@ -42,7 +42,7 @@ func _thief_r() -> void:
 			P.ak.cd["x"] = 0.0
 			P.ak.cast_ult()
 		_aim(T.pos)
-	await _go(3.0, cast, _sheet("r", "X Encore: the ring opens, blades on the beats (rim dummy right, inner up), the fade",
+	await _go(3.0, cast, _sheet("r", "X Encore: the ring opens, blades on the beats (rim dummy right, inner up)",
 		[0.2, 0.35, 0.5, 0.56, 0.7, 1.0, 1.5, 2.2, 2.7], func(): return P.pos), 2.5)
 	crop_px = SHEET_CROP
 	T2.teleport(home + Vector3(-30, 0, 30))
