@@ -201,11 +201,12 @@ func _build_aegis() -> void:
 	add_child(aegis)
 	var pal: Dictionary = HeroVfx.data(h.arch)["palette"]
 	plate_col = Color(String(pal["plate"]))
-	edge_col = Color(String(pal["main"]))
+	# the rim, ribs and boss: the source slab's top edge is its lightest part
+	edge_col = Color(String(pal["hot"]))
 	broken_col = Color(String(pal["char"]))
 	var plate := Models.toon(plate_col, true, 0.0)
 	var edge := Models.toon(edge_col, true, 0.0)
-	var rivet := Models.toon(Color(String(pal["hot"])), false, 0.2)
+	var rivet := Models.toon(Color(String(pal["main"])), false, 0.2)
 	plate_mats = [plate, edge]
 	var seg := aegis_half * 2.0 / PLATE_N
 	var width := 2.0 * aegis_r * sin(seg * 0.5)
