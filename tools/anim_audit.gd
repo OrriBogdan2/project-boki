@@ -23,10 +23,9 @@ const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
 ## The start gate: the idle's first pose to the first walk pose played when he sets off (loco "start_phase", the
-## "start_blend" bones still in the idle) at most this many body heights apart for these Hunters (dredge and mage:
-## their own item).
+## "start_blend" bones still in the idle) at most this many body heights apart for these Hunters.
 const MAX_START_GAP := 0.25
-const START_GATE := ["gunslinger", "juggernaut", "archer", "ashwick"]
+const START_GATE := ["gunslinger", "juggernaut", "archer", "ashwick", "dredge", "mage"]
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -59,6 +58,9 @@ func _hero(main: Node, id: String) -> void:
 	var sync := m.get_node("Warden/Sync")
 	sync.set_process(false)
 	var clips: WardenClips = sync.get("clips")
+	if clips == null:     # (no hand-keyed clips yet: nothing to audit)
+		m.free()
+		return
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
 	var row := {}
