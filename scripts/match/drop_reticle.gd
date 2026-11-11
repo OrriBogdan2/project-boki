@@ -7,7 +7,7 @@ const RADIUS := 3.0           # m, your ring
 const MATE_RADIUS := 1.5      # m, a squadmate's
 const BEAM_R := 0.14          # m
 const STEP := 0.1             # s, projection step
-const MAX_STEPS := 120
+const MAX_STEPS := 260        # 26 s: the whole glide down from the ship under the canopy
 const PULSE_HZ := 0.8
 const RED := Color(1.0, 0.25, 0.2)
 
@@ -46,10 +46,11 @@ static func project(h: Hunter, mv: Vector2) -> Dictionary:
 		var above := p.y - (0.0 if void_here else gy)
 		if above <= 0.0:
 			return {"at": Vector3(p.x, 0.0 if void_here else gy, p.z), "void": void_here}
-		diving = diving and above >= Hunter.DEPLOY_H
+		if diving and DropFeel.low(w, p):
+			diving = false
+			vy = maxf(vy, DropFeel.pop_vy)      # the canopy catches
 		hv = DropFeel.steer(hv, mv, diving, STEP)
-		var sink := Hunter.DIVE_FALL if diving else Hunter.DROP_FALL
-		vy = DropFeel.fall_vy(vy, sink, Hunter.DIVE_VY_RATE if diving else Hunter.DROP_VY_RATE, above, STEP)
+		vy = DropFeel.fall_vy(vy, diving, above, STEP)
 		p += Vector3(hv.x, vy, hv.y) * STEP
 	return {"at": Vector3(p.x, 0.0, p.z), "void": true}
 
@@ -98,7 +99,7 @@ func _update(h: Hunter, delta: float) -> void:
 		if o == h or o.team != h.team or not o.dropping or o.out:
 			continue
 		var mate := _mate(k)
-		var mv := Vector2(o.vel.x, o.vel.z) / Hunter.DIVE_SPEED
+		var mv := Vector2(o.vel.x, o.vel.z) / DropFeel.dive_speed
 		var ml := project(o, mv)
 		mate._place(ml["at"], MATE_RADIUS, RED if ml["void"] else col, o.pos.y, 0.55)
 		mate.visible = true
