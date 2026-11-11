@@ -3,8 +3,8 @@ extends RefCounted
 ## 2560x1080 ultrawide, 1024x640). At each, every group (a registered HUD panel, or a top-level control of a
 ## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
 ## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
-## The Ways Out widgets (the strip, its one line, the Gate prompt, the uplink's status, the Blight line and the
-## edge markers) are checked in each of their states, and every direction an edge marker can point.
+## The Ways Out widgets (the strip, its one line, the quest tracker, the Gate prompt, the uplink's status, the Blight
+## line and the edge markers) are checked in each of their states, and every direction an edge marker can point.
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
 ## and size (<dir>/<W>x<H>_<screen>.png) and a contact sheet of them.
 
@@ -107,15 +107,16 @@ func _hud_at(win: Vector2i, sz: Vector2, screen: String, with_toasts := true) ->
 	await _judge(screen, win, groups, sz)
 
 # ------------------------------------------------------------------ the Ways Out widgets
-const WAYS_STATES := ["locked", "unlocked", "quest_racing", "uplink_far", "last_way_out", "last_way_out_dead",
-		"gate_prompt", "outside_ring"]
+const WAYS_STATES := ["locked", "unlocked", "quest_racing", "uplink_far", "quest_tracker", "last_way_out",
+		"last_way_out_dead", "gate_prompt", "outside_ring"]
 const WAYS_GROUP := {"locked": "ways_strip", "unlocked": "waypoint", "quest_racing": "exit_status",
-		"uplink_far": "waypoint", "last_way_out": "ways_strip", "last_way_out_dead": "ways_line",
-		"gate_prompt": "gate_prompt", "outside_ring": "blight_line"}
+		"uplink_far": "waypoint", "quest_tracker": "quest_tracker", "last_way_out": "ways_strip",
+		"last_way_out_dead": "ways_line", "gate_prompt": "gate_prompt", "outside_ring": "blight_line"}
 const EDGE_ANGLES := 16
 const BELT := ["vitals", "abilities", "weapon", "gear", "kin"]      # what a marker's box must stay off
 
 func _ways_out() -> void:
+	m.exits.seats.build()      # (the quest seats the tracker reads; the match is paused, so only _ways_set moves them)
 	for win: Vector2i in sizes:
 		var sz := await _resize(win)
 		var prompt: Array = []
@@ -138,6 +139,10 @@ func _ways_set(st: String) -> void:
 	var q: Dictionary = Heart.rules()["quest"]
 	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
 	var out_x: Dictionary = m.exits.list.filter(func(x): return x["kind"] == "outpost")[0]
+	var qs: QuestSeats = m.exits.seats
+	for s: QuestSeat in qs.seats():
+		s._force(QuestSeat.S.LOCKED, "check")
+	qs.uplink_x()["state"] = "idle"
 	m.hud.full_map.close()
 	P.inp["interact"] = false
 	H.interact_for(P)      # (a released key clears the Gate's hold, so each size starts it afresh)
@@ -167,6 +172,18 @@ func _ways_set(st: String) -> void:
 				P.teleport(m.world.free_spot_near(out_x["pos"], [], 1.0, 0.45, 6.0))
 			else:
 				P.teleport(m.world.free_spot_near(out_x["pos"] + Vector3(60, 0, 0), [], 1.0, 0.45, 6.0))
+		"quest_tracker":
+			m.sess_t0 = float(q["uplink_open_s"]) + 20.0 - m.time
+			var x: Dictionary = qs.uplink_x()
+			x["state"] = "charging"
+			x["team"] = P.team
+			x["prog"] = 0.62
+			x["contested"] = false
+			qs.uplink._force(QuestSeat.S.IN_USE, "check", P.team)
+			var boss: Boss = m.lairs.boss_of(qs.lair.ref)
+			boss.hp = boss.max_hp * 0.7
+			qs.lair._force(QuestSeat.S.IN_USE, "check", foe.team)
+			P.teleport(m.world.free_spot_near(x["pos"] + Vector3(60, 0, 0), [], 1.0, 0.45, 6.0))
 		"last_way_out", "last_way_out_dead":
 			m.sess_t0 = Heart.r("final_s") + 30.0 - m.time
 			H.early_team = foe.team

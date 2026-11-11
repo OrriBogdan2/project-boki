@@ -2,7 +2,8 @@ class_name WaysOutHud
 extends RefCounted
 ## The Ways Out strip (briefs/specs/LIMITED_WAY_OUTS.md section 9), top centre: four pips (Lair, Heart, Uplink,
 ## Final), each locked with a countdown, open, in use (the squad's colour), taken (struck through) or lost to
-## the Blight, and "Squads left" beside them. Plus the carrier's Heart Gate prompt.
+## the Blight, and "Squads left" beside them. Under it, the quest tracker (QuestTracker). Plus the carrier's
+## Heart Gate prompt.
 ## Reads the match only: the Heart's state for the two Heart seats, the lairs and outposts for the quest seats
 ## (their schedule is content/rules/heart.json "quest"). Drawn with HudStyle on the Hud's canvas.
 
@@ -124,6 +125,7 @@ static func draw(hud) -> void:
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+	QuestTracker.draw(hud, r)
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
