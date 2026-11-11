@@ -866,6 +866,12 @@ read, so no lock existed either; ext/drop-parity deletes it and `hunter_move.jso
 baselines are blind: Elluna's RMB isn't accepted standing still either (it wants a target) and Celeste's darts pace
 themselves inside her kit, so those two cells measure nothing and the other three keys carry their rows.
 
+Re-measured on the 0.24.6 parity base (ext/w0246-feel + ext/w0246-combat-a, with drop-parity and parity-jump-pads in):
+every row above is still 0 / 0 for all 12 hunters. The 0.24.5 landing stays as it is: a fast fall squashes, puffs and thuds
+(`MoveSfx.land`) and never locks input, which is what the source shows; the branch only measures it. A long drop's
+heavier squash and dust (`hunter.gd`, 12 m/s and up) were kept, and the dead `land_t` they used to set is gone with the
+drop-parity change. `hard_landing.gd` (ext/early-hard-landing) is not on this base.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
