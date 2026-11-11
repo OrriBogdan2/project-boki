@@ -4,6 +4,7 @@ extends RefCounted
 ## 144 fps: it must hit 100% of the time at both rates. Then the same casts with one thin block between
 ## the two at both rates: nothing gets through (Swept, scripts/combat/swept.gd).
 
+## Wirerun: its lane is 5.6-9.75 m (754d177a0), so its case lists ranges inside it.
 const RANGES := [4.0, 8.0, 12.0]      # m to the dummy unless a case lists its own (a weapon or lane that is shorter)
 const RATES := [30.0, 144.0]
 const SECS := 2.2          # how long each cast is stepped
@@ -28,12 +29,12 @@ const CASES := [
 	{"arch": "dredge", "name": "Grimble shotgun", "fire": 0.4, "ranges": [2.0, 3.5, 5.0]},
 	{"arch": "thief", "name": "Sparkle Shadow Knife", "e": true},
 	{"arch": "thief", "name": "Sparkle Bola", "rmb": 0.0, "ranges": [3.0, 5.0, 6.5]},
-	{"arch": "mage", "name": "Motley dash", "dash": true},
-	{"arch": "mage", "name": "Motley Coilshot", "rmb": 1.0},
+	{"arch": "mage", "name": "Sparkle Wirerun", "dash": true, "ranges": [4.0, 7.0, 9.0]},
+	{"arch": "mage", "name": "Sparkle Storm Rod", "rmb": 1.0},
 	{"arch": "juggernaut", "name": "Kael Warchain", "e": true},
 	{"arch": "juggernaut", "name": "Kael Rampage", "dash": true, "no_cover": true, "ranges": [2.0, 3.5, 5.0]},
 	{"arch": "juggernaut", "name": "Kael wave", "fire": 0.3, "ranges": [3.0, 5.0, 7.0]},
-	{"arch": "ostra", "name": "Sable snap", "rmb": 0.0},
+	{"arch": "ostra", "name": "Motley Snap", "rmb": 0.0},
 	{"arch": "tender", "name": "Meeko seed", "rmb": 0.0},
 	{"arch": "ashwick", "name": "Cinder bolt", "rmb": 0.0},
 ]
