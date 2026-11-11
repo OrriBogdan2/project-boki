@@ -13,7 +13,7 @@
   1
  ],
  "price": 60,
- "desc": "Calls a blast down on the spot you aim at. It lands after 5s: leave.",
+ "desc": "Calls a blast down on the spot you aim at. It lands after 5s and one hit finishes any hunter: leave.",
  "effects": [
   {
    "type": "telegraph",
@@ -27,7 +27,7 @@
    "at": "aim",
    "delay": 5.0,
    "radius": 6.0,
-   "dmg": 150.0,
+   "dmg": 690.0,
    "kb": 8.0,
    "color": "#ff7a3a"
   }
