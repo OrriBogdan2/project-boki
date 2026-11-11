@@ -1,0 +1,35 @@
+{
+ "id": "skyfall_charge",
+ "name": "Skyfall Charge",
+ "short": "Skyfall",
+ "icon": "rocket",
+ "col": "ff7a3a",
+ "use": "fx",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  1,
+  1
+ ],
+ "price": 60,
+ "desc": "Calls a blast down on the spot you aim at. It lands after 5s: leave.",
+ "effects": [
+  {
+   "type": "telegraph",
+   "at": "aim",
+   "radius": 6.0,
+   "time": 5.0,
+   "color": "#ff7a3a"
+  },
+  {
+   "type": "area",
+   "at": "aim",
+   "delay": 5.0,
+   "radius": 6.0,
+   "dmg": 150.0,
+   "kb": 8.0,
+   "color": "#ff7a3a"
+  }
+ ]
+}

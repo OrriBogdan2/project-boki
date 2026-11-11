@@ -1,0 +1,20 @@
+{
+ "id": "bounty_banner",
+ "name": "Bounty Banner",
+ "short": "Bounty",
+ "icon": "knock",
+ "col": "ff6a5a",
+ "use": "field",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  0,
+  1
+ ],
+ "price": 60,
+ "desc": "Show yourself to every rival for 2 minutes. Live through it: your dead squadmates return and you get 150 gems. One per squad at a time.",
+ "field": "banner",
+ "time": 120.0,
+ "reward": 150
+}

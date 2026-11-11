@@ -5,7 +5,7 @@ class_name Effects
 ## "at" picks where an area happens: "self", "owner", "aim" (the cursor or the kin's target), "here".
 ##
 ##   projectile  dmg speed range size color kb stun slow root burn count spread  on_end:[...] on_hit:[...]
-##   area        radius dmg kb lift stun slow root burn at delay color
+##   area        radius dmg kb lift stun slow root burn shred(share of armor stripped) at delay color
 ##   cone        radius arc dmg kb slow stun color                  (in front of the caster, toward the aim)
 ##   chain       count first jump dmg stun color                    (lightning hopping between foes)
 ##   pull        radius strength at                                 (drags foes toward the spot)
@@ -322,6 +322,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						o.erase("lift")
 						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
 						m.displace.spike(f, -16.0)
+					if e.has("shred") and "armor" in f and not f.remote: f.armor *= 1.0 - float(e["shred"])
 					f.hurt(dmg, caster, o)
 		"cone":
 			var d := _aim_dir(caster, ctx)
