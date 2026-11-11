@@ -139,7 +139,8 @@ func _blight_row() -> void:
 	var at := Vector3.INF
 	for rs in range(40, 8, -2):
 		for i in 12:
-			var a := Vector3(sin(deg_to_rad(35.0 + 30.0 * i)), 0, -cos(deg_to_rad(35.0 + 30.0 * i)))
+			var b := deg_to_rad(35.0 + 30.0 * i)
+			var a := Vector3(sin(b), 0, -cos(b))
 			var g := site + a * rs
 			var wall := site + a * (rs + 10.0)
 			if not m.world.is_void(g.x, g.z) and not m.world.is_void(wall.x, wall.z):
@@ -180,7 +181,7 @@ func _shoot(id: String, word: String, d: float) -> void:
 		h.ctrl = "bot"
 		h.hp = h.max_hp
 	cap.text = "%s  ·  %d m  ·  %s" % [word, int(round(d)), Settings.quality()]
-	for f in SETTLE:
+	for _f in SETTLE:
 		_clock()
 		if pin.is_valid():
 			pin.call()
