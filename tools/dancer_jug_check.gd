@@ -58,7 +58,7 @@ func thief(a) -> void:
 	A.ok("dancer LMB: bolts hit and stack Marks (one per hit)",
 			A.dmg(T) >= 20.0 and K.marks_on(T) == 3, "took %.0f marks %d" % [A.dmg(T), K.marks_on(T)])
 	A.ok("dancer LMB: the aim line ends at the cursor, pale lilac",
-			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.AIM_LILAC))
+			AimKit.shown(P, "aim") and (AimKit.entry(P, "aim")["col"] as Color).is_equal_approx(ThiefKit.pale_col))
 	# a bolt with nothing in its way stops at the cursor and fizzles there; past range it stops at 8.5m
 	var spot := home + Vector3(-4.0, 0, -3.0)
 	A.aim_at(P, spot)
@@ -364,7 +364,7 @@ func thief(a) -> void:
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
 func _dancer_rings(m: Match) -> int:
 	var res_col := Color(Arch.def("thief")["resource"]["col"])
-	var cols := [ThiefKit.AIM_LILAC, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
+	var cols := [ThiefKit.pale_col, ThiefKit.EMP_LINE, Arch.color("thief"), res_col]
 	var n := 0
 	for rg in m.fx.rings:
 		for c in cols:

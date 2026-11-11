@@ -323,8 +323,8 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 	n.add_child(head)
 	match kind:
 		"chakram":
-			# Sable's bolt: a flared four-point gold chakram about 0.45 m across with a hot centre; the
-			# orange flame tail is the trail (col: the tail, col2: the head)
+			# Sable's bolt: a flared four-point chakram about 0.45 m across with a hot centre; the short
+			# tail is the trail (col: the tail, col2: the head)
 			head.add_child(_mi(star_mesh(4, 0.42), solid(col2)))
 			head.add_child(_mi(star_mesh(4, 0.3), solid(col2.lightened(0.45))))
 			var c := _mi(Models.sphere(0.3, 8), Models.glow_mat(Color(col2, 0.9)))
@@ -332,11 +332,11 @@ func _build_rider(kind: String, col: Color, col2: Color) -> Node3D:
 			head.scale = Vector3.ONE * 0.24
 			_add_core(n, col2)
 		"chakram_big":
-			# the empowered shot: a big blue chakram inside a crackling gold streak
+			# the empowered shot: a big chakram (col2) inside a crackling streak (col) with a near-white core
 			head.add_child(_mi(star_mesh(6, 0.45), solid(col2)))
 			head.add_child(_mi(Models.sphere(0.35, 8), Models.glow_mat(Color(col, 1.0))))
 			head.scale = Vector3.ONE * 0.6
-			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, Color(1, 0.95, 0.6, 1), false, true))
+			var bolt := _mi(_ribbon_mesh(), _mat(M_BOLT, col, col.lightened(0.6), false, true))
 			bolt.name = "Bolt"
 			n.add_child(bolt)
 		"bola":
