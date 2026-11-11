@@ -47,10 +47,7 @@ static func knock(k: Kin, kb: Vector2, lift: float) -> void:
 	var s := kb.length() / ms
 	if s >= 0.05:
 		if s > 4.0: k.kb_time = k.m.time
-		var dir := kb / kb.length()
-		var hv := Vector2(k.vel.x, k.vel.z)
-		var along := hv.dot(dir)
-		hv += dir * (maxf(along, s) - along)
+		var hv := HunterMove.push(Vector2(k.vel.x, k.vel.z), kb / kb.length(), s)
 		k.vel.x = hv.x
 		k.vel.z = hv.y
 	if lift >= 0.0:
