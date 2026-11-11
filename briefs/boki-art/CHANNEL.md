@@ -932,3 +932,11 @@ READY (owner-picked, final for this session). New card + sheet + portrait + hero
 - Bigger dex poses (cards changed, sheets unchanged): Bullsfrog (leaping toward viewer), Scopeleon (sitting up on its tail), Filefin (tight curl).
 - Murmuron female: new turnaround (wings spread, no straps).
 sheet_audit: 259 Boki, 0 behind. pixel/: 259 sprites. Cairnback unchanged (owner).
+
+
+### 11-11 12:22 ET ART -> COORD
+RELAY FOR MAIN (gameplay, not art). The owner typed these Kael notes into the art session by mistake; passing them on word for word so they are not lost. Please forward to main's inbox. I have not touched any game code.
+1. "so the e rmb change on kael is better but it still magnetically goes to the chain for some reason - and i dont want a thing in front of him at all if he holds it, just have him hold it over his head and slow"
+2. "his slam is correct, havent tested shift slam yet"
+3. "his rmb is worse, its like a cone now (tap rmb) - that one should show where its hitting (not his held one) and be a forward sword strike / slam like brawls is"
+My reading, to be checked with the owner: (a) remove the pull toward the chain on E/RMB; (b) HELD version: no shape or indicator in front of him, he raises it over his head and is slowed; (c) TAP RMB: currently a cone, should be a forward sword strike / slam (he compares it to Brawl Stars), and this tap version is the one that shows a hit indicator; (d) slam is correct; (e) shift slam untested.
