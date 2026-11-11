@@ -2,14 +2,14 @@ class_name WaysOutPins
 extends RefCounted
 ## The Ways Out seats and the Blight's edge read from afar in the play view (decision 0051 "Seat looks"). The match
 ## camera frames about 15 m round the player, so a seat's beam or the Blight's wall farther off is out of frame
-## whatever its height. Each seat still to be had (locked, open, in use) within REACH_M and off screen gets a pin on
-## the edge of the play box toward it: its map badge (WaysOutMap: the state's shape and colour, the countdown arc,
-## the squad's colour while in use) under a beam when open or in use, its word and the distance. The Heart ring's
-## pin waits while the Gate is still to be had, unless the ring is open. The Blight's wall within WALL_M gets a
-## crimson bar on that edge, heavier as it nears. Canvas draws only; once on screen the world looks (SeatBeacon,
-## BlightWall) carry the read.
+## whatever its height. Each seat still to be had and off screen (open or in use anywhere, locked within REACH_M)
+## gets a pin on the edge of the play box toward it: its map badge (WaysOutMap: the state's shape and colour, the
+## countdown arc, the squad's colour while in use) under a beam when open or in use, its word and the distance. The
+## Heart ring's pin waits while the Gate is still to be had, unless the ring is open. The Blight's wall within WALL_M
+## gets a crimson bar on that edge, heavier as it nears. Canvas draws only; once on screen the world looks
+## (SeatBeacon, BlightWall) carry the read.
 
-const REACH_M := 90.0      # m: seats farther off are left to the minimap's edge arrows
+const REACH_M := 90.0      # m: locked seats farther off are left to the minimap's edge arrows
 const WALL_M := 70.0       # m: the Blight's wall closer than this gets its bar
 const BADGE_R := 12.0      # px, a pin's badge
 const BEAM_W := 5.0        # px, the beam over an open or used seat's badge...
@@ -17,7 +17,7 @@ const BEAM_H := 24.0       # ...and its height
 const GAP := 44.0          # px: a pin that would sit on an earlier one moves along the edge by this
 const FS := 17             # px, a pin's line
 
-static var _placed := PackedVector2Array()    # this frame's pins (cleared, not reallocated)
+static var _placed := PackedVector2Array()    # where this frame's pins sit (for _place)
 
 static func draw(hud) -> void:
 	var m: Match = hud.m
@@ -52,13 +52,14 @@ static func draw(hud) -> void:
 		c.draw_line(e - side * 34.0, e + side * 34.0, HeartHud.TIDE_COL, w)
 		_label(c, e, wd, "Blight  %d m" % int(gap), HeartHud.NEXT_COL)
 
-## The screen direction of seat `i`'s pin, or ZERO for none: the seat is gone (taken, lost), farther than REACH_M,
-## on screen, or it is the Heart ring still locked while the Gate is to be had. `sd` is WaysOutHud.seats.
+## The screen direction of seat `i`'s pin, or ZERO for none: the seat is gone (taken, lost), on screen, locked and
+## farther than REACH_M, or it is the Heart ring still locked while the Gate is to be had. `sd` is WaysOutHud.seats.
 static func seat_dir(m: Match, sz: Vector2, i: int, sd: Array, at: Vector3) -> Vector2:
 	var st := int(sd[i]["st"])
-	if at == Vector3.INF or st > WaysOutHud.St.USE or m.player.flat_dist(at) > REACH_M:
+	if at == Vector3.INF or st > WaysOutHud.St.USE:
 		return Vector2.ZERO
-	if i == 3 and st == WaysOutHud.St.LOCKED and int(sd[1]["st"]) <= WaysOutHud.St.USE:
+	var ring_waits := i == 3 and int(sd[1]["st"]) <= WaysOutHud.St.USE      # (the Gate is still to be had)
+	if st == WaysOutHud.St.LOCKED and (ring_waits or m.player.flat_dist(at) > REACH_M):
 		return Vector2.ZERO
 	return MarkerDir.off_dir(m.cam, sz, at, m.player.pos)
 
