@@ -39,6 +39,7 @@ var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
 const HITCH_MS := 100.0
 var vp: RID
+var slept := 0           # most monsters the preset's MobCap held asleep at once (sampled once a second)
 
 func run(main_node: Node) -> void:
 	setup(main_node)
@@ -85,7 +86,7 @@ func _finish() -> void:
 func _match() -> Array:
 	var o := Match.demo_opts()
 	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+		"autoplay": true, "client_cap": true, "demo_kin": "cindle", "seed": 4101}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -130,9 +131,12 @@ func _match() -> Array:
 			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
 				added])
 		added.clear()
+		if fl.size() % 60 == 0:
+			slept = maxi(slept, m.mob_cap.sleeping())
 		last = now
 	_summary("match", fl)
 	_emitters()
+	print("BENCH mob cap %d, most asleep at once %d" % [m.mob_cap.limit(), slept])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])

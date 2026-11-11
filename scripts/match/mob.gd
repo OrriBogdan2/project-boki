@@ -280,15 +280,21 @@ func sim(dt: float) -> void:
 ## The distance is in 3D, so the sky ship and the gliders passing high overhead don't wake the camps under
 ## them, and an awake one looks again only every NAP_CHECK seconds too (80 Hunters and Boki each step was
 ## most of a 40-hunter match's monster time).
+## One MobCap holds asleep (capped) sleeps regardless of who is near.
 const NAP_M := 36.0          # m: anyone this close keeps it awake (beyond the match camera's view)
 const NAP_CHECK := 0.5       # s between its looks around, asleep or awake
 var _nap := 0.0              # s to its next look around
 var _asleep := false
+var capped := false          # MobCap: too many awake near the local player, so this idle one sleeps
 func _napping(dt: float) -> bool:
 	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
 		_asleep = false
 		return false
+	if capped:
+		_nap = NAP_CHECK
+		_asleep = true
+		return true
 	_nap -= dt
 	if _nap <= 0.0:
 		_nap = NAP_CHECK
