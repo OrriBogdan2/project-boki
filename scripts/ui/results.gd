@@ -91,7 +91,8 @@ func show_result(r: Dictionary) -> void:
 			chips.append(["gem", "%d gems" % s["gems"], UI.GOLD])
 		for sd in s["seeds"]:
 			var crop: Dictionary = Data.CROPS[sd]
-			chips.append(["seed", "%d %s seeds, to plant" % [s["seeds"][sd], crop["name"]], crop["color"]])
+			var n := int(s["seeds"][sd])
+			chips.append(["seed", "%d %s %s to plant" % [n, crop["name"], "seed" if n == 1 else "seeds"], crop["color"]])
 		for k in s["caught"]:
 			var rare := " ".join(Mutations.tags(k))
 			chips.append(["egg", ("%s the %s %s" % [k["name"], rare, Data.KIN[k["species"]]["name"]]) if rare != "" else Data.kin_title(String(k["name"]), String(Data.KIN[k["species"]]["name"])), Data.KIN[k["species"]]["color"], k])
