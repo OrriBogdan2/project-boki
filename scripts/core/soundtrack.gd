@@ -12,6 +12,9 @@ const PATH := "res://content/music/soundtracks.json"
 const OWN_STYLE := "isles"
 const MATCH_PLACES := ["calm", "tense", "final", "boss"]
 const SCREENS := ["menu", "victory"]     # places a screen sets once; a new pick replays them at once
+## place -> the setting holding its hand-picked track ("" = the style's)
+const HAND_PICK := {"menu": "track_menu", "base": "track_base", "calm": "track_calm", "tense": "track_tense",
+	"final": "track_final", "boss": "track_boss", "victory": "track_victory", "training": "track_training"}
 
 static var _data := {}
 static var _scene := ""        # the scene Shuffle last rolled for
@@ -41,7 +44,7 @@ static func track(place: String, own: String) -> String:
 
 ## The track the settings pick for `place`: a hand pick, else the style's.
 static func picked(place: String) -> String:
-	var hand := String(Settings.get_v("track_" + place))
+	var hand := String(Settings.get_v(HAND_PICK[place]))
 	if hand != "" and ResourceLoader.exists("res://audio/music_%s.ogg" % hand):
 		return hand
 	return _track_of(style_for(place), place)

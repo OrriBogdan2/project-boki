@@ -380,7 +380,7 @@ func _tab_audio(v: VBoxContainer) -> void:
 	_toggle(v, "Shuffle soundtracks", "music_shuffle", "Each screen and expedition rolls a soundtrack")
 	for pl in Soundtrack.places():
 		var id := String(pl["id"])
-		_choice(v, String(pl["name"]), "track_" + id, Soundtrack.options(id), Soundtrack.replay)
+		_choice(v, String(pl["name"]), Soundtrack.HAND_PICK[id], Soundtrack.options(id), Soundtrack.replay)
 	_group(v, "Sounds")
 	var cues := [["a", "Rising bells"], ["b", "Bell with a glide"], ["c", "Soft whoomp and ping"]]
 	_choice(v, "Ability ready again", "reset_cue", cues, func(): Sfx.play_reset_cue(), "Plays when a kill resets your cooldowns")

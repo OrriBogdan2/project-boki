@@ -33,7 +33,7 @@ func pick(style: String, hand := {}) -> void:
 	Settings.set_v("soundtrack", style, false)
 	Settings.set_v("music_shuffle", false, false)
 	for pl in Soundtrack.places():
-		Settings.set_v("track_" + String(pl["id"]), String(hand.get(pl["id"], "")), false)
+		Settings.set_v(Soundtrack.HAND_PICK[pl["id"]], String(hand.get(pl["id"], "")), false)
 
 func _data() -> void:
 	ok("Classic Adventure is the default", String(Settings.DEFAULTS["soundtrack"]) == "classic"
