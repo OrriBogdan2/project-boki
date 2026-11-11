@@ -1,10 +1,14 @@
 extends RefCounted
-## --clan-check: clans, slice 1 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
+## --clan-check: clans, slices 1 and 2 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
 ##   1. clean_roster drops other clans' rows, unknown ranks and repeats, doubts a forged founder, clamps, caps at 24
 ##   2. founding a clan makes you its founder; joining makes you a member with a roster doc; both round-trip
 ##   3. only the founder can close the clan to newcomers; the flag reads back
 ##   4. leaving deletes the roster doc and clears the clan
 ##   5. an old save (v11, no clan) loads: in a guild it becomes a member of the clan, otherwise no clan
+##   6. clean_clanbase: one showcase Boki per current member, a 13th is dropped, forged numbers are clamped
+##   7. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
+##      (read the log for errors; two predate clans: the startup OptionButton theme line and the farm's
+##      exit leak of HomeBuild/HomeMarket/HomeTrade)
 
 const OLD_SAVE := "user://clan_check_old.json"
 var docs := {}
@@ -128,6 +132,62 @@ func _write(d: Dictionary) -> void:
 	f.store_string(JSON.stringify(d))
 	f.close()
 
+func _kin(who: String, level = 3) -> Dictionary:
+	return {"owner": who, "uid": "u" + who, "species": Data.KIN.keys()[0], "name": who + "'s", "level": level}
+
+func _showcase() -> void:
+	var ids: Array = []
+	var wall: Array = []
+	for i in 13:
+		ids.append("m%d" % i)
+		wall.append(_kin("m%d" % i))
+	wall.push_front(_kin("stranger"))
+	wall.push_front(_kin("m0", 1e15))
+	wall[0]["trust"] = 1e9
+	wall.push_front({"owner": "m1", "species": "not_a_boki"})
+	var out: Array = Social.clean_clanbase({"showcase": wall}, ids)["showcase"]
+	var owners: Array = out.map(func(r): return r["owner"])
+	ok(out.size() == Social.SHOWCASE_CAP and not owners.has("m12"), "a 13th showcase Boki is dropped")
+	ok(not owners.has("stranger") and owners.count("m0") == 1, "only members, one Boki each")
+	ok(out[0]["level"] == 999 and out[0]["trust"] == 100.0, "forged huge numbers are clamped")
+	ok(Social.clean_clanbase({"showcase": "lots"}, ids)["showcase"] == [], "a broken doc reads as an empty wall")
+
+func _base(main: Node) -> void:
+	var furn: String = Data.FURN.keys()[0]
+	for who in ["ann", "ben", "cat"]:
+		var roster := [_kin(who), _kin(who), _kin(who), _kin(who)]
+		var decor := [{"id": furn, "x": 1e15}]
+		docs["profiles/" + who] = {"name": who.capitalize(), "guild": "g5", "roster": roster, "decor": decor}
+	docs["profiles/dan"] = {"name": "Dan", "guild": "g6", "roster": [_kin("dan")]}
+	docs["clanroster/g5_ann"] = {"guild": "g5", "role": "founder", "corner_seed": 1e15}
+	docs["clanbase/g5"] = {"showcase": [_kin("ben", 1e15), _kin("dan")]}
+	var gdoc := Social.clean_guild({"name": "Reed Bank", "founder": "ann"})
+	ClanBase.open("g5", gdoc)
+	var tree := main.get_tree()
+	var root: Node = null
+	for i in 600:
+		await tree.process_frame
+		var home: Node = main.get("current")
+		root = home.get_node_or_null("ClanBase") if home != null else null
+		if root != null:
+			break
+	ok(root != null, "the clan base opens")
+	if root == null:
+		return
+	var home: Node = main.get("current")
+	var corners := root.get_children().filter(func(n): return n.name.begins_with("Corner_"))
+	ok(corners.size() == 3, "3 members give 3 corners (%d)" % corners.size())
+	var owners := {}
+	for kd in home.get("kins"):
+		owners[kd["rec"].get("owner")] = owners.get(kd["rec"].get("owner"), 0) + 1
+	ok(owners == {"ann": 3, "ben": 3, "cat": 3}, "each corner brings 3 of its member's Boki (%s)" % [owners])
+	var wall: Node = root.get_node("ShowcaseWall")
+	var shown: Array = home.get("visit")["clan_base"]["showcase"]
+	ok(shown.size() == 1 and shown[0]["level"] == 999 and wall != null, "the wall shows members only, clamped")
+	Game.goto("title")      # leave the farm before quitting, so it frees cleanly
+	for i in 30:
+		await tree.process_frame
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -139,5 +199,8 @@ func run(main: Node) -> void:
 	_founding()
 	_leaving()
 	_old_saves()
+	_showcase()
+	Save.d = Save.fresh()
+	await _base(main)
 	print("CLAN DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

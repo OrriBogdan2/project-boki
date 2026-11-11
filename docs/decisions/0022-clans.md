@@ -31,3 +31,6 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
   a roll, never touch another save.
 - `Social.store_stub` lets `--clan-check` run Social against an in-memory store.
 - Debt (docs/DEBT.md): focus, officers, founder hand-off, kick, invite links, base, league, chat.
+- Slice 2 (the shared base): the ferry on the guild isle opens `ClanBase` (scripts/home/clan_base.gd), a visit to
+  an island built from the members' published snapshots plus `clanbase/<gid>` (read only, cleaned by
+  `Social.clean_clanbase`: one showcase Boki per current member, 12 at most). No new writes, no save change.
