@@ -22,10 +22,6 @@
 "long_line": 1,
 "semicolon": 13
 },
-"scripts/arch/hex.gd": {
-"long_line": 1,
-"semicolon": 1
-},
 "scripts/arch/kit_status.gd": {
 "long_line": 2,
 "nested_ternary": 1,

@@ -353,7 +353,7 @@ func _move_mult() -> float:
 	if downed: k *= 0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0)
 	k *= (0.92 if stolen_carry else 1.0) * (ak.pace() if ak else 1.0) * KinDowned.carry_speed(self)
 	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
-	return k * (Hex.SPEED_K if Hex.active(self) else 1.0)      # a hexed critter scurries
+	return k
 
 ## The colour that marks this hunter's effects (from their class).
 func accent() -> Color:
@@ -1038,8 +1038,8 @@ const DASH_BUFFER := 0.18
 func do_dash() -> void:
 	if downed or out:
 		return
-	# stunned, rooted, hexed or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
-	if stun_t > 0.0 or root_t > 0.0 or Hex.active(self) or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
+	# stunned, rooted or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
+	if stun_t > 0.0 or root_t > 0.0 or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
 		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
@@ -1193,7 +1193,7 @@ func _shove_along() -> void:
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
 
 func can_fire() -> bool:
-	if Hex.active(self) or Capture.active(self):
+	if Capture.active(self):
 		return false
 	if ak and not ak.can_shoot():
 		return false
@@ -1851,7 +1851,6 @@ func sim(dt: float) -> void:
 	if dt <= 0.0:
 		prev = pos                  # a far, calm bot's off step (SimLod)
 		return
-	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:
 		if not merge_st.is_empty():
@@ -1962,7 +1961,7 @@ func sim(dt: float) -> void:
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
 		if inp.get("gear%d" % (gi + 1), false):
-			if Hex.active(self) or (ak and ak.cast_locked()):
+			if (ak and ak.cast_locked()):
 				_ab_feedback("gear%d" % gi, "deny")
 			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
 				_ab_feedback("gear%d" % gi, "deny")
@@ -1974,7 +1973,7 @@ func sim(dt: float) -> void:
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
-		if inp.get("kin_ab", false) and not Hex.active(self) and not ak.cast_locked(): use_boki_c()
+		if inp.get("kin_ab", false) and not ak.cast_locked(): use_boki_c()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
@@ -2528,7 +2527,7 @@ func _update_glide(dt: float) -> void:
 # the same after a short push. Getting launched hard still carries you past the edge.
 func _try_ledge_grab(dt: float) -> void:
 	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 \
-			or stun_t > 0.0 or root_t > 0.0 or Hex.active(self):
+			or stun_t > 0.0 or root_t > 0.0:
 		push_t = 0.0
 		return
 	var w: World = m.world
@@ -3257,14 +3256,13 @@ func render(delta: float, alpha: float) -> void:
 			see = lp.flat_dist(self) < 2.2 and int(m.time * 10.0) % 3 == 0
 		else:
 			see = int(m.time * 14.0) % 3 != 0
-	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
+	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
-	Hex.tick(self, delta)
 	if (drink_t > 0.0 or kit_t > 0.0 or box_reviving()) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
