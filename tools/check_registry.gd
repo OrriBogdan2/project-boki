@@ -122,6 +122,7 @@ const CHECKS := {
 	# no clip stretches a skinned edge past 1.3x
 	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
+	"--loot-open-check": ["res://tools/loot_open_check.gd", "loot_open_check", null],   # WardenOpen
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
