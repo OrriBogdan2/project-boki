@@ -7,8 +7,8 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 ## How this was measured
 
 - **`godot -- --anim-audit [--wardens=a,b] [--json=file]`** (tools/anim_audit.gd, headless, 19 s for all 12). It drives the
-  game's own locomotion hand-off (the state carries the speed; WardenClips blends and scales) at 2.2 and 4.65 m/s and
-  reads the bones.
+  game's own locomotion hand-off (the state carries the speed; WardenClips blends and scales) at 2.2, 3.4 (a jog,
+  mid-blend) and 4.65 m/s and reads the bones.
   - **slide**: how far a foot in the lowest 30 % of its height range moves against the floor, |move speed - foot
     backward speed|, as a share of the move speed. 0 is a planted foot; 100 % is a foot that skates.
   - **counter**: the reach-weighted negative correlation of each hand and the same side's foot (forward position).
@@ -20,9 +20,9 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
 - **`godot -- --anim-shots --shots-dir=<dir>`** (tools/anim_shots.gd, GPU): walk, run, idle and two attacks at the match
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
-- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+- The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the speed at the jog
+  or the run, or a counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and
+  are exempt, and are listed below as open; `tender` is exempt at the jog only (its stride cap, open below).
 
 ## What is wrong with all of them
 
@@ -51,6 +51,39 @@ body (not in the air, a crouch, or a move that owns the body):
   the `stride` gains. `ostra` and `rimewright` keep their clips (no leg motion to stretch).
 - The glbs are not re-baked (other art jobs are in flight on them), so this is a runtime layer. When an art job re-keys
   a gait, re-run `--anim-audit` and re-tune that Hunter's three keys.
+
+## The walk and run blend in step (Nov 11)
+
+Between the rings the loco space blends the walk and the run clip, and they did not step together: their cycles differ
+(Albert 0.50 and 0.37 s) and a clip out of the blend stood still, so at 3.4 m/s the feet of the two clips crossed out of
+phase and the planted foot slid 28 to 80 % of the speed. Now (WardenClips._build, WardenGait.plan):
+
+- each walk clip plays on its run clip's timeline (stretched) and the space is synced, so the two keep one phase;
+- the walk ring sits at the data's `walk_speed` over `run_speed` (was a fixed 0.45);
+- the rate is the same per-speed solve as at the rings, on the blend: at the blend's share of the run the cycle is the
+  mix of the two cycles and the stride the mix of the two strides (`foot_mps` times the cycle), and the rate (0.6 to
+  1.4 as the clips feel it) keeps that stride planted. At either ring it is the old speed over `foot_mps`.
+- `ashwick`'s walk `foot_mps` is re-measured on the pure walk (2.26 to 2.57: the old value was fitted with 5 % run in the
+  blend; walk slide 14 % to 7 %, cadence 2.9 to 2.6 steps/s).
+
+Jog (3.4 m/s) slide, before to after; walk and run rows for the side effects; steps/s at the jog:
+
+| Hunter | Jog % | Jog m/s | Walk % | Run % | Jog steps/s |
+|---|---|---|---|---|---|
+| `archer` | 40 → 17 | 1.34 → 0.59 | 32 → 29 | 13 → 15 | 4.1 → 3.3 |
+| `ashwick` | 61 → 12 | 2.09 → 0.40 | 5 → 7 | 12 → 13 | 2.6 → 2.5 |
+| `bulwark` | 80 → 13 | 2.71 → 0.44 | 16 → 13 | 11 → 12 | 3.5 → 3.2 |
+| `dolm` | 63 → 16 | 2.14 → 0.54 | 25 → 25 | 18 → 20 | 4.3 → 3.4 |
+| `dredge` | 28 → 11 | 0.96 → 0.39 | 30 → 20 | 12 → 10 | 3.2 → 2.7 |
+| `gunslinger` | 30 → 11 | 1.01 → 0.37 | 20 → 13 | 13 → 14 | 3.5 → 3.1 |
+| `juggernaut` | 38 → 11 | 1.29 → 0.38 | 25 → 22 | 12 → 12 | 3.3 → 2.9 |
+| `mage` | 47 → 10 | 1.59 → 0.34 | 19 → 19 | 9 → 8 | 4.1 → 3.6 |
+| `ostra` | 100 → 100 | 3.40 → 3.40 | 100 → 100 | 100 → 100 | 0.0 → 0.0 |
+| `rimewright` | 92 → 90 | 3.13 → 3.05 | 93 → 91 | 90 → 91 | 2.0 → 1.7 |
+| `tender` | 50 → 28 | 1.72 → 0.97 | 39 → 37 | 17 → 17 | 7.0 → 5.4 |
+| `thief` | 44 → 21 | 1.50 → 0.72 | 39 → 33 | 17 → 16 | 4.3 → 3.6 |
+
+Run rows move 1 to 3 points either way: the synced clips start their cycle at another frame of the 2.4 s sample.
 
 ## Free arm in attacks (`WardenFreeArm`)
 
@@ -109,8 +142,9 @@ posts scroll at the move speed).
    keeps its authored carry: a 0.2 sway (tried, counter +0.80) swung the chained head back past his heels at floor level,
    a dragged flail, so the hammer rides low in front as keyed.
 3. lmb_throw and lmb_slam jump the hand 0.5 to 0.64 body heights in one frame.
-4. Open: at a jog (3.4 m/s, between the walk and run rings) the walk and run clips blend out of phase and the feet
-   slide 80 %; the gate reads the run only, and Albert's game speed sits at the run ring.
+4. At a jog (3.4 m/s, between the walk and run rings) the walk and run clips blended out of phase and the feet slid
+   2.71 m/s (80 %); now 0.44 m/s (13 %), 3.2 steps/s between his walk and run (see "The walk and run blend in step";
+   rows walk, jog, run, before then after, in the strip below).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
@@ -188,6 +222,6 @@ Split into backlog items per Hunter (role build):
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
-- `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
+- `tender`: the stride cap (foot speed 3.9 of 4.65; at the jog the rate cap leaves 28 % slide, so the jog gate
+  exempts it), and a stronger counter-swing (+0.39).
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).

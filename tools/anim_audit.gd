@@ -88,8 +88,9 @@ func _hero(main: Node, id: String) -> void:
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	var jog: Dictionary = live[str(SPEEDS[1])]
-	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d; jog: slide %d%%" % [
-			id, hgt, top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"],
+	var fmt := "AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d"
+	fmt += "; jog: slide %d%%"
+	print(fmt % [id, hgt, top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"],
 			top["bob_cm"], top["peaks"], round(100.0 * jog["slide"] / SPEEDS[1])])
 	if not id in NO_LEGS:
 		_gate(id, live)
