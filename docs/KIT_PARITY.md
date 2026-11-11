@@ -55,7 +55,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Motley | RMB range | 13 | crystal bundle crosses about 6 h = 10.8 m in 0.2 s (0116, 0139), a lower bound | **Not determinable**: 13 is above the seen range, no max frame. Clips: void 0116-0139, 0156-0183 |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
 | Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0); the one cast was 2-3 bh (3.6-5.4 m) away, on the dummy (ult f21-f23) | radius match; cast range **Not determinable**: no cast near the clamp. Clips: void ult f21-f101 |
-| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen | aegis match; slam [?] |
+| Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), 0.5 h in front (0179, 0217); the bash is only the Empower Shield Bash augment (card 0296): the dummy flashes red as the shield drops (0309), its distance and the knock cone not recorded, no other bash cast | aegis match; slam **Not determinable**: one augmented hit, no reach or angle in the sheet, and ours is the Guard 50+ Shield Charge end, not a release bash. Kept. Clips: oath (bjorn) 0282-0361 |
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
 | Sparkle | RMB range | 13 | 7.5 bh (13.5) | match |
