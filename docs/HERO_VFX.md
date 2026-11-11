@@ -16,6 +16,7 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   ended. Particle layers only, and local.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges.
+- A move name built from a prefix (`vfx("pop_" + kind)`, Gil's potions) answers for every recipe that starts with it.
 - `run_own(stage, cx)` (ArchKit) in place of `run`: the stage's rules run, the shared cast language (AbilityFx, KinExec's rings,
   cones and delivery sounds) stays out, so only the Hero's own look shows.
 
@@ -74,7 +75,8 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
-  and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
+  and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`. Two Heroes of one hue part by shape and shade: Gil (#4aa8ff) is water and
+  glass (drops, foam, bottle shards) leaning cyan, Tenzo (#3a7cff) cobalt rock and dust.
 - **Budget:** `MAX_LIVE` GPU particles alive in a match, `POOL` nodes per kind, the quality preset's `fx` thins particles,
   past `LOD_NEAR` the `near` layers drop and particles halve, past `LOD_FAR` nothing draws. No per-ability lights. Looks
   last at most 2.2 s, flares at most 4 m, swirls at most 4.5 m (checked).

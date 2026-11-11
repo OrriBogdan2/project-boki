@@ -101,7 +101,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | blue splash marks over the target, one per different effect |
+| Building up | a SPLASH badge over the target counting the different effects, gold one short of a Beach |
 | Armed / full | three splash marks: the next different effect Beaches them; the next potion glows in his hand |
 | Dash spent | a fin cutting the ground, dash pip dark |
 
