@@ -97,7 +97,7 @@
 		"col": "#ffe0a0",
 		"cooldown": 11.5,
 		"charge": 0.6,
-		"turn_deg_s": 90.0,
+		"turn_deg_s": 30.0,
 		"self_slow": 1.0,
 		"range": 18.0,
 		"width": 0.9,

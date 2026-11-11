@@ -176,6 +176,10 @@ func teardown() -> void:
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
+## The Longneedle's line is near-planted: it turns toward the cursor at "turn_deg_s" at most (cast to shot).
+func aim_lock() -> Vector2:
+	return needle.get("dir", Vector2.ZERO)
+
 ## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
 	return not dry
@@ -681,7 +685,8 @@ func _tick_needle(dt: float) -> void:
 	if h.downed or h.stun_t > 0.0 or Hex.active(h):
 		_end_needle()
 		return
-	_turn_needle(dt)
+	var dir := turn_lock(needle["dir"], float(ed["turn_deg_s"]), dt)
+	needle["dir"] = dir
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes
 	var wide := beam_width()
@@ -691,23 +696,14 @@ func _tick_needle(dt: float) -> void:
 	needle["push"] = lerpf(float(needle["push"]), _push_want(), 1.0 - exp(-PUSH_EASE * dt))
 	if h.is_local() and m.cam:
 		var push := float(needle["push"])
-		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]) * push, float(ed["range"]) * push)   # (the caster's camera)
+		m.cam.cast_view(dir, float(ed["view_zoom"]) * push, float(ed["range"]) * push)   # (the caster's camera)
 	AimKit.charge(h, k, {"col": EMBER, "col2": HOT})
 	# an ember orb swells at the muzzle through the cast
 	if int(m.time * 20.0) != int((m.time - dt) * 20.0):
-		fx().star(_muzzle(h.aim_dir()), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
+		fx().star(_muzzle(dir), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
-		_fire_needle()                                              # along the capped aim, so before the lock lifts
+		_fire_needle(dir)                                           # along the capped aim, so before the lock lifts
 		_end_needle()
-
-## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
-func _turn_needle(dt: float) -> void:
-	var want := _cursor()
-	if want.length() < 0.05:
-		return
-	var cur: Vector2 = needle["dir"]
-	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
-	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
 
 ## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
 func _cursor() -> Vector2:
@@ -735,9 +731,8 @@ func charge_now() -> Array:
 		return ["needle", clampf(float(needle["t"]) / float(e_def()["charge"]), 0.0, 1.0)]
 	return super.charge_now()
 
-func _fire_needle() -> void:
+func _fire_needle(d: Vector2) -> void:
 	var ed := e_def()
-	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
 	var b := a + Vector3(d.x, 0, d.y) * L
