@@ -68,8 +68,12 @@ static func find(id: String) -> Dictionary:
 
 # ------------------------------------------------------------------ adopting
 ## Adopts a Boki: the gems are destroyed and it comes home. {ok, why, rec}.
+## Open from stall level 2; the base has no Upgrades tab, so base_mode opens it from the start.
+static func open() -> bool:
+	return Stalls.level() >= 2 or FarmUnlocks.base_mode()
+
 static func adopt(id: String) -> Dictionary:
-	if Stalls.level() < 2:
+	if not open():
 		return {"ok": false, "why": "Upgrade the market stall to open the shelter"}
 	var c := find(id)
 	if c.is_empty():
@@ -107,7 +111,7 @@ static func adopt(id: String) -> Dictionary:
 ## Why this Boki can't be put up ("" if it can).
 static func why_not(rec: Dictionary) -> String:
 	var uid := String(rec.get("uid", ""))
-	if Stalls.level() < 2:
+	if not open():
 		return "Upgrade the market stall to open the shelter"
 	if (Save.d["roster"] as Array).size() <= 1:
 		return "It's your only Boki"

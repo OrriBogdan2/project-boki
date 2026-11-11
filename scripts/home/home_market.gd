@@ -32,12 +32,15 @@ func _init(home, spawn_kin_cb: Callable) -> void:
 	spawn_kin = spawn_kin_cb
 	trade = HomeTrade.new(self)
 
-## The tabs this stall's level opens.
+## The tabs this stall's level opens (the Shelter also in base_mode, Shelter.open; no Exchange there).
 func tabs() -> Array:
 	var lv := Stalls.level()
-	var no_exchange := FarmUnlocks.base_mode()
-	return TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
-			.map(func(t): return String(t[0]))
+	var base := FarmUnlocks.base_mode()
+	var shown := func(t) -> bool:
+		if base and t[0] == "Exchange":
+			return false
+		return int(t[1]) <= lv or (t[0] == "Shelter" and Shelter.open())
+	return TABS.filter(shown).map(func(t): return String(t[0]))
 
 ## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.
 static func vendor_tabs() -> Array:

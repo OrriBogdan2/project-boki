@@ -1,0 +1,13 @@
+{
+	"desc": "Garden XP (scripts/home/garden_xp.gd; briefs/design/GARDEN_MODERN.md section 2.5): a Boki raised only at home levels too, so it can be Grown (the Nesting Nook's gate) and evolve. Level n needs 100 x n XP (Game.xp_need), the same curve as expeditions. Only with base_mode on.",
+	"play": 8,
+	"play_doc": "XP to each Boki that played a garden minigame (a loss, or the other side of a win).",
+	"win": 15,
+	"win_doc": "XP to the winner, instead of play.",
+	"first_win": 45,
+	"first_win_doc": "XP to the winner of the first win of the day in that game (three times a win), instead of win.",
+	"care_first": 3,
+	"care_first_doc": "XP for the first care of a kind in a garden day (a meal, a pet, a play).",
+	"care_kinds": 3,
+	"care_kinds_doc": "Kinds of care a day that pay care_first."
+}

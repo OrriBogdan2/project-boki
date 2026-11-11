@@ -275,6 +275,7 @@ static func care_day(rec: Dictionary, kind: String) -> bool:
 	if now - float(days.get(kind, 0.0)) < float(Content.rules("care")["care_day_s"]):
 		return false
 	days[kind] = now
+	GardenXp.care(rec, kind)
 	return true
 
 ## Overall condition, 0 to 100.

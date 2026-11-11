@@ -78,15 +78,17 @@ static func bank(e: Dictionary) -> void:
 		Save.add_item(String(e["id"]), 1)
 
 ## Pays one finished match to the Boki you backed (`mine`) against `foe`. Returns what the card shows:
-## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset, keepsake (name or "")}.
+## {game, won, items (entries), first, round (name of the round won), crown, ribbon, reset, keepsake (name or ""),
+## xp (garden XP the backed Boki got)}.
 static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now := -1.0,
 		rng: RandomNumberGenerator = null) -> Dictionary:
 	var out := {"game": id, "won": won, "items": [], "first": false, "round": "", "crown": false,
-			"ribbon": false, "reset": false, "keepsake": ""}
+			"ribbon": false, "reset": false, "keepsake": "", "xp": 0}
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
 	if not won:
 		out["reset"] = _runs(id).erase(String(mine["uid"]))
+		out["xp"] = GardenXp.played(String(game(id)["name"]), mine, foe, false, false)
 		return out
 	var dice := rng
 	if dice == null:
@@ -102,6 +104,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 	for e in got:
 		bank(e)
 	out["items"] = got
+	out["xp"] = GardenXp.played(String(game(id)["name"]), mine, foe, true, out["first"])
 	_cup(out, mine, foe, now)
 	return out
 
@@ -146,6 +149,8 @@ static func rows(res: Dictionary, font := 0) -> Array:
 		names.append(entry_name(e))
 	if not names.is_empty():
 		out.append(["Prize: " + ", ".join(names) + (" (first win today)" if res["first"] else ""), UI.GOLD])
+	if int(res.get("xp", 0)) > 0:
+		out.append(["+%d XP for your Boki" % int(res["xp"]), UI.TEAL])
 	if res["ribbon"]:
 		out.append(["Crown! The %s is yours" % game(res["game"])["ribbon"], UI.ACCENT_HI])
 		if res["keepsake"] != "":

@@ -909,6 +909,23 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
 | groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
 
+## garden_xp (`content/rules/garden_xp.json`)
+
+Garden XP (scripts/home/garden_xp.gd; briefs/design/GARDEN_MODERN.md section 2.5): a Boki raised only at home levels too, so it can be Grown (the Nesting Nook's gate) and evolve. Level n needs 100 x n XP (Game.xp_need), the same curve as expeditions. Only with base_mode on.
+
+| Setting | Value |
+|---|---|
+| play | 8 |
+| play_doc | XP to each Boki that played a garden minigame (a loss, or the other side of a win). |
+| win | 15 |
+| win_doc | XP to the winner, instead of play. |
+| first_win | 45 |
+| first_win_doc | XP to the winner of the first win of the day in that game (three times a win), instead of win. |
+| care_first | 3 |
+| care_first_doc | XP for the first care of a kind in a garden day (a meal, a pet, a play). |
+| care_kinds | 3 |
+| care_kinds_doc | Kinds of care a day that pay care_first. |
+
 ## garden_zones (`content/rules/garden_zones.json`)
 
 The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).
