@@ -10,8 +10,8 @@ Run: `godot --headless --path . -- --bot-kit-use[=<arch>] [--kit-use-t=120] [--k
 
 | Hunter | Slot | What counts |
 |---|---|---|
-| Kael | RMB hold | Lunge held to full charge and let go in the perfect window (`lunge perfect`) |
-| Kael | E recast | Warchain pulled in once hooked (`chain reel`) |
+| Kael | RMB hold | Lunge held only to wait out a foe's dash, let go in the perfect window (`lunge perfect`; rare by design) |
+| Kael | E recast | Warchain pulled in once hooked (`chain reel`; RMB never pulls along it) |
 | Mossy | RMB hold | Aegis raised (hold-only: a tap does nothing) |
 | Mossy | LMB | Hammer thrown (`hammer throw`) and recalled (`hammer recall`) |
 | Mossy | Shift behind the aegis | Shield Charge (`shield charge`), a Shield Slam at 50 Guard (`shield slam`, rare in a short duel) |
@@ -63,3 +63,14 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 - **Neve** (`rimewright_kit.gd`): the bot schedules the freeze 0.15 to 0.45 s into the wall's slide (its decision tick, 0.9 to 2.2 s, never landed inside the slide of 1 s or less).
 - **Lace** (`archer_kit.gd`): presses the ultimate at 4 to 14 m.
 - Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
+
+## Kael after his owner 11-11 kit
+
+His RMB changed: the tap is a 4.3 x 0.72 m lane locked at the press and planted, the hold is the blade raised overhead with no lane (walking at 80%) and a plain Lunge along the aim on release, the Chain Lunge is gone (a hooked chain never pulls on RMB), and the Rampage is a movement dash first. The bot follows (`juggernaut_kit.gd` `bot_use`, tuning in the archetype's `bot` row of `content/archetypes/juggernaut.json`):
+
+- **Tap** only when the foe stands in the lane as it would lock now (`AimMode.in_lane` along his current aim, the foe's body counted); a foe beside it gets no tap, and the aim is no longer snapped onto them for the press.
+- **Hold** only while the foe is dashing (a locked lane would miss): full charge + `lunge_lead` (0.07 s, inside the 0.15 s perfect window), then the Lunge goes where they stopped.
+- **Hooked chain:** E pulls in; no RMB hold expecting a pull, no Haul Slam timing.
+- **Rampage** to close from `close` (2.5 to 6 m, `close_p` 25% a decision) or to escape: under `escape_hp` (30%) with the foe inside `escape_near` (3.5 m), straight away from them; never onto the void, never on the tick a Smash was pressed.
+
+Checks: `--juggernaut-combo-check` rows "jug bot: ..." (tools/jug_bot_check.gd): a dummy in the lane gets the tap and the Slam lands; a dummy 1.5 m beside the aim gets no tap (fails on the old bot code, which snapped its aim onto the foe). `--bot-kit-use=juggernaut` on 11-11 (seeds 3, 5, 9): LMB hits 760, RMB presses 130, holds 1, RMB hits 118, E 26 (hits 23), R 16, dashes 33, glides 34, lunge perfect 1, chain reel 13; no failures.

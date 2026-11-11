@@ -182,9 +182,6 @@ func _tick(dt: float) -> void:
 	_flush_buffer()
 	_end_held_poses()
 	_tick_tells()
-	if st.has("bot_haul_at") and m.time >= float(st["bot_haul_at"]):
-		st.erase("bot_haul_at")
-		if rmb_down and warchain.hooked(): warchain.press()     # a bot pulling in with the Smash charged
 	net_pulse(dt, enraged_t > 0.0, 1.4)
 
 func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
@@ -948,11 +945,13 @@ func start_e_cd() -> void:
 	cd["e"] = float(e_def().get("cooldown", 13.0)) * cd_k("kin")
 
 # ------------------------------------------------------------------ bots
-const PERFECT_LEAD := 0.07     # s past full charge a bot lets the Lunge go (the perfect window is 0.15 s wide)
-
+## Bot Kael (tuning in the archetype's "bot" row, docs/BOT_KIT_USE.md): a tap only with the foe
+## in the lane it locks at the press, a hold only to wait out their dash, a hooked chain pulled with E (RMB never
+## pulls), and the Rampage to close in or to get out.
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
+	var bd: Dictionary = d["bot"]
 	# the Gilded Riposte up close: the guard eats what they throw, then the cleave answers
 	if HeroUlt.ready(self) and los and dist < float(x_def()["len"]):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
@@ -962,20 +961,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if warchain.spin_window() and rmb_ready() and int(h.slot_lv["sec"]) > 0:
 		h.inp["sec"] = true
 		return
-	# chained to them: Lunge at them, wind up a Smash and pull into a Haul Slam, or just pull
+	# chained to them: pull in
 	if warchain.hooked() and warchain.target != null and dist > 2.0 and not rmb_down:
-		var roll := randf()
-		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.2:
-			h.inp["aim"] = tgt.pos
-			h.inp["sec"] = true
-			bot_hold["rmb"] = 1.0
-			return
-		if rmb_ready() and int(h.slot_lv["sec"]) > 0 and roll < 0.4:
-			h.inp["aim"] = tgt.pos
-			h.inp["sec"] = true
-			bot_hold["rmb"] = 1.2
-			st["bot_haul_at"] = m.time + 0.45
-			return
 		h.inp["sig"] = true
 		return
 	var worth_chain := dist > 3.0 or (not rmb_ready() and dist > 1.2)
@@ -992,17 +979,35 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 	elif int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and slam_w.is_empty():
-		if dist < 3.2:
-			h.inp["aim"] = tgt.pos
-			h.inp["sec"] = true # the Finishing Slam (best on the wounded)
-		elif dist < 7.0 and randf() < 0.45:
-			h.inp["aim"] = tgt.pos
+		if tgt is Hunter and (tgt as Hunter).roll_t > 0.0 and dist < float(rmb_def()["lunge"]["dist"][1]):
+			# they're dashing: a locked lane would miss, so raise the blade, wait it out and Lunge where they stop
 			h.inp["sec"] = true
-			bot_hold["rmb"] = rmb_charge_full() + PERFECT_LEAD       # a full charge let go in the perfect window
-	# Rampage in: the tip is the sweet spot, so dash from about a dash length out, facing them
-	var dash_up := int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and lunge.is_empty()
-	if dash_up and los and dist > 2.5 and dist < 6.0 and randf() < 0.25:
-		h.inp["aim"] = tgt.pos
-		h.ai["dash_dir"] = h.dir_to(tgt)
-		h.inp["move"] = h.dir_to(tgt)
-		h.inp["dash"] = true
+			bot_hold["rmb"] = rmb_charge_full() + float(bd["lunge_lead"])       # let go in the perfect window
+		elif _bot_in_lane(tgt):
+			h.inp["sec"] = true # the Finishing Slam down the lane it aims now (best on the wounded)
+	if not h.inp["sec"]: _bot_rampage(tgt, dist, los, bd)       # (a Rampage would drop the Smash just pressed)
+
+## The foe stands in the Finishing Slam's lane as it would lock now (the way he aims).
+func _bot_in_lane(tgt: Ent) -> bool:
+	var sl: Dictionary = rmb_def()["slam"]
+	return AimMode.in_lane(h.pos, h.aim_dir(), float(sl["len"]), float(sl["width"]), tgt.pos, tgt.r)
+
+## Rampage in from about a dash length out (the tip is the sweet spot), or away from them when hurt and close.
+func _bot_rampage(tgt: Ent, dist: float, los: bool, bd: Dictionary) -> void:
+	if int(h.slot_lv["dash"]) <= 0 or h.dashes < 1.0 or not lunge.is_empty():
+		return
+	var to := h.dir_to(tgt)
+	var near: Array = bd["close"]
+	var dv := Vector2.ZERO
+	if h.hp < h.max_hp * float(bd["escape_hp"]) and dist < float(bd["escape_near"]):
+		dv = -to
+	elif los and dist > float(near[0]) and dist < float(near[1]) and randf() < float(bd["close_p"]):
+		dv = to
+	var reach := float(dash_def()["dist"])
+	var end := Vector2(h.pos.x, h.pos.z) + dv * reach
+	if dv == Vector2.ZERO or m.world.is_void(end.x, end.y):
+		return
+	h.inp["aim"] = h.pos + Vector3(dv.x, 0, dv.y) * reach
+	h.ai["dash_dir"] = dv
+	h.inp["move"] = dv
+	h.inp["dash"] = true

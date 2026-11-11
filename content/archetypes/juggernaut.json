@@ -37,6 +37,7 @@
 	"x": {"name": "Gilded Riposte", "short": "Riposte", "icon": "cleave", "col": "#ffc94a", "cooldown": 36.0, "unlock": 6,
 		"guard": 0.65, "strike_t": 0.1, "recover": 0.35, "lunge": 1.8, "len": 3.6, "width": 1.8, "dmg": 43.0, "block_k": 0.2, "blocks_max": 2, "heal": 0.8,
 		"desc": "Plant in a gold guard for 0.65s: nothing hurts or stuns you, and each hit you block (two at most) makes the answer 20% harder. Then you lunge 1.8m and cleave up through the 1.8m x 3.6m strip ahead (everyone sees it through the guard): 43, and you heal 80% of what it deals (less while blighted). Knock a hunter with it and it is ready again at once."},
+	"bot": {"lunge_lead": 0.07, "close": [2.5, 6.0], "close_p": 0.25, "escape_hp": 0.3, "escape_near": 3.5},
 	"order": ["dash", "sec", "kin", "sec", "dash", "sec", "kin", "gear"],
 	"rank_cd": {"sec": [1, 1, 1], "dash": [1, 0.8462, 0.6154], "kin": [1, 0.875, 0.625]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1, 1]},
