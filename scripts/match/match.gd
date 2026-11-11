@@ -5323,7 +5323,7 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			if it.size() > 23:
 				h.armor = float(it[22]); h.max_armor = float(it[23])
 			KinNet.apply_hunter(h, it)
-			KitMoveNet.apply(h, it)
+			KitMoveNet.apply(h, it, t_owner)
 			GripNet.apply_hunter(h, it)       # gloves, their cooldowns and the bond meter (the overhead row)
 			HunterNet.apply(h, it)
 		"k":

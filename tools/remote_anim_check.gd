@@ -128,11 +128,17 @@ func _compare(mine: Array, theirs: Array) -> Dictionary:
 		if not ids.has(String(r[2])) and out["bad"] == "":
 			out["bad"] = "the copy plays '%s', the host never did" % r[2]
 	var at := 0
+	var shown := ""          # the host's last move that lasted a snapshot
 	for i in mine.size():
 		var id := String(mine[i][2])
 		var life: float = (float(mine[i + 1][0]) - float(mine[i][0])) / 1000.0 if i + 1 < mine.size() else 9.0
 		if life < MIN_LIFE or i == 0:
+			if i == 0: shown = id
 			continue
+		# (no move again after one no snapshot carried, a tapped shield: the guest's copy never changed)
+		if id == "" and shown == "":
+			continue
+		shown = id
 		if id != "": out["moves"] += 1
 		var found := false
 		for j in range(at, theirs.size()):

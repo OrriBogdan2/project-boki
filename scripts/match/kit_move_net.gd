@@ -10,6 +10,7 @@ const AT := 31
 const LIFE := 3.0          # seconds a move is still worth sending (the longest is about 2.5s)
 const CLEAR := "-"
 const DRIFT := 0.3         # s: the copy's clock re-syncs when the sender's age differs by more (a kit moving anim_at)
+const SNAP_MAX := 0.2      # s: the most a snapshot's own age (since its "t") adds; the clocks agree only roughly
 
 static func extra(h: Hunter) -> Array:
 	var k: ArchKit = h.ak
@@ -22,8 +23,9 @@ static func extra(h: Hunter) -> Array:
 	return ["%s~%d" % [k.anim_id, k.anim_n % 100], snappedf(h.m.time - k.anim_at, 0.05)]
 
 ## A remote hunter's move starts when its id~n changes (or the sender's clock moved it), then plays on
-## locally like any kit move; CLEAR ends it.
-static func apply(h: Hunter, it: Array) -> void:
+## locally like any kit move; CLEAR ends it. The clip starts as far in as the move's age plus the snapshot's
+## (t_owner: the sender's clock when it sent it), so the copy's keys land when the sender's did.
+static func apply(h: Hunter, it: Array, t_owner := -1.0) -> void:
 	if h.ak == null or it.size() <= AT + 1:
 		return
 	var raw := String(it[AT])
@@ -37,6 +39,8 @@ static func apply(h: Hunter, it: Array) -> void:
 		return
 	var id := raw.get_slice("~", 0)
 	var age := float(it[AT + 1])
+	if t_owner >= 0.0:
+		age += clampf(h.m.time - t_owner, 0.0, SNAP_MAX)
 	if raw != last or k.anim_id != id or absf((h.m.time - k.anim_at) - age) > DRIFT:
 		k.anim_id = id
 		k.anim_at = h.m.time - age
