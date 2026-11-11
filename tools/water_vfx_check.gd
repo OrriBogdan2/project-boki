@@ -39,15 +39,17 @@ func run(main: Node) -> void:
 	for hero in HEROES:
 		var hm = await _home(main, hero)
 		var r: Dictionary = await _events(hm, tree, hero)
-		sizes[hero] = r["size"]; splash_n[hero] = r["splash_n"]
+		sizes[hero] = r["body_k"]
+		splash_n[hero] = r["splash_n"]
 		if shot != "":
-			hm.queue_free(); await tree.process_frame
+			hm.queue_free()
+			await tree.process_frame
 			hm = await _home(main, hero)
-			await _film(hm, tree, hero)
+			await _film(main, hm, hero)
 		hm.queue_free()
 		await tree.process_frame
-	ok(sizes["bulwark"] > sizes["gunslinger"] and splash_n["bulwark"] > splash_n["gunslinger"],
-		"scaled by Hunter size: Albert %.2f (%d droplets) over Vex %.2f (%d)" % [sizes["bulwark"], splash_n["bulwark"], sizes["gunslinger"], splash_n["gunslinger"]])
+	var al := [sizes["bulwark"], splash_n["bulwark"], sizes["gunslinger"], splash_n["gunslinger"]]
+	ok(al[0] > al[2] and al[1] > al[3], "scaled by Hunter size: Albert %.2f (%d droplets) over Vex %.2f (%d)" % al)
 	_low(main)
 	Settings.v["quality"] = q0
 	print("WATERVFX DONE, failures: %d" % bad)
@@ -56,10 +58,13 @@ func run(main: Node) -> void:
 ## The classic farm with a stream laid north to south east of the landing, this Hunter worn.
 func _home(main: Node, hero: String):
 	var od := Save.fresh()
-	var k := Save.new_kin("puddlet", "Drip"); od["roster"].append(k); od["active"] = k["uid"]
+	var k := Save.new_kin("puddlet", "Drip")
+	od["roster"].append(k)
+	od["active"] = k["uid"]
 	od["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	od["matches"] = 3
-	od["cls"] = Arch.weight(hero); od["arch"] = hero
+	od["cls"] = Arch.weight(hero)
+	od["arch"] = hero
 	var lay := HomeLayout.fresh()
 	for z in range(STREAM_Z.x, STREAM_Z.y + 1):
 		for x in [STREAM_X, STREAM_X + 1]: lay["water"][HomeLayout.key(x, z)] = 1
@@ -70,8 +75,14 @@ func _home(main: Node, hero: String):
 	return hm
 
 func _put(hm, at: Vector3) -> void:
-	hm.ppos = at; hm.py = 0.0; hm.pvy = 0.0; hm.pvel = Vector3.ZERO; hm.dash_t = 0.0; hm.dash_charges = 2.0
-	hm.water.was = hm.water.depth(at.x, at.z); hm.water.wade_k = 0.0
+	hm.ppos = at
+	hm.py = 0.0
+	hm.pvy = 0.0
+	hm.pvel = Vector3.ZERO
+	hm.dash_t = 0.0
+	hm.dash_charges = 2.0
+	hm.water.was = hm.water.depth(at.x, at.z)
+	hm.water.wade_k = 0.0
 
 ## Steps the hunter `n` frames holding `dir`; a dash or a jump pressed on the first. Returns whether
 ## it dashed and how high it rose.
@@ -105,9 +116,11 @@ func _events(hm, tree: SceneTree, hero: String) -> Dictionary:
 	var wtr = hm.water
 	var mid_z := (STREAM_Z.x + STREAM_Z.y) / 2.0
 	var in_x := STREAM_X + 1.0      # the seam between the stream's two columns
-	ok(wtr.depth(in_x, mid_z) == 1 and wtr.depth(in_x - 0.5, STREAM_Z.x + 0.5) == 1 and wtr.depth(STREAM_X - 2.5, mid_z) == 0,
+	var shallow: bool = wtr.depth(in_x, mid_z) == 1 and wtr.depth(in_x - 0.5, STREAM_Z.x + 0.5) == 1
+	ok(shallow and wtr.depth(STREAM_X - 2.5, mid_z) == 0,
 		"%s: the stream is shallow water all through, dry ground beside it" % hero)
-	ok(hm.world.occupy(in_x, mid_z, 0.38, 0.0, true) == 0.0 and hm.world.occupy(STREAM_X - 3.0, mid_z, 0.38, 0.0, true) == 0.0,
+	var w_open: bool = hm.world.occupy(in_x, mid_z, 0.38, 0.0, true) == 0.0
+	ok(w_open and hm.world.occupy(STREAM_X - 3.0, mid_z, 0.38, 0.0, true) == 0.0,
 		"%s: the stream and its west bank are open ground" % hero)
 	# dry ground: run, dash, jump and land beside the stream (west of it, heading away)
 	_put(hm, Vector3(STREAM_X - 3.0, 0, mid_z))
@@ -115,7 +128,8 @@ func _events(hm, tree: SceneTree, hero: String) -> Dictionary:
 	var dash: Dictionary = await _steps(hm, tree, Vector2(0, -1), 20, "dash")
 	var jump: Dictionary = await _steps(hm, tree, Vector2(0, 1), 60, "jump")
 	var c := _counts(hm)
-	ok(dash["dashed"] and jump["peak"] > 0.5 and absf(hm.py) < 0.01, "%s: the dry run dashed, jumped %.1f m and landed" % [hero, jump["peak"]])
+	ok(dash["dashed"] and jump["peak"] > 0.5 and absf(hm.py) < 0.01,
+		"%s: the dry run dashed, jumped %.1f m and landed" % [hero, jump["peak"]])
 	ok(c["splash"] + c["spray"] + c["wake"] == 0 and hm.water.depth(hm.ppos.x, hm.ppos.z) == 0,
 		"%s: on dry ground running, a dash and a landing spawn no water effect (%s)" % [hero, str(c)])
 	# walk in from the west bank: a splash
@@ -125,11 +139,12 @@ func _events(hm, tree: SceneTree, hero: String) -> Dictionary:
 	var w: WaterFx = wtr.wfx
 	ok(w != null and w.counts["splash"] == 1, "%s: stepping in splashes" % hero)
 	if w == null:
-		return {"size": 0.0, "splash_n": 0}
+		return {"body_k": 0.0, "splash_n": 0}
 	var nodes: int = w.get_child_count()
 	var all := 0
 	for kind in WaterFx.POOL: all += int(WaterFx.POOL[kind])
-	ok(nodes == all and _pooled(w, "splash", nodes), "%s: the splash is a pooled emitter (%d emitters, none made for it)" % [hero, nodes])
+	ok(nodes == all and _pooled(w, "splash", nodes),
+		"%s: the splash is a pooled emitter (%d emitters, none made for it)" % [hero, nodes])
 	var splash_n: int = w.pools["splash"][0].amount
 	# run along the stream: a wake
 	_put(hm, Vector3(in_x, 0, STREAM_Z.y - 0.5))
@@ -142,20 +157,22 @@ func _events(hm, tree: SceneTree, hero: String) -> Dictionary:
 	c0 = _counts(hm)
 	dash = await _steps(hm, tree, Vector2(0, -1), 14, "dash")
 	c = _counts(hm)
-	ok(dash["dashed"] and c["spray"] - c0["spray"] >= 3 and _pooled(w, "spray", nodes), "%s: a dash along it sprays (%d puffs, pooled)" % [hero, c["spray"] - c0["spray"]])
+	ok(dash["dashed"] and c["spray"] - c0["spray"] >= 3 and _pooled(w, "spray", nodes),
+		"%s: a dash along it sprays (%d puffs, pooled)" % [hero, c["spray"] - c0["spray"]])
 	ok(hm.fx.radial == radial0, "%s: no ring or burst decal stepping in, running or dashing through it" % hero)
 	# jump and land in it: a splash
-	_put(hm, Vector3(in_x, 1.4, mid_z))
-	hm.py = 1.4; hm.pvy = 0.0
+	_put(hm, Vector3(in_x, 0, mid_z))
+	hm.py = 1.4
 	c0 = _counts(hm)
 	for i in 90:
 		hm._move_player(DT)
 		if absf(hm.py) < 0.01 and i > 5: break
 	c = _counts(hm)
-	ok(c["splash"] - c0["splash"] == 1 and _pooled(w, "splash", nodes), "%s: landing in it splashes once, from the pool" % hero)
+	ok(c["splash"] - c0["splash"] == 1 and _pooled(w, "splash", nodes),
+		"%s: landing in it splashes once, from the pool" % hero)
 	ok(w.capacity() <= WaterFx.BUDGET and w.get_child_count() == all,
-		"%s: the pool holds %d droplets at most (budget %d), %d emitters" % [hero, w.capacity(), WaterFx.BUDGET, w.get_child_count()])
-	return {"size": w.size, "splash_n": splash_n}
+		"%s: the pool holds %d droplets at most (budget %d), %d emitters" % [hero, w.capacity(), WaterFx.BUDGET, all])
+	return {"body_k": w.body_k, "splash_n": splash_n}
 
 ## On Low no pool is made: nothing spawns from any event.
 func _low(main: Node) -> void:
@@ -165,19 +182,23 @@ func _low(main: Node) -> void:
 	w.splash(Vector3.ZERO, 1.0)
 	w.move(Vector3.ZERO, Vector2(4, 0), true, 0.1)
 	w.move(Vector3.ZERO, Vector2(4, 0), false, 0.2)
-	ok(w.get_child_count() == 0 and w.capacity() == 0 and w.counts["splash"] + w.counts["spray"] + w.counts["wake"] == 0,
+	var spawned: int = w.counts["splash"] + w.counts["spray"] + w.counts["wake"]
+	ok(w.get_child_count() == 0 and w.capacity() == 0 and spawned == 0,
 		"Low: culled (no emitter made, nothing spawns)")
 	w.queue_free()
 
 ## The film: the game running at half speed (so a dash gets frames while each one is read back), the
 ## Hunter crosses the stream from the west bank into it, runs along it, dashes, jumps and lands in it, and
 ## climbs out the east bank. Every frame kept at half size, saved at the end.
-func _film(hm, tree: SceneTree, hero: String) -> void:
+func _film(main: Node, hm, hero: String) -> void:
+	var tree := main.get_tree()
+	if main.fade: main.fade.reveal(0.05)      # (the loading card over a new home)
+	await tree.create_timer(0.3).timeout
 	_put(hm, Vector3(STREAM_X - 1.2, 0, STREAM_Z.y + 0.5))
 	hm.cam.snap(hm.ppos)
 	# [direction, seconds of play, key pressed at its start]
-	var plan := [[Vector2(0.8, -0.6), 0.6, ""], [Vector2(0, -1), 0.7, ""], [Vector2(0, -1), 0.35, "dash"], [Vector2(0, -1), 0.25, ""],
-		[Vector2(0, -1), 0.8, "jump"], [Vector2(1, 0), 0.8, ""], [Vector2.ZERO, 0.4, ""]]
+	var plan := [[Vector2(0.8, -0.6), 0.6, ""], [Vector2(0, -1), 0.7, ""], [Vector2(0, -1), 0.35, "dash"],
+		[Vector2(0, -1), 0.25, ""], [Vector2(0, -1), 0.8, "jump"], [Vector2(1, 0), 0.8, ""], [Vector2.ZERO, 0.4, ""]]
 	var frames: Array[Image] = []
 	Engine.time_scale = 0.5
 	var t0 := Time.get_ticks_msec()
@@ -197,4 +218,5 @@ func _film(hm, tree: SceneTree, hero: String) -> void:
 	_press(Vector2.ZERO)
 	for i in frames.size():
 		frames[i].save_png("%s/%s_%03d.png" % [shot, hero, i])
-	print("WATERVFX film %s: %d frames over %.2f s of play (%.1f fps)" % [hero, frames.size(), played, frames.size() / played])
+	var fps := frames.size() / played
+	print("WATERVFX film %s: %d frames over %.2f s of play (%.1f fps)" % [hero, frames.size(), played, fps])

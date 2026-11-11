@@ -69,8 +69,9 @@ func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:
 		Sfx.play("splash", h.ppos, -8.0 + hard * 6.0, 0.08, 1.05 - hard * 0.1)
 		if fx:
 			if wfx == null:
-				wfx = WaterFx.new(); fx.add_child(wfx)
-			wfx.set_size(WaterFx.size_of(Arch.of_save(), Data.class_of_save()))
+				wfx = WaterFx.new()
+				fx.add_child(wfx)
+			wfx.set_body(WaterFx.size_of(Arch.of_save(), Data.class_of_save()))
 			wfx.splash(at, hard)
 	elif wdep == 0 and was > 0:
 		Sfx.play("drip", h.ppos, -10.0)

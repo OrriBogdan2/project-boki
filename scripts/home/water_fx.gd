@@ -6,9 +6,9 @@ extends Node3D
 ## (size_of), and on the Low preset no pool is made and nothing shows.
 
 const POOL := {"splash": 2, "spray": 6, "wake": 4}     # emitters per kind, made once (the oldest is reused)
-const SPLASH_N := 16         # droplets in a splash at size 1 (a hard fall adds up to as many again)
-const SPRAY_N := 7           # droplets per spray puff at size 1
-const WAKE_N := 4            # droplets per wake puff at size 1
+const SPLASH_N := 16         # droplets in a splash for a size-1 Hunter (a hard fall adds up to as many again)
+const SPRAY_N := 7           # droplets per spray puff for a size-1 Hunter
+const WAKE_N := 4            # droplets per wake puff for a size-1 Hunter
 const SPRAY_DT := 0.045      # s between spray puffs along a dash
 const WAKE_DT := 0.11        # s between wake puffs while running
 const WAKE_MIN_SPEED := 1.5  # m/s: slower wading leaves no wake
@@ -18,7 +18,7 @@ const COL := Color(0.9, 0.97, 1.0, 0.9)
 var pools := {"splash": [], "spray": [], "wake": []}     # kind -> its emitters
 var next := {"splash": 0, "spray": 0, "wake": 0}         # kind -> the emitter the next puff reuses
 var counts := {"splash": 0, "spray": 0, "wake": 0}       # puffs started per kind (checks read them)
-var size := 1.0              # the Hunter's size (size_of), set as they step in
+var body_k := 1.0            # the Hunter's size (size_of), set as they step in
 var spray_t := 0.0
 var wake_t := 0.0
 
@@ -31,10 +31,13 @@ static func size_of(arch: String, cls: String) -> float:
 func _ready() -> void:
 	if Settings.quality() == "low":
 		return
-	var dot := QuadMesh.new(); dot.size = Vector2(0.15, 0.15)
-	var mat := ShaderMaterial.new(); mat.shader = load("res://shaders/fx_dot.gdshader")
+	var dot := QuadMesh.new()
+	dot.size = Vector2(0.15, 0.15)
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://shaders/fx_dot.gdshader")
 	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1, 1, 1, 1)); ramp.set_color(1, Color(1, 1, 1, 0))
+	ramp.set_color(0, Color(1, 1, 1, 1))
+	ramp.set_color(1, Color(1, 1, 1, 0))
 	for kind in POOL:
 		for i in int(POOL[kind]):
 			var p := CPUParticles3D.new()
@@ -48,30 +51,31 @@ func _ready() -> void:
 			p.local_coords = false
 			p.damping_min = 1.0
 			p.damping_max = 2.5
-			p.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING if kind == "splash" else CPUParticles3D.EMISSION_SHAPE_SPHERE
+			p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+			if kind == "splash": p.emission_shape = CPUParticles3D.EMISSION_SHAPE_RING
 			p.emission_ring_axis = Vector3.UP
 			p.emission_ring_height = 0.0
 			add_child(p)
 			pools[kind].append(p)
-	set_size(1.0)
+	set_body(1.0)
 
 ## Size the droplets for this Hunter (amounts change only here and on a splash: resizing reallocates).
-func set_size(s: float) -> void:
-	size = s
+func set_body(k: float) -> void:
+	body_k = k
 	var q := float(Settings.q("fx"))
 	for p in pools["splash"]:
-		p.emission_ring_radius = 0.32 * s
-		p.emission_ring_inner_radius = 0.2 * s
+		p.emission_ring_radius = 0.32 * k
+		p.emission_ring_inner_radius = 0.2 * k
 	for p in pools["spray"]:
-		p.amount = maxi(3, roundi(SPRAY_N * s * q))
-		p.emission_sphere_radius = 0.22 * s
+		p.amount = maxi(3, roundi(SPRAY_N * k * q))
+		p.emission_sphere_radius = 0.22 * k
 	for p in pools["wake"]:
-		p.amount = maxi(2, roundi(WAKE_N * s * q))
-		p.emission_sphere_radius = 0.12 * s
+		p.amount = maxi(2, roundi(WAKE_N * k * q))
+		p.emission_sphere_radius = 0.12 * k
 
 ## Droplets in a splash: more for a harder fall (hard 0..1) and a bigger Hunter.
 func _splash_n(hard: float) -> int:
-	return maxi(4, roundi(SPLASH_N * (1.0 + hard) * size * float(Settings.q("fx"))))
+	return maxi(4, roundi(SPLASH_N * (1.0 + hard) * body_k * float(Settings.q("fx"))))
 
 ## Every droplet the pool can have alive at once (splashes counted at their hardest).
 func capacity() -> int:
@@ -86,7 +90,7 @@ func splash(at: Vector3, hard: float) -> void:
 	if p == null: return
 	var na := _splash_n(hard)
 	if p.amount != na: p.amount = na
-	_fire(p, at, Vector3.UP, 28.0, (2.4 + hard * 2.2) * sqrt(size), 0.55, 12.0)
+	_fire(p, at, Vector3.UP, 28.0, (2.4 + hard * 2.2) * sqrt(body_k), 0.55, 12.0)
 
 ## Each step in shallow water on the ground: a spray along a dash, a wake while running.
 func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:
@@ -98,7 +102,7 @@ func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:
 			spray_t = SPRAY_DT
 			var p := _take("spray")
 			if p:
-				_fire(p, at, (Vector3.UP + back * 0.5).normalized(), 50.0, 3.4 * sqrt(size), 0.42, 11.0)
+				_fire(p, at, (Vector3.UP + back * 0.5).normalized(), 50.0, 3.4 * sqrt(body_k), 0.42, 11.0)
 		return
 	spray_t = 0.0
 	if spd < WAKE_MIN_SPEED:
@@ -109,7 +113,8 @@ func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:
 		wake_t = WAKE_DT
 		var p := _take("wake")
 		if p:
-			_fire(p, at + back * 0.2 * size, (Vector3.UP * 0.8 + back).normalized(), 38.0, 1.7 * sqrt(size), 0.32, 9.0)
+			var dir := (Vector3.UP * 0.8 + back).normalized()
+			_fire(p, at + back * 0.2 * body_k, dir, 38.0, 1.7 * sqrt(body_k), 0.32, 9.0)
 
 func _take(kind: String) -> CPUParticles3D:
 	var pool: Array = pools[kind]
@@ -128,7 +133,7 @@ func _fire(p: CPUParticles3D, at: Vector3, dir: Vector3, spread: float, speed: f
 	p.initial_velocity_max = speed
 	p.gravity = Vector3(0, -grav, 0)
 	p.lifetime = life
-	p.scale_amount_min = 0.6 * size
-	p.scale_amount_max = 1.3 * size
+	p.scale_amount_min = 0.6 * body_k
+	p.scale_amount_max = 1.3 * body_k
 	p.restart()
 	p.emitting = true
