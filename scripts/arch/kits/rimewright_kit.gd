@@ -21,6 +21,7 @@ var dart_n := 0                # darts thrown (alternates the bow side and the h
 var seq_next := 0.0            # when the next dart may leave
 var burst_i := 0               # darts so far in this hold: after wpn.burst plain ones come wpn.heavy.n large ones
 var rinkrun := {}              # the running Skate: {t, dir, loop, slab}
+var skate_snd := RimeSkateSfx.new()     # the skate loop, the carve scrape and the slide-out hiss
 var ice_t := 0.0               # s until the rank-3 Skate may lay its next span of ice
 var wall := {}                 # the Rink Wall: {w, dir, sliding, t, slide_t, hp0, hit}
 var carried := {}              # foe id -> its Displace tow: bodies the sliding Rink Wall carries
@@ -445,7 +446,6 @@ func _tick_rinkrun(dt: float) -> void:
 	if stride_free and (float(rinkrun["loop"]) <= 0.0 or (striding and anim_id != stride)):
 		rinkrun["loop"] = KMovesCare.length(stride)
 		play(stride)
-		m.sfx("rimewright_skate_scrape", h.pos, -5.0, 1.0)     # each stride's blade on the ice
 	_lay_ice(cur, dt)
 
 ## A jump press in the air skate with no jump left in it, clear of the ground: ending in the air takes the normal
@@ -515,6 +515,9 @@ func _rinkrun_end(into_rime := false) -> void:
 	vfx("skate_stop", null, h.roll_dir)          # a spray of ice off the braced blades, thrown on ahead
 
 func rinkrunning() -> bool: return not rinkrun.is_empty()
+
+func sound_tick(dt: float) -> void:
+	skate_snd.tick(self, dt)
 
 ## Carving: a spray of ice and chips off the outside blade, more the harder she turns.
 func _edge_spray(dir: Vector2, turn_rate: float, dt: float) -> void:

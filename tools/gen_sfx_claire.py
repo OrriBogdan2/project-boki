@@ -308,6 +308,37 @@ def skate_scrape(i):
                g(lpf(noise(d), 500) * env(N(d), 0.03, 0.15), 0.15))
 
 
+def skate_glide():
+    """The skate loop: one long blade held on the ice, a steady steel ring over a soft shave (the game pitches
+    and levels it with her speed)."""
+    d = 1.2
+    n = N(d)
+    src = noise(d)
+    flutter = 1 + 0.3 * lpf(S.rng.standard_normal(n), 40) * 4
+    ring = _narrow(src * flutter, 2520, 2600) + 0.3 * _narrow(src * flutter, 3950, 4050)
+    shave = lpf(bpf(src, 1400, 4800), 5000) * 0.18
+    low = lpf(noise(d), 380) * 0.2
+    return ring * 2.5 + shave + low
+
+
+def skate_carve(i):
+    """The carve: the outside edge biting in, a short rising scrape with a stick-slip chatter of chips."""
+    d = 0.22
+    f = [2900, 3150, 2750, 3300][i]
+    edge = blade(d, f, 0.9, 0.3, 1.18)
+    chips = grains(d, 70, 2200, 6000, 0.002, 0.005, 0.06)
+    return mix(g(edge, 1.0), g(chips, 0.35), g(bpf(noise(d), 1800, 5200) * env(N(d), 0.01, 0.08), 0.3))
+
+
+def skate_hiss():
+    """The slide-out: shaved ice hissing off both blades held sideways (the game fades it with her speed)."""
+    d = 0.8
+    spray = bpf(noise(d), 1700, 5600)
+    edge = _narrow(noise(d), 2280, 2340) * 0.5
+    chips = grains(d, 40, 2500, 6000, 0.002, 0.005)
+    return mix(spray, edge, g(chips, 0.25))
+
+
 def stop():
     """The hockey stop: both blades braced sideways, a hard spray of shaved ice."""
     d = 0.45
@@ -452,6 +483,10 @@ def build():
     S2.save_cat(A + 'death', death(), 'grunt')
     for surf, fn in (('grass', step_grass), ('stone', step_stone), ('wood', step_wood), ('snow', step_snow)):
         S2.takes_cat(A + 'step_' + surf, fn, 3, 'step')
+    # the 11-11 skate: written last so the sounds above keep their noise (one seeded generator)
+    S.save_loop(A + 'skate_glide', polish(skate_glide()), 'loop')
+    S2.takes_cat(A + 'skate_carve', skate_carve, 3, 'dash')
+    S.save_loop(A + 'skate_hiss', polish(skate_hiss()), 'loop')
 
 
 if __name__ == '__main__':

@@ -189,6 +189,11 @@ func describe_rmb_variant(c: Dictionary) -> String:
 	return "tap"
 
 # ------------------------------------------------------------------ per step
+## Once a frame for this hunter on every screen, other players' too, where the kit's tick doesn't run:
+## sounds read off the synced move and velocity (Neve's skate, RimeSkateSfx).
+func sound_tick(_dt: float) -> void:
+	pass
+
 func tick(dt: float) -> void:
 	if KinMerge.transforming(h):
 		drop_holds()

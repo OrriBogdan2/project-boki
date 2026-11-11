@@ -62,10 +62,10 @@ func _skate_feel() -> void:
 	var late: Vector2 = K.rinkrun.get("dir", Vector2.ZERO)
 	var turned := rad_to_deg(absf(Vector2(1, 0).angle_to(late)))
 	ok(
-			"tm Shift: she steers the skate into a wide curve (not a snap) with ice spraying off the edge",
+			"tm Shift: she steers the skate into a wide curve (not a snap) with ice spraying and scraping off the edge",
 			K.rinkrunning() and turned > 25.0 and rad_to_deg(absf(Vector2(1, 0).angle_to(early))) < 10.0
-				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2,
-			"turned %.0f deg" % turned)
+				and int(HeroVfx.of(m).plays.get("skate_carve", 0)) >= 2 and int(K.skate_snd.stats["carve"]) >= 2,
+			"turned %.0f deg, %d carve scrapes" % [turned, int(K.skate_snd.stats["carve"])])
 	ok(
 			"tm Shift: LMB keeps firing (straight beams) the whole skate",
 			int(K.stats["beams"]) - b0 >= 3, "%d beams in 0.6 s" % (int(K.stats["beams"]) - b0))
