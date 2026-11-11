@@ -8,6 +8,14 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
+##      an unknown species falls back to the generic cues, and no two species share a happy take
+##   8. the garden's ambience (HomeAmbience): every bed has its file, the parts of the day and the rain each
+##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
+##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
+##      garden never plays amb_match
+##   9. HomeVoice: at most 3 Boki voices at once, one Boki not twice inside its gap, a voice past earshot is dropped
+##      without taking a slot, and a need falling to urgent sulks once
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -33,6 +41,10 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_garden_names()
+	_fallback()
+	_boki_cues()
+	_garden()
+	_voices()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -61,6 +73,30 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "boki_voices":
+		_boki_voices(d["sounds"])
+
+## 7. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
+func _boki_voices(sounds: Dictionary) -> void:
+	var gaps := []
+	var same := []
+	var seen := {}
+	for sp in DirAccess.get_directories_at("res://art/kin"):
+		for mood in KinVoice.GENERIC_CUE:
+			var want := "bk_%s_%s" % [sp, mood]
+			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
+				gaps.append(want)
+		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
+		if seen.has(sig):
+			same.append("%s = %s" % [sp, seen[sig]])
+		seen[sig] = sp
+	var what := "boki_voices: %d species, 5 moods, 2 takes (gaps %s)" % [seen.size(), gaps]
+	ok(gaps.is_empty() and not seen.is_empty(), what)
+	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
+	var fell := []
+	for mood in KinVoice.GENERIC_CUE:
+		fell.append(KinVoice.cue("no_such_species", mood))
+	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -147,6 +183,82 @@ func _fallback() -> void:
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
 
+## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
+func _boki_cues() -> void:
+	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
+		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/match/kin_voice.gd"}
+	for cue in wired:
+		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
+		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
+
+## 8. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
+## first, the player walking from the pond to far away and back.
+func _garden() -> void:
+	var beds := ["garden_morning", "garden_midday", "garden_evening", "garden_night", "pond"]
+	var missing := []
+	for b in beds + ["rain"]:
+		if not ResourceLoader.exists("res://audio/amb_%s.ogg" % b):
+			missing.append(b)
+	ok(missing.is_empty(), "garden: every bed has its file %s" % [missing])
+	var picked := {}
+	for clock in [0.0, 0.3, 0.5, 0.7, 0.9]:
+		picked[HomeAmbience.bed_for(clock, false)] = true
+	var rain_bed := HomeAmbience.bed_for(0.5, true)
+	ok(picked.size() == 4 and rain_bed == "rain", "garden: four day parts and rain pick beds %s" % [picked.keys()])
+	var d := {"layout": {"water": {HomeLayout.key(10, 10): 1}}}
+	var by_water := HomeAmbience.pond_level(d, Vector2(10.5, 11.5))
+	var far_off := HomeAmbience.pond_level(d, Vector2(40, 40)) + HomeAmbience.pond_level({}, Vector2(10, 10))
+	ok(is_equal_approx(by_water, 1.0) and far_off == 0.0, "garden: pond full by the water, silent far off or with none")
+	var h := HomeAmbience.new()
+	var dt := 0.25
+	var t := 0.0
+	var peak := 0
+	var match_heard := false
+	var off_bus := 0
+	var pond_far := 0.0
+	var pond_near := 0.0
+	var watching := ""
+	var started := -1.0
+	var fade_len := 0.0
+	var prev_bed := ""
+	for i in int(2.0 * 300.0 / dt):
+		t += dt
+		var day_t := fmod(t / 300.0 + 0.3, 1.0)
+		var raining := t > 100.0 and t < 150.0
+		var by_pond := fmod(t, 200.0) < 100.0
+		h.tick(dt, day_t, raining, d, Vector3(11.0, 0, 11.0) if by_pond else Vector3(40.0, 0, 40.0))
+		Sfx._process(dt)
+		var bed := HomeAmbience.bed_for(day_t, raining)
+		var lvl := float(h.levels.get(bed, 0.0))
+		if bed != prev_bed and prev_bed != "" and watching == "" and fade_len == 0.0:
+			watching = bed
+		if watching == bed:
+			if started < 0.0 and lvl > 0.0:
+				started = t
+			if lvl >= 1.0:
+				fade_len = t - started
+				watching = ""
+		prev_bed = bed
+		peak = maxi(peak, maxi(h.levels.size(), Sfx.amb_layers.size() + (1 if Sfx.amb_name != "" else 0)))
+		match_heard = match_heard or Sfx.amb_name == "match" or Sfx.amb_layers.has("match")
+		for n in Sfx.amb_layers:
+			off_bus += 0 if (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).bus == "Ambience" else 1
+		if t > 60.0 and t < 90.0: pond_near = maxf(pond_near, float(h.levels.get("pond", 0.0)))
+		if t > 180.0 and t < 200.0: pond_far = maxf(pond_far, float(h.levels.get("pond", 0.0)))
+	ok(peak == HomeAmbience.MAX_LOOPS, "garden: %d loops at most at once (peak %d)" % [HomeAmbience.MAX_LOOPS, peak])
+	ok(absf(fade_len - HomeAmbience.BED_FADE_S) <= 1.0, "garden: a new day part fades in over 20 s (%.1f)" % fade_len)
+	ok(pond_near >= 0.99 and pond_far == 0.0, "garden: pond up by water %.2f, off far %.2f" % [pond_near, pond_far])
+	ok(off_bus == 0, "garden: every bed is on the Ambience bus, so the ambience volume setting governs it")
+	ok(not match_heard, "garden: never plays amb_match")
+	var src := ""
+	for f in DirAccess.get_files_at("res://scripts/home"):
+		if f.ends_with(".gd"):
+			src += FileAccess.get_file_as_string("res://scripts/home/" + f)
+	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
+	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
+	Sfx.clear_amb_layers(0.0)
+
 func _takes(sname: String) -> Array:
 	var out := []
 	var paths: Array = ["res://audio/%s.wav" % sname]
@@ -185,3 +297,32 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 9. The garden's Boki voices: the cap, the self gap, earshot and the sulk edge.
+func _voices() -> void:
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	var at := Sfx.listener + Vector3(2, 0, 0)
+	var far := Sfx.listener + Vector3(Sfx.hear_range + 5.0, 0, 0)
+	var recs := []
+	for i in 6:
+		recs.append({"uid": "voice_test_%d" % i, "species": "no_such_species", "name": "T%d" % i})
+	HomeVoice.say(recs[5], "happy", far)
+	ok(HomeVoice._until.is_empty(), "voices: a Boki past earshot takes no slot")
+	for i in 5:
+		HomeVoice.say(recs[i], "happy", at)
+	ok(HomeVoice._until.size() == HomeVoice.MAX_VOICES, "voices: five Bokis at once sound %d" % HomeVoice._until.size())
+	HomeVoice._until.clear()
+	HomeVoice.say(recs[0], "happy", at)
+	ok(HomeVoice._until.is_empty(), "voices: the same Boki twice inside its gap speaks once")
+	recs[1]["needs"] = {"food": 5.0, "energy": 80.0, "joy": 70.0, "clean": 75.0}
+	var k := {"rec": recs[1], "pos": at}
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	var sulked := HomeVoice._until.size()
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()
+	HomeVoice.sulk_edge(k, "food")
+	ok(sulked == 1 and HomeVoice._until.is_empty(), "voices: a need gone urgent sulks once (%d, then none)" % sulked)
+	HomeVoice._until.clear()
+	HomeVoice._last.clear()

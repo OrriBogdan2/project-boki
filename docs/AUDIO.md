@@ -1,6 +1,6 @@
 # Audio: sound sets, loudness and buses
 
-How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py` and `tools/gen_ambience.py`.
+How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py`, `tools/gen_ambience.py` and `tools/gen_garden_ambience.py`.
 
 ## Making sounds
 - Sounds are **synthesised in code** (numpy/scipy, `pip install numpy scipy`), one script per group: `tools/gen_sfx_<group>.py` (e.g. `gen_sfx_vex.py`, `gen_sfx_boki.py`, `gen_sfx_ui.py`). Each one imports `tools/sfx_lib.py`, calls `S.reseed(<its own seed>)` and writes `audio/<name>.wav` (44.1 kHz mono 16-bit). Then `godot --headless --import`.
@@ -31,6 +31,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - **Shared kinds picked per Hunter by `HeroSfx`** (falls back to the shared sound when a Hunter has none): `<arch>_dash`, `<arch>_hurt`, `<arch>_down`, `<arch>_death`, `<arch>_step_grass|stone|wood|snow`, `<arch>_pickup`. Wired at: the dash (`Hunter`; with its own dash, `Feel.dash_sound`'s shared layers are skipped), footsteps (`Juice.footstep`), loot picked up or put on (`Pack`), your own hurt (`Match` damage), downed (`Match` knock and its net event) and death (`Life.drop_box`). The voice lines are wordless.
 - Garden minigames (Dash, Stump Shove): `garden_*`, `tools/gen_sfx_garden.py`, played from `base_race.gd` / `base_shove.gd` at the Boki (positional, -6 dB); `--sfx-set-check` also asserts every literal name they play exists.
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
+- Species voices: `bk_<species>_<mood>` for every rigged species (`art/kin/*`), moods happy, alert, unsure, sleepy, hurt, 2 takes each (set `content/sfx/boki_voices.json`, made by `gen_sfx_boki.py`). Pitch comes from the species' weight, the texture from its type (crackle Fire/storm, burble Water/venom, rustle Grass/spore/swarm, chime Crystal/moon/sound, else plain), the 3-note motif is its signature. Play them with `KinVoice.cue(species, mood)`: it falls back to `kin_happy` / `kin_alert` / `kin_unsure` / `boki_sleep` / `kinhit` for a species with no set. A new species adds its row to `SPECIES_VOICE` and regenerates; `--sfx-set-check` fails if a rigged species lacks a mood.
 
 ## Sound sets (`content/sfx/<group>.json`)
 ```json
@@ -46,3 +47,9 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+
+## The garden's ambience (`scripts/home/home_ambience.gd`)
+One bed for the part of the day on the home clock (`Home.day_t`): `amb_garden_morning` birds (0.2-0.4), `amb_garden_midday` a quiet hush (0.4-0.6), `amb_garden_evening` insects (0.6-0.8), `amb_garden_night` a slow wind; `amb_rain` while it rains. `amb_pond` comes up as you near water (full within 2 tiles, silent past 9, from `layout["water"]`). The beds go through `Sfx.amb_layer`, so they sit on the **Ambience** bus and follow its volume setting; a bed fades out as the next fades in over 20 s. At most 2 loops sound at once (the pond steps out during a crossfade), and the garden never plays `amb_match` (the title's wind). `Sfx` frees a bed once it has faded to nothing. Regenerate the beds with `tools/gen_garden_ambience.py`. `--sfx-set-check` section 7 asserts all of this.
+
+## The garden's Boki voices (`scripts/home/home_voice.gd`)
+Every Boki cry at home goes through `HomeVoice.say(rec, mood_or_cue, pos, vol)`: a mood (`happy` chirp, `alert`, `unsure` sulk, `sleepy` breath) plays the species' own voice (`KinVoice.cue`), `boki_eat` is the munch. It plays through `Sfx` at the Boki's position, so it fades with distance and is dropped past `Sfx.hear_range` without taking a slot. At most 3 Boki voices sound at once (`MAX_VOICES`), and one Boki speaks at most once per 1.2 s, so a feed that also pets gives one chirp. Mood changes: a need falling under `KinWants.URGENT_BELOW` is one sulk (`HomeVoice.sulk_edge`, called from `KinWants.update`); a want met is a chirp (`KinWants._relief`). Voices ride the SFX bus under the music; the beds above are on the Ambience bus.

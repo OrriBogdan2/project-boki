@@ -2,6 +2,11 @@ class_name KinVoice
 ## What a kin says in a match. Lines depend on its strongest trait and how much it trusts you.
 ## If the AI wrote personal lines for this kin before the match, those are used most of the time.
 
+## What a mood plays for a species with no voice set of its own.
+const GENERIC_CUE := {
+	"happy": "kin_happy", "alert": "kin_alert", "unsure": "kin_unsure", "sleepy": "boki_sleep", "hurt": "kinhit",
+}
+
 const BASE := {
 	"throw": {
 		"bravery": ["Charging in!", "Watch this!", "Out of my way!"],
@@ -118,6 +123,12 @@ static func dominant(k) -> String:
 		if v > bv:
 			bv = v; best = key
 	return best
+
+## The sound for a mood ("happy", "alert", "unsure", "sleepy", "hurt"): the species' own voice
+## (audio/bk_<species>_<mood>, tools/gen_sfx_boki.py) when it has one, else the shared cue.
+static func cue(species: String, mood: String) -> String:
+	var own := "bk_%s_%s" % [species, mood]
+	return own if Sfx.ensure(own) else String(GENERIC_CUE[mood])
 
 static func line(k, cat: String, extra := "") -> String:
 	# young kin can only say their own name (and a word or two once they trust you)
