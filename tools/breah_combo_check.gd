@@ -628,6 +628,7 @@ func _breah() -> void:
 	step(m, 0.8)
 	await _dash_moves(m, P, T, home, K, reset)
 	_air_dash_hold(m, P, K, reset)
+	_air_punch_steer(m, P, K, reset)
 	# ---- rank 3
 	P.slot_lv["sec"] = 3
 	P.slot_lv["kin"] = 3
@@ -925,6 +926,35 @@ func _air_dash_hold(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
 	var kept := Vector2(P.vel.x, P.vel.z).length()
 	ok("item 51: let go in the air dash, she punches as it ends, still in the air and moving",
 		K.punches == n0 + 1 and not P.grounded and kept >= speed * 0.5, "%.2fs speed %.1f -> %.1f" % [t, speed, kept])
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.8)
+
+## DECISIONS 11-08 (docs/MOVEMENT_FEEL.md "Air velocity"): the air punch's step is added to what she carries, so a
+## sideways drift survives it and the keys still turn her against it.
+func _air_punch_steer(m: Match, P: Hunter, K: DolmKit, reset: Callable) -> void:
+	reset.call()
+	P.inp["fire"] = true
+	step(m, float(K.lmb_def()["tap"]) + 0.15)
+	var n0 := K.punches
+	P.pos.y += 4.0
+	P.grounded = false
+	P.vel = Vector3(0.0, 0.0, 3.0)
+	P.inp["fire"] = false
+	var t := 0.0
+	while K.punches == n0 and t < 0.3:
+		m.step(DT)
+		t += DT
+	var after := P.vel
+	ok("air steer: an air punch east keeps her 3 m/s drift south and steps her east",
+		K.punches == n0 + 1 and not P.grounded and after.z > 2.5 and after.x > 0.5,
+		"punches +%d vel x %.2f z %.2f" % [K.punches - n0, after.x, after.z])
+	P.inp["move"] = Vector2(0, -1)
+	t = 0.0
+	while P.vel.z > 0.0 and t < 0.5 and not P.grounded:
+		m.step(DT)
+		t += DT
+	ok("air steer: holding the keys against the drift after the punch turns it within 0.25s", P.vel.z <= 0.0
+		and t <= 0.25, "%.2fs vz %.2f" % [t, P.vel.z])
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 
