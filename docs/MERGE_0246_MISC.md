@@ -67,7 +67,7 @@ NEW-RED vs ext/release-integ-0245 272368589 (6):
 |---|---|
 | --boki-rig-check | caecilith, lilybara, umbrathere glbs have no win/sulk/push, which boki-react-clips now asks of every species (base passes: it did not ask). Blender rebuild (not on rpc6) |
 | --perf-throttle-check | two rows perf-occluders/perf-fight-pools added: an occluder corner below an island's underside on the 2x map; the Fx flurry leaves one node |
-| --cover-check | Lark (meadow) cover 7.8-8.0%, floor 8.5%: the early-camps layout moves cut Lark's bushes 874 -> 741 |
+| --cover-check | Lark (meadow) cover 7.8-8.0%, floor 8.5%: the early-camps layout moves cut Lark's bushes 874 -> 741. Fixed on ext/map-lark-cover (stacked here): the generator counted grass a patch planted over another twice; Lark 9.8-10.3%, 85/0 |
 | --demo-quick-check (new) | "every Boki evolved" short 6: 0245's evolve.json levels 14-40 with an art gate (DEBT: no launch species level-evolves) |
 | --loading-check (new) | the bar jumps more than 25% in one frame once |
 | --leave-match-check (new, hangs to timeout) | expects a Boki left in a deep match to be in the Ransom House at once; 0245 has it guard your box first |
