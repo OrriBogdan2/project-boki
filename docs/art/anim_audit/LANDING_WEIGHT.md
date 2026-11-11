@@ -58,5 +58,8 @@ first frame, eased straight back) dipped 0.078 / 0.135 m on screen (run / still)
 His new one (tools/art1/breaker_anims.py, his own pose, timed to the source's weight): the hull comes down 0.1 m on
 splayed stubs and bottoms out at 0.08 s, the drum hand and the helmet arrive late (0.14 s), a 0.012 m bob at 0.3 s, then
 carrying at 0.44 s. Now 0.198 / 0.256 m on screen; the hop at the heavies' `w` 0.6 dips 0.105 / 0.128 m. Strips:
-`albert_land_{drop,jump}_{run,still}_{before,after}.jpg`. Open: Cinder (ashwick) reads 0.094 / 0.182 m, under the
+`albert_land_{drop,jump}_{run,still}_{before,after}.jpg` (`--jump-land-shots --wardens=bulwark --way=drop|jump`;
+before = 568829fd6, the stack without his new clip, jobs 185337-24954 / 185351-17899 on rp1-3; after = 0149b4d38, jobs
+161732-28161 / 161743-09660 on a mac and pc-MRROBOTO; the workers' renderers shade the ink and glow differently, the
+.glb materials are the same). Open: Cinder (ashwick) reads 0.094 / 0.182 m, under the
 mediums, reported as open in `JL_HEAVY_OPEN` (docs/DEBT.md).
