@@ -32,8 +32,9 @@ func run(main_node: Node) -> void:
 		roster.append({"peer": p[0], "team": p[1], "name": "Hunter" + p[0], "cls": "medium", "weapon": "", "kin": {}})
 	var m := Match.new()
 	main.add_child(m)
+	var nd := {"mid": "nl", "seed": 4242, "host": ME, "teams": 2, "squad": 2, "tier": 0, "roster": roster}
 	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "cls": "medium",
-		"heart": true, "net": {"mid": "nl", "seed": 4242, "host": ME, "teams": 2, "squad": 2, "tier": 0, "roster": roster}})
+		"heart": true, "net": nd})
 	m.set_process(false)
 	m.step(DT)
 	var p2: Hunter = m.ents_by_id.get("P2", null)

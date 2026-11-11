@@ -19,8 +19,11 @@ func _check() -> void:
 	if not Net.online():
 		return       # our own line went down (Net clears the peer list then): that's not them leaving
 	for h in m.hunters.duplicate():
-		if h.remote and not h.out and not h.extracted and h.nid.begins_with("P") and not Net.peers.has(Net.owner_of(h.nid)):
+		if h.remote and not h.out and not h.extracted and h.nid.begins_with("P") and _gone(h):
 			_left(h)
+
+func _gone(h: Hunter) -> bool:
+	return not Net.peers.has(Net.owner_of(h.nid))
 
 func _left(h: Hunter) -> void:
 	h.out = true
