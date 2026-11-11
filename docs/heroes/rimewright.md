@@ -334,3 +334,11 @@ stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback
 | E recast (freeze the sliding wall) | stun, knocked | [?] | denied while busy; the wall slides on | [?] |
 | X Rimelock (sealed, then recast) | stun, knockback, root, Grounded | ignore: [D] "become Invulnerable", [F] invulnerable in the crystal (tamsin f25) | `inv_t` blocks every hit's crowd control, she is rooted and held still; recast ends early as [D] "Reactivate early to cancel" | match |
 | X Rimelock | pulls that are not hits (a hook's tow) | [?] (is Invulnerable immune to a pull?) | a Displace tow is not stopped by `inv_t` | [?] |
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--rimewright-combo-check`) |
+|---|---|---|---|
+| Rink Wall (E), Rimelock (X) | [wiki Celeste] and footage: nothing stated for the wall or the ult over an edge (only Skate: ice islands) | the wall erupts at its reach point, or a metre ahead if that point is over the abyss; it slides on the island and stops at the lip; from the lip itself it still forms over the abyss. Rimelock is round her: the rink opens and chills a foe hanging over the abyss. Neither refunds | `abyss: ...` rows of tools/abyss_cast.gd (`rimewright()`) |

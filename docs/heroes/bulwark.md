@@ -361,3 +361,11 @@ stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback
 | X plant | knocked | ends | INTERRUPTED | match (cooldown [?]) |
 | X plant | knockback | [?] | his speed is held at 0 through the plant | [?] |
 | X fissure after the slam | any | [?] | runs on (already cast) | [?] |
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--bulwark-combo-check`) |
+|---|---|---|---|
+| Faultline (X) | [wiki Abyssalbreaker]: "blocked by walls"; edge and abyss not stated; footage has no cliff cast | the lane stops at a wall or a raised ledge; a drop or the abyss does not stop it: all four cells run on and erupt at his height (owner) | `abyss: ...` rows of tools/abyss_cast.gd (`bulwark()`) |

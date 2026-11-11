@@ -412,3 +412,11 @@ stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback
 | X Brass Broadside charge and waves | stun | [?] | stops; before the first wave the cooldown is cut to `x.stop_cd` (ours), after it the waves left are lost | [?] |
 | X charge and waves | knockback, root | [?] | no check: goes on | [?] |
 | X charge and waves | knocked | ends | stops | match (cooldown [?]) |
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--dredge-combo-check`) |
+|---|---|---|---|
+| Anchor Drop (E) | [wiki Kingpin Primal Slam]: "the downward force is not applied if Kingpin is over the abyss"; edge not stated | cast from the lip, the cone is cast anyway (it is round him, not at the cursor) and hits a foe hanging over the abyss (double at rank 3); over the abyss there is no downward push (existing rows) | `abyss: ...` rows of tools/abyss_cast.gd (`dredge()`) |

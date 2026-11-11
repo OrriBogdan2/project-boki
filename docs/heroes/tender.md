@@ -328,3 +328,11 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Burrseed (Darkside Binding) | Data: a shot that deals damage on hit, then roots the target and nearby enemies after a delay. | Sticks to the first foe (hunter, Boki or monster), passes allies, ends on walls; the root bursts round the stuck foe. Matches. |
 | E Hearthlight (Moonlight Blessing) | Data: reactivate to throw the zone to the target; it attaches to any ally it passes through. | The thrown light flies to the cursor, passes foes and walls, and latches onto the first ally it passes. Matches. |
 | Shift Relay Step | Data (Lunar Dash): a plain dash. | Passes through teammates; hits nobody. Matches. |
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--tender-combo-check`) |
+|---|---|---|---|
+| Hearthlight (E recast) | [wiki Elluna's Moonlight Blessing] "thrown to target location"; nothing about the abyss | the toss lands at the cursor (9 m reach) over the abyss and stays its full time at his height; the cooldown runs | `abyss: ...` rows of tools/abyss_cast.gd (`tender()`) |

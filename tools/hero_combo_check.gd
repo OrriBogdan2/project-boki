@@ -43,6 +43,11 @@ func run(main_node: Node, who: String) -> void:
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gunslinger")
 		await ults.gunslinger()
 		await _ally("gunslinger")
+		var abyss = load("res://tools/abyss_cast.gd").new()
+		abyss.main = main
+		await abyss.gunslinger()
+		n += abyss.n
+		fails += abyss.fails
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 

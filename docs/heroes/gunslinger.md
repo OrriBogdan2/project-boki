@@ -324,3 +324,11 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Burr Charge | Data: sticky grenade. Footage briefs/hero-ref/venator.md:63: it sticks to the first enemy or a wall; the lane is fixed, not the cursor. | Stops on the first foe (hunter, Boki or monster: direct hit, Daze, no cone), passes allies, sticks to a wall or the lane's end (cone back at her). Matches. |
 | E Longneedle (Ion Cannon) | Data (briefs/supervive-data/supervive_kits.md, Railgun): a long beam that pierces terrain, and each hunter hit cuts its cooldown (so it hits several). Footage venator.md:103: crosses a chasm and an island; several targets not shown (:226). Wiki: every target. | An instant lane that hits every foe on it (hunters, Boki, monsters), ignores walls and terrain, passes allies. Matches (`Longneedle passes through a wall`). |
 | X Cinderfall | Data: a shell fired up that lands on the cursor. | A lobbed shell: it sails over everyone and walls and lands at the cursor. Matches. |
+
+## Over the abyss (ground-placed casts)
+
+Parity rule (DECISIONS 2026-11-07): the source is silent on these, so ours follows what it does show (Void's Swap lands over the abyss, Ghost's and Elluna's zones go to the "target location", Cinder's carpet is the one documented refusal). Alternative if footage ever shows a refusal: refuse and refund.
+
+| Ability | Source (data > wiki > footage) | Ours | Assert (`--hero-combo-check`) |
+|---|---|---|---|
+| Cinderfall (X) | [wiki Ghost's Summon Napalm] "at target location"; nothing about the abyss; footage has only the Ion Cannon beam crossing a chasm | the shell is aimed at the cursor (14 m) even over the abyss, the disc and column form there on his height, it lands and burns what hangs in it; the cooldown runs | `abyss: ...` rows of tools/abyss_cast.gd (`gunslinger()`) |
