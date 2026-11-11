@@ -352,6 +352,7 @@ func _start(o: Dictionary) -> void:
 	await _spawn_pads_and_exits()
 	await _stage("build.pads_exits")
 	await _spawn_hunters()
+	if net_on: add_child(NetLeave.new(self))      # players who drop off the relay are out (0061)
 	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
