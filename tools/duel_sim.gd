@@ -1,12 +1,14 @@
 extends RefCounted
-## --duel-sim: headless bot-vs-bot duels for balance (docs/BALANCE_1111.md). Every pairing of the 12
-## launch Hunters (both sides, mirrors too) fights `--sim-n=N` times in the Duel room, both bots on the
-## same difficulty (`--sim-diff=`, default hard), each fight with fresh kits (rank 1 everywhere, full
-## health, no Boki) and its own seed. A fight ends on the first knock or after FIGHT_S (a draw).
-## Prints the win-rate matrix, each Hunter's win rate, time to kill and damage share by ability, and
-## writes one JSON line per fight to `--sim-out=<file>` when given. `--sim-arch=a,b` limits the roster.
+## --duel-sim: headless bot-vs-bot duels for balance (docs/BALANCE_1111.md). Every ordered pairing of
+## the 12 launch Hunters (mirrors too) fights `--sim-n=N` times in the Duel room: two fresh bots on the
+## same difficulty (`--sim-diff=`, default hard), rank 1 everywhere, full health, no Boki, no belt, no
+## gear, no truces, each fight on its own seed. Odd fights swap the spawn spots and the step order. A
+## fight ends on the first knock or after FIGHT_S (a draw).
+## Prints the side bias, the win-rate matrix (row beats column, both orders pooled so the side bias
+## cancels), and each Hunter's win rate, median time to knock (its wins) and damage share by ability;
+## `--sim-out=<file>` writes one JSON line per fight. `--sim-arch=a,b` limits the roster.
 ## Damage by ability: hits tagged primary/shot/melee are LMB, ult/ultimate tags R, dash/dodge tags the
-## dash; any other hit goes to the slot whose cooldown last started (rmb, e, r, x), else "other".
+## dash; any other hit goes to the slot whose cooldown last started (rmb, e, r, x, air), else "other".
 ## Fails (exit 1) if a Hunter never lands damage or more than a third of all fights time out.
 
 const DT := 1.0 / 60.0
@@ -15,6 +17,7 @@ const LAUNCH := 12             # the launch roster: the first 12 of Arch.ORDER (
 const LMB_TAGS := ["primary", "shot", "melee"]
 const ULT_TAGS := ["ult", "ultimate"]
 const DASH_TAGS := ["dash", "dodge"]
+const SCORE := {"a": 1.0, "draw": 0.5, "b": 0.0}      # side a's score for a fight's outcome
 
 var bad := 0
 var m: Match
@@ -87,12 +90,16 @@ func _fight(a: String, b: String, diff: String, sd: int, swap: bool) -> Dictiona
 		_drop_boki(h)
 		h.unlock_all()
 		h.belt = UtilityBelt.empty()      # no tonics or armour kits on either side
+		h.gear = Gear.empty_slots()
 		h.refresh_gear()
 		h.ai = m.bot_brain.new_mind(m.rng, float(mind["skill"]), mind)
 		h.hp = h.max_hp
 		h.armor = h.max_armor
 		h.inv_t = 0.6
 		prev_cd[h] = _cds(h)
+	if swap:      # (the hunter earlier in the list steps first: a frame's head start, so it swaps too)
+		m.hunters.erase(A)
+		m.hunters.insert(m.hunters.find(B), A)
 	A.teleport(m.duel.bot_at if swap else m.duel.home_at)
 	B.teleport(m.duel.home_at if swap else m.duel.bot_at)
 	for pair in [[A, B], [B, A]]:
@@ -110,11 +117,19 @@ func _fight(a: String, b: String, diff: String, sd: int, swap: bool) -> Dictiona
 		for h in [A, B]:
 			h.reveal_t = maxf(h.reveal_t, 0.3)      # (as the Duel room does: both always know where the other is)
 			_watch_casts(h)
-	var win := "a" if B.downed else ("b" if A.downed else "draw")
+	var win := "draw"
+	if B.downed: win = "a"
+	elif A.downed: win = "b"
 	var row := {"a": a, "b": b, "seed": sd, "swap": swap, "win": win, "t": snappedf(t, 0.01), "steps": steps,
 		"hp": [A.max_hp, B.max_hp], "dmg_a": fight[A], "dmg_b": fight[B]}
+	for sh in m.shots.duplicate():      # (both fighters go before the next fight: their shots in the air too)
+		if sh["by"] == A or sh["by"] == B:
+			m.shots.erase(sh)
+			if sh.has("deco") and is_instance_valid(sh["deco"]):
+				(sh["deco"] as Node3D).queue_free()
 	m.hunters.erase(A)
 	prev_cd.erase(A)
+	prev_cd.erase(B)
 	A.queue_free()
 	return row
 
@@ -160,13 +175,23 @@ func _slot(h: Hunter, tags: Array) -> String:
 
 # ---- the report
 func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
-	var wins := {}; var games := {}; var ttk := {}; var share := {}; var cell := {}; var draws := 0; var a_won := 0
+	var wins := {}
+	var games := {}
+	var ttk := {}
+	var share := {}
+	var cell := {}         # "a|b" -> a's score over its n fights as side a (a draw is half)
+	var draws := 0
+	var a_won := 0
 	for a in roster:
-		wins[a] = 0.0; games[a] = 0; ttk[a] = []; share[a] = {}
+		wins[a] = 0.0
+		games[a] = 0
+		ttk[a] = []
+		share[a] = {}
 	for r in rows:
-		var a := String(r["a"]); var b := String(r["b"])
+		var a := String(r["a"])
+		var b := String(r["b"])
 		var key := "%s|%s" % [a, b]
-		cell[key] = float(cell.get(key, 0.0)) + (1.0 if r["win"] == "a" else (0.5 if r["win"] == "draw" else 0.0))
+		cell[key] = float(cell.get(key, 0.0)) + float(SCORE[r["win"]])
 		if r["win"] == "draw": draws += 1
 		if r["win"] == "a": a_won += 1
 		for side in [[a, "a", r["dmg_a"]], [b, "b", r["dmg_b"]]]:
@@ -179,8 +204,9 @@ func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
 				wins[h] = float(wins[h]) + 0.5
 			for s in side[2]:
 				share[h][s] = float(share[h].get(s, 0.0)) + float(side[2][s])
-	print("DUELSIM %d fights, %s bots, %d per pairing, %d draws; side bias: the player's side won %d%% of decided fights" % [rows.size(), diff, n, draws,
-		roundi(100.0 * a_won / maxi(rows.size() - draws, 1))])
+	var a_pct := roundi(100.0 * a_won / maxi(rows.size() - draws, 1))
+	print("DUELSIM %d fights, %s bots, %d per pairing, %d draws" % [rows.size(), diff, n, draws])
+	print("DUELSIM side bias: side a won %d%% of decided fights" % a_pct)
 	# row beats column, both ways round (a|b and b|a): the side bias cancels
 	var head := "DUELSIM row-vs-col   "
 	for b in roster: head += " %5s" % String(b).substr(0, 5)
@@ -188,7 +214,9 @@ func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
 	for a in roster:
 		var line := "DUELSIM %-12s" % a
 		for b in roster:
-			line += " %5.2f" % ((float(cell.get("%s|%s" % [a, b], 0.0)) + n - float(cell.get("%s|%s" % [b, a], 0.0))) / (2.0 * n))
+			var ab := float(cell.get("%s|%s" % [a, b], 0.0))
+			var ba := float(cell.get("%s|%s" % [b, a], 0.0))
+			line += " %5.2f" % ((ab + n - ba) / (2.0 * n))
 		print(line)
 	for a in roster:
 		var tot := 0.0
@@ -199,6 +227,7 @@ func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
 		var tk: Array = ttk[a]
 		tk.sort()
 		var med: float = tk[tk.size() / 2] if not tk.is_empty() else -1.0
-		print("DUELSIM %-12s win %.2f  ttk median %.1f s  dmg %s" % [a, float(wins[a]) / maxi(int(games[a]), 1), med, ", ".join(parts)])
+		var rate := float(wins[a]) / maxi(int(games[a]), 1)
+		print("DUELSIM %-12s win %.2f  ttk median %.1f s  dmg %s" % [a, rate, med, ", ".join(parts)])
 		ok(tot > 0.0, "%s lands damage" % a)
 	ok(draws * 3 <= rows.size(), "at most a third of fights time out (%d of %d)" % [draws, rows.size()])
