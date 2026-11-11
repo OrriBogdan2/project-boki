@@ -36,8 +36,7 @@ Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam
 with tip 36, R 130) is kept as ratios: slash 8 (tip 16), Slam 26, Lunge 14 to 22, Meteor 18, Spin 18, Rampage 7
 with tip 14, Gilded Riposte 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
 Chains, so ours is 22s against the Warchain's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
-specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 7.2s slot (9s against the Smash's 2.5s, kept as the
-ratio 3.6x of our 2s), 2.4s shorter at rank 3 (the -3s as a third of its cooldown); the Rampage tip no longer stuns into
+specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 9s slot (the Smash 2.5s), 3s shorter at rank 3; the Rampage tip no longer stuns into
 a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Warchain loses its refund for the data's
 -2s three times (12.5% of its cooldown each, merged: 12.5% at rank 2, 37.5% at rank 3); every Smash gets +20% at rank 2 and
 again at rank 3.
@@ -57,7 +56,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 | RMB air, Meteor Drop | in the air only (already jumping or falling) | Owner spec 11-10: a down slam, no dive across and no leap. A purple circle shows where it would hit while it's ready. Press: his drift stops, a 0.08s hang (blade hauled overhead), then a straight drop to the ground under him (24 m/s, 0.12 to 0.35s) with flame streaks. The hit is a 2.4m circle (1.2m stun core) centred 0.8m ahead of where he lands, in his facing at the press, shown to everyone from the press. The landing: a crouch, cracks across the circle, a shock ring and cel dust, debris, a shake for others nearby and a deep boom; 18, and everyone in it knocked down 0.45s (anyone airborne or gliding spiked to the ground); the core +50% and down 0.8s. 0.5s recovery rising from the crouch (planted 0.2s; Shift or a jump moves him out of it at once). Its own 7.2s cooldown (4.8s at rank 3) | Air Slam: a disc at the cursor, ~0.85s airborne from the jump, ~0.5s recovery in a low crouch ([F] 412.0-413.9s) | Ours (owner 11-10): straight down where he is, the hit a little ahead, not at the cursor |
 | RMB in the pull | during E | Cinder Spin, Haul Slam, Chain Lunge (below) | Anti-Heal Spin | As before |
 | Dash, Rampage | Shift | 2 charges, a third at rank 2: a 0.07s dip, then 4.5m in 0.17s (x the global dash feel; owner 113.8: much shorter than the 0.15s + 0.3s it was), flat and stretched, and a low recovery with the blade dragging: 7 along it, the tip 14 and a big knock, orange flame streaks; rank 3: a shot dodged through it feeds Rage (+15) | Quick Dash: 3 charges, about 2 bh | As the source; sync62's slower heavy dash kept (0.3s) |
-| E, Warchain | tap, recast | 13m (9.5s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
+| E, Warchain | tap, recast | 13m (16s cooldown): a barbed hook on a wavy orange chain; hooked (foe, blighted) or a wall: a straight striped link chain that stays on as you move, 5s, paying out to 24 m and holding taut there; recast is an impulse in at 22 m/s that your input and facing curve and backing away slingshots; Shift or a jump breaks off; you arrive still moving. See "Warchain: the state machine" | Tether Chain: wavy in flight, striped links attached, 7 bh in 0.4s, pulled 5 bh in 0.4s, 9.4s | As the source, plus our exits |
 | X, Gilded Riposte | tap (level 6) | A 0.65s guard: planted (no walk, jump or other button), blade upright, a gold glow and sparks; no damage and no crowd control get through, and each hit blocked (two at most, a metallic ting each) makes the answer 20% harder. A 1.8m x 3.6m strip ahead (it follows the aim) shows to everyone through the guard. Then he lunges 1.8m and cleaves up through it (an upward crescent in his gold, run hot at the edge, and a gold cloud): 34, he heals 80% of what it deals (less while blighted); a knock with it makes it ready at once. About 1.1s in all; 22s cooldown. Landing it on a rival hunter fills the bond | Retaliation: 0.65s invulnerable, then a heavy strike in a rectangle ahead (about 1 x 2 bh), heals 80%, reusable on a kill | As the source; our look (gold guard, upward gold cleave) replaces its red crescent |
 | Merge (its own key, `ultimate`) | tap | The Boki Merge | (n/a) | The Merge is the same for every hero |
 | Allies | all | the Warchain flies past a teammate and hooks the foe or wall behind; no slot hurts, stuns, roots or slows a teammate | the chain attaches to enemies or walls; spin, slam and strike hit enemies [data] | none; asserted (`jug chain: Throwing passes an ally...`, `juggernaut ally: ...`) |
@@ -90,7 +89,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 |---|---|---|---|
 | E pull model (facing, input, slingshot) | HIGH | (a) | ext/zedran-warchain 1ae768d5: an impulse that input and facing curve, backing away slingshots; "jug chain pull: ..." asserts. Speed 22 m/s (footage 5 bh / 0.4 s) over the wiki's 19: the game data has none |
 | E tether extend | MED | (a) | 1ae768d5 / 95c291c8: pays out to 24 m and holds there; the length is ours `[?]` (no data, no frame shows a limit; 24 m kept), see "Warchain" |
-| E range / cooldown | MED | (b) | cooldown 12.8 s (the data's 16 s at the kit's 0.8x), ranks still -12.5% / -37.5% (8 s at rank 3 = 0.8 x the data's 10 s) |
+| E range / cooldown | MED | (b) | cooldown 16 s (the data's level 1, 1.0x), ranks still -12.5% / -37.5% (10 s at rank 3 = the data's) |
 | E pull exits | LOW | (a) | kept and re-asserted under the new model ("jug pull: Shift exits ...", "... a jump exits ...") |
 | E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Warchain hooks (no blight ...)" |
 | RMB hold auto-fire, perfect release | HIGH | (a) | ext/parity e6429ccb: held indefinitely, a perfect window at full then once a second (+20%); "jug parity rmb: ..." |
@@ -101,7 +100,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
 | LMB tip 2.0x | LOW | (b) | 1.6x (the footage's 151 / 94). "juggernaut LMB tap: a slash, 1.6x at the tip ..." |
 | LMB hold Shift-cancel, self-release | MED | (a)+(b) | Shift keeps the charge (item 51, 53820b53); the self-release at full + 0.5 s is gone (the owner's hold scales; no data rule) |
-| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 10.4 s (0.8 x 13) |
+| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 13 s (the data, 1.0x) |
 | Air dash shove | LOW | (b) | no shove (no source) |
 | X cooldown / damage | MED | (b) | 36 s (0.8 x 45) and 43 (the data's 230 = 5.35x a slash) |
 | X fx (guard ring, self-shake) | LOW | (b)+(c) | the guard-start ring is gone; the shake is ext/no-shake's |
@@ -298,7 +297,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
 | Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
-| The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
+| The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 9s, 6s at rank 3 (1.0x); the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
 | Turning is restricted when the dash follows an RMB | wiki patch 05.02.25 | no | Not built (a turn lock reads as lag in our camera); Assumption 7 |
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |

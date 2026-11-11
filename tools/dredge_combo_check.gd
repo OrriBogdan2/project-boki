@@ -918,8 +918,8 @@ func _all() -> void:
 	P.slot_lv["dash"] = 3
 	_throw(m, P)
 	ok(
-		"abyssal hand rank 3: a hit takes half the cooldown off (12s -> 9.6s -> 4.8s)",
-		float(K.cd["rmb"]) < 9.6 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
+		"abyssal hand rank 3: a hit takes half the cooldown off (18s -> 14.4s -> 7.2s)",
+		float(K.cd["rmb"]) < 14.4 * 0.5 + 0.5 and K.grapples >= 1, "cd %.1f" % float(K.cd["rmb"])
 	)
 	P.dashes = 0.0
 	K.on_deal(T, 3.0, {"src": "shot"})

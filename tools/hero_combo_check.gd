@@ -316,14 +316,14 @@ func _mage() -> void:
 		up.append([K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 				K.e_def()["cooldown"] * K.cd_k("kin"),
 				K.power("sec") / pb1, K.power("dash"), K.power("kin") / pk1])
-	ok("upgrade parity: Storm Rod cooldown 8 -> 7.2 -> 6.4 and damage +20% / +90%",
-			near.call(up[1][0], 7.2) and near.call(up[2][0], 6.4)
+	ok("upgrade parity: Storm Rod cooldown 10 -> 9 -> 8 and damage +20% / +90%",
+			near.call(up[1][0], 9.0) and near.call(up[2][0], 8.0)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.9), str(up))
-	ok("upgrade parity: Wirerun recharge 8 -> 7.33 -> 6.67, no shared damage step",
-			near.call(up[1][1], 7.33) and near.call(up[2][1], 6.67)
+	ok("upgrade parity: Wirerun recharge 9 -> 8.25 -> 7.5, no shared damage step",
+			near.call(up[1][1], 8.25) and near.call(up[2][1], 7.5)
 			and near.call(up[1][4], up[0][4]) and near.call(up[2][4], up[0][4]), str(up))
-	ok("upgrade parity: Skycall cooldown 10.5 -> 10.5 -> 7.9 and damage +25% / +50%",
-			near.call(up[1][2], 10.5) and near.call(up[2][2], 7.875)
+	ok("upgrade parity: Skycall cooldown 12 -> 12 -> 9 and damage +25% / +50%",
+			near.call(up[1][2], 12.0) and near.call(up[2][2], 9.0)
 			and near.call(up[1][5], 1.25) and near.call(up[2][5], 1.5), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1
@@ -439,12 +439,12 @@ func _mage() -> void:
 			"%.2f" % Displace.slide_speed(sl_d, sl_t, 0.0))
 	ok("Skycall: the strike direction is the flick", (K.last_strike.get("dir", Vector2.ZERO) as Vector2).x < -0.9)
 	# source rows (briefs/hero-ref/vireo.md "E: Lightning Javelin": 0.8 s = 4 frames at 5 fps; briefs/supervive-data/
-	# supervive_kits.md Joule E: 12 s, 1 Static; cooldown kept at our 8 : 8 : 10.5 pace, E / rod = 9.2 / 7)
+	# supervive_kits.md Joule E: 12 s, 1 Static; cooldown 12 against the rod 10, the data)
 	var rod_cd := float(K.rmb_def()["cooldown"])
-	ok("Skycall data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 10.5 at the source's E : rod ratio",
+	ok("Skycall data: 0.8 s countdown, 1 Static, 11 m reach, cooldown 12 (the data)",
 			absf(float(e_d["delay"]) - 0.8) < 0.001 and int(e_d["stacks"]) == 1
-			and absf(float(e_d["reach"]) - 11.0) < 0.001 and absf(float(e_d["cooldown"]) - 10.5) < 0.001
-			and absf(float(e_d["cooldown"]) / rod_cd - 9.2 / 7.0) < 0.05,
+			and absf(float(e_d["reach"]) - 11.0) < 0.001 and absf(float(e_d["cooldown"]) - 12.0) < 0.001
+			and absf(float(e_d["cooldown"]) / rod_cd - 12.0 / 10.0) < 0.05,
 			"%s / %s" % [e_d["cooldown"], rod_cd])
 	# the drag window is ours (the source states none): held with no release, it commits at drag_max, then 0.8 s
 	K.cd["e"] = 0.0
@@ -1075,12 +1075,12 @@ func _gunslinger() -> void:
 			K.rmb_def()["cooldown"] * K.cd_k("sec"), K.dash_def()["cd"] * K.dash_k(),
 			K.e_def()["cooldown"] * K.cd_k("kin"), K.power("kin") / K.power("sec"),
 		])
-	ok("upgrade parity: Burr Charge cooldown 6.5 -> 5.4 -> 4.3",
-			near.call(up[0][0], 6.5) and near.call(up[1][0], 5.4) and near.call(up[2][0], 4.3), str(up))
-	ok("upgrade parity: Slipstep recharge 8.5 -> 7.4 -> 6.3",
-			near.call(up[0][1], 8.5) and near.call(up[1][1], 7.4) and near.call(up[2][1], 6.3), str(up))
-	ok("upgrade parity: Longneedle cooldown stays 11.5 and damage +20% / +40%",
-			near.call(up[1][2], 11.5) and near.call(up[2][2], 11.5)
+	ok("upgrade parity: Burr Charge cooldown 9 -> 7.5 -> 6",
+			near.call(up[0][0], 9.0) and near.call(up[1][0], 7.5) and near.call(up[2][0], 6.0), str(up))
+	ok("upgrade parity: Slipstep recharge 11.5 -> 10 -> 8.5",
+			near.call(up[0][1], 11.5) and near.call(up[1][1], 10.0) and near.call(up[2][1], 8.5), str(up))
+	ok("upgrade parity: Longneedle cooldown stays 12 and damage +20% / +40%",
+			near.call(up[1][2], 12.0) and near.call(up[2][2], 12.0)
 			and near.call(up[1][3], 1.2) and near.call(up[2][3], 1.4), str(up))
 	P.slot_lv["sec"] = 1
 	P.slot_lv["dash"] = 1

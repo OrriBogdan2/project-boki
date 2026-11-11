@@ -58,8 +58,6 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 | Signature weapon | War Hammer & Aegis (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The squad's shield. Holds the line with his aegis, plants his hammer where the fight is, and heals the spot. |
 | Silhouette | the brass diving helmet, the figurehead hatch shield and the spiked capstan hammer chained to his wrist |
-| Resource | Guard (max 100) |
-| Silhouette | the frozen prow shield and the long ice-cased oar |
 | Resource | none |
 
 ### Kit card
@@ -79,7 +77,6 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1.0 (8 damage).
 **Crushed (passive).** Any knock of yours (Crushing Blow, 360 Smash, Shield Charge) that drives a foe into a wall or another foe stuns it 0.5s (8 damage).
 
 **360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
@@ -92,7 +89,7 @@ What the in-game kit card (K) says.
 
 **Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
-**Faultline (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Faultline (hunter ultimate, from level 6, 50s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 
@@ -103,7 +100,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | shield HP +25% (160 -> 200). | shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
 | Dash (Shift) | recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further. |
 | E | healing +25% (burst 18 -> 22). | cooldown 12s -> 8s, healing +50% in all. |
-| R (ultimate) | Faultline cooldown 40s -> 36s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Merge lasts 30% longer. | Faultline cooldown 40s -> 32s, first-strike damage 4 -> 5.6, damage 18 -> 25.2. |
+| R (ultimate) | Faultline cooldown 50s -> 45s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Fusion lasts 30% longer. | Faultline cooldown 50s -> 40s, first-strike damage 4 -> 5.6, damage 18 -> 25.2. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 
