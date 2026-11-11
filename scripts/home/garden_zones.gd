@@ -61,6 +61,13 @@ static func zone_of(rec: Dictionary) -> String:
 static func is_open(id: String) -> bool:
 	return bool(Save.d.get("zones", fresh()).get(id, {}).get("open", false))
 
+## A locked zone wakes: it opens, with its sting (the one place a zone opens, for the unlock step to call).
+static func wake(id: String) -> void:
+	if is_open(id):
+		return
+	Save.d["zones"][id] = {"open": true}
+	Sfx.play("garden_wake")
+
 ## The Boki out (not in the Burrow) whose home is this zone.
 static func residents(id: String) -> Array:
 	return KinBox.farm().filter(func(r): return zone_of(r) == id)

@@ -113,7 +113,7 @@ func hop(id: String) -> bool:
 	h._close_panel()
 	var col := Color(String(GardenZones.info(id).get("colour", "c9c2b2")))
 	h.fx.burst(node.position + Vector3(0, 0.4, 0), col, 24, 3.0, 0.6, -2.0)
-	Sfx.play("whoosh")
+	Sfx.play("garden_hop")        # swells for hop_fade_s, the light-up
 	h.get_tree().create_timer(float(GardenZones.rules()["hop_fade_s"])).timeout.connect(_go)
 	return true
 

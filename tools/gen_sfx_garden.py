@@ -21,6 +21,8 @@ Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Bok
   relay_finish     the tape swish and three rising bells, one for each leg
   garden_chime_stat / _level / _evolve   a Boki's own chime at home: a stat rose, it levelled up, a change is
                    coming; two, three and four notes over its chirp, pitched by size at play time (home_chimes.gd)
+  garden_hop      the Waystone lighting for a hop: a rising shimmer swelling for 0.5 s, then a soft close
+  garden_wake     a zone waking: three slow rising bells and a held shimmer (once, when a zone opens)
 Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd and home_chimes.gd.
 """
 import numpy as np
@@ -309,6 +311,23 @@ def chime_evolve(i):
     return B.soft(B.room(mix(chime_notes([523, 659, 784, 1047], 0.09, 0.6, 1300 * j(i)), ooh, bell), 0.55), 6000)
 
 
+# ---------------------------------------------------------------- zones
+def hop(i):
+    """0.5 s, the length of the Waystone's light-up (hop_fade_s): a shimmer rising and swelling, ending as the screen goes."""
+    d = 0.5; n = N(d)
+    rise = S.sweep(330, 990, d) * S.shape(d, 0.35, 0.0, 0.15)
+    shimmer = hpf(noise(d), 3000) * S.shape(d, 0.4, 0.0, 0.1) * 0.25
+    bell = at(S.chime(1320 * j(i, 0.02), 0.25, 0.1), 0.3) * 0.5
+    return B.soft(B.room(mix(0.6 * rise, shimmer, bell), 0.4), 5200)
+
+
+def wake(i):
+    notes = [(392, 0.0), (523, 0.28), (784, 0.56)]
+    bells = [at(S.chime(f, 1.2 if k == 2 else 0.7, 0.4), t0) for k, (f, t0) in enumerate(notes)]
+    glow = at(0.3 * S.sweep(784, 1175, 1.0) * S.shape(1.0, 0.5, 0.1, 0.4), 0.56)
+    return B.soft(B.room(mix(*bells, glow), 0.6), 5500)
+
+
 def main():
     S.takes_cat('garden_count', count, 1, 'boki')
     S.takes_cat('garden_go', go, 1, 'boki')
@@ -341,6 +360,8 @@ def main():
     S.takes_cat('garden_chime_stat', chime_stat, 2, 'boki')
     S.takes_cat('garden_chime_level', chime_level, 2, 'boki')
     S.takes_cat('garden_chime_evolve', chime_evolve, 1, 'boki')
+    S.takes_cat('garden_hop', hop, 1, 'boki')
+    S.takes_cat('garden_wake', wake, 0, 'boki')
 
 
 if __name__ == '__main__':

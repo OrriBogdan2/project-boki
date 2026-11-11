@@ -125,6 +125,7 @@ var raining := false
 var rain_k := 0.0
 var weather_t := 40.0
 var rain_next := randf() < 0.45     # what the coming weather turn brings, known ahead (FarmChatter's rain warnings)
+var ambience := HomeAmbience.new()
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
@@ -133,7 +134,7 @@ func _ready() -> void:
 	GardenZones.here = "" if _visiting() else zone
 	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Sfx.play_ambience("home")
+	Sfx.play_ambience("")        # the beds of HomeAmbience take over
 	Sfx.new_track.connect(_on_new_track)
 	if not Game.last_result.is_empty():      # back from a run: the welcome-home sting, once
 		Sfx.sting("home")
@@ -1039,8 +1040,8 @@ func _update_sky(d: float) -> void:
 		rain_next = not raining and randf() < 0.45
 		weather_t = randf_range(50.0, 110.0) if raining else randf_range(70.0, 160.0)
 		rain.emitting = raining
-		Sfx.play_ambience("rain" if raining else "home")
 	rain_k = move_toward(rain_k, 1.0 if raining else 0.0, d * 0.3)
+	ambience.tick(d, day_t, raining, _d(), ppos)
 	rain.position = Vector3(ppos.x, 12.0, ppos.z)
 	# home is the warm place: a honey-coloured sun, a long golden hour, and lamps glowing amber
 	# against a soft blue night (the expedition is the cold, moody one)
@@ -1151,6 +1152,7 @@ func _see_through() -> void:
 func _exit_tree() -> void:
 	ZoneLayout.leave()
 	SeeThrough.off()
+	Sfx.clear_amb_layers()
 
 ## Boki on the farm are drawn bigger than in a match: the farm's camera sits much further back than the
 ## expedition's (HOME_ACROSS_REF framing at HOME_ZOOM), and at match size a Boki was a speck beside
