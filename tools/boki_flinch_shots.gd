@@ -78,5 +78,5 @@ func _species(id: String) -> Image:
 func _step(pup: KinPuppet, rig: BokiRig) -> void:
 	pup._process(STEP)
 	if rig:
-		rig.player.advance(STEP)
+		rig.advance(STEP)
 		rig._process(STEP)

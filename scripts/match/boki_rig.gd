@@ -132,6 +132,9 @@ const STRIDE := {
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
+## Frames between two steps of a seen rig (clip, skeleton, face) on GL over Metal below Ultra. There, re-skinning a
+## rig costs about 1.3 ms of render CPU (docs/PERF_PLAN_1111.md); each rig keeps its own frame parity.
+const METAL_RIG_EVERY := 2
 const FACE_SNAP := 0.002      # blend weight: this close to its goal, a face shape stops easing (and being written)
 const LOOK_SNAP := 0.0005     # eye UV offset: this close, the eyes stop drifting and their uniform stops being set
 const WALK_SPEED := 0.5       # m/s: below this it stands
@@ -188,6 +191,9 @@ var root: Node3D
 var flex: Node3D
 var model: Node3D
 var player: AnimationPlayer
+var _skel: Skeleton3D
+var _rig_every := 1             # frames between rig steps (METAL_RIG_EVERY where skinning is dear)
+var _rig_dt := 0.0              # time the skipped frames held back, stepped at the next rig step
 var face: MeshInstance3D
 var eye_mat: ShaderMaterial
 var clip := ""
@@ -271,13 +277,28 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	BokiHomeClips.install(species, player, skeleton())
+	player.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	_skel = skeleton()
+	# BokiDna's modifier would otherwise re-pose (and re-skin) the rig every frame, stepped or not
+	_skel.modifier_callback_mode_process = Skeleton3D.MODIFIER_CALLBACK_MODE_PROCESS_MANUAL
+	_rig_every = METAL_RIG_EVERY if _skinning_dear() else 1
+	BokiHomeClips.install(species, player, _skel)
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
 	set_clip("idle")
+
+## GL over Metal (the Mac's Compatibility renderer) below Ultra, where every re-skin is a long render-CPU stall.
+static func _skinning_dear() -> bool:
+	var metal_gl := OS.get_name() == "macOS" and RenderingServer.get_current_rendering_method() == "gl_compatibility"
+	return metal_gl and Settings.quality() != "ultra"
+
+## Moves the rig on by `dt`: the clip, then the skeleton's modifiers (BokiDna) over it. The only way it moves.
+func advance(dt: float) -> void:
+	player.advance(dt)
+	_skel.advance(dt)
 
 ## The model's skeleton.
 func skeleton() -> Skeleton3D:
@@ -298,22 +319,28 @@ func set_clip(which: String, fade := FADE) -> void:
 ## Tools: holds the body at `at` (s) of the current clip and the face fully on its expression.
 func seek(at: float) -> void:
 	player.seek(at, true)
+	_skel.advance(0.0)
 	for s in _shapes:
 		_now[s] = float(_want.get(s, 0.0))
 		face.set_blend_shape_value(int(_shapes[s]), float(_now[s]))
 
 func _process(dt: float) -> void:
-	if manual or dt <= 0.0:
+	if dt <= 0.0:
 		return
-	var seen := root.is_visible_in_tree()
-	player.active = seen
-	if not seen:
+	if manual:
+		advance(dt)
+		return
+	if not root.is_visible_in_tree():
 		return
 	_flinch.update(root, dt)
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
-	_face_step(dt)
+	_rig_dt += dt
+	if (Engine.get_process_frames() + get_instance_id()) % _rig_every == 0:
+		_face_step(_rig_dt)
+		advance(_rig_dt)
+		_rig_dt = 0.0
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
