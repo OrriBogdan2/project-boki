@@ -2,7 +2,8 @@ class_name ZoneDress
 extends RefCounted
 ## What a built zone (ZoneLayout) puts on its ground besides the layout's own things: the shallows
 ## (one translucent sheet over the channel the tiles say, if it has one) and a scatter: Flora crystal
-## stacks, reeds and pebbles, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
+## stacks, reeds, pebbles, mushrooms (they glow on a gloom island), ferns and flowers, and the plain
+## slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
 ## The scatter is MultiMesh, one batch per kind and shape, and every instance of a kind shares one
 ## cached Flora material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
 ## Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
@@ -13,7 +14,7 @@ const SHEET_COLOUR := Color(0.36, 0.78, 0.86, 0.55)
 const KEEP_OUT := 2.2          # m round the landing, the pad and a zone's stump that scatter stays away from
 const TRIES := 40              # spots tried per prop before giving up on it
 const SHAPES := 1              # Flora shapes used per kind (one batch each)
-const KINDS_FLORA := ["crystal", "reed", "pebble"]
+const KINDS_FLORA := ["crystal", "reed", "pebble", "mushroom", "fern", "flower"]
 const SHORE := ["crystal", "reed"]     # kinds that crowd the shallows' edge
 ## Slab kinds, one unit box scaled per instance and lit by Flora's shared rock material (the box has no
 ## vertex colours, so each instance's colour is its whole colour; alpha 0 glows day and night). size: m
@@ -31,7 +32,8 @@ static func place(h) -> void:
 		return
 	for br in h.bridges.values():
 		for part in ["node", "sign", "label"]:
-			br[part].visible = false          # the side isles' bridge stubs and signs belong to Bramblebank
+			if br.has(part):                  # a retired side isle has no sign or label (base_mode)
+				br[part].visible = false      # the side isles' bridge stubs and signs belong to Bramblebank
 	var B: Dictionary = GardenZones.info(h.zone)["build"]
 	var shallow := Rect2()
 	if B.has("shallow"):
@@ -75,7 +77,7 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 			var b := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * rng.randf_range(0.8, 1.4), s))
 			by[rng.randi_range(0, SHAPES - 1)].append(Transform3D(b, at))
 		for v in SHAPES:
-			_batch(h, Flora.mesh(kind, style, v), Flora.material(kind, kind == "crystal"), by[v], "%s_%d" % [kind, v],
+			batch(h, Flora.mesh(kind, style, v), Flora.material(kind, kind == "crystal"), by[v], "%s_%d" % [kind, v],
 				Color.WHITE)
 	for kind in KINDS_BOX:
 		var K: Dictionary = KINDS_BOX[kind]
@@ -91,7 +93,7 @@ static func _scatter(h, S: Dictionary, shallow: Rect2) -> void:
 				list.append(Transform3D(b.scaled(dims), at))
 				at.y += dims.y * 0.5
 				dims *= Vector3(STEP_IN, 1.0, STEP_IN)
-		_batch(h, BoxMesh.new(), Flora.material("rock", false), list, kind, K["colour"])
+		batch(h, BoxMesh.new(), Flora.material("rock", false), list, kind, K["colour"])
 
 ## A free spot on dry ground, `clear` m round, for one prop: crystals and reeds crowd the shallows' edge,
 ## the rest go anywhere.
@@ -112,7 +114,8 @@ static func _spot(h, rng: RandomNumberGenerator, kind: String, S: Dictionary, sh
 		return Vector3(p.x, h.world.ground_at(p.x, p.y), p.y)
 	return Vector3.INF
 
-static func _batch(h, mesh: Mesh, mat: Material, list: Array, label: String, tint: Color) -> void:
+## One MultiMesh of `mesh` under `parent` (no shadows), one draw for the whole list; the home's ponds use it too.
+static func batch(parent: Node, mesh: Mesh, mat: Material, list: Array, label: String, tint: Color) -> void:
 	if list.is_empty():
 		return
 	var mm := MultiMesh.new()
@@ -128,4 +131,4 @@ static func _batch(h, mesh: Mesh, mat: Material, list: Array, label: String, tin
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.name = label
-	h.add_child(mi)
+	parent.add_child(mi)
