@@ -93,6 +93,8 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var reach := 1.6 if melee else 3.0
 	if sid == "hook" and not tu.flag:
 		reach = 9.0
+	elif sid == "kin" and not tu.flag:
+		reach = 14.0       # (the E line reaches the row from where you stand)
 	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
 		"shoot": p.inp["fire"] = _fire_key(m)

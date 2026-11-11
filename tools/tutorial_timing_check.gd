@@ -62,8 +62,8 @@ func _wait(cond: Callable, what: String, secs := STALL_S) -> bool:
 	var got: bool = await super._wait(cond, what, secs)
 	var on_screens := stage_name in ["prologue", "first Relic"] or stage_name.begins_with("hatch")
 	if on_screens and is_instance_valid(main.current):
-		var secs := (Time.get_ticks_msec() - t0) / 1000.0
-		row("screens", "%s: %s" % [stage_name, what], secs, "wall", screen_text(), "", "")
+		var took := (Time.get_ticks_msec() - t0) / 1000.0
+		row("screens", "%s: %s" % [stage_name, what], took, "wall", screen_text(), "", "")
 	return got
 
 # ------------------------------------------------------------------ the tutorial course, per step
