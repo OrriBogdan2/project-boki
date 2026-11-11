@@ -19,6 +19,13 @@ const DEEP := Color("c43a2a")
 const BRONZE := Color("b9732f")
 const SMOKE := Color("d9c2a8")       # the Longneedle's recoil smoke ring: warm, not white
 const SCRAPE := Color("6b4a2e")      # the slide's dust scrape under her
+const ROUND_EDGE := Color("4f8a12")  # LMB slot: the deep green rim on her lime rounds, so they hold on bright ground
+const ROUND_HOT := Color("eaffa8")   # LMB slot: a pale tint of her lime, the hot core of the rounds and muzzle star
+const ROUND_LEN := 2.6               # m of tracer per rifle round: about 1.5 bh with its fading tail (footage)
+const ROUND_WIDTH := 0.34            # m across a round's head: her 0.3 m hit width (HITBOX_SIZE) plus the rim
+const FLASH_ACROSS := 0.8            # m, the muzzle star on each round
+const FLASH_SECONDS := 0.08          # s, the muzzle star's life: gone before the next round (0.12 s apart)
+const GUN_MUZZLE := ^"Rig/Torso/Aim/Gun/Muzzle"  # on her model this sits on the rifle's mouth
 const DAZE_FLASH := 1.8              # m, the pink spark on a Dazed foe per rifle round
 const DAZE_NUM_LIFT := 2.1           # m over a foe's feet: the "+N" floats above its hit number
 const BURR_HIT_HEIGHT := 2.6         # m above a foe's feet the charge can still strike
@@ -66,9 +73,11 @@ var refill_part := 0.0         # rounds the resting drum has part-refilled
 var dry := false               # the drum ran dry: no round until it is full again
 var round_at := -9.0           # match time of her last rifle round (the firing brackets)
 var ult: GunslingerUlt         # Cinderfall, her ultimate on X
+var hero_col: Color            # her signature lime (content "color"): the rifle rounds' body and muzzle star
 
 func _setup() -> void:
 	ult = GunslingerUlt.new(self)
+	hero_col = Arch.color(id)
 
 func fx() -> VVFx:
 	return VVFx.of(m)
@@ -229,7 +238,8 @@ func _on_knock(t: Ent) -> void:
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick.
+## Each round in her green fire: a tracer with a hot core line in a lime body rimmed deep green, a short star on
+## the rifle's mouth, the shoulder kick.
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -241,8 +251,9 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
-			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
+			fx().ride(sd, "tracer", hero_col, ROUND_HOT, ROUND_LEN, ROUND_WIDTH, _round_end, ROUND_EDGE)
+			var mouth := _gun_muzzle()
+			fx().star(mouth.global_position if mouth else sd["start"], hero_col, ROUND_HOT, FLASH_ACROSS, FLASH_SECONDS)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -282,7 +293,7 @@ func _tick_mag(dt: float) -> void:
 
 func _round_end(at: Vector3, vel: Vector2) -> void:
 	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
-	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7)
+	m.fx.spark(at, d, hero_col, 3, 5.0, 50.0, 0.14, 8.0, 0.7)
 
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
@@ -423,8 +434,12 @@ func _launcher_at(d: Vector2) -> Vector3:
 	var spot := WardenGlb.anchor(h.model, TUBE_FIRE)
 	if spot != null:
 		return spot.global_position
-	var muzzle := h.model.get_node_or_null("Rig/Torso/Aim/Gun/Muzzle") as Node3D if h.model else null
+	var muzzle := _gun_muzzle()
 	return (muzzle.global_position if muzzle else _muzzle(d)) + Vector3.UP * TUBE_UP
+
+## The Gun's Muzzle on her model (the rifle's mouth), or null with no model.
+func _gun_muzzle() -> Node3D:
+	return h.model.get_node_or_null(GUN_MUZZLE) as Node3D if h.model else null
 
 ## The launcher's puff: at the bell once it has swung forward, or at once where there is no swinging bell.
 func _launcher_puff(at: Vector3, d: Vector2) -> void:

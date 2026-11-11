@@ -441,7 +441,7 @@ func _venator_lmb() -> void:
 	marks.append([0.31,
 			"full",
 			"lmb_aim",
-			"LMB: ember tracers through a near cursor out to full range, the bronze muzzle star, the firing brackets"])
+			"LMB: green-fire tracers through a near cursor out to full range, the muzzle star, the firing brackets"])
 	await _go(1.2, string, marks)
 	P.inp["fire"] = false
 	await _reset(8.0)
