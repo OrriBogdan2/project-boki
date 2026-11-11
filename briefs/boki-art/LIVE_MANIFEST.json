@@ -136,7 +136,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Blastopuff.png",
   "hash": {
-   "sheet": "9791d095e9e3",
+   "sheet": "d6ac5fb895b8",
    "card": "2b8671b8bb0f",
    "portrait": "853dad4b35e9",
    "hero": "b47c81aa184f"
@@ -1265,7 +1265,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Lunowl.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Lunowl.png",
   "hash": {
-   "sheet": "f74cea0d0a07",
+   "sheet": "3f4b71b5bae7",
    "card": "9a437d3ec59b",
    "portrait": "75822ccfa602",
    "hero": "8820c88432e1"
@@ -1276,7 +1276,7 @@
    "card": "briefs/boki-art/cards/Lunowl_female.jpg",
    "hash": {
     "card": "a4ab985b4cc9",
-    "sheet": "45302238af04",
+    "sheet": "c72a4b7be5a3",
     "portrait": "8aa65103b0b7",
     "hero": "9c4280c3cca9"
    },
@@ -1322,7 +1322,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Malletary.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Malletary.png",
   "hash": {
-   "sheet": "3b4897b14f1c",
+   "sheet": "edc3939e1aa5",
    "card": "faa25d75cd71",
    "portrait": "dc652899be3b",
    "hero": "2ddcc91517c6"
@@ -1876,12 +1876,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Rimink.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Rimink.png",
   "hash": {
-   "sheet": "31c0b8fc05d7",
-   "card": "097ef0d33109",
-   "portrait": "1050280a844c",
-   "hero": "816dac00d9d4"
+   "sheet": "b7c8071cdc74",
+   "card": "169a979c9228",
+   "portrait": "cf4946a0cbd2",
+   "hero": "9cfbf8470fbd"
   },
-  "sheet_for_card": "097ef0d33109"
+  "sheet_for_card": "169a979c9228"
  },
  "Ringrove": {
   "sheet": "briefs/boki-art/turnarounds/Ringrove.jpg",
@@ -2436,7 +2436,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Voltmink.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Voltmink.png",
   "hash": {
-   "sheet": "b8ceb3dff7d5",
+   "sheet": "03012da9ad06",
    "card": "d23775fc1940",
    "portrait": "1a4328cf5519",
    "hero": "d701377c44be"
@@ -2991,7 +2991,7 @@
    "card": "briefs/boki-art/cards/Hourachnid_female.jpg",
    "hash": {
     "card": "0e92e9df1c1d",
-    "sheet": "3e6909204862",
+    "sheet": "be9c8887f6eb",
     "portrait": "29fc8ac02f7f",
     "hero": "9fa571910c20"
    },
@@ -3355,12 +3355,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Tiltster.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Tiltster.png",
   "hash": {
-   "sheet": "15db11f7b5e1",
-   "card": "ae8959dd801b",
-   "portrait": "8fc7943c16fc",
-   "hero": "bb93c8b40ed7"
+   "sheet": "c4a3743dc871",
+   "card": "2eaad05b23d5",
+   "portrait": "733e628b8446",
+   "hero": "42db72cc69f7"
   },
-  "sheet_for_card": "ae8959dd801b"
+  "sheet_for_card": "2eaad05b23d5"
  },
  "Wayshell": {
   "sheet": "briefs/boki-art/turnarounds/Wayshell.jpg",
@@ -3629,7 +3629,7 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Barokit.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Barokit.png",
   "hash": {
-   "sheet": "cb7c7658c863",
+   "sheet": "ad29780dce6e",
    "card": "1fe2203b282d",
    "portrait": "ddb70c9a1705",
    "hero": "06a16472234a"

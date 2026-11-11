@@ -2204,3 +2204,12 @@ for _n,_st,_ar,_fu in (('Tiltster','final','tough',0),('Rimink','mid','sleek',1)
     _cd=_O+'rv_'+_n.lower()+'_light2_2.jpg'
     SPECS.append({'id':'v2s_'+_n.lower()+'_lt','name':_n+' (sheet, lighter card)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'))+_NOGHOST})
     SPECS.append({'id':'v2p_'+_n.lower()+'_lt','name':_n+' (portrait, lighter card)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':3,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'),False,bool(_fu))+" Use the light finish of image 2: thin mid-tone outlines, light flat shading."})
+
+# 11-11 recheck results promoted: Malletary rc_3, Blastopuff rc_4, Voltmink rc_2, Lunowl rc_1, Lunowl_female rc_4, Hourachnid_female rc_4,
+# Barokit rc_2 (topclean); Tiltster/Rimink sheet + portrait lt_2. Meteorab: every rc try has a ghost row over the horns. Erase edit + 4 fresh tries.
+SPECS.append({'id':'gclean_meteorab_rc','name':'Meteorab (sheet: erase ghost row)','refs':[_O+'v2s_meteorab_rc_4.jpg'],'runs':3,'aspect':'16:9','size':'2K','prompt':_GCLEAN})
+V2SHEET_NEW('Meteorab','briefs/boki-art/cards/Meteorab.jpg',_GC,_GN); SPECS[-1]['id']='v2s_meteorab_rc2'; SPECS[-1]['runs']=4
+SPECS[-1]['prompt']+=_NOGHOST+" Same colours and lightness as the card. No ground line, no dust, no flying rock bits around the views."
+# Lighter Tiltster/Rimink cards: fresh pixel sprites.
+for _n in ('Tiltster','Rimink'):
+    SPECS.append({'id':'px9c_'+_n.lower(),'name':_n+' (pixel sprite 80, lighter card)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})

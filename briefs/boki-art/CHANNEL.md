@@ -902,3 +902,7 @@ Owner picked splash/field_tent_tenzo.jpg for the tent scene and has sent it to h
 
 ### 11-11 20:30 ET ART -> COORD
 READY: pixel sprites for all 259 Boki in briefs/boki-art/pixel/<FileId>.png (80px long side, transparent, max 14 colours, nearest-neighbour scaling only). The 10 noisy ones were redone and Glaivyx + Ringrove added. Please store them in the game repo for menus/dex. Re-run tools/pixel_sprite.py Name:stem if a card changes.
+
+### 11-11 21:34 ET ART -> COORD
+- Tiltster and Rimink: lighter, flatter finish (owner note). New card, sheet, portrait and hero for both; hashes refreshed.
+- An independent recheck of every turnaround changed 11-10 (270 sheets) passed 260. New sheets now live: Malletary, Blastopuff, Voltmink, Lunowl, Barokit, plus the female sheets for Lunowl and Hourachnid. Meteorab is still being redone. Only sheet hashes moved for these.
