@@ -9,7 +9,8 @@ extends RefCounted
 ##   7. a world label under a card fades back
 ##   8. the match HUD's lane is single: six banners fired in one frame (a Boki line, Ways Out, a steal, a
 ##      level-up, a pickup, a Boki status) show one at a time, most important first, each its minimum
-##      time; the pickup waiting behind them is dropped
+##      time; the pickup waiting behind them is dropped. With --shots-dir=<dir> it also saves the burst at
+##      1280x720 as <dir>/burst_<s>.png (a GPU run: jobq submit --needs gpu)
 ## Never touches the save.
 
 var bad := 0
@@ -150,6 +151,7 @@ func _wiring() -> void:
 	ok(lane.count() == 1, "a hint lands in the same lane")
 	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
 	_burst(m)
+	await _burst_shots(m)
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
@@ -166,12 +168,7 @@ func _burst(m: Match) -> void:
 	var lane: MsgLane = m.hud.msgs
 	lane.clear()
 	lane.fight = false
-	m.hud.toast_small("Dropped it", Color.WHITE)                              # Boki line, LOW
-	m.hud.toast("Uplink started: hold the yard", Color.CYAN)                  # Ways Out, NORMAL
-	lane.push("Rook stole the Warden", StealCall.LOSER_COL, MsgLane.HIGH)     # a boss steal, HIGH
-	m.hud.level_up(3)                                                         # HIGH
-	m.hud.toast_small("Chest key found", Color.WHITE)                         # pickup, LOW
-	m.hud.toast("Your Boki is resting", Color.CYAN)                           # Boki status, NORMAL
+	_fire_six(m)
 	var order: Array[String] = []
 	var shown_s: Array[float] = []
 	var most := 0
@@ -209,6 +206,40 @@ func _burst(m: Match) -> void:
 		ok(full,
 			"six in one frame: nothing more important waiting, a banner keeps its full life (%s)" % str(shown_s))
 	lane.clear()
+
+## The six banners of part 8, all in this frame.
+func _fire_six(m: Match) -> void:
+	m.hud.toast_small("Dropped it", Color.WHITE)                              # Boki line, LOW
+	m.hud.toast("Uplink started: hold the yard", Color.CYAN)                  # Ways Out, NORMAL
+	m.hud.msgs.push("Rook stole the Warden", StealCall.LOSER_COL, MsgLane.HIGH)  # a boss steal, HIGH
+	m.hud.level_up(3)                                                         # HIGH
+	m.hud.toast_small("Chest key found", Color.WHITE)                         # pickup, LOW
+	m.hud.toast("Your Boki is resting", Color.CYAN)                           # Boki status, NORMAL
+
+const SHOT_AT := [0.3, 1.1, 2.0, 5.0, 8.0, 10.5]   # s after the burst: one shot per banner change
+
+## Part 8 on screen at 1280x720 in real frames, when --shots-dir is given.
+func _burst_shots(m: Match) -> void:
+	var dir := ""
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--shots-dir="):
+			dir = String(a).substr(12)
+	if dir == "":
+		return
+	DirAccess.make_dir_recursive_absolute(dir)
+	main.get_tree().root.size = Vector2i(1280, 720)
+	m.hud.msgs.clear()
+	await main.get_tree().create_timer(0.5).timeout
+	_fire_six(m)
+	var t0 := Time.get_ticks_msec()
+	for at: float in SHOT_AT:
+		while (Time.get_ticks_msec() - t0) * 0.001 < at:
+			await main.get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		var img := main.get_viewport().get_texture().get_image()
+		img.save_png(dir.path_join("burst_%04.1f.png" % at))
+		print("MSGQ shot %.1fs %s" % [at, str(m.hud.msgs.texts())])
+	m.hud.msgs.clear()
 
 # ------------------------------------------------------------------ 7. world labels yield
 func _yield() -> void:
