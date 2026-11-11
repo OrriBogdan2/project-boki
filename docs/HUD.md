@@ -185,3 +185,6 @@ badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU throu
   in the opening drop). It clears at the first dive and never returns (`Save.d tutorial glide_dive`).
 - Checks: `--tutorial-hud-check` (strip geometry at 1280x720, 1920x1080, 3440x1440; the dive line shows once and
   never again after a dive), `--tutorial-strip-shots`.
+
+## Key text
+Every key named in tutorial steps, Boki hints, first-time hints, Training Grounds rows and farm tutorial lines comes from `Settings.key_cap` (tokens: `%E %S %T %F %R %J %G` in `TutorialText`/`Tutorial`, `{interact} {build} {details}` in `FarmTutorial.fill`); no letter or mouse-button name is written into the text. `--key-text-check` rebinds every action to an unusual key and fails on any default key or mouse-button name left in those lines.
