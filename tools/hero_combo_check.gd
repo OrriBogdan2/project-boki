@@ -630,7 +630,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
 		P.teleport(home)
-		ac.step(m, 0.1)
+		ac.step(m, 0.1 + K.recover_left())
 		ac.aim_at(P, home + aim_from)
 		P.ak.use_e()
 		ac.step(m, 0.05)
@@ -654,7 +654,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var push := func(at_m: float) -> Array:
 		K.cd["e"] = 0.0
 		P.teleport(home)
-		ac.step(m, 0.1)
+		ac.step(m, 0.1 + K.recover_left())
 		ac.aim_at(P, home + Vector3(at_m, 0, 0))
 		P.ak.use_e()
 		ac.step(m, 0.3)
@@ -830,7 +830,7 @@ func _gunslinger() -> void:
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
 	P.teleport(home)
-	ac.step(m, 0.1)
+	ac.step(m, 0.1 + K.recover_left())
 	ac.aim_at(P, T.pos)
 	var sk0 := K.skewers
 	P.ak.use_e()
@@ -839,7 +839,7 @@ func _gunslinger() -> void:
 	ac.fresh(T)
 	KitStatus.clear_rattled(T)
 	P.teleport(home)
-	ac.step(m, 0.1)
+	ac.step(m, 0.1 + K.recover_left())
 	for zz in [-1, 0, 1]: _wall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
 	ac.aim_at(P, T.pos)
@@ -850,7 +850,7 @@ func _gunslinger() -> void:
 	K.cd["e"] = 0.0
 	ac.fresh(T)
 	P.teleport(home)
-	ac.step(m, 0.1)
+	ac.step(m, 0.1 + K.recover_left())
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.3)

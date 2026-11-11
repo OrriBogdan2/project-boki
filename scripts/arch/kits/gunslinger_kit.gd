@@ -47,6 +47,7 @@ var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
+var recover_end := 0.0         # match time the Longneedle's recovery ends (e.recover_s after the beam)
 var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
@@ -101,6 +102,8 @@ func _tick(dt: float) -> void:
 		_tick_burrs(dt)
 	if not needle.is_empty():
 		_tick_needle(dt)
+	if h.roll_t > 0.0:
+		recover_end = 0.0            # a dash (Shift) ends the Longneedle's recovery: its into_dash row
 	if ult.running():
 		ult.tick(dt)
 	_tick_lmb()
@@ -124,19 +127,17 @@ func shows_charge_ball() -> bool:
 const TRAILS := {"gunslinger_knock": ["r", 0.0, 0.25]}
 const SLIDE_KEY := 0.45              # s: the dash clip's last slide key (vex.json "dash", low from 0.08): a held slide
                                      # keeps the clip there, so she stands up as the skid ends, not mid-skid
-const WALK_OFF := {"gunslinger_dash": 0.0, "gunslinger_e": 0.8}   # s into the move its hit is past: the dash's
-                                     # from the skid's end, the Longneedle's once its shove has played
 const OVER := 2.0                    # s: older than any of her clips (the longest runs 1.07 s): a move aged this far
                                      # is over to the clips (the kit's anim_id is read as long as it is set)
 
-## Walking out of a move's recovery (the slide's stand-up, the Longneedle's settle): the legs are hers again and
-## the walk blends in (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off.
+## Walking out of the slide's stand-up once the skid has ended: the legs are hers again and the walk blends in
+## (WardenClips.FADE_LOCO) in place of the clip's stand-still pose, the source's Ghost walking off. The
+## Longneedle's settle always plays out: its recovery holds her until the clip hands the body back.
 ## (Clearing anim_id would not do: the published anim state keeps the last kmove until another move plays.)
 func _tick_walk_off() -> void:
-	if not WALK_OFF.has(anim_id) or not slide.is_empty() or not needle.is_empty() or not h.grounded:
+	if anim_id != "gunslinger_dash" or not slide.is_empty() or not needle.is_empty() or not h.grounded:
 		return
-	var walking := (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5
-	if walking and float(m.time) - anim_at >= float(WALK_OFF[anim_id]):
+	if (h.inp.get("move", Vector2.ZERO) as Vector2).length() > 0.5:
 		anim_at = float(m.time) - OVER        # the move reads as over: past its clip, the body goes back to the legs
 
 func _tick_trail() -> void:
@@ -171,12 +172,23 @@ func teardown() -> void:
 	ult.clear()
 	_end_needle()
 
+## Her walk: slowed by self_slow through the Longneedle's charge, none at all through its recovery.
 func move_k() -> float:
+	if recover_left() > 0.0:
+		return 0.0
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
-## The rifle can't fire while a dry drum refills (_tick_mag).
+## The rifle can't fire while a dry drum refills (_tick_mag) or through the Longneedle's recovery.
 func fire_ok() -> bool:
-	return not dry
+	return not dry and recover_left() <= 0.0
+
+## Through the Longneedle's recovery no ability goes either (RMB, E, X); Shift still slides her out of it.
+func busy() -> bool:
+	return super.busy() or recover_left() > 0.0
+
+## s left of the Longneedle's recovery: the source's shove and settle after the beam (e.recover_s, 0 once over).
+func recover_left() -> float:
+	return maxf(0.0, recover_end - float(m.time))
 
 func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
@@ -749,6 +761,7 @@ func _fire_needle() -> void:
 	net_bolt(a, b, EMBER)
 	m.sfx("vn_ion_fire", h.pos, 1.0)
 	h.impulse(-d * float(ed.get("recoil", 6.0)))                  # the recoil shoves her back a step
+	recover_end = float(m.time) + float(ed["recover_s"])          # then she stands and recovers
 	var hits := 0
 	var dmg0: float = float(ed["dmg"]) * power("kin")
 	for f in m.foes_of(h.team):

@@ -179,7 +179,8 @@ func _slide(m: Match, P: Hunter, K: GunslingerKit, home: Vector3) -> void:
 
 ## E: the charge is 0.6 s (the source's cast bar), the beam at 0.63 lands on the clip's fire key (0.65), the
 ## recoil and settle run to 1.05: the source's beam at 0.6, a 0.2 s shove and about 0.4 s to recover. Walking
-## off after the shove, the legs walk.
+## held from the shove, she stands through that recovery (e.recover_s from the beam, to 1.23 s, as the clip hands
+## the body back) and then walks off on her own legs.
 func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
 	C.ac.fresh(T)
 	T.teleport(home + Vector3(8.0, 0, 0))
@@ -187,16 +188,23 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	C.ac.aim_at(P, T.pos)
 	K.cd["e"] = 0.0
 	var hits0 := K.needle_hits
+	var stand := {}
 	var walk := {}
+	var stand_probe := _walk_probe(P, 0.85, 1.15, stand)
+	var walk_probe := _walk_probe(P, 0.85, 1.45, walk)
 	K.use_e()
 	var r := _time(m, P, K, "gunslinger_e", 1.5, func() -> bool: return K.needle_hits > hits0,
-			_walk_probe(P, 0.85, 1.05, walk))
+			func(t: float) -> void:
+				stand_probe.call(t)
+				walk_probe.call(t))
 	C.ok("Vex timing E: the beam fires at 0.63 s on the clip's fire key, the move settles by 1.05 s + the fade",
 			absf(float(r["hit"]) - 0.63) <= DT * 2 and absf(float(r["at"]) - 0.63) <= DT * 2
 			and absf(float(r["len"]) - 1.05) < CLIP_TOL and float(r["out"]) < 1.05 + HAND_BACK,
 			"hit %.2f len %.2f out %.2f" % [r["hit"], r["len"], r["out"]])
-	C.ok("Vex timing E: walking off after the shove, the legs are hers again by 1.05 s",
-			float(walk.get("speed", 0.0)) > 1.0 and float(walk.get("full", 1.0)) <= 0.01, _walk_line("at 1.05", walk))
+	var walks_off := float(walk.get("speed", 0.0)) > 1.0 and float(walk.get("full", 1.0)) <= 0.01
+	C.ok("Vex timing E: walking held, she stands through the recovery, then walks off on her own legs",
+			float(stand.get("speed", 9.0)) < 0.3 and walks_off,
+			"%s; %s" % [_walk_line("at 1.15", stand), _walk_line("at 1.45", walk)])
 	_settle(m, P, home, 0.5)
 
 ## R: the barrel comes up over 0.1 s and the shot leaves on its kick key (0.14 s), not at the press: the source's

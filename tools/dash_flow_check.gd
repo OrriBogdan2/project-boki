@@ -161,9 +161,10 @@ func _steps(m: Match, n: int) -> void:
 func _ready_up(m: Match) -> void:
 	var k := hunter.ak
 	for i in QUIET_MAX:
-		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press)
+		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press; so does the kit's
+		# own lock, like the recovery after Vex's Longneedle)
 		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running() \
-				or _last_shot() >= 0
+				or _last_shot() >= 0 or k.busy()
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)

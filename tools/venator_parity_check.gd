@@ -26,6 +26,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_rifle_pose()
 	_launcher(m, P, K, T, home)
 	_needle(m, P, K, T, home)
+	_recovery(m, P, K, T, home)
 	_audit(m, P, K, T, home)
 	P.inp["fire"] = false
 	P.inp["move"] = Vector2.ZERO
@@ -377,6 +378,7 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	C.ok("Vex item 68: the beam fires along the line and the aim at release (1 degree); she faces it throughout",
 			d_dir <= 1.0 and d_aim <= 1.0 and float(rec["face"]) <= 5.0,
 			"line %.2f, aim %.2f, face %.1f deg" % [d_dir, d_aim, rec["face"]])
+	C.ac.step(m, K.recover_left() + C.DT)
 	var was := P.ctrl
 	P.ctrl = "idle"
 	cam.cast_left = 0.0
@@ -388,6 +390,73 @@ func _needle(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) ->
 	P.ctrl = was
 	C.ok("Vex item 68: anyone else's cast leaves the camera alone", quiet)
 	C.ac.step(m, 0.3)
+
+## The Longneedle's recovery, e.recover_s after the beam (the footage's shove, then about 0.4 s): she stands, and
+## the rifle, RMB, E and X wait for its end; Shift slides her out of it at once (its into_dash row), and a jump is
+## a hop in place that leaves it running.
+func _recovery(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+	var rec_s := float(K.e_def()["recover_s"])
+	_to_beam(m, P, K, T, home)
+	var at_beam := K.recover_left()
+	var shots0 := P.shot_n
+	P.ammo = MAG
+	P.inp["fire"] = true
+	C.ac.step(m, 0.3)                            # past the recoil shove (its knock)
+	P.inp["move"] = Vector2(0, 1)                # across the shove's line: any walk shows in z alone
+	var z0 := P.pos.z
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	K.cd["e"] = 0.0
+	K.cd["x"] = 0.0
+	var burrs0 := K.burrs.size()
+	K.press_rmb()
+	K.use_e()
+	var x_went := K.cast_ult()
+	C.ac.step(m, rec_s - 0.4)                    # to 0.1 s before its end
+	var stood := absf(P.pos.z - z0)
+	var held := P.shot_n == shots0 and K.burrs.size() == burrs0 and K.needle.is_empty() and not x_went
+	C.ok("Vex E recovery: %.1f s from the beam (data) she stands; no round, RMB, E or X goes" % rec_s,
+			absf(at_beam - rec_s) <= C.DT + 0.001 and held and stood < 0.05,
+			"%.2f s left at the beam, %d rounds, walked %.2f m" % [at_beam, P.shot_n - shots0, stood])
+	C.ac.step(m, 0.3)                            # 0.2 s past its end
+	C.ok("Vex E recovery: as it ends she walks off and the held rifle fires again",
+			absf(P.pos.z - z0) - stood > 0.4 and P.shot_n > shots0,
+			"walked %.2f m, %d rounds" % [absf(P.pos.z - z0) - stood, P.shot_n - shots0])
+	P.inp["fire"] = false
+	P.inp["move"] = Vector2.ZERO
+	_to_beam(m, P, K, T, home)
+	C.ac.step(m, 0.3)
+	P.dashes = P.max_dashes()
+	P.inp["move"] = Vector2(0, 1)
+	P.do_dash()
+	m.step(C.DT)
+	C.ok("Vex E recovery: Shift in it slides at once and ends it; the rifle and abilities are back",
+			P.roll_t > 0.0 and K.recover_left() <= 0.0 and K.fire_ok() and not K.busy(),
+			"roll %.2f, %.2f s left" % [P.roll_t, K.recover_left()])
+	P.inp["move"] = Vector2.ZERO
+	_to_beam(m, P, K, T, home)
+	C.ac.step(m, 0.3)
+	P.inp["jump"] = true
+	m.step(C.DT)
+	P.inp["jump"] = false
+	C.ok("Vex E recovery: a jump in it goes at once, a hop in place, and the recovery runs on (E -> jump row)",
+			P.vel.y > 0.5 and K.recover_left() > 0.0 and K.move_k() == 0.0,
+			"up %.1f m/s, %.2f s left" % [P.vel.y, K.recover_left()])
+	C.ac.step(m, 1.0)
+
+## Casts the Longneedle at T, 8 m east of `home`, and steps to its beam: she is then in its recovery.
+func _to_beam(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> void:
+	C.ac.fresh(T)
+	P.teleport(home)
+	T.teleport(home + Vector3(8.0, 0, 0))
+	C.ac.step(m, K.recover_left() + 0.1)
+	C.ac.aim_at(P, T.pos)
+	K.cd["e"] = 0.0
+	K.use_e()
+	var steps := 0
+	while not K.needle.is_empty() and steps < int(1.0 / C.DT):
+		m.step(C.DT)
+		steps += 1
 
 ## Her plain walk (move held down the screen, not firing), in m/s; she is still walking when it returns.
 func _walk_speed(m: Match, P: Hunter) -> float:
