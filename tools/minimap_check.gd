@@ -4,6 +4,8 @@ extends RefCounted
 ##   2. every other kind waits for a hold (Tab or the map key), or for its own reason to matter
 ##   3. the draw code gates only kinds MapDetail lists, and every detail kind is gated somewhere
 ##   4. in a match: the nearest exit and an awake lair matter, a far exit and a dormant lair do not
+##   5. the zone clock under the minimap: "Closing in 0:30" before the tide moves, the time left while it
+##      does, empty once it holds; the edge arrow points off screen at the way in from out in the Blight
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
@@ -21,6 +23,7 @@ func run(main: Node) -> void:
 	_kinds()
 	_source()
 	await _match(main)
+	await _zone(main)
 	print("MINIMAP CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -72,3 +75,29 @@ func _match(main: Node) -> void:
 		ok(not MapDetail.lair_matters(m, L), "a dormant lair waits for a hold")
 		L["state"] = "awake"
 		ok(MapDetail.lair_matters(m, L), "an awake lair shows by itself")
+
+func _zone(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "heart": true})
+	m.set_process(false)
+	var start := Heart.r("tide_start_s")
+	var held := start + Heart.r("tide_close_s")
+	m.sess_t0 = 60.0 - m.time
+	ok(HeartHud.zone_line(m) == "Closing in 0:30", "30 s before the tide moves: '%s'" % HeartHud.zone_line(m))
+	m.sess_t0 = start + 75.0 - m.time
+	ok(HeartHud.zone_line(m) == "Closing  %d:%02d left" % [int(held - start - 75.0) / 60, int(held - start - 75.0) % 60],
+		"while it closes: '%s'" % HeartHud.zone_line(m))
+	m.sess_t0 = held + 5.0 - m.time
+	ok(HeartHud.zone_line(m).is_empty(), "once the ring holds there is no clock")
+	var p: Hunter = m.player
+	var d := Vector2(p.pos.x - m.heart.site.x, p.pos.z - m.heart.site.z).normalized()
+	var way_in := m.heart.site + Vector3(d.x, 0, d.y) * (Heart.tide_r(m) - HeartHud.EDGE_IN)
+	ok(Heart.tide_r(m) > 0.0 and Heart.next_r(m) <= Heart.tide_r(m), "the edge and the next circle both exist")
+	p.teleport(m.heart.site + Vector3(d.x, 0, d.y) * (Heart.tide_r(m) + 60.0))
+	m.cam.snap(p.pos)
+	ok(Heart.tide_out(m, p.pos) > 0.0, "a hunter 60 m past the ring is out in the Blight")
+	ok(MarkerDir.off_dir(m.cam, Vector2(1280, 720), way_in, p.pos) != Vector2.ZERO,
+		"the way in is off screen from 60 m out: the edge arrow shows")
+	m.queue_free()
+	print("MINIMAP CHECK ZONE DONE, failures: ", bad)

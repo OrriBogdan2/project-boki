@@ -852,6 +852,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 		_text(Vector2(rr.end.x - 8 - big.get_string_size(st, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x, rr.position.y + 14), st, 10, MUTED, big)
 	if m.rolling:
 		SessionRow.draw(self, Rect2(Vector2(r.position.x, rr.end.y + 4), Vector2(r.size.x, 42)))
+	HeartHud.zone_clock(self, Rect2(r.position.x, mm_bottom, r.size.x, 0))
 
 ## A bounty mark: an amber target with a pulse (on the maps and over a hunter's nameplate).
 func bounty_marker(cv: Control, p: Vector2, k := 1.0) -> void:
