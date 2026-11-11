@@ -11,6 +11,7 @@ const HEROES := ["gunslinger", "bulwark"]      # Vex, Albert
 const STREAM_X := 40         # the stream's west tile column (it is two tiles wide)
 const STREAM_Z := Vector2i(29, 41)      # its first and last tile row
 const DT := 1.0 / 60.0
+const FILM_FPS := 60.0       # frames kept per second of play (a fast GPU renders many more)
 
 var bad := 0
 var shot := ""
@@ -189,7 +190,7 @@ func _low(main: Node) -> void:
 
 ## The film: the game running at half speed (so a dash gets frames while each one is read back), the
 ## Hunter crosses the stream from the west bank into it, runs along it, dashes, jumps and lands in it, and
-## climbs out the east bank. Every frame kept at half size, saved at the end.
+## climbs out the east bank. FILM_FPS frames a second of play kept at half size, saved at the end.
 func _film(main: Node, hm, hero: String) -> void:
 	var tree := main.get_tree()
 	if main.fade: main.fade.reveal(0.05)      # (the loading card over a new home)
@@ -201,7 +202,8 @@ func _film(main: Node, hm, hero: String) -> void:
 		[Vector2(0, -1), 0.25, ""], [Vector2(0, -1), 0.8, "jump"], [Vector2(1, 0), 0.8, ""], [Vector2.ZERO, 0.4, ""]]
 	var frames: Array[Image] = []
 	Engine.time_scale = 0.5
-	var t0 := Time.get_ticks_msec()
+	var played := 0.0
+	var kept_t := -1.0
 	for step in plan:
 		_press(step[0])
 		if step[2] != "": Input.action_press(step[2])
@@ -210,10 +212,16 @@ func _film(main: Node, hm, hero: String) -> void:
 			await tree.process_frame
 			if t == 0.0 and step[2] != "": Input.action_release(step[2])
 			t += hm.get_process_delta_time()
+			played += hm.get_process_delta_time()
+			if played - kept_t < 1.0 / FILM_FPS: continue
+			kept_t = played
 			var img := tree.root.get_texture().get_image()
+			if img == null or img.is_empty():
+				ok(false, "%s film: no frame to read back (not a GPU run?)" % hero)
+				Engine.time_scale = 1.0
+				return
 			img.resize(img.get_width() / 2, img.get_height() / 2, Image.INTERPOLATE_BILINEAR)
 			frames.append(img)
-	var played := (Time.get_ticks_msec() - t0) / 1000.0 * Engine.time_scale
 	Engine.time_scale = 1.0
 	_press(Vector2.ZERO)
 	for i in frames.size():
