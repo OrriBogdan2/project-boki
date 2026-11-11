@@ -13,6 +13,8 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##   9 walk          Vex walks across a still camera (match zoom) on a cleared lane, then back with the camera
+##                   following: the walk speed for a before/after cut (decision 0061)
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -71,6 +73,7 @@ func run(main_node: Node) -> void:
 		6: await _echo(secs)
 		7: await _show(secs)
 		8: await _relay(secs)
+		9: await _walk(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -223,6 +226,28 @@ func _fight(secs: float) -> void:
 		_assist(t, squad_a, squad_b)
 		_assist(t, squad_b, squad_a),
 		func(_t: float): return _centre(squad_a + squad_b))
+
+# ------------------------------------------------------------------ 9: walk
+const MoveSpeedCheck := preload("res://tools/move_speed_check.gd")
+const WALK_LANE := 22.0         # m of the cleared lane the walk crosses (the match screen is ~23 m across)
+
+func _walk(secs: float) -> void:
+	await _start("gunslinger", "zapple")
+	var P := m.player
+	P.teleport(MoveSpeedCheck.flat_lane(m.world, P.pos, int(WALK_LANE) + 2))
+	var still_cam := P.pos + Vector3(WALK_LANE * 0.5, 0, 0)
+	_zoom(1.0)
+	still_at = 2.0
+	_mark("across")
+	var x0 := P.pos.x
+	await _go(secs, func(t: float):
+		var mv := Vector2(-1, 0)      # the second half: back the other way, the camera following
+		if t < secs * 0.5:
+			mv = Vector2(1, 0) if P.pos.x < x0 + WALK_LANE else Vector2.ZERO
+		P.inp["move"] = mv
+		P.inp["aim"] = P.pos + Vector3(5.0 if t < secs * 0.5 else -5.0, 0.9, 0),
+		func(t: float): return still_cam if t < secs * 0.5 else P.pos)
+	print("MEDIA_WALK speed %.2f m/s" % HunterMove.speed(P.arch))
 
 # ------------------------------------------------------------------ 2: Boki combat
 func _boki_combat(secs: float) -> void:
