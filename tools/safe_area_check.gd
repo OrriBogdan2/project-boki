@@ -113,7 +113,7 @@ func _farm() -> void:
 		var sz := await _resize(win)
 		await main.get_tree().create_timer(0.6).timeout
 		home._close_panel()      # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
-		await _frames(2)
+		await main.get_tree().create_timer(0.3).timeout      # the key row steps off the hub bar on a 0.2 s beat
 		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout
