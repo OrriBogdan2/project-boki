@@ -49,6 +49,10 @@ locale/translations=PackedStringArray("res://translations/rebrand.en.po")
 
 [shader_globals]
 
+vfx_noise={
+"type": "sampler2D",
+"value": "res://art/vfx/noise.png"
+}
 vis_on={
 "type": "float",
 "value": 0.0
