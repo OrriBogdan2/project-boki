@@ -12,8 +12,8 @@ extends ArchKit
 ##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
 ##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
-##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop onto a disc at
-##   the cursor (slows; the centre stunned), during the Warchain's pull a Cinder Spin.
+##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop straight down, its hit
+##   circle just ahead (slows; the centre stunned), during the Warchain's pull a Cinder Spin.
 ## - Dash, Rampage (Flame Step): 2 charges (3 at rank 2) of a dash attack the way you face, the tip hits double.
 ## - E, Warchain (Feysteel Chain): a chain to a foe (blighted) or a wall; recast to pull yourself in.
 ## - X, Gilded Riposte (JuggernautUlt, level 6): a 0.65s gold guard that blocks everything, then a lunging
@@ -883,9 +883,9 @@ func _haul_land(k: float) -> void:
 	m.fx.word(at + Vector3(0, 2.6, 0), "HAUL SLAM", Color("ffcf6a"), true)
 	vfx("haul_hit", at, h.aim_dir(), {"r": float(hd["radius"])})
 
-## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only),
-## the landing disc under the cursor while you're in the air with it ready, and the ring round the body
-## while the Searing Wave charges.
+## The reads that aren't a key press: the wounded outlined red while the Smash is ready (yours only), the
+## Meteor Drop's hit circle (under him, just ahead) while you're in the air with it ready, and the ring round the
+## body while the Searing Wave charges.
 func _tick_tells() -> void:
 	if not h.is_local() or busy() or KinMerge.active(h):
 		return
@@ -978,11 +978,15 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sig"] = true
 		return
-	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and slam_w.is_empty():
-		if not h.grounded and dist < 3.0:
+	# in the air any press is the Meteor Drop: only with its slot ready and them inside its hit circle
+	if not h.grounded:
+		var dd: Dictionary = rmb_def()["drop"]
+		if int(h.slot_lv["sec"]) > 0 and float(cd["air"]) <= 0.0 and los \
+				and dist < float(dd["ahead"]) + float(dd["radius"]):
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
-		elif dist < 3.2:
+	elif int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and slam_w.is_empty():
+		if dist < 3.2:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true # the Finishing Slam (best on the wounded)
 		elif dist < 7.0 and randf() < 0.45:
