@@ -62,7 +62,7 @@ func run(main_node: Node) -> void:
 	await _go(0.6)
 	m.eliminate(P, foe, "finished")
 	await _go(0.05)
-	_take("wisp_a_elim_hit", "Finished: the hit, the white heart flashes in the killer's colour, the rim stays the team's")
+	_take("wisp_a_elim_hit", "Finished: the hit knocks the Wisp up, its heart in the killer's colour")
 	await _go(0.25)
 	_take("wisp_b_elim_fall", "The fall: the Wisp dims and drops into the deathbox as the box grows in")
 	await _go(0.28)
