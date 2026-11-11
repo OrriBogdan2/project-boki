@@ -4,7 +4,10 @@ extends RefCounted
 ##   2. each event (open, start, taken own / other, warn, last) plays its cue once with its words in the feed,
 ##      and spamming the same call plays nothing more; a start sounds again only after START_GAP_S
 ##   3. the Heart makes its own calls: the wake and the final seat open, a squad holding the ring starts it, the
-##      early and the final seat taken; a client mirroring the host's "ht take" hears it too
+##      early and the final seat taken
+##   4. a client mirroring the host's "ht take" hears it too
+##   5. the countdown: an open seat you can reach ticks once a second over its last TICK_FROM_S, the last
+##      TICK_LAST_S strong, all under the calls; nothing for a rival's seat, a seat you left or one already used
 ## Every Heart sound cue (heart_take, heart_reveal, heart_extract) still plays once beside them. Never touches the save.
 
 const CALLS := ["ways_open", "ways_start", "ways_taken_own", "ways_taken_other", "ways_warn", "ways_last"]
@@ -25,6 +28,7 @@ func run(main: Node) -> void:
 	_calls(main)
 	_heart(main)
 	_net(main)
+	_ticks(main)
 	print("WAYSSFX DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -83,6 +87,8 @@ func _files() -> void:
 		ok(s != null and s.get_length() > 0.1 and s.get_length() < 2.5, "%s is a short sound" % c)
 		seen[c] = true
 	ok(seen.size() == CALLS.size(), "the six calls are six different sounds")
+	var tick := load("res://audio/ways_tick.wav") as AudioStream
+	ok(tick != null and tick.get_length() < 0.5, "ways_tick is its own short sound")
 
 # ------------------------------------------------------------------ 2. each event once
 func _calls(main: Node) -> void:
@@ -212,3 +218,61 @@ func _net(main: Node) -> void:
 		"a client told of a seat taken: the call, once")
 	cli.net_on = false
 	cli.queue_free()
+
+# ------------------------------------------------------------------ 5. the countdown ticks
+## The whole seconds a seat ticked over its last seconds before session second `shut`: only the Heart's
+## sounds run (the seats stay as the caller set them).
+func _count_down(m: Match, seat: String, shut: float) -> Array:
+	var A: HeartSfx = m.heart.audio
+	A.ticks.clear()
+	A._ticked.clear()
+	m.time = shut - HeartSfx.TICK_FROM_S - 1.0 - m.sess_t0
+	for i in int((HeartSfx.TICK_FROM_S + 2.0) / Match.DT):
+		m.time += Match.DT
+		A.update()
+	return A.ticks.filter(func(t): return t[0] == seat).map(func(t): return t[1])
+
+func _ticks(main: Node) -> void:
+	var all_s := range(HeartSfx.TICK_FROM_S, 0, -1)
+	ok(HeartSfx.TICK_DB < HeartSfx.TICK_LAST_DB and HeartSfx.TICK_LAST_DB < HeartSfx.CALL_DB,
+		"the soft tick under the strong one, both under the calls (%.0f < %.0f < %.0f dB)"
+		% [HeartSfx.TICK_DB, HeartSfx.TICK_LAST_DB, HeartSfx.CALL_DB])
+	# the real clock: the Uplink opens, ticks down and shuts
+	var m := _match(main, 8308)
+	var up: QuestSeat = m.exits.seats.uplink
+	ok(up != null, "the match has an Uplink seat")
+	if up == null:
+		m.queue_free()
+		return
+	_to(m, up.shut_s - HeartSfx.TICK_FROM_S - 2.0)
+	_run(m, HeartSfx.TICK_FROM_S + 4.0)
+	var got: Array = m.heart.audio.ticks.filter(func(t): return t[0] == "uplink")
+	var secs: Array = got.map(func(t): return t[1])
+	ok(secs == all_s and up.state == QuestSeat.S.SHUT,
+		"an open Uplink: one tick a second over its last %d s, then it shuts (%s)" % [all_s.size(), str(secs)])
+	var strong: Array = got.filter(func(t): return t[2] == HeartSfx.TICK_LAST_DB).map(func(t): return t[1])
+	ok(strong == range(HeartSfx.TICK_LAST_S, 0, -1),
+		"...the last %d of them strong (%s)" % [HeartSfx.TICK_LAST_S, str(strong)])
+	m.queue_free()
+	# whose clock it is
+	m = _match(main, 8309)
+	up = m.exits.seats.uplink
+	var lair: QuestSeat = m.exits.seats.lair
+	var p: Hunter = m.player
+	up._force(QuestSeat.S.IN_USE, "check", _other_team(m))
+	ok(_count_down(m, "uplink", up.shut_s).is_empty(), "a rival charging the Uplink: no ticks for you")
+	up._force(QuestSeat.S.IN_USE, "check", p.team)
+	ok(_count_down(m, "uplink", up.shut_s) == all_s, "your own squad charging it: all %d ticks" % all_s.size())
+	up._force(QuestSeat.S.OPEN, "check")
+	p.extracted = true
+	ok(_count_down(m, "uplink", up.shut_s).is_empty(), "you already left: no ticks")
+	p.extracted = false
+	if lair:
+		lair._force(QuestSeat.S.IN_USE, "check", p.team)
+		ok(_count_down(m, "lair", lair.shut_s).is_empty(), "sealed in the lair: the clock leaves it be, no ticks")
+	m.heart.state = Heart.S.FINAL
+	m.length = m.time + 60.0
+	ok(_count_down(m, "final", m.sess_len()) == all_s, "the Heart's final seat: ticks as the islands fall")
+	m.heart.audio.used["final"] = true
+	ok(_count_down(m, "final", m.sess_len()).is_empty(), "...not once it was taken")
+	m.queue_free()
