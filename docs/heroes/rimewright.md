@@ -113,7 +113,7 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 - **Dart pattern:** the game data's barrage wins (f6250bd1): no pause, 4 plain then 3 large darts, round again. The footage at 5 fps showed no visible pattern (the sheet ranks it gap 1).
 - **Ice Spear:** 2 charges with a 10.2s recharge (the source's 12s, scaled by our wall's 17s against its 20s; the card's 0.3s is read as the cast time). Its direct hit is small; the detonation is the big hit. The ice-encased look after it is a 0.5s freeze plus a 1.5s ice shell. The wiki's near/far slow-versus-damage split is dropped in favour of the footage's slow zone.
 - **Rink Wall:** it slides until its middle reaches the cursor (4.5 to 16.2m of travel, +50% by the owner) and stands 4.5s in all; the freeze recast is the wiki's (6s).
-- **Body and movement (not in the footage):** she has **no separate air dash**: Shift is the skate everywhere, and in the air (owner item 62, replacing item 12's buffer to the landing) it starts at once and skates through the air (see the Skate row). Her **plain jump** is the shared one; her **idle** is the shared idle with her skater's stance (one leg back, arms out, a slight lean). The sheet asks for a ~0.15s stop on release: the stop keeps the shared 30% carry (about 0.1-0.2s to rest).
+- **Body and movement (not in the footage):** she has **no separate air dash**: Shift is the skate everywhere, and in the air (owner item 62, replacing item 12's buffer to the landing) it starts at once and skates through the air (see the Skate row). Her **plain jump** is the shared one; her **idle** is the shared idle with her skater's stance (one leg back, arms out, a slight lean). The sheet asks for a ~0.15s stop on release; the owner's 11-11 slide-out replaces it (she keeps 70% of the skate's speed into the ground brake: about 0.8m in 0.25s).
 - **Skate:** 1.6s at most; it goes on over a ledge (and over the abyss it falls once it ends unless rank 3 has laid ice). The rank-3 ice (`dash.ice_*`: look 2m ahead, 3.6m long, 1.6m wide, every 0.2s, 5s) is our own shape and duration; the source gives only "ice islands". Remote players see it through the existing `zone bridge` event, which now carries an optional colour.
 - **No squad shield or heal** (owner).
 - **Rimelock:** the stun is 0.75s (the dummy stayed encased about 0.5s; the wiki gives no number). The slow ramp (15% + 12% a second, cap 55%) is ours; the wiki only says it stacks for 3.5s. Line of sight is checked from the rink's centre at chest height. The cooldown starts on the cast. Merging while sealed ends it with no crash.
@@ -121,13 +121,63 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 - **Rimelock and Shift (owner item 27):** the source data says nothing about dashing out, so Shift ends it the way X again does (a late press still cracks it open at two thirds) and starts the skate at once at full speed. She is rooted while sealed, so the speed she carries out is the skate's own; any planar speed she still had (a knock) is kept for 0.5s. In the air the skate starts at once (item 62).
 - **Rimelock and the bond:** `HeroUlt.landed` for each hunter the crash stuns; the cast pays once, for its best event ("hit", "knock" if a hunter went down, "kill" if one was eliminated), through `KinBond.from_ult` with one cast id per cast. Monsters pay nothing (the shared base counts hunters only). The sheet's 0.4 per hunter up to 0.8 is replaced by the main session's per-cast amounts (boki_system.json). An early break pays nothing.
 
+## Cancels (ability to ability)
+
+What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
+ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
+Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here, except the skate
+pairs re-walked for the owner's 11-11 skate (the carve, the slide-out), which close the table. Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
+that can't be seen, and each ability's frames are a separate stretch of the clip, so no pair is shown back to back),
+[W] the wiki page linked above (ability text and patch history), owner = DECISIONS / OWNER_REVIEW_1103. Ours is
+origin/main d255acbee, read in the code (cancel-matrix-b pass, 11-09). **Unsettled** means no frame, card line or wiki
+line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both (ArchKit has no
+shared cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack key does
+nothing from a glide (`Hunter.can_fire`).
+
+| First (phase) | Second | Source | Ours | Verdict | Evidence |
+|---|---|---|---|---|---|
+| LMB held (darts every 0.18 s) | RMB | not shown | both: the darts keep flying while the spear forms in her palms | unsettled | [F] LMB 0009-0090, RMB 0094-0168: separate stretches |
+| RMB held (spear aim) | LMB | not shown | both, as above | unsettled | |
+| RMB held (spear aim) | E | not shown | both: the wall's tell starts, the spear aim stays | unsettled | |
+| RMB held | X | not shown | the aim is dropped and the charge is **kept**; Rimelock goes | unsettled | `_start_rime` |
+| RMB let go (0.1 s push), spear in flight | any | not shown | both: LMB, E, X all go; a stun or the seal drops the push | unsettled | `_tick_throw` |
+| RMB, no charge left | RMB | "2 charges" | denied (deny buzz), no queue | match | [D] |
+| E Rink Wall tell (0.2 s) | E | "reactivate Frozen Barricade to freeze it" | the press is **swallowed** (neither freezes nor casts) until the wall is out and sliding | unsettled (the wiki gives no rule for a press in the cast) | [W] patch 22.01.25 |
+| E wall sliding | E | "can reactivate to freeze it in place, lasts 6 s when stopped" | freezes it; a press on a frozen wall is ignored | match | [W]; `tm E: E again freezes it ...` |
+| E (tell, wall) | LMB, RMB, X | not shown (the wall is cast standing, both hands pushed out) | both | unsettled | [F] 0297-0358 |
+| X Rimelock (3.5 s) | X | "Reactivate early to cancel" | before the last 0.75 s: the shell breaks, no damage, no stun, no bond | match | [D]; [F] ult; `tm X: X early ends it ...` |
+| X, last 0.75 s | X | "Reactivating early in the last 0.75 seconds ... 33% less damage and stuns for 33% less duration" | cracks open at 67% | match | [W] patch 05.03.25; `tm X: X in the last 0.75 s ...` |
+| X Rimelock | LMB, E | "rooted and invulnerable 3.2-3.5 s"; nothing else shown | **ignored**: no darts, E denied | owner | #65; `tm X: ... nothing fires` |
+| X Rimelock | RMB | as above | ignored (nothing fires) | owner | #65 |
+| X Rimelock | jump | rooted in the crystal | locked | owner | #65, content/dash_flow `into_jump.x` |
+| X Rimelock | glide | not shown | shut, the press is refused out loud ("NO GLIDE"); over the abyss she falls | owner | #27, #65 |
+| X Rimelock | Boki merge | not shown | ends it with no crash | ours | Assumptions above |
+| Skate, carving (owner 11-11: the turn builds over ~0.17 s to 1.6 rad/s) | LMB | "straight, thick laser-like beams" while skating; owner Nov 7: they home in late | beams leave at the cursor whatever way the carve heads, then home late; firing turns her to the cursor and leaves her line as it was | match (late homing: owner; damage: open, parity row 6) | [F] 0239-0245, 0285-0290; `neve Shift -> LMB: carving ...` |
+| Skate, carving | E | not shown | both: the wall goes along the aim of the press, 1 bh ahead of where she is when the 0.2 s tell ends (about 2.3 m on); she carves on | unsettled [?] | `neve Shift -> E: carving ...` |
+| Skate, carving | X | rooted in the crystal; owner items 64/65 carry the skate into it | the statue slides 0.8 s straight along the cast frame's heading (the carve stops, keys or not), then she is rooted | owner | [F] ult f25-f55; `neve Shift -> X: cast mid-carve ...`, `tm X (item 64)` |
+| Skate (ground) | jump | not shown (the sheet: jumps not in the video) | she rises and the skate goes on under it | owner | items 51/62; `tm Shift (items 51/62): a jump in the skate rises ...` |
+| Skate in the air, clear of the ground | jump | not shown | the skate ends and the glider opens at the full skate speed (the 0.7x slide-out is ground only) | owner | item 62; `tm Shift (item 62): a jump press in the air skate opens the glider ...` |
+| Slide-out (after the release: 0.25 s, about 0.8 m) | LMB | "release to stop" [D]; beams only while skating [F] | plain darts (the skate ended on the release) | match | `neve slide-out -> LMB` |
+| Slide-out | X | rooted for the whole ult [F] | rooted at once, the slide is dropped (no statue slide) | match; [?] whether items 64/65 mean the slide-out too | `neve slide-out -> X` |
+| Slide-out | Shift | one Skate charge, 13 s [D] | refused with the deny buzz (the early-stop refund is at most 0.6 of a charge); the slide goes on | match | `neve slide-out -> Shift` |
+| Slide-out | jump | not shown | the shared jump, taking off with the slide's speed (it keeps its run-up) | unsettled [?] | `neve slide-out -> jump` |
+| Slide-out | RMB, E | not shown | both: the cast goes, the slide runs out under the brake | unsettled [?] | ArchKit default, not asserted |
+
+Fixes made: none. Every source line above already matches or is an owner item; the rest is unsettled. The 11-11 skate
+re-walk (ext/neve-cancels-1111) changed no behaviour and no dash-flow row; it fixed the stale 30% stop in Assumptions
+and asserts the skate pairs in `--neve-feel-check`.
+Suggestions (not built): the swallowed E press inside the wall's 0.2 s tell is ours; a frame or a source line saying
+whether a second E there should buffer into the freeze would settle it. Rimelock pressed in the slide-out could carry
+the slide as a short statue slide, like items 64/65 (the source roots her, so it stays rooted).
+
 ## Combinations
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
 |---|---|
 | A steady stream of equal darts, slow and bowed, curving onto the foe at the cursor | "a steady stream ...", "every dart the same", "darts come out slowly ...", "the bowed darts curve back ..." |
 | Darts Chill; a shard sticks per dart; 8 Shatter | "the ice shards in the foe count the stacks", "8 darts on one foe Shatter them" |
 | A knock on a Chilled foe Shatters them | "knocking a Chilled foe Shatters them after a beat" |
-| Skate: the push-off, straight beams at normal damage, the stride loop, over a ledge, the hockey stop and refund; rank 3 lays ice over the Abyss | the "tm Shift" rows |
+| Skate: the push-off, straight beams at normal damage, the stride loop, over a ledge, the slide-out and refund; rank 3 lays ice over the Abyss | the "tm Shift" rows |
 | Ice Spear: ring at the cursor while held, lands there, slows and Chills in the zone, detonates at 1.8s with a freeze; two charges on 10.2s; rank 3 hits 45% harder | the "tm RMB" rows |
 | Rink Wall: the tell, erupts narrow ahead in her look, widens while sliding, shoves, stops at the cursor, freezes on E, stops shots | the seven "tm E" rows (the slab row checks the solid sheet) |
 | The wall gives teammates nothing | `--support-check` "Rink Wall: no squad shield or heal" |
