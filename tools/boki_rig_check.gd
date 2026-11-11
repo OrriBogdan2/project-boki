@@ -156,7 +156,8 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	for i in 40:
 		rig._face_step(0.05)
 	var held := rig.face.get_blend_shape_value(sad)
-	ok(held == float(rig._want.get("sad", 0.0)), "a held expression lands on its goal, so it stops being written: %.4f" % held)
+	var goal := float(rig._want.get("sad", 0.0))
+	ok(held == goal, "a held expression lands on its goal, so it stops being written: %.4f" % held)
 	k.remove_meta("face")
 	ok(w > 0.9, "the face meta sets the expression: sad %.2f" % w)
 	k.set_meta("pose", "growl")

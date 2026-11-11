@@ -132,7 +132,7 @@ const STRIDE := {
 }
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
-const FACE_SNAP := 0.002      # blend weight: this close to its goal, a face shape stops easing (and stops being written)
+const FACE_SNAP := 0.002      # blend weight: this close to its goal, a face shape stops easing (and being written)
 const LOOK_SNAP := 0.0005     # eye UV offset: this close, the eyes stop drifting and their uniform stops being set
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
