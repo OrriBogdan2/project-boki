@@ -19,8 +19,12 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    a box; first match wins), `room` (ink room per bone), `anchors` (moved through the same fit), `keep` (bones
    whose old parts stay, with their old paint: Grimble's junk ball), `keep_mats` (old faces kept by material: Kael's
    skinned sword), `anchor_bones` (`{anchor: bone}` puts a moved anchor on another bone: Kael's arm blooms onto the
-   master's cursed left arm) and `move_bones` (such a bone's rest moved,
-   its clips' translation keys corrected so they end where they did). The budget: `tris` + the kept parts +
+   master's cursed left arm), `move_bones` (such a bone's rest moved,
+   its clips' translation keys corrected so they end where they did; or `{"to": master point, "chain": [bones]}`:
+   the bone's head goes to that point and the chain moves with it, keys untouched: Albert's fish and its spring
+   chain onto the mast it hangs from), `emit` (bake the master's emission map too: glTF emissive, which WardenGlb
+   tints to the archetype's model_glow) and `screen` (`{"slot", "centre", "r"}`: that slot's triangles get a flat
+   disc UV, u = 0.5 + dx/2r, v = 0.5 + dz/2r, for a shader face such as warden_mood's). The budget: `tris` + the kept parts +
    skin_relax's caps <= 15k (RIG_CONTRACT.md).
    Face detail: `tex` (atlas size, 2048 default; 4096 for a close-up Warden), `head_uv` (the head islands' scale
    against the body's: the face island is about 250 px of a 2048 atlas at 2.0, about 850 px of a 4096 one at 4.0)
@@ -37,6 +41,17 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `godot --headless --path . --import`, then
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
+
+## Albert (Mossy, the Breaker, bulwark): swapped 2026-11-10
+`art/wardens/src/breaker_v95.json`: the appeal3 face master (body only) onto breaker.glb; k 1 (the rig is as wide as he
+is, much shorter: the torso squashes ~0.76), masts and sails on `hips`, the fish and its spring chain moved to his
+left mast (`move_bones` "to"/"chain"), the cracks from the emission map (`emit`), the porthole glass a flat disc for
+warden_mood's face (`screen`). `relax` with no cuts: with cuts it took 5.4k of 13.8k triangles (the rigid-piece clips
+swing the shoulders and hips hard); left without cuts the worst edge is 8.0x (shoulders, hips; 2.5k edges over 1.3).
+`max_tris` 13000: the kept hammer and shield add ~1.8k, so the .glb stays under warden_glb_check's 15000 (14.7k).
+`--stretch-check --wardens=bulwark` fails every clip (worst 9.45x, fuse; hips and right arm); the in-game shots of
+fuse, x_wind and run_f show no tear at match size. He stands 2.47x a medium (the helmet and masts; was 1.9x).
+Shots: docs/shots/albert-appeal/ (game/: in-engine, moods_sheet.png = calm, happy, angry, determined, sad, flare).
 
 ## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
