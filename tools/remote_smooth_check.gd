@@ -81,7 +81,9 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a == "--remote-smooth-check=guest": guest = true
 		if a.begins_with("--rs-port="): dn.port = int(a.substr(10))
-	dir = ProjectSettings.globalize_path("user://remote_smooth")
+		if a.begins_with("--rs-dir="): dir = a.substr(9)      # the guest writes its record where the host reads it
+	if dir == "":
+		dir = ProjectSettings.globalize_path("user://remote_smooth")
 	DirAccess.make_dir_recursive_absolute(dir)
 	Net.message.connect(_on_msg)
 	if guest:
@@ -99,7 +101,8 @@ func _host() -> void:
 	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
 	CheckChild.hold(relay.peer, START_S)
 	ok(await dn._connect(), "the host is on the relay")
-	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d" % dn.port, dir.path_join("guest.log"))
+	guest_pid = CheckChild.start("--remote-smooth-check=guest --rs-port=%d '--rs-dir=%s'" % [dn.port, dir],
+			dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
@@ -116,8 +119,9 @@ func _host() -> void:
 	await dn._build(d)
 	m = dn.m
 	var G: Hunter = null
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _host_run(0.2, "", [])
 		G = m.ents_by_id.get("P" + other, null)
 	ok(G != null, "the guest's game is sending")
