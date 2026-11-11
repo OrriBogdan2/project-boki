@@ -427,6 +427,10 @@ func _lmb_parity() -> void:
 	ok("bjorn parity LMB: the throw's cadence is the source card's 0.45 s (sheet: 175 out, 175 back)",
 		absf(float(K.lmb_def()["throw_rate"]) - 0.45) < 0.001 and cadence > 0.30 and cadence <= 0.45 + 0.001,
 		"throw_rate %s fire_cd %.3f" % [K.lmb_def()["throw_rate"], cadence])
+	P.fire_cd = 0.0
+	K._recall()
+	ok("bjorn parity LMB: the recall is a press too, the next one waits the same 0.45 s (TTK: one hit per press)",
+		absf(P.fire_cd - float(K.lmb_def()["throw_rate"])) < 0.001, "fire_cd %.3f" % P.fire_cd)
 	await _rmb_parity(m, P, K, home)
 	await done(m)
 

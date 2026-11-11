@@ -20,20 +20,20 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | gunslinger (Ghost) | combo rank max | 1.37 | 1.76 | 0.78 | FAIL |
 | juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 3.48 | 7.70 | 0.45 | FAIL |
-| juggernaut (Brall) | combo rank max | 1.15 | 7.00 | 0.16 | FAIL |
+| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
+| juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
 | ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
-| ashwick (Felix) | LMB rank max | 4.72 | 6.20 | 0.76 | FAIL |
+| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
 | ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
 | ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
 | mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
 | mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | combo rank 0 | 7.32 | 9.00 | 0.81 | ok |
-| mage (Joule) | combo rank max | 4.07 | 6.40 | 0.64 | FAIL |
-| bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.12 | 5.85 | 0.70 | FAIL |
-| bulwark (Oath) | combo rank max | 3.65 | 5.00 | 0.73 | FAIL |
+| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
+| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
+| bulwark (Oath) | LMB rank 0 | 7.85 | 6.75 | 1.16 | ok |
+| bulwark (Oath) | LMB rank max | 7.85 | 6.75 | 1.16 | ok |
+| bulwark (Oath) | combo rank 0 | 6.28 | 5.85 | 1.07 | ok |
+| bulwark (Oath) | combo rank max | 5.45 | 5.00 | 1.09 | ok |
 | thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
@@ -58,7 +58,7 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | gunslinger (Ghost) | rmb | 0.143 | 0.128 | 1.11 |
 | gunslinger (Ghost) | e | 0.234 | 0.157 | 1.49 |
 | juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 |
-| juggernaut (Brall) | dash | 0.175 | 0.038 | 4.60 |
+| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 |
 | juggernaut (Brall) | e | 0.052 | 0.023 | 2.23 |
 | ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
 | ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
@@ -80,7 +80,6 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | Kael (Brall) | LMB 0.65; combo 0.45 and 0.16 | Slash 8 is 5.2% of our target against 43 = 3.3% (1.56x, cadence 0.34 vs 0.35 s matches). Rampage hits 9 + tip 18 = 17.5% of the target against Flame Step 49 = 3.8% (4.6x); Warchain 5.2% vs 2.3% (2.2x); Smash 16.9% vs 10.1% (1.67x). Max rank adds +40% Smash and a shorter dash recharge on top. | Slash 8 -> 5, Rampage hit 9 / tip 18 -> about 2 / 4 (the tip doubling is ours), Warchain hit 8 -> 3.6, Smash 26 -> 15. |
 | Cinder (Felix) | LMB 0.78, 0.76; combo 0.76, 0.61 | Stream 25.6% of the target a second vs 20.1% (258 of 1285). Cinder Shot 13.1% vs 8.2% (1.59x); the dash 0.70x and the cloak 0.76x are under. | Stream damage x0.8; Cinder Shot 20 -> 13; dash x1.4, cloak x1.3. |
 | Sparkle (Joule) | LMB 0.77; combo max 0.64 | Bolt 12 every 0.648 s is 12.0% a second against 90 every 0.8 s = 8.8% (1.37x); the owner set 0.648 s (items 70 and 116 in docs/heroes/mage.md, not in DECISIONS). Abilities are at parity (1.03 to 1.13x), so max rank (+90% spear, +100% dash, +50% strike on the source side vs our +15% and +30% steps) is where the combo drifts. | Bolt 12 -> 9 keeps 0.648 s (owner) at parity; ask the owner whether item 116 covers the damage. |
-| Albert (Oath) | LMB 0.73; combo 0.71, 0.73 | Hammer 12 is 7.8% against 192 of 2365 = 8.1% (match). Ours alternates throw and recall hits faster than 0.45 s (about 3.3 hits a second against 2.2); if the source recall hits as well, as the tooltip's "recall (192 dmg)" may mean, the source is 3.4 s and the ratio 1.45, still out. Spin Dash is at parity (1.01x). | Settle whether the source recall deals damage, then set throw_rate or recall_dmg. |
 | Motley (Void) | LMB 1.91; combo 2.15, 1.74 | Orb 9 is 5.8% of the target against 263 of 2365 = 11.1% (0.53x). Spear 0.53x, bomb 0.59x. The whole kit sits about half the source. Held fire never charges (owner item 60, DECISIONS line 162 -15%). | Orb 9 -> 17, spear x1.9, bomb x1.7. |
 
 Within the bar: Sable at both ranks (0.85 to 0.95), Vex combo rank 0 (0.92), Sparkle combo rank 0 (0.81).
