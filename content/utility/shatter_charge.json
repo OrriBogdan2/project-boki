@@ -1,0 +1,29 @@
+{
+ "id": "shatter_charge",
+ "name": "Shatter Charge",
+ "short": "Shatter",
+ "icon": "concussion",
+ "col": "ff9a5a",
+ "use": "fx",
+ "cd": 3.0,
+ "max": 3,
+ "bring": [
+  1,
+  2,
+  3
+ ],
+ "price": 45,
+ "desc": "Thrown. A beat after it lands it strips most of the armor of rivals close by and slows them for 2s.",
+ "effects": [
+  {
+   "type": "area",
+   "at": "aim",
+   "delay": 0.3,
+   "radius": 3.0,
+   "shred": 0.6,
+   "slow": 2.0,
+   "color": "#ff9a5a",
+   "dmg": 1.0
+  }
+ ]
+}
