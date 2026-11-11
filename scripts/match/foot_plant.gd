@@ -28,15 +28,16 @@ const META := "foot_plant"     # root meta: this FootPlant, for the .glb body's 
 const NEAR := 14.0             # m from the local player: Hunters this near get planted feet
 const REACH_DOWN := 0.3        # m: the most a foot reaches down; lower ground is a ledge (it stays on the lip)
 const REACH_UP := 0.3          # m: the most a foot lifts; higher ground is a wall or rock (it stays put)
-const RATE := 30.0             # 1/s: how fast a foot follows the ground, so a tile edge doesn't pop
+const RATE := 30.0             # 1/s: how fast a swinging foot follows the ground, so a tile edge doesn't pop
 const BODY_SLACK := 0.08       # m: a body this far off the terrain (mounted, on a train car) is left alone
 
 var lift := Vector2.ZERO       # m, world: each foot's move onto the ground (left, right), eased
 var drop := 0.0                # m, world: the hips' drop, eased
 var world: World               # where the ground is, while on
 var on := false                # planting this frame (near, not under animation LOD, standing on the terrain)
-var weight := 0.0              # how much the pose stands (0 in the air, gliding, downed, diving, mantling, rolling)
-var ref := 0.0                 # m, world: the terrain under the body
+var weight := 0.0              # how much the pose stands (0 in the air, gliding, diving, mantling, rolling)
+var ref := 0.0                 # m, world: the body's height in the game (on the ground: the ground under it)
+var lag := 0.0                 # m, world: the drawn body's height off ref while it eases up a step, by weight
 var posed := PackedInt32Array()                # the .glb bones the plant turns (_keep)
 var kept: Array[Transform3D] = []              # their poses before it did, this frame
 var wrote: Array[Transform3D] = []             # and after
@@ -46,14 +47,21 @@ static func near(h: Hunter) -> bool:
 	return h.is_local() or h.m.player == null or h.position.distance_to(h.m.player.position) < NEAR
 
 ## After a.update: plants the feet of a.model on w's ground. want: false under animation LOD or far away (the pose
-## stays the clip's and nothing is sampled).
-func plant(a: HunterAnim, w: World, dt: float, want: bool) -> void:
+## stays the clip's and nothing is sampled). y: the body's height in the game (Hunter.pos.y; the drawn body sits off
+## it while it eases up a step, Hunter.step_vis: a terrace, or one of Tenzo's rocks onto a higher one, and the feet
+## stay on the top meanwhile). r: the body's radius, so a rock it stands on counts as Ent.ground counts it.
+func plant(a: HunterAnim, w: World, dt: float, want: bool, y := INF, r := 0.0) -> void:
 	world = w
 	var body := a.model.global_position
-	ref = _ground(w, body, body.y)
-	weight = (1.0 - a.air_k) * (1.0 - a.glide_k) * (1.0 - a.down_k) * (1.0 - a.dive_k) * (1.0 - a.ledge_k)
-	if a.roll_t >= 0.0 or absf(body.y - ref) > BODY_SLACK:
+	var was := ref
+	ref = body.y if is_inf(y) else y
+	var off := minf(absf(ref - _ground(w, body, ref, r)), absf(ref - _ground(w, body, ref)))
+	weight = (1.0 - a.air_k) * (1.0 - a.glide_k) * (1.0 - a.dive_k) * (1.0 - a.ledge_k)
+	if a.roll_t >= 0.0 or off > BODY_SLACK:
 		weight = 0.0
+	lag = (body.y - ref) * weight
+	if weight > 0.01 and absf(ref - was) > StoneStand.POP and absf(ref - was) < REACH_UP:
+		lift -= Vector2.ONE * (ref - was)      # the body went up or down a step at once: the feet keep their height
 	on = want
 	if not on:
 		lift = Vector2.ZERO
@@ -68,8 +76,8 @@ func plant(a: HunterAnim, w: World, dt: float, want: bool) -> void:
 		return
 	a.rig.position += a.model.global_basis.inverse() * Vector3(0.0, -drop, 0.0)
 	var up := a.legs.global_basis.inverse() * Vector3.UP
-	_reach(a.leg_l, a.knee_l, up * (lift.x + drop))
-	_reach(a.leg_r, a.knee_r, up * (lift.y + drop))
+	_reach(a.leg_l, a.knee_l, up * (lift.x + drop - lag))
+	_reach(a.leg_r, a.knee_r, up * (lift.y + drop - lag))
 
 ## The .glb body's pass, once its clips have posed: the same plant on its root, thigh and shin bones.
 ## legs: [thigh.L, shin.L, thigh.R, shin.R] bone indices.
@@ -94,8 +102,8 @@ static func bones(root: Node3D, sk: Skeleton3D, legs: PackedInt32Array, dt: floa
 		sk.set_bone_global_pose(pelvis, pose)
 		foot_l -= up * fp.drop
 		foot_r -= up * fp.drop
-	_reach_bones(sk, legs[0], legs[1], foot_l + up * (fp.lift.x + fp.drop))
-	_reach_bones(sk, legs[2], legs[3], foot_r + up * (fp.lift.y + fp.drop))
+	_reach_bones(sk, legs[0], legs[1], foot_l + up * (fp.lift.x + fp.drop - fp.lag))
+	_reach_bones(sk, legs[2], legs[3], foot_r + up * (fp.lift.y + fp.drop - fp.lag))
 	for i in fp.posed.size():
 		fp.wrote[i] = sk.get_bone_pose(fp.posed[i])
 
@@ -122,18 +130,23 @@ func _restore(sk: Skeleton3D) -> void:
 			sk.set_bone_pose(posed[i], kept[i])
 
 ## Eases lift and drop toward the ground under the feet at foot_l and foot_r (world); false when there is nothing to do.
+## (lag is not eased: it follows the drawn body exactly.)
 func _settle(foot_l: Vector3, foot_r: Vector3, body_y: float, dt: float) -> bool:
 	var want := Vector2.ZERO
 	if weight > 0.01:
 		want = Vector2(_offset(world, foot_l, ref, body_y), _offset(world, foot_r, ref, body_y)) * weight
 	var follow := 1.0 - exp(-RATE * dt)
 	lift = lift.lerp(want, follow)
-	drop = lerpf(drop, maxf(0.0, -minf(want.x, want.y)), follow)
-	return absf(lift.x) > 0.001 or absf(lift.y) > 0.001 or drop > 0.001
+	if foot_l.y <= foot_r.y:       # the lower foot bears the weight: it stands on the ground at once (no float)
+		lift.x = want.x
+	else:
+		lift.y = want.y
+	drop = maxf(lerpf(drop, maxf(0.0, -minf(want.x, want.y)), follow), -minf(lift.x, lift.y))
+	return absf(lift.x) > 0.001 or absf(lift.y) > 0.001 or drop > 0.001 or absf(lag) > 0.001
 
-## The terrain's top under p (a stone stand counts), m.
-static func _ground(w: World, p: Vector3, body_y: float) -> float:
-	return StoneStand.top_under(w.dyn_walls, Vector3(p.x, body_y, p.z), 0.0, w.ground_at(p.x, p.z))
+## The terrain's top under p (a stone stand counts, for a body of radius r as Ent.ground counts it), m.
+static func _ground(w: World, p: Vector3, body_y: float, r := 0.0) -> float:
+	return StoneStand.top_under(w.dyn_walls, Vector3(p.x, body_y, p.z), r, w.ground_at(p.x, p.z))
 
 ## How far the ground under a foot at f sits above the body's (ref), 0 when it's out of the legs' reach.
 static func _offset(w: World, f: Vector3, ground_ref: float, body_y: float) -> float:
