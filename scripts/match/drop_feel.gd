@@ -1,6 +1,6 @@
 class_name DropFeel
 extends RefCounted
-## The opening drop's numbers and motion, from content/rules/drop.json (decision 0048): the skyship's
+## The opening drop's numbers and motion, from content/rules/drop.json (decision 0049): the skyship's
 ## height and speed, the launch, the dive you hold, the canopy and its flare, the landing's impact and
 ## each Hunter's ribbon in the dive. DropLaunch, DropReticle, DropSquad and DropView read the numbers here.
 

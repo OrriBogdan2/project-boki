@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. steering ramps (no snapping), the dive is clearly faster than the glider, the flare slows the last metres
 ##   3. the reticle: projected landing within RETICLE_M of where you land (canopy and dive), sits on the ground,
 ##      hides on landing; red over the void
-##   4. decision 0048, from the ship's height: a straight dive lands in DIVE_S, the canopy opens by itself at
+##   4. decision 0049, from the ship's height: a straight dive lands in DIVE_S, the canopy opens by itself at
 ##      DropFeel.open_h, a canopy open from the top lands in CANOPY_S with CANOPY_REACH_M of flat reach, crouch
 ##      held dives and letting go opens the canopy, a soft landing draws no ring, and the dive view (wider,
 ##      tipped down) is back to the usual view within VIEW_BACK_S of landing

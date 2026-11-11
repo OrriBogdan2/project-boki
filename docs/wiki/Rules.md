@@ -253,7 +253,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 
 | Setting | Value |
 |---|---|
-| doc | The opening drop (docs/decisions/0048-drop-height.md, EARLY_CAMPS_DROP.md section 3): the skyship, the squad launch, the dive, the canopy, the landing, and what the local player sees and hears on the way down. Read by DropFeel; DropLaunch, DropReticle, DropSquad, DropView and GliderSfx take their numbers from it. Metres, seconds, m/s, degrees. |
+| doc | The opening drop (docs/decisions/0049-drop-height.md, EARLY_CAMPS_DROP.md section 3): the skyship, the squad launch, the dive, the canopy, the landing, and what the local player sees and hears on the way down. Read by DropFeel; DropLaunch, DropReticle, DropSquad, DropView and GliderSfx take their numbers from it. Metres, seconds, m/s, degrees. |
 | ship | {"doc": "height: the ship's flight height (owner call 1; 140 is the grander alternative). speed: along its line. ride_cam_dist / launch_cam_dist: how far back the camera sits aboard and in the launch. plan_s: the planning phase before it sets off.", "height": 110.0, "speed": 14.0, "ride_cam_dist": 60.0, "launch_cam_dist": 26.0, "plan_s": 12.0} |
 | launch | {"doc": "speed: along the ship's heading. lift: up out of the hatch. lock_s: no keys for this long (45 m carried). separate_after_s: Separate can break you off from here.", "speed": 18.0, "lift": 8.0, "lock_s": 2.5, "separate_after_s": 1.5} |
 | dive | {"doc": "fall / speed: the dive's sink and top flat speed. vy_rate: 1/s, how fast it reaches its sink. accel: m/s^2 toward the keys.", "fall": 20.0, "speed": 16.0, "vy_rate": 7.0, "accel": 52.0} |

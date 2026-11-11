@@ -6,9 +6,9 @@ extends RefCounted
 ##     launch's heading.
 ##  3. Separate is refused before DropFeel.separate_after_s.
 ##  4. When the lock ends everyone breaks off on their own and their glider opens (a bot may fold it again at
-##     once to dive for its spot: a dive it holds, decision 0048).
+##     once to dive for its spot: a dive it holds, decision 0049).
 ##  5. A Separate after separate_after_s breaks that member off at once, glider open.
-##  6. The launch carries the squad CARRY_M along the ship's heading (decision 0048).
+##  6. The launch carries the squad CARRY_M along the ship's heading (decision 0049).
 
 const FORMATION_M := 9.0         # m: the widest drop slot and some slack
 const CARRY_M := [40.0, 50.0]    # m the launch carries you before the lock ends

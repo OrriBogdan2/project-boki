@@ -1,5 +1,5 @@
 {
-	"doc": "The opening drop (docs/decisions/0048-drop-height.md, EARLY_CAMPS_DROP.md section 3): the skyship, the squad launch, the dive, the canopy, the landing, and what the local player sees and hears on the way down. Read by DropFeel; DropLaunch, DropReticle, DropSquad, DropView and GliderSfx take their numbers from it. Metres, seconds, m/s, degrees.",
+	"doc": "The opening drop (docs/decisions/0049-drop-height.md, EARLY_CAMPS_DROP.md section 3): the skyship, the squad launch, the dive, the canopy, the landing, and what the local player sees and hears on the way down. Read by DropFeel; DropLaunch, DropReticle, DropSquad, DropView and GliderSfx take their numbers from it. Metres, seconds, m/s, degrees.",
 	"ship": {
 		"doc": "height: the ship's flight height (owner call 1; 140 is the grander alternative). speed: along its line. ride_cam_dist / launch_cam_dist: how far back the camera sits aboard and in the launch. plan_s: the planning phase before it sets off.",
 		"height": 110.0, "speed": 14.0, "ride_cam_dist": 60.0, "launch_cam_dist": 26.0, "plan_s": 12.0

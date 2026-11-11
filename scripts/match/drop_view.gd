@@ -1,6 +1,6 @@
 class_name DropView
 extends Node3D
-## What the local player sees on the way down (decision 0048, content/rules/drop.json "view", "cloud" and
+## What the local player sees on the way down (decision 0049, content/rules/drop.json "view", "cloud" and
 ## "wind"): the view widens and tips further down while you dive and eases back as the canopy opens; one
 ## drifting cloud sheet hangs under the ship, and crossing it is a moment of haze and a whoosh; wind streaks
 ## at the screen edges grow with the fall speed (one screen pass, off on the lowest quality preset).
