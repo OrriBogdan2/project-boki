@@ -110624,5 +110624,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_checkmare_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_chimelop",
+    "name": "Chimelop (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_chimelop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_chandelapi",
+    "name": "Chandelapi (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_chandelapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_cetorgan",
+    "name": "Cetorgan (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_cetorgan_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_carrousteed",
+    "name": "Carrousteed (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_carrousteed_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_chiptero",
+    "name": "Chiptero (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_chiptero_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_chandelotl",
+    "name": "Chandelotl (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_chandelotl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_clinkpede",
+    "name": "Clinkpede (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_clinkpede_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_chainipede",
+    "name": "Chainipede (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_chainipede_1.jpg",
+    "ok": true
   }
 ]
