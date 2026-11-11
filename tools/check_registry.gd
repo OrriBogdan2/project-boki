@@ -146,6 +146,7 @@ const CHECKS := {
 	"--hero-combo-check": ["res://tools/archer_bulwark_combo_check.gd", "hero_check", null],
 	"--buff-stack-check": ["res://tools/buff_stack_check.gd", "buff_stack_check", null],
 	"--buff-stack-shots": ["res://tools/buff_stack_check.gd", "buff_stack_check", "shots"],      # --shots-dir=<dir> (GPU)
+	"--kit-sweep-check": ["res://tools/kit_sweep_check.gd", "kit_sweep_check", null],      # every slot, every Hunter: no log errors
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],      # --shots-dir=<dir> [--size=WxH] (GPU)
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
