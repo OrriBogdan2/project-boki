@@ -47,6 +47,7 @@ func run(main_node: Node) -> void:
 			for st in STATES:
 				await _sweep(arch, env, st)
 	OS.remove_logger(errlog)
+	_torn_row()
 	print("KSWEEP DONE, %d runs, %d distinct errors" % [runs, seen.size()])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -157,3 +158,15 @@ func _recast(m: Match, P: Hunter, slot: String, st: String) -> void:
 	_frame(m, P, slot, true, false, st)
 	_play(m, P, slot, SETTLE_T, false, st)
 	await main.get_tree().process_frame
+
+## The torn box outline must triangulate at every size (the 379x153 tooltip box folded at a corner and
+## logged "Invalid polygon data" each frame while Neve fired).
+func _torn_row() -> void:
+	var torn := UiTorn.new()
+	torn.jag = 2.5
+	var bad := 0
+	for w in range(60, 500, 7):
+		for h in range(36, 300, 11):
+			if Geometry2D.triangulate_polygon(torn._outline(Rect2(0.0, 0.0, w, h))).is_empty():
+				bad += 1
+	ok("torn box outlines all triangulate (%d of 40x24 sizes do not)" % bad, bad == 0)
