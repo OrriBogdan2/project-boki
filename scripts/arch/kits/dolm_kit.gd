@@ -493,8 +493,8 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
-## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): no ring (a ring means
+## a hit area), a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	var fwd := Vector3(dir.x, 0.25, dir.y)
 	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
@@ -687,7 +687,6 @@ func cast_e() -> bool:
 		var p2: Vector3 = spots[j][0]
 		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
 	m.later(tell, _raise_feel)
-	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
 func _raise(p: Vector3, dir: Vector2) -> void:

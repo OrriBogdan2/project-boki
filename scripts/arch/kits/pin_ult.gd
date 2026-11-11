@@ -103,7 +103,6 @@ func end() -> void:
 	window = 0.0
 	nock_t = -1.0
 	AimKit.hide(h, "x")
-	AimKit.hide(h, "x_ring")
 	_tells(false)
 
 ## A Boki merge: the nock and the empowered window both end with no arrow.
