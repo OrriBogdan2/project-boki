@@ -1208,6 +1208,7 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | swap_cooldown | 3 |
 
 ## kit_parity (`content/rules/kit_parity.json`)
+## legendary (`content/rules/legendary.json`)
 
 
 
@@ -1228,6 +1229,12 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 | marks_doc | Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part. |
 | types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "tail_long"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "spikes"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "crest"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
 | foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric", "chimebun": "sound", "frostdrop": "ice", "pebblenut": "rock", "scalepepper": "dragon", "duskplum": "dark", "pricklepear": "poison", "sapjelly": "bug", "ironcrisp": "steel", "geodecandy": "crystal"} |
+| _doc | Legendary Boki (owner decision 2026-11-09, briefs/DECISIONS.md). Each match rolls once per map: with probability 'chance' one legendary appears, picked uniformly from the map's 'legendaries' list (content/maps/*.json, key 'legendary_spawn_chance' overrides 'chance'; maps without a list use 'roster'). It turns up delay_s seconds into the match (never at the start), at a Rare Boki point that isn't live, at least min_hunter_dist from every hunter. The roster also orders the Bokidex: legendaries sit last. |
+| chance | 0.2 |
+| roster | ["cairnback", "hivara", "zephyrak"] |
+| delay_s | 90 |
+| min_hunter_dist | 40 |
+| level_bonus | 6 |
 
 ## level_growth (`content/rules/level_growth.json`)
 
