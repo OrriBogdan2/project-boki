@@ -10,6 +10,9 @@ static var RULES: Dictionary = _load_rules()
 ## Settings "Camera" presets: pitch in degrees, distance, vertical field of view, rise (the view aims that far
 ## above you).
 static var STYLES: Dictionary = RULES["styles"]
+## Width / height of the screen the styles' lenses are measured at. Every screen shows that frame's width of
+## ground, a wider screen less ahead and behind, a narrower one more (frame_fov).
+static var FRAME_ASPECT: float = RULES["frame_aspect"]
 
 var focus := Vector3.ZERO
 var target: Node3D = null
@@ -25,6 +28,7 @@ var top := 0.0                # 0 = the usual angle, 1 = looking straight down (
 var top_to := 0.0
 var pitch := deg_to_rad(57.0)  # how steeply the camera looks down
 var dist := 32.2              # how far back it sits
+var lens := 28.0              # degrees: the vertical lens on a FRAME_ASPECT screen (the style's "fov")
 var rise := 0.0               # (camcal) the view aims this far above the focus (the style's "rise")
 var yaw := 0.0                # turned around the focus (0 = looking north); only the skyship ride turns it
 var yaw_to := 0.0
@@ -70,7 +74,7 @@ func air_zoom(h: Hunter, alt: float) -> float:
 const CAST_EASE := 16.0       # 1/s
 const CAST_HOLD := 0.04       # s a request lasts, so the view lets go as soon as the kit stops asking
 const CAST_STEP := 1.0 / 60.0 # s a frame can take off that at most
-static var EDGE: float = RULES["lean_edge_m"]      # m the cursor lean and a cast keep between you and the screen's edge
+static var EDGE: float = RULES["lean_edge_m"]      # m an aimed cast keeps between you and the screen's edge
 var cast_k := 0.0             # 0 = the usual view, 1 = fully pushed out
 var cast_zoom := 0.0          # how much wider at cast_k 1 (0.25: 25%)
 var cast_left := 0.0
@@ -92,7 +96,7 @@ func use_style(id: String) -> void:
 	style_id = id if STYLES.has(id) else "supervive"
 	pitch = deg_to_rad(float(st["pitch"]))
 	dist = float(st["dist"])
-	fov = float(st["fov"])
+	lens = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
@@ -103,14 +107,18 @@ func apply_settings() -> void:
 	if sty != style_id:
 		use_style(sty)
 
-## Metres of ground across a 16:9 screen at the focus, for a style at zoom 1.
+## Metres of ground across any screen at the focus, for a style at zoom 1.
 static func style_across(id: String) -> float:
 	var st: Dictionary = STYLES.get(id, STYLES["supervive"])
-	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * 16.0 / 9.0)
+	var hfov := 2.0 * atan(tan(deg_to_rad(float(st["fov"])) * 0.5) * FRAME_ASPECT)
 	return 2.0 * float(st["dist"]) * tan(hfov * 0.5)
 
+## The vertical lens for this screen: `lens` widened or narrowed so the view shows a FRAME_ASPECT screen's width.
+func frame_fov() -> float:
+	var view := get_viewport().get_visible_rect().size
+	return rad_to_deg(2.0 * atan(tan(deg_to_rad(lens) * 0.5) * FRAME_ASPECT * view.y / maxf(1.0, view.x)))
+
 func _ready() -> void:
-	fov = 28.0
 	near = 1.0
 	far = 120.0
 	current = true
@@ -220,6 +228,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)
 	var z := zoom * (1.0 + pull) * cast_wide()
+	fov = frame_fov()
 	far = (120.0 * maxf(1.0, z) + 30.0) * (1.0 + 1.5 * chase)
 	var k := top * top * (3.0 - 2.0 * top)
 	var c := chase * chase * (3.0 - 2.0 * chase)
