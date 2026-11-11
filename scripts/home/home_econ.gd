@@ -632,13 +632,9 @@ func open_grave(g: Dictionary) -> void:
 ## Keep the soul / bring it back, with what each needs.
 func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 	if not Save.has_building("shrine"):
-		var l := UI.label("A Soul Shrine could keep its soul, and one day bring it back. Build one beside the graveyard (it needs a Soul Ember from a vault or a Watcher).", 13, UI.MUTED)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		v.add_child(l)
+		v.add_child(UI.para("Build a Soul Shrine to keep its soul and bring it back."))
 		return
-	var r := UI.hbox(10)
 	if not g.get("soul", false):
-		var why := Econ.keep_soul(g.duplicate())    # just to ask; the real one is below
 		var b := UI.primary("Keep its soul in the shrine", func():
 			var w := Econ.keep_soul(g)
 			if w != "": h._toast(w); return
@@ -646,22 +642,19 @@ func _soul_row(v: VBoxContainer, g: Dictionary) -> void:
 			build_graves()
 			Save.save_game()
 			open_grave(g), 260)
-		b.disabled = why != ""
-		b.tooltip_text = why
-		r.add_child(b)
-		r.add_child(UI.label("%d of %d souls kept" % [Econ.souls_kept(), Econ.SHRINE_SLOTS], 13, UI.MUTED))
-	else:
-		var why2 := Econ.revive_why(g)
-		var b2 := UI.primary("Bring it back  (1 Soul Ember, %d gems)" % Econ.revive_cost(g), func(): _revive(g), 330)
-		b2.disabled = why2 != ""
-		b2.tooltip_text = why2
-		r.add_child(b2)
-		if why2 != "":
-			r.add_child(UI.label(why2, 12, Color("ffb0a0")))
-	v.add_child(r)
-	var note := UI.label("A Boki brought back is still itself, but not quite: its personality shifts, it loses a couple of levels and some trust, it keeps only a few memories, its tastes change, and it has a ghostly shimmer and a new title.", 12, UI.MUTED)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	v.add_child(note)
+		_gated(v, b, Econ.keep_soul(g.duplicate()))    # a copy: just to ask
+		return
+	_gated(v, UI.primary("Bring it back  ·  1 ember, %d gems" % Econ.revive_cost(g), func(): _revive(g), 330),
+		Econ.revive_why(g))
+	v.add_child(UI.para("It comes back changed: a new nature and tastes, fewer levels and memories."))
+
+## Adds button b to box, greyed out with why on a line under it when why isn't "".
+func _gated(box: Control, b: Button, why: String) -> void:
+	b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	b.disabled = why != ""
+	box.add_child(b)
+	if why != "":
+		box.add_child(UI.para(why, 12, Color("ffb0a0")))
 
 func _revive(g: Dictionary) -> void:
 	var rec := Econ.revive(g)
@@ -686,10 +679,9 @@ func _revive(g: Dictionary) -> void:
 # ------------------------------------------------------------------ the Soul Shrine
 func open_shrine() -> void:
 	var v: VBoxContainer = h._new_panel("Soul Shrine", 640, true)
-	UI.subtitle(v, "Keeps the souls of Boki buried here. An ember and some gems bring one back, changed.")
+	UI.subtitle(v, "Bring a buried Boki back, a little changed.")
 	var hx := UI.head_extra(v)
 	hx.add_child(UI.chip("bond", str(Econ.embers()), Color("9ff0e0"), "Soul Embers"))
-	hx.add_child(UI.chip("heart", "%d/%d" % [Econ.souls_kept(), Econ.SHRINE_SLOTS], Color("bff8ec"), "Souls kept"))
 	hx.add_child(UI.chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
 	var gs: Array = Econ.graves()
 	if gs.is_empty():
@@ -699,37 +691,22 @@ func open_shrine() -> void:
 		var g: Dictionary = gs[i]
 		var card := UI.card(UI.CARD, 10, 10)
 		var cv := UI.vbox(4); card.add_child(cv)
-		var sp: Dictionary = Data.KIN.get(String(g["species"]), {})
 		var nr := UI.hbox(10)
-		nr.add_child(UI.IconDot.new("paw", Color(sp.get("color", UI.INK)).lerp(Color.WHITE, 0.3), 20.0))
 		nr.add_child(UI.label(String(g["name"]), UI.T_HEAD, UI.INK, UI.big))
 		if g.get("soul", false): nr.add_child(UI.tag("Soul kept", Color("9ff0e0")))
 		cv.add_child(nr)
 		cv.add_child(UI.label(Econ.epitaph(g), 12, UI.MUTED))
-		var r := UI.hbox(8)
+		var gg := g
 		if not g.get("soul", false):
-			var gg := g
-			var why := "" if Econ.souls_kept() < Econ.SHRINE_SLOTS else "The shrine is full"
-			var b := UI.button("Keep its soul", func():
+			var full := "" if Econ.souls_kept() < Econ.SHRINE_SLOTS else "The shrine is full (%d souls)" % Econ.SHRINE_SLOTS
+			_gated(cv, UI.button("Keep its soul", func():
 				if Econ.keep_soul(gg) == "":
 					Sfx.play("unlock", null, -4.0); build_graves(); Save.save_game()
-				open_shrine(), 150)
-			b.disabled = why != ""
-			b.tooltip_text = why
-			r.add_child(b)
+				open_shrine(), 150), full)
 		else:
-			var gg2 := g
-			var why2 := Econ.revive_why(g)
-			var b2 := UI.button("Bring back  ·  1 ember, %d gems" % Econ.revive_cost(g), func(): _revive(gg2), 280, "bond")
-			b2.add_theme_color_override("font_color", Color("bff8ec"))
-			b2.disabled = why2 != ""
-			b2.tooltip_text = why2
-			r.add_child(b2)
-			if why2 != "":
-				var wl := UI.label(why2, 12, Color("ffb0a0"))
-				wl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-				r.add_child(wl)
-		cv.add_child(r)
+			var b := UI.button("Bring back  ·  1 ember, %d gems" % Econ.revive_cost(g), func(): _revive(gg), 280, "bond")
+			b.add_theme_color_override("font_color", Color("bff8ec"))
+			_gated(cv, b, Econ.revive_why(g))
 		v.add_child(card)
 
 ## The empty lot: what the shrine needs before you can build it.
@@ -744,10 +721,9 @@ func open_shrine_lot() -> void:
 		r.add_child(UI.IconDot.new("check" if ok else "lock", UI.GOOD if ok else UI.FAINT, 16.0))
 		r.add_child(UI.label(txt, UI.T_BODY, UI.INK if ok else UI.MUTED))
 		v.add_child(r)
-	need.call(ex >= 3, "3 successful expeditions  (%d)" % ex)
-	need.call(Econ.embers() > 0, "A Soul Ember to light it  (%d)" % Econ.embers())
-	need.call(int(Save.d["gems"]) >= int(bd["cost"]), "%d gems  (you have %d)" % [int(bd["cost"]), int(Save.d["gems"])])
-	var why := Econ.shrine_why()
+	need.call(ex >= 3, "3 expeditions you made it out of  ·  %d/3" % mini(ex, 3))
+	need.call(Econ.embers() > 0, "A Soul Ember to light it  ·  %d/1" % mini(Econ.embers(), 1))
+	need.call(int(Save.d["gems"]) >= int(bd["cost"]), "%d gems  ·  you have %d" % [int(bd["cost"]), int(Save.d["gems"])])
 	var btn := UI.primary("Build it", func():
 		if Econ.shrine_why() != "" or Save.has_building("shrine"): return
 		Econ.use_ember()
@@ -756,11 +732,8 @@ func open_shrine_lot() -> void:
 		Save.save_game()
 		h._close_panel()
 		h._construct("shrine"), 200)
-	btn.disabled = why != ""
-	btn.tooltip_text = why
+	btn.disabled = Econ.shrine_why() != ""
 	v.add_child(btn)
-	if why != "":
-		v.add_child(UI.label(why, 13, Color("ffb0a0")))
 
 # ------------------------------------------------------------------ the Armory
 ## The armory's tabs: gear by slot (Gear.SLOTS indexes), gloves covering both glove slots, then the
@@ -777,10 +750,11 @@ func open_armory() -> void:
 	UI.subtitle(v, "Next expedition: %s" % _loadout_line())
 	# what's stored, scrap and gems sit by the title; the two upgrades in the footer
 	var top := UI.head_extra(v)
-	top.add_child(_chip("satchel", "%d/%d" % [items.size(), Econ.arm_cap()], UI.INK, "Stored: gear you've brought home. Full: new pieces are sold as they come in"))
+	top.add_child(_chip("satchel", "%d/%d" % [items.size(), Econ.arm_cap()], UI.INK, "Stored gear. When full, new pieces are sold"))
 	top.add_child(_chip("gem", str(int(Save.d["gems"])), UI.GOLD, "Gems"))
-	top.add_child(_chip("medkit", "%d" % int(Save.d.get("scrap", 0)), Color("c8d0dc"), "Scrap: salvage spare gear for it. Upgrades and farm buildings need it"))
-	top.add_child(_chip("bond", "%d" % Econ.embers(), Color("9ff0e0"), "Soul Embers, for the Soul Shrine"))
+	top.add_child(_chip("medkit", "%d" % int(Save.d.get("scrap", 0)), Color("c8d0dc"), "Scrap: from salvaged gear, for upgrades and buildings"))
+	if Econ.embers() > 0:
+		top.add_child(_chip("bond", "%d" % Econ.embers(), Color("9ff0e0"), "Soul Embers, for the Soul Shrine"))
 	var fl := UI.footer_left(v)
 	fl.add_child(_upgrade_btn("arm", "Storage", Econ.arm_cap(), Econ.ARM_CAPS))
 	if not ARM_TABS.has(arm_tab) and arm_tab not in ["Treasure", "Utility", "Backpacks"]:
