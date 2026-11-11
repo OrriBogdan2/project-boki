@@ -195,7 +195,6 @@ func launch(l: Hunter, from_net := false) -> void:
 	if m.net_on and not from_net:
 		m.net_event(["rkt", l.nid])
 	if m.player and r.riders.has(m.player):
-		m.sfx("whoosh", null, -2.0)
 		if m.hud:
 			m.hud.toast("%s to jump out  ·  then %s again for your glider" % [Settings.key_cap("jump"), Settings.key_cap("jump")], Color("cfeaff"))
 

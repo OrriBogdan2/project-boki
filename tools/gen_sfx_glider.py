@@ -15,29 +15,9 @@ import os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sfx_lib as S
-from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, crack, grains, shape, soft_in
+from sfx_lib import N, noise, lpf, hpf, bpf, env, mix, at, crack, grains, shape, soft_in, sweep_noise, wobble
 
 S.reseed(9411)
-
-
-def sweep_noise(d, f0, f1, width=0.4):
-    """Noise whose band glides f0 -> f1 (a rush of air)."""
-    n = N(d); u = np.arange(n) / max(1, n - 1)
-    lf = np.log(f0) + (np.log(f1) - np.log(f0)) * u
-    out = np.zeros(n); src = noise(d)
-    for fc in np.geomspace(150, 8000, 18):
-        g = np.exp(-((np.log(fc) - lf) / width) ** 2)
-        if g.max() < 0.02:
-            continue
-        out += bpf(src, fc * 0.8, fc * 1.25) * g
-    return out
-
-
-def wobble(d, rate, depth):
-    """A smooth random level around 1 (gusts), `rate` new values a second."""
-    pts = max(4, int(d * rate) + 3)
-    x = np.interp(np.arange(N(d)) / S.SR * rate, np.arange(pts), S.rng.standard_normal(pts))
-    return np.clip(1.0 + depth * lpf(x, 40) / (np.std(x) + 1e-9), 0.1, None)
 
 
 def snap():
