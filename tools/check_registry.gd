@@ -18,6 +18,9 @@ const CHECKS := {
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
 	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],      # GPU
+	"--heart-seats-check": ["res://tools/heart_seats_check.gd", "heart_seats_check", null],      # 0051 seats
+	"--hud-reveal-check": ["res://tools/hud_reveal_check.gd", "hud_reveal_check", null],      # the staged HUD
+	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],      # the Ways Out strip
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
@@ -225,6 +228,7 @@ const CHECKS := {
 	"--inventory-check": ["res://tools/inventory_check.gd", "inventory_check", null],      # in-match inventory
 	"--inv-shots": ["res://tools/inv_shots.gd", "inv_shots", null],      # --shots-dir=<dir>, --resolution
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],      # --shots-dir=<dir>
+	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],      # --shots-dir=<dir> --res=WxH
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
@@ -353,6 +357,7 @@ const CHECKS := {
 	"--dex-filter-check": ["res://tools/dex_filter_check.gd", "dex_filter_check", null],      # Field Book filters
 	"--dex-filter-shots": ["res://tools/dex_filter_shots.gd", "dex_filter_shots", null],      # --shots-dir=<dir>
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
+	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # summon ring + tags on the Boki
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace

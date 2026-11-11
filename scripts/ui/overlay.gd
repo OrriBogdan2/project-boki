@@ -410,6 +410,7 @@ func _tab_video(v: VBoxContainer) -> void:
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
 	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
+	_toggle(v, "Show full HUD", "hud_full", "Every HUD panel from the first expedition")
 	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
 	var palettes: Array = SideColor.ORDER.map(func(id): return [id, SideColor.NAMES[id]])
 	_choice(v, "Colour vision", SideColor.KEY, palettes, Callable(),
