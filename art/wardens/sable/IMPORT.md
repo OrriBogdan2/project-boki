@@ -31,3 +31,20 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 - **Weapons:** twin flintlocks skinned to hand.R / hand.L, procedural silver and maroon wood with violet runes and a crystal, scaled up from v1 to the sheet (not projected from it). The silver and wood ramps sit a step under the sheet because the engine's toon light lifts them; the muzzle halos are small so the barrels keep their grey. Two moth-curved knives on each hip, from the turnaround's side view (the master shows two on her right). `anchor_bola` keeps its name on the hips; the kit needs the name.
 - **Face and skin:** the scan's stitched mouth was removed in three places: the low mesh's crease smoothed (`sable_finish.py`), the normal bake flattened there, and a thin smile painted (`face_fix` in `sable_paint.py`). The same pass grades the skin toward the sheet's grey-lilac (tuned in the engine: a step below the hair, not the Blender preview), redraws the beauty mark, cleans collar violet off the neck and paints the cut buns back to hair.
 - **The back of the skull:** the buns the scan grew are cut in `sable_source.py`; `hairback()` closes the hole with a fitted ellipsoid down to the nape.
+
+## Pilot loops (11-11, animation-quality lane)
+
+All 8 loco clips are on the motion-pilot recipe now, not `sable_clips.py`'s keys.
+- **Forward loops.** `walk_f` (0.833 s) and `run_f` (0.5 s, about the source's 2.2 Hz) come from a Meshy auto-rig of the v1 glb (Meshy's walking and running clips) retargeted onto the rig contract (~/anim/pilot-sm, outside git; ext/anim-pilot-loops-sm c3ad9e523). The rig and its rest pose are unchanged by the v95 swap, so they carry over byte for byte with `glb_add_clips.py`.
+- **Re-pinned feet.** The game's `--anim-audit` showed the retarget still slid (93 % at a run), so the soles were re-pinned with `hunter_dir_gait.py` (origin/ext/anim-dirloops-pelvis e8326f59f): `-- sable.glb out.glb 2.2 4.6 f`, then `b,l,r` on the result. b/l/r take the forward loop's length, strike and hip height, so the ring stays in step. Every planted sole now moves at 2.2 / 4.6 m/s, 100 % within 5 %.
+- **The json.** `loco.stride` and `loco.foot_mps` in `content/rules/warden_anim/sable.json` went from [1.5, 1.5] / [1.02, 3.18], which were tuned for the old short-stride clips, to [1.2, 1.2] / [1.89, 3.95]. The audit reads an ankle proxy, which measures about 0.64x of the sole speed. A sweep over stride 1.0 / 1.2 / 1.35 gave the lowest slide at 1.2.
+- **Results.**
+
+  | Speed | Main slide | New slide |
+  | --- | --- | --- |
+  | 2.2 m/s | 39 % | 20 % |
+  | 3.4 m/s | 44 % | 47 % |
+  | 4.65 m/s | 17 % | 18 % |
+
+  The run stays under the 25 % gate. Blind Fable rubric from the pilot (before the re-pin): walk 4.2 vs 2.2, run 3.8 vs 2.7.
+- **Shots.** docs/shots/anim-pilot-loops-sm/.
