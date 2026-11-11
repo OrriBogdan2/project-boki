@@ -252,3 +252,6 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 
 ## Payoff
 CRUSHED: stun, heal, T4 hitstop and shake, own sound, `bul_crush`.
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/breaker/breaker.glb): his own hand-keyed 1.00 s loop (tools/art1/breaker_anims.py), bent over the Wisp with the hands at its top. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

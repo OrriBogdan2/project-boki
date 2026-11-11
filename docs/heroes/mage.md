@@ -199,3 +199,6 @@ slot changes. R reloads and the Boki Merge is on its own key (T by default).
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
   Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/ryzz/ryzz.glb): a 3.60 s loop, 3 presses, keyed on her own `crouch_idle`: the torso leans 0.50 rad over a Wisp 0.95 m ahead and both hands press on it at 0.56 m. Baked by `--revive-bake --wardens=ryzz` (tools/revive_bake.gd) and put in the .glb with `tools/art1/glb_add_clips.py <glb> <dir>/ryzz_revive.json revive`; the old `revive` (the downed get-up) is gone. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

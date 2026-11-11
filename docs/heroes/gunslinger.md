@@ -273,3 +273,6 @@ Suggestion (not built): carry the burr cone length over the network so remote pl
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/vex/vex.glb): a 3.60 s loop, 3 presses, keyed on her own `crouch_idle`: the torso leans 0.42 rad over a Wisp 0.70 m ahead and both hands press on it at 0.56 m. Baked by `--revive-bake --wardens=vex` (tools/revive_bake.gd) and put in the .glb with `tools/art1/glb_add_clips.py <glb> <dir>/vex_revive.json revive`; the old `revive` (the downed get-up) is gone. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

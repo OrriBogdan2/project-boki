@@ -1,6 +1,8 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
 with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
-Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
+The source may also be a keys .json (tools/revive_bake.gd: {"name", "fps", "frames", "bones": {bone: {"rotation": [xyzw..],
+"translation": [xyz..]}}}, one key per frame); its bone names match the target's nodes with "_" read as ".".
+Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb|keys.json> <prefix-or-name>[,...] [out.glb]"""
 import json
 import struct
 import sys
@@ -27,6 +29,33 @@ def write(path, j, bin_):
         f.write(js)
         f.write(struct.pack("<I4s", len(bin_), b"BIN\0"))
         f.write(bin_)
+
+
+def from_keys(path, node_names):
+    """A keys .json as a one-clip glTF (json, bin) for add(): nodes named as the target's."""
+    k = json.load(open(path))
+    norm = {n.replace("_", "."): n for n in node_names if n}
+    sj = {"nodes": [], "accessors": [], "bufferViews": [], "animations": [{"name": k["name"], "channels": [], "samplers": []}]}
+    sb = bytearray()
+
+    def accessor(vals, kind):
+        flat = [float(x) for v in vals for x in (v if isinstance(v, list) else [v])]
+        sj["bufferViews"].append({"buffer": 0, "byteOffset": len(sb), "byteLength": 4 * len(flat)})
+        sb.extend(struct.pack("<%df" % len(flat), *flat))
+        ac = {"bufferView": len(sj["bufferViews"]) - 1, "componentType": 5126, "count": len(vals), "type": kind}
+        if kind == "SCALAR":
+            ac["min"], ac["max"] = [min(flat)], [max(flat)]
+        sj["accessors"].append(ac)
+        return len(sj["accessors"]) - 1
+
+    times = accessor([i / k["fps"] for i in range(k["frames"])], "SCALAR")
+    anim = sj["animations"][0]
+    for bone, paths in k["bones"].items():
+        sj["nodes"].append({"name": norm.get(bone.replace("_", "."), bone)})
+        for path, vals in paths.items():
+            anim["samplers"].append({"input": times, "output": accessor(vals, "VEC4" if path == "rotation" else "VEC3")})
+            anim["channels"].append({"sampler": len(anim["samplers"]) - 1, "target": {"node": len(sj["nodes"]) - 1, "path": path}})
+    return sj, sb
 
 
 def add(tj, tb, sj, sb, wanted):
@@ -73,7 +102,7 @@ if __name__ == "__main__":
     out = sys.argv[4] if len(sys.argv) > 4 else target
     keys = keys.split(",")
     tj, tb = read(target)
-    sj, sb = read(source)
+    sj, sb = from_keys(source, [n.get("name") for n in tj["nodes"]]) if source.endswith(".json") else read(source)
     done = add(tj, tb, sj, sb, lambda n: any(n == k or n.startswith(k) for k in keys))
     write(out, tj, tb)
     print("added", len(done), done)

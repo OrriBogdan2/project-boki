@@ -329,3 +329,6 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   each rock event carries its own direction, so the arc needs no new Net field (Net.VERSION unchanged).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/tarek/tarek.glb): his own hand-keyed 1.20 s loop (tools/art1/tarek_clips.py), bent over the Wisp with the hands at its top. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

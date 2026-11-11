@@ -423,3 +423,6 @@ left over when the merge ends: the Searing Wave charge (`lmb_t`, `lmb_buf`, `mel
 wind-up (`slam_w`), an armed Haul Slam (`haul`) and the held Smash (`rmb_down`, cleared by the merge itself), a Meteor Drop in its dive (`drop`), the Lunge's full flag (`lunge_full`) and a running Gilded Riposte
 (`riposte.st`, its guard or cleave; the gold glow hides).
 Scripted in `--kit-combo-check` as the `merge hold jug:` checks.
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/kael/kael.glb): a 3.60 s loop, 3 presses, keyed on his own `crouch_idle`: the torso leans 0.42 rad over a Wisp 0.60 m ahead and both hands press on it at 0.56 m. Baked by `--revive-bake --wardens=kael` (tools/revive_bake.gd) and put in the .glb with `tools/art1/glb_add_clips.py <glb> <dir>/kael_revive.json revive`; the old `revive` (the downed get-up) is gone. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

@@ -321,3 +321,6 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/cinder/cinder.glb): a 3.60 s loop, 3 presses, keyed on her own `crouch_idle`: the torso leans 0.42 rad over a Wisp 1.00 m ahead and both hands press on it at 0.56 m. Baked by `--revive-bake --wardens=cinder` (tools/revive_bake.gd) and put in the .glb with `tools/art1/glb_add_clips.py <glb> <dir>/cinder_revive.json revive`; the old `revive` (the downed get-up) is gone. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

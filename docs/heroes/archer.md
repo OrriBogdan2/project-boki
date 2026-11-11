@@ -270,3 +270,6 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/hem/hem.glb): a 3.60 s loop, 3 presses, keyed on her own `crouch_idle`: the torso leans 0.42 rad over a Wisp 0.75 m ahead and both hands press on it at 0.56 m. Baked by `--revive-bake --wardens=hem` (tools/revive_bake.gd) and put in the .glb with `tools/art1/glb_add_clips.py <glb> <dir>/hem_revive.json revive`; the old `revive` (the downed get-up) is gone. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).

@@ -254,3 +254,6 @@ ring grows, then a full spin as it opens), `thf_encore_dance` (eight 0.2s beats 
   Sounds: `dj_encore` (the ring opening), `dj_encore_whirr` (the 2s it runs), `dj_encore_hit` (a blade landing).
 - The Jackpot fold (the fifth Mark set off a short Death Blossom) is gone: with Encore on X it duplicated the
   ultimate, so the passive is back to the source's (Marks ramp the bolts, knocks heal).
+
+## Revive clip
+`revive` (`states.reviving`, art/wardens/sable/sable.glb): a 3.60 s loop, 3 presses, keyed on her own `crouch_idle`: the torso leans 0.82 rad over a Wisp 0.90 m ahead and both hands press on it at 0.56 m. Baked by `--revive-bake --wardens=sable` (tools/revive_bake.gd) and put in the .glb with `tools/art1/glb_add_clips.py <glb> <dir>/sable_revive.json revive`; the old `revive` (the downed get-up) is gone. Played while standing still on a teammate's Wisp (decision 0019); the root turns to the Wisp, a hit flinches out of it at once, a step or a dash walks out. The 4 s revive (Life.R revive_time) plays it as a loop. Asserted by `--clip-check` (loop seam, hands down on the Wisp, breaks).
