@@ -44,7 +44,9 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 
 ## Playing and buses
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
-- They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
+- Buses (all set up in `SfxMix`, `scripts/core/sfx_mix.gd`): **Music**, **Ambience** and **UI** go to the master; **SFX** (compressor, a little room, limiter) too, with **Voice** (`grunt` sounds and the `v_*` monster cries), **Boki** (`boki` sounds) and **SFXFar** (low-passed; every sound past 9 m, whatever its kind) feeding into it. A sound's set category picks its bus (`content/rules/audio_mix.json` `bus_of_category`); anything else is SFX.
+- Big events duck the bed: when one of `big_event.sounds` is heard (`ult_tag_foe`, a rival's ultimate; `heart_reveal`/`heart_gate_open`; `steal_won`/`steal_lost`), Music and Ambience dip together by `dip_db` (-6) and come back over `recover_s` (1 s). This is apart from `Sfx.duck` (music only, under slow-motion beats and catches). `--match-audio-check` asserts the routing and the dip and prints each bus's peak meter over 12 s of an autoplay match (`MATCHAUDIO BUS`).
+- A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
 ## Ultimate cast cues
