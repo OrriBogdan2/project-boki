@@ -1,0 +1,72 @@
+{
+	"juggernaut": {"line": "Kael: grim, cold, never cocky. He rolls his neck and resettles his grip, one economical motion.", "dur": 2.4, "tracks": [
+		{"bone": "head", "rot": [-0.1, 0, 0.22], "to": 0.55},
+		{"bone": "head", "rot": [0, 0, -0.2], "from": 0.45},
+		{"bone": "hips", "rot": [0, 0.1, 0], "from": 0.5},
+		{"bone": "forearm.R", "rot": [0.25, 0, 0], "from": 0.55, "beats": 2}
+	]},
+	"bulwark": {"line": "Mossy: huge, warm-hearted, laughs easily. He glances down at his lure and chuckles.", "dur": 2.6, "tracks": [
+		{"bone": "head", "rot": [-0.4, 0.15, 0], "to": 0.85},
+		{"bone": "hips", "rot": [-0.06, 0, 0], "to": 0.85},
+		{"bone": "hips", "rot": [0.05, 0, 0], "from": 0.4, "to": 0.95, "beats": 3}
+	]},
+	"dolm": {"line": "Tenzo: nimble, reads the ground by feel. He taps a toe and listens through the stone.", "dur": 2.4, "tracks": [
+		{"bone": "thigh.R", "rot": [0.35, 0, 0], "to": 0.75, "beats": 3},
+		{"bone": "hips", "rot": [0.04, 0, 0], "to": 0.75, "beats": 3},
+		{"bone": "head", "rot": [0, 0, 0.14], "in": 0.35, "out": 0.35}
+	]},
+	"ashwick": {"line": "Cinder: delighted by fire. She lets a flame lick up her wrist and smiles at it.", "dur": 2.6, "tracks": [
+		{"bone": "upper_arm.R", "rot": [0.8, 0, -0.1], "from": 0.05, "to": 0.95},
+		{"bone": "forearm.R", "rot": [1.0, 0, 0], "from": 0.05, "to": 0.95},
+		{"bone": "head", "rot": [-0.2, -0.3, 0.1], "from": 0.1, "to": 0.95}
+	]},
+	"mage": {"line": "Sparkle: bold, asks nobody's permission. She snaps her fingers and the air answers.", "dur": 2.2, "tracks": [
+		{"bone": "upper_arm.R", "rot": [0.7, 0, -0.15]},
+		{"bone": "forearm.R", "rot": [0.9, 0, 0]},
+		{"bone": "forearm.R", "rot": [-0.35, 0, 0], "from": 0.4, "to": 0.8, "beats": 2},
+		{"bone": "head", "rot": [0.12, 0, -0.15]}
+	]},
+	"ostra": {"line": "Motley: a grinning jester. The head tilts too far, past natural, and snaps back.", "dur": 2.4, "tracks": [
+		{"bone": "head", "rot": [0, 0, -1.0], "to": 0.8, "in": 0.7, "out": 0.06},
+		{"bone": "hips", "rot": [0, 0, -0.1], "to": 0.8, "in": 0.7, "out": 0.06}
+	]},
+	"tender": {"line": "Meeko: timid, walks into the dark anyway. She startles at a noise, looks back, then squares up.", "dur": 2.6, "tracks": [
+		{"bone": "head", "rot": [0, 1.0, 0], "to": 0.6, "in": 0.2},
+		{"bone": "hips", "rot": [0, 0.35, 0], "to": 0.6, "in": 0.2},
+		{"bone": "hips", "rot": [0.06, 0, 0], "from": 0.6},
+		{"bone": "head", "rot": [0.1, 0, 0], "from": 0.6}
+	]},
+	"rimewright": {"line": "Neve: elegant and playful. A toe-pick tap on the ice, then a half spin back to rest.", "dur": 2.8, "tracks": [
+		{"bone": "thigh.L", "rot": [0.25, 0, 0], "to": 0.4, "beats": 2},
+		{"bone": "hips", "rot": [0, 0.9, 0], "from": 0.45, "in": 0.45, "out": 0.45},
+		{"bone": "head", "rot": [0, 0.35, 0], "from": 0.45, "in": 0.45, "out": 0.45}
+	]},
+	"thief": {"line": "Sable: quick, light-fingered. A sleight of hand with her blade, eyes down, then gone again.", "dur": 2.2, "tracks": [
+		{"bone": "upper_arm.R", "rot": [0.6, 0, -0.1]},
+		{"bone": "forearm.R", "rot": [0.8, 0, 0]},
+		{"bone": "hand.R", "rot": [1.2, 0, 0], "from": 0.3, "to": 0.8, "beats": 2},
+		{"bone": "head", "rot": [-0.25, 0, 0]}
+	]},
+	"gunslinger": {"line": "Vex: calm, professional, always has a plan. A slow scan of the horizon, hold, return.", "dur": 2.8, "tracks": [
+		{"bone": "head", "rot": [0, 0.7, 0], "to": 0.5, "in": 0.35, "out": 0.35},
+		{"bone": "head", "rot": [0, -0.9, 0], "from": 0.4, "in": 0.35, "out": 0.4},
+		{"bone": "hips", "rot": [0, 0.12, 0], "to": 0.5},
+		{"bone": "hips", "rot": [0, -0.12, 0], "from": 0.4}
+	]},
+	"archer": {"line": "Lace: cool, patient, watches everything. She draws a red thread taut between two fingers and lets it go.", "dur": 2.6, "tracks": [
+		{"bone": "upper_arm.L", "rot": [0.5, 0, 0.2], "in": 0.25, "out": 0.2},
+		{"bone": "upper_arm.R", "rot": [0.5, 0, -0.2], "in": 0.25, "out": 0.2},
+		{"bone": "forearm.L", "rot": [0.8, 0, 0], "in": 0.25, "out": 0.2},
+		{"bone": "forearm.R", "rot": [0.8, 0, 0], "in": 0.25, "out": 0.2},
+		{"bone": "upper_arm.L", "rot": [0, 0, -0.3], "from": 0.35, "to": 0.75},
+		{"bone": "upper_arm.R", "rot": [0, 0, 0.3], "from": 0.35, "to": 0.75},
+		{"bone": "head", "rot": [-0.3, 0, 0]}
+	]},
+	"dredge": {"line": "Grimble: greedy, hunched, a smug squint. He holds a coin to his loupe, then bites it.", "dur": 2.8, "tracks": [
+		{"bone": "upper_arm.R", "rot": [0.55, 0, -0.1], "in": 0.25, "out": 0.25},
+		{"bone": "forearm.R", "rot": [1.1, 0, 0], "in": 0.25, "out": 0.25},
+		{"bone": "head", "rot": [-0.15, -0.25, 0.2], "in": 0.25, "out": 0.25},
+		{"bone": "hips", "rot": [-0.05, 0, 0]},
+		{"bone": "head", "rot": [-0.2, 0, 0], "from": 0.55, "to": 0.85, "beats": 2}
+	]}
+}
