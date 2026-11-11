@@ -13,6 +13,7 @@ const SPOT_R := 1.15          # tiles from a toy's centre to where a Boki stands
 const SPOT_GAP := 0.9         # m: a toy's standing place keeps this far from a Boki lying down
 const CROWD := 1.9            # m: a toy with a Boki lying this close to it is left alone (it would push through them)
 const ARRIVE := 0.7           # tiles: close enough to start
+const STALL_GAIN := 0.5       # m nearer the toy that count as getting somewhere
 const HUFF_SECS := 1.5        # the growl after a squabble
 const BALL_R := 0.28          # the ball's resting height (its radius)
 
@@ -165,9 +166,9 @@ func step(k: Dictionary, d: float) -> bool:
 	k["goal"] = _spot(k, t)
 	if p["phase"] == "go":
 		p["t"] = float(p["t"]) + d
-		if Vector2(pos.x - k["goal"].x, pos.z - k["goal"].z).length() < ARRIVE:
+		if _left(pos, k["goal"]) < ARRIVE:
 			_arrive(k, t)
-		elif float(p["t"]) > float(rules()["go_timeout"]):
+		elif float(p["t"]) > float(rules()["go_timeout"]) or _stalled(p, _left(pos, k["goal"])):
 			_stop(k)
 			return false
 		return k.has("play")
@@ -177,6 +178,16 @@ func step(k: Dictionary, d: float) -> bool:
 	if float(p["t"]) <= 0.0:
 		_finish(k, t)
 	return true
+
+func _left(pos: Vector3, goal: Vector3) -> float:
+	return Vector2(pos.x - goal.x, pos.z - goal.z).length()
+
+## Boxed in on the way: no nearer the toy (`left` m away) for toys.json stall_s.
+func _stalled(p: Dictionary, left: float) -> bool:
+	if left < float(p.get("best", INF)) - STALL_GAIN:
+		p["best"] = left
+		p["best_t"] = p["t"]
+	return float(p["t"]) - float(p["best_t"]) > float(rules()["stall_s"])
 
 ## Reaching the toy: play, or (with someone already there) share it or squabble over it.
 func _arrive(k: Dictionary, t: Dictionary) -> void:
