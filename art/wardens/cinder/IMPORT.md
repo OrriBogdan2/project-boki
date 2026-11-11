@@ -40,3 +40,7 @@ Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUD
 `x_breath` leaf (eeb4f3ae4, e557cd71e). The 0.24.4 merge copied the 41 clips of that glb (spring tracks included)
 onto the swapped body by node name (same skeleton: no rest drift) and added `x_breath` with kael_retarget.py's
 `add_breath` at her own spot (0.283 m over hips) and chest band (1.0-1.32 m up, |x| under 0.17 m): 3363 vertices.
+
+walk_fl, walk_br, run_fl, run_br (2026-11-11; the judge kept only these): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/cinder/cinder.glb OUT.glb 2.26 5.19`
+(her `loco.foot_mps`: the game plays the ring at speed / foot_mps, so the soles land at 2.2 and 4.6 m/s), then
+`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb OUT.glb walk_fl,walk_br,run_fl,run_br` (judge: docs/art/wardens/dirloops/JUDGE.md).

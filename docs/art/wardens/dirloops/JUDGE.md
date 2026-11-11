@@ -96,3 +96,58 @@ Cost: the stance gets short where the forward hip is tall and the step long. Tar
 cycle (a bounding side step); Vex walk_r 0.23 (a light, springy walk). Fix for both (ours, not built): a shorter stride
 at loco speed needs a faster cadence, i.e. a shorter loop, which breaks the ring's one length; the alternative is
 a lower, longer-legged forward walk (the forward loop sets the band).
+
+## Cinder (heavy) and Sable (light): blind judge (2026-11-11, ext/anim-dirloops-cinder-sable)
+
+Baked with the same recipe plus one change: a swing sole now leaves and meets the floor at `SWING_V` 0.9 of the
+stance speed (was 0.3 and 0.6). The old values made the foot scoot just above the floor at lift-off, which
+`--anim-audit` counts as slide: Cinder run, probe at 90/135/180 deg went from 1.23/1.03/1.04 to 0.70/0.43/0.42 m/s.
+Bake speeds come from each hero's playback rate, because the ring plays at speed / `foot_mps`:
+- Cinder: her `foot_mps` 2.26 / 5.19, so the soles land at 2.2 / 4.6 in game.
+- Sable: 1.39 / 2.9. Her forward loops plant at 0.9 / 2.8 m/s and need `stride` 1.5 and the 1.4 rate cap. Without
+  them her run_f slides 45% (gate 25%), and a re-baked run_f still measured 40%, so her loco data stays as on main.
+
+All loops are the forward loop's length and strike key (Cinder walk 0.667 s, run 0.708; Sable 0.938, 0.625). Soles are
+100% within 5% of the bake speed, the worst pelvis dip is 0.024 m and the worst ankle miss 0.001 m.
+
+The judge is a Fable subagent, blind. Each sheet shows the forward loop (REF) on top, then the current and the new
+loop as rows A/B in seeded random order, 8 frames, 3/4 view. The frames are software renders (Xvfb llvmpipe),
+because the GPU queue sat 60+ min. Scores are contact / weight / seam / look, 1-5:
+
+| clip | new | current | winner |
+|---|---|---|---|
+| Cinder walk_b | 3/3/4/3 | 3/4/4/4 | current (new: stiff, narrow shuffle) |
+| Cinder walk_l | 3/2/3/3 | 3/3/4/3 | current (new: splays wide, pelvis drops) |
+| Cinder walk_r | 2/2/3/2 | 3/4/4/4 | current (new: straddle, legs intersect) |
+| Cinder run_b | 3/3/4/3 | 3/4/4/4 | current (new: too upright, loses the heavy drive) |
+| Cinder run_l | 2/2/3/2 | 3/3/3/3 | current (new: splits, hip sinks) |
+| Cinder run_r | 2/2/3/2 | 3/4/4/4 | current |
+| Sable walk_b | 3/3/4/3 | 3/4/4/4 | current |
+| Sable walk_l | 3/3/4/3 | 3/4/4/4 | current |
+| Sable walk_r | 3/3/3/3 | 3/4/4/4 | current |
+| Sable run_b | 3/3/3/4 | 3/3/3/3 | tie: current kept |
+| Sable run_l | 2/2/3/2 | 3/3/3/3 | current (new: full lunge split) |
+| **Sable run_r** | 3/4/4/4 | 3/3/3/3 | **new** |
+
+There is no current diagonal clip; the current diagonal is a blend of two neighbours, which the audit probe measures
+at 3.0-3.5 m/s slide. A new diagonal is kept if it passes (no score under 3). Sheets are in `cinder_sable/`:
+
+| ring | fl | fr | bl | br |
+|---|---|---|---|---|
+| Cinder walk | 3/4/4/4 pass | 2/2/3/2 FAIL | 2/2/3/2 FAIL | 3/4/4/4 pass |
+| Cinder run | 3/4/4/4 pass | 2/2/3/2 FAIL | 2/2/3/2 FAIL | 3/4/4/4 pass |
+| Sable walk | 3/4/4/4 pass | 3/4/4/4 pass | 3/3/3/3 pass | 3/4/4/4 pass |
+| Sable run | 3/4/4/4 pass | 3/4/4/4 pass | 3/3/3/3 pass | 3/3/3/3 pass |
+
+Shipped:
+- Cinder: walk and run fl and br. fr and bl stay blends.
+- Sable: all eight diagonals and run_r.
+- Both rings are `in_step`, and the hand-keyed b/l/r loops are already the forward loop's length.
+
+Gate (`--anim-audit`, run slide): Cinder 12% (main 13%), Sable 18% (main 17%). Diagonal probe on the shipped set
+(temporary `--anim-audit` patch, not committed): Sable 45 deg 0.92 m/s (was 3.47), 135 deg 1.20 (2.78).
+
+Not passed, and why:
+- The recipe's side steps and Cinder's fr/bl read as a wide straddle or a lunge next to the hand-keyed loops. The
+  turned pelvis plus `WIDEN` spreads the feet, and her heavy, low-duty run (stance 0.15) loses the drive.
+- Stills at 150 px cap contact at 3. The judge could not see sinking or hovering.
