@@ -477,6 +477,8 @@ func _gunslinger() -> void:
 	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
 	ok("venator Dazed: the bonus gets its own pink +9 number",
 			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
+	_burr_terrain(m, P, T, K, home, r[5])
+	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
 	fresh(T); KitStatus.clear_rattled(T); K.cd["e"] = 0.0; aim_at(P, T.pos)
 	P.ak.use_e()
