@@ -131,7 +131,7 @@ func _garden_names() -> void:
 	var re := RegEx.create_from_string("\"(garden_[a-z0-9_]+)\"")
 	var seen := []
 	var silent := []
-	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "garden_sfx.gd"]:
+	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "garden_sfx.gd", "home_chimes.gd"]:
 		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
 			if hit.get_string(1).ends_with("_"):          # a prefix, completed below
 				continue
@@ -139,7 +139,8 @@ func _garden_names() -> void:
 			if not Sfx.ensure(hit.get_string(1)):
 				silent.append(hit.get_string(1))
 	var sizes: Array = GardenSfx.SIZE.values()
-	var prefixed := {"garden_cheer_": GardenSfx.GRADE.values(), "garden_win_": sizes, "garden_sulk_": sizes}
+	var prefixed := {"garden_cheer_": GardenSfx.GRADE.values(), "garden_win_": sizes, "garden_sulk_": sizes,
+			"garden_chime_": HomeChimes.KINDS}
 	for prefix in prefixed:
 		for tail in prefixed[prefix]:
 			seen.append(prefix + tail)

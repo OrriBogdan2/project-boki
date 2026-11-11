@@ -8,7 +8,8 @@
   "garden_strain": "loop", "garden_creak": "step", "garden_thud": "impact",
   "garden_win_small": "boki", "garden_win_medium": "boki", "garden_win_large": "boki",
   "garden_sulk_small": "boki", "garden_sulk_medium": "boki", "garden_sulk_large": "boki",
-  "garden_sniff": "loop", "garden_bat": "ui"
+  "garden_sniff": "loop", "garden_bat": "ui",
+  "garden_chime_stat": "boki", "garden_chime_level": "boki", "garden_chime_evolve": "boki"
  },
  "signature": [],
  "replaces": [],

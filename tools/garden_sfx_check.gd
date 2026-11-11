@@ -7,6 +7,9 @@ extends RefCounted
 ##      swish per runner and one crowd for the first home; one fanfare and one huff
 ##   4. Seek: the sniffing loop starts once per hunt and stops with it; one fanfare and one huff
 ##   5. Spark Volley: one seed bat per hit; the spike call's crowd cheer; one fanfare and one huff
+##   6. home chimes (home_chimes.gd): a stat, a level and a new form each chime once; a drill that lands a
+##      stat and a level together (and one 0.3 s later) is one chime; nothing while the Boki sleeps; a
+##      small Boki chimes higher than a large one
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -110,6 +113,8 @@ func _games() -> void:
 	await _seek(home)
 	GardenSfx.heard.clear()
 	await _volley(home)
+	GardenSfx.heard.clear()
+	_chimes(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -182,3 +187,41 @@ func _volley(home) -> void:
 	var bats := _count("garden_bat")
 	ok(hits > 0 and bats == hits, "volley: one seed bat per hit (%d bats, %d hits)" % [bats, hits])
 	_results("volley")
+
+## Driven by hand in one frame, so the home's own tick can't land between the steps.
+func _chimes(home) -> void:
+	var hc: HomeChimes = home.chimes
+	var k: Dictionary = {}
+	for kk in home.kins:
+		if not HomeChimes._asleep(kk):
+			k = kk
+	var rec: Dictionary = k["rec"]
+	hc.tick(0.0)
+	var gap := HomeChimes.MERGE_S + 0.05
+	Care.add_stat(rec, "power", 1)
+	hc.tick(gap)
+	hc.tick(0.1)
+	ok(_count("garden_chime_stat") == 1 and _total("garden_chime_") == 1, "chimes: one stat chime for a stat")
+	rec["level"] = int(rec["level"]) + 1
+	hc.tick(gap)
+	ok(_count("garden_chime_level") == 1 and _total("garden_chime_") == 2, "chimes: one level chime for a level")
+	rec["forms"].append("fierce")
+	hc.tick(gap)
+	ok(_count("garden_chime_evolve") == 1 and _total("garden_chime_") == 3, "chimes: one evolve chime for a form")
+	rec["xp"] = 100 * int(rec["level"]) - 1
+	Care.add_stat(rec, "guard", 2)
+	GardenXp.give(rec, "drill", false, 4)
+	hc.tick(gap)
+	Care.add_stat(rec, "speed", 1)
+	hc.tick(0.3)
+	ok(_total("garden_chime_") == 4, "chimes: a drill's stat and level and a stat 0.3 s on merge into one (%s)"
+			% [GardenSfx.heard])
+	k["nap_t"] = 5.0
+	Care.add_stat(rec, "focus", 1)
+	hc.tick(gap)
+	k["nap_t"] = 0.0
+	hc.tick(gap)
+	ok(_total("garden_chime_") == 4, "chimes: nothing while the Boki sleeps, nor once it wakes")
+	var p := HomeChimes.PITCH
+	ok(Sfx.ensure("garden_chime_stat") and Sfx.ensure("garden_chime_level") and Sfx.ensure("garden_chime_evolve")
+			and p["small"] > p["medium"] and p["medium"] > p["large"], "chimes: all three exist, small sings higher")

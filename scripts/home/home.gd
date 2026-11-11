@@ -56,6 +56,7 @@ var hrace: BaseRace = null       # the Dash's race post and loop (base_race.gd),
 var hshove: BaseShove = null     # the Stump Shove's stump (base_shove.gd), base_mode only
 var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode only
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
+var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level or change (home_chimes.gd)
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var hb: HomeBuild = null         # build mode and the island's layout (home_build.gd, home_layout.gd)
@@ -178,6 +179,7 @@ func _ready() -> void:
 	hw = HomeWork.new(self)
 	if visit.is_empty() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
 	toys = HomeToys.new(self)
+	chimes = HomeChimes.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
 		guide = FarmGuide.new(self)
@@ -1045,6 +1047,7 @@ func _process(delta: float) -> void:
 	if hshove: hshove.tick(d)
 	if hseek: hseek.tick(d)
 	if hvolley: hvolley.tick(d)
+	if chimes: chimes.tick(d)
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
