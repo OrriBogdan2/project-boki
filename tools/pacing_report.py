@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Reads the logs of `--pacing-sim` runs and prints the clock as markdown (docs/PACING_1111.md).
-Usage: tools/pacing_report.py seed1.log seed2.log ...  (one row per run, then the median)."""
+Usage: tools/pacing_report.py seed1.log seed2.log ...  (one row per run, then the median).
+   or: tools/pacing_report.py --compare solos s1.log ... -- trios t1.log ...  (per-mode medians, docs/PACING_SOLOS.md)."""
 import re
 import statistics
 import sys
@@ -168,5 +169,73 @@ def main(paths):
             " ".join("%s %s" % (fmt(t), k) for k, t in sorted(d["heart"].items(), key=lambda kv: kv[1]))))
 
 
+def knocks(path):
+    """The first Hunter-on-Hunter knock (s) and how many there were, from the PACE first_knock / end lines."""
+    t, n = None, 0
+    for line in open(path, errors="replace"):
+        m = re.match(r"PACE first_knock (\d+)", line)
+        if m:
+            t = float(m.group(1))
+        m = re.search(r" knocks (\d+)", line) if line.startswith("PACE end") else None
+        if m:
+            n = int(m.group(1))
+    return t, n
+
+
+def mode_clock(path):
+    """One run's numbers for the mode comparison (docs/PACING_SOLOS.md); None where the run never got there."""
+    d = row(path)
+    r = parse(path)
+    t_knock, n_knock = knocks(path)
+    hunters = len({s.split()[0] for t, k, s in r["ev"] if k == "land"})
+    out_4 = r["snap"].get(240, (0, [], 0, 0))[2]
+    h = d["heart"]
+    seat = lambda which, to: next((t for t, b in d[which] if b == to), None)
+    return {
+        "first damage after landing (median, s)": d["fight_gap_med"],
+        "first Hunter knocked by a Hunter (s)": t_knock,
+        "Hunter knocks a run": n_knock,
+        "Hunters out a minute, first 4:00": out_4 / 4.0,
+        "share of the field out by 4:00": out_4 / max(1, hunters),
+        "camp clears a minute, first 4:00": sum(1 for t, k, s in r["ev"] if k == "camp_clear" and t <= 240) / 4.0,
+        "lair gate opens (s)": min(d["lair_open"].values()) if d["lair_open"] else None,
+        "lair boss dies (s)": min(d["lair_cleared"].values()) if d["lair_cleared"] else None,
+        "Heart wakes (s)": h.get("ASLEEP>CHARGING"),
+        "spark charged (s)": h.get("CHARGING>READY"),
+        "Heart final (s)": next((t for k, t in h.items() if k.endswith(">FINAL")), None),
+        "Sealed Lair seat opens (s)": seat("seat_lair", "OPEN"),
+        "Sealed Lair seat used (s)": seat("seat_lair", "IN_USE"),
+        "Uplink seat opens (s)": seat("seat_uplink", "OPEN"),
+        "Uplink seat used (s)": seat("seat_uplink", "IN_USE"),
+        "first extraction (s)": d["extract"][0][0] if d["extract"] else None,
+        "half the squads out (s)": squads_alive_t(d, d["alive"][0][1] // 2) if d["alive"] else None,
+        "one squad left (s), before the islands fall": next((t for t, a in d["alive"] if a == 1), None),
+    }
+
+
+def compare(a_paths, b_paths, a_name, b_name, flag=0.30):
+    """Median of each number per mode (with how many runs had it, when not all), and the gap; gaps over `flag` are marked."""
+    a = [mode_clock(p) for p in a_paths]
+    b = [mode_clock(p) for p in b_paths]
+
+    def cell(rows, k):
+        v = med([x[k] for x in rows])
+        n = sum(1 for x in rows if x[k] is not None)
+        txt = "-" if v is None else ("%.2f" % v if v < 10 else "%.0f" % v)
+        return v, txt + ("" if n == len(rows) else " (%d of %d runs)" % (n, len(rows)))
+
+    print("| measure | %s (median of %d) | %s (median of %d) | %s vs %s | flag |" % (a_name, len(a), b_name, len(b), a_name, b_name))
+    print("|---|---|---|---|---|")
+    for k in a[0]:
+        (ma, ta), (mb, tb) = cell(a, k), cell(b, k)
+        gap = None if ma is None or not mb else (ma - mb) / mb
+        print("| %s | %s | %s | %s | %s |" % (k, ta, tb, "-" if gap is None else "%+.0f%%" % (gap * 100),
+                                         "**over 30%**" if gap is not None and abs(gap) > flag else ""))
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    if sys.argv[1:2] == ["--compare"]:   # --compare NAME_A a1.log a2.log ... -- NAME_B b1.log ...
+        cut = sys.argv.index("--")
+        compare(sys.argv[3:cut], sys.argv[cut + 2:], sys.argv[2], sys.argv[cut + 1])
+    else:
+        main(sys.argv[1:])
