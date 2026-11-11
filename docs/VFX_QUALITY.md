@@ -98,3 +98,25 @@ row keeps its place until the integrator re-sorts the table.
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
 linked from PR #14; Kael's X pair (`before_juggernaut_r.png`, `after_juggernaut_r.png`) is there too.
+
+## Meeko's root field (ext/vfx-meeko-ult-field)
+The 11-09 rescore (ext/vfx-rescore, on the 0.24.6 audio-vfx train) left Meeko at 26 with "X root field: a pale flat
+teal disc, only its centre burst is layered". That field is the Burrseed's (RMB) burst area, the last row of her strip:
+Hearth Call (X) draws no field. It was drawn twice, a care_disc with a thorn sigil and an AimKit circle whose radial
+fill sat on it, so by the root it was one flat sheet. Now it follows the zone rule, numbers in
+`content/vfx/tender.json` `field`: leaf `#5fdc6a`, a lit rim (`leaf_lit`) whose outer edge is `burst_radius()` (the
+AimKit circle is a band ending on it), inside alpha 0.23 at most up to the rim and clear in the middle, the build
+front filling outward, motes off the rim (`seed_field`). The root moment: a ring runs out to the rim (`seed_burst`),
+a small centre swirl, stars off the rim, and on each foe it roots a control-violet snap (`seed_root`) under the kept
+root beam. Timing, radius, damage and root are unchanged. Asserted by --hero-vfx-check (colour, inside alpha, ring
+on the radius) and --tender-combo-check (band, disc on the radius, one `seed_root` per rooted foe).
+
+| Hunter | arch | before | R | S | L | T | Sc | C | Snd | after | weakest ability left |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Meeko | tender | 26 | 4 | 4 | 4 | 3 | 4 | 4 | 4 | **27** | R Hearth Call: a small swirl at her feet and a thin tether at match zoom |
+
+Scored as the 11-09 table (all READY VFX branches merged), with the RMB strip re-read: shape 3 -> 4. Before/after RMB
+sheets (three dummies in the burst): `docs/shots/vfx-meeko-ult-field/xvfb_{before,after}_rmb.jpg` (local xvfb, green
+arena ground); GPU reels jobq `meeko-field-before` 20261111-200528-06761 (RMB, one dummy) and `meeko-field-after2`
+20261111-201340-26693 (whole reel). Built on main + ext/vfx-zone-rims, without ext/vfx-tender, so the other parts in
+these reels still show main's gold and cyan.
