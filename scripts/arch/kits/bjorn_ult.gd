@@ -136,7 +136,7 @@ func tick(dt: float) -> void:
 			_slam()
 		return
 	var x := xd()
-	var lead := float(x.get("lead", 0.2))
+	var lead := float(x.get("lead", 0.4))
 	var reached := mini(cells.size(), int(floor(t / maxf(0.01, lead) * cells.size())) + 1)
 	while struck < reached:
 		_strike(struck)
@@ -145,7 +145,7 @@ func tick(dt: float) -> void:
 	while erupted < mini(due, cells.size()):
 		_erupt(erupted)
 		erupted += 1
-	if erupted >= cells.size() and t > float(x.get("lead", 0.2)) + float(x.get("cell_t", 0.15)) * cells.size():
+	if erupted >= cells.size() and t > float(x.get("lead", 0.4)) + float(x.get("cell_t", 0.15)) * cells.size():
 		phase = ""
 		var length := cell_len() * cells.size()
 		scar = {"t": float(x.get("scar_t", 10.0)), "a": origin, "len": length, "fx": 0.0}
@@ -163,7 +163,7 @@ func _interrupt() -> void:
 	interrupts += 1
 	k.cd["x"] = minf(float(k.cd["x"]), float(xd().get("refund", 8.0)))
 	k.m.fx.word(h.pos + Vector3(0, 2.4, 0), "INTERRUPTED", Color("ff8a7a"), true)
-	k.m.sfx("warn", h.pos, -4.0, 0.8)
+	k.m.sfx("bulwark_interrupt", h.pos, -4.0)
 	_hide_lane()
 
 ## A merge drops the wind-up with no slam; a fissure already running finishes (it's a cast).
@@ -190,7 +190,7 @@ func _slam() -> void:
 	var c0 := _cell_mid(0)
 	_flood_t = 0.3
 	_place_flat(_flood, c0 + Vector3(0, 0.08, 0), Vector2(cell_len(), float(x.get("width", 4.0))))
-	_streak_t = float(x.get("cell_t", 0.15)) * cells.size() + float(x.get("lead", 0.2))
+	_streak_t = float(x.get("lead", 0.4))
 	k.m.fx.burst(c0 + Vector3(0, 0.4, 0), GOLD, 24, 7.0, 0.4, 3.0, 1.3)
 	k.m.fx.dust(c0, 14)
 	k.net_ring(c0, cell_len() * 0.6, GOLD)
@@ -205,7 +205,6 @@ func _strike(i: int) -> void:
 		hit[f.get_instance_id()] = true
 		f.hurt(strike, h, {"src": "abil", "ab": "ultimate", "stun": float(x.get("strike_stun", 0.5)), "dr": true,
 			"tags": ["ultimate"]})
-		KitLooks.of(k.m).crown(f, float(x.get("strike_stun", 0.5)))
 		if f is Hunter:
 			HeroUlt.landed(k, f)
 
@@ -242,7 +241,7 @@ func _foes_in(i: int) -> Array:
 	var a: Vector3 = cells[i]
 	var out: Array = []
 	for f in k.m.foes_of(h.team):
-		if not f.hittable() or absf(f.pos.y - a.y) > 2.5:
+		if not f.hittable() or not AimMode.in_reach(a.y, f.pos.y):
 			continue
 		if AimMode.in_lane(a, dir, cell_len(), float(xd().get("width", 4.0)), f.pos, f.r):
 			out.append(f)
@@ -260,7 +259,7 @@ func _tick_scar(dt: float) -> void:
 	var length := float(scar["len"])
 	var slow := float(x.get("scar_slow", 0.2))
 	for f in k.m.foes_of(h.team):
-		if not f.hittable() or absf(f.pos.y - a.y) > 1.5:
+		if not f.hittable() or not AimMode.in_reach(a.y, f.pos.y):
 			continue
 		if AimMode.in_lane(a, dir, length, float(x.get("scar_w", 1.4)), f.pos):
 			f.slow_k = maxf(f.slow_k, slow) if f.slow_t > 0.0 else slow
@@ -294,7 +293,7 @@ func _process(delta_in: float) -> void:
 		KitShaders.param(_flood, "power", 2.0 * clampf(_flood_t / 0.3, 0.0, 1.0))
 	if _streak_t > 0.0:
 		_streak_t -= delta
-		var total := maxf(0.05, float(xd().get("cell_t", 0.15)) * cells.size() + float(xd().get("lead", 0.2)))
+		var total := maxf(0.05, float(xd().get("lead", 0.4)))
 		var u := 1.0 - clampf(_streak_t / total, 0.0, 1.0)
 		var length := cell_len() * cells.size()
 		var head := origin + Vector3(dir.x, 0, dir.y) * length * u

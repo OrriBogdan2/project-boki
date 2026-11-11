@@ -18,7 +18,7 @@
 	},
 	"into_dash": {
 		"lmb": {"mode": "fire", "source": "Footage 0187 -> 0193: the empowered hit lands and the next Cartwheel follows at once; a bolt in flight keeps going."},
-		"rmb": {"mode": "fire", "source": "Not shown in the data or footage. Ours: Shift in the Bola's 0.4s wind-up cartwheels and the Bola still goes at the end of the wind-up."},
+		"rmb": {"mode": "fire", "source": "Not shown in the data or footage. Ours: the Bola is thrown on the press, so a cartwheel under way doesn't hold it back."},
 		"e": {"mode": "fire", "source": "Not shown. Ours: the dagger thrown 0.12s into the throw still flies if she cartwheels; a stuck dagger stays to blink to."},
 		"x": {"mode": "fire", "source": "Footage (0296-0350): she moves and acts freely through Fusillade, which also gives Quickflip back."},
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}

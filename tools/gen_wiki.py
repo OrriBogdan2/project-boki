@@ -194,6 +194,25 @@ def block(name, key, body):
 
 # ------------------------------------------------------------------ shared data
 ARCH = content("archetypes")
+
+def fill_ability_text(root, o):
+    """Archetype texts hold {key:action} (the game fills the player's own key) and {slot.field} (a number from the same JSON): the wiki shows the default keys."""
+    keys = {"dash": "Shift", "secondary": "RMB", "signature": "E", "fire": "LMB"}
+    def one(m):
+        t = m.group(1)
+        if t.startswith("key:"):
+            return keys[t[4:]]
+        v = root
+        for part in t.split("."):
+            v = v[part]
+        return ("%.2f" % v).rstrip("0").rstrip(".")
+    if isinstance(o, dict):
+        return {k: fill_ability_text(root, v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [fill_ability_text(root, v) for v in o]
+    return re.sub(r"\{([^}]+)\}", one, o) if isinstance(o, str) else o
+
+ARCH = {a: fill_ability_text(d, d) for a, d in ARCH.items()}
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
 WEAPONS = content("weapons")
@@ -290,12 +309,13 @@ def gen_classes():
     unlock += table(["Hunter", "Goal", "Target", "Reward"], m_rows)
     lv = []
     for i, t in enumerate(xp):
-        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank 2" if (i + 1) in ult_at[1:] else "")])
+        lv.append([str(i + 1), num(t), "R unlocks" if (i + 1) in ult_at[:1] else ("R rank %d" % (ult_at.index(i + 1) + 1) if (i + 1) in ult_at else "")])
     body = "### All %d Hunters\n\n" % len(rows) + table(["Hunter", "Health / dashes", "Weapons", "Passive", "Dash", "RMB", "E", "R"], rows)
     body += "\n\n" + unlock
     body += "\n\n### Run levels\n\nEvery expedition starts at level 1 with one skill point and every ability locked. "
-    body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (rank 2 at %s).\n\n" % (
-        ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?", num(ult_at[1]) if len(ult_at) > 1 else "?")
+    body += "Each level gives a point. Ranks per slot: %s. The ultimate opens at level %s (%s).\n\n" % (
+        ", ".join("%s %s" % (SLOT_NAMES.get(k, k), v) for k, v in slot_max.items()), num(ult_at[0]) if ult_at else "?",
+        ", ".join("rank %d at %s" % (i + 2, num(v)) for i, v in enumerate(ult_at[1:])))
     body += table(["Level", "Total XP", ""], lv)
     block("Classes.md", "classes", body)
 
@@ -347,7 +367,7 @@ def gen_classes():
         b.append("### Ranks\n\nRank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the special.\n")
         rk = []
         for s in ("sec", "dash", "kin", "ult"):
-            if s == "ult" and "r" not in d: continue
+            if s == "ult" and "x" not in d: continue
             r2 = d.get("rank2", {}).get(s, "")
             r3 = d.get("rank_next", {}).get(s, "") or ("Rank 3: " + d["rank3"][s] if s in d.get("rank3", {}) and s != "ult" else "")
             if r2 or r3:
@@ -495,7 +515,7 @@ def gen_gear():
         rows.append([w.get("name", wid), ", ".join(users) or "none", ", ".join(w.get("classes", [])), num(p.get("dmg", "")), secs(p.get("rate", "")), num(p["mag"]) if "mag" in p else "none", secs(p["reload"]) if "reload" in p else "none", "%sm" % num(p.get("range", "")), p.get("desc", "")])
     body = "## Weapons\n\nNumbers are per shot or swing before any upgrades. Class kits that run their own weapon (Kael's greatsword, the Bulwark's shield and mace) take their numbers from the class file instead.\n\n"
     body += table(["Weapon", "Carried by", "Weight", "Damage", "Fire interval", "Magazine", "Reload", "Range", "Notes"], rows)
-    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (each hero's fixed weapon path on even levels, perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
+    body += "\n\n## Weapon upgrades\n\nNo weapon is ever found or swapped: every hunter carries one signature weapon. It grows through upgrade perks (perk orbs from chests, shrines and bosses, and tuning pickups on the ground). They last the expedition.\n\n"
     pk0 = gd_const("core/data.gd", "PERKS") or {}
     body += table(["Upgrade", "Effect", "Stacks"], [[v["name"], v["desc"], num(v.get("max", 1))] for v in pk0.values() if "wup" in v])
     el = gd_const("core/loot.gd", "ELEMENTS") or {}
@@ -545,9 +565,7 @@ def gen_maps():
             names = {i["id"]: i.get("name", i["id"]) for i in isl}
             body += "### Boss lairs\n\n" + table(["Lair", "Boss", "Island", "Ways in"], [[l["name"], bn.get(l["boss"], l["boss"]), names.get(l.get("island"), l.get("island", "")), ", ".join(en.get(e, e) for e in l.get("entry", []))] for l in m["lairs"]]) + "\n\n"
         ex = []
-        if m.get("docks"): ex.append("%d skiff docks" % len(m["docks"]))
         if m.get("outposts"): ex.append("%d uplink outposts" % len(m["outposts"]))
-        if m.get("hatches"): ex.append("%d rift hatches" % len(m["hatches"]))
         if ex: body += "**Exits:** " + ", ".join(ex) + ".\n\n"
         trav = []
         for key, label in (("bridges", "bridges"), ("glides", "glide routes"), ("pads", "jump pads"), ("updrafts", "updrafts"), ("winds", "wind roads")):

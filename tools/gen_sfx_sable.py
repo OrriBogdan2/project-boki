@@ -291,6 +291,27 @@ def step(surface, i):
     return mix(hit(1.0), at(hit(0.45), 0.035 + 0.006 * i), at(jingle, 0.02))
 
 
+# ------------------------------------------------------------------ kit cues
+def pip_chime():
+    """The target's marks are full: two small silver bells a fifth apart."""
+    return mix(bell(2400, 0.5, 0.2), at(bell(3600, 0.45, 0.16) * 0.7, 0.07))
+
+
+def reset_chime():
+    """RESET: a rising swipe into a bright coin-bell, her flintlock made ready again."""
+    return mix(swish(0.16, 1500, 6000, 2.5) * 0.5, at(bell(3000, 0.55, 0.22), 0.1), at(click(0.004, 3500, 9000) * 0.6, 0.1))
+
+
+def bola_ricochet():
+    """The bola's chain ball glancing off a wall: a short bright metal ping."""
+    return mix(click(0.004, 3000, 9000) * 0.7, bell(3200, 0.2, 0.06))
+
+
+def shadowstep():
+    """Her step through the target's shadow: a quick air tear and a soft landing scuff."""
+    return mix(swish(0.2, 700, 3200, 2.5), at(lpf(noise(0.08), 900) * env(N(0.08), 0.004, 0.025) * 0.5, 0.15))
+
+
 def build():
     takes('dj_bolt', bolt, 3, 'fire')
     save('thief_flintlock_crack', flintlock_crack(0), 'signature')
@@ -314,6 +335,10 @@ def build():
     save('thief_death', death(0), 'grunt')
     for s in ('grass', 'stone', 'wood', 'snow'):
         takes('thief_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
+    save('thief_pip_chime', pip_chime(), 'cast')
+    save('thief_reset_chime', reset_chime(), 'cast')
+    save('thief_bola_ricochet', bola_ricochet(), 'impact')
+    save('thief_shadowstep', shadowstep(), 'cast')
 
 
 if __name__ == '__main__':

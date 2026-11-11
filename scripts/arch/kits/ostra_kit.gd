@@ -15,7 +15,6 @@ const PAY := "COLLAPSE"
 const TEAL := Color("7fe0d0")
 const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
-const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
@@ -116,10 +115,14 @@ func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
 ## He floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
 ## touch him. A sky strike (the lightning rod) still does.
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
-	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in GROUND_HAZARDS):
+	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in float_tags()):
 		hazards_dodged += 1
 		return [0.0, o]
 	return [dmg, o]
+
+## The damage tags of ground hazards he floats over (passive.float_tags): the data's "avoids ground hazards".
+func float_tags() -> Array:
+	return (d["passive"] as Dictionary)["float_tags"]
 
 func hovering() -> bool:
 	return not swap.is_empty()
@@ -528,7 +531,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	KitLooks.of(m).crown(e, stun)
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
@@ -683,6 +685,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if int(
 		h.slot_lv["dash"]
-	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los and randf() < 0.15:
-		h.inp["aim"] = tgt.pos
+	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los \
+			and (tgt.stun_t > 0.0 or randf() < 0.15):
+		# it lands swap_time() later: lead them
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * swap_time()
 		h.inp["dash"] = true

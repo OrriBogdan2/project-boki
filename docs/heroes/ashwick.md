@@ -47,7 +47,9 @@ Durations (slow 1.5s, boost and shield 2s) and counts (+1 charge) copy the data.
 | Shift, Soot Ram | tap, 2 charges | a quick, short head-first dash toward the cursor (the source's 3.4m in 0.33s, fastest at the start; Cinder is off the global dash feel) that stops on the first foe: 16 damage, a heavy shove (7), 17 Char, and Cinder bounces back a little. Two charges chain right away. Rank 3: +4.3 damage, and a hit gives +16% speed and a shield of 11.6% health for 2s | dash in flames, knocks struck targets back and the hero slightly back, 17 burns, 2 charges, rank 4 (owner data): +40 base damage, +75 move speed and a 150 shield for 2s on a hit | none (the folded lava carpet went back to the ult on X) |
 | E, Furnace Cloak | tap (fires on the press) | the blast goes off at once round him, never at the cursor, with a quick arms-out flare (0.24s) and a thin ring at its exact 4.5m that everyone sees: 7 damage, 16 Char, Anti-Heal 3s, foes in sight dragged to you (walls stop them), a swirling 3s fire shield of 6.4% + 5.1% per foe hit. A knock resets it. 10.5s | spin: damage, Anti-Heal, pull, shield by foes hit, knock reset, blocked by line of sight; a 0.2s edge ring before it (footage) | instant on the press, no 0.2s ring first (owner review item 11) |
 | X, Flue Flight (ult, level 6) | tap; X again lands | a ring of embers (2.2m, everyone sees it), then 1.8s of low flight (12.6 m/s, about 22.7m) toward the cursor that steers with the aim at up to 120 degrees a second. A 1.8m molten carpet forms under him and lasts 5.2s (the oldest end fades first): 4.5 damage a second, a 30% slow and 4 Char every 0.3s (Ablaze in about 2.4s). Only the Furnace Cloak works mid-flight (no RMB, Shift, gloves or items); a knockback speeds the flight up; a stun ends it; the carpet never forms over the abyss. 36s | flight forward that steers, a fire trail that slows and builds Ignite (4 stacks every 0.3s), 4s, recast ends it, Heat Shield castable mid-flight, impulses speed it up, no trail over abyss | no flamethrower mid-flight (owner item 66: LMB is ignored, not buffered, with a soft tick on a press; back the moment the flight ends); only E works (owner decision: RMB, Shift, gloves and items are dropped too); the flight and the carpet's linger are 30% longer (owner review item 20) |
+| X, Flue Flight (ult, level 6) | tap; X again lands | a ring of embers (2.2m, everyone sees it), then 1.8s of low flight (12.6 m/s, about 22.7m) toward the cursor that steers with the aim at up to 120 degrees a second. A 1.8m molten carpet forms under him and lasts 5.2s (the oldest end fades first): 25 damage a second in ticks of 0.1 s, a 30% slow and 1.3 Char a tick (Ablaze in about 2.4s). Only the Furnace Cloak works mid-flight (no RMB, Shift, gloves or items); a knockback speeds the flight up; a stun ends it; the carpet never forms over the abyss. 32s | flight forward that steers, a fire trail that slows and builds Ignite (4 stacks every 0.3s), 4s, recast ends it, Heat Shield castable mid-flight, impulses speed it up, no trail over abyss | no flamethrower mid-flight (owner item 66: LMB is ignored, not buffered, with a soft tick on a press; back the moment the flight ends); only E works (owner decision: RMB, Shift, gloves and items are dropped too); the flight and the carpet's linger are 30% longer (owner review item 20) |
 | R | | the Boki Merge (not a hero ability) | | |
+| Allies | all | no slot hurts, stuns, roots or slows a teammate (the cloak's shield is Cinder's alone) | Heat Shield pulls and the burning ground hit enemies; the shield is per enemy hit, on yourself [data] | none; asserted (`ashwick ally: ...`) |
 
 Rank 2 / 3: the shared steps (-10% cooldown, +15% damage a rank; the ram recharges 15% faster a rank). Rank 3 specials follow
 the source's last tier: Cinder Shot holds a second charge; the Soot Ram does +4.3 damage and a hit gives +16% speed and a shield
@@ -121,11 +123,20 @@ so nothing was built. In flight means extra polish on an unmerged branch; the ro
 The source's flight is back as its own ultimate on X (owner decision, SERVER_UPDATE6), so the rank-3 Soot Ram no longer lays the
 carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows the owner's data (more damage, speed and a shield).
 - Numbers keep the source's ratios: cooldown 32s against the cloak's 10.5s (source 25s : 8.3s); the carpet ticks far below the
-  hose (about 1/6 of its damage a second, as in the footage), and its value is the slow and the Ignite build-up.
+  hose (239.2 against 258 a second in the data, so 25 against the hose's 27, ticking at the hose's 0.1 s; it was 1/6 of that from the footage, and the data wins), and it still brings the slow and the Ignite build-up.
 - Bond: an enemy hunter the carpet burns fills the Boki bond (a hit; a knock or a kill counts higher), the best event of the cast
   once, never the cast alone (`HeroUlt.landed`, then `KinBond.from_ult` with one cast id per cast).
 - Burst: Flue Flight plus the cloak, then straight into a merge and its ultimate, leaves a full-health light hunter standing
   (`--ashwick-combo-check`, "burst").
+
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). 
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| RMB Cinder Shot | 26 m/s (`rmb.speed`) | 14 m | 0.54 s | none | no, always its full length (owner review item 19) | [F] about 13 to 15 body heights a second (about 25 m/s); one miss ended near the cursor (6.5 body heights), which the owner overrode | match on speed; range is the owner's |
+| X Flue Flight | 12.6 m/s (`x.speed`), steered | 1.8 s of flight, about 22.7 m | the flight | none, low flight | follows the cursor, steers at up to 120 degrees a second | [F] about 7 body heights a second (12.6 m/s) for 1.4 s; ours 30% longer (owner item 20) | match |
 
 ## Small mechanics
 | Mechanic | Ours | Source | Footage |
@@ -144,11 +155,11 @@ carpet: that fold would have duplicated the X ult, and the ram's rank 3 follows 
 | Ram stops on the first foe; the foe is knocked back and Cinder slightly too | built | [wiki](https://supervive.wiki.gg/wiki/Felix), footage | yes (0141-0145) |
 | A knock restores only one ram charge | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
 | The cloak is blocked by line of sight; a knock resets it | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
-| The carpet can't form over the abyss; builds burns every 0.3s | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
+| The carpet can't form over the abyss; builds burns | built (every 0.1 s tick) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
 | The flight steers toward the cursor while flying (curved trails) | built: 120 degrees a second at most | footage | yes (ult 0034, 0038) |
 | Reactivating ends the flight early | built (X again lands) | [wiki](https://supervive.wiki.gg/wiki/Felix), card | no |
 | The trail forms under him whatever his height or speed and grows with the distance flown | built (a piece every metre) | [wiki](https://supervive.wiki.gg/wiki/Felix) | yes |
-| The trail slows and builds Ignite quickly: 4 stacks every 0.3s, Ignited after about 2.4s | built (4 Char every 0.3s, Ablaze at 31) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
+| The trail slows and builds Ignite quickly: 4 stacks every 0.3s, Ignited after about 2.4s | built (1.3 Char every 0.1 s, the same 13 a second; Ablaze at 31) | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
 | The trail lasts 4s and fades from the oldest end | built (5.2s: owner review, +30% with the flight) | [wiki](https://supervive.wiki.gg/wiki/Felix), footage | yes (ult 0072) |
 | The trail can't form over the abyss | built | [wiki](https://supervive.wiki.gg/wiki/Felix) | no |
 | The shield ability can be cast mid-flight | built (Furnace Cloak) | [wiki](https://supervive.wiki.gg/wiki/Felix) | yes (ult 0137) |
@@ -321,3 +332,33 @@ The Furnace Cloak fires on the key's press: `e.on_press` in the data, read throu
 so E skips the hold-to-aim preview (there is nothing to aim).
 Holds dropped on a merge (`_drop_holds`): `hose` (the stream), `spool`, `was_held`, `after_t`, `flame_acc`, `bash`, `aiming`,
 and `jet.flight` (Flue Flight).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Cinder Shot (Embry Bolt) | Data: a fire bolt, damage and slow. Footage briefs/hero-ref/linwick.md:62: on a hit it stops at the first enemy. | Stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Matches. |
+| E Furnace Cloak (Heat Shield) | Data: a spin that pulls in nearby enemies. | A blast round him that drags foes in sight (walls stop them). No shot. Matches. |
+| Shift Soot Ram (Flame Skull Bash) | Footage linwick.md:77: the dash stops on the first enemy ('impact'), he does not pass through. | Stops on the first foe with the impact. Matches (`ram: stops on the first foe`). |
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Torch Lance (hold stream) | stun | [?] Felix data and linwick footage silent | the stream stops while stunned (`Hunter.can_fire`), then relights if still held | [?] |
+| LMB Torch Lance | knock, root | [?] | ignored | [?] |
+| RMB Cinder Shot (hold to aim, release) | stun | [?] | the hold is let go: the shot goes (shared rule) | [?] |
+| RMB Cinder Shot | knock, root | [?] | ignored | [?] |
+| Shift Soot Ram (dash to first foe) | stun, knock, root | [?] | not checked: the ram runs on | [?] |
+| X Flue Flight (1.8 s) | stun (and down, merge) | [?] the sheet: "whether he can be interrupted ... not found" | lands where he is, the cooldown stays spent (`AshwickJet._fly`) | [?] |
+| X Flue Flight | knock | [?] | adds to the flight's speed and bends it (`_take_boost`) | [?] |
+| X Flue Flight | root | [?] | ignored | [?] |
+| X recast | none | [F] reactivating ends the flight early | X again lands | match |

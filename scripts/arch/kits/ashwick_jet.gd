@@ -12,6 +12,7 @@ const OVERLAP := 0.45           # m each piece reaches back over the last, so th
 const NET_EVERY := 3            # carpet pieces between two rings sent to other players' games
 const STEER_LEAD := 1.0         # m the heading lane runs past where the flight will end
 const LAVA_DY := 1.6            # m above the carpet a body still stands in it
+const EMBER_P := 0.12            # chance per carpet piece per tick (0.1s) that an ember lifts
 const FOOTING := 0.05           # s: the low flight counts as footing for a jump (Hunter.coyote) while it runs
 const ROAR_EVERY := 0.45        # s between the roars of the heel and tail fire
 
@@ -47,7 +48,8 @@ func running() -> bool:
 ## other ability or item press is dropped before it reaches its handler (not buffered): RMB (Cinder Shot, and a
 ## hold carried in is cancelled with nothing fired), Shift (no poof, no Soot Ram), the glove/utility slots,
 ## gear, the Boki's C and a throw. A press answers with the soft "can't" tick.
-const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "gear1", "gear2", "kin_ab", "skill", "throw"]
+const LOCKED := ["dash", "sec", "util1", "util2", "util3", "util4", "util5", "util6", "gear1", "gear2", "kin_ab",
+	"skill", "throw"]
 const SLOT_OF := {"gear1": "gear0", "gear2": "gear1"}      # input -> the HUD slot its deny pulses
 
 func lock_inputs() -> void:
@@ -224,7 +226,7 @@ func _lay(a: Vector3, b: Vector3) -> void:
 		k.vfx("carpet", from, span.normalized(), {"len": span.length(), "w": float(x["trail_w"])})
 		m.sfx("lw_trail", b, -6.0, 1.0)
 
-## Every tick (0.3s): burn, slow and Char whoever stands in the carpet; the oldest pieces fade first.
+## Every tick (0.1s, the hose's rate): burn, slow and Char whoever stands in the carpet; the oldest pieces fade first.
 func _burn(dt: float) -> void:
 	trail = trail.filter(func(t): return float(t["until"]) > m.time)
 	tick_acc += dt
@@ -245,7 +247,7 @@ func _burn(dt: float) -> void:
 		trail_hits += 1
 		HeroUlt.landed(k, f)
 	for t in trail:
-		if randf() < 0.35 and k.tells_visible():
+		if randf() < EMBER_P and k.tells_visible():
 			k.vfx("carpet_embers", t["b"])
 
 ## The carpet piece this body stands in, or null.

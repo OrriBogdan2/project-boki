@@ -18,16 +18,12 @@ const ROWS := ["passive", "lmb", "rmb", "e", "dash", "x", "r"]
 const ICON_FIX := {"quill_rifle": "rifle", "coilcaster": "burst_rifle", "longbow": "sniper", "flamethrower": "fireball",
 	"tower_shield": "bulwark", "rubble_fists": "haymaker", "tether_lantern": "tether", "hoar_fan": "wave",
 	"lantern_crook": "mend", "earthshatter": "quake", "bolt": "fireball", "shield": "bulwark", "dash2": "dash"}
-## (The ultimate tiles have no fixed key: _cap reads them from Settings.)
-const KEYS := {"dash": "Shift", "passive": "", "lmb": "LMB", "rmb": "RMB", "e": "E", "r": "", "x": ""}
-## The key cap on a slot's tile: the Merge tile unless the class ultimates are on, the hunter's own
-## ultimate on its "x" tile.
+## The key cap on a slot's tile, from the player's bindings: the Merge tile unless the class ultimates
+## are on, the hunter's own ultimate on its "x" tile, none on the passive.
 static func _cap(slot: String) -> String:
-	if slot == "x":
-		return Settings.key_cap("hunter_ult")
 	if slot == "r":
 		return Settings.key_cap("ultimate")
-	return String(KEYS[slot])
+	return "" if slot == "passive" else HunterViewer.key_for(slot)
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
 	"x": "Ultimate"}
@@ -119,6 +115,7 @@ func _row(slot: String) -> Control:
 	p.custom_minimum_size = Vector2(0, ROW_H)
 	p.add_theme_stylebox_override("panel", UI.frame(Color(1, 1, 1, 0.045), UI.R_CARD, Color(col, 0.3), 1, 12, 3))
 	p.set_meta("slot", slot)
+	AbilityCard.hover(p, arch, slot)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	p.add_child(row)
@@ -205,35 +202,32 @@ static func card_slots(a: String) -> Array:
 
 static func slot_text(a: String, slot: String) -> Dictionary:
 	var d := Arch.def(a)
-	var cd: Dictionary = d.get("card", {})
 	var col := Arch.color(a)
-	var out := {"name": "", "icon": "dash", "col": col, "tag": "", "line": "", "detail": []}
+	var out := {"name": AbilityText.name_of(a, slot), "short": AbilityText.short_name(a, slot), "icon": "dash", "col": col, "tag": "", "line": AbilityText.line(a, slot), "detail": []}
 	match slot:
 		"dash":
 			var sd: Dictionary = d["dash"]
-			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "dash")
+			out.merge({"icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
+				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))]}, true)
+			out["detail"] = [["", AbilityText.full(a, slot)]] + _ranks(a, "dash")
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
-			out.merge({"name": String(d["passive"]["name"]), "icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", "#ffffff"))),
-				"tag": "no key · always on" if String(rd.get("kind", "")) == "none" else "no key · builds as you fight", "line": String(cd.get("passive", ""))}, true)
+			out.merge({"icon": String({"thief": "satchel", "archer": "scanner", "mage": "blaze_mantle", "gunslinger": "barrage", "juggernaut": "haymaker", "bulwark": "fortify"}.get(a, "burst")), "col": Color(String(rd.get("col", d["passive"].get("col", "#ffffff")))),
+				"tag": "no key · always on" if String(rd.get("kind", "none")) == "none" else "no key · builds as you fight"}, true)
 			var tl: Dictionary = d.get("tells", {})
-			out["detail"] = [["", String(d["passive"]["desc"])]]
+			out["detail"] = [["", AbilityText.full(a, slot)]]
 			if tl.has("half"):
 				var seen := "%s; full: %s." % [String(tl["half"]), String(tl.get("full", ""))]
 				out["detail"].append(["What enemies see", seen])
 			if d.has("jackpot"):
 				out["detail"].append([String(d["jackpot"]["name"]), String(d["jackpot"]["desc"])])
 		"lmb":
-			var wl: Dictionary = cd.get("weapons", {})
 			var ws: Array = Arch.weapons(a)
-			var w0 := String(ws[0]) if not ws.is_empty() else ""
-			out.merge({"name": String(Data.weapon_stats(w0).get("name", w0)), "icon": w0, "tag": "signature weapon", "line": String(wl.get(w0, Data.weapon_stats(w0).get("desc", "")))}, true)
+			out.merge({"icon": String(ws[0]) if not ws.is_empty() else "", "tag": "signature weapon"}, true)
 			var det: Array = []
 			for w in ws:
 				var st: Dictionary = Data.weapon_stats(w)
-				det.append([String(st.get("name", w)), "%s  %s" % [String(wl.get(w, "")), _wstat(st)]])
+				det.append([String(st.get("name", w)), "%s  %s" % [AbilityText.weapon_line(a, w), _wstat(st)]])
 			out["detail"] = det
 		"rmb":
 			var sd: Dictionary = d["rmb"]
@@ -241,35 +235,30 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			var keys: Array = []
 			for v in ["tap", "hold", "air", "during_e", "full"]:
 				if vs.has(v): keys.append({"tap": "tap", "hold": "hold", "air": "air", "during_e": "in E", "full": "full"}[v])
-			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%ss · %s" % [KinText.n(float(sd.get("cooldown", 8.0))), " / ".join(keys)], "line": String(cd.get("rmb", "")),
-				"how": _how(keys)}, true)
-			var det: Array = []
-			for v in ["tap", "hold", "air", "during_e", "full"]:
-				if vs.has(v): det.append([{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "During E", "full": "Resource full"}[v], String(vs[v])])
-			det.append_array(_ranks(a, "sec"))
-			out["detail"] = det
+			out.merge({"icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
+				"tag": "%ss · %s" % [KinText.n(float(sd.get("cooldown", 8.0))), " / ".join(keys)], "how": _how(keys)}, true)
+			out["detail"] = AbilityText.variant_rows(a) + _ranks(a, "sec")
 		"e":
 			var sd: Dictionary = d["e"]
-			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0))), "line": String(cd.get("e", ""))}, true)
-			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "kin")
+			out.merge({"icon": String(sd.get("icon", "")), "col": Color(String(sd.get("col", "#ffffff"))),
+				"tag": "%ss" % KinText.n(float(sd.get("cooldown", 14.0)))}, true)
+			out["detail"] = [["", AbilityText.full(a, slot)]] + _ranks(a, "kin")
 		"x":
 			var xd: Dictionary = d["x"]
 			var tag := "level %d · %ss" % [int(xd.get("unlock", 6)), KinText.n(float(xd.get("cooldown", 30.0)))]
 			var xcol := Color(String(xd.get("col", "#ffffff")))
-			out.merge({"name": String(xd["name"]), "icon": String(xd.get("icon", "")), "col": xcol,
-				"tag": tag, "line": String(cd.get("x", ""))}, true)
-			out["detail"] = [["", String(xd.get("desc", ""))],
+			out.merge({"icon": String(xd.get("icon", "")), "col": xcol, "tag": tag}, true)
+			out["detail"] = [["", AbilityText.full(a, slot)],
 				["Bond", "Landing it on a hunter fills your Boki bond a long way, ready for the Fusion on %s."
 					% Settings.key_cap("ultimate")]]
 		"r" when not d.has("r"):
 			# no hero ultimate: the Merge key is the Boki's Merge
-			out.merge({"name": "Boki Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
+			out.merge({"name": "Boki Fusion", "short": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
 			# the Merge key is the Merge for every class
-			out.merge({"name": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter", "line": "You and your Boki become one: its colour, its type, your abilities changed."}, true)
+			out.merge({"name": "Fusion", "short": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter",
+				"line": "You and your Boki become one: its colour, its type, your abilities changed."}, true)
 			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
@@ -362,7 +351,7 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		var b := Button.new()
 		b.custom_minimum_size = Vector2(64, 70)
 		b.focus_mode = Control.FOCUS_NONE
-		b.tooltip_text = "%s: %s" % [String(info["name"]), String(info["line"])]
+		AbilityCard.hover(b, a, s)
 		var lit_box := UI.frame(Color(1, 1, 1, 0.1), UI.R_CTRL, Color(info["col"], 0.85), 2, 4, 4)
 		var rest_box := UI.frame(Color(1, 1, 1, 0.05), UI.R_CTRL, Color(info["col"], 0.35), 1, 4, 4)
 		b.add_theme_stylebox_override("normal", rest_box)
@@ -383,14 +372,14 @@ static func strip(a: String, open_cb: Callable) -> Control:
 		kl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		kl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bv.add_child(kl)
-		var nl := UI.label(String(info["name"]).split(" ")[0], 11, UI.INK, UI.big)
+		var nl := UI.label(String(info["short"]), 11, UI.INK, UI.big)
 		nl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nl.clip_text = true
 		nl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		bv.add_child(nl)
 		b.add_child(bv)
 		row.add_child(b)
-	var ll := UI.label(String(Arch.def(a).get("card", {}).get("loop", "")), UI.T_SMALL, Arch.color(a))
+	var ll := UI.label(AbilityText.loop(a), UI.T_SMALL, Arch.color(a))
 	ll.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(ll)
 	return v

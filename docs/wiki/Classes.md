@@ -61,6 +61,7 @@ your class in the Expedition menu, and you can try every class against dummies i
 | [the Scrap King](Class-Scrap-King.md) | 193 / 2 | Shotgun | Salvage | Barge | Abyssal Hand | Anchor Drop | none (Boki Fusion) |
 | [the Snowglide](Class-Snowglide.md) | 124 / 1 | Hoar Fan | Hoarfrost | Skate | Ice Spear | Rink Wall | none (Boki Fusion) |
 | [the Storm Chaser](Class-Storm-Chaser.md) | 124 / 1 | Coilcaster | Static | Wirerun | Storm Rod | Skycall | none (Boki Fusion) |
+| [the Barnacle Knight](Class-Barnacle-Knight.md) | 193 / 2 | War Hammer & Aegis | Crushed | 360 Smash | Aegis | Mending Ground | none (Boki Fusion) |
 | [the Silver Thief](Class-Silver-Thief.md) | 124 / 1 | Arc Shots | Marks | Vault | Bola | Shadow Knife | none (Boki Fusion) |
 | [the Void Jester](Class-Void-Jester.md) | 145 / 1 | Tether Lantern | Swell | Lantern Trade | Shard Snap | Brimseed | none (Boki Fusion) |
 | [the Novice Mage](Class-Novice-Mage.md) | 124 / 1 | Swordfish | Fish Out of Water | Ground Swim | Grab Bag | Riptide | none (Boki Fusion) |
@@ -148,7 +149,7 @@ Each Hunter has its own mastery goals, counted only in expeditions played as tha
 
 ### Run levels
 
-Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 2. The ultimate opens at level 6 (rank 2 at 9).
+Every expedition starts at level 1 with one skill point and every ability locked. Each level gives a point. Ranks per slot: RMB 3, Dash (Shift) 3, E 3, R (ultimate) 3. The ultimate opens at level 6 (rank 2 at 9, rank 3 at 10).
 
 | Level | Total XP |  |
 |---|---|---|
@@ -161,6 +162,6 @@ Every expedition starts at level 1 with one skill point and every ability locked
 | 7 | 870 |  |
 | 8 | 1120 |  |
 | 9 | 1400 | R rank 2 |
-| 10 | 1710 |  |
+| 10 | 1710 | R rank 3 |
 
 <!-- /gen:classes -->

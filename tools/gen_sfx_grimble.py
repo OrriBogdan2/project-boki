@@ -318,6 +318,14 @@ def death():
     return mix(cry, at(wheeze(0.6, 700, 2200), 0.95), hoard, spill)
 
 
+# ------------------------------------------------------------------ fan stopped
+def blast_stop():
+    """The charge cut short: the brass sparks die in a falling buzz and a dull clack."""
+    return mix(crack(0.04, 700, 4000, 0.014) * 0.8, kick(200, 70, 0.3, 0.04, 0.1) * 0.9,
+               at(lpf(S.sweep(520, 130, 0.35, 'saw'), 1100) * shape(0.35, 0.01, 0.04, 0.25) * 0.5, 0.02),
+               S.rattle(0.2, 70, 2500, 6000, 0.5, 0.06) * 0.3)
+
+
 def build():
     S.takes_cat('dr_shot', shot, 3, 'fire')
     S.save_cat('dr_throw', throw(), 'cast')
@@ -340,6 +348,7 @@ def build():
     S.takes_cat('dredge_hurt', hurt, 3, 'grunt')
     S.save_cat('dredge_down', down(), 'grunt')
     S.save_cat('dredge_death', death(), 'grunt')
+    S.save_cat('dredge_stop', blast_stop(), 'impact')
 
 
 if __name__ == '__main__':

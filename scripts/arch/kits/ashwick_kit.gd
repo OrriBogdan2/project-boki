@@ -25,6 +25,10 @@ const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
 const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const HEAT_CORE := Color("ffd23a")     # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
+const HEAT_RISE := 0.8                 # s of roaring before her palm glows at full heat
+const HEAT_COOL := 0.8                 # s it takes to cool from full heat once the fire stops
+const HEAT_SIZE := 1.2                 # the heat glow's scale at full heat (the pilot flame is 0.4)
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
@@ -41,8 +45,8 @@ const NOZZLE_REACH := 2.6                # m: a palm further off than this isn't
 # m the fire leaves ahead of the wrist, off the palm (a model without a palm point)
 const PALM_AHEAD := 0.12
 
-var chars := {}                 # foe id -> {e, n, t}
-var ignites := {}               # foe id -> {e, lvl, until}
+var chars := {}                 # foe id -> foe to draw Char on (the amount is Stacks "char", shared)
+var ignites := {}               # foe id -> foe to draw burn pips on (the stage is Stacks "ignite")
 var hose := AshwickHose.new()   # the Torch Lance stream
 var flame_acc := 0.0
 var spool := 0.0                # how long the hose has been held
@@ -52,6 +56,7 @@ var relight_t := 0.0            # the lance can't relight until this runs out (0
 var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
+var heat := 0.0                 # 0..1: how hot her palm glows, building while the lance roars
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
@@ -84,7 +89,7 @@ func _setup() -> void:
 func _best_char() -> float:
 	var b := 0.0
 	for k in chars:
-		b = maxf(b, float(chars[k]["n"]))
+		b = maxf(b, char_of(chars[k]))
 	return b
 
 func _fwd() -> Vector3:
@@ -112,24 +117,18 @@ func tip() -> Vector3:
 
 # ------------------------------------------------------------------ Char and Flashover
 func char_of(f: Ent) -> float:
-	var e: Dictionary = chars.get(f.get_instance_id(), {})
-	return float(e.get("n", 0.0))
+	return Stacks.count(f, "char")
 
 func burning(f: Ent) -> int:
-	var e: Dictionary = ignites.get(f.get_instance_id(), {})
-	return int(e.get("lvl", 0)) if not e.is_empty() and float(e["until"]) > m.time else 0
+	return int(Stacks.count(f, "ignite"))
 
 ## Adds Char; at the top the foe goes Ablaze (or the burn upgrades). True if that stoked the burn.
 func add_char(f: Ent, amt: float) -> bool:
 	if f == null or not is_instance_valid(f) or f.dead or f.team == h.team:
 		return false
-	var key := f.get_instance_id()
-	var e: Dictionary = chars.get(key, {"e": f, "n": 0.0, "t": 0.0})
-	e["n"] = float(e["n"]) + amt
-	e["t"] = m.time
-	chars[key] = e
-	if float(e["n"]) >= float(rd()["ignite_at"]):
-		e["n"] = 0.0          # extra Char past the top is discarded
+	chars[f.get_instance_id()] = f
+	if Stacks.add(f, "char", amt, float(rd()["expire"])) >= float(rd()["ignite_at"]):
+		Stacks.clear(f, "char")          # extra Char past the top is discarded
 		stoke(f)
 		return true
 	return false
@@ -145,14 +144,13 @@ func stoke(f: Ent) -> int:
 
 func _ignite(f: Ent, lvl: int, was: int) -> void:
 	var key := f.get_instance_id()
-	ignites[key] = {"e": f, "lvl": lvl, "until": m.time + float(rd()["ignite_t"])}
+	ignites[key] = f
+	Stacks.add(f, "ignite", float(lvl), float(rd()["ignite_t"]))
 	var dps := float(rd()["dps%d" % lvl]) * f.max_hp * power("sec")
 	if f.remote:
 		f.hurt(0.01, h, {"src": "flame", "burn": dps, "burn_for": float(rd()["ignite_t"])})
 	else:
-		f.burn_t = maxf(f.burn_t, float(rd()["ignite_t"]))
-		f.burn_dps = dps
-		f.burn_by = h
+		f.add_burn(dps, float(rd()["ignite_t"]), h)
 	if lvl == 2 and was < 2:
 		_flashover_fx(f)
 		_stoke_pose()
@@ -168,7 +166,7 @@ func _flashover_fx(f: Ent) -> void:
 	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
-	m.sfx("crit", f.pos, -7.0, 0.85)
+	m.sfx("ashwick_flashover", f.pos, -4.0)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, f)
@@ -195,17 +193,19 @@ func on_knock(t: Hunter, mine: bool) -> void:
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
+## Whether the foe (maybe freed) still carries `kind`.
+func _holds(fv, kind: String) -> bool:
+	return is_instance_valid(fv) and not (fv as Ent).dead and Stacks.count(fv, kind) > 0.0
+
 func _tick(dt: float) -> void:
 	fx.track()
 	if after_t > 0.0: after_t -= dt
 	if relight_t > 0.0: relight_t -= dt
 	for key in chars.keys():
-		var e: Dictionary = chars[key]
-		if not is_instance_valid(e["e"]) or (e["e"] as Ent).dead or m.time - float(e["t"]) > float(rd()["expire"]):
+		if not _holds(chars[key], "char"):
 			chars.erase(key)
 	for key in ignites.keys():
-		var e: Dictionary = ignites[key]
-		if not is_instance_valid(e["e"]) or (e["e"] as Ent).dead or float(e["until"]) <= m.time:
+		if not _holds(ignites[key], "ignite"):
 			ignites.erase(key)
 	_tick_tells(dt)
 	if not hose.puffs.is_empty():
@@ -245,21 +245,20 @@ func _tick_tells(dt: float) -> void:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
+	_heat_glow(dt, vis)
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
 		for key in chars:
-			var e: Dictionary = chars[key]
-			if float(e["n"]) >= 15.0 and vis:
-				vfx("char_drift", (e["e"] as Ent).pos)
+			if vis and char_of(chars[key]) >= 15.0:
+				vfx("char_drift", (chars[key] as Ent).pos)
 	if not vis:
 		return
 	for key in ignites:
-		var e: Dictionary = ignites[key]
-		var f := e["e"] as Ent
+		var f := ignites[key] as Ent
 		if not is_instance_valid(f):
 			continue
-		var lvl := int(e["lvl"])
+		var lvl := burning(f)
 		var top := f.pos + Vector3(0, 3.7, 0)
 		var n := 1 if lvl < 2 else 3
 		for i in n:
@@ -274,6 +273,20 @@ func _tick_tells(dt: float) -> void:
 				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
+
+## The heat in her palm: an orange glow that builds over HEAT_RISE of roaring and cools after she lets go.
+func _heat_glow(dt: float, vis: bool) -> void:
+	var roaring := was_held and spool >= float(lmbd()["spool"])
+	if roaring:
+		heat = minf(1.0, heat + dt / HEAT_RISE)
+	else:
+		heat = maxf(0.0, heat - dt / HEAT_COOL)
+	var id := "heat%d" % h.get_instance_id()
+	if heat <= 0.0 or not vis or jet.running():
+		fx.unplace(id)
+		return
+	var flicker := 0.9 + 0.1 * sin(m.time * 23.0)
+	fx.place(id, "glow", tip(), SHIELD_COL, HEAT_CORE, HEAT_SIZE * heat * flicker, 0.0, heat)
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
@@ -580,8 +593,6 @@ func _tick_bash(dt: float) -> void:
 		bash = {}
 		if b.get("hop", false):
 			_keep_poof(b)
-		elif not b.get("hit", false):
-			m.fx.dust(h.pos, 6)
 
 ## The poof's cloud of smoke and flame blown out behind her along `dir` (no blast), and its sound.
 func _poof_cloud(dir: Vector2) -> void:
@@ -683,7 +694,7 @@ func _cloak_blast() -> void:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
 		h.shield_t = float(ed["shield_t"])
 		st["shield_on"] = true
-		m.sfx("shield", h.pos, -5.0, 0.9)
+		m.sfx("ashwick_cloak_shield", h.pos, -4.0)
 
 # ------------------------------------------------------------------ X: Flue Flight
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
@@ -702,14 +713,14 @@ func combo_marks(out: Array) -> void:
 	super(out)
 	var ttl := float(rd()["expire"])
 	for key in chars:
-		var c: Dictionary = chars[key]
-		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
+		var f = chars[key]     # untyped first: a freed foe can't be assigned to a typed var
+		if not is_instance_valid(f) or (f as Ent).dead:
 			continue
-		var lvl := burning(c["e"])
-		var left: float = ttl - (m.time - float(c["t"]))
+		var lvl := burning(f)
+		var left := Stacks.left(f, "char")
 		if left > 0.0 or lvl > 0:
 			var label := "ABLAZE" if lvl > 0 else "CHAR"
-			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
+			out.append(RecastCue.mark(f, int(char_of(f)), left, ttl, label, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
@@ -732,6 +743,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and in_reach and (burning(te) > 0 or randf() < 0.5):
 		h.inp["aim"] = tgt.pos + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.3      # a held lane, then the release
 		return
 	if int(h.slot_lv["dash"]) > 0 and h.dashes >= 1.0 and los and dist > 2.5 and dist < 5.0 and randf() < 0.2:
 		h.inp["aim"] = tgt.pos

@@ -9,6 +9,7 @@ extends RefCounted
 
 const MIN_DRAG := 0.8        # m of cursor drag below which the tap default is used
 const TOWARD_COS := 0.64     # a drag within about 50 degrees of "to Sparkle" counts as pulling toward her
+const BOT_HOLD := 0.4       # s a bot holds E to drag before it lets go
 const ARROW_LEN := 1.3       # of the circle radius: the committed arrow inside the circle
 
 var kit: MageKit
@@ -24,6 +25,8 @@ func default_dir(at: Vector3) -> Vector2:
 ## The drag vector for the cursor as it is now (the preview, and the commit when E is let go).
 func drag_dir(at: Vector3) -> Vector2:
 	var cursor: Vector3 = kit.h.inp.get("aim", at)
+	if kit.h.ctrl == "bot":
+		cursor = kit.h.pos        # a bot drags toward herself: pulls the foe in
 	var drag := Vector2(cursor.x - at.x, cursor.z - at.z)
 	return drag.normalized() if drag.length() >= MIN_DRAG else default_dir(at)
 
@@ -38,10 +41,12 @@ func cast() -> bool:
 	return true
 
 ## Skycall is held to drag (the data: "HOLD AND DRAG before release to aim"): the key read here for the local
-## player, inp["e_down"] for tests and scripted demos. Bots never hold (a tap: the default drag).
-func _held() -> bool:
+## player, inp["e_down"] for tests and scripted demos. A bot holds BOT_HOLD s, then lets go.
+func _held(s: Dictionary) -> bool:
 	if bool(kit.h.inp.get("e_down", false)):
 		return true
+	if kit.h.ctrl == "bot":
+		return float(kit.e_def()["drag_max"]) - float(s["t"]) < BOT_HOLD
 	return kit.h.is_local() and Input.is_action_pressed("signature")
 
 func tick(dt: float) -> void:
@@ -67,7 +72,7 @@ func tick(dt: float) -> void:
 	for s in kit.strikes.duplicate():
 		s["t"] = float(s["t"]) - dt
 		var dragging := String(s["phase"]) == "flick"
-		if float(s["t"]) > 0.0 and (not dragging or _held()):
+		if float(s["t"]) > 0.0 and (not dragging or _held(s)):
 			continue
 		if dragging:
 			_commit(s, ed, r)
@@ -81,8 +86,9 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	kit.fx().disc(at, r, MageKit.VIOLET, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER)
-	kit.fx().pillar(at, Color(MageKit.PINK, 0.45), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
+	var dark := MageKit.VIOLET.darkened(0.4)
+	kit.fx().disc(at, r, dark, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER, false, true)
+	kit.fx().pillar(at, Color(MageKit.PINK, 0.7), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
 	AimKit.hide(kit.h, "e_drag")
 	kit.m.sfx("vv_sky_count", at, -4.0)
 	kit.net_ring(at, r, kit.col_of(ed))

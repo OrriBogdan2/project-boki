@@ -6,16 +6,30 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
+##   7. footsteps: a Hunter walked over every surface of the Hollow Crown (and the sky train's deck on
+##      Skyreach) plays the cue for it: its own set on grass, stone, wood and snow, the weight class's
+##      steps on sand, water and metal, a little louder the heavier it is
+##   8. jump, land and wall kick exist for every weight class an archetype has, HeroSfx.weighted picks them,
+##      a heavy hunter's glider open has its own layer, and a landing gets louder the faster the fall
+##   9. mobs and bosses: every kind that attacks has its own mob_<kind>_atk and _hit, each boss its _tell,
+##      and no sound played by mob.gd or boss.gd is a Boki cue (k_*), so a Boki rename cannot silence them
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. the garden's ambience (HomeAmbience): every bed has its file, the parts of the day and the rain each
+##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
+##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
+##      garden never plays amb_match
+##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
+##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd and utility_more.gd play no stock cue
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
+const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
@@ -28,6 +42,8 @@ func ok(cond: bool, what: String) -> void:
 		bad += 1
 
 func run(main: Node) -> void:
+	Save.no_write = true
+	Save.d = Save.fresh()
 	levels = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_levels.json"))
 	ok(levels is Dictionary and (levels.get("cats", {}) as Dictionary).size() >= 8, "the loudness table loads")
 	var sets := 0
@@ -39,6 +55,11 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_garden_names()
+	_garden()
+	await _steps(main)
+	_weighted()
+	_belt()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -67,6 +88,8 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "mob":
+		_check_mobs(sounds)
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -105,6 +128,24 @@ func _kit_names(arch: String, extra: Array) -> void:
 				silent.append(sname)
 	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
 
+## 7. Mob and boss attack sounds are their own (mob_*, boss_*), not borrowed Boki cues.
+func _check_mobs(sounds: Dictionary) -> void:
+	var gaps := []
+	for kind in Data.MOBS:
+		if kind.begins_with("bl_") or Data.BOSSES.has(kind) or Data.MOBS[kind]["attack"] == "none": continue
+		for part in ["atk", "hit"]:
+			if not sounds.has("mob_%s_%s" % [kind, part]): gaps.append("mob_%s_%s" % [kind, part])
+	for kind in Data.BOSSES:
+		if not sounds.has("boss_%s_tell" % kind): gaps.append("boss_%s_tell" % kind)
+	ok(gaps.is_empty(), "every attacking mob has a cue and impact, every boss a wind-up tell (missing %s)" % [gaps])
+	var re := RegEx.create_from_string("sfx\\(\"([a-z0-9_]+)\"[,)]")
+	var borrowed := []
+	for f in ["mob.gd", "boss.gd"]:
+		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/" + f)):
+			var sname := hit.get_string(1)
+			if sname.begins_with("k_") or not Sfx.ensure(sname): borrowed.append(sname)
+	ok(borrowed.is_empty(), "mob.gd and boss.gd play no k_ cue and only sounds that exist (%s)" % [borrowed])
+
 ## 6. Heavy sounds that carry, and held sounds that loop.
 func _reach_and_loops(group: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -131,6 +172,33 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## The garden minigames play literal names (garden_ ones, and any name handed to GardenSfx.cue): a typo would
+## play silence.
+func _garden_names() -> void:
+	var re := RegEx.create_from_string("\"(garden_[a-z0-9_]+)\"|cue\\(\"([a-z0-9_]+)\"")
+	var seen := []
+	var silent := []
+	for f in ["base_race.gd", "base_shove.gd", "base_seek.gd", "base_volley.gd", "base_tumble.gd", "echo_steps.gd",
+			"show_ring.gd", "base_relay.gd", "garden_sfx.gd", "home_chimes.gd"]:
+		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/home/" + f)):
+			var sname := hit.get_string(1) + hit.get_string(2)
+			if sname.ends_with("_"):          # a prefix, completed below
+				continue
+			seen.append(sname)
+			if not Sfx.ensure(sname):
+				silent.append(sname)
+	var sizes: Array = GardenSfx.SIZE.values()
+	var prefixed := {"garden_cheer_": GardenSfx.GRADE.values(), "garden_win_": sizes, "garden_sulk_": sizes,
+			"tumble_clash_": BaseTumble.rules()["moves"].keys(),
+			"garden_chime_": HomeChimes.KINDS}
+	for prefix in prefixed:
+		for tail in prefixed[prefix]:
+			seen.append(prefix + tail)
+			if not Sfx.ensure(prefix + tail):
+				silent.append(prefix + tail)
+	var named := seen.size() >= 12 and silent.is_empty()
+	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
 ## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
 func _ult_cues() -> void:
@@ -178,6 +246,95 @@ func _dash_air() -> void:
 	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
+## 7. The garden's beds (docs/AUDIO.md): a simulated two days at 0.25 s steps, rain in the middle of the
+## first, the player walking from the pond to far away and back.
+func _garden() -> void:
+	var beds := ["garden_morning", "garden_midday", "garden_evening", "garden_night", "pond"]
+	var missing := []
+	for b in beds + ["rain"]:
+		if not ResourceLoader.exists("res://audio/amb_%s.ogg" % b):
+			missing.append(b)
+	ok(missing.is_empty(), "garden: every bed has its file %s" % [missing])
+	var picked := {}
+	for clock in [0.0, 0.3, 0.5, 0.7, 0.9]:
+		picked[HomeAmbience.bed_for(clock, false)] = true
+	var rain_bed := HomeAmbience.bed_for(0.5, true)
+	ok(picked.size() == 4 and rain_bed == "rain", "garden: four day parts and rain pick beds %s" % [picked.keys()])
+	var d := {"layout": {"water": {HomeLayout.key(10, 10): 1}}}
+	var by_water := HomeAmbience.pond_level(d, Vector2(10.5, 11.5))
+	var far_off := HomeAmbience.pond_level(d, Vector2(40, 40)) + HomeAmbience.pond_level({}, Vector2(10, 10))
+	ok(is_equal_approx(by_water, 1.0) and far_off == 0.0, "garden: pond full by the water, silent far off or with none")
+	var h := HomeAmbience.new()
+	var dt := 0.25
+	var t := 0.0
+	var peak := 0
+	var match_heard := false
+	var off_bus := 0
+	var pond_far := 0.0
+	var pond_near := 0.0
+	var watching := ""
+	var started := -1.0
+	var fade_len := 0.0
+	var prev_bed := ""
+	for i in int(2.0 * 300.0 / dt):
+		t += dt
+		var day_t := fmod(t / 300.0 + 0.3, 1.0)
+		var raining := t > 100.0 and t < 150.0
+		var by_pond := fmod(t, 200.0) < 100.0
+		h.tick(dt, day_t, raining, d, Vector3(11.0, 0, 11.0) if by_pond else Vector3(40.0, 0, 40.0))
+		Sfx._process(dt)
+		var bed := HomeAmbience.bed_for(day_t, raining)
+		var lvl := float(h.levels.get(bed, 0.0))
+		if bed != prev_bed and prev_bed != "" and watching == "" and fade_len == 0.0:
+			watching = bed
+		if watching == bed:
+			if started < 0.0 and lvl > 0.0:
+				started = t
+			if lvl >= 1.0:
+				fade_len = t - started
+				watching = ""
+		prev_bed = bed
+		peak = maxi(peak, maxi(h.levels.size(), Sfx.amb_layers.size() + (1 if Sfx.amb_name != "" else 0)))
+		match_heard = match_heard or Sfx.amb_name == "match" or Sfx.amb_layers.has("match")
+		for n in Sfx.amb_layers:
+			off_bus += 0 if (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).bus == "Ambience" else 1
+		if t > 60.0 and t < 90.0: pond_near = maxf(pond_near, float(h.levels.get("pond", 0.0)))
+		if t > 180.0 and t < 200.0: pond_far = maxf(pond_far, float(h.levels.get("pond", 0.0)))
+	ok(peak == HomeAmbience.MAX_LOOPS, "garden: %d loops at most at once (peak %d)" % [HomeAmbience.MAX_LOOPS, peak])
+	ok(absf(fade_len - HomeAmbience.BED_FADE_S) <= 1.0, "garden: a new day part fades in over 20 s (%.1f)" % fade_len)
+	ok(pond_near >= 0.99 and pond_far == 0.0, "garden: pond up by water %.2f, off far %.2f" % [pond_near, pond_far])
+	ok(off_bus == 0, "garden: every bed is on the Ambience bus, so the ambience volume setting governs it")
+	ok(not match_heard, "garden: never plays amb_match")
+	var src := ""
+	for f in DirAccess.get_files_at("res://scripts/home"):
+		if f.ends_with(".gd"):
+			src += FileAccess.get_file_as_string("res://scripts/home/" + f)
+	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
+	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
+	Sfx.clear_amb_layers(0.0)
+
+## 7. Every belt item has its own cues (BeltSfx), none of them a stock one.
+func _belt() -> void:
+	var rows := BeltSfx.items()
+	var seen := {}
+	var wrong := []
+	for id in UtilityBelt.ids():
+		if UtilityBelt.is_key(id):
+			continue
+		var kinds := ["start"] + (["loop", "end", "cancel"] if UtilityUse.use_of(id) in ["drink", "repair"] else [])
+		for kind in kinds:
+			var c := BeltSfx.cue(id, kind)
+			if c != "belt_%s_%s" % [id, kind] or c in STOCK or seen.has(c) or _takes(c).is_empty():
+				wrong.append("%s %s '%s'" % [id, kind, c])
+			seen[c] = true
+		for kind in rows.get(id, {}):
+			if BeltSfx.cue(id, kind) != "belt_%s_%s" % [id, kind] or _takes(BeltSfx.cue(id, kind)).is_empty():
+				wrong.append("%s extra cue %s" % [id, kind])
+	ok(wrong.is_empty(), "belt: %d items with their own start/loop/end/cancel cues %s" % [rows.size(), wrong])
+	var src := FileAccess.get_file_as_string("res://scripts/match/utility_use.gd")
+	src += FileAccess.get_file_as_string("res://scripts/match/utility_more.gd")
+	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))
+	ok(stock_left.is_empty(), "belt: utility_use.gd and utility_more.gd play no stock cue %s" % [stock_left])
 
 func _takes(sname: String) -> Array:
 	var out := []
@@ -217,3 +374,90 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 7. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
+const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
+const STEP_VOL := -17.0       # dB: step_db in content/rules/move_sfx.json
+
+func _steps(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	m.set_process(false)
+	var w: World = m.world
+	var h: Hunter = m.player
+	var tiles := _surface_tiles(w, m.skytrain)
+	ok(w.layout_id == "hollowcrown", "step check runs on the Hollow Crown (%s)" % w.layout_id)
+	for surf in ["grass", "stone", "wood", "snow", "sand", "water", "metal"]:
+		if tiles.has(surf):
+			_walk(m, h, surf, tiles[surf])
+		else:
+			ok(false, "the Hollow Crown has a %s tile to step on" % surf)
+	m.queue_free()
+	var sky := Match.new()
+	main.add_child(sky)
+	sky.start({"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "map": "skyreach"})
+	sky.set_process(false)
+	var car: Transform3D = sky.skytrain.cur[1]
+	var deck := Vector3(car.origin.x, sky.skytrain.deck_y(car.origin + Vector3(0, 0.3, 0)), car.origin.z)
+	ok(sky.skytrain.on_deck(deck), "a point on a sky train car is on its deck")
+	_walk(sky, sky.player, "metal", deck)
+	sky.queue_free()
+
+## One Hunter per weight class steps on `p` (a surface `surf`): the cue played is the expected one, the
+## shared steps get quieter to heavier, and the sound has its takes loaded.
+func _walk(m: Match, h: Hunter, surf: String, p: Vector3) -> void:
+	var arch0 := h.arch
+	var vols := []
+	for cls in WEIGHT_ARCH:
+		h.arch = WEIGHT_ARCH[cls]
+		h.teleport(p)
+		var want := "step_%s_%s" % [surf, cls] if surf in StepSurface.SHARED else "%s_step_%s" % [h.arch, surf]
+		Sfx.last_played.clear()
+		Sfx.recent.clear()
+		Sfx.listener = p
+		MoveSfx.footstep(h)
+		# (the gear under the step is checked in --match-audio-check)
+		var got: Array = Sfx.last_played.keys().filter(func(s): return not s.ends_with("_foley"))
+		ok(got == [want] and Sfx.streams.has(want), "%s on %s: %s plays %s (%s)" % [cls, surf, h.arch, want, got])
+		vols.append(StepSurface.vol_db(h, surf, STEP_VOL))
+	var spread: bool = vols[0] < vols[1] and vols[1] < vols[2]
+	ok(spread == (surf in StepSurface.SHARED) and (surf in StepSurface.SHARED or vols[0] == vols[2]),
+			"%s: shared steps are louder the heavier the Hunter (%s)" % [surf, vols])
+	h.arch = arch0
+
+## A walkable ground tile centre per surface (the last rect's tile wins, as in StepSurface.at).
+func _surface_tiles(w: World, train: SkyTrain) -> Dictionary:
+	var out := {}
+	for z in w.h:
+		for x in w.w:
+			var i := w.idx(x, z)
+			if w.kind[i] != World.T_GROUND and not w.bridge.has(i):
+				continue
+			var p := Vector3(x + 0.5, w.ground_at(x + 0.5, z + 0.5), z + 0.5)
+			var surf := StepSurface.at(w, train, p)
+			if not out.has(surf):
+				out[surf] = p
+	return out
+
+## 8. Movement by weight: every archetype's class has its variants and gets them; louder landings from faster falls.
+func _weighted() -> void:
+	var picked := []
+	var missing := []
+	for arch in Arch.ids():
+		var h := Hunter.new()
+		h.arch = arch
+		for kind in ["jump", "land", "kick"]:
+			var want := "%s_%s" % [kind, Arch.weight(arch)]
+			if HeroSfx.weighted(h, kind, "") != want:
+				missing.append("%s/%s" % [arch, want])
+		picked.append(HeroSfx.weighted(h, "glide_open", "") != "")
+		h.free()
+	ok(missing.is_empty(), "every Hunter gets jump, land and kick in its weight class (missing %s)" % [missing])
+	var heavies := Arch.ids().filter(func(a): return Arch.weight(a) == "heavy").size()
+	ok(picked.count(true) == heavies, "only the heavy class has the heavier glider open")
+	var db := [HeroSfx.land_db(4.0), HeroSfx.land_db(10.0), HeroSfx.land_db(20.0)]
+	ok(db[0] < db[1] and db[1] < db[2], "a landing is louder the faster the fall %s dB" % [db])
+	var plain := Hunter.new()
+	ok(HeroSfx.weighted(plain, "jump", "jump") == "jump", "no class: the shared jump")
+	plain.free()

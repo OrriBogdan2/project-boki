@@ -1,5 +1,8 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"springs": {
+		"spring_mane": {"pull": [0.3, 0.12], "damp": 0.72, "limit": 0.6, "limit_in": 0.0}
+	},
 	"extra_bones": {"x_breath": "hips"},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
@@ -24,7 +27,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6, "stride": [1.5, 1.2], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
+		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -65,7 +68,9 @@
 			"clip": "wave"
 		},
 		"jug_slam": {
-			"clip": "slam"
+			"clip": "slam",
+			"time": [[0, 0], [0.6, 0.6], [0.7, 0.633], [1.15, 1.133]],
+			"blend_out": 0.2
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
@@ -80,7 +85,10 @@
 			"hold_from": 0.3
 		},
 		"jug_meteor_land": {
-			"clip": "meteor_land"
+			"clip": "meteor_land",
+			"fade": 0.05,
+			"time": [[0, 0], [0.13, 0.07], [0.5, 0.5]],
+			"blend_out": 0.15
 		},
 		"jug_dash": {
 			"clip": "dash"
@@ -124,6 +132,7 @@
 			"clip": "fusion"
 		}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",

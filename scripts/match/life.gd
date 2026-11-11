@@ -26,6 +26,7 @@ const R := {
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
 	"sickness_time": 12.0,      # [patch 1.0] resurrection sickness
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
+	"sickness_heal": 0.75,      # [patch 1.0] -25% healing received
 }
 
 const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
@@ -208,9 +209,8 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	KinTrack.drop_carried(m, h, at)       # a Boki you were carrying home drops for its owner
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
 		"belt": UtilityBelt.clear(h), "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
-		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys, "chest_keys": h.chest_keys}
+		"gear": [], "pack": h.pack.duplicate(true), "chest_keys": h.chest_keys}
 	h.pack = []
-	h.rift_keys = 0
 	h.chest_keys = 0
 	Backpacks.into_box(h, b)
 	# the gear you wear goes in the box too (Supervive: the box holds everything); your weapon stays with you
@@ -295,8 +295,6 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b.get("belt", []) as Array).size():
 		var st: Dictionary = b["belt"][i]
 		out.append({"key": "belt", "i": i, "id": String(st["id"]), "name": "%d %s" % [int(st["n"]), UtilityBelt.name_of(String(st["id"])).to_lower()], "sub": "Utility", "icon": UtilityBelt.icon_of(String(st["id"])), "col": UtilityBelt.col_of(String(st["id"])), "upgrade": UtilityBelt.has_room(h, String(st["id"]))})
-	if int(b.get("keys", 0)) > 0:
-		out.append({"key": "keys", "name": "%d Rift Key%s" % [int(b["keys"]), "" if int(b["keys"]) == 1 else "s"], "sub": "Opens a rift hatch", "icon": "gem", "col": ExitModels.HATCH, "upgrade": true})
 	if int(b.get("chest_keys", 0)) > 0:
 		var n_keys := int(b["chest_keys"])
 		var key_label := "%d key%s" % [n_keys, "" if n_keys == 1 else "s"]
@@ -355,8 +353,6 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				if int(st["n"]) <= 0:
 					(b["belt"] as Array).remove_at(bi)
 				break
-		"keys":
-			b["keys"] = int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 		"backpack":
 			Backpacks.take_from_box(m, h, b)
 		"chest_keys":
@@ -399,7 +395,7 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
-		and (b.get("belt", []) as Array).is_empty() and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
+		and (b.get("belt", []) as Array).is_empty() and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
 		and (b.get("pack", []) as Array).is_empty() \
 		and int(b.get("backpack", Backpacks.POUCH)) <= Backpacks.POUCH
 	_refresh_box(b)
@@ -450,13 +446,11 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 		st["n"] = int(st["n"]) - UtilityBelt.grant(h, String(st["id"]), int(st["n"]))
 		if int(st["n"]) > 0: belt_left.append(st)
 	b["belt"] = belt_left
-	var rift_left := int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 	var box_keys := int(b.get("chest_keys", 0))
 	var keys_left := box_keys - BeltKeys.give(h, "chest_key", box_keys)
 	var got := int(b["gems"])
 	b["gems"] = 0
 	b["seeds"] = {}
-	b["keys"] = rift_left
 	b["chest_keys"] = keys_left
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)
@@ -491,6 +485,9 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	o.down_hp = 0.0
 	o.revive = 0.0
 	o.hp = o.max_hp * hp_frac
+	o.armor_tier = 0          # back on a broken Common piece, as in the source (docs/ARMOUR_PARITY.md)
+	o.armor_xp = 0.0
+	o.refresh_gear()
 	o.armor = 0.0
 	o.inv_t = 1.5
 	o.vel = Vector3.ZERO
@@ -516,7 +513,7 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 		m.killcam_text = ""
 		if m.hud:
 			m.hud.flash(Color("9ee2a0"), 0.3)
-			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage for 12s" if sick else ""), Color("9ee2a0"))
+			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage and healing for 12s" if sick else ""), Color("9ee2a0"))
 
 ## Someone died for good: no box revive any more, and no beacon either.
 static func make_gone(m: Match, h: Hunter) -> void:

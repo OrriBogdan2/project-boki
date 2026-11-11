@@ -147,7 +147,9 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
+const LAND_SQUASH := 0.16     # how far a hard landing flattens it (share of its height; widens by 0.6 of that)
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -169,6 +171,10 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -191,9 +197,11 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _feel := LandLean.new()    # the landing squash and the run-start/stop lean laid over the clips
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -263,6 +271,7 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -301,17 +310,20 @@ func _process(dt: float) -> void:
 	if not seen:
 		return
 	_flinch.update(root, dt)
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
-## the jolt of a hit (KinFlinch) stay.
-func _keep_flex() -> void:
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do the rest, so only its width roll, the
+## jolt of a hit (KinFlinch), a landing's squash and a lean as it starts and stops (LandLean) stay.
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	_feel.step(dt, root.global_position)
+	var sq := _feel.squash * LAND_SQUASH
+	flex.rotation = _flinch.rot + Vector3(-_feel.lean, 0.0, 0.0)
+	var land := Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide) * land
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -341,6 +353,11 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
@@ -357,7 +374,7 @@ func _start_shot(which: String) -> void:
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work

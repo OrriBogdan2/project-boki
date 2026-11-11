@@ -46,3 +46,6 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 
 ### ext/sfx-ui
 - Synthesised, no samples.
+
+### ext/sfx-step-surfaces (sand, water, metal footsteps)
+- Synthesised, no samples (`tools/gen_sfx_steps.py`).

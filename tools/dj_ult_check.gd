@@ -5,6 +5,8 @@ extends RefCounted
 ## cooldown, the level gate (no cast below 6), the bond paid only on a land, the small mechanics, the merge
 ## hold, and (combos) the burst cap: an ultimate followed straight by a merge never knocks a full-health hunter.
 
+const CC := preload("res://tools/cc_probe.gd")
+
 var A
 
 ## What the bond meter owes the current ult cast (KinBond.from_ult keeps the best event per cast id).
@@ -49,6 +51,7 @@ func dancer(a) -> void:
 	A.aim_at(P, T.pos)
 	P.ult = 0.0
 	P.dashes = 0.0
+	P.ex_cd = 5.0
 	K.add_mark(T, 2, true)
 	var used0 := int(P.used.get("x", 0))
 	HunterKeys.ult_pressed(P)
@@ -60,6 +63,7 @@ func dancer(a) -> void:
 			U.running() and AimKit.shown(P, "ult") and bool(ring.get("all", false))
 			and float(ring.get("r", 0.0)) < float(d["reach"]) * 0.6 and P.dashes >= P.max_dashes() - 0.01,
 			"r %.2f dashes %.2f" % [float(ring.get("r", 0.0)), P.dashes])
+	A.ok("dancer X: Encore resets the Vault whole, the long dash too", P.ex_cd <= 0.0, "ex_cd %.1f" % P.ex_cd)
 	A.ok("dancer X: its cooldown runs from the cast (24s)", absf(float(K.cd["x"]) - float(d["cooldown"])) < 0.1,
 			"%.1f" % float(K.cd["x"]))
 	A.step(m, 0.36)
@@ -91,8 +95,8 @@ func dancer(a) -> void:
 	A.ok("dancer X: 2s of blades, 10 at most on each foe; ends with a plain fade and the dance stops",
 			U.blades == 20 and not U.running() and not AimKit.shown(P, "ult") and K.anim_id != ThiefUlt.DANCE,
 			"blades %d" % U.blades)
-	A.ok("dancer X small mechanic: the outer band hits harder and blights 6s; the inside doesn't blight",
-			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
+	A.ok("dancer X small mechanic: the outer band hits harder; no Anti-Heal (the source's four carriers exclude Sable)",
+			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t <= 0.0 and T2.blight_t <= 0.0,
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
 	var total := float(d["dmg"]) * float(d["shots"])
 	A.ok("dancer X: the faster blades keep the old totals (40 inside, 60 from the outer band)", total == 40.0
@@ -186,6 +190,9 @@ func zedran(a) -> void:
 	A.ok("juggernaut X small mechanic: the guard blocks every hit and its stun; blocks count (two at most)",
 			P.hp == hp0 and P.stun_t <= 0.0 and U.blocked == 3 and int(U.st["blocks"]) == 2,
 			"hp %.0f -> %.0f blocked %d" % [hp0, P.hp, U.blocked])
+	var took := CC.landed(m, P, T2)
+	A.ok("juggernaut X parity: the guard is Invulnerable, a pull, a knock and a slow take no hold either",
+			took == "" and K.cc_proof(), "took hold: " + took)
 	A.ok("juggernaut X: no bond before the strike lands (blocking pays nothing)", _owed(P) == 0.0)
 	A.step(m, 0.5)
 	var dealt_blocked := U.last_dealt
@@ -209,7 +216,7 @@ func zedran(a) -> void:
 	A.step(m, 0.9)
 	A.ok("juggernaut X small mechanic: two hits blocked make the answer 40% harder",
 			absf(dealt_blocked / maxf(0.01, U.last_dealt) - 1.4) < 0.03, "%.1f vs %.1f" % [dealt_blocked, U.last_dealt])
-	# blighted, the heal barely takes
+	# under Anti-Heal, the heal barely takes
 	A.step(m, 0.4)
 	A.fresh(T)
 	T.teleport(home + Vector3(2.6, 0, 0))
@@ -219,7 +226,7 @@ func zedran(a) -> void:
 	K.cd["x"] = 0.0
 	HunterKeys.ult_pressed(P)
 	A.step(m, 0.9)
-	A.ok("juggernaut X small mechanic: blighted, the heal barely takes",
+	A.ok("juggernaut X small mechanic: under Anti-Heal, the heal barely takes",
 			U.last_healed < 0.5 * 0.8 * U.last_dealt, "healed %.0f of %.0f" % [U.last_healed, U.last_dealt])
 	P.blight_t = 0.0
 	A.step(m, 0.4)

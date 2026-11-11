@@ -109,8 +109,36 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	_feel(id, m, sync, clips, bool(dd.get("rig_root", false)))
 	m.free()
 	await _flinch(id)
+
+## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, and both
+## leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
+## ("rig_root") takes the Rig's own squash, which HunterAnim drives (not running here): only the lean is his.
+func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var head := WardenSkeleton.find(sk, "head")
+	var at := func() -> Vector3:
+		return m.global_transform.affine_inverse() * (sk.global_transform * sk.get_bone_global_pose(head).origin)
+	m.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true})
+	clips.force = {"clip": String((clips.d["loco"] as Dictionary)["idle"]), "t": 0.5}
+	var settle := func(feel: Vector2, frames: int) -> Vector3:
+		m.set_meta(WardenClips.FEEL, feel)
+		for k in frames:
+			sync.call("_process", DT)
+		return at.call()
+	var rest: Vector3 = settle.call(Vector2.ZERO, 12)
+	var landed: Vector3 = settle.call(Vector2(1.0, 0.0), 1)
+	var drop := (rest.y - landed.y) / rest.y
+	ok(on_rig or (drop > WardenClips.LAND_SQUASH * 0.7 and drop < WardenClips.LAND_SQUASH * 1.3),
+			"%s: a hard landing flattens him %.0f%% (head %.2f -> %.2f m)" % [id, drop * 100.0, rest.y, landed.y])
+	var leaned: Vector3 = settle.call(Vector2(0.0, 0.2), 30)
+	ok(rest.z - leaned.z > 0.05, "%s: a run start tips his head forward (%.3f m)" % [id, rest.z - leaned.z])
+	var back: Vector3 = settle.call(Vector2.ZERO, 60)
+	ok(back.distance_to(rest) < 0.005, "%s: and he stands back as he was (%.4f m off)" % [id, back.distance_to(rest)])
+	m.remove_meta(WardenClips.FEEL)
+	clips.force = {}
 
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
@@ -126,6 +154,7 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
+	out.append_array((dd.get("act", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
@@ -198,11 +227,27 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var end_t := float(def["keys"][-1][0])
 		var length := clips.lib.get_animation(String(moves[km]["clip"])).length
+		var pts: Array = moves[km].get("time", [])
+		if not pts.is_empty():     # ("time": the clip ends at its last kit point; the map stays on the clip, in order)
+			var on := true
+			for i in pts.size():
+				var c := float(pts[i][1])
+				on = on and c >= 0.0 and c <= length + 0.001 and (i == 0 or pts[i][0] > pts[i - 1][0])
+			ok(on, "%s %s: the time map stays on the clip, in order" % [id, km])
+			length = float(pts[-1][0])
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
 		if off > worst:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
 	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
+	var act_off := 0.0
+	for verb in dd.get("act", {}):
+		var pick := clips._pick({"act": verb, "act_t": 0.4}, 0.0)
+		var clip := String(dd["act"][verb])
+		ok(pick.get("clip") == clip and is_equal_approx(float(pick.get("t", -1.0)), 0.4),
+				"%s: the home %s plays its own clip, seeked to the verb's clock" % [id, verb])
+		act_off = maxf(act_off, absf(clips.lib.get_animation(clip).length - float(HunterVerbs.LENGTH[verb])))
+	ok(act_off <= 0.034, "%s: its garden clips last as long as the home verbs (off %.3f s)" % [id, act_off])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:

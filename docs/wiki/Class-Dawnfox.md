@@ -77,12 +77,14 @@ What the in-game kit card (K) says.
 ### Abilities in full
 
 **Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
+**Carrier (passive).** Run into a downed teammate to shoulder them (up to 2; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned or hexed, you drop them and can't pick anyone up for 4s. Your embers Kindle foes (up to 5, 4s): each stack adds 0.7 damage to your embers, and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s for a long-range ember).
 
-**Relay Step (dash, Shift, 7s cooldown).** A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
+**Relay Step (dash, Shift, 7s cooldown).** A quick skip about 4.2m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).
 
 **Burrseed (RMB, 10.5s cooldown).**
 
 - *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within 15m of you. After 2s of that it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off.
+- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (36 m/s, 15.3m) sticks to the first foe it hits (9 damage) and a violet disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
@@ -97,6 +99,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 10.5s -> 9.5s, damage +15%. | cooldown 10.5s -> 8.4s, damage +30%; the roots last 0.3s longer and the burst is twice as wide. |
 | Dash (Shift) | recharge 7s -> 6s per charge. | recharge 7s -> 4.9s; picking up a teammate refreshes your long air dash. |
 | E | cooldown 11s -> 9.9s, healing +15%. | cooldown 11s -> 8.8s, healing +30%; the thrown light's healing boost is 100% instead of 50%. |
+| R (ultimate) | Hearth Call cooldown 46s -> 41.4s. The Merge lasts 30% longer. | Hearth Call cooldown 46s -> 36.8s. |
 
 **Suggested level-up order** (what bots follow): E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > Glove (Q).
 

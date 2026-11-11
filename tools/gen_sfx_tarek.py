@@ -279,6 +279,13 @@ def step(surface, i):
     return mix(hit(1.0), at(hit(0.45), 0.04 + 0.006 * i), at(grit, 0.01))
 
 
+# ------------------------------------------------------------------ glider folds for the slam
+def glide_fold():
+    """The glider folding shut as she plunges: air rushing past, falling in pitch, and a low flap."""
+    air = bpf(noise(0.4), 500, 2800) * S.shape(0.4, 0.03, 0.05, 0.3)
+    return mix(air * 0.8, kick(160, 55, 0.35, 0.06, 0.12) * 0.7)
+
+
 def build():
     takes('br_throw', throw, 3, 'fire')
     takes('br_boulder_hit', boulder_hit, 3, 'impact')
@@ -302,6 +309,7 @@ def build():
     save('dolm_death', death(0), 'grunt')
     for s in ('grass', 'stone', 'wood', 'snow'):
         takes('dolm_step_' + s, lambda i, s=s: step(s, i), 3, 'step')
+    save('dolm_glide_fold', glide_fold(), 'cast')
 
 
 if __name__ == '__main__':

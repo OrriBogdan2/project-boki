@@ -47,7 +47,6 @@ var slide := {}                # {t, held, dir} while a Slipstep runs
 var burrs: Array = []          # Burr Charges in flight or stuck: {pos, dir, t, node, wall, fuse, fuse0, range, out, y0}
 var burr_pool: Array = []      # their nodes, reused
 var needle := {}               # Longneedle's charge: {t, dir (the turn-capped aim), push (0..1 of the view push-out)}
-var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
 var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
@@ -174,6 +173,10 @@ func teardown() -> void:
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
+## The Longneedle's line is near-planted: it turns toward the cursor at "turn_deg_s" at most (cast to shot).
+func aim_lock() -> Vector2:
+	return needle.get("dir", Vector2.ZERO)
+
 ## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
 	return not dry
@@ -216,12 +219,11 @@ func on_deal(t: Ent, dmg: float, o: Dictionary) -> void:
 		h.heal(dmg * fever_k())
 	if o.has("ab") and String(o.get("ab")) != "dodge":
 		add_fever(1)
-	if t is Hunter and ((t as Hunter).downed or t.hp <= 0.0) and not knocked.has(t.get_instance_id()):
-		_on_knock(t)
 
 ## Hot Streak: rank 3 resets the Burr Charge on a knock (Slipstep comes back by the game-wide DashReset rule).
-func _on_knock(t: Ent) -> void:
-	knocked[t.get_instance_id()] = true
+func on_knock(_t: Hunter, mine: bool) -> void:
+	if not mine:
+		return
 	if rank("sec") >= 3:
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
@@ -628,7 +630,7 @@ func _cone(at: Vector3, out: Vector2, bd: Dictionary, wall: bool) -> void:
 	m.fx.burst(at + Vector3(out.x, 0.4, out.y) * 1.5, EMBER, 18, 8.0, 0.4, 3.0, 1.4, spray, float(bd["cone_deg"]) * 0.5)
 	for f in m.foes_of(h.team):
 		if not f.hittable(): continue
-		if absf(f.pos.y - at.y) > 2.6: continue
+		if not AimMode.in_reach(at.y, f.pos.y): continue
 		if not AimMode.in_cone(at, out, float(bd["cone_len"]), float(bd["cone_deg"]), f.pos, 0.3, f.r): continue
 		var to := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		var away := (out * 0.6 + to.normalized() * 0.4).normalized() if to.length() > 0.2 else out
@@ -670,17 +672,14 @@ func _end_needle() -> void:
 	e_t = 0.0
 	AimKit.hide(h, "e")
 
-## While the Longneedle charges she aims along the capped line, not the cursor (ZERO otherwise: free).
-func aim_lock() -> Vector2:
-	return needle.get("dir", Vector2.ZERO)
-
 func _tick_needle(dt: float) -> void:
 	var ed := e_def()
 	needle["t"] = float(needle["t"]) + dt
 	if h.downed or h.stun_t > 0.0 or Hex.active(h):
 		_end_needle()
 		return
-	_turn_needle(dt)
+	var dir := turn_lock(needle["dir"], float(ed["turn_deg_s"]), dt)
+	needle["dir"] = dir
 	var k := clampf(float(needle["t"]) / float(ed["charge"]), 0.0, 1.0)
 	# a bright wide line drawn full length at once, narrowing to a thin core as the cast completes
 	var wide := beam_width()
@@ -690,23 +689,14 @@ func _tick_needle(dt: float) -> void:
 	needle["push"] = lerpf(float(needle["push"]), _push_want(), 1.0 - exp(-PUSH_EASE * dt))
 	if h.is_local() and m.cam:
 		var push := float(needle["push"])
-		m.cam.cast_view(h.aim_dir(), float(ed["view_zoom"]) * push, float(ed["range"]) * push)   # (the caster's camera)
+		m.cam.cast_view(dir, float(ed["view_zoom"]) * push, float(ed["range"]) * push)   # (the caster's camera)
 	AimKit.charge(h, k, {"col": EMBER, "col2": HOT})
 	# an ember orb swells at the muzzle through the cast
 	if int(m.time * 20.0) != int((m.time - dt) * 20.0):
-		fx().star(_muzzle(h.aim_dir()), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
+		fx().star(_muzzle(dir), EMBER, HOT, 0.35 + 0.6 * k, 0.07)
 	if float(needle["t"]) >= float(ed["charge"]) + 0.03:          # (a beat at full so the full tick plays)
-		_fire_needle()                                              # along the capped aim, so before the lock lifts
+		_fire_needle(dir)                                           # along the capped aim, so before the lock lifts
 		_end_needle()
-
-## The locked aim turns toward the cursor at the data's capped rate (deg/s): a flick across the screen can't drag it.
-func _turn_needle(dt: float) -> void:
-	var want := _cursor()
-	if want.length() < 0.05:
-		return
-	var cur: Vector2 = needle["dir"]
-	var step := deg_to_rad(float(e_def()["turn_deg_s"])) * dt
-	needle["dir"] = cur.rotated(clampf(cur.angle_to(want), -step, step)).normalized()
 
 ## The cursor relative to her on the ground: where she wants to aim, as against the capped aim she holds.
 func _cursor() -> Vector2:
@@ -734,9 +724,8 @@ func charge_now() -> Array:
 		return ["needle", clampf(float(needle["t"]) / float(e_def()["charge"]), 0.0, 1.0)]
 	return super.charge_now()
 
-func _fire_needle() -> void:
+func _fire_needle(d: Vector2) -> void:
 	var ed := e_def()
-	var d := h.aim_dir()
 	var a := _muzzle(d)
 	var L := float(ed["range"])
 	var b := a + Vector3(d.x, 0, d.y) * L
@@ -757,7 +746,7 @@ func _fire_needle() -> void:
 		var along := v.dot(d)
 		if along < 0.0 or along > L + f.r: continue
 		if absf(v.cross(d)) > float(ed["width"]) + f.r: continue
-		if absf(f.pos.y - h.pos.y) > 2.6: continue
+		if not AimMode.in_reach(h.pos.y, f.pos.y): continue
 		var rat := KitStatus.rattled(f)
 		var dmg: float = dmg0 * ((1.0 + float(ed["rattle_k"])) if rat else 1.0)
 		var o := {"src": "abil", "ab": "k1", "tags": ["k1", "needle"]}
@@ -774,7 +763,7 @@ func _fire_needle() -> void:
 				# the word rides up the screen, clear of the damage number on the body
 				payoff_fx(f.pos, "", EMBER, "", h.dir_to(f), f)
 				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", EMBER, true)
-				m.sfx("hero_skewer", f.pos, 0.0)
+				m.sfx("gunslinger_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
 		var cut := float(ed["shave"])

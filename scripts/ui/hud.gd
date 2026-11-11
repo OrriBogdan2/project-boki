@@ -333,6 +333,7 @@ func _draw_world_labels() -> void:
 	var cam := m.cam
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
+	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -690,19 +691,21 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(pts, Color(1, 1, 1, 0.07))
 	if m.exits:
 		for x in m.exits.list:
-			var pv: Vector2 = to_map.call(x.get("berth", x["pos"]))
-			var busy: bool = String(x["state"]) in ["called", "boarding", "charging", "open"]
+			var pv: Vector2 = to_map.call(x["pos"])
+			var busy: bool = String(x["state"]) in ["charging", "open"]
 			if not MapDetail.shows("far_exit", hold, m.player != null and MapDetail.exit_matters(m, x)):
 				continue
 			if not on_map.call(pv, 4.0):
-				# off the map: an arrow for the loud ones (a called skiff, a charging uplink, an open lift)
-				if busy and x["kind"] != "hatch": _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
+				# off the map: an arrow for the loud ones (a charging uplink, an open lift)
+				if busy: _edge_arrow(inner, inner.get_center(), pv, Exits.color_of(x))
 				continue
 			_draw_exit_icon(pv, x, MapDetail.ICON_R / 7.0)
 	if m.lairs:
 		_draw_map_lairs(inner, to_map, on_map, hold)
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
+	HeartHud.minimap(self, inner, to_map, on_map)
+	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
 		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
 		for cnd in m.spawn_plan.cands:
@@ -756,12 +759,14 @@ func _draw_minimap(sz: Vector2) -> void:
 	# sound pings: rings that ripple out where you heard gunfire or a blast you can't see
 	for sp in m.sound_pings:
 		var age := m.time - float(sp["t"])
-		if age > 1.6: continue
+		var life := float(sp.get("life", 1.6))
+		if age > life: continue
 		var pv: Vector2 = to_map.call(sp["pos"])
 		var boom: bool = sp["kind"] == "boom" or sp["kind"] == "shriek"
 		var col := Color("ff9a5a") if boom else Color("ff5a5a")
 		if sp["kind"] in ["blight", "shriek"]: col = Color("ff6a2a")      # the Blight: ember
-		var a := clampf(1.0 - age / 1.6, 0.0, 1.0)
+		if sp["kind"] == "wisp": col = Color("9fe8ff")      # a rival's killed Boki showing its owner
+		var a := clampf(1.0 - age / life, 0.0, 1.0)
 		if on_map.call(pv):
 			c.draw_arc(pv, 3.0 + age * (12.0 if boom else 8.0), 0, TAU, 20, Color(col, a), 2.0, true)
 			c.draw_circle(pv, 2.5, Color(col, a))
@@ -816,18 +821,17 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
 	_draw_clock_bar(sz, r)
 
-## Under the minimap, like Supervive's day bar: the match clock, what the exits are doing, your run
+## Under the minimap, like Supervive's day bar: the match clock, your run
 ## level, and a thin bar for how far through the match you are.
 func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
+	WaysOutHud.draw(self)
 	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
 	mm_bottom = r.end.y
 	var left := m.length - m.time
 	var phase := ""; var pc := MUTED
-	var xl: Array = m.exits.clock_line() if m.exits else ["", MUTED]
-	if left < 30.0 and (m.exits == null or m.exits.active_for(m.player.team if m.player else -9).is_empty()): phase = "ISLANDS FALLING"; pc = BAD
-	else: phase = String(xl[0]); pc = xl[1]
+	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
@@ -896,40 +900,24 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
 		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
 
-## An exit on the minimap: a little boat for a skiff dock, a diamond for a rift hatch, an outpost's banner
-## post (OutpostGlyph). Bright when it's usable, grey when not; a pulsing ring while it's going.
+## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
+## when not; a pulsing ring while it's going.
 func _draw_exit_icon(pv: Vector2, x: Dictionary, k := 1.0) -> void:
 	var col: Color = Exits.color_of(x)
 	var usable: bool = m.exits.live(x)
 	var st := String(x["state"])
 	if not usable: col = Color(0.55, 0.58, 0.64, 0.7)
-	var dark := Color(0, 0, 0, 0.7)
-	match String(x["kind"]):
-		"dock":
-			var hull := PackedVector2Array([pv + Vector2(-6, 1) * k, pv + Vector2(6, 1) * k, pv + Vector2(4, 5) * k, pv + Vector2(-4, 5) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(-7, 0) * k, pv + Vector2(7, 0) * k, pv + Vector2(5, 6) * k, pv + Vector2(-5, 6) * k]), dark)
-			c.draw_colored_polygon(hull, col)
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -7) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 0) * k]), col)
-			c.draw_line(pv + Vector2(0, -7) * k, pv + Vector2(0, 1) * k, dark, 1.5)
-			if st == "closed":
-				c.draw_line(pv + Vector2(-6, -6) * k, pv + Vector2(6, 6) * k, Color(BAD, 0.8), 2.0)
-		"hatch":
-			var dm := PackedVector2Array([pv + Vector2(0, -5) * k, pv + Vector2(5, 0) * k, pv + Vector2(0, 5) * k, pv + Vector2(-5, 0) * k])
-			c.draw_colored_polygon(PackedVector2Array([pv + Vector2(0, -6.5) * k, pv + Vector2(6.5, 0) * k, pv + Vector2(0, 6.5) * k, pv + Vector2(-6.5, 0) * k]), dark)
-			c.draw_colored_polygon(dm, col if st == "open" or (m.player and m.player.rift_keys > 0) else Color(col, 0.55))
-			c.draw_circle(pv, 1.6 * k, dark)
-		"outpost":
-			var held := OutpostLook.held(x)
-			var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
-			OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
-			if st == "charging":
-				_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
-	if st in ["called", "boarding", "charging", "open", "unlocking"]:
+	var held := OutpostLook.held(x)
+	var flag: Color = Data.TEAM_COLORS[int(x["team"]) % Data.TEAM_COLORS.size()] if held else Color(0.55, 0.58, 0.64, 0.9)
+	OutpostGlyph.draw(c, pv, k, col, flag, OutpostLook.lit_of(x))
+	if st == "charging":
+		_arc(pv, 11.0 * k, float(x["prog"]), col, 2.0)
+	if st in ["charging", "open"]:
 		var ph := fmod(m.time * 1.2, 1.0)
 		c.draw_arc(pv, (8.0 + ph * 8.0) * k, 0, TAU, 24, Color(col, 0.8 * (1.0 - ph)), 2.0, true)
 
-## Over each exit nearby: its name and what it's doing. Your squad's own exit (a skiff you called, an
-## uplink you're charging) gets a waypoint from anywhere on the map.
+## Over each exit nearby: its name and what it's doing. Your squad's own uplink gets a waypoint from
+## anywhere on the map.
 func _draw_exit_labels() -> void:
 	if m.exits == null or m.player == null or m.player.out or m.player.extracted:
 		return
@@ -942,37 +930,21 @@ func _draw_exit_labels() -> void:
 		var d := p.flat_dist(at)
 		var st := String(x["state"])
 		var line := ""
-		match String(x["kind"]):
-			"dock":
-				match st:
-					"called": line = "Skiff inbound  %s" % _fmt(x["t"])
-					"boarding": line = "BOARDING  %ds" % int(ceil(x["t"]))
-					"gone": line = "Skiff away"
-					"closed": line = "Closed"
-					_: line = "Call skiff" if m.exits.callable(x) else ("Opens %s" % _fmt(float(x["open_at"]) - m.time) if m.time < float(x["open_at"]) else "")
-			"hatch":
-				match st:
-					"unlocking": line = "OPENING  %ds" % int(ceil(float(x["t"])))
-					"open": line = "OPEN  ·  %d/%d left" % [int(x["uses"]), Exits.HATCH_USES]
-					_: line = "Sealed  ·  you have a key" if p.rift_keys > 0 else "Sealed  ·  needs a Rift Key"
-			"outpost":
-				match st:
-					"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
-					"fizzling": line = "Shutting off"
-					"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
-					"spent": line = "Cooling down"
-					_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
-		var reach := 26.0 if x["kind"] == "hatch" else 44.0
-		if st in ["boarding", "open", "unlocking"]: reach = 70.0
+		match st:
+			"charging": line = "Uplink %d%%%s" % [int(x["prog"] * 100.0), "  ·  contested" if x["contested"] else ("  ·  draining %s" % _fmt(m.exits.drain_left(x)) if x.get("draining", false) else "")]
+			"fizzling": line = "Shutting off"
+			"open": line = "LIFT OPEN  %ds" % int(ceil(x["t"]))
+			"spent": line = "Cooling down"
+			_: line = "Start uplink" if m.exits.startable(x) else ("Online in %s" % _fmt(float(x["open_at"]) - m.time))
+		var reach := 70.0 if st == "open" else 44.0
 		var prompted: bool = not m.interact.is_empty() and is_same(m.interact.get("x"), x)     # the prompt already says it
 		if d < reach and not cam.is_position_behind(at) and not prompted:
-			var lp := cam.unproject_position(at + Vector3(0, 3.4 if x["kind"] != "hatch" else 1.6, 0))
+			var lp := cam.unproject_position(at + Vector3(0, 3.4, 0))
 			_ctext(lp, String(x["name"]), 13, col, big)
 			if line != "":
-				_ctext(lp + Vector2(0, 17), line, 12 if st not in ["boarding", "open", "unlocking"] else 16, INK if st not in ["boarding", "open", "unlocking"] else col, big)
+				_ctext(lp + Vector2(0, 17), line, 16 if st == "open" else 12, col if st == "open" else INK, big)
 		if is_same(x, mine) and d > 7.0 and not m.opts.get("tutorial", false):
-			var tgt: Vector3 = x.get("berth", at)
-			_draw_waypoint(tgt, "Skiff" if x["kind"] == "dock" else ("Hatch" if x["kind"] == "hatch" else ("Lift" if st == "open" else "Uplink")), col)
+			_draw_waypoint(at, "Lift" if st == "open" else "Uplink", col)
 
 ## A small arrow on the minimap's edge pointing at something off the map.
 func _edge_arrow(inner: Rect2, from: Vector2, to: Vector2, col: Color) -> void:
@@ -1066,15 +1038,12 @@ func _hud_origin(sz: Vector2) -> Vector2:
 
 var lvl_pop := 0.0
 var lvl_seen := -1
-## A level just went up (Hunter.gain_xp): the badge pops and the lane names what improved (the
-## weapon's step on even levels, which also get a gold wash).
-func level_up(lv: int, info := {}) -> void:
-	lvl_pop = 0.35      # every level: the badge flashes (the growth itself is quiet, LevelGrowth)
-	var line := "LEVEL %d  ·  +1 skill point" % lv
-	if lv % 2 == 0:
-		flash(Color("ffd27a"), 0.16)
-		if not info.is_empty(): line = "LEVEL %d  ·  %s" % [lv, info["name"]]
-	msgs.push(line, Color("ffd27a"), MsgLane.HIGH)
+## A level just went up (Hunter.gain_xp): the badge pops, the screen washes gold and the lane names
+## the skill point to rank an ability with (the growth itself is quiet, LevelGrowth).
+func level_up(lv: int) -> void:
+	lvl_pop = 0.35
+	flash(Color("ffd27a"), 0.16)
+	msgs.push("LEVEL %d  ·  +1 skill point" % lv, Color("ffd27a"), MsgLane.HIGH)
 
 ## The archetype resource under the health bar, with its name and tells (ARCHETYPES §3.2).
 func _draw_res_bar(x0: float, y: float, w: float, p: Hunter) -> void:
@@ -1476,8 +1445,8 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 	_draw_squad_markers(sz, p)
 
 func _has_status(e: Ent) -> bool:
-	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
-		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
+	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.blight_t > 0.0 \
+		or e.guard_t > 0.0 or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -1783,12 +1752,14 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"chest": prog = it["chest"]["prog"]
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
-		var s: String = it["label"]
-		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
-		if prog > 0.0:
-			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
+			"heart": prog = float(it.get("prog", 0.0))
+		if not WaysOutHud.gate_prompt(self, sz, y, it):
+			var s: String = it["label"]
+			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
+			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+			if prog > 0.0:
+				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
@@ -1955,13 +1926,13 @@ func _draw_overhead(p: Hunter) -> void:
 		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
 		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
-		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
+		var df := 1.0 - p.drink_t / p.drink_len
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
 		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
-		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
+		var kf := 1.0 - p.kit_t / p.kit_len
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
@@ -1984,6 +1955,8 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 		hover_id = id
 		hover_t = 0.0
 	hover_t += get_process_delta_time()
+	if AbilityCard.on_hud(c, id, hit[0] if hit.size() > 0 else Rect2(), p):      # Tab held: the ability card
+		return
 	if id == "" or hover_t < 0.25:
 		return
 	var lines := _tip_lines(id, p)
@@ -2035,7 +2008,7 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 			return out
 	var si := p.slot_info(id)
 	var r_name := "Ultimate (%s)" % Settings.key_cap("hunter_ult")
-	var slot_names := {"sec": "Right click", "k1": "Utility (E)", "r": r_name, "dash": "Dash"}
+	var slot_names := {"sec": "Right click", "k1": "Utility (%s)" % Settings.key_cap("signature"), "r": r_name, "dash": "Dash"}
 	var slot_name: String = slot_names[id]
 	var key: String = {"sec": "secondary", "k1": "signature", "r": "hunter_ult", "dash": "dash"}[id]
 	out.append([String(si["name"]), si["col"]])
@@ -2047,10 +2020,9 @@ func _arch_tip(id: String, p: Hunter) -> Array:
 	for i in nr.size():
 		out.append(["%s%s: %s" % ["Next  ·  " if i == 0 else "", String(nr[i][0]), String(nr[i][1])], Color(si["col"], 0.95 if i == 0 else 0.7), 12])
 	if id == "r":
-		out.append(["Unlocks at level %d, rank 2 at %d. " % [int(Hunter.ULT_AT[0]), int(Hunter.ULT_AT[1])], MUTED, 12])
+		out.append(["Unlocks at level %d, rank 2 at %d, rank 3 at %d. " % Hunter.ULT_AT, MUTED, 12])
 	if id == "sec":
-		var rd := p.ak.res_def()
-		out.append(["Passive: %s" % String(p.ak.d["passive"]["desc"]), Color(Color(String(rd.get("col", "#ffffff"))), 0.9), 12])
+		out.append(["Passive: %s" % AbilityText.full(p.arch, "passive"), Color(p.ak.res_col(), 0.9), 12])
 	out.append(["Cooldown %s%s" % [_secs(float(si["cd_max"])), ("  ·  ready in %s" % _secs(float(si["cd"]))) if float(si["cd"]) > 0.0 else "  ·  ready"], MUTED, 13])
 	return out
 
@@ -2137,7 +2109,7 @@ func _tip_lines(id: String, p: Hunter) -> Array:
 			out.append(["Dodge  ·  %s" % Settings.key_cap("dash"), MUTED, 12])
 			out.append([dd.desc if dd else "A quick burst the way you're moving.", INK, 14])
 			out.append(["%d of %d charges. One comes back every %s." % [int(floor(p.dashes)), int(p.max_dashes()), _secs(p.dash_regen())], MUTED, 13])
-		"util1", "util2", "util3", "util4": out = BeltHud.tip(p, int(id.substr(4)) - 1)
+		"util1", "util2", "util3", "util4", "util5", "util6": out = BeltHud.tip(p, int(id.substr(4)) - 1)
 		"armor_level": out = ArmorHud.tip(p)
 		"base":
 			out.append(["Base to a teammate", Color("8fe3c8")])

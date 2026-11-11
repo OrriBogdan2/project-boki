@@ -68,9 +68,13 @@ func mage() -> void:
 			"r %.1f" % float(ring.get("r", 0.0)))
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
-	var hp0 := P.hp
+	ok("Kitefall: the cursor marker is the strike's hit area", absf(float(AimKit.entry(P, "x_aim").get("r", 0.0))
+			- float(U.data()["radius"])) < 0.05)
+	var hp0 := P.hp + P.armor + P.shield
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
-	ok("Kitefall: invulnerable in the air", P.hp == hp0)
+	ok("Kitefall parity: shots pass through her up there (data), a blow still lands",
+			P.phase_t > 0.0 and P.inv_t <= 0.0 and P.hp + P.armor + P.shield < hp0,
+			"phase %.2f inv %.2f" % [P.phase_t, P.inv_t])
 	K.cd["e"] = 0.0
 	K.use_e()
 	ok("Kitefall: nothing else of hers works up there (E, the attack)",
@@ -436,6 +440,11 @@ func gunslinger() -> void:
 	ok("Cinderfall: the patch burns and slows",
 			ac.dmg(T) > took and T.slow_t > 0.0 and U.zone_ticks >= 2 and AimKit.shown(P, "xz1"),
 			"+%.1f ticks %d" % [ac.dmg(T) - took, U.zone_ticks])
+	var zone_share := float(xd["tick_dmg"]) / float(xd["tick"]) / float(xd["dmg"])
+	ok("Cinderfall DoT parity: the patch is 59 of the shell's 203 a second (+-8%), ticking every 0.5 s",
+			absf(zone_share - 59.0 / 203.0) < 0.08 * 59.0 / 203.0
+			and float(xd["tick"]) == 0.5 and float(xd["zone_t"]) == 3.0,
+			"%.3f vs %.3f" % [zone_share, 59.0 / 203.0])
 	ok("Cinderfall: burn ticks pay no more bond", is_equal_approx(_paid(P, id), float(KinBond.rules()["hit"])))
 	ac.step(m, float(xd["zone_t"]))
 	ok("Cinderfall: the patch is gone after 3s", not U.running() and not AimKit.shown(P, "xz1"))

@@ -133,11 +133,8 @@ func _apply_hp() -> void:
 	if delta > 0.0: h.hp += delta
 	else: h.hp = minf(h.hp, h.max_hp)
 
-func on_knock(t: Hunter, mine: bool) -> void:
+func on_knock(_t: Hunter, _mine: bool) -> void:
 	add_stack(1)
-	if mine and is_instance_valid(t):
-		h.heal(h.max_hp * float(rd()["heal_knock"]))
-		m.fx.burst(h.pos + Vector3(0, 1.0, 0), Color("7fe08a"), 14, 2.5, 0.5, -2.0)
 
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 	_shred_armor(t, dmg, o)
@@ -159,7 +156,7 @@ func _shred_armor(t: Ent, dmg: float, o: Dictionary) -> void:
 	var ht := t as Hunter
 	if ht.armor <= 0.0:
 		return
-	var wear := dmg * (1.0 - Hunter.ARMOR_DR) * float(gun_def()["armor_k"])
+	var wear := dmg * (1.0 - float(Hunter.ARMOR_TIERS[ht.armor_tier][3])) * float(gun_def()["armor_k"])
 	ht.armor = maxf(0.01, ht.armor - wear)
 	armor_shreds += 1
 
@@ -269,7 +266,6 @@ func _dress_volley() -> void:
 	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
 	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
 	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
-	m.sfx("dr_shot", h.pos, -5.0 if h.is_local() else -8.0, 1.0)
 	if not tells_visible():
 		return
 	var key := "%s_%d" % [h.nid, h.shot_n]
@@ -647,11 +643,8 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 		abyss_dunks += 1
 		f.hurt(amt * power("kin") * float(ed["abyss_k"]), h, {"src": "abil", "ab": "k1", "tags": ["anchor"]})
 	m.displace.spike(f, -16.0, h)
-	# ANCHORED says it all: no separate GROUNDED word over the stun
-	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	stunned.append({"e": f, "until": m.time + stun})
-	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:

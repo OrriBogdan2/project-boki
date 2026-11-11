@@ -12,9 +12,8 @@ extends ArchKit
 ## (HeroVfx) for the moments, CareLook and UltLook for the bodies (darts, spear, wall, zone, rink, shells);
 ## moves: KMovesCare "tm_".
 
-var chill := {}                # target instance id -> {t: Ent, left: float}
-var fan_hits := {}             # target instance id -> {n: int, left: float, t: Ent}
-const FAN_HOLD := 3.0          # s a foe's Fan stacks last after its last fan hit
+var chill := {}                # target instance id -> foe Chilled (the count is Stacks "chill"): its look and badge
+var fan_hits := {}             # target instance id -> foe to glow (the count is Stacks "shatter", shared)
 var darts: Array = []          # homing shards in flight: {s: Dictionary, side: float, passed}
 var dart_n := 0                # darts thrown (alternates the bow side and the hand)
 var seq_next := 0.0            # when the next dart may leave
@@ -38,6 +37,7 @@ var rime := {}                 # Rimelock running: {t, at, slow: {instance id: s
 var last_stunned := 0          # foes the last Rimelock crash stunned (tests)
 var glide_held := false        # the glide key was down last step (Rimelock refuses each new press once)
 var ult_look: UltLook
+const FAN_HIT_T := 3.0         # s the dart count on a foe lasts after its latest dart
 const SHELL_T := 0.15          # s the icy shell shows on a foe before the 8-dart Shatter bursts
 const SLAB_GAP := 0.06         # s between ice plates under the skate
 const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
@@ -67,26 +67,25 @@ func play_soft(move: String) -> void:
 func chilled(t: Ent) -> bool:
 	if t == null or not is_instance_valid(t):
 		return false
-	var e: Dictionary = chill.get(t.get_instance_id(), {})
-	return float(e.get("left", 0.0)) > 0.0
+	return Stacks.count(t, "chill") > 0.0
 
 func add_chill(t: Ent) -> void:
 	if t == null or not is_instance_valid(t) or t.dead or t.team == h.team:
 		return
-	var key := t.get_instance_id()
 	var fresh := not chilled(t)
-	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
+	Stacks.add(t, "chill", 1.0, float(d["passive"].get("chill_t", 4.0)))
+	chill[t.get_instance_id()] = t
 	if fresh:
 		vfx("chill", t.pos)
 
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
-	return int((fan_hits.get(t.get_instance_id(), {}) as Dictionary).get("n", 0))
+	return int(Stacks.count(t, "shatter"))
 
 func best_fan() -> int:
 	var b := 0
 	for k in fan_hits:
-		b = maxi(b, int((fan_hits[k] as Dictionary)["n"]))
+		b = maxi(b, fan_on(fan_hits[k]))
 	return b
 
 func res_frac() -> float: return float(best_fan()) / float(d["passive"].get("fan_hits", 8))
@@ -108,18 +107,15 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		m.later(
 				delay,
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
-		chill.erase(t.get_instance_id())
+		Stacks.clear(t, "chill")
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
 		m.sfx("rimewright_dart_hit", t.pos, -5.0, 1.0)
 		var key := t.get_instance_id()
-		var e: Dictionary = fan_hits.get(key, {"n": 0, "left": FAN_HOLD, "t": t})
-		e["n"] = int(e["n"]) + 1
-		e["left"] = FAN_HOLD
-		e["t"] = t
-		fan_hits[key] = e
-		if int(e["n"]) >= int(pd.get("fan_hits", 8)):
+		fan_hits[key] = t
+		if Stacks.add(t, "shatter", 1.0, FAN_HIT_T) >= float(pd.get("fan_hits", 8)):
+			Stacks.clear(t, "shatter")
 			fan_hits.erase(key)
 			# an icy shell closes over them for a beat, then it bursts
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
@@ -127,7 +123,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			var at := t.pos
 			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
 
-## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
+## Shatter: a starburst of ice spikes round the foe and damage to everyone near (data: damage only; no slow, no
+## fresh Chill: those were ours-only riders, cut 2026-11-07).
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
@@ -141,30 +138,24 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 		f.hurt(
 				dmg * power("passive"), h,
 				{
-					"src": "splinter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "splinter"],
-					"payoff": true})
-		add_chill(f)
+					"src": "splinter", "ab": "passive", "tags": ["passive", "splinter"], "payoff": true})
 
 func _tick(dt: float) -> void:
 	for key in chill.keys():
-		var e: Dictionary = chill[key]
-		e["left"] = float(e["left"]) - dt
-		var tv = e["t"]     # untyped first: a freed foe can't be assigned to a typed var
-		var t: Ent = tv if is_instance_valid(tv) else null
-		if float(e["left"]) <= 0.0 or t == null or t.dead:
+		var tv = chill[key]     # untyped first: a freed foe can't be assigned to a typed var
+		if not is_instance_valid(tv) or tv.dead or not chilled(tv):
 			chill.erase(key)
 			continue
+		StatusLooks.of(m).keep(tv, "chill")
 	for key in fan_hits.keys():
-		var e2: Dictionary = fan_hits[key]
-		e2["left"] = float(e2["left"]) - dt
-		var tv2 = e2["t"]
-		if float(e2["left"]) <= 0.0 or not is_instance_valid(tv2):
+		var tv = fan_hits[key]     # untyped first: a freed foe can't be assigned to a typed var
+		var n := fan_on(tv) if is_instance_valid(tv) and not tv.dead else 0
+		if n <= 0:
 			fan_hits.erase(key)
 			continue
 		# the frost glow on the foe grows with each dart toward the Shatter
-		var n := int(e2["n"])
 		lk().keep(
-				"frost%d" % key, "frost", (tv2 as Node3D).global_position,
+				"frost%d" % key, "frost", (tv as Node3D).global_position,
 				{"r": 0.7 + 0.08 * n, "a": 0.15 + 0.75 * float(n) / 8.0})
 	_tick_darts(dt)
 	_tick_throw(dt)
@@ -721,6 +712,10 @@ func cast_e() -> bool:
 func _tick_wall_cast(dt: float) -> void:
 	if wall_cast.is_empty():
 		return
+	if h.downed:
+		wall_cast = {}                 # knocked in the tell: no wall (docs/heroes/rimewright.md "Interrupts")
+		AimKit.hide(h, "e")
+		return
 	wall_cast["t"] = float(wall_cast["t"]) - dt
 	if float(wall_cast["t"]) <= 0.0:
 		var wc := wall_cast
@@ -775,15 +770,15 @@ func combo_marks(out: Array) -> void:
 	super(out)
 	var pd: Dictionary = d["passive"]
 	for key in chill:
-		var c: Dictionary = chill[key]
-		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), "CHILL", true))
+		var c = chill[key]
+		if is_instance_valid(c) and chilled(c):
+			out.append(RecastCue.mark(c, 0, Stacks.left(c, "chill"), float(pd.get("chill_t", 4.0)), "CHILL", true))
 	for key in fan_hits:
-		var f: Dictionary = fan_hits[key]
-		if is_instance_valid(f["t"]):
-			var n := int(f["n"])
+		var f = fan_hits[key]
+		if is_instance_valid(f):
+			var n := fan_on(f)
 			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, "FAN", full))
+			out.append(RecastCue.mark(f, n, Stacks.left(f, "shatter"), FAN_HIT_T, "FAN", full))
 
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
@@ -858,7 +853,7 @@ func _tick_wall(dt: float) -> void:
 ## Displace pushes it at the wall's speed until the wall stops (a player online, on their own game).
 func _carry(w: Dictionary, dir: Vector2, speed: float) -> void:
 	for f in m.foes_of(h.team):
-		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
+		if f.dead or not AimMode.in_reach(float(w["y"]), f.pos.y) or carried.has(f.get_instance_id()):
 			continue
 		var p2 := Vector2(f.pos.x, f.pos.z)
 		var off := p2 - Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
@@ -906,6 +901,10 @@ func icb() -> IceBody:
 		ice = IceBody.new(h)
 	return ice
 
+
+## Sealed in Rimelock: invulnerable, pulls and slows included.
+func cc_proof() -> bool:
+	return not rime.is_empty()
 
 func ult_running() -> bool:
 	return not rime.is_empty()
@@ -1069,7 +1068,7 @@ func _rime_crash(k: float) -> void:
 	for f in foes_in(at, radius):
 		if not m.world.los(at, f.pos, at.y + 0.95):
 			continue
-		f.hurt(float(xd["dmg"]) * power("ult") * k, h, {"src": "abil", "ab": "ult", "stun": stun, "dr": true,
+		f.hurt(float(xd["dmg"]) * power("x") * k, h, {"src": "abil", "ab": "ult", "stun": stun, "dr": true,
 			"payoff": true, "tags": ["ult", "rimelock"]})
 		add_chill(f)
 		ulk().burst("block", f.pos, {"ent": f, "dur": maxf(0.3, stun)})
@@ -1118,6 +1117,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.15      # held past the tap, then released
 	if (int(h.slot_lv["kin"]) > 0
 			and float(cd["e"]) <= 0.0
 			and dist < 9.0

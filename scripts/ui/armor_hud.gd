@@ -1,9 +1,10 @@
 class_name ArmorHud
 extends RefCounted
-## Armor levelling on the HUD. Everyone starts on the same base armor; it levels up as you deal
-## damage to rival hunters (Hunter.armor_gain: monsters count a third, a knock adds a big chunk), and
-## each level adds plates. HudVitals shows the tier word and a progress hairline by the armour strip;
-## this adds a shield badge on the portrait, ringed by that progress, that pops on a level-up.
+## Armor levelling on the HUD. Everyone starts on the same base armor; it levels up as you deal or
+## take damage from rival hunters (Hunter.armor_gain: monsters count a third, a knock adds a big chunk),
+## and each level blocks more (Hunter.ARMOR_TIERS). HudVitals shows the tier word and a progress hairline
+## by the armour strip; this adds a shield badge on the portrait, ringed by that progress, that pops on a
+## level-up.
 ## Look: HudStyle.
 
 const POP := 0.5               # seconds the badge pops after a level-up
@@ -44,13 +45,13 @@ static func tip(p: Hunter) -> Array:
 	var out: Array = []
 	var last: bool = p.armor_tier >= Hunter.ARMOR_TIERS.size() - 1
 	out.append(["Armor  ·  %s" % String(Hunter.ARMOR_TIERS[p.armor_tier][0]), p.armor_col()])
-	var how := "Everyone starts on the same armor. Deal damage to rival hunters to level it up "
+	var how := "Everyone starts on the same armor. Deal or take damage from rival hunters to level it up "
 	how += "(monsters count a third, a knock a lot)."
 	out.append([how, HudStyle.INK, 14])
 	if last:
 		out.append(["Top level: %d armor." % int(p.max_armor), HudStyle.MUTED, 13])
 	else:
 		var nx: Array = Hunter.ARMOR_TIERS[p.armor_tier + 1]
-		out.append(["Next: %s  ·  %d of %d  ·  +%d%% plates" % [nx[0], int(p.armor_xp), int(nx[2]),
-				int(Hunter.ARMOR_TIER_BONUS * 100.0)], nx[1], 13])
+		out.append(["Next: %s  ·  %d of %d  ·  blocks %d%%" % [nx[0], int(p.armor_xp), int(nx[2]),
+				int(round(float(nx[3]) * 100.0))], nx[1], 13])
 	return out

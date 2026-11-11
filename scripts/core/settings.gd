@@ -13,6 +13,8 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
+	"boki_wisps": false,
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -23,7 +25,7 @@ const DEFAULTS := {
 	# camera
 	"depth_cues": true, "cam_style": "supervive", "cam_follow": "supervive", "cam_lead": 1.0,
 	# sounds
-	"reset_cue": "a",
+	"reset_cue": "a", "ult_ready_cue": true,
 	# accessibility
 	"screen_shake": 0.3, "reduce_flashes": false,
 	# demo / recording (Settings > Demo): for filming a match, offline only (online matches use the host's rules)
@@ -47,32 +49,33 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   ·  mob_cap: most monsters awake within 60 m of you (the rest sleep, see MobCap)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "mob_cap": 4},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "mob_cap": 6},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "mob_cap": 12},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "mob_cap": 24},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "mob_cap": 32},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -148,15 +151,17 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
-	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["scores", "Scoreboard"],
+	["util3", "Utility belt slot 3"], ["util4", "Utility belt slot 4"], ["util5", "Utility belt slot 5"],
+	["util6", "Utility belt slot 6"], ["scores", "Scoreboard"],
 	["emote", "Emote wheel (hold, in a match)"],
 	["ping", "Ping for your squad: a spot, an enemy or loot (on the map too)"],
 	["map", "Full map (click to ping)"], ["pass_lead", "Pass the drop lead"], ["separate", "Separate from the drop"],
 	["play", "Play fetch with a Boki"], ["talk", "Talk to a Boki"], ["details", "A Boki's details"], ["inventory", "Inventory"],
-	["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
+	["whistle", "Whistle at home: your partner comes, hold for the nearest Boki"], ["build", "Build mode at home / decorate indoors"], ["hero", "Relics: change your Relic (at home and in practice areas)"], ["rotate", "Turn a piece (build mode)"],
 	["store", "Put a piece away (build mode)"],
 	["record", "Recording mode (again: hide the HUD)"], ["record_orbit", "Recording: slow camera orbit"],
 	["move_readout", "Movement readout (tuning)"],
@@ -522,7 +527,8 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
+	["details", "summon"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true

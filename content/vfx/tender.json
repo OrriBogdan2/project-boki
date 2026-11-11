@@ -45,7 +45,7 @@
 				"size": 0.08, "c": "lilac", "c2": "hot"}
 		]},
 		"seed_cast": {"fx": [
-			{"p": "flare", "at": "lantern", "size": 0.7, "grow": 1.2, "life": 0.18, "c": "lilac", "c2": "pink", "c3": "char"},
+			{"p": "flare", "at": "lantern", "size": 0.7, "grow": 1.2, "life": 0.3, "ride": true, "c": "lilac", "c2": "pink", "c3": "char"},
 			{"p": "star", "at": "lantern", "n": 8, "way": "fwd", "speed": 3.0, "spread": 0.5, "drag": 2.0, "life": 0.5,
 				"size": 0.12, "c": "lilac", "c2": "hot"}
 		]},

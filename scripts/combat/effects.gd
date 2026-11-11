@@ -5,7 +5,7 @@ class_name Effects
 ## "at" picks where an area happens: "self", "owner", "aim" (the cursor or the kin's target), "here".
 ##
 ##   projectile  dmg speed range size color kb stun slow root burn count spread  on_end:[...] on_hit:[...]
-##   area        radius dmg kb lift stun slow root burn at delay color
+##   area        radius dmg kb lift stun slow root burn shred(share of armor stripped) at delay color
 ##   cone        radius arc dmg kb slow stun color                  (in front of the caster, toward the aim)
 ##   chain       count first jump dmg stun color                    (lightning hopping between foes)
 ##   pull        radius strength at                                 (drags foes toward the spot)
@@ -246,7 +246,7 @@ static func _hit_opts(e: Dictionary, ctx: Dictionary, kb: Vector2, caster: Node)
 	return o
 
 static func _hits(f: Ent, at: Vector3, r: float) -> bool:
-	return Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 2.2
+	return Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and AimMode.in_reach(at.y, f.pos.y)
 
 static func _heal(t: Node, n: float) -> void:
 	if t is Hunter:
@@ -309,7 +309,9 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
 			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
-			for f in m.foes_of(caster.team):
+			if e.get("raze", false):
+				Beacons.raze(m, at, r)
+			for f in m.foes_of(-1 if e.get("friendly", false) else caster.team):
 				if _hits(f, at, r):
 					var rel := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 					var kb := rel.normalized() * float(e.get("kb", 0.0)) if rel.length() > 0.05 else Vector2.ZERO
@@ -322,6 +324,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						o.erase("lift")
 						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
 						m.displace.spike(f, -16.0, caster)
+					if e.has("shred") and "armor" in f and not f.remote: f.armor *= 1.0 - float(e["shred"])
 					f.hurt(dmg, caster, o)
 		"cone":
 			var d := _aim_dir(caster, ctx)
@@ -332,7 +335,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			if caster is Hunter: AbilityFx.cast(m, caster, "cone", caster.pos, d, col, {"radius": r})
 			for f in m.foes_of(caster.team):
 				var to := Vector2(f.pos.x - caster.pos.x, f.pos.z - caster.pos.z)
-				if to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(d) > arc) and absf(f.pos.y - caster.pos.y) < 2.2:
+				if to.length() < r + f.r and (to.length() < 0.6 or to.normalized().dot(d) > arc) and AimMode.in_reach(caster.pos.y, f.pos.y):
 					f.hurt(float(e.get("dmg", 0.0)) * pw, caster, _hit_opts(e, ctx, d * float(e.get("kb", 0.0)), caster))
 		"chain":
 			var from: Vector3 = owner_of(caster).pos if String(e.get("from", "")) == "owner" else caster.pos
@@ -365,7 +368,7 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			m.fx.ring(at, r, col, 0.4)
 			for f in m.foes_of(caster.team):
 				var rel := Vector2(at.x - f.pos.x, at.z - f.pos.z)
-				if rel.length() < r + f.r and rel.length() > 0.4 and absf(f.pos.y - at.y) < 2.5:
+				if rel.length() < r + f.r and rel.length() > 0.4 and AimMode.in_reach(at.y, f.pos.y):
 					m.displace.knock(f, rel.normalized() * float(e.get("strength", 6.0)) * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
 		"zone":
 			var at := _where(e, caster, ctx, "aim")

@@ -7,6 +7,7 @@ extends "res://tools/hero_pair_check.gd"
 func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
+	await _ally("dolm")
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -127,8 +128,23 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.4)
 	ok(
-		"lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 3.0,
+		"lmb: hold + release = punch, knocks back (the data's 199 vs the 169 boulder = 10.6, no charge scaling)",
+		K.punches == 1 and typeof(pd["dmg"]) == TYPE_FLOAT and T.pos.x - home.x > 3.0
+		and absf(dmg(T) - float(pd["dmg"]) * m.dmg_mult(P)) < 0.6,
 		"punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x]
+	)
+	var full_dmg := dmg(T)
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.inp["fire"] = true
+	step(m, 0.4, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"lmb: a short hold hits as hard as a full one (no charge scaling on damage or knockback)",
+		K.punches == 2 and absf(dmg(T) - full_dmg) < 0.1 and T.pos.x - home.x > 3.0,
+		"short %.1f full %.1f dx %.1f" % [dmg(T), full_dmg, T.pos.x - home.x]
 	)
 	ok("lmb: the punch steps her forward about half a body", P.pos.x - x0 > 0.35, "step %.2f" % (P.pos.x - x0))
 	ok("lmb: the lane is gone after the punch", not AimKit.shown(P, "punch"))
@@ -182,7 +198,7 @@ func _breah() -> void:
 	step(m, 0.5)
 	ok(
 		"combo: punch into a wall = stun, with stars over the head",
-		K.wall_stuns >= 1 and T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		K.wall_stuns >= 1 and T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"wall stuns %d stun %.2f" % [K.wall_stuns, T.stun_t]
 	)
 	W.kind[W.idx(bx, bz)] = World.T_GROUND
@@ -413,7 +429,7 @@ func _breah() -> void:
 		m.verbs.walls.size() == walls0 and rocks(m).is_empty(), "walls %d -> %d" % [walls0, m.verbs.walls.size()]
 	)
 	ok(
-		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and KitLooks.of(m).crowned(T),
+		"rmb: a full charge in the centre stuns, with stars", T.stun_t > 0.0 and StatusLooks.of(m).showing(T, "stun"),
 		"stun %.2f" % T.stun_t
 	)
 	ok(
@@ -680,7 +696,7 @@ func _breah() -> void:
 	var c1 := AimKit.entry(P, "sight")
 	step(m, 2.1, func(): P.inp["crouch"] = true)
 	var c2 := AimKit.entry(P, "sight")
-	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 15.0)
+	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 17.9)
 	ok(
 		"passive: the cone widens 25 -> 40 degrees over 2s of sneaking",
 		float(c1.get("deg", 0.0)) < 28.0 and absf(float(c2.get("deg", 0.0)) - 40.0) < 0.5,
