@@ -368,6 +368,8 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
+	if String(root.get_meta("kstate", "")) == "faint":           # a downed Boki lies still, eyes shut
+		return "sleep"
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
@@ -388,6 +390,10 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if String(root.get_meta("kstate", "")) == "faint":
+		return "asleep"
+	if _hit_k > 0.3:
+		return "sad"
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")
