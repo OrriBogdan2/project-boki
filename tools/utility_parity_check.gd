@@ -34,9 +34,11 @@ func run(host: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
+	for mb in m.mobs: mb.queue_free()         # the camps stay out of it: only the belt items hurt anyone here
+	m.mobs.clear()
 	var P: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
-	foe.ctrl = "idle"
+	foe.ctrl = "idle"                        # a bot would walk out of the blast and the patch
 	_banner(m, P, foe)
 	_skyfall(m, P, foe)
 	_blight(m, P, foe)
@@ -56,6 +58,10 @@ func run(host: Node) -> void:
 	_raft_cast(m, P)
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
+
+## Fields the belt put down: the biome's own lava vents come and go on their own clock.
+func _patches(m: Match) -> int:
+	return m.fields.list.filter(func(f): return (f["ctx"] as Dictionary).get("slot", "") != "lava").size()
 
 func _steps(m: Match, secs: float) -> void:
 	for i in int(secs / Match.DT): m.step(Match.DT)
@@ -98,9 +104,9 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	ok(foe.hp >= foe.max_hp - 0.5, "...nothing lands for 5 s")
 	_steps(m, 1.0)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
-	ok(m.fields.list.size() >= 1, "then the ground burns (a fire patch)")
+	ok(_patches(m) >= 1, "then the ground burns (a fire patch)")
 	_steps(m, 3.5)
-	ok(m.fields.list.is_empty(), "...for 3 s")
+	ok(_patches(m) == 0, "...for 3 s")
 
 func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	_live(P)        # the Skyfall blast above reaches its own thrower now
@@ -119,9 +125,9 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	ok(foe.blight_t > 0.0 and foe.hp + foe.armor < foe.max_hp + foe.max_armor,
 			"a rival in the patch is blighted and hurt")
 	_steps(m, 35.0)
-	ok(m.fields.list.size() >= 1, "the patch is still there after 37 s")
+	ok(_patches(m) >= 1, "the patch is still there after 37 s")
 	_steps(m, 4.0)
-	ok(m.fields.list.is_empty(), "...and gone after 40 s")
+	ok(_patches(m) == 0, "...and gone after 40 s")
 
 # ------------------------------------------------------------------ the Nov 10 follow-ups
 func _live(x: Hunter) -> void:
@@ -158,6 +164,9 @@ func _stage(m: Match, P: Hunter, foe: Hunter) -> void:
 	P.vel = Vector3.ZERO
 	P.inp["aim"] = P.pos + Vector3(6.0, 0, 0)
 	foe.teleport(P.pos + Vector3(6.0, 0, 0))
+	for h in [P, foe]:
+		if h.kin:
+			h.kin.stow()                     # on the shoulder: out, your Boki would run off and bite the rival
 
 ## Flat ground all round to 9 m, so a gate or a pad can go anywhere near.
 func _open(m: Match, p: Vector3) -> bool:
@@ -178,7 +187,7 @@ func _gate(m: Match, P: Hunter, foe: Hunter) -> void:
 	_steps(m, 4.0)
 	ok(not UtilityBelt.use_id(P, "twin_gate"), "...pressing it again before 8 s does nothing")
 	_steps(m, 5.0)
-	ok(P.flat_dist(home) < 1.0 and foe.flat_dist(far) < 1.0, "...and nothing swaps by itself")
+	ok(P.flat_dist(home) < 1.0 and foe.flat_dist(far) < 1.0, "...and nothing swaps by itself (%.1f %.1f)" % [P.flat_dist(home), foe.flat_dist(far)])
 	ok(UtilityBelt.use_id(P, "twin_gate"), "the second press, once armed, swaps")
 	_steps(m, 0.2)
 	ok(P.flat_dist(far) < 2.0 and foe.flat_dist(home) < 2.0, "...you and the rival trade places")
