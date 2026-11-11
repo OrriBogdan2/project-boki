@@ -51,5 +51,11 @@
 			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
 			"ours": "glide pressed 0.3 s into a hold: LMB n/a; RMB 0.58 s; E 0.45 s; X 0.32 s; Q at once."
 		}
-	]
+	],
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:32); no cast from the air in the footage (hero-ref/tamsin.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:33); no cast from the air in the footage (hero-ref/tamsin.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:35); no cast from the air in the footage (hero-ref/tamsin.md)", "verdict": "[?]"},
+		"x": {"h": "zero", "v": "fall", "ours": "sealed in place (a standing cast roots; only a skate carries) and falls", "source": "Footage f25-f55: rooted for the whole ult (rimewright.md, owner items 64/65); data: Invulnerable (supervive_kits.md:36); a cast from the air not shown", "verdict": "h match, v [?]"}
+	}
 }

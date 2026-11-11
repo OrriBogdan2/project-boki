@@ -40,5 +40,11 @@
 			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
 			"ours": "glide pressed 0.3 s into a hold: LMB shut while held; RMB 0.47 s; E 0.68 s; X 0.12 s; Q at once."
 		}
-	]
+	],
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:97); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:98); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:100); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:101); no cast from the air in the footage (hero-ref/dancer.md)", "verdict": "[?]"}
+	}
 }

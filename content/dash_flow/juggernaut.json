@@ -120,5 +120,11 @@
 			"source": "Not determinable: same as above. Kept: owner item 162b, a hold keeps the glider shut (Kael 113.2, Grimble bug 26 pattern stays).",
 			"ours": "glide pressed 0.3 s into a hold: LMB n/a; RMB at once; E 0.42 s; X 0.37 s; Q at once."
 		}
-	]
+	],
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:18); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
+		"rmb": {"h": "push", "v": "slow", "ours": "the Meteor Drop: slides to the cursor disc (5 m at most) in a 0.2 s hang, then slams straight down", "source": "Data: Obsidian Slam is the RMB while airborne, 'strike down' (supervive_kits.md:22); footage 0261-0288: up to the top, about 0.2 s there, then a steep drive down onto the cursor disc (hero-ref/juggernaut.md:276-283)", "verdict": "match"},
+		"e": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:27); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"},
+		"x": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:28); no cast from the air in the footage (hero-ref/juggernaut.md)", "verdict": "[?]"}
+	}
 }
