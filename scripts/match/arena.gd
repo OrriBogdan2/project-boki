@@ -124,6 +124,7 @@ func _on_hit(by, t, d, _tags) -> void:
 			dm["total"] = float(dm["total"]) + float(d)
 			dm["last"] = float(d)
 			dm["quiet"] = 0.0
+			TrainingSfx.cue(TrainingSfx.DUMMY_HIT, (t as Hunter).pos)
 	if t == bot or dummies.any(func(x): return x["h"] == t):
 		hits_all.append([m.time, float(d)])
 		dealt += float(d)
@@ -262,7 +263,7 @@ func reset() -> void:
 		dm["hits"] = []; dm["total"] = 0.0; dm["last"] = 0.0
 	hits_all.clear(); dealt = 0.0
 	m.fx.ring(home, 1.6, Color("8fe3c8"), 0.35)
-	m.sfx("revive", null, -8.0, 1.2)
+	TrainingSfx.cue(TrainingSfx.RESET)
 
 ## Become another archetype on the spot (its weight class comes with it); your Boki stays.
 func set_arch(a: String, w := "") -> void:
@@ -350,6 +351,7 @@ func _spawn_bot() -> void:
 	bot.lives = 99
 	bot.tonics = 0
 	bot.unlock_all()
+	TrainingSfx.cue(TrainingSfx.BOT_SPAWN, bot_at)
 
 func toggle_cd() -> void:
 	cd_off = not cd_off
