@@ -58,6 +58,9 @@ func lk() -> CareLook:
 		look = CareLook.new(m, h)
 	return look
 
+func warm_fx(_at: Vector3) -> void:
+	lk().prewarm()
+
 func play_soft(move: String) -> void:
 	if anim_id == "" or m.time - anim_at >= KMovesCare.length(anim_id):
 		play(move)

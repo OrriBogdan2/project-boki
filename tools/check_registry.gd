@@ -82,6 +82,7 @@ const CHECKS := {
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	"--far-ranges-check": ["res://tools/far_ranges_check.gd", "far_ranges_check", null],      # visibility ranges and far cliffs
 	"--squad-format-check": ["res://tools/squad_format_check.gd", "squad_format_check", null],      # the 10-trio format
+	"--first-cast-check": ["res://tools/first_cast_check.gd", "first_cast_check", null],      # first-use cost of each Hunter slot
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
 	"--anim-lod-check": ["res://tools/anim_lod_check.gd", "anim_lod_check", null],      # owner 11-08 expedition fps
 	"--hotpath-check": ["res://tools/hotpath_check.gd", "hotpath_check", null],        # owner 11-08 expedition fps
