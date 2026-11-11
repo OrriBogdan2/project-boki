@@ -395,6 +395,7 @@ const CHECKS := {
 	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # side palettes, settings
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
+	"--next-form-shots": ["res://tools/next_form_shots.gd", "next_form_shots", null],      # GPU, =<dir>
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
