@@ -46,3 +46,6 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 
 ### ext/sfx-ui
 - Synthesised, no samples.
+
+### ext/sfx-breakables
+- Synthesised, no samples.

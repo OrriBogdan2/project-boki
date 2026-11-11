@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://m3ckl0l8spus"
-path="res://.godot/imported/fuse_hiss.wav-c34ecd62ceeb217522b94322b88275a7.sample"
+uid="uid://cpb35w3xn3nk6"
+path="res://.godot/imported/keg_blast_1.wav-59885c7be5f188ed994772a7d46cd2a4.sample"
 
 [deps]
 
-source_file="res://audio/fuse_hiss.wav"
-dest_files=["res://.godot/imported/fuse_hiss.wav-c34ecd62ceeb217522b94322b88275a7.sample"]
+source_file="res://audio/keg_blast_1.wav"
+dest_files=["res://.godot/imported/keg_blast_1.wav-59885c7be5f188ed994772a7d46cd2a4.sample"]
 
 [params]
 

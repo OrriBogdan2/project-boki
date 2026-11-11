@@ -60,3 +60,10 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **`scan_fail`**: a scan cancelled by a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
 - **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m.
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
+
+## Breakables and chests (`content/sfx/breakables.json`, `tools/gen_sfx_breakables.py`)
+Wired in `scripts/match/breakables.gd` and `chest_loot.gd`. The names live in the rules, and `--sfx-set-check` (item 9) asserts every material, powder keg and chest tier resolves to its own sound; `--breakables-check` (item 6) and `--keys-check` hear them play.
+- **Breaks**: one sound per material in 3 takes (`Sfx` plays a different take each time), `content/rules/breakables.json` `debris.<material>.sound`: `break_wood` (crate, barrel), `break_clay` (pot), `break_metal` (a keg's hoops and staves, under its blast).
+- **Powder keg**: `keg_fuse` from the hit to the blow, then `keg_blast` (3 takes); rules `explosive.fuse_sound` / `blast_sound`. The fuse file is exactly the keg's `fuse` long, so a chain-lit keg plays it `fuse / chain_fuse` times faster and it still ends on the blast.
+- **Chest lid**: by the chest's tier, its rarity bonus (`ChestLoot.rarity_bonus`: region, danger and match tier steps), `content/rules/keys.json` `chest.creak`: `chest_creak_plain`, `chest_creak_rich`, `chest_creak_grand` (the last for anything richer).
+- Levels: breaks at impact, the fuse and lids at cast, the blast at heavy_impact; the call sites (`Breakables.BREAK_DB`, `FUSE_DB`, `KEG_BLAST_DB`, `ChestLoot.CREAK_DB`) set intent. All are pooled one-shots on the SFX bus (far ones muffled); `Sfx.MIN_GAP` merges a crowd of breaks or a row of kegs blowing together into one of each.
