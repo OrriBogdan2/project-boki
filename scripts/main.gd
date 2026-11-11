@@ -789,6 +789,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld
@@ -796,7 +797,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
 				get_viewport().disable_3d = true
 				await ld.shown
-				ld.want = 0.04
+				ld.advance(0.04)
 				if gen != _gen:
 					get_viewport().disable_3d = false
 					ld.queue_free()
@@ -809,7 +810,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# build in short slices so the loading screen keeps moving, then draw everything once
 				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
 				await m.start_staged(opts, func(f: float, stage: String):
-					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.advance(0.04 + 0.66 * f)
 					ld.set_stage(stage))
 				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
@@ -817,7 +818,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 					return
 				if not opts.has("net"): m.set_process(false)
 				ld.set_stage("graphics")
-				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				await m.warm_up(func(f: float): ld.advance(0.7 + 0.28 * f))
 				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
