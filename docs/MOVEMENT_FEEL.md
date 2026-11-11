@@ -516,6 +516,8 @@ Causes traced and cleared, with where each would have cost a frame:
 
 Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
 
+- **Town and interior on `FarmStep`, facing blended** (decision 0049). Both walked on the frame time with their own constants (town speed 5.0, jump 8.5 at gravity 26; room speed 4.2, an exponential ease). They now step in `Match.DT` steps with the hero's row (`speed`, `accel`, the walking brake, `turn_rate`) and the town jumps with `Hunter.JUMP_V` and `H_GRAV`, coyote time and the buffer included. The farm, town and room draw their facing between the last two steps' facings. `--move-rate-check` gained town and room rows (run, stop, jump, graces) and a facing assert: through a reversal at 144 fps no frame turns the drawn facing by more than `turn_rate` allows in that frame.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
