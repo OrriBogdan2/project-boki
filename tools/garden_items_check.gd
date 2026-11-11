@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 27 and fine, "27 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 29 and fine, "29 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -113,6 +113,7 @@ func _tokens_and_stay() -> void:
 	var off := GardenItems.take_off(rec, "stayleaf")
 	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
 	_aura(rec)
+	_more_auras()
 
 ## Glowmoss Sprig: a worn aura, one at a time, looks only; the model grows a GardenAura that glows at night.
 func _aura(rec: Dictionary) -> void:
@@ -139,6 +140,71 @@ func _aura(rec: Dictionary) -> void:
 	var bare := Models.kin(String(rec["species"]), look)
 	ok(bare.get_node_or_null("GardenAura") == null, "no aura worn, no aura node")
 	bare.free()
+
+class FakeHome:
+	var kins: Array = []
+
+## Mistbloom and Chimegrass: worn like the Sprig; one particle set each, none at Low quality.
+func _more_auras() -> void:
+	var rec := _boki("cindle", 3, "power")
+	var other := _boki("cindle", 3, "power")
+	rec["lean"] = {}
+	other["lean"] = {}
+	var q_was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	Save.d["items"]["mistbloom"] = 1
+	Save.d["items"]["chimegrass"] = 1
+	var previews: bool = GardenItems.preview(rec, "mistbloom")["ok"] and GardenItems.preview(rec, "chimegrass")["ok"]
+	ok(previews, "both new auras preview on hold")
+	ok(GardenItems.use(rec, "mistbloom")["ok"] and rec["aura"] == "mistbloom", "Mistbloom is worn")
+	ok(GardenItems.take_off(rec, "mistbloom") and GardenItems.use(other, "mistbloom")["ok"]
+			and other["aura"] == "mistbloom" and rec["aura"] == "", "taken off and given to another Boki")
+	other["lean"] = {"fire": Evo.LEAN_FULL}
+	var mist := _aura_node(other)
+	ok(mist != null and mist.color == Lean.face("fire")["tint"] and not mist.night_only and mist.emitting,
+			"Mistbloom: one set, in the lean colour, always on")
+	other["lean"] = {}
+	ok(_aura_node(other).color == Color(GardenAura.NO_LEAN), "no lean yet: pale mist")
+	GardenItems.use(rec, "chimegrass")
+	var bell := _aura_node(rec)
+	ok(bell != null and bell.chimes and bell.one_shot and not bell.emitting, "Chimegrass: sits still until it chimes")
+	var home := FakeHome.new()
+	var model := Models.kin(String(rec["species"]), rec)
+	home.kins = [{"rec": rec, "pos": Vector3.ZERO, "node": model}]
+	var chimes := HomeChimes.new(home)
+	chimes.tick(0.1)
+	var heard := int(GardenSfx.heard.get("garden_chime_level", 0))
+	Care.change(rec, "joy", HomeChimes.JOY_RISE - 1.0)
+	chimes.tick(0.1)
+	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard, "a small joy rise: no note")
+	Care.change(rec, "joy", HomeChimes.JOY_RISE + 1.0)
+	chimes.tick(0.1)
+	var puffed: bool = (model.get_node("GardenAura") as GardenAura).emitting
+	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard + 1 and puffed,
+			"a happy rise (a win): one note through the garden sound path and a puff of notes")
+	rec["aura"] = ""
+	Care.change(rec, "joy", -30.0)
+	chimes.tick(0.1)
+	Care.change(rec, "joy", 30.0)
+	chimes.tick(0.1)
+	ok(int(GardenSfx.heard.get("garden_chime_level", 0)) == heard + 1, "without Chimegrass the joy rise is silent")
+	model.free()
+	rec["aura"] = "chimegrass"
+	Settings.v["quality"] = "low"
+	ok(_aura_node(other) == null and _aura_node(rec) == null, "Low quality: no aura particles")
+	Settings.v["quality"] = q_was
+
+func _aura_node(rec: Dictionary) -> GardenAura:
+	var look := Save.new_kin(String(rec["species"]), "Look")
+	look["aura"] = rec["aura"]
+	look["lean"] = rec.get("lean", {})
+	var n := Models.kin(String(rec["species"]), look)
+	var pt := n.get_node_or_null("GardenAura") as GardenAura
+	if pt:
+		n.remove_child(pt)
+		pt.owner = null
+	n.free()
+	return pt
 
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")
