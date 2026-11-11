@@ -27,3 +27,5 @@ Boki are sold for gems in two places (the Drift Pens, `BokiPens`, and the web to
 - Removed: `BokiPens`, `Social.sell_kin` and kin listings on the web market, `origin.pen_line`, the pens' tick and their results line.
 - Net.VERSION unchanged (nothing synced). The server protocol shape is in docs/EXCHANGE_SERVER.md.
 - Check: `--market-check` (registered). `--economy-floor-check` keeps the floor and Exchange parts.
+
+- 2026-11-11 (owner: always adoptable Boki): **the Shelter never runs empty.** It always holds at least `shelter.strays` (3) strays: commons that are not the usual starters (`Data.LAUNCH_KIN`), level 1, one flat `shelter.stray_fee` (20 gems, destroyed); adopting a stray restocks a new one at once. Given Boki keep the old level/rarity pricing and rules. `Shelter.cheapest()` (the Lifeline floor) is the stray fee. Stall level 2 still opens the Shelter tab (alternative: open it at L1; not done, a no-Boki save gets a free stray from the Lifeline anyway).
