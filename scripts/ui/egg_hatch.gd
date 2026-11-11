@@ -122,12 +122,12 @@ func _seg(p0: Vector3, p1: Vector3) -> void:
 	cracks.add_child(m)
 	create_tween().tween_property(m, "scale", Vector3.ONE, 0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
-## A gentle glow while it's kept warm (0..1).
 ## The pointer's glow on the shell (EggHover): `k` 0 at rest .. 1 a lit rim `rim` stronger, in `rim_col`.
 func set_hover(k: float, rim: float, rim_col: Color) -> void:
 	shell_mat.set_shader_parameter("rim_amount", REST_RIM + rim * k)
 	shell_mat.set_shader_parameter("rim_color", REST_RIM_COL.lerp(rim_col, k))
 
+## A gentle glow while it's kept warm (0..1).
 func set_warmth(w: float) -> void:
 	shell_mat.set_shader_parameter("glow", w * 0.3)
 
