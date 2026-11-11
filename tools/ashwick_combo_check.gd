@@ -623,14 +623,16 @@ func _all() -> void:
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	K._cloak_blast()
-	var shield1: float = P.shield
+	# (the shield is a share of max health, which a level gained between the two blasts raises: compare shares)
+	var shield1: float = P.shield / P.max_hp
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))
 	P.slot_lv["kin"] = 3
 	K._cloak_blast()
+	var shield3: float = P.shield / P.max_hp
 	ok(
-		"cloak rank 3: shield +80% in all", shield1 > 5.0 and absf(P.shield / shield1 - 1.8) < 0.02,
-		"rank 1 %.1f rank 3 %.1f" % [shield1, P.shield]
+		"cloak rank 3: shield +80% in all", shield1 > 0.02 and absf(shield3 / shield1 - 1.8) < 0.02,
+		"rank 1 %.1f%% rank 3 %.1f%% of health" % [shield1 * 100.0, shield3 * 100.0]
 	)
 	ok("cloak: rank 3 no longer refunds on a stoke", not K.has_method("_refund"))
 	ok("cinder: one charge at rank 1", K.rmb_charges() == 1)
