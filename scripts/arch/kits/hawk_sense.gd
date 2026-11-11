@@ -1,16 +1,19 @@
 class_name HawkSense
 extends RefCounted
 ## Lace's passive, Hawk Sense (the source's injured-hunter vision): rivals under the health line (resource
-## sense_hp) within sense_r are seen through fog and cover for as long as they stay hurt and close. On her
-## side's screens each one also wears a glowing outline in her colour that shows through rocks and walls:
-## the x-ray shell your squad's Boki wear (kin_aura_xray), laid over the body as a material overlay. It goes
-## off within HOLD_S of the rival healing past the line, leaving range or dying.
+## sense_hp) within sense_r are seen by her side through fog, grass and rocks (Match.can_see asks seen_by) and
+## revealed to all (reveal_t) for as long as they stay hurt and close. On her side's screens each one also
+## wears a glowing outline in her colour that shows through rocks and walls: the x-ray shell your squad's
+## Boki wear (kin_aura_xray), laid over the body as a material overlay. It goes off within HOLD_S of the
+## rival healing past the line, leaving range or dying.
 
 const XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 const SCAN_S := 0.3            # s between scans for hurt rivals
 const HOLD_S := 0.4            # s a sensed rival stays revealed after the last scan that found them
 const STRENGTH := 1.0          # the outline's brightness (Boki shells sit at 0.6; this one has to cut through fog)
 const GROW := 0.02             # m the shell stands off the body
+
+const TEAMS_META := "hawk_teams"   # on a sensed rival: a bit per team whose Lace senses them
 
 var k: ArcherKit
 var seen := {}                 # Hunter -> {t: s left, mats: the body it was put on, meshes: [MeshInstance3D]}
@@ -36,11 +39,14 @@ func tick(dt: float) -> void:
 		var e: Dictionary = seen[f]
 		e["t"] = float(e["t"]) - dt
 		if float(e["t"]) <= 0.0 or not is_instance_valid(f):
-			_outline_off(e)
-			seen.erase(f)
+			_forget(f)
 		elif not is_same(e["mats"], (f as Hunter).mats):
 			_outline_off(e)              # (the model was rebuilt: put it on the new one)
 			_outline_on(f, e)
+
+## Whether a Lace on `team` senses `f` (so her side sees them wherever they stand).
+static func seen_by(f: Hunter, team: int) -> bool:
+	return int(f.get_meta(TEAMS_META, 0)) & (1 << team) != 0
 
 ## Whether `f` is under Hawk Sense right now (revealed, and outlined for Lace's side).
 func senses(f: Hunter) -> bool:
@@ -48,9 +54,15 @@ func senses(f: Hunter) -> bool:
 
 ## Takes every outline off (the kit is swapped away or the match ends).
 func clear() -> void:
-	for f in seen:
-		_outline_off(seen[f])
-	seen.clear()
+	for f in seen.keys():
+		_forget(f)
+
+func _forget(f: Variant) -> void:
+	_outline_off(seen[f])
+	seen.erase(f)
+	if is_instance_valid(f):
+		var teams := int((f as Hunter).get_meta(TEAMS_META, 0)) & ~(1 << k.h.team)
+		(f as Hunter).set_meta(TEAMS_META, teams)
 
 func _scan() -> void:
 	var rd := k.res_def()
@@ -64,6 +76,7 @@ func _scan() -> void:
 			seen[f]["t"] = HOLD_S
 		else:
 			seen[f] = {"t": HOLD_S}
+			f.set_meta(TEAMS_META, int(f.get_meta(TEAMS_META, 0)) | (1 << k.h.team))
 			_outline_on(f, seen[f])
 
 ## The outline only shows to Lace's own side (the reveal itself is the shared reveal_t).
