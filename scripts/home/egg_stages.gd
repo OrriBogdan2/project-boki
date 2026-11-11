@@ -7,15 +7,18 @@ extends RefCounted
 
 const STAGES := [0.3, 0.6, 0.85]      # progress where the next crack set shows
 const GLOW_MIN := 0.35                # the shell's glow on a cold egg (as Models.rare_egg_small)
-const GLOW_GAIN := 1.4                # extra glow at progress 1
+const GLOW_GAIN := 1.8                # extra glow at progress 1
 const WOBBLE_MIN := 0.03              # radians of sway on a cold egg
-const WOBBLE_GAIN := 0.1              # extra sway at progress 1
-const SHELL_R := 0.26                 # the shell's sphere radius, and its squash (x/z, y), as in Models
+const WOBBLE_GAIN := 0.14             # extra sway at progress 1
+const SHELL_R := 0.26                 # the shell's sphere radius, centre height and squash, as in Models
+const SHELL_Y := 0.3
 const SHELL_SQUASH := Vector3(0.9, 1.22, 0.9)
-const CRACKS := [                     # per stage: [x, y, length] on the shell's front, in egg units
-	[[0.05, 0.5, 0.16], [0.12, 0.38, 0.1]],
-	[[-0.1, 0.42, 0.16], [-0.04, 0.26, 0.12], [0.1, 0.22, 0.1]],
-	[[0.0, 0.34, 0.2], [-0.14, 0.2, 0.1], [0.14, 0.5, 0.1]]]
+const CRACK_W := 0.045                # a crack's width and length in egg units, wide enough to read
+const CRACK_LEN := 0.13
+const CRACKS := [                     # per stage: [turn round the egg (rad), angle down from the top (rad)]
+	[[0.3, 0.75], [3.4, 0.75]],       # on the upper cap, spread round the egg so some always face the camera
+	[[1.4, 0.6], [4.5, 0.65], [5.6, 0.9]],
+	[[0.9, 0.35], [2.5, 0.5], [4.0, 0.4], [5.2, 0.45]]]
 
 static func _unshaded(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -23,32 +26,38 @@ static func _unshaded(c: Color) -> StandardMaterial3D:
 	m.albedo_color = c
 	return m
 
-## A point on the shell's front for a crack at (x, y), egg units scaled by s.
-static func _on_shell(x: float, y: float, s: float) -> Vector3:
-	var rx := SHELL_SQUASH.x * SHELL_R * s
-	var ry := SHELL_SQUASH.y * SHELL_R * s
-	var u := 1.0 - pow(x / rx, 2) - pow((y - 0.3 * s) / ry, 2)
-	return Vector3(x, y, rx * sqrt(maxf(0.0, u)) + 0.004)
+## The shell's surface at (turn, down), egg scale s, and the basis a crack sits in there: x across the
+## crack, y along it (down the egg), z out of the shell.
+static func _on_shell(turn: float, down: float, s: float) -> Transform3D:
+	var r := SHELL_SQUASH * SHELL_R * s
+	var dir := Vector3(sin(down) * cos(turn), cos(down), sin(down) * sin(turn))
+	var out := Vector3(dir.x / r.x, dir.y / r.y, dir.z / r.z).normalized()
+	var along := Vector3(cos(down) * cos(turn), -sin(down), cos(down) * sin(turn))
+	along = (along - out * along.dot(out)).normalized()
+	var at := Vector3(0, SHELL_Y * s, 0) + dir * r + out * 0.003 * s
+	return Transform3D(Basis(along.cross(out), along, out), at)
 
-## Adds the (hidden) cracks to an egg node from Models.rare_egg_small, scale s.
+## Adds the (hidden) cracks to an egg node from Models.rare_egg_small, scale s. Each crack is two
+## short strokes at a kink, the last stage's lit gold.
 static func dress(egg: Node3D, s: float) -> void:
 	var cracks := Node3D.new()
 	cracks.name = "Cracks"
-	var dark := _unshaded(Color("5a3a1c"))
-	var lit := _unshaded(Color("fff0a0"))
+	var dark := _unshaded(Color("4a2c12"))
+	var lit := _unshaded(Color("ff9a1f"))
+	var box := BoxMesh.new()
+	box.size = Vector3(CRACK_W, CRACK_LEN, 0.01) * s
 	for st in CRACKS.size():
 		var group := Node3D.new()
 		group.visible = false
 		for c in CRACKS[st]:
-			var m := MeshInstance3D.new()
-			var box := BoxMesh.new()
-			box.size = Vector3(0.02, float(c[2]) * 1.6, 0.01) * s
-			m.mesh = box
-			m.material_override = lit if st == CRACKS.size() - 1 else dark
-			m.position = _on_shell(float(c[0]) * s, float(c[1]) * s, s)
-			var lean := 0.5 if c[0] > 0.0 else -0.4
-			m.rotation.z = -lean if st == 1 else lean
-			group.add_child(m)
+			var t := _on_shell(float(c[0]), float(c[1]), s)
+			for k in 2:
+				var m := MeshInstance3D.new()
+				m.mesh = box
+				m.material_override = lit if st == CRACKS.size() - 1 else dark
+				var kink := (0.5 if k == 0 else -0.4) * signf(0.5 - st % 2)
+				m.transform = t * Transform3D(Basis(Vector3.BACK, kink), Vector3(0, (k - 0.5) * CRACK_LEN * 0.8 * s, 0))
+				group.add_child(m)
 		cracks.add_child(group)
 	(egg.get_node("Shell") as Node3D).add_child(cracks)
 
