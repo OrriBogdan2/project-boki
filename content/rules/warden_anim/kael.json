@@ -10,6 +10,7 @@
 		"spring_hangwarchain"
 	],
 	"loco": {
+		"blend_rate": 7.5,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 4.0,

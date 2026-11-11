@@ -4,6 +4,7 @@
 	"extra_bones": {"foot.L": "shin.L", "foot.R": "shin.R", "lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "fing_a1.R": "hand.R", "fing_a2.R": "fing_a1.R", "fing_b1.R": "hand.R", "fing_b2.R": "fing_b1.R", "thumb1.R": "hand.R", "thumb2.R": "thumb1.R", "bow": "hand.L", "bow_t": "bow", "bow_b": "bow", "bow_s": "bow", "arrow": "hips"},
 	"blade": {"root": "anchor_bow_root", "tip": "weapon_muzzle", "bone": "bow"},
 	"loco": {
+		"blend_rate": 9,
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},

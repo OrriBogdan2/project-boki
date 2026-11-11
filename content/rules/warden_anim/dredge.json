@@ -26,6 +26,7 @@
 	],
 	"free_arm": {"throw": "L", "shot": "R"},
 	"loco": {
+		"blend_rate": 5.5,
 		"idle": "idle",
 		"stance": "stance",
 		"stance_after": 6.0,

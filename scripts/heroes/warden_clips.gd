@@ -32,6 +32,7 @@ const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-c
 const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
 const MANTLE_FADE := 0.05    # s: into a ledge rise (a low ledge is over in ~0.1 s)
 const MANTLE_DONE := 0.8     # a rise that got this far up the face went over the lip (its vault plays out)
+const LOCO_RATE := 12.0      # 1/s: how fast the walk and run blend follows the move ("loco.blend_rate" per Hunter)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -743,7 +744,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var k := clampf(spd / run, 0.0, 1.0) if spd >= STILL else 0.0
 	var dir := flat / spd if spd > 0.01 else Vector2.ZERO
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
-	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
+	var blend := float(lc.get("blend_rate", LOCO_RATE))
+	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * blend))
 	_p("loco/blend_position", loco_pos)
 	var rate := gait.plan(spd, lc)
 	# ("cadence": the run clip's rate over its planted feet, for a hero whose source scurries or plods; the walk keeps 1)
