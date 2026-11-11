@@ -169,7 +169,7 @@ Other checks:
 ## What changed (all in clearly marked `(movefeel)` blocks)
 
 - **Input to screen:** the local player is drawn at the present (`Hunter.render_pos`, `LOCAL_RENDER_LEAD`), extrapolated by the fraction of a step since the last one. Before, it was interpolated up to a step in the past, so a press showed a frame late and the camera trailed. Everyone else is still interpolated, and a teleport snaps.
-- **Camera before the cursor:** each frame moves the view first (`MatchCam.update`, following where the last frame drew you), then reads the cursor, then steps the sim. A shot fired while the view moves (a dash, a knock, the skyship) leaves on the reticle as drawn; with the old order it trailed by one camera step (0.35 m at 15 m in a 10 m knock). The cost is one more frame of follow lag, about 0.1 m at a run. `--dash-aim-check` (steady rows) holds it to 0.25 m at 15 m for Vex, Lace, Sparkle and Neve.
+- **Camera after the steps, aim read against it:** each frame reads the cursor, steps the sim, then moves the view once (`MatchCam.update`, at the frame's own alpha), so the camera follows the body as this frame draws it and never leads its own frame: a blink or a reel no longer shows one frame off centre (`--camera-fast-check`: Ostra's dash 30% -> 0%, the Abyssal Hand reel 7.6% -> 0.8%). Before each fixed step `MatchCam.steady_aim` re-reads the cursor against the camera moved by what `follow` will do once the frame's steps are done (the body predicted along its velocity by the frame time not yet stepped), so a shot fired while the view moves (a dash, a knock) still leaves on the reticle as drawn. `--dash-aim-check` (steady rows) holds it to 0.25 m at 15 m for Vex, Lace, Sparkle and Neve (worst 0.12 m, Vex's dash). Replaces "camera before the cursor" (feel-aim-steady), which moved the view first, following where the last frame drew you: one more frame of lag, and the frame that drew a jump showed you off centre.
 - **Ground:** acceleration 70 → 90 m/s², deceleration 90 → 110 m/s².
 - **Air:** steering 22/3 → 40/9 m/s², so letting go in a jump stops you. Speed above run speed (a dash, a pad, a knockback) still carries at 3 m/s².
 - **Falls:** gravity x1.2 straight to a 10 m/s terminal speed, which matches the footage depth and tightens the jump arc. It replaces the slow 3.2/s ease to 9 m/s. The camera's soft vertical follow keeps falls from jolting the view.
@@ -289,12 +289,13 @@ Other checks:
     maxzone, pan distance, quadratic easing; a Supervive guide recommends 0.5 / 0.8 / 100% on Fully dynamic).
   - Dashes: the view trails and eases, never cuts. In the 1v4 clip at 4.37-4.80 s the hunter crosses 105 px (11% of the width)
     while the ground moves at most 8.5 px per frame; the dredge sheet (frames 0187-0188, 493.2-493.8 s) saw ~0.5 s to catch up
-    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 0.5 s in (`--cam-lead-check`); a slower,
-    dash-only catch-up like the source's 0.4-0.5 s is not built (the tight 15/s follow is what keeps `cam_lag_m` under 0.4 m).
+    on a blink dash. With the across follow locked (`--camera-fast-check`) ours does not trail a dash at all: the view moves with you
+    and `--cam-lead-check` asserts it stays within 0.1 m of the running lag, never jumps over 0.5 m a frame and is on you 0.5 s in
+    (the trail it measured was the old 15/s follow's). A dash-only catch-up like the source's 0.4-0.5 s is not built (docs/MERGE_0246_FEEL.md, "Camera").
   - Knocks and glides: no clean sample in these clips. With no cursor lean there is nothing to hold or recentre.
   - `--cam-lead-check` asserts it in an expedition and in the Training Grounds: the lean with the cursor at the screen's edge is
     under 0.35 m (the footage's noise floor, 1.5% of the view), the view drifts under 5 cm in the second after a flick, and a dash
-    moves it under 0.5 m in any frame, trails, and is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
+    moves it under 0.5 m in any frame, keeps it on you, and it is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
     a review frame (GPU).
 - **Settings:**
   - "Expedition camera" is now "Camera".

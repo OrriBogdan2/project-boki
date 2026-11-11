@@ -1,10 +1,32 @@
 class_name MatchCam
 extends RefCounted
 ## The match's view for this frame: the ride, the launch, you, or the death camera, each with its zoom, pitch and
-## follow. It runs before the frame reads the cursor (Match._process), so the aim ray a shot leaves on is cut by the
-## camera the frame is drawn with: while the view moves (a dash, a knock, the skyship) rounds go to the reticle, as
-## in the source, not a frame's camera step behind it (--dash-aim-check, steady part). `alpha` is where the last
-## frame drew the bodies, so the view follows what is on screen.
+## follow. It runs once, after the fixed steps (Match._process), at the frame's own `alpha`: the view follows the
+## body as this frame draws it and never leads its own frame (--camera-fast-check: a blink or a reel no longer
+## shows one frame off centre). Steady aim (--dash-aim-check, steady part) is kept by steady_aim, which reads the
+## cursor before each step against the camera moved to where the frame will draw you, so while the view moves
+## (a dash, a knock) rounds go to the reticle as drawn, not a frame's camera step behind it.
+
+## Before each fixed step: re-read the local cursor against the camera shifted by what follow() will do once the
+## steps are done. `ahead` is the frame time not yet stepped (Match.acc): the body is predicted that far along its
+## velocity, which is where render_pos puts it at the end of the frame. Only the play follow (not the ride, the
+## launch or the death camera), and only when _gather_input read the cursor this frame.
+static func steady_aim(m: Match, delta: float, ahead: float) -> void:
+	var p: Hunter = m.player
+	if p == null or p.out or p.downed or p.riding or m.opts.get("tut_test", false) or DropLaunch.locked(p):
+		return
+	var cam: CamRig = m.cam
+	var stp := p.pos - p.prev
+	var at := p.pos if stp.length() > 1.5 else p.pos + p.vel * ahead
+	var shift := cam.follow_shift(at, delta)
+	if shift.length_squared() < 1e-6:
+		return
+	cam.global_position += shift
+	var mp := m.get_viewport().get_mouse_position()
+	p.inp["aim"] = m._mouse_aim(mp)
+	p.inp["aim_ray"] = cam.mouse_ray()
+	p.inp["aim_y"] = m.aim_y
+	cam.global_position -= shift
 
 static func update(m: Match, delta: float, alpha: float) -> void:
 	var cam: CamRig = m.cam

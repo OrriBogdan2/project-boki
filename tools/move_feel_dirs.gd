@@ -39,6 +39,11 @@ func run() -> int:
 	if cam == null:
 		print("MFEEL (no camera, 8-direction rows skipped)")
 		return 0
+	# no wild mobs: they spawn by where the view was and walk into you, so the rows read a mob in the way, not
+	# the keys (as --camera-fast-check and --dash-aim-check clear them)
+	for mb in m.mobs:
+		mb.queue_free()
+	m.mobs.clear()
 	var lead0: float = cam.lead
 	cam.lead = 0.0            # the cursor pan off: the hunter sits on the screen's vertical centre line
 	m.paused = false

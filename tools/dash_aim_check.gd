@@ -149,6 +149,11 @@ func steady(m: Match, how: String) -> Dictionary:
 	var P: Hunter = m.player
 	var out := {"err": 0.0, "rounds": 0, "cam": 0.0, "moved": 0.0}
 	m.acc = 0.0
+	# the practice area's panels own the mouse (hud.ui_extra); one sits over the top of the square headless view,
+	# where the cursor is held 15 m out, and would swallow the fire button
+	for pn in m.hud.ui_extra:
+		if is_instance_valid(pn):
+			pn.visible = false
 	var release := P.wpn.has("draw")
 	for i in 60:
 		_cursor(m, P.pos + Vector3(0, 0.95, -STEADY_AT))
@@ -175,7 +180,7 @@ func steady(m: Match, how: String) -> Dictionary:
 		P.fire_cd = 0.0          # a round every frame the gun can, so each frame's camera step is measured
 		m._process(DT)
 		out["cam"] = maxf(float(out["cam"]), was.distance_to(m.cam.global_position))
-		var r: Vector3 = m._mouse_aim()
+		var r: Vector3 = m._mouse_aim(m.get_viewport().get_mouse_position())
 		for s in m.shots:
 			if s["by"] != P or s.has("_seen"):
 				continue

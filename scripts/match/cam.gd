@@ -196,15 +196,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		pan = want_pan
 	else:
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * float(rr[2]) * delta))
-	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
-	# far up in the sky you stay on screen
-	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
-	if p.y < 0.0:
-		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
-	# across, the view is locked to you; only recording mode trails, at its own slower, smoother rates
-	var kxz := 1.0 - exp(-float(rr[0]) * delta) if Record.clean() else 1.0
-	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
-	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
+	base = _base_to(p, delta)
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)
 	focus = base + pan.lerp(cast_pan, cast_k) + lead_off
@@ -222,6 +214,23 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 			shake_amp = 0.0
 	_apply(shake)
 	Sfx.listener = focus
+
+## The followed point after follow(p, delta): the focus sits a little below you (so the ground reads), but never
+## more than 4 m below, so even far up in the sky you stay on screen.
+func _base_to(p: Vector3, delta: float) -> Vector3:
+	var rr: Array = Record.cam_rates()
+	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
+	if p.y < 0.0:
+		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
+	# across, the view is locked to you; only recording mode trails, at its own slower, smoother rates
+	var kxz := 1.0 - exp(-float(rr[0]) * delta) if Record.clean() else 1.0
+	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
+	return Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
+
+## How far follow(p, delta) would move the view (the cursor pan, glide lean and cast view, which ease, aside):
+## MatchCam.steady_aim reads the cursor against the camera moved by it before each fixed step.
+func follow_shift(p: Vector3, delta: float) -> Vector3:
+	return _base_to(p, delta) - base
 
 func _apply(shake: Vector3) -> void:
 	pull = maxf(0.0, pull - get_process_delta_time() * 0.2)

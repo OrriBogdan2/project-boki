@@ -174,9 +174,6 @@ const CHECKS := {
 	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--impact-weight-check": ["res://tools/impact_weight_check.gd", "impact_weight_check", null],      # hit weights
-	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
-	# --shots-dir=<dir> (GPU)
-	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--camera-frame-check": ["res://tools/camera_frame_check.gd", "camera_frame_check", "check"],
 	"--camera-frame-shots": ["res://tools/camera_frame_check.gd", "camera_frame_check", "shots"],
 	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement

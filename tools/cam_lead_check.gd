@@ -1,8 +1,9 @@
 extends RefCounted
 ## The camera's cursor lead against the source footage (docs/MOVEMENT_FEEL.md "Camera lead"):
 ##   --cam-lead-check (headless): with the Supervive follow the view stays on you with the cursor at the
-##     screen's edge, a cursor flick moves it by nothing within a frame, and a dash eases the view after
-##     you with no jump cut. The same in an expedition and in the Training Grounds.
+##     screen's edge, a cursor flick moves it by nothing within a frame, and a dash carries the view with
+##     you (the follow is locked across, --camera-fast-check) with no jump cut. The same in an expedition
+##     and in the Training Grounds.
 ##   --cam-lead-shots: a frame with the cursor held at the right edge, into --shots-dir=<dir> (xvfb, GPU).
 ## Never touches the save.
 
@@ -69,7 +70,9 @@ func _area(label: String, opts: Dictionary) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
 
-## A dash while running: the view trails you, eases back within DASH_BACK_S and never jumps.
+## A dash while running: the view stays with you (the locked follow: never further behind than at a run plus
+## DASH_BACK_SLACK_M), is on you DASH_BACK_S in, and never jumps. (ext/feel-camera-lead asserted a trail here,
+## measured on the old 15/s follow; ext/feel-camera-fast locked it, docs/MERGE_0246_FEEL.md "Camera".)
 func _dash(label: String, m: Match, cam: CamRig, P: Hunter) -> void:
 	P.inp["move"] = Vector2(1, 0)
 	for i in 30:
@@ -97,7 +100,8 @@ func _dash(label: String, m: Match, cam: CamRig, P: Hunter) -> void:
 	P.inp["move"] = Vector2.ZERO
 	ok(jump <= DASH_JUMP_MAX_M, "%s: the view moves at most %.2f m in one frame of a dash (at most %.2f, no jump cut)"
 		% [label, jump, DASH_JUMP_MAX_M])
-	ok(trail > run_lag + 0.05, "%s: the view trails the dash (%.2f m behind you, %.2f m at a run)"
+	ok(trail <= run_lag + DASH_BACK_SLACK_M,
+		"%s: the view stays with you through the dash (%.2f m behind you, %.2f m at a run)"
 		% [label, trail, run_lag])
 	ok(back <= run_lag + DASH_BACK_SLACK_M, "%s: %.1f s into the dash the view is %.2f m behind you (a run: %.2f m)"
 		% [label, DASH_BACK_S, back, run_lag])
