@@ -2353,3 +2353,16 @@ for _k,_p in (('diag',"leaping diagonally UP toward the viewer in three-quarter 
               ('bow',"standing up on its back legs like an archer, body upright, front feet drawn back as if pulling a bowstring, its long tongue pulled taut like an arrow ready to fire"),
               ('coil',"coiled tight to spring, seen from the front three-quarter facing RIGHT, back legs folded under like loaded springs, head up, tongue tip just showing")):
     ON_POSE('Bullsfrog',_LM['Bullsfrog']['sheet'],'mid','sleek',False,False,_p,"red skin with dark red-brown bands, green target-ring markings on its back, two green and red fletching-shaped crest fins, green eyes, the long pink arrow-tipped tongue"); SPECS[-1]['id']='pose_bullsfrog_'+_k; SPECS[-1]['runs']=2
+
+# 11-11 OWNER: Scopeleon and Filefin read too small in the dex (long flat side-on poses fill only half the frame height). The dex hero is cut
+# from the portrait, so new compact portrait poses, 3 x 2. (Carpenjaw already fixed: current hero fills the frame; the owner's dex view is older.)
+for _n,_st,_ar,_dk,_poses in (
+  ('Scopeleon','baby','cute',True,[("up","sitting upright on its curled tail like a little lookout, telescope eye raised toward the sky, front feet together, compact and tall"),
+                                   ("front","facing the viewer in three-quarter view, body turned toward us, tail curled into a big round spiral beside it, telescope eye pointed at the viewer"),
+                                   ("climb","climbing straight up a thin branch shape made of its own curled tail, head turned to the viewer, body vertical, filling the frame top to bottom")]),
+  ('Filefin','baby','cute',False,[("turn","swimming toward the viewer in a tight C-shaped turn, saw nose curving round, three-quarter front view, compact and filling the frame"),
+                                  ("dive","diving down diagonally toward the viewer, saw nose leading, tail flicked up behind, seen from the front three-quarter"),
+                                  ("rise","rising straight up, nose and saw pointing at the sky, tail curled under it, cheerful, body vertical")])):
+    for _k,_p in _poses:
+        V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,_dk,False,_p); SPECS[-1]['id']='v2p_'+_n.lower()+'_cmp_'+_k; SPECS[-1]['runs']=2
+        SPECS[-1]['prompt']+=" The creature fills most of the square frame in both width and height."
