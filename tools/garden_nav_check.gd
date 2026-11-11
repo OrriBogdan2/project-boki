@@ -173,7 +173,7 @@ func _sweep(theme: String) -> void:
 	overlaps = 0
 	_save(theme)
 	home = await _open_home()
-	var cast := home.kins.size()
+	var cast: int = home.kins.size()
 	ok(cast == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, cast])
 	_stage()
 	var cases := 0
