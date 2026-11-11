@@ -155,8 +155,8 @@ func _motley() -> void:
 	T.teleport(r[3] + Vector3(14.0, 0, 0))
 	shoot_until(m, T, P, func(): return false, 1.0)
 	ok("motley seed: a foe's LMB does not touch it", not K.seed.is_empty() and String(K.seed["sid"]) == sid)
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.5)
-	ok("motley seed: fizzles out unpopped after grow + hold_full", K.seed.is_empty())
+	step(m, float(K.e_def()["grow"]) + 10.5)
+	ok("motley seed: waits at full size unpopped, no timer (ext/motley-seed-fizzle)", not K.seed.is_empty())
 	await done(m)
 
 func _meeko() -> void:

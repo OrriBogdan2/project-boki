@@ -645,20 +645,21 @@ func _archer_combos() -> void:
 	P.inp["move"] = Vector2.ZERO
 	step(m, 0.8)
 	ok(
-		"combo pin: Spirit Walk climbs a raised terrace wall and drops off the far side (a plain walk stops at it)",
-		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and top_y > home.y + 0.8
+		"combo pin: Spirit Walk passes a raised terrace wall at her own height, out the far side (a plain walk stops)",
+		plain_x > wx + 1.0 and P.pos.x < wx - 1.5 and K.spirit.passed > in1 and top_y < home.y + 0.3
 			and absf(P.pos.y - home.y) < 0.1 and P.grounded and W.ground_at(P.pos.x, P.pos.z) <= P.pos.y + 0.1,
 		"plain x %.1f, spirit x %.1f y %+.2f peak %+.2f (wall %d..%d) inside %d"
 			% [plain_x, P.pos.x, P.pos.y - home.y, top_y - home.y, wx - 1, wx + 1, K.spirit.passed - in1]
 	)
-	# ending inside the terrace sets her on top of it (never inside terrain, no snap back)
+	# ending inside the terrace puts her back where she last stood clear (never on top of the face)
 	P.teleport(Vector3(wx + 0.5, home.y, home.z))
 	step(m, 0.05)
 	var sn1 := K.spirit.snap_backs
 	K.spirit.end("time")
 	ok(
-		"combo pin: Spirit Walk ending inside a terrace = on top of it, not inside",
-		K.spirit.snap_backs == sn1 and P.pos.y > home.y + 0.8 and W.ground_at(P.pos.x, P.pos.z) <= P.pos.y + 0.1,
+		"combo pin: Spirit Walk ending inside a terrace = back where she stood clear, not on top or inside",
+		K.spirit.snap_backs == sn1 + 1 and absf(P.pos.y - home.y) < 0.1
+			and W.ground_at(P.pos.x, P.pos.z) <= P.pos.y + 0.1,
 		"x %.1f y %+.2f ground %+.2f" % [P.pos.x, P.pos.y - home.y, W.ground_at(P.pos.x, P.pos.z) - home.y]
 	)
 	for dz in range(-2, 3):
@@ -1246,7 +1247,7 @@ func _bulwark_combos() -> void:
 	ok(
 		"combo bulwark: Shift behind the shield = the Bash (6 s cooldown), no Guard meter, no Shield Slam",
 		float(K.rmb_def()["cooldown"]) == 6.0 and float(K.cd["rmb"]) > 4.5 and cd_full <= 0.0
-				and not K.d.has("resource") and not K.d["rmb"].has("slam") and not K.has_res(),
+				and not K.d.has("resource") and not K.d["rmb"].has("slam") and K.res_def().is_empty(),
 		"cd %.2f" % float(K.cd["rmb"])
 	)
 	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
