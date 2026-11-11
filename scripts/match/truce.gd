@@ -5,7 +5,7 @@ extends RefCounted
 ## Anyone can emote (hold the emote key for the wheel). A Truce emote (a white flag) offers peace to
 ## the nearest rival squad you can see; one of them answers within a few seconds with Accept or No.
 ## While a truce holds, bots of both squads leave each other (and each other's kin) alone, truce
-## partners share an outpost's yard without contesting the uplink, board the same skiff, and bots
+## partners share an outpost's yard without contesting the uplink, and bots
 ## escort their partners to whichever exit they're using. Nothing stops you shooting a partner, but
 ## a real attack breaks the truce for both squads, is called out in the feed, and marks the
 ## betrayer on everyone's map for a while. A truce ends by itself after a few minutes, or when one

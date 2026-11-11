@@ -211,6 +211,8 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.add_child(glb)
 	var sync := Sync.new()
 	sync.name = "Sync"
+	# (before the toon pass and the moods)
+	sync.companions = WardenCompanions.detach(glb, skel, WardenClips.data(art(arch)))
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
@@ -454,11 +456,11 @@ static func _hold_weapon(root: Node3D, glb: Node3D, wscale := 1.0, shift := Vect
 	var muzzle := gun.get_node_or_null("Muzzle") as Node3D
 	if mouth and muzzle:
 		muzzle.transform = WardenGlb.model_xf(weapon, mouth)
-	# its magazine (WEAPON_MAG) becomes the Gun's Mag, which the reload drops out and slaps back in
+	# its magazine (WEAPON_MAG) becomes the Gun's Mag
 	var mag := weapon.find_child(WEAPON_MAG, true, false) as Node3D
 	var old := gun.get_node_or_null("Mag")
 	if old is MeshInstance3D and mag == null:
-		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole: the reload still moves the Mag node)
+		(old as MeshInstance3D).mesh = null      # (a weapon modelled whole)
 	if mag and old:
 		var at := WardenGlb.model_xf(gun, mag)
 		gun.remove_child(old)
@@ -585,7 +587,7 @@ static func _skinned_weapon(root: Node3D) -> void:
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).visible = false
 		mi.set_meta("glb_hidden", true)
-	var mag := gun.get_node_or_null("Mag") as MeshInstance3D      # (the reload's motion stays, shown or not)
+	var mag := gun.get_node_or_null("Mag") as MeshInstance3D
 	if mag:
 		mag.mesh = null
 		mag.visible = false
@@ -937,6 +939,7 @@ class Sync extends Node:
 	var hand_nodes: Array = []    # [rig hand, its bone index]: the kits read the hands off the rig
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
+	var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
@@ -1013,6 +1016,8 @@ class Sync extends Node:
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
+		if companions:
+			companions.step(dt)     # (before the blade: the sun's FX points ride it)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
 		orbits.look = root.get_meta(ORBIT_LOOK, Vector3.INF)
 		orbits.step(dt)
