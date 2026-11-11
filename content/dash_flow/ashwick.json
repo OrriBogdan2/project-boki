@@ -66,5 +66,13 @@
 		"air": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323).", "verdict": "[?]"},
 		"rise": {"ours": "dash", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323).", "verdict": "[?]"},
 		"same": {"ours": "cancel", "carry": 0.55, "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Felix): no jump shown (linwick.md:286, :323). The footage is 5 fps (0.2 s a frame, PHYSICS_PARITY.md:170): one step can't be seen.", "verdict": "[?]"}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/linwick.md shows Felix cast or pressed with the glider open. Ours: Hunter.can_fire() refuses every weapon while gliding; left as is."},
+		"rmb": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/linwick.md shows Felix cast or pressed with the glider open."},
+		"e": {"mode": "cast", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/linwick.md shows Felix cast or pressed with the glider open."},
+		"x": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/linwick.md shows Felix cast or pressed with the glider open."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "[?] Nothing settles it: no data row (briefs/supervive-data/supervive_kits.md, supervive_physics.md) and no footage in briefs/hero-ref/linwick.md shows Felix cast or pressed with the glider open. The source has air dashes (supervive_kits.md:10-11, :58-59); ours: Shift in a glide is the air dash and hands its speed back to the glider."}
 	}
 }
