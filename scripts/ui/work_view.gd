@@ -190,12 +190,15 @@ static func _drop(h: Node, rec: Dictionary) -> void:
 # ------------------------------------------------------------------ the Job Board
 static func open(h: Node) -> void:
 	var v: VBoxContainer = h._new_panel("Job Board", 1010)
-	UI.subtitle(v, "Farm Boki take the jobs they're best at on their own. Set what matters most.")
+	UI.subtitle(v, "Boki pick their own jobs. Set which ones matter most.")
 	var hx := UI.head_extra(v)
-	hx.add_child(UI.chip("seed", "%d wood" % Work.mat("wood"), Work.col_of("timber"), "Wood: from Timber Boki at a Lumber Camp"))
-	hx.add_child(UI.chip("seed", "%d stone" % Work.mat("stone"), Work.col_of("stone"), "Stone: from Stone Boki at a Quarry"))
-	hx.add_child(UI.chip("gem", "%d scrap" % int(Save.d.get("scrap", 0)), Work.col_of("craft"), "Scrap: from Craft Boki at a Workbench"))
-	hx.add_child(UI.chip("heart", "%d kibble" % int(Save.d["items"].get("kibble", 0)), Work.col_of("ember"), "Kibble: from Ember Boki at the Hearth Oven"))
+	# only what the farm has made: a row of zeros says nothing
+	for c in [["seed", Work.mat("wood"), "wood", "timber", "Wood: Timber Boki at a Lumber Camp"],
+			["seed", Work.mat("stone"), "stone", "stone", "Stone: Stone Boki at a Quarry"],
+			["gem", int(Save.d.get("scrap", 0)), "scrap", "craft", "Scrap: Craft Boki at a Workbench"],
+			["heart", int(Save.d["items"].get("kibble", 0)), "kibble", "ember", "Kibble: Ember Boki at the Hearth Oven"]]:
+		if int(c[1]) > 0:
+			hx.add_child(UI.chip(c[0], "%d %s" % [c[1], c[2]], Work.col_of(c[3]), c[4]))
 	UI.shell_tabs(v, ["Jobs", "Kin"], tab, func(t): tab = t; open(h))
 	var hw = h.hw
 	if tab == "Jobs":
@@ -208,8 +211,13 @@ static func open(h: Node) -> void:
 		grid.columns = 2
 		grid.add_theme_constant_override("h_separation", 26); grid.add_theme_constant_override("v_separation", 2)
 		v.add_child(grid)
+		var hidden := 0
 		for el in Work.ORDER:
-			grid.add_child(_job_row(h, el, int(counts.get(el, 0)), busy.get(el, [])))
+			var row := _job_row(h, el, int(counts.get(el, 0)), busy.get(el, []))
+			if row: grid.add_child(row)
+			else: hidden += 1
+		if hidden > 0:
+			v.add_child(UI.para("%d more jobs show up once a farm Boki can do them." % hidden, 12, UI.FAINT))
 	else:
 		var list := UI.vbox(6)
 		v.add_child(list)
@@ -231,7 +239,14 @@ static func open(h: Node) -> void:
 	ft.add_child(ml)
 	UI.footer_primary(v, "Done", func(): h._close_panel(), 100)
 
+## One job's row, or null when no farm Boki can do it and none of it waits (nothing to set).
 static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
+	var best := ""; var bl := 0
+	for k in h.kins:
+		var lv := Work.level(k["rec"], el)
+		if lv > bl and Work.can_work(k["rec"]): bl = lv; best = String(k["rec"]["name"])
+	if best == "" and waiting == 0 and who.is_empty():
+		return null
 	var r := UI.hbox(10)
 	r.custom_minimum_size.x = 470
 	r.add_child(Icon.new(el, 28.0))
@@ -242,10 +257,6 @@ static func _job_row(h: Node, el: String, waiting: int, who: Array) -> Control:
 	var nl := UI.label("%s  ·  %s" % [e["name"], e["job"]], UI.T_BODY, Work.col_of(el).lerp(UI.INK, 0.35), UI.semi)
 	nl.autowrap_mode = TextServer.AUTOWRAP_OFF
 	top.add_child(nl)
-	var best := ""; var bl := 0
-	for k in h.kins:
-		var lv := Work.level(k["rec"], el)
-		if lv > bl and Work.can_work(k["rec"]): bl = lv; best = String(k["rec"]["name"])
 	var st := ""
 	if not who.is_empty(): st = ", ".join(who) + (" working" if who.size() > 1 else " on it")
 	elif waiting > 0: st = "%d waiting" % waiting

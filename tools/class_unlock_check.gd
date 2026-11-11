@@ -357,7 +357,7 @@ func _challenges() -> void:
 	var tender_stat := String(ClassUnlock.challenge("tender")["stat"])
 	Game.apply_result(result("archer", true, {}, {tender_stat: int(ClassUnlock.challenge("tender")["target"])}))
 	ok(bool(ClassUnlock.challenge_progress("tender")["done"]) and ClassUnlock.status("tender") == "progress"
-			and ClassUnlock.requirement("tender").contains("Relics are open"),
+			and ClassUnlock.requirement("tender").contains("after %d Relics" % ClassUnlock.open_needed("tender")),
 					"a hard challenge done early still waits for %d open Hunters" % ClassUnlock.open_needed("tender"))
 	var c := ClassUnlock.state()
 	for a in ["thief", "mage", "dredge"]: (c["open"] as Array).append(a)

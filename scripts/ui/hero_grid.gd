@@ -51,10 +51,9 @@ static func _card(ak: String, cur: String, on_pick: Callable, on_kit: Callable, 
 	var kitb := UI.ghost("Kit (K)", func(): on_kit.call(ak), 0)
 	kitb.focus_mode = Control.FOCUS_NONE
 	col.add_child(kitb)
-	card.tooltip_text = ClassCard.kit_tip(ak)
 	card.set_meta("arch", ak)
 	card.set_meta("class_status", ClassUnlock.status(ak))
-	if not open: card.tooltip_text = "Locked: %s\n%s" % [requirement(ak), card.tooltip_text]
+	if not open: card.tooltip_text = requirement(ak)
 	card.mouse_entered.connect(func(): on_hover.call(ak))
 	if not can:
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)

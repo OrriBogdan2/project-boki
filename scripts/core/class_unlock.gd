@@ -282,7 +282,7 @@ static func requirement(id: String) -> String:
 	var gp := challenge_progress(id)
 	var line := "%s (%d/%d)" % [challenge_text(id), int(gp["have"]), int(gp["need"])]
 	if open_ids().size() < open_needed(id):
-		line += ", once %d Relics are open" % open_needed(id)
+		line += "  ·  after %d Relics" % open_needed(id)
 	return line
 
 ## Unlocks a ready Hunter (the end of the hold). Returns false if it isn't ready.

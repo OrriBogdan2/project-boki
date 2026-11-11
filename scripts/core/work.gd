@@ -23,18 +23,18 @@ class_name Work
 ##   Save.d["work"]["seen"]  the last time the farm was looked at (unix seconds), for catch_up
 
 const ELEMENTS := {
-	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Keeps the Hearth Oven going (firewood becomes Boki kibble), and warms the Incubator's Rare Egg twice as fast."},
-	"tide": {"name": "Tide", "col": Color("4ab0ff"), "job": "Watering", "desc": "Waters the crops so they grow."},
-	"bloom": {"name": "Bloom", "col": Color("6fd86a"), "job": "Planting", "desc": "Sows seeds in empty plots and tends growing crops along."},
-	"spark": {"name": "Spark", "col": Color("ffe04a"), "job": "Powering", "desc": "Cranks the Spark Mill: a powered farm works half again as fast."},
-	"craft": {"name": "Craft", "col": Color("e0a868"), "job": "Crafting", "desc": "Turns wood and stone into scrap at the Workbench."},
-	"forage": {"name": "Forage", "col": Color("f0c04a"), "job": "Harvesting", "desc": "Picks ripe crops into your pantry."},
-	"timber": {"name": "Timber", "col": Color("b0784a"), "job": "Lumbering", "desc": "Fells the wild trees round a Lumber Camp and splits its logs into wood."},
-	"stone": {"name": "Stone", "col": Color("a8b0c4"), "job": "Mining", "desc": "Breaks the boulders round a Quarry and mines its rock into stone."},
-	"frost": {"name": "Frost", "col": Color("a6eeff"), "job": "Cooling", "desc": "Keeps the Cold Store cold: fresh food fills Boki up 15% more."},
-	"haul": {"name": "Haul", "col": Color("c6a4ff"), "job": "Hauling", "desc": "Carries logs and stone to the Storage Chest, and food to feeders that run low."},
-	"mend": {"name": "Mend", "col": Color("ff8ab4"), "job": "Mending", "desc": "Cheers up tired, glum or hungry Boki, and brews tonics at the Infirmary."},
-	"ranch": {"name": "Ranch", "col": Color("ffcf9a"), "job": "Ranching", "desc": "Lounges in the Ranch Pen and makes things: glowcaps, sweet buns, kibble."},
+	"ember": {"name": "Ember", "col": Color("ff7a3a"), "job": "Kindling", "desc": "Fires the Hearth Oven and warms Rare Eggs."},
+	"tide": {"name": "Tide", "col": Color("4ab0ff"), "job": "Watering", "desc": "Waters the crops."},
+	"bloom": {"name": "Bloom", "col": Color("6fd86a"), "job": "Planting", "desc": "Sows seeds and tends crops."},
+	"spark": {"name": "Spark", "col": Color("ffe04a"), "job": "Powering", "desc": "Powers the Spark Mill: the farm works faster."},
+	"craft": {"name": "Craft", "col": Color("e0a868"), "job": "Crafting", "desc": "Turns wood and stone into scrap."},
+	"forage": {"name": "Forage", "col": Color("f0c04a"), "job": "Harvesting", "desc": "Picks ripe crops."},
+	"timber": {"name": "Timber", "col": Color("b0784a"), "job": "Lumbering", "desc": "Cuts trees at a Lumber Camp into wood."},
+	"stone": {"name": "Stone", "col": Color("a8b0c4"), "job": "Mining", "desc": "Mines boulders at a Quarry into stone."},
+	"frost": {"name": "Frost", "col": Color("a6eeff"), "job": "Cooling", "desc": "Keeps the Cold Store cold: food fills more."},
+	"haul": {"name": "Haul", "col": Color("c6a4ff"), "job": "Hauling", "desc": "Carries wood, stone and feeder food."},
+	"mend": {"name": "Mend", "col": Color("ff8ab4"), "job": "Mending", "desc": "Cheers up Boki and brews tonics."},
+	"ranch": {"name": "Ranch", "col": Color("ffcf9a"), "job": "Ranching", "desc": "Makes glowcaps, buns and kibble in the Ranch Pen."},
 }
 const ORDER := ["tide", "bloom", "forage", "ember", "timber", "stone", "craft", "spark", "frost", "haul", "mend", "ranch"]
 const MAX_LV := 4

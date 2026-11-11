@@ -59,7 +59,7 @@ const IV_INHERIT_MAX := 5
 ## Rare Eggs from boss lairs: this many stats are always at least IV_RARE_FLOOR.
 const IV_RARE_HIGH := 3
 const IV_RARE_FLOOR := 26
-const IV_EXPLAIN := "IVs are what a Boki is born with: 0 to 31 a stat, fixed for life, passed down when Boki breed. 31 is up to 10% better than 0."
+const IV_EXPLAIN := "IVs: born-with stats from 0 to 31, passed on to eggs."
 
 const BONDS := [
 	[0.0, "Wary", "Might refuse a risky throw."],
