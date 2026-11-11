@@ -308,7 +308,9 @@ The sim already answers in one step (e2e 1 frame) and matches the source (rows a
 body and the camera show. `--move-butter-check` runs one Hero with clips (gunslinger) through the real frame
 (Match._process) on a carved course: a run with a 90 degree turn and a stop, five 1.6 m ledges (jump and push in), a
 run off the top into a glide with a 45 degree bend, a landing run. `--butter-csv=<file>` writes the per-frame trace;
-`docs/shots/move-feel-1111/butter_graph.png` plots it before and after.
+`docs/shots/move-feel-1111/butter_graph.png` plots it before and after; the same course from the game camera on a GPU
+worker, side by side (left main, right this pass): `mantle_chain_5_ledges.mp4`, `glide_off_cliff_landing.mp4`,
+`full_course.mp4` in that folder (`--shots-dir`, jobs 20261111-201735-08872 / -201748-17024).
 
 The ten worst, measured on main 88b06b9e7 (before) and ext/move-feel-1111 (after):
 
