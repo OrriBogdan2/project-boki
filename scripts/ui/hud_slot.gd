@@ -86,8 +86,9 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if sfx_d.get("kind", "") == "reset":
 		ResetPop.draw(c, rect, col, float(sfx_d["t"]))
 
-## A locked slot: the dimmed icon under a padlock and the key cap; "UNLOCK" in gold when a point can open it
-## (`can`), else `tag` (when it opens, "" for none) on a pill over the slot. `id` names it in shown_keys.
+## A locked slot: the dimmed icon under a padlock and the key cap; a pulsing gold rim and padlock when a
+## point can open it (`can`; no word over it: docs/UI_STYLE.md), else `tag` (when it opens, "" for none)
+## on a pill over the slot. `id` names it in shown_keys.
 static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: String, can: bool, tag: String) -> void:
 	var c: CanvasItem = H.c
 	var pulse := 0.5 + 0.5 * sin(float(H.m.time) * 5.0)
@@ -101,9 +102,7 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
 	c.draw_arc(lc + Vector2(0, -6), 5.0, PI, TAU, 12, lcol, 2.0, true)
 	H._rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
-	if can:
-		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
-	elif tag != "":
+	if tag != "" and not can:
 		var tw := HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
 		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 17), Vector2(tw, 14))
 		H._rounded(tr, HudStyle.KEY_BG, 5, Color(HudStyle.MUTED, 0.7), 1)

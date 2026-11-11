@@ -314,6 +314,7 @@ const STICK_T := 0.3
 const CRIT_POP := 1.7          # a crit lands this many times its size and settles
 const HIT_POP := 1.25          # ... and a normal hit this many
 const NUM_POOL := 24           # floating numbers and words on screen at once (the oldest is reused)
+const WORD_MAX := 2            # floating words in the air at once (damage numbers aside)
 const NUM_OUTLINE := Color(0.05, 0.04, 0.08, 0.9)     # every number's dark outline ...
 const CRIT_OUTLINE := Color(0.42, 0.12, 0.0, 0.95)    # ... a crit's is a hot ember brown, and thicker
 
@@ -328,8 +329,13 @@ func _num_size(v: float, crit: bool) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
 	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
 
-## A short word that floats up (COMBO, an ability's name, BOND READY).
+## A short word that floats up (COMBO, an ability's name, BOND READY). At most WORD_MAX are in the
+## air: a new one drops the oldest (docs/UI_STYLE.md pop-up budget).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
+	var words := nums.filter(func(n): return not n.has("last"))
+	if words.size() >= WORD_MAX:
+		(words[0]["node"] as Label3D).visible = false
+		nums.erase(words[0])
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
 	for n in nums:

@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -782,8 +782,8 @@
 "semicolon": 1
 },
 "scripts/ui/boki_hud.gd": {
-"long_line": 31,
-"nested_ternary": 5,
+"long_line": 29,
+"nested_ternary": 2,
 "shadow": 1
 },
 "scripts/ui/capture_hud.gd": {
@@ -908,7 +908,7 @@
 "scripts/ui/title.gd": {
 "long_line": 21,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 38
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,

@@ -9,6 +9,7 @@ extends RefCounted
 const MINT := Color("8fe3c8")
 const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
+const STRIP_GAP := 10.0       # px (HUD units) between the ways-out strip and the guide line under it
 
 var m: Match
 var line := ""                # the one line on screen ("" for none)
@@ -123,6 +124,7 @@ func draw(h, sz: Vector2) -> void:
 	if line == "":
 		return
 	var r: Rect2 = TutorialHud.lanes(sz)["banner"]
+	r.position.y = maxf(r.position.y, WaysOutHud.TOP_Y + WaysOutHud.CELL.y + STRIP_GAP)    # under the ways-out strip
 	var a := clampf(_t / 0.25, 0.0, 1.0)
 	h._panel(r, Color(TutorialHud.PANEL.r, TutorialHud.PANEL.g, TutorialHud.PANEL.b, TutorialHud.PANEL.a * a), 14)
 	h.c.draw_rect(r, Color(MINT, 0.7 * a), false, 2.0)

@@ -152,10 +152,8 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	var in_form := KinMerge.in_form(p)
 	if in_form:
 		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
-	var from_txt := "from Boki" if k.state in ["active", "flying", "returning", "flying_home"] else ("DOWN" if down else "through you")
-	if in_form:
-		from_txt = "FUSED"
-	H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), from_txt, 8, DOWN_COL if down else Color(H.INK, 0.5 if in_form else 0.7), H.big)
+	if down or in_form:
+		H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), "DOWN" if down else "FUSED", 8, DOWN_COL if down else Color(H.INK, 0.5), H.big)
 	x += 50.0
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
@@ -165,10 +163,8 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	if hf > 0.0 and hf < 1.0 or bool(p.inp.get("g_fired", false)) and Input.is_action_pressed("throw"):
 		H.c.draw_arc(gr.get_center(), 22.0, -PI / 2, -PI / 2 + TAU * hf, 28, Color("cfe8ff"), 3.0, true)
 	var mode := String(KinFollow.NAMES.get(k.cmd, "Follow")).to_upper()
-	if k.ks and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()):
-		# its carried bonuses: on while it is on you, greyed while it is out beside you
-		var on := p.kin_carry_on()
-		H._ctext(Vector2(gr.get_center().x, gr.position.y - 17.0), "CARRY ON" if on else "CARRY OFF", 8, Color(k.sp["color"], 0.95) if on else Color(H.INK, 0.4), H.big)
+	# its carried bonuses: the order's word in its colour while they're on you, greyed while it is out
+	var carry_off := k.ks != null and (not k.ks.carry_passives.is_empty() or not k.ks.carry_on_shot.is_empty()) and not p.kin_carry_on()
 	if down:
 		H._rounded(gr, Color(0.3, 0.02, 0.02, 0.5), 12)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.down_t))), 14, DOWN_COL, H.big)
@@ -180,7 +176,12 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		H._rounded(gr, Color(0.04, 0.04, 0.06, 0.72), 8)
 		H._ctext(gr.get_center() + Vector2(0, 4), str(int(ceil(k.rest_t))), 14, Color(H.INK, 0.8), H.big)
 		mode = "RESTING"
-	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, DOWN_COL if down else (Color(H.INK, 0.5) if in_form else Color(k.sp["color"], 0.95)), H.big)
+	var mode_col := Color(k.sp["color"], 0.95)
+	if down:
+		mode_col = DOWN_COL
+	elif in_form or carry_off:
+		mode_col = Color(H.INK, 0.45)
+	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, mode_col, H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
 	return x + 42.0

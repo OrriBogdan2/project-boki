@@ -127,7 +127,3 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 		c.draw_circle(pts_at, 10.0 + pulse, gold)
 		var pts_txt := "+%d" % p.skill_pts if p.skill_pts > 1 else "+"
 		HudStyle.ctext(c, pts_at + Vector2(0, 5), pts_txt, 13, Color(0.1, 0.07, 0.02), 0)
-	# the archetype's name under the portrait instead of just the class
-	if p.ak:
-		var arch_txt := Arch.name_of(p.arch).to_upper() + "  ·  " + String(p.cdat["name"]).to_upper()
-		HudStyle.text(c, pr.position + Vector2(36, pr.size.y + 14), arch_txt, 10, Color(Arch.color(p.arch), 0.9))

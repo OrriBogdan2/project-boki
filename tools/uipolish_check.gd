@@ -32,6 +32,8 @@ func run(main_node: Node) -> void:
 	_removed(src)
 	await _migration()
 	_static_styles(src)
+	_house_look()
+	await _popup_budget()
 	await _screens()
 	print("UIPOLISH DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -131,7 +133,26 @@ func _static_styles(src: Dictionary) -> void:
 		for line in String(src[path]).split("\n"):
 			if line.contains("UI.section(") and line.contains(".lerp("):
 				dim_heads.append(path)
-	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
+	ok("section headers keep their colour (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
+
+## docs/UI_STYLE.md: panels are the clean ink frame (rounded, hairline rim) and the primary is the solid accent.
+func _house_look() -> void:
+	var pc := UI.theme().get_stylebox("panel", "PanelContainer") as UiFrame
+	var hairline := pc != null and pc.edge.a > 0.0 and pc.edge.a < 0.2
+	ok("panels: the clean frame, R_PANEL corners, a hairline rim", hairline and pc.rad == UI.R_PANEL)
+	var pr := UI.theme().get_stylebox("normal", "Primary") as UiFrame
+	ok("the primary button is filled with the accent", pr != null and pr.fill == UI.ACCENT)
+
+## docs/UI_STYLE.md pop-up budget: floating words over the fight are capped.
+func _popup_budget() -> void:
+	var fx := Fx.new()
+	main.add_child(fx)
+	for i in 5:
+		fx.word(Vector3.ZERO, "WORD %d" % i, Color.WHITE)
+	var shown := fx.nums.filter(func(nm): return not nm.has("last") and (nm["node"] as Label3D).visible).size()
+	ok("pop-up budget: at most %d floating words at once" % Fx.WORD_MAX, shown == Fx.WORD_MAX, "%d shown" % shown)
+	fx.queue_free()
+	await main.get_tree().process_frame
 
 func _theme_boxes() -> Dictionary:
 	var out := {}

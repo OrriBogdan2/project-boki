@@ -25,7 +25,6 @@ func map_region(tiles: Rect2) -> Rect2:
 	var t := map_tex()
 	var k := Vector2(float(t.get_width()) / m.world.w, float(t.get_height()) / m.world.h)
 	return Rect2(tiles.position * k, tiles.size * k)
-var kit_t0 := 0.0
 
 const INK := Color("f3eee2")
 const MUTED := Color("a9b0bf")
@@ -1630,19 +1629,11 @@ func _draw_squad_pings(p: Hunter) -> void:
 		var lbl2 := String(pg.get("label", ""))
 		_draw_waypoint(pg["pos"], ("%s: %s" % [who, lbl2]) if who != "" else lbl2, Color(pg["col"], a2))
 
-## For the first seconds of every match: what each of your buttons does.
+## In the Training Grounds: what each of your buttons does, pinned on the left. Expeditions don't pop
+## it up (docs/UI_STYLE.md pop-up budget): the kit card (K) and the slots' key caps carry it there.
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
-	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden:
+	if not m.opts.get("training", false) or not Settings.get_v("tips") or Record.clean() or p.out or guide_hidden:
 		return
-	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
-	var t := m.time - kit_t0
-	if p.dropping or p.riding:
-		# shown once you land, not over the drop map
-		kit_t0 = m.time
-		return
-	if t > show_t:
-		return
-	var a := clampf(show_t - t, 0.0, 1.0)
 	var lines: Array = []
 	var util: AbilityDef = p.runner.def_of("utility") if p.runner and p.ak == null else null
 	if util:
@@ -1684,37 +1675,26 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		var dh := body.get_multiline_string_size(String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12).y
 		hs.append(26.0 + dh + 8.0)
 		total += 26.0 + dh + 8.0
-	var bottom := sz.y - 176.0
-	var compact := false
-	if not m.opts.get("training", false) and total > bottom - 230.0:
-		# too tall to sit under the kill feed: names only
-		compact = true
+	# under the minimap, clear of the checklist; on a short screen it drops the descriptions rather
+	# than run into your kin card
+	var compact := total > sz.y - 240 - 196
+	if compact:
 		hs = []
 		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
-	var box := Rect2(Vector2(sz.x - w - 16, bottom - total), Vector2(w, total))
-	if m.opts.get("training", false):
-		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
-		# on a short screen it drops the descriptions rather than run into your kin card
-		box.position = Vector2(16, 240)
-		if total > sz.y - 240 - 196:
-			compact = true
-			hs = []
-			for l in lines: hs.append(28.0)
-			total = 34.0 + 28.0 * lines.size() + 4.0
-		box.size.y = total
-	_panel(box, Color(0.06, 0.07, 0.1, 0.82 * a), 12)
-	_text(box.position + Vector2(14, 22), "Your kit", 14, Color(GOLD, a), big)
+	var box := Rect2(Vector2(16, 240), Vector2(w, total))
+	_panel(box, Color(0.06, 0.07, 0.1, 0.82), 12)
+	_text(box.position + Vector2(14, 22), "Your kit", 14, GOLD, big)
 	var y := box.position.y + 34
 	for i in lines.size():
 		var l: Array = lines[i]
 		var kw := big.get_string_size(l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
-		var ks := StyleBoxFlat.new(); ks.bg_color = Color(l[3], a); ks.set_corner_radius_all(5)
+		var ks := StyleBoxFlat.new(); ks.bg_color = l[3]; ks.set_corner_radius_all(5)
 		c.draw_style_box(ks, Rect2(Vector2(box.position.x + 14, y), Vector2(kw + 12, 20)))
-		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.07, 0.06, 0.08, a))
-		_text(Vector2(box.position.x + 34 + kw, y + 15), l[1], 14, Color(INK, a))
+		c.draw_string(big, Vector2(box.position.x + 20, y + 15), l[0], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(0.07, 0.06, 0.08))
+		_text(Vector2(box.position.x + 34 + kw, y + 15), l[1], 14, INK)
 		if not compact:
-			c.draw_multiline_string(body, Vector2(box.position.x + 14, y + 38), String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12, -1, Color(MUTED, a))
+			c.draw_multiline_string(body, Vector2(box.position.x + 14, y + 38), String(l[2]), HORIZONTAL_ALIGNMENT_LEFT, w - 28, 12, -1, MUTED)
 		y += float(hs[i])
 
 ## Perks you've picked up this run: a row of little badges over your health bar, with stacks.
