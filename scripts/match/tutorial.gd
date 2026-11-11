@@ -78,6 +78,7 @@ var held := false            # and whether it was held (kits with a hold only)
 var hits := 0                # your weapon hits on a monster this step
 var seen := {}               # what this run has used: sec, fire, dash, kick, boki, kin, glove, ult (the checks)
 var camps: TutorialCamps
+var aim: TutorialAim         # the E step: a miss gives the cooldown back
 var crouch_t := 0.0
 var rmb_t_prev := 0.0
 var _course: Dictionary = {}
@@ -89,6 +90,7 @@ func _init(match_node: Match) -> void:
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
 	camps = TutorialCamps.new(self)
+	aim = TutorialAim.new()
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -179,6 +181,7 @@ func update(dt: float) -> void:
 		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
 	var sid := id()
 	camps.update()
+	aim.update(self, dt, int(p.used.get("k1", 0)) - int(used0.get("k1", 0)))
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
 	if got != got_seen:
@@ -288,6 +291,7 @@ func _enter() -> void:
 	got = 0
 	got_seen = 0
 	stall_got = 0
+	aim.reset()
 	_refresh(p)
 	held = false
 	hits = 0
@@ -392,7 +396,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return _camp_done(sid)
 		"kin":
 			got = int(p.used.get("k1", 0)) - int(used0.get("k1", 0))
-			flag = got > 0
+			flag = aim.hit
 			seen["kin"] = seen.get("kin", false) or flag
 			return _camp_done(sid)
 		"glove": return ground_item().is_empty()
@@ -647,6 +651,8 @@ func _dist(at: Vector3) -> float:
 
 ## The extra line for a faraway target: a hint to scout ahead from a crouch.
 func scout_hint() -> String:
+	if aim.alert() != "":
+		return aim.alert()
 	if target == Vector3.INF or m.player.crouch or id() in ["land", "crouch", "wallkick"]:
 		return ""
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
@@ -662,9 +668,10 @@ func respawn() -> Vector3:
 	_refresh(m.player)          # (a fall is a retry: every move is ready for it)
 	return last_stop if last_stop != Vector3.INF else stop("land")
 
-## A weapon hit of yours on a monster (Match).
-func on_hit() -> void:
+## A hit of yours on a monster (Match).
+func on_hit(target: Mob) -> void:
 	hits += 1
+	aim.on_hit(self, target)
 
 ## The first-time intro card waits for a key or INTRO_T seconds, and the match waits with it.
 func intro_wait(dt: float) -> void:
