@@ -6,7 +6,8 @@ extends RefCounted
 ## (its attack, its preview ability and its dash, one clip after the other; only one plays: the cards are
 ## painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
 ## `choose` opens it (ClassUnlock.choose_second or choose_starters) and `done` carries on (HobTalk plays the short
-## Mask moment). "Not now" lets it wait, when there is a `later` to call (the first pick has none).
+## Mask moment). "Try" on a second-pick card goes to the Training Grounds as that Hunter for a minute and comes
+## back to this card (TryRelic). "Not now" lets it wait, when there is a `later` to call (the first pick has none).
 
 const CARD_W := 230.0          # px
 const FACE_PX := 110.0
@@ -64,7 +65,8 @@ func build() -> Control:
 	take_button.call_deferred("grab_focus")      # (Enter takes the Relic in focus)
 	for id in ids:
 		WardenGlb.fetch(String(id))      # (their models, read off the main thread before a clip needs one)
-	focus(0)
+	focus(maxi(0, ids.find(TryRelic.back_to)))      # (back from a Try: the same card)
+	TryRelic.back_to = ""
 	return v
 
 func _card(id: String, i: int) -> PanelContainer:
@@ -94,6 +96,11 @@ func _card(id: String, i: int) -> PanelContainer:
 	role.set_meta("mask_role", id)
 	v.add_child(role)
 	v.add_child(ClassCard.howto_box(id, CARD_W - 24.0, 12))
+	if later.is_valid():      # (the second pick: "Try" plays it in the Training Grounds and comes back here)
+		var try_button := UI.ghost(String(rules["offer_try"]), func(): TryRelic.start(id), 110)
+		try_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		try_button.set_meta("mask_try", id)
+		v.add_child(try_button)
 	return card
 
 ## Puts the focus on the i-th Mask: its card lights up and its clip plays under the cards.
