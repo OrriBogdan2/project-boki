@@ -4,8 +4,8 @@ extends RefCounted
 ## in splashes, running along it leaves a wake, a dash sprays and a jump lands in a splash, each a
 ## restart of a pooled emitter (no node made, no ring or burst decal); the pool stays within its droplet
 ## budget, Albert's splash is bigger than Vex's, and on Low nothing is made or shown.
-## --shots-dir=<dir>: also films each Hunter crossing the stream (frames <hero>_NNN.png, real frames
-## with the game running, the camera close in; GPU).
+## --shots-dir=<dir>: also films each Hunter (in their match look) crossing the stream (frames
+## <hero>_NNN.png, real frames with the game running, the camera close in; GPU).
 
 const HEROES := ["gunslinger", "bulwark"]      # Vex, Albert
 const STREAM_X := 40         # the stream's west tile column (it is two tiles wide)
@@ -199,6 +199,11 @@ func _film(main: Node, hm, hero: String) -> void:
 	if main.fade: main.fade.reveal(0.05)      # (the loading card over a new home)
 	await tree.create_timer(0.3).timeout
 	_put(hm, Vector3(STREAM_X - 1.2, 0, STREAM_Z.y + 0.5))
+	# at home you are the Unmasked: the film wears the Hunter's own look, as in a match, so it shows them
+	var body: Node3D = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], hm._weapon(), "", Unmasked.mask_look(), hero)
+	hm.player.queue_free()
+	hm.player = body
+	hm.add_child(body)
 	hm.cam.zoom_to = FILM_ZOOM
 	hm.cam.zoom = FILM_ZOOM
 	hm.cam.snap(hm.ppos)
