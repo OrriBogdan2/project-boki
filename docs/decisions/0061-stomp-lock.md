@@ -18,4 +18,4 @@ Option 2. One fixed time for every style: 3.0 s from commit to kill, Supervive's
 - New: `scripts/match/stomp.gd`, `scripts/match/stomp_look.gd`, `content/rules/stomps.json`, `tools/stomp_check.gd`, `tools/stomp_film.gd`. Life loses its stomp code, and the "missed" and per-slam chip paths go.
 - Net.VERSION 0.24.6: the "stomp" event `[stomper, wisp, "go" | "broken" | "done" | "gone" | "extract", style]`. The wisp's own game pins its wisp and executes it on "done". A stomp from a game that goes quiet is dropped 2 s past its time.
 - Save: two optional keys, both read with defaults, so old saves load as "wearing your own, nothing bought". No migration is needed.
-- Debt: no shop screen for stomp styles yet (`StompLook.buy`/`equip` exist, and the check exercises them).
+- Shop: the stomp picker on the Hunters screen (StompPick, under the Wisp pick) previews each style on the picked Hunter, buys with `StompLook.buy` and wears with `StompLook.equip`.

@@ -10,6 +10,9 @@ extends RefCounted
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
+##  7. The picker on the Hunters screen (StompPick): the Hunter's own and each style for sale, each with a
+##     live preview of that Hunter stomping; the worn one marked; an unowned one shows its price and a Buy
+##     that is off without the gems, else spends them and wears it.
 ## Never touches the save.
 
 var bad := 0
@@ -86,6 +89,7 @@ func run(main: Node) -> void:
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
 	_check_styles()
+	await _check_picker(main)
 	print("STOMP CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -197,3 +201,49 @@ func _check_styles() -> void:
 	var a := StompLook.legs(StompLook.style("thunder_stomp"), 0.4)
 	var b := StompLook.legs(StompLook.style(StompLook.default_for("archer")), 0.4)
 	ok(a.distance_to(b) > 0.2, "styles pose differently mid-lift")
+
+func _check_picker(main: Node) -> void:
+	Save.d["stomps"] = []
+	StompLook.equip("")
+	Save.d["gems"] = 100
+	var picker := StompPick.make("archer", func(): pass)
+	main.add_child(picker)
+	var cards := _stomp_cards(picker)
+	var styles: Dictionary = StompLook.rules()["styles"]
+	var sale := styles.keys().filter(func(k): return StompLook.style(k).has("cost"))
+	ok(cards.size() == sale.size() + 1 and cards[0].get_meta("stomp") == "",
+		"the picker has the Hunter's own and a card per style for sale (%d)" % cards.size())
+	var own := cards[0].get_child(-1) as Button
+	var own_name := String(StompLook.style(StompLook.default_for("archer"))["name"])
+	ok(own.theme_type_variation == "Chosen" and own.text == own_name, "the Hunter's own is worn and marked")
+	var thunder: Control = cards.filter(func(n): return n.get_meta("stomp") == "thunder_stomp")[0]
+	var buy := thunder.get_child(-1) as Button
+	ok(buy.text.contains("300 gems") and buy.disabled, "an unowned one shows its price; Buy is off without the gems")
+	var stage := thunder.get_child(0).get_child(0).get_node("StompStage")
+	for i in 600:
+		if stage.anim != null:
+			break
+		await main.get_tree().process_frame
+	for i in 10:
+		stage._process(0.05)
+	ok(stage.anim != null and stage.style_id == "thunder_stomp" and stage.hunter_id == "archer"
+		and stage.anim.stomp_k > 0.9, "the preview is the picked Hunter stomping in that style")
+	picker.free()
+	Save.d["gems"] = 1000
+	var worn := [0]
+	picker = StompPick.make("archer", func(): worn[0] += 1)
+	thunder = _stomp_cards(picker).filter(func(n): return n.get_meta("stomp") == "thunder_stomp")[0]
+	(thunder.get_child(-1) as Button).pressed.emit()
+	ok(int(Save.d["gems"]) == 700 and StompLook.owned("thunder_stomp") and Save.d["look"]["stomp"] == "thunder_stomp"
+		and worn[0] == 1, "Buy spends 300 gems, wears it and saves it in look.stomp")
+	picker.free()
+	picker = StompPick.make("archer", func(): pass)
+	var buttons := picker.find_children("*", "Button", true, false)
+	var marked := buttons.filter(func(b): return b.theme_type_variation == "Chosen")
+	ok(marked.size() == 1 and marked[0].get_parent().get_meta("stomp") == "thunder_stomp",
+		"a rebuilt picker marks it worn")
+	picker.free()
+	StompLook.equip("")
+
+func _stomp_cards(picker: Control) -> Array:
+	return picker.find_children("*", "VBoxContainer", true, false).filter(func(n): return n.has_meta("stomp"))

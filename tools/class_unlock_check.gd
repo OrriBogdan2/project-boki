@@ -696,6 +696,10 @@ func _home(tree: SceneTree) -> void:
 	ok(ml != null and int(ml.get_meta("level")) >= 1, "%s's mastery level shows (%s)" % [Arch.name_of("archer"),
 			str(ml.get_meta("level")) if ml else "?"])
 	var pick := _find_meta(hm.panel_host, "glider_pick")
+	var wisp_pick := _find_meta(hm.panel_host, "wisp_pick")
+	var stomp_pick := _find_meta(hm.panel_host, "stomp_pick")
+	ok(wisp_pick != null and stomp_pick != null and stomp_pick.get_index() == wisp_pick.get_index() + 1,
+			"the stomp pick sits under the Wisp pick")
 	var crane: Button = null
 	var chips: Array = []
 	if pick: _collect_meta(pick, "glider", chips)
