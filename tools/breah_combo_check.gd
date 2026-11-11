@@ -590,6 +590,23 @@ func _breah() -> void:
 		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
 		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
 	)
+	# Molten Guard stacks add (18 each) up to the cap of 4, share one 6 s timer, and the pool drops whole at 6 s
+	var gt: float = float(K.d["passive"]["guard"]["t"])
+	P.shield = 0.0
+	K.shield_stacks = 0
+	for i in 5:
+		K.guard_stack()
+	ok(
+		"data: Molten Guard stacks add to the cap of 4 (72)", K.shield_stacks == 4 and absf(P.shield - 72.0) < 0.5,
+		"stacks %d shield %.1f" % [K.shield_stacks, P.shield]
+	)
+	step(m, gt - 0.3)
+	var left: float = P.shield
+	step(m, 0.6)
+	ok(
+		"data: the Molten Guard shield is gone at its 6 s, not before",
+		left > 71.0 and P.shield == 0.0 and K.shield_stacks == 0, "5.7 s: %.1f, after: %.1f" % [left, P.shield]
+	)
 	reset.call()
 	P.shield = 0.0
 	K.shield_stacks = 0
