@@ -178,7 +178,8 @@ func _mob(kind: String) -> void:
 	lands = lands and (fills.size() < 3 or fills[fills.size() - 3] < 0.999)
 	ok("%s: the fill reaches 1 on the hit frame, not before" % kind, lands, "%.3f -> %.3f" % [f_prev, f_last])
 	ok("%s: the tell stays up on the hit frame" % kind, kept)
-	ok("%s: the tell shows for its whole wind-up" % kind, lead >= windup - 1e-4, "lead %.2f s, wind-up %.2f s" % [lead, windup])
+	var span := "lead %.2f s, wind-up %.2f s" % [lead, windup]
+	ok("%s: the tell shows for its whole wind-up" % kind, lead >= windup - 1e-4, span)
 	var rising := true
 	for i in range(1, glows.size() - 1):
 		if glows[i] < glows[i - 1]: rising = false
