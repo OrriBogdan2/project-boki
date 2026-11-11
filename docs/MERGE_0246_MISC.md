@@ -70,4 +70,4 @@ NEW-RED vs ext/release-integ-0245 272368589 (6):
 | --cover-check | Lark (meadow) cover 7.8-8.0%, floor 8.5%: the early-camps layout moves cut Lark's bushes 874 -> 741 |
 | --demo-quick-check (new) | "every Boki evolved" short 6: 0245's evolve.json levels 14-40 with an art gate (DEBT: no launch species level-evolves) |
 | --loading-check (new) | the bar jumps more than 25% in one frame once |
-| --leave-match-check (new, hangs to timeout) | expects a Boki left in a deep match to be in the Ransom House at once; 0245 has it guard your box first |
+| --leave-match-check (new, hung to timeout) | FIXED on ext/farm-leave-match-order: the check now follows guard, end-of-match result, Ransom House (captured_by) with frame-capped waits; 42 ok/0 fail, no game change |
