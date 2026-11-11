@@ -11,6 +11,7 @@ var P: Hunter
 var dr: MoveDrills
 const DT := Match.DT
 const MAX_STEPS := 1200
+const DIVE_AT := 5.0   # m from the mat the dive bot crouches: with Loco.glide_step steering (0.24.5) 6-9 m lands short
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
 		"training": true, "practice": true}
 
@@ -92,7 +93,7 @@ func _dive_bot(f: int) -> void:
 	P.inp["glide"] = true
 	P.inp["jump"] = f == 0
 	P.inp["move"] = flat.normalized() if flat.length() > 0.5 else Vector2.ZERO
-	P.inp["crouch"] = flat.length() < 7.0
+	P.inp["crouch"] = flat.length() < DIVE_AT
 
 func _dive_idle_bot(_f: int) -> void:
 	P.inp["glide"] = false
