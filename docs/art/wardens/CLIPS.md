@@ -26,6 +26,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, owning the body for `dur` s standing and
   `moving` s (default `dur`) while he runs on, played at `rate` times its speed (default 1). `--clip-check` measures the
   plain jump through the clips (take-off, apex, dip, recovery: the JL rows); `--jump-land-shots` films it at the match camera.
+- `air`, `land`: rise, fall, glide, dive (a plunge: the glider's Ctrl dive and the opening skydive; `dive_at` s holds a
+  one-shot clip on one frame); a landing clip after `min_fall` s airborne. WardenAirTilt turns the whole .glb about the
+  hips on top: `dive_tilt` (deg forward in a plunge, default 105: head-down), `glide_tilt` (deg forward under the
+  glider, default 12: the legs trail), `glide_bank` (deg into a glider turn, default 28). A clip that already leans
+  sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `lead` (s: the clip starts that far in, so a late strike key lands on the kit's hit; under zero, its first frame is held that long)}.

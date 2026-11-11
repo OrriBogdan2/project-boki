@@ -187,6 +187,7 @@ const CHECKS := {
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],   # Meeko's sun and cloud orbit her, bob, clear the wings
 	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],   # frames of that orbit
+	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],      # glide, turn, dive, close, air dash (GPU)
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
 	"--training-area-shots": ["res://tools/training_area_shots.gd", "training_area_shots", null],      # (GPU)
 	"--dummy-move-shots": ["res://tools/dummy_move_shots.gd", "dummy_move_shots", null],      # (GPU)

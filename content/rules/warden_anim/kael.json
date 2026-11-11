@@ -47,7 +47,7 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "exdash"
+		"dive": "glide"
 	},
 	"land": {
 		"clip": "land",
