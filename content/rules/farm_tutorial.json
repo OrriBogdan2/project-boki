@@ -150,7 +150,7 @@
 				"patch_dry": "Press {build} and place a patch; you water it yourself.",
 				"plant": "Press {interact} at the patch to plant a seed.",
 				"water": "Press {interact} at the patch to water it.",
-				"grow": "Ripe in {secs}s: wait by the patch, then pick it.",
+				"grow": "Your seed is growing: wait by the patch, then pick it.",
 				"pick": "It's ripe: press {interact} to pick it."
 			},
 			"world": {

@@ -151,12 +151,6 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if not grow.is_empty() and id != "crop":
-		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
-	elif id == "crop" and not grow.is_empty():
-		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
-	s = s.replace("{secs}", "a few")
 	var txt := s.strip_edges()
 	hint_box.set_line({"text": ("\u2713 Done!  " if done_t > 0.0 else "") + txt,
 			"count": "%d/%d" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size()]}, id)
