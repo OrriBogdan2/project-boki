@@ -59,6 +59,7 @@ const CHECKS := {
 	"--fusion-band-check": ["res://tools/fusion_band_check.gd", "fusion_band_check", null],      # Fusions stay inside the Hunter ultimates' band
 	"--glove-band-check": ["res://tools/glove_band_check.gd", "glove_band_check", null],      # gloves stay inside the kits' E band
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
+	"--armor-parity-check": ["res://tools/armor_parity_check.gd", "armor_parity_check", null],      # docs/ARMOUR_PARITY.md
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
