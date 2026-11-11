@@ -178,7 +178,8 @@ func _offer() -> void:
 			func(c): return not c.is_queued_for_deletion())
 	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Relic in focus (Meeko)")
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
-	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
+	var tracker_off: bool = home.guide.tracker == null or not home.guide.tracker.visible
+	ok(tracker_off and marker_off and not home.guide.hint_box.visible
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
 	var pick_rect: Rect2 = (offer.root as Control).get_global_rect()
 	var screen: Rect2 = main.get_viewport().get_visible_rect()
