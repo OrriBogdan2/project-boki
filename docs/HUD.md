@@ -93,8 +93,10 @@ nothing else on screen:
 - Keys: interact takes everything worth having (smart loot), Enter takes the thing pointed at, Esc closes.
   Buttons never take keyboard focus (Space jumps). There is no gamepad loot input yet.
 - It builds in one go and sits by anchors (no frame waits); lists scroll past the screen height minus 420 px.
-- Check: `--loot-window-check` (1920x1080 and 1280x720, small and long box: on screen, nothing out of the
-  window, one button per thing and every thing takeable, WORN in place, no perks, upgrade goes on, Esc).
+- Check: `--loot-window-check` (at the window's size, headless 1280x720; small and long box: on screen, nothing
+  out of the window, one button per thing and every thing takeable, WORN in place, no perks, upgrade goes on, Esc).
+- Shots (GPU, `--inv-shots --shots-size=1920x1080`): [before](shots/loot-simple/before_1920x1080.jpg),
+  [after](shots/loot-simple/after_1920x1080.jpg), [full backpack hold](shots/loot-simple/after_full_pack_1280x720.jpg).
 
 ## Looting with a full inventory
 
