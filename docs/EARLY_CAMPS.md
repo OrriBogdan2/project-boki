@@ -69,7 +69,7 @@ Three squads Hard Landing in view: `--drop-feel-check` on a GPU (Apple M5, mac-N
 - `drop_map.jpg`: the drop map with the 28 camps, the region lines ("N camps: to level L"), the hot zone's ring and legend row.
 - `dive_smoke.jpg`: mid-dive above the cloud layer (the sheet at 60 m) with the camps' smoke columns, orange in the hot zone.
 - `hard_landing.jpg`: a Hard Landing on the hot zone's camp: the 6 m ring, the Puffbomb and Brute hit for 30.
-- `minimap_cleared.png` (the minimap beside a cleared camp): **not saved.** The run that did complete showed the planning map open over the HUD (the shot's `set_process(true)` reopened it); the fix is in `tools/region_shots.gd`, but every GPU job since then was lost with its worker or sat in the queue for more than 40 minutes. Re-run `jobq submit --needs gpu --tree <tree> --out shots -- --region-shots --shots-dir=shots` and copy `minimap_cleared.png` over.
+- `minimap_cleared.png` (the minimap beside a cleared camp): **not saved.** The two runs that completed showed the full map open over the HUD, because the tool called `open_map(false)` (which opens it) where it needed `close_map()`. That is fixed in `tools/region_shots.gd` but the fix is unverified: the rerun sat in the GPU queue for over an hour. Run `jobq submit --needs gpu --tree <tree> --out shots -- --region-shots --shots-dir=shots` and copy `minimap_cleared.png` over.
 
 
 ## Pace table
