@@ -78,8 +78,10 @@ and steps are unchanged at 9-10: the HUD is still drawn whole from the first fra
 read the same as llvmpipe (same positions, same text); only water, light and the sky differ, so the llvmpipe counts held.
 
 No breach was a clean one-line fix (each needs a staged-reveal rule across a god file, or a design call on the Ways Out strip), so no code was changed here.
-The per-second prompt log (`--fresh-run-log`, from ext/tut-fresh-run) was merged for this job; its GPU run was still queued when this was written
-(job 20261111-131630-17882), so no prompt-gap numbers are in this table.
+The per-second prompt log (`--fresh-run-log`, from ext/tut-fresh-run; GPU job 20261111-131630-17882, rp1-2, `--new-player-flow-check` part 0 failures):
+**no gap over 8 s with no prompt** anywhere from the prologue to the farm tutorial; the world marker was hidden or off screen for the 10 s of the farm
+"crop" step only (the farm has no edge arrow); texts over 110 characters: the hatch screens (176-525 characters in all, the cards' bodies) and two farm hints
+(task 114, sell 119). Its 42 per-step shots are in the job's out dir, not in the repo. The log was run at the default window, not per size.
 
 ## 3. Clipping at 1280x720 and 1920x1080
 
