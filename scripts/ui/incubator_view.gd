@@ -1,7 +1,7 @@
 class_name IncubatorView
 extends RefCounted
 ## The Nesting Nook's Incubator tab: every cradle with its Rare Egg and how warm it is, what's left
-## (expeditions or minutes), what's warming them (an Ember kin, Ember Coals), the cradles you can
+## (minutes of play), what's warming them (an Ember kin, Ember Coals), the cradles you can
 ## still buy, and the eggs on the shelf waiting for one. Built inside the home screen's Nook panel
 ## (home.gd _open_nook), in the game's menu style.
 
