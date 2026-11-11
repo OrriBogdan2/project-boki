@@ -114033,5 +114033,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9d_cisternmander_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9d_mossbastion",
+    "name": "Mossbastion (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_mossbastion_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthorn_bk3",
+    "name": "Crofthorn (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_crofthorn_bk3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_cisternmander",
+    "name": "Cisternmander (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_cisternmander_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_briarlynx",
+    "name": "Briarlynx (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_briarlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_soakybara",
+    "name": "Soakybara (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_soakybara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_briarlynx",
+    "name": "Briarlynx (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_briarlynx_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_soakybara",
+    "name": "Soakybara (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_soakybara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_geysirbara",
+    "name": "Geysirbara (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_geysirbara_2.jpg",
+    "ok": true
   }
 ]
