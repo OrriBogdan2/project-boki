@@ -88,7 +88,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
-5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
+5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. *Expedition panel done on ext/ui-expedition-first (`ExpeditionFirst`): 3 blocks, no scroll, until a real expedition is finished; the Boki/loadout rows and Conditions fold too; GPU shots [first visit](shots/ui-expedition-first/720_fresh.jpg), [returning](shots/ui-expedition-first/720_all.jpg).* The Relics tile grid needs a layout where full names fit.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
