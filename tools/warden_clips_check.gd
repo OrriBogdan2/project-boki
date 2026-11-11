@@ -419,6 +419,9 @@ func _air(id: String) -> void:
 	holder.add_child(m)
 	var w := m.get_node_or_null("Warden")
 	var sync := w.get_node("Sync") as WardenGlb.Sync if w else null
+	if WardenClips.data(art_name).is_empty():
+		m.free()           # (a Hero with no keyed clips yet, Gil: the rig's procedural pose, nothing to tilt)
+		return
 	if sync == null or sync.clips == null:
 		ok(false, "%s: plays its clips" % art_name)
 		m.free()
