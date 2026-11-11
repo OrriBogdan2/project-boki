@@ -1128,10 +1128,10 @@ func combos(a) -> void:
 	var hp0 := A.dmg(T)
 	A.hold(m, P, 0.95)
 	A.step(m, 0.4)
-	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
+	A.ok("combo jug: E > hold RMB = Chain Lunge (no stun)",
+			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t <= 0.0
 			and P.flat_dist(T) < 3.4,
-			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
+			"lunges %d dist %.1f took %.0f stun %.2f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0, T.stun_t])
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	A.step(m, 1.0)
 	hook.call()
@@ -1142,8 +1142,8 @@ func combos(a) -> void:
 	P.ak.use_e()
 	P.inp["sec_hold"] = false
 	A.step(m, 0.45)
-	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
-			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
+	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival (no stun)",
+			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t <= 0.0 and K.chain_lunges == 1,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
 	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)
