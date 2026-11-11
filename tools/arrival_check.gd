@@ -1,9 +1,9 @@
 extends RefCounted
 ## --arrival-check: the first minutes' declutter (briefs/UI_DECLUTTER_PLAN.md, sections 4 and 5).
-##   1. results: three big numbers, no armor tile, the rest behind "Details", the way home on screen
-##   2. the arrival queue: modals open one at a time, in order, and wait while something else is open
-##   3. the top bar's counters show from the first time you have some (old saves see them all)
-##   4. the key row: each hint goes after 3 uses; whistle and build wait for the tutorial's end
+## (The results screen's first view is --results-first-check.)
+##   1. the arrival queue: modals open one at a time, in order, and wait while something else is open
+##   2. the top bar's counters show from the first time you have some (old saves see them all)
+##   3. the key row: each hint goes after 3 uses; whistle and build wait for the tutorial's end
 
 var main: Node
 var fails := 0
@@ -21,49 +21,11 @@ class Host extends Node:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
-	await _results()
 	await _queue()
 	_chips()
 	_keys()
 	print("ARRIVAL DONE, failures: %d" % fails)
 	main.get_tree().quit(1 if fails > 0 else 0)
-
-func _texts(root: Node, visible_only: bool) -> Array:
-	var out: Array = []
-	for l in root.find_children("*", "Label", true, false):
-		if not visible_only or (l as Label).is_visible_in_tree():
-			out.append((l as Label).text)
-	return out
-
-func _results() -> void:
-	var rec := Save.new_kin("zapple", "Pip")
-	Save.d["roster"] = [rec]
-	Save.d["active"] = rec["uid"]
-	Save.d["name"] = "Vex"
-	var scr := Control.new()
-	scr.set_script(load("res://scripts/ui/results.gd"))
-	main.add_child(scr)
-	scr.show_result({"extracted": true, "gems": 42, "knocks": 3, "damage": 512, "taken": 388, "kills": 1, "downs": 1,
-			"revives": 2, "armor_tier": 3, "time": 201.0, "kin_trust": 57.0, "vault_gems": 9})
-	await main.get_tree().process_frame
-	await main.get_tree().process_frame
-	var shown := _texts(scr, true)
-	var three := "KNOCKS" in shown and "DAMAGE" in shown and "TIME" in shown
-	ok("Vex made it out" in shown and three, "results: the hunter's name in the headline and three numbers")
-	ok(not ("ARMOR" in _texts(scr, false)), "results: no armor tile")
-	ok(not ("Damage taken" in shown) and not ("Your vault kept 9 of the gems you dropped." in shown),
-			"results: the small numbers and notes are hidden")
-	var toggle: Button = null
-	var home_btn: Button = null
-	for b in scr.find_children("*", "Button", true, false):
-		if (b as Button).text.begins_with("Details"): toggle = b
-		if (b as Button).text == "Back to the farm": home_btn = b
-	ok(toggle != null and home_btn != null and home_btn.is_visible_in_tree(),
-			"results: a Details toggle and the way home on screen")
-	if toggle:
-		toggle.pressed.emit()
-		ok("Damage taken" in _texts(scr, true), "results: Details shows them")
-	scr.queue_free()
 
 func _queue() -> void:
 	var host := Host.new()
