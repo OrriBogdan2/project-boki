@@ -1,7 +1,7 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|shroud|feet|farm|eggs to take one group (eggs: the egg pick, then the black
+## --only=creator|first|viewer|mask|shroud|feet|farm|eggs to take one group (eggs: the egg pick, then the black
 ## mystery egg picked; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
 ## farm: the Empty at home from every side and above; eggs: the egg pick, 1280x720).
@@ -35,6 +35,8 @@ func run(main_node: Node) -> void:
 		main.fade.reveal(0.05)
 	if only in ["", "creator"]:
 		await _creator(tree)
+	if only in ["", "first"]:
+		await _first_screens(tree)
 	if only in ["", "viewer"]:
 		await _viewer(tree)
 	if only in ["", "mask"]:
@@ -81,6 +83,18 @@ func _eggs(tree: SceneTree) -> void:
 	await _shot(tree, "hatch_mystery_picked", 1.2)
 	hx.queue_free()
 	await tree.process_frame
+
+## What a new player sees: the hatch card, the creator with its first rows, then with More looks... open.
+func _first_screens(tree: SceneTree) -> void:
+	Save.d = Save.fresh()
+	await _shot(tree, "hatch_card", 2.0)
+	hx._end_intro()
+	await _shot(tree, "creator_first", 2.0)
+	var buttons: Array = hx.create_box.find_children("*", "Button", true, false)
+	var more: Array = buttons.filter(func(b): return (b as Button).text == "More looks...")
+	if not more.is_empty():
+		(more[0] as Button).pressed.emit()
+		await _shot(tree, "creator_more", 1.0)
 
 func _viewer(tree: SceneTree) -> void:
 	_fresh()
