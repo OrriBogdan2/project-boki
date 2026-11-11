@@ -113060,5 +113060,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_terrarimit_c_bk_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_crofthollow_b_bk",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_crofthollow_b_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_crofthollow_a_bk",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_crofthollow_a_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_crofthollow_b_bk",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_crofthollow_b_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_crofthollow_c_bk",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_crofthollow_c_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_crofthollow_c_bk",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_crofthollow_c_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_crofthollow_a_bk",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_crofthollow_a_bk_1.jpg",
+    "ok": true
   }
 ]
