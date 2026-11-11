@@ -2,7 +2,7 @@ extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
-## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
+## (a remote hunter fed only by the snapshots, KitMoveNet's kit move id~n or clear) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
 ## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
@@ -14,13 +14,6 @@ const HOLD := 0.8            # s a held key stays down
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
-
-## Casts whose copy still differs, and why (docs/DEBT.md): printed as GAP, not failures (timing may hide one
-## run to run). Both fixes sit in ArchKit.net_move / apply_net_move, not in Net.
-const KNOWN := {
-	"bulwark rmb held": "lowering the shield clears the move id; the wire's '' is ignored, the copy keeps guarding",
-	"gunslinger lmb held": "a restart of the same move within 0.3 s of its start is not seen (apply_net_move)",
-}
 
 var log_rows: Array = []     # [unix ms, the kit's move id, HunterAnim's move id]; one row per change or restart
 var last_row := ["?", "?"]
@@ -79,9 +72,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var cmp := _compare(mine, theirs)
 	if cmp["moves"] > 0:
 		played[arch] = int(played.get(arch, 0)) + 1
-	if KNOWN.has(what):
-		print("%s %s %s" % [tag, "GAP" if cmp["bad"] != "" else "gap not seen this run", what])
-	elif cmp["bad"] != "":
+	if cmp["bad"] != "":
 		unlike[arch] = unlike.get(arch, []) + ["%s: %s" % [what, cmp["bad"]]]
 		print("%s FAIL %s: %s" % [tag, what, cmp["bad"]])
 		bad += 1
