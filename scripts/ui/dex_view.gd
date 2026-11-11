@@ -212,6 +212,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
 		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
+	info.add_child(summon_row(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
@@ -276,6 +277,21 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	vl.custom_minimum_size.x = 200
 	r.add_child(vl)
 	parent.add_child(r)
+
+## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
+## itself reads), a ring icon and the Burst / Steady tag.
+static func summon_text(spk: String) -> String:
+	var t := KinSummon.times(KinLib.kin(spk))
+	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
+
+static func summon_row(spk: String) -> Control:
+	var r := UI.hbox(8)
+	r.add_child(UI.IconDot.new("ring", type_col(type_of(spk)), 15.0))
+	var l := UI.label(summon_text(spk), UI.T_SMALL, UI.INK)
+	l.name = "SummonText"
+	r.add_child(l)
+	r.add_child(UI.tag(KinSummon.tag(KinSummon.times(KinLib.kin(spk)).x), UI.MUTED))
+	return r
 
 ## One or two lines about the species (its flavour text, cut at the second sentence).
 static func _field_note(spk: String) -> String:
