@@ -102,7 +102,7 @@ void fragment() {
 		float w = mix(0.9, 0.08, uv.x);
 		float shaft = 1.0 - smoothstep(w * 0.5, w, d);
 		float head = (1.0 - smoothstep(0.0, 0.12, uv.x)) * (1.0 - smoothstep(0.0, 0.8, d));
-		float core = (1.0 - smoothstep(w * 0.15, w * 0.35, d)) * (1.0 - smoothstep(0.1, 0.65, uv.x));
+		float core = (1.0 - smoothstep(w * 0.15, w * 0.35, d)) * (1.0 - smoothstep(0.15, 0.8, uv.x));
 		body_a = shaft * (1.0 - uv.x) * k;
 		glow = (color2.rgb * head + color3.rgb * color3.a * core) * k;
 	} else if (mode == 6) {
