@@ -14,6 +14,7 @@ var bad := 0
 var m: Match
 var main: Node
 
+const DETAIL_MAX := 100      # characters: the longest plain-words line under a step (it was 157)
 const SIZES := [Vector2(1280, 720), Vector2(1920, 1080)]
 
 func ok(cond: bool, what: String) -> void:
@@ -82,6 +83,7 @@ func _course() -> void:
 	var under := 0
 	var texts := {}
 	var counters := {}
+	var details := {}
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
@@ -96,6 +98,7 @@ func _course() -> void:
 				asked += 1
 			texts[tu.id()] = tu.text
 			counters[tu.id()] = tu.progress_text()
+			details[tu.id()] = tu.detail
 		step_t += Match.DT
 		if m.hud == null:
 			continue
@@ -115,6 +118,10 @@ func _course() -> void:
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
 	ok(wide.is_empty(), "every banner line fits one short line (%s)" % str(wide))
+	var rank := String(details.get("rank", ""))
+	var jargon := ["skill point", "ultimate", "rank up"].filter(func(w): return rank.to_lower().contains(w))
+	var plain := rank != "" and rank.length() <= DETAIL_MAX and jargon.is_empty()
+	ok(plain, "the level-up line is short plain words (%d chars, jargon %s)" % [rank.length(), str(jargon)])
 	var counts_ok: bool = String(counters.get("shoot", "")) == "0/3" and String(counters.get("sig", "")) == "0/2"
 	ok(counts_ok, "the panel counts hits and casts (%s)" % str(counters))
 	var ak: ArchKit = m.player.ak

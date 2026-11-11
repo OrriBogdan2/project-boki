@@ -43,7 +43,7 @@
 			],
 			"title": "Chop trees for the house",
 			"hints": {
-				"go": "Walk up to a tree and hold {interact} to chop. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."
+				"go": "Hold {interact} at a tree to chop. The house needs {house_cost}: the bar at the top counts them."
 			},
 			"world": {
 				"go": "Chop a tree"
@@ -72,7 +72,7 @@
 			],
 			"title": "Place your house",
 			"hints": {
-				"place": "Now for a house. Press {build}, choose House, then click the marked spot. Marking it out is free. The {house_cost} are spent while it goes up.",
+				"place": "Press {build}, choose House, then click the marked spot. Marking is free; building uses {house_cost}.",
 				"wait": "Hold {interact} at the house to hammer. Your Boki come to help, and it uses up the wood and stone as it goes."
 			},
 			"world": {
@@ -229,7 +229,7 @@
 			"needs_all": true,
 			"title": "Head out",
 			"hints": {
-				"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."
+				"go": "Put on this Relic, a fallen Hunter's mask, and their soul is yours. Press {interact} at the portal to head out."
 			},
 			"world": {
 				"go": "Portal"
