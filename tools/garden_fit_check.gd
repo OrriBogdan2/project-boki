@@ -3,8 +3,8 @@ extends RefCounted
 ## zones and "Move to...", the games board, the Waystone wishes card, the games picker, the Nesting Nook
 ## preview, the Boki card's Family tab with its lineage) at 1280x720, 1920x1080, 2560x1080, a small
 ## 960x540 window and 1280x720 with the Interface size slider at its top (1.5). Every visible control must
-## sit inside its panel (no clipped or overflowing text, nothing cut off sideways), and the panel inside the
-## window's safe margin. With --shots-dir (a real renderer: jobq --needs gpu) each is saved as
+## sit inside its panel (no overflowing text, nothing cut off sideways), no one-line label or button may clip or
+## ellipsize its text, and the panel must sit inside the window's safe margin. With --shots-dir (a real renderer: jobq --needs gpu) each is saved as
 ## <dir>/<W>x<H>_<screen>.png. Never touches the real save.
 
 const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
@@ -116,3 +116,21 @@ func _scan(tag: String) -> void:
 		if not limit.grow(SLACK).encloses(c.get_global_rect()):
 			stray.append("%s %s at %s" % [c.get_class(), c.name, c.get_global_rect()])
 	ok(stray.is_empty(), "%s: nothing sticks out of its panel (%d: %s)" % [tag, stray.size(), stray.slice(0, 3)])
+	var cut: Array = panel.find_children("*", "Control", true, false).filter(_cut_short)
+	ok(cut.is_empty(), "%s: no text cut short (%d: %s)" % [tag, cut.size(), cut.slice(0, 3).map(func(c): return c.text)])
+
+## A one-line label or button that clips or ellipsizes a text wider than itself.
+func _cut_short(c: Control) -> bool:
+	if not c.is_visible_in_tree() or c.size.x <= 0.0 or not (c is Label or c is Button) or c.text == "":
+		return false
+	if c is Label and (c.autowrap_mode != TextServer.AUTOWRAP_OFF or (not c.clip_text
+			and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING)):
+		return false
+	if c is Button and not c.clip_text and c.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING:
+		return false
+	var font: Font = c.get_theme_font("font")
+	var wide := font.get_string_size(c.text, HORIZONTAL_ALIGNMENT_LEFT, -1, c.get_theme_font_size("font_size")).x
+	var room: float = c.size.x
+	if c is Button:
+		room -= c.get_theme_stylebox("normal").get_minimum_size().x + (c.icon.get_width() if c.icon else 0.0)
+	return wide > room + SLACK
