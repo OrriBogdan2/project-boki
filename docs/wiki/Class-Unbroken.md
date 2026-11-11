@@ -28,7 +28,7 @@ every knock.
 5. **Warchain** (E): hook a foe or a wall, then press E again to pull yourself in.
 6. **Gilded Riposte** (X, from level 6): a 0.65s gold guard where nothing hurts or stuns you, then you lunge
    into an upward cleave through the strip ahead and heal 80% of what it deals. Each hit you block makes it
-   harder; a knock with it makes it ready again. The Boki Fusion has its own key.
+   harder; a knock with it makes it ready again. The Boki Merge has its own key.
 
 ## Combos and interactions
 
@@ -110,6 +110,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 2s -> 1.8s, damage +15%; +20% damage on every Smash. | cooldown 2s -> 1.6s, damage +30%; +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less. |
 | Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 7.3s; a shot dodged through the Rampage feeds your Rage. |
 | E | cooldown 12.8s -> 11.2s, damage +15%. | cooldown 12.8s -> 8s, damage +30%. |
+| R (ultimate) | Gilded Riposte cooldown 36s -> 32s, damage 43 -> 73. The Merge lasts 30% longer. | Gilded Riposte cooldown 36s -> 28s, damage 43 -> 103. |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

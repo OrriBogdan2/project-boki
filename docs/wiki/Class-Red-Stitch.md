@@ -1,4 +1,4 @@
-# The Red Stitch
+# Red Stitch
 
 A light marksman who controls space. Every bow draw is timed, Heavy Shots pin people to walls, and a pinned
 target eats the big shot. Spirit Walk carries her through rocks and barriers.
@@ -105,6 +105,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
 | Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 9.5s -> 6.7s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 12.8s, damage +15%. | cooldown 15s -> 12s, damage +30%; the Hail Wall is 30% wider. |
+| R (ultimate) | Starpiercer cooldown 60s -> 55s, damage 18 -> 19.8, last-shot damage 25 -> 27.5. The Merge lasts 30% longer. | Starpiercer cooldown 60s -> 50s, damage 18 -> 21.6, last-shot damage 25 -> 30. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 
