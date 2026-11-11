@@ -227,40 +227,50 @@ Our numbers per hit are the raw values in `Data.MOBS` (`scripts/core/data.gd`). 
 
 | Monster / camp | Ours per hit (data) | Measured per hit | Measured per s | Falls, level 1 | Falls, level 5 | Source |
 |---|---|---|---|---|---|---|
-| Skitter | 9 | 7.2 | 3.9 | 38.6 s | 46.5 s | — |
-| Spitter | 11 | 8.4 | 2.8 | 53.5 s | 65.7 s | — |
-| Brute | 24 | 18.3 | 5.2 | 31.8 s | 35.4 s | — |
-| The Watcher (warden) | 30 | 24.0 | 8.2 | 20.3 s | 23.4 s | — |
+| Skitter | 9 | 7.2 | 3.7 | 40.2 s | 48.2 s | — |
+| Spitter | 11 | 8.4 | 2.8 | 54.4 s | 66.9 s | — |
+| Brute | 24 | 18.3 | 5.3 | 30.8 s | 34.8 s | — |
+| The Watcher (warden) | 30 | 24.0 | 8.2 | 20.5 s | 23.5 s | — |
 | Puffbomb (bomber) | 16, once (blows up) | 12.8 | one blast | never | never | — |
-| Sentinel | 8 | 8.1 | 3.2 | 37.1 s | 58.8 s | — |
+| Sentinel | 8 | 8.4 | 3.6 | 37.5 s | 51.6 s | — |
 | Glimmerkin | 0 (flees) | 0 | 0 | never | never | — |
-| Light: 2 Skitter | | 7.5 | 4.8 | 33.7 s | 37.3 s | — |
-| Light: Spitter + Skitter | | 7.6 | 5.4 | 29.9 s | 33.7 s | — |
-| Light: Puffbomb + Skitter | | 7.4 | 4.0 | 36.6 s | 45.9 s | — |
-| Normal: Brute + Skitter + Puffbomb | | 13.6 | 8.5 | 19.0 s | 22.5 s | — |
-| Normal: Skitter + Puffbomb + Spitter | | 7.8 | 5.4 | 28.3 s | 34.9 s | — |
-| Normal: Sentinel + 2 Skitter | | 8.0 | 7.4 | 20.8 s | 24.9 s | — |
-| Heavy: Brute + Spitter + Skitter + Sentinel | | 7.9 | 7.9 | 19.5 s | 23.1 s | — |
-| The Stone Colossus | 26 base | 15.5 | 5.9 | 26.6 s | 31.2 s | — |
-| Stormcoil | 22 base | 16.0 | 5.0 | 28.6 s | 38.3 s | — |
-| The Brood Mother (and her adds) | 18 base | 5.8 | 11.4 | 12.3 s | 16.3 s | — |
+| Light: 2 Skitter | | 7.2 | 5.6 | 26.4 s | 32.1 s | — |
+| Light: Spitter + Skitter | | 7.5 | 5.0 | 30.5 s | 35.9 s | — |
+| Light: Puffbomb + Skitter | | 7.4 | 4.1 | 35.5 s | 45.2 s | — |
+| Normal: Brute + Skitter + Puffbomb | | 12.6 | 7.7 | 20.7 s | 24.6 s | — |
+| Normal: Skitter + Puffbomb + Spitter | | 7.6 | 5.5 | 29.3 s | 33.4 s | — |
+| Normal: Sentinel + 2 Skitter | | 8.0 | 7.6 | 20.2 s | 24.3 s | — |
+| Heavy: Brute + Spitter + Skitter + Sentinel | | 13.7 | 9.7 | 16.2 s | 19.7 s | — |
+| The Stone Colossus | 26 base | 15.3 | 6.1 | 22.3 s | 30.3 s | ≈700 a hit, one attack (Soul Boss) [W] |
+| Stormcoil | 22 base | 16.0 | 4.9 | 29.4 s | 39.1 s | ≈700 a hit, one attack (Soul Boss) [W] |
+| The Brood Mother (and her adds) | 18 base | 5.7 | 10.3 | 13.2 s | 17.7 s | ≈700 a hit, one attack (Soul Boss) [W] |
 
 A camp never has more than two monsters on one Hunter at once (`Mob.MAX_ENGAGED`), so a 4-monster
 heavy camp hits about as hard as a 3-monster normal one.
 
-**Source column: — means the source publishes nothing on this (2026-11-11).** Where we looked:
+**Source column (2026-11-11).** — means the source publishes nothing on this. [W] is the wiki. The
+measured rows above are origin/main at 88b06b9e7. Where we looked:
 - `briefs/supervive-data`: the game-file pull covers Hunter attributes only, with no creature tables.
-- The wiki Creeps page (supervive.wiki.gg/wiki/Creeps): no damage, health or attack rate for any creep
-  or boss, and the page is marked outdated. It gives only the camp makeup (3 small creeps and 1 elite,
-  back each day) and that a stagger takes 3x damage.
+- The wiki: Creeps, Normal Camps, Biome Leaders, Soul Bosses and Major Monsters (supervive.wiki.gg).
+  None gives a creature's health, damage or attack rate. They give only the camp makeup (3 small creeps
+  and 1 elite, back each day) and that a stagger takes 3x damage. There is one damage number: the Soul
+  Boss's phase-3 laser, charged and fired four ways, deals "roughly around 700" (Soul Bosses page,
+  edited 26 Jul 2024).
+- Patch notes (wiki Patch Open Beta; Steam): loot and XP for creeps were retuned, but no damage change.
 - The footage in briefs: training-range kit footage against dummies (docs/CAMP_PARITY.md on
-  ext/camp-parity says the same).
+  ext/camp-parity says the same). The walkthroughs in docs/SUPERVIVE_DATA.md can't be fetched from the
+  workers (YouTube asks them to sign in).
 
-So none of these numbers can be matched, and **no monster or boss number was changed**.
+The source's base Hunter health is 1,290 for most Hunters, plus 77.4 a level (6%)
+(`briefs/supervive-data/supervive_physics.md`). Ours is 145 for a Medium plus 6% a level, so the
+curve matches, and so does the level-5 gain over level 1 (+24%). Source numbers run about 9x ours
+(1,290 / 145), so read source damage as a share of base health.
 
-What the source does settle is Hunter health growth. Its base health is 1,290 for most Hunters, plus
-77.4 a level (6%) (`briefs/supervive-data/supervive_physics.md`). Ours is 145 for a Medium plus 6% a
-level, so the curve matches, and so does the level-5 gain over level 1 (+24%). Source numbers run
-about 9x ours (1,290 / 145). Read any creature damage that turns up later at that scale. When a camp
-capture or a data pull gives creature damage, fill the Source column, change `Data.MOBS` to match,
+The one boss number, at that scale: 700 / 1,290 is 54% of a Hunter's health in one telegraphed hit, or
+about 79 for our 145. Our heaviest boss hit is the Colossus slam: 26 base (18%), up to 47 (32%) when it
+is enraged in its last third (`Boss.dmg`: x1.5 enraged, +10% a phase). The source attack is a different
+move on a different boss, a jumpable four-way laser after a crystal phase, and none of our bosses has
+one. Rescaling an unrelated attack to fit it would be a design call, not parity. **So no monster or
+boss number was changed.** When a camp capture or a pull of the creature curve tables (the same install
+route as the Hunter pull) gives creature damage, fill the Source column, change `Data.MOBS` to match,
 and rerun `--mob-damage-check`.

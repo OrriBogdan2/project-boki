@@ -3,7 +3,7 @@ extends RefCounted
 ## Medium Hunter (classic kit, no Boki, full starting armour) at level 1 and level 5 stands still,
 ## first alone with each of the 7 monsters, then in each fixed camp mix Match spawns, then in each
 ## lair with its boss awake. Every row prints the seconds to fall, the damage per hit landed (after
-## armour) and the damage per second, which is the table in docs/EXPEDITION_SPEC.md section 12.
+## armour) and the damage per second, which is the table in docs/EXPEDITION_SPEC.md section 13.
 ## Health is put back after each hit and the loss is added up instead, so the Hunter never actually
 ## goes down and every row starts the same. Monsters are the base kind (tier 0, no region, rarity or
 ## mutation). Never touches the save.
