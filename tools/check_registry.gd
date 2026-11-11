@@ -158,6 +158,7 @@ const CHECKS := {
 	"--friendly-fire-check": ["res://tools/friendly_fire_check.gd", "friendly_fire_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
+	"--mob-tell-check": ["res://tools/mob_tell_check.gd", "mob_tell_check", null],      # monster attack tells
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 	"--bot-dodge-check": ["res://tools/bot_dodge_check.gd", "bot_dodge_check", null],
 	"--pin-bjorn-shots": ["res://tools/pin_bjorn_shots.gd", "pin_bjorn_shots", null],
