@@ -259,3 +259,25 @@ func _wave() -> void:
 		P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
+	_wave_way(Vector2(-1, 0))
+	_wave_way(Vector2(0, 1))
+
+## Owner 11-11: the ult pushed him the wrong way. Cast while running another way (back, or sideways), he surfs the
+## wave's own line toward the cursor, the whole 14 m, and stays on it.
+func _wave_way(run: Vector2) -> void:
+	_reset(6.0)
+	P.lvl = 6
+	K.cd["x"] = 0.0
+	P.inp["move"] = run
+	var p0 := P.pos
+	var aim := P.aim_dir()
+	K.cast_ult()
+	step(m, 1.1, func(): P.inp["move"] = run)
+	P.inp["move"] = Vector2.ZERO
+	var moved := P.pos - p0
+	var along := Vector2(moved.x, moved.z).dot(aim)
+	var off := absf(Vector2(moved.x, moved.z).cross(aim))
+	ok("Tidal Wave: running %s, he surfs toward the cursor" % str(run), along > 10.0 and off < 1.0,
+		"along %.2f off-line %.2f" % [along, off])
+	ok("Tidal Wave: he rides with the crest (within 2 m of it at the end)",
+		absf(along - float(K.x_def()["range"])) < 2.0, "along %.2f" % along)

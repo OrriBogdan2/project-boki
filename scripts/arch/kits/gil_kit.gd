@@ -326,7 +326,8 @@ func _start_wave() -> bool:
 		"slow": float(xd["slow"]), "slow_k": float(xd["slow_k"]),
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
-	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
+	# along the wave's own line: a bare dash steers by the move keys, so a moving cast surfed off the wave
+	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t, "dir": dir}], h, ctx)
 	m.sfx("whoosh", h.pos, 0.0, 0.6)
 	return true
 
