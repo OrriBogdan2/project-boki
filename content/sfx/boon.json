@@ -1,0 +1,8 @@
+{
+ "group": "boon",
+ "name": "Boon of the Hunt",
+ "script": "tools/gen_sfx_boon.py",
+ "sounds": {"boon_gain": "cast", "boon_lost": "ui", "boon_tick": "ui"},
+ "signature": [],
+ "reach": {"boon_gain": 30, "boon_tick": 30}
+}

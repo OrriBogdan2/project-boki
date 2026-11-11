@@ -60,3 +60,5 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **`scan_fail`**: a scan cancelled by a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
 - **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m.
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
+## Boon of the Hunt cues (`tools/gen_sfx_boon.py`, set `content/sfx/boon.json`)
+Played by `HuntBoon` (`scripts/match/hunt_boon.gd`), for the local player's squad only: `boon_gain` (cast level, a bright rising pair) at each squadmate who gets or refreshes the Boon, positional with a 30 m reach, run from `KitStatus` "bon" so every game plays it from the same `kst` event; `boon_lost` (ui level, a soft falling pair, flat) when a rival's knock steals your holder's Boon; `boon_tick` (ui level, -6 dB, 30 m) 5 s before it ends, skipped when a refresh moved the end. A rival squad's Boon is silent.

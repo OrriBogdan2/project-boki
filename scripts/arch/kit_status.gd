@@ -135,6 +135,7 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 		"bon":
 			m.fx.word(e.pos + Vector3(0, 2.6, 0), "BOON OF THE HUNT", HuntBoon.COL, false)
 			m.fx.ring(e.pos, 1.4, HuntBoon.COL, 0.35)
+			if e is Hunter: HuntBoon.cue_gain(e, secs)
 
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:

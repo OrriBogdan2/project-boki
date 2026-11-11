@@ -156,8 +156,44 @@ func _boon(m: Match) -> void:
 	ok(HuntBoon.left(near) == 0.0 and absf(HuntBoon.left(P) - 50.0) < 0.01,
 		"boon: a monster's knock ends it and passes it to nobody")
 	m.revive_hunter(near, near)
+	_boon_sfx(m, P, near, rival)
 	_boon_net(m, P, near, rival)
 	for h in m.hunters: h.set_meta("bon_until", 0.0)
+
+## The boon's own sounds (content/sfx/boon.json): the local squad hears the gain cue, a rival's boon is silent,
+## the squad robbed by a steal hears the sting, and the tick comes 5 s before the end (not after a refresh).
+func _boon_sfx(m: Match, P: Hunter, near: Hunter, rival: Hunter) -> void:
+	for h in m.hunters: h.set_meta("bon_until", 0.0)
+	Sfx.listener = P.pos
+	Sfx.last_played.clear()
+	KitStatus.apply(rival, "bon", 120.0)
+	ok(not Sfx.last_played.has("boon_gain"), "boon sfx: a rival squad getting the boon is not heard")
+	Sfx.last_played.clear()
+	KitStatus.apply(near, "bon", 120.0)
+	ok(Sfx.last_played.has("boon_gain"), "boon sfx: a squadmate getting the boon plays the gain cue")
+	for h in m.hunters: h.set_meta("bon_until", 0.0)
+	KitStatus.apply(rival, "bon", 60.0)
+	Sfx.last_played.clear()
+	m.knock(rival, P, {})
+	ok(not Sfx.last_played.has("boon_lost"), "boon sfx: the stealing squad does not hear the sting")
+	m.revive_hunter(rival, rival)
+	for h in m.hunters: h.set_meta("bon_until", 0.0)
+	KitStatus.apply(P, "bon", 60.0)
+	Sfx.last_played.clear()
+	m.knock(P, rival, {})
+	ok(Sfx.last_played.has("boon_lost"), "boon sfx: the robbed squad hears the sting when a rival steals it")
+	m.revive_hunter(P, P)
+	for h in m.hunters: h.set_meta("bon_until", 0.0)
+	KitStatus.apply(near, "bon", 20.0)
+	m.time += 10.0
+	KitStatus.apply(near, "bon", 20.0)
+	Sfx.last_played.clear()
+	m.time += 5.0
+	m._run_later()
+	ok(not Sfx.last_played.has("boon_tick"), "boon sfx: a refresh moves the tick (the old one stays quiet)")
+	m.time += 10.0
+	m._run_later()
+	ok(Sfx.last_played.has("boon_tick"), "boon sfx: a quiet tick with 5 s left")
 
 ## The boon online, on one game: what it sends for its own Hunters, and what it does with the events.
 func _boon_net(m: Match, P: Hunter, near: Hunter, rival: Hunter) -> void:
