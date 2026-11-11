@@ -3,6 +3,8 @@ extends RefCounted
 ## What the farm's interact prompt (InteractPrompt) shows for Home's target `it`: a short verb, what it
 ## works on, and a detail line. A line that only informs (you can't use it yet) has no verb.
 
+const CARE_LINE_M := 2.4      # m above a Boki's feet where its care line sits (over its want bubble)
+
 static func item(h: Node, it: Dictionary) -> Dictionary:
 	if not h.visit.is_empty():
 		return _visiting(h, it)
@@ -19,7 +21,7 @@ static func item(h: Node, it: Dictionary) -> Dictionary:
 			var nm: String = Data.BUILDINGS[it["b"]]["name"]
 			return _building(it["b"], nm) if h.lots[it["b"]]["built"] else {"verb": "Build", "who": nm}
 		"bridge": return {"verb": "Build", "who": "Bridge", "note": "to %s" % Data.ISLES[it["isle"]]["name"]}
-		"kin": return KinWants.prompt(it["k"]["rec"], h.POND_EDGE.x > -100.0)
+		"kin": return care(h, it["k"])
 		"egg": return {"verb": "Hatch" if h._egg_ready() else "Warm", "who": h._egg_label()}
 		"yard": return {"verb": "Train", "who": "Partner"}
 		"race": return h.race.prompt()
@@ -34,6 +36,20 @@ static func item(h: Node, it: Dictionary) -> Dictionary:
 			return {"verb": "Assign", "who": HomeLayout.CATALOG[it["id"]]["name"], "note": "a Boki works here"}
 		"wild": return h.hg.label(it)
 	return {}
+
+## The care line over a Boki you stand next to: pet (or what it needs soothing with), feed, play and
+## pick up, each with its key; what can't be done now is greyed. The interact key does the one lit.
+static func care(h: Node, k: Dictionary) -> Dictionary:
+	var rec: Dictionary = k["rec"]
+	var pond: bool = h.POND_EDGE.x > -100.0
+	var act := KinWants.action(rec, pond)
+	var soothes := act not in ["feed", "lift"]
+	var hungry_empty := Care.want(rec) == "food" and KinWants.best_food(rec) == ""
+	return {"more": [
+		["interact", KinWants.prompt(rec, pond)["verb"] if soothes else "Pet", soothes],
+		["interact", "Feed (no food)" if hungry_empty else "Feed", act == "feed"],
+		["play", "Play", not k.has("fetch")],
+		["interact", "Pick up", act == "lift" and h.carry.can_lift(k)]]}
 
 static func _visiting(h: Node, it: Dictionary) -> Dictionary:
 	match it["kind"]:

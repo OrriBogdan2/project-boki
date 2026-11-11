@@ -2045,8 +2045,10 @@ func _find_interact() -> void:
 	if panel_open != "" or best.is_empty() or building_now or chat_open or not train.is_empty() or (hb and hb.active):
 		prompt.visible = false
 		return
-	var more: Array = [["play", "Play fetch"], ["talk", "Talk"], ["details", "Details"]] if best["kind"] == "kin" and visit.is_empty() else []
-	prompt.show_for(HomePrompt.item(self, best).merged({"more": more}))
+	prompt.show_for(HomePrompt.item(self, best))
+	if best["kind"] == "kin" and visit.is_empty():
+		prompt.place_over(cam, (best["k"]["node"] as Node3D).global_position + Vector3.UP * HomePrompt.CARE_LINE_M)
+		return
 	var vp := get_viewport().get_visible_rect().size
 	prompt.place(vp, vp.y - 60.0)
 	_keep_off_hub(prompt)

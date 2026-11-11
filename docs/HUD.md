@@ -86,6 +86,7 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 - Interact prompt (InteractPrompt, `scripts/ui/interact_prompt.gd`): one widget for the match, farm, town and indoors: the live key cap (`Settings.key_cap`), a short verb, the target, an optional detail line, and a ring on the cap that fills for hold actions. Only the picked target (InteractPick) is ever shown. Check: `--interact-prompt-check`.
+- Care line (`HomePrompt.care`): next to a Boki on the farm the same widget sits over it as one line of the four care actions, pet (or what its want needs), feed, play and pick up, each with its live key; the one the interact key would do now is lit, the rest greyed (Feed says "no food" when it is hungry and you have none). Check: `--care-prompt-check`.
 
 ## Two-step abilities (RecastCue)
 
