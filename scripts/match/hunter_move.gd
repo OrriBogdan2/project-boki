@@ -29,6 +29,7 @@ static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
 static var abyss_cam_zoom: float = _phys["abyss_cam_zoom"]
 static var abyss_cam_ease: float = _phys["abyss_cam_ease"]
+static var hunter_push: float = _phys["hunter_push"]
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
