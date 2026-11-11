@@ -26,6 +26,7 @@ var plan: Array = []           # the current Hunter's steps (steps())
 var step := 0
 var presses := 0               # of the current step
 var held_t := 0.0
+var rig_t := 0.0               # s until the tech step's dummy is set up again
 var done_t := -1.0             # >= 0 once the last step is done: counting the closing line
 var _panel: PanelContainer
 var _key: Label
@@ -43,9 +44,11 @@ static func attach(p: Practice) -> void:
 	k.m = p.m
 	p.add_child(k)
 	k.build_ui()
+	CombatBus.tech.connect(k._on_tech)
 	k.start(p.m.player.arch)
 
-## Every slot's step for a Hunter: {slot, action, key, line, how ("", "again" or "hold")}.
+## Every slot's step for a Hunter, then its signature tech (SignatureDrill): {slot, action, key, line, how ("", "again",
+## "hold" or "tech")}.
 static func steps(hunter_id: String) -> Array:
 	var out := []
 	if not Arch.exists(hunter_id):
@@ -54,6 +57,9 @@ static func steps(hunter_id: String) -> Array:
 		var action: String = ACTIONS[slot]
 		out.append({"slot": slot, "action": action, "key": Settings.key_cap(action),
 				"line": line(hunter_id, slot), "how": how(hunter_id, slot)})
+	var tech := SignatureDrill.step(hunter_id)
+	if not tech.is_empty():
+		out.append(tech)
 	return out
 
 ## The slot's line: the Hunter's own text for the slice Hunters, else a generic one.
@@ -85,9 +91,12 @@ static func callout(st: Dictionary, pressed: int) -> String:
 			return "%s AGAIN" % st["key"] if pressed > 0 else "Press %s, then %s AGAIN" % [st["key"], st["key"]]
 		"hold":
 			return "HOLD %s, not just a tap" % st["key"]
+		"tech":
+			return "The trick: %s" % st["tech"]
 	return ""
 
 func start(hunter_id: String) -> void:
+	SignatureDrill.unrig(m)
 	arch = hunter_id
 	plan = steps(hunter_id)
 	step = 0
@@ -116,11 +125,22 @@ func on_held(action: String, dt: float) -> void:
 	if held_t >= HOLD_S:
 		_next()
 
+## The kit reports the player's own tech (CombatBus.tech); the tech step is done by it and by nothing else.
+func _on_tech(hunter: Node, id: String) -> void:
+	if hunter == m.player:
+		tech_done(id)
+
+func tech_done(id: String) -> void:
+	if done_t < 0.0 and step < plan.size() and plan[step]["how"] == "tech" and plan[step]["id"] == id:
+		_next()
+
 func _next() -> void:
 	step += 1
 	presses = 0
 	held_t = 0.0
+	rig_t = 0.0
 	if step >= plan.size():
+		SignatureDrill.unrig(m)
 		done_t = 0.0
 		finish()
 	_show()
@@ -131,6 +151,7 @@ func finish() -> void:
 	Save.save_game()
 
 func _skip() -> void:
+	SignatureDrill.unrig(m)
 	finish()
 	queue_free()
 
@@ -149,8 +170,15 @@ func _process(dt: float) -> void:
 		return
 	if m.player.arch != arch:
 		start(m.player.arch)      # a swap in the hero picker: the drill follows the Hunter
-	elif step < plan.size() and not m.paused and Input.is_action_pressed(plan[step]["action"]):
-		on_held(plan[step]["action"], dt)
+	elif step < plan.size() and not m.paused:
+		var st: Dictionary = plan[step]
+		if st["how"] == "tech":
+			rig_t -= dt
+			if rig_t <= 0.0:
+				rig_t = float(Content.rules("signature_drills")["rearm_s"])
+				SignatureDrill.rig(m, arch)
+		elif Input.is_action_pressed(st["action"]):
+			on_held(st["action"], dt)
 
 func build_ui() -> void:
 	var layer := CanvasLayer.new()
