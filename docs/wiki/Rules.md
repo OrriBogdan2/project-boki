@@ -1434,6 +1434,26 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## shops (`content/rules/shops.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | In-match shops (scripts/match/shops.gd, shop_stock.gd; the stock plan is docs/SOURCE_UTILITIES.md section 3). Vendors stand at the spots a hand-made map lists under islands[].shops ([x, z, theme]). Every vendor sells its theme's whole `sells` list, the same in every match: tonic and armor_kit everywhere, everything else in exactly one shop. The gems are the ones a hunter picked up this run, so spending means less to extract. Entries: a utility item id (content/utility), repair (armor back to full), armor_up (the next armor tier), backpack (the next pack tier, priced by Equal backpack_shop), boots:<gear id> (worn at boots_rar), perk:<perk id> (Data.PERKS). left = how many of one entry a vendor has (the host keeps count online). Never sold: keys, shards, the Revive Ember and anything found only in matches; the never list is what --shops-check scans for. Prices are run gems: utility items use their content price times util_k. |
+| use_radius | 2.8 |
+| util_k | 1 |
+| repair_price | 20 |
+| armor_tier_price | [0, 45, 90, 150, 240] |
+| boots_price | [30, 50, 80, 130, 200] |
+| boots_rar | 2 |
+| perk_price | {"weapon": 70, "kit": 55, "flat": 45} |
+| perk_stack_extra | 15 |
+| left | {"util": 3, "repair": 3, "armor_up": 2, "backpack": 2, "boots": 1, "perk": 2} |
+| never | ["rift_key", "chest_key", "crown_shard", "sky_pearl", "kin_idol", "revive_ember"] |
+| bot | {"reserve": 25, "range": 48.0, "wants": ["tonic", "armor_kit", "medkit", "shield_cell"], "repair_below": 0.5, "belt_below": 2} |
+| themes | {"armor": {"name": "Plate and Patch", "tag": "Armor and repairs", "icon": "anvil", "col": "dfe9f7", "sells": ["tonic", "armor_kit", "armor_up", "repair", "shield_cell", "medkit", "deep_draught", "hearth_lamp"]}, "move": {"name": "Swift Stall", "tag": "Boots and backpacks", "icon": "dash", "col": "8fe3c8", "sells": ["tonic", "armor_kit", "backpack", "boots:quickstep_boots", "jump_pad", "stim", "cloud_raft", "gust_fan", "twin_gate", "warp_seed", "lostway_scroll"]}, "gear": {"name": "Gadget Cart", "tag": "Siege and control tools", "icon": "satchel", "col": "ffd27a", "sells": ["tonic", "armor_kit", "smoke", "shatter_charge", "thorn_wall", "blight_flask", "skyfall_charge", "pilfer_pouch"]}, "perks": {"name": "Perk Peddler", "tag": "Weapon perks and scouting", "icon": "burst", "col": "ff9a5a", "sells": ["tonic", "armor_kit", "perk:hotload", "perk:deepmag", "perk:brand_fire", "scanner", "lookout_lantern", "hawk_whistle", "omen_draught", "bounty_banner", "toss_satchel"]}} |
+
 ## show_ring (`content/rules/show_ring.json`)
 
 Show Ring, a judged show on a small stage near the Training post (briefs/design/GARDEN_MODERN.md 4.2 game 3, scripts/home/show_ring.gd). Only with farm_build.json base_mode on. Two rested Boki show: the one you back and a rival. Three rounds of up to 10 points each: Look (how it has been raised), Trick (three timed presses, the trick picked by its best stat) and Bond (it walks to you past a snack, a toy and the rival; you call as it passes each). Three judges post a taste for the week; each judge whose taste the Boki fits adds taste_bonus. Every score is worked out from the records and the presses only, so the same Boki and presses always score the same. Units: seconds, points, needs and trust 0-100, traits 0-1.
@@ -1555,7 +1575,6 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | lines | ["Play one full first match as Vex, from the drop to the exit.", "Try Kael, Lace and Cinder in the Arena.", "Leave a note on the rate card when you quit."] |
 
 ## tuning (`content/rules/tuning.json`)
-## shops (`content/rules/shops.json`)
 
 
 
@@ -1568,19 +1587,6 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | glide_carry | {"carry_drag": 3.0, "default": 12.0, "archer": 9.0} |
 | dash | {"jump_keep": 0.75} |
 | dash_speed | {"archer": 0.7} |
-| _doc | In-match shops (scripts/match/shops.gd, shop_stock.gd; the stock plan is docs/SOURCE_UTILITIES.md section 3). Vendors stand at the spots a hand-made map lists under islands[].shops ([x, z, theme]). Every vendor sells its theme's whole `sells` list, the same in every match: tonic and armor_kit everywhere, everything else in exactly one shop. The gems are the ones a hunter picked up this run, so spending means less to extract. Entries: a utility item id (content/utility), repair (armor back to full), armor_up (the next armor tier), backpack (the next pack tier, priced by Equal backpack_shop), boots:<gear id> (worn at boots_rar), perk:<perk id> (Data.PERKS). left = how many of one entry a vendor has (the host keeps count online). Never sold: keys, shards, the Revive Ember and anything found only in matches; the never list is what --shops-check scans for. Prices are run gems: utility items use their content price times util_k. |
-| use_radius | 2.8 |
-| util_k | 1 |
-| repair_price | 20 |
-| armor_tier_price | [0, 45, 90, 150, 240] |
-| boots_price | [30, 50, 80, 130, 200] |
-| boots_rar | 2 |
-| perk_price | {"weapon": 70, "kit": 55, "flat": 45} |
-| perk_stack_extra | 15 |
-| left | {"util": 3, "repair": 3, "armor_up": 2, "backpack": 2, "boots": 1, "perk": 2} |
-| never | ["rift_key", "chest_key", "crown_shard", "sky_pearl", "kin_idol", "revive_ember"] |
-| bot | {"reserve": 25, "range": 48.0, "wants": ["tonic", "armor_kit", "medkit", "shield_cell"], "repair_below": 0.5, "belt_below": 2} |
-| themes | {"armor": {"name": "Plate and Patch", "tag": "Armor and repairs", "icon": "anvil", "col": "dfe9f7", "sells": ["tonic", "armor_kit", "armor_up", "repair", "shield_cell", "medkit", "deep_draught", "hearth_lamp"]}, "move": {"name": "Swift Stall", "tag": "Boots and backpacks", "icon": "dash", "col": "8fe3c8", "sells": ["tonic", "armor_kit", "backpack", "boots:quickstep_boots", "jump_pad", "stim", "cloud_raft", "gust_fan", "twin_gate", "warp_seed", "lostway_scroll"]}, "gear": {"name": "Gadget Cart", "tag": "Siege and control tools", "icon": "satchel", "col": "ffd27a", "sells": ["tonic", "armor_kit", "smoke", "shatter_charge", "thorn_wall", "blight_flask", "skyfall_charge", "pilfer_pouch"]}, "perks": {"name": "Perk Peddler", "tag": "Weapon perks and scouting", "icon": "burst", "col": "ff9a5a", "sells": ["tonic", "armor_kit", "perk:hotload", "perk:deepmag", "perk:brand_fire", "scanner", "lookout_lantern", "hawk_whistle", "omen_draught", "bounty_banner", "toss_satchel"]}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 

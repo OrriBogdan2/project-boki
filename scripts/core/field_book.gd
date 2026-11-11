@@ -38,7 +38,8 @@ static func entries() -> Array:
 	var ids: Array = Data.KIN.keys().filter(func(s): return entry_key(s) == s)
 	var legend := func(k): return Legendary.is_legendary(k) or DexView.tier_of(k) != ""
 	var legends: Array = ids.filter(legend)
-	legends.sort_custom(func(a, b): return DexView.TIERS.find(DexView.tier_of(a)) < DexView.TIERS.find(DexView.tier_of(b)))
+	var rank := func(k): return DexView.TIERS.find(DexView.tier_of(k))
+	legends.sort_custom(func(a, b): return rank.call(a) < rank.call(b))
 	return ids.filter(func(k): return not legend.call(k)) + legends
 
 ## One species on its own (caught ones count as seen).

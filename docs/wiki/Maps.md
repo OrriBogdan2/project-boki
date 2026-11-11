@@ -55,23 +55,11 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
 | Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
 | Stormbreak | shrine | Storm | contested | 28 |  |
-| Thornwood | nest | Bloom | contested | 71 | Bramble Rise |
+| Thornwood | nest | Bloom | contested | 69 | Bramble Rise |
 | Larkhollow | landing | Meadow | quiet | 39 | The Hollow |
 | Highwatch | landing | Frost | quiet | 6 | The Lookout |
 | Duskmoor | landing | Storm | quiet | 17 | Moor Chapel |
 | Saltmere | landing | Bloom | quiet | 35 | Salt River |
-| The Crown | heart | Gloom | dangerous | 27 |  |
-| Stormcrown Gaol | camp | Storm | dangerous | 4 |  |
-| Ashen Gaol | camp | Ember | dangerous | 6 |  |
-| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 11 |  |
-| Thornwood | nest | Bloom | contested | 28 |  |
-| Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
-| Highwatch | landing | Frost | quiet | 3 |  |
-| Duskmoor | landing | Storm | quiet | 11 |  |
-| Saltmere | landing | Bloom | quiet | 16 |  |
-| Shardfall | perch | Gloom | dangerous | 0 |  |
 
 ### Boss lairs
 
@@ -93,8 +81,6 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Vaults | 3 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
 | Item caches | 7 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol, Frostgate, Stormbreak, Thornwood, Cinder Steps |
 | Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
-
-**Legendary Boki:** a 20% chance per match that one of Cairnback, Hivara turns up, partway in, at a quiet Rare Boki spot.
 
 
 ## Skyreach
