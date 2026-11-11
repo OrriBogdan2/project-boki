@@ -26,6 +26,7 @@ func run(main: Node) -> void:
 	_toggle()
 	_squad_and_launch()
 	_chat_and_voice()
+	await _first_lobby(main)
 	await _screen(main)
 	print("PREMATCH DONE, failures: %d" % bad)
 	main.get_tree().quit()
@@ -57,6 +58,56 @@ func _pick_lock() -> void:
 	var before := pm.pick
 	var swapped := pm.choose(String(open[0]) if String(open[0]) != before else String(open[open.size() - 1]))
 	ok(not swapped and pm.pick == before, "after the lock a pick changes nothing")
+
+## The first-lobby teach (once per save): no pick, a pick, then a second lobby with none.
+func _first_lobby(main: Node) -> void:
+	Save.d["tutorial"].erase("first_lobby")
+	var o := EXPEDITION.duplicate()
+	Prematch.deal_mates(o)
+	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
+	view.setup(o)
+	main.add_child(view)
+	await main.get_tree().process_frame
+	var dflt := Arch.label(Arch.of_save())
+	var want := "Pick a Hunter. At 0:00 we lock in %s for you." % dflt
+	var got: String = view.teach_label.text
+	ok(view.teach_label.visible and got == want, "first lobby, no pick: '%s' (%s)" % [want, got])
+	ok(view.teach_label.horizontal_alignment == HORIZONTAL_ALIGNMENT_CENTER, "the line is centred")
+	ok(bool(Save.d["tutorial"].get("first_lobby", false)), "showing it marks the save: once per save")
+	var pm: Prematch = view.pm
+	view.pm.tick(Prematch.DURATION)
+	var kept: bool = pm.pick == pm.default_pick and pm.pick == Arch.of_save()
+	ok(kept, "no pick: the last/default Hunter locks in (%s)" % pm.pick)
+	view.set_process(false)
+	view.queue_free()
+	await main.get_tree().process_frame
+	# a pick in the first lobby
+	var v2: Control = load("res://scripts/ui/prematch_view.gd").new()
+	var o2 := EXPEDITION.duplicate()
+	o2["first_lobby"] = true
+	v2.setup(o2)
+	main.add_child(v2)
+	await main.get_tree().process_frame
+	var open := Arch.ids().filter(func(a): return ClassUnlock.is_open(a) and a != v2.pm.pick)
+	var other := String(open[0])
+	v2._choose(other)
+	var locked_line := "Locked in. Your squad sees your pick."
+	ok(v2.teach_label.text == locked_line, "after the pick: '%s' (%s)" % [locked_line, v2.teach_label.text])
+	ok(v2.pm.pick == other and v2.pm.default_pick != other, "the pick is yours, the default is unchanged")
+	v2.set_process(false)
+	v2.queue_free()
+	await main.get_tree().process_frame
+	# the second lobby of the same save
+	ok(not Prematch.first_lobby(), "second lobby: the save has seen it")
+	var v3: Control = load("res://scripts/ui/prematch_view.gd").new()
+	v3.setup(EXPEDITION.duplicate())
+	main.add_child(v3)
+	await main.get_tree().process_frame
+	ok(not v3.teach_label.visible and v3.teach_label.text == "", "second lobby: no line")
+	v3._choose(other)
+	ok(not v3.teach_label.visible, "second lobby: still no line after a pick")
+	v3.set_process(false)
+	v3.queue_free()
 
 func _toggle() -> void:
 	var was: Variant = Settings.v.get("lobby_enabled")

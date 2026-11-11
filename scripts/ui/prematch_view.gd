@@ -6,6 +6,7 @@ var pm: Prematch
 var voice := VoiceChat.new()
 var timer_label: Label
 var title_label: Label
+var teach_label: Label           # first lobby of a save: what the countdown does, then "Locked in."
 var grid_box: VBoxContainer      # holds the HunterPicker grid, rebuilt on a pick
 var squad_box: HBoxContainer
 var chat_hint: Label
@@ -48,6 +49,12 @@ func _ready() -> void:
 	strip.add_child(UI.section("Squad"))
 	squad_box = UI.hbox(10)
 	strip.add_child(squad_box)
+	teach_label = UI.label("", 22, UI.GOLD)
+	teach_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	root.add_child(teach_label)
+	if pm.first:
+		Prematch.mark_first_seen()
+	_fill_teach()
 	var sc := ScrollContainer.new()
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -107,6 +114,7 @@ func _process(delta: float) -> void:
 	_tick_label()
 	if pm.locked and not was:
 		title_label.text = "Picks are locked. Loading in..."
+		_fill_teach()
 		_fill_hunters()
 		chat_in.release_focus()
 	if go:
@@ -139,8 +147,14 @@ func _fill_hunters() -> void:
 	var note := "locked in" if pm.locked else ""
 	grid_box.add_child(HunterPicker.grid(pm.pick, _choose, COLUMNS, CARD_W, PORTRAIT_PX, note))
 
+func _fill_teach() -> void:
+	var line := pm.teach_line()
+	teach_label.text = line
+	teach_label.visible = line != ""
+
 func _choose(ak: String) -> void:
 	if pm.choose(ak):
+		_fill_teach()
 		_fill_hunters()
 		_fill_squad()
 		_announce_pick()

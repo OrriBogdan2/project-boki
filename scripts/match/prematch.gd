@@ -17,6 +17,9 @@ var opts: Dictionary
 var left := DURATION
 var locked := false
 var pick := ""                  # your Hunter (an Arch id)
+var default_pick := ""          # the Hunter that locks in if you never pick (your last, else the default)
+var picked := false             # you chose a Hunter yourself in this lobby
+var first := false              # this save's first lobby: the one-line teach shows (once per save)
 var peer_picks := {}            # online: peer id -> the Hunter they picked
 var _hold := 0.0
 var _launched := false
@@ -24,6 +27,28 @@ var _launched := false
 func _init(o: Dictionary) -> void:
 	opts = o
 	pick = Arch.of_save()
+	default_pick = pick
+	first = bool(opts.get("first_lobby", first_lobby()))
+
+## Whether this save has not yet seen a lobby (Save.d.tutorial.first_lobby, absent on old saves = once).
+static func first_lobby() -> bool:
+	return not bool(Save.d.get("tutorial", {}).get("first_lobby", false))
+
+## Marks the teach shown: the first lobby only teaches once per save.
+static func mark_first_seen() -> void:
+	if not Save.d.has("tutorial"):
+		Save.d["tutorial"] = {}
+	Save.d["tutorial"]["first_lobby"] = true
+	Save.save_game()
+
+## The first-lobby line: before a pick it says what the countdown does, after it says it is kept.
+## "" when this is not the save's first lobby, or picks are locked.
+func teach_line() -> String:
+	if not first or locked:
+		return ""
+	if picked:
+		return "Locked in. Your squad sees your pick."
+	return "Pick a Hunter. At 0:00 we lock in %s for you." % Arch.label(default_pick)
 
 ## A real expedition (offline or online), not training, the tutorial, the arena or a demo.
 static func expedition(o: Dictionary) -> bool:
@@ -89,6 +114,7 @@ func choose(ak: String) -> bool:
 	if locked or not ClassUnlock.is_open(ak):
 		return false
 	pick = ak
+	picked = true
 	return true
 
 ## Saves the locked pick and returns the options the match starts with: your Hunter, and online every
