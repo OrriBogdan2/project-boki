@@ -36,6 +36,7 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | Shift while charging [wiki] | a short dash without the spin, ending the charge, on a reduced cooldown | short dash for half a charge | short dash on a full charge (owner #51 keeps the charge, so the reduction has no reason left; the game data doesn't list one) |
 | E, R, passive | see the per-slot table | matched in the earlier passes | unchanged |
 | Camera | - | a directional camera nudge on the swing | removed (item 50: no self-caused camera motion) |
+| Allies | Brightshield blocks all damage from the front, so it covers allies behind it; Regen Field heals allies in its zone and starts Wisps resurrecting [data] | built earlier | the raised aegis stops a foe's shot at a teammate behind it; Mending Ground heals teammates and restarts downed ones; no slot hurts, stuns, roots or slows a teammate. Asserted (`bjorn ally: ...`, `bjorn small: ...`) |
 
 ## Footage gaps, Nov 9 re-check
 The 10 ranked rows of `briefs/hero-ref/bjorn.md` section 4, checked on main d255acbee (read in the code, not from old notes). Nothing built: every open piece is in `bulwark_kit.gd`, `bjorn_fx.gd`, `bulwark.json` or `archer_bulwark_combo_check.gd`, which unmerged branches for Albert change (`ext/parity-bulwark-guardcut`, `ext/albert-parity-verify`, `ext/albert-size-boop`, `ext/mossy-shield-bash`, `ext/mossy-dash-refund`, `ext/vfx-bulwark`).

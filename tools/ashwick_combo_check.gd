@@ -9,6 +9,7 @@ extends RefCounted
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
 ## squash on the hit frame, the jet lift-off, the run cadence).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
 var main: Node
@@ -29,12 +30,18 @@ func run(main_node: Node) -> void:
 	await _lance_combos()
 	await _growth()
 	_timing()
+	await _ally()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally() -> void:
+	var bad: Array = await ALLY.sweep(main, "ashwick")
+	ok("ashwick ally: no slot hurts, stuns, roots or slows a teammate", bad.is_empty(), "; ".join(bad))
 
 ## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
 ## keeps burning through a jump.

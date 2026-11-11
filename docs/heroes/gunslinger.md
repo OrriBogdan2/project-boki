@@ -115,6 +115,7 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 | lmb | none: 0.53 at a 0.12 cadence re-plays from its kick each round |
 | R | cast | the rifle raised straight up and fired [footage] | the same, and a screen shake on your own camera | no screen shake (owner rule 50) |
 | Shift | | a front-loaded 0.45s skid, firing through it [footage] | already the source's (kit data pass) | unchanged |
+| Allies | all | no ally effect in the data (beam, grenade, napalm and dash hit enemies) | no slot hurts, stuns, roots or slows a teammate | the same; asserted (`gunslinger ally: ...`) |
 
 ## Per-slot table
 | Slot | Input | Aim | What it does | Telegraph / reticle | Move (KMovesVV) | Sound |

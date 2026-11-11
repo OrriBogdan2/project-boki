@@ -8,6 +8,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
 	await _ranks()
+	await _ally("dolm")
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
