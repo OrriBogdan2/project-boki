@@ -345,7 +345,7 @@ const MOVES := {
 		[0.55, {}]]},
 	# Rink Wall (footage: both hands pushed forward): the 0.2 s tell, a deep crouch with both palms drawn back
 	# to the hips and the sparkle at her feet; then both palms shoved out low and wide along the ground as the
-	# ice erupts ahead (0.27), the body driving after them, held while it starts to slide, then a settle
+	# ice erupts ahead (0.2, e.tell), the body driving after them, held while it starts to slide, then a settle
 	"tm_wall": {"keys": [
 		[0.0, {}],
 		[
@@ -357,17 +357,11 @@ const MOVES := {
 		[
 				0.2,
 				{
-					"p": -0.15, "lift": -0.17, "sq": 0.46, "fl": Vector3(0.32, -0.46, 0.3), "hw": 1.0,
-					"fr": Vector3(-0.32, -0.46, 0.3), "rw": 1.0, "wf": 1.0, "lw": 1.0,
-					"legs": [1.15, -1.75, 1.05, -1.65]}],
-		[
-				0.27,
-				{
 					"p": -0.5, "lift": -0.08, "sq": -0.2, "fl": Vector3(0.32, -0.3, -0.68), "hw": 1.0,
 					"fr": Vector3(-0.32, -0.3, -0.68), "rw": 1.0, "wf": 1.0, "lw": 1.0,
 					"legs": [1.05, -1.25, -0.6, -0.2]}],
 		[
-				0.42,
+				0.35,
 				{
 					"p": -0.4, "lift": -0.06, "sq": -0.05, "fl": Vector3(0.34, -0.28, -0.6), "hw": 0.9,
 					"fr": Vector3(-0.34, -0.28, -0.6), "rw": 0.9, "wf": 0.9, "lw": 0.9,
@@ -477,14 +471,15 @@ const MOVES := {
 		[0.24, {"p": -0.15, "sq": 0.12, "fl": Vector3(0.1, -0.03, -0.12), "hw": 1.0, "wf": 1.0}],
 		[0.45, {}]]},
 	# ================================================================ ultimates on X (10 fps beats)
-	# cast (f25): the hand pulled back low, then thrust high and out as the plus bursts on the ally,
+	# cast (f25): the hand pulled back low, then thrust high and out as the plus bursts on the ally (ring
+	# by f28, 0.3 s; 0.33 s = the call clip, so the channel takes the body on the clip's last frame),
 	# an overshoot, then into the channel pose
 	"mm_call": {"keys": [
 		[0.0, {"y": 0.2, "p": -0.08, "fl": Vector3(0.1, 0.32, -0.5), "hw": 1.0}],
 		[0.05, {"y": -0.2, "p": 0.15, "sq": 0.18, "fl": Vector3(0.05, -0.15, 0.25), "hw": 1.0}],
 		[0.1, {"y": 0.3, "p": -0.25, "sq": -0.22, "lift": 0.06, "fl": Vector3(0.1, 0.78, -0.3), "hw": 1.0}],
 		[0.2, {"y": 0.22, "p": -0.18, "sq": -0.08, "fl": Vector3(0.08, 0.7, -0.22), "hw": 1.0}],
-		[0.35, {"p": -0.06, "fl": Vector3(0.06, 0.62, -0.12), "hw": 1.0, "fr": Vector3(0.25, 0.0, -0.2), "rw": 0.7}]]},
+		[0.33, {"p": -0.06, "fl": Vector3(0.06, 0.62, -0.12), "hw": 1.0, "fr": Vector3(0.25, 0.0, -0.2), "rw": 0.7}]]},
 	# the channel (f26-f73): one hand held high over the tether, the other out for balance; the legs
 	# keep walking (no leg channel)
 	"mm_call_hold": {"hold": true, "keys": [

@@ -268,11 +268,11 @@ def clips():
     # the catch: he snatches the catch in and grins over it
     o.append(C("pullend", 0.36, [(0.0, r1), (0.08, dict(r2, G=(0.34, 0.42, 0.86), BE=be(-20, -30, FLAT), LP=(-0.30, 0.46, 0.80), jaw=0.9, lid=-0.3), "out"), (0.22, dict(r2, G=(0.36, 0.34, 0.80), hd=(0.04, 0, 0))), (0.36, END)]))
 
-    # E: the scrap fist: raised through the wind-up (0.38), slammed into the cone ahead, a long drag home
+    # E: the scrap fist: raised through the wind-up (0.38), slammed into the cone ahead, home by 0.8 (source settle)
     up = {"pel": (0.02, -0.06, -0.06), "prt": (-0.02, 0.26, 0), "tor": (-0.14, 0.34, 0.05), "hed": (-0.14, -0.40, 0.02), "LP": (-0.24, 0.10, 1.54), "Lh": (0.5, 0, 0), "fing": 1.0, "G": (0.46, -0.08, 0.84), "BE": be(-120, -6, FLAT), "brow": 1.0, "lid": -0.3, "jaw": 0.7, "FL": (-0.22, 0.28, A_Z), "FR": (0.22, -0.26, A_Z), "hd": (0.0, 0.0, 0.0)}
     up2 = dict(up, pel=(0.02, -0.09, -0.03), tor=(-0.24, 0.40, 0.06), LP=(-0.20, -0.02, 1.60), hd=(-0.10, 0, 0))
     hit = {"pel": (-0.04, 0.26, -0.27), "prt": (0.62, 0.0, 0.0), "tor": (0.52, -0.30, -0.06), "hed": (-0.86, 0.26, 0.08), "LP": (-0.14, 0.86, 0.21), "Lh": (0.0, 0, 0), "G": (0.50, -0.10, 0.92), "BE": be(-140, 0, FLAT), "FL": (-0.22, 0.44, A_Z), "FR": (0.26, -0.34, A_Z), "FRp": -0.5, "jaw": 1.0, "skirt": 0.5, "hd": (0.18, 0.0, 0.0)}
-    o.append(C("anchor", 1.0, [(0.0, END), (0.12, up), (0.30, up2), (0.38, hit, "out"), (0.48, dict(hit, pel=(-0.04, 0.24, -0.25), hd=(-0.06, 0, 0)), "out"), (0.75, dict(hit, pel=(0.0, 0.14, -0.18), prt=(0.36, 0, 0), tor=(0.38, 0, 0), LP=(-0.22, 0.64, 0.38), hd=(0.0, 0, 0), jaw=0.5)), (1.0, END)]))
+    o.append(C("anchor", 0.8, [(0.0, END), (0.12, up), (0.30, up2), (0.38, hit, "out"), (0.46, dict(hit, pel=(-0.04, 0.24, -0.25), hd=(-0.06, 0, 0)), "out"), (0.62, dict(hit, pel=(0.0, 0.14, -0.18), prt=(0.36, 0, 0), tor=(0.38, 0, 0), LP=(-0.22, 0.64, 0.38), hd=(0.0, 0, 0), jaw=0.5)), (0.8, END)]))
     # E in the air: the fist under him, legs flung up behind, held till the ground
     dv = {"pel": (0, 0.0, 0.10), "prt": (0.95, 0, 0), "tor": (0.32, 0, 0), "hed": (-0.95, 0, 0), "LP": (-0.10, 0.44, 0.30), "Lh": (0, 0, 0), "fing": 1.0, "G": (0.46, -0.02, 0.98), "BE": be(-150, 10, FLAT), "FL": (-0.14, -0.42, 0.50), "FR": (0.16, -0.52, 0.56), "FLp": 0.9, "FRp": 0.9, "brow": 1, "lid": -0.3, "jaw": 1.0, "hd": (-0.16, 0, 0)}
     o.append(C("dive", 0.3, [(0.0, END), (0.12, dv, "out"), (0.3, dict(dv, pel=(0.01, 0.0, 0.115)))]))
@@ -286,7 +286,7 @@ def clips():
     t1 = dict(t0, spin=2 * math.tau)
     t2 = dict(t0, spin=2.8 * math.tau)
     start = dict(END, hs=0.8, bs=2.0, bl=0.6, rel=0.5, pel=(0, 0, -0.12), tor=(0.5, 0, 0))
-    o.append(C("lunge", 0.38, [(0.0, start), (0.04, t0, "out"), (0.18, t1, "lin"), (0.30, t2, "out"), (0.38, dict(END, spin=3 * math.tau))]))
+    o.append(C("lunge", 0.44, [(0.0, start), (0.04, t0, "out"), (0.18, t1, "lin"), (0.30, t2, "out"), (0.38, dict(END, spin=3 * math.tau)), (0.44, dict(END, spin=3 * math.tau))]))
     # the pounce: the same ball in the air, a slower turn
     a0 = dict(t0, pel=(0, 0, 0.0))
     o.append(C("pounce", 0.38, [(0.0, start), (0.05, a0, "out"), (0.24, dict(a0, spin=1.5 * math.tau), "lin"), (0.38, dict(END, spin=2 * math.tau))]))
@@ -326,7 +326,21 @@ def clips():
     o.append(C("stun", 1.2, [(0.0, s1), (0.6, s2), (1.2, s1)]))
     fl = {"pel": (0, 0.1, -0.46), "prt": (0.95, 0.1, 0.1), "tor": (0.30, 0.2, 0.0), "hed": (-0.75, 0.3, 0.1), "LP": (-0.34, 0.52, 0.19), "G": (0.34, 0.30, 0.20), "BE": be(-20, -8, FLAT), "fing": 0.5, "FL": (-0.20, -0.14, 0.10), "FR": (0.22, -0.38, 0.10), "FLp": 0.8, "FRp": 0.9, "brow": -1, "lid": 0.6, "jaw": 0.6, "hd": (0.1, 0.05, 0.0)}
     o.append(C("downed", 2.4, [(0.0, fl), (1.2, dict(fl, LP=(-0.34, 0.58, 0.19), pel=(0, 0.12, -0.45), jaw=0.3)), (2.4, fl)]))
-    o.append(C("revive", 1.6, [(0.0, fl), (0.5, dict(fl, tor=(0.5, 0.1, 0.1), hed=(-0.3, 0, 0), lid=0.2, brow=0.6)), (1.1, dict(END, pel=(0, 0.02, -0.26), prt=(0.45, 0, 0), jaw=0.5)), (1.6, END)]))
+    # revive: on his knees beside the fallen, long arms over them, the scrap fist pumping their chest and the hook held clear; the grin stays, he is helping (and checking their pockets)
+    kn = {"pel": (0.0, 0.14, -0.36), "prt": (0.55, 0.05, 0.0), "tor": (0.34, 0.1, 0.0), "hed": (-0.62, 0.0, 0.0), "LP": (-0.2, 0.46, 0.32), "G": (0.42, 0.34, 0.45), "BE": be(-10, -40, FLAT), "fing": 0.8,
+          "FL": (-0.2, 0.28, A_Z), "FR": (0.2, -0.28, A_Z + 0.04), "FLy": 0.3, "FRy": -0.4, "FRp": 1.1, "brow": 0.5, "lid": 0.0, "jaw": 0.4, "hd": (0.0, 0.0, 0.0)}
+    pr = dict(kn, pel=(0.0, 0.16, -0.39), tor=(0.42, 0.1, 0.0), LP=(-0.2, 0.46, 0.22), hed=(-0.7, 0.0, 0.0), jaw=0.6)
+    o.append(C("revive", 1.2, [(0.0, kn), (0.2, pr, "in"), (0.4, kn, "out"), (0.6, kn), (0.8, pr, "in"), (1.0, kn, "out"), (1.2, kn)], loop=True))
+    # stomp (stomp_cycle 0.7 s, the foot lands at 0.7 of it): the hook flung back for balance, the scrap fist cocked high, one long leg up, and all of him comes down with it
+    sp0 = dict(READY, pel=(-0.03, 0.0, -0.12), prt=(0.25, 0.0, 0.0), tor=(0.3, 0.0, 0.0), G=(0.5, 0.15, 0.55), LP=(-0.46, 0.2, 0.62), FL=(-0.2, 0.1, A_Z), FR=(0.2, -0.1, A_Z), brow=-0.7, jaw=0.7, lid=-0.2)
+    sp1 = dict(sp0, pel=(-0.07, -0.03, -0.14), prt=(0.1, 0.0, 0.0), tor=(0.0, 0.0, 0.0), FR=(0.2, -0.05, A_Z + 0.12), FRp=-0.5, G=(0.56, -0.02, 0.7), LP=(-0.5, 0.12, 0.82))
+    sp2 = dict(sp1, pel=(-0.07, 0.0, -0.06), FR=(0.2, 0.16, A_Z + 0.34), FRp=-0.7, hed=(-0.6, 0.0, 0.0), G=(0.6, -0.1, 0.9), LP=(-0.52, 0.08, 1.0), jaw=0.9)
+    sp3 = dict(sp0, pel=(-0.03, 0.04, -0.27), prt=(0.7, 0.0, 0.0), tor=(0.4, 0.0, 0.0), FR=(0.2, 0.16, A_Z), FRp=0.0, hed=(-0.7, 0.0, 0.0), G=(0.48, 0.2, 0.5), LP=(-0.3, 0.42, 0.34), jaw=1.0, hd=(0.2, 0.0, 0.0))
+    o.append(C("stomp", 0.7, [(0.0, sp0), (0.16, sp1, "out"), (0.38, sp2, "out"), (0.49, sp3, "in"), (0.58, dict(sp3, pel=(-0.03, 0.03, -0.2), prt=(0.5, 0.0, 0.0), tor=(0.34, 0.0, 0.0)), "out"), (0.7, sp0)], loop=True))
+    # drink (DRINK_TIME 1.1 s): the scrap fist hoists the flask up, the head tips right back, the throat works, a wet gasp and a wipe of the mouth
+    dr1 = {"LP": (-0.12, 0.34, 0.86), "tor": (0.2, 0.06, 0.02), "hed": (-0.5, -0.06, 0.05), "fing": 0.9, "brow": 0.5, "jaw": 0.3}
+    dr2 = dict(dr1, LP=(-0.1, 0.28, 0.98), hed=(-0.98, -0.06, 0.05), tor=(0.12, 0.06, 0.02), jaw=0.9, lid=0.6, brow=-0.3)
+    o.append(C("drink", 1.1, [(0.0, KEYS_END), (0.22, dr1, "out"), (0.36, dr2), (0.8, dict(dr2, hed=(-1.04, -0.06, 0.05), jaw=0.5)), (0.92, dict(dr1, jaw=1.0, brow=0.8, lid=-0.1), "out"), (1.1, KEYS_END)]))
     # death: he reels back, the pile takes him over, he lies on it, one last grin
     d1 = {"pel": (0, -0.08, -0.10), "prt": (-0.22, 0, 0), "tor": (-0.34, 0, 0), "hed": (0.2, 0.0, 0.0), "lid": 0.2, "brow": -1, "jaw": 1.0, "LP": (-0.46, 0.05, 0.92), "G": (0.5, 0.05, 0.92), "BE": be(-90, 10, FLAT), "fing": 0.1, "hd": (-0.3, 0, 0)}
     d2 = {"pel": (0, -0.30, -0.42), "prt": (-1.22, 0, 0.05), "tor": (-0.02, 0.1, 0), "hed": (0.36, 0.5, 0.2), "lid": 1.0, "brow": -1, "jaw": 0.55, "LP": (-0.62, 0.06, 0.20), "G": (0.62, -0.02, 0.16), "BE": be(-60, -2, FLAT), "fing": 0.05, "FL": (-0.22, 0.26, 0.14), "FR": (0.20, 0.36, 0.20), "FLp": -0.6, "FRp": -0.8, "hd": (0.14, 0.06, 0.08)}
