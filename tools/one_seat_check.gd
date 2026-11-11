@@ -117,7 +117,8 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 		"the Lair takes the two in it; the third is on the clock")
 	far.teleport(L["up"])
 	run.call(m, 0.3)
-	say(far.extracted and String(m.exits.one_seat.used.get(P.team, "")) == QuestSeats.HOW_LAIR, "they reach the updraft in time and leave by it")
+	var used := String(m.exits.one_seat.used.get(P.team, ""))
+	say(far.extracted and used == QuestSeats.HOW_LAIR, "they reach the updraft in time and leave by it")
 	done.call(m)
 	await main.get_tree().process_frame
 	return ok
