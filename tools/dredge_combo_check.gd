@@ -139,7 +139,7 @@ func _hook_hold() -> void:
 	)
 	await ak.done(m)
 
-## Item 33: through the wind-up the slam's area fills on the ground, for everyone, and it is the exact cone
+## Item 33: through the wind-up an outline of the slam's area shows on the ground, for everyone, and it is the exact cone
 ## the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
 func _slam_tell() -> void:
 	var r: Array = ak.setup("dredge", 6.0, "", true)
@@ -188,6 +188,25 @@ func _slam_tell() -> void:
 		"anchor tell: the slam hits inside the drawn cone and nothing outside it",
 		K.anchors == 1 and ak.dmg(T) > 10.0 and ak.dmg(T2) == 0.0 and not AimKit.shown(P, "e_tell"),
 		"inside %.0f, outside %.0f (anchors %d)" % [ak.dmg(T), ak.dmg(T2), K.anchors]
+	)
+	# a stun in the wind-up stops the move: the tell and the falling fist go at once, and no slam
+	var V := HeroVfx.of(m)
+	V._process(1.0)             # (m.step leaves HeroVfx to the frame) the first fist has rested and faded
+	Sfx.listener = P.pos        # the camera on him, so the fist draws
+	K.cd["e"] = 0.0
+	P.ak.use_e()
+	ak.step(m, 0.1)
+	V._process(0.1)
+	var fists: Array = V.pools.get("fist", [])
+	var up := fists.any(func(n: Node3D) -> bool: return n.visible)
+	P.stun_t = 0.6
+	ak.step(m, 0.05)
+	V._process(0.05)
+	var left := fists.any(func(n: Node3D) -> bool: return n.visible)
+	ok(
+		"anchor tell: a stun in the wind-up takes the outline and the falling fist away, no slam",
+		up and not left and not AimKit.shown(P, "e_tell") and K.anchors == 1,
+		"fist up %s, after the stun %s (anchors %d)" % [up, left, K.anchors]
 	)
 	await ak.done(m)
 

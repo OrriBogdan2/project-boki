@@ -40,7 +40,7 @@ static var _data := {}         # arch -> its content/vfx data ({} when the Hero 
 
 var m: Node
 var pools := {}                # kind -> nodes made for it
-var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind}
+var live: Array = []           # shader looks running: {node, mat, t, dur, s0, s1, kind; cut, h}
 var ribbons: Array = []        # mesh trails running: {node, mat, h, anchor, t, dur, tail, width, pts}
 var motes: Array = []          # one-shot emitters running: {node, t, dur, n}
 var holds := {}                # "<hunter id>/<move>" -> {h, move, last, layers: [{node, layer, n}]}
@@ -460,7 +460,11 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
-	live.append({"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1})
+	var e := {"node": mi, "mat": mt, "t": 0.0, "dur": _num(layer, "life", o, 0.4), "b": b, "s0": s0, "s1": s1}
+	if layer.has("cut"):
+		e["cut"] = float(layer["cut"])
+		e["h"] = h
+	live.append(e)
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
@@ -735,7 +739,7 @@ func _process(delta: float) -> void:
 		var e: Dictionary = live[i]
 		e["t"] = float(e["t"]) + delta
 		var u := float(e["t"]) / float(e["dur"])
-		if u >= 1.0:
+		if u >= 1.0 or (e.has("cut") and u < float(e["cut"]) and _stopped(e["h"])):
 			(e["node"] as Node3D).visible = false
 			live.remove_at(i)
 			continue
@@ -755,6 +759,11 @@ func _process(delta: float) -> void:
 		if not _tick_ribbon(ribbons[i], delta):
 			(ribbons[i]["node"] as Node3D).visible = false
 			ribbons.remove_at(i)
+
+## A "cut" layer goes the moment its hunter is stunned, downed or gone before that share of its life (a wind-up
+## the stun stopped: the move never comes).
+func _stopped(h: Variant) -> bool:
+	return not is_instance_valid(h) or (h as Hunter).stun_t > 0.0 or (h as Hunter).downed
 
 ## One mesh trail's frame: it samples its anchor while it runs, then the tail runs out. False once it's gone.
 func _tick_ribbon(e: Dictionary, delta: float) -> bool:
