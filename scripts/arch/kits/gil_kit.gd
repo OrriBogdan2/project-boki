@@ -7,6 +7,8 @@ extends ArchKit
 ## surfs a wave down a line, untargetable, and lands with a shield). Passive Fish Out of Water: three different
 ## potion effects on one foe inside 5s Beach them. Every number lives in the JSON.
 
+const THRUSTS := ["gil_thrust_a", "gil_thrust_b", "gil_lunge"]   # the Fencer's moves, one per combo step (KMovesDJ)
+
 var bag: Array = []                 # the potions still in the bag; the last one is the next throw
 var rng := RandomNumberGenerator.new()
 var flying: Array = []              # thrown potions in the air: {at, from, t, left, v}
@@ -81,6 +83,7 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	combo_at = m.time
 	combo_n += 1
 	h.combo_i = i + 1
+	play(THRUSTS[i])
 	h._lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
 	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2})

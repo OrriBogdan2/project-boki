@@ -9,6 +9,7 @@ ART-1 pipeline (docs/art/wardens/PIPELINE.md steps 5-9). Raw files in ~/meshy/gi
     $B tools/meshy/fit_warden.py -- art/wardens/src/gil_fit.json          # -> ~/meshy/gill/fit/fit.glb
     $B tools/meshy/gil_parts.py -- ~/meshy/gill/fit/fit.glb ~/meshy/gill/m_sf/glb.glb ~/meshy/gill/parts.glb
     $B tools/blender/decimate_warden.py -- ~/meshy/gill/parts.glb --tris=14000 --out=art/wardens/gil/gil.glb
+    $B tools/art1/gil_clips.py -- art/wardens/gil/gil.glb                     # foot bones, tail skin, the clips (in place)
 
 - **Scan:** Meshy s_g2 (hat, polka-dot coat, satchel, striped curl-toe boots, the fish face). No new Meshy credits.
 - **Rig:** the body numbers in BODY.json (size 1.0, head 0.71, legs 1.03, torso 1.0, shoulder 1.14, arms 0.92,
@@ -23,4 +24,11 @@ ART-1 pipeline (docs/art/wardens/PIPELINE.md steps 5-9). Raw files in ~/meshy/gi
 - **Fish tail and dorsal fin (turnaround; scripted, gil_parts.py):** a tapered tube from under the coat's back hem,
   down and back to a forked caudal fin at boot height (`skin-tail` / `skin-fin`), and a ray fin on the upper back
   (`skin-fin`, blue root to orange edge); both rigid on hips. Simple stand-ins: no spring bones, flat from behind.
+- **Clips (v2, 2026-11-11, tools/art1/gil_clips.py):** foot.L / foot.R added at the ankles (the boots below 3.5 cm and
+  the curled toes moved onto them from the shins, blended to 8.5 cm) so the boots stay flat as the shins tilt, and the
+  Tail mesh moved from hips onto the `tail` bone (fully past 15 cm from where it leaves the coat) so it swishes. 19
+  clips keyed in fistkit (the right fist's `br` points the bill): idle, stance (en garde), walk and run f/b/l/r, rise,
+  fall, glide, thrust_a, thrust_b, lunge (the Fencer, KMovesDJ gil_*), hit_f, hit_b, death (knocked down onto his back,
+  flops twice). Mapped in content/rules/warden_anim/gil.json; the rest of the rig, mesh, images and materials go out
+  as they came in. The script reruns on its own output.
 - **Import:** `meshes/generate_lods=false`, `force_disable_compression=true` in gil.glb.import.
