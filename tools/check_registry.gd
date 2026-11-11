@@ -29,6 +29,7 @@ const CHECKS := {
 	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],      # GARDEN_MODERN.md 1
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],      # GARDEN_MODERN 1.2
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
+	"--evo-path-check": ["res://tools/evo_path_check.gd", "evo_path_check", null],      # GARDEN_MODERN.md 3
 	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--stat-budget-check": ["res://tools/stat_budget_check.gd", "stat_budget_check", null],      # decision 0022
