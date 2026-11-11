@@ -5,7 +5,7 @@ extends Node3D
 
 const VOID := -1.0e9
 const LEVEL := 0.8      # height of one terrace
-const STEP := 0.32      # how high you can walk up without jumping
+static var STEP: float = HunterMove.step_height      # m: the tallest lip you walk up without jumping (hunter_move.json)
 const BLOCK_H := 3.0
 
 enum { T_VOID, T_GROUND, T_BLOCK }
@@ -45,8 +45,8 @@ var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed 
 var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
 var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
 var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
-## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
-## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
+## The uplink outposts an authored layout places (see Exits): {kind: "outpost", at: Vector2, walled: bool}.
+## Empty: Exits works them out.
 var exit_defs: Array = []
 ## Boss lairs (see Lairs): walled arenas with one gate, each holding a boss and its Rare Egg.
 ## {id, name, boss, c: Vector2 (centre), half (tiles from the centre to the wall), gate ("n"/"s"/"e"/"w"),
@@ -64,6 +64,10 @@ func idx(x: int, z: int) -> int:
 
 func inb(x: int, z: int) -> bool:
 	return x >= 0 and z >= 0 and x < w and z < h
+
+## True on a flight of stairs, where the ground rises smoothly instead of in lips.
+func on_stairs(x: float, z: float) -> bool:
+	return stairs.has(idx(int(floor(x)), int(floor(z))))
 
 # ------------------------------------------------------------------ queries
 func ground_at(x: float, z: float) -> float:
@@ -2473,12 +2477,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		authored_portals.append(_v2(ap))
 	exit_defs.clear()
 	await _slice()
-	for ek in [["docks", "dock"], ["outposts", "outpost"], ["hatches", "hatch"]]:
-		await _slice()
-		for ap in L.get(ek[0], []):
-			authored_portals.append(_v2(ap))
-			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
-				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
+	for ap in L.get("outposts", []):
+		authored_portals.append(_v2(ap))
+		exit_defs.append({"kind": "outpost", "at": _v2(ap), "walled": (ap as Array).size() >= 3 and bool(ap[2])})
 	await _slice()
 	if hand:
 		HandLayout.place_spots(self, defs)
