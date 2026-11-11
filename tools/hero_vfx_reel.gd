@@ -225,7 +225,7 @@ func _juggernaut_drop() -> void:
 		P.inp["jump"] = _at(t, 0.15)
 		if _at(t, 0.45):
 			K.press_rmb()
-		_aim(T.pos + Vector3(4.0, 0, 0))
+		_aim(T.pos + Vector3(4.0, 0, -4.0))         # (well past the dummy: the slam still lands under him)
 	await _go(3.0, drop, _sheet("drop",
 			"RMB in the air, Meteor Drop, W held toward the cursor all the way: the jump forward, the press "
 			+ "(the hit circle straight under him), he stops dead, the straight drop, the ground cracking",
@@ -337,6 +337,9 @@ func _juggernaut_tether_hold() -> void:
 func _juggernaut_e_rmb_e() -> void:
 	await _reset(7.0)
 	var K: JuggernautKit = P.ak
+	K.warchain.snap("")             # (a chain still hooked from the part before would pull at the first E)
+	K.cd["e"] = 0.0
+	K.cd["air"] = 0.0
 	var combo := func(t: float):
 		if _at(t, 0.1):
 			K.use_e()
