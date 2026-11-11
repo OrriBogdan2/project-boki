@@ -111,6 +111,8 @@ func _course() -> void:
 			sum_details[tu.detail] = true
 			var ks: KinSummon = m.player.kin.summon
 			early_cd_ok = early_cd_ok or (tu.sm.early and not ks.out() and ks.cd <= 0.0)
+			if tu.sm.phase == TutorialSummon.OUT and not tu.sm._warned:
+				_hold_foes()      # (a Boki that kills the lone spitter early skips the warn: a coin flip)
 		_rival_probe(tu, rv)
 		if tu.pell.talking():
 			talk_at = m.time if talk_at < 0.0 else talk_at
@@ -157,6 +159,14 @@ func _course() -> void:
 	ok(counts_ok, "one kill and one cast need no counter (%s)" % str(counters))
 	_gap_help_and_downed(tu)
 	_summon_banners(sum_lines, sum_details, early_cd_ok)
+
+## Beat 5's monsters stay at full health until the 3 s warn has played: the beat ends a window early
+## when the pack is down, so whether the course sees the early call back and the warn would hang
+## on how hard the Boki hit (one hit is 44 of the spitter's 54 hp).
+func _hold_foes() -> void:
+	for mb in m.mobs:
+		if not mb.dead:
+			mb.hp = mb.max_hp
 
 ## Beat 5: the banner reads ask, out, called back early; the detail lines and the cooldown reset all showed.
 func _summon_banners(lines: Array, details: Dictionary, early_cd_ok: bool) -> void:
