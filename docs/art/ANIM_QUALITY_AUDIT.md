@@ -81,7 +81,7 @@ speed in m/s against 4.65. Bob (cm of hip) and cadence are as after.
 | `mage` | 59 → 19 | 42 → 9 | 2.7 → 4.8 | +0.95 → +0.89 | 7 | 4.2 |
 | `ostra` | 100 → 100 | 100 → 100 | 0.0 → 0.0 | +0.00 → -0.00 | 4 | 0.0 |
 | `rimewright` | 93 → 93 | 90 → 90 | 0.4 → 0.4 | -0.39 → -0.39 | 1 | 1.7 |
-| `tender` | 76 → 39 | 62 → 17 | 1.8 → 3.9 | -0.82 → +0.39 | 5 | 6.7 |
+| `tender` | 76 → 29 | 62 → 13 | 1.8 → 4.4 | -0.82 → +0.75 | 5 | 7.0 |
 | `thief` | 73 → 39 | 60 → 17 | 1.8 → 4.3 | -0.96 → +0.82 | 5 | 4.2 |
 
 Strips under each Hunter: rows are walk before, walk after, run before, run after (8 frames at 10 fps, side view, floor
@@ -170,9 +170,13 @@ posts scroll at the move speed).
 ![rimewright walk and run, before and after](anim_audit/rimewright.jpg)
 
 **Meeko (`tender`)**
-1. Feet slid 62 % of the run speed, 76 % at a walk (now 17 %, 39 %). A 0.65 m body takes 6.7 steps/s.
-2. The left arm paced its leg (counter -0.82, now +0.39, still weakest).
-3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself). Foot speed stays at 3.9 of 4.65 m/s (gain cap 1.5, rate cap 1.4).
+1. Feet slid 62 % of the run speed, 76 % at a walk (now 13 %, 29 %: thigh stride 2.0 walk and 2.05 run, up from 1.5). A
+   0.65 m body (appeal3 body b) takes 7.0 steps/s; the cadence is not changed (rate cap 1.4, the 0.5 s run cycle stays
+   parked in docs/heroes/tender.md).
+2. The arms paced their legs (counter -0.82, now +0.75: both arms swing, gain 0.7; more gain does not raise it).
+3. seed and shot_r held the free arm sideways for 71 to 88 % (fixed: 0 to 4 %; the free arm's travel fell 1.0-1.2 to 0.7-0.8 body heights; shot_r's remaining 71 % is the aiming arm itself). Foot speed is 4.4 of 4.65 m/s (was 3.9); a run stride above about
+   2.15 swings the foot forward through the planted band and the run slides 25 to 70 %, so 2.05 is the ceiling. (The
+   strip below shows the earlier tuning.)
 
 ![tender walk and run, before and after](anim_audit/tender.jpg)
 
@@ -191,6 +195,6 @@ Split into backlog items per Hunter (role build):
 - `rimewright`: a gait clip with a real stride (skate now).
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
-- `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
-- `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
+- `bulwark` and `tender`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s and 2.6 m/s (`tender` was
+  1.7 at stride 1.5: the longer stride stretches the unsynced walk and run mix too); the gate only reads the run.
 - Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
