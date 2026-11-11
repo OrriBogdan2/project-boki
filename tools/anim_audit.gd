@@ -21,12 +21,18 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 ## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
-const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const NO_LEGS := ["ostra", "rimewright"]     # they hover and skate, no foot steps (Neve's gait clip: a backlog item)
+## A hover Hunter's gate instead (docs/heroes/ostra.md: he glides, the hem trailing): at full stick the lower body under him
+## trails his hips by at least MIN_TRAIL and treads (swings fore-aft or sideways through the loop) at least MIN_TREAD.
+const HOVER := {"ostra": "x_box"}
+const MIN_TRAIL := 0.1       # m behind the hips
+const MIN_TREAD := 0.03      # m of swing
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
 var holder: Node3D
 var rows := {}
+var low_bone := ""           # the Hunter's HOVER bone, read with the others
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -56,6 +62,7 @@ func _hero(main: Node, id: String) -> void:
 	var clips: WardenClips = sync.get("clips")
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var lc: Dictionary = clips.d["loco"]
+	low_bone = HOVER.get(id, "")
 	var row := {}
 	var rest := _pose_at(sync, clips, sk, String(lc["idle"]), 0.0)
 	row["same_side"] = {"hand_foot": signf((rest["hand.L"] as Vector3).x) == signf((rest["foot.L"] as Vector3).x),
@@ -90,6 +97,8 @@ func _hero(main: Node, id: String) -> void:
 			top["peaks"]])
 	if not id in NO_LEGS:
 		_gate(id, top)
+	if low_bone != "":
+		_gate_hover(id, top)
 	m.free()
 
 func _gate(id: String, top: Dictionary) -> void:
@@ -100,6 +109,13 @@ func _gate(id: String, top: Dictionary) -> void:
 		bad += 1
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
+		bad += 1
+
+func _gate_hover(id: String, top: Dictionary) -> void:
+	print("AUDIT %-10s hover: the %s trails %.2f m, treads %.2f m" % [id, low_bone, top["trail"], top["tread"]])
+	if top["trail"] < MIN_TRAIL or top["tread"] < MIN_TREAD:
+		print("FAIL %s: the lower body hangs under the glide (trail %.2f m, tread %.2f m; wanted %.2f, %.2f)" % [id,
+				top["trail"], top["tread"], MIN_TRAIL, MIN_TREAD])
 		bad += 1
 
 ## Where the bones are, model frame, metres: the points of POINTS, plus the arms' direction.
@@ -114,6 +130,8 @@ func _read(sk: Skeleton3D) -> Dictionary:
 		var gs := sk.get_bone_global_pose(shin)
 		var leg := (sk.get_bone_global_rest(shin).origin - sk.get_bone_global_rest(thigh).origin).length()
 		out["foot." + side] = xf * (gs.origin + gs.basis.y.normalized() * leg)
+	if low_bone != "":
+		out["low"] = xf * sk.get_bone_global_pose(WardenSkeleton.find(sk, low_bone)).origin
 	return out
 
 func _height(sync: Node, clips: WardenClips, sk: Skeleton3D, idle: String) -> float:
@@ -156,7 +174,23 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 	m.set_meta(WardenClips.STATE, {})
 	var out := _slide(fr, s)
 	out.merge(_swing(fr))
+	if low_bone != "":
+		out.merge(_trail(fr))
 	return out
+
+## The HOVER bone against the hips: how far it trails (m, mean; + behind, he moves along -Z) and treads (the wider of its
+## fore-aft and side swing, m).
+func _trail(fr: Array) -> Dictionary:
+	var back: Array = []
+	var side: Array = []
+	for p in fr:
+		var d: Vector3 = (p["low"] as Vector3) - (p["hips"] as Vector3)
+		back.append(d.z)
+		side.append(d.x)
+	var sum := 0.0
+	for v in back:
+		sum += v
+	return {"trail": sum / back.size(), "tread": maxf(back.max() - back.min(), side.max() - side.min())}
 
 ## Foot slide: while a foot is planted its speed against the ground is the speed minus how fast the clip pulls it back.
 func _slide(fr: Array, s: float) -> Dictionary:
