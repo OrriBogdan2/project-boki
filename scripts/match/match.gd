@@ -351,6 +351,9 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.systems")
 	await _spawn_pads_and_exits()
 	await _stage("build.pads_exits")
+	if Heart.enabled(opts):
+		heart = Heart.new(self)
+		heart.setup(layout)      # (before the hunters: they start inside its play space)
 	await _spawn_hunters()
 	if tut: tut.setup()
 	await _stage("build.hunters")
@@ -367,9 +370,7 @@ func _start(o: Dictionary) -> void:
 		skytrain.setup(self)
 	await _slice()
 	Beacons.place(self)
-	if Heart.enabled(opts):
-		heart = Heart.new(self)
-		heart.setup(layout)
+	if heart:
 		ways_vfx = WaysOutVfx.new(self)
 	await _slice()
 	if not opts.get("arena", false):
@@ -674,9 +675,10 @@ func bot_kin_record() -> Dictionary:
 func _spawn_hunters() -> void:
 	var n_teams := int(opts.get("teams", 4))
 	var squad := int(opts.get("squad", 1))
-	# one starting island per squad, spread out as far as possible
+	# one starting island per squad, spread out as far as possible, inside the play space the match starts with
+	var spawns: Array = heart.in_play(world.spawns) if heart else world.spawns
 	var by_isl := {}
-	for sp in world.spawns:
+	for sp in spawns:
 		var ii := world.island_of(sp.x, sp.z)
 		if not by_isl.has(ii): by_isl[ii] = sp
 	var pool: Array = by_isl.values()
@@ -693,7 +695,7 @@ func _spawn_hunters() -> void:
 		spots.append(pool[best]); pool.remove_at(best)
 	# more squads than islands: share the bigger islands, still as far apart as possible
 	if spots.size() < n_teams:
-		var rest: Array = world.spawns.filter(func(q): return not spots.has(q))
+		var rest: Array = spawns.filter(func(q): return not spots.has(q))
 		while spots.size() < n_teams and rest.size() > 0:
 			var best := 0; var bd := -1.0
 			for i in rest.size():
@@ -702,7 +704,7 @@ func _spawn_hunters() -> void:
 				if dmin > bd: bd = dmin; best = i
 			spots.append(rest[best]); rest.remove_at(best)
 	if spots.is_empty():
-		spots = world.spawns.duplicate()
+		spots = spawns.duplicate()
 	if tut:
 		spots = [tut.stop("land")]
 	var taken: Array = [Save.d.get("name", "Hunter")]
