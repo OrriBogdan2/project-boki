@@ -4,7 +4,8 @@ extends RefCounted
 ## coin ringed by XP, then to its right your health as a big number over a thick segmented bar
 ## (same segments and chip as your overhead plate), armour as a strip under it with its number and
 ## tier, shields past the end of health, the merged form's shell, and the archetype resource under
-## that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## that, then any crowd control on you (SelfCcLine). The ability row sits below the bars
+## (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, armor_lerp, hover_spots); this file only draws.
 
 const BAR_W := 318.0       # px: health / armour width
@@ -72,8 +73,11 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w, 1)), Color(0, 0, 0, 0.35))
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
+	var cc_y := ar.end.y + 4
 	if p.ak and p.ak.has_meter():
-		H._draw_res_bar(x0, ar.end.y + 4, w, p)
+		H._draw_res_bar(x0, cc_y, w, p)
+		cc_y += 12.0
+	SelfCcLine.draw(c, Vector2(x0, cc_y), w, p)
 	_hidden_tag(H, sz, p)
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
