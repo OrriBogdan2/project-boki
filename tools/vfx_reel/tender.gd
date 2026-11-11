@@ -27,14 +27,21 @@ func _part_dash() -> void:
 		[0.17, 0.22, 0.28, 0.34, 0.42, 0.55, 0.7, 1.0, 1.4]), 2.0)
 	await _go(GAP)
 
+## Two more dummies stand beside the target, inside the burst, so the root shows on each foe it takes.
 func _part_rmb() -> void:
 	await _reset(6.0)
+	var near: Array[Hunter] = []
+	for side in [-1.3, 1.3]:
+		near.append(m.make_hunter("T%d" % near.size(), 5, "medium", "Target", "idle", {},
+				T.pos + Vector3(0.9, 0, side), {"arch": "none"}))
 	var cast := func(t: float):
 		P.inp["sec"] = _at(t, 0.1)
 		P.inp["sec_hold"] = t > 0.1 and t < 0.6
 		_aim(T.pos)
-	await _go(3.8, cast, _sheet("rmb", "RMB: the lantern starlight, the cast, the seed's vine building, the root",
-		[0.3, 0.7, 1.0, 1.2, 1.7, 2.3, 2.9, 3.3, 3.7], func(): return (P.pos + T.pos) * 0.5), 2.5)
+	await _go(4.4, cast, _sheet("rmb", "RMB: the cast, the seed's vine, the root field filling, the root on each foe",
+		[0.3, 1.0, 1.5, 2.3, 3.0, 3.35, 3.5, 3.8, 4.3], func(): return (P.pos + T.pos * 2.0) / 3.0), 2.5)
+	for x in near:
+		x.teleport(home + Vector3(-30, 0, 30))
 	await _go(GAP)
 
 func _part_e() -> void:
