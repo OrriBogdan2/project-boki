@@ -2336,3 +2336,12 @@ for _n in ('Terrarimit','Mossbastion','Cisternmander','Briarlynx','Soakybara','G
 # 11-11 OWNER: Murmuron female turnaround redo (wings folded, tall stance, collar read as a strapped harness from the back). Male kept.
 V2SHEET_NEW('Murmuron_female','briefs/boki-art/cards/Murmuron_female.jpg',_GC,_GN); SPECS[-1]['id']='v2s_murmuron_female_bk4'; SPECS[-1]['runs']=4
 SPECS[-1]['prompt']+=_NOGHOST+" Wings spread wide in every view exactly as on the card, the same round hovering body and trailing feather tail. The pan-pipe collar is part of her body, grown feathers shaped like pipes, with no straps or buckles in any view, including the back. No ground line."
+
+# 11-11 OWNER: "were Pipguin and Rollguin made to look less cartoony?" Still more cartoon than the house look (Coolatee, Glaciatee).
+# Whole line, 3 directions x 2 runs: (a) same design, calmer house finish; (b) truer penguin anatomy; (c) (b) plus the signature reworked as body parts.
+_PEN=" Less cartoony: natural penguin proportions (smaller head, longer sleeker body, real penguin flippers and feet), a calm natural expression with no scowl and no human gestures such as hands on hips, thinner outlines in a dark shade of the local colour, flat colours with one soft shade, nothing worn."
+for _n,_st,_ar,_sig in (('Pinguin','baby','cute',"a small penguin chick: its red neck marking is a band of red feathers grown in its plumage, not a scarf, and its belly is round like a bowling pin"),
+                        ('Rollguin','mid','sleek',"a young penguin tobogganing on its belly; its dark back has three round bowling-ball finger-hole markings and a small red crest"),
+                        ('Kingpinguin','final','tough',"a large emperor-like penguin standing tall, the ten white-and-red bowling-pin plumes fanned behind its head, three bowling-ball finger-hole markings on its belly")):
+    for _k,_d in (('a',"Keep this exact design and pose; change only the finish."),('b',"Redraw it as a more natural penguin with the same colours and signature: "+_sig+"."),('c',"Redraw it as a more natural penguin, a new calm pose, with this signature built into its body: "+_sig+".")):
+        ON_CHANGE(_n,_C%_n,_st,_ar,False,False,_d+_PEN,runs=2,tag='_pen'+_k)
