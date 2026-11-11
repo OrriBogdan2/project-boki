@@ -44,7 +44,10 @@ static func line(rec: Dictionary, pond: bool) -> String:
 ## Every frame: the happy answer to a met want, then the mood icons (KinMood).
 static func update(home: Node, dt: float, now: float) -> void:
 	for k in home.kins:
-		_relief(home, k, Care.want(k["rec"]) if home.visit.is_empty() else "")
+		var w := Care.want(k["rec"]) if home.visit.is_empty() else ""
+		_relief(home, k, w)
+		if not k.has("indoors"):
+			HomeVoice.sulk_edge(k, w)
 	KinMood.update(home, dt, now)
 
 static func free_to_show(k: Dictionary) -> bool:
@@ -64,6 +67,7 @@ static func _relief(home: Node, k: Dictionary, w: String) -> void:
 	k["joy_t"] = 0.9
 	home._emote(k, "♥", true)
 	home.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 8, 1.6)
+	HomeVoice.say(k["rec"], "happy", k["pos"])
 
 ## The bubble: a white cloud with a tail and one child per icon (only the current one is shown).
 static func bubble() -> Node3D:
