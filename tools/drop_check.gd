@@ -100,19 +100,19 @@ func _push(P: Hunter, mv: Vector2, steps: int) -> Dictionary:
 	return out
 
 func _parity() -> void:
-	var quarter: float = Hunter.GLIDE_ACCEL * HunterMove.dive_steer
+	var quarter: float = DropFeel.GLIDE_ACCEL * HunterMove.dive_steer
 	# the dive: a quarter of the glide's steering force, falling faster than the canopy
 	var P := _arena(60.0)
 	var d := _push(P, Vector2(1, 0), 120)
 	row("dive_steer_t", d["t90"], 0.9, 1.3, "s",
-			"[game data] GlideDiveXYForceMultiplier 0.25 x %.2f m/s^2" % Hunter.GLIDE_ACCEL)
+			"[game data] GlideDiveXYForceMultiplier 0.25 x %.2f m/s^2" % DropFeel.GLIDE_ACCEL)
 	ok(d["snap"] <= quarter + 1.0 and d["top"] <= Hunter.GLIDE_SPEED + 0.1,
 			"dive steering ramps (peak %.1f m/s^2, top %.1f m/s)" % [d["snap"], d["top"]])
 	ok(absf(-P.vel.y - Hunter.DIVE_FALL) < 0.1 and Hunter.DIVE_FALL > Hunter.DROP_FALL,
 			"the dive falls at %.1f m/s, faster than the canopy's %.1f" % [-P.vel.y, Hunter.DROP_FALL])
 	P.inp["move"] = Vector2.ZERO
 	m.step(Match.DT)
-	var kept: bool = Vector2(P.vel.x, P.vel.z).length() > d["top"] - Hunter.GLIDE_ACCEL * Match.DT * 1.5
+	var kept: bool = Vector2(P.vel.x, P.vel.z).length() > d["top"] - DropFeel.GLIDE_ACCEL * Match.DT * 1.5
 	ok(kept, "letting go decelerates, it does not stop dead")
 	var open_h := -1.0
 	for i in 900:

@@ -39,7 +39,6 @@ static func tick(k: Kin, dt: float) -> void:
 		if k.regen_fx <= 0.0:
 			k.regen_fx = MOTE_EVERY
 			motes(k.m.fx, k.pos + Vector3(0, 0.9, 0), MOTE_COL)
-	k.regen_hp = k.hp
 	k.mending = pct > 0.0
 
 ## The little rising motes of mending (also the stat glint at home, StatGlint, in the stat's colour).

@@ -559,7 +559,7 @@ func _bulwark() -> void:
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
 	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s",
-			not K.has_res() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
+			K.res_def().is_empty() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)

@@ -7,11 +7,12 @@ const FLARE_H := 4.0           # m, the glider flares (slows the fall) this far 
 const FLARE_FALL := 2.2        # m/s, the fall speed it flares down to [est]
 const FLARE_RATE := 6.0        # 1/s, how quickly the flare takes hold [est]
 const LAND_SQUASH := 0.45      # model squash on touchdown: a low crouch [footage]
+const GLIDE_ACCEL := 16.25      # m/s^2 [game data] GlideTargetXYForce 162,500 / 100 kg: steering has inertia
 
-## The next flat velocity: the glide's force (Hunter.GLIDE_ACCEL) pulls it toward `mv * GLIDE_SPEED`, a quarter
+## The next flat velocity: the glide's force (GLIDE_ACCEL) pulls it toward `mv * GLIDE_SPEED`, a quarter
 ## of it in the dive (HunterMove.dive_steer). Letting go brakes with the same force [est]: it never snaps.
 static func steer(hv: Vector2, mv: Vector2, diving: bool, dt: float) -> Vector2:
-	var force := Hunter.GLIDE_ACCEL * (HunterMove.dive_steer if diving else 1.0)
+	var force := GLIDE_ACCEL * (HunterMove.dive_steer if diving else 1.0)
 	return hv.move_toward(mv * Hunter.GLIDE_SPEED, force * dt)
 
 ## The next fall speed: the glider's sink, and a flare over the last few metres.

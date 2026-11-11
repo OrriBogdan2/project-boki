@@ -48,7 +48,7 @@ const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 # The opening drop (ext/drop-parity): the squad's rocket launch (DropLaunch, item 163), then the glider as
-# SUPERVIVE's high glide: GLIDE_SPEED, GLIDE_ACCEL and the pull toward its height target (DropFeel).
+# SUPERVIVE's high glide: GLIDE_SPEED, DropFeel.GLIDE_ACCEL and the pull toward its height target (DropFeel).
 # m/s the launch (and the tutorial's skydive) falls at: a 70 m start lands in 18-22 s (owner)
 const DIVE_FALL := 5.0
 const DROP_FALL := 3.5         # [game data] GlideDownwardForceMinZVelocity -350 uu/s: the sink high over the ground
@@ -1145,8 +1145,8 @@ func _pass_along(dt: float) -> void:
 	var end := _dash_end(dt)
 	for f in m.foes_of(team):
 		if dash_pass.is_empty(): return
-		var reach := r + f.r + float(dash_pass.get("w", 0.8)) * 0.5
-		var off := Swept.dist(f.pos, pos, end) > reach or absf(f.pos.y - pos.y) > 1.4
+		var reach: float = r + f.r + float(dash_pass.get("w", 0.8)) * 0.5
+		var off: bool = Swept.dist(f.pos, pos, end) > reach or absf(f.pos.y - pos.y) > 1.4
 		if dash_pass["hit"].has(f.get_instance_id()) or off:
 			continue
 		dash_pass["hit"][f.get_instance_id()] = true
