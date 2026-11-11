@@ -284,7 +284,7 @@ const SHOTS := [
 		"smash",
 		0.78,
 		3.5,
-		"360 Smash: the one spin hit, the red-orange-gold spiral ring, sliding on"
+		"360 Smash: the one spin hit, the red ring on the hit radius running round with the hammer, sliding on"
 	],
 	[
 		"bjorn_purify_column",

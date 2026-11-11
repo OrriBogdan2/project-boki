@@ -417,6 +417,9 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			var flip: bool = o.get("flip", false) != bool(layer.get("flip", false))
 			s0 = Vector3(-extent if flip else extent, extent, extent)
 			s1 = s0
+			var dur := _num(layer, "life", o, 0.4)
+			mt.set_shader_parameter("head_t", clampf(_num(layer, "turn", o, 0.28 * dur) / dur, 0.05, 1.0))
+			mt.set_shader_parameter("band", float(layer.get("band", 0.0)))
 		"scorch":
 			var sh := String(layer.get("shape", "disc"))
 			mt.set_shader_parameter("shape", SCORCH_SHAPES[sh])
