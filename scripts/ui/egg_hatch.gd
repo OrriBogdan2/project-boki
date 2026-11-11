@@ -7,7 +7,7 @@ extends Node3D
 ## your face now) and makes its first sound in its own voice. Then it climbs out. Used for the
 ## first egg and for eggs from the nest.
 ##
-## Quiet on purpose (docs/POSITIONING.md): no light beams, bursts, flashes or rarity colours. What
+## Quiet on purpose: no light beams, bursts, flashes or rarity colours. What
 ## makes a Boki rare shows on the Boki itself (its colours, markings, how it moves).
 
 signal popped(kin: Node3D)     # the kin has just appeared

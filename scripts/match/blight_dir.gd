@@ -1,6 +1,6 @@
 class_name BlightDir
 extends RefCounted
-## Runs the Blight for a match (docs/TONE_AND_THREATS.md §1, §1b): where Wardens stand, when and
+## Runs the Blight for a match: where Wardens stand, when and
 ## where Skitters claw out of the ground, what they hear, and how strong they are.
 ##
 ## Pacing (the owner's rule): you drop at level 1 with one ability and level up fast on monster

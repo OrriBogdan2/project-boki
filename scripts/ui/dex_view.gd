@@ -8,7 +8,7 @@ extends RefCounted
 ## its sexes work (BokiQuirks), the forms you've found and the ones you're raising.
 ##
 ## Reads Save "dex" exactly as Care keeps it ({species: {seen, caught, forms, shimmer, mutations}});
-## nothing here writes to it. Field notes, not a checklist (docs/POSITIONING.md): no completion
+## nothing here writes to it. Field notes, not a checklist: no completion
 ## percentage, no rarity colours.
 
 ## Each type's badge colour and name (the glyphs are drawn by TypeIcon); "ink" tints the glyph (white if unset).
