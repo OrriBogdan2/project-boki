@@ -66,7 +66,8 @@ func run(main: Node) -> void:
 	var P: Hunter = m.player
 	var Q: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	# ---- 1. riding: stand on a car of a moving train, out over the abyss (open air both sides for
-	# the next stretch)
+	# the next stretch, and no bridge ahead for as far as the train runs during the tests below: under
+	# one the deck dives 4.6 m and drops the rider)
 	var K := 2
 	var found := false
 	for li in st.legs.size():
@@ -81,6 +82,8 @@ func run(main: Node) -> void:
 				for xx in [-(SkyTrain.HALF_W + 0.8), SkyTrain.HALF_W + 0.8]:
 					var q: Vector3 = a + sd * xx
 					if not m.world.is_void(q.x, q.z): clear = false
+			for ds in range(0, 50, 2):
+				if absf(m.world.train_at(s0 + ds).y - m.world.train_at(s0).y) > 0.05: clear = false
 			if clear:
 				found = true
 				break
