@@ -107,7 +107,7 @@ func _ready() -> void:
 		var fm := KitShaders.mat("flame", Color("5aa8ff"))
 		fm.set_shader_parameter("seed", float(i) * 1.7)
 		flames.append({"node": KitMeshes.inst(self, KitMeshes.quad(0.9, 1.3), fm), "foe": null})
-	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(GREEN, 0.9)))
+	aura = KitMeshes.inst(self, Models.capsule(0.42, 1.7), KitShaders.mat("beam", Color(THREAD, 0.9)))
 	aura.material_override.set_shader_parameter("bands", 3.0)
 
 func _arrow_node() -> Node3D:
