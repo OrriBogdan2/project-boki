@@ -53,7 +53,7 @@ pocket opener cut a gap, the ridge broke up into short pieces: the "mini walls".
 Now (`HomeBuild._apply_wild`): the ridge stays as 1.6 m ground. A running jump tops it: the jump
 peaks at 1.57 m and the mantle (`home.gd MANTLE` 1.5 m above your feet) carries you over, and the shared
 movement numbers are unchanged. You walk off the top. A Boki walks round it, because raised ground is
-solid on the kin grid (`HomeBuild._solid_tile`). The pocket opener still runs with the ridge as a wall, so
+solid on the kin grid (`HomeBuild._solid_tile`). A stub that is not part of any 2x2 of ridge is levelled (`_settle_ridge`), because it is too thin to stop on after the climb and was most of the stray bits. The pocket opener still runs with the ridge as a wall, so
 no meadow is shut in. The Clear the wild brush (Island tab, 3 gems a tile) levels it for good. Trees and
 boulders are unchanged: chopped or mined with the axe and pickaxe.
 
