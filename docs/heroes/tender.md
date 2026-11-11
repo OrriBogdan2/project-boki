@@ -45,6 +45,18 @@ Source vs ours per slot. [data] = briefs/supervive-data (supervive_kits.md, Ellu
 
 Nothing in her LMB was off the source beyond what the earlier passes fixed; this pass adds the asserts.
 
+### Look weight (ext/vfx-meeko-weight, from the "By eye" note in docs/parity_reel/README.md)
+The source's shots, root, aura and ult carry far more on screen than ours did. Shape, size and weight now follow it; the palette is her leaf (#5fdc6a, from ext/vfx-tender; the root stays control violet) and nothing in the kit's numbers changed. Merged onto the integration line (ext/vfx-meeko-weight-rebased-rebased): the ember head stays at its hit radius and zones keep the ZONE_FILL centre cap; the weight comes from the halo, tail, rim width and tether.
+
+| Slot | Source (by eye) | Ours now |
+|---|---|---|
+| LMB | a comet with a trail | head at the hit radius with a near-white core and a 1.75x pale-leaf halo, a tail 0.8 m wide and 3.4 m long at EMBER_R (scaled with the hit radius); hand ribbon 0.4 m |
+| RMB | a bolt with a rune ring | a violet 0.9 m rune ring square to the flight round the burr; the root area under the foe keeps the faint ZONE_FILL inside with a wide lit rim (14%), so it reads while it fills, before the root |
+| E | a big bright disc | on her, a lit leaf ring with a wide bright edge (rim 16% of the radius; was 8%) over the faint 0.45 inside |
+| R | a long arc to the ally | the tether is ten segments bowed out to her right and up by 14% of the gap, a 0.16 m core in a 0.5 m halo; drawn for everyone, as before |
+
+GPU strips (match camera, `--hero-vfx-reel --reel-hero=tender`, `tender_{lmb,rmb,e,r}.png`): before jobq 20261109-152735-17087 (main d255acbee), after 20261109-162019-22501 (bab085d82; the R part uses the dummy as her teammate so the arc has an ally). The E edge reads only a little stronger on the gold ground. No bursts were added on dashes or landings. Asserted: `mm LMB: the comet has a trail ...`, `mm X: the tether is an arc ...`.
+
 ## Audit (Nov 3 23:40)
 Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3 (audited on main 200effce) against this branch.
 

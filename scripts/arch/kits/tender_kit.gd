@@ -438,7 +438,7 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": deep(), "rim": pale(), "fill": ZONE_FILL,
+					"r": burst_radius(), "col": deep(), "rim": pale(), "fill": ZONE_FILL, "rim_w": 0.14,
 					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9, "glow": 1.0})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": pale()})
 		if float(b["left"]) <= 0.0:
@@ -555,10 +555,11 @@ func _tick_hearth(dt: float) -> void:
 	var c := hearth_center()
 	hearth["pos"] = c if String(hearth["mode"]) != "flying" else hearth["pos"]
 	var tossed := bool(hearth.get("tossed", false))
-	# on her: a lit leaf ring with a faint inside; thrown: the same ring wider and brighter, pale in the middle
-	# shading to leaf at a glowing rim, its lantern floating over the middle
+	# on her: a lit leaf ring with a wide bright edge over a faint inside; thrown: the same ring wider and brighter,
+	# pale in the middle shading to leaf at a glowing rim, its lantern floating over the middle
 	var gk := float(hearth["left"]) / maxf(0.01, float(ed["time"]))
-	var look_p := {"r": hearth_r(), "col": pale(), "rim": leaf, "fill": 0.45, "pattern": 5.0, "glow": 1.0,
+	var look_p := {
+		"r": hearth_r(), "col": pale(), "rim": leaf, "fill": 0.45, "rim_w": 0.16, "pattern": 5.0, "glow": 1.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
 		look_p.merge({"fill": ZONE_FILL, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
