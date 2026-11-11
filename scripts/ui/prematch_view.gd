@@ -32,9 +32,10 @@ var talk_btn: Button
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
-const COLUMNS := 4          # Hunter cards per row
+const COLUMNS := 5          # Hunter cards per row (13 Hunters = 3 rows, which fit at 1280x720)
+const PORTRAIT_PX := 48.0   # px, a card's portrait (the lobby's smaller one)
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
-const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
+const LOG_H := 64.0         # px, the most the chat log grows to (it scrolls past that)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
 class Padlock extends Control:
@@ -65,15 +66,16 @@ func _ready() -> void:
 	banner = UI.vbox(0)
 	banner.alignment = BoxContainer.ALIGNMENT_CENTER
 	root.add_child(banner)
+	var turn_line := UI.hbox(16)      # whose turn and what to do share one line (the Hunter rows need the height)
+	turn_line.alignment = BoxContainer.ALIGNMENT_CENTER
+	banner.add_child(turn_line)
 	caption = UI.label("", 20, UI.MUTED, UI.semi)
-	caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	banner.add_child(caption)
+	turn_line.add_child(caption)
 	timer_label = UI.label("", TIMER_SIZE, UI.INK, UI.big)
-	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	timer_label.size_flags_horizontal = Control.SIZE_SHRINK_CENTER      # hugs the digits: the throb stays in the margin
 	banner.add_child(timer_label)
 	note_label = UI.label("", 22, UI.GOOD, UI.semi)
-	note_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	banner.add_child(note_label)
+	turn_line.add_child(note_label)
 	var head := UI.hbox(20)
 	root.add_child(head)
 	title_label = UI.title("Before the drop: pick your Hunter", 34)
@@ -92,7 +94,7 @@ func _ready() -> void:
 	grid.columns = COLUMNS
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	grid.add_theme_constant_override("v_separation", 8)
 	sc.add_child(grid)
 	_build_chat(root)
 	_talk(false)
@@ -192,7 +194,7 @@ func _pulse(left: float) -> void:
 
 ## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
 ## smaller windows get smaller digits. The declutter layout has no side column, so the Hunter grid
-## keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical px UI).
+## keeps COLUMNS at every size (5 x CARD_MIN_W fits the 1240 logical px UI).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
@@ -226,12 +228,12 @@ func _fill_hunters() -> void:
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
-	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
+	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 8, Arch.color(ak))
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var row := UI.hbox(10)
 	card.add_child(row)
-	row.add_child(ClassCard.portrait(ak))
+	row.add_child(ClassCard.portrait(ak, PORTRAIT_PX))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -239,13 +241,16 @@ func _tile(ak: String) -> PanelContainer:
 	row.add_child(col)
 	col.add_child(UI.label(HeroTitle.base_name(ak), 20, Arch.color(ak) if open else UI.FAINT, UI.big))
 	var role := String(Arch.def(ak)["card"]["role_word"])
+	var sub: Label
 	if ak == pm.pick:
-		col.add_child(UI.label(role + ("  ·  your pick" if pm.my_turn() else "  ·  locked in"), 13, UI.GOOD))
+		sub = UI.label(role + ("  ·  your pick" if pm.my_turn() else "  ·  locked in"), 13, UI.GOOD)
 	elif mate != "":
-		col.add_child(UI.label(role + "  ·  taken by " + mate, 13, UI.FAINT))
+		sub = UI.label(role + "  ·  taken by " + mate, 13, UI.FAINT)
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	else:
-		col.add_child(UI.label(role, 13, UI.MUTED))
+		sub = UI.label(role, 13, UI.MUTED)
+	sub.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS      # a long squadmate name never widens the grid
+	col.add_child(sub)
 	card.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak)
 	if not open:
 		row.add_child(Padlock.new())
