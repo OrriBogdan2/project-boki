@@ -165,14 +165,18 @@ func _slam_tell() -> void:
 	ak.step(m, 0.2)
 	var tell: Dictionary = AimKit.entry(P, "e_tell")
 	var tdir: Vector2 = tell.get("dir", Vector2.ZERO)
-	var fill_mid := float(tell.get("fill", 0.0))
+	var fist: Dictionary = (HeroVfx.data("dredge")["moves"] as Dictionary)["anchor_fist"]["fx"][0]
+	var lands := absf(float(fist["life"]) * float(fist["fall"]) - float(ed["windup"])) < 0.01
+	var fist_up: bool = HeroVfx.of(m).plays.get("anchor_fist", 0) == 1 and lands
 	ok(
-		"anchor tell: the hit cone is drawn for everyone, the slam's own radius, angle and direction",
+		"anchor tell: an outline (no fill) of the hit cone for all; the fist lands on the slam",
 		AimKit.shown(P, "e_tell") and bool(tell.get("all", false))
 			and absf(float(tell.get("len", 0.0)) - reach) < 0.01
 			and absf(float(tell.get("deg", 0.0)) - float(ed["angle"])) < 0.01 and tdir.distance_to(Vector2(1, 0)) < 0.02
-			and fill_mid > 0.3 and fill_mid < 0.8 and ak.dmg(T) == 0.0,
-		"len %.1f deg %.0f fill %.2f" % [float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), fill_mid]
+			and bool(tell.get("outline", false)) and float(tell.get("fill", -1.0)) < 0.0
+			and fist_up and ak.dmg(T) == 0.0,
+		"len %.1f deg %.0f outline %s fist %s" % [
+			float(tell.get("len", 0.0)), float(tell.get("deg", 0.0)), tell.get("outline"), fist_up]
 	)
 	# the hop carries the drawn cone with him: wait it out, then place the foes in the cone
 	while K.wind > 0.03:
