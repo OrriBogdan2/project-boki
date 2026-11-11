@@ -11,7 +11,6 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
 # out under four terraces (the wall kick's job) on our 0.8m terraces
 const JUMP_V := 6.8
-const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
@@ -236,7 +235,7 @@ var ak: ArchKit = null        # the archetype's kit at run time
 var shot_range_k := 1.0       # the next shot's range multiplier (1 unless a kit sets it)
 var shot_aim := ""            # the next shot's aim mode (AimMode.CURSOR / MAX); "" = the weapon's own
 var draw_t := -1.0            # a bow being drawn: how long (-1: not drawing)
-var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and terrain don't stop you while > 0
+var spirit_t := 0.0           # Spirit Walk (PinSpirit): rocks, trees, barriers and ledge faces don't stop you while > 0
 var nth_n := 0                # shots since the weapon's "every Nth" bonus
 
 
@@ -2264,12 +2263,7 @@ func _physics(dt: float) -> void:
 	# you inside the clump). Terrain ledges are the ledge rise's (_ledge_rise).
 	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
-	var g := ground()
-	if spirit_t > 0.0 and g > pos.y + World.STEP:
-		# Phase Walk into a ledge face: she climbs it (no wall stops her), and walking off the top drops her
-		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
-		grounded = true
-		vel.y = 0.0
+	var g := PinSpirit.floor_under(self, ground())
 	if grounded and g < pos.y - 0.05:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)

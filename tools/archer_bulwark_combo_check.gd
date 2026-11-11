@@ -73,6 +73,83 @@ func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	m.step(DT)
 	return _shot_reach(m, P)
 
+## Spirit Walk through terrain (docs/KIT_PARITY.md gap 8): a terrace face is passed at her own height, ending
+## inside a pillar puts her back where she went in (never on its top), a roll over an abyss gap into a cliff
+## ends back on her own island, never in the gap, and she still walks off a ledge.
+func _spirit_ledges(m: Match, P: Hunter, K: ArcherKit, home: Vector3) -> void:
+	var W: World = m.world
+	var hx := int(home.x)
+	var hz := int(home.z)
+	var lv := int(W.level[W.idx(hx, hz)])
+	var lv0: PackedByteArray = W.level.duplicate()
+	var kd0: PackedByteArray = W.kind.duplicate()
+	var build := func(x0: int, x1: int, z0: int, z1: int, tiers: int, kind: int):
+		W.level = lv0.duplicate()
+		W.kind = kd0.duplicate()
+		for z in range(hz + z0, hz + z1 + 1):
+			for x in range(hx + x0, hx + x1 + 1):
+				W.kind[W.idx(x, z)] = kind
+				W.level[W.idx(x, z)] = lv + tiers
+	var roll := func(at: Vector3, hold: float, secs: float):     # roll +z, keep walking `hold` s, stand to `secs`
+		P.teleport(at)
+		P.vel = Vector3.ZERO
+		P.grounded = true
+		P.dashes = P.max_dashes()
+		aim_at(P, at + Vector3(0, 0, 6))
+		P.inp["move"] = Vector2(0, 1)
+		P.do_dash()
+		var t := [0.0]
+		step(m, secs, func():
+			P.inp["move"] = Vector2(0, 1) if t[0] < hold else Vector2.ZERO
+			t[0] += DT)
+	# a 2 m thick, 2.4 m terrace face 1.5 m ahead: she comes out the far side at her own height
+	build.call(-2, 2, 2, 3, 3, World.T_GROUND)
+	var in0 := K.spirit.passed
+	roll.call(home, 1.0, 1.0)
+	ok(
+		"combo pin: Spirit Walk passes through a terrace face at her own height",
+		P.pos.z > hz + 4.3 and absf(P.pos.y - home.y) < 0.35 and K.spirit.passed > in0 and P.grounded,
+		"z +%.1f (face +1.5..+3.5) y %+.2f inside %d" % [P.pos.z - home.z, P.pos.y - home.y, K.spirit.passed - in0]
+	)
+	K.spirit.end("time")
+	step(m, 0.3)
+	# a 4.8 m pillar (no climb reaches its top): she stops inside it and the walk runs out
+	build.call(-1, 1, 2, 4, 6, World.T_GROUND)
+	var sn0 := K.spirit.snap_backs
+	roll.call(home, 0.0, K.spirit.walk_time() + 0.5)
+	ok(
+		"combo pin: Spirit Walk ending inside a pillar = back where she went in, not on its top",
+		K.spirit.snap_backs == sn0 + 1 and P.pos.z < hz + 2 and absf(P.pos.y - home.y) < 0.35
+			and P.safe_pos.y < home.y + 0.5,
+		"z +%.1f y %+.2f safe y %+.2f" % [P.pos.z - home.z, P.pos.y - home.y, P.safe_pos.y - home.y]
+	)
+	# a 2 m abyss gap, then a 4.8 m cliff (past any climb): rolled across into the cliff, the walk ends inside it
+	build.call(-2, 2, 2, 3, 0, World.T_VOID)
+	for z in range(hz + 4, hz + 8):
+		for x in range(hx - 2, hx + 3):
+			W.level[W.idx(x, z)] = lv + 6
+	sn0 = K.spirit.snap_backs
+	roll.call(home, 0.5, K.spirit.walk_time() + 0.5)
+	ok(
+		"combo pin: Spirit Walk over an abyss gap into a cliff = back on her own island, never in the gap",
+		K.spirit.snap_backs == sn0 + 1 and P.pos.z < hz + 2 and not P.over_void() and not P.out
+			and absf(P.pos.y - home.y) < 0.35,
+		"z +%.1f y %+.2f void %s" % [P.pos.z - home.z, P.pos.y - home.y, P.over_void()]
+	)
+	# ...and walking off a ledge still drops her (home raised 2 tiers, the ground beyond it not)
+	build.call(-3, 3, -3, 1, 2, World.T_GROUND)
+	roll.call(home + Vector3(0, 2 * World.LEVEL, 0), 1.0, 1.2)
+	ok(
+		"combo pin: Spirit Walk still walks off a ledge (lands on the ground below)",
+		P.pos.z > hz + 2.5 and absf(P.pos.y - home.y) < 0.1 and P.grounded,
+		"z +%.1f y %+.2f" % [P.pos.z - home.z, P.pos.y - home.y]
+	)
+	K.spirit.end("time")
+	W.level = lv0
+	W.kind = kd0
+	P.inp["move"] = Vector2.ZERO
+	step(m, 0.3)
+
 func _archer_combos() -> void:
 	var r := setup("archer", 7.0, "", true)
 	var m: Match = r[0]
@@ -592,6 +669,7 @@ func _archer_combos() -> void:
 	P.hurt(5.0, T2, {"src": "shot"})
 	step(m, 0.05)
 	ok("pin: damage ends Spirit Walk", not K.spirit.active() and P.spirit_t <= 0.0)
+	_spirit_ledges(m, P, K, home)
 	# rank 3 (data: Phase Walk IV): 0.5 s longer, +33% inside something that fades over the walk, allies near her walk too
 	P.slot_lv["dash"] = 3
 	step(m, 0.5)
