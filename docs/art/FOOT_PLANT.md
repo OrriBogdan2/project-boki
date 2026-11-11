@@ -44,6 +44,9 @@ match the twin's within 0.04 m, and a step up must not pop the drawn body (under
 Worst: 0.000 m in every case (the weight-bearing foot follows at once). It also prints how far the crags' mesh (RockLook) lies under the
 foot, not asserted: the stand surface is the rock's `top` (2.2 m, the main crag's peak) over its whole footprint,
 while the crown's peaks and gaps put the mesh 0.02 m to 2.2 m under a planted foot.
+Shot at gameplay zoom (`--breah-shots --breah-only=ridge`: standing on the ridge, then walking along it):
+`docs/art/foot_plant/dolm_ridge.jpg` (xvfb software render on rpc6; the GPU jobs 20261111-102330-06262,
+-102541-03323 and -102753-32355 were lost to GPU worker restarts).
 
 Strips: `jobq submit --needs gpu --tree <tree> --out shots -- --foot-plant-shots --shots-dir=shots` writes
 `<id>.png` per Hunter: slope stand, slope walk, step stand and step walk side on. Planting is off in the top row and
