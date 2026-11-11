@@ -120,6 +120,7 @@ func step(d: float) -> void:
 			_seen[uid] = true
 	for k in h.kins:
 		_tick(k, dt)
+	GardenVisitor.step(h, dt)
 	if h.hway:
 		h.hway.step(dt)
 

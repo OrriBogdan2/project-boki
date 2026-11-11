@@ -46,3 +46,9 @@ Step 7b (Cinderstep) is the second, on the same system with no new code path: it
 `ZoneDress` gained (stepped terraces, glowing cracks; one batch and one material each). The Stump Shove
 stump stands on the zone's own spot from `base_shove.json` `spots`, as Spark Volley's court does, with no
 Training post.
+
+Wild visitors (GARDEN_MODERN.md 5 rank 6, `GardenVisitor`) add one lazy key, `Save.d["visitor"]` (the wild
+Boki's record, its zone, arrival time, favourite meals given, away-card notes and the earliest next
+arrival); an older save simply lacks it and no version changes. The visitor is not on the roster: it joins
+the zone's kins through `GardenZones.out_here()` for one garden day, and only becomes a roster Boki (or
+leaves an egg) after three favourite meals. Suit data: `content/rules/garden_visitor.json`.
