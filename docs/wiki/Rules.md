@@ -631,6 +631,17 @@ The Dash, the first Boki-vs-Boki race (scripts/home/base_race.gd, briefs/design/
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## stretch_held (`content/rules/stretch_held.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| gunslinger | 3.68 |
+| juggernaut | 2.6 |
+| archer | 2.91 |
+| ashwick | 4.35 |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Units: seconds, tiles, 0..1 trait values, joy points.

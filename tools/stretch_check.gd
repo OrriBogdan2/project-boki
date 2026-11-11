@@ -1,18 +1,22 @@
 extends RefCounted
 ## --stretch-check [--wardens=a,b] [--limit=1.3] [--step=0.125]: skins every visible mesh of each Hero's .glb through
 ## every one of its clips (the game's own clip tree and Sync) and measures each triangle edge against its rest length.
-## No clip may stretch an edge past the limit. Spring chains (spring_*: the game's own physics ropes and cloth)
-## are not measured. A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch:
-## the ratio is divided by it. Prints one line per clip and a table per Hero. Never touches the save.
+## No clip may stretch an edge past the limit, except Heroes held in content/rules/stretch_held.json: their worst
+## ratio may not pass the ceiling there (a ratchet: lower it when a Hero is relaxed further).
+## Spring chains (spring_*: the game's own physics ropes and cloth) are not measured.
+## A bone that grows on all three axes, like Grimble's junk ball, is growth, not stretch: the ratio is divided by it.
+## Prints one line per clip and a table per Hero. Never touches the save.
 
 const MIN_EDGE := 0.008          # m: shorter rest edges (seams, welds, chain links) say nothing about stretch
 const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.FADE 0.1 s) before it is measured
 const DT := 1.0 / 30.0
+const HELD := "res://content/rules/stretch_held.json"    # Hero id -> its ceiling (worst ratio when held)
 
 var tree: SceneTree
 var bad := 0
 var limit := 1.3
 var step := 0.125                # s between samples of a clip
+var held: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(HELD))
 var parts: Array = []            # per skinned mesh: {verts, bones, weights, stride, skin, edges, rest, bind_bones}
 var skel: Skeleton3D
 
@@ -61,7 +65,7 @@ func _hero(id: String, holder: Node3D) -> Array:
 	for nm in names:
 		var r := await _clip(clips, String(nm))
 		var ratio := float(r[0])
-		var flag := ratio > limit
+		var flag := ratio > maxf(limit, float(held.get(id, 0.0)))
 		print("STRETCH %s %s %s max=%.2f t=%.2f %s" % ["FAIL" if flag else "ok  ", id, nm, ratio, r[1], r[2]])
 		over += 1 if flag else 0
 		if ratio > worst:

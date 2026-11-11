@@ -32,7 +32,7 @@ poses_game, moves_close_1/2): no tearing at the mouth or elsewhere, no arm/chest
 
 Checks: `--cinder-art-check` 0 fails; `--warden-glb-check` all ashwick lines pass (13.7k tris); `--warden-model-check`
 passes with ashwick's `height_3d` re-measured to 1.15 (the new horns stand lower than v2's). `--stretch-check` (new,
-`tools/stretch_check.gd`, the same maths as `tools/art1/skin_relax.py`) still flags every ashwick clip past 1.3x, worst 6.8x
+`tools/stretch_check.gd`, the same maths as `tools/art1/skin_relax.py`) still flags every ashwick clip past 1.3x, worst 6.8x (relaxed in place 2026-11-11 by tools/art1/relax_glb.py: worst 4.3x, held in content/rules/stretch_held.json)
 (idle 2.3x, run 4.0x); the old build was worse on every clip (worst 19.4x, idle 5.8x, run 11.9x), from the same rig's hips,
 thighs, forearms and the kept jets.
 

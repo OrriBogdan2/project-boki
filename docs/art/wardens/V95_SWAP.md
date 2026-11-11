@@ -38,6 +38,13 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
+## Relaxing a finished glb without a re-swap
+`blender -b --factory-startup --python tools/art1/relax_glb.py -- art/wardens/<id>/<id>.glb OUT.glb` imports the game .glb on its own
+armature, runs skin_relax with `CUTS` 0 (nothing cut or capped: the triangle count stays) and `MAX_ITER` 800, `RINGS` 2 (the defaults, 60
+and 1, stop near 6x), and exports with the swap's settings. About 30 minutes a Hero. Copy it over the .glb, `godot --headless --path . --import`,
+run `--stretch-check --wardens=<arch>` and put the worst in `content/rules/stretch_held.json`. Done 2026-11-11 for vex, kael, hem (Lace)
+and cinder. Run it on the merged .glb if a branch added clips to one of these after.
+
 ## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
 the master has no extra hand and its slime arm and gauntlet are right (master_v95_grid_front.jpg), the skeleton,
