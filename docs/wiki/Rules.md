@@ -808,11 +808,12 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 
 | Setting | Value |
 |---|---|
-| _doc | Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd. |
+| _doc | Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd. steal (scripts/match/steal_window.gd, docs/decisions/0048-camps-and-xp.md): prize = the monster kinds with a kill window (a Camp Chief is a Brute); window = health fraction at or under which the bar pulses and it cries; reel = seconds the first drop under it stands open, no attacks, normal damage. |
 | share_r | 30 |
 | knock | {"base": 40, "per_level": 15} |
 | camp_mob | {"skitter": 30, "bomber": 30, "spitter": 30, "sentinel": 50, "brute": 100, "chief": 170} |
 | stray | 8 |
+| steal | {"prize": ["brute", "glimmer", "warden", "colossus", "serpent", "brood"], "window": 0.25, "reel": 1.2} |
 
 ## Combos
 

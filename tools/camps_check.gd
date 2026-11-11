@@ -5,8 +5,9 @@ extends RefCounted
 ## standing still or for hurting Hunters (armor only); a kill pays its XP to the last hit's squad
 ## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
-## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
-## touches the save.
+## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. A prize
+## monster at or under 25% health has a kill window (cry once, band, a 1.2 s reel on the first drop
+## into it: no attacks, normal damage; scripts/match/steal_window.gd). Never touches the save.
 
 const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
 
@@ -33,6 +34,7 @@ func run(main: Node) -> void:
 	_xp(m)
 	_clear(m)
 	_comeback(m)
+	_window(m)
 	_hot(main)
 	print("CAMPS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -252,3 +254,64 @@ func _hot(main: Node) -> void:
 			if hot: checked += 1
 		m.queue_free()
 	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
+
+## The kill window: prize monsters only, one cry and one reel per drop under 25%.
+func _window(m: Match) -> void:
+	var P: Hunter = m.player
+	P.pos = Vector3(0, 0, 0)
+	var prize := ["brute", "glimmer", "warden", "colossus", "serpent", "brood"]
+	var rest := ["skitter", "spitter", "bomber", "sentinel", "shrubling", "ward"]
+	var set_ok := true
+	for k in prize: set_ok = set_ok and StealWindow.is_prize(m.spawn_mob(k, Vector3(60, 0, 60)))
+	for k in rest: set_ok = set_ok and not StealWindow.is_prize(m.spawn_mob(k, Vector3(60, 0, 60)))
+	ok(set_ok, "prize monsters: Brute (so the Camp Chief), Glimmerkin, the Watcher, the three lair bosses; no others")
+	var mb := m.spawn_mob("brute", Vector3(4, 0, 0))
+	var n0 := m.stag_n
+	mb.hurt(100.0, P)
+	StealWindow.tick(mb)
+	var quiet := not StealWindow.open(mb) and mb.stagger_t == 0.0 and not mb.win_cried
+	ok(quiet, "a Brute at 41%: no window, no cry, no reel")
+	mb.hp = mb.max_hp * 0.30
+	var dealt := mb.hurt(3.0, P)
+	ok(mb.stagger_t == 0.0 and absf(dealt - 3.0) < 0.01, "at 28%: still no reel")
+	P.hp = P.max_hp
+	mb.hurt(mb.hp - mb.max_hp * 0.2, P)
+	StealWindow.tick(mb)
+	ok(StealWindow.open(mb) and mb.win_cried, "dropping under 25%: the window is open and it cried")
+	var reeled := absf(mb.stagger_t - 1.2) < 0.001 and mb.stun_t >= 1.2 and mb.st == "recover"
+	ok(reeled and m.stag_n == n0, "the first drop reels it 1.2 s (stagger, no refund or stagger count)")
+	var hp0 := mb.hp
+	var took := mb.hurt(10.0, P)
+	ok(absf(took - 10.0) < 0.01 and absf(hp0 - mb.hp - 10.0) < 0.01, "a hit in the reel does normal damage, not x2.5")
+	var atk := false
+	for i in 11:
+		mb.sim(0.1)
+		atk = atk or mb.st in ["windup", "lunge"]
+	ok(not atk and P.hp == P.max_hp, "it makes no attack for the whole reel")
+	mb.stagger_t = 0.0
+	mb.stun_t = 0.0
+	mb.hurt(5.0, P)
+	ok(mb.stagger_t == 0.0 and mb.win_reeled, "no second reel when it drops again inside the window")
+	var one := m.spawn_mob("brute", Vector3(4, 4, 0))
+	one.hurt(1e6, P)
+	ok(one.dead and one.stagger_t == 0.0, "a hit that kills from above the window reels nothing")
+	var sk := m.spawn_mob("skitter", Vector3(4, 8, 0))
+	sk.hurt(sk.max_hp * 0.9, P)
+	StealWindow.tick(sk)
+	quiet = not StealWindow.open(sk) and sk.stagger_t == 0.0 and not sk.win_cried
+	ok(quiet, "a small monster at 10%: no window, no cry, no reel")
+	# another machine: it only sees health from the host's snapshot and cries by itself, never reels
+	var far := m.spawn_mob("brute", Vector3(60, 0, 60))
+	far.remote = true
+	far.hp = far.max_hp * 0.2
+	StealWindow.tick(far)
+	var cried := far.win_cried and not far.win_reeled and far.stagger_t == 0.0
+	ok(cried, "a remote copy at 20% cries itself and never reels (host timer)")
+	far.hp = far.max_hp * 0.6
+	StealWindow.tick(far)
+	ok(not far.win_cried, "healed back above the window it rearms")
+	var boss: Mob = m.mobs.filter(func(b): return b is Boss)[0]
+	var bhp := boss.hp
+	boss.hp = boss.max_hp * 0.2
+	ok(StealWindow.open(boss), "a lair boss at 20% has the window too")
+	boss.hp = bhp

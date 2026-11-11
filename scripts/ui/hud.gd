@@ -395,7 +395,9 @@ func _draw_world_labels() -> void:
 		if mb is Boss:
 			if not (mb as Boss).dormant and m.lairs.boss_for(m.player) != mb:
 				_ctext(sp + Vector2(0, -26), String(mb.md["name"]), 15, Lairs.color_of((mb as Boss).lair), big)
-				_bar(Rect2(sp + Vector2(-50, -18), Vector2(100, 7)), clampf(mb.hp / mb.max_hp, 0.0, 1.0), Color("ff6a5a"))
+				var lr := Rect2(sp + Vector2(-50, -18), Vector2(100, 7))
+				_bar(lr, clampf(mb.hp / mb.max_hp, 0.0, 1.0), Color("ff6a5a"))
+				StealWindow.draw_band(c, lr, mb, m.time)
 			continue
 		if mb.hp < mb.max_hp or rare:
 			var bw := 64.0 if mb.mkind in ["brute", "warden"] else 48.0
@@ -413,6 +415,7 @@ func _draw_world_labels() -> void:
 			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
+			StealWindow.draw_band(c, br, mb, m.time)
 			_status_row(sp + Vector2(0, 16), mb)
 	# gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
 	# already drawn this frame step up above it, so a few drops side by side stay readable.
@@ -3105,6 +3108,7 @@ func _draw_boss_bar(sz: Vector2, p: Hunter) -> void:
 		c.draw_rect(Rect2(r.position + Vector2(w * frac, 0), Vector2(w * (ct - frac), r.size.y)), Color(1.0, 0.95, 0.88, 0.8))
 	var hc := Color("ff5a4a") if b.enraged else (Color("e0b0ff") if b.stagger_t > 0.0 else Color("ff8a5a"))
 	c.draw_rect(Rect2(r.position, Vector2(w * frac, r.size.y)), hc)
+	StealWindow.draw_band(c, r, b, m.time)
 	for mk in [0.66, 0.33]:
 		c.draw_line(r.position + Vector2(w * mk, -3), r.position + Vector2(w * mk, r.size.y + 3), Color(1, 1, 1, 0.8), 2.0)
 	_ctext(r.get_center() + Vector2(0, 5), "%d / %d" % [int(ceil(b.hp)), int(b.max_hp)], 12, INK, big)

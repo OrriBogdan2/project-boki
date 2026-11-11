@@ -29,6 +29,9 @@ var stag_next := 0.0
 var stagger_t := 0.0
 var stag_ring: MeshInstance3D = null
 var stag_stars: Node3D = null           # a treasure kin slips away if nobody hurts it for a while
+var stagger_mult := STAGGER_DMG         # damage taken while staggered (1 in a kill-window reel)
+var win_cried := false                  # the kill window's cry sounded here (StealWindow)
+var win_reeled := false                 # the kill window's reel already happened (StealWindow)
 
 func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0) -> void:
 	setup(match_node, id)
@@ -79,13 +82,14 @@ func _cancel_tele() -> void:
 func hurt(d: float, by: Ent, opts := {}) -> float:
 	if not remote and not dead and d > 0.0:
 		if stagger_t > 0.0:
-			d *= STAGGER_DMG
+			d *= stagger_mult
 		elif stag_open > 0.0 and opts.has("ab"):
 			d += max_hp * float(md.get("stag_k", 0.08 if mkind == "warden" else 0.2))
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0:
 		calm_t = 0.0
+		StealWindow.on_hurt(self, by, opts)
 		var from: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
 		if from is Hunter:
 			damage_by[from.team] = float(damage_by.get(from.team, 0.0)) + dealt
@@ -101,13 +105,22 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 				st = "chase"
 	return dealt
 
-func _stagger(by: Ent, opts: Dictionary) -> void:
-	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
+## A kill-window reel (StealWindow): the stagger's stillness without its bonus damage or refund.
+func reel(by: Ent, opts: Dictionary) -> void:
+	_stagger(by, opts, StealWindow.reel_time())
+
+func _stagger(by: Ent, opts: Dictionary, reel_s := 0.0) -> void:
+	stagger_mult = STAGGER_DMG if reel_s <= 0.0 else 1.0
+	stagger_t = reel_s
+	if reel_s <= 0.0:
+		stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
 	stun_t = maxf(stun_t, stagger_t)
-	stag_open = 0.0
-	stag_next = randf_range(10.0, 14.0)
 	_cancel_tele()
 	st = "recover"; st_t = stagger_t
+	if reel_s > 0.0:
+		return
+	stag_open = 0.0
+	stag_next = randf_range(10.0, 14.0)
 	m.on_stagger(self, by, String(opts.get("ab", "")))
 
 ## Opens and closes stagger windows. Runs on whoever owns the monster.
@@ -166,6 +179,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
+	StealWindow.tick(self)
 	if remote:
 		st_t -= dt
 		net_follow(dt)
