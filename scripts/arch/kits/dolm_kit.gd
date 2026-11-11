@@ -347,6 +347,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 		if lmb_t >= 0.0:
 			lmb_t = -1.0
 			h.mel_hold = 0.0
+			if h.stun_t > 0.0 or h.downed: KitWindup.broken(self, "lmb")
 		return true
 	if slam.charging():
 		if pressed: slam.extend()            # a punch during the Quakefall charge carries her (and the circle) forward
@@ -372,7 +373,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 			h.mel_hold = k
 			if anim_id != "breah_wind" or m.time - anim_at > 3.0: play("breah_wind")
 			_punch_tele(k)
-			if not KitLooks.of(m).holding("br_fist"): m.sfx("br_wind", h.pos, -6.0, 1.0)
+			if not KitLooks.of(m).holding("br_fist"): KitWindup.play(self, "lmb", "br_wind", -6.0)
 			KitLooks.of(m).hold_on("br_fist", "mote", h, _fist_at(), 0.9 + 1.0 * k, COBALT.lerp(Color("9ad0ff"), k))
 	elif lmb_t >= 0.0:
 		# held as long as you like (the data: hold and release; no timeout), full stays full

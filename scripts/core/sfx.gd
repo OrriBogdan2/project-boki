@@ -44,6 +44,11 @@ var recent := {}          # sound -> start times (ms) still inside the stacking 
 var streams := {}
 var players: Array[AudioStreamPlayer] = []
 var next := 0
+## A handle (from play) names one sound on one pool voice: starts * POOL + the voice, so a handle to a sound
+## that has ended, its voice gone on to another, cuts nothing.
+var starts := PackedInt32Array()       # per pool voice: how many sounds it has started
+var _cut_tw: Array[Tween] = []         # per pool voice: its fade-out under way (cut)
+const CUT_FADE := 0.05                 # s: a cut sound fades this fast, so it doesn't click (a broken cast)
 var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
@@ -92,6 +97,8 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+	starts.resize(POOL)
+	_cut_tw.resize(POOL)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -408,44 +415,59 @@ func _distance_db(pos, reach := 0.0) -> float:
 	return db + linear_to_db(maxf(edge, 0.001))
 
 ## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer:
-	var p: AudioStreamPlayer = null
+func _voice(pos) -> int:
+	var i := next
 	for k in POOL:
-		var c := players[(next + k) % POOL]
-		if not c.playing:
-			p = c
-			next = (next + k + 1) % POOL
+		if not players[(next + k) % POOL].playing:
+			i = (next + k) % POOL
 			break
-	if p == null:
-		p = players[next]
-		next = (next + 1) % POOL
+	next = (i + 1) % POOL
+	if _cut_tw[i] != null:
+		_cut_tw[i].kill()
+	starts[i] += 1
 	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
-	return p
+	players[i].bus = "SFXFar" if far else "SFX"
+	return i
+
+## Fades out the sound `handle` names (from play) if its voice still plays it: a wind-up whose cast was broken.
+func cut(handle: int, fade := CUT_FADE) -> void:
+	if not sounding(handle):
+		return
+	var p := players[handle % POOL]
+	var tw := p.create_tween()
+	tw.tween_property(p, "volume_db", -60.0, fade)
+	tw.tween_callback(p.stop)
+	_cut_tw[handle % POOL] = tw
+
+## Whether the sound `handle` names (from play) is still playing.
+func sounding(handle: int) -> bool:
+	var i := handle % POOL
+	return handle >= 0 and handle == starts[i] * POOL + i and players[i].playing
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
-## burst of the same sound is capped and stacked quieter.
-func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> void:
+## burst of the same sound is capped and stacked quieter. Returns a handle for cut, -1 when nothing played.
+func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 1.0) -> int:
 	if sname in skip or (not streams.has(sname) and not _lazy(sname)):
-		return
+		return -1
 	var now := Time.get_ticks_msec()
 	var gap: int = 260 if sname.begins_with("v_") else int(MIN_GAP.get(sname, SfxKits.MIN_GAP.get(sname, 30)))
 	if sname.contains("step_"): gap = 25         # footsteps: several people can walk at once
 	if now - int(last_played.get(sname, -1000)) < gap:
-		return
+		return -1
 	var v := vol_db + _distance_db(pos, float(sound_reach.get(sname, 0.0))) + (BLAST_DB if sname in BLAST else 0.0)
 	if is_nan(v):
-		return
+		return -1
 	var times: Array = recent.get(sname, [])
 	while not times.is_empty() and now - int(times[0]) > STACK_MS:
 		times.pop_front()
 	if times.size() >= STACK_MAX:
-		return
+		return -1
 	v -= STACK_DB * times.size()
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	var p := _voice(pos)
+	var vi := _voice(pos)
+	var p := players[vi]
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -459,6 +481,7 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	p.volume_db = v
 	p.pitch_scale = pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var))
 	p.play()
+	return starts[vi] * POOL + vi
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
@@ -568,7 +591,7 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	if is_nan(v):
 		return
 	last_played[key] = now
-	var p := _voice(pos)
+	var p := players[_voice(pos)]
 	p.stream = st
 	p.volume_db = v
 	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)

@@ -90,9 +90,10 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	_kit_names(arch, d.get("kit_files", []))
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
-## files the set lists under "kit_files" (paths under scripts/arch/kits/).
+## files the set lists under "kit_files" (paths under scripts/arch/kits/). A wind-up's sound goes through
+## KitWindup.play(kit, "slot", "name", ...), so those names count too.
 func _kit_names(arch: String, extra: Array) -> void:
-	var re := RegEx.create_from_string("\\.sfx\\(\"([a-z0-9_]+)\"")
+	var re := RegEx.create_from_string("(?:\\.sfx\\(|KitWindup\\.play\\(\\w+, \"\\w+\", )\"([a-z0-9_]+)\"")
 	var silent := []
 	for f in ["%s_kit.gd" % arch] + extra:
 		var path := "res://scripts/arch/kits/" + String(f)

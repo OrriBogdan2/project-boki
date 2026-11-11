@@ -3,7 +3,8 @@
 Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quiet 4x partial, a 2-3 ms
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
-muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
+muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick, a broken cast
+= a snap and a flat sag.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -134,6 +135,14 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+def broken(i):
+    """A cast broken under you (a stun in a wind-up): a dry snap and a short pluck that sags flat, over in 0.2 s."""
+    snap = bpf(noise(0.018), 2600, 5200) * env(N(0.018), 0.0008, 0.005)
+    sag = S.sweep(NOTE['E5'], NOTE['E5'] * 0.82, 0.16) * env(N(0.16), 0.002, 0.045)
+    thud = 0.35 * pluck(NOTE['C4'], 0.12, 0.03, 0.2)
+    return finish(room(mix(0.8 * snap, at(0.55 * sag, 0.012), thud), 0.25), 4200)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -150,6 +159,7 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.save_cat('cast_broken', broken(0), 'ui')
 
 
 if __name__ == '__main__':

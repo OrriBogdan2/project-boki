@@ -543,7 +543,7 @@ func cast_e() -> bool:
 	wind = float(ed["windup"])
 	slam_dir = h.aim_dir()
 	play("dr_anchor")
-	m.sfx("dr_anchor_wind", h.pos, -3.0, 1.0)
+	KitWindup.play(self, "e", "dr_anchor_wind", -3.0)
 	return true
 
 func use_e() -> void:
@@ -560,6 +560,7 @@ func _tick_wind(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
+		KitWindup.broken(self, "e")
 		return
 	h.face = atan2(-slam_dir.x, -slam_dir.y)
 	_hop(ed, float(ed["windup"]) - wind)

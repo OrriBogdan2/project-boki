@@ -46,6 +46,16 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
+- `Sfx.play` returns a handle to its pool voice (-1 when nothing played); `Sfx.cut(handle)` fades just that sound out
+  (`CUT_FADE` 0.05 s) if the voice still plays it, `Sfx.sounding(handle)` says whether it does.
+- Broken casts (`scripts/arch/kit_windup.gd`): a kit plays an interruptible wind-up's sound through
+  `KitWindup.play(kit, slot, name, db)` (or `KitWindup.keep` for a HeroVfx move's, `HeroVfx.last_voice`), and where a
+  stun or a knock breaks the cast it calls `KitWindup.broken(kit, slot)`: the wind-up voice stops and the caster hears
+  `cast_broken` (ui set). One per kit: Albert's Faultline plant, Grimble's Anchor Drop, Vex's Longneedle, Kael's
+  Finishing Slam, Motley's Shard Snap, Sparkle's Wirerun, Meeko's Hearth Call, Sable's Bola, Neve's spear push,
+  Cinder's Flue Flight, Lace's bow draw, Tenzo's Quake Fist. Not cut, since nothing breaks them: Vex's Cinderfall (the
+  shell is fired at the tap) and Motley's Nightwell (a stun frees him, the well goes on). `--match-audio-check` breaks
+  each and wants its voice silent within 0.1 s.
 
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.

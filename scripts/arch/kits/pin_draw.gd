@@ -130,12 +130,13 @@ func tick() -> void:
 		tgt = null
 	if drawing and was < 0.0:
 		k.play("arc_draw")
-		k.m.sfx("pin_draw", h.pos, -9.0 if h.is_local() else -13.0)
+		KitWindup.play(k, "lmb", "pin_draw", -9.0 if h.is_local() else -13.0)
 	elif drawing and k.anim_id == "arc_draw":
 		k.anim_at = k.m.time - t           # the pull-back runs on the draw's clock (a quick draw too)
 	elif not drawing and was >= 0.0 and k.anim_id in ["arc_draw", "arc_over"]:
 		if k.m.time - loosed_at > 0.1:
 			k.anim_id = ""                 # the draw was cancelled (a stun, a dash): nothing left the string
+			if h.stun_t > 0.0 or h.downed: KitWindup.broken(k, "lmb")
 			was = t
 			return
 		k.play(release_move())

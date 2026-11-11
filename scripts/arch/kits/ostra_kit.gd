@@ -479,7 +479,7 @@ func fire_rmb(c: Dictionary) -> void:
 	var wind := float(rmb_def()["snap"]["wind"])
 	snap = {"t": wind, "T": wind}
 	play("ostra_snap_wind")
-	m.sfx("os_snap_wind", h.pos, -5.0, 1.0)
+	KitWindup.play(self, "rmb", "os_snap_wind", -5.0)
 
 func _tick_snap(dt: float) -> void:
 	snap["t"] = float(snap["t"]) - dt
@@ -487,6 +487,7 @@ func _tick_snap(dt: float) -> void:
 	KitLooks.of(m).hold_on("os_snaporb", "dark", h, _hand(), lerpf(0.5, 1.3, grown))
 	if h.downed or h.stun_t > 0.0:
 		snap = {}
+		KitWindup.broken(self, "rmb")
 		return
 	if float(snap["t"]) <= 0.0:
 		snap = {}

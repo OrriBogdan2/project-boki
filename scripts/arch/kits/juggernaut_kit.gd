@@ -731,11 +731,13 @@ func fire_rmb(c: Dictionary) -> void:
 		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
 		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
 		vfx("slam_tell")
+		KitWindup.keep(self, "rmb", HeroVfx.of(m).last_voice)
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
+		KitWindup.broken(self, "rmb")
 		return
 	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]

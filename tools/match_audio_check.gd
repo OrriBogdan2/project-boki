@@ -5,6 +5,7 @@ extends RefCounted
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
+## And a broken cast's wind-up sound ends within 0.1 s, one interrupt per kit (tools/match_audio_interrupts.gd).
 
 var main: Node
 var fails := 0
@@ -53,6 +54,7 @@ func run(main_node: Node) -> void:
 	_ult_cues(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	await load("res://tools/match_audio_interrupts.gd").new().run(self, m, P, other)
 	other.remote = true
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")

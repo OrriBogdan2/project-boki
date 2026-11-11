@@ -36,6 +36,7 @@ var fx_t := 0.0
 var tell := ""                 # "" | "half" | "full": the resource tell enemies read
 var bonded_glow := false
 var fuse := {}                 # the R's fuse (wind-up) running: {t, T, bond, guard}
+var windups := {}              # slot -> the Sfx handles of its wind-up sounds, cut if the cast breaks (KitWindup)
 var cd_off := false            # practice toggle (Arena): cooldowns don't run down, they're skipped
 var flow: DashFlow             # what ability presses do during this hero's dash
 var dash_press_at := -9.0      # when Shift last went to on_dash (AirLimits: the dash's moves never hold the glider)
