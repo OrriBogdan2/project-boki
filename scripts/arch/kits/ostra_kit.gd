@@ -412,7 +412,7 @@ func _swap_end(go: bool) -> void:
 			if o2 != h and o2.team == h.team and not o2.downed and (
 				o2.flat_dist(from) < float(dd["ally_r"]) or o2.flat_dist(h) < float(dd["ally_r"])
 			):
-				o2.shield = maxf(o2.shield, float(dd["ally_shield"]))
+				ReceiverCue.shield(o2, float(dd["ally_shield"]))
 				o2.shield_t = 3.0
 
 ## Everyone in the landing circle (foes, allies, Boki off the shoulder) goes to where he was, each keeping
@@ -528,7 +528,6 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	s["x"]["stun"] = stun
 	s["x"]["dr"] = true
 	_boost(float(sn["boost"]["hit"]))
-	KitLooks.of(m).crown(e, stun)
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed

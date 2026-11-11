@@ -41,10 +41,10 @@ const FRAME := {
 		"ear_tip": Vector3(0.125, 0.45, -0.28), "tail_tip": Vector3(0, 0.057, 0.48), "tip_bone": "tail4", "hip": 0.15,
 		"marks": {"left flank": Vector3(-0.245, 0.28, 0.03), "right flank": Vector3(0.245, 0.28, 0.03),
 			"back": Vector3(0, 0.49, 0.05), "chest": Vector3(0, 0.18, -0.21)}},
-	"cairnback": {"head": Vector3(0, 0.30, -0.39), "top": 0.56, "carry": Vector3(0, 0.47, 0.23),
-		"ear_tip": Vector3(0.24, 0.345, -0.25), "tail_tip": Vector3(0, 0.095, 0.375), "tip_bone": "tail2", "hip": 0.15,
-		"marks": {"left flank": Vector3(-0.235, 0.26, 0.05), "right flank": Vector3(0.235, 0.26, 0.05),
-			"back": Vector3(0, 0.45, 0.22), "chest": Vector3(0, 0.19, -0.2)}},
+	"cairnback": {"head": Vector3(0, 0.234, -0.244), "top": 0.72, "carry": Vector3(0, 0.73, 0.05),
+		"ear_tip": Vector3(0.221, 0.257, -0.21), "tail_tip": Vector3(0, 0.091, 0.28), "tip_bone": "tail2", "hip": 0.146,
+		"marks": {"left flank": Vector3(-0.216, 0.221, -0.041), "right flank": Vector3(0.216, 0.221, -0.041),
+			"back": Vector3(0, 0.483, 0.095), "chest": Vector3(0, 0.182, -0.191)}},
 	"wisplet": {"head": Vector3(0, 0.44, -0.24), "top": 0.64, "carry": Vector3(0, 0.68, -0.02), "hip": 0.14,
 		"ear_tip": Vector3(0.204, 0.665, -0.038), "tail_tip": Vector3(0, 0.114, 0.257), "tip_bone": "tail1",
 		"marks": {"left flank": Vector3(-0.18, 0.22, 0.03), "right flank": Vector3(0.18, 0.22, 0.03),
@@ -71,14 +71,18 @@ const FRAME := {
 		"coat": {"fres": 0.15, "rim_amount": 0.1, "top_light": 0.1, "sheen": 0.0},
 		"marks": {"left flank": Vector3(-0.09, 0.225, -0.126), "right flank": Vector3(0.09, 0.225, -0.126),
 			"back": Vector3(0, 0.27, -0.03), "chest": Vector3(0, 0.225, -0.22)}},
+	"gibbelle": {"head": Vector3(0, 0.37, -0.15), "top": 0.52, "carry": Vector3(0, 0.6, 0.03),
+		"ear_tip": Vector3(0.155, 0.365, -0.05), "tail_tip": Vector3(0, 0.1, 0.17), "tip_bone": "hips", "hip": 0.0,
+		"marks": {"left flank": Vector3(-0.16, 0.15, 0.02), "right flank": Vector3(0.16, 0.15, 0.02),
+			"back": Vector3(0, 0.25, 0.16), "chest": Vector3(0, 0.24, -0.12)}},
 	"glomwort": {"head": Vector3(0, 0.26, -0.22), "top": 0.42, "carry": Vector3(0, 0.5, 0.08),
 		"ear_tip": Vector3(0.085, 0.42, 0.07), "tail_tip": Vector3(0, 0.12, 0.28), "tip_bone": "hips", "hip": 0.0,
 		"marks": {"left flank": Vector3(-0.21, 0.13, 0.04), "right flank": Vector3(0.21, 0.13, 0.04),
 			"back": Vector3(0, 0.28, 0.14), "chest": Vector3(0, 0.1, -0.2)}},
-	"kestrike": {"head": Vector3(0, 0.46, -0.22), "top": 0.59, "carry": Vector3(0, 0.5, 0.16), "hip": 0.11,
-		"ear_tip": Vector3(0.147, 0.57, 0.124), "tail_tip": Vector3(0, 0.057, 0.342), "tip_bone": "tail2",
-		"marks": {"left flank": Vector3(-0.135, 0.15, 0.03), "right flank": Vector3(0.135, 0.15, 0.03),
-			"back": Vector3(0, 0.3, 0.125), "chest": Vector3(0, 0.275, -0.152)}},
+	"kestrike": {"head": Vector3(0, 0.4, -0.246), "top": 0.5, "carry": Vector3(0, 0.435, 0.07), "hip": 0.084,
+		"ear_tip": Vector3(0.09, 0.47, -0.04), "tail_tip": Vector3(0, 0.07, 0.24), "tip_bone": "tail2",
+		"marks": {"left flank": Vector3(-0.174, 0.151, -0.083), "right flank": Vector3(0.174, 0.151, -0.083),
+			"back": Vector3(0, 0.253, 0.025), "chest": Vector3(0, 0.238, -0.197)}},
 	"kindlewren": {"head": Vector3(0, 0.4, -0.22), "top": 0.6, "carry": Vector3(0, 0.64, -0.04), "hip": 0.12,
 		"ear_tip": Vector3(0.027, 0.616, -0.067), "tail_tip": Vector3(0, 0.49, 0.255), "tip_bone": "tail2",
 		"marks": {"left flank": Vector3(-0.165, 0.15, -0.02), "right flank": Vector3(0.165, 0.15, -0.02),
@@ -147,7 +151,8 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -169,11 +174,17 @@ const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
 	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
+	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
+	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
+	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
 
 static var enabled := true
+## How deep a body's baked normal map cuts (a Meshy body has one, docs/art/kin/MESHY_BOKI_RECIPE.md); 0 leaves it out.
+static var normal_k := 1.0
 
 var species := ""
 var manual := false            # tools pose it by hand: set_clip, seek and set_face, nothing automatic
@@ -194,6 +205,7 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _asleep := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -263,6 +275,7 @@ func _ready() -> void:
 	_rng.seed = hash(get_instance_id())
 	_blink_t = _rng.randf_range(0.8, 3.5)
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
@@ -341,6 +354,11 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	if asleep != _asleep:
+		_asleep = asleep
+		if _speed < WALK_SPEED:
+			_start_shot("settle" if asleep else "wake")
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
@@ -357,7 +375,7 @@ func _start_shot(which: String) -> void:
 
 func _state_clip() -> String:
 	if String(root.get_meta("kstate", "")) == "sleep":
-		return "sleep"
+		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work
@@ -451,6 +469,11 @@ func _material_for(src: Material, c: Dictionary, mats: Array) -> Material:
 	for k in look:
 		m.set_shader_parameter(k, look[k])
 	m.set_shader_parameter("rim_color", (c["body"] as ShaderMaterial).get_shader_parameter("rim_color"))
+	var relief := (src as BaseMaterial3D).normal_texture
+	if relief and normal_k > 0.0:
+		m.set_shader_parameter("normal_tex", relief)
+		m.set_shader_parameter("use_nrm", true)
+		m.set_shader_parameter("normal_k", normal_k)
 	if id == "boki_coat":
 		_coat = m
 		m.next_pass = _ink()

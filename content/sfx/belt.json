@@ -1,0 +1,20 @@
+{
+ "group": "belt",
+ "name": "Belt items",
+ "script": "tools/gen_sfx_belt.py",
+ "sounds": {
+  "belt_tonic_start": "cast", "belt_tonic_end": "cast", "belt_tonic_cancel": "cast",
+  "belt_armor_kit_start": "cast", "belt_armor_kit_end": "cast", "belt_armor_kit_cancel": "cast",
+  "belt_medkit_start": "cast", "belt_jump_pad_start": "cast", "belt_scanner_start": "cast",
+  "belt_shield_cell_start": "cast", "belt_smoke_start": "cast", "belt_stim_start": "cast",
+  "belt_tonic_loop": "loop", "belt_armor_kit_loop": "loop"
+ },
+ "signature": [],
+ "reach": {
+  "belt_tonic_start": 30, "belt_tonic_loop": 30, "belt_tonic_end": 30, "belt_tonic_cancel": 30,
+  "belt_armor_kit_start": 30, "belt_armor_kit_loop": 30, "belt_armor_kit_end": 30, "belt_armor_kit_cancel": 30,
+  "belt_medkit_start": 30, "belt_jump_pad_start": 30, "belt_scanner_start": 30,
+  "belt_shield_cell_start": 30, "belt_smoke_start": 30, "belt_stim_start": 30
+ },
+ "loops": ["belt_tonic_loop", "belt_armor_kit_loop"]
+}

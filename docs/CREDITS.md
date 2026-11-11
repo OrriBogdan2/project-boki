@@ -5,6 +5,9 @@ Models and textures: see [ASSET_CREDITS.md](ASSET_CREDITS.md).
 ## Sound effects
 All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/sfx_*.py`, docs/AUDIO.md) unless a section below lists a CC0 source. Nothing is taken from SUPERVIVE or any other game.
 
+### ext/sfx-pilot-1110 (ElevenLabs pilot)
+- Generated with the ElevenLabs sound-effects API (`eleven_text_to_sound_v3`) on the owner's account, under its plan's licence (not CC0): `dodge*` and the files listed in docs/SFX_PILOT.md, made by `tools/gen_sfx_el.py`.
+
 ### ext/sfx-vex (gunslinger)
 - Synthesised, no samples.
 

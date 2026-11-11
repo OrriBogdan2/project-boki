@@ -1,0 +1,11 @@
+{
+	"desc": "Duo bonus for friends (GARDEN_MODERN.md section 5 rank 4, scripts/home/base_duo.gd): two Boki whose bond is at least friend_at do better together. Joy is a 0-100 need, pace a multiplier, times are seconds.",
+	"friend_at": 0.6,
+	"friend_at_doc": "bond (-1..1, rec['bonds']) at or above which a pair is a duo; below it no bonus.",
+	"nap_joy": 6.0,
+	"nap_joy_doc": "extra joy a Boki gets on waking from a nap it spent beside a duo friend (a nap alone gives +4 in home.gd).",
+	"nap_min_s": 8.0,
+	"nap_min_s_doc": "s beside the friend, asleep, for the nap to count as shared.",
+	"handoff_pace": 1.06,
+	"handoff_pace_doc": "Dash: a runner that starts a new stretch with a duo friend alongside (within base_race friend_near) hands off cleanly and runs it at this times the pace."
+}
