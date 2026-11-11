@@ -30,7 +30,7 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow` |
-| `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |
+| `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread), `head` m across a bright tip on the newest point (`head_len` times as long: a pointed diamond; drawn in the trail's own mesh), `soft` a feathered glow strewn with twinkling glints and a round twinkling head instead of the hard edge |
 | `thread` | a loose thread lying on the ground from `at` along `dir`, swaying | `len`, `w`, `life` (may outlast the 2.2 s cap, with its needle) |
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor; `"here"`: the move's point `to_y` m up, a bolt out of the sky with `y`), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
