@@ -528,6 +528,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 	cols.add_child(right)
 	var gl: Array = Gear.ALL.keys().filter(func(g): return Gear.is_glove(String(g)))
 	gl.sort_custom(func(x, y): return (1 if Gear.active(x) else 0) > (1 if Gear.active(y) else 0) or (Gear.active(x) == Gear.active(y) and String(x) < String(y)))
+	var drag := SlotDrag.attach(v, _glove_drop.bind(v))
 	for si in Gloves.SLOTS:
 		var slot: int = si
 		right.add_child(UI.section("Glove %d  (%s)" % [slot + 1, Gloves.key_cap(slot)]))
@@ -537,6 +538,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 		gg.add_theme_constant_override("v_separation", 4)
 		var nb := UI.choice("None", String(gloves[slot]) == "", func(): clear_glove(slot); _fill_menu(v), 60)
 		nb.add_theme_font_size_override("font_size", 12)
+		drag.add(nb, {"slot": slot, "id": ""})
 		gg.add_child(nb)
 		for g in gl:
 			var gid: String = g
@@ -544,6 +546,7 @@ func _fill_menu(v: VBoxContainer) -> void:
 			var b := UI.choice(nm2.substr(0, 11), String(gloves[slot]) == gid, func(): give_glove(gid, slot); _fill_menu(v), 90, Gear.icon_of(gid))
 			b.tooltip_text = "%s%s  ·  %s\n%s" % [nm2, ("  ·  %ss" % KinText.n(Gear.cd_of(gid, 2))) if Gear.active(gid) else "  ·  passive", Gloves.key_cap(slot), Gear.desc_of(gid, 2)]
 			b.add_theme_font_size_override("font_size", 12)
+			drag.add(b, {"slot": slot, "id": gid}, nm2, UI.INK)
 			gg.add_child(b)
 		right.add_child(gg)
 		var gd := UI.label(_glove_line(slot), 13, UI.MUTED)
@@ -578,6 +581,22 @@ func _glove_line(slot: int) -> String:
 	if g == "" or not Gear.ALL.has(g):
 		return "%s: no glove. Pick any to wear it here." % Gloves.key_cap(slot)
 	return "%s: %s%s: %s" % [Gloves.key_cap(slot), String(Gear.ALL[g].get("name", g)), ("  ·  %ss" % KinText.n(Gear.cd_of(g, 2))) if Gear.active(g) else "  ·  passive", Gear.desc_of(g, 2)]
+
+## A glove held and dragged onto the other glove's row (SlotDrag) is worn there; dragging the one you wear
+## swaps the two gloves.
+func _glove_drop(from: Dictionary, to: Dictionary, v: VBoxContainer) -> String:
+	var a := int(from["slot"])
+	var b := int(to["slot"])
+	var gid := String(from["id"])
+	if a == b:
+		return ""
+	var was := String(gloves[b])
+	var swap := String(gloves[a]) == gid
+	give_glove(gid, b)
+	if swap and was != "":
+		give_glove(was, a)
+	_fill_menu(v)
+	return ""
 
 func _kin_choices() -> Array:
 	var out: Array = []
