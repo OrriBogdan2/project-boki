@@ -377,9 +377,12 @@ func show_flash(hit: float) -> void:
 		_flash_n = mats.size()
 		_flash_hot = hot
 		_flash_shell = shell
+		var tint := SHELL_FLASH if shell else Color.WHITE
+		if hot:
+			tint = DotLook.COL
 		for mt in mats:
 			mt.set_shader_parameter("flash", f)
-			mt.set_shader_parameter("flash_color", DotLook.COL if hot else (SHELL_FLASH if shell else Color.WHITE))
+			mt.set_shader_parameter("flash_color", tint)
 
 ## Presentation only: a hit shoves the model a little along the hit (Juice.hit adds to it) and it
 ## springs back; during a hit's freeze the model holds where it was and shivers along that line.

@@ -4,18 +4,20 @@ extends Node
 ## across the map stays soft. The SFX bus has a gentle compressor, a touch of room reverb and a
 ## limiter, so a crowd of sounds blends together instead of piling up into peaks.
 
-const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt", "dash", "jump", "land", "grab",
-	"throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall", "pickup", "catch", "warn", "portal",
-	"revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant", "harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult", "combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum",
-	"swipe", "cleave", "charge", "k_normal", "k_fire", "k_water", "k_grass", "k_spore", "k_electric", "k_ice", "k_rock", "k_psychic", "k_flying",
-	"k_dragon", "k_dark", "k_poison", "k_bug", "k_steel", "k_fairy", "k_crystal", "k_sound",
-	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "armor_up", "armor_up_own", "knock_confirm", "elim_confirm", "extract_ok",
-	"ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap", "ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry",
-	"ab_plant", "ab_tether", "ab_blink", "ab_whirr", "ab_stun", "ab_slow", "ab_hit", "ab_ready",
-	"pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam", "pay_cashin", "pay_rage", "level_up",
-	"hero_blowout", "hero_skewer", "dr_anchor", "as_ignite", "pay_rockfall", "pay_collapse",
-	"rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c",
-	"break_wood", "break_clay", "break_metal", "fuse_hiss"]
+const NAMES := ["splash", "swim", "drip", "smg", "rifle", "thump", "boom", "hit", "crit", "kill", "knock", "hurt",
+	"dash", "jump", "land", "grab", "throw", "kinhit", "skill", "kin_happy", "kin_unsure", "kin_alert", "recall",
+	"pickup", "catch", "warn", "portal", "revive", "click", "reload", "shield", "cloak", "heal", "fall", "plant",
+	"harvest", "ping", "glide", "build", "unlock", "whoosh", "step0", "step1", "step2", "hover", "zap", "bond", "ult",
+	"combo", "swap", "horn", "rail", "train_hit", "revive_hum", "revive_done", "scan_pop", "wisp_hum", "swipe",
+	"cleave", "charge", "k_normal", "k_fire", "k_water", "k_grass", "k_spore", "k_electric", "k_ice", "k_rock",
+	"k_psychic", "k_flying", "k_dragon", "k_dark", "k_poison", "k_bug", "k_steel", "k_fairy", "k_crystal", "k_sound",
+	"shotgun", "sniper", "hit_heavy", "slash_hit", "armor_hit", "armor_break", "armor_up", "armor_up_own",
+	"knock_confirm", "elim_confirm", "extract_ok", "ab_throw", "ab_rail", "ab_charge", "ab_blast", "ab_leap",
+	"ab_slam", "ab_wall", "ab_shield_hit", "ab_guard", "ab_parry", "ab_plant", "ab_tether", "ab_blink", "ab_whirr",
+	"ab_stun", "ab_slow", "ab_hit", "ab_ready", "pay_deadeye", "pay_flashpoint", "pay_called", "pay_slam",
+	"pay_cashin", "pay_rage", "level_up", "hero_blowout", "hero_skewer", "dr_anchor", "as_ignite", "pay_rockfall",
+	"pay_collapse", "rustle", "squeak", "key_get", "lock_rattle", "reset_a", "reset_b", "reset_c", "break_wood",
+	"break_clay", "break_metal", "fuse_hiss"]
 const POOL := 24
 ## The squad cues (you or a squadmate downs or finishes a rival): one dedicated voice, so footsteps and
 ## the combat crowd never steal it, and no gap or stack cap thins it.
@@ -24,9 +26,13 @@ const CUES := ["knock_confirm", "elim_confirm"]
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
-const MIN_GAP := {"xp_tick": 60, "steal_won": 400, "steal_lost": 400, "scan_pop": 150, "scan_pop_fine": 150, "scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200,
-	"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,
-	"reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150, "pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150, "ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45, "crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60, "die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60, "armor_up": 120}
+const MIN_GAP := {"xp_tick": 60, "steal_won": 400, "steal_lost": 400, "scan_pop": 150, "scan_pop_fine": 150,
+	"scan_pop_rare": 150, "scan_fail": 150, "scan_call": 200, "break_wood": 40, "break_clay": 40, "break_metal": 40,
+	"fuse_hiss": 80, "reset_a": 120, "reset_b": 120, "reset_c": 120, "pay_deadeye": 120, "pay_flashpoint": 150,
+	"pay_called": 120, "pay_slam": 150, "pay_cashin": 120, "pay_rage": 150, "pay_rockfall": 150, "pay_collapse": 150,
+	"ab_hit": 60, "squeak": 80, "rustle": 120, "ab_shield_hit": 70, "ab_stun": 150, "ab_slow": 120, "hit": 45,
+	"crit": 60, "hit_heavy": 70, "slash_hit": 60, "armor_hit": 70, "armor_break": 200, "hurt": 120, "kinhit": 60,
+	"die_small": 90, "die_big": 150, "land": 80, "step0": 60, "step1": 60, "step2": 60, "armor_up": 120}
 ## On top of that, at most STACK_MAX of one sound start within STACK_MS, each extra one a little quieter.
 const STACK_MAX := 3
 const STACK_MS := 90
@@ -66,6 +72,9 @@ var cue_plays := {}           # cue name -> times played (--knock-sfx-check)
 var listener := Vector3.ZERO   # set by the camera each frame (move_listener)
 var hear_range := 22.0
 const ROOM_BUS := &"SFXRoom"      # the reverb send: sounds heard from inside a sound zone play through it
+## Where each world bus sends: SFXWorld (dulled while you are down) into SFX, the rest into SFXWorld.
+const BUS_SEND := {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld", "SFXPan": "SFXWorld",
+	ROOM_BUS: "SFXWorld"}
 const ROOM_EXIT_M := 1.5          # m: past a zone's edge before it lets go (no flutter on the line)
 ## The two reverbs a zone can name: a small stone room and a big arch (size 0-1, damping 0-1, ms, wet 0-1).
 const ROOMS := {
@@ -101,7 +110,7 @@ func _ready() -> void:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
-		AudioServer.set_bus_send(bi, {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld", "SFXPan": "SFXWorld", ROOM_BUS: "SFXWorld"}.get(bn, "Master"))
+		AudioServer.set_bus_send(bi, BUS_SEND.get(bn, "Master"))
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
 	for i in 2:
@@ -551,7 +560,9 @@ func _bus_for(pos, clear := false) -> String:
 		return "SFXWorld"
 	if occlusion.blocked(pos, listener):
 		return "SFXMuffled"
-	return "SFXFar" if Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR else ("SFXWorld" if room.is_empty() else String(ROOM_BUS))
+	if Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR:
+		return "SFXFar"
+	return "SFXWorld" if room.is_empty() else String(ROOM_BUS)
 
 ## Reverb zones from the map JSON ("sound_zones": [{at: [tile x, tile y], r: metres, preset}]). Only
 ## entering or leaving one touches the audio server; the rest is a distance test per camera frame.
@@ -696,7 +707,8 @@ func loop_start(key: String, sname: String, pos = null, vol_db := 0.0, reach := 
 	p.bus = _bus_for(pos, sname in CLEAR)
 	add_child(p)
 	var carry := reach if reach > 0.0 else float(sound_reach.get(sname, 0.0))
-	loops[key] = {"p": p, "pos": pos, "vol": vol_db + float(cue_db.get(sname, 0.0)), "reach": carry, "clear": sname in CLEAR}
+	var vol := vol_db + float(cue_db.get(sname, 0.0))
+	loops[key] = {"p": p, "pos": pos, "vol": vol, "reach": carry, "clear": sname in CLEAR}
 	if st == null:
 		return
 	if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode == AudioStreamWAV.LOOP_DISABLED:

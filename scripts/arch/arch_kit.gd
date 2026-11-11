@@ -1124,7 +1124,8 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(col, 0.9), SideColor.of(m, h))
+		var ring_r := 1.15 * float(h.cdat.get("scale", 1.0))
+		var ring: Node3D = m.fx.telegraph_circle(h.pos, ring_r, Color(col, 0.9), SideColor.of(m, h))
 		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)
