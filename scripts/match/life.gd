@@ -26,6 +26,7 @@ const R := {
 	"loot_time": 1.0,           # [design] bots: hold interact to take everything from a box (you get a loot window)
 	"sickness_time": 12.0,      # [patch 1.0] resurrection sickness
 	"sickness_dmg": 0.75,       # [patch 1.0] -25% damage dealt
+	"sickness_heal": 0.75,      # [patch 1.0] -25% healing received
 }
 
 const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map and its label
@@ -509,7 +510,7 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 		m.killcam_text = ""
 		if m.hud:
 			m.hud.flash(Color("9ee2a0"), 0.3)
-			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage for 12s" if sick else ""), Color("9ee2a0"))
+			m.hud.toast("You're back" + ("  ·  resurrection sickness: -25% damage and healing for 12s" if sick else ""), Color("9ee2a0"))
 
 ## Someone died for good: no box revive any more, and no beacon either.
 static func make_gone(m: Match, h: Hunter) -> void:

@@ -149,7 +149,7 @@ func _kit(main: Node) -> void:
 	var k0 := P.kit_t
 	for i in int((UtilityUse.channel("armor_kit", "time") + 0.2) / Match.DT): m.step(Match.DT)
 	print("RAID repair: started %.2f, stun %.2f roll %.2f glide %s grounded %s" % [k0, P.stun_t, P.roll_t, P.gliding, P.grounded])
-	ok(P.armor_kits == 1 and P.armor >= P.max_armor - 0.5, "an uninterrupted repair uses a kit and fills armor (kits %d, armor %.0f/%.0f)" % [P.armor_kits, P.armor, P.max_armor])
+	ok(P.armor_kits == 1 and P.armor >= P.max_armor * UtilityUse.repair_frac(P) - 0.5, "an uninterrupted repair uses a kit and patches armor (kits %d, armor %.0f/%.0f)" % [P.armor_kits, P.armor, P.max_armor])
 	# the HUD has a slot for it with its key
 	ok(m.hud != null and m.hud.has_method("_ab_slot"), "the HUD draws the kit slot")
 	m.queue_free()
