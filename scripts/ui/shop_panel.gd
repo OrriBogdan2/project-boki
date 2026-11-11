@@ -76,8 +76,9 @@ static func _row(m, pc: PanelContainer, v: Dictionary, i: int, flash: bool) -> C
 	var label := why if why != "" else "%d" % cost
 	if flash:
 		label = "Bought!"
-	var buy := UI.button(label, func(): buy_row(m, pc, v, i), 96.0, "" if why != "" or flash else "gem")
-	buy.disabled = why != ""
+	var buy := UI.button(label, Callable(), 96.0, "" if why != "" or flash else "gem")
+	buy.pressed.connect(func(): buy_row(m, pc, v, i))      # no click: the buy or refusal is the sound
+	buy.disabled = why != "" and why != ShopStock.BROKE      # short of gems stays clickable for the tick
 	buy.tooltip_text = why
 	buy.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	line.add_child(buy)
@@ -87,10 +88,10 @@ static func _row(m, pc: PanelContainer, v: Dictionary, i: int, flash: bool) -> C
 static func buy_row(m, pc: PanelContainer, v: Dictionary, i: int) -> void:
 	var why := Shops.buy(m, m.player, v, i)
 	if why != "":
+		ShopSfx.refused()
 		m.hud.toast_small(why, Color("ff8a6a"))
 		return
 	_fill(m, pc, v, i)
-	var t := pc.get_tree().create_timer(FLASH_S)
-	t.timeout.connect(func():
-		if is_instance_valid(pc) and pc.is_inside_tree():
-			_fill(m, pc, v, -1))
+	var tw := pc.create_tween()      # dies with the panel, so closing it mid-flash calls nothing
+	tw.tween_interval(FLASH_S)
+	tw.tween_callback(func(): _fill(m, pc, v, -1))

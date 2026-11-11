@@ -8,6 +8,8 @@ extends RefCounted
 ## For other parts: ShopStock.price(h, row), can_buy(h, row) (a reason, "" when fine), owned(h, row)
 ## and sell(h, row) (takes the gems, hands over the item; true on success).
 
+const BROKE := "Not enough gems"      # can_buy's reason when the price is more than the hunter's gems
+
 static var _rules: Dictionary = {}
 
 static func rules() -> Dictionary:
@@ -146,7 +148,7 @@ static func can_buy(h, row: Dictionary) -> String:
 	if cost < 0:
 		return "Maxed"
 	if int(h.gems) < cost:
-		return "Not enough gems"
+		return BROKE
 	match kind_of(String(row["id"])):
 		"util": return "" if UtilityBelt.has_room(h, r) else "Belt full"
 		"repair": return "" if h.armor < h.max_armor else "Armor is full"

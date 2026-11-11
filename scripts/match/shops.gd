@@ -44,6 +44,7 @@ static func update(m, dt: float) -> void:
 		var bob := (v["node"] as Node3D).get_node("Bob") as Node3D
 		bob.position.y = 2.7 + sin(m.time * 2.0 + float(v["idx"])) * BOB_HEIGHT
 		(bob.get_child(0) as Node3D).rotation.y += dt * 1.5
+	ShopSfx.tick(m)
 	var v = s["vendor"]
 	if v != null and (m.player == null or not near(m, m.player, v) or m.player.out or m.player.downed):
 		close(m)
@@ -78,19 +79,26 @@ static func use(m, h, best: Dictionary) -> void:
 	if s["vendor"] == best["vendor"]:
 		close(m)
 		return
-	close(m)
+	_drop_panel(m)
 	s["vendor"] = best["vendor"]
 	s["panel"] = ShopPanel.open(m, best["vendor"])
-	Sfx.play("whoosh", null, -10.0, 0.05, 1.3)
+	ShopSfx.opened()
 
 static func close(m) -> void:
+	if _drop_panel(m):
+		ShopSfx.closed()
+
+## Takes the panel off the HUD; true if one was open.
+static func _drop_panel(m) -> bool:
 	var s := _st(m)
 	s["vendor"] = null
 	var p = s["panel"]
 	s["panel"] = null
-	if p != null and is_instance_valid(p):
-		m.hud.ui_extra.erase(p)
-		(p as Node).queue_free()
+	if p == null or not is_instance_valid(p):
+		return false
+	m.hud.ui_extra.erase(p)
+	(p as Node).queue_free()
+	return true
 
 # ------------------------------------------------------------------ buying
 
@@ -129,7 +137,7 @@ static func _bought(m, h, row: Dictionary, paid: int) -> void:
 	if h == m.player and s["panel"] != null and is_instance_valid(s["panel"]):
 		ShopPanel.refresh(m, s["panel"], s["vendor"])
 	var col := ShopStock.col_of(row)
-	m.sfx("bond", h.pos, -6.0, 1.5)
+	ShopSfx.bought(m, h, paid)
 	m.fx.ring(h.pos, 1.3, col, 0.3)
 	if h == m.player and m.hud:
 		m.hud.toast_small("Bought %s  ·  %d gems left" % [ShopStock.name_of(row), int(h.gems)], TOAST_COL)
@@ -162,6 +170,7 @@ static func on_net(m, x: Array) -> void:
 			row["left"] = int(x[4])
 			if m.player != null and String(x[3]) == m.player.nid:
 				_st(m)["pending"].erase(m.player.nid)
+				ShopSfx.refused()
 				if m.hud:
 					m.hud.toast_small("Sold out", Color("ff8a6a"))
 
