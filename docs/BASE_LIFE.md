@@ -6,7 +6,7 @@ check: `--base-life-check`.
 
 - One explicit machine per farm Boki (`Fsm`, briefs/STATE_MACHINES.md), kept on the kin entry as `k["life"]`:
   Roam, Eat, Nap, Play (a toy), PlayWith (tag with another Boki), Watch (a rival, or whoever took its toy),
-  React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
+  React (a newcomer, or a toy you just placed). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
 - home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed). While one has a
@@ -24,6 +24,12 @@ check: `--base-life-check`.
   `BaseLife.choose` asks `HomeToys.pick(k, true)` when a Boki is bored or curious, and the machine shows Play while
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
   `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
+- A new toy (GARDEN.md section 4, `BaseLife.new_toy`, rules `new_toy`): placing a Base-tab toy sends the roaming
+  Boki within `new_toy.near` m on its island to React at it for one shared gather (`new_toy.gather`, 3-6 s; the
+  player is never held). Each says a FarmChatter `look_toy` line when it is its turn to talk, then the most curious
+  (`traits.curiosity`) goes React -> Play at it first; until it plays, `BaseLife.saved` keeps the toy out of
+  `HomeToys.pick` for the rest. Each looker keeps the day in `rec["memory"]`. ComeLook still covers furniture.
+  Checked by `--garden-day-check` (Bramblebank's day starts with it).
 - Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
   goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
   the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
