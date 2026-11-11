@@ -485,7 +485,8 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	T.teleport(home + Vector3(2.0, 0, 0))
 	aim_at(P, T.pos)
 	var sd: Dictionary = K.rmb_def()["shield"]
-	ok("bjorn shield: the wall is 40% longer (4.2 m)", absf(float(sd["len"]) - 4.2) < 0.01,
+	# (#29 asked for the source size, else +40%: the source width is held by --kit-parity-check)
+	ok("bjorn shield: the wall is at least 40% longer than the old 3 m", float(sd["len"]) >= 3.0 * 1.4 - 0.01,
 		"len %.2f" % float(sd["len"]))
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = true

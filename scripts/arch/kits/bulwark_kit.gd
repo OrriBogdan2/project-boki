@@ -58,7 +58,7 @@ const WINDDOWN := 0.3
 
 func _setup() -> void:
 	shield_hp = shield_max()
-	fx = BjornFx.new(h)
+	fx = BjornFx.new(h, rmb_def()["shield"])
 	h.add_child(fx)
 	self_nodes.append(fx)
 	ult = BjornUlt.new(self)
@@ -118,7 +118,7 @@ func on_block(dmg: float, by) -> void:
 		if by is Node3D and is_instance_valid(by):
 			var to := Vector2((by as Node3D).global_position.x - h.pos.x, (by as Node3D).global_position.z - h.pos.z)
 			if to.length() > 0.1: d = to.normalized()
-		fx.aegis_block(h.pos + Vector3(d.x * 0.95, 1.1, d.y * 0.95))
+		fx.aegis_block(h.pos + Vector3(d.x, 0, d.y) * aegis_out() + Vector3(0, 1.1, 0))
 		m.sfx("bjorn_block", h.pos, -5.0)
 
 func _tick(dt: float) -> void:
@@ -126,7 +126,6 @@ func _tick(dt: float) -> void:
 		add_res(-float(res_def().get("decay", 5.0)) * dt)
 	lock_t = maxf(0.0, lock_t - dt)
 	front_t = maxf(0.0, front_t - dt)
-	var sd: Dictionary = rmb_def()["shield"]
 	if not wall.is_empty():
 		if not m.verbs.walls.has(wall):
 			# broken: locked out for 3s
@@ -136,7 +135,7 @@ func _tick(dt: float) -> void:
 			down_t = 0.0
 			m.fx.word(h.pos + Vector3(0, 2.2, 0), "SHIELD BROKEN", Feel.cat_color("damage"), false)
 			var d0 := h.aim_dir()
-			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * 0.95)
+			fx.aegis_break(h.pos + Vector3(d0.x, 0, d0.y) * aegis_out())
 			play("bul_break")
 			m.sfx("bjorn_break", h.pos, -2.0)
 		else:
@@ -265,32 +264,46 @@ func _start_ult() -> bool:
 func ult_running() -> bool:
 	return ult.phase != ""
 
-## The Shield Charge's front guard: hits from the front 140° are blocked (and become Guard).
+## The raised aegis takes hits from inside its arc, and so does the Shield Charge's front guard (they become Guard).
 func incoming(by: Ent, dmg: float, o: Dictionary) -> Array:
 	if _aegis_takes(by, o):
 		m.verbs.absorb(wall, dmg)          # it takes the hit (and turns it into Guard) as it does a shot
-		o = o.duplicate(); o.erase("kb"); o.erase("lift")
-		return [0.0, o]
+		return [0.0, _no_knock(o)]
 	if front_t > 0.0 and by != null and is_instance_valid(by):
 		var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
 		var fwd := Vector2(-sin(h.face), -cos(h.face))
-		if to.length() > 0.1 and fwd.dot(to.normalized()) > cos(deg_to_rad(70.0)):
+		if to.length() > 0.1 and fwd.dot(to.normalized()) > cos(aegis_half()):
 			on_block(dmg, by)
 			m.fx.flash(h.pos + Vector3(to.normalized().x * 0.6, 1.0, to.normalized().y * 0.6), res_col(), 0.4, 0.05)
-			o = o.duplicate(); o.erase("kb"); o.erase("lift")
-			return [0.0, o]
+			return [0.0, _no_knock(o)]
 	return [dmg, o]
 
+## A blocked hit's options without its knockback and lift.
+func _no_knock(o: Dictionary) -> Dictionary:
+	var kept := o.duplicate()
+	kept.erase("kb")
+	kept.erase("lift")
+	return kept
+
 ## The raised aegis blocks all damage from the front (data: Brightshield), melee and abilities as well as the
-## shots the wall itself stops: a hit from a foe inside its arc, facing the cursor. Damage over time isn't a hit.
+## shots the wall itself stops: a hit from a foe inside the arc the drawn slab spans, facing the cursor. Damage
+## over time isn't a hit.
 func _aegis_takes(by: Ent, o: Dictionary) -> bool:
 	if wall.is_empty() or by == null or not is_instance_valid(by) or o.get("tick", false):
 		return false
 	if String(o.get("src", "")) in ["burn", "fall", "heat"]:
 		return false
 	var to := Vector2(by.pos.x - h.pos.x, by.pos.z - h.pos.z)
-	var half := deg_to_rad(float(rmb_def()["shield"].get("arc", 140.0)) * 0.5)
-	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(half)
+	return to.length() > 0.1 and h.aim_dir().dot(to.normalized()) > cos(aegis_half())
+
+## m from him to the middle of the aegis's face: the slab stands "dist" out, bowed so its two ends are "bow" nearer.
+func aegis_out() -> float:
+	return float(rmb_def()["shield"]["dist"])
+
+## Half the arc the aegis blocks, seen from him (rad): out to the drawn slab's two ends, "len" m apart.
+func aegis_half() -> float:
+	var sd: Dictionary = rmb_def()["shield"]
+	return atan2(float(sd["len"]) * 0.5, float(sd["dist"]) - float(sd["bow"]))
 
 ## A Shield Charge counts as being in the fight up front (the dash's own "during E" stand-in).
 func in_e() -> bool:
@@ -678,16 +691,20 @@ func rmb_hold_tick(t: float) -> void:
 	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
 		_raise()
 
+## The aegis goes up: the wall that stops shots runs between the drawn slab's two ends, in its plate colour.
 func _raise() -> void:
 	var sd: Dictionary = rmb_def()["shield"]
 	var d := h.aim_dir()
-	wall = m.verbs.add_wall(h, h.pos + Vector3(d.x, 0, d.y) * 1.0, d, {"length": float(sd["len"]), "hp": shield_hp, "time": 99.0, "follow": true, "dist": 0.95, "block": "enemy", "color": rmb_def().get("col", "#9ad8ff")}, 1.0)
+	var ends := aegis_out() - float(sd["bow"])      # m out to the line through the slab's two ends
+	var spec := {"length": float(sd["len"]), "hp": shield_hp, "time": 99.0, "follow": true, "dist": ends,
+		"block": "enemy", "color": fx.plate_col.to_html(false)}
+	wall = m.verbs.add_wall(h, h.pos + Vector3(d.x, 0, d.y) * ends, d, spec, 1.0)
 	h.mel_hold = 0.0
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
 	play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
-	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
+	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * aegis_out())
 
 ## A Boki merge ends every hold of this kit with no release effect: the Crushing Blow's charge (lmb_t) and the raised
 ## shield (it keeps its hit points and starts its regen). The mace in flight and Mending Ground's pending burst are casts, not holds.

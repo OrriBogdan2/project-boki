@@ -640,6 +640,7 @@ func _audit() -> void:
 	P.inp["sec_hold"] = true
 	K.press_rmb()
 	step(m, 0.3, rmb_at.bind(P, T.pos))
+	_aegis_span(P, T, K)
 	var hp0 := P.hp
 	var w0 := float(K.wall.get("hp", 0.0))
 	P.hurt(20.0, T, {"src": "melee", "melee": true, "kb": Vector2(-4, 0)})
@@ -654,6 +655,62 @@ func _audit() -> void:
 	P.inp["sec_hold"] = false
 	step(m, 0.3)
 	await done(m)
+
+const SPAN_EDGE := deg_to_rad(4.0)     # how far inside and outside each end of the aegis the test blows come from
+
+## The raised aegis blocks what is drawn (PARITY: the source's pale gold slab about 3.3 bh wide, hero sheet
+## bjorn.md): its meshes span the data width in the palette's pale gold, the wall that stops shots runs between
+## the drawn slab's two ends, and the arc that takes blows reaches those ends, so a blow from just inside an end
+## lands on the aegis and one from just outside lands on him. T ends back where it stood.
+func _aegis_span(P: Hunter, T: Hunter, K: BulwarkKit) -> void:
+	var col: Color = (K.fx.plate_mats[0] as ShaderMaterial).get_shader_parameter("albedo")
+	var pale := Color(String(HeroVfx.data("bulwark")["palette"]["plate"]))
+	ok("bjorn aegis: the slab is drawn in the palette's pale gold",
+		col.is_equal_approx(pale) and pale.h > 0.09 and pale.h < 0.14 and pale.s <= 0.55 and pale.v >= 0.9,
+		"#%s h %.2f s %.2f v %.2f" % [col.to_html(false), pale.h, pale.s, pale.v])
+	var fwd := P.aim_dir()
+	var side := Vector2(-fwd.y, fwd.x)
+	var ends := _aegis_ends(P, K, side)
+	var drawn_w := (ends[1] as Vector2).dot(side) - (ends[0] as Vector2).dot(side)
+	var data_w := float(K.rmb_def()["shield"]["len"])
+	ok("bjorn aegis: the slab is drawn as wide as its data", absf(drawn_w - data_w) < 0.2,
+		"drawn %.2f data %.2f m" % [drawn_w, data_w])
+	var feet := Vector2(P.pos.x, P.pos.z)
+	var wall_a: Vector2 = K.wall["a"] - feet
+	var wall_b: Vector2 = K.wall["b"] - feet
+	var off_deg := 0.0
+	var wall_off := 0.0
+	for end: Vector2 in ends:
+		off_deg = maxf(off_deg, absf(rad_to_deg(absf(fwd.angle_to(end)) - K.aegis_half())))
+		wall_off = maxf(wall_off, minf(end.distance_to(wall_a), end.distance_to(wall_b)))
+	# (the end's own 0.34 m rim spans about 2.5 deg seen from him)
+	ok("bjorn aegis: the arc it blocks reaches the drawn slab's two ends", off_deg < 3.0,
+		"arc %.1f deg, ends off %.1f deg" % [rad_to_deg(K.aegis_half() * 2.0), off_deg])
+	ok("bjorn aegis: the wall that stops shots runs between the drawn ends", wall_off < 0.25, "%.2f m off" % wall_off)
+	var taken := []
+	for a in [-K.aegis_half() - SPAN_EDGE, -K.aegis_half() + SPAN_EDGE, K.aegis_half() - SPAN_EDGE,
+			K.aegis_half() + SPAN_EDGE]:
+		var dir := fwd.rotated(a)
+		T.teleport(P.pos + Vector3(dir.x, 0, dir.y) * 2.5)
+		var hp0 := P.hp
+		P.hurt(5.0, T, {"src": "melee", "melee": true})
+		taken.append(P.hp < hp0)
+	ok("bjorn aegis: a blow from just inside an end lands on the aegis, from just outside on him",
+		taken == [true, false, false, true], "landed on him (outside, inside, inside, outside) %s" % str(taken))
+	T.teleport(P.pos + Vector3(fwd.x, 0, fwd.y) * 1.6)
+
+## The drawn aegis's outermost mesh corner on each side of him ([left, right], relative to his feet).
+func _aegis_ends(P: Hunter, K: BulwarkKit, side: Vector2) -> Array:
+	var ends := [Vector2.ZERO, Vector2.ZERO]
+	for mi: MeshInstance3D in K.fx.aegis.find_children("*", "MeshInstance3D", true, false):
+		var box := mi.get_aabb()
+		for i in 8:
+			var c: Vector3 = mi.global_transform * box.get_endpoint(i)
+			var rel := Vector2(c.x - P.pos.x, c.z - P.pos.z)
+			var k := 1 if rel.dot(side) > 0.0 else 0
+			if absf(rel.dot(side)) > absf((ends[k] as Vector2).dot(side)):
+				ends[k] = rel
+	return ends
 
 ## A foe's shot is stopped by the raised aegis from the front (the wall takes it, he and the ally behind it
 ## don't), and one fired from behind him lands on him (data: Brightshield blocks all damage from the front).
