@@ -65,8 +65,8 @@ func _row(vp: SubViewport, cam: Camera3D, id: String, v: float, sheet: Image, ro
 	var steps := int(round(FRAME_S / DT))
 	for i in int(WARM_S / DT) + steps * FRAMES:
 		k.position.z -= v * DT
-		rig._process(DT)
 		rig.player.advance(DT)
+		rig._process(DT)          # after the clip, as live: the rig plants the legs over its pose
 		cam.position = k.position + Vector3(3.0, 0.45, 0)
 		cam.look_at(k.position + Vector3(0, 0.3, 0))
 		var f := i - int(WARM_S / DT)

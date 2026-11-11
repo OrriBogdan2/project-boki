@@ -17,20 +17,22 @@ const GLIDE_STRIDE := [1.5, 2.9]      # what such a Boki keeps: BokiRig.STRIDE b
 ## No stepping feet, so not gated: the check asserts these are exactly the ones whose feet do not sweep.
 const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "serpent", "glomwort": "blob",
 	"gloamshell": "blob (snail foot)"}
-## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
-## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
-## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
-## re-keyed (docs/DEBT.md).
+## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even with BokiPlant's planted paws, with the
+## most they may slide. Ceilings only come down: lower or drop a row when a clip is re-keyed (docs/DEBT.md). Why each
+## is over: at match speeds the step is too short even at BokiRig.MAX_CADENCE (every run, and lodestick's walk);
+## BokiPlant leaves a paw that hops or shuffles on its clip's own timing (zapple walk, kindlewren, mossgrade); caecilith
+## has no paws (its lowest limbs stand in, and they do not step).
 const OVER := {
-	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
-	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.75,
-	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
-	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
-	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
-	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
+	"burrlet run": 0.60, "cairnback run": 0.65, "cindle run": 0.45, "glintmole run": 0.60, "hivara run": 0.60,
+	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.35,
+	"lodestick run": 0.80, "marchleaf run": 0.55, "mossgrade walk": 0.65, "mossgrade run": 0.70, "nettlynx run": 0.65,
+	"pebbit run": 0.55, "puddlet run": 0.50, "rimeshrew run": 0.70, "wisplet run": 0.85, "zapple walk": 0.60,
+	"zapple run": 0.55, "caecilith walk": 0.65, "caecilith run": 0.90,
 }
 const SAMPLES := 48           # poses per loop
+## Slices a foot must be down for its slip to count: a lone one is the touch-down or lift-off itself, straddling the
+## stance's end (half on the ground, half swinging), not a slide.
+const MIN_DOWN := 2
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
 const DT := 1.0 / 60.0        # s per frame when the rig is driven live (the idle-to-walk pop)
 ## Bones that are not limbs when a Boki has no paws and its lowest limb stands in for a foot.
@@ -55,11 +57,9 @@ func _species(main: Node, id: String) -> void:
 	await main.get_tree().process_frame
 	var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 	rig.manual = true
-	var steps := {}
 	var measured: Array = []
-	for clip in ["walk", "run"]:
-		steps[clip] = contact_steps(rig, clip)
-		measured.append(stride(steps[clip], rig.player.get_animation(clip).length))
+	for clip in BokiRig.GAITS:
+		measured.append(stride(contact_steps(rig, clip), rig.player.get_animation(clip).length))
 	var seams := "seam idle %.1f walk %.1f run %.1f" % [seam(rig, "idle"), seam(rig, "walk"), seam(rig, "run")]
 	print("BOKIGAIT %s measured walk %.2f run %.2f m/s, %s, pop %.1f" % [id, measured[0], measured[1], seams,
 			pop(k, rig)])
@@ -78,7 +78,7 @@ func _species(main: Node, id: String) -> void:
 		k.scale = Vector3.ONE * grown
 		rig._keep_flex()
 		for v in speeds:
-			var got := _gait(rig, steps, id, grown, v)
+			var got := _gait(rig, id, grown, v)
 			if grown == 1.0:
 				row.append("%.0f%% %.1f/s" % got)
 	print("BOKIGAIT ROW %s | %s | %s" % [id, " | ".join(row), seams])
@@ -89,14 +89,14 @@ static func match_speed(id: String) -> float:
 	var ks := KinLib.kin(id)
 	return KinLib.stat_value("kin_speed", KinLib.points(ks, {}) if ks else {})
 
-## One species at one size and speed: the clip and rate the rig picks, and how fast its feet slip at them.
+## One species at one size and speed: the clip and rate the rig picks, and how fast its planted feet slip at them.
 ## Returns [slide %, steps/s].
-func _gait(rig: BokiRig, steps: Dictionary, id: String, grown: float, v: float) -> Array:
+func _gait(rig: BokiRig, id: String, grown: float, v: float) -> Array:
 	rig._speed = v
 	rig._pick_clip(0.016)
 	var length := rig.player.get_animation(rig.clip).length
 	var sc := rig.player.speed_scale
-	var slid := slip(steps[rig.clip], length, v / grown, sc)
+	var slid := slip(contact_steps(rig, rig.clip, true), length, v / grown, sc)
 	var limit: float = OVER.get("%s %s" % [id, rig.clip], MAX_SLIDE)
 	var why := " (at full cadence)" if is_equal_approx(sc, BokiRig.MAX_CADENCE * length) else ""
 	var what := "%s x%.2f at %.1f m/s (%s x%.2f, %.1f steps/s)" % [id, grown, v, rig.clip, sc, sc / length]
@@ -105,8 +105,11 @@ func _gait(rig: BokiRig, steps: Dictionary, id: String, grown: float, v: float) 
 
 ## Per foot, the back-along-the-body step (m, models face -Z) of each of SAMPLES even slices of `clip` at speed 1
 ## while the foot is down (both ends in the lowest PLANTED of its lift, moving back), NAN while it is up or swinging
-## forward. The clips are swung from the hips, so a paw also passes low on its way forward.
-static func contact_steps(rig: BokiRig, clip: String) -> Array:
+## forward. The clips are swung from the hips, so a paw also passes low on its way forward. `planted`: as the rig
+## re-times the legs at its speed, size and rate (BokiPlant), not the clip's own timing.
+static func contact_steps(rig: BokiRig, clip: String, planted := false) -> Array:
+	rig.player.stop()             # no crossfade from the clip the rig had: the clip alone
+	rig.clip = ""
 	rig.set_clip(clip, 0.0)
 	var anim := rig.player.get_animation(clip)
 	var skel := rig.skeleton()
@@ -117,6 +120,8 @@ static func contact_steps(rig: BokiRig, clip: String) -> Array:
 	for i in SAMPLES:
 		rig.player.seek(anim.length * i / SAMPLES, true)
 		rig.player.advance(0.0)
+		if planted:
+			rig.plant(clip, anim.length * i / SAMPLES, rig.player.speed_scale)
 		for f in feet.size():
 			var at := skel.get_bone_global_pose(feet[f]).origin
 			paths[f].append(rig.model.to_local(skel.to_global(at)))
@@ -152,8 +157,9 @@ static func stride(steps: Array, length: float) -> float:
 	all.sort()
 	return all[all.size() / 2] / (length / SAMPLES)
 
-## The worst foot's mean slip against the ground while it is down, as a share of the move speed, when the body moves
-## at `v` m/s and the clip plays at `rate`. A planted foot that goes back at half the body's speed slips 50%.
+## The worst foot's mean slip against the ground while it is down (MIN_DOWN slices or more), as a share of the move
+## speed, when the body moves at `v` m/s and the clip plays at `rate`. A planted foot that goes back at half the
+## body's speed slips 50%.
 static func slip(steps: Array, length: float, v: float, rate: float) -> float:
 	var h := length / SAMPLES
 	var worst := 0.0
@@ -164,7 +170,8 @@ static func slip(steps: Array, length: float, v: float, rate: float) -> float:
 			if not is_nan(dz):
 				slid += absf(1.0 - dz * rate / (v * h))
 				n += 1
-		worst = maxf(worst, slid / maxi(n, 1))
+		if n >= MIN_DOWN:
+			worst = maxf(worst, slid / n)
 	return worst
 
 ## The loop seam: the bones' jump from the clip's last sample back to its first, over the median jump between the
@@ -201,6 +208,7 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 		rig._track_speed(DT)
 		rig._pick_clip(DT)
 		rig.player.advance(DT)
+		rig._plant_feet(DT)
 		var now := _bones(rig.skeleton())
 		var jump := _jump(prev, now)
 		prev = now
