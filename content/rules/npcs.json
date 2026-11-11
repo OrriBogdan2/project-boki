@@ -1,0 +1,5 @@
+{
+  "desc": "The talking NPCs drawn from a rigged Meshy model (NpcModel, art/npcs/<id>/<id>.glb, docs/art/npcs/PIPELINE.md). height: m tall in the world; clips: pose -> the GLB's clip (a pose with no clip plays idle); face_y: m up to the face for the talk-box portrait.",
+  "hob": {"height": 1.8, "face_y": 1.5, "clips": {"idle": "idle", "talk": "talk", "wave": "wave", "point": "point", "hammer": "hammer", "walk": "walk"}},
+  "pell": {"name": "Pell", "height": 1.55, "face_y": 1.3, "clips": {"idle": "idle", "talk": "talk", "wave": "wave", "walk": "walk"}}
+}

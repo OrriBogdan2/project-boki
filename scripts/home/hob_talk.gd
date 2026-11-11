@@ -52,7 +52,7 @@ func start() -> void:
 	h.panel_open = TALK
 	h.cam.zoom_to = TALK_ZOOM
 	_screen_clear(false)
-	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
+	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.face(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
 	if offer_due():

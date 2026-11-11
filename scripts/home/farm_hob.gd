@@ -97,9 +97,8 @@ func _walk(dt: float) -> void:
 		return
 	if to.length() > step:
 		node.position += to.normalized() * step
-		node.position.y = absf(sin(t * 9.0)) * 0.05
 		node.face_to = pos
-		node.pose = "idle"
+		node.pose = "walk"
 		return
 	node.position = Vector3(pos.x, 0, pos.z)
 	node.pose = "hammer" if at_site() else "idle"
