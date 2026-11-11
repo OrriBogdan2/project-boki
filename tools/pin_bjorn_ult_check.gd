@@ -278,7 +278,7 @@ func bjorn() -> void:
 	step(m, 0.35)
 	var hit_t := T.stun_t > 0.0 and T.slow_t > 0.0
 	ok("bjorn ult: a stun marker circles over each foe it stunned",
-		KitLooks.of(m).crowned(T), "stunned %s" % (T.stun_t > 0.0))
+		StatusLooks.of(m).showing(T, "stun"), "stunned %s" % (T.stun_t > 0.0))
 	ok("bjorn ult: the racing fissure struck every foe on the lane before its cell erupts (data: stuns struck targets)",
 		K.ult.hit.size() >= 2, "struck %d" % K.ult.hit.size())
 	step(m, 0.3)

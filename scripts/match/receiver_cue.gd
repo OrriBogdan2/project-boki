@@ -129,12 +129,12 @@ func tick(dt: float) -> void:
 		if not mi.visible:
 			continue
 		s["t"] = float(s["t"]) + dt
-		var e: Ent = s["e"]
 		var k := float(s["t"]) / float(s["dur"])
-		if k >= 1.0 or not is_instance_valid(e):
+		if k >= 1.0 or not is_instance_valid(s["e"]):
 			mi.visible = false
 			live -= 1
 			continue
+		var e: Ent = s["e"]          # (typed only once it is known to be alive: a freed body can't be assigned)
 		var fade := (1.0 - k) * minf(1.0, k * 8.0)         # a quick fade in, a long soft fade out
 		var wide := e.r / BODY_R * (1.12 + 0.12 * k)
 		mi.global_position = e.pos + Vector3(0, BODY_H * 0.5 * e.r / BODY_R, 0)

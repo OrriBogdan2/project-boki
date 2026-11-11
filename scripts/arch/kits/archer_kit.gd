@@ -42,6 +42,8 @@ func _setup() -> void:
 func teardown() -> void:
 	if spirit:
 		spirit.end("merge")
+	if sense:
+		sense.clear()
 	super()
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
@@ -140,11 +142,6 @@ func _tag_shots() -> void:
 		if arrow != null:
 			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
-
-func teardown() -> void:
-	if sense:
-		sense.clear()
-	super()
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():

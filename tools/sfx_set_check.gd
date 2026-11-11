@@ -28,7 +28,7 @@ extends RefCounted
 ##  18. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
 ##  19. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
 ##      drops, and stops on a heal, a down or out
-##   7. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
+##  20. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]

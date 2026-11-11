@@ -6,7 +6,8 @@ extends RefCounted
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-total=6] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-total=6] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv]
+##   [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
