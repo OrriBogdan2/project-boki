@@ -408,6 +408,16 @@ const CHECKS := {
 	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
 	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
 	"--train-check": ["res://tools/train_check.gd", "train_check", null],
+	# timing, "advisory" (docs/CHECKS_TIMING.md): a fail prints but exits 0 unless --timing-strict (GPU_HOST)
+	"--hitch-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # drop and landing frames
+	"--load-check": ["res://tools/hitch_check.gd", "hitch_check", "advisory"],      # the loading screen; =home|training
+}
+
+## The strict runs of the advisory timing checks: the gate sends each through
+## `jobq submit --needs gpu --tree <tree> --out <name> -- <args>`, where frame times are stable.
+const GPU_HOST := {
+	"hitch-gpu": "--hitch-check --timing-strict",
+	"load-gpu": "--load-check --timing-strict",
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
