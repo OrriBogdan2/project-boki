@@ -308,6 +308,8 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | _rush_k | the last squad standing: the final seat opens at once and fills this much faster |
 | end_after_final_s | 15 |
 | _end_after_final_s | once the final seat is taken the islands fall this many seconds later |
+| late_s | 20 |
+| _late_s | a squad uses one seat: when it takes one, each member not in it has this long to reach it (HUD countdown + a line to the seat), then goes home without their carried loot (their own Boki always comes home) |
 | tide_start_s | 90 |
 | tide_close_s | 510 |
 | _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |

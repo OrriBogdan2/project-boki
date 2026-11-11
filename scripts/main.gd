@@ -2322,6 +2322,8 @@ func _extract_check() -> void:
 	await get_tree().process_frame
 	# ---- 3d. the Uplink quest seat (tools/uplink_seat_check.gd)
 	if not await load("res://tools/uplink_seat_check.gd").new().check(self, fresh, run, done): ok = false
+	# ---- 3e. one seat per squad (tools/one_seat_check.gd)
+	if not await load("res://tools/one_seat_check.gd").new().check(self, fresh, run, done): ok = false
 	# ---- 4. docks close late, one stays open
 	m = fresh.call(2)
 	var closing := m.exits.of_kind("dock").filter(func(x): return float(x["close_at"]) < 1e8).size()
