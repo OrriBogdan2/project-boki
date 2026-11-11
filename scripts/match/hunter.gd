@@ -181,6 +181,7 @@ var wall_n := Vector2.ZERO
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
+var dash_glide := DashGlide.new()      # an air dash's exit eases out, and Shift hands over to the glider
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
@@ -860,10 +861,15 @@ func can_glide() -> bool:
 ## Item 4: a fresh glide press at any moment of an air Shift dash ends the dash that frame (no minimum time) and
 ## the glide takes over at the dash's own velocity, no reset, no snap: Loco.glide_step's drag and this hunter's
 ## glide_carry cap tame it. A kit's rush or special movement (move_kind other than "dash") is not cancelled.
+## A press just after the dash (DashGlide.fresh) counts as one in it, past the kit's wind-down (decision 0061).
 func _dash_into_glide() -> bool:
-	if roll_t <= 0.0 or grounded or move_kind != "dash" or dropping or glide_cd > 0.0 or downed or shot_down:
+	var in_dash := roll_t > 0.0 and move_kind == "dash" and glide_cd <= 0.0
+	var just_after := roll_t <= 0.0 and dash_glide.fresh(self)
+	if not (in_dash or just_after) or grounded or dropping or downed or shot_down or stun_t > 0.0 \
+			or (ak != null and ak.no_glide()) or not loco.can(Loco.S.GLIDING):
 		return false
 	roll_t = 0.0
+	glide_cd = 0.0 if just_after else glide_cd      # (as in the dash: its wind-down never folds this glider)
 	shove = {}
 	if Vector2(vel.x, vel.z).length() > GLIDE_SPEED * 1.25:
 		_glide_boost_fx()
@@ -2127,6 +2133,7 @@ func _physics(dt: float) -> void:
 			hv = Loco.accel_to(hv, mv * spd, AIR_ACCEL, AIR_DECEL, AIR_OVERSPEED, dt)
 		else:
 			hv = Loco.air_step(hv, mv, spd, dt)     # strong WASD air control (owner 11-08), the farm's too
+	hv = dash_glide.step(self, Vector2(vel.x, vel.z), hv, dt)
 	hv = MantleCarry.step(self, hv, dt)
 	vel.x = hv.x; vel.z = hv.y
 	update_lip()
