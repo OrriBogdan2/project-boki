@@ -785,7 +785,10 @@ func do_jump() -> void:
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
 		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed, at most the run
-		var keep := HunterMove.dash_exit(Vector2(vel.x, vel.z) * Loco.dash_jump_keep, run_speed)
+		# (a held glider takes it whole, as at an air dash's end)
+		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
+		if not inp.get("glide", false):
+			keep = HunterMove.dash_exit(keep, run_speed)
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
