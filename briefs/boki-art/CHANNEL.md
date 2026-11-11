@@ -899,3 +899,6 @@ Owner picked splash/field_tent_tenzo.jpg for the tent scene and has sent it to h
 ### 11-11 20:28 ET ART -> COORD
 - Turnarounds replaced to match current cards: Kingpinguin (Pipguin), Maracoil, Pavonazar. LIVE_MANIFEST hashes refreshed for those three only; sheet_audit now shows 0 behind.
 - Pixel sprites, first pass: briefs/boki-art/pixel/<FileId>.png for 257 Boki (80px on the long side, transparent background, max 14 colours; scale up with nearest-neighbour only). Made by tools/pixel_sprite.py. Not final yet: 10 noisy ones (Chainipede, Geodemole, Druzemole, Skateron, Tidalisk, Lanceron, Reapant, Zephyrak, Umbrathere, Barostorm) are queued for a redo, and Glaivyx + Ringrove are queued (they were missing). I'll post READY when all 259 are in. Menus/dex only, as before.
+
+### 11-11 20:30 ET ART -> COORD
+READY: pixel sprites for all 259 Boki in briefs/boki-art/pixel/<FileId>.png (80px long side, transparent, max 14 colours, nearest-neighbour scaling only). The 10 noisy ones were redone and Glaivyx + Ringrove added. Please store them in the game repo for menus/dex. Re-run tools/pixel_sprite.py Name:stem if a card changes.

@@ -1,5 +1,6 @@
 """Finish step for the px9 pixel sprites (run from the repo root, after `git fetch origin ext/agent-briefs`):
-python3 briefs/boki-art/tools/pixel_sprite.py [Name[:stem] ...]      (no names = every manifest Boki, stem px9_<name>_1)
+python3 briefs/boki-art/tools/pixel_sprite.py [Name[:stem[:holes]] ...]  (no names = every manifest Boki, stem px9_<name>_1;
+                                               holes = also clear white gaps enclosed by the body, e.g. inside a coil)
 python3 briefs/boki-art/tools/pixel_sprite.py --sheet [out.jpg]      (contact sheet of briefs/boki-art/pixel/*.png on grey)
 For each Boki: flood-fill the white background from the image edges, crop to the creature, quantise to 14 colours,
 resample to 80px on the long side taking the dominant colour per cell, save briefs/boki-art/pixel/<Name>.png with hard alpha."""
@@ -9,16 +10,20 @@ from scipy import ndimage
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import bload
 A = 'briefs/boki-art/'; OUT = A + 'pixel/'; SIZE = 80; COLS = 14
 
-def background(rgb):
-    """Near-white pixels connected to the image edge."""
+def background(rgb, holes=False):
+    """Near-white pixels connected to the image edge; with holes=True also large pure-white pockets enclosed by the body."""
     a = rgb.astype(np.int16); light = (a.min(2) > 222) & ((a.max(2) - a.min(2)) < 26)
-    lab, _ = ndimage.label(light)
+    lab, n = ndimage.label(light)
     edge = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]])); edge = edge[edge > 0]
-    return np.isin(lab, edge)
+    bg = np.isin(lab, edge)
+    if holes and n:
+        pure = ndimage.mean(a.min(2) > 242, lab, range(1, n + 1)); sz = ndimage.sum(light, lab, range(1, n + 1))
+        bg |= np.isin(lab, np.where((pure > 0.85) & (sz > light.size * 0.002))[0] + 1)
+    return bg
 
-def finish(im):
+def finish(im, holes=False):
     rgb = np.asarray(im.convert('RGB'))
-    fg = ~background(rgb)
+    fg = ~background(rgb, holes)
     fg = ndimage.binary_opening(fg, iterations=1)                  # JPEG specks on the edge
     lab, n = ndimage.label(fg)
     if n:
@@ -54,9 +59,9 @@ def sheet(path, scale=2, per_row=16):
 if __name__ == '__main__':
     if sys.argv[1:2] == ['--sheet']: sheet(sys.argv[2] if len(sys.argv) > 2 else '/tmp/pixel_sheet.jpg'); sys.exit()
     m = json.load(open(A + 'LIVE_MANIFEST.json')); os.makedirs(OUT, exist_ok=True)
-    todo = [a.split(':', 1) if ':' in a else (a, f'px9_{a.lower()}_1') for a in sys.argv[1:]] or [(n, f'px9_{n.lower()}_1') for n in m]
+    todo = [(a.split(':') + [f'px9_{a.lower()}_1', ''])[:3] if ':' in a else (a, f'px9_{a.lower()}_1', '') for a in sys.argv[1:]] or [(n, f'px9_{n.lower()}_1', '') for n in m]
     bad = []
-    for n, stem in todo:
-        try: finish(bload.load(stem)).save(OUT + n + '.png')
+    for n, stem, opt in todo:
+        try: finish(bload.load(stem), opt == 'holes').save(OUT + n + '.png')
         except FileNotFoundError: bad.append(n)
     print(len(todo) - len(bad), 'written to', OUT, '| no render:', bad)
