@@ -66,8 +66,8 @@ func set_body(k: float) -> void:
 	body_k = k
 	var q := float(Settings.q("fx"))
 	for p in pools["splash"]:
-		p.emission_ring_radius = 0.42 * k
-		p.emission_ring_inner_radius = 0.28 * k
+		p.emission_ring_radius = 0.6 * k      # (wide enough to show round the Hunter seen from above)
+		p.emission_ring_inner_radius = 0.42 * k
 	var n_spray := maxi(3, roundi(SPRAY_N * k * q))
 	var n_wake := maxi(2, roundi(WAKE_N * k * q))
 	for p in pools["spray"]:
@@ -94,7 +94,7 @@ func splash(at: Vector3, hard: float) -> void:
 	if p == null: return
 	var na := _splash_n(hard)
 	if p.amount != na: p.amount = na
-	_fire(p, at, Vector3.UP, 30.0, (3.0 + hard * 2.2) * sqrt(body_k), 0.6, 12.0)
+	_fire(p, at, Vector3.UP, 35.0, (3.2 + hard * 2.4) * sqrt(body_k), 0.6, 12.0)
 
 ## Each step in shallow water on the ground: a spray along a dash, a wake while running.
 func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:

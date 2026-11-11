@@ -203,7 +203,7 @@ func _film(main: Node, hm, hero: String) -> void:
 	hm.cam.zoom = FILM_ZOOM
 	hm.cam.snap(hm.ppos)
 	# [direction, seconds of play, key pressed at its start]
-	var plan := [[Vector2(0.8, -0.6), 0.6, ""], [Vector2(0, -1), 0.7, ""], [Vector2(0, -1), 0.35, "dash"],
+	var plan := [[Vector2(0.8, -0.6), 0.6, ""], [Vector2(0, -1), 0.5, ""], [Vector2(0, -1), 0.35, "dash"],
 		[Vector2(0, -1), 0.25, ""], [Vector2(0, -1), 0.8, "jump"], [Vector2(1, 0), 0.8, ""], [Vector2.ZERO, 0.4, ""]]
 	var frames: Array[Image] = []
 	Engine.time_scale = 0.5
@@ -232,4 +232,5 @@ func _film(main: Node, hm, hero: String) -> void:
 	for i in frames.size():
 		frames[i].save_png("%s/%s_%03d.png" % [shot, hero, i])
 	var fps := frames.size() / played
-	print("WATERVFX film %s: %d frames over %.2f s of play (%.1f fps)" % [hero, frames.size(), played, fps])
+	print("WATERVFX film %s: %d frames over %.2f s of play (%.1f fps), effects %s" % [hero, frames.size(), played, fps,
+		str(_counts(hm))])
