@@ -2354,6 +2354,7 @@ for _k,_p in (('diag',"leaping diagonally UP toward the viewer in three-quarter 
               ('coil',"coiled tight to spring, seen from the front three-quarter facing RIGHT, back legs folded under like loaded springs, head up, tongue tip just showing")):
     ON_POSE('Bullsfrog',_LM['Bullsfrog']['sheet'],'mid','sleek',False,False,_p,"red skin with dark red-brown bands, green target-ring markings on its back, two green and red fletching-shaped crest fins, green eyes, the long pink arrow-tipped tongue"); SPECS[-1]['id']='pose_bullsfrog_'+_k; SPECS[-1]['runs']=2
 
+_KEEP={'Scopeleon':"navy skin with pale gold crescent-moon and star spots, a brass telescope eye, a curled tail with a brass tip, pink cheeks",'Filefin':"sandy tan shark body with a pale belly, a long flat saw nose with teeth on both edges, two fins, a forked tail"}
 # 11-11 OWNER: Scopeleon and Filefin read too small in the dex (long flat side-on poses fill only half the frame height). The dex hero is cut
 # from the portrait, so new compact portrait poses, 3 x 2. (Carpenjaw already fixed: current hero fills the frame; the owner's dex view is older.)
 for _n,_st,_ar,_dk,_poses in (
@@ -2364,5 +2365,6 @@ for _n,_st,_ar,_dk,_poses in (
                                   ("dive","diving down diagonally toward the viewer, saw nose leading, tail flicked up behind, seen from the front three-quarter"),
                                   ("rise","rising straight up, nose and saw pointing at the sky, tail curled under it, cheerful, body vertical")])):
     for _k,_p in _poses:
-        V2PORT_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_st,_ar,_GC,_GN,_dk,False,_p); SPECS[-1]['id']='v2p_'+_n.lower()+'_cmp_'+_k; SPECS[-1]['runs']=2
+        # 11-11 correction: the dex hero is cut from the CARD (refresh_names.py: hero(e['card'])), so these are card poses, ref = sheet.
+        ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,_dk,False,_p,_KEEP[_n]); SPECS[-1]['id']='pose_'+_n.lower()+'_cmp_'+_k; SPECS[-1]['runs']=2
         SPECS[-1]['prompt']+=" The creature fills most of the square frame in both width and height."

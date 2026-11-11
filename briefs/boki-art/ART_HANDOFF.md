@@ -189,3 +189,4 @@ Crofthorn (earlier form) and Dribbara (baby) follow whatever is picked for their
 ### OWNER RULE 11-11: how to show options (applies to every session and every agent asking his opinion)
 Show ONE image per decision round, one row per Boki: NOW (current) -> 1st -> 2nd -> 3rd, left to right, big clear labels and names,
 your favourite first. Do not show him every try in a grid; the full grid is for your own review. He picks; nothing goes live before that.
+Correction 11-11: the dex hero (portraits/cutout_v2/<Name>.png) is cut from the CARD by refresh_names.py, not from the portrait. To change what the dex shows, change the card.

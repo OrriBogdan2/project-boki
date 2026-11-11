@@ -83,3 +83,4 @@ DROP-={'opt_ringrove_u1','opt_ringrove_u2','opt_ringrove_u3','v2s_ringrove_p2','
 DROP-={'v2s_ringrove_m','v2p_ringrove_m'}
 DROP-={'px9_glaivyx','px9_ringrove'}  # 11-11 pixel sprites
 DROP|={'on_pinguin_pena','on_pinguin_penb','on_pinguin_penc'}  # 11-11 owner: Kegling looks fine
+DROP|={'v2p_filefin_cmp_dive','v2p_filefin_cmp_rise','v2p_filefin_cmp_turn','v2p_scopeleon_cmp_climb','v2p_scopeleon_cmp_front','v2p_scopeleon_cmp_up'}  # 11-11 replaced by card poses pose_*_cmp_*
