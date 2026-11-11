@@ -907,7 +907,7 @@ func ship_jump(h: Hunter, force := false) -> void:
 		sfx("whoosh", null, -2.0)
 		if hud and not force:
 			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
-		elif hud:
+		elif hud and Life.has_mates(self, h):
 			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)

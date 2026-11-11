@@ -60,6 +60,10 @@ static func box_color(b: Dictionary) -> Color:
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
 
+## Does `h` have a squadmate in this match (alive or not)? Solos: never, so no squad UI shows.
+static func has_mates(m: Match, h: Hunter) -> bool:
+	return h != null and m.hunters.any(func(x): return x != h and x.team == h.team)
+
 static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
 

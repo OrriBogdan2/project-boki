@@ -24,6 +24,7 @@ var _press := Vector2.INF
 var _press_center := Vector2.ZERO
 var _dragged := false
 var _roster: Array = []        # [Rect2, Hunter] squad rows you can click to pass the lead
+var side_rows := 0             # squad rows the side panel drew last frame (checks read it)
 var _hover: Dictionary = {}    # the spawn candidate under the cursor
 
 func _init(h, match_node: Match) -> void:
@@ -159,7 +160,8 @@ func draw(sz: Vector2) -> void:
 		c.draw_rect(Rect2(Vector2(rect.position.x, 70), Vector2(rect.size.x * clampf(left / maxf(0.1, m.skydrop.plan_len), 0.0, 1.0), 3)), GOLD)
 	else:
 		hud._ctext(Vector2(sz.x * 0.5, 44), _map_title(), 28, INK, hud.big)
-		hud._ctext(Vector2(sz.x * 0.5, 66), "Click to ping  ·  right click takes your ping down  ·  wheel zooms  ·  %s closes" % Settings.key_cap("map"), 13, MUTED)
+		var hint := "Click to ping  ·  right click takes your ping down  ·  " if Life.has_mates(m, m.player) else ""
+		hud._ctext(Vector2(sz.x * 0.5, 66), "%swheel zooms  ·  %s closes" % [hint, Settings.key_cap("map")], 13, MUTED)
 	# the map itself: the painted map (MapPaint), framed
 	hud._rounded(rect.grow(9.0), Color(0, 0, 0, 0.45), 10)
 	c.draw_rect(rect, SEA)
@@ -603,7 +605,8 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)
 		y += 22.0
 	hud._text(Vector2(r.position.x + 14, y + 6), "Vaults and lairs are known to all.", 11, MUTED)
-	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once your squad sees them.", 11, MUTED)
+	var who := "your squad sees" if Life.has_mates(m, m.player) else "you scout"
+	hud._text(Vector2(r.position.x + 14, y + 20), "The rest show up once %s them." % who, 11, MUTED)
 	# exits, under the spawns
 	var exit_rows := 1 + int(not m.shrines.is_empty()) + int(not m.beacons.is_empty())
 	var r2 := Rect2(Vector2(x0, r.end.y + 10), Vector2(wv, 38 + exit_rows * 22))
@@ -619,11 +622,12 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 			row_y += 22
 		if not m.beacons.is_empty():
 			ReviveHud.beacon_glyph(c, Vector2(r2.position.x + 26, row_y), 5.0, {}, 0.0)
-			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)", 12, INK)
+			hud._text(Vector2(r2.position.x + 48, row_y + 5), "Revive beacon (your squad back)" if Life.has_mates(m, m.player) else "Revive beacon", 12, INK)
 
 ## Left of the map: your squad, who leads the drop, and the keys for it.
 func _side(c: Control, sz: Vector2) -> void:
 	_roster.clear()
+	side_rows = 0
 	var p: Hunter = m.player
 	if p == null:
 		return
@@ -631,6 +635,8 @@ func _side(c: Control, sz: Vector2) -> void:
 	if wv < 150.0:
 		return
 	var x0 := rect.position.x - 22.0 - wv
+	if not Life.has_mates(m, p):
+		return          # solos: no squad panel, no ping or lead keys (the drop prompt has your jump key)
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
@@ -639,6 +645,7 @@ func _side(c: Control, sz: Vector2) -> void:
 	var y := r.position.y + 50.0
 	var i_lead: bool = m.skydrop != null and m.skydrop.is_lead(p)
 	for h in squad:
+		side_rows += 1
 		var row := Rect2(Vector2(r.position.x + 8, y), Vector2(wv - 16, 38))
 		var col := m.mate_col(h)
 		var lead: bool = m.skydrop != null and m.skydrop.is_lead(h)

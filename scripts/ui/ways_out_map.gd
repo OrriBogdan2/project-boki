@@ -185,7 +185,7 @@ static func line(m: Match) -> String:
 		return ""
 	var s := "Ways out left: %d" % ways_left(m)
 	var near := nearest(m, p.team)
-	if near["i"] >= 0:
+	if near["i"] >= 0 and Life.has_mates(m, p):
 		s += "  ·  your squad is nearest the %s, %d m" % [String(WORDS[near["i"]]).to_lower(), int(near["d"])]
 	return s
 

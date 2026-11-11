@@ -9,6 +9,8 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
+##   9. a solos match (one hunter a squad) shows no squad UI: no squad row or Boki icon, no base badge, no
+##      map squad panel, the plain ping-free map hint and no squad words on the dead/wisp or uplink lines
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -203,6 +205,8 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	m.queue_free()
+	await _solos()
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -304,6 +308,44 @@ func _mate_down(m: Match, hud, P: Hunter) -> void:
 	hud.mates.track(hud, P, MateAlerts.LINE_S)
 	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
 		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
+
+func _spot(hud, id: String) -> bool:
+	return hud.hover_spots.any(func(x): return String(x[1]) == id)
+
+## 9. A solos match with the real HUD: nothing of the squad shows, and the same HUD still draws the rest.
+func _solos() -> void:
+	var m := Match.new()
+	main.add_child(m)
+	var opts := HudRefDemo.opts("--hudref-demo=plates")
+	opts.merge({"tier": 0, "length": 1e9, "seed": 5, "arch": "thief", "cls": Arch.weight("thief"),
+		"weapon": Arch.signature("thief")})
+	opts.merge(Data.mode_opts("solos"), true)
+	opts["teams"] = 6       # (a few rivals, the demo's row of them, not the whole 20)
+	m.start(opts)
+	var hud = m.hud
+	await frames_until(m, 1.0)
+	var P: Hunter = m.player
+	await hud.panels.draw
+	ok(not Life.has_mates(m, P) and m.hunters.size() > 3, "solos: %d hunters, none on your squad" % m.hunters.size())
+	ok(TeamBoki.shown.is_empty() and TeamBoki.levels.is_empty() and hud.mates.last.is_empty(),
+		"solos: no squad row, Boki icon, level chip or squad watch on the left")
+	ok(_spot(hud, "vitals") and not _spot(hud, "base"),
+		"solos: the vitals block is there, the base-to-a-teammate badge is not")
+	var rivals: Array = m.hunters.filter(func(x): return x != P)
+	m.knock(rivals[0], P, {})
+	await hud.panels.draw
+	ok(hud.mates.lines.is_empty() and hud.mates.last.is_empty(), "solos: a rival going down raises no squad line")
+	var fm: FullMap = hud.full_map
+	fm.open()
+	await hud.panels.draw
+	ok(fm.side_rows == 0, "solos: the full map has no squad panel")
+	rivals[1].team = P.team       # the same HUD with a squadmate: every squad piece comes back
+	await hud.panels.draw
+	ok(fm.side_rows == 2 and TeamBoki.levels.has(rivals[1].nid) and _spot(hud, "base"),
+		"a squadmate joins: the map's squad panel (%d rows), their row and the base badge show" % fm.side_rows)
+	fm.close()
+	m.queue_free()
+	await main.get_tree().process_frame
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

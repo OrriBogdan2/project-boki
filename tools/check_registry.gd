@@ -16,6 +16,7 @@ const CHECKS := {
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart early seat (0023, 0051)
 	"--modes-check": ["res://tools/modes_check.gd", "modes_check", null],      # trios, solos, play space (0084)
 	"--modes-shots": ["res://tools/modes_shots.gd", "modes_shots", null],      # GPU, --shots-dir=
+	"--solo-hud-shots": ["res://tools/solo_hud_shots.gd", "solo_hud_shots", null],      # GPU, --shots-dir=, 1280x720
 	# the Ways Out strip and Gate prompt
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
