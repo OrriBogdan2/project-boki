@@ -7,6 +7,7 @@ extends RefCounted
 
 const CHECKS := {
 	"--heart-check": ["res://tools/heart_check.gd", "heart_check", null],      # the Heart loop (docs/decisions/0023)
+	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],      # the Heartspark carry layer
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>

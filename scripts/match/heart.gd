@@ -21,6 +21,7 @@ const GLASS := Color("b8203f")      # smooth crimson glass: no crack, no gold
 const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
+const HELD_SCALE := 0.45             # the Heartspark in a carrier's hand, against 0.9 floating over the head
 const NEAR_LABEL := 7.0
 
 static var _rules := {}
@@ -162,6 +163,10 @@ func _apply_carrier() -> void:
 		h.set_meta("heart_slow", r("carrier_slow") if on else 0.0)
 		if on and bool(rules()["carrier_reveal"]):
 			h.reveal_t = maxf(h.reveal_t, 0.3)
+
+## Is h holding the Heartspark right now (what its model's carry layer reads)?
+static func carrying(h: Hunter) -> bool:
+	return float(h.get_meta("heart_slow", 0.0)) > 0.0 and not h.downed and not h.out and not h.extracted
 
 func carrier_pos() -> Vector3:
 	return carrier.pos if state == "carried" and carrier else spark_pos
@@ -410,8 +415,12 @@ func _update_nodes() -> void:
 	_spark.visible = state != "cooling"
 	var at := carrier_pos()
 	if state == "carried" and carrier:
-		_spark.position = at + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
-		_spark.scale = Vector3.ONE * 0.9
+		var held := carrier.model != null and carrier.model.has_meta(WardenCarry.MOTE)
+		if held:
+			_spark.position = carrier.model.get_meta(WardenCarry.MOTE)      # (in the off hand)
+		else:
+			_spark.position = at + Vector3(0, 2.7 + sin(t * 4.0) * 0.1, 0)
+		_spark.scale = Vector3.ONE * (HELD_SCALE if held else 0.9)
 	else:
 		var sf := 1.0 if state == "ready" else clampf(0.15 + f * 0.85, 0.15, 1.0)
 		_spark.position = (site if state == "charging" else at) + Vector3(0, 2.7 + sin(t * 2.0) * 0.12, 0)

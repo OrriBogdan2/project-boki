@@ -78,6 +78,7 @@ var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
 var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
+var heart_w := 0.0           # how far the Heartspark carry layer (WardenCarry.hold_mote) holds the mote
 var stowed := false          # "carry_stow" bones are put away
 var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" hand
 
@@ -390,6 +391,7 @@ func step(dt: float) -> void:
 	_turn_to_heading(s, bool(want.get("heading", false)) or legs, legs, dt)
 	_out(dt)
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
+	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
 
 ## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
 func _carry(on: bool, dt: float) -> void:
@@ -407,6 +409,16 @@ func _carry(on: bool, dt: float) -> void:
 	stowed = true
 	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
 	WardenCarry.hold(drop, carry_w >= 0.5)
+
+## The Heartspark carry layer: the off hand holds the mote while the legs and the main arm play on. It lets go the
+## moment the carrier stops carrying, is downed or out, or a clip (a shot, a cast, a hit) needs the arms.
+func _heart(on: bool, dt: float) -> void:
+	heart_w = move_toward(heart_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if heart_w <= 0.0:
+		root.remove_meta(WardenCarry.MOTE)
+		return
+	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
+	root.set_meta(WardenCarry.MOTE, WardenCarry.hold_mote(skel, root, heart_w, String(d.get("heart_hand", "L")), fwd))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it.

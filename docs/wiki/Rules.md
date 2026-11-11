@@ -270,6 +270,41 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## heart (`content/rules/heart.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Heart loop (docs/decisions/0023-heartspark.md; scripts/match/heart.gd). Every number of the prototype lives here. Seconds and metres. |
+| charge_s | 75 |
+| _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
+| cool_s | 90 |
+| _cool_s | after a carrier extracts, the Heart cools down this long, then charges a new Heartspark (owner: start at 90 s) |
+| pickup_hold_s | 1.5 |
+| _pickup_hold_s | hold interact (F) on a charged Heartspark this long to take it |
+| pickup_r | 2.2 |
+| carrier_slow | 0.15 |
+| _carrier_slow | the carrier moves this much slower (owner: about 15%) |
+| carrier_reveal | True |
+| _carrier_reveal | the carrier shows on every player's map and in the world while they hold it |
+| gate_dist | 24 |
+| _gate_dist | the Heart Gate stands this far from the Heart, on solid ground |
+| gate_r | 2.4 |
+| gate_hold_s | 2.5 |
+| _gate_hold_s | the carrier holds interact at the open gate this long to leave with the Heartspark |
+| tide_start_s | 15 |
+| tide_close_s | 240 |
+| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this |
+| tide_r0 | 130 |
+| tide_r1 | 34 |
+| tide_boost | 0.55 |
+| _tide_boost | added to the Blight's strength outside the tide ring (so they hit harder and are tougher there), scaled by how far out |
+| tide_heat | 0.06 |
+| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
+| reward | {"seeds": {"emberberry": 2, "sunroot": 2, "mindmint": 2, "tidebloom": 2}, "_seeds": "the four evolution foods, so any affinity can be pushed", "goods": {"heartwood": 1, "starstone": 1}, "_goods": "rare evolution materials (market goods)", "trust": 12.0, "_trust": "bond/trust added to the carrier's Boki (and each Boki that stood with the squad gets a share)", "gems": 60} |
+| demo_charge | 1 |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
