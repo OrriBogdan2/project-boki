@@ -219,6 +219,7 @@ const CHECKS := {
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
 	"--first15-shots": ["res://tools/first15_shots.gd", "first15_shots", null],      # --shots-dir=<dir> --size=WxH
+	"--ui-screens-shots": ["res://tools/ui_screens_shots.gd", "ui_screens_shots", null],      # UI_STYLE audit
 	# walking off a ledge is never gated
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
