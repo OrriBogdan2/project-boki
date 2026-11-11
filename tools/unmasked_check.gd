@@ -136,7 +136,7 @@ func _model(main: Node) -> void:
 	for g in Unmasked.GHOSTS:
 		names[g] = true
 	ok(Unmasked.GHOSTS.size() >= 10 and names.size() == Unmasked.GHOSTS.size() and drawn == names.size(),
-		"%d distinct ghost face marks, each one reaching the void shader (owner item 153b)" % drawn)
+		"%d distinct ghost face marks, each one reaching the void shader" % drawn)
 	var woman := _build({"unmasked": true, "gender": 0})
 	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x

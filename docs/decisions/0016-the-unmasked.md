@@ -55,3 +55,9 @@ Relic moment).
 - **Soles**: `FootPlant.reach` gives HunterAnim the real lowest boot point so the hips drop or lift until the sole
   meets the ground, standing and walking, at every height, build and sex (`--unmasked-check` asserts 2 cm).
 - Prologue captions wrap inside 86% of the width and grow upward from the bottom, never off screen.
+
+## Update: more Ghost marks (owner, Nov 5, item 153b)
+- Ghost, the face-mark row on the void, has 12 marks: None, Eyes, Whole face, Stitched, Smile, Tears, Third eye,
+  Cracked, Runes, Many eyes, Fanged, Hollow stare (dark sockets that black out the stars). The first four keep
+  their index, so saves need no migration. Contact sheet: docs/shots/creator-empty-marks/ghost_sheet.jpg.
+- Not built yet from 153b: the ghost intensity slider and the Aura types.
