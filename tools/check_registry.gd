@@ -739,6 +739,25 @@ const GPU_HOST := {
 	"hitch-gpu": "--hitch-check --timing-strict",
 	"load-gpu": "--load-check --timing-strict",
 	# mashing LMB never beats holding
+	"--revive-check": ["res://tools/revive_check.gd", "revive_check", null],
+	"--weapon-clip-check": ["res://tools/weapon_clip_check.gd", "weapon_clip_check", null],
+	"--farm-start-check": ["res://tools/farm_start_check.gd", "farm_start_check", null],
+	"--work-check": ["res://tools/work_check.gd", "work_check", null],
+	"--polish-check": ["res://tools/polish_check.gd", "polish_check", null],
+	"--boki-system-check": ["res://tools/boki_system_check.gd", "boki_system_check", null],
+	"--merge-form-check": ["res://tools/merge_form_check.gd", "merge_form_check", null],
+	"--boki-follow-check": ["res://tools/boki_follow_check.gd", "boki_follow_check", null],
+	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
+	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
+	"--unique-check": ["res://tools/unique_check.gd", "unique_check", null],
+	"--iv-check": ["res://tools/iv_check.gd", "iv_check", null],
+	"--nook-check": ["res://tools/nook_check.gd", "nook_check", null],
+	"--incubator-check": ["res://tools/incubator_check.gd", "incubator_check", null],
+	"--abyss-check": ["res://tools/abyss_check.gd", "abyss_check", null],
+	"--wallhug-check": ["res://tools/wallhug_check.gd", "wallhug_check", null],
+	"--obstacle-check": ["res://tools/obstacle_slide_check.gd", "obstacle_slide_check", null],
+	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
+	"--train-check": ["res://tools/train_check.gd", "train_check", null],
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

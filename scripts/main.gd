@@ -313,73 +313,8 @@ func _ready() -> void:
 		return
 	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
 		return
-	if "--revive-check" in args:
-		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
-		set_meta("revive_check", rvc)
-		rvc.run(self)
-		return
-	if "--weapon-clip-check" in args:
-		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
-		set_meta("weapon_clip_check", wcc)
-		wcc.run(self)
-		return
-	if "--farm-start-check" in args:
-		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
-	if "--work-check" in args:
-		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
-		set_meta("work_check", wkc)
-		wkc.run(self)
-		return
-	if "--polish-check" in args:
-		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
-		return
-	if "--boki-system-check" in args:
-		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
-		return
-	if "--merge-form-check" in args:
-		load("res://tools/merge_form_check.gd").new().run(self)      # merge forms: transformation, kit swap, ultimates, shell, no tiers, net, bots
-		return
-	if "--boki-follow-check" in args:
-		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
-		return
-	if "--capture-check" in args:
-		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
-		return
-	if "--teammate-check" in args:
-		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
-		return
-	if "--unique-check" in args:
-		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size
-		return
-	if "--iv-check" in args:
-		load("res://tools/iv_check.gd").new().run(self)      # kin IVs: rolls, backfill, breeding, Rare Eggs, caps
-		return
-	if "--nook-check" in args:
-		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding: friend gate, head start, habits
-		return
-	if "--incubator-check" in args:
-		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
-		set_meta("incubator_check", icc)
-		icc.run(self)
-		return
 	if "--glide-reach" in args:
 		load("res://tools/glide_reach.gd").new().run(self)    # how far a glide carries over open void (sizes map gaps)
-		return
-	if "--abyss-check" in args:
-		set_meta("abyss_check", load("res://tools/abyss_check.gd").new())
-		get_meta("abyss_check").run(self)
-		return
-	if "--wallhug-check" in args:
-		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
-		return
-	if "--obstacle-check" in args:
-		load("res://tools/obstacle_slide_check.gd").new().run(self)    # walking past and around trees and rocks: no sticking, no pull
-		return
-	if "--airheal-check" in args:
-		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
-		return
-	if "--train-check" in args:
-		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
 	if "--arena-check" in args:
 		var arc = load("res://tools/arena_check.gd").new()      # the Arena, training's practice tools, the kit card
