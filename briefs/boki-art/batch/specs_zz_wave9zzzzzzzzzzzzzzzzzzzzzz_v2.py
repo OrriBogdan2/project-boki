@@ -2320,3 +2320,15 @@ for _k,_d in (('splash',"a tiny round baby capybara whose fluffy head tuft stick
     ON_CHANGE('Dribbara',_C%'Dribbara','baby','cute',False,True,"no puddle, no lily pad and nothing on its back. "+_d,runs=2,tag='_x'+_k)
 V2PORT_NEW('Kestrike_female','briefs/boki-art/cards/Kestrike_female.jpg','mid','cute',_GC,_GN,False,True,"perched on one foot with BOTH wings folded neatly at her sides, head tilted, looking at the viewer");SPECS[-1]['id']='v2p_kestrike_female_bk3'
 SPECS[-1]['prompt']+=" She has exactly two wings, both folded. One bird only."
+
+# 11-11 OWNER "yes" = all 1st. Live: Crofthorn on_crofthorn_xwheat_2, Crofthollow on_crofthollow_xwheat_1, Dribbara on_dribbara_xsplash_1 (cards);
+# full sets for Terrarimit s2/p2, Mossbastion s3/p3, Cisternmander s3/p2, Briarlynx s2/p3, Soakybara s3/p2, Geysirbara s2/p3,
+# Kestrike female sheet bk2_2 + portrait bk3_1, Pavonazar female sheet bk2_1 + portrait bk2_3. Sets for the three new cards, then pixel sprites.
+for _n,_st,_ar,_fu,_pose in (('Crofthorn','mid','tough',1,"trotting toward the viewer, wheat fringe bouncing, tail tuft swinging"),
+                             ('Crofthollow','final','tough',1,"head lowered and turned, sickle horns forward, flail tail raised behind it"),
+                             ('Dribbara','baby','cute',1,"sitting up on its haunches, looking up happily, splash tuft bouncing")):
+    _cd='briefs/boki-art/cards/'+_n+'.jpg'
+    V2SHEET_NEW(_n,_cd,_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_bk3'; SPECS[-1]['runs']=4; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
+    V2PORT_NEW(_n,_cd,_st,_ar,_GC,_GN,False,bool(_fu),_pose); SPECS[-1]['id']='v2p_'+_n.lower()+'_bk3'
+for _n in ('Terrarimit','Mossbastion','Cisternmander','Briarlynx','Soakybara','Geysirbara','Crofthorn','Crofthollow','Dribbara'):
+    SPECS.append({'id':'px9d_'+_n.lower(),'name':_n+' (pixel sprite 80, new design)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})

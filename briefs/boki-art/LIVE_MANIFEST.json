@@ -192,12 +192,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Briarlynx.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Briarlynx.png",
   "hash": {
-   "sheet": "053c422a3013",
-   "card": "2c70e872bcc4",
-   "portrait": "24cc339c08fe",
-   "hero": "49916fa700ba"
+   "sheet": "85b73df14931",
+   "card": "1c8f8c71c7c5",
+   "portrait": "4c68d0af1cbc",
+   "hero": "054ffe77e35e"
   },
-  "sheet_for_card": "2c70e872bcc4"
+  "sheet_for_card": "1c8f8c71c7c5"
  },
  "Bubblisk": {
   "sheet": "briefs/boki-art/turnarounds/Bubblisk.jpg",
@@ -336,12 +336,12 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Cisternmander.png",
   "display_name": "Vatmander",
   "hash": {
-   "sheet": "fe023a32dc01",
-   "card": "09bdc8cab8a6",
-   "portrait": "c8f77a746aad",
-   "hero": "8fc4a27d9b8a"
+   "sheet": "909b7b5c1cbf",
+   "card": "3fcc026ddc75",
+   "portrait": "609e1c8f4615",
+   "hero": "570726664762"
   },
-  "sheet_for_card": "09bdc8cab8a6"
+  "sheet_for_card": "3fcc026ddc75"
  },
  "Clinkpede": {
   "sheet": "briefs/boki-art/turnarounds/Clinkpede.jpg",
@@ -365,9 +365,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Crofthorn.png",
   "hash": {
    "sheet": "b7c039397ea0",
-   "card": "93178bd2584a",
+   "card": "7d1eba50b338",
    "portrait": "f2c4518e6db9",
-   "hero": "c8acf05490d8"
+   "hero": "b91a6f9a0d16"
   },
   "sheet_for_card": "93178bd2584a"
  },
@@ -465,9 +465,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Dribbara.png",
   "hash": {
    "sheet": "8d812b40a438",
-   "card": "b88a8e86efd1",
+   "card": "b11d8e377e5a",
    "portrait": "044f01db53c3",
-   "hero": "1b6f3106923c"
+   "hero": "9a3db82e0930"
   },
   "sheet_for_card": "b88a8e86efd1"
  },
@@ -680,13 +680,13 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Geysirbara.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Geysirbara.png",
   "hash": {
-   "sheet": "ddd69d757e4f",
-   "card": "225b444edbd7",
-   "portrait": "421b213a6117",
-   "hero": "3dbb14e5370d"
+   "sheet": "aec6d0f547ca",
+   "card": "e6c874310229",
+   "portrait": "7cd742116737",
+   "hero": "0a513490df48"
   },
   "display_name": "Geyserbara",
-  "sheet_for_card": "225b444edbd7"
+  "sheet_for_card": "e6c874310229"
  },
  "Gilabacus": {
   "sheet": "briefs/boki-art/turnarounds/Gilabacus.jpg",
@@ -1079,8 +1079,8 @@
    "portrait": "briefs/boki-art/portraits/light/Kestrike_female.jpg",
    "hash": {
     "card": "d2da6d51e19b",
-    "sheet": "958033985a86",
-    "portrait": "681ad655d444",
+    "sheet": "335d9ea7dc83",
+    "portrait": "1d8d393adebf",
     "hero": "4679f1231626"
    },
    "hero": "briefs/boki-art/portraits/cutout_v2/Kestrike_female.png",
@@ -2089,12 +2089,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Soakybara.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Soakybara.png",
   "hash": {
-   "sheet": "1b40b5336b80",
-   "card": "79316ba1f2f3",
-   "portrait": "c1394e13a39f",
-   "hero": "e632e64fbc6d"
+   "sheet": "2ffe603d6c10",
+   "card": "4684b71e5954",
+   "portrait": "a18947a57216",
+   "hero": "323f4efe6aee"
   },
-  "sheet_for_card": "79316ba1f2f3"
+  "sheet_for_card": "4684b71e5954"
  },
  "Spirevark": {
   "sheet": "briefs/boki-art/turnarounds/Spirevark.jpg",
@@ -2187,12 +2187,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Terrarimit.png",
   "hash": {
-   "sheet": "380e1186bba3",
-   "card": "890b39e5847f",
-   "portrait": "d638990affa5",
-   "hero": "25eb29a1f443"
+   "sheet": "9917d173e81d",
+   "card": "47e4bdba504f",
+   "portrait": "285c57453033",
+   "hero": "fa01fe86f65c"
   },
-  "sheet_for_card": "890b39e5847f"
+  "sheet_for_card": "47e4bdba504f"
  },
  "Terrasloth": {
   "sheet": "briefs/boki-art/turnarounds/Terrasloth.jpg",
@@ -2581,12 +2581,12 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Mossbastion.png",
   "display_name": "Mosstodon",
   "hash": {
-   "sheet": "13469396dc7f",
-   "card": "23bd3d0754bf",
-   "portrait": "491bc36ba510",
-   "hero": "172f0d30ae15"
+   "sheet": "3622acfb4f01",
+   "card": "577dcb581aaf",
+   "portrait": "ea9b1d0e3f2b",
+   "hero": "4782b8cf4186"
   },
-  "sheet_for_card": "23bd3d0754bf"
+  "sheet_for_card": "577dcb581aaf"
  },
  "Rimefang": {
   "card": "briefs/boki-art/cards/Rimefang.jpg",
@@ -2669,9 +2669,9 @@
   "sheet": "briefs/boki-art/turnarounds/Crofthollow.jpg",
   "hash": {
    "sheet": "344015a3d1fe",
-   "card": "ca7e0c36e1e0",
+   "card": "35852f6d199a",
    "portrait": "19a36a887ae9",
-   "hero": "a7e0c16d5a25"
+   "hero": "1a66d3d26947"
   },
   "sheet_for_card": "ca7e0c36e1e0"
  },
@@ -3079,8 +3079,8 @@
    "portrait": "briefs/boki-art/portraits/light/Pavonazar_female.jpg",
    "hash": {
     "card": "89831e7d223e",
-    "sheet": "3fb1a43f62be",
-    "portrait": "d5eaa843c1f9",
+    "sheet": "31836a1ecf65",
+    "portrait": "aacc68cdf9f6",
     "hero": "8162656632ac"
    },
    "hero": "briefs/boki-art/portraits/cutout_v2/Pavonazar_female.png",
