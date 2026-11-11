@@ -60,6 +60,7 @@ static func apply_hunter(h: Hunter, it: Array) -> void:
 			h.set_meta("mf_glow", f["glow"])
 			h.set_meta("mf_name", f["name"])
 			h.set_meta("mf_dur", float(f["dur"]))
+			MergeAugment.remote_dash(h, f)
 		h.set_meta("mf_left", float(it[HUNTER_AT + 1]))
 		h.set_meta("shell", float(it[HUNTER_AT + 2]))
 		h.set_meta("shell_max", float(it[HUNTER_AT + 3]))

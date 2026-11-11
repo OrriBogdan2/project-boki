@@ -1059,6 +1059,32 @@ func _net() -> void:
 	ok(R.get_node_or_null(MergeLook.NODE_NAME) == null and R.get_node_or_null("MergeLookLeaving") != null and not bool(R.get_meta("mf_kit")), "...and the look starts peeling off when the merge ends")
 	(R.get_node("MergeLookLeaving") as MergeLook)._process(MergeLook.PEEL_S + 0.05)          # (headless: nothing renders, so play the peel by hand)
 	ok(not R.has_node("Rig/Torso/MergePartsLeaving") and not R.has_node("Rig/Torso/" + MergeLook.PARTS_NAME), "...and the parts are gone from the torso when the peel finishes")
+	_remote_prism()
+
+## Another game: a remote Prism Shell wearer whose snapshot starts a dash opens the Mirror Step window here too
+## (the fan and its ring), once per dash.
+func _remote_prism() -> void:
+	var P := merged("puddlet")
+	var R := rival()
+	var it: Array = []
+	it.resize(KinNet.HUNTER_AT)
+	it.append_array(KinNet.hunter_extra(P))
+	R.remote = true
+	var n0 := m.verbs.mirrors.size()
+	KinNet.apply_hunter(R, it)
+	ok(m.verbs.mirrors.size() == n0, "a remote Prism Shell that is not dashing has no reflect window here")
+	R.roll_t = 0.05
+	KinNet.apply_hunter(R, it)
+	KinNet.apply_hunter(R, it)
+	var mine := m.verbs.mirrors.filter(func(mr): return mr["ent"] == R)
+	var shown := mine.size() == 1 and (mine[0]["node"] as Node3D).visible
+	ok(shown, "...its dash opens the Mirror Step fan on this side, once per dash (%d)" % mine.size())
+	R.roll_t = 0.0
+	KinNet.apply_hunter(R, it)
+	R.roll_t = 0.05
+	KinNet.apply_hunter(R, it)
+	ok(m.verbs.mirrors.filter(func(mr): return mr["ent"] == R).size() == 2, "...and the next dash opens it again")
+	R.remote = false
 
 func _bots() -> void:
 	ults = {}
