@@ -6,7 +6,8 @@
   "no_e": "the E ability was never used",
   "few_glide": "you hardly glided",
   "wisp_stolen": "a rival took one of your Boki",
-  "blight": "the Blight knocked you down or out"
+  "blight": "the Blight knocked you down or out",
+ "camp": "you walk up to a camp nobody has woken (CrouchHint shows this one in the match, once)"
  },
  "hints": {"recast": "{key} AGAIN to {verb}"},
  "min_time_s": 90.0,
@@ -29,6 +30,7 @@
   {"id": "wisp_sense", "when": "wisp_stolen", "text": "A rival took your Boki? You'll sense it when they're nearby. Take it back."},
   {"id": "wisp_chase", "when": "wisp_stolen", "text": "Whoever carries a stolen Boki walks slower and shows up marked. Run them down and take it back."},
   {"id": "wisp_guard", "when": "wisp_stolen", "text": "Go down for good and the Boki you brought are left behind. Old Pell's Black Market sells back the ones nobody claims."},
+  {"id": "crouch_camp", "when": "camp", "text": "{crouch} to crouch: you see further and aim steadier, but you move slower."},
   {"id": "blight_noise", "when": "blight", "text": "The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking with {crouch} doesn't."},
   {"id": "blight_grow", "when": "blight", "text": "The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night. Leave before it catches up."},
   {"id": "blight_watcher", "when": "blight", "text": "A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach."},

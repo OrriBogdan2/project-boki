@@ -592,6 +592,7 @@ func _draw_top(sz: Vector2) -> void:
 		TutorialHud.draw(self, sz)
 		return
 	if m.guide: m.guide.draw(self, sz)
+	if m.crouch_hint: m.crouch_hint.draw(self, sz)
 	feed_top = AliveCounter.draw(c, m)       # top right: squads and players left, your own numbers
 
 ## The duel room: what you're up against at the top, and your numbers on the right.

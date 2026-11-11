@@ -159,9 +159,13 @@ func _done(lid: String, p: Hunter) -> bool:
 
 ## The line in the tutorial's strip at the top-centre (the two never show together), under the Ways Out strip.
 func draw(h, sz: Vector2) -> void:
-	if line == "":
+	draw_line(h, sz, line, _t)
+
+## One banner line, faded in over its first quarter second (the crouch hint draws through this too).
+static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
+	if text == "":
 		return
 	var below := WaysOutHud.bottom(h.m)
 	if h.m.skydrop and h.m.skydrop.planning:
 		below = maxf(below, 48.0)      # the ship's countdown line (Hud, y 40, 18 px)
-	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, _t, below), {"text": line}, _t, clampf(_t / 0.25, 0.0, 1.0))
+	TutorialStrip.paint(h.c, h.big, TutorialStrip.shown(sz, t, below), {"text": text}, t, clampf(t / 0.25, 0.0, 1.0))
