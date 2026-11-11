@@ -277,11 +277,12 @@ static func route_new(rec: Dictionary) -> String:
 	ensure()
 	rec["got_t"] = Time.get_unix_time_from_system()
 	if is_boxed(rec): _unbox(rec)
+	if not rec.has("zone"): rec["zone"] = GardenZones.current()      # it lives in the zone you are in
 	if (Save.d["roster"] as Array).size() <= 1 or pinned(rec) != "":
 		rec["went"] = "farm"
 		return "farm"
 	var dup := dup_on_farm(rec) and not Mutations.special(rec) and burrow_built()
-	if not dup and farm().size() <= farm_cap():
+	if not dup and GardenZones.residents(GardenZones.zone_of(rec)).size() <= farm_cap():      # each zone holds the cap
 		rec["went"] = "farm"
 		return "farm"
 	if to_box(rec) == "":
