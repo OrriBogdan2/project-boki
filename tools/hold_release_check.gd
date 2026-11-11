@@ -101,7 +101,7 @@ static func _whirl(A, ev: String, which := "") -> Dictionary:
 		A.aim_at(P, T.pos)
 	P.inp["fire"] = true
 	_ending(A, m, P, ev, func(): _press_key(P, which), held)
-	var out := {"whirling": P.ak.lmb_t >= 0.0, "anim": P.ak.anim_id}
+	var out := {"whirling": P.ak.lmb_t >= 0.0, "anim": P.ak.anim_id, "cut_slams": P.ak.slams}
 	P.inp["fire"] = false
 	A.step(m, 0.4)
 	out["slams"] = P.ak.slams
@@ -117,8 +117,9 @@ static func albert(A) -> void:
 				d["slams"] == 0 and not d["whirling"] and d["anim"] != "bul_smash_wind", str(d))
 	for which in ["rmb", "e"]:
 		var k := await _whirl(A, "key", which)
-		A.ok("hold albert whirl: %s mid-hold [?] ends it, no swing" % which,
-				k["slams"] == 0 and not k["whirling"] and k["anim"] != "bul_smash_wind", str(k))
+		# held fire (content/dash_flow/bulwark.json held_fire): the key still down starts a fresh hold once he is free
+		A.ok("hold albert whirl: %s mid-hold [?] ends it with no swing, the held key holds again" % which,
+				k["cut_slams"] == 0 and k["whirling"], str(k))
 
 ## Sparkle's Skycall (E held to drag): the drag phase right after the ending, and what the strike did to the dummy.
 static func _skycall(A, ev: String, which := "") -> Dictionary:

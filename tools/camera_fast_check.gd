@@ -132,7 +132,7 @@ func _chain() -> void:
 func _reel() -> void:
 	var g: Hunter = m.make_hunter("G", 1, "heavy", "Grimble", "idle", {}, flat + Vector3(8.0, 0, 0), {"arch": "dredge"})
 	var rdf: Dictionary = (g.ak as DredgeKit).rmb_def()
-	m.displace.tow(P, g, {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": float(rdf["gap"]),
+	m.displace.tow(P, g, {"mode": "haul", "spd": float(rdf["pull_speed"]), "gap": g.r + P.r + float(rdf["stop_gap"]),
 			"dur": float(rdf["pull_max"]), "swing": DredgeKit.SWING, "stun": 0.2})
 
 func _clear_guest() -> void:

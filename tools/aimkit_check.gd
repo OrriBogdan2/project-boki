@@ -46,6 +46,7 @@ func run(main_node: Node) -> void:
 
 func _aim(P: Hunter, d: float) -> void:
 	P.inp["aim"] = P.pos + Vector3(d, 0.9, 0); P.inp["aim_y"] = P.pos.y
+	P.aim_dir()      # a frame reads it: a cursor past the body sets the kept aim (Hunter.aim_good)
 
 ## Fire one round and read back how far it will fly (life x speed).
 func _shot_dist(m: Match, P: Hunter) -> float:
@@ -54,7 +55,12 @@ func _shot_dist(m: Match, P: Hunter) -> float:
 	if m.shots.size() <= before:
 		return -1.0
 	var s: Dictionary = m.shots.back()
-	return float(s["life0"]) * (s["vel"] as Vector2).length()
+	var flown := float(s["life0"]) * (s["vel"] as Vector2).length()
+	if s.has("muzzle"):      # pulled back to the body (ShotOrigin): its range still counts from the muzzle
+		var mz: Vector3 = s["muzzle"]
+		var st: Vector3 = s["start"]
+		flown -= Vector2(mz.x - st.x, mz.z - st.z).length()
+	return flown
 
 func _aim_modes(m: Match, P: Hunter, _T: Hunter) -> void:
 	var rng := float(P.wpn["range"])

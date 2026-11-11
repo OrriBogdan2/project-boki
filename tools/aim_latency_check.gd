@@ -111,15 +111,17 @@ func _watch(to: Vector2, cs: float, dt: float) -> Dictionary:
 		out["stale"] = maxi(int(out["stale"]), stale)
 	return out
 
-## px between the aim point and where the cursor lands on the aim's own plane (Match._mouse_aim: the
-## height it resolved, aim_y + 0.95, lifted to the shooter's height), seen through the camera at `cam_tf`.
+## px between the aim point and where Match._mouse_aim puts the cursor's aim (a foe's plane, or the first ground
+## the cursor ray meets: AimMode.ray_ground), seen through the camera at `cam_tf`.
 func _gap(cam_tf: Transform3D) -> float:
 	var now: Transform3D = m.cam.global_transform
+	var aim_y_was: float = m.aim_y
 	m.cam.global_transform = cam_tf
-	var e: Vector3 = m.cam.mouse_on_plane(m.aim_y + 0.95)
+	var want: Vector3 = m._mouse_aim(root.get_mouse_position())
 	var aim: Vector3 = P.inp["aim"]
-	var gap := m.cam.unproject_position(Vector3(e.x, aim.y, e.z)).distance_to(m.cam.unproject_position(aim))
+	var gap := m.cam.unproject_position(want).distance_to(m.cam.unproject_position(aim))
 	m.cam.global_transform = now
+	m.aim_y = aim_y_was
 	return gap
 
 func _rec(case_name: String, key: String, frames: int, allow: int) -> void:

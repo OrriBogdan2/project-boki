@@ -27,6 +27,10 @@
 		"dive_steer": 0.25,
 		"dive_cancel_h": 3.5,
 		"dive_timeout": 10.0,
+		"floor_snap": 0.45,
+		"walkable_angle": 50.0,
+		"speed_cap": 7.0,
+		"haste": 0.35,
 		"coyote_s": 0.12,
 		"jump_buffer_s": 0.12,
 		"sneak_speed": 0.5
@@ -40,11 +44,7 @@
 		"keep_hv": 0.3,
 		"reopen_cd": 2.5,
 		"slam_min": 10.0,
-		"cool_by": 0.5,
-		"floor_snap": 0.45,
-		"walkable_angle": 50.0,
-		"speed_cap": 7.0,
-		"haste": 0.35
+		"cool_by": 0.5
 	},
 	"default": {"speed": 4.55, "accel": 54.0},
 	"bulwark": {"speed": 4.85, "accel": 47.0},

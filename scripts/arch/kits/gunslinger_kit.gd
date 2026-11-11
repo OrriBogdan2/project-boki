@@ -574,9 +574,8 @@ func _direct_hit(b: Dictionary, victim: Ent, at: Vector3) -> void:
 func _confirm_hit(victim: Ent, at: Vector3) -> void:
 	victim.flash_t = maxf(victim.flash_t, HIT_HOLD)
 	m.fx.ring(victim.pos + Vector3(0, 0.1, 0), victim.r + 0.9, HOT, 0.3)
-	if h == m.player and m.hud:
-		m.hud.hitmarker(true)
-		m.sfx("crit", at, -2.0, 0.8)
+	if h == m.player:
+		m.sfx("crit", at, -2.0, 0.8)      # (the reticle's hit tick comes from the hit itself: Reticle, CombatBus)
 
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:

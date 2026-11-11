@@ -28,7 +28,6 @@ func bjorn() -> void:
 		K.ch_rmb = 1.0
 		K.cd["rmb"] = 0.0
 		K.lmb_t = -1.0
-		K.hold_blocked = false
 		K.res = 0.0
 		fresh(T)
 		T.teleport(home + NEAR)
