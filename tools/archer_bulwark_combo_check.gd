@@ -405,7 +405,8 @@ func _archer_combos() -> void:
 	ok(
 		"combo archer: Hawk Sense: above the line hidden, below it revealed and outlined",
 		not healthy_seen and T.reveal_t > 0.0 and K.sense.senses(T) and _hawk_lines(T) > 0,
-		"healthy %s injured %.2f, %d outlined meshes at %.1f m" % [healthy_seen, T.reveal_t, _hawk_lines(T), P.flat_dist(T)]
+		"healthy %s injured %.2f, %d outlined meshes at %.1f m"
+			% [healthy_seen, T.reveal_t, _hawk_lines(T), P.flat_dist(T)]
 	)
 	T.hp = T.max_hp * 0.55
 	step(m, 0.5)
