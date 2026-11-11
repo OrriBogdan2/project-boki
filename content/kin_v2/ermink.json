@@ -1,7 +1,7 @@
 {
 	"grammar": 1,
 	"id": "ermink",
-	"name": "Ermink",
+	"name": "Minkee",
 	"animals": [
 		"Stoat"
 	],
@@ -101,12 +101,12 @@
 	"voice": {
 		"line": "slow and sleepy, very calm",
 		"syllables": [
-			"Erm",
-			"ink"
+			"Min",
+			"kee"
 		]
 	},
 	"egg": {
-		"name": "Ermink Egg",
+		"name": "Minkee Egg",
 		"temper": "Unbothered",
 		"desc": "Something unbothered is in here.",
 		"play": "Keeps you alive and patched up."

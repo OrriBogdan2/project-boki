@@ -8,7 +8,7 @@ extends Node3D
 ## --kin-pop: the Model Room's ten wisps; each wisp bursts into its Boki and folds back, on a loop (BokiWispPop).
 ## --kin-pop-strip[=back]: one species (--kin-only=<id>) frozen at STRIP_STEPS moments of the burst (or fold).
 
-## The starters, the mystery egg's Ermink, and six more with a spread of ears, horns, crests and tails.
+## The starters, the mystery egg's Minkee, and six more with a spread of ears, horns, crests and tails.
 const WISP_ROOM := ["cindle", "puddlet", "burrlet", "ermink", "zapple", "wisplet", "pebbit", "kestrike",
 	"kindlewren", "heatherhorn"]
 const WISP_SHOW_SCALE := 2.4   # the wisps shown bigger than in a match so their outlines read from the camera

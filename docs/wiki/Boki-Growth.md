@@ -9,15 +9,15 @@ Each species evolves into the next at its own level, with an Ink used on it, or 
 
 | Boki | Evolves into | When | Branch |
 |---|---|---|---|
-| Ermink | Flarmink | Ember Ink |  |
-| Ermink | Rippmink | Tide Ink |  |
-| Ermink | Blossmink | Bloom Ink |  |
-| Ermink | Voltmink | Storm Ink |  |
-| Ermink | Rimink | Frost Ink |  |
-| Ermink | Umbrink | Shadow Ink |  |
-| Ermink | Lunink | Lunar Ink |  |
-| Ermink | Prismink | Prism Ink |  |
-| Ermink | Wyrmink | Wyrm Ink |  |
+| Minkee | Flarmink | Ember Ink |  |
+| Minkee | Rippmink | Tide Ink |  |
+| Minkee | Blossmink | Bloom Ink |  |
+| Minkee | Voltmink | Storm Ink |  |
+| Minkee | Rimink | Frost Ink |  |
+| Minkee | Umbrink | Shadow Ink |  |
+| Minkee | Lunink | Lunar Ink |  |
+| Minkee | Prismink | Prism Ink |  |
+| Minkee | Wyrmink | Wyrm Ink |  |
 | Mycroll | Sporcupine | level 16 |  |
 | Sporcupine | Amanitusk | level 36 | Fierce |
 | Sporcupine | Ringrove | level 36 | Steadfast |

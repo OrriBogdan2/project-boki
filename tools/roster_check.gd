@@ -1,14 +1,16 @@
 extends RefCounted
 ## --roster-check: the species roster (docs/boki/ROSTER_50.md) is whole and live. Every kin in content/kin_v2
 ## loads through the grammar (KinLib), there are exactly 50 with no clashing display names, each has home data
-## in content/kin, and the big ones split into the 4-6 rideables the owner capped (a rideable is a large kin
-## whose mount speed is at least RIDEABLE_SPEED; the other large kin have non-ridden roles kept in the doc).
+## in content/kin, no game text or data says Ermink (it is Minkee; only the id stays `ermink`), and the big ones
+## split into the 4-6 rideables the owner capped (a rideable is a large kin whose mount speed is at least
+## RIDEABLE_SPEED; the other large kin have non-ridden roles kept in the doc).
 ## Never touches the save.
 
 const TARGET_TOTAL := 91      # the 50 of ROSTER_50.md plus 41 early-zone Meshy species (zone_sync.py)
 const RIDEABLE_SPEED := 1.1      # x; slower large kin have another big-Boki role (ROSTER_50.md)
 const RIDEABLE_MIN := 4
 const RIDEABLE_MAX := 6      # the owner capped mounts at about 6
+const OLD_NAME := "Ermink"      # the name Minkee replaced; matched by case, the id stays `ermink`
 
 var bad := 0
 
@@ -35,6 +37,9 @@ func run(main: Node) -> void:
 		var kind := "model" if drawn else "placeholder"
 		ok(_mesh_count(n) > 0, "%s draws (%s)" % [id, kind])
 		n.free()
+	ok(KinLib.kin("ermink").display_name == "Minkee", "ermink is shown as Minkee")
+	var stale := _old_name_hits("res://content") + _old_name_hits("res://scripts")
+	ok(stale.is_empty(), "no text says %s (%s)" % [OLD_NAME, ", ".join(stale)])
 	var total := KinLib.kin_ids().size()
 	ok(total == TARGET_TOTAL, "%d species (want %d)" % [total, TARGET_TOTAL])
 	var rideable := int(sizes["rideable"])
@@ -56,3 +61,14 @@ func _mesh_count(n: Node) -> int:
 	for ch in n.get_children():
 		c += _mesh_count(ch)
 	return c
+
+## The .json and .gd files under `dir` whose text still carries OLD_NAME.
+func _old_name_hits(dir: String) -> Array:
+	var hits: Array = []
+	for f in DirAccess.get_files_at(dir):
+		var path := dir.path_join(f)
+		if f.get_extension() in ["json", "gd"] and FileAccess.get_file_as_string(path).contains(OLD_NAME):
+			hits.append(path)
+	for sub in DirAccess.get_directories_at(dir):
+		hits += _old_name_hits(dir.path_join(sub))
+	return hits

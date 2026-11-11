@@ -74,7 +74,7 @@ func _data() -> void:
 	ok(Evo.cap() == 100, "the level cap is 100 (%d)" % Evo.cap())
 	var erm: Array = lines.get("ermink", {}).get("into", [])
 	var jar: Array = lines.get("jarmit", {}).get("into", [])
-	ok(erm.size() == 9 and jar.size() == 3, "Ermink has 9 Ink forms and Jarmit 3 Ink branches")
+	ok(erm.size() == 9 and jar.size() == 3, "Minkee has 9 Ink forms and Jarmit 3 Ink branches")
 
 ## Level: it evolves at its own level, not before; a branch follows its leading affinity.
 func _level() -> void:

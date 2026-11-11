@@ -6,11 +6,15 @@ extends RefCounted
 const DIR := "res://audio/cries/"
 const PITCH_VAR := 0.03     # a touch of pitch spread so the same cry twice is not a copy
 
-## The cry file of a species (a Data.KIN key), or "" when there is none for it.
+## The cry file of a species (a Data.KIN key), or "" when there is none for it. A file carries the species'
+## name; one whose name differs from its files (Minkee, id ermink) is found by its id.
 static func path(species_id: String) -> String:
 	var sp: Dictionary = Data.KIN.get(species_id, {})
-	var p := DIR + String(sp.get("name", "")).to_lower() + ".wav"
-	return p if ResourceLoader.exists(p) else ""
+	for stem: String in [String(sp.get("name", "")).to_lower(), species_id]:
+		var p := DIR + stem + ".wav"
+		if ResourceLoader.exists(p):
+			return p
+	return ""
 
 
 ## Plays the species' cry (nothing when it has none).
