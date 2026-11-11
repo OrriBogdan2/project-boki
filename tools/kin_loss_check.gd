@@ -46,6 +46,7 @@ func _fresh(tier: int) -> void:
 	d["active"] = rec["uid"]
 	var rec2 := Save.new_kin("cindle", "Ash")
 	d["roster"].append(rec2)
+	d["active2"] = "none"          # one Boki in: these cases follow a single loss (two in: tools/carry_two_check.gd)
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
 	Save.d = d
 	m = Match.new()
