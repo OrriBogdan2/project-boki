@@ -6,12 +6,13 @@ extends RefCounted
 
 const COL := Color("8fe3c7")
 ## Hints the tutorial match leaves for a real one (its outpost opens by itself and the course is short).
-const REAL_ONLY := ["crouch", "uplink", "defend", "goexit"]
+const REAL_ONLY := ["crouch", "uplink", "defend", "goexit", "revive"]
 
 var m: Match
 var _poll_t := 0.0
 var _void_t := 0.0
 var _fight_t := -1.0      # s since a foe came close (-1: none close)
+var _mate := ""           # the downed teammate the revive hint names
 var _last := ""           # the line of the hint shown last, while it may still be on screen
 
 func _init(match_node: Match) -> void:
@@ -21,6 +22,8 @@ func tick(dt: float) -> void:
 	var p: Hunter = m.player
 	if m.hud == null or p == null or p.out or p.extracted or p.dropping or p.downed:
 		return
+	if p.holding() == "revive":
+		FirstTimeHint.mark("revive")      # already reviving: nothing to teach
 	var r := FirstTimeHint.rules()
 	var over_void: bool = not p.grounded and not p.gliding and m.world.is_void(p.pos.x, p.pos.z)
 	_void_t = _void_t + dt if over_void else 0.0
@@ -38,7 +41,7 @@ func tick(dt: float) -> void:
 		if FirstTimeHint.seen(id) or (m.tut != null and id in REAL_ONLY):
 			continue
 		if _due(String(id), p, r):
-			FirstTimeHint.show(id, _say)
+			FirstTimeHint.show(id, _say, _mate)
 			return      # one at a time
 
 func _say(line: String) -> void:
@@ -58,6 +61,7 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"key": return p.chest_keys > 0
 		"uplink": return _outpost(p, "idle", float(r["outpost_m"]))
 		"defend": return _outpost(p, "charging", float(r["outpost_m"]))
+		"revive": return _downed_mate(p, float(r["revive_m"])) != ""
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
 	return false
 
@@ -85,3 +89,12 @@ func _outpost(p: Hunter, state: String, dist: float) -> bool:
 		if state != "charging" or int(x["team"]) == p.team:
 			return true
 	return false
+
+## Sets _mate to a downed teammate within `dist` and returns their name ("" if none).
+func _downed_mate(p: Hunter, dist: float) -> String:
+	_mate = ""
+	for o in m.hunters:
+		if o != p and o.team == p.team and o.downed and not o.out and p.flat_dist(o) < dist:
+			_mate = o.pname
+			break
+	return _mate

@@ -28,13 +28,14 @@ static func mark(id: String) -> void:
 	if id != "":
 		_seen()[id] = true
 
-## The hint's line with the player's own keys and Boki name ("" for an unknown id).
-static func text(id: String) -> String:
+## The hint's line with the player's own keys and Boki name ("" for an unknown id); `mate` fills {mate}.
+static func text(id: String, mate := "") -> String:
 	var raw := ""
 	for g in ["match", "farm"]:
 		raw = String((rules()[g] as Dictionary).get(id, raw))
 	if raw.contains("{rank}"):
 		raw = raw.replace("{rank}", TutorialText.rank_combo())
+	raw = raw.replace("{mate}", mate)
 	if raw.contains("{boki}"):
 		raw = raw.replace("{boki}", String(Save.active_kin().get("name", "your Boki")))
 	for action in ["dash", "crouch", "interact", "throw", "secondary", "build"]:
@@ -42,10 +43,10 @@ static func text(id: String) -> String:
 	return raw
 
 ## Shows the hint through toast(text) if this save has not had it; then never again. True if shown.
-static func show(id: String, toast: Callable) -> bool:
+static func show(id: String, toast: Callable, mate := "") -> bool:
 	if seen(id):
 		return false
-	var line := text(id)
+	var line := text(id, mate)
 	if line == "":
 		return false
 	mark(id)

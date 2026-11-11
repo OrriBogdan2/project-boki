@@ -6,6 +6,8 @@ extends RefCounted
 ##   2. never in the first 2 s of a fight (a foe close or targeting you)
 ##   3. never more than one hint line on screen
 ##   4. after a save round-trip, a second expedition shows none of them again
+##   5. the revive hint: the first downed teammate within 15 m shows "Hold <interact key> to revive <name>" once,
+##      a second does not, a rebind changes the key, and it is skipped when you are already reviving
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -39,17 +41,18 @@ func run(mn: Node) -> void:
 	Save.d["roster"].append(k)
 	Save.d["active"] = k["uid"]
 	_expedition(true)
+	_revive()
 	_second_expedition()
 	_table()
 	print("FHC DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-func _start() -> void:
+func _start(squad := 1) -> void:
 	if m:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 3, "squad": 1, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle", "no_drop": true})
+	m.start({"teams": 3, "squad": squad, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle", "no_drop": true})
 	m.set_process(false)
 	p = m.player
 	for i in 4000:      # the ship, the jump, the drop
@@ -138,7 +141,7 @@ func _expedition(first: bool) -> void:
 	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
 	_check("after", "everything seen: quiet", _moment(func(): pass, 5.0), "")
-	var all: Array = FirstTimeHint.ids("match")
+	var all: Array = FirstTimeHint.ids("match").filter(func(id): return id != "revive")      # needs a mate: _revive
 	ok(all.all(func(id): return FirstTimeHint.seen(String(id))), "every match hint is marked seen in the save")
 	var ids: Array = shown.map(func(s): return s["id"])
 	var early := shown.filter(func(h): return h["fight_age"] >= 0.0 and h["fight_age"] < 2.0)
@@ -235,6 +238,53 @@ func _far_from_outposts_late() -> void:
 	_secs(MOMENT_S)
 	for i in outs.size():
 		outs[i]["pos"] = home[i]
+
+## The revive hint, in a duo: a mate downed far away shows nothing, the first one within 15 m shows the line
+## once with the player's own key and the mate's name, a second one nothing, and an already-reviving player none.
+func _revive() -> void:
+	_pin = QUIET_TIME
+	_start(2)
+	var mate: Hunter = m.hunters.filter(func(h): return h != p and h.team == p.team)[0]
+	mate.dropping = false
+	mate.riding = false
+	_settle()
+	_down_mate(mate, 30.0)
+	_secs(MOMENT_S)
+	ok(shown.is_empty() and not FirstTimeHint.seen("revive"), "a teammate downed 30 m away: nothing")
+	_check("revive", "a teammate downed 10 m away", _moment(_down_mate.bind(mate, 10.0)), "revive")
+	var line := FirstTimeHint.text("revive", mate.pname)
+	var want := "Hold %s to revive %s" % [Settings.key_cap("interact"), mate.pname]
+	ok(line == want, "the line names the key and the mate: '%s'" % line)
+	m.revive_hunter(mate, null)
+	_check("revive-again", "a second teammate downed close", _moment(_down_mate.bind(mate, 8.0)), "")
+	Settings.rebind("interact", _key_event(KEY_G))
+	var rebound := FirstTimeHint.text("revive", "Pip")
+	ok(rebound == "Hold G to revive Pip", "a rebind changes the key text: '%s'" % rebound)
+	Settings.reset_all()
+	_reviving_skips(mate)
+
+func _key_event(k: int) -> InputEventKey:
+	var e := InputEventKey.new()
+	e.physical_keycode = k
+	e.pressed = true
+	return e
+
+func _down_mate(mate: Hunter, away: float) -> void:
+	if mate.downed:
+		m.revive_hunter(mate, null)
+	mate.teleport(p.pos + Vector3(away, 0, 0))
+	m.knock(mate, null, {})
+
+## Already reviving when the mate goes down within reach: the hint is never shown (it counts as seen).
+func _reviving_skips(mate: Hunter) -> void:
+	Save.d["tutorial"]["hints"].erase("revive")
+	m.revive_hunter(mate, null)
+	_settle()
+	var n0 := shown.size()
+	_down_mate(mate, 1.0)
+	_secs(MOMENT_S)
+	var held := p.holding() == "revive" and FirstTimeHint.seen("revive")
+	ok(held and shown.size() == n0, "already reviving: no hint (new lines %d)" % (shown.size() - n0))
 
 ## A second expedition on the saved-and-reloaded save: the same moments show nothing.
 func _second_expedition() -> void:

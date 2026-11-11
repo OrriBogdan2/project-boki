@@ -5,7 +5,7 @@ extends RefCounted
 ##     teammate brings them up; red and pulsing while an enemy stands on them (stomp)
 ##   - over them, a small knocked mark ringed by their bleed-out timer, draining as they bleed out
 ##   - for a teammate near (not yet in) the ring, one short cue: "Revive" and how far
-## Reviving is standing in the ring (Life), so there is no key to press.
+## Reviving is standing in the ring (Life); the reviver sees a small progress arc in the knocked mark.
 
 const MARK_UP := 2.35         # m over the feet: the knocked mark
 const MARK_R := 13.0          # px: the bleed-out ring's radius
@@ -29,6 +29,8 @@ static func draw(c: Control, m: Match) -> void:
 			if o.revive > 0.0:
 				ring(c, m.cam, o.pos, rr, Color(col.lerp(Color.WHITE, 0.4), 0.95), 5.0, o.revive)
 		_mark(c, m, o, STOMP_RED if stomped else col)
+		if p != null and p in o.get_meta("revivers", []):
+			_pip(c, m, o, col)
 		if p == null or p.out or p.downed or p == o or o.team != p.team or stomped:
 			continue
 		var d := p.flat_dist(o)
@@ -53,6 +55,12 @@ static func ring(c: CanvasItem, cam: Camera3D, at: Vector3, r: float, col: Color
 ## How much of a downed Hunter's bleed-out is left, 1 (just knocked) to 0.
 static func bleed_frac(o: Hunter) -> float:
 	return clampf(o.down_hp / maxf(1.0, float(Data.MATCH["down_hp"])), 0.0, 1.0)
+
+## The reviver's own progress pip, a small arc inside the knocked mark that fills as the revive does.
+static func _pip(c: Control, m: Match, o: Hunter, col: Color) -> void:
+	var at := m.cam.unproject_position(o.pos + Vector3(0, MARK_UP, 0))
+	var end := -PI * 0.5 + TAU * clampf(o.revive, 0.0, 1.0)
+	c.draw_arc(at, MARK_R - 5.0, -PI * 0.5, end, 24, col.lerp(Color.WHITE, 0.5), 3.0, true)
 
 static func _mark(c: Control, m: Match, o: Hunter, col: Color) -> void:
 	var at := m.cam.unproject_position(o.pos + Vector3(0, MARK_UP, 0))
