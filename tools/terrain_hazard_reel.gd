@@ -82,7 +82,8 @@ func _clip(kind: String, safe: bool) -> void:
 	tz.hinted.clear()
 	var out := dir.path_join("%s_%s" % [kind, "with" if safe else "without"])
 	DirAccess.make_dir_recursive_absolute(out)
-	var label := "%s  ·  %s %s" % [A["def"]["name"], "with" if safe else "without", Data.KIN[(P.kin as Kin).species]["name"]]
+	var boki := String(Data.KIN[(P.kin as Kin).species]["name"])
+	var label := "%s  ·  %s %s" % [A["def"]["name"], "with" if safe else "without", boki]
 	if m.hud: m.hud.toast(label, Color.WHITE)
 	var frame := 0
 	var phase := "in"
