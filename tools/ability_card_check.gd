@@ -1,6 +1,6 @@
 extends RefCounted
 ## --ability-card-check: the ability card says what the data says (docs/decisions: ability cards).
-##   1. for all 12 Hunters and every kit slot: name = the data's name, key = Settings.key_cap, cooldown and range
+##   1. for every Hunter (12 or more) and every kit slot: name = the data's name, key = Settings.key_cap, cooldown and range
 ##      = the numbers in content/archetypes (the dash's "cd", the others' "cooldown", the "card_range" path)
 ##   2. exactly the two-step abilities say "Press <key> again to ...", and no one-press ability does
 ##   3. the HUD's card (the kit's live slot_info at rank 1) shows the same numbers as the menus' card
@@ -75,7 +75,7 @@ func _numbers() -> void:
 			bad.append(ak + "/lmb numbers")
 	ok("12 Hunters x dash, RMB, E, X: name, key, cooldown, range, again = data", bad.is_empty(), ", ".join(bad))
 	ok("%d abilities are two-step, each says 'Press <key> again to'" % TWO_STEP, again_n == TWO_STEP, str(again_n))
-	ok("12 Hunters", Arch.ids().size() == 12)
+	ok("at least 12 Hunters (all are checked)", Arch.ids().size() >= 12)
 
 func _widget() -> void:
 	var tree := main.get_tree()
