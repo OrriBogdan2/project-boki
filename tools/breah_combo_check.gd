@@ -322,8 +322,9 @@ func _breah() -> void:
 	)
 	step(m, 0.6)
 	ok(
-		"combo: launched rocks burst on the foe, shred and slow it (ROCKFALL)",
-		dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0 and K.launch_pay >= 1,
+		"combo: launched rocks burst on the foe and shred it, no slow (ROCKFALL; the source rocks do not slow)",
+		dmg(T) >= 10.0 and T.vuln_t > 0.0 and K.launch_pay >= 1 and not K.rock_def().has("slow_t")
+			and T.slow_t <= Oomph.STAGGER_T,
 		"took %.1f vuln %.1f slow %.2f pay %d" % [dmg(T), T.vuln_t, T.slow_t, K.launch_pay]
 	)
 	ok(
@@ -1129,8 +1130,9 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	P.ak.on_dash(false)
 	step(m, 1.7)
 	ok(
-		"crash: the rock rolls on and hits: shred and a slow",
-		K.landslides >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and T.slow_t > 0.0,
+		"crash: the rock rolls on and hits: shred, no slow",
+		K.landslides >= 1 and dmg(T) >= 10.0 and T.vuln_t > 0.0 and not K.dash_def().has("slow_t")
+			and T.slow_t <= Oomph.STAGGER_T,
 		"took %.1f slow %.2f" % [dmg(T), T.slow_t]
 	)
 	reset.call()
