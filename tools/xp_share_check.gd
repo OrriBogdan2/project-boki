@@ -2,7 +2,8 @@ extends RefCounted
 ## --xp-share-check: a monster's XP goes to the Hunter who lands the last hit and to their squadmates
 ## within XpRules' share_r of the killer, nothing for damage alone. A squad that deals 95% of a lair boss
 ## and loses the last hit to a rival gets no XP; the kill's other rewards (stat and gear) go to the
-## killer too, so the rival squad takes both. Never touches the save.
+## killer too, and so does its Boon of the Hunt (HuntBoon), so the rival squad takes it all. Never
+## touches the save.
 
 var bad := 0
 var m: Match
@@ -127,5 +128,9 @@ func run(main: Node) -> void:
 		"squad A, with 95%% of the damage, gets none (%.2f, %.2f)" % [Q.xp, Q2.xp])
 	ok(int(P.stats.get("bosses", 0)) == 1 and int(Q.stats.get("bosses", 0)) == 0,
 		"the boss kill itself is credited to B, not A")
+	var boon := float(XpRules.rules()["boon"]["secs"])
+	var b_got := absf(HuntBoon.left(P) - boon) < 0.01 and absf(HuntBoon.left(C) - boon) < 0.01
+	ok(b_got and HuntBoon.left(Q) == 0.0 and HuntBoon.left(Q2) == 0.0,
+		"squad B also takes the boss's Boon of the Hunt (%.0f s), squad A none" % boon)
 	print("XPSHARE done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

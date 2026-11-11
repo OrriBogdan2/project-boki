@@ -5,8 +5,8 @@ extends RefCounted
 ## standing still or for hurting Hunters (armor only); a kill pays its XP to the last hit's squad
 ## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
-## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
-## touches the save.
+## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. The Boon of
+## the Hunt (HuntBoon) rows: _boon. Never touches the save.
 
 const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
 
@@ -31,6 +31,7 @@ func run(main: Node) -> void:
 	var m := _match(main, 5)
 	_spawn(m)
 	_xp(m)
+	_boon(m)
 	_clear(m)
 	_comeback(m)
 	_hot(main)
@@ -110,6 +111,93 @@ func _xp(m: Match) -> void:
 	m.knock(rival, P, {})
 	ok(absf(P.xp - xs[0] - kx) < 0.01 and absf(near.xp - xs[1] - kx) < 0.01 and absf(far.xp - xs[2]) < 0.001, "the knock XP goes in full to the knocker and teammates within 30 m only")
 	m.revive_hunter(rival, rival)
+
+## Boon of the Hunt (xp.json "boon"): the Watcher's kill gives the Hunters it pays +8% damage and +8%
+## move speed for 120 s, a second refreshes, a knock passes what the holder had left to the knocker's
+## squad. Online the owner of each Hunter grants theirs and sends "kst" "bon"; the other games end and
+## pass a boon on the "knock" event and grant their own on "mobdead" the same way.
+func _boon(m: Match) -> void:
+	var B: Dictionary = XpRules.rules()["boon"]
+	ok(float(B["secs"]) == 120.0 and float(B["dmg"]) == 0.08 and float(B["speed"]) == 0.08,
+		"boon: 120 s, +8% damage, +8% move speed, in xp.json")
+	var P: Hunter = m.player
+	var mates: Array = m.hunters.filter(func(h): return h.team == P.team and h != P)
+	var near: Hunter = mates[0]
+	var far: Hunter = mates[1]
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team and not h.downed)[0]
+	var v0 := _run_speed(P)
+	var d0 := m.dmg_mult(P)
+	near.pos = P.pos + Vector3(10, 0, 0)
+	far.pos = P.pos + Vector3(40, 0, 0)
+	rival.pos = P.pos + Vector3(3, 0, 0)
+	m.spawn_mob("skitter", P.pos + Vector3(2, 0, 0)).hurt(1e6, P)
+	ok(HuntBoon.left(P) == 0.0, "boon: a plain monster's kill gives none")
+	m.spawn_mob("warden", P.pos + Vector3(2, 0, 0)).hurt(1e6, P)
+	ok(absf(HuntBoon.left(P) - 120.0) < 0.01 and absf(HuntBoon.left(near) - 120.0) < 0.01,
+		"boon: the Watcher's kill gives the killer and a teammate 10 m away 120 s")
+	ok(HuntBoon.left(far) == 0.0 and HuntBoon.left(rival) == 0.0, "boon: not a teammate 40 m away, nor a rival")
+	ok(is_equal_approx(m.dmg_mult(P), d0 * 1.08), "boon: +8%% damage dealt (x%.3f -> x%.3f)" % [d0, m.dmg_mult(P)])
+	var v1 := _run_speed(P)
+	ok(absf(v1 / v0 - 1.08) < 0.01, "boon: +8%% move speed (%.2f -> %.2f m/s)" % [v0, v1])
+	P.set_meta("bon_until", m.time + 30.0)
+	m.spawn_mob("warden", P.pos + Vector3(2, 0, 0)).hurt(1e6, P)
+	ok(absf(HuntBoon.left(P) - 120.0) < 0.01 and is_equal_approx(m.dmg_mult(P), d0 * 1.08),
+		"boon: a second refreshes it to 120 s and never stacks")
+	# a knock passes the holder's time left to the knocker's squad in range
+	for h in [P, near]: h.set_meta("bon_until", 0.0)
+	KitStatus.apply(rival, "bon", 50.0)
+	m.knock(rival, P, {})
+	ok(HuntBoon.left(rival) == 0.0, "boon: knocking a holder ends theirs")
+	ok(absf(HuntBoon.left(P) - 50.0) < 0.01 and absf(HuntBoon.left(near) - 50.0) < 0.01 and HuntBoon.left(far) == 0.0,
+		"boon: the knocker and a teammate 10 m away get the 50 s it had left, not one 40 m away")
+	m.revive_hunter(rival, rival)
+	var by_mob := m.spawn_mob("skitter", near.pos + Vector3(2, 0, 0))
+	m.knock(near, by_mob, {})
+	ok(HuntBoon.left(near) == 0.0 and absf(HuntBoon.left(P) - 50.0) < 0.01,
+		"boon: a monster's knock ends it and passes it to nobody")
+	m.revive_hunter(near, near)
+	_boon_net(m, P, near, rival)
+	for h in m.hunters: h.set_meta("bon_until", 0.0)
+
+## The boon online, on one game: what it sends for its own Hunters, and what it does with the events.
+func _boon_net(m: Match, P: Hunter, near: Hunter, rival: Hunter) -> void:
+	m.net_on = true
+	for h in [P, near]: h.set_meta("bon_until", 0.0)
+	Net.out_events.clear()
+	m.spawn_mob("warden", P.pos + Vector3(2, 0, 0)).hurt(1e6, P)
+	var sent: Array = Net.out_events.filter(func(e): return String(e[0]) == "kst" and String(e[2]) == "bon")
+	var to: Array = sent.map(func(e): return String(e[1]))
+	ok(sent.size() == 2 and P.nid in to and near.nid in to and float(sent[0][3]) == 120.0,
+		"boon net: a \"kst\" \"bon\" of 120 s for each Hunter this game gave it to (%s)" % [to])
+	for h in [P, near]: h.set_meta("bon_until", 0.0)
+	rival.remote = true
+	m._net_ev(["kst", rival.nid, "bon", 40.0, 0.0], "peer")
+	ok(absf(HuntBoon.left(rival) - 40.0) < 0.01, "boon net: another game's Hunter shows the boon it was sent")
+	m._net_ev(["knock", rival.nid, P.nid], "peer")
+	ok(HuntBoon.left(rival) == 0.0 and absf(HuntBoon.left(P) - 40.0) < 0.01 and absf(HuntBoon.left(near) - 40.0) < 0.01,
+		"boon net: a \"knock\" event ends theirs and gives this game's knocking squad the 40 s")
+	rival.downed = false
+	rival.remote = false
+	m.revive_hunter(rival, rival)
+	for h in [P, near]: h.set_meta("bon_until", 0.0)
+	var w := m.spawn_mob("warden", P.pos + Vector3(2, 0, 0))
+	m._net_ev(["mobdead", w.nid, P.nid, 8.0], "host")
+	ok(absf(HuntBoon.left(P) - 120.0) < 0.01 and absf(HuntBoon.left(near) - 120.0) < 0.01,
+		"boon net: a host's \"mobdead\" for the Watcher gives this game's squad the boon")
+	m.net_on = false
+	Net.out_events.clear()
+
+## h's run speed on flat input after a second, from where it stands (it is put back after).
+func _run_speed(h: Hunter) -> float:
+	var at := h.pos
+	h.vel = Vector3.ZERO
+	h.inp["move"] = Vector2(1, 0)
+	for i in 30: h.sim(1.0 / 30.0)
+	var v := Vector2(h.vel.x, h.vel.z).length()
+	h.inp["move"] = Vector2.ZERO
+	h.vel = Vector3.ZERO
+	h.teleport(at)
+	return v
 
 ## Clears a camp with hunter h; returns the toasts and drops it made.
 func _kill_camp(m: Match, c: Dictionary, h: Hunter) -> Dictionary:

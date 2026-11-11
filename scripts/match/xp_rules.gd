@@ -6,6 +6,7 @@ extends RefCounted
 ##
 ## Public API:
 ##   XpRules.pay_squad(m, by, xp)   pays xp to the killer (a Boki's kill is its Hunter's) and squad in range
+##   XpRules.squad_paid(m, by) -> Array[Hunter]   who that pays on this game (HuntBoon grants the same)
 ##   XpRules.knock_xp(victim) -> float   what knocking this Hunter pays
 ##   XpRules.kill_xp(mb) -> float   what killing this monster pays
 
@@ -19,13 +20,22 @@ static func rules() -> Dictionary:
 
 ## Pays the killer and each squadmate (alive or downed) within share_r of the killer.
 static func pay_squad(m, by, xp: float) -> void:
-	var h = by.owner_h if by is Kin else by
-	if not (h is Hunter) or xp <= 0.0:
+	if xp <= 0.0:
 		return
+	for o: Hunter in squad_paid(m, by):
+		o.gain_xp(xp)
+
+## The Hunters this game owns that a kill by `by` pays: the killer and squadmates within share_r.
+static func squad_paid(m, by) -> Array[Hunter]:
+	var out: Array[Hunter] = []
+	var h = by.owner_h if by is Kin else by
+	if not (h is Hunter):
+		return out
 	var r := float(rules()["share_r"])
 	for o: Hunter in m.hunters:
 		if o.team == h.team and not o.remote and not o.out and not o.extracted and o.flat_dist(h.pos) <= r:
-			o.gain_xp(xp)
+			out.append(o)
+	return out
 
 static func knock_xp(victim: Hunter) -> float:
 	var k: Dictionary = rules()["knock"]

@@ -21,3 +21,9 @@ Levels came from standing still (1.2 XP/s) and from stray damage (0.35 per damag
 - Rolling loses CAMP_RESPAWN, `camps`, `note_camp` and `_camp_respawns`. Its "picked over" start calls `Camps.picked_over`.
 - New check `--camps-check`. `--rolling-check` drops its camp-respawn rows (the comeback is asserted in `--camps-check`).
 - Left to the levels task: the new XP curve, the pace and gap bonuses, rarity multipliers, the XP bar, and the 300 last-hit boss pay.
+
+## Addendum: Boon of the Hunt (EARLY_CAMPS_DROP.md 6.6, owner 11-10: a stolen boss kill carries its bonuses to the thief)
+- `HuntBoon` (`scripts/match/hunt_boon.gd`, `xp.json` "boon"): the Hunters a lair boss's or the Watcher's kill pays (`XpRules.squad_paid`) get +8% damage dealt (`Match.dmg_mult`) and +8% move speed (Hunter run speed) for 120 s. A second grant refreshes it, never stacks. Any knock ends it; a rival Hunter's knock passes the time left to the knocker's squad that the knock pays.
+- It is the KitStatus "bon" (meta `bon_until`). Each game grants it to the Hunters it owns and broadcasts "kst" "bon". Every game ends and passes it on the "knock" event and grants its own on "mobdead". Shown as a gold trim on nameplates (`HudPlate.boon_trim`) and one tile with a timer right of the vitals bars. Rides the unreleased 0.24.4 entry of Net.VERSION.
+- The kill XP has one payer: `XpRules` (KillXp from ext/combat-xp-last-hit folded in, a lair boss's 260 as `xp.json` "boss").
+- Checks: `--camps-check` boon rows (with the net events on one game), `--xp-share-check` (a stolen lair boss's boon goes to the thief's squad).

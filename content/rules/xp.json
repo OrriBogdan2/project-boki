@@ -1,8 +1,9 @@
 {
- "_doc": "Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards). boss: a lair boss, to the last hit's squad in range like any kill.",
+ "_doc": "Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards). boss: a lair boss, to the last hit's squad in range like any kill. boon: Boon of the Hunt (scripts/match/hunt_boon.gd): the Hunters a lair boss's or a `from` monster's kill pays get +dmg damage dealt and +speed move speed for secs s; knocking a holder passes the time left to the knocker's squad that the knock pays; one boon a Hunter, a second refreshes.",
  "share_r": 30.0,
  "knock": {"base": 40, "per_level": 15},
  "camp_mob": {"skitter": 30, "bomber": 30, "spitter": 30, "sentinel": 50, "brute": 100, "chief": 170},
  "stray": 8,
- "boss": 260
+ "boss": 260,
+ "boon": {"secs": 120.0, "dmg": 0.08, "speed": 0.08, "from": ["warden"]}
 }
