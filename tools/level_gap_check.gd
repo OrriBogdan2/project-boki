@@ -36,7 +36,7 @@ func run(main: Node, mode = "check") -> void:
 	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
 	for i in rivals.size():
 		rivals[i].ctrl = "idle"
-		rivals[i].teleport(P.pos + Vector3(-8.0 + 8.0 * i, 0, 14))
+		rivals[i].teleport(P.pos + Vector3(-6.0 + 6.0 * i, 0, -4.0))
 	P.lvl = 4
 	rivals[0].lvl = 2
 	rivals[1].lvl = 3
@@ -65,6 +65,7 @@ func run(main: Node, mode = "check") -> void:
 		if fade != null:
 			await fade.reveal(0.01)
 		for i in 8:
+			m.cam.snap(P.pos)
 			await main.get_tree().process_frame
 		for i in 3:
 			var sh: Dictionary = m.hud.plates.shown.get(rivals[i].nid, {})
