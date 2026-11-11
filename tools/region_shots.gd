@@ -130,5 +130,4 @@ func _cleared_minimap() -> void:
 	m.spawn_plan.tick(0.1)
 	_camera(m.player.pos + Vector3(0, 6.0, 12.0), (camp["pos"] as Vector3) + Vector3(0, 1.0, 0), 60.0)
 	m.hud.visible = true
-	m.set_process(true)
 	await _grab("minimap_cleared", 20)
