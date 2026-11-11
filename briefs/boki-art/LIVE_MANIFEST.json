@@ -364,12 +364,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Crofthorn.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Crofthorn.png",
   "hash": {
-   "sheet": "b7c039397ea0",
+   "sheet": "abc550b7ca1c",
    "card": "7d1eba50b338",
-   "portrait": "f2c4518e6db9",
+   "portrait": "ed194a2d175b",
    "hero": "b91a6f9a0d16"
   },
-  "sheet_for_card": "93178bd2584a"
+  "sheet_for_card": "7d1eba50b338"
  },
  "Cubbat": {
   "sheet": "briefs/boki-art/turnarounds/Cubbat.jpg",
@@ -464,12 +464,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Dribbara.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Dribbara.png",
   "hash": {
-   "sheet": "8d812b40a438",
+   "sheet": "f769e695b6a4",
    "card": "b11d8e377e5a",
-   "portrait": "044f01db53c3",
+   "portrait": "856542c7f1f1",
    "hero": "9a3db82e0930"
   },
-  "sheet_for_card": "b88a8e86efd1"
+  "sheet_for_card": "b11d8e377e5a"
  },
  "Echolop": {
   "sheet": "briefs/boki-art/turnarounds/Echolop.jpg",
@@ -2668,12 +2668,12 @@
   "portrait": "briefs/boki-art/portraits/light/Crofthollow.jpg",
   "sheet": "briefs/boki-art/turnarounds/Crofthollow.jpg",
   "hash": {
-   "sheet": "344015a3d1fe",
+   "sheet": "70b6843345ec",
    "card": "35852f6d199a",
-   "portrait": "19a36a887ae9",
+   "portrait": "300b75877ff5",
    "hero": "1a66d3d26947"
   },
-  "sheet_for_card": "ca7e0c36e1e0"
+  "sheet_for_card": "35852f6d199a"
  },
  "Effigoon": {
   "sheet": "briefs/boki-art/turnarounds/Effigoon.jpg",
