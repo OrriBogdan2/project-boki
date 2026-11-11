@@ -21,7 +21,7 @@
 			"effects": [
 				{
 					"type": "damage",
-					"amount": 24
+					"amount": 16
 				},
 				{
 					"type": "push",
@@ -36,7 +36,7 @@
 	],
 	"pulses": [
 		{
-			"every": 1.5,
+			"every": 2.0,
 			"stage": {
 				"delivery": {
 					"type": "burst",
@@ -46,7 +46,7 @@
 				"effects": [
 					{
 						"type": "damage",
-						"amount": 15
+						"amount": 5
 					},
 					{
 						"type": "push",

@@ -98,7 +98,7 @@ func _update(h: Hunter, delta: float) -> void:
 		if o == h or o.team != h.team or not o.dropping or o.out:
 			continue
 		var mate := _mate(k)
-		var mv := Vector2(o.vel.x, o.vel.z) / Hunter.DIVE_SPEED
+		var mv := (Vector2(o.vel.x, o.vel.z) / Hunter.GLIDE_SPEED).limit_length(1.0)
 		var ml := project(o, mv)
 		mate._place(ml["at"], MATE_RADIUS, RED if ml["void"] else col, o.pos.y, 0.55)
 		mate.visible = true

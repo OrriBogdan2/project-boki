@@ -24,6 +24,7 @@
 		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["gunslinger_lmb", 0.25], ["gunslinger_lmb", 0.12], ["gunslinger_dash", 0.5], ["gunslinger_lmb", 0.25], ["gunslinger_rmb", 0.4], ["gunslinger_e", 1.0], ["gunslinger_knock", 0.5], ["gunslinger_x", 0.5]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
