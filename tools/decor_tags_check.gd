@@ -51,7 +51,7 @@ func _set_deco(ids: Array) -> void:
 func _card_has(zone: String, tag: String) -> bool:
 	var title := String(DecorComfort.rules()["effects"][tag]["name"])
 	var found := false
-	for l in ZoneCards.open_lines(zone):
+	for l in ZoneCards._open_lines(zone, null):
 		found = found or (l as Label).text.begins_with(title + ":")
 		l.free()
 	return found

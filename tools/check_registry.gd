@@ -587,6 +587,8 @@ const CHECKS := {
 	"--show-ring-shots": ["res://tools/show_ring_shots.gd", "show_ring_shots", null],  # --shots-dir= (GPU)
 	"--decor-tags-check": ["res://tools/decor_tags_check.gd", "decor_tags_check", null],      # GARDEN_MODERN 5 rank 7
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
+	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],      # the Dash's showcase wall
+	"--seasons-check": ["res://tools/seasons_check.gd", "seasons_check", null],      # garden seasons
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run
 	"--new-player-flow-check": ["res://tools/new_player_flow_check.gd", "new_player_flow_check", null],
