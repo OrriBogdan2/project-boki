@@ -334,6 +334,7 @@ func _draw_world_labels() -> void:
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
+	TerrainHud.draw(self)    # the hazard you're standing in, and whether your Boki keeps you safe
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
 		_draw_waypoint(m.tut.target, m.tut.label, Color("8fe3c8").lerp(Color.WHITE, 0.6 if m.tut.flash_t > 0.0 and int(Time.get_ticks_msec() / 150.0) % 2 == 0 else 0.0))

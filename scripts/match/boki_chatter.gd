@@ -14,12 +14,15 @@ static func line(k: Kin, trigger_id: String) -> String:
 	return BokiLines.line(id, t, k.species, stage, -1.0, k.lines.get(t, []))
 
 ## Says a trigger's line over the Boki, if it has one to say right now (inside a Fusion it's quiet).
-static func say(m: Match, k: Kin, trigger_id: String) -> void:
+## fill: placeholders in the line and what replaces them ("%H" -> "the lava").
+static func say(m: Match, k: Kin, trigger_id: String, fill := {}) -> void:
 	if k == null or k.dead or k.state == "downed":
 		return
 	if k.state == "fused" and k.owner_h != null and KinMerge.in_form(k.owner_h):
 		return
 	var txt := line(k, trigger_id)
+	for key in fill:
+		txt = txt.replace(key, fill[key])
 	if txt != "":
 		m.kin_bark(k, txt, trigger_id)
 
