@@ -102,8 +102,9 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 	var d3 := Vector3(dir2.x, 0, dir2.y)
 	var hand: Vector3 = at + Vector3(0, 1.0, 0) + d3 * 0.6
 	var hot := col.lerp(Color.WHITE, 0.35)
-	# every cast: a ring at the caster's feet in the ability's colour, so you see who cast it
-	if not delivery in ["launch", "trap", "wall"]:
+	# every cast: a ring at the caster's feet in the ability's colour, so you see who cast it (a Hunter's is
+	# BodyTell's, in the viewer's side colour)
+	if not delivery in ["launch", "trap", "wall"] and not caster is Hunter:
 		fx.ring((caster as Ent).pos if caster is Ent else at, 1.25, Color(col, 0.85), 0.22)
 	match delivery:
 		"rail", "beam":
@@ -137,8 +138,7 @@ static func cast(m: Node, caster: Node, delivery: String, at: Vector3, dir2: Vec
 		"trap", "zone":
 			fx.flash(at + Vector3(0, 0.3, 0), hot, 0.6, 0.12)
 			fx.spark(at + Vector3(0, 0.1, 0), Vector3.UP, hot, 10, 5.0, 60.0, 0.22, 12.0, 0.9)
-			fx.ring(at, float(o.get("radius", 1.1)), Color(col, 0.95), 0.35)
-			fx.ring(at, float(o.get("radius", 1.1)) * 1.8, Color(col, 0.6), 0.45)
+			fx.ring(at, float(o.get("radius", 1.1)), Color(SideColor.fx(m, caster, col), 0.95), 0.45)
 		"tether":
 			fx.flash(at + Vector3(0, 1.0, 0), hot, 0.9, 0.12)
 			fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, hot, 10, 6.0, 140.0, 0.22, 4.0, 1.0)
@@ -155,7 +155,7 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 	var fx: Fx = m.fx
 	var hot := col.lerp(Color.WHITE, 0.4)
 	fx.flash(at + Vector3(0, 0.5, 0), hot, 0.5 + r * 0.35, 0.16)
-	fx.ring(at, r * 1.15, Color(col, 0.9), 0.32)
+	fx.ring(at, r, Color(SideColor.fx(m, caster, col), 0.9), 0.32)      # the true area, in whose-it-is colour
 	fx.ring(at, r * 0.6, Color(1, 1, 1, 0.7), 0.2)
 	fx.spark(at + Vector3(0, 0.2, 0), Vector3.UP, hot, int(10 + r * 6), 6.0 + r * 2.0, 65.0, 0.35, 14.0, 1.0 + r * 0.15)
 	fx.dust(at, int(8 + r * 4))
@@ -165,8 +165,9 @@ static func land(m: Node, caster: Node, at: Vector3, r: float, col: Color) -> vo
 			Shake.incoming_big(m, at, 0.5, caster as Ent)
 
 ## What an ability hit does to the one it hit, readable at a glance and by ear (Juice.hit calls this
-## for every ability hit): the category's impact sound, then the status: a stun rings round their
-## head, a root pins rings at their feet, a slow frosts them, a hard knock throws dust behind them.
+## for every ability hit): the category's impact sound, then the moment a status lands: a stun bursts
+## round their head, a root rings their feet, a slow frosts them, a hard knock throws dust behind them.
+## What lasts (the stars, the tendrils, the frost) is on their body, BodyTell's; no words float up.
 static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	var fx: Fx = m.fx
 	var p: Hunter = m.player
@@ -179,16 +180,13 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 	var head := target.pos + Vector3(0, 1.9 if target is Hunter else 1.3, 0)
 	var stun := float(o.get("stun", 0.0)); var root := float(o.get("root", 0.0)); var slow := float(o.get("slow", 0.0))
 	if stun > 0.0:
-		fx.ring(head, 0.7, Color("fff27a"), 0.35)
-		fx.spark(head, Vector3.UP, Color("fff6b0"), 10, 4.0, 180.0, 0.35, 0.0, 0.8)
-		fx.word(head + Vector3(0, 0.3, 0), "STUNNED", Color("fff27a"), false)
+		fx.ring(head, 0.7, BodyTell.STUN_COL, 0.35)
+		fx.spark(head, Vector3.UP, BodyTell.STUN_COL.lightened(0.4), 10, 4.0, 180.0, 0.35, 0.0, 0.8)
 	elif root > 0.0:
-		fx.ring(target.pos, 1.0, Color("ffb04a"), 0.5)
-		fx.ring(target.pos, 0.6, Color("ffb04a"), 0.6)
-		fx.word(head + Vector3(0, 0.3, 0), "ROOTED", Color("ffb04a"), false)
+		fx.ring(target.pos, 1.0, BodyTell.ROOT_COL, 0.5)
 	elif slow > 0.0:
-		fx.burst(target.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 10, 2.0, 0.5, -1.0, 1.0)
-		fx.ring(target.pos, 0.9, Color("bff0ff", 0.8), 0.3)
+		fx.burst(target.pos + Vector3(0, 0.8, 0), BodyTell.SLOW_COL.lightened(0.3), 10, 2.0, 0.5, -1.0, 1.0)
+		fx.ring(target.pos, 0.9, Color(BodyTell.SLOW_COL, 0.8), 0.3)
 		if mine: m.sfx("ab_slow", target.pos, -6.0)
 	var kb: Vector2 = o.get("kb", Vector2.ZERO) if o.get("kb", null) is Vector2 else Vector2.ZERO
 	if kb.length() >= 6.0 or float(o.get("lift", 0.0)) >= 4.0:

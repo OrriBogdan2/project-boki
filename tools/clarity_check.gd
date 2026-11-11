@@ -3,7 +3,9 @@ extends RefCounted
 ## your teammate's the ally colour and both rivals' the foe colour, and every Boki's ring matches its
 ## Hunter's. With your teammate knocked: their bleed-out drains, their Boki's status icon says what it
 ## is doing (pulling them up, down too, defending) and only your squad's Boki get tethers. Never touches
-## the save.
+## the save. Who and what on the body (docs/COMBAT_CLARITY.md): other Hunters' silhouettes carry their side's edge,
+## other people's ability looks lean to their side (SideColor.fx), crowd control stays on the body it holds (stars,
+## tendrils, frost and a pulsing tint, BodyTell) and a cast glints the caster.
 
 const DT := 1.0 / 60.0
 
@@ -45,6 +47,11 @@ func run(main: Node) -> void:
 		if h.kin:
 			ok(_same(SideRings.shown((h.kin as Kin).ring), want), "%s's Boki ring matches its Hunter" % h.pname)
 			ok(SideColor.of(m, h.kin) == want, "%s's Boki takes its Hunter's colour" % h.pname)
+		var edge := SideRings.edge_of(h)
+		var edge_ok := edge.a == 0.0 if h == P else (_same(edge, want) and edge.a > 0.5)
+		ok(edge_ok, "%s's body edge: %s (%s)" % [h.pname, "none on yours" if h == P else _side(m, h), edge])
+	_side_fx(m, P, ally, foes[0])
+	_body_tell(m, foes[0])
 	# ---------------------------------------------------------------- 2. the downed teammate
 	ally.teleport(P.pos + Vector3(8.0, 0, 0))        # nobody in reach to pick them up: the bleed-out runs
 	for f: Hunter in foes:
@@ -122,6 +129,50 @@ func _cc_plate(m: Match, a: Hunter, b: Hunter) -> void:
 		var ms := _icon(mob, "concussion")
 		ok(ms.size() == 1 and absf(float(ms[0][3]) - 1.2) < 0.01, "a stunned monster: STUNNED icon, 1.2 s left")
 		mob.stun_t = 0.0
+
+## Other people's looks lean to their side: yours as made, a teammate's cooler, a rival's toward the hostile red.
+func _side_fx(m: Match, P: Hunter, ally: Hunter, foe: Hunter) -> void:
+	var c := Color("ffc832")
+	ok(SideColor.fx(m, P, c) == c, "your own ability look keeps its colour")
+	var a := SideColor.fx(m, ally, c)
+	var f := SideColor.fx(m, foe, c)
+	ok(a.b > c.b and a != c, "a teammate's look leans cool (%s)" % a)
+	ok(f.r >= c.r and f.g < c.g, "a rival's look leans hostile (%s)" % f)
+	var look := Oomph.shot_look(m, foe, c, 0.2)
+	ok(_same(look[2], SideColor.fx(m, foe, (look[0] as Color).lightened(0.2))), "a rival's shot carries the hostile halo")
+
+## Crowd control on a body, on the body: the props show while it lasts, the tint pulses its colour, all gone after;
+## a cast glints the caster in their signature colour and fades.
+func _body_tell(m: Match, f: Hunter) -> void:
+	f.stun_t = 1.0
+	_run(m, 0.1)
+	var props := f.get_node_or_null("BodyTell") as Node3D
+	ok(props != null and (props.get_node("Stun") as Node3D).visible, "a stunned body spins the stars")
+	ok(_same(BodyTell.tint_of(f), BodyTell.STUN_COL), "... and pulses the stun colour")
+	f.stun_t = 0.0
+	f.root_t = 1.0
+	_run(m, 0.3)
+	var r := props.get_node("Root") as Node3D if props else null
+	ok(r != null and r.visible and r.scale.y > 0.99, "a rooted body grows its tendrils")
+	ok(_same(BodyTell.tint_of(f), BodyTell.ROOT_COL), "... and pulses the root colour")
+	f.root_t = 0.0
+	f.slow_t = 1.0
+	f.stagger_t = 0.0
+	_run(m, 0.05)
+	ok(props != null and (props.get_node("Slow") as Node3D).visible, "a slowed body drips frost")
+	f.slow_t = 0.0
+	_run(m, 0.05)
+	var none := props != null and not ((props.get_node("Stun") as Node3D).visible
+			or (props.get_node("Root") as Node3D).visible or (props.get_node("Slow") as Node3D).visible)
+	ok(none and BodyTell.tint_of(f).a == 0.0, "nothing holding it: nothing on the body")
+	var rings0: int = m.fx.radial
+	f.cast_at = m.time
+	_run(m, DT)
+	ok(_same(BodyTell.tint_of(f), Arch.color(f.arch)) and BodyTell.tint_of(f).a > 0.5,
+		"a cast glints the caster in their colour")
+	ok(m.fx.radial > rings0, "... and rings their feet")
+	_run(m, BodyTell.GLINT_T)
+	ok(BodyTell.tint_of(f).a == 0.0, "the glint fades")
 
 func _icon(e: Ent, icon: String) -> Array:
 	return HudPlate.statuses(e).filter(func(x): return x[0] == icon)
