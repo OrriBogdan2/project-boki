@@ -6,9 +6,9 @@ extends RefCounted
 
 const MAIN_KEYS := ["quality", "fullscreen", "ui_scale", "master"]
 ## Not rows on the settings tabs: version markers, the auto-detected preset, the per-hunter model switches
-## (Video, one row per modelled hunter) and the bot level (Admin tools).
+## (Video, one row per modelled hunter), the bot level (Admin tools) and the title try card closed last.
 const NOT_ROWS := ["keys", "keys_v", "keys2_v", "keys3_v", "keys4_v", "keys5_v", "keys6_v", "video_v",
-		"quality_found", "warden_models", "bot_diff"]
+		"quality_found", "warden_models", "bot_diff", "try_dismissed"]
 
 var bad := 0
 var tree: SceneTree
