@@ -4,7 +4,7 @@ extends RefCounted
 ## The player's squad plays on --autoplay and stands in for the human squad (no bot delay, no bot cap).
 ## Per match one "WAYS match" line: each seat's squad (and its plan) and the time it was taken, squads
 ## out, the human squad out or not, bot squads on early seats against the cap, the final (taken, or no
-## winner with squads still alive when it opened) and squads alive at each minute. Then "WAYS sum" over
+## winner: squads still in when the islands fell) and squads alive at each minute. Then "WAYS sum" over
 ## the run against the spec's gates (section 12): squads out at most 40%, each quest seat used in over
 ## 50% of matches, no-winner finals at most 5%. Reads the match, changes nothing; never touches the save.
 ## Run: godot --headless --path . -- --ways-out-sim [--seed=1 --runs=1 --map=hollowcrown]
@@ -61,7 +61,7 @@ func _match(main: Node, seed_v: int, map: String) -> Dictionary:
 	var by_bots := func(k): return row["seats"].has(k) and BotWays.bot_squad(m, int(row["seats"][k][0]))
 	row["bot_early"] = ["lair", "spark", "uplink"].filter(by_bots).size()
 	var opened: bool = float(row["final_open"]) >= 0.0
-	row["nowin"] = opened and not row["seats"].has("final") and int(row["final_alive"]) > 0
+	row["nowin"] = opened and not row["seats"].has("final") and int(row.get("alive_end", 0)) > 0
 	_print(m, row)
 	m.queue_free()
 	return row
@@ -76,6 +76,8 @@ func _look(m: Match, row: Dictionary) -> void:
 	for k in taken:
 		if int(taken[k]) >= 0 and not row["seats"].has(k):
 			row["seats"][k] = [int(taken[k]), t, BotWays.plan(m, int(taken[k]))]
+	if m.time < m.length:
+		row["alive_end"] = _alive(m)
 	if float(row["final_open"]) < 0.0 and m.heart.state >= Heart.S.FINAL:
 		row["final_open"] = t
 		row["final_alive"] = _alive(m)
@@ -96,9 +98,19 @@ func _print(m: Match, row: Dictionary) -> void:
 	if float(row["final_open"]) >= 0.0:
 		fin = "%s with %d" % [_clock(row["final_open"]), row["final_alive"]]
 	var alive := ",".join(row["alive"].map(func(x): return str(x)))
-	print("WAYS match seed %d end %s %s out %d/10 human_out %s bot_early %d/%d final_open %s nowin %s alive/min %s" % [
+	print("WAYS match seed %d end %s %s out %d/10 human_out %s bot_early %d/%d final_open %s nowin %s" % [
 		row["seed"], _clock(m.sess_time()), " ".join(seats), row["out"], _yes(row["human_out"]),
-		row["bot_early"], row["cap"], fin, _yes(row["nowin"]), alive])
+		row["bot_early"], row["cap"], fin, _yes(row["nowin"])], " tries %s alive/min %s" % [_tries(m), alive])
+
+## How often each early seat was started at all: a squad sealed in the lair, the spark picked up, the uplink
+## started ("lair/spark/uplink").
+func _tries(m: Match) -> String:
+	var sq: QuestSeats = m.exits.seats
+	var n := func(trail: Array, edge: String) -> int:
+		return trail.filter(func(x): return String(x).contains(edge)).size()
+	var lair: int = n.call(sq.lair.trail, ">IN_USE") if sq.lair else 0
+	var up: int = n.call(sq.uplink.trail, ">IN_USE") if sq.uplink else 0
+	return "%d/%d/%d" % [lair, n.call(m.heart.trail, ">CARRIED"), up]
 
 func _sum() -> void:
 	var n := float(_rows.size())

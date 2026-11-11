@@ -66,6 +66,7 @@ func _cap_delay(m: Match) -> void:
 	sq.lair.team = b1
 	m.heart.early_team = b2
 	ok(not BotWays.may_start(m, b3, "uplink"), "two early seats taken by bot squads: a third bot squad is capped")
+	ok(not BotWays.may_start(m, b1, "uplink"), "...and so is one of a squad that already took one")
 	ok(BotWays.may_start(m, me, "uplink"), "...the human squad never is")
 	sq.lair.team = me
 	ok(BotWays.may_start(m, b3, "uplink"), "a seat the human squad took does not count against the bots")

@@ -736,18 +736,12 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
 		if goal != Vector3.INF: gk = "boki"
-	# a dead teammate: their deathbox while the soul's there, else a revive beacon
+	# a dead teammate: their deathbox while the soul's there (a revive beacon comes after the seat below)
 	if goal == Vector3.INF:
 		for b in m.boxes:
 			var o: Hunter = b["owner"]
 			if o.team == h.team and o != h and Life.soul_here(m, b) and h.flat_dist(b["pos"]) < 45.0:
 				goal = b["pos"]; gk = "box"; break
-	if goal == Vector3.INF and m.hunters.any(func(x): return x.team == h.team and x.out and not x.gone):
-		var bd := 90.0
-		for bc in m.beacons:
-			if bc["used"]: continue
-			var d := h.flat_dist(bc["pos"])
-			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
 	# hurt with the Blight close: get away from it first
 	if goal == Vector3.INF and m.blight:
 		var fl := _blight_flee(m, h)
@@ -769,6 +763,13 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not wg.is_empty():
 			goal = wg[0]
 			gk = String(wg[1])
+	# a revive beacon for a dead teammate (a seat in play comes first)
+	if goal == Vector3.INF and m.hunters.any(func(x): return x.team == h.team and x.out and not x.gone):
+		var bd := 90.0
+		for bc in m.beacons:
+			if bc["used"]: continue
+			var d := h.flat_dist(bc["pos"])
+			if d < bd: bd = d; goal = bc["pos"]; gk = "beacon"
 	# a rival's deathbox revive humming within earshot: go and stop it
 	if goal == Vector3.INF:
 		for b in m.box_hums.values():

@@ -80,11 +80,12 @@ static func may_start(m: Match, team: int, seat: String) -> bool:
 static func _delayed(m: Match, team: int, seat: String) -> bool:
 	return on(m) and bot_squad(m, team) and m.sess_time() < start_t(seat)
 
-## Bot squads other than this one already hold or took as many early seats as bots may.
+## Bot squads already hold or took as many early seats as bots may (this squad's own count too: one of
+## it left behind after its squad took a seat does not start a second).
 static func _capped(m: Match, team: int) -> bool:
 	if not on(m) or not bot_squad(m, team):
 		return false
-	var taken := early_teams(m).filter(func(t): return t >= 0 and t != team and bot_squad(m, t)).size()
+	var taken := early_teams(m).filter(func(t): return t >= 0 and bot_squad(m, t)).size()
 	return taken >= cap(m)
 
 ## [goal, kind] for the squad's seat now, or [] (nothing to do yet: loot). Sealed in a lair, or riding
