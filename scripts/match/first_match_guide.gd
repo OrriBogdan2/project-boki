@@ -1,20 +1,24 @@
 class_name FirstMatchGuide
 extends RefCounted
-## "What to do next" for a new player's first three real Extractions: one highlighted plain line at a time
-## (content/rules/first_match_guide.json). A line shows once per match, when its moment comes, and clears
-## on its trigger or after its time. It is only drawn: it never pauses or blocks anything. The save's
-## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
+## "What to do next" for a new player's first real Extractions (the camp lines one match longer): one
+## highlighted plain line at a time (content/rules/first_match_guide.json). A line shows once per match,
+## when its moment comes, and clears on its trigger or after its time. It is only drawn: it never pauses
+## or blocks anything. The save's
+## "first_guide" counts the Extractions that have had it; past the rule's `matches` only the camp lines
+## (CAMP_LINES) show, and at its `camp_matches` it stops for good.
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
 ## What to say first when two lines are due.
 const ORDER := ["pick", "land", "camp", "squad", "blight", "exit", "rank", "send", "chest"]
+const CAMP_LINES := ["pick", "camp"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
 var m: Match
 var line := ""                # the one line on screen ("" for none)
 var id := ""                  # which line
 var shown := {}               # ids already shown this match
+var nth := 0                  # this match among the save's guided Extractions (0: the first)
 var _t := 0.0                 # s the line has been up
 var _gap := 0.0               # s of quiet left before the next line
 var _throws0 := 0             # the Boki's sends when its line came up
@@ -31,17 +35,18 @@ static func for_match(mt: Match, opts: Dictionary) -> FirstMatchGuide:
 		if opts.get(skip, false):
 			return null
 	var n := int(Save.d.get("first_guide", 0))
-	if n >= int(rules()["matches"]):
+	if n >= int(rules()["camp_matches"]):
 		return null
 	Save.d["first_guide"] = n + 1
 	var g := FirstMatchGuide.new()
 	g.m = mt
+	g.nth = n
 	return g
 
 ## Old saves: one that has played already has had its first matches (keyed by its own field, like FarmBuilder).
 static func migrate(data: Dictionary) -> void:
 	if not data.has("first_guide"):
-		data["first_guide"] = mini(int(data.get("matches", 0)), int(rules()["matches"]))
+		data["first_guide"] = mini(int(data.get("matches", 0)), int(rules()["camp_matches"]))
 
 func tick(dt: float) -> void:
 	var p := m.player
@@ -129,6 +134,8 @@ func _kin_ready(p: Hunter) -> bool:
 
 ## Is it time for this line?
 func _due(lid: String, p: Hunter) -> bool:
+	if nth >= int(rules()["matches"]) and lid not in CAMP_LINES:
+		return false
 	if lid == "pick":
 		return m.skydrop != null and m.skydrop.planning and _mid_small_camp() != Vector3.INF
 	if lid == "land":

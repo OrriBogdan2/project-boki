@@ -1,6 +1,7 @@
 extends RefCounted
-## --first-match-guide-check: the "what to do next" line in a save's first two Extractions.
-##   1. the save flag: only real Extractions count, three get the guide, the fourth does not, old saves migrate
+## --first-match-guide-check: the "what to do next" line in a save's first Extractions.
+##   1. the save flag: only real Extractions count, two get every line, the third only the camp lines,
+##      the fourth none; old saves migrate
 ##   2. a walk through the triggers: pick a camp, land, clear it, rank, send, chest, a squad, the Blight,
 ##      an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
@@ -31,6 +32,8 @@ func _save_flag() -> void:
 	var second := FirstMatchGuide.for_match(null, o)
 	var third := FirstMatchGuide.for_match(null, o)
 	ok(first != null and second != null and third != null, "the first three Extractions get the guide")
+	ok(third.nth == 2 and not third._due("land", null) and not third._due("rank", null),
+		"the third gets only the camp lines")
 	var fourth := FirstMatchGuide.for_match(null, o)
 	ok(fourth == null and int(Save.d["first_guide"]) == 3, "the fourth does not; the flag stays at 3")
 	var old := {"matches": 5}
@@ -90,7 +93,7 @@ func _walk() -> void:
 	_tick(1.5)
 	ok(g.id == "camp" and g.line == "Clear the camp to level up" and g.target != Vector3.INF,
 		"on the ground: clear the camp (%s)" % g.line)
-	g._cleared = true
+	m.camps.cleared.emit(0, p.team)
 	_tick(0.2)
 	ok(g.line == "" and g.target == Vector3.INF, "the squad cleared a camp: it clears")
 	_tick(1.6)
