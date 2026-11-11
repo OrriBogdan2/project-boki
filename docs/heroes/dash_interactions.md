@@ -389,3 +389,95 @@ Every Hunter's air dash is its ground dash or a special one the source has, neve
 | Vex (mage) | Wirerun (cd 8.0 s) | the same Wirerun (7.5 to 13 m by rank, one charge, same clip) | same | vireo.md: one Wirerun, no air variant |
 | Sable (thief) | Vault, 4.5 m in 0.48 s (cd 4.5 s) | 8.4 m in 0.95 s (ground 4.5 m in 0.48 s), the same dash charges, the cartwheel vault clips (`thf_vault_*`) | special | dancer.md and owner items 7 / 129: the air dash is longer and slower |
 | Void (ostra) | Lantern Trade (cd 9.5 s) | the same Lantern Trade (1.8 s), the same charge and clip | same | ostra.md: one Lantern Trade |
+## Cast into cast
+
+The second ability pressed during the first one's wind-up and its recovery (the times are seconds after the first press), read from `into_cast` in `content/dash_flow/<hero>.json` and asserted by `--cast-into-cast-check`. Cancels are not asserted: in the measuring runs no press ended the first move (its hit or state still came). "Source" is what the footage shows; `[?]` marks a pair it cannot settle.
+
+### archer
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Myth presses nothing else inside a draw or its release in the clip (briefs/hero-ref/pin.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Impaling Shot: no other press inside its charge or release in the clip (briefs/hero-ref/pin.md:91-110). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Rain of Arrows: no other press inside its cast in the clip (briefs/hero-ref/pin.md). |
+| LMB tap during ult (X) | queued, goes 0.52 s later (0.05 s in) | queued, goes 0.52 s later (0.6 s in) | Each empowered shot still shows a short magenta draw of about 0.4-0.8 s (briefs/hero-ref/pin.md:257,268): ours goes after 0.52 s. Matches. |
+| LMB hold during ult (X) | queued, goes 0.52 s later (0.05 s in) | queued, goes 0.52 s later (0.6 s in) | Each empowered shot still shows a short magenta draw of about 0.4-0.8 s (briefs/hero-ref/pin.md:257,268): ours goes after 0.52 s. Matches. |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Only LMB shots are shown in the empowered window (briefs/hero-ref/pin.md:255-281). |
+### juggernaut
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.3 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.3 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.3 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Brall presses nothing else inside a Quick Attack swing or the blast's charge in the clip (briefs/hero-ref/juggernaut.md, LMB 0014-0120). |
+| LMB tap during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| LMB hold during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| E during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| ult (X) during RMB | fires at once (0.3 s in) | fires at once (0.8 s in) | [?] No other press inside the Execution Slam's wind-up in the clip (briefs/hero-ref/juggernaut.md, RMB 0121-0250). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] No other press during the throw or while the chain is out on nothing in the clip (briefs/hero-ref/juggernaut.md, 0301-0366). |
+| LMB tap during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| LMB hold during ult (X) | queued, goes 0.45 s later (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| RMB during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+| E during ult (X) | dropped (0.3 s in) | fires at once (0.9 s in) | [?] Retaliation: planted through the 0.65 s guard, then the strike (briefs/hero-ref/juggernaut.md:205,226); no other press shown in it or after it. |
+### gunslinger
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Ghost fires no other ability while the rifle runs in the clip (briefs/hero-ref/venator.md:35-55). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches. |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | Wind-up [?] (the 0.2 s commit, briefs/hero-ref/venator.md:72). Recovery: the rifle fires straight after the throw, the Daze combo (briefs/hero-ref/venator.md:85, 0075-0080, 0098-0106). Matches. |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it. |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Spike Grenade commits about 0.2 s (briefs/hero-ref/venator.md:72): one frame at 5 fps, no press seen inside it. |
+| LMB tap during E | fires at once (0.3 s in) | fires at once (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. |
+| LMB hold during E | fires at once (0.3 s in) | fires at once (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. |
+| RMB during E | fires at once (0.3 s in) | fires at once (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. |
+| ult (X) during E | dropped (0.3 s in) | fires at once (0.85 s in) | [?] Ion Cannon: he stands still with the rifle braced through the 0.6 s cast bar, then a 0.4 s recovery (briefs/hero-ref/venator.md:102,109,111); no other press shown in either. |
+| LMB tap during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235). |
+| LMB hold during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235). |
+| RMB during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235). |
+| E during ult (X) | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Mini Nuke: about 0.8 s committed with no other press seen (briefs/hero-ref/venator.md:129); he walks and jumps after it (briefs/hero-ref/venator.md:235). |
+### ashwick
+
+| Pair | Ours, wind-up | Ours, recovery | Source |
+|---|---|---|---|
+| RMB during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| E during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during LMB tap | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| RMB during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| E during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during LMB hold | fires at once (0.3 s in) | fires at once (0.95 s in) | [?] Felix casts nothing else inside the flamethrower stream in the clip (briefs/hero-ref/linwick.md). |
+| LMB tap during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| LMB hold during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| E during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| ult (X) during RMB | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Fire Bolt: no other press inside its 0.4 s aim lane or the shot in the clip (briefs/hero-ref/linwick.md:56-70). |
+| LMB tap during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| LMB hold during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| RMB during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| ult (X) during E | fires at once (0.05 s in) | fires at once (0.6 s in) | [?] Flame Shield: no other press inside its cast in the clip (briefs/hero-ref/linwick.md). |
+| LMB tap during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| LMB hold during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| RMB during ult (X) | dropped (0.3 s in) | fires at once (2.1 s in) | [?] Can he act while flying? is an open question (briefs/hero-ref/linwick.md:198); after the landing he simply continues on foot (briefs/hero-ref/linwick.md:215). |
+| E during ult (X) | fires at once (0.3 s in) | fires at once (2.1 s in) | Mid-flight [?] (briefs/hero-ref/linwick.md:198). Recovery: Flame Shield fires the moment he lands (briefs/hero-ref/linwick.md:216, f137-f139). Matches. |
