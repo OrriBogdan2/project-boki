@@ -450,6 +450,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s0 = Vector3.ONE * extent
 			s1 = s0 * float(layer.get("grow", 1.2))
 		"fist":
+			b = b * Basis(Vector3.RIGHT, deg_to_rad(float(layer.get("pitch", 0.0))))
 			mt.set_shader_parameter("fall", float(layer.get("fall", 0.5)))
 			mt.set_shader_parameter("drop", _num(layer, "drop", o, 3.0) / extent)
 		"vortex", "ring":

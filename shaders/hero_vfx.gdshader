@@ -43,10 +43,10 @@ void vertex() {
 	}
 	if (mode == M_FIST) {
 		float k = clamp(life / max(fall, 0.01), 0.0, 1.0);
-		VERTEX.y += drop * (1.0 - k * k);      // drops faster as it falls: it lands on the last step
+		vec3 up = normalize(inverse(mat3(MODEL_MATRIX)) * vec3(0.0, 1.0, 0.0));   // world up, however it is tipped
+		VERTEX += up * drop * (1.0 - k * k);      // drops faster as it falls: it lands on the last step
 	}
 }
-
 
 // the distance to the nearest cell wall: dark at the walls of a broken-plate pattern
 float cracks(vec2 p) {
@@ -245,10 +245,10 @@ vec4 ring(vec2 uv) {
 // ground, the rest see-through. It fades in as it starts to fall and out as it rests.
 vec4 fist(vec3 n, vec3 view) {
 	float lit = cel(clamp(dot(normalize(n), normalize(vec3(-0.35, 0.8, 0.5))) * 0.5 + 0.5, 0.0, 1.0));
-	vec3 body = lit < 0.3 ? col3.rgb : (lit < 0.7 ? col.rgb : col2.rgb);
+	vec3 body = lit < 0.3 ? col3.rgb : (lit < 0.7 ? mix(col3.rgb, col.rgb, 0.6) : col.rgb);
 	float rim = hard(1.0 - abs(dot(normalize(n), normalize(view))) - 0.68);
 	float seen = smoothstep(0.0, 0.12, life) * (1.0 - smoothstep(0.82, 1.0, life));
-	float cover = mix(0.38, 0.85, rim) * seen;
+	float cover = mix(0.3, 0.9, rim) * seen;
 	return vec4(mix(body, col2.rgb, rim) * cover, cover);
 }
 
