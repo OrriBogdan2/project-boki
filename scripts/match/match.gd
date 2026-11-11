@@ -366,8 +366,7 @@ func _start(o: Dictionary) -> void:
 	await _slice()
 	Beacons.place(self)
 	await _slice()
-	if not opts.get("arena", false):
-		await _spawn_breakables()
+	await _spawn_breakables()
 	await _slice()
 	for rg in world.rings:
 		var rn := Models.air_ring()
@@ -1113,29 +1112,6 @@ func _spawn_breakables() -> void:
 				continue
 			q.y = world.ground_at(q.x, q.z)
 			_add_break(t[1], q)
-		# a gear rack: gear to try (an active glove goes in your Q slot, the rest in theirs), in two
-		# staggered rows 2.6 m apart so their name tags don't run into each other (one row 1.8 m apart
-		# printed "Fissure GlMirror GloHook GIce Bridge Glove"); spots off the island are skipped for
-		# the next free one, so all six make it onto the ground
-		var spots: Array = []
-		for row in [[-2.4, 0.0], [-4.6, 1.3], [0.0, 1.3], [2.4, 0.0], [4.6, 1.3]]:
-			# across the row from the middle out: 0, 2.6, -2.6, 5.2 ... (or 1.3, -1.3, 3.9 ... staggered)
-			for k in 6:
-				var x := (float(row[1]) + float((k + (1 if row[1] == 0.0 else 0)) / 2) * 2.6) * (1.0 if k % 2 == 0 else -1.0)
-				if Vector2(x, float(row[0])).length() <= 6.2:
-					spots.append(Vector3(x, 0, float(row[0])))
-		var used: Array = [Vector3(-2.0, 0, 1.2), Vector3(-2.6, 0, 2.2), Vector3(1.4, 0, 1.6), Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(0, 0, 4.0)]
-		for gid in ["blink", "quake", "bubble", "bastion_plate", "windstep_boots", "vest"]:
-			for off in spots:
-				var q2: Vector3 = player.pos + off
-				if used.any(func(u): return (u as Vector3).distance_to(off) < 2.3):
-					continue
-				if world.is_void(q2.x, q2.z) or world.is_block(q2.x, q2.z) or absf(world.ground_at(q2.x, q2.z) - player.pos.y) > 1.7:
-					continue
-				used.append(off)
-				q2.y = world.ground_at(q2.x, q2.z)
-				spawn_gear(gid, 2, q2)
-				break
 		# the way into the duel room: a glowing pad next to where you start
 		if not opts.get("duel", false):
 			for off in [Vector3(3.6, 0, 2.6), Vector3(-3.6, 0, 2.6), Vector3(3.6, 0, -1.0), Vector3(0, 0, 4.0)]:
@@ -4459,7 +4435,8 @@ static func demo_opts() -> Dictionary:
 
 ## The Arena: a compact practice map with dummies, a sparring bot and the kit card (scripts/match/arena.gd).
 static func arena_opts(arch_id := "") -> Dictionary:
-	var o := {"arena": true, "training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true}
+	# at_xz: you start where Arena.setup puts you, so the duel pad and the crates land around you
+	var o := {"arena": true, "training": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 6262, "no_drop": true, "at_xz": "26.5,33.5"}
 	if Arch.exists(arch_id):
 		o["arch"] = arch_id; o["cls"] = Arch.weight(arch_id); o["weapon"] = Arch.signature(arch_id)
 	return o

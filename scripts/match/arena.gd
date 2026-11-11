@@ -414,6 +414,11 @@ func _fill_menu(v: VBoxContainer) -> void:
 	hd.add_child(UI.label("Loadout", 26, UI.INK, UI.big))
 	hd.add_child(UI.label("   Everything applies at once. Esc or L closes.", 14, UI.MUTED))
 	hd.add_child(UI.fill())
+	var bench := ParityBench.of(m)
+	if bench:
+		var bb := UI.choice("Parity bench", bench.is_open(), func(): bench.toggle(); _fill_menu(v), 150)
+		bb.tooltip_text = "Readouts for the dummy you hit last: DPS, last hit, crowd control, knock distance"
+		hd.add_child(bb)
 	hd.add_child(UI.ghost("Kit card", func(): close_menu(); _open_card(), 120))
 	hd.add_child(UI.primary("Done", close_menu, 110))
 	v.add_child(hd)
@@ -502,9 +507,6 @@ func _fill_menu(v: VBoxContainer) -> void:
 	ba.add_child(bl)
 	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
 	right.add_child(ba)
-	var bench := ParityBench.of(m)
-	if bench:
-		right.add_child(UI.choice("Parity bench (the dummy you hit last)", bench.is_open(), func(): bench.toggle(); _fill_menu(v), 300))
 
 func _glove_line(slot: int) -> String:
 	var g := String(gloves[slot])
