@@ -114089,5 +114089,54 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/px9d_geysirbara_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px9d_geysirbara",
+    "name": "Geysirbara (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_geysirbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_dribbara",
+    "name": "Dribbara (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_dribbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_crofthorn",
+    "name": "Crofthorn (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_crofthorn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_dribbara",
+    "name": "Dribbara (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_dribbara_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_crofthollow",
+    "name": "Crofthollow (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_crofthollow_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_crofthorn",
+    "name": "Crofthorn (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_crofthorn_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_crofthollow",
+    "name": "Crofthollow (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_crofthollow_1.jpg",
+    "ok": true
   }
 ]
