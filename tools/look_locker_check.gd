@@ -69,12 +69,13 @@ func _tabs() -> void:
 	locker.show_tab("Hollow")
 	await _frames(90)
 	var hollow_d: float = locker._cam.global_position.distance_to(head)
-	ok(hollow_d < body_d * 0.6, "Hollow closes in on the head (%.2f m from %.2f m)" % [hollow_d, body_d])
+	ok(hollow_d < body_d * 0.7, "Hollow closes in on the head (%.2f m from %.2f m)" % [hollow_d, body_d])
 	ok(_opts("glow:").size() == Unmasked.GLOWS.size() and _opt("glow:0") is Button, "the glow colours as swatches")
 	locker.show_tab("Glider")
 	await _frames(90)
 	ok(locker._cam.global_position.distance_to(head) > body_d, "Glider pulls back to show the canopy")
-	ok(locker.model.position.y > LookLocker.TOP, "under the glider you hang over the turntable")
+	ok(locker.model.position.y > LookLocker.TOP and locker.model.get_node("Rig/Torso/Glider").visible,
+		"under the open glider you hang over the turntable")
 	locker.show_tab("Shroud")
 	await _frames(2)
 

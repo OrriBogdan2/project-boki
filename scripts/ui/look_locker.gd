@@ -23,7 +23,7 @@ const TOP := 0.07                           # m: the turntable's top, where your
 ## Each tab's shot, from the turntable's centre: [camera, the point it looks at] (m). The look point sits left
 ## of you so you stand right of the panel; Hollow is a close-up of the head, Glider pulls back to the canopy.
 const SHOTS := {"Body": [Vector3(-0.75, 1.2, 3.15), Vector3(-0.6, 0.98, 0)],
-	"Hollow": [Vector3(-0.32, 1.62, 1.3), Vector3(-0.24, 1.52, 0)],
+	"Hollow": [Vector3(-0.4, 1.6, 1.7), Vector3(-0.3, 1.45, 0)],
 	"Shroud": [Vector3(-0.62, 1.12, 2.45), Vector3(-0.48, 0.86, 0)],
 	"Glider": [Vector3(-1.05, 1.75, 4.3), Vector3(-0.85, 1.75, 0)]}
 const CAM_EASE := 5.0                       # 1/s: how fast the camera settles on a new shot or zoom
@@ -34,6 +34,7 @@ const DRAG_TURN := 0.012                    # rad per pixel dragged
 const KEY_TURN := 2.5                       # rad/s while A / D is held
 const SPIN_DECAY := 6.0                     # 1/s: how fast a flicked turntable slows to a stop
 const GLIDE_LIFT := 0.35                    # m: you hang this high over the turntable under an open glider
+const GLIDER_TILT := 0.25                   # rad: the open canopy leans back over you, as in flight
 const TRY_SETTLE := 0.06                    # s: a hovered choice rebuilds the model at most this often
 const POP_SCALE := 1.07                     # x your size at the top of the pick pop
 const PANEL_W := 540.0
@@ -98,7 +99,7 @@ func show_tab(t: String) -> void:
 	_tabs = _tab_row()
 	old.replace_by(_tabs)
 	old.queue_free()
-	model.position.y = TOP + (GLIDE_LIFT if tab == "Glider" else 0.0)
+	_dress_for_tab()
 	_fill()
 
 ## Picks a choice: the look takes it, the model pops and the turntable flashes.
@@ -220,10 +221,18 @@ func _rebuild_model(lk: Dictionary) -> void:
 		model.free()
 	model = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], "", "", lk)      # empty-handed: just you
 	model.get_node("Rig/Torso/Aim/Gun").free()
-	model.position.y = TOP + (GLIDE_LIFT if tab == "Glider" else 0.0)
 	_turn.add_child(model)
 	_anim = HunterAnim.new(model)
+	_dress_for_tab()
 	_tint()
+
+## On the Glider tab you hang over the turntable under your open glider; elsewhere you stand, glider packed.
+func _dress_for_tab() -> void:
+	var gliding := tab == "Glider"
+	model.position.y = TOP + (GLIDE_LIFT if gliding else 0.0)
+	var gl := model.get_node("Rig/Torso/Glider") as Node3D
+	gl.visible = gliding
+	gl.rotation.x = GLIDER_TILT
 
 func _pop() -> void:
 	var tw := model.create_tween()
