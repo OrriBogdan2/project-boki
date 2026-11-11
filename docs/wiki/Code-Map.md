@@ -59,7 +59,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `blight.gd`, `blight_dir.gd`, `blight_models.gd` | The Blight and its director |
 | `mob.gd`, `mob_models.gd` | Monsters |
 | `spawn_plan.gd` | What's live on a fixed map each match |
-| `drop_squad.gd` | Planning phase, the skyship, squad drop formation |
+| `drop_squad.gd`, `drop_rocket.gd` | Planning phase, drop leaders, the squad mini rocket |
 | `raid_look.gd` | Raid conditions: light, weather, sight |
 | `truce.gd` | Emotes and truces |
 | `pack.gd` | The backpack |
