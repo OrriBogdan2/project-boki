@@ -30,6 +30,8 @@ const TRUCE_T := 180.0        # a truce lasts this long
 const BREAK_DMG := 14.0       # damage one side does to the other before it counts as an attack
 const MARK_T := 15.0          # how long a betrayer shows on everyone's map
 const SEE_R := 26.0           # bots weigh peace with squads this close that they can see
+const OFFER_SQUADS := 7.0     # squads in a 20-hunter match: with more, each waits longer between weighing offers,
+                              # so a step weighs as many (each look is members x hunters x line of sight)
 const BUBBLE_T := 2.6
 
 var m: Match
@@ -299,7 +301,7 @@ func _bot_offers() -> void:
 	for team in teams:
 		if not _bot_team(team) or m.time < float(_think.get(team, 0.0)):
 			continue
-		_think[team] = m.time + randf_range(1.5, 2.5)
+		_think[team] = m.time + randf_range(1.5, 2.5) * maxf(1.0, teams.size() / OFFER_SQUADS)
 		var near := _near_squads(team)
 		for other in near:
 			var o := int(other)

@@ -1,7 +1,7 @@
 extends RefCounted
 ## --camera-follow-check: how far the camera trails you, frame by frame, through each kind of dash, and how
 ## long it takes to catch up (docs/MOVEMENT_FEEL.md, "Camera"; the follow is CamRig.follow, its numbers in
-## content/rules/hunter_move.json "camera").
+## content/rules/camera.json "trail").
 ## - The source curve: a 4.6 m dash in 0.12 s fed straight to the follow must pan at about 700 px/s and catch
 ##   up in about 0.5 s, as briefs/hero-ref/dredge.md measured Grimble's Brute Dash (50 px = 1 m there).
 ## - In play: Vex's tap dash and held slide, Sparkle's Wirerun (40 m/s), Grimble's barges, Motley's Lantern
