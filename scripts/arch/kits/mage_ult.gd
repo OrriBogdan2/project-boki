@@ -68,10 +68,11 @@ func cast() -> bool:
 	casts += 1
 	kit.play("mage_x")
 	# the range ring snaps out round her at once; a bolt drops onto her as she gathers
-	kit.fx().ring(from, float(data()["range"]), MageKit.PINK, MageKit.TEAL, 0.3)
-	kit.fx().arc(h.position + Vector3(0, 7.0, 0), h.position + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.7, 0.2)
+	kit.fx().ring(from, float(data()["range"]), MageKit.hot_col, MageKit.main_col, 0.3)
+	var sky := h.position + Vector3(0, 7.0, 0)
+	kit.fx().arc(sky, h.position + Vector3(0, 0.3, 0), MageKit.main_col, MageKit.hot_col, 0.7, 0.2)
 	kit.m.sfx("vv_ult_rise", h.pos, -2.0)
-	kit.net_ring(from, float(data()["range"]), MageKit.PINK)
+	kit.net_ring(from, float(data()["range"]), MageKit.hot_col)
 	return true
 
 ## RecastCue: X again during the hang brings her down at the marker (she comes down by herself when it ends).
@@ -185,8 +186,8 @@ func _take_off() -> void:
 	var was: Vector3 = leap["from"]
 	if Vector2(h.pos.x - was.x, h.pos.z - was.z).length() > 0.5 and not kit.m.world.is_void(h.pos.x, h.pos.z):
 		leap["from"] = kit.ground(h.pos)
-		kit.fx().ring(leap["from"], r, MageKit.PINK, MageKit.TEAL, 0.3)
-		kit.net_ring(leap["from"], r, MageKit.PINK)
+		kit.fx().ring(leap["from"], r, MageKit.hot_col, MageKit.main_col, 0.3)
+		kit.net_ring(leap["from"], r, MageKit.hot_col)
 	var from: Vector3 = leap["from"]
 	leap["base"] = h.pos.y
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
@@ -194,10 +195,10 @@ func _take_off() -> void:
 	kit.play("mage_x_air")
 	kit.m.fx.dust(from, 6)
 	var top := from + Vector3(0, float(data()["height"]), 0)
-	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.TEAL, MageKit.PINK, 0.9, 0.25)
+	kit.fx().arc(from + Vector3(0, 0.2, 0), top, MageKit.main_col, MageKit.hot_col, 0.9, 0.25)
 	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
-	leap["disc"] = kit.fx().disc(from, r, MageKit.VIOLET.darkened(0.45), MageKit.PINK, hover, MageKit.PINK)
-	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
+	leap["disc"] = kit.fx().disc(from, r, MageKit.deep_col.darkened(0.45), MageKit.hot_col, hover, MageKit.hot_col)
+	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.hot_col, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
 
@@ -242,17 +243,18 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The range ring with its gold rim (everyone sees where she can come down), the dark inside, and the gold
+## The range ring with its hot pink rim (everyone sees where she can come down), the dark inside, and the hot pink
 ## crown at the cursor (her own).
 func _aim_tick() -> void:
 	var h := kit.h
 	var from: Vector3 = leap["from"]
 	var r := float(data()["range"])
 	leap["land"] = land_point()
-	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
+	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.hot_col, "col2": MageKit.hot_col, "all": true,
+			"lw": 0.1}
 	AimKit.circle(h, "x_ring", ring)
 	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
-	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
+	crown.merge({"col": MageKit.hot_col, "col2": MageKit.main_col, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
 ## Gold crackle along the rim and round her body while she hangs.
@@ -264,10 +266,10 @@ func _air_fx(dt: float) -> void:
 		var a := rng.randf() * TAU
 		var p := from + Vector3(cos(a) * r, 0.15, sin(a) * r)
 		var q := from + Vector3(cos(a + 0.12) * r, 0.25, sin(a + 0.12) * r)
-		kit.fx().arc(p, q, MageKit.PINK, MageKit.PINK.lightened(0.5), 0.35, 0.12)
+		kit.fx().arc(p, q, MageKit.hot_col, MageKit.hot_col.lightened(0.5), 0.35, 0.12)
 	if rng.randf() < 6.0 * dt:
 		var c := kit.h.position + Vector3(0, 1.0, 0)
-		kit.fx().crackle(c, MageKit.TEAL, MageKit.PINK, 0.9, 3, 0.1)
+		kit.fx().crackle(c, MageKit.main_col, MageKit.hot_col, 0.9, 3, 0.1)
 
 # ------------------------------------------------------------------ the strike
 func _slam() -> void:
@@ -279,10 +281,10 @@ func _slam() -> void:
 	AimKit.hide(kit.h, "x_aim")
 	# the landing marker flashes on the spot a beat before she arrives (everyone sees it)
 	var mark := {"at": land, "r": float(data()["radius"]), "all": true, "dur": float(data()["drop"]), "fill": 1.0}
-	mark.merge({"col": MageKit.PINK, "col2": MageKit.PINK, "hot": 0.6})
+	mark.merge({"col": MageKit.hot_col, "col2": MageKit.hot_col, "hot": 0.6})
 	AimKit.circle(kit.h, "x_land", mark)
-	kit.fx().ring(land, float(data()["radius"]), MageKit.PINK, MageKit.TEAL, 0.15)
-	kit.net_ring(land, float(data()["radius"]), MageKit.PINK)
+	kit.fx().ring(land, float(data()["radius"]), MageKit.hot_col, MageKit.main_col, 0.15)
+	kit.net_ring(land, float(data()["radius"]), MageKit.hot_col)
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
 func _fall_tick(u: float) -> void:
@@ -350,24 +352,24 @@ func _share_static(f: Ent, shared: int, source: Ent) -> void:
 	kit.add_spark(f, shared - have)
 	spreads += 1
 	var chest := Vector3(0, 1.0, 0)
-	kit.fx().arc(source.position + chest, f.position + chest, MageKit.TEAL, MageKit.PINK, 0.6, 0.2)
+	kit.fx().arc(source.position + chest, f.position + chest, MageKit.main_col, MageKit.hot_col, 0.6, 0.2)
 
-## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
+## A pillar of hot pink light slams onto the spot out of the sky, a shock ring and a spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:
 	var fx := kit.fx()
-	fx.pillar(at, Color(MageKit.PINK, 0.9), Color.WHITE, 14.0, 1.2, 0.35, true)
+	fx.pillar(at, Color(MageKit.hot_col, 0.9), Color.WHITE, 14.0, 1.2, 0.35, true)
 	for i in 3:
 		var sky := at + Vector3(0, 12.0, 0) + kit._jitter(0.8, 0.0, 0.0)
-		fx.arc(sky, at + kit._jitter(0.5, 0.1, 0.1), MageKit.TEAL, MageKit.PINK, 1.3 - 0.3 * i, 0.25)
-	fx.ring(at, r, MageKit.PINK, MageKit.TEAL, 0.35)
-	fx.disc(at, r * 0.8, Color("1a1420"), MageKit.PINK, 0.4, MageKit.COPPER)
-	kit.m.fx.spark(at + Vector3(0, 0.3, 0), Vector3.UP, MageKit.PINK, 26, 11.0, 75.0, 0.4, 8.0, 1.3)
-	kit.m.fx.flash(at + Vector3(0, 1.2, 0), MageKit.PINK, 2.4, 0.12)
-	kit.net_bolt(at + Vector3(0, 12.0, 0), at, MageKit.PINK)
+		fx.arc(sky, at + kit._jitter(0.5, 0.1, 0.1), MageKit.main_col, MageKit.hot_col, 1.3 - 0.3 * i, 0.25)
+	fx.ring(at, r, MageKit.hot_col, MageKit.main_col, 0.35)
+	fx.disc(at, r * 0.8, Color("1a1420"), MageKit.hot_col, 0.4, MageKit.rim_col)
+	kit.m.fx.spark(at + Vector3(0, 0.3, 0), Vector3.UP, MageKit.hot_col, 26, 11.0, 75.0, 0.4, 8.0, 1.3)
+	kit.m.fx.flash(at + Vector3(0, 1.2, 0), MageKit.hot_col, 2.4, 0.12)
+	kit.net_bolt(at + Vector3(0, 12.0, 0), at, MageKit.hot_col)
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
-## Orange-gold lightning stays at her feet for a moment after the strike (she is free to act).
+## Pink lightning stays at her feet for a moment after the strike (she is free to act).
 func _after_fx(dt: float) -> void:
 	var rng := kit.fx().rng
 	if rng.randf() > 14.0 * dt:
@@ -376,7 +378,7 @@ func _after_fx(dt: float) -> void:
 	var a := rng.randf() * TAU
 	var p := foot + Vector3(cos(a) * 0.3, 0.05, sin(a) * 0.3)
 	var q := foot + Vector3(cos(a) * rng.randf_range(0.8, 1.6), 0.05, sin(a) * rng.randf_range(0.8, 1.6))
-	kit.fx().arc(p, q, MageKit.COPPER, MageKit.PINK, 0.3, 0.12)
+	kit.fx().arc(p, q, MageKit.rim_col, MageKit.hot_col, 0.3, 0.12)
 
 # ------------------------------------------------------------------ ends
 ## A Boki merge (or a kit swap) mid-cast: she drops straight down where she took off, nothing strikes; the

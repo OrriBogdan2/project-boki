@@ -31,8 +31,8 @@ func cast() -> bool:
 	var ed := kit.e_def()
 	var at := AimMode.place(kit.h, float(ed["reach"]))
 	kit.strikes.append({"at": at, "t": float(ed["drag_max"]), "dir": default_dir(at), "phase": "flick"})
-	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.TEAL, MageKit.PINK, 0.8, 0.12)
-	kit.fx().disc(at, float(ed["radius"]), MageKit.VIOLET, MageKit.PINK, 0.2, MageKit.COPPER)
+	kit.fx().star(at + Vector3(0, 0.3, 0), MageKit.main_col, MageKit.hot_col, 0.8, 0.12)
+	kit.fx().disc(at, float(ed["radius"]), MageKit.deep_col, MageKit.hot_col, 0.2, MageKit.rim_col)
 	kit.m.sfx("vv_sky_place", at, -3.0)
 	kit.play("mage_e")
 	return true
@@ -56,12 +56,12 @@ func tick(dt: float) -> void:
 		else:
 			s["dir"] = drag_dir(at)
 			var drag := {"from": at, "dir": s["dir"], "len": 4.0, "width": 0.55, "tip": true}
-			drag.merge({"col": MageKit.PINK, "col2": MageKit.PINK})
+			drag.merge({"col": MageKit.hot_col, "col2": MageKit.hot_col})
 			AimKit.lane(kit.h, "e_drag", drag)
 		var k := 1.0 - float(s["t"]) / float(ed["delay"]) if counting else 0.0
-		# a copper ticked rim with the pink chevron on it pointing the drag (the dark disc is VVFx's)
+		# a rose ticked rim with the pink chevron on it pointing the drag (the dark disc is VVFx's)
 		var rim := {"at": at, "r": r, "ticks": true, "pointer": s["dir"], "all": true}
-		rim.merge({"col": MageKit.COPPER, "col2": MageKit.DEEP_GOLD, "fill": k})
+		rim.merge({"col": MageKit.rim_col, "col2": MageKit.rim_hot_col, "fill": k})
 		AimKit.circle(kit.h, "e%d" % i, rim)
 		_chevron(at, s["dir"] as Vector2, r)
 	for s in kit.strikes.duplicate():
@@ -81,8 +81,8 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	kit.fx().disc(at, r, MageKit.VIOLET, MageKit.PINK, float(ed["delay"]) + 0.1, MageKit.COPPER)
-	kit.fx().pillar(at, Color(MageKit.PINK, 0.45), MageKit.PINK.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
+	kit.fx().disc(at, r, MageKit.deep_col, MageKit.hot_col, float(ed["delay"]) + 0.1, MageKit.rim_col)
+	kit.fx().pillar(at, Color(MageKit.hot_col, 0.45), MageKit.hot_col.lightened(0.6), 8.0, r * 0.95, float(ed["delay"]))
 	AimKit.hide(kit.h, "e_drag")
 	kit.m.sfx("vv_sky_count", at, -4.0)
 	kit.net_ring(at, r, kit.col_of(ed))
@@ -93,7 +93,7 @@ func _arrow(i: int, s: Dictionary, r: float) -> void:
 	var at: Vector3 = s["at"]
 	var from := at - Vector3(dir.x, 0, dir.y) * r * ARROW_LEN * 0.5
 	var arrow := {"from": from, "dir": dir, "len": r * ARROW_LEN, "width": 0.5, "tip": true}
-	arrow.merge({"col": MageKit.PINK, "col2": Color.WHITE})
+	arrow.merge({"col": MageKit.hot_col, "col2": Color.WHITE})
 	AimKit.lane(kit.h, "e_arrow%d" % i, arrow)
 
 ## The pink rim chevron pointing the drag: two short pink strokes, redrawn every step.
@@ -102,7 +102,7 @@ func _chevron(at: Vector3, d: Vector2, r: float) -> void:
 	for side in [-1.0, 1.0]:
 		var wing := d.rotated(side * 2.4)
 		var start := tip + Vector3(wing.x, 0, wing.y) * 0.55
-		kit.fx().smear(start, tip, MageKit.PINK, MageKit.PINK.lightened(0.4), 0.2, 0.05)
+		kit.fx().smear(start, tip, MageKit.hot_col, MageKit.hot_col.lightened(0.4), 0.2, 0.05)
 
 func _strike(s: Dictionary) -> void:
 	var ed := kit.e_def()
@@ -120,7 +120,7 @@ func _strike(s: Dictionary) -> void:
 		_slide(f, dir, ed)
 		if f is Hunter:
 			KitStatus.apply(f, "gnd", float(ed["grounded"]))
-		kit.fx().shackle(f, MageKit.TEAL, MageKit.PINK, float(ed["grounded"]))
+		kit.fx().shackle(f, MageKit.main_col, MageKit.hot_col, float(ed["grounded"]))
 	for o in kit.m.hunters:       # rival Wisps (downed hunters) are launched too; no Static, no Grounded
 		if o.team != kit.h.team and o.downed and o.hittable() and not CareUtil.is_carried(o) \
 				and o.flat_dist(at) < float(ed["radius"]) + o.r and absf(o.pos.y - at.y) < 2.2:
@@ -138,11 +138,11 @@ func _strike_fx(at: Vector3, r: float) -> void:
 	var fx := kit.fx()
 	for i in 3:
 		var sky := at + Vector3(0, 9.0, 0) + kit._jitter(0.6, 0.0, 0.0)
-		fx.arc(sky, at + kit._jitter(0.4, 0.1, 0.1), MageKit.TEAL, MageKit.PINK, 1.0 - 0.25 * i, 0.22)
-	kit.net_bolt(at + Vector3(0, 9.0, 0), at, MageKit.TEAL)
-	fx.ring(at, r, MageKit.PINK, MageKit.TEAL, 0.35)          # the hit area, at its true size
-	fx.disc(at, r * 0.9, Color("1a1420"), MageKit.PINK, 0.45, MageKit.COPPER)
-	kit.m.fx.flash(at + Vector3(0, 1.0, 0), MageKit.PINK, 1.8, 0.12)
+		fx.arc(sky, at + kit._jitter(0.4, 0.1, 0.1), MageKit.main_col, MageKit.hot_col, 1.0 - 0.25 * i, 0.22)
+	kit.net_bolt(at + Vector3(0, 9.0, 0), at, MageKit.main_col)
+	fx.ring(at, r, MageKit.hot_col, MageKit.main_col, 0.35)          # the hit area, at its true size
+	fx.disc(at, r * 0.9, Color("1a1420"), MageKit.hot_col, 0.45, MageKit.rim_col)
+	kit.m.fx.flash(at + Vector3(0, 1.0, 0), MageKit.hot_col, 1.8, 0.12)
 	kit.m.sfx("vv_sky_strike", at, 0.0)
 	kit.play("mage_e_snap")
 
@@ -158,4 +158,4 @@ func _fling_orb(mt: Dictionary, dir: Vector2, ed: Dictionary) -> void:
 	var dest := kit.ground(kit.h.pos) if homing else kit.ground(land)
 	mt["fly"] = {"from": from, "to": dest, "t": 0.0, "home": homing}
 	var lift := Vector3(0, 0.55, 0)
-	kit.fx().arc(from + lift, dest + lift, MageKit.TEAL, MageKit.PINK, 0.6, 0.25)
+	kit.fx().arc(from + lift, dest + lift, MageKit.main_col, MageKit.hot_col, 0.6, 0.25)

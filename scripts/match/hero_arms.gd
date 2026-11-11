@@ -17,13 +17,13 @@ static func build(gun: Node3D, weapon: String, m_gun: Material, m_dark: Material
 	return false
 
 ## One great basalt gauntlet, much bigger than the hand: a fist of stacked plates whose cracks glow
-## with magma (shaders/molten_rock), four knuckle studs, a thumb slab, a strapped wrist bracer and a
+## cobalt (shaders/molten_rock), four knuckle studs, a thumb slab, a strapped wrist bracer and a
 ## hot core at the back of the hand. The fist leads her silhouette.
 static func _fists(gun: Node3D, m_dark: Material, m_acc: Material) -> void:
 	var rock := KitLooks.rock_mat(0.5, 2.0)
 	var rock2 := KitLooks.rock_mat(0.35, 5.0)
 	var pale := Models.toon(Color("e0bd86"), true, 0.5)
-	var seam := Models.toon(Color("ffb36a"), false, 1.6)
+	var seam := Models.toon(DolmKit.hot_col, false, 1.6)
 	# the fist
 	Models.part(gun, Models.box(0.27, 0.25, 0.34), rock, Vector3(0, 0, -0.2))
 	# the back plate

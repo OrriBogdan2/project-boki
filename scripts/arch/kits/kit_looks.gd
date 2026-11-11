@@ -7,7 +7,7 @@ extends Node3D
 ## back to it, so a burst of rocks or a stream of orbs never creates nodes per frame.
 ##
 ## Skins (shape, colour, trail, impact):
-##   boulder    Tarek's tap throw: a lumpy molten rock tumbling end over end, ember trail
+##   boulder    Tarek's tap throw: a lumpy glowing rock tumbling end over end, cobalt trail
 ##   rock       a launched rock: bigger, hotter, flaming trail
 ##   dashrock   Rock Hop's last rock: rolls along the ground, dust and embers
 ##   footrock   the slab under Tarek's foot through a Rock Hop (held)
@@ -15,7 +15,7 @@ extends Node3D
 ##              brightens it with its charge
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
 ## Lingering: aura (Ostra's Swollen sphere), crown (stun stars over a head), burst and crater (Tarek's slam:
-## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
+## a cobalt starburst, then a dark cracked crater), shard (a rock chip flying off an impact), column (the
 ## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
 ## black wind-up orb), star (the Trade's lobbed, masked lantern).
 ## Colour and darkness are alpha-blended (shade_mat, the void glass); only small hot cores add light, so
@@ -58,6 +58,8 @@ static func rock_mat(heat: float, seed_v: float) -> ShaderMaterial:
 	var mt := ShaderMaterial.new()
 	mt.shader = ROCK_SH
 	mt.set_shader_parameter("heat", heat)
+	mt.set_shader_parameter("glow", DolmKit.main_col)       # Tenzo's stone glows in his cobalt
+	mt.set_shader_parameter("rim_col", DolmKit.hot_col)
 	mt.set_shader_parameter("seed", seed_v)
 	return mt
 
@@ -138,7 +140,7 @@ func _build(kind: String) -> Node3D:
 	add_child(n)
 	return n
 
-## Tarek's rocks in flight: opaque molten basalt lumps with a warm (alpha-blended) heat haze.
+## Tarek's rocks in flight: opaque basalt lumps glowing in his cobalt, with an (alpha-blended) cobalt haze.
 func _build_rock(n: Node3D, kind: String) -> void:
 	var r := {"boulder": 0.3, "rock": 0.45, "dashrock": 0.5}[kind] as float
 	var heat := {"boulder": 0.8, "rock": 0.95, "dashrock": 0.75}[kind] as float
@@ -150,7 +152,7 @@ func _build_rock(n: Node3D, kind: String) -> void:
 	body.name = "Spin"
 	Models.part(body, lump(r * 0.55), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(r * 0.55, r * 0.3, 0.0))
 	Models.part(body, lump(r * 0.45), rock_mat(heat, vis_rng.randf() * 10.0), Vector3(-r * 0.4, -r * 0.2, r * 0.45))
-	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(1.0, 0.42, 0.1, 0.28)), Vector3.ZERO)
+	Models.part(n, Models.sphere(r * 1.45, 10), shade_mat(Color(DolmKit.main_col, 0.28)), Vector3.ZERO)
 
 ## The slab he rides through a Rock Hop, like a board: long along +Z (he turns it along the hop), a pale sunlit
 ## top so the match camera reads it under his feet, a hot underside.
@@ -158,7 +160,7 @@ func _build_footrock(n: Node3D) -> void:
 	Models.part(n, Models.box(0.5, 0.14, 1.0), Models.toon(RockLook.STONE_HI, true, 0.6), Vector3(0, -0.07, 0))
 	var top := Models.toon(RockLook.STONE_HI.lerp(RockLook.CAP, 0.4), true, 0.6)
 	Models.part(n, Models.box(0.42, 0.04, 0.86), top, Vector3(0, 0.01, 0))
-	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(Color("ff7a2a")), Vector3(0, -0.17, 0))
+	Models.part(n, Models.box(0.3, 0.12, 0.7), Models.glow_mat(DolmKit.main_col), Vector3(0, -0.17, 0))
 
 ## Ostra's shots: dark violet glass with bright rims, each with its own length and tail (the tail points
 ## back along the flight, -Z being forward after look_at).
@@ -225,34 +227,34 @@ func _build_crown(n: Node3D) -> void:
 		)
 	Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(1.0, 0.85, 0.2, 0.4)), Vector3.ZERO)
 
-## Tarek's slam, radius 1: a molten starburst of rays (burst), or the dark red crater it leaves with radial
-## cracks and ember flecks (crater). Both alpha-blended, in her molten colours.
+## Tarek's slam, radius 1: a cobalt starburst of rays (burst), or the dark crater it leaves with radial
+## cracks and glowing flecks (crater). Both alpha-blended, in his cobalt (DolmKit's table).
 func _build_impact(n: Node3D, kind: String) -> void:
 	if kind == "burst":
-		Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(1.0, 0.82, 0.3, 0.85)), Vector3(0, 0.06, 0))
+		Models.part(n, Models.cyl(0.42, 0.42, 0.02, 20), shade_mat(Color(DolmKit.pale_col, 0.85)), Vector3(0, 0.06, 0))
 		for i in 12:
 			var a := TAU * i / 12.0 + vis_rng.randf() * 0.2
 			var long_ray := i % 2 == 0
 			var len_ := (0.7 if long_ray else 0.45) + vis_rng.randf() * 0.3
-			var col := Color(1.0, 0.48, 0.12, 0.9) if long_ray else Color(1.0, 0.78, 0.25, 0.9)
+			var col := Color(DolmKit.main_col, 0.9) if long_ray else Color(DolmKit.hot_col, 0.9)
 			Models.part(
 				n, PrismMesh.new(), shade_mat(col), Vector3(cos(a), 0.05, sin(a)) * (0.3 + len_ * 0.5),
 				Vector3(0.16, len_, 0.02), Vector3(-PI * 0.5, -a - PI * 0.5, 0)
 			)
 		return
-	Models.part(n, Models.cyl(1.0, 1.0, 0.02, 24), shade_mat(Color(0.3, 0.05, 0.02, 0.78)), Vector3(0, 0.03, 0))
-	Models.part(n, Models.cyl(0.55, 0.55, 0.02, 20), shade_mat(Color(0.12, 0.03, 0.02, 0.85)), Vector3(0, 0.04, 0))
+	Models.part(n, Models.cyl(1.0, 1.0, 0.02, 24), shade_mat(Color(0.05, 0.08, 0.2, 0.78)), Vector3(0, 0.03, 0))
+	Models.part(n, Models.cyl(0.55, 0.55, 0.02, 20), shade_mat(Color(0.03, 0.04, 0.1, 0.85)), Vector3(0, 0.04, 0))
 	for i in 8:
 		var a3 := TAU * i / 8.0 + vis_rng.randf() * 0.3
 		var len3 := 0.55 + vis_rng.randf() * 0.4
 		Models.part(
-			n, Models.box(0.05, 0.015, len3), shade_mat(Color(1.0, 0.45, 0.1, 0.95)),
+			n, Models.box(0.05, 0.015, len3), shade_mat(Color(DolmKit.main_col, 0.95)),
 			Vector3(cos(a3), 0.05, sin(a3)) * (0.35 + len3 * 0.5), Vector3.ONE, Vector3(0, -a3 + PI * 0.5, 0)
 		)
 	for i in 10:
 		var a4 := vis_rng.randf() * TAU
 		Models.part(
-			n, Models.box(0.06, 0.03, 0.06), shade_mat(Color(1.0, 0.72, 0.25, 1.0)),
+			n, Models.box(0.06, 0.03, 0.06), shade_mat(DolmKit.hot_col),
 			Vector3(cos(a4), 0.06, sin(a4)) * (0.3 + vis_rng.randf() * 0.65)
 		)
 
@@ -416,15 +418,15 @@ func _trail(e: Dictionary, p: Vector3, back: Vector3) -> void:
 	var fx: Fx = m.fx
 	match String(e["kind"]):
 		"boulder":
-			fx.burst(p, Color(1.0, 0.5, 0.15, 0.8), 2, 1.0, 0.3, -1.0, 1.1, back, 25.0)
-			fx.spark(p, back, Color("ff9a3c"), 2, 2.5, 30.0, 0.25, 4.0, 0.8)
+			fx.burst(p, Color(DolmKit.main_col, 0.8), 2, 1.0, 0.3, -1.0, 1.1, back, 25.0)
+			fx.spark(p, back, DolmKit.hot_col, 2, 2.5, 30.0, 0.25, 4.0, 0.8)
 		"rock":
-			fx.burst(p, Color(1.0, 0.42, 0.1, 0.85), 3, 1.5, 0.35, -1.0, 1.5, back, 30.0)
-			fx.spark(p, back + Vector3(0, 0.3, 0), Color("ffb347"), 4, 4.0, 40.0, 0.3, 2.0, 1.3)
+			fx.burst(p, Color(DolmKit.main_col, 0.85), 3, 1.5, 0.35, -1.0, 1.5, back, 30.0)
+			fx.spark(p, back + Vector3(0, 0.3, 0), DolmKit.pale_col, 4, 4.0, 40.0, 0.3, 2.0, 1.3)
 		"dashrock":
 			var dust := Color(0.62, 0.48, 0.34, 0.85)
 			fx.burst(p - Vector3(0, 0.4, 0), dust, 3, 2.0, 0.4, 4.0, 1.4, back + Vector3.UP, 50.0)
-			fx.spark(p, back, Color("ff8a2c"), 2, 2.0, 30.0, 0.25, 4.0, 0.8)
+			fx.spark(p, back, DolmKit.hot_col, 2, 2.0, 30.0, 0.25, 4.0, 0.8)
 		"orb":
 			var k := float(e["k"])
 			if k < ORB_HELD_K:
@@ -592,8 +594,8 @@ func crown(e: Ent, secs: float) -> void:
 func crowned(e: Ent) -> bool:
 	return timed.any(func(t): return t["kind"] == "crown" and is_instance_valid(t["ent"]) and t["ent"] == e)
 
-## Tarek's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a molten
-## starburst, rock chips flying out, a dust ring at the edge, and a dark red cracked crater left `secs`.
+## Tarek's heavy impacts (the slam, the leap's landing) at `at`, radius `r`, strength k 0..1: a cobalt
+## starburst, rock chips flying out, a dust ring at the edge, and a dark cracked crater left `secs`.
 func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
 	_timed("burst", at, r * 0.7, 0.32)
 	_timed("crater", at, r * 0.5, secs)

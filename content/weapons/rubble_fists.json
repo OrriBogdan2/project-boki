@@ -14,7 +14,7 @@
 		"arc": 120.0,
 		"charge_time": 1.0,
 		"size": 0.3,
-		"color": "#d9a35b",
+		"color": "#9ad0ff",
 		"sfx": "thump",
 		"fire_slow": 0.85,
 		"desc": "Tap to hurl a boulder 11m. Hold and let go to punch: it throws foes back, stuns them against a wall and sends rocks flying.",
