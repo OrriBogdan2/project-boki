@@ -65,4 +65,5 @@ static func arrival() -> Array:
 	out.append_array(GardenAway.arrive(since, now))
 	for egg in Incubator.ready_eggs():
 		out.append("A %s is ready to hatch" % Incubator.egg_name(egg))
+	out.append_array(GardenVisitor.arrival_lines(now))
 	return out
