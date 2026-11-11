@@ -526,10 +526,7 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 		if st[0] == "" or own.has(st[0]):
 			continue
 		var clip := String(moves[st[0]]["clip"])
-		# (the clip as the game plays it: "rate" clip s per kit s, "lead" s skipped)
-		var rate := float(moves[st[0]].get("rate", 1.0))
-		var lead := float(moves[st[0]].get("lead", 0.0))
-		clips.force = {"clip": clip, "t": lead}
+		clips.force = {"clip": clip, "t": 0.0}
 		for k in 10:
 			sync.call("_process", DT)
 		await holder.get_tree().process_frame
@@ -537,7 +534,7 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 		var t := 0.0
 		var last_p := hand.global_position
 		while t < float(st[1]):
-			clips.force = {"clip": clip, "t": minf(t * rate + lead, clips.lib.get_animation(clip).length - 0.001)}
+			clips.force = {"clip": clip, "t": minf(t, clips.lib.get_animation(clip).length - 0.001)}
 			sync.call("_process", DT)
 			await holder.get_tree().process_frame
 			path.append(hand.global_position.distance_to(last_p))

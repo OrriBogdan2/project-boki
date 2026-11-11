@@ -308,8 +308,8 @@ fingers or held weapon, drops back under a third of its peak; a snap peaks at 8 
 Hunters strike inside the blend. Each now carries its own `"fade"` in `content/rules/warden_anim/<art>.json`: one
 frame past its key, at most 0.05 s, so it is at full weight on the key from locomotion. The upper-body path now honours
 `"fade"` too (it was always 0.1). Clips and kit numbers are unchanged. `--clip-check` asserts it per Hunter.
-Kael's wind-ups keep their slower authored fades (0.18-0.2); Ryzz's `mage_dash_land` takes 0.08 and `mage_lmb_l` 0.067 (0.05 popped the hand
-in the dash flow and over the upper-body crossfade); keys at 0.1 s or later were already full.
+Kael's wind-ups keep their slower authored fades (0.18-0.2); Ryzz's `mage_dash_land` takes 0.08 (0.05 popped the hand
+in the dash flow); keys at 0.1 s or later were already full.
 
 | Hunter (art) | Moves (key s; fade 0.05 unless shown) |
 |---|---|
@@ -318,7 +318,7 @@ in the dash flow and over the upper-body crossfade); keys at 0.1 s or later were
 | tender (pip) | `mm_shot_r` 0.067, `mm_shot_l` 0.067, `mm_seed` 0.025 (0.04), `mm_skip` 0.067, `mm_float` 0.034, `mm_kindled` 0.067, `mm_call` 0.067, `mm_call_end` 0.034 |
 | gunslinger (vex) | `gunslinger_dash` 0.034, `gunslinger_x` 0.067, `gunslinger_knock` 0.059 |
 | ashwick (cinder) | `lw_stoke_lance` 0.034, `as_leap` 0.034, `as_cloak` 0.034, `lw_stoke` 0.034, `lw_land` 0.034, `lw_jump` 0.034 |
-| mage (ryzz) | `mage_lmb_l` 0.067 (0.067), `mage_lmb_r` 0.042, `mage_rmb_hold` 0.067, `mage_rmb` 0.034, `mage_dash` 0.025 (0.04), `mage_dash_go` 0.075, `mage_dash_land` 0.067 (0.08), `mage_dash_ex` 0.034, `mage_e_snap` 0.034, `mage_live` 0.034, `mage_x` 0.025 (0.04), `mage_x_dive` 0.067 |
+| mage (ryzz) | `mage_lmb_l` 0.067, `mage_lmb_r` 0.042, `mage_rmb_hold` 0.067, `mage_rmb` 0.034, `mage_dash` 0.025 (0.04), `mage_dash_go` 0.075, `mage_dash_land` 0.067 (0.08), `mage_dash_ex` 0.034, `mage_e_snap` 0.034, `mage_live` 0.034, `mage_x` 0.025 (0.04), `mage_x_dive` 0.067 |
 | dolm (tarek) | `breah_wind` 0.042, `breah_punch` 0.067, `breah_crouch` 0.034, `breah_leap` 0.034, `breah_slam` 0.034, `breah_lunge` 0.067, `breah_exdash` 0.034, `breah_sense` 0.034, `breah_spine_aim` 0.034, `breah_spine` 0.067, `breah_hop` 0.034, `breah_skate` 0.042 |
 | rimewright (claire) | `tm_dart_l` 0.067, `tm_dart_heavy` 0.034, `tm_spear_aim` 0.034, `tm_spear` 0.067, `tm_skate_stop` 0.034, `tm_rime` 0.034, `tm_rime_carry` 0.034 |
 | dredge (dredge) | `dr_reel` 0.067, `dr_dive` 0.050, `dr_lunge` 0.034, `dr_pounce` 0.034, `dr_flex` 0.034, `dr_jump` 0.034 |
