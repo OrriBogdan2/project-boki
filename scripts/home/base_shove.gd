@@ -4,8 +4,7 @@ extends RefCounted
 ## farm_build.json base_mode on. A stump stands by the Training post. Press interact at it and two
 ## rested Boki out on the base (your partner and the next one) push on it from opposite sides until
 ## one is shoved off balance. Push comes from Power, held off by the other's Guard; mood and trust
-## nudge it, a species theme that beats the other's gives a 10% edge (content/rules/base_shove.json
-## "beats"). You back your partner and press once on the Training post's timing bar for a burst of
+## nudge it. You back your partner and press once on the Training post's timing bar for a burst of
 ## push. The winner gains joy, trust and you a few gems; the loser sulks and remembers.
 ## Tuning: content/rules/base_shove.json. Run is the bout itself (no nodes), so --shove-check
 ## (tools/shove_check.gd) runs it headless.
@@ -25,19 +24,15 @@ static func rules() -> Dictionary:
 static func theme(rec: Dictionary) -> String:
 	return String(Data.KIN.get(String(rec.get("species", "")), {}).get("theme", ""))
 
-## Does a's species theme beat b's?
-static func has_edge(a: Dictionary, b: Dictionary) -> bool:
-	return rules()["beats"].get(theme(a), []).has(theme(b))
-
 ## What a Boki pushes with against another, before the wobble and your press.
-static func push(rec: Dictionary, foe: Dictionary) -> float:
+static func push(rec: Dictionary) -> float:
 	var R := rules()
 	var power := float(rec.get("stats", {}).get("power", 0))
 	var mood: Array = R["mood"]
 	var p := float(R["push"]) * (1.0 + power * float(R["power_per_point"]))
 	p *= lerpf(float(mood[0]), float(mood[1]), Care.need(rec, "joy") / 100.0)
 	p *= lerpf(1.0, float(R["trust_max"]), float(rec.get("trust", 0.0)) / 100.0)
-	return p * (float(R["edge"]) if has_edge(rec, foe) else 1.0)
+	return p
 
 ## How firmly it holds against a push.
 static func hold(rec: Dictionary) -> float:
@@ -45,7 +40,7 @@ static func hold(rec: Dictionary) -> float:
 
 ## a's net drift over b's: above 0 the expected winner is a, below 0 it is b.
 static func expected(a: Dictionary, b: Dictionary) -> float:
-	return push(a, b) / hold(b) - push(b, a) / hold(a)
+	return push(a) / hold(b) - push(b) / hold(a)
 
 ## The bout itself: the stump's balance, stepped in time. balance runs -1 (b wins) to 1 (a wins).
 class Run:
@@ -68,7 +63,7 @@ class Run:
 		backed = back
 		rng = r
 		for i in 2:
-			base.append(BaseShove.push(recs[i], recs[1 - i]) / BaseShove.hold(recs[1 - i]))
+			base.append(BaseShove.push(recs[i]) / BaseShove.hold(recs[1 - i]))
 
 	func can_shove() -> bool:
 		return not shoved and not over()
