@@ -225,7 +225,7 @@ func _shots() -> void:
 	home.cam.zoom = 0.5
 	home.cam.snap(at + Vector3(0.6, 0, 0.4))
 	await main.get_tree().create_timer(0.8).timeout
-	home._train_anim(striker, "power", "great")
+	home.drill.anim(striker, "power", "great")
 	var spin: Tween = home.create_tween()
 	spin.tween_property(spinner["node"], "rotation:y", (spinner["node"] as Node3D).rotation.y + TAU, 0.6)
 	await main.get_tree().create_timer(0.15).timeout
