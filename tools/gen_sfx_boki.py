@@ -6,9 +6,14 @@ of each so a Boki that talks a lot never repeats itself. Moves are by element:
   venom   bubbling gloop and a spit      spore   fluffy puffs and falling sparkle
   gravity a deep soft thud and a pull    prism   a glassy chime fan
   lunar   moonlit wind and a pale bell   echo    one ping bouncing away through a dark room
+Every rigged species also has its own voice set, bk_<species>_<mood> (happy, alert, unsure, sleepy,
+hurt; 2 takes each): base pitch from its weight, timbre from its type (SPECIES_VOICE below), and a
+3-note signature motif that every mood bends (happy as is, alert clipped and high, unsure ending on
+a question, sleepy a sigh, hurt a yelp). KinVoice.cue picks the set; kin_happy/alert/unsure stay the fallback.
 Existing names are regenerated (kin_happy/unsure/alert, kinhit, recall, throw, catch, bond, skill,
 k_<element>); new ones (boki_*) are lazy-loaded, so each needs its call site listed in the report.
 """
+import json, os
 import numpy as np
 import sfx_lib as S
 from sfx_lib import N, T, env, mix, at, lpf, hpf, bpf, noise
@@ -254,6 +259,106 @@ def unfuse(i):
     return soft(room(mix(fall, at(bubble(360, 0.1, 2.0), 0.02), at(squeak(880, 0.12, 0.1) * 0.4, 0.3)), 0.5), 4200)
 
 
+# ---------------------------------------------------------------- per-species voices
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+MOODS = ['happy', 'alert', 'unsure', 'sleepy', 'hurt']
+# Species theme -> the texture laid under its voice. crackle: Fire and sparks, burble: Water and venom,
+# rustle: Grass, spores and swarms, chime: Crystal, moon and sound; anything else stays a plain voice.
+TIMBRE = {'ember': 'crackle', 'storm': 'crackle', 'venom': 'burble', 'tempest': 'burble',
+          'spore': 'rustle', 'bloom': 'rustle', 'swarm': 'rustle',
+          'prism': 'chime', 'lunar': 'chime', 'echo': 'chime', 'frost': 'chime', 'stone': 'chime'}
+# Per species: (vowel, signature motif as 3 pitch ratios). The motif is what makes a Pebbit and a
+# Cairnback tell apart even at the same size.
+SPECIES_VOICE = {
+    'burrlet': ('eh', (1, 1.26, 1.12)), 'cairnback': ('oh', (1, 0.84, 0.84)), 'cindle': ('eh', (1, 1.5, 1.19)),
+    'glintmole': ('ee', (1, 1.12, 1.5)), 'gloamshell': ('uh', (1, 0.9, 1.07)), 'glomwort': ('uh', (1, 1.19, 1.41)),
+    'hivara': ('eh', (1, 1, 1.26)), 'kestrike': ('ee', (1, 1.78, 1.34)), 'kindlewren': ('ee', (1, 1.33, 1.67)),
+    'lodestick': ('ah', (1, 0.94, 1.12)), 'marchleaf': ('eh', (1, 1.12, 1.26)), 'mossgrade': ('mm', (1, 0.89, 1)),
+    'nettlynx': ('ah', (1, 1.41, 1.12)), 'pebbit': ('oh', (1, 1, 0.89)), 'puddlet': ('uh', (1, 1.26, 1.5)),
+    'rimeshrew': ('ee', (1, 1.68, 1.5)), 'selenfin': ('oh', (1, 1.12, 1.33)), 'thrumbird': ('eh', (1, 1.19, 1.19)),
+    'wisplet': ('ee', (1, 1.5, 1.78)), 'zapple': ('ah', (1, 1.33, 1)), 'zephyrak': ('ee', (1, 1.5, 2.0)),
+}
+
+
+def species_data(sp):
+    """(weight kg, theme, curiosity, temper) of a species from its content files."""
+    home = json.load(open(os.path.join(ROOT, 'content', 'kin', sp + '.json')))
+    v2 = json.load(open(os.path.join(ROOT, 'content', 'kin_v2', sp + '.json')))
+    pers = v2['personality']
+    return home['size']['kg'], v2['theme'], pers['curiosity'], pers['temper']
+
+
+def texture(kind, d, f, amt):
+    """The type's colour under a voice of d seconds around pitch f."""
+    n = N(d)
+    if kind == 'crackle':
+        return amt * 0.5 * S.grains(d, 150, 2500, 9000, 0.001, 0.004, fall=d * 0.7)
+    if kind == 'burble':
+        out = np.zeros(n)
+        for _ in range(int(14 * d) + 1):
+            out = mix(out, at(bubble(f * S.rng.uniform(0.4, 0.8), 0.05, 1.8) * 0.5, S.rng.uniform(0, d * 0.8)))
+        return amt * out
+    if kind == 'rustle':
+        gate = np.abs(lpf(S.rng.standard_normal(n), 40)) * 14
+        return amt * 0.4 * bpf(noise(d), 3500, 9000) * np.clip(gate, 0, 1) * env(n, 0.01, d * 0.8)
+    if kind == 'chime':
+        return amt * 0.35 * S.chime(f * 2, d, 0.25, ((1.0, 1.0), (2.76, 0.3)))
+    return amt * 0.4 * S.sweep(f * 0.5, f * 0.5, d) * env(n, 0.01, d * 0.6)
+
+
+def note(f, f_end, d, vow, tail_d=None):
+    """One syllable: a squeak with a soft vowel under it, gliding f -> f_end."""
+    sq = squeak(f, d, 0.1, 0.02, tail_d=tail_d)
+    return mix(sq, 0.45 * vowel(f * 0.5, f_end * 0.5, d, vow, 1.4))
+
+
+def species_voice(sp, mood, i):
+    kg, theme, curious, temper = species_data(sp)
+    vow, motif = SPECIES_VOICE[sp]
+    kind = TIMBRE.get(theme, 'plain')
+    base = float(np.clip(1000.0 * (2.5 / kg) ** 0.2, 520, 1450)) * j(i, 0.04)
+    dd = 0.11 / (0.8 + 0.5 * curious)                 # curious ones chatter faster
+    f = [base * m for m in motif]
+    if mood == 'happy':
+        out, t0 = np.zeros(0), 0.0
+        for fr, d in zip(f, (dd, dd, dd * 1.5)):
+            out = mix(out, at(note(fr, fr * 1.04, d, vow), t0))
+            t0 += d * 0.85
+        d_all = t0 + 0.1
+    elif mood == 'alert':
+        hi = 1.0 + 0.3 * temper                       # the temperamental ones go higher
+        parts = [at(note(f[k % 2] * hi, f[k % 2] * hi * 1.05, 0.07, vow, 0.04), 0.085 * k) for k in range(3)]
+        out, d_all = mix(*parts), 0.4
+    elif mood == 'unsure':
+        a = note(f[2] * 0.8, f[1] * 0.75, dd * 1.2, vow)
+        b = note(f[0] * 0.7, f[0] * 1.15, dd * 2.2, vow)          # ends on a question
+        out, d_all = mix(a, at(b, dd * 1.1)), dd * 3.6
+    elif mood == 'sleepy':
+        d_all = 0.7
+        sigh = note(f[0] * 0.75, f[0] * 0.45, d_all * 0.85, 'mm', tail_d=0.4)
+        out = lpf(mix(sigh, 0.3 * hpf(noise(d_all), 1500) * env(N(d_all), 0.2, 0.3)), 2200)
+    else:   # hurt
+        d_all = 0.26
+        yelp = mix(squeak(f[0] * 1.3, 0.2, -0.25, 0.0, a=0.003, tail_d=0.1),
+                   0.6 * S.voice(0.2, f[0] * 0.65, f[0] * 0.4, vow, rasp=0.5, scale=1.35, a=0.004))
+        out = mix(yelp, at(S.kick(180, 80, 0.1, 0.01, 0.03, 1.2) * 0.4, 0.0))
+    amt = 0.45 if mood in ('sleepy', 'hurt') else 1.0
+    out = mix(out, texture(kind, d_all, base, amt))
+    return soft(room(out, 0.3), 5200 if mood != 'sleepy' else 3000)
+
+
+def species_names():
+    return sorted(SPECIES_VOICE)
+
+
+def voice_sets():
+    """Writes bk_<species>_<mood> (2 takes) for every rigged species."""
+    S.reseed(7001)
+    for sp in species_names():
+        for mood in MOODS:
+            S.takes_cat('bk_%s_%s' % (sp, mood), lambda i, sp=sp, mood=mood: species_voice(sp, mood, i), 1, 'boki')
+
+
 def main():
     S.takes_cat('kin_happy', happy, 3, 'boki')
     S.takes_cat('kin_unsure', unsure, 3, 'boki')
@@ -277,6 +382,7 @@ def main():
     S.takes_cat('boki_work', work, 3, 'boki')
     S.takes_cat('boki_fuse', fuse, 0, 'boki')
     S.takes_cat('boki_unfuse', unfuse, 0, 'boki')
+    voice_sets()
 
 
 if __name__ == '__main__':
