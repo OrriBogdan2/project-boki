@@ -639,7 +639,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "point" if Tutorial.leads(id) else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
+			pose = "point" if Tutorial.leads(id) else ("growl" if id in Tutorial.FOE_STEPS else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
