@@ -2,9 +2,9 @@ extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
-## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
-## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced).
+## <dir>/<id>/<strip>/fNNN.png, strips start and start_raw (setting off from a stand, _start), walk, run (the game's
+## own locomotion hand-off at WALK_MPS and RUN_MPS, seen from the side with a scrolling floor, so a sliding foot slides
+## against it), idle and atk1, atk2 (the keyed clip, forced).
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
@@ -91,6 +91,7 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.rotation.y = SIDE_YAW
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
+	await _start(model, sync, clips, dir, frames)
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
@@ -109,20 +110,36 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int) -> void:
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, warm_s := WARM_S,
+		fps := LOCO_FPS) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
 	model.set_meta(WardenClips.STATE, {"vel": fw * mps, "face": SIDE_YAW, "grounded": true})
-	for k in int(WARM_S / DT):
+	for k in int(warm_s / DT):
 		sync.call("_process", DT)
 		_scroll(mps, DT)
-	var steps := int(round(1.0 / (LOCO_FPS * DT)))
+	var steps := int(round(1.0 / (fps * DT)))
 	for i in frames:
 		for k in steps:
 			sync.call("_process", DT)
 			_scroll(mps, DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	model.set_meta(WardenClips.STATE, {})
+
+## Setting off from a stand at the walk speed, every frame at 30 frames/s: "start" as the game plays it, "start_raw"
+## with no loco "start_phase" or "start_blend" (the clips' own first frame: the before of the first-pose gaps).
+func _start(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	var keep := [clips.ring_starts, clips.start_bones]
+	for raw in [true, false]:
+		if raw:
+			clips.ring_starts = clips.ring_starts.map(func(r: Array) -> Array: return [r[0], 0.0])
+			clips.start_bones = []
+		model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": true})
+		for k in int(WARM_S / DT):
+			sync.call("_process", DT)
+		await _loco(model, sync, dir.path_join("start_raw" if raw else "start"), WALK_MPS, frames, 0.0, 1.0 / DT)
+		clips.ring_starts = keep[0]
+		clips.start_bones = keep[1]
 
 ## A keyed clip, `frames` even steps from its start to just before its end (a loop's seam is the step after the last).
 func _keyed(model: Node3D, sync: Node, clips: WardenClips, dir: String, clip: String, frames: int) -> void:
