@@ -1,12 +1,14 @@
 class_name BaseKite
 extends RefCounted
-## Kite Tow, part 1 (briefs/design/GARDEN_MODERN.md 4.2 game 7): a steering course on Kitewind Ridge, only
+## Kite Tow (briefs/design/GARDEN_MODERN.md 4.2 game 7): a steering course on Kitewind Ridge, only
 ## with farm_build.json base_mode on and an island of the ridge theme. Press interact at the kite stand and
 ## your partner (or the first rested Boki out) glides on a kite one loop round the stand through twelve rings.
-## A and D steer it left and right of its heading (on the loop: in toward the stand and out); Speed sets the
-## pace; a missed ring adds a second to the finish time. The result card shows the time and the rings.
-## Flaps and updraft vents are part 2. Tuning: content/rules/base_kite.json. Run is the flight itself (no
-## nodes), so --kite-check (tools/kite_check.gd) flies it headless.
+## A and D steer it left and right of its heading (on the loop: in toward the stand and out); Space flaps it
+## up to the high rings (3 flaps, +1 per 25 Guard; an updraft vent gives one back); Speed sets the pace; a
+## missed ring adds a second. The lap races a visiting kite at the cup round's strength, and a win pays the
+## garden_prizes.json kite table, the first win of the day and the cup step; garden XP per garden_xp.json.
+## Tuning: content/rules/base_kite.json. Run is the flight itself (no nodes), so --kite-check
+## (tools/kite_check.gd) flies it headless.
 
 const STAND_OFF := Vector3(-2.6, 0, 3.4)     # m from the Training post to the kite stand
 const STAND_H := 1.4                          # m, the stand's pole
@@ -16,6 +18,7 @@ const RING_COL := Color("f2c84a")             # the next ring
 const RING_DIM := Color(0.95, 0.85, 0.6, 0.35)
 const RING_HIT := Color("7ee08a")
 const RING_MISS := Color("8a8a96")
+const VENT_OFF := 1.2                         # m the vent toy sits below the tow line's lowest point
 
 static func rules() -> Dictionary:
 	return Content.rules("base_kite")
@@ -24,6 +27,20 @@ static func rules() -> Dictionary:
 static func pace(rec: Dictionary) -> float:
 	var R := rules()
 	return float(R["pace"]) * (1.0 + float(rec.get("stats", {}).get("speed", 0)) * float(R["speed_per_point"]))
+
+## Flaps a lap starts with: 3, plus one for every 25 trained Guard points (base_kite.json).
+static func flaps(rec: Dictionary) -> int:
+	var R := rules()
+	return int(R["flaps"]) + floori(float(rec.get("stats", {}).get("guard", 0)) / float(R["guard_per_flap"]))
+
+## The visiting kite for the cup round `rec` flies next: its stats are rec's times the round's min_ratio.
+static func rival(rec: Dictionary) -> Dictionary:
+	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
+	return GardenPrizes.rival(rec, float(rounds[GardenPrizes.stage(rec, "kite")]["min_ratio"]))
+
+## The rival's finish time over a lap of `lap` m.
+static func rival_time(foe: Dictionary, lap: float) -> float:
+	return lap / pace(foe) + float(rules()["rival_misses"]) * float(rules()["miss_s"])
 
 ## One lap: the kite's place on the loop and across it, stepped in time.
 class Run:
@@ -35,6 +52,13 @@ class Run:
 	var s := 0.0                    # m along the loop
 	var off := 0.0                  # m across it, + is out
 	var vel := 0.0                  # m/s across it
+	var lift := 0.0                 # m above the tow line
+	var climb := 0.0                # m/s up
+	var high: Array = []            # each ring: true when it sits high_lift up
+	var vents: Array = []           # each vent: {s, off, used}
+	var flaps_max := 0
+	var flaps := 0                  # flaps left
+	var refunds := 0                # flaps a vent gave back
 	var next := 0                   # the next ring to pass
 	var got: Array = []             # each passed ring: true when the kite went through it
 	var hits := 0
@@ -46,10 +70,33 @@ class Run:
 		lap = TAU * float(R["loop_r"])
 		for i in int(R["rings"]):
 			rings.append(rng.randf_range(-float(R["ring_off"]), float(R["ring_off"])))
+			high.append(false)
+		var ups := range(1, rings.size())
+		for i in int(R["high"]):
+			high[ups.pop_at(rng.randi_range(0, ups.size() - 1))] = true
+		for i in rings.size():
+			if high[i] and vents.size() < int(R["vents"]):
+				var mid := (float(rings[i]) + float(rings[mini(i + 1, rings.size() - 1)])) * 0.5
+				var at := mid + rng.randf_range(-float(R["vent_r"]), float(R["vent_r"]))
+				vents.append({"s": lap * (i + 1.0) / rings.size(), "off": at, "used": false})
+		flaps_max = BaseKite.flaps(rec)
+		flaps = flaps_max
 
 	## m along the loop to ring i.
 	func ring_at(i: int) -> float:
 		return lap * (i + 0.5) / rings.size()
+
+	## m above the tow line ring i sits.
+	func ring_lift(i: int) -> float:
+		return float(R["high_lift"]) if high[i] else 0.0
+
+	## Space: true when a flap was left to spend.
+	func flap() -> bool:
+		if flaps <= 0 or over():
+			return false
+		flaps -= 1
+		climb = float(R["flap_v"])
+		return true
 
 	func over() -> bool:
 		return s >= lap
@@ -58,7 +105,8 @@ class Run:
 	func time() -> float:
 		return t + misses * float(R["miss_s"])
 
-	## steer: -1 (A, left of the heading) .. 1 (D, right). Returns "hit" or "miss" for a ring passed, else "".
+	## steer: -1 (A, left of the heading) .. 1 (D, right). Returns "hit" or "miss" for a ring passed, "vent"
+	## for a flap given back, else "".
 	func step(dt: float, steer: float) -> String:
 		var go := minf(dt, (lap - s) / speed)    # the last step stops on the line, so the time is exact
 		t += go
@@ -68,9 +116,15 @@ class Run:
 		off = clampf(off + vel * dt, -edge, edge)
 		if absf(off) >= edge:
 			vel = 0.0
+		climb = maxf(climb - float(R["lift_g"]) * dt, -float(R["lift_fall"]))
+		lift = maxf(0.0, lift + climb * dt)
+		if lift <= 0.0:
+			climb = maxf(climb, 0.0)
+		var vented := _vent()
 		if next >= rings.size() or s < ring_at(next):
-			return ""
-		var hit := absf(off - float(rings[next])) <= float(R["ring_r"])
+			return "vent" if vented else ""
+		var miss := Vector2(off - float(rings[next]), lift - ring_lift(next))
+		var hit := miss.length() <= float(R["ring_r"])
 		next += 1
 		got.append(hit)
 		if hit:
@@ -79,20 +133,41 @@ class Run:
 		misses += 1
 		return "miss"
 
-## Pays out a finished lap: energy, joy and gems. Returns what the card shows.
-static func settle(run: Run, rec: Dictionary) -> Dictionary:
+	## Passing over an unused vent within vent_r gives a flap back, up to the lap's start count.
+	func _vent() -> bool:
+		for v in vents:
+			if v["used"] or s < float(v["s"]):
+				continue
+			v["used"] = true
+			if absf(off - float(v["off"])) <= float(R["vent_r"]) and flaps < flaps_max:
+				flaps += 1
+				refunds += 1
+				return true
+		return false
+
+## Pays out a finished lap: energy, joy, gems, the race against `foe` (prizes and cup through
+## GardenPrizes) and garden XP. Returns what the card shows.
+static func settle(run: Run, rec: Dictionary, foe: Dictionary, now := -1.0,
+		rng: RandomNumberGenerator = null) -> Dictionary:
 	var R := rules()
 	Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(rec, "joy", float(R["joy"]))
 	var gems := int(R["gems_clean"]) if run.misses == 0 else int(R["gems"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
-	return {"rec": rec, "time": run.time(), "hits": run.hits, "misses": run.misses, "gems": gems}
+	var foe_t := rival_time(foe, run.lap)
+	var won := run.time() <= foe_t
+	var prize := GardenPrizes.settle("kite", rec, foe, won, now, rng)
+	var xp := GardenXp.played(rec, won, prize["first"])
+	return {"rec": rec, "time": run.time(), "hits": run.hits, "misses": run.misses, "gems": gems,
+			"won": won, "rival_time": foe_t, "prize": prize, "xp": xp}
 
 # ------------------------------------------------------------------ on the base
 var h                          # the Home screen
 var stand: Node3D = null
 var run: Run = null
 var flier: Dictionary = {}     # the home's kin entry on the kite
+var foe: Dictionary = {}       # the visiting kite's record (rival())
+var vent_nodes: Array = []     # the vent toys under the loop, in order
 var kite: Node3D = null
 var hoops: Array = []          # the ring nodes, in order
 var card: Control = null
@@ -150,10 +225,16 @@ func use() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 	run = Run.new(flier["rec"], rng)
+	foe = rival(flier["rec"])
 	kite = _kite_mesh(Color("e05a4a"))
 	h.add_child(kite)
 	for i in run.rings.size():
 		hoops.append(_hoop(i))
+	for v in run.vents:
+		var vn := FarmModels.toy("toy_vent")
+		h.add_child(vn)
+		vn.position = _at(float(v["s"]), float(v["off"])) - Vector3(0, float(rules()["glide_h"]) - VENT_OFF, 0)
+		vent_nodes.append(vn)
 	_paint_hoops()
 	_place_flier()
 	Sfx.play("garden_start", stand.position, BaseRace.GARDEN_DB)
@@ -172,19 +253,24 @@ func tick(d: float) -> void:
 			card.queue_free()
 	if run == null:
 		return
+	if Input.is_action_just_pressed("jump") and run.flap():
+		Sfx.play("jump", flier["pos"], BaseRace.GARDEN_DB)
 	var passed := run.step(d, Input.get_axis("left", "right"))
-	if passed != "":
+	if passed == "vent":
+		h._toast("Updraft! A flap back (%d left)" % run.flaps)
+	elif passed != "":
 		Sfx.play("garden_cheer" if passed == "hit" else "garden_miss", flier["pos"], BaseRace.GARDEN_DB)
 		_paint_hoops()
 	_place_flier()
 	if run.over():
 		_end(true)
 
-## A point on the loop: s m along it, off m out from its middle line, glide_h above the stand.
-func _at(s: float, off: float) -> Vector3:
+## A point on the loop: s m along it, off m out from its middle line, lift m above the tow line (glide_h
+## above the stand).
+func _at(s: float, off: float, lift := 0.0) -> Vector3:
 	var r := float(rules()["loop_r"])
 	var a := s / r
-	return stand.position + Vector3(cos(a) * (r + off), float(rules()["glide_h"]), -sin(a) * (r + off))
+	return stand.position + Vector3(cos(a) * (r + off), float(rules()["glide_h"]) + lift, -sin(a) * (r + off))
 
 ## The way the loop runs at s m along it (counter-clockwise seen from above).
 func _heading(s: float) -> Vector3:
@@ -192,7 +278,7 @@ func _heading(s: float) -> Vector3:
 	return Vector3(-sin(a), 0, -cos(a))
 
 func _place_flier() -> void:
-	var p := _at(run.s, run.off)
+	var p := _at(run.s, run.off, run.lift)
 	var fwd := _heading(run.s)
 	var n: Node3D = flier["node"]
 	n.position = p
@@ -210,7 +296,7 @@ func _hoop(i: int) -> MeshInstance3D:
 	m.mesh = tm
 	var s := run.ring_at(i)
 	h.add_child(m)
-	m.position = _at(s, float(run.rings[i]))
+	m.position = _at(s, float(run.rings[i]), run.ring_lift(i))
 	m.basis = Basis.looking_at(_heading(s)) * Basis(Vector3.RIGHT, PI * 0.5)
 	return m
 
@@ -237,7 +323,7 @@ func _kite_mesh(c: Color) -> MeshInstance3D:
 	return m
 
 func _end(finished: bool) -> void:
-	var res := settle(run, flier["rec"]) if finished else {}
+	var res := settle(run, flier["rec"], foe) if finished else {}
 	var land := stand.position + Vector3(0.8, 0, 0.6)
 	var g: float = h._ground_h(land.x, land.z)
 	land.y = g if g > -50.0 else stand.position.y
@@ -245,17 +331,20 @@ func _end(finished: bool) -> void:
 	flier["pos"] = land
 	flier["busy"] = false
 	flier["t"] = 1.5
-	for n in hoops + [kite]:
+	for n in hoops + vent_nodes + [kite]:
 		n.queue_free()
 	hoops = []
+	vent_nodes = []
 	kite = null
 	if finished:
 		Sfx.play("garden_win", land, BaseRace.GARDEN_DB)
 		h._emote(flier, "♥", true)
 		_card(res)
+		h._play_evolutions.call_deferred()     # a level the garden XP brought plays its form
 		Save.save_game()
 	run = null
 	flier = {}
+	foe = {}
 
 func _card(res: Dictionary) -> void:
 	var rec: Dictionary = res["rec"]
@@ -263,9 +352,13 @@ func _card(res: Dictionary) -> void:
 	var lost := float(res["misses"]) * float(rules()["miss_s"])
 	if is_instance_valid(card):
 		card.queue_free()
+	var title := "%s beats the %s!" if res["won"] else "The %s's kite is faster than %s"
+	title = title % ([rec["name"], rules()["rival"]] if res["won"] else [rules()["rival"], rec["name"]])
 	card = BaseRace.result_card(h, [
-		["%s lands the Kite Tow in %.1f s!" % [rec["name"], res["time"]], 18, UI.ACCENT_HI],
-		["%d of %d rings (+%.0f s for misses)" % [res["hits"], total, lost], 14, UI.INK],
-		["%s is beaming (+joy)" % rec["name"], 14, UI.INK],
-		["+%d gems%s" % [res["gems"], " for a clean lap" if res["misses"] == 0 else ""], 14, UI.GOLD]])
+		[title, 18, UI.ACCENT_HI if res["won"] else UI.INK],
+		["%.1f s vs %.1f s; %d of %d rings (+%.0f s for misses)"
+				% [res["time"], res["rival_time"], res["hits"], total, lost], 14, UI.INK],
+		["%s is beaming (+joy, +%d XP)" % [rec["name"], res["xp"]], 14, UI.INK],
+		["+%d gems%s" % [res["gems"], " for a clean lap" if res["misses"] == 0 else ""], 14, UI.GOLD]]
+		+ GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])
