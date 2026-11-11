@@ -2213,3 +2213,14 @@ SPECS[-1]['prompt']+=_NOGHOST+" Same colours and lightness as the card. No groun
 # Lighter Tiltster/Rimink cards: fresh pixel sprites.
 for _n in ('Tiltster','Rimink'):
     SPECS.append({'id':'px9c_'+_n.lower(),'name':_n+' (pixel sprite 80, lighter card)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
+
+# 11-11 owner calls: female colours. Kestrike female is peach/teal, but her line's females (Arcestrel, Voltalon) are sandy brown with dark barring.
+# Pavonazar female (green peahen) has no legendary crown ring. Options, 2 runs each.
+SPECS.append({'id':'fopt_kestrike_line','name':'Kestrike female in her line\'s colours','refs':['briefs/boki-art/cards/Kestrike_female.jpg','briefs/boki-art/cards/Arcestrel_female.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"her colours only, to match the female of her evolved form in image 2: warm sandy brown plumage with fine dark brown barring, a cream chest, soft slate-blue wings and tail. No peach, no teal. Same pose, shape, face, eyes, crest and swirl markings."})
+SPECS.append({'id':'fopt_kestrike_soft','name':'Kestrike female, softer male colours','refs':['briefs/boki-art/cards/Kestrike_female.jpg','briefs/boki-art/cards/Kestrike.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"her colours only: use the male's rust-red and slate-blue from image 2 but paler and softer, with a cream chest and fine brown barring on the back. No teal. Same pose, shape, face, eyes, crest and swirl markings."})
+SPECS.append({'id':'fopt_pavonazar_ring','name':'Pavonazar female + crown ring','refs':['briefs/boki-art/cards/Pavonazar_female.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"add her legendary crown ring: a thin floating ring of bronze and green eye-spot feathers hovering just above her head crest, not touching it. Nothing else changes."})
+SPECS.append({'id':'fopt_pavonazar_line','name':'Pavonazar female, closer to the male','refs':['briefs/boki-art/cards/Pavonazar_female.jpg','briefs/boki-art/cards/Pavonazar.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+  'prompt':_EDIT+"her colours and crown. Keep her peahen shape, pose and short rounded train, but recolour her in muted versions of the male's palette in image 2: dusky violet-blue body, soft lilac and dull gold eye-spots, and give her a smaller version of his floating gold crown ring above her head. Same face and eyes."})

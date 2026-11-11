@@ -46587,6 +46587,53 @@
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
   },
   {
+    "id": "fopt_kestrike_line",
+    "name": "Kestrike female in her line's colours",
+    "refs": [
+      "briefs/boki-art/cards/Kestrike_female.jpg",
+      "briefs/boki-art/cards/Arcestrel_female.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: her colours only, to match the female of her evolved form in image 2: warm sandy brown plumage with fine dark brown barring, a cream chest, soft slate-blue wings and tail. No peach, no teal. Same pose, shape, face, eyes, crest and swirl markings."
+  },
+  {
+    "id": "fopt_kestrike_soft",
+    "name": "Kestrike female, softer male colours",
+    "refs": [
+      "briefs/boki-art/cards/Kestrike_female.jpg",
+      "briefs/boki-art/cards/Kestrike.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: her colours only: use the male's rust-red and slate-blue from image 2 but paler and softer, with a cream chest and fine brown barring on the back. No teal. Same pose, shape, face, eyes, crest and swirl markings."
+  },
+  {
+    "id": "fopt_pavonazar_ring",
+    "name": "Pavonazar female + crown ring",
+    "refs": [
+      "briefs/boki-art/cards/Pavonazar_female.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: add her legendary crown ring: a thin floating ring of bronze and green eye-spot feathers hovering just above her head crest, not touching it. Nothing else changes."
+  },
+  {
+    "id": "fopt_pavonazar_line",
+    "name": "Pavonazar female, closer to the male",
+    "refs": [
+      "briefs/boki-art/cards/Pavonazar_female.jpg",
+      "briefs/boki-art/cards/Pavonazar.jpg"
+    ],
+    "runs": 2,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: her colours and crown. Keep her peahen shape, pose and short rounded train, but recolour her in muted versions of the male's palette in image 2: dusky violet-blue body, soft lilac and dull gold eye-spots, and give her a smaller version of his floating gold crown ring above her head. Same face and eyes."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

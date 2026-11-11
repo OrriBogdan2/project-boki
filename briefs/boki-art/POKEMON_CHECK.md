@@ -31,3 +31,6 @@ Method: every Boki name (227 live + 5 new + the approved renames) compared with 
 | Effigeetle (proposed Marbeetle) | new name with its redesign (Marbillar) | Orbeetle |
 
 Lower risk, no change proposed: Latchling/Fletchling, Rampartoad/Rampardos, Pinster/Pinsir, Blastopuff/Blastoise, Cindermaw/Cinderace, Pickadactyl/Aerodactyl, Sirencada/Nincada (cicada lines both), the -mander names (salamander is a real word).
+
+## 11-11 recheck (PokeAPI species names, difflib, limit 0.72)
+Parrywhal 0.57 (paras), Anchorpup 0.67 (machop), Sculptillar 0.63, Pipguin 0.62, Kegling 0.67, Jerbit 0.62, Jerbolt 0.62, Dynaboa 0.62. All clear. Parrywhal design: no narwhal Pokemon exists.
