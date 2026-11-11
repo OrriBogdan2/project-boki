@@ -535,3 +535,7 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Coordinator: spec job turns this into GARDEN.md + a build list, then builds it for 0.24.4.
 
 - 2026-11-10 (owner): Shadow is split into Ghost and Dark (19 types; list in briefs/boki-art/GHOST_DARK_SPLIT.md). NO type matchups for now: types are labels for identity, filters and colour only, no strong/weak chart. Revisit only if the owner asks.
+
+## 2026-11-11 ~12 AM EST owner: ship 0.24.4 now, the big changes follow in 0.24.5
+- Overrides 2026-11-10 "0.24.4 holds": ship what is gated now (ext/release-integ-0244c 23cc281bd, docs/GATE_0244.md) so the owner can play it.
+- 0.24.5: Limited Ways Out (Heart + quest exits, open extraction removed), the Chao-style garden core, ext/meeko-orbit, ext/albert-appeal, the appeal4 candidates (Cinder, Sable).
