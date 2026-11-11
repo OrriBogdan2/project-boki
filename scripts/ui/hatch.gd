@@ -56,6 +56,7 @@ var look: Dictionary = {}
 var preview: Node3D
 var look_at_t := Vector3(0, 0.25, 0.5)
 var edit_only := false
+var building := false       # main holds the loading wipe while this is true (_warm_relics)
 var create_box: Control
 var sub_lbl: Label        # opened from the menu just to change how you look
 var top_box: VBoxContainer    # the title and its line: centred, or over the preview while you make yourself
@@ -104,6 +105,7 @@ func _ready() -> void:
 		holder.add_child(egg)
 		eggs.append({"holder": holder, "egg": egg, "base": holder.position, "data": d})
 	_build_ui()
+	_warm_relics()
 	cam_from = Vector3(-9, 7.5, 16); cam.position = cam_from
 	cam_to = Vector3(-3.5, 4.2, 9.0)
 	if edit_only:
@@ -784,6 +786,15 @@ func _mask_moment(then: Callable) -> void:
 			func(id): return ClassUnlock.choose_starters([id]), picked)
 	centre.add_child(offer.build())
 	ui.add_child(holder)
+
+## A new player's first pick, paid for while the wipe still hides the island: main holds the wipe while
+## `building` is true (PreviewWarm: the three starters' models and their pick screen).
+func _warm_relics() -> void:
+	if edit_only or not ClassUnlock.needs_starters() or not PreviewWarm.hidden():
+		return
+	building = true
+	await PreviewWarm.starters(self)
+	building = false
 
 func _put_on_first(first: String, then: Callable) -> void:
 	Save.d["arch"] = first

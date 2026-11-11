@@ -650,6 +650,7 @@ func _ready_rest() -> void:
 	_refresh_top()
 	if guide: guide.build_ui()
 	if building:
+		await PreviewWarm.farm(self)      # (Relic previews and the Relics screen, paid for under the wipe)
 		building = false
 		set_process(true)
 		set_process_unhandled_input(true)
