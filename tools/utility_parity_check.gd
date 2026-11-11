@@ -9,6 +9,8 @@ extends RefCounted
 ##  8. Lookout Lantern can be taken down by whoever steps on it.     9. Toss Satchel bounces a body in the air.
 ## 10. Thorn Wall roots you 2 s and rises after.  11. Hearth Lamp revives carry sickness (damage and healing).
 ## 12. Tonic cleanses anti-heal.  13. Each knock shortens a Bounty Banner.  14. Cloud Raft refills gliders.
+## 15. Using an item and moving (MOVES): cast length, speed, starting in the air or mid-dash, a hit.
+## 16. Cloud Raft: open air only, and you hang in the air for its 0.3 s cast.
 ## Prints UTIL ok/FAIL lines and "UTIL DONE, failures: N". Never touches the save file.
 
 var bad := 0
@@ -50,6 +52,8 @@ func run(host: Node) -> void:
 	_tonic(m, P)
 	_bounty_cut(m, P, foe)
 	_raft(m, P, foe)
+	_moves(m, P, foe)
+	_raft_cast(m, P)
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
@@ -131,6 +135,8 @@ func _live(x: Hunter) -> void:
 	x.sick_t = 0.0
 	x.blight_t = 0.0
 	x.root_t = 0.0
+	x.roll_t = 0.0
+	x.shield = 0.0
 	x.belt = UtilityBelt.empty()
 
 ## Item patches (gates, wards, packs, banners) standing now; the damage patches are not counted.
@@ -296,6 +302,7 @@ func _lamp_sickness(m: Match, P: Hunter, ally: Hunter) -> void:
 
 func _tonic(m: Match, P: Hunter) -> void:
 	_live(P)
+	P.inv_t = 99.0        # a patch left by an earlier item must not spill the drink
 	P.hp = 10.0
 	P.blight_t = 8.0
 	UtilityBelt.grant(P, "tonic", 1)
@@ -339,6 +346,142 @@ func _raft(m: Match, P: Hunter, foe: Hunter) -> void:
 	_steps(m, 0.35)
 	ok(P.glide_fuel > 0.8, "a squadmate's glider is cooled on it (%.2f)" % P.glide_fuel)
 	ok(foe.glide_fuel < 0.5, "...a rival's is not (%.2f)" % foe.glide_fuel)
+
+## 15. The table in docs/SOURCE_UTILITIES.md "Using an item and moving", one row per belt item (keys aside:
+## they need a lock). [cast s, speed while it runs, starts mid-air, starts mid-dash, a hit spills it].
+## Drinks and the kit channel; Thorn Wall and Pilfer Pouch root you; everything else lands at once.
+const MOVES := {
+	"tonic": [1.0, 1.0, true, false, true], "deep_draught": [5.0, 0.4, true, false, true],
+	"lostway_scroll": [4.0, 1.0, true, false, true], "omen_draught": [1.0, 1.0, true, false, true],
+	"armor_kit": [1.6, 0.45, true, false, true],
+	"thorn_wall": [2.0, 0.0, true, true, false], "pilfer_pouch": [1.5, 0.0, true, true, false],
+	"medkit": [0.0, 1.0, true, true, false], "smoke": [0.0, 1.0, true, true, false],
+	"scanner": [0.0, 1.0, true, true, false], "hawk_whistle": [0.0, 1.0, true, true, false],
+	"jump_pad": [0.0, 1.0, true, true, false], "gust_fan": [0.0, 1.0, true, true, false],
+	"shatter_charge": [0.0, 1.0, true, true, false], "blight_flask": [0.0, 1.0, true, true, false],
+	"skyfall_charge": [0.0, 1.0, true, true, false], "shield_cell": [0.0, 1.0, true, true, false],
+	"stim": [0.0, 1.0, true, true, false], "lookout_lantern": [0.0, 1.0, true, true, false],
+	"toss_satchel": [0.0, 1.0, true, true, false], "twin_gate": [0.0, 1.0, true, true, false],
+	"warp_seed": [0.0, 1.0, true, true, false], "bounty_banner": [0.0, 1.0, true, true, false],
+	"hearth_lamp": [0.0, 1.0, true, true, false], "revive_ember": [0.0, 1.0, true, true, false],
+}
+
+func _moves(m: Match, P: Hunter, foe: Hunter) -> void:
+	_stage(m, P, foe)
+	var ground := P.pos
+	var team := foe.team
+	foe.team = P.team           # a fallen squadmate for the ember and the lamp
+	var rows := UtilityBelt.stock_ids().filter(func(id): return not UtilityBelt.def(id).get("float", false))
+	ok(rows.all(func(id): return MOVES.has(id)), "every belt item has a movement row (missing: %s)"
+			% str(rows.filter(func(id): return not MOVES.has(id))))
+	for id in rows:
+		if not MOVES.has(id):
+			continue
+		var row: Array = MOVES[id]
+		var cast := float(row[0])
+		# on the ground, running: the cast and your speed
+		_ready_for(m, P, foe, id, ground)
+		ok(UtilityBelt.use_id(P, id), "%s starts on the ground" % id)
+		var held := P.drink_t + P.kit_t + P.root_t
+		ok(absf(held - cast) < 0.05, "...%s cast %.1f s (expected %.1f)" % [id, held, cast])
+		var spd := UtilityUse.channel_move(P)
+		ok(is_equal_approx(spd, float(row[1])) if P.root_t <= 0.0 else P.root_t > 0.0,
+				"...%s speed %.2f while it runs (expected %.2f; a root stands still)" % [id, spd, row[1]])
+		if cast > 0.0 and P.root_t > 0.0:
+			P.do_dash()
+			ok(P.roll_t <= 0.0 and P.root_t > 0.0, "...%s: a dash can't cut the root" % id)
+		var spent_later := held > 0.0 and P.root_t <= 0.0    # a drink or a repair spends its charge at the end
+		ok(UtilityBelt.count(P, id) == (1 if spent_later else 0), "...%s spends its charge when it lands" % id)
+		# a hit
+		P.inv_t = 0.0
+		P.hurt(5.0, null, {"src": "shot"})
+		P.inv_t = 99.0
+		if bool(row[4]):
+			ok(P.drink_t <= 0.0 and P.kit_t <= 0.0 and UtilityBelt.count(P, id) == 1,
+					"...%s: a hit spills it, nothing spent (%d left)" % [id, UtilityBelt.count(P, id)])
+		else:
+			ok(UtilityBelt.count(P, id) == 0 and (cast <= 0.0 or P.root_t > cast - 0.1),
+					"...%s: a hit does not stop it" % id)
+		# in the air (not gliding)
+		_ready_for(m, P, foe, id, ground)
+		P.teleport(ground + Vector3(0, 4.0, 0))
+		P.grounded = false
+		var started := UtilityBelt.use_id(P, id)
+		var going := P.drink_t + P.kit_t + P.root_t > 0.0 or UtilityBelt.count(P, id) == 0
+		ok(started == bool(row[2]) and going == bool(row[2]),
+				"...%s mid-air: %s" % [id, "starts" if row[2] else "waits"])
+		# mid-dash
+		_ready_for(m, P, foe, id, ground)
+		P.roll_t = 0.15
+		P.roll_dir = Vector2.RIGHT
+		P.move_kind = "dash"
+		started = UtilityBelt.use_id(P, id)
+		going = P.drink_t + P.kit_t + P.root_t > 0.0 or UtilityBelt.count(P, id) == 0
+		ok(started == bool(row[3]) and going == bool(row[3]),
+				"...%s mid-dash: %s" % [id, "starts" if row[3] else "denied, nothing spent"])
+		P.roll_t = 0.0
+	foe.team = team
+	P.inv_t = 0.0
+	_ready_for(m, P, foe, "", ground)
+
+## One fresh charge of `id` on an otherwise empty belt, the caster hurt and bare so a drink or a repair has
+## work to do, the squadmate down for the ember, and nothing of the last item left: no channel, no root,
+## no pending fuse or raid, no open gate or banner.
+func _ready_for(m: Match, P: Hunter, ally: Hunter, id: String, ground: Vector3) -> void:
+	for z in m.fields.list:
+		z["t"] = 0.0
+	m._later.clear()
+	m.step(Match.DT)
+	m.remove_meta("gate_%d" % P.get_instance_id())
+	m.remove_meta("banner_%d" % P.team)
+	_live(P)
+	P.teleport(ground)
+	P.grounded = true
+	P.vel = Vector3.ZERO
+	P.roll_t = 0.0
+	P.drink_t = 0.0
+	P.kit_t = 0.0
+	P.inv_t = 99.0
+	P.hp = P.max_hp * 0.3
+	P.armor = 0.0
+	P.inp["aim"] = ground + Vector3(6.0, 0, 0)
+	ally.out = true
+	ally.gone = false
+	if id != "":
+		UtilityBelt.grant(P, id, 1)
+
+## 16. Cloud Raft: denied on solid ground; over the abyss you hang in the air for its 0.3 s cast and the
+## raft forms under you [P-1.03].
+func _raft_cast(m: Match, P: Hunter) -> void:
+	var spot := _edge(m)
+	if spot.is_empty():
+		ok(false, "an island edge for the raft cast")
+		return
+	var from: Vector3 = spot["from"]
+	var dir: Vector2 = spot["dir"]
+	_live(P)
+	P.teleport(from)
+	P.grounded = true
+	P.vel = Vector3.ZERO
+	UtilityBelt.grant(P, "cloud_raft", 1)
+	ok(not UtilityBelt.use_id(P, "cloud_raft") and UtilityBelt.count(P, "cloud_raft") == 1,
+			"a Cloud Raft is for open air only: denied on the ground")
+	var air := Vector3(from.x + dir.x * 2.0, from.y + 1.5, from.z + dir.y * 2.0)
+	P.teleport(air)
+	P.grounded = false
+	P.inp["aim"] = air + Vector3(dir.x, 0, dir.y) * 3.0
+	var spans := m.verbs.terrain.size()
+	ok(UtilityBelt.use_id(P, "cloud_raft"), "...over the abyss it casts")
+	ok(absf(P.float_t - 0.3) < 0.02, "...and holds you in the air for 0.3 s (%.2f)" % P.float_t)
+	_steps(m, 0.2)
+	ok(absf(P.pos.y - air.y) < 0.02 and absf(P.vel.y) < 0.01 and m.verbs.terrain.size() == spans,
+			"...no fall and no raft yet at 0.2 s (dy %.3f)" % (P.pos.y - air.y))
+	_steps(m, 0.2)
+	ok(m.verbs.terrain.size() == spans + 1 and P.float_t <= 0.0, "...the raft forms at 0.3 s and the hold ends")
+	_steps(m, 1.5)
+	var deck := floorf(air.y / World.LEVEL) * World.LEVEL
+	ok(P.grounded and absf(P.pos.y - deck) < 0.05,
+			"...you land on it, at your own height (y %.2f, raft %.2f)" % [P.pos.y, deck])
 
 ## A ground point and a heading that points off the island's edge into open air.
 func _edge(m: Match) -> Dictionary:

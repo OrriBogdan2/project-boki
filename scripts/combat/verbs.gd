@@ -230,7 +230,7 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var seen := {}
 	var n := Node3D.new()
 	var side := Vector2(-d.y, d.x)
-	var k := 0.6
+	var k := 0.0            # from the caster's own tile: cast in the air, the span must be under their feet
 	var mat := Models.toon(col, true, 0.5)
 	var glass := Models.glow_mat(Color(col.lightened(0.3), 0.45))
 	while k <= length:

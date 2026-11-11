@@ -13,10 +13,12 @@ extends RefCounted
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
 ##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
-##   fx      run the item's "effects" list through Effects (haste, shield, ...); "root_self" s holds the user still
+##   fx      run the item's "effects" list through Effects (haste, shield, ...); "root_self" s holds the user still;
+##           a "float" item (Cloud Raft) is for open air only and hangs you in the air for its effect's "delay"
 ##   field pilfer lamp ember   the source utilities (UtilityMore); pad and scan take their numbers from the item
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
-## spent unless they finish. The rest take effect at once and spend one charge.
+## spent unless they finish. The rest take effect at once and spend one charge, in the air or mid-dash
+## too, and never touch your speed (docs/SOURCE_UTILITIES.md "Using an item and moving").
 
 const DRINK_HEAL := 0.4         # of max health, for a drink with no number of its own
 const CHANNEL_TIME := 1.0       # s, for a drink or repair with no "time" (the source heals "after 1s")
@@ -26,11 +28,13 @@ const MEND_ARMOR := 20.0
 static func use_of(id: String) -> String:
 	return String(UtilityBelt.def(id).get("use", "fx"))
 
-## Is there anything for this item to do right now? (A tonic at full health buzzes instead.)
+## Is there anything for this item to do right now? (A tonic at full health buzzes instead.) A drink or
+## a repair can't start mid-dash: the dash would spill it on the spot (tick).
 static func can_use(h: Hunter, id: String) -> bool:
 	match use_of(id):
-		"drink": return heal_of(h, id) <= 0.0 or h.hp < h.max_hp - 0.5
-		"repair": return h.armor < h.max_armor - 0.5
+		"drink": return (heal_of(h, id) <= 0.0 or h.hp < h.max_hp - 0.5) and h.roll_t <= 0.0
+		"repair": return h.armor < h.max_armor - 0.5 and h.roll_t <= 0.0
+		"fx": return not UtilityBelt.def(id).get("float", false) or h.over_void()
 		"mend": return h.hp < h.max_hp - 0.5 or h.armor < h.max_armor - 0.5
 		"ember", "field": return UtilityMore.can_use(h, id)
 	return true
@@ -84,12 +88,20 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
 			h.root_t = maxf(h.root_t, float(d.get("root_self", 0.0)))
+			if d.get("float", false) and not h.grounded:
+				h.float_t = cast_of(d)      # the source floats you over the abyss while the raft forms
+				h.vel.y = maxf(h.vel.y, 0.0)
 	# the instant ones are spent now; the channelled ones when they finish (tick)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
 	if i < UtilityBelt.SLOTS and not (h.belt[i] as Dictionary).is_empty():
 		h.belt[i]["cd"] = float(d.get("cd", 0.0))
 	return true
+
+## How long an instant item's effect takes to land: its first effect's "delay" (0 = at once).
+static func cast_of(d: Dictionary) -> float:
+	var effs: Array = d.get("effects", [])
+	return float(effs[0].get("delay", 0.0)) if not effs.is_empty() else 0.0
 
 ## What a drink heals before perks and gear: its flat "heal_hp", else "heal" of max health.
 static func heal_of(h: Hunter, id: String) -> float:
@@ -114,6 +126,7 @@ static func channel_move(h: Hunter) -> float:
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
 static func tick(h: Hunter, dt: float) -> void:
+	h.float_t = maxf(0.0, h.float_t - dt)
 	if h.drink_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.drink_t = 0.0

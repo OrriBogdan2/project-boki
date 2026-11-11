@@ -6,6 +6,7 @@
  "col": "bfe9ff",
  "use": "fx",
  "cd": 3.0,
+ "float": true,
  "max": 2,
  "bring": [
   1,
@@ -24,5 +25,5 @@
    "refill": 2.0
   }
  ],
- "src": "docs/SOURCE_UTILITIES.md: refills ally gliders; 2 gliders' worth a second (ours)"
+ "src": "docs/SOURCE_UTILITIES.md: over the abyss only; casts after 0.3 s (the effect's delay) and floats you for it [P-1.03]; refills ally gliders, 2 gliders' worth a second (ours)"
 }
