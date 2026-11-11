@@ -163,9 +163,9 @@ static func next_way(rec: Dictionary) -> Dictionary:
 		return {"how": "item", "inks": inks}
 	if has_art(next_for(rec, "trade")):
 		return {"how": "trade"}
-	var at := rec.duplicate()       # as if it had reached its evolve level
-	at["level"] = int(line.get("level", 1))
-	if has_art(next_for(at, "level")):
+	var at_level := rec.duplicate()       # as if it had reached its evolve level
+	at_level["level"] = int(line.get("level", 1))
+	if has_art(next_for(at_level, "level")):
 		return {"how": "level", "level": int(line["level"])}
 	return {"how": "soon"}
 
