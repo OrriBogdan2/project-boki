@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -432,7 +432,7 @@
 },
 "scripts/match/biome_run.gd": {
 "long_line": 25,
-"semicolon": 60
+"semicolon": 59
 },
 "scripts/match/blight.gd": {
 "long_line": 5,
@@ -619,7 +619,7 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
+"long_line": 48,
 "nested_ternary": 9,
 "semicolon": 28
 },
@@ -634,9 +634,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
-"nested_ternary": 19,
-"semicolon": 142,
+"long_line": 216,
+"nested_ternary": 18,
+"semicolon": 141,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {
@@ -707,7 +707,7 @@
 "history_comment": 1,
 "long_line": 13,
 "nested_ternary": 1,
-"semicolon": 19,
+"semicolon": 16,
 "shadow": 1
 },
 "scripts/match/ruin_walls.gd": {
@@ -1147,8 +1147,8 @@
 },
 "tools/rolling_check.gd": {
 "history_comment": 1,
-"long_line": 44,
-"semicolon": 18
+"long_line": 42,
+"semicolon": 16
 },
 "tools/rolling_sim.gd": {
 "long_line": 25,
