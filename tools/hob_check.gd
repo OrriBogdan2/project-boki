@@ -76,8 +76,8 @@ func _first_arrival() -> void:
 	ok(FarmTutorial.current() == "hob" and home.guide.hint_lbl.text.contains("Hob")
 			and not home.guide.hint_lbl.text.contains("Hob:"),
 			"the first goal: meet him (%s)" % home.guide.hint_lbl.text)
-	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["gunslinger"],
-			"after the first expedition no second Mask is owned yet")
+	ok(ClassUnlock.second_pending() and ClassUnlock.open_ids() == ["archer", "gunslinger"],
+			"after the first expedition no second Relic is owned yet (Vex and Lace are open)")
 	# 2. the camera swing
 	await _wait(func(): return hob.chat.intro_t > 0.7, 8.0)
 	var focus: Vector3 = home.ppos
@@ -186,8 +186,8 @@ func _offer() -> void:
 			"the pick fits a 1280x720 screen (%s)" % pick_rect)
 	await _shot("hob_6_three_masks", 1.6)
 	offer.pick("tender")
-	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
-			"taking Meeko opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))
+	ok(ClassUnlock.open_ids() == ["archer", "gunslinger", "tender"] and not ClassUnlock.second_pending(),
+			"taking Meeko opens her and no one else (%s)" % str(ClassUnlock.open_ids()))
 	box.advance()
 	box.advance()
 	await _frames(3)

@@ -1,6 +1,6 @@
 class_name BlockPrune
 extends RefCounted
-## Clears lone blocked tiles from a generated map (training area, duel room): a one- or two-tile
+## Clears lone blocked tiles from a generated map (Training Grounds, duel room): a one- or two-tile
 ## post is where a thrown or fired shot clips and nobody expects it. Whatever stays is a wall or a
 ## rock you can read. The same piece-finder backs tools/wall_size_check.gd.
 

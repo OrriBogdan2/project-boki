@@ -31,7 +31,7 @@
 		"hop": {"fx": [
 			{"p": "star", "y": 0.3, "n": 6, "way": "back", "speed": 1.2, "spread": 0.6, "grav": -0.4, "life": 0.6,
 				"size": 0.1, "c": "main", "c2": "hot"},
-			{"p": "smoke", "y": 0.15, "n": 3, "way": "back", "speed": 0.8, "spread": 0.6, "life": 0.6, "size": 0.25,
+			{"p": "smoke", "y": 0.15, "n": 2, "way": "back", "speed": 0.8, "spread": 0.6, "life": 0.6, "size": 0.15,
 				"c": "smoke", "c3": "lilac", "near": true}
 		]},
 		"dash_trail": {"fx": [

@@ -204,7 +204,7 @@ the image-gen turnaround (silhouette and palette).
 
 - **Mix:** Owl + Luna moth. **Theme:** lunar. **Size:** small. **Body:** winged, rig `WING`. **Fights as:** trickster.
 - **Personality:** Airy, teasing and dramatic. Quick and slippery.
-- **Abilities:** Moon Swap (E, `moon_swap`), Moonlift (auto, `updraft`).
+- **Abilities:** Moon Mark (E, `moon_mark`), Moonlift (auto, `updraft`).
 - **Rarity / where:** common, Wild, nest eggs.
 - **Art note:** Moonlit lilac owl with pale green moth wings; cream belly, moon-yellow glow.
 
@@ -308,7 +308,7 @@ the image-gen turnaround (silhouette and palette).
 
 - **Mix:** Stick insect + Lodestone. **Theme:** gravity. **Size:** small. **Body:** insect, rig `HEXA`. **Fights as:** trickster.
 - **Personality:** Still and patient, a deadpan joker. Plays dead whenever it's bored.
-- **Abilities:** Moon Swap (E, `moon_swap`), Moonlift (auto, `updraft`); merge stub: Eclipse (`tempest`).
+- **Abilities:** Moon Mark (E, `moon_mark`), Moonlift (auto, `updraft`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Lodestar: projectile 9 m, pull to the kin.
 - **Rarity / where:** uncommon, Gloomheart.
 - **Art note:** Thin twiggy stick insect with blocky lodestone joints, iron filings bristling on its legs, purple glow between segments.
@@ -335,7 +335,7 @@ the image-gen turnaround (silhouette and palette).
 
 - **Mix:** Basilisk lizard + Opal. **Theme:** prism. **Size:** small. **Body:** biped, rig `BIPED`. **Fights as:** trickster.
 - **Personality:** A show-off that startles easily. Runs first, poses later.
-- **Abilities:** Moon Swap (E, `moon_swap`), Refraction (auto, `refraction`); merge stub: Eclipse (`tempest`).
+- **Abilities:** Moon Mark (E, `moon_mark`), Refraction (auto, `refraction`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Opal Flash: burst 3 m, decoy + slow.
 - **Rarity / where:** uncommon, Greenreach.
 - **Art note:** Slim upright-running lizard, tall head crest and back sail, white opal scales flashing pink and green, long whip tail.
@@ -400,7 +400,7 @@ the image-gen turnaround (silhouette and palette).
 
 - **Mix:** Caecilian + Obsidian. **Theme:** shadow. **Size:** medium. **Body:** serpent, rig `SERPENT`. **Fights as:** trickster.
 - **Personality:** Secretive and sly, loves surprises. Appears where you least expect it, grinning.
-- **Abilities:** Moon Swap (E, `moon_swap`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`).
+- **Abilities:** Moon Mark (E, `moon_mark`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Underpass: blink 7 m, then burst 2 m slow.
 - **Rarity / where:** uncommon, Gloomheart.
 - **Art note:** Smooth ringed legless body like a giant earthworm, glossy black obsidian bands, tiny eyes, blunt head, violet glow in the seams.
@@ -445,7 +445,7 @@ the image-gen turnaround (silhouette and palette).
 
 - **Mix:** Slow loris + Moonflower. **Theme:** lunar. **Size:** medium. **Body:** biped, rig `BIPED`. **Fights as:** support.
 - **Personality:** Soft-spoken and sleepy by day, wide awake at night. Clings to you when it's frightened.
-- **Abilities:** Moon Swap (E, `moon_swap`), Moonlift (auto, `updraft`); merge stub: Eclipse (`tempest`).
+- **Abilities:** Moon Mark (E, `moon_mark`), Moonlift (auto, `updraft`); merge stub: Eclipse (`tempest`).
 - **Own ability later (grammar parts):** Moonbloom: burst 6 m, reveal + heal over 3 s.
 - **Rarity / where:** uncommon, Gloomheart.
 - **Art note:** Round fluffy loris, enormous amber eyes in dark rings, white moonflowers on its head and arms, pale cream fur.
@@ -624,7 +624,7 @@ the image-gen turnaround (silhouette and palette).
 - **Mix:** Okapi + Dusk smoke. **Theme:** shadow. **Size:** rideable. **Body:** quadruped, rig `QUAD-L`. **Fights as:** trickster.
 - **Big-Boki role:** **mount**. You ride it: travel speed out of combat, one rider, get off to loot or extract.
 - **Personality:** Shy and graceful, vanishes when strangers come. Trusts one rider and only one.
-- **Abilities:** Moon Swap (E, `moon_swap`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`); mount speed x1.25, jump x1.1, turn x0.85.
+- **Abilities:** Moon Mark (E, `moon_mark`), Echolocate (auto, `echolocate`); merge stub: Eclipse (`tempest`); mount speed x1.25, jump x1.1, turn x0.85.
 - **Own ability later (grammar parts):** Fade: blink 8 m, decoy at the start.
 - **Rarity / where:** rare, Gloomheart.
 - **Art note:** Graceful okapi, deep plum-brown body, white stripes on the hind legs that dissolve into dark smoke, long ears, small horn knobs.
