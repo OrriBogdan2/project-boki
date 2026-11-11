@@ -99,8 +99,6 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 	b["dead"] = true
 	if _m.net_on and not from_net:
 		_m.net_event(["brk", b["i"], by.nid if by else ""])
-	if by == _m.player:
-		_m.train["_smash"] = true
 	_hitstop(by, HITSTOP)
 	if lit.has(b):
 		lit.erase(b)
