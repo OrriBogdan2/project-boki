@@ -253,7 +253,6 @@ func _tick_recast(dt: float) -> void:
 				if slot_id in ["e", "x"]: h._ab_feedback("k1" if slot_id == "e" else "x", "deny")     # it never opened
 	if h.is_local():
 		RecastCue.track(self, dt)
-		RecastSound.track(self)
 
 func buffer_recast(slot_id: String) -> void:
 	recast_buf[slot_id] = RECAST_BUFFER
