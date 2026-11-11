@@ -9,6 +9,15 @@
 		"worn": "put on"
 	},
 	"verbs_doc": "Journal verb by use; an item's own verb wins.",
+	"log_keep": 5,
+	"log_keep_doc": "Uses remembered per item for its Field Book page (Save.d item_log, newest last).",
+	"families": {
+		"stat": {"name": "Stat bites", "icon": "burst"},
+		"path": {"name": "Path tokens", "icon": "dash"},
+		"lean": {"name": "Rinse", "icon": "wave"},
+		"respec": {"name": "Unwinding", "icon": "recall"}
+	},
+	"families_doc": "Field Book page grouping: a family's name and picture; it gets a star once every item of it has been owned.",
 	"items": [
 		{
 			"id": "thumpnut",

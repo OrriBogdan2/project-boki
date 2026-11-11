@@ -614,14 +614,17 @@ func _finish_rebind(ev: InputEvent) -> void:
 # ------------------------------------------------------------------ inventory
 var inv_tab := "Items"
 const INV_H := 404.0          # the inventory's body height on every tab (fits a 720p window)
-var dex_open := ""            # the species whose Field Book page is open
+var dex_open := ""            # the species (or shaping item) whose Field Book page is open
 
-## A Boki's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
+## A Boki's or shaping item's page in the Field Book (a sub-page of the inventory: Esc or Back returns to the grid).
 func open_dex(spk: String) -> void:
 	dex_open = spk
 	var v := _page("dex", "Field Book", 760)
 	UI.hold(v, INV_H + 58.0)        # the inventory's height (a sub-page has no tab row, so its body is taller)
-	DexView.detail(v, spk, get_tree(), open_dex)
+	if GardenItems.has(spk):
+		ItemPages.detail(v, spk)
+	else:
+		DexView.detail(v, spk, get_tree(), open_dex)
 
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
@@ -705,6 +708,7 @@ func open_inventory() -> void:
 			empty = false
 			grid.queue_free()
 			DexView.grid(v, get_tree(), func(spk: String): open_dex(spk))
+			ItemPages.grid(v, func(id: String): open_dex(id))
 	if empty:
 		var es: Array = {"Seeds": ["No seeds", "Find them on expeditions or buy them at the stall."], "Crops": ["No crops yet", "Harvest your plots."],
 			"Furniture": ["Nothing stored", "Furniture you buy or put away lands here."], "Kin": ["No Boki yet", "Hatch an egg to get your first."]}.get(inv_tab, ["Nothing here", ""])

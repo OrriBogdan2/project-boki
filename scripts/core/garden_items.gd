@@ -70,7 +70,47 @@ static func apply(rec: Dictionary, id: String) -> Dictionary:
 		Save.remember(rec, "down", NestItems.take_memory())
 	var verb := String(it.get("verb", rules()["verbs"][it["use"]]))
 	CareJournal.note(rec, "%s %s: %s" % [verb, it["name"], pv["text"]])
+	_remember(rec, id, String(pv["text"]))
 	return pv
+
+## The uses kept for an item's Field Book page: [{boki, text}], newest last.
+static func uses(id: String) -> Array:
+	return Save.d.get("item_log", {}).get(id, [])
+
+static func _remember(rec: Dictionary, id: String, text: String) -> void:
+	var log: Dictionary = Save.d.get("item_log", {})
+	var mine: Array = log.get(id, [])
+	mine.append({"boki": String(rec.get("name", "")), "text": text})
+	if mine.size() > int(rules()["log_keep"]):
+		mine.pop_front()
+	log[id] = mine
+	Save.d["item_log"] = log
+
+## Has it ever been in the bag? In the bag now, or used on a Boki (worn ones are out of the bag).
+static func owned(id: String) -> bool:
+	return int(Save.d["items"].get(id, 0)) > 0 or not uses(id).is_empty()
+
+## Item ids of one family, in file order.
+static func family_ids(fam: String) -> Array:
+	return ids().filter(func(id): return item(id)["family"] == fam)
+
+## Every item of the family has been owned: the page shows a star.
+static func family_done(fam: String) -> bool:
+	return family_ids(fam).all(func(id): return owned(id))
+
+static func family_name(fam: String) -> String:
+	return String(rules()["families"].get(fam, {}).get("name", fam.capitalize()))
+
+## What the item nudges, in words (the page's one line; preview() has the exact numbers for a Boki).
+static func nudge(id: String) -> String:
+	var e: Dictionary = item(id)["effect"]
+	match String(e["kind"]):
+		"stat": return "+%d %s, up to the limit for its level" % [int(e["n"]), Care.STATS[e["stat"]]["name"]]
+		"xp": return "+%d xp" % int(e["n"])
+		"token": return "1 step toward %s when a form is chosen" % String(Evo.AFF[e["aff"]]["name"]).to_lower()
+		"stay": return "no new forms while worn"
+		"rinse": return "clears the lean; the grown parts stay"
+		_: return "%d points of the top stat become loose points" % int(e["n"])
 
 ## Takes a worn item off and puts it back in the bag. False if the Boki isn't wearing it.
 static func take_off(rec: Dictionary, id: String) -> bool:
