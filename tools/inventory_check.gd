@@ -147,6 +147,11 @@ func _drags(main: Node, m: Match, p: Hunter, lp: LoadoutPanel) -> void:
 	var hints := lp.find_children("drag_hint", "", true, false)
 	ok(str(p.pack) + str(p.gear) == before and hints.size() == 1 and _texts(hints[0]).has("Only gear is worn"),
 		"treasure on a glove slot: nothing moves, it snaps back with a hint")
+	var row := _slot(lp, "pack", 0)
+	var list := row.get_parent().get_parent() as ScrollContainer
+	var below := Vector2(_mid(row).x, SlotDrag._rect(list).end.y + 4.0)
+	ok(SlotDrag._unclipped(row, _mid(row)) and not SlotDrag._unclipped(row, below),
+		"a point the pack list scrolls out of view picks up nothing")
 	var g0: Dictionary = p.gear[0]
 	var g1: Dictionary = p.gear[1]
 	_mouse(vp, true, _mid(_slot(lp, "worn", 0)))

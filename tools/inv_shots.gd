@@ -4,7 +4,7 @@ extends RefCounted
 ## inv_loot: a deathbox with gear beside it; inv_tip: the compare tooltip on a hovered backpack piece
 ## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the height.
 ## --inv-drag instead saves <dir>/drag/NNNNN.jpg, a frame each, of the press-and-hold drags (SlotDrag) played
-## with real input: armor onto its slot, treasure refused by a glove slot, the gloves swapped, then the pad
+## with real input: armor onto its slot, a glove refused by the armor slot, the gloves swapped, then the pad
 ## swapping two belt slots. Encode: ffmpeg -framerate 30 -i <dir>/drag/%05d.jpg -pix_fmt yuv420p drag.mp4
 
 const REEL_W := 960              # px wide, each --inv-drag frame
@@ -100,8 +100,7 @@ func _drag_reel(m: Match) -> void:
 	await _mouse_drag(_at(lp, "pack", 0), _at(lp, "worn", 2))
 	lp = _panel(m)
 	await _hold(12)
-	var idol := m.player.pack.find_custom(func(it): return it.get("id", "") == "kin_idol")
-	await _mouse_drag(_at(lp, "pack", idol), _at(lp, "worn", 0))
+	await _mouse_drag(_at(lp, "pack", 1), _at(lp, "worn", 2))
 	await _hold(40)
 	await _mouse_drag(_at(lp, "worn", 0), _at(lp, "worn", 1))
 	lp = _panel(m)

@@ -168,16 +168,25 @@ func _slot_of(c: Control) -> Control:
 		c = c.get_parent() as Control
 	return null
 
-## The innermost registered slot under a point.
+## The innermost registered slot under a point (one scrolled out of its list is not under anything).
 func _slot_at(pos: Vector2) -> Control:
 	var best: Control = null
 	for c in _slots:
 		if not is_instance_valid(c) or not c.is_visible_in_tree():
 			continue
 		var r: Rect2 = _rect(c)
-		if r.has_point(pos) and (best == null or r.get_area() < _rect(best).get_area()):
+		if r.has_point(pos) and _unclipped(c, pos) and (best == null or r.get_area() < _rect(best).get_area()):
 			best = c
 	return best
+
+## False when a clipping parent (a scroll list) hides the point of `c`.
+static func _unclipped(c: Control, pos: Vector2) -> bool:
+	var up := c.get_parent() as Control
+	while up != null:
+		if up.clip_contents and not _rect(up).has_point(pos):
+			return false
+		up = up.get_parent() as Control
+	return true
 
 ## A slot's rect on screen (the layer it sits on may be scaled), in the preview layer's space.
 static func _rect(c: Control) -> Rect2:
