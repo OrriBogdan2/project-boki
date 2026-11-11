@@ -572,3 +572,9 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 ## 2026-11-11 owner: shrinking zone + map hazards (coord)
 - **Shrinking zone (battle-royale style)**: every match picks a part of the Hollow Crown (seeded, same for all) and the playable area closes toward it in phases (telegraphed on the map/minimap, damage outside, Boki/kin warn). It replaces "timer runs out -> all islands fall at once"; exits stay, the last ones sit inside the final zone. Works on the 2x map (shipped 0.24.4).
 - **Region hazards that Boki counter**: the map's distinct regions get real terrain hazards (lava, deep water, ice, plus others that fit each biome), not only small traps. Your Boki's type mitigates them (e.g. Fire walks lava, Water swims/bridges water, Ice keeps footing on ice), so team/Boki choice matters for routes. Each hazard readable at a glance.
+
+## 2026-11-11 owner: always adoptable Boki + carry 2 in, 1 extra out (coord proposal applied; owner may change)
+- **Always a Boki to adopt:** the Shelter never runs empty. If no player-given Boki is up, it shows at least 3 strays: common species that are not usual starters, at a low flat fee; adopting one restocks a new stray. Players with 0 Boki can always afford one.
+- **Carry 2 into a match:** a lead (has the summon button) and a second (its carry passive also on). A key swaps the lead (short cooldown). The same passive from both does not stack (the stronger one counts).
+- **1 extra out:** one carry-out slot for a Boki claimed in the match: no passive, no summon, it only rides home. It can be stolen like other wisps when you're downed (extraction tension). Each Hunter has their own slots; when yours is full the kin points out a teammate with room. No shared team pool.
+- Stolen-wisp rule stays, capped so one Hunter never holds more than 4 wisps (2 own + carry-out + 1 stolen).
