@@ -116810,5 +116810,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pose_bullsfrog_land_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_rollguin_pena",
+    "name": "Rollguin (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_rollguin_pena_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_rollguin_penb",
+    "name": "Rollguin (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_rollguin_penb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_rollguin_penc",
+    "name": "Rollguin (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_rollguin_penc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_murmuron_female_bk4",
+    "name": "Murmuron_female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_murmuron_female_bk4_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_bullsfrog_diag",
+    "name": "Bullsfrog (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_bullsfrog_diag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_murmuron_female_bk4",
+    "name": "Murmuron_female (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_murmuron_female_bk4_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_kingpinguin_penb",
+    "name": "Kingpinguin (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_kingpinguin_penb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_bullsfrog_bow",
+    "name": "Bullsfrog (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_bullsfrog_bow_2.jpg",
+    "ok": true
   }
 ]
