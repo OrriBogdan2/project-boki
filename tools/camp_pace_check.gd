@@ -113,6 +113,16 @@ func _play(main: Node, sd: int) -> Dictionary:
 			out["up"][mk] = _up(m)
 			out["kn"][mk] = _knocks(m)
 			out["xp"][mk] = src.duplicate()
+			if mk == "2:00" or mk == "2:30":
+				for t in range(9):
+					var sq: Array = m.hunters.filter(func(x): return x.team == t)
+					var home := int(m.skydrop.picks.get(t, -1))
+					var hc: Array = m.camps.camps.filter(func(c): return c["region"] == home)
+					var st: Array = hc.map(func(c): return "%s:%d" % [str(c["size"]).substr(0, 2), c["state"]])
+					var dd: Array = sq.map(func(x): return int(x.flat_dist(sq[0])))
+					var cd: Array = hc.map(func(c): return int(sq[0].flat_dist(c["pos"])))
+					var lr: Array = sq.map(func(x): return int(m.biomes.hot.region_at(x.pos)))
+					print("DBGSQ %s t%d home=%d camps=%s lv=%s xp=%s out=%s mate_d=%s camp_d=%s at_reg=%s goal=%s" % [mk, t, home, st, sq.map(func(x): return x.lvl), sq.map(func(x): return int(x.xp)), sq.map(func(x): return x.out), dd, cd, lr, str(sq[0].ai.get("goal_k", ""))])
 			if mk == "2:30":
 				for h in m.hunters: out["top230"] = maxi(out["top230"], h.lvl)
 	if "--feed" in OS.get_cmdline_user_args():

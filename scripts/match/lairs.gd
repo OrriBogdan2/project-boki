@@ -1297,7 +1297,7 @@ func bot_goal(h: Hunter, leaving: bool) -> Array:
 	var cg := _bot_camp(h, leaving)
 	if not cg.is_empty():
 		return cg
-	if leaving or m.time < 25.0 or h.hp < h.max_hp * 0.55:
+	if leaving or m.time < 25.0 or BotCamps.opening(m) or h.hp < h.max_hp * 0.55:
 		return []
 	if not a.has("boss_hunt"):
 		# a bot on its own (no squadmate left) waits for level 8 before it thinks about a boss: alone

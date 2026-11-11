@@ -13,6 +13,7 @@ extends RefCounted
 ## Public API:
 ##   BotCamps.pick(m, h, picks) -> Vector3    the camp to ping from the drop map (INF: none free)
 ##   BotCamps.reachable(m, h, at) -> bool     the ship's run lets h's squad glide down onto `at`
+##   BotCamps.opening(m) -> bool            before home_s: camps only, no boss lair
 ##   BotCamps.goal(m, h) -> Array             [position, kind] for Bot._choose, or [] for none
 ##   BotCamps.hold_burst(m, h, tgt) -> bool   keep the abilities for the prize monster's kill window
 ##   BotCamps.fight_reach(m, h, o, reach, provoked) -> float   how far h reaches for rival o (0: leave it)
@@ -100,6 +101,11 @@ static func _camp_to_ping(camps: Array) -> Dictionary:
 	return sorted[1] if distinct.size() >= 3 else sorted[0]
 
 # ------------------------------------------------------------------ on the ground
+## The opening (before home_s): a bot squad's XP is its region's camps, so it opens no boss lair yet
+## (the zone spec seals the lairs until 2:00).
+static func opening(m: Match) -> bool:
+	return m.camps != null and m.time < float(_rules()["home_s"])
+
 static func goal(m: Match, h: Hunter) -> Array:
 	if m.camps == null or m.biomes == null or m.skydrop == null:
 		return []
@@ -191,7 +197,7 @@ static func _blight_near(m: Match, p: Vector3, r: float) -> bool:
 	return m.blight != null and m.mobs.any(func(mb): return mb is Blight and not mb.dead and mb.flat_dist(p) < r)
 
 # ------------------------------------------------------------------ fights
-## How far bot h reaches for rival Hunter o, from the reach Bot would use (spec 6.8). Before home_s
+## How far bot h reaches for rival Hunter o, from the reach Bot would use (spec 6.8). Before fight.calm_s
 ## (the opening, when the XP is camps) none at all. Later none for a squad fight.gap or more levels
 ## above ours, unless it was hurt in the last busy_s (it is already in a fight), and none while our
 ## squad is on a camp one short of an even level or the ultimate; press_k times further for a squad
@@ -201,12 +207,12 @@ static func fight_reach(m: Match, h: Hunter, o: Hunter, reach: float, provoked: 
 	var mine := _squad(m, h.team)
 	if m.camps == null or mine.is_empty():
 		return reach
-	var opening: bool = m.time < float(_rules()["home_s"])
+	var F: Dictionary = _rules()["fight"]
+	var opening: bool = m.time < float(F["calm_s"])
 	if provoked and not (opening and _stray(h)):
 		return reach
 	if opening:
 		return 0.0
-	var F: Dictionary = _rules()["fight"]
 	var theirs := _squad(m, o.team)
 	var gap := _level(theirs) - _level(mine)
 	if gap >= float(F["gap"]) and not theirs.any(func(x): return m.time - x.hurt_at < float(F["busy_s"])):

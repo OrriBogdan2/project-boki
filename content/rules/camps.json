@@ -16,6 +16,6 @@
  "spread": 1.8,
  "bots": {"crown_pick": 0.15, "home_s": 120.0, "safe_s": 60.0, "blight_r": 40.0, "rival_r": 30.0, "together_r": 25.0, "detour_r": 60.0, "glide_k": 0.8,
   "pace_s": [0, 45, 105, 165, 240, 315, 400, 490, 600],
-  "fight": {"gap": 2.0, "busy_s": 3.0, "camp_s": 1.0, "press_k": 1.5},
+  "fight": {"calm_s": 150.0, "gap": 2.0, "busy_s": 3.0, "camp_s": 1.0, "press_k": 1.5},
   "steal": {"bold": 0.5, "r": 25.0, "hp": 0.25, "try": 0.35, "hold_hp": 0.3, "seen_s": 5.0}}
 }
