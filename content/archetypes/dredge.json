@@ -18,7 +18,7 @@
 		"dist": 3.2, "time": 0.16, "gap": 0.22, "hit_kb": 4.0, "lock_t": 0.8, "lock_deg": 35.0, "cut": 0.25, "air_k": 1.35, "air": {"cd": 12.5, "rank_cut": 2.0},
 		"desc": "A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees."},
 	"rmb": {"delivery": "projectile", "name": "Abyssal Hand", "short": "Abyssal Hand", "icon": "hook", "col": "#f0d070", "cooldown": 12.0, "charges": 1, "hold": 0.0,
-		"range": 11.5, "speed": 17.0, "windup": 0.2, "dmg": 6.0, "pull_speed": 11.0, "pull_max": 3.0, "gap": 1.5, "refund": 0.5, "fly_slow": 0.2,
+		"range": 11.5, "speed": 17.0, "windup": 0.2, "dmg": 6.0, "pull_speed": 9.0, "pull_max": 3.0, "stop_gap": 0.1, "refund": 0.5, "fly_slow": 0.2,
 		"variants": {"tap": "Your abyssal arm coils back for 0.2s, then reaches 11.5m (slowly: a foe who sees it can sidestep) through rocks, props and cliff faces at the first body it meets (a placed wall stops it). The hand grabs and the foe is reeled to you, stunned, dragged over rocks and cliffs (until it arrives or 3s pass), swinging round you. While it flies out you can only walk slowly; from the throw until the reel ends you hold your height, even over the abyss. You stand braced while you reel, shuffling at a fifth of your walk to swing them (Grounded: no jump or glide; the barge still works). It also pulls an ally to safety and scoops up wisps on the way. Rank 3: a foe it hits takes half the cooldown off. The abyss takes whoever is pulled over it."},
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "mod": "add"}},
 	"e": {"delivery": "cone", "name": "Anchor Drop", "short": "Anchor", "icon": "quake", "col": "#d89040", "cooldown": 7.0, "windup": 0.38, "hop": 1.8, "hop_from": 0.14, "hop_t": 0.2, "radius": 3.0, "angle": 110.0, "dmg": 25.0, "stun": 1.1, "gnd_t": 1.0, "air_min": 1.2, "dive": 28.0, "quake_r": 3.2, "air_max": 0.5, "air_h": 6.0, "abyss_k": 1.0, "rank3_stun": 0.2,
@@ -32,5 +32,11 @@
 	"rank3": {"dash": "pellet hits trim 0.25s off the barge recharge, and a dash resets the gun's spread", "sec": "hitting a foe takes half the cooldown off", "kin": "double damage on a foe over the abyss, and +0.2s stun"},
 	"rank2": {"sec": "Rank 2: cooldown 12s -> 10.8s.", "dash": "Rank 2: recharge 10s -> 8.5s per charge; the air pounce 12.5s -> 10.5s.", "kin": "Rank 2: cooldown 7s -> 6.3s, damage +15%, stun +0.1s."},
 	"rank_next": {"sec": "Rank 3: cooldown 12s -> 9.6s; hitting a foe takes half of it off.", "dash": "Rank 3: recharge 10s -> 7s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread.", "kin": "Rank 3: cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more."},
+	"turn": {
+		"lmb": {"early": "free", "late": "free", "source": "briefs/hero-ref/dredge.md:54 'the hunter turns to the cursor'"},
+		"rmb": {"early": "free", "late": "locked", "source": "briefs/hero-ref/dredge.md:78 and :90 the arm is thrown along the aim; through the pull he is braced side-on, 'turned toward the target', the cursor elsewhere (0147); fixed 11-10: the body followed the cursor"},
+		"e": {"early": "locked", "late": "free", "source": "briefs/hero-ref/dredge.md:119-125 slam 'in the facing/cursor direction', the shoulder turned away in the wind-up; ours: the direction locks at the press for the 0.38 s wind-up (owner item 33, docs/heroes/dredge.md)"},
+		"x": {"early": "free", "late": "free", "source": "briefs/hero-ref/dredge.md:256-257 the cone is 'locked at cast' and he stands planted; ours: kept turning to the cursor at a slow walk by owner item 36 (OWNER_REVIEW_1103.md:258-261)"}
+	},
 	"tells": {"half": "brass glints along the shoulder drum from 5 stacks", "full": "10 stacks: a brass halo ring at the feet and a bell within 20m", "dash_spent": "dash pips dark"}
 }

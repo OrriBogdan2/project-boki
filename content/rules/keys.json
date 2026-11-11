@@ -12,8 +12,7 @@
   "tonic_odds": 0.7,
   "table": "chest",
   "tier_bonus": [0, 0, 1],
-  "rift_key_min_bonus": 2,
-  "rift_key_odds": 0.35,
+  "soul_ember_min_bonus": 2,
   "soul_ember_odds": 0.3
  },
  "keys": {
@@ -21,7 +20,6 @@
   "seed_add": 31,
   "no_carry": ["ward", "glimmer", "warden", "sentinel"],
   "glint_h": 1.9,
-  "pickup_pull": 2.2,
   "cap": 3,
   "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."
  },

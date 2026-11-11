@@ -9,10 +9,10 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # measured by --move-feel-check. Snappy first: input acts the step it arrives, falls hit the
 # footage depth, the glider opens and steers at once and keeps the momentum you bring into it.
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
-# out under four terraces (the wall kick's job) on our 0.8m terraces
+# out under four terraces (the wall kick's job) on our 0.8m terraces. Fixed height and no re-jump delay
+# (JumpMaxHoldTime / JumpCooldown undecoded); coyote and buffer times are in HunterMove
 const JUMP_V := 6.8
 const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
-const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by Loco.air_step)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
@@ -39,6 +39,7 @@ const MANTLE_REACH_ABYSS := 4.5  # below an island's lip over the abyss, its sid
 const WALL_CATCH_REACH := 0.75   # (movefeel) over the abyss below a lip, a wall this far from your side catches you (elsewhere 0.4)
 const ABYSS_GLIDE_ROOM := 1.5    # a glider with heat left (lifting you out) gets this much more room
 const EX_DASH_CD := 12.5         # the long dash: in the air, or with the short one on cooldown
+const GLIDER_HIT_HEAT := 3.0 * 0.30 / 34.5   # [sync64] glider heat per point of damage: hits heat it 3x (34.5 burns 90%)
 const DASH_SPEED := 19.0      # m/s: the base dash (owner: 23 felt too fast); 19 x 0.19s = 3.6m
 const DASH_TIME := 0.19       # s
 const DASH_REGEN := 2.2
@@ -97,7 +98,8 @@ var grap_cd := 0.0
 var grap: Dictionary = {}       # floating back up a ledge
 var push_t := 0.0
 var last_gy := 0.0             # ground height where you last stood
-var pad: Dictionary = {}        # jump-pad flight along a fixed arc
+var pad: Dictionary = {}        # a scripted arc: a ledge hop, or a leap onto higher ground (launch_to)
+var pad_flight: Dictionary = {}  # off a jump pad (PadFlight): {land, open}
 var kb_t := -9.0
 var sig_cd := 0.0
 var cloak_t := 0.0
@@ -138,7 +140,6 @@ func set_hold(kind: String, dur := 0.15) -> void:
 
 func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
-var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
 var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
@@ -179,12 +180,14 @@ var crouch_k := 0.0
 var reveal_t := 0.0           # seen through bushes and around walls for a moment after firing or getting hit
 var wall_touch_t := 0.0       # touching a wall in the air: a jump kicks off it
 var wall_n := Vector2.ZERO
+var slide_n := Vector2.ZERO   # out of the wall the last step's walk pressed into (HunterMove.along_wall)
 var wall_moves := WallMoves.new()      # wall kick and wall bounce
 var glide_lift := GlideLift.new()      # the abyss lift's spring and float, ledge catch timing
 var glide_dive := GlideDive.new()      # the glider's plunge while crouch is held under it
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
+var wallstun_at := -9.0       # s (match time) the hit that set wallstun landed (Displace.knocked keeps it)
 var land_t := 0.0
 var ghost_t := 0.0
 var step_t := 0.0
@@ -341,15 +344,15 @@ func equip(w: String, with_ammo := -1, rebuild := true) -> void:
 				ch.queue_free()
 		Models.gun_parts(gun, w, Models.toon(Color("4a4d5c")), Models.toon(Color("2b2a33")), Models.toon(Data.TEAM_COLORS[team % Data.TEAM_COLORS.size()], true, 0.0))
 
-## Chasing down whoever took your kin: 18% faster heading their way. Carrying a stolen kin: 8% slower.
-func _chase_mod(mv: Vector2) -> float:
-	var k := 0.92 if stolen_carry else 1.0
-	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
-	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
-	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
-	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
-	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
-		k *= 1.18
+## Everything that slows your ground speed, multiplied (the bonuses add in HunterMove.speed_bonus): a
+## slow, being downed, reloading, firing, a channel (drink, kit), sneaking, the kit's own pace, a stolen kin or the
+## Heartspark carried.
+func _move_mult() -> float:
+	var k := slow_mult(0.65) * _fire_slow() * (0.88 if reload_t > 0.0 else 1.0) * UtilityUse.channel_move(self)
+	k *= HunterMove.sneak_speed if crouch else 1.0
+	if downed: k *= 0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0)
+	k *= (0.92 if stolen_carry else 1.0) * (ak.pace() if ak else 1.0) * KinDowned.carry_speed(self)
+	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
 	return k
 
 ## The colour that marks this hunter's effects (from their class).
@@ -454,11 +457,19 @@ func targetable() -> bool:
 func is_local() -> bool:
 	return ctrl == "local"
 
+## A cursor closer than this many body widths (2 r) says nothing about a way to face: aim_dir keeps the last good one.
+const AIM_MIN_BODIES := 2.0
+var aim_good := Vector2.ZERO      # the last aim direction taken from a cursor outside that circle
+
 func aim_dir() -> Vector2:
 	if ak and ak.aim_lock() != Vector2.ZERO:
 		return ak.aim_lock()
 	var d := Vector2(inp["aim"].x - pos.x, inp["aim"].z - pos.z)
-	return d.normalized() if d.length() > 0.05 else Vector2(sin(face), cos(face)) * -1.0
+	if d.length() > r * AIM_MIN_BODIES:
+		aim_good = d.normalized()
+	elif aim_good == Vector2.ZERO:
+		aim_good = Vector2(sin(face), cos(face)) * -1.0
+	return aim_good
 
 # ------------------------------------------------------------------ damage
 func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
@@ -474,11 +485,13 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if ctrl == "local" and Game.god:
 		return 0.0
 	reveal_t = maxf(reveal_t, 1.0)
-	hurt_at = m.time
+	# (a hot glider or the tide never breaks a channel)
+	hurt_at = hurt_at if opts.get("src", "") == "heat" else m.time
 	if base_t > 0.0 and dmg > 0.0:
 		cancel_base("you took damage")
 	if opts.has("wallstun"):
 		wallstun = float(opts["wallstun"])
+		wallstun_at = m.time
 	# Getting hit while gliding, as in Supervive: a hit does NOT knock you out of the air by itself
 	# and you take normal damage. What it does is drain the glider at triple the usual rate. Only
 	# when the glider runs dry are you spiked (stunned, plummeting, a 0.7s stun when you land; over
@@ -486,8 +499,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	var spiked := false
 	if gliding and not dropping and dmg > 0.0 and opts.get("src", "") not in ["fall", "burn", "heat"]:
 		var was := glide_fuel
-		# a knock's worth of damage (250 of 1,050) would burn 30% of the glider; hits drain it 3x
-		glide_fuel = maxf(0.0, glide_fuel - 3.0 * dmg * (0.30 / 34.5) / float(cdat.get("glide_cap", 1.0)))
+		glide_fuel = maxf(0.0, glide_fuel - dmg * GLIDER_HIT_HEAT / float(cdat.get("glide_cap", 1.0)))
 		hit_heat_t = 1.0
 		if is_local() and m.hud and m.hud.has_method("glider_hit"):
 			m.hud.glider_hit(was - glide_fuel)
@@ -731,6 +743,20 @@ func _render_balloon(delta: float) -> void:
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
 ## stack with whatever you were doing), you slide for a fixed moment without control, and it never
 ## pops you into the air unless the attack says so.
+func _shot_down() -> void:
+	gliding = false
+	glide_cd = 2.5
+	shot_down = true
+	stun_t = maxf(stun_t, 0.35)
+	vel = Vector3(vel.x * 0.3, minf(vel.y, -6.0), vel.z * 0.3)
+	m.fx.burst(pos + Vector3(0, 1.8, 0), Color("ff9a5a"), 14, 3.0, 0.45, 6.0, 0.8)
+	m.sfx("knock", pos, -2.0, 1.3)
+	if ctrl == "local" and m.hud:
+		m.hud.toast_small("GLIDER SHOT DOWN", Color("ff9a5a"))
+
+## Knockback is a clean, predictable shove: a knock replaces the flight you were in (Displace.knock_speed: a
+## second knock takes over from the first, a pull or a reel), you slide for a fixed moment without control,
+## and it never pops you into the air unless the attack says so.
 var knock_t := 0.0
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
@@ -749,13 +775,11 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 		return
 	if s > 4.0:
 		kb_t = m.time
-	var dir := k / k.length()
-	var hv := Vector2(vel.x, vel.z)
-	var along := hv.dot(dir)
-	hv += dir * (maxf(along, s) - along)
+	var hv := Displace.knock_speed(Vector2(vel.x, vel.z), k / k.length(), s)
 	vel.x = hv.x; vel.z = hv.y
-	if s > 2.5:
+	if s >= Displace.KNOCK_MIN:
 		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
+		if m is Match: (m as Match).displace.knocked(self)
 	if lift >= 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
@@ -778,7 +802,7 @@ func do_jump() -> void:
 		_deploy()
 		return
 	if pad.size() > 0:
-		# press jump mid-flight off a jump pad and the glider opens, keeping the launch's speed
+		# press jump mid-leap onto higher ground and the glider opens, keeping the leap's speed
 		if not pad.get("ledge", false) and float(pad["t"]) > 0.12 and can_glide():
 			pad = {}
 			_open_glider()
@@ -793,7 +817,7 @@ func do_jump() -> void:
 		jump_at = m.time
 		grounded = false
 		coyote = 0.0
-		m.sfx("jump", pos, -6.0)
+		HeroSfx.move(m, self, "jump", "jump", -6.0)
 		m.fx.dust(pos, 2)                   # (movefeel) a little kick of dust off the ground
 		return
 	if air_jumps < int(owner_stat("extra_jumps")) and not gliding:
@@ -801,19 +825,17 @@ func do_jump() -> void:
 		air_jumps += 1
 		vel.y = JUMP_V
 		m.fx.dust(pos, 4)
-		m.sfx("jump", pos, -4.0, 1.2)
+		HeroSfx.move(m, self, "jump", "jump", -4.0, 1.2)
 		return
 	if wall_moves.try_kick(self):
 		return
 	# already in the air: a second press opens the glider, rising or falling, unless you're about to land
-	var lead := JUMP_BUFFER + 0.02     # "about to land": the ground is this many seconds of falling away
-	var fall_left := maxf(0.9, (0.5 * H_GRAV * lead - vel.y) * lead)
-	var near_ground := vel.y < 0.0 and pos.y - ground() < fall_left and not over_void()
+	var near_ground := HunterMove.near_landing(vel.y, pos.y - ground()) and not over_void()
 	if not gliding and not near_ground and (_dash_into_glide() or can_glide()):
 		_open_glider()
 		return
 	_glide_armed = not gliding and not near_ground      # a move keeps it shut: held, it opens as the move ends
-	jump_buf = JUMP_BUFFER
+	jump_buf = HunterMove.jump_buffer_s
 
 ## A glider sinks at one steady rate, whatever your speed, so every glide reads the same.
 const GLIDE_SINK := 1.4       # (movefeel) floatier: [spec] says 2-4 m/s eyeball, [est] 2.2 felt like falling; was 2.2
@@ -911,6 +933,8 @@ func _glider_sfx(which: String) -> void:
 		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
 	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
+	if which == "open":
+		m.sfx(HeroSfx.weighted(self, "glide_open", ""), pos, vol)
 
 ## The class's dodge (Shift), as described by its ability data: a dash, plus anything else in its
 ## effect list (the heavy class's charge shoves people).
@@ -922,8 +946,8 @@ var hit_heat_t := 0.0           # a moment after being hit while gliding, the gl
 var ex_next := false
 var dash_is_ex := false
 ## Movement chains (Supervive): Shift during a glove rush cancels it into the dash; during a dash
-## or a ledge climb it's buffered and fires the moment that ends; off a jump pad (after the first
-## beat of the launch) it breaks the pad flight into a dash. Jump out of a ground dash keeps half
+## or a ledge climb it's buffered and fires the moment that ends; in a leap onto higher ground (after
+## its first beat) it breaks the leap into a dash. Jump out of a ground dash keeps half
 ## its speed. Dash in the air and keep holding glide and the glider opens again as the dash ends.
 ## B: base to a teammate (Supervive's recall-to-ally). A 3s channel where you stand still and can't
 ## attack; moving, attacking or taking any damage cancels it. Everyone sees the channel ring on you
@@ -1010,19 +1034,20 @@ func _skyfall(drop: float, fall_v: float) -> void:
 	m.fx.word(pos + Vector3(0, 2.2, 0), "SKYFALL", Color("ffd27a"), true)
 	add_stat("skyfalls")
 var move_kind := "dash"          # what the current roll is: "dash" (Shift) or "rush" (an ability or glove)
+var roll_falls := false          # this ground dash ran off a ledge: it falls as it goes (HunterMove.dash_off_ledge)
 const DASH_BUFFER := 0.18
 
 func do_dash() -> void:
 	if downed or out:
 		return
-	# stunned, rooted, hexed or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
-	if stun_t > 0.0 or root_t > 0.0 or Hex.active(self) or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
+	# stunned, rooted or Grounded (a Thief's Bola: no dash, jump or glide; a reeling Dredge still barges)
+	if stun_t > 0.0 or root_t > 0.0 or (KitStatus.grounded(self) and not DredgeKit.reeling(self)):
 		_ab_feedback("dash", "deny")
 		return
 	if roll_t > 0.0 and move_kind == "rush":
 		roll_t = 0.0            # a glove/ability rush cancels straight into the dash
 	elif pad.size() > 0 and not pad.get("ledge", false) and float(pad.get("t", 0.0)) > 0.12:
-		pad = {}                # break out of a jump pad's flight
+		pad = {}                # break out of a leap's arc
 	elif roll_t > 0.0 or grap.size() > 0 or pad.size() > 0:
 		dash_buf = DASH_BUFFER  # pressed a hair early: fire it as soon as this movement ends
 		return
@@ -1101,6 +1126,7 @@ func dash_with(e: Dictionary) -> void:
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
+	roll_falls = false
 	dash_is_ex = ex_next
 	if ex_next:
 		# the long dash: the class's own distance and time (light 7m, medium 6m, heavy 5m)
@@ -1169,7 +1195,7 @@ func _shove_along() -> void:
 		f.hurt(maxf(0.1, float(shove["dmg"])) * m.dmg_mult(self), self, so)
 
 func can_fire() -> bool:
-	if Hex.active(self) or Capture.active(self):
+	if Capture.active(self):
 		return false
 	if ak and not ak.can_shoot():
 		return false
@@ -1278,8 +1304,8 @@ func _draw_step(dt: float) -> void:
 func _loose() -> void:
 	var t := draw_t
 	draw_t = -1.0
-	if not can_fire() or ammo <= 0:
-		return
+	if not can_fire() or ammo <= 0 or t < float(wpn.get("draw_min", 0.0)):
+		return          # (let go inside draw_min it is a mashed click: no arrow, the next press draws afresh)
 	var stages: Array = wpn.get("draw", [])
 	var dmg := float(wpn.get("draw_early", 15.0)); var rng := float(wpn["range"]); var spd := float(wpn["speed"])
 	for stg in stages:
@@ -1827,7 +1853,6 @@ func sim(dt: float) -> void:
 	if dt <= 0.0:
 		prev = pos                  # a far, calm bot's off step (SimLod)
 		return
-	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:
 		if not merge_st.is_empty():
@@ -1923,11 +1948,11 @@ func sim(dt: float) -> void:
 	_tick_base(dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
-	if ak: ak.flow.route(dt)       # presses during a dash: fire, held to its end, or cancel it (DashFlow)
 	if inp["dash"]: do_dash()
 	if dash_buf > 0.0 and roll_t <= 0.0 and grap.is_empty() and pad.is_empty() and not inp["dash"]:
 		dash_buf = 0.0
 		do_dash()
+	if ak: ak.flow.route(dt)       # presses during a dash (one on Shift's own step too): DashFlow's rows
 	if inp["jump"]: do_jump()
 	if runner:
 		runner.rate = 1.0 + gear_stat("cdr")
@@ -1938,7 +1963,7 @@ func sim(dt: float) -> void:
 	for gi in 2:
 		gear_cd[gi] = maxf(0.0, float(gear_cd[gi]) - dt)
 		if inp.get("gear%d" % (gi + 1), false):
-			if Hex.active(self) or (ak and ak.cast_locked()):
+			if (ak and ak.cast_locked()):
 				_ab_feedback("gear%d" % gi, "deny")
 			elif (gear[gi] as Dictionary).is_empty() or float(gear_cd[gi]) > 0.0 or not Gear.active(String(gear[gi].get("id", ""))):
 				_ab_feedback("gear%d" % gi, "deny")
@@ -1950,7 +1975,7 @@ func sim(dt: float) -> void:
 		ak.tick(dt)
 		if inp["sig"]: ak.use_e()
 		if inp["sec"]: ak.press_rmb()
-		if inp.get("kin_ab", false) and not Hex.active(self) and not ak.cast_locked(): use_boki_c()
+		if inp.get("kin_ab", false) and not ak.cast_locked(): use_boki_c()
 	elif inp["sig"]: use_kin_ability("k1")
 	if inp.get("kin_ab", false) and ak == null: use_kin_ability("k1")
 	# (a kin's second ability and mid-fight kin swaps are retired from the kit; bots don't press them)
@@ -1987,13 +2012,6 @@ func sim(dt: float) -> void:
 	if not (ak and ak.face_locked()):
 		face = rotate_toward(face, want, HunterMove.turn_rate * dt)
 
-func pad_launch(to: Vector3) -> void:
-	var d := Vector2(to.x - pos.x, to.z - pos.z).length()
-	pad = {"from": pos, "to": to, "t": 0.0, "dur": clampf(d / 12.0, 0.7, 1.5), "h": maxf(pos.y, to.y) - pos.y + 2.5 + d * 0.12}
-	roll_t = 0.0
-	grap = {}
-	grounded = false
-
 func _pad_fly(dt: float) -> void:
 	pad["t"] += dt
 	var k := clampf(pad["t"] / pad["dur"], 0.0, 1.0)
@@ -2018,7 +2036,7 @@ func _pad_fly(dt: float) -> void:
 		pad = {}
 		squash = 0.12 if ledge else 0.3
 		m.fx.dust(pos, 3 if ledge else 8)
-		m.sfx("land", pos, -12.0 if ledge else -8.0)
+		MoveSfx.land(self, -12.0 if ledge else -8.0)
 
 ## Where a mantle has you at progress k (0..1): up the face with an ease-out (a quick pull that
 ## slows near the top), then over the lip with a small hop and an ease-in-out onto the top. The
@@ -2057,10 +2075,11 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
-	spd *= KinDowned.carry_speed(self)
+	var spd := HunterMove.ground_speed(base_speed, HunterMove.speed_bonus(self, mv), _move_mult())
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
+	HunterMove.dash_off_ledge(self)
+	var in_dash := roll_t > 0.0      # (its last step, the hand-over to the run, included)
 	if roll_t > 0.0:
 		roll_t -= dt
 		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
@@ -2109,13 +2128,15 @@ func _physics(dt: float) -> void:
 			var up: Dictionary = m.world.updraft_at(pos)
 			if not up.is_empty():
 				in_current = true
-				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
+				vel.y = move_toward(vel.y, HunterMove.updraft_vy, 45.0 * dt)     # (movefeel) grabs you in ~0.2 s
 	else:
-		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
+		# the ground (and a kit's hover): up to the cap at ground_accel, down to it at the walking brake
+		# (a Slow lands, a haste ends, a pad's carry) [game data]; a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				hv = Loco.accel_to(hv, HunterMove.along_wall(mv * spd, slide_n), ground_accel * grip, 0.0,
+						HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
@@ -2151,7 +2172,7 @@ func _physics(dt: float) -> void:
 		else:
 			sink = glide_lift.sink(self, sink)     # high over the ground: pulled down, the drop becomes speed
 			if vel.y < -sink:
-				vel.y = move_toward(vel.y, -sink, Loco.glide_catch * dt)    # the canopy eases the fall: absorbed, never turned into speed
+				vel.y = move_toward(vel.y, -sink, GlideDive.catch_rate(self, sink) * dt)    # the canopy catches you: over a beat, or by the ground after a dive
 			else:
 				vel.y = maxf(vel.y - GLIDE_GRAV * glide_lift.gravity_scale() * dt, -sink)
 			# [footage] over the abyss a glider holds at island level instead of sinking below it,
@@ -2160,7 +2181,7 @@ func _physics(dt: float) -> void:
 				vel.y = minf(0.0, (lip_y - pos.y) / dt)
 	elif MergeKit.rising(self):
 		vel.y = MergeKit.rise_vy(self)      # the ultimate's climb (Thunderhead)
-	elif roll_t > 0.0 and not grounded and not dropping:
+	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
@@ -2178,12 +2199,13 @@ func _physics(dt: float) -> void:
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
 	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
 	dash_rest = Vector2.ZERO
-	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
+	var pw := Vector3(tgt.x, tgt.y, 0.0) if spirit_t > 0.0 else HunterMove.push_out_walls(self, m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y))
+	var po := Vector2(pw.x, pw.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
 	if po.distance_squared_to(tgt) > 1e-10:
 		block_n = (po - tgt).normalized()
-		rock_b = m.world.ground_at(tgt.x - block_n.x * r * 0.7, tgt.y - block_n.y * r * 0.7) + World.BLOCK_H
+		rock_b = pw.z if pw.z > 0.0 else m.world.ground_at(tgt.x - block_n.x * r * 0.7, tgt.y - block_n.y * r * 0.7) + World.BLOCK_H
 		var hvb := Vector2(vel.x, vel.z)
 		var into := hvb.dot(block_n)
 		if into < 0.0:
@@ -2194,21 +2216,21 @@ func _physics(dt: float) -> void:
 	var b1: float = _occ(nx, pos.z, guard)
 	if b1 == 0.0: pos.x = nx
 	elif grounded and b1 > 0.0 and b1 - pos.y <= World.LEVEL + 0.05: step_up = b1
-	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else vel.x * -0.1
+	elif b1 > 0.0 or b1 == -1.0: vel.x = 0.0 if b1 == -1.0 else WallMoves.stopped(self, vel.x)
 	var nz := tgt.y
 	var b2: float = _occ(pos.x, nz, guard)
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
-	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
-	if step_up > 0.0 and mv.length() > 0.3:
-		# walking into a single terrace steps you up it smoothly, no hop
+	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else WallMoves.stopped(self, vel.z)
+	if step_up > 0.0 and (mv.length() > 0.3 or roll_t > 0.0):
+		# walking or dashing into a single terrace steps you up it smoothly, no hop (a dash at its own speed)
 		step_vis -= step_up - pos.y
 		pos.y = step_up
 		prev.y = pos.y
-		var fw := mv.normalized() * spd * dt
+		var fw := (hv if roll_t > 0.0 else mv.normalized() * spd) * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
+	elif step_up == 0.0 and HunterMove.caught(in_dash, b1, b2) and hv.length() > 1.0:
 		# caught on a corner: slip sideways around it rather than sticking
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
 		var want := hv.length() * dt
@@ -2244,11 +2266,13 @@ func _physics(dt: float) -> void:
 		wall_hit_v = Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
 	elif rock_v.length() > 0.01:
 		wall_hit_v = rock_v
+	var hit_n := Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
+	slide_n = hit_n if grounded and step_up == 0.0 else Vector2.ZERO
 	if (b1 > 0.0 or b2 > 0.0 or rock_v.length() > 0.01) and blk > pos.y + 0.6:
 		# against a wall: in the air you can kick off it; knocked into it hard, you're stunned
 		if not grounded:
 			wall_touch_t = 0.2
-			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
+			wall_n = hit_n
 			wall_moves.hit(self, pre_v, blk)
 		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
 			wslam_t = 1.2
@@ -2264,7 +2288,7 @@ func _physics(dt: float) -> void:
 	wslam_t = maxf(0.0, wslam_t - dt)
 	# rocks, trees and walls are walls: no hop onto them (item 151; their tops were never ground, so a hop left
 	# you inside the clump). Terrain ledges are the ledge rise's (_ledge_rise).
-	StoneStand.climb(self, maxf(b1, b2))      # the caster walking into her own rock rises onto it
+	StoneStand.climb(self, maxf(maxf(b1, b2), pw.z))      # the caster walking into her own rock rises onto it
 	StoneStand.mover = null
 	var g := ground()
 	if spirit_t > 0.0 and g > pos.y + World.STEP:
@@ -2272,10 +2296,11 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - 0.05:
+	if grounded and g < pos.y - 0.05 and not HunterMove.follows_floor(self, g, Vector2(pos.x - x0, pos.z - z0).length()):
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
-		coyote = 0.12
+		coyote = HunterMove.coyote_s
+		roll_falls = roll_t > 0.0 and move_kind == "dash"
 	if not grounded:
 		var fv := vel.y
 		pos.y += vel.y * dt
@@ -2301,13 +2326,13 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 6)
 				squash = 0.15
 				land_t = 0.2
-				m.sfx("land", pos, -10.0)
+				MoveSfx.land(self, maxf(HeroSfx.land_db(-fv), -12.0))
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
 				# and a soft thud; no lockout, you keep moving the same step
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
-				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
+				MoveSfx.land(self, HeroSfx.land_db(-fv) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
 				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
@@ -2318,6 +2343,9 @@ func _physics(dt: float) -> void:
 				vel.y = JUMP_V
 				grounded = false
 	else:
+		if g > pos.y and not m.world.on_stairs(pos.x, pos.z):
+			step_vis -= g - pos.y      # a lip under the step height: the model eases up it like a terrace step
+			prev.y = g                 # (no render lead on the rise, or the model would overshoot it)
 		pos.y = g
 	if grounded:
 		last_gy = pos.y
@@ -2415,7 +2443,7 @@ func _interrupt_consume() -> void:
 	m.fx.burst(pos + Vector3(0, 1.3, 0), Color("ff7a4a"), 10, 3.0, 0.35, 8.0)
 	m.sfx("crit", pos, -4.0, 0.7)
 
-## Hold jump while falling to open the glider. It folds when you land, run out, dash, or get hit.
+## Hold jump while falling to open the glider. It folds when you land, let go, dash, are stunned or spiked.
 var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
@@ -2449,15 +2477,19 @@ func _update_glide(dt: float) -> void:
 	if auto_glide and (glide_press or downed or out or (grounded and air_t <= 0.0 and vel.y <= 0.0)):
 		auto_glide = false
 		_glide_armed = _glide_armed or (glide_press and not grounded)
+	PadFlight.step(self)             # off a jump pad: the glider opens at the apex
+	var glider_shut_in_air := not gliding and not auto_glide and not grounded and not dropping and can_glide()
+	if glider_shut_in_air and not m.world.updraft_at(pos).is_empty():
+		auto_glide = true            # rising air off an edge opens the glider by itself and carries you up (DECISIONS)
 	# an overheated glider scorches you while it stays open
 	if gliding and not dropping and glide_fuel <= 0.001 and not downed:
 		heat_burn += dt * max_hp * 0.035      # an overheated glider burns ~3.5% of your health a second (was a token 4/s)
 		if heat_burn >= 20.0:                  # (in ~20-damage ticks, ~2 a second: not a stream of numbers)
 			heat_burn -= 20.0
 			hurt(20.0, null, {"src": "heat"})
-	# an overheated glider stays open (slow and sinking) until you land or get hit again
+	# an overheated glider stays open until you land or get hit again; a knock carries an open one (0055)
 	var can: bool = (lfloat.is_empty() or (bool(inp.get("glide", false)) and not bool(lfloat.get("g0", true)))) and not grounded and roll_t <= 0.0 and fly_t <= 0.0 and glide_cd <= 0.0 and not downed and stun_t <= 0.0 \
-		and m.time - kb_t > 0.4 and pad.is_empty() and not shot_down
+		and (gliding or m.time - kb_t > 0.4) and pad.is_empty() and not shot_down
 	var want: bool = inp.get("glide", false) or auto_glide
 	var btn_down: bool = inp.get("glide_btn", false)
 	_glide_armed = (_glide_armed or (btn_down and not _glide_btn_held and can)) and bool(inp.get("glide", false)) and not grounded
@@ -2498,7 +2530,7 @@ func _update_glide(dt: float) -> void:
 # the same after a short push. Getting launched hard still carries you past the edge.
 func _try_ledge_grab(dt: float) -> void:
 	if not lfloat.is_empty() or grap.size() > 0 or pad.size() > 0 or fly_t > 0.0 or charge.size() > 0 or dropping or shot_down or pos.y < last_gy - 14.0 \
-			or stun_t > 0.0 or root_t > 0.0 or Hex.active(self):
+			or stun_t > 0.0 or root_t > 0.0:
 		push_t = 0.0
 		return
 	var w: World = m.world
@@ -2670,11 +2702,10 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 		mantle_cd = 0.3
 		return true
 	if not bool(lf["win"]) and left <= LRISE_WINDOW:
-		# the fling window opens: a tick and a quick ring, so the timing reads
+		# the fling window opens: a tick, so the timing reads
 		lf["win"] = true
 		if is_local():
 			m.sfx("click", pos, -8.0, 1.6)
-			m.fx.ring(pos + Vector3(0, 0.1, 0), 0.9, Color(1, 1, 1, 0.8), 0.18)
 	vel.y = HunterMove.rise_vy(vel.y, left, 0.75 if downed else 1.0, LRISE_SPEED, dt)
 	return true
 
@@ -2717,7 +2748,7 @@ func _ledge_fling() -> void:
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
-	m.sfx("jump", pos, -6.0)
+	HeroSfx.move(m, self, "jump", "jump", -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
 		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
@@ -2739,7 +2770,7 @@ func _grapple(dt: float) -> void:
 	grap["fx"] -= dt
 	if grap["fx"] <= 0.0:
 		grap["fx"] = 0.07
-		m.fx.burst(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
+		m.fx.debris(pos + Vector3(0, 0.6, 0), Color("cfeaff"), 2, 1.2, 0.35, 0.0)
 	if (absf(tz - pos.y) < 0.02 and hd.length() < 0.05) or grap["t"] > 2.0:
 		pos = Vector3(grap["ex"], maxf(pos.y, tz), grap["ez"])
 		var land: Vector3 = grap["land"]
@@ -2768,7 +2799,7 @@ var level_ups := 0          # how many times this run the local level-up moment 
 var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 
 func gain_xp(x: float) -> void:
-	if lvl >= XP_TO.size() or x <= 0.0:
+	if lvl >= XP_TO.size() or x <= 0.0 or not TutorialCamps.xp_ok(self):
 		return
 	if m and m.rolling:
 		x = m.rolling.scale_xp(self, x)      # catch-up XP below the session's median level (Rolling.xp_mult)
@@ -2800,6 +2831,8 @@ func xp_frac() -> float:
 
 func can_level(slot: String) -> bool:
 	if skill_pts <= 0 or not SLOT_MAX.has(slot) or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX[slot]):
+		return false
+	if not TutorialCamps.lets_level(self, slot):
 		return false
 	if slot == "ult":
 		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
@@ -2859,7 +2892,7 @@ func _gate(key: String, slot: String, fb: String) -> void:
 		if slot == "ult" and skill_pts > 0:
 			m.hud.toast("Ultimate unlocks at level %d" % int(ULT_AT[0]), Color("a2a8bb"))
 		else:
-			m.hud.toast("Locked  ·  earn a skill point to unlock it", Color("a2a8bb"))
+			m.hud.toast(TutorialCamps.locked_text(self), Color("a2a8bb"))
 
 var base_armor := 50.0
 ## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters
@@ -2921,8 +2954,8 @@ func gear_stat(k: String) -> float:
 		"cdr": t += owner_stat("cooldown")
 	return t
 
-## Ground speed while you ride your mount (its carry.mount speed).
-func _mount_speed() -> float:
+## Ground speed while you ride your mount (its carry.mount speed), as a share of your own.
+func mount_speed() -> float:
 	var k: Kin = kin
 	return float(k.ks.mount.get("speed", 1.0)) if k and k.ks else 1.0
 
@@ -3052,6 +3085,8 @@ func _anim_state(stretch: float) -> void:
 	if ak and ak.anim_id != "":
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
 		s["kmove_t"] = m.time - ak.anim_at
+	else:
+		s.erase("kmove")                       # a move the kit cleared ends (kept, it froze on its last frame)
 	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
@@ -3192,7 +3227,7 @@ func render(delta: float, alpha: float) -> void:
 		boost_fx_t = maxf(0.0, boost_fx_t - delta) if boosted else 0.0
 		if wind_t <= 0.0:
 			wind_t = 0.035 if boosted else 0.09
-			m.fx.burst(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
+			m.fx.debris(pos + Vector3(randf_range(-0.8, 0.8), 1.9, randf_range(-0.4, 0.4)), Color(1, 1, 1, 0.8 if boosted else 0.5), 4 if boosted else 2, 1.0, 0.45, -1.0, 0.9 if boosted else 0.7, Vector3(-vel.x, 0, -vel.z).normalized(), 20.0)
 			if boosted:
 				m.fx.ghost(position, face, Color(0.85, 0.95, 1.0), float(cdat["scale"]))
 	# little puffs of dust while running, and a kick of dust when you turn hard
@@ -3201,7 +3236,7 @@ func render(delta: float, alpha: float) -> void:
 		if step_t <= 0.0:
 			step_t = 0.32
 			m.fx.dust(pos, 2)
-			Juice.footstep(self)
+			MoveSfx.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")
@@ -3211,6 +3246,7 @@ func render(delta: float, alpha: float) -> void:
 		var ek := 1.0 + 2.7 * gk * gk * gk + 1.7 * gk * gk      # pops open with a little overshoot
 		gl.scale = Vector3(ek * (1.0 + sin(m.time * 9.0) * 0.02), ek, ek)
 		gl.rotation.x = 0.35 * ek - 0.1
+		GliderHeat.tick(self, gl, delta)
 	var halo := torso.get_node_or_null("Halo")
 	if halo:
 		halo.rotation.y += delta * 2.0
@@ -3224,14 +3260,13 @@ func render(delta: float, alpha: float) -> void:
 			see = lp.flat_dist(self) < 2.2 and int(m.time * 10.0) % 3 == 0
 		else:
 			see = int(m.time * 14.0) % 3 != 0
-	model.visible = see and not Hex.active(self) and not HunterWisp.hides(self)    # a critter or a Wisp stands in
+	model.visible = see and not HunterWisp.hides(self)    # a critter or a Wisp stands in
 	ShieldLook.tick(self)
 	SideRings.tick(self)
 	var ring := model.get_node("TeamRing") as MeshInstance3D
 	ring.visible = not downed
 	_render_balloon(delta)
 	Oomph.render_hit(self, delta)
-	Hex.tick(self, delta)
 	if (drink_t > 0.0 or kit_t > 0.0 or box_reviving()) and visible and see:
 		vuln_fx_t -= delta
 		if vuln_fx_t <= 0.0:
