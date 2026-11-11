@@ -9,11 +9,11 @@ Owner, 11-11: "bot is trying to kill me when hes in the boss fight". A bot seale
 
 ## Options
 1. Never target hunters in a boss fight: simple, but a rival can then shoot a bot for free inside the seal.
-2. Target the boss; a rival sealed in with us only once they (or their Boki) land a hit on us after the seal closed.
+2. Target the boss; a rival sealed in with us only once they land a hit of their own on us after the seal closed. Their Boki's hits don't count: a Boki picks its own fights, and the player's Boki nipping the bot turned the bot on the player.
 3. Keep hunter-first targeting, only lower hunter scores: still shoots the player when the boss is far.
 
 ## Decision
-Option 2. "In a boss fight" is `Lairs.boss_fight(h)`: sealed in a lair whose boss is up (not the post-kill victory lock). `Lairs.spares(h, o)` reads `Ent.hit_by` (the time of each rival's last landed hit, already kept for DashReset) against the lair's `lock_at`, so a hit from before the seal doesn't count. Bot._choose skips spared rivals; the fight's boss is always in reach and outranks its adds. It also covers finishing a downed rival and the revive "danger" pick, and the bot's Boki (`KinTactics.spares`): it kept meleeing the player all fight, credited to the bot.
+Option 2. "In a boss fight" is `Lairs.boss_fight(h)`: sealed in a lair whose boss is up (not the post-kill victory lock). `Lairs.spares(h, o)` reads the lair's `grudges`, which `_tick_lock` fills while sealed: a fighter whose `last_hit_by` is a rival sealed in with them and whose `hurt_at` is after `lock_at`. A hit from before the seal doesn't count. Bot._choose skips spared rivals; the fight's boss is always in reach and outranks its adds. It also covers finishing a downed rival and the revive "danger" pick, and the bot's Boki (`KinTactics.spares`): it kept meleeing the player all fight.
 
 ## Consequences
 `scripts/match/bot.gd`, `scripts/match/lairs.gd`, `scripts/combat/kin_tactics.gd`, `scripts/match/kin.gd`. No Net or save change. Check: `--boss-focus-check`.
