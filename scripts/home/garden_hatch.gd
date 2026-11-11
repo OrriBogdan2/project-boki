@@ -16,7 +16,8 @@ const MYSTERY := {
 		+ " and it's more likely than most to hatch a little strange.",
 }
 const PANEL := "Hatch"                           # Home.panel_open while the eggs are up: you stand still
-const AHEAD_M := 3.0                             # m from where you land to the eggs, toward the camera's far side
+const AHEAD_M := 3.5                             # m from where you land to the eggs (the camera looks from your side)
+const YOU_AT := Vector3(2.5, 0, -1.0)            # m from the eggs: where you stand while they hatch
 const MYSTERY_AT := Vector3(-2.75, 0, -2.55)     # m from the eggs: the basket, at the back
 const CAM_PICK := Vector3(0, 3.6, 6.4)           # m from the eggs: the camera while you choose
 const CAM_KNOCK := Vector3(0, 2.5, 5.4)
@@ -45,6 +46,7 @@ var root_ui: Control
 var bottom: VBoxContainer
 var title: Label
 var top_box: VBoxContainer
+var sub_lbl: Label              # the line under the title, for the pick only
 var cam_to := CAM_PICK
 var t := 0.0
 
@@ -62,15 +64,17 @@ static func starter_eggs() -> Array:
 	out.append(MYSTERY.duplicate())
 	return out
 
-## Puts the eggs a few steps ahead of where you landed, facing the home camera, and holds you still.
-static func place(home: Node, at: Vector3, from: Vector3) -> GardenHatch:
+## Puts the eggs a few steps in from where you landed (toward the house spot, clear of the portal), you beside
+## them, and holds you still. The farm's screen and Hob wait until the Boki is named (the farm is rebuilt then).
+static func place(home: Node, at: Vector3) -> GardenHatch:
 	var g := GardenHatch.new()
 	g.h = home
-	var back := Vector2(from.x - at.x, from.z - at.z).normalized()
-	g.position = at - Vector3(back.x, 0, back.y) * AHEAD_M
-	g.rotation.y = atan2(back.x, back.y)
+	g.position = at + Vector3(0, 0, -AHEAD_M)
+	home.ppos = g.position + YOU_AT
 	home.panel_open = PANEL
-	if home.hub: home.hub.visible = false
+	home.ui.visible = false
+	if home.hob:
+		home.hob.node.visible = false
 	home.add_child(g)
 	return g
 
@@ -141,6 +145,7 @@ func _build_ui() -> void:
 	sub.add_theme_constant_override("outline_size", 6)
 	sub.add_theme_color_override("font_outline_color", Color(0.05, 0.03, 0.09, 0.8))
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub_lbl = sub
 	top.add_child(sub)
 	root_ui.add_child(top)
 	var holder := CenterContainer.new()
@@ -268,6 +273,7 @@ func _tap_egg() -> void:
 func _start_hatch() -> void:
 	stage = "warm"
 	_clear_bottom()
+	sub_lbl.visible = false
 	title.text = KNOCK_TITLES[0]
 	taps = 0
 	var card := UI.card(UI.CARD, 14, 16)

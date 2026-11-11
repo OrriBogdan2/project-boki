@@ -667,7 +667,7 @@ func _ready_rest() -> void:
 	if not visit.is_empty():
 		pass
 	elif GardenHatch.needed():
-		GardenHatch.place(self, ppos, cam.global_position)      # a new save: the first Boki hatches here
+		GardenHatch.place(self, ppos)      # a new save: the first Boki hatches here
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):

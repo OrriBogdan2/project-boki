@@ -127,7 +127,7 @@ func _front() -> void:
 	rx._put_on_first("gunslinger", func(): pass)
 	await _wait(4.0)
 	await _shot("first_mask_moment")
-	main.show_screen("title", {})      # (the tutorial below is played by hand, not through the portal)
+	rx.queue_free()      # (the tutorial below is played by hand, not through the portal)
 	await _frames(2)
 
 ## Waits for the farm to be up.
