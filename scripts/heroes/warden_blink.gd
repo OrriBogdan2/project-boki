@@ -1,10 +1,13 @@
 class_name WardenBlink
-extends Node
-## A Hero's eyelids blink in a close-up (hero select, the Model Room, the relic put-on). Data: warden_anim/<art>.json
-## "blink": the lids' closed pose off their rest, in each bone's own frame: "turn" {bone: axis x angle, radians},
-## "move" {bone: metres}. Every EVERY s (random) it looks for the camera: within WardenGlb.FAR_HIDE_D of the head the
-## lids close over the clip's pose for SHUT_T s, now and then twice; past it (the match camera) they never do. Asleep
-## between blinks: a Timer wakes it, so a far camera costs no per-frame work. Cosmetic: its own RNG, nothing synced.
+extends Node3D
+## A Hero blinks in a close-up (hero select, the Model Room, the relic put-on). The appeal3 eyes are painted on the
+## skin atlas and no mesh rides the lid bones, so a lid is a Decal: a skin-coloured lid with a dark lash edge projected
+## onto each painted eye, riding the head, shown only while a blink runs. Data: warden_anim/<art>.json "blink":
+## "eyes" [[x, y, z], ...] each eye's middle on the face, "size" [w, h] an eye, in the model's bind space (m, the face
+## looks along -Z); "skin" the lid's colour. Every EVERY s (random) it looks for the camera: within
+## WardenGlb.FAR_HIDE_D of the head the lids come down for SHUT_T s, now and then twice; past it (the match camera)
+## they never do. Asleep between blinks: a Timer wakes it, so a far camera costs no per-frame work and no draw.
+## Cosmetic: its own RNG, nothing synced.
 
 const EVERY := Vector2(2.0, 6.0)   # s between blinks, at random
 const DOWN_T := 0.04               # s the lids take to close
@@ -13,17 +16,28 @@ const UP_T := 0.07                 # s they take to open
 const SHUT_T := DOWN_T + HOLD_T + UP_T
 const GAP_T := 0.12                # s open between the two of a double blink
 const TWICE := 0.2                 # share of blinks that come as a double
+const DEPTH := 0.03                # m: how deep a lid projects into the face (no further: the nose, the hair)
+const LASH := Color(0.1, 0.06, 0.07)
+const LASH_W := 0.22               # share of the lid's height its lash edge takes
+const TEX := Vector2i(64, 32)      # px, the lid's texture
+const FACING := Basis(Vector3.RIGHT, Vector3.FORWARD, Vector3.UP)   # a lid's decal frame in bind space
+
+static var _tex: ImageTexture
 
 var skel: Skeleton3D
 var head := -1
-var lids: Array = []               # [bone index, closed rotation, closed position or null]
+var unbind := Transform3D.IDENTITY # the head's bind pose, undone: bind space -> the head's current pose
+var size := Vector2.ZERO           # m, one eye
+var lids: Array = []               # a Decal per eye
+var eyes: Array = []               # each eye's middle, bind space (m)
+var shut_k := 0.0                  # 0 open .. 1 closed, the last pose
 var left := 0                      # blinks still to come in this run
 var t := 0.0                       # s into the current blink
 var timer := Timer.new()
 var rng := RandomNumberGenerator.new()
 
-## The blink of this model, added under glb; null when its art has no lids in its data.
-static func make(glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenBlink:
+## The blink of this model, added under its skeleton; null when its art has no eyes in its data.
+static func make(sk: Skeleton3D, art_name: String) -> WardenBlink:
 	var cfg: Dictionary = WardenClips.data(art_name).get("blink", {})
 	if cfg.is_empty():
 		return null
@@ -31,24 +45,37 @@ static func make(glb: Node3D, sk: Skeleton3D, art_name: String) -> WardenBlink:
 	b.name = "Blink"
 	b.skel = sk
 	b.head = WardenSkeleton.find(sk, "head")
-	var turn: Dictionary = cfg.get("turn", {})
-	var move: Dictionary = cfg.get("move", {})
-	for nm in turn.keys() + move.keys():
-		var bi := WardenSkeleton.find(sk, String(nm))
-		if bi < 0 or b.lids.any(func(l): return int(l[0]) == bi):
-			continue
-		var rest := sk.get_bone_rest(bi)
-		var rq := rest.basis.get_rotation_quaternion()
-		var tv := _vec(turn.get(nm, [0, 0, 0]))
-		var q := rq * Quaternion(tv.normalized(), tv.length()) if tv.length() > 0.0 else rq
-		b.lids.append([bi, q, rest.origin + rq * _vec(move[nm]) if move.has(nm) else null])
-	b.process_priority = 11         # after the clips pose the lids (WardenGlb.Sync, 10)
+	b.unbind = sk.get_bone_global_rest(b.head).affine_inverse()
+	b.size = Vector2(float(cfg["size"][0]), float(cfg["size"][1]))
+	for e in cfg["eyes"]:
+		b.eyes.append(Vector3(float(e[0]), float(e[1]), float(e[2])))
+		var d := Decal.new()
+		d.texture_albedo = _lid_tex()
+		d.modulate = Color(String(cfg["skin"]))
+		d.upper_fade = 0.0
+		d.lower_fade = 0.3
+		d.visible = false
+		b.lids.append(d)
+		b.add_child(d)
 	b.rng.randomize()
-	glb.add_child(b)
+	sk.add_child(b)
 	return b
 
-static func _vec(a: Array) -> Vector3:
-	return Vector3(float(a[0]), float(a[1]), float(a[2]))
+## The lid: white (the decal's modulate makes it skin), its bottom rim the lash edge, soft all round.
+static func _lid_tex() -> ImageTexture:
+	if _tex:
+		return _tex
+	var img := Image.create(TEX.x, TEX.y, false, Image.FORMAT_RGBA8)
+	for y in TEX.y:
+		for x in TEX.x:
+			var p := Vector2((x + 0.5) / TEX.x * 2.0 - 1.0, (y + 0.5) / TEX.y * 2.0 - 1.0)
+			var r := p.length()
+			var a := clampf((1.0 - r) / 0.12, 0.0, 1.0)
+			# (a Decal's texture runs up its +Z, here the face's up: row 0 is the bottom rim, on the lower lashes)
+			var lash := p.y < 0.0 and r > 1.0 - LASH_W * 2.0
+			img.set_pixel(x, y, Color(LASH if lash else Color.WHITE, a))
+	_tex = ImageTexture.create_from_image(img)
+	return _tex
 
 func _ready() -> void:
 	set_process(false)
@@ -97,13 +124,20 @@ func _process(dt: float) -> void:
 		pose(shut(t))
 	elif left <= 1:
 		left = 0
+		pose(0.0)
 		set_process(false)
 		_arm()
 
-## The lids k of the way from the clip's pose to closed.
+## The lids k of the way down: each hangs from the top of its eye, k of the eye's height, on the head's current pose.
 func pose(k: float) -> void:
-	for l in lids:
-		var bi := int(l[0])
-		skel.set_bone_pose_rotation(bi, skel.get_bone_pose_rotation(bi).slerp(l[1], k))
-		if l[2] != null:
-			skel.set_bone_pose_position(bi, skel.get_bone_pose_position(bi).lerp(l[2], k))
+	shut_k = k
+	var on_head := skel.get_bone_global_pose(head) * unbind
+	for i in lids.size():
+		var d := lids[i] as Decal
+		d.visible = k > 0.0
+		if not d.visible:
+			continue
+		var top: Vector3 = eyes[i] + Vector3(0.0, size.y * 0.5, 0.0)
+		# (a Decal projects along its -Y: here into the face, +Z)
+		d.transform = on_head * Transform3D(FACING, top - Vector3(0.0, size.y * k * 0.5, 0.0))
+		d.size = Vector3(size.x, DEPTH, size.y * k)
