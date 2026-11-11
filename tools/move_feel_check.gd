@@ -36,6 +36,7 @@ const T := {
 	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
+	"fire_walk_thief":         ["~", [0.0, 9.0], "x", "TBD"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
@@ -218,6 +219,7 @@ func run(main: Node) -> void:
 	flat = _flat_spot(6.5)
 	print("MFEEL flat spot %s" % str(flat))
 	_ground()
+	_fire_walk()
 	_face_turn()
 	_jump()
 	_glide()
@@ -298,6 +300,24 @@ func _ground() -> void:
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
 	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+## Sable's run with LMB held, as a share of her plain run (docs/MOVEMENT_FEEL.md, walking while attacking):
+## the steady speed over the last 0.25 s of each half, the bolts aimed ahead along the run.
+func _fire_walk() -> void:
+	var was := [P.cls, P.arch]
+	P.reclass(Arch.weight("thief"), "thief")
+	_reset(flat + Vector3(-3.0, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	var plain := _hv(P).length()
+	P.inp["aim"] = P.pos + Vector3(6.0, 0.9, 0)
+	P.inp["aim_y"] = P.pos.y
+	P.inp["fire"] = true
+	_steps(30)
+	var firing := _hv(P).length()
+	_clear_inp()
+	rec("fire_walk_thief", firing / plain)
+	P.reclass(was[0], was[1])
 
 ## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
 func _face_turn() -> void:
@@ -976,16 +996,10 @@ func _wall2() -> Dictionary:
 					var hs: Vector2i = hi + side * sd
 					for k in range(0, 3):
 						var hk: Vector2i = hs + d * k
-						if not w.inb(hk.x, hk.y) \
-								or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND \
-								or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 \
-								or w.sheer.has(w.idx(hk.x, hk.y)): good = false
+						if not w.inb(hk.x, hk.y) or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 or w.sheer.has(w.idx(hk.x, hk.y)): good = false
 					for back in range(0, 4):
 						var lb: Vector2i = Vector2i(x, z) + side * sd - d * back
-						if not w.inb(lb.x, lb.y) \
-								or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND \
-								or int(w.level[w.idx(lb.x, lb.y)]) != l0 \
-								or w.stairs.has(w.idx(lb.x, lb.y)): good = false
+						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0 or w.stairs.has(w.idx(lb.x, lb.y)): good = false
 				if not good: continue
 				var n := Vector2(d)
 				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5

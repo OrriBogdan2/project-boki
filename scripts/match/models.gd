@@ -2077,7 +2077,6 @@ static func kin(species: String, rec := {}) -> Node3D:
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
 		accessory(body, acc, Goods.wear_col(rec))
-	PrizeBoard.dress(body, rec)      # a rosette for each Cup Ribbon (garden games)
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2642,10 +2641,11 @@ static func deathbox(col: Color) -> Node3D:
 # ------------------------------------------------------------------ world legend: interactable icons
 ## Everything you can use out in the world (not loot, not breakables) wears a small floating badge
 ## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
-## shrines (blessing, teal), chest keys (brass), eggs (warm gold), revive beacons (mint). Loot is
-## gold / rarity coloured with a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "ckey": Color("f2c84a"), "egg": Color("ffc04a"),
-	"revive": Color("6ae8a0")}
+## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
+## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
+## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
+const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
+	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
 static var _icon_tex := {}
 
 ## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?
@@ -2653,7 +2653,10 @@ static func _icon_sym(kind: String, x: float, y: float) -> bool:
 	match kind:
 		"bless":     # a four-point sparkle
 			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
-		"ckey":
+		"hatch", "dock":   # an arrow up and out
+			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
+			return absf(x) < 0.15 and y > -0.56 and y < 0.0
+		"key", "ckey":
 			var d := Vector2(x, y - 0.24).length()
 			if d < 0.27 and d > 0.12: return true
 			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true
