@@ -114,6 +114,7 @@ func screen(day: int, zone: String) -> Dictionary:
 		main.fade.reveal(0.01)
 	await _frames(SETTLE)
 	var cards := await _arrival_cards(home)
+	await _frames(SETTLE)      # the dim behind the last card fades out
 	var groups := groups_of(home)
 	var tag := "%s_day%d" % [zone if zone != "" else "hub", day]
 	print("GARDENHUD %s: %d groups, %d arrival cards: %s" % [tag, groups.size(), cards.size(), ", ".join(cards)])
