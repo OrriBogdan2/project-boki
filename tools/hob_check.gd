@@ -11,6 +11,8 @@ extends RefCounted
 ##      is down, then a "!" and "By the way... I see you found a Vex Relic"; the pick shows exactly Kael, Cinder and
 ##      Meeko, each with portrait, name and title and a role, and one clip (the one in focus); taking Meeko opens
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
+##   4b. "Try" on a card opens the Training Grounds as that Hunter with a countdown, the timer hands you back to
+##      Hob's same card with nothing spent, and the pick still works
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_waves, hob_3_dialogue_box,
 ## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks,
@@ -41,6 +43,7 @@ func run(m: Node) -> void:
 	main.get_tree().root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for)
 	await _first_arrival()
 	await _offer()
+	await _try()
 	await _later_and_legacy()
 	print("HOBCHECK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -237,6 +240,51 @@ func _offer() -> void:
 	var line_ok := not is_instance_valid(g.hint_box) or g.hint_box.visible
 	ok(card_ok and line_ok and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
+
+## "Try" on Cinder's card: the Grounds as Cinder, the countdown ends it, the same card is back, then Take works.
+func _try() -> void:
+	await _new_farm(false)
+	var hob: FarmHob = home.hob
+	hob.node.position = hob.pos
+	_stand_by(hob.node.position)
+	hob.talk()
+	await _frames(2)
+	hob.chat._show_offer()
+	await _frames(2)
+	var tries: Array = hob.chat.box.find_children("*", "Button", true, false).filter(
+			func(b): return b.has_meta("mask_try"))
+	ok(tries.map(func(b): return String(b.get_meta("mask_try"))) == SECOND, "each card has a Try button")
+	var before := _spendable()
+	(tries[1] as Button).pressed.emit()
+	await _wait(func(): return main.current is Match and (main.current as Match).arena != null, 60.0)
+	var grounds := main.current as Match
+	ok(grounds != null and grounds.player.arch == "ashwick" and grounds.opts.get("try_relic", false),
+			"Try opens the Grounds as Cinder")
+	var timer := grounds.get_node_or_null(TryRelic.NAME) as TryRelic
+	ok(timer != null and timer.left_s > TryRelic.TRY_S - 5.0 and TryRelic.TRY_S == 60.0, "with a 60 s countdown")
+	timer.left_s = 0.1
+	await _wait(_back_on_card, 60.0)
+	home = main.current
+	var offer: HobOffer = home.hob.chat.offer
+	ok(offer != null and offer.ids[offer.focus_i] == "ashwick" and TryRelic.back_to == "",
+			"the timer returns to the same card, Cinder in focus")
+	ok(_spendable() == before and ClassUnlock.second_pending(), "nothing was spent or unlocked by the Try")
+	offer.pick("ashwick")
+	ok(ClassUnlock.open_ids() == ["gunslinger", "ashwick"] and not ClassUnlock.second_pending(),
+			"the pick still works afterwards (%s)" % str(ClassUnlock.open_ids()))
+
+## What a Try must leave alone: gems, items, the worn Relic and the Relic unlocks.
+func _spendable() -> Dictionary:
+	var keys := ["gems", "items", "arch", "cls", "weapon"]
+	var out := {"unlock": ClassUnlock.state().duplicate(true)}
+	for k in keys:
+		out[k] = Save.d.get(k)
+	return out
+
+## Whether the farm is back on screen with Hob's pick card open.
+func _back_on_card() -> bool:
+	var farm = main.current
+	return farm != null and not farm is Match and farm.get("hob") != null and farm.hob.chat.offer != null
 
 func _later_and_legacy() -> void:
 	await _new_farm(false)
