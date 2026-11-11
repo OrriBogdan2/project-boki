@@ -164,6 +164,8 @@ posts scroll at the move speed).
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
 
+![ostra orb, before (top) and after (bottom): 8 frames, side view](anim_audit/ostra_orb.jpg)
+
 **Neve (`rimewright`)**
 1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Unchanged: needs a new gait clip.
 2. Arms barely move in a gait (reach 0.14 and 0.01).
