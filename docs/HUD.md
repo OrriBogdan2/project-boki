@@ -174,3 +174,8 @@ A kit marks an empowered hit with `"heavy": true` in its hit options (a shot's `
 
 Every Hunter already had the body flash (0.12 s, Lace's heavy 0.2 s) and no shake from a plain hit. Your Boki's
 numbers looked like yours and the hits you took were the same size; now both are a size down.
+## Tab squad board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
+The source shows no scoreboard: only a squads-left counter, your squad's list and "SQUAD ELIMINATED" cards. So the Tab-hold board follows
+that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
+levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
+Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
