@@ -19,8 +19,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `air`, `land`: rise, fall, glide, dive (a plunge: the glider's Ctrl dive and the opening skydive; `dive_at` s holds a
   one-shot clip on one frame); a landing clip after `min_fall` s airborne. WardenAirTilt turns the whole .glb about the
   hips on top: `dive_tilt` (deg forward in a plunge, default 105: head-down), `glide_tilt` (deg forward under the
-  glider, default 12: the legs trail), `glide_bank` (deg into a glider turn, default 28). A clip that already leans
+  glider, default 12: the legs trail), `glide_bank` (deg at full steer, default 28). A clip that already leans
   sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
+  The glide set (WardenGlide, [GLIDE_SET](../anim_audit/GLIDE_SET.md)): `open`, `close` (one-shots over the hold and
+  over the fall), `lean_l`/`lean_r` (the hold leaned, a Blend3 by the steer keys), `burn` (the overheat struggle).
+  Built from each Hero's own fall and glide clips by `tools/art1/glide_set.py`. `--glide-anim-check` asserts them.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.

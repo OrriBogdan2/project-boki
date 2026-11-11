@@ -2,7 +2,8 @@ class_name WardenAirTilt
 extends RefCounted
 ## A Hero's whole body in the air, on top of the clips (WardenClips): it pitches head-down in a plunge (the glider's
 ## dive, the opening skydive), hangs a little forward under the glider so the legs trail, and banks by the glider's
-## steer (WardenGlide.lean). The clips own the limbs; this turns the whole .glb about the hips, the way HunterAnim tips the procedural rig.
+## steer (WardenGlide.lean). The clips own the limbs; this turns the whole .glb about the hips, the way HunterAnim
+## tips the procedural rig.
 ## Per Hero in content/rules/warden_anim/<art>.json "air": dive_tilt, glide_tilt, glide_bank (degrees); "rig_root"
 ## Heroes already ride the rig's own tip, so their data sets what they add to it.
 

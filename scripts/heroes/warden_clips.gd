@@ -8,8 +8,9 @@ extends RefCounted
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
-## and rise (the close over it), or the glide (WardenGlide: the open, the leaning hold, the struggle), or the dive: a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a
-## one-shot) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
+## and rise with the close over it, or the glide (WardenGlide: the open, the leaning hold, the struggle), or the dive:
+## a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a one-shot) > upper (Blend2 filtered to
+## the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action itself is two seekable channels crossfaded, so one move hands to the
 ## next without a pop (item 32).
 ##

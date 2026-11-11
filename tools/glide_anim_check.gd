@@ -64,7 +64,8 @@ func _hero(id: String) -> void:
 	var close_len := cl.lib.get_animation(String(ai["close"])).length
 	ok(open_len <= OPEN_MAX and close_len <= CLOSE_MAX, "%s: open %.2f s <= %.2f, close %.2f s <= %.2f" % [id,
 			open_len, OPEN_MAX, close_len, CLOSE_MAX])
-	var loops := WardenGlide.loops(ai).all(func(c): return cl.lib.get_animation(String(c)).loop_mode == Animation.LOOP_LINEAR)
+	var loops := WardenGlide.loops(ai).all(
+			func(c): return cl.lib.get_animation(String(c)).loop_mode == Animation.LOOP_LINEAR)
 	ok(loops, "%s: the leans and the struggle loop" % id)
 	var an := HunterAnim.new(m)
 	var fall := {"vel": Vector3(0, -12.0, -2.0), "face": 0.0, "grounded": false, "gliding": false}
@@ -100,19 +101,23 @@ func _hero(id: String) -> void:
 	ok(lean_in >= 0.6 and lean_out <= 0.2, "%s: the lean responds (%.2f by %.2f s) and lets go (%.2f after %.2f s)"
 			% [id, lean_in, LEAN_BY, lean_out, LEAN_OFF])
 	ok(bank_r > straight + BANK_DEG and bank_l < straight - BANK_DEG and _diff(leaned, hold) >= POSE_DEG
-			and absf(tree_lean - 1.0) < 0.05, "%s: steer leans the body right %.0f / left %.0f deg (straight %.0f), the clip blend at %.2f"
+			and absf(tree_lean - 1.0) < 0.05,
+			"%s: steer leans the body right %.0f / left %.0f deg (straight %.0f), the clip blend at %.2f"
 			% [id, bank_r, bank_l, straight, tree_lean])
 	var turning := glide.duplicate()
 	for i in 30:
-		turning["vel"] = Vector3(5.0 * sin(i * 3.0 * DT), -1.4, -5.0 * cos(i * 3.0 * DT))   # heading turns right at 3 rad/s
-		turning["face"] = -i * 3.0 * DT                                                      # (facing along it)
+		var a := i * 3.0 * DT                     # the heading turns right at 3 rad/s, the body facing along it
+		turning["vel"] = Vector3(5.0 * sin(a), -1.4, -5.0 * cos(a))
+		turning["face"] = -a
 		_play(an, sync, turning, 1)
-	ok(cl.glide.lean > 0.5, "%s: with no keys (a remote Hunter) a turning heading leans it (%.2f)" % [id, cl.glide.lean])
+	ok(cl.glide.lean > 0.5, "%s: with no keys (a remote Hunter) a turning heading leans it (%.2f)" % [id,
+			cl.glide.lean])
 	var burn := glide.duplicate()
 	burn["burn"] = true
 	_play(an, sync, burn, 24)
-	ok(cl.glide.burn_w > 0.99 and _diff(_pose(cl), hold) >= POSE_DEG, "%s: overheated, the struggle plays (%.2f, %.0f deg off the hold)"
-			% [id, cl.glide.burn_w, _diff(_pose(cl), hold)])
+	ok(cl.glide.burn_w > 0.99 and _diff(_pose(cl), hold) >= POSE_DEG,
+			"%s: overheated, the struggle plays (%.2f, %.0f deg off the hold)" % [id, cl.glide.burn_w,
+			_diff(_pose(cl), hold)])
 	_play(an, sync, glide, 30)
 	_play(an, sync, fall, 3)
 	var close_w := cl.glide.close_w()
@@ -125,8 +130,8 @@ func _hero(id: String) -> void:
 	_play(an, sync, glide, 30)
 	var landed := {"vel": Vector3(0, 0, -3.0), "face": 0.0, "grounded": true, "gliding": false}
 	_play(an, sync, landed, 3)
-	ok(cl.glide.close_w() == 0.0 and cl.cur == String(cl.d["land"]["clip"]), "%s: a landing out of a glide is the land clip (%s), no close"
-			% [id, cl.cur])
+	ok(cl.glide.close_w() == 0.0 and cl.cur == String(cl.d["land"]["clip"]),
+			"%s: a landing out of a glide is the land clip (%s), no close" % [id, cl.cur])
 	m.free()
 
 ## One live Hunter high over the ground: with no glide input it falls with no hold; held, it opens and holds; let go,
@@ -164,9 +169,11 @@ func _live(main: Node) -> void:
 			top = maxf(top, _hold_w(cl)) if ph[0] != "let go" else _hold_w(cl)
 			glided = glided or h.gliding
 		if ph[0] == "fall":
-			ok(not glided and top == 0.0, "live: no glide input, no glider and no hold pose (hold weight up to %.2f)" % top)
+			ok(not glided and top == 0.0, "live: no glide input, no glider and no hold pose (hold weight up to %.2f)"
+					% top)
 		elif ph[0] == "held":
-			ok(glided and _hold_w(cl) > 0.99, "live: the glide input held opens the glider into the hold (%.2f)" % _hold_w(cl))
+			ok(glided and _hold_w(cl) > 0.99, "live: the glide input held opens the glider into the hold (%.2f)"
+					% _hold_w(cl))
 		else:
 			ok(not h.gliding and top < 0.01, "live: let go, the hold is gone within %.2f s (%.2f)" % [HOLD_OFF, top])
 	m.queue_free()
