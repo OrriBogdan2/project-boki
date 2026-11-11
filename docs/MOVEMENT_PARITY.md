@@ -58,7 +58,7 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Charges | 1, or 2 with "a knock restores one" | per kit; knock refresh by decision 0022 | [W]; KIT_PARITY | match |
 | I-frames | not listed, except one 0.1 s incorporeal dash | 0.08–0.12 s on four kits, none on the rest | [W]; archetypes `invuln` | unknown (three of ours have no source row) |
 | Exit speed | no hard stop: you leave at run speed | dash_exit_run 1.0; slide 0.33 m if the keys are let go | [D]; MFEEL `dash_exit_run`, `dash_exit_slide_m` | match |
-| Jump out of a dash | AirDash multipliers not decoded | keeps 0.75 of the dash speed (`tuning.json` dash.jump_keep) | [D] undecoded | unknown |
+| Jump out of a dash | AirDash multipliers not decoded; no dash-then-jump in the footage of Ghost (slides 0118-0121, 0135-0138, 0149-0151: all end on the ground), Brall (Quick Dash 0371-0420 on the ground; his only jumps, Air Slam 0252-0269, start from a stand), Myth (the 0051-0053 push is a hop during a camera zoom with no dash before it) or Felix (Bash 0134-0165 ends on the ground) | keeps 0.75 of the dash speed for every Hunter (`tuning.json` dash.jump_keep); MFEEL `dash_jump_keep` 0.750 for Vex, Kael and Cinder, 0.752 for Lace | [D] undecoded; [F] none (5 fps, footage/<hero>/frames on ext/hero-ref-footage) | unknown (ours [est]) |
 | Dash on the farm | the hunter's own dash everywhere | the class dodge (3.53 m in 0.15 s), not the kit's dash, without `dash_feel` | RATE (farm) | off (follow-up 3) |
 
 ## 5. Glide

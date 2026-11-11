@@ -54,6 +54,7 @@ const T := {
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
+	"dash_jump_keep":                 ["~", [0.74, 0.76], "x", "[est] 0.75: source undecoded, no footage"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "FeelConfig jump_buffer 0.12s (7 steps)"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
@@ -229,6 +230,7 @@ func run(main: Node) -> void:
 	_dash_glide()
 	_dash_exit()
 	_dash_curves()
+	_dash_jump_keep()
 	_plain_dash()
 	_kit_dashes()
 	_abyss_updraft()
@@ -694,6 +696,37 @@ func _dash_curves() -> void:
 		rec("dash_curve_dist", (P.pos.x - x0) / (float(dd.get("roll", dd.get("dist"))) * float(feel["dist"])))
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
 	P.reclass(cls_was, kit_was)
+
+## Jump out of a ground dash, keys let go: the take-off keeps tuning.json dash.jump_keep of the dash's speed. The
+## jump is pressed once the dash is at full travel (past Kael's wind-up and the slow start of Lace's roll); the
+## speed after the jump step has that step's air drag (Loco.air_step, no keys) undone. One shared value: the
+## source's air-dash multipliers are undecoded and its footage holds no dash-then-jump (docs/MOVEMENT_PARITY.md).
+func _dash_jump_keep() -> void:
+	var was := [P.cls, P.arch]
+	var keep := Loco.dash_jump_keep
+	ok(is_equal_approx(keep, 0.75), "dash.jump_keep = 0.75, one value for every Hunter (%s)" % keep)
+	for id in ["gunslinger", "juggernaut", "archer", "ashwick"]:
+		P.reclass(Arch.weight(id), id)
+		_steps(30)
+		_reset(flat + Vector3(-3.0, 0, 0))
+		P.inp["move"] = Vector2(1, 0)
+		P.inp["dash"] = true
+		for i in 40:
+			m.step(DT)
+			P.inp["dash"] = false
+			P.inp["move"] = Vector2.ZERO
+			if _hv(P).length() > 1.5 * P.base_speed: break
+		var before := _hv(P).length()
+		var dashing := P.roll_t > 0.0 and P.grounded
+		P.inp["jump"] = true
+		m.step(DT)
+		P.inp["jump"] = false
+		var cap := P.base_speed
+		var took := (_hv(P).length() / exp(-Loco.air_idle_drag * DT) - cap) / exp(-Loco.air_drag * DT) + cap
+		print("MFEEL dash jump: %s %.2f -> %.2f m/s (dashing %s)" % [id, before, _hv(P).length(), dashing])
+		ok(dashing and not P.grounded, "dash jump %s: pressed mid-dash on the ground, takes off" % id)
+		rec("dash_jump_keep", took / before)
+	P.reclass(was[0], was[1])
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
