@@ -11,6 +11,8 @@ extends RefCounted
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. the rival-cast layer (HostileCue): every Hunter's E and R start it once; a rival's cast plays it, an ally's
+##      does not, nor a rival's past its 30 m; E, R and X (UltCue) and other games' casts are wired to it
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -39,6 +41,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_hostile()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -153,6 +156,50 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## 9. A rival's cast is heard as a threat; yours and your allies' are not.
+func _hostile() -> void:
+	var reach: float = Sfx.sound_reach.get(HostileCue.NAME, 0.0)
+	var near_30 := reach >= 25.0 and reach <= 35.0
+	ok(Sfx.ensure(HostileCue.NAME) and near_30, "the rival-cast layer exists, reach %.0f m" % reach)
+	var h := Hunter.new()
+	var once := []
+	for arch in Arch.ids():
+		var k := ArchKit.new()
+		k.d = Arch.def(arch)
+		h.ak = k
+		var r_slots := ["ult_fuse", "ult"] if k.fuse_time() > 0.0 else ["ult"]
+		var r_n := r_slots.filter(func(s): return HostileCue.starts_threat(h, s)).size()
+		var others := ["secondary", "dodge", "primary", "ultimate"]
+		var quiet := others.all(func(s): return not HostileCue.starts_threat(h, s))
+		if HostileCue.starts_threat(h, "kin") and (k.r_def().is_empty() or r_n == 1) and quiet:
+			once.append(arch)
+	h.ak = null
+	ok(once.size() == Arch.ids().size(),
+			"%d Hunters: E and R each start the layer once, RMB and dash never (%s)" % [Arch.ids().size(), once])
+	var you := Hunter.new()
+	you.team = 1
+	Sfx.listener = Vector3.ZERO
+	var heard := func(team: int, at: Vector3) -> bool:
+		var before := int(Sfx.last_played.get(HostileCue.NAME, -1))
+		h.team = team
+		h.pos = at
+		HostileCue.play(you, h)
+		return int(Sfx.last_played.get(HostileCue.NAME, -1)) != before
+	var ally: bool = heard.call(1, Vector3(5, 0, 0))
+	var far: bool = heard.call(2, Vector3(40, 0, 0))
+	var rival: bool = heard.call(2, Vector3(5, 0, 0))
+	ok(rival and not ally, "a rival's cast at 5 m plays the layer, an ally's does not (%s, %s)" % [rival, ally])
+	ok(not far, "a rival's cast at 40 m does not")
+	h.free()
+	you.free()
+	var hunter_src := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var cue_src := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var used := hunter_src.contains("HostileCue.on_used(self, slot)")
+	var x := cue_src.contains("HostileCue.play(m.player, h)")
+	var net := match_src.contains("\"hcast\": HostileCue.net_in")
+	ok(used and x and net, "E and R (ability_used), X (UltCue) and other games' casts (hcast) play it")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

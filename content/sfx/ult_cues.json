@@ -17,7 +17,8 @@
   "tender_ult_cue": "signature",
   "thief_ult_cue": "signature",
   "ult_tag_ally": "cast",
-  "ult_tag_foe": "cast"
+  "ult_tag_foe": "cast",
+  "hostile_cast": "cast"
  },
  "reach": {
   "archer_ult_cue": 60,
@@ -34,6 +35,7 @@
   "tender_ult_cue": 60,
   "thief_ult_cue": 60,
   "ult_tag_ally": 60,
-  "ult_tag_foe": 60
+  "ult_tag_foe": 60,
+  "hostile_cast": 30
  }
 }
