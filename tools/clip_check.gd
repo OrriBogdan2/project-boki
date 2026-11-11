@@ -4,7 +4,8 @@ extends RefCounted
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each walk and run ring's
-## loops are one length, so the blended diagonals stay in step. Never touches the save.
+## loops are one length, so the blended diagonals stay in step; in a ring baked in step with its forward loop the
+## pelvis stays within the forward loop's height at the same phase (no dip). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -18,6 +19,9 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
+const HIP_TOL := 0.03          # m: an in-step ring's pelvis may leave the forward loop's height band by this much
+const HIP_WIN := 1.0 / 16.0    # of a cycle: the band is the forward loop's lowest to highest within this of the phase
+const HIP_N := 64              # phases sampled a loop
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
@@ -206,6 +210,60 @@ func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 				off += " %s %.3f" % [k, k_len]
 		var what := off if off != "" else " all match"
 		ok(off == "", "%s: the %s loops are one length (f %.3f s;%s)" % [id, gait, f_len, what])
+		if bool(dd.get("loco", {}).get("in_step", false)):
+			_pelvis(id, gait, ring, clips)
+
+## An in-step ring (docs/art/wardens/dirloops/JUDGE.md): each loop's pelvis height, phase by phase, stays inside the
+## forward loop's band at that phase (its lowest to highest within HIP_WIN), give or take HIP_TOL, so no direction
+## crouches or bobs where forward doesn't.
+func _pelvis(id: String, gait: String, ring: Dictionary, clips: WardenClips) -> void:
+	var f := _hip_curve(clips, clips.lib.get_animation(String(ring["f"])))
+	var w := int(ceil(HIP_WIN * HIP_N))
+	for k in ring:
+		if k == "f" or not clips.lib.has_animation(String(ring[k])):
+			continue
+		var y := _hip_curve(clips, clips.lib.get_animation(String(ring[k])))
+		var under := -INF
+		var over := -INF
+		var at := 0
+		for i in HIP_N:
+			var lo := INF
+			var hi := -INF
+			for j in range(i - w, i + w + 1):
+				lo = minf(lo, f[posmod(j, HIP_N)])
+				hi = maxf(hi, f[posmod(j, HIP_N)])
+			if lo - y[i] > under:
+				under = lo - y[i]
+				at = i
+			over = maxf(over, y[i] - hi)
+		ok(under <= HIP_TOL and over <= HIP_TOL, "%s: %s_%s pelvis within %s_f's height at the same phase: %.3f m under "
+				% [id, gait, k, gait, maxf(under, 0.0)] + "(at %.2f), %.3f m over (tolerance %.2f)"
+				% [float(at) / HIP_N, maxf(over, 0.0), HIP_TOL])
+
+## The hips bone's height (skeleton space) at HIP_N even phases of a loop, through the root's keys.
+func _hip_curve(clips: WardenClips, anim: Animation) -> PackedFloat32Array:
+	var sk := clips.skel
+	var ri := WardenSkeleton.find(sk, "root")
+	var hi := WardenSkeleton.find(sk, "hips")
+	var tr := {}
+	for t in anim.get_track_count():
+		var bone := String(anim.track_get_path(t)).get_slice(":", 1)
+		if bone in ["root", "hips"]:
+			tr["%s%d" % [bone, anim.track_get_type(t)]] = t
+	var out := PackedFloat32Array()
+	for i in HIP_N:
+		var t := anim.length * i / HIP_N
+		var rp: Vector3 = sk.get_bone_rest(ri).origin if ri >= 0 else Vector3.ZERO
+		var rq: Quaternion = sk.get_bone_rest(ri).basis.get_rotation_quaternion() if ri >= 0 else Quaternion.IDENTITY
+		var hp: Vector3 = sk.get_bone_rest(hi).origin if hi >= 0 else Vector3.ZERO
+		if tr.has("root%d" % Animation.TYPE_POSITION_3D):
+			rp = anim.position_track_interpolate(tr["root%d" % Animation.TYPE_POSITION_3D], t)
+		if tr.has("root%d" % Animation.TYPE_ROTATION_3D):
+			rq = anim.rotation_track_interpolate(tr["root%d" % Animation.TYPE_ROTATION_3D], t)
+		if tr.has("hips%d" % Animation.TYPE_POSITION_3D):
+			hp = anim.position_track_interpolate(tr["hips%d" % Animation.TYPE_POSITION_3D], t)
+		out.append((rp + rq * hp).y)
+	return out
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
