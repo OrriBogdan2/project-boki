@@ -829,10 +829,8 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | bands_doc | Target bands, [low, high], every player must land inside (docs/GARDEN.md Balance). form_lv4_day: median day of the first form step (Evo.on_level, level 4, 600 XP); evolution_day: median day of the first real form swap (first_evo_level) on garden XP alone, so a home-only player still evolves (DECISIONS 2026-11-09); budget_full_day: when the 240 budget fills (only checked where it fills inside the month: never trivial); stat_total: total at the end of the month (90% of 240 or more: even five minutes a day nearly fills it); gems_day: mean gems earned a day (at least a weekly Wayseed, 300 / 7, so home-only players reach every zone; at most one a day); joy: mean joy over a visit (above sulky, below always full so toys and cares still matter). |
 | joy_model | {"away": 30.0, "care": 6.0, "decay_per_min": 0.6} |
 | joy_model_doc | assume, copies of scripts/core/care.gd: a Boki away a day sits at the offline joy floor 30; each first care gives about 6 joy (Care.feed base); joy falls DECAY['joy'] 0.6 a minute. Toy joy_gain and joy_below are read from toys.json. |
-| xp_curve | {"per_level": 50, "flat_from": 20} |
-| xp_curve_doc | XP from level n to n + 1: per_level x n, and per_level x flat_from from level flat_from on (null: never). Tuned from game.gd Game.xp_need (100 x n, no flat part, still the live curve; the garden XP rules file does not carry it yet). |
-| garden_xp | {"play": 3, "win": 5, "first_win": 60, "care_first": 5, "care_kinds": 3, "wish": 3, "sunsap": 40} |
-| garden_xp_doc | GARDEN_MODERN 2.5, not built (the live garden_xp.json only has feed, pet, fetch and drill), tuned by the balance pass: a played minigame 3, a win 5, the first win of the day in a game 60; first care of each of care_kinds kinds a day 5; a granted wish 3 (section 5 rank 1); Sunsap 40. |
+| garden_xp_unbuilt | {"care_kinds": 3, "wish": 3, "sunsap": 40} |
+| garden_xp_unbuilt_doc | Garden XP rules that are not live yet or are sim-only: the care kinds that pay a first care a day (feed, pat, fetch), a granted wish 3 (GARDEN_MODERN section 5 rank 1), Sunsap 40. The built numbers (a played game, a win, the first win of the day, a first care, the level curve) are read from garden_xp.json. |
 | expedition | {"xp_base": 40, "xp_win": 40, "xp_knock": 10, "win_p": 0.5, "knocks": 1.0, "run_min": 10, "wayseed_p": 0.25, "gems": 40} |
 | expedition_doc | game.gd _after_match for the lead Boki: 40 + 40 on a win + 10 a knock. assume: half the runs won, one knock a run, 10 minutes a run, a Wayseed for a locked zone in a quarter of the runs (garden-wayseed: once a run, matching lair only), 40 gems a run. |
 | time | {"arrive": 1.0, "care": 1.0, "wish": 0.5, "game": 1.5, "cup_round": 1.5} |
@@ -913,14 +911,14 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 
 | Setting | Value |
 |---|---|
-| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models. |
-| feed | 2 |
-| feed_love | 5 |
-| pet | 1 |
-| pet_love | 2 |
-| fetch | 3 |
-| fetch_love | 6 |
+| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace and Balance). scripts/home/garden_xp.gd reads it, tools/garden_sim.py fits it. care: a kin's first feed, first pat and first game of fetch each day pay it once. drill_per_point: per training point. games: the garden games that pay (GardenPrizes.settle): play for a played game, win for a win, first_win for the day's first win in that game; the Boki you backed gets it. curve: XP from level n to n + 1 is per_level x n, flat from level flat_from on (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock) to the lead Boki. The pace assumptions are what tools/garden_pace_check.gd models. |
+| care | 5 |
 | drill_per_point | 1 |
+| games | ["dash", "shove", "seek", "volley"] |
+| play | 3 |
+| win | 5 |
+| first_win | 60 |
+| curve | {"per_level": 50, "flat_from": 20} |
 | pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0} |
 
 ## garden_zones (`content/rules/garden_zones.json`)

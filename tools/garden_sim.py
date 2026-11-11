@@ -433,8 +433,17 @@ def check(sim):
     return 1 if fails else 0
 
 
+def load_sim():
+    """garden_sim.json plus the live garden XP and level curve (garden_xp.json), so the sim fits what is built."""
+    sim, live = load("garden_sim.json"), load("garden_xp.json")
+    sim["xp_curve"] = live["curve"]
+    sim["garden_xp"] = dict(sim["garden_xp_unbuilt"], play=live["play"], win=live["win"],
+                            first_win=live["first_win"], care_first=live["care"])
+    return sim
+
+
 def main():
-    sim = load("garden_sim.json")
+    sim = load_sim()
     if "--garden-sim-check" in sys.argv:
         sys.exit(check(sim))
     text = body(sim)

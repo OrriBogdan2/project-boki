@@ -9,25 +9,29 @@ never reached a first form. Now the farm gives kin XP too: `content/rules/garden
 
 | Action | XP |
 |---|---|
-| Feed (favourite food) | 2 (5) |
-| Pet, once per 20 s (favourite play) | 1 (2) |
-| Fetch (favourite play) | 3 (6) |
+| First feed, first pat, first game of fetch of each Boki each day (`care`) | 5 each, then 0 |
 | Training yard, per point scored | 1 |
+| A played Dash, Shove, Seek or Volley (backed Boki) | 3 |
+| ...a win | 5 |
+| ...the day's first win in that game | 60 |
+
+Level n to n + 1 needs 50 x n XP, flat at 1,000 from level 20 (`curve` in the same file; `Game.xp_need`).
+So level 4 is 300 XP and level 8 is 1,400. Relay and Show Ring pay no XP.
 
 Stat gains are unchanged. An expedition gives 40, +40 for a win, +10 a knock.
 
 **Measured** with `--garden-pace-check` (a fixed play model on the real Care, Game and Evo code; the
-assumptions are in the `pace` block of the rules file): time to the first form (level 4, 600 XP).
+assumptions are in the `pace` block of the rules file): time to the first form (level 4, 300 XP).
 
 | Player | Minutes |
 |---|---|
-| Garden-only (feed, pet, fetch, drill; naps when worn out) | 229 |
-| Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 141 |
-| Ratio | about 1.6 (limit 2.0, `pace.max_ratio`) |
+| Garden-only (feed, pet, fetch, drill; naps when worn out; no games) | 123 |
+| Also runs expeditions (12 min each, half won, 1 knock, 3 min of garden between) | 76 |
+| Ratio | 1.63 (limit 2.0, `pace.max_ratio`) |
 
-With the first tuning (2x these XP values) the ratio was 1.32: garden XP per minute matched a run's,
-so extraction stopped being the faster way. These values keep runs ahead without making the garden a
-dead end. The check fails above 2.0x.
+The first tuning paid per action (feed 2, pat 1, fetch 3, 100 x level): a ratio of 1.6 at 229 and 141 min.
+The sim fit replaced it (below): care pays once a kind a day, the games carry most of the XP, and the
+curve is halved, so a garden-only first form is 123 min and the runner's 76. The check fails above 2.0x.
 
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
@@ -58,4 +62,16 @@ Out of band before: 5 min and home 5 evolution (day 27 and 29), home 5 stat tota
 
 - `toys.json` `joy_gain` 10 to 14: a toy play lifts a Boki's joy more, so a short visit leaves it above the band floor.
 - `base_race.json` `gems_win` 6 to 14: a won game pays enough for a home-only 5-minute player to afford a weekly Wayseed.
-- XP (garden_sim.json `garden_xp`, `xp_curve`): a played game 3, a win 5, the first win of the day 60, the first care of each kind 5, curve 50 x level and flat 1,000 from level 20. **Not live:** this stack's `garden_xp.json` pays feed, pet, fetch and drill only, and `Game.xp_need` is still 100 x level. The evolution and stat-total rows hold once that XP (backlog 5) and the curve are built with these numbers; with today's live XP a home-only 5-minute player does not reach level 8 in a month. No new system was added here, so those two stay targets for that build.
+- XP, now live (`garden_xp.json`; `garden_sim.json` no longer carries it, the sim reads the file): a played game 3, a win 5, the first win of the day 60, the first care of each kind 5, curve 50 x level flat from level 20.
+
+Sim vs live (the sim's own fitted proposal against what is built, the same numbers; `--garden-sim-check` reads the live file, so they cannot drift):
+
+| Number | Sim fit | Live before this change | Live now |
+|---|---|---|---|
+| Level curve | 50 x n, flat from 20 | 100 x n, no flat part | 50 x n, flat from 20 |
+| Care | 5, first of 3 kinds a day | feed 2 (5), pat 1 (2), fetch 3 (6), every action | 5, first of feed, pat, fetch a day |
+| Dash, Shove, Seek, Volley | 3 / 5 / 60 | 0 | 3 / 5 / 60 (play / win / first win of the day) |
+| Training yard | not modelled | 1 a point | 1 a point |
+| Expedition (lead Boki) | 40 + 40 win + 10 knock | same | same |
+
+Expedition XP still fits: the halved curve makes a won run (90 XP) a level or two early on (level 8 is about 16 won runs, was 31), and the sim's expedition-only player (105 XP a day at 5 minutes, 350 at 30) stays near the garden's 80 to 290, so neither road is a dead end. Existing saves need no migration: `xp` and `level` keep their meaning, a Boki whose stored XP now exceeds its need levels up on its next gain, and `rec.xp_day` (the day of each first care) is created when read. The drill is unmodelled and adds up to 1 XP a point on top.

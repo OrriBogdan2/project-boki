@@ -85,6 +85,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 	if now < 0.0:
 		now = Time.get_unix_time_from_system()
 	if not won:
+		GardenXp.play(id, mine, false, false)
 		out["reset"] = _runs(id).erase(String(mine["uid"]))
 		return out
 	var dice := rng
@@ -101,6 +102,7 @@ static func settle(id: String, mine: Dictionary, foe: Dictionary, won: bool, now
 	for e in got:
 		bank(e)
 	out["items"] = got
+	GardenXp.play(id, mine, true, out["first"])
 	_cup(out, mine, foe, now)
 	return out
 

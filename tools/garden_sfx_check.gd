@@ -343,9 +343,9 @@ func _chimes(home) -> void:
 	rec["forms"].append("fierce")
 	hc.tick(gap)
 	ok(_count("garden_chime_evolve") == 1 and _total("garden_chime_") == 3, "chimes: one evolve chime for a form")
-	rec["xp"] = 100 * int(rec["level"]) - 1
+	rec["xp"] = Game.xp_need(int(rec["level"])) - 1
 	Care.add_stat(rec, "guard", 2)
-	GardenXp.give(rec, "drill", false, 4)
+	GardenXp.give(rec, "drill", 4)
 	hc.tick(gap)
 	Care.add_stat(rec, "speed", 1)
 	hc.tick(0.3)
