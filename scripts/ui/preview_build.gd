@@ -45,7 +45,11 @@ static func _prepared(hunter_id: String) -> bool:
 		return false
 	last_frame = Engine.get_process_frames()
 	if not WardenGlb.has_rest(hunter_id):
-		WardenGlb.neutral_rest(hunter_id)
+		_lock.lock()
+		var idle := not _running      # (measuring builds with no .glb on: a worker build would see that too)
+		_lock.unlock()
+		if idle:
+			WardenGlb.neutral_rest(hunter_id)
 		return false
 	return true
 
