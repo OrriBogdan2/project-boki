@@ -9,12 +9,16 @@ extends RefCounted
 const POP := 0.5               # seconds the badge pops after a level-up
 const RADIUS := 19.0           # px: the badge at rest
 
+## Makes the badge pop (a level-up, or a hint pointing at it).
+static func pop(hud) -> void:
+	hud.set_meta("armor_pop", POP)
+
 ## The badge at the portrait's bottom-right corner: a shield in the tier's colour ringed by progress.
 static func badge(hud, pr: Rect2, p: Hunter) -> void:
 	var c: CanvasItem = hud.c
 	var seen: int = int(hud.get_meta("armor_seen", -1))
 	if seen >= 0 and p.armor_tier > seen:
-		hud.set_meta("armor_pop", POP)
+		pop(hud)
 	hud.set_meta("armor_seen", p.armor_tier)
 	var pop: float = maxf(0.0, float(hud.get_meta("armor_pop", 0.0)) - hud.get_process_delta_time())
 	hud.set_meta("armor_pop", pop)
