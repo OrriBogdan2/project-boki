@@ -83,3 +83,9 @@ to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBea
 `seat_beam.gdshader`, one ring, one glyph, two materials made once); `WaysOutVfx` owns the beacons. No bursts and no
 rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
 outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
+
+## First-time hints (a new player's first match)
+`WaysHints` (scripts/match/ways_hints.gd) gives the three moments that teach the mode one plain line each in the
+message lane, the shortened tutorials' hint pattern (Match._tip: once per save in Save.d["tutorial"] as
+"ways_<id>", tips setting, no tutorial step, nothing blocks): the Blight's tide first closes, a quest seat first
+opens, the Heart wakes. Texts: heart.json "hints". No save-format or Net change. Check: --ways-hints-check.
