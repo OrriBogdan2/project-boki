@@ -15,6 +15,8 @@ PARITY FIRST audit (briefs/DECISIONS.md 2026-11-07, briefs/PRIORITIES.md step 2)
 - **Animation timing was not re-measured frame by frame.** Animation rows report clip coverage (computed from kit code, `warden_anim/*.json` and each GLB) plus timings already recorded in docs/heroes. Hitbox rows use content numbers; no in-game overlay run was done.
 - `[?]` marks a row carried from a hero doc that I could not settle from code here.
 
+Heals, shields, knock heals and Anti-Heal are tabulated in [HEAL_PARITY.md](HEAL_PARITY.md).
+
 **Every Hunter, shared:**
 - **Q:** ours (a glove, gear slot, with V). Not in the source, so no parity target. DashFlow fires it through dashes.
 - **Glove band:** gloves must not outshine the kits' E. `--glove-band-check` holds every glove at every rarity to the 12 E abilities' maximum for damage per cooldown second (4.38), CC seconds per cast (4.4) and travel metres per cast (14). Launch gloves keep their numbers in content `launch` (m/s, m). Gust's forward launch went 9 to 7.5 m/s (15.9 to 13.3 m, over Thief's 14 m blink-to-knife before).
