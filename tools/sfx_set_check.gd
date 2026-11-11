@@ -22,11 +22,14 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
+##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
+##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd and utility_more.gd play no stock cue
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
 const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
+const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
@@ -56,6 +59,7 @@ func run(main: Node) -> void:
 	_garden()
 	await _steps(main)
 	_weighted()
+	_belt()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -308,6 +312,29 @@ func _garden() -> void:
 	var asks_match := src.contains("amb_match") or src.contains("play_ambience(\"match\")")
 	ok(not asks_match, "garden: no script of scripts/home asks for the match ambience")
 	Sfx.clear_amb_layers(0.0)
+
+## 7. Every belt item has its own cues (BeltSfx), none of them a stock one.
+func _belt() -> void:
+	var rows := BeltSfx.items()
+	var seen := {}
+	var wrong := []
+	for id in UtilityBelt.ids():
+		if UtilityBelt.is_key(id):
+			continue
+		var kinds := ["start"] + (["loop", "end", "cancel"] if UtilityUse.use_of(id) in ["drink", "repair"] else [])
+		for kind in kinds:
+			var c := BeltSfx.cue(id, kind)
+			if c != "belt_%s_%s" % [id, kind] or c in STOCK or seen.has(c) or _takes(c).is_empty():
+				wrong.append("%s %s '%s'" % [id, kind, c])
+			seen[c] = true
+		for kind in rows.get(id, {}):
+			if BeltSfx.cue(id, kind) != "belt_%s_%s" % [id, kind] or _takes(BeltSfx.cue(id, kind)).is_empty():
+				wrong.append("%s extra cue %s" % [id, kind])
+	ok(wrong.is_empty(), "belt: %d items with their own start/loop/end/cancel cues %s" % [rows.size(), wrong])
+	var src := FileAccess.get_file_as_string("res://scripts/match/utility_use.gd")
+	src += FileAccess.get_file_as_string("res://scripts/match/utility_more.gd")
+	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))
+	ok(stock_left.is_empty(), "belt: utility_use.gd and utility_more.gd play no stock cue %s" % [stock_left])
 
 func _takes(sname: String) -> Array:
 	var out := []

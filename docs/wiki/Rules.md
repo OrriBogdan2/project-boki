@@ -41,6 +41,17 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
+| sickness_heal | 0.75 | -25% healing received |
+
+## belt_sfx (`content/rules/belt_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Belt item sounds (BeltSfx, docs/AUDIO.md), keyed by belt item id (content/utility): start = played at the Hunter when the item is used; loop = held while it channels (tonic, armor_kit); end = the channel finished; cancel = the channel was spilt (hit, stunned, rolled). "beds" lists the placed items: a loop (and an end cue when it runs out) at the spot while the item stands, for the item's own time; "front" = 2 m ahead of the user, "aim" = where they aim, "self" = following the user. hit = a pad launched someone. Keys (rift_key, chest_key) have their own sounds in BeltKeys. --sfx-set-check asserts every other belt item is here with no shared stock cue. |
+| items | {"tonic": {"start": "belt_tonic_start", "loop": "belt_tonic_loop", "end": "belt_tonic_end", "cancel": "belt_tonic_cancel"}, "armor_kit": {"start": "belt_armor_kit_start", "loop": "belt_armor_kit_loop", "end": "belt_armor_kit_end", "cancel": "belt_armor_kit_cancel"}, "medkit": {"start": "belt_medkit_start"}, "jump_pad": {"start": "belt_jump_pad_start"}, "scanner": {"start": "belt_scanner_start"}, "shield_cell": {"start": "belt_shield_cell_start"}, "smoke": {"start": "belt_smoke_start"}, "stim": {"start": "belt_stim_start"}, "twin_gate": {"start": "belt_twin_gate_start", "loop": "belt_twin_gate_loop", "end": "belt_twin_gate_end"}, "warp_seed": {"start": "belt_warp_seed_start", "loop": "belt_warp_seed_loop", "end": "belt_warp_seed_end"}, "gust_fan": {"start": "belt_gust_fan_start", "loop": "belt_gust_fan_loop", "hit": "belt_gust_fan_hit", "end": "belt_gust_fan_end"}, "cloud_raft": {"start": "belt_cloud_raft_start", "loop": "belt_cloud_raft_loop", "end": "belt_cloud_raft_end"}, "skyfall_charge": {"start": "belt_skyfall_charge_start", "loop": "belt_skyfall_charge_loop", "end": "belt_skyfall_charge_end"}, "blight_flask": {"start": "belt_blight_flask_start", "loop": "belt_blight_flask_loop", "end": "belt_blight_flask_end"}, "thorn_wall": {"start": "belt_thorn_wall_start", "loop": "belt_thorn_wall_loop", "end": "belt_thorn_wall_end"}, "lookout_lantern": {"start": "belt_lookout_lantern_start", "loop": "belt_lookout_lantern_loop", "end": "belt_lookout_lantern_end"}, "bounty_banner": {"start": "belt_bounty_banner_start", "loop": "belt_bounty_banner_loop", "end": "belt_bounty_banner_end"}, "pilfer_pouch": {"start": "belt_pilfer_pouch_start"}, "hawk_whistle": {"start": "belt_hawk_whistle_start"}, "hearth_lamp": {"start": "belt_hearth_lamp_start"}, "revive_ember": {"start": "belt_revive_ember_start"}, "shatter_charge": {"start": "belt_shatter_charge_start"}, "toss_satchel": {"start": "belt_toss_satchel_start", "end": "belt_toss_satchel_end"}, "deep_draught": {"start": "belt_deep_draught_start", "loop": "belt_deep_draught_loop", "end": "belt_deep_draught_end", "cancel": "belt_deep_draught_cancel"}, "lostway_scroll": {"start": "belt_lostway_scroll_start", "loop": "belt_lostway_scroll_loop", "end": "belt_lostway_scroll_end", "cancel": "belt_lostway_scroll_cancel"}, "omen_draught": {"start": "belt_omen_draught_start", "loop": "belt_omen_draught_loop", "end": "belt_omen_draught_end", "cancel": "belt_omen_draught_cancel"}} |
+| beds | {"twin_gate": "front", "warp_seed": "front", "gust_fan": "front", "cloud_raft": "front", "skyfall_charge": "aim", "blight_flask": "aim", "thorn_wall": "front", "lookout_lantern": "front", "bounty_banner": "self"} |
 
 ## base_drift (`content/rules/base_drift.json`)
 
@@ -657,7 +668,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | rarity_cap_by_tier | [2, 3, 4] |
 | issue | {"tonic": 2, "armor_kit": 2} |
 | util_drops | {"_default": 0.0, "ground": 0.0, "crate": 0.18, "cache": 0.5, "chest0": 0.35, "chest1": 0.5, "chest2": 0.65, "brute": 0.4, "sentinel": 0.4, "warden": 0.6, "glimmer": 0.3, "boss": 0.9, "chest": 0.5} |
-| util_weights | {"tonic": 5, "armor_kit": 4, "medkit": 2, "smoke": 2, "jump_pad": 1.5, "scanner": 1, "stim": 2, "shield_cell": 2} |
+| util_weights | {"tonic": 5, "armor_kit": 4, "medkit": 2, "smoke": 2, "jump_pad": 1.5, "scanner": 1, "stim": 2, "shield_cell": 2, "deep_draught": 1, "hawk_whistle": 0.6, "cloud_raft": 0.8, "gust_fan": 1, "twin_gate": 0.6, "warp_seed": 0.6, "bounty_banner": 0.3, "hearth_lamp": 0.3, "skyfall_charge": 0.5, "pilfer_pouch": 0.5, "lostway_scroll": 0.8, "shatter_charge": 0.8, "blight_flask": 0.8, "lookout_lantern": 0.8, "thorn_wall": 0.8, "omen_draught": 0.8, "toss_satchel": 0.8, "revive_ember": 0.1} |
 | migration | {"gem_k": 1.0, "moved_gloves_charges": [1, 2, 2, 3, 4]} |
 | bot_util | {"easy": 0, "medium": 1, "hard": 1, "expert": 1} |
 | backpacks | [{"name": "Pouch", "slots": 0}, {"name": "Satchel", "slots": 2, "cost": [120, 4]}, {"name": "Pack", "slots": 4, "cost": [260, 10]}, {"name": "Rucksack", "slots": 6, "cost": [450, 20]}] |
@@ -1541,6 +1552,24 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 | char | {"combine": "add", "time": "refresh", "owner": "target"} |
 | ignite | {"combine": "strongest", "time": "longest", "owner": "target"} |
 | mark | {"combine": "add", "time": "refresh", "owner": "caster"} |
+
+## shops (`content/rules/shops.json`)
+
+
+
+| _doc | In-match shops (scripts/match/shops.gd, shop_stock.gd; the stock plan is docs/SOURCE_UTILITIES.md section 3). Vendors stand at the spots a hand-made map lists under islands[].shops ([x, z, theme]). Every vendor sells its theme's whole `sells` list, the same in every match: tonic and armor_kit everywhere, everything else in exactly one shop. The gems are the ones a hunter picked up this run, so spending means less to extract. Entries: a utility item id (content/utility), repair (armor back to full), armor_up (the next armor tier), backpack (the next pack tier, priced by Equal backpack_shop), boots:<gear id> (worn at boots_rar), perk:<perk id> (Data.PERKS). left = how many of one entry a vendor has (the host keeps count online). Never sold: keys, shards, the Revive Ember and anything found only in matches; the never list is what --shops-check scans for. Prices are run gems: utility items use their content price times util_k. |
+| use_radius | 2.8 |
+| util_k | 1 |
+| repair_price | 20 |
+| armor_tier_price | [0, 45, 90, 150, 240] |
+| boots_price | [30, 50, 80, 130, 200] |
+| boots_rar | 2 |
+| perk_price | {"weapon": 70, "kit": 55, "flat": 45} |
+| perk_stack_extra | 15 |
+| left | {"util": 3, "repair": 3, "armor_up": 2, "backpack": 2, "boots": 1, "perk": 2} |
+| never | ["rift_key", "chest_key", "crown_shard", "sky_pearl", "kin_idol", "revive_ember"] |
+| bot | {"reserve": 25, "range": 48.0, "wants": ["tonic", "armor_kit", "medkit", "shield_cell"], "repair_below": 0.5, "belt_below": 2} |
+| themes | {"armor": {"name": "Plate and Patch", "tag": "Armor and repairs", "icon": "anvil", "col": "dfe9f7", "sells": ["tonic", "armor_kit", "armor_up", "repair", "shield_cell", "medkit", "deep_draught", "hearth_lamp"]}, "move": {"name": "Swift Stall", "tag": "Boots and backpacks", "icon": "dash", "col": "8fe3c8", "sells": ["tonic", "armor_kit", "backpack", "boots:quickstep_boots", "jump_pad", "stim", "cloud_raft", "gust_fan", "twin_gate", "warp_seed", "lostway_scroll"]}, "gear": {"name": "Gadget Cart", "tag": "Siege and control tools", "icon": "satchel", "col": "ffd27a", "sells": ["tonic", "armor_kit", "smoke", "shatter_charge", "thorn_wall", "blight_flask", "skyfall_charge", "pilfer_pouch"]}, "perks": {"name": "Perk Peddler", "tag": "Weapon perks and scouting", "icon": "burst", "col": "ff9a5a", "sells": ["tonic", "armor_kit", "perk:hotload", "perk:deepmag", "perk:brand_fire", "scanner", "lookout_lantern", "hawk_whistle", "omen_draught", "bounty_banner", "toss_satchel"]}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
