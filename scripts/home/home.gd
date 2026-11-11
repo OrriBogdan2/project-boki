@@ -971,14 +971,15 @@ func _spawn_kin() -> void:
 	if hb and hb.astar: hb.assign_beds()
 
 ## One kin on the farm: its model, mood label and entry in kins, on island `isl`; `slot` (its place in the
-## roster, -1 for none) picks its bed.
-func add_kin(rec: Dictionary, isl: int, slot := -1) -> Dictionary:
+## roster, -1 for none) picks its bed; `at` (default: an open spot on `isl`) is where it appears.
+func add_kin(rec: Dictionary, isl: int, slot := -1, at := Vector3.INF) -> Dictionary:
 	var n := Models.kin(rec["species"], rec)
 	add_child(n)
 	# somewhere open, not wedged against a building and not on top of another kin
 	var taken: Array = kins.map(func(o): return o["pos"])
 	taken.append(ppos)
-	var at := world.free_spot_near(world.random_ground(isl), taken, 1.3)
+	if at == Vector3.INF:
+		at = world.free_spot_near(world.random_ground(isl), taken, 1.3)
 	n.position = at
 	var lbl := Label3D.new()
 	lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
@@ -1484,6 +1485,7 @@ func _move_kin(d: float) -> void:
 			# being petted or talked to: it stays put and looks at you
 			k["hold_t"] = hold - d
 			k["goal"] = pos
+		if k.has("burrow_t") and BurrowSwap.step(self, k, d): continue      # through the Burrow door
 		var wish := Vector2.ZERO
 		var goal: Vector3 = k["goal"]
 		if goal != Vector3.INF:
@@ -2277,7 +2279,7 @@ func _use(it: Dictionary) -> void:
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
-		"burrow": _open_burrow()
+		"burrow": BurrowPanel.open(self)
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":
