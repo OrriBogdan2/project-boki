@@ -1,11 +1,12 @@
 extends RefCounted
-## --load-trim-check: what build.hunters no longer does on the main thread. A glider canopy's sheet is built
-## once per skin and only recoloured per Hunter (same geometry, the skin's colours on it). A duel reads only
-## your Warden's .glb; a match with rival squads reads every Warden's and every common Boki's on loader
-## threads from its start. A Hunter's glider shares its strings' mesh and paints its own canopy. A Warden
-## drawn from its .glb keeps the rig nodes that drive its bones but none of the hidden procedural body's
-## loose parts; set to procedural, the same Warden still merges its body.
+## --load-trim-check: what build.hunters no longer does on the main thread. A glider canopy's sheet is built once
+## per skin and only recoloured per Hunter (same geometry, the skin's colours on it). A duel reads only your
+## Warden's .glb; a match with rival squads reads every Warden's and every common Boki's on loader threads from its
+## start, one read at a time (BackgroundWork.read_ahead). A Hunter's glider shares its strings' mesh and paints its
+## own canopy. A Warden drawn from its .glb keeps the rig nodes that drive its bones but none of the hidden
+## procedural body's loose parts; set to procedural, the same Warden still merges its body.
 
+const QUEUE_FRAMES := 3000    # frames the queued .glb reads may take to finish (~50 s at 60 fps)
 const RIG := ["Rig/Torso", "Rig/Torso/HeadPivot", "Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Legs/LegR/Knee"]
 
 var bad := 0
@@ -13,7 +14,7 @@ var bad := 0
 func run(main: Node) -> void:
 	Save.no_write = true
 	_gliders()
-	_fetches()
+	await _fetches(main.get_tree())
 	_bodies(main)
 	print("LOADTRIM DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -36,9 +37,12 @@ func _near(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) < 0.02
 
 func _asked(p: String) -> bool:
+	return BackgroundWork.asked(p)
+
+func _reading(p: String) -> bool:
 	return ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
 
-func _fetches() -> void:
+func _fetches(tree: SceneTree) -> void:
 	var own := "gunslinger"
 	var other := "juggernaut" if WardenGlb.has_model("juggernaut") else ""
 	WardenGlb.fetch_for({"duel": true, "arch": own})
@@ -50,6 +54,16 @@ func _fetches() -> void:
 	BokiRig.fetch_common()
 	var kin_missing := Data.common_kin().filter(func(k): return BokiRig.has(k) and not _asked(BokiRig.PATH % [k, k]))
 	_ok("and every common Boki's (missing %s)" % str(kin_missing), kin_missing.is_empty())
+	var paths := Arch.ids().map(func(a): return WardenGlb.path(a))
+	paths += Data.common_kin().map(func(k): return BokiRig.PATH % [k, k])
+	var started := paths.filter(_reading).size()
+	_ok("one read at a time, the rest queued (%d started)" % started, started == 1)
+	var frames := 0
+	while frames < QUEUE_FRAMES and paths.any(func(p): return not BackgroundWork.done(p)):
+		await tree.process_frame
+		frames += 1
+	var left := paths.filter(func(p): return not BackgroundWork.done(p)).size()
+	_ok("the queue reads them all on loader threads, a frame apart (%d frames, %d left)" % [frames, left], left == 0)
 	BackgroundWork.drain()
 
 func _loose(n: Node) -> int:
