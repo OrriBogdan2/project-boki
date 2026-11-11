@@ -6,6 +6,8 @@ extends RefCounted
 ## one size up, then SPENT. The last kill drops the camp's one reward bundle where that monster fell
 ## and toasts the killer's squad. Its monsters pay XP on their own kills (XpRules) and roll no drops
 ## of their own. The host (or the offline game) runs camps; other games see the monsters and the toast.
+## A clear gives back part of the summon cooldown (KinSummon.refund) of each clearing squadmate the camp
+## paid XP, by size ("refund" in the rules); each game refunds the Hunters it owns, from the "campclr" event.
 ##
 ## Public API:
 ##   Camps.list() -> Array            {id, pos, size, state, back_t, region} per camp
@@ -21,7 +23,9 @@ enum State { LIVE, CLEARED, RETURNING, SPENT }
 static var _rules: Dictionary = {}
 
 var m: Match
-var camps: Array = []        # {id, pos, island, size (index in sizes), state, mobs, back_t, region, paid {team: xp}}
+# per camp: {id, pos, island, size (index in sizes), state, mobs, back_t, region, paid {team: xp},
+# paid_h {hunter nid: true} (everyone its kills paid XP, for the summon refund)}
+var camps: Array = []
 var comebacks := 0           # (tests and the rolling sim)
 var _tick_t := 0.0
 
@@ -71,6 +75,7 @@ func _populate(c: Dictionary) -> void:
 	var spread := float(rules()["spread"])
 	c["mobs"] = []
 	c["paid"] = {}
+	c["paid_h"] = {}
 	for kk in comp:
 		var q := p
 		for _t in 20:
@@ -92,6 +97,9 @@ func on_mob_dead(mb: Mob, credit: Ent, xp: float) -> void:
 	var c: Dictionary = camps[int(mb.get_meta("camp"))]
 	var team: int = credit.team if credit is Hunter else -1
 	c["paid"][team] = float(c["paid"].get(team, 0.0)) + xp
+	if xp > 0.0:
+		for o: Hunter in XpRules.squad_in_range(m, credit):
+			c["paid_h"][o.nid] = true
 	if c["mobs"].all(func(o): return not is_instance_valid(o) or o.dead):
 		_clear(c, mb, credit as Hunter if credit is Hunter else null, team)
 
@@ -102,8 +110,10 @@ func _clear(c: Dictionary, last: Mob, by: Hunter, team: int) -> void:
 	var p := last.pos if not m.world.is_void(last.pos.x, last.pos.z) else (c["pos"] as Vector3)
 	_bundle(size_def(int(c["size"])), p, by)
 	var xp := int(c["paid"].get(team, 0.0))
+	var paid_h: Array = c["paid_h"].keys()
 	show_clear(m, team, int(c["size"]), xp)
-	if m.net_on: m.net_event(["campclr", team, int(c["size"]), xp])
+	refund_summons(m, team, int(c["size"]), paid_h)
+	if m.net_on: m.net_event(["campclr", team, int(c["size"]), xp, paid_h])
 	cleared.emit(int(c["id"]), team)
 
 ## The camp's one reward, in one spot: armor, maybe a perk orb, maybe a gear piece.
@@ -120,6 +130,19 @@ func _bundle(sd: Dictionary, p: Vector3, by: Hunter) -> void:
 static func show_clear(mt: Match, team: int, size_i: int, xp: int) -> void:
 	if mt.hud and mt.player and mt.player.team == team:
 		mt.hud.toast("%s cleared  +%d XP" % [String(size_def(size_i)["name"]), xp], Color("ffd27a"))
+
+## The clear's summon refund: each of this game's own Hunters on the clearing squad whose nid is in paid_h
+## gets the size's share of their Boki's remaining summon cooldown back (the Boki box ring jumps).
+static func refund_summons(mt: Match, team: int, size_i: int, paid_h: Array) -> void:
+	var frac := float(size_def(size_i).get("refund", 0.0))
+	for h: Hunter in mt.hunters:
+		if h.team == team and not h.remote and h.nid in paid_h and h.kin and h.kin.summon and h.kin.owner_h == h:
+			h.kin.summon.refund(frac)
+
+## The "campclr" event from the host: the toast, and the refund for the Hunters this game owns.
+static func on_clear_event(mt: Match, x: Array) -> void:
+	show_clear(mt, int(x[1]), int(x[2]), int(x[3]))
+	if x.size() > 4: refund_summons(mt, int(x[1]), int(x[2]), x[4])
 
 func tick(dt: float) -> void:
 	_tick_t -= dt

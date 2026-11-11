@@ -17,7 +17,7 @@ Levels came from standing still (1.2 XP/s) and from stray damage (0.35 per damag
 - `Camps.safe_for` wraps the Blight's closing. This base has no ring yet, so today it asks whether the islands will still be up (`Match.length`). The zone redesign replaces only this function.
 
 ## Consequences
-- Net: each peer pays its own Hunters. The "mobdead" event now carries the host's XP for the kill, peers pay knock XP from the "knock" event, and a new "campclr" event carries the clear toast. Noted in the unreleased 0.24.4 entry of Net.VERSION (no number change; the alternative is 0.24.5).
+- Net: each peer pays its own Hunters. The "mobdead" event now carries the host's XP for the kill, peers pay knock XP from the "knock" event, and a new "campclr" event carries the clear toast. Summon refund (EARLY_CAMPS_DROP 2.9): a clear takes `refund` (Small 10%, Camp 20%, Great and Chief 35%) off the remaining summon cooldown of each clearing squadmate the camp's kills paid, through `KinSummon.refund`; "campclr" carries those nids so each peer refunds its own Hunters (Net 0.31.1 on the stacked branch). The feedback is the Boki box ring jumping, no toast. Noted in the unreleased 0.24.4 entry of Net.VERSION (no number change; the alternative is 0.24.5).
 - Rolling loses CAMP_RESPAWN, `camps`, `note_camp` and `_camp_respawns`. Its "picked over" start calls `Camps.picked_over`.
 - New check `--camps-check`. `--rolling-check` drops its camp-respawn rows (the comeback is asserted in `--camps-check`).
 - Left to the levels task: the new XP curve, the pace and gap bonuses, rarity multipliers, the XP bar, and the 300 last-hit boss pay.

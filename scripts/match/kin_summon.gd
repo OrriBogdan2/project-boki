@@ -124,6 +124,10 @@ func end() -> void:
 	left = 0.0
 	shrink = SHRINK_S
 
+## A camp clear (Camps.refund_summons): frac (0..1) of the cooldown still to run comes off; the HUD ring jumps.
+func refund(frac: float) -> void:
+	cd *= 1.0 - clampf(frac, 0.0, 1.0)
+
 ## Knocked down while summoned (Kin.go_down): back into a wisp at once, the longer cooldown. True if it was out.
 func knocked() -> bool:
 	if not out():

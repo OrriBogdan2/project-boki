@@ -6,6 +6,7 @@ extends RefCounted
 ##
 ## Public API:
 ##   XpRules.pay_squad(m, by, xp)   pays xp to the killer (a Boki's kill is its Hunter's) and squad in range
+##   XpRules.squad_in_range(m, by) -> Array   who a kill by `by` pays (Hunters on any game)
 ##   XpRules.knock_xp(victim) -> float   what knocking this Hunter pays
 ##   XpRules.kill_xp(mb) -> float   what killing this monster pays (0 for a lair boss: Lairs pays it)
 
@@ -19,13 +20,20 @@ static func rules() -> Dictionary:
 
 ## Pays the killer and each squadmate (alive or downed) within share_r of the killer.
 static func pay_squad(m, by, xp: float) -> void:
-	var h = by.owner_h if by is Kin else by
-	if not (h is Hunter) or xp <= 0.0:
+	if xp <= 0.0:
 		return
-	var r := float(rules()["share_r"])
-	for o: Hunter in m.hunters:
-		if o.team == h.team and not o.remote and not o.out and not o.extracted and o.flat_dist(h.pos) <= r:
+	for o: Hunter in squad_in_range(m, by):
+		if not o.remote:
 			o.gain_xp(xp)
+
+## The killer (a Boki's kill is its Hunter's) and each squadmate within share_r of them, owned here or not.
+static func squad_in_range(m, by) -> Array:
+	var h = by.owner_h if by is Kin else by
+	if not (h is Hunter):
+		return []
+	var r := float(rules()["share_r"])
+	return m.hunters.filter(func(o: Hunter) -> bool:
+		return o.team == h.team and not o.out and not o.extracted and o.flat_dist(h.pos) <= r)
 
 static func knock_xp(victim: Hunter) -> float:
 	var k: Dictionary = rules()["knock"]

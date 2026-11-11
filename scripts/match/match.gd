@@ -5526,7 +5526,7 @@ func _net_ev(x, from: String) -> void:
 				var wat := Vector3(x[4], x[5], x[6])
 				if String(x[2]) == "tune" and Data.PERKS.has(String(x[7])): spawn_tune(String(x[7]), wat, String(x[1]), false)
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
-		"campclr": Camps.show_clear(self, int(x[1]), int(x[2]), int(x[3]))
+		"campclr": Camps.on_clear_event(self, x)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
 		"wtake":

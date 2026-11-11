@@ -5,10 +5,14 @@ extends RefCounted
 ## standing still or for hurting Hunters (armor only); a kill pays its XP to the last hit's squad
 ## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
-## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
+## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. A clear gives
+## back part of the summon cooldown (Small 10%, Camp 20%, Great and Chief 35%) to each clearing
+## squadmate it paid, nothing to one it did not or to a rival; online, from the "campclr" event. Never
 ## touches the save.
 
 const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
+const SIZE_REFUND := {"small": 0.1, "camp": 0.2, "great": 0.35, "chief": 0.35}   # share of the summon cooldown left
+const CD := 40.0   # s: the summon cooldown each refund row starts from
 
 var bad := 0
 
@@ -32,6 +36,7 @@ func run(main: Node) -> void:
 	_spawn(m)
 	_xp(m)
 	_clear(m)
+	_refund_event(m)
 	_comeback(m)
 	_hot(main)
 	print("CAMPS DONE, failures: %d" % bad)
@@ -138,12 +143,17 @@ func _clear(m: Match) -> void:
 	var by_size := {}
 	for c in C.camps:
 		by_size[Camps.size_def(int(c["size"]))["id"]] = c
+	var mates: Array = m.hunters.filter(func(h): return h.team == P.team and h != P)
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
 	var seeds_vals := 0
 	for sid in by_size:
 		var c: Dictionary = by_size[sid]
 		var sd := Camps.size_def(int(c["size"]))
 		m.time = 30.0
+		mates[0].pos = (c["pos"] as Vector3) + Vector3(8, 0, 0)     # paid: 8 m from the kills (XP is not split)
+		var sums := [_resting(m, P), _resting(m, mates[0]), _resting(m, mates[1]), _resting(m, rival)]
 		var r := _kill_camp(m, c, P)
+		_refund_rows(sid, sums)
 		ok(absf(float(r["xp"]) - float(SIZE_XP[sid])) < 0.5, "%s: clearing it pays %d XP (got %d)" % [sid, int(SIZE_XP[sid]), int(r["xp"])])
 		ok(r["got"].size() == 1 and int(r["got"][0][1]) == P.team, "%s: one cleared signal, for the clearing squad" % sid)
 		ok(c["state"] == Camps.State.CLEARED and absf(float(c["back_t"]) - 180.0) < 0.01, "%s: CLEARED, back at +150 s" % sid)
@@ -158,6 +168,7 @@ func _clear(m: Match) -> void:
 		seeds_vals += r["picks"].filter(func(p): return String(p.get("kind", "")) == "seed").size()
 		seeds_vals += r["w"].filter(func(w): return w.has("val")).size()
 	ok(seeds_vals == 0, "camp monsters roll no seeds or treasure of their own")
+	mates[0].pos = Vector3(-1e4, 0, -1e4)
 	# a stealer takes the last hit, the XP and the bundle
 	var thief: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
 	var c2: Dictionary = {}
@@ -175,6 +186,38 @@ func _clear(m: Match) -> void:
 		var r := _kill_camp(m, c2, thief)
 		ok(r["got"].size() == 1 and int(r["got"][0][1]) == thief.team and absf(float(r["xp"]) - XpRules.kill_xp(ms[-1])) < 0.5, "a stealer's last hit takes that kill's XP and the clear")
 		ok(absf(P.xp - px - pgot) < 0.001 and pgot > 0.0 and thief.xp > tx, "the first squad keeps what its own kills paid")
+
+## The fixture: this Hunter's Boki with CD s of summon cooldown to run (a Boki if it has none).
+func _resting(m: Match, h: Hunter) -> KinSummon:
+	if h.kin == null:
+		m.give_kin(h, m.bot_kin_record())
+	var s: KinSummon = h.kin.summon
+	s.cd = CD
+	s.cd_full = CD
+	return s
+
+## Clearing a camp refunds the paid squadmates' summon cooldown by its size; not an unpaid one or a rival.
+func _refund_rows(sid: String, sums: Array) -> void:
+	var want := CD * (1.0 - float(SIZE_REFUND[sid]))
+	ok(absf(sums[0].cd - want) < 0.01 and absf(sums[1].cd - want) < 0.01,
+		"%s: the killer's and a paid squadmate's summon cooldown drop %d%% (%.1f s, %.1f s; want %.1f s)"
+		% [sid, roundi(float(SIZE_REFUND[sid]) * 100.0), sums[0].cd, sums[1].cd, want])
+	ok(sums[2].cd == CD and sums[3].cd == CD, "%s: nothing for an unpaid squadmate 1e4 m off, nor a rival" % sid)
+	ok(sums[0].cd_full == CD, "%s: the ring's full length stays, so the ring jumps forward" % sid)
+
+## Online: another game refunds only the Hunters it owns that the "campclr" event names.
+func _refund_event(m: Match) -> void:
+	var P: Hunter = m.player
+	var mates: Array = m.hunters.filter(func(h): return h.team == P.team and h != P)
+	var near: Hunter = mates[0]
+	var far: Hunter = mates[1]
+	var s_near := _resting(m, near)
+	var s_far := _resting(m, far)
+	Camps.on_clear_event(m, ["campclr", P.team, 0, 60, [near.nid]])      # size 0, a Small Camp: 10%
+	ok(absf(s_near.cd - CD * 0.9) < 0.01 and s_far.cd == CD,
+		"online: a \"campclr\" event refunds the named squadmate only")
+	Camps.on_clear_event(m, ["campclr", P.team, 0, 60])
+	ok(absf(s_near.cd - CD * 0.9) < 0.01, "an old 4-field \"campclr\" refunds nothing")
 
 ## One Camps tick now (it runs once a second).
 func _tick(C: Camps) -> void:
@@ -239,6 +282,7 @@ func _comeback(m: Match) -> void:
 ## In the hot zone every camp is one size up from its spot's kind.
 func _hot(main: Node) -> void:
 	var checked := 0
+	var chief_done := false
 	var good := true
 	for s in [3, 9, 21]:
 		var m := _match(main, s)
@@ -250,5 +294,24 @@ func _hot(main: Node) -> void:
 			var hot: bool = m.biomes != null and int(c["region"]) >= 0 and int(c["region"]) == m.biomes.hot.hot
 			good = good and int(c["size"]) == (mini(base + 1, ids.size() - 1) if hot else base)
 			if hot: checked += 1
+		if not chief_done:
+			chief_done = _chief_refund(m)
 		m.queue_free()
 	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
+	ok(chief_done, "a Camp Chief to clear for the refund rows")
+
+## The refund rows on a Camp Chief (only the hot zone has them); false if this match has none.
+func _chief_refund(m: Match) -> bool:
+	var cs: Array = m.camps.camps.filter(func(c): return Camps.size_def(int(c["size"]))["id"] == "chief")
+	if cs.is_empty():
+		return false
+	var P: Hunter = m.player
+	for h in m.hunters:
+		if h != P: h.pos = Vector3(-1e4, 0, -1e4)
+	var mates: Array = m.hunters.filter(func(h): return h.team == P.team and h != P)
+	mates[0].pos = (cs[0]["pos"] as Vector3) + Vector3(8, 0, 0)
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var sums := [_resting(m, P), _resting(m, mates[0]), _resting(m, mates[1]), _resting(m, rival)]
+	_kill_camp(m, cs[0], P)
+	_refund_rows("chief", sums)
+	return true
