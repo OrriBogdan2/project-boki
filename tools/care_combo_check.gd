@@ -1036,7 +1036,7 @@ func _dashes_cute() -> void:
 	step(m, P.roll_t)
 	var ground_d := P.pos.x - p0.x
 	ok(
-			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s after the dash feel",
+			"mm dashes: the ground hop is Elluna's: 2 bh (3.6 m) in 0.2 s (off the dash feel)",
 			absf(ground_d - 3.6) < 0.25 and absf(ground_t - 0.2) < 0.02,
 			"%.2f m in %.2f s" % [ground_d, ground_t])
 	step(m, 0.5)
