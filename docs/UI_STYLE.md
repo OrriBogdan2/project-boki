@@ -95,10 +95,23 @@ or pulses unless it needs you now (a downed teammate's row, a recast window). Fu
 Anything new that wants screen time in a fight takes a row of this table in the same change, or merges into an
 existing one.
 
-## 7. Left for later (not in this pass)
+## 7. Words (owner, 11-11: "super simplified and easy to understand/use")
 
-- Hunter pick: one-line tile names (shorter names or a two-column list), the "challenge" header, the title/subtitle
-  naming (Relics vs Hunters).
+The audit and its numbers: [UI_SIMPLIFY_1111.md](UI_SIMPLIFY_1111.md). Check: `--ui-words-check`.
+
+- **Subtitle**: one short sentence (about 10 words) or none. Don't restate the tabs or the title.
+- **Tooltip**: one line (`TIP_WORDS`, 14 words). It adds what the control doesn't show; never repeat its label or the
+  card it sits on, never a list of stats or ability names (the detail view or K kit card has those).
+- **No help walls**: a side panel's "how it works" is at most two short lines. Rules live in the wiki.
+- **Hide what you can't act on**: counters at 0, rows nobody can use yet (one faint "N more..." line instead),
+  a hint that the next line already gives.
+- **Why it's greyed out**: a disabled button gets its reason on a line under it (`HomeEcon._gated`), not only on hover.
+- **Wrapping text**: `UI.label` (over 48 letters) and `UI.para` wrap and take the row's free width (`UI.wrap_text`). A
+  wrapping label set up by hand in an HBox needs `SIZE_EXPAND_FILL`, or it shows one letter per line.
+
+## 8. Left for later (not in this pass)
+
+- Hunter pick: one-line tile names (shorter names or a two-column list), the title naming (Relics vs Hunters).
 - Full map: label collision (place names over halt and gate names), hide the HUD strip and guide line while it is open.
 - Tutorial card: move it onto the house look (`TutorialHud`), Rubik body text.
 - Home top bar: one Materials chip instead of four (needs the `--arrival-check` "stays once seen" rule revisited).
