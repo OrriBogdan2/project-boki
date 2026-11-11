@@ -25,7 +25,6 @@ const SKY_KEYS := ["top", "mid", "horizon"]
 const SEA_KEYS := ["deep", "light", "glow"]
 ## How fast a camera move still creeps at its end, as a share of its average speed (eased, never a dead stop)
 const END_CREEP := 0.25
-const SKIP_FADE_T := 0.2       # s of wipe to black when it ends or is skipped
 const MANTLES_AT := 2.6        # s into THE HOLLOWING: the Hunters' selves burst out of the Crown as Relics
 
 var cam: Camera3D
@@ -544,13 +543,10 @@ func _finish() -> void:
 	if done:
 		return
 	done = true
-	var tw := create_tween()
-	tw.tween_property(fade, "color:a", 1.0, SKIP_FADE_T)
-	tw.tween_callback(func():
-		finished.emit()
-		Save.d["tutorial"]["prologue"] = true
-		# the hatch screen still tells its own three lines: the storm, the shrine, the eggs
-		Game.goto(then_go))
+	finished.emit()
+	Save.d["tutorial"]["prologue"] = true
+	# the screen change covers the picture itself (one wipe, not two); the hatch screen still tells its own three lines
+	Game.goto(then_go)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if done:
