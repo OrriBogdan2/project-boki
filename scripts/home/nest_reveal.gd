@@ -14,7 +14,8 @@ static func play(fx: Fx, nest: Node3D, sp: String) -> void:
 	var col := DexView.type_col(DexView.type_of(sp))
 	fx.ring(nest.global_position, RING_R, Color(col, 0.6), RING_S)
 	# sparkles drift up slowly and hang a moment, not a blast
-	fx.burst(nest.global_position + Vector3(0, 0.5, 0), col.lightened(0.3), SPARKS, 1.6, 1.0, 0.6, 0.6, Vector3.UP, 45.0)
+	var above := nest.global_position + Vector3(0, 0.5, 0)
+	fx.burst(above, col.lightened(0.3), SPARKS, 1.6, 1.0, 0.6, 0.6, Vector3.UP, 45.0)
 	var shell: Node3D = nest.get_node("Shell")
 	var tw := shell.create_tween().set_trans(Tween.TRANS_SINE)
 	for tip in [WOBBLE, -WOBBLE * 0.6, WOBBLE * 0.25, 0.0]:

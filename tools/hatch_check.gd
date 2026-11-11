@@ -215,9 +215,11 @@ func _nest_reveal(sp: String) -> void:
 	main.add_child(nest)
 	NestReveal.play(spy, nest, sp)
 	var col := DexView.type_col(DexView.type_of(sp))
-	var tinted := spy.got_bursts.filter(func(b): return (b[0] as Color).is_equal_approx(col.lightened(0.3)) and int(b[1]) <= 14)
+	var tinted := spy.got_bursts.filter(
+		func(b): return (b[0] as Color).is_equal_approx(col.lightened(0.3)) and int(b[1]) <= 14)
 	ok(spy.got_rings == 1 and spy.got_bursts.size() == 1 and tinted.size() == 1,
-		"a new nest egg: one glow ring and one small sparkle in its type colour (%d rings, %d bursts)" % [spy.got_rings, spy.got_bursts.size()])
+		"a new nest egg: one glow ring and one small sparkle in its type colour (%d rings, %d bursts)"
+		% [spy.got_rings, spy.got_bursts.size()])
 	var shell: Node3D = nest.get_node("Shell")
 	var tip := 0.0
 	var t0 := Time.get_ticks_msec()
