@@ -18,21 +18,23 @@ from mathutils import Matrix, Vector
 
 SRC, OUT = sys.argv[sys.argv.index("--") + 1:][:2]
 SIZE = 0.68         # game metres per model metre (content/archetypes/tender.json body size)
-FPS = 48            # keys per second: a run stance is 0.06 s
+FPS = 48            # keys per second (pip.glb.import bakes at this rate too): a run stance is 0.08 s
 CONTACT = 0.006     # model m: a sole vert this close to the floor is planted
 TAU = math.tau
-# Per gait. speed: game m/s (warden_anim/pip.json loco). period: s for a left + right pair. duty: the part of the
-# period a foot is planted (under 0.5: a float between steps). ahead: the share of the stance sweep in front of the
-# hip. lift: swing foot's peak, model m. sink: the root's mean drop, bob: its rise in the float, model m.
-# toe_up at the strike and heel_up at the push, degrees.
+# s for a left + right pair, every loop: WardenClips' BlendSpace2D (synced) blends a ring's loops at a diagonal and the
+# walk ring into the run ring between their speeds, and only loops of one length stay in step
+PERIOD = 0.34
+# Per gait. speed: game m/s (warden_anim/pip.json loco). duty: the part of the period a foot is planted (under 0.5: a
+# float between steps). ahead: the share of the stance sweep in front of the hip. lift: swing foot's peak, model m.
+# sink: the root's mean drop, bob: its rise in the float, model m. toe_up at the strike, heel_up at the push, degrees.
 GAITS = {
-    "walk": dict(speed=2.2, period=0.42, duty=0.34, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=6.0,
+    "walk": dict(speed=2.2, duty=0.34, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=6.0,
                    heel_up=30.0, push=0.6),
-    "run": dict(speed=4.55, period=0.34, duty=0.24, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=4.0,
+    "run": dict(speed=4.55, duty=0.24, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=4.0,
                   heel_up=40.0, push=0.55),
 }
-# heading in degrees (as pip_clips.py's gait(): l is her left, -x) and the period's share: her legs reach less
-# behind and to the side than ahead, so those steps are shorter and quicker at the same speed
+# heading in degrees (as pip_clips.py's gait(): l is her left, -x) and the duty's share: her legs reach less behind
+# and to the side than ahead, so those soles sweep less floor: down for less of the same period, a longer float
 HEADINGS = {"f": (0.0, 1.0), "b": (180.0, 0.8), "l": (90.0, 0.62), "r": (-90.0, 0.62)}
 LEGS = ("thigh", "shin", "foot")
 
@@ -245,7 +247,7 @@ for gait_name, gait in GAITS.items():
     for tag, (heading, share) in HEADINGS.items():
         h = math.radians(heading)
         bake("%s_%s" % (gait_name, tag), dict(gait, d=Vector((-math.sin(h), math.cos(h), 0.0)),
-                                               period=gait["period"] * share))
+                                               period=PERIOD, duty=gait["duty"] * share))
 arm.animation_data.action = None
 for ac in list(bpy.data.actions):
     if ac.name.rsplit("_", 1)[0] not in GAITS:
