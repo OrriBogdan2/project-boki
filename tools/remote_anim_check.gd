@@ -6,8 +6,9 @@ extends "res://tools/displace_net_check.gd"
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
 ## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
 ## Once both games are up they run in lockstep, not on the wall clock: the host steps one DT, tells the guest,
-## and goes on when the guest has stepped too, so a cast takes as many frames as it needs and no real time, and
-## times in the log are step counts (the same on a slow box). --remote-anim-check=archer,mage runs only those kits.
+## and goes on when the guest has stepped too; the guest also holds a step until the host's latest snapshot is in,
+## so a cast takes as many frames as it needs and no real time, and times in the log are step counts (the same
+## on a slow box). --remote-anim-check=archer,mage runs only those kits.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -15,6 +16,7 @@ const SKEW := 0.05           # s: clocks of two processes on one machine
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
 const ACK_S := 30.0          # s of real time to wait for the guest's step before giving up
+const SNAP_S := 3.0          # s of real time the guest waits for a snapshot the unreliable channel may have dropped
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
@@ -35,6 +37,7 @@ var locked := false          # both games step together, one DT per "step" messa
 var steps := 0               # locked steps taken on this game: the log's clock
 var owed := 0                # guest: steps the host asked for and this game has not taken
 var acks := 0                # host: steps the guest has taken
+var snap_t := 0.0            # host: its match time at its last snapshot; guest: the same, from the step message
 var sampled := -1            # the step _sample last looked at
 var kits: Array = ARCHS
 
@@ -60,7 +63,8 @@ func _run(secs: float) -> void:
 		if Net.is_host():
 			await super._run(DT)
 			steps += 1
-			Net.lobby_emit("ra", {"c": "step"})
+			if Net.send_t > 0.09: snap_t = m.time      # (Net.tick just sent a snapshot: send_t restarts at 0.1)
+			Net.lobby_emit("ra", {"c": "step", "t": snap_t})
 			var t0 := Time.get_ticks_msec()
 			while acks < steps and Time.get_ticks_msec() - t0 < ACK_S * 1000.0:
 				await main.get_tree().process_frame
@@ -69,9 +73,17 @@ func _run(secs: float) -> void:
 				await main.get_tree().process_frame
 			if stop: return
 			owed -= 1
+			var t1 := Time.get_ticks_msec()
+			while not stop and not _snap_in() and Time.get_ticks_msec() - t1 < SNAP_S * 1000.0:
+				await main.get_tree().process_frame
 			await super._run(DT)
 			steps += 1
 			Net.lobby_emit("ra", {"c": "ack"})
+
+## Guest: the host's hunter has the snapshot the host sent at `snap_t` (or a later one).
+func _snap_in() -> bool:
+	var buf := _copy().net_buf
+	return buf == null or buf.ts.is_empty() or buf.ts[buf.ts.size() - 1] >= snap_t - 1.5 * DT
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
@@ -193,7 +205,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 			"lock":
 				locked = true
 				Engine.max_fps = 0
-			"step": owed += 1
+			"step":
+				owed += 1
+				snap_t = float(data.get("t", 0.0))
 			"ack": acks += 1
 			"mark":
 				log_rows.clear()
