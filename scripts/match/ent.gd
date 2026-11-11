@@ -38,14 +38,16 @@ var vuln_k := 0.0
 var dr := {}                # diminishing returns on crowd control: kind -> [applications, last time]
 var dr_stun := false        # the running stun counts toward the immunity that follows it
 var cc_immune_t := 0.0      # just came out of a stun: stuns and roots don't land (KinRules.STUN_IMMUNE)
-var marks := {}             # combo setups on this body: status -> {by, owner, until}
+var marks := {}             # combo setups on this body: combo id -> {team, owner, until, window}
 var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
+var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0
 var net_seen := 0.0
+var net_buf: NetSmooth = null   # remote Hunters: drawn a little behind, smoothly between snapshots
 
 func setup(match_node: Node, id: String) -> void:
 	m = match_node
@@ -143,7 +145,7 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
-	flash_t = 0.12
+	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1
 	if opts.has("kb") or float(opts.get("lift", -1.0)) > 0.0:
@@ -326,6 +328,9 @@ func tick_status(dt: float) -> void:
 func net_follow(dt: float) -> void:
 	prev = pos
 	if net_t < 0.0:
+		return
+	if net_buf:
+		net_buf.follow(self, m.time)
 		return
 	var age := clampf(m.time - net_t, 0.0, 0.25)
 	var tgt := net_pos + net_vel * age
