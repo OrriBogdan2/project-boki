@@ -92,6 +92,7 @@ func fresh() -> Dictionary:
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
+		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -301,12 +302,18 @@ func _migrate_10_to_11(data: Dictionary) -> void:
 ## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
 ## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
 ## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
-## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load. Clans
+## (d["clan"]) ride the same step, keyed by their own field.
 func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
 	for r in data.get("roster", []):
 		if not r.has("bonds"):
 			r["bonds"] = {}
+	if not data.has("clan"):
+		# clans grow out of guilds: a save in a guild becomes a plain member of the clan with that id (Social.clan_for)
+		var gid := String(data.get("guild_id", ""))
+		var who := String(data.get("profile", {}).get("id", ""))
+		data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
 
 ## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
 ## (every Boki gets its worn-token slots and loose points, Care.ensure) and sleepovers. A v12 save from either line gets the
