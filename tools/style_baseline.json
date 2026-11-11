@@ -725,7 +725,7 @@
 },
 "scripts/match/sky_train.gd": {
 "long_line": 11,
-"semicolon": 10
+"semicolon": 8
 },
 "scripts/match/spawn_plan.gd": {
 "long_line": 8,
@@ -1181,8 +1181,8 @@
 "semicolon": 1
 },
 "tools/train_check.gd": {
-"long_line": 11,
-"semicolon": 7
+"long_line": 10,
+"semicolon": 6
 },
 "tools/unique_check.gd": {
 "long_line": 49,
