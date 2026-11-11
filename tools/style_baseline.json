@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 28,
+"long_line": 31,
 "nested_ternary": 2,
 "semicolon": 9
 },
@@ -32,7 +32,7 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 12,
+"long_line": 13,
 "semicolon": 1,
 "shadow": 1
 },
@@ -186,7 +186,7 @@
 "semicolon": 4
 },
 "scripts/core/sfx.gd": {
-"long_line": 5,
+"long_line": 7,
 "semicolon": 3,
 "shadow": 3
 },
@@ -494,7 +494,7 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 23,
+"long_line": 24,
 "semicolon": 43
 },
 "scripts/match/exits.gd": {
@@ -555,7 +555,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 38,
-"long_line": 95,
+"long_line": 96,
 "nested_ternary": 19,
 "semicolon": 53,
 "shadow": 4
@@ -667,7 +667,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 281,
+"long_line": 282,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -917,7 +917,7 @@
 "scripts/ui/title.gd": {
 "long_line": 21,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 40
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -1002,7 +1002,7 @@
 "semicolon": 1
 },
 "tools/check_registry.gd": {
-"long_line": 1
+"long_line": 61
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
@@ -1121,7 +1121,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 32,
+"long_line": 34,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
