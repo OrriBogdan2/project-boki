@@ -16,9 +16,6 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 | Setting | Value | Meaning |
 |---|---|---|
 | players | 30 | hunters in an expedition (solos, duos or trios) |
-| down_hp | 100 | so about 40 seconds downed before you bleed out |
-| players | 20 | hunters in an expedition (solos, duos or trios) |
-| length | 360 | seconds until the islands fall |
 | down_hp | 100 | a wisp's pool; it drains over Life.R.bleed_out (15 s) |
 
 ## Down, death and revive
@@ -44,6 +41,22 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | loot_time | 1 | bots: hold interact to take everything from a box (you get a loot window) |
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
+
+## armor_xp (`content/rules/armor_xp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Armour progress (scripts/match/armor_xp.gd, docs/ARMOUR_PARITY.md Progress). Only damage dealt to and taken from rival Hunters fills it; monsters and Boki build none; no level XP comes from any of it. thresholds_source: the source's cumulative damage to reach Uncommon, Rare, Epic, Legendary, in source damage points (docs/SUPERVIVE_DATA.md section 3, 1.04 data). Ours = round(source x our_health / source_health): our_health is the Medium class's base health (scripts/core/data.gd), source_health the source's median base health (SUPERVIVE_DATA section 5). Rates are progress per point of damage after armour. knock_source_damage: the chunk a knock adds, in source damage points (the source counts knocks, amount unpublished). |
+| thresholds_source | [2000, 3600, 12000, 20000] |
+| our_health | 145 |
+| source_health | 1030 |
+| dealt | 1 |
+| taken | 1 |
+| monster | 0 |
+| boki | 0 |
+| knock_source_damage | 1000 |
 
 ## base_drift (`content/rules/base_drift.json`)
 
@@ -449,6 +462,16 @@ Spark Volley, the Boki base's fourth minigame (briefs/design/GARDEN.md section 5
 | courts | {"glasswater": {"at": [38.5, 31.5], "splash": "9fe4f2"}} |
 | courts_doc | A zone's own court (GardenZones.here): at = the log's middle, tiles; splash = the colour of the water a miss throws up. It lies across the zone's shallow channel (garden_zones.json build.shallow) and needs no Training post. |
 
+## blockers (`content/rules/blockers.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | One rule for what stops what (docs/ABILITIES.md 'Blockers and crossers', scripts/combat/blockers.gd, --blocker-check). Each crosser has a class; the class row says stop, pass or na (can't meet) per blocker kind. arch: the kit the check fires it from. |
+| classes | {"solid": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"}, "body": {"shield": "na", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "na"}, "pierce": {"shield": "stop", "rock": "pass", "ice": "stop", "wall": "stop", "guard": "stop"}, "phase": {"shield": "na", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "na"}, "lob": {"shield": "pass", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "pass"}} |
+| crossers | {"shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"}, "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Abyssal Hand (pierces terrain)"}, "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"}, "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"}, "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"}, "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"}, "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"}, "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"}, "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls and objects, not terrain ledges)"}, "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}} |
+
 ## How kit hits land on a Boki (`content/rules/boki_hit.json`)
 
 How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the source's creeps and summons take every ability as written (one number per card, no creep scaling) and every crowd control on the cards works on them.
@@ -458,25 +481,6 @@ How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the so
 | dmg_k | {"summoned": 1.0, "wild": 1.0} |
 | cc | ["stun", "root", "slow", "burn", "blight"] |
 | execute | True |
-## armor_xp (`content/rules/armor_xp.json`)
-## blockers (`content/rules/blockers.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | Armour progress (scripts/match/armor_xp.gd, docs/ARMOUR_PARITY.md Progress). Only damage dealt to and taken from rival Hunters fills it; monsters and Boki build none; no level XP comes from any of it. thresholds_source: the source's cumulative damage to reach Uncommon, Rare, Epic, Legendary, in source damage points (docs/SUPERVIVE_DATA.md section 3, 1.04 data). Ours = round(source x our_health / source_health): our_health is the Medium class's base health (scripts/core/data.gd), source_health the source's median base health (SUPERVIVE_DATA section 5). Rates are progress per point of damage after armour. knock_source_damage: the chunk a knock adds, in source damage points (the source counts knocks, amount unpublished). |
-| thresholds_source | [2000, 3600, 12000, 20000] |
-| our_health | 145 |
-| source_health | 1030 |
-| dealt | 1 |
-| taken | 1 |
-| monster | 0 |
-| boki | 0 |
-| knock_source_damage | 1000 |
-| _doc | One rule for what stops what (docs/ABILITIES.md 'Blockers and crossers', scripts/combat/blockers.gd, --blocker-check). Each crosser has a class; the class row says stop, pass or na (can't meet) per blocker kind. arch: the kit the check fires it from. |
-| classes | {"solid": {"shield": "stop", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "stop"}, "body": {"shield": "na", "rock": "stop", "ice": "stop", "wall": "stop", "guard": "na"}, "pierce": {"shield": "stop", "rock": "pass", "ice": "stop", "wall": "stop", "guard": "stop"}, "phase": {"shield": "na", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "na"}, "lob": {"shield": "pass", "rock": "pass", "ice": "pass", "wall": "pass", "guard": "pass"}} |
-| crossers | {"shot": {"class": "solid", "arch": "gunslinger", "what": "every projectile (LMB weapons, kit shots, Boki shots)"}, "hand": {"class": "pierce", "arch": "dredge", "what": "Grimble's Abyssal Hand (pierces terrain)"}, "beam": {"class": "pierce", "arch": "gunslinger", "what": "Vex's Longneedle (pierces terrain)"}, "chain": {"class": "solid", "arch": "juggernaut", "what": "Kael's Warchain (bites the wall it meets)"}, "cloak": {"class": "solid", "arch": "ashwick", "what": "Cinder's Furnace Cloak pull (needs sight)"}, "fissure": {"class": "solid", "arch": "bulwark", "what": "Albert's Faultline cells"}, "knock": {"class": "solid", "arch": "gunslinger", "what": "every knockback"}, "dash": {"class": "body", "arch": "gunslinger", "what": "every dash"}, "phase": {"class": "phase", "arch": "archer", "what": "Lace's Spirit Walk (through walls and objects, not terrain ledges)"}, "trade": {"class": "lob", "arch": "ostra", "what": "Motley's Trade (a high lob, then a swap)"}} |
 
 ## boki_lines (`content/rules/boki_lines.json`)
 
@@ -559,13 +563,6 @@ How the bond meter fills (it gates the Merge). All values are fractions of a ful
 | marked_factor | 2 |
 | mark_s | 4 |
 
-## branch_forms (`content/rules/branch_forms.json`)
-
-Branching evolution lines whose two finals are alternate forms of ONE Field Book entry (owner decision 2026-11-08, GAME_RULES_NOV8.md). Each pair is two species ids; the first is the entry's number and default face. A species id that is not in the game yet is skipped, so the entry exists as soon as either form does.
-
-| Setting | Value |
-|---|---|
-| pairs | [["amanitusk", "ringrove"], ["glaivyx", "lashyx"], ["geodelotl", "chandelotl"], ["howlop", "chimelop"]] |
 ## boss_moves (`content/rules/boss_moves.json`)
 
 
@@ -578,6 +575,14 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | phase_tell_k | 0.1 |
 | phase_roar | {"tell_s": 1.0, "radius_m": 5.5, "dmg": 6.0} |
 | moves | {"colossus": {"slam": {"tell_s": 1.1, "quickens": true, "shape": "circle", "radius_m": 3.1, "dmg": 26.0}, "wave": {"shape": "ring", "speed_mps": 7.5, "reach_m": 9.5, "dmg": 12.0, "dash_escape": false}, "boulders": {"tell_s": 0.85, "quickens": false, "shape": "circle", "radius_m": 1.9, "dmg": 20.0, "flight_s": 1.0}, "fissure": {"tell_s": 0.99, "quickens": true, "shape": "line", "length_m": 12.0, "width_m": 2.4, "dmg": 22.0}}, "serpent": {"dash": {"tell_s": 0.95, "quickens": true, "shape": "line", "length_m": 13.0, "width_m": 3.1, "dmg": 22.0, "speed_mps": 24.0}, "storm": {"tell_s": 1.1, "quickens": false, "shape": "circle", "radius_m": 1.8, "dmg": 18.0}, "static": {"tell_s": 1.5, "quickens": false, "shape": "circle", "radius_m": 3.6, "dmg": 16.0}}, "brood": {"spit": {"tell_s": 0.85, "quickens": true, "shape": "shots", "length_m": 10.0, "width_m": 0.5, "dmg": 14.0}, "lob": {"tell_s": 0.7, "quickens": false, "shape": "circle", "radius_m": 2.1, "dmg": 0.0, "puddle_dmg": 6.0}, "brood": {"tell_s": 1.0, "quickens": false, "shape": "circle", "radius_m": 0.9, "dmg": 0.0}, "burrow": {"tell_s": 1.6, "quickens": false, "shape": "circle", "radius_m": 3.0, "dmg": 24.0}}} |
+
+## branch_forms (`content/rules/branch_forms.json`)
+
+Branching evolution lines whose two finals are alternate forms of ONE Field Book entry (owner decision 2026-11-08, GAME_RULES_NOV8.md). Each pair is two species ids; the first is the entry's number and default face. A species id that is not in the game yet is skipped, so the entry exists as soon as either form does.
+
+| Setting | Value |
+|---|---|
+| pairs | [["amanitusk", "ringrove"], ["glaivyx", "lashyx"], ["geodelotl", "chandelotl"], ["howlop", "chimelop"]] |
 
 ## breakables (`content/rules/breakables.json`)
 
@@ -688,20 +693,12 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 |---|---|
 | doc | Dash feel (Shift) on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Parity first (DECISIONS 2026-11-07): a kit whose dash numbers are the source's measured dash runs them as-is (the default, 1.0 / 1.0): Vex, Hem, Cinder, Pip, Bjorn and Sable. Owner, Nov 2: dashes were too fast and too far in general, Sparkle's (Ryzz, mage) should go further. That rule stays only on the kits whose dash has no source number: Zedran's Rampage (owner 113.8), Grimble's Barge (owner 23:40) and Tarek's Rock Hop (owner item 111) at x0.85 distance, x1.15 time; Ryzz's Wirerun lane is the owner's own (item 70), so only its time is scaled. Claire's Skate and Ostra's Lantern Trade never pass through it. The felt table is asserted in --move-feel-check (docs/KIT_PARITY.md gap 4). Gil runs his own numbers (x1). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. |
 | default | {"dist": 1.0, "time": 1.0} |
-| juggernaut | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
+| juggernaut | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
 | dredge | {"dist": 0.85, "time": 1.15} |
 | dolm | {"dist": 0.85, "time": 1.15} |
 | mage | {"dist": 1.0, "time": 1.15} |
 | gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
 | archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
-| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Sparkle's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. Cinder (ashwick) is taken off it too: his Soot Ram is the source's measured ~3.4m in 0.33s and his poof 6.8m in 0.28s, set as-is in content/archetypes/ashwick.json (KIT_PARITY item 11). Dancer (thief) is taken off it: her Cartwheel is the source's measured one (owner review item 7: 4.5m in 0.48s on the ground, 8.4m over 0.95s from a jump), set as-is in content/archetypes/thief.json. Kael (juggernaut) is taken off it: his Rampage is the footage's measured ~3.6m in 0.2s and his Lunge 4.5 to 5.4m, set as-is in content/archetypes/juggernaut.json (docs/heroes/juggernaut.md, footage gaps 3 and 6); his curve still shapes the Rampage's speed (mean 1, so the 3.6m holds). curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. |
-| default | {"dist": 0.85, "time": 1.15} |
-| mage | {"dist": 1.0, "time": 1.15} |
-| thief | {"dist": 1.0, "time": 1.0} |
-| ashwick | {"dist": 1.0, "time": 1.0} |
-| gunslinger | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
-| juggernaut | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.12], [0.27, 1.73], [0.29, 1.73], [1, 0.28]]} |
-| archer | {"dist": 0.85, "time": 1.15, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
 
 ## equal (`content/rules/equal.json`)
 
@@ -1254,7 +1251,6 @@ Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: th
 | marks_doc | Flecks in the lean's colour over the head at full lean (one at a first meal): the small mark that shows before any part. |
 | types | {"normal": {"name": "Normal"}, "fire": {"name": "Fire", "tint": "#f0663a", "part": "horns"}, "water": {"name": "Water", "tint": "#4a9af0", "part": "fins"}, "grass": {"name": "Grass", "tint": "#6cc050", "part": "crest"}, "spore": {"name": "Spore", "tint": "#d89a5a", "part": "spots"}, "electric": {"name": "Electric", "tint": "#f2d43a", "part": "tail_long"}, "ice": {"name": "Ice", "tint": "#9fe6f2", "part": "spikes"}, "rock": {"name": "Rock", "tint": "#9a8a70", "part": "plates"}, "psychic": {"name": "Psychic", "tint": "#f070a8", "part": "third_eye"}, "flying": {"name": "Flying", "tint": "#9ab4f0", "part": "wings"}, "dragon": {"name": "Dragon", "tint": "#4a5ad8", "part": "club"}, "dark": {"name": "Dark", "tint": "#6a5a80", "part": "brow"}, "poison": {"name": "Poison", "tint": "#a050d0", "part": "fangs"}, "bug": {"name": "Bug", "tint": "#98c038", "part": "antennae"}, "steel": {"name": "Steel", "tint": "#9aa8b8", "part": "shell"}, "fairy": {"name": "Fairy", "tint": "#ffb8e0", "part": "crest"}, "crystal": {"name": "Crystal", "tint": "#6ae0d0", "part": "spikes"}, "sound": {"name": "Sound", "tint": "#f0a040", "part": "fins"}} |
 | foods | {"emberberry": "fire", "tidebloom": "water", "sunroot": "grass", "mindmint": "psychic", "puffcorn": "flying", "glowcap": "spore", "starfruit": "fairy", "kibble": "normal", "sweetbun": "normal", "tonicbrew": "electric", "chimebun": "sound", "frostdrop": "ice", "pebblenut": "rock", "scalepepper": "dragon", "duskplum": "dark", "pricklepear": "poison", "sapjelly": "bug", "ironcrisp": "steel", "geodecandy": "crystal"} |
-| rows | [{"hero": "gunslinger", "slot": "passive", "field": "resource.vamp", "value": 0.06, "tol": 0.0, "evidence": "D Ghost Combat Rush: +6% Omnivamp (supervive_kits.md)"}, {"hero": "gunslinger", "slot": "passive", "field": "resource.wait", "value": 3.5, "tol": 0.0, "evidence": "D Ghost Combat Rush: for 3.5s (supervive_kits.md)"}, {"hero": "gunslinger", "slot": "E", "field": "e.shave", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: hitting a hunter reduces CD by 20%"}, {"hero": "gunslinger", "slot": "E", "field": "e.shave_rank3", "value": 0.3, "tol": 0.0, "evidence": "D Arcane Railgun upg IV: -30% CD per target hit"}, {"hero": "gunslinger", "slot": "E", "field": "e.rattle_k", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: +20% dmg vs Dazed"}, {"hero": "gunslinger", "slot": "X", "field": "x.zone_t", "value": 3.0, "tol": 0.0, "evidence": "D Summon Napalm: 3s fire zone"}, {"hero": "mage", "slot": "RMB", "field": "rmb.rank3_mult", "value": 1.5, "tol": 0.0, "evidence": "D Voltaic Spear upg IV: +50% dmg"}, {"hero": "thief", "slot": "E", "field": "e.time", "value": 6.0, "tol": 0.0, "evidence": "D Farstep Dagger: after 6s Shiv MUST teleport back"}, {"hero": "thief", "slot": "E", "field": "e.refund_wall", "value": 0.25, "tol": 0.0, "evidence": "D Farstep Dagger upg: refund 25% CD on hitting terrain"}, {"hero": "thief", "slot": "E", "field": "e.refund_foe", "value": 0.5, "tol": 0.0, "evidence": "D Farstep Dagger upg: doubled (50%) on enemies"}, {"hero": "rimewright", "slot": "RMB", "field": "rmb.charges", "value": 2, "tol": 0.0, "evidence": "D Cryo Spear: 2 charges"}, {"hero": "dredge", "slot": "X", "field": "x.waves", "value": 2, "tol": 0.0, "evidence": "D Slugwave: two waves"}, {"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.dmg", "per": "lmb.dmg", "value": 3.0, "tol": 0.35, "evidence": "D Execution Slam 130 vs Caldera 43 = 3.0x (audit: 26/8 fine)"}] |
 
 ## level_growth (`content/rules/level_growth.json`)
 
@@ -1343,7 +1339,7 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | types | {"venom": {"style": "nova", "parts": ["fangs", "tail", "crest"], "word": "VENOM", "rider": {"burn": 5.0, "burn_for": 3.0}, "dash": {"dmg": 8.0, "burn": 4.0, "burn_for": 3.0}}, "spore": {"style": "bloom", "parts": ["crest", "plates", "halo"], "word": "SPORE", "rider": {"slow_k": 0.25, "slow_s": 1.6}, "dash": {"dmg": 6.0, "slow_k": 0.3, "slow_s": 1.4}}, "gravity": {"style": "quake", "parts": ["plates", "spikes", "halo"], "word": "GRAVITY", "rider": {"kb": -3.5}, "dash": {"dmg": 10.0, "kb": -4.0}}, "prism": {"style": "prism", "parts": ["crest", "halo", "wings"], "word": "PRISM", "rider": {"chain": 0.08}, "dash": {"dmg": 8.0, "chain": 0.35}}, "lunar": {"style": "spiral", "parts": ["halo", "wings", "crest"], "word": "LUNAR", "rider": {"leech": 0.06}, "dash": {"dmg": 6.0, "leech": 0.06}}, "echo": {"style": "storm", "parts": ["antennae", "crest", "wings"], "word": "ECHO", "rider": {"chain": 0.06}, "dash": {"dmg": 8.0, "chain": 0.3}}, "ember": {"style": "pillar", "parts": ["horns", "crest", "tail"], "word": "EMBER", "rider": {"burn": 7.0, "burn_for": 2.5}, "dash": {"dmg": 10.0, "burn": 6.0, "burn_for": 2.5}}, "frost": {"style": "bloom", "parts": ["spikes", "crest", "halo"], "word": "FROST", "rider": {"slow_k": 0.35, "slow_s": 1.8}, "dash": {"dmg": 6.0, "slow_k": 0.4, "slow_s": 1.6}}, "storm": {"style": "storm", "parts": ["wings", "crest", "antennae"], "word": "STORM", "rider": {"chain": 0.06}, "dash": {"dmg": 9.0, "chain": 0.4}}, "stone": {"style": "quake", "parts": ["plates", "horns", "spikes"], "word": "STONE", "rider": {"kb": 4.5}, "dash": {"dmg": 12.0, "kb": 5.0}}, "bloom": {"style": "bloom", "parts": ["crest", "wings", "halo"], "word": "BLOOM", "rider": {"leech": 0.07}, "dash": {"dmg": 5.0, "leech": 0.07}}, "shadow": {"style": "spiral", "parts": ["horns", "wings", "tail"], "word": "SHADOW", "rider": {"slow_k": 0.2, "slow_s": 1.2, "leech": 0.04}, "dash": {"dmg": 8.0, "slow_k": 0.25, "slow_s": 1.2}}, "titan": {"style": "quake", "parts": ["horns", "plates", "spikes"], "word": "TITAN", "rider": {"kb": 5.5}, "dash": {"dmg": 14.0, "kb": 6.0}}, "swarm": {"style": "storm", "parts": ["antennae", "wings", "spikes"], "word": "SWARM", "rider": {"burn": 3.5, "burn_for": 2.0, "chain": 0.05}, "dash": {"dmg": 6.0, "burn": 3.0, "burn_for": 2.0}}, "tempest": {"style": "storm", "parts": ["wings", "crest", "halo"], "word": "TEMPEST", "rider": {"chain": 0.45}, "dash": {"dmg": 9.0, "chain": 0.45}}, "none": {"style": "nova", "parts": ["crest", "halo", "plates"], "word": "MERGE", "rider": {"kb": 2.0}, "dash": {"dmg": 6.0, "kb": 2.0}}} |
 | shell_base | {"light": 80, "medium": 110, "heavy": 150} |
 | shell_note | hp of the shell every merge gives on top of your own health (docs/decisions/0003): by weight class; a form multiplies it with `shell_k` in its file. Damage hits the shell first; when it breaks the merge ends and the ultimate is lost. |
-| band | {"lo_k": {"burst": 1.0, "sust": 0.0, "ehp": 0.0}} |
+| band | {"lo_k": {"burst": 1.0, "sust": 0.0, "ehp": 0.0}, "note": "--fusion-band-check (docs/FUSION_BAND.md): every Fusion's burst (most added damage in one second), sustained damage (added per second over 6 s) and effective health stay at or under the strongest Hunter ultimate's, measured on the training strip; lo_k x the ultimates' median is the floor (burst 1.0: a release is at least a typical ultimate, so it reads as an event). Pull a Fusion back in through its own numbers (its form file, its merge, its type's rider), never the code."} |
 
 ## minigames (`content/rules/minigames.json`)
 
@@ -1499,6 +1495,14 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 | price | 16 |
 | foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
 
+## summon_cc (`content/rules/summon_cc.json`)
+
+What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.
+
+| Setting | Value |
+|---|---|
+| immune | ["gnd"] |
+
 ## toys (`content/rules/toys.json`)
 
 The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base_mode is on). A Boki at home with a joy below joy_below picks a toy on its own, walks to it, plays play_secs and gains one point of the toy's stat (Care.add_stat, capped by level as today) and joy. Each toy has the clip a rigged Boki plays at it (BokiHomeClips, set as the kact meta). Units: seconds, tiles, 0..1 trait values, joy points.
@@ -1541,13 +1545,6 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | glide_carry | {"carry_drag": 3.0, "default": 12.0, "archer": 9.0} |
 | dash | {"jump_keep": 0.75} |
 | dash_speed | {"archer": 0.7} |
-## summon_cc (`content/rules/summon_cc.json`)
-
-What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.
-
-| Setting | Value |
-|---|---|
-| immune | ["gnd"] |
 
 ## tutorial (`content/rules/tutorial.json`)
 
@@ -1560,11 +1557,6 @@ What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind
 | detail | {"points": "Choose wisely: every level gives one more. Monsters give XP when they fall.", "pick_sec": "%L", "pick_dash": "%L", "pick_kin": "%L", "pick_ult": "Fuse with %s: one body, its power and yours, for a while.", "shoot": "%L", "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.", "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.", "wallkick": "A jump against a wall kicks you up it.", "crouch": "Crouching shows what lies far ahead.", "gkey": "%T sends %s at a monster. Tap again to call it back.", "glove": "Gloves need no points. %Q uses this one.", "hook": "It shoots from afar. Your glove drags it to your feet.", "ranks": "Ranks make an ability stronger: %R, or click a gold +.", "wayout": "A match has only a few ways out. This one is the Uplink at the outpost.", "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!", "defend": "Stay inside the circle. Step out and the capture slips back!"} |
 | alt | {"sec_hold": "Tap, then hold, to use %A", "shoot_draw": "Hold to draw, let go to loose", "shoot_melee": "Step in and swing at them"} |
 | need | {} |
-| doc | The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land, shown as 1/3 on the pill. |
-| steps | [["land", "Steer down to the meadow"], ["move", "Walk to the glowing beam"], ["dash", "Dash across the gap"], ["exdash", "Jump, then dash in mid-air"], ["glide", "Jump, press %J again to glide"], ["crouch", "Climb up, then hold to crouch"], ["pickup", "Pick up the item"], ["gkey", "Send %s out"], ["rank", "You levelled up!"], ["shoot", "%W the monster"], ["sig", "Use %A on the group"], ["utility", "Use %A"], ["throw", "Tap to send %s at the monster"], ["orders", "Hold to give %s an order"], ["kin1", "Watch %s use %A"], ["key", "Grab the key"], ["chest", "Open the chest with the key"], ["fight", "Beat all the monsters"], ["goexit", "Go to the outpost"], ["uplink", "Capture the uplink mast"], ["defend", "Defend the outpost"], ["extract", "Step into the light"]] |
-| detail | {"gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.", "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.", "sig": "%X", "key": "Chests are locked. Walk over the key to pick it up.", "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.", "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!", "defend": "Stay inside the circle. Step out and the capture slips back!"} |
-| alt | {"utility_hold": "Tap, then hold, to use %A", "throw_back": "Tap to call %s back", "throw_send": "Tap again to send %s at the monster"} |
-| need | {"shoot": 3, "sig": 2, "utility": 2, "throw": 2} |
 | cds | 0.25 |
 | mob | {"hp": 8.0, "scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6, "camp_hp": 2.5} |
 | fight_foes | {"archer": ["skitter", "spitter", "skitter", "skitter", "spitter", "skitter", "skitter"], "juggernaut": ["skitter", "spitter", "skitter", "spitter", "skitter", "skitter", "spitter", "skitter"], "gunslinger": ["skitter", "spitter", "skitter", "skitter", "spitter", "skitter", "skitter"]} |
