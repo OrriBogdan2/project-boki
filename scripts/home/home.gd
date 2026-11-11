@@ -394,6 +394,7 @@ func _ready_rest() -> void:
 	await world.build_meshes()
 	world.stage_cb = Callable()
 	ZoneLook.dress(self)
+	ZoneAir.add(self)
 	fx = Fx.new(); add_child(fx)
 	cam = CamRig.new(); add_child(cam)
 	cam.zoom_to = HOME_ZOOM; cam.zoom = HOME_ZOOM; cam.lead = 0.2

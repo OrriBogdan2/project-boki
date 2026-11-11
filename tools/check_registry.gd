@@ -16,7 +16,8 @@ const CHECKS := {
 	"--garden-nav-check": ["res://tools/garden_nav_check.gd", "garden_nav_check", null],      # GARDEN nav sweep
 	"--ridge-shots": ["res://tools/ridge_shots.gd", "ridge_shots", null],      # Kitewind Ridge, --shots-dir=<dir>
 	"--hushwood-check": ["res://tools/hushwood_check.gd", "hushwood_check", null],      # GARDEN.md 10.7 step 7c
-	"--hushwood-shots": ["res://tools/hushwood_shots.gd", "hushwood_shots", null],      # --shots-dir=<dir>
+	"--zone-shots": ["res://tools/zone_shots.gd", "zone_shots", null],      # --shots-dir=<dir> [--shots-zone=<id>|all]
+	"--zone-air-check": ["res://tools/zone_air_check.gd", "zone_air_check", null],      # each zone's ambient layer
 	"--garden-nav-hushwood": ["res://tools/garden_nav_check.gd", "garden_nav_check", "hushwood"],      # in a zone
 	"--snack-patch-check": ["res://tools/snack_patch_check.gd", "snack_patch_check", null],      # garden snack patch
 	"--lean-check": ["res://tools/lean_check.gd", "lean_check", null],      # food lean by type (base_mode)

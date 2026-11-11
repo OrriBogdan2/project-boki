@@ -183,6 +183,8 @@ Seek, the Boki base's third minigame (briefs/design/GARDEN.md section 5.3, scrip
 | night_right | 0.2 |
 | night_themes | ["spore", "shadow"] |
 | night_doc | At night (HomeWork.is_night, the base's day clock) a Boki whose species theme is in night_themes, or whose species is in Work.NOCTURNAL, adds night_right to its chance of sniffing the right way. |
+| night_zones | ["hushwood"] |
+| night_zones_doc | Garden zones where Seek always runs by the night rules (their sky stays at dusk). |
 | friend_share | 0.15 |
 | friend_doc | Friends (bond at or above base_race friend_at) hunt as a pair: when a friend's last sniff was right, a Boki's chance goes up by friend_share. |
 | rival_near | 1 |
@@ -541,13 +543,14 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | hop_fade_s_doc | Seconds the Waystone lights up and fades before the zone loads under the ink wipe. |
 | hop_max_s | 2 |
 | hop_max_s_doc | Seconds from pressing E to having control in the zone (--load-check=hop judges it). |
+| look_doc | A zone with a look is its own island, saved on Save.d zones[id].layout (scripts/home/zone_look.gd): theme (home_layout.gd THEMES), seed (its shape), sky_t (the day clock its sky stays at: 0.75 is dusk), patch (the snacks its snack patch grows), deco ([piece, tiles east, tiles south of HomeLayout.LANDING]) and moss (lantern moss tufts, clumps they gather in, drifting mote emitters). |
 | walk_s | 12 |
 | walk_s_doc | Seconds a Boki you sent has to reach the return pad before it blinks out where it is. |
 | ask_chance | 0.06 |
 | ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
 | ask_s | 25 |
 | ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
-| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley"}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove"}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "look": {"theme": "hushwood", "seed": 7731, "sky_t": 0.78, "patch": ["mindmint", "glowcap"], "deco": [["training_post", 0, -3], ["toy_dig", 4, 2], ["snack_patch", -5, 2]], "moss": {"count": 90, "clumps": 9, "motes": 3}}}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
 | wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
 
 ## gear (`content/rules/gear.json`)
@@ -819,7 +822,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | trait_weight | 1 |
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
-| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
+| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound", "tempest", "storm", "lunar", "echo"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types (species themes tempest, storm, lunar, echo today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
@@ -912,6 +915,19 @@ When two Boki are paired in the Nesting Nook the pair is an unstable mix if thei
 | _doc | Wisp looks (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into. Add a look = add an entry under 'looks'; any key left out comes from 'default'. A look is chosen by its id in Save.d['look']['wisp']. Colours: 'team' (the hunter's side colour, SideColor: you, ally, foe) or a hex string. Times in seconds, sizes in metres, sfx names from Sfx.NAMES. |
 | default | default |
 | looks | {"default": {"name": "Wisp", "desc": "A small glowing spirit in your team's colour.", "core": {"radius": 0.34, "color": "team", "rim": "ffffff", "glow": 0.45, "flicker": 0.25, "flicker_hz": 9.0}, "halo": {"radius": 0.8, "alpha": 0.5}, "eyes": {"on": true, "color": "1a1530", "size": 0.055, "gap": 0.1, "height": 0.04}, "motes": {"amount": 10, "color": "ffffff", "size": 0.05, "life": 0.9, "rise": 0.5}, "trail": {"amount": 20, "color": "team", "size": 0.16, "life": 0.5}, "hover": 1.0, "bob": 0.12, "bob_hz": 1.1, "lean": 0.5, "stretch": 0.18, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
+
+## zone_air (`content/rules/zone_air.json`)
+
+Each garden zone's ambient layer (scripts/home/zone_air.gd): one GPUParticles3D over the island, unshaded, no lights, no bursts. Off at the lowest quality preset, count x Settings fx above it. Keys are garden_zones.json ids.
+
+| Setting | Value |
+|---|---|
+| off_at | low |
+| off_at_doc | The quality preset (Settings.QUALITY) at which no zone has its layer. |
+| box | [16.0, 2.0, 12.0] |
+| box_doc | m, half-extents of the box round HomeLayout.LANDING the motes start in (the start island is about 32 x 24 m). |
+| zones_doc | col: colour (hex) · count: particles at fx 1 · life: s each lives · size: m [width, height] of its quad · y: m above the ground the box centre sits · vel: m/s start velocity · spread: degrees off vel · grav: m/s2 (y) · fade: share of its life it takes to fade in and out (a twinkle at 0.5) |
+| zones | {"bramblebank": {"name": "pollen", "col": "f6eaa0", "count": 40, "life": 9.0, "size": [0.07, 0.07], "y": 1.6, "vel": [0.25, 0.05, 0.1], "spread": 60.0, "grav": -0.02, "fade": 0.2}, "glasswater": {"name": "glints", "col": "e8fbff", "count": 36, "life": 1.4, "size": [0.12, 0.12], "y": 0.15, "vel": [0.0, 0.0, 0.0], "spread": 0.0, "grav": 0.0, "fade": 0.5}, "cinderstep": {"name": "embers", "col": "ff8a3a", "count": 36, "life": 5.0, "size": [0.06, 0.06], "y": 0.6, "vel": [0.1, 0.45, 0.0], "spread": 25.0, "grav": 0.0, "fade": 0.3}, "hushwood": {"name": "fireflies", "col": "d6ff7a", "count": 28, "life": 6.0, "size": [0.09, 0.09], "y": 1.2, "vel": [0.0, 0.08, 0.2], "spread": 180.0, "grav": 0.0, "fade": 0.5}, "ridge": {"name": "wind streaks", "col": "ffffff", "count": 18, "life": 1.6, "size": [1.1, 0.03], "y": 1.8, "vel": [6.0, 0.0, 0.6], "spread": 6.0, "grav": 0.0, "fade": 0.4}} |
 
 ## Combos
 

@@ -164,7 +164,8 @@ func _sweep(theme: String, zone: String) -> void:
 	overlaps = 0
 	_save(theme, zone)
 	home = await _open(zone)
-	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [label, home.kins.size()])
+	var built: bool = home.kins.size() == CAST.size() and home.life != null
+	ok(built, "%s: %d Boki on a base_mode farm" % [label, home.kins.size()])
 	_stage(zone)
 	var cases := 0
 	var t := 0.0
