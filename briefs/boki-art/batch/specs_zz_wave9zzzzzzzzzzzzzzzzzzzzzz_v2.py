@@ -2332,3 +2332,7 @@ for _n,_st,_ar,_fu,_pose in (('Crofthorn','mid','tough',1,"trotting toward the v
     V2PORT_NEW(_n,_cd,_st,_ar,_GC,_GN,False,bool(_fu),_pose); SPECS[-1]['id']='v2p_'+_n.lower()+'_bk3'
 for _n in ('Terrarimit','Mossbastion','Cisternmander','Briarlynx','Soakybara','Geysirbara','Crofthorn','Crofthollow','Dribbara'):
     SPECS.append({'id':'px9d_'+_n.lower(),'name':_n+' (pixel sprite 80, new design)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
+
+# 11-11 OWNER: Murmuron female turnaround redo (wings folded, tall stance, collar read as a strapped harness from the back). Male kept.
+V2SHEET_NEW('Murmuron_female','briefs/boki-art/cards/Murmuron_female.jpg',_GC,_GN); SPECS[-1]['id']='v2s_murmuron_female_bk4'; SPECS[-1]['runs']=4
+SPECS[-1]['prompt']+=_NOGHOST+" Wings spread wide in every view exactly as on the card, the same round hovering body and trailing feather tail. The pan-pipe collar is part of her body, grown feathers shaped like pipes, with no straps or buckles in any view, including the back. No ground line."

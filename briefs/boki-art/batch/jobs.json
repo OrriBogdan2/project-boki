@@ -47448,6 +47448,17 @@
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
   },
   {
+    "id": "v2s_murmuron_female_bk4",
+    "name": "Murmuron_female (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Murmuron_female.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Murmuron_female. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Wings spread wide in every view exactly as on the card, the same round hovering body and trailing feather tail. The pan-pipe collar is part of her body, grown feathers shaped like pipes, with no straps or buckles in any view, including the back. No ground line."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
