@@ -435,8 +435,6 @@ func _start(o: Dictionary) -> void:
 	await hud.setup(self)
 	hud.process_mode = hud_mode
 	hud.visible = true
-	if player and player.dropping and tut == null:
-		hud.toast("Steer to choose where you land", Color("f3eee2"))
 	if skydrop.planning and player:
 		hud.open_map(true)
 	if player:
@@ -898,10 +896,6 @@ func ship_jump(h: Hunter, force := false) -> void:
 	DropLaunch.start(h, hs["dir"])      # the squad's rocket launch (item 163)
 	if h == player:
 		sfx("whoosh", null, -2.0)
-		if hud and not force:
-			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
-		elif hud:
-			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
 	if skydrop and skydrop.is_lead(h):
 		skydrop.on_lead_jump(h)
 
@@ -5691,13 +5685,6 @@ func _tips() -> void:
 	var k: Kin = player.kin
 	if k == null:
 		return
-	if _tip_t > 9.0:
-		var near_foe := false
-		for f in foes_of(player.team):
-			if player.flat_dist(f) < 9.0:
-				near_foe = true; break
-		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")

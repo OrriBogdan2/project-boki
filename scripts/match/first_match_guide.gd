@@ -2,12 +2,13 @@ class_name FirstMatchGuide
 extends RefCounted
 ## "What to do next" for a new player's first two real Extractions: one highlighted plain line at a time
 ## (content/rules/first_match_guide.json). A line shows once per match, when its moment comes, and clears
-## on its trigger or after its time. It is only drawn: it never pauses or blocks anything. The save's
+## on its trigger or after its time, and never in the plane or the drop.
+## It is only drawn: it never pauses or blocks anything. The save's
 ## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
 const MINT := Color("8fe3c8")
-const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
+const ORDER := ["blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
 var m: Match
@@ -41,7 +42,7 @@ static func migrate(data: Dictionary) -> void:
 
 func tick(dt: float) -> void:
 	var p := m.player
-	if p == null or p.out or p.extracted or p.downed:
+	if p == null or p.out or p.extracted or p.downed or p.riding or p.dropping:
 		line = ""
 		id = ""
 		return
@@ -79,13 +80,6 @@ func _start(lid: String, p: Hunter) -> void:
 func _left() -> float:
 	return (m.length - m.time) / m.length
 
-func _enemy_near(p: Hunter) -> bool:
-	for h in m.hunters:
-		if h.team != p.team and not h.out and not h.extracted and not h.downed \
-				and h.pos.distance_to(p.pos) <= float(rules()["squad_range"]):
-			return true
-	return false
-
 func _exit_near(p: Hunter) -> bool:
 	return m.exits != null and m.exits.spots().any(func(s: Vector3): return s.distance_to(p.pos) <= EXIT_NEAR)
 
@@ -94,12 +88,7 @@ func _kin_ready(p: Hunter) -> bool:
 
 ## Is it time for this line?
 func _due(lid: String, p: Hunter) -> bool:
-	if lid == "land":
-		return p.dropping
-	if p.dropping:
-		return false
 	match lid:
-		"squad": return _enemy_near(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
 		"rank": return p.ak != null and p.skill_pts > 0
@@ -110,8 +99,6 @@ func _due(lid: String, p: Hunter) -> bool:
 ## Has the player done what this line says (or is it no longer true)?
 func _done(lid: String, p: Hunter) -> bool:
 	match lid:
-		"land": return not p.dropping
-		"squad": return not _enemy_near(p)
 		"exit": return _exit_near(p)
 		"rank": return p.skill_pts == 0
 		"send": return not _kin_ready(p) or p.kin.st_throws > _throws0

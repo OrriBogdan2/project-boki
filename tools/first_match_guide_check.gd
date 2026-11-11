@@ -1,8 +1,9 @@
 extends RefCounted
 ## --first-match-guide-check: the "what to do next" line in a save's first two Extractions.
 ##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
-##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
+##   2. a walk through the triggers: rank, send, chest, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
+##      (no line at all in the plane or the drop, and no squad-nearby line anywhere)
 ##   3. every line fits the banner lane in at most two lines at 1280x720
 var bad := 0
 var m: Match
@@ -68,12 +69,7 @@ func _walk() -> void:
 	if m.chests.is_empty():
 		m.chests.append({"open": false, "pos": p.pos, "prog": 0.0})
 	var move0: Vector2 = p.inp["move"]
-	p.dropping = true
-	_tick(0.2)
-	ok(g.id == "land" and g.line.begins_with("Pick a landing spot"), "dropping: pick a landing spot (%s)" % g.line)
-	p.dropping = false
-	_tick(0.2)
-	ok(g.line == "", "landed: the line clears and a quiet gap follows")
+	_no_hints_in_flight(p)
 	_tick(1.5)
 	ok(g.id == "rank" and g.line.contains("Rank up"), "a skill point: rank an ability (%s)" % g.line)
 	p.skill_pts = 0
@@ -93,16 +89,9 @@ func _walk() -> void:
 	for h in m.hunters:
 		if h != p and h.team != p.team:
 			foe = h
-	_tick(1.6)
-	foe.pos = p.pos + Vector3(10, 0, 0)
-	_tick(0.2)
-	ok(g.id == "squad" and g.line.contains("squad"), "another squad close by: fight or avoid (%s)" % g.line)
-	foe.pos = p.pos + Vector3(300, 0, 0)
-	_tick(0.2)
-	ok(g.line == "", "they are gone: it clears")
 	foe.pos = p.pos + Vector3(10, 0, 0)
 	_tick(2.0)
-	ok(g.line == "", "a line shows only once a match")
+	ok(g.line == "" and not g.shown.has("squad"), "a squad close by gets no line")
 	m.time = m.length * 0.7
 	_tick(1.6)
 	ok(g.id == "blight" and g.line.contains("Blight"), "the match is closing: the Blight line (%s)" % g.line)
@@ -128,6 +117,18 @@ func _walk() -> void:
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
 
+## The plane ride and the drop: no guide line, and no first-time tip card, however due they are.
+func _no_hints_in_flight(p: Hunter) -> void:
+	for st in ["riding", "dropping"]:
+		p.set(st, true)
+		g._gap = 0.0
+		_tick(0.5)
+		ok(g.line == "" and g.shown.is_empty(), "%s: no guide line" % st)
+		m._tip_t = 20.0
+		m._tips()
+		ok(m.hud.msgs.count() == 0, "%s: no hint card" % st)
+		p.set(st, false)
+
 func _fit() -> void:
 	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
 	for row: Array in FirstMatchGuide.rules()["lines"]:
@@ -135,3 +136,5 @@ func _fit() -> void:
 		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
 		var n: int = fit["lines"].size()
 		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+		var gone := txt.contains("slip away") or txt.contains("landing spot")
+		ok(not gone, "%s is not the squad or landing line" % row[0])
