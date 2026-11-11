@@ -2,7 +2,7 @@ extends RefCounted
 ## --toy-check: the Boki base's playthings (GARDEN.md section 4, content/rules/toys.json, HomeToys).
 ##   1. data: a ball, post, tub, warm stone, updraft vent and dig patch in the Base category, each with a Care stat
 ##   2. lean: Flying and Rock Boki weigh the post up, Water and Ice the tub
-##   3. off: with base_mode off (the shipped default) nothing plays
+##   3. off: with base_mode off (the old farm) nothing plays
 ##   4. on: a placed ball is used by an idle Boki within 60 s, a second Boki joins, the stat rises
 ##   5. a squabble between two hot tempers, the stat cap, and the rest pose
 ##   6. each toy placed alone: a fitting Boki uses it within 60 s and its stat rises; a dig turns up a snack
@@ -49,7 +49,8 @@ func run(m: Node) -> void:
 		return HomeLayout.CATALOG[id]["cat"] == "Base" and Care.STATS.has(String(R["toys"][id]["stat"]))
 	ok(ids.all(in_base),
 			"every toy is in the Base category, each training a Care stat")
-	ok(not FarmUnlocks.rules()["base_mode"], "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.rules()["base_mode"], "base_mode is on in the shipped rules")
+	FarmUnlocks.rules()["base_mode"] = false
 	Save.d = _new_save()
 	var lay := HomeLayout.ensure(Save.d)
 	_place(lay)
@@ -151,7 +152,7 @@ func run(m: Node) -> void:
 	await main.get_tree().process_frame
 	for f in FITTING:
 		await _alone(String(f[0]), String(f[1]))
-	FarmUnlocks.rules()["base_mode"] = false
+	FarmUnlocks.rules()["base_mode"] = true
 	print("TOY DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

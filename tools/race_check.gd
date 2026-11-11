@@ -183,7 +183,8 @@ func _base_save(theme: String) -> Dictionary:
 
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false
 	Save.d = _base_save("meadow")
 	HomeLayout.ensure(Save.d)
 	var off = await main._hb_home()
@@ -221,7 +222,7 @@ func _on_base() -> void:
 		ok(race.run == null and is_instance_valid(race.card), "on: the race ends with a result card (%.1f s)" % t)
 		await _solo(home)
 	await _drill(home)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame
 

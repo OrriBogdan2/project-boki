@@ -145,6 +145,7 @@ func _on_base() -> void:
 	d["layout"] = HomeLayout.fresh()
 	Save.d = d
 	HomeLayout.ensure(Save.d)
+	rules["base_mode"] = false
 	var off = await main._hb_home()
 	ok(off.hshove == null, "off: no stump on the farm")
 	off.queue_free()
@@ -170,6 +171,6 @@ func _on_base() -> void:
 			sh.tick(0.1)
 			t += 0.1
 		ok(sh.run == null and is_instance_valid(sh.card), "on: the bout ends with a result card (%.1f s)" % t)
-	rules["base_mode"] = false
+	rules["base_mode"] = true
 	home.queue_free()
 	await main.get_tree().process_frame

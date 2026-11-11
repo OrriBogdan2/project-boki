@@ -2,6 +2,8 @@ extends RefCounted
 ## --garden-save-check: every field the Boki garden put on the save survives a save and a load in a
 ## fresh process, and a v11 save made on main before the garden (tools/fixtures/pre_garden_save.json)
 ## migrates with sane defaults and runs through the garden readers without a crash.
+## base_mode is the shipped default: the gate loads three saves (a v11 save from main, a farm-heavy one and a
+## fresh one) into a real Home and asserts the garden runs and nothing the player owned is gone.
 ## Parent: builds the garden save, writes it, starts the child (--garden-save-load) and relays its lines.
 ## Child: loads the file with Save.load_from and compares it with the fields the parent wrote.
 ## Prints GSAVE ok/FAIL lines and "GSAVE DONE, failures: N". Never touches a real save file.
@@ -48,6 +50,7 @@ func run(host: Node, which := "all") -> void:
 	var loaded := lines.any(func(l): return l.begins_with("GSAVE LOADED"))
 	ok(rc == 0 and loaded, "the fresh process loaded and compared the save (exit %d)" % rc)
 	_old_save()
+	await _gate(host)
 	print("GSAVE DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
 
@@ -138,11 +141,8 @@ func _old_save() -> void:
 	ok(not (Save.d.get("egg", {}) as Dictionary).has("minded"), "the old egg is not marked minded")
 	ok(Mentor.take_gift().is_empty(), "no mentor on an old save, so no gift")
 
-## The garden's readers on records that have none of its keys, with base_mode on: none may crash.
+## The garden's readers on records that have none of its keys, with the shipped base_mode: none may crash.
 func _readers(recs: Array) -> void:
-	var farm := Content.rules("farm_build")
-	var was: Variant = farm["base_mode"]
-	farm["base_mode"] = true
 	var a: Dictionary = recs[0]
 	var b: Dictionary = recs[recs.size() - 1]
 	ok(BaseLife.bond(a, b) == 0.0 and BaseRace.bond(a, b) == 0.0, "an unknown bond reads as 0")
@@ -151,4 +151,77 @@ func _readers(recs: Array) -> void:
 	ok(Care.lean_total(a) == 0.0 and CareJournal.text({"words": "x"}) == "x", "lean and journal read cleanly")
 	KinBondMoment.due(recs.map(func(r): return {"rec": r}))
 	ok(recs.all(func(r): return r.has("bond_seen")), "a missing bond_seen is filled in, not crashed on")
-	farm["base_mode"] = was
+
+# ------------------------------------------------------------------ the load gate (base_mode on by default)
+const FARM_DECO := ["crop_patch", "cook_pot", "ranch_pen", "lumber_camp", "bench"]
+const FARM_BUILDINGS := ["workshop", "cottage"]
+
+## A v11 save made on main, a farm-heavy save and a fresh one each load into the garden and lose nothing.
+func _gate(host: Node) -> void:
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules, no flag to find")
+	var old = JSON.parse_string(FileAccess.get_file_as_string(FIXTURE))
+	Save.migrate(old)
+	await _into_garden(host, "an old v11 save", old, 3)
+	await _into_garden(host, "a farm-heavy save", _farm_heavy(), 6)
+	var fresh := Save.fresh()
+	var starter := Save.new_kin("zapple", "Pip")
+	starter["starter"] = true
+	fresh["roster"] = [starter]
+	fresh["active"] = starter["uid"]
+	await _into_garden(host, "a fresh save", fresh, 1)
+
+## A farm that has been played hard: crops and seeds, planted plots, farm buildings and decor, eggs and food.
+func _farm_heavy() -> Dictionary:
+	var d := Save.fresh()
+	d["roster"] = []
+	for i in 6:
+		var k := Save.new_kin(["zapple", "cindle", "puddlet"][i % 3], "Farm%d" % i, 20 + i)
+		k["level"] = 8
+		d["roster"].append(k)
+	d["active"] = d["roster"][0]["uid"]
+	d["gems"] = 4321
+	d["crops"] = {"tidebloom": 14, "emberberry": 9}
+	d["seeds"] = {"tidebloom": 6, "emberberry": 4}
+	d["items"] = {"tonic": 3, "kibble": 12}
+	d["egg"] = {"sp": "cindle", "gift": {"lean": "fire"}}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}
+	d["buildings"] = FARM_BUILDINGS.duplicate()
+	d["plots"][0] = {"crop": "tidebloom", "stage": 2}
+	var L := HomeLayout.fresh()
+	for i in FARM_DECO.size():
+		L["deco"].append({"u": 800 + i, "id": FARM_DECO[i], "x": 30 + 3 * i, "z": 30, "r": 0})
+	L["uid"] = 800 + FARM_DECO.size()
+	d["layout"] = L
+	return d
+
+## What a player would miss: Boki, eggs, food, crops, seeds, gems, buildings, plots and every placed piece.
+func _owned(d: Dictionary) -> Dictionary:
+	var deco: Array = HomeLayout.of(d)["deco"].map(func(e): return "%s@%d,%d" % [e["id"], int(e["x"]), int(e["z"])])
+	deco.sort()
+	var who: Array = d["roster"].map(func(r): return [r["uid"], r["name"]])
+	return {"roster": who, "egg": d.get("egg"), "gems": int(d["gems"]), "items": d["items"], "crops": d["crops"],
+			"seeds": d["seeds"], "buildings": d["buildings"], "plots": d["plots"], "deco": deco}
+
+func _into_garden(host: Node, label: String, d: Dictionary, boki: int) -> void:
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	var before := _owned(Save.d)
+	var home = await host._hb_home()
+	var t0 := Time.get_ticks_msec()
+	while home.panel_host == null and Time.get_ticks_msec() - t0 < 60000:
+		await host.get_tree().process_frame
+	var in_garden: bool = home.life != null and home.hrace != null and FarmTutorial.base()
+	ok(in_garden, "%s: loads into the garden (BaseLife, the Dash, the base tutorial)" % label)
+	var homed: int = Save.d["roster"].filter(func(r): return not r.get("boxed", false)).size()
+	ok(Save.d["roster"].size() == boki and home.kins.size() == homed,
+			"%s: all %d Boki are here, %d walking in the garden" % [label, boki, homed])
+	var after := _owned(Save.d)
+	for k in before:
+		if k == "deco":      # the home may add pieces (the garden's starter lamps), never take one
+			ok(before[k].all(func(e): return after[k].has(e)), "%s: every placed piece is still there" % label)
+			continue
+		ok(JSON.stringify(after[k], "", true) == JSON.stringify(before[k], "", true), "%s: %s kept" % [label, k])
+	var patches := HomeLayout.count_of(SnackPatch.ID, Save.d)
+	ok(patches == 1, "%s: the snack patch is placed or waiting in storage (%d)" % [label, patches])
+	home.queue_free()
+	await host.get_tree().process_frame

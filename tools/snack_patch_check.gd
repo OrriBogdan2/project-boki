@@ -25,7 +25,8 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	ok(FarmUnlocks.base_mode(), "base_mode is on in the shipped rules")
+	rules["base_mode"] = false
 	Save.d = _save()
 	HomeLayout.ensure(Save.d)
 	ok(HomeLayout.count_of(SnackPatch.ID, Save.d) == 0 and not FarmUnlocks.open(SnackPatch.ID),
@@ -35,7 +36,6 @@ func run(m: Node) -> void:
 	_ridge()
 	await _in_the_garden()
 	_market()
-	rules["base_mode"] = false
 	print("SNACK DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -82,7 +82,7 @@ func _ridge() -> void:
 			"ridge: the patch grows Flying, Electric, Fairy and Sound snacks: %s" % str(SnackPatch.snacks(Save.d)))
 	var L := HomeLayout.of(Save.d)
 	var e := {"u": HomeLayout._next_uid(L), "id": SnackPatch.ID, "x": 40, "z": 30, "r": 0,
-			"t": Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
+			SnackPatch.RIPE_KEY: Time.get_unix_time_from_system() - float(SnackPatch.rules()["grow_secs"]) - 1.0}
 	(L["deco"] as Array).append(e)
 	var got := SnackPatch.harvest(Save.d, Time.get_unix_time_from_system())
 	var each := got.size() == 4
