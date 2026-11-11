@@ -203,5 +203,6 @@
 		"eye",
 		"hoard",
 		"gun"
-	]
+	],
+	"carry_stow": ["gun"]
 }

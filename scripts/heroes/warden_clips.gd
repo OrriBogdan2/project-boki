@@ -92,6 +92,10 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
+var heart_w := 0.0           # how far the Heartspark carry layer (WardenCarry.hold_mote) holds the mote
+var stowed := false          # "carry_stow" bones are put away
+var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" hand
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -151,6 +155,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
+	drop = WardenCarry.held(sk, d.get("carry_drop", []))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -373,7 +378,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var r := _move_clip(km, moves[km], s)
 		if not r.is_empty():
 			return r
-	elif km != "":
+	elif km != "" and not WardenCarry.owns(km):
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
 	if act.has(String(s.get("act", ""))):
@@ -532,6 +537,35 @@ func step(dt: float) -> void:
 	_turn_to_heading(s, want, legs, dt)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
+	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)
+	_heart(bool(s.get("heart", false)) and want.is_empty() and not WardenCarry.owns(String(s.get("kmove", ""))), dt)
+
+## The rescue carry (WardenCarry) over what is shown: arms in around the Boki, the data's weapon bones put away.
+func _carry(on: bool, dt: float) -> void:
+	carry_w = move_toward(carry_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if carry_w <= 0.0:
+		root.remove_meta(WardenCarry.SOCKET)
+		if stowed:
+			stowed = false
+			WardenCarry.stow(skel, d.get("carry_stow", []), 0.0)
+			WardenCarry.hold(drop, false)
+			_out(0.0)       # (a weapon bone with a size of its own gets it back)
+		return
+	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
+	root.set_meta(WardenCarry.SOCKET, WardenCarry.apply(skel, root, carry_w, fwd))
+	stowed = true
+	WardenCarry.stow(skel, d.get("carry_stow", []), carry_w)
+	WardenCarry.hold(drop, carry_w >= 0.5)
+
+## The Heartspark carry layer: the off hand holds the mote while the legs and the main arm play on. It lets go the
+## moment the carrier stops carrying, is downed or out, or a clip (a shot, a cast, a hit) needs the arms.
+func _heart(on: bool, dt: float) -> void:
+	heart_w = move_toward(heart_w, 1.0 if on else 0.0, dt / WardenCarry.FADE)
+	if heart_w <= 0.0:
+		root.remove_meta(WardenCarry.MOTE)
+		return
+	var fwd := float(d.get("carry_fwd", WardenCarry.REACH_FWD))
+	root.set_meta(WardenCarry.MOTE, WardenCarry.hold_mote(skel, root, heart_w, String(d.get("heart_hand", "L")), fwd))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that

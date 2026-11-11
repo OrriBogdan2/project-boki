@@ -1062,6 +1062,11 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | _wake_s | the Heart wakes and its one Heartspark starts charging (the early seat unlocks) |
 | charge_s | 75 |
 | _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
+| _doc | The Heart loop (docs/decisions/0023-heartspark.md; scripts/match/heart.gd). Every number of the prototype lives here. Seconds and metres. |
+| charge_s | 75 |
+| _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
+| cool_s | 90 |
+| _cool_s | after a carrier extracts, the Heart cools down this long, then charges a new Heartspark (owner: start at 90 s) |
 | pickup_hold_s | 1.5 |
 | _pickup_hold_s | hold interact (F) on a charged Heartspark this long to take it |
 | pickup_r | 2.2 |
@@ -1093,6 +1098,11 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |
 | tide_next_s | 60 |
 | _tide_next_s | the dashed ring on the maps is where the tide will be this many seconds from now |
+| gate_hold_s | 2.5 |
+| _gate_hold_s | the carrier holds interact at the open gate this long to leave with the Heartspark |
+| tide_start_s | 15 |
+| tide_close_s | 240 |
+| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this |
 | tide_r0 | 130 |
 | tide_r1 | 34 |
 | tide_boost | 0.55 |
@@ -1110,6 +1120,9 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
 | place | {"_doc": "placement pay for a squad that did not leave (spec task 5, Game.apply_result)", "gems_per_squad_below": 5, "gems_max": 40, "min_level": 2, "_min_level": "a squad whose Hunters are all still below this run level at the end hid all match and gets no placement gems"} |
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
+| tide_heat | 0.06 |
+| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
+| reward | {"seeds": {"emberberry": 2, "sunroot": 2, "mindmint": 2, "tidebloom": 2}, "_seeds": "the four evolution foods, so any affinity can be pushed", "goods": {"heartwood": 1, "starstone": 1}, "_goods": "rare evolution materials (market goods)", "trust": 12.0, "_trust": "bond/trust added to the carrier's Boki (and each Boki that stood with the squad gets a share)", "gems": 60} |
 | demo_charge | 1 |
 
 ## hunter_move (`content/rules/hunter_move.json`)
