@@ -1,7 +1,7 @@
 class_name QuestTracker
 extends RefCounted
-## The quest tracker under the Ways Out strip (owner DECISIONS 11-10: a quest exit is a race, the first squad to
-## finish it leaves; 11-08: show only what is needed now). While your squad is on a quest seat (QuestSeats: IN_USE
+## The quest tracker under the Ways Out strip. DECISIONS 11-10: a quest exit is a race, the first squad to finish
+## it leaves; 11-08: show only what is needed now. While your squad is on a quest seat (QuestSeats: IN_USE
 ## with your squad, sealed in with the Sealed Lair's boss or charging the Uplink), one compact card: the quest in
 ## plain words, your squad's progress, the leading rival squad's progress on a quest seat as a thin second bar,
 ## and how far you are from the site. Hidden otherwise, and while the boss bar is up: inside the fight that bar is
@@ -59,10 +59,10 @@ static func numbers(m: Match, s: QuestSeat, rival: QuestSeat) -> String:
 static func draw(hud, strip: Rect2) -> void:
 	var m: Match = hud.m
 	var p: Hunter = m.player
-	if p == null or p.out or p.extracted or (m.lairs and m.lairs.boss_for(p) != null):
+	if p == null or p.out or p.extracted:
 		return
 	var s := seat_of(m, p.team)
-	if s == null:
+	if s == null or (m.lairs and m.lairs.boss_for(p) != null):
 		return
 	var rival := rival_seat(m, p.team)
 	var c: Control = hud.c
