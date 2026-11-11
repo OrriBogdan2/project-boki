@@ -68,7 +68,9 @@ func _expired() -> void:
 	var P: Hunter = s[1]
 	aim_at(P, s[2].pos)
 	P.ak.use_e()
-	_open(m, P, "e")
+	var w := _open(m, P, "e")
+	ok("ostra e: no world marker on the seed, the slot still pulses",
+			not bool(w.get("marker", true)) and String(w.get("slot", "")) == "e", str(w))
 	step(m, P.ak.e_t + 0.3)
 	ok("ostra e: an unused window shows EXPIRED", String(P.ak.cue.get("exp_slot", "")) == "e"
 			and float(P.ak.cue.get("exp_t", 0.0)) > 0.0, str(P.ak.cue.get("exp_slot", "")))
