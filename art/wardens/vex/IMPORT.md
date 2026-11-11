@@ -42,6 +42,6 @@ Head: a separate Meshy scan of a v2 head sheet, placed on the body by its eye li
 gridded front render); the scan's braid is cut and rebuilt on the spring chain. Gun length elbow to muzzle 0.55 m = 31% of her height
 (the turnaround: about 30%).
 
-walk_b/l/r and run_b/l/r (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/vex/vex.glb OUT.glb 2.1 4.55`,
-then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b,walk_l,walk_r,run_b,run_l,run_r`
+walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/vex/vex.glb OUT.glb 2.1 4.55`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
 (judge: docs/art/wardens/dirloops/JUDGE.md).

@@ -28,6 +28,6 @@ skipping the two swap lines.
 tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
 --rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.
 
-walk_b/l/r and run_b/l/r (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/tarek/tarek.glb OUT.glb 2.2 5.0`,
-then `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb OUT.glb walk_b,walk_l,walk_r,run_b,run_l,run_r`
+walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/tarek/tarek.glb OUT.glb 2.2 5.0`,
+then `python3 tools/art1/glb_add_clips.py art/wardens/tarek/tarek.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
 (judge: docs/art/wardens/dirloops/JUDGE.md).
