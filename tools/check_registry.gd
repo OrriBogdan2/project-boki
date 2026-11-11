@@ -364,6 +364,7 @@ const CHECKS := {
 	"--dot-look-check": ["res://tools/dot_look_check.gd", "dot_look_check", null],      # DoT body look, --shots-dir=<dir>
 	"--shield-expiry-check": ["res://tools/shield_expiry_check.gd", "shield_expiry_check", null],      # the shell follows amount and time
 	"--hawk-sense-shots": ["res://tools/hawk_sense_shots.gd", "hawk_sense_shots", null],      # --shots-dir=<dir>
+	"--receiver-cue-check": ["res://tools/receiver_cue_check.gd", "receiver_cue_check", null],      # heal and shield receiver cue
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--status-shots": ["res://tools/status_shots.gd", "status_shots", null],      # status looks, 3 grounds
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189
