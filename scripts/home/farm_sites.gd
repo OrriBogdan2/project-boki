@@ -335,7 +335,6 @@ static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 	if add_swing(e):
 		Sfx.play("unlock", at, -4.0)
 		hw.h.fx.burst(at + Vector3(0, 1.4, 0), UI.GOLD, 22, 5.0, 0.8, 8.0, 1.2)
-		hw.h.fx.ring(at, 3.0, Color(UI.GOLD, 0.9), 0.5)
 		hw.produced(at, "%s %s the %s" % [who, "upgraded" if up else "finished", HomeLayout.CATALOG[String(e["id"])]["name"].to_lower()], "craft", "")
 		Work.count("built", 1)
 		if hw.h.hb: hw.h.hb.apply(false)

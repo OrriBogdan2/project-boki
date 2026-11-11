@@ -835,8 +835,6 @@ static func _post(e: PartSpec, f: Ent, cx: Dictionary, center: Vector3, k: float
 				f.impulse(rel.normalized() * float(pr["strength"]) * k * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
 		"mark":
 			KinRules.mark(f, String(pr["mode"]), float(pr["duration"]), float(pr["amount"]))
-			if String(pr["mode"]) == "reveal":
-				m.fx.ring(f.pos, 1.2, KinRules.cat_color("utility"), 0.6)
 
 ## The friendly effects of a delivery event: on the owner, the kin itself or allies near it.
 static func apply_friends(effs: Array, cx: Dictionary, center: Vector3, radius: float) -> void:
@@ -879,7 +877,6 @@ static func _friend(e: PartSpec, t: Ent, cx: Dictionary, center: Vector3) -> voi
 			if "shield" in t:
 				t.set("shield", maxf(float(t.get("shield")), float(pr["amount"]) * k * weak))
 				if "shield_t" in t: t.set("shield_t", maxf(float(t.get("shield_t")), float(pr["duration"])))
-			m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
 			m.sfx("shield", t.pos, -3.0)
 		"heal":
 			var amt := float(pr["amount"]) * k * weak

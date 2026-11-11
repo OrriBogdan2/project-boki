@@ -73,6 +73,32 @@ Still open (shared, not done here):
 - Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
   moves them to teal. The alternative (keep void violet) would clash with Sable.
 
+## Ground ring audit (ext/vfx-ring-audit)
+Rule (owner, Movement and combat feel): a ground ring, disc or burst means gameplay (an area that hurts, heals, blocks, times or marks a place); explosions only for things that truly explode. `ext/no-dash-bursts-audit` covered dashes, landings and resets; this pass is every other `Fx.ring`. A ring that marks no area got no replacement where a word, flash, body-height burst or sound already carries the moment; the base-recall teleport got a body-height flash.
+
+| Call site | Area it shows | Verdict |
+|---|---|---|
+| `Fx.impact` crit ring | none (a hit) | removed (starburst stays) |
+| `ArchKit.payoff_fx` rings (tier-4 payoffs, all kits), `_r_impact`, `_bond_tell`, the fuse's own ring, the full-resource tell | none; the fuse keeps its `tele_circle` | removed (mage already ran without; the `rings` argument is gone) |
+| `KitStatus` GROUNDED, DAZED, SLOWED, SHRED; `Hex` swap | a status on one foe or self | removed (the words stay) |
+| `AbilityFx` cast ring at the caster's feet, rail muzzle, leap/dash, wall/summon, blink, charge-ready, boomerang catch; stun, root, slow rings | none | removed |
+| `AbilityFx` cone/burst, reflect/aura, trap/zone, `land` rings | the delivery's radius | kept |
+| `Effects` shield, haste-burst, per-foe reveal rings; `KinExec` shield and reveal mark | a buff or mark on one body | removed (the reveal's own radius ring is kept) |
+| `Effects` blast, zone and wave rings; `KinExec._burst` | the hit radius | kept |
+| Revive ring (`Life`), revive stomp ring, Boki rescued and come-round rings | none (revive has no area once done) | removed (burst and sound stay) |
+| Chest pickup ring, `Arena` reset and class-swap rings, `Duel` round-start rings | none | removed |
+| Boki order, ability-use, throw and scoop/round rings (`KinCommand`, `KinNet`, `Hunter`); scan start and catch rings (`Capture`) | none | removed |
+| Fusion: begin, pop, flash-only, shell-broken, release, augment, warn tick, ult strike per foe (`MergeXform`, `MergeRelease`, `MergeAugment`, `MergeKit`) | none | removed (flash, shards and burst stay) |
+| Base recall departure and arrival (`Hunter`) | none | replaced by a body-height flash |
+| Vulnerable-while-channelling ring (`Hunter`), Wisp pop rings (`HunterWisp`, `wisp_looks.json`) | none | removed |
+| Home: shrine, plot unlock, farm site, Boki bond moment, yard guard rings | none (UI-driven) | removed (bursts at height stay) |
+| Gil landing-wave shield ring, Motley swell disc, Gunslinger `_confirm_hit` ring | none | removed |
+| Exits (dock, hatch, uplink, lift), lairs, boss and Blight rings, breakable blast and keg rings, `UtilityUse` scan, `Abil._blast`, kit zones (Ostra well, Bulwark mend, Mage ult, Gil, Breah) | the zone or blast radius | kept |
+| Every `telegraph_*`, `tele_circle`, `AimKit` marker, `DropReticle`, tutorial markers, Boki downed pillar | telegraph, recast or team marker | kept |
+| Mage Shift Surge shock ring | the source's own arrival ring (owner override, docs/heroes/mage.md) | kept (parity) |
+| `DepthCues` shadow discs | a height cue, not a ring | kept |
+| Ledge-rise window ring (`Hunter`) | none | left: `ext/no-dash-bursts-audit` removes it |
+
 ## Scorecard (worst first)
 Each axis is scored 1–5: R readability, S shape, L layering, T timing, Sc scale, C colour (before the shared fix), Snd
 sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored by code read (the strips are silent).
