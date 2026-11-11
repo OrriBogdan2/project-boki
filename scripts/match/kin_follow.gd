@@ -15,6 +15,8 @@ extends RefCounted
 
 const CMD_IDS := ["guard", "follow", "chase", "return"]       # the index is what goes over the network (KinNet)
 const NAMES := {"guard": "Guard", "follow": "Follow", "chase": "Chase", "return": "Return"}
+## The order in plain words, for the status under the portrait.
+const PLAIN := {"guard": "guarding", "follow": "with you", "chase": "chasing", "return": "with you"}
 const HEEL_PULL := 4.0     # 1/s: how hard an out-of-place Boki closes on its side spot, on top of your pace
 const GUARD_PULL := 14.0   # 1/s: how fast a big Boki on the Return order closes on its guard spot beside you
 
