@@ -16,6 +16,16 @@ feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trouser
 Lost against the v2 build below: the antenna, braid, wing and coat-tail spring chains stay in the rig but carry no mesh, the
 hip knives, the procedural pistols and the wing alpha cards.
 
+## Skin relax (2026-11-11, ext/anim-skin-relax-c)
+The shipped sable.glb measured 18x worst stretch (`--stretch-check`): her pistol hands rest on the thighs in the master,
+so hand.R/L weight sat on the thighs (and thigh.L/R on each other at the crotch). The swap's WORK files are not kept, so
+the shipped glb was relaxed in place (skin_relax.py cuts those welds apart and caps both sides closed); the spec's
+`relax` is now `{"CAP_LAST": true}`. The braid, antennae, wings and coat tails carry no mesh (their spring chains stay
+unweighted, and the relax adds no weight to a bone a vertex's neighbours lack). Worst now 2.44x (caps at the knees in a
+crouch), held by the check's CEILING.
+
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- art/wardens/sable/sable.glb art/wardens/sable/sable.glb CAP_LAST=true
+
 ## Previous build: v2 (2026-11-06)
 
 The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-briefs; its index.md and "Notes for 3D" win). Built by script from sable_v2_turnaround.jpg, with sable_v2_master_sheet.jpg for detail; nothing is hand-edited in Blender.

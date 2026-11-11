@@ -24,3 +24,11 @@ Meshy raw files stay in ~/meshy/breaker_v2 (not in git); the measured scan joint
 - **Weapon (76b):** mesh `hammer` skinned to `x_weapon`; `anchor_hammer_head`, `weapon_muzzle`, `anchor_hammer_grip`, `weapon_thrown` on it. The hold
   whirl seeks from the kit's angle (WardenClips.PHASE). Mirrored from the art: hammer in the right hand, shield in the left (the rig's sides).
 - **Mood and fish:** scripts/heroes/warden_mood.gd + shaders/warden_mood.gdshader, data in warden_anim/breaker.json "mood". Fish on spring_hangfish_*, cosmetic.
+- **Skin relax (2026-11-11):** the arms hang against the hull at rest, so forearm weight sat on the hull (and hips on the
+  forearms): 14x worst stretch. breaker_anims.py now runs skin_relax.py (`CAP_LAST`: those welds cut and capped closed) before the
+  export; the shipped glb was relaxed in place, its WORK files not being kept:
+
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- art/wardens/breaker/breaker.glb art/wardens/breaker/breaker.glb CAP_LAST=true
+
+  Worst now 2.30x (caps at the fingers and hull), held by tools/stretch_check.gd's CEILING. `body.bulk` 0.8 scales the model
+  root, above the skeleton, so it does not show in the check (docs/DEBT.md "Mossy's 20% narrower").
