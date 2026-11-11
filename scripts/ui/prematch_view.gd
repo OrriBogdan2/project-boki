@@ -32,7 +32,8 @@ var talk_btn: Button
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
-const COLUMNS := 4          # Hunter cards per row
+const COLUMNS := 5          # Hunter cards per row (13 Hunters = 3 rows, which fit at 1280x720)
+const PORTRAIT_PX := 56.0   # px, a card's portrait (the lobby's smaller one)
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
 
@@ -192,7 +193,7 @@ func _pulse(left: float) -> void:
 
 ## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
 ## smaller windows get smaller digits. The declutter layout has no side column, so the Hunter grid
-## keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical px UI).
+## keeps COLUMNS at every size (5 x CARD_MIN_W fits the 1240 logical px UI).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
@@ -231,7 +232,7 @@ func _tile(ak: String) -> PanelContainer:
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var row := UI.hbox(10)
 	card.add_child(row)
-	row.add_child(ClassCard.portrait(ak))
+	row.add_child(ClassCard.portrait(ak, PORTRAIT_PX))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
