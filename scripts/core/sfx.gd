@@ -101,9 +101,6 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
-	cue_voice = AudioStreamPlayer.new()
-	cue_voice.bus = "SFX"
-	add_child(cue_voice)
 		var s := AudioStreamPlayer3D.new()
 		s.attenuation_model = AudioStreamPlayer3D.ATTENUATION_DISABLED
 		s.attenuation_filter_db = 0.0
@@ -111,6 +108,9 @@ func _ready() -> void:
 		s.panning_strength = PAN
 		add_child(s)
 		spots.append(s)
+	cue_voice = AudioStreamPlayer.new()
+	cue_voice.bus = "SFX"
+	add_child(cue_voice)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
