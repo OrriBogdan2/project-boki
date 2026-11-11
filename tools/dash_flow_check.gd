@@ -163,7 +163,7 @@ func _ready_up(m: Match) -> void:
 	for i in QUIET_MAX:
 		# (a shot still out counts: a slow one, like Grimble's hook, would deny the next press)
 		var busy := k.e_t > 0.0 or k.r_t > 0.0 or not k.fuse.is_empty() or k.rmb_down or k.ult_running() \
-				or _last_shot() >= 0
+				or _last_shot() >= 0 or k.commit_left() > 0.0      # (a move's committed recovery: Vex's E and X)
 		if not busy and hunter.roll_t <= 0.0 and k.dash_left() <= 0.0 and hunter.grounded and i > 30:
 			break
 		m.step(Match.DT)

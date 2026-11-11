@@ -643,6 +643,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var east := Vector2(1, 0)
 	var charge := func(aim_from: Vector3, aim_to: Vector3, mid: float) -> Array:
 		K.cd["e"] = 0.0
+		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + aim_from)
@@ -667,6 +668,7 @@ func _gunslinger_needle_aim(m: Match, P: Hunter, K: GunslingerKit, home: Vector3
 	var cam: CamRig = m.cam
 	var push := func(at_m: float) -> Array:
 		K.cd["e"] = 0.0
+		K.commit_end = 0.0           # (the last cast's recovery: each probe is a fresh cast)
 		P.teleport(home)
 		ac.step(m, 0.1)
 		ac.aim_at(P, home + Vector3(at_m, 0, 0))
@@ -843,6 +845,7 @@ func _gunslinger() -> void:
 	ac.fresh(T)
 	KitStatus.apply(T, "rat", 4.0)
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	P.teleport(home)
 	ac.step(m, 0.1)
 	ac.aim_at(P, T.pos)
@@ -856,6 +859,7 @@ func _gunslinger() -> void:
 	ac.step(m, 0.1)
 	for zz in [-1, 0, 1]: _wall(m, home + Vector3(2.5, 0, zz))
 	K.cd["e"] = 0.0
+	K.commit_end = 0.0
 	ac.aim_at(P, T.pos)
 	P.ak.use_e()
 	ac.step(m, 0.9)
