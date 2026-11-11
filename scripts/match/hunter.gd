@@ -2324,7 +2324,7 @@ func _physics(dt: float) -> void:
 				vel.y = JUMP_V
 				grounded = false
 	else:
-		pos.y = g
+		StoneStand.stand(self, g)
 	if grounded:
 		last_gy = pos.y
 		if int(m.time * 10.0) != int((m.time - dt) * 10.0) and not dropping:
@@ -3179,6 +3179,7 @@ func render(delta: float, alpha: float) -> void:
 	if posed:
 		_anim_state(stretch)
 		anim.update(_anim_dt, anim_s)
+		anim.feet.plant(anim, m.world, _anim_dt, every == 1 and FootPlant.near(self), pos.y, r)
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed and not crouch:
 		Sfx.step(pos, -14.0 if is_local() else -20.0)
