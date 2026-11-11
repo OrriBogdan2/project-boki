@@ -262,15 +262,6 @@ func _start_ult() -> bool:
 	_drop_holds()
 	return ult.cast()
 
-## The hammer is out and not yet on its way back: LMB calls it (lie_t 0 = it lies there for good).
-func recast_left() -> float:
-	if mace.is_empty() or String(mace["st"]) == "back":
-		return 0.0
-	var lie := float(lmb_def().get("lie_t", 0.0))
-	return INF if lie <= 0.0 else maxf(0.0, lie - float(mace["t"]))
-
-func recast_slot() -> String: return "primary"
-
 func ult_running() -> bool:
 	return ult.phase != ""
 
@@ -554,7 +545,6 @@ func _throw() -> void:
 	mace = {"st": "wind", "pos": at, "dir": h.aim_dir(), "d": 0.0, "to": dist, "hit": {}, "t": 0.0}
 	throws += 1
 	h.swing_t = 0.18; h.swing_n += 1
-	m.sfx("bjorn_throw", h.pos, -2.0)
 	Oomph.on_fire(h, true)
 	net_bolt(at, at + Vector3(mace["dir"].x, 0, mace["dir"].y) * dist, Color("ffd27a"))
 	CombatBus.ability_used.emit(h, id + "_throw", "primary")
@@ -576,13 +566,6 @@ func recast_now(slot_id: String) -> void:
 		_recall()
 	else:
 		super(slot_id)
-
-## LMB again calls the hammer back, from the recall lockout on. It waits wherever it lies (left INF) unless the
-## data gives it a lie_t, after which it comes back by itself.
-	if mace.is_empty() or String(mace["st"]) == "back" or m.time - throw_at < float(md.get("recall_lock", 0.25)):
-	if lie <= 0.0:
-		return {"slot": "lmb", "left": INF}
-	return {"slot": "lmb", "left": lie - (float(mace["t"]) if String(mace["st"]) == "ground" else 0.0)}
 
 func _recall() -> void:
 	play("bul_recall")
@@ -612,6 +595,7 @@ func _tick_mace(dt: float) -> void:
 			if float(mace["t"]) >= THROW_WIND:
 				mace["st"] = "fly"
 				fx.in_hand(false)
+				m.sfx("bjorn_throw", h.pos, -2.0)      # on the release, the clip's strike
 		"fly":
 			var dir: Vector2 = mace["dir"]
 			var step := float(md["throw_speed"]) * dt
@@ -670,15 +654,6 @@ func _catch(quiet := false) -> void:
 	m.sfx("bjorn_catch", h.pos, -6.0)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), HeroVfx.pal(h.arch, "deep"), 8, 2.5, 0.25)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), HeroVfx.pal(h.arch, "hot"), 0.5, 0.06)
-
-## The recall: while the hammer is out (flying or lying) a press on the attack key calls it back, no time limit.
-func recast_at() -> Vector3:
-	if mace.is_empty() or String(mace["st"]) in ["wind", "back"]:
-		return Vector3.INF
-	return ground(mace["pos"])
-
-func recast_key() -> String: return "fire"
-func recast_left() -> float: return -1.0
 
 # ------------------------------------------------------------------ RMB: Shield (hold to block)
 ## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).

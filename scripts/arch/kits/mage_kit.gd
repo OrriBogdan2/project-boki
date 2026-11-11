@@ -100,15 +100,6 @@ func combo_marks(out: Array) -> void:
 			var n := int(sp["n"])
 			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
 
-## X again in the hang brings her down at the cursor (she comes down by herself when the hover runs out).
-func recast_window() -> Dictionary:
-	if ult.phase() != MageUlt.AIR:
-		return {}
-	return {"slot": "x", "left": float(ult.data()["hover"]) - float(ult.leap["t"])}
-
-func recast_left() -> float: return ult.recast_left()
-func recast_slot() -> String: return "x"
-
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -161,6 +152,7 @@ func add_spark(f: Ent, n := 1) -> void:
 	s["n"] = mini(int(rd["max"]), was + n)
 	s["t"] = float(rd["dur"])
 	sparks[key] = s
+	if f.remote: KitStatus.apply(f, "sta", float(s["t"]), float(s["n"]), true, "", h.nid)
 	if int(s["n"]) >= int(rd["max"]) and was < int(rd["max"]):
 		# the 4th stack: a bolt drops out of the sky onto them
 		var top := f.position + Vector3(0, 9.0, 0)
@@ -187,6 +179,7 @@ func clear_sparks(f: Ent) -> void:
 	if sparks.has(key):
 		sparks.erase(key)
 		fx().unmark("vs%d" % key)
+		if f.remote: KitStatus.apply(f, "sta", 0.0, 0.0, true, "", h.nid)
 
 func _tick_sparks(dt: float) -> void:
 	var mx := int(res_def()["max"])

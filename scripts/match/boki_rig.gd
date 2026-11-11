@@ -231,8 +231,7 @@ static func fetch_common() -> void:
 			BackgroundWork.request(p)
 
 static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
-static func _scene(kin_id: String) -> PackedScene:
-	var p := PATH % [kin_id, kin_id]
+static func _scene(p: String) -> PackedScene:
 	if not _scenes.has(p):
 		var asked := ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_INVALID_RESOURCE
 		_scenes[p] = BackgroundWork.take(p) if asked else load(p)
@@ -249,10 +248,12 @@ static func work_clip(k: Dictionary) -> String:
 		return ""
 	return String(WORK_KINDS.get(String(job["kind"]), "tend"))
 
-## Adds the model and its driver under `flex`; `c` is KinModels' material set. Returns the head frame, as
+## Adds the model and its driver under `flex`; `c` is KinModels' material set plus the Boki's "rec" (its sex
+## look). Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := _scene(kin_id).instantiate() as Node3D
+	var path: String = BokiSex.model_path(kin_id, c.get("rec", {}), PATH % [kin_id, kin_id])
+	var model_root := _scene(path).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()

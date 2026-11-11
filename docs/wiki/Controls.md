@@ -14,7 +14,7 @@ ability in a match; **R** turns a piece in build mode and reloads in a match.
 | Left click | Weapon attack (some weapons charge when held) |
 | Right click | Your class's RMB ability: tap, hold, in the air and other variants (see your class page) |
 | Shift | Your class's dash |
-| Space | Jump; hold it in the air to glide |
+| Space | Jump; press it again in the air and hold to glide |
 | Mouse 5 | Glide at once, without jumping (Mouse 4 works too) |
 | Q | Your active glove |
 | E | Your class's utility |
@@ -82,7 +82,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | L | Boki order: hold this position | `kin_hold` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift / Mouse 5 | Hunter dash | `dash` | yes |
-| Space | Jump (hold to glide) | `jump` | yes |
+| Space | Jump (again in the air: glide) | `jump` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |
@@ -100,6 +100,12 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
+| Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
+| Shift | Hold to keep placing (build mode) | `keep_placing` | yes |
+| Alt | Hold with a slot key to level it | `level_mod` | yes |
+| K | Hunter kit card (hover a hunter) | `kit_card` | yes |
+| Enter / Kp | Press the open panel's main button | `confirm` | yes |
+| V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |

@@ -64,7 +64,7 @@ func setup(main_node: Node) -> void:
 	if stress:
 		teams = 10
 		squad = 3
-	if stress or not OS.get_cmdline_user_args().any(func(a): return a.begins_with("--bench-hunters=")):
+	if stress or not Array(OS.get_cmdline_user_args()).any(func(a): return a.begins_with("--bench-hunters=")):
 		hunters = teams * squad
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true

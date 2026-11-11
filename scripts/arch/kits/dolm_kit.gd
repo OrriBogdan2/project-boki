@@ -41,6 +41,7 @@ var dunks := 0
 var wall_stuns := 0
 var guard_punches := 0         # punches that launched a rock of ours and gave a Molten Guard stack
 var rocks_made := 0
+var row_heard_t := -1.0       # s (m.time): when a Stone Row's rise was last heard
 var sight_pings := 0
 var landslides := 0            # Rock Hop's last rocks that rolled on
 var leap_lands := 0            # Rock Hop chains that ended in a crash
@@ -543,12 +544,6 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 func extra_dashes() -> float:
 	return 1.0 if rank("dash") >= 3 else 0.0
 
-## Shift again inside a chain is the next hop (each hop opens a fresh window; none after the last).
-func recast_window() -> Dictionary:
-	if not hop.chaining() or int(hop.st["n"]) >= int(hop.dd()["hops"]):
-		return {}
-	return {"slot": "dash", "left": hop.left()}
-
 ## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
 ## RecastCue: Shift again chains the next hop (a press in the air waits for the rock).
@@ -596,10 +591,6 @@ func fires_in_dash() -> bool:
 ## The hops turn her along the chain; only the air dash keeps the weapon on the cursor.
 func aims_in_dash() -> bool:
 	return not hop.chaining() and super.aims_in_dash()
-
-## The next hop is open while the chain has a hop to give (Shift again).
-func recast_left() -> float: return hop.left() if hop.chaining() and hop.hops_left() > 0 else 0.0
-func recast_slot() -> String: return "dash"
 
 ## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:
@@ -695,18 +686,16 @@ func cast_e() -> bool:
 	for j in spots.size():
 		var p2: Vector3 = spots[j][0]
 		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
-	m.later(tell, _raise_feel)
 	return true
 
+## One rock of the Stone Row rises; the row's rocks rise on the same step and the first to rise carries its sound.
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
 	m.fx.burst(p + Vector3(0, 0.2, 0), COBALT, 8, 4.0, 0.3, 8.0, 1.0)
-
-func _raise_feel() -> void:
-	if not is_instance_valid(h):
-		return
-	m.sfx("br_raise", h.pos, -1.0, 1.0)
+	if m.time != row_heard_t:
+		row_heard_t = m.time
+		m.sfx("br_raise", h.pos, -1.0, 1.0)
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

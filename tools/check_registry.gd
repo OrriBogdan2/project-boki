@@ -66,8 +66,6 @@ const CHECKS := {
 	"--barrier-hit-check": ["res://tools/barrier_hit_check.gd", "hero_pair_check", null],      # barrier hit ripple; --shots-dir=<dir>
 	"--dolm-combo-check": ["res://tools/breah_combo_check.gd", "hero_pair_check", null],
 	"--deployable-hp-check": ["res://tools/deployable_hp_check.gd", "hero_pair_check", null],      # docs/heroes/deployables.md
-	"--recast-marker-check": ["res://tools/recast_marker_check.gd", "recast_marker_check", "check"],
-	"--recast-marker-shots": ["res://tools/recast_marker_check.gd", "recast_marker_check", "shots"],      # --shots-dir=<dir>
 	"--ostra-combo-check": ["res://tools/ostra_combo_check.gd", "hero_pair_check", null],
 	"--dredge-combo-check": ["res://tools/dredge_combo_check.gd", "hero_check", null],
 	"--ashwick-combo-check": ["res://tools/ashwick_combo_check.gd", "hero_check", null],
@@ -120,7 +118,6 @@ const CHECKS := {
 	"--mob-sfx-check": ["res://tools/mob_sfx_check.gd", "mob_sfx_check", null],      # monster death and stagger sounds
 	"--gear-reveal-shots": ["res://tools/gear_reveal_shots.gd", "gear_reveal_shots", null],      # --shots-dir=<dir>
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],      # sound sets, loudness
-	"--recast-sound-check": ["res://tools/recast_sound_check.gd", "recast_sound_check", null],      # recast open chime + closing tick
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
@@ -154,6 +151,7 @@ const CHECKS := {
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],      # --shots-dir=<dir> (GPU)
+	"--kit-text-check": ["res://tools/kit_text_check.gd", "kit_text_check", null],      # ability text vs slot data
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
@@ -173,6 +171,7 @@ const CHECKS := {
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
 	"--fire-run-check": ["res://tools/fire_run_check.gd", "fire_run_check", null],      # firing while running keeps the legs
+	"--sfx-strike-check": ["res://tools/sfx_strike_check.gd", "sfx_strike_check", null],  # sounds land on the strike
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
 	"--vex-clip-live-check": ["res://tools/vex_clip_live_check.gd", "vex_clip_live_check", null],
@@ -246,6 +245,7 @@ const CHECKS := {
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],      # nothing random
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],      # the first two Extractions' guide
+	"--tip-text-check": ["res://tools/tip_text_check.gd", "tip_text_check", null],  # glide wording: double press
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],      # one voice
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
@@ -273,7 +273,9 @@ const CHECKS := {
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],      # trust from care
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],      # news at home: Boki come to look
+	"--legendary-check": ["res://tools/legendary_check.gd", "legendary_check", null],      # legendary Boki
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
+	"--boki-sex-check": ["res://tools/boki_sex_check.gd", "boki_sex_check", null],  # sex 50/50, female looks
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
@@ -301,6 +303,7 @@ const CHECKS := {
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],     # 2 games, laggy relay
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
 	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
+	"--status-net-check": ["res://tools/status_net_check.gd", "status_net_check", null],  # kit statuses over the relay
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],

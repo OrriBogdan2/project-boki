@@ -11,7 +11,7 @@
 "scripts/arch/arch_kit.gd": {
 "long_line": 31,
 "nested_ternary": 2,
-"semicolon": 9
+"semicolon": 6
 },
 "scripts/arch/feel.gd": {
 "long_line": 10,
@@ -391,7 +391,7 @@
 "scripts/main.gd": {
 "long_line": 387,
 "nested_ternary": 7,
-"semicolon": 407,
+"semicolon": 405,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -499,8 +499,15 @@
 },
 "scripts/match/exits.gd": {
 "long_line": 30,
+"semicolon": 13
+},
+"scripts/match/exits_flow.gd": {
+"long_line": 7,
 "nested_ternary": 1,
-"semicolon": 20
+"semicolon": 7
+},
+"scripts/match/exits_look.gd": {
+"long_line": 17
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
@@ -624,9 +631,26 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
-"nested_ternary": 9,
-"semicolon": 28
+"long_line": 18,
+"semicolon": 9
+},
+"scripts/match/lairs_bots.gd": {
+"long_line": 2,
+"semicolon": 2
+},
+"scripts/match/lairs_demo.gd": {
+"long_line": 7,
+"semicolon": 6
+},
+"scripts/match/lairs_fight.gd": {
+"long_line": 8,
+"nested_ternary": 3,
+"semicolon": 3
+},
+"scripts/match/lairs_lock.gd": {
+"long_line": 17,
+"nested_ternary": 6,
+"semicolon": 8
 },
 "scripts/match/landmarks.gd": {
 "long_line": 24,
@@ -667,7 +691,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 282,
+"long_line": 281,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -831,7 +855,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 191,
+"long_line": 190,
 "nested_ternary": 39,
 "semicolon": 52,
 "shadow": 2
@@ -952,16 +976,16 @@
 "semicolon": 7
 },
 "tools/airheal_check.gd": {
-"long_line": 2,
+"long_line": 1,
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 20
+"semicolon": 19
 },
 "tools/archetype_check.gd": {
 "long_line": 65,
-"semicolon": 71,
+"semicolon": 66,
 "shadow": 1
 },
 "tools/arena_check.gd": {

@@ -1186,7 +1186,6 @@ func _draw_arch_abilities(sz: Vector2, p: Hunter) -> void:
 	x = HunterUltTile.draw(self, p, x, y, s, gap)
 	# C: the Boki's own ability, G: throw / recall (hold: hold the spot or follow)
 	x = BokiHud.cg_slots(self, p, x, y, s)
-	RecastCue.draw(self, p)
 	if m.hunters.any(func(oh): return oh != p and oh.team == p.team):
 		var brr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 		_ab_slot("base", brr, "swap", Settings.key_cap("base"), Color("8fe3c8"), p.base_cd / Hunter.BASE_CD if p.base_cd > 0.0 else 0.0, p.base_cd, p.base_cd <= 0.0 and p.base_t <= 0.0)
@@ -1844,7 +1843,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"revive": prog = it["ent"].revive
 			"finish": prog = p.finish_t / Life.R["stomp_commit"]
 			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
-			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
+			"boxrev": prog = p.box_t / BoxRevive.time_for()
 			"loot": prog = p.box_t / Life.R["loot_time"]
 			"catch": prog = CaptureHud.progress(p)
 			"chest": prog = it["chest"]["prog"]

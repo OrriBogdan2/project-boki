@@ -552,6 +552,9 @@ the rig's joint heights; past a bone's ends the scan's own scale). The hoard, be
 the loupe is scripted; the face's squint, teeth and gums and the glowing veins are paint fixes (grimble_paint.scan_face, vein_key).
 
 ### Claire v2 (owner redesign: rabbit ears, braid, puff tail), 2026-11-07 (85 credits)
+### Vex v2 (owner redesign, briefs/art-refs/vex_v2/), 2026-11-06 (152 credits)
+=======
+### Vex v2 (owner redesign, briefs/art-refs/vex_v2/), 2026-11-06 (152 credits)
 | Warden | Date (UTC) | Task id | ai_model | Settings | Credits | Result |
 |---|---|---|---|---|---|---|
 | Claire v2 edit front | 13:02 | 01a1b61a-8f75-7116-b432-5496b1cabe44 | nano-banana-pro (image-to-image) | nivi_v2_turnaround crop; ears, braid, scarf ends, tail and blades out, skirt opaque | 9 | Kept |

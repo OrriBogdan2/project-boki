@@ -78,6 +78,7 @@ func add_chill(t: Ent) -> void:
 	var key := t.get_instance_id()
 	var fresh := not chilled(t)
 	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
+	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
 
@@ -119,6 +120,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 				delay,
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
 		chill.erase(t.get_instance_id())
+		if t.remote: KitStatus.apply(t, "chl", 0.0, 0.0, true, "", h.nid)
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
@@ -926,28 +928,6 @@ func icb() -> IceBody:
 
 func ult_running() -> bool:
 	return not rime.is_empty()
-
-## E again stops the sliding wall (it stops by itself at the end of its slide); X again in Rimelock's last
-## `late` seconds cracks it open early (any earlier X only breaks the shell, so that is no recast).
-func recast_window() -> Dictionary:
-	if e_recastable():
-		return {"slot": "e", "left": float(wall["slide_t"]) - float(wall["t"])}
-	if not rime.is_empty():
-		var xd := x_def()
-		var left := float(xd["hold"]) - float(rime["t"])
-		if left <= float(xd["late"]):
-			return {"slot": "x", "left": left}
-	return {}
-
-
-## Rimelock is open until it cracks (X ends it early or late); else the Rink Wall's slide (E).
-func recast_left() -> float:
-	if rime.is_empty():
-		return super.recast_left()
-	return maxf(0.0, float(x_def()["hold"]) - float(rime["t"]))
-
-
-func recast_slot() -> String: return "x" if not rime.is_empty() else "k1"
 
 
 func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)

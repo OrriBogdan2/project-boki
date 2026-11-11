@@ -3,7 +3,7 @@ extends "res://tools/hero_vfx_reel.gd"
 ## Hearthlight on her and thrown (its heals rising as stars, the bloom), and Hearth Call's tether to its end.
 
 func parts() -> Array:
-	return ["lmb", "hold", "dash", "rmb", "e", "r"]
+	return ["lmb", "hold", "kindle", "dash", "rmb", "e", "r"]
 
 func _part_lmb() -> void:
 	await _reset(6.0)
@@ -12,6 +12,18 @@ func _part_lmb() -> void:
 		_aim(T.pos)
 	await _go(2.0, cast, _sheet("lmb", "LMB held: starlit comets from alternating hands, the hand flares, Kindled",
 		[0.15, 0.3, 0.45, 0.6, 0.8, 1.0, 1.3, 1.6, 1.9], func(): return (P.pos + T.pos) * 0.5), 2.0)
+	await _go(GAP)
+
+## Sheet gap 9: embers held on a foe near the end of their 12 m reach, the number warming a step per Kindle
+## stack (cream to ember) as the foot glow goes violet to ember; the crop follows the foe.
+func _part_kindle() -> void:
+	await _reset(11.0)
+	(P.ak.get("kind") as Dictionary).clear()
+	var cast := func(t: float):
+		P.inp["fire"] = t > 0.1 and t < 2.6
+		_aim(T.pos)
+	await _go(3.2, cast, _sheet("kindle", "LMB on a foe 11 m off: the number warms a step per Kindle stack",
+		[0.7, 1.1, 1.5, 1.9, 2.3, 2.7, 3.1], func(): return T.pos + Vector3(0, 1.4, 0)), 2.0)
 	await _go(GAP)
 
 func _part_dash() -> void:

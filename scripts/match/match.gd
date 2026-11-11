@@ -1771,7 +1771,8 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
+	var tint: Color = o.get("num_col", HudStyle.HIT)      # a kit's optional per-hit colour (Meeko's Kindle)
+	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player, tint)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
 		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
@@ -3319,7 +3320,7 @@ func _gather_input() -> void:
 			continue
 		if slot_of.has(a[0]) and player and PanelInput.pressed(self, a[0]):
 			var sl: String = slot_of[a[0]]
-			if Input.is_key_pressed(KEY_ALT) and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
+			if Input.is_action_pressed("level_mod") and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
 				player.level_slot(sl)       # Alt + key: put a point into it
 				continue
 			if int(player.slot_lv[sl]) == 0:

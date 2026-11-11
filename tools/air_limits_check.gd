@@ -278,6 +278,7 @@ func _cast_table(m: Match, home: Vector3, arch: String) -> void:
 
 ## 4. What a status forbids, on the first hero (the table is the same for every Hunter).
 func _cc(m: Match, home: Vector3, arch: String) -> void:
+	var h: Hunter = m.player
 	for kind in ["gnd", "root"]:
 		_clear(h)
 		h.teleport(home + Vector3(0, HEIGHT, 0))
@@ -306,6 +307,7 @@ func _cc(m: Match, home: Vector3, arch: String) -> void:
 	_land(m, h, home)
 	_lock(h, "daze", 1.0)
 	var dashes0 := h.dashes
+	var cd0: Dictionary = h.ak.cd.duplicate()
 	h.inp["dash"] = true
 	h.inp["sec"] = true
 	h.inp["sec_hold"] = true

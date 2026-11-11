@@ -409,3 +409,23 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Cinder Shot (Embry Bolt) | Data: a fire bolt, damage and slow. Footage briefs/hero-ref/linwick.md:62: on a hit it stops at the first enemy. | Stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Matches. |
 | E Furnace Cloak (Heat Shield) | Data: a spin that pulls in nearby enemies. | A blast round him that drags foes in sight (walls stop them). No shot. Matches. |
 | Shift Soot Ram (Flame Skull Bash) | Footage linwick.md:77: the dash stops on the first enemy ('impact'), he does not pass through. | Stops on the first foe with the impact. Matches (`ram: stops on the first foe`). |
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Torch Lance (hold stream) | stun | [?] Felix data and linwick footage silent | the stream stops while stunned (`Hunter.can_fire`), then relights if still held | [?] |
+| LMB Torch Lance | knock, root | [?] | ignored | [?] |
+| RMB Cinder Shot (hold to aim, release) | stun | [?] | the hold is let go: the shot goes (shared rule) | [?] |
+| RMB Cinder Shot | knock, root | [?] | ignored | [?] |
+| Shift Soot Ram (dash to first foe) | stun, knock, root | [?] | not checked: the ram runs on | [?] |
+| X Flue Flight (1.8 s) | stun (and down, merge) | [?] the sheet: "whether he can be interrupted ... not found" | lands where he is, the cooldown stays spent (`AshwickJet._fly`) | [?] |
+| X Flue Flight | knock | [?] | adds to the flight's speed and bends it (`_take_boost`) | [?] |
+| X Flue Flight | root | [?] | ignored | [?] |
+| X recast | none | [F] reactivating ends the flight early | X again lands | match |
