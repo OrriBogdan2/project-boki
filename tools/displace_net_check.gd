@@ -13,7 +13,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match (a busy box boots it slowly)
-const REPLY_S := 30.0        # s of real time for the guest to answer (a busy box starves it; sim time races ahead)
+const REPLY_S := 30.0        # s for the guest to answer, on its clock (CheckClock: a busy box starves it)
 const TOL := 0.5             # m: the player's own game puts it within this of where the bot went
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
@@ -359,8 +359,9 @@ func _ask() -> Vector3:
 	return await _reply()
 
 func _reply() -> Vector3:
-	var t0 := Time.get_ticks_msec()
-	while replies.is_empty() and Time.get_ticks_msec() - t0 < REPLY_S * 1000.0 and OS.is_process_running(guest_pid):
+	var t0 := CheckClock.own_msec(guest_pid)
+	while (replies.is_empty() and CheckClock.own_msec(guest_pid) - t0 < REPLY_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.1)
 	if replies.is_empty():
 		return Vector3.INF

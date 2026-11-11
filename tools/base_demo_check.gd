@@ -24,13 +24,13 @@ func run(m: Node) -> void:
 	seed(11)
 	var real := Save.path_for(Save.slot)
 	var before := FileAccess.get_md5(real)
-	var t0 := Time.get_ticks_msec()
+	var t0 := CheckClock.own_msec()
 	var d := BaseDemo.save()
 	var recs: Array = d["roster"]
 	var home = await main._hb_home()
 	var demo := BaseDemo.new()
 	demo.stage(home)
-	var secs := float(Time.get_ticks_msec() - t0) / 1000.0
+	var secs := float(CheckClock.own_msec() - t0) / 1000.0
 	ok(secs < LOAD_SECS, "ready in %.1f s (under %.0f)" % [secs, LOAD_SECS])
 	ok(FarmUnlocks.base_mode() and home.life != null, "base_mode on: the farm runs BaseLife")
 	ok(home.kins.size() == 4 and recs.size() == 4, "4 Boki (%d on the farm)" % home.kins.size())

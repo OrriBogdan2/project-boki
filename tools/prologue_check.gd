@@ -100,11 +100,11 @@ func _skips(tree: SceneTree) -> void:
 		var pr = main.current
 		for i in 3:
 			await tree.process_frame
-		var t0 := Time.get_ticks_msec()
+		var t0 := CheckClock.own_msec()
 		pr._unhandled_input(ev)
-		while main.current == pr and Time.get_ticks_msec() - t0 < 3000:
+		while main.current == pr and CheckClock.own_msec() - t0 < 3000:
 			await tree.process_frame
-		var took := Time.get_ticks_msec() - t0
+		var took := CheckClock.own_msec() - t0
 		ok(main.current != pr and took <= 400, "one %s press skips to the hatch (%d ms)" % [ev.get_class(), took])
 	ok(bool(Save.d["tutorial"]["prologue"]), "a skip is remembered")
 	await main.show_screen("prologue", {"then": "hatch"})
