@@ -288,7 +288,7 @@ Each target applies **quality** parity only. The attitude comes from the line qu
   every track;
 - each clip lasts at least 2 s (`STAND_MIN`).
 
-`STAND_OPEN` lists what is still open: `bulwark:idle`, `bulwark:stance`, `ostra:idle`, `ostra:stance` and
+`STAND_OPEN` lists what is still open: `bulwark:stance` (`bulwark:idle` closed by ext/anim-pilot-four), `ostra:idle`, `ostra:stance` and
 `dolm:stance`. Open entries are reported, not failed. An entry that starts passing fails the run until it is removed,
 so each rework must delete its own entries.
 
