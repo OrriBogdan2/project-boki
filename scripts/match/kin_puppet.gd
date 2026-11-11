@@ -49,6 +49,7 @@ var vy := 0.0
 var vy_prev := 0.0
 var sq := 0.0          # squash (+) and stretch (-), springs back
 var sq_v := 0.0
+var feel := LandLean.new()     # a landing off a leap or a drop squashes too, and it leans as it starts and stops
 var ear_flop := 0.0
 var ear_v := 0.0
 var twitch_t := 3.0
@@ -166,6 +167,7 @@ func _process(dt: float) -> void:
 		ear_v += (-ear_flop * 120.0 - ear_v * 9.0) * h
 		ear_flop += ear_v * h
 	sq = clampf(sq, -0.18, 0.28)
+	feel.step(dt, gp)
 	# casting: a quick swell
 	var p: int = root.get_meta("pulse", 0)
 	if p != last_pulse:
@@ -184,10 +186,11 @@ func _process(dt: float) -> void:
 	air = lerpf(air, clampf(vy * 0.4, -1.0, 1.0), 1.0 - exp(-10.0 * dt))
 	gait += dt * (4.0 + move_k * 12.0 + happy_k * 4.0)
 	var breathe := sin(t * (2.2 - sleep_k * 1.0) + phase) * (0.018 + sleep_k * 0.03) * (1.0 - move_k)
-	var sx := 1.0 + sq * 0.6 + swell + breathe * 0.5
-	var sy := 1.0 - sq + swell * 0.6 + breathe
+	var land := feel.squash * BokiRig.LAND_SQUASH
+	var sx := 1.0 + (sq + land) * 0.6 + swell + breathe * 0.5
+	var sy := 1.0 - sq - land + swell * 0.6 + breathe
 	var sz := 1.0
-	var rx := 0.0
+	var rx := -feel.lean
 	var ry := 0.0
 	var rz := 0.0
 	var off := Vector3.ZERO
