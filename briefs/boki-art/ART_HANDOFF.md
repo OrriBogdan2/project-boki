@@ -178,3 +178,10 @@ Owner prefs that matter most: short plain messages; always show 1st/2nd/3rd; pic
 4. Recheck of 270 sheets: 260 passed. Replaced Malletary, Meteorab, Blastopuff, Voltmink, Lunowl, Barokit, Lunowl_female, Hourachnid_female. Left as is (minor): Murmuron (faint smear under the views), Murmuron_female (wings folded on the sheet, spread on the card).
 5. Bokidex link image: owner says handled.
 Note: `promote_female.py` re-cuts the female hero even when the portrait is `-`; restore `cutout_v2/<Name>_female.png` and its hero hash if you only changed the sheet.
+
+### OWNER RULE 11-11 (replaces "full pick control" for design changes)
+"Try a bunch of stuff, I don't want to pick until I see, as a rule. Always show me your favorites and 2nd / 3rd."
+So: for any design change, queue several directions (3-4 x 2 runs), show ONE labelled strip with your 1st/2nd/3rd, and promote only after he picks.
+Open from 11-11: back-scenery rework (Terrarimit, Mosstodon/Mossbastion, Vatmander/Cisternmander, Crofthollow, Briarlynx shave, Soakybara + Geyserbara water ideas; ids opt_<id>_<k>_bk, shave_briarlynx_*).
+Cairnback held back (3D model in game; its ability throws its cairn stones). Kestrike female (fopt_kestrike_line_1) and Pavonazar female (fopt_pavonazar_ring_2) are proposed, not live.
+Crofthorn (earlier form) and Dribbara (baby) follow whatever is picked for their finals.
