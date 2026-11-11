@@ -196,7 +196,9 @@ func _games(rig: BokiRig) -> void:
 	rig._speed = 1.0
 	rig._pick_clip(0.016)
 	var feet: float = rig.player.speed_scale * rig.stride_of("sniff")
-	ok(rig.clip == "sniff" and absf(feet - 1.0) < 0.05, "kgait sniff while it walks")
+	var capped := rig.player.speed_scale >= BokiRig.MAX_CADENCE * rig.player.get_animation("sniff").length - 0.01
+	ok(rig.clip == "sniff" and (capped or absf(feet - 1.0) < 0.05),
+			"kgait sniff while it walks, at ground speed or its cadence cap (%.2f of feet)" % feet)
 	rig._speed = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "standing, a sniffer stands")
