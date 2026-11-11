@@ -56,7 +56,18 @@ in about 4.5 s.
 The full map always shows lanes (dashed cyan lines, a tick per ring) and lift rings (gold ring with an up
 chevron). The minimap shows them as the DETAIL kind "air" (hold Tab or the map key, or while riding in).
 
-## Not done here
-- Bots fly lanes (they are glide links) but do not plan around lift rings; they climb by stairs as before.
-- Lane choice for bots is by hops, not time (the island graph search counts links), so a bot may still walk a
-  bridge where a lane would be faster.
+## Bots (scripts/match/bot_route.gd, BotRoute)
+- **Route by time.** A bot heading for another island plans the quickest chain of hops (Dijkstra over the
+  island graph): the run to each take-off at 5 m/s plus the hop's flight, a ringed lane at the ring speed, a
+  plain glide at glide speed, a wind road at 14 m/s, a pad at 10 m/s, a bridge on foot, and 2 s per hop.
+  The plan is made once per trip, so a ringed lane beats a walk round by a bridge.
+- **Lift rings.** A bot whose goal is 2.5 m or more above it on its own island takes a lift ring when the
+  ring's way (walk to its foot, ~4.5 s up, walk on) takes under 0.7 of the walk by the stairs, or when no
+  walk gets there. It walks to the foot, hops in, holds still with the glider open until over the top,
+  then steers onto it. A lift that doesn't put it on top is skipped for 20 s.
+- Bots no longer walk straight at a cliff: a straight line with a rise over 1.7 m (Bot.STEP_MAX) is not
+  "clear", so they take the tile path round by the stairs (or the lift).
+
+`--air-rings-check` also checks that the plan from each lane's take-off is that lane, and that a bot 3 m
+off each lift ring's foot sent up to its high ground stands on top within 7 s (four of the six rings by the
+ring, two by stairs that are quicker there).

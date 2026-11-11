@@ -15,7 +15,7 @@ const TIP_R := 9.0                     # m: the first time you come this close t
 const CLIMB_EASE := 2.5                # 1/s and m/s per m: the lane pulls you to its height (as a wind road does)
 
 var n := 0                     # rings flown through this match (SIMSTAT)
-var list: Array = []           # {pos, dir: Vector2, lift: bool, lane: int, node, cd: {nid: time}}
+var list: Array = []           # {pos, dir: Vector2, lift: bool, lane: int, node, cd: {nid: time}, top, onto (lifts)}
 var lanes: Array = []          # {a, b}: each ringed lane's ring line (ring centres), for the hold and the maps
 var _m: Match
 var _slip := {}                # Hunter -> {until: time, speed: m/s, lane: int}
@@ -36,12 +36,34 @@ static func lay(w: World, layout: Dictionary, ids: Dictionary) -> void:
 			continue
 		var take := _ground(w, G["take"])
 		var land := _ground(w, G["land"])
-		w.links.append({"from": to, "to": from, "take": land, "land": take, "glide": true})
+		for lk in w.links:
+			if lk.get("glide", false) and lk["take"].distance_to(take) < 0.1 and lk["land"].distance_to(land) < 0.1:
+				lk["rings"] = true       # (bots time a ringed lane at the ring speed: BotRoute)
+		w.links.append({"from": to, "to": from, "take": land, "land": take, "glide": true, "rings": true})
 		_lay_lane(w, take, land)
 	for U in layout.get("updrafts", []):
 		if U.get("ring", false):
 			var at := _ground(w, U["at"])
-			w.rings.append({"pos": at + Vector3.UP * r("lift_y"), "dir": Vector2.ZERO, "lift": true})
+			var top := float(U.get("top", 2)) * World.LEVEL
+			w.rings.append({"pos": at + Vector3.UP * r("lift_y"), "dir": Vector2.ZERO, "lift": true,
+				"top": top, "onto": onto(w, at, top)})
+
+## Where a lift ring at `foot` sets you down: the nearest ground at least `top` high beside it (within 6 m),
+## 1.5 m further in from the rim. INF if there is none.
+static func onto(w: World, foot: Vector3, top: float) -> Vector3:
+	var best := Vector3.INF
+	for dz in range(-6, 7):
+		for dx in range(-6, 7):
+			var x := foot.x + dx
+			var z := foot.z + dz
+			if w.is_void(x, z) or w.ground_at(x, z) < top - 0.05:
+				continue
+			var p := Vector3(x, w.ground_at(x, z), z)
+			if best == Vector3.INF or foot.distance_to(p) < foot.distance_to(best):
+				best = p
+	if best == Vector3.INF:
+		return best
+	return best + (best - foot).normalized() * Vector3(1, 0, 1) * 1.5
 
 static func _ground(w: World, xz: Array) -> Vector3:
 	var x := floorf(float(xz[0])) + 0.5
@@ -73,7 +95,8 @@ func _init(m: Match) -> void:
 		if not lift:
 			node.rotation.y = atan2(float(rg["dir"].x), float(rg["dir"].y))
 		m.add_child(node)
-		list.append({"pos": rg["pos"], "dir": rg["dir"], "lift": lift, "lane": _lane_of(rg), "node": node, "cd": {}})
+		list.append({"pos": rg["pos"], "dir": rg["dir"], "lift": lift, "lane": _lane_of(rg), "node": node, "cd": {},
+			"top": rg.get("top", 0.0), "onto": rg.get("onto", Vector3.INF)})
 
 func _lane_of(rg: Dictionary) -> int:
 	if not rg.has("a"):

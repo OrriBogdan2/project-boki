@@ -2,15 +2,19 @@ extends RefCounted
 ## --air-rings-check: the Hollow Crown's air rings (scripts/match/air_rings.gd, docs/AIR_RINGS.md).
 ## The map lays its lanes and lift rings from content/maps/hollowcrown.json; every region has a ring;
 ## each lane is flown both ways by a hunter on scripted keys, through every ring, onto the far island,
-## held at ring speed and well inside AIR_MAX_S; a bot takes a lane on its own crossing logic; a hop
-## into each lift ring lands you on the high ground it serves. Never touches the save.
+## held at ring speed and well inside AIR_MAX_S; a bot takes a lane on its own crossing logic and plans
+## each lane as its quickest way across (BotRoute, by time); a hop into each lift ring lands you on the
+## high ground it serves, and a bot sent up there gets there quickly (by the ring when that is quicker).
+## Never touches the save.
 
 const AIR_MAX_S := 25.0         # s: the longest a lane may take (no empty runs past this)
 const RING_GAP_S := 3.0         # s: the longest between two rings on a lane
 const FLY_LIMIT_S := 30.0       # s: a flight that hasn't landed by now failed
 const LIFT_LIMIT_S := 6.0       # s: a hop into a lift ring that isn't on top by now failed
+const BOT_LIFT_LIMIT_S := 7.0   # s: a bot 3 m off a lift ring not on top by now was too slow (the ring takes ~5)
 
 var bad := 0
+var bot_lifts := 0              # lift rings a bot took on its own (_bot_lift)
 var m: Match
 var w: World
 var P: Hunter
@@ -45,9 +49,12 @@ func run(main: Node) -> void:
 		_fly(i, false)
 		_fly(i, true)
 	_bot()
+	_routes()
 	for rg in m.air_rings.list:
 		if rg["lift"]:
 			_lift(rg)
+			_bot_lift(rg)
+	ok(bot_lifts >= 2, "bots take lift rings by themselves (%d)" % bot_lifts)
 	print("AIRRINGS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -199,13 +206,12 @@ func _bot() -> void:
 	B.ctrl = "idle"
 	_park(B)
 
-## Hop into a lift ring: up the updraft, then steer onto the nearest ground of the level it serves.
+## Hop into a lift ring: up the updraft, then steer onto the ground of the level it serves.
 func _lift(rg: Dictionary) -> void:
 	var c: Vector3 = rg["pos"]
 	var foot := Vector3(c.x, w.ground_at(c.x, c.z), c.z)
-	var up: Dictionary = w.updraft_at(foot + Vector3.UP * 0.5)
-	var top_y: float = float(up.get("top", foot.y + 1.6)) - 1.6
-	var target := _ground_at_least(foot, top_y)
+	var top_y: float = rg["top"]
+	var target: Vector3 = rg["onto"]
 	var label := "lift at (%.0f, %.0f) to %.1f m" % [c.x, c.z, top_y]
 	ok(target != Vector3.INF, "%s: has high ground beside it" % label)
 	if target == Vector3.INF:
@@ -227,17 +233,46 @@ func _lift(rg: Dictionary) -> void:
 	var on_top := P.grounded and P.pos.y >= top_y - 0.05
 	ok(on_top, "%s: lands on the high ground in %.1f s (at %.1f m)" % [label, t, P.pos.y])
 
-func _ground_at_least(foot: Vector3, y: float) -> Vector3:
-	var best := Vector3.INF
-	for dz in range(-6, 7):
-		for dx in range(-6, 7):
-			var x := foot.x + dx
-			var z := foot.z + dz
-			if w.is_void(x, z) or w.ground_at(x, z) < y - 0.05:
-				continue
-			var p := Vector3(x, w.ground_at(x, z), z)
-			if best == Vector3.INF or foot.distance_to(p) < foot.distance_to(best):
-				best = p
-	if best == Vector3.INF:
-		return best
-	return best + (best - foot).normalized() * Vector3(1, 0, 1) * 1.5
+## Standing at a lane's take-off, the quickest way to the far island (by time) is the lane.
+func _routes() -> void:
+	for lk in w.links:
+		if not lk.get("rings", false):
+			continue
+		var hop := BotRoute.plan(w, lk["take"], int(lk["from"]), int(lk["to"]))
+		var what := "a bot at the lane %d>%d's take-off plans the lane (%.1f s)" % [int(lk["from"]), int(lk["to"]),
+			BotRoute.hop_s(lk)]
+		ok(hop.get("rings", false) and hop["take"] == lk["take"], what)
+
+## A bot 3 m off a lift ring's foot (on the far side from the high ground), sent up to it, gets there in
+## time: by the ring, or on foot when the stairs are the quicker way.
+func _bot_lift(rg: Dictionary) -> void:
+	var c: Vector3 = rg["pos"]
+	var onto: Vector3 = rg["onto"]
+	if onto == Vector3.INF:
+		return
+	var away := (Vector3(c.x, 0, c.z) - Vector3(onto.x, 0, onto.z)).normalized()
+	var start := Vector3(c.x, 0, c.z) + away * 3.0
+	start.y = w.ground_at(start.x, start.z)
+	var B: Hunter = m.hunters.filter(func(h): return h != P)[0]
+	_park(P)
+	_reset(B, start)
+	B.ctrl = "bot"
+	B.ai["tgt"] = null
+	B.ai.erase("lift_plan")
+	B.ai.erase("lift_ban")
+	var top_y: float = rg["top"]
+	var n0: int = m.air_rings.n
+	var t := 0.0
+	while t < BOT_LIFT_LIMIT_S and not (B.grounded and B.pos.y >= top_y - 0.05):
+		B.ai["think"] = 1.0
+		B.ai["goal"] = onto
+		B.ai["goal_kind"] = "loot"
+		m.step(Match.DT)
+		t += Match.DT
+	var took := m.air_rings.n > n0
+	bot_lifts += 1 if took else 0
+	var way := "by the ring" if took else "on foot, the quicker way"
+	var what := "a bot below the lift at (%.0f, %.0f) stands on the %.1f m high ground" % [c.x, c.z, top_y]
+	ok(B.grounded and B.pos.y >= top_y - 0.05, "%s in %.1f s (%s)" % [what, t, way])
+	B.ctrl = "idle"
+	_park(B)
