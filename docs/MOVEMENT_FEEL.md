@@ -58,6 +58,10 @@ Nothing here comes from SUPERVIVE's files.
 | ground_stop_dist | 0.10m | 0.31m | 0.27–0.4m | [game data] UE's walking brake slides 0.28–0.39m drawn at 30–144 fps (MOVEMENT_PARITY.md §1) |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
+| ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
+| reverse_vs_source (A to D to 95% run, each of the 12 hunters, over ln(1 + 2Fv/a)/2F + 0.95v/a) | 1.04–1.06x (constant ramp, 0.17–0.22 s) | 0.99–1.02x (0.17–0.20 s) | 0.98–1.03x | [game data] UE walking CalcVelocity, GroundFriction 1 (decision 0022) |
+| cut90_vs_source (90-degree cut to within 10 degrees, over ln(1/tan 5°)/(F + a/v)) | 0.54x (0.12 s) | 1.05–1.06x (0.20–0.25 s) | 0.97–1.10x | [game data] the same; 60 Hz steps add ~5% |
+| cut90_min_speed (slowest point of the cut / run) | 0.71x | 1.0x | >= 0.97x | [game data] UE caps at MaxWalkSpeed: a cut arcs at run speed |
 | speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
 | haste_two_bonus_x (haste 0.35 + kin buff 0.15, speed / plain run) | 1.55x (multiplied) | 1.50x | 1.49–1.51x | [game data] one MoveSpeed attribute: bonuses add (decision 0054) |
 | haste_bonus_slow_x (haste 0.35 under a 40% slow) | 0.81x | 0.81x | 0.80–0.82x | the slow multiplies the hasted total |
