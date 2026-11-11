@@ -30,5 +30,10 @@ ART-1 pipeline (docs/art/wardens/PIPELINE.md steps 5-9). Raw files in ~/meshy/gi
   clips keyed in fistkit (the right fist's `br` points the bill): idle, stance (en garde), walk and run f/b/l/r, rise,
   fall, glide, thrust_a, thrust_b, lunge (the Fencer, KMovesDJ gil_*), hit_f, hit_b, death (knocked down onto his back,
   flops twice). Mapped in content/rules/warden_anim/gil.json; the rest of the rig, mesh, images and materials go out
-  as they came in. The script reruns on its own output.
+  as they came in. The script reruns on its own output (it reads the bill's direction with the rig at rest).
+- **Clips (v3, 2026-11-11):** 16 more, so every state he has is keyed: crouch (idle, sneak f/b/l/r, in, out), land,
+  stun, emote (a fencer's salute, a bow too deep, two giddy bounces), revive (on one knee, fanning the Boki), fuse
+  (mf_xform), and his casts, kit moves with a clip and no procedural keys: toss (Grab Bag, upper while moving), spin
+  (Riptide: five turns on his toes, the longest spin), spout, swim (Ground Swim: a dive, then only the back fin and the
+  tail fork cut the ground), surface, surf (Tidal Wave, side-on on the crest) and wave_land.
 - **Import:** `meshes/generate_lods=false`, `force_disable_compression=true` in gil.glb.import.
