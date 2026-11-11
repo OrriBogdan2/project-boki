@@ -21,6 +21,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
+| `training_panel.gd` (`TrainingPanel`, built by `Arena`) | the Training Grounds's one controls panel, top left: every practice key (K, L, 2-9, Backspace, N, O, U) with its state, Leave, and your DPS / damage dealt; each row is a button; H folds it to one "H Controls" chip |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -113,3 +114,20 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+
+## The Training Grounds (one place)
+
+Owner, 11-11: "i dont like that theres two training grounds, merge it into one" and "ui in the training ground
+is super crowded and stuff repeats too". The title, the farm's expedition footer and the farm's Esc menu all
+open `Match.arena_opts(<your Hunter>)` (the farm through `Home._start_training`; `--training` and
+`--demo=training` too). The generated "practice" island and its opts flag are gone.
+
+| Had | Where | Now |
+|---|---|---|
+| Hand-made map, dummies by a slam block, sparring bot, reset, cooldowns / ult toggles, loadout (L), kit card (K), 2-9 swaps, parity bench | Arena (title) | kept |
+| Duel room pad, crates to break, the gear rack | both (`opts.training`) | kept |
+| Fast ult / E / Boki recharge, tonic refill, wild monsters | island | dropped: cooldowns-off (O) and the dummies cover them |
+| "Try everything" checklist, banner "Nothing can hurt you here · Esc to leave" | island | dropped: the KitDrill banner teaches the kit, the tutorial the moves |
+| Start toast, 3D key sign, top key line, top-right meter, bottom bar (Relics, Loadout, Bench, Leave), HUD "Your kit" panel | both | one `TrainingPanel`; Bench is a switch in the loadout; J still opens the hero picker; K is the kit |
+
+Check: `--arena-check` section "one ground".

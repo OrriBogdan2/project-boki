@@ -6,7 +6,7 @@ extends RefCounted
 
 var bad := 0
 const OPTS := {"teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true,
-		"training": true, "practice": true}
+		"training": true, "arena": true}
 
 func ok(cond: bool, what: String) -> void:
 	print("KITDRILL %s %s" % ["ok  " if cond else "FAIL", what])

@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 	Save.d = d
 	var m := Match.new()
 	main.add_child(m)
-	await m.start(OPTS.duplicate().merged({"training": true, "practice": true}))
+	await m.start(OPTS.duplicate().merged(Match.arena_opts(), true))
 	m.set_process(false)
 	for i in 5: await tree.process_frame
 	_bench(m)
@@ -82,12 +82,17 @@ func _clear_dir(m: Match, D: Hunter) -> Vector2:
 func _bench(m: Match) -> void:
 	var pr := Practice.of(m)
 	var b := ParityBench.of(m)
-	ok(pr != null and b != null and pr.bar_btns.has("bench"), "the Training Area bar has a Bench button")
+	ok(pr != null and b != null, "the Training Grounds has a parity bench")
 	if b == null or pr == null:
 		return
 	ok(not b.is_open(), "the bench starts closed")
-	(pr.bar_btns["bench"] as Button).pressed.emit()
-	ok(b.is_open(), "its button opens the panel")
+	m.arena.open_menu()
+	var btns: Array = m.arena.menu_layer.find_children("*", "Button", true, false)
+	var sw: Array = btns.filter(func(x): return (x as Button).text.begins_with("Parity bench"))
+	ok(sw.size() == 1, "the loadout menu has its switch")
+	if sw.size() == 1: (sw[0] as Button).pressed.emit()
+	m.arena.close_menu()
+	ok(b.is_open(), "its switch opens the panel")
 	ok(b.lines().size() == 1, "nothing selected before a hit: %s" % str(b.lines()))
 	var D: Hunter = m.arena.dummies[0]["h"]
 	var dir := _clear_dir(m, D)

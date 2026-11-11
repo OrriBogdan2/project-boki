@@ -23,7 +23,6 @@ func run(main: Node) -> void:
 	d["classes"] = ClassUnlock.legacy()      # an old save, every Hunter open (the locks: --hunter-unlock-check)
 	Save.d = d
 	var areas := {
-		"training": {"training": true, "practice": true},
 		"arena": Match.arena_opts("gunslinger"),
 		"duel": Match.duel_opts(),
 		"tutorial": {"tutorial": true},
@@ -53,16 +52,22 @@ func _area(main: Node, m: Match, area: String) -> void:
 	var tree := main.get_tree()
 	var P: Hunter = m.player
 	var pr := Practice.of(m)
-	ok(pr != null and pr.bar != null and pr.bar.is_inside_tree(), "%s: the bottom bar exists" % area)
 	if pr == null:
+		ok(false, "%s: the practice kit is attached" % area)
 		return
-	var want: Array = ["hero", "leave"] + (["menu"] if area in ["training", "arena", "duel"] else [])
-	ok(want.all(func(i): return pr.bar_btns.has(i)), "%s: it has %s (%s)" % [area, str(want), str(pr.bar_btns.keys())])
-	ok(m.hud != null and m.hud.ui_extra.has(pr.bar), "%s: the bar owns the mouse (no shooting through it)" % area)
-	# the Hero button opens the picker; J toggles it
-	(pr.bar_btns["hero"] as Button).pressed.emit()
-	await tree.process_frame
-	ok(pr.picker != null and m.paused, "%s: the Hero button opens the picker (the game pauses)" % area)
+	if area == "arena":
+		# the Training Grounds: its controls panel instead of a bar (--arena-check); J opens the picker
+		ok(pr.bar == null, "arena: no bottom bar")
+		await _key(tree, "hero")
+	else:
+		ok(pr.bar != null and pr.bar.is_inside_tree(), "%s: the bottom bar exists" % area)
+		var want: Array = ["hero", "leave"] + (["menu"] if area == "duel" else [])
+		var has_all := want.all(func(i): return pr.bar_btns.has(i))
+		ok(has_all, "%s: it has %s (%s)" % [area, str(want), str(pr.bar_btns.keys())])
+		ok(m.hud != null and m.hud.ui_extra.has(pr.bar), "%s: the bar owns the mouse (no shooting through it)" % area)
+		(pr.bar_btns["hero"] as Button).pressed.emit()      # the Hero button opens the picker; J toggles it
+		await tree.process_frame
+	ok(pr.picker != null and m.paused, "%s: the Hero button (J) opens the picker (the game pauses)" % area)
 	var grid: GridContainer = pr.picker.get_meta("grid")
 	var archs: Array = grid.get_children().map(func(c): return String(c.get_meta("arch", "")))
 	ok(archs.size() == Arch.ORDER.size() and Arch.ORDER.all(func(a): return archs.has(a)), "%s: the picker shows all %d heroes" % [area, Arch.ORDER.size()])

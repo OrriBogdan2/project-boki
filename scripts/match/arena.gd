@@ -1,7 +1,7 @@
 class_name Arena
 extends RefCounted
-## The Arena (opts "arena", map content/maps/arena.json) and the Training Grounds's practice tools
-## (opts "training": the same controller in its "practice" layout, on the training island).
+## The Training Grounds (opts "arena", map content/maps/arena.json; the title and the farm both open it
+## with Match.arena_opts) and its practice tools.
 ##
 ## What it gives you:
 ## - practice dummies (real hunters, so Marks, carries, wall slams and every ability work on them):
@@ -10,17 +10,16 @@ extends RefCounted
 ## - a sparring bot you can switch Off / Idle / Moving / Fighting (N), and give any archetype
 ## - a reset (Backspace; X is the hero ultimate), cooldowns off (O: dash, RMB, E, R and the glove), the ultimate unlocked (U)
 ## - a quick swap without leaving: 2-9 pick one of the first eight archetypes (the loadout lists all); L opens the loadout (archetype, weapon,
-##   Boki, glove, toggles), K the kit card
+##   Boki, glove, toggles, the bot, the parity bench), K the kit card
+## - one controls panel (TrainingPanel, H folds it) with every key, its state and your damage numbers
 ## Nobody dies here: a downed player or bot is back up after a beat.
 
-const KEYS_HINT := "K kit card   ·   L loadout   ·   2-9 first eight Hunters (L: all)   ·   Backspace reset   ·   N bot   ·   O cooldowns   ·   U ultimate"
 const BOT_MODES := ["off", "idle", "moving", "fighting"]
 const BOT_NAMES := {"off": "Off", "idle": "Idle", "moving": "Moving", "fighting": "Fights back"}
 const DUMMY_HP := 3000.0
 const TEAM := 7
 
 var m: Match
-var layout := "arena"          # "arena" (its own map) | "practice" (the training island)
 var home := Vector3.ZERO       # where you start (and reset to)
 var dummies: Array = []        # {h: Hunter, kind, at, label: Label3D, hits: [[t, d]], total, last, quiet}
 var bot: Hunter = null
@@ -35,41 +34,35 @@ var hits_all: Array = []       # [[t, d]] everything you dealt (the session DPS 
 var dealt := 0.0
 var _cb: Callable
 var layer: CanvasLayer = null
-var hint: Label = null
-var meter: Label = null
+var panel: TrainingPanel = null
 var card_layer: CanvasLayer = null
 var menu_layer: CanvasLayer = null
 var keys_node: Node = null
 
-func setup(match_node: Match, which: String) -> void:
+func setup(match_node: Match) -> void:
 	m = match_node
-	layout = which
 	var P: Hunter = m.player
 	if P == null:
 		return
-	if layout == "arena":
-		home = _arena_point(Vector3(26.5, 0, 33.5))
-		P.teleport(home)
-		P.vel = Vector3.ZERO
-		P.face = 0.0
-		m.cam.snap(P.pos)
-	else:
-		home = P.pos
+	home = _arena_point(Vector3(26.5, 0, 33.5))
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	P.face = 0.0
+	m.cam.snap(P.pos)
 	P.unlock_all()
 	_apply_ult()
 	for i in Gloves.SLOTS:
 		gloves[i] = String(P.gear[i].get("id", "")) if not (P.gear[i] as Dictionary).is_empty() else ""
 	_spawn_dummies()
-	bot_at = _arena_point(Vector3(26.5, 0, 19.5)) if layout == "arena" else _free_near(home + Vector3(0, 0, -7.0))
+	bot_at = _arena_point(Vector3(26.5, 0, 19.5))
 	_cb = func(by, t, d, tags): _on_hit(by, t, d, tags)
 	CombatBus.hit_landed.connect(_cb)
-	_build_ui()
-	_sign()
+	layer = CanvasLayer.new()
+	layer.layer = 6
+	m.add_child(layer)
+	panel = TrainingPanel.new(self, layer)
 	keys_node = ArenaKeys.new(self)
 	m.add_child(keys_node)
-	if m.hud:
-		m.hud.guide_hidden = true
-		m.hud.toast(("Arena" if layout == "arena" else "Training") + "  ·  K kit card  ·  L loadout  ·  2-9 first eight Hunters", Color("f3eee2"))
 
 func teardown() -> void:
 	if _cb.is_valid() and CombatBus.hit_landed.is_connected(_cb):
@@ -79,24 +72,16 @@ func teardown() -> void:
 func _arena_point(p: Vector3) -> Vector3:
 	return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
 
-func _free_near(p: Vector3) -> Vector3:
-	var q: Vector3 = m.world.free_spot_near(p, [m.player.pos], 1.2, 0.5, 6.0)
-	q.y = m.world.ground_at(q.x, q.z)
-	return q
-
 # ------------------------------------------------------------------ dummies
 func _spawn_dummies() -> void:
-	var spots: Array
-	if layout == "arena":
-		spots = [["still", Vector3(23.5, 0, 26.5), "light"], ["strafe", Vector3(29.5, 0, 26.0), "medium"], ["heavy", Vector3(30.2, 0, 22.8), "heavy"]]
-	else:
-		spots = [["still", home + Vector3(-2.5, 0, -4.0), "light"], ["strafe", home + Vector3(2.5, 0, -4.5), "medium"], ["heavy", home + Vector3(0, 0, -6.5), "heavy"]]
+	var spots := [["still", Vector3(23.5, 0, 26.5), "light"], ["strafe", Vector3(29.5, 0, 26.0), "medium"], ["heavy", Vector3(30.2, 0, 22.8), "heavy"]]
 	for sp in spots:
-		var at: Vector3 = sp[1]
-		at = _arena_point(at) if layout == "arena" else _free_near(at)
+		var at := _arena_point(sp[1])
 		var D: Hunter = m.make_hunter(m.next_id("dummy"), TEAM, String(sp[2]), {"still": "Dummy", "strafe": "Strafer", "heavy": "Training dummy"}[sp[0]], "idle", {}, at, {"arch": "none"})
-		D.max_hp = DUMMY_HP; D.hp = DUMMY_HP
-		D.armor = 0.0; D.max_armor = 0.0
+		D.max_hp = DUMMY_HP
+		D.hp = DUMMY_HP
+		D.armor = 0.0
+		D.max_armor = 0.0
 		D.lives = 99
 		D.tonics = 0
 		var lb := Label3D.new()
@@ -215,13 +200,13 @@ func tick(dt: float) -> void:
 		if P.ammo < int(P.wpn["mag"]) and P.reload_t <= 0.0 and not P.wpn.get("melee", false): P.ammo = int(P.wpn["mag"])
 	if ult_on and int(P.slot_lv.get("ult", 0)) <= 0:
 		_apply_ult()
-	if P.downed and layout == "arena":
+	if P.downed:
 		P.set_meta("arena_down", float(P.get_meta("arena_down", 0.0)) + dt)
 		if float(P.get_meta("arena_down", 0.0)) > 1.6:
 			P.remove_meta("arena_down")
 			m.revive_hunter(P, null)
 			P.hp = P.max_hp
-	_update_ui()
+	panel.tick(m.hud == null or m.hud.guide_hidden or Record.clean())
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 
 func _apply_ult() -> void:
@@ -329,13 +314,13 @@ func clear_glove(slot: int) -> void:
 func cycle_bot(step := 1) -> void:
 	bot_mode = BOT_MODES[(BOT_MODES.find(bot_mode) + step + BOT_MODES.size()) % BOT_MODES.size()]
 	_spawn_bot()
-	if m.hud: m.hud.toast_small("Sparring bot: %s" % BOT_NAMES[bot_mode], Color("ff9a8a"))
 
 func set_bot_arch(a: String) -> void:
 	bot_arch = a
 	_spawn_bot()
 
 func _spawn_bot() -> void:
+	panel.refresh()
 	if bot and is_instance_valid(bot):
 		m.hunters.erase(bot)
 		if bot.kin:
@@ -353,69 +338,14 @@ func _spawn_bot() -> void:
 
 func toggle_cd() -> void:
 	cd_off = not cd_off
-	if m.hud: m.hud.toast_small("Cooldowns %s" % ("OFF" if cd_off else "on"), Color("9ff0e0"))
+	panel.refresh()
 
 func toggle_ult() -> void:
 	ult_on = not ult_on
 	_apply_ult()
-	if m.hud: m.hud.toast_small("Ultimate %s" % ("unlocked (level 6)" if ult_on else "locked (under level 6)"), Color("ffd27a"))
+	panel.refresh()
 
 # ------------------------------------------------------------------ on screen
-func _build_ui() -> void:
-	layer = CanvasLayer.new()
-	layer.layer = 6
-	m.add_child(layer)
-	var root := Control.new()
-	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layer.add_child(root)
-	hint = UI.label(KEYS_HINT, 13, Color(1, 1, 1, 0.8), UI.big)
-	hint.autowrap_mode = TextServer.AUTOWRAP_OFF
-	hint.add_theme_constant_override("outline_size", 6)
-	hint.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.position.y = 10 if layout == "arena" else 70     # (the Training Grounds's banner sits at the top)
-	hint.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	root.add_child(hint)
-	meter = UI.label("", 15, UI.INK, UI.big)
-	meter.autowrap_mode = TextServer.AUTOWRAP_OFF
-	meter.add_theme_constant_override("outline_size", 6)
-	meter.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
-	meter.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	meter.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	meter.position = Vector2(-330, 120)
-	meter.custom_minimum_size = Vector2(310, 0)
-	root.add_child(meter)
-
-func _update_ui() -> void:
-	if meter == null:
-		return
-	var P: Hunter = m.player
-	var lines := "%s   DPS %d   ·   dealt %d" % [Arch.name_of(P.arch).to_upper() if P.ak else "", int(round(dps_of(hits_all, m.time))), int(round(dealt))]
-	lines += "\nBot: %s   ·   Cooldowns: %s   ·   Ult: %s" % [BOT_NAMES[bot_mode], "OFF" if cd_off else "on", "on" if ult_on else "locked"]
-	if meter.text != lines:
-		meter.text = lines
-
-## A sign by your start: where the kit card and the loadout are.
-func _sign() -> void:
-	var lb := Label3D.new()
-	lb.text = "K  ·  KIT CARD\nL  ·  LOADOUT (Hunter, Boki, 2 gloves)\nBACKSPACE  ·  RESET"
-	lb.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	lb.font = UI.big
-	lb.font_size = 44
-	lb.outline_size = 12
-	lb.pixel_size = 0.008
-	lb.modulate = Color("ffe9b8")
-	var at := home + Vector3(-3.2, 2.2, 1.2)
-	lb.position = at
-	m.add_child(lb)
-	var post := MeshInstance3D.new()
-	post.mesh = Models.box(0.14, 1.6, 0.14)
-	post.material_override = Models.toon(Color("7a5a3a"))
-	post.position = Vector3(at.x, home.y + 0.8, at.z)
-	m.add_child(post)
-
 func _open_card() -> void:
 	_close_card()
 	var P: Hunter = m.player
@@ -572,6 +502,9 @@ func _fill_menu(v: VBoxContainer) -> void:
 	ba.add_child(bl)
 	ba.add_child(UI.button("›", func(): set_bot_arch(String(ids[(ids.find(bot_arch) + 1) % ids.size()])); _fill_menu(v), 44))
 	right.add_child(ba)
+	var bench := ParityBench.of(m)
+	if bench:
+		right.add_child(UI.choice("Parity bench (the dummy you hit last)", bench.is_open(), func(): bench.toggle(); _fill_menu(v), 300))
 
 func _glove_line(slot: int) -> String:
 	var g := String(gloves[slot])

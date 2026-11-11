@@ -1,8 +1,8 @@
 extends RefCounted
 ## --arena-check: the Arena boots on its own map with its practice tools, dummies take damage and
 ## show it, reset works, archetype / weapon / Boki / glove swaps apply, the toggles work, the kit
-## card builds for all six archetypes, the expedition loadout shows the card, and the Training Grounds
-## gets the same tools. Prints ARENACHECK PASS/FAIL.
+## card builds for all six archetypes, the expedition loadout shows the card, and there is one Training
+## Grounds (the farm opens the same place as the title) with one controls panel. Prints ARENACHECK PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -25,8 +25,7 @@ func run(main_node: Node) -> void:
 	await _breaker_whirl()
 	await _cards()
 	await _loadout()
-	printerr("ARENACHECK (training match next)")
-	await _training()
+	await _one_ground()
 	print("ARENACHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -107,7 +106,7 @@ func _arena() -> void:
 	m.set_process(false)
 	var P: Hunter = m.player
 	ok(
-		"arena boots on its own map", m.world.layout_id == "arena" and m.arena != null and m.arena.layout == "arena",
+		"arena boots on its own map", m.world.layout_id == "arena" and m.arena != null,
 		"layout %s" % m.world.layout_id
 	)
 	ok(
@@ -346,36 +345,43 @@ func _arena() -> void:
 	await main.get_tree().process_frame
 	printerr("ARENACHECK (next frame)")
 
-func _training() -> void:
+## One Training Grounds: the farm's way in (its footer button and the Esc menu both call _start_training)
+## opens the Arena's opts as the title does, and the place has one controls panel (no bottom bar, no HUD kit
+## panel) whose rows show the toggles' states and which H folds to a chip.
+func _one_ground() -> void:
+	var g_main = Game.main
+	Game.main = null          # (goto only records the opts)
+	var home: Node = load("res://scripts/home/home.gd").new()
+	home._start_training()
+	home.free()
+	Game.main = g_main
+	var same := Game.match_opts == Match.arena_opts(Arch.of_save())
+	ok("the farm opens the title's Training Grounds", same, str(Game.match_opts))
 	var m := Match.new()
 	main.add_child(m)
-	printerr("ARENACHECK starting the training match")
-	await m.start(
-		{
-			"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
-			"no_drop": true
-		}
-	)
+	await m.start(Game.match_opts)
 	m.set_process(false)
-	printerr("ARENACHECK training match up")
-	var P: Hunter = m.player
-	ok(
-		"training gets the practice tools",
-		m.arena != null and m.arena.layout == "practice" and m.arena.dummies.size() == 3
-	)
-	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)
-	m.arena.set_arch("thief")
-	ok("training: archetype swap", P.arch == "thief")
-	# every ability goes off in training
-	P.inp["aim"] = P.pos + Vector3(3, 0.9, 0)
-	P.ak.use_e()
-	ok("training: E casts", float(P.ak.cd["e"]) > 0.0)
-	P.ak.ch_rmb = 1.0; P.inp["sec_hold"] = false; P.ak.press_rmb()
-	step(m, 0.1)        # a tap fires on release
-	ok("training: RMB casts", P.ak.last_variant != "", P.ak.last_variant)
-	var dsh := P.dashes
-	P.do_dash()
-	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
+	var A: Arena = m.arena
+	var pr := Practice.of(m)
+	ok("one ground: the practice tools and dummies", A != null and A.dummies.size() == 3)
+	ok("one ground: no second bar under the panel", pr != null and pr.bar == null)
+	ok("one ground: the panel owns the mouse", m.hud.ui_extra.has(A.panel.panel))
+	var keys: Array = A.panel.rows().map(func(r): return r[1])
+	var every := ["K", "L", "2-9", "Bksp", "N", "O", "U"].all(func(k): return keys.has(k))
+	ok("one ground: the panel lists every practice key", every, str(keys))
+	A.toggle_cd()
+	A.cycle_bot()
+	var cd_txt: String = A.panel.states["cd"].text
+	var bot_txt: String = A.panel.states["bot"].text
+	var shown := cd_txt == "off" and bot_txt == Arena.BOT_NAMES[A.bot_mode]
+	ok("one ground: the rows show the toggles", shown, cd_txt + " " + bot_txt)
+	m.hud.guide_hidden = false
+	A.tick(DT)
+	ok("one ground: the panel shows (H not pressed)", A.panel.panel.visible and not A.panel.chip.visible)
+	m.hud.guide_hidden = true
+	A.tick(DT)
+	ok("one ground: H folds it to a chip", not A.panel.panel.visible and A.panel.chip.visible)
+	A.teardown()
 	m.queue_free()
 	await main.get_tree().process_frame
 
