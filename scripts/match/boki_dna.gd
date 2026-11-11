@@ -95,11 +95,20 @@ func _grown(muts: Array) -> void:
 	for m in muts:
 		var id := String(m["id"])
 		var k := 1.0 + (int(m["lv"]) - 1) * LEVEL_GROW
-		if id == "tail_long":
-			_grow("tail1", 1.0 + 0.12 * k)
-		_show("part_" + id, k)
+		var bone := part_bone(id, skel)
+		if bone == "tail1":
+			_grow(bone, 1.0 + 0.12 * k)
+		else:
+			_show(bone, k)
 		for extra in PART_EXTRA.get(id, []):
 			_show(String(extra), 1.0)
+
+## The bone a grown part shows on: tail_long stretches the tail (antennae on a body with no tail), the rest have a
+## part_<id> bone of their own.
+static func part_bone(id: String, skeleton: Skeleton3D) -> String:
+	if id != "tail_long":
+		return "part_" + id
+	return "tail1" if skeleton.find_bone("tail1") >= 0 else "part_antennae"
 
 func _show(bone: String, k: float) -> void:
 	var i := skel.find_bone(bone)
