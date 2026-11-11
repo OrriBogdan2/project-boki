@@ -78,6 +78,8 @@ static func how(hunter_id: String, slot: String) -> String:
 	if _again == null:
 		_again = RegEx.create_from_string("(?i)\\b(press|tap|hit|use|click)\\b[^.]{0,20}\\bagain\\b|\\brecast")
 		_hold = RegEx.create_from_string("(?i)\\bhold\\b|\\bheld\\b")
+	if slot in (d.get("clip", {}) as Dictionary).get("holds", []):
+		return "hold"      # the Hunter's JSON says this slot is a charged draw (Lace's bow)
 	if slot == "lmb":
 		return ""
 	if _again.search(text) != null:
