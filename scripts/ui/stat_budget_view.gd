@@ -2,7 +2,7 @@ class_name StatBudgetView
 extends RefCounted
 ## The Boki card's Training tab, stats half (decision 0022): the budget ring (points spent of the total),
 ## one bar per stat on a 0 to 100 scale with marks where the gain bands change and the level cap, and the
-## "next point: N more plays" line.
+## "next point: N more plays" line, and the loose points an Unwind Tea set free.
 
 const RING_PX := 64.0
 const RING_W := 7.0
@@ -22,6 +22,10 @@ static func fill(box: Control, rec: Dictionary) -> void:
 	box.add_child(head)
 	for s in Care.STATS:
 		box.add_child(_row(rec, s))
+	var loose := int(rec.get("loose", 0))
+	if loose > 0:
+		var back := "Loose  %d  ·  they go back into any stat %d a play, past the bands"
+		box.add_child(UI.label(back % [loose, int(StatBudget.rules()["loose_rate"])], UI.T_SMALL, CAP_MARK))
 	var tip := "Train at the yard to raise them. Past 50 points a gain counts half, past 80 a quarter."
 	box.add_child(UI.para(tip, 12, UI.FAINT))
 
