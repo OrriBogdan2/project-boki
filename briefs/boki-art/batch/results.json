@@ -117167,5 +117167,47 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_kingpinguin_ball_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pg_ball_stand",
+    "name": "Pipguin ball body, house style stand",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pg_ball_stand_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pg_ball_roll",
+    "name": "Pipguin ball body, house style roll",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pg_ball_roll_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pg_ball_roll",
+    "name": "Pipguin ball body, house style roll",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pg_ball_roll_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pg_ball_rest",
+    "name": "Pipguin ball body, house style rest",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pg_ball_rest_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pg_ball_rest",
+    "name": "Pipguin ball body, house style rest",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pg_ball_rest_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pg_ball_stand",
+    "name": "Pipguin ball body, house style stand",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pg_ball_stand_2.jpg",
+    "ok": true
   }
 ]
