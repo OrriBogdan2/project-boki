@@ -5,7 +5,7 @@ extends RefCounted
 ##   2. shown once: show() toasts it the first time and never again; mark() (doing the thing first) means
 ##      it never shows; the flags live in the save, so a reload keeps them
 ##   3. the v12 -> v13 migration (run from v11): a save past the old tutorials gets none of their hints, one mid-farm-
-##      tutorial keeps the farm ones
+##      tutorial keeps the farm ones, and every save keeps the expedition ones (not cut steps)
 ##   4. when the farm ones are due (FarmHints.due): out of seeds, holding a crop
 
 const LINE_MAX := 60        # characters: a hint is one short toast line
@@ -38,7 +38,7 @@ func _fresh() -> Dictionary:
 func _data() -> void:
 	Save.d = _fresh()
 	var when: Dictionary = FirstTimeHint.rules().get("when", {})
-	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("farm")
+	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("expedition") + FirstTimeHint.ids("farm")
 	var nm := FirstTimeHint.ids("match").size()
 	var nf := FirstTimeHint.ids("farm").size()
 	ok(nm >= 8 and nf >= 5, "the cut steps are hints: %d match, %d farm" % [nm, nf])
@@ -50,6 +50,8 @@ func _data() -> void:
 	var key := FirstTimeHint.text("key")
 	ok(key.contains(Settings.key_cap("interact")), "keys are the player's own: '%s'" % key)
 	ok(FirstTimeHint.text("orders").contains("Pip"), "the Boki is named: '%s'" % FirstTimeHint.text("orders"))
+	var box := FirstTimeHint.text("deathbox")
+	ok(box.contains(Settings.key_cap("interact")), "the deathbox line names the key: '%s'" % box)
 	ok(FirstTimeHint.text("nope") == "", "an unknown id has no line")
 
 func _once() -> void:
@@ -76,6 +78,8 @@ func _migrate() -> void:
 	var all: Array = FirstTimeHint.ids("match") + FirstTimeHint.ids("farm")
 	ok(all.all(func(id): return FirstTimeHint.seen(String(id))),
 			"past both old tutorials: no hints for what they taught")
+	ok(not FirstTimeHint.ids("expedition").any(func(id): return FirstTimeHint.seen(String(id))),
+			"past both old tutorials: the expedition hints are still to come")
 	var mid := _fresh()
 	mid["v"] = 11
 	mid["tutorial"] = {"hatched": true, "match": true, "ft": {"done": false, "did": {"chop": true}}}

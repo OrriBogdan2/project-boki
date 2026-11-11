@@ -2,15 +2,15 @@ class_name FirstTimeHint
 extends RefCounted
 ## One-time contextual hints: one short line the first time something matters (a chest key in hand, a
 ## skill point, a house short of stone), then never again on that save. They took over the tutorial
-## steps that were cut, and the first Fuse. The words are content/rules/hints.json ("match", "farm" and
-## "bond" groups); which ones
+## steps that were cut, the first Fuse, and first moments of an expedition. The words are
+## content/rules/hints.json ("match", "expedition", "farm" and "bond" groups); which ones
 ## a save has had is Save.d.tutorial.hints {id: true}. Callers decide when (MatchHints, FarmHints) and
 ## how to show it (a match toast, a farm toast); this only makes sure it happens once and words it.
 
 static func rules() -> Dictionary:
 	return Content.rules("hints")
 
-## Every hint id of a group ("match", "farm" or "bond").
+## Every hint id of a group ("match", "expedition", "farm" or "bond").
 static func ids(group: String) -> Array:
 	return (rules().get(group, {}) as Dictionary).keys()
 
@@ -32,7 +32,7 @@ static func mark(id: String) -> void:
 ## The hint's line with the player's own keys and Boki name ("" for an unknown id).
 static func text(id: String) -> String:
 	var raw := ""
-	for g in ["match", "farm", "bond"]:
+	for g in ["match", "expedition", "farm", "bond"]:
 		raw = String((rules()[g] as Dictionary).get(id, raw))
 	if raw.contains("{rank}"):
 		raw = raw.replace("{rank}", TutorialText.rank_combo())

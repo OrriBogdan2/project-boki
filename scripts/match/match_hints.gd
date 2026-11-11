@@ -2,13 +2,15 @@ class_name MatchHints
 extends RefCounted
 ## The match's one-time hints (FirstTimeHint, content/rules/hints.json "match"): the moves and rules the
 ## tutorial no longer stops for, each told in one toast the first time it matters (in the air over the
-## void, a skill point, a chest key in hand, an idle outpost close by...). Match owns one and ticks it.
+## void, a skill point, a chest key in hand, an idle outpost close by...), and the "expedition" ones (the
+## Blight closing in, a first kill, a deathbox in reach) in real matches only. Match owns one and ticks it.
 
 const COL := Color("8fe3c7")
 ## Hints the tutorial match leaves for a real one (its outpost opens by itself and the course is short).
 const REAL_ONLY := ["crouch", "uplink", "defend", "goexit"]
 
 var m: Match
+var _ids: Array           # the hint ids this match may show, in order
 var _poll_t := 0.0
 var _void_t := 0.0
 var _fight_t := -1.0      # s since a foe came close (-1: none close)
@@ -16,6 +18,8 @@ var _last := ""           # the line of the hint shown last, while it may still 
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	var practice: bool = m.tut != null or m.opts.get("training", false)
+	_ids = FirstTimeHint.ids("match") + ([] if practice else FirstTimeHint.ids("expedition"))
 
 func tick(dt: float) -> void:
 	var p: Hunter = m.player
@@ -34,7 +38,7 @@ func tick(dt: float) -> void:
 	_poll_t = float(r["poll_s"])
 	if _hint_up() or (_fight_t >= 0.0 and _fight_t < float(r["fight_quiet_s"])):
 		return      # one line on screen at a time, and none in the first seconds of a fight
-	for id in FirstTimeHint.ids("match"):
+	for id in _ids:
 		if FirstTimeHint.seen(id) or (m.tut != null and id in REAL_ONLY):
 			continue
 		if _due(String(id), p, r):
@@ -68,6 +72,9 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"uplink": return _outpost(p, "idle", float(r["outpost_m"]))
 		"defend": return _outpost(p, "charging", float(r["outpost_m"]))
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
+		"blight": return _tide_near(p, float(r["blight_m"]))
+		"camp": return int(p.stats.get("mobs", 0)) > 0
+		"deathbox": return String(m.interact.get("kind", "")) == "loot"
 	return false
 
 ## The last hint is still on the lane, or something waits behind it (a hint never stacks on another).
@@ -76,6 +83,11 @@ func _hint_up() -> bool:
 		return false
 	_last = _last if m.hud.msgs.waiting() > 0 or m.hud.msgs.texts().any(func(t): return t.contains(_last)) else ""
 	return _last != ""
+
+## The Blight's ring is closing and its edge is within `dist` of you (or you are out in it).
+func _tide_near(p: Hunter, dist: float) -> bool:
+	var tr := Heart.tide_r(m)
+	return tr > 0.0 and p.flat_dist(m.heart.site) > tr - dist
 
 ## A foe is close or has picked you out.
 func _fight_on(p: Hunter, dist: float) -> bool:
