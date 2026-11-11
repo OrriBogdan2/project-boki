@@ -1,7 +1,8 @@
 extends RefCounted
-## --dot-soft-shots --shots-dir=<dir> [--dot-hard]: the shared fx_dot particles of three kits (Juggernaut, Archer, Claire)
-## landing on the ground, seen from a low camera: <dir>/dots_a.png (just landing) and dots_b.png (settling). --dot-hard
-## turns the fade off (soft_m ~ 0), the look before the soft dots, for the before shot. Needs a renderer (xvfb or GPU).
+## --dot-soft-shots --shots-dir=<dir> [--dot-hard]: the shared fx_dot particles of three kits (Juggernaut, Archer,
+## Claire) landing on the ground, seen from the match camera: <dir>/dots_a.png (just landing) and dots_b.png
+## (settling). --dot-hard turns the fade off (soft_m ~ 0), the look before the soft dots, for the before shot.
+## Needs a renderer (xvfb or GPU).
 
 const KITS := ["juggernaut", "archer", "rimewright"]
 const SPREAD := 2.2           # m between the kits' bursts
@@ -40,7 +41,8 @@ func run(main_node: Node) -> void:
 	for i in KITS.size():
 		var pal: Dictionary = HeroVfx.data(KITS[i])["palette"]
 		var at := spot + Vector3((i - 1) * SPREAD, 0.0, 0.6)
-		m.fx.burst(Vector3(at.x, ground + 0.15, at.z), Color(String(pal["main"])), 70, 2.4, LIFE, 14.0, 2.4, Vector3.UP, 75.0)
+		var col := Color(String(pal["main"]))
+		m.fx.burst(Vector3(at.x, ground + 0.15, at.z), col, 70, 2.4, LIFE, 14.0, 2.4, Vector3.UP, 75.0)
 	await _frames(FRAMES_A)
 	_take("dots_a")
 	await _frames(FRAMES_B)

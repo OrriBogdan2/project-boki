@@ -54,10 +54,9 @@ top of the signature colour. Any new hard-coded colour in a kit needs a comment 
 | `Fx.bolt` drew flat glow boxes that popped off | segments are fading `beam`s |
 | Tenzo's kit hard-coded molten red/orange | recoloured to cobalt in `dolm_kit`, `breah_*`, `rock_look` (FX only; the rock body stays sandstone) |
 | The reel had no held-LMB part | `hold` part in `tools/hero_vfx_reel.gd` |
+| `fx_dot` particles cut hard into the ground | `FxDot.material()` is the one material: Forward+ and Mobile fade by the depth behind the dot, gl_compatibility and the Low presets by height above the ground under the burst (no depth copy); `--dot-soft-shots`, shots in `docs/shots/dot-soft/` |
 
 Still open (shared, not done here):
-- `fx_dot` particles are `blend_mix` and have no soft-particle depth fade, so they clip hard into the ground. A depth fade
-  breaks gl_compatibility, so it needs a mobile fallback.
 - Kits hard-code a shared gold (`ffd25a` and near) for flashes: bulwark, thief, dolm, tender. Move these to slot colours.
 - `AbilityFx.CAT` damage `#ff7a3d` and `KinRules.CAT_COLORS` damage `#ff7a52` still colour Boki/generic casts. That's right
   for Boki; check that no Hunter path reaches them.
