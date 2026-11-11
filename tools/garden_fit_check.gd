@@ -45,6 +45,10 @@ func run(m: Node) -> void:
 	nav._save()
 	_dress_save()
 	home = await nav._open_home()
+	ok(not home.hg.demo_place("training_post", HomeLayout.LANDING + Vector3(5.0, 0, 3.0)).is_empty(),
+			"a Training post placed (the picker lists its games)")
+	await _frames(2)
+	ok(not MinigameHub.listed(home).is_empty(), "the picker has games to list")
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	for row in SIZES:
@@ -70,7 +74,7 @@ func _frames(n: int) -> void:
 	for i in n:
 		await main.get_tree().process_frame
 
-## Six Boki, two Grown friends (the first with a record of parents), a Dash winner on the wall.
+## Six Boki, two Grown friends (the first with a record of parents), three with wishes, a Dash winner on the wall.
 func _dress_save() -> void:
 	var roster: Array = Save.d["roster"]
 	for i in 2:
@@ -78,11 +82,17 @@ func _dress_save() -> void:
 		roster[i]["trust"] = 60.0
 	roster[0]["lineage"] = {"parents": [], "names": ["Pennyroyal the Wandering", "Bartholomew-Longname"], "gen": 3,
 			"nest": {"gifts": 2, "species": true, "habit": true}}
+	for i in range(2, 5):
+		for n in roster[i]["needs"]:
+			roster[i]["needs"][n] = 5.0
+	Save.d.erase("wishes")
 	Save.d["showcase"] = [{"name": "Pennyroyal the Wandering", "date": "day 12", "twist": "Low-gravity gust week"}]
 
 func _wishes() -> void:
 	var v: VBoxContainer = home._new_panel("Today's wishes", 520)
-	GardenWishes.fill(v, GardenWishes.today(Time.get_unix_time_from_system()))
+	var w := GardenWishes.today(Time.get_unix_time_from_system())
+	ok(not w["list"].is_empty(), "the wishes card has wishes")
+	GardenWishes.fill(v, w)
 
 func _nook() -> void:
 	home.nook_pick = [Save.d["roster"][0]["uid"], Save.d["roster"][1]["uid"]]
