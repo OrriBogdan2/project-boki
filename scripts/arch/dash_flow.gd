@@ -8,7 +8,9 @@ extends RefCounted
 ## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
 ## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md).
 
-const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
+## s: a held press waits at most this long past a dash's end (or a CC's end) while the hunter can't act. One frame
+## of the 5 fps source footage: every chain there has the follow-up on the first frame after the dash.
+const BUFFER_S := 0.2
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
 const MODES := ["fire", "buffer", "cancel"]
 ## The one-step Hunter.inp press each slot reads. LMB is the held "fire" key; X comes in through HunterKeys.
