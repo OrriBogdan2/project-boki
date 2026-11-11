@@ -289,7 +289,8 @@ func set_muffle(on: bool) -> void:
 ## Tooling (--match-audio-check): the muffle as the bus has it right now.
 func muffle_state() -> Dictionary:
 	var bus := AudioServer.get_bus_index("SFXWorld")
-	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus), "hz": _muffle_fx.cutoff_hz}
+	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus),
+			"hz": _muffle_fx.cutoff_hz}
 
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
