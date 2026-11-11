@@ -200,6 +200,11 @@ func _tender_support() -> void:
 	ok("Carrier: a hit drops them with a 4s lock and no stun on you",
 		carried_third and not CareUtil.is_carried(A) and K.lock_t > 3.0 and P.stun_t <= 0.0,
 		"lock %.1f stun %.2f" % [K.lock_t, P.stun_t])
+	var pd: Dictionary = K.d["passive"]
+	var kd: Dictionary = K.res_def()
+	ok("Carrier numbers: lock 4s (data), 2 carried, Kindle 5 stacks for 4s, no carry-slow key",
+		absf(float(pd["lock"]) - 4.0) < 0.001 and int(pd["max"]) == 2 and int(kd["max"]) == 5
+		and absf(float(kd["dur"]) - 4.0) < 0.001 and not pd.has("pick_speed"), "%s %s" % [pd, kd])
 	# --- the drop set: a stun or any damage; a root or a hex holds; 4s no re-pick
 	P.stun_t = 0.0
 	K.lock_t = 0.0

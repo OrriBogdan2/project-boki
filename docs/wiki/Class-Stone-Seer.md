@@ -48,7 +48,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 16m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
+**Molten Guard (passive).** Molten Guard: a punch that sends any of your rocks flying gives you a shield of 18, up to 4 stacks for 6s (one stack per punch, however many rocks it throws). Tremor Sense: while sneaking, a narrow cone ahead (25 degrees, widening to 40 over 2s of sneaking, 18m long) shows every enemy in it through walls and fog as a molten ring, refreshed every half second.
 
 **Rock Hop (dash, Shift, 12s cooldown).** A rock bursts up under you and you spring off it toward the cursor, about 2.5m. A fresh rock rises under your feet at each landing and you skid along it, skateboard style. Press again within 0.6s of a take-off to hop on toward the cursor, up to 3 hops; press nothing and you land. Each landing nudges whoever is beside you. The last one crashes (8 damage and a shove), and a rock rolls on 6m: 12 damage, a shove, Shred (+15% damage taken for 3s) and a 1.5s slow. Rocks crumble in a moment, allies can hop them, and a hop crosses the abyss only if ground lies within your hops left. The cooldown starts when the chain ends. In the air: your long dash.
 

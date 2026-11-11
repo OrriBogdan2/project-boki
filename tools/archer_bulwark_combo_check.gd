@@ -479,6 +479,11 @@ func _archer_combos() -> void:
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
 	_hawk_sense(m, P, T, lv)
+	var hk: Dictionary = K.res_def()
+	ok("combo archer: Hawk Sense under 50% health within 22m [?], tall ledges climbed (data)",
+		absf(float(hk["sense_hp"]) - 0.5) < 0.001 and absf(float(hk["sense_r"]) - 22.0) < 0.001
+		and HunterMove.climbs_tall(P),
+		str(hk))
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world
 	var bx := int(home.x) + 3

@@ -94,6 +94,8 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | R | Invulnerable, strike back, heal, kill resets, 45 s [D] | Riposte: guard .65, strike .1, recover .35, heal, cd 36 | match in shape; kill reset `[?]` |
 | Dash | Dash attack, charges, 13 s [D] | 0.07 s dip, then 4.5 m/.17 s raw (owner 113.8), ×.85/×1.15 feel: felt 3.8 m/.2 s (F ~2 bh/.2 s), 2 charges, cd 10.4 | differ (owner) |
 | Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s, heal_knock .2 | match in shape |
+| Dash | Dash attack, charges, 13 s [D] | 4.5 m/.3 s raw, ×.85/×1.15 feel, 2 charges, cd 10.4 | match; dist scaled |
+| Passive | Damage empowers; heal on knock [D] | Rage, Enrage 6 s [?], heal_knock .2 | match in shape |
 | Anim | Full set | **20 moves. `kael.glb` has 0 clips and no `warden_anim/kael.json`: stays on procedural HunterAnim** | **missing** (gap 1) |
 
 ## Hem (`archer`, source Myth) · slice Warden
