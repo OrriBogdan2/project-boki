@@ -5,6 +5,8 @@ extends RefCounted
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -33,6 +35,7 @@ func run(main_node: Node) -> void:
 	await abyss.dredge()
 	n += abyss.n
 	fails += abyss.fails
+	await _ally("dredge")
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -49,6 +52,11 @@ func _throw(m: Match, P: Hunter) -> void:
 		ak.step(m, ak.DT)
 		tw += ak.DT
 	ak.step(m, ak.DT)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 ## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
 ## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.

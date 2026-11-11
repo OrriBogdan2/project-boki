@@ -9,6 +9,7 @@ var ac: RefCounted
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -33,6 +34,7 @@ func run(main_node: Node, who: String) -> void:
 		await parity.vireo()
 		n += parity.n
 		fails += parity.fails
+		await _ally("mage")
 	else:
 		await _gunslinger()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gunslinger")
@@ -42,8 +44,14 @@ func run(main_node: Node, who: String) -> void:
 		await abyss.gunslinger()
 		n += abyss.n
 		fails += abyss.fails
+		await _ally("gunslinger")
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 func _wall(m: Match, p: Vector3) -> void:
 	var W = m.world
