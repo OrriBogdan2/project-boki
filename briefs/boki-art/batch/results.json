@@ -112633,5 +112633,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_blastopuff_rc_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_barokit_rc",
+    "name": "Barokit (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_barokit_rc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_barokit_rc",
+    "name": "Barokit (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_barokit_rc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_female_rc",
+    "name": "Hourachnid_female (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_female_rc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_female_rc",
+    "name": "Hourachnid_female (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_female_rc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_barokit_rc",
+    "name": "Barokit (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_barokit_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_female_rc",
+    "name": "Hourachnid_female (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_female_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_barokit_rc",
+    "name": "Barokit (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_barokit_rc_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_hourachnid_female_rc",
+    "name": "Hourachnid_female (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_hourachnid_female_rc_4.jpg",
+    "ok": true
   }
 ]
