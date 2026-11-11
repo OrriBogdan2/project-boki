@@ -119,6 +119,8 @@ func fresh(T: Hunter) -> void:
 	# hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
 	T.armor_tier = 0
 	T.armor_xp = 0.0
+	T.armor = 0.0   # a tier-up from earlier hits left Common armor on the body, taking 20% off the next hit
+	T.max_armor = 0.0
 	T.set_meta("marks", {})
 
 func dmg(T: Hunter) -> float:
