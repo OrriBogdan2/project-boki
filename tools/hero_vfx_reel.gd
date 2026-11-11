@@ -11,7 +11,7 @@ extends "res://tools/combo51_shots.gd"
 ## box (jobq's GPU worker returns the out dir, not a movie): ffmpeg -framerate 60 -i <dir>/frames/%05d.jpg ...
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice",
-		"tether_hold", "e_rmb_e", "slam_drive"],
+		"tether_hold", "e_rmb_e", "slam_drive", "dash_chain", "jump_shift_glide", "air_dash"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
 	"dredge": ["lmb", "hold", "rmb", "hook", "dash", "e", "r"]}
 const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
@@ -362,6 +362,56 @@ func _juggernaut_slam_drive() -> void:
 	await _go(1.8, drive, _sheet("slam_drive",
 			"Shift in the Slam's wind-up: the Slam Drive down the locked lane, the Slam lands where it arrives",
 			[0.2, 0.3, 0.42, 0.56, 0.76, 0.95, 1.1, 1.3, 1.6]), 3.0)
+	await _go(GAP)
+
+## The dummy off the lane and Kael 7m back from the island's middle, room to run, dash and glide toward +x.
+func _back_up() -> void:
+	await _reset(6.0, 14.0)
+	P.teleport(home + Vector3(-7.0, 0, 0))
+	await _go(0.3)
+
+## Running, Shift twice: two Rampages back to back, the run carrying into each and out of the last.
+func _juggernaut_dash_chain() -> void:
+	await _back_up()
+	var chain := func(t: float):
+		P.inp["move"] = Vector2(1, 0) if t > 0.1 and t < 1.25 else Vector2.ZERO
+		if _at(t, 0.5) or _at(t, 0.8):
+			P.do_dash()
+		_aim(P.pos + Vector3(8, 0, 0))
+	await _go(2.4, chain, _sheet("dash_chain", "Running, Shift, Shift: two Rampages, no stop in or out",
+			[0.45, 0.55, 0.65, 0.75, 0.85, 0.95, 1.1, 1.4, 2.0]), 2.0)
+	await _go(GAP)
+
+## Running, Space, Shift at the top, Space again: the glider opens at the drive's speed and carries it.
+func _juggernaut_jump_shift_glide() -> void:
+	await _back_up()
+	P.inp["glide_press_only"] = true          # (a player's keys: only a fresh Space press opens the glider)
+	var chain := func(t: float):
+		P.inp["move"] = Vector2(1, 0) if t > 0.1 else Vector2.ZERO
+		P.inp["jump"] = _at(t, 0.4) or _at(t, 0.72)
+		P.inp["glide"] = (t > 0.39 and t < 0.5) or t > 0.71        # (Space held from each press on)
+		if _at(t, 0.6):
+			P.do_dash()
+		_aim(P.pos + Vector3(8, 0, 0))
+	await _go(2.6, chain, _sheet("jump_shift_glide", "Run, jump, Shift, Space: the glide carries the dash's speed",
+			[0.45, 0.6, 0.66, 0.72, 0.8, 1.0, 1.4, 1.9, 2.5]), 2.0)
+	P.inp["glide"] = false
+	P.inp["glide_press_only"] = false
+
+## Running, a jump with Space let go, Shift at the top: the air Rampage with no glider out at any point.
+func _juggernaut_air_dash() -> void:
+	await _back_up()
+	P.inp["glide_press_only"] = true
+	var chain := func(t: float):
+		P.inp["move"] = Vector2(1, 0) if t > 0.1 and t < 1.2 else Vector2.ZERO
+		P.inp["jump"] = _at(t, 0.4)
+		P.inp["glide"] = t > 0.39 and t < 0.5
+		if _at(t, 0.6):
+			P.do_dash()
+		_aim(P.pos + Vector3(8, 0, 0))
+	await _go(2.0, chain, _sheet("air_dash", "Jump, Shift with Space let go: the air Rampage, no glider",
+			[0.5, 0.6, 0.65, 0.7, 0.75, 0.8, 0.9, 1.1, 1.4]), 2.0)
+	P.inp["glide_press_only"] = false
 	await _go(GAP)
 
 ## The sounds with no key of their own: footsteps by surface, the hurt grunts and the downed grunt.
