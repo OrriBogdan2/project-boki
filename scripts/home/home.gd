@@ -60,6 +60,7 @@ var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mod
 var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base_mode only
 var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
+var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
@@ -169,9 +170,10 @@ func _ready() -> void:
 		hshove = BaseShove.new(self)
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
+		hecho = EchoSteps.new(self)
 		hfish = GlintFishing.new(self)
 		htumble = BaseTumble.new(self)
-		games = [hrace, hshove, hseek, hvolley, htumble, hfish]     # in this order: Tumble's ring needs the stump placed
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hfish]     # in this order: Tumble's ring needs the stump placed
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -1214,7 +1216,8 @@ func _move_player(d: float) -> void:
 		_climb_step(d)
 		return
 	var mv := Vector2.ZERO
-	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
+	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() \
+			and not (hecho and hecho.run)
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
@@ -2217,6 +2220,7 @@ func _label_for(it: Dictionary) -> String:
 		"volley": return hvolley.label()
 		"fishing": return hfish.label()
 		"tumble": return htumble.label()
+		"echo": return hecho.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2259,6 +2263,7 @@ func _use(it: Dictionary) -> void:
 		"fishing": hfish.use()
 		"waystone": hway.use()
 		"tumble": htumble.use()
+		"echo": hecho.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
