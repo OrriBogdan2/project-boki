@@ -11,6 +11,8 @@ const TITLE := "Relics"
 const RANK := ["ready", "open", "progress", "locked"]
 const TILE_W := 140.0          # px, one Hunter tile
 const TILE_COLS := 3
+const NAME_W := TILE_W - 62.0   # px a tile's name has: the tile less its portrait, the gap and the padding
+const NAME_MIN_PX := 12         # the smallest a long tile name shrinks to
 const LEFT_W := TILE_W * TILE_COLS + 16.0      # px, the tiles with their gaps: mastery and the glider pick match it
 const STAGE := Vector2(180, 240)
 const CLIP := Vector2(150, 84)        # px: each ability clip beside the turntable
@@ -93,8 +95,9 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	c.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(c)
-	var name_label := UI.label(Arch.name_of(id), 14, col if st in ["open", "ready"] else UI.FAINT, UI.big)
-	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # ("The Barnacle Knight" wraps; it used to be cut)
+	var nm := Arch.bare_title(id)      # ("Barnacle Knight": the viewer's card gives the full name)
+	var name_label := UI.label(nm, _name_px(nm), col if st in ["open", "ready"] else UI.FAINT, UI.big)
+	name_label.autowrap_mode = TextServer.AUTOWRAP_OFF      # one line, so every tile in a row is the same height
 	c.add_child(name_label)
 	var cur := id == Arch.of_save()
 	match st:
@@ -104,14 +107,20 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 			var gp := ClassUnlock.challenge_progress(id)
 			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
 					ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
-			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, TILE_W - 56.0, 5.0)
-			gb.set_meta("tile_bar", id)
-			c.add_child(gb)
+			if st == "progress":      # (no empty bar on a tile that hasn't started)
+				c.add_child(UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, TILE_W - 56.0, 5.0))
 	card.tooltip_text = ClassCard.kit_tip(id)
 	if st != "open": card.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id)) + card.tooltip_text
 	if st == "locked": card.modulate = Color(0.62, 0.62, 0.68, 0.9)
 	elif st == "progress": card.modulate = Color(0.82, 0.82, 0.88, 0.96)
 	return card
+
+## A tile name's size: 14, a point or two smaller for a long title so it stays on one line.
+static func _name_px(nm: String) -> int:
+	var px := 14
+	while px > NAME_MIN_PX and UI.big.get_string_size(nm, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > NAME_W:
+		px -= 1
+	return px
 
 ## Under the viewer: Play it, hold to unlock it, or what it still needs.
 static func _actions(home: Node, id: String, viewer: HunterViewer) -> Control:
