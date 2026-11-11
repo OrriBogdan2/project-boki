@@ -185,3 +185,7 @@ So: for any design change, queue several directions (3-4 x 2 runs), show ONE lab
 Open from 11-11: back-scenery rework (Terrarimit, Mosstodon/Mossbastion, Vatmander/Cisternmander, Crofthollow, Briarlynx shave, Soakybara + Geyserbara water ideas; ids opt_<id>_<k>_bk, shave_briarlynx_*).
 Cairnback held back (3D model in game; its ability throws its cairn stones). Kestrike female (fopt_kestrike_line_1) and Pavonazar female (fopt_pavonazar_ring_2) are proposed, not live.
 Crofthorn (earlier form) and Dribbara (baby) follow whatever is picked for their finals.
+
+### OWNER RULE 11-11: how to show options (applies to every session and every agent asking his opinion)
+Show ONE image per decision round, one row per Boki: NOW (current) -> 1st -> 2nd -> 3rd, left to right, big clear labels and names,
+your favourite first. Do not show him every try in a grid; the full grid is for your own review. He picks; nothing goes live before that.
