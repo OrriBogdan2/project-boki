@@ -186,7 +186,6 @@
 },
 "scripts/core/sfx.gd": {
 "long_line": 5,
-"semicolon": 3,
 "shadow": 3
 },
 "scripts/core/shiny.gd": {

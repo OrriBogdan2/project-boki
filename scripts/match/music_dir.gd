@@ -5,11 +5,13 @@ extends RefCounted
 ## or got hit lately, or a rival is close and in sight), the boss stem inside a woken boss's arena,
 ## and the clock stem while extracting or when the islands are about to fall. Three stingers mark the
 ## run: the last squad standing (you are in it), and the run's end (out, or taken out), each with the
-## stems falling away under it. Reads the match, never changes it.
+## stems falling away under it. The ambience follows the place (_ambience: each region's own bed) and
+## sinks under a fight. Reads the match, never changes it.
 
 const FIGHT_HOLD := 7.0       # seconds the fight music hangs on after the last shot traded
 const RIVAL_NEAR := 13.0
 const UNDER := 0.15           # how much of the stems is left while a sting plays
+const BED_FADE := 3.0         # s: one region's ambience bed crossfading into the next
 var heat := 0.0               # 0..1, how much of a fight is going on
 var last_fight := -99.0
 var last_done := 0.0
@@ -24,9 +26,9 @@ func start(m: Match) -> void:
 	started = true
 	Sfx.play_layers("match", {"calm": 1.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 
-## Ambience by place, every quarter second: wind howling up from the abyss as you near an edge (or
-## glide over it), the creak and grit of the old ruins among their walls, and now and then a
-## creature calling from somewhere out of sight.
+## Ambience by place, every quarter second: the region's own bed, wind howling up from the abyss as
+## you near an edge (or glide over it), the creak and grit of the old ruins among their walls, and now
+## and then a creature calling from somewhere out of sight.
 var amb_t := 0.0
 var call_t := 12.0
 var rng := RandomNumberGenerator.new()
@@ -52,6 +54,7 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 	if w.is_void(p.pos.x, p.pos.z) or p.gliding or p.dropping: abyss = 1.0
 	Sfx.amb_layer("abyss", abyss)
 	Sfx.amb_layer("ruins", clampf(float(walls) / 6.0, 0.0, 1.0))
+	_region_bed(m, p)
 	call_t -= 0.25
 	if call_t <= 0.0:
 		call_t = rng.randf_range(16.0, 34.0)
@@ -59,6 +62,41 @@ func _ambience(m: Match, p: Hunter, dt: float) -> void:
 			var a2 := rng.randf() * TAU
 			var at := p.pos + Vector3(cos(a2), 0, sin(a2)) * 15.0
 			Sfx.play(CALLS[rng.randi() % CALLS.size()], at, 3.0, 0.05, rng.randf_range(0.45, 0.62))
+
+## Each region of an authored map has its own low bed (its "bed" in the layout's regions, an
+## audio/amb_<bed>.ogg): wind on the heights, water by the shore isles, insects in the wood, the hum
+## round the Heart. The ground under you picks it; Sfx.play_ambience crossfades (two players, so at most
+## two beds sound). In the drop, on a bridge or over the void the last bed holds (the match wind until
+## you first land); a map without regions keeps the match wind.
+func _region_bed(m: Match, p: Hunter) -> void:
+	if m.biomes == null or p.dropping:
+		return
+	var ri := m.biomes.hot.region_at(p.pos)
+	var bed := String(m.world.regions[ri].get("bed", "")) if ri >= 0 else ""
+	if bed != "":
+		Sfx.play_ambience(bed, BED_FADE)
+
+## How much of a fight is going on (heat, 0..1): you hit or got hit lately, or a rival is close and in
+## sight. It drives the drive stem and sinks the ambience beds; it holds while you drop or ride, never
+## rises in training or the tutorial, and settles once you are out.
+func _fight(m: Match, p: Hunter, dt: float) -> void:
+	if not _scored(m, p):
+		return
+	var want := 0.0
+	if not p.out and not p.extracted:
+		if p.dmg_done > last_done + 0.5 or m.time - float(p.hurt_at) < 0.6:
+			last_fight = m.time
+		last_done = p.dmg_done
+		var rival := false
+		for h in m.hunters:
+			if h.team != p.team and not h.out and not h.extracted and not h.unseen and p.flat_dist(h) < RIVAL_NEAR:
+				rival = true; break
+		want = 1.0 if m.time - last_fight < FIGHT_HOLD else (0.65 if rival else 0.0)
+	heat = move_toward(heat, want, dt * (2.0 if want > heat else 0.25))
+
+## The score follows play only out on the islands: not in training or the tutorial, the drop or a ride.
+func _scored(m: Match, p: Hunter) -> bool:
+	return not (m.opts.get("training", false) or m.opts.get("tutorial", false)) and not p.dropping and not p.riding
 
 ## The last squad standing is yours (Exits.on_last_team): one sting, once.
 func last_squad() -> void:
@@ -76,6 +114,8 @@ func tick(m: Match, dt: float) -> void:
 			Sfx.sting("extract" if m.result.get("extracted", false) else "out")
 		Sfx.set_layers({"calm": 0.0, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 		return
+	_fight(m, p, dt)
+	Sfx.duck_ambience(heat)
 	if not p.out and not p.extracted:
 		_ambience(m, p, dt)
 	if not started:
@@ -84,16 +124,7 @@ func tick(m: Match, dt: float) -> void:
 	if p.out or p.extracted:
 		Sfx.set_layers({"calm": 0.7, "drive": 0.0, "boss": 0.0, "extract": 0.0})
 		return
-	if not (m.opts.get("training", false) or m.opts.get("tutorial", false)) and not p.dropping and not p.riding:
-		if p.dmg_done > last_done + 0.5 or m.time - float(p.hurt_at) < 0.6:
-			last_fight = m.time
-		last_done = p.dmg_done
-		var rival := false
-		for h in m.hunters:
-			if h.team != p.team and not h.out and not h.extracted and not h.unseen and p.flat_dist(h) < RIVAL_NEAR:
-				rival = true; break
-		var want := 1.0 if m.time - last_fight < FIGHT_HOLD else (0.65 if rival else 0.0)
-		heat = move_toward(heat, want, dt * (2.0 if want > heat else 0.25))
+	if _scored(m, p):
 		drive = heat
 		if m.lairs and bool(m.lairs.get("music_on")):
 			boss = 1.0; drive = maxf(drive, 0.8); calm = 0.6
