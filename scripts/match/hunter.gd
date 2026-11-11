@@ -1790,6 +1790,7 @@ func heal(n: float) -> void:
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
 var drink_id := "tonic"        # which belt drink is being drunk (its length: UtilityUse.channel(id, "time"))
+var float_t := 0.0             # s left hanging in the air while a Cloud Raft forms under you (UtilityUse)
 var kit_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
@@ -2125,6 +2126,8 @@ func _physics(dt: float) -> void:
 	_update_glide(dt)
 	if not lfloat.is_empty() and _ledge_rise(dt, mv):
 		pass   # rising up a ledge's face (sets vel.y; your keys steer as in any jump)
+	elif float_t > 0.0:
+		vel.y = 0.0   # held up while a Cloud Raft forms (UtilityUse)
 	elif gliding and in_current:
 		pass   # the current sets the height
 	elif gliding and not dropping and below_lip:      # overheated: still lifts, at half strength, while it burns
