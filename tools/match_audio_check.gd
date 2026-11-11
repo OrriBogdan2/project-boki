@@ -60,6 +60,7 @@ func run(main_node: Node) -> void:
 	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
 	m.music_dir.beds.tick(m, P)
 	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
+	_belt_items(m, P)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -170,6 +171,41 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 	Sfx.last_played.erase(cue)
 	g.tick(h)
 	ok(first and not Sfx.last_played.has(cue), what)
+## Every belt item makes its own start cue at the user; the tonic and the armour kit loop while they channel and
+## then play their end cue, or the cancel cue when spilt (BeltSfx, content/rules/belt_sfx.json).
+func _belt_items(m: Match, P: Hunter) -> void:
+	Sfx.listener = P.pos
+	for id in BeltSfx.items():
+		var start := BeltSfx.cue(id, "start")
+		Sfx.last_played.erase(start)
+		UtilityBelt.set_slot(P, 0, id, 3, 0)
+		UtilityUse.start(P, 0, id)
+		ok(Sfx.last_played.has(start), "belt %s: heard at its start cue %s" % [id, start])
+		if not BeltSfx.cue(id, "loop").is_empty():
+			_belt_channel(m, P, id)
+		_step(m, 0.3)
+		P.drink_t = 0.0
+		P.kit_t = 0.0
+		Sfx.loop_stop(BeltSfx.loop_key(P, id))
+
+func _belt_channel(m: Match, P: Hunter, id: String) -> void:
+	var key := BeltSfx.loop_key(P, id)
+	_step(m, 0.1)
+	ok(Sfx.loop_on(key), "belt %s: loops while it channels" % id)
+	Sfx.last_played.erase(BeltSfx.cue(id, "end"))
+	_step(m, Hunter.KIT_TIME + 0.1)
+	ok(not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "end")), "belt %s: ends with its end cue" % id)
+	UtilityBelt.set_slot(P, 0, id, 3, 0)
+	P.hp = 20.0
+	P.armor = 0.0
+	UtilityUse.start(P, 0, id)
+	_step(m, 0.1)
+	Sfx.last_played.erase(BeltSfx.cue(id, "cancel"))
+	P.stun_t = 1.0
+	_step(m, 0.1)
+	var spilt := not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "cancel"))
+	ok(spilt, "belt %s: a spill plays its cancel cue" % id)
+	P.stun_t = 0.0
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
