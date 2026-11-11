@@ -302,14 +302,14 @@ func _zone(secs: float) -> void:
 	var z := m.zone
 	var fc := z.cs[z.last()]
 	var mid := Vector2(m.world.w, m.world.h) * 0.5
-	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.6
+	var at := fc + (mid - fc).normalized() * z.rs[z.last()] * 0.85
 	m.player.teleport(_ground(Vector3(at.x, 0, at.y)))
-	m.time = z.t0[1] - 8.0
-	var warp := (z.t1[z.last()] + 4.0 - m.time) / secs
+	var from := z.t0[1] - 8.0
+	var warp := (z.t1[z.last()] + 4.0 - from) / secs
 	m.hud.full_map.open()
 	still_at = secs * 0.35
 	await _go(secs, func(t: float):
-		m.time += (warp - 1.0) * FRAME      # (the steps add the rest)
+		m.time = from + t * warp
 		m.player.inp["move"] = Vector2.ZERO
 		if t >= secs * 0.5:
 			m.hud.full_map.close(),

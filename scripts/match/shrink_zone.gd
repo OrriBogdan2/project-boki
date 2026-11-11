@@ -12,7 +12,7 @@ extends RefCounted
 ## circles come from the seed and the match clock alone, and each game hurts only its own bodies.
 
 const RULES_PATH := "res://content/rules/shrink_zone.json"
-const COL := Color("7fd4ff")               # the edge, on the maps and in the world
+const COL := Color("5cc8ff")               # the edge, on the maps and in the world
 const NEXT_COL := Color(1, 1, 1, 0.8)      # the next circle
 const OUT_SHADE := Color(0.3, 0.08, 0.4, 0.3)   # outside the edge on the full map
 const SHADE_W := 1400.0                    # px of that shade past the edge (past the map at any zoom)
@@ -37,7 +37,7 @@ void fragment() {
 	float band = smoothstep(0.6, 1.0, 0.5 + 0.5 * sin(a * bands + up * 60.0 - TIME * 2.5));
 	float fade = smoothstep(0.0, 0.25, up) * (1.0 - smoothstep(0.45, 1.0, up));
 	ALBEDO = mix(col.rgb, vec3(1.0), band * 0.5);
-	ALPHA = (0.16 + 0.34 * band) * fade * col.a;
+	ALPHA = (0.32 + 0.43 * band) * fade * col.a;
 }
 """
 
