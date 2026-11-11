@@ -3933,6 +3933,7 @@ func step(dt: float) -> void:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
 	_update_interact(dt)
+	loot_sfx.sweep()
 	_update_box_hums()
 	_prof("interact")
 	if opts.get("perk_demo", false) and player and time > 0.5 and time - dt <= 0.5:
@@ -4142,6 +4143,7 @@ func _update_dex(dt: float) -> void:
 ## breaks or completes. Rivals who hear it get a sound ping on the minimap; bots come to look.
 const HUM_RANGE := 30.0
 const HUM_DB := 2.0
+var loot_sfx := LootOpenSfx.new()     # the sound of a chest or deathbox opening
 var box_hums := {}             # hum key -> its box, while that box's revive hum is playing
 var _hum_seq := 0
 func _update_box_hums() -> void:
@@ -4339,19 +4341,23 @@ func _update_interact(dt: float) -> void:
 						if b0["empty"] or got > 0: hud.close_loot()
 					else:
 						hud.open_loot(b0)
+						loot_sfx.done(b0, LootOpenSfx.box_rar(b0))
 			"boxrev":
 				BoxRevive.hold(self, h, best["box"], dt)
 			"loot":
 				h.set_hold("loot")
+				loot_sfx.hold("box", best["box"])
 				h.box_t = 0.0 if time - h.hurt_at < 0.1 else h.box_t + dt     # a hit starts the loot over
 				if h.box_t >= Life.R["loot_time"]:
 					h.box_t = 0.0
+					loot_sfx.done(best["box"], LootOpenSfx.box_rar(best["box"]))
 					Life.loot_box(self, h, best["box"])
 			"catch":
 				Capture.hold(self, h, best["ent"], dt)
 			"chest":
 				var c: Dictionary = best["chest"]
 				h.set_hold("chest")
+				loot_sfx.hold("chest", c)
 				c["prog"] += dt / float(ChestLoot.R()["hold_s"])
 				if c["prog"] >= 1.0:
 					_open_chest(h, c)
