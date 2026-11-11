@@ -4,8 +4,10 @@
  "script": "tools/gen_sfx_boki.py",
  "sounds": {
   "bk_burrlet_happy": "boki", "bk_burrlet_alert": "boki", "bk_burrlet_unsure": "boki", "bk_burrlet_sleepy": "boki", "bk_burrlet_hurt": "boki",
+  "bk_caecilith_happy": "boki", "bk_caecilith_alert": "boki", "bk_caecilith_unsure": "boki", "bk_caecilith_sleepy": "boki", "bk_caecilith_hurt": "boki",
   "bk_cairnback_happy": "boki", "bk_cairnback_alert": "boki", "bk_cairnback_unsure": "boki", "bk_cairnback_sleepy": "boki", "bk_cairnback_hurt": "boki",
   "bk_cindle_happy": "boki", "bk_cindle_alert": "boki", "bk_cindle_unsure": "boki", "bk_cindle_sleepy": "boki", "bk_cindle_hurt": "boki",
+  "bk_gibbelle_happy": "boki", "bk_gibbelle_alert": "boki", "bk_gibbelle_unsure": "boki", "bk_gibbelle_sleepy": "boki", "bk_gibbelle_hurt": "boki",
   "bk_glintmole_happy": "boki", "bk_glintmole_alert": "boki", "bk_glintmole_unsure": "boki", "bk_glintmole_sleepy": "boki", "bk_glintmole_hurt": "boki",
   "bk_gloamshell_happy": "boki", "bk_gloamshell_alert": "boki", "bk_gloamshell_unsure": "boki", "bk_gloamshell_sleepy": "boki", "bk_gloamshell_hurt": "boki",
   "bk_glomwort_happy": "boki", "bk_glomwort_alert": "boki", "bk_glomwort_unsure": "boki", "bk_glomwort_sleepy": "boki", "bk_glomwort_hurt": "boki",

@@ -80,11 +80,14 @@ func _hero(ac: RefCounted, arch: String) -> void:
 		var rim_mine: Color = rim_mat.get_shader_parameter("color")      # (the player's own shot: a friend's)
 		var rim_core := (beacon.get_child(0) as MeshInstance3D).mesh as SphereMesh
 		ok(tag + " rim wider than core", rim_core.radius > r_core)
-		found["by"] = T      # the same shot, fired by the opposing team
+		var volley := m.shots.filter(func(x): return x["by"] == P)      # (a shotgun's slugs share the beacons)
+		for x in volley:
+			x["by"] = T      # the same shots, fired by the opposing team
 		m.shot_floor.sync(1.0)
 		var rim_foe: Color = rim_mat.get_shader_parameter("color")
 		var coded := not rim_foe.is_equal_approx(rim_mine)
 		ok(tag + " rim is side-coded", coded, "%s vs %s" % [rim_foe.to_html(), rim_mine.to_html()])
-		found["by"] = P
+		for x in volley:
+			x["by"] = P
 	ok(tag + " hit radius unchanged by the beacon", is_equal_approx(float(found["r"]), r_hit), "%.3f m" % r_hit)
 	await ac.done(m)
