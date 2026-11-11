@@ -66,8 +66,12 @@ NEW-RED vs ext/release-integ-0245 272368589 (6):
 | Check | Why |
 |---|---|
 | --boki-rig-check | caecilith, lilybara, umbrathere glbs have no win/sulk/push, which boki-react-clips now asks of every species (base passes: it did not ask). Blender rebuild (not on rpc6) |
-| --perf-throttle-check | two rows perf-occluders/perf-fight-pools added: an occluder corner below an island's underside on the 2x map; the Fx flurry leaves one node |
+| --perf-throttle-check | two rows perf-occluders/perf-fight-pools added: an occluder corner below an island's underside on the 2x map; the Fx flurry leaves one node. FIXED on ext/perf-occluder-pool-rows (stacked on this branch): the box bottom skipped a stair tile at a box corner (stairs are island ground in the terrain mesh); bolt() draws its 5 segments as beams since this merge (10 quads a bolt, bolt_pool gone) but beam_pool warmed 8, so a flurry built 26 beam nodes (now BEAM_WARM 40); the row compares nodes, not the count (a telegraph from the earlier match steps ends in the window) |
 | --cover-check | Lark (meadow) cover 7.8-8.0%, floor 8.5%: the early-camps layout moves cut Lark's bushes 874 -> 741 |
 | --demo-quick-check (new) | "every Boki evolved" short 6: 0245's evolve.json levels 14-40 with an art gate (DEBT: no launch species level-evolves) |
 | --loading-check (new) | the bar jumps more than 25% in one frame once |
 | --leave-match-check (new, hangs to timeout) | expects a Boki left in a deep match to be in the Ransom House at once; 0245 has it guard your box first |
+
+Not in the chosen set: --merge-form-check fails 2 on f23d91db7 (and the same 2 with the fix above): "says 'Rescue
+Gravadillo to fuse'" and "a tick ring each second" (it waits for the Fx child count to rise; rings are pooled since
+perf-fight-pools, so a ring adds no node).
