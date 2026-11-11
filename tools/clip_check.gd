@@ -3,8 +3,8 @@ extends RefCounted
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); a Hunter's own stomp lands
-## on the game's beats and a stun cuts it. Never touches the save.
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); a Hunter's own
+## stomp lands on the game's beats and a stun cuts it. Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -392,7 +392,8 @@ func _stomp(id: String, m: Node3D, sync: Node, clips: WardenClips, sd: Dictionar
 	ok(worst == "", "%s: each beat lifts the foot and lands it on Stomp's slam%s" % [id, worst])
 	clips.commit_t = 0.0
 	var pick := clips._pick({"act": "windup"}, 0.1)
-	ok(pick.get("clip") == sd["commit"] and is_equal_approx(float(pick["t"]), 0.1), "%s: the commit hold plays its clip on its clock" % id)
+	ok(pick.get("clip") == sd["commit"] and is_equal_approx(float(pick["t"]), 0.1),
+			"%s: the commit hold plays its clip on its clock" % id)
 	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "stomp_style": sd["style"]}
 	m.set_meta(WardenClips.STATE, s)
 	for at in [1.2, Stomp.TIME - DT]:
@@ -400,14 +401,16 @@ func _stomp(id: String, m: Node3D, sync: Node, clips: WardenClips, sd: Dictionar
 		s.erase("stun")
 		for k in 10:
 			sync.call("_process", DT)
-		ok(clips.cur == sd["clip"] and absf(clips.stomp_at - at) < 0.001, "%s: the finisher follows the stomp's clock (%.2f s)" % [id, at])
+		ok(clips.cur == sd["clip"] and absf(clips.stomp_at - at) < 0.001,
+				"%s: the finisher follows the stomp's clock (%.2f s)" % [id, at])
 		s["stomp"] = -1.0
 		s["stun"] = at < 2.0
 		sync.call("_process", DT)
 		var off_live := clips.act_w * absf(clips.xf - float(clips.chan))      # (the channel that is not live)
 		var shown := clips.act_w if clips.cur == sd["clip"] else off_live
 		if at < 2.0:
-			ok(clips.cur != sd["clip"] and shown <= 0.0, "%s: a stun at %.1f s cuts the stomp clip that frame (left %.2f)" % [id, at, shown])
+			ok(clips.cur != sd["clip"] and shown <= 0.0,
+					"%s: a stun at %.1f s cuts the stomp clip that frame (left %.2f)" % [id, at, shown])
 		else:
 			ok(shown > 0.5, "%s: the kill eases out of the stomp (%.2f shown)" % [id, shown])
 	s["stomp"] = 1.0

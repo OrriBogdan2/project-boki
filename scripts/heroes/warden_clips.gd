@@ -38,7 +38,7 @@ const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carr
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
-const STOMP_END := 0.1       # s: a stomp that stops this close to its clip's end finished; earlier (or stunned) it broke
+const STOMP_END := 0.1       # s: a stomp that stops this close to its clip's end finished (earlier or stunned: broke)
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
