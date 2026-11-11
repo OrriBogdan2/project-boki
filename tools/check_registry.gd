@@ -320,6 +320,7 @@ const CHECKS := {
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
+	"--solo-drop-check": ["res://tools/solo_drop_check.gd", "solo_drop_check", null],      # Solo / Trios pick, 20x1 and 7x3
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],      # the opening drop
 	"--expedition-shots": ["res://tools/expedition_shots.gd", "expedition_shots", null],      # --expedition-shots=<dir>
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],      # --void-ui-shots=<dir>
