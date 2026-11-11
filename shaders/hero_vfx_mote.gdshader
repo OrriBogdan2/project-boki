@@ -5,6 +5,7 @@ shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
 #include "res://shaders/noise.gdshaderinc"
+#include "res://shaders/cel.gdshaderinc"
 
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);
 uniform vec4 col2 : source_color = vec4(1.0, 0.85, 0.3, 1.0);
@@ -14,7 +15,6 @@ uniform vec4 col3 : source_color = vec4(0.16, 0.05, 0.02, 1.0);
 uniform int look = 0;
 uniform float stretch = 0.05;  // s of velocity an ember's streak spans
 uniform float gain = 1.0;
-uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;  // art/vfx/noise.png: r billows, g fbm
 
 const vec2 SMOKE_LIGHT = vec2(-0.45, 0.89);   // on screen, where a cel puff is lit from (up and a little left)
 
@@ -73,14 +73,14 @@ void fragment() {
 	} else if (look == 1) {
 		// lumpy billows with a hard edge, two flat tones lit from above, eaten away by noise as the puff ages
 		vec2 nuv = p * 0.24 + vec2(pick * 0.71, pick * 0.37 + age * 0.05);
-		vec4 nz = texture(noise_tex, nuv);
-		vec2 slope = vec2(texture(noise_tex, nuv + vec2(0.01, 0.0)).r, texture(noise_tex, nuv + vec2(0.0, 0.01)).r) - nz.r;
+		vec4 nz = texture(vfx_noise, nuv);
+		vec2 slope = vec2(texture(vfx_noise, nuv + vec2(0.01, 0.0)).r, texture(vfx_noise, nuv + vec2(0.0, 0.01)).r) - nz.r;
 		float body = 0.75 - d + (nz.r - 0.5) * 0.45;     // lumps stay inside the quad
 		float eat = mix(0.0, 0.95, pow(age, 1.5)) + (nz.g - 0.5) * 0.35;
 		float cut = body - eat;
-		a = clamp(cut / max(fwidth(cut), 1e-4) + 0.5, 0.0, 1.0) * smoothstep(0.0, 0.06, age) * 0.8;
+		a = hard(cut) * smoothstep(0.0, 0.06, age) * 0.8;
 		float shade = dot(p + slope * 6.0, light_uv) + 0.2;
-		float lit = clamp(shade / max(fwidth(shade), 1e-4) + 0.5, 0.0, 1.0);
+		float lit = hard(shade);
 		ALBEDO = mix(col3.rgb, col.rgb, lit) * a * gain;
 		ALPHA = a * gain;
 	} else if (look == 3) {

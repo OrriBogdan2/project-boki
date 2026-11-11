@@ -6,6 +6,7 @@ shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
 #include "res://shaders/noise.gdshaderinc"
+#include "res://shaders/cel.gdshaderinc"
 
 const int M_SWEEP = 0;      // an arc of flame: UV.x along the swing, UV.y outer edge (0) to inner (1)
 const int M_SCORCH = 1;     // the ground burning: UV across the quad
@@ -16,7 +17,6 @@ const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the came
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
-const float CEL_BANDS = 4.0;  // flat heat steps in a look: char, body, hot, white-hot
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -32,7 +32,6 @@ uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
-uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;  // art/vfx/noise.png: g fbm, b cell walls
 
 void vertex() {
 	if (billboard) {
@@ -56,17 +55,6 @@ float cracks(vec2 p) {
 		}
 	}
 	return f2 - f1;
-}
-
-// 0 below zero, 1 above, with a one-pixel anti-aliased step between: a cel edge at any size on screen
-float hard(float x) {
-	return clamp(x / max(fwidth(x), 1e-4) + 0.5, 0.0, 1.0);
-}
-
-// heat snapped to CEL_BANDS flat steps, the step edges anti-aliased
-float cel(float h) {
-	float s = h * CEL_BANDS;
-	return (floor(s) + hard(fract(s) - 0.5)) / CEL_BANDS;
 }
 
 // Fire by heat, 0..1: char, the body colour, the hot colour, nearly white. Everything hot is drawn with high
@@ -234,21 +222,14 @@ vec4 vortex(vec2 uv) {
 }
 
 vec4 ring(vec2 uv) {
-	vec2 p = uv * 2.0 - 1.0;
-	float d = length(p);
-	float round_u = atan(p.y, p.x) / 6.2832 * 2.0 + seed;     // two whole turns of the tiling noise: no seam
 	float go = 1.0 - pow(1.0 - min(life / 0.55, 1.0), 3.0);    // races out, then slows
-	float wob = texture(noise_tex, vec2(round_u, 0.2)).g;
-	float r = go * 0.9 + (wob - 0.5) * 0.08;
-	float w = mix(0.2, 0.03, go);
-	float band = hard(min(r - d, d - r + w));
-	float lead = hard(d - r + w * 0.4);                         // the outer edge, hot
-	float gaps = hard(texture(noise_tex, vec2(round_u * 1.5, go * 0.25)).b - life * 1.2 + 0.35);   // breaks up late
-	float fill = hard(r - w - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flat flash of dust inside, gone early
+	vec2 ring_v = cel_ring(uv, go, life, seed);
+	float d = length(uv * 2.0 - 1.0);
+	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flash of dust inside
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
-	float a = (band * gaps + fill * (1.0 - band)) * fade;
-	vec3 c = mix(mix(col.rgb, col2.rgb, lead), mix(col2.rgb, vec3(1.0), 0.5), lead * (1.0 - hard(life - 0.2)));
-	c = mix(col3.rgb, c, band);
+	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade;
+	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, vec3(1.0), 0.5), ring_v.y * (1.0 - hard(life - 0.2)));
+	c = mix(col3.rgb, c, ring_v.x);
 	return vec4(c * a, a);
 }
 

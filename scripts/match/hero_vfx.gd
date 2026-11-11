@@ -13,7 +13,6 @@ extends Node3D
 const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
-const NOISE: Texture2D = preload("res://art/vfx/noise.png")      # baked by tools/gen_vfx_noise.py
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
 	"ring": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
@@ -297,7 +296,6 @@ func _surface_node(kind: String) -> Node3D:
 	var mt := ShaderMaterial.new()
 	mt.shader = SURFACE
 	mt.set_shader_parameter("mode", MODES[kind])
-	mt.set_shader_parameter("noise_tex", NOISE)
 	mi.material_override = mt
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	match kind:
@@ -537,7 +535,6 @@ func _mote_node(kind: String) -> Node3D:
 	var mt := ShaderMaterial.new()
 	mt.shader = MOTE
 	mt.set_shader_parameter("look", LOOKS[kind])
-	mt.set_shader_parameter("noise_tex", NOISE)
 	quad.material = mt
 	p.draw_pass_1 = quad
 	return p
