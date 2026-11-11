@@ -161,4 +161,5 @@ func _migration() -> void:
 	no_aura.erase("aura")
 	Care.ensure(no_aura)
 	ok(no_aura["aura"] == "", "a Boki saved before auras loads wearing none")
-	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == {}, "a v12 save gains path, stay, loose")
+	var gained: bool = old["path"] == [] and old["stay"] == false and old["loose"] == {}
+	ok(moved and gained, "a v12 save gains path, stay, loose")

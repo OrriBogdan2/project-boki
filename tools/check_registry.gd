@@ -141,7 +141,8 @@ const CHECKS := {
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
-	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],      # clans slices 1-2: roster, join, leave, old saves, base
+	# clans slices 1-2: roster, join, leave, old saves, base
+	"--clan-check": ["res://tools/clan_check.gd", "clan_check", null],
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
@@ -155,7 +156,8 @@ const CHECKS := {
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
-	"--cursor-mode-check": ["res://tools/cursor_mode_check.gd", "cursor_mode_check", null],      # cursor confined in a fight, shown in menus
+	# cursor confined in a fight, shown in menus
+	"--cursor-mode-check": ["res://tools/cursor_mode_check.gd", "cursor_mode_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
@@ -230,8 +232,10 @@ const CHECKS := {
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
-	"--home-hatch-check": ["res://tools/home_hatch_check.gd", "home_hatch_check", null],      # the nest egg's hatch at home: wobble, watchers, skip
-	"--hatch-sfx-check": ["res://tools/hatch_sfx_check.gd", "hatch_sfx_check", null],      # hatch stage sounds, mystery egg
+	# the nest egg's hatch at home: wobble, watchers, skip
+	"--home-hatch-check": ["res://tools/home_hatch_check.gd", "home_hatch_check", null],
+	# hatch stage sounds, mystery egg
+	"--hatch-sfx-check": ["res://tools/hatch_sfx_check.gd", "hatch_sfx_check", null],
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
@@ -286,12 +290,15 @@ const CHECKS := {
 	"--garden-audio-check": ["res://tools/garden_audio_check.gd", "garden_audio_check", null],  # GARDEN.md 10.2 sound
 	# --home-verbs-check also takes --home-verbs-shots=<dir>
 	"--home-verbs-check": ["res://tools/home_verbs_check.gd", "home_verbs_check", null],
-	"--stat-cause-check": ["res://tools/stat_cause_check.gd", "stat_cause_check", null],      # play trains a stat, the card says why
+	# play trains a stat, the card says why
+	"--stat-cause-check": ["res://tools/stat_cause_check.gd", "stat_cause_check", null],
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],  # news at home
-	"--food-journal-check": ["res://tools/food_journal_check.gd", "food_journal_check", null],      # a food shows ? until fed once
+	# a food shows ? until fed once
+	"--food-journal-check": ["res://tools/food_journal_check.gd", "food_journal_check", null],
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
-	"--boki-sex-check": ["res://tools/boki_sex_check.gd", "boki_sex_check", null],      # sex 50/50, female looks only on chosen species
+	# sex 50/50, female looks only on chosen species
+	"--boki-sex-check": ["res://tools/boki_sex_check.gd", "boki_sex_check", null],
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
@@ -325,7 +332,8 @@ const CHECKS := {
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
 	"--market-check": ["res://tools/market_check.gd", "market_check", null],      # docs/decisions/0013-market.md
-	"--solo-drop-check": ["res://tools/solo_drop_check.gd", "solo_drop_check", null],      # Solo / Trios pick, 20x1 and 7x3
+	# Solo / Trios pick, 20x1 and 7x3
+	"--solo-drop-check": ["res://tools/solo_drop_check.gd", "solo_drop_check", null],
 	"--drop-feel-check": ["res://tools/drop_check.gd", "drop_feel_check", null],      # the opening drop
 	"--expedition-shots": ["res://tools/expedition_shots.gd", "expedition_shots", null],      # --expedition-shots=<dir>
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],      # --void-ui-shots=<dir>
@@ -372,7 +380,8 @@ const CHECKS := {
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
-	"--tut-first-breed-check": ["res://tools/tut_first_breed_check.gd", "tut_first_breed_check", null],      # the first-breeding prompt
+	# the first-breeding prompt
+	"--tut-first-breed-check": ["res://tools/tut_first_breed_check.gd", "tut_first_breed_check", null],
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens

@@ -42,7 +42,8 @@ func _solo_run() -> void:
 		if m.player.riding: m.ship_jump(m.player, true)
 		m.step(Match.DT)
 		t += Match.DT
-	ok(is_instance_valid(m.player) and m.hunters.size() == Data.MATCH_PLAYERS, "solo: 30 s on, everyone still in the list")
+	var all_in := is_instance_valid(m.player) and m.hunters.size() == Data.MATCH_PLAYERS
+	ok(all_in, "solo: 30 s on, everyone still in the list")
 	ok(m.result.is_empty() and not m.player.out, "solo: still in the match, nothing ended it (%s)" % [m.result])
 
 func _rolling() -> void:
@@ -60,7 +61,8 @@ func _panel() -> void:
 	var home = main.current
 	home._open_expedition()
 	await main.get_tree().process_frame
-	var tabs = home.find_children("*", "Button", true, false).filter(func(b): return String(b.get_meta("tab", "")) in ["Solo", "Trios"])
+	var is_mode := func(b): return String(b.get_meta("tab", "")) in ["Solo", "Trios"]
+	var tabs = home.find_children("*", "Button", true, false).filter(is_mode)
 	ok(tabs.size() == 2, "the panel has the Solo and Trios tabs")
 	for b in tabs:
 		var nm: String = b.get_meta("tab")

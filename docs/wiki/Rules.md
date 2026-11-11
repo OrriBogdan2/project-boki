@@ -15,7 +15,7 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 
 | Setting | Value | Meaning |
 |---|---|---|
-| players | 30 | hunters in an expedition (solos, duos or trios) |
+| players | 30 | hunters in an expedition (solo or trios) |
 | down_hp | 100 | so about 40 seconds downed before you bleed out |
 
 ## Down, death and revive
@@ -134,6 +134,54 @@ Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN
 | gems_doc | Gems to you when your Boki wins (or dances a good solo), or for any other dance. |
 | card_s | 6 |
 
+## base_kite (`content/rules/base_kite.json`)
+
+Kite Tow (briefs/design/GARDEN_MODERN.md 4.2 game 7, scripts/home/base_kite.gd). Only with farm_build.json base_mode on, and only on Kitewind Ridge. Your Boki glides on a kite round one loop through twelve rings, steered with A and D; Speed sets the pace and a missed ring costs a second. Space flaps the kite up over the high rings; flaps are limited and updraft vents give one back. A lap is raced against a visiting kite whose stats are yours times the cup round's min_ratio (garden_prizes.json kite), so prizes, the first win of the day and the cup come with it. Units: metres, seconds, metres a second; joy is 0-100 points.
+
+| Setting | Value |
+|---|---|
+| theme | ridge |
+| theme_doc | The island theme (home_layout.gd THEMES) whose garden has the kite stand. |
+| rings | 12 |
+| loop_r | 6.5 |
+| glide_h | 3 |
+| loop_doc | The loop is a circle of loop_r round the kite stand, flown counter-clockwise glide_h above the stand; the rings sit evenly round it, the first half a gap after the start, and the lap ends back at the start. |
+| pace | 0.75 |
+| speed_per_point | 0.015 |
+| pace_doc | m/s along the loop for a Boki with no Speed points; each trained Speed point adds this fraction (Speed 40 flies 1.6 times as fast). |
+| steer | 2.2 |
+| steer_accel | 6 |
+| max_off | 2.5 |
+| steer_doc | A and D slide the kite in and out of the loop's middle line at up to steer m/s, reaching it at steer_accel m/s/s, never more than max_off m either way. |
+| ring_off | 2 |
+| ring_r | 0.6 |
+| ring_doc | Each ring sits a seeded random distance within +-ring_off m of the middle line; the kite goes through it when it passes within ring_r m of the ring's centre (across and up). |
+| flaps | 3 |
+| guard_per_flap | 25 |
+| flaps_doc | Flaps a lap starts with: flaps, plus one for every guard_per_flap trained Guard points; a vent never gives more than that. |
+| flap_v | 2.4 |
+| lift_g | 3 |
+| lift_fall | 0.6 |
+| lift_doc | Height above the tow line (m). A flap sets the climb to flap_v m/s; it slows by lift_g m/s/s down to a fall of lift_fall m/s, and the tow line holds the kite at 0 (a flap peaks about 0.96 m up after 0.8 s). |
+| high | 6 |
+| high_lift | 0.9 |
+| high_doc | How many rings sit high_lift m above the tow line (seeded, never the first); the others sit on it. |
+| vents | 2 |
+| vent_r | 0.8 |
+| vent_doc | Updraft vents sit half a gap after the first vents high rings, across between the rings either side, give or take a seeded vent_r m; passing within vent_r m of one gives a flap back. |
+| miss_s | 1 |
+| miss_doc | Seconds added to the finish time for each missed ring. |
+| energy | 8 |
+| energy_doc | Energy the flier spends; who may fly is the Dash's rested rule (base_race.json min_energy). |
+| joy | 8 |
+| gems_clean | 4 |
+| gems | 1 |
+| gems_doc | Gems to you for a lap through all twelve rings, or for any other finished lap. |
+| rival | Gale Kite |
+| rival_misses | 2 |
+| rival_doc | The visiting kite flies the lap at its pace (base_kite pace from its Speed) and misses rival_misses rings; your lap wins when its time is no longer. |
+| card_s | 6 |
+
 ## base_life (`content/rules/base_life.json`)
 
 Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json base_mode on, every farm Boki runs one state machine (Roam, Eat, Nap, Play, PlayWith, Watch, React, Mentor, Chore) and keeps rec['bonds'] = {uid: -1..1}. Times are seconds, distances metres (tiles), bond changes are per event unless they say per second.
@@ -142,10 +190,13 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 |---|---|
 | think | [2.0, 5.0] |
 | think_doc | s between a roaming Boki's choices (random in the range). |
-| max | {"roam": 45.0, "eat": 40.0, "play": 30.0, "play_with": 40.0, "watch": 12.0, "react": 12.0, "chore": 45.0} |
+| max | {"roam": 45.0, "eat": 40.0, "play": 30.0, "play_with": 20.0, "watch": 12.0, "react": 12.0, "chore": 45.0} |
 | max_doc | s a Boki stays in each state before it moves on (Play is HomeToys' time at a toy, toys.json play_secs; eat also caps the walk for a snack, BaseFeed); a Boki that roamed this long picks something to do. Nap has no cap: night naps last till morning. |
 | play | [10.0, 22.0] |
-| play_with | [14.0, 26.0] |
+| play_with | [10.0, 20.0] |
+| play_with_doc | s one game of tag lasts (BaseTag), random in the range; max.play_with is the cap. |
+| tag | {"grace": 1.2, "speed": 1, "rival_gap": 3.0, "sulk_joy": 6.0, "sulk_s": 6.0, "rest": 12.0, "flee_s": 3.0, "stand_s": 1.5} |
+| tag_doc | grace: s the new it can't tag back; speed: Speed points a finished game gives each player (Care.add_stat); rival_gap: m a rival of either player breaks the game up from; sulk_joy: joy each loses; sulk_s: s they stand about; flee_s/stand_s: s the runner flees, then stands to be caught; rest: s the pair roams before either picks again. |
 | watch | [4.0, 9.0] |
 | chore_chance | 0.3 |
 | chore_chance_doc | chance a roaming Boki whose knack has a chore to do right now (scripts/home/base_chore.gd) does it. |
@@ -176,6 +227,8 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | mentor_doc | s between a retired mentor's slow steps near the Soul Shrine (Mentor, GARDEN.md section 3). |
 | mentor_radius | 3 |
 | mentor_radius_doc | m from the Soul Shrine a mentor strolls. |
+| home | {"stagger": 1.5, "run_max": 8.0, "greet": 2.0, "nap_trust": 70.0, "bound_at": 0.62, "shy_at": 0.4, "stop": {"bound": 1.2, "wave": 2.2, "shy": 3.5}} |
+| home_doc | Coming home from a run: a Boki starts running to the portal `stagger` s after the one before it (highest trust first), greets after at most `run_max` s of running and for `greet` s, then goes back to what it was doing. A napping Boki only comes at trust >= nap_trust. bravery >= bound_at bounds in, below shy_at peeks from afar, else waves; `stop` is the metres from the portal each greeter stands. |
 | clash | 0.55 |
 | clash_doc | the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more. |
 | whistle | {"hold_s": 0.5, "sulky_joy": 25.0, "shy_trust": 22.0, "look_s": 2.5, "slot_m": 1.5, "pace": [0.7, 1.3], "give_up_s": 9.0} |
@@ -187,8 +240,8 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 
 | Setting | Value |
 |---|---|
-| stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
-| stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
+| tracks | {"garden": [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}], "ridge": [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "jump", "len": 3.0, "mult": 0.75}, {"kind": "updraft", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.75}]} |
+| tracks_doc | One lap per course, in order, laid out as a 6 x 3 m loop (the lens of stretches 0 and 2 are 6, of 1 and 3 are 3). A home island runs the course named by its theme's 'track' (home_layout.gd THEMES), else 'garden'. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. 'ridge' is Kitewind Ridge's (GARDEN.md 10.2): a run, a glide gap, a climb up an updraft, a second gap. |
 | pace | 2.6 |
 | pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. A run: the Boki gallop clip keeps its feet on the ground from about 2.2 m/s (BokiRig.RUN_SPEED), so a lap takes about 9 s. |
 | speed_per_point | 0.015 |
@@ -199,6 +252,10 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | swim_per_tide_doc | The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist. |
 | glide | 1.45 |
 | glide_doc | The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it. |
+| rise | 1.4 |
+| rise_doc | The updraft stretch: a winged Boki rides the rising air at this times the pace; a lean in one of updraft_types blends toward it. |
+| updraft_types | ["flying", "electric", "fairy", "sound"] |
+| updraft_types_doc | The Kitewind Ridge types (GARDEN.md 10.2): the leans that ride an updraft. |
 | wobble | 0.1 |
 | wobble_doc | Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win. |
 | cheer | {"great": 1.15, "good": 1.07, "miss": 1.0} |
@@ -257,6 +314,35 @@ Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd
 | gems_win | 8 |
 | gems_ran | 2 |
 | gems_doc | Gems to you when your team wins, or for any other relay. |
+
+## base_rival (`content/rules/base_rival.json`)
+
+Rivalries from garden minigames (GARDEN.md sections 4 and 5, scripts/home/base_rival.gd). A Boki that loses to the same Boki lose_to_mark times marks it a rival: the pair's bond (rec['bonds'], base_life.json) drops to bond_mark so the usual stares apply, and rec['grudge'] = {uid: {lost, rival, good, game}} keeps the tally. Times are seconds, distances metres.
+
+| Setting | Value |
+|---|---|
+| lose_to_mark | 2 |
+| lose_to_mark_doc | games lost to the same Boki in a row (a win over it clears the tally) before it counts as a rival. |
+| bond_mark | -0.6 |
+| bond_mark_doc | the bond a new rivalry drops to (at or under base_life.json rival_at, so the existing rival stares apply). |
+| bond_end | 0 |
+| bond_end_doc | the bond a settled rivalry returns to: strangers again, not friends. |
+| good_joy | 60 |
+| good_joy_doc | joy need both rivals must have at the day's end for it to be a shared good day. |
+| good_days | 3 |
+| good_days_doc | shared good days that end a rivalry without a rematch. |
+| gap | 6 |
+| gap_doc | m a rival keeps from the other when it picks a nap spot or a toy. |
+| glare_at | 2.5 |
+| glare_at_doc | m within which two rivals passing show a glare bubble. |
+| glare_cd | 8 |
+| glare_cd_doc | s before the same Boki glares again. |
+| ask_chance | 0.25 |
+| ask_chance_doc | chance a roaming loser that holds a grudge walks to the Games board to ask for a rematch. |
+| ask_secs | 50 |
+| ask_secs_doc | s a rematch ask lasts, walk included, before the loser gives up. |
+| ask_cd | 120 |
+| ask_cd_doc | s before the same loser may ask again. |
 
 ## base_seek (`content/rules/base_seek.json`)
 
@@ -667,6 +753,20 @@ Decor with a purpose (briefs/design/GARDEN_MODERN.md section 5 rank 7; scripts/h
 | backpack_shop | [0, 25, 50, 90] |
 | bot_backpack | {"easy": 0.0, "medium": 0.25, "hard": 0.4, "expert": 0.55} |
 
+## evo_paths (`content/rules/evo_paths.json`)
+
+Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by species id. Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). level: the level the final is due. The end with more pips wins; tie: the stat lead; still tied: undecided.
+
+| Setting | Value |
+|---|---|
+| pips | {"stat_lead": 3, "lean_half": 1, "lean_full": 2, "tokens_max": 3, "care_trait": 1, "care_toy": 1, "ribbons_max": 2} |
+| pips_doc | stat_lead: the end whose key stat is higher. lean_half / lean_full: the end's type lean at lean_half_at of full / full (Evo.LEAN_FULL). tokens_max: one per worn path token of the end's path. care_trait: an end trait at trait_at or more. care_toy: the most-used toy (rec.toy_use) trains the end's key stat. ribbons_max: one per Cup Ribbon in the end's sports. |
+| lean_half_at | 0.5 |
+| trait_at | 0.6 |
+| lines | {"burrlet": {"stage": "Sporcupine", "level": 16, "ends": [{"form": "amanitusk", "name": "Amanitusk", "path": "fierce", "stat": "power", "type": "poison", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "ringrove", "name": "Ringrove", "path": "steadfast", "stat": "guard", "type": "grass", "traits": ["loyalty"], "sports": ["shove"]}]}, "cindle": {"stage": "Vespox", "level": 16, "ends": [{"form": "glaivyx", "name": "Glaivyx", "path": "fierce", "stat": "power", "type": "steel", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "lashyx", "name": "Lashyx", "path": "swift", "stat": "speed", "type": "dark", "traits": ["bravery"], "sports": ["dash", "relay"]}]}, "puddlet": {"stage": "Glassolotl", "level": 16, "ends": [{"form": "chandelotl", "name": "Chandelotl", "path": "curious", "stat": "focus", "type": "fairy", "traits": ["curiosity"], "sports": ["seek", "volley", "echo_steps", "lantern_match"]}, {"form": "geodelotl", "name": "Geodelotl", "path": "steadfast", "stat": "guard", "type": "rock", "traits": ["loyalty"], "sports": ["shove"]}]}, "zapple": {"stage": "Echolop", "level": 8, "ends": [{"form": "howlop", "name": "Howlop", "path": "fierce", "stat": "power", "type": "dark", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "chimelop", "name": "Chimelop", "path": "curious", "stat": "focus", "type": "fairy", "traits": ["curiosity"], "sports": ["seek", "volley", "echo_steps", "lantern_match"]}]}} |
+| inks_doc | Ink lines: the held Ink alone decides (no pips); the card only previews the silhouette. ink item id -> form. |
+| inks | {"minkee": {"name": "Minkee", "forms": {"ember_ink": "Flarmink", "tide_ink": "Rippmink", "bloom_ink": "Blossmink", "storm_ink": "Voltmink", "frost_ink": "Rimink", "shadow_ink": "Umbrink", "lunar_ink": "Lunink", "prism_ink": "Prismink", "wyrm_ink": "Wyrmink"}}, "jarmit": {"name": "Jarmit", "forms": {"ember_ink": "Lanternmit", "storm_ink": "Stormit", "bloom_ink": "Terrarimit"}}} |
+
 ## evolve (`content/rules/evolve.json`)
 
 Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (a level-up at or past it). 'into': the options; 'path' picks a branch by the Boki's leading affinity (fierce/steadfast/curious/swift), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.
@@ -787,7 +887,7 @@ The garden's daily hooks (scripts/home/garden_wishes.gd, scripts/home/garden_awa
 
 ## garden_items (`content/rules/garden_items.json`)
 
-Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; this file does not drop them. Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).
+Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; this file does not drop them. aura = a worn look, one at a time (rec.aura; its aura block is drawn by GardenAura, scripts/home/garden_aura.gd). Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).
 
 | Setting | Value |
 |---|---|
@@ -801,7 +901,7 @@ Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.
 | log_keep_doc | Uses remembered per item for its Field Book page (Save.d item_log, newest last). |
 | families | {"stat": {"name": "Stat bites", "icon": "burst"}, "path": {"name": "Path tokens", "icon": "dash"}, "lean": {"name": "Rinse", "icon": "wave"}, "respec": {"name": "Unwinding", "icon": "recall"}} |
 | families_doc | Field Book page grouping: a family's name and picture; it gets a star once every item of it has been owned. |
-| items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}, {"id": "heirloom_thread", "name": "Heirloom Thread", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "gifts", "n": 1, "max": 2}, "sources": ["Soul Shrine mentor gift", "Crown prize (rare)"]}, {"id": "likeness_locket", "name": "Likeness Locket", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "species"}, "sources": ["Show Ring cup"]}, {"id": "lullaby_shell", "name": "Lullaby Shell", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "habit"}, "sources": ["Glint Fishing (rare)"]}, {"id": "hatchling_down", "name": "Hatchling Down", "family": "nest", "use": "eaten", "effect": {"kind": "down", "trust": 3}, "sources": ["every hatch"]}, {"id": "fourfold_bun", "name": "Fourfold Bun", "family": "stat", "use": "eaten", "effect": {"kind": "stat_all", "n": 1}, "sources": ["Mixing Bowl: any two different bites"]}, {"id": "bramble_honey", "name": "Bramble Honey", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["grass", "bug", "spore"], "share": 0.5, "hold_days": 7}, "sources": ["Bramblebank golden ripening", "Mixing Bowl: 3 snacks of one type"]}, {"id": "glassdew", "name": "Glassdew", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["water", "ice", "crystal"], "share": 0.5, "hold_days": 7}, "sources": ["Glasswater ripening", "Glint Fishing", "Mixing Bowl: 3 snacks of one type"]}, {"id": "cinderbrittle", "name": "Cinderbrittle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["fire", "rock", "steel", "dragon"], "share": 0.5, "hold_days": 7}, "sources": ["Cinderstep ripening", "Tumble cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "hush_truffle", "name": "Hush Truffle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["dark", "psychic", "poison"], "share": 0.5, "hold_days": 7}, "sources": ["Hushwood ripening", "Lantern Match", "Mixing Bowl: 3 snacks of one type"]}, {"id": "windfloss", "name": "Windfloss", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["flying", "electric", "fairy", "sound"], "share": 0.5, "hold_days": 7}, "sources": ["Kitewind ripening", "Echo Steps cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "dare_pepper", "name": "Dare Pepper", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "bravery", "by": 0.04}, "sources": ["Cinderstep patch"]}, {"id": "lullwort_tea", "name": "Lullwort Tea", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "temper", "by": -0.04}, "sources": ["Glasswater patch"]}, {"id": "peekbox", "name": "Peekbox", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "curiosity", "by": 0.04}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "twinbun", "name": "Twinbun", "family": "personality", "use": "eaten", "effect": {"kind": "twin", "trait": "loyalty", "by": 0.04, "bond": 0.1}, "sources": ["Bramblebank patch", "Mixing Bowl: 2 sweet buns"]}] |
+| items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "glowmoss_sprig", "name": "Glowmoss Sprig", "family": "look", "use": "worn", "effect": {"kind": "aura", "text": "slow glow motes drift round it at night (looks only)"}, "aura": {"colour": "#9dffb0", "amount": 6, "life": 2.6, "rise": 0.12, "size": 0.03, "night_only": true}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}, {"id": "heirloom_thread", "name": "Heirloom Thread", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "gifts", "n": 1, "max": 2}, "sources": ["Soul Shrine mentor gift", "Crown prize (rare)"]}, {"id": "likeness_locket", "name": "Likeness Locket", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "species"}, "sources": ["Show Ring cup"]}, {"id": "lullaby_shell", "name": "Lullaby Shell", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "habit"}, "sources": ["Glint Fishing (rare)"]}, {"id": "hatchling_down", "name": "Hatchling Down", "family": "nest", "use": "eaten", "effect": {"kind": "down", "trust": 3}, "sources": ["every hatch"]}, {"id": "fourfold_bun", "name": "Fourfold Bun", "family": "stat", "use": "eaten", "effect": {"kind": "stat_all", "n": 1}, "sources": ["Mixing Bowl: any two different bites"]}, {"id": "bramble_honey", "name": "Bramble Honey", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["grass", "bug", "spore"], "share": 0.5, "hold_days": 7}, "sources": ["Bramblebank golden ripening", "Mixing Bowl: 3 snacks of one type"]}, {"id": "glassdew", "name": "Glassdew", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["water", "ice", "crystal"], "share": 0.5, "hold_days": 7}, "sources": ["Glasswater ripening", "Glint Fishing", "Mixing Bowl: 3 snacks of one type"]}, {"id": "cinderbrittle", "name": "Cinderbrittle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["fire", "rock", "steel", "dragon"], "share": 0.5, "hold_days": 7}, "sources": ["Cinderstep ripening", "Tumble cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "hush_truffle", "name": "Hush Truffle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["dark", "psychic", "poison"], "share": 0.5, "hold_days": 7}, "sources": ["Hushwood ripening", "Lantern Match", "Mixing Bowl: 3 snacks of one type"]}, {"id": "windfloss", "name": "Windfloss", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["flying", "electric", "fairy", "sound"], "share": 0.5, "hold_days": 7}, "sources": ["Kitewind ripening", "Echo Steps cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "dare_pepper", "name": "Dare Pepper", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "bravery", "by": 0.04}, "sources": ["Cinderstep patch"]}, {"id": "lullwort_tea", "name": "Lullwort Tea", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "temper", "by": -0.04}, "sources": ["Glasswater patch"]}, {"id": "peekbox", "name": "Peekbox", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "curiosity", "by": 0.04}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "twinbun", "name": "Twinbun", "family": "personality", "use": "eaten", "effect": {"kind": "twin", "trait": "loyalty", "by": 0.04, "bond": 0.1}, "sources": ["Bramblebank patch", "Mixing Bowl: 2 sweet buns"]}] |
 
 ## garden_prizes (`content/rules/garden_prizes.json`)
 
@@ -814,7 +914,7 @@ Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/de
 | week_s | 604800 |
 | week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
 | cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
-| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "relay": {"name": "Relay Cup", "first": "zipseed", "ribbon": "Relay Cup Ribbon", "colour": "#4ad6b0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 30}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 15}]}} |
+| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "relay": {"name": "Relay Cup", "first": "zipseed", "ribbon": "Relay Cup Ribbon", "colour": "#4ad6b0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 30}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 15}]}, "kite": {"name": "Kite Tow", "first": "zipseed", "ribbon": "Kite Tow Cup Ribbon", "colour": "#8fd3f4", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 55}, {"kind": "item", "id": "windfloss", "w": 45}]}, "lantern": {"name": "Lantern Match", "first": "hush_truffle", "ribbon": "Lantern Match Cup Ribbon", "colour": "#b48cff", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "peekbox", "w": 35}, {"kind": "item", "id": "hush_truffle", "w": 25}, {"kind": "item", "id": "glowmoss_sprig", "w": 15}, {"kind": "snack", "id": "glowcap", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}} |
 
 ## garden_recipes (`content/rules/garden_recipes.json`)
 
@@ -823,6 +923,19 @@ The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui
 | Setting | Value |
 |---|---|
 | recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
+
+## garden_seasons (`content/rules/garden_seasons.json`)
+
+Garden seasons (scripts/home/garden_seasons.gd; briefs/design/GARDEN_MODERN.md section 5 rank 9). Every few weeks one zone is in season, in list order, counted on the weekly-event clock (BaseRace.week_now, the device clock the save uses; no server). While in season: the zone's game plays its season twist (unless this week's weekly format is already for that game), the snack patch grows the season's snack on top of its four, and that game's Crown also gives the season's keepsake (rec.keepsakes, once a season per Boki).
+
+| Setting | Value |
+|---|---|
+| weeks | 2 |
+| weeks_doc | Weeks each season lasts. |
+| seasons | [{"zone": "bramblebank", "name": "Bramblebank", "game": "dash", "twist": "two_streams", "snack": "glowcap", "keepsake": {"id": "mossbank_acorn", "name": "Mossbank Acorn"}}, {"zone": "glasswater", "name": "Glasswater Shallows", "game": "volley", "twist": "seven_up", "snack": "mindmint", "keepsake": {"id": "rimeglass_pebble", "name": "Rimeglass Pebble"}}, {"zone": "cinderstep", "name": "Cinderstep", "game": "shove", "twist": "hot_ledge", "snack": "glowcap", "keepsake": {"id": "cinder_bead", "name": "Cinder Bead"}}, {"zone": "hushwood", "name": "Hushwood", "game": "seek", "twist": "night_seek", "snack": "mindmint", "keepsake": {"id": "lantern_moth_charm", "name": "Lantern Moth Charm"}}, {"zone": "kitewind", "name": "Kitewind Ridge", "game": "dash", "twist": "gusty", "snack": "starfruit", "keepsake": {"id": "ridge_kite_tassel", "name": "Ridge Kite Tassel"}}] |
+| seasons_doc | In rotation order. zone: GARDEN.md 10.2 zone id; game: the game that zone hosts (a garden_prizes.json game id); twist: an id in base_race.json twists or in twists below; snack: a Data.CROPS id the patch does not already grow; keepsake: what the season's Crown adds. |
+| twists | [{"id": "hot_ledge", "game": "shove", "name": "Hot ledge", "note": "The stump rocks harder: footing slips", "wobble": 0.95}] |
+| twists_doc | Season-only twists, in the same shape as base_race.json twists. wobble: Stump Shove's per-side push roll (base_shove.json wobble, +- fraction). |
 
 ## garden_sim (`content/rules/garden_sim.json`)
 
@@ -885,19 +998,6 @@ Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/d
 | proposal_doc | The changed numbers the balance brief proposes (dotted keys into this file); --write reports the sim with and without them. |
 | fallback | {"stat_budget": {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]]}, "cup": [0.9, 1.0, 1.1], "games": {"dash": {"first": "zipseed", "cup_prize": "galeribbon", "table": {"zipseed": 40, "snack": 35, "sunsap": 15, "shellbark_chew": 10}}, "shove": {"first": "thumpnut", "cup_prize": "keepstone", "table": {"thumpnut": 35, "shellbark_chew": 25, "snack": 20, "sunsap": 10, "zipseed": 10}}, "seek": {"first": "hushpearl", "cup_prize": "puzzlenut", "table": {"hushpearl": 40, "snack": 35, "sunsap": 15, "thumpnut": 10}}, "volley": {"first": "hushpearl", "cup_prize": "galeribbon", "table": {"hushpearl": 30, "zipseed": 25, "snack": 25, "sunsap": 10, "shellbark_chew": 10}}}, "items": {"thumpnut": ["stat", "power", 3], "shellbark_chew": ["stat", "guard", 3], "zipseed": ["stat", "speed", 3], "hushpearl": ["stat", "focus", 3], "sunsap": ["stat", "xp", 40], "bristlethorn": ["path", "fierce", 0], "keepstone": ["path", "steadfast", 0], "puzzlenut": ["path", "curious", 0], "galeribbon": ["path", "swift", 0], "stayleaf": ["path", "stay", 0], "rinse_melon": ["lean", "rinse", 0], "unwind_tea": ["respec", "loose", 20]}, "line": {"level": 16, "ends": [{"name": "Amanitusk", "path": "fierce", "stat": "power", "sports": ["tumble"]}, {"name": "Ringrove", "path": "steadfast", "stat": "guard", "sports": ["shove"]}], "pips": {"stat_lead": 3, "tokens_max": 3, "ribbons_max": 2, "care_toy": 1}}} |
 
-## garden_seasons (`content/rules/garden_seasons.json`)
-
-Garden seasons (scripts/home/garden_seasons.gd; briefs/design/GARDEN_MODERN.md section 5 rank 9). Every few weeks one zone is in season, in list order, counted on the weekly-event clock (BaseRace.week_now, the device clock the save uses; no server). While in season: the zone's game plays its season twist (unless this week's weekly format is already for that game), the snack patch grows the season's snack on top of its four, and that game's Crown also gives the season's keepsake (rec.keepsakes, once a season per Boki).
-
-| Setting | Value |
-|---|---|
-| weeks | 2 |
-| weeks_doc | Weeks each season lasts. |
-| seasons | [{"zone": "bramblebank", "name": "Bramblebank", "game": "dash", "twist": "two_streams", "snack": "glowcap", "keepsake": {"id": "mossbank_acorn", "name": "Mossbank Acorn"}}, {"zone": "glasswater", "name": "Glasswater Shallows", "game": "volley", "twist": "seven_up", "snack": "mindmint", "keepsake": {"id": "rimeglass_pebble", "name": "Rimeglass Pebble"}}, {"zone": "cinderstep", "name": "Cinderstep", "game": "shove", "twist": "hot_ledge", "snack": "glowcap", "keepsake": {"id": "cinder_bead", "name": "Cinder Bead"}}, {"zone": "hushwood", "name": "Hushwood", "game": "seek", "twist": "night_seek", "snack": "mindmint", "keepsake": {"id": "lantern_moth_charm", "name": "Lantern Moth Charm"}}, {"zone": "kitewind", "name": "Kitewind Ridge", "game": "dash", "twist": "gusty", "snack": "starfruit", "keepsake": {"id": "ridge_kite_tassel", "name": "Ridge Kite Tassel"}}] |
-| seasons_doc | In rotation order. zone: GARDEN.md 10.2 zone id; game: the game that zone hosts (a garden_prizes.json game id); twist: an id in base_race.json twists or in twists below; snack: a Data.CROPS id the patch does not already grow; keepsake: what the season's Crown adds. |
-| twists | [{"id": "hot_ledge", "game": "shove", "name": "Hot ledge", "note": "The stump rocks harder: footing slips", "wobble": 0.95}] |
-| twists_doc | Season-only twists, in the same shape as base_race.json twists. wobble: Stump Shove's per-side push roll (base_shove.json wobble, +- fraction). |
-
 ## garden_trust (`content/rules/garden_trust.json`)
 
 Trust from care at the base (Care.trust_up). Petting, its habit food and winning together each raise trust by a named amount, shown to the player as one plain line. Trust stays 0 to 100 and nothing here lowers it. A habit (rec.habit.food) is picked when a Boki hatches, from its element (the species theme).
@@ -939,7 +1039,7 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 
 | Setting | Value |
 |---|---|
-| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models. |
+| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.xp_need). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models. |
 | feed | 2 |
 | feed_love | 5 |
 | pet | 1 |
@@ -947,6 +1047,10 @@ Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/gar
 | fetch | 3 |
 | fetch_love | 6 |
 | drill_per_point | 1 |
+| game | 8 |
+| game_win | 15 |
+| first_win_mult | 3 |
+| game_doc | A garden minigame (brief 2.5): game to the Boki that played, game_win instead when it won, times first_win_mult on the first win of the day in that game (GardenPrizes first). |
 | pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0} |
 
 ## garden_zones (`content/rules/garden_zones.json`)
@@ -978,7 +1082,7 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | pace | {"seeds": 200, "days": 16, "runs_a_day": 3, "run_lair_p": 0.5, "run_gems": 40, "garden_gems": 20, "zone_gems": 10, "biomes": ["meadow", "bloom", "frost", "ember", "storm", "gloom"], "meals": 2, "zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]} |
 | pace_doc | The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1]. |
 | hub_hints | {"start_s": 1.5, "start_s_doc": "Seconds after you arrive in the hub before its first hint can show.", "gap_s": 8.0, "gap_s_doc": "Seconds between two hub hints: one at a time, each longer than its 6 s on screen.", "near_m": 6.0, "near_m_doc": "Metres from the place a hint is about (the Waystone, the nest corner) at which it shows.", "list": [{"id": "waystone", "at": "waystone", "text": "The Waystone: step on the ring and press {interact} to travel."}, {"id": "nest", "at": "nest", "text": "The nest corner: pair two Boki here, hatch eggs and pass on gifts."}, {"id": "keys", "at": "waystone", "needs": "waystone", "locked": true, "text": "A dark stone needs two keys: a Wayseed and a Boki leaning its way. Its card shows both."}], "list_doc": "First-time hints, in order, each once per save (Save.d tutorial hub_hints): id, at (waystone or nest), needs (a hint seen first), locked (only while a zone sleeps), text."} |
-| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"], "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"], "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"]}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"]}} |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"], "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"], "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "clock": 0.7, "lair_biomes": ["bloom", "gloom"]}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"], "build": {"theme": "ridge", "seed": 5521, "sk": 0.85, "deco": [["toy_vent", 41, 33, 0], ["snack_patch", 43, 38, 0]], "clear": [20, 22, 58, 48], "scatter": {"seed": 31}}}} |
 | lair_biomes_doc | A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists). |
 | budget | {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5} |
 | budget_hub | {"draws": 200, "objects": 500, "nodes": 2000, "emitters": 6, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 0.5} |
@@ -1199,6 +1303,43 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 |---|---|
 | about | Sourced kit numbers the audit (briefs/specs/kit-audit) marks as matching the source. --kit-parity-check fails when content/archetypes/<hero>.json drifts outside tolerance. How to add a row: docs/ARCHETYPES.md, 'Kit parity lock'. |
 | rows | [{"hero": "gunslinger", "slot": "passive", "field": "resource.vamp", "value": 0.06, "tol": 0.0, "evidence": "D Ghost Combat Rush: +6% Omnivamp (supervive_kits.md)"}, {"hero": "gunslinger", "slot": "passive", "field": "resource.wait", "value": 3.5, "tol": 0.0, "evidence": "D Ghost Combat Rush: for 3.5s (supervive_kits.md)"}, {"hero": "gunslinger", "slot": "E", "field": "e.shave", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: hitting a hunter reduces CD by 20%"}, {"hero": "gunslinger", "slot": "E", "field": "e.shave_rank3", "value": 0.3, "tol": 0.0, "evidence": "D Arcane Railgun upg IV: -30% CD per target hit"}, {"hero": "gunslinger", "slot": "E", "field": "e.rattle_k", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: +20% dmg vs Dazed"}, {"hero": "gunslinger", "slot": "X", "field": "x.zone_t", "value": 3.0, "tol": 0.0, "evidence": "D Summon Napalm: 3s fire zone"}, {"hero": "mage", "slot": "RMB", "field": "rank_dmg.sec.2", "value": 1.9, "tol": 0.001, "evidence": "D Voltaic Spear upgs: +20% dmg x2, upg IV +50% dmg, added (docs/heroes/mage.md)"}, {"hero": "thief", "slot": "E", "field": "e.time", "value": 6.0, "tol": 0.0, "evidence": "D Farstep Dagger: after 6s Shiv MUST teleport back"}, {"hero": "thief", "slot": "E", "field": "e.refund_wall", "value": 0.25, "tol": 0.0, "evidence": "D Farstep Dagger upg: refund 25% CD on hitting terrain"}, {"hero": "thief", "slot": "E", "field": "e.refund_foe", "value": 0.5, "tol": 0.0, "evidence": "D Farstep Dagger upg: doubled (50%) on enemies"}, {"hero": "rimewright", "slot": "RMB", "field": "rmb.charges", "value": 2, "tol": 0.0, "evidence": "D Cryo Spear: 2 charges"}, {"hero": "dredge", "slot": "X", "field": "x.waves", "value": 2, "tol": 0.0, "evidence": "D Slugwave: two waves"}, {"hero": "juggernaut", "slot": "RMB", "field": "rmb.slam.dmg", "per": "lmb.dmg", "value": 3.0, "tol": 0.35, "evidence": "D Execution Slam 130 vs Caldera 43 = 3.0x (audit: 26/8 fine)"}, {"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"}, {"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"}, {"hero": "thief", "slot": "RMB", "field": "rmb.bola.lane_w", "value": 1.8, "tol": 0.18, "evidence": "F Trickshot lane about 1 bh wide = 1.8 m (hero-ref/dancer.md)"}, {"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"}] |
+
+## lantern_match (`content/rules/lantern_match.json`)
+
+Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6, scripts/home/lantern_match.gd). Only with farm_build.json base_mode on. Twelve glowcaps in a ring flash in pairs, then go dark; open two at a time to find the pairs. Your Boki sniffs every so often and points at the partner of the last cap you opened, if it saw that cap. Solo against the clock, or turn by turn against a Boki. Units: seconds, probabilities 0-1, joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| colours | ["#ffd166", "#7ee0ff", "#c69cff", "#8cf0a0", "#ff8fb1", "#ffa65c"] |
+| colours_doc | One glow colour per pair; the ring holds two caps of each (so 12 caps). |
+| flash_s | 0.6 |
+| flash_doc | When a ring is dealt each pair glows for flash_s seconds in turn, then all go dark; the clock waits while it flashes. |
+| time_s | 90 |
+| time_doc | The clock in seconds. Versus: whoever holds more pairs when it runs out (or the ring is cleared) wins; a tie is a draw. |
+| solo_goal | 18 |
+| solo_doc | Solo: a cleared ring deals a fresh one (and flashes again); find solo_goal pairs before the clock runs out to win. |
+| reveal_s | 0.9 |
+| reveal_doc | Two caps that do not match stay lit this long, then go dark. In versus the turn then passes; a match keeps the turn. |
+| sniff_s | 6 |
+| sniff_per_focus | 0.02 |
+| sniff_curiosity | 1 |
+| sniff_doc | Seconds between your Boki's sniffs: sniff_s / ((1 + Focus points * sniff_per_focus) * (1 + (curiosity - 0.5) * sniff_curiosity)), at least sniff_min. 50 Focus sniffs twice as often; a fully curious Boki half as often again. |
+| sniff_min | 1 |
+| see | 0.4 |
+| see_per_focus | 0.008 |
+| see_doc | Chance your Boki notices a pair while it flashes: see + Focus points * see_per_focus, at most 1. Every cap opened in play it always sees. |
+| foe_mem | 0.45 |
+| foe_mem_per_focus | 0.008 |
+| foe_mem_doc | Versus: the chance the rival Boki remembers a cap it has seen (in the flash or opened by anyone): foe_mem + its Focus points * foe_mem_per_focus, at most 0.95. |
+| foe_s | 0.8 |
+| foe_doc | Seconds the rival Boki takes before each cap it opens. |
+| energy | 6 |
+| win_joy | 10 |
+| win_trust | 3 |
+| lose_joy | -6 |
+| gems | 4 |
+| gems_doc | Gems to you when a game ends (win or not). |
+| card_s | 6 |
 
 ## lean (`content/rules/lean.json`)
 
@@ -1496,7 +1637,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | trait_weight | 1 |
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
-| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
+| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound", "tempest", "storm", "lunar", "echo"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types (species themes tempest, storm, lunar, echo today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
 ## tuning (`content/rules/tuning.json`)
 

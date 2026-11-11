@@ -48,9 +48,7 @@ static func _row(rec: Dictionary, s: String) -> Control:
 ## Under a stat's bar: its last change and what caused it (StatCause.last).
 static func _cause(rec: Dictionary, s: String) -> Label:
 	var why := StatCause.last(rec, s)
-	var line := UI.label(why if why != "" else "No training yet", 12, UI.MUTED if why != "" else UI.FAINT)
-	line.name = "Cause_" + s
-	return line
+	return UI.label(why, 12, UI.MUTED) if why != "" else UI.label("No training yet", 12, UI.FAINT)
 
 static func _draw_marks(c: Control, rec: Dictionary, cap_max: float) -> void:
 	for b in StatBudget.rules()["bands"]:

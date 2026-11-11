@@ -316,8 +316,8 @@ func _migrate_11_to_12(data: Dictionary) -> void:
 		data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
 
 ## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
-## (every Boki gets its worn-token slots and loose points, Care.ensure) and sleepovers. A v12 save from either line gets the
-## other half of v12 first (every step only adds what is missing).
+## (every Boki gets its worn-token slots and loose points, Care.ensure) and sleepovers. A v12 save from either
+## line gets the other half of v12 first (every step only adds what is missing).
 func _migrate_12_to_13(data: Dictionary) -> void:
 	_migrate_11_to_12(data)
 	GardenZones.migrate(data)

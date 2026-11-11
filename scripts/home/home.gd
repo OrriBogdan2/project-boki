@@ -1468,7 +1468,8 @@ func _move_kin(d: float) -> void:
 				k["t"] = randf_range(1.5, 3.0)
 				if k["chase_t"] > 0.0:
 					_emote(k, "♪"); _emote(other, "!")
-					Sfx.play(KinVoice.cue(other["rec"]["species"], "happy"), other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					var chirp := KinVoice.cue(other["rec"]["species"], "happy")
+					Sfx.play(chirp, other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -3510,7 +3511,10 @@ func _open_expedition() -> void:
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
 	var solo := ExpMode.is_solo()
-	var mtabs := UI.tabs(["Solo", "Trios"], "Solo" if solo else "Trios", func(nm): Save.d["exp_mode"] = "solo" if nm == "Solo" else "trio"; _open_expedition(), {}, 96)
+	var pick_mode := func(nm: String) -> void:
+		Save.d["exp_mode"] = "solo" if nm == "Solo" else "trio"
+		_open_expedition()
+	var mtabs := UI.tabs(["Solo", "Trios"], "Solo" if solo else "Trios", pick_mode, {}, 96)
 	for tb in mtabs.get_child(0).get_children():
 		tb.tooltip_text = ExpMode.TEXT["solo" if String(tb.get_meta("tab")) == "Solo" else "trio"]
 	right.add_child(mtabs)

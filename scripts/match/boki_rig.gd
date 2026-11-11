@@ -255,7 +255,8 @@ static func work_clip(k: Dictionary) -> String:
 ## look). Returns the head frame, as
 ## KinModels.build.
 static func build(kin_id: String, flex_node: Node3D, c: Dictionary, mats: Array) -> Dictionary:
-	var model_root := _scene(BokiSex.model_path(kin_id, c.get("rec", {}), PATH % [kin_id, kin_id])).instantiate() as Node3D
+	var path := BokiSex.model_path(kin_id, c.get("rec", {}), PATH % [kin_id, kin_id])
+	var model_root := _scene(path).instantiate() as Node3D
 	model_root.name = "Rig"
 	flex_node.add_child(model_root)
 	var rig := BokiRig.new()
