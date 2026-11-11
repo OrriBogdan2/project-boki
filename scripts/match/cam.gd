@@ -259,7 +259,10 @@ func mouse_ray() -> Array:
 
 ## Where the mouse points on the horizontal plane at height y.
 func mouse_on_plane(y: float) -> Vector3:
-	var mp := get_viewport().get_mouse_position()
+	return screen_on_plane(get_viewport().get_mouse_position(), y)
+
+## Where screen point mp points on the horizontal plane at height y.
+func screen_on_plane(mp: Vector2, y: float) -> Vector3:
 	var o := project_ray_origin(mp)
 	var d := project_ray_normal(mp)
 	if absf(d.y) < 0.0001:
