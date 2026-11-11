@@ -10,6 +10,8 @@ const STEP := 0.05            # s: one simulated frame
 const WORK_SECONDS := 8.0     # s: more than three swings
 const IN_FRONT := 0.15        # m: the Boki stands this far from you, towards the boulder (its body overlaps you)
 const OFF_LANE := 0.1         # m: and this far to the side of the straight line
+const FILM_AHEAD := 0.55      # m: in the clip it stands clear of your body, so it shows (still nearer than the boulder)
+const FILM_SIDE := 0.35
 
 var bad := 0
 var main: Node
@@ -84,9 +86,9 @@ func _rock_center(i: int) -> Vector3:
 	return Vector3(i % w.w + 0.5, 0, i / w.w + 0.5)
 
 ## The Boki in front of you, between you and the boulder.
-func _block(rock: int, pet: Dictionary) -> void:
+func _block(rock: int, pet: Dictionary, ahead := IN_FRONT, side := OFF_LANE) -> void:
 	var to_rock: Vector3 = (_rock_center(rock) - home.ppos).normalized()
-	_put(pet, home.ppos + to_rock * IN_FRONT + Vector3(-to_rock.z, 0, to_rock.x) * OFF_LANE)
+	_put(pet, home.ppos + to_rock * ahead + Vector3(-to_rock.z, 0, to_rock.x) * side)
 	pet["hold_t"] = 0.0
 	pet.erase("joy_t")
 
@@ -160,14 +162,14 @@ func _mine_live(rock: int, pet: Dictionary) -> void:
 	var start := Time.get_ticks_msec()
 	var c := _rock_center(rock)
 	Settings.set_v("cam_style", "low", false)
-	home.cam.zoom_to = 0.55
-	home.cam.zoom = 0.55
+	home.cam.zoom_to = 0.45
+	home.cam.zoom = 0.45
 	home.cam.snap(home.ppos.lerp(c, 0.5))
 	if main.fade:
 		main.fade.reveal(0.05)
-	_block(rock, pet)
+	_block(rock, pet, FILM_AHEAD, FILM_SIDE)
 	await _film(1.2)
-	_block(rock, pet)
+	_block(rock, pet, FILM_AHEAD, FILM_SIDE)
 	home._find_interact()
 	ok(home.interact.get("kind") == "wild", "live: interact targets the boulder")
 	home.tw.test_hold = true
