@@ -4,7 +4,7 @@
 		"ground": {
 			"lmb": {
 				"mode": "buffer",
-				"source": "Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch. Ours: a 0.07s dip and a ~0.2s drive; a slash pressed in the dip or the drive swings as the drive ends."
+				"source": "Data: Flame Step is itself the attack ('dash attack in facing direction'); footage 0372-0377: crouch, ~0.3s drive, ~0.35s low recovery, no slash inside it; hero-ref 0387: about 2 bh in about 0.2s. Owner 113.8: much shorter than the footage crouch; owner 11-11: a movement dash first, no crouch. Ours: a ~0.2s drive from the press; a slash pressed in it swings as the drive ends."
 			},
 			"rmb": {
 				"mode": "fire",
@@ -17,7 +17,7 @@
 			},
 			"x": {
 				"mode": "cancel",
-				"source": "Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash (or its crouch) and he plants into the guard."
+				"source": "Data: Volcanic Rebuke makes him Invulnerable, then he strikes back; footage ult f33-f38: planted through the guard; the sheet's combo is 'dive with Quick Dash, then the guard'. Ours: X ends the dash and he plants into the guard."
 			},
 			"q": {
 				"mode": "fire",
@@ -71,7 +71,7 @@
 		"lmb": {
 			"ground": {
 				"mode": "keep",
-				"source": "Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's crouch and drive and goes on charging after it; let go in it, the wave goes as the drive ends."
+				"source": "Footage card: 'Dash while attacking'; nothing in the data ends the charge. Ours: the Searing Wave charge waits through the Rampage's drive and goes on charging after it; let go in it, the wave goes as the drive ends."
 			},
 			"air": {
 				"mode": "keep",

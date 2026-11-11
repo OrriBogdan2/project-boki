@@ -45,6 +45,8 @@ var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
 var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
+const GLIDE_CATCH := 0.2       # s after the Rampage's drive in which a glide opened still leaves at its carry
+var drive := {}                # the last Rampage drive in the air: {dir, end (m.time)}, until a glide or GLIDE_CATCH
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
@@ -59,8 +61,6 @@ var lunge_full := false        # the Lunge charge reached full (its flash played
 var perfect_flashed := -1      # the last perfect window whose cue played (-1: none this hold)
 var perfects := 0              # (tests) Lunges let go in a perfect window
 var knock_healed := 0.0        # (tests) health the knock heals gave back
-var rampage_wind := 0.0        # the Rampage's crouch still to go before the drive
-var rampage_dir := Vector2.ZERO  # the way the Rampage will drive once its crouch ends
 
 func _setup() -> void:
 	riposte = JuggernautUlt.new(self)
@@ -158,7 +158,7 @@ func _tick_look(dt: float) -> void:
 func _tick(dt: float) -> void:
 	_tick_look(dt)
 	_tick_trail()
-	if rampage_wind > 0.0: _tick_crouch(dt)
+	_tick_glide_catch()
 	var rd := res_def()
 	if enraged_t > 0.0:
 		enraged_t -= dt
@@ -257,7 +257,6 @@ func has_ult() -> bool:
 	return true
 
 func _start_riposte() -> bool:
-	rampage_wind = 0.0                 # X in the Rampage's crouch (its dash row: cancel): no drive after the guard
 	riposte.start()
 	return true
 
@@ -293,7 +292,6 @@ func _wk() -> float:
 ## cleave). Nothing fires and nothing is left over.
 func _drop_holds() -> void:
 	riposte.drop()
-	rampage_wind = 0.0
 	lmb_t = -1.0
 	lmb_buf = 0.0
 	h.mel_hold = 0.0
@@ -481,51 +479,46 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	var dd := dash_def()
 	var in_hang := meteor.running()           # the Smash's gather: the drive rides it, the gather pose kept
-	var wind := 0.0 if from_pull or from_slam or in_hang else float(dd.get("windup", 0.15))
 	var dir: Vector2 = slam_w["dir"] if from_slam else dash_dir()
-	rampage_dir = dir
 	st["last_dash"] = "rampage"
-	# its wind-down: no glider straight out of the dash's end (a glide pressed during it opens at once, owner 11-08)
-	var dash_end := wind + float(dd["time"])
-	m.later(dash_end, func(): if is_instance_valid(h) and not h.gliding: h.glide_cd = maxf(h.glide_cd, 0.35))
-	if from_slam or in_hang:
-		_rampage(dir)                # the Slam's own keys run on: the overhead blade rides the drive in
-		return true
-	play("jug_dash")                 # the crouch with the blade cocked high behind, then the drive
-	if from_pull:
-		anim_at -= float(dd.get("windup", 0.15))       # (straight into the drive's keys)
-		_rampage(dir)
-		return true
-	vfx("dash_wind", h.pos, dir)
-	# the crouch is the dash's start standing still (planted; DashFlow and the dash rules see the dash from here)
-	rampage_wind = wind
-	h.dash_with({"type": "dash", "speed": 0.0, "time": wind, "dir": dir, "invuln": 0.0})
+	if not (from_slam or in_hang):
+		# a movement dash first: no planted crouch, the drive goes at once with the run carried in
+		play("jug_dash")
+		anim_at -= float(dash_def()["clip_lead"])       # (straight into the clip's drive keys)
+	_rampage(dir)
 	return true
 
-## The crouch before the drive: the drive goes when it's done, unless something ended the dash first (a stun,
-## a dash row's cancel such as X, a merge).
-func _tick_crouch(dt: float) -> void:
-	if h.roll_t <= 0.0 or h.downed or h.stun_t > 0.0:
-		rampage_wind = 0.0
-		return
-	rampage_wind -= dt
-	if rampage_wind <= 0.0:
-		rampage_wind = 0.0
-		_rampage(rampage_dir)
-
-## Rampage's drive after the crouch: the dash attack along `dir`, the tip at its end.
+## Rampage's drive: the dash attack along `dir`, the tip at its end.
 func _rampage(dir: Vector2) -> void:
 	var dd := dash_def()
 	var t := float(dd["time"])
 	var pk := power("dash") / maxf(0.01, m.dmg_mult(h))
-	rampage_wind = 0.0
 	travel(float(dd["dist"]), t,
 			{"invuln": 0.06, "shove": true, "shove_kb": float(dd["hit_kb"]), "shove_dmg": float(dd["hit_dmg"]) * pk,
 					"trail": "dust", "dir": dir, "curved": true})
 	vfx("dash_go", h.pos, dir, {"len": float(dd["dist"]) * float(dash_feel()["dist"])})
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
+	drive = {"dir": dir, "end": m.time + h.roll_t}
+
+## Jump, Shift, Space is a fast way to travel: a glide opened in the drive takes its speed
+## (Hunter._dash_into_glide); one opened up to GLIDE_CATCH after it still leaves at the glide carry.
+func _tick_glide_catch() -> void:
+	if drive.is_empty():
+		return
+	if h.gliding:
+		var hv := Vector2(h.vel.x, h.vel.z)
+		var way: Vector2 = hv.normalized() if hv.length() > 0.5 else drive["dir"]
+		hv = way * maxf(hv.length(), Loco.glide_carry(h.arch))
+		h.vel.x = hv.x
+		h.vel.z = hv.y
+	if h.gliding or h.grounded or m.time - float(drive["end"]) > GLIDE_CATCH:
+		drive = {}
+
+## The air Rampage keeps a jump's rise (under gravity) and holds his height from its top: the drive never cuts the
+## jump short, so a Space after it still has the air to glide.
+func dash_vy(dt: float) -> float:
+	return maxf(h.vel.y - Hunter.H_GRAV * dt, 0.0)
 
 ## His own after-images on a dash: orange flame streaks along the ground behind him, not the shared pill.
 func own_dash_trail() -> bool:
@@ -547,7 +540,7 @@ func _tip() -> void:
 				{"src": "abil", "ab": "dodge", "tags": ["dodge", "tip"], "kb": dv * float(dd["tip_kb"]),
 						"melee": true, "crit": true})
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "TIP", res_col(), false)
-	vfx("dash_tip", h.pos, dv, {"hit": hit})
+	vfx("dash_tip", h.pos, dv, {"hit": hit, "ground": h.grounded, "air": not h.grounded})
 	if hit:
 		tips += 1
 

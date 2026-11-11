@@ -298,7 +298,7 @@ func _judge() -> void:
 		_ok(name_i + ": no hitch", worst <= limit and (comp == 0 or not software),
 				"worst %.0f ms, limit %.0f ms (window median %.0f), %d compiles" % [worst, limit, med, comp])
 
-## The frames of the first dash in a window. Rampage's crouch and drive, under JOIN_S apart, are one; a later roll
+## The frames of the first dash in a window (rolls under JOIN_S apart are one); a later roll
 ## is the terrain's (running on into the rocks after the dash).
 func _dash_of(fs: Array) -> Array:
 	var out: Array = []

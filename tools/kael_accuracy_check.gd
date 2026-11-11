@@ -258,7 +258,7 @@ func short_dash() -> void:
 	var t0: float = m.time
 	P.do_dash()
 	var t := 0.0
-	while (P.roll_t > 0.0 or K.rampage_wind > 0.0 or t < A.DT * 2.0) and t < 1.0:
+	while (P.roll_t > 0.0 or t < A.DT * 2.0) and t < 1.0:
 		m.step(A.DT)
 		t += A.DT
 	var commit: float = m.time - t0

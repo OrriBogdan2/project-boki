@@ -314,8 +314,7 @@ func chain_pull() -> void:
 	P.do_dash()
 	A.step(m, 0.04)
 	A.ok("jug pull: Shift exits into the Rampage's drive at once",
-			W.exits == "dash" and W.state == "ready" and P.roll_t > 0.0 and P.move_kind == "dash"
-			and K.rampage_wind <= 0.0,
+			W.exits == "dash" and W.state == "ready" and P.roll_t > 0.0 and P.move_kind == "dash",
 			"exit %s roll %.2f kind %s" % [W.exits, P.roll_t, P.move_kind])
 	# a jump in the pull: a chain launch that keeps most of the speed; RMB then is the Meteor Drop
 	_settle(m, P, K, home)
@@ -533,7 +532,7 @@ func dash_moves() -> void:
 	P.inp["move"] = Vector2.ZERO
 	var g_len := _last_key(ground)
 	var a_len := _last_key(air)
-	var g_dash := float(dd["windup"]) + float(dd["time"]) * float(feel["time"])
+	var g_dash := float(dd["clip_lead"]) + float(dd["time"]) * float(feel["time"])
 	var a_dash := float(P.cdat.get("ex_time", 0.21)) * float(feel["time"])
 	A.ok("jug dash moves: his own ground and air dashes (jug_dash, jug_exdash), nobody else's table has them",
 			ground == "jug_dash" and air == "jug_exdash" and KMovesDJ.MOVES.has(ground) and KMovesDJ.MOVES.has(air)
@@ -622,7 +621,7 @@ func _into_dash(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
 		var charging := K.lmb_t > 0.0 and K.waves == waves0
 		var moved := P.dashes < 2.5 or P.ex_cd > 0.0
 		var end := 0.0
-		while (P.roll_t > 0.0 or K.rampage_wind > 0.0) and end < 1.0:
+		while P.roll_t > 0.0 and end < 1.0:
 			P.inp["fire"] = true
 			m.step(A.DT)
 			end += A.DT
