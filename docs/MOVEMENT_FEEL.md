@@ -407,6 +407,114 @@ The source: mashing the mouse never beats holding. The weapon's cadence caps bot
 - **Fixed, Lace's draw (the shared bow path, `Hunter._loose`):** a release inside the weapon's `draw_min` (longbow 0.08 s) looses nothing and the next press draws afresh. 20 Hz clicks used to loose a 15-damage tap arrow on every 0.5 s cooldown (6 arrows, 90, as much as the best hold). A deliberate tap (0.1 s or more) still looses the 15 tap shot.
 - In no other kit do the clicks get past the weapon's cadence: no clicks run beat the best play by more than one shot, so the shared press path (hunter.gd's `trigger`, DashFlow) needed no change.
 - Kael's 3 s hold is one Searing Wave (20). His clicks are the slash series, a separate move (source: press = series, hold = blast), at the same cadence as deliberate taps. How the series' damage compares with the wave's is a numbers question, not an input one.
+## Press to picture: key to first visible frame (`--press-latency-check`)
+
+How many frames pass between a key going down and the first frame its result is on screen, for every hero's LMB, RMB, E, R (the Merge), dash and jump, at 60 and 144 Hz. Budget: 2 frames at 60 Hz, and the same 33 ms at 144 Hz (4 frames); the check fails above it.
+
+```
+XDG_DATA_HOME=<scratch> godot --headless --path . -- --press-latency-check            # all twelve
+XDG_DATA_HOME=<scratch> godot --headless --path . -- --press-latency-check=thief,ostra
+```
+
+**How it measures.** `tools/press_latency_check.gd` drives `Match._process` one call per engine frame at the case's refresh rate, so the whole real path is on the clock: the Input flush, `_gather_input`, the 60 Hz fixed steps under the accumulator, the interpolated render. It presses through the real Input actions (`fire`, `secondary`, `signature`, `ultimate`, `dash`, `jump`) with a 33 ms tap, and stamps two frames: `sim`, the first frame the simulation acted (a shot, a charge spent, a cast, a dash or jump under way, a draw or wind-up started), and `vis`, the first frame something is on screen (a shot or node spawned, the hunter's rendered position moving, the cast or kit-move pose, a swing, the bow draw, the muzzle flash). Frame 0 is the frame of the press. At 144 Hz every press is tried at the three phases of the 60 Hz tick and the latest kept. Between cases the hunter waits until it is at rest; a case where it is not is void and fails, so a long move leaking into the next press can never pass as "fast".
+
+**The path, and where a frame could hide.** A press lands in `_gather_input`, which runs at the top of the same `_process`, before the steps. `Input.is_action_just_pressed` goes into `pending_input`, which the next `step` turns into the hunter's `inp` flags; `inp["fire"]` is read as a level, so a held button fires on the first step that sees it. Nothing on the ability path is deferred to a later frame: no `call_deferred`, no `await`, no Timer; the kits' wind-ups (`Match.later`, the R fuse, a dash "windup") run on match time inside `step`, and their first visible sign (the pose, the telegraph) is on the press frame. The render reads the state the steps just produced in the same `_process` (`LOCAL_RENDER_LEAD`: the local hunter is drawn at `pos + step * alpha`, never a tick behind), and shot nodes are placed the frame they spawn. The one hop is the fixed step itself: at 144 Hz a press can wait up to two frames (14 ms) for the accumulator to reach the next 60 Hz tick; at 60 Hz every frame runs a step.
+
+**Result: nothing over budget, nothing to fix.** Every hero's six keys show their result on the press frame at 60 Hz (0 frames), and within 2 frames at 144 Hz, with three readings at 3 (Tenzo's RMB and E, Meeko's RMB: the cast or kit-move pose eases in from zero over its first 60 Hz tick, so the pose is read one tick after the sim accepted). Before and after are the same table, since no game code changed for latency; the table below is the trace. Measured headless on rpc1 and on a real GPU (Forward+, RTX 4090, through jobq): the same frames.
+
+Causes traced and cleared, with where each would have cost a frame:
+
+| Suspect | Found | Frames |
+|---|---|---|
+| Input polled late in the frame | `_gather_input` runs first in `Match._process`, before the steps; the step in the same call acts on it | 0 |
+| `pending_input` to `inp` handoff | just-pressed flags go into `pending_input`, the next `step` moves them into the hunter's `inp`; at 60 Hz that step is in the same frame | 0 (60 Hz), the tick hop at 144 Hz |
+| A deferred call, `await`, Timer | none on the key paths (`scripts/arch`, `hunter.gd`, `match.gd`); the one `call_deferred` in combat is `HunterFeats._watch_knock`, bookkeeping after a knock | 0 |
+| A wait on an animation event | none: casts stamp `cast_at`, the pose follows the sim state in the same render | 0 |
+| Wind-ups (`Match.later`, the R fuse, a dash `windup`) | run on match time inside `step`; the pose or telegraph shows on the press frame, the effect lands when the data says | 0 to first sign |
+| The physics tick hop | the 60 Hz accumulator: at 144 Hz a press waits 0 to 2 frames for the next tick (14 ms at most) | 0 to 2 (144 Hz) |
+| Render a tick behind the sim | `LOCAL_RENDER_LEAD`: the local hunter is drawn at `pos + step * alpha`, shot nodes are placed the frame they spawn | 0 |
+| Release-shaped keys | an RMB with a hold variant (Kael 0.3 s, Cinder 0.15, Tenzo 0.2, Lace 0.15, Neve 0.2, Motley 1.0, Mossy 0.1) and a charged sword (Tenzo's fists) fire on the release by design; the result is on the release frame | 0 from the release |
+
+**Per hero** (frames from the event to the sim acting / to the first thing on screen; "first sign" is press to the first visible sign for the release-shaped keys; via names what showed first):
+
+| Hero | Key | 60 Hz sim/vis | first sign | 144 Hz sim/vis | first sign | via |
+|---|---|---|---|---|---|---|
+| Vex (gunslinger) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Vex (gunslinger) | RMB | 0/0 |  | 2/2 |  | kit move / kit move |
+| Vex (gunslinger) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Vex (gunslinger) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Vex (gunslinger) | dash | 0/0 |  | 2/2 |  | move / move |
+| Vex (gunslinger) | jump | 0/0 |  | 2/2 |  | move / move |
+| Kael (juggernaut) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Kael (juggernaut) | RMB | 0/0 | 0 | 0/0 | 2 | cast pose / cast pose |
+| Kael (juggernaut) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Kael (juggernaut) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Kael (juggernaut) | dash | 0/0 |  | 2/2 |  | move / move |
+| Kael (juggernaut) | jump | 0/0 |  | 2/2 |  | move / move |
+| Cinder (ashwick) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Cinder (ashwick) | RMB | 0/0 | 0 | 0/0 | 2 | cast pose / cast pose |
+| Cinder (ashwick) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Cinder (ashwick) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Cinder (ashwick) | dash | 0/0 |  | 2/2 |  | move / move |
+| Cinder (ashwick) | jump | 0/0 |  | 2/2 |  | move / move |
+| Meeko (tender) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Meeko (tender) | RMB | 0/0 |  | 1/3 |  | kit move / kit move |
+| Meeko (tender) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Meeko (tender) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Meeko (tender) | dash | 0/0 |  | 2/2 |  | move / move |
+| Meeko (tender) | jump | 0/0 |  | 2/2 |  | move / move |
+| Tenzo (dolm) | LMB | 0/0 | 2 | 2/2 | 7 | shot / shot |
+| Tenzo (dolm) | RMB | 0/0 | 2 | 0/3 | 8 | kit move / cast pose |
+| Tenzo (dolm) | E | 0/0 |  | 1/3 |  | kit move / cast pose |
+| Tenzo (dolm) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Tenzo (dolm) | dash | 0/0 |  | 2/2 |  | move / move |
+| Tenzo (dolm) | jump | 0/0 |  | 1/1 |  | move / move |
+| Lace (archer) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Lace (archer) | RMB | 0/0 | 0 | 0/0 | 2 | cast pose / cast pose |
+| Lace (archer) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Lace (archer) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Lace (archer) | dash | 0/0 |  | 2/2 |  | move / move |
+| Lace (archer) | jump | 0/0 |  | 2/2 |  | move / move |
+| Grimble (dredge) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Grimble (dredge) | RMB | 0/0 |  | 2/2 |  | kit move / kit move |
+| Grimble (dredge) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Grimble (dredge) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Grimble (dredge) | dash | 0/0 |  | 2/2 |  | move / move |
+| Grimble (dredge) | jump | 0/0 |  | 2/2 |  | move / move |
+| Neve (rimewright) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Neve (rimewright) | RMB | 0/0 | 0 | 0/0 | 2 | cast pose / cast pose |
+| Neve (rimewright) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Neve (rimewright) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Neve (rimewright) | dash | 0/0 |  | 2/2 |  | move / move |
+| Neve (rimewright) | jump | 0/0 |  | 2/2 |  | move / move |
+| Motley (mage) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Motley (mage) | RMB | 0/0 | 0 | 0/0 | 2 | cast pose / cast pose |
+| Motley (mage) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Motley (mage) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Motley (mage) | dash | 0/0 |  | 2/2 |  | move / move |
+| Motley (mage) | jump | 0/0 |  | 2/2 |  | move / move |
+| Mossy (bulwark) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Mossy (bulwark) | RMB | 0/0 | 0 | 0/0 | 2 | cast pose / cast pose |
+| Mossy (bulwark) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Mossy (bulwark) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Mossy (bulwark) | dash | 0/0 |  | 2/2 |  | move / move |
+| Mossy (bulwark) | jump | 0/0 |  | 2/2 |  | move / move |
+| Sparkle (thief) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Sparkle (thief) | RMB | 0/0 |  | 2/2 |  | kit move / kit move |
+| Sparkle (thief) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Sparkle (thief) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Sparkle (thief) | dash | 0/0 |  | 2/2 |  | move / move |
+| Sparkle (thief) | jump | 0/0 |  | 2/2 |  | move / move |
+| Sable (ostra) | LMB | 0/0 |  | 2/2 |  | shot / shot |
+| Sable (ostra) | RMB | 0/0 |  | 2/2 |  | kit move / kit move |
+| Sable (ostra) | E | 0/0 |  | 2/2 |  | kit move / kit move |
+| Sable (ostra) | R | 0/0 |  | 2/2 |  | merge / merge |
+| Sable (ostra) | dash | 0/0 |  | 2/2 |  | kit move / kit move |
+| Sable (ostra) | jump | 0/0 |  | 2/2 |  | move / move |
+
+**Worth a look (not built, PARITY FIRST):** Tenzo's LMB and RMB are the only keys that show nothing on the press frame: both wait for the release (first sign 2 frames at 60 Hz, 7 to 8 at 144: the 33 ms tap plus the tick hop), where every other hold-variant RMB plants its cast pose on the press. If the source shows a wind-up on the press for his fists or his RMB hold, that pose is the fix; if not, this is parity.
+
+Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
 
 ## Not touched
 
