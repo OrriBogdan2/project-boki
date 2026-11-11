@@ -68,13 +68,13 @@ func run(main: Node) -> void:
 	var loaded: Array = []
 	for a in Arch.ids():
 		var m := _model(a)
-		var head := m.get_node("Rig/Torso/HeadPivot/Head") as MeshInstance3D
+		var head := m.get_node_or_null("Rig/Torso/HeadPivot/Head") as MeshInstance3D      # (a .glb's has none)
 		if WardenGlb.has_model(a):
-			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and not head.visible:
+			if bool(m.get_meta("glb", false)) and m.has_node("Warden") and head == null:
 				loaded.append(a)
 			else:
 				print("WARDENGLB %s has a .glb that did not load" % a)
-		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head.visible:
+		elif not bool(m.get_meta("glb", true)) and not m.has_node("Warden") and head != null and head.visible:
 			fallback.append(a)
 		m.free()
 	ok(fallback.size() + loaded.size() == Arch.ids().size(),

@@ -3,9 +3,11 @@ extends RefCounted
 ## once per skin and only recoloured per Hunter (same geometry, the skin's colours on it). A duel reads only
 ## your Warden's .glb; a match with rival squads reads every Warden's and every common Boki's on loader
 ## threads from its start. A Hunter's glider shares its strings' mesh and paints its own canopy. A Warden
-## drawn from its .glb keeps the rig nodes that drive its bones but none of the hidden procedural body's
-## loose parts; set to procedural, the same Warden still merges its body.
+## drawn from its .glb builds only the rig nodes that drive its bones and the pieces it keeps, no procedural
+## body (HunterBody), and that rig rests where the procedural one does in the same look; set to procedural,
+## the same Warden still builds and merges its body.
 
+const MANTLE_CHECK := preload("res://tools/mantle_look_check.gd")
 const RIG := ["Rig/Torso", "Rig/Torso/HeadPivot", "Rig/Torso/ArmLPivot/Elbow/Hand", "Rig/Legs/LegR/Knee"]
 
 var bad := 0
@@ -52,14 +54,15 @@ func _fetches() -> void:
 	_ok("and every common Boki's (missing %s)" % str(kin_missing), kin_missing.is_empty())
 	BackgroundWork.drain()
 
-func _loose(n: Node) -> int:
+## The procedural body's meshes under n (not the .glb, nor the pieces it keeps).
+func _body_meshes(n: Node) -> int:
 	var c := 0
 	for ch in n.get_children():
 		if String(ch.name) in WardenGlb.KEEP or ch.name == "Warden":
 			continue
-		if ch is MeshInstance3D and String(ch.name).begins_with("@"):
+		if ch is MeshInstance3D:
 			c += 1
-		c += _loose(ch)
+		c += _body_meshes(ch)
 	return c
 
 func _glider_meshes(m: Node3D) -> Array:
@@ -76,7 +79,7 @@ func _bodies(main: Node) -> void:
 	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", look, a)
 	main.add_child(m)
 	_ok("a .glb Warden keeps its rig nodes", RIG.all(func(p): return m.has_node(p)))
-	_ok("a .glb Warden keeps no hidden loose parts (%d)" % _loose(m), _loose(m) == 0)
+	_ok("a .glb Warden builds no procedural body (%d meshes)" % _body_meshes(m), _body_meshes(m) == 0)
 	var m2 := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[1], Arch.signature(a), "", look, a)
 	var g1 := _glider_meshes(m)
 	var g2 := _glider_meshes(m2)
@@ -87,9 +90,29 @@ func _bodies(main: Node) -> void:
 	m2.free()
 	WardenGlb.set_model(a, false)
 	var pm := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", PlayerLook.random(), a)
-	_ok("set to procedural, the body is built and merged", not WardenGlb.will_dress(a) and _loose(pm) > 0)
+	_ok("set to procedural, the body is built and merged", not WardenGlb.will_dress(a) and _body_meshes(pm) > 0)
 	pm.free()
 	WardenGlb.set_model(a, true)
+	for w in Arch.ids():
+		if WardenGlb.will_dress(w):
+			_same_rig(w)
+
+## Built from its .glb or procedural, a Warden in a look away from the neutral one (every slider at the top) has
+## the same rig: every bone's node at rest (the head's size with it), the hip height, the arm length, its size.
+func _same_rig(a: String) -> void:
+	var look := MANTLE_CHECK.flat(1.0)
+	var g := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", look, a)
+	WardenGlb.set_model(a, false)
+	var p := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", look, a)
+	WardenGlb.set_model(a, true)
+	var gr: Dictionary = g.get_meta("rig_rest")
+	var pr: Dictionary = p.get_meta("rig_rest")
+	var off := gr.keys().filter(func(b): return not pr.has(b) or not (gr[b] as Transform3D).is_equal_approx(pr[b]))
+	var same: bool = off.is_empty() and gr.size() == pr.size() and g.get_meta("hip_y") == p.get_meta("hip_y") \
+			and g.get_meta("arm_k") == p.get_meta("arm_k") and g.scale.is_equal_approx(p.scale)
+	_ok("%s: its .glb's rig is the procedural rig (%d bones, off %s)" % [a, gr.size(), str(off)], same)
+	g.free()
+	p.free()
 
 func _ok(what: String, cond: bool) -> void:
 	print("LOADTRIM %s %s" % ["ok  " if cond else "FAIL", what])
