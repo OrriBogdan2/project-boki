@@ -84,6 +84,21 @@ func close_map() -> void:
 	if full_map:
 		full_map.close()
 
+## The match's HUD windows (map, backpack, swap) hold UiFocus.panel one at a time: taking it closes the
+## window that had it. While one is up nothing reaches the hunter (Match._gather_input).
+func take_focus(id: String) -> void:
+	var old := UiFocus.panel
+	UiFocus.panel = id
+	if old == id:
+		return
+	if old == UiFocus.MAP: close_map()
+	elif old == UiFocus.PACK: close_pack()
+	elif old == UiFocus.SWAP: close_swap()
+
+func drop_focus(id: String) -> void:
+	if UiFocus.panel == id:
+		UiFocus.panel = ""
+
 func _unhandled_input(event: InputEvent) -> void:
 	if full_map and full_map.input(event):
 		get_viewport().set_input_as_handled()
@@ -2653,6 +2668,7 @@ func _fit_panel(pc: PanelContainer, sc: ScrollContainer, rows: VBoxContainer) ->
 
 func open_swap(wp: Dictionary) -> void:
 	close_pack()
+	take_focus(UiFocus.SWAP)
 	swap_wp = wp
 	_build_swap()
 	if swap_panel: UI.pop_in(swap_panel)
@@ -2660,6 +2676,7 @@ func open_swap(wp: Dictionary) -> void:
 
 func close_swap() -> void:
 	swap_wp = null
+	drop_focus(UiFocus.SWAP)
 	if swap_panel and is_instance_valid(swap_panel):
 		swap_panel.queue_free()
 	swap_panel = null
@@ -2706,13 +2723,14 @@ func toggle_pack() -> void:
 	if pack_open():
 		close_pack()
 	else:
-		close_swap()
+		take_focus(UiFocus.PACK)
 		pack_sig = ""
 		_build_pack()
 		if pack_panel: UI.pop_in(pack_panel)
 		Sfx.play("ui_open", null, -10.0)
 
 func close_pack() -> void:
+	drop_focus(UiFocus.PACK)
 	if pack_panel and is_instance_valid(pack_panel):
 		pack_panel.queue_free()
 	pack_panel = null

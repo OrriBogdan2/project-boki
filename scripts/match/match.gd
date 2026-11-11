@@ -131,6 +131,7 @@ func sess_len() -> float: return Rolling.SESSION if rolling else length     # th
 func at_sess(k: float) -> float: return k * sess_len() - sess_t0     # match time at a share of the session (negative if before you joined)
 
 func _ready() -> void:
+	UiFocus.reset()
 	set_process(false)
 
 ## Builds the whole match in one go (checks, tools, tests).
@@ -3317,6 +3318,7 @@ func cam_lead_vel() -> Vector3:
 func _gather_input() -> void:
 	if player == null or player.out or opts.get("tut_test", false):
 		return       # (the tutorial test drives the player itself)
+	var locked := not UiFocus.keys_free()      # a menu or window holds the keys: nothing below reaches the hunter
 	var mv := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 	if mv.length() > 1.0:
 		mv = mv.normalized()
@@ -3338,46 +3340,50 @@ func _gather_input() -> void:
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
 	var over_ui: bool = hud != null and hud.mouse_on_ui() and player.draw_t < 0.0
-	player.inp["fire"] = Input.is_action_pressed("fire") and not paused and not over_ui
-	if paused and player.draw_t >= 0.0:
+	player.inp["fire"] = Input.is_action_pressed("fire") and not locked and not over_ui
+	if locked and player.draw_t >= 0.0:
 		player.draw_t = -1.0           # a menu opened mid-draw: the draw is dropped, nothing is loosed
 	var map_up: bool = hud != null and hud.map_open()      # the map takes the mouse buttons
 	var on_panel: bool = hud != null and hud.mouse_on_panel()      # ... and so do the item windows under the cursor
 	PingInput.poll(self, map_up)
-	if paused:
+	if locked:
 		player.inp["move"] = Vector2.ZERO
-	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
+	if KinCommand.poll(player, get_process_delta_time(), locked or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
 		pending_input["throw"] = true
-	if KinKeys.poll(player, paused):       # the quick keys: the same orders and tap as the wheel and G
+	if KinKeys.poll(player, locked):       # the quick keys: the same orders and tap as the wheel and G
 		pending_input["throw"] = true
-	player.inp["interact"] = Input.is_action_pressed("interact")
+	player.inp["interact"] = Input.is_action_pressed("interact") and not locked
 	if lairs and not lairs.puzzle_of(player).is_empty():
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
 		player.inp["interact"] = player.inp["interact"] or (player.inp["fire"] and not (hud and hud.mouse_on_ui())) or pad
 		player.inp["fire"] = false
 	# a second Space press (or Mouse 5/4) in the air, held, glides; Space held from the jump never does
 	player.inp["glide_press_only"] = true
-	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not paused
-	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not paused     # (movefeel) a fresh press opens the glider with no wait
-	player.inp["dash_down"] = Input.is_action_pressed("dash") and not paused     # hold-shaped dashes (Slide, Rampage)
+	player.inp["glide"] = (Input.is_action_pressed("jump") or Input.is_action_pressed("glide")) and not locked
+	player.inp["glide_btn"] = Input.is_action_pressed("glide") and not locked     # (movefeel) a fresh press opens the glider with no wait
+	player.inp["dash_down"] = Input.is_action_pressed("dash") and not locked     # hold-shaped dashes (Slide, Rampage)
 	var quick: bool = Settings.get_v("cast_on_press")
-	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not paused and not on_panel
+	player.inp["sec_hold"] = Input.is_action_pressed("secondary") and not locked and not on_panel
 	# crouch: hold by default, or tap to toggle (the web version defaults to toggle, so you never
 	# hold Ctrl while pressing W, which closes the browser tab)
 	if Settings.get_v("crouch_toggle"):
-		if Input.is_action_just_pressed("crouch") and not paused:
+		if Input.is_action_just_pressed("crouch") and not locked:
 			crouch_on = not crouch_on
 		if Input.is_action_just_pressed("jump") or Input.is_action_just_pressed("dash"):
 			crouch_on = false
 	else:
-		crouch_on = Input.is_action_pressed("crouch") and not paused
+		crouch_on = Input.is_action_pressed("crouch") and not locked
 	player.inp["crouch"] = crouch_on
 	# the kit: Q glove, E kin ability, C throw kin, R bond, 1 2 3 the utility belt (the second kin
 	# ability and kin swap are retired)
-	if Input.is_action_just_pressed("base") and not paused and duel == null and not opts.get("arena", false):
+	if Input.is_action_just_pressed("base") and not locked and duel == null and not opts.get("arena", false):
 		pending_input["base"] = true
+	if locked:
+		aim_hold = ""
 	var slot_of := {"dash": "dash", "secondary": "sec", "signature": "kin", "ultimate": "ult"}      # (gloves don't rank)
 	for a in [["dash", "dash"], ["jump", "jump"], ["signature", "sig"], ["util1", "util1"], ["util2", "util2"], ["util3", "util3"], ["util4", "util4"], ["ultimate", "ult"], ["secondary", "sec"], ["gear1", "gear1"], ["gear2", "gear2"]]:
+		if locked:
+			break
 		if a[0] in ["util2", "util3", "util4"] and arena != null:
 			continue       # the Arena's 2-7 swap archetypes (and nothing wears out there)
 		if (map_up or on_panel) and a[0] in ["secondary", "throw"]:
@@ -3385,7 +3391,7 @@ func _gather_input() -> void:
 		if a[0] == "secondary" and aim_hold != "" and aim_hold != "secondary" and Input.is_action_just_pressed("secondary"):
 			aim_hold = ""          # right click while aiming something else cancels the cast
 			continue
-		if slot_of.has(a[0]) and player and Input.is_action_just_pressed(a[0]) and not paused:
+		if slot_of.has(a[0]) and player and Input.is_action_just_pressed(a[0]):
 			var sl: String = slot_of[a[0]]
 			if Input.is_key_pressed(KEY_ALT) and player.can_level(sl) and int(player.slot_lv[sl]) > 0:
 				player.level_slot(sl)       # Alt + key: put a point into it
@@ -3402,7 +3408,7 @@ func _gather_input() -> void:
 			aimable = false       # a self-centred E goes off on the press (no cursor preview)
 		if aimable:
 			# hold to see where it will land, let go to cast it
-			if Input.is_action_just_pressed(a[0]) and not paused:
+			if Input.is_action_just_pressed(a[0]):
 				aim_hold = a[0]
 			if aim_hold == a[0] and not Input.is_action_pressed(a[0]):
 				aim_hold = ""
@@ -3410,7 +3416,7 @@ func _gather_input() -> void:
 			continue
 		if Input.is_action_just_pressed(a[0]):
 			pending_input[a[1]] = true
-	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
+	if Input.is_action_just_pressed("hunter_ult") and player and not locked:
 		HunterKeys.ult_pressed(player)
 
 func _unhandled_input(event: InputEvent) -> void:

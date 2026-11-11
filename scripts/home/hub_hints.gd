@@ -22,7 +22,7 @@ static func rules() -> Dictionary:
 ## Per frame: shows the first unseen hint whose place you are near, if none is up.
 func tick(dt: float) -> void:
 	_wait -= dt
-	if _wait > 0.0 or h.panel_open != "" or Overlay.is_open() or not Settings.get_v("tips") or Record.clean():
+	if _wait > 0.0 or not UiFocus.keys_free() or not Settings.get_v("tips") or Record.clean():
 		return
 	var seen: Dictionary = Save.d["tutorial"].get_or_add("hub_hints", {})
 	for e in rules()["list"]:

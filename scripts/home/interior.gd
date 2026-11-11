@@ -30,13 +30,13 @@ var root_ui: Control
 var prompt_box: PanelContainer
 var prompt_lbl: Label
 var panel_host: CenterContainer
-var panel_open := ""
 var decorating := false         # Decorate.active, kept here for the tile checks
 var dec: Decorate
 var why := ""                   # why a piece can't go where it was tried
 var blocker := -1               # index of the piece in the way
 
 func _ready() -> void:
+	UiFocus.reset()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	R = Data.ROOMS.get(room, Data.ROOMS["house"])
 	W = int(R["w"]); D = int(R["d"])
@@ -266,12 +266,12 @@ func _process(delta: float) -> void:
 		dec.tick(d)
 	else:
 		_find_interact()
-		if panel_open == "" and not Overlay.is_open() and Input.is_action_just_pressed("interact") and not interact.is_empty():
+		if UiFocus.keys_free() and Input.is_action_just_pressed("interact") and not interact.is_empty():
 			_use(interact)
 
 func _move_player(d: float) -> void:
 	var mv := Vector2.ZERO
-	if panel_open == "" and not Overlay.is_open():
+	if UiFocus.keys_free():
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
 	var hv := Vector2(pvel.x, pvel.z)
@@ -298,7 +298,7 @@ func _find_interact() -> void:
 		var dd := Vector2(k["pos"].x - ppos.x, k["pos"].z - ppos.z).length()
 		if dd < bd: bd = dd; best = {"kind": "kin", "k": k, "label": "Pet %s" % k["rec"]["name"]}
 	interact = best
-	prompt_box.visible = not best.is_empty() and panel_open == ""
+	prompt_box.visible = not best.is_empty() and UiFocus.panel == ""
 	if prompt_box.visible:
 		prompt_lbl.text = Settings.key_cap("interact") + "  " + String(best["label"])
 		prompt_box.reset_size()
@@ -341,17 +341,17 @@ func _leave() -> void:
 		Game.goto("home", {"spawn": room})
 
 func _unhandled_input(event: InputEvent) -> void:
-	if decorating and panel_open == "" and not Overlay.is_open() and dec.input(event):
+	if decorating and UiFocus.keys_free() and dec.input(event):
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("menu") and not Overlay.is_open():
-		if panel_open != "":
+		if UiFocus.panel != "":
 			_close_panel()
 		else:
 			Overlay.open_pause("home")
 		get_viewport().set_input_as_handled()
 		return
-	if event.is_action_pressed("build") and visit.is_empty() and panel_open == "" and not Overlay.is_open():
+	if event.is_action_pressed("build") and visit.is_empty() and UiFocus.keys_free():
 		dec.toggle()
 
 # ------------------------------------------------------------------ ui
@@ -385,7 +385,7 @@ func _build_ui() -> void:
 		deco_btn.offset_top = -64; deco_btn.offset_bottom = -16; deco_btn.offset_left = 16; deco_btn.offset_right = 216
 	panel_dim = UI.backdrop()
 	panel_dim.gui_input.connect(func(ev):
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and panel_open != "":
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and UiFocus.panel != "":
 			_close_panel())
 	root_ui.add_child(panel_dim)
 	panel_host = CenterContainer.new()
@@ -409,7 +409,7 @@ func _new_panel(title_txt: String, width := 560.0) -> VBoxContainer:
 	_close_panel()
 	var pb := UI.scroll_panel(title_txt, width, _close_panel)
 	panel_host.add_child(pb[0])
-	panel_open = title_txt
+	UiFocus.panel = title_txt
 	UI.show_backdrop(panel_dim, true)
 	UI.pop_in(pb[0])
 	return pb[1]
@@ -419,8 +419,8 @@ var panel_dim: ColorRect = null
 func _close_panel() -> void:
 	for ch in panel_host.get_children():
 		ch.queue_free()
-	if panel_open != "" and panel_dim: UI.show_backdrop(panel_dim, false)
-	panel_open = ""
+	if UiFocus.panel != "" and panel_dim: UI.show_backdrop(panel_dim, false)
+	UiFocus.panel = ""
 
 ## Every kin you have, and who comes along on expeditions.
 func _open_journal() -> void:

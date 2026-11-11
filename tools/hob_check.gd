@@ -98,7 +98,7 @@ func _first_arrival() -> void:
 	home._use(it)
 	await _frames(3)
 	var box: TalkBox = hob.chat.box
-	ok(box != null and home.panel_open == HobTalk.TALK, "interact opens the talk box (you stand still)")
+	ok(box != null and UiFocus.panel == UiFocus.TALK, "interact opens the talk box (you stand still)")
 	if box == null:
 		return
 	var intro: Array = hob.chat.rules()["intro"]
@@ -119,7 +119,7 @@ func _first_arrival() -> void:
 		if hob.chat.talking():
 			box.advance()
 	await _frames(3)
-	ok(not hob.chat.talking() and home.panel_open == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
+	ok(not hob.chat.talking() and UiFocus.panel == "" and FarmTutorial.did("hob") and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
 	ok(FarmTutorial.current() == "axe", "the next goal is the axe")
 	await _frames(40)
@@ -193,14 +193,14 @@ func _offer() -> void:
 	box.advance()
 	await _frames(3)
 	var beats: Array = home.find_children("*", "MaskBeat", true, false)
-	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and home.panel_open == HobTalk.TALK,
+	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and UiFocus.panel == UiFocus.TALK,
 			"the short Mask moment plays (you stand still)")
 	await _shot("hob_7_mask_moment", 1.0)
 	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 6.0)
 	await _shot("hob_8_mask_name", 0.3)
 	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 10.0)
 	await _frames(5)
-	ok(home.panel_open == "" and ClassUnlock.pending_reveal().is_empty()
+	ok(UiFocus.panel == "" and ClassUnlock.pending_reveal().is_empty()
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")

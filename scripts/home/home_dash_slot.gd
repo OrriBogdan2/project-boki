@@ -21,7 +21,7 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 
 func _process(delta: float) -> void:
-	visible = home.panel_open == "" and not Overlay.is_open()
+	visible = UiFocus.panel == "" and not Overlay.is_open()
 	HudSlot.decay(self, delta)
 	if visible:
 		queue_redraw()

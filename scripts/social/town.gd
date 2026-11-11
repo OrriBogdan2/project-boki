@@ -12,7 +12,6 @@ var cam: CamRig
 var fx: Fx
 var root_ui: Control
 var panel_host: Control
-var panel_open := ""
 var topbar: Label
 var prompt_box: PanelContainer
 var prompt_lbl: Label
@@ -38,6 +37,7 @@ var center := Vector2.ZERO
 var solids: Array = []         # Rect2 footprints of things built after the ground was laid
 
 func _ready() -> void:
+	UiFocus.reset()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_build_env()
 	world = World.new(); add_child(world)
@@ -342,15 +342,15 @@ func _process(delta: float) -> void:
 			k["hop"] += d * 9.0
 		n.position = k["pos"]
 		n.get_node("Body").position.y = absf(sin(k["hop"])) * 0.12
-	cam.follow(ppos, d, panel_open == "")
+	cam.follow(ppos, d, UiFocus.panel == "")
 	_send_presence(d)
 	_find_interact()
-	if panel_open == "" and not Overlay.is_open() and Input.is_action_just_pressed("interact") and not interact.is_empty():
+	if UiFocus.keys_free() and Input.is_action_just_pressed("interact") and not interact.is_empty():
 		_use(interact)
 
 func _move_player(d: float) -> void:
 	var mv := Vector2.ZERO
-	if panel_open == "" and not Overlay.is_open():
+	if UiFocus.keys_free():
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
 	var hv := Vector2(pvel.x, pvel.z)
@@ -360,7 +360,7 @@ func _move_player(d: float) -> void:
 	var nz := ppos.z + hv.y * d
 	if not _blocked(ppos.x, nz, 0.38): ppos.z = nz
 	pvel = Vector3(hv.x, 0, hv.y)
-	if panel_open == "" and not Overlay.is_open() and py <= 0.0 and pvy <= 0.0 and Input.is_action_just_pressed("jump"):
+	if UiFocus.keys_free() and py <= 0.0 and pvy <= 0.0 and Input.is_action_just_pressed("jump"):
 		pvy = 8.5
 		Sfx.play("jump", null, -12.0)
 	if py > 0.0 or pvy > 0.0:
@@ -372,7 +372,7 @@ func _move_player(d: float) -> void:
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
 	var want := pface
-	if panel_open == "" and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp):
+	if UiFocus.panel == "" and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp):
 		var aim := cam.mouse_on_plane(0.9)
 		if Vector2(aim.x - ppos.x, aim.z - ppos.z).length() > 0.4: want = atan2(-(aim.x - ppos.x), -(aim.z - ppos.z))
 	elif hv.length() > 0.3:
@@ -404,7 +404,7 @@ func _find_interact() -> void:
 		if dd < float(s["reach"]) and dd < bd:
 			bd = dd; best = s
 	interact = best
-	if panel_open != "" or best.is_empty():
+	if UiFocus.panel != "" or best.is_empty():
 		prompt_box.visible = false
 		return
 	prompt_box.visible = true
@@ -415,9 +415,9 @@ func _find_interact() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("menu") and not Overlay.is_open():
-		if panel_open != "": _close_panel()
+		if UiFocus.panel != "": _close_panel()
 		else: Overlay.open_pause("town")
-	if event is InputEventMouseButton and event.pressed and panel_open == "":
+	if event is InputEventMouseButton and event.pressed and UiFocus.panel == "":
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.5)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.5)
 
@@ -456,13 +456,13 @@ func _build_ui() -> void:
 	root_ui.add_child(panel_host)
 
 func _new_panel(title_txt: String, width := 540.0) -> VBoxContainer:
-	var prev := panel_open
+	var prev := UiFocus.panel
 	_close_panel()
 	var pb := UI.scroll_panel(title_txt, width, _close_panel)
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
 	panel_host.add_child(p)
-	panel_open = title_txt
+	UiFocus.panel = title_txt
 	if prev != title_txt:
 		UI.pop_in(p)
 		Sfx.play("whoosh", null, -10.0)
@@ -471,7 +471,7 @@ func _new_panel(title_txt: String, width := 540.0) -> VBoxContainer:
 func _close_panel() -> void:
 	for ch in panel_host.get_children():
 		ch.queue_free()
-	panel_open = ""
+	UiFocus.panel = ""
 
 func _toast(txt: String) -> void:
 	UI.toast(root_ui, txt)
@@ -565,7 +565,7 @@ func _open_market() -> void:
 					_lock()
 					Social.unlist(lid, func(okk: bool):
 						if okk: _toast("Taken back")
-						if panel_open == "Market": _open_market()), 120)
+						if UiFocus.panel == "Market": _open_market()), 120)
 				tb.disabled = not Save.d.get("listings", {}).has(lid)
 				row.add_child(tb)
 			else:
@@ -577,7 +577,7 @@ func _open_market() -> void:
 							_toast("Bought a %s" % what)
 						else:
 							_toast("Someone else got there first")
-						if panel_open == "Market": _open_market()), 100)
+						if UiFocus.panel == "Market": _open_market()), 100)
 				b.disabled = int(Save.d["gems"]) < int(l["price"])
 				row.add_child(b))
 	v.add_child(UI.section("Sell"))
@@ -594,7 +594,7 @@ func _open_market() -> void:
 				_lock()
 				Social.sell(kd, kk, price, func(okk: bool):
 					if okk: _toast("Listed. You'll be paid when it sells.")
-					if panel_open == "Market": _open_market()), 200))
+					if UiFocus.panel == "Market": _open_market()), 200))
 	if not any:
 		v.add_child(UI.label("You have no seeds or crops to sell yet.", 14, UI.MUTED))
 
@@ -622,7 +622,7 @@ func _open_notices() -> void:
 		_lock()
 		Social.post_notice(inp.text, func(okk: bool):
 			if okk: Sfx.play("pickup")
-			if panel_open == "Notice board": _open_notices()), 100))
+			if UiFocus.panel == "Notice board": _open_notices()), 100))
 	v.add_child(row)
 
 # ---- guilds
@@ -637,7 +637,7 @@ func _open_guilds() -> void:
 			_lock()
 			Social.leave_guild(func():
 				_toast("You left the guild")
-				if panel_open == "Guild registry": _open_guilds()), 200))
+				if UiFocus.panel == "Guild registry": _open_guilds()), 200))
 		v.add_child(hb)
 	else:
 		v.add_child(UI.label("Guilds share an isle: every member gets a cottage, and you build projects together that help everyone on expeditions.", 14, UI.MUTED))
@@ -655,7 +655,7 @@ func _open_guilds() -> void:
 				if okk:
 					Sfx.play("unlock")
 					_toast("%s is founded" % gname)
-				if panel_open == "Guild registry": _open_guilds()), 120))
+				if UiFocus.panel == "Guild registry": _open_guilds()), 120))
 		v.add_child(row)
 	v.add_child(UI.section("Guilds"))
 	var list := _loading(v)
@@ -674,7 +674,7 @@ func _open_guilds() -> void:
 					Social.join_guild(rid, func(_okk):
 						Sfx.play("unlock")
 						_toast("Welcome to %s" % g["name"])
-						if panel_open == "Guild registry": _open_guilds()), 90)))
+						if UiFocus.panel == "Guild registry": _open_guilds()), 90)))
 
 # ---- guild projects
 func _open_project(k: String) -> void:
@@ -685,7 +685,7 @@ func _open_project(k: String) -> void:
 	v.add_child(UI.label("When it's built, everyone in the guild gets: " + String(pd["perk"]), 15))
 	var body := _loading(v)
 	Social.load_progress(gid, guild_doc, func(prog: Dictionary):
-		if not is_inside_tree() or panel_open != title or not _clear(body): return
+		if not is_inside_tree() or UiFocus.panel != title or not _clear(body): return
 		var total := int(prog.get(k, 0))
 		var goal := int(pd["goal"])
 		body.add_child(UI.label("%d of %d gems put in" % [mini(total, goal), goal], 15, UI.GOLD))
@@ -707,7 +707,7 @@ func _open_project(k: String) -> void:
 						fx.burst(Vector3(ppos.x, 1.0, ppos.z - 1.5), UI.GOLD, 16, 3.0)
 						_toast("Thanks for helping")
 						_refresh_projects()
-					if panel_open == title: _open_project(k)), 150)
+					if UiFocus.panel == title: _open_project(k)), 150)
 			b.disabled = int(Save.d["gems"]) < a or a <= 0
 			hb.add_child(b)
 		body.add_child(hb)

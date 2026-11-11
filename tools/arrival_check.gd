@@ -14,8 +14,6 @@ func ok(cond: bool, what: String) -> void:
 		fails += 1
 
 class Host extends Node:
-	var panel_open := ""
-	var building_now := false
 	var panel_host := Control.new()      # the queue waits for it (a home builds it late)
 
 func run(m: Node) -> void:
@@ -72,19 +70,19 @@ func _queue() -> void:
 	var order: Array = []
 	var open := func(id: String) -> void:
 		order.append(id)
-		host.panel_open = id
+		UiFocus.panel = id
 	q.add(open.bind("welcome"))
 	q.add(open.bind("evolved"))
 	q.add(open.bind("away"))
 	ok(order == ["welcome"], "queue: the first modal opens, the others wait")
-	host.panel_open = ""
+	UiFocus.panel = ""
 	q.pump()
 	ok(order == ["welcome", "evolved"], "queue: closing one opens the next, never two")
-	host.panel_open = ""
-	host.building_now = true      # an evolution playing
+	UiFocus.panel = ""
+	UiFocus.build = true      # an evolution playing
 	q.pump()
 	ok(order.size() == 2, "queue: nothing opens while something plays")
-	host.building_now = false
+	UiFocus.build = false
 	await main.get_tree().create_timer(ArrivalQueue.RETRY_S + 0.2).timeout
 	ok(order == ["welcome", "evolved", "away"], "queue: it opens by itself when that is over, in order")
 	host.queue_free()

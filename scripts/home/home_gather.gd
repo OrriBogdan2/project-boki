@@ -118,7 +118,7 @@ func tick(d: float) -> void:
 		return
 	# walking away (or the tile going) stops it
 	var mv := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
-	if mv.length() > 0.2 or not h.hb.wild_t.has(tile) or h.panel_open != "" or (h.hb and h.hb.active):
+	if mv.length() > 0.2 or not h.hb.wild_t.has(tile) or UiFocus.panel != "" or (h.hb and h.hb.active):
 		cancel()
 		return
 	h.tw.tick(d, h.tw.held())

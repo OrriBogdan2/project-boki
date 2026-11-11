@@ -141,7 +141,7 @@ func _travel_part(m: Node) -> void:
 	hub.ppos = HubWaystone.HUB_AT + HubWaystone.ARRIVE_OFF
 	hub._find_interact()
 	hub.hway.use()
-	ok(hub.panel_open == "The Waystone", "E on the Waystone opens the cards")
+	ok(UiFocus.panel == "The Waystone", "E on the Waystone opens the cards")
 	ok(not hub.hway.hop("glasswater") and hub.hway.hopping == "", "a hop to locked Glasswater is refused")
 	var lines := ZoneCards.key_lines("glasswater")
 	ok(lines.size() == 2 and "Wayseed" in lines[0] and "leaning" in lines[1], "its card lists both keys")
@@ -218,7 +218,7 @@ func _move_part(m: Node) -> void:
 	var k: Dictionary = bb.kins.filter(func(o): return String(o["rec"]["uid"]) != partner)[0]
 	var rec: Dictionary = k["rec"]
 	ZoneCards.move_to(bb, k)
-	ok(bb.panel_open == "Move %s to..." % rec["name"], "Move to... opens its zone cards")
+	ok(UiFocus.panel == "Move %s to..." % rec["name"], "Move to... opens its zone cards")
 	bb._close_panel()
 	ok(bb.hway.send(k, "glasswater") == "", "%s is sent to Glasswater" % rec["name"])
 	var t := 0.0
@@ -259,7 +259,7 @@ func _ask_part(bb, partner: String) -> void:
 	bb.life.machine(k).go(BaseLife.S.ROAM, "check")
 	ok(not bb.hway.answer(k), "a Boki not asking is petted as usual")
 	bb.hway.dropped(k, bb.hway.node.position)
-	ok(bb.panel_open == "Move %s to..." % k["rec"]["name"], "set down on the pad: its zone cards open")
+	ok(UiFocus.panel == "Move %s to..." % k["rec"]["name"], "set down on the pad: its zone cards open")
 	bb._close_panel()
 
 ## The cap is per zone: Glasswater full, the next move is refused; Bramblebank keeps its own room.

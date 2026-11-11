@@ -295,7 +295,7 @@ func run(m: Node) -> void:
 	rocky.erase("boxed")
 	# the station's panel
 	hw.open_station(camp)
-	ok(home.panel_open != "", "walking up to the Lumber Camp opens its panel (who's assigned)")
+	ok(UiFocus.panel != "", "walking up to the Lumber Camp opens its panel (who's assigned)")
 	home._close_panel()
 	# ---------------------------------------------------------------- 6. crouching on the farm
 	home.ppos = HomeLayout.LANDING + Vector3(-6, 0, -3); home.py = 0.0; home.pvy = 0.0

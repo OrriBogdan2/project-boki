@@ -95,9 +95,9 @@ func _picker() -> void:
 	for f in SETTLE_FRAMES:
 		await main.get_tree().process_frame
 		home = main.screen_node()
-		if home != null and home.get("panel_open") == MinigameHub.TITLE:
+		if home != null and UiFocus.panel == MinigameHub.TITLE:
 			break
-	ok(home != null and home.get("panel_open") == MinigameHub.TITLE, "picker: the home opens on 'Play with your Boki'")
+	ok(home != null and UiFocus.panel == MinigameHub.TITLE, "picker: the home opens on 'Play with your Boki'")
 	var tut: Dictionary = Save.d["tutorial"]
 	var ft: Dictionary = tut.get("ft", {})
 	var flags := [ft.get("did", {}).is_empty(), not ft.get("done", false)]
@@ -114,7 +114,7 @@ func _picker() -> void:
 		var lines := [g["rule"], MinigameHub.summary(String(g["id"]))]
 		ok(lines.all(func(t): return t != ""), "%s: a rule line and a result line" % g["id"])
 		MinigameHub.start(home, g)
-		ok(home.panel_open == "", "%s: a pick closes the picker and opens the game" % g["id"])
+		ok(UiFocus.panel == "", "%s: a pick closes the picker and opens the game" % g["id"])
 		MinigameHub.open(home)
 	home._close_panel()
 	var stub := Stub.new()
@@ -128,7 +128,7 @@ func _picker() -> void:
 	ok(only, "list: a game the home holds is listed, the rest are not")
 	MinigameHub.open(home)
 	MinigameHub.start(home, shown[0])
-	ok(started and home.panel_open == "", "start: the picker closes and the game's use() runs")
+	ok(started and UiFocus.panel == "", "start: the picker closes and the game's use() runs")
 	stub.post.free()
 	fake.free()
 
@@ -156,9 +156,9 @@ func _garden() -> void:
 	for f in SETTLE_FRAMES:
 		await main.get_tree().process_frame
 		home = main.screen_node()
-		if home != old and home != null and home.get("panel_open") == MinigameHub.TITLE:
+		if home != old and home != null and UiFocus.panel == MinigameHub.TITLE:
 			break
-	ok(home != old and home.get("panel_open") == MinigameHub.TITLE, "garden: the picker opens on the base")
+	ok(home != old and UiFocus.panel == MinigameHub.TITLE, "garden: the picker opens on the base")
 	var games := MinigameHub.listed(home)
 	var ids: Array = games.map(func(g): return g["id"])
 	ok(ids == ["race", "shove", "seek", "volley"], "garden: all four games are listed (%s)" % [ids])
@@ -169,7 +169,7 @@ func _garden() -> void:
 		MinigameHub.start(home, g)
 		var game: Object = g["game"]
 		var on: bool = game.state == BaseSeek.S.CARRY if g["id"] == "seek" else game.get(STARTED[g["id"]]) != null
-		ok(on and home.panel_open == "", "garden: picking %s starts it" % g["name"])
+		ok(on and UiFocus.panel == "", "garden: picking %s starts it" % g["name"])
 		if g["id"] == "seek":
 			game.go(BaseSeek.S.IDLE)
 		elif on:

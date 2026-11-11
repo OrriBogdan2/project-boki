@@ -227,13 +227,13 @@ func _home() -> void:
 		await _wait_home()
 		h = cur()
 	await shot("farm_arrive")
-	if String(h.panel_open) != "":
-		print("TOUR panel open on arrival: ", h.panel_open)
-		if String(h.panel_open) == "Make it home":
+	if String(UiFocus.panel) != "":
+		print("TOUR panel open on arrival: ", UiFocus.panel)
+		if String(UiFocus.panel) == "Make it home":
 			press("Use suggested layout")
 			await wait(1.5)
 			await shot("farm_made_home")
-		if String(h.panel_open) != "":
+		if String(UiFocus.panel) != "":
 			h._close_panel()
 		await wait(0.6)
 	Input.action_press("right"); Input.action_press("down")
@@ -256,7 +256,7 @@ func _home() -> void:
 		await key_event(KEY_T)       # talk
 		await wait(1.2)
 		await shot("farm_talk")
-		if String(h.panel_open) != "": h._close_panel()
+		if String(UiFocus.panel) != "": h._close_panel()
 		if h.has_method("_close_chat"): h._close_chat()
 		await wait(0.5)
 		h._open_kin(k["rec"])
@@ -345,7 +345,7 @@ func _farm_start(h) -> void:
 	print("TOUR plot 0: crop=%s watered=%s" % [d["crop"], float(d.get("wt", 0.0)) > 0.0])
 	if String(d["crop"]) == "" or float(d.get("wt", 0.0)) <= 0.0: note_bad("the first plot isn't planted and watered (%s)" % str(d))
 	await shot("farm_planted")
-	if String(h.panel_open) != "": h._close_panel()
+	if String(UiFocus.panel) != "": h._close_panel()
 
 ## The nearest cells to p where the held building fits ([] if none).
 func _build_spot(hb: HomeBuild, p: Vector3) -> Array:

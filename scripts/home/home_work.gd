@@ -922,7 +922,7 @@ func _feed_tick(d: float) -> void:
 		f["t"] = float(f["t"]) - d
 		if is_instance_valid(f["n"]):
 			(f["n"] as Control).modulate.a = clampf(float(f["t"]) / 1.0, 0.0, 1.0)
-			(f["n"] as Control).visible = h.panel_open == "" or h.panel_open == "Job Board"
+			(f["n"] as Control).visible = UiFocus.panel == "" or UiFocus.panel == "Job Board"
 	for f in feed_lines.filter(func(x): return float(x["t"]) <= 0.0):
 		if is_instance_valid(f["n"]): f["n"].queue_free()
 		feed_lines.erase(f)

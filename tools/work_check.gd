@@ -260,11 +260,11 @@ func run(m: Node) -> void:
 	# ---------------------------------------------------------------- 10. the Job Board and the card
 	H.open_job_board("Jobs")
 	for _f in 2: await main.get_tree().process_frame
-	ok(H.panel_open == "Job Board", "the Job Board opens (Jobs tab)")
+	ok(UiFocus.panel == "Job Board", "the Job Board opens (Jobs tab)")
 	H._close_panel()
 	H.open_job_board("Kin")
 	for _f in 2: await main.get_tree().process_frame
-	ok(H.panel_open == "Job Board", "... and its Kin tab")
+	ok(UiFocus.panel == "Job Board", "... and its Kin tab")
 	H._close_panel()
 	# ---------------------------------------------------------------- 11. shimmer odds
 	var rng := RandomNumberGenerator.new(); rng.seed = 99

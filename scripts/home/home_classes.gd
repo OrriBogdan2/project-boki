@@ -157,7 +157,7 @@ static func _show(home: Node, id: String) -> void:
 	Sfx.play("hover", null, -6.0)
 	var viewer = home.get_meta("hunter_viewer", null)
 	var grid = home.get_meta("classes_grid", null)
-	if home.panel_open != TITLE or not is_instance_valid(viewer) or not is_instance_valid(grid):
+	if UiFocus.panel != TITLE or not is_instance_valid(viewer) or not is_instance_valid(grid):
 		open(home, id)
 		return
 	var was := String(home.get_meta("hunters_sel", ""))

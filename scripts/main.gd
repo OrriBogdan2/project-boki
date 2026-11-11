@@ -3781,11 +3781,11 @@ func _home_build_check() -> void:
 	# (no glider: the jump pressed above still reads as pressed in a headless run, which opens one, and
 	# an open glider now lifts you back to the lip over the abyss instead of sinking. A panel open
 	# means no keys)
-	mv.panel_open = "test"
+	UiFocus.panel = "test"
 	for i in 60:
 		mv.gliding = false
 		mv._move_player(0.05)
-	mv.panel_open = ""
+	UiFocus.panel = ""
 	ok.call(mv.ppos.distance_to(safe) < 0.01 and mv.py >= -0.01, "falling off the island puts you back where you last stood")
 	Save.d["classes"] = ClassUnlock.legacy()      # an old save: every Hunter open (the locks: --hunter-unlock-check)
 	# dashing at home: the match's charges and recharge for each class, then the long dash

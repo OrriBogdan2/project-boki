@@ -199,7 +199,7 @@ func _hammer(dt: float) -> void:
 	var at := Vector2(h.ppos.x, h.ppos.z)
 	var away := e.is_empty() or at.distance_to(Vector2(h.tw.target.x, h.tw.target.z)) > _reach(e)
 	var walking := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down")).length() > 0.2
-	if away or walking or h.panel_open != "":
+	if away or walking or UiFocus.panel != "":
 		h.tw.stop()
 		return
 	h.tw.tick(dt, h.tw.held())

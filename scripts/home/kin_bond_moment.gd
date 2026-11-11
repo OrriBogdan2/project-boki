@@ -18,7 +18,7 @@ static func due(kins: Array) -> Dictionary:
 
 ## Called once a second at home: plays the next due moment when nothing else is on screen.
 static func tick(home: Node) -> void:
-	if home.panel_open != "" or home.building_now or not home.train.is_empty() or FarmTutorial.active():
+	if not UiFocus.keys_free() or FarmTutorial.active():
 		return
 	var k := due(home.kins)
 	if not k.is_empty() and not k.get("busy", false):

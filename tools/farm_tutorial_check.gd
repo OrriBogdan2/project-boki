@@ -529,7 +529,7 @@ func _spotlight() -> void:
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	ok(not FarmSpotlight.showing(), "opening the page puts the spotlight away")
-	ok(home.panel_open != "" and FarmTaskGuide.page_up(), "the Boki page is up with the job dropdown")
+	ok(UiFocus.panel != "" and FarmTaskGuide.page_up(), "the Boki page is up with the job dropdown")
 	await _page_rules(home)
 	home._close_panel()
 	home.guide.tick(0.6)
@@ -679,7 +679,7 @@ func _world() -> void:
 	FarmTutorial.state()["done"] = false
 	home.guide.refresh()
 	home.hob.talk()
-	ok(home.panel_open == HobTalk.TALK and home.hob.chat.talking() and FarmTutorial.did("hob"),
+	ok(UiFocus.panel == UiFocus.TALK and home.hob.chat.talking() and FarmTutorial.did("hob"),
 			"talking opens the talk box face to face")
 	home._close_panel()
 	# the build menu

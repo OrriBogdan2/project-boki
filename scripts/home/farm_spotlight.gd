@@ -101,7 +101,7 @@ static func in_beat() -> bool:
 
 static func _free_to_show(home: Node) -> bool:
 	var building: bool = home.hb != null and home.hb.active
-	return home.panel_open == "" and not home.chat_open and not home.building_now and not building \
+	return UiFocus.panel == "" and not UiFocus.chat and not UiFocus.build and not building \
 			and not Overlay.is_open()
 
 ## The screen boxes to light: the named bottom-bar button, and the step's marker in the world (a Boki).
@@ -160,7 +160,7 @@ func _process(dt: float) -> void:
 	age += dt
 	if closing:
 		return
-	if h.panel_open != "" or FarmTutorial.current() != step_id:
+	if UiFocus.panel != "" or FarmTutorial.current() != step_id:
 		close()
 		return
 	_holes = _rects(h, step_id, spec)

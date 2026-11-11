@@ -68,7 +68,7 @@ func _hub(m: Node) -> void:
 	hub.hhints.tick(float(rules["start_s"]))
 	ok(lane.count() == 1 and seen.has("waystone") and "ring" in lane.texts()[0], "the Waystone hint shows first")
 	ok(Settings.key_cap("interact") in lane.texts()[0], "it names the interact key")
-	ok(hub.panel_open == "" and not Overlay.is_open(), "it is a line in the lane, not a panel")
+	ok(UiFocus.panel == "" and not Overlay.is_open(), "it is a line in the lane, not a panel")
 	await _shot(m)
 	hub.hhints.tick(gap * 0.5)
 	ok(lane.count() == 1 and seen.size() == 1, "no second hint while the first is still up")
@@ -85,8 +85,8 @@ func _hub(m: Node) -> void:
 	ok(lane.count() == n, "a later visit says nothing")
 	seen.clear()
 	hub.hhints = HubHints.new(hub)
-	hub.panel_open = "x"
+	UiFocus.panel = "x"
 	hub.hhints.tick(100.0)
 	ok(lane.count() == n and seen.is_empty(), "nothing shows over an open panel")
-	hub.panel_open = ""
+	UiFocus.panel = ""
 	Content.rules("farm_build")["base_mode"] = false

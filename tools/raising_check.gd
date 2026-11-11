@@ -132,7 +132,7 @@ func run(m: Node) -> void:
 	ok(not k.is_empty(), "the Boki is out on the farm")
 	await _welcome(home, k)
 	KinBondMoment.tick(home)
-	ok(home.panel_open == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
+	ok(UiFocus.panel == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
 		"the rank it arrives with is where it starts: no moment (%s)" % Care.bond(rec)[1])
 	var t0 := float(rec["trust"])
 	home._pet_kin(k)
@@ -162,11 +162,11 @@ func run(m: Node) -> void:
 	ok(int(Save.d["matches"]) == 0 and Care.bond_index(rec) >= 2,
 		"a week of farm days of care, no expedition: %s (trust %.0f)" % [Care.bond(rec)[1], float(rec["trust"])])
 	KinBondMoment.tick(home)
-	ok(home.panel_open == "Ember is now Close" and int(rec["bond_seen"]) == 2,
-		"reaching Close plays its moment: \"%s\"" % home.panel_open)
+	ok(UiFocus.panel == "Ember is now Close" and int(rec["bond_seen"]) == 2,
+		"reaching Close plays its moment: \"%s\"" % UiFocus.panel)
 	home._close_panel()
 	KinBondMoment.tick(home)
-	ok(home.panel_open == "", "and only once")
+	ok(UiFocus.panel == "", "and only once")
 	home.queue_free()
 	print("RAISING DONE, failures: %d" % bad)
 	main.get_tree().quit()

@@ -40,7 +40,6 @@ var kins: Array = []           # {rec, node, pos, vel, goal, t, emote, emote_t, 
 var spots := {}                # name -> Vector3
 var plots: Array = []          # nodes, index matches Save plots
 var interact := {}
-var panel_open := ""
 var chat_log: Array = []       # [{role, content}]
 var chat_kin: Dictionary = {}
 var chat_input: LineEdit
@@ -109,7 +108,6 @@ func _has_br(k: String) -> bool:
 	return _d().get("bridges", []).has(k)
 var bridges := {}              # isle id -> {tiles, node, built, label}
 var gh_plots: Array = []
-var building_now := false
 # ---- day, night and weather
 const DAY_LEN := 300.0          # seconds for a full day at home
 var env_res: Environment
@@ -128,6 +126,7 @@ var rain_next := randf() < 0.45     # what the coming weather turn brings, known
 var ambience := HomeAmbience.new()
 
 func _ready() -> void:
+	UiFocus.reset()
 	if Game.modding(): Game.apply_mod()
 	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
@@ -1093,15 +1092,15 @@ func _process(delta: float) -> void:
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
-	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
+	cam.follow(hob.chat.frame(focus) if hob else focus, d, UiFocus.panel == "" and not UiFocus.train)
 	_see_through()
 	_abyss_tint(d)
 	_find_interact()
 	if hb and hb.active:
 		return
-	if carry.tick(d, interact, panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty()):
+	if carry.tick(d, interact, UiFocus.keys_free()):
 		return
-	if panel_open == "" and not building_now and not Overlay.is_open() and not chat_open and train.is_empty() and not interact.is_empty():
+	if UiFocus.keys_free() and not interact.is_empty():
 		if Input.is_action_just_pressed("interact"):
 			_use(interact)
 		elif interact["kind"] == "kin" and visit.is_empty():
@@ -1236,7 +1235,7 @@ func _move_player(d: float) -> void:
 		_climb_step(d)
 		return
 	var mv := Vector2.ZERO
-	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() \
+	var can_act := UiFocus.keys_free() \
 			and not (hecho and hecho.run)
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
@@ -1368,7 +1367,7 @@ func _move_player(d: float) -> void:
 	# face the mouse; with the mouse outside the window, face where you're walking
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
-	var aim_ok := panel_open == "" and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
+	var aim_ok := UiFocus.panel == "" and Rect2(Vector2.ZERO, vp.get_visible_rect().size).has_point(mp)
 	var want := pface
 	if aim_ok:
 		var aim := cam.mouse_on_plane(0.9)
@@ -1623,7 +1622,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		return false
 	var left: float = float(lfl["lip"]) + 0.12 - py
 	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
-	if Input.is_action_just_pressed("jump") and panel_open == "":
+	if Input.is_action_just_pressed("jump") and UiFocus.panel == "":
 		# the fling: strong in the window near the top, weaker before it
 		var timed := left <= Hunter.LRISE_WINDOW
 		lfl = {}
@@ -2116,7 +2115,7 @@ func _find_interact() -> void:
 			var sd := p2.distance_to(Vector2(sc.x, sc.z))
 			if sd < 1.7 and (best.is_empty() or sd < bd): bd = sd; best = {"kind": "station", "id": s["id"], "e": s["e"]}
 	interact = best
-	if panel_open != "" or best.is_empty() or building_now or chat_open or not train.is_empty() or (hb and hb.active):
+	if not UiFocus.keys_free() or best.is_empty() or (hb and hb.active):
 		prompt_box.visible = false
 		return
 	prompt_box.visible = true
@@ -2170,7 +2169,7 @@ func _update_hover() -> void:
 	var vp := get_viewport()
 	var mp := vp.get_mouse_position()
 	var best: Dictionary = {}; var bd := 52.0
-	if panel_open == "" and not chat_open and not building_now and not Overlay.is_open() and not (hb and hb.active):
+	if UiFocus.keys_free() and not (hb and hb.active):
 		for k in kins:
 			if k.has("indoors"): continue
 			var np: Vector3 = (k["node"] as Node3D).global_position + Vector3(0, 0.45, 0)
@@ -2321,7 +2320,7 @@ func open_job_board(tab := "") -> void:
 	WorkView.open(self)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if hb and hb.active and panel_open == "" and not Overlay.is_open():
+	if hb and hb.active and UiFocus.panel == "" and not Overlay.is_open():
 		if hb.input(event):
 			get_viewport().set_input_as_handled()
 			return
@@ -2343,31 +2342,32 @@ func _unhandled_input(event: InputEvent) -> void:
 			tk["busy"] = false
 			train["bar"].close()
 			train = {}
+			UiFocus.train = false
 			get_viewport().set_input_as_handled()
 			return
-	if event is InputEventMouseButton and event.pressed and panel_open == "":
+	if event is InputEventMouseButton and event.pressed and UiFocus.panel == "":
 		# click a kin to see its details
-		if event.button_index == MOUSE_BUTTON_LEFT and not hover_k.is_empty() and visit.is_empty() and not building_now and not chat_open:
+		if event.button_index == MOUSE_BUTTON_LEFT and not hover_k.is_empty() and visit.is_empty() and not UiFocus.build and not UiFocus.chat:
 			_open_kin(hover_k["rec"])
 			get_viewport().set_input_as_handled()
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP: cam.zoom_to = clampf(cam.zoom_to - 0.08, 0.55, 1.6)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN: cam.zoom_to = clampf(cam.zoom_to + 0.08, 0.55, 1.6)
-	if panel_open == HomeClasses.TITLE and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
+	if UiFocus.panel == HomeClasses.TITLE and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_K and has_meta("hero_hover"):
 		HomeHero.kit(self, String(get_meta("hero_hover")))      # K on the Hunters screen: its full kit card
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open == "" and visit.is_empty() and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_G and guide and guide.toggle_goals():
+	if UiFocus.panel == "" and visit.is_empty() and event is InputEventKey and event.pressed and not event.echo and (event as InputEventKey).physical_keycode == KEY_G and guide and guide.toggle_goals():
 		get_viewport().set_input_as_handled()      # G: the Goals line opens into the full list
 		return
-	if event.is_action_pressed("hero") and visit.is_empty() and not chat_open and not Overlay.is_open() and not building_now and (panel_open == "" or panel_open == HomeClasses.TITLE):
-		if panel_open == HomeClasses.TITLE: _close_panel()
+	if event.is_action_pressed("hero") and visit.is_empty() and not UiFocus.chat and not Overlay.is_open() and not UiFocus.build and (UiFocus.panel == "" or UiFocus.panel == HomeClasses.TITLE):
+		if UiFocus.panel == HomeClasses.TITLE: _close_panel()
 		else: HomeHero.open(self)
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_released("whistle") and life:
 		life.whistle.release()
-	if event.is_action_pressed("whistle") and panel_open == "" and not chat_open and visit.is_empty() and train.is_empty() and not Overlay.is_open():
+	if event.is_action_pressed("whistle") and UiFocus.keys_free() and visit.is_empty():
 		_whistle()
 		get_viewport().set_input_as_handled()
 		return
@@ -2375,7 +2375,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hecon.cancel_carry()
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open != "" and not Overlay.is_open() and event is InputEventKey and event.pressed and not event.echo \
+	if UiFocus.panel != "" and not Overlay.is_open() and event is InputEventKey and event.pressed and not event.echo \
 			and (event.physical_keycode == KEY_ENTER or event.physical_keycode == KEY_KP_ENTER) and not (get_viewport().gui_get_focus_owner() is LineEdit):
 		if UI.press_primary(panel_host):
 			get_viewport().set_input_as_handled()
@@ -2383,14 +2383,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not Overlay.is_open() and _hub_key(event):
 		get_viewport().set_input_as_handled()
 		return
-	if panel_open != "" and not Overlay.is_open() and event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"):
+	if UiFocus.panel != "" and not Overlay.is_open() and event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"):
 		_close_panel()
 		get_viewport().set_input_as_handled()
 		return
 	if event.is_action_pressed("menu") and not Overlay.is_open():
-		if chat_open:
+		if UiFocus.chat:
 			_close_chat()
-		elif panel_open != "":
+		elif UiFocus.panel != "":
 			_close_panel()
 		else:
 			Overlay.open_pause("home")
@@ -2437,7 +2437,7 @@ func _build_ui() -> void:
 	# menus open over a blurred, dimmed farm
 	panel_dim = UI.backdrop()
 	panel_dim.gui_input.connect(func(ev):
-		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and panel_open != "":
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT and UiFocus.panel != "":
 			_close_panel())
 	root_ui.add_child(panel_dim)
 	panel_host = CenterContainer.new()
@@ -2474,9 +2474,9 @@ func _build_hub() -> void:
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN
 
 func _hub_go(cb: Callable, id: String) -> void:
-	if chat_open: _close_chat()
+	if UiFocus.chat: _close_chat()
 	if Overlay.is_open(): Overlay.close()
-	if panel_open != "" and String(get_meta("hub_open", "")) == id:
+	if UiFocus.panel != "" and String(get_meta("hub_open", "")) == id:
 		_close_panel()
 		return
 	cb.call()
@@ -2486,7 +2486,7 @@ func _hub_go(cb: Callable, id: String) -> void:
 func _hub_key(event: InputEvent) -> bool:
 	if hub == null or not visit.is_empty() or not (event is InputEventKey) or not event.pressed or event.echo:
 		return false
-	if building_now or not train.is_empty() or chat_open:
+	if UiFocus.build or UiFocus.train or UiFocus.chat:
 		return false
 	if get_viewport().gui_get_focus_owner() is LineEdit:
 		return false
@@ -2540,7 +2540,7 @@ func _treat_name(t: String) -> String:
 	return t
 
 func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxContainer:
-	var prev := panel_open
+	var prev := UiFocus.panel
 	# the same panel rebuilt (a button on it changed something, as the expedition loadout's do):
 	# keep it scrolled where it was instead of jumping back to the top
 	var keep_scroll := -1
@@ -2552,7 +2552,7 @@ func _new_panel(title_txt: String, width := 520.0, scroll := false) -> VBoxConta
 	var p: PanelContainer = pb[0]
 	var v: VBoxContainer = pb[1]
 	panel_host.add_child(p)
-	panel_open = title_txt
+	UiFocus.panel = title_txt
 	# the blur and the panel go over everything else on the screen (the day-one list, toasts)
 	root_ui.move_child(panel_dim, -1)
 	root_ui.move_child(panel_host, -1)
@@ -2593,10 +2593,10 @@ func _restore_scroll(p: Control, val: int, tries: int) -> void:
 		if pp: _restore_scroll(pp, val, tries - 1), CONNECT_ONE_SHOT)
 
 func _close_panel() -> void:
-	var was := panel_open
+	var was := UiFocus.panel
 	for ch in panel_host.get_children():
 		ch.queue_free()
-	panel_open = ""
+	UiFocus.panel = ""
 	chat_input = null
 	set_meta("hub_open", "")
 	if panel_dim and not was.is_empty(): UI.show_backdrop(panel_dim, false)
@@ -3293,7 +3293,6 @@ func _open_kin(rec: Dictionary) -> void:
 			_open_kin(rec)))
 
 # ---- talking: speech bubbles over the kin and a slim bar to type in
-var chat_open := false
 var chat_bar: Control = null
 var chat_hist: Label = null
 
@@ -3301,7 +3300,7 @@ func _open_chat(rec: Dictionary) -> void:
 	_close_panel()
 	_close_chat()
 	chat_kin = rec
-	chat_open = true
+	UiFocus.chat = true
 	if chat_log.size() == 0 or chat_log[0].get("uid", "") != rec["uid"]:
 		chat_log = [{"uid": rec["uid"]}]
 	var k := _kin_entry(rec)
@@ -3342,10 +3341,10 @@ func _close_chat() -> void:
 	chat_bar = null
 	chat_input = null
 	chat_hist = null
-	if chat_open:
+	if UiFocus.chat:
 		var k := _kin_entry(chat_kin)
 		if not k.is_empty(): k["hold_t"] = 0.6
-	chat_open = false
+	UiFocus.chat = false
 
 ## What it says when you walk up or start talking: cold if it doesn't trust you, else what it wants.
 func _greeting(rec: Dictionary) -> String:
@@ -3641,7 +3640,7 @@ func _start_match() -> void:
 # ---- evolution
 ## Kin that grew during the last expedition change in front of you when you get home.
 func _play_evolutions() -> void:
-	if building_now or panel_open != "":
+	if UiFocus.build or UiFocus.panel != "":
 		return
 	var k: Dictionary = {}
 	for kk in kins:
@@ -3649,7 +3648,7 @@ func _play_evolutions() -> void:
 			k = kk; break
 	if k.is_empty():
 		return
-	building_now = true
+	UiFocus.build = true
 	var rec: Dictionary = k["rec"]
 	var evs: Array = rec["pending_evo"]
 	rec["pending_evo"] = []
@@ -3677,7 +3676,7 @@ func _play_evolutions() -> void:
 	tw.tween_callback(func():
 		# swap in the grown model
 		if not is_instance_valid(n):
-			building_now = false
+			UiFocus.build = false
 			return
 		_swap_kin_model(k)
 		k["busy"] = false
@@ -3686,7 +3685,7 @@ func _play_evolutions() -> void:
 		Sfx.play("unlock")
 		Sfx.play("kin_happy")
 		_emote(k, "★")
-		building_now = false
+		UiFocus.build = false
 		cam.zoom_to = HOME_ZOOM
 		var v := _new_panel(("%s evolved" if big else "%s is changing") % rec["name"], 520)
 		for e in evs:
@@ -3789,7 +3788,7 @@ func unstick() -> void:
 
 ## Builds a building on its lot: the site packs away and the building pops up with dust and hammering.
 func _construct(b: String) -> void:
-	building_now = true
+	UiFocus.build = true
 	var l: Dictionary = lots[b]
 	var holder: Node3D = l["node"]
 	l["built"] = true
@@ -3817,7 +3816,7 @@ func _construct(b: String) -> void:
 		fx.burst(l["at"] + Vector3(0, 2.6, 0), UI.GOLD, 26, 6.0, 0.8, 8.0, 1.2)
 		fx.ring(l["at"], 4.0, Color(UI.GOLD, 0.9), 0.5)
 		l["built"] = true
-		building_now = false
+		UiFocus.build = false
 		if b == "greenhouse": _build_plots()
 		_toast("%s built" % Data.BUILDINGS[b]["name"]))
 	cam.zoom_to = 0.95
@@ -3844,7 +3843,7 @@ func _open_bridge(k: String) -> void:
 	v.add_child(btn)
 
 func _build_bridge_now(k: String) -> void:
-	building_now = true
+	UiFocus.build = true
 	var br: Dictionary = bridges[k]
 	br["built"] = true
 	_lay_planks(k, true)
@@ -3859,7 +3858,7 @@ func _build_bridge_now(k: String) -> void:
 		var tw := create_tween()
 		tw.tween_property(lbl, "modulate:a", 0.0, 0.6)
 		tw.tween_callback(func(): lbl.visible = false)
-		building_now = false
+		UiFocus.build = false
 		_spawn_kin()
 		_toast("%s is open" % Data.ISLES[k]["name"]))
 
@@ -4237,7 +4236,7 @@ func _update_bubbles(d: float) -> void:
 		# saying hello when you walk up to it
 		k["hi_cd"] = float(k.get("hi_cd", 0.0)) - d
 		# the big moment of its last expedition: it brings it up when you're close
-		if rec.has("recall") and visit.is_empty() and panel_open == "" and not chat_open and not k.get("busy", false) \
+		if rec.has("recall") and visit.is_empty() and UiFocus.keys_free() and not k.get("busy", false) \
 				and float(k.get("nap_t", 0.0)) <= 0.0 and Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 3.2:
 			var rl := BokiLines.say(rec, "back_" + String(rec["recall"].get("kind", "")))
 			rec.erase("recall")
@@ -4247,7 +4246,7 @@ func _update_bubbles(d: float) -> void:
 				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
 				Sfx.play("kin_happy", k["pos"], -8.0, 0.15, Unique.voice(rec))
 				Save.save_game()
-		if visit.is_empty() and float(k["hi_cd"]) <= 0.0 and panel_open == "" and not chat_open and train.is_empty() and not k.get("busy", false):
+		if visit.is_empty() and float(k["hi_cd"]) <= 0.0 and UiFocus.keys_free() and not k.get("busy", false):
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
 				k["hi_cd"] = randf_range(18.0, 30.0)
 				if randf() < 0.5 and float(k.get("nap_t", 0.0)) <= 0.0:
@@ -4528,6 +4527,7 @@ func _start_drill(rec: Dictionary, stat: String) -> void:
 	var bar := TimingBar.new()
 	bar.open(root_ui, "Press %s (or click) when the marker is in the gold" % Settings.key_cap("interact"))
 	train = {"k": k, "stat": stat, "round": 0, "results": [], "bar": bar, "wait": 0.0}
+	UiFocus.train = true
 	_train_label()
 	Sfx.play("whoosh", null, -8.0)
 
@@ -4627,6 +4627,7 @@ func _finish_training() -> void:
 	k["t"] = 1.5
 	train["bar"].close()
 	train = {}
+	UiFocus.train = false
 
 # ---- eggs: two kin who are close leave an egg in the nest; you hatch and name it
 func _can_pair(rec: Dictionary) -> String:
@@ -5036,7 +5037,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	KinBox.route_new(baby)        # a repeat of a kind already on the farm goes to the Kin Burrow (unless it's rare)
 	Care.dex_got(baby)
 	Save.save_game()
-	building_now = true
+	UiFocus.build = true
 	# the egg hatches in stages: wiggles, cracks, a peek, then the kin pops out
 	var shell_c: Color = Color("ffd36a") if rare else Color(Data.KIN[baby["species"]]["color"]).lightened(0.15)
 	if is_instance_valid(hide):
@@ -5057,7 +5058,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 		eh.queue_free()
 		_refresh_nest()
 		if hinc: hinc.refresh()
-		building_now = false
+		UiFocus.build = false
 		cam.zoom_to = zoom0
 		_spawn_kin()
 		var ke := _kin_entry(baby)
@@ -5067,9 +5068,9 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 		# a closer look (its card, and turning it round), then naming
 		var rv := KinReveal.new(baby["species"], baby)
 		add_child(rv)
-		panel_open = "reveal"; building_now = true      # hold the hunter still while you turn it round
+		UiFocus.panel = UiFocus.REVEAL; UiFocus.build = true      # hold the hunter still while you turn it round
 		rv.proceed.connect(func():
-			panel_open = ""; building_now = false
+			UiFocus.panel = ""; UiFocus.build = false
 			_name_baby(baby)))
 
 func _name_baby(baby: Dictionary) -> void:

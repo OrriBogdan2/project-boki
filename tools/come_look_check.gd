@@ -139,7 +139,7 @@ func run(m: Node) -> void:
 	_new_save()
 	home = await main._hb_home()
 	ok(home.kins.size() == 5, "five Boki live on the farm (%d)" % home.kins.size())
-	home.panel_open = ""      # the welcome card would keep the farm quiet
+	UiFocus.panel = ""      # the welcome card would keep the farm quiet
 	FarmChatter._known.clear()
 	ComeLook._extracts = -1
 	FarmChatter._look_t = 0.0

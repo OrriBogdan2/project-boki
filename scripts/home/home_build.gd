@@ -998,7 +998,7 @@ func reset_layout() -> void:
 
 # ------------------------------------------------------------------ build mode on / off
 func can_build() -> bool:
-	return not h._visiting() and ZoneLayout.live.is_empty() and h.panel_open == "" and not h.chat_open and h.train.is_empty() and not h.building_now and not Overlay.is_open()
+	return not h._visiting() and ZoneLayout.live.is_empty() and UiFocus.keys_free()
 
 func toggle() -> void:
 	if active:
@@ -1242,7 +1242,7 @@ func _brush_ok(c: Vector2i, mode: String) -> bool:
 
 # ------------------------------------------------------------------ every frame
 func tick(d: float) -> void:
-	if not make_marks.is_empty() and h.panel_open != "Make it home":
+	if not make_marks.is_empty() and UiFocus.panel != "Make it home":
 		# "Make it home" closed some other way than Done (its X, Esc): its spot marks go with it
 		for mk in make_marks:
 			if is_instance_valid(mk): mk.queue_free()

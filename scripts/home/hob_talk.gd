@@ -11,7 +11,6 @@ extends RefCounted
 ## When a line is about something (a "show"), he points at it and the camera looks there for a moment. On the
 ## first arrival the camera also swings over to him for a moment while he waves and calls you over.
 
-const TALK := "Hob"            # Home.panel_open while you talk: you stand still and no prompt shows
 const TALK_ZOOM := 0.8         # the home camera's zoom while you talk (Home.HOME_ZOOM after)
 const EASE_S := 0.6            # s the camera takes to swing over to him and back on the first arrival
 const FACE_K := 0.45           # how far the camera's focus moves from you toward him while you talk
@@ -49,7 +48,7 @@ func start() -> void:
 	var ids := FarmBuilder.draw_up()
 	FarmTutorial.event("hob")
 	Save.save_game()
-	h.panel_open = TALK
+	UiFocus.panel = UiFocus.TALK
 	h.cam.zoom_to = TALK_ZOOM
 	_screen_clear(false)
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
@@ -110,7 +109,7 @@ func later() -> void:
 func _put_on(id: String) -> void:
 	box.close()
 	var h = hob.h
-	h.panel_open = TALK      # (you stay still through the Mask moment)
+	UiFocus.panel = UiFocus.TALK      # (you stay still through the Mask moment)
 	_screen_clear(false)
 	var relic := MaskRelic.make(id)
 	h.add_child(relic)
@@ -123,8 +122,8 @@ func _after_beat(id: String) -> void:
 	ClassUnlock.reveal_done(id)      # (the beat was its reveal)
 	Save.save_game()
 	var h = hob.h
-	if h.panel_open == TALK:
-		h.panel_open = ""
+	if UiFocus.panel == UiFocus.TALK:
+		UiFocus.panel = ""
 	h.cam.zoom_to = h.HOME_ZOOM
 	_screen_clear(true)
 	h._refresh_top()
@@ -156,8 +155,8 @@ func _closed() -> void:
 	box = null
 	offer = null
 	show_t = -1.0
-	if h.panel_open == TALK:
-		h.panel_open = ""
+	if UiFocus.panel == UiFocus.TALK:
+		UiFocus.panel = ""
 	h.cam.zoom_to = h.HOME_ZOOM
 	_screen_clear(true)
 	if h.guide:
@@ -177,7 +176,7 @@ func _screen_clear(shown: bool) -> void:
 func tick(dt: float) -> void:
 	var h = hob.h
 	if talking():
-		if h.panel_open != TALK:      # (Esc closed it)
+		if UiFocus.panel != UiFocus.TALK:      # (Esc closed it)
 			box.close()
 			return
 		hob.node.face_to = h.ppos
@@ -196,7 +195,7 @@ func _intro(dt: float) -> void:
 	var h = hob.h
 	if intro_t < 0.0:
 		var tut: Dictionary = Save.d["tutorial"]
-		var clear: bool = h.panel_open == "" and not h.building_now and bool(tut.get("home", false))
+		var clear: bool = UiFocus.panel == "" and not UiFocus.build and bool(tut.get("home", false))
 		var met := bool(FarmBuilder.state().get("met", false))
 		if met or bool(tut.get("hob_intro", false)) or not clear or not FarmTutorial.active() or FarmTutorial.base():
 			return

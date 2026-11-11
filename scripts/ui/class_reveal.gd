@@ -37,7 +37,7 @@ static func maybe_show(home: Node) -> ClassReveal:
 ## as no panel (the welcome, make-home) covers the farm.
 static func announce_fresh(home: Node) -> void:
 	if not (ClassUnlock.state().get("fresh", []) as Array).is_empty():
-		if home.panel_open != "" or home.building_now or not Save.d["tutorial"].get("home", false):
+		if UiFocus.panel != "" or UiFocus.build or not Save.d["tutorial"].get("home", false):
 			home.get_tree().create_timer(1.0).timeout.connect(func():
 				if is_instance_valid(home) and home.is_inside_tree(): announce_fresh(home))
 			return

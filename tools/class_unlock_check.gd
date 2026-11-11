@@ -618,7 +618,7 @@ func _home(tree: SceneTree) -> void:
 	ev.pressed = true
 	hm._unhandled_input(ev)
 	await tree.process_frame
-	ok(hm.panel_open == "Relics", "J opens the Relics screen (%s)" % hm.panel_open)
+	ok(UiFocus.panel == "Relics", "J opens the Relics screen (%s)" % UiFocus.panel)
 	var by := _statuses(hm)
 	ok(by.size() == Arch.ids().size(), "every Hunter has a tile (%d)" % by.size())
 	var mixed: bool = by.get("juggernaut", "") == "ready" and by.get("thief", "") == "progress"
@@ -675,7 +675,7 @@ func _home(tree: SceneTree) -> void:
 			tree.root.get_texture().get_image().save_png("%s/reveal_burst.png" % shots)
 		rv._finish(false)
 		for i in 6: await tree.process_frame
-	ok(hm.panel_open == "Relics", "Later goes back to the Relics screen")
+	ok(UiFocus.panel == "Relics", "Later goes back to the Relics screen")
 	ok(ClassReveal.maybe_show(hm) == null, "and the reveal never plays twice")
 	# --- a locked Hunter: its challenge with progress, and its mastery list
 	HomeClasses.open(hm, "thief")

@@ -26,7 +26,7 @@ static func tick(h, d: float) -> void:
 	if _look_t > 0.0:
 		return
 	_look_t = LOOK_S
-	if not h.visit.is_empty() or h.panel_open != "" or h.chat_open:
+	if not h.visit.is_empty() or not UiFocus.keys_free():
 		return
 	_welcome(h)
 	var idle := (h.kins as Array).filter(func(k): return _idle(h, k))

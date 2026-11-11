@@ -144,7 +144,7 @@ func _home_slot() -> void:
 	Econ.ensure()
 	var home = await main._hb_home()
 	ok(not ("dash_pips" in home), "the farm's own overhead dash pips are gone")
-	home.panel_open = ""
+	UiFocus.panel = ""
 	home._move_player(0.001)
 	var slot: HomeDashSlot = home.dash_slot
 	ok(slot != null and slot.get_parent() == home.ui, "the farm has the dash slot on its HUD layer")

@@ -32,6 +32,7 @@ func _init(h, match_node: Match) -> void:
 	center = Vector2(m.world.w, m.world.h) * 0.5
 
 func open(by_plan := false) -> void:
+	hud.take_focus(UiFocus.MAP)
 	is_open = true
 	Sfx.play("ui_open", null, -8.0)
 	auto = by_plan
@@ -42,6 +43,7 @@ func open(by_plan := false) -> void:
 func close() -> void:
 	if is_open: Sfx.play("ui_close", null, -8.0)
 	is_open = false
+	hud.drop_focus(UiFocus.MAP)
 	auto = false
 	_press = Vector2.INF
 
