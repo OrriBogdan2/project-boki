@@ -553,9 +553,9 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 27,
-"long_line": 92,
-"nested_ternary": 15,
+"history_comment": 24,
+"long_line": 90,
+"nested_ternary": 14,
 "semicolon": 47,
 "shadow": 4
 },

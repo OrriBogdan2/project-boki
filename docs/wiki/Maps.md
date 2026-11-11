@@ -49,16 +49,16 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 58 |  |
+| The Crown | heart | Gloom | dangerous | 52 |  |
 | Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
 | Ashen Gaol | camp | Ember | dangerous | 12 |  |
-| Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
+| Frostgate | camp | Frost | contested | 12 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 27 | The Kilns, Forge Yard |
 | Stormbreak | shrine | Storm | contested | 26 |  |
-| Thornwood | nest | Bloom | contested | 61 | Bramble Rise |
-| Larkhollow | landing | Meadow | quiet | 48 | The Hollow |
+| Thornwood | nest | Bloom | contested | 66 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 37 | The Hollow |
 | Highwatch | landing | Frost | quiet | 3 | The Lookout |
-| Duskmoor | landing | Storm | quiet | 16 | Moor Chapel |
+| Duskmoor | landing | Storm | quiet | 14 | Moor Chapel |
 | Saltmere | landing | Bloom | quiet | 32 | Salt River |
 
 ### Boss lairs
