@@ -3703,9 +3703,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Pinguin.png",
   "hash": {
    "sheet": "bcfbd95875a3",
-   "card": "f48f4abc4ba1",
+   "card": "8bad292a8044",
    "portrait": "2516d418ab5d",
-   "hero": "020d93693ffc"
+   "hero": "1b43f797bc42"
   },
   "sheet_for_card": "f48f4abc4ba1",
   "display_name": "Kegling"
@@ -3718,9 +3718,9 @@
   "hero": "briefs/boki-art/portraits/cutout_v2/Rollguin.png",
   "hash": {
    "sheet": "87d24dc17e1f",
-   "card": "de8965c6211e",
+   "card": "c115abcc7d5b",
    "portrait": "379e88cb6c94",
-   "hero": "e3ace533da1a"
+   "hero": "39f2678c02ce"
   },
   "sheet_for_card": "de8965c6211e"
  },
@@ -3731,12 +3731,12 @@
   "cutout": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hero": "briefs/boki-art/portraits/cutout_v2/Kingpinguin.png",
   "hash": {
-   "sheet": "2ebb1b3de196",
+   "sheet": "a761ae301797",
    "card": "ac580571818a",
-   "portrait": "f0b1d6685fc4",
+   "portrait": "06712ac7db52",
    "hero": "4bcfc897dcaf"
   },
-  "sheet_for_card": "f8382e405ba2",
+  "sheet_for_card": "ac580571818a",
   "display_name": "Pipguin"
  },
  "Filefin": {

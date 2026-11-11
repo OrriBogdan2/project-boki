@@ -2416,3 +2416,11 @@ for _k,_d in (('a',"Make it a much smaller, rounder, fatter chick: a near-spheri
 V2SHEET_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg',_GC,_GN); SPECS[-1]['id']='v2s_kingpinguin_ball2'; SPECS[-1]['runs']=4; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
 V2PORT_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg','final','tough',_GC,_GN,False,False,"leaning forward as it starts to roll, one flipper tucked, calm focused eyes"); SPECS[-1]['id']='v2p_kingpinguin_ball2'
 SPECS.append({'id':'px9f_kingpinguin','name':'Kingpinguin (pixel sprite 80, calm ball)','refs':['briefs/boki-art/cards/Kingpinguin.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
+
+# 11-11 OWNER "push your picks": Kegling (Pinguin) kg_fat_c_2, Rollguin rg_fat_b_2, Pipguin set v2s/v2p_kingpinguin_ball2_2 + sprite px9f_1.
+# Sets + sprites for the new Kegling and Rollguin cards:
+for _n,_st,_ar,_fu,_pose in (('Pinguin','baby','cute',1,"waddling toward the viewer, tiny flippers out, curious"),('Rollguin','mid','cute',0,"tucking its head to roll forward, flippers in, calm focus")):
+    _cd='briefs/boki-art/cards/'+_n+'.jpg'
+    V2SHEET_NEW(_n,_cd,_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_fat'; SPECS[-1]['runs']=3; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
+    V2PORT_NEW(_n,_cd,_st,_ar,_GC,_GN,False,bool(_fu),_pose); SPECS[-1]['id']='v2p_'+_n.lower()+'_fat'
+    SPECS.append({'id':'px9f_'+_n.lower(),'name':_n+' (pixel sprite 80, fat line)','refs':[_cd],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
