@@ -48,6 +48,10 @@ var listener := Vector3.ZERO   # set by the camera each frame
 var hear_range := 22.0
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
+var prios := PackedInt32Array()     # per pool voice: SfxVoices priority of what it plays
+var born := PackedInt64Array()      # per pool voice: when it started (ms)
+var stolen := 0                     # sounds that took over a lower-priority voice on a full bus
+var dropped := 0                    # sounds left out because every voice on a full bus mattered more
 var rng := RandomNumberGenerator.new()
 
 signal new_track(name: String)
@@ -92,6 +96,8 @@ func _ready() -> void:
 		p.bus = "SFX"
 		add_child(p)
 		players.append(p)
+	prios.resize(POOL)
+	born.resize(POOL)
 
 ## Heavy sounds that carry further than hear_range (a gatling you hear coming): each sound set lists them
 ## under "reach" (metres). Past FAR they still go through the muffled bus, so what carries is the low end.
@@ -407,21 +413,46 @@ func _distance_db(pos, reach := 0.0) -> float:
 	var edge := 1.0 - smoothstep(hr * 0.7, hr, dist)
 	return db + linear_to_db(maxf(edge, 0.001))
 
-## A free voice from the pool, so a new sound doesn't cut one that's still ringing (the oldest if all are busy).
-func _voice(pos) -> AudioStreamPlayer:
-	var p: AudioStreamPlayer = null
+## A voice from the pool for a sound that plays on pos, or null when its bus is full of voices that matter
+## more (SfxVoices): past the bus's cap a sound takes over the cheapest voice there, so far footsteps and
+## far Boki chatter go first and your own sounds, warnings and recasts stay. Under the cap, a free voice
+## (the oldest if all are busy), so a new sound doesn't cut one that's still ringing.
+func _voice(sname: String, pos) -> AudioStreamPlayer:
+	var dist := -1.0 if pos == null else Vector2(pos.x - listener.x, pos.z - listener.z).length()
+	var bus := "SFXFar" if dist > FAR else "SFX"
+	var prio := SfxVoices.priority(sname, dist, FAR)
+	var i := -1
+	if voices_on(bus) >= SfxVoices.cap(bus):
+		i = SfxVoices.victim(players, prios, born, bus, prio)
+		if i >= 0:
+			stolen += 1
+		elif prio < SfxVoices.KEEP:
+			dropped += 1
+			return null
+	if i < 0:
+		i = _free_voice()
+	prios[i] = prio
+	born[i] = Time.get_ticks_msec()
+	players[i].bus = bus
+	return players[i]
+
+## Pool voices sounding on a bus right now.
+func voices_on(bus: String) -> int:
+	var n := 0
+	for p in players:
+		if p.playing and p.bus == bus:
+			n += 1
+	return n
+
+func _free_voice() -> int:
 	for k in POOL:
-		var c := players[(next + k) % POOL]
-		if not c.playing:
-			p = c
-			next = (next + k + 1) % POOL
-			break
-	if p == null:
-		p = players[next]
-		next = (next + 1) % POOL
-	var far := pos != null and Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR
-	p.bus = "SFXFar" if far else "SFX"
-	return p
+		var i := (next + k) % POOL
+		if not players[i].playing:
+			next = (i + 1) % POOL
+			return i
+	var oldest := next
+	next = (next + 1) % POOL
+	return oldest
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
@@ -441,11 +472,13 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 		times.pop_front()
 	if times.size() >= STACK_MAX:
 		return
+	var p := _voice(sname, pos)
+	if p == null:
+		return
 	v -= STACK_DB * times.size()
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
-	var p := _voice(pos)
 	var st = streams[sname]
 	if st is Array:
 		# a different take from last time
@@ -567,8 +600,10 @@ func play_stream(st: AudioStream, pos = null, vol_db := 0.0, pitch_var := 0.05) 
 	var v := vol_db + _distance_db(pos)
 	if is_nan(v):
 		return
+	var p := _voice("", pos)
+	if p == null:
+		return
 	last_played[key] = now
-	var p := _voice(pos)
 	p.stream = st
 	p.volume_db = v
 	p.pitch_scale = 1.0 + rng.randf_range(-pitch_var, pitch_var)
