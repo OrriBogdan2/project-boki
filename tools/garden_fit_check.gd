@@ -4,8 +4,8 @@ extends RefCounted
 ## preview, the Boki card's Family tab with its lineage) at 1280x720, 1920x1080, 2560x1080, a small
 ## 960x540 window and 1280x720 with the Interface size slider at its top (1.5). Every visible control must
 ## sit inside its panel (no overflowing text, nothing cut off sideways), no one-line label or button may clip or
-## ellipsize its text, and the panel must sit inside the window's safe margin. With --shots-dir (a real renderer: jobq --needs gpu) each is saved as
-## <dir>/<W>x<H>_<screen>.png. Never touches the real save.
+## ellipsize its text, and the panel must sit inside the window's safe margin. With --shots-dir (a real
+## renderer: jobq --needs gpu) each is saved as <dir>/<W>x<H>_<screen>.png. Never touches the real save.
 
 const SIZES := [[Vector2i(1280, 720), 1.0], [Vector2i(1920, 1080), 1.0], [Vector2i(2560, 1080), 1.0],
 		[Vector2i(960, 540), 1.0], [Vector2i(1280, 720), 1.5]]      # [window, Settings "ui_scale"]
@@ -117,7 +117,8 @@ func _scan(tag: String) -> void:
 			stray.append("%s %s at %s" % [c.get_class(), c.name, c.get_global_rect()])
 	ok(stray.is_empty(), "%s: nothing sticks out of its panel (%d: %s)" % [tag, stray.size(), stray.slice(0, 3)])
 	var cut: Array = panel.find_children("*", "Control", true, false).filter(_cut_short)
-	ok(cut.is_empty(), "%s: no text cut short (%d: %s)" % [tag, cut.size(), cut.slice(0, 3).map(func(c): return c.text)])
+	var texts: Array = cut.slice(0, 3).map(func(c): return c.text)
+	ok(cut.is_empty(), "%s: no text cut short (%d: %s)" % [tag, cut.size(), texts])
 
 ## A one-line label or button that clips or ellipsizes a text wider than itself.
 func _cut_short(c: Control) -> bool:
