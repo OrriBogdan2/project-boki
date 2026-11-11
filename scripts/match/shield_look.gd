@@ -50,14 +50,14 @@ static func occludes(m: Node, h: Hunter) -> bool:
 		if not is_instance_valid(n):
 			continue
 		for mi in (n as Node).find_children("*", "MeshInstance3D", true, false):
-			if _see_through(mi as MeshInstance3D):
+			if see_through(mi as MeshInstance3D):
 				continue
 			var box := (mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()
 			if box.intersects_segment(from, to):
 				return true
 	return false
 
-static func _see_through(mi: MeshInstance3D) -> bool:
+static func see_through(mi: MeshInstance3D) -> bool:
 	if not mi.is_visible_in_tree():
 		return true
 	var mat := mi.material_override as ShaderMaterial

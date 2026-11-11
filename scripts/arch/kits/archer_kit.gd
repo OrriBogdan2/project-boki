@@ -17,7 +17,7 @@ var perfects: int:
 	get: return draw.perfects if draw else 0
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
-var sense_t := 0.0
+var sense: HawkSense         # the passive: hurt rivals revealed and outlined through cover
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
 var cremations := 0            # Heavy Shots that knocked a foe burning in the Hail Wall (tests)
@@ -34,16 +34,14 @@ func _setup() -> void:
 	h.add_child(ult)
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
+	sense = HawkSense.new(self)
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
 		_arrow_hit(t)
 
 func _tick(dt: float) -> void:
-	sense_t -= dt
-	if sense_t <= 0.0:
-		sense_t = 0.3
-		_sense_injured()
+	sense.tick(dt)
 	if pin_aim and rmb_down:
 		_heavy_tele()
 	if pin_aim and rmb_down and tells_visible():
@@ -131,13 +129,10 @@ func _tag_shots() -> void:
 			vfx("fire_" + kind, s["pos"], h.aim_dir(), {"follow": arrow})
 	draw.pending = ""
 
-## Passive, Hawk Sense: rivals under half health are seen through cover and fog within 22m.
-func _sense_injured() -> void:
-	var rd := res_def()
-	for f in m.foes_of(h.team):
-		var hurt_enough: bool = f.hp < f.max_hp * float(rd.get("sense_hp", 0.5))
-		if f is Hunter and not f.dead and hurt_enough and h.flat_dist(f) < float(rd.get("sense_r", 22.0)):
-			f.reveal_t = maxf(f.reveal_t, 0.4)
+func teardown() -> void:
+	if sense:
+		sense.clear()
+	super()
 
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.5 and spirit.active():
