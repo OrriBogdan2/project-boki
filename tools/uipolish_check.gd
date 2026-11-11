@@ -177,10 +177,16 @@ func _off_look(root: Node, ours: Dictionary) -> Array:
 		out.append(String(root.get_path_to(ctl)) + (" (%s)" % owner_script.resource_path if owner_script else ""))
 	return out
 
+## Opens `screen` and waits until it is the new, built, uncovered screen. Under the ink wipe
+## (xvfb, real play) `main.current` is still the outgoing screen, or gone, for the first second.
 func _go(screen: String) -> Node:
+	var old_id: int = main.current.get_instance_id() if main.current else 0
 	Game.goto(screen)
-	for i in 10:
+	for i in 600:
 		await main.get_tree().process_frame
+		var cur: Node = main.current
+		if i >= 9 and cur and cur.get_instance_id() != old_id and not main.fade.covered and not cur.get("building"):
+			break
 	return main.current
 
 func _screens() -> void:
