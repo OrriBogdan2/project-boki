@@ -15,7 +15,7 @@ huge man's, deep and warm, with a wet gurgle under the bad moments (he went down
   bjorn_spin (3) / bjorn_glint  the Crushing Blow's wind-up turns / the full charge's ship's-bell ding
   bjorn_slam (3)                the Crushing Blow landing
   bjorn_shield_up / bjorn_block (3) / bjorn_break   the prow raised / a shot thudding into it / it splitting
-  bjorn_bash                    the prow rammed into foes (push hint, Shield Slam)
+  bjorn_bash                    the prow rammed into foes (push hint)
   bulwark_charge                Shield Charge: the prow driven forward like a ram, the hull groaning
   bulwark_dash / bjorn_whirl    the 360 Smash's lunge / its spin landing all round him
   bjorn_purify / _burst         Mending Ground: a bell toll and a rising sea glow / the healing wave breaking

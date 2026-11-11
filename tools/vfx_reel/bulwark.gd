@@ -1,6 +1,6 @@
 extends "res://tools/hero_vfx_reel.gd"
 ## Albert's reel (tools/hero_vfx_reel.gd), every slot at the match camera's zoom: the hammer thrown and called back,
-## the charged swing, the raised shield and its Shield Charge into a Shield Slam, a foe driven into a rock, the 360
+## the charged swing, the raised shield and its Shield Charge, a foe driven into a rock, the 360
 ## Smash (dash), Mending Ground (e) and Faultline (r).
 
 func parts() -> Array:
@@ -53,7 +53,6 @@ func _part_shield() -> void:
 func _part_bash() -> void:
 	await _reset(5.0)
 	_hand()
-	P.ak.res = 50.0          # (a full Guard: the charge ends in a Shield Slam)
 	var charge := func(t: float):
 		P.inp["sec_hold"] = t > 0.15
 		if _at(t, 0.2):
@@ -65,7 +64,7 @@ func _part_bash() -> void:
 		if t > 0.55:
 			P.inp["move"] = Vector2.ZERO
 		_aim(T.pos)
-	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Shield Charge into a Shield Slam",
+	await _go(1.9, charge, _sheet("bash", "Shift behind the shield: the Shield Charge",
 		[0.45, 0.52, 0.6, 0.7, 0.8, 0.9, 1.0, 1.15, 1.5]), 2.0)
 	await _go(GAP)
 

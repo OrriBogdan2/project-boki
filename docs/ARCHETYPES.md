@@ -94,7 +94,7 @@ already exists), `ult` (R). Ranks stay 3/3/3/3/2.
 | Mage | **Heat** | casting | risk meter (overheat Vents) |
 | Gunslinger | **Chambers** | weapon hits | six-count |
 | Juggernaut | **Rage** | dealing and taking damage | brawl meter |
-| Bulwark | **Guard** | blocking | defence meter |
+| Bulwark | **Crushed** (no meter; Guard cut 11-07) | a knock into a wall | none |
 
   The Gunslinger's is the lightest. If playtests show six resources is too much to read, cut that one first.
 
@@ -972,7 +972,9 @@ stun is your window to unload. Quickdraw (E) speeds the loading and doubles the 
 
 Owner direction (Nov 1): base the kits on SUPERVIVE / League references, and make the Bulwark as
 close to Oath as possible; mechanics only, our own names, art, sounds and numbers. The §6.6 design
-above is superseded by this:
+above is superseded by this. Since then (PARITY FIRST, owner 11-07) the Guard meter, the Shield Slam
+and the full Crushing Blow's own stun are cut: the only stun is Crushed (a knock into a wall, 1.0 s).
+The current kit is docs/heroes/bulwark.md.
 
 | Slot | What it does |
 |---|---|

@@ -881,16 +881,24 @@ func _bulwark_combos() -> void:
 	ok("bjorn LMB held: the full-charge flare at 1.25s", K.flared and K.smash_k() >= 0.99, "k %.2f" % K.smash_k())
 	var px0 := P.pos.x
 	var sl0 := K.slams
+	var crush0 := K.crushes
+	var stun_max := [0.0]
+	var watch_stun := func(): stun_max[0] = maxf(stun_max[0], T.stun_t)
 	P.inp["fire"] = false
 	m.step(DT)
+	watch_stun.call()
 	m.step(DT)
+	watch_stun.call()
 	var gcd := P.glide_cd
-	step(m, 0.32)
+	step(m, 0.32, watch_stun)
 	ok(
 		"combo bjorn: the full slam = a 180 crescent, carries him forward, hits hard (5x the throw)",
 		K.slams == sl0 + 1 and K.slam_k >= 0.99 and P.pos.x - px0 >= 1.0 and dmg(T) >= 55.0 and not K.fx.held,
 		"carry %.2f took %.0f" % [P.pos.x - px0, dmg(T)]
 	)
+	# parity: the source's only stun here is Crush (a knock into a wall); the blow itself does not stun
+	ok("parity bjorn: a full Crushing Blow in the open does not stun",
+		K.crushes == crush0 and stun_max[0] <= 0.0, "crushes %d stun %.2f" % [K.crushes - crush0, stun_max[0]])
 	ok("bjorn anim: the slam plays bul_smash", K.anim_id == "bul_smash", K.anim_id)
 	var hv := HeroVfx.of(m)
 	var vmoves: Dictionary = HeroVfx.data("bulwark")["moves"]
@@ -1102,29 +1110,19 @@ func _bulwark_combos() -> void:
 		)
 	CombatBus.dash_reset_cue.disconnect(on_cue)
 	P.slot_lv["dash"] = 1
-	# Guard at 50: the Shield Charge ends in a Shield Slam (stun 0.6, spends the Guard)
+	# parity: the Shield Charge is only the Bash (no Guard meter, no Shield Slam)
 	step(m, 1.0)
 	reset.call()
-	K.res = 80.0
-	var guard_before := K.res
-	var slams_before := K.shield_slams
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
-	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
-	guard_before = K.res
+	step(m, 0.3, func(): P.inp["sec_hold"] = true)
 	P.do_dash()
 	step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
-	ok(
-		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
-		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
-		"slams %d guard %.0f -> %.0f stun %.2f" % [K.shield_slams - slams_before, guard_before, K.res, T.stun_t]
-	)
-	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
-		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
-		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
+	ok("parity bulwark: the Shield Charge plays its look and never ends in a Shield Slam",
+		int(hv.plays.get("charge_go", 0)) >= 1 and not hv.plays.has("slam") and not K.rmb_def().has("slam")
+		and not K.has_meter(), "plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()

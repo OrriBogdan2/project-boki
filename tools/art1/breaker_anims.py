@@ -183,7 +183,6 @@ def guard_over(t, p):
 C.bake("rmb_guard", 0.72, [(0, CARRY), (0.1, merged(GUARD, e="out")), (0.72, {})], over=guard_over)
 C.bake("guard_break", 0.65, [(0, GUARD), (0.06, dict(pos=(0, -0.06, 0.0), rot=(14, -5, 6), head=(-10, 0, 0), sh=sl(0.06, 0.24, 0.0), sn=(-0.6, 0.6, 0.5), e="snap")),
                              (0.3, dict(rot=(4, 0, 2), sh=sl(0.06, 0.12, -0.38), sn=(-0.86, 0.5, 0))), (0.65, CARRY)])
-C.bake("guard_armed", 0.35, [(0, CARRY), (0.1, dict(rot=(-5, 0, -8), head=(6, 0, 8), sh=sl(-0.04, 0.22, -0.3), e="out")), (0.35, CARRY)])
 
 # ---------------------------------------------------------------------- Shift
 # 360 Smash (0.75 s): 0.17 s of leaning in, ONE full spin of the whole ball 0.17..0.33, the hammer straight out, then a skid
@@ -201,10 +200,6 @@ C.bake("dash_air", 0.6, [(0, CARRY), (0.12, dict(pos=(0, 0.02, 0.07), rot=(-24, 
                          (0.3, dict(pos=(0, 0, 0.1), rot=(-14, 0, 0), fr=(AX, 0.03, AZ + 0.08), fl=(-AX, 0.0, AZ + 0.06))),
                          (0.5, dict(pos=(0, 0, -0.05), rot=(-10, 0, 0), fr=(AX + 0.02, 0.0, AZ), fl=(-AX - 0.02, 0.04, AZ))), (0.6, CARRY)])
 C.bake("crush", 0.6, [(0, CARRY), (0.1, dict(rot=(-10, 0, 12), head=(4, 0, -8), e="out")), (0.6, CARRY)])
-# Shield Slam (0.85 s): wound back behind the door, the shove at 0.33 with everything he has
-C.bake("shield_slam", 0.85, [(0, GUARD), (0.25, merged(GUARD, pos=(0, -0.05, -0.05), rot=(10, 0, -26), sh=sl(-0.14, 0.2, -0.3), sn=(-0.8, 0.5, 0.1), fr=(AX, -0.1, AZ), fl=(-AX, 0.03, AZ))),
-                             (0.33, merged(GUARD, pos=(0, 0.1, -0.05), rot=(-24, 0, 22), sh=sl(-0.36, 0.46, -0.3), fr=(AX, -0.12, AZ), fl=(-AX, 0.11, AZ), fra=-18.0, e="snap")),
-                             (0.55, dict(rot=(-20, 0, 18))), (0.85, CARRY)])
 
 # ---------------------------------------------------------------------- E, Mending Ground: the drum lifted and set down gently
 C.bake("e_mend", 0.95, [(0, CARRY),
