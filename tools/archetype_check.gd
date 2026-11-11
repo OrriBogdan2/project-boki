@@ -466,10 +466,10 @@ func _gunslinger() -> void:
 	ok("venator RMB: the hit fed Fever", K.res >= 1.0, "fever %.0f" % K.res)
 	var nums0: int = m.fx.nums.size()
 	var base := K.outgoing(T, 10.0, {"src": "shot"})
-	ok("venator Dazed: rifle +90%", is_equal_approx(base, 19.0), "%.1f" % base)
+	ok("venator Dazed: rifle +38%", is_equal_approx(base, 13.83), "%.1f" % base)
 	var bonus_num: Dictionary = m.fx.nums[-1] if m.fx.nums.size() > nums0 else {}
-	ok("venator Dazed: the bonus gets its own pink +9 number",
-			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 9.0))
+	ok("venator Dazed: the bonus gets its own pink +3.8 number",
+			bonus_num.get("pre", "") == "+" and is_equal_approx(float(bonus_num.get("val", 0.0)), 3.83))
 	_burr_terrain(m, P, T, K, home, r[5])
 	T.teleport(home + Vector3(7, 0, 0)); step(m, 0.2)
 	# Longneedle: charge, then a piercing beam
@@ -479,7 +479,7 @@ func _gunslinger() -> void:
 	step(m, 0.5)
 	var early := dmg(T)
 	step(m, 0.6)
-	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 30.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
+	ok("venator E: needle fires after the charge, shaves its cooldown", early < 0.5 and dmg(T) >= 22.0 and float(K.cd["e"]) < 12.0 * 0.75, "early %.0f took %.0f cd %.1f" % [early, dmg(T), float(K.cd["e"])])
 	# Slipstep: tap skids, hold slides, early release refunds
 	P.teleport(home); P.dashes = P.max_dashes(); P.inp["move"] = Vector2(0, 1)
 	P.do_dash(); step(m, 0.6)      # the tap skid runs ~0.5s
