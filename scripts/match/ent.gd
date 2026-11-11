@@ -5,6 +5,7 @@ extends Node3D
 
 const GRAV := 30.0
 
+static var DBGH := {}
 var m: Node = null          # the Match
 var nid := ""
 var team := -1
@@ -145,6 +146,14 @@ func hurt(dmg: float, by: Ent, opts := {}) -> float:
 		return 0.0
 	hp -= d
 	last_hit_by = by
+	if self is Hunter and by and is_instance_valid(by) and m.time < 150.0:
+		var cr = by.owner_h if by is Kin and by.owner_h else by
+		if cr is Hunter and cr.team != team:
+			var k := "%d>%d" % [cr.team, team]
+			if not DBGH.has(k):
+				DBGH[k] = true
+				var kt = by.target if by is Kin else null
+				print("DBGHIT t=%.1f %s by=%s d=%.0f kin_tgt=%s opts=%s" % [m.time, k, "kin" if by is Kin else "hunter", d, ("self" if kt == self else ("hunter" if kt is Hunter else ("mob" if kt else "-"))), str(opts.keys())])
 	flash_t = maxf(flash_t, 0.12)       # (a combo payoff may have set it longer)
 	freeze_t = 0.05 if d >= 10.0 else 0.03
 	squash = 0.1

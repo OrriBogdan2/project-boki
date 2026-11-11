@@ -683,6 +683,9 @@ func _choose(m: Match, h: Hunter) -> void:
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
 		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
+		if m.time < 150.0 and o != a["tgt"]:
+			var lb = h.last_hit_by
+			print("DBGTGT t=%.1f %d>%d prov=%s lhb=%s d=%.1f reach=%.1f fresh=%s gap=%.1f" % [m.time, h.team, o.team, provoked, ("kin" if lb is Kin else ("hunter" if lb is Hunter else "other")), d, reach, fresh(m, o), 0.0])
 		if s > bs: bs = s; best = o
 	if best == null:
 		for mb in m.mobs:

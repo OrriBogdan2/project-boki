@@ -191,15 +191,21 @@ static func _blight_near(m: Match, p: Vector3, r: float) -> bool:
 	return m.blight != null and m.mobs.any(func(mb): return mb is Blight and not mb.dead and mb.flat_dist(p) < r)
 
 # ------------------------------------------------------------------ fights
-## How far bot h reaches for rival Hunter o, from the reach Bot would use (spec 6.8). None for a
-## squad fight.gap or more levels above ours, unless it was hurt in the last busy_s (it is already
-## in a fight). None while our squad is on a camp and either the opening (home_s) is still running or
-## it is one short of an even level or the ultimate. press_k times further for a squad fight.gap or
-## more below. A rival that hit h is always fought.
+## How far bot h reaches for rival Hunter o, from the reach Bot would use (spec 6.8). Before home_s
+## (the opening, when the XP is camps) none at all. Later none for a squad fight.gap or more levels
+## above ours, unless it was hurt in the last busy_s (it is already in a fight), and none while our
+## squad is on a camp one short of an even level or the ultimate; press_k times further for a squad
+## fight.gap or more below. A rival that hit h is always fought, but in the opening only if it was
+## aiming at h: a splash or a chain meant for a camp monster starts no fight.
 static func fight_reach(m: Match, h: Hunter, o: Hunter, reach: float, provoked: bool) -> float:
 	var mine := _squad(m, h.team)
-	if provoked or m.camps == null or mine.is_empty():
+	if m.camps == null or mine.is_empty():
 		return reach
+	var opening: bool = m.time < float(_rules()["home_s"])
+	if provoked and not (opening and _stray(h)):
+		return reach
+	if opening:
+		return 0.0
 	var F: Dictionary = _rules()["fight"]
 	var theirs := _squad(m, o.team)
 	var gap := _level(theirs) - _level(mine)
@@ -207,17 +213,23 @@ static func fight_reach(m: Match, h: Hunter, o: Hunter, reach: float, provoked: 
 		return 0.0
 	var next := int(_level(mine)) + 1
 	var on_camp: bool = m.time - float(mine[0].ai.get("camp_t", -INF)) < float(F["camp_s"])
-	var opening: bool = m.time < float(_rules()["home_s"])
-	if on_camp and (opening or next % 2 == 0 or next == int(Hunter.ULT_AT[0])):
+	if on_camp and (next % 2 == 0 or next == int(Hunter.ULT_AT[0])):
 		return 0.0
 	return reach * (float(F["press_k"]) if gap <= -float(F["gap"]) else 1.0)
 
-## A bot's Boki leaves rival o alone when its Hunter would not reach for o (fight_reach is 0) and o has
-## not hit it. Without this the Boki, which likes a Hunter target, started the fights its Hunter avoids.
+## The last hit on h came from something aiming elsewhere: a Boki or a bot after another target.
+static func _stray(h: Hunter) -> bool:
+	var by = h.last_hit_by
+	if by is Kin:
+		return (by as Kin).target != h
+	return by is Hunter and (by as Hunter).ctrl == "bot" and (by as Hunter).ai.get("tgt") != h
+
+## A bot's Boki leaves rival o alone when its Hunter would not reach for o (fight_reach is 0). Without
+## this the Boki, which likes a Hunter target, started the fights its Hunter avoids.
 static func kin_leaves(m: Match, own: Hunter, o: Hunter) -> bool:
-	if own.ctrl != "bot" or own.last_hit_by == o or own.last_hit_by == o.kin:
+	if own.ctrl != "bot":
 		return false
-	return fight_reach(m, own, o, 1.0, false) <= 0.0
+	return fight_reach(m, own, o, 1.0, own.last_hit_by == o or own.last_hit_by == o.kin) <= 0.0
 
 # ------------------------------------------------------------------ steals
 ## A camp's prize monster: its Brute or Camp Chief (spec 6.6).
