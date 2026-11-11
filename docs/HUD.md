@@ -88,28 +88,25 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 
 ## Two-step abilities (RecastCue)
 
-DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;
-no kit draws its own recast HUD.
+DECISIONS 2026-11-08 "two-step abilities must be obvious", without words or key letters since the owner's
+2026-11-11 declutter (docs/UI_DECLUTTER.md). Kits report and `RecastCue` draws; no kit draws its own recast HUD.
 
 - **Reporting (pull).** `ArchKit.recast_window()` returns `RecastCue.window(slot, left, total, at, armed, auto)`
   while a recast is open: `slot` is `e`, `x`, `dash` or `lmb`; `at` is what the recast triggers (the seed, the
-  knife, the hammer, the landing spot); `armed` false shows WAIT (a minimum hold); `auto` means the window fires by
-  itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total, label,
-  ready)` for every foe carrying the kit's mark, stack or Daze. `_tick_recast` runs `RecastCue.track` for the
-  local hunter only.
-- **Slot.** The slot pulses in the ability colour (`slot_col`), a timer ring empties (red under `WARN` = 0.6 s),
-  and a big "<KEY> AGAIN" sits over it on a dark pill; the key is `Settings.key_cap` of the live InputMap action.
-  A window that ran out (not used, not `auto`) shows EXPIRED for 0.9 s.
-- **World.** A marker with the key and a ring over `at`. A badge over each marked foe (count, ring for the time
-  left, name and seconds, gold when the payoff is ready), and a white burst on the foe when the payoff lands
-  (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
-- **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
+  knife, the hammer, the landing spot); `armed` false dims the slot (a minimum hold); `auto` means the window fires
+  by itself at the end (the slot never goes dark). `_tick_recast` runs `RecastCue.track` for the local hunter only.
+- **Slot.** The slot pulses in the ability colour (`slot_col`) and a timer ring empties (red under `WARN` = 0.6 s).
+  A window that ran out (not used, not `auto`) darkens the slot for 0.9 s. The slot's own key cap is the only key.
+- **World.** In the last `WARN` seconds a glow blinks hot/white over `at` (the dagger, the seed, the hammer), and a
+  white burst marks the foe when the payoff lands (`RecastCue.payoff`, from `ArchKit.payoff_fx` and the payoffs
+  that bypass it). Marks, stacks and Daze on foes read through `ComboMark` (`ArchKit.combo_read`), not here.
+- **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click when it runs out.
 - **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Badges:
-Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift).
 
-Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
-badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, the dark slot, the buffer, the
+marks reaching ComboMark, a busy Sable fight floating numbers only); `--recast-cue-shots --shots-dir=<dir>`
+(screenshots, run on a GPU through jobq).

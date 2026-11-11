@@ -1,6 +1,6 @@
 extends "res://tools/archetype_check.gd"
 ## --recast-cue-shots --shots-dir=<dir>: RecastCue's review screenshots (run under a renderer, jobq --needs gpu).
-## Hunters mid-recast (Sparkle's knife, Motley's hang, Mossy's hammer, Sable's seed), a Dazed foe, EXPIRED and
+## Hunters mid-recast (Sparkle's knife, Motley's hang, Mossy's hammer, Sable's seed), a Dazed foe, the dark slot and
 ## the payoff flash; full frames as recast_<name>.png. The match is paused (set_process off) so each frame holds
 ## the moment.
 
@@ -37,7 +37,7 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
-	# Sparkle (thief): the knife stuck by the foe, "E AGAIN" and the marker on the knife; Marks on the foe
+	# Sparkle (thief): the knife stuck by the foe, the pulsing E slot and its closing flash; Marks on the foe
 	var s := await _scene("thief")
 	var m: Match = s[0]
 	var P: Hunter = s[1]
@@ -52,7 +52,7 @@ func run(main_node: Node) -> void:
 	step(m, 0.08)
 	await _grab("thief_payoff_flash")
 	await done(m)
-	# Motley (mage): Kitefall's hang, "X AGAIN" on the ult tile and the marker on the landing spot; Sparks
+	# Motley (mage): Kitefall's hang, the pulsing ult tile and the closing flash on the landing spot; Sparks
 	s = await _scene("mage")
 	m = s[0]
 	P = s[1]
@@ -63,7 +63,7 @@ func run(main_node: Node) -> void:
 	await _until(m, P, "x", 0.6)
 	await _grab("mage_hang")
 	await done(m)
-	# Mossy (bulwark): the hammer out, "LMB AGAIN" on the weapon card and the marker on the hammer
+	# Mossy (bulwark): the hammer out, the pulsing weapon card and the closing flash on the hammer
 	s = await _scene("bulwark")
 	m = s[0]
 	P = s[1]
@@ -75,7 +75,7 @@ func run(main_node: Node) -> void:
 	await _until(m, P, "lmb", 0.5)
 	await _grab("bulwark_hammer")
 	await done(m)
-	# Sable (ostra): the seed's 0.3s WAIT, then the late window (hot ring, ticks), then EXPIRED
+	# Sable (ostra): the seed's 0.3s dimmed slot, then the late window (hot ring, ticks), then the dark slot
 	s = await _scene("ostra")
 	m = s[0]
 	P = s[1]
@@ -89,7 +89,7 @@ func run(main_node: Node) -> void:
 	step(m, 0.6)
 	await _grab("ostra_expired")
 	await done(m)
-	# Vex (gunslinger): a Dazed foe's badge (what it is, the ring of time left)
+	# Vex (gunslinger): a Dazed foe's ComboMark tag (its icon, the ring of time left)
 	s = await _scene("gunslinger")
 	m = s[0]
 	P = s[1]
