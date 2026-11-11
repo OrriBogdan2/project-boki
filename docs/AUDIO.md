@@ -60,3 +60,4 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **`scan_fail`**: a scan cancelled by a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
 - **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m.
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
+- A monster's notice cue (`MobNotice`, `scripts/match/mob_notice.gd`): when an idle monster turns to chase (it saw a Hunter or was hit) its kind's `v_<kind>` voice plays from it, pitched as a short alert (small kinds high, heavy kinds low). A camp waking is one cue: a monster stays quiet while a camp-mate (camp spots within 5 m) is awake or cued in the last 3 s of match time. Clients cue from the synced idle -> chase change. Checked in `--mob-notice-check`.
