@@ -11,7 +11,7 @@ const SETTLE_FRAMES := 12        # frames of DT: the clip fades in (WardenClips.
 const DT := 1.0 / 30.0
 ## Worst ratio a Hero may reach (docs/DEBT.md "Skin stretch"): its glb's welds are cut and capped by
 ## tools/art1/skin_relax.py (CAP_LAST); these are the caps' own edges, measured and rounded up, so a worse glb fails.
-const CEILING := {"bulwark": 2.35, "mage": 1.65, "thief": 2.5}
+const CEILING := {"bulwark": 2.35, "mage": 1.65, "thief": 2.5, "archer": 1.85, "juggernaut": 1.85, "gunslinger": 2.15}
 
 var tree: SceneTree
 var bad := 0

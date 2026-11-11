@@ -46,3 +46,9 @@ Checks (2026-11-11): `--warden-glb-check` 183/0 failed, `--warden-model-check` 1
 --wardens=juggernaut` still flags all 49 clips (worst 7.45x in fusion, idle 2.56x, run_f 4.09x, mostly hips and
 thighs), against 31.06x (death), idle 10.39x and run_f 16.72x for the old v2 build: better, but not under 1.3x. No
 tearing or arm, chest or cape clipping shows in the turnaround, idle, run or kit poses.
+
+**Skin stretch (2026-11-11):** relaxed in place by tools/art1/skin_relax.py (CAP_LAST): weights blended, the scan's welds
+cut and capped (383 + 59 + 59 triangles). `--stretch-check` worst 7.94x -> 1.84x, held by its CEILING (juggernaut 1.85).
+Clips, nodes, props and textures unchanged. docs/art/wardens/STRETCH.md.
+
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- art/wardens/kael/kael.glb art/wardens/kael/kael.glb CAP_LAST=true

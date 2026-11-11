@@ -41,3 +41,9 @@ FX points (empties on bones): `gatling_muzzle` (= `weapon_muzzle`), `launcher_mu
 Head: a separate Meshy scan of a v2 head sheet, placed on the body by its eye line and chin (H_EYE, H_CHIN in build.sh, read on the scan's
 gridded front render); the scan's braid is cut and rebuilt on the spring chain. Gun length elbow to muzzle 0.55 m = 31% of her height
 (the turnaround: about 30%).
+
+**Skin stretch (2026-11-11):** relaxed in place by tools/art1/skin_relax.py (CAP_LAST): weights blended, the scan's welds
+cut and capped (1192 + 111 + 111 triangles). `--stretch-check` worst 7.77x -> 2.11x, held by its CEILING (gunslinger 2.15).
+Clips, nodes, props and textures unchanged. docs/art/wardens/STRETCH.md.
+
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- art/wardens/vex/vex.glb art/wardens/vex/vex.glb CAP_LAST=true

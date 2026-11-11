@@ -22,3 +22,9 @@ Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/arc
 
 Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
 through the chest; the bow passes through her open left hand.
+
+**Skin stretch (2026-11-11):** relaxed in place by tools/art1/skin_relax.py (CAP_LAST): weights blended, the scan's welds
+cut and capped (551 + 56 + 56 triangles). `--stretch-check` worst 10.36x -> 1.83x, held by its CEILING (archer 1.85).
+Clips, nodes, props and textures unchanged. docs/art/wardens/STRETCH.md.
+
+    blender -b --factory-startup --python tools/art1/skin_relax.py -- art/wardens/hem/hem.glb art/wardens/hem/hem.glb CAP_LAST=true
