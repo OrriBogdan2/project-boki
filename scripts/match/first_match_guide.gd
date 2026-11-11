@@ -6,7 +6,6 @@ extends RefCounted
 ## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
 ## Match owns one as `guide` (null when this match gets none) and calls tick().
 
-const MINT := Color("8fe3c8")
 const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 const STRIP_GAP := 10.0       # px (HUD units) between the ways-out strip and the guide line under it
@@ -126,10 +125,9 @@ func draw(h, sz: Vector2) -> void:
 	var r: Rect2 = TutorialHud.lanes(sz)["banner"]
 	r.position.y = maxf(r.position.y, WaysOutHud.TOP_Y + WaysOutHud.CELL.y + STRIP_GAP)    # under the ways-out strip
 	var a := clampf(_t / 0.25, 0.0, 1.0)
-	h._panel(r, Color(TutorialHud.PANEL.r, TutorialHud.PANEL.g, TutorialHud.PANEL.b, TutorialHud.PANEL.a * a), 14)
-	h.c.draw_rect(r, Color(MINT, 0.7 * a), false, 2.0)
+	h._panel(r, Color(TutorialHud.PANEL, TutorialHud.PANEL.a * a), UI.R_PANEL)
 	var w := TutorialText.wrap(h.big, line, int(r.size.y * 0.42), r.size.x - 28.0, 2)
 	var y: float = r.get_center().y - (w["lines"].size() - 1) * float(w["px"]) * 0.6 + float(w["px"]) * 0.36
 	for ln in w["lines"]:
-		h._ctext(Vector2(r.get_center().x, y), String(ln), int(w["px"]), Color(1, 1, 1, a), h.big)
+		h._ctext(Vector2(r.get_center().x, y), String(ln), int(w["px"]), Color(UI.INK, a), h.big)
 		y += float(w["px"]) * 1.2

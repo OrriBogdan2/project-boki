@@ -8,14 +8,13 @@ extends RefCounted
 ## bottom of the screen, where the hunter, the Boki and the hotbar are. While a new panel is fresh
 ## (Tutorial.card_up) other popups (messages, Boki bubbles, the scout hint) wait.
 
-const MINT := Color("8fe3c8")
-const GOLD := Color("f2c84a")
+const ACCENT := UI.ACCENT      # the one action colour: a fresh step's edge, the way-to-go arrow
+const PANEL := UI.GLASS        # glass over the world, like the hub bar and the hover cards
 const BAR_W := 0.35         # of the screen width: the widest the panel gets
 const BAR_H := 0.085        # of the screen height: the panel's height (one line)
 const POP_T := 0.25         # s the panel takes to drop and pop in
 const POP_K := 0.12         # how much bigger than its size the panel starts as it pops in
 const GLOW_T := 0.8         # s the bright edge of a new panel takes to settle
-const PANEL := Color(0.03, 0.04, 0.07, 0.94)
 const DETAIL_K := 1.9       # a panel with a second line is this much taller
 
 static var _ring_at := Rect2()      # the pick ring's slot, as last drawn
@@ -65,7 +64,7 @@ static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
 	var glow := 1.0 - clampf(tu.card_t / GLOW_T, 0.0, 1.0)
 	if tu.nag_t > 0.0:
 		glow = maxf(glow, 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 8.0))
-	h._rounded(r, PANEL, 14, Color(MINT, 0.45 + 0.55 * glow), int(2.0 + 2.0 * glow))
+	h._rounded(r, PANEL, UI.R_PANEL, UI.LINE.lerp(ACCENT, glow), int(1.0 + glow))
 	var row := r.size.y / (DETAIL_K if tu.detail != "" else 1.0)     # the first line's height
 	var mid := r.position.y + row * 0.5
 	var px := int(row * 0.46)
@@ -74,7 +73,7 @@ static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
 	var n := tu.progress_text()
 	if n != "":
 		var n_w: float = h.big.get_string_size(n, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-		h._text(Vector2(right - n_w, mid + px * 0.36), n, px, MINT, h.big)
+		h._text(Vector2(right - n_w, mid + px * 0.36), n, px, UI.MUTED, h.big)
 		right -= n_w + 12.0
 	if dir != Vector2.ZERO:
 		right = _arrow(h, Vector2(right, mid), row, dir, tu) - 10.0
@@ -88,7 +87,7 @@ static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
 	var tpx := px
 	while tpx > 16 and h.big.get_string_size(tu.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tpx).x > right - left:
 		tpx -= 1
-	h._text(Vector2(left, mid + tpx * 0.36), tu.text, tpx, GOLD, h.big)
+	h._text(Vector2(left, mid + tpx * 0.36), tu.text, tpx, UI.INK, h.big)
 	if tu.detail != "":
 		_detail(h, r, row, tu.detail)
 
@@ -98,29 +97,29 @@ static func _arrow(h, end: Vector2, row: float, dir: Vector2, tu: Tutorial) -> f
 	var at := Vector2(end.x - row * 0.3, end.y)
 	var s := row * 0.26
 	var perp := Vector2(-dir.y, dir.x)
-	h.c.draw_circle(at, s * 1.25, Color(MINT, 0.18))
+	h.c.draw_circle(at, s * 1.25, Color(ACCENT, 0.18))
 	h.c.draw_colored_polygon(PackedVector2Array([at + dir * s, at - dir * s * 0.6 + perp * s * 0.75,
-		at - dir * s * 0.6 - perp * s * 0.75]), MINT)
+		at - dir * s * 0.6 - perp * s * 0.75]), ACCENT)
 	var dist := "%dm" % int(round(Vector2(tu.target.x - tu.m.player.pos.x, tu.target.z - tu.m.player.pos.z).length()))
 	var dpx := int(row * 0.34)
 	var dw: float = h.big.get_string_size(dist, HORIZONTAL_ALIGNMENT_LEFT, -1, dpx).x
 	var x := at.x - s * 1.25 - 6.0 - dw
-	h._text(Vector2(x, end.y + dpx * 0.36), dist, dpx, MINT, h.big)
+	h._text(Vector2(x, end.y + dpx * 0.36), dist, dpx, UI.ACCENT_HI, h.big)
 	return x
 
-## The plain-words line under a step's line: wrapped to three lines in the space below it.
+## The plain-words line under a step's line (body text: Rubik): wrapped to three lines in the space below it.
 static func _detail(h, r: Rect2, row: float, txt: String) -> void:
-	var w := TutorialText.wrap(h.big, txt, int(row * 0.27), r.size.x - 28.0, 3)
+	var w := TutorialText.wrap(h.body, txt, int(row * 0.27), r.size.x - 28.0, 3)
 	var y := r.position.y + row * 0.92
 	for ln in w["lines"]:
 		y += float(w["px"]) * 1.2
-		h._text(Vector2(r.position.x + 14.0, y), String(ln), int(w["px"]), Color(1, 1, 1, 0.88), h.big)
+		h._text(Vector2(r.position.x + 14.0, y), String(ln), int(w["px"]), UI.MUTED, h.body)
 
 ## The scout hint under the panel and the outpost's defend bar just under its edge.
 static func _extras(h, r: Rect2, tu: Tutorial) -> void:
 	var hint := tu.scout_hint()
 	if hint != "":
-		h._ctext(Vector2(r.get_center().x, r.end.y + 34.0), hint, int(h.c.size.y * 0.026), MINT, h.big)
+		h._ctext(Vector2(r.get_center().x, r.end.y + 34.0), hint, int(h.c.size.y * 0.026), UI.ACCENT_HI, UI.semi)
 	if tu.id() in ["uplink", "defend"]:
 		var o := tu.outpost()
 		if not o.is_empty():
@@ -142,26 +141,27 @@ static func _pick_ring(h, tu: Tutorial) -> void:
 	var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 6.0)
 	var c := _ring_at.get_center()
 	var rad := maxf(_ring_at.size.x, _ring_at.size.y) * (0.78 + 0.1 * pulse)
-	h.c.draw_circle(c, rad, Color(GOLD, 0.12 + 0.1 * pulse))
-	h.c.draw_arc(c, rad, 0.0, TAU, 40, Color(GOLD, 0.7 + 0.3 * pulse), 4.0, true)
+	h.c.draw_circle(c, rad, Color(HudStyle.GOLD, 0.12 + 0.1 * pulse))
+	h.c.draw_arc(c, rad, 0.0, TAU, 40, Color(HudStyle.GOLD, 0.7 + 0.3 * pulse), 4.0, true)
 	var tip := c - Vector2(0, rad + 6.0 + 10.0 * pulse)
 	var s := rad * 0.5
-	h.c.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-s, -s * 1.2), tip + Vector2(s, -s * 1.2)]), GOLD)
+	h.c.draw_colored_polygon(PackedVector2Array([tip, tip + Vector2(-s, -s * 1.2), tip + Vector2(s, -s * 1.2)]),
+		HudStyle.GOLD)
 
 ## The first-time intro: short, over a light dim, and the rest of the HUD stays away.
 static func _intro(h, sz: Vector2, tu: Tutorial) -> void:
 	h.c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0, 0, 0, 0.5 * clampf(1.0 - (tu.intro_t - 1.6) / 0.4, 0.0, 1.0)))
 	var r: Rect2 = lanes(sz)["intro"]
-	h._panel(r, Color(0.06, 0.08, 0.12, 0.94), 18)
+	h._panel(r, PANEL, UI.R_PANEL)
 	var cx := r.get_center().x
-	h._ctext(Vector2(cx, r.position.y + r.size.y * 0.34), "TRAINING RUN", int(sz.y * 0.032), MINT, h.big)
+	h._ctext(Vector2(cx, r.position.y + r.size.y * 0.34), "TRAINING RUN", int(sz.y * 0.026), UI.EYEBROW, UI.caps)
 	var y := r.position.y
-	h._ctext(Vector2(cx, y + r.size.y * 0.62), "Follow your Boki and the marker", int(sz.y * 0.04), Color.WHITE, h.big)
-	h._ctext(Vector2(cx, y + r.size.y * 0.86), "Press any key", int(sz.y * 0.028), Color(1, 1, 1, 0.75), h.big)
+	h._ctext(Vector2(cx, y + r.size.y * 0.62), "Follow your Boki and the marker", int(sz.y * 0.04), UI.INK, h.big)
+	h._ctext(Vector2(cx, y + r.size.y * 0.86), "Press any key", int(sz.y * 0.024), UI.MUTED)
 
 ## A small check beside the panel when a step is done: it fades, it does not pop over the screen.
 static func _check(h, r: Rect2, k: float) -> void:
-	var col := Color(MINT, clampf(k * 1.5, 0.0, 1.0))
+	var col := Color(UI.GOOD, clampf(k * 1.5, 0.0, 1.0))
 	var c := r.get_center()
 	var s := r.size.y * 0.32
 	var pts := PackedVector2Array([Vector2(-0.5, 0.05), Vector2(-0.15, 0.45), Vector2(0.55, -0.4)])
