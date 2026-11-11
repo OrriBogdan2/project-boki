@@ -106,12 +106,13 @@ func smash(b: Dictionary, by: Ent, from_net := false) -> void:
 	if sp.has("explosive"):
 		_explode(at, sp["explosive"], by, from_net)
 
-## Lights every unbroken prop a blast at `c` reaches.
-func _chain(c: Vector3, radius: float, by: Ent) -> void:
+## Hits every unbroken prop a blast at `c` reaches (Explosive hits: a keg's blast, Ostra's Empowered
+## Nightwell ticks). `chain`: the blast is a keg's, so kegs it lights burn the short chain fuse.
+func hit_around(c: Vector3, radius: float, by: Ent, chain := false) -> void:
 	for b in _m.breaks:
 		var reach := Vector2(b["pos"].x - c.x, b["pos"].z - c.z).length() < radius + CHAIN_SLACK
 		if not b["dead"] and reach and absf(b["pos"].y - c.y) < 2.0:
-			hit(b, by, true)
+			hit(b, by, chain)
 
 func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	var radius := float(ex["radius"])
@@ -128,7 +129,7 @@ func _explode(at: Vector3, ex: Dictionary, by: Ent, from_net: bool) -> void:
 	if from_net:
 		return
 	_hurt_around(c, ex, by)
-	_chain(c, radius, by)
+	hit_around(c, radius, by, true)
 
 func _hurt_around(c: Vector3, ex: Dictionary, by: Ent) -> void:
 	var radius := float(ex["radius"])
@@ -166,8 +167,8 @@ func _drop_loot(at: Vector3, loot: Dictionary, by: Ent, from_net: bool) -> void:
 	var up := at + Vector3(0, 0.5, 0)
 	var scale_by := float(_m.T["loot"])
 	var gems: Array = loot["gems"]
-	for i in randi_range(int(gems[0]), int(gems[1])):
-		_m.drop("gem", up, maxi(1, int(round(float(loot["gem_base"]) * scale_by))))
+	var each := maxi(1, int(round(float(loot["gem_base"]) * scale_by)))
+	DropMerge.gems(_m, up, randi_range(int(gems[0]), int(gems[1])), each)
 	if loot.has("seed") and randf() < float(loot["seed"]):
 		_m.drop("seed", up, 1, Data.pick_seed())
 	if loot.has("tonic") and randf() < float(loot["tonic"]):

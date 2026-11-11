@@ -15,9 +15,18 @@ extends RefCounted
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
 
-const DRINK_HEAL := 0.4         # of max health
 const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
+
+## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
+static func channel(id: String, key: String) -> float:
+	return float((UtilityBelt.def(id).get("channel", {}) as Dictionary).get(key, 1.0))
+
+## The speed multiplier for a hunter who is drinking or repairing (1.0 otherwise).
+static func channel_move(h: Hunter) -> float:
+	if h.drink_t > 0.0:
+		return channel("tonic", "move")
+	return channel("armor_kit", "move") if h.kit_t > 0.0 else 1.0
 
 static func use_of(id: String) -> String:
 	return String(UtilityBelt.def(id).get("use", "fx"))
@@ -50,7 +59,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			return true
 		"repair":
 			h._fold_for_action()
-			h.kit_t = Hunter.KIT_TIME
+			h.kit_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))

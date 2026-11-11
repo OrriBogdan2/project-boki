@@ -222,13 +222,28 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 		# nowhere to put it: the abyss keeps it
 		return b
 	trace(m, "box %s value %d at %s" % [h.pname, box_value(b), at.snapped(Vector3.ONE)])
+	_place_box(m, b, at)
+	m.net_event(["box", h.nid, Match._r(at.x), Match._r(at.y), Match._r(at.z)])
+	return b
+
+static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
 	var n := Models.deathbox(box_color(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
 	_mark_owner(m, b)
 	m.boxes.append(b)
-	return b
+
+## Another game's Hunter died: their box here is a soul marker only (their game keeps the loot), so
+## a teammate can hold interact at it and the owner's game brings them back (BoxRevive.net_in).
+static func mirror_box(m: Match, o: Hunter, at: Vector3) -> void:
+	for old in m.boxes:
+		if old["owner"] == o: old["soul_until"] = 0.0
+	var b := {"owner": o, "team": o.team, "pos": at, "gems": 0, "seeds": {}, "caught": [], "belt": [],
+		"soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": true, "gear": [], "pack": [],
+		"keys": 0, "chest_keys": 0}
+	_place_box(m, b, at)
+	_settle_box(b)
 
 ## Whose box it is, for you: a teammate's in their squad colour (the map's), a rival's in red.
 static func owner_col(m: Match, b: Dictionary) -> Color:
@@ -484,6 +499,7 @@ static func bring_back(m: Match, o: Hunter, at: Vector3, hp_frac: float, sick: b
 	o.sick_t = R["sickness_time"] if sick else 0.0
 	o.teleport(m.world.free_spot_near(at, [], 1.0, 0.4, 6.0) if not m.world.is_void(at.x, at.z) else at)
 	o.prev = o.pos
+	m.net_event(["back", o.nid])
 	for kk in [o.kin, o.kin2]:
 		# your kin was keeping out of sight; it comes straight back to you
 		if kk and not (kk as Kin).dead and (kk as Kin).state == "away":
@@ -506,6 +522,8 @@ static func make_gone(m: Match, h: Hunter) -> void:
 	if h.gone:
 		return
 	h.gone = true
+	if not h.remote:
+		m.net_event(["lost", h.nid])
 	# kin that were keeping out of sight flee home: they're never lost that way
 
 # ------------------------------------------------------------------ kin at risk (by run tier)
