@@ -15,7 +15,60 @@
     "gaol_ne",
     "gaol_sw"
    ],
-   "purpose": "The vault on the Throne, two boss Gaols and the richest chests, under the most Blight."
+   "purpose": "The vault on the Throne, two boss Gaols and the richest chests, under the most Blight.",
+   "camps": [
+    {
+     "id": "throne_guard",
+     "name": "Throne Guard",
+     "at": [
+      133,
+      124
+     ],
+     "tier": 3,
+     "set": [
+      "brute",
+      "sentinel",
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 210,
+     "reward": "treasure"
+    },
+    {
+     "id": "gloom_barracks",
+     "name": "Gloom Barracks",
+     "at": [
+      172,
+      181
+     ],
+     "tier": 3,
+     "set": [
+      "brute",
+      "bomber",
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 210,
+     "reward": "treasure"
+    },
+    {
+     "id": "crownfall_pit",
+     "name": "Crownfall Pit",
+     "at": [
+      121,
+      167
+     ],
+     "tier": 3,
+     "set": [
+      "sentinel",
+      "brute",
+      "skitter",
+      "skitter"
+     ],
+     "respawn": 240,
+     "reward": "treasure"
+    }
+   ]
   },
   {
    "id": "frostgate",
@@ -29,7 +82,58 @@
      "armor": 1.6
     }
    },
-   "purpose": "The best armor on the map, the Keep's high ground over the Gate Span, an uplink outpost on the south edge."
+   "purpose": "The best armor on the map, the Keep's high ground over the Gate Span, an uplink outpost on the south edge.",
+   "camps": [
+    {
+     "id": "rimefield_pack",
+     "name": "Rimefield Pack",
+     "at": [
+      130,
+      62
+     ],
+     "tier": 1,
+     "set": [
+      "skitter",
+      "skitter",
+      "spitter"
+     ],
+     "respawn": 90,
+     "reward": "armor"
+    },
+    {
+     "id": "keep_sentries",
+     "name": "Keep Sentries",
+     "at": [
+      185,
+      62
+     ],
+     "tier": 2,
+     "set": [
+      "sentinel",
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 150,
+     "reward": "armor"
+    },
+    {
+     "id": "span_breakers",
+     "name": "Span Breakers",
+     "at": [
+      113,
+      68
+     ],
+     "tier": 3,
+     "set": [
+      "brute",
+      "sentinel",
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 210,
+     "reward": "armor"
+    }
+   ]
   },
   {
    "id": "cinder",
@@ -43,7 +147,57 @@
      "glove": 1.6
     }
    },
-   "purpose": "Forge country: gloves and weapon tunings from the Kilns, a camp to level on, an uplink outpost on the east rim."
+   "purpose": "Forge country: gloves and weapon tunings from the Kilns, a camp to level on, an uplink outpost on the east rim.",
+   "camps": [
+    {
+     "id": "kiln_rats",
+     "name": "Kiln Rats",
+     "at": [
+      65,
+      107
+     ],
+     "tier": 2,
+     "set": [
+      "skitter",
+      "bomber",
+      "bomber"
+     ],
+     "respawn": 120,
+     "reward": "glove"
+    },
+    {
+     "id": "slag_yard",
+     "name": "Slag Yard",
+     "at": [
+      59,
+      141
+     ],
+     "tier": 1,
+     "set": [
+      "bomber",
+      "skitter"
+     ],
+     "respawn": 75,
+     "reward": "glove"
+    },
+    {
+     "id": "forge_breakers",
+     "name": "Forge Breakers",
+     "at": [
+      48,
+      155
+     ],
+     "tier": 3,
+     "set": [
+      "brute",
+      "bomber",
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 180,
+     "reward": "glove"
+    }
+   ]
   },
   {
    "id": "storm",
@@ -52,7 +206,57 @@
    "islands": [
     "storm"
    ],
-   "purpose": "The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."
+   "purpose": "The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim.",
+   "camps": [
+    {
+     "id": "halt_raiders",
+     "name": "Halt Raiders",
+     "at": [
+      254,
+      158
+     ],
+     "tier": 2,
+     "set": [
+      "spitter",
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 150,
+     "reward": "boots"
+    },
+    {
+     "id": "shrine_strays",
+     "name": "Shrine Strays",
+     "at": [
+      229,
+      147
+     ],
+     "tier": 1,
+     "set": [
+      "spitter",
+      "skitter"
+     ],
+     "respawn": 105,
+     "reward": "boots"
+    },
+    {
+     "id": "thunder_ledge",
+     "name": "Thunder Ledge",
+     "at": [
+      226,
+      164
+     ],
+     "tier": 3,
+     "set": [
+      "sentinel",
+      "spitter",
+      "spitter",
+      "bomber"
+     ],
+     "respawn": 210,
+     "reward": "boots"
+    }
+   ]
   },
   {
    "id": "thorn",
@@ -61,7 +265,42 @@
    "islands": [
     "thorn"
    ],
-   "purpose": "The Boki nest and the Thornhive lair; tall-grass ambushes."
+   "purpose": "The Boki nest and the Thornhive lair; tall-grass ambushes.",
+   "camps": [
+    {
+     "id": "bramble_lurkers",
+     "name": "Bramble Lurkers",
+     "at": [
+      138,
+      226
+     ],
+     "tier": 1,
+     "set": [
+      "skitter",
+      "skitter",
+      "skitter"
+     ],
+     "respawn": 90,
+     "reward": "seed"
+    },
+    {
+     "id": "hive_wardens",
+     "name": "Hive Wardens",
+     "at": [
+      164,
+      223
+     ],
+     "tier": 3,
+     "set": [
+      "brute",
+      "skitter",
+      "skitter",
+      "spitter"
+     ],
+     "respawn": 180,
+     "reward": "seed"
+    }
+   ]
   },
   {
    "id": "lark",
@@ -70,7 +309,24 @@
    "islands": [
     "lark"
    ],
-   "purpose": "Wild Boki graze in the Hollow; a calm place to catch one."
+   "purpose": "Wild Boki graze in the Hollow; a calm place to catch one.",
+   "camps": [
+    {
+     "id": "meadow_grazers",
+     "name": "Meadow Grazers",
+     "at": [
+      56,
+      28
+     ],
+     "tier": 1,
+     "set": [
+      "skitter",
+      "skitter"
+     ],
+     "respawn": 90,
+     "reward": "seed"
+    }
+   ]
   },
   {
    "id": "highwatch",
@@ -84,7 +340,25 @@
      "boots": 1.8
     }
    },
-   "purpose": "The Lookout over the Gaol and the Watch Road, and boots."
+   "purpose": "The Lookout over the Gaol and the Watch Road, and boots.",
+   "camps": [
+    {
+     "id": "lookout_snipers",
+     "name": "Lookout Snipers",
+     "at": [
+      274,
+      23
+     ],
+     "tier": 2,
+     "set": [
+      "spitter",
+      "spitter",
+      "sentinel"
+     ],
+     "respawn": 150,
+     "reward": "boots"
+    }
+   ]
   },
   {
    "id": "duskmoor",
@@ -98,7 +372,40 @@
      "passive": 2.0
     }
    },
-   "purpose": "Relics in the Moor Chapel ruins."
+   "purpose": "Relics in the Moor Chapel ruins.",
+   "camps": [
+    {
+     "id": "chapel_ghouls",
+     "name": "Chapel Ghouls",
+     "at": [
+      251,
+      274
+     ],
+     "tier": 1,
+     "set": [
+      "skitter",
+      "bomber"
+     ],
+     "respawn": 105,
+     "reward": "relic"
+    },
+    {
+     "id": "moor_crypt",
+     "name": "Moor Crypt",
+     "at": [
+      282,
+      249
+     ],
+     "tier": 2,
+     "set": [
+      "sentinel",
+      "spitter",
+      "bomber"
+     ],
+     "respawn": 165,
+     "reward": "relic"
+    }
+   ]
   },
   {
    "id": "saltmere",
@@ -107,7 +414,25 @@
    "islands": [
     "saltmere"
    ],
-   "purpose": "Salt caches along the dry river, the outer ring's most chests."
+   "purpose": "Salt caches along the dry river, the outer ring's most chests.",
+   "camps": [
+    {
+     "id": "riverbed_scavengers",
+     "name": "Riverbed Scavengers",
+     "at": [
+      51,
+      271
+     ],
+     "tier": 2,
+     "set": [
+      "skitter",
+      "bomber",
+      "spitter"
+     ],
+     "respawn": 135,
+     "reward": "treasure"
+    }
+   ]
   }
  ],
  "islands": [
@@ -410,23 +735,6 @@
     [
      167,
      181
-    ]
-   ],
-   "camps": [
-    [
-     133,
-     124,
-     "heavy"
-    ],
-    [
-     172,
-     181,
-     "heavy"
-    ],
-    [
-     121,
-     167,
-     "heavy"
     ]
    ],
    "breakables": [
@@ -833,7 +1141,6 @@
      88
     ]
    ],
-   "camps": [],
    "breakables": [
     [
      212,
@@ -975,7 +1282,6 @@
      212
     ]
    ],
-   "camps": [],
    "breakables": [
     [
      72,
@@ -1251,23 +1557,6 @@
     [
      141,
      88
-    ]
-   ],
-   "camps": [
-    [
-     130,
-     62,
-     "light"
-    ],
-    [
-     185,
-     62,
-     "normal"
-    ],
-    [
-     113,
-     68,
-     "heavy"
     ]
    ],
    "breakables": [
@@ -1582,23 +1871,6 @@
     [
      65,
      131
-    ]
-   ],
-   "camps": [
-    [
-     65,
-     107,
-     "normal"
-    ],
-    [
-     59,
-     141,
-     "light"
-    ],
-    [
-     48,
-     155,
-     "heavy"
     ]
    ],
    "breakables": [
@@ -2005,23 +2277,6 @@
      192
     ]
    ],
-   "camps": [
-    [
-     254,
-     158,
-     "normal"
-    ],
-    [
-     229,
-     147,
-     "light"
-    ],
-    [
-     226,
-     164,
-     "heavy"
-    ]
-   ],
    "breakables": [
     [
      240,
@@ -2386,18 +2641,6 @@
     [
      186,
      260
-    ]
-   ],
-   "camps": [
-    [
-     138,
-     226,
-     "light"
-    ],
-    [
-     164,
-     223,
-     "heavy"
     ]
    ],
    "wild": [
@@ -2991,13 +3234,6 @@
      25
     ]
    ],
-   "camps": [
-    [
-     56,
-     28,
-     "normal"
-    ]
-   ],
    "breakables": [
     [
      42,
@@ -3419,13 +3655,6 @@
      42
     ]
    ],
-   "camps": [
-    [
-     274,
-     23,
-     "normal"
-    ]
-   ],
    "breakables": [
     [
      260,
@@ -3685,18 +3914,6 @@
     [
      274,
      271
-    ]
-   ],
-   "camps": [
-    [
-     251,
-     274,
-     "light"
-    ],
-    [
-     282,
-     249,
-     "normal"
     ]
    ],
    "breakables": [
@@ -4007,13 +4224,6 @@
     [
      28,
      277
-    ]
-   ],
-   "camps": [
-    [
-     51,
-     271,
-     "normal"
     ]
    ],
    "breakables": [
@@ -6404,7 +6614,8 @@
    "entry": [
     "dial",
     "runes"
-   ]
+   ],
+   "wake": 120
   },
   {
    "id": "forge",
@@ -6419,7 +6630,8 @@
    "gate": "e",
    "entry": [
     "dial"
-   ]
+   ],
+   "wake": 90
   },
   {
    "id": "hive",
@@ -6435,7 +6647,8 @@
    "entry": [
     "dial",
     "wards"
-   ]
+   ],
+   "wake": 180
   }
  ],
  "spawn_points": {

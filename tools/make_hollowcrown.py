@@ -29,7 +29,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   hand (+)            true: nothing is placed by dice. No auto stairs, no random rocks, no random
                       chests/camps/breakables/spawns: only what the layout lists. The match seed only
                       rolls spawn plan picks, live lairs, loot, the Blight and the weather.
-  regions (+)         [{id, name, purpose, biome, islands: [ids]}] named regions (map legend, docs)
+  regions (+)         [{id, name, purpose, biome, islands: [ids], camps}] named regions (map legend, docs);
+                      camps: [{id, name, at:[x,z], tier 1-3, set:[monster kinds], respawn (s), reward}] (Camps)
   islands[]           id, name, role, region, biome, danger, poi, noise (coast wobble), sheer arcs
     shapes            circle / ellipse / rect / capsule / poly (+, [[x,z],...]) each with "lv";
                       the first shape is the outline, later ones raise tiers inside it
@@ -43,7 +44,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     crates (+)        [[x,z]] camp supply piles (block)
     bush              [[x,z,r]] tall grass to hide in: computed by place_cover() below, not listed by hand
     landings (+)      [[x,z]] where squads come down (World.spawns)
-    camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled)
+    camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled). Hollow Crown lists
+                      none here: its camps are named under regions[].camps (CAMPS below)
     chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel|keg"]];  weapons (+) [[x,z]]
     wild (+)          [[x,z]] wild Boki;  shrine (+) [x,z]
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
@@ -51,7 +53,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
-  pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
+  pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach; a lair's
+                      wake (+) is the match second its boss rises (Lairs)
   ways_scale (+)     the Ways Out radii and bands over the 216 m design (SIZE / DESIGN; tools/ways_out_sites.py)
   train (+)           {cars, speed, dwell, pier_below, path:[[x,z],...] (a closed winding loop, splined
                       from TRAIN_WAY), stations:[[x,z]] (points on the path), names}: the sky train
@@ -101,7 +104,6 @@ islands = [
          rocks=rocks((86, 90, 87, 91), (130, 88, 131, 89), (85, 126, 86, 127), (129, 126, 130, 127)),
          landings=[],
          chests=[[108, 108], [84, 108], [132, 108]],
-         camps=[[94, 88, "heavy"], [122, 128, "heavy"]],
          breakables=[[126, 88, "barrel"], [127, 88, "crate"], [89, 128, "pot"], [90, 128, "crate"]],
          wardens=[[114, 94], [98, 124], [108, 110]],
          traps=[[96, 96], [120, 120]]),
@@ -110,13 +112,13 @@ islands = [
          shapes=[poly([(146, 56), (164, 52), (172, 60), (170, 78), (158, 85), (146, 79), (142, 66)], 4)],
          sheer=[[200, 260]],
          rocks=rocks((149, 79, 151, 79)),
-         chests=[[164, 79]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
+         chests=[[164, 79]], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
          wardens=[[160, 81]], traps=[]),
     dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[56, 162], noise=0.05, landmark="",
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
          rocks=rocks((72, 158, 72, 160)),
-         chests=[[62, 161]], camps=[], breakables=[[51, 140, "keg"], [52, 140, "crate"]],
+         chests=[[62, 161]], breakables=[[51, 140, "keg"], [52, 140, "crate"]],
          wardens=[[74, 146]], traps=[]),
     # ---- FROSTGATE (north): a long frozen ridge. The Keep (lv 6, walled) on its east end looks straight
     # down the Gate Span into the Crown; reach it by the West Stair or the narrow South Stair. The open
@@ -130,7 +132,6 @@ islands = [
          rocks=rocks((84, 38, 85, 39), (96, 50, 98, 50), (102, 32, 103, 32), (102, 33, 102, 34), (88, 56, 90, 56)),
          landings=[[84, 32]],
          chests=[[128, 41], [76, 44]],
-         camps=[[92, 44, "light"], [131, 44, "normal"]],
          breakables=[[106, 26, "crate"], [107, 26, "barrel"], [122, 62, "pot"]],
          weapons=[[104, 56]],
          wardens=[[104, 48], [126, 52]],
@@ -147,7 +148,6 @@ islands = [
          crates=[[50, 104], [51, 104], [50, 105]],
          landings=[[38, 120], [58, 66]],
          chests=[[46, 70], [52, 118]],
-         camps=[[46, 76, "normal"], [42, 100, "light"]],
          breakables=[[60, 68, "keg"], [33, 90, "crate"], [34, 90, "crate"], [52, 124, "pot"]],
          weapons=[[38, 108]],
          wardens=[[56, 92], [40, 66]],
@@ -164,7 +164,6 @@ islands = [
                      (158, 112, 158, 115), (190, 106, 190, 109), (160, 132, 162, 132)),
          landings=[[186, 100], [176, 140]],
          chests=[[172, 108], [184, 132]],
-         camps=[[180, 112, "normal"], [162, 104, "light"]],
          breakables=[[170, 96, "crate"], [171, 96, "pot"], [158, 128, "barrel"]],
          weapons=[[190, 126]],
          wardens=[[172, 132], [170, 122]],
@@ -182,7 +181,6 @@ islands = [
          rocks=rocks((108, 172, 109, 173)),
          landings=[[86, 168]],
          chests=[[100, 166], [114, 176], [134, 172]],
-         camps=[[98, 160, "light"]],
          wild=[[94, 172], [97, 168]],
          breakables=[[82, 172, "pot"], [83, 173, "pot"], [138, 160, "crate"]],
          weapons=[[106, 186]],
@@ -202,7 +200,7 @@ islands = [
          sheer=[[90, 150]],
          landings=[[34, 30], [50, 28], [14, 26]],
          chests=[[28, 26], [42, 40]],
-         camps=[], breakables=[[30, 22, "crate"], [31, 22, "keg"]],
+         breakables=[[30, 22, "crate"], [31, 22, "keg"]],
          wild=[[30, 30], [36, 26], [34, 34]],
          wardens=[],
          areas=[[32, 28, "The Hollow"]]),
@@ -218,7 +216,7 @@ islands = [
          rocks=rocks((178, 15, 180, 16), (190, 14, 191, 15)),
          landings=[[180, 36], [196, 30], [172, 28]],
          chests=[[185, 15], [198, 34]],
-         camps=[], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
+         breakables=[[184, 40, "crate"], [185, 40, "pot"]],
          wardens=[[182, 19]],
          areas=[[184, 15, "The Lookout"]]),
     # Duskmoor: the ruined chapel on a raised floor (lv 2), its broken walls the cover, with the stone
@@ -235,7 +233,7 @@ islands = [
          rocks=rocks((190, 186, 191, 187)),
          landings=[[176, 176], [200, 192], [186, 200]],
          chests=[[190, 182], [192, 170]],
-         camps=[[178, 194, "light"]], breakables=[[200, 184, "keg"], [200, 185, "crate"]],
+         breakables=[[200, 184, "keg"], [200, 185, "crate"]],
          wardens=[[188, 172]],
          areas=[[189, 184, "Moor Chapel"]]),
     # Saltmere: a dry salt river winds north to south between two raised banks (lv 2). The riverbed is
@@ -250,7 +248,7 @@ islands = [
          ramps=[ramp(23, 180, "w", 3, 0, 2), ramp(30, 192, "e", 3, 0, 2)],
          landings=[[14, 190], [38, 178], [28, 198]],
          chests=[[14, 182], [26, 196], [36, 180]],
-         camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
+         breakables=[[18, 176, "pot"], [19, 176, "pot"]],
          wardens=[],
          areas=[[27, 184, "Salt River"]]),
 ]
@@ -261,26 +259,90 @@ BY = {d["id"]: d for d in islands}
 # landings and exits per square metre stay about where the 216 m map had them. Every pick fills ground
 # that scaling opened up: a far corner, the other side of a plateau, the stretch between two landmarks.
 MORE = {
-    "crown": dict(chests=[[98, 89], [118, 128]], camps=[[86, 118, "heavy"]],
-                  breakables=[[132, 96, "crate"], [133, 96, "pot"]], wardens=[[90, 98]], traps=[[108, 128]]),
+    "crown": dict(chests=[[98, 89], [118, 128]], breakables=[[132, 96, "crate"], [133, 96, "pot"]], wardens=[[90, 98]], traps=[[108, 128]]),
     "gaol_ne": dict(chests=[[147, 62]]),
     "gaol_sw": dict(chests=[[48, 150]]),
-    "frostgate": dict(chests=[[94, 30], [100, 62]], camps=[[80, 48, "heavy"]], landings=[[110, 28], [118, 62], [74, 46]],
+    "frostgate": dict(chests=[[94, 30], [100, 62]], landings=[[110, 28], [118, 62], [74, 46]],
                       breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
-    "cinder": dict(chests=[[30, 100], [46, 93]], camps=[[34, 110, "heavy"]], landings=[[28, 84], [54, 112], [36, 116]],
+    "cinder": dict(chests=[[30, 100], [46, 93]], landings=[[28, 84], [54, 112], [36, 116]],
                    breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
-    "storm": dict(chests=[[190, 110], [160, 136]], camps=[[160, 116, "heavy"]], landings=[[158, 104], [190, 120], [166, 94]],
+    "storm": dict(chests=[[190, 110], [160, 136]], landings=[[158, 104], [190, 120], [166, 94]],
                   breakables=[[188, 106, "crate"], [189, 106, "keg"]]),
-    "thorn": dict(chests=[[88, 184], [132, 184]], camps=[[116, 158, "heavy"]], landings=[[96, 186], [138, 166], [90, 160]],
+    "thorn": dict(chests=[[88, 184], [132, 184]], landings=[[96, 186], [138, 166], [90, 160]],
                   wild=[[90, 176]], breakables=[[124, 154, "crate"], [125, 154, "pot"]], wardens=[[130, 158]]),
-    "lark": dict(chests=[[44, 18]], camps=[[40, 20, "normal"]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
-    "highwatch": dict(chests=[[172, 30]], camps=[[194, 16, "normal"]], landings=[[200, 34], [186, 28]],
+    "lark": dict(chests=[[44, 18]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
+    "highwatch": dict(chests=[[172, 30]], landings=[[200, 34], [186, 28]],
                       breakables=[[200, 32, "keg"]]),
-    "duskmoor": dict(chests=[[194, 192]], camps=[[200, 176, "normal"]], landings=[[176, 172], [176, 200]]),
-    "saltmere": dict(chests=[[20, 196]], camps=[[36, 192, "normal"]], landings=[[14, 180], [40, 180]]),
+    "duskmoor": dict(chests=[[194, 192]], landings=[[176, 172], [176, 200]]),
+    "saltmere": dict(chests=[[20, 196]], landings=[[14, 180], [40, 180]]),
 }
 for _iid, _more in MORE.items():
     for _k, _pts in _more.items(): BY[_iid].setdefault(_k, []).extend(_pts)
+
+# Monster camps (Camps, docs/CAMPS.md): every camp named, with its fixed monster set, tier (1 light, 2 normal,
+# 3 heavy: the monsters' rarity), seconds to come back once cleared, and a reward that fits its region.
+# Design grid, like the islands. Each camp also lands in its island's "camps" so the cover and checks below see it.
+CAMP_KIND = {1: "light", 2: "normal", 3: "heavy"}
+CAMPS = {
+    "crown": [
+        dict(id="throne_guard", island="crown", at=[94, 88], name="Throne Guard", tier=3, respawn=210, reward="treasure",
+             set=["brute", "sentinel", "spitter", "skitter"]),
+        dict(id="gloom_barracks", island="crown", at=[122, 128], name="Gloom Barracks", tier=3, respawn=210, reward="treasure",
+             set=["brute", "bomber", "spitter", "skitter"]),
+        dict(id="crownfall_pit", island="crown", at=[86, 118], name="Crownfall Pit", tier=3, respawn=240, reward="treasure",
+             set=["sentinel", "brute", "skitter", "skitter"]),
+    ],
+    "frostgate": [
+        dict(id="rimefield_pack", island="frostgate", at=[92, 44], name="Rimefield Pack", tier=1, respawn=90, reward="armor",
+             set=["skitter", "skitter", "spitter"]),
+        dict(id="keep_sentries", island="frostgate", at=[131, 44], name="Keep Sentries", tier=2, respawn=150, reward="armor",
+             set=["sentinel", "spitter", "skitter"]),
+        dict(id="span_breakers", island="frostgate", at=[80, 48], name="Span Breakers", tier=3, respawn=210, reward="armor",
+             set=["brute", "sentinel", "spitter", "skitter"]),
+    ],
+    "cinder": [
+        dict(id="kiln_rats", island="cinder", at=[46, 76], name="Kiln Rats", tier=2, respawn=120, reward="glove",
+             set=["skitter", "bomber", "bomber"]),
+        dict(id="slag_yard", island="cinder", at=[42, 100], name="Slag Yard", tier=1, respawn=75, reward="glove",
+             set=["bomber", "skitter"]),
+        dict(id="forge_breakers", island="cinder", at=[34, 110], name="Forge Breakers", tier=3, respawn=180, reward="glove",
+             set=["brute", "bomber", "spitter", "skitter"]),
+    ],
+    "storm": [
+        dict(id="halt_raiders", island="storm", at=[180, 112], name="Halt Raiders", tier=2, respawn=150, reward="boots",
+             set=["spitter", "spitter", "skitter"]),
+        dict(id="shrine_strays", island="storm", at=[162, 104], name="Shrine Strays", tier=1, respawn=105, reward="boots",
+             set=["spitter", "skitter"]),
+        dict(id="thunder_ledge", island="storm", at=[160, 116], name="Thunder Ledge", tier=3, respawn=210, reward="boots",
+             set=["sentinel", "spitter", "spitter", "bomber"]),
+    ],
+    "thorn": [
+        dict(id="bramble_lurkers", island="thorn", at=[98, 160], name="Bramble Lurkers", tier=1, respawn=90, reward="seed",
+             set=["skitter", "skitter", "skitter"]),
+        dict(id="hive_wardens", island="thorn", at=[116, 158], name="Hive Wardens", tier=3, respawn=180, reward="seed",
+             set=["brute", "skitter", "skitter", "spitter"]),
+    ],
+    "lark": [
+        dict(id="meadow_grazers", island="lark", at=[40, 20], name="Meadow Grazers", tier=1, respawn=90, reward="seed",
+             set=["skitter", "skitter"]),
+    ],
+    "highwatch": [
+        dict(id="lookout_snipers", island="highwatch", at=[194, 16], name="Lookout Snipers", tier=2, respawn=150, reward="boots",
+             set=["spitter", "spitter", "sentinel"]),
+    ],
+    "duskmoor": [
+        dict(id="chapel_ghouls", island="duskmoor", at=[178, 194], name="Chapel Ghouls", tier=1, respawn=105, reward="relic",
+             set=["skitter", "bomber"]),
+        dict(id="moor_crypt", island="duskmoor", at=[200, 176], name="Moor Crypt", tier=2, respawn=165, reward="relic",
+             set=["sentinel", "spitter", "bomber"]),
+    ],
+    "saltmere": [
+        dict(id="riverbed_scavengers", island="saltmere", at=[36, 192], name="Riverbed Scavengers", tier=2, respawn=135, reward="treasure",
+             set=["skitter", "bomber", "spitter"]),
+    ],
+}
+for _cs in CAMPS.values():
+    for _c in _cs: BY[_c["island"]].setdefault("camps", []).append(_c["at"] + [CAMP_KIND[_c["tier"]]])
 
 # One line each in docs/MAP_REGIONS.md. "loot" leans chests on top of the biome's lean (BiomeRun):
 # slot weights multiply, rarity steps add. Every region can be the match's hot drop zone (HotZone).
@@ -381,10 +443,12 @@ glides = [
     dict(a="thorn", b="duskmoor", take=[144, 176], land=[172, 182]),
 ]
 
+# wake: match seconds before its boss rises (same every match; the map counts it down). The Eyrie wakes as the
+# Sealed Lair way out opens (heart.json quest.lair_open_s); the Forge first, the Hive last.
 lairs = [
-    dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="gaol_ne", at=[157, 66], half=7, gate="s", entry=["dial", "runes"]),
-    dict(id="forge", name="The Sunken Forge", boss="colossus", island="gaol_sw", at=[60, 150], half=7, gate="e", entry=["dial"]),
-    dict(id="hive", name="The Thornhive", boss="brood", island="thorn", at=[127, 172], half=7, gate="w", entry=["dial", "wards"]),
+    dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="gaol_ne", at=[157, 66], half=7, gate="s", entry=["dial", "runes"], wake=120),
+    dict(id="forge", name="The Sunken Forge", boss="colossus", island="gaol_sw", at=[60, 150], half=7, gate="e", entry=["dial"], wake=90),
+    dict(id="hive", name="The Thornhive", boss="brood", island="thorn", at=[127, 172], half=7, gate="w", entry=["dial", "wards"], wake=180),
 ]
 # exits: two walled uplink outposts 42-50 m (design grid; 59-71 m on the map) from the Heart
 # (tools/ways_out_sites.py has the rule).
@@ -1081,6 +1145,10 @@ def main():
     print("train loop %.0f m, %d stops, a lap %.0f s" % (loop, len(stops), sum(l[2] for l in legs)))
     for (nm, isl, d), (a, b, ride, run) in zip(stops, legs):
         print("train %-12s (%-9s pier %4.1f m) -> %-12s ride %3.0f s, run %s" % (nm, isl, d, b, ride, "%.0f s" % run if run < 1e9 else "no way on foot"))
+    for R in regions:
+        R["camps"] = [dict(id=c["id"], name=c["name"], at=sc_pt(c["at"]), tier=c["tier"], set=c["set"], respawn=c["respawn"],
+                           reward=c["reward"]) for c in CAMPS.get(R["id"], [])]
+    for d in islands: d.pop("camps", None)       # (they live on the regions)
     out = dict(id="hollowcrown", name="The Hollow Crown", size=SIZE, seed=5150, hand=True,
                notes="Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). "
                      "A raised core (the Crown, its Throne and two boss Gaols), a ring of four regions each with one "
