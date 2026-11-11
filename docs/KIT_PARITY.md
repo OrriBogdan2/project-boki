@@ -40,8 +40,8 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] |
 | Cinder | E radius | 4.5 | 2.5 bh (4.5) | match |
 | Cinder | R carpet, ring, flight | 1.8, 2.2, 22.7 | 1 bh, 1.2 bh, 16-18 | width, ring match; flight longer (owner item 20) |
-| Meeko | RMB range, burst | 14, 2.2 | 8-9 bh (14.4-16.2), disc 1.2 bh (2.2; flare 1.8 bh = 3.2) | match; flare [?] |
-| Meeko | E ring, thrown, reach | 2.6, 2.9, 9 | 1.3-1.5 bh, 1.6 bh, - | match; reach [?] |
+| Meeko | RMB range, burst | 14, 2.2 | lane to max range 8-9 bh (14.4-16.2, 0106); disc under the foe 1.2 bh (2.2, 0123), 0.6 s later it flares to 1.8 bh = 3.2 with the root (0126) | range, disc match; flare **Not determinable** as a hit radius: ours draws and hits one `seed.burst_r` 2.2, the sheet does not say whether the 3.2 flare is the hit or a visual. Kept; suggestion: `seed.burst_r` 3.2 if a clip shows a foe at 2.2-3.2 m rooted. Clips: elluna 0106-0130 (no frame left to re-measure) |
+| Meeko | E ring, thrown, reach | 2.6, 2.9, 9 | 1.3-1.5 bh, 1.6 bh, thrown zone lands on the cursor ring in about 1 frame (0205, 0218), no cursor distance recorded | ring, thrown match; reach **Not determinable**: no cast far from her was measured. Clips: elluna 0196-0218 |
 | Meeko | R range | 12.6 | tether ring 7 bh (12.6) | match |
 | Tenzo | RMB radius, core | 4.5 (3.82 tap), 0.9-1.8 | 2.5 bh (4.5), 0.5-1 bh | match |
 | Tenzo | E ahead, span | 3.4, 5 | 2 bh (3.6), 3 bh (5.4) | match |
@@ -49,12 +49,12 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Grimble | RMB range | 11.5 | 6-7 bh (10.8-12.6) | match |
 | Grimble | E depth, angle | 3.0, 110 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | within footage error [?] |
 | Grimble | R fan, depth | 105, 5.9 | 100-110, 3.3 bh (5.9) | match |
-| Neve | RMB range, zone, burst | 12, 2.2, 2.7 | lands at the cursor, clamp and rings not measured | [?] (owner: travel time grows with distance) |
-| Neve | E width, slide | 1.8 to 4.5, to 16.2 | narrow to ~2.5 h (4.5), slide not measured | width match; slide [?] |
+| Neve | RMB range, zone, burst | 12, 2.2, 2.7 | lands at the cursor, no distance (spear crosses 5 h in <=0.2 s, a lower bound 9 m); zone ring 1.2 h = 2.2 (0132-0139); detonation dome 1.5 h = 2.7 (0140) | zone and burst match, pinned in kit_parity.json (`rmb.lance.zone_r`, `rmb.lance.burst_r`); clamp **Not determinable** (owner: travel time grows with distance, unchanged). Clips: celeste 0094-0168 |
+| Neve | E width, slide | 1.8 to 4.5, to 16.2 | 1 h to 2.5 h wide (1.8 to 4.5); slid about 6 h = 10.8 m in 2.4 s, one cast (0306-0313) | width match; slide max **Not determinable**: 10.8 m is a lower bound under 16.2, no cast at the cursor clamp. Clips: celeste 0297-0358 |
 | Neve | R rink radius | 7.2 | 4 bh (7.2) | match |
-| Motley | RMB range | 13 | bundle seen over 6 h (10.8), max not seen | [?] |
+| Motley | RMB range | 13 | crystal bundle crosses about 6 h = 10.8 m in 0.2 s (0116, 0139), a lower bound | **Not determinable**: 13 is above the seen range, no max frame. Clips: void 0116-0139, 0156-0183 |
 | Motley | E seed radius | 3.2 | 1.8 h (3.2) | match |
-| Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0), - | match; range [?] |
+| Motley | R radius, range | 3.6 / 5.1 swollen, 10 | 350 / 500 uu (3.5 / 5.0); the one cast was 2-3 bh (3.6-5.4 m) away, on the dummy (ult f21-f23) | radius match; cast range **Not determinable**: no cast near the clamp. Clips: void ult f21-f101 |
 | Albert | RMB aegis, slam | 4.2 at 140, 2.6 at 100 | slab 2.2 h wide (4.0), bash not seen | aegis match; slam [?] |
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
@@ -62,7 +62,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Sparkle | E radius, reach, slide | 1.5, 11, 3.4 | circle ~2 bh across (radius 1.8), -, ~4 bh (7.2) | differ 17% and 53%, kept: mage.md set 1.5 as the hit on purpose; [?] |
 | Sparkle | R radius, range | 2.7, 14.4 | ring 1.5 bh (2.7), 8 bh | match |
 | Sable | RMB range, lane | 7 + 3.8, **1.8 wide** (was 1.4) | lane 5.5-6 bh (9.9-10.8), 1 bh wide (1.8) | **fixed** (width) |
-| Sable | E range | 14 | landed at 9 bh (16.2), max not seen | [?] |
+| Sable | E range | 14 | dagger landed at the cursor, about 9 bh (0236); the sheet reads 40 px per bh there, its later re-measure 48 px (Shiv 93-95 px at 1080p), where 360 px is 7.5-7.7 bh = 13.5-13.8 m | **Not determinable**: a landing at the cursor is a lower bound, and the two scales put it at 13.5-16.2, around our 14. Kept. Clips: shiv 0219-0280 |
 | Sable | R ring | 5.4 (rim band outer 25%) | 3 bh (5.4); the first sheet's 3.5 bh is superseded | match |
 
 Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
