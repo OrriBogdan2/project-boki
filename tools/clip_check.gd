@@ -1,33 +1,27 @@
 extends RefCounted
 ## --clip-check: every Hero with hand-keyed clips (content/rules/warden_anim/<art>.json). Per Hero: the .glb stays in
-## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
-## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
-## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each walk and run ring's
-## loops are one length, so the blended diagonals stay in step; a move whose strike snaps inside the blend-in is at full
-## weight on its key; each emote of the wheel has its own clip (a gesture or a .glb clip) that ends within the bubble
-## and plays on the right layer; each strike's weapon tip or fist lands on the kit's hit area
-## (tools/strike_reach_check.gd). Never touches the save.
+## the tri budget and matches its data (tools/clip_data.gd: the clips it names, each move's clip and hold window, the
+## idle and stance loops, docs/art/IDLE_AUDIT.md); the kit's time seeks the clip; through all clips the skinned weapon
+## stays on its bone and the Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand
+## over with no pop; each walk and run ring's loops are one length, so the blended diagonals stay in step; a move
+## whose strike snaps inside the blend-in is at full weight on its key; each emote of the wheel has its own clip (a
+## gesture or a .glb clip) that ends within the bubble and plays on the right layer; each strike's weapon tip or fist
+## lands on the kit's hit area (tools/strike_reach_check.gd). Never touches the save.
 
+const ClipData := preload("res://tools/clip_data.gd")
 const PondWalk := preload("res://tools/pond_walk.gd")
 const StrikeReach := preload("res://tools/strike_reach_check.gd")
 const TRI_BUDGET := 15000
-const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
-	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
-	"ostra": "ostra", "juggernaut": "kael"}
 const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
-const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
-const SEAM_M := 0.01           # and move it this far
 const SNAP_MPS := 8.0          # m/s: an arm bone this fast at a clip's start is a strike or release snapping in
 const FRAME := 1.0 / 60.0      # s: the game frame the kit clock steps by
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
 const POSE_MIN_DEG := 25       # a keyed result pose turns at least one bone this far from the rest
 const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
-const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 const JL_READ_DEG := 15.0      # deg: a take-off or an apex turns some bone at least this far (it reads on screen)
 const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ from the first by this much
 const JL_HOP_DIP_M := 0.015    # m: the hips drop at least this far off a plain jump (the source's small dip)
@@ -36,14 +30,6 @@ const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
 const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
-## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
-const STAND_OPEN := {
-	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
-	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
-	"ostra:idle": "x_fing seams 11-13 deg",
-	"ostra:stance": "x_fing seams 12-16 deg",
-}
-
 var bad := 0
 var holder: Node3D
 
@@ -56,14 +42,13 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	holder = Node3D.new()
 	main.add_child(holder)
-	for id in OWN_MODELS:
-		_own_model(String(id), String(OWN_MODELS[id]))
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
 		if not WardenClips.data(art_name).has("loco"):      # (no clips yet, as Gil: the rig's poses drive it)
 			continue
 		n += 1
+		_own_model(String(id), art_name)
 		await _hero(main, String(id), art_name)
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
 	print("CLIP_CHECK_DONE, failures: ", bad)
@@ -99,14 +84,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		for si in mesh.get_surface_count():
 			tris += (mesh.surface_get_arrays(si)[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
 	ok(tris > 0 and tris <= TRI_BUDGET, "%s: %d tris, weapon included (budget %d)" % [id, tris, TRI_BUDGET])
-	var missing: Array = []
-	var named: Array = _named(dd)
-	for c in named:
-		if not clips.lib.has_animation(String(c)):
-			missing.append(c)
-	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
-	_timings(id, dd, clips)
-	_standing(id, dd, clips)
+	for r in ClipData.rows(id, dd, clips.lib):
+		ok(r[0], r[1])
+	_garden(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
 	_emotes(id, dd, clips)
 	_rings(id, dd, clips)
@@ -170,34 +150,6 @@ func _beats(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			most = maxf(most, rad_to_deg(rest.angle_to(a.rotation_track_interpolate(i, WardenBeats.INTRO))))
 		ok(most >= POSE_MIN_DEG, "%s: the %s pose turns a bone %.0f deg (min %d)" % [id, nm, most, POSE_MIN_DEG])
 
-func _named(dd: Dictionary) -> Array:
-	var out: Array = []
-	for b in (dd.get("beats", {}) as Dictionary).values():
-		if b.has("clip"):
-			out.append(b["clip"])
-	for mv in (dd.get("kmoves", {}) as Dictionary).values():
-		for k in ["clip", "air_clip", "ground_clip"]:
-			if mv.has(k):
-				out.append(mv[k])
-	var lc: Dictionary = dd.get("loco", {})
-	out.append(lc.get("idle"))
-	out.append(lc.get("stance"))
-	out.append_array((lc.get("walk", {}) as Dictionary).values())
-	out.append_array((lc.get("run", {}) as Dictionary).values())
-	var cr: Dictionary = dd.get("crouch", {})
-	if not cr.is_empty():
-		out.append_array([cr["idle"], cr["in"], cr["out"]])
-		out.append_array((cr["walk"] as Dictionary).values())
-	out.append_array((dd.get("act", {}) as Dictionary).values())
-	out.append_array((dd.get("emotes", {}) as Dictionary).values())
-	var air: Array = (dd.get("air", {}) as Dictionary).values()
-	out.append_array(air.filter(func(v): return v is String))     # (not its tilts)
-	for k in dd.get("states", {}):
-		var v = dd["states"][k]
-		if v is String:
-			out.append(v)
-	return out
-
 ## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.
 func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:
 	var sw: WardenSway = sync.get("sway")
@@ -216,43 +168,6 @@ func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:
 	ok(peak > 0.03 and sw.lean.length() < 0.01, "%s: accelerating forward leans it back (%.3f rad), then settles (%.4f)"
 			% [id, peak, sw.lean.length()])
 	m.position = Vector3.ZERO
-
-## Each mapped kit move: its clip lasts as long as the move's keys (a held move: at least to its last key).
-## The idle and stance loops: the last key meets the first on every track (no pop at the loop), and the loop is
-## long enough to carry a breath. Entries in STAND_OPEN are reported, not failed.
-func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
-	for clip in ["idle", "stance"]:
-		var anim_name := String(dd.get("loco", {}).get(clip, clip))
-		if not clips.lib.has_animation(anim_name):
-			continue
-		var anim := clips.lib.get_animation(anim_name)
-		var worst := 0.0
-		var where := ""
-		for t in anim.get_track_count():
-			var n := anim.track_get_key_count(t)
-			if n < 2 or anim.track_get_key_time(t, n - 1) < anim.length - 0.001:
-				continue
-			var gap := 0.0
-			match anim.track_get_type(t):
-				Animation.TYPE_ROTATION_3D:
-					var q0: Quaternion = anim.track_get_key_value(t, 0)
-					gap = rad_to_deg(q0.angle_to(anim.track_get_key_value(t, n - 1))) / SEAM_DEG
-				Animation.TYPE_POSITION_3D:
-					var p0: Vector3 = anim.track_get_key_value(t, 0)
-					gap = p0.distance_to(anim.track_get_key_value(t, n - 1)) / SEAM_M
-			if gap > worst:
-				worst = gap
-				where = String(anim.track_get_path(t)).get_slice(":", 1)
-		var good := worst <= 1.0 and anim.length >= STAND_MIN
-		var what := "%s: %s loop seam %.1fx the limit (worst %s), %.1f s long (min %.1f)" % [
-				id, clip, worst, where if where != "" else "none", anim.length, STAND_MIN]
-		var key := "%s:%s" % [id, clip]
-		if STAND_OPEN.has(key):
-			var stale := " (now passes: drop it from STAND_OPEN)" if good else ""
-			print("CLIP open %s [%s]%s" % [what, STAND_OPEN[key], stale])
-			ok(not good, "%s: STAND_OPEN entry still needed" % key)
-		else:
-			ok(good, what)
 
 ## The ways down, running and standing (tools/jump_land_check.gd), printed as "JL" rows. The jump: the take-off and
 ## the apex read (the pose turns), every jump reads like the first (the rise clip starts over). Every way: the landing
@@ -372,43 +287,18 @@ func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		var what := off if off != "" else " all match"
 		ok(off == "", "%s: the %s loops are one length (f %.3f s;%s)" % [id, gait, f_len, what])
 
-func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
-	var worst := 0.0
-	var where := ""
-	var moves: Dictionary = dd.get("kmoves", {})
-	for km in moves:
-		var def := HunterAnim.km_def(String(km))
-		if def.is_empty():
-			continue
-		var end_t := float(def["keys"][-1][0])
-		var length := clips.lib.get_animation(String(moves[km]["clip"])).length
-		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
-		if off > worst:
-			worst = off
-			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
-	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
+## The home verbs: each plays its own clip, seeked to the verb's clock, and the clip lasts as long as the verb.
+func _garden(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var act_off := 0.0
 	for verb in dd.get("act", {}):
-		var pick := clips._pick({"act": verb, "act_t": 0.4}, 0.0)
 		var clip := String(dd["act"][verb])
+		if not clips.lib.has_animation(clip):      # (ClipData's row names it)
+			continue
+		var pick := clips._pick({"act": verb, "act_t": 0.4}, 0.0)
 		ok(pick.get("clip") == clip and is_equal_approx(float(pick.get("t", -1.0)), 0.4),
 				"%s: the home %s plays its own clip, seeked to the verb's clock" % [id, verb])
 		act_off = maxf(act_off, absf(clips.lib.get_animation(clip).length - float(HunterVerbs.LENGTH[verb])))
 	ok(act_off <= 0.034, "%s: its garden clips last as long as the home verbs (off %.3f s)" % [id, act_off])
-	var unmapped: Array = []
-	var pre: String = {"juggernaut": "jug_"}.get(id, "")
-	for km in KMovesDJ.MOVES:
-		if pre != "" and String(km).begins_with(pre) and not moves.has(km):
-			unmapped.append(km)
-	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
-	# the shared actions: a stomp clip is the game's cycle with the slam at Life's hit beat, a drink clip is the drink
-	var st: Dictionary = dd.get("states", {})
-	for k in ["stomp", "drink"]:
-		if not st.has(k):
-			continue
-		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else UtilityUse.channel("tonic", "time")
-		var dur := clips.lib.get_animation(String(st[k])).length
-		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
 
 ## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand.
 func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
