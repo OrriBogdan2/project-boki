@@ -2167,3 +2167,9 @@ for _k,_d,_ms,_po,_r,_t in (
 for _n in ('Kingpinguin','Maracoil','Pavonazar'):
     V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_L2'; SPECS[-1]['runs']=5
     SPECS[-1]['prompt']+=" No ground line or floor under the views."
+
+# 11-10 night: owner "go on the full sprite run". All 259, 80px look (_PX8), one try each from the live card. ids px9_<file id lowercase>.
+# Post-process later with the finish() step (edge flood-fill background, 80px grid, 14 colours); thin dark Boki will need a second try.
+for _n in sorted(_LM):
+    if _os.path.exists(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cards',_n+'.jpg')):
+        SPECS.append({'id':'px9_'+_n.lower(),'name':_n+' (pixel sprite 80)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':1,'aspect':'1:1','size':'1K','prompt':_PX8})

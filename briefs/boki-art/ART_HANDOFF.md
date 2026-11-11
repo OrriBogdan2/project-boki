@@ -155,3 +155,9 @@ For a Boki `<Name>` (file ID, not the display name):
 
 ### Standing rule: sharing splashes and key art (owner, 11-10 evening)
 Owner: "i wont ask again, always do it to the art branch and tell it to store them." Every splash or key art keeper goes, without being asked, into `briefs/boki-art/splash/` or `briefs/boki-art/og/` on `ext/agent-briefs`, is listed in `PICKS_FOR_MAIN.md` with its status, and gets a CHANNEL.md note telling main to store it in the game repo's permanent art folder. Never push to the main branch.
+
+### State at 11-10 night (owner low on usage until Sat 11pm reset: keep check-ins rare and short)
+- Full pixel sprite run queued: `px9_<id>` for all 259 (80px look). Not reviewed. Next step: run the finish step, build a contact sheet, redo the thin dark ones.
+- Turnarounds behind: Kingpinguin (Pipguin), Maracoil, Pavonazar (`v2s_*_L2`, 5 tries each, queued).
+- Owner picks so far: tent splash = Tenzo; Sable vault splash approved; link image not picked (options sheet sent, my order egg_A, storm_A, aurora_A).
+- Still to do: Tiltster + Rimink lighter finish, independent recheck of turnarounds changed 11-10, use 3d-refs for angles in new splashes.
