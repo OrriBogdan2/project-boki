@@ -94,24 +94,23 @@ static func kit_tip(id: String) -> String:
 	names.append(Settings.key_cap("ultimate"))
 	return "%s\nDash: %s  ·  Passive: %s\nRMB: %s  ·  E: %s  ·  %s: Boki Fusion" % names
 
-## The results screen's Hunter line: mastery goals this expedition finished, and a Hunter unlock that
-## became ready.
+## The results screen's Hunter news, one line each: mastery goals this expedition finished, and a Hunter
+## unlock that became ready. Null when nothing is new.
 static func results_strip(s: Dictionary) -> Control:
 	var cu: Dictionary = s.get("class_unlock", {})
-	var v := UI.vbox(0)
-	var news: Array = []
+	var v := UI.vbox(2)
 	for m in cu.get("mastered", []):
 		var rw: Dictionary = m["reward"]
-		news.append("%s mastery: %s (%s %s)" % [Arch.name_of(String(m["id"])), String(m["text"]),
-				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])])
+		var ml := UI.label("New: %s mastery: %s (%s %s)" % [Arch.name_of(String(m["id"])), String(m["text"]),
+				ClassUnlock.reward_kind_name(String(rw["kind"])), String(rw["name"])], UI.T_SMALL, GOAL_COL)
+		ml.set_meta("mastery_done", String(m["id"]))
+		v.add_child(ml)
 	if int(cu.get("new", 0)) > 0:
-		news.append("Relic challenge done: hold to unlock it on the Relics screen at home")
-	if news.is_empty():
-		return v
-	var nl := UI.para("New: " + "  ·  ".join(news), UI.T_SMALL, GOAL_COL)
-	if not (cu.get("mastered", []) as Array).is_empty():
-		nl.set_meta("mastery_done", String(cu["mastered"][0]["id"]))
-	if int(cu.get("new", 0)) > 0:
-		nl.set_meta("hunter_unlock_ready", int(cu["new"]))
-	v.add_child(nl)
+		var ul := UI.label("New: Relic challenge done, hold to unlock it on the Relics screen at home", UI.T_SMALL,
+				GOAL_COL)
+		ul.set_meta("hunter_unlock_ready", int(cu["new"]))
+		v.add_child(ul)
+	if v.get_child_count() == 0:
+		v.free()
+		return null
 	return v
