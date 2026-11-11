@@ -7031,3 +7031,4 @@ READY ext/garden-trait-drift-age 9263ea700 (BASED ON ext/release-integ-0245 2723
 READY ext/anim-neve-run-v95 a2a6f3650 (Neve run 0.34 s on v95 loops)
 READY ext/farm-led-boki-trail eaf98ef4f (led Boki within 3 m)
 READY ext/ui-mask-preview-warm 33c2bc15a (supersedes 37d75cfa1: Mask preview models built on a worker thread (PreviewBuild) and now race-free: every cache a cold build fills (Models meshes, HeroKit, WardenClips, WardenGlb scenes/rests/misfits/far inks) goes through scripts/core/shared_cache.gd, a Mutex read/put; models.gd -1 line; neutral-rig measuring waits for no worker build. --mask-lag-check headless 0 fail, xvfb llvmpipe 0 fail (worker path), --mask-moment-check 0 fail, health --strict OK, gen_wiki --check 50 unchanged. Real-GPU before/after NOT measured: GPU queue ~76 deep; after = jobq 20261111-165850-23943)
+READY ext/anim-empty-crouch-feet f1bca3904 (Empty crouch walk planted, no floating feet)
