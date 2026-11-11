@@ -191,7 +191,7 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	if tag != "" and not KinMerge.active(p):
 		chip(H, r, tag, HudStyle.MUTED if tag == "RESTING" else col)
 
-## The wisps you stole (KinSteal), one row each in the column left of the Boki box (BokiCarry), up to the carry limit: the critter in its own
+## The wisps you stole (KinSteal), one row each in BokiCarry's column, up to the carry limit: the critter in its own
 ## colours inside a thief-side ring, its carry passive at the share it gives (passive_k), and its one summon:
 ## the summon key while ready, "OUT 4s" while it fights for you, "USED" once spent. Nothing when you carry none.
 const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
