@@ -52,7 +52,7 @@ func run(main: Node) -> void:
 			main.get_viewport().get_texture().get_image().save_png(dir.path_join("cel_%s_%d.png" % [preset, shot]))
 			var draws := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)
 			var objs := RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME)
-			print("CELSHOTS draws %s %d %d %d" % [preset, shot, draws, objs])
+			print("CELSHOTS draws %s %d %d %d (frame %d)" % [preset, shot, draws, objs, Engine.get_process_frames()])
 			shot += 1
 	Engine.time_scale = 1.0
 	main.get_tree().quit(0)
