@@ -24,7 +24,7 @@ static func world_labels(hud) -> void:
 	if ht == null or m.player == null or ht.site == Vector3.INF:
 		return
 	var cam: Camera3D = m.cam
-	_outside(hud, m, ht)
+	var out := _outside(hud, m, ht)
 	if ht.carrier and ht.carrier != m.player:
 		var who := "%s has the Heartspark" % ht.carrier.pname
 		hud._draw_waypoint(ht.carrier.pos + Vector3(0, 1.0, 0), who, Heart.COL)
@@ -32,7 +32,7 @@ static func world_labels(hud) -> void:
 		hud._draw_waypoint(ht.gate + Vector3(0, 1.0, 0), "Heart Gate", Heart.GATE_COL)
 	elif ht.spark_live() and ht.state != Heart.S.FINAL:
 		hud._draw_waypoint(ht.spark_pos + Vector3(0, 1.0, 0), "Heartspark", Heart.COL)
-	elif ht.state in [Heart.S.CHARGING, Heart.S.FINAL]:
+	elif not out and ht.state in [Heart.S.CHARGING, Heart.S.FINAL]:
 		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), _word(ht), Heart.COL)
 	elif m.player.flat_dist(ht.site) < 40.0 and not cam.is_position_behind(ht.site):
 		var cp := cam.unproject_position(ht.site + Vector3(0, 3.8, 0))
@@ -46,12 +46,13 @@ static func world_labels(hud) -> void:
 		hud._ctext(cp2, "You carry the Heartspark  ·  everyone sees you", 13, Heart.COL, hud.big)
 
 # ------------------------------------------------------------------ the maps
-## Past the ring the screen is tinted and says so; each tide tick pulses the edges red.
-static func _outside(hud, m: Match, ht: Heart) -> void:
+## Past the ring the screen is tinted and says so; each tide tick pulses the edges red; the edge arrow points
+## in (it stands in for the Heart's own waypoint, which points the same way). True while the player is out.
+static func _outside(hud, m: Match, ht: Heart) -> bool:
 	var p: Hunter = m.player
 	var tr := Heart.tide_r(m)
 	if tr <= 0.0 or p.out or p.extracted or Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).length() <= tr:
-		return
+		return false
 	var sz: Vector2 = hud.c.size
 	var calm := 0.3 if Settings.get_v("reduce_flashes") else 1.0
 	var k := 0.07 + 0.13 * Heart.tide_out(m, p.pos)
@@ -67,6 +68,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.8), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 	var way_in := (Vector2(p.pos.x - ht.site.x, p.pos.z - ht.site.z).normalized() * maxf(tr - EDGE_IN, 0.0))
 	hud._draw_waypoint(Vector3(ht.site.x + way_in.x, p.pos.y, ht.site.z + way_in.y), "Zone edge", NEXT_COL)
+	return true
 
 ## The zone clock's words: "Closing in 0:30" before the tide moves, "Closing  7:12 left" while it does,
 ## empty once the ring holds (or with no Heart).
