@@ -14,7 +14,8 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: pink-white
 ## Scaling
 Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
 bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
-source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
+source is about 4, held lower because the rod also stuns and leaves an orb; the --ttk-check row: source share 0.104 of the
+target against our 0.117 at 18 to 30, ext/parity-ttk-sparkle-sable-lace takes it to 16 to 26.7); Skycall 20 (source 2.5
 bolts, ours 1.7); Wirerun pass 20 (1.7 bolts; was 10 before the audit), doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 Damage is the source's share of the standard target (1285 source HP, 154 ours; docs/TTK.md, pinned in
 content/rules/kit_parity.json): bolt 9 every 0.648s (the cadence is owner items 70 and 116; 90 every 0.8 s is
@@ -333,3 +334,9 @@ Suggestions (ours, not built):
 - Merge cleanup: `_drop_holds()` ends `wire` (refunded), `rmb_down`/`rmb_t` and the rod prop, any
   Skycall in `strikes` still in its `"flick"` phase, and Kitefall's `ult.leap` (she drops at the take-off).
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=mage` (tools/vv_shots.gd).
+
+## Storm Rod damage in --mage-combo-check (11-11)
+The Rod landed 24 where the check asserts 25 or more (full charge is 30 in data, 18 to 30 by charge). Not a stale assert and
+not a lost multiplier: the shared dummy reset (`archetype_check.fresh`) zeroed the armour tier but kept the armour the
+Wirerun/Blowout hits had already earned the dummy, so the Rod took Common's 20% off (30 -> 24). `fresh` now zeroes the
+armour too; the assert (25+) stays, and holds after the parity branch's 26.7 full charge.
