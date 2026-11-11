@@ -102,6 +102,8 @@ func step(d: float) -> void:
 	night = sin((h.day_t - 0.25) * TAU) < -0.2      # the farm's own night test (home.gd _move_kin)
 	if h.day_t < _day_t:
 		BaseDrift.day(h.kins.map(func(k): return k["rec"]))
+		for k in h.kins:
+			GardenItems.day(k["rec"])
 	_day_t = h.day_t
 	for k in h.kins:
 		machine(k)       # every machine first: a newcomer looks for Boki that have one

@@ -63,8 +63,10 @@ static func eat(rec: Dictionary, f: String) -> String:
 	if key == "":
 		return ""
 	var ln: Dictionary = rec.get_or_add("lean", {})
+	var held: Dictionary = rec.get("hold", {})      # a sweet's lean: other meals don't fade it (GardenItems)
 	for other in ln:
-		ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
+		if not held.has(other):
+			ln[other] = maxf(0.0, float(ln[other]) - LEAN_FADE)
 	ln[key] = minf(LEAN_FULL, float(ln.get(key, 0.0)) + FOOD_AFF + LEAN_FADE)
 	return key
 

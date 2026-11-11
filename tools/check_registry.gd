@@ -10,6 +10,7 @@ const CHECKS := {
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],      # GARDEN_MODERN.md 1
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
+	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--garden-soak": ["res://tools/garden_soak.gd", "garden_soak", null],      # the garden pieces together, 30 days
