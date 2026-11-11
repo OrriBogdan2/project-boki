@@ -65,8 +65,9 @@ check: `--base-life-check`.
   Glasswater pools): a Boki in pond or stream water sinks into it, walks at `wade_speed` (shallow) or `deep_speed`
   (middle) of its dry pace, splashes going in and shakes off coming out. While in, it leaves marks
   (`scripts/home/boki_wake.gd`, `shaders/boki_wake.gdshader`): a ripple ring under it (a wave every `ripple_secs`)
-  and a short V wake while it moves, sized by its body; every Boki's marks are one MultiMesh (one draw call), made
-  when the first Boki steps in and never on Very Low. Water, Ice and Crystal
+  and a short V wake while it moves, sized by its body and faded out at the bank by a water-tile mask; every Boki's
+  marks are one MultiMesh (one draw call), made when the first Boki steps in and never on Very Low. Water, Ice and
+  Crystal
   types (`HomeToys.lean_of`: lean, else species theme) paddle: a free roaming one lingers 4 to 8 s playing the
   `splash` clip and gains `joy_per_sec`. Fire types hurry out at `out_speed` to the nearest dry ground and shake off.
   The rest wade through. Check: `--wade-check`; `--garden-nav-check` has a stream in the sweep. **Clips for the anim
