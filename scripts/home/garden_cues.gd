@@ -27,8 +27,10 @@ static func type_colour(rec: Dictionary) -> Color:
 	return DexView.type_col(DexView.type_of(String(rec.get("species", ""))))
 
 ## An unlit, see-through material: plain alpha, so the violet and teal read on bright day ground too.
-static func glow(c: Color, alpha: float) -> StandardMaterial3D:
+## `on_top` draws it over everything, for the cues that float among the Boki.
+static func glow(c: Color, alpha: float, on_top := false) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
+	m.no_depth_test = on_top
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	m.cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -362,6 +364,7 @@ class TellCue:
 	const POP_S := 0.12                 # s the icon takes to grow in
 	const SWAY := 0.5                   # rad of sway at a coin-flip tell, none at a sure one
 	const SWAY_RATE := 5.0              # rad/s
+	const SIZE := 1.5                   # the icon's scale: about 0.55 m across, a Boki's head
 
 	var root: Node3D                    # faces the camera and sways
 	var pivot: Node3D                   # grows the icon in
@@ -374,8 +377,8 @@ class TellCue:
 
 	func _init(parent: Node3D, col: Color) -> void:
 		root = GardenCues.root_in(parent, "TellCue")
-		mat = GardenCues.glow(col, 0.0)
-		face = GardenCues.glow(Color.WHITE, 0.0)
+		mat = GardenCues.glow(col, 0.0, true)
+		face = GardenCues.glow(Color.WHITE, 0.0, true)
 		var rush := Node3D.new()
 		for x in [-0.12, 0.12]:
 			for y in [-1.0, 1.0]:
@@ -421,7 +424,7 @@ class TellCue:
 			root.look_at(cam.global_position, Vector3.UP, true)
 			icons["rush"].scale.x = -1.0 if cam.global_basis.x.dot(yours - rival) < 0.0 else 1.0
 		root.rotate_object_local(Vector3.BACK, sin(t * SWAY_RATE) * SWAY * 2.0 * (1.0 - sure))
-		pivot.scale = Vector3.ONE * clampf(t / POP_S, 0.05, 1.0)
+		pivot.scale = Vector3.ONE * SIZE * clampf(t / POP_S, 0.05, 1.0)
 
 	func clear() -> void:
 		root.queue_free()
@@ -445,9 +448,9 @@ class BatonCue:
 		root = GardenCues.root_in(parent, "BatonCue")
 		for team in 2:
 			var c := CapsuleMesh.new()
-			c.radius = 0.06
-			c.height = 0.42
-			var m := GardenCues.glow(Color.WHITE, GardenCues.BRIGHT)
+			c.radius = 0.08
+			c.height = 0.6
+			var m := GardenCues.glow(Color.WHITE, GardenCues.BRIGHT, true)
 			mats.append(m)
 			var b := GardenCues.piece(root, c, m, Vector3.ZERO)
 			b.rotation.z = PI * 0.5
@@ -458,7 +461,7 @@ class BatonCue:
 	## its last hand-off lost no time.
 	func update(team: int, at: Vector3, leg: int, col: Color, waiting: bool, clean: bool) -> void:
 		var b: MeshInstance3D = batons[team]
-		b.position = at + Vector3(0, GardenCues.LIFT - 0.4, 0)
+		b.position = at + Vector3(0, GardenCues.LIFT, 0)
 		b.rotation.y = t * SPIN
 		var on := not waiting or sin(t * BLINK) > 0.0
 		GardenCues.tint(mats[team], col.lightened(0.25), GardenCues.BRIGHT if on else 0.2)

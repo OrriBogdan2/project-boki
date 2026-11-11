@@ -403,7 +403,8 @@ func tick(d: float) -> void:
 		bar.step(d)
 	_place_pair(d)
 
-## The judges' score for the round that just ended pops over your Boki; after the walk both totals follow.
+## The judges' score for the round that just ended pops over your Boki; after the walk both totals follow
+## where the two stand to be judged.
 func _pop(ended: Run.Phase) -> void:
 	var shown: Dictionary = run.recs[run.backed]
 	var at: Vector3 = pair[run.backed]["pos"]
@@ -419,13 +420,14 @@ func _pop(ended: Run.Phase) -> void:
 			for i in 2:
 				cue.pop(pair[i]["pos"], "%.1f" % float(s[i]["total"]), GardenCues.type_colour(run.recs[i]), TOTAL_DELAY)
 
-## After the round `ended`: its score pops, then the next round is set up or the show ends.
+## After the round `ended`: the show ends, or the next round is set up (the Boki in place) and the
+## ended round's score pops over them.
 func _after_step(ended: Run.Phase) -> void:
-	_pop(ended)
 	if run.over():
 		_end(true)
-	else:
-		_enter()
+		return
+	_enter()
+	_pop(ended)
 
 ## Sets up the round the run is in: its card, the bar or the walk.
 func _enter() -> void:

@@ -15,7 +15,7 @@ extends RefCounted
 const DT := 1.0 / 30.0           # s per step: one frame of the clips
 const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
 const NEAR := 0.05               # m a cue may sit from where it belongs
-const TELLS := 3                 # tells watched before the bout is stopped
+const TELLS := 2                 # tells watched: every bout has two (depth 3, at most 2 steps a push)
 const LEFT_OUT := 2              # the answer beat (of the first phrase) the player leaves out
 const MAX_S := 240.0             # s of game time any game may take
 
@@ -180,7 +180,8 @@ func _tumble() -> void:
 	ok(spans.all(func(s): return absf(s - tell_s) <= DT + 0.001),
 			"tumble: each icon showed for the tell's %.1f s to a frame %s" % [tell_s, str(spans)])
 	ok(wrong == 0, "tumble: the tell's move over the rival in its colour, alpha = its honesty (%d off)" % wrong)
-	tb._end(false)
+	if tb.run != null:
+		tb._end(false)
 	ok(tb.cue == null and gone(cue.root), "tumble: the icon goes with the bout")
 
 func _relay() -> void:
@@ -198,11 +199,12 @@ func _relay() -> void:
 		if rl.run == null:
 			break
 		var changed := 0
+		var bursts := _newest(cue.rings, cue.rings.spawns - was)
 		for team in 2:
 			var ents: Array = rl.mine if team == 0 else rl.visitors
 			var leg := int(rl.run.leg[team])
 			var k: Dictionary = ents[leg]
-			if not near(cue.batons[team].position, k["pos"] + Vector3(0, GardenCues.LIFT - 0.4, 0)):
+			if not near(cue.batons[team].position, k["pos"] + Vector3(0, GardenCues.LIFT, 0)):
 				wrong += 1
 			if leg == legs[team]:
 				continue
@@ -212,13 +214,23 @@ func _relay() -> void:
 			var c := GardenCues.type_colour(k["rec"])
 			var clean := float(rl.run.lost[team][-1]) == 0.0
 			var tone := Color(c.lightened(0.4), 1.0) if clean else Color(GardenCues.MISS, GardenCues.BRIGHT)
-			if not near(cue.rings.last_at, k["pos"] + Vector3(0, 0.06, 0)) or not same(cue.rings.last_col, tone):
+			var at: Vector3 = k["pos"] + Vector3(0, 0.06, 0)
+			if not bursts.any(func(b): return near(b[0], at) and same(b[1], tone)):
 				wrong += 1
+				print("GGVFX   team %d leg %d: no burst at %s in %s" % [team, leg, str(at), str(tone)])
 		if cue.rings.spawns - was != changed:
 			wrong += 1
 	ok(passes == 4, "relay: four hand-offs, two a team (%d)" % passes)
 	ok(wrong == 0, "relay: batons over their runners, each hand-off burst on its frame at the taker (%d off)" % wrong)
 	ok(rl.run == null and rl.cue == null and gone(cue.root), "relay: the batons go with the race")
+
+## [position, colour] of the `count` rings spawned last.
+static func _newest(b: GardenCues.Bursts, count: int) -> Array:
+	var out: Array = []
+	for i in range(1, count + 1):
+		var slot := posmod(b.next - i, b.nodes.size())
+		out.append([b.nodes[slot].position, b.tone[slot]])
+	return out
 
 func _press(game) -> void:
 	var ev := InputEventAction.new()
