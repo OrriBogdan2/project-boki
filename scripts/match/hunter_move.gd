@@ -207,10 +207,16 @@ static func mantle_launch(run_speed: float) -> float:
 
 ## "About to land": falling, with the ground no further than the jump buffer (and a step more) of falling away,
 ## and never further than 0.9 m. A jump pressed then waits for the landing instead of opening the glider.
+## Holding its height (a flat air dash a hair off the ground) counts for what the buffer's own fall covers.
 ## `height` is metres above the ground.
 static func near_landing(vy: float, height: float) -> bool:
+	if vy > 0.0:
+		return false
 	var lead := jump_buffer_s + 0.02
-	return vy < 0.0 and height < maxf(0.9, (0.5 * Hunter.H_GRAV * lead - vy) * lead)
+	var fall := (0.5 * Hunter.H_GRAV * lead - vy) * lead
+	if vy == 0.0:
+		return height < fall
+	return height < maxf(0.9, fall)
 
 ## Where a body wanting to be at p ends up once it's pushed straight out of every barrier that blocks
 ## it (a Tenzo rock, a raised wall; Verbs.wall_blocks), as World.push_out_blocks does for rock tiles:
