@@ -11,12 +11,14 @@ run The Dash, pair two Boki, hatch the egg. Each step uses the button or prompt 
 Feed, the build bar, the market's Adopt, the Dash prompt, the Nook's Pick and Pair, the nest prompt). Where the
 screen cannot do it the step logs `GAP` or `LISTED` (known, in the list below) and takes a shortcut so the hour
 goes on. Farm time runs in 0.25 s steps like `--garden-soak`; the egg's unix-time clock is aged to match.
-`--shots-dir=<dir>` saves one image per step (jobq gpu). Never touches the real save.
+`--shots-dir=<dir>` saves one image per step: `jobq submit --needs gpu --tree <tree> --out shots -- --garden-day-check
+--shots-dir=shots --size=1280x720`. Four such jobs were lost (workers rp1-2 and rp2-2 restarted, three attempts each), so
+there are no shots yet. Never touches the real save.
 
 Time to the first egg: **never from the screen in an hour**: with the level and friendship shortcuts the egg is laid
 at 3 minutes and hatches 10 minutes later. The real wall is levels (below).
 
-## Fixed on this branch (the two worst blockers)
+## Fixed on this branch (two blockers; the third below, the wood gate, is as bad and waits on an economy call)
 
 1. **A Boki raised at home could never level, so the Nook never opened (no egg, ever).** XP came only from
    expeditions (`Game.add_xp` callers: match results and the Sunsap item). The Nook needs both Grown (level 8,

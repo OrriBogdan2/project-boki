@@ -129,8 +129,11 @@ func _age_clocks(secs: float) -> void:
 ## Walk up to a Boki the way a player does and read what the prompt offers.
 func stand_by(rec: Dictionary) -> void:
 	var k: Dictionary = home._kin_entry(rec)
-	home.ppos = k["pos"] + Vector3(1.2, 0, 0)
-	home._find_interact()
+	for off in [Vector3(0.8, 0, 0), Vector3(-0.8, 0, 0), Vector3(0, 0, 0.8), Vector3(0, 0, -0.8)]:
+		home.ppos = k["pos"] + off
+		home._find_interact()
+		if home.interact.get("kind", "") == "kin":
+			return
 
 ## All the XP a Boki has earned: the levels behind it plus the bar.
 func total_xp(rec: Dictionary) -> int:
@@ -202,7 +205,8 @@ func _feed(rec: Dictionary) -> void:
 		if has_text("Nothing to feed"):
 			gap("feed", "the Feed panel has nothing to feed (bag %s; fixed on ext/tut-garden-fresh 8f3c0180a)"
 					% str(Save.d["items"]), true)
-			Save.d["crops"][KinWants.best_food(rec)] = 3
+			var food := String(rec["likes"]["food"])
+			Save.d["crops" if Data.CROPS.has(food) else "items"][food] = 3
 		else:
 			var before := float(rec["needs"]["hunger"])
 			fed = press("Feed")
@@ -211,9 +215,9 @@ func _feed(rec: Dictionary) -> void:
 		gap("feed", "no Feed button on the Boki card")
 	home._close_panel()
 	if not fed:
-		home._care_feed(rec, KinWants.best_food(rec))
-	check_journal("feed", rec, jl, jt)
+		home._care_feed(rec, String(rec["likes"]["food"]))
 	await main.get_tree().create_timer(3.0).timeout      # the meal's own timers (the lean's new look) run in real time
+	check_journal("feed", rec, jl, jt)
 	await advance(20.0)
 
 func _pet(rec: Dictionary) -> void:
