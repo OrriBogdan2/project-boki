@@ -79,6 +79,7 @@ func run(m: Node) -> void:
 	var wary := _kin(small, "Wa", 0.9, 0.3, 10.0)
 	var bigrec := _kin(big, "Bigg", 0.5, 0.3, 60.0)
 	d["active"] = brave["uid"]
+	HomeLayout.new_fs(d, 7)      # one island every run (a new save rolls its own)
 	HomeLayout.ensure(d)
 	home = await main._hb_home()
 	home.set_process(false)      # the check drives the frames itself
