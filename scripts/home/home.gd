@@ -12,6 +12,7 @@ var cam: CamRig
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
+var corners: Control      # root_ui's corner groups, kept to SafeArea's frame
 var panel_host: Control
 var topbar: Label
 var top_chips: HBoxContainer
@@ -1177,10 +1178,10 @@ func _keep_off_hub(c) -> void:
 	var cc := c as Control
 	var hr := hub.get_global_rect()
 	var cr := cc.get_global_rect()
-	var vw := get_viewport().get_visible_rect().size.x
+	var box := SafeArea.frame(get_viewport().get_visible_rect().size)      # (the hub's frame)
 	var room_l := hr.end.x + 12.0
-	var centred := (vw - cr.size.x) * 0.5
-	var want := centred if centred >= room_l else room_l + maxf(0.0, (vw - room_l - cr.size.x) * 0.5)
+	var centred := box.get_center().x - cr.size.x * 0.5
+	var want := centred if centred >= room_l else room_l + maxf(0.0, (box.end.x - room_l - cr.size.x) * 0.5)
 	if absf(cr.position.x - want) > 1.0 and cr.end.y > hr.position.y - 4.0:
 		cc.global_position.x = want
 
@@ -2403,6 +2404,7 @@ func _build_ui() -> void:
 	root_ui.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_ui.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui.add_child(root_ui)
+	corners = SafeArea.framed(root_ui)      # (on 21:9 and wider the corner groups keep to a centred 16:9 frame)
 	# top left: your partner and what you have, as quiet chips on glass
 	var top := UI.glass(6, 14)
 	top.position = Vector2(16, 14)
@@ -2414,7 +2416,7 @@ func _build_ui() -> void:
 	topbar.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	topbar.visible = false
 	th.add_child(topbar)
-	root_ui.add_child(top)
+	corners.add_child(top)
 	# what F (and the kin keys) do with whatever is in front of you
 	prompt_box = UI.glass(10, 16)
 	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
@@ -2469,7 +2471,7 @@ func hub_items() -> Array:
 
 func _build_hub() -> void:
 	hub = HubBar.build(hub_items(), _hub_go, hub_btns)
-	root_ui.add_child(hub)
+	SafeArea.framed(root_ui).add_child(hub)      # (over the menu dim, so its own frame)
 	hub.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT, Control.PRESET_MODE_MINSIZE, 14)
 	hub.grow_vertical = Control.GROW_DIRECTION_BEGIN
 

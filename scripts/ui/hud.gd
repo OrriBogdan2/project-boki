@@ -1696,11 +1696,12 @@ func _draw_kit(sz: Vector2, p: Hunter) -> void:
 		hs = []
 		for l in lines: hs.append(28.0)
 		total = 34.0 + 28.0 * lines.size() + 4.0
-	var box := Rect2(Vector2(sz.x - w - 16, bottom - total), Vector2(w, total))
+	var fr := SafeArea.frame(sz)      # (with the corner panels: a centred 16:9 frame on wider screens)
+	var box := Rect2(Vector2(fr.end.x - w - 16, bottom - total), Vector2(w, total))
 	if m.opts.get("training", false):
 		# in training it stays up, so it lives on the left under the minimap, clear of the checklist;
 		# on a short screen it drops the descriptions rather than run into your kin card
-		box.position = Vector2(16, 240)
+		box.position = Vector2(fr.position.x + 16, 240)
 		if total > sz.y - 240 - 196:
 			compact = true
 			hs = []
@@ -1916,7 +1917,7 @@ func _draw_overhead(p: Hunter) -> void:
 # ------------------------------------------------------------------ hover tips
 ## Point at anything on the bottom bar (abilities, health, weapon, kin) to see what it is.
 func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
-	var mp := c.get_local_mouse_position()
+	var mp := panels.get_local_mouse_position()      # (the spots are in the panels' frame)
 	var hit: Array = []
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--hover="):      # test hook: point at a HUD element
@@ -1941,7 +1942,7 @@ func _draw_hover_tip(sz: Vector2, p: Hunter) -> void:
 	var h := 40.0
 	for i in range(1, lines.size()):
 		h += _wrapped_h(String(lines[i][0]), w - 28, int(lines[i][2])) + 4.0
-	var anchor: Rect2 = hit[0]
+	var anchor: Rect2 = Rect2(hit[0].position + panels.position, hit[0].size)
 	var pos := HudTip.place(anchor, Vector2(w, h), sz)      # above if it fits, else beside; always on screen, never over the slot
 	var a := clampf((hover_t - 0.25) / 0.12, 0.0, 1.0)
 	var box := Rect2(pos, Vector2(w, h))

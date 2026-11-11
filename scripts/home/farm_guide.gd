@@ -44,10 +44,8 @@ func refresh() -> void:
 	tracker = null if FarmTutorial.active() else GoalTracker.build()
 	sig = _sig()
 	if tracker:
-		h.root_ui.add_child(tracker)
+		h.corners.add_child(tracker)      # (under the menus: corners sits below panel_host)
 		tracker.visible = not quiet
-		if is_instance_valid(h.panel_host):
-			h.root_ui.move_child(tracker, h.panel_host.get_index())      # menus open on top of it
 	_refresh_hint()
 
 ## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.

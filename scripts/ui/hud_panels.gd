@@ -16,7 +16,7 @@ static var draws := 0        # panel redraws so far; RankMarks keeps a "+" only 
 static func make(h: Node) -> HudPanels:
 	var p := HudPanels.new()
 	p.hud = h
-	p.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	p.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)      # (tick keeps it to SafeArea's frame)
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	p.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS      # (the painted minimap, as on Hud.c)
 	p.draw.connect(p._draw_panels)
@@ -27,6 +27,10 @@ static func make(h: Node) -> HudPanels:
 const MIN_FRAMES := 3
 var _frames := 0
 func tick(delta: float) -> void:
+	var box := SafeArea.frame(get_parent_area_size())      # (on 21:9 and wider, a centred 16:9 frame)
+	if box != get_rect():
+		position = box.position
+		size = box.size
 	_t -= delta
 	_frames += 1
 	if _t <= 0.0 and _frames >= MIN_FRAMES:

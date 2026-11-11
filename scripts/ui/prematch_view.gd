@@ -210,13 +210,17 @@ func _pulse(left: float) -> void:
 	timer_label.pivot_offset = timer_label.size * 0.5
 	timer_label.scale = Vector2.ONE * (1.0 + PULSE_GROW * beat)
 
-## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
-## smaller windows get smaller digits. The declutter layout has no side column, so the Hunter grid
-## keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical px UI).
+## Keeps the whole screen inside a title-safe margin and SafeArea's frame, so the countdown shows top
+## centre at every window size and aspect; smaller windows get smaller digits. The declutter layout has
+## no side column, so the Hunter grid keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical
+## px UI).
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
-	for side in ["left", "right", "top", "bottom"]:
+	var side_m := m + int(SafeArea.frame(win).position.x)      # (21:9 and wider: SafeArea's centred frame)
+	for side in ["left", "right"]:
+		_pad.add_theme_constant_override("margin_" + side, side_m)
+	for side in ["top", "bottom"]:
 		_pad.add_theme_constant_override("margin_" + side, m)
 	timer_label.add_theme_font_size_override("font_size", clampi(int(win.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
 

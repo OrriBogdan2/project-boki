@@ -1,13 +1,14 @@
 extends RefCounted
-## --safe-area-check: the HUD and the main screens at five window sizes (1280x720, 1920x1080, 2560x1440,
-## 2560x1080 ultrawide, 1024x640). At each, every group (a registered HUD panel, or a top-level control of a
-## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
+## --safe-area-check: the HUD and the main screens at seven window sizes (1280x720, 1920x1080, 2560x1440,
+## 2560x1080 21:9, 5120x1440 32:9, 1920x1200 16:10, a 1024x640 window). At each, every group (a registered HUD
+## panel, or a top-level control of a screen) sits inside SafeArea's margin of its frame (all of a 16:9 screen, a
+## centred 16:9 frame on wider ones) and no two groups of one screen overlap. The match HUD is read from
 ## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
 ## and size (<dir>/<W>x<H>_<screen>.png) and a contact sheet of them.
 
 const SIZES := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080),
-		Vector2i(1024, 640)]
+		Vector2i(5120, 1440), Vector2i(1920, 1200), Vector2i(1024, 640)]
 const RESULT := {"extracted": true, "gems": 42, "seeds": {"sunroot": 1}, "caught": [], "knocks": 3, "damage": 512,
 		"taken": 388, "kills": 1, "downs": 1, "deaths": 0, "revives": 2, "armor_tier": 3, "time": 201.0}
 
@@ -89,8 +90,11 @@ func _hud_at(win: Vector2i, sz: Vector2, screen: String) -> void:
 	m.hud.panels.queue_redraw()
 	await _frames(4)
 	SafeArea.recording = false
-	SafeArea.seen["toasts"] = m.hud.msgs.rects()
-	await _judge(screen, win, SafeArea.seen.duplicate(), sz)
+	var groups := {}
+	for g: String in SafeArea.seen:      # (the panels draw in their own frame: HudPanels)
+		groups[g] = SafeArea.seen[g].map(func(r: Rect2): return Rect2(r.position + m.hud.panels.position, r.size))
+	groups["toasts"] = m.hud.msgs.rects()
+	await _judge(screen, win, groups, sz)
 
 func _screens() -> void:
 	for win: Vector2i in sizes:
@@ -113,7 +117,7 @@ func _farm() -> void:
 		var sz := await _resize(win)
 		await main.get_tree().create_timer(0.6).timeout
 		home._close_panel()      # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
-		await _frames(2)
+		await main.get_tree().create_timer(0.3).timeout      # the key row steps off the hub bar on a 0.2 s beat
 		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout

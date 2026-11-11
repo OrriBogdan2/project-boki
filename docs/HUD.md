@@ -89,15 +89,22 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 ## Safe area
 
 - `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels
-  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 1240x775
-  at 1024x640), so one margin fits every window. Anchor panels to the nearest corner or edge and, where a
-  panel hangs off a corner, `SafeArea.keep` it inside; never branch on the window size.
+  (`Settings._apply_ui_scale`: 1280x720 at 1280x720, 1920x1080 and 2560x1440; 1707x720 at 2560x1080; 2560x720
+  at 5120x1440; 1240x775 at 1920x1200 and 1024x640), so one margin fits every window. Anchor panels to the
+  nearest corner or edge and, where a panel hangs off a corner, `SafeArea.keep` it inside; never branch on the
+  window size.
+- Wider than 16:9 (21:9, 32:9) the HUD keeps to `SafeArea.frame`, a centred 16:9 frame, so the corner groups sit
+  near the middle instead of out at the far edges (the world still fills the screen). `HudPanels` sizes itself
+  to the frame each frame (hover tips convert from it), the farm's corner groups (top chips, hub bar, Goals
+  card) hang under `SafeArea.framed(root_ui)`, and the pick screen widens its side margins to it. Things
+  placed on the 3D world stay on the full screen.
 - The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
   the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
   margin (4% of the height) for the countdown banner.
 - `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
   toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
-  2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
+  2560x1080 (21:9), 5120x1440 (32:9), 1920x1200 (16:10) and 1024x640: every group inside the margin of the
+  frame, no two overlapping. `--safe-area-shots --size=WxH
   --shots-dir=<dir>` takes the same screens with a real renderer.
 
 ## Looting with a full inventory
