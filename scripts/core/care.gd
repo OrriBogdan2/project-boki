@@ -135,7 +135,6 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("path"):
 		rec["path"] = []           # path tokens it wears (GardenItems)
 		rec["stay"] = false        # wearing a Stayleaf: no new forms
-		rec["loose"] = 0           # points taken out of its stats, waiting to go back in
 	if not rec.has("aura"):
 		rec["aura"] = ""           # the aura item it wears, "" none (GardenItems, GardenAura draws it)
 	if not rec.has("hold"):

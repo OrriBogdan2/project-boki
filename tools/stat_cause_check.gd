@@ -54,7 +54,7 @@ func run(m: Node) -> void:
 	for i in 30:
 		StatCause.gain(rec, "guard", 1, "toy")
 	var kept: int = (rec["journal"] as Array).size()
-	ok(kept == StatCause.KEEP, "the journal keeps the last %d lines" % StatCause.KEEP)
+	ok(kept == CareJournal.KEEP, "the journal keeps the last %d lines" % CareJournal.KEEP)
 	var old := Save.new_kin("zapple", "Old")
 	old.erase("journal")
 	ok(StatCause.last(old, "speed") == "", "an older record without a journal reads as no change")

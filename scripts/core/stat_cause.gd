@@ -1,10 +1,9 @@
 class_name StatCause
 ## Why a trained stat moved: each gain from play (Care.STATS) writes one journal line on the Boki,
 ## "+2 Speed from the race", and the Boki card shows the latest one under each stat bar (StatBudgetView).
-## Lines are rec["journal"] entries {t: unix seconds, stat, words}, the last KEEP kept; an older
-## record without the key just has none yet. Every source of a stat gain goes through gain().
+## Lines are CareJournal lines (rec["journal"]) that also carry the stat; an older record without the key
+## just has none yet. Every source of a stat gain goes through gain().
 
-const KEEP := 20       # journal lines kept per Boki
 ## Where a gain came from, as the end of the line.
 const CAUSES := {"drill": "yard training", "toy": "a toy", "race": "the race"}
 
@@ -12,12 +11,8 @@ const CAUSES := {"drill": "yard training", "toy": "a toy", "race": "the race"}
 static func gain(rec: Dictionary, stat: String, n: int, cause: String) -> int:
 	var gained := Care.add_stat(rec, stat, n)
 	if gained > 0:
-		var lines: Array = rec.get("journal", [])
-		lines.append({"t": Time.get_unix_time_from_system(), "stat": stat,
-			"words": "+%d %s from %s" % [gained, Care.STATS[stat]["name"], CAUSES[cause]]})
-		while lines.size() > KEEP:
-			lines.pop_front()
-		rec["journal"] = lines
+		CareJournal.note(rec, "+%d %s from %s" % [gained, Care.STATS[stat]["name"], CAUSES[cause]])
+		(rec["journal"] as Array).back()["stat"] = stat
 	return gained
 
 ## The latest line for a stat with its age, "+2 Speed from the race, 5 min ago", or "" if it never gained.

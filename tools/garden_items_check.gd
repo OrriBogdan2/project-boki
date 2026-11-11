@@ -149,7 +149,7 @@ func _feeding() -> void:
 	ok(rinse and Care.lean_total(rec) == 0.0, "Rinse Melon clears the lean through Care.feed")
 	var tea := Care.feed(rec, "unwind_tea")
 	var power: int = rec["stats"]["power"]
-	ok(tea["ok"] and int(rec["loose"]) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
+	ok(tea["ok"] and int(rec["loose"].get("power", 0)) == 7 and power == 0, "Unwind Tea: all 7 Power points go loose")
 
 func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")
@@ -161,4 +161,4 @@ func _migration() -> void:
 	no_aura.erase("aura")
 	Care.ensure(no_aura)
 	ok(no_aura["aura"] == "", "a Boki saved before auras loads wearing none")
-	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == 0, "a v12 save gains path, stay, loose")
+	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == {}, "a v12 save gains path, stay, loose")
