@@ -112136,5 +112136,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_voltalon_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_wickapi",
+    "name": "Wickapi (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_wickapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_wayshell",
+    "name": "Wayshell (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_wayshell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_xylogator",
+    "name": "Xylogator (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_xylogator_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_zephyrak",
+    "name": "Zephyrak (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_zephyrak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_voltmink",
+    "name": "Voltmink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_voltmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_vespyx",
+    "name": "Vespyx (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_vespyx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_wyrmink",
+    "name": "Wyrmink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_wyrmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_zipling",
+    "name": "Zipling (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_zipling_1.jpg",
+    "ok": true
   }
 ]
