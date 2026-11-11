@@ -2189,3 +2189,12 @@ RV_EDIT('Tiltster','light2',"the rendering only. Make the grey shell plates a li
 RV_EDIT('Rimink','light2',"the outlines and shading only. Every outline becomes thinner and a medium blue-grey instead of dark navy. The dark band on its neck and the dark tail tip "
  "become a medium slate blue, clearly lighter than now but still the darkest colour on it. Shade the white coat with only a few small pale blue shapes. "
  "The ice crystals, face, eyes, pose and every part stay exactly the same.",runs=3)
+
+# 11-11 independent recheck of the 11-10 turnarounds (270 sheets): 6 fail, 2 doubtful worth redoing. New sheets from the current card.
+# Malletary, Meteorab, Blastopuff: card got the lighter finish, sheet still dark. Voltmink: views tiny, no real front/back.
+# Lunowl (+female): moth wings missing in side views. Barokit: extra floating clouds. Hourachnid_female: sand turns blue-grey in side/back.
+for _n,_x in (('Malletary',''),('Meteorab',''),('Blastopuff',''),('Voltmink'," Four large full-body standing views: front, three-quarter, side and back."),
+              ('Lunowl'," Its moth wings are visible in all four views, including the side view."),('Lunowl_female'," Its moth wings are visible in all four views, including the three-quarter and side views."),
+              ('Barokit'," Nothing floats above it: no extra clouds or smears."),('Hourachnid_female'," The hourglass sand is red in every view, as on the card.")):
+    V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_rc'; SPECS[-1]['runs']=4
+    SPECS[-1]['prompt']+=_NOGHOST+" Same colours and lightness as the card. No ground line or floor under the views."+_x

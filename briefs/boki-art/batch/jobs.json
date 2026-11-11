@@ -46407,6 +46407,94 @@
     "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the outlines and shading only. Every outline becomes thinner and a medium blue-grey instead of dark navy. The dark band on its neck and the dark tail tip become a medium slate blue, clearly lighter than now but still the darkest colour on it. Shade the white coat with only a few small pale blue shapes. The ice crystals, face, eyes, pose and every part stay exactly the same."
   },
   {
+    "id": "v2s_malletary_rc",
+    "name": "Malletary (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Malletary.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Malletary. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views."
+  },
+  {
+    "id": "v2s_meteorab_rc",
+    "name": "Meteorab (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Meteorab.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Meteorab. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views."
+  },
+  {
+    "id": "v2s_blastopuff_rc",
+    "name": "Blastopuff (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Blastopuff.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Blastopuff. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views."
+  },
+  {
+    "id": "v2s_voltmink_rc",
+    "name": "Voltmink (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Voltmink.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Voltmink. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views. Four large full-body standing views: front, three-quarter, side and back."
+  },
+  {
+    "id": "v2s_lunowl_rc",
+    "name": "Lunowl (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Lunowl.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Lunowl. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views. Its moth wings are visible in all four views, including the side view."
+  },
+  {
+    "id": "v2s_lunowl_female_rc",
+    "name": "Lunowl_female (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Lunowl_female.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Lunowl_female. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views. Its moth wings are visible in all four views, including the three-quarter and side views."
+  },
+  {
+    "id": "v2s_barokit_rc",
+    "name": "Barokit (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Barokit.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Barokit. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views. Nothing floats above it: no extra clouds or smears."
+  },
+  {
+    "id": "v2s_hourachnid_female_rc",
+    "name": "Hourachnid_female (V2 sheet from card)",
+    "refs": [
+      "briefs/boki-art/cards/Hourachnid_female.jpg"
+    ],
+    "runs": 4,
+    "aspect": "16:9",
+    "size": "2K",
+    "prompt": "Clean flat model sheet of exactly the creature in image 1: Hourachnid_female. Exactly four views of it in one single row: front, three-quarter, side and back, in that order, all the same height with the feet on one invisible baseline, all four in the same stance. The same design, proportions, colours, face, eyes, markings and part counts as image 1 in every view. Colours: exactly the colours of image 1, each part keeping its own colour. Parts, the same in every view: every part image 1 shows, the same number of each. Model-sheet finish: Line: a bold, clean inked outline in three weights: the outer silhouette line is the heaviest, the lines between body parts are half as thick, and small detail lines are a quarter as thick. Each line keeps an even thickness along its length. Every line is a very dark shade of the colour it borders (deep plum round purple, dark umber round brown and gold, deep slate blue round white and ice), always clearly darker than the fill beside it. One clean line. Flat colour fills only, using image 1's base colours, with no shading at all, in even neutral light. The only highlight is one crisp white highlight in each eye. The front, side and back are true front, side and back views, and the back shows how its signature part attaches. Background: one perfectly flat pale grey (#E8E8EE) and nothing else: no floor, no cast shadow, no text, no extra or faded copies of the creature. IMPORTANT: draw each view exactly once. The top quarter of the image is empty plain background: no second row, no faded or partial copies of the creature or of its crown ring anywhere. Same colours and lightness as the card. No ground line or floor under the views. The hourglass sand is red in every view, as on the card."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [
