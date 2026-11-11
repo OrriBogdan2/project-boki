@@ -95,7 +95,8 @@
 		},
 		"dr_lunge": {
 			"clip": "lunge",
-			"fade": 0.05
+			"fade": 0.05,
+			"rate": 1.1
 		},
 		"dr_pounce": {
 			"clip": "pounce",

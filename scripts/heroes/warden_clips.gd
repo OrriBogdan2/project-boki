@@ -401,8 +401,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 ## "ground_clip" / "air_clip": the clip when the move starts on the ground / in the air
 ## (a dash picks its look by where it was pressed; the kit's timing, hitbox and distance stay the same).
 func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
-	# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
-	var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
+	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
+	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
+	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
 	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on

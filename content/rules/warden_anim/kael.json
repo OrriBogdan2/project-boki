@@ -96,7 +96,8 @@
 		},
 		"jug_lunge": {
 			"fade": 0.05,
-			"clip": "lunge"
+			"clip": "lunge",
+			"rate": 1.5
 		},
 		"jug_meteor": {
 			"clip": "meteor",
@@ -107,7 +108,8 @@
 		},
 		"jug_dash": {
 			"fade": 0.05,
-			"clip": "dash"
+			"clip": "dash",
+			"rate": 1.1
 		},
 		"jug_exdash": {
 			"clip": "exdash",
