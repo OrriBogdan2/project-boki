@@ -11,12 +11,16 @@ extends RefCounted
 ##    and your keys don't pull back, so air drag doesn't take it straight back off you.
 ## The speed you came in with is a decaying peak (carry_v), so the wall that stopped you a step
 ## before the catch doesn't count as having stopped you.
+## Rising up the face, your speed into it eases off at APPROACH_BRAKE to what meets the face as your feet clear the
+## lip, so a jump at a ledge is one arc over it rather than a smack into the wall and a float up (approach).
 
 const KEEP := 0.6              # [game data] MiniMantleXYSpeedTargetCoefficient
 const APPROACH_DOT := 0.45     # keys or momentum this far into the face (cos ~63 degrees) catch a ledge
 const PUSH_SPEED := 2.0        # m/s into the face: momentum alone is a push
 const PEAK_DECAY := 6.0        # m/s per s: how fast the remembered approach speed fades
 const MINI_S := 0.75           # [game data] MiniMantlePostLaunchDuration
+const APPROACH_BRAKE := 80.0   # m/s^2 [est]: the most the rise eases your speed into the face a step (after the rise's own
+                               # steering, Hunter.AIR_ACCEL 40, has pushed: a net ~40 m/s^2, ~0.1 s off a run)
 
 ## Every step, before the move: hold a fresh mantle's speed, and remember how fast you're going (a
 ## decaying peak). Returns the horizontal velocity to move with.
@@ -31,10 +35,29 @@ static func step(h: Hunter, hv: Vector2, dt: float) -> Vector2:
 			var short := float(mini["v"]) - hv.dot(d)
 			if short > 0.0 and h.inp["move"].dot(d) >= 0.0:
 				hv += d * short       # held firm: air drag doesn't take it back off you
+	if not h.lfloat.is_empty():
+		hv = approach(h, hv, dt)
 	h.carry_v = maxf(hv.length(), h.carry_v - PEAK_DECAY * dt)
 	if hv.length() > 0.5:
 		h.carry_dir = hv.normalized()
 	return hv
+
+## Rising up a face: the speed into it, eased toward what reaches the face just as the feet come within a step of
+## the lip (where the wall lets you over). The way along the wall is yours.
+static func approach(h: Hunter, hv: Vector2, dt: float) -> Vector2:
+	var lf := h.lfloat
+	var n: Vector2 = lf["n"]
+	var tile: Vector2i = lf["tile"]
+	var near := Vector2(clampf(h.pos.x, tile.x, tile.x + 1.0), clampf(h.pos.z, tile.y, tile.y + 1.0))
+	var gap := (near - Vector2(h.pos.x, h.pos.z)).dot(n) - h.r
+	var up := float(lf["lip"]) - World.STEP - h.pos.y
+	var into := hv.dot(n)
+	if gap <= 0.0 or up <= 0.0 or into <= 0.0:
+		return hv
+	var want := gap / maxf(up / maxf(h.vel.y, HunterMove.mantle_vy_cap), dt)
+	if into <= want:
+		return hv
+	return hv - n * minf(into - want, APPROACH_BRAKE * dt)
 
 ## A teleport (a blink, a respawn, a portal) starts you with no momentum to carry.
 static func forget(h: Hunter) -> void:
