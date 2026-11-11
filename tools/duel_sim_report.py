@@ -25,7 +25,7 @@ FIRST = {"primary": "LMB", "shot": "LMB", "flame": "LMB", "melee": "LMB", "lmb":
          "rock": "E",       # Tenzo's rocks: Rockwave (E) raises them, the punch and the dash launch them
          "dodge": "Dash", "dash": "Dash", "form_dash": "Dash",
          "passive": "Passive", "burn": "Passive",     # (burn: Cinder's Ignite ticks, summed per round)
-         "fall": "Env", "wall": "Env"}
+         "fall": "Env", "wall": "Env", "boom": "Env"}       # (boom: a breakable keg or pot set off)
 LOW, HIGH = 0.40, 0.60      # a Hunter's overall win rate outside this band is an outlier
 LOPSIDED = 0.80             # a matchup won this often by one side is an outlier
 HEAVY_SLOT = 0.60           # one slot dealing this share of a Hunter's damage is an outlier
