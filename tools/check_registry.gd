@@ -168,6 +168,8 @@ const CHECKS := {
 	# feet on stairs (FootPlant)
 	"--foot-plant-check": ["res://tools/foot_plant_check.gd", "foot_plant_check", "check"],
 	"--foot-plant-shots": ["res://tools/foot_plant_check.gd", "foot_plant_check", "shots"],      # --shots-dir=<dir>
+	"--stride-check": ["res://tools/stride_check.gd", "stride_check", null],      # run start and stop
+	"--stride-shots": ["res://tools/stride_shots.gd", "stride_shots", null],      # the stop from a run, before/after
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],

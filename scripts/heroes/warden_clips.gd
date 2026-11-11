@@ -108,6 +108,7 @@ var stowed := false          # "carry_stow" bones are put away
 var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" hand
 var fired_prev := 99.0       # the state's s since the last shot, last frame
 var recoil_deg := 0.0        # the arms' kick now
+var stride: WardenStride      # the run start and stop laid over the loops (scripts/heroes/warden_stride.gd)
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -142,6 +143,7 @@ static func make(model: Node3D, glb: Node3D, sk: Skeleton3D, art_name: String) -
 	var c := WardenClips.new()
 	if not c._setup(model, glb, sk, dd, players[0]):
 		return null
+	c.stride = WardenStride.make(model, sk, art_name)
 	return c
 
 func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: AnimationPlayer) -> bool:
@@ -575,6 +577,7 @@ func step(dt: float) -> void:
 		_recoil(s, dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
+	stride.step(dt, s, self)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
 	_carry(String(s.get("kmove", "")) == WardenCarry.MOVE and not proc, dt)

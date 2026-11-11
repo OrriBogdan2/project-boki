@@ -325,6 +325,13 @@ in the dash flow); keys at 0.1 s or later were already full.
 | bulwark (breaker) | `bul_smash` 0.067, `bul_launch` 0.067, `bul_guard` 0.034, `bul_break` 0.034, `bul_charge` 0.067, `bul_ult_wind` 0.067, `bul_ult_slam` 0.067 |
 | ostra (ostra) | `ostra_orb` 0.067, `ostra_snap` 0.034, `ostra_swap_aim` 0.067, `ostra_well_snap` 0.034 |
 | juggernaut (kael) | `jug_slash_r` 0.034, `jug_slash_l` 0.034, `jug_wave` 0.067, `jug_lunge` 0.034, `jug_dash` 0.075, `jug_exdash` 0.034, `jug_reel` 0.034, `jug_spin` 0.075, `jug_chainlunge` 0.034, `jug_haulslam` 0.034, `jug_guard` 0.034, `jug_riposte` 0.034 |
+## Run start and stop poses (`WardenStride`, `--stride-check`, `--stride-shots`)
+Decision 0020 gave every Hunter the source's acceleration and a 0.3-0.5 m stop slide; the clips still snapped from idle to a run and back. `WardenStride` (scripts/heroes, called at the end of `WardenClips.step`, nothing in hunter.gd) adds both on top of the walk/run loops, from the speed and the brake state, never a timer:
+- **Start:** the hips lean along the way he goes by `lean_deg`, scaled by how far the *shown* speed (it climbs to the real one over 0.3 s) still lags it, so the lean settles as speed builds and is gone at a steady run.
+- **Stop:** a let-go (speed falling under its peak from a walk or run) shifts the weight back by `settle_deg` over the slide (`HunterMove.slide`). Two-bone foot pins: the trailing foot swings to its idle spot as the body halts, the leading foot stays where it was planted, then steps in over `step_s`, then the idle loop. The planted foot slides 0.7-1.8 cm in the stop (the loops alone: 20-90 cm; limit 3 cm). The idle spots are read off the standing pose; the drawn body's lead over the physics is learned off each stop.
+- **Skips:** a dash, a cast or keyed move, a hit or stun, the air, a crouch dip, a knock or kit step (speed over 1.15x run that nothing keyed) show neither, in that frame, with no ease-out.
+- **Per Hero** (content/rules/warden_stride.json): Kael, Albert and Tenzo lean less, settle 9-10 degrees and step in over 0.28-0.3 s; Vex, Neve, Sable and Pip lean 10-12 degrees, settle 3.5-4 and step in over 0.16-0.17 s.
+- `--stride-check` covers all 12 Hunters; `--stride-shots` films a stop from a run with the stride on and off (docs/shots/anim-run-start-stop/).
 
 ## Not touched
 
