@@ -6,7 +6,8 @@ extends RefCounted
 ##      (Boki owned, first Hunter, the Relics that open, the tutorial marked played)
 ##   2. the farm tutorial: the same for the goal line's Skip (then Yes); afterwards the house is placed
 ##      (a site with its materials, or already there), the axe and pickaxe are in hand, the starter food
-##      is given, the Boki is owned, and the tutorial is gone
+##      is given, the Boki is owned, and the tutorial is gone; run twice, with farm_build.json base_mode
+##      off (the farm) and on (the Boki garden), restoring the shipped value after
 ## Never touches the real save.
 
 const SAFE_PX := 8.0        # the Skip button keeps this far from every screen edge
@@ -33,7 +34,12 @@ func run(mn: Node) -> void:
 			continue
 		var shown := "" if got == full else str(got)
 		ok(got == full, "match: skipping at '%s' leaves the save as a full run does %s" % [id, shown])
-	await _farm()
+	var rules: Dictionary = FarmUnlocks.rules()
+	var shipped = rules.get("base_mode", false)
+	for on in [false, true]:
+		rules["base_mode"] = on
+		await _farm("garden" if on else "farm")
+	rules["base_mode"] = shipped
 	print("TUTSKIP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -167,10 +173,10 @@ func _farm_full() -> Dictionary:
 	await _frames()
 	return snap
 
-func _farm() -> void:
+func _farm(tag: String) -> void:
 	var full := await _farm_full()
 	ok(full["done"] and full["axe"] and full["pickaxe"] and full["house"] and full["food"] and full["boki"] == 1,
-			"farm: a full playthrough ends with the house, both tools, the food and the Boki (%s)" % str(full))
+			"%s: a full playthrough ends with the house, both tools, the food and the Boki (%s)" % [tag, str(full)])
 	var steps := FarmTutorial.steps()
 	var cost := FarmSites.build_cost("house")
 	for i in steps.size():
@@ -180,22 +186,23 @@ func _farm() -> void:
 		home.guide.refresh()
 		await _frames()
 		var now := FarmTutorial.current()
-		ok(FarmTutorial.active() and now == id, "farm '%s': the tutorial is on that step (now '%s')" % [id, now])
+		ok(FarmTutorial.active() and now == id, "%s '%s': the tutorial is on that step (now '%s')" % [tag, id, now])
 		var yes := await _press_skip(home, id)
-		ok(yes, "farm '%s': Skip is visible in the safe area, and asks before it skips" % id)
+		ok(yes, "%s '%s': Skip is visible in the safe area, and asks before it skips" % [tag, id])
 		var wood0 := FarmSites.have("wood")
 		var stone0 := FarmSites.have("stone")
 		var had_house := not FarmHob.house_entry().is_empty()
 		if yes:
 			_press(home.guide.skip_row, "Yes")
 		var snap := _farm_snap()
-		ok(snap == full, "farm '%s': skipping leaves what a full run does %s" % [id, "" if snap == full else str(snap)])
+		var diff := "" if snap == full else str(snap)
+		ok(snap == full, "%s '%s': skipping leaves what a full run does %s" % [tag, id, diff])
 		if not had_house:
 			var wood_ok: bool = FarmSites.have("wood") >= wood0 + int(cost.get("wood", 0))
 			var mats: bool = wood_ok and FarmSites.have("stone") >= stone0 + int(cost.get("stone", 0))
-			ok(mats, "farm '%s': the house site comes with its wood and stone" % id)
+			ok(mats, "%s '%s': the house site comes with its wood and stone" % [tag, id])
 		var hint: Control = home.guide.hint_box
-		ok(not is_instance_valid(hint) or hint.is_queued_for_deletion(), "farm '%s': the prompt is gone" % id)
+		ok(not is_instance_valid(hint) or hint.is_queued_for_deletion(), "%s '%s': the prompt is gone" % [tag, id])
 		home.queue_free()
 		await _frames()
 
