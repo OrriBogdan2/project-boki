@@ -3064,6 +3064,7 @@ func _anim_state(stretch: float) -> void:
 		s["hit_dir"] = Vector2(pos.x - last_hit_by.pos.x, pos.z - last_hit_by.pos.z)
 	s["stun"] = stun_t > 0.0
 	s["heart"] = Heart.carrying(self)
+	s["rooted"] = root_t > 0.0
 	s["base"] = (1.0 - base_t / BASE_TIME) if base_t > 0.0 else -1.0
 	s["squash"] = squash
 	s["stretch"] = stretch

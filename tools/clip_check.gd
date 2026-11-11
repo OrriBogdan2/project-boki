@@ -24,6 +24,7 @@ const SNAP_MPS := 8.0          # m/s: an arm bone this fast at a clip's start is
 const FRAME := 1.0 / 60.0      # s: the game frame the kit clock steps by
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
 const POSE_MIN_DEG := 25       # a keyed result pose turns at least one bone this far from the rest
+const ROOT_FOOT_M := 0.02      # m: a rooted Hunter's feet move this much more than the idle's own sway through any move
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 const JL_READ_DEG := 15.0      # deg: a take-off or an apex turns some bone at least this far (it reads on screen)
 const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ from the first by this much
@@ -128,6 +129,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		var want := float(dd["bone_scale"][nm])
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
+	await _rooted(id, m, sync, clips, dd)
 	await _handover(id, m, sync, clips, dd)
 	_snaps(id, m, clips, dd)
 	await _carry(id, m, sync, clips, dd)
@@ -425,6 +427,63 @@ func _sliders(id: String, sync: Node) -> void:
 	var stays := float(sync.get("root").get_meta(WardenClips.DEATH_T, 0.0))
 	ok(not (clips.d.get("states", {}) as Dictionary).has("dead") or stays > 0.0,
 			"%s: a knocked-out Hero stays on screen for its death clip" % id)
+
+## Rooted (a foe's Root, the state's "rooted"), the legs stay planted while the body casts: through every kit move the
+## feet move under ROOT_FOOT_M over the idle's sway, though the velocity says he runs (Rimelock's statue is frozen).
+func _rooted(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var feet: Array = []
+	for nm in ["shin.L", "shin.R"]:
+		var kids := sk.get_bone_children(WardenSkeleton.find(sk, nm))
+		feet.append(kids[0] if not kids.is_empty() else WardenSkeleton.find(sk, nm))
+	var s := {"vel": Vector3(0, 0, -3.0), "face": 0.0, "grounded": true, "rooted": true}
+	m.set_meta(WardenClips.STATE, s)
+	for k in 12:
+		sync.call("_process", DT)
+	await holder.get_tree().process_frame
+	clips.still_t = 0.0
+	clips.stance_w = 0.0
+	for k in 20:
+		sync.call("_process", DT)
+	await holder.get_tree().process_frame
+	var rest: Array = []
+	for b in feet:
+		rest.append(sk.global_transform * sk.get_bone_global_pose(b).origin)
+	var moves: Dictionary = dd.get("kmoves", {})
+	var worst := 0.0
+	var where := ""
+	var sway := 0.0      # (the idle's own weight shift moves a heavy Hero's feet; a cast adds to it)
+	for k in 45:
+		sync.call("_process", DT)
+		await holder.get_tree().process_frame
+		sway = maxf(sway, _foot_dist(sk, feet, rest))
+	for km in moves:
+		if (dd.get("still", []) as Array).has(moves[km]["clip"]):
+			continue
+		var length := minf(clips.lib.get_animation(String(moves[km]["clip"])).length, 1.5)
+		var t := 0.0
+		clips.still_t = 0.0      # (the standing stance after 6 s still is its own pose, not the cast's)
+		while t < length:
+			s["kmove"] = km
+			s["kmove_t"] = t
+			sync.call("_process", DT)
+			await holder.get_tree().process_frame
+			var d := _foot_dist(sk, feet, rest)
+			if d > worst:
+				worst = d
+				where = "%s @%.2f" % [km, t]
+			t += DT
+	s.erase("kmove")
+	m.set_meta(WardenClips.STATE, {})
+	ok(worst <= sway + ROOT_FOOT_M, "%s: rooted, feet planted over every move (worst %.3f, %s; idle %.3f)"
+			% [id, worst, where, sway])
+
+## How far the furthest-moved foot has gone from where it stood.
+func _foot_dist(sk: Skeleton3D, feet: Array, rest: Array) -> float:
+	var far := 0.0
+	for i in feet.size():
+		far = maxf(far, (sk.global_transform * sk.get_bone_global_pose(feet[i]).origin).distance_to(rest[i]))
+	return far
 
 ## Moves handed over as the game does, the state fed frame by frame. A strike is meant to snap, so a pop is the hand
 ## moving further in a frame than the clip alone moves it there: that excess stays small against the Hero's height.

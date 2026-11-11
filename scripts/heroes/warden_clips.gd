@@ -474,7 +474,9 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("upper": true, or "moving": the legs keep walking only while he walks)
 	var up = mv.get("upper", false)
 	var keeps_lead: bool = up is String or bool(up)
-	if up is String:
+	if planted(s):
+		up = true      # rooted: the legs stay on the standing layer, only the body plays the move
+	elif up is String:
 		var vel: Vector3 = s.get("vel", Vector3.ZERO)
 		up = Vector2(vel.x, vel.z).length() >= STILL
 	# ("air_legs": a play that has been in the air keeps the fall legs under it, then the loco ones once he lands,
@@ -659,9 +661,14 @@ func _moving(s: Dictionary) -> bool:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	return Vector2(vel.x, vel.z).length() >= STILL
 
+## Rooted (a Root or a stuck cast), the feet stay planted whatever the velocity still says; Rimelock's statue
+## (the "statue" state) is a full freeze and keeps its own clips.
+static func planted(s: Dictionary) -> bool:
+	return bool(s.get("rooted", false)) and not bool(s.get("statue", false))
+
 func _loco(s: Dictionary, dt: float) -> void:
 	var lc: Dictionary = d["loco"]
-	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var vel: Vector3 = Vector3.ZERO if planted(s) else s.get("vel", Vector3.ZERO)
 	var flat := Vector2(vel.x, vel.z)
 	var spd := flat.length()
 	var face := float(s.get("face", 0.0))
