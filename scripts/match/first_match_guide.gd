@@ -1,13 +1,17 @@
 class_name FirstMatchGuide
 extends RefCounted
-## "What to do next" for a new player's first two real Extractions: one highlighted plain line at a time
+## "What to do next" for a new player's first three real Extractions: one highlighted plain line at a time
 ## (content/rules/first_match_guide.json). A line shows once per match, when its moment comes, and clears
 ## on its trigger or after its time. It is only drawn: it never pauses or blocks anything. The save's
 ## "first_guide" counts the Extractions that have had it; at the rule's `matches` it stops for good.
-## Match owns one as `guide` (null when this match gets none) and calls tick().
+## Match owns one as `guide` (null when this match gets none) and calls tick() (DropSquad too, while the
+## drop is planned). Two lines are about camps (briefs/specs/EARLY_CAMPS_DROP.md 2.7): "plan" while the
+## drop is planned, with a mid region's Small Camp pulsing on the drop map, then "camp" after landing,
+## pointing at the nearest live camp until your squad's first clear.
 
 const MINT := Color("8fe3c8")
-const ORDER := ["land", "squad", "blight", "exit", "rank", "send", "chest"]   # what to say first when two lines are due
+## what to say first when two lines are due
+const ORDER := ["plan", "land", "squad", "blight", "exit", "camp", "rank", "send", "chest"]
 const EXIT_NEAR := 8.0        # m: this close to an exit, the exit line has done its job
 
 var m: Match
@@ -17,6 +21,9 @@ var shown := {}               # ids already shown this match
 var _t := 0.0                 # s the line has been up
 var _gap := 0.0               # s of quiet left before the next line
 var _throws0 := 0             # the Boki's sends when its line came up
+var _pick := {}               # the camp the plan line points at (picked once, on the drop map)
+var _wired := false           # listening for camp clears
+var _cleared := false         # your squad has cleared a camp: the camp line is done for good
 
 static func rules() -> Dictionary:
 	return Content.rules("first_match_guide")
@@ -34,6 +41,9 @@ static func for_match(mt: Match, opts: Dictionary) -> FirstMatchGuide:
 	g.m = mt
 	return g
 
+func _on_camp_cleared(_id: int, squad: int) -> void:
+	_cleared = _cleared or squad == m.player.team
+
 ## Old saves: one that has played already has had its first matches (keyed by its own field, like FarmBuilder).
 static func migrate(data: Dictionary) -> void:
 	if not data.has("first_guide"):
@@ -45,6 +55,9 @@ func tick(dt: float) -> void:
 		line = ""
 		id = ""
 		return
+	if not _wired and m.camps != null:
+		_wired = true
+		m.camps.cleared.connect(_on_camp_cleared)
 	_gap = maxf(_gap - dt, 0.0)
 	if id != "":
 		_t += dt
@@ -66,7 +79,8 @@ func _life(lid: String) -> float:
 
 func _start(lid: String, p: Hunter) -> void:
 	id = lid
-	shown[lid] = true
+	if lid != "camp":
+		shown[lid] = true      # (the camp line comes back until your squad has cleared one)
 	_t = 0.0
 	_throws0 = p.kin.st_throws if p.kin else 0
 	var txt := ""
@@ -75,6 +89,37 @@ func _start(lid: String, p: Hunter) -> void:
 			txt = String(row[1])
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who)
+
+func _planning() -> bool:
+	return m.skydrop != null and m.skydrop.planning
+
+## The camp the guide points at: while the drop is planned, the nearest live Small Camp in a mid region
+## to the ship (else the nearest live camp); after that, the nearest live camp to you. {} for none.
+func target() -> Dictionary:
+	var p := m.player
+	if m.camps == null or p == null:
+		return {}
+	if not _planning():
+		return m.camps.nearest_live(p.pos, INF)
+	if _pick.is_empty() or _pick["state"] != Camps.State.LIVE:
+		_pick = _first_pick(p.pos)
+	return _pick
+
+func _first_pick(from: Vector3) -> Dictionary:
+	var mid: Array = rules()["mid_regions"]
+	var best := {}
+	var bd := INF
+	for c: Dictionary in m.camps.camps:
+		if c["state"] != Camps.State.LIVE:
+			continue
+		var ri := int(c["region"])
+		var small: bool = Camps.size_def(int(c["size"]))["id"] == "small"
+		var rank := 0 if small and ri >= 0 and mid.has(m.world.regions[ri]["id"]) else 1
+		var d := Vector2(c["pos"].x - from.x, c["pos"].z - from.z).length() + rank * 1.0e5
+		if d < bd:
+			bd = d
+			best = c
+	return best
 
 func _left() -> float:
 	return (m.length - m.time) / m.length
@@ -94,11 +139,14 @@ func _kin_ready(p: Hunter) -> bool:
 
 ## Is it time for this line?
 func _due(lid: String, p: Hunter) -> bool:
+	if lid == "plan":
+		return _planning() and not target().is_empty()
 	if lid == "land":
 		return p.dropping
-	if p.dropping:
+	if p.dropping or _planning():
 		return false
 	match lid:
+		"camp": return not _cleared and not target().is_empty()
 		"squad": return _enemy_near(p)
 		"blight": return _left() <= float(rules()["close_at"])
 		"exit": return shown.has("blight")
@@ -110,6 +158,8 @@ func _due(lid: String, p: Hunter) -> bool:
 ## Has the player done what this line says (or is it no longer true)?
 func _done(lid: String, p: Hunter) -> bool:
 	match lid:
+		"plan": return not _planning()
+		"camp": return _cleared
 		"land": return not p.dropping
 		"squad": return not _enemy_near(p)
 		"exit": return _exit_near(p)
@@ -123,6 +173,12 @@ func draw(h, sz: Vector2) -> void:
 	if line == "":
 		return
 	var r: Rect2 = TutorialHud.lanes(sz)["banner"]
+	if id == "plan":
+		r.position.y = sz.y - r.size.y - 8.0      # (the drop map's header owns the top)
+	elif id == "camp" and not h.map_open() and not m.player.riding:
+		var at: Dictionary = target()
+		if not at.is_empty():
+			h._draw_waypoint(at["pos"] + Vector3(0, 1.0, 0), "Camp", MINT)
 	var a := clampf(_t / 0.25, 0.0, 1.0)
 	h._panel(r, Color(TutorialHud.PANEL.r, TutorialHud.PANEL.g, TutorialHud.PANEL.b, TutorialHud.PANEL.a * a), 14)
 	h.c.draw_rect(r, Color(MINT, 0.7 * a), false, 2.0)
@@ -131,3 +187,14 @@ func draw(h, sz: Vector2) -> void:
 	for ln in w["lines"]:
 		h._ctext(Vector2(r.get_center().x, y), String(ln), int(w["px"]), Color(1, 1, 1, a), h.big)
 		y += float(w["px"]) * 1.2
+
+## On the full map: a pulsing ring on the camp the line points at.
+func map_pulse(fm: FullMap) -> void:
+	var at: Dictionary = target()
+	if line == "" or at.is_empty() or not (id == "plan" or id == "camp"):
+		return
+	var pv := fm.to_screen(at["pos"])
+	var k := fmod(Time.get_ticks_msec() / 1000.0, 1.2) / 1.2
+	var c: Control = fm.hud.c
+	c.draw_circle(pv, 5.0, MINT)
+	c.draw_arc(pv, 8.0 + 22.0 * k, 0, TAU, 28, Color(MINT, 1.0 - k), 3.0, true)
