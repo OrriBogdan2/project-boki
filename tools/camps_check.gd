@@ -33,6 +33,7 @@ func run(main: Node) -> void:
 	_xp(m)
 	_clear(m)
 	_comeback(m)
+	_sources(m)
 	_hot(main)
 	print("CAMPS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -110,6 +111,39 @@ func _xp(m: Match) -> void:
 	m.knock(rival, P, {})
 	ok(absf(P.xp - xs[0] - kx) < 0.01 and absf(near.xp - xs[1] - kx) < 0.01 and absf(far.xp - xs[2]) < 0.001, "the knock XP goes in full to the knocker and teammates within 30 m only")
 	m.revive_hunter(rival, rival)
+
+## XP by source: they add up to each Hunter's XP, a steal counts on both sides, the log marks fire.
+func _sources(m: Match) -> void:
+	var P: Hunter = m.player
+	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team and not h.remote)[0]
+	var c: Dictionary = m.camps.camps.filter(
+			func(x): return x["state"] == Camps.State.LIVE and (x["mobs"] as Array).size() >= 3)[0]
+	var mobs := _camp_mobs(c)
+	var stole0 := XpRules.tally(P)["stole"] as int
+	var robbed0 := XpRules.tally(rival)["robbed"] as int
+	var camps0 := XpRules.tally(P)["camps"] as int
+	rival.pos = (c["pos"] as Vector3) + Vector3(1, 0, 0)
+	P.pos = rival.pos
+	for i in mobs.size() - 1:
+		mobs[i].hurt(1e6, rival)
+	mobs[-1].hurt(1e6, P)
+	ok(XpRules.tally(P)["stole"] == stole0 + 1 and XpRules.tally(rival)["robbed"] == robbed0 + 1,
+		"a last hit on a camp another squad mostly cleared: a steal for one squad, a robbery for the other")
+	ok(XpRules.tally(P)["camps"] == camps0 + 1 and XpRules.count(P, "camp") >= mobs.size(),
+		"the camp counts as cleared for the last hit's squad, its monsters as camp XP")
+	var adds_up := true
+	for h: Hunter in m.hunters:
+		adds_up = adds_up and absf(XpRules.xp_total(h) - h.xp) < 0.01
+	ok(adds_up and XpRules.xp_total(P) > 0.0, "every Hunter's XP by source adds up to their XP")
+	ok(XpRules.count(P, "knock") >= 1 and XpRules.count(P, "mob") >= 1, "knocks and strays are counted on their own")
+	var line := XpRules.line(P)
+	ok(line.begins_with("Level %d: " % P.lvl) and line.contains("camp") and line.contains("knock"),
+		"the results line reads: " + line)
+	m.camps._mark_i = 0      # (the earlier steps moved the clock past some marks)
+	m.time = XpRules.MARKS[0] + 1.0
+	m.camps._tick_t = 0.0
+	m.camps.tick(0.1)
+	ok(m.camps._mark_i == 1, "the first level mark (2:00) goes to the match log")
 
 ## Clears a camp with hunter h; returns the toasts and drops it made.
 func _kill_camp(m: Match, c: Dictionary, h: Hunter) -> Dictionary:

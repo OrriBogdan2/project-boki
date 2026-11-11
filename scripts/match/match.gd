@@ -1788,7 +1788,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
-			XpRules.pay_squad(self, credit, XpRules.knock_xp(h))
+			XpRules.pay_knock(self, credit, h)
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
@@ -2149,7 +2149,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	var xp := XpRules.kill_xp(mb) if credit is Hunter else 0.0      # (each game pays its own Hunters: XpRules)
 	if net_on: net_event(["mobdead", mb.nid, by.nid if by else "", xp])
-	XpRules.pay_squad(self, credit, xp)
+	XpRules.pay_kill(self, credit, mb, xp)
 	var own := not Camps.is_camp(mb)       # a camp's monsters drop nothing of their own: the camp pays one bundle
 	if camps: camps.on_mob_dead(mb, credit, xp)
 	if credit == player:
@@ -5022,12 +5022,14 @@ func _finish() -> void:
 			r["kin_trust"] = k0.trust
 		if not player_lost.is_empty():
 			r["lost_kin"] = _resolve_lost()
+		r["squad_xp"] = XpRules.squad_lines(self, player.team)
 		r["rivals"] = hunters.filter(func(x): return x.ctrl == "bot" and x.team != player.team).map(func(x): return x.pname)
 	var placed := 1
 	for h in hunters:
 		if h.extracted and h != player:
 			placed += 0
 	r["placed"] = placed
+	XpRules.log_hunters(self, "end")
 	if rolling:
 		r["rolling"] = {"joined_at": rolling.t0, "left_at": sess_time(), "session": Rolling.SESSION, "wave": rolling.join_i}
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -5385,7 +5387,7 @@ func _net_ev(x, from: String) -> void:
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
-				if by is Hunter and by.team != who.team: XpRules.pay_squad(self, by, XpRules.knock_xp(who))
+				if by is Hunter and by.team != who.team: XpRules.pay_knock(self, by, who)
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)
@@ -5475,7 +5477,7 @@ func _net_ev(x, from: String) -> void:
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				sfx("kill", who.pos, -6.0, 1.3)
-				if x.size() > 3: XpRules.pay_squad(self, ents_by_id.get(String(x[2]), null), float(x[3]))
+				if x.size() > 3: XpRules.pay_kill(self, ents_by_id.get(String(x[2]), null), who, float(x[3]))
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
