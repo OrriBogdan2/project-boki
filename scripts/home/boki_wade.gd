@@ -49,7 +49,8 @@ func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:
 			_enter(k, w, pos)
 		w["bed"] = move_toward(float(w["bed"]), _bed(w, dep), BED_RATE * d)
 		n.position.y -= float(w["bed"]) - sin(float(k["hop"]) * 0.7) * 0.03
-		n.set_meta("kwater", HomeBuild.POND_Y - n.position.y)
+		if w["rig"]:
+			n.set_meta("kwater", HomeBuild.POND_Y - n.position.y)
 		_ripple(k, w, pos, d)
 		_play(k, w, pos, d)
 	elif w["in"]:

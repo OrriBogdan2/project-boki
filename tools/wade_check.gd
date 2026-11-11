@@ -87,7 +87,7 @@ func _cross(zc: int) -> void:
 			shallow = sp      # the last step in the near edge, once the speed has settled
 		elif dep == 2:
 			deep = sp
-			paddled = paddled or _afloat(k)
+			paddled = paddled or _paddling(k)
 		if dep > 0:
 			wet_steps += 1
 			stalled = stalled or sp < 0.3
@@ -104,7 +104,7 @@ func _cross(zc: int) -> void:
 	ok(paddled, "in the deep middle it paddles, lifted off the bed (BokiRig)")
 
 ## The rig takes the water this step put on the node: true while it paddles afloat.
-func _afloat(k: Dictionary) -> bool:
+func _paddling(k: Dictionary) -> bool:
 	var rig := (k["node"] as Node3D).get_node("Body/Flex/BokiRig") as BokiRig
 	rig._process(DT)
 	return rig.clip == "paddle" and rig.model.position.y > 0.0

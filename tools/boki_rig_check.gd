@@ -155,7 +155,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._shot_left = 0.0
 	rig._pick_clip(0.016)
 	ok(rig.clip == "idle", "and it goes back to idle")
-	_water(k, rig)
+	_in_water(k, rig)
 	k.set_meta("face", "sad")
 	rig._face_step(1.0)
 	k.remove_meta("face")
@@ -175,7 +175,7 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 
 ## In DEEP water it floats off the bed, SWIM_LINE of its height under, and swims (a Water type) or paddles; one
 ## that hovers stays over the water. In a puddle it stands on the bed; with no water said this frame it is dry again.
-func _water(k: Node3D, rig: BokiRig) -> void:
+func _in_water(k: Node3D, rig: BokiRig) -> void:
 	var hovers: bool = BokiRig.FRAME[kin_id].get("hover", false)
 	var want := "swim" if BokiRig.swimmer(kin_id) else "paddle"
 	k.set_meta("kwater", DEEP)
