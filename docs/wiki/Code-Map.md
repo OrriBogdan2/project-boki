@@ -130,7 +130,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `ui.gd` | The menu kit every screen builds from |
 | `hud.gd` (3.7k lines) | The in-match HUD |
 | `overlay.gd` | Esc menu, settings, save files, admin panel |
-| `title.gd`, `prologue.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story, first egg |
+| `title.gd`, `prologue.gd`, `hold_skip.gd`, `hatch.gd`, `wyrm.gd`, `scenery.gd` | Title, story (click for next, hold to skip), first egg |
 | `kit_card.gd` | A class's whole kit on one page (K) |
 | `full_map.gd`, `map_paint.gd` | The M map and its baked painting |
 | `results.gd`, `loading.gd`, `lobby.gd`, `screen_fade.gd` | Between screens |

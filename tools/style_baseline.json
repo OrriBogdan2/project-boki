@@ -883,7 +883,7 @@
 "scripts/ui/prologue.gd": {
 "long_line": 23,
 "nested_ternary": 1,
-"semicolon": 33,
+"semicolon": 32,
 "shadow": 1
 },
 "scripts/ui/reset_pop.gd": {
