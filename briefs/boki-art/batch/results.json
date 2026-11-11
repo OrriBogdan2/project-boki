@@ -112080,5 +112080,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_vespox_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_umbrink",
+    "name": "Umbrink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_umbrink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_tootle",
+    "name": "Tootle (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_tootle_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_twinklup",
+    "name": "Twinklup (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_twinklup_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_umbrathere",
+    "name": "Umbrathere (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_umbrathere_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_torpecone",
+    "name": "Torpecone (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_torpecone_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_vaultara",
+    "name": "Vaultara (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_vaultara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_truffapir",
+    "name": "Truffapir (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_truffapir_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_voltalon",
+    "name": "Voltalon (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_voltalon_1.jpg",
+    "ok": true
   }
 ]
