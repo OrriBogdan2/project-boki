@@ -127,16 +127,24 @@ func _states(m: Match) -> void:
 	ok(camp["state"] == Camps.State.RETURNING and all_live,
 		"back again: live for everyone, one size up (%s)" % String(c["name"]))
 
-## The minimap draws a camp only inside its range (hud's on_map test); the camps are the same markers.
+## The minimap (HUD's disc on the ground, MapDetail.ground_view) shows exactly the camps inside it,
+## without a hold, through the same filter HUD draws from (FullMap.minimap_spawns).
 func _minimap(m: Match) -> void:
 	var P: Hunter = m.player
 	var c: Dictionary = m.spawn_plan.of("camp")[1]
 	P.pos = (c["pos"] as Vector3) + Vector3(10, 0, 0)
-	var r: float = MapDetail.ICON_R
+	var disc := 100.0                          # px: the disc's radius (any size: it scales with the view)
+	var view := MapDetail.ground_view(P.pos)
+	var k := disc * 2.0 / view.size.x
+	var to_map := func(p3: Vector3) -> Vector2: return (Vector2(p3.x, p3.z) - view.position) * k
+	var on_map := func(v: Vector2, pad := 0.0) -> bool: return v.distance_to(Vector2(disc, disc)) <= disc - pad
+	var shown: Array = m.hud.full_map.minimap_spawns(P.team, false, to_map, on_map) \
+		.filter(func(o): return o["cat"] == "camp")
+	var reach := MapDetail.GROUND_R - 5.0 / k
 	var near := m.spawn_plan.of("camp").filter(func(o):
-		return Vector2(o["pos"].x - P.pos.x, o["pos"].z - P.pos.z).length() <= MapDetail.GROUND_R)
-	ok(near.size() >= 1 and near.size() < 28 and r > 0.0,
-		"only the camps in the minimap's range show (%d of 28)" % near.size())
+		return Vector2(o["pos"].x - P.pos.x, o["pos"].z - P.pos.z).length() <= reach)
+	ok(not near.is_empty() and near.size() < 28 and shown == near,
+		"the minimap shows only the camps in its range (%d shown, %d in range, of 28)" % [shown.size(), near.size()])
 
 func _smoke(m: Match) -> void:
 	var S: CampSmoke = m.camp_smoke

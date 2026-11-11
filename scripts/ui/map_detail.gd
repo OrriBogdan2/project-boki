@@ -13,6 +13,10 @@ const DETAIL := [
 	"place", "train", "hot_zone", "far_exit", "lair", "cache", "beacon", "rival_box", "ship", "bounty", "ally",
 ]
 
+## The world square the on-the-ground minimap shows, centred on p.
+static func ground_view(p: Vector3) -> Rect2:
+	return Rect2(Vector2(p.x, p.z) - Vector2(GROUND_R, GROUND_R), Vector2(GROUND_R, GROUND_R) * 2.0)
+
 ## Holding Tab (the scoreboard key) or the map key.
 static func holding() -> bool:
 	return Input.is_action_pressed("scores") or Input.is_action_pressed("map")

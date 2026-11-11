@@ -336,10 +336,7 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var pv := to_screen(cnd["pos"])
 		if not rect.grow(-6.0).has_point(pv):
 			continue
-		var def: Dictionary = sp.cats.get(cnd["cat"], {})
-		var st := sp.state_for(cnd, team)
-		var col: Color = def.get("col", Color.WHITE)
-		marker(c, sp.shape_of(cnd), pv, s, col, st, sp.comeback_frac(cnd) if st == "returning" else 0.0)
+		spawn_marker(c, cnd, pv, s, team)
 		if m.guide and m.guide.target == cnd["pos"]:
 			CampMap.pulse(c, pv, s)
 		if pv.distance_to(mp) < s + 4.0:
@@ -360,6 +357,24 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		hud._rounded(r, Color(0.04, 0.05, 0.08, 0.92), 8, Color(def.get("col", Color.WHITE), 0.5), 1)
 		hud._text(r.position + Vector2(10, 19), line, 14, def.get("col", Color.WHITE), hud.big)
 		hud._text(r.position + Vector2(10, 36), what, 12, INK)
+
+## One of the match's spawns as this squad sees it, in its category's shape and colour.
+func spawn_marker(c: Control, cnd: Dictionary, pv: Vector2, s: float, team: int) -> void:
+	var sp: SpawnPlan = m.spawn_plan
+	var st := sp.state_for(cnd, team)
+	var col: Color = sp.cats.get(cnd["cat"], {}).get("col", Color.WHITE)
+	marker(c, sp.shape_of(cnd), pv, s, col, st, sp.comeback_frac(cnd) if st == "returning" else 0.0)
+
+## The spawns the minimap shows: what the squad knows is there (vaults from the start, the rest once
+## scouted) and every camp in whatever state the squad sees, inside the minimap (on_map, as HUD's).
+func minimap_spawns(team: int, hold: bool, to_map: Callable, on_map: Callable) -> Array:
+	var sp: SpawnPlan = m.spawn_plan
+	return sp.cands.filter(func(cnd):
+		var camp: bool = cnd["cat"] == "camp"
+		if not camp and sp.state_for(cnd, team) != "active":
+			return false
+		var known: bool = camp or (cnd["known"] as Dictionary).has(team)
+		return MapDetail.shows("cache", hold, known) and on_map.call(to_map.call(cnd["pos"]), 5.0))
 
 ## A spawn marker in one of its states: "unknown" (faint, with a ?), "active", "empty" (a cross),
 ## "taken" (a tick), "cleared" (a camp, dim) or "returning" (dim, a ring that fills to its comeback,

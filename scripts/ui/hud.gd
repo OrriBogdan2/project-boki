@@ -651,8 +651,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	# riding in or dropping: the whole map. On the ground: a close view that follows you.
 	var view := Rect2(Vector2.ZERO, Vector2(w.w, w.h))
 	if not riding and m.player:
-		var R := MapDetail.GROUND_R
-		view = Rect2(Vector2(m.player.pos.x, m.player.pos.z) - Vector2(R, R), Vector2(R, R) * 2.0)
+		view = MapDetail.ground_view(m.player.pos)
 	var k := inner.size.x / view.size.x
 	var to_map := func(p3: Vector3) -> Vector2:
 		return inner.position + (Vector2(p3.x, p3.z) - view.position) * k
@@ -704,19 +703,8 @@ func _draw_minimap(sz: Vector2) -> void:
 	ReviveHud.minimap(self, inner, to_map, on_map, hold)
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
-		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
-		for cnd in m.spawn_plan.cands:
-			var cst: String = m.spawn_plan.state_for(cnd, m.player.team)
-			if cst != "active" and cnd["cat"] != "camp":
-				continue
-			if not MapDetail.shows("cache", hold, cnd["cat"] == "camp" or (cnd["known"] as Dictionary).has(m.player.team)):
-				continue
-			var cpv: Vector2 = to_map.call(cnd["pos"])
-			if on_map.call(cpv, 5.0):
-				var cdef: Dictionary = m.spawn_plan.cats.get(cnd["cat"], {})
-				var fill: float = m.spawn_plan.comeback_frac(cnd) if cst == "returning" else 0.0
-				full_map.marker(c, m.spawn_plan.shape_of(cnd), cpv, MapDetail.ICON_R / 1.35,
-					cdef.get("col", Color.WHITE), cst, fill)
+		for cnd in full_map.minimap_spawns(m.player.team, hold, to_map, on_map):
+			full_map.spawn_marker(c, cnd, to_map.call(cnd["pos"]), MapDetail.ICON_R / 1.35, m.player.team)
 	if not m.ship.is_empty() and not m.ship.get("gone", false) and MapDetail.shows("ship", hold):
 		var sa: Vector2 = to_map.call(m.ship["a"]); var sb: Vector2 = to_map.call(m.ship["b"])
 		c.draw_line(sa, sb, Color(1, 1, 1, 0.35), 2.0, true)
