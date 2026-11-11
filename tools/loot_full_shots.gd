@@ -2,7 +2,8 @@ extends RefCounted
 ## --loot-full-shots --shots-dir=<dir> [--size=WxH]: screenshots of looting with a full backpack (run under xvfb with a
 ## renderer). 1: a deathbox beside the hold window (your backpack, the clicked thing held in red, Swap and
 ## Drop). 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
-## 4: a deathbox with gear (rarity names, better/worse arrows). 5: ground gear's compare card over the prompt. <dir>/captions.txt gets "file: caption" per file.
+## 4: a deathbox with gear (rarity names, better/worse arrows).
+## 5: ground gear's compare card over the prompt. <dir>/captions.txt gets "file: caption" per file.
 
 var main: Node
 var m: Match
