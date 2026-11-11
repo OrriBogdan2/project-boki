@@ -56,5 +56,7 @@ docs/art/home_gait/ (before, after; eight shots half a second apart at 5 m/s pas
 
 ## Left open
 - Crouch-walking adds HunterAnim's knee bend after the solve, so a crouched walk slides a little (DEBT).
+- Standing after a stop or a turn leaves a foot on its toe, the heel 8-15 cm up, until a leg is out of reach; the
+  short slight and tall sturdy women, not in the check, fail its idle creep and turning-run slide bars (DEBT).
 - The toe dips up to 2 cm into the floor just after toe-off on the sturdy body (gated at 3 cm).
 - Arm swing is HunterAnim's, following the gait's phase (left leg's cycle); not re-tuned here.
