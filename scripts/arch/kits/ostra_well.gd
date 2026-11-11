@@ -170,6 +170,8 @@ func _tick_catch(left: float) -> void:
 		var first := not caught.has(f.get_instance_id())
 		if first:
 			hit["stun"] = maxf(left, TICK)
+		else:
+			hit["tick"] = true      # (the catch's hold-down ticks carry no hit-stop; the catch does)
 		caught[f.get_instance_id()] = f
 		f.hurt(dmg, k.h, hit)
 		if first:
