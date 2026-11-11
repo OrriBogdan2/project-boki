@@ -137,6 +137,12 @@ func _catch_and_hold() -> void:
 	late.teleport(c + Vector3(0, 0, 3.0))
 	step(m, 0.3)
 	ok("ult: a foe who walks in later is caught too", late.stun_t > 1.0, "stun %.2f" % late.stun_t)
+	var kl := KitLooks.of(m)
+	kl._process(0.0)
+	ok(
+		"ult look: while open, one whirlpool shows and the dome is gone",
+		_wells(kl) == 1 and not kl.holding("os_well_dome")
+	)
 	paid0 = paid(P)
 	step(m, 2.75)
 	ok("ult bond: paid once per cast, never per tick", paid(P) == paid0)
@@ -153,6 +159,10 @@ func _catch_and_hold() -> void:
 		"ult plain: a well that is not Empowered breaks and lights nothing",
 		props.all(func(b): return not b["dead"] and not b.has("fuse_t"))
 	)
+	ok(
+		"ult look: closing frees the whirlpool at once (before any look refresh)",
+		not kl.holding("os_well") and _wells(kl) == 0
+	)
 	await done(m)
 
 ## A crate, a pot and a keg inside the well's reach (Swollen 5.1m, plain 3.6m), 2.6m out.
@@ -164,6 +174,10 @@ func _props(m: Match, c: Vector3) -> Array:
 		m._add_break(["crate", "pot", "keg"][i], at)
 		out.append(m.breaks[-1])
 	return out
+
+## Nightwell whirlpools showing (after a look refresh): the quad's "Disc" node, only the well has one.
+func _wells(kl: KitLooks) -> int:
+	return kl.get_children().filter(func(c): return c is Node3D and c.visible and c.has_node("Disc")).size()
 
 func _swollen_and_merge() -> void:
 	var r := setup_ult("ostra", 7.0)
@@ -198,6 +212,9 @@ func _swollen_and_merge() -> void:
 		merged and W.is_open() and T.stun_t > 2.0,
 		"stun %.2f" % T.stun_t
 	)
+	var disc: Node3D = KitLooks.of(m).held["os_well"]["n"]
+	var mt := (disc.get_node("Disc") as MeshInstance3D).material_override as ShaderMaterial
+	ok("ult Swollen: the whirlpool's rim is the empowered one", float(mt.get_shader_parameter("power")) > 0.99)
 	await done(m)
 
 ## A hard CC frees him early from the cast (a stun, then a knock); the placed well goes on either way.
