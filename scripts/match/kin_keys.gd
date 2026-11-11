@@ -13,7 +13,8 @@ const ORDERS := {"kin_chase": "chase", "kin_guard": "guard", "kin_return": "retu
 static func ids() -> Array:
 	return [SUMMON] + ORDERS.keys()
 
-## The local player's keys, each frame. Queues the orders pressed; true when the summon key went down.
+## The local player's keys, each frame. Queues the orders pressed and a swap (lead and second, the swap_kin
+## key); true when the summon key went down.
 static func poll(h: Hunter, paused: bool) -> bool:
 	if paused:
 		return false
@@ -22,10 +23,15 @@ static func poll(h: Hunter, paused: bool) -> bool:
 			var q: Array = h.inp.get("kin_keys", [])
 			q.append(ORDERS[action])
 			h.inp["kin_keys"] = q
+	if Input.is_action_just_pressed("swap_kin"):
+		h.inp["kin_swap"] = true
 	return Input.is_action_just_pressed(SUMMON)
 
 ## The queued orders, on the fixed step (with KinCommand.apply_pick).
 static func apply(h: Hunter) -> void:
+	if h.inp.get("kin_swap", false):
+		h.inp.erase("kin_swap")
+		h.swap_kin()          # lead and second trade places (KinSlots)
 	var q: Array = h.inp.get("kin_keys", [])
 	if q.is_empty():
 		return
