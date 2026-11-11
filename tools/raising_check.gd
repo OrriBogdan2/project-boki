@@ -114,9 +114,9 @@ func _welcome(home, k: Dictionary) -> void:
 func _care_line(rec: Dictionary) -> void:
 	var kept: Dictionary = (rec["needs"] as Dictionary).duplicate()
 	rec["needs"] = {"food": 95.0, "energy": 95.0, "joy": 95.0, "clean": 95.0}
-	var good := Care.care_line(rec)
+	var good := RidePick.care_line(rec)
 	rec["needs"] = {"food": 10.0, "energy": 10.0, "joy": 10.0, "clean": 10.0}
-	var poor := Care.care_line(rec)
+	var poor := RidePick.care_line(rec)
 	rec["needs"] = kept
 	ok(good.contains("+10% health") and poor.contains("-18% damage"),
 		"the expedition panel says what raising does: \"%s\" / \"%s\"" % [good, poor])

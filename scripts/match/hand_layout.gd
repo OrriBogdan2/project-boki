@@ -33,7 +33,7 @@ static func stamp_ramp(w: World, R: Dictionary, ii: int) -> void:
 			else: w.authored_stairs.erase(i)
 
 ## A hand-made layout's places, exactly where it lists them (World.hand): landings, chests, camps,
-## wild Boki, breakables, weapons, the shrine, Warden posts and trap spots. Nothing is rolled here.
+## wild Boki, breakables, weapons, the shrine, vendors, Warden posts and trap spots. Nothing is rolled here.
 static func place_spots(w: World, defs: Array) -> void:
 	w.shrine_spots.clear(); w.break_spots.clear(); w.weapon_spots.clear()
 	w.heart_spot = Vector3.INF
@@ -69,6 +69,10 @@ static func place_spots(w: World, defs: Array) -> void:
 		if D.has("shrine"):
 			var q: Vector3 = at.call(D["shrine"])
 			if q != Vector3.INF: w.shrine_spots.append(q)
+		w.islands[ii]["shops"] = []
+		for p in D.get("shops", []):
+			var q: Vector3 = at.call(p)
+			if q != Vector3.INF: w.islands[ii]["shops"].append({"pos": q, "theme": String(p[2])})
 		for p in D.get("wardens", []):
 			var q: Vector3 = at.call(p)
 			if q != Vector3.INF: w.warden_posts.append({"pos": q, "island": ii})

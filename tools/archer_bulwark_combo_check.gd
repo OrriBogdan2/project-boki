@@ -28,8 +28,12 @@ func run(main_node: Node) -> void:
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
-	n += ult.n + own.n + launch.n + tall.n
-	fails += ult.fails + own.fails + launch.fails + tall.fails
+	var hits = load("res://tools/hit_feedback_check.gd").new()      # every Hunter's hit feedback (item 96.4)
+	hits.main = main_node
+	if both:
+		await hits.audit()
+	n += ult.n + own.n + launch.n + tall.n + hits.n
+	fails += ult.fails + own.fails + launch.fails + tall.fails + hits.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -66,7 +70,6 @@ func _shot_reach(m: Match, P: Hunter) -> float:
 func _loose_after(m: Match, P: Hunter, t: float, at: Vector3) -> float:
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, t, func(): P.inp["fire"] = true; aim_at(P, at))
 	P.inp["fire"] = false
 	m.step(DT)
@@ -176,7 +179,6 @@ func _archer_combos() -> void:
 	var od0 := K.draw.overdraws
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 1.8, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok("pin anim: overdrawn, the draw arm shakes (arc_over)", K.anim_id == "arc_over", K.anim_id)
 	var oe := AimKit.entry(P, "draw")
@@ -204,7 +206,6 @@ func _archer_combos() -> void:
 	)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	step(m, 0.42, func(): P.inp["fire"] = true; aim_at(P, T.pos))
 	ok(
 		"combo pin: perfect > the next draw reaches Empowered in ~0.38s",
@@ -279,7 +280,6 @@ func _archer_combos() -> void:
 	var dd0 := dmg(T)
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 1)
-	P.reload_t = 0.0
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -626,7 +626,6 @@ func _archer_combos() -> void:
 	K.cd["rmb"] = 0.0
 	P.fire_cd = 0.0
 	P.ammo = maxi(P.ammo, 3)
-	P.reload_t = 0.0
 	P.teleport(home)
 	T.teleport(home + Vector3(7, 0, 0))
 	aim_at(P, T.pos)
