@@ -21,7 +21,7 @@ static var _rules := {}
 
 var m: Match
 var w: World
-var areas: Array = []                 # {kind, def, y, centre, cells: Array[Vector2i], mat, t, phase}
+var areas: Array = []                 # {kind, def, y, centre, cells: Array[Vector2i], poly, box (tile units), mat, t, phase}
 var cell := PackedInt32Array()        # per tile: area index + 1, 0 = no hazard
 var state := {}                       # hunter instance id -> {area, safe, breath, tick, fx}
 var hint_t := 0.0
@@ -78,7 +78,7 @@ func _add_area(kind: String, pts: Array) -> void:
 		return
 	var c := sum / cells.size()
 	var y := w.ground_at(cells[0].x + 0.5, cells[0].y + 0.5)
-	var A := {"kind": kind, "def": def, "y": y, "centre": Vector3(c.x, y, c.y), "cells": cells,
+	var A := {"kind": kind, "def": def, "y": y, "centre": Vector3(c.x, y, c.y), "cells": cells, "poly": poly, "box": box,
 		"t": float(def["effect"].get("every_s", 0.0)), "phase": "idle"}
 	A["mat"] = _surface(poly, box.grow(SDF_PAD), y, def["look"])
 	if kind == "bramble":

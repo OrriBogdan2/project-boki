@@ -674,6 +674,8 @@ func _draw_minimap(sz: Vector2) -> void:
 	elif tex_view.size.x > 0.0 and tex_view.size.y > 0.0:
 		var dest := Rect2(inner.position + (tex_view.position - view.position) * k, tex_view.size * k)
 		c.draw_texture_rect_region(map_tex(), dest, map_region(tex_view))
+	if MapDetail.shows("hazard", hold, HazardMap.matters(m)):
+		HazardMap.draw(c, m, to_map, inner, mm_circ, HazardMap.MM_SHIELD)
 	if MapDetail.shows("place", hold):
 		_draw_map_labels(w, inner, view, k, riding)
 	if m.skytrain and MapDetail.shows("train", hold, train_map.near(m.skytrain, m.player)):

@@ -10,7 +10,8 @@ extends RefCounted
 ##   bramble     slowed and scratched                    / bloom: neither
 ## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
-## Steps the real match at Match.DT; never touches the save. Prints "TERRAIN ..." lines and
+## and the maps: HazardMap shows each area (minimap on a hold or once one is near, full map always) in its kind's
+## colours from the rules, and paints without error round and square. Steps the real match at Match.DT; never touches the save. Prints "TERRAIN ..." lines and
 ## "TERRAIN CHECK DONE, N checks, failures: F".
 
 const COUNTER := {"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike",
@@ -56,6 +57,7 @@ func run(main_node: Node) -> void:
 				ok("%s %s: the HUD reads it (safe = %s)" % [kind, _who(safe), safe], hud_safe == safe)
 				_hint(kind, safe)
 		_bots()
+		_map()
 	print("TERRAIN CHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit()
 
@@ -226,3 +228,43 @@ func _bots() -> void:
 		var d := Vector2(b.x - a.x, 0).normalized()
 		var guard := "ignores" if safe else "steers off"
 		ok("its edge guard %s the lava ahead" % guard, m.bot_brain._safe(m, bot, d, 3.5) == safe)
+
+# ------------------------------------------------------------------ the minimap and the full map
+var painted := 0
+
+func _map() -> void:
+	ok("the minimap lists the hazards as a detail kind", "hazard" in MapDetail.DETAIL)
+	ok("every area keeps its outline and box for the maps",
+		tz.areas.all(func(a): return (a["poly"] as PackedVector2Array).size() >= 3 and (a["box"] as Rect2).has_area()))
+	var tint := tz.areas.all(func(a):
+		var look: Dictionary = a["def"]["look"]
+		return HazardMap.edge(a["kind"]).is_equal_approx(Color(Color(String(look["edge"])), HazardMap.EDGE_A)) \
+			and HazardMap.fill(a["kind"]).a == HazardMap.FILL_A)
+	ok("area colours come from the rules' look", tint)
+	var kinds := {}
+	for a in tz.areas:
+		kinds[HazardMap.fill(a["kind"])] = true
+	ok("each hazard kind has its own tint", kinds.size() == COUNTER.size(), str(kinds.size()))
+	P = m.player
+	var home := P.pos
+	_stand(0)
+	ok("the minimap shows hazards once one is close", HazardMap.matters(m))
+	var far := false
+	for x in range(0, m.world.w, 8):
+		P.pos = Vector3(x, home.y, m.world.h * 0.5)
+		far = far or not HazardMap.matters(m)
+	ok("and not when none is within %d m" % int(HazardMap.NEAR_M), far)
+	P.pos = home
+	var c := Control.new()
+	main.add_child(c)
+	c.draw.connect(func():
+		var to_screen := func(p3: Vector3) -> Vector2: return Vector2(p3.x, p3.z) * 2.0
+		var inner := Rect2(Vector2.ZERO, Vector2(m.world.w, m.world.h) * 2.0)
+		HazardMap.draw(c, m, to_screen, inner, Vector3.ZERO, HazardMap.FULL_SHIELD)
+		HazardMap.draw(c, m, to_screen, inner, Vector3(inner.size.x * 0.5, inner.size.y * 0.5, 300.0), HazardMap.MM_SHIELD)
+		painted += 1)
+	c.queue_redraw()
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok("the areas paint on a square and a round map", painted > 0, str(painted))
+	c.queue_free()
