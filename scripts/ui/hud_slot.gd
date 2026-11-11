@@ -102,10 +102,8 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 		H._rounded(r.grow(2.0 + pulse * 2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, glow, 2)
 	var icol := Color(col.lerp(HudStyle.MUTED, 0.5), 0.45 if can else 0.22)
 	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.25, icol)
-	var lc := r.get_center() + Vector2(0, 4)
 	var lcol := HudStyle.GOLD if can else Color(HudStyle.MUTED, 0.85)
-	c.draw_arc(lc + Vector2(0, -6), 5.0, PI, TAU, 12, lcol, 2.0, true)
-	H._rounded(Rect2(lc + Vector2(-7, -6), Vector2(14, 11)), lcol, 3)
+	padlock(H, r.get_center() + Vector2(0, 4), lcol)
 	if can:
 		HudStyle.ctext(c, Vector2(r.get_center().x, r.position.y - 7), "UNLOCK", 10, HudStyle.GOLD, 3)
 	elif tag != "":
@@ -115,6 +113,46 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 		HudStyle.ctext(c, Vector2(r.get_center().x, tr.end.y - 3), tag, 10, Color(HudStyle.INK, 0.9), 0)
 	shown_keys[id] = key
 	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
+
+## The padlock every locked slot shows, its body centred on `at`.
+static func padlock(H, at: Vector2, col: Color) -> void:
+	H.c.draw_arc(at + Vector2(0, -6), 5.0, PI, TAU, 12, col, 2.0, true)
+	H._rounded(Rect2(at + Vector2(-7, -6), Vector2(14, 11)), col, 3)
+
+## `r` moved by the red shake while a denied press on slot `id` is still playing.
+static func shaken(H, id: String, r: Rect2) -> Rect2:
+	var sfx_d: Dictionary = H.slot_fx.get(id, {})
+	if not sfx_d.is_empty() and sfx_d["kind"] == "deny":
+		var ft := float(sfx_d["t"])
+		r.position.x += sin(ft * 70.0) * 5.0 * clampf(1.0 - ft / DENY_T, 0.0, 1.0)
+	return r
+
+## Over an ab_slot drawn not ready: off cooldown but it can't be cast now (stunned, downed, merged).
+## A dark veil and the padlock, so it never reads as ready or as cooling.
+static func lock_over(H, r: Rect2) -> void:
+	H._rounded(r.grow(-2.0), Color(0.0, 0.0, 0.02, 0.5), HudStyle.SLOT_RAD - 1)
+	padlock(H, r.get_center() + Vector2(0, 4), Color(HudStyle.INK, 0.9))
+
+## Over an ab_slot drawn ready: the ultimate's lit frame (a bright rim and a soft halo in the slot colour,
+## steady), and while `shine` runs 1 -> 0 after it comes back a white edge, a brightened icon and a band of
+## light crossing the slot left to right.
+static func lit(H, r: Rect2, col: Color, icon: String, shine: float) -> void:
+	var c: CanvasItem = H.c
+	H._rounded(r.grow(5.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 5, Color(col, 0.3), 3)
+	H._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(col.lightened(0.25), 0.95), 2)
+	if shine <= 0.0:
+		return
+	H._rounded(r.grow(2.0), Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(1, 1, 1, shine), 3)
+	Icons.draw(c, icon, r.get_center() + Vector2(0, -2), r.size.x * 0.27, Color(1, 1, 1, 0.7 * shine))
+	var w := r.size.x * 0.3
+	var bx := lerpf(r.position.x - w * 2.0, r.end.x + w, 1.0 - shine)
+	var band := PackedVector2Array([Vector2(bx + w, r.position.y), Vector2(bx + w * 2.0, r.position.y),
+			Vector2(bx + w, r.end.y), Vector2(bx, r.end.y)])
+	var inner := r.grow(-3.0)      # (inside the frame's rounded corners)
+	var clip := PackedVector2Array([inner.position, Vector2(inner.end.x, inner.position.y), inner.end,
+			Vector2(inner.position.x, inner.end.y)])
+	for part in Geometry2D.intersect_polygons(band, clip):
+		c.draw_colored_polygon(part, Color(1, 1, 1, 0.4 * shine))
 
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
@@ -142,9 +180,7 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 	var can := p.can_level(slot)
 	if lv <= 0:
 		H.hover_spots.append([r, id])
-		var sfx_d: Dictionary = H.slot_fx.get(id, {})
-		if not sfx_d.is_empty() and sfx_d["kind"] == "deny":
-			r.position.x += sin(float(sfx_d["t"]) * 70.0) * 5.0 * clampf(1.0 - float(sfx_d["t"]) / DENY_T, 0.0, 1.0)
+		r = shaken(H, id, r)
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
 		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
 		if can:
