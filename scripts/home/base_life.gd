@@ -257,6 +257,7 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 		return
 	if not _awake(k):
 		k["nap_t"] = maxf(nap, 2.0)      # night: it sleeps on till dawn
+	Care.change(k["rec"], "joy", DecorComfort.value("cosy", "nap_joy", 0.0) * dt / 60.0)
 	for o in h.kins:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
@@ -457,7 +458,7 @@ func _greet(k: Dictionary, near: Array) -> void:
 ## Two hot tempers that meet may squabble: the chance grows with how far their summed temper is over 1.0.
 func _clash(a: Dictionary, b: Dictionary) -> bool:
 	var over := float(a["traits"].get("temper", 0.5)) + float(b["traits"].get("temper", 0.5)) - 1.0
-	return randf() < maxf(0.0, over) * float(R["clash"])
+	return randf() < maxf(0.0, over) * float(R["clash"]) * DecorComfort.value("quiet", "clash", 1.0)
 
 func _squabble(a: Dictionary, b: Dictionary) -> void:
 	add_bond(a["rec"], b["rec"], float(R["bond_squabble"]))
