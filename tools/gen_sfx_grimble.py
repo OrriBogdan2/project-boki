@@ -124,35 +124,79 @@ def shot(i):
 
 
 # ------------------------------------------------------------------ RMB: Abyssal Hand
+# Timed to the kit (content/archetypes/dredge.json rmb, DredgeKit.HAUL_T): a WIND_T wind-back, the hook out in
+# about FLY_T, slowing as the arm runs out; hand-over-hand hauls every HAUL_T from HAUL_AT after the catch.
+WIND_T = 0.1
+FLY_T = 0.4
+HAUL_T = 0.26
+HAUL_AT = 0.18
+
+
+class own_stream:
+    """Runs a sound on its own seeded random stream and gives the shared one back untouched, so reworking it
+    never re-rolls the rest of his set."""
+    def __init__(self, seed): self.seed = seed
+    def __enter__(self):
+        self.keep = (S.rng, S.C.rng)
+        S.rng = S.C.rng = np.random.default_rng(self.seed)
+    def __exit__(self, *_):
+        S.rng, S.C.rng = self.keep
+
+
+def payout(d, gap0, gap1, f_lo=1100, f_hi=4200):
+    """The arm's links running out: clicks whose spacing widens gap0 -> gap1 (fast, then slowing)."""
+    out = np.zeros(N(d)); t = 0.0
+    while t < d - 0.03:
+        u = t / d
+        link = mix(click(0.002, f_lo, f_hi) * 0.8, clank(S.rng.uniform(1400, 2200), 0.012, 1.0) * 0.25)
+        out = mix(out, at(link * (1.0 - 0.6 * u) * S.rng.uniform(0.6, 1.0), t))
+        t += gap0 + (gap1 - gap0) * u * u
+    return out
+
+
 def throw():
-    """The gaff hook flung out: a heave, the chain paying out, the abyss moaning behind it."""
-    d = 0.6
-    heave = sweep_noise(0.4, 350, 1900, 0.4) * shape(0.4, 0.04, 0.06, 0.28) * 0.9
-    links = chain(0.5, 110) * shape(0.5, 0.02, 0.2, 0.25)
-    moan = lpf(S.sweep(95, 70, d, 'saw'), 500) * shape(d, 0.08, 0.2, 0.3) * 0.25
-    return mix(heave, links, moan, kick(160, 80, 0.2, 0.02, 0.04, 1.5) * 0.3)
+    """The arm cocks back (a flesh-and-chain creak, a sucked breath), then whips: a sharp crack and a fast
+    falling whoosh, the links rattling out and slowing as the arm runs out, the abyss moaning under it."""
+    with own_stream(7361):
+        d = WIND_T + FLY_T + 0.25
+        coil = S.creak(0.16, 120, 85, 0.7, 1500) * shape(0.16, 0.02, 0.06, 0.08) * 0.7
+        breath = bpf(noise(0.12), 600, 1800) * shape(0.12, 0.05, 0.02, 0.05) * 0.35
+        snap = mix(click(0.003, 1800, 6000) * 1.1, crack(0.06, 900, 4000, 0.012) * 0.9)
+        whoosh = sweep_noise(0.34, 3000, 420, 0.38) * shape(0.34, 0.006, 0.03, 0.3) * 1.5
+        links = payout(FLY_T, 0.016, 0.07)
+        thump = kick(150, 70, 0.22, 0.015, 0.04, 1.6) * 0.45
+        moan = lpf(S.sweep(90, 62, d - WIND_T, 'saw'), 420) * shape(d - WIND_T, 0.03, 0.2, 0.3) * 0.22
+        return mix(coil, breath, at(mix(snap, whoosh, thump, moan), WIND_T), at(links, WIND_T + 0.02))
 
 
 def grab():
-    """The hook bites: an iron clank, a thud and the chain snapping taut."""
-    d = 0.6
-    hit = mix(click(0.003, 2200, 6500) * 1.0, kick(200, 70, 0.4, 0.012, 0.05, 2.6) * 0.65, crack(0.3, 250, 2200, 0.03) * 1.6)
-    iron = clank(330, 0.16, 3.0) * 0.7
-    taut = at(chain(0.2, 160, 0.05), 0.02)
-    return mix(hit, iron, taut, sub(75, 45, 0.4, 0.06) * 0.3)
+    """The hook bites: a heavy iron clank on a deep thud, a wet crunch, and the arm snapping taut."""
+    with own_stream(7362):
+        d = 0.7
+        hit = mix(click(0.003, 2000, 6500) * 1.2, kick(180, 52, 0.5, 0.01, 0.07, 3.0) * 0.85,
+                  crack(0.25, 300, 2600, 0.025) * 1.6, sub(62, 36, 0.55, 0.11) * 0.55)
+        iron = mix(clank(240, 0.2, 3.4) * 0.75, clank(510, 0.1, 2.2) * 0.4)
+        crunch = lpf(noise(0.12), 900) * env(N(0.12), 0.001, 0.03) * 0.6
+        taut = at(mix(chain(0.14, 240, 0.035), click(0.002, 3000, 7000) * 0.6), 0.03)
+        return mix(hit, iron, crunch, taut)
 
 
 def reel():
-    """Reeling in: a winch ratchet clacking faster, the drum creaking and the chain rattling."""
-    d = 1.05
-    out = np.zeros(N(d)); t = 0.0; gap = 0.07
-    while t < d - 0.08:
-        tick = mix(click(0.002, 1500, 4500) * 0.7, clank(S.rng.uniform(900, 1100), 0.02, 1.2) * 0.35)
-        out = mix(out, at(tick, t))
-        t += gap; gap = max(0.038, gap * 0.93)
-    drum = S.creak(d, 70, 95, 0.5, 1800) * 0.8
-    links = chain(d, 60) * shape(d, 0.05, 0.6, 0.35) * 0.6
-    return mix(out, drum, links)
+    """The yank: a jolt and a taut groan, then a hand-over-hand haul every HAUL_T (a chain drag, the arm's
+    creak and a low knock each), the links ratcheting in between."""
+    with own_stream(7363):
+        d = 1.2
+        jolt = mix(kick(130, 55, 0.3, 0.01, 0.06, 2.2) * 0.6, chain(0.12, 200, 0.04) * 0.8)
+        out = mix(np.zeros(N(d)), jolt)
+        t = HAUL_AT
+        while t < d - 0.2:
+            drag = chain(0.18, 140, 0.07) * shape(0.18, 0.01, 0.03, 0.14) * 0.7
+            heave = S.creak(0.2, 95, 70, 0.6, 1400) * shape(0.2, 0.02, 0.05, 0.13) * 0.55
+            haul = mix(drag, heave, knock(S.rng.uniform(110, 150)) * 0.45)
+            out = mix(out, at(haul, t))
+            t += HAUL_T
+        links = payout(d - 0.1, 0.05, 0.035, 900, 3200) * 0.35
+        return mix(out, at(links, 0.06))
 
 
 # ------------------------------------------------------------------ E: Anchor Drop (the scrap fist)

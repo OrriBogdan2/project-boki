@@ -4,7 +4,7 @@
 	"name": "Stinger Hook",
 	"short": "Hook",
 	"flavor": "Vespyx lashes its tail 8m: the first foe it stings is dragged back to it, poisoned, blighted (healing halved) and stunned 0.3s.",
-	"theme": "venom",
+	"theme": "poison",
 	"tier": 1,
 	"from": "kin",
 	"range": 8,

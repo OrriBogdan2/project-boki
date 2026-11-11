@@ -3,7 +3,7 @@
 	"id": "titan",
 	"name": "Heavy Star",
 	"flavor": "Gravadillo folds into you as a heavy star for 10s. Slam with the left button, roll through foes with the right, drag them in with E, then Fuse again brings the whole sky down.",
-	"theme": "gravity",
+	"theme": "psychic",
 	"duration": 10,
 	"passives": []
 }

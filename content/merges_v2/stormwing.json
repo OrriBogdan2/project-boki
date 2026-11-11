@@ -3,7 +3,7 @@
 	"id": "stormwing",
 	"name": "Stormwing",
 	"flavor": "Zephyrak wraps you in a living storm for 10s. Chaining bolts, a hover over any gap, a double storm blink, and Fuse again calls a thunderhead down on everyone near.",
-	"theme": "tempest",
+	"theme": "flying",
 	"duration": 10,
 	"passives": []
 }

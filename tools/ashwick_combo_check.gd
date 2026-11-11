@@ -6,7 +6,8 @@ extends RefCounted
 ## the 0.35s relight gap), the burn stages and their pips, the Cinder Shot lane and its fixed full range, the
 ## Soot Ram stopping on the first foe, two quick charges and a knock's single charge back, the rank-3 speed and shield,
 ## the Furnace Cloak on the press round him (no cursor) and its swirling shield, walls, Char rules, the merge drops,
-## and the X ult, Flue Flight (tools/ashwick_ult_check.gd).
+## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
+## squash on the hit frame, the jet lift-off, the run cadence).
 
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
@@ -27,6 +28,7 @@ func run(main_node: Node) -> void:
 	await _all()
 	await _lance_combos()
 	await _growth()
+	_timing()
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
@@ -88,7 +90,17 @@ func _lance_combos() -> void:
 	ok("lance audit: 10 s of roaring with no fuel to run out (no refill), at his full walk",
 			not reloaded and K.hose.emitted > late and late - em3 > 250 and slowest >= 0.999,
 			"puffs %d, reload %s, move_k %.2f" % [late - em3, reloaded, slowest])
+	# hold-pose audit: a lance let go in the middle of a ram takes its pose down with it
 	P.inp["fire"] = false
+	ak.step(m, 0.5)
+	P.dashes = P.max_dashes()
+	P.do_dash()
+	ak.step(m, 0.05, keep_fire)
+	var in_ram: bool = P.roll_t > 0.0
+	P.inp["fire"] = false
+	ak.step(m, 0.25)
+	ok("lance: let go mid-ram, the lance pose is gone 0.25s later (hold-pose audit)",
+			in_ram and K.anim_id != "as_lance", "in ram %s, move %s" % [in_ram, K.anim_id])
 	await ak.done(m)
 
 ## Soot Ram's hit on the first foe with the hunter at level `lvl`.
@@ -108,6 +120,44 @@ func _ram(lvl: int) -> float:
 	return d
 
 ## Ability damage reads ArchKit.power(), so quiet level growth (LevelGrowth.ap) raises it.
+## The source's beats (briefs/hero-ref/linwick.md, a frame = 0.2 s; docs/heroes/ashwick.md, Animation timing):
+## the lance's pilot is the kick key, the jet's crouch and flight pose land in its first frame, and the run clip's
+## footfalls at Cinder's cadence come every 0.15-0.21 s at his run speed.
+func _timing() -> void:
+	var lance: Array = KMovesPair.MOVES["as_lance"]["keys"]
+	var spool := float((Arch.def("ashwick").get("lmb", {}) as Dictionary).get("spool", -1.0))
+	ok(
+		"timing: the lance pilot (spool) ends on as_lance's kick key", is_equal_approx(spool, float(lance[2][0])),
+		"spool %.2f key %.2f" % [spool, float(lance[2][0])]
+	)
+	var jet: Array = KMovesPair.MOVES["lw_jet"]["keys"]
+	ok(
+		"timing: jet lift-off crouch by 0.1 s, flight pose by 0.22 s (source: burst 0.1, flying at 0.2)",
+		float(jet[1][0]) <= 0.1 and float(jet[2][0]) <= 0.22, "%.2f %.2f" % [float(jet[1][0]), float(jet[2][0])]
+	)
+	var cfg := WardenClips.data("cinder")
+	var lc: Dictionary = cfg.get("loco", {})
+	var holder := Node3D.new()
+	main.add_child(holder)
+	var mdl := Models.hunter(
+		Arch.weight("ashwick"), Data.TEAM_COLORS[0], Arch.signature("ashwick"), "", PlayerLook.neutral(), "ashwick"
+	)
+	holder.add_child(mdl)
+	var w := mdl.get_node_or_null("Warden")
+	var sync := w.get_node_or_null("Sync") as WardenGlb.Sync if w else null
+	var clips: WardenClips = sync.clips if sync else null
+	var foot := -1.0
+	if clips and clips.lib and lc.has("run"):
+		var cycle := clips.lib.get_animation(String((lc["run"] as Dictionary)["f"])).length
+		var spd := float(HunterMove.of("ashwick").get("speed", 4.55))
+		var rate := clampf(spd / float(lc["run_speed"]), 0.6, 1.5) * float(lc.get("cadence", 1.0))
+		foot = cycle * 0.5 / rate
+	ok(
+		"timing: running, a footfall every 0.15-0.21 s (source 0.15-0.2)",
+		foot >= 0.15 and foot <= 0.21, "%.3f s" % foot
+	)
+	holder.queue_free()
+
 func _growth() -> void:
 	var d1: float = await _ram(1)
 	var d10: float = await _ram(10)
@@ -258,6 +308,8 @@ func _all() -> void:
 		"lance: a sweep bends the stream (old fire keeps its own heading)", east >= 3 and north >= 1,
 		"still east %d, new north %d" % [east, north]
 	)
+	var heat_id := "heat%d" % P.get_instance_id()
+	ok("lance: her palm glows with heat while it roars", K.fx.shown(heat_id) and K.heat > 0.0, "heat %.2f" % K.heat)
 	P.inp["fire"] = false
 	ak.step(m, 0.15)
 	var live := 0
@@ -275,6 +327,9 @@ func _all() -> void:
 		"emitted +%d" % (K.hose.emitted - em0)
 	)
 	P.inp["fire"] = false
+	ak.step(m, AshwickKit.HEAT_COOL)
+	var cooled: bool = not K.fx.shown(heat_id) and K.heat == 0.0
+	ok("lance: the heat glow cools off after she lets go", cooled, "heat %.2f" % K.heat)
 	# --- Char builds into Ablaze, then Flashover
 	reset.call()
 	var aim_t := func(): P.inp["fire"] = true
@@ -378,6 +433,11 @@ func _all() -> void:
 		not lane.is_empty() and absf(float(lane.get("len", 0.0)) - max_r) < 0.01 and K.aiming and K.anim_id == "as_aim",
 		"lane %s len %.1f" % [not lane.is_empty(), float(lane.get("len", 0.0))]
 	)
+	ok(
+		"cinder: the aim lane is twice the shot radius (%.2f m), drawn = hit" % float(K.rmb_def()["size"]),
+		absf(float(lane.get("width", 0.0)) - 2.0 * float(K.rmb_def()["size"])) < 0.001,
+		"width %.2f" % float(lane.get("width", 0.0))
+	)
 	P.inp["sec_hold"] = false
 	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
@@ -442,11 +502,23 @@ func _all() -> void:
 	P.ak.on_dash(false)
 	var skull := false
 	var tt := 0.0
+	var hit_t := -1.0               # s after the press the ram landed
+	var hit_key := -1.0             # s into as_leap right after the hit
 	while tt < 0.5:
 		ak.step(m, ak.DT)
 		tt += ak.DT
 		if K.fx.shown("skull%d" % P.get_instance_id()): skull = true
+		if hit_t < 0.0 and K.bash_hits == 1:
+			hit_t = tt
+			hit_key = m.time - K.anim_at
 	ok("ram: the flame skull wraps his front while it flies", skull)
+	ok(
+		"ram timing: a foe 3 m out is hit by 0.22 s, the squash key on that frame (source: back in 0.1 s)",
+		hit_t > 0.0 and hit_t <= 0.22 and hit_key >= AshwickKit.RAM_IMPACT_KEY - 0.001
+			and hit_key <= AshwickKit.RAM_IMPACT_KEY + ak.DT + 0.001
+			and m.time - K.anim_at >= _move_len("as_leap"),
+		"hit %.2f s key %.2f upright by %.2f" % [hit_t, hit_key, hit_t + _move_len("as_leap") - hit_key]
+	)
 	ok(
 		"ram: stops on the first foe and shoves it hard (doesn't pass through)",
 		K.bash_hits == 1 and P.pos.x < T.pos.x and P.flat_dist(T) < 4.0 and T.pos.x - home.x > 3.4 and ak.dmg(T2) < 1.0,
@@ -601,6 +673,12 @@ func _all() -> void:
 		float(K.cd["e"]) <= 0.0 and K.resets >= 1 and P.hp > P.max_hp * 0.6,
 		"cd %.1f hp %.0f" % [float(K.cd["e"]), P.hp]
 	)
+	# the kit's heal is ours-only (the data has none): 16% of max health; the takedown reset adds its own 5%
+	ok("passive: the knock heal is 16% of max health (ours-only, the data has none)",
+		absf(P.hp - P.max_hp * 0.66) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
+	DashReset.takedown(P, T)
+	ok("passive: with the takedown reset's 5% a knock heals 21% in all, no more",
+		absf(P.hp - P.max_hp * 0.71) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
 	# --- rank 3: the cloak's shield is 30% bigger on top of the rank's own gain; Cinder Shot holds two charges
 	reset.call()
 	T.teleport(home + Vector3(3.8, 0, 0))

@@ -704,8 +704,18 @@ func _home(tree: SceneTree) -> void:
 	ok(Arch.of_save() == sel, "a locked one can't be")
 	hm._open_expedition()
 	await tree.process_frame
-	ok(_disabled_buttons(hm.panel_host).size() >= 1 and _no_weight(hm.panel_host),
-			"the expedition panel picks a Hunter (locked ones disabled) with no weight tabs")
+	var cards: Array = []
+	_collect_meta(hm.panel_host, "arch", cards)
+	var locked_cards := cards.filter(func(c): return not ClassUnlock.is_open(String(c.get_meta("arch"))))
+	var tip_ok := locked_cards.all(func(c): return c.tooltip_text == ClassUnlock.requirement(c.get_meta("arch")))
+	ok(cards.size() == Arch.ids().size() and locked_cards.size() >= 1 and tip_ok and _no_weight(hm.panel_host),
+			"the expedition panel: one card per Hunter, locked ones say how to unlock, no weight tabs")
+	var inert := func(c: Control): return c.focus_mode == Control.FOCUS_NONE \
+			and c.gui_input.get_connections().is_empty()
+	ok(locked_cards.all(inert),
+			"a locked Hunter's card takes no focus and no click")
+	ok(_texts(hm.panel_host).all(func(t): return not String(t).contains("LMB") and not String(t).contains("RMB")),
+			"the expedition panel lists no abilities")
 	hm._close_panel()
 	hm.queue_free()
 	for i in 3: await tree.process_frame
@@ -818,9 +828,3 @@ func _collect_meta(n: Node, key: String, out: Array) -> void:
 
 func _any_text(n: Node, needle: String) -> bool:
 	return _texts(n).any(func(t): return String(t).contains(needle))
-
-func _disabled_buttons(n: Node) -> Array:
-	var out: Array = []
-	if n is Button and (n as Button).disabled: out.append(n)
-	for c in n.get_children(): out.append_array(_disabled_buttons(c))
-	return out

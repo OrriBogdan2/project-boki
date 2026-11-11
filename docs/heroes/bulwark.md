@@ -1,6 +1,6 @@
 # Albert the Barnacle Knight (id `bulwark`, Heavy) - fidelity pass (hero sheet bjorn.md)
 
-Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/abilities/bulwark.json) is now Bracewall.
+Behaviour reference: the hero named in the Inspired-by table in docs/ARCHETYPES.md (internal note; nothing of the source's names or look ships). Player-facing names are our own. Display name is the class title Barnacle Knight; the id, files and save keys stay `bulwark`. The minigun ability that was also called "Bulwark" (content/hunter_abilities/bulwark.json) is now Bracewall.
 
 ## Upgrade parity (rank 2 = source tier II, rank 3 = tiers II+III+IV)
 Source: Oath, `Upg:` lines. Ranks come from `rank_cd` / `rank_dmg` and the kit's own shield, cooldown and heal numbers; the
@@ -37,6 +37,24 @@ What the source does: tap throws the hammer to the cursor, where it stays plante
 | E, X, passive | see the per-slot table | matched in the earlier passes | unchanged |
 | Camera | - | a directional camera nudge on the swing | removed (item 50: no self-caused camera motion) |
 
+## Footage gaps, Nov 9 re-check
+The 10 ranked rows of `briefs/hero-ref/bjorn.md` section 4, checked on main d255acbee (read in the code, not from old notes). Nothing built: every open piece is in `bulwark_kit.gd`, `bjorn_fx.gd`, `bulwark.json` or `archer_bulwark_combo_check.gd`, which unmerged branches for Albert change (`ext/parity-bulwark-guardcut`, `ext/albert-parity-verify`, `ext/albert-size-boop`, `ext/mossy-shield-bash`, `ext/mossy-dash-refund`, `ext/vfx-bulwark`).
+
+| # | Gap | Status on main | Evidence |
+|---|---|---|---|
+| 1 | Throw lands at the cursor | closed | `_throw` stores `"to"` from `AimMode.dist(CURSOR)`, clamped to `throw_range` 9 m (584afbfb8); `bjorn aim: the hammer lands at the cursor (5m) and stays planted` |
+| 2 | Damage ratios | closed | throw 12 = recall 12, smash 36-66 (3x-5.5x), Shift 24 (2x), all in `bulwark.json` since 584afbfb8 |
+| 3 | Hold: no lunge, free turning, glint | closed, lunge kept by owner | turning asserted in `tools/bjorn_launch_check.gd` (`bjorn parity LMB: in the hold he turns with a cursor sweeping 1.25 turns a second`); glint from 0.6 s asserted (`bjorn LMB held: the glint shows from 0.6s`); the forward step stays by owner override (#30, #49: lunge and perfect launch) |
+| 4 | Swing VFX | closed | a 180 degree flaming crescent, hammer swept from behind (`smash_arc` 180, `bjorn_fx`; 584afbfb8) |
+| 5 | Shift: short dash, one 360 spin | closed | `dash.whirl` 3.5 m, one `_strike` and one `smash_ring` on arrival; cooldown 8 s (game data over the card's 9.2 s) |
+| 6 | Planted hammer, beacon | closed | `lie_t` 0.0 (6c4789d94; stays until recalled; `bjorn: the planted hammer never comes back by itself`), upright gold beacon in `bjorn_fx` |
+| 7 | E with the hammer in hand lands on him | closed | `_zone_anchor` returns `h.pos` when no hammer is out (584afbfb8, the lasting zone 6c4789d94); `bjorn E: with the hammer in hand it comes down on him, the column and circle shown`, and the zone follows a recalled hammer |
+| 8 | Shield look: curved pale-gold slab, sparks on block | partly closed; the rest in flight | curved plate wall, gold sparks on block, plate chunks and "SHIELD BROKEN" on break are built. Open: ours is a 4.2 m chord (the source's slab is about 2.2 body heights wide) in amber `c9953a`, not pale gold. `ext/vfx-bulwark` replaces the plate wall with a dome and `ext/parity-bulwark-guardcut` edits the same file, so left alone. Owner sync61 asked for a shield unique to him |
+| 9 | Bash on RMB release | open by choice (our extension) | the source has it as an augment; ours bashes on every release, documented. `ext/mossy-shield-bash` and `ext/mossy-dash-refund` change it |
+| 10 | Passive heal | closed | no Crush heal on main (Crushed is a 0.5 s stun and 8 damage); the footage shows only the stun |
+
+Suggestions, not built (parity first): if the owner wants row 8 to match, narrow the wall to about 2.4 m and use a paler gold, after `ext/vfx-bulwark` lands; row 9 stays our extension unless the owner calls it.
+
 ## Audit (Nov 3 23:40)
 Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on main 200effce). (a) already done on this branch, (b) fixed now, (c) not applied, with the reason.
 | Row | Sev | Verdict | Where / why |
@@ -53,6 +71,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Passive: 8 damage on a Crush | MED | (c) | The stun rides a hit (Ent.hurt ignores a 0-damage hit); 8 is small. Kept, ours |
 | RMB: rises after 0.2 s | MED | (a) | 0.1 s (e625aa8e); `bjorn parity RMB: the aegis is up 0.1 s into the hold` |
 | RMB: does it block front melee? | MED | (b) | Yes now: any hit from a foe in its 140 degree arc lands on the aegis (its HP, Guard), as the data's "blocks all damage from the front"; damage over time and blows from behind still land. `bjorn audit: the raised aegis takes a melee blow from the front`, `a blow from behind still lands on him` |
+| RMB: what the aegis stops (Nov 9 pass) | MED | (b) | Data: "blocks all damage from the front"; footage: beams stop at it (0217, 0226), it breaks with SHIELD BROKEN. Hits from its 140 degree arc (melee, abilities, shots) land on it with their stun, slow, root and knock; its wall stops foes' shots in flight, so Grimble's hand and Kael's chain never reach him or the ally behind it; shots and blows from behind land. Fixed: Kael's chain used to anchor to the aegis as if it were a wall (now a miss). A beam also cutting at the aegis (allies behind it) waits for ext/barrier-block-parity. Not in the source, kept: damage over time, pulls that are not hits, move speed behind it (60%, the footage never shows him walking), the 160 HP numbers. `bjorn audit: a shot from the front is stopped`, `Kael's chain from the front`, `Grimble's hand from the front/behind`, `a stun, slow and root riding a hit from the front` |
 | Shield Charge: whole-body invulnerable | LOW | (c) | Data: "shield briefly Invulnerable" during the bash; the shield is in front of the body for the whole dash, so the whole-body window is the same in practice. Kept |
 | Shift: cooldown 9 vs data 8 | LOW | (b) | `dash.cd` 8 (ranks 6.5 / 5) |
 | Shift: start burst | MED | (b) | Removed (DECISIONS: no bursts on dashes); the gameplay spin ring (2.2 m, its true hit radius) stays |
@@ -68,21 +87,32 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 ## Per-slot table (slot, input, our behaviour, source behaviour, difference and why)
 | Slot | Input | What it does now (our words) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive | knock into wall/foe | Crushed: stun 0.5 and 8 damage when any knock of his (the hammer out or back, Crushing Blow of any charge, 360 Smash, Shield Charge, Shield Slam) drives a foe into a wall; no heal. Guard from blocking (50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit). Guard stays our own loop |
+| Passive | knock into wall/foe | Crushed: stun 1.0 and 8 damage when any knock of his (the hammer out or back, Crushing Blow of any charge, 360 Smash, Shield Charge, Shield Slam) drives a foe into a wall; no heal. Guard from blocking (50 turns the Shield Charge into a Shield Slam) | Valiant Strength: knocked into a wall, stunned | Data: any knock into a wall, no heal (the foe-into-foe case was removed in the audit). Guard stays our own loop |
 | LMB | tap | War hammer thrown to the cursor (clamped to 9 m, at least 2.5 m), 24 m/s, through foes (12); stays planted (head-down in the ground under an upright gold beacon ray with rising chevrons, your team sees foes within 4.5 m) until called back | Lands at the cursor, stays until recalled | Matches; no auto-return |
 | LMB | tap again | Recall: flies back hitting on the way (12), caught with an ember flash | 175 out, 175 back | Equal hits, as the source |
 | LMB | hold | Owner item 59: side-on and crouched, the shield arm forward, the hammer whirling round him at arm's length (2.5-4 turns a second with the charge, a gold-orange trail behind its head, a whoosh each turn), turning with the cursor (walks at 55%); a glint on the head from 0.6 s that grows. The whirl is the charge motion only, nothing is hit until the release (the owner's call is open: ext is asking). At full (1.25 s) a short ring-free flash on its head, a click and the cursor flare open the perfect window (0.18 s, the glint burning white-hot while it's open), the whirl still going. Release: Crushing Blow 36-66 (3x-5.5x the throw), 180 degree reach 2.8 m, knock 5-13, stun 0.4 at full; a flaming crescent (white-yellow core, orange and red edges); the slam steps him 1.5-1.8 m forward in 0.24 s; white dust on the target, a debris trail as it flies | A static charged swing, no lunge (footage) | The whirl, the forward step and the walk follow the owner (the whirl is item 59, over the footage notes); tracking, glint, flare, crescent and ratios follow the footage |
 | LMB | release in the perfect window | Perfect swing (owner #49): the same blow with 1.4x the knock, a T4 hit-stop (no screen shake: owner #50), and a launch: 4 m forward in 0.3 s, feet off the ground (`bul_launch`), a plant and skid on landing, no ground burst. Carried off a drop (2 m+ or the abyss) the glider opens by itself; glide or jump pressed during it jumps him out into a glide. Either way the glider takes the launch's speed by the shared hand-off (`Hunter.glide_handoff`, 75%). Let go in the air (out of a jump or a dash: owner #51) it launches him on from there, holding his height like an air dash, then the glider takes it (2 m+ up) or he drops on with its speed. A mantle ends it at once; a jump or Shift in it goes within a step | No lunge at all (footage) | Owner override: a timing reward and a movement tool |
-| RMB | hold | Up 0.1 s into the hold, following the cursor at once. His aegis: a curved wall of riveted, forged gold plates (4.2 m chord, 1.7 m tall) with ribs, a rim and a hammer boss that rises out of the ground in a puff of dust; sparks and a flash on each block, darkening as it weakens, crumbling into chunks and SHIELD BROKEN when it breaks (locked 3 s). A foe that meets it is pushed back 2 m (once per 0.6 s each; a dashing one is stopped), shown by a pulsing double chevron in front of it that flashes on a push | Curved pale gold slab, sparks, a break burst | Matches, our own look |
+| RMB | hold | Up 0.1 s into the hold, following the cursor at once. His aegis: a clear ivory dome (4.2 m chord, curving back toward him, 1.4 m tall) with a halo along its rim, rising out of the ground in a puff of dust; sparks and a flash on each block, cracking as it weakens, shattering into shards and SHIELD BROKEN when it breaks (locked 3 s). A foe that meets it is pushed back 2 m (once per 0.6 s each; a dashing one is stopped), shown by a pulsing double chevron in front of it that flashes on a push | Curved pale gold slab, sparks, a break burst | Matches, our own look |
 | RMB | tap / release | Nothing: letting go only lowers the aegis. The Bash is the Shield Charge on Shift | Shield Bash only with Shift while shielding | Data: the bash lives in one place |
 | Shift | tap | 360 Smash: a hard fixed 3.5 m dash (~20 m/s, 0.17 s, the sheet's run-up), sliding on about 1 m through one full spin hit around him (2.2 m, 24 = 2x the throw, push 7) with a red-gold swirl ring | Short fixed dash, one 360 spin on arrival (350 = 2x the throw) | Matches; cooldown 8 s (data; the card showed 9.2) |
-| Shift | aegis up | Shield Charge (the Bash): 4.2 m, invulnerable, 10, push 11, Crushed on a wall. Its own 6 s cooldown on the RMB slot (no dash charge spent; on cooldown the Shift does nothing); at 50 Guard it ends in a Shield Slam (cone 2.6 m, 18, push 12, stun 0.6, spends 50) | Shield Bash (6 s, Brightshield + Shift), shield briefly invulnerable | Data: own cooldown. Slam carried over from the old RMB bash |
+| Shift | aegis up (or RMB held, in the 0.1 s it takes to rise) | Shield Charge (the Bash): 4.2 m, invulnerable, 10, push 11, Crushed on a wall. Its own 6 s cooldown on the RMB slot (no dash charge spent, never the Spin Dash; on cooldown the Shift does nothing; a Shift in the rise raises the aegis and goes; in the air, riding Shield Surf, it is the same bash); at 50 Guard it ends in a Shield Slam (cone 2.6 m, 18, push 12, stun 0.6, spends 50) | Shield Bash (6 s, Brightshield + Shift), shield briefly invulnerable | Data: own cooldown. Slam carried over from the old RMB bash |
 | Shift / jump | LMB held | Owner #51: the swing keeps charging through a jump and a Shift dash (on the ground the dash is the short plain one, no spin, on a full charge; in the air the lumber) and swings where he lets go: in the air with no step, keeping his speed; in a dash riding it; in the window a perfect launch from there. Out of the dash he eases back into the wind-up pose at the charge reached. A mantle (owner #30), glide, knock, stun or another ability ends the hold, and the button must come up before it can start again; a jump or Shift in the swing's step or the launch goes at once | Wiki (Spin Dash): Shift while charging ends the Hammer Smash in a short dash without the spin | Owner #51 keeps the charge (supersedes #30's dash cancel) |
 | Shift | in a dash / planted | A press in the dash: LMB waits for its end (a tap throws or recalls, held it winds up), RMB, E and Q go mid-dash, X ends the dash and plants him. Shift while planted for Faultline goes when the plant ends. Every pair: [dash_interactions.md](dash_interactions.md) (content/dash_flow/bulwark.json) | Not in the data or footage beyond the Shield Bash and the short dash out of a Hammer Smash | Our picks, nothing dropped |
 | Shift | long dash | In the air or out of charges: a lumbering shoulder shove (`bul_lumber`), shoving foes aside | (base dash) | Our per-hero base dash variant |
-| E | tap | Mending Ground: round the hammer wherever it is (planted, flying, or on himself with the hammer in hand), following it. A green light column comes down over 1 s with a filling ring everyone sees, then a lasting zone: allies inside get 2 health every 0.5 s for 4 s, and it ends in a burst of 18 (mends the aegis 60 while raised; a downed teammate inside gets a third of the revive). No slow on foes. Cooldown 12 s | Regen Field: a healing zone round the hammer wherever it is, bursting for extra healing | Data: a lasting zone with a burst, 12 s base (8 s at the top rank) |
+| E | tap | Mending Ground: round the hammer wherever it is (planted, flying, or on himself with the hammer in hand), following it. An ivory light column comes down over 1 s with a filling ring everyone sees, then a lasting zone: allies inside get 2 health every 0.5 s for 4 s, and it ends in a burst of 18 (mends the aegis 60 while raised; a downed teammate inside gets a third of the revive). No slow on foes. Cooldown 12 s | Regen Field: a healing zone round the hammer wherever it is, bursting for extra healing | Data: a lasting zone with a burst, 12 s base (8 s at the top rank) |
 | X | tap (level 6) | Faultline: planted 0.4 s with the hammer overhead while a 16 m lane of four cells, 4 m long and 4.5 m wide, shows to everyone; the slam sends the fissure racing down the lane, striking each foe on it once (4, stun 0.5), then the ground erupts cell by cell (0.15 s apart) and throws each foe once (18, slowed 50% for 1.5 s). A wall or ledge stops it; it runs on over a drop or the abyss (drawn at his height). A glowing scar stays 10 s and slows foes on it 20%. A stun in the wind-up interrupts it (cooldown back to 8 s). He is planted only for the wind-up and the slam (0.6 s); from there he walks at full speed while the lane erupts where it was cast. Cooldown 40 s (0.8 x the data's 50 s) | Earthshatter / Abyssalbreaker: a fissure down a lane, a small first hit with a brief stun, cascading eruptions with a heavy slow, blocked by walls, a lingering crack | Lane 2.5 bh wide and 8.9 bh long, as the sheet. Eruption 1.5x the throw (source 1.2x) |
 | R | - | the Boki Merge | - | R is the Merge for every hero. No slot held a folded Earthshatter, so nothing is unfolded |
+
+## Moving while casting (RMB and E)
+
+Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is mostly a hero standing in front of a dummy, so 'not shown' means no body displacement can be read (the frames are not on this worker; sheet text used). Ours = the kit's `move_k()` / `CastHold` through `Hunter._chase_mod` (`ak.pace()`), and `Hunter` facing (`face` follows `aim_dir()` at 20/s unless a kit locks it). Facing follows the cursor in every row unless the row says otherwise. Audit of 2026-11-09 (ext/cast-move-b); no value changed.
+
+| Move and phase | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB raise (0.1 s cast) | Card 0.1 s; shield sweeps with the cursor at once, he turns with it | Walks at 60% on the ground (`shield.slow` 0.6), full speed in the air, faces the cursor | source: he mostly stands still, number not measured; no owner note, left, suggestion only |
+| RMB held | Movement while held: not clearly seen | 60% on the ground, plus 55% if an LMB wind-up (`lmb_t`) runs | unmeasured |
+| RMB lowered | Not shown | Free the step it drops | n/a |
+| E cast (column 1 s, then zone) | Green column falls on the planted hammer; body not described | Free at full speed, faces the cursor | unmeasured, no data to change |
 
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
@@ -91,7 +121,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 - The throw's max range is 9 m (never thrown beyond about 7 bh in the footage); a cursor past it lands at 9 m.
 - The planted hammer never returns by itself (it comes back if he goes down or out).
 - The 360 Smash is a fixed distance (it stopped short of the cursor once) and only invulnerable for its first 0.1 s.
-- Knockout is a 0.5 s stun and 8 damage; the old heal (24) is gone (data). The stun length is ours (the data says "Stunned").
+- Knockout is a 1.0 s stun and 8 damage; the old heal (24) is gone (data). The data says "Stunned" with no number; the footage label stays up about 1 s or more (briefs/hero-ref/bjorn.md), so 1.0 (was 0.5, ours).
 - The aegis keeps 160 HP, regenerating 20/s after 2 s down, and he walks at 60% behind it.
 - The blue ring on the target before the Smash is the hammer's reveal, not part of the dash.
 - The wind-down is a 0.3 s glider lock after the slam and the 360 spin.
@@ -104,7 +134,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 - The throw flies at least 2.5 m: the owner wants it to land where the cursor is anywhere in range, so the source patch note's 5 m minimum is cut to 2.5 m (a point-blank click still clears his own feet).
 
 ## Body and movement (hero sheet: Body, scale and movement feel)
-- About 1.15 of a medium tall to the top of the head (`--warden-model-check`) and ~1.6 wide with the coat and fur (`body.build` 1.18 over the heavy build); the hit radius is 0.46 (1.15 x standard, `body.hit_r`, docs/HITBOX_SIZE.md), so the wider model isn't an easier target. The Warden model (concept sheet, `scripts/heroes/warden_bulwark.gd`: the drowned ferryman, the prow shield and ice-cased oar in `PinBjornWeapons`) has a small head on a big body: `body.head` 0.75, `body.neck` 0.08, `body.size` 1.02.
+- About 1.15 of a medium tall to the top of the head (`--warden-model-check`) and ~1.6 wide with the coat and fur (`body.build` 1.18 over the heavy build); the hit radius is 0.50 (1.25 x standard, DECISIONS, `body.hit_r`, docs/HITBOX_SIZE.md), so the wider model isn't an easier target. The Warden model (concept sheet, `scripts/heroes/warden_bulwark.gd`: the drowned ferryman, the prow shield and ice-cased oar in `PinBjornWeapons`) has a small head on a big body: `body.head` 0.75, `body.neck` 0.08, `body.size` 1.02.
 - Runs pitched far forward (~0.32 rad at a full run), the shield shoulder leading, shoulders square; quick steps at `spd*2.9` (HunterAnim.STRIDE), as fast as the lights.
 - His dash after-image is his own: a gold chevron wake at chest height (BjornFx.afterimage), not the shared ghost.
 - Nameplate at 2.6 m (`plate_offset` in the archetype JSON, read by `HudPlate.plate_offset(h)`).
@@ -124,7 +154,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Hammer Smash full at 1.25 s | [wiki](https://supervive.wiki.gg/wiki/Oath) | full by 2.4 s | built | `bjorn LMB held: the full-charge flare at 1.25s` |
 | Shift during a Hammer Smash: a short dash without the spin, reduced cooldown | [wiki: Spin Dash](https://supervive.wiki.gg/wiki/Oath) | not shown | built as the short dash without the spin; owner #51 keeps the charge, so it costs a full charge (the reduced cooldown went with the ending) | `combo bulwark: hold LMB > Shift` |
 | Shield up + Shift: a bash with its own 6 s cooldown, briefly invulnerable | in-game data, [wiki: Shield Bash](https://supervive.wiki.gg/wiki/Oath) | not shown | built: Shield Charge on the RMB slot's cooldown | `combo bulwark: shield up > Shift`, `... spends no dash charge and has its own 6 s cooldown` |
-| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, [wiki: Valiant Strength](https://supervive.wiki.gg/wiki/Oath) | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the 360 Smash, the Shield Charge and Slam; walls only | `combo bulwark: the 360 Smash into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him` |
+| Any knock into a wall (the Spin Dash included) stuns, no heal | in-game data, [wiki: Valiant Strength](https://supervive.wiki.gg/wiki/Oath) | confirms the stun (0171) | built: the thrown and recalled hammer, any Crushing Blow, the 360 Smash, the Shield Charge and Slam; walls only | `combo bulwark: the 360 Smash into the wall Crushes`, `a half-charged blow ... Crushes`, `a Crush no longer heals him`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
 | Regen Field: a lasting zone round the hammer with a burst at its end; heals the shield only while it's up; never repairs a broken one | in-game data, [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | confirms the zone (0414) | built: 4 s of ticks, then the burst | `combo bulwark: Mending Ground is a zone`, `bjorn small: Mending Ground doesn't repair a broken aegis` |
 | Allied wisps hit by the burst begin to resurrect | [wiki: Regen Field](https://supervive.wiki.gg/wiki/Oath) | not shown | built: a downed teammate inside gets a third of the revive | `bjorn small: a downed teammate ... starts reviving` |
 | Ult: a fissure that travels forward from him | [wiki: Abyssalbreaker](https://supervive.wiki.gg/wiki/Oath), sheet | confirms (f29-f39) | built: 4 cells near to far, 0.15 s apart | `bjorn ult payoff` |
@@ -133,7 +163,7 @@ Rows from the kit audit (briefs/specs/kit-audit/zedran_bjorn_pin.md, audited on 
 | Ult: planted for the wind-up and slam, the lane shown first | sheet | confirms (f25-f31) | built | `bjorn ult cast: planted`, `bjorn ult telegraph` |
 | Ult: a crack stays about 10 s | sheet | confirms (f43-f71) | built: slows 20% | `bjorn ult small: the scar ...` |
 | Ult: interrupted by a stun in the wind-up | ours | - | built | `bjorn ult small: a stun in the wind-up interrupts it` |
-| Dash hits refund Shield Bash (rank 4) | in-game data | - | built at rank 3 (our last rank): a 360 Smash that hits refunds the Shield Charge | `combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge` |
+| Dash hits refund Shield Bash (rank 4) | in-game data | - | built at rank 3 (our last rank): a 360 Smash that hits refunds the Shield Charge, with the dash-reset cue (sound and Shift pop) when a charge or cooldown was spent | `combo bulwark: rank 3, a 360 Smash that hits refunds the Shield Charge`, `combo bulwark: dash refund, rank 3 miss / rank 1 hit` |
 
 ## Kit data pass (SERVER_UPDATE7, in-game data wins over the footage)
 | Item | Before | After | Conversion |
@@ -172,6 +202,7 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | Hold LMB, jump, let go in the air | Charges on through the jump; the swing goes in the air, no step, his speed kept | `bjorn #51` lines |
 | Hold LMB, jump or Shift, let go in the window | The perfect launch from there (in the air, at his height) | same |
 | Swing's step or perfect launch, then jump or Shift | Acts within 0.1 s | same |
+| Every move's wind-up, hit and recovery | Held to the sheet's frames and the clip beats (table in Animation timing) | `bjorn time` lines (`tools/bjorn_anim_time_check.gd`) |
 | E with the aegis down / raised | Ticks heal; the burst heals / heals and mends it |
 | Hammer recalled while the zone stands | The zone follows it back to him | same |
 | A Boki merge mid spin / aegis | The charge drops with no swing; the aegis comes down keeping its HP | same |
@@ -181,10 +212,26 @@ Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x t
 | A merge in the Faultline wind-up | No slam; a fissure already running finishes | same |
 | Faultline then a merge on a full-health light hunter | Standing (burst cap) | same |
 
+## Animation timing (measured in game; source = footage frames of 0.2 s, so +-0.2 s)
+Seconds from the input at 60 Hz, printed as `AKTIME` lines by `tools/bjorn_anim_time_check.gd` in `--bulwark-combo-check`.
+| Move | Source (briefs/hero-ref/bjorn.md) | Ours before | Ours after |
+|---|---|---|---|
+| Throw, hammer leaves the hand | cock 1 frame (0033), release next (0034) | 0.13 (`THROW_WIND` 0.08 + 0.05 step), the arm still cocked (clip release key 0.14) | 0.15, as the arm comes through |
+| Throw, key pose blend | one-frame cock | 0.1 s crossfade smeared the cock (clip key 0.07) | 0.04 s (`fade` in `warden_anim/breaker.json`) |
+| Recall, catch | flight 0.2-0.4 s | 0.17 | same (the catch is inside the 0.48 s clip; suggestion below) |
+| Smash, wind-up pose | on the hold (tap 0.2) | 0.23 | same |
+| Smash, blow after release | impact the frame after the sweep | 0.03 (clip impact key 0.08), 0.1 s blend | same hit; 0.04 s blend so the impact pose shows |
+| Smash, recovery | about 0.4 s after the impact | 0.61 free | same |
+| 360 Smash, spin hit | dash 0.15-0.2 s, one spin on arrival | 0.22, inside the spin (0.17-0.33) | same; 0.04 s blend |
+| 360 Smash, spin and recovery | spin 0.15-0.2 s, recovery about 0.4 s | 0.16 / 0.42 | same |
+| Mending Ground, column | about 1 s after the cast | 1.02 (hammer down at clip key 0.26) | same |
+| Faultline slam (X) | wind 0.4, plant 0.2 | same | same; 0.04 s blend into the slam |
+Suggestions, not built (parity first): the recall catch lands at 0.17 s, before the clip's catch key (0.3 s); the ult streak `lead` is 0.2 s against about 0.4 s in the footage.
+
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
-| LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.12 s after the press, as the arm comes through |
+| LMB tap (throw) | `bul_throw` | cocked low and behind one frame (0.07 s), the overhand throw (0.14 s); the hammer leaves the hand ~0.15 s after the press, as the arm comes through |
 | LMB tap again (recall) | `bul_recall` | hand out, the catch |
 | LMB hold (whirl, owner item 59) | `bul_smash_wind` (held) | side-on and crouched, the hammer arm out to the side, the shield arm forward, sinking lower to full charge; BjornFx whirls the model's "Hammer" pivot on the kit's angle (eases out of the hand over 0.12 s). The release keys still start from the coil (`BUL_COIL`), so the hammer hauls back on the swing's first frame |
 | LMB release (Crushing Blow) | `bul_smash` | from the coil, sweep from behind to front in one frame, crash down, the step, 0.4 s recovery |
@@ -206,7 +253,7 @@ Strips: `--arena-demo=anim_<id> --arena-shot=<png>`.
 - Telegraphs and cursor: `AimKit.charge` / `flare` during the spin, `AimKit.circle` "e" (all) while Mending Ground comes down.
 - Sounds: `tools/gen_sfx_breaker.py` writes `audio/bjorn_*.wav` and `bulwark_*`.
 - Merge: `_drop_holds()` drops the spin (`lmb_t`, `h.mel_hold`, the spinning hammer and glint), lowers the aegis, and drops the Faultline wind-up (`BjornUlt.phase == "wind"`).
-- Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: `cast_ult` returns `HeroUlt.press(self, _start_ult)` behind main's `HunterKeys.ult_pressed`), `scripts/arch/kits/bjorn_ult.gd` (BjornUlt: the lane, the slam, the eruptions, the scar, pooled basalt spikes, seams, streak and scar). Data: `content/archetypes/bulwark.json` `x`. Sounds: `bjorn_ult_wind`, `bjorn_ult_slam`, `bjorn_ult_rumble`, `bjorn_ult_crackle`. Telegraph: one AimKit `lane` per cell (`x0`..`x3`, `all`).
+- Ult on X: `scripts/arch/hero_ult.gd` (HeroUlt, the shared X base: `cast_ult` returns `HeroUlt.press(self, _start_ult)` behind main's `HunterKeys.ult_pressed`), `scripts/arch/kits/bjorn_ult.gd` (BjornUlt: one outlined lane with a glowing crack, the slam, pooled light columns and seams per cell, the streak, the crack left as the scar; the stun stars over each foe struck). Data: `content/archetypes/bulwark.json` `x`. Sounds: `bjorn_ult_wind`, `bjorn_ult_slam`, `bjorn_ult_rumble`, `bjorn_ult_crackle`. Telegraph: one AimKit `lane` per cell (`x0`..`x3`, `all`).
 - No Net shape change.
 
 ## Payoff

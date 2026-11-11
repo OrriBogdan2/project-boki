@@ -40,7 +40,7 @@ Current binds are in `scripts/core/game.gd` `_setup_input()`.
 |---|---|---|
 | LMB | weapon fire | weapon fire (unchanged) |
 | RMB | the weapon's own utility (9 different abilities, one per weapon) | the **archetype's RMB**, tied to firing, with contextual variants (tap, hold, airborne, during E, resource full). Both weapons of an archetype share the verb |
-| Shift | class dodge (phase step, roll, shoulder charge) | the **archetype dash** (charges from weight) |
+| Shift | class dodge (phase step, roll, shoulder charge) | the **archetype dash** (charges: its own `dash.charges`, else the weight class's) |
 | Space / Mouse 5 | jump / glide | unchanged |
 | Q | active glove (`gear1`) | **unchanged**: gloves stay the run's loot layer, so Q is still the glove |
 | E | the kin's ability (`signature`) | the **archetype's E** (usually utility). The kin's old E becomes the kin's **infusion source** (§4) |
@@ -216,8 +216,7 @@ The six kin today:
 ## 5. Merge vs R: resolving the conflict
 
 > **Superseded (docs/decisions/0001-boki-merge-and-commands.md):** R is the Merge for every class. The
-> options below are kept for the record; the class's own R stays reachable behind
-> `content/rules/boki_system.json` `class_ults` until the hero-port work folds it into the kits.
+> options below are kept for the record; the class R switch (`class_ults`) is removed.
 
 Today the merge **is** R (the bond ultimate, unlocking at run level 6). The new kit gives R to the
 archetype. Options:
@@ -743,7 +742,7 @@ front. Break the Banner (60 HP). Melee inside Bastion.
 |---|---|
 | Rail Charge, Earthshatter, Tripwire Mine, Breach, Bulwark, Shadow Step | archetype RMB variants (above) |
 | Razor Disc, Leash Bolt, Riposte | retired as RMBs (the data stays and can return as gloves) |
-| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Swap) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
+| Kin E actives (Stinger Hook, Gravity Slam, Prism Wall, Puffcap Mines, Echo Chain, Moon Mark) | infusion sources. They're still playable as the kin's **auto** ability if desired, but the kin keeps one auto. Recommendation: keep each kin's current auto and archive the actives as infusion sources |
 | `kin` slot | archetype E |
 
 ## 8. Open questions
@@ -1164,10 +1163,10 @@ rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe
 ### Couldn't reproduce (or chose not to)
 
 - Mana: none of it (costs, refunds on hit, the Lunge's double cost) exists in our game.
-- Brall: climbing double-height walls; dodging shots building Blazing Spirit (his level-4 dash
+- Brall: climbing double-height walls is now **built** (`climb_tall` for Kael `juggernaut` and the Archer in `content/rules/hunter_move.json`). Still missing (see docs/KIT_PARITY.md, Kael): dodging shots building Blazing Spirit (his level-4 dash
   upgrade); Volcanic Rebuke sending a knocked hunter straight to the deathbox (ours resets but the
   knocked hunter goes down as usual); turn restriction when dashing out of a Smash.
-- Shiv: Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
+- Shiv (Sable): the Bolas row is **owner-overridden** (30% slow, cd 7, owner item 53; see docs/KIT_PARITY.md Sable RMB), and the Dagger row matches (E: 14 m, 6 s, cd 15). Still missing (see docs/KIT_PARITY.md, Sable): Farstep Dagger sticking to moving objects other than hunters and monsters; Bolas hitting
   destructibles; whether the weaker Fusillade dashes empower (ours do).
 - The wiki gives no Malice stack cap or duration (ours: 5 and 4s) and no Blazing Spirit duration
   (ours: 6s Enraged). Online, Grounded, blight and Shred go through Net event `["kst", nid, kind,
@@ -1184,7 +1183,9 @@ for the SMG's rate), Primed +10, Bola 6 (+13 tangled), Jackpot 4.5 a knife (4 of
 the crash 24. A medium (145) falls to the Thief in about 4s of steady fire with two Primed hits, to the
 Juggernaut in about 4s with a sweet-spot slam (rank 3 adds the crash on top).
 
-### R removed: the ult choice (kits2-nor, Nov 2)
+### R removed: the ult choice (kits2-nor, Nov 2) — superseded
+
+> **Stale since the ult pass (server update 6):** Sable and Kael each have their own ultimate again (on X; see docs/heroes/thief.md and docs/heroes/juggernaut.md), and the Boki Merge has its own `ultimate` key. The text below is history; the R-to-Merge rule no longer holds for them (the Merge is the same for every hero, on its own key). Doomfall/Jackpot-as-Smash/Mark-trigger folds are only built where those hero docs still list them.
 
 Owner decision (Nov 1): R becomes the Boki Merge for every hero, so the Thief and Juggernaut lose
 theirs. Rather than drop the wiki's ultimates, each is folded into the kit where it already fits:
@@ -1198,7 +1199,7 @@ theirs. Rather than drop the wiki's ultimates, each is folded into the kit where
   the rim ring and its blight are gone.
 
 `docs/heroes/thief.md` and `docs/heroes/juggernaut.md` carry the per-slot tables and the checks that
-assert each combination. The class-ultimate framework (`ArchKit.use_r`, `class_ults`) stays for the
+assert each combination. The class-ultimate framework (`ArchKit.use_r`) stays for the
 other four kits; a kit with no `"r"` in its JSON refuses the press.
 
 ## Hero rebuild: Sparkle (mage) and Vex (gunslinger), Nov 1
@@ -1208,7 +1209,7 @@ heroes under the same ids: **Sparkle** (id `mage`, now Light: Sparks, Wirerun, C
 (id `gunslinger`, Medium: Fever, Slipstep, Burr Charge, Longneedle). Neither has an R (the Boki Merge owns it).
 The old Mage and Gunslinger sections above are history. Per-slot tables, research notes and combinations:
 `docs/heroes/mage.md` and `docs/heroes/gunslinger.md`; combos are checked by `--mage-combo-check` and
-`--gunslinger-combo-check`. `Hex` (scripts/arch/hex.gd) is no longer used by a kit.
+`--gunslinger-combo-check`. No kit applies `Hex` (scripts/arch/hex.gd) any more; only its `Hex.active` checks remain (hunter.gd, arch_kit.gd, kit guards), so the status is effectively unused.
 
 ## Inspired by (per hero)
 
@@ -1229,3 +1230,31 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 | `rimewright` | Neve, the Rimewright | [Celeste](https://supervive.wiki.gg/wiki/Celeste) | `docs/heroes/rimewright.md` |
 | `dolm` | Tenzo | [Tetra](https://supervive.wiki.gg/wiki/Tetra) | `docs/heroes/dolm.md` |
 | `ostra` | Motley | [Void](https://supervive.wiki.gg/wiki/Void) | `docs/heroes/ostra.md` |
+
+## Kit parity lock
+`content/rules/kit_parity.json` holds sourced kit numbers (hero, slot, `field` = dotted path into `content/archetypes/<hero>.json`, `value`, `tol`, `evidence`). `--kit-parity-check` fails when the JSON drifts outside `value ± tol`, so a retune of a matched number is a deliberate edit of both files. It sits beside the combo checks (which assert our spec); this one asserts the source.
+- **Add a row** only for a number the kit audit (`briefs/specs/kit-audit`) marks as matching, with `[D]` evidence from `briefs/supervive-data` (an owner decision in DECISIONS / OWNER_REVIEW wins over it). Ranges, durations, charges, ratios; not cooldowns, which we scale on purpose.
+- A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
+- Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
+- Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+## Body and hitbox parity (item 46 follow-up, Nov 8)
+
+Each hero's height and breadth against the source hero's footage sheet (`briefs/hero-ref/<file>.md`, "Body, scale and movement feel"; the data in `briefs/supervive-data` has no per-hero hitbox, only one bot agent radius 0.43 m for all). Source index `S = height x sqrt(width)`, both against a medium; `hit_r = standard x clamp(1 + 0.5 (S - 1), 0.85, 1.15)`. A hit radius changed only where it was off by 0.015 m or more (footage error is about 5-10%). **No art mesh was rescaled** (every Warden has an art branch); the model height is the true height from `--warden-model-check`, so the art follow-ups are listed. DECISIONS wins: Breaker's model is 1.5x and his hitbox the heavy class's 0.50 m.
+
+| Archetype | Source (file) | Source height x / width x | Model height before = after | `hit_r` before | `hit_r` after | Note |
+|---|---|---|---|---|---|---|
+| bulwark | Oath (bjorn) | 1.15 / 2.0 | 1.50 | 0.460 | **0.500** | DECISIONS: model 1.5x, hitbox 0.50 m (past the item-46 cap) |
+| dredge | Kingpin (dredge) | 1.17-1.2 / 1.5 | 1.30 | 0.452 | 0.452 | at the high end already (cap 0.46) |
+| juggernaut | Brall (juggernaut) | 1.12 / 1.3 | 1.26 | 0.428 | **0.445** | hunched; model 1.26 vs 1.12: art follow-up (Kael, stature carried as a hunch) |
+| gunslinger | Ghost (venator) | 1.0 / 1.0 | 1.04 | 0.416 | **0.400** | the source's medium reference |
+| ostra | Void (ostra) | 1.0 with hover / 1.0 | 1.18 | 0.412 | 0.412 | within 0.012; model 1.18 is owner's "bigger, menacing" (size 0.9, Nov 4) |
+| mage | Joule (vireo) | 0.96 / 1.15 (shoulders) | 1.04 | 0.400 | 0.400 | model 8% over: art follow-up (Ryzz) |
+| archer | Myth (pin) | 0.98 / 1.0 | 0.98 | 0.392 | 0.392 | matches |
+| dolm | Tetra (breah) | 0.97 / 1.2 (fists excluded) | 1.19 | 0.388 | **0.412** | model is lean and 1.19 tall vs short and blocky: art follow-up (Tarek) |
+| thief | Shiv (dancer) | 0.96 / 0.9 | 0.95 | 0.384 | 0.384 | matches |
+| rimewright | Celeste (tamsin) | 1.15 / 0.5 | 1.08 | 0.380 | **0.362** | tall but half a medium wide; size 1.15 already matches (Neve) |
+| ashwick | Felix (linwick) | 0.90 / 1.0 (pack) | 1.02 | 0.376 | 0.376 | model 13% over: art follow-up (Cinder; flame excluded) |
+| tender | Elluna (mooshmoosh) | 0.70 / 1.0 | 0.60 | 0.340 | 0.340 | at the floor; model 0.6 vs 0.70 is item 108's owner shrink |
+
+`--hitbox-size-check` asserts each `hit_r` equals the value above (Breaker's band top is 1.25 by DECISIONS); `--warden-model-check` freezes the same radii.
