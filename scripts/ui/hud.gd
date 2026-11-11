@@ -568,15 +568,7 @@ func _draw_top(sz: Vector2) -> void:
 		if not h.out and not h.extracted: teams[h.team] = true
 	var cells := [["paw", str(teams.size()), INK], ["knock", str(m.player.kills if m.player else 0), Color("ff9a8a")],
 		["burst", str(m.player.knocks if m.player else 0), Color("ffd27a")], ["gem", str(m.player.gems if m.player else 0), GOLD]]
-	var cw := 58.0
-	var cr := Rect2(Vector2(sz.x - 18 - cw * cells.size(), 18), Vector2(cw * cells.size(), 34))
-	_rounded(cr, Color(0.04, 0.05, 0.08, 0.86), 8)
-	for i in cells.size():
-		var cx := cr.position.x + cw * i
-		Icons.draw(c, String(cells[i][0]), Vector2(cx + 17, cr.position.y + 17), 7.0, Color(cells[i][2], 0.85))
-		_text(Vector2(cx + 28, cr.position.y + 23), String(cells[i][1]), 15, cells[i][2], big)
-		if i > 0: c.draw_line(Vector2(cx, cr.position.y + 7), Vector2(cx, cr.end.y - 7), Color(1, 1, 1, 0.1), 1.0)
-	feed_top = cr.end.y + 10.0
+	feed_top = HudTopRow.draw_counters(self, sz, cells) + 10.0
 
 ## The duel room: what you're up against at the top, and your numbers on the right.
 func _draw_duel(sz: Vector2) -> void:
@@ -828,13 +820,7 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var xl: Array = m.exits.clock_line() if m.exits else ["", MUTED]
 	if left < 30.0 and (m.exits == null or m.exits.active_for(m.player.team if m.player else -9).is_empty()): phase = "ISLANDS FALLING"; pc = BAD
 	else: phase = String(xl[0]); pc = xl[1]
-	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
-	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
-	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-	_text(Vector2(r.get_center().x - pw * 0.5 + 6, r.position.y + 19), phase, 11, pc, big)
-	if m.player:
-		var lt := "LV %d" % m.player.lvl
-		_text(Vector2(r.end.x - 10 - big.get_string_size(lt, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x, r.position.y + 19), lt, 12, Color("ffd27a"), big)
+	r = HudTopRow.draw_clock(self, r, [_fmt(left), BAD if left < 30.0 else INK], [phase, pc], ("LV %d" % m.player.lvl) if m.player else "")
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
