@@ -145,14 +145,14 @@ func _chest_and_keys() -> void:
 	P.teleport(c["pos"] + Vector3(0.8, 0, 0))
 	P.chest_keys = 0
 	var pr := KeyChest.prompt(P, c)
-	ok("no key: the prompt says locked", String(pr["kind"]) == "locked", String(pr["label"]))
+	ok("no key: the prompt says locked", String(pr["kind"]) == "locked", String(pr["note"]))
 	m._open_chest(P, c)
 	ok("no key: the chest stays shut", not c["open"])
 	P.chest_keys = 2
 	pr = KeyChest.prompt(P, c)
 	ok(
 			"with a key: the prompt offers to open it",
-			String(pr["kind"]) == "chest" and String(pr["label"]).contains("1 key"), String(pr["label"]))
+			String(pr["kind"]) == "chest" and String(pr["note"]).contains("1 key"), String(pr["note"]))
 	var gems0 := m.pickups.size()
 	m._open_chest(P, c)
 	ok("opening uses exactly one key", c["open"] and P.chest_keys == 1, "keys %d" % P.chest_keys)

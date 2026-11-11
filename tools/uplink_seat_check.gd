@@ -39,7 +39,7 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 		if d.get("dark", false):
 			P.teleport(d["pos"] + Vector3(0.6, 0, 0.6))
 			run.call(m, 0.1)
-			var lab := String(m.exits.interact_for(P).get("label", ""))
+			var lab := String(m.exits.interact_for(P).get("note", ""))
 			say(not m.exits.startable(d) and lab.contains("dark"), "a dark outpost can't be started: '%s'" % lab)
 			break
 	# 6:00: open; P's squad starts it

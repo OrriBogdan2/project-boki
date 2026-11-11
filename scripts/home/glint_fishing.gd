@@ -354,8 +354,8 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "fishing"}
 
-func label() -> String:
-	return "Go Glint Fishing with %s" % Save.active_kin().get("name", "your partner")
+func label() -> Dictionary:
+	return {"verb": "Fish", "who": "Glint Fishing", "note": "with %s" % Save.active_kin().get("name", "your partner")}
 
 func use() -> void:
 	var ak := Save.active_kin()

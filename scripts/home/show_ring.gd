@@ -334,8 +334,8 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "show"}
 
-func label() -> String:
-	return "Enter the Show Ring (show %s)" % Save.active_kin().get("name", "your partner")
+func label() -> Dictionary:
+	return {"verb": "Enter", "who": "Show Ring", "note": "Show %s" % Save.active_kin().get("name", "your partner")}
 
 func use() -> void:
 	var ks: Array = h.hrace.entrants()

@@ -66,9 +66,8 @@ static func prompt(m, h) -> Dictionary:
 		return {}
 	var th := ShopStock.theme(String(v["theme"]))
 	var open: bool = _st(m)["vendor"] == v
-	var verb := "close" if open else "shop at %s  ·  %s" % [th["name"], String(th["tag"]).to_lower()]
-	return {"kind": "shop", "vendor": v, "label": "Press %s to %s" % [Settings.key_cap("interact"), verb],
-		"col": Color(String(th["col"]))}
+	return {"kind": "shop", "vendor": v, "verb": "Close" if open else "Shop", "who": th["name"],
+		"note": "" if open else String(th["tag"]), "col": Color(String(th["col"]))}
 
 ## The use key at a vendor: opens the panel, or closes it.
 static func use(m, h, best: Dictionary) -> void:

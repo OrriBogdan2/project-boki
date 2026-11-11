@@ -72,9 +72,9 @@ func _steal() -> void:
 		"loose: the downed hunter's wisp breaks loose and pops off them")
 	ok(fk.visible and absf(fk.pos.y - fell.y - KinWisp.SHOULDER_Y) < 0.05, "...floating at shoulder height")
 	_hold(p, fk, 0.2)
-	var label := String(m.interact.get("label", ""))
-	ok(label.contains(Settings.key_cap("interact")) and String(m.interact.get("kind", "")) == "wisp",
-		"grab: the prompt names the interact key (%s)" % label)
+	var verb := String(m.interact.get("verb", ""))
+	ok(verb == "Grab" and bool(m.interact.get("hold", false)) and String(m.interact.get("kind", "")) == "wisp",
+		"grab: the prompt is a hold to grab (%s %s)" % [verb, m.interact.get("who", "")])
 	ok(KinSteal.loose(fk), "...a short hold is not a grab")
 	_hold(p, fk, 0.7)
 	ok(KinSteal.stolen(fk) and fk.owner_h == p and fk.team == p.team and not KinSteal.loose(fk) and fk.wisp,
@@ -108,7 +108,7 @@ func _steal() -> void:
 	m.knock(mate, null, {})
 	_frames(0.1)
 	_hold(p, mk, 0.8)
-	ok(KinSteal.loose(mk) and KinSteal.count(p) == 2 and String(m.interact.get("label", "")).begins_with("Hands full"),
+	ok(KinSteal.loose(mk) and KinSteal.count(p) == 2 and String(m.interact.get("note", "")).begins_with("Hands full"),
 		"cap: a third is refused, 'Hands full'")
 	var at := p.pos
 	m.knock(p, null, {})

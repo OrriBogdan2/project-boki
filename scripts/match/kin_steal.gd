@@ -99,9 +99,11 @@ static func _ride_with(k: Kin, h: Hunter) -> void:
 	k.owner_h = h
 	k.team = h.team
 
-## The prompt for a loose wisp within reach, and the grab once interact is held long enough
-## (Match._update_interact). Empty when none is near.
-static func interact_for(m: Match, h: Hunter, want: bool, dt: float) -> Dictionary:
+## The prompt for a loose wisp within reach (InteractPick.gather). Empty when none is near.
+## Letting go of interact drops a grab under way.
+static func interact_for(m: Match, h: Hunter) -> Dictionary:
+	if not bool(h.inp.get("interact", false)):
+		h.set_meta("wgrab", 0.0)
 	var r := rules()
 	var near: Kin = null
 	var best := float(r["grab_r"])
@@ -111,24 +113,32 @@ static func interact_for(m: Match, h: Hunter, want: bool, dt: float) -> Dictiona
 			near = k
 	if near == null:
 		return {}
-	var key := Settings.key_cap("interact")
 	var own := near.home_h == h
 	if not own and count(h) >= int(r["carry_max"]):
 		var full := "Hands full: you carry %d stolen wisps" % count(h)
-		return {"kind": "wisp", "ent": near, "label": full, "col": Color("a2a8bb")}
-	var held := float(h.get_meta("wgrab", 0.0)) + dt if want else 0.0
-	h.set_meta("wgrab", held)
-	if held >= float(r["grab_s"]) and not h.remote:
-		h.set_meta("wgrab", 0.0)
-		if near.remote:
-			KinNet.event(m, "wgrab", h, Vector3.INF, near.nid)
-		else:
-			grab(near, h)
+		return {"kind": "wisp", "ent": near, "note": full, "col": Color("a2a8bb")}
 	var boki := String(near.rec.get("name", "Boki"))
-	var label := "Hold %s to grab %s's %s" % [key, near.home_h.pname, boki]
+	var col: Color = near.sp.get("glow", near.sp["color"])
+	var whose := "%s's %s" % [near.home_h.pname, boki]
+	var it := {"kind": "wisp", "ent": near, "verb": "Grab", "hold": true, "who": whose, "col": col}
 	if own:
-		label = "Hold %s to take %s back" % [key, boki]
-	return {"kind": "wisp", "ent": near, "label": label, "col": near.sp.get("glow", near.sp["color"])}
+		it.merge({"verb": "Take back", "who": boki}, true)
+	return it
+
+## One step of holding interact on a loose wisp (Match._update_interact): the grab once held grab_s.
+static func hold(m: Match, h: Hunter, it: Dictionary, dt: float) -> void:
+	if not it.has("verb"):
+		return
+	var held := float(h.get_meta("wgrab", 0.0)) + dt
+	h.set_meta("wgrab", held)
+	if held < float(rules()["grab_s"]) or h.remote:
+		return
+	h.set_meta("wgrab", 0.0)
+	var near: Kin = it["ent"]
+	if near.remote:
+		KinNet.event(m, "wgrab", h, Vector3.INF, near.nid)
+	else:
+		grab(near, h)
 
 ## Into a hunter's orbit: home if it is theirs, else stolen. Refused when it is not loose or their hands are full.
 static func grab(k: Kin, h: Hunter) -> bool:

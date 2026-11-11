@@ -27,11 +27,10 @@ static func time_for() -> float:
 	return float(rules()["box_revive_s"])
 
 ## The prompt at a teammate's box.
-static func prompt(h: Hunter, o: Hunter) -> String:
+static func prompt(h: Hunter, o: Hunter) -> Dictionary:
 	if h.box_reviving():
-		return "Bringing %s back  ·  moving or a hit stops it" % o.pname
-	var key := Settings.key_cap("interact")
-	return "Hold %s to bring %s back  ·  %.1fs, you take more damage" % [key, o.pname, time_for()]
+		return {"verb": "Reviving", "hold": true, "note": "Moving or a hit stops it"}
+	return {"verb": "Revive", "hold": true, "note": "%.1fs, you take more damage" % time_for()}
 
 ## One step of holding interact at a teammate's box (Match._update_interact).
 static func hold(m: Match, h: Hunter, b: Dictionary, dt: float) -> void:

@@ -135,12 +135,13 @@ func _wants() -> void:
 	ok(c["bubble"].visible and c["bubble"].get_node("bath").visible, "a dirty Boki further away shows a bath")
 	ok(c["bubble"].scale.x > b["bubble"].scale.x and KinWants.urgency(c["rec"]) > KinWants.urgency(a["rec"]) - 0.5,
 		"the more urgent want is bigger (%.2f)" % c["bubble"].scale.x)
-	ok(KinWants.line(a["rec"], true).contains("hungry"), "the prompt names it: \"%s\"" % KinWants.line(a["rec"], true))
+	var say := KinWants.prompt(a["rec"], true)
+	ok(String(say["note"]).contains("hungry"), "the prompt names it: %s" % say)
 	a["rec"]["likes"]["food"] = "kibble"
 	Save.d["items"]["kibble"] = 2
-	ok(KinWants.line(a["rec"], true) == "%s is hungry: give food" % a["rec"]["name"]
+	ok(KinWants.prompt(a["rec"], true) == {"verb": "Feed", "who": a["rec"]["name"], "note": "hungry"}
 		and KinWants.action(a["rec"], true) == "feed",
-		"with food on you the prompt is \"%s\"" % KinWants.line(a["rec"], true))
+		"with food on you the prompt is %s" % KinWants.prompt(a["rec"], true))
 	ok(KinWants.action(c["rec"], false) == "brush" and KinWants.action(c["rec"], true) == "bath",
 		"a dirty Boki gets a bath, or a brush with no pond")
 	a["rec"]["needs"]["food"] = 90.0

@@ -296,7 +296,7 @@ func _stalling() -> void:
 	ok(need.begins_with("Needs ") and need.contains("more wood") and short.has("wood") and int(short["wood"]) > 0,
 			"the site says so: '%s'" % need)
 	var it: Dictionary = home.hob.find(Vector2(home.ppos.x, home.ppos.z))
-	ok(home._label_for(it) == need, "and so does the prompt: '%s'" % home._label_for(it))
+	ok(HomePrompt.item(home, it) == {"note": need}, "and so does the prompt: %s" % HomePrompt.item(home, it))
 	FarmModels.tick_bars(home.hw)
 	var tag := home.hb.nodes[int(e["u"])].get_node_or_null("Need") as Label3D
 	ok(tag != null and tag.visible and tag.text == need, "and it hangs over the site as a label")

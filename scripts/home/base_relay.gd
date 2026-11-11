@@ -248,8 +248,8 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "relay"}
 
-func label() -> String:
-	return "Run the Relay Cup (%s round)" % cup_round(Save.active_kin())["name"]
+func label() -> Dictionary:
+	return {"verb": "Run", "who": "Relay Cup", "note": "%s round" % cup_round(Save.active_kin())["name"]}
 
 func use() -> void:
 	var ks := race.entrants().slice(0, 3)

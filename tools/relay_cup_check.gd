@@ -174,7 +174,7 @@ func _on_base() -> void:
 	ok(relay != null and is_instance_valid(relay.stand), "on: the Dash loop has a relay stand")
 	if relay != null and is_instance_valid(relay.stand):
 		var at := Vector2(relay.stand.position.x, relay.stand.position.z)
-		ok(home.hrace.find(at) == {"kind": "relay"}, "on: the stand offers \"%s\"" % relay.label())
+		ok(home.hrace.find(at) == {"kind": "relay"}, "on: the stand offers %s" % str(relay.label()))
 		for k in home.kins:
 			k.erase("indoors")
 		relay.use()

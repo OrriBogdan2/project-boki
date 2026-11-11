@@ -20,7 +20,7 @@ func _prep() -> void:
 		if hm.guide and hm.guide.hint_box: hm.guide.hint_box.visible = false
 		hm.set_process(false)
 		if hm.hover_box: hm.hover_box.visible = false
-		hm.prompt_box.visible = false
+		hm.prompt.visible = false
 	await _settle(2)
 
 func _grab() -> Image:

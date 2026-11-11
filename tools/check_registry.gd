@@ -376,6 +376,9 @@ const CHECKS := {
 	"--scoreboard-check": ["res://tools/scoreboard_check.gd", "scoreboard_check", null],      # the Tab squad board
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
+	"--interact-pick-check": ["res://tools/interact_pick_check.gd", "interact_pick_check", null],    # which F wins
+	"--interact-prompt-check": ["res://tools/interact_prompt_check.gd", "interact_prompt_check", null],
+	"--interact-prompt-shots": ["res://tools/interact_prompt_shots.gd", "interact_prompt_shots", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],      # TrainMap

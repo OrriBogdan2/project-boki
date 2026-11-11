@@ -37,7 +37,7 @@ func toggle() -> void:
 	room.decorating = active
 	if active:
 		room._close_panel()
-		room.prompt_box.visible = false
+		room.prompt.visible = false
 		Placement.build_view(room.cam, true)
 		_open_ui()
 		Sfx.play("ui_open", null, -8.0)

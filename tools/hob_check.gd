@@ -94,7 +94,7 @@ func _first_arrival() -> void:
 	# 3. talking
 	_stand_by(hob.node.position)
 	var it: Dictionary = hob.find(Vector2(home.ppos.x, home.ppos.z))
-	ok(String(it.get("kind", "")) == "hob", "walking up to him: '%s'" % home._label_for(it))
+	ok(String(it.get("kind", "")) == "hob", "walking up to him: %s" % str(HomePrompt.item(home, it)))
 	home._use(it)
 	await _frames(3)
 	var box: TalkBox = hob.chat.box

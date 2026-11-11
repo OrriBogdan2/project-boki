@@ -134,7 +134,6 @@ func let_go(h: Hunter) -> void:
 
 func interact_for(h: Hunter) -> Dictionary:
 	var want: bool = h.inp.get("interact", false)
-	var key := Settings.key_cap("interact")
 	var best := {}
 	for x in list:
 		if not want:
@@ -148,16 +147,16 @@ func interact_for(h: Hunter) -> Dictionary:
 			"idle":
 				var why := seats.uplink_wait(x) if seats else ""
 				if why != "":
-					best = {"label": why}
+					best = {"note": why}
 				elif m.time < float(x["open_at"]):
-					best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
+					best = {"note": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 				else:
-					best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-			"charging": best = {"label": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
-			"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
-			"open": best = {"label": "The lift is open! Step into the light"}
-			"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
-			"closed": best = {"label": "The Uplink has shut"}
+					best = {"act": "start", "need": START_HOLD, "verb": "Start uplink", "hold": true, "note": "Monsters will attack the outpost"}
+			"charging": best = {"note": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+			"fizzling": best = {"note": "The uplink lost its charge and is shutting off"}
+			"open": best = {"note": "The lift is open! Step into the light"}
+			"spent": best = {"note": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
+			"closed": best = {"note": "The Uplink has shut"}
 		if not best.is_empty():
 			best["kind"] = "exit"
 			best["x"] = x

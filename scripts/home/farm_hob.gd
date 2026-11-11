@@ -145,18 +145,20 @@ func find(p2: Vector2) -> Dictionary:
 func swing_on() -> bool:
 	return bool(FarmTutorial.option("player_swing"))
 
-func label(it: Dictionary) -> String:
+func label(it: Dictionary) -> Dictionary:
 	if String(it["kind"]) == "hob":
 		var n := FarmBuilder.pending().size()
-		return "Talk to %s%s" % [FarmBuilder.short_name(), (" (%d new blueprints)" % n) if n > 0 else ""]
+		return {"verb": "Talk", "who": FarmBuilder.short_name(), "note": ("%d new blueprints" % n) if n > 0 else ""}
 	var e := FarmSites.entry(int(it["u"]))
 	if e.is_empty():
-		return ""
+		return {}
 	var need := FarmSites.need_text(e)
 	if need != "":
-		return need
-	var nm := String(HomeLayout.CATALOG[String(e["id"])]["name"]).to_lower()
-	return "Hold to hammer the %s (%d/%d)" % [nm, int(e["site"]["got"]), int(e["site"]["need"])]
+		return {"note": need}
+	var got := int(e["site"]["got"])
+	var all := int(e["site"]["need"])
+	return {"verb": "Hammer", "who": String(HomeLayout.CATALOG[String(e["id"])]["name"]), "note": "%d/%d" % [got, all],
+		"hold": true, "frac": float(got) / maxf(1.0, all)}
 
 func use(it: Dictionary) -> void:
 	if String(it["kind"]) == "hob":

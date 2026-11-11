@@ -193,7 +193,7 @@ func _fixtures_part(hub) -> void:
 	ok(decos.all(func(e): return HomeLayout.deco_cells(e).all(afloat)), "every fixture stands on land")
 	var spots: Array = [HubWaystone.HUB_AT, HubLayout.BOARD_AT]
 	ok(spots.all(func(p): return afloat.call(Vector2i(int(p.x), int(p.z)))), "the Waystone and the board are on land")
-	ok(hub.hway.label() == "Games board", "the games board reads as one")
+	ok(hub.hway.label().get("who", "") == "Games board", "the games board reads as one")
 	hub.hway.use()
 	var said: String = _texts(hub.root_ui)
 	ok(BaseRace.twist()["name"] in said and "Showcase wall" in said, "the board shows this week's twist and the wall")
@@ -345,7 +345,7 @@ func _hub_shot(m: Node, hub, file: String, zoom: float, arrival := false) -> voi
 	hub.cam.zoom = zoom
 	hub.cam.snap(HubWaystone.HUB_AT + (HubWaystone.ARRIVE_OFF if arrival else Vector3.ZERO))
 	await m.get_tree().create_timer(SHOT_WAIT_S).timeout
-	hub.prompt_box.visible = false
+	hub.prompt.visible = false
 	await m.get_tree().process_frame
 	m.get_viewport().get_texture().get_image().save_png(dir.path_join(file))
 	print("ZONES shot %s" % dir.path_join(file))

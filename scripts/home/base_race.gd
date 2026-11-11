@@ -373,10 +373,10 @@ func find(p2: Vector2) -> Dictionary:
 		return relay.find(p2)
 	return {"kind": "race"}
 
-func label() -> String:
+func label() -> Dictionary:
 	var fmt := String(tweak("dash").get("name", ""))
-	var back := "back %s" % Save.active_kin().get("name", "your partner")
-	return "Start a Dash, %s (%s)" % [fmt, back] if fmt else "Start a Dash (%s)" % back
+	var back := "Back %s" % Save.active_kin().get("name", "your partner")
+	return {"verb": "Start", "who": "Dash", "note": "%s  ·  %s" % [fmt, back] if fmt else back}
 
 ## Up to 4 rested Boki out on the base, your partner first.
 func entrants() -> Array:

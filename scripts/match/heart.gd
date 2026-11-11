@@ -409,7 +409,6 @@ func on_leave(h: Hunter, how: String) -> void:
 func interact_for(h: Hunter) -> Dictionary:
 	if site == Vector3.INF:
 		return {}
-	var key := Settings.key_cap("interact")
 	if not bool(h.inp.get("interact", false)):
 		_hold.erase(h.nid)
 	var at_spark := h.flat_dist(spark_pos) <= r("pickup_r") and absf(h.pos.y - spark_pos.y) < 3.0
@@ -417,14 +416,14 @@ func interact_for(h: Hunter) -> Dictionary:
 		var need := r("pickup_hold_s")
 		var slow := int(r("carrier_slow") * 100.0)
 		return {"kind": "heart", "act": "pick", "need": need, "col": COL, "prog": float(_hold.get(h.nid, 0.0)) / need,
-			"label": "Hold %s to take the Heartspark  ·  %d%% slower and everyone sees you" % [key, slow]}
+			"verb": "Take", "hold": true, "note": "%d%% slower and everyone sees you" % slow}
 	if spark_live() and carrier != null and h.flat_dist(gate) <= r("gate_r") + 1.0:
 		if h == carrier:
 			var gneed := r("gate_hold_s")
 			return {"kind": "heart", "act": "leave", "need": gneed, "col": GATE_COL,
 				"prog": float(_hold.get(h.nid, 0.0)) / gneed,
-				"label": "Hold %s: leave now, small reward" % key}
-		return {"kind": "heart", "col": GATE_COL, "label": "The Heart Gate only opens for the Heartspark's bearer"}
+				"verb": "Leave now", "hold": true, "note": "Small reward  ·  " + WaysOutHud.stay_line(m)}
+		return {"kind": "heart", "col": GATE_COL, "note": "The Heart Gate only opens for the Heartspark's bearer"}
 	if h.flat_dist(site) > NEAR_LABEL:
 		return {}
 	var say := ""
@@ -437,7 +436,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			say = "The Heart opens in %ds" % int(ceil(r("final_s") - m.sess_time()))
 		S.FINAL:
 			say = "Hold the Heart ring to leave  ·  %d%%" % int(final_prog * 100.0)
-	return {} if say == "" else {"kind": "heart", "col": COL, "label": say}
+	return {} if say == "" else {"kind": "heart", "col": COL, "note": say}
 
 func hold(h: Hunter, it: Dictionary, dt: float) -> void:
 	if not it.has("act"):

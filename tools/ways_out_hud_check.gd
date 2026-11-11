@@ -105,10 +105,6 @@ func run(main: Node) -> void:
 	ok(WaysOutHud.squads_left(m) == 2, "a squad with nobody left drops out of the count")
 	foe.out = false
 	# ---------------------------------------------------------------- 6. the Gate prompt
-	var it := {"kind": "heart", "act": "leave", "prog": 0.5, "need": Heart.r("gate_hold_s")}
-	var other := {"kind": "heart", "col": Color.WHITE, "label": "x"}
-	ok(not WaysOutHud.gate_prompt(m.hud, Vector2(1280, 720), 500.0, other),
-		"only the carrier's leave prompt is drawn by the strip")
 	ok(Heart.r("gate_hold_s") == 4.0, "the Gate hold is 4 s (rules)")
 	H.state = Heart.S.WAITING
 	ok(WaysOutHud.stay_line(m) == "Stay and the Heart opens at 10:00.",
@@ -121,14 +117,17 @@ func run(main: Node) -> void:
 	H.charge = Heart.r("charge_s")
 	H.carrier = m.player
 	var gate_it := H.interact_for(m.player)
-	var label := String(gate_it["label"])
-	var has_key := label.contains(Settings.key_cap("interact"))
-	ok(gate_it.get("act", "") == "leave" and label.contains("leave now, small reward") and has_key,
-		"at the Gate the carrier's prompt says leave now, small reward, with the live key")
+	gate_it["prog"] = 0.5
+	var pr: InteractPrompt = m.hud.prompt
+	pr.show_for(InteractPrompt.match_item(m, m.player, gate_it))
+	ok(gate_it.get("act", "") == "leave" and pr.visible and pr.line.text == "Leave now"
+		and pr.cap_lbl.text == Settings.key_cap("interact") and String(gate_it["note"]).begins_with("Small reward"),
+		"at the Gate the carrier gets the one interact prompt: Leave now, live key, small reward (%s)" % pr.line.text)
+	ok(is_equal_approx(pr.ring.frac, 0.5), "...its ring shows how far the hold has got")
 	ok(is_equal_approx(float(gate_it["need"]), 4.0), "...and holds 4 s")
 	# ---------------------------------------------------------------- 7. the real HUD draws it
 	m.player.pos = H.gate
-	m.interact = it
+	m.interact = gate_it
 	for k in Heart.S.values():
 		H.state = k
 		for i in 3:

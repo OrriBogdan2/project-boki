@@ -369,8 +369,8 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "echo"}
 
-func label() -> String:
-	return "Dance Echo Steps (%s)" % Settings.key_cap("interact")
+func label() -> Dictionary:
+	return {"verb": "Dance", "who": "Echo Steps"}
 
 func use() -> void:
 	var ks: Array = h.hrace.entrants()

@@ -53,14 +53,12 @@ static func show_all(m: Match, on: bool) -> void:
 
 ## What the interact prompt says and does beside chest `c` for hunter `h`.
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
-	var k := Settings.key_cap("interact")
 	if bool(c.get("free", false)) or h.chest_keys > 0:
-		return {
-				"kind": "chest", "chest": c,
-				"label": "Hold %s to open%s" % [k, "" if bool(c.get("free", false)) else "  ·  uses 1 key"]}
+		var note := "" if bool(c.get("free", false)) else "Uses 1 key"
+		return {"kind": "chest", "chest": c, "verb": "Open", "hold": true, "note": note}
 	return {
-			"kind": "locked", "chest": c, "label": "Locked  ·  needs a key  ·  monsters with a key glint carry them",
-			"col": Color("ffb0a0")}
+			"kind": "locked", "chest": c, "verb": "Locked", "col": Color("ffb0a0"),
+			"note": "Needs a key  ·  monsters with a key glint carry them"}
 
 ## Takes the key for opening `c`. False (and nothing changes) when the hunter has none.
 static func spend(h: Hunter, c: Dictionary) -> bool:

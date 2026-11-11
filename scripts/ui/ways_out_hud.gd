@@ -2,7 +2,7 @@ class_name WaysOutHud
 extends RefCounted
 ## The Ways Out strip (briefs/specs/LIMITED_WAY_OUTS.md section 9), top centre: four pips (Lair, Heart, Uplink,
 ## Final), each locked with a countdown, open, in use (the squad's colour), taken (struck through) or lost to
-## the Blight, and "Squads left" beside them. Plus the carrier's Heart Gate prompt.
+## the Blight, and "Squads left" beside them.
 ## Reads the match only: the Heart's state for the two Heart seats, the lairs and outposts for the quest seats
 ## (their schedule is content/rules/heart.json "quest"). Drawn with HudStyle on the Hud's canvas.
 
@@ -174,32 +174,7 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
 
 # ------------------------------------------------------------------ the Heart Gate prompt
-## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
-## one line under it. `it` is the Heart's interact dictionary; false when it is not the carrier's leave prompt.
-static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
-	if it.get("kind", "") != "heart" or it.get("act", "") != "leave":
-		return false
-	var c: Control = hud.c
-	var key := Settings.key_cap("interact")
-	var main := "Leave now: small reward"
-	var mw := TextCache.width(HudStyle.BIG, main, 16)
-	var kw := TextCache.width(HudStyle.BIG, key, HudStyle.KEY_FS) + 12.0
-	var w := kw + 10.0 + mw + 26.0
-	var x := sz.x * 0.5 - w * 0.5
-	var edge := Color(Heart.GATE_COL, 0.7)
-	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
-	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.GATE_COL)
-	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
-	HudStyle.strip(c, Rect2(Vector2(x + 6, y + 14), Vector2(w - 12, 4)), float(it["prog"]), Heart.GATE_COL)
-	var mid := sz.x * 0.5
-	var stay := stay_line(hud.m)
-	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0
-	var back := Rect2(Vector2(mid - sw * 0.5, y + 22), Vector2(sw, 20))
-	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
-	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
-	return true
-
-## The line under the Gate prompt: what staying gets you.
+## The Gate prompt's detail line (Heart.interact_for, shown by InteractPrompt): what staying gets you.
 static func stay_line(m: Match) -> String:
 	if m.heart.state == Heart.S.FINAL:
 		return "Stay and hold the Heart ring for the big reward."

@@ -89,10 +89,10 @@ func find(p2: Vector2) -> Dictionary:
 		return {}
 	return {"kind": "waystone"}
 
-func label() -> String:
+func label() -> Dictionary:
 	if aim == "board":
-		return "Games board"
-	return "The Waystone: travel" if here() == GardenZones.HUB else "Return pad: travel"
+		return {"verb": "Open", "who": "Games board"}
+	return {"verb": "Travel", "who": "Waystone" if here() == GardenZones.HUB else "Return pad"}
 
 func use() -> void:
 	if aim == "board":

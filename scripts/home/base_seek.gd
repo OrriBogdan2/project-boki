@@ -209,10 +209,11 @@ func find(p2: Vector2) -> Dictionary:
 			return {"kind": "seek"}
 	return {}
 
-func label() -> String:
+func label() -> Dictionary:
 	if state == S.CARRY:
-		return "Hide the scent here"
-	return "Take the scent to hide (%s and the next Boki will hunt it)" % Save.active_kin().get("name", "your partner")
+		return {"verb": "Hide", "who": "Scent"}
+	var nm: String = Save.active_kin().get("name", "your partner")
+	return {"verb": "Take", "who": "Scent", "note": "%s and the next Boki will hunt it" % nm}
 
 func use() -> void:
 	if state == S.IDLE:

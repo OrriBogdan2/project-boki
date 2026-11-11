@@ -2557,9 +2557,9 @@ func _boss_check() -> void:
 			var it: Dictionary = m.lairs.interact_for(P)
 			run.call(0.1)
 			P.inp["interact"] = true; run.call(Match.DT); P.inp["interact"] = false; run.call(0.3)
-			ok.call(vic and held and String(it.get("what", "")) == "lever" and String(it.get("label", "")) == "%s: Open the gate" % Settings.key_cap("interact")
+			ok.call(vic and held and String(it.get("what", "")) == "lever" and String(it.get("verb", "")) == "Open gate"
 				and not L.get("locked", false) and gate_free.call(L) and not L.get("up_on", false) and String(L.get("opened_by_lever", "")) == P.pname,
-				"the lever: '%s'; pulled %.1fs after the kill, the gate opens and the updraft dies down" % [it.get("label", "?"), m.time - kill_t])
+				"the lever: '%s'; pulled %.1fs after the kill, the gate opens and the updraft dies down" % [it.get("verb", "?"), m.time - kill_t])
 		elif L == E:
 			# the updraft: anyone who wasn't sealed in gets no lift from it
 			var up: Vector3 = L["up"]
