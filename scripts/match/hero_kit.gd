@@ -12,6 +12,7 @@ static var _cache := {}
 ## each class wears its default; any of the six can be asked for (galleries, the creator preview).
 const ARCHES := {
 	"thief": {"cls": "light"},
+	"gil": {"cls": "light"},
 	"archer": {"cls": "light"},
 	"mage": {"cls": "light"},
 	"gunslinger": {"cls": "medium"},
@@ -24,7 +25,7 @@ const ARCHES := {
 	"dolm": {"cls": "medium"},
 	"ostra": {"cls": "medium"},
 }
-const ARCH_ORDER := ["gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage", "bulwark", "thief", "ostra"]
+const ARCH_ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright", "mage", "thief", "ostra", "gil"]
 const ARCH_DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 ## Which archetype a hunter wears: asked for by name, else from the look, else the class default.

@@ -81,18 +81,22 @@ static func _head_ring(hud, h: Hunter, prog: float) -> void:
 
 # ------------------------------------------------------------------ the maps
 ## Boxes and beacons on the minimap (inner: its rect; to_map: world -> map point; on_map: inside it).
-static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
+static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable, hold: bool) -> void:
 	var m: Match = hud.m
 	for bc in m.beacons:
 		var pv: Vector2 = to_map.call(bc["pos"])
+		if not MapDetail.shows("beacon", hold, bc["lit"] and not bc["used"]):
+			continue
 		if on_map.call(pv, 4.0):
-			beacon_glyph(hud.c, pv, 4.5, bc, m.time)
+			beacon_glyph(hud.c, pv, MapDetail.ICON_R, bc, m.time)
 		elif bc["lit"] and not bc["used"]:
 			hud._edge_arrow(inner, inner.get_center(), pv, Beacons.COL)
 	for b in _known_boxes(m):
 		var pv: Vector2 = to_map.call(b["pos"])
+		if not MapDetail.shows("squad" if _ally(m, b) else "rival_box", hold):
+			continue
 		if on_map.call(pv, 3.0):
-			box_glyph(hud.c, pv, 4.0, Life.owner_col(m, b), Life.soul_here(m, b))
+			box_glyph(hud.c, pv, MapDetail.ICON_R, Life.owner_col(m, b), Life.soul_here(m, b))
 		elif Life.soul_here(m, b) and _ally(m, b):
 			hud._edge_arrow(inner, inner.get_center(), pv, Life.owner_col(m, b))
 

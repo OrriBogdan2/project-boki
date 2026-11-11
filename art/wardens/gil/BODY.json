@@ -1,0 +1,7 @@
+{
+  "_note": "Gil's archetype body numbers the gil.glb was fitted to (art/wardens/src/gil_rig.json was generated from them). Copy into content/archetypes/gil.json `body` (the kit's file); neck, build and chest stay at the archetype defaults.",
+  "arch": "gil",
+  "body": {"size": 1.0, "head": 0.71, "legs": 1.03, "torso": 1.0, "shoulder": 1.14, "arms": 0.92, "hit_r": 0.38},
+  "rig_land": {"crown": 1.40, "knee": 0.247, "sole": 0.0},
+  "hat_top_m": 1.7
+}
