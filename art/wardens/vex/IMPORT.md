@@ -1,5 +1,12 @@
 # Vex (gunslinger): import note
 
+## Women body pass 11-11 (ext/women-body-1111): the current vex.glb
+
+`~/meshy/v95/Vex/r2/body5/cand_2.glb` (pick.txt, sheet_vex.jpg beside it; cand_1 is the gentler alternative): appeal3 cand_b with a position+normal displacement
+(waist and shoulders in, hips and bust fuller; area p95 1.18 / p99 1.44, 1 flip), same vertices and UVs. `art/wardens/src/vex_v95.json` reads it; the rest of
+the swap (rig, clips, coin, gun regions) is unchanged. Deformer: `~/meshy/v95/_body5_tools/`.
+
+
 ## v95 swap, appeal3 body b (2026-11-10, ext/vex-appeal-b): the current vex.glb
 
 The mesh is the v95 master in the owner's appeal3 look, body variant b (owner pick 11-10: fuller bust, waist 3% narrower,

@@ -1,5 +1,11 @@
 # Hem (archer; shown as Ravyl): import note, v95 swap of Lace appeal3, body b (2026-11-10)
 
+**Women body pass 11-11 (ext/women-body-1111):** the spec now reads `~/meshy/v95/lace/r2/body5/lace_v95_body5_body.glb`, which is `body5/cand_1.glb` (Lace
+"less wide, thin, good chest": cand_b with slimmer arms, waist and shoulders and a fuller bust and hip; position+normal displacement, area p95 1.06 / p99 1.17,
+27 tiny flips; pick.txt and sheet_lace.jpg beside it; cand_2 is slimmer still but distorts the arm) without its `lace_bow` node, as before.
+Deformer: `~/meshy/v95/_body5_tools/`.
+
+
 `hem.glb`: the owner's pick (11-10), Lace v95 r2 appeal3 `cand_b.glb` (the slimmer body; its face is the appeal3 face, one mesh), swapped
 onto Hem's own skeleton, 48 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with `art/wardens/src/hem_v95.json`.
 Raw files in ~/meshy/v95/lace/r2/appeal3 (never in git); the spec reads `lace_v95_b_body.glb`, which is `cand_b.glb` without its

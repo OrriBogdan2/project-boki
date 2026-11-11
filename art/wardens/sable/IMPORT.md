@@ -1,5 +1,13 @@
 # Sable (thief): import note
 
+## Women body pass 11-11 (ext/women-body-1111): the current sable.glb
+
+Owner 11-10: all the women's bodies accentuated and attractive. `~/meshy/v95/Sable/r2/body5/cand_3.glb` (pick.txt, sheet_sable.jpg beside it; cand_4 is the
+gentler alternative) is appeal4 cand_6_motheye with a position+normal displacement field (waist, shoulders and arm line in, hips/glute and bust fuller; max
+move 3.5 cm, area p95 1.16 / p99 1.31, 3 flips). Vertex order, UVs and indices are unchanged, so the paint and the solid grey/black moth eyes are untouched.
+Same swap: `art/wardens/src/sable_v95.json` now reads body5/cand_3.glb. The deformer is `~/meshy/v95/_body5_tools/` (body.py, cfg.py).
+
+
 ## v95 swap, appeal4 cand_6 (cand_2 + moth eyes + curvier, 2026-11-11, ext/sable-appeal4): the current sable.glb
 
 Owner 11-10 ("looks kind of boyish, maybe bigger breasts and hair showing"). The mesh is the worker's pick of three candidates (the owner has not

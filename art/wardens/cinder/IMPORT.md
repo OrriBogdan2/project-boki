@@ -1,5 +1,10 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+**Women body pass 11-11 (ext/women-body-1111):** owner "Cinder bust bigger". The spec now reads `~/meshy/v95/Cinder/r2/body5/cinder_v95_body5_body.glb` =
+`body5/cand_2.glb` (cand_5's rounded dome pushed 2.6 cm further, waist a centimetre tighter; area p95 1.17 / p99 1.30, 0 flips; pick.txt and sheet_cinder.jpg
+beside it; cand_1 is the smaller alternative) with the tail cut off by the same flood fill as bust5 (27259 verts). Deformer: `~/meshy/v95/_body5_tools/`.
+
+
 `cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
