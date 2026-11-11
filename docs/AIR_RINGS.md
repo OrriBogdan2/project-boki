@@ -52,6 +52,11 @@ every lane both ways goes through all its rings and lands in 3-9.5 s, never more
 bot crosses the 97 m Moor Line on its own crossing logic in 8 s; every lift ring puts you on its high ground
 in about 4.5 s.
 
+## First-time hint
+The first time a ring is within 30 m while you glide or fall, one line names the kind in view and the glide key
+(Settings.key_cap). Once per save (Match._tip, `tutorial.rings`); never in a match where you already flew a ring,
+never with Tips off. `--air-rings-check` asserts all of it.
+
 ## On the maps
 The full map always shows lanes (dashed cyan lines, a tick per ring) and lift rings (gold ring with an up
 chevron). The minimap shows them as the DETAIL kind "air" (hold Tab or the map key, or while riding in).

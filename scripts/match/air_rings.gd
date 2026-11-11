@@ -11,7 +11,7 @@ extends RefCounted
 const GLIDE_COL := Color("5ad0f0")     # cyan: speed
 const LIFT_COL := Color("ffd27a")      # warm gold, the updraft column's colour: height
 const BODY_Y := 0.8                    # m: a hunter's body over its feet (what goes through a ring)
-const TIP_R := 9.0                     # m: the first time you come this close to a ring, the tip shows
+const TIP_R := 30.0                    # m: a ring this close counts as in view for the first-time tip
 const CLIMB_EASE := 2.5                # 1/s and m/s per m: the lane pulls you to its height (as a wind road does)
 
 var n := 0                     # rings flown through this match (SIMSTAT)
@@ -211,15 +211,18 @@ static func lane_y(a: Vector3, b: Vector3, p: Vector3) -> float:
 	var from_low := Vector2(p.x - low.x, p.z - low.z).length()
 	return lerpf(low.y, high.y, clampf(from_low / r("rise"), 0.0, 1.0))
 
+## The one first-time hint: a ring in view while you glide or fall (never once you have flown one this match).
+## Once per save through Match._tip; the text names the kind that is in view.
 func _tip() -> void:
 	var p: Hunter = _m.player
-	if p == null or p.out or int(_m.time * 4.0) % 4 != 0:
+	if p == null or p.out or p.grounded or p.riding or int(p.stats.get("rings", 0)) > 0:
+		return
+	if Save.d["tutorial"].get("rings", false) or not Settings.get_v("tips") or _m.opts.get("autoplay", false):
 		return
 	for rg in list:
 		if p.pos.distance_to(rg["pos"]) < TIP_R:
-			var jump := Settings.key_cap("jump")
-			_m._tip("rings", "Rings in the air: glide through a blue one to fly fast along its line, "
-				+ "hop into a gold one to soar up to high ground (%s, then %s again to glide)." % [jump, jump])
+			var what := "gold ring lifts you to high ground" if rg["lift"] else "blue ring flings you along its lane"
+			_m._tip("rings", "Glide through it (%s): a %s" % [Settings.key_cap("glide"), what])
 			return
 
 ## Test (--ring-demo): start gliding at the first glide ring's lane, flying along it.

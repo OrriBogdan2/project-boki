@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		(P.kin as Kin).stow()
 	P.ctrl = "local"
 	_layout()
+	_hint()
 	for i in m.air_rings.lanes.size():
 		_fly(i, false)
 		_fly(i, true)
@@ -77,6 +78,37 @@ func _reset(h: Hunter, at: Vector3) -> void:
 	h.inp["glide"] = false
 	for rg in m.air_rings.list:
 		rg["cd"].clear()
+
+## The first-time hint: once per save, only airborne, never after the player flew a ring this match.
+func _hint() -> void:
+	var rg: Dictionary = m.air_rings.list[0]
+	var seen: Dictionary = Save.d["tutorial"]
+	var key: String = Settings.key_cap("glide")
+	var at: Vector3 = rg["pos"] + Vector3(0, 3, 0)
+	_reset(P, at)
+	m.hud.msgs.clear()
+	m.air_rings._tip()
+	ok(not seen.get("rings", false) and m.hud.msgs.count() == 0, "no hint while standing on the ground")
+	P.grounded = false
+	P.add_stat("rings")
+	m.air_rings._tip()
+	ok(not seen.get("rings", false) and m.hud.msgs.count() == 0, "no hint after a ring flown this match")
+	P.stats["rings"] = 0
+	P.teleport(Vector3(-400, 50, -400))
+	m.air_rings._tip()
+	ok(not seen.get("rings", false), "no hint with no ring in view")
+	P.teleport(at)
+	m.air_rings._tip()
+	var texts: Array[String] = m.hud.msgs.texts()
+	ok(seen.get("rings", false) and texts.size() == 1 and texts[0].contains(key) and not texts[0].contains("\n"),
+		"airborne with a ring in view: one line naming the glide key %s (%s)" % [key, texts])
+	m.hud.msgs.clear()
+	m.air_rings._tip()
+	ok(m.hud.msgs.count() == 0, "shown once per save")
+	_reset(P, at)
+	P.grounded = true
+	seen.erase("rings")
+
 
 ## The map data made it into the world: lanes with rings, a way back for bots, a lift ring per updraft.
 func _layout() -> void:
