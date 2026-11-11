@@ -23,6 +23,8 @@ const CHECKS := {
 	"--ways-out-vfx-shots": ["res://tools/ways_out_vfx_shots.gd", "ways_out_vfx_shots", null],      # GPU, --shots-dir=
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
+	"--cam-lead-check": ["res://tools/cam_lead_check.gd", "cam_lead_check", "check"],      # footage: no cursor lean
+	"--cam-lead-shots": ["res://tools/cam_lead_check.gd", "cam_lead_check", "shots"],      # --shots-dir=<dir>
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
@@ -153,6 +155,8 @@ const CHECKS := {
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
+	"--camera-frame-check": ["res://tools/camera_frame_check.gd", "camera_frame_check", "check"],
+	"--camera-frame-shots": ["res://tools/camera_frame_check.gd", "camera_frame_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
@@ -206,6 +210,7 @@ const CHECKS := {
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
+	"--glide-cam-shots": ["res://tools/glide_cam_shots.gd", "glide_cam_shots", null],      # camera through a glide dive
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
 	"--inventory-check": ["res://tools/inventory_check.gd", "inventory_check", null],      # in-match inventory
 	"--inv-shots": ["res://tools/inv_shots.gd", "inv_shots", null],      # --shots-dir=<dir>, --resolution

@@ -53,21 +53,9 @@ static func update(m: Match, delta: float, alpha: float) -> void:
 			cam.zoom_to = lerpf(1.05, 1.7, hk)
 			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
 		else:
-			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
-			# the camera only eases back while gliding, so jumps and falls never change the framing
-			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.0
-			if player.gliding:
-				cam.zoom_to = 1.25
-			elif player.crouch and player.grounded:
-				cam.zoom_to = 1.45
+			cam.zoom_to = cam.air_zoom(player, m.player_altitude())
 			if m.train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
 			if m.has_meta("zoom_hold"): cam.zoom_to = float(m.get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
-			# high up, the camera pulls back with your altitude so you can still read the ground
-			var alt := m.player_altitude()
-			if alt > 4.0:
-				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
 			cam.top_to = 0.0
 		cam.lead_vel = m.cam_lead_vel()
 		cam.follow(player.render_pos(alpha), delta, not player.dropping)

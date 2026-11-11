@@ -127,6 +127,11 @@ const T := {
 	"cam_lag_m":               ["<=", 0.40, "m", "[footage] hunter stays roughly centred; [spec] follow 0.08-0.15s"],
 	"cam_settle_t":            ["<=", 0.35, "s", "camera settles on you after a stop"],
 	"cam_glide_lead_m":        [">=", 0.4, "m", "slight lead in glide direction"],
+	"cam_glide_zoom_05":       ["~", [1.12, 1.25], "x", "[spec] glider opens the view +15..25%, mostly by +0.5 s"],
+	"cam_dive_zoom_hold":      [">=", 0.98, "x", "plunge keeps the view open (min / start zoom)"],
+	"cam_dive_land_view":      ["<=", 0.3, "x", "ground under a plunge, screens below centre"],
+	"cam_land_step":           ["<=", 0.1, "x", "zoom-out lost on landing's first step: no pop"],
+	"cam_land_left_05":        ["<=", 0.35, "x", "zoom-out left 0.5 s after landing: eased back"],
 	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
 	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
@@ -1340,6 +1345,82 @@ func _camera() -> void:
 		if m.has_method("cam_lead_vel"): cam.set("lead_vel", m.call("cam_lead_vel"))
 		cam.follow(P.position, DT, false)
 	rec("cam_glide_lead_m", cam.focus.x - P.pos.x)
+	_glide_cam(cam)
+
+## One step of play with the camera driven the way Match drives it (zoom, glide lead, follow).
+func _cam_step(cam: CamRig) -> void:
+	m.step(DT)
+	P.render(DT, 0.0)
+	cam.zoom_to = cam.air_zoom(P, m.player_altitude())
+	cam.lead_vel = m.cam_lead_vel()
+	cam.follow(P.position, DT, false)
+
+## The view opens up under the glider, stays open through a plunge (so you see where you'll land), and
+## eases back on landing, with no shake and no change of lens.
+func _glide_cam(cam: CamRig) -> void:
+	var lens := cam.fov
+	cam.shake_left = 0.0
+	cam.pull = 0.0
+	# glide start: a jump from the ground, the glider opened at the top
+	_reset(flat)
+	cam.snap(P.pos)
+	cam.zoom = 1.0
+	P.inp["jump"] = true
+	_cam_step(cam)
+	P.inp["jump"] = false
+	for i in 20: _cam_step(cam)
+	var z0 := cam.zoom
+	for i in 30:
+		P.inp["glide"] = true
+		_cam_step(cam)
+	ok(P.gliding, "glide_cam: the glider is open")
+	rec("cam_glide_zoom_05", cam.zoom / z0)
+	# the plunge: steady glide high up, then crouch held to the cancel height
+	_reset(flat + Vector3(0, 20.0, 0), false)
+	P.inp["jump"] = true
+	cam.snap(P.pos)
+	for i in 90:
+		P.inp["glide"] = true
+		_cam_step(cam)
+	cam.zoom = cam.zoom_to
+	var z_dive := cam.zoom
+	var z_min := z_dive
+	var lead := 0.0
+	var n_on := 0
+	var land_y := -1.0
+	for i in 240:
+		P.inp["glide"] = true
+		P.inp["crouch"] = true
+		_cam_step(cam)
+		if not P.glide_dive.on:
+			break
+		n_on += 1
+		z_min = minf(z_min, cam.zoom)
+		lead = maxf(lead, Vector2(cam.focus.x - P.pos.x, cam.focus.z - P.pos.z).length())
+		var vh := cam.get_viewport().get_visible_rect().size.y
+		var to16 := tan(deg_to_rad(cam.fov) * 0.5) / tan(deg_to_rad(cam.lens) * 0.5)      # (as on a 16:9 screen)
+		land_y = maxf(land_y, (cam.unproject_position(Vector3(P.pos.x, P.ground(), P.pos.z)).y / vh - 0.5) * to16)
+	ok(n_on > 10, "glide_cam: the plunge ran (%d steps)" % n_on)
+	rec("cam_dive_zoom_hold", z_min / z_dive)
+	rec("cam_dive_land_view", land_y)
+	print("MFEEL glide_cam dive lead %.2fm, zoom at dive start %.2f" % [lead, z_dive])
+	# landing: let the glide set you down, then 0.5 s on the ground
+	P.inp["crouch"] = false
+	for i in 600:
+		P.inp["glide"] = true
+		_cam_step(cam)
+		if P.grounded: break
+	ok(P.grounded, "glide_cam: landed")
+	var z_land := cam.zoom
+	P.inp["glide"] = false
+	_cam_step(cam)
+	rec("cam_land_step", (z_land - cam.zoom) / maxf(0.001, z_land - 1.0))
+	for i in 29: _cam_step(cam)
+	rec("cam_land_left_05", (cam.zoom - 1.0) / maxf(0.001, z_land - 1.0))
+	print("MFEEL glide_cam zoom at landing %.2f, 0.5 s on %.2f" % [z_land, cam.zoom])
+	ok(cam.fov == lens, "glide_cam: no lens change (fov %.1f)" % cam.fov)
+	ok(cam.shake_left == 0.0 and cam.pull == 0.0, "glide_cam: no shake or pull-back")
+	_clear_inp()
 
 # ---------------------------------------------------------------- framing: how big you are on screen
 func _screen_scale() -> void:
@@ -1361,22 +1442,23 @@ func _screen_scale() -> void:
 		cam.follow(P.position, DT, false)
 	var vh := cam.get_viewport().get_visible_rect().size.y
 	var vw := cam.get_viewport().get_visible_rect().size.x
-	var aspect := 16.0 / 9.0
-	var hfov := 2.0 * atan(tan(deg_to_rad(cam.fov) * 0.5) * aspect)
-	# (Camera3D keeps the vertical FOV, so a share of screen HEIGHT doesn't depend on the window shape)
+	var hfov := 2.0 * atan(tan(deg_to_rad(cam.lens) * 0.5) * CamRig.FRAME_ASPECT)
+	# shares of a 16:9 screen's height: this view's shape widens or narrows the vertical lens (CamRig.frame_fov),
+	# and a share from the centre scales with the tangent of half the lens
+	var h16 := vh * tan(deg_to_rad(cam.lens) * 0.5) / tan(deg_to_rad(cam.fov) * 0.5)
 	var ref := _stand_in("", MantleLook.at_home(PlayerLook.neutral()))
 	var now := _model_span(cam, ref)
 	print("MFEEL framing: style supervive pitch %.0f dist %.1f fov %.0f, viewport %dx%d, model scale %.2f, model %.2fm tall" % [rad_to_deg(cam.pitch), cam.dist, cam.fov, int(vw), int(vh), ref.scale.y, now[2]])
 	rec("view_across_m", 2.0 * cam.dist * tan(hfov * 0.5))
-	rec("hunter_screen_pct", now[1] / vh * 100.0)
-	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / vh * 100.0)
+	rec("hunter_screen_pct", now[1] / h16 * 100.0)
+	rec("hunter_feet_below_pct", (float(now[3]) - vh * 0.5) / h16 * 100.0)
 	for id in FRAME_HEROES:
 		var hm := _stand_in(id, PlayerLook.neutral())
 		var hs := _model_span(cam, hm)
 		var kind := "3D" if hm.has_node("Warden") else "procedural"
-		var feet := (float(hs[3]) - vh * 0.5) / vh * 100.0
+		var feet := (float(hs[3]) - vh * 0.5) / h16 * 100.0
 		print("MFEEL framing %s (%s model): %.2f%% of screen height, feet %.2f%% below the centre"
-				% [id, kind, hs[1] / vh * 100.0, feet])
+				% [id, kind, hs[1] / h16 * 100.0, feet])
 		hm.free()
 	# the same measure for the framing before movefeel (25m, hunters at their plain size), for the doc
 	var d0 := cam.dist
@@ -1385,7 +1467,7 @@ func _screen_scale() -> void:
 	ref.scale /= vs
 	cam.snap(P.pos)
 	var was := _model_span(cam, ref)
-	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / vh * 100.0, was[0] / vh * 100.0, now[0] / vh * 100.0])
+	print("MFEEL framing before (dist 25.0, scale /%.2f): %.1fm across, hunter %.1f%% of screen height (silhouette %.1f%%); now silhouette %.1f%%" % [vs, 2.0 * 25.0 * tan(hfov * 0.5), was[1] / h16 * 100.0, was[0] / h16 * 100.0, now[0] / h16 * 100.0])
 	ref.free()
 	cam.dist = d0
 	cam.snap(P.pos)

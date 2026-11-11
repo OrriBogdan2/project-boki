@@ -118,6 +118,10 @@ Nothing here comes from SUPERVIVE's files.
 | cam_lag_m (camera behind you at a run) | 0.65m | 0.00m | <= 0.40m | [footage] centred: the follow is locked across |
 | cam_settle_t (after a stop) | 0.35s | 0.15s | <= 0.35s | |
 | cam_glide_lead_m | -0.67m (trailing) | +0.92m | >= 0.4m | lead in glide |
+| cam_glide_zoom_05 (zoom 0.5 s after the glider opens / before) | 1.18x | 1.18x | 1.12–1.25x | [spec] +15..25% boom in the air |
+| cam_dive_zoom_hold (lowest zoom in a plunge / zoom at its start) | 0.85x (closed in) | 1.00x | >= 0.98x | the view stays open so you see where you'll land |
+| cam_dive_land_view (ground under a plunge, screens below centre) | 0.18 | 0.18 | <= 0.3 | |
+| cam_land_step / cam_land_left_05 (zoom-out lost in landing's first step / left at +0.5 s) | 0.04 / 0.29 | 0.04 / 0.29 | <= 0.1 / <= 0.35 | eases back, no pop; no lens change or shake (asserted) |
 | view_across_m (Supervive preset, 16:9) | 28.0m | 23.5m (movefeel 23.0m) | 22–25m | camcal: ~17 hunter silhouettes across, as in gameplay frames |
 | hunter_screen_pct (medium hunter, feet to head) | 5.4% | ~7% (movefeel 7.6%) | 6.4–7.6% | camcal: its silhouette ~10.5% of the height, as in gameplay frames |
 | hunter_feet_below_pct (feet below screen centre) | 0% | ~4% | 1.5–5% | camcal: the view aims at the body |
@@ -152,6 +156,7 @@ Other checks:
   - The glider opens falling at least 0.85 m/s ([game data] GlideStartFallSpeedMin, `Loco.glide_start`, match and farm): a rising jump is cut at the open, no float-up, and the jump pad's own 2 m/s cap went with it. The canopy then catches a fall at 60 m/s² (ours: the source's matching fastest-fall clamp is locked; [guide] it opens "instantly").
   - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
   - **Dive** (`GlideDive`, `HunterMove.dive_*`, all [game data]): hold crouch (Ctrl) under an open glider and the canopy folds into a plunge toward 32.5 m/s at 35 m/s², the keys steering at a quarter of their glide force. Let go, come within 3.5 m of the ground (or the island's lip over the abyss) or hold for 10 s and the glide catches you again; the drop you pull out of becomes speed, capped at the glide's 15 m/s max. The key is ours: the source names no dive input, and Space is the glider itself. The folded pose is local-only (the dive isn't in the net snapshot).
+  - **Dive camera** (`CamRig.air_zoom`): the plunge holds the view at least as open as it was, where height alone would close it in as you drop (1.82 → 1.70 mid-plunge before). Landing eases back as from any glide (2.5/s; 1.65 → 1.18 at +0.5 s → 1.01 at +1.5 s). Strip: `--glide-cam-shots`.
   - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2). Updrafts grab at 45 m/s² (was 30).
 - **Heat** (owner, Nov 2: "lasts too long, not punishing enough"): a level glide overheats after 9s (was 14). Hits heat it 3x (was 2x). An overheated glider burns ~3.5% of max health a second in 20-damage ticks, flies at 0.5x speed and sinks at 5 m/s.
 - **Feathering** [est] (tap the glider on and off instead of holding it). Constants: `FEATHER_*`, `lift_t`, `glide_off_t`.
@@ -202,7 +207,7 @@ Other checks:
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
   - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
-- **Camera framing vs the source (parity pass, 2026-11-09, `--cam-framing-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
+- **Camera framing vs the source (parity pass, 2026-11-09, now `--camera-frame-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
 
   | Measure | Source | Ours before | Ours now |
   |---|---|---|---|
@@ -212,13 +217,55 @@ Other checks:
   | Ground across 16:9 | ~37 m: Void's 3.5 m Black Hole [D] reads ~2 bh (90 px) and run pans of 205–250 px/s at the data's 4.4–4.8 m/s [D] both give ~51 px/m | 23.5 m | 23.5 m (narrower) |
   | Hunter height on screen | mediums 90–100 px of 1080 (8.3–9.3%), Oath 107 px, Elluna 67 px [F] | 3.8–11.1% by Hunter (gunslinger 6.0, bulwark 11.1, tender 3.8), median ~1.3x smaller than the source's | same |
   | Feet below the centre | ~3–4% [F camcal] | 3.0% on level ground | 3.5% (`rise` 1.0 -> 1.2 m) |
-  | Cursor lean, how far | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim (venator) | 42% past 1.4 m, cap 7.5 m; at sneak zoom a full lean up-screen put you at the bottom edge | same share and cap, also held to the screen's room (perspective-correct), you stay >= 1.5 m inside |
+  | Cursor lean, how far | not measurable in the sheets: the view sits still through 1–2 bh moves and pans with the aim (venator) | 42% past 1.4 m, cap 7.5 m; at sneak zoom a full lean up-screen put you at the bottom edge | none: measured from the clips, "Camera lead" below (ext/feel-camera-lead) |
   | Cursor lean, how fast | not measurable [F]; a blink dash takes ~0.5 s to catch up (dredge) | eased 6/s; follow 15/s | unchanged |
   | Glide / drop zoom | only ability zoom-outs (Vireo's R, Oath's ult) [F]; data names an abyss zoom, no value [D] | glide 1.25x, drop 1.05–1.7x, sneak 1.45x | unchanged |
   | `CameraDistance` 5500 uu [D] | 55 m, meaning unproven (the ADS row is a fog-of-war radius); as an arm length it would need a ~21° lens, against the footage's ~32° | not used | not used |
 
   - Not matched: the distance. The source shows ~1.6x more ground across and draws its Hunters ~1.3x bigger: its Hunters are about twice the size of the world ours are, which no camera can match. 36 m back would show the source's ground but shrink tender to ~2.5% of the screen (the owner wants silhouettes that read at gameplay zoom); 18 m would match the Hunters' size on half the source's view. 23 m sits between the two, so it stays. Matching both means drawing Hunters larger (`Hunter.VIS_SCALE`), a model call for the owner (docs/DEBT.md).
-  - GPU pair (`--cam-framing-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
+  - GPU pair (`--cam-framing-shots`, since replaced by `--camera-frame-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
+- **Camera frame per aspect (2026-11-11, `--camera-frame-check`):** what the Supervive style shows of level ground around your feet, on each screen shape. Sources: the 16:9 source column is the framing table above solved for the ground (pitch 65.5°, lens 32°, ~37 m across at your feet, so ~36 m from the camera, feet 3-5% below the centre [F]); the source's other aspects are inferred [E]: its footage is all 16:9, its engine keeps the horizontal lens by default, and players reported no ultrawide view (a Steam thread, 2024-10), so every screen shows the 16:9 width. The numbers are in `content/rules/camera.json` (`styles`, `frame_aspect`, the `source` bands).
+
+  | Measure | Source 16:9 | Ours before 16:9 / 21:9 / 4:3 | Ours after 16:9 / 21:9 / 4:3 | Source 21:9 / 4:3 [E] |
+  |---|---|---|---|---|
+  | Camera height above your feet | ~33 m | 22.2 m (all) | 22.2 m (all) | ~33 m |
+  | Pitch | 65.5° ±1.5 | 66° | 66° | 65.5° |
+  | Vertical lens | ~32° | 32° / 32° / 32° | 32° / 24.6° / 41.8° | 24.6° / 41.8° |
+  | Ground ahead (to the top edge) | ~14.2 m | 9.3 / 9.3 / 9.3 m | 9.3 / 7.0 / 12.8 m | ~10.7 / ~19.6 m |
+  | Ground behind (to the bottom edge) | ~9.3 m | 6.2 / 6.2 / 6.2 m | 6.2 / 4.8 / 8.2 m | ~7.1 / ~12.2 m |
+  | Ground to each side, at your feet | ~18.5 m | 12.3 / 16.1 / 9.2 m | 12.3 / 12.3 / 12.3 m | ~18.5 / ~18.5 m |
+  | Ahead per behind | 1.46-1.62 | 1.49 | 1.49 | same |
+  | Side per ahead | 1.25-1.35 | 1.32 | 1.32 | — |
+
+  - Fixed: the screen's shape. Godot keeps the vertical lens, so a 21:9 screen showed 31% more ground to each side than 16:9 and a 4:3 one 25% less. `CamRig.frame_fov` now sets the lens each frame so every screen shows the 16:9 frame's width (`frame_aspect` 1.7778; the style's `fov` is the lens on that screen, kept as `CamRig.lens`): 21:9 sees less ahead and behind, 4:3 more. Windowed and full screen differ only by shape: a 1280x720 window, 1920x1080 and 3840x2160 frame the same metres, and a maximised window under a title bar (1920x1017) is a slightly wider shape (8.7 m ahead). Only the shape counts: `frame_fov` reads the view's width over its height.
+  - The shape matches the source (ahead per behind, side per ahead inside its bands); the scale does not: ours shows 0.66x the source's metres every way, the distance left open in the table above (docs/DEBT.md, an owner call on Hunter size). Kept as it was: the cursor lean (none, below), the glide camera, the cast view (its room follows the live lens).
+  - `--camera-frame-check` asserts it on ten views (16:9 at 1280x720, 1920x1080, 3840x2160 and 1920x1017; 16:10; 21:9 at 2560x1080, 3440x1440, 1680x720; 4:3 at 1600x1200, 1024x768): the 16:9 side metres within 0.5% everywhere, less ahead on wider shapes and more on narrower ones, the same shape framing the same metres at any size, your feet and head inside the screen; and the 16:9 pitch, lens, feet and ground shape inside the source's bands. `--move-feel-check`'s framing rows now read shares of a 16:9 screen's height (the headless view is square, so its lens is wider).
+  - GPU pair (`--camera-frame-shots`, one 720 px-tall window per shape; `--frame-before` keeps the lens at every shape, the rule before this change): before jobq 20261111-053358-15138 (rp1-0), after 20261111-053415-04484 (pc-MRROBOTO, gl_compatibility, so the light differs), `out/frame_16x9|21x9|4x3.png`. The 4:3 window came out 1240x930 (the window's minimum width), still 4:3.
+  - Not taken: black bars at 21:9 (the 16:9 picture, with as much ahead as 16:9). Fairer to ultrawide players, but nothing shows the source draws them, and it needs a letterbox under the HUD.
+- **Camera lead (measured, Nov 2026):** the Supervive follow used to lean toward the cursor (42% of its distance from you after a
+  1.4 m deadzone, capped at 7.5 m). Nobody had checked that against the source, so it was measured from the reference clips in
+  `/home/boki/refs/supervive-mantle/` (hetzner): the cursor ring and the player's own health bar were tracked per frame, and the
+  ground's shift between frames read by phase correlation of the HUD-free centre of the picture.
+  - `sv_every_ability.mp4` (training ground, 1080p60): a cursor flick with the hunter standing moves the view by nothing. At
+    252.27 s (frame 15136) the cursor jumps 116 px of 480 (a quarter of the screen) and the ground shifts under 1 px over the next
+    4 s; at 293.53 s a 108 px flick gives 5 px; the flicks at 218.2, 220.3, 221.8, 247.6, 248.4, 249.1, 284.0, 285.2, 288.4 and
+    301.0 s all give 0-2 px. The hunter sits a fixed ~5% of the height below the centre whatever the cursor does.
+  - `sv_joule_1v4.mp4` (a fight, 1080p60): over the 1173 frames where both the bar and the cursor read, the hunter's screen offset
+    against the cursor's has a slope of -0.03 px/px (r = -0.1): no lean. From 2.0 to 4.25 s the cursor flips between (-240, +50)
+    and (+296, -130) px of 960x540 while the hunter stays at (-100 +-10, -30).
+  - `owner_mantle_clip.mp4` (a streamer's clip, webcam overlays): too noisy to read (weak slopes of -0.1 and -0.24), not used.
+  - So **the view stays on the hunter wherever the cursor is**: the Supervive row of `content/rules/camera.json` "follow" has a 0 m pan and there is no ease to time.
+    The lean survives as the Standard and Fully dynamic follow presets, which model the source's own camera options (deadzone,
+    maxzone, pan distance, quadratic easing; a Supervive guide recommends 0.5 / 0.8 / 100% on Fully dynamic).
+  - Dashes: the view trails and eases, never cuts. In the 1v4 clip at 4.37-4.80 s the hunter crosses 105 px (11% of the width)
+    while the ground moves at most 8.5 px per frame; the dredge sheet (frames 0187-0188, 493.2-493.8 s) saw ~0.5 s to catch up
+    on a blink dash. Ours trails a dash by ~0.55 m and is back to the running lag 0.5 s in (`--cam-lead-check`); a slower,
+    dash-only catch-up like the source's 0.4-0.5 s is not built (the tight 15/s follow is what keeps `cam_lag_m` under 0.4 m).
+  - Knocks and glides: no clean sample in these clips. With no cursor lean there is nothing to hold or recentre.
+  - `--cam-lead-check` asserts it in an expedition and in the Training Grounds: the lean with the cursor at the screen's edge is
+    under 0.35 m (the footage's noise floor, 1.5% of the view), the view drifts under 5 cm in the second after a flick, and a dash
+    moves it under 0.5 m in any frame, trails, and is back within 0.5 s. `--cam-lead-shots` holds the cursor at the right edge for
+    a review frame (GPU).
 - **Settings:**
   - "Expedition camera" is now "Camera".
   - The style and follow mode also apply at home (`CamRig.apply_settings`). The farm keeps its own wider framing (`Home._apply_cam_settings`).
