@@ -44,6 +44,7 @@ func run(main: Node) -> void:
 	d["classes"] = ClassUnlock.legacy()
 	Save.d = d
 	var o := Match.duel_opts()
+	o["sim_keep"] = true      # (the player sits out: without this the match ends a moment later)
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
@@ -83,7 +84,6 @@ func _fight(a: String, b: String, diff: String, sd: int, swap: bool) -> Dictiona
 	var A := m.make_hunter(m.next_id("sim"), 2, Arch.weight(a), "Sim %s" % a, "bot", m.bot_kin_record(), m.duel.home_at,
 		{"arch": a, "weapon": Arch.signature(a), "perk": ""}, {})
 	m.player.out = true
-	m.player.teleport(m.duel.home_at + Vector3(0, -50, 0))
 	var mind: Dictionary = Data.BOT_DIFF[diff].duplicate()
 	mind["dmg"] = 1.0         # (the game scales only a bot's damage, never the player's: the kits at face value)
 	for h in [A, B]:
@@ -110,7 +110,7 @@ func _fight(a: String, b: String, diff: String, sd: int, swap: bool) -> Dictiona
 	fight = {A: {}, B: {}, "cast": {A: "other", B: "other"}}
 	var t := 0.0
 	var steps := 0
-	while t < FIGHT_S and not A.downed and not B.downed:
+	while t < FIGHT_S and not A.downed and not B.downed and not m.over:
 		m.step(DT)
 		t += DT
 		steps += 1
@@ -230,4 +230,5 @@ func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
 		var rate := float(wins[a]) / maxi(int(games[a]), 1)
 		print("DUELSIM %-12s win %.2f  ttk median %.1f s  dmg %s" % [a, rate, med, ", ".join(parts)])
 		ok(tot > 0.0, "%s lands damage" % a)
+	ok(not m.over, "the match ran to the end of the last fight")
 	ok(draws * 3 <= rows.size(), "at most a third of fights time out (%d of %d)" % [draws, rows.size()])
