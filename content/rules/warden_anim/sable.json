@@ -1,5 +1,5 @@
 {
-	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock.",
+	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock. A move's fade key is its blend-in (default 0.1 s): the quick ones (whip, flip, knife) read from their first key.",
 	"skinned_weapon": true,
 	"carry_drop": ["hand.L", "hand.R"],
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "foot.L": "shin.L", "foot.R": "shin.R"},
@@ -14,12 +14,12 @@
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},
 	"land": {"clip": "land", "hop": {"w": 0.75, "rate": 1.0, "dur": 0.2, "moving": 0.1}, "drop": {"rate": 1.0, "dur": 0.33, "moving": 0.12}},
 	"kmoves": {
-		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving", "air_legs": true, "fade": 0.05}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving", "air_legs": true, "fade": 0.05}, "thf_primed": {"clip": "primed", "upper": "moving", "air_legs": true, "fade": 0.05},
-		"thf_vault_r": {"clip": "vault_r", "heading": true, "heading_off": 1.5708, "turn_max": 3.2}, "thf_vault_l": {"clip": "vault_l", "heading": true, "heading_off": -1.5708, "turn_max": 3.2, "fade": 0.05}, "thf_vault_f": {"clip": "vault_f", "fade": 0.05}, "thf_vault_b": {"clip": "vault_b"}, "thf_vault_twist": {"clip": "vault_twist"},
-		"thf_exdash": {"clip": "exdash", "hold_from": 0.46, "heading": true, "turn_max": 3.2, "air_clip": "exdash", "ground_clip": "vault_f", "fade": 0.05}, "thf_land": {"clip": "land_v"},
-		"thf_bola": {"clip": "bola", "upper": "moving", "air_legs": true, "fade": 0.05}, "thf_knife": {"clip": "knife", "air_legs": true, "strike": ["hand.R", "e/range", "throw"]}, "thf_arrive": {"clip": "arrive", "fade": 0.05},
+		"thf_lmb_r": {"clip": "lmb_r", "upper": "moving", "air_legs": true, "fade": 0.03}, "thf_lmb_l": {"clip": "lmb_l", "upper": "moving", "air_legs": true, "fade": 0.03}, "thf_primed": {"clip": "primed", "upper": "moving", "air_legs": true, "fade": 0.03},
+		"thf_vault_r": {"clip": "vault_r", "heading": true, "heading_off": 1.5708, "turn_max": 3.2, "fade": 0.04}, "thf_vault_l": {"clip": "vault_l", "heading": true, "heading_off": -1.5708, "turn_max": 3.2, "fade": 0.04}, "thf_vault_f": {"clip": "vault_f", "fade": 0.04}, "thf_vault_b": {"clip": "vault_b", "fade": 0.04}, "thf_vault_twist": {"clip": "vault_twist", "fade": 0.04},
+		"thf_exdash": {"clip": "exdash", "hold_from": 0.46, "heading": true, "turn_max": 3.2, "air_clip": "exdash", "ground_clip": "vault_f", "fade": 0.04}, "thf_land": {"clip": "land_v", "fade": 0.03},
+		"thf_bola": {"clip": "bola", "upper": "moving", "air_legs": true, "fade": 0.05}, "thf_knife": {"clip": "knife", "air_legs": true, "strike": ["hand.R", "e/range", "throw"], "fade": 0.04}, "thf_arrive": {"clip": "arrive", "fade": 0.05},
 		"thf_encore": {"clip": "encore"}, "thf_encore_dance": {"clip": "encore_dance", "hold_from": 0.0, "upper": "moving", "air_legs": true},
-		"thf_reset": {"clip": "reset", "upper": "moving", "air_legs": true}, "thf_flourish": {"clip": "flourish", "upper": "moving", "air_legs": true, "fade": 0.05},
+		"thf_reset": {"clip": "reset", "upper": "moving", "air_legs": true, "fade": 0.04}, "thf_flourish": {"clip": "flourish", "upper": "moving", "air_legs": true, "fade": 0.05},
 		"mf_xform": {"clip": "fusion"}
 	},
 	"lockin": {"clip": "emote", "from": 0.3, "dur": 1.45, "rate": 1.2},
@@ -42,5 +42,6 @@
 			}
 		}
 	},
-	"summon_call": "g_call_fling_r"
+	"summon_call": "g_call_fling_r",
+	"free_arm": {"vault_r": "L", "vault_l": "R"}
 }
