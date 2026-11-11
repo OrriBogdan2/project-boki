@@ -223,6 +223,7 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 		Save.add_item(item, 1)
 		h._toast("%s dug up a %s" % [rec["name"], String(Care.FOODS[item]["name"]).to_lower()])
 	h._emote(k, "♥" if gained > 0 else "♪", true)
+	GardenFirstDay.mark("toy", h)
 	if gained > 0:
 		h.fx.burst(k["pos"] + Vector3(0, 0.9, 0), Care.STATS[stat]["col"], 7, 2.0, 0.5)
 	_stop(k)

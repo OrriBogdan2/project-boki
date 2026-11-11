@@ -1,7 +1,8 @@
 class_name GoalTracker
 extends RefCounted
 ## The "Goals" card at the top right of the farm: what you are working towards, never the tutorial.
-## Rows come from four sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+## Rows come from five sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+##   first_day the new-save list (GardenFirstDay), in its own order with the ticked lines last
 ##   unlock    a Hunter's unlock challenge (ClassUnlock), for every Hunter not open yet
 ##   mastery   the goals of the Hunter you play that are not done
 ##   milestone a farm milestone not reached (FarmUnlocks)
@@ -10,7 +11,7 @@ extends RefCounted
 ## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
 ## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
-const SOURCE_ORDER := ["unlock", "mastery", "milestone", "level"]
+const SOURCE_ORDER := ["first_day", "unlock", "mastery", "milestone", "level"]
 
 static var all := false      # the full list is open
 
@@ -18,17 +19,22 @@ static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
 
 static func lines() -> Array:
-	var by_source := {"unlock": _unlocks(), "mastery": _mastery(), "milestone": _milestones(), "level": _level()}
+	var by_source := {"first_day": _first_day(), "unlock": _unlocks(), "mastery": _mastery(),
+			"milestone": _milestones(), "level": _level()}
 	var caps: Dictionary = cfg()["per_source"]
 	var picked: Array = []
 	for src in SOURCE_ORDER:
 		var rows: Array = by_source[src]
-		rows.sort_custom(func(a, b): return _closer(a, b))
+		if src != "first_day":
+			rows.sort_custom(func(a, b): return _closer(a, b))
 		picked.append_array(rows.slice(0, int(caps.get(src, 1))))
+	var order := picked.duplicate()      # sort_custom is not stable: equal rows keep their order through this
 	picked.sort_custom(func(a, b):
 		if bool(a["ready"]) != bool(b["ready"]):
 			return bool(a["ready"])
-		return SOURCE_ORDER.find(a["source"]) < SOURCE_ORDER.find(b["source"]))
+		if a["source"] != b["source"]:
+			return SOURCE_ORDER.find(a["source"]) < SOURCE_ORDER.find(b["source"])
+		return order.find(a) < order.find(b))
 	return picked.slice(0, int(cfg()["max"]))
 
 static func _closer(a: Dictionary, b: Dictionary) -> bool:
@@ -39,6 +45,9 @@ static func _closer(a: Dictionary, b: Dictionary) -> bool:
 static func _row(text: String, prog: Dictionary, source: String, ready := false) -> Dictionary:
 	return {"text": text, "have": int(prog["have"]), "need": int(prog["need"]), "frac": float(prog["frac"]),
 			"ready": ready, "source": source}
+
+static func _first_day() -> Array:
+	return GardenFirstDay.rows().map(func(r): return _row(r["text"], _prog(int(r["done"]), 1), "first_day"))
 
 static func _unlocks() -> Array:
 	var out: Array = []

@@ -4367,6 +4367,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	var res := Care.feed(rec, f)
 	GardenVisitor.fed(self, rec, res)
 	if res["ok"]:
+		GardenFirstDay.mark("feed", self)
 		# taken out of the pantry now, so two quick feeds can't both use the last one
 		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
 		else: Save.d["items"][f] = int(Save.d["items"][f]) - 1
@@ -4899,6 +4900,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_t"] = Time.get_unix_time_from_system()
 	ok["bred_t"] = rec["bred_t"]
+	GardenFirstDay.mark("pair", self)
 	Save.d["egg"]["gift"] = Mentor.take_gift()      # a retired mentor's gift for this egg ({} if none)
 	NestItems.lay(Save.d["egg"], rec, ok)      # placed nest items go on the egg and are used up
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
