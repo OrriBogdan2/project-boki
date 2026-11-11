@@ -9,6 +9,7 @@ extends RefCounted
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
+const ZONE_CORE_A := 0.25      # alpha at most at the centre of a zone (docs/VFX_QUALITY.md)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
@@ -58,6 +59,7 @@ func run(main: Node) -> void:
 	_view(m, V, P)
 	_kit(m, V, P)
 	_net(m, V, P)
+	_zones(main)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
@@ -230,6 +232,33 @@ func _kit(m: Match, V: HeroVfx, P: Hunter) -> void:
 	ok(int(V.plays.get("slam_hit", 0)) == 1, "the Finishing Slam plays its recipe")
 	ok(m.fx.rings.size() == rings0, "no shared ring under it")
 	ok(not m.fx.own_look and Sfx.skip.is_empty(), "the own-look scope closes")
+
+## docs/VFX_QUALITY.md: a zone is a lit rim and a soft inside, 0.25 alpha at most at the centre. Vex's X discs, Motley's
+## well (floor and dome), Meeko's seed and Hearthlight discs and Sable's X ring, from the values the kits draw with.
+func _zones(main: Node) -> void:
+	var m: Match = flow._match(main, "gunslinger")
+	var vex: Node3D = (m.player.ak as GunslingerKit).fx().disc(
+			Vector3.ZERO, 3.4, Color("2a1018"), Color("c43a2a"), 1.0, Color("ff9a5c"))
+	var vm := (vex as MeshInstance3D).material_override as ShaderMaterial
+	ok(float(vm.get_shader_parameter("core_a")) <= ZONE_CORE_A and (vm.get_shader_parameter("color3") as Color).a > 0.0,
+			"Vex's scorch disc: centre alpha at most %.2f and a lit rim" % ZONE_CORE_A)
+	var looks := KitLooks.of(m)
+	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 4.5)
+	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
+	var floor_a := float(fm.get_shader_parameter("fill")) * (fm.get_shader_parameter("color") as Color).a
+	ok(floor_a <= ZONE_CORE_A and float(fm.get_shader_parameter("thickness")) > 0.0,
+			"Motley's well: no solid floor (centre alpha 0), a lit rim")
+	var dome := looks.hold_on("zone_dome", "well_dome", m, Vector3.ZERO, 4.5)
+	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
+	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
+	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
+	var meeko := [["Meeko's seed disc", TenderKit.BURR_FILL, 0.9],
+		["Meeko's Hearthlight disc", TenderKit.HEARTH_FILL, 1.1]]
+	for d in meeko:
+		var raw := float(d[1]) * 0.18 * 1.6 * float(d[2])     # care_disc: body * 1.6 at the centre, cel steps of 0.25
+		ok(roundf((raw + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A, "%s: centre alpha at most %.2f" % [d[0], ZONE_CORE_A])
+	var sable_a: float = AimShapes.FILL_A * 0.2 * 2.0     # the band's tint inside, at the ult's brightest beat
+	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:

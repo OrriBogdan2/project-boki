@@ -13,6 +13,8 @@ extends ArchKit
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+const BURR_FILL := 1.0         # care_disc body strength of the seed's disc (centre alpha 0.25 at most: VFX_QUALITY)
+const HEARTH_FILL := 0.9       # the same for the thrown Hearthlight's disc
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
@@ -437,7 +439,7 @@ func _tick_burrs(dt: float) -> void:
 		lk().keep(
 				key, "disc", t.pos,
 				{
-					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
+					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": BURR_FILL,
 					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
 		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
@@ -569,7 +571,8 @@ func _tick_hearth(dt: float) -> void:
 	var look_p := {"r": hearth_r(), "col": Color("ffd27a"), "rim": Color("ffb347"), "fill": 0.45, "pattern": 5.0,
 		"a": 0.85 * (0.6 + 0.4 * gk), "spin": m.time * 0.5, "lamp": tossed}
 	if tossed:
-		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": 1.8, "a": 1.1 * (0.6 + 0.4 * gk)}, true)
+		look_p.merge({"col": Color("ffd27a"), "rim": Color("3fd8d0"), "fill": HEARTH_FILL,
+			"a": 1.1 * (0.6 + 0.4 * gk)}, true)
 	lk().keep("hearth", "hearth", c, look_p)
 	hearth["left"] = float(hearth["left"]) - dt
 	e_t = float(hearth["left"])

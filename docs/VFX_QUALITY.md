@@ -64,10 +64,11 @@ Still open (shared, not done here):
 - Only five kits are data-driven (`content/vfx/`: archer, ashwick, juggernaut, rimewright, tender). The rest draw with
   `Fx` primitives in code (`dj_fx`, `ld_fx`, `vv_fx`, `pin_fx`, `bjorn_fx`, `breah_*`). Moving each to `HeroVfx` data is
   how a kit reaches the bar.
-- **Opaque zone fills** (seen in the strips): Vex's E/X scorch (`VvFx.disc`), Motley's well dome, Meeko's seed and
-  ult discs and Sable's X fill the whole area with a near-opaque flat colour that hides the target. Rule: a zone is a lit
-  rim plus a soft inner falloff (alpha 0.25 or less at the centre), never a solid fill. Each kit sets these, so the fix
-  is per kit (backlog).
+- **Opaque zone fills** (seen in the strips): done on branch ext/vfx-zone-rims. Rule: a zone is a lit rim plus a soft
+  inner falloff (alpha 0.25 or less at the centre), never a solid fill. Vex's X discs (`VvFx.disc`, `core_a` 0.1, also
+  Sparkle's), Motley's well floor (ring shader with `wash`, no fill), Meeko's Hearthlight disc (`HEARTH_FILL`) and seed
+  disc (`BURR_FILL`) now follow it; Motley's dome (centre about 0.1) and Sable's X (a ring band) already did.
+  `--hero-vfx-check` asserts each (`_zones`).
 - Motley's kit draws its well and orbs in indigo/violet, but his slot colours and signature are teal. The ostra item
   moves them to teal. The alternative (keep void violet) would clash with Sable.
 
