@@ -63,6 +63,12 @@ All wired in `scripts/match/capture.gd`, so a rival's game plays them from the s
 - **`scan_fail`**: a scan cancelled by a dash or crowd control, a box that filled mid-scan, or a rival's scan that broke off.
 - **`scan_call`**: the Boki's own short call at the catch, positional with a reach of 11 m.
 - Voice limits are `Sfx.MIN_GAP` (a crowd of scans cannot stack one cue) and the pool's stacking cap.
+## Carry cues (`content/sfx/carry.json`, `tools/gen_sfx_carry.py`)
+"Carry 2 in, 1 extra out" (docs/decisions/0090), all through `scripts/match/carry_sfx.gd` (`CarrySfx`), one-shots on the SFX bus:
+- **Lead swap** (`Match.on_kin_swap`): `carry_swap_out`, the outgoing Boki's chirp dipping into the satchel, then 0.13 s later `carry_swap_in`, the incoming one's a fifth up; each pitched by its Boki's size (`HomeChimes.PITCH`), -6 dB at the hunter. It runs in the owner's game only (the swap is not a net event).
+- **Carry-out claim**: `carry_claim`, a soft latch and a warm low chord under the scan's chime, when a wild Boki's scan lands (`Capture._pop`, so every game hears it) or a capsule comes out of your own team's deathbox.
+- **Stolen**: a rival takes one of your Boki (`KinTrack.register`, which every game runs for a catch online, or a rival's deathbox in `Life`): its owner hears `carry_stolen` (a falling minor sting, flat, wherever the thief is); everyone else hears `carry_take` at the thief, a sly pluck and swish that carries 30 m (`reach`), so a squad nearby knows.
+- Voice cap: each cue has a `Sfx.MIN_GAP` (200 ms, the sting 400 ms), so a burst of claims or a looted box full of capsules plays once; at most two voices per event. `--sfx-set-check` section 10 asserts the names, gaps, reach and wiring; `--match-audio-check` the swap order, the claim, and who hears a steal where.
 ## The Heart and the Ways Out calls
 - `scripts/match/heart_sfx.gd` (`Heart.audio`) owns the Heartspark cues (`tools/gen_sfx_heart.py`, set `content/sfx/heart.json`) and the Ways Out calls: `call_out(event, seat, team)` with `open`, `start`, `taken`, `warn`, `last` plays one flat UI sting (`ways_*`) and writes the same line to the match feed and the toast lane, so sound and banner fire together. Each call plays once per seat (a squad's `start` again after 10 s); the quest seats call it the same way when they are built. `--ways-out-sfx-check` asserts it.
 ## The garden's ambience (`scripts/home/home_ambience.gd`)
