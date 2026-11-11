@@ -25,5 +25,7 @@
    "slow": 1.0,
    "color": "#8a4aba"
   }
- ]
+ ],
+ "move": "throw",
+ "cast": 0.4
 }

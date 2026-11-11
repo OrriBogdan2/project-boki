@@ -1,12 +1,14 @@
 extends RefCounted
 ## --utility-pose-shots --warden=<id> --shots-dir=<dir> [--size=420] [--frames=8] [--yaw=125]:
 ## a Hero going through each belt
-## move (throw, place, read, drink), driven through the game state (HunterAnim, then WardenClips) the way
+## move (UtilityPose.MOVES), driven through the game state (HunterAnim, then WardenClips) the way
 ## Hunter._anim_state feeds it (UtilityPose.fill): <dir>/<move>/f00.png... evenly across the move, at a close
-## camera that shows the hand. Needs a renderer.
+## camera that shows the hand, then the same on the run (<dir>/<move>_run/: the legs keep the gait). Needs a
+## renderer.
 
 const DT := 1.0 / 30.0
 const SECS := 1.2          # one run of a move, to see the whole of it (the real ones last their item's cast time)
+const RUN := 4.0           # m/s along the facing for the _run strips
 
 var tree: SceneTree
 var cam: Camera3D
@@ -44,31 +46,37 @@ func run(main: Node) -> void:
 	if sync:
 		sync.set_process(false)
 	for mv in UtilityPose.MOVES:
-		DirAccess.make_dir_recursive_absolute(out.path_join(mv))
-		var n := int(SECS / DT)
-		var shot := 0
-		for step in n:
-			var p := float(step) / float(n - 1)
-			var s := {"vel": Vector3.ZERO, "face": yaw, "grounded": true, "crouch": 0.0, "fired": 99.0,
-				"drink": -1.0, "util": -1.0}
-			if mv == "drink":
-				s["drink"] = p
-			else:
-				s["util"] = p
-				s["util_move"] = mv
-				if mv == "place":
-					s["crouch"] = UtilityPose.weight(mv, p)
-			anim.update(DT, s)
-			if sync:
-				sync.call("_process", DT)
-			if step * frames / n == shot and shot < frames:
-				var hp := model.to_local(anim.hand_l.global_position) if anim.hand_l else Vector3.ZERO
-				print("UPOSE_HAND %s f%02d %s" % [mv, shot, hp.snappedf(0.01)])
-				_aim()
-				await _grab(out.path_join(mv).path_join("f%02d.png" % shot))
-				shot += 1
+		for running in [false, true]:
+			var dir := out.path_join(mv + ("_run" if running else ""))
+			DirAccess.make_dir_recursive_absolute(dir)
+			await _strip(anim, model, sync, String(mv), running, yaw, frames, dir)
 	print("UTILITY_POSE_SHOTS_DONE ", frames)
 	tree.quit()
+
+func _strip(anim: HunterAnim, model: Node3D, sync: Node, mv: String, running: bool, yaw: float, frames: int,
+		dir: String) -> void:
+	var n := int(SECS / DT)
+	var shot := 0
+	var vel := Vector3(sin(yaw), 0.0, cos(yaw)) * (RUN if running else 0.0)
+	for step in n:
+		var p := float(step) / float(n - 1)
+		var s := {"vel": vel, "face": yaw, "grounded": true, "crouch": 0.0, "fired": 99.0, "drink": -1.0, "util": -1.0}
+		if mv == "drink":
+			s["drink"] = p
+		else:
+			s["util"] = p
+			s["util_move"] = mv
+			if mv == "place" and not running:
+				s["crouch"] = UtilityPose.weight(mv, p)
+		anim.update(DT, s)
+		if sync:
+			sync.call("_process", DT)
+		if step * frames / n == shot and shot < frames:
+			var hp := model.to_local(anim.hand_l.global_position) if anim.hand_l else Vector3.ZERO
+			print("UPOSE_HAND %s%s f%02d %s" % [mv, "_run" if running else "", shot, hp.snappedf(0.01)])
+			_aim()
+			await _grab(dir.path_join("f%02d.png" % shot))
+			shot += 1
 
 func _aim() -> void:
 	cam.fov = 28.0

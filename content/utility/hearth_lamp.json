@@ -13,5 +13,7 @@
   1
  ],
  "price": 110,
- "desc": "Sets a revive beacon where you stand. Any squad can use it, once."
+ "desc": "Sets a revive beacon where you stand. Any squad can use it, once.",
+ "move": "place",
+ "cast": 0.6
 }

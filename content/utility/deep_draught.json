@@ -19,5 +19,6 @@
   "move": 0.45,
   "heal": 1000.0,
   "src": "Heal 1000 = restores all your health: more than any max HP; move 0.45 = the shared drink slow these items had before per-item channel data. See docs/CONSUMABLES.md"
- }
+ },
+ "move": "drink"
 }

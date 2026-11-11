@@ -18,5 +18,7 @@
  "range": 2.0,
  "time": 30.0,
  "r": 1.6,
- "hold": 1.5
+ "hold": 1.5,
+ "move": "place",
+ "cast": 0.6
 }

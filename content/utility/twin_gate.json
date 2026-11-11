@@ -17,5 +17,7 @@
  "field": "gate",
  "range": 9.0,
  "time": 8.0,
- "r": 2.0
+ "r": 2.0,
+ "move": "throw",
+ "cast": 0.4
 }

@@ -16,5 +16,7 @@
  "desc": "Show yourself to every rival for 2 minutes. Live through it: your dead squadmates return and you get 150 gems. One per squad at a time.",
  "field": "banner",
  "time": 120.0,
- "reward": 150
+ "reward": 150,
+ "move": "raise",
+ "cast": 0.6
 }

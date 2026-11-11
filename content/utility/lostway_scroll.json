@@ -20,5 +20,6 @@
   "move": 0.45,
   "heal": 0.0,
   "src": "move 0.45 = the shared drink slow these items had before per-item channel data. See docs/CONSUMABLES.md"
- }
+ },
+ "move": "read"
 }

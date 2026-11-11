@@ -22,5 +22,7 @@
    "time": 30.0,
    "delay": 0.3
   }
- ]
+ ],
+ "move": "throw",
+ "cast": 0.3
 }

@@ -17,5 +17,7 @@
  "field": "ward",
  "range": 1.6,
  "time": 60.0,
- "r": 14.0
+ "r": 14.0,
+ "move": "read",
+ "cast": 0.5
 }

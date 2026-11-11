@@ -31,5 +31,7 @@
    "kb": 8.0,
    "color": "#ff7a3a"
   }
- ]
+ ],
+ "move": "raise",
+ "cast": 0.6
 }

@@ -15,5 +15,7 @@
  "price": 45,
  "desc": "A hawk scouts the whole map: every rival hunter shows for 4s, through walls and grass.",
  "range": 120.0,
- "time": 4.0
+ "time": 4.0,
+ "move": "raise",
+ "cast": 0.5
 }

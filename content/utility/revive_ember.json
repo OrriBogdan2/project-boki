@@ -13,5 +13,7 @@
   0
  ],
  "price": 0,
- "desc": "Wakes every fallen squadmate at your feet. Only the hardest bosses drop it; no one sells it."
+ "desc": "Wakes every fallen squadmate at your feet. Only the hardest bosses drop it; no one sells it.",
+ "move": "raise",
+ "cast": 0.6
 }
