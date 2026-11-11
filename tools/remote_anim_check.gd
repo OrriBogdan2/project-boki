@@ -4,7 +4,9 @@ extends "res://tools/displace_net_check.gd"
 ## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
 ## (a remote hunter fed only by the snapshots, Net 0.16.0's kit move id) must start the same HunterAnim move
 ## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## id and HunterAnim's), compared per cast. Vex's tapped RMB also compares the ground cone her stuck Burr Charge
+## shows (the "cone" fx, Net 0.24.5): the guest's copy must draw it as long as the host's.
+## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -27,6 +29,7 @@ var last_row := ["?", "?"]
 var last_prev_t := 0.0
 var unlike := {}             # arch -> casts whose copy differs
 var played := {}             # arch -> casts that played any move
+var cone_len := 0.0          # m: the longest ground cone the watched hunter showed since the mark
 
 func _init() -> void:
 	tag = "RANIM"
@@ -67,6 +70,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	await _run(0.3)
 	log_rows.clear()
 	last_row = ["?", "?"]
+	cone_len = 0.0
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
 	await _press(key, held)
@@ -77,6 +81,11 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	await _reply()
 	var theirs: Array = replies[0].get("log", []) if not replies.is_empty() else []
 	var cmp := _compare(mine, theirs)
+	if what == "gunslinger rmb":
+		var their_cone := float(replies[0].get("cone", 0.0)) if not replies.is_empty() else 0.0
+		ok(cone_len > 0.0 and absf(their_cone - cone_len) < 0.05,
+			"gunslinger rmb: the guest draws the Burr cone as long as the host",
+			"host %.2f m, guest %.2f m" % [cone_len, their_cone])
 	if cmp["moves"] > 0:
 		played[arch] = int(played.get(arch, 0)) + 1
 	if KNOWN.has(what):
@@ -152,8 +161,9 @@ func _on_msg(topic: String, data, from: String) -> void:
 			"mark":
 				log_rows.clear()
 				last_row = ["?", "?"]
+				cone_len = 0.0
 			"log":
-				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows})
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "log": log_rows, "cone": cone_len})
 		return
 	super._on_msg(topic, data, from)
 
@@ -171,6 +181,10 @@ func _sample() -> void:
 		return
 	var H := _copy()
 	H.render(DT, 1.0)      # (Match's own render pass is off in the checks)
+	var aims := AimKit.layer(m)
+	for e: Dictionary in aims.entries.values():
+		if e["h"] == H and e["kind"] == "cone" and aims.live(e):
+			cone_len = maxf(cone_len, float(e["len"]))
 	if H.ak == null or H.anim == null:
 		return
 	var row := [H.ak.anim_id, H.anim.km_id]
