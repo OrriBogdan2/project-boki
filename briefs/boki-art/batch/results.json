@@ -112255,5 +112255,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/px9b_druzemole_3.jpg",
     "ok": true
+  },
+  {
+    "id": "px9b_tidalisk",
+    "name": "Tidalisk (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_tidalisk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_chainipede",
+    "name": "Chainipede (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_chainipede_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_lanceron",
+    "name": "Lanceron (pixel sprite 80, chunky redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9b_lanceron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_reapant",
+    "name": "Reapant (pixel sprite 80, chunky redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9b_reapant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_geodemole",
+    "name": "Geodemole (pixel sprite 80, chunky redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9b_geodemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_zephyrak",
+    "name": "Zephyrak (pixel sprite 80, chunky redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9b_zephyrak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_ringrove",
+    "name": "Ringrove (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_ringrove_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_druzemole",
+    "name": "Druzemole (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_druzemole_2.jpg",
+    "ok": true
   }
 ]
