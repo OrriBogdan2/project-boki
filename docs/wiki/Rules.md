@@ -1461,6 +1461,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
 ## tuning (`content/rules/tuning.json`)
+## try_today (`content/rules/try_today.json`)
 
 
 
@@ -1473,6 +1474,10 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | glide_carry | {"carry_drag": 3.0, "default": 12.0, "archer": 9.0} |
 | dash | {"jump_keep": 0.75} |
 | dash_speed | {"archer": 0.7} |
+| _doc | The 'What to try today' card on the title screen (scripts/ui/try_card.gd). Change `id` with each new ask: a card the player has dismissed stays hidden until its id changes. Keep it to three lines. Names are display names; the full list is in docs/TESTER_GUIDE.md. |
+| id | 2026-11-09 |
+| title | What to try today |
+| lines | ["Play one full first match as Vex, from the drop to the exit.", "Try Kael, Lace and Cinder in the Arena.", "Leave a note on the rate card when you quit."] |
 
 ## tutorial (`content/rules/tutorial.json`)
 
