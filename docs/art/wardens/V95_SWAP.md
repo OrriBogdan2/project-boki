@@ -80,3 +80,29 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Skin relax on a shipped .glb (`tools/art1/glb_relax.py`, 2026-11-11)
+The swaps relaxed their weights with skin_relax's defaults (60 passes, 1 ring, `CUTS` 0), which stops well short:
+Vex, Kael, Hem and Cinder measured 6.9x to 10.4x worst edge stretch (`--stretch-check`). Their swap work files
+(bake.blend) are gone, so `blender -b --factory-startup --python tools/art1/glb_relax.py -- SPEC` runs the same
+skin_relax on the .glb the game ships (`game` in the spec) with the spec's `relax` overrides, and writes back only
+JOINTS_0 and WEIGHTS_0: mesh, clips, anchors and paint stay byte for byte. Run it once per bake (a second run relaxes
+the relaxed weights again). The export splits vertices at UV seams (Vex: 14.6k vertices, 6.5k places); the tool
+welds them for the relax, or the two copies would get different weights and the seam would open, which the check
+cannot see (it measures triangle edges only).
+The four specs now carry `"relax": {"CUTS": 0, "MAX_ITER": 400, "RINGS": 4}` (a later swap re-run uses it too).
+Worst stretch per clip, before -> after (min to max over the clips):
+
+| Hero | before | after |
+|---|---|---|
+| Vex (gunslinger) | 2.46-7.59 | 2.13-3.92 |
+| Cinder (ashwick) | 2.41-6.86 | 2.36-5.41 |
+| Kael (juggernaut) | 3.37-7.94 | 2.67-6.39 |
+| Hem (archer) | 3.46-10.36 | 2.84-6.92 |
+
+Seen or hidden: of the edges over 1.3x, a ray test from each edge's middle at its worst pose (26 directions,
+hidden when 24 or more hit the body) finds 7-32% enclosed (folds, armpits, crotch) and the rest open to view, so the
+check counts every edge. What is left over 5.3x on Kael and Hem is short (9-16 mm) inner-knee and crotch edges in
+death, downed, emote and hail: the knees touch at rest and bone heat gave each knee some weight from the other leg.
+Weights alone stop there (200 or 400 passes, 2 or 4 rings: the same; taking the other leg's weights away made it
+worse, Hem 8.6x). A `detach` of the knees in a swap re-run is the next step (docs/DEBT.md "Skin stretch").
