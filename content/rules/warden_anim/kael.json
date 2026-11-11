@@ -230,5 +230,6 @@
 			}
 		}
 	},
-	"summon_call": "g_call_raise_r"
+	"summon_call": "g_call_raise_r",
+	"free_arm": {"slam": "L", "meteor": "L"}
 }
