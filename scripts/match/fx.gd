@@ -26,6 +26,8 @@ var fi := 0
 var ring_pool: FxPool
 var ghost_pool: FxPool
 var beam_pool: FxPool
+## beam quads warmed: a beam takes 2 (glow and core), a bolt 10 (5 segments of beam), so 3 bolts and 5 beams fit
+const BEAM_WARM := 40
 
 func _ready() -> void:
 	particles = PARTICLES * float(Settings.q("fx"))
@@ -84,7 +86,7 @@ func _ready() -> void:
 func _build_pools() -> void:
 	ring_pool = FxPool.new(self, _make_ring, 24)
 	ghost_pool = FxPool.new(self, _make_ghost, 12)
-	beam_pool = FxPool.new(self, _make_beam, 8)
+	beam_pool = FxPool.new(self, _make_beam, BEAM_WARM)
 
 func _mesh_node(mesh: Mesh, mat: Material) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()

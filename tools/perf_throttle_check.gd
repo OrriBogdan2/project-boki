@@ -321,7 +321,7 @@ func _plates() -> void:
 
 func _fx_pools() -> void:
 	var fx: Fx = m.fx
-	var kids := fx.get_child_count()
+	var kids := fx.get_children().map(func(c: Node) -> int: return c.get_instance_id())
 	var out := [fx.ring_pool.live(), fx.ghost_pool.live(), fx.beam_pool.live()]
 	var tele: Array = []
 	for i in 3:
@@ -337,7 +337,10 @@ func _fx_pools() -> void:
 	for i in 60:
 		fx._process(0.02)
 		await main.get_tree().process_frame
-	ok(fx.get_child_count() == kids, "a flurry of rings, ghosts, bolts, beams and telegraphs adds no node to the Fx")
+	# by node, not by count: a telegraph from the match steps above can end in this window
+	var added := fx.get_children().filter(func(c: Node) -> bool: return not kids.has(c.get_instance_id()))
+	ok(added.is_empty(),
+		"a flurry of rings, ghosts, bolts, beams and telegraphs adds no node to the Fx (%d added)" % added.size())
 	var back: bool = fx.ring_pool.live() <= out[0] and fx.ghost_pool.live() <= out[1]
 	back = back and fx.beam_pool.live() <= out[2]
 	ok(back,
