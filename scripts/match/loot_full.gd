@@ -17,7 +17,8 @@ static func fits(h: Hunter, row: Dictionary, b: Dictionary) -> bool:
 		"chest_keys":
 			return UtilityBelt.room_for(h, "chest_key") > 0
 		"caught":
-			return Capture.room(h) or _is_yours(h, row, b)
+			var recs: Array = b["caught"]
+			return _is_yours(h, row, b) or (int(row["i"]) < recs.size() and Capture.room(h, recs[int(row["i"])]))
 		"pack", "belt":
 			return bool(row.get("upgrade", true))
 	return true
@@ -91,7 +92,7 @@ static func denied(m: Match, h: Hunter, key: String) -> void:
 	Sfx.play("lock_rattle", null, -4.0)
 	if key == "pack":
 		return
-	var what := "Box full" if key == "caught" else "Belt full"
+	var what := "No Boki slot free" if key == "caught" else "Belt full"
 	_told(m, h, what, FULL_COL, true)
 
 static func _is_yours(h: Hunter, row: Dictionary, b: Dictionary) -> bool:
