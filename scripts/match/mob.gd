@@ -238,7 +238,7 @@ func sim(dt: float) -> void:
 					if tele:
 						m.fx.aim_telegraph(tele, pos, atk_dir)
 			if tele:
-				m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+				m.fx.telegraph_progress(tele, MobAnim.windup_k(st_t, float(md["windup"])))
 			if st_t <= 0.0:
 				_strike()
 		"lunge":
@@ -249,7 +249,7 @@ func sim(dt: float) -> void:
 					lunge_hit[e.nid] = true
 					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
 			if st_t <= 0.0:
-				st = "recover"; st_t = 0.45
+				st = "recover"; st_t = MobAnim.LUNGE_REC
 				vel.x *= 0.2; vel.z *= 0.2
 		"recover":
 			if st_t <= 0.0:
@@ -354,13 +354,13 @@ func _strike() -> void:
 	cd = md["cd"] * randf_range(0.85, 1.15)
 	match md["attack"]:
 		"lunge":
-			st = "lunge"; st_t = 0.2; lunge_hit = {}
+			st = "lunge"; st_t = MobAnim.LUNGE_S; lunge_hit = {}
 		"spit":
-			st = "recover"; st_t = 0.5
+			st = "recover"; st_t = MobAnim.RECOVER_S["spit"]
 			m.spawn_shot(self, pos + Vector3(atk_dir.x * 0.6, 0.8, atk_dir.y * 0.6), atk_dir * 8.5, md["dmg"] * dmg_mult, 8.5 / 8.5, 0.32, Color("b6ff6a"), {"mob": true, "kb": 2.0})
 			m.sfx("k_spore", pos, -8.0, 1.25)      # a wet spit
 		"volley":
-			st = "recover"; st_t = 0.6
+			st = "recover"; st_t = MobAnim.RECOVER_S["volley"]
 			for k in [-0.2, 0.0, 0.2]:
 				var d := atk_dir.rotated(k)
 				m.spawn_shot(self, pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), d * 9.5, md["dmg"] * dmg_mult, 10.5 / 9.5, 0.28, Color("8ae8ff"), {"mob": true, "kb": 2.5})
@@ -380,7 +380,7 @@ func _strike() -> void:
 			_on_zero(null, {"self": true})
 			return
 		"slam":
-			st = "recover"; st_t = 0.8
+			st = "recover"; st_t = MobAnim.RECOVER_S["slam"]
 			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
 			m.fx.dust(atk_at, 16)
@@ -406,10 +406,11 @@ func render(delta: float, alpha: float) -> void:
 	if dead:
 		# a death pop: swell, flatten and blink out
 		death_t += delta
-		visible = death_t < 0.32
+		visible = death_t < MobAnim.DEATH_S
 		if visible:
-			var dk := death_t / 0.32
+			var dk := death_t / MobAnim.DEATH_S
 			var bd: Node3D = model.get_node("Body")
+			MobAnim.pose(self, delta)
 			var w := 1.0 + sin(minf(dk * 1.6, 1.0) * PI) * 0.35
 			bd.scale = Vector3(w + dk * 0.3, maxf(0.05, 1.0 - dk * dk), w + dk * 0.3)
 			for mt in mats:
@@ -420,9 +421,7 @@ func render(delta: float, alpha: float) -> void:
 	var moving := spd > 0.3
 	anim += delta * (2.0 + minf(spd, 6.0) * 1.8 if moving else 2.0)
 	var body: Node3D = model.get_node("Body")
-	var wind := 0.0
-	if st == "windup":
-		wind = 1.0 - st_t / float(md["windup"])
+	var wind := MobAnim.windup_k(st_t, float(md["windup"])) if st == "windup" else 0.0
 	# shared body language: lean back and gather while winding up, shiver as it is about to go,
 	# throw the weight forward on the attack, recoil when hit
 	var shiver := sin(m.time * 60.0) * 0.03 * maxf(0.0, wind - 0.6) * 2.5
@@ -439,81 +438,7 @@ func render(delta: float, alpha: float) -> void:
 		var sq0 := squash
 		body.scale = Vector3(1.0 + sq0 * 0.3 + gather * 0.5, 1.0 - sq0 * 0.35 - gather * 0.5, 1.0 + sq0 * 0.3 + gather * 0.5)
 		return
-	match mkind:
-		"skitter":
-			body.position.y = absf(sin(anim)) * 0.05 * float(moving) - gather * 0.3 + (0.0 if moving else sin(m.time * 3.0) * 0.012)
-			for i in 3:
-				for sx in [-1, 1]:
-					var lg := body.get_node_or_null("Leg%d%d" % [i, sx]) as Node3D
-					if lg == null: continue
-					# tripod gait: legs 0 and 2 on one side move with leg 1 on the other
-					var ph := anim * 1.6 + (PI if (i % 2 == 0) == (sx > 0) else 0.0)
-					var mv := 1.0 if moving else 0.15
-					lg.rotation.y = sin(ph) * 0.45 * mv
-					lg.rotation.z = maxf(0.0, cos(ph)) * 0.35 * sx * mv - wind * 0.3 * sx
-			var jaw := 0.25 + wind * 0.5 + (0.6 if st == "lunge" else 0.0) + sin(m.time * 7.0) * 0.06
-			for jn in ["JawL", "JawR"]:
-				var j := body.get_node_or_null(jn) as Node3D
-				if j: j.rotation.y = jaw * (1.0 if jn == "JawL" else -1.0)
-		"spitter":
-			var bulb: Node3D = body.get_node("Bulb")
-			bulb.scale = Vector3(1.0 - wind * 0.15, 0.9 + wind * 0.4, 1.0 - wind * 0.15) * (1.0 + sin(anim) * 0.03)
-			bulb.rotation.x = -wind * 0.5 + (0.5 if st == "recover" else 0.0) * 0.5
-			body.rotation.y = sin(m.time * 1.3) * 0.05
-			for i in 4:
-				var lf := body.get_node_or_null("Leaf%d" % i) as Node3D
-				if lf: lf.rotation.z = sin(m.time * 1.7 + i * 1.3) * 0.08 + wind * 0.45 + hurt_k * 0.3
-		"bomber":
-			var sw := 1.0 + wind * 0.45 + sin(anim * (1.0 + wind * 6.0)) * 0.04 * (1.0 + wind * 3.0)
-			body.get_node("Puff").scale = Vector3.ONE * sw
-			body.position.y = absf(sin(anim)) * 0.1
-			var puff := body.get_node("Puff")
-			for fn in ["FinL", "FinR"]:
-				var fin := puff.get_node_or_null(fn) as Node3D
-				if fin: fin.rotation.z = sin(anim * 2.6) * (0.5 + wind * 0.5) * (1.0 if fn == "FinL" else -1.0)
-			var spk := puff.get_node_or_null("Spark") as Node3D
-			if spk: spk.scale = Vector3.ONE * (0.85 + absf(sin(m.time * 23.0)) * 0.35 + wind * 0.9)
-		"glimmer":
-			body.position.y = absf(sin(anim * 1.3)) * 0.16
-			if model.has_meta("sculpted"):
-				for en in ["EarL", "EarR"]:
-					var ear := body.get_node_or_null(en) as Node3D
-					if ear: ear.rotation.x = 0.25 + sin(anim * 1.3 + 0.6) * 0.25
-			else:
-				body.rotation.y += delta * 2.0
-		"sentinel":
-			var cr: Node3D = body.get_node("Crystal")
-			cr.rotation.y += delta * (1.5 + wind * 10.0)
-			cr.position.y = 1.25 + sin(anim * 0.6) * 0.08 + wind * 0.25
-			var shd := cr.get_node_or_null("Shards") as Node3D
-			if shd: shd.rotation.y -= delta * (2.5 + wind * 12.0)
-		"brute", "warden":
-			var tor := body.get_node_or_null("Torso") as Node3D
-			var ll := body.get_node_or_null("LegL") as Node3D
-			var lr := body.get_node_or_null("LegR") as Node3D
-			var al := tor.get_node_or_null("ArmL") as Node3D if tor else null
-			var ar := tor.get_node_or_null("ArmR") as Node3D if tor else null
-			var ph2 := anim * 0.9
-			var mv := 1.0 if moving else 0.0
-			var stride := sin(ph2) * 0.5 * mv
-			if ll: ll.rotation.x = stride - wind * 0.3
-			if lr: lr.rotation.x = -stride + wind * 0.2
-			body.position.y = absf(cos(ph2)) * 0.06 * mv - wind * 0.1
-			var arm_x := 0.0
-			if st == "windup": arm_x = wind * 2.7                    # both fists up overhead
-			elif st == "recover" and stagger_t <= 0.0 and st_t > 0.35: arm_x = 0.9   # slammed down in front
-			if al: al.rotation.x = lerpf(al.rotation.x, arm_x - stride * 0.6, 1.0 - exp(-(30.0 if st == "recover" else 12.0) * delta))
-			if ar: ar.rotation.x = lerpf(ar.rotation.x, arm_x + stride * 0.6, 1.0 - exp(-(30.0 if st == "recover" else 12.0) * delta))
-			if al: al.rotation.z = -0.15 - wind * 0.2
-			if ar: ar.rotation.z = 0.15 + wind * 0.2
-			if tor:
-				tor.rotation.y = sin(ph2) * 0.12 * mv
-				tor.rotation.x = -0.12 * mv + wind * 0.15
-				# heavy breathing while it stands about
-				var br := sin(m.time * 2.2) * 0.025 * (1.0 - mv)
-				tor.scale = Vector3(1.0 + br, 1.0 + br * 0.6, 1.0 + br)
-				var hd := tor.get_node_or_null("Head") as Node3D
-				if hd and model.has_meta("sculpted"): hd.rotation.y = sin(m.time * 0.7) * 0.25 * (1.0 - mv)
+	MobAnim.pose(self, delta)
 	if model.has_meta("pulse"):
 		# glowing parts (a maw, a fuse, runes) flare as an attack winds up
 		for pm in model.get_meta("pulse"):
@@ -566,6 +491,6 @@ func _net_telegraph() -> void:
 		elif md["attack"] in ["lunge", "spit", "volley"]:
 			m.fx.aim_telegraph(tele, pos, atk_dir)
 		if tele:
-			m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+			m.fx.telegraph_progress(tele, MobAnim.windup_k(st_t, float(md["windup"])))
 	elif tele:
 		_cancel_tele()
