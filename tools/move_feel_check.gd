@@ -719,8 +719,10 @@ func _plain_dash() -> void:
 ## pass through it. Tarek's hop is an arc, so his row is its reach and flight time, not a measured travel.
 const KIT_DASH := {
 	"gunslinger": {"ground": [4.8, 0.45], "src": "[footage] Combat Slide tap 4.8 m in 0.47 s"},
-	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7
-	"archer": {"ground": [3.0, 0.386], "src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed"},
+	# owner item 9 (6503f4fa8): her dash slower and lower, tuning.json dash_speed archer 0.7, so 0.27 s / 0.7;
+	# owner 11-11: 10-15% further in the same time, so the footage's 3 m x1.125
+	"archer": {"ground": [3.375, 0.386],
+			"src": "[footage] Phase Walk roll 3 m in 0.27 s, owner item 9: x0.7 speed, owner 11-11: x1.125 far"},
 	"ashwick": {"ground": [3.4, 0.33], "air": [6.8, 0.28], "src": "[footage] Felix ram 3.4 m in 0.33 s, poof 6.8 m"},
 	"tender": {"ground": [3.6, 0.2], "src": "[footage] Elluna 2 bh in 0.2 s (air glide: tender's own check)"},
 	"bulwark": {"ground": [3.5, 0.17], "src": "[footage] Oath Spin Dash ~3.5 m in ~0.17 s"},
