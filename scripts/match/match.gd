@@ -366,6 +366,7 @@ func _start(o: Dictionary) -> void:
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
+		Shops.build(self)
 	await _stage("build.chests")
 	if not world.train_route.is_empty() and not opts.get("duel", false) and not opts.get("arena", false):
 		skytrain = SkyTrain.new()
@@ -1339,24 +1340,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			sfx("jump", h.pos, -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
-	for gp in gpads.duplicate():
-		gp["t"] = float(gp["t"]) - dt
-		if float(gp["t"]) <= 0.0:
-			(gp["node"] as Node3D).queue_free(); gpads.erase(gp); continue
-		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
-		if top: top.scale = Vector3.ONE * (1.0 + sin(time * 6.0) * 0.06)
-		for h in hunters:
-			if h.out or h.downed or h.remote or not h.grounded:
-				continue
-			if h.flat_dist(gp["pos"]) < 0.8 and absf(h.pos.y - float(gp["pos"].y)) < 0.6 and float(gp["cd"].get(h.nid, -9.0)) < time:
-				gp["cd"][h.nid] = time + 1.0
-				var hv := Vector2(h.vel.x, h.vel.z)
-				var d: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
-				h.vel = Vector3(d.x * maxf(hv.length(), 6.0), 17.0, d.y * maxf(hv.length(), 6.0))
-				h.grounded = false
-				h.glide_cd = 0.0
-				fx.burst(gp["pos"] + Vector3(0, 0.3, 0), Color("8ff0c8"), 16, 5.0, 0.4, -2.0)
-				sfx("jump", h.pos, -2.0, 0.8)
+	UtilityMore.pads(self, dt)
 	for sm in smokes.duplicate():
 		sm["t"] = float(sm["t"]) - dt
 		var n: Node3D = sm["node"]
@@ -3890,6 +3874,7 @@ func step(dt: float) -> void:
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
 	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
+	Shops.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
 	_prof("pickups")
@@ -4266,6 +4251,8 @@ func _update_interact(dt: float) -> void:
 				if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
 					best = {"kind": "shrine", "shrine": sh, "label": "Hold " + Settings.key_cap("interact") + " to pray: heal, a blessing and a perk"}
 					break
+		if best.is_empty() and h == player:
+			best = Shops.prompt(self, h)
 		# 5. the exits: start an uplink
 		if exits:
 			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
@@ -4298,6 +4285,10 @@ func _update_interact(dt: float) -> void:
 				h.finish_t += dt
 				if h.finish_t >= Life.R["stomp_commit"]:
 					Life.start_stomp(self, h, o)
+			"shop":
+				if not h.swap_hold:
+					h.swap_hold = true
+					Shops.use(self, h, best)
 			"loot" when h == player and hud:
 				# press to open the box's loot window; press again (with it open) to smart loot
 				if not bool(h.get_meta("loot_hold", false)):
@@ -5525,6 +5516,8 @@ func _net_ev(x, from: String) -> void:
 		HardLanding.NET_EVENT: HardLanding.on_net(self, x)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
+		"sbuy", "sgot", "sno":
+			Shops.on_net(self, x)
 		"wtake":
 			for wp in wpicks:
 				if wp["id"] == String(x[1]):

@@ -1,0 +1,19 @@
+{
+ "id": "deep_draught",
+ "name": "Deep Draught",
+ "short": "Deep",
+ "icon": "tonic",
+ "col": "6fd0ff",
+ "use": "drink",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  1,
+  1
+ ],
+ "price": 40,
+ "desc": "A long, slow drink that restores all your health. You are open and slowed for 5s, and a hit spills it.",
+ "time": 5.0,
+ "heal": 1.0
+}
