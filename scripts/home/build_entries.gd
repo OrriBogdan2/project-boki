@@ -77,8 +77,9 @@ func tab(tab_name: String) -> Array:
 					var nf := int(Save.d.get("feeder_inv", {}).get(kind, 0))
 					if nf > 0: out.append(feeder_entry(kind, nf))
 			if hb.fs():
+				var hub_owns: Array = HubLayout.OWN if HubLayout.vacant(hb.h) else []      # the garden: the hub's only
 				for id in HomeLayout.CATALOG:
-					if String(HomeLayout.CATALOG[id]["cat"]) == "Buildings":
+					if String(HomeLayout.CATALOG[id]["cat"]) == "Buildings" and not hub_owns.has(id):
 						add_fixture_entry(out, id)
 			for b in hb.h.lots:
 				add_lot_entry(out, b)

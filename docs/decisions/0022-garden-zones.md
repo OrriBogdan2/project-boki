@@ -25,8 +25,8 @@ stall, Burrow, games board) are a template kept as `Save.d["hub_layout"]` (absen
 first use, so no migration); the Dash's showcase wall hangs by the games board (by the race post
 before the hub opens) and the board lists this week's twist; build mode there offers only the Garden tab. With the garden on and the
 first day's tutorial done, a plain `Game.goto("home")` lands in the hub (`GardenZones.landing`); before
-that it lands in Bramblebank, where the tutorial runs. The garden's own house, Nook, stall and Burrow
-stay until the zones are rebuilt (steps 7 and 11).
+that it lands in Bramblebank, where the tutorial runs. The hub's house, Nook, stall and Burrow are the only
+ones: Bramblebank's go to its storage (docs/decisions/0078-hub-owns-fixtures.md).
 
 ## Consequences
 Step 10: the profile doc gains "hub_layout" and "zones" ({id: layout} for each open zone that has one) and each

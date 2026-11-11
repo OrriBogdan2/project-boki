@@ -3,7 +3,7 @@ extends RefCounted
 ## Every save has a market stall (docs/decisions/0013-market.md). A farm-start island with none placed
 ## or stored gets one set down near the portal when it loads (a new island, or an older save):
 ## searching outward from the landing, every rotation, for a spot build mode would accept. If
-## nothing fits it waits in storage, with a one-time hint.
+## nothing fits it waits in storage, with a one-time hint. With the garden on, the stall is the hub's (HubLayout).
 
 const SEARCH_R := 14        # tiles out from the landing
 
@@ -11,7 +11,7 @@ const SEARCH_R := 14        # tiles out from the landing
 static func ensure(home) -> bool:
 	var d: Dictionary = home._d()
 	var lay := HomeLayout.of(d)
-	if not HomeLayout.fs(d) or HomeLayout.count_of("market_stall", d) > 0 or not ZoneLayout.live.is_empty():
+	if not HomeLayout.fs(d) or HomeLayout.count_of("market_stall", d) > 0 or HubLayout.vacant(home):
 		return false
 	var spot := _spot(home.hb)
 	if spot.is_empty():

@@ -258,6 +258,7 @@ static func ensure(d: Dictionary) -> Dictionary:
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
 	SnackPatch.grant(d)
+	HubLayout.claim(d)
 	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
