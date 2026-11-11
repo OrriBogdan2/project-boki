@@ -64,6 +64,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Heavy Shot",
+		"card_range": "pin.range",
 		"short": "Heavy",
 		"icon": "snare",
 		"col": "#e04aff",
@@ -102,6 +103,7 @@
 	"e": {
 		"delivery": "zone",
 		"name": "Hail Wall",
+		"card_range": "reach",
 		"short": "Hail",
 		"icon": "barrage",
 		"col": "#d060ff",
@@ -128,6 +130,7 @@
 	},
 	"x": {
 		"name": "Starpiercer",
+		"card_range": "range",
 		"short": "Starpierce",
 		"icon": "skypierce",
 		"col": "#e04aff",
