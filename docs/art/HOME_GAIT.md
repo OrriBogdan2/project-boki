@@ -24,21 +24,19 @@ short/slight, average, tall/sturdy; female average), the tool moving the model a
 |---|---|---|---|---|---|---|---|---|
 | before, average | 39-54 cm | 65-82 cm | 64-87 cm | 2.5 / 3.8 | 1-3 cm | 0.6 s | 4 cm | 6 cm (free foot) |
 | male short/slight | 0.3 cm | 0.7 cm | 1.1 cm | 3.3 / 4.6 | 5.0 cm | 0.33 s | 2.9 cm | 0.2 cm |
-| male average | 0.4 cm | 0.8 cm | 1.8 cm | 2.9 / 4.2 | 5.5 cm | 0.42 s | 4.0 cm | 0.2 cm |
+| male average | 0.4 cm | 0.8 cm | 1.8 cm | 2.9 / 4.2 | 5.5 cm | 0.40 s | 3.8 cm | 0.2 cm |
 | male tall/sturdy | 0.5 cm | 0.8 cm | 2.5 cm | 2.9 / 3.8 | 6.1 cm | 0.38 s | 5.3 cm | 0.3 cm |
-| female average | 0.1 cm | 0.0 cm | 0.0 cm | 5.8* / 4.2 | 5.5 cm | 0.47 s | 4.6 cm | 0.0 cm |
+| female average | 0.2 cm | 0.7 cm | 2.6 cm | 2.9 / 4.2 | 5.2 cm | 0.45 s | 4.3 cm | 0.5 cm |
 
-"Before" is the same tool on origin/main's legs (slide there is a contact that is really a skating foot). *The
-female walk count is doubled by a toe brush at toe-off (the toe comes back under 1.2 cm one frame after lifting);
-her real cadence is 2.9 steps/s like the male. Strips: docs/art/home_gait/ (before, after; eight shots half a
-second apart at 5 m/s past floor posts every half metre).
+"Before" is the same tool on origin/main's legs (slide there is a contact that is really a skating foot). Strips:
+docs/art/home_gait/ (before, after; eight shots half a second apart at 5 m/s past floor posts every half metre).
 
 ## What the gait does
 
 - **Planted**: the heel's ground point is stored in world space when the foot lands; each frame the hip, knee and
-  leg-out angles are solved (thigh and boot are one planar chain about the thigh's axis, the knee set by its length) so the sole
-  point on the ground stays on it while the hips pass over. The boot rolls heel, mid, toe as the hips move on and
-  the leg cannot reach with the earlier point.
+  leg-out angles are solved (thigh and boot are one planar chain about the thigh's axis, the knee set by its
+  length) so the sole point on the ground stays on it while the hips pass over. The boot rolls heel, mid, toe as
+  the hips move on and the leg cannot reach with the earlier point.
   The knee is bisected between the folded boot and the straight leg, on the leg node's own z scale (a woman's legs
   are 0.9, Unmasked._shape; `FootPlant.at`), and the leg's reach, the sole's length on the ground and the hip drop
   (`FootPlant.reach`) use that scale too (--unmasked-check: every body, plus a row each for the four women's bodies
