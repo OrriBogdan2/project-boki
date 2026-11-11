@@ -21,7 +21,8 @@ var close := false
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
-	"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "gunslinger": ["lmb", "rmb"],
+	"dolm": ["lmb_throw", "lmb_punch"], "dredge": ["shot", "throw"], "gil": ["thrust_a", "lunge"],
+	"gunslinger": ["lmb", "rmb"],
 	"juggernaut": ["slash_r", "slam"], "mage": ["lmb_l", "rmb"], "ostra": ["orb", "snap"],
 	"rimewright": ["dart_r", "dart_heavy"], "tender": ["shot_r", "seed"], "thief": ["lmb_r", "vault_r"],
 }

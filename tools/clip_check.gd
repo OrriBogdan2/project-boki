@@ -8,7 +8,7 @@ extends RefCounted
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
-	"ostra": "ostra", "juggernaut": "kael"}
+	"ostra": "ostra", "juggernaut": "kael", "gil": "gil"}
 const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
@@ -42,7 +42,7 @@ func run(main: Node) -> void:
 	var n := 0
 	for id in Arch.ids():
 		var art_name := WardenGlb.art(String(id))
-		if not WardenClips.data(art_name).has("loco"):      # (no clips yet, as Gil: the rig's poses drive it)
+		if not WardenClips.data(art_name).has("loco"):      # (no clips yet: the rig's poses drive it)
 			continue
 		n += 1
 		await _hero(main, String(id), art_name)
