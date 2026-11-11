@@ -7,8 +7,7 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
-var mode := "trios"           # Data.MODES
-var mode_btns := {}
+var mode_box: VBoxContainer      # the ModeCards row
 
 func setup(o: Dictionary) -> void:
 	opts = o
@@ -30,18 +29,10 @@ func _ready() -> void:
 	list_box.add_child(UI.para("Looking for hunters with the game open...", UI.T_SMALL, UI.FAINT))
 	v.add_child(list_box)
 	v.add_child(UI.spacer(2))
-	v.add_child(UI.section("Teams"))
-	var modes := UI.hbox(2)
-	var track := PanelContainer.new()
-	track.add_theme_stylebox_override("panel", UiFrame.sunk(UI.WELL, UI.R_SMALL + 5).padded(3, 3))
-	track.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	track.add_child(modes)
-	for key in Data.MODES:
-		var b := UI.button(String(key).capitalize(), func(): mode = key; _refresh_modes())
-		mode_btns[key] = b
-		modes.add_child(b)
-	v.add_child(track)
-	v.add_child(UI.para(("Bots fill the empty places: %d hunters in trios, %d in solos. " % [Data.MATCH_PLAYERS, Data.SOLO_PLAYERS])
+	v.add_child(UI.section("Mode"))
+	mode_box = UI.vbox(0)
+	v.add_child(mode_box)
+	v.add_child(UI.para("Bots fill the empty places. "
 		+ "Whoever presses Start hosts the match and runs the monsters, so keep the game open and in front."))
 	ready_btn = UI.button("I'm ready", _toggle_ready, 160, "check")
 	UI.footer(v).add_child(ready_btn)
@@ -67,8 +58,9 @@ func _exit_tree() -> void:
 		Net.message.disconnect(_on_msg)
 
 func _refresh_modes() -> void:
-	for k in mode_btns:
-		mode_btns[k].theme_type_variation = "SegOn" if k == mode else "Seg"
+	for c in mode_box.get_children():
+		c.queue_free()
+	mode_box.add_child(ModeCards.make(Data.saved_mode(), func(m): ModeCards.pick(m, _refresh_modes)))
 
 func _announce() -> void:
 	var k := Save.active_kin()
@@ -120,7 +112,7 @@ func _refresh() -> void:
 func _start() -> void:
 	if Net.mode == "":
 		return
-	var mo := Data.mode_opts(mode)
+	var mo := Data.mode_opts(Data.saved_mode())
 	var squad := int(mo["squad"])
 	var ids: Array = []
 	for id in Net.peers:

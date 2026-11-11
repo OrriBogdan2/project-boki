@@ -23,6 +23,8 @@ const MATCH_PLAYERS := 30
 const SOLO_PLAYERS := 20
 ## The expedition modes a player can queue for, as shown on the expedition panel and the online lobby.
 const MODES := ["trios", "solos"]
+## The one line each mode's card reads (ModeCards): who is in it and how big the map plays.
+const MODE_LINES := {"trios": "10 squads of 3, bigger map", "solos": "20 Hunters, every one for themself, smaller map"}
 
 const CLASSES := {
 	"light": {
@@ -167,6 +169,11 @@ static func mode_opts(mode: String) -> Dictionary:
 	var squad := 1 if solos else 3
 	var n := SOLO_PLAYERS if solos else MATCH_PLAYERS
 	return {"teams": n / squad, "squad": squad, "total": n}
+
+## The mode last picked (Save.d "exp_mode"; trios until you pick another).
+static func saved_mode() -> String:
+	var mode := String(Save.d.get("exp_mode", "trios"))
+	return mode if mode in MODES else "trios"
 
 ## Which difficulty "auto" means for a run: the tier sets the base (Meadow easy, Dusk Isles medium,
 ## the Hollow hard) and lots of successful extractions push it up one step. The tutorial is always easy.

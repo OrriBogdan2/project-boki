@@ -7,7 +7,8 @@ extends RefCounted
 ##   4. a solos match (real skyship drop, every hunter a bot) starts with 20 hunters each on their own, the
 ##      tide already in on the solos play space with land left outside it, every bot planning to land
 ##      inside it; it runs on to the end (sim_keep: after the player is out too) and every hunter is out by then.
-##   5. the expedition panel offers Trios and Solos and no rolling session.
+##   5. the expedition panel and the online lobby show a Trios card and a Solos card, one plain line each; a
+##      press picks and remembers the mode (Data.saved_mode), the lobby opens on it; no rolling session.
 
 const MAPS := ["hollowcrown", "skyreach"]
 const SOLO_LEN := 150.0       # s: the solos run is cut short (the islands fall then), so the check stays quick
@@ -105,14 +106,44 @@ func _panel() -> void:
 	var hm = await main._hb_home()
 	hm._open_expedition()
 	await main.get_tree().process_frame
-	var texts := _texts(hm.panel_host)
-	ok(texts.has("Trios") and texts.has("Solos"), "the expedition panel: a Trios tab and a Solos tab")
-	ok(not texts.any(func(t): return String(t).to_lower().contains("rolling")), "no rolling session on the panel")
-	var solos_tab: Button = _button(hm.panel_host, "Solos")
-	solos_tab.pressed.emit()
+	_cards(hm.panel_host, "the expedition panel")
+	var rolling := _texts(hm.panel_host).filter(func(t): return String(t).to_lower().contains("rolling"))
+	ok(rolling.is_empty(), "no rolling session on the panel")
+	_card(hm.panel_host, "solos").gui_input.emit(_click())
 	await main.get_tree().process_frame
-	ok(hm._exp_mode() == "solos", "picking Solos queues a solos expedition")
+	ok(Data.saved_mode() == "solos" and Save.d["exp_mode"] == "solos", "a Solos card press queues and remembers solos")
+	_cards(hm.panel_host, "the panel after a pick")
+	var picked := _card(hm.panel_host, "solos").get_theme_stylebox("panel") as UiFrame
+	ok(picked.edge_w == 2, "the picked card wears the accent edge (Solos)")
 	hm.queue_free()
+	var lobby: Control = load("res://scripts/ui/lobby.gd").new()
+	main.add_child(lobby)
+	await main.get_tree().process_frame
+	_cards(lobby, "the online lobby")
+	var lit := _card(lobby, "solos").get_theme_stylebox("panel") as UiFrame
+	ok(lit.edge_w == 2, "the lobby opens on the last-picked mode (Solos)")
+	lobby.queue_free()
+
+## Both cards, trios then solos, each one plain line of the owner's wording.
+func _cards(root: Node, where: String) -> void:
+	ok(_card(root, "trios") != null and _card(root, "solos") != null, "%s: a Trios card and a Solos card" % where)
+	var texts := _texts(root)
+	ok(texts.has("10 squads of 3, bigger map") and texts.has("20 Hunters, every one for themself, smaller map"),
+		"%s: Trios reads '10 squads of 3, bigger map', Solos '20 Hunters, every one for themself, smaller map'" % where)
+
+func _card(n: Node, mode: String) -> Control:
+	if n.has_meta("mode") and n.get_meta("mode") == mode:
+		return n
+	for c in n.get_children():
+		var f := _card(c, mode)
+		if f: return f
+	return null
+
+func _click() -> InputEventMouseButton:
+	var e := InputEventMouseButton.new()
+	e.button_index = MOUSE_BUTTON_LEFT
+	e.pressed = true
+	return e
 
 func _texts(n: Node) -> Array:
 	var out: Array = []
@@ -121,11 +152,3 @@ func _texts(n: Node) -> Array:
 	if n is Control and String((n as Control).tooltip_text) != "": out.append((n as Control).tooltip_text)
 	for c in n.get_children(): out.append_array(_texts(c))
 	return out
-
-func _button(n: Node, text: String) -> Button:
-	if n is Button and (n as Button).text == text:
-		return n
-	for c in n.get_children():
-		var b := _button(c, text)
-		if b: return b
-	return null
