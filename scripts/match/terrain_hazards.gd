@@ -151,7 +151,10 @@ func area_at(p: Vector3) -> int:
 
 ## Whether h's active Boki walks this kind of ground safely (its type or its species is a counter).
 func guards(h: Hunter, kind: String) -> bool:
-	var k := h.kin as Kin
+	return kin_guards(h.kin as Kin, kind)
+
+## Whether this Boki (up, not downed) is a counter for the kind.
+static func kin_guards(k: Kin, kind: String) -> bool:
 	if k == null or k.state == "downed":
 		return false
 	var C: Dictionary = kind_def(kind).get("counter", {})
@@ -333,6 +336,9 @@ func _hint() -> void:
 	if P == null or P.out or not P.kin is Kin:
 		return
 	var kind := _near_kind(P.pos, float(rules()["hint"]["near_m"]))
+	if kind != "" and HazardHint.say(m, self, kind):
+		hinted[kind] = m.time
+		return
 	if kind == "" or m.time - float(hinted.get(kind, -1e9)) < float(rules()["hint"]["again_s"]):
 		return
 	hinted[kind] = m.time

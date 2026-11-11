@@ -17,3 +17,5 @@ Option 2 (`scripts/match/terrain_hazards.gd`, owned by BiomeRun). Values in `con
 
 ## Consequences
 New: terrain_hazards.gd, terrain_hazard.gdshader, ui/terrain_hud.gd, two BokiLines triggers, `--terrain-hazard-check`, `--terrain-hazard-reel`. Wiring: Match.ground_grip and Hunter pass the hunter (frost counter), Ent.hurt scales a deep-water wader's hits, HUD one call. No Net change (areas come from the map; each game applies them only to the bodies it owns, like the traps), no save change. Monsters and Boki ignore the areas (not asked for); the minimap doesn't draw them.
+
+**First-time hint (11-11):** `HazardHint` shows one HUD line the first time the player nears each kind (once per kind per save, via `Match._tip`; text in `terrain_hazards.json` `tip`), plus "<Boki> keeps you safe: cross it." when the lead Boki counters it. Only the lead counts: the second Boki is retired and `swap_kin` has no key, and no perk or item grants immunity in code yet. Check: `--hazard-hint-check`.
