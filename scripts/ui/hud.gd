@@ -818,18 +818,17 @@ func _draw_minimap(sz: Vector2) -> void:
 		c.draw_colored_polygon(PackedVector2Array([ctr + Vector2(0, -mm_circ.z - 7), ctr + Vector2(5, -mm_circ.z + 1), ctr + Vector2(-5, -mm_circ.z + 1)]), Color("ffd27a"))
 	_draw_clock_bar(sz, r)
 
-## Under the minimap, like Supervive's day bar: the match clock, what the exits are doing, your run
+## Under the minimap, like Supervive's day bar: the match clock, your run
 ## level, and a thin bar for how far through the match you are.
 func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	if m.duel or m.opts.get("training", false) or m.opts.get("tutorial", false):
 		return
+	WaysOutHud.draw(self)
 	var r := Rect2(Vector2(mm.position.x, mm.end.y + 8), Vector2(maxf(mm.size.x, 196.0), 30))
 	mm_bottom = r.end.y
 	var left := m.length - m.time
 	var phase := ""; var pc := MUTED
-	var xl: Array = m.exits.clock_line() if m.exits else ["", MUTED]
-	if left < 30.0 and (m.exits == null or m.exits.active_for(m.player.team if m.player else -9).is_empty()): phase = "ISLANDS FALLING"; pc = BAD
-	else: phase = String(xl[0]); pc = xl[1]
+	if left < 30.0: phase = "ISLANDS FALLING"; pc = BAD
 	_rounded(r, Color(0.04, 0.05, 0.08, 0.86), 8)
 	_text(r.position + Vector2(10, 20), _fmt(left), 16, BAD if left < 30.0 else INK, big)
 	var pw := big.get_string_size(phase, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
@@ -1754,12 +1753,13 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
 			"heart": prog = float(it.get("prog", 0.0))
-		var s: String = it["label"]
-		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
-		if prog > 0.0:
-			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
+		if not WaysOutHud.gate_prompt(self, sz, y, it):
+			var s: String = it["label"]
+			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
+			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+			if prog > 0.0:
+				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)

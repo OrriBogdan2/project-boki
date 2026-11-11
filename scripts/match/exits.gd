@@ -432,24 +432,6 @@ static func color_of(_x: Dictionary) -> Color:
 func live(x: Dictionary) -> bool:
 	return x["state"] in ["charging", "open"] or startable(x)
 
-## The line under the minimap: what the exits are doing, from your point of view.
-func clock_line() -> Array:
-	var p := m.player
-	if p == null or list.is_empty():
-		return ["", Color.WHITE]
-	var mine := active_for(p.team)
-	if not mine.is_empty():
-		match String(mine["state"]):
-			"charging":
-				if mine.get("draining", false):
-					# (short: it sits between the clock and your level under the minimap)
-					return ["DRAINING %s" % _cap(drain_left(mine)), ExitModels.UPLINK.lerp(Color.WHITE, 0.25 + 0.25 * sin(m.time * 7.0))]
-				if mine["contested"]:
-					return ["CONTESTED %d%%" % int(mine["prog"] * 100.0), Color("ff8a6a")]
-				return [("UPLINK %d%%%s" % [int(mine["prog"] * 100.0), (" x%s" % String.num(crew_rate(int(mine.get("crew", 0))), 1)) if int(mine.get("crew", 0)) > 1 else ""]), ExitModels.UPLINK]
-			"open": return ["LIFT OPEN %s" % _cap(mine["t"]), ExitModels.UPLINK]
-	return ["", Color.WHITE]
-
 ## The big status line in the middle of the screen while you're in the middle of an exit, or {}.
 func status_for(p: Hunter) -> Dictionary:
 	if p == null or p.out or p.extracted:
