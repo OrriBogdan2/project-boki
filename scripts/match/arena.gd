@@ -229,7 +229,7 @@ func tick(dt: float) -> void:
 			m.revive_hunter(P, null)
 			P.hp = P.max_hp
 	if grounds:
-		grounds.tick()
+		grounds.tick(dt)
 	_update_ui()
 	ArenaDemo.tick(self, dt)      # (screenshot tooling only, --arena-demo)
 

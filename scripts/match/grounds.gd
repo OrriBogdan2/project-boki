@@ -24,6 +24,7 @@ var near_i := -1
 var _belt_turn := 0            # which belt slot a full belt gives up next
 var prompt: Label = null
 var _layer: CanvasLayer = null
+var trial: TimeTrial = null   # the time-trial course on the open floor
 
 ## The map's "grounds" block ({} when this isn't the Training Grounds).
 static func data() -> Dictionary:
@@ -90,6 +91,8 @@ func build() -> void:
 	prompt.visible = false
 	_layer.add_child(prompt)
 	m.add_child(_layer)
+	trial = TimeTrial.new(m)
+	trial.build(_layer, self)
 
 ## One ring of pedestals round a perch's middle, one per id of the kind.
 func _ring(kind: String, c: Vector3, r: float) -> void:
@@ -127,13 +130,14 @@ func _pedestal(kind: String, id: String, p: Vector3, c: Vector3) -> void:
 	mi.position = p + Vector3(0, 0.25, 0)
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	m.add_child(mi)
-	var lb := _label(name_of(kind, id), col, 1.9)
+	var lb := label_3d(name_of(kind, id), col, 1.9)
 	lb.position = p + Vector3(0, 1.2, 0)
 	lb.visible = false
 	m.add_child(lb)
 	stations.append({"kind": kind, "id": id, "at": p, "c": c, "label": lb})
 
-func _label(text: String, col: Color, scale_k := 1.0) -> Label3D:
+## A floating sign that faces the camera and shows through walls, `scale_k` times the base size.
+func label_3d(text: String, col: Color, scale_k := 1.0) -> Label3D:
 	var lb := Label3D.new()
 	lb.text = text
 	lb.font = UI.big
@@ -153,21 +157,24 @@ func _duel(at: Vector3) -> void:
 	var pad := Models.jump_pad(Color(String(KIND_COL["duel"])))
 	pad.position = at
 	m.add_child(pad)
-	var lb := _label("DUEL ROOM\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
+	var lb := label_3d("DUEL ROOM\n%s to enter" % Settings.key_cap("interact"), Color(String(KIND_COL["duel"])), 2.6)
 	lb.position = at + Vector3(0, 2.7, 0)
 	m.add_child(lb)
 	m.duel_pad = at
 
-## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home.
-func tick() -> void:
+## Per frame (from Arena.tick): show the near pedestal's name, use it on interact, bring a faller home,
+## run the time trial.
+func tick(dt: float) -> void:
 	var P: Hunter = m.player
 	if P == null or prompt == null:
 		return
 	if P.pos.y < FALL_Y and not P.downed:
 		P.teleport(a.home)
 		P.vel = Vector3.ZERO
+		trial.stop()
 		if m.hud: m.hud.toast_small("Back to the Training Grounds", Color("8fe3c8"))
 		return
+	trial.tick(dt)
 	var best := -1
 	var bd := ACT_R
 	for i in stations.size():

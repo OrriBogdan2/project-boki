@@ -166,5 +166,5 @@ func _duel_and_fall(m: Match, G: Grounds) -> void:
 	var P: Hunter = m.player
 	ok("duel pad on the floor", m.duel_pad != Vector3.INF and m.world.island_id(m.duel_pad.x, m.duel_pad.z) == "floor")
 	P.teleport(Vector3(60, -20, 25))      # off the map
-	G.tick()
+	G.tick(DT)
 	ok("a faller is brought home", P.flat_dist(m.arena.home) < 1.0 and P.pos.y > -1.0, "at %s" % P.pos)

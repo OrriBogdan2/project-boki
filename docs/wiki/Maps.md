@@ -14,7 +14,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 ## Training Grounds
 
-The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, and five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding. Pads fire up; glide back down.
+The Training Grounds (--arena): the old Training Room (walled ring, dummies, sparring bot) in the middle of a big open floor, a duel ring to the east, and five sky perches (Hunters, Gear, Belt items, Bots, Boki) reached by one-way pads and left by gliding. Pads fire up; glide back down. West of the Training Room a time trial: ten gates between a start and a finish arch, with a dash, a wall kick up a short tower, a jump pad onto a tall one and a glide down; each Hunter keeps a personal best.
 
 ### Islands
 
