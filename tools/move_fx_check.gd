@@ -16,9 +16,10 @@ const STEPS := 70              # sim steps (1/60 s) watched after each trigger
 ## Hero looks (content/vfx layer kinds) that are a ring, disc or burst; a "scorch" of shape disc/cone counts too.
 const BURST_KINDS := ["flare", "vortex", "skirt"]
 ## "<hero>/<event>" pairs whose dash is itself an area move: Ostra's Lantern Trade swaps its circle, Dolm's raises a
-## rock wall, Bulwark's 360 Smash hits all round him (in the air too since item 183).
+## rock wall (its hop's landing circle shows in the air too), Bulwark's 360 Smash hits all round him (in the air too
+## since item 183).
 const AREA := ["ostra/dash", "ostra/air dash", "ostra/standing dash", "dolm/dash", "dolm/standing dash",
-	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash"]
+	"bulwark/dash", "bulwark/standing dash", "bulwark/air dash", "dolm/air dash"]
 ## Moves played again and again along a path: a trail laid behind the mover (Rimewright's frost under the skate).
 const TRAILS := ["skate_frost"]
 const EVENTS := ["dash", "standing dash", "air dash", "soft landing", "hard landing", "spiked landing", "wall kick",
@@ -29,6 +30,7 @@ var rows := 0
 var flow := preload("res://tools/dash_flow_check.gd").new()
 var walls := {}
 var foe_at := Vector3(1e6, 0, 0)       # where the last reset's foe stood
+var circles_seen := {}                 # AimKit circle keys shown at any step of the event being run
 
 func ok(cond: bool, what: String) -> void:
 	if not cond:
@@ -83,7 +85,13 @@ func _setup(m: Match) -> void:
 ## What the world holds before an event, to tell what it added.
 func _snap(m: Match) -> Dictionary:
 	var vfx := HeroVfx.of(m)
-	return {"radial": m.fx.radial, "rings": m.fx.rings.size(), "fi": m.fx.fi, "plays": vfx.plays.duplicate()}
+	return {"radial": m.fx.radial, "rings": m.fx.rings.size(), "fi": m.fx.fi, "plays": vfx.plays.duplicate(),
+		"circles": _aim_circles(m)}
+
+## The keys of the ground circles the aim layer shows now.
+func _aim_circles(m: Match) -> Array:
+	var d := AimKit.layer(m)
+	return d.entries.keys().filter(func(k): return d.entries[k]["kind"] == "circle" and d.live(d.entries[k]))
 
 func _event(m: Match, hero: String, ev: String) -> void:
 	var h: Hunter = flow.hunter
@@ -96,10 +104,14 @@ func _event(m: Match, hero: String, ev: String) -> void:
 		if o != h:
 			o.out = true          # out of the match: nobody fights, falls or shoots
 			o.teleport(flow.get_meta("home") + FOE_SPOT)
+	if ev == "air dash":
+		flow._lift()
+		m.step(Match.DT)          # (what the air shows for being up there is not the dash's)
+	circles_seen.clear()
 	var before := _snap(m)
 	var flashes0: int = m.fx.flashes.size()
 	_trigger(m, h, ev)
-	var spawned := _spawned(m, hero, before, flashes0)
+	var spawned := _spawned(m, hero, ev, before, flashes0)
 	rows += 1
 	print("MOVEFX %-10s %-14s %s" % [hero, ev, ", ".join(spawned) if not spawned.is_empty() else "-"])
 	var area: bool = "%s/%s" % [hero, ev] in AREA
@@ -109,8 +121,6 @@ func _trigger(m: Match, h: Hunter, ev: String) -> void:
 	h.inp["move"] = Vector2.ZERO
 	match ev:
 		"dash", "air dash", "standing dash":
-			if ev == "air dash":
-				flow._lift()
 			if ev != "standing dash":
 				h.inp["move"] = Vector2(0, -1)
 			h.inp["dash"] = true
@@ -128,6 +138,8 @@ func _trigger(m: Match, h: Hunter, ev: String) -> void:
 			_kit_reset(m, h)
 	for i in STEPS:
 		m.step(Match.DT)
+		for k: String in _aim_circles(m):
+			circles_seen[k] = true       # (a circle lives about a second: look at every step)
 	h.inp["move"] = Vector2.ZERO
 
 func _foe(m: Match, h: Hunter) -> Hunter:
@@ -172,7 +184,7 @@ func _at_wall(h: Hunter, ev: String) -> void:
 			h.wall_touch_t = 0.2
 
 ## The ring/disc/burst types the event added, as short labels.
-func _spawned(m: Match, hero: String, before: Dictionary, flashes0: int) -> Array:
+func _spawned(m: Match, hero: String, ev: String, before: Dictionary, flashes0: int) -> Array:
 	var out: Array = []
 	var h: Hunter = flow.hunter
 	var all_rings: Array = m.fx.rings.slice(int(before["rings"]))
@@ -191,6 +203,9 @@ func _spawned(m: Match, hero: String, before: Dictionary, flashes0: int) -> Arra
 	for f: Dictionary in m.fx.flashes.slice(flashes0):
 		if float(f["s0"]) > FLASH_BIG and (f["node"] as Node3D).global_position.distance_to(foe_at) > ON_FOE:
 			out.append("Fx.flash %.1f" % float(f["s0"]))
+	for k: String in circles_seen:
+		if ev.ends_with("dash") and not k in before["circles"]:
+			out.append("aim circle %s" % k.get_slice(":", 1))
 	var plays: Dictionary = HeroVfx.of(m).plays
 	var moves: Dictionary = HeroVfx.data(hero).get("moves", {})
 	for mv: String in plays:

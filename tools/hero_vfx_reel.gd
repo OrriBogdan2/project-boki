@@ -57,7 +57,7 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in parts():
+	for part: String in (["airdash"] if only == "airdash" else parts()):
 		if only != "" and part != only:
 			continue
 		print("REEL_MARK %d %s" % [Engine.get_frames_drawn(), part])
@@ -131,6 +131,20 @@ func _part_rmb() -> void:
 		_aim(T.pos)
 	await _go(2.4, cast, _sheet("rmb", "RMB at the dummy", [0.15, 0.25, 0.35, 0.5, 0.65, 0.8, 1.0, 1.4, 2.0]), 2.0)
 	await _go(GAP)
+
+## --reel-only=airdash (any Hunter): the dash pressed 7 m up, to see nothing ring or disc round them.
+func _part_airdash() -> void:
+	await _reset(6.0)
+	P.pos += Vector3(0, 7, 0)
+	P.grounded = false
+	var dash := func(t: float):
+		if _at(t, 0.1):
+			P.inp["move"] = Vector2(1, 0)
+			P.do_dash()
+		if t > 0.3:
+			P.inp["move"] = Vector2.ZERO
+		_aim(T.pos)
+	await _go(1.2, dash, _sheet("airdash", "Shift in the air", [0.12, 0.2, 0.28, 0.36, 0.45, 0.55, 0.7, 0.9, 1.1]), 2.5)
 
 func _part_dash() -> void:
 	await _reset(6.0)
