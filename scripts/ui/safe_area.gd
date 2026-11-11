@@ -83,18 +83,20 @@ static func clipped(root: Node) -> Array:
 			var l := c as Label
 			var plain := l.autowrap_mode == TextServer.AUTOWRAP_OFF
 			plain = plain and l.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING
-			if plain and _wider(l, l.text, l.size.x):
+			if plain and wider(l, l.text, l.size.x):
 				bad.append("clipped '%s'" % l.text.left(24))
 			elif l.get_line_count() > l.get_visible_line_count():
 				bad.append("hidden lines '%s'" % l.text.left(24))
 		elif c is Button:
 			var b := c as Button
 			var room := b.size.x - b.get_theme_stylebox("normal").get_minimum_size().x
-			if b.clip_text and b.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING and _wider(b, b.text, room):
+			if b.clip_text and b.text_overrun_behavior == TextServer.OVERRUN_NO_TRIMMING and wider(b, b.text, room):
 				bad.append("clipped '%s'" % b.text.left(24))
 	return bad
 
-static func _wider(c: Control, s: String, room: float) -> bool:
+static func wider(c: Control, s: String, room: float) -> bool:
 	var font := c.get_theme_font("font")
-	var w := font.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, c.get_theme_font_size("font_size")).x
-	return s != "" and w > room + 1.0
+	var w := 0.0
+	for line in s.split("\n"):      # (a plain label with line breaks is as wide as its longest line)
+		w = maxf(w, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, c.get_theme_font_size("font_size")).x)
+	return w > room + 1.0
