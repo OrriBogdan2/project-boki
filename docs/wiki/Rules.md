@@ -2034,26 +2034,6 @@ Ground pickup reach (scripts/match/pickup_reach.gd, docs/PICKUP_REACH.md). Each 
 | face | {"bulwark": [0.52, 0.29], "archer": [0.46, 0.33], "juggernaut": [0.5, 0.33], "thief": [0.64, 0.46], "mage": [0.47, 0.27], "dolm": [0.47, 0.34], "gil": [0.55, 0.44], "ostra": [0.44, 0.47], "ashwick": [0.52, 0.47], "gunslinger": [0.41, 0.32], "tender": [0.48, 0.48], "rimewright": [0.49, 0.47], "dredge": [0.5, 0.4]} |
 | splash | {"bulwark": [0.49, 0.19], "archer": [0.52, 0.22], "juggernaut": [0.55, 0.26], "thief": [0.4, 0.27], "gil": [0.39, 0.3], "mage": [0.55, 0.22], "dolm": [0.34, 0.28], "ostra": [0.71, 0.25], "ashwick": [0.57, 0.3], "rimewright": [0.34, 0.3], "dredge": [0.64, 0.36], "gunslinger": [0.64, 0.19], "tender": [0.58, 0.35]} |
 
-## results_pose (`content/rules/results_pose.json`)
-
-
-
-| Setting | Value |
-|---|---|
-| _doc | The pose each Hunter holds on the results stage (scripts/ui/results_stage.gd): one clip of its own GLB, frozen at t seconds, a held strike or an idle beat that fits it. Keyed by Hunter id; a Hunter left out stands in the plain idle. |
-| gunslinger | {"clip": "lmb", "t": 0.2} |
-| juggernaut | {"clip": "slash_r", "t": 0.25} |
-| thief | {"clip": "flourish", "t": 0.4} |
-| ashwick | {"clip": "lance", "t": 0.3} |
-| rimewright | {"clip": "spear", "t": 0.3} |
-| archer | {"clip": "draw", "t": 1.2} |
-| dredge | {"clip": "flex", "t": 0.3} |
-| ostra | {"clip": "flurry", "t": 0.5} |
-| tender | {"clip": "hearth", "t": 0.5} |
-| mage | {"clip": "rmb_hold", "t": 0.5} |
-| dolm | {"clip": "lmb_punch", "t": 0.35} |
-| bulwark | {"clip": "rmb_guard", "t": 0.5} |
-
 ## revive (`content/rules/revive.json`)
 
 
