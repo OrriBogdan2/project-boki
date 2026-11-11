@@ -27,6 +27,8 @@ to Compatibility by the worker. GDScript has no GC, so there is no GC column.
 - **Bots' target pick** ran the sight test (two line-of-sight marches per teammate) on every rival before the
   reach test: 2.4 ms a step in the fight. Reach first now; line of sight reads the ground once a sample.
 - Rings and dash after-images made and freed a node and a material each: pooled now.
+- The spring chains of the 3D heroes built a Quaternion from a zero vector whenever two chain points met (a
+  teleport, the floor clamp): an error print with a backtrace each time. Now no turn there.
 - `--perf-bench` and `--hitch-check` ran two sim steps a frame (Match._process steps on its own clock after
   the tool's own step): their match script times were about doubled. Fixed; old and new bench numbers differ by it.
 - Not a cause: CPU particle simulation (all 111 systems off: under 1 ms), Skeleton3D updates, the small
@@ -39,7 +41,29 @@ Local (rpc4, headless, shared box: compare within a row), frame ms p50 / other s
 the Sync fix alone: ride 18.5 / 6.7 -> 13.4 / 1.7, drop 20.5 / 6.9 -> 16.8 / 2.7, fight 30.8 / 8.3 -> 27.9 / 5.7
 (fight p99 65 -> 37).
 
-GPU (rp1-0, RTX 4090, Forward+ Vulkan, 1920x1080): see the table below.
+GPU: rp1-0 (RTX 4090, Forward+ Vulkan, 1920x1080, auto quality = Medium), the same worker for both; before =
+4235ef621 + the final tool (jobs 20261111-184424-31053 and -195259-26987, which agree within 2 ms at p50),
+after = 63d70807e (job 20261111-195313-00416). Frame ms p50 / p95 / p99, then "other scripts", bots and draws:
+
+| phase | before | after | other ms | bots ms (sim) | draws |
+|---|---|---|---|---|---|
+| ride | 57.5 / 80 / 146 | 47.3 / 75 / 106 | 12.4 -> 3.5 | 0.5 -> 0.4 | 1720 |
+| drop | 63.9 / 81 / 97 | 55.4 / 91 / 205 | 13.9 -> 5.4 | 2.6 -> 2.7 | 930 |
+| land | 67.3 / 80 / 94 | 58.5 / 73 / 82 | 13.0 -> 4.0 | 5.1 -> 4.0 | 1000-1050 |
+| 30-hunter fight | 102.5 / 135 / 255 | 85.4 / 127 / 306 | 16.9 -> 10.2 | 10.5 -> 5.9 | 1750-1850 -> 1500 |
+| extract | 70.3 / 90 / 146 | 60.5 / 81 / 92 | 15.6 -> 7.4 | 4.3 -> 2.5 | 820-900 |
+
+Every phase is CPU bound: GPU time is 0.3-2 ms a frame. This worker's CPU is slow and shared (one host, four
+GPU jobs), so all of its frames are over 33 ms and its p99 swings run to run (a third 'after' run timed out on a
+loaded host); compare medians. Per frame in the fight after: sim 27 ms (hunters 11.7: kit ticks and hunter
+physics, Boki 4.0), visuals 9.9, render submit 17.8 (1500 draws), the HUD canvas 11.7. Load is 43-49 s from a
+cold shader cache (93 compiles, under the loading screen).
+
+Hitches over 33 ms by cause (before): sim (the bone sync, bots' sight and a heavy step), swap/driver waits, a
+few first-draw shader compiles on a cold cache (the Ways Out seat beam at the start of the ride: 274 ms), a mob
+pack's spawn frame, and a flood of zero-vector Quaternion errors from the 3D heroes' spring chains (20,303 error
+prints with backtraces in one run; fixed). No GC (GDScript), no physics (0.1 ms), no navmesh, no network
+(offline) costs.
 
 ## Merge-candidate history (MERGE_REPORT.md, Mac M5 worker, `--perf-bench` 6 hunters)
 Main and candidate swing between two levels on the same worker (match script avg 6-7 ms or 21-27 ms; wall avg
