@@ -240,8 +240,9 @@ func _summon() -> void:
 	var p: Hunter = m.player
 	var k: Kin = p.kin
 	var s := k.summon
-	ok(Settings.key_cap("summon") != "?" and Settings.ACTIONS.any(func(a): return a[0] == "summon"),
-		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon"))
+	var one_key: bool = not InputMap.has_action("summon") and Settings.ACTIONS.all(func(a): return a[0] != "summon")
+	ok(one_key and Settings.key_cap("throw") != "?",
+		"summon: on the one Boki key (%s), no summon action" % Settings.key_cap("throw"))
 	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",
 		"summon: the wisp bursts into the full Boki")
 	ok(k.ready_to_fight() and k.hp == k.max_hp and absf(s.left - 8.0) < 0.01, "...whole, on its AI, for its 8 s window")
