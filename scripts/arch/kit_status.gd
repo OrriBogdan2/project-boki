@@ -1,13 +1,14 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; cords round the legs (StatusLooks)
+##   gnd  Grounded (the Thief's Bola): no dash, jump or glide (CcLockout); cords round the legs (StatusLooks)
 ##   blt  Anti-Heal (the source's four: Kael's Cinder Spin, Cinder's Furnace Cloak, Grimble's Brass Broadside,
 ##        Lace's Hail Wall; docs/HEAL_PARITY.md): healing on the body is cut; streaks out of the body
 ##        (StatusLooks) and the plate's Anti-Heal icon
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
-##        source's Daze is only a damage window); a crystal ring over the head (StatusLooks)
+##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder, and it locks the
+##        body like a stun (CcLockout, the source's "Ghost's version of stun"; no slow); a crystal ring over the
+##        head (StatusLooks)
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.

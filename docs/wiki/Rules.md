@@ -589,6 +589,15 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
 | stat_budget_doc | Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
 
+## cc_lockouts (`content/rules/cc_lockouts.json`)
+
+What each crowd-control status forbids a Hunter (CcLockout, scripts/combat/cc_lockout.gd; table and sources in docs/COMBAT.md). Acts: move (walk and air control), dash (Shift), lmb (weapon), abil (RMB, E, R), travel (an ability that moves the caster), jump, glide, crouch, item (a belt item: drink, repair kit). Slow, knock-up, Static and Chill forbid nothing, so they have no row.
+
+| stun | ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"] |
+| daze | ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"] |
+| root | ["move", "dash", "travel", "jump", "glide"] |
+| gnd | ["dash", "travel", "jump", "glide"] |
+
 ## chest_keys (`content/rules/chest_keys.json`)
 
 
