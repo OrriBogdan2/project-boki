@@ -37,6 +37,8 @@ const CHECKS := {
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],      # item 63
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
+	"--garden-save-check": ["res://tools/garden_save_check.gd", "garden_save_check", "all"],
+	"--garden-save-load": ["res://tools/garden_save_check.gd", "garden_save_load", "load"],      # its child process
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
@@ -177,6 +179,9 @@ const CHECKS := {
 	"--echo-steps-check": ["res://tools/echo_steps_check.gd", "echo_steps_check", null],  # GARDEN_MODERN 4.2
 	"--echo-steps-clip": ["res://tools/echo_steps_clip.gd", "echo_steps_clip", null],  # --shots-dir=<dir>
 	"--show-ring-check": ["res://tools/show_ring_check.gd", "show_ring_check", null],      # GARDEN_MODERN 4.2 game 3
+	"--board-check": ["res://tools/board_check.gd", "board_check", null],      # the Games board, GARDEN.md 5
+	"--garden-rivals-check": ["res://tools/rivals_check.gd", "rivals_check", null],      # rivals, GARDEN.md 4-5
+	"--garden-tag-check": ["res://tools/tag_check.gd", "tag_check", null],      # tag, GARDEN.md 4
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck
