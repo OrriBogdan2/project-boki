@@ -822,10 +822,14 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 185,
-"nested_ternary": 37,
-"semicolon": 45,
+"long_line": 137,
+"nested_ternary": 28,
+"semicolon": 40,
 "shadow": 2
+},
+"scripts/ui/hud_hover.gd": {
+"long_line": 49,
+"nested_ternary": 7
 },
 "scripts/ui/hud_tip.gd": {
 "shadow": 1
