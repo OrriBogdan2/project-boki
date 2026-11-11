@@ -5061,7 +5061,7 @@ func net_send_hit(target: Ent, dmg: float, by: Ent, o: Dictionary) -> bool:
 		by.nid if by else "", String(o.get("src", "")), String(o.get("ab", "")), Displace.hit_extra(o)])
 	return true
 
-const OVERHEAT_BIT := 1 << 19      # hunter flags: the glider is burning (the hold kind uses bits 15-18)
+const OVERHEAT_BIT := 1 << 24      # hunter flags: the glider overheated (hold kind bits 15-18, glider heat 19-23)
 func _flags(h: Hunter) -> int:
 	var f := 0
 	if h.downed: f |= 1
@@ -5078,6 +5078,8 @@ func _flags(h: Hunter) -> int:
 	if h.reveal_t > 0.0: f |= 4096
 	if h.crouch: f |= 8192
 	if h.diving: f |= 16384
+	if h.gliding: f |= GliderHeat.net_level(h) << 19      # the glider's heat, 4 bits, and whether it burns
+	if GliderHeat.burning(h): f |= 1 << 23
 	if h.glider_snd.hot: f |= OVERHEAT_BIT
 	# holding interact (an animation each): bit 2048, and which kind in bits 15-18
 	var hk := Hunter.HOLD_KINDS.find(h.holding())
@@ -5232,6 +5234,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 			h.dropping = f & 512 != 0
 			h.riding = f & 1024 != 0
 			h.diving = f & 16384 != 0
+			h.glide_fuel = GliderHeat.fuel_of((f >> 19) & 15) if h.gliding else 1.0
+			h.below_lip = f & (1 << 23) != 0
 			h.glider_snd.net_hot = f & OVERHEAT_BIT != 0
 			if f & 4096 != 0: h.reveal_t = maxf(h.reveal_t, 0.3)
 			h.crouch = f & 8192 != 0
