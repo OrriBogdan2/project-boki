@@ -47,11 +47,15 @@ func _terrain() -> void:
 		for x0 in range(0, _w.w, MAX_NODE):
 			_node(x0, z0, MAX_NODE)
 
-func _solid(x: int, z: int) -> bool:
+## Ground the terrain mesh draws, so its underside is the island's (stairs too; bridges are planks).
+func _land(x: int, z: int) -> bool:
 	if not _w.inb(x, z):
 		return false
 	var i := _w.idx(x, z)
-	return _w.kind[i] != World.T_VOID and not _w.bridge.has(i) and not _w.stairs.has(i)
+	return _w.kind[i] != World.T_VOID and not _w.bridge.has(i)
+
+func _solid(x: int, z: int) -> bool:
+	return _land(x, z) and not _w.stairs.has(_w.idx(x, z))
 
 func _node(x0: int, z0: int, s: int) -> void:
 	if x0 >= _w.w or z0 >= _w.h:
@@ -81,14 +85,15 @@ func _node(x0: int, z0: int, s: int) -> void:
 			_node(x0 + d.x, z0 + d.y, q)
 
 ## One box over s x s tiles at terrace `lv`: top under the ground, bottom above the highest underside in
-## and around the square, faces that meet lower ground or the void pulled in, faces that meet more ground
-## of the same height or higher left out (the neighbour's box continues them).
+## and around the square (a stair flight beside it included: a corner can touch its tile), faces that meet
+## lower ground or the void pulled in, faces that meet more ground of the same height or higher left out
+## (the neighbour's box continues them).
 func _box_tiles(x0: int, z0: int, s: int, lv: int) -> void:
 	var top := lv * World.LEVEL - TOP_GAP
 	var bottom := -INF
 	for z in range(z0 - 1, z0 + s + 1):
 		for x in range(x0 - 1, x0 + s + 1):
-			if _solid(x, z):
+			if _land(x, z):
 				bottom = maxf(bottom, _w.under[_w.idx(x, z)])
 	bottom += BOTTOM_GAP
 	if top - bottom < MIN_DEPTH:
