@@ -138,7 +138,10 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 		_circle_edge(g, e, ctr, r, lw)
 	var f := float(e["fill"])
 	if f > 0.0:
-		g.disc(ctr, r * f, _fill(e, 1.2), _fill(e, 2.2))
+		if band > 0.0:
+			g.disc(ctr, r * f, _fill(e, 0.4), _fill(e, 0.9))     # a band keeps its inside faint as it fills
+		else:
+			g.disc(ctr, r * f, _fill(e, 1.2), _fill(e, 2.2))
 	var core := float(e["core"])
 	if core > 0.0:
 		var cc: Color = e["col2"]

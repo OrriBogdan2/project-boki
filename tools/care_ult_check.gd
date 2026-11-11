@@ -284,6 +284,13 @@ func rimewright() -> void:
 	ok(
 			"tm X: the countdown fill (and the cracks) brighten as it builds",
 			float(AimKit.entry(P, "x").get("fill", 0.0)) > fill1 + 0.3)
+	# care_disc's body alpha at the centre is fill * 0.18 * 1.6; the zone rule caps it at 0.25 (docs/VFX_QUALITY.md)
+	var rink_fill := UltLook.RINK_FILL + UltLook.RINK_FILL_CRACK
+	var disc := (K.ulk().held["rink"]["n"] as Node3D).get_node("Disc") as MeshInstance3D
+	var live := float((disc.material_override as ShaderMaterial).get_shader_parameter("fill"))
+	ok("tm X: the rink is a lit rim over a soft inside, its hit ring a thin band (no screen-wide cyan)",
+			rink_fill * 0.18 * 1.6 <= 0.25 and live <= rink_fill + 0.001 and float(AimKit.entry(P, "x")["band"]) > 0.0,
+			"fill %.2f (max %.2f)" % [live, rink_fill])
 	ok("tm X: no damage before the crash", T.hp >= h0 - 6.0, "-%.0f" % (h0 - T.hp))
 	step(m, 1.3)
 	ok("tm X: it cracks open by itself at 3.5 s: damage and an ice-block stun", K.rime.is_empty()

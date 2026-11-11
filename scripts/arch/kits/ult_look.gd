@@ -9,6 +9,8 @@ extends CareLook
 ## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
 
 const FRINGE := 18            # crystals round the rink's edge
+const RINK_FILL := 0.3        # the rink's body (care_disc fill): alpha about 0.09 at its centre, 0.17 by the rim
+const RINK_FILL_CRACK := 0.1  # added at full crack (0.12 / 0.23); the lines and the lit rim carry the countdown, not the body
 
 
 func _build(kind: String) -> Node3D:
@@ -131,7 +133,7 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		_disc(disc.get_parent() as Node3D, Color("7fd8ff"), Color("e8ffff"), float(p.get("a", 1.0)), 4.0, -1.0, 0.0)
 		var sm := disc.material_override as ShaderMaterial
 		sm.set_shader_parameter("crack", crack)
-		sm.set_shader_parameter("fill", 0.7 + 0.5 * crack)
+		sm.set_shader_parameter("fill", RINK_FILL + RINK_FILL_CRACK * crack)
 	var fringe := n.get_node_or_null("Fringe") as Node3D
 	if fringe == null:
 		return
