@@ -64,7 +64,7 @@ press fires at once (`ArchKit.press_rmb`); above 0, the release fires and a quic
 | Slot | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|
 | LMB | hold-auto / tap | hold-auto, alternating hands | match | S:mooshmoosh 25 |
-| RMB | footage: hold to aim with a telegraph, release fires | press, then a fixed 1 s wind-up with a short lane, throws by itself; not holdable (`rmb.hold` absent) | differ (owner #118) | O 118, 118b; S:mooshmoosh 62 |
+| RMB | footage: hold to aim with a telegraph, release fires | press, then a fixed 0.6 s wind-up with a short lane, throws by itself; not holdable (`rmb.hold` absent) | differ (owner #118) | O 118, 118b; S:mooshmoosh 62 |
 | E | press (ring on you), recast throws it to the cursor | press, E again throws to the cursor (up to 9 m) while the 2.5 s ring is up | match; window 2.5 s both | D "zone 2.5s ... reactivate to throw"; S:mooshmoosh 92 |
 | R | press with an ally under the cursor, ~5 s channel, walk freely, no recast | same, 5 s tether, press while it runs is swallowed (`ult_recast` true) | match | D; S:mooshmoosh 221 |
 | Shift | press, own air-dash slot | press hop, air press = long glide on its own 14 s cooldown | match | D |

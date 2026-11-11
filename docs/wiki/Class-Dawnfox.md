@@ -69,7 +69,7 @@ What the in-game kit card (K) says.
 | Passive: Carrier | Carrier: run into a downed teammate to carry up to 2; a hit or a stun drops them. |
 | Dash: Relay Step | Relay Step: a quick hop where you move; in the air, a long floaty glide. |
 | LMB | Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle. |
-| RMB: Burrseed | Burrseed: a 1s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them. |
+| RMB: Burrseed | Burrseed: a 0.6s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; 2s in your reach roots them. |
 | E: Hearthlight | Hearthlight: a healing ring on you; press again to throw it to the cursor. |
 | Hunter ultimate: Hearth Call | Hearth Call (hunter ultimate, level 6): tether a teammate for 5s of healing while you walk; a downed one is pulled to you and stood up at the end. |
 | Weapon: Ember Cast | Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle. |
@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Burrseed (RMB, 10.5s cooldown).**
 
-- *Tap:* Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within 15m of you. After 2s of that it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off.
+- *Tap:* Press: a fixed 0.6s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within 15m of you. After 2s of that it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off.
 
 **Hearthlight (E, 11s cooldown).** A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.
 
