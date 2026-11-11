@@ -2267,8 +2267,8 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", []), "landmark": D.get("landmark")})
 		if String(D.get("biome", "")) != "":
 			var bj := load_biome(String(D["biome"]))
-			if bj.has("colors"):
-				islands[ii]["biome_colors"] = bj["colors"]
+			if bj.has("colors"):     # an island's own "colors" (the map's) tint a few of its biome's
+				islands[ii]["biome_colors"] = (bj["colors"] as Dictionary).merged(D.get("colors", {}), true)
 		if String(D.get("name", "")) != "":
 			var top_lv := 0
 			for S in shapes: top_lv = maxi(top_lv, int(S.get("lv", 0)))
