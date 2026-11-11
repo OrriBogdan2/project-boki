@@ -79,7 +79,7 @@ static func tide_heat(m: Match, p: Vector3) -> float:
 ## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
 ## holding once the ring is closed (-1 before the tide starts).
 static func tide_stage(m: Match) -> int:
-	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
+	var t := (m.time - r("tide_start_s")) / r("tide_close_s")
 	if m.heart == null or t < 0.0:
 		return -1
 	return mini(int(t * TIDE_STAGES), TIDE_STAGES - 1)
