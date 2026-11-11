@@ -165,7 +165,7 @@ func _flow() -> void:
 
 # ------------------------------------------------------------------ 4. interruptions
 func _interrupts() -> void:
-	for why in ["stun", "root", "dash", "damage", "nudge", "knock"]:
+	for why in ["stun", "root", "dash", "jump", "damage", "nudge", "knock"]:
 		_fresh()
 		var P := m.player
 		var k := wild()
@@ -174,15 +174,22 @@ func _interrupts() -> void:
 			ok(false, "%s: the scan did not start" % why)
 			continue
 		run_for(0.5)
+		if why == "stun":
+			var text := CaptureHud.prompt(P, k)
+			ok(text.contains("(%s to cancel)" % Settings.key_cap("jump")), "the prompt names Space: " + text)
 		match why:
 			"stun": P.stun_t = 0.4
 			"root": P.root_t = 0.4
 			"dash": P.inp["dash"] = true
+			"jump": P.inp["jump"] = true
 			"damage": P.hurt(8.0, m.hunters[1])
 			"knock": P.impulse(Vector2(Capture.HARD_KNOCK + 4.0, 0) * P.mass())
 			"nudge": P.impulse(Vector2(Capture.HARD_KNOCK - 3.0, 0) * P.mass())
 		run_for(0.1)
 		P.inp["dash"] = false
+		if why == "jump":
+			ok(P.grounded and P.jump_at < 0.0, "Space cancels the scan and does not also hop")
+		P.inp["jump"] = false
 		if why == "damage" or why == "nudge":
 			ok(Capture.active(P) and k.scan_by == P, "%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage"))
 			run_for(float(Capture.rules()["scan_s"]))
