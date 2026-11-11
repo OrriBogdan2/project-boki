@@ -261,12 +261,16 @@ func _quiet() -> String:
 	if P.position.distance_to(P.pos) > 0.01: return "render catching up"
 	return ""
 
-## The cursor on the foe's chest: a mouse motion event is what the viewport reads, in window pixels (the
-## canvas point times the content scale, which a real window may have; headless it is 1).
+## The cursor on the foe's feet: snapped to the foe or not, the aim is its spot on the ground (a plant like
+## Sable's E needs ground within reach). A mouse motion event is what the viewport reads, in window pixels:
+## the canvas point through the root's final transform (a real window's stretch and scale; headless, identity).
+## The pointer itself is warped there too, so a real display's own pointer never contradicts the event.
 func _aim_at_target() -> void:
 	if T == null or m.cam == null: return
+	var at: Vector2 = main.get_tree().root.get_final_transform() * m.cam.unproject_position(T.pos)
+	Input.warp_mouse(at)
 	var ev := InputEventMouseMotion.new()
-	ev.position = m.cam.unproject_position(T.pos + Vector3(0, 0.9, 0)) * main.get_tree().root.content_scale_factor
+	ev.position = at
 	ev.global_position = ev.position
 	Input.parse_input_event(ev)
 	Input.flush_buffered_events()
