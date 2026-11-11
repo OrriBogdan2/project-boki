@@ -96,6 +96,10 @@ static func draw(hud) -> void:
 		return
 	var c: Control = hud.c
 	var sd := seats(m)
+	if not HudReveal.on(m, "seat_pips"):
+		if not _any_open(sd):
+			return
+		HudReveal.see("seat_pips")      # the first open seat: the strip stays from now on
 	var w := CELL.x * 4.0
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
 	SafeArea.note_as("ways_strip", r)
@@ -104,6 +108,12 @@ static func draw(hud) -> void:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 	QuestTracker.draw(hud, r)
+
+static func _any_open(sd: Array) -> bool:
+	for s in sd:
+		if int(s["st"]) == St.OPEN:
+			return true
+	return false
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
