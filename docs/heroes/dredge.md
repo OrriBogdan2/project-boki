@@ -361,3 +361,13 @@ Branch `ext/telegraph-audit-b`. Drawn = what AimKit/fx draws; Hit = the number t
 | X Brass Broadside | fan | 105 deg, grows to 5.9 m over the 1.1 s charge, then flashes at full size | slugs fan 105 deg to range 5.9 | 1.1 s charge, 2 waves 0.6 s apart | yes (`all`) | white-pink fan growing | matched; assert deg == `fan_deg`, len <= `range`. Remote echo is a 2.95 m `net_ring` |
 
 Suggestion (not built): the remote machines only get rings, so the Anchor cone and Broadside fan are seen as a round ring there; a Net cone message would show the true shape.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Abyssal Hand (Grasp) | Data: pierces terrain, pulls in the first target hit, enemy or ally. Footage briefs/hero-ref/dredge.md:25, :168: the first enemy, through a rock pillar. | Flies over rocks, props and cliffs; stops on the first foe or ally (hunter, Boki or monster) and reels it in; placed walls still stop it (placed-walls job). Matches (`abyssal hand: hooks the first foe`). |
+| X Brass Broadside (Kaiju Blast) | Data: two waves of slugs, anti-heal. Footage dredge.md:263: two fans of 6 orbs; whether an orb passes a foe is not shown. | Not determinable: each of the 12 slugs stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Kept. |
+| Shift Barge (Brute Dash) | Data and footage: a dash that hits nobody. | Hits nobody. Matches. |

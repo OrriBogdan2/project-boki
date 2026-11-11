@@ -247,3 +247,14 @@ Branch `ext/telegraph-audit-b`. Drawn = what AimKit/fx draws; Hit = the number t
 | Passive Shatter | disc | spikes and flare now r = the hit (2.4 on 8 darts, 3.0 on a knock) | `splinter(.., r)` | 0.4 s after | local fx + `net_ring` r | ice starburst | was a fixed 2.7 plus 2.4 and 1.0 rings; now one true ring |
 
 `CareUtil.payoff` gained a `rings` flag; Neve passes false and draws her own true-size ring (Meeko keeps the shared rings, out of scope). Suggestion (not built): the wall's lane could draw the widening wedge.
+- Net: unchanged (0.16.0, main's); the ult adds no sync shape. Checks: `--support-check`, `--rimewright-combo-check`.
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Ice Spear (Cryo Spear) | Data and footage briefs/hero-ref/tamsin.md:51: lands at the cursor, then a slow zone and a delayed blast. Whether a foe in the path stops it is not shown. | Not determinable: flies to the cursor, lands early on the first foe (hunter, Boki or monster) or wall, passes allies. Kept. |
+| E Rink Wall (Frozen Barricade) | Data and footage: a sliding wall that blocks shots and shoves foes. | Placed wall: see the placed-walls job. |
+| X Rimelock (Chilling Finale) | Data: a zone round her. | An area round her; no shot. Matches. |

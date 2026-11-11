@@ -377,3 +377,13 @@ Re-measured on the v2 rig (`--anim-audit`, `--kael-sword-check`, `--clip-shots`,
 - Palms: the muzzles are the palms (`weapon_muzzle` right, `weapon_muzzle_l` left); both sit within 0.06 m of the hand bones in `lance` and `shot`.
 - Idle to walk first-pose gap 0.38 body heights, unchanged (blend-covered).
 - Timing: Cinder's move timing table is on the unmerged `ext/anim-time-cinder*` branches (it conflicts with this one in `warden_clips.gd` and `cinder.json`, so it was not re-run here); `--ashwick-combo-check` on the v2 clips passes (119 checks, 0 failures).
+
+## Ability shot rules (parity: what each ability's shot or lane stops on)
+
+PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes override it. One row per ability projectile or lane (not LMB); the rules every shot shares are in [docs/KIT_PARITY.md](../KIT_PARITY.md) "Ability shot and lane rules". What placed walls (Tenzo's rocks, Neve's ice) block is the placed-walls job's, not repeated here. "Not determinable" rows keep ours (data and footage are silent).
+
+| Ability | Source | Ours |
+|---|---|---|
+| RMB Cinder Shot (Embry Bolt) | Data: a fire bolt, damage and slow. Footage briefs/hero-ref/linwick.md:62: on a hit it stops at the first enemy. | Stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Matches. |
+| E Furnace Cloak (Heat Shield) | Data: a spin that pulls in nearby enemies. | A blast round him that drags foes in sight (walls stop them). No shot. Matches. |
+| Shift Soot Ram (Flame Skull Bash) | Footage linwick.md:77: the dash stops on the first enemy ('impact'), he does not pass through. | Stops on the first foe with the impact. Matches (`ram: stops on the first foe`). |
