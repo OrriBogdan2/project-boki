@@ -56,6 +56,8 @@ func stage(h) -> void:
 	h.ppos = land + Vector3(0, 0, 1.0)
 	h.player.position = h.ppos
 	for k in h.kins:
+		if not CAST.has(String(k["rec"]["name"])):
+			continue       # a Boki a caller added (the perf bench's two extras) stays where the farm put it
 		k["pos"] = h.world.free_spot_near(land + CAST[String(k["rec"]["name"])][1], [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
 		k["goal"] = k["pos"]
