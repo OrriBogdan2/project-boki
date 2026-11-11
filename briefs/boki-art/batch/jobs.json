@@ -44339,6 +44339,17 @@
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
   },
   {
+    "id": "px9_glaivyx",
+    "name": "Glaivyx (pixel sprite 80)",
+    "refs": [
+      "briefs/boki-art/cards/Glaivyx.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
     "id": "px9_glassolotl",
     "name": "Glassolotl (pixel sprite 80)",
     "refs": [
@@ -45604,6 +45615,17 @@
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
   },
   {
+    "id": "px9_ringrove",
+    "name": "Ringrove (pixel sprite 80)",
+    "refs": [
+      "briefs/boki-art/cards/Ringrove.jpg"
+    ],
+    "runs": 1,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
     "id": "px9_rippmink",
     "name": "Rippmink (pixel sprite 80)",
     "refs": [
@@ -46251,6 +46273,116 @@
     "aspect": "1:1",
     "size": "1K",
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only."
+  },
+  {
+    "id": "px9b_chainipede",
+    "name": "Chainipede (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Chainipede.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_geodemole",
+    "name": "Geodemole (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Geodemole.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_druzemole",
+    "name": "Druzemole (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Druzemole.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_skateron",
+    "name": "Skateron (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Skateron.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_tidalisk",
+    "name": "Tidalisk (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Tidalisk.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_lanceron",
+    "name": "Lanceron (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Lanceron.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_reapant",
+    "name": "Reapant (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Reapant.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_zephyrak",
+    "name": "Zephyrak (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Zephyrak.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_umbrathere",
+    "name": "Umbrathere (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Umbrathere.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
+  },
+  {
+    "id": "px9b_barostorm",
+    "name": "Barostorm (pixel sprite 80, chunky redo)",
+    "refs": [
+      "briefs/boki-art/cards/Barostorm.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "1K",
+    "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
   },
   {
     "id": "portrait_canvastross_p83",

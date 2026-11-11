@@ -2173,3 +2173,10 @@ for _n in ('Kingpinguin','Maracoil','Pavonazar'):
 for _n in sorted(_LM):
     if _os.path.exists(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'..','cards',_n+'.jpg')):
         SPECS.append({'id':'px9_'+_n.lower(),'name':_n+' (pixel sprite 80)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':1,'aspect':'1:1','size':'1K','prompt':_PX8})
+
+# 11-11 pixel finish (tools/pixel_sprite.py -> pixel/<Name>.png). Thin/dark/pale ones came out noisy at 80px: 3 more tries each,
+# drawn chunkier. Glaivyx + Ringrove px9 jobs were eaten by the old name DROP rule (un-dropped in specs_zzzz_locked.py).
+_PXTHICK=(" Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones,"
+ " and keep strong contrast between the body and its outline so it reads at a small size.")
+for _n in ('Chainipede','Geodemole','Druzemole','Skateron','Tidalisk','Lanceron','Reapant','Zephyrak','Umbrathere','Barostorm'):
+    SPECS.append({'id':'px9b_'+_n.lower(),'name':_n+' (pixel sprite 80, chunky redo)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'1K','prompt':_PX8+_PXTHICK})
