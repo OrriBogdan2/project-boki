@@ -71,5 +71,8 @@ func _frames(k: int) -> void:
 
 func _shot(file: String, caption: String) -> void:
 	await RenderingServer.frame_post_draw
-	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
+	var img := main.get_viewport().get_texture().get_image()
+	var err := img.save_png(dir.path_join(file + ".png")) if img else ERR_UNAVAILABLE
+	if err != OK:
+		push_error("INVSHOTS %s not saved: %s" % [file, error_string(err)])
 	captions.append("%s.png: %s" % [file, caption])
