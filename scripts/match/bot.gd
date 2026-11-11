@@ -224,7 +224,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.ak:
 				# the archetype's kit: dash, RMB variants, E and R (each kit knows its own moments)
 				h.ak.bot_use(tgt, d, los)
-				if not KinCommand.class_ults(): inp["ult"] = false      # R is the Merge: BotKin decides
+				inp["ult"] = false      # R is the Merge: BotKin decides
 				if not rv.is_empty() and h.flat_dist(rv["o"]) < 6.0:
 					# picking up a squadmate: no kit move that carries us off them (a Shadow Step
 					# behind the rival, a Rampage, a leap, an ult chase); E and the gun still go
@@ -320,6 +320,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			move = dd
 	move = _brake_at_lip(m, h, move)
 	inp["move"] = move
+	if StoneStand.hop_ahead(h, move):
+		inp["jump"] = true      # a teammate's rock in the way: hop it (Tenzo walks up his own; a foe's stops us)
 	if a.has("dash_dir"):
 		inp["move"] = a["dash_dir"]
 		a.erase("dash_dir")
@@ -368,6 +370,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 ## round several times a second. Shots and abilities still aim exactly where they were meant to.
 const AIM_TURN := 5.0          # rad/s with nothing to fight
 const AIM_TURN_FIGHT := 9.0    # rad/s with a target, between shots
+## rad: with nothing to fight, a smaller change of heading keeps the facing (the body turns at a fixed rate now,
+## so a wobbling path made it flip every step)
+const AIM_DEAD := 0.15
 const AIM_NEAR := 1.5          # m: an aim point this close says nothing about a way to face: hold the facing
 func _ease_aim(h: Hunter, dt: float) -> void:
 	var a := h.ai
@@ -384,7 +389,8 @@ func _ease_aim(h: Hunter, dt: float) -> void:
 	# (from where the bot is facing now: Hunter.face points along (-sin, -cos))
 	var cur := atan2(-cos(h.face), -sin(h.face))
 	var rate := AIM_TURN_FIGHT if a.get("tgt") != null else AIM_TURN
-	if dv.length() >= AIM_NEAR:
+	var dead := a.get("tgt") == null and absf(wrapf(want - cur, -PI, PI)) < AIM_DEAD
+	if dv.length() >= AIM_NEAR and not dead:
 		cur += clampf(wrapf(want - cur, -PI, PI), -rate * dt, rate * dt)
 	var L := maxf(dv.length(), 1.0)
 	inp["aim"] = Vector3(h.pos.x + cos(cur) * L, aim3.y, h.pos.z + sin(cur) * L)

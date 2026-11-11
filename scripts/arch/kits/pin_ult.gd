@@ -12,11 +12,10 @@ extends Node3D
 ## feet while empowered, the cursor ring filling through each nock. Everyone sees three pips over her
 ## and her glowing bow, and hears the cast anywhere on the map (content/vfx/archer.json "ult_cast").
 ## Look: the empower burst, a flare at the bow per shot, the travelling arrow (PinFx kind "ult", sized to
-## the hit width, red thread trail), a white burst cloud and a star on each hit, a bigger burst on the last.
+## the hit width, orchid thread trail), a white burst cloud and a star on each hit, a bigger burst on the last.
 ## Bond: an arrow that hits a hunter goes to HeroUlt.landed once the hit has landed (a hit, or the knock or
 ## kill it caused); a miss pays nothing.
 
-const RED := Color("ff2a3a")           # her thread
 const CORE := Color("dfe6f0")          # the telegraph lane's silver core
 const GOLD := Color("ffe27a")
 
@@ -39,10 +38,10 @@ func _init(kit: ArcherKit) -> void:
 
 func _ready() -> void:
 	for i in 3:
-		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", RED, true))
+		var pip := KitMeshes.inst(self, KitMeshes.quad(0.7, 0.7), KitShaders.mat("star", PinFx.THREAD, true))
 		KitShaders.param(pip, "power", 2.4)
 		_pips.append(pip)
-	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", RED, true))
+	_bow = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", PinFx.THREAD, true))
 
 func xd() -> Dictionary:
 	return k.d.get("x", {})
@@ -92,10 +91,10 @@ func tick(dt: float) -> void:
 	var x := xd()
 	var nk := clampf(nock_t / float(x.get("nock", 0.3)), 0.0, 1.0) if nock_t >= 0.0 else 0.0
 	AimKit.lane(h, "x", {"len": float(x.get("range", 18.0)), "width": float(x.get("width", 0.5)), "tip": true,
-		"col": RED, "col2": CORE, "k": nk, "fill": nk, "hot": nk})
-	AimKit.circle(h, "x_ring", {"self": true, "r": 0.9, "ticks": true, "star": true, "col": RED})
+		"col": PinFx.THREAD, "col2": CORE, "k": nk, "fill": nk, "hot": nk})
+	AimKit.circle(h, "x_ring", {"self": true, "r": 0.9, "ticks": true, "star": true, "col": PinFx.THREAD})
 	if nock_t >= 0.0:
-		AimKit.charge(h, nk, {"col": RED, "col2": CORE})
+		AimKit.charge(h, nk, {"col": PinFx.THREAD, "col2": CORE})
 	_tells(true)
 
 ## Ends the empowered window (spent, timed out, or a merge): unused shots are lost.
@@ -129,7 +128,7 @@ func _loose() -> void:
 	var extra := {"src": "abil", "ab": "ultimate", "pierce": true, "hitset": {}, "kb": float(x.get("kb", 4.0)),
 		"tracer": 0.0,
 		"kx": func(_s: Dictionary, _at: Vector3, e: Ent, _why: String): _hit(e, arrow)}
-	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, RED, extra)
+	k.m.spawn_shot(h, start, dir * spd, dmg, rng / spd, 0.3, PinFx.THREAD, extra)
 	k.vfx("ult_beam", Vector3(start.x, h.pos.y, start.z), dir, {"last": last})
 	k.play("pin_ult_final" if last else "pin_ult_loose")
 	h.vel.x -= dir.x * 2.5

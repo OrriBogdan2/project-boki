@@ -287,7 +287,7 @@ func _shading(a: String) -> void:
 			if sm and sm.shader == WardenGlb.FLAME:
 				shows = true      # (fire: no paint of its own)
 			elif sm and atlas:
-				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")

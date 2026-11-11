@@ -146,7 +146,7 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees and ability barriers don't block, terrain still does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
 	if not dyn_walls.is_empty() and not ghost:
@@ -164,11 +164,12 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-		var g := ground_at(x + o.x, z + o.y)
-		if g > y + STEP:
-			worst = maxf(worst, g)
-			hit = true
+	if not ghost:
+		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
+			var g := ground_at(x + o.x, z + o.y)
+			if g > y + STEP:
+				worst = maxf(worst, g)
+				hit = true
 	if hit:
 		return maxf(worst, WALL_MIN)
 	if guard:
@@ -1354,13 +1355,6 @@ static func with_lods(m: Mesh) -> Mesh:
 	_lod_cache[m] = out
 	return out
 
-## Every other grass tuft or flower kept (or fewer), by the quality preset, with a fixed pattern.
-static func _thin(items: Array, keep: float, seed_i: int) -> Array:
-	if keep >= 0.999:
-		return items
-	var r := RandomNumberGenerator.new(); r.seed = seed_i
-	return items.filter(func(_it): return r.randf() < keep)
-
 ## Scatter batches split into 16x16-tile chunks, so the camera only draws the ones it can see.
 func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: String, shadows := false, chunk := 16) -> void:
 	if shadows:
@@ -1375,10 +1369,11 @@ func _chunked(parent: Node3D, items: Array, mesh: Mesh, mat: Material, label: St
 	var draw_k := float(Settings.q("draw"))
 	var vis_end := 0.0
 	match cls:
-		"small":
-			vis_end = DRAW_SMALL * draw_k
-			items = _thin(items, float(Settings.q("grass")), hash(label) + rng.seed)
-		"bush": vis_end = DRAW_BUSH * draw_k
+		"small", "bush":
+			# clutter thinned per preset (Clutter.KEEP); 32-tile batches: a quarter of the draws
+			vis_end = (DRAW_SMALL if cls == "small" else DRAW_BUSH) * draw_k
+			items = Clutter.thin(items, Clutter.keep(cls), hash(label) + rng.seed)
+			chunk = maxi(chunk, 32)
 		"big":
 			if draw_k < 0.999: vis_end = DRAW_BIG_LOW * draw_k
 			# trees (rounded canopies simplify cleanly); rocks and pillars keep full detail: their
@@ -1750,6 +1745,7 @@ func _decorate() -> void:
 		cm.set_shader_parameter("deep", (clouds[0] as Color).lightened(0.1))
 		cm.set_shader_parameter("light", (clouds[1] as Color).lightened(0.28))
 		cm.set_shader_parameter("glow_amount", 0.25)
+	cm.set_shader_parameter("abyss_dim", DepthCues.abyss_dim())
 	sea.material_override = cm
 	sea.position = Vector3(w / 2.0, -18.0, h / 2.0)
 	sea.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -2268,7 +2264,7 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		islands.append({"c": cen, "r": sqrt(cells.size() / PI), "base": 0, "cells": cells, "role": String(D.get("role", "grove")),
 			"form": "authored", "fdir": Vector2.RIGHT, "name": String(D.get("name", "")), "id": String(D["id"]),
 			"region_fixed": int(D.get("region", 0)), "poi_at": poi, "drop": bool(D.get("drop", false)), "sheer_arcs": D.get("sheer", []),
-			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", [])})
+			"biome": String(D.get("biome", "")), "danger": int(D.get("danger", 0)), "perch": bool(D.get("perch", false)), "extras": D.get("extras", []), "landmark": D.get("landmark")})
 		if String(D.get("biome", "")) != "":
 			var bj := load_biome(String(D["biome"]))
 			if bj.has("colors"):
@@ -2511,6 +2507,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 			var wx := int(D2["weapon"][0]); var wz := int(D2["weapon"][1])
 			if inb(wx, wz) and kind[idx(wx, wz)] == T_GROUND:
 				weapon_spots.append(Vector3(wx + 0.5, level[idx(wx, wz)] * LEVEL, wz + 0.5))
+	if bool(L.get("calm", false)):      # the tutorial: nothing random, only what the course places itself
+		for spots: Array in [chest_spots, shrine_spots, wild_spots, break_spots, weapon_spots, camp_spots]:
+			spots.clear()
 	await _slice()
 	_place_stairs()
 

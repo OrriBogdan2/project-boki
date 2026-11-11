@@ -17,13 +17,14 @@ const MATCH_COST := {"food": -26.0, "energy": -34.0, "clean": -30.0}
 
 ## Starving: hours a kin has spent with nothing in it (food at zero), real time, at home or away.
 ## Each stage keeps the ones before it. A meal takes 4 hours off; being fed (food over 20) undoes it
-## three times as fast as it built up. Feeders keep it from ever starting.
+## three times as fast as it built up. Feeders keep it from ever starting. "dead" only counts while
+## content/rules/care.json natural_death is on (off: neglect bottoms out at sick).
 const STARVE := {"weak": 6.0, "refuse": 18.0, "sick": 30.0, "dead": 72.0}
 const STARVE_INFO := {
 	"starving": ["Starving", "Hasn't eaten in a while. Feed it, or fill a feeder."],
 	"weak": ["Weak from hunger", "Slow, and weaker on expeditions. Losing trust in you."],
 	"refuse": ["Too weak to go out", "Won't come on expeditions until it's eaten."],
-	"sick": ["Sick from hunger", "Ill and miserable. It won't last much longer without food."],
+	"sick": ["Sick from hunger", "Ill and miserable. Feed it and it will slowly get better."],
 }
 
 const STATS := {
@@ -82,7 +83,15 @@ const FOODS := {
 	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any Boki happy."},
 	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
 }
+const LEAN_HEAD_START := 0.5     # share of the stronger parent's lean a hatchling starts with
+const UNSTABLE_JOY := 35.0       # joy (0-100) an unstable mix hatches with: it needs a day of care
+const CLASHES := [["ember", "frost"], ["storm", "stone"], ["bloom", "venom"], ["shadow", "lunar"]]
+const TEMPER_CLASH := 0.5        # temper gap (0-1) at which two parents' tempers clash
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]
+## Play is practice: a finished game of fetch trains this stat by one point, as long as the Boki has
+## the energy (PLAY_TRAIN_ENERGY, the same line under which the Training post drill teaches less).
+const PLAY_TRAINS := {"fetch": "speed"}
+const PLAY_TRAIN_ENERGY := 35.0
 const PLAY_NAMES := {"fetch": "playing fetch", "brush": "being brushed", "bath": "baths", "chat": "chatting", "pet": "scratches"}
 
 ## Fills in anything an older record is missing. Likes come from the kin's id, so they're fixed.
@@ -108,6 +117,8 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("ivs") or typeof(rec["ivs"]) != TYPE_DICTIONARY:
 		rec["ivs"] = ivs_from_uid(String(rec.get("uid", "x")))     # old saves: fixed by the kin's id
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)
+	for old in ["pet_m", "played", "fed_m", "trained_m", "talked"]:
+		rec.erase(old)              # the old once-per-expedition care stamps (now care_day)
 
 static func need(rec: Dictionary, n: String) -> float:
 	ensure(rec)
@@ -119,8 +130,9 @@ static func change(rec: Dictionary, n: String, amt: float) -> float:
 	rec["needs"][n] = clampf(before + amt, 0.0, 100.0)
 	return float(rec["needs"][n]) - before
 
-## Time passing at home. sleeping: curled up in bed or napping.
-static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
+## Time passing at home. sleeping: curled up in bed or napping (or indoors); raining: rain on the
+## farm, which some kinds love and some hate (BokiQuirks.rain_joy).
+static func tick(rec: Dictionary, secs: float, sleeping := false, raining := false) -> void:
 	ensure(rec)
 	if rec.get("boxed", false):
 		# asleep in the Kin Burrow: nothing changes
@@ -129,8 +141,9 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	var mins := secs / 60.0
 	var nd: Dictionary = rec["needs"]
 	var f0 := float(nd["food"])
-	var rate := DECAY["food"] / 60.0 * (0.5 if sleeping else 1.0)
-	nd["food"] = clampf(float(nd["food"]) - DECAY["food"] * mins * (0.5 if sleeping else 1.0), 0.0, 100.0)
+	var species := String(rec.get("species", ""))
+	var rate := DECAY["food"] * BokiQuirks.food_rate(species) / 60.0 * (0.5 if sleeping else 1.0)
+	nd["food"] = clampf(float(nd["food"]) - rate * secs, 0.0, 100.0)
 	# the part of this stretch spent with nothing in it counts toward starving
 	starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
@@ -141,6 +154,8 @@ static func tick(rec: Dictionary, secs: float, sleeping := false) -> void:
 	# a hungry, grubby or worn-out kin gets glum faster
 	var glum := 1.0 + (1.0 if float(nd["food"]) < 25.0 else 0.0) + (0.5 if float(nd["clean"]) < 20.0 else 0.0) + (0.5 if float(nd["energy"]) < 15.0 else 0.0)
 	nd["joy"] = clampf(float(nd["joy"]) - DECAY["joy"] * mins * glum * (0.3 if sleeping else 1.0), 0.0, 100.0)
+	if raining and not sleeping:
+		nd["joy"] = clampf(float(nd["joy"]) + BokiQuirks.rain_joy(species) * mins, 0.0, 100.0)
 	if starve_h(rec) >= STARVE["sick"]:
 		# sick from hunger: no energy and no joy to speak of
 		nd["energy"] = minf(float(nd["energy"]), 35.0)
@@ -169,6 +184,7 @@ static func catch_up(rec: Dictionary) -> float:
 			nd[k] = maxf(float(nd[k]), minf(float(before[k]), floors[k]))
 		# the floor means it found enough to get by; one that was already empty starved the whole time
 		var st1 := st0 + gone if float(before["food"]) <= 0.5 else minf(float(rec.get("starve", 0.0)), st0)
+		st1 = minf(st1, starve_cap())
 		if st1 > 0.0: rec["starve"] = st1
 		else: rec.erase("starve")
 	rec["needs_t"] = Time.get_unix_time_from_system()
@@ -181,7 +197,7 @@ static func starve_h(rec: Dictionary) -> float:
 ## "" (fine), "starving", "weak", "refuse", "sick" or "dead".
 static func starve_stage(rec: Dictionary) -> String:
 	var h := starve_h(rec)
-	if h >= STARVE["dead"]: return "dead"
+	if h >= STARVE["dead"] and bool(Content.rules("care")["natural_death"]): return "dead"
 	if h >= STARVE["sick"]: return "sick"
 	if h >= STARVE["refuse"]: return "refuse"
 	if h >= STARVE["weak"]: return "weak"
@@ -198,11 +214,16 @@ static func starve_step(rec: Dictionary, secs: float, zero_secs := -1.0) -> void
 		if st / 3600.0 >= STARVE["weak"]:
 			# weak and still hungry: it trusts you a little less every few hours
 			rec["trust"] = clampf(float(rec.get("trust", 0.0)) - z / 10800.0, 0.0, 100.0)
-		st += z
+		st = minf(st + z, starve_cap())
 	elif need(rec, "food") > 20.0 and st > 0.0:
 		st = maxf(0.0, st - secs * 3.0)
 	if st > 0.0: rec["starve"] = st
 	else: rec.erase("starve")
+
+## The most the starve clock holds, in seconds. With natural_death off it stops at the "dead" mark, so
+## a Boki left alone for weeks still recovers with a few meals and a day of care.
+static func starve_cap() -> float:
+	return INF if bool(Content.rules("care")["natural_death"]) else STARVE["dead"] * 3600.0
 
 ## It just ate: a meal takes four hours off the starve clock.
 static func fed(rec: Dictionary) -> void:
@@ -210,6 +231,16 @@ static func fed(rec: Dictionary) -> void:
 		var st := maxf(0.0, float(rec["starve"]) - 4.0 * 3600.0)
 		if st > 0.0: rec["starve"] = st
 		else: rec.erase("starve")
+
+## True once a farm day (care.json care_day_s) for each kind of care, and stamps it: the
+## gate on how much trust looking after it at home builds.
+static func care_day(rec: Dictionary, kind: String) -> bool:
+	var now := Time.get_unix_time_from_system()
+	var days: Dictionary = rec.get_or_add("care_day", {})
+	if now - float(days.get(kind, 0.0)) < float(Content.rules("care")["care_day_s"]):
+		return false
+	days[kind] = now
+	return true
 
 ## Overall condition, 0 to 100.
 static func condition(rec: Dictionary) -> float:
@@ -254,6 +285,28 @@ static func match_mods(rec: Dictionary) -> Dictionary:
 		"skill": 1.05 if trust >= 50.0 else 1.0,
 		"mood": clampf((c - 50.0) / 50.0, -1.0, 1.0),
 	}
+
+## A game it just finished: the point it trains (0 when too tired or at its cap for now).
+static func play_train(rec: Dictionary, play: String) -> int:
+	if not PLAY_TRAINS.has(play) or need(rec, "energy") < PLAY_TRAIN_ENERGY:
+		return 0
+	return add_stat(rec, String(PLAY_TRAINS[play]), 1)
+
+## What its raising does for it on an expedition, in one line (the expedition panel): match_mods
+## as percentages, so the care at home shows up where you pick your Boki.
+static func care_line(rec: Dictionary) -> String:
+	var mm := match_mods(rec)
+	var bits: Array = []
+	for pair in [["dmg", "damage"], ["hp", "health"], ["speed", "speed"]]:
+		var pct := roundi((float(mm[pair[0]]) - 1.0) * 100.0)
+		if pct != 0:
+			bits.append("%+d%% %s" % [pct, pair[1]])
+	var faster := roundi((1.0 - float(mm["cd"])) * 100.0)
+	if faster != 0:
+		bits.append("skills recharge %d%% faster" % faster)
+	if bits.is_empty():
+		return "Care, training and trust at home make it stronger out there."
+	return "From how you've raised it: %s." % ", ".join(bits)
 
 ## Trained points can't run too far ahead of its level.
 static func stat_cap(rec: Dictionary) -> int:
@@ -481,11 +534,49 @@ static func breed(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator, sp :
 	baby["iv_from"] = inh["from"]       # stat -> which parent (index into "parents") it came from
 	# its own looks and habits, a blend of both parents' (Unique.inherit, its own seed: rng untouched)
 	baby["dna"] = Unique.inherit(a, b, int(baby["dna"]["seed"]))
+	BokiQuirks.set_sex(baby)
 	baby["lineage"] = {"parents": [String(a.get("uid", "")), String(b.get("uid", ""))], "names": [String(a["name"]), String(b["name"])],
 		"gen": maxi(int((a.get("lineage", {}) as Dictionary).get("gen", 0)), int((b.get("lineage", {}) as Dictionary).get("gen", 0))) + 1}
 	baby["origin"] = {"how": "egg", "where": {"place": "home"}}
 	ensure(baby)
+	_inherit_habits(baby, a, b, rng)
+	if unstable_mix(a, b): baby["needs"]["joy"] = UNSTABLE_JOY
+	var lean := stronger(a, b).get("lean", {}) as Dictionary
+	if not lean.is_empty():
+		baby["lean"] = {}
+		for el in lean: baby["lean"][el] = float(lean[el]) * LEAN_HEAD_START
 	return baby
+
+## How much a kin leans toward an element in all (rec["lean"]; older records have none: 0).
+static func lean_total(rec: Dictionary) -> float:
+	var t := 0.0
+	for el in rec.get("lean", {}): t += float(rec["lean"][el])
+	return t
+
+## The parent with the stronger lean (a on a tie), whose lean the baby gets a head start from.
+static func stronger(a: Dictionary, b: Dictionary) -> Dictionary:
+	return b if lean_total(b) > lean_total(a) else a
+
+## Clashing elements or tempers: the baby hatches low on joy and needs a day of care.
+static func unstable_mix(a: Dictionary, b: Dictionary) -> bool:
+	var ta := String(Data.KIN.get(a["species"], {}).get("theme", ""))
+	var tb := String(Data.KIN.get(b["species"], {}).get("theme", ""))
+	for c in CLASHES:
+		if (c[0] == ta and c[1] == tb) or (c[0] == tb and c[1] == ta): return true
+	return absf(float(a["traits"].get("temper", 0.5)) - float(b["traits"].get("temper", 0.5))) >= TEMPER_CLASH
+
+## One habit from each parent: the favourite food from one, the favourite play from the other.
+static func _inherit_habits(baby: Dictionary, a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
+	ensure(a)
+	ensure(b)
+	var a_food := rng.randf() < 0.5
+	var pf: Dictionary = a if a_food else b
+	var pp: Dictionary = b if a_food else a
+	var likes: Dictionary = baby["likes"]
+	var food := String(pf["likes"]["food"])
+	if String(likes["hates"]) == food: likes["hates"] = likes["food"]
+	likes["food"] = food
+	likes["play"] = pp["likes"]["play"]
 
 ## Rare Eggs no longer use the breeding nest: they hatch on the Incubator (scripts/core/incubator.gd).
 ## Kept for older callers: puts shelf eggs into free incubator cradles. True if any went in.
