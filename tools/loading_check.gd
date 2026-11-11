@@ -85,7 +85,8 @@ func _real_load(main: Node) -> void:
 		if shown[i][1] < shown[i - 1][1]: want_back += 1
 		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
 			jumps += 1
-			print("LOADING jump at frame %d (%s): %.2f -> %.2f in %.3f s" % [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]])
+			var at := [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]]
+			print("LOADING jump at frame %d (%s): %.2f -> %.2f in %.3f s" % at)
 	ok(back == 0, "the bar never goes backwards (%d frames did)" % back)
 	ok(want_back == 0, "the stage target never goes backwards (%d frames did)" % want_back)
 	ok(jumps == 0, "the bar never jumps more than %d%% in a normal frame (%d did)" % [int(MAX_STEP * 100.0), jumps])
