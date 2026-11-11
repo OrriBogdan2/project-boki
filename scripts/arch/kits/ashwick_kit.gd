@@ -641,6 +641,7 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
+	h.shield_kind = "cloak"
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
@@ -684,6 +685,7 @@ func _cloak_blast() -> void:
 	if hit > 0:
 		h.shield = maxf(h.shield, h.max_hp * (float(ed["shield_base"]) + float(ed["shield_each"]) * hit) * shield_k)
 		h.shield_t = float(ed["shield_t"])
+		h.shield_kind = "cloak"
 		st["shield_on"] = true
 		m.sfx("shield", h.pos, -5.0, 0.9)
 
