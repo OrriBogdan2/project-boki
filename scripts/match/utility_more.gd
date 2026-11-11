@@ -15,7 +15,7 @@ extends RefCounted
 ##                     takes it down onto their own belt
 ##             pack    the first body to step in heals "heal" of its health over "hold" s (a hit stops it);
 ##                     a body in the air is thrown up "bounce" instead
-##   pilfer  after a "channel" s stand still, raccoons take "take" of the gems of every rival hunter within
+##   pilfer  after its channel "time" s standing still, raccoons take "take" of the gems of every rival hunter within
 ##           "r" of the aim and empty the locked chests there
 ##   lamp    a revive beacon where you stand (Beacons.lamp)
 ##   ember   every fallen squadmate wakes where you stand (Beacons.pop)
@@ -314,7 +314,7 @@ static func _pilfer(h: Hunter, d: Dictionary) -> void:
 	var m = h.m
 	var at := Effects._aim_point(h, {"reach": float(d.get("range", 8.0))})
 	at.y = m.world.ground_at(at.x, at.z) if not m.world.is_void(at.x, at.z) else h.pos.y
-	var wait := float(d.get("channel", 0.0))
+	var wait := UtilityUse.channel(String(d["id"]), "time", 0.0)
 	h.root_t = maxf(h.root_t, wait)
 	m.fx.ring(at, float(d.get("r", 4.0)), Color("d0b080"), maxf(wait, 0.8))
 	m.later(wait, func(): _raid(m, h, at, d))

@@ -17,6 +17,8 @@
  "range": 8.0,
  "r": 4.0,
  "take": 0.5,
- "channel": 1.5,
+ "channel": {
+  "time": 1.5
+ },
  "src": "docs/SOURCE_UTILITIES.md: 1.5 s channel, 50% of a hunter's gold, loot from unopened vaults"
 }
