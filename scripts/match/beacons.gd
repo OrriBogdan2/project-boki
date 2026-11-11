@@ -51,11 +51,11 @@ static func _add(m: Match, p: Vector3) -> void:
 	m.beacons.append({"pos": p, "used": false, "prog": 0.0, "team": -1, "node": n, "contested": false,
 		"lit": false, "lit_team": -1, "lit_at": 0.0, "lit_net": false})
 
-## A beacon set down mid-match (Hearth Lamp). Online, the others stand the same one up ("lamp").
+## A beacon set down mid-match (Hearth Lamp). Online, the others stand the same one up ("lamp"). Its
+## sound is the item's own (BeltSfx).
 static func lamp(m: Match, at: Vector3, net := false) -> void:
 	_add(m, at)
 	m.fx.ring(at, 3.0, COL, 0.6)
-	m.sfx("unlock", at, -4.0, 1.2)
 	if not net:
 		m.net_event(["bcn", m.beacons.size() - 1, -1, "lamp", at.x, at.y, at.z])
 

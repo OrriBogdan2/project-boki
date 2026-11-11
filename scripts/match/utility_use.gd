@@ -68,7 +68,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			var n := Models.gear_smoke()
 			n.position = h.pos
 			m.add_child(n)
-			m.smokes.append({"pos": h.pos, "r": 3.6, "t": 8.0, "node": n})
+			m.smokes.append({"pos": h.pos, "r": 3.6, "t": float(d.get("time", 8.0)), "node": n})
 		"scan":
 			var rng := float(d.get("range", 26.0))
 			for o in m.hunters:
@@ -79,7 +79,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			UtilityMore.start(h, id, d)
 		_:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
-					{"slot": "utility", "ability": id, "level": 1})
+					{"slot": "utility", "ability": id, "level": 1, "belt": true})
 	# the instant ones are spent now; the channelled ones when they finish (tick)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)

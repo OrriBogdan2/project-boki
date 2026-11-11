@@ -1,5 +1,5 @@
 {
- "_doc": "Belt item sounds (BeltSfx, docs/AUDIO.md), keyed by belt item id (content/utility): start = played at the Hunter when the item is used; loop = held while it channels (tonic, armor_kit); end = the channel finished; cancel = the channel was spilt (hit, stunned, rolled). \"beds\" lists the placed items: a loop (and an end cue when it runs out) at the spot while the item stands, for the item's own time; \"front\" = 2 m ahead of the user, \"aim\" = where they aim, \"self\" = following the user. hit = a pad launched someone. Keys (rift_key, chest_key) have their own sounds in BeltKeys. --sfx-set-check asserts every other belt item is here with no shared stock cue.",
+ "_doc": "Belt item sounds (BeltSfx, docs/AUDIO.md), keyed by belt item id (content/utility). Every item has start (the use cue, played at the Hunter when it is used) and end. Channels (tonic, armor_kit and the drinks): loop held while it channels, end when it finishes, cancel when it is spilt (hit, stunned, rolled). \"beds\": where the item's run is heard: a loop (if it has one) at the spot for the item's own time, then its end cue; \"front\" = ahead of the user by the item's \"range\" (1.6 m without one, a pad's spot), \"aim\" = where they aim, \"here\" = where they stand, \"self\" = following the user, \"buff\" = following the user with the loop quiet (BeltSfx.BUFF_DB), ended early when the buff is gone (a shield broken). An item's time is its \"time\" or \"life\", else its first effect's \"time\" or \"delay\" (Shatter's blast), else \"tails\": seconds from the use to the end cue of an instant item. A pad used once is cut to its \"after\", a pack picked up ends there. hit = a pad launched someone. Keys play theirs when they open a lock (BeltKeys). --sfx-set-check asserts every belt item has its own start and end, none a shared stock cue.",
  "items": {
   "tonic": {
    "start": "belt_tonic_start",
@@ -14,22 +14,33 @@
    "cancel": "belt_armor_kit_cancel"
   },
   "medkit": {
-   "start": "belt_medkit_start"
+   "start": "belt_medkit_start",
+   "end": "belt_medkit_end"
   },
   "jump_pad": {
-   "start": "belt_jump_pad_start"
+   "start": "belt_jump_pad_start",
+   "loop": "belt_jump_pad_loop",
+   "end": "belt_jump_pad_end"
   },
   "scanner": {
-   "start": "belt_scanner_start"
+   "start": "belt_scanner_start",
+   "loop": "belt_scanner_loop",
+   "end": "belt_scanner_end"
   },
   "shield_cell": {
-   "start": "belt_shield_cell_start"
+   "start": "belt_shield_cell_start",
+   "loop": "belt_shield_cell_loop",
+   "end": "belt_shield_cell_end"
   },
   "smoke": {
-   "start": "belt_smoke_start"
+   "start": "belt_smoke_start",
+   "loop": "belt_smoke_loop",
+   "end": "belt_smoke_end"
   },
   "stim": {
-   "start": "belt_stim_start"
+   "start": "belt_stim_start",
+   "loop": "belt_stim_loop",
+   "end": "belt_stim_end"
   },
   "twin_gate": {
    "start": "belt_twin_gate_start",
@@ -78,22 +89,29 @@
    "end": "belt_bounty_banner_end"
   },
   "pilfer_pouch": {
-   "start": "belt_pilfer_pouch_start"
+   "start": "belt_pilfer_pouch_start",
+   "end": "belt_pilfer_pouch_end"
   },
   "hawk_whistle": {
-   "start": "belt_hawk_whistle_start"
+   "start": "belt_hawk_whistle_start",
+   "loop": "belt_hawk_whistle_loop",
+   "end": "belt_hawk_whistle_end"
   },
   "hearth_lamp": {
-   "start": "belt_hearth_lamp_start"
+   "start": "belt_hearth_lamp_start",
+   "end": "belt_hearth_lamp_end"
   },
   "revive_ember": {
-   "start": "belt_revive_ember_start"
+   "start": "belt_revive_ember_start",
+   "end": "belt_revive_ember_end"
   },
   "shatter_charge": {
-   "start": "belt_shatter_charge_start"
+   "start": "belt_shatter_charge_start",
+   "end": "belt_shatter_charge_end"
   },
   "toss_satchel": {
    "start": "belt_toss_satchel_start",
+   "loop": "belt_toss_satchel_loop",
    "end": "belt_toss_satchel_end"
   },
   "deep_draught": {
@@ -113,6 +131,14 @@
    "loop": "belt_omen_draught_loop",
    "end": "belt_omen_draught_end",
    "cancel": "belt_omen_draught_cancel"
+  },
+  "rift_key": {
+   "start": "belt_rift_key_start",
+   "end": "belt_rift_key_end"
+  },
+  "chest_key": {
+   "start": "belt_chest_key_start",
+   "end": "belt_chest_key_end"
   }
  },
  "beds": {
@@ -124,6 +150,28 @@
   "blight_flask": "aim",
   "thorn_wall": "front",
   "lookout_lantern": "front",
-  "bounty_banner": "self"
+  "bounty_banner": "self",
+  "jump_pad": "front",
+  "smoke": "here",
+  "shatter_charge": "aim",
+  "pilfer_pouch": "aim",
+  "medkit": "self",
+  "hearth_lamp": "here",
+  "revive_ember": "here",
+  "rift_key": "self",
+  "chest_key": "self",
+  "scanner": "buff",
+  "hawk_whistle": "buff",
+  "shield_cell": "buff",
+  "stim": "buff",
+  "toss_satchel": "front"
+ },
+ "tails": {
+  "medkit": 0.5,
+  "pilfer_pouch": 0.7,
+  "hearth_lamp": 0.6,
+  "revive_ember": 0.8,
+  "rift_key": 0.5,
+  "chest_key": 0.5
  }
 }

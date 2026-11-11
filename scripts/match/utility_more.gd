@@ -38,7 +38,8 @@ static func can_use(h: Hunter, id: String) -> bool:
 	return true
 
 # ------------------------------------------------------------------ pads
-static func _spot(h: Hunter, dist: float) -> Vector3:
+## Where a placed item goes: `dist` m along the aim, or under the user if that is over a void or a wall.
+static func spot(h: Hunter, dist: float) -> Vector3:
 	var a := h.aim_dir()
 	var at := Vector3(h.pos.x + a.x * dist, h.pos.y, h.pos.z + a.y * dist)
 	if h.m.world.is_void(at.x, at.z) or h.m.world.is_block(at.x, at.z):
@@ -47,7 +48,7 @@ static func _spot(h: Hunter, dist: float) -> Vector3:
 	return at
 
 static func _pad(h: Hunter, d: Dictionary) -> void:
-	var at := _spot(h, 1.6)
+	var at := spot(h, 1.6)
 	var n := Models.gear_pad(d.get("col", Color.WHITE))
 	n.position = at
 	h.m.add_child(n)
@@ -80,6 +81,7 @@ static func pads(m: Node, dt: float) -> void:
 				gp["cd"][h.nid] = m.time + 1.0
 				if float(gp["after"]) > 0.0:
 					gp["t"] = minf(float(gp["t"]), float(gp["after"]))
+					BeltSfx.cut(m, String(gp["id"]), gp["pos"], gp["t"])
 				var hv := Vector2(h.vel.x, h.vel.z)
 				var dir: Vector2 = hv.normalized() if hv.length() > 0.5 else h.aim_dir()
 				var sp := maxf(hv.length(), float(gp["push"]))
@@ -98,7 +100,7 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 	var col: Color = d.get("col", Color.WHITE)
 	var time := float(d.get("time", 10.0))
 	var r := float(d.get("r", 1.5))
-	var at := _spot(h, float(d.get("range", 1.6)))
+	var at := spot(h, float(d.get("range", 1.6)))
 	match String(d.get("field", "")):
 		"gate":
 			var b := h.pos
@@ -209,7 +211,7 @@ static func _pack_tick(m: Node, at: Vector3, z: Dictionary, d: Dictionary, done:
 		done[0] = true
 		z["t"] = 0.0
 		_regen(m, x, x.max_hp * float(d.get("heal", 0.6)), float(d.get("hold", 5.0)), 0.5, x.hp)
-		BeltSfx.play_at(m, "toss_satchel", "end", at)
+		BeltSfx.cut(m, "toss_satchel", at, 0.0)      # its bed ends with the pack
 		return
 
 ## Heals `total` over `secs` in steps; getting hit stops it.

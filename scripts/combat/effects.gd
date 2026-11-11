@@ -307,7 +307,8 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var r := float(e.get("radius", 2.0))
 			m.fx.ring(at, r, col, 0.3)
 			m.fx.burst(at + Vector3(0, 0.4, 0), col, int(clampf(r * 10.0, 8.0, 30.0)), 5.0, 0.45, 6.0, 1.1)
-			m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
+			if not ctx.get("belt", false):      # a belt item plays its own (BeltSfx)
+				m.sfx("boom", at, -3.0 if r > 2.0 else -7.0, 1.3 - minf(0.5, r * 0.1))
 			if not caster is Kin: AbilityFx.land(m, caster, at, r, col)
 			for f in m.foes_of(caster.team):
 				if _hits(f, at, r):
@@ -447,7 +448,8 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 					t.shield = maxf(float(t.shield), float(e.get("amount", 40.0)) * _heal_k(caster))
 					if "shield_t" in t: t.shield_t = maxf(float(t.shield_t), float(e.get("time", 5.0)))
 				m.fx.ring(t.pos + Vector3(0, 0.1, 0), 1.0 if t is Hunter else 0.7, col, 0.4)
-			m.sfx("shield", caster.pos, -3.0)
+			if not ctx.get("belt", false):
+				m.sfx("shield", caster.pos, -3.0)
 		"haste":
 			for t in _targets(e, caster):
 				if "haste_t" in t:

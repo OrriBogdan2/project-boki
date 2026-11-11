@@ -71,6 +71,8 @@ func run(main_node: Node) -> void:
 func _belt_items(m: Match, P: Hunter) -> void:
 	Sfx.listener = P.pos
 	for id in BeltSfx.items():
+		if UtilityBelt.is_key(id):
+			continue                # a key sounds only at its lock (--utility-sfx-check)
 		var start := BeltSfx.cue(id, "start")
 		Sfx.listener = P.pos       # a Warp Seed or Lostway Scroll earlier moved the user
 		Sfx.last_played.erase(start)

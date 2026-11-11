@@ -5800,6 +5800,7 @@ func _net_ev(x, from: String) -> void:
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"whop": WallMoves.scuff(self, Vector3(x[2], x[3], x[4]), float(x[5]))      # a wall hop (item 149)
+				"belt": BeltSfx.net_in(self, x.slice(1))
 		"knock":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.downed:

@@ -73,6 +73,7 @@ static func use(h, id: String) -> bool:
 	var m = h.m
 	var lock := _near_lock(m, h, id)
 	if not lock.is_empty():
+		BeltSfx.start(h, id)
 		if id == "rift_key":
 			m.exits.act(lock, "open", h)
 		else:

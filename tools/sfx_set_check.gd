@@ -8,8 +8,9 @@ extends RefCounted
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
-##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
-##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd and utility_more.gd play no stock cue
+##   7. every belt item, the keys too, has its own row in content/rules/belt_sfx.json: cues named for the item
+##      with files on disk, a use (start) and an end each, a channel also loop and cancel, an item whose use
+##      lasts LOOP_MIN_S or more also a loop; utility_use.gd and utility_more.gd play no stock cue
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -17,6 +18,7 @@ const VOICE := ["hurt", "down", "death"]
 const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+const LOOP_MIN_S := 1.0        # s: a belt item's use that lasts this long is heard while it runs
 
 var bad := 0
 var levels := {}
@@ -144,9 +146,11 @@ func _belt() -> void:
 	var seen := {}
 	var wrong := []
 	for id in UtilityBelt.ids():
-		if UtilityBelt.is_key(id):
-			continue
-		var kinds := ["start"] + (["loop", "end", "cancel"] if UtilityUse.use_of(id) in ["drink", "repair"] else [])
+		var kinds := ["start", "end"]
+		if UtilityUse.use_of(id) in ["drink", "repair"]:
+			kinds += ["loop", "cancel"]
+		elif BeltSfx.bed_time(id) >= LOOP_MIN_S:
+			kinds.append("loop")
 		for kind in kinds:
 			var c := BeltSfx.cue(id, kind)
 			if c != "belt_%s_%s" % [id, kind] or c in STOCK or seen.has(c) or _takes(c).is_empty():
@@ -155,7 +159,9 @@ func _belt() -> void:
 		for kind in rows.get(id, {}):
 			if BeltSfx.cue(id, kind) != "belt_%s_%s" % [id, kind] or _takes(BeltSfx.cue(id, kind)).is_empty():
 				wrong.append("%s extra cue %s" % [id, kind])
-	ok(wrong.is_empty(), "belt: %d items with their own start/loop/end/cancel cues %s" % [rows.size(), wrong])
+	var all := UtilityBelt.ids().size()
+	ok(wrong.is_empty() and rows.size() == all,
+			"belt: %d of %d items with their own use and end cues (loop, cancel) %s" % [rows.size(), all, wrong])
 	var src := FileAccess.get_file_as_string("res://scripts/match/utility_use.gd")
 	src += FileAccess.get_file_as_string("res://scripts/match/utility_more.gd")
 	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))

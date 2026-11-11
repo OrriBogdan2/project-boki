@@ -12,6 +12,11 @@ when they go and (fan) a hit; the drinks a loop, end and cancel; Skyfall a 5 s f
   twin_gate portal hum      warp_seed throbbing anomaly   gust_fan blade whirr   cloud_raft soft wind
   blight_flask bubbling     thorn_wall creaking vines     lookout_lantern hum and tick   bounty_banner drone
   skyfall_charge accelerating fuse beeps, then a boom     deep_draught / lostway_scroll / omen_draught drinks
+The rest (MORE_CUES) get a quiet loop while their use lasts and an end when it goes:
+  jump_pad springy hum / sag    scanner sonar blips / falling blip   hawk_whistle wingbeats / a returning cry
+  shield_cell shimmer / power-down   smoke hiss / thinning puff     stim heartbeat / a breath out
+  medkit, pilfer_pouch (raccoon chitter), hearth_lamp, revive_ember, shatter_charge (glass burst): an end
+  rift_key, chest_key: a key turning (start) and a chime as it is spent (end); toss_satchel a warm hum
 """
 import numpy as np
 import sfx_lib as S
@@ -389,6 +394,119 @@ def omen_cancel(i):
     return mix(S.ring([262, 311], 0.4, [0.1, 0.08], [0.4, 0.3]), S.sweep(500, 150, 0.3) * env(N(0.3), 0.01, 0.12) * 0.3)
 
 
+# ------------------------------------------------------------------ every item's run and end (sfx-utilities-2)
+# The rest of the items get a quiet loop while their use lasts and an end cue when it goes; the instant
+# ones an end a moment after the use. Their own random stream, so the cues above stay as they were.
+def medkit_end(i):
+    return mix(S.click(0.004, 1500, 5000, 0.002) * 0.6, at(knock(900, 0.12, 0.03) * 0.5, 0.02), at(S.chime(1046, 0.5, 0.25) * 0.4, 0.06))
+
+
+def pad_loop(i):
+    d = 1.6
+    return bed(d, tone(140, d, 0.01, 99) * 0.4 * lfo(d, 2.5, 0.6), bpf(noise(d), 300, 900) * 0.15 * lfo(d, 2.5, 0.8))
+
+
+def pad_end(i):
+    return lpf(mix(S.sweep(420, 120, 0.35) * env(N(0.35), 0.005, 0.15) * 0.6, S.kick(110, 60, 0.1, 0.02, 0.04) * 0.4), 4000)
+
+
+def scanner_loop(i):
+    d = 1.5
+    blips = [at(tone(1750, 0.06, 0.003, 0.03) * 0.5, 0.5 * k) for k in range(3)]
+    return bed(d, tone(220, d, 0.01, 99) * 0.15 * lfo(d, 2, 0.5), *blips)
+
+
+def scanner_end(i):
+    return mix(S.sweep(2100, 900, 0.25) * env(N(0.25), 0.003, 0.12) * 0.6, at(tone(700, 0.15, 0.005, 0.06) * 0.4, 0.2))
+
+
+def hawk_loop(i):
+    d = 2.0
+    flaps = [at(whoosh(0.18, 250, 1400, 0.03, 0.08) * 0.6, 0.5 * k) for k in range(4)]
+    return bed(d, bpf(noise(d), 600, 2200) * 0.12 * lfo(d, 1, 0.7), *flaps)
+
+
+def hawk_end(i):
+    cry = S.sweep(2600, 1700, 0.5) * env(N(0.5), 0.02, 0.25) * (1 + 0.25 * np.sin(2 * np.pi * 22 * np.arange(N(0.5)) / S.SR))
+    return mix(lpf(cry, 5000) * 0.7, at(whoosh(0.3, 400, 2000, 0.02, 0.12) * 0.4, 0.15))
+
+
+def shield_loop(i):
+    d = 2.0
+    return bed(d, tone(330, d, 0.01, 99) * 0.4 * lfo(d, 3, 0.3), tone(495, d, 0.01, 99) * 0.15 * lfo(d, 2, 0.5),
+               bpf(noise(d), 3000, 7000) * 0.05)
+
+
+def shield_end(i):
+    return mix(S.sweep(1300, 280, 0.45, curve=2.0) * env(N(0.45), 0.005, 0.2) * 0.6, at(S.ring([980, 1520], 0.4, [0.12, 0.08], [0.3, 0.2]), 0.05))
+
+
+def smoke_loop(i):
+    d = 2.0
+    return bed(d, S.pad(bpf(noise(d), 700, 4000), d)[:N(d)] * 0.6 * lfo(d, 1, 0.3), bpf(noise(d), 150, 500) * 0.25)
+
+
+def smoke_end(i):
+    return whoosh(0.9, 500, 3500, 0.02, 0.5) * 0.7
+
+
+def stim_loop(i):
+    d = 1.2
+    beats = [at(S.kick(75, 45, 0.1, 0.02, 0.05) * 0.8, 0.3 * k) for k in range(4)]
+    return bed(d, *beats, bpf(noise(d), 2500, 6000) * 0.03)
+
+
+def stim_end(i):
+    breath = bpf(noise(0.5), 500, 2200) * env(N(0.5), 0.12, 0.25) * 0.5
+    return mix(breath, at(S.kick(70, 40, 0.14, 0.02, 0.07) * 0.6, 0.05))
+
+
+def pilfer_end(i):
+    chitter = [at(tone(2400 + 300 * (k % 3), 0.04, 0.003, 0.02) * 0.4, 0.06 * k) for k in range(6)]
+    scurry = [at(S.click(0.003, 800, 3000, 0.002) * 0.4, 0.05 * k + 0.02) for k in range(8)]
+    coins = [at(S.ring([3600, 5400], 0.15, [0.04, 0.03], [0.3, 0.15]), 0.1 + 0.12 * k) for k in range(3)]
+    return mix(*chitter, *scurry, *coins)
+
+
+def lamp_end(i):
+    return mix(whoosh(0.4, 200, 1200, 0.02, 0.2) * 0.6, at(S.hiss(0.5, 2500, 7000, 0.02, 0.3) * 0.2, 0.05), at(S.chime(392, 1.0, 0.5) * 0.4, 0.1))
+
+
+def ember_end(i):
+    return mix(S.sweep(330, 990, 0.5, curve=2.0) * env(N(0.5), 0.05, 0.3) * 0.5, at(S.chime(1568, 0.9, 0.4) * 0.6, 0.35))
+
+
+def shatter_end(i):
+    glass = mix(*[at(S.ring([2300 + 700 * k, 3900 + 900 * k], 0.25, [0.06, 0.04], [0.3, 0.2]), 0.012 * k) for k in range(5)])
+    return lpf(mix(S.kick(120, 50, 0.2, 0.03, 0.08), S.click(0.006, 2000, 9000, 0.004), hpf(noise(0.3), 2500) * env(N(0.3), 0.003, 0.08) * 0.5, glass), 9000)
+
+
+def satchel_loop(i):
+    d = 2.0
+    return bed(d, tone(392, d, 0.01, 99) * 0.25 * lfo(d, 1, 0.5), tone(588, d, 0.01, 99) * 0.1 * lfo(d, 2, 0.6),
+               bpf(noise(d), 1500, 4000) * 0.04)
+
+
+def key_start(f):
+    return mix(S.rattle(0.12, 60, 2000, 7000, 0.5, 0.04) * 0.5, at(knock(f, 0.12, 0.03), 0.12), at(S.click(0.004, 1500, 6000, 0.002) * 0.7, 0.22))
+
+
+def key_end(f):
+    return mix(S.chime(f, 0.7, 0.3) * 0.6, at(S.hiss(0.3, 4000, 9000, 0.01, 0.15) * 0.25, 0.02))
+
+
+MORE_CUES = {
+    'medkit': {'end': medkit_end}, 'jump_pad': {'loop': pad_loop, 'end': pad_end},
+    'scanner': {'loop': scanner_loop, 'end': scanner_end}, 'hawk_whistle': {'loop': hawk_loop, 'end': hawk_end},
+    'shield_cell': {'loop': shield_loop, 'end': shield_end}, 'smoke': {'loop': smoke_loop, 'end': smoke_end},
+    'stim': {'loop': stim_loop, 'end': stim_end}, 'pilfer_pouch': {'end': pilfer_end},
+    'hearth_lamp': {'end': lamp_end}, 'revive_ember': {'end': ember_end}, 'shatter_charge': {'end': shatter_end},
+    'rift_key': {'start': lambda i: key_start(1450), 'end': lambda i: key_end(1175)},
+    'chest_key': {'start': lambda i: key_start(1900), 'end': lambda i: key_end(1568)},
+    'toss_satchel': {'loop': satchel_loop},
+}
+
+
 # item -> {kind: maker}. A start gets two takes (Sfx rotates them), the other kinds one.
 UTILITY_CUES = {
     'twin_gate': {'start': gate_start, 'loop': gate_loop, 'end': gate_end},
@@ -419,14 +537,19 @@ def main():
         S.takes_cat(name, fn, 2, 'cast')
     S.save_loop('belt_tonic_loop', tonic_loop(0), 'loop')
     S.save_loop('belt_armor_kit_loop', kit_loop(0), 'loop')
-    for item, kinds in UTILITY_CUES.items():
+    _write(UTILITY_CUES)
+    S.reseed(7015)
+    _write(MORE_CUES)
+
+
+def _write(cues):
+    for item, kinds in cues.items():
         for kind, fn in kinds.items():
             name = 'belt_%s_%s' % (item, kind)
             if kind == 'loop':
                 S.save_loop(name, fn(0), 'loop')
             else:
                 S.takes_cat(name, fn, 1 if kind == 'start' else 0, 'cast')
-
 
 if __name__ == '__main__':
     main()
