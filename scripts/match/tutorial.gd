@@ -326,6 +326,7 @@ func _spawn_key() -> void:
 
 ## Brings monsters in near the player for a step (only if none are left).
 func _foes(kinds: Array) -> void:
+	_cull_strays()
 	if m.mobs.any(func(x): return not x.dead):
 		return
 	for i in kinds.size():
@@ -333,8 +334,21 @@ func _foes(kinds: Array) -> void:
 		if at != Vector3.INF:
 			_tank(m.spawn_mob(kinds[i], at))
 
+## A monster that fell or was knocked off the player's island is out of every kit's reach: it goes, so a
+## new one comes.
+func _cull_strays() -> void:
+	var p := m.player
+	if not p.grounded:
+		return
+	var isl := m.world.island_of(p.pos.x, p.pos.z)
+	for mb in m.mobs:
+		if not mb.dead and m.world.island_of(mb.pos.x, mb.pos.z) != isl:
+			mb.dead = true
+			mb.visible = false
+
 ## Keeps a monster around for the shooting steps (another comes if it falls off).
 func _keep_foe(kind: String) -> void:
+	_cull_strays()
 	if m.mobs.any(func(x): return not x.dead) or int(m.time * 4.0) % 4 != 0:
 		return
 	var at := spot(5.5, randf() * TAU)
