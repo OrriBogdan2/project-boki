@@ -20,7 +20,6 @@ const GOLD := Color("ffc94a")
 const EMBER := Color("ff8a2a")
 const AEGIS := Color("ffcb4f")
 const GREEN := Color("7dffb0")
-const STAR_GOLD := Color("ffd25a")
 const SWIRL_T := 0.45
 const SWIRL_IN := 0.55         # the spin ring's inner edge as a share of the hit radius (its outer edge is the radius)
 ## the dash's after-image: a gold chevron wake left behind at chest height, how long each lasts (s), how
@@ -113,7 +112,7 @@ func _ready() -> void:
 	if not _own_hammer():
 		PinBjornWeapons.hammer(hammer, 1.25)
 	beacon = KitMeshes.inst(self, KitMeshes.pillar(0.22, 0.4, 5.0), KitShaders.mat("beam", GOLD, true))
-	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", STAR_GOLD, true))
+	glint = KitMeshes.inst(self, KitMeshes.quad(1.0, 1.0), KitShaders.mat("star", AimKit.hero_col(h), true))
 	KitShaders.param(glint, "white", 0.25)
 	var orbit_mesh := KitMeshes.band(ORBIT_IN, ORBIT_OUT, ORBIT_ARC, 0.0, 36)
 	orbit_trail = KitMeshes.inst(self, orbit_mesh, KitShaders.mat("streak", ORBIT_COL, true))
@@ -405,7 +404,7 @@ func aegis_block(at: Vector3) -> void:
 	aegis_hit = 1.0
 	WardenMood.poke(h.model)
 	var out := Vector3(at.x - h.pos.x, 0.15, at.z - h.pos.z).normalized()
-	h.m.fx.spark(at, out, Color("ffd25a"), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
+	h.m.fx.spark(at, out, AimKit.hero_col(h), 14, 9.0, 70.0, 0.25, 10.0, 1.2)
 	h.m.fx.flash(at, Color("ffc94a"), 0.8, 0.06)
 
 ## Broken: the plates crumble into chunks and dust.
@@ -415,7 +414,7 @@ func aegis_break(at: Vector3) -> void:
 	h.m.fx.burst(at + Vector3(0, 1.0, 0), PLATE_COL, 22, 7.0, 0.9, 16.0, 2.4)
 	h.m.fx.burst(at + Vector3(0, 0.8, 0), PLATE_EDGE, 16, 5.0, 1.0, 18.0, 2.0)
 	h.m.fx.dust(at, 16)
-	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, Color("ffd25a"), 14, 11.0, 160.0, 0.4, 14.0, 1.4)
+	h.m.fx.spark(at + Vector3(0, 1.0, 0), Vector3.UP, AimKit.hero_col(h), 14, 11.0, 160.0, 0.4, 14.0, 1.4)
 
 ## The push the raised wall gives, shown in front of it to everyone: a double chevron pointing outward that
 ## pulses along its reach (a gameplay area: foes that touch the wall are pushed this far); `flash` on a push.
