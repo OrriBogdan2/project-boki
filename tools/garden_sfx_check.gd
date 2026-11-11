@@ -7,6 +7,14 @@ extends RefCounted
 ##      swish per runner and one crowd for the first home; one fanfare and one huff
 ##   4. Seek: the sniffing loop starts once per hunt and stops with it; one fanfare and one huff
 ##   5. Spark Volley: one seed bat per hit; the spike call's crowd cheer; one fanfare and one huff
+##   6. Tumble: the rival's plans are set so each move decides one exchange; one clash in the deciding move per
+##      exchange, one push scuff per exchange won, one ring-out when the loser leaves the ring, fanfare and huff
+##   7. Echo Steps: the stone notes stay generated; one hit sparkle per hit, one miss per miss, one streak run at
+##      every cheer_every hits in a row (counted from the dance's own events), the start and the finish
+##   8. the Show Ring: a crowd cheer for each trick press and lure call, the judges' reveal once on the judging
+##      round and the crowd once after it, fanfare and huff
+##   9. the Relay Cup: per team, one clean or fumbled hand-off sound per hand-off (by the seconds it lost), one
+##      finish per team home, fanfare and huff
 ## Never touches the real save.
 
 const SETTLE_FRAMES := 900       # frames to wait at most for the home to build
@@ -50,6 +58,12 @@ func _names() -> void:
 			if not Sfx.ensure(p + tail):
 				silent.append(p + tail)
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
+	var cues: Array = ["tumble_push", "tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal",
+			"show_crowd", "relay_handoff", "relay_fumble", "relay_finish"]
+	for move in BaseTumble.rules()["moves"]:
+		cues.append("tumble_clash_" + move)
+	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring and Relay cue exists (%d)"
+			% cues.size())
 
 func _count(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))
@@ -110,6 +124,11 @@ func _games() -> void:
 	await _seek(home)
 	GardenSfx.heard.clear()
 	await _volley(home)
+	for game in [_tumble, _echo, _show, _relay]:
+		for k in home.kins:
+			k["rec"]["needs"]["energy"] = 90.0
+		GardenSfx.heard.clear()
+		await game.call(home)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
@@ -182,3 +201,120 @@ func _volley(home) -> void:
 	var bats := _count("garden_bat")
 	ok(hits > 0 and bats == hits, "volley: one seed bat per hit (%d bats, %d hits)" % [bats, hits])
 	_results("volley")
+
+func _tumble(home) -> void:
+	var tb: BaseTumble = home.htumble
+	var moves: Array = BaseTumble.rules()["moves"].keys()
+	tb.use()
+	var want := {}                # move -> exchanges it should decide
+	var pushes := 0
+	var out := false
+	var t := 0.0
+	while tb.run != null and t < SIM_S:
+		var r: BaseTumble.Run = tb.run
+		if r.state == "tell" and r.pick == "":
+			r.plan = moves[r.played % moves.size()]
+			var mine := BaseTumble.counter(r.plan)
+			tb._choose(moves.find(mine))
+			want[mine] = int(want.get(mine, 0)) + 1
+			pushes += 1
+		if r.state == "resolve" and r.grade == "":
+			_press(tb.bar, 0.0, tb)
+		out = r.out()
+		tb.tick(0.1)
+		t += 0.1
+	await _wait()
+	_countdown("tumble")
+	var got := moves.map(func(m): return _count("tumble_clash_" + m))
+	var need := moves.map(func(m): return int(want.get(m, 0)))
+	ok(not need.has(0) and got == need, "tumble: one clash in the deciding move per exchange, %s (%s, want %s)"
+			% [moves, got, need])
+	ok(_count("tumble_push") == pushes, "tumble: one push scuff per exchange won (%d of %d)"
+			% [_count("tumble_push"), pushes])
+	ok(out and _count("tumble_ringout") == 1, "tumble: one ring-out as the loser leaves the ring")
+	_results("tumble")
+
+func _echo(home) -> void:
+	var es: EchoSteps = home.hecho
+	es.use()
+	var r: EchoSteps.Run = es.run
+	var every := int(EchoSteps.rules()["cheer_every"])
+	var want := {"hit": 0, "miss": 0, "streak": 0}
+	var streak := [0, 0]
+	var t := 0.0
+	while not r.over() and t < SIM_S:
+		var nt := t + 0.05
+		if r.mine():
+			for i in r.pattern.size():
+				var pt := r.at(r.first + i)
+				if pt > t and pt <= nt:
+					var s: int = i % 4 if r.pattern[i] < 0 else r.pattern[i]
+					r.press(pt, s if r.round_i == 0 else (s + 1) % 4)        # all right, then all wrong
+		r.step(nt)
+		for e in r.events:
+			var side: int = e[1]
+			match String(e[0]):
+				"hit", "fixed":
+					streak[side] += 1
+					if e[0] == "hit":
+						want["hit"] += 1
+						want["streak"] += 1 if streak[side] % every == 0 else 0
+				"miss":
+					streak[side] = 0
+					want["miss"] += 1
+			es._show(e, nt)
+		r.events.clear()
+		t = nt
+	es._end(true)
+	var got := {"hit": _count("echo_hit"), "miss": _count("echo_miss"), "streak": _count("echo_streak")}
+	ok(want["hit"] > 0 and want["miss"] > 0 and want["streak"] > 0 and got == want,
+			"echo: one sparkle per hit, one miss per miss, one streak run every %d in a row (%s, want %s)"
+			% [every, got, want])
+	ok(_count("garden_go") == 1 and _count("garden_finish") == 1, "echo: the start and the finish once each")
+	ok(es.voices.size() == 4 and es.voices[0].stream is AudioStreamWAV, "echo: the four stone notes are generated")
+
+func _show(home) -> void:
+	var sr: ShowRing = home.hshow
+	sr.use()
+	var presses := 0
+	var t := 0.0
+	while sr.run != null and t < SIM_S:
+		var r: ShowRing.Run = sr.run
+		var due := false
+		for i in r.calls.size():
+			due = due or (r.phase == ShowRing.Run.Phase.BOND and r.calls[i] == "" and r.t >= r.lure_t(i))
+		if r.can_trick() or due:
+			_press(sr.bar, 0.0, sr)
+			presses += 1
+		sr.tick(0.1)
+		t += 0.1
+	await _wait()
+	_countdown("show")
+	ok(presses > 3 and _total("garden_cheer_") == presses, "show: a crowd cheer for each of %d presses (%d)"
+			% [presses, _total("garden_cheer_")])
+	ok(_count("show_reveal") == 1 and _count("show_crowd") == 1, "show: the judges' reveal and the crowd once each")
+	_results("show")
+
+func _relay(home) -> void:
+	var rc: BaseRelay = home.hrace.relay
+	rc.use()
+	var lost := [[], []]
+	var t := 0.0
+	while rc.run != null and t < SIM_S:
+		if rc.run.can_press():
+			_press(rc.bar, 0.0 if rc.run.grades.is_empty() else 0.9, rc)      # one great hand-off, one missed
+		lost = rc.run.lost.duplicate(true)
+		rc.tick(0.1)
+		t += 0.1
+	await _wait()
+	_countdown("relay")
+	var clean_s := float(BaseRelay.rules()["handoff"]["good"])
+	var want := [0, 0]
+	for team in lost:
+		for s in team:
+			want[0 if float(s) <= clean_s else 1] += 1
+	var got := [_count("relay_handoff"), _count("relay_fumble")]
+	ok(want[0] > 0 and want[1] > 0 and got == want, "relay: clean and fumbled hand-offs each sound once (%s, want %s)"
+			% [got, want])
+	ok(_count("relay_finish") == 2, "relay: one finish for each team home (%d)" % _count("relay_finish"))
+	_results("relay")
