@@ -17,6 +17,7 @@ const CHECKS := {
 	# the Ways Out strip and Gate prompt
 	"--ways-out-hud-check": ["res://tools/ways_out_hud_check.gd", "ways_out_hud_check", null],
 	"--ways-out-map-ui-check": ["res://tools/ways_out_map_ui_check.gd", "ways_out_map_ui_check", null],
+	"--map-names-check": ["res://tools/map_names_check.gd", "map_names_check", null],     # full map names: no overprint
 	"--ways-out-map-ui-shots": ["res://tools/ways_out_map_ui_shots.gd", "ways_out_map_ui_shots", null],      # GPU
 	"--ways-out-hud-shots": ["res://tools/ways_out_hud_shots.gd", "ways_out_hud_shots", null],      # GPU
 	"--ways-out-vfx-check": ["res://tools/ways_out_vfx_check.gd", "ways_out_vfx_check", null],      # 0051 seat looks

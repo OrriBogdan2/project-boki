@@ -801,8 +801,7 @@
 "scripts/ui/full_map.gd": {
 "long_line": 34,
 "nested_ternary": 4,
-"semicolon": 10,
-"shadow": 1
+"semicolon": 10
 },
 "scripts/ui/gear_panel.gd": {
 "long_line": 2
