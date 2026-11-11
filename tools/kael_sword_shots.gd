@@ -36,7 +36,6 @@ func run(main: Node, mode: String = "check") -> void:
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	_stage(main)
-	WardenGlb.set_model("juggernaut", true)
 	await _measure()
 	if mode == "shots":
 		DirAccess.make_dir_recursive_absolute(out)

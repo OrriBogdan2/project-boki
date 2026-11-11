@@ -13,8 +13,6 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
-	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
-	"warden_models": {},
 	# how keys behave (Controls)
 	"cast_on_press": true, "dash_to_cursor": false, "crouch_toggle": false, "move_readout": false,
 	# the aiming reticle (Reticle): shape and colour ids, size factor, opacity, dark outline
@@ -33,7 +31,7 @@ const DEFAULTS := {
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
-const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
+const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake", "warden_models"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
 ## detail for speed, Ultra pushes draw distance, shadows and level of detail further. A preset sets the
