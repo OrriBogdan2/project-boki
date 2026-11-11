@@ -47,6 +47,9 @@ rules beat the source data (DECISIONS line 2; the burst cap in SERVER_UPDATE6 is
 
 ### Per Hunter
 
+TTK p90 below was taken one rank low (floor index; fixed to nearest rank after the run): at 100+ knocks a Hunter that is one
+sample under the true p90, well inside the seed noise.
+
 | Hunter | Win % (mirrors out) | Rounds | Draws | TTK median s | TTK p90 s |
 |---|---|---|---|---|---|
 | Vex | 58 | 264 | 4 | 8.5 | 22.0 |

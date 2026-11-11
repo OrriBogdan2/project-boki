@@ -7,6 +7,7 @@ Prints markdown: the 12x12 win-rate matrix, each Hunter's totals (win rate, time
 share by slot, and the outliers (a Hunter outside 40-60%, a matchup past 80/20, a slot over 60%).
 """
 import json
+import math
 import statistics
 import sys
 from collections import defaultdict
@@ -105,7 +106,7 @@ def report(rounds):
         overall[h] = w / n if n else 0.0
         t = sorted(ttk[h])
         med = statistics.median(t) if t else 0.0
-        p90 = t[int(0.9 * (len(t) - 1))] if t else 0.0
+        p90 = t[math.ceil(0.9 * len(t)) - 1] if t else 0.0      # nearest rank
         out.append("| %s | %s | %d | %d | %.1f | %.1f |" % (NAME[h], pct(overall[h]), n, draws[h], med, p90))
     out += ["", "## Damage share by slot (%% of all damage the Hunter dealt to the other Hunter)", "",
             "| Hunter | " + " | ".join(SLOTS) + " |", "|---" * (len(SLOTS) + 1) + "|"]
