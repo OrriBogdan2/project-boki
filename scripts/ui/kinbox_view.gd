@@ -291,7 +291,6 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 			var l := UI.label("free", 12, Color(UI.GOOD, 0.5))
 			l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER; l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 			c.add_child(l)
-		c.tooltip_text = "Room on the farm" if where == "farm" else "Empty: drop a Boki here"
 		return c
 	var sp: Dictionary = Data.KIN[rec["species"]]
 	var stack := Control.new()

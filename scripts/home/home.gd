@@ -4767,9 +4767,7 @@ func _nook_tile(o: Dictionary, egg_in: bool) -> Control:
 	mi.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	st.add_child(mi)
 	tv.add_child(st)
-	var tags := Mutations.tags(o)
-	t.tooltip_text = "%s the %s%s  ·  Lv %d\n%s\nIVs %d/155 (%s)" % [o["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(o), int(o.get("level", 1)),
-		"Ready to pair" if why == "" else why, Care.iv_total(o), Care.iv_grade(o)[0]]
+	t.tooltip_text = "Ready to pair" if why == "" else why      # (name, level and IVs are on the tile)
 	return t
 
 ## The side panel for one kin: who it is, then its IVs as a chart, rows and the judge's word.

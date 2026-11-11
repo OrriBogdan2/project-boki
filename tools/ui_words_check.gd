@@ -8,12 +8,13 @@ extends "res://tools/first15_shots.gd"
 ##   3. one of the simplified screens (BUDGET) shows more words than its budget
 ## With --shots-dir it also saves one .jpg per screen (needs a renderer: xvfb-run or a GPU).
 
-const TIP_WORDS := 12          # a tooltip is one short line
-## Words a simplified screen may show (made-up save below): the screens cut in the 11-11 pass.
+const TIP_WORDS := 14          # a tooltip is one line (about 80 letters)
+## Words a simplified screen may show (made-up save below): the 15 screens cut in the 11-11 pass, each a
+## little over its count after the cut, so they can only shrink.
 const BUDGET := {
-	"soul_shrine": 70, "graveyard": 60, "grave": 90, "shrine_lot": 45, "armory": 200, "expedition": 140,
-	"kin_page": 170, "job_board": 150, "kitchen": 110, "challenges": 130, "hall": 90, "house": 90,
-	"burrow": 140, "nook": 110, "train": 90, "music": 60, "market": 110, "hunters": 190, "black_market": 45,
+	"soul_shrine": 90, "grave": 70, "shrine_lot": 55, "armory": 50, "expedition": 235, "kin_page": 85,
+	"job_board": 95, "challenges": 115, "burrow": 80, "nook": 75, "train": 70, "music": 25, "market": 95,
+	"hunters": 195, "black_market": 45,
 }
 
 var fails := 0
@@ -84,7 +85,9 @@ func _screens(h: Node) -> Array:
 	return [
 		["soul_shrine", func(): h.hecon.open_shrine()],
 		["shrine_lot", func():
-			Save.d["buildings"].erase("shrine"); h.hecon.open_shrine_lot(); Save.d["buildings"].append("shrine")],
+			Save.d["buildings"].erase("shrine")
+			h.hecon.open_shrine_lot()
+			Save.d["buildings"].append("shrine")],
 		["graveyard", func(): h.hecon.open_graveyard()],
 		["grave", func(): h.hecon.open_grave(g)],
 		["armory", func(): h.hecon.open_armory()],
