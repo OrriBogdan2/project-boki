@@ -496,7 +496,7 @@ func _ready_rest() -> void:
 				get_tree().create_timer(0.3).timeout.connect(func():
 					var before := sc.scroll_vertical
 					if "--no-keep-scroll" in dbg: set_meta("no_keep_scroll", true)
-					Save.d["exp_rolling"] = not Save.d.get("exp_rolling", false)
+					Save.d["exp_mode"] = "solos" if _exp_mode() == "trios" else "trios"
 					_open_expedition()
 					get_tree().create_timer(0.5).timeout.connect(func():
 						var sc2 := _panel_scroll()
@@ -3486,15 +3486,13 @@ func _open_expedition() -> void:
 		right.add_child(tc)
 	right.add_child(UI.spacer(2))
 	right.add_child(UI.section("Match"))
-	right.add_child(UI.label("Extraction: trios, 7 squads of three", UI.T_SMALL, UI.MUTED))
-	# the session: today's fixed match, or a rolling 30-minute session you join part-way through
-	# (scripts/match/rolling.gd; the fixed match stays the default until the owner switches it)
-	var rolling_on: bool = Save.d.get("exp_rolling", false)
-	var stabs := UI.tabs(["Fixed match", "Rolling session"], "Rolling session" if rolling_on else "Fixed match", func(nm): Save.d["exp_rolling"] = nm == "Rolling session"; _open_expedition(), {}, 150)
-	for tb in stabs.get_child(0).get_children():
-		tb.tooltip_text = "Everyone drops together; the islands fall after about 10 minutes" if String(tb.get_meta("tab")) == "Fixed match" else "A 30-minute session already under way: you drop in with the next wave, wherever it's at"
-	right.add_child(stabs)
-	right.add_child(UI.label("30 minutes, waves every 2-3 minutes; late arrivals start at a higher level" if rolling_on else "Everyone drops together; about 10 minutes", UI.T_SMALL, UI.MUTED))
+	# the queue: trios or solos (Data.MODES); bots fill the places nobody took
+	var mode := _exp_mode()
+	var pick_mode := func(nm: String): Save.d["exp_mode"] = nm.to_lower(); _open_expedition()
+	right.add_child(UI.tabs(Data.MODES.map(func(x): return String(x).capitalize()), mode.capitalize(), pick_mode, {}, 150))
+	var mo := Data.mode_opts(mode)
+	var who := "%d squads of three" % mo["teams"] if mo["squad"] > 1 else "%d hunters, each on their own" % mo["teams"]
+	right.add_child(UI.label(who + "; everyone drops together", UI.T_SMALL, UI.MUTED))
 	# the raid condition this drop will have (rolled with the match's seed: RaidLook)
 	if exp_seed == 0: exp_seed = randi() | 1
 	var rc := RaidLook.pick(Settings.demo_opts({}), exp_seed)
@@ -3511,6 +3509,11 @@ func _open_expedition() -> void:
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
+
+## The expedition mode picked on the panel (Data.MODES; trios until you pick another).
+func _exp_mode() -> String:
+	var mode := String(Save.d.get("exp_mode", "trios"))
+	return mode if mode in Data.MODES else "trios"
 
 ## The full kit card for your archetype and Boki (KitCard), over the expedition panel.
 func _open_kit_card() -> void:
@@ -3624,11 +3627,7 @@ func _start_match() -> void:
 		if not (kk as Dictionary).is_empty() and KinBox.is_boxed(kk): KinBox.bring_out(kk)
 	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	# about 20 hunters a match, whatever the squad size (your squadmates are bots)
-	var o := {"teams": int(ceil(Data.MATCH_PLAYERS / 3.0)), "squad": 3}
-	o["total"] = Data.MATCH_PLAYERS
-	if Save.d.get("exp_rolling", false):
-		o["rolling"] = true      # the session sizes its own waves (Rolling.plan)
+	var o := Data.mode_opts(_exp_mode())      # its squads and hunters (bots fill the places nobody took)
 	o["tier"] = exp_tier
 	o["kit_items"] = Equal.take_loadout(exp_tier)      # gloves and boots from the armory ride with you (capped by tier)
 	o["belt_items"] = Equal.take_belt(exp_tier)         # and the utility you picked
