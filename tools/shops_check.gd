@@ -5,7 +5,9 @@ extends RefCounted
 ## source utility on sale somewhere except the Revive Ember; no keys, shards or match-only items are
 ## ever for sale; the full map's legend has a row for every vendor and every area; a bot with spare
 ## gems buys; the source utilities (docs/SOURCE_UTILITIES.md) each work and cost what the doc says;
-## an online purchase goes buyer -> host -> every game. Prints SHOPS PASS/FAIL.
+## an online purchase goes buyer -> host -> every game; the shop panel shows one row per item (icon, name,
+## live line, price; greyed with the missing gems when short) inside the safe margin at five window
+## sizes. Prints SHOPS PASS/FAIL.
 
 var main: Node
 var fails := 0
@@ -33,6 +35,7 @@ func run(main_node: Node) -> void:
 	_buying(m)
 	_items(m)
 	_legend(m)
+	await _panel(m)
 	await _bot(m)
 	await _online()
 	print("SHOPS DONE, %d checks, failures: %d" % [n, fails])
@@ -311,6 +314,88 @@ func _legend(m: Match) -> void:
 	ok("every legend row has a name and a line of text", texted)
 	var stormy := areas.filter(func(r): return String(r["text"]).contains("boots"))
 	ok("an area's lean comes from its loot data (the storm lands lean to boots)", stormy.size() == 1)
+
+# ------------------------------------------------------------------ the panel
+const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440), Vector2i(2560, 1080),
+		Vector2i(1024, 640)]
+
+func _panel(m: Match) -> void:
+	var h: Hunter = m.player
+	var v := _vendor_of(m, "perks")
+	UtilityBelt.clear(h)
+	h.gems = 60
+	Shops.use(m, h, {"vendor": v})
+	var pc: PanelContainer = m.get_meta("shops")["panel"]
+	await main.get_tree().process_frame
+	ok("the header names the vendor and its fixed set", _texts(pc).has(String(ShopStock.theme("perks")["name"]))
+			and _texts(pc).has("%s, the same every match" % String(ShopStock.theme("perks")["tag"])))
+	ok("the footer shows the use key from Settings.key_cap", _texts(pc).has(Settings.key_cap("interact")))
+	var bad: Array = []
+	var short := 0
+	for i in (v["rows"] as Array).size():
+		var why := _row_problem(m, pc, v, i)
+		if why != "": bad.append(why)
+		if Shops.why_not(h, v["rows"][i]) == ShopStock.NO_GEMS: short += 1
+	var mixed := short > 0 and _buttons(pc) > 0
+	ok("every row: icon, name, one live line, price or 'Need N' greyed", bad.is_empty() and mixed,
+			"%d short, %d buyable %s" % [short, _buttons(pc), str(bad.slice(0, 3))])
+	h.gems = 500
+	ShopPanel.refresh(m, pc, v)
+	ok("more gems: every row is a Buy button again", (v["rows"] as Array).size() == _buttons(pc))
+	var tonic_v := _vendor_of(m, "armor")
+	var tonic := _row(tonic_v, "tonic")
+	Shops.use(m, h, {"vendor": tonic_v})
+	pc = m.get_meta("shops")["panel"]
+	Shops.buy(m, h, tonic_v, tonic)
+	var line := pc.find_child("Row%d" % tonic, true, false).find_child("Line", true, false) as Label
+	ok("a sale updates the row's line (live data)", line.text.begins_with("You have 1."), line.text)
+	var root := main.get_tree().root
+	var was := root.size
+	for win: Vector2i in WINDOWS:
+		root.size = win
+		await main.get_tree().process_frame
+		ShopPanel.refresh(m, pc, tonic_v)
+		await main.get_tree().process_frame
+		var vs := pc.get_viewport_rect().size
+		var m_px := ShopPanel.SAFE_MARGIN
+		var safe := Rect2(Vector2(m_px, m_px), vs - Vector2(m_px, m_px) * 2.0)
+		var r := pc.get_global_rect()
+		var clear := r.end.y <= vs.y - ShopPanel.BELT_CLEAR + 0.5
+		ok("%dx%d: the panel is inside the safe area and above the belt" % [win.x, win.y],
+				safe.encloses(r) and clear, "%s in %s" % [r, vs])
+	root.size = was
+	Shops.close(m)
+
+## "" when row i of the open panel reads right, else what is wrong with it.
+func _row_problem(m: Match, pc: PanelContainer, v: Dictionary, i: int) -> String:
+	var h: Hunter = m.player
+	var row: Dictionary = v["rows"][i]
+	var card := pc.find_child("Row%d" % i, true, false)
+	if card == null: return "row %d missing" % i
+	var line := card.find_child("Line", true, false) as Label
+	var price := card.find_child("Price", true, false) as Control
+	var name_ok := _texts(card).has(ShopStock.name_of(row))
+	var icon_n := card.find_children("*", "Control", true, false).filter(func(c): return c is Icons.Glyph).size()
+	if not name_ok or icon_n != 1 or line == null or price == null: return "row %d parts" % i
+	if line.text != ShopStock.line_of(h, row) or line.autowrap_mode != TextServer.AUTOWRAP_OFF:
+		return "row %d line" % i
+	var why := Shops.why_not(h, row)
+	var greyed: bool = (line.get_parent() as Control).modulate == ShopPanel.GREY
+	if why == "":
+		var priced := price is Button and (price as Button).text == "%d" % ShopStock.price(h, row)
+		return "" if priced and not greyed else "row %d price" % i
+	var need := "Need %d" % (ShopStock.price(h, row) - h.gems)
+	var want := need if why == ShopStock.NO_GEMS else why
+	return "" if greyed and _texts(price).has(want) else "row %d '%s' not shown greyed" % [i, want]
+
+func _texts(n: Node) -> Array:
+	var out: Array = []
+	for c in n.find_children("*", "Label", true, false):
+		out.append((c as Label).text)
+	return out
+
+func _buttons(pc: Node) -> int:
+	return pc.find_children("Price", "Button", true, false).filter(func(b): return not (b as Button).disabled).size()
 
 # ------------------------------------------------------------------ bots
 func _bot(m: Match) -> void:
