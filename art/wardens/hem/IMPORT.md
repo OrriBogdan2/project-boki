@@ -22,3 +22,10 @@ Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/arc
 
 Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
 through the chest; the bow passes through her open left hand.
+
+**walk_f / run_f (anim pilot slice3, 11-11):** rebuilt by retargeting Meshy animation-library actions (her pilot2 Meshy rig
+task), loops rebuilt, sole planted at loco speed. Blind Fable 5.2 judge (pilot1 rubric): walk 4.17 vs 3.67 current, run
+4.17 vs 3.67. Licence: Meshy API output on the paid plan, commercial use allowed under Meshy's terms. Judged on the pre-appeal
+body; ported onto appeal-b (legs x1.146) with `tools/art1/gait_port.py`: same joint rotations, hips height x1.146, time
+x1.19 walk / x1.16 run so the planted foot still covers walk_speed/run_speed (FK: 2.15 / 4.24 m/s vs 2.12 / 4.27 before).
+Idle unchanged (owned by the pilot4 idle job).

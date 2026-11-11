@@ -40,3 +40,8 @@ Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUD
 `x_breath` leaf (eeb4f3ae4, e557cd71e). The 0.24.4 merge copied the 41 clips of that glb (spring tracks included)
 onto the swapped body by node name (same skeleton: no rest drift) and added `x_breath` with kael_retarget.py's
 `add_breath` at her own spot (0.283 m over hips) and chest band (1.0-1.32 m up, |x| under 0.17 m): 3363 vertices.
+
+**Anim slice3 (11-11), no change:** idle candidates retargeted from Meshy library actions 338, 335, 249 and 12 (Meshy API
+on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
+blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
+a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.
