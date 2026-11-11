@@ -232,6 +232,8 @@ Fixes made: 1. The punch recovery is 0.6 s (`content/archetypes/dolm.json` `lmb.
 disagrees; the rest is unsettled.
 Suggestions (not built): whether a tapped LMB inside the recovery should buffer is not shown anywhere; the answer
 would also settle the same row on the boulder.
+## Impact weight (parity-reel "by eye")
+The source's rocks burst in fire and its punch lands with a flash; ours read thin. `DolmImpact` (scripts/arch/kits/dolm_impact.gd) lays Tenzo's ability colour (blue, DECISIONS 2026-11-08) on top of each hit's own fire: two flashes, two ground rings and a spray of chips, sized by the hit's damage (weight = dmg / 30, at least 0.25). Used by the boulder landing, a launched rock's burst, the punch's hit (or lane end), and every slam (tap, hop, dive, glide). Dashes and their landings (Rock Hop, air dash) get none. Each Stone Row and Tetraform rock also breaks the ground in a blue ring and flash (`DolmImpact.rise`); the R layout is unchanged. Asserted by `--dolm-combo-check` ("impact:" rows); strips `--breah-shots --breah-only=impacts`.
 
 ## Combinations (`--dolm-combo-check`, tools/breah_combo_check.gd; placement in `--zone-check`)
 | Combo | Result | Asserted by |
