@@ -26,3 +26,10 @@ static func off_dir(cam: Camera3D, sz: Vector2, at: Vector3, me: Vector3) -> Vec
 		return Vector2.ZERO
 	var d := (tp - sz * 0.5) if not behind else (sz * 0.5 - tp)
 	return d.normalized() if d.length() > 0.1 else Vector2.UP
+
+## Where an edge arrow sits for the unit screen direction `d`: on a box round the play area's middle, under the
+## tutorial panel and the strip, above the ability bar, 70 px in from the sides.
+static func edge_point(sz: Vector2, d: Vector2) -> Vector2:
+	var hx := sz.x * 0.5 - 70.0
+	var hy := sz.y * 0.24
+	return Vector2(sz.x * 0.5, sz.y * 0.47) + d * minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))

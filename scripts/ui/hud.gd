@@ -334,6 +334,7 @@ func _draw_world_labels() -> void:
 	LabelCull.begin()        # (item 94: anything off screen or far away isn't laid out)
 	ReviveHud.world_labels(self)       # deathboxes and revive beacons
 	HeartHud.world_labels(self)        # the Heart, its Heartspark and Gate
+	WaysOutPins.draw(self)             # the seats out and the Blight's edge, from afar
 	BondHud.draw(self)       # whoever carries your Boki: an arrow to them; and the Tracked chip if that is you
 	# the tutorial's marker: a pin over what to go to, or an arrow at the screen edge, with the distance
 	if m.tut and m.tut.target != Vector3.INF and m.player and not m.player.out:
@@ -888,11 +889,7 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		var gp := cam.unproject_position(at + Vector3(0, 0.05, 0))      # a ring on the ground under it
 		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
-		# kept inside the play area: under the tutorial panel, above the ability bar
-		var ctr := Vector2(sz.x * 0.5, sz.y * 0.47)
-		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
-		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
-		var edge := ctr + d * t + d * bob * 0.5
+		var edge := MarkerDir.edge_point(sz, d) + d * bob * 0.5
 		var perp := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 44.0, edge - d * 12.0 + perp * 28.0, edge - d * 12.0 - perp * 28.0]), Color(0, 0, 0, 0.5))
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
