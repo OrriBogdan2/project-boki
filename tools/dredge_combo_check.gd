@@ -139,8 +139,8 @@ func _hook_hold() -> void:
 	)
 	await ak.done(m)
 
-## Item 33: through the wind-up an outline of the slam's area shows on the ground, for everyone, and it is the exact cone
-## the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
+## Item 33: through the wind-up an outline of the slam's area shows on the ground, for everyone, and it is the
+## exact cone the slam hits: a foe just inside its edge is hit, one just outside is not, and only on the slam frame.
 func _slam_tell() -> void:
 	var r: Array = ak.setup("dredge", 6.0, "", true)
 	var m: Match = r[0]
