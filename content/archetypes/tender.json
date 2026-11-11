@@ -95,8 +95,8 @@
 		"wind_move": 0.5,
 		"wind_lane": 6.0,
 		"seed": {
-			"speed": 30.0,
-			"range": 14.0,
+			"speed": 36.0,
+			"range": 15.3,
 			"hit_r": 0.7,
 			"dmg": 9.0,
 			"build": 2.0,

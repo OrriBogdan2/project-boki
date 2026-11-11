@@ -172,6 +172,16 @@ Fixes made: none. No pair has a source frame or line that disagrees with ours. T
 wiki's Railgun reads "Charge for 0.8s"; ours is the footage's 0.6 s cast bar (a later patch than the clip, or the
 level-9 hunter).
 
+## Projectile
+
+Every ability projectile, thrown object and travelling zone (basic attacks are in the LMB rows). Ours is read from the content JSON and the kit; the source is [D] data or [F] footage at 5 fps (one frame = 0.2 s, one body height = 1.8 m). 
+
+| Ability | Launch speed | Max range | Travel at max range | Gravity / arc | Stops at the cursor | Source | Verdict |
+|---|---|---|---|---|---|---|---|
+| RMB Coin Blast | 26 m/s (`rmb.burr.speed`) | 10.5 m | 0.40 s | a slight lob: up 0.6 m, down onto the lane's end | no, the full lane past the cursor; sticks to the first foe or wall | [F] about 15 body heights a second (27 m/s), about 6 (10.8 m), 0.4 s, slight arc, fixed lane | match |
+| E Palm Lance | beam, no flight (fires after the 0.6 s charge) | 18 m (`e.range`) | 0 s | none | no, a fixed line through terrain | [F] a fixed long line, 10+ body heights (18+ m), well past the cursor | match |
+| X Cinderfall | a shell that falls for 1.6 s (`x.delay`) | 14 m | 1.6 s whatever the distance | straight up, then down | yes: lands on the cursor, clamped to 14 m | [F] cast to impact 1.6 s in both casts, at the cursor, clamped to a long range (no number) | match |
+
 ## Small mechanics
 | Mechanic | Source | Footage | Built and checked |
 |---|---|---|---|
