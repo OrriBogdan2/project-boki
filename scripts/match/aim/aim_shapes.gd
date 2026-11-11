@@ -128,14 +128,13 @@ static func _cone(g: AimGeo, e: Dictionary) -> void:
 static func _circle(g: AimGeo, e: Dictionary) -> void:
 	var ctr: Vector2 = e["at"]; var r := float(e["r"])
 	var lw := _lw(e)
-	g.disc(ctr, r, _fill(e, 0.5), _fill(e, 1.2))
-	if e["dashed"]:
-		var segs := maxi(8, int(r * TAU / 0.6))
-		for i in segs:
-			var a0 := TAU * i / segs
-			g.ring(ctr, r, lw, _rim(e), a0, a0 + TAU / segs * 0.6)
+	var band := float(e["band"])
+	if band > 0.0:
+		g.disc(ctr, r, _fill(e, 0.2))               # a thin ring, its outer edge on r, a faint tint inside
+		g.ring(ctr, r - band * 0.5, band, _rim(e))
 	else:
-		g.ring(ctr, r, lw, _rim(e))
+		g.disc(ctr, r, _fill(e, 0.5), _fill(e, 1.2))
+		_circle_edge(g, e, ctr, r, lw)
 	var f := float(e["fill"])
 	if f > 0.0:
 		g.disc(ctr, r * f, _fill(e, 1.2), _fill(e, 2.2))
@@ -153,6 +152,15 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 	var pd: Vector2 = e["pointer"]
 	if pd != Vector2.ZERO:
 		g.chevron(ctr + pd * (r + 0.32), pd, 0.3, lw * 1.4, _hot(e))     # a rim chevron: which way it will throw or drag
+
+static func _circle_edge(g: AimGeo, e: Dictionary, ctr: Vector2, r: float, lw: float) -> void:
+	if e["dashed"]:
+		var segs := maxi(8, int(r * TAU / 0.6))
+		for i in segs:
+			var a0 := TAU * i / segs
+			g.ring(ctr, r, lw, _rim(e), a0, a0 + TAU / segs * 0.6)
+	else:
+		g.ring(ctr, r, lw, _rim(e))
 
 static func _arc_wall(g: AimGeo, e: Dictionary) -> void:
 	var ctr: Vector2 = e["center"]; var u: Vector2 = e["dir"]

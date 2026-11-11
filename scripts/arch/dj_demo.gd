@@ -28,7 +28,7 @@ const ANIM := {
 	"jug_slam": ["juggernaut", "greatsword", [0.6, 0.85, 1.08, 1.12, 1.25, 1.6]],
 	"jug_riposte": ["juggernaut", "greatsword", [0.6, 1.0, 1.16, 1.22, 1.32, 1.55]],
 	"jug_lunge": ["juggernaut", "greatsword", [0.65, 1.0, 1.31, 1.42, 1.5, 1.8]],
-	"jug_meteor": ["juggernaut", "greatsword", [0.53, 0.62, 0.7, 0.82, 0.98, 1.3]],
+	"jug_meteor": ["juggernaut", "greatsword", [0.55, 0.74, 0.79, 0.86, 0.94, 1.15]],
 	"jug_dash": ["juggernaut", "greatsword", [0.55, 0.64, 0.74, 0.9, 1.2]],
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],
 	"jug_pull": ["juggernaut", "greatsword", [0.82, 0.92, 1.0, 1.08, 1.16, 1.32]],
@@ -157,13 +157,13 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.bot_hold["rmb"] = 0.9
 				K.press_rmb()
 		"jug_meteor":
-			if at(t, dt, 0.4):
-				P.teleport(Vector3(D.pos.x - 4.0, P.pos.y + 2.5, D.pos.z))
-				P.grounded = false
-				P.vel = Vector3.ZERO
-			if at(t, dt, 0.5):
-				K.ch_rmb = 1.0
-				K.cd["rmb"] = 0.0
+			# a real jump, RMB near its top: the hang, the straight drop, the hit circle just ahead of him
+			if at(t, dt, 0.3):
+				P.teleport(Vector3(D.pos.x - 2.4, D.pos.y, D.pos.z))
+				P.inp["aim"] = D.pos + Vector3(0, 0.9, 0)
+			if at(t, dt, 0.4): P.do_jump()
+			if at(t, dt, 0.72):
+				K.cd["air"] = 0.0
 				K.press_rmb()
 		"jug_dash":
 			if at(t, dt, 0.5):

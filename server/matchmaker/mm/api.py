@@ -1,4 +1,4 @@
-"""The HTTP side: GET /health, POST /queue, GET/DELETE /queue/<ticket>. JSON in, JSON out."""
+"""The HTTP side: GET /health, POST /queue, GET/DELETE /queue/<ticket>, POST /queue/<ticket>/pick. JSON in, JSON out."""
 import json
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -8,7 +8,8 @@ from .core import Matchmaker
 from .log import log
 
 MAX_BODY = 4096          # bytes; a queue request is a few names
-STATUS = {"version": 409, "mode": 400, "bad_request": 400}
+STATUS = {"version": 409, "mode": 400, "bad_request": 400, "no_match": 404,
+          "unknown": 400, "loading": 409, "turn": 409, "taken": 409}
 
 
 def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/var/lib/boki/feedback.jsonl") -> ThreadingHTTPServer:
@@ -28,6 +29,8 @@ def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/v
         def do_POST(self):
             if self.path == "/feedback":
                 return self._feedback()
+            if self.path.endswith("/pick"):
+                return self._pick()
             if self.path != "/queue":
                 return self._reply(404, {"error": "not_found"})
             body = self._json_body()
@@ -46,6 +49,14 @@ def make_server(core: Matchmaker, host: str, port: int, feedback_path: str = "/v
                 return self._reply(404, {"error": "not_found"})
             core.cancel(ticket)
             self._reply(200, {"state": "gone"})
+
+        def _pick(self):
+            ticket = _ticket_id(self.path[:-len("/pick")])
+            body = self._json_body()
+            if not ticket or body is None:
+                return self._reply(400, {"error": "bad_request"})
+            out = core.pick(ticket, str(body.get("hunter", "")))
+            self._reply(STATUS.get(out.get("error"), 200), out)
 
         def _feedback(self):
             body = self._json_body(feedback.MAX_FEEDBACK)

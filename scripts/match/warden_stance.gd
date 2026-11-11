@@ -174,9 +174,9 @@ func carry_free_l() -> float:
 func carry_free_r() -> float:
 	return _carry_free_r * carry_w
 
-## How far a whole-body move (downed, gliding, a ledge, a dodge, a trick...) takes over from the stance.
+## How far a whole-body move (gliding, a ledge, a dodge, a trick...) takes over from the stance.
 func _whole_body(a: HunterAnim) -> float:
-	var off := maxf(maxf(a.down_k, a.glide_k), maxf(a.dive_k, a.ledge_k))
+	var off := maxf(a.glide_k, maxf(a.dive_k, a.ledge_k))
 	off = maxf(off, maxf(maxf(a.revive_k, a.act_k), maxf(a.base_k, a.stomp_k)))
 	off = maxf(off, maxf(maxf(a.dash_k, a.emote_k), a.stun_k))
 	if a.roll_t >= 0.0 or a.trick != "":
