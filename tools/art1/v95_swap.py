@@ -141,7 +141,7 @@ def bake():
                             shape_method="CONCAVE")
     bpy.ops.object.mode_set(mode="OBJECT")
     tex = int(SPEC.get("tex", 2048))
-    img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX)
+    img = BW.bake_colour(high, low, tex, float(SPEC.get("cage", CAGE)), float(SPEC.get("ray", RAY)), MARGIN_PX)
     body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
     # the kept parts: the old atlas onto their new UVs, on an image of their own, laid over the body's
     src = old.data.materials[0].node_tree.nodes
