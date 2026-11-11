@@ -8,6 +8,8 @@ extends RefCounted
 ##   6. extracting brings the carry-out Boki home (Game.apply_result)
 ##   7. stealing from a deathbox: one stolen slot, at most 4 Boki on one hunter
 ##   8. bots bring two
+##   9. three one-line first-time hints, once per save each: the swap key when the lead's summon is on cooldown,
+##      the first claim (rides home, can be stolen), a full slot that points at a teammate
 ## --carry-two-clip --shots-dir=<dir>: the swap and the carry-out HUD as numbered JPGs (frame_0000.jpg ...) for an MP4.
 
 var bad := 0
@@ -29,6 +31,9 @@ func run(main: Node, mode := "") -> void:
 	m.set_process(false)
 	_step(0.5)
 	var P := m.player
+	Settings.v["tips"] = true
+	for key in ["carry_swap", "carry_claim", "carry_full"]:
+		(Save.d["tutorial"] as Dictionary).erase(key)
 	_two_in(P)
 	_passives(P)
 	_swap(P)
@@ -78,6 +83,14 @@ func _passives(P: Hunter) -> void:
 func _swap(P: Hunter) -> void:
 	var a: Kin = P.kin
 	var b: Kin = P.kin2
+	a.throw_cd = 0.0
+	CarryHints.swap(m)
+	ok(not _shown("carry_swap"), "swap hint: not while the lead can be summoned")
+	a.throw_cd = 1.0
+	CarryHints.swap(m)
+	ok(_shown("carry_swap") and not m.tip_once("carry_swap", "x"),
+		"swap hint: the lead's summon on cooldown names the key, once")
+	a.throw_cd = 0.0
 	P.swap_cd = 0.0
 	P.inp["kin_swap"] = true
 	KinKeys.apply(P)
@@ -92,6 +105,9 @@ func _swap(P: Hunter) -> void:
 	KinKeys.apply(P)
 	ok(P.kin == a and P.kin2 == b, "after the cooldown the swap works again")
 
+func _shown(key: String) -> bool:
+	return bool((Save.d["tutorial"] as Dictionary).get(key, false))
+
 func _wild(at: Vector3, species := "puddlet") -> Kin:
 	var rec := Save.new_kin(species, "", 77)
 	return m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
@@ -102,7 +118,10 @@ func _carry_out(P: Hunter) -> void:
 	var own := m.kins.filter(func(k): return k.owner_h == P and not k.dead).size()
 	var k := _wild(P.pos + Vector3(2.0, 0, 0))
 	ok(Capture.block_reason(P, k) == "", "an empty carry-out slot: the scan can start")
+	ok(not _shown("carry_claim"), "claim hint: not before a claim")
 	m._catch(P, k)
+	ok(_shown("carry_claim") and not m.tip_once("carry_claim", "x"),
+		"claim hint: the first claim says it rides home and can be stolen, once")
 	ok(P.caught.size() == 1 and Capture.stolen_count(P) == 0,
 		"the claimed Boki takes the carry-out slot (%s)" % CaptureHud.box_text(P))
 	P._refresh_kin_stats()
@@ -112,6 +131,12 @@ func _carry_out(P: Hunter) -> void:
 	var k2 := _wild(P.pos + Vector3(-2.0, 0, 0))
 	var mate: Hunter = Capture.mate_with_room(m, P)
 	ok(mate != null and not Capture.room(P), "the carry-out slot is full; a teammate has room")
+	ok(not _shown("carry_full"), "full hint: not before a scan is blocked")
+	Capture.full_note(m, P)
+	ok(_shown("carry_full"), "full hint: the first blocked scan shows the teammate line as a hint")
+	Settings.v["tips"] = false
+	ok(not CarryHints.wanted(m), "hints off in settings: no carry hints")
+	Settings.v["tips"] = true
 	ok(mate != null and Capture.block_reason(P, k2).contains(mate.pname),
 		"the full note points to a teammate with room (%s)" % Capture.block_reason(P, k2))
 

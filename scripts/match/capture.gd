@@ -63,8 +63,9 @@ static func mate_with_room(m, h: Hunter, rec := {}) -> Hunter:
 static func full_note(m, h: Hunter, rec := {}) -> void:
 	if h.is_local() and m.hud and m.time - float(h.get_meta("cap_full_msg", -9.0)) > 1.5:
 		h.set_meta("cap_full_msg", m.time)
-		m.hud.toast(full_text(m, h, rec), Color("ffb0a0"))
 		var mate := mate_with_room(m, h, rec)
+		if mate == null or not CarryHints.wanted(m) or not m.tip_once("carry_full", full_text(m, h, rec)):
+			m.hud.toast(full_text(m, h, rec), Color("ffb0a0"))
 		if mate:
 			m.ping(mate.pos, Color("8fe3c8"))
 

@@ -4399,6 +4399,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
 		add_feed(Capture.caught_line(h, rec))
+		CarryHints.claimed(self, h, rec)
 		if player.kin and player.kin.state != "downed":
 			BokiChatter.say(self, player.kin, "caught")
 
@@ -5594,6 +5595,7 @@ func _net_ev(x, from: String) -> void:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
 				add_feed(Capture.caught_line(player, rec))
+				CarryHints.claimed(self, player, rec)
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
@@ -5660,11 +5662,16 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 	return best
 
 func _tip(key: String, text: String) -> void:
+	tip_once(key, text)
+
+## A first-time hint: shows `text` the first time `key` comes up in this save; true if it showed.
+func tip_once(key: String, text: String) -> bool:
 	var seen: Dictionary = Save.d["tutorial"]
 	if seen.get(key, false) or hud == null:
-		return
+		return false
 	seen[key] = true
 	hud.tip(text)
+	return true
 
 func _tips() -> void:
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
@@ -5685,6 +5692,7 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	CarryHints.swap(self)
 	var k: Kin = player.kin
 	if k == null:
 		return
