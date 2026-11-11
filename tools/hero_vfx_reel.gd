@@ -17,6 +17,7 @@ const GENERIC := ["lmb", "hold", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
 const WIDE_CROP := Vector2i(640, 300)     # ... for a bow's long shots
+const LMB_RANGE := {"gunslinger": 8.0}    # m to the dummy in the LMB parts, for rounds to show in flight (else 3.3)
 const FRAME_W := 960                      # px wide, each --reel-frames frame
 
 var only := ""
@@ -47,7 +48,7 @@ func run(main_node: Node) -> void:
 		await load(own).new().run(main_node)
 		return
 	hero_name = String(who)
-	if who == "archer":
+	if who == "archer" or LMB_RANGE.has(who):
 		crop_px = WIDE_CROP
 	DirAccess.make_dir_recursive_absolute(dir)
 	if frame_dir != "":
@@ -108,7 +109,7 @@ func _sheet(part: String, caption: String, times: Array, focus := Callable()) ->
 
 # ------------------------------------------------------------------ the generic parts
 func _part_lmb() -> void:
-	await _reset(3.3)
+	await _reset(LMB_RANGE.get(who, 3.3))
 	var shoot := func(t: float):
 		P.inp["fire"] = fmod(t, 0.5) < DT * 2.0 and t < 1.9
 		_aim(T.pos)
@@ -116,7 +117,7 @@ func _part_lmb() -> void:
 	await _go(GAP)
 
 func _part_hold() -> void:
-	await _reset(3.3)
+	await _reset(LMB_RANGE.get(who, 3.3))
 	var hold := func(t: float):
 		P.inp["fire"] = t > 0.1 and t < 1.5
 		_aim(T.pos)
