@@ -1,5 +1,5 @@
 extends RefCounted
-## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=match|panels]: every screen of the first 15 minutes on a
+## --first15-shots --shots-dir=<dir> [--size=WxH] [--part=front|match|panels]: every screen of the first 15 minutes on a
 ## fresh save (title, prologue, hatch card, creator, eggs, name, first Hunter, tutorial steps, results, farm, expedition
 ## panel, Hunter pick, first expedition HUD, pause), one .jpg each plus <dir>/layout.txt with, per shot:
 ## the screen's UI controls (nodes, not the HUD's own drawing) that cross the window edge or sit inside the
@@ -37,6 +37,8 @@ func run(main_node: Node) -> void:
 	tree.root.size = win
 	await _wait(1.0)
 	match part:
+		"front":
+			await _front()
 		"match":
 			_made_up_save()
 			await _first_match()
@@ -97,6 +99,10 @@ func _front() -> void:
 	hx._end_intro()
 	await _wait(2.0)
 	await _shot("creator")
+	hx.more_looks = true
+	hx._show_create()
+	await _wait(0.8)
+	await _shot("creator_more")
 	hx._looks_good()
 	await _wait(1.5)
 	await _shot("hatch_eggs")
@@ -108,7 +114,7 @@ func _front() -> void:
 	hx._show_name()
 	await _wait(1.0)
 	await _shot("hatch_name")
-	hx._finish(String(hx.egg_defs[0]["species"]), "", "", true)
+	hx._finish(String(hx.egg_defs[0]["species"]), "", true)
 	await _wait(2.5)
 	await _shot("first_mask")
 	hx.queue_free()
