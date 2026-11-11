@@ -908,6 +908,11 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	var from: Vector3 = _mine(m, P)[-1]["start"] if _mine(m, P).size() > n0 else P.pos
+	ok(
+			"mm RMB: the seed leaves from her hands, out in front at hand height, not on her",
+			P.flat_dist(from) >= 0.7 and from.y - P.pos.y < 0.8,
+			"%.2f m out, %.2f m up" % [P.flat_dist(from), from.y - P.pos.y])
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:

@@ -14,6 +14,8 @@ const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight 
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
 const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
+const SEED_OUT := 0.8          # m ahead of her the Burrseed leaves: past her pushing hands, its halo clear of her body
+const SEED_UP := 0.72          # m up it leaves: hand height (as the embers), not her head
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
 var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
@@ -385,7 +387,7 @@ func _throw_seed() -> void:
 	play("mm_seed")
 	var sd: Dictionary = rmb_def()["seed"]
 	var dir := h.aim_dir()
-	var start := Vector3(h.pos.x + dir.x * 0.6, h.pos.y + 0.95, h.pos.z + dir.y * 0.6)
+	var start := Vector3(h.pos.x + dir.x * SEED_OUT, h.pos.y + SEED_UP, h.pos.z + dir.y * SEED_OUT)
 	var life := AimMode.dist(h, float(sd["range"]), AimMode.MAX) / float(sd["speed"])
 	var on_hit := func(_s: Dictionary, _at: Vector3, e: Ent, _why: String):
 		if e != null and e.team != h.team and not e.dead:
