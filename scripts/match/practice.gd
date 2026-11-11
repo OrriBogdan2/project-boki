@@ -1,10 +1,10 @@
 class_name Practice
 extends Node
-## What every practice area shares (the Training Grounds, the tutorial, the Arena and the Duel room;
-## never a real match): a bottom bar like the farm's hub (Hero, the area's own menu, Leave), J for
-## the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are dummies the parity bench
-## (ParityBench). One node under the Match,
-## attached by Match.start with a single call.
+## What every practice area shares (the Training Grounds, the tutorial and the Duel room; never a real
+## match): J for the hero picker (PracticeHero), the mouse wheel zooming the camera, and where there are
+## dummies the parity bench (ParityBench). The tutorial and the Duel room get a bottom bar like the farm's
+## hub (Hero, the area's own menu, Leave); the Training Grounds has its controls panel instead
+## (TrainingPanel). One node under the Match, attached by Match.start with a single call.
 
 const NAME := "Practice"
 const LEFT_PAD := 560          # px, the bar starts right of the HUD's portrait and ability row
@@ -38,20 +38,16 @@ static func attach(match_node: Match) -> Practice:
 	p.m = match_node
 	match_node.add_child(p)
 	p.bench = ParityBench.attach(match_node)
-	p._build_bar()
+	if match_node.arena == null:
+		p._build_bar()
 	KitDrill.attach(p)
 	return p
 
-## The bar's entries: [id, label, icon, open, key cap]. The Arena and the Training Grounds share a loadout
-## menu (L), the Duel room has its setup menu (B).
+## The bar's entries: [id, label, icon, open, key cap]. The Duel room adds its setup menu (B).
 func items() -> Array:
 	var out: Array = [["hero", "Relics", "swap", func(): PracticeHero.toggle(self), Settings.key_cap("hero")]]
-	if m.arena:
-		out.append(["menu", "Loadout", "bag", func(): if not m.paused: m.arena.open_menu(), "L"])
-	elif m.duel:
+	if m.duel:
 		out.append(["menu", "Duel", "gear", func(): if not m.paused: m.duel.open_menu(), "B"])
-	if bench:
-		out.append(["bench", "Bench", "gear", func(): bench.toggle(), ""])
 	out.append(["leave", "Leave", "back", func(): leave(m, true), ""])
 	return out
 

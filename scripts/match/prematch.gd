@@ -14,7 +14,7 @@ const LOCK_HOLD := 1.0      # seconds "picks locked" shows before the match load
 const CHAT_MAX := 140       # characters in one chat line
 ## Options that mark a match as something other than a real expedition: no lobby for those.
 const NOT_EXPEDITION := [
-	"tutorial", "training", "practice", "arena", "duel", "sandbox", "autoplay", "probe", "spectate", "demo_match",
+	"tutorial", "training", "arena", "duel", "sandbox", "autoplay", "probe", "spectate", "demo_match",
 ]
 
 var opts: Dictionary

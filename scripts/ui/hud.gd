@@ -526,38 +526,8 @@ func _draw_top(sz: Vector2) -> void:
 	if m.duel:
 		_draw_duel(sz)
 		return
-	if m.opts.get("arena", false):
-		return        # the Arena draws its own key line and meter (scripts/match/arena.gd)
 	if m.opts.get("training", false):
-		if Record.clean():
-			return      # (recording: no training banner or checklist)
-		var rr := Rect2(Vector2(sz.x * 0.5 - 220, 12), Vector2(440, 54))
-		_panel(rr, Color(0.06, 0.07, 0.1, 0.88), 12)
-		_ctext(Vector2(sz.x * 0.5, 34), "TRAINING GROUNDS", 12, Color("8fe3c8"))
-		_ctext(Vector2(sz.x * 0.5, 56), "Nothing can hurt you here  ·  Esc to leave", 15, INK)
-		# the checklist: only what's left (up to six), with a count; H folds it away
-		var all_rows: Array = m.train_rows()
-		var left: Array = all_rows.filter(func(t): return not m.train.has(t[0]))
-		var n_done := all_rows.size() - left.size()
-		if guide_hidden:
-			var pill := Rect2(Vector2(sz.x - 196, 16), Vector2(180, 30))
-			_panel(pill, Color(0.06, 0.07, 0.1, 0.8), 10)
-			_text(pill.position + Vector2(12, 20), "Guide %d/%d  ·  H to show" % [n_done, all_rows.size()], 13, MUTED)
-			return
-		var shown: Array = left.slice(0, 6)
-		var box := Rect2(Vector2(sz.x - 346, 16), Vector2(330, 58 + maxi(1, shown.size()) * 24))
-		_panel(box, Color(0.06, 0.07, 0.1, 0.82), 12)
-		_text(box.position + Vector2(14, 24), "Try everything", 15, GOLD, big)
-		_text(box.position + Vector2(box.size.x - 120, 24), "%d / %d done" % [n_done, all_rows.size()], 12, MUTED)
-		if shown.is_empty():
-			_text(box.position + Vector2(14, 50), "All done. Try the duel room!", 13, GOOD)
-		for i in shown.size():
-			var t: Array = shown[i]
-			var key := ("[%s]  " % Settings.key_cap(t[2])) if t[2] != "" else ""
-			if t[0] == "move": key = "[%s%s%s%s]  " % [Settings.key_cap("up"), Settings.key_cap("left"), Settings.key_cap("down"), Settings.key_cap("right")]
-			_text(box.position + Vector2(14, 50 + i * 24), ("→  " if i == 0 else "○  ") + key + String(t[1]), 13, GOLD if i == 0 else INK)
-		_text(box.position + Vector2(14, box.size.y - 10), "H hides the guide and your kit", 11, Color(MUTED, 0.8))
-		return
+		return        # the Training Grounds draws its own controls panel (scripts/match/arena.gd)
 	if m.tut:
 		TutorialHud.draw(self, sz)
 		return
@@ -1049,7 +1019,7 @@ func _hud_tick(delta: float) -> void:
 	mates.track(self, m.player, delta)
 	_loot_tick(delta)
 	glider_hit_t = maxf(0.0, glider_hit_t - delta)
-	# H folds the training guide (G is send / recall your kin) and the kit panel away (and back)
+	# H folds the Training Grounds's controls panel and the duel room's numbers away (and back)
 	var hd := Input.is_physical_key_pressed(KEY_H)
 	if hd and not _h_down and (m.opts.get("training", false) or m.opts.get("duel", false)):
 		guide_hidden = not guide_hidden
@@ -1664,7 +1634,9 @@ func _draw_squad_pings(p: Hunter) -> void:
 func _draw_kit(sz: Vector2, p: Hunter) -> void:
 	if not Settings.get_v("tips") or Record.clean() or m.opts.get("tutorial", false) or p.out or guide_hidden:
 		return
-	var show_t := 14.0 if not m.opts.get("training", false) else 1e9
+	if m.opts.get("training", false):
+		return      # the Training Grounds has the kit card (K) and its controls panel instead
+	var show_t := 14.0
 	var t := m.time - kit_t0
 	if p.dropping or p.riding:
 		# shown once you land, not over the drop map

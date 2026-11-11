@@ -446,10 +446,9 @@ func _start(o: Dictionary) -> void:
 		duel.setup(self)
 		duel.attach_keys()
 		hud.toast("Duel room  ·  B sets up the bot  ·  Backspace resets", Color("f3eee2"))
-	if player and duel == null and not opts.get("tutorial", false) and (opts.get("arena", false) or opts.get("practice", false)):
-		# the Arena, and the same practice tools on the training island (dummies, swaps, kit card)
-		arena = Arena.new()
-		arena.setup(self, "arena" if opts.get("arena", false) else "practice")
+	if player and duel == null and opts.get("arena", false):
+		arena = Arena.new()       # the Training Grounds's practice tools (dummies, bot, swaps, kit card)
+		arena.setup(self)
 	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
@@ -2259,8 +2258,6 @@ func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
 		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 	if k.owner_h == player:
 		player.add_stat("kin_abilities")
-		if auto and hud and not train.has("_auto_told"):
-			train["_auto_told"] = true
 
 func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
 	kstat["swap"] += 1
@@ -2268,7 +2265,6 @@ func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
 	fx.ring(h.pos, 1.4, now_k.sp["color"], 0.3)
 	sfx("swap", h.pos, -4.0)
 	if h == player:
-		train["_swapped"] = true
 		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
 
 func on_bond_ready(h: Hunter) -> void:
@@ -2460,7 +2456,6 @@ func _stagger_reward(mb: Mob, hunter: Hunter, ab: String) -> void:
 	if hunter == player:
 		var what: String = {"e": "Cooldown back", "kin": (player.kin.rec.get("name", "Your Boki") if player.kin else "Your Boki") + "'s abilities are ready again"}.get("kin" if ab in ["k1", "k2"] else ab, "")
 		hud.toast("Staggered %s!%s" % [mb.md["name"], ("  " + what) if what != "" else ""], Color("e0b0ff"))
-		train["_stagger"] = true
 
 ## Someone's armor just shattered: a clear sound and burst so the attacker knows to push.
 func on_armor_break(h: Hunter, by: Ent) -> void:
@@ -4439,14 +4434,6 @@ func _use_shrine(h: Hunter, sh: Dictionary, from_net := false) -> void:
 ## Midway through, the Warden wakes on the heart island and guards it until someone brings it down.
 # ---- Training Grounds
 ## [id, what to do, the action whose key it uses ("" for none)]
-const TRAIN := [["move", "Walk around", "up"], ["dash", "Dash", "dash"], ["glide", "Jump, then press Space again in the air (or Mouse 5) and hold to glide", "jump"],
-	["shoot", "Shoot a target dummy", "fire"], ["ability", "Use your E ability", "signature"], ["ult", "Fuse with your Boki (%s: open from the start here)", "ultimate"],
-	["secondary", "Use your right click", "secondary"], ["glove", "Use your glove (pick one up from the rack first)", "gear1"],
-	["crouch", "Sneak: slower, steadier aim, harder to spot", "crouch"],
-	["throw", "Sic your Boki at a dummy", "throw"], ["combo", "Land a combo: shoot a foe your Boki just stunned or rooted", "fire"], ["tonic", "Heal with a tonic (belt slot 1)", "util1"],
-	["stagger", "Stagger a big dummy: hit it with an ability while it has a purple ring", "signature"],
-	["smash", "Break a crate or pot", "fire"], ["weapon", "Take a found weapon off the ground", "interact"],
-	["ledge", "Dash off an edge and float back up", ""]]
 var train := {}
 var train_t := 0.0
 
@@ -4493,64 +4480,18 @@ func _update_training(dt: float) -> void:
 		revive_hunter(player, null)
 	if opts.get("arena", false):
 		return        # the Arena runs its own (scripts/match/arena.gd)
-	var was_ult: bool = train.get("_ult_full", false)
 	# everything recharges quickly here
 	player.ult = minf(1.0, player.ult + dt / 6.0)
 	player.sig_cd = maxf(0.0, player.sig_cd - dt * 2.0)
 	for kk in [player.kin, player.kin2]:
 		if kk: (kk as Kin).runner.tick(dt * 2.0)
 	if player.tonics < 1: player.tonics = 3
-	if not train.has("tonic") and player.hp >= player.max_hp and train_t > 1.0:
-		player.hp = player.max_hp * 0.7     # a scratch, so the tonic has something to heal
-	if player.inp["move"].length() > 0.1:
-		train["_moved"] = float(train.get("_moved", 0.0)) + Vector2(player.pos.x - player.prev.x, player.pos.z - player.prev.z).length()
-	var marks := {
-		"move": float(train.get("_moved", 0.0)) > 4.0,
-		"dash": player.roll_t > 0.0,
-		"glide": player.gliding and not player.dropping,
-		"shoot": player.dmg_done > 0.0,
-		"ability": (player.ak != null and float(player.ak.cd["e"]) > 0.0) or (player.ak == null and player.kin != null and (player.kin as Kin).runner.has_slot("k1") and not (player.kin as Kin).runner.is_ready("k1")),
-		"glove": float(player.gear_cd[0]) > 0.0,
-		"combo": int(player.stats.get("combos", 0)) > 0,
-		"crouch": player.crouch,
-		"secondary": (player.ak != null and player.ak.last_variant != "") or (player.runner != null and player.runner.has_slot("utility") and not player.runner.is_ready("utility")),
-		"ult": (player.ak != null and float(player.ak.cd["r"]) > 0.0) or (was_ult and player.ult < 0.5),
-		"throw": player.kin != null and player.kin.st_throws > 0,
-		"tonic": player.tonics < int(train.get("_tonics", player.tonics)),
-		"ledge": player.grap.size() > 0 or player.mantle_k() > 0.0,
-		"smash": train.get("_smash", false),
-		"stagger": train.get("_stagger", false),
-		"weapon": train.get("_weapon", false),
-	}
-	train["_ult_full"] = player.ult >= 0.99
-	train["_tonics"] = player.tonics
-	for k in marks:
-		if marks[k] and not train.has(k):
-			train[k] = true
-			Sfx.play("unlock", null, -8.0)
-			var left := train_rows().filter(func(t): return not train.has(t[0])).size()
-			if hud: hud.toast(("Done: %s" % _train_label(k)) if left > 0 else "Training complete. Press Esc to head home whenever you like", Color("8ff0a0"))
-			if left == 0:
-				Save.d["tutorial"]["training"] = true
 	# keep a few target dummies around you
 	var alive := mobs.filter(func(x): return not x.dead)
 	if alive.size() < 4 and int(train_t * 10.0) % 20 == 0:
 		var at := world.random_ground(world.island_of(player.pos.x, player.pos.z))
 		if Vector2(at.x - player.pos.x, at.z - player.pos.z).length() > 3.0:
 			spawn_mob(["skitter", "spitter", "brute", "sentinel"][randi() % 4], at)
-
-## The checklist for this hero: the secondary step only shows for heroes that have one.
-func train_rows() -> Array:
-	var rows := TRAIN.filter(func(t): return t[0] != "secondary" or (player != null and (player.ak != null or (player.runner != null and player.runner.has_slot("utility")))))
-	return rows.map(func(t): return [t[0], _train_text(t), t[2]])
-
-func _train_text(t: Array) -> String:
-	return String(t[1]) % Settings.key_cap(String(t[2])) if String(t[1]).contains("%s") else String(t[1])
-
-func _train_label(k: String) -> String:
-	for t in TRAIN:
-		if t[0] == k: return _train_text(t)
-	return k
 
 ## Test hook (--balloon-demo=lip|glide|hop|self): hit markers. "lip" hangs a foe and a squadmate
 ## below an island's lip (balloons) and you shoot the foe's; "glide" holds them high over land

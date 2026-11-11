@@ -3395,7 +3395,7 @@ func _open_expedition() -> void:
 		right.add_child(UI.para("Go down for good and the Boki you bring are left behind (the Black Market holds the unclaimed ones).", 12, UI.FAINT))
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
-	fl.add_child(UI.ghost("Training Grounds", func(): Save.save_game(); Game.start_match(Match.arena_opts(Arch.of_save())), 0, "knock"))
+	fl.add_child(UI.ghost("Training Grounds", _start_training, 0, "knock"))
 	if Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
@@ -3468,11 +3468,10 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 	row.add_child(next_b)
 	return card
 
-## A safe island to learn every button: nothing can hurt you and nothing you do there counts.
+## The Training Grounds (the same place the title opens), as your expedition Hunter: nothing there counts.
 func _start_training() -> void:
-	Save.d["cls"] = Data.class_of_save()
 	Save.save_game()
-	Game.start_match({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242})
+	Game.start_match(Match.arena_opts(Arch.of_save()))
 
 ## Before a run where kin can be lost, say so plainly and make the player confirm.
 func _confirm_start() -> void:

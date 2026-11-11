@@ -69,8 +69,7 @@ static func open(main: Node, preset: String, args: PackedStringArray) -> void:
 		"match":
 			main.show_screen("match", _as_hunter(Match.demo_opts(), hunter))
 		"training":
-			main.show_screen("match", _as_hunter({"training": true, "practice": true, "teams": 1, "squad": 1, "tier": 0,
-				"length": 1e9, "seed": 4242, "no_drop": true}, hunter))
+			main.show_screen("match", _as_hunter(Match.arena_opts(), hunter))
 		"tier2":
 			var o := Match.demo_opts()
 			o["tier"] = HOLLOW_TIER
