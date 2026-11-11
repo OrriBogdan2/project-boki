@@ -6,16 +6,26 @@ extends RefCounted
 ## tools/gameplay_media.sh. MEDIA_MARK lines give the frame each phase starts on. (--media-child: the scene alone.)
 ##   1 squad fight   three Hunters with their Boki against a rival squad, abilities going off
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
-##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
+##   3 extraction    the squad holds an uplink's yard as it finishes charging, then rides the lift out
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
+##   5 tumble        a Tumble on the Boki base (base_tumble.gd): tells, picks that read them, presses in the gold
+##   6 echo steps    Echo Steps (echo_steps.gd): the first round answered on the beat, then every third stone wrong
+##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
+##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
+##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
 const FRAME := 2.0 * STEP        # s per rendered frame
 const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
-const BOARD_LEFT := 6.5          # s of the skiff's boarding window left when the clip starts
+const CHARGE_LEFT := 2.5         # s of the uplink's charge left when the clip starts
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
+const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
+const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer than the usual 1.0)
+const GAME_ZOOM := 0.55          # the home camera's zoom for clips 6-8
+const LURE_LEAD := 1.5           # s of the Show Ring walk kept before each lure (clip 7 cuts the rest)
+const JUDGE_HOLD := 4.0          # s of the judges' cards clip 7 keeps before the result
 
 var main: Node
 var m: Match
@@ -57,6 +67,10 @@ func run(main_node: Node) -> void:
 		2: await _boki_combat(secs)
 		3: await _extraction(secs)
 		4: await _hatch(secs)
+		5: await _tumble(secs)
+		6: await _echo(secs)
+		7: await _show(secs)
+		8: await _relay(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -228,33 +242,26 @@ func _boki_combat(secs: float) -> void:
 func _extraction(secs: float) -> void:
 	await _start("ashwick", "cindle")
 	var P := m.player
-	var d: Dictionary = m.exits.of_kind("dock")[0]
-	var berth: Vector3 = d["berth"]
-	var out3 := Vector3(d["out"].x, 0, d["out"].y)
-	m.time = float(d["open_at"]) + 1.0
-	m.exits.act(d, "call", P)
-	m.exits._arrive(d)
-	d["t"] = BOARD_LEFT
-	d["wave_t"] = 1e9       # no monster waves at the berth
-	var side := Vector3(-out3.z, 0, out3.x)
-	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", berth), _hunter("a2", 0, "gunslinger", "zapple", berth)]
+	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var mast: Vector3 = o["pos"]
+	m.time = float(o["open_at"]) + 1.0
+	m.exits.act(o, "start", P)
+	o["prog"] = 1.0 - CHARGE_LEFT * Exits.crew_rate(3) / m.exits.uplink_time(o)
+	o["wave_t"] = 1e9       # no monster waves at the yard
+	squad_a = [P, _hunter("a1", 0, "juggernaut", "pebbit", mast), _hunter("a2", 0, "gunslinger", "zapple", mast)]
 	for i in squad_a.size():
 		var h: Hunter = squad_a[i]
 		h.ctrl = "idle"
-		h.teleport(_ground(berth - out3 * (9.0 + 1.5 * i) + side * (i - 1) * 2.0))
+		var ang := TAU * i / squad_a.size()
+		h.teleport(_ground(mast + Vector3(cos(ang), 0, sin(ang)) * (Exits.OUTPOST_R - 1.0)))
 	_zoom(0.55)
 	still_at = secs * 0.6
 	await _go(secs, func(_t: float):
-		if String(d["state"]) == "boarding":
-			for i in squad_a.size():
-				var h: Hunter = squad_a[i]
-				var spot := berth + side * (i - 1) * 1.1 - out3 * 0.2
-				var to := spot - h.pos
-				h.inp["move"] = Vector2(to.x, to.z).normalized() if to.length() > 0.4 else Vector2.ZERO
-		else:
-			for h in squad_a:
-				h.inp["move"] = Vector2.ZERO,
-		func(_t: float): return berth + Vector3(0, 0, 0))
+		for h in squad_a:
+			var to: Vector3 = mast - h.pos
+			var go := String(o["state"]) == "open" and to.length() > 0.4
+			h.inp["move"] = Vector2(to.x, to.z).normalized() if go else Vector2.ZERO,
+		func(_t: float): return mast)
 
 # ------------------------------------------------------------------ 4: hatch
 ## The real hatch screen: the egg is picked, knocked on (auto_warm), cracks, hatches, and KinReveal shows the Boki.
@@ -281,3 +288,141 @@ func _hatch(secs: float) -> void:
 			still_at = -1.0
 		t += FRAME
 		frame += 1
+
+# ------------------------------------------------------------------ the Boki base
+## A fresh base with `n` rested level-6 Boki out (Ember, Ripple, Moss), `stats` per Boki when given, and the player
+## standing south of `at` (a Callable: the game's spot, placed once the home is built) at camera zoom `zoom`.
+func _base(n: int, at: Callable, zoom: float, stats: Array = []) -> Node:
+	FarmUnlocks.rules()["base_mode"] = true
+	var d := Save.fresh()
+	for i in n:
+		var k := Save.new_kin(["cindle", "puddlet", "zapple"][i], ["Ember", "Ripple", "Moss"][i], 11 + i)
+		k["level"] = 6
+		if not stats.is_empty():
+			k["stats"] = stats[i]
+		k["needs"]["energy"] = 95.0
+		d["roster"].append(k)
+	d["active"] = d["roster"][0]["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	d["layout"] = HomeLayout.fresh()
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	var home = await main._hb_home()
+	while not is_instance_valid(home.root_ui):
+		await main.get_tree().process_frame
+	home._close_panel()
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)
+	for e in home.kins:
+		e.erase("indoors")
+	home.ppos = at.call(home) + Vector3(0.0, 0.0, TUMBLE_STAND)
+	home.player.position = home.ppos
+	home.cam.zoom = zoom
+	home.cam.zoom_to = zoom
+	home.cam.snap(home.ppos)
+	return home
+
+## Films a base minigame (the home ticks it) for `secs` or until `over` is true; `each(t)` scripts the presses.
+func _film(secs: float, each: Callable, over: Callable) -> void:
+	still_at = secs * 0.55
+	_mark("start")
+	var t := 0.0
+	while t < secs and not over.call():
+		await main.get_tree().process_frame
+		each.call(t)
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+	for _i in 30:                     # a second more for the result's fanfare and huff
+		await main.get_tree().process_frame
+
+func _press(game, action := "interact") -> void:
+	var ev := InputEventAction.new()
+	ev.action = action
+	ev.pressed = true
+	game.input(ev)
+
+## Two rested Boki on a fresh base; the clip opens as the first tell shows. The scripted player picks the move
+## that beats the tell a moment after it, and presses as the marker crosses the gold.
+func _tumble(secs: float) -> void:
+	var home = await _base(2, func(hm): return hm.htumble.ring.position, TUMBLE_ZOOM, [
+		{"power": 42, "guard": 20, "speed": 30, "focus": 36}, {"power": 18, "guard": 38, "speed": 34, "focus": 22}])
+	var tb: BaseTumble = home.htumble
+	tb.use()
+	tb.run.left = FRAME
+	still_at = secs * 0.55
+	_mark("start")
+	var t := 0.0
+	var picked_at := -1.0
+	while t < secs and tb.run != null:
+		await main.get_tree().process_frame
+		var r := tb.run
+		if r != null and r.state == "pick" and r.pick == "":
+			picked_at = t if picked_at < 0.0 else picked_at
+			if t - picked_at > 0.7:
+				tb._choose(BaseTumble.rules()["moves"].keys().find(BaseTumble.counter(r.tell)))
+				picked_at = -1.0
+		elif r != null and r.state == "resolve" and r.grade == "" and absf(tb.bar.m - tb.bar.zone) < TimingBar.GREAT:
+			_press(tb)
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## Two dancers: the first round answered on each beat, from the second on every third stone is the wrong one.
+func _echo(secs: float) -> void:
+	var home = await _base(2, func(hm): return hm.hecho.middle.position, GAME_ZOOM)
+	var es: EchoSteps = home.hecho
+	es.use()
+	var each := func(_t: float) -> void:
+		var r := es.run
+		if r == null or not r.mine():
+			return
+		var now := es._clock()
+		for i in r.pattern.size():
+			var pt := r.at(r.first + i)
+			if not r.done[i] and now >= pt and now - pt < r.window * 0.5:
+				var s: int = i % 4 if r.pattern[i] < 0 else r.pattern[i]
+				_press(es, EchoSteps.KEYS[(s + 1) % 4 if r.round_i > 0 and i % 3 == 2 else s])
+	await _film(secs, each, func(): return es.run == null)
+
+## Two Boki from the end of the Look round: three presses in the gold, a call at each lure, the judges' cards.
+func _show(secs: float) -> void:
+	var home = await _base(2, func(hm): return hm.hshow.stage.position, GAME_ZOOM)
+	var sr: ShowRing = home.hshow
+	sr.use()
+	sr.run.t = float(ShowRing.rules()["look_s"]) - 2.0
+	var each := func(_t: float) -> void:
+		var r := sr.run
+		if r == null:
+			return
+		if r.can_trick() and r.t > 1.0 and absf(sr.bar.m - sr.bar.zone) < TimingBar.GREAT:
+			_press(sr)
+		elif r.phase == ShowRing.Run.Phase.BOND:
+			var next := r.calls.find("")
+			if next < 0:
+				r.t = maxf(r.t, float(ShowRing.rules()["walk_s"]) - FRAME)
+			elif r.t >= r.lure_t(next):
+				_press(sr)
+			else:
+				r.t = maxf(r.t, r.lure_t(next) - LURE_LEAD)
+		elif r.phase == ShowRing.Run.Phase.JUDGE and r.t > JUDGE_HOLD:
+			r.t = float(ShowRing.rules()["judge_s"])
+	await _film(secs, each, func(): return sr.run == null)
+
+## Three of yours against a visiting team: the first hand-off in the gold, the second pressed far off it.
+func _relay(secs: float) -> void:
+	var home = await _base(3, func(hm): return hm.hrace.start, GAME_ZOOM * 1.6)
+	var rc: BaseRelay = home.hrace.relay
+	rc.use()
+	var each := func(_t: float) -> void:
+		var r := rc.run
+		if r == null or not r.can_press():
+			return
+		var off := absf(rc.bar.m - rc.bar.zone)
+		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
+			_press(rc)
+	await _film(secs, each, func(): return rc.run == null)
