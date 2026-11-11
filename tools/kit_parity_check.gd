@@ -61,3 +61,20 @@ func _verdict(r: Dictionary, got: float) -> String:
 		var src := "source %s +-%s (%s)" % [r["value"], r["tol"], r["evidence"]]
 		print("PARITY %s %s: %s, %s%s" % [verdict, label, got, src, note])
 		if verdict == "FAIL": bad += 1
+
+
+## The number at a dotted path ("rmb.slam.dmg", "rmb.coil.dmg.0") in a hero's JSON, or NAN when it is
+## missing. A path starting "weapon." reads the hero's signature weapon file instead.
+	var keys := path.split(".")
+	if keys[0] == "weapon":
+		cur = Content._load("weapons", String(hero.get("signature", "")))
+		keys.remove_at(0)
+	for key in keys:
+		if cur is Array and key.is_valid_int() and int(key) < (cur as Array).size():
+			cur = cur[int(key)]
+		elif cur is Dictionary and (cur as Dictionary).has(key):
+			cur = cur[key]
+		else:
+			return NAN
+
+		if r.has("owner"): label += " [owner: %s]" % r["owner"]
