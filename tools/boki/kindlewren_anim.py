@@ -136,6 +136,9 @@ def bounce(p, t, n, height, crouch):
 
 
 # ---------------------------------------------------------------- clips
+WALK_FROM = 0.39     # of the walk cycle: where its loop starts, at the bottom of a landing (hop phase 0.78)
+
+
 def idle(t):
     """Never still: breathes, jerks its head about, flicks its tail up, taps a foot, flirts its wings."""
     p = {}
@@ -159,9 +162,10 @@ def idle(t):
 
 
 def walk(t):
-    """Wrens hop, they don't walk: two bouncy hops a cycle, the tail jerking up on every landing."""
+    """Wrens hop, they don't walk: two bouncy hops a cycle, the tail jerking up on every landing. The loop starts deep
+    in a landing's crouch (a calm seam), so a walk sets off with a spring."""
     p = {}
-    air, sq = bounce(p, t, 2, 0.05, 0.02)
+    air, sq = bounce(p, t + WALK_FROM, 2, 0.05, 0.02)
     add(p, "hips", rx=-0.1 + 0.08 * sq)
     look(p, 1.0 - 0.3 * sq)
     cock(p, 0.35 * sq - 0.15 * air)

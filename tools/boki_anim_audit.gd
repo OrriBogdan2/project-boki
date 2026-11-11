@@ -208,7 +208,7 @@ static func pop(k: Node3D, rig: BokiRig) -> float:
 			start = f
 		if start < 0:
 			continue
-		if f - start <= int((BokiRig.FADE + 0.1) / DT):
+		if f - start <= int((rig.gait_fade() + 0.1) / DT):
 			hand = maxf(hand, jump)
 		else:
 			steady = maxf(steady, jump)

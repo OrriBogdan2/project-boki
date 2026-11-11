@@ -10,6 +10,7 @@ from thrumbird import SIDES, mir, v3
 
 LOOK_UP = 0.3        # the face tips up toward the high cameras
 LIFT = 0.3           # m: how high it hovers, feet to ground
+PIVOT = thrumbird.SHOULDER[1]   # m over the feet: the wing root, where its lift holds it, so it pitches about it
 BUZZ = 7.5           # wing beats per second: one swap of the wing per review frame at 15 fps
 RINGS = 3
 
@@ -87,8 +88,9 @@ def buzz(p, t, beats, amp=0.42, lift=0.0, fwd=0.0):
 
 
 def hover(p, t, beats, lift=LIFT, pitch=0.12, amp=0.42, tail=0.0):
-    """Holds it up in the air: lift (m), the body's pitch (nose up > 0) with the tail balancing it."""
-    p["root_at"] = (0, lift, 0)
+    """Holds it up in the air: lift (m), the body's pitch (nose up > 0) about the wing root with the tail balancing
+    it, so tipping into flight swings the feet, not the head."""
+    p["root_at"] = (0, lift + PIVOT * (1 - math.cos(pitch)), -PIVOT * math.sin(pitch))
     add(p, "root", rx=pitch)
     add(p, "tail1", rx=-tail + pitch * 0.4)
     buzz(p, t, beats, amp)
@@ -140,7 +142,7 @@ def flight(t, seconds, pitch, lift, tail):
 
 
 def walk(t):
-    return flight(t, WALK_S, -0.22, 0.28, 0.15)
+    return flight(t, WALK_S, -0.12, 0.28, 0.15)   # slow flight: it stays near its hover tilt
 
 
 def run(t):
