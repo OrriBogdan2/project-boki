@@ -1,13 +1,13 @@
 extends RefCounted
-## --move-butter-check [--butter-hero=<arch>] [--butter-csv=<file>] [--shots-dir=<dir>]: how smooth movement looks, where
-## --move-feel-check measures how fast it answers. One Hero with clips runs the real frame (Match._process; the
+## --move-butter-check [--butter-hero=<arch>] [--butter-csv=<file>] [--shots-dir=<dir>]: how smooth movement looks,
+## where --move-feel-check measures how fast it answers. One Hero with clips runs the real frame (Match._process; the
 ## check holds the keys and the aim) through a course carved on flat ground: a run with a 90 degree turn and a stop,
 ## a chain of five 1.6 m ledges (jump and push in at each face), a run off the top into a glide that bends 45
 ## degrees, and a landing run on. Visual only: it reads the posed skeleton, the clip channels and the camera.
 ##
 ## Prints "BUTTER <key> = <value> <unit> target <op> <target> ok|FAIL (why)" and "MOVE BUTTER CHECK DONE, failures: N";
-## --butter-csv (default <dir>/butter_trace.csv) gets the per-frame speed, heading, lean and bank (the velocity graph). With
-## --shots-dir every second frame goes to <dir>/frames/NNNNN.jpg (run it under jobq --needs gpu):
+## --butter-csv (default <dir>/butter_trace.csv) gets the per-frame speed, heading, lean and bank (the velocity
+## graph). With --shots-dir every second frame goes to <dir>/frames/NNNNN.jpg (run it under jobq --needs gpu):
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 24 -pix_fmt yuv420p butter.mp4
 ## Never writes the save.
 
@@ -51,7 +51,8 @@ var shots := ""
 var csv_path := ""
 var frame := 0
 var main: Node
-var trace := PackedStringArray(["t,phase,speed,heading_deg,lean_deg,bank_deg,act_w,air_w,clip,y,vy,mantling,grounded,pop_m,cam_acc"])
+const TRACE_HEAD := "t,phase,speed,heading_deg,lean_deg,bank_deg,act_w,air_w,clip,y,vy,mantling,grounded,pop_m,cam_acc"
+var trace := PackedStringArray([TRACE_HEAD])
 var t := 0.0
 var phase := ""
 var res := {}
@@ -88,13 +89,16 @@ func run(main_node: Node) -> void:
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
 	for h in m.hunters:
-		if h != P: h.teleport(Vector3(-500, 50, -500)); h.out = true
+		if h != P:
+			h.teleport(Vector3(-500, 50, -500))
+			h.out = true
 	if P.kin: (P.kin as Kin).stow()
 	P.unlock_all()
 	if m.hud: m.hud.visible = false
 	var o := _course()
 	if o == Vector3.INF:
-		print("BUTTER no flat strip for the course"); bad += 1
+		print("BUTTER no flat strip for the course")
+		bad += 1
 		return _done()
 	if shots != "":
 		DirAccess.make_dir_recursive_absolute(shots.path_join("frames"))
@@ -102,7 +106,8 @@ func run(main_node: Node) -> void:
 	sync = P.model.get_node_or_null("Warden/Sync") as WardenGlb.Sync
 	clips = sync.clips if sync else null
 	if clips == null:
-		print("BUTTER %s has no clips: nothing to measure" % who); bad += 1
+		print("BUTTER %s has no clips: nothing to measure" % who)
+		bad += 1
 		return _done()
 	skel = clips.skel
 	sync.set_process(false)     # (posed once a step, below: the same clock as the sim)
@@ -128,7 +133,8 @@ func rec(key: String, v: float) -> void:
 	res[key] = v
 	var tg: Array = T[key]
 	var ok := v >= float(tg[1]) - 1e-6 if tg[0] == ">=" else v <= float(tg[1]) + 1e-6
-	print("BUTTER %-18s = %7.3f %-5s target %s %s %s   (%s)" % [key, v, tg[2], tg[0], str(tg[1]), "ok" if ok else "FAIL", tg[3]])
+	var verdict := "ok" if ok else "FAIL"
+	print("BUTTER %-18s = %7.3f %-5s target %s %s %s   (%s)" % [key, v, tg[2], tg[0], str(tg[1]), verdict, tg[3]])
 	if not ok: bad += 1
 
 # ---------------------------------------------------------------- the course
@@ -172,7 +178,11 @@ func _frame(mv: Vector2, jump := false, glide := false) -> void:
 	P.inp["jump"] = jump
 	P.inp["glide"] = glide
 	var hv := Vector2(P.vel.x, P.vel.z)
-	var ahead := mv if mv.length() > 0.1 else (hv.normalized() if hv.length() > 0.5 else Vector2(1, 0))
+	var ahead := Vector2(1, 0)
+	if mv.length() > 0.1:
+		ahead = mv
+	elif hv.length() > 0.5:
+		ahead = hv.normalized()
 	P.inp["aim"] = P.pos + Vector3(ahead.x, 0.0, ahead.y) * 6.0
 	m.acc = 0.0
 	m._process(DT)
@@ -182,12 +192,14 @@ func _frame(mv: Vector2, jump := false, glide := false) -> void:
 	if shots != "":
 		await main.get_tree().process_frame
 		if frame % 2 == 0:
-			main.get_viewport().get_texture().get_image().save_jpg(shots.path_join("frames/%05d.jpg" % (frame / 2)), 0.9)
+			var img := main.get_viewport().get_texture().get_image()
+			img.save_jpg(shots.path_join("frames/%05d.jpg" % (frame / 2)), 0.9)
 	frame += 1
 
 func _measure() -> void:
 	# the head against the feet, in the model's frame (the camera's lean toward it is the model's own basis)
-	var hp := (P.model.global_transform.affine_inverse() * (skel.global_transform * skel.get_bone_global_pose(head).origin))
+	var head_at := skel.global_transform * skel.get_bone_global_pose(head).origin
+	var hp := P.model.global_transform.affine_inverse() * head_at
 	var pop_now := hp.distance_to(last_head) if last_head != Vector3.INF else 0.0
 	pop = maxf(pop, pop_now)
 	last_head = hp
@@ -209,8 +221,10 @@ func _measure() -> void:
 	cam_wait -= 1
 	if cam_wait < 0:
 		cam_jerk = maxf(cam_jerk, cam_acc)
-	trace.append("%.3f,%s,%.3f,%.1f,%.2f,%.2f,%.2f,%.2f,%s,%.2f,%.2f,%d,%d,%.3f,%.1f" % [t, phase, spd, rad_to_deg(atan2(P.vel.z, P.vel.x)),
-			lean_now, bank_now, clips.act_w, clips.air_w, clips.cur, P.pos.y, P.vel.y, int(P.mantling()), int(P.grounded), pop_now, cam_acc])
+	trace.append("%.3f,%s,%.3f,%.1f,%.2f,%.2f,%.2f,%.2f,%s,%.2f,%.2f,%d,%d,%.3f,%.1f" % [t, phase, spd,
+			rad_to_deg(atan2(P.vel.z, P.vel.x)), lean_now, bank_now, clips.act_w, clips.air_w, clips.cur,
+			P.pos.y, P.vel.y,
+			int(P.mantling()), int(P.grounded), pop_now, cam_acc])
 
 ## Stands the player at p, the camera on him (and its history cleared, so the jump isn't a jerk).
 func _put(p: Vector3) -> void:

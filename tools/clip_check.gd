@@ -114,8 +114,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	await _flinch(id)
 
 ## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, a turn rolls
-## him into it, and all leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
-## ("rig_root") takes the Rig's own squash, which HunterAnim drives (not running here): only the lean is his.
+## him into it, and all leave nothing behind once they're over (the root's size isn't keyed, so it must not build
+## up). A root on the Rig ("rig_root") takes the Rig's own squash, which HunterAnim drives (not running here): only
+## the lean and the bank are his.
 func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) -> void:
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var head := WardenSkeleton.find(sk, "head")

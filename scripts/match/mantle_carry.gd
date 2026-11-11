@@ -19,8 +19,9 @@ const APPROACH_DOT := 0.45     # keys or momentum this far into the face (cos ~6
 const PUSH_SPEED := 2.0        # m/s into the face: momentum alone is a push
 const PEAK_DECAY := 6.0        # m/s per s: how fast the remembered approach speed fades
 const MINI_S := 0.75           # [game data] MiniMantlePostLaunchDuration
-const APPROACH_BRAKE := 80.0   # m/s^2 [est]: the most the rise eases your speed into the face a step (after the rise's own
-                               # steering, Hunter.AIR_ACCEL 40, has pushed: a net ~40 m/s^2, ~0.1 s off a run)
+## m/s^2 [est]: the most the rise eases your speed into the face, after the rise's own steering (Hunter.AIR_ACCEL 40)
+## has pushed: a net ~40 m/s^2, ~0.1 s off a run.
+const APPROACH_BRAKE := 80.0
 
 ## Every step, before the move: hold a fresh mantle's speed, and remember how fast you're going (a
 ## decaying peak). Returns the horizontal velocity to move with.

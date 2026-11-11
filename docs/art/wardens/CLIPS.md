@@ -20,11 +20,13 @@ Hero live in `tools/art1/` (Kael is the pilot).
   and move speed over it sets the clip rate (0.6 to 1.4); `arm_swing` {"L": gain, "R": gain} puts that arm on the opposite
   swing of its own side's leg. No key: the clip plays as keyed.
 - `crouch` (item 143): idle, walk by direction, `in`, `out` (the 0.1 s dip and settle), `speed` (crouched walk, m/s). Under `air`; the game state's crouch says which way it is going. No key: the clips stand through a crouch. tools/art1/crouchkit.py shares the sneak and the dip; tools/art1/glb_add_clips.py puts the clips on a later build of the model with no Blender.
-- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne.
+- `air`, `land`: rise, fall, glide; a landing clip after `min_fall` s airborne, landing still (on the run the legs keep
+  running and the root's squash takes the landing).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `lead` (s of the clip skipped at the start, so its hit pose lands on the kit's hit), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
-  Over every clip (no data): HunterAnim's landing squash and its lean into a run start or stop (meta `FEEL`) go on
-  the root bone after the rig blend, pivoting at the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean only).
+  Over every clip (no data): HunterAnim's landing squash, its lean into a run start or stop and over a ledge's lip, and
+  its bank into a turn or under the glider (meta `FEEL`, Vector3) go on the root bone after the rig blend, pivoting at
+  the feet (`WardenClips.feel`; a `rig_root` Hero takes the lean and bank only).
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 

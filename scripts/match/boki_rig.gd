@@ -315,7 +315,8 @@ func _keep_flex(dt: float) -> void:
 	_feel.step(dt, root.global_position)
 	var sq := _feel.squash * LAND_SQUASH
 	flex.rotation = _flinch.rot + Vector3(-_feel.lean, 0.0, 0.0)
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide) * Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
+	var flinched := Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	flex.scale = flinched * Vector3(1.0 + sq * 0.6, 1.0 - sq, 1.0 + sq * 0.6)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:

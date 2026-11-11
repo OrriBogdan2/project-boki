@@ -301,6 +301,33 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## Smooth, not just quick (`--move-butter-check`, decision 0086, 11-11)
+
+Owner 11-11: "the movement / gliding / mantling still feels mid" and "doesn't feel smooth/buttery... very formulaic".
+The sim already answers in one step (e2e 1 frame) and matches the source (rows above), so this pass measures what the
+body and the camera show. `--move-butter-check` runs one Hero with clips (gunslinger) through the real frame
+(Match._process) on a carved course: a run with a 90 degree turn and a stop, five 1.6 m ledges (jump and push in), a
+run off the top into a glide with a 45 degree bend, a landing run. `--butter-csv=<file>` writes the per-frame trace;
+`docs/shots/move-feel-1111/butter_graph.png` plots it before and after.
+
+The ten worst, measured on main 88b06b9e7 (before) and ext/move-feel-1111 (after):
+
+| # | Problem | Before | After | |
+|---|---|---|---|---|
+| 1 | Landing on the run plays the full-body land clip: legs planted while he runs on (foot_slide_s) | 1.30 s (0.33 s a landing) | 0.00 s | fixed: WardenClips plays it landing still only |
+| 2 | A jump at a ledge smacks the face at run speed, then chatters 0-0.9 m/s pressed to it (chain_stall_s, 5 ledges) | 0.83 s | 0.32 s | fixed: MantleCarry.approach |
+| 3 | Up a face the body tips back (the air rise pose), so the climb reads as a float, not a vault | -4 deg | +14 deg over the lip | fixed: HunterAnim RISE_TUCK |
+| 4 | No roll into a turn on a clip Hero (turn_bank_deg) | 0.0 deg | 4.5 deg | fixed: HunterAnim bank on the root |
+| 5 | No bank under the glider (glide_bank_deg) | 0.0 deg | 8.5 deg | fixed |
+| 6 | The camera's glide lead starts at full speed when the glider opens or closes (cam_jerk) | 175 m/s2 | 59 m/s2 | fixed: a damped spring |
+| 7 | A landing's squash lands in one frame, and a soft glider landing squashes like a fall (pose_pop_m) | 0.10-0.17 m | 0.076 m | fixed: SQUASH_IN, glide-aware hardness |
+| 8 | Starting and stopping: no lean past the run pose, no rock back past standing (start/stop_lean_deg) | -1.0 / 0.0 deg | 3.1 / 3.8 deg | fixed: ext/land-squash-lean + gains |
+| 9 | Opening the glider out of a rising jump cuts the climb in one step | +5.3 to -1.1 m/s | same | not changed: the glide_start_vy row ([game data] GlideStartFallSpeedMin) |
+| 10 | A 90 degree key turn on the ground: speed dips (straight-line velocity blend), the body turns to the cursor at 1280 deg/s | 4.55 to 3.25 m/s, 90 deg in 4 frames | same | not changed: momentum-1111 / decision 0083 own the turn; turn_rate is [game data] |
+
+Also: clip switches over the course 6 to 0 (no land clips mid-run); all five ledges climbed in 5.1 s before and after
+(the ledge rows above are unchanged); landing to 90% run 0.017 s both.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

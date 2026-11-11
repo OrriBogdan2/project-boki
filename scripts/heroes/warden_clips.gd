@@ -476,7 +476,8 @@ func feel(dt: float, on_feet: bool) -> void:
 	var bi := WardenSkeleton.find(skel, "root")
 	var k := 1.0 - proc_w
 	var sq_to := f.x * LAND_SQUASH * k if on_feet else 0.0
-	squash = sq_to if sq_to < squash else lerpf(squash, sq_to, 1.0 - exp(-SQUASH_IN * dt))     # (it springs back as HunterAnim lets go)
+	# (on over a few frames; it springs back as HunterAnim lets go)
+	squash = sq_to if sq_to < squash else lerpf(squash, sq_to, 1.0 - exp(-SQUASH_IN * dt))
 	var sq := squash
 	if bi < 0 or (sq < 0.001 and absf(lean * k) < 0.001 and absf(bank * k) < 0.001):
 		return
@@ -485,7 +486,8 @@ func feel(dt: float, on_feet: bool) -> void:
 	var up := (inv * root.global_basis.y).normalized()
 	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
 	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
-	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * k) * Basis((inv * root.global_basis.z).normalized(), bank * k)
+	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * k)
+	tip *= Basis((inv * root.global_basis.z).normalized(), bank * k)
 	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
