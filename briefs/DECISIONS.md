@@ -4,6 +4,17 @@ Main keeps this file current; anyone can propose a line in EXT_TO_MAIN tagged "D
 
 
 
+
+## 2026-11-11 ~2:40 AM EST: merge trains and branch deadlines (owner)
+Owner: "can we make a rule that a job must be merged by X time of release?" Model: trunk-based dev + release trains + merge queue (Riot/Supercell/Epic/Chrome practice). Starts right after 0.24.6 ships.
+- A job is DONE when its work is MERGED into the current integ branch, not when it posts READY.
+- Every job starts from and rebases onto the base ref (/home/boki/cj/base-ref, the newest integ/release branch), never stale main.
+- Merge trains at 6 AM and 6 PM EST: every READY branch that passes the gate rides the next train; a green train can ship as a release. Releases never wait for a feature; a feature waits for the next train.
+- 24 h rule: a READY branch that misses two trains goes back to a fix-and-rebase task (coordinator queues it); it does not sit.
+- 3-day rule: any unmerged branch older than 3 days is archived as tag archive/<branch> (nothing lost) and leaves the merge list, unless it is HELD for owner review.
+- Unfinished or large features merge behind a flag that is OFF by default instead of living on a branch.
+- merge-gap tracker alerts the coordinator on >60 unmerged or any branch past these limits.
+
 ## 2026-11-10 ~1:20 PM EST: XP follows SUPERVIVE's model (owner)
 Owner: "we should follow supervive here - no passive xp, clear xp tracker on the bottom left, and hitting players gives no xp, only builds towards armor upgrades" + "killing a monster = you and nearby teammates get xp - if an enemy steals a last hit, they get the xp (and bonuses for monsters that give those, like bosses)". Mechanics only; never SUPERVIVE names/art.
 Rules:
