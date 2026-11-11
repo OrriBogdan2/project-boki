@@ -53,6 +53,9 @@ func _arrived(was: Node):
 			return cur
 	return null
 
+func _snap(rec: Dictionary) -> String:
+	return JSON.stringify([rec["stats"], rec.get("lean"), rec["needs"], rec["level"]])
+
 func _rec(nm: String) -> Dictionary:
 	return (Save.d["roster"] as Array).filter(func(r): return String(r["name"]) == nm)[0]
 
@@ -86,7 +89,7 @@ func run(m: Node) -> void:
 	Save.no_write = true
 	seed(5)
 	var d := BaseDemo.save()
-	d["zones"]["cinderstep"] = {"open": true}      # the second zone the day plays in (a real run opens it on day 3 or so)
+	d["zones"]["cinderstep"] = {"open": true}      # the second zone the day plays in
 	var real := Save.path_for(Save.slot)
 	var before := FileAccess.get_md5(real)
 	Game.goto("home", {"zone": "bramblebank"})
@@ -118,22 +121,23 @@ func _morning(bb) -> void:
 	Save.add_item("bramble_honey", 1)
 	Save.add_item("heirloom_thread", 1)
 	await _wait(1.0)
-	var snap := JSON.stringify([pip["stats"], pip.get("lean"), pip["needs"], pip["level"]])
+	var snap := _snap(pip)
 	bb._open_feed(pip)
 	var text := _labels(bb.root_ui)
 	ok(bb.panel_open == "Feed Pip" and "Zipseed" in text, "the feed menu lists the Zipseed")
 	var pv := GardenItems.preview(pip, "zipseed")
 	ok(pv["ok"] and String(pv["text"]) in text, "the row shows the exact preview line: %s" % pv["text"])
-	ok(JSON.stringify([pip["stats"], pip.get("lean"), pip["needs"], pip["level"]]) == snap, "looking at the preview changes nothing")
+	ok(_snap(pip) == snap, "looking at the preview changes nothing")
 	if "Heirloom" not in text:
-		note("the Nest item (Heirloom Thread) has no row in the feed menu: it only works in the Nook, and nothing here says so")
+		note("the Nest item (Heirloom Thread) has no row in the feed menu and nothing here says it works in the Nook")
 	await _grab("feed_menu")
 	var stat := String(GardenItems.item("zipseed")["effect"]["stat"])
 	var was: int = int(pip["stats"][stat])
 	bb._care_feed(pip, "zipseed")
 	await _wait(0.5)
 	var now: int = int(pip["stats"][stat])
-	ok(now == mini(was + int(GardenItems.item("zipseed")["effect"]["n"]), Care.stat_cap(pip)), "feeding it adds the previewed points (%s %d to %d)" % [stat, was, now])
+	var gain := int(GardenItems.item("zipseed")["effect"]["n"])
+	ok(now == mini(was + gain, Care.stat_cap(pip)), "feeding adds the preview (%s %d to %d)" % [stat, was, now])
 	ok(int(Save.d["items"].get("zipseed", 0)) == 0, "the Zipseed left the bag")
 	ok(pip["journal"].any(func(e): return "Zipseed" in String(CareJournal.text(e))), "the journal has the line")
 	await _grab("fed")
@@ -183,7 +187,8 @@ func _dash_and_cup(bb) -> void:
 	Engine.time_scale = 1.0
 	ok(seen_card != "", "a result card follows the first race: %s" % seen_card.left(120))
 	var crowned: bool = GardenPrizes.ribbon_count(pip, "dash") > 0
-	ok(crowned, "the Dash Crown is won (%d of %d races won, cup stage %d)" % [wins, races, GardenPrizes.stage(pip, "dash")])
+	var stage := GardenPrizes.stage(pip, "dash")
+	ok(crowned, "the Dash Crown is won (%d of %d races won, cup stage %d)" % [wins, races, stage])
 	if not crowned:
 		note("no Crown in %d races (Pip fast, rivals %.2fx the total): Pip won %d" % [races, FOE_RATIO, wins])
 	await _grab("after_dash")
@@ -193,11 +198,12 @@ func _nook(bb) -> void:
 	var a := _rec("Pip")
 	var b := _rec("Moss")
 	var why: String = NookRules.pair_why(a, b)
-	note("the demo's two friends are level %d: the Nook says '%s' (the first-day list asks for a pair)" % [int(a["level"]), why])
+	note("the demo's friends are level %d: the Nook says '%s'" % [int(a["level"]), why])
 	ok(why != "", "a level-%d pair is refused with a reason" % int(a["level"]))
 	bb._open_nook()
 	await _grab("nook_gated")
-	ok("lv %d needed" % NookRules.GROWN_LV in _labels(bb.root_ui).to_lower(), "the Nook tile says the real level it needs")
+	var tag := "lv %d needed" % NookRules.GROWN_LV
+	ok(tag in _labels(bb.root_ui).to_lower(), "the Nook tile says the real level it needs")
 	bb._close_panel()
 	for r in [a, b]:
 		r["level"] = PAIR_LEVEL
