@@ -105,10 +105,33 @@ func run(main: Node) -> void:
 	ok(buttons.size() == 2 * P.pack.size(), "hold window: Swap and Drop for each of your %d things" % P.pack.size())
 	hold.free()
 	m.hud.close_loot()
+	_double_f(m, P, Q)
 	_merged_drops(m, P)
 	print("LOOT FULL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
+
+## First F opens the box window, a second F press closes it even when smart loot takes nothing
+## (a full pack, worse things inside), and the player's inputs are free right after.
+func _double_f(m: Match, P: Hunter, Q: Hunter) -> void:
+	P.pack = [Loot.valuable("kin_idol"), Loot.valuable("sky_pearl")]
+	P.backpack = 0
+	m.boxes.clear()      # the nearest box wins the prompt: earlier sections' boxes sit on the same spot
+	var bx := make_box(Q, P.pos, [Loot.valuable("old_coin")])
+	m.boxes.append(bx)
+	P.inp["interact"] = true
+	m._update_interact(0.016)
+	ok(m.hud.loot_is(bx), "double F: the first press opens the box window")
+	P.inp["interact"] = false
+	m._update_interact(0.016)
+	P.inp["interact"] = true
+	m._update_interact(0.016)
+	ok(not m.hud.loot_is(bx) and m.hud.loot_open == null, "double F: the second press closes it with nothing taken")
+	ok(not bx["empty"] and (bx["pack"] as Array).size() == 1, "double F: the box still holds what you didn't take")
+	ok(m.hud.loot_panel == null and not m.hud.mouse_on_panel(), "double F: no window is left to eat mouse input")
+	P.inp["interact"] = false
+	m._update_interact(0.016)
+	m.boxes.erase(bx)
 
 ## Most loose pickups one monster kill, one chest or one prop may leave (one per kind: gem, seed, tonic, armor, key).
 const MAX_PER_KILL := 5
