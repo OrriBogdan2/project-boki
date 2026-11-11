@@ -1,6 +1,7 @@
 extends Control
-## The pre-match lobby screen (rules: Prematch): pick your Hunter, meet your squad, plan with text
-## chat (and a voice hook), watch the countdown. At 0 the picks lock and the match loads.
+## The pre-match lobby screen (rules: Prematch): pick your Hunter, see and swap the Boki riding with you
+## (RidePick), meet your squad, plan with text chat (and a voice hook), watch the countdown. At 0 the
+## picks lock and the match loads.
 
 var pm: Prematch
 var voice := VoiceChat.new()
@@ -8,6 +9,7 @@ var timer_label: Label
 var hint: Label
 var grid: GridContainer
 var squad_box: VBoxContainer
+var ride_box: VBoxContainer
 var chat_log: VBoxContainer
 var chat_scroll: ScrollContainer
 var chat_in: LineEdit
@@ -56,6 +58,8 @@ func _ready() -> void:
 	var side_col := UI.vbox(12)
 	side_col.custom_minimum_size = Vector2(380, 0)
 	cols.add_child(side_col)
+	ride_box = UI.vbox(0)
+	side_col.add_child(ride_box)
 	side_col.add_child(UI.section("Your squad"))
 	squad_box = UI.vbox(6)
 	side_col.add_child(squad_box)
@@ -82,6 +86,7 @@ func _ready() -> void:
 	side_col.add_child(talk_btn)
 	_talk(false)
 	_fill_hunters()
+	_fill_ride()
 	_fill_squad()
 	_tick_label()
 	Net.message.connect(_on_msg)
@@ -98,6 +103,7 @@ func _process(delta: float) -> void:
 	if pm.locked and not was:
 		hint.text = "Picks are locked. Loading in..."
 		_fill_hunters()
+		_fill_ride()
 		chat_in.release_focus()
 	if go:
 		set_process(false)
@@ -153,6 +159,18 @@ func _choose(ak: String) -> void:
 		_fill_hunters()
 		_fill_squad()
 		_announce_pick()
+
+## Your riding Boki (RidePick): swap it until the picks lock. Online the lobby already told everyone
+## which Boki you bring, so it stays as you joined with.
+func _fill_ride() -> void:
+	for c in ride_box.get_children():
+		c.queue_free()
+	var why := ""
+	if pm.locked:
+		why = "Locked in."
+	elif pm.opts.has("net"):
+		why = "Online: you bring the Boki you joined with."
+	ride_box.add_child(RidePick.build(self, why, _fill_ride))
 
 func _fill_squad() -> void:
 	for c in squad_box.get_children():

@@ -13,6 +13,7 @@ Option 2. `Prematch` (scripts/match/prematch.gd) holds the rules (countdown, loc
 - Picks lock at 0; the locked pick is saved (`HeroGrid.save_pick`) and passed as `opts["arch"]` and, online, into the roster.
 - Chat and picks go over the lobby channel (`Net.lobby_emit` topics `chat` and `pick`), filtered to teammates. Voice is a stub: `VoiceChat.transport` is the plug-in point, none ships.
 - Loading screen: map name, mode, squad portraits, a lore line under the tip, the staged progress bar.
+- Your Boki (RidePick, also on the home expedition panel): the one riding with you, its carry passive and summon window, swapped from your garden roster until the lock. Online it stays as you joined the lobby with (the presence already sent it; no Net change).
 
 ## Affects
 Net.VERSION 0.25.0 (new topics, roster field), `Game.start_match`, `Match.make_bot`, the online lobby's `_go`, loading.gd. No save-format change. Online countdowns are local per client from the moment each receives Start.

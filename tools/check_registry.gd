@@ -114,6 +114,8 @@ const CHECKS := {
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
+	"--ride-pick-check": ["res://tools/ride_pick_check.gd", "ride_pick_check", "check"],      # the Boki riding with you
+	"--ride-pick-shots": ["res://tools/ride_pick_check.gd", "ride_pick_check", "shots"],      # --shots-dir=<dir> (GPU)
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
