@@ -24,6 +24,7 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	_mob_naps()
 	_far_bots()
+	_far_mobs()
 	_shadows()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
@@ -86,6 +87,38 @@ func _far_bots() -> void:
 		if float(b.ai["dash_cd"]) != before:
 			thinks += 1
 	ok(thinks == 6, "near the player it decides every step (%d of 6)" % thinks)
+
+func _far_mobs() -> void:
+	var mb: Mob = null
+	for x in m.mobs:
+		if not x.dead:
+			mb = x
+	ok(mb != null, "setup: a monster")
+	if mb == null:
+		return
+	mb.grounded = true
+	mb.tgt = null
+	mb.pos = m.player.pos + Vector3(Mob.FAR_M + 15.0, 0, 0)
+	mb._far_dt = 0.0
+	var steps := 0
+	var banked := 0.0
+	for i in Mob.FAR_EVERY * 4:
+		m.time += Match.DT
+		var dt := mb._far_step(Match.DT)
+		if dt > 0.0:
+			steps += 1
+			banked += dt
+	var all := Match.DT * Mob.FAR_EVERY * 4
+	ok(steps >= 4 and steps <= 5 and is_equal_approx(banked + mb._far_dt, all),
+		"far away a monster steps every %d sim steps, no time lost (%d steps)" % [Mob.FAR_EVERY, steps])
+	mb.pos = m.player.pos + Vector3(5.0, 0, 0)
+	mb._far_dt = 0.0
+	steps = 0
+	for i in 6:
+		m.time += Match.DT
+		if mb._far_step(Match.DT) == Match.DT:
+			steps += 1
+	ok(steps == 6, "near the player it steps every sim step (%d of 6)" % steps)
 
 ## The world box of a mesh: its longest side in metres.
 func _world_size(gi: GeometryInstance3D) -> float:

@@ -4,12 +4,18 @@ extends RefCounted
 ##   wisp_0_hero      standing, before the knock
 ##   wisp_1_pop_a     the pop-in, first frames (flash and ring)
 ##   wisp_2_pop_b     the pop-in settling (puff, Wisp small)
-##   wisp_3_idle      the Wisp bobbing, the hero gone
-##   wisp_4_moving    the Wisp drifting: leaning, trailing
-##   wisp_5_mate      a teammate's Wisp beside the player's
-##   wisp_6_revive_a  the revive: the Wisp brightens, the hero small
-##   wisp_7_revive_b  the hero scaling up
-##   wisp_8_hero      the hero back at full size
+##   wisp_3_idle      the Wisp floating low with a steady glow, the hero gone
+##   wisp_4_moving    the Wisp hanging back behind the moving hunter, leaning back
+##   wisp_5_settle    the hunter stopped, the Wisp still catching up
+##   wisp_6_mate      a teammate's Wisp beside the player's
+##   wisp_7_revive_a  the revive: the Wisp brightens, the hero small
+##   wisp_8_revive_b  the hero scaling up
+##   wisp_9_hero      the hero back at full size
+## and the stolen Boki wisps (StolenWisp), beside the player:
+##   stolen_0_loose   two loose wisps: the slow bob and soft pulse
+##   stolen_1_held    a rival and a teammate each carry one: thin side-colour ring, tether to the carrier
+##   stolen_2_scatter the rival dies: its wisp darts out on its own arc
+##   stolen_3_home    match end: both fly home to the player, a ribbon behind each
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -37,21 +43,24 @@ func run(main_node: Node) -> void:
 	await _go(0.1)
 	_take("wisp_2_pop_b", "Pop-in settling: the puff drifts off, the Wisp grows to size")
 	await _go(0.5)
-	_take("wisp_3_idle", "The Wisp idling: bob and flicker, the hero model is hidden")
+	_take("wisp_3_idle", "The Wisp idling low: round outline, team rim, white core, steady glow, the hero hidden")
 	await _go(0.5, Vector3(0.05, 0, 0.03))
-	_take("wisp_4_moving", "The Wisp drifting: it leans into the move and sheds a trail")
+	_take("wisp_4_moving", "The Wisp hangs back behind the moving hunter and leans back, slow and heavy")
+	await _go(0.2)
+	_take("wisp_5_settle", "The hunter stopped: the Wisp is still settling back over the hunter")
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	mate.teleport(P.pos + Vector3(2.0, 0, 0.0))
 	m.knock(mate, foe, {})
 	await _go(0.5)
-	_take("wisp_5_mate", "A teammate's Wisp beside yours (the default look, tinted by team)")
+	_take("wisp_6_mate", "A teammate's Wisp beside yours (the default look, tinted by team)")
 	m.revive_hunter(P, null)
 	await _go(0.08)
-	_take("wisp_6_revive_a", "Revive: the Wisp brightens as the hero pops back in, small and squashed")
+	_take("wisp_7_revive_a", "Revive: the Wisp brightens as the hero pops back in, small and squashed")
 	await _go(0.12)
-	_take("wisp_7_revive_b", "The hero scaling up, the Wisp fading")
+	_take("wisp_8_revive_b", "The hero scaling up, the Wisp fading")
 	await _go(0.6)
-	_take("wisp_8_hero", "The hero back at full size, no Wisp")
+	_take("wisp_9_hero", "The hero back at full size, no Wisp")
+	await _stolen(foe, mate)
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)
@@ -85,13 +94,35 @@ func _setup() -> void:
 		if h != P:
 			h.teleport(m.world.free_spot_near(away, [], 1.0, 0.4, 8.0))
 
-func _go(secs: float, drift := Vector3.ZERO) -> void:
+func _stolen(foe: Hunter, mate: Hunter) -> void:
+	var front := P.pos + Vector3(0, 1.4, 0)
+	var a := StolenWisp.spawn(m, "cindle", {}, front + Vector3(3, 0, -1))
+	var b := StolenWisp.spawn(m, "puddlet", {}, front + Vector3(3, 0, 1.5))
+	await _go(0.5)
+	_take("stolen_0_loose", "Two loose Boki wisps: a slow bob and a soft pulse, grabbable")
+	foe.teleport(m.world.free_spot_near(P.pos + Vector3(5, 0, 2), [], 1.0, 0.4, 8.0))
+	mate.teleport(m.world.free_spot_near(P.pos + Vector3(5, 0, -3), [], 1.0, 0.4, 8.0))
+	a.grab(foe, 0)
+	b.grab(mate, 0)
+	await _go(0.8, Vector3(0, 0, 0.04), foe)
+	_take("stolen_1_held", "A rival and a teammate each carry one: a thin ring in their side colour and a tether")
+	a.scatter(0, 1)
+	await _go(0.3)
+	_take("stolen_2_scatter", "The rival died: its wisp darts out on its own arc")
+	await _go(0.7)
+	a.go_home(P)
+	b.go_home(P)
+	await _go(0.35)
+	_take("stolen_3_home", "Match end: the wisps fly home to their owner, a fading ribbon behind each")
+
+func _go(secs: float, drift := Vector3.ZERO, who: Hunter = null) -> void:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
 		t += DT
-		P.pos += drift
-		P.prev = P.pos
+		var mover := who if who else P
+		mover.pos += drift
+		mover.prev = mover.pos
 		m.cam.snap(P.pos)
 		for h in m.hunters:
 			h.render(DT, 1.0)

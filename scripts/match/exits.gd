@@ -68,12 +68,11 @@ func setup(match_node: Match) -> void:
 	if docks.size() > 1:
 		var keep: int = m.rng.randi_range(0, docks.size() - 1)
 		var fr := [0.62, 0.74, 0.86, 0.9, 0.93]
-		if m.rolling: fr = [0.84, 0.89, 0.93, 0.95]     # a rolling session: the docks close in its last few minutes
 		var k := 0
 		for i in docks.size():
 			if i == keep:
 				continue
-			docks[i]["close_at"] = m.at_sess(float(fr[mini(k, fr.size() - 1)]))
+			docks[i]["close_at"] = m.length * float(fr[mini(k, fr.size() - 1)])
 			k += 1
 		docks[keep]["last"] = true
 	for i in list.size():
@@ -145,7 +144,7 @@ func _add_dock(d: Dictionary) -> void:
 	sk.rotation.y = yaw
 	m.add_child(sk)
 	list.append({"kind": "dock", "pos": beacon, "berth": berth, "out": out, "node": n, "skiff": sk, "name": (nm + " Dock") if nm != "" else "Skiff Dock",
-		"state": "idle", "t": 0.0, "open_at": m.at_sess(0.18), "close_at": 1e9, "team": -1, "caller": "", "hold": {}, "waves": 0, "wave_t": 0.0, "aboard": []})
+		"state": "idle", "t": 0.0, "open_at": m.length * 0.18, "close_at": 1e9, "team": -1, "caller": "", "hold": {}, "waves": 0, "wave_t": 0.0, "aboard": []})
 
 func _add_hatch(d: Dictionary) -> void:
 	var p: Vector3 = d["pos"]
@@ -165,7 +164,7 @@ func _add_outpost(d: Dictionary, tut: bool) -> void:
 		_place(pal, at)
 	var nm := _island_name(at)
 	list.append({"kind": "outpost", "pos": at, "node": n, "name": (nm + " Outpost") if nm != "" else "Outpost", "state": "idle", "t": 0.0, "prog": 0.0,
-		"open_at": 0.0 if tut else m.at_sess(0.22), "team": -1, "hold": {}, "waves": 0, "wave_t": 0.0, "contested": false, "steal": 0.0, "tut": tut})
+		"open_at": 0.0 if tut else m.length * 0.22, "team": -1, "hold": {}, "waves": 0, "wave_t": 0.0, "contested": false, "steal": 0.0, "tut": tut})
 
 # ------------------------------------------------------------------ queries
 func of_kind(k: String) -> Array:
@@ -346,7 +345,6 @@ func _call(x: Dictionary, h: Hunter) -> void:
 	var n: Node3D = x["node"]
 	var lamp := n.get_node("Beacon/Lamp") as MeshInstance3D
 	lamp.material_override = Models.toon(ExitModels.DOCK, false, 1.6)
-	n.get_node("Beacon/Flare").visible = true
 	(n.get_node("Sparks") as CPUParticles3D).emitting = true
 	(n.get_node("Beacon/Lever") as Node3D).rotation.x = 0.5
 	# loud: everyone hears the horn and sees the flare and the ping
@@ -454,7 +452,6 @@ func _depart(x: Dictionary) -> void:
 	x["aboard"] = []
 	var nd: Node3D = x["node"]
 	(nd.get_node("Beacon/Lamp") as MeshInstance3D).material_override = Models.toon(Color("6a5a40"))
-	nd.get_node("Beacon/Flare").visible = false
 	(nd.get_node("Sparks") as CPUParticles3D).emitting = false
 	(nd.get_node("Beacon/Lever") as Node3D).rotation.x = -0.5
 	m.sfx("whoosh", x["berth"], 0.0, 0.6)
@@ -468,7 +465,6 @@ func _close_dock(x: Dictionary) -> void:
 	for nm in ["LanternL", "LanternR"]:
 		var l := nd.get_node_or_null(nm) as MeshInstance3D
 		if l: l.material_override = Models.toon(Color("5a5048"))
-	(nd.get_node("Berth") as Node3D).visible = false
 	(nd.get_node("Beacon/Ring") as Node3D).visible = false
 	m.add_feed("%s has closed" % x["name"])
 	if m.hud and m.player and not m.player.out and not m.player.extracted:
@@ -672,7 +668,13 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 		OutpostLook.sway(n, m.time)
 	var near: bool = m.player != null and in_yard(x, m.player)
 	var charging: bool = x["state"] == "charging"
-	OutpostLook.rings(n, near or x["contested"], x["contested"], charging, float(x["prog"]))
+	OutpostLook.rings(n, near or x["contested"], charging, float(x["prog"]))
+
+## Opens an outpost's lift for a team at once, with no uplink (the tutorial's last step: the uplink and
+## holding its yard are one-time hints now).
+func open_now(x: Dictionary, team: int) -> void:
+	x["team"] = team
+	_open_lift(x)
 
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
@@ -688,7 +690,7 @@ func _open_lift(x: Dictionary) -> void:
 		m.ping(x["pos"], ExitModels.UPLINK)
 		if m.player and not m.player.out and m.player.flat_dist(x["pos"]) < 70.0:
 			m.add_feed("The lift is open at %s for %ds" % [x["name"], int(LIFT_T)])
-	if m.hud and m.player and int(x["team"]) == m.player.team and not m.player.out:
+	if m.hud and m.player and int(x["team"]) == m.player.team and not m.player.out and not x.get("tut", false):
 		m.hud.toast("Uplink complete! The lift is open: step into the light", ExitModels.UPLINK)
 
 # ------------------------------------------------------------------ monster waves
@@ -765,6 +767,22 @@ func tick(dt: float) -> void:
 			"dock": _tick_dock(x, dt)
 			"hatch": _tick_hatch(x, dt)
 			"outpost": _tick_outpost(x, dt)
+		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1
+		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time)
+
+## The team of someone standing on a live exit (on the deck, at the hatch, in the yard), or -1.
+func occupant(x: Dictionary) -> int:
+	for h in m.hunters:
+		if not _live(h):
+			continue
+		match String(x["kind"]):
+			"dock":
+				if on_deck(x, h): return h.team
+			"hatch":
+				if h.flat_dist(x["pos"]) < HATCH_R: return h.team
+			"outpost":
+				if in_yard(x, h): return h.team
+	return -1
 
 ## Only one squad is left: their way out comes faster.
 func on_last_team() -> void:

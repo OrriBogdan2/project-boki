@@ -4,7 +4,7 @@
 	"name": "Echo Chain",
 	"short": "Echo",
 	"flavor": "A sound pulse leaps between up to 3 foes, stunning each 0.4s, then echoes 0.9s later and does it all again at half strength.",
-	"theme": "echo",
+	"theme": "sound",
 	"tier": 1,
 	"from": "kin",
 	"range": 7,
