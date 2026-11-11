@@ -313,6 +313,8 @@ func _skiff(m: Match) -> void:
 	ok(landed, "jumping off the ship ends with you on your feet (%.0f s)" % fall_t)
 	var docks := m.exits.of_kind("dock")
 	ok(not docks.is_empty(), "there is a skiff to take")
+	if docks.is_empty():
+		return
 	var d: Dictionary = docks[0]
 	P.max_hp = 5000.0      # the driver stands at the dock while rivals and the wave come: the exit is what is tested
 	P.hp = P.max_hp
