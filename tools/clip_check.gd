@@ -14,7 +14,7 @@ const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
 const NO_STRIDE_M := 0.05      # m: a shin swinging less than this does not step (Motley hovers: his legs hang, 0.024 m)
-const HAND_PIECE_M := 0.25     # m: while carrying, a shown piece on one hand alone may reach this far (a hand, not a weapon)
+const HAND_PIECE_M := 0.25     # m: carrying, a shown piece on one hand alone may reach this far (a hand, not a weapon)
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
@@ -425,7 +425,8 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	for gone in dd.get("carry_drop_surfaces", []):
 		ok(_surface_tris(clips.drop, String(gone)) <= 1, "%s: the fused weapon (%s) is hidden" % [id, gone])
 	var loose := _hand_piece(sk)
-	ok(loose <= HAND_PIECE_M, "%s: no weapon rides a hand into the Boki (longest piece on a hand alone %.2f m, limit %.2f)"
+	ok(loose <= HAND_PIECE_M,
+			"%s: no weapon rides a hand into the Boki (longest piece on a hand alone %.2f m, limit %.2f)"
 			% [id, loose, HAND_PIECE_M])
 	ok(plain < NO_STRIDE_M or stride >= plain * 0.75,
 			"%s: the legs keep stepping under it (%.3f m of stride, %.3f m without)" % [id, stride, plain])

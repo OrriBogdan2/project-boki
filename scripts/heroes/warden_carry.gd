@@ -4,7 +4,8 @@ extends RefCounted
 ## (the walk and run clips at the carry's 90% speed). Both arms come in to cradle the Boki at a chest socket, the
 ## torso leans back a little under the weight, and the weapon bones the Hero's data names ("carry_stow") are put away
 ## where the hands are needed; a weapon modelled straight into a hand ("carry_drop": the hands; "carry_drop_surfaces":
-## a weapon fused into the hand by blended weights, named by its surface) leaves the shown mesh for the carry (held, hold). Two-bone arm IK on the contract bones (RIG_CONTRACT), so one layer fits all 12 bodies;
+## a weapon fused into the hand by blended weights, named by its surface) leaves the shown mesh for the carry (held,
+## hold). Two-bone arm IK on the contract bones (RIG_CONTRACT), so one layer fits all 12 bodies;
 ## no clip is authored for it. The socket (world position) is left on the model for KinDowned.scoop_pose.
 
 const MOVE := "rs_carry"           # HunterAnim pose id (KinDowned.rescue_pose) that carries; "rs_done" eases it out
