@@ -3,7 +3,8 @@ extends RefCounted
 ## Recording mode caps frames at Record.REC_FPS with v-sync and gives the player's cap back when off.
 ## Each quick start (DemoQuick) is up within READY_S with no tutorial: the expedition has every seat
 ## filled, its bots in showcase Hunters, every kit open and no foe plates stacked over the drop while
-## recording; the farm's Boki are evolved and its Goals card steps aside while recording; the hatch
+## recording; every farm Boki whose next form has art has evolved, the ones waiting on art stay and say
+## so on their Growth card, and the Goals card steps aside while recording; the hatch
 ## opens on the creator.
 ## Neither the real save file nor Save.d is touched: the title screen gives the real one back.
 ## With --shots-dir=<dir> (a real GPU run) each path also saves screenshots and logs its frame times:
@@ -11,7 +12,6 @@ extends RefCounted
 
 const READY_S := 10.0          # s: the most a quick start may take to be playable
 const WATCH_S := 12.0          # s: how long each path runs for its frame times and second shot
-const FORMS_MIN := 3           # Evo forms every grown-farm Boki has (DemoQuick.FARM_LEVEL 13)
 
 var main: Node
 var fails := 0
@@ -129,10 +129,25 @@ func _expedition(m: Match) -> void:
 func _farm(h: Node) -> void:
 	var tut: Dictionary = Save.d["tutorial"]
 	ok("farm: no tutorial", bool(tut.get("home", false)) and bool(tut.get("day1_done", false)))
-	var low: Array = []
+	# (DECISIONS 2026-11-08: never into a form whose model is not in the game, so the demo promises
+	# evolution only where the art is in)
+	var short: Array = []
+	var told: Array = []
+	var wait: Array = []
 	for r in Save.d["roster"]:
-		if (r.get("forms", []) as Array).size() < FORMS_MIN: low.append(r["name"])
-	ok("farm: every Boki evolved", low.is_empty(), "%d Boki, short: %s" % [Save.d["roster"].size(), low])
+		var f := Evo.level_form(r)
+		var evolved := not (r.get("was", []) as Array).is_empty()
+		if not f.is_empty() and f[2] and int(r["level"]) >= int(f[1]):
+			short.append(r["name"])        # its form has art and it is past the level, yet it didn't
+		elif not f.is_empty() and not f[2]:
+			wait.append("%s %s" % [r["name"], r["species"]])
+			if not Evo.level_note(r).ends_with("waits on its art"): told.append(r["name"])
+		elif f.is_empty() and not evolved:
+			wait.append("%s %s (no level form)" % [r["name"], r["species"]])
+	ok("farm: every Boki whose next form has art evolved", short.is_empty(),
+		"%d Boki, short: %s" % [Save.d["roster"].size(), short])
+	ok("farm: the ones waiting on art stay, and their card says so", told.is_empty(),
+		"waiting: %s, wrong: %s" % [wait, told])
 	ok("farm: the base built", (Save.d["layout"]["deco"] as Array).size() >= 10 and h.get("hb") != null)
 	var card = (h.get("guide") as FarmGuide).tracker
 	var was := Record.level

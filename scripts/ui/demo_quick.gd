@@ -13,7 +13,7 @@ const NAMES := ["Expedition (busy)", "Farm (grown)", "Hatch"]
 const SHOWCASE := ["juggernaut", "archer", "rimewright", "tender", "ashwick", "gunslinger"]
 const YOU := "juggernaut"          # Kael: your Hunter in the expedition
 const MATE := "archer"             # Lace: your squadmate, who leads the drop (Match._demo_drop)
-const FARM_LEVEL := 13             # Boki level on the grown farm: three forms each (Evo, a form every 4 levels)
+const FARM_LEVEL := 13             # Boki level on the grown farm; one whose level form has art grows on to it
 
 static var _real := {}             # the real save while a made-up one plays (empty when none is held)
 static var _real_no_write := false
@@ -64,7 +64,8 @@ static func expedition_opts() -> Dictionary:
 	o["unlocked"] = true          # every Hunter's whole kit open from the drop: abilities to film, not padlocks
 	return o
 
-## HomeWork's farm at work, its Boki grown to FARM_LEVEL with the forms and parts that brings.
+## HomeWork's farm at work, its Boki grown to FARM_LEVEL with the parts that brings, and on to the level
+## of each next form whose model is in the game, so the farm shows every evolution the art allows.
 static func grown_save() -> Dictionary:
 	var d := HomeWork.demo_save()
 	var rng := RandomNumberGenerator.new()
@@ -72,6 +73,11 @@ static func grown_save() -> Dictionary:
 	for r in d["roster"]:
 		r["level"] = FARM_LEVEL
 		Evo.simulate(r, rng)
+		var f := Evo.level_form(r)
+		while not f.is_empty() and f[2] and int(f[1]) > int(r["level"]):
+			r["level"] = int(f[1])
+			Evo.on_level(r, rng)
+			f = Evo.level_form(r) if r["level"] < Evo.cap() else []
 	d["bridges"] = Data.ISLES.keys()
 	d["buildings"] = Data.BUILDINGS.keys()
 	d["name"] = "Hunter"
