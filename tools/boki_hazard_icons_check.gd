@@ -69,9 +69,10 @@ func _stand(kind: String) -> void:
 	var ai := _first(kind)
 	var cells: Array = tz.areas[ai]["cells"]
 	var c: Vector3 = tz.areas[ai]["centre"]
+	var mid := Vector2(c.x - 0.5, c.z - 0.5)
 	var best: Vector2i = cells[0]
 	for q in cells:
-		if Vector2(q).distance_to(Vector2(c.x - 0.5, c.z - 0.5)) < Vector2(best).distance_to(Vector2(c.x - 0.5, c.z - 0.5)):
+		if Vector2(q).distance_to(mid) < Vector2(best).distance_to(mid):
 			best = q
 	P.teleport(Vector3(best.x + 0.5, float(tz.areas[ai]["y"]), best.y + 0.5))
 	P.vel = Vector3.ZERO
@@ -92,7 +93,8 @@ func _rows() -> void:
 	ok("the map has lava and static", lava >= 0 and _first("static") >= 0)
 	_frames(0.3)
 	var v := BokiHazardIcons.view(tz, P)
-	ok("off the hazards: lead's lava icon and second's static icon, both dim", v == [["lava", false], ["static", false]], str(v))
+	ok("off the hazards: lava icon (lead) and static icon (second), both dim",
+		v == [["lava", false], ["static", false]], str(v))
 	await _shot("icons_dim")
 	_stand("lava")
 	v = BokiHazardIcons.view(tz, P)
