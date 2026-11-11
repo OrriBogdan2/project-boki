@@ -7,17 +7,28 @@ extends RefCounted
 const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]      # [name, s left on your turn]
 
 ## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
-## margin, as "Class at rect".
+## margin, as "Class at rect". Inside a ScrollContainer only the part it shows counts.
 func outside(node: Node, area: Rect2) -> Array:
 	var pv = load("res://scripts/ui/prematch_view.gd")
 	var margin := float(maxi(pv.SAFE_MIN, int(area.size.y * pv.SAFE_FRAC)))
 	var safe := area.grow(-margin + 1.0)
 	var bad: Array = []
 	for c in node.find_children("*", "Control", true, false):
-		var inside := safe.encloses(c.get_global_rect())
+		var shown := _shown(c, node)
+		var inside := not shown.has_area() or safe.encloses(shown)      # scrolled out of sight counts as inside
 		if c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0 and not inside:
 			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
 	return bad
+
+## The part of `c` on screen: its rect clipped by every ScrollContainer between it and `top`.
+func _shown(c: Control, top: Node) -> Rect2:
+	var r := c.get_global_rect()
+	var p := c.get_parent()
+	while p and p != top:
+		if p is ScrollContainer:
+			r = r.intersection(p.get_global_rect())
+		p = p.get_parent()
+	return r
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -56,6 +67,6 @@ func run(main: Node) -> void:
 		var win := main.get_window().size
 		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
 		main.get_viewport().get_texture().get_image().save_png(path)
-		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
+		var bad := outside(view, Rect2(Vector2.ZERO, view.size))      # logical px: the UI scale shrinks the view
 		print("PREMATCHSHOT %s outside the safe area: %d %s" % [path, bad.size(), bad.slice(0, 3)])
 	tree.quit()

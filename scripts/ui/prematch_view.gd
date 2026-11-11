@@ -35,7 +35,8 @@ var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 const COLUMNS := 5          # Hunter cards per row (13 Hunters fit in 3 rows)
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
 const CARD_PAD := 10        # px, inside a card
-const GRID_GAP := 12        # px, between cards
+const GRID_GAP := 12        # px, between cards in a row
+const ROW_GAP := 8          # px, between rows (3 rows and a chat line fit 1280x720)
 const PIC_MAX := 84.0       # px, a card's portrait at full size
 const PIC_MIN := 48.0       # px, the smallest card portrait (the name and role stack is about this tall)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
@@ -97,7 +98,7 @@ func _ready() -> void:
 	grid.columns = COLUMNS
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", GRID_GAP)
-	grid.add_theme_constant_override("v_separation", GRID_GAP)
+	grid.add_theme_constant_override("v_separation", ROW_GAP)
 	sc.add_child(grid)
 	_build_chat(root)
 	_talk(false)
@@ -228,12 +229,20 @@ func _fill_hunters() -> void:
 	_fit_cards()
 
 ## Card portraits sized so all the rows fit the room the grid has (PIC_MAX at most, PIC_MIN at least).
+## A card is never shorter than its name and role; when even those rows overflow, the chat log gives
+## up the difference (it scrolls).
 func _fit_cards() -> void:
 	var rows := ceili(Arch.ids().size() / float(COLUMNS))
-	var room: float = grid.get_parent().size.y - GRID_GAP * (rows - 1)
+	var room: float = grid.get_parent().size.y - ROW_GAP * (rows - 1)
 	var px := clampf(floorf(room / rows) - 2 * CARD_PAD, PIC_MIN, PIC_MAX)
+	var card_h := 0.0
 	for card in grid.get_children():
 		card.get_meta("pic").custom_minimum_size = Vector2(px, px)
+		card_h = maxf(card_h, card.get_combined_minimum_size().y)
+	var over := card_h * rows - room
+	if over > 0.0 and chat_scroll and chat_scroll.visible and chat_log.get_child_count() > 0:
+		var line: float = chat_log.get_child(-1).get_combined_minimum_size().y
+		chat_scroll.custom_minimum_size.y = maxf(line, chat_scroll.custom_minimum_size.y - ceilf(over))
 
 ## One card: portrait, name, role word. Stats and the unlock quest are the tooltip. A shut Hunter is dim
 ## with a padlock.
@@ -262,6 +271,8 @@ func _tile(ak: String) -> PanelContainer:
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	else:
 		col.add_child(UI.label(role, 13, UI.MUTED))
+	# a long "taken by" trims instead of widening the card
+	col.get_child(-1).text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	card.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak)
 	if not open:
 		row.add_child(Padlock.new())

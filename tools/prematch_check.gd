@@ -245,6 +245,11 @@ func _screen(main: Node) -> void:
 	ok(view.pm.locked and view.caption.text == "PICKS LOCKED", "once the squad has picked the banner says so")
 	var note: String = view.note_label.text
 	ok(note.contains("locked in") and note.contains(HunterViewer.display_name("bulwark")), "the note names the pick")
+	for i in 4:
+		view._add_chat("sleepyfox_", "push north, I hold the ridge", UI.INK)
+	for i in 6:
+		await main.get_tree().process_frame
+	_fits(view, " with the picks locked and a full chat log")
 	view.set_process(false)
 	view.queue_free()
 
@@ -268,8 +273,12 @@ func _declutter(view: Control) -> void:
 		shut_ok = shut_ok and plain and lock == shut and tip_ok
 	ok(open == 2 and shut_ok, "each card is name + role word, shut ones have a padlock, hover has stats and quest")
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
+	_fits(view, "")
+
+## The whole screen inside the safe margin and every Hunter row in view (`when` names the moment).
+func _fits(view: Control, when: String) -> void:
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
-	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
+	ok(fits.is_empty(), "every element sits inside the screen's safe margin%s (%s)" % [when, fits.slice(0, 2)])
 	var room: Rect2 = view.grid.get_parent().get_global_rect()
 	var rows: Rect2 = view.grid.get_global_rect()
-	ok(room.encloses(rows), "every Hunter row shows without scrolling (grid %s in %s)" % [rows, room])
+	ok(room.encloses(rows), "every Hunter row shows without scrolling%s (grid %s in %s)" % [when, rows, room])
