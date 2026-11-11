@@ -39,6 +39,7 @@ func run(main: Node) -> void:
 	_fallback()
 	_ult_cues()
 	_boki_cues()
+	_pickups()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -189,6 +190,32 @@ func _boki_cues() -> void:
 	for cue in wired:
 		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
 		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
+
+## 7. Pickups by item category (content/rules/pickup_sfx.json): every category, gear kind, treasure, belt
+## item and ground kind maps to a sound that exists, and the key cue is kept.
+func _pickups() -> void:
+	var r: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PickupSfx.RULES))
+	var cats: Dictionary = r["cues"]
+	var cues := cats.values()
+	for c in (r["gear_kind"] as Array) + [r["valuable"], r["belt"]] + (r["kinds"] as Dictionary).values():
+		ok(cats.has(c), "pickup category %s has a cue" % c)
+	var kinds := Gear.SLOT_NAMES.size()
+	ok((r["gear_kind"] as Array).size() == kinds, "a pickup category for each of the %d gear kinds" % kinds)
+	var silent := cues.filter(func(s): return not Sfx.ensure(String(s)))
+	ok(silent.is_empty(), "every pickup category has its sound file (missing %s)" % [silent])
+	ok(Sfx.ensure("key_get"), "the key cue key_get is kept")
+	var wrong := []
+	for gid in Gear.ALL:
+		if not cues.has(PickupSfx.of_gear(String(gid))):
+			wrong.append(gid)
+	for vid in Loot.VALUABLES:
+		if not cues.has(PickupSfx.of(Loot.valuable(String(vid)))):
+			wrong.append(vid)
+	for iid in UtilityBelt.ALL:
+		if not cues.has(PickupSfx.of_kind(String(iid))):
+			wrong.append(iid)
+	ok(wrong.is_empty(), "every gear piece, treasure and belt item has a cue (%s)" % [wrong])
+	ok(Sfx.ensure("use_tonic") and Sfx.ensure("use_armor_kit"), "tonic drink and armour-kit repair have own sounds")
 
 func _takes(sname: String) -> Array:
 	var out := []
