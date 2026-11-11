@@ -28,7 +28,7 @@ const DN := preload("res://tools/displace_net_check.gd")
 ## The relay with a bad line: every send waits its one-way time; snapshots may be lost or overtaken.
 class LagRelay extends RelayServer:
 	var rng := RandomNumberGenerator.new()
-	var held: Array = []          # [due msec, peer id, message, fast, seq]
+	var in_flight: Array = []     # [due msec, peer id, message, fast, seq]
 	var seq := 0
 	var last_fast := {}           # peer id -> seq of the newest snapshot it got
 	var last_due := {}            # peer id -> due msec of its last reliable message (they stay in order)
@@ -43,14 +43,14 @@ class LagRelay extends RelayServer:
 		if not fast:
 			due = maxi(due, int(last_due.get(id, 0)))
 			last_due[id] = due
-		held.append([due, id, d, fast, seq])
+		in_flight.append([due, id, d, fast, seq])
 
 	func _process(dt: float) -> void:
 		super._process(dt)
 		var now := Time.get_ticks_msec()
-		held.sort_custom(func(a, b): return a[0] < b[0])
-		while not held.is_empty() and int(held[0][0]) <= now:
-			var x: Array = held.pop_front()
+		in_flight.sort_custom(func(a, b): return a[0] < b[0])
+		while not in_flight.is_empty() and int(in_flight[0][0]) <= now:
+			var x: Array = in_flight.pop_front()
 			if x[3]:
 				if int(x[4]) < int(last_fast.get(x[1], 0)):
 					lost += 1
