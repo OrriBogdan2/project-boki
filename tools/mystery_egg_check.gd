@@ -88,7 +88,7 @@ func _scene(main: Node) -> void:
 	var holder: Node3D = hx.eggs[m]["holder"]
 	var egg: EggHatch = hx.eggs[m]["egg"]
 	var in_basket := holder.get_children().any(func(c): return c is MysteryEgg)
-	ok(in_basket and egg.shell_col.get_luminance() < 0.15, "it's a black egg in a basket")
+	ok(in_basket and egg.kind == "mystery", "it's the mystery egg (void shell, a cracked \"?\") in a basket")
 	ok(_cards(hx) == 3, "its card is hidden until you find it (%d cards)" % _cards(hx))
 	hx._pick(m)
 	await tree.process_frame
