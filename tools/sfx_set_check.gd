@@ -15,6 +15,8 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
+##  10. the world's cues outside the kits (mobs, pickups, gloves, utilities, garden games, Ways Out):
+##      tools/sfx_world_cues.gd
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -47,6 +49,7 @@ func run(main: Node) -> void:
 	_ult_cues()
 	_garden_names()
 	_garden()
+	preload("res://tools/sfx_world_cues.gd").new().run(ok)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

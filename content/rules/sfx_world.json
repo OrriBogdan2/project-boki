@@ -1,0 +1,127 @@
+{
+ "_doc": "The world's sound cues outside the kits, walked by --sfx-set-check (tools/sfx_world_cues.gd, docs/SFX_WORLD.md). Per system: the content/sfx sets that are its own sounds, the files whose literal cues it plays (path or path#function), and the holes left: cues that fall back to a shared stock sound or a missing one. The holes list is a ratchet; it only shrinks.",
+ "systems": {
+  "mobs": {
+   "sets": ["mob", "mobs"],
+   "files": [
+    "scripts/match/mob.gd",
+    "scripts/match/boss.gd"
+   ],
+   "mob_voices": true,
+   "holes": [
+    "mob _strike/spit:k_spore",
+    "mob _strike/volley:throw",
+    "mob _strike/fuse:boom",
+    "mob _strike/slam:k_gravity",
+    "boss _begin:v_warden",
+    "boss _atk_slam:k_gravity",
+    "boss _throw:throw",
+    "boss _tick_flying:boom",
+    "boss _tick_flying:k_spore",
+    "boss _atk_fissure:k_gravity",
+    "boss _atk_dash:zap",
+    "boss _atk_dash:whoosh",
+    "boss _atk_storm:zap",
+    "boss _atk_static:zap",
+    "boss _atk_spit:k_spore",
+    "boss _atk_brood:die_small",
+    "boss _atk_burrow:k_gravity",
+    "boss _atk_burrow:boom",
+    "boss _phase_up:v_warden",
+    "boss _phase_up:boom"
+   ]
+  },
+  "pickups": {
+   "sets": ["pickups"],
+   "files": [
+    "scripts/match/chest_loot.gd",
+    "scripts/match/loot_full.gd",
+    "scripts/match/pack.gd",
+    "scripts/match/life.gd#take_item",
+    "scripts/match/life.gd#loot_box",
+    "scripts/match/key_run.gd",
+    "scripts/match/key_chest.gd"
+   ],
+   "holes": [
+    "chest_loot open:pickup",
+    "loot_full swap_held:pickup",
+    "loot_full drop_for_held:pickup",
+    "loot_full denied:lock_rattle",
+    "pack stash:pickup",
+    "pack swap:pickup",
+    "pack _wear:pickup",
+    "life take_item:pickup",
+    "life loot_box:pickup",
+    "key_run on_pickup:key_get",
+    "key_chest deny:lock_rattle",
+    "key_chest unlock_fx:unlock"
+   ]
+  },
+  "gloves": {
+   "sets": ["gloves"],
+   "files": [
+    "scripts/match/match.gd#use_gear"
+   ],
+   "gloves": true,
+   "holes": [
+    "match use_gear:skill",
+    "match use_gear/gust_fan:glide",
+    "match use_gear/platform:shield",
+    "match use_gear/rocket:glide",
+    "match use_gear/skyhook:throw",
+    "match use_gear/hover:jump",
+    "glove blink area:boom",
+    "glove grapple projectile:throw",
+    "glove shock projectile:throw",
+    "glove ward cloak:cloak"
+   ]
+  },
+  "utilities": {
+   "sets": ["belt"],
+   "files": [
+    "scripts/match/utility_use.gd"
+   ],
+   "holes": [
+    "utility_use start/drink:pickup",
+    "utility_use start/repair:build",
+    "utility_use start/mend:heal",
+    "utility_use start/smoke:cloak",
+    "utility_use start/scan:ping",
+    "utility_use start:skill",
+    "utility_use _pad:throw",
+    "utility_use tick:heal",
+    "utility_use tick:shield"
+   ]
+  },
+  "garden games": {
+   "sets": ["garden"],
+   "files": [
+    "scripts/home/base_race.gd",
+    "scripts/home/base_shove.gd",
+    "scripts/home/base_seek.gd",
+    "scripts/home/base_volley.gd",
+    "scripts/home/garden_sfx.gd"
+   ],
+   "holes": []
+  },
+  "ways out": {
+   "sets": ["heart"],
+   "files": [
+    "scripts/match/heart.gd",
+    "scripts/match/heart_sfx.gd",
+    "scripts/match/exits.gd",
+    "scripts/match/quest_seat.gd",
+    "scripts/match/quest_seats.gd",
+    "scripts/match/seat_beacon.gd"
+   ],
+   "holes": [
+    "heart _force:portal",
+    "heart _tide_tick:thump",
+    "exits _tick_outpost/open:thump",
+    "exits _waves:thump",
+    "quest_seat _force:horn",
+    "quest_seats _reseal:boom"
+   ]
+  }
+ }
+}
