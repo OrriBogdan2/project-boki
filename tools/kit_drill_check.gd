@@ -39,6 +39,12 @@ func _text() -> void:
 	ok(KitDrill.callout(jug, 1) == "%s AGAIN" % jug["key"], "after the first press the call-out is '<KEY> AGAIN'")
 	ok(not KitDrill.line("juggernaut", "e").begins_with("Try "), "a slice Hunter's line is its own text")
 	ok(KitDrill.line("tender", "e").begins_with("Try "), "a Hunter outside the slice gets the generic line")
+	for slot in ["rmb", "e", "x", "dash"]:
+		var gil_line := KitDrill.line("gil", slot)
+		var gil_name := String(Arch.def("gil")[slot]["name"])
+		ok(gil_line.contains(gil_name), "gil %s: the drill line names his own move (%s)" % [slot, gil_line])
+	ok(KitDrill.how("gil", "e") == "again", "gil E is a recast (Riptide: press E again to send the spout)")
+	ok(KitDrill.how("gil", "rmb") == "hold", "gil RMB has a hold (Grab Bag: hold to aim further)")
 
 func _steps() -> void:
 	var k := KitDrill.new()
