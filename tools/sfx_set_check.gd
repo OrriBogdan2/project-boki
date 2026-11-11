@@ -11,6 +11,7 @@ extends RefCounted
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. the level-up rise, the rank confirm and the max sting exist and are wired once each (LevelSfx)
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -39,6 +40,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_level_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -153,6 +155,21 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## 9. Levelling up has its own cues, each called from one place, for the local Hunter only.
+func _level_cues() -> void:
+	var made := true
+	for sname in ["level_up", "rank_up", "rank_max"]:
+		made = made and Sfx.ensure(sname) and Sfx.sound_reach.get(sname, 0.0) == 0.0
+	ok(made, "level_up, rank_up and rank_max exist and are not positional")
+	var pitched := true
+	for slot in Hunter.SLOTS:
+		pitched = pitched and LevelSfx.SLOT_PITCH.has(slot)
+	ok(pitched, "every ranked slot has its own confirm pitch")
+	var hunter := FileAccess.get_file_as_string("res://scripts/match/hunter.gd")
+	var local := hunter.count("LevelSfx.level_up(m)") == 1 and hunter.count("LevelSfx.rank(m, slot,") == 1
+	ok(local and hunter.contains("if is_local() and m and m.hud:\n\t\t\tm.hud.level_up(lvl, wstep)\n\t\t\tLevelSfx"),
+			"Hunter plays the rise and the rank cue once each, inside the is_local gates")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
