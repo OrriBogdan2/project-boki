@@ -6,7 +6,8 @@ extends "res://tools/idle_shots.gd"
 ## recoil's leftover after the last shot (deg). With --shots-dir (a renderer) also films
 ## <dir>/<id>/<layer>_<gait>_<dir>/f###.png, FILM_FRAMES across the run. The checks are in --clip-check.
 
-const ART := {"gunslinger": "vex", "dolm": "tarek"}     # Hero id -> its warden_anim file
+# Hero id -> its warden_anim file
+const ART := {"gunslinger": "vex", "dolm": "tarek", "dredge": "dredge", "mage": "ryzz"}
 # (x, z) off the facing
 const DIRS := {"f": Vector2(0, -1), "b": Vector2(0, 1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 const SETTLE := 30              # frames on the gait before anything starts
@@ -26,6 +27,12 @@ const LAYERS := {
 	"dolm": {
 		"wind": {"kmove": "breah_wind"}, "boulder": {"kmove": "breah_throw"}, "punch": {"kmove": "breah_punch"},
 		"flinch": {"hit": true}, "aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
+	"dredge": {
+		"shot": {"kmove": "dr_shot"}, "throw": {"kmove": "dr_throw"}, "reel": {"kmove": "dr_reel"},
+		"blast": {"kmove": "dr_blast"}, "flinch": {"hit": true}, "aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
+	"mage": {
+		"cast": {"kmove": "mage_lmb_l", "cycle": SHOT_GAP * 2.0}, "hold": {"kmove": "mage_rmb_hold"},
+		"e": {"kmove": "mage_e"}, "flinch": {"hit": true}, "aim_up": {"aim": AIM}, "aim_down": {"aim": -AIM}},
 }
 
 func run(main: Node) -> void:

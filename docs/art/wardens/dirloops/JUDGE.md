@@ -23,3 +23,24 @@ Open, not mine to pick: the loco speeds against the f loop lengths ask for steps
 2.2 m/s x 1.083 s = 1.19 m a step on a 1.17 m leg), so any non-forward loop must crouch or flight. A longer walk cycle
 (f too) or a lower walk_speed would let b/l/r stand as tall as f. The pilot run_f loops themselves plant at 7.4 m/s
 (Tarek, loco 5.0) and 6.0 m/s (Vex, 4.55): they slide in game and pull the run diagonals with them.
+
+# Grimble (dredge) and Sparkle (ryzz) walk/run loops: rubric judge (2026-11-11)
+
+All eight walk/run loops of each rebuilt with `tools/art1/hunter_dir_gait.py` (f too, own lengths: `... -- SRC OUT walk_f run_f b,l,r,f <walk s> <run s>`).
+No Meshy: the poses are the characters' own (Grimble hunched under the hoard, hook arm; Sparkle's caster stride). Judged by the builder against
+the rubric, no subagent. Strips (game renderer, --clip-shots --match, 12 fps, 6 evenly spaced frames per loop; rows per direction f/b/l/r, before then after):
+`grimble_{walk,run}_before_after.jpg`, `sparkle_{walk,run}_before_after.jpg`. At match zoom the silhouettes are the same size and shape before and after;
+the change is in where the feet are and when.
+
+| clip | length s | planted sole m/s vs loco | pelvis dip | verdict |
+|---|---|---|---|---|
+| Grimble walk f/b/l/r | 1.000 -> 0.750 | 1.03 -> 2.20 vs 2.2 | 0 | keep: slide, contact, seam pass; weight 3/5 (hoard rides the hips) |
+| Grimble run f/b/l/r | 0.625 -> 0.542 | 3.15 -> 4.40 vs 4.4 | 0 | keep |
+| Sparkle walk f/b/l/r | 0.938 -> 0.792 | 1.17 -> 2.20 vs 2.2 | 0 / 0 / 4.1 / 4.6 cm | keep; l/r dip is a small knee give |
+| Sparkle run f/b/l/r | 0.604 -> 0.542 | 3.73 -> 4.80 vs 4.8 | 0 | keep |
+
+Both heroes' shipped loops skated at 47-78% of loco speed; every kept loop now plants at 100% of it. Seams: last key = first; `--clip-check` (0 failures,
+walk loops one length per hero, ring-length assert). Upper layers (`--layer-verify --wardens=dredge,mage`, entries added to the tool): legs off the
+unlayered run 0.000 m in every layer x gait x direction, recoil leftover 0.00 deg; the flinch's extra hand/head jump on the run (up to 0.32 m) is the flinch
+itself, as for Vex and Tarek. `--dredge-combo-check` 95 checks, `--mage-combo-check` 129 checks, 0 failures. Alternative not taken: the shorter A build for Grimble
+(walk 0.604 s, run 0.5 s): the cadence is too quick for a hunched sack carrier; B keeps the weight.
