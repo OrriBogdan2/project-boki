@@ -229,20 +229,16 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 | Passive proc | `ostra_empower` | `anim_os_empower` |
 | X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
 
-## Timing pass (`tools/ostra_anim_time_check.gd`, run inside `--ostra-combo-check`)
-Each keyed move played in a real match with the model rendered, read off the clips (s from the press). Source = briefs/hero-ref/ostra.md
-(5 fps: one footage frame is 0.2 s, so every source time is good to a frame). "Owns" = the move has the body (clip blend, WardenClips.FADE 0.1);
-"back" = the legs have the body again. Before = this branch's start (ext/anim-time-motley off origin/main), after = now.
+## Engine notes
+- Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
+  HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
+- Net: the seed travels as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
+  Nightwell runs on the caster's game like the seed's pop: hits carry the stun, and every caught body (a player online on
+  their own game) is drawn to the centre by a Displace "glide" tow.
+- Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
+  adds no hold field (nothing to drop on a merge).
 
-| Move | Source | Ours before | Ours after |
-|---|---|---|---|
-| LMB orb (`ostra_orb`) | one orb about every 0.6 s, a one-hand flick, the body barely moves | orb on the press frame, flick owns 0.12, back 0.50 (clip 0.30, upper body) | same |
-| LMB full orb (`ostra_orb_hot`) | a long blue-violet bolt, no extra pause read | orb on the press frame, owns 0.12, back 0.70 (clip 0.50) | same |
-| RMB wind-up to release (`ostra_snap_wind`) | black orb one frame, shards the next: 0.2-0.4 s | owns 0.10, released 0.33 (owner item 40: 0.32, longer than the source) | same (owner decision kept) |
-| Shift cast (`ostra_swap_aim`, `ostra_swap`) | cast 0158, teleport 0168: about 1.8 s | aim owns 0.10, lantern leaves on the key release (0.53), lands 1.80 s later, legs back 1.55 | same |
-| E seed (`ostra_seed`) | the orb drops in the cast's one frame (0352) | seed down 0.02, clip owns 0.10, palm key at 0.20, back 0.97 | same (inside the frame) |
-| E pop (`ostra_pop`) | a quick pop, 0.6-0.8 s after the recast | pops on the press frame, owns 0.10, back 0.77 | same |
-| Hover | about 0.3 m (0.25-0.35 m) up, "no bob readable"; the brief's build note: +-0.03 m at 0.6 Hz | 0.15 m +-0.015 m (a hand's width: HOVER_H 0.15; the doc said 0.3 and the code did not) | 0.30 m +-0.03 m (HOVER_H 0.3, HOVER_BOB 0.03): lowest bone 0.268-0.325 m up standing, 0.260-0.324 walking |
+## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
 
 Not timed (no source time beyond "a held cast"): `ostra_well*`, `ostra_empower`, `ostra_arrive`, `ostra_swap_air`.
 
@@ -277,12 +273,3 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 | R | the Boki Merge (`mf_xform`, ours) | 0.80 | same | no source |
 
 Not in the slots: `ostra_flurry` is cut (no caller, `--dead-kmoves-check`); `ostra_empower` (Swollen, 0.9 s) has no source frame.
-
-## Engine notes
-- Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
-  HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
-- Net: the seed travels as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
-  Nightwell runs on the caster's game like the seed's pop: hits carry the stun, and every caught body (a player online on
-  their own game) is drawn to the centre by a Displace "glide" tow.
-- Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
-  adds no hold field (nothing to drop on a merge).
