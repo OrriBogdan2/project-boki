@@ -108,9 +108,16 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	var armor_drag := {"inv": "pack", "i": 0}
 	ok(lp._can_drop_worn(Vector2.ZERO, armor_drag, 2) and not lp._can_drop_worn(Vector2.ZERO, armor_drag, 0),
 		"dragging armor: it can drop on the armor slot, not on a glove")
-	lp._drop_worn(Vector2.ZERO, {"inv": "pack", "i": 0}, 2)
-	ok(p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
-		"the drop wears it")
+	var vp := main.get_viewport()
+	var nowhere := vp.get_final_transform() * Vector2(4, 4)
+	var kept := await _drag(main, lp._pack_rows[0], nowhere)
+	ok(kept == [true, false] and p.pack[0].get("id", "") == "vest",
+		"a drag picks the vest up with a sound and, let go off the window, puts it back silently %s" % [kept])
+	lp = await _reopen(main, m)
+	var slot: Control = lp._worn_tiles[2]
+	var worn := await _drag(main, lp._pack_rows[0], vp.get_final_transform() * (slot.get_global_transform_with_canvas() * (slot.size * 0.5)))
+	ok(worn == [true, true] and p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
+		"dragged onto the armor slot it sounds picked up and set down, and the drop wears it %s" % [worn])
 	lp = await _reopen(main, m)
 	lp._hover = {"kind": "worn", "i": 2}
 	lp._input(_key(KEY_DELETE))
@@ -136,6 +143,37 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 		"looting: your inventory opens at the right, the box side by side to its left")
 	m.hud.close_loot()
 	ok(not m.hud.pack_open(), "closing the box closes it again")
+
+## A real mouse drag through Input, as the OS sends it: press near the left end of `from` (clear of its
+## buttons), move past the drag threshold in steps and let go at `to` (window pixels). Whether the pick-up
+## sound played, then whether the set-down sound did (UiSfx).
+func _drag(main: Node, from: Control, to: Vector2) -> Array:
+	var vp := main.get_viewport()
+	var at := vp.get_final_transform() * (from.get_global_transform_with_canvas() * Vector2(24.0, from.size.y * 0.5))
+	await _mouse(main, at, InputEventMouseMotion.new())
+	Sfx.last_played.clear()
+	var press := InputEventMouseButton.new()
+	press.button_index = MOUSE_BUTTON_LEFT
+	press.pressed = true
+	await _mouse(main, at, press)
+	for k in range(1, 7):
+		var mv := InputEventMouseMotion.new()
+		mv.button_mask = MOUSE_BUTTON_MASK_LEFT
+		mv.relative = (to - at) / 6.0
+		await _mouse(main, at.lerp(to, k / 6.0), mv)
+	var lifted := Sfx.last_played.has("pickup")
+	Sfx.last_played.clear()
+	var release := InputEventMouseButton.new()
+	release.button_index = MOUSE_BUTTON_LEFT
+	await _mouse(main, to, release)
+	return [lifted, Sfx.last_played.has("click")]
+
+## Sends one mouse event at `at` (window pixels) and lets two frames pass.
+func _mouse(main: Node, at: Vector2, e: InputEventMouse) -> void:
+	e.position = at
+	e.global_position = at
+	Input.parse_input_event(e)
+	await _frames(main, 2)
 
 func _reopen(main: Node, m: Match) -> LoadoutPanel:
 	m.hud.close_pack()
