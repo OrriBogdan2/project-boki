@@ -15,7 +15,7 @@ const STEP := 1.0 / 60.0
 const COST_MS := 1.0           # ms per frame for 30 Boki's naps (one KinNap each in both drivers: 60 updates)
 const RIGGED := "cindle"
 const PRIMITIVE := "basaltoad"
-const SHOT_AT := [["awake", 0.0], ["settling", 0.3], ["asleep", 2.0], ["stretch", 0.45]]
+const SHOT_AT := [["awake", 0.0], ["settling", 0.3], ["asleep", 2.0], ["stretch", 0.55]]
 const BIG := 1.5               # the second Boki's scale in the shot
 
 var bad := 0
@@ -246,7 +246,7 @@ func _shots() -> void:
 	pair[1].scale *= BIG
 	for k in pair:
 		vp.add_child(k)
-		k.rotation.y = 0.6
+		k.rotation.y = PI - 0.5      # three-quarters toward the camera (front is -z)
 	await main.get_tree().process_frame
 	for k in pair:
 		_puppet_of(k).set_process(false)
