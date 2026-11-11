@@ -261,6 +261,7 @@ const CHECKS := {
 	"--portrait-check": ["res://tools/portrait_check.gd", "portrait_check", null],     # the Wardens' painted faces
 	"--boss-tell-check": ["res://tools/boss_tell_check.gd", "boss_tell_check", null],      # boss tells, hit shapes, dash escape
 	"--perkorb-check": ["res://tools/perkorb_check.gd", "perkorb_check", null],      # perk orbs, boss fan, weapon path
+	"--perk-orb-check": ["res://tools/perk_orb_check.gd", "perk_orb_check", null],      # orb perks vs the source's
 	"--prematch-check": ["res://tools/prematch_check.gd", "prematch_check", null],      # the pre-match lobby
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
