@@ -410,7 +410,7 @@ func _tutorial() -> void:
 	var mk := "the marker and its beam are up on every destination step frame (%d without, %d no beam)"
 	ok(no_marker == 0 and beam_miss == 0, mk % [no_marker, beam_miss])
 	ok(back_ok, "a fall into the void puts you back at the last stop")
-	var need := ["crouch", "pickup", "kin1", "glide"].all(func(s): return steps_seen.has(s))
+	var need := ["crouch", "pick_sec", "kin", "glide"].all(func(s): return steps_seen.has(s))
 	ok(need, "the course has the crouch, pick-up, glide and watch stops (%s)" % str(steps_seen.keys()))
 	# (goexit and uplink both point at the outpost: when the fight ends next to it, goexit can be over in a
 	# second, while the Boki is still flying back or riding your shoulder over the last gap)

@@ -62,16 +62,16 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Control mage: fence up close, throw the bag's potions, and land three different effects to Beach a foe. |
-| Passive: Fish Out of Water | Each different potion effect marks a foe. Three different marks within 5s Beach them: stunned 0.75s. |
+| Passive: Fish Out of Water | Each different potion effect, and a full Tide Lunge, marks a foe. Three different marks within 5s Beach them: stunned 0.75s. |
 | Dash: Ground Swim | Dive into the ground and swim 6m in 0.4s (you can still be hit). Surfacing next to foes knocks them up. |
 | RMB: Grab Bag | Throw the next potion from the bag (Thunder, Slime, Air, Fire, or a rare Super Zeep) in an arc. Hold to aim further; in the air it drops straight down. |
 | E: Riptide | Spin with the swordfish for up to 2s, then send a waterspout down a line that knocks up. A longer spin makes a bigger spout. |
 | Hunter ultimate: Tidal Wave | Surf a tidal wave down a line: it knocks foes up and slows them, and you land with a shield. |
-| Weapon: Swordfish | Three quick thrusts with the swordfish; every thrust steps you in, and the third slows. |
+| Weapon: Swordfish | Three quick thrusts with the swordfish; every thrust steps you in, and the third slows. Hold for a Tide Lunge down a line; full charge soaks (a splash mark). |
 
 ### Abilities in full
 
-**Fish Out of Water (passive).** Each different potion effect (shock, slime, gust, fire, Super Zeep) puts a splash mark on the foe it hits. Three different marks within 5s Beach them: stunned 0.75s, then the marks clear. Each foe can be Beached once every 8s.
+**Fish Out of Water (passive).** Each different potion effect (shock, slime, gust, fire, Super Zeep) and a full Tide Lunge (soak) puts a splash mark on the foe it hits. Three different marks within 5s Beach them: stunned 0.75s, then the marks clear. Each foe can be Beached once every 8s.
 
 **Ground Swim (dash, Shift, 8s cooldown).** Dive into the ground and swim about 6m in 0.4s, the fin cutting the surface (you can still be hit). Surfacing next to foes (2.2m) knocks them up for 0.5s.
 
