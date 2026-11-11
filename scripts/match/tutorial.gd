@@ -34,6 +34,8 @@ const KIT_KEY := {"pick_sec": "rmb", "sec": "rmb", "pick_dash": "dash", "dash": 
 
 const CARD_T := 1.5        # s a new step's panel counts as fresh: messages, bubbles and the scout hint wait
 const NAG_T := 8.0         # s without progress before the panel pulses and the Boki says it once more
+const NAG_PULSE_T := 2.4   # s the panel and the marker pulse after a stall (TutorialHud flares it 3 times)
+const CHIME_AT := 0.3      # s into a new step its banner chimes (after the step-done sting's first notes)
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const SPOT_T := 5.0        # s the lookout shows the glove it spotted
 const POINTS_T := 3.5      # s the "one ability point" line stands before the first pick
@@ -173,6 +175,8 @@ func update(dt: float) -> void:
 	if p.kin and p.kin.state == "downed":
 		p.kin.down_t = minf(p.kin.down_t, 0.5)     # (a Boki that got knocked out here comes round at once)
 	t += dt
+	if card_t < CHIME_AT and card_t + dt >= CHIME_AT:
+		m.sfx("ui_step", null, -8.0)
 	card_t += dt
 	done_t = maxf(0.0, done_t - dt)
 	flash_t = maxf(0.0, flash_t - dt)
@@ -513,8 +517,8 @@ func _stall(dt: float) -> void:
 	if stall_t >= NAG_T and wait <= 0.0:
 		stall_t = 0.0
 		best_d = 1e9 if target == Vector3.INF else _dist(target)
-		nag_t = 2.5
-		flash_t = 2.5
+		nag_t = NAG_PULSE_T
+		flash_t = NAG_PULSE_T
 		if m.player.kin and m.player.kin.comp:
 			m.player.kin.comp.nag()
 

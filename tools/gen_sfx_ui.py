@@ -2,11 +2,11 @@
 
 Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quiet 4x partial, a 2-3 ms
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
-Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
-muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick, your
-ultimate back = a low fifth and one bell over it (UltReadyCue).
-Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
-unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
+Press = a short tap, a new tutorial step = a rising fourth under a bell, hover = a tiny high tick,
+confirm = a rising pair, back = a falling pair, deny = a muted low double bump, open/close = an airy rise
+or fall under a pluck, tabs = a wood tick, your ultimate back = a low fifth and one bell over it
+(UltReadyCue). Several of these replace the older gameplay-era files under the same names (click, hover,
+pickup, unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
 import numpy as np
 import sfx_lib as S
@@ -134,6 +134,14 @@ def ult_ready(i):
     return finish(room(mix(fifth, bell), 0.7), 5200)
 
 
+def step(i):
+    """A new tutorial step's banner: a soft rising fourth with a light bell over it, quieter and shorter than
+    unlock (the step-done sting it follows), so the pair reads 'done, and here is the next one'."""
+    pair = mix(pluck(NOTE['G5'], 0.35, 0.09, 0.6), at(pluck(NOTE['C6'], 0.6, 0.16, 0.6), 0.09))
+    bell = at(S.chime(NOTE['G6'], 0.6, 0.22, ((1.0, 0.5), (2.76, 0.12))) * 0.18, 0.1)
+    return finish(room(mix(pair, bell), 0.7), 5200)
+
+
 def charge(i):
     """A held-button swell that rises in pitch, soft; the caller pitch-scales it as the hold grows."""
     d = 0.5; n = N(d); u = np.arange(n) / n
@@ -159,6 +167,7 @@ def main():
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
     S.save_cat('ui_ult_ready', ult_ready(0), 'ui')
+    S.save_cat('ui_step', step(0), 'ui')
 
 
 if __name__ == '__main__':
