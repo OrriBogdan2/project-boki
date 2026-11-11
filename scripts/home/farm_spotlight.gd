@@ -3,7 +3,8 @@ extends Control
 ## The tutorial spotlight: the screen darkens with a rounded cut-out round the one thing to do next (a bottom-bar
 ## button and/or a Boki in the world), the cut-out flashes a few times with the hint beside it, then the dim eases
 ## to a light vignette and the ring keeps a soft pulse until the thing is clicked. FarmGuide drives it (sync, every
-## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id, "world": true}).
+## poll); a step asks for it with "spot" in farm_tutorial.json ({"hub": button id, "world": true, "tile": build
+## entry id, "tab": its tab}). With build mode open it lights the tile (or its tab) instead of the bar button.
 ## Only the opening beat swallows mouse clicks; after it nothing here takes a click, so the target is always clickable.
 
 const BEAT_S := 0.9              # s, the opening beat: clicks held, the target flashes
@@ -66,9 +67,14 @@ var _ring_pad := RING_PAD_PX
 static func sync(home: Node, quiet: bool) -> void:
 	var id := FarmTutorial.current()
 	var want := {}
-	if not quiet and id != "" and _free_to_show(home):
+	var building: bool = home.hb != null and home.hb.active
+	if not quiet and id != "":
 		want = FarmTutorial.spot(id)
+	if not _free_to_show(home, want.has("tile")):
+		want = {}
 	var key := JSON.stringify(want, "", true) if not want.is_empty() else ""
+	if key != "" and building:
+		key += "|build"      # the build bar opening is a new target: it gets its own beat
 	if key == _key and is_instance_valid(_node):
 		return
 	close()
@@ -99,14 +105,22 @@ static func showing() -> bool:
 static func in_beat() -> bool:
 	return showing() and _node.beat and _node.age < BEAT_S
 
-static func _free_to_show(home: Node) -> bool:
+## Nothing in the way of the spotlight: no panel, talk or build animation; build mode only for a step that lights
+## a build tile.
+static func _free_to_show(home: Node, in_build: bool) -> bool:
 	var building: bool = home.hb != null and home.hb.active
-	return home.panel_open == "" and not home.chat_open and not home.building_now and not building \
+	return home.panel_open == "" and not home.chat_open and not home.building_now and (in_build or not building) \
 			and not Overlay.is_open()
 
 ## The screen boxes to light: the named bottom-bar button, and the step's marker in the world (a Boki).
 static func _rects(home: Node, id: String, want: Dictionary) -> Array[Rect2]:
 	var out: Array[Rect2] = []
+	if home.hb != null and home.hb.active:
+		var r: Rect2 = home.hb.bar.spot_rect(String(want["tile"]), String(want.get("tab", ""))) \
+				if want.has("tile") and home.hb.bar != null else Rect2()
+		if r.size.x > 0.0:
+			out.append(r)
+		return out
 	if bool(want.get("world", false)):
 		var box := _world_box(home, id)
 		if box.size.x > 0.0:
