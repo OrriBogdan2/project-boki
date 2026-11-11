@@ -145,6 +145,8 @@ func run(m: Node) -> void:
 	var H = load("res://scripts/home/home.gd").new()
 	main.add_child(H)
 	for _f in 4: await main.get_tree().process_frame
+	# built under a still-covered fade, the farm comes in slices
+	while H.building: await main.get_tree().process_frame
 	H.day_t = 0.5
 	ok(H.hinc != null and H.hinc.egg_nodes.size() == 3, "the Incubator stands by the Nook with 3 eggs placed in their cradles")
 	var locked := 0
