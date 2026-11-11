@@ -168,17 +168,22 @@
 				{
 					"kind": "item",
 					"id": "peekbox",
-					"w": 40
+					"w": 35
 				},
 				{
 					"kind": "item",
 					"id": "hush_truffle",
-					"w": 30
+					"w": 25
+				},
+				{
+					"kind": "item",
+					"id": "glowmoss_sprig",
+					"w": 15
 				},
 				{
 					"kind": "snack",
 					"id": "glowcap",
-					"w": 20
+					"w": 15
 				},
 				{
 					"kind": "item",

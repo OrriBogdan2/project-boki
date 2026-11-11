@@ -186,7 +186,8 @@ func _done(me: Dictionary, foe: Dictionary, mine: int, theirs: int) -> LanternMa
 func _settle() -> void:
 	var table: Array = GardenPrizes.game("lantern")["table"]
 	var ids := table.map(func(e): return e["id"])
-	ok(ids.has("peekbox") and ids.has("hush_truffle"), "the lantern table holds Peekbox and Hush Truffle")
+	ok(ids.has("peekbox") and ids.has("hush_truffle") and ids.has("glowmoss_sprig"),
+			"the lantern table holds Peekbox, Glowmoss Sprig and Hush Truffle")
 	for e in table:
 		var id := String(e["id"])
 		var known: bool = Data.CROPS.has(id) if e["kind"] == "snack" else GardenItems.item_name(id) != id
