@@ -150,7 +150,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 4 | 4 | 3 | **27** | was 25 (E / X wedges flat pale sectors, slugs small): fixed on ext/vfx-grimble-wedges, see below. Left: sound (3); the X charge fan has no lit front of its own |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 4 | 4 | 3 | **27** | was 25 (E / X wedges flat pale sectors, slugs small): fixed on ext/vfx-grimble-wedges, see below. Left: sound (3) |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
@@ -174,7 +174,8 @@ The scorecard's "RMB wedge" is read as his X fan: his RMB is the Abyssal Hand (a
 `wedge` ground look (docs/HERO_VFX.md): a soft inside (coverage 0.04 at the apex, 0.22 by the rim), a dark char line
 and a lit coin-gold rim on the exact edge, and a bright ragged front running out from him. Grimble's E wind-up holds
 one whose front is the wind-up's charge, so it reaches the rim on the slam frame; the slam flashes the rim and burns
-it away; each Broadside wave's front reaches the rim with the slugs (0.17 s, asserted against `x.range`, `MUZZLE` and
+it away; the X charge holds one whose front is the charge fan's growing edge, so it reaches the rim as the first wave
+fires; each Broadside wave's front reaches the rim with the slugs (0.17 s, asserted against `x.range`, `MUZZLE` and
 `x.speed`). The wedges are the hit cones (`e.radius`/`e.angle`, `x.range`/`x.fan_deg`); hit shapes and shot sizes
 are unchanged. His AimKit tells drop from alpha 1.8 to 0.7 so their fill stays under 0.25 at the apex. Slug trails
 (LMB and X) are 0.34 m wide (was 0.16), tail 0.14 s. Timing 3 -> 4 (the front lands on the hit), scale 3 -> 4 (slugs

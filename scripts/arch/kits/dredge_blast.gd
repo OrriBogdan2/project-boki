@@ -99,7 +99,8 @@ func _stop() -> void:
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "STOPPED", Color("ff8a7a"), true)
 	m.sfx("warn", h.pos, -4.0, 0.8)
 
-## The charge: the fan grows out from his front over 1.1s, brass sparks crackle between his fists.
+## The charge: the fan grows out from his front over 1.1s, its lit front (HeroVfx wedge) at the fan's edge so it
+## reaches the rim as the first wave fires; brass sparks crackle between his fists.
 func _charge_looks(kc: float) -> void:
 	var x := xd()
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
@@ -107,7 +108,7 @@ func _charge_looks(kc: float) -> void:
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
 		"fill": kc, "all": true, "col": FAN_COL, "col2": FAN_HOT, "alpha": FAN_ALPHA, "hot": 0.15 * kc})
 	if k.tells_visible():
-		HeroVfx.of(m).hold(h, "broadside_charge", kc, {"r": float(x["range"])})     # gold gathers in his fists
+		HeroVfx.of(m).hold(h, "broadside_charge", grow, {"r": float(x["range"])})     # fists, the fan's front
 
 ## One wave: six slugs fanned evenly across the locked fan, out to its edge.
 func _wave(i: int) -> void:

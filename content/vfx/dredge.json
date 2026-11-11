@@ -43,7 +43,8 @@
 				{"p": "coin", "y": 0.3, "n": 12, "speed": 6.0, "spread": 0.7, "grav": 13.0, "life": 0.9, "size": 0.1},
 				{"p": "ember", "y": 0.3, "n": 24, "speed": 8.0, "spread": 0.7, "grav": 5.0, "life": 0.6, "size": 0.06}]},
 
-		"broadside_charge": {"fx": [{"p": "ember", "at": "fists", "shape": "gather", "radius": 1.0, "n": 22, "speed": 3.0, "drag": 0.0, "curl": 0.3, "life": 0.3, "size": 0.05, "c": "main", "c2": "hot"},
+		"broadside_charge": {"fx": [{"p": "wedge", "size": "r", "arc": 105, "c": "main", "c2": "hot", "c3": "char"},
+				{"p": "ember", "at": "fists", "shape": "gather", "radius": 1.0, "n": 22, "speed": 3.0, "drag": 0.0, "curl": 0.3, "life": 0.3, "size": 0.05, "c": "main", "c2": "hot"},
 				{"p": "coin", "at": "fists", "radius": 0.25, "way": "up", "n": 4, "speed": 1.2, "spread": 0.6, "grav": -0.5, "life": 0.4, "size": 0.08, "near": true},
 				{"p": "ember", "at": "feet", "shape": "arc", "radius": "r", "arc": 105, "w": 0.4, "way": "up", "n": 24, "speed": 0.9, "spread": 0.2, "grav": -1.0, "life": 0.45, "size": 0.06, "c": "main", "c2": "hot"}]},
 		"broadside_wave": {"fx": [{"p": "wedge", "at": "h", "size": "r", "arc": 105, "life": 0.5, "lead": 0.17, "c": "main", "c2": "hot", "c3": "char"},

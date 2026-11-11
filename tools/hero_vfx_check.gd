@@ -99,9 +99,9 @@ func _wedges(m: Match, V: HeroVfx, P: Hunter) -> void:
 	var arch: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/dredge.json"))
 	var ed: Dictionary = arch["e"]
 	var x: Dictionary = arch["x"]
-	for mv in ["anchor_wind", "anchor_slam", "broadside_wave"]:
+	for mv in ["anchor_wind", "anchor_slam", "broadside_charge", "broadside_wave"]:
 		var lay: Dictionary = (moves[mv]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
-		var deg := float(x["fan_deg"]) if mv == "broadside_wave" else float(ed["angle"])
+		var deg := float(x["fan_deg"]) if mv.begins_with("broadside") else float(ed["angle"])
 		ok(lay["size"] == "r" and float(lay["arc"]) == deg,
 				"dredge %s: the wedge is the hit cone (r, %d deg)" % [mv, deg])
 	var wave: Dictionary = (moves["broadside_wave"]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
