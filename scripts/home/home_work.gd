@@ -89,9 +89,10 @@ func scan() -> void:
 	for r in Save.d["roster"]:
 		if Work.assigned(r) >= 0 and not live_u.has(Work.assigned(r)): Work.assign(r, -1)
 	_plot_jobs()
-	_wild_jobs()
-	_station_jobs()
-	_haul_jobs()
+	if not FarmUnlocks.base_mode():
+		_wild_jobs()
+		_station_jobs()
+		_haul_jobs()
 	_mend_jobs()
 	_warm_jobs()
 	FarmSites.scan(self)
@@ -425,7 +426,11 @@ func _warm_jobs() -> void:
 
 # ------------------------------------------------------------------ choosing a job
 func _night() -> bool:
-	return sin((h.day_t - 0.25) * TAU) < -0.2
+	return is_night(h.day_t)
+
+## Is the day clock (0..1, 0.25 morning, 0.75 dusk) in the night?
+static func is_night(day_t: float) -> bool:
+	return sin((day_t - 0.25) * TAU) < -0.2
 
 ## A free kin looks for work. True if it took a job.
 func pick(k: Dictionary) -> bool:

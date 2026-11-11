@@ -165,6 +165,8 @@ static func why_not(rec: Dictionary) -> String:
 		return "Asleep in the Boki Burrow"
 	if rec.get("work_rest", false):
 		return "Resting only"
+	if Mentor.is_mentor(rec):
+		return "A mentor at the Soul Shrine"
 	if rec.get("ghost_wait", false):
 		return "Away"
 	var ss := Care.starve_stage(rec)

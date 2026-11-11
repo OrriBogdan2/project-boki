@@ -78,6 +78,11 @@
 			"world": {
 				"place": "Your house goes here",
 				"wait": "Building..."
+			},
+			"spot": {
+				"place": {
+					"hub": "build"
+				}
 			}
 		},
 		{
@@ -106,6 +111,11 @@
 			"world": {
 				"go": "Your Boki"
 			},
+			"spot": {
+				"go": {
+					"world": true
+				}
+			},
 			"after_built": true
 		},
 		{
@@ -121,6 +131,11 @@
 			"world": {
 				"place": "",
 				"fill": "Fill the trough"
+			},
+			"spot": {
+				"place": {
+					"hub": "build"
+				}
 			}
 		},
 		{
@@ -145,6 +160,14 @@
 				"grow": "Growing",
 				"pick": "Pick it"
 			},
+			"spot": {
+				"patch": {
+					"hub": "build"
+				},
+				"patch_dry": {
+					"hub": "build"
+				}
+			},
 			"waits": [
 				"grow"
 			]
@@ -162,6 +185,11 @@
 			"world": {
 				"stall": "Market stall",
 				"bar": ""
+			},
+			"spot": {
+				"bar": {
+					"hub": "shop"
+				}
 			}
 		},
 		{
@@ -178,6 +206,11 @@
 			"world": {
 				"stall": "Sell here",
 				"bar": ""
+			},
+			"spot": {
+				"bar": {
+					"hub": "shop"
+				}
 			}
 		},
 		{
@@ -203,13 +236,69 @@
 			}
 		}
 	],
+	"base": {
+		"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it. lead: your Boki leads each step (scripts/home/base_tut_lead.gd): it waits and looks back when you are more than wait_m metres behind, and stops stop_m metres short of the place. boki: the line it says over its head when the step comes up.",
+		"lead": {"wait_m": 6.0, "stop_m": 1.8},
+		"start_food": {"emberberry": 3},
+		"skip_toy": "toy_ball",
+		"near": 3.0,
+		"steps": [
+			{
+				"id": "meet",
+				"title": "Meet your Boki",
+				"hints": {"go": "This is your Boki. Walk up and say hello."},
+				"world": {"go": "Your Boki"},
+				"boki": "Hi! Hi! Over here!"
+			},
+			{
+				"id": "eat",
+				"needs": ["meet"],
+				"title": "Feed it",
+				"hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."},
+				"world": {"go": "Feed your Boki"},
+				"boki": "Is that a berry? For me?"
+			},
+			{
+				"id": "toy",
+				"needs": ["eat"],
+				"title": "Place a toy",
+				"hints": {
+					"place": "Press {build}, open Base and set a toy down.",
+					"watch": "Watch your Boki go and play with it."
+				},
+				"world": {"place": "", "watch": "Toy"},
+				"boki": "Can we have something to play with?"
+			},
+			{
+				"id": "out",
+				"needs": ["toy"],
+				"title": "Head out or stay",
+				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing. Later, the Waystone in your hub wakes the next zone."},
+				"world": {"go": "Portal"},
+				"boki": "Out there, or more play? Your call!"
+			}
+		]
+	},
 	"skip_ask": "Skip the tutorial?",
 	"done_toast": "Tutorial done! +{gems} gems",
 	"skip_label": "Skip tutorial",
+	"stay_label": "Stay",
+	"first_day": {
+		"reward_gems": 15,
+		"doc": "A new save gets this short list in the Goals tracker (GardenFirstDay): one line each, ticked as the thing happens, one small gem reward when the last is ticked, then it is gone. Not tutorial steps. Saves made before it have no 'gfd' state and never see it.",
+		"rows": [
+			{"id": "feed", "text": "Feed your Boki"},
+			{"id": "toy", "text": "Play with a toy"},
+			{"id": "race", "text": "Run your first race"},
+			{"id": "nap", "text": "See a nap pile"},
+			{"id": "pair", "text": "Pair two Boki in the Nook"}
+		]
+	},
 	"tracker": {
 		"title": "Goals",
 		"max": 5,
 		"per_source": {
+			"first_day": 5,
 			"unlock": 2,
 			"mastery": 1,
 			"milestone": 1,
@@ -222,5 +311,9 @@
 		"pickaxe": "And a pickaxe for the rocks, too."
 	},
 	"gems_toast": "Hob gives you %d gems to buy seeds",
-	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect)."
+	"picked_say": {
+		"go": "Off to work!",
+		"wait": "Ready when there's work!"
+	},
+	"steps_doc": "needs: steps that must be done first; needs_all: everything else; after_built: the house must stand; waits: hint stages that are only waiting (the next open step is shown meanwhile); gives_tool: handed over when the step comes up; gets: a material that finishes the step (detect); spot: per hint stage, what FarmSpotlight lights up (hub: a bottom-bar button id, world: the step's marker in the world, a Boki). Each target gets its full dimmed beat once, then only a soft ring."
 }

@@ -45,7 +45,7 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ 1. the art
 func _art() -> void:
-	ok("12 Hunters", Arch.ids().size() == 12, str(Arch.ids()))
+	ok("13 Hunters", Arch.ids().size() == 13, str(Arch.ids()))
 	for a in Arch.ids():
 		var ak := String(a)
 		var path := Portraits.art_path(ak)
@@ -59,6 +59,11 @@ func _art() -> void:
 			var st := load(splash) as Texture2D
 			ok("%s: its splash" % Arch.name_of(ak), splash.ends_with("_splash.jpg") and st != null
 					and Vector2i(st.get_size()) == SPLASH_PX, splash)
+	var backdrop := TitleBackdrop.ORDER.duplicate()
+	backdrop.sort()
+	var every := Arch.ids().duplicate()
+	every.sort()
+	ok("the title backdrop shows every Hunter's current splash", backdrop == every)
 	var names_ok: bool = HeroTitle.base_name("gunslinger") == "Vex" and HeroTitle.base_name("rimewright") == "Neve"
 	var names2: bool = HeroTitle.base_name("tender") == "Meeko" and HeroTitle.base_name("mage") == "Sparkle"
 	var names3: bool = HeroTitle.base_name("bulwark") == "Albert" and HeroTitle.base_name("archer") == "Lace"
@@ -114,7 +119,7 @@ func _menus() -> void:
 	var cards := grid.get_children()
 	var faces := cards.map(func(c): return _first_pic(c))
 	var want := cards.map(func(c): return Portraits.art_path(String(c.get_meta("arch"))))
-	ok("the practice picker: every card shows its Warden", cards.size() == 12 and faces == want and not want.has(""))
+	ok("the practice picker: every card shows its Warden", cards.size() == 13 and faces == want and not want.has(""))
 	await _shot(tree, "practice_picker")
 	grid_box.queue_free()
 	var viewer := HunterViewer.make("gunslinger", Vector2(250, 300))
