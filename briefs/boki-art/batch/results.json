@@ -111800,5 +111800,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_rollguin_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_sandwidow",
+    "name": "Sandwidow (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sandwidow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_scopeleon",
+    "name": "Scopeleon (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_scopeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_sawright",
+    "name": "Sawright (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sawright_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rosedart",
+    "name": "Rosedart (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rosedart_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_scoopsy",
+    "name": "Scoopsy (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_scoopsy_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_scarabit",
+    "name": "Scarabit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_scarabit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_sarcobra",
+    "name": "Sarcobra (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sarcobra_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_selenfin",
+    "name": "Selenfin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_selenfin_1.jpg",
+    "ok": true
   }
 ]
