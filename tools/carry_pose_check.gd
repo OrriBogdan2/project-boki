@@ -84,12 +84,11 @@ func _hero(id: String) -> void:
 			% [id, z[1] - z[0]])
 	var spark: Node3D = H._spark
 	ok(spark.position.distance_to(mote) < SPARK_LAG and spark.scale.x < 0.5, "%s: the Heartspark rides the hand" % id)
-	var swung := P.swing_at
 	var fired := [false]
 	P.inp["fire"] = true
-	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.swing_at != swung)
+	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.fire_cd > 0.0)
 	P.inp["fire"] = false
-	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.swing_at != swung)
+	await _step(m, FIRE_S, func(): fired[0] = fired[0] or P.idle_fire < 0.2 or P.fire_cd > 0.0)
 	ok(fired[0] and H.state == "carried", "%s: LMB still fires with the Heartspark" % id)
 	await _step(m, SETTLE_S)
 	for how in ["hand-off", "knock", "extract"]:
