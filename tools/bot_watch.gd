@@ -31,7 +31,8 @@ func run(main: Node) -> void:
 	for h in m.hunters:
 		seen[h] = {"low_fight": 0.0, "low_back": 0.0, "last_low": -99.0, "belt": _belt(h), "was_down": false,
 			"was_rt": false, "rt_at": -99.0}
-	var tot := {"retreats": 0, "retreat_downs": 0, "downs": 0, "low_downs": 0, "unused_downs": 0, "alone_downs": 0, "use_fight": 0, "use_calm": 0,
+	var tot := {"retreats": 0, "retreat_downs": 0, "downs": 0, "low_downs": 0, "unused_downs": 0, "alone_downs": 0,
+		"use_fight": 0, "use_calm": 0,
 		"focus_same": 0, "focus_n": 0, "spread": 0.0, "spread_n": 0}
 	var since := 0.0
 	print("BOTWATCH seed %d diff %s" % [m.seed_val, m.bot_diff])
