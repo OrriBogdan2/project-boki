@@ -238,7 +238,8 @@ func feed_step(k: Dictionary, d: float) -> bool:
 		return false
 	var e: Dictionary = k["eat"]
 	var f := _feeder(String(e["fid"]))
-	if f.is_empty() or k.has("called_t") or k.get("busy", false) or k.has("fetch") or k.has("bath") or float(k.get("nap_t", 0.0)) > 0.0:
+	if f.is_empty() or k.has("called_t") or k.get("busy", false) or k.has("fetch") or k.has("bath") \
+			or float(k.get("nap_t", 0.0)) > 0.0:
 		k.erase("eat")
 		return false
 	var c := _fpos(f)
@@ -247,7 +248,8 @@ func feed_step(k: Dictionary, d: float) -> bool:
 		"go":
 			e["t"] = float(e["t"]) + d
 			if Econ.fill(f) == 0 or float(e["t"]) > 40.0:
-				k.erase("eat"); k["t"] = 1.0
+				k.erase("eat")
+				k["t"] = 1.0
 				h._emote(k, "?")
 				return false
 			var ss := seats(f)
@@ -255,7 +257,8 @@ func feed_step(k: Dictionary, d: float) -> bool:
 				e["seat"] = -1
 				for i in ss.size():
 					if not _taken(String(e["fid"]), i, k):
-						e["seat"] = i; break
+						e["seat"] = i
+						break
 			if int(e["seat"]) < 0:
 				# all the places are taken: wait in the outer ring, each in its own spot
 				k["goal"] = h._seat(k, c, QUEUE_R)
@@ -263,8 +266,10 @@ func feed_step(k: Dictionary, d: float) -> bool:
 			var sp: Vector3 = ss[int(e["seat"])]
 			k["goal"] = sp
 			if Vector2(sp.x - pos.x, sp.z - pos.z).length() < 0.4:
-				e["phase"] = "eat"; e["t"] = 2.6
+				e["phase"] = "eat"
+				e["t"] = 2.6
 				k["hold_t"] = 0.3
+				BokiLifeSfx.at_home(k, "eat")
 				(k["node"] as Node3D).rotation.y = atan2(-(c.x - pos.x), -(c.z - pos.z))
 		"eat":
 			k["hold_t"] = 0.3
@@ -288,7 +293,8 @@ func feed_step(k: Dictionary, d: float) -> bool:
 				elif res.get("love", false):
 					k["joy_t"] = 1.0
 					h._emote(k, "♥")
-					if res.get("new", false): h._toast("%s loves %s!" % [rec["name"], Care.food_name(String(res["food"]))])
+					if res.get("new", false):
+						h._toast("%s loves %s!" % [rec["name"], Care.food_name(String(res["food"]))])
 				else:
 					h._emote(k, "♪")
 				Sfx.play("pickup", c, -16.0, 0.1, 1.4)

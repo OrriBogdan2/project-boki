@@ -48,8 +48,12 @@ static func begin(k: Kin, fell: bool) -> void:
 	k.rescue_block = 0.0
 	k.down_void = fell
 	if fell:
-		k.teleport(k.last_safe if k.last_safe != Vector3.INF else (k.owner_h.pos if k.owner_h else k.pos))
+		var back := k.last_safe
+		if back == Vector3.INF:
+			back = k.owner_h.pos if k.owner_h else k.pos
+		k.teleport(back)
 	k.m.fx.burst(k.pos + Vector3(0, 0.4, 0), k.sp["color"], 16, 3.0)
+	BokiLifeSfx.in_match(k, "down")
 
 ## Can the owner scoop it up right now?
 static func rescuable(k: Kin) -> bool:
