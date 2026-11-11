@@ -2409,6 +2409,7 @@ func _boss_check() -> void:
 	ok.call(live >= 2 and live <= 3 and marks == live and LS.filter(func(L): return not L["active"]).all(func(L): return L["state"] == "dormant" and L["boss_mob"] == null),
 		"Skyreach rolled %d of 3 lairs live (%d boss markers on the full map), the rest dormant" % [live, marks])
 	for L in LS: m.lairs.activate(L)
+	for L in LS: m.lairs.breach.as_dial(L)      # (this check covers the dial, runes and wards; --lair-breach-check the seal)
 	var by_boss := {}
 	for L in LS: by_boss[L["boss"]] = L
 	var sealed_ok := true
