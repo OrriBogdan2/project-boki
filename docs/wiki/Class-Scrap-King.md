@@ -46,7 +46,7 @@ grows with every knock.
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
+| Body | 193 health, 5.39 m/s, 2 dash charges |
 | Signature weapon | Shotgun (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The harbour hauler. Reels you in on a rope, drops an anchor on you, and grows with every knock. |
 | Silhouette | the round brass helm and the rope drum on one shoulder |

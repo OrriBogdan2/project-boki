@@ -46,7 +46,7 @@ head first, and hits back harder after every knock.
 
 |  |  |
 |---|---|
-| Body | 193 health, 4.4 m/s, 2 dash charges |
+| Body | 193 health, 5.39 m/s, 2 dash charges |
 | Signature weapon | Torch Lance (the only weapon this hunter carries; it grows through upgrades, never swaps) |
 | Fantasy | The court alchemist. Pours fire from her bare hands until foes blaze, rams them head first, and hits back harder after every knock. |
 | Silhouette | the horns, the ember-tipped hair, the obsidian shards and the long flame-tipped tail |
