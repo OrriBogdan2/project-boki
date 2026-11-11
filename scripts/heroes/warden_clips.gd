@@ -704,7 +704,7 @@ func _recoil(s: Dictionary, dt: float) -> void:
 ## "legs_heading" (Vex's slide, aims_in_dash): only the legs go: the hips take the turn back, so the torso
 ## and the arm on the aim keep their pose.
 func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
-	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var vel: Vector3 = Vector3.ZERO if planted(s) else s.get("vel", Vector3.ZERO)      # (rooted, he goes nowhere)
 	var goal := 0.0
 	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
 		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
