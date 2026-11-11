@@ -19,6 +19,10 @@ const LOOKS := {
 ## [sex, height, build] of the feet strip: the smallest woman, the tallest sturdiest woman (the body whose feet stood
 ## highest) and the tallest sturdiest man.
 const FEET_BODIES := [[0, 0, 0], [0, 2, 2], [1, 2, 2]]
+const FEET_WALK := 2.2       # m/s: their walk, the farm's half stick (home_gait_check SPEEDS)
+const FEET_WARM := 90        # frames (60 fps) of walking before the first walking shot: the gait settles into step
+const FEET_WALK_SHOTS := 3   # walking shots...
+const FEET_EVERY := 7        # ...this many frames apart: about a third of a step each at FEET_WALK
 const GAIT_SHOTS := 8        # frames of the gait strip
 const GAIT_EVERY := 4        # frames (60 fps) between its shots: 8 x 4 = half a second, about two strides
 
@@ -165,7 +169,8 @@ func _shroud(tree: SceneTree) -> void:
 	hx.queue_free()
 	await tree.process_frame
 
-## The soles on a floor of the three FEET_BODIES, standing and mid-stride, close and low.
+## The soles on a floor of the three FEET_BODIES, close and low: standing, then FEET_WALK_SHOTS shots across a step
+## of their walk.
 func _feet(tree: SceneTree) -> void:
 	_fresh()
 	var stage := Node3D.new()
@@ -200,13 +205,26 @@ func _feet(tree: SceneTree) -> void:
 		stage.add_child(m)
 		models.append(m)
 		anims.append(HunterAnim.new(m))
-	for step in 2:
-		var vel := Vector3(0, 0, 0) if step == 0 else Vector3(3.5, 0, 0)
-		for i in 75:
-			for a in anims:
-				(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
-			await tree.process_frame
-		await _shot(tree, "feet_%s_extremes" % ("idle" if step == 0 else "walking"), 0.0)
+	for i in 75:
+		for a in anims:
+			(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": Vector3.ZERO})
+		await tree.process_frame
+	await _shot(tree, "feet_idle_extremes", 0.0)
+	# walking: a planted foot only steps as the hips pass over it, so each body walks in from behind and reaches its
+	# spot at the last shot
+	var vel := Vector3(FEET_WALK, 0, 0)
+	var frames := FEET_WARM + (FEET_WALK_SHOTS - 1) * FEET_EVERY
+	for m in models:
+		(m as Node3D).position -= vel * frames / 60.0
+	var shot := 0
+	for i in range(1, frames + 1):
+		for k in models.size():
+			(models[k] as Node3D).position += vel / 60.0
+			(anims[k] as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
+		await tree.process_frame
+		if i >= FEET_WARM and (i - FEET_WARM) % FEET_EVERY == 0:
+			await _shot(tree, "feet_walking_extremes_%d" % shot, 0.0)
+			shot += 1
 	stage.queue_free()
 	await tree.process_frame
 
