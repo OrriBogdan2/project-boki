@@ -29,10 +29,13 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 | `shaders/boki_eye.gdshader`, `boki_marks.gdshader` | Eye with its own iris colour; coat marks fixed to the rest pose |
 
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
-Home clips (settle, nap, wake, munch, nudge, climb, splash) are not baked: `BokiHomeClips` builds them when the rig
+Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
 `TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
+Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
+`impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
+asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.

@@ -287,6 +287,13 @@ func _on_base() -> void:
 		ok(tb.run != null and tb.run.visitor and tb.pair.size() == 2, "on: alone, your Boki meets a garden visitor")
 		var visitor: Node3D = tb.pair[1]["node"] if tb.pair.size() == 2 else null
 		var t := 0.0
+		while tb.run != null and tb.run.state != "resolve" and t < 200.0:
+			tb.tick(0.1)
+			t += 0.1
+		var moves: Dictionary = BaseTumble.rules()["moves"]
+		var clips: Array = [String(moves[tb.run.pick]["clip"]), String(moves[tb.run.plan]["clip"])]
+		var shown: Array = tb.pair.map(func(k: Dictionary) -> String: return String(k["node"].get_meta("kact", "")))
+		ok(shown == clips, "on: in the charge each Boki plays its move's clip %s" % str(shown))
 		while tb.run != null and t < 200.0:
 			tb.tick(0.1)
 			t += 0.1

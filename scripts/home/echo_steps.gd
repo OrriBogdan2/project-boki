@@ -38,6 +38,10 @@ const RIVAL := 1
 static func rules() -> Dictionary:
 	return Content.rules("base_echo")
 
+## A dancer's spin lasts two beats.
+static func spin_s() -> float:
+	return 2.0 * 60.0 / float(rules()["bpm"])
+
 static func _focus(rec: Dictionary) -> float:
 	return clampf(float(rec.get("stats", {}).get("focus", 0)) / 100.0, 0.0, 1.0)
 
@@ -316,6 +320,7 @@ var bed: AudioStreamPlayer = null
 var run: Run = null
 var dancers: Array = []        # the home's kin entries: you, the rival ({} solo)
 var hops: Array = []           # per side: [from, to, start s on the clock]
+var acts: Array = [["", 0.0], ["", 0.0]]   # per side: the rig clip it plays and the clock s it ends
 var clock := 0.0               # s since the bed started, from its playback position
 var bed_pos := 0.0             # the bed's last playback position (to count its loops)
 var bed_loops := 0
@@ -471,6 +476,7 @@ func _show(e: Array, now: float) -> void:
 				h._emote(dancers[side], "♪", true)
 		"kept":
 			h._emote(dancers[side], "♫", true)
+			_act(side, "spin", spin_s(), now)
 		"miss":
 			GardenSfx.cue("echo_miss", null)
 			if not dancers[side].is_empty():
@@ -478,8 +484,16 @@ func _show(e: Array, now: float) -> void:
 	lbl.text = _line()
 
 func _hop(side: int, stone: int, now: float) -> void:
+	_act(side, "stonehop", float(rules()["hop_s"]), now)
 	var where: Vector3 = middle.position + STONE_AT[stone] * SPREAD if stone >= 0 else _spot(side)
 	hops[side] = [_at(side, now), where, now]
+
+## The dancer plays a rig clip for `secs` (a spin is not cut short by a hop).
+func _act(side: int, clip: String, secs: float, now: float) -> void:
+	if dancers[side].is_empty() or (acts[side][0] == "spin" and now < float(acts[side][1])):
+		return
+	(dancers[side]["node"] as Node3D).set_meta("kact", clip)
+	acts[side] = [clip, now + secs]
 
 ## Where side waits off the stones.
 func _spot(side: int) -> Vector3:
@@ -500,6 +514,8 @@ func _place(now: float) -> void:
 			continue
 		var n: Node3D = dancers[side]["node"]
 		n.position = _at(side, now)
+		if now >= float(acts[side][1]):
+			n.remove_meta("kact")
 		var look: Vector3 = middle.position - n.position
 		n.rotation.y = atan2(look.x, look.z)
 		dancers[side]["pos"] = n.position
@@ -554,6 +570,8 @@ func _end(finished: bool) -> void:
 		if not k.is_empty():
 			k["busy"] = false
 			k["t"] = float(rules()["rest_s"])
+			(k["node"] as Node3D).remove_meta("kact")
+	acts = [["", 0.0], ["", 0.0]]
 	bed.stop()
 	if is_instance_valid(readout):
 		readout.queue_free()

@@ -1,10 +1,13 @@
 extends RefCounted
 ## --boki-home-shots --shots-dir=<dir> [--species=cindle,kestrike,selenfin,hivara] [--px=256]: one sheet per
-## home state (settle, nap, wake, munch, nudge, climb, splash; BokiHomeClips): a row per species, FRAMES over the
+## home or garden-game state (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin;
+## BokiHomeClips): a row per species, FRAMES over the
 ## clip, in the engine. Needs a renderer.
 
 const Shots := preload("res://tools/boki_rig_shots.gd")
-const STATES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash"]
+const STATES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
+const ONE_SHOT := ["settle", "wake", "rush", "brace", "dodge", "stonehop", "spin"]       # clips that end, not loop
 const FRAMES := 6
 var species := ["cindle", "kestrike", "selenfin", "hivara"]
 
@@ -33,7 +36,7 @@ func run(m: Node) -> void:
 			rig.set_clip(c, 0.0)
 			var length := rig.player.get_animation(c).length
 			for f in FRAMES:
-				var k := float(f) / float(FRAMES - 1 if c in ["settle", "wake"] else FRAMES)
+				var k := float(f) / float(FRAMES - 1 if c in ONE_SHOT else FRAMES)
 				rig.set_face(s._face_for(rig, c, k))
 				rig.seek(k * length)
 				var img: Image = await s._grab(vp)
