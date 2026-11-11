@@ -668,8 +668,7 @@ func _tick_zones(dt: float) -> void:
 				h, key,
 				{"at": at, "r": float(ld["burst_r"]), "fill": k, "all": true, "dashed": true, "col": Color("bff7ef")})
 		for f in foes_in(at, float(ld["zone_r"])):
-			f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, float(ld["zone_slow"]))
-			f.slow_t = maxf(f.slow_t, 0.2)
+			f.add_slow(0.2, float(ld["zone_slow"]))
 			add_chill(f)
 		if float(z["left"]) <= 0.0:
 			zones.erase(z)
@@ -941,7 +940,7 @@ func _start_rime() -> bool:
 func _rime_hold_body() -> void:
 	h.face = float(rime["face"])        # a statue: facing and pose locked from the cast frame
 	h.inv_t = maxf(h.inv_t, 0.12)
-	h.root_t = maxf(h.root_t, 0.12)
+	h.add_root(0.12)
 	if _rime_carrying():
 		var carry: Dictionary = rime["carry"]
 		h.roll_dir = carry["dir"]
@@ -1032,8 +1031,7 @@ func _rime_slow(at: Vector3, radius: float, dt: float) -> void:
 		var key: int = f.get_instance_id()
 		slow[key] = float(slow.get(key, 0.0)) + dt
 		var k := minf(float(xd["slow_max"]), float(xd["slow_base"]) + float(xd["slow_per_s"]) * float(slow[key]))
-		f.slow_k = maxf(f.slow_k if f.slow_t > 0.0 else 0.0, k)
-		f.slow_t = maxf(f.slow_t, 0.2)
+		f.add_slow(0.2, k)
 		add_chill(f)
 
 

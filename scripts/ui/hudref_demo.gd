@@ -70,9 +70,9 @@ static func tick(m) -> void:
 			up.lvl += 1                            # someone levels up just before the picture (the badge pulse)
 		var st: Hunter = m.get_meta("hudref_stun", null)
 		if st:
-			st.stun_t = maxf(st.stun_t, 3.0)         # the whole CC row, timers held at a readable length
-			st.root_t = maxf(st.root_t, 2.5)
-			st.slow_t = maxf(st.slow_t, 2.0)
+			st.add_stun(3.0)             # the whole CC row, timers held at a readable length
+			st.add_root(2.5)
+			st.add_slow(2.0)
 			KitStatus.apply(st, "gnd", 1.5, 0.0, false, "demo")
 			KitStatus.apply(st, "rat", 2.2, 0.0, false)
 

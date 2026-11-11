@@ -3571,7 +3571,7 @@ func step(dt: float) -> void:
 			if time > 1.0 and time < 1.1 and not mates[0].downed: knock(mates[0], null, {})
 			if mates[0].downed and not opts.has("mates_revive") or (opts.has("mates_revive") and time < float(opts.get("mates_revive", 0.0))): mates[0].revive = 0.0
 			if time > 1.6 and time < 1.7 and not mates[1].out: eliminate(mates[1], null, "knocked out")
-			if time > 1.2: mates[2].hp = mates[2].max_hp * 0.4; mates[2].armor = mates[2].max_armor * 0.5; mates[2].slow_t = 2.0
+			if time > 1.2: mates[2].hp = mates[2].max_hp * 0.4; mates[2].armor = mates[2].max_armor * 0.5; mates[2].add_slow(2.0)
 			if opts.has("mates_revive") and time > float(opts["mates_revive"]) and mates[0].downed:
 				revive_hunter(mates[0], player)
 			# test: an enemy standing on the knocked teammate (the stomp signal), kept alive for the shot

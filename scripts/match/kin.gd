@@ -171,6 +171,9 @@ func t(k: String) -> float:
 func is_wild() -> bool:
 	return owner_h == null
 
+func usual_slow() -> float:
+	return 0.4
+
 func hittable() -> bool:
 	return not dead and state in ["active", "flying", "returning", "reviving", "wild"] and not (state == "flying" and fly.get("leap", false))
 
@@ -827,7 +830,7 @@ func _sim_active(dt: float) -> void:
 		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
-	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
+	var spd := speed * BokiHit.move_k(self) * (1.3 if haste_t > 0.0 else 1.0)
 	if target:
 		var to := Vector2(target.pos.x - pos.x, target.pos.z - pos.z)
 		var d := to.length()
@@ -1007,7 +1010,7 @@ func _sim_wild(dt: float) -> void:
 		if wander_to != Vector3.INF:
 			var to := Vector2(wander_to.x - pos.x, wander_to.z - pos.z)
 			wish = to.normalized() * speed * 0.35
-	_ground_move(wish * BokiHit.move_k(self, 0.6), dt)
+	_ground_move(wish * BokiHit.move_k(self), dt)
 
 func _daze() -> void:
 	burn_t = 0.0

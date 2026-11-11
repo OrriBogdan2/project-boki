@@ -98,7 +98,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
-	stun_t = maxf(stun_t, stagger_t)
+	add_stun(stagger_t)
 	stag_open = 0.0
 	stag_next = randf_range(10.0, 14.0)
 	_cancel_tele()
@@ -180,7 +180,7 @@ func sim(dt: float) -> void:
 		if calm_t > 30.0:
 			m.on_mob_escaped(self)
 			return
-	var spd: float = md["speed"] * slow_mult(0.55)
+	var spd: float = md["speed"] * slow_mult()
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
 		if stun_t > 0.0 and st == "windup":
@@ -266,7 +266,7 @@ func sim(dt: float) -> void:
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
+		add_stun(1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})

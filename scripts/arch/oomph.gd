@@ -54,8 +54,7 @@ static func react(m: Node, target: Ent, by: Ent, d: float, o: Dictionary) -> voi
 		if big and pvp and not h.remote and not h.downed and h.fortify_t <= 0.0:
 			# a stagger: a short slow, so a big hit actually interrupts the dance (unstoppable
 			# states, fortify_t, shrug it off)
-			h.slow_k = maxf(h.slow_k, STAGGER_SLOW) if h.slow_t > 0.0 else STAGGER_SLOW
-			h.slow_t = maxf(h.slow_t, STAGGER_T)
+			h.add_slow(STAGGER_T, STAGGER_SLOW)
 			h.stagger_t = STAGGER_T
 	elif target is Mob:
 		target.squash = maxf(target.squash, clampf(0.12 + frac * 0.6, 0.12, 0.35))
