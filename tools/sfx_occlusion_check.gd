@@ -48,8 +48,8 @@ func _buses(occ: SfxOcclusion, low: Vector3, high: Vector3, floor_mate: Vector3)
 	Sfx.occlusion = occ
 	Sfx.listener = low
 	ok(Sfx._bus_for(high) == "SFXMuffled", "the voice behind the cliff plays on the muffled bus")
-	ok(Sfx._bus_for(floor_mate) == "SFX", "the voice in sight stays on the SFX bus")
-	ok(Sfx._bus_for(null) == "SFX", "a UI sound (no position) stays on the SFX bus")
+	ok(Sfx._bus_for(floor_mate) == "SFXWorld", "the voice in sight stays on the plain world bus")
+	ok(Sfx._bus_for(null, true) == "SFX", "a clear sound (no position) skips the world buses")
 	var bus := AudioServer.get_bus_index("SFXMuffled")
 	var lp: AudioEffectLowPassFilter = AudioServer.get_bus_effect(bus, 0)
 	var far_lp: AudioEffectLowPassFilter = AudioServer.get_bus_effect(AudioServer.get_bus_index("SFXFar"), 0)
