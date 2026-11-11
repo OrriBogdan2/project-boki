@@ -653,7 +653,7 @@ The Dash, the first Boki-vs-Boki race (scripts/home/base_race.gd, briefs/design/
 
 | Setting | Value |
 |---|---|
-| _doc | Voice budget of the Sfx pool (docs/AUDIO.md, decision 2026-11-08: a 30-player expedition is ~60 animated characters). cap: most one-shot voices sounding at once on each bus, a new sound past it steals the lowest-priority voice or is dropped. own_m: a sound this close to the listener is your own (your Hunter, your Boki, a hit on you) and is never stolen. keep: cues that are never stolen wherever they play (warnings, recasts, your hurt). cheap: name fragments of footsteps and Boki chatter, the first to go when they are far. |
+| _doc | Voice budget of the Sfx pool (docs/AUDIO.md, decision 2026-11-08: a 30-player expedition is ~60 animated characters). cap: most one-shot voices sounding at once in each lane (SFX: every near voice, on the clear SFX bus or the SFXWorld bus the downed muffle dulls; SFXFar: far ones), a new sound past it steals the lowest-priority voice or is dropped. own_m: a sound this close to the listener is your own (your Hunter, your Boki, a hit on you) and is never stolen. keep: cues that are never stolen wherever they play (warnings, recasts, your hurt). cheap: name fragments of footsteps and Boki chatter, the first to go when they are far. |
 | cap | {"SFX": 12, "SFXFar": 4} |
 | cap_unit | voices per bus (pool size is Sfx.POOL = 24) |
 | own_m | 2 |

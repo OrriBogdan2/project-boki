@@ -61,6 +61,20 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
+	await _muffle_step(m, true)
+	var dull := Sfx.muffle_state()
+	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),
+		"downed: the world bus is low-passed and ducked (%s)" % dull)
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	ok(Sfx._bus_for(null, true) != "SFXWorld" and Sfx._bus_for(null, false) == "SFXWorld",
+		"the Wisp hum, pings and Boki voices skip the world bus")
+	await _muffle_step(m, false)
+	var clear := Sfx.muffle_state()
+	ok(not clear.fx and is_zero_approx(clear.db) and is_equal_approx(clear.hz, Sfx.MUFFLE_OPEN_HZ),
+		"revived: the muffle is off again (%s)" % clear)
+	await _muffle_step(m, true)
+	ok(Sfx.muffle_state().fx and bus >= 0, "downed again: muffled")
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -72,6 +86,8 @@ func run(main_node: Node) -> void:
 			await main.get_tree().process_frame
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
+	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
@@ -289,6 +305,11 @@ func _probe(P: Hunter, at: Vector3, make: Callable, who: Hunter = P):
 		if p.stream != null and (p is AudioStreamPlayer or (p as AudioStreamPlayer3D).position.is_equal_approx(at)):
 			return p
 	return null
+## Downs (or revives) the player and lets the match's audio director and the ramp run.
+func _muffle_step(m: Match, down: bool) -> void:
+	m.player.downed = down
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
