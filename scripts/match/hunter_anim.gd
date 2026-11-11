@@ -294,6 +294,8 @@ var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
 var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
+var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
+var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)
 
 func _init(m: Node3D) -> void:
 	model = m
@@ -329,6 +331,9 @@ func _init(m: Node3D) -> void:
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
 	var stance := String(m.get_meta("stance", arch))      # the Empty's own stance by sex (Unmasked)
 	st.merge(WardenStance.gait(stance), true)
+	if arch == "unmasked":
+		gait = EmptyGait.new(legs, st)
+		legs_sway = 0.0
 	ws = WardenStance.new(stance)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
@@ -753,6 +758,17 @@ func update(dt: float, s: Dictionary) -> void:
 			hl += shuffle_lift * 0.35; kl -= shuffle_lift * 0.7
 		else:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
+	# the Empty: each foot planted where it landed, moving or standing, over these legs
+	if gait != null:
+		gait.step(dt, grounded and not downed, moving, vel, [hl, hr, kl, kr, wl, wr])
+		hl = gait.hl
+		hr = gait.hr
+		kl = gait.kl
+		kr = gait.kr
+		wl = gait.wl
+		wr = gait.wr
+		ph = gait.ph
+		stepped = gait.landed
 	# crouch, landing, slam: knees bend, hips drop
 	var bend := maxf(crouch_k * 0.75, land_k * 0.85) + slam_k * 0.5
 	hl += bend * 0.62; hr += bend * 0.5
@@ -1006,9 +1022,11 @@ func update(dt: float, s: Dictionary) -> void:
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var leg_ref := LEG
-	if arch == "unmasked":      # the Empty's soles, not a point foot, meet the ground
-		dl2 = FootPlant.reach(hl, kl, wl)
-		dr2 = FootPlant.reach(hr, kr, wr)
+	if gait != null:      # the Empty's soles, not a point foot, meet the ground; its planted feet carry the hips
+		var sole_l := FootPlant.reach(hl, kl, wl)
+		var sole_r := FootPlant.reach(hr, kr, wr)
+		dl2 = gait.hip_reach(sole_l, sole_r, maxf(sole_l, sole_r))
+		dr2 = dl2
 		leg_ref = FootPlant.HIP
 	var drop := (leg_ref - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
@@ -1036,7 +1054,7 @@ func update(dt: float, s: Dictionary) -> void:
 	rb = Basis(Vector3.BACK, sin(ph) * 0.03 * r1) * rb
 	rig.basis = rb * Basis.from_scale(scl)
 	rig.position = rpivot - rb * rpivot + off
-	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - dive_k) + sin(ph) * 0.12 * r1 * back
+	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - dive_k) + sin(ph) * legs_sway * r1 * back
 	leg_l.rotation = Vector3(hl, 0, wl)
 	leg_r.rotation = Vector3(hr, 0, wr)
 	if knee_l: knee_l.rotation.x = kl
