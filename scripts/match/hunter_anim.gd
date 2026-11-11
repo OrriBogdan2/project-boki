@@ -189,6 +189,9 @@ var revive_k := 0.0
 var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
 var act_kind := ""
 var act_t := 0.0
+var act_aim := Vector3.INF     # world: where a garden move's hand goes (HunterVerbs.aim); INF: its own spot
+var act_need := -1.0           # m (legs' rest size): how deep that Boki asks the hips to go; < 0: the move's own
+var sh_y := 0.0                # m: the right shoulder's rest height in the model's space
 var tool_kind := ""            # the tool in hand or fading out (HunterTool)
 var tool_k := 0.0
 var tool_ph := 0.0             # where the tool is in its swing, 0..1
@@ -316,6 +319,7 @@ func _init(m: Node3D) -> void:
 		el_l = arm_l.get_node("Elbow"); hand_l = el_l.get_node("Hand"); sh_l = arm_l.position
 	if arm_r:
 		el_r = arm_r.get_node("Elbow"); hand_r = el_r.get_node("Hand"); sh_r = arm_r.position
+		sh_y = (rig.transform * torso.transform * sh_r).y
 	skirt = torso.get_node_or_null("Skirt")
 	cape = torso.get_node_or_null("Cape")
 	scarf = torso.get_node_or_null("Scarf")
@@ -760,6 +764,7 @@ func update(dt: float, s: Dictionary) -> void:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
 	if gait != null:
+		gait.squat = act_k * HunterVerbs.squat(act_kind, act_t, act_need) if HunterVerbs.ACTS.has(act_kind) else 0.0
 		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
 		hl = gait.hl
 		hr = gait.hr
@@ -842,7 +847,9 @@ func update(dt: float, s: Dictionary) -> void:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack":
+	# (the Empty squats for a garden move on its planted feet instead)
+	var own_legs := gait != null and HunterVerbs.ACTS.has(act_kind)
+	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack" and not own_legs:
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -1714,13 +1721,27 @@ func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	act_k = _ease(act_k, 1.0 if want != "" else 0.0, 9.0 if want != "" else 12.0, dt)
 	if act_k < 0.01 and want == "":
 		act_kind = ""
+	if want != "":
+		_aim_verb(s.get("act_box", AABB()))
+
+## A garden move's reach for the Boki (HunterVerbs.aim): the hand's world spot, and the squat that gets the
+## hand down to it from the shoulder.
+func _aim_verb(box: AABB) -> void:
+	if not model.is_inside_tree():
+		act_aim = Vector3.INF
+		return
+	act_aim = HunterVerbs.aim(act_kind, box, model.global_position, model.to_global(Vector3(0.0, sh_y + REACH * arm_k * 0.4, 0.0)).y)
+	act_need = -1.0
+	if act_aim != Vector3.INF:
+		var drop := sh_y - REACH * arm_k * HunterVerbs.REACH_K - model.to_local(act_aim).y
+		act_need = maxf(drop, 0.0) / legs.scale.y
 
 ## Leg angles for the hold: Vector4(hip_l, knee_l, hip_r, knee_r).
 func _act_legs() -> Vector4:
 	if HunterTool.ACTS.has(act_kind):
 		return HunterTool.legs(act_kind, tool_ph)
 	if HunterVerbs.ACTS.has(act_kind):
-		return HunterVerbs.legs(act_kind, act_t)
+		return HunterVerbs.legs(act_kind, act_t, act_need)
 	var w := sin(act_t * 3.0)
 	match act_kind:
 		"scan", "revive", "key", "loot", "offer":
@@ -1743,7 +1764,7 @@ func _act_pitch() -> float:
 	if HunterTool.ACTS.has(act_kind):
 		return HunterTool.pitch(act_kind, tool_ph)
 	if HunterVerbs.ACTS.has(act_kind):
-		return HunterVerbs.pitch(act_kind, act_t)
+		return HunterVerbs.pitch(act_kind, act_t, act_need)
 	match act_kind:
 		"scan": return 0.25 + 0.04 * sin(act_t * 1.6)
 		"revive": return 0.4 + 0.06 * maxf(0.0, sin(act_t * 6.0))
@@ -1764,7 +1785,8 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 	if HunterTool.ACTS.has(act_kind):
 		return HunterTool.hands(act_kind, tool_ph, sh_l, sh_r)
 	if HunterVerbs.ACTS.has(act_kind):
-		return HunterVerbs.hands(act_kind, act_t, sh_l, sh_r)
+		var at := torso.to_local(act_aim) if act_aim != Vector3.INF else Vector3.INF
+		return HunterVerbs.hands(act_kind, act_t, sh_l, sh_r, at, REACH * arm_k)
 	var t := act_t
 	match act_kind:
 		"scan":

@@ -2938,7 +2938,8 @@ func _pet_kin(k: Dictionary) -> void:
 	_care_trust(rec, "pet")
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
-	verbs.play("pat")
+	HomeVerbs.come_in(k, ppos)
+	verbs.play("pat", k["node"])
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
@@ -4350,12 +4351,12 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		_toast("You're out of %s" % Care.food_name(f).to_lower())
 		return
 	# it comes over to you and you put the food down in front of it
-	var at := ppos + Vector3(sin(pface) * -1.0, 0, cos(pface) * -1.0)
+	var at := HomeVerbs.hold_spot(ppos, ppos - Vector3(sin(pface), 0, cos(pface)), k["node"])
 	if world.is_void(at.x, at.z) or world.is_block(at.x, at.z): at = ppos + Vector3(0.9, 0, 0.4)
 	k["pos"] = at
 	(k["node"] as Node3D).position = at
 	k["hold_t"] = 3.2
-	verbs.play("feed")
+	verbs.play("feed", k["node"])
 	_face(at)
 	var food := MeshInstance3D.new()
 	food.mesh = Models.sphere(0.11, 10)
