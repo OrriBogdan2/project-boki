@@ -77,7 +77,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | a ring of teal motes closes around him |
-| Armed / full | the lantern burns white and his ribbons lift |
+| Armed / full | the jack-in-the-box glows white and his spring coils tall |
 | Dash spent | a pale ripple where he stood |
 
 <!-- /gen:kit -->
