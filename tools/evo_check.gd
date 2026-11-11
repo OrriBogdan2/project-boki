@@ -44,6 +44,7 @@ func run(main: Node) -> void:
 	_level()
 	_item()
 	_trade()
+	_next_form()
 	_art_gate()
 	_cap()
 	_migrate()
@@ -126,6 +127,40 @@ func _trade() -> void:
 	var ev := Evo.try_evolve(rec, "trade")
 	ok(rec["species"] == "thrumbird" and String(ev.get("how", "")) == "trade",
 		"trade: traded, it evolves (%s)" % rec["species"])
+
+## The Boki card's "Next form" block (EvoView.next_form): one species per way a Boki can evolve, read
+## from the data, with the XP bar filling toward its evolve level.
+func _next_form() -> void:
+	var no_art := ""
+	for id in Data.KIN:
+		if no_art == "" and not BokiRig.FRAME.has(id):
+			no_art = id
+	_line("pebbit", {"level": 5, "into": [{"id": "cindle"}]})
+	_line("zapple", {"into": [{"id": "cindle", "item": "ink_tide"}]})
+	_line("selenfin", {"into": [{"id": "thrumbird", "trade": true}]})
+	_line("hivara", {"level": 8, "into": [{"id": no_art}]})
+	var rec := _kin("pebbit", 2)
+	rec["xp"] = 100
+	var nf := EvoView.next_form(rec)
+	var share: float = 100.0 / (Evo.XP_PER_LEVEL * (2 + 3 + 4))
+	var shown: bool = nf["line"] == "Evolves at Lv 5" and int(nf["goal"]) == 5
+	ok(shown and is_equal_approx(float(nf["frac"]), share),
+		"next form: a level line says 'Evolves at Lv 5', bar 100 of 900 XP: %s" % str(nf))
+	rec["level"] = 5
+	ok(EvoView.next_form(rec)["frac"] == 1.0, "next form: at its evolve level the bar is full")
+	nf = EvoView.next_form(_kin("zapple", 3))
+	ok(nf["line"] == "Needs a Tide Ink" and int(nf["goal"]) == 4,
+		"next form: an Ink line names the Ink: %s" % nf["line"])
+	_line("zapple", {"into": [{"id": "cindle", "item": "ink_tide"}, {"id": "thrumbird", "item": "ink_storm"}]})
+	nf = EvoView.next_form(_kin("zapple", 3))
+	ok(nf["line"] == "Needs an Ink", "next form: Inks that pick the form say 'an Ink': %s" % nf["line"])
+	nf = EvoView.next_form(_kin("selenfin", 3))
+	ok(nf["line"] == "Evolves when traded", "next form: a trade line says so: %s" % nf["line"])
+	nf = EvoView.next_form(_kin("hivara", 3))
+	ok(nf["line"] == "Its next form is coming soon" and not nf.has("goal"),
+		"next form: a form with no art says coming soon and has no bar: %s" % nf["line"])
+	_line("pebbit", {"into": []})
+	ok(EvoView.next_form(_kin("pebbit", 3))["line"] == "Fully grown", "next form: a last form is fully grown")
 
 ## The art gate: never into a species without data, model and framing; it waits, then evolves.
 func _art_gate() -> void:

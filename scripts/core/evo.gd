@@ -107,6 +107,9 @@ static func form_name(rec: Dictionary) -> String:
 static func rules() -> Dictionary:
 	return Content.rules("evolve")
 
+## XP a Boki needs at level L to reach L+1 is XP_PER_LEVEL * L (Game's match results).
+const XP_PER_LEVEL := 100
+
 ## The highest level a Boki can reach.
 static func cap() -> int:
 	return int(rules()["cap"])

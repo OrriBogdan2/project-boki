@@ -1,15 +1,18 @@
 class_name EvoView
 extends RefCounted
-## The Growth tab's "Growing toward" column on a Boki's card: its nature, the form it evolves into
-## next and at what level, the final its training leans toward (training-branch lines), and the
-## Inks that evolve it, each with a Use button (Ink lines). Rules: Evo, content/rules/evolve.json.
+## The Growth tab's "Growing toward" column on a Boki's card: the "Next form" block (level, XP bar and
+## what evolving takes), its nature, the next mutation, the final its training leans toward
+## (training-branch lines) and the Inks that evolve it, each with a Use button (Ink lines).
+## Rules: Evo, content/rules/evolve.json.
 
 ## Fills `parent`; `refresh` reopens the card after an Ink is used.
 static func growth(rec: Dictionary, parent: VBoxContainer, refresh: Callable) -> void:
+	next_block(rec, parent)
 	var lead := Evo.leading(rec)
 	parent.add_child(UI.section("Growing toward", UI.FAINT.lightened(0.2)))
 	parent.add_child(UI.label(String(Evo.AFF[lead]["name"]), UI.T_HEAD, Evo.AFF[lead]["tint"], UI.big))
-	parent.add_child(UI.label(_next_line(rec), UI.T_SMALL, UI.MUTED))
+	var lv := int(rec["level"])
+	parent.add_child(UI.label("Mutation at level %d" % (lv + 4 - (lv + 2) % 4), UI.T_SMALL, UI.MUTED))
 	var ln := Evo.lean(rec)
 	if not ln.is_empty():
 		var pts: Array = ln["stats"].map(func(p): return "%s %d" % [Care.STATS[p[0]]["name"], p[1]])
@@ -23,18 +26,63 @@ static func growth(rec: Dictionary, parent: VBoxContainer, refresh: Callable) ->
 	for pair in inks:
 		parent.add_child(_ink_row(rec, String(pair[0]), String(pair[1]), refresh))
 
-## "Becomes a Sporcupine at level 8  ·  mutation at 10", or just the mutation when no level form is next.
-static func _next_line(rec: Dictionary) -> String:
-	var lv := int(rec["level"])
-	var next_mut := lv + ((2 - lv % 4) + 4) % 4
-	if next_mut == lv: next_mut += 4
+## The "Next form" block: level, an XP bar to the level of the form it evolves into and, in one plain
+## line, what that takes (see `next_form`). A Boki with no next form gets the line alone.
+static func next_block(rec: Dictionary, parent: VBoxContainer) -> void:
+	var nf := next_form(rec)
+	parent.add_child(UI.section("Next form", UI.FAINT.lightened(0.2)))
+	parent.add_child(UI.label(String(nf["line"]), UI.T_HEAD, UI.INK, UI.big))
+	if not nf.has("goal"):
+		return
+	var r := UI.hbox(10)
+	var l := UI.label("Lv %d" % int(rec["level"]), UI.T_SMALL, UI.MUTED)
+	l.custom_minimum_size.x = 92
+	r.add_child(l)
+	var bar := UI.bar(float(nf["frac"]), UI.ACCENT, 150, 8)
+	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	r.add_child(bar)
+	var to := UI.label("Lv %d" % int(nf["goal"]), 12, UI.MUTED, UI.semi)
+	to.custom_minimum_size.x = 64
+	to.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	r.add_child(to)
+	parent.add_child(r)
+
+## What comes next for `rec`, read from the evolution data: {"line": the plain condition, and for a
+## Boki that is still growing "goal" (the level the bar fills toward: its evolve level, or the next
+## level when an Ink or a trade decides) and "frac" (0..1, XP earned on the way to it)}.
+## Only forms that have art count (Evo.has_art); a Boki never shows a form it cannot become.
+static func next_form(rec: Dictionary) -> Dictionary:
 	var line: Dictionary = Evo.rules()["lines"].get(String(rec["species"]), {})
-	if not line.has("level"):
-		return "Mutation at level %d" % next_mut
-	var into: Array = line["into"]
-	var to := _name(String(into[0]["id"])) if into.size() == 1 else "its final form"
-	var at := maxi(int(line["level"]), lv + 1)
-	return "Becomes %s at level %d  ·  mutation at %d" % [to, at, next_mut]
+	var into: Array = line.get("into", [])
+	if into.is_empty():
+		return {"line": "Fully grown"}
+	var ready := into.filter(func(o): return Evo.has_art(String(o["id"])))
+	if ready.is_empty():
+		return {"line": "Its next form is coming soon"}
+	var goal := mini(int(rec["level"]) + 1, Evo.cap())
+	var text := ""
+	if ready[0].has("item"):
+		text = "Needs %s" % _ink_name(ready)
+	elif ready[0].get("trade", false):
+		text = "Evolves when traded"
+	else:
+		goal = int(line["level"])
+		text = "Evolves at Lv %d" % goal
+	return {"line": text, "goal": goal, "frac": _xp_frac(rec, goal)}
+
+## "a Tide Ink" when one Ink is the way, "an Ink" when its type picks the form.
+static func _ink_name(opts: Array) -> String:
+	if opts.size() > 1:
+		return "an Ink"
+	return "a " + Goods.name_of("good:" + String(opts[0]["item"]))
+
+## The share of the XP from the start of its level to level `goal` that it has earned (full once there).
+static func _xp_frac(rec: Dictionary, goal: int) -> float:
+	var lv := int(rec["level"])
+	if lv >= goal:
+		return 1.0
+	var span := Evo.XP_PER_LEVEL * ((goal - 1) * goal - (lv - 1) * lv) / 2
+	return clampf(float(rec.get("xp", 0)) / float(span), 0.0, 1.0)
 
 static func _ink_row(rec: Dictionary, ink: String, to: String, refresh: Callable) -> HBoxContainer:
 	var r := UI.hbox(8)

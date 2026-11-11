@@ -343,8 +343,8 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	if not lead: xp = int(xp * 0.7)
 	if treat == "treat_xp": xp = int(xp * 1.5)
 	k["xp"] = int(k.get("xp", 0)) + xp
-	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= 100 * int(k["level"]):
-		k["xp"] = int(k["xp"]) - 100 * int(k["level"])
+	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= Evo.XP_PER_LEVEL * int(k["level"]):
+		k["xp"] = int(k["xp"]) - Evo.XP_PER_LEVEL * int(k["level"])
 		Evo.level_up(k)
 		out["levelup"] = true
 		_evolve(k, out)
