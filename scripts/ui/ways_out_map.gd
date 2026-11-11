@@ -3,8 +3,8 @@ extends RefCounted
 ## The four Ways Out seats on the minimap and the full map (briefs/specs/LIMITED_WAY_OUTS.md section 9), from 0:00:
 ## a badge on each site (a dark ring, a countdown arc in the seat's state colour) and, for the dead and the
 ## watching, one line: "Ways out left: N" and which seat your squad is nearest.
-## States come from WaysOutHud.seats; the dashed next Blight ring is HeartHud's. Until the quest seats are built
-## (spec task 4) the Lair seat is the first lair and the Uplink the outpost farther from it (the spec's rule).
+## States come from WaysOutHud.seats; the dashed next Blight ring is HeartHud's. The Lair and Uplink sites are the
+## quest seats' own (QuestSeats' seeded pick).
 
 const WORDS := ["Sealed Lair", "Heart Gate", "Uplink", "Heart ring"]
 const LOCKED_COL := Color("9fb0d8")    # a seat not open yet: cool blue-grey
@@ -14,33 +14,21 @@ const LINE_FS := 13
 
 static var _sites: Array[Vector3] = [Vector3.INF, Vector3.INF, Vector3.INF, Vector3.INF]    # reused every frame
 
-## Where each seat stands (Vector3.INF where the map has none): Lair, Heart Gate, Uplink, Heart ring.
+## Where each seat stands (Vector3.INF where the map has none): Sealed Lair, Heart Gate, Uplink, Heart ring.
 static func sites(m: Match) -> Array[Vector3]:
 	_sites.fill(Vector3.INF)
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return _sites
-	if m.lairs != null and not m.lairs.list.is_empty():
-		_sites[0] = m.lairs.list[0]["c"]
 	_sites[1] = m.heart.gate
-	_sites[2] = _uplink_site(m, _sites[0])
 	_sites[3] = m.heart.site
+	var qs: QuestSeats = m.exits.seats if m.exits else null
+	if qs:
+		qs.build()
+		if qs.lair:
+			_sites[0] = qs.lair.ref["c"]
+		if qs.uplink:
+			_sites[2] = qs.uplink.ref["pos"]
 	return _sites
-
-## The outpost farthest from the Lair (the only one when there is one).
-static func _uplink_site(m: Match, lair: Vector3) -> Vector3:
-	var best := Vector3.INF
-	var far := -1.0
-	if m.exits == null:
-		return best
-	for x in m.exits.list:
-		if x["kind"] != "outpost":
-			continue
-		var at: Vector3 = x["pos"]
-		var d := Vector2(at.x - lair.x, at.z - lair.z).length() if lair != Vector3.INF else 0.0
-		if d > far:
-			far = d
-			best = at
-	return best
 
 static func color_of(s: Dictionary) -> Color:
 	match int(s["st"]):

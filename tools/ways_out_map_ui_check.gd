@@ -9,7 +9,8 @@ extends RefCounted
 ##   7. the dashed next Blight ring: the first ring before the tide, then where it will be tide_next_s on
 ##   8. the real HUD and the full map draw all of it (frames run with the Hud on, map open, player dead)
 ##   9. pins from afar in the play view (WaysOutPins): a seat off screen within reach points at it, none on screen,
-##      none for taken or lost seats or past reach, the locked Heart ring waits for the Gate; the Blight's bar
+##      none for taken or lost seats or past reach, the locked Heart ring waits for the Gate; the Blight's bar;
+##      only the Sealed Lair's own fight puts its seat in use
 ## Never touches the save.
 
 var bad := 0
@@ -42,7 +43,7 @@ func run(main: Node) -> void:
 		"a lair and an outpost carry the quest seats (%s, %s)" % [at[0], at[2]])
 	var qs: QuestSeats = m.exits.seats
 	ok(at[0] == qs.lair.ref["c"] and at[2] == qs.uplink.ref["pos"],
-		"the Lair and Uplink badges stand on the seeded Sealed Lair and Uplink (%s, %s)" % [qs.lair.ref["c"], qs.uplink.ref["pos"]])
+		"the Lair and Uplink badges stand on the seeded Sealed Lair and Uplink (%s, %s)" % [at[0], at[2]])
 	var outposts: Array = m.exits.list.filter(func(x): return x["kind"] == "outpost")
 	var far: float = 0.0
 	for x in outposts:
@@ -190,6 +191,13 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	H.early_team = -1
 	H.charge = Heart.r("charge_s")
 	H._force(Heart.S.READY, "test")
+	m.time = float(q["lair_open_s"]) + 10.0 - m.sess_t0
+	var other: Array = m.lairs.list.filter(func(L): return not L.get("seat", false))
+	if not other.is_empty():
+		other[0]["sealed_in"] = [m.player]
+		var lair_st := int(WaysOutHud.seats(m)[0]["st"])
+		ok(lair_st == WaysOutHud.St.OPEN, "a fight in another lair leaves the Sealed Lair open")
+		other[0]["sealed_in"] = []
 	m.time = float(q["uplink_open_s"]) + 10.0 - m.sess_t0
 	var sd := WaysOutHud.seats(m)
 	var spot := _stand(m, at[2], 40.0)
@@ -223,12 +231,14 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	var hs := _stand(m, at[3], 50.0)
 	_put(m, hs)
 	sd = WaysOutHud.seats(m)
-	ok(WaysOutPins.seat_dir(m, sz, 1, sd, at[1]) != Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) == Vector2.ZERO,
+	var gate_pin := WaysOutPins.seat_dir(m, sz, 1, sd, at[1])
+	ok(gate_pin != Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) == Vector2.ZERO,
 		"the Gate open, the Heart ring locked: one Heart pin, the Gate's")
 	H.early_team = 1
 	H._force(Heart.S.WAITING, "test")
 	sd = WaysOutHud.seats(m)
-	ok(WaysOutPins.seat_dir(m, sz, 1, sd, at[1]) == Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) != Vector2.ZERO,
+	gate_pin = WaysOutPins.seat_dir(m, sz, 1, sd, at[1])
+	ok(gate_pin == Vector2.ZERO and WaysOutPins.seat_dir(m, sz, 3, sd, at[3]) != Vector2.ZERO,
 		"the Gate used: its pin goes, the ring's (locked, counting down) shows")
 	# the Blight's wall
 	var R := Heart.tide_r(m)

@@ -127,17 +127,19 @@ func _row(id: String, word: String, t: float, at: Vector3, put: Callable, keep :
 		spot = _stand(at, d)
 		await _shoot(id, word, spot.distance_to(Vector3(at.x, spot.y, at.z)))
 
-## The Blight's wall, 8..60 m off: one spot on the island, the ring set by the clock.
+## The Blight's wall, 8..60 m off: one spot on the island with ground under the wall's 8 m stand, the ring set by
+## the clock.
 func _blight_row() -> void:
 	pin = Callable()
 	var site := m.heart.site
 	var k := m.heart.ways_scale
 	var at := Vector3.INF
-	for rs in range(36, 8, -4):
+	for rs in range(40, 8, -2):
 		for i in 12:
-			var a := deg_to_rad(35.0 + 30.0 * i)
-			var g := site + Vector3(sin(a), 0, -cos(a)) * rs
-			if not m.world.is_void(g.x, g.z):
+			var a := Vector3(sin(deg_to_rad(35.0 + 30.0 * i)), 0, -cos(deg_to_rad(35.0 + 30.0 * i)))
+			var g := site + a * rs
+			var wall := site + a * (rs + 10.0)
+			if not m.world.is_void(g.x, g.z) and not m.world.is_void(wall.x, wall.z):
 				at = m.world.free_spot_near(g, [], 1.0, 0.45, 2.0)
 				break
 		if at != Vector3.INF:
