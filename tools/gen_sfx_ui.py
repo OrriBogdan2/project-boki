@@ -134,6 +134,28 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+def ready_ult(i):
+    """Ultimate back: a low felt pluck on A4 then E5 (a fifth up), a soft breath of air between, no glass."""
+    first = pluck(NOTE['A4'], 0.3, 0.12, 0.6)
+    swell = S.hiss(0.2, 700, 2400, 0.08, 0.08) * 0.12
+    second = pluck(NOTE['E5'], 0.4, 0.17, 0.5)
+    return finish(room(mix(first, at(swell, 0.1), at(second, 0.2)), 0.6), 3000)
+
+
+def ready_boki(i):
+    """Boki summon back: a breathy rise (a wisp drawing in) that lands on one soft high glass note."""
+    rise = S.sweep(520, 980, 0.28) * env(N(0.28), 0.1, 0.1) * 0.5 + S.hiss(0.28, 1500, 5000, 0.12, 0.1) * 0.18
+    note = S.chime(NOTE['E6'], 0.3, 0.14, ((1.0, 1.0), (2.0, 0.25))) * 0.55
+    return finish(room(mix(rise, at(note, 0.22)), 0.5), 5200)
+
+
+def ready_dash(i):
+    """Dash charge back: the shortest of the three, one dry wood tick with a small upward blip."""
+    blip = S.sweep(900, 1500, 0.06) * env(N(0.06), 0.004, 0.02) * 0.6
+    tick = pluck(NOTE['G6'], 0.1, 0.02, 0.3) * 0.5
+    return finish(mix(blip, tick), 4000)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -150,6 +172,9 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.save_cat('ready_ult', ready_ult(0), 'ui')
+    S.save_cat('ready_boki', ready_boki(0), 'ui')
+    S.save_cat('ready_dash', ready_dash(0), 'ui')
 
 
 if __name__ == '__main__':
