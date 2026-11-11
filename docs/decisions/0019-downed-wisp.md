@@ -32,3 +32,10 @@ Add an entry under `looks` in `wisp_looks.json` with only the keys that differ f
   needs a join-kit field and a Net.VERSION bump: see docs/DEBT.md.
 - `HunterAnim`'s downed crawl code is dead and can go.
 - Check: `--wisp-check`.
+
+## Boki wisps (the other outline, DECISIONS 2026-11-09)
+Round = Hunter, critter = Boki. `BokiWispLook` (scripts/kin/boki_wisp_look.gd) builds a Boki's wisp from its
+species: its own palette (the shiny one when it shimmers), its ears and tail tip from `look` (or a small table
+for the hand-built bodies), one baked mesh on one shared unlit material (`shaders/boki_wisp.gdshader`), a quick
+hop-and-squash idle (`pose`) and a 24-sparkle trail. Only the look so far: the wisp prototype wires it into
+matches. See it with `tests/kin_gallery.tscn -- --kin-wisps [--kin-shiny]`; check: `--boki-wisp-check`.
