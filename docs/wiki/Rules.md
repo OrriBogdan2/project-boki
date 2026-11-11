@@ -187,8 +187,14 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 
 | Setting | Value |
 |---|---|
-| stretches | [{"kind": "straight", "len": 6.0, "mult": 1.0}, {"kind": "water", "len": 3.0, "mult": 0.7}, {"kind": "climb", "len": 6.0, "mult": 0.65}, {"kind": "jump", "len": 3.0, "mult": 0.9}] |
-| stretches_doc | One lap, in order, laid out as a 6 x 3 m loop. 'mult' is everyone's pace on that stretch (swimming and climbing are slow). The three marks are the ends of the first three stretches. |
+| courses | {"bramblebank": {"name": "Hedge lane", "note": "A winding lane along the berry hedge: ford the brook, climb the bank, hop the log.", "stretches": [{"kind": "straight", "mult": 1, "pts": [[2.2, -0.9], [4.4, 0.3], [6.6, -0.7]]}, {"kind": "water", "mult": 0.7, "pts": [[7.8, -2], [7.6, -3.4]]}, {"kind": "climb", "mult": 0.65, "pts": [[5.4, -4.5], [3, -4]]}, {"kind": "jump", "mult": 0.9, "pts": [[1.1, -2.2], [0, 0]]}]}, "glasswater": {"name": "Pond loop", "note": "Along the shore, across the channel on stepping stones, back wading the shallows, up the bank to the line.", "stretches": [{"kind": "straight", "mult": 1, "pts": [[2.2, 0.5], [4.2, -0.3], [6, 0]]}, {"kind": "jump", "mult": 0.9, "pts": [[7, -2.2], [7.6, -3.8]]}, {"kind": "water", "mult": 0.7, "pts": [[5.9, -3.9], [3.6, -3.5], [1.8, -3.4]]}, {"kind": "climb", "mult": 0.65, "pts": [[1, -1.8], [0, 0]]}]}, "cinderstep": {"name": "Hill climb", "note": "A run-up, a switchback up the terrace, a leap over a crack at the top, a quick slope down.", "stretches": [{"kind": "straight", "mult": 1, "pts": [[2.5, 0.6], [5, 0]]}, {"kind": "climb", "mult": 0.65, "pts": [[6.5, -1.6], [4, -2.8], [5.6, -4.4]]}, {"kind": "jump", "mult": 0.9, "pts": [[4.4, -5.8], [2.4, -6.2]]}, {"kind": "straight", "mult": 1.15, "pts": [[1.2, -3.6], [0, 0]]}]}, "hushwood": {"name": "Wood path", "note": "A path that winds between the trunks, up a root hill, through the brook, over a fallen log.", "stretches": [{"kind": "straight", "mult": 1, "pts": [[1.6, -1.6], [3.4, -0.4], [5.2, -2], [6.2, -3.6]]}, {"kind": "climb", "mult": 0.65, "pts": [[5, -5.4], [3.6, -6.4]]}, {"kind": "water", "mult": 0.7, "pts": [[1.8, -6], [0.6, -4.6]]}, {"kind": "jump", "mult": 0.9, "pts": [[1.4, -2.4], [0, 0]]}]}, "ridge": {"name": "Ridge track", "note": "Up the ridge stair, along the top, a gust gap, and a long run down the far side.", "stretches": [{"kind": "climb", "mult": 0.65, "pts": [[2.4, -1], [4.4, -2.6]]}, {"kind": "straight", "mult": 1, "pts": [[6, -2.6], [8.2, -1.8], [9.4, -3.2]]}, {"kind": "jump", "mult": 0.9, "pts": [[9.4, -5.4], [8.2, -6.8]]}, {"kind": "straight", "mult": 1.15, "pts": [[5.4, -5.2], [2.4, -2.8], [0.4, -1], [0, 0]]}]}} |
+| courses_doc | One course per garden zone (garden_zones.json ids; a zone with none, the hub, runs bramblebank's), our own layouts: four stretches in order, each a kind (straight, water, climb, jump), a 'mult' (everyone's pace on it: swimming and climbing are slow, a slope down is quick) and 'pts', metres right (x) and up the screen (-z) of the start line, the points after the end of the stretch before it. The first stretch starts at [0, 0] and the last ends there, so the lap is closed; each stretch's length is worked out from its points. The three marks are the ends of the first three stretches. |
+| posts | {"glasswater": [33.5, 35.5], "cinderstep": [35.5, 45.0], "hushwood": [41.5, 33.2], "ridge": [46.1, 36.9]} |
+| posts_doc | Where the race post stands in a zone (GardenZones.here), tiles x and z; the line is LOOP_OFF from it and the course (above) runs from there. It needs no Training post, and the zone's scatter keeps clear of the loop. The start zone's post stands by the farm's Training post. |
+| max_turn | 110 |
+| max_turn_doc | Degrees a course may turn at one point inside the lap (not at the line, where the lap ends and starts); --race-check measures every course. The switchback up Cinderstep is the sharpest. |
+| lap_band | [18.0, 28.0] |
+| lap_band_doc | s: a Boki with no Speed points at joy 50 and no lean runs any zone's lap in this time (--race-check). The faster or slower the Boki, the further from it. |
 | pace | 1.1 |
 | pace_doc | m/s on a straight for a Boki with no Speed points and joy 50. |
 | speed_per_point | 0.015 |
@@ -238,12 +244,12 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 
 ## base_relay (`content/rules/base_relay.json`)
 
-Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd): three of your Boki against a visiting team of three on the Dash loop (base_race.json stretches and pace). Each runs one leg and hands the baton on at a mark; your two hand-offs are the Dash's cheer press on the timing bar. Prizes and the cup: garden_prizes.json 'relay'. Units: seconds; joy is 0-100 points, bonds -1..1.
+Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd): three of your Boki against a visiting team of three on the Dash loop (the zone's base_race.json course and pace). Each runs one leg and hands the baton on at a mark; your two hand-offs are the Dash's cheer press on the timing bar. Prizes and the cup: garden_prizes.json 'relay'. Units: seconds; joy is 0-100 points, bonds -1..1.
 
 | Setting | Value |
 |---|---|
 | legs | [[0], [1], [2, 3]] |
-| legs_doc | Which base_race.json stretches each leg runs, in order: the straight, the water, the climb (with the jump to the line). A Boki is put on the leg it runs best relative to its team. |
+| legs_doc | Which stretches of the zone's base_race.json course each leg runs, in order: the straight, the water, the climb (with the jump to the line). A Boki is put on the leg it runs best relative to its team. |
 | handoff | {"great": 0.0, "good": 0.25, "miss": 0.6} |
 | handoff_doc | s the next runner loses taking the baton, by your press's grade (no press before the mark is a miss). |
 | fumble | 0.3 |

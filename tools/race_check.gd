@@ -13,6 +13,9 @@ extends RefCounted
 ##   8. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
 ##      under a twist still finishes, a won Dash pins the winner on the showcase wall and the sign shows the twist
 ##   9. the Training post drill still runs on the shared timing bar: three presses, then it ends
+##  10. courses: every garden zone has its own, closed, no sharper than max_turn, and every rigged body plan
+##      runs it to the line in a lap time inside lap_band; the zone's own Home puts the loop on land,
+##      clear of its toys, with no step in the ground a runner could not take
 ## Never touches the real save.
 
 const RACES := 20
@@ -20,6 +23,9 @@ const WIN_SHARE := 0.6           # the favourite must win at least this share
 const DT := 1.0 / 30.0           # s per step
 const MAX_S := 120.0             # s: a race that runs longer is stuck
 const SETTLE_FRAMES := 600       # frames to wait at most for the home to finish building
+const SAMPLE := 0.25             # m between the footing samples along a course
+const MAX_STEP := 0.3            # m of ground height between two samples: steeper than this is a wall, not a hill
+const CLOSE := 0.01              # m the lap may miss closing by
 
 var bad := 0
 var main: Node
@@ -39,6 +45,8 @@ func run(m: Node) -> void:
 	_settle()
 	_twists()
 	_formats()
+	_courses()
+	await _zone_tracks()
 	await _on_base()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -91,7 +99,7 @@ func _leans() -> void:
 	var fly := _kin(walker, "Fly", 10, 60.0)
 	swim["lean"] = {"water": 1.0}
 	fly["lean"] = {"flying": 1.0}
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.stretches()
 	var water := -1
 	var jump := -1
 	for i in st.size():
@@ -159,7 +167,7 @@ func _settle() -> void:
 
 func _twists() -> void:
 	var rec := _kin("zapple", "Tw", 10, 60.0)
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.stretches()
 	var tw := {"mult": {"water": 0.5}}
 	for i in st.size():
 		var want := 0.5 if st[i]["kind"] == "water" else 1.0
@@ -231,6 +239,7 @@ func _on_base() -> void:
 	ok(home.hrace != null, "on: the base has the Dash")
 	if home.hrace != null:
 		var race: BaseRace = home.hrace
+		_footing(GardenZones.start(), home, race)
 		var post_ok := is_instance_valid(race.post)
 		ok(post_ok and race.find(Vector2(race.post.position.x, race.post.position.z)) == {"kind": "race"},
 				"on: the race post stands by the Training post and offers a race")
@@ -324,3 +333,104 @@ func _drill(home) -> void:
 		for f in 40:
 			home._train_process(1.0 / 30.0)
 	ok(home.train.is_empty(), "drill: three presses end it (%s)" % rec["stats"]["speed"])
+
+## The species that stand for each body plan: the rigged ones (KinPuppet.BODY) and one older round kin.
+func _plan_species() -> Dictionary:
+	var out := {}
+	for sp in Data.KIN:
+		out[String(KinPuppet.BODY.get(sp, "blob"))] = sp
+	return out
+
+## Every zone's course is its own, closed and gentle on the turns, and every body plan runs it to the line.
+func _courses() -> void:
+	var R: Dictionary = BaseRace.rules()
+	var band: Array = R["lap_band"]
+	var zones: Array = GardenZones.ids()
+	ok(R["courses"].keys() == zones, "a course for each zone: %s" % [R["courses"].keys()])
+	var plans := _plan_species()
+	ok(plans.keys().size() == BaseRace.PLANS.size(), "every body plan has a species to run (%s)" % [plans.keys()])
+	var shapes := {}
+	for z in zones:
+		var c: Array = BaseRace.course(z)
+		var pts: Array = []
+		for i in c.size():
+			pts.append_array(BaseRace.path(c, i) if i == 0 else BaseRace.path(c, i).slice(1))
+		shapes[JSON.stringify(pts)] = true
+		ok(c.size() == 4, "%s: four stretches" % z)
+		ok(pts[0].distance_to(pts[-1]) < CLOSE, "%s: the lap closes at the line" % z)
+		var worst := 0.0
+		for i in range(1, pts.size() - 1):
+			worst = maxf(worst, rad_to_deg(abs((pts[i] - pts[i - 1]).angle_to(pts[i + 1] - pts[i]))))
+		ok(worst <= float(R["max_turn"]), "%s: sharpest turn %.0f of %.0f degrees" % [z, worst, float(R["max_turn"])])
+		GardenZones.here = z
+		for plan in plans:
+			var rec := _kin(plans[plan], "Run", 0, 50.0)
+			var secs := BaseRace.expected_time(rec)
+			ok(secs >= float(band[0]) and secs <= float(band[1]),
+					"%s: a %s (%s) laps in %.1f s, band %s-%s" % [z, plan, plans[plan], secs, band[0], band[1]])
+			var r := _race([rec, _kin(plans[plan], "Mate", 0, 50.0)], 0, RandomNumberGenerator.new())
+			ok(r.over() and r.t < MAX_S, "%s: a %s runs it to the line (%.1f s)" % [z, plan, r.t])
+	GardenZones.here = ""
+	ok(shapes.size() == zones.size(), "no two zones share a course")
+
+## In each built zone's own Home (the start zone's is the farm, below): a race post, and the loop lies on
+## land clear of its toys and props without a step the ground can't take.
+func _zone_tracks() -> void:
+	FarmUnlocks.rules()["base_mode"] = true
+	for z in GardenZones.ids():
+		if not ZoneLayout.built(z) or z == GardenZones.start():
+			continue
+		var d := Save.fresh()
+		d["tutorial"] = {"hatched": true, "intro": true}
+		d["zones"][z] = {"open": true}
+		Save.d = d
+		var home: Node = load("res://scripts/home/home.gd").new()
+		home.zone = z
+		main.add_child(home)
+		main.current = home
+		for i in SETTLE_FRAMES:
+			await main.get_tree().process_frame
+			if is_instance_valid(home.root_ui):
+				break
+		var race: BaseRace = home.hrace
+		ok(race != null and is_instance_valid(race.post), "%s: a race post stands in the zone" % z)
+		if race != null and is_instance_valid(race.post):
+			_footing(z, home, race)
+		home.queue_free()
+		await main.get_tree().process_frame
+	FarmUnlocks.rules()["base_mode"] = false
+
+func _footing(z: String, home: Node, race: BaseRace) -> void:
+	var taken := {}
+	for e in HomeLayout.of(Save.d)["deco"]:
+		if e["id"] != "training_post":
+			for c in HomeLayout.deco_cells(e):
+				taken[c] = true
+	var lane := float(BaseRace.rules()["lane"])
+	var worst := 0.0
+	var wet := 0
+	var dry := 0        # water-stretch samples off the zone's channel, in a zone that has one
+	var blocked := 0
+	var tiles: Array = GardenZones.info(z).get("build", {}).get("shallow", [])
+	var channel := Rect2(tiles[0], tiles[1], tiles[2] - tiles[0] + 1, tiles[3] - tiles[1] + 1) if tiles else Rect2()
+	var c: Array = BaseRace.course(z)
+	for s in c.size():
+		var n := int(float(c[s]["len"]) / SAMPLE)
+		for k in 4:
+			var last := 0.0
+			for i in n + 1:
+				var p := race.track_at(s, float(i) / n, lane * (k - 1.5))
+				var g: float = home._ground_h(p.x, p.z)
+				wet += 1 if g < -50.0 else 0
+				if tiles and c[s]["kind"] == "water" and not channel.has_point(Vector2(p.x, p.z)):
+					dry += 1
+				var cell := Vector2i(floori(p.x), floori(p.z))
+				blocked += 1 if taken.has(cell) or home.world.occupy(p.x, p.z, 0.3, 0.0, false) != 0.0 else 0
+				if i > 0 and g > -50.0 and last > -50.0:
+					worst = maxf(worst, absf(g - last))
+				last = g
+	ok(wet == 0, "%s: the whole loop is on land (%d samples off it)" % [z, wet])
+	if tiles:
+		ok(dry == 0, "%s: the water stretch runs down its channel (%d samples off it)" % [z, dry])
+	ok(blocked == 0, "%s: no toy, snack patch, tree or prop on the loop (%d samples)" % [z, blocked])
+	ok(worst <= MAX_STEP, "%s: ground steps stay under %.2f m between samples (worst %.2f)" % [z, MAX_STEP, worst])
