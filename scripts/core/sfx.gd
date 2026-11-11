@@ -37,7 +37,7 @@ const BLAST_PEAK_DB := -6.0
 ## Distance falloff: full volume within NEAR metres, then a gentle roll-off; muffled beyond FAR.
 const NEAR := 3.5
 const FAR := 9.0
-var skip: Array = []      # sounds left out for now (ArchKit.run_own: the shared cast sounds under a Hero's own)
+var skip: Array = []      # sounds left out for now (ArchKit.run: the shared delivery sounds under a kit's own)
 var last_take := {}
 var recent := {}          # sound -> start times (ms) still inside the stacking window
 

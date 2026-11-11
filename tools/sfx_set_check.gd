@@ -12,6 +12,8 @@ extends RefCounted
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. every Hunter with a meter has its own resource-full tell (<arch>_tell) that carries past hearing range,
+##      and ArchKit._tells plays it; every kit file that emits a cue is walked by item 4
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -22,9 +24,11 @@ const REACH_MAX := 80.0        # m: past this a sound would carry over most of t
 const CUE_CALLS := "(?:\\.sfx\\(|armed_fx\\([^,)]*,[^,)]*,\\s*|payoff_fx\\([^,]+,[^,]+,[^,]+,\\s*)\"([a-z0-9_]*)\""
 # the Hunters whose weapon or kit winds up a charge: ArchKit plays <arch>_charge_tick and <arch>_charge_full
 const CHARGERS := ["archer", "mage", "gunslinger", "juggernaut", "bulwark", "dolm", "ostra", "thief"]
+const TELL_REACH_MAX := 30.0  # m: the resource-full tell is for foes nearby (12-25 m), not across the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
+var walked := {}               # kit file -> true once item 4 has read it
 var levels := {}
 
 func ok(cond: bool, what: String) -> void:
@@ -44,6 +48,8 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_res_tells()
+	_unwalked()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -102,6 +108,7 @@ func _kit_names(arch: String, extra: Array, own: Dictionary) -> void:
 	var re := RegEx.create_from_string(CUE_CALLS)
 	var holes := []
 	for f in ["%s_kit.gd" % arch] + extra:
+		walked[String(f)] = true
 		var path := "res://scripts/arch/kits/" + String(f)
 		if not FileAccess.file_exists(path):
 			ok(false, "%s: kit file %s exists" % [arch, f])
@@ -171,6 +178,33 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## 9. The resource-full tell: a Hunter's own sting when its meter comes full (Lace's Hawk Sense has no meter).
+func _res_tells() -> void:
+	var wrong := []
+	for arch in Arch.ids():
+		if String((Arch.def(arch).get("resource", {}) as Dictionary).get("kind", "")) == "none":
+			continue
+		var sname: String = arch + "_tell"
+		var reach: float = Sfx.sound_reach.get(sname, 0.0)
+		if not (Sfx.ensure(sname) and reach > Sfx.hear_range and reach <= TELL_REACH_MAX):
+			wrong.append("%s %.0f m" % [sname, reach])
+	ok(wrong.is_empty(), "every Hunter with a meter has its own resource-full tell that carries (%s)" % [wrong])
+	var kit := FileAccess.get_file_as_string("res://scripts/arch/arch_kit.gd")
+	var own := kit.contains("m.sfx(id + \"_tell\"") and not kit.contains("\"unlock\"")
+	ok(own, "ArchKit._tells plays the Hunter's own tell")
+
+## 9. Every kit file that emits a cue is walked by item 4 (listed in its Hunter's "kit_files"), unless it is the
+## kit of a Hunter with no set (item 5's fallback).
+func _unwalked() -> void:
+	var re := RegEx.create_from_string(CUE_CALLS)
+	var loose := []
+	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
+		if not f.ends_with(".gd") or walked.has(f) or Arch.ids().has(f.trim_suffix("_kit.gd")):
+			continue
+		if re.search(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)) != null:
+			loose.append(f)
+	ok(loose.is_empty(), "every kit file that plays a cue is walked (not walked: %s)" % [loose])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:

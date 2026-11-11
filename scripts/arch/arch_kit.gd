@@ -66,7 +66,7 @@ static func make(hunter: Hunter, arch_id: String) -> ArchKit:
 	k._setup()
 	return k
 
-const OWN_LOOK_SKIP := ["boom", "ping", "whoosh", "throw"]     # KinExec's delivery sounds (see run_own)
+const DELIVERY_SOUNDS := ["boom", "ping", "whoosh", "throw"]     # KinExec's shared ones, out of a kit's stage (run)
 
 # ------------------------------------------------------------------ data
 func rmb_def() -> Dictionary: return d.get("rmb", {})
@@ -649,16 +649,18 @@ func cx(slot: String, ability: String, aim: Vector3, extra := {}) -> Dictionary:
 		c[k] = extra[k]
 	return c
 
+## A kit's stage: the rules and the shared look run; the sound is the kit's own (it plays its cast sound itself),
+## so the shared cast tell and delivery sounds stay out.
 func run(st_: StageSpec, c: Dictionary) -> void:
-	KinExec.run_stage(st_, c)
-
-## A stage whose look and sound are the Hero's own (HeroVfx): the rules run, the shared cast language stays out.
-func run_own(st_: StageSpec, c: Dictionary) -> void:
 	c["silent"] = true
-	m.fx.own_look = true
-	Sfx.skip = OWN_LOOK_SKIP
+	Sfx.skip = DELIVERY_SOUNDS
 	KinExec.run_stage(st_, c)
 	Sfx.skip = []
+
+## A stage whose look is the Hero's own too (HeroVfx): the shared cast look stays out as well.
+func run_own(st_: StageSpec, c: Dictionary) -> void:
+	m.fx.own_look = true
+	run(st_, c)
 	m.fx.own_look = false
 
 # ------------------------------------------------------------------ helpers
@@ -732,7 +734,7 @@ func _tells(dt: float) -> void:
 	var f := res_frac()
 	var t := "full" if f >= 0.999 or full_ready() else ("half" if f >= 0.5 else "")
 	if t == "full" and tell != "full":
-		m.sfx("unlock", h.pos, -6.0 if h.is_local() else -3.0, 1.6)
+		m.sfx(id + "_tell", h.pos, -6.0 if h.is_local() else -3.0)
 		if not h.unseen and h.visible: m.fx.body_glow(h.pos, res_col())     # coming full: the body glow, no ground ring
 	tell = t
 	bonded_glow = int(h.slot_lv.get("ult", 0)) > 0 and h.ult >= 1.0 and h.kin != null and not (h.kin as Kin).dead

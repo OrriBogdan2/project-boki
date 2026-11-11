@@ -54,6 +54,7 @@
   "vv_ult_slam"
  ],
  "kit_files": [
+  "mage_gum.gd",
   "mage_sky.gd",
   "mage_ult.gd"
  ]
