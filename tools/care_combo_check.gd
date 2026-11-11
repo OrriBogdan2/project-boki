@@ -804,6 +804,46 @@ func _release_beats() -> void:
 	ok("mm LMB: the hand releases within the source's %.2f s wind of the ember" % SRC_WIND,
 			wind <= SRC_WIND, "%.3f s" % wind)
 
+## Sheet gap 9 (footage: numbers go white to yellow as the ramp builds): an ember's damage number takes the
+## colour of the Kindle stacks it landed on, one clear step per stack from the plain hit, through the shared
+## damage-number path (the hit's "num_col"); other sources keep the plain colour.
+func _kindle_numbers(m: Match, P: Hunter, T: Hunter, K: TenderKit) -> void:
+	const MIN_STEP := 0.08    # RGB distance between neighbouring stack colours (about 14 dE in Lab)
+	T.armor = 0.0
+	var cols: Array = []
+	for n in 6:
+		K.kind[T.get_instance_id()] = {"t": T, "n": n, "left": 3.0}
+		T.hp = T.max_hp
+		var o := {"src": "shot"}
+		T.hurt(8.0, P, o)
+		cols.append(_newest_num_col(m))
+	var step_min := 9.0
+	for i in range(1, cols.size()):
+		var a: Color = cols[i - 1]
+		var b: Color = cols[i]
+		step_min = minf(step_min, Vector3(a.r - b.r, a.g - b.g, a.b - b.b).length())
+	var crit_gap := 9.0
+	for c: Color in cols.slice(1):
+		crit_gap = minf(crit_gap, Vector3(c.r - HudStyle.CRIT.r, c.g - HudStyle.CRIT.g, c.b - HudStyle.CRIT.b).length())
+	# a Burrseed hit on the same Kindled foe keeps the plain colour (only embers ramp)
+	T.hurt(8.0, P, {"src": "abil"})
+	var plain := _newest_num_col(m) == HudStyle.HIT
+	ok(
+			"mm passive: each Kindle stack (0-5) tints the ember's damage number one clear step, cream to ember",
+			cols[0] == HudStyle.HIT and cols[5] == Color(String(Arch.def("tender")["resource"]["num_cols"][4]))
+			and step_min >= MIN_STEP and crit_gap >= MIN_STEP and plain,
+			"min step %.2f, nearest crit %.2f" % [step_min, crit_gap])
+	K.kind.erase(T.get_instance_id())
+	T.hp = T.max_hp
+
+## The colour of the damage number hit last (the one whose last hit is newest; words have no "val").
+func _newest_num_col(m: Match) -> Color:
+	var best: Dictionary = {}
+	for x: Dictionary in m.fx.nums:
+		if x.has("val") and (best.is_empty() or float(x["last"]) < float(best["last"])):
+			best = x
+	return (best["node"] as Label3D).modulate if not best.is_empty() else Color.BLACK
+
 func _mine(m: Match, P: Hunter) -> Array:
 	return m.shots.filter(func(s): return s["by"] == P)
 
@@ -860,6 +900,7 @@ func tender() -> void:
 	ok(
 			"mm passive: Kindle ramps embers about +45% at 5 stacks", ramp > 0.38 and ramp < 0.52,
 			"+%.0f%%" % (ramp * 100.0))
+	_kindle_numbers(m, P, T, K)
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
 	var e0: int = K.stats["emp"]
