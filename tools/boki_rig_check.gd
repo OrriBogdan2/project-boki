@@ -11,8 +11,8 @@ const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"nettlynx", "thrumbird", "caecilith", "lilybara", "umbrathere"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend", "win", "sulk", "push", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge",
-	"stonehop", "spin"]
+	"tend", "win", "sulk", "push", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace",
+	"dodge", "stonehop", "spin"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip

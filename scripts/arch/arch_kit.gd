@@ -1113,7 +1113,8 @@ func _tick_charge(dt: float) -> void:
 			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
-	AimKit.circle(h, "charge_ring", {"self": true, "r": 1.15 * float(h.cdat.get("scale", 1.0)), "all": true, "col": col, "fill": k})
+	var r := 1.15 * float(h.cdat.get("scale", 1.0))
+	AimKit.circle(h, "charge_ring", {"self": true, "r": r, "all": true, "col": col, "fill": k})
 	var g2: Node3D = chg.get("glow")
 	if g2 and is_instance_valid(g2):
 		var d := h.aim_dir()
