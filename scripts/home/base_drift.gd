@@ -4,7 +4,8 @@ extends RefCounted
 ## lives with slowly shapes it. Once per in-game day at home (BaseLife.step calls day()), each Boki's four traits
 ## move a small step toward the average of its friends (base life bonds at or above friend_at); rivals and
 ## strangers do not pull. A trait moves at most week_cap per drift week, and crossing a band writes a journal line
-## ("Pip is getting braver"). Tuning: content/rules/base_drift.json. Optional Boki key rec["drift"] = {day, moved}.
+## ("Pip is getting braver"). Young Boki get the full step and cap, Grown ones only adult_share of both.
+## Tuning: content/rules/base_drift.json. Optional Boki key rec["drift"] = {day, moved}.
 
 const TRAITS := ["bravery", "loyalty", "temper", "curiosity"]
 
@@ -34,16 +35,21 @@ static func _follow_friends(rec: Dictionary, was: Dictionary, friends: Array, R:
 	if friends.is_empty():
 		return
 	var drift: Dictionary = rec["drift"]
+	var age := age_share(rec, R)
 	for t in TRAITS:
 		var mean := 0.0
 		for f in friends:
 			mean += float(f.get(t, 0.5))
 		mean /= friends.size()
-		var left := float(R["week_cap"]) - float(drift["moved"].get(t, 0.0))
-		var by := clampf((mean - float(was.get(t, 0.5))) * float(R["step"]), -left, left)
+		var left := maxf(0.0, float(R["week_cap"]) * age - float(drift["moved"].get(t, 0.0)))
+		var by := clampf((mean - float(was.get(t, 0.5))) * float(R["step"]) * age, -left, left)
 		drift["moved"][t] = float(drift["moved"].get(t, 0.0)) + absf(by)
 		rec["traits"][t] = clampf(float(was.get(t, 0.5)) + by, 0.05, 0.95)
 		_band_line(rec, t, float(was.get(t, 0.5)), float(rec["traits"][t]), R)
+
+## How much of the step and weekly cap this Boki gets: 1 while young (young_stages), adult_share once Grown.
+static func age_share(rec: Dictionary, R: Dictionary) -> float:
+	return 1.0 if (R["young_stages"] as Array).has(Care.stage_name(rec)) else float(R["adult_share"])
 
 ## A journal line when the trait moved into another band (same line shape as CareJournal.note).
 static func _band_line(rec: Dictionary, which: String, from: float, to: float, R: Dictionary) -> void:
