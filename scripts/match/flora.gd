@@ -845,7 +845,7 @@ static func _cbox(b: MB, c: Vector3, e: Vector3, c0: Color, c1: Color, bev: floa
 		quad.call([Vector3(a.x, ys, a.y), Vector3(bb.x, ys, bb.y), Vector3(ib.x, y1, ib.y), Vector3(ia.x, y1, ia.y)], bn, [hc, hc, hc, hc])
 
 # ------------------------------------------------------------------ set pieces
-## Gives a set piece built from primitives (docks, hatches, outposts, shrines, the train, lairs) the
+## Gives a set piece built from primitives (outposts, shrines, the train, lairs) the
 ## painted value structure of the characters: each part lighter at its top and darker at its foot,
 ## dark where it tucks into the next part, and form shadow on its turned-away edges.
 static func paint_set_piece(n: Node3D, grad := 0.24, crease := 0.3, edge := 0.2) -> void:
