@@ -9,6 +9,7 @@ extends RefCounted
 const WITHIN := 15.0         # s: everyone is back to what they were doing by then
 const DT := 0.25             # s per farm step
 const START_R := 12.0        # m from the portal every greeter starts
+const ISLAND_SEED := 5       # the farm-start island (a random one each run moved the ring round the portal)
 
 var bad := 0
 
@@ -22,7 +23,8 @@ func _new_save() -> Array:
 	var recs: Array = []
 	# name, species, trust, bravery: bound (high trust, brave), wave, shy (low trust)
 	for spec in [["cindle", "Ash", 90.0, 0.9], ["burrlet", "Moss", 60.0, 0.5], ["basaltoad", "Crag", 20.0, 0.1]]:
-		var rec := Save.new_kin(spec[0], spec[1])
+		var rec := Save.new_kin(spec[0], spec[1], recs.size() + 1)      # a fixed Unique roll: the same body every run
+		rec["uid"] = "homecoming_%s" % spec[1]      # likes are seeded from the uid
 		rec["trust"] = spec[2]
 		rec["traits"]["bravery"] = spec[3]
 		recs.append(rec)
@@ -31,6 +33,7 @@ func _new_save() -> Array:
 	d["active"] = recs[0]["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
+	HomeLayout.new_fs(d, ISLAND_SEED)
 	HomeLayout.ensure(d)
 	return recs
 
@@ -81,6 +84,7 @@ func run(main: Node) -> void:
 	rules["base_mode"] = true
 	_new_save()
 	var home = await main._hb_home()
+	seed(5)      # again: the home used up a different number of rolls in the real frames it took to build
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
 	home.day_t = 0.4
 	home.ppos = home.spots["portal"] + Vector3(0, 0, -4.5)
