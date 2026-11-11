@@ -541,6 +541,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
+			_merge_parts(n)
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			ShadowPolicy.judge_tree(n, n.scale.x)      # small props throw no shadow (item 94)
@@ -548,6 +549,13 @@ func _sync_deco() -> void:
 			nodes[u] = n
 			for l in _lights_of(n): h.lamps.append(l)
 		(nodes[u] as Node3D).visible = not (held.get("kind", "") == "deco" and int(held.get("from", -1)) == int(u))
+
+## A placed piece's plain parts baked into one mesh per material in every group of it (a moving group keeps
+## moving: its parts merge among themselves), so a house or stall costs a few draws instead of dozens.
+func _merge_parts(n: Node3D) -> void:
+	var groups := n.find_children("*", "Node3D", true, false).filter(func(g): return not (g is MeshInstance3D))
+	for g in [n] + groups:
+		Models.merge_static(g)
 
 func _sig(e: Dictionary) -> String:
 	return "%s|%d|%d|%d|%s|%s|%s" % [e["id"], int(e["x"]), int(e["z"]), int(e.get("r", 0)), str(e.get("c", "")), str(e.get("px", "")), str(e.get("sp", ""))] + FarmModels.sig(e) + SnackPatch.sig(e)
@@ -636,28 +644,25 @@ func _sync_water() -> void:
 	var rim := Models.toon(Color("8d8a86"))
 	var plane := PlaneMesh.new(); plane.size = Vector2(1.02, 1.02); plane.subdivide_width = 3; plane.subdivide_depth = 3
 	var strip := PlaneMesh.new(); strip.size = Vector2(1.0, 0.26)
-	var stone := Models.sphere(0.13, 6)
+	var tiles: Array = []
+	var foam: Array = []
+	var stones: Array = []
 	for k in wt:
 		var c := HomeLayout.unkey(k)
-		var mi := MeshInstance3D.new(); mi.mesh = plane; mi.material_override = wm
-		mi.position = Vector3(c.x + 0.5, 0.05, c.y + 0.5)
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		water_root.add_child(mi)
+		tiles.append(Transform3D(Basis(), Vector3(c.x + 0.5, 0.05, c.y + 0.5)))
 		for dv in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			if wt.has(HomeLayout.key(c.x + dv.x, c.y + dv.y)): continue
 			# foam along the bank (the strip's UV.y runs from the bank out onto the water)
-			var fo := MeshInstance3D.new(); fo.mesh = strip; fo.material_override = fm
-			fo.position = Vector3(c.x + 0.5 + dv.x * 0.37, 0.065, c.y + 0.5 + dv.y * 0.37)
-			fo.rotation.y = atan2(-float(dv.x), -float(dv.y))
-			fo.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			water_root.add_child(fo)
+			var turn := Basis(Vector3.UP, atan2(-float(dv.x), -float(dv.y)))
+			foam.append(Transform3D(turn, Vector3(c.x + 0.5 + dv.x * 0.37, 0.065, c.y + 0.5 + dv.y * 0.37)))
 			for t in [-0.3, 0.05, 0.38]:
 				var side: Vector3 = Vector3(-dv.y, 0, dv.x) * t
-				var s := MeshInstance3D.new(); s.mesh = stone; s.material_override = rim
-				s.position = Vector3(c.x + 0.5 + dv.x * 0.5, 0.07, c.y + 0.5 + dv.y * 0.5) + side
-				s.scale = Vector3(1.2, 0.6, 1.0)
-				s.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-				water_root.add_child(s)
+				var at := Vector3(c.x + 0.5 + dv.x * 0.5, 0.07, c.y + 0.5 + dv.y * 0.5) + side
+				stones.append(Transform3D(Basis().scaled(Vector3(1.2, 0.6, 1.0)), at))
+	# one MultiMesh each: a pond is a few draws however many tiles it has
+	ZoneDress.batch(water_root, plane, wm, tiles, "Pond", Color.WHITE)
+	ZoneDress.batch(water_root, strip, fm, foam, "Foam", Color.WHITE)
+	ZoneDress.batch(water_root, Models.sphere(0.13, 6), rim, stones, "Rim", Color.WHITE)
 
 ## Kin beds you've put down are slept in by kin that don't have one of the six by the house.
 func assign_beds() -> void:

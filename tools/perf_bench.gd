@@ -158,7 +158,7 @@ func _farm(part: String, params: Dictionary) -> void:
 	if part == "hub": Content.rules("farm_build")["base_mode"] = true      # the hub only exists in base mode
 	var was = main.current
 	Game.goto("home", params)
-	while main.current == was or main.current.get("root_ui") == null or main.fade.covered:
+	while main.current == was or main.current == null or main.current.get("root_ui") == null or main.fade.covered:
 		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
@@ -412,3 +412,29 @@ func _meshes() -> void:
 	ks.sort_custom(func(a, b): return by[a][1] > by[b][1])
 	var top := ks.slice(0, 12).map(func(k): return "%s: %d, %.1fk, %d" % [k, by[k][0], by[k][1] / 1000.0, by[k][2]])
 	print("BENCH heaviest meshes (name: instances, total tris k, shadow casters): " + ", ".join(top))
+	_owners()
+
+## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
+## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
+func _owners() -> void:
+	var by := {}
+	var scene: Node = main.current
+	for n in scene.find_children("*", "GeometryInstance3D", true, false):
+		var gi := n as GeometryInstance3D
+		var mesh: Mesh = gi.mesh if gi is MeshInstance3D else (gi.multimesh.mesh if gi is MultiMeshInstance3D and gi.multimesh else null)
+		if mesh == null or not gi.is_visible_in_tree():
+			continue
+		var passes := 0
+		for si in mesh.get_surface_count():
+			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
+			passes += 2 if mat and mat.next_pass else 1
+		var top: Node = gi
+		var under: Node = gi      # the level below `top`: the home's world root holds most pieces
+		while top.get_parent() != scene:
+			under = top
+			top = top.get_parent()
+		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
+		by[key] = int(by.get(key, 0)) + passes
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))

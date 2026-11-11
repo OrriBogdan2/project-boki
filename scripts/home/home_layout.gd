@@ -364,6 +364,7 @@ static func lobe(level: int) -> Array:
 ## the save's size. The original island's shape is untouched, so nothing that stood on it falls off.
 ## sk: a farm-start island's size scale (its layout's "sk"); 0 for the classic and procedural meadows.
 static func make_world(world: World, level: int, seed := 0, sk := 0.0) -> void:
+	world.scatter_chunk = 1024      # the camera sees the whole home at once: one scatter batch per kind
 	# a farm-start island keeps only a small fixed heart round the portal: the rest is its own shape
 	var defs: Array = [["main", CORE_C, CORE_R] if sk <= 0.0 else ["main", FS_CORE_C, FS_CORE_R]]
 	for k in Data.ISLES:
