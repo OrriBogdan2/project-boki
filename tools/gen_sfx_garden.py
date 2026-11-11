@@ -19,7 +19,9 @@ Soft and outdoorsy, quiet enough for a garden: wood, breath, small bells and Bok
   show_reveal      a wood-block roll, three judge cards flipped and a chime   show_crowd   paw-pat applause and cheers
   relay_handoff    a paw slap and a baton tick, a happy chirp   relay_fumble   the baton dropped: clatter and an "eep"
   relay_finish     the tape swish and three rising bells, one for each leg
-Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd.
+  garden_chime_stat / _level / _evolve   a Boki's own chime at home: a stat rose, it levelled up, a change is
+                   coming; two, three and four notes over its chirp, pitched by size at play time (home_chimes.gd)
+Boki voices reuse gen_sfx_boki's chirp. Call sites: scripts/home/garden_sfx.gd and home_chimes.gd.
 """
 import numpy as np
 import sfx_lib as S
@@ -282,6 +284,29 @@ def relay_finish(i):
     swish = hpf(noise(0.25), 2500) * S.shape(0.25, 0.1, 0.0, 0.15) * 0.5
     bells = [at(S.chime(f, 0.6, 0.25) * 0.6, 0.1 + 0.11 * k) for k, f in enumerate([988, 1319, 1568])]
     return B.soft(B.room(mix(swish, *bells), 0.4), 6500)
+# ---------------------------------------------------------------- home chimes
+def chime_notes(notes, gap, tail, voice_f):
+    """Soft plucks rising by gap seconds, the last one rung out, and the Boki's chirp on the top note."""
+    parts = [at(pluck(f, 0.3 if k < len(notes) - 1 else tail, 0.1 if k < len(notes) - 1 else tail * 0.5), k * gap)
+             for k, f in enumerate(notes)]
+    return mix(*parts, at(0.45 * chirp(voice_f, 0.12), (len(notes) - 1) * gap + 0.02))
+
+
+def chime_stat(i):
+    """A stat rose: two quick notes up a fifth and a small chirp."""
+    return B.soft(B.room(chime_notes([784 * j(i, 0.02), 1175], 0.07, 0.35, 1150 * j(i)), 0.35), 5400)
+
+
+def chime_level(i):
+    """A garden level: three notes up a major chord, a brighter chirp, a little longer ring."""
+    return B.soft(B.room(chime_notes([659, 831, 988 * j(i, 0.01)], 0.08, 0.5, 1250 * j(i)), 0.45), 5600)
+
+
+def chime_evolve(i):
+    """A change is coming: four notes and a bell on top, with a rising 'oh' under them."""
+    ooh = B.vowel(420 * j(i, 0.03), 620, 0.45, 'oh', 1.3, breath=0.15) * 0.35
+    bell = at(0.5 * S.chime(1568, 0.8, 0.3), 0.3)
+    return B.soft(B.room(mix(chime_notes([523, 659, 784, 1047], 0.09, 0.6, 1300 * j(i)), ooh, bell), 0.55), 6000)
 
 
 def main():
@@ -313,6 +338,9 @@ def main():
     S.takes_cat('relay_handoff', handoff, 2, 'boki')
     S.takes_cat('relay_fumble', fumble, 2, 'boki')
     S.takes_cat('relay_finish', relay_finish, 1, 'boki')
+    S.takes_cat('garden_chime_stat', chime_stat, 2, 'boki')
+    S.takes_cat('garden_chime_level', chime_level, 2, 'boki')
+    S.takes_cat('garden_chime_evolve', chime_evolve, 1, 'boki')
 
 
 if __name__ == '__main__':
