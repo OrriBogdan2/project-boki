@@ -13,6 +13,7 @@ var atk_at := Vector3.ZERO
 var tele: Node3D = null
 var cd := 0.0
 var wander := Vector3.INF
+var damage_by := {}          # team -> damage dealt; KillSteal reads it before the killing hit adds in
 var lunge_hit := {}
 var anim := 0.0
 var dmg_mult := 1.0
@@ -84,6 +85,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			_stagger(by, opts)
 	var dealt := super.hurt(d, by, opts)
 	if dealt > 0.0: calm_t = 0.0
+	if dealt > 0.0 and by and not remote:
+		damage_by[by.team] = float(damage_by.get(by.team, 0.0)) + dealt
 	if dealt > 0.0 and md.get("ward", false) and m.lairs:
 		m.lairs.on_ward_hit(self, by)
 	if dealt > 0.0 and by and not dead:

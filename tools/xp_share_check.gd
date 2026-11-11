@@ -2,8 +2,8 @@ extends RefCounted
 ## --xp-share-check: a monster's XP goes to the Hunter who lands the last hit and to their squadmates
 ## within XpRules' share_r of the killer, nothing for damage alone. A squad that deals 95% of a lair boss
 ## and loses the last hit to a rival gets no XP; the kill's other rewards (stat and gear) go to the
-## killer too, and so does its Boon of the Hunt (HuntBoon), so the rival squad takes it all. Never
-## touches the save.
+## killer too, and so does its Boon of the Hunt (HuntBoon), so the rival squad takes it all, and the
+## feed names the stealer (KillSteal). Never touches the save.
 
 var bad := 0
 var m: Match
@@ -132,5 +132,11 @@ func run(main: Node) -> void:
 	var b_got := absf(HuntBoon.left(P) - boon) < 0.01 and absf(HuntBoon.left(C) - boon) < 0.01
 	ok(b_got and HuntBoon.left(Q) == 0.0 and HuntBoon.left(Q2) == 0.0,
 		"squad B also takes the boss's Boon of the Hunt (%.0f s), squad A none" % boon)
+	var line := String(m.feed_all[-1]) if not m.feed_all.is_empty() else ""
+	var named := "%s stole %s from %s" % [P.pname, b.md["name"], m.truce.squad_name(Q.team)]
+	ok(line.ends_with(named), "the feed calls out the steal, naming the stealer (%s)" % line)
+	var steals: Array = m.feed_all.filter(func(f): return " stole " in String(f))
+	ok(steals.size() == 1,
+		"a stolen skitter carries no kill bonus, so only the boss is called out (%d)" % steals.size())
 	print("XPSHARE done, %d fail" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

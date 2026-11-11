@@ -27,3 +27,8 @@ Levels came from standing still (1.2 XP/s) and from stray damage (0.35 per damag
 - It is the KitStatus "bon" (meta `bon_until`). Each game grants it to the Hunters it owns and broadcasts "kst" "bon". Every game ends and passes it on the "knock" event and grants its own on "mobdead". Shown as a gold trim on nameplates (`HudPlate.boon_trim`) and one tile with a timer right of the vitals bars. Rides the unreleased 0.24.4 entry of Net.VERSION.
 - The kill XP has one payer: `XpRules` (KillXp from ext/combat-xp-last-hit folded in, a lair boss's 260 as `xp.json` "boss").
 - Checks: `--camps-check` boon rows (with the net events on one game), `--xp-share-check` (a stolen lair boss's boon goes to the thief's squad).
+
+## Addendum: the steal is called out (DECISIONS 2026-11-10, XP follows the last hit)
+- `KillSteal` (`scripts/match/kill_steal.gd`): when a rival squad dealt over half of a lair boss's, a Boon monster's or a Camp Chief's health and another squad lands the last hit, the feed says "<killer> stole <monster> from <squad>" and the robbed squad gets a "STOLEN" toast. The rewards already follow the last hit; this only makes it readable.
+- `Mob.damage_by` (team -> damage, moved down from `Boss`) is what it reads. The host decides; "mobdead" carries the robbed team (-1: no steal) as its fifth field so every game shows the same line (Net note under 0.24.4, the combine bumps the version).
+- Checks: `--xp-share-check` (the lair boss callout), `--camps-check` `_steal_chief` (95% of a Camp Chief by A, last hit by B: B takes the 170 XP and the clear, A nothing, the feed names B).

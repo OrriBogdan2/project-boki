@@ -2149,7 +2149,8 @@ func S_dev_god() -> bool:
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
 	var xp := XpRules.kill_xp(mb) if credit is Hunter else 0.0      # (each game pays its own Hunters: XpRules)
-	if net_on: net_event(["mobdead", mb.nid, by.nid if by else "", xp])
+	var robbed := KillSteal.robbed(mb, credit)
+	if net_on: net_event(["mobdead", mb.nid, by.nid if by else "", xp, robbed])
 	XpRules.pay_squad(self, credit, xp)
 	HuntBoon.on_kill(self, mb, credit)
 	var own := not Camps.is_camp(mb)       # a camp's monsters drop nothing of their own: the camp pays one bundle
@@ -2159,6 +2160,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
+	KillSteal.callout(self, mb, credit, robbed)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
@@ -5480,6 +5482,7 @@ func _net_ev(x, from: String) -> void:
 				sfx("kill", who.pos, -6.0, 1.3)
 				if x.size() > 3: XpRules.pay_squad(self, ents_by_id.get(String(x[2]), null), float(x[3]))
 				HuntBoon.on_kill(self, who, ents_by_id.get(String(x[2]), null))
+				if x.size() > 4: KillSteal.callout(self, who, ents_by_id.get(String(x[2]), null), int(x[4]))
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))

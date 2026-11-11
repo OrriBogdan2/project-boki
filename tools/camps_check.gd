@@ -6,7 +6,8 @@ extends RefCounted
 ## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
 ## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. The Boon of
-## the Hunt (HuntBoon) rows: _boon. Never touches the save.
+## the Hunt (HuntBoon) rows: _boon. A Camp Chief stolen after a rival did 95% of it: _steal_chief.
+## Never touches the save.
 
 const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
 
@@ -35,6 +36,7 @@ func run(main: Node) -> void:
 	_clear(m)
 	_comeback(m)
 	_hot(main)
+	_steal_chief(main)
 	print("CAMPS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
 
@@ -340,3 +342,45 @@ func _hot(main: Node) -> void:
 			if hot: checked += 1
 		m.queue_free()
 	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
+
+## Squad A (the player's) deals 95% of a Camp Chief's Brute, the camp's last monster; squad B lands
+## the last hit and takes the chief's XP and the clear, A gets nothing, and the feed names B's killer.
+func _steal_chief(main: Node) -> void:
+	var m: Match = null
+	var c: Dictionary = {}
+	for s in [5, 3, 9, 21, 1, 2, 4, 6]:
+		m = _match(main, s)
+		for cc in m.camps.camps:
+			if Camps.size_def(int(cc["size"]))["id"] == "chief":
+				c = cc
+		if not c.is_empty():
+			break
+		m.queue_free()
+	ok(not c.is_empty(), "a seed with a Camp Chief")
+	if c.is_empty():
+		return
+	var P: Hunter = m.player
+	var thief: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	for h in m.hunters:
+		h.pos = Vector3(-1e4, 0, -1e4)
+	P.pos = (c["pos"] as Vector3) + Vector3(1, 0, 0)
+	thief.pos = (c["pos"] as Vector3) + Vector3(-1, 0, 0)
+	var chief: Mob = _camp_mobs(c).filter(func(mb): return mb.has_meta("chief"))[0]
+	for mb in _camp_mobs(c):
+		if mb != chief: mb.hurt(1e6, P)
+	chief.hurt(chief.max_hp * 0.95, P)
+	var a_dealt := float(chief.damage_by.get(P.team, 0.0))
+	ok(not chief.dead and a_dealt > chief.max_hp * 0.9, "squad A has dealt over 90% of the Chief")
+	var px := P.xp
+	var tx := thief.xp
+	var got := []
+	m.camps.cleared.connect(func(id, sq): got.append(sq))
+	chief.hurt(1e6, thief)
+	var want := XpRules.kill_xp(chief)
+	ok(chief.dead and absf(thief.xp - tx - want) < 0.01 and absf(P.xp - px) < 0.001,
+		"squad B's last hit takes the Chief's %d XP, squad A gets none (%.1f, %.1f)"
+		% [int(want), thief.xp - tx, P.xp - px])
+	ok(got == [thief.team], "the camp's clear (its bundle and toast) goes to squad B")
+	var named := "%s stole the Camp Chief from %s" % [thief.pname, m.truce.squad_name(P.team)]
+	ok(String(m.feed_all[-1]).ends_with(named), "the feed calls out the steal (%s)" % String(m.feed_all[-1]))
+	m.queue_free()
