@@ -166,9 +166,6 @@
 		"x_ring": {"fx": [
 			{"p": "scorch", "shape": "pool", "band": 0.1, "size": "r", "life": 0.5, "c": "core", "c2": "hot", "c3": "dusk"}
 		]},
-		"x_field": {"fx": [
-			{"p": "scorch", "shape": "disc", "size": "r", "life": 1.2, "c": "dusk", "c2": "core", "c3": "core"}
-		]},
 		"x_rim": {"net": false, "fx": [
 			{"p": "bolt", "jag": 0.5, "size": 0.35, "life": 0.12, "c": "core", "c2": "hot", "c3": "deep"}
 		]},

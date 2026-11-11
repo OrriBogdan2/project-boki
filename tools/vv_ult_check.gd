@@ -103,11 +103,17 @@ func mage() -> void:
 			AimKit.shown(P, "x_land") and bool(AimKit.entry(P, "x_land").get("all", false)))
 	ac.step(m, float(xd["drop"]) + 0.05)
 	var storm := 0
-	for l: Dictionary in hc._looks_at(m, from):
-		var ring_wide := absf(float(l["size"]) - 2.0 * range_r) < 0.01
-		if l["mode"] == HeroVfx.MODES["scorch"] and l["shape"] == HeroVfx.SCORCH_SHAPES["disc"] and ring_wide:
+	for l: Dictionary in hc._looks_at(m, U.last.get("at", P.pos)):
+		if l["mode"] == HeroVfx.MODES["scorch"] and absf(float(l["size"]) - 1.6 * float(xd["radius"])) < 0.01:
 			storm += 1
-	ok("Kitefall: the storm field spreads over the ring once she lands", storm == 1, str(storm))
+	var fields := 0                    # burning scorch discs past the hit area (the dark ring band is a pool)
+	for e: Dictionary in HeroVfx.of(m).live:
+		var mt: ShaderMaterial = e["mat"]
+		var disc: bool = hc._param(mt, "mode", -1) == HeroVfx.MODES["scorch"] and hc._param(mt, "shape", 0) == 0
+		if disc and (e["s0"] as Vector3).x > 2.0 * float(xd["radius"]) + 0.01:
+			fields += 1
+	ok("Kitefall: the storm stays on the hit area once she lands (no ring-wide field, no screen tint)",
+			storm == 1 and fields == 0, "storm %d wide %d" % [storm, fields])
 	var want := float(xd["dmg"]) * K.ult.power()
 	ok("Kitefall: she lands on the spot and the strike hits both foes",
 			hc._flat(P.pos, t_at) < 0.8 and U.last.get("hits", 0) == 2

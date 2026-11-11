@@ -343,11 +343,10 @@ func _share_static(f: Ent, shared: int, source: Ent) -> void:
 	var chest := Vector3(0, 1.0, 0)
 	kit.vfx("x_spread", source.position + chest, null, {"to": f.position + chest})
 
-## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks; the storm field
-## spreads over the whole ring.
+## A pillar of gold light slams onto the spot out of the sky, a shock ring, a scorched storm on the hit area and a
+## spray of sparks.
 func _strike_fx(at: Vector3, r: float) -> void:
 	kit.vfx("x_strike", at, null, {"r": r})
-	kit.vfx("x_field", leap["from"], null, {"r": float(data()["range"])})
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 
