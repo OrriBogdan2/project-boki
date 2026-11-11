@@ -197,10 +197,15 @@ func _build() -> AnimationNodeBlendTree:
 	bs.max_space = Vector2(1, 1)
 	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
+	bs.sync = bool(lc.get("in_step", false))      # (a ring baked on one length and strike key: every loop keeps time)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
 		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
 		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
+	for k in ["fl", "fr", "bl", "br"]:            # (a Hero with its own diagonal loops: no half-speed blend of two)
+		var at: Vector2 = (dirs[k[0]] + dirs[k[1]]).normalized()
+		if lc["walk"].has(k): bs.add_blend_point(_anim(String(lc["walk"][k])), at * 0.45)
+		if lc["run"].has(k): bs.add_blend_point(_anim(String(lc["run"][k])), at)
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
 	t.add_node("loco_rate", AnimationNodeTimeScale.new())
