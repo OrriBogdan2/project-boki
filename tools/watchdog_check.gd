@@ -3,7 +3,8 @@ extends RefCounted
 ## Starts this game a second time as --watchdog-check=die: that run raises a script error in its check
 ## coroutine, so it never reaches its quit(). The watchdog must end it with exit code 1 and say so, long
 ## before the child's own cap. Also which flags count as a check run, and that a check's second game
-## (CheckChild) is left alone.
+## (CheckChild) is left alone. And the gate's skip list (CheckRegistry.COVERED) names registered flags of one script.
+## And CheckClock, the stopwatch for time budgets, stays behind the wall clock.
 ## Lines: WATCHDOG ok|FAIL <what>.
 
 const Watchdog := preload("res://tools/check_watchdog.gd")
@@ -30,6 +31,14 @@ func run(main: Node) -> void:
 		ok(not Watchdog.is_check_flag(flag), "%s does not" % flag)
 	ok(Watchdog.watches(["--nofog", "--feed-check"]), "a check run is watched")
 	ok(not Watchdog.watches(["--displace-net-check=guest", Watchdog.CHILD_FLAG]), "a check's second game is not")
+	for flag: String in CheckRegistry.COVERED:
+		var script: String = CheckRegistry.CHECKS.get(flag, [""])[0]
+		var covers: Array = CheckRegistry.COVERED[flag]
+		ok(script != "" and not covers.is_empty() and covers.all(func(c: String) -> bool:
+			return not CheckRegistry.COVERED.has(c) and CheckRegistry.CHECKS.get(c, [""])[0] == script),
+			"%s is covered by run flags of its own script" % flag, str(covers))
+	var own := CheckClock.own_usec()
+	ok(own > 0 and own <= Time.get_ticks_usec(), "the check clock never runs ahead of the wall clock")
 	var out: Array = []
 	var t0 := Time.get_ticks_msec()
 	var rc := OS.execute(OS.get_executable_path(), PackedStringArray([

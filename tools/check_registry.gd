@@ -347,6 +347,15 @@ const CHECKS := {
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 }
 
+## Flags the gate leaves out: the whole run is part of the listed flags' runs (same script, a mode or an
+## old name). One entry per line: suite-fast.sh reads the lines. --watchdog-check holds each entry to one script.
+const COVERED := {
+	"--class-unlock-check": ["--hunter-unlock-check"],
+	"--hero-combo-check": ["--archer-combo-check", "--bulwark-combo-check"],
+	"--support-check": ["--tender-combo-check", "--rimewright-combo-check"],
+	"--equal-migrate-check": ["--equal-check"],
+}
+
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
 ## Returns true when one started (Main stops there).
 static func run(main: Node, args: PackedStringArray) -> bool:
