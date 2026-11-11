@@ -23,3 +23,7 @@ reads at the match camera and he keeps the line-up height), the ruff at 0.85, lo
 - **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).
+
+## Pilot loops (11-11, animation-quality lane)
+
+The 8 loco clips (`walk_*`, `run_*`) are float-drift loops (`drift()` in `ostra_clips.py`). He has no feet, so each cycle has two spring pulses. On each pulse the box gives under him and kicks him on: the body dips, rebounds past rest and lags a beat along the travel. The box and spine lean into the travel, and the arms paddle once a cycle. The base pose stays the cycle's mean, so the runtime hover bob (KMovesStone) still rides on top. Meshy can't rig a legless body, so these are hand-keyed on the rig contract rather than retargeted. Blind Fable rubric (weight and readable direction in place of foot contact) over 6 pairs: walk 3.8 vs 2.8 for the old sway, run 4.1 vs 3.0. They went in with `glb_add_clips.py` over the committed glb, which grows it by the old clip bytes (2.54 to 2.81 MB). A full `ostra_anim.py --export` rebuild drops that.
