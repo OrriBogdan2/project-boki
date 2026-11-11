@@ -3,7 +3,8 @@ extends RefCounted
 ## the tri budget and carries every clip its file names; each keyed move of its kit has a clip as long as the move (the
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
-## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md). Never touches the save.
+## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each walk and run ring's
+## loops are one length, so the blended diagonals stay in step. Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -16,6 +17,7 @@ const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible 
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
+const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
@@ -89,6 +91,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
 	_standing(id, dd, clips)
+	_rings(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -189,6 +192,22 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+
+## A walk or run ring: the back and side loops last as long as the forward one, or a diagonal's two feet drift apart.
+func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	for gait in ["walk", "run"]:
+		var ring: Dictionary = dd.get("loco", {}).get(gait, {})
+		if not ring.has("f") or not clips.lib.has_animation(String(ring["f"])):
+			continue
+		var f_len := clips.lib.get_animation(String(ring["f"])).length
+		var off := ""
+		for k in ring:
+			var clip := String(ring[k])
+			var k_len := clips.lib.get_animation(clip).length if clips.lib.has_animation(clip) else f_len
+			if absf(k_len - f_len) > RING_DT:
+				off += " %s %.3f" % [k, k_len]
+		var what := off if off != "" else " all match"
+		ok(off == "", "%s: the %s loops are one length (f %.3f s;%s)" % [id, gait, f_len, what])
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
