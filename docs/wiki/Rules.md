@@ -60,6 +60,38 @@ Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with far
 | words | {"bravery": ["braver", "shyer"], "loyalty": ["more loyal", "more independent"], "temper": ["hotter-tempered", "calmer"], "curiosity": ["more curious", "more settled"]} |
 | words_doc | per trait: [line when it rises, line when it falls], written as 'is getting <word>' in the Boki's journal. |
 
+## base_kite (`content/rules/base_kite.json`)
+
+Kite Tow, part 1 (briefs/design/GARDEN_MODERN.md 4.2 game 7, scripts/home/base_kite.gd). Only with farm_build.json base_mode on, and only on Kitewind Ridge. Your Boki glides on a kite round one loop through twelve rings, steered with A and D; Speed sets the pace and a missed ring costs a second. Flaps and updraft vents come in part 2. Units: metres, seconds, metres a second; joy is 0-100 points.
+
+| Setting | Value |
+|---|---|
+| theme | ridge |
+| theme_doc | The island theme (home_layout.gd THEMES) whose garden has the kite stand. |
+| rings | 12 |
+| loop_r | 6.5 |
+| glide_h | 3 |
+| loop_doc | The loop is a circle of loop_r round the kite stand, flown counter-clockwise glide_h above the stand; the rings sit evenly round it, the first half a gap after the start, and the lap ends back at the start. |
+| pace | 0.75 |
+| speed_per_point | 0.015 |
+| pace_doc | m/s along the loop for a Boki with no Speed points; each trained Speed point adds this fraction (Speed 40 flies 1.6 times as fast). |
+| steer | 2.2 |
+| steer_accel | 6 |
+| max_off | 2.5 |
+| steer_doc | A and D slide the kite in and out of the loop's middle line at up to steer m/s, reaching it at steer_accel m/s/s, never more than max_off m either way. |
+| ring_off | 2 |
+| ring_r | 0.6 |
+| ring_doc | Each ring sits a seeded random distance within +-ring_off m of the middle line; the kite goes through it when it passes within ring_r m of the ring's centre. |
+| miss_s | 1 |
+| miss_doc | Seconds added to the finish time for each missed ring. |
+| energy | 8 |
+| energy_doc | Energy the flier spends; who may fly is the Dash's rested rule (base_race.json min_energy). |
+| joy | 8 |
+| gems_clean | 4 |
+| gems | 1 |
+| gems_doc | Gems to you for a lap through all twelve rings, or for any other finished lap. |
+| card_s | 6 |
+
 ## base_life (`content/rules/base_life.json`)
 
 Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json base_mode on, every farm Boki runs one state machine (Roam, Eat, Nap, Play, PlayWith, Watch, React, Mentor, Chore) and keeps rec['bonds'] = {uid: -1..1}. Times are seconds, distances metres (tiles), bond changes are per event unless they say per second.
@@ -796,7 +828,7 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | trait_weight | 1 |
 | join_weight | 2.5 |
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
-| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
+| toys | {"toy_ball": {"clip": "nudge", "stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"clip": "climb", "stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"clip": "splash", "stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}, "toy_stone": {"stat": "guard", "trait": "loyalty", "likes": ["fire", "ember"], "doc": "basked on by Fire leans (species theme ember today)"}, "toy_vent": {"stat": "speed", "trait": "bravery", "likes": ["flying", "electric", "fairy", "sound", "tempest", "storm", "lunar", "echo"], "doc": "hovered over by Flying, Electric, Fairy and Sound leans, the Kitewind Ridge types (species themes tempest, storm, lunar, echo today)"}, "toy_dig": {"stat": "focus", "trait": "curiosity", "likes": ["grass", "bug", "bloom", "spore", "swarm"], "snack": 0.3, "doc": "dug by Grass and Bug leans (species themes bloom, spore, swarm today); now and then it turns up a snack"}} |
 
 ## tutorial (`content/rules/tutorial.json`)
 
