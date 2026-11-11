@@ -263,6 +263,7 @@ const CHECKS := {
 	"--garden-zone-shots": ["res://tools/garden_zone_shots.gd", "garden_zone_shots", null],      # --zone= --shots-dir=
 	"--garden-unlock-pace-check": ["res://tools/garden_unlock_pace_check.gd", "garden_unlock_pace_check", null],
 	"--garden-zones-check": ["res://tools/garden_zones_check.gd", "garden_zones_check", null],      # GARDEN.md 10 zones
+	"--garden-day-played-check": ["res://tools/garden_day_played_check.gd", "garden_day_played_check", null],      # one garden day on the --base-demo seed, GPU shots with --shots-dir=
 	"--hub-hints-check": ["res://tools/hub_hints_check.gd", "hub_hints_check", null],      # GARDEN.md 10 hub hints
 	"--garden-audio-check": ["res://tools/garden_audio_check.gd", "garden_audio_check", null],  # GARDEN.md 10.2 sound
 	# --home-verbs-check also takes --home-verbs-shots=<dir>
