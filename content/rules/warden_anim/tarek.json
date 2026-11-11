@@ -80,6 +80,7 @@
 		"breah_throw": {
 			"clip": "lmb_throw",
 			"air_legs": true,
+			"fade": 0.05,
 			"upper": "moving"
 		},
 		"breah_wind": {

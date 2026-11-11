@@ -233,7 +233,7 @@
 		"speed": 2.42
 	},
 	"carry_stow": ["x_weapon", "x_shield"],
-	"carry_fwd": 1.35,
+	"carry_fwd": 1.6,
 	"beats": {
 		"win": {"clip": "emote"},
 		"lose": {"clip": "downed"},
