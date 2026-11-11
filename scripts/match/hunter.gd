@@ -2134,7 +2134,8 @@ func _physics(dt: float) -> void:
 				in_current = true
 				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
 	else:
-		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
+		# the ground (and a kit's hover): up to the cap at ground_accel, down to it at the walking brake
+		# (a Slow lands, a haste ends, a pad's carry) [game data]; a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:

@@ -76,6 +76,12 @@ const T := {
 	"jump_buffer_frames":      [">=", 7.0, "frames", "hunter_move.json jump_buffer_s 0.12s: earliest press before landing (source silent)"],
 	"jump_buffer_dash_frames": [">=", 7.0, "frames", "the same window across the end of an air dash that lands"],
 	"dash_jump_eaten":         ["<=", 0.0, "frames", "a jump pressed on any frame of a ground dash fires that step"],
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] the cap steps at once; the body brakes to it (22.2 m/s2 + 2/s x v): ~0.05s"],
+	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
+	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
+	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
+	"haste_land_0p1s":         ["~", [0.99, 1.01], "x", "[game data] a haste lands as a Slow ends: MaxAcceleration"],
+	"haste_end_0p1s":          ["~", [0.99, 1.01], "x", "[game data] and ends as a Slow lands: the walking brake"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -272,6 +278,7 @@ func run(main: Node) -> void:
 	_brake_exact()
 	_dash_curves()
 	_brake_cast()
+	_slow_ramp()
 	_plain_dash()
 	_kit_dashes()
 	LEDGE.new(self).run()
@@ -1030,6 +1037,51 @@ func _cast_stop(cast: bool) -> Dictionary:
 		moved = moved or P.roll_t > 0.0 or P.fly_t > 0.0 or P.knock_t > 0.0 or not P.grounded
 		if ts < 0.0 and _hv(P).length() < 0.05: ts = (i + 1) * DT
 	return {"dist": P.pos.x - x0, "t": ts, "moved": moved}
+# ---------------------------------------------------------------- slow and haste ramp
+## Speed 0.1 s and 0.3 s after a 30% Slow lands on a run and after it ends, as a share of the run speed
+## before it, one kit per weight class; then a haste landing and ending on the medium kit. Every Slow and
+## haste source moves the one cap, so this is the ramp rule for all of them (HunterMove.brake_rate).
+func _slow_ramp() -> void:
+	var kit_was := P.arch
+	var cls_was := P.cls
+	for id in ["thief", "gunslinger", "juggernaut"]:
+		P.cls = Arch.weight(id)
+		P.set_arch(id)
+		var top := _run_up()
+		print("MFEEL slow ramp on %s (%s), run %.2f m/s" % [id, P.cls, top])
+		P.slow_t = 1.0
+		P.slow_k = 0.3
+		_steps(6)
+		rec("slow_land_0p1s", _hv(P).length() / top)
+		_steps(12)
+		rec("slow_land_0p3s", _hv(P).length() / top)
+		P.slow_t = 0.0
+		_steps(6)
+		rec("slow_end_0p1s", _hv(P).length() / top)
+		_steps(12)
+		rec("slow_end_0p3s", _hv(P).length() / top)
+	P.cls = "medium"
+	P.set_arch("gunslinger")
+	P.haste_t = 9.0
+	var hasted := _run_up()
+	P.haste_t = 0.0
+	var run := _run_up()
+	P.haste_t = 9.0
+	_steps(6)
+	rec("haste_land_0p1s", _hv(P).length() / hasted)
+	P.haste_t = 0.0
+	_steps(6)
+	rec("haste_end_0p1s", _hv(P).length() / run)
+	P.slow_k = 0.0
+	P.cls = cls_was
+	P.set_arch(kit_was)
+
+## A clean start on the flat, then half a second of running right: the settled run speed.
+func _run_up() -> float:
+	_reset(flat)
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	return _hv(P).length()
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.

@@ -389,6 +389,16 @@ Three ledge heights x walk / jump / glide, keys into the face (`_ledge_matrix`; 
 | 3.2 m (four, the wall tier) | never climbs | never (by design) | tops; 0.100 s; in 5.00, over the lip 4.60 m/s |
 
 Asserted: each cell tops or not as above; a caught ledge's catch-to-top <= 0.35 s ([footage] ~0.2 s rim to top); over the lip >= max(0.6x in, 3.5 m/s) ([game data]). Rows this pass fixed, each with its source: `hunter_move.json` now says mantle_launch_keep is a share of the approach speed, not the run speed (MANTLE_185b: "the approach speed was thrown away"); `MantleCarry` lost its own copy of that 0.6; this doc's no-jump pop read 3.2 m/s where `LRISE_POP` is 2.6; the Physics pass line and docs/SUPERVIVE_FEEL.md's Mantle row said the launch was 0.6x run speed.
+## Slow and haste ramp (`--move-feel-check` slow_* / haste_* rows; docs/decisions/0022)
+
+The source has no ramp time: a Slow or a speed boost moves the speed cap at once, and the body follows it under the ordinary movement, down at the walking brake (BrakingDecelerationWalking 22.2 m/s² plus GroundFriction 1 × 2 per second of speed) and up at MaxAcceleration (47-54 m/s²). A 30% Slow on a run settles in about 0.05 s either way. Ours: every Slow (`slow_t`/`slow_k`, from kits, hazards, Boki and merges) and every haste (`haste_t`, the kits' `pace()`, a `move_speed` buff) multiplies into the one cap in `Hunter._physics`, and the ground step follows it with `ground_accel` up and `HunterMove.cap_brake` down. The check runs one kit per weight class (thief, gunslinger, juggernaut) and the haste on the medium kit.
+
+| Key | Measured | Target | Source |
+|---|---|---|---|
+| slow_land_0p1s / 0p3s (speed over the run before it) | 0.70 / 0.70 | 0.69–0.71 | [game data] the brake: ~0.05 s |
+| slow_end_0p1s / 0p3s | 1.00 / 1.00 | 0.99–1.01 | [game data] MaxAcceleration: ~0.03 s |
+| haste_land_0p1s (over the hasted run) | 1.00 | 0.99–1.01 | [game data] as a Slow ends |
+| haste_end_0p1s (over the plain run) | 1.00 | 0.99–1.01 | [game data] as a Slow lands |
 
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
