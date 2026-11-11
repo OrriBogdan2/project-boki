@@ -119,6 +119,8 @@ posts scroll at the move speed).
 
 ![bulwark walk and run, before and after](anim_audit/bulwark.jpg)
 
+![bulwark lmb_slam and lmb_throw, before and after: rows lmb_slam before, lmb_slam after, lmb_throw before, lmb_throw after (12 frames each, side view; the 1/60 s pop fell between these frames, the numbers above are its measure)](anim_audit/bulwark_atk.jpg)
+
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
 2. Arms swung with their own side's leg (counter -0.86, fixed to +0.72).
@@ -126,6 +128,8 @@ posts scroll at the move speed).
    is 0.44 and 0.31 with 60 fps keys: the punch drives 1.1 body heights in its 0.05 s beat, a straight path now.
 
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
+
+![dolm lmb_punch and lmb_throw, before and after: rows lmb_punch before, lmb_punch after, lmb_throw before, lmb_throw after (12 frames each, side view; the 1/60 s pop fell between these frames, the numbers above are its measure)](anim_audit/dolm_atk.jpg)
 
 **Grimble (`dredge`)**
 1. Hip bob 17 cm at a run (12 % of his height); not changed.
