@@ -48,13 +48,17 @@ var _water_sig := ""
 static var pending_toast := ""
 var popped := -1                       # uid of the deco just placed (its node gets the pop)
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
+var stuck: StuckGuard                  # frees you or a Boki boxed in by what was built
 
+const CUT_TEXT := "That would cut off a door or a path"
+const POCKET_TEXT := "That would shut in a patch of ground"
 const CUT_WIDTH := 0.5    # m: clear room either side of a corner-cutting shortcut, so a Boki never clips a corner
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
 
 func _init(home) -> void:
 	h = home
 	entries = BuildEntries.new(self)
+	stuck = StuckGuard.new(home)
 
 func L() -> Dictionary:
 	return HomeLayout.of(h._d())
@@ -390,7 +394,7 @@ func apply(ground := false) -> void:
 	_reach_cache.clear()
 	refresh_grid()
 	if h.has_method("_sync_fixtures"): h._sync_fixtures()
-	h.unstick()
+	stuck.free_all()
 	assign_beds()
 
 func _sync_buildings() -> void:
@@ -831,7 +835,7 @@ func _hit(seen: PackedByteArray, p: Vector3) -> bool:
 	return false
 
 ## True if shutting solid_cells (with free_cells, the thing being moved, taken out) keeps every place
-## that could be reached still reachable, and the new door too.
+## that could be reached still reachable, the new door too, and shuts in no pocket of ground. Sets why if not.
 func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Vector3.INF) -> bool:
 	var ck := "%d|%s|%s" % [ver, skip_b, str(free_cells)]
 	var base: PackedByteArray
@@ -841,6 +845,7 @@ func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Ve
 		base = _reach(free_cells, [])
 		_reach_cache[ck] = base
 	var after := _reach(free_cells, solid_cells)
+	why = CUT_TEXT
 	for t in _targets(skip_b):
 		if _hit(base, t) and not _hit(after, t):
 			return false
@@ -849,7 +854,22 @@ func keeps_paths(free_cells: Array, solid_cells: Array, skip_b := "", door := Ve
 		var di := w.idx(int(floor(door.x)), int(floor(door.z)))
 		if not w.inb(int(floor(door.x)), int(floor(door.z))) or after[di] != 1:
 			return false
+	why = POCKET_TEXT
+	if _shuts_in(base, after, solid_cells):
+		return false
+	why = ""
 	return true
+
+## Would ground you could walk to before be cut off from the house door after (a pocket a Boki gets stuck in)?
+func _shuts_in(base: PackedByteArray, after: PackedByteArray, solid_cells: Array) -> bool:
+	var w: World = h.world
+	var shut := {}
+	for c in solid_cells:
+		shut[w.idx(c.x, c.y)] = true
+	for i in base.size():
+		if base[i] == 1 and after[i] != 1 and not shut.has(i):
+			return true
+	return false
 
 ## Can held go on these tiles? Sets why.
 func fits(item: Dictionary, at: Array) -> bool:
@@ -870,6 +890,9 @@ func fits(item: Dictionary, at: Array) -> bool:
 		if r != "":
 			why = r
 			return false
+	why = BuildClearance.reason(self, item, at, tag)
+	if why != "":
+		return false
 	var solid: bool = item.get("kind", "") == "b" and h._has_b(String(item["id"])) or (item.get("kind", "") == "deco" and HomeLayout.blocks(String(item["id"])))
 	var door := Vector3.INF
 	if item.get("kind", "") == "deco" and HomeLayout.CATALOG.get(String(item["id"]), {}).get("door", false):
@@ -895,9 +918,7 @@ func fits(item: Dictionary, at: Array) -> bool:
 				why = "Its door would face something"
 				return false
 	if solid or door != Vector3.INF:
-		if not keeps_paths(free_cells, at if solid else [], skip_b, door):
-			why = "That would cut off a door or a path"
-			return false
+		return keeps_paths(free_cells, at if solid else [], skip_b, door)
 	return true
 
 func _deco_by_uid(u: int) -> Dictionary:
@@ -1248,6 +1269,7 @@ func tick(d: float) -> void:
 	if grid_t <= 0.0:
 		grid_t = 2.5
 		refresh_grid()      # feeders and graves change the ground too
+	stuck.tick(d)
 	if not active:
 		return
 	if held.is_empty():
@@ -1299,22 +1321,29 @@ func _check_cells() -> void:
 		why = "" if ghost_ok else "Can't paint here"
 		if c["brush"] == "wild" and not ghost_ok: why = "Nothing wild to clear here"
 		if ghost_ok and c["brush"] == "water" and not keeps_paths([], good):
-			ghost_ok = false; why = "That would cut off a door or a path"
+			ghost_ok = false
 		return
 	if held["kind"] == "deco" and c.has("line"):
 		var good: Array = []
 		for t in cells:
-			if cell_reason(t) == "": good.append(t)
-			else: _bad[t] = true
+			if _line_reason(t) == "":
+				good.append(t)
+			else:
+				_bad[t] = true
 		ghost_ok = not good.is_empty()
-		why = "" if ghost_ok else cell_reason(cells[0])
+		why = "" if ghost_ok else _line_reason(cells[0])
 		if ghost_ok and not keeps_paths([], good):
-			ghost_ok = false; why = "That would cut off a door or a path"
+			ghost_ok = false
 		return
 	if held["kind"] == "feeder":
 		ghost_ok = feeder_fits(cells[0], String(held["from"]))
 		return
 	ghost_ok = fits(held, cells)
+
+## Why one tile of a fence line can't take a piece ("" if it can).
+func _line_reason(t: Vector2i) -> String:
+	var r := cell_reason(t)
+	return r if r != "" else BuildClearance.reason(self, held, [t], "")
 
 ## A feeder: open ground (not right by another feeder), room round it for kin to eat, no path cut.
 func feeder_fits(t: Vector2i, from: String) -> bool:
@@ -1333,6 +1362,9 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 		return false
 	if w.kind[i] != World.T_GROUND and o != tag: why = "Something's in the way"; return false
 	if reserved.has(i) or _near_plot(t): why = "That spot is kept clear"; return false
+	why = BuildClearance.reason(self, {"kind": "feeder"}, [t], tag)
+	if why != "":
+		return false
 	var p := Vector3(t.x + 0.5, 0, t.y + 0.5)
 	for f in Econ.feeders():
 		if String(f["id"]) == from: continue
@@ -1348,9 +1380,7 @@ func feeder_fits(t: Vector2i, from: String) -> bool:
 	if from != "":
 		var f0: Dictionary = h.hecon._feeder(from)
 		if not f0.is_empty(): fc = [Vector2i(int(floor(float(f0["x"]))), int(floor(float(f0["z"]))))]
-	if not keeps_paths(fc, [t]):
-		why = "That would cut off a door or a path"; return false
-	return true
+	return keeps_paths(fc, [t])
 
 ## Holding a feeder to set down: a new one from storage (from = "") or one that's out (its id).
 func take_feeder(kind: String, from := "") -> void:

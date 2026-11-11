@@ -3684,7 +3684,7 @@ func _home_build_check() -> void:
 	hb.cells = [wt]; hb._check_cells()
 	ok.call(hb.place_held() and home.water.depth(wt.x + 0.5, wt.y + 0.5) > 0 and not home.world.is_block(wt.x + 0.5, wt.y + 0.5), "a pond tile goes down (water you can wade into, but nothing can be built on it)")
 	# kin walk round a fence
-	var fx := 56; var fz := 41
+	var fx := 56; var fz := 42      # one tile clear of the Workshop: a fence may not touch a building (BuildClearance)
 	var line: Array = []
 	for z in range(fz - 4, fz + 5): line.append(Vector2i(fx, z))
 	hb.take("fence")

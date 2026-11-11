@@ -390,7 +390,7 @@ func place() -> void:
 	_spawn_feeder(f)
 	Econ.auto_refill(f)
 	refresh_feeder(f)
-	h.unstick()
+	h.hb.stuck.free_all()
 	Sfx.play("build", null, -4.0, 0.1)
 	h.fx.dust(p, 10)
 	Save.save_game()

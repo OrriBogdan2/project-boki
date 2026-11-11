@@ -1312,7 +1312,7 @@ func _move_player(d: float) -> void:
 		wedge_t = wedge_t + d if boxed else 0.0
 		if wedge_t > 0.8:
 			wedge_t = 0.0
-			unstick()
+			hb.stuck.free_player()
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
@@ -3776,20 +3776,6 @@ func _open_lot(b: String) -> void:
 	v.add_child(btn)
 
 var wedge_t := 0.0
-
-## Moves you (and any kin) to the nearest open ground if something has boxed you in.
-func unstick() -> void:
-	var p2 := world.free_spot_near(ppos, [], 1.0, 0.5)
-	if p2.distance_to(ppos) > 0.05:
-		ppos = Vector3(p2.x, ppos.y, p2.z)
-		if player: player.position = ppos
-	for k in kins:
-		var kp: Vector3 = k["pos"]
-		if not world._fits(kp.x, kp.z, 0.35) or not world.roomy(int(floor(kp.x)), int(floor(kp.z))):
-			var np := world.free_spot_near(kp, [ppos], 1.2, 0.4)
-			k["pos"] = np
-			k["goal"] = Vector3.INF
-			(k["node"] as Node3D).position = np
 
 ## Builds a building on its lot: the site packs away and the building pops up with dust and hammering.
 func _construct(b: String) -> void:
