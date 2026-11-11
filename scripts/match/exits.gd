@@ -438,10 +438,11 @@ func _wave_spot(focus: Vector3, ii: int) -> Vector3:
 # ------------------------------------------------------------------ the match clock
 func tick(dt: float) -> void:
 	if seats: seats.tick(dt)
+	var viewer := SideColor.viewer(m)
 	for x in list:
 		_tick_outpost(x, dt)
 		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1
-		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time)
+		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time, viewer)
 
 ## The team of someone standing in a live outpost's yard, or -1.
 func occupant(x: Dictionary) -> int:

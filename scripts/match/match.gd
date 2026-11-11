@@ -4923,7 +4923,7 @@ func _extract(h: Hunter, how := "", where := "") -> void:
 	cancel_abilities(h)
 	if net_on and not h.remote:
 		net_event(["ext", h.nid])
-	var col: Color = {"uplink": ExitModels.UPLINK, Heart.HOW_EARLY: Heart.COL, Heart.HOW_FINAL: Heart.COL}.get(how, Color("8fe3c8"))
+	var col: Color = {"uplink": ExitModels.UPLINK, Heart.HOW_EARLY: Heart.col(), Heart.HOW_FINAL: Heart.col()}.get(how, Color("8fe3c8"))
 	sfx("portal", h.pos, 0.0, 1.3)
 	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 30, 5.0, 0.8, -4.0)
 	Juice.extract(self, h, col)

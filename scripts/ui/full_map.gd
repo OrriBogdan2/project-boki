@@ -265,7 +265,7 @@ func _labels(c: Control, kk: float) -> void:
 		var nm := String(lb["name"])
 		var kind := String(lb["kind"])
 		if not kind in ["perch", "rail", "choke"] and regions.has(nm):
-			var col := Color("ffd2f0") if String(lb.get("role", "")) == "heart" else INK
+			var col := Heart.gate_col().lightened(0.3) if String(lb.get("role", "")) == "heart" else INK
 			var sz := int(17 * big_k)
 			_name(nm.to_upper(), pv + Vector2(0, 5), sz, col, taken, true)
 		else:
