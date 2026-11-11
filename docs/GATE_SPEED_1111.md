@@ -155,6 +155,10 @@ under load, also red on 0245 in `run6`), `--farm-tutorial-check` (the uid seed, 
 alone), `--kin-indoors-check` (red in 2 of 4 runs on 0245 alone, fixed after the pass, 5 of 5 green). None of them
 runs code this branch changed.
 
+The base branch moved to 2723685892 during the work and is merged in. On the merged tree: `--check`,
+`--hob-check` (1/3 on the old base), `--farm-tutorial-check`, `--kin-indoors-check`, `--watchdog-check` all 0/0.
+No full pass was run on the merged tree.
+
 After the pass, alone on the same box: `--revive-net-check` 124/1 to 0/0 in 980 s, `--displace-net-check`
 124/2 to 124/0 (no FAIL, not finished in 1200 s), `--farm-tutorial-check` 0/0 in 246 s, `--remote-smooth-check`
 1/1 in 588 s to 1/4 in 352 s (it compares now, section 3).
