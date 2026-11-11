@@ -20,16 +20,18 @@ const MISC_ICON := "cloak"
 
 static var shown: Array = []
 
-## One {"kind": "second"|"carry", "state", ...} per row in use. `state`: second "ready" | "wait" (swap cooling)
-## | "down"; carry "claimed" | "empty" | "stolen".
+## One {"kind": "second"|"carry", "state", ...} per row in use. `state`: second "ready" | "wait" (swap cooling);
+## carry "claimed" | "empty" | "stolen".
 static func rows(p: Hunter) -> Array:
 	var out: Array = []
 	var k2: Kin = p.kin2
 	if k2 != null and not k2.dead:
 		var full := maxf(0.1, float(Content.rules("kin_ai").get("swap_cooldown", 3.0)))
+		var state := "ready"
+		if p.swap_cd > 0.0:
+			state = "wait"
 		out.append({"kind": "second", "kin": k2, "rec": k2.rec, "hp": clampf(k2.hp / maxf(k2.max_hp, 1.0), 0.0, 1.0),
-			"cool": clampf(1.0 - p.swap_cd / full, 0.0, 1.0), "stat": _stat(k2),
-			"state": "down" if k2.hp <= 0.0 else ("wait" if p.swap_cd > 0.0 else "ready")})
+			"cool": clampf(1.0 - p.swap_cd / full, 0.0, 1.0), "stat": _stat(k2), "state": state})
 	for rec in p.caught:
 		out.append({"kind": "carry", "rec": rec, "state": "claimed"})
 	if p.caught.is_empty():
@@ -75,39 +77,49 @@ static func _second(H, p: Hunter, row: Dictionary, box: Rect2) -> void:
 	var k: Kin = row["kin"]
 	var glow: Color = k.sp.get("glow", k.sp["color"])
 	var st := String(row["state"])
+	var hp := float(row["hp"])
 	H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
 	icon(H, k.rec, k.sp["color"], SideColor.ally(), box.position + Vector2(ROW_H * 0.5, ROW_H * 0.5))
 	var bar := Rect2(box.position + Vector2(ROW_H + 4.0, ROW_H * 0.5 - HP_H * 0.5), Vector2(HP_W, HP_H))
-	HudStyle.strip(H.c, bar, float(row["hp"]), HudStyle.HURT if st == "down" else HudStyle.hp_fill(SideColor.ally(), float(row["hp"]), H.m.time))
+	var hp_col := HudStyle.hp_fill(SideColor.ally(), hp, H.m.time)
+	HudStyle.strip(H.c, bar, hp, hp_col)
 	var stat := String(row["stat"])
 	if stat != "":
-		var grp := String(KinParts.OWNER_STATS[stat][0])
-		Icons.draw(H.c, GROUP_ICON.get(grp, MISC_ICON), Vector2(bar.end.x + 14.0, box.get_center().y), 7.0, Color(glow, 0.9))
+		var group := String(KinParts.OWNER_STATS[stat][0])
+		var icon_at := Vector2(bar.end.x + 14.0, box.get_center().y)
+		Icons.draw(H.c, GROUP_ICON.get(group, MISC_ICON), icon_at, 7.0, Color(glow, 0.9))
 	var at := Vector2(box.end.x - 20.0, box.get_center().y)
-	var key := Settings.key_cap("swap_kin")
-	if st == "down":
-		HudStyle.text(H.c, at + Vector2(-14.0, 4.0), "DOWN", 11, HudStyle.HURT, 3)
-		return
 	if st == "wait":
-		H.c.draw_arc(at, KEY_R, -PI / 2.0, -PI / 2.0 + TAU * float(row["cool"]), 24, Color(HudStyle.MUTED, 0.9), 2.0, true)
-	HudStyle.key_pill(H.c, at, key, glow if st == "ready" else HudStyle.MUTED)
+		var sweep := -PI / 2.0 + TAU * float(row["cool"])
+		H.c.draw_arc(at, KEY_R, -PI / 2.0, sweep, 24, Color(HudStyle.MUTED, 0.9), 2.0, true)
+	var key_col := glow
+	if st != "ready":
+		key_col = HudStyle.MUTED
+	HudStyle.key_pill(H.c, at, Settings.key_cap("swap_kin"), key_col)
 
 static func _carry(H, row: Dictionary, box: Rect2) -> void:
 	var st := String(row["state"])
 	var rec: Dictionary = row["rec"]
-	var col := HudStyle.MUTED
-	if not rec.is_empty():
-		col = Data.KIN[String(rec["species"])]["color"]
-	var edge: Color = HudStyle.HURT if st == "stolen" else Color(col, 0.7)
-	H._rounded(box, Color(0.03, 0.03, 0.05, 0.85 if st != "empty" else 0.5), 8, edge if st != "empty" else Color(HudStyle.MUTED, 0.5), 1)
 	var at := box.position + Vector2(ROW_H * 0.5, ROW_H * 0.5)
+	var text_at := box.position + Vector2(ROW_H + 2.0, 16.0)
+	var back := Color(0.03, 0.03, 0.05, 0.85)
 	if st == "empty":
+		H._rounded(box, Color(back, 0.5), 8, Color(HudStyle.MUTED, 0.5), 1)
 		H.c.draw_arc(at, ICON_PX * 0.5 + 2.0, 0.0, TAU, 24, Color(HudStyle.MUTED, 0.6), 1.0, true)
-		HudStyle.text(H.c, box.position + Vector2(ROW_H + 2.0, 16.0), "Carry out: free", 11, HudStyle.MUTED, 3)
+		HudStyle.text(H.c, text_at, "Carry out: free", 11, HudStyle.MUTED, 3)
 		return
-	icon(H, rec, col, HudStyle.HURT if st == "stolen" else SideColor.ally(), at)
-	HudStyle.text(H.c, box.position + Vector2(ROW_H + 2.0, 16.0), String(rec.get("name", "Boki")), 11,
-			HudStyle.MUTED if st == "stolen" else HudStyle.INK, 3)
-	var tag := "STOLEN" if st == "stolen" else "RIDES HOME"
+	var col: Color = Data.KIN[String(rec["species"])]["color"]
+	var tone := SideColor.ally()
+	var name_col: Color = HudStyle.INK
+	var tag := "RIDES HOME"
+	var tag_col := col
+	if st == "stolen":
+		tone = HudStyle.HURT
+		name_col = HudStyle.MUTED
+		tag = "STOLEN"
+		tag_col = HudStyle.HURT
+	H._rounded(box, back, 8, Color(tone if st == "stolen" else col, 0.7), 1)
+	icon(H, rec, col, tone, at)
+	HudStyle.text(H.c, text_at, String(rec.get("name", "Boki")), 11, name_col, 3)
 	var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-	HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 10, HudStyle.HURT if st == "stolen" else col, 3)
+	HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 10, tag_col, 3)

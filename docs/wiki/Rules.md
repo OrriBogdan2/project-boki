@@ -500,7 +500,7 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | leash | 10 |
 | leash_swing | 2 |
 | rebloom_dist | 20 |
-| steal | {"_doc": "Stolen Boki wisps (KinSteal, decision 0041, WISP_DESIGN_OPEN.md Q6/Q8): loose_s = s a downed hunter's wisp floats loose; grab_r = m reach, grab_s = s holding interact; carry_max = stolen wisps one hunter carries; passive_k = share of each stolen carry passive; summon_k = share of its window for the one stolen summon, at least summon_min_s s.", "loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0} |
+| steal | {"_doc": "Stolen Boki wisps (KinSteal, decision 0041, WISP_DESIGN_OPEN.md Q6/Q8): loose_s = s a downed hunter's wisp floats loose; grab_r = m reach, grab_s = s holding interact; carry_max = stolen wisps one hunter carries; wisp_max = all wisps one hunter holds (own Boki + carry-out capsule + stolen, KinPair); passive_k = share of each stolen carry passive; summon_k = share of its window for the one stolen summon, at least summon_min_s s.", "loose_s": 10.0, "grab_r": 2.0, "grab_s": 0.6, "carry_max": 2, "wisp_max": 4, "passive_k": 0.5, "summon_k": 0.5, "summon_min_s": 5.0} |
 
 ## boki_system (`content/rules/boki_system.json`)
 
@@ -608,8 +608,8 @@ Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) c
 | scan_s | 4 |
 | range | 3.5 |
 | cancel_range | 5 |
-| box_capacity | 3 |
-| box_capacity_doc | How many captured Boki (capsules) a hunter can carry in the run box (Hunter.caught). Full: a new scan is blocked until one is released. |
+| box_capacity | 1 |
+| box_capacity_doc | How many captured Boki (capsules) a hunter can carry out in the run box (Hunter.caught): one carry-out slot (DECISIONS 2026-11-11). Full: a new scan is blocked until one is released. |
 | noise_every_s | 0.5 |
 | hear_range | 26 |
 | rise_pitch | [0.8, 1.6] |

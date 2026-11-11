@@ -35,7 +35,7 @@ static func room_for_stolen(h: Hunter) -> bool:
 	var r := KinSteal.rules()
 	return KinSteal.count(h) < int(r["carry_max"]) and wisps(h) < int(r["wisp_max"])
 
-## A rival took `rec` out of `owner`'s deathbox into `looter`'s box.
-static func robbed(owner: Hunter, looter: Hunter, rec: Dictionary) -> void:
-	if owner != null and owner.team != looter.team:
-		owner.set_meta(ROBBED, rec)
+## A rival took `rec` out of `victim`'s deathbox into `looter`'s box.
+static func robbed(victim: Hunter, looter: Hunter, rec: Dictionary) -> void:
+	if victim != null and victim.team != looter.team:
+		victim.set_meta(ROBBED, rec)

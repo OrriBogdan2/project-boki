@@ -106,8 +106,9 @@ func _rows() -> void:
 	lead.ks.carry_passives = [{"stat": "move_speed", "amount": 0.1}, {"stat": "armor", "amount": 0.2}]
 	p.kin2.ks.carry_passives = [{"stat": "move_speed", "amount": 0.15}, {"stat": "regen", "amount": 3.0}]
 	var ps := KinPair.passives(p)
-	ok(p.kin_carry_on() and is_equal_approx(float(ps.get("move_speed", 0.0)), 0.15) and float(ps.get("armor", 0.0)) == 0.2
-			and float(ps.get("regen", 0.0)) == 3.0, "equal passives count once (the stronger), the others add (%s)" % [ps])
+	var once := is_equal_approx(float(ps.get("move_speed", 0.0)), 0.15)
+	ok(p.kin_carry_on() and once and float(ps.get("armor", 0.0)) == 0.2 and float(ps.get("regen", 0.0)) == 3.0,
+			"equal passives count once (the stronger), the others add (%s)" % [ps])
 	# ---------------------------------------------------------------- the carry-out slot
 	p.set_meta("cap", {"phase": "hold", "hold": 0.1})
 	await _drawn()
@@ -117,7 +118,8 @@ func _rows() -> void:
 	var rec := Save.new_kin("cindle", "Ember", 12)
 	p.caught.append(rec)
 	await _drawn()
-	ok(_kinds() == ["second:ready", "carry:claimed"] and not Capture.room(p), "a claimed Boki: its row, the slot is full (%s)" % [_kinds()])
+	ok(_kinds() == ["second:ready", "carry:claimed"] and not Capture.room(p),
+			"a claimed Boki: its row, the slot is full (%s)" % [_kinds()])
 	await _shot("carry_claimed")
 	_fits("second + carry-out")
 	# ---------------------------------------------------------------- wisp cap
