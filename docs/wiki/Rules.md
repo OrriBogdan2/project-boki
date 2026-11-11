@@ -367,6 +367,17 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## hit_flinch (`content/rules/hit_flinch.json`)
+
+How hard a hit flinches a Hunter (Oomph.hit_strength, Oomph.flinch_weight). Strength hit_k = chip_k + damage share of max health * frac_k + knock (m/s) * knock_k, from chip_k up to Oomph.HEAVY_FLINCH; a big hit (stagger) is always the heaviest. The body's spring (HunterAnim) scales by hit_k; the clip hero's base additive flinch layer (WardenClips) plays `light` of the hit clip on a chip hit and all of it by a stagger, which takes the whole body. Source-quality weight: a chip hit never looks like a knockdown, a big one is never a twitch.
+
+| Setting | Value |
+|---|---|
+| chip_k | 0.8 |
+| frac_k | 9 |
+| knock_k | 0.06 |
+| light | 0.35 |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
