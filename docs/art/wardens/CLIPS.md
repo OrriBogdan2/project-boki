@@ -32,9 +32,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
   glider, default 12: the legs trail), `glide_bank` (deg into a glider turn, default 28). A clip that already leans
   sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
+- `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running; `"moving"`: only while he moves, standing the clip owns the body), `fade` (s into the move), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `lead` (s: the clip starts that far in, so a late strike key lands on the kit's hit; under zero, its first frame is held that long)}.
   The clip is seeked to the kit's own `kmove_t` (plus the lead), so it can't drift from the hit. Clip length = the table's last key.
+  Firing on the run: a move the kit lets him run through (a shot, a throw, a slash, a cast he can walk in) is `upper`
+  (`"moving"` when it also has a standing pose), or the legs freeze and the feet skid. `--fire-run-check` runs every
+  Hunter at full stick, presses LMB, RMB and E, and gates the planted feet against his plain run (+25 % of the speed).
+  `--clip-shots --run-fire=<kmove>` shoots it.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `emotes`: the clip each wheel emote (`Truce.EMOTES`) plays, {emote id: clip}, all eight, all different, each shorter than the 2.6 s bubble. A clip is one of the `.glb` or a gesture `g_<name>` keyed at load from `warden_anim/emote_gestures.json` (`WardenGestures`: degrees from the rig's rest, axes in that file's doc). Moving, it plays on the upper layer (the legs keep running); standing, a `.glb` clip owns the body and a gesture still only moves the upper body. An id off the wheel (the bots' replies) plays `states.emote`. Remote players get it from the existing `emo` event. `--clip-check` asserts the map; `--emote-shots` renders it.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
