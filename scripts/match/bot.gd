@@ -13,6 +13,7 @@ func new_mind(rng: RandomNumberGenerator, skill: float, diff := {}) -> Dictionar
 const ARRIVE_R := 1.5          # bots ease off and stop turning this close to where they're going
 const GOAL_KEEP := 4.0         # metres of extra reach for a goal we're already heading to
 const GOAL_STICK := 5.0        # seconds a bot sticks to a goal before it may flip back to the last one
+const TGT_KEEP := 3.0          # m nearer a monster we already fight counts (two at one range swapped every think)
 const LAND_SPREAD := 16.0      # metres: another squad landing this close counts as a crowded spot
 const FRESH_T := 20.0          # seconds after landing a hunter is left alone unless they start it
 
@@ -694,7 +695,7 @@ func _choose(m: Match, h: Hunter) -> void:
 				if h.hp < h.max_hp * 0.3 and h.tonics <= 0 and d > 2.5:
 					continue
 			if d < reach and absf(mb.pos.y - h.pos.y) < 2.0 and m.world.los(h.pos, mb.pos, h.pos.y + 0.95):
-				var s := 10.0 - d
+				var s := 10.0 - d + (TGT_KEEP if mb == a["tgt"] else 0.0)
 				if mb.tgt == h: s += 5.0
 				if s > bs: bs = s; best = mb
 	# finish off downed rivals before their kin or team picks them up
@@ -956,7 +957,7 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		return h.dir_to(goal)
 	if fresh or m.time - float(wp["t"]) > PATH_REPLAN_S:
 		var at := Vector2i(int(floor(h.pos.x)), int(floor(h.pos.z)))
-		wp = {"goal": gt, "t": m.time, "aim": 0, "path": _grid_path(m, at, gt)}
+		wp = {"goal": gt, "t": m.time, "path": _grid_path(m, at, gt)}
 		h.ai["wp"] = wp
 	var path: Array = wp["path"]
 	if path.is_empty():
@@ -965,20 +966,16 @@ func _steer(m: Match, h: Hunter, goal: Vector3) -> Vector2:
 		_no_path(m, h)
 		return h.dir_to(goal)
 	h.ai.erase("nopath")
-	# drop waypoints already reached, then pull the aim to the furthest one in clear sight
-	var aim := int(wp["aim"])
+	# drop waypoints already reached, then pull the aim on to the furthest one in clear sight. The ones it
+	# passes are done too: a cut corner never comes within reach of them, they sit behind the bot, and
+	# aiming back at one when the line ahead flickers out of sight turns the bot round mid-walk
 	while path.size() > 1 and from.distance_to(path[0]) < 0.6:
 		path.pop_front()
-		aim -= 1
-	aim = clampi(aim, 0, path.size() - 1)
 	var pulls := 0
-	while aim + 1 < path.size() and pulls < PULL_PER_STEP and _clear_line(m, from, path[aim + 1]):
-		aim += 1
+	while path.size() > 1 and pulls < PULL_PER_STEP and _clear_line(m, from, path[1]):
+		path.pop_front()
 		pulls += 1
-	if pulls == 0 and aim > 0 and not _clear_line(m, from, path[aim]):
-		aim = 0                  # pushed off the line: fall back to the next waypoint
-	wp["aim"] = aim
-	var d: Vector2 = (path[aim] as Vector2) - from
+	var d: Vector2 = (path[0] as Vector2) - from
 	return d.normalized() if d.length() > 0.05 else h.dir_to(goal)
 
 const NO_PATH_GIVE_UP := 1.5     # seconds without a walkable path before a goal is banned for now
