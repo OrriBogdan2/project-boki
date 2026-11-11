@@ -111184,5 +111184,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_kestrike_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_klaxada",
+    "name": "Klaxada (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_klaxada_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_kingpinguin",
+    "name": "Kingpinguin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kingpinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_kintsuwyrm",
+    "name": "Kintsuwyrm (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kintsuwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_knotling",
+    "name": "Knotling (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_knotling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_kindlewren",
+    "name": "Kindlewren (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kindlewren_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_kitlet",
+    "name": "Kitlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kitlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_knotwyrm",
+    "name": "Knotwyrm (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_knotwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lanternlong",
+    "name": "Lanternlong (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lanternlong_1.jpg",
+    "ok": true
   }
 ]
