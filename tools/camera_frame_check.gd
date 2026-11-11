@@ -68,7 +68,8 @@ func _style(cam: CamRig) -> void:
 			"the Supervive style is camera.json's: %s" % str(st))
 	var pitch := rad_to_deg(cam.pitch)
 	ok(_inside(pitch, src["pitch_deg"]), "pitch %.1f deg inside the source's %s" % [pitch, str(src["pitch_deg"])])
-	ok(_inside(cam.fov, src["fov_deg"]), "lens %.1f deg at 16:9 inside the source's %s" % [cam.fov, str(src["fov_deg"])])
+	ok(_inside(cam.fov, src["fov_deg"]), "lens %.1f deg at 16:9 inside the source's %s"
+			% [cam.fov, str(src["fov_deg"])])
 	var view := Vector2(VIEWS[0][1])
 	var feet := (cam.unproject_position(Vector3.ZERO).y - view.y * 0.5) / view.y * 100.0
 	ok(_inside(feet, src["feet_below_pct"]), "feet %.2f%% of the height below the centre, inside the source's %s"
@@ -94,8 +95,11 @@ func _aspects(cam: CamRig, vp: SubViewport) -> void:
 			ref = g
 		ok(absf(g.z / ref.z - 1.0) < SAME, "%s: %.1f m each side, the 16:9 frame's %.1f m" % [v[0], g.z, ref.z])
 		var wider := aspect - CamRig.FRAME_ASPECT
-		ok(absf(wider) < 0.01 or (g.x < ref.x) == (wider > 0.0),
-				"%s: %.1f m ahead, %s the 16:9 frame's %.1f m" % [v[0], g.x, "under" if wider > 0.0 else ("at" if absf(wider) < 0.01 else "over"), ref.x])
+		var than := "under" if wider > 0.0 else "over"
+		if absf(wider) < 0.01:
+			than = "at"
+		ok(than == "at" or (g.x < ref.x) == (wider > 0.0),
+				"%s: %.1f m ahead, %s the 16:9 frame's %.1f m" % [v[0], g.x, than, ref.x])
 		var key := snappedf(aspect, 0.01)
 		if by_aspect.has(key):
 			var was: Vector3 = by_aspect[key]

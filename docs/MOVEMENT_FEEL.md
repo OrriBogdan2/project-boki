@@ -194,7 +194,7 @@ Other checks:
   - Ours measured the same way (the medium gunslinger, 1320x742): the movefeel framing already drew the silhouette at ~10.8% (80 px; the wide hat seen from above makes it read far bigger than the 7.6% feet-to-head figure), so the distance stays near it. A metre-based match (a 1.8 m hunter, ~12–16 m across) would have drawn our chunkier hunters ~1.5x the footage size.
   - The preset is now pitch 66° (was 65°), FOV 32° (was 35°), 23.0 m back (was 20.5 m; the narrower lens needs it to keep the same size), and it aims 1.0 m above the focus (`CamRig.rise`, new). That is ~23.5 m across. Wall-face foreshortening (cot pitch) is 0.445 vs the reference 0.456 (was 0.466). Ground scale at the screen's top edge vs its bottom edge is 0.774 vs the reference 0.769 (was 0.744).
   - The movefeel framing stays available as "Supervive (wider lens)" (`supervive_wide`). `--cam-style=<id>` picks a style for one tooling run.
-- **Camera framing vs the source (parity pass, 2026-11-09, `--cam-framing-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
+- **Camera framing vs the source (parity pass, 2026-11-09, now `--camera-frame-check`):** sources are the hero-ref sheets' 1080p measures [F] (no frames on the box that wrote this, so their numbers, not new pixels), camcal above [F] and the game data [D]. Numbers live in `content/rules/camera.json`.
 
   | Measure | Source | Ours before | Ours now |
   |---|---|---|---|
@@ -210,7 +210,25 @@ Other checks:
   | `CameraDistance` 5500 uu [D] | 55 m, meaning unproven (the ADS row is a fog-of-war radius); as an arm length it would need a ~21° lens, against the footage's ~32° | not used | not used |
 
   - Not matched: the distance. The source shows ~1.6x more ground across and draws its Hunters ~1.3x bigger: its Hunters are about twice the size of the world ours are, which no camera can match. 36 m back would show the source's ground but shrink tender to ~2.5% of the screen (the owner wants silhouettes that read at gameplay zoom); 18 m would match the Hunters' size on half the source's view. 23 m sits between the two, so it stays. Matching both means drawing Hunters larger (`Hunter.VIS_SCALE`), a model call for the owner (docs/DEBT.md).
-  - GPU pair (`--cam-framing-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
+  - GPU pair (`--cam-framing-shots`, since replaced by `--camera-frame-shots`, 1280x720): before job 20261109-101651-10739 (origin/main), after 20261109-101658-27648, `out/framing_*.png`. The default view moves 4 px (feet 381 -> 385). Sneaking with the cursor on the top edge, the lean stops at 7.8 m instead of 8.1 m, so you sit 55 px above the bottom edge instead of 45.
+- **Camera frame per aspect (2026-11-11, `--camera-frame-check`):** what the Supervive style shows of level ground around your feet, on each screen shape. Sources: the 16:9 source column is the framing table above solved for the ground (pitch 65.5°, lens 32°, ~37 m across at your feet, so ~36 m from the camera, feet 3-5% below the centre [F]); the source's other aspects are inferred [E]: its footage is all 16:9, its engine keeps the horizontal lens by default, and players reported no ultrawide view (a Steam thread, 2024-10), so every screen shows the 16:9 width. The numbers are in `content/rules/camera.json` (`styles`, `frame_aspect`, the `source` bands).
+
+  | Measure | Source 16:9 | Ours before 16:9 / 21:9 / 4:3 | Ours after 16:9 / 21:9 / 4:3 | Source 21:9 / 4:3 [E] |
+  |---|---|---|---|---|
+  | Camera height above your feet | ~33 m | 22.2 m (all) | 22.2 m (all) | ~33 m |
+  | Pitch | 65.5° ±1.5 | 66° | 66° | 65.5° |
+  | Vertical lens | ~32° | 32° / 32° / 32° | 32° / 24.6° / 41.8° | 24.6° / 41.8° |
+  | Ground ahead (to the top edge) | ~14.2 m | 9.3 / 9.3 / 9.3 m | 9.3 / 7.0 / 12.8 m | ~10.7 / ~19.6 m |
+  | Ground behind (to the bottom edge) | ~9.3 m | 6.2 / 6.2 / 6.2 m | 6.2 / 4.8 / 8.2 m | ~7.1 / ~12.2 m |
+  | Ground to each side, at your feet | ~18.5 m | 12.3 / 16.1 / 9.2 m | 12.3 / 12.3 / 12.3 m | ~18.5 / ~18.5 m |
+  | Ahead per behind | 1.46-1.62 | 1.49 | 1.49 | same |
+  | Side per ahead | 1.25-1.35 | 1.32 | 1.32 | — |
+
+  - Fixed: the screen's shape. Godot keeps the vertical lens, so a 21:9 screen showed 31% more ground to each side than 16:9 and a 4:3 one 25% less. `CamRig.frame_fov` now sets the lens each frame so every screen shows the 16:9 frame's width (`frame_aspect` 1.7778; the style's `fov` is the lens on that screen, kept as `CamRig.lens`): 21:9 sees less ahead and behind, 4:3 more. Windowed and full screen differ only by shape: a 1280x720 window, 1920x1080 and 3840x2160 frame the same metres, and a maximised window under a title bar (1920x1017) is a slightly wider shape (8.7 m ahead). Only the shape counts: `frame_fov` reads the view's width over its height.
+  - The shape matches the source (ahead per behind, side per ahead inside its bands); the scale does not: ours shows 0.66x the source's metres every way, the distance left open in the table above (docs/DEBT.md, an owner call on Hunter size). Kept as it was: the cursor lean (none, below), the glide camera, the cast view (its room follows the live lens).
+  - `--camera-frame-check` asserts it on ten views (16:9 at 1280x720, 1920x1080, 3840x2160 and 1920x1017; 16:10; 21:9 at 2560x1080, 3440x1440, 1680x720; 4:3 at 1600x1200, 1024x768): the 16:9 side metres within 0.5% everywhere, less ahead on wider shapes and more on narrower ones, the same shape framing the same metres at any size, your feet and head inside the screen; and the 16:9 pitch, lens, feet and ground shape inside the source's bands. `--move-feel-check`'s framing rows now read shares of a 16:9 screen's height (the headless view is square, so its lens is wider).
+  - GPU pair (`--camera-frame-shots`, one 720 px-tall window per shape; `--frame-before` keeps the lens at every shape, the rule before this change): before jobq 20261111-053358-15138 (rp1-0), after 20261111-053415-04484 (pc-MRROBOTO, gl_compatibility, so the light differs), `out/frame_16x9|21x9|4x3.png`. The 4:3 window came out 1240x930 (the window's minimum width), still 4:3.
+  - Not taken: black bars at 21:9 (the 16:9 picture, with as much ahead as 16:9). Fairer to ultrawide players, but nothing shows the source draws them, and it needs a letterbox under the HUD.
 - **Camera lead (measured, Nov 2026):** the Supervive follow used to lean toward the cursor (42% of its distance from you after a
   1.4 m deadzone, capped at 7.5 m). Nobody had checked that against the source, so it was measured from the reference clips in
   `/home/boki/refs/supervive-mantle/` (hetzner): the cursor ring and the player's own health bar were tracked per frame, and the

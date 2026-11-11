@@ -60,7 +60,7 @@ const CHECKS := {
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--camera-frame-check": ["res://tools/camera_frame_check.gd", "camera_frame_check", "check"],
-	"--camera-frame-shots": ["res://tools/camera_frame_check.gd", "camera_frame_check", "shots"],      # --shots-dir=<dir> (GPU)
+	"--camera-frame-shots": ["res://tools/camera_frame_check.gd", "camera_frame_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
