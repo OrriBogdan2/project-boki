@@ -290,10 +290,50 @@ def tend(t):
     return p
 
 
+def win(t):
+    """A spring: coils low, shoots up with the head high and the wings thrown wide, then rides down proud."""
+    p = {}
+    crouch = seq(t, [(0, 0), (0.15, 1), (0.25, 0), (1, 0)])
+    air = seq(t, [(0, 0), (0.2, 0), (0.4, 1), (0.62, 0.2), (1, 0)])
+    proud = seq(t, [(0, 0), (0.55, 0), (0.7, 1), (0.9, 1), (1, 0.7)])
+    bend(p, side=swim(t, 0.03 * proud + 0.05 * air, waves=2), lift=arch(0.7 * air + 0.25 * proud - 0.5 * crouch))
+    p["root_at"] = (0, 0.12 * air - 0.03 * crouch, 0)
+    add(p, "head", rx=0.2 * air + 0.15 * proud)
+    wings(p, flap=0.15 + 0.7 * air + 0.2 * proud - 0.1 * crouch, sweep=0.2 * crouch, tip=0.3 * air * s(t, 3))
+    fins(p, back=0.0, flick=0.5 * (air + proud))
+    return p
+
+
+def sulk(t):
+    """Low and turned away: the head hangs, the wings droop, the fins lie flat, a sigh now and then."""
+    p = {}
+    sigh = 0.5 + 0.5 * s(t, 1, -0.25)
+    peek = seq(t, [(0, 0), (0.5, 0), (0.58, 1), (0.72, 1), (0.8, 0), (1, 0)])
+    bend(p, side=swim(t, 0.03, waves=0.5), lift=arch(-0.8 - 0.1 * sigh))
+    p["root_at"] = (0, -0.045 - 0.004 * sigh, 0)
+    add(p, "root", ry=0.4 * (1 - 0.7 * peek))
+    add(p, "head", rx=-0.3 + 0.12 * peek, ry=0.35 * (1 - 1.5 * peek))
+    wings(p, flap=-0.35 - 0.04 * sigh, sweep=0.55, tip=-0.3)
+    fins(p, back=0.9, flick=-0.2)
+    return p
+
+
+def push(t):
+    """Braced and driving: the body straight and low, leaning into it, wings swept back and beating short."""
+    p = {}
+    thrust = 0.5 + 0.5 * s(t, 1, -0.25)
+    bend(p, side=swim(t, 0.012, waves=2), lift=arch(-0.25 - 0.1 * thrust, 0.35))
+    p["root_at"] = (0, -0.02, -0.06 * thrust)
+    add(p, "head", rx=-0.15 - 0.05 * thrust)
+    wings(p, flap=0.1 + 0.15 * thrust, sweep=0.9, tip=-0.1 + 0.2 * thrust, twist=-0.1)
+    fins(p, back=0.8)
+    return p
+
+
 CLIPS = {
     "idle": (2.8, True, idle), "walk": (0.9, True, walk), "run": (0.5, True, run), "hop": (1.1, True, hop),
     "sleep": (3.4, True, sleep), "eat": (2.0, True, eat), "pet": (2.2, True, pet), "attack": (0.8, False, attack),
     "ability": (1.2, False, ability), "chop": (1.1, True, chop), "mine": (1.0, True, mine), "carry": (0.9, True, carry),
-    "tend": (1.3, True, tend),
+    "tend": (1.3, True, tend), "win": (1.0, False, win), "sulk": (2.8, True, sulk), "push": (0.9, True, push),
 }
 HIDE_AT = {"prop_berry": (0, 0.15, 0.62)}
