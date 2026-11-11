@@ -261,11 +261,12 @@ func _quiet() -> String:
 	if P.position.distance_to(P.pos) > 0.01: return "render catching up"
 	return ""
 
-## The cursor on the foe's chest (headless: a mouse motion event is what the viewport reads).
+## The cursor on the foe's chest: a mouse motion event is what the viewport reads, in window pixels (the
+## canvas point times the content scale, which a real window may have; headless it is 1).
 func _aim_at_target() -> void:
 	if T == null or m.cam == null: return
 	var ev := InputEventMouseMotion.new()
-	ev.position = m.cam.unproject_position(T.pos + Vector3(0, 0.9, 0))
+	ev.position = m.cam.unproject_position(T.pos + Vector3(0, 0.9, 0)) * main.get_tree().root.content_scale_factor
 	ev.global_position = ev.position
 	Input.parse_input_event(ev)
 	Input.flush_buffered_events()
