@@ -20,8 +20,8 @@
 		"as_lance_end": {"clip": "lance_end", "upper": "moving", "air_legs": true},
 		"as_aim": {"clip": "aim", "hold_from": 0.12, "upper": "moving", "air_legs": true}, "as_shot": {"clip": "shot", "upper": "moving", "air_legs": true},
 		"as_leap": {"clip": "leap", "heading": true, "turn_max": 3.2, "fade": 0.05, "rate": 1.15}, "lw_hop": {"clip": "hop", "heading": true, "turn_max": 3.2, "air_clip": "hop"},
-		"as_cloak": {"clip": "cloak", "air_legs": true, "fade": 0.05}, "lw_stoke": {"clip": "stoke", "upper": true, "fade": 0.05},
-		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land", "fade": 0.05},
+		"as_cloak": {"clip": "cloak", "air_legs": true, "fade": 0.05, "upper": "moving"}, "lw_stoke": {"clip": "stoke", "upper": true, "fade": 0.05},
+		"lw_jet": {"clip": "jet", "hold_from": 0.22}, "lw_land": {"clip": "jet_land", "fade": 0.05, "upper": "moving"},
 		"lw_jump": {"clip": "jump", "fade": 0.05},
 		"mf_xform": {"clip": "fusion"}
 	},
