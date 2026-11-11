@@ -6,6 +6,7 @@
  "col": "bfe9ff",
  "use": "fx",
  "cd": 3.0,
+ "float": true,
  "max": 2,
  "bring": [
   1,
@@ -22,5 +23,6 @@
    "time": 30.0,
    "delay": 0.3
   }
- ]
+ ],
+ "src": "docs/SOURCE_UTILITIES.md: over the abyss only; casts after 0.3 s (the effect's delay) and floats you for it [P-1.03]"
 }

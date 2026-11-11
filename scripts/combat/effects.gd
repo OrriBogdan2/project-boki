@@ -588,7 +588,11 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 			var d := _aim_dir(caster, ctx)
 			var from: Vector3 = caster.pos
 			var g0: float = m.world.ground_at(from.x, from.z)
-			if g0 > World.VOID + 1.0: from.y = g0
+			if g0 > World.VOID + 1.0:
+				from.y = g0
+			else:   # cast in the air (a Cloud Raft over the abyss): the span forms under your feet, from your own tile
+				from.y = floorf(from.y / World.LEVEL) * World.LEVEL
+				e = e.merged({"lead": 0.0})
 			m.verbs.add_bridge(caster, from, d, e)
 		"line":
 			_fissure(e, caster, ctx, m, pw, col)

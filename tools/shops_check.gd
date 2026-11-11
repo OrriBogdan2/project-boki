@@ -204,7 +204,8 @@ func _items(m: Match) -> void:
 	for id in UtilityBelt.stock_ids():
 		h.pos = _vendor_of(m, "gear")["pos"]
 		bot.reveal_t = 0.0
-		if not _fresh(h, id) and id != "revive_ember":
+		# the Ember needs a fallen squadmate; the Cloud Raft open air (--utility-parity-check casts it there)
+		if not _fresh(h, id) and id != "revive_ember" and not UtilityBelt.def(id).get("float", false):
 			smoke.append(id)
 		UtilityUse.tick(h, 30.0)
 	ok("every belt item can be used without a crash", smoke.is_empty(), str(smoke))

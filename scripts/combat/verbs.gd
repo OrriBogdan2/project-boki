@@ -21,6 +21,7 @@ const WALL_TH := 0.32      # half thickness of a barrier
 const WALL_H := 2.3
 const CARRIED_A := 0.4     # a carried wall's body is this much fainter: the bearer reads through it
 const BRIDGE_RISE_DROP := 0.6   # m below its place a rising span's slabs start (add_bridge e.rise)
+const BRIDGE_LEAD := 0.6        # m along from its start a span's first slab goes (add_bridge e.lead overrides)
 const BRIDGE_SHAKE := 0.14      # m: a crumble-warned span's shake at the very end
 const BRIDGE_CRACK_W := 0.11    # m: the width of its warning cracks
 const BRIDGE_PUFF_GAP := 0.3    # s between the grit puffs spilling off it while it warns
@@ -238,7 +239,7 @@ func add_bridge(by: Node, from: Vector3, d: Vector2, e: Dictionary) -> int:
 	var seen := {}
 	var n := Node3D.new()
 	var side := Vector2(-d.y, d.x)
-	var k := 0.6
+	var k := float(e.get("lead", BRIDGE_LEAD))
 	var mat := Models.toon(col, true, 0.5)
 	var glass := Models.glow_mat(Color(col.lightened(0.3), 0.45))
 	while k <= length:
