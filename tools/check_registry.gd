@@ -233,6 +233,7 @@ const CHECKS := {
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
+	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
 	"--unmasked-check": ["res://tools/unmasked_check.gd", "unmasked_check", null],      # the Unmasked
 	"--empty-shots": ["res://tools/empty_shots.gd", "empty_shots", null],      # the Empty creator + Relic moment shots
