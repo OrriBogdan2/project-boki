@@ -44,7 +44,9 @@ static func whole(s: Dictionary) -> int:
 static func next_secs(s: Dictionary) -> float:
 	if whole(s) >= int(s["cap"]):
 		return 0.0
-	return (1.0 - fposmod(float(s["charges"]), 1.0)) * float(s["regen"])
+	var have := float(s["charges"])
+	var owed := floorf(maxf(have, 0.0)) + 1.0 - have       # over 1 after a held slide (charges below 0)
+	return owed * float(s["regen"])
 
 ## Draws the slot in `r` on host `H` (Hud or HomeDashSlot). `audible`: tick when a charge returns.
 static func draw(H, r: Rect2, s: Dictionary, audible := true) -> void:

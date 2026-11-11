@@ -25,9 +25,15 @@ const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
 const SHIELD_COL := Color("ff5a1a")    # the cloak's fire shield: a deep orange that holds on yellow grass
+const HEAT_CORE := Color("ffd23a")     # the heat glow's core (her vfx palette "hot"); its body is SHIELD_COL
+const HEAT_RISE := 0.8                 # s of roaring before her palm glows at full heat
+const HEAT_COOL := 0.8                 # s it takes to cool from full heat once the fire stops
+const HEAT_SIZE := 1.2                 # the heat glow's scale at full heat (the pilot flame is 0.4)
 const RAM_FRONT := 0.3                 # share of the ram spent at its burst speed, then it slows
 const RAM_FRONT_K := 1.4               # the burst speed against the average (front-loaded, hero-ref)
 const RAM_BACK_K := 0.85
+# s into as_leap: the squash key; a hit earlier jumps the move there (source: knocked back within 0.1 s)
+const RAM_IMPACT_KEY := 0.36
 const DRAG_T := 0.45                   # s the cloak pulls a foe in for (at pull_speed, stopping gap m away)
 const TONGUE_EVERY := 2                # flame ticks between two tongues licking off the stream
 const LICK_EVERY := 3                  # flame ticks between two scorches where the stream's end licks the ground
@@ -52,6 +58,7 @@ var relight_t := 0.0            # the lance can't relight until this runs out (0
 var was_held := false
 var hose_paused := false        # the lance held through a dash: the stream is out, it roars again as the dash ends
 var ember_t := 0.0
+var heat := 0.0                 # 0..1: how hot her palm glows, building while the lance roars
 var bash := {}                  # hold: the Soot Ram under way {t, dir, hit}
 var aiming := false             # hold: Cinder Shot held (the lane shows)
 var fx: LDFx
@@ -171,6 +178,7 @@ func _flashover_fx(f: Ent) -> void:
 	m.sfx("crit", f.pos, -7.0, 0.85)
 	if h.is_local() and m.hud:
 		m.hud.flash(col, 0.12)
+	RecastCue.payoff(self, f)
 	CombatBus.ability_used.emit(h, id + "_payoff", "secondary")
 
 ## The Flashover fist pump; mid-roar the hand stays on the foe and only the off arm and the body move.
@@ -184,7 +192,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	vfx("knock")
 	_stoke_pose()
 	if h.dashes < h.max_dashes():
-		h.dashes = minf(h.max_dashes(), floorf(h.dashes) + 1.0)     # a knock gives back one ram charge, never more
+		h.dashes = minf(h.max_dashes(), h.dashes + 1.0)     # one ram charge back; the recharge keeps its time
 		st["knock_charges"] = int(st.get("knock_charges", 0)) + 1
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
@@ -244,6 +252,7 @@ func _tick_tells(dt: float) -> void:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		var big := 1.0 + (1.2 if was_held and spool < float(lmbd()["spool"]) else 0.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), FLAME_CYAN, PILOT_CORE, 0.4 * fl * big)
+	_heat_glow(dt, vis)
 	ember_t -= dt
 	if ember_t <= 0.0:
 		ember_t = 0.35
@@ -273,6 +282,20 @@ func _tick_tells(dt: float) -> void:
 				"pipg%d" % key, "glow", top + Vector3(0, -0.05, 0), Color("ff4a1a"), Color("ff9a3a"),
 				0.75 + 0.08 * sin(m.time * 9.0)
 			)
+
+## The heat in her palm: an orange glow that builds over HEAT_RISE of roaring and cools after she lets go.
+func _heat_glow(dt: float, vis: bool) -> void:
+	var roaring := was_held and spool >= float(lmbd()["spool"])
+	if roaring:
+		heat = minf(1.0, heat + dt / HEAT_RISE)
+	else:
+		heat = maxf(0.0, heat - dt / HEAT_COOL)
+	var id := "heat%d" % h.get_instance_id()
+	if heat <= 0.0 or not vis or jet.running():
+		fx.unplace(id)
+		return
+	var flicker := 0.9 + 0.1 * sin(m.time * 23.0)
+	fx.place(id, "glow", tip(), SHIELD_COL, HEAT_CORE, HEAT_SIZE * heat * flicker, 0.0, heat)
 
 ## Shown burn stage over a foe: 0, 1 (Ablaze, one pip) or 3 (Flashover, three pips) (tests).
 func pips_on(f: Ent) -> int:
@@ -328,8 +351,9 @@ func lmb_override(held: bool, dt: float) -> bool:
 		_pause_hose()
 		return true
 	if not held or not h.can_fire() or merging or (relight_t > 0.0 and not was_held):
+		if was_held:
+			play("as_lance_end")           # (a key let go in a dash too: the pose never outlasts the key)
 		if was_held and not hose_paused:
-			play("as_lance_end")
 			vfx("lance_end")
 			m.sfx("ashwick_tank_hiss", h.pos, -4.0, 1.0)      # the fire gutters out as she lets go
 		if was_held:
@@ -437,7 +461,8 @@ func rmb_hold_tick(_t: float) -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
-		h, "rmb", {"len": ln, "width": 0.42, "col": Color("fff4e6"), "col2": BOLT_COL, "alpha": 0.9, "tip": true}
+		h, "rmb", {"len": ln, "width": float(rdf["size"]) * 2.0, "col": Color("fff4e6"), "col2": BOLT_COL,
+				"alpha": 0.9, "tip": true}
 	)
 
 func fire_rmb(c: Dictionary) -> void:
@@ -613,6 +638,8 @@ func _bash_impact(f: Ent) -> void:
 	bash["hit"] = true
 	bash_hits += 1
 	h.roll_t = 0.0                  # the dash stops on the foe
+	if anim_id == "as_leap":
+		anim_at = minf(anim_at, m.time - RAM_IMPACT_KEY)      # the squash on the hit frame, not at the full ram
 	var dir: Vector2 = bash["dir"]
 	# and he bounces back a little off them
 	h.vel.x = -dir.x * float(dd["recoil"])
@@ -658,7 +685,7 @@ func _cloak_blast() -> void:
 	var ed := e_def()
 	blasts += 1
 	var hit := 0
-	var shield_k := float(ed["rank3_shield_k"]) if rank("kin") >= 3 else 1.0
+	var shield_k := rank_k("rank_shield", "kin", 1.0)
 	var r := float(ed["radius"])
 	vfx("cloak", null, null, {"r": r})        # no wider than the blast reaches
 	for f in foes_in(h.pos, r):
@@ -687,6 +714,26 @@ func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
 func ult_running() -> bool: return jet.running()
+## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
+func recast_window() -> Dictionary:
+	if not jet.running():
+		return {}
+	var t := float(x_def()["time"])
+	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
+
+## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
+func combo_marks(out: Array) -> void:
+	super(out)
+	var ttl := float(rd()["expire"])
+	for key in chars:
+		var c: Dictionary = chars[key]
+		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
+			continue
+		var lvl := burning(c["e"])
+		var left: float = ttl - (m.time - float(c["t"]))
+		if left > 0.0 or lvl > 0:
+			var label := "ABLAZE" if lvl > 0 else "CHAR"
+			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

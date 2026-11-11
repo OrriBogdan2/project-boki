@@ -1,0 +1,6 @@
+{
+	"NVIDIA GeForce RTX 4090|3x2|medium|60s": {"p99": 88.0, "avg": 28.3, "from": "PC rp1-0, ext/expedition-fps-1108 8d32915de (job 20261108-223713-07084)"},
+	"NVIDIA GeForce RTX 4090|10x3|medium|60s": {"p99": 93.4, "avg": 56.1, "from": "PC rp1-0, ext/expedition-fps-1108 8d32915de (job 20261108-215015-27457)"},
+	"Apple M5|3x2|medium|60s": {"p99": 54.9, "avg": 23.4, "from": "Mac, main d255acbee with the one-step bench (job 20261108-214429-03237); replace with this branch's run"},
+	"Apple M5|10x3|medium|60s": {"p99": 114.3, "avg": 47.4, "from": "Mac, main d255acbee with the one-step bench (job 20261108-214432-22612); replace with this branch's run"}
+}
