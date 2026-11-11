@@ -164,6 +164,37 @@ The rest of the Nov 9 list, each number in the item's JSON `src` field (source n
 Online, as with the gates and seeds before: razed beacons, raided chests, fans shot down and lanterns
 taken are handled by the game that did it; the other games are not told (no Net change).
 
+## Built Nov 11 (ext/feel-utility-move): using an item and moving
+
+How pressing a belt item treats your movement, settled from the wiki pages and patch notes above (the footage
+is not on this worker, so anything only footage could settle is [?]). Columns: what the source says about the
+cast, moving while it runs, a dash and a hit; then ours. Checked row by row by `--utility-parity-check`
+(MOVES: on the ground, mid-air, mid-dash, while hit).
+
+| Item (source) | Source | Ours | Status |
+|---|---|---|---|
+| Tonic (Vive Brew) | 1 s drink, Vulnerable while drinking, cancelled on taking damage [W-ViveBrew]. Holding the key chains drinks [P-1.02]. Nothing on moving or dashing | 1.0 s at full speed, run kept; folds the glider; a hit spills it, nothing spent; a dash spills it, and a press mid-dash is denied (was: started and spilled the same step) | have. Moving, gliding and dash [?] |
+| Armor kit (Portable Armor Repair) | "a short cast time" [W-PAR]. Nothing on moving, dashing or damage | 1.6 s at 45% speed (ours), a hit or a dash spills it | have. Length, slow, hit and dash [?] |
+| Deep Draught (Hypervive) | 5 s, slows you 60%, Vulnerable, taking damage cancels it [W-Hypervive] | 5 s at 40% speed, a hit spills it | have. Dash [?] |
+| Lostway Scroll (Anywhere But Here) | "Channel for 4s" [W-ABH]. The recall it replaces is cancelled by damage [W-Basecamp] | a 4 s drink at full speed, a hit spills it | have. Whether you may walk [?] |
+| Omen Draught (Prophet's Potion) | "Channel for 1s" [W-Prophet] | a 1 s drink at full speed, a hit spills it | have. Walking and hit [?] |
+| Thorn Wall (Spike Wall) | "Root yourself for 2s" [W-SpikeWall] | rooted 2 s, Shift denied while rooted, a hit changes nothing, the wall rises after | have. Hit [?] |
+| Pilfer Pouch (Mass Heist) | "Target a location and channel for 1.5s" [W-MassHeist] | rooted 1.5 s, Shift denied, a hit changes nothing, knocked and the raid is off | have. Whether the source roots, and a hit [?] |
+| Cloud Raft (Emergency Platform) | "Only usable if you're over abyss or hazards" [W-EmPlatform]; "casts after 0.3s instead of instantly; if used over Abyss floats the caster for this duration" [P-1.03] | **FIXED**: denied unless you are over the abyss; held in the air (no fall) for the 0.3 s, then the raft forms under your own feet (before: it could form a terrace above you or miss your tile) | closed. A hit during the cast [?] (ours: the charge is spent at the press, the raft comes) |
+| Twin Gate (Two-Way Teleporter) | no cast noted for the consumable [W-2Way]; the power-era Two-Way Tunnel had a cast, 1.5 s → 0.75 s [P-Feb19] | at once, run kept | have. Whether 1.0's Group Teleport kept the 0.75 s cast [?] |
+| Jump Pad | "Place a jump pad" [W-JumpPad], no cast noted. Riding it: "Dashing into jump pads preserves forward momentum and provides a small speed boost" [W-JumpPad] | placed at once; a body on the pad keeps the faster of its speed and the pad's push, no extra boost | have. The boost [?] |
+| Gust Fan, Skyfall Charge, Shatter Charge, Blight Flask, Lookout Lantern, Toss Satchel, Hearth Lamp, Warp Seed, Hawk Whistle, Bounty Banner, Revive Ember | thrown or placed; no cast, slow or cancel noted on any page [W-Fan][W-Nuke][W-EMP][W-DeathCircle][W-ScanGren][W-VivePacks][W-Beacon][W-ABH][W-PocketUAV][W-MostWanted] | at once, one charge spent; run and air momentum kept; usable mid-air and mid-dash; a hit changes nothing | have. Mid-air and mid-dash in the source [?]. Most Wanted takes no slot and fires on pickup [W-MostWanted]; ours is a belt item (ext/utility-parity) |
+| Warp Seed, stepping in | "players will begin to channel for a short time before teleporting" [W-ABH] | stand in it 1.5 s | have |
+| Toss Satchel, picking up | "picked up while airborne, it will launch the target upwards" [W-VivePacks] | a body in the air is thrown up | have |
+| Chest Key, Rift Key (Gold Key, Evil Key) | "Activating points near the closest ... chest" [W-GoldKey][W-EvilKey], no cast | at once | have (not in MOVES: needs a lock) |
+| Medkit, Shield cell, Swift draught | ours only | at once, run kept | ours |
+| Silence | "no abilities, powers or consumables" [S-data §4]; the final ally recall gives a damage and CC cut, not a silence [P-1.03] | no silence in Boki | n/a |
+
+Not changed, for the owner: the source's Vulnerable is double damage ("Gliding players will take double damage"
+[W-Gliding], "Vulnerable: takes 2x" [S-data §4]); ours is 1.2x while drinking, repairing or reviving a box
+(`Hunter.CONSUME_VULN`, shared with the box revive). Changing it is a one-line parity fix that also changes
+box revives, so it is left for a decision.
+
 ## Sources
 
 - [W-x] wiki pages, `https://supervive.wiki.gg/wiki/<Page>` (raw wikitext read Nov 8 2026): Consumables, Powers, Shops, World_objects, Anywhere_But_Here, Vive_Brew, Portable_Armor_Repair, Hypervive, Pocket_UAV, Jump_Pad, Emergency_Platform_(Power), Deployable_Fan, Two-Way_Teleporter_(Power), Most_Wanted, Mobile_Respawn_Beacon, Tactical_Nuke_(Power), Mass_Heist, Basecamp, Ethereal_Smoke, EMP_Grenade, Death_Circle_Grenade, Scan_Grenade, Spike_Wall, Prophet's_Potion, Vive_Packs, Gold_Key, Evil_Key, Tome_of_Knowledge, Codex_of_Mass_Enlightenment, Little_Cook_(Power), Chonker_Cannon, Snowball_(Power), Present!_(Power), Tree_Costume_(Power), Money_Tree_Seeds, The_Breach, Hot_Zone, Vaults, Supply_Drops, Train, Skysharks.
