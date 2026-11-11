@@ -112192,5 +112192,12 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_zipling_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_zippelith",
+    "name": "Zippelith (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_zippelith_1.jpg",
+    "ok": true
   }
 ]
