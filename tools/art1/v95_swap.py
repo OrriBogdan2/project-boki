@@ -2,17 +2,20 @@
 Warden's own skeleton, clips and anchors, which come from its current .glb and stay as they are.
  1. Bake (once, cached in WORK): bake_warden.py's low mesh (`tris`, `head_tris` round `head`) and UVs, the old model's parts
     that ride the `keep` bones (Grimble's junk ball) packed beside it, and one `tex` atlas: the master's base colour on the
-    low mesh, the old atlas on the kept parts. The game .glb is copied to WORK/game.glb: later runs start from it.
+    low mesh, the old atlas on the kept parts (with `normal`, also the master's tangent normals: the .glb's normal texture,
+    WardenGlb's use_nrm). The game .glb is copied to WORK/game.glb: later runs start from it.
  2. Fit (grimble_source.py's method): each limb segment of the master (its `joints`) moves onto the rig's, a length along
     the bone and a girth across it; the limbs take the rig's joint heights and keep the master's spread, or with `spread`
     "rig" sit on the rig's joints; past a segment's ends the master keeps its own scale (a hook, a gauntlet keep their shape).
  3. Weights: bone heat on the body bones, `past_wrist` (the bone that takes each hand's weights: Grimble's hook), then
-    `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`, within `in_segs` capsules if given.
+    `regions` in order (a later one wins): boxes moved whole onto one bone, minus `except_segs` capsules and `except_boxes`, within `in_segs` capsules if given;
+    with `fade` [z0, z1] the bone's share falls from whole at z0 to none at z1 (Motley's spring stretches from box to hips).
     `detach` bone pairs ("*": any other) are cut apart and both openings capped: a scan fuses the gun to the belt and the
     pack to the shoulders, and the clips swing those apart. `smooth` passes widen the blends.
  4. Toon slots per triangle (`slots`, first match wins: hue/sat/value ranges of the paint, a bone, a box), the ink room per
     bone (`room`), the anchors moved onto the new mesh (`anchors`, through the same fit), `move_bones` (a kept part's bone
-    moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb.
+    moved at rest, its clips' translation keys corrected), skin_relax (no edge past 1.3x in any clip), and the .glb, less the
+    old model's `drop` meshes (the parts the master paints itself: Motley's face, ruff and wisp).
 Points in the spec are in the fit frame: his front +Y, his right +X, soles on z 0, the master's metres (v95_grid.py).
 Run: blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB"""
 import json
@@ -169,6 +172,29 @@ def bake_emit(high, low, tex):
     return img
 
 
+def bake_normal(high, low, tex):
+    """The master's tangent-space normals (its normal map and the detail the decimation took) onto the low mesh's UVs, smooth
+    shaded as the game draws it; texels nothing lands on stay flat. After bake_colour: its BSDF goes back on the output."""
+    for m in high.data.materials:
+        nt = m.node_tree
+        bsdf = next((n for n in nt.nodes if n.type == "BSDF_PRINCIPLED"), None)
+        if bsdf:
+            nt.links.new(bsdf.outputs[0], next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL").inputs["Surface"])
+    for p in low.data.polygons:
+        p.use_smooth = True
+    img = bpy.data.images.new("normal", tex, tex, alpha=False)      # (the game .glb writes it as <id>_normal.jpg)
+    img.colorspace_settings.name = "Non-Color"
+    img.pixels = np.tile(np.array([0.5, 0.5, 1, 1], F), tex * tex)
+    nt = low.data.materials[0].node_tree
+    node = nt.nodes.new("ShaderNodeTexImage")
+    node.image = img
+    nt.nodes.active = node
+    select([high, low], low)
+    bpy.ops.object.bake(type="NORMAL", normal_space="TANGENT", use_selected_to_active=True, cage_extrusion=CAGE,
+                        max_ray_distance=RAY, margin=MARGIN_PX, margin_type="EXTEND", use_clear=False)
+    return img
+
+
 def bake():
     """Step 1: WORK/bake.blend (Low in the master's frame, Kept in the game's, the atlas packed) and WORK/game.glb."""
     os.makedirs(WORK, exist_ok=True)
@@ -200,12 +226,14 @@ def bake():
     tex = int(SPEC.get("tex", 2048))
     img = BW.bake_colour(high, low, tex, CAGE, RAY, MARGIN_PX)
     emit = bake_emit(high, low, tex) if SPEC.get("emit") else None
-    if emit:        # (the kept parts' texels stay black: they don't glow)
-        emit.filepath_raw = os.path.join(WORK, "emit.png")
-        emit.file_format = "PNG"
-        emit.save()
-        emit.pack()
-        emit.use_fake_user = True
+    nrm = bake_normal(high, low, tex) if SPEC.get("normal") else None
+    for extra in (emit, nrm):       # (the kept parts' texels stay black (no glow) and flat)
+        if extra:
+            extra.filepath_raw = os.path.join(WORK, extra.name + ".png")
+            extra.file_format = "PNG"
+            extra.save()
+            extra.pack()
+            extra.use_fake_user = True
     body = np.array(img.pixels[:], F).reshape(tex, tex, 4)
     if kept.data.polygons:      # the kept parts: the old atlas onto their new UVs, on an image of their own, laid over the body's
         lay_kept(old, kept, body, tex)
@@ -223,6 +251,8 @@ def bake():
     kept.data.materials.clear()
     bpy.context.scene["sole"] = sole
     bpy.ops.outliner.orphans_purge(do_recursive=True)
+    if nrm:     # (the master's own normal map held the name: it is purged now)
+        nrm.name = "normal"
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(WORK, "bake.blend"))
 
 
@@ -413,10 +443,11 @@ def place_weights(gr, P):
     for sd, bone in SPEC["past_wrist"].items():
         hand = gr.pop("hand." + sd)
         gr[bone] = gr.get(bone, 0) + hand
-    for bone, m in region_masks(P):
+    for r, (bone, m) in zip(SPEC.get("regions", []), region_masks(P)):
+        f = m * (np.clip((r["fade"][1] - P[:, 2]) / (r["fade"][1] - r["fade"][0]), 0, 1) if "fade" in r else 1.0)
         for nm in gr:
-            gr[nm] = gr[nm] * ~m
-        gr[bone] = gr.get(bone, np.zeros(len(P))) + m
+            gr[nm] = gr[nm] * (1 - f)
+        gr[bone] = gr.get(bone, np.zeros(len(P))) + f
     return gr
 
 
@@ -515,7 +546,8 @@ def move_bones(arm, kept, T, K):
     the offset in proportion to how far each goes toward the largest one, so the clips still end where they did (the junk
     ball hides in the new body at rest and still grows round him in a dash). {bone: {"to": point, "chain": [bones]}}: the
     bone's head onto a master point (through the fit) and its chain by the same offset, the keys as they were (Albert's fish
-    onto the master's mast)."""
+    onto the master's mast); "turn" (degrees) then turns its rest about the vertical through its head, so its rotation keys
+    swing about another edge (Motley's lid hinge on the master's diagonal box)."""
     for name, spec in SPEC.get("move_bones", {}).items():
         bones, fix = [name], not isinstance(spec, dict)
         if fix:
@@ -532,6 +564,10 @@ def move_bones(arm, kept, T, K):
         for bn, (h, t) in rest.items():     # (from the rest as it was: a connected child follows its parent's tail)
             arm.data.edit_bones[bn].head = h + d
             arm.data.edit_bones[bn].tail = t + d
+        if not fix and "turn" in spec:
+            h = arm.data.edit_bones[name].head.copy()
+            arm.data.edit_bones[name].transform(Matrix.Translation(h) @ Matrix.Rotation(np.radians(spec["turn"]), 4, "Z") @
+                                                Matrix.Translation(-h))
         bpy.ops.object.mode_set(mode="OBJECT")
 
 
@@ -671,6 +707,8 @@ def main():
         o.data.color_attributes.new("Col", "FLOAT_COLOR", "POINT")
     old_name = old.name
     bpy.data.objects.remove(old)
+    for nm in SPEC.get("drop", []):
+        bpy.data.objects.remove(bpy.data.objects[nm])
     select([low, kept], low)
     bpy.ops.object.join()
     me = low.data
@@ -691,6 +729,12 @@ def main():
             e.image = bpy.data.images["emit"]
             m.node_tree.links.new(e.outputs[0], b.inputs["Emission Color"])
             b.inputs["Emission Strength"].default_value = 1.0
+        if "normal" in bpy.data.images:     # (the glTF normal texture: WardenGlb's use_nrm)
+            t = m.node_tree.nodes.new("ShaderNodeTexImage")
+            t.image = bpy.data.images["normal"]
+            n = m.node_tree.nodes.new("ShaderNodeNormalMap")
+            m.node_tree.links.new(t.outputs[0], n.inputs["Color"])
+            m.node_tree.links.new(n.outputs[0], b.inputs["Normal"])
         me.materials.append(m)
     me.polygons.foreach_set("material_index", np.array([names.index(s) for s in slots], np.int32))
     ntri = sum(len(p.vertices) - 2 for p in me.polygons)
