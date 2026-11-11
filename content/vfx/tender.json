@@ -65,7 +65,7 @@
 		]},
 		"seed_burst": {"fx": [
 			{"p": "flare", "y": 0.8, "size": 1.6, "grow": 1.25, "life": 0.25, "c": "leaf", "c2": "leaf_hot", "c3": "leaf_char"},
-			{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.6, "c": "leaf", "c2": "leaf_hot", "c3": "leaf_char"},
+			{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.6, "c": "leaf", "c2": "leaf_hot", "c3": "leaf_lit"},
 			{"p": "vortex", "size": "r", "size_x": 0.45, "spin": -0.5, "grow": 1.1, "life": 0.8, "c": "leaf", "c2": "leaf_hot",
 				"c3": "leaf_char"},
 			{"p": "star", "y": 0.2, "n": 18, "shape": "arc", "arc": 360, "w": 0.2, "radius": "r", "radius_x": 0.95,
