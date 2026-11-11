@@ -323,7 +323,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
 	if admin_allowed():
 		_group(v, "Admin")
-		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 90 s lobby before each expedition. Off: plain loading")
+		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
 func _tab_controls(v: VBoxContainer) -> void:

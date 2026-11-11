@@ -1,6 +1,6 @@
 extends RefCounted
 ## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0019-prematch-lobby.md).
-## The 90 s countdown and the lock at 0, picks refused once locked (and for a Hunter that isn't open),
+## The 30 s countdown and the lock at 0, picks refused once locked (and for a Hunter that isn't open),
 ## the admin toggle (Settings lobby_enabled) and which matches get a lobby, the squad the lobby and the
 ## loading screen share, the options the match starts with, chat lines, the voice hook, and the screen.
 
@@ -33,10 +33,10 @@ func run(main: Node) -> void:
 
 func _countdown() -> void:
 	var pm := Prematch.new(EXPEDITION.duplicate())
-	ok(Prematch.DURATION == 90.0 and pm.left == 90.0, "the lobby starts at 90 seconds")
-	pm.tick(30.0)
-	ok(is_equal_approx(pm.left, 60.0) and not pm.locked, "30 s later 60 s are left, picks still open")
-	pm.tick(59.9)
+	ok(Prematch.DURATION == 30.0 and pm.left == 30.0, "the lobby starts at 30 seconds")
+	pm.tick(10.0)
+	ok(is_equal_approx(pm.left, 20.0) and not pm.locked, "10 s later 20 s are left, picks still open")
+	pm.tick(19.9)
 	ok(not pm.locked, "0.1 s before the end picks are still open")
 	pm.tick(0.2)
 	ok(pm.left == 0.0 and pm.locked, "at 0 the timer stops and picks lock")
@@ -116,13 +116,19 @@ func _screen(main: Node) -> void:
 	view.setup(o)
 	main.add_child(view)
 	await main.get_tree().process_frame
-	ok(view.grid.get_child_count() == Arch.ids().size(), "the screen shows every Hunter")
+	var cards: Array = view.grid_box.get_child(0).get_children()
+	ok(cards.size() == Arch.ids().size(), "the screen shows every Hunter")
 	ok(view.squad_box.get_child_count() == 2, "the screen shows your squad")
-	ok(view.timer_label.text == "1:30", "the screen counts down from 1:30 (%s)" % view.timer_label.text)
+	ok(view.timer_label.text == "0:30", "the screen counts down from 0:30 (%s)" % view.timer_label.text)
+	_declutter(view, cards)
+	view._show_chat_line(true)
+	ok(view.chat_in.visible and not view.chat_hint.visible, "Enter opens the input in place of the line")
 	view.chat_in.text = "hello"
 	view._send_chat()
 	await main.get_tree().process_frame
 	ok(view.chat_log.get_child_count() == 1 and view.chat_in.text == "", "a sent chat line shows in the log")
+	var log_open: bool = view.chat_scroll.visible and view.chat_hint.visible and not view.chat_in.visible
+	ok(log_open, "the first message opens the log and the input folds back")
 	view.pm.left = 0.0
 	view.set_process(false)
 	view.queue_free()
@@ -130,7 +136,7 @@ func _screen(main: Node) -> void:
 ## The pick screen's cards that carry a "Start here" line, in grid order (their Hunters' base names).
 func _tagged(view: Control) -> Array:
 	var out: Array = []
-	for card in view.grid.get_children():
+	for card in view.grid_box.get_child(0).get_children():
 		var labels: Array = card.find_children("*", "Label", true, false)
 		if labels.any(func(l): return l.text.begins_with("Start here")):
 			out.append(HeroTitle.base_name(String(card.get_meta("arch"))))
@@ -154,6 +160,9 @@ func _start_here(main: Node) -> void:
 	ok(tags == ["Vex", "Kael", "Cinder", "Lace"], "a fresh save tags the four 'Start here' (%s)" % [tags])
 	ok(ClassUnlock.start_role("archer") == "High-ground sharpshooter" and ClassUnlock.start_role("mage") == "",
 		"each tag has a one-line role, and the rest have none")
+	var vex: Control = view.grid_box.get_child(0).get_child(0)
+	var hover := String(vex.tooltip_text)
+	ok(hover.begins_with("Start here: Long-range gunner"), "a tagged card's hover leads with its role")
 	view.queue_free()
 	d["matches"] = 2
 	ok(ClassUnlock.start_role("gunslinger") != "", "after 2 matches the tags stay")
@@ -169,3 +178,32 @@ func _start_here(main: Node) -> void:
 	view.queue_free()
 	for k in kept:
 		Settings.set_v(k, kept[k], false)
+
+## Cards are portrait + name + role word (stats and quests on hover); shut ones are dim with a padlock; the
+## chat is one line until a message comes; the expedition panel builds the same cards (one picker).
+func _declutter(view: Control, cards: Array) -> void:
+	var open := 0
+	var plain_ok := true
+	for card in cards:
+		var ak: String = card.get_meta("arch")
+		var texts: Array = card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+		var lock: bool = card.find_children("*", "Control", true, false).any(func(c): return c is HunterPicker.Padlock)
+		var shut := not ClassUnlock.is_open(ak)
+		open += 0 if shut else 1
+		var want: Array = [HeroTitle.base_name(ak), String(Arch.def(ak)["card"]["role_word"])]
+		if ClassUnlock.start_role(ak) != "":
+			want.append("Start here")       # a fresh save's four starters carry the tag under the role word
+		var plain: bool = texts == want
+		var quest := "Locked: " + ClassUnlock.requirement(ak)
+		var tip_ok: bool = card.tooltip_text.contains("health") and (not shut or card.tooltip_text.begins_with(quest))
+		plain_ok = plain_ok and plain and lock == shut and tip_ok
+	ok(open == 2 and plain_ok, "each card is name + role word, shut ones have a padlock, hover has stats and the quest")
+	var line_only: bool = not view.chat_scroll.visible and not view.chat_in.visible and view.chat_hint.visible
+	ok(line_only, "the chat is one 'Enter to chat' line until a message comes")
+	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
+	var panel := VBoxContainer.new()
+	HunterPickRow.add(view, panel)
+	var exp_cards: Array = panel.get_child(panel.get_child_count() - 1).get_children()
+	var same: bool = exp_cards.size() == cards.size() and exp_cards[0].get_meta("arch") == cards[0].get_meta("arch")
+	ok(same, "the expedition panel shows the same picker")
+	panel.free()

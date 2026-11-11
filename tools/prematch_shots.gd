@@ -1,29 +1,63 @@
 extends RefCounted
-## --prematch-shots --shots-dir=<dir>: the pre-match pick screen as a fresh save (four 'Start here' tags, Vex
-## selected) and as a save with 3 matches (no tags), on a renderer (xvfb).
+## --prematch-shots --size=WxH --shots-dir=<dir>: the pre-match lobby at the window's size, three moments
+## (full 30 s, after the first chat line, locked in), as <dir>/<W>x<H>_<moment>.png, and the controls that
+## stick out of the screen, then the same lobby once the save has 3 matches (<W>x<H>_3_matches.png: the
+## fresh save's 'Start here' tags gone). Run once per size with a real renderer:
+## godot -- --prematch-shots --size=1280x720 --shots-dir=out (--size resizes the window).
+
+const MOMENTS := [["full", 30.0], ["chat", 30.0], ["locked", 0.0]]
+
+## The visible controls under `node` (not its frame) that stick out of `area`, as "Class at rect".
+func outside(node: Node, area: Rect2) -> Array:
+	var bad: Array = []
+	for c in node.find_children("*", "Control", true, false):
+		var shown: bool = c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0
+		if shown and not area.encloses(c.get_global_rect()):
+			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
+	return bad
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	var dir := "."
+	var classes := ClassUnlock.fresh()      # a new player: Vex open, the rest shut
+	classes["picks"] = ["gunslinger"]
+	classes["open"] = ["gunslinger"]
+	Save.d = Save.fresh()
+	Save.d["arch"] = "gunslinger"
+	Save.d["name"] = "Ember"
+	Save.d["classes"] = classes
+	var dir := "prematch_shots"
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--size="):
+			var wh := String(a).substr(7).split("x")
+			main.get_window().size = Vector2i(int(wh[0]), int(wh[1]))
 	DirAccess.make_dir_recursive_absolute(dir)
-	var d := Save.fresh()
-	d["name"] = "Tester"
-	Save.d = d
-	ClassUnlock.choose_starters(["gunslinger"])
-	await _shot(main, dir.path_join("pick_fresh.png"))
-	d["matches"] = 3
-	await _shot(main, dir.path_join("pick_3_matches.png"))
-	main.get_tree().quit(0)
-
-func _shot(main: Node, file: String) -> void:
+	var opts := {"teams": 10, "squad": 3, "tier": 0}
+	Prematch.deal_mates(opts)
 	var view: Control = load("res://scripts/ui/prematch_view.gd").new()
-	view.setup({"teams": 10, "squad": 1, "tier": 0})
+	view.setup(opts)
 	main.add_child(view)
-	await main.fade.reveal(0.01)       # the boot splash covers the screen until revealed
-	await main.get_tree().process_frame
-	main.get_viewport().get_texture().get_image().save_png(file)
-	view.set_process(false)
-	view.queue_free()
+	var tree := main.get_tree()
+	await main.fade.reveal(0.01)      # the boot splash stays up when a tool opens a screen by hand
+	await tree.create_timer(0.5).timeout      # let the window settle at its size
+	for m in MOMENTS:
+		view.pm.left = m[1]
+		if m[0] == "chat":
+			view._add_chat("Ember", "push north, I hold the ridge", UI.INK)
+		for i in 20:
+			await tree.process_frame
+		var win := main.get_window().size
+		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
+		main.get_viewport().get_texture().get_image().save_png(path)
+		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
+		print("PREMATCHSHOT %s outside the screen: %d %s" % [path, bad.size(), bad.slice(0, 3)])
+	Save.d["matches"] = 3
+	view._fill_hunters()
+	for i in 20:
+		await tree.process_frame
+	var at := main.get_window().size
+	var last := dir.path_join("%dx%d_3_matches.png" % [at.x, at.y])
+	main.get_viewport().get_texture().get_image().save_png(last)
+	print("PREMATCHSHOT %s" % last)
+	tree.quit()

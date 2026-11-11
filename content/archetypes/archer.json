@@ -16,6 +16,7 @@
 	"fantasy": "The hunter of high ground. Climbs, reads the field, pins people to walls.",
 	"silhouette": "the long weapon over the shoulder",
 	"card": {
+		"role_word": "Marksman",
 		"loop": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
 		"role": "Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover.",
 		"lmb": "Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw.",

@@ -26,6 +26,7 @@
 	"fantasy": "The squad's courier and field medic. Shoulders the fallen and runs them out, keeps the squad on its feet with sunlight, pins chasers with burr-seeds.",
 	"silhouette": "small: a tiny fairy fox medic with gold-veined wings and a leaf cape, a little sun and a raincloud floating beside her",
 	"card": {
+		"role_word": "Medic",
 		"role": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"loop": "Support medic: heals and carries the downed, roots whoever chases them.",
 		"lmb": "Ember Cast: hold to push embers from alternating hands; they fly past the cursor and each hit on a foe adds Kindle.",
