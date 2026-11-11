@@ -49,3 +49,18 @@ UI (spec task 8, first part): scripts/ui/ways_out_hud.gd draws the Ways Out stri
 and the carrier's Heart Gate prompt; `Exits.clock_line` is deleted. The Lair and Uplink pips read the lairs and
 outposts and the "quest" times in heart.json until task 4 gives Exits its own seat states. Checks:
 --ways-out-hud-check, --ways-out-hud-shots (GPU). Not built yet: the dead/watching line, banner calls, map icons.
+
+## The quest seats (spec task 4)
+`QuestSeats` (scripts/match/quest_seats.gd, `Exits.seats`, null outside the mode) owns the schedule from heart.json
+"quest"; each seat is one `QuestSeat` machine (quest_seat.gd): LOCKED > OPEN <> IN_USE > TAKEN | SHUT, the same
+NEXT / `go()` / `_force()` shape as the Heart. The pick is the match seed's alone (every game makes it): the Sealed
+Lair is one of all the lairs (woken if the spawn plan left it asleep), the Uplink the outpost farthest from it, the
+other outposts dark. The host polls the lair and outpost it already runs and moves the states; clients mirror
+`["xc", "seat", kind, state, team, out]` (Net.VERSION 0.24.5). What a state does to the world each game does itself:
+a LOCKED lair keeps its gate shut (a crack before 2:00 is remembered and opens it at 2:00); the boss killer's squad
+TAKEs it and leaves (`how` "lair") when one of it steps into the updraft or the victory lock ends, its downed in the
+lair too, rivals not; unused at 5:30 its gate seals again. The Uplink starts only 6:00-8:00, its lift carries the
+finishing squad alone (and their downed in the yard), then it is "closed"; a charge still running at 8:00 is SHUT.
+Not done here: late joiners get the seat state only on its next change; the HUD strip, the map marks and the bots'
+seat plans are the later tasks. Checks: --lair-lock-check section 5, --extract-check section 3d
+(tools/uplink_seat_check.gd).

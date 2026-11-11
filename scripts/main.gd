@@ -2122,7 +2122,7 @@ func _extract_check() -> void:
 	P = m.player
 	var crew: Array = m.hunters.filter(func(x): return x.team == P.team)
 	R = m.hunters.filter(func(x): return x.team != P.team)[0]
-	o = m.exits.of_kind("outpost")[0]
+	o = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	for i in crew.size():
 		var h: Hunter = crew[i]
@@ -2210,6 +2210,8 @@ func _extract_check() -> void:
 	if String(o["state"]) != "idle" or not m.exits.startable(o): ok = false; print("EXCHECK FAIL uplink not startable again")
 	done.call(m)
 	await get_tree().process_frame
+	# ---- 3d. the Uplink quest seat (tools/uplink_seat_check.gd)
+	if not await load("res://tools/uplink_seat_check.gd").new().check(self, fresh, run, done): ok = false
 	print("EXCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 
@@ -2305,7 +2307,7 @@ func _truce_check() -> void:
 	# sharing an uplink
 	T.marked.clear()
 	T.make(0, 1)
-	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
 	m.exits.act(o, "start", A[0])
 	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
