@@ -111688,5 +111688,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_proofhop_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_prismink",
+    "name": "Prismink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_prismink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rampartoad",
+    "name": "Rampartoad (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rampartoad_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_puffuse",
+    "name": "Puffuse (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_puffuse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_prowyak",
+    "name": "Prowyak (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_prowyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rattlebub",
+    "name": "Rattlebub (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rattlebub_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pyrraven",
+    "name": "Pyrraven (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pyrraven_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_quivertoad",
+    "name": "Quivertoad (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_quivertoad_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rimink",
+    "name": "Rimink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rimink_1.jpg",
+    "ok": true
   }
 ]
