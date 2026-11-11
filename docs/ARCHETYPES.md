@@ -1124,7 +1124,8 @@ the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola l
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the
 Jackpot burst). Strips: `--arena-demo=anim_<move>` (see `ArenaDemo.ANIM_DEMO`). Kit moves play on the
 hunter's own game and bots, and since Net 0.15.0 on remote players too: the move id and its age ride the
-hunter snapshot (indices 31-32, `ArchKit.net_move` / `apply_net_move`).
+hunter snapshot (indices 31-33, `ArchKit.net_move` / `apply_net_move`): the id, its age and a play count, so a
+quick restart restarts remotely too, and `"-"` when the kit clears its move (Net 0.24.5, decision 0077).
 
 Ranks: Smash rank 3 +20% on every Smash and the sweet-spot crash (levels 2-3, and Volcanic Rebuke); Rampage
 rank 3 a third charge (level 2); Warchain rank 3 refunds 33% when it hooks a foe (level 4).

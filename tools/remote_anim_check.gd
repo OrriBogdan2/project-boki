@@ -8,6 +8,7 @@ extends "res://tools/displace_net_check.gd"
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
+const SNAP := 0.1            # s between snapshots: a restart of the same move that lasts this long reaches the copy
 const SKEW := 0.05           # s: clocks of two processes on one machine
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
@@ -15,11 +16,11 @@ const KEYS := ["lmb", "rmb", "e", "r", "dash"]
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
 
-## Casts whose copy still differs, and why (docs/DEBT.md): printed as GAP, not failures (timing may hide one
-## run to run). Both fixes sit in ArchKit.net_move / apply_net_move, not in Net.
-const KNOWN := {
-	"bulwark rmb held": "lowering the shield clears the move id; the wire's '' is ignored, the copy keeps guarding",
-	"gunslinger lmb held": "a restart of the same move within 0.3 s of its start is not seen (apply_net_move)",
+## Casts that once differed on the copy (decision 0077), asserted on their own: the claim, the _compare count that
+## proves the cast did it, and how many it needs.
+const WATCH := {
+	"bulwark rmb held": ["lowering the shield (the kit clears its move) stops the guard on the copy", "clears", 1],
+	"gunslinger lmb held": ["every rapid shot (restarted 0.13 s after the last) restarts on the copy", "restarts", 3],
 }
 
 var log_rows: Array = []     # [unix ms, the kit's move id, HunterAnim's move id]; one row per change or restart
@@ -79,10 +80,13 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var cmp := _compare(mine, theirs)
 	if cmp["moves"] > 0:
 		played[arch] = int(played.get(arch, 0)) + 1
-	if KNOWN.has(what):
-		print("%s %s %s" % [tag, "GAP" if cmp["bad"] != "" else "gap not seen this run", what])
-	elif cmp["bad"] != "":
+	if cmp["bad"] != "":
 		unlike[arch] = unlike.get(arch, []) + ["%s: %s" % [what, cmp["bad"]]]
+	if WATCH.has(what):
+		var w: Array = WATCH[what]
+		ok(int(cmp[w[1]]) >= int(w[2]), "%s: the host's cast has %d+ %s" % [what, w[2], w[1]], str(cmp[w[1]]))
+		ok(cmp["bad"] == "", "%s: %s" % [what, w[0]], cmp["bad"])
+	elif cmp["bad"] != "":
 		print("%s FAIL %s: %s" % [tag, what, cmp["bad"]])
 		bad += 1
 	n += 1
@@ -112,22 +116,25 @@ func _press(key: String, held: bool) -> void:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
 
-## The host's rows against the guest's: every move of the host's that lasted a snapshot shows on the guest
-## in order within LAG_TOL, and the guest shows no move the host never played.
+## The host's rows against the guest's: every move of the host's that lasted a snapshot (a restart: SNAP, else
+## MIN_LIFE) and every clear of the kit's move shows on the guest in order within LAG_TOL, and the guest shows
+## no move the host never played.
 func _compare(mine: Array, theirs: Array) -> Dictionary:
-	var out := {"moves": 0, "lag": 0.0, "bad": ""}
+	var out := {"moves": 0, "restarts": 0, "clears": 0, "lag": 0.0, "bad": ""}
 	var ids := {}
 	for r in mine: ids[String(r[2])] = true
 	for r in theirs:
 		if not ids.has(String(r[2])) and out["bad"] == "":
 			out["bad"] = "the copy plays '%s', the host never did" % r[2]
 	var at := 0
-	for i in mine.size():
+	for i in range(1, mine.size()):
 		var id := String(mine[i][2])
+		var again := id != "" and id == String(mine[i - 1][2]) and String(mine[i][1]) == String(mine[i - 1][1])
 		var life: float = (float(mine[i + 1][0]) - float(mine[i][0])) / 1000.0 if i + 1 < mine.size() else 9.0
-		if life < MIN_LIFE or i == 0:
+		if life < (SNAP if again else MIN_LIFE):
 			continue
 		if id != "": out["moves"] += 1
+		if again: out["restarts"] += 1
 		var found := false
 		for j in range(at, theirs.size()):
 			var lag: float = (float(theirs[j][0]) - float(mine[i][0])) / 1000.0
@@ -137,9 +144,27 @@ func _compare(mine: Array, theirs: Array) -> Dictionary:
 				at = j + 1
 				break
 		if not found and out["bad"] == "":
-			var into := (float(mine[i][0]) - float(mine[0][0])) / 1000.0
-			out["bad"] = "the host's '%s' (%.2f s in) does not show within %.1f s" % [id, into, LAG_TOL]
+			out["bad"] = "the host's '%s' (%.2f s in) does not show within %.1f s" % [id, _into(mine, i), LAG_TOL]
+	_clears(mine, theirs, out)
 	return out
+
+## Each time the host's kit clears its move (the kit's id goes to ""), the copy's kit clears too within LAG_TOL.
+func _clears(mine: Array, theirs: Array, out: Dictionary) -> void:
+	for i in range(1, mine.size()):
+		if String(mine[i][1]) != "" or String(mine[i - 1][1]) == "":
+			continue
+		out["clears"] += 1
+		var found := false
+		for j in range(1, theirs.size()):
+			var lag: float = (float(theirs[j][0]) - float(mine[i][0])) / 1000.0
+			if String(theirs[j][1]) == "" and String(theirs[j - 1][1]) != "" and lag > -SKEW and lag <= LAG_TOL:
+				found = true
+		if not found and out["bad"] == "":
+			var was := String(mine[i - 1][1])
+			out["bad"] = "the host's kit clears '%s' (%.2f s in), the copy's does not" % [was, _into(mine, i)]
+
+func _into(rows: Array, i: int) -> float:
+	return (float(rows[i][0]) - float(rows[0][0])) / 1000.0
 
 # ------------------------------------------------------------------ the guest
 func _on_msg(topic: String, data, from: String) -> void:

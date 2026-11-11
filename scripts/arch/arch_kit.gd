@@ -788,35 +788,49 @@ func e_recastable() -> bool: return false
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
 var anim_at := -9.0
+var anim_n := 0                # counts plays, so a move restarted soon after its start restarts in other games too
 
-## The kit's full-body move on the wire (Net 0.16.0): the move id and its age in seconds, after the
-## state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: nothing playing (an expired move is not sent).
+## The kit's full-body move on the wire (Net 0.16.0, 0.24.5): the move id, its age in seconds and the play count,
+## after the state array after KinNet.hunter_extra (26-30), at index NET_MOVE_AT. Empty id: an expired move (the
+## copy plays it out); NET_MOVE_CLEAR: the kit cleared its move (a lowered shield, a cancelled draw).
 const NET_MOVE_AT := 31
+const NET_MOVE_SIZE := 3       # fields: id, age, play count
 const NET_MOVE_LIFE := 3.0     # seconds a move is still worth sending (the longest is about 2.5s)
+const NET_MOVE_CLEAR := "-"
 
 static func net_move(h: Hunter) -> Array:
 	var k: ArchKit = h.ak
-	if k == null or k.anim_id == "" or h.m.time - k.anim_at > NET_MOVE_LIFE:
-		return ["", 0.0]
-	return [k.anim_id, snappedf(h.m.time - k.anim_at, 0.05)]
+	if k == null:
+		return ["", 0.0, 0]
+	if k.anim_id == "":
+		return [NET_MOVE_CLEAR, 0.0, k.anim_n]
+	if h.m.time - k.anim_at > NET_MOVE_LIFE:
+		return ["", 0.0, k.anim_n]
+	return [k.anim_id, snappedf(h.m.time - k.anim_at, 0.05), k.anim_n]
 
-## A remote hunter's move starts when the id changes (or the sender's clock says it restarted), then plays
-## on locally like any kit move; old hosts send nothing and the hunter just keeps its weapon poses.
+## A remote hunter's move starts when the id or the play count changes (or the sender's clock moved it, as a
+## held draw does), then plays on locally like any kit move; a clear stops it.
 static func apply_net_move(h: Hunter, it: Array) -> void:
-	if h.ak == null or it.size() <= NET_MOVE_AT + 1:
+	if h.ak == null or it.size() < NET_MOVE_AT + NET_MOVE_SIZE:
 		return
 	var id := String(it[NET_MOVE_AT])
+	var k: ArchKit = h.ak
+	if id == NET_MOVE_CLEAR:
+		k.anim_id = ""
+		return
 	if id == "":
 		return
 	var age := float(it[NET_MOVE_AT + 1])
-	var k: ArchKit = h.ak
-	if k.anim_id != id or absf((h.m.time - k.anim_at) - age) > 0.3:
+	var n := int(it[NET_MOVE_AT + 2])
+	if k.anim_id != id or k.anim_n != n or absf((h.m.time - k.anim_at) - age) > 0.3:
 		k.anim_id = id
 		k.anim_at = h.m.time - age
+		k.anim_n = n
 
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:
 	anim_id = move
+	anim_n += 1
 	anim_at = m.time
 
 ## True when the kit draws its own dash after-images; the hunter then skips the shared team-colour pill.
