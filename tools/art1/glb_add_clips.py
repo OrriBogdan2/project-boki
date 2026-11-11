@@ -1,5 +1,5 @@
 """Copies named clips from one .glb into another, leaving everything already in the target byte for byte the same, so a clip set can go on any later build of the model
-with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced.
+with no Blender (tracks match the target's nodes by name; both builds must share the rig). A clip of the same name in the target is replaced, keeping its tracks for the bones the source clip does not key.
 Run: python3 tools/art1/glb_add_clips.py <target.glb> <source.glb> <prefix-or-name>[,...] [out.glb]"""
 import json
 import struct
@@ -31,6 +31,7 @@ def write(path, j, bin_):
 
 def add(tj, tb, sj, sb, wanted):
     names = {n.get("name"): i for i, n in enumerate(tj["nodes"])}
+    old = {a["name"]: a for a in tj.get("animations", []) if wanted(a["name"])}
     tj["animations"] = [a for a in tj.get("animations", []) if not wanted(a["name"])]
     copied = {}
 
@@ -62,6 +63,12 @@ def add(tj, tb, sj, sb, wanted):
             sm = a["samplers"][ch["sampler"]]
             new["samplers"].append({"input": accessor(sm["input"]), "output": accessor(sm["output"]), "interpolation": sm.get("interpolation", "LINEAR")})
             new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": {"node": names[nm], "path": ch["target"]["path"]}})
+        keyed = {(c["target"]["node"], c["target"]["path"]) for c in new["channels"]}
+        for ch in old.get(a["name"], {}).get("channels", []):     # a track the source leaves out stays the old clip's (the static bones)
+            if (ch["target"]["node"], ch["target"]["path"]) not in keyed:
+                sm = old[a["name"]]["samplers"][ch["sampler"]]
+                new["samplers"].append(dict(sm))
+                new["channels"].append({"sampler": len(new["samplers"]) - 1, "target": dict(ch["target"])})
         tj["animations"].append(new)
         done.append(a["name"])
     tj["buffers"][0]["byteLength"] = len(tb) + (-len(tb) % 4)
