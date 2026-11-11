@@ -279,7 +279,8 @@ func _ready() -> void:
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
-		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+		if player.has_animation(n):       # (an older glb may lack the react clips sulk/push)
+			player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()

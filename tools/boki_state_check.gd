@@ -13,7 +13,8 @@ const STATES := {
 	"walk": {"clip": "walk", "speed": 1.2},
 	"run": {"clip": "run", "speed": 4.0},
 	"play": {"clip": "hop", "meta": {"happy": true}},
-	"nap": {"clip": "nap", "meta": {"kstate": "sleep"}},
+	# (falling asleep shows the settle lead-in first; nap follows when it ends: --boki-rig-check covers that)
+	"nap": {"clip": "settle", "meta": {"kstate": "sleep"}},
 	"eat": {"clip": "eat", "meta": {"kact": "eat"}},
 	"pet": {"clip": "pet", "meta": {"kact": "pet"}},
 	"chop": {"clip": "chop", "meta": {"kwork": "chop"}},
