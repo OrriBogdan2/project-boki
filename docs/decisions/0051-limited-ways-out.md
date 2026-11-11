@@ -88,7 +88,17 @@ seats; a squad with a human in it (the player's, on --autoplay too) has neither.
 ring: goals are pulled in to ground inside the ring 20 s on, and a bot near the edge drops everything and walks
 in. In the mode `Bot._choose` skips the old leave rule (time_left < 170, gems > 40, a random leave); outside it
 (tutorial, endless-clock tests) it stays. Checks: --bot-ways-check (plans, cap, delay, fall-through, ring),
---ways-out-sim (whole bot matches, see below).
+--ways-out-sim (whole bot matches, below).
+
+First --ways-out-sim, seeds 1-50, Hollow Crown, 10 trios (the --autoplay player's squad is the human one; 9 bot
+squads, cap 2), on 0.24.5 tip 272368589 plus this: squads out 18.2% (91/500, max 3 a match; gate at most 40%: pass);
+Sealed Lair used 40% (median 4:40), Uplink 32% (7:20) (gate over 50% each: miss), spark 68% (6:12), final 68% (7:51);
+2.08 seats a match, first seat at 5:59 (median); no-winner finals 4/50 = 8% (gate at most 5%: miss: two with two
+squads still in at 12:00, one where a Hunter left behind by its squad's Gate seat stood alone); the human squad got
+out 6/50; bots never passed the cap. Seat tries over the 50: 41 lair seal-ins, 37 spark pick-ups, 25 uplink starts.
+What drives the misses is the pace, not the seat plans: 6 squads are left at 2:00 (median, the spec guesses 9-10)
+and 0.3 at 10:00 (the spec 2-4), so 44 of 50 finals open early on the last-squad rush (docs/PACING_1111.md on
+ext/verify-expedition-pacing saw the same early wipe with no Ways Out bots). heart.json is not tuned here (task 9).
 
 ## Seat looks (ext/vfx-ways-out-seats)
 Every seat reads from across the island with one of five looks: locked (dim stub, countdown glyph), open (tall clear
