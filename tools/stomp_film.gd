@@ -5,6 +5,9 @@ extends RefCounted
 ##   full      you stomp a rival's wisp while another rival hits you: you stay locked in, take the hits,
 ##             and the wisp dies at the end
 ##   stunned   the same, but the rival stuns you halfway: the stomp breaks and the wisp drifts off alive
+##   mate      a rival stomps your teammate while you stand by as Motley, Shard Snap ready: the ring fills in
+##             the rival's colour and "Stun to save" with your key shows at the stomper (DownedMarks), until
+##             a stun breaks it
 ## Make the clips off the box: ffmpeg -framerate 30 -i <dir>/<take>/%05d.jpg -c:v libx264 -pix_fmt yuv420p <take>.mp4
 ## Never writes the save.
 
@@ -31,6 +34,7 @@ func run(main_node: Node) -> void:
 	await _setup()
 	await _take("full", false)
 	await _take("stunned", true)
+	await _mate_take()
 	print("STOMPFILM done in %s" % dir)
 	main.get_tree().quit(0)
 
@@ -117,6 +121,28 @@ func _take(take: String, stun: bool) -> void:
 	await _go(STUN_FOR + 1.0 if stun else 1.5)
 	W.inp["move"] = Vector2.ZERO
 	P.max_hp /= 3.0
+
+## The third take: the stomp on your teammate, seen by you (Motley) from a few metres off.
+func _mate_take() -> void:
+	take_dir = dir.path_join("mate")
+	DirAccess.make_dir_recursive_absolute(take_dir)
+	frames = 0
+	P.reclass(Arch.weight("ostra"), "ostra")
+	P.unlock_all()
+	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P and not x.out)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team and not (x.out or x.downed))[0]
+	var at := _roomy()
+	mate.teleport(at)
+	foe.teleport(at + Vector3(0.8, 0, 0.3))
+	P.teleport(at + Vector3(-4.0, 0, 2.5))
+	m.knock(mate, foe, {})
+	await _go(0.5)
+	Stomp.start(m, foe, mate)
+	await _go(Stomp.TIME * 0.5)
+	var word := String(DownedMarks.shown.get(mate.nid, {}).get("word", ""))
+	print("STOMPFILM_MARK mate halfway frame %d word '%s'" % [frames, word])
+	foe.hurt(4.0, P, {"stun": STUN_FOR})
+	await _go(1.0)
 
 func _go(secs: float) -> void:
 	var t := 0.0

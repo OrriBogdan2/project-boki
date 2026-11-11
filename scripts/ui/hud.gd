@@ -2756,7 +2756,7 @@ func _ground_ring(at: Vector3, r: float, col: Color, width: float, frac := 1.0, 
 
 func _draw_wisp_rings() -> void:
 	var p: Hunter = m.player
-	DownedMarks.draw(c, m)
+	DownedMarks.draw(self)
 	BokiMarks.draw(c, m)
 	# you, standing on an enemy wisp
 	if p and not p.out and p.has_meta("standing_on") and m.time - float(p.get_meta("standing_at", -9.0)) < 0.15:

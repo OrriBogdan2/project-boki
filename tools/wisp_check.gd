@@ -6,7 +6,8 @@ extends RefCounted
 ## gameplay (downed flag, speed, hittable) is read untouched. Also the look data and the outline rule
 ## (round body with a head, team rim, white core, low hover, no flicker, one mesh in one material): every
 ## look has all its keys and real sounds, an unknown id gives the default Wisp, a look that lists only a
-## few keys builds, and the saved id round-trips. Prints PASS/FAIL.
+## few keys builds, and the saved id round-trips. A stomp on a teammate: its Wisp knows the stomper
+## until a stun breaks it, and each hero's "Stun to save" key is its first ready saver. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -24,6 +25,7 @@ func run(main_node: Node) -> void:
 		_hero_cycle(a)
 	_bleed_out()
 	_teammate()
+	_stomp_cues()
 	m.queue_free()
 	_tutorial()
 	print("WISPCHECK %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
@@ -130,6 +132,42 @@ func _teammate() -> void:
 	_frames(0.6)
 	var back: bool = mate.model.visible and HunterWisp.node_of(mate) == null
 	ok(teammates_downed and back, "...and their revive brings the hero back")
+
+## A stomp on a teammate (Stomp, DownedMarks): their Wisp knows its stomper until a stun breaks it, and
+## for every hero your "Stun to save" key is your first saver (stomps.json) while it's unlocked and ready.
+func _stomp_cues() -> void:
+	var p: Hunter = m.player
+	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	mate.pos = p.pos + Vector3(3, 0, 0)
+	foe.pos = mate.pos + Vector3(0.8, 0, 0)
+	m.knock(mate, foe, {})
+	mate.down_hp = 1e6
+	Stomp.start(m, foe, mate)
+	_frames(0.2)
+	ok(DownedMarks.stomper_of(mate) == foe, "a stomp on a teammate: their Wisp knows its stomper")
+	var savers: Dictionary = StompLook.rules()["savers"]
+	p.lvl = int(Hunter.ULT_AT[0])
+	var wrong := []
+	for a in Arch.ids():
+		p.reclass(Arch.weight(a), a)
+		p.unlock_all()
+		var want := Settings.key_cap(DownedMarks.SAVE_KEYS[savers[a][0]]) if savers.has(a) else ""
+		if DownedMarks.saver_key(p) != want:
+			wrong.append(a)
+	ok(wrong.is_empty(), "every hero's Stun to save key is its first saver, none without one (wrong: %s)" % [wrong])
+	p.reclass(Arch.weight("ostra"), "ostra")
+	p.unlock_all()
+	p.slot_lv["sec"] = 0
+	ok(DownedMarks.saver_key(p) == Settings.key_cap("hunter_ult"),
+		"Motley's locked Shard Snap isn't offered, his Nightwell is")
+	p.ak.cd["x"] = 9.0
+	ok(DownedMarks.saver_key(p) == "", "...and with Nightwell cooling down, nothing is")
+	foe.stun_t = 0.5
+	_frames(0.05)
+	ok(DownedMarks.stomper_of(mate) == null and mate.downed and not mate.out,
+		"a stun on the stomper breaks it: no stomper, the Wisp lives")
+	m.revive_hunter(mate, null)
 
 func _tutorial() -> void:
 	_start({"teams": 1, "squad": 1, "tier": 0, "length": 1500.0, "tutorial": true})

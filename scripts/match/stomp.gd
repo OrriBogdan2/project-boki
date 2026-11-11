@@ -36,8 +36,6 @@ static func start(m: Match, h: Hunter, o: Hunter, style_id := "") -> void:
 	o.set_meta("stomped_by", h)
 	Life.trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
-	if o == m.player and m.hud:
-		m.hud.toast("%s is stomping you! Only a stun on them saves you" % h.pname, Color("ff6a5a"))
 	if m.net_on and not h.remote:
 		m.net_event(["stomp", h.nid, o.nid, "go", sid])
 

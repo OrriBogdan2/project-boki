@@ -9,6 +9,9 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
+##   9. a stomp on a teammate (DownedMarks): the ring over their Wisp fills in the stomper's colour; at the
+##      stomper "Stun to save" and your key only with a saver ready, laid out by LabelCull.claim; nothing
+##      from past NEAR_M or once a stun breaks it; "Being stomped" under your own Wisp
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -203,6 +206,7 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	await _stomp_marks(m, P)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -304,6 +308,71 @@ func _mate_down(m: Match, hud, P: Hunter) -> void:
 	hud.mates.track(hud, P, MateAlerts.LINE_S)
 	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
 		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
+
+## 9. A stomp on a teammate, then on you (real frames; DownedMarks.shown is what was drawn). Runs last:
+## it turns the player (Sable, no stun or knock) into Motley (Shard Snap, Nightwell).
+func _stomp_marks(m: Match, P: Hunter) -> void:
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team and not x.out)
+	var foes: Array = m.hunters.filter(_stomper_for.bind(P))
+	ok(not mates.is_empty() and not foes.is_empty(), "a teammate and a rival for the stomp")
+	if mates.is_empty() or foes.is_empty():
+		return
+	var mate: Hunter = mates[0]
+	var foe: Hunter = foes[0]
+	if not mate.downed:
+		m.knock(mate, foe, {})
+	mate.down_hp = 1e6
+	mate.pos = P.pos + Vector3(3, 0, 0)
+	foe.pos = mate.pos + Vector3(0.8, 0, 0)
+	Stomp.start(m, foe, mate)
+	await frames_until(m, m.time + Stomp.TIME * 0.5)
+	var sh: Dictionary = DownedMarks.shown.get(mate.nid, {})
+	var frac := float(sh.get("frac", -1.0))
+	ok(absf(frac - 0.5) < 0.1 and sh.get("col") == SideColor.of(m, foe),
+		"a stomp on a teammate: halfway, the ring over their Wisp is %.2f full in the stomper's colour" % frac)
+	ok(sh.has("word") and String(sh["word"]) == "", "Sable has no stun or knock: no Stun to save")
+	P.reclass(Arch.weight("ostra"), "ostra")
+	P.unlock_all()
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	sh = DownedMarks.shown.get(mate.nid, {})
+	ok(String(sh.get("word", "")) == DownedMarks.SAVE and String(sh.get("key", "")) == Settings.key_cap("secondary"),
+		"Motley, Shard Snap ready: '%s' and '%s' at the stomper" % [sh.get("word", ""), sh.get("key", "")])
+	var r: Rect2 = sh.get("rect", Rect2())
+	var r2 := LabelCull.claim(r)
+	ok(r.has_area() and r2.end.y <= r.position.y, "a label laid out on top of it steps up above it (LabelCull.claim)")
+	P.ak.ch_rmb = 0.0
+	P.ak.cd["rmb"] = 9.0
+	P.ak.cd["x"] = 9.0
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(String(DownedMarks.shown.get(mate.nid, {}).get("word", "?")) == "", "with both his stuns cooling down: no word")
+	var at := P.pos
+	P.pos += Vector3(DownedMarks.NEAR_M + 5.0, 0, 0)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(not DownedMarks.shown.has(mate.nid), "%.0f m off, no ring or word" % P.flat_dist(mate))
+	P.pos = at
+	foe.stun_t = 0.5
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(not DownedMarks.shown.has(mate.nid) and mate.downed,
+		"a stun on the stomper: ring and words gone, the Wisp lives")
+	m.revive_hunter(mate, null)
+	foe.stun_t = 0.0
+	m.knock(P, foe, {})
+	P.down_hp = 1e6
+	Stomp.start(m, foe, P)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(String(DownedMarks.shown.get(P.nid, {}).get("word", "")) == DownedMarks.BEING,
+		"stomped yourself: Being stomped under your Wisp")
+	Stomp.end(m, foe, "broken")
+	m.revive_hunter(P, null)
+
+## A rival that can stomp: on its feet, local, and free of the crowd control rows 4 put on rivals.
+func _stomper_for(x: Hunter, P: Hunter) -> bool:
+	return x.team != P.team and not (x.downed or x.out or x.remote or Stomp.breaks(x))
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)
