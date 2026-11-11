@@ -110512,5 +110512,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_barostorm_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_anchorhorn",
+    "name": "Anchorhorn (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_anchorhorn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_barrelmander",
+    "name": "Barrelmander (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_barrelmander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_bastionpet",
+    "name": "Bastionpet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_bastionpet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_anchorbill",
+    "name": "Anchorbill (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_anchorbill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_briarlynx",
+    "name": "Briarlynx (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_briarlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_bonsolith",
+    "name": "Bonsolith (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_bonsolith_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_blastopuff",
+    "name": "Blastopuff (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_blastopuff_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_aurostag",
+    "name": "Aurostag (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_aurostag_1.jpg",
+    "ok": true
   }
 ]
