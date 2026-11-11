@@ -127,3 +127,4 @@ One bed for the part of the day on the home clock (`Home.day_t`): `amb_garden_mo
 | `amb_water` | on the shore islands (`AmbBeds.WATER_ISLANDS`: Saltmere), over that island's own bed |
 | `amb_gust`, `amb_rain` | the raid condition (`AmbBeds.GUST` / `RAIN`): ash storm is all gust, dusk and fog bring rain |
 | `amb_blight` | a low rumble that follows `BlightDir.level` where you stand (up toward the core, up with the session's age) and climbs in the last 90 s before the islands fall |
+- An ability's sound plays from the event it belongs to (the release, the hit, the rock rising), never from its own timer beside it. `--sfx-strike-check` times every Hero move's sounds against the clip's strike and the hit; results in docs/art/SFX_TIMING.md.

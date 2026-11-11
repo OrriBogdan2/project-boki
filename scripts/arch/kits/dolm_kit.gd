@@ -690,6 +690,7 @@ func cast_e() -> bool:
 	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
+## One rock of the Stone Row rises (the row's one rise sound is _raise_feel).
 func _raise(p: Vector3, dir: Vector2) -> void:
 	if not _new_rock(p, dir):
 		return
