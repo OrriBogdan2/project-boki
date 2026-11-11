@@ -91,6 +91,7 @@ func _steal() -> void:
 	_frames(0.1)
 	ok(not f.kin_carry_on() and f.owner_stat(stat) == 0.0, "...and its revived owner has none")
 	ok(not KinSummon.press(f) and fk.wisp, "...nor its summon")
+	f.teleport(f.pos + Vector3(40, 0, 0))      # (out of the stolen summon's leash: it would down its own owner)
 	p.kin.summon.cd = 40.0
 	ok(KinSummon.press(p) and not fk.wisp and p.kin.wisp, "summon: own Boki resting, Summon bursts the stolen one")
 	var win := maxf(5.0, ceilf(fk.summon.dur * 0.5))
@@ -116,7 +117,8 @@ func _steal() -> void:
 	var popped := absf(fk.flat_dist(at) - KinSteal.POP_M) < 0.1
 	ok(KinSteal.loose(fk) and KinSteal.loose(f2k) and fk.owner_h == f and f2k.owner_h == f2 and popped,
 		"scatter: the thief goes down, both wisps are loose again where they fell")
-	f.teleport(Vector3(fk.pos.x + 0.5, f.pos.y, fk.pos.z))
+	var off := Vector3(fk.pos.x - p.pos.x, 0, fk.pos.z - p.pos.z).normalized() * 0.5
+	f.teleport(Vector3(fk.pos.x + off.x, f.pos.y, fk.pos.z + off.z))     # (beyond the wisp: no stomp on the thief)
 	f.inp["interact"] = true
 	_frames(0.7)
 	f.inp["interact"] = false
