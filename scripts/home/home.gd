@@ -81,6 +81,7 @@ var life: BaseLife = null          # base_mode only: each Boki's own life and bo
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
 var hwatch: HomeHatchWatch = null   # the nest egg's last 20 s and its hatch (home_hatch_watch.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
+var hbreed: FirstBreed = null      # the first-breeding prompt: a Boki leads you to the Nook (first_breed.gd)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
 ## A farm-start island (HomeLayout.fs): the house, crop patches, pot, stall, Nook, Burrow, training
@@ -1103,6 +1104,7 @@ func _process(delta: float) -> void:
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	if hwatch: hwatch.tick(d)
+	if hbreed: hbreed.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
@@ -4158,6 +4160,7 @@ func _setup_care() -> void:
 		hinc.build()
 		hwatch = HomeHatchWatch.new(self)
 		add_child(hwatch)
+		hbreed = FirstBreed.new(self)
 	if not visit.is_empty():
 		_refresh_nest()
 		if HubLayout.is_hub(visit): ZoneAway.card(self)      # the hub: nobody lives there; the card covers every zone
@@ -4909,6 +4912,8 @@ func _nook_intro(dv: VBoxContainer, egg_in: bool) -> void:
 		dv.add_child(UI.para("The nest is taken until this egg hatches. You can still look through your Boki's IVs.", UI.T_SMALL, UI.INK))
 	else:
 		dv.add_child(UI.para("Pick two Boki who are ready: Grown, friends, and rested from their last egg. The egg hatches after your next expedition, or in about ten minutes at home.", UI.T_SMALL, UI.INK))
+		var gate := FirstBreed.missing_line(Save.d["roster"])
+		if gate != "": dv.add_child(UI.para(gate, UI.T_SMALL, UI.GOLD))
 	dv.add_child(UI.spacer(4))
 	dv.add_child(IvView.heading())
 	dv.add_child(UI.para(Care.IV_EXPLAIN, UI.T_SMALL, UI.MUTED))
@@ -4998,7 +5003,7 @@ func _nest_demo(which: String) -> void:
 	match which:
 		"kin": nook_view = String(kid["uid"]); _open_nook()
 		"rare": nook_view = String(rare["uid"]); _open_nook()
-		"pair": nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
+		"pair": pa["lean"] = {"ember": 6.0, "storm": 2.0}; nook_pick = [String(pa["uid"]), String(pb["uid"])]; _open_nook()
 		"card": kin_tab = "Growth"; _open_kin(kid)
 		"card-care": kin_tab = "Care"; _open_kin(kid)
 		"card-train": kin_tab = "Training"; _open_kin(kid)

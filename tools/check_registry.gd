@@ -367,6 +367,7 @@ const CHECKS := {
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
+	"--tut-first-breed-check": ["res://tools/tut_first_breed_check.gd", "tut_first_breed_check", null],      # the first-breeding prompt
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
