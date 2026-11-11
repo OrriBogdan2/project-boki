@@ -823,7 +823,7 @@ func _spin_hit(wd: Vector2) -> void:
 	knock_until = m.time + 0.25
 	if rank("dash") >= 3 and not foes_in(h.pos, r).is_empty():
 		# rank 3: hitting foes with the dash refunds the Shield Charge (cue only when something was spent)
-		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: DashReset.cue(h, "dash_hit")
+		if ch_rmb < float(rmb_charges()) or float(cd["rmb"]) > 0.0: ResetCue.play(h, "bulwark_whirl_hit")
 		ch_rmb = float(rmb_charges())
 		cd["rmb"] = 0.0
 	if not h.gliding:      # a glide pressed in the dash already took over: its wind-down never folds it
