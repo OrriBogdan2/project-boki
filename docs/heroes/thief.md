@@ -384,3 +384,26 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Bola (Trickshot) | Footage briefs/hero-ref/dancer.md:26, :99: grounds the first target, flies on, a second target makes both stunned, bounces off terrain. Wiki: flies on past a destructible. | Grounds the first foe (hunter, Boki or monster), flies on and tangles a second; passes allies; bounces off a wall; a crate counts as a catch. Matches (`dancer RMB: Bola grounds the first, flies on, tangles two`). |
 | E Shadow Knife (Phantom Dagger) | Footage dancer.md:28: sticks in the first enemy (and slows it) or lands at the end of its path. | Sticks in the first foe, passes allies, lands on a wall or at its range. Matches. |
 | X Encore (Death Blossom) | Footage: a ring round her, blades at each foe inside. | A ring; no shot. Matches. |
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB Bola wind-up (0.4-0.6 s lane, [F] `0100`) | stun | [?] ([F] open question 1: hold or fixed cast) | cancelled, charge spent | [?] |
+| RMB wind-up | knocked | ends | cancelled | match (cooldown [?]) |
+| RMB wind-up | knockback, root, Grounded | [?] | no check: the Bola goes | [?] |
+| E Shadow Knife throw (0.12 s to the release) | stun, knocked | [?] / ends | no throw, cooldown spent | [?] / match |
+| E recast, and the forced return when it runs out | stun | [?] ([D] "after 6s ... MUST teleport back") | the recast is denied while stunned; stunned at the time-out the dagger is gone with no blink | [?] |
+| E recast and return | knocked | ends | no blink | match |
+| E recast | root, Grounded | [?] ([D] Ground = no jumping/dashing up; a blink is not named) | the blink goes | [?] |
+| X Encore ring | stun | [?] | the blades keep flying | [?] |
+| X Encore ring | knocked | ends | ends | match |

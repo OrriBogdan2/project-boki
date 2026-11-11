@@ -371,3 +371,30 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Abyssal Hand (Grasp) | Data: pierces terrain, pulls in the first target hit, enemy or ally. Footage briefs/hero-ref/dredge.md:25, :168: the first enemy, through a rock pillar. | Flies over rocks, props and cliffs; stops on the first foe or ally (hunter, Boki or monster) and reels it in; placed walls still stop it (placed-walls job). Matches (`abyssal hand: hooks the first foe`). |
 | X Brass Broadside (Kaiju Blast) | Data: two waves of slugs, anti-heal. Footage dredge.md:263: two fans of 6 orbs; whether an orb passes a foe is not shown. | Not determinable: each of the 12 slugs stops on the first foe (hunter, Boki or monster), passes allies, stops on walls. Kept. |
 | Shift Barge (Brute Dash) | Data and footage: a dash that hits nobody. | Hits nobody. Matches. |
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB hook in flight | any | [?] | flies on (already thrown) | [?] |
+| RMB reel | stun | [?] [F] "whether the reel can be cancelled... the video only shows standing still" | reel ends, foe let go, cooldown spent | [?] |
+| RMB reel | knockback, root | [?] | no check: the reel goes on | [?] |
+| RMB reel | Grounded | [F] he is GROUNDED himself while reeling (`0127`) | KitStatus `gnd` on him for the reel | match |
+| RMB reel | knocked | ends | ends (`_tick_pull`) | match (cooldown [?]) |
+| E Anchor Drop wind-up | stun | [?] | cancelled, no slam, cooldown spent | [?] |
+| E wind-up | knockback, root, Grounded | [?] | no check: the slam lands | [?] |
+| E wind-up | knocked | ends | cancelled | match |
+| E air smash (falling) | stun | [?] | the dive ends, he falls plain | [?] |
+| E air smash | knocked | ends | ends | match |
+| X Brass Broadside charge and waves | stun | [?] | stops; before the first wave the cooldown is cut to `x.stop_cd` (ours), after it the waves left are lost | [?] |
+| X charge and waves | knockback, root | [?] | no check: goes on | [?] |
+| X charge and waves | knocked | ends | stops | match (cooldown [?]) |
