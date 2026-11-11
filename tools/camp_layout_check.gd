@@ -3,9 +3,9 @@ extends RefCounted
 ## by tools/make_hollowcrown.py). Builds the real world for a few seeds and asserts, on the camps the match
 ## would spawn: how many of each kind per region (12 light, 9 normal, 7 heavy, 79 monsters), and the placing
 ## rules: 30-70 m apart inside a region; 14 m from a train halt; 20 m from a lair gate, a vault and a way-out
-## seat (dock, outpost, hatch); cover within 12 m; a region's heavy camp is its nearest to the map centre
-## (the Crown: its three heavy camps are nearer than its normal one); within 190 m of the centre; and on
-## flat, level, walkable ground (no slope, no stair, no rock or tree in the way). Never touches the save.
+## seat (dock, outpost, hatch); cover within 12 m; a region's biggest camp (heavy, else normal) is its
+## nearest to the map centre (the Crown: its three heavy camps are nearer than its normal one); within
+## 190 m of the centre; and on flat, level, walkable ground (no slope, stair, rock or tree). Never touches the save.
 
 const SEEDS := [3, 9, 21]
 const WANT := {
@@ -16,6 +16,7 @@ const WANT := {
 	"duskmoor": {"light": 2, "normal": 1}, "saltmere": {"light": 2, "normal": 1},
 }
 const MONSTERS := {"light": 2, "normal": 3, "heavy": 4}
+const RANK := {"light": 0, "normal": 1, "heavy": 2}
 const GAP := [30.0, 70.0]
 const FROM_HALT := 14.0
 const FROM_SEAT := 20.0
@@ -95,7 +96,11 @@ func _region(w: World, sd: int, rid: String, camps: Array, centre: Vector2, far:
 	var near := 0
 	for i in camps.size():
 		if dc[i] < dc[near]: near = i
-	ok(String(camps[near]["kind"]) == "heavy", "%s: the camp nearest the centre (%.0f m) is heavy" % [tag, dc[near]])
+	var top := "light"          # the region's biggest kind: heavy where it has one, else normal (rim isles)
+	for c in camps:
+		if RANK[c["kind"]] > RANK[top]: top = c["kind"]
+	var what := "%s: the camp nearest the centre (%.0f m) is its biggest, %s" % [tag, dc[near], top]
+	ok(String(camps[near]["kind"]) == top, what)
 	if rid == "crown":
 		var farthest := 0
 		for i in camps.size():
