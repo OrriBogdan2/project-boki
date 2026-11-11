@@ -1,9 +1,9 @@
 extends RefCounted
 ## Vex's parity pass and audit fixes (docs/heroes/gunslinger.md, "Parity pass"), run inside --gunslinger-combo-check
 ## (tools/hero_combo_check.gd): the rifle's cadence, how its rounds track the cursor while she walks, the 30-round
-## drum that refills whenever the trigger rests, the firing brackets, the shouldered recoil pose, and the Burr
-## Charge fired from the cannon's launcher (item 112), a tap she walks through, and the Longneedle's wide beam,
-## pushed-out view and aim (item 68).
+## drum that refills whenever the trigger rests, the one Shift charge, the firing brackets, the shouldered recoil
+## pose, and the Burr Charge fired from the cannon's launcher (item 112), a tap she walks through, and the
+## Longneedle's wide beam, pushed-out view and aim (item 68).
 const ROUND_GAP := 0.12      # s between rounds held
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
 const REFILL_DRY := 1.3      # s from running dry to the next round, the trigger held (0.35s rest + 30 at 40/s)
@@ -22,6 +22,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_tracking(m, P, home)
 	_dash_aim(m, P, K, home)
 	_drum(m, P, K, home)
+	_shift_charges(P)
 	_brackets(m, P, home)
 	_rifle_pose()
 	_launcher(m, P, K, T, home)
@@ -492,3 +493,18 @@ func _into_dash(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	C.ok("Vex audit: Shift in the Longneedle charge slides and the beam fires; after a Burr Charge she slides at once",
 			e_ok and rmb_ok and rows, "E %s RMB %s rows %s" % [e_ok, rmb_ok, rows])
 	C.ac.step(m, 1.5)
+
+## The source's Combat Slide is one charge: her own dash.charges, even over a two-charge class dodge, and a
+## Second Wind still adds one.
+func _shift_charges(P: Hunter) -> void:
+	var roll := P.dodge_def
+	P.dodge_def = Content.class_dodge("heavy")
+	var over_two := P.max_dashes()
+	P.dodge_def = roll
+	var base := P.max_dashes()
+	P.add_perk("secondwind")
+	var perked := P.max_dashes()
+	P.perks.erase("secondwind")
+	C.ok("Vex Shift: one charge (the source's slide), her own count over the class's, Second Wind adds one",
+			base == 1.0 and over_two == 1.0 and perked == 2.0 and P.max_dashes() == 1.0,
+			"%.0f, over a two-charge dodge %.0f, with Second Wind %.0f" % [base, over_two, perked])

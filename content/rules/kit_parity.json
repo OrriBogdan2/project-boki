@@ -1,6 +1,7 @@
 {
 	"about": "Sourced kit numbers the audit (briefs/specs/kit-audit) marks as matching the source. --kit-parity-check fails when content/archetypes/<hero>.json drifts outside tolerance. How to add a row: docs/ARCHETYPES.md, 'Kit parity lock'.",
 	"rows": [
+		{"hero": "gunslinger", "slot": "Shift", "field": "dash.charges", "value": 1, "tol": 0.0, "evidence": "D Ghost Combat Slide: press or hold, no extra charge listed (Felix's Pyro Pounce lists 2) (supervive_kits.md)"},
 		{"hero": "gunslinger", "slot": "passive", "field": "resource.vamp", "value": 0.06, "tol": 0.0, "evidence": "D Ghost Combat Rush: +6% Omnivamp (supervive_kits.md)"},
 		{"hero": "gunslinger", "slot": "passive", "field": "resource.wait", "value": 3.5, "tol": 0.0, "evidence": "D Ghost Combat Rush: for 3.5s (supervive_kits.md)"},
 		{"hero": "gunslinger", "slot": "E", "field": "e.shave", "value": 0.2, "tol": 0.0, "evidence": "D Arcane Railgun: hitting a hunter reduces CD by 20%"},

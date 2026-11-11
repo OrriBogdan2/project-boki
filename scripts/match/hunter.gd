@@ -361,7 +361,7 @@ func accent() -> Color:
 
 func max_dashes() -> float:
 	var base := float(dodge_def.charges) if dodge_def else float(cdat["dashes"])
-	return base + float(perk_n("secondwind")) + (ak.extra_dashes() if ak else 0.0)
+	return (ak.dash_charges(base) if ak else base) + float(perk_n("secondwind"))
 
 func dash_regen() -> float:
 	# each rank past the first recharges dashes faster; a kin's dodge_regen too (1 = instantly)

@@ -875,6 +875,8 @@ func shows_charge_ball() -> bool: return true
 func dodge_anim() -> String: return ""
 ## Dash charges the kit adds on top of the class's (the Juggernaut's Rampage at rank 2).
 func extra_dashes() -> float: return 0.0
+## The kit's Shift charges: its own dash.charges (Vex: one, as the source's slide) or else the class's, plus extras.
+func dash_charges(class_n: float) -> float: return float(dash_def().get("charges", class_n)) + extra_dashes()
 
 ## A shot dodged through this hero's dash (kits that feed on it override).
 func on_perfect_dodge() -> void: pass
