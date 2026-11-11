@@ -231,6 +231,10 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | swim_per_tide_doc | The water stretch: +this fraction of pace per level of the Tide knack (Work, 1-4). A Boki's rec['lean']['water'] (GARDEN 9.1, 0..1) counts as 4 levels at 1.0 once leans exist. |
 | glide | 1.45 |
 | glide_doc | The jump stretch: a winged species (its look has wings) glides the gap at this times the pace; rec['lean']['flying'] blends toward it. |
+| rise | 1.4 |
+| rise_doc | The updraft stretch: a winged Boki rides the rising air at this times the pace; a lean in one of updraft_types blends toward it. |
+| updraft_types | ["flying", "electric", "fairy", "sound"] |
+| updraft_types_doc | The Kitewind Ridge types (GARDEN.md 10.2): the leans that ride an updraft. |
 | wobble | 0.1 |
 | wobble_doc | Each stretch every runner's pace is rolled within +-this fraction, so the fastest Boki is likely, not certain, to win. |
 | cheer | {"great": 1.15, "good": 1.07, "miss": 1.0} |
