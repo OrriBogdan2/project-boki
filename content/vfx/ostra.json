@@ -1,6 +1,6 @@
 {
 	"palette": {
-		"main": "#2ee6c0", "pale": "#7fe0d0", "hot": "#eafffa", "char": "#06221e", "smoke": "#16202a",
+		"main": "#2ee6c0", "pale": "#7fe0d0", "hot": "#eafffa", "char": "#06221e", "smoke": "#3a5c58",
 		"pink": "#ff4fd8"
 	},
 	"anchors": {
@@ -37,7 +37,7 @@
 			{"p": "shard", "y": 0.9, "n": 9, "n_k": 1.0, "speed": 5.0, "spread": 1.0, "grav": 6.0, "drag": 1.5,
 				"life": 0.35, "size": 0.1, "size_k": 0.5, "c": "main", "c2": "hot"},
 			{"p": "ring", "size": 0.9, "size_k": 0.8, "life": 0.25, "c": "main", "c2": "hot", "c3": "char", "when": "hot"},
-			{"p": "smoke", "y": 0.9, "n": 3, "speed": 1.2, "spread": 1.0, "grav": -0.5, "life": 0.5, "size": 0.35,
+			{"p": "smoke", "y": 0.9, "n": 2, "speed": 1.2, "spread": 1.0, "grav": -0.5, "life": 0.5, "size": 0.25,
 				"c": "smoke", "c3": "char", "near": true, "when": "hot"}
 		]},
 		"snap_cast": {"sfx": [{"n": "os_snap", "db": -2}], "fx": [
@@ -55,20 +55,20 @@
 		]},
 		"trade_cast": {"sfx": [{"n": "os_swap_lob", "db": -3}], "fx": [
 			{"p": "flare", "at": "hand", "size": 0.8, "life": 0.14, "c": "pale", "c2": "hot", "c3": "char"},
-			{"p": "smoke", "y": 0.4, "n": 6, "shape": "disc", "radius": 0.8, "speed": 1.2, "spread": 0.4, "grav": -1.0,
-				"life": 0.8, "size": 0.4, "c": "smoke", "c3": "char"}
+			{"p": "smoke", "y": 0.4, "n": 3, "shape": "disc", "radius": 0.8, "speed": 1.2, "spread": 0.4, "grav": -1.0,
+				"life": 0.8, "size": 0.25, "c": "smoke", "c3": "char"}
 		]},
 		"trade_trail": {"fx": [
 			{"p": "ribbon", "size": 0.45, "life": 2.0, "tail": 0.3, "c": "pale", "c2": "hot", "c3": "char"}
 		]},
 		"trade_hover": {"fx": [
-			{"p": "smoke", "at": "hem", "n": 3, "speed": 0.5, "spread": 1.0, "grav": -1.5, "life": 0.6, "size": 0.25,
+			{"p": "smoke", "at": "hem", "n": 2, "speed": 0.5, "spread": 1.0, "grav": -1.5, "life": 0.6, "size": 0.25,
 				"c": "smoke", "c3": "char", "near": true}
 		]},
 		"trade_fold": {"fx": [
 			{"p": "star", "y": 1.0, "shape": "gather", "radius": 1.8, "n": 18, "speed": 6.0, "life": 0.3, "size": 0.12,
 				"c": "main", "c2": "hot"},
-			{"p": "smoke", "y": 1.0, "shape": "gather", "radius": 1.4, "n": 6, "speed": 3.5, "life": 0.35, "size": 0.45,
+			{"p": "smoke", "y": 1.0, "shape": "gather", "radius": 1.4, "n": 3, "speed": 3.5, "life": 0.35, "size": 0.25,
 				"c": "smoke", "c3": "char", "near": true}
 		]},
 		"trade_arrive": {"sfx": [{"n": "os_swap", "db": -2}], "fx": [
@@ -84,8 +84,8 @@
 				"c": "main", "c2": "hot", "c3": "char"},
 			{"p": "shard", "y": 0.6, "n": 10, "n_k": 1.2, "speed": 8.0, "spread": 0.8, "grav": 8.0, "life": 0.45,
 				"delay": 0.12, "size": 0.14, "c": "main", "c2": "hot"},
-			{"p": "smoke", "y": 0.5, "n": 4, "n_k": 1.0, "speed": 2.0, "spread": 1.0, "grav": -0.8, "life": 0.7,
-				"delay": 0.12, "size": 0.5, "c": "smoke", "c3": "char", "near": true}
+			{"p": "smoke", "y": 0.5, "n": 2, "n_k": 1.0, "speed": 2.0, "spread": 1.0, "grav": -0.8, "life": 0.7,
+				"delay": 0.12, "size": 0.25, "c": "smoke", "c3": "char", "near": true}
 		]},
 		"well_open": {"sfx": [{"n": "os_well_hum", "db": -3}], "fx": [
 			{"p": "flare", "y": 0.6, "size": 1.8, "grow": 1.2, "life": 0.14, "c": "main", "c2": "hot", "c3": "char"},
@@ -94,7 +94,7 @@
 		"well_close": {"fx": [
 			{"p": "vortex", "size": "r", "size_x": 0.5, "spin": 2.0, "grow": 0.2, "life": 0.35, "c": "main", "c2": "hot",
 				"c3": "char"},
-			{"p": "smoke", "y": 0.3, "shape": "gather", "radius": 1.6, "n": 6, "speed": 3.0, "life": 0.4, "size": 0.4,
+			{"p": "smoke", "y": 0.3, "shape": "gather", "radius": 1.6, "n": 3, "speed": 3.0, "life": 0.4, "size": 0.25,
 				"c": "smoke", "c3": "char", "near": true}
 		]}
 	}
