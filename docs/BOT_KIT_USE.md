@@ -63,3 +63,22 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 - **Neve** (`rimewright_kit.gd`): the bot schedules the freeze 0.15 to 0.45 s into the wall's slide (its decision tick, 0.9 to 2.2 s, never landed inside the slide of 1 s or less).
 - **Lace** (`archer_kit.gd`): presses the ultimate at 4 to 14 m.
 - Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
+
+## Lead casts: Motley and Tenzo (ext/bot-kit-lead-casts)
+
+The FUN audit (gap 6) read "0 Shard Snap and 0 Brimseed hits from 42 and 28 casts, 0 Quakefall and 0 Stone Row hits" off the table's hit columns. Those columns only count the tags `utility` and `k1`, and these kits tag their hits `abil`, so the zeros were a counting gap, not a bot that never hit. The check now counts hits per cast (`ab:rmb`, `ab:e`, `ab:rock`: the hit event carries the cast's `ab`) and the kit's own casts (`snaps`, `pops`, `rocks raised`, `rocks launched`).
+
+**The helper.** `BotLead` (scripts/arch/bot_lead.gd) gives the spot a foe will stand at after the cast's own delay plus its flight at its own speed (the foe's velocity, two passes), kept inside the cast's range. `BotLead.aim` keeps re-aiming every step for the length of a wind-up (ArchKit.tick), so the cast reads the lead aim when it lets go, not the default aim of the next frame. The delays and speeds come from the json: Shard Snap `wind` 0.32 s, `speed` 29.5, `range` 13; Brimseed `drop` 0.25 s plus 0.5 s ahead, `reach` 9; Quakefall `hold` plus `slam.time`, `hop` plus `radius`; Stone Row `tell` 0.2 s, `dist` plus `row_gap`. No bot-only damage, range or cooldown.
+
+**Bot use.** Motley: Snap aimed with the lead through its wind-up; Brimseed planted where the foe's path is, and popped every step (not every 0.4 to 1 s think) once the foe is within max(0.7 m, half the radius) of the centre, never on a timer (an unpopped seed fizzles, so it waits). Tenzo: Quakefall aimed with the lead through its charge; Stone Row planted across the foe's line from 3.5 m (was 4 m, one try in four, now three in five) and the punch fires when the row stands in line with the foe, which sends the rocks at them (the row itself does no damage).
+
+Both runs below use `--bot-kit-use=<arch>` (seeds 3, 5, 9, 120 s, both fighters counted), the same seeds, three repeats that matched exactly.
+
+| Cast | Before (origin/main) | After |
+|---|---|---|
+| Motley Shard Snap | 29 hits / 38 casts | 28 hits / 38 casts |
+| Motley Brimseed | 30 hits / 18 pops | 44 hits / 18 pops |
+| Tenzo Quakefall | 25 hits / 14 slams | 35 hits / 18 slams |
+| Tenzo Stone Row | 0 rock hits / 10 rocks raised, 7 launched | 4 rock hits / 31 raised, 27 launched |
+
+The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). The audit's other claims stand: Cinder's flamethrower and Meeko's R are not in this change.
