@@ -1112,12 +1112,9 @@ func _tick_charge(dt: float) -> void:
 	if chg.is_empty() or String(chg["src"]) != src:
 		if not chg.is_empty(): _charge_release()
 		chg = {"src": src, "k": k, "full": false, "tick": 0.0}
-		var rc := col
-		var p = m.get("player")
-		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)
-		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
+		net_ring(h.pos, 0.8, col)           # remote players: "they're winding something up"
 	chg["k"] = k
 	AimKit.circle(h, "charge_ring", {"self": true, "r": 1.15 * float(h.cdat.get("scale", 1.0)), "all": true, "col": col, "fill": k})
 	var g2: Node3D = chg.get("glow")

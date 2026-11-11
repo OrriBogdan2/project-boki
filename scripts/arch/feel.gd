@@ -14,9 +14,7 @@ const CAT := {
 	"utility": Color("5fd8ff"),
 }
 const CAT_ORDER := ["control", "damage", "sustain", "utility"]
-## §5.2 allegiance: rim says whose it is.
-const RIM_ENEMY := Color("ff2d55")
-const RIM_OWN := Color(1, 1, 1, 0.9)
+## §5.2 allegiance: the rim says whose it is, in the side colour (SideColor); the fill keeps the caster's.
 
 static func cat_color(cat: String) -> Color:
 	return CAT.get(cat, Color("e8f4ff"))
