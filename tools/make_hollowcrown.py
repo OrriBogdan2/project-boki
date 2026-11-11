@@ -29,7 +29,9 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   hand (+)            true: nothing is placed by dice. No auto stairs, no random rocks, no random
                       chests/camps/breakables/spawns: only what the layout lists. The match seed only
                       rolls spawn plan picks, live lairs, loot, the Blight and the weather.
-  regions (+)         [{id, name, purpose, biome, islands: [ids]}] named regions (map legend, docs)
+  regions (+)         [{id, name, purpose, biome, islands: [ids], loot, shops}] named regions (map legend, docs)
+    shops             [[x,z,"stock"]] the region's vendors (0-2) and each one's fixed stock (content/rules/shops.json
+                      themes); a spot off the region's open ground moves to the nearest open tile (Shops.spot)
   islands[]           id, name, role, region, biome, danger, poi, noise (coast wobble), sheer arcs
     shapes            circle / ellipse / rect / capsule / poly (+, [[x,z],...]) each with "lv";
                       the first shape is the outline, later ones raise tiers inside it
@@ -46,7 +48,6 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     camps (+)         [[x,z,"light|normal|heavy"]] monster camps (which monsters: rolled)
     chests            [[x,z]] (one locked chest type);  breakables (+) [[x,z,"crate|pot|barrel|keg"]];  weapons (+) [[x,z]]
     wild (+)          [[x,z]] wild Boki;  shrine (+) [x,z]
-    shops (+)         [[x,z,"armor|move|gear|perks"]] a vendor and its stock theme (content/rules/shops.json)
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
@@ -134,7 +135,6 @@ islands = [
          weapons=[[104, 56]],
          wardens=[[104, 48], [126, 52]],
          traps=[[90, 54]],
-         shops=[[100, 40, "armor"]],
          areas=[[128, 42, "Frostgate Keep"], [84, 54, "Rimefield"]]),
     # ---- CINDER STEPS (west): the Kilns (lv 6) on the north half overlook the Crown's west face; one
     # wide stair comes down into the Forge Yard. The Ash Bridge runs south to the Ashen Gaol.
@@ -151,7 +151,6 @@ islands = [
          weapons=[[38, 108]],
          wardens=[[56, 92], [40, 66]],
          traps=[[48, 110]],
-         shops=[[46, 108, "gear"]],
          areas=[[46, 70, "The Kilns"], [40, 114, "Forge Yard"]]),
     # ---- STORMBREAK (east): a storm-lashed tableland. The Shrine Table (lv 6) rises in the middle, up
     # the South Ramp (a long flight with landings). The Moor Steps run south to Duskmoor.
@@ -168,7 +167,6 @@ islands = [
          weapons=[[190, 126]],
          wardens=[[172, 132], [170, 122]],
          traps=[[166, 120]],
-         shops=[[163, 114, "move"]],
          shrine=[174, 118]),
     # ---- THORNWOOD (south): a low bramble wood full of tall grass and blossom trees, the Boki nest in
     # its west glade and the Thornhive lair at its east end on Bramble Rise (lv 4, stairs from the
@@ -187,7 +185,6 @@ islands = [
          weapons=[[106, 186]],
          wardens=[[112, 168]],
          traps=[[104, 172]],
-         shops=[[106, 178, "perks"]],
          areas=[[133, 170, "Bramble Rise"]]),
     # ---- the outer isles: low, monster-light landings, each with a way out of the match and its own
     # shape and reason to come (docs/MAP_REGIONS.md).
@@ -297,24 +294,34 @@ for _iid, _camps in CAMPS.items(): BY[_iid]["camps"] = _camps
 
 # One line each in docs/MAP_REGIONS.md. "loot" leans chests on top of the biome's lean (BiomeRun):
 # slot weights multiply, rarity steps add. Every region can be the match's hot drop zone (HotZone).
+# "shops": the region's vendors and their stock (Shops; one premium one in the Crown, two in the forge country).
 regions = [
     dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne", "gaol_sw"],
+         shops=[[88, 112, "crown_exchange"]],
          purpose="The vault on the Throne, two boss Gaols and the richest chests, under the most Blight."),
     dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"], loot={"slots": {"armor": 1.6}},
+         shops=[[100, 40, "frost_armory"]],
          purpose="The best armor on the map, the Keep's high ground over the Gate Span, an uplink outpost on the south edge."),
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}},
+         shops=[[46, 108, "kiln_forge"], [52, 76, "tuning_bench"]],
          purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on, an uplink outpost on the east rim."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
+         shops=[[163, 114, "storm_outfitter"]],
          purpose="The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."),
     dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"],
+         shops=[[106, 178, "thorn_snares"]],
          purpose="The Boki nest and the Thornhive lair; tall-grass ambushes."),
     dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"],
+         shops=[[38, 34, "lark_provisions"]],
          purpose="Wild Boki graze in the Hollow; a calm place to catch one."),
     dict(id="highwatch", name="Highwatch", biome="frost", islands=["highwatch"], loot={"slots": {"boots": 1.8}},
+         shops=[[178, 22, "lookout_post"]],
          purpose="The Lookout over the Gaol and the Watch Road, and boots."),
     dict(id="duskmoor", name="Duskmoor", biome="storm", islands=["duskmoor"], loot={"slots": {"passive": 2.0}},
+         shops=[[182, 188, "chapel_relics"]],
          purpose="Relics in the Moor Chapel ruins."),
     dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"],
+         shops=[[30, 188, "salt_market"]],
          purpose="Salt caches along the dry river, the outer ring's most chests."),
 ]
 
@@ -470,7 +477,7 @@ def sc_wall(W):
         if k in W: W[k] = [sc(v) for v in W[k]]
     return W
 
-POINT_KEYS = ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "shops", "areas")
+POINT_KEYS = ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "areas")
 
 def scale_layout():
     """Everything above is drawn on the DESIGN grid; this maps it onto SIZE (one constant to grow the map).
@@ -489,6 +496,7 @@ def scale_layout():
     for G in glides:
         G["take"] = sc_pt(G["take"]); G["land"] = sc_pt(G["land"])
     for L in lairs: L["at"] = sc_pt(L["at"])
+    for R in regions: R["shops"] = [sc_pt(p) for p in R.get("shops", [])]
     outposts[:] = [sc_pt(e) for e in outposts]
     heart[:] = sc_pt(heart)
     for sp in spawn_points.values(): sp["points"] = [sc_pt(p) for p in sp["points"]]
@@ -655,8 +663,12 @@ def check(lv, owner, stairs):
         if q not in lv or lv[q] == -2 and False: probs.append("%s %s not on ground" % (what, p))
         elif q in stairs: probs.append("%s %s on a stair" % (what, p))
     for d in islands:
-        for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps", "shops"]:
+        for k in ["landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps"]:
             for p in d.get(k, []): ground(p, "%s.%s" % (d["id"], k))
+    for r in regions:      # a vendor stands on its own region's open ground
+        for p in r.get("shops", []):
+            ground(p, "%s.shops" % r["id"])
+            if owner.get((int(p[0]), int(p[1]))) not in r["islands"]: probs.append("%s shop %s off the region" % (r["id"], p))
         for R in d.get("rocks", []):      # a boulder half over the void is clipped to a post
             if any((x, z) not in lv for x in range(R[0], R[2] + 1) for z in range(R[1], R[3] + 1)):
                 probs.append("%s rock %s over the void" % (d["id"], R))
@@ -852,11 +864,13 @@ class Cover:
         self.hard |= self.solid
         for d in islands:
             for R in d.get("ramps", []): self.hard |= ramp_tiles(R)
-            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables", "shops"):
+            for k in ("chests", "weapons", "wild", "wardens", "traps", "breakables"):
                 for p in d.get(k, []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 1.7)
             if d.get("shrine"): self.hard |= _disc_r(d["shrine"][0], d["shrine"][1], 3.0)
             for p in d.get("camps", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 3.6)
             for p in d.get("landings", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, LANDING_R)
+        for r in regions:
+            for p in r.get("shops", []): self.hard |= _disc_r(p[0] + 0.5, p[1] + 0.5, 1.7)
         for L in lairs:
             h = L["half"]
             for z in range(L["at"][1] - h - 2, L["at"][1] + h + 3):

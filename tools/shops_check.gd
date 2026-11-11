@@ -97,7 +97,7 @@ func _stock() -> void:
 
 func _never_sold() -> void:
 	var bad: Array = []
-	var allowed := ["util", "repair", "armor_up", "backpack", "boots", "perk"]
+	var allowed := ["util", "repair", "armor_up", "backpack", "gear", "perk"]
 	var never: Array = ShopStock.rules()["never"]
 	for e in ShopStock.all_entries():
 		var kind := ShopStock.kind_of(String(e))
@@ -107,7 +107,7 @@ func _never_sold() -> void:
 			bad.append(e)
 		if kind == "util" and (not UtilityBelt.is_item(r) or UtilityBelt.is_key(r)):
 			bad.append(e)
-		if kind == "boots" and not Gear.ALL.has(r):
+		if kind == "gear" and not Gear.ALL.has(r):
 			bad.append(e)
 		if kind == "perk" and not Data.PERKS.has(r):
 			bad.append(e)
@@ -118,8 +118,11 @@ func _vendors(m: Match) -> void:
 	var themes := {}
 	for v in Shops.list(m):
 		themes[v["theme"]] = true
-	var four: bool = Shops.list(m).size() == 4 and themes.size() == 4
-	ok("The Hollow Crown has 4 vendors, one per theme", four, str(themes.keys()))
+	var listed := 0
+	for reg in m.world.regions:
+		listed += (reg.get("shops", []) as Array).size()
+	var all_up: bool = Shops.list(m).size() == listed and themes.size() == listed
+	ok("every shop a region lists stands, each with its own stock", all_up, str(themes.keys()))
 	var on_ground := true
 	for v in Shops.list(m):
 		if m.world.is_void(v["pos"].x, v["pos"].z): on_ground = false
@@ -133,7 +136,7 @@ func _vendors(m: Match) -> void:
 
 func _buying(m: Match) -> void:
 	var h: Hunter = m.player
-	var v := _vendor_of(m, "gear")
+	var v := _vendor_of(m, "thorn_snares")
 	h.gems = 500
 	UtilityBelt.clear(h)
 	var i := 0
@@ -148,11 +151,11 @@ func _buying(m: Match) -> void:
 	ok("buy puts the item on the belt", UtilityBelt.count(h, id) == 1)
 	ok("buy uses up one of the vendor's stock", int(row["left"]) == left - 1)
 	h.gems = 500
-	var armor_v := _vendor_of(m, "armor")
+	var armor_v := _vendor_of(m, "frost_armory")
 	var up := _row(armor_v, "armor_up")
 	var tier: int = h.armor_tier
 	ok("an armor upgrade raises the armor tier", Shops.buy(m, h, armor_v, up) == "" and h.armor_tier == tier + 1)
-	var pv := _vendor_of(m, "perks")
+	var pv := _vendor_of(m, "tuning_bench")
 	var prow := 0
 	for k in (pv["rows"] as Array).size():
 		if ShopStock.kind_of(String(pv["rows"][k]["id"])) == "perk":
@@ -160,11 +163,15 @@ func _buying(m: Match) -> void:
 			break
 	var perk := String(pv["rows"][prow]["id"]).get_slice(":", 1)
 	ok("a perk sale grants the perk", Shops.buy(m, h, pv, prow) == "" and h.perk_n(perk) == 1)
-	var mv := _vendor_of(m, "move")
+	var mv := _vendor_of(m, "storm_outfitter")
 	var pack: int = h.backpack
 	ok("a backpack sale upgrades the pack", Shops.buy(m, h, mv, _row(mv, "backpack")) == "" and h.backpack == pack + 1)
-	var boots := _row(mv, "boots:quickstep_boots")
+	var boots := _row(mv, "gear:quickstep_boots")
 	ok("a boots sale wears them", Shops.buy(m, h, mv, boots) == "" and String(h.gear[3]["id"]) == "quickstep_boots")
+	var kv := _vendor_of(m, "kiln_forge")
+	var glove := _row(kv, "gear:rocket")
+	ok("a glove sale wears it in a glove slot", Shops.buy(m, h, kv, glove) == "" and Gloves.slot_for(h, "rocket") < 2
+			and ShopStock.owned(h, kv["rows"][glove]) == 1)
 
 func _poor_refused(m: Match, v: Dictionary) -> bool:
 	var h: Hunter = m.player
@@ -202,7 +209,7 @@ func _items(m: Match) -> void:
 	ok("the 17 new items cost what the doc says", priced and UtilityBelt.is_item("revive_ember"))
 	var smoke: Array = []
 	for id in UtilityBelt.stock_ids():
-		h.pos = _vendor_of(m, "gear")["pos"]
+		h.pos = _vendor_of(m, "thorn_snares")["pos"]
 		bot.reveal_t = 0.0
 		if not _fresh(h, id) and id != "revive_ember":
 			smoke.append(id)
@@ -221,7 +228,7 @@ func _items(m: Match) -> void:
 	ok("Lostway Scroll carries you across the map", warped)
 	# pads
 	m.gpads.clear()
-	h.pos = _vendor_of(m, "move")["pos"] + Vector3(3, 0, 0)
+	h.pos = _vendor_of(m, "storm_outfitter")["pos"] + Vector3(3, 0, 0)
 	_fresh(h, "jump_pad")
 	var gp: Dictionary = m.gpads[0]
 	var pad_ok: bool = is_equal_approx(float(gp["t"]), 30.0) and is_equal_approx(float(gp["arm"]), 2.0)
@@ -321,14 +328,14 @@ const WINDOWS := [Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1440
 
 func _panel(m: Match) -> void:
 	var h: Hunter = m.player
-	var v := _vendor_of(m, "perks")
+	var v := _vendor_of(m, "tuning_bench")
 	UtilityBelt.clear(h)
 	h.gems = 60
 	Shops.use(m, h, {"vendor": v})
 	var pc: PanelContainer = m.get_meta("shops")["panel"]
 	await main.get_tree().process_frame
-	ok("the header names the vendor and its fixed set", _texts(pc).has(String(ShopStock.theme("perks")["name"]))
-			and _texts(pc).has("%s, the same every match" % String(ShopStock.theme("perks")["tag"])))
+	ok("the header names the vendor and its fixed set", _texts(pc).has(String(ShopStock.theme("tuning_bench")["name"]))
+			and _texts(pc).has("%s, the same every match" % String(ShopStock.theme("tuning_bench")["tag"])))
 	ok("the footer shows the use key from Settings.key_cap", _texts(pc).has(Settings.key_cap("interact")))
 	var bad: Array = []
 	var short := 0
@@ -342,7 +349,7 @@ func _panel(m: Match) -> void:
 	h.gems = 500
 	ShopPanel.refresh(m, pc, v)
 	ok("more gems: every row is a Buy button again", (v["rows"] as Array).size() == _buttons(pc))
-	var tonic_v := _vendor_of(m, "armor")
+	var tonic_v := _vendor_of(m, "frost_armory")
 	var tonic := _row(tonic_v, "tonic")
 	Shops.use(m, h, {"vendor": tonic_v})
 	pc = m.get_meta("shops")["panel"]
@@ -403,7 +410,7 @@ func _bot(m: Match) -> void:
 	for h in m.hunters:
 		if h != m.player and h.ctrl == "bot":
 			bot = h
-	var v := _vendor_of(m, "armor")
+	var v := _vendor_of(m, "frost_armory")
 	bot.pos = v["pos"] + Vector3(1.0, 0, 0)
 	bot.gems = 10
 	UtilityBelt.clear(bot)
@@ -426,8 +433,8 @@ func _online() -> void:
 	host.is_host = true
 	guest.net_on = true
 	guest.is_host = false
-	var hv := _vendor_of(host, "gear")
-	var gv := _vendor_of(guest, "gear")
+	var hv := _vendor_of(host, "thorn_snares")
+	var gv := _vendor_of(guest, "thorn_snares")
 	var i := 0
 	var id := ShopStock.ref(String(gv["rows"][i]["id"]))
 	hv["rows"][i]["left"] = 1

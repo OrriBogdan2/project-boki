@@ -710,6 +710,7 @@ func _draw_minimap(sz: Vector2) -> void:
 	if m.biomes and MapDetail.shows("hot_zone", hold): m.biomes.hot.minimap(self, to_map, on_map)
 	HeartHud.minimap(self, inner, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
+	ShopLegend.minimap(self, to_map, on_map, hold)
 	if m.spawn_plan and full_map and m.player:
 		for cnd in full_map.minimap_spawns(m.player.team, hold, to_map, on_map):
 			full_map.spawn_marker(c, cnd, to_map.call(cnd["pos"]), MapDetail.ICON_R / 1.35, m.player.team)

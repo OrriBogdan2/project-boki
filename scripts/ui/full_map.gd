@@ -682,7 +682,7 @@ func _side(c: Control, sz: Vector2) -> void:
 	var squad: Array = m.hunters.filter(func(x): return x.team == p.team)
 	var in_drop: bool = p.riding or p.dropping
 	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 48 + squad.size() * 44 + (118 if in_drop else 40)))
-	var lr := ShopLegend.place(m, x0, wv, r.end.y)
+	var lr := ShopLegend.place(m, x0, wv, r.end.y, sz.y - 10)
 	if lr.end.y < sz.y - 10:
 		ShopLegend.draw(self, c, lr)
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)

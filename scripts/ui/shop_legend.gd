@@ -1,10 +1,11 @@
 class_name ShopLegend
 extends RefCounted
 ## The full map's shop and area legend: each vendor's icon, name and stock theme (with its mark on
-## the map), then each region's drop lean from BiomeRun (slot_lean_at / rarity_bonus_at data).
+## the map and the minimap), then each region's drop lean from BiomeRun (slot_lean_at / rarity_bonus_at data).
 
 const SLOT_WORDS := {"glove": "gloves", "passive": "gloves", "armor": "armor", "boots": "boots"}
 const ROW_H := 31.0
+const ROW_COMPACT := 18.0   # px: a one-line row, when the two-line legend doesn't fit the screen
 const HEAD_H := 22.0
 const TOP_MIN := 284.0      # px: below the minimap and the clock chips that show through the map
 const PAD := 14.0
@@ -38,31 +39,49 @@ static func lean_text(def: Dictionary) -> String:
 		text += ("; " if text != "" else "") + "rarer loot"
 	return text if text != "" else "no particular lean"
 
-## Marks every vendor on the map itself.
+## Marks every vendor on the map itself (the drop map too).
 static func markers(fm, c: Control) -> void:
 	for v in Shops.list(fm.m):
-		var th := ShopStock.theme(String(v["theme"]))
-		var col := Color(String(th["col"]))
 		var pv: Vector2 = fm.to_screen(v["pos"])
-		if not fm.rect.grow(-6.0).has_point(pv):
-			continue
-		c.draw_circle(pv, 11.0, Color(0.04, 0.05, 0.09, 0.9))
-		c.draw_arc(pv, 11.0, 0.0, TAU, 24, col, 2.0, true)
-		Icons.draw(c, String(th["icon"]), pv, 7.0, col)
+		if fm.rect.grow(-6.0).has_point(pv):
+			badge(c, pv, 11.0, String(v["theme"]))
 
-## How tall the legend wants to be.
-static func height(m) -> float:
-	return HEAD_H * 2.0 + ROW_H * Shops.legend_rows(m).size() + PAD
+## Vendors on the minimap: a detail kind (MapDetail "shop"), so on the ground only the ones in view.
+static func minimap(hud, to_map: Callable, on_map: Callable, hold: bool) -> void:
+	var p: Hunter = hud.m.player
+	for v in Shops.list(hud.m):
+		var near := p != null and p.flat_dist(v["pos"]) < MapDetail.GROUND_R
+		var pv: Vector2 = to_map.call(v["pos"])
+		if MapDetail.shows("shop", hold, near) and on_map.call(pv, 6.0):
+			badge(hud.c, pv, MapDetail.ICON_R * 1.3, String(v["theme"]))
 
-## Where the legend goes in the left column: under the squad panel, never above TOP_MIN.
-static func place(m, x: float, width: float, below: float) -> Rect2:
-	return Rect2(Vector2(x, maxf(below + 10.0, TOP_MIN)), Vector2(width, height(m)))
+## A vendor's round badge: its stock's icon in its colour on a dark disc.
+static func badge(c: Control, pv: Vector2, r: float, theme_id: String) -> void:
+	var th := ShopStock.theme(theme_id)
+	var col := Color(String(th["col"]))
+	c.draw_circle(pv, r, Color(0.04, 0.05, 0.09, 0.9))
+	c.draw_arc(pv, r, 0.0, TAU, 24, col, maxf(1.5, r * 0.18), true)
+	Icons.draw(c, String(th["icon"]), pv, r * 0.64, col)
+
+## How tall the legend wants to be, with rows of row_h.
+static func height(m, row_h := ROW_H) -> float:
+	return HEAD_H * 2.0 + row_h * Shops.legend_rows(m).size() + PAD
+
+## Where the legend goes in the left column: under the squad panel, never above TOP_MIN; one-line
+## rows when the full legend would run past bottom.
+static func place(m, x: float, width: float, below: float, bottom: float) -> Rect2:
+	var top := maxf(below + 10.0, TOP_MIN)
+	var h := height(m)
+	if top + h > bottom:
+		h = height(m, ROW_COMPACT)
+	return Rect2(Vector2(x, top), Vector2(width, h))
 
 ## The legend panel in r: SHOPS (icon, name, theme) then AREAS (name, lean).
 static func draw(fm, c: Control, r: Rect2) -> void:
 	var hud = fm.hud
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	var rows := Shops.legend_rows(fm.m)
+	var compact := r.size.y < height(fm.m)
 	var y := r.position.y + 20.0
 	var last := ""
 	for row in rows:
@@ -77,6 +96,10 @@ static func draw(fm, c: Control, r: Rect2) -> void:
 			Icons.draw(c, String(row["icon"]), Vector2(x + 9, y + 4), 8.0, col)
 		else:
 			c.draw_circle(Vector2(x + 9, y + 4), 4.0, col)
+		if compact:
+			hud._text(Vector2(x + 28, y + 2), "%s  ·  %s" % [row["name"], row["text"]], 12, col)
+			y += ROW_COMPACT
+			continue
 		hud._text(Vector2(x + 28, y), String(row["name"]), 14, col, hud.big)
 		hud._text(Vector2(x + 28, y + 14), String(row["text"]), 11, HudStyle.INK)
 		y += ROW_H

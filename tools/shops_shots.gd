@@ -23,7 +23,7 @@ func take(main_node: Node, out: String) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	var p: Hunter = m.player
-	var v: Dictionary = Shops.list(m).filter(func(x): return x["theme"] == "perks")[0]
+	var v: Dictionary = Shops.list(m).filter(func(x): return x["theme"] == "tuning_bench")[0]
 	for mb in m.mobs:
 		mb.queue_free()
 	m.mobs.clear()
