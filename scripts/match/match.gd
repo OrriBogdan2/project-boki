@@ -202,6 +202,8 @@ func _progress(label: String) -> void:
 
 ## Draws everything once behind the loading screen (WarmUp), so no shader compiles mid-play.
 func warm_up(progress := Callable()) -> void:
+	for h: Hunter in hunters.filter(func(x): return x.ak != null):
+		h.ak.warm_fx(Vector3(0, -600, 0))      # the kits' effect pools, filled deep under the map
 	await WarmUp.new(self).run(progress)
 
 

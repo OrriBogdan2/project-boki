@@ -27,6 +27,9 @@ var skins: Array = []         # {s: shot, n: Node3D, kind}
 var live: Array = []          # {n, kind, t, dur, at, p}
 var held := {}                # key -> {n, kind, last, p}
 var made := 0                 # nodes built (tests: stays flat while firing)
+## every look _build makes (prewarm builds one of each at load)
+const KINDS := ["ember", "burr", "shard", "beam", "spear", "plus", "column", "beam_root", "disc", "flare", "zone",
+	"kindle", "hearth", "spikes", "shell", "frost", "slab", "wall"]
 
 func _init(match_node: Node, hunter: Hunter) -> void:
 	m = match_node
@@ -35,6 +38,12 @@ func _init(match_node: Node, hunter: Hunter) -> void:
 	root.name = "CareLook"
 	root.top_level = true
 	m.add_child(root)
+
+## The loading screen's rehearsal (ArchKit.warm_fx, from Match.warm_up): one of every look built and put in its
+## pool, so the first shot makes nothing mid-fight and warm_up's scan draws them all (Pip's first LMB: 220 ms).
+func prewarm() -> void:
+	for kind: String in KINDS:
+		_give(kind, _build(kind))
 
 func teardown() -> void:
 	if is_instance_valid(root):

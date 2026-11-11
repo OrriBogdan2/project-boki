@@ -28,6 +28,8 @@ var run_exit := false          # the streak's hand-over at run speed is still to
 var motes: Array = []          # charge orbs: {pos, t, node, owner, fly}
 var mote_pool: Array = []      # orb nodes, reused
 var strikes: Array = []        # Skycall: {at, t, dir, phase ("flick" | "count"), dir0}
+const COIL_ARCS := 8           # arcs a Coil hit strings up in one frame (crackle and wire), one pooled node each
+
 var rod: Node3D = null         # the Storm Rod held in the hand while RMB is down
 var rod_full := false
 var blowouts := 0              # tests and the demo
@@ -72,6 +74,14 @@ func on_knock(_t: Hunter, mine: bool) -> void:
 
 func fx() -> VVFx:
 	return VVFx.of(m)
+
+## The rehearsal also pools the Coil's arcs and builds the Storm Rod: the first RMB built it mid-fight (7 meshes,
+## 6 shader compiles).
+func warm_fx(at: Vector3) -> void:
+	fx().prewarm(at, h, int(res_def()["max"]), COIL_ARCS)
+	if rod == null:
+		rod = _build_rod()
+		rod.visible = false
 
 func cast_ult() -> bool:
 	return HeroUlt.press(self, ult.cast)
