@@ -481,6 +481,7 @@ func _run(L: float, d: Vector2, drift := Vector2.ZERO) -> void:
 	net_bolt(a, b, col_of(dd))
 	m.sfx("vv_surge_go", h.pos, -1.0)
 	m.fx.word(h.pos + Vector3(0, 2.2, 0), "INVULNERABLE", PINK, false)   # the source labels the streak
+	net_word(h.pos + Vector3(0, 2.2, 0), "INVULNERABLE", PINK)
 	if h.model: h.model.visible = false
 	m.later(time, _arrive)
 

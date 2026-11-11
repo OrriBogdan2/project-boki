@@ -5394,6 +5394,7 @@ func _net_ev(x, from: String) -> void:
 			match String(x[1]):
 				"ring": fx.ring(Vector3(x[2], x[3], x[4]), float(x[5]), Color.html(String(x[6])), 0.35)
 				"bolt": fx.bolt(Vector3(x[2], x[3], x[4]), Vector3(x[5], x[6], x[7]), Color.html(String(x[8])))
+				"word": fx.word(Vector3(x[2], x[3], x[4]), String(x[5]), Color.html(String(x[6])), false)
 				"cone": fx.cone(Vector3(x[2], x[3], x[4]), Vector2(x[5], x[6]), 5.0, Color.html(String(x[7])))
 				"hvfx": HeroVfx.of(self).net_in(x)
 				"ucast": UltCue.net_in(self, x)       # an ultimate went off in another game
