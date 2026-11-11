@@ -113,6 +113,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 - During Spirit Walk she can still shoot and cast, and moves 10% faster (the sheet measures +5-10% outside); at rank 3, 33% more inside something, fading over the walk.
 - The spirit orb lasts 4 s and gives anyone who touches it (ally or foe) one 2.8 s Spirit Walk; they get no roll and no snap-back.
 - Cremation is +10 damage and a longer burn on a foe knocked by the Heavy Shot while it stands in her burning Hail Wall.
+- Double-wall climb (hunter_move.json `climb_tall`, the data's bCanWallJump: Lace and Brall; Hunter reach +0.9 m): a jump into a 4-terrace wall (3.2 m, two single 1.6 m walls, source 3 m) puts her on top; 5 terraces and her back to the wall do not. Facing is the keys pushed into the wall, as for every ledge. A Hunter without it (Vex) tops a single wall but not a double one. Asserted in --archer-combo-check (`combo archer: tall climb, ...`, tools/tall_climb_check.gd).
 - Not built: Hail Wall damaging wisps (our downed hunters take no ability damage).
 - Starpiercer: the beam is stopped by walls and terrain (the source pierces "destructibles"; ours has no destructible walls on the shot line), and a breakable prop ends it.
 - Starpiercer: the cooldown starts on the cast; unused shots are lost when the 6 s run out; a merge ends the window.
@@ -145,7 +146,7 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Into terrain: 1.2 s stun and extra damage | [wiki: Heartpiercer](https://supervive.wiki.gg/wiki/Myth) | not clean in footage | built (earlier pass) | `combo archer: Heavy Shot > wall`; surfaces: `docs/KNOCK_WALLS.md`, `--wall-stun-check` |
 | Knocking back a burning enemy Cremates it | [wiki: Rain of Arrows](https://supervive.wiki.gg/wiki/Myth), sheet | flavour text | built: a Heavy Shot knock on a foe in the burning wall: +10 and a longer burn, CREMATED | `pin small: Heavy Shot into a foe burning...` |
 | Rain of Arrows: a cone/arc wall, slow and anti-heal | [wiki](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (0457, 0498) | built: 120 degree arc at the cursor distance | `pin E:` lines |
-| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach | `combo archer: tall climb, ...` |
+| Climb double-high walls by jumping while facing them | [wiki: Spectral Hunter](https://supervive.wiki.gg/wiki/Myth) | not shown | built: `climb_tall` in content/rules/hunter_move.json (Lace and Brall only, the data's bCanWallJump); the shared mantle takes 0.9 m more reach: a 4-terrace wall (3.2 m vs source 3 m) by jumping into it, not 5 terraces or facing away | `combo archer: tall climb, ...` |
 | Ult: empowered arrows need no charge, 6 s, the next 3 shots | [wiki: Virideth's Fury](https://supervive.wiki.gg/wiki/Myth), sheet | confirms (f33-f78) | built | `pin ult cast`, `pin ult small: the beam needs no draw`, `... the 6s window ends` |
 | Ult: pierces enemies, longer range, knocks back | [wiki](https://supervive.wiki.gg/wiki/Myth) | confirms the long beam (f48) | built: 18 m, pierce, push 4 | `pin ult payoff: the beam pierces both foes, 16m out`, `... knocks back` |
 | Ult: the final shot hits harder and executes; shots shred armor | [wiki](https://supervive.wiki.gg/wiki/Myth), card text | final number not legible | built: 25 vs 18, execute under 12%, -10 armor per beam | `pin ult payoff: the last beam finishes...`, `pin ult small: armor shredded` |
@@ -176,7 +177,6 @@ shared dash step are gone).
 | RMB Heavy Shot | -3s cooldown x2 (flat), +20% damage x2, tier IV: +3m range, wall stun gives a dash charge | 13s / 10s, damage +15% / +30% | 13s / 10s, damage +20% / +40%; range and charge at 3 |
 | Space Spirit Walk | -1s recharge x2, tier IV: lasts 0.5s longer, faster inside something, allies in 6m walk too | 8.1s / 6.7s | 8.5s / 7.5s; tier IV riders at 3 |
 | E Hail Wall | -2s cooldown x2, +30% damage x2, tier IV: -2s more, 30% wider | 13.5s / 12s, damage +15% / +30% | 13s / 9s, damage +30% / +60%; 30% wider at 3 |
-Skipped, with reasons: the tall-ledge climb has no heightmap equivalent (main's movement work); the Hail Wall stays the arc wall at the cursor distance (the data's own upgrade says "arc width", so the arc is right and the "cone from you" note is the comparison's wording); R (Starpiercer on R) untouched.
 ## Ranks: source tier table (rank 2 = tier II, rank 3 = tiers III + IV)
 On level-up the player picks the slot to rank; rank 3 is the max and carries the data's tier IV. [D] = game data
 (briefs/supervive-data/supervive_kits.md, Myth `Upg:` II / III / IV). Each slot reads `rank_cd` / `rank_dmg` in
