@@ -57,7 +57,10 @@ static func mastery_list(id: String, width := 330.0) -> VBoxContainer:
 	v.set_meta("mastery_list", id)
 	v.set_meta("level", ClassUnlock.mastery_level(id))
 	var head := UI.hbox(8)
-	head.add_child(UI.label("Mastery", 12, UI.MUTED, UI.caps))
+	var mt := UI.label("Goals: each earns a look", 12, UI.MUTED, UI.caps)
+	mt.tooltip_text = "Mastery: finish goals with this Relic to earn colours, gliders and emotes (looks only)."
+	mt.mouse_filter = Control.MOUSE_FILTER_PASS
+	head.add_child(mt)
 	head.add_child(UI.label("level %d / %d" % [ClassUnlock.mastery_level(id), goals.size()], 12, GOAL_COL, UI.semi))
 	v.add_child(head)
 	for i in goals.size():
