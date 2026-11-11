@@ -615,7 +615,8 @@ func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
 ## Rock chips thrown out from `at`: every way, or within CHIP_FAN of `dir` when it is set (a blow with a direction).
 func chips(at: Vector3, count: int, k: float, dir := Vector2.ZERO) -> void:
 	for i in count:
-		var a := vis_rng.randf() * TAU if dir == Vector2.ZERO else dir.angle() + vis_rng.randf_range(-CHIP_FAN, CHIP_FAN)
+		var a := vis_rng.randf() * TAU
+		if dir != Vector2.ZERO: a = dir.angle() + vis_rng.randf_range(-CHIP_FAN, CHIP_FAN)
 		var out := 3.0 + vis_rng.randf() * 4.0 * (0.6 + k)
 		var chip := _take("shard")
 		chip.global_position = at + Vector3(cos(a) * 0.4, 0.3, sin(a) * 0.4)

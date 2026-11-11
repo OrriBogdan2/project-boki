@@ -498,12 +498,12 @@ func _punch(k: float) -> void:
 ## cloud thrown on along the punch, as wide as the lane at full charge and PUNCH_TAP_K of it from the shortest hold,
 ## and the blue flash. No ground ring: the lane, not a circle, is what it hits.
 func _punch_impact(at: Vector3, dir: Vector2, k: float, dmg: float) -> void:
-	var size := float(lmb_def()["punch"]["width"]) * lerpf(PUNCH_TAP_K, 1.0, k)    # m across
+	var across := float(lmb_def()["punch"]["width"]) * lerpf(PUNCH_TAP_K, 1.0, k)    # m across
 	var g := AimMode.ground(m, at)
 	var fwd := Vector3(dir.x, 0.3, dir.y)
 	KitLooks.of(m).chips(g + Vector3(0, 0.4, 0), int(5 + 9 * k), k, dir)
-	m.fx.burst(g + Vector3(0, 0.4, 0), DUST, int(10 + 16 * k), 1.6 * size, 0.6, 1.5, 0.9 * size, fwd, 65.0)
-	m.fx.burst(g + Vector3(0, 0.15, 0), STONE, int(8 + 10 * k), 2.2 * size, 0.4, 9.0, 0.6 * size, fwd, 45.0)
+	m.fx.burst(g + Vector3(0, 0.4, 0), DUST, int(10 + 16 * k), 1.6 * across, 0.6, 1.5, 0.9 * across, fwd, 65.0)
+	m.fx.burst(g + Vector3(0, 0.15, 0), STONE, int(8 + 10 * k), 2.2 * across, 0.4, 9.0, 0.6 * across, fwd, 45.0)
 	m.fx.dust(g, int(6 + 8 * k), DUST)
 	DolmImpact.blow(m, g, dmg, dir)
 
