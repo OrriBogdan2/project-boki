@@ -421,7 +421,11 @@ func _owners() -> void:
 	var scene: Node = main.current
 	for n in scene.find_children("*", "GeometryInstance3D", true, false):
 		var gi := n as GeometryInstance3D
-		var mesh: Mesh = gi.mesh if gi is MeshInstance3D else (gi.multimesh.mesh if gi is MultiMeshInstance3D and gi.multimesh else null)
+		var mesh: Mesh = null
+		if gi is MeshInstance3D:
+			mesh = gi.mesh
+		elif gi is MultiMeshInstance3D and gi.multimesh:
+			mesh = gi.multimesh.mesh
 		if mesh == null or not gi.is_visible_in_tree():
 			continue
 		var passes := 0
@@ -435,9 +439,6 @@ func _owners() -> void:
 			top = top.get_parent()
 		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
 		by[key] = int(by.get(key, 0)) + passes
-		var path := String(scene.get_path_to(gi)).split("/")
-		var lab := "/".join(Array(path.slice(1, 4)).map(func(x): return x.rstrip("0123456789@").get_slice("_", 0)))
-		by["  " + lab] = int(by.get("  " + lab, 0)) + passes
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
-	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 60).map(func(k): return "%s %d" % [k, by[k]])))
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))
