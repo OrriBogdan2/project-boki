@@ -6377,6 +6377,10 @@
   152
  ],
  "ways_scale": 1.412,
+ "play_space": {
+  "trios": 160,
+  "solos": 118
+ },
  "outposts": [
   [
    158,

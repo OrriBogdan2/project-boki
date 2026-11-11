@@ -29,7 +29,7 @@ instead, install Godot 4.6.2 (standard build, not .NET), import `project.godot` 
    when you like. See [The farm](The-Farm.md).
 5. **Your first expedition.** Open **Expedition** from the hub bar (or the signpost by the portal).
    Pick your Hunter, the Boki you bring, the tier (the Meadow first: your Boki can't be lost there) and
-   a mode: Solo (20 hunters), Duos (10 squads of two) or Trios (7 squads of three).
+   a mode: Trios (10 squads of three) or Solos (20 hunters, each on their own).
 
 ## Things worth knowing early
 

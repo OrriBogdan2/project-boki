@@ -73,6 +73,9 @@ func _start(lid: String, p: Hunter) -> void:
 	for row: Array in rules()["lines"]:
 		if row[0] == lid:
 			txt = String(row[1])
+	var solo_txt: Variant = rules()["solo_lines"].get(lid)
+	if solo_txt != null and SoloWords.solo(m.opts):
+		txt = String(solo_txt)
 	var who := String(p.kin.rec.get("name", "your Boki")) if p.kin else "your Boki"
 	line = TutorialText.fill(txt, p).replace("%s", who)
 

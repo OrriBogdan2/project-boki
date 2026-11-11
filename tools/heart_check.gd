@@ -134,7 +134,8 @@ func _early_seat(main: Node) -> void:
 		"the Heart keeps the map's site; another match seeds another Gate")
 	var p: Hunter = m.player
 	# ---- the tide
-	ok(Heart.tide_r(m) == 0.0, "no tide before it starts")
+	ok(is_equal_approx(Heart.tide_r(m), H.start_r) and H.start_r < float(rl["tide_r0"]) * H.ways_scale,
+		"the tide starts already in, on the map's play space (%.0f m)" % H.start_r)
 	m.time = 5000.0
 	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"]) * H.ways_scale),
 		"the tide has closed to its smallest ring")
@@ -148,9 +149,12 @@ func _early_seat(main: Node) -> void:
 	var edge := H.site + Vector3(half + 60.0, 0, 0)
 	var with_tide: float = m.blight.level_here(edge)
 	var t_keep := m.time
-	m.time = 0.0          # (tide not started)
+	var r_keep := H.start_r
+	m.time = 0.0          # (the closing ring's first radius, and no play space inside it: edge is in the ring)
+	H.start_r = INF
 	var without: float = m.blight.level_here(edge)
 	m.time = t_keep
+	H.start_r = r_keep
 	ok(with_tide > without or with_tide >= BlightDir.LVL_MAX - 1.0e-4,
 		"BlightDir reads the tide (%.2f vs %.2f at the same spot)" % [with_tide, without])
 	ok(Heart.tide_heat(m, far) > 0.0 and Heart.tide_heat(m, H.site) == 0.0,
@@ -169,8 +173,9 @@ func _early_seat(main: Node) -> void:
 		"embers only on presets that can afford them, inside the budget")
 	m2.time = 0.0
 	m2.step(Match.DT)
-	ok(not W.wall.wall.visible and is_equal_approx(Heart.next_r(m2), float(rl["tide_r0"]) * W.ways_scale),
-		"before the tide: no wall, and the first ring is the next ring")
+	var on_space := is_equal_approx(W.wall.wall.scale.x, W.start_r) and is_equal_approx(Heart.next_r(m2), W.start_r)
+	ok(W.wall.wall.visible and on_space,
+		"before the close: the wall stands on the play space, and that is the next ring too")
 	_free(m2)
 	m.time = 0.0
 	# ---- asleep, then charging

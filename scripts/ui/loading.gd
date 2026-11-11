@@ -37,7 +37,7 @@ const TIPS := [
 	"Shrines on the islands give a short power-up. Stand by one and hold F.",
 	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
 	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
-	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
+	"The Blight starts weak and grows the longer the expedition runs, the deeper you go, and at night.",
 ]
 ## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
 const LORE := [
@@ -96,6 +96,13 @@ func _grad(cols: Array, offs: Array, radial := false) -> GradientTexture2D:
 		gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(0, 1)
 	return gt
 
+## The tips this match can show: no Blight tips without a Blight, no squad tips in a solo run.
+static func tips_for(opts: Dictionary) -> Array:
+	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
+	if SoloWords.solo(opts):
+		tips = tips.filter(func(x): return SoloWords.leaks(String(x)) == "")
+	return tips
+
 func setup(opts: Dictionary) -> void:
 	layer = 45
 	tier = clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
@@ -118,7 +125,7 @@ func setup(opts: Dictionary) -> void:
 			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
-	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
+	var tips := tips_for(opts)
 	tip = tips[randi() % tips.size()]
 	lore = LORE[randi() % LORE.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier

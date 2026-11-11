@@ -8,7 +8,7 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 - **Tiers:** the Meadow (Boki are never lost), the Dusk Isles (opens after 2 extractions) and the
   Hollow (after 5). Each tier is a depth toward the bottom of the world (Depth 1, 2, 3; shown on the Expedition menu and the results screen). Deeper tiers have tougher monsters, more loot, rarer Boki and real risk to your
   Boki. See [Rules](Rules.md#expedition-tiers) and [Boki](Boki.md#losing-a-boki).
-- **Modes:** Solo (20 hunters), Duos (10 squads of two), Trios (7 squads of three). Bots fill the lobby.
+- **Modes:** Trios (10 squads of three, 30 hunters) or Solos (20 hunters, each on their own). Bots fill the lobby.
 - **One life.** Health and armor don't regenerate. Tonics (1) heal and armor kits (2) repair armor.
 - **Clock.** A match runs 6 minutes, then the islands fall.
 
@@ -17,10 +17,13 @@ Pick it from the Expedition menu at home: your class, your Boki, a **tier** and 
 The match opens with a short **planning phase**: the full map is up and everyone can ping where they
 want to land (bots ping too). Then the skyship crosses the map.
 
-- Your squad has a **drop leader**. The leader jumps and the rest of the squad follows in formation.
-  **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
-- After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
-  the far side is dropped.
+- Your squad has a **drop leader**. The leader launches the squad's **mini rocket** and steers it down;
+  everyone else rides along, and a ring on the ground shows where it will hit. Do nothing and the
+  squad lands together. **P** passes the lead to a squadmate riding with you (or click a name on the map).
+- **Jump** jumps out of the rocket early: you free-fall (slower than the rocket) and **Jump** again opens
+  your glider to travel further. Anyone still aboard the ship at the far side is launched.
+- The first launch shows a one-line hint, once per save each: the leader (or a solo) "You steer the rocket",
+  a rider how to jump out and open the glider. It goes as soon as you steer, jump out or land.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
@@ -169,7 +172,9 @@ The Wyrm's corruption, a faction that hunts every squad by **noise and light**.
   grace period after landing) and on the outer islands; stronger with time, toward the core, at night
   and in storms. Early Blight die fast and hit soft.
 - **Noise draws it.** Gunfire, blasts, opened chests, dashing and running all add up; quiet squads see less of it.
-- **The tide closes on the Heart.** From 15 s the Blight's ring shrinks toward the Heart's site over 4 minutes.
+- **The tide closes on the Heart.** Every match starts with the map's edge already in the Blight: its ring
+  round the Heart starts on the map's play space (smaller in Solos than in Trios), holds there, and from
+  1:30 shrinks toward the Heart's site over 8.5 minutes.
   Outside it the Blight is stronger and comes sooner, and the tide itself hurts you every second, past your
   armor: barely at first (a full-health medium Hunter lasts minutes), 26 s to die by the third of its 11 stages,
   and about 3 s once it has closed.

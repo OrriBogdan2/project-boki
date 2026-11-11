@@ -365,7 +365,7 @@ func _tide(main: Node) -> void:
 	var t0 := float(rl["tide_start_s"])
 	var close := float(rl["tide_close_s"])
 	m.time = t0 - 1.0 - m.sess_t0
-	ok(Heart.tide_stage(m) == -1, "no tide stage before the tide starts")
+	ok(Heart.tide_stage(m) == 0, "before the close the play space's edge hurts at the first stage")
 	var stages_ok := true
 	for st in Heart.TIDE_STAGES:
 		m.time = t0 + close * (st + 0.5) / Heart.TIDE_STAGES - m.sess_t0

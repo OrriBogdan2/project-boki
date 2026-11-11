@@ -140,7 +140,7 @@ func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
 var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
-var kin2: Ent = null            # the benched kin, swapped in with X
+var kin2: Ent = null            # the second kin: in the satchel, its carry passive on (KinSlots), swapped in
 var swap_cd := 0.0
 var merge_st: Dictionary = {}   # the merge (bond ultimate) while it runs: {def, t, T, giant, pulse, form, phase, kit, shell...} (KinMerge)
 var merge_cd := 0.0             # the spent window after a merge ends
@@ -216,9 +216,7 @@ var dropping := false         # gliding down from the sky at the start of a matc
 var drop_from := Vector2.INF  # where the drop started
 var diving := false           # the skydive part of the drop, before the glider opens
 var riding := false           # aboard the skyship, waiting to jump
-var drop_follow: Hunter = null  # gliding down in formation behind this squad's drop leader (see DropSquad)
-var drop_slot := 0            # which slot of the formation
-var drop_solo := false        # broke away from the squad's drop
+var rocket: DropRocket = null  # riding the squad's rocket down (still `riding`); see DropRocket
 var bless_t := 0.0
 var wup_dmg := 1.0            # your signature weapon's damage from weapon upgrades (WeaponUps): kits scale their own hits by it
 var welem := ""               # its element ("fire", "frost", ...) from a Brand upgrade: a rider on every hit (Loot.rider)
@@ -229,7 +227,6 @@ var backpack := 0              # the backpack tier worn (Backpacks): 0 is the Po
 var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
-var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -393,12 +390,7 @@ func owner_stat(stat: String) -> float:
 	return float(_kst.get(stat, 0.0))
 
 func _refresh_kin_stats() -> void:
-	var out := {}
-	var k: Kin = kin
-	if k and k.ks:
-		if kin_carry_on():
-			for ps in k.ks.carry_passives:
-				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
+	var out := KinSlots.carry_stats(self)      # the lead's and the second's carry passives, no double stack
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -1726,7 +1718,7 @@ func _ab_feedback(slot: String, kind: String) -> void:
 	m.hud.ability_feedback(slot, kind)
 	m.sfx("skill", null, -9.0, 1.15)
 
-## X: swap which of your two kin is out. The benched one rests in your satchel.
+## The swap key: your lead and second Boki trade places (KinSlots). The second rides in your satchel.
 func swap_kin(force := false) -> void:
 	if kin2 == null or riding or out or (not force and (swap_cd > 0.0 or downed)):
 		return
@@ -1839,10 +1831,11 @@ func sim(dt: float) -> void:
 		if remote:
 			net_follow(dt)
 		else:
-			pos = m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
-			prev = pos
-			vel = Vector3.ZERO
-			if ctrl == "local" and inp["jump"]:
+			pos = rocket.pos if rocket else m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
+			if rocket == null:
+				prev = pos
+				vel = Vector3.ZERO
+			if ctrl == "local" and inp["jump"] and not m.skydrop.detach(self):
 				m.ship_jump(self)
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
 				inp[k] = false
@@ -2086,11 +2079,7 @@ func _physics(dt: float) -> void:
 			hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(hv, mv * gs, gs, carry, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
-			gs = DIVE_SPEED if diving else DROP_SPEED
-			if not DropLaunch.locked(self):
-				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
-			if drop_follow != null and m.skydrop:
-				hv = m.skydrop.follow_hv(self, gs)     # in formation: the leader steers
+			hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)
 		# wind roads carry you along (either way), updrafts lift you
 		in_current = false
 		if not dropping:
@@ -2140,8 +2129,6 @@ func _physics(dt: float) -> void:
 		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
 		if dropping:
 			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
-			if drop_follow != null and m.skydrop:
-				vel.y = m.skydrop.follow_vy(self)
 		elif glide_dive.on:
 			vel.y = glide_dive.fall_vy(vel.y, dt)
 		else:
@@ -2416,7 +2403,6 @@ var air_t := 0.0                # time since you left the ground
 func _update_glide(dt: float) -> void:
 	air_t = 0.0 if grounded else air_t + dt
 	glide_lift.tick(self, dt)
-	DropLaunch.tick(self)            # the squad launch over: break off, the glider opens (item 163)
 	glide_dive.tick(self, dt)
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
@@ -2424,7 +2410,7 @@ func _update_glide(dt: float) -> void:
 		if diving:
 			var void_below: bool = m.world.is_void(pos.x, pos.z)
 			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (drop_follow != null and not drop_follow.diving):
+			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (inp.get("glide", false) and ctrl != "bot"):
 				_deploy()
 		if pos.y < -1.5:
 			dropping = false

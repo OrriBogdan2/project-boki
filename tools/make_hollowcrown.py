@@ -53,6 +53,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
   pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
   ways_scale (+)     the Ways Out radii and bands over the 216 m design (SIZE / DESIGN; tools/ways_out_sites.py)
+  play_space          {mode: m}: the Blight's ring round the Heart at the start of a match, per mode
+                      ("trios", "solos"; Heart.start_r, docs/decisions/0084)
   train (+)           {cars, speed, dwell, pier_below, path:[[x,z],...] (a closed winding loop, splined
                       from TRAIN_WAY), stations:[[x,z]] (points on the path), names}: the sky train
 """
@@ -63,6 +65,9 @@ SIZE = 305          # the map's side in tiles (= metres): the one number to chan
 DESIGN = 216        # the grid every coordinate below is written on; scale_layout() maps it onto SIZE
 K = SIZE / DESIGN
 LEVEL = 0.8
+# m round the Heart still clear of the Blight when a match starts, per mode (Heart.start_r): trios keep
+# about 90% of the land, solos (20 hunters, not 30) about 70%
+PLAY_SPACE = {"trios": 160, "solos": 118}
 
 def poly(pts, lv=0, **k):
     return dict(poly=[list(p) for p in pts], lv=lv, **k)
@@ -1087,7 +1092,7 @@ def main():
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
-               winds=[], train=train, heart=heart, ways_scale=round(K, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
+               winds=[], train=train, heart=heart, ways_scale=round(K, 3), play_space=PLAY_SPACE, outposts=outposts, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

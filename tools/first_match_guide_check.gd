@@ -4,10 +4,13 @@ extends RefCounted
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
 ##   3. every line fits the banner lane in at most two lines at 1280x720
+##   4. a solo run (Solos, squad 1) never reads a squad word: the guide lines it shows, the kill and carry hints,
+##      the loading tips and the tutorial steps; a trios run keeps its squad lines
 var bad := 0
 var m: Match
 var main: Node
 var g: FirstMatchGuide
+var seen_lines: Array = []   # every guide line the solo walk put on screen
 
 func ok(cond: bool, what: String) -> void:
 	print("FMGUIDE %s %s" % ["PASS" if cond else "FAIL", what])
@@ -48,6 +51,8 @@ func _tick(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		g.tick(0.1)
+		if g.line != "":
+			seen_lines.append(g.line)
 		t += 0.1
 
 func _walk() -> void:
@@ -96,7 +101,7 @@ func _walk() -> void:
 	_tick(1.6)
 	foe.pos = p.pos + Vector3(10, 0, 0)
 	_tick(0.2)
-	ok(g.id == "squad" and g.line.contains("squad"), "another squad close by: fight or avoid (%s)" % g.line)
+	ok(g.id == "squad" and g.line.contains("hunter"), "solo, a rival close by: fight or avoid (%s)" % g.line)
 	foe.pos = p.pos + Vector3(300, 0, 0)
 	_tick(0.2)
 	ok(g.line == "", "they are gone: it clears")
@@ -127,6 +132,8 @@ func _walk() -> void:
 	m.step(Match.DT)
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
+	_solo(o)
+	_trios()
 
 func _fit() -> void:
 	var w: float = TutorialHud.lanes(Vector2(1280, 720))["banner"].size.x - 28.0
@@ -135,3 +142,48 @@ func _fit() -> void:
 		var fit := TutorialText.wrap(m.hud.big, txt, int(720 * 0.085 * 0.42), w, 2)
 		var n: int = fit["lines"].size()
 		ok(n <= 2 and int(fit["px"]) >= 12, "%s fits the banner lane (%d lines, %d px)" % [row[0], n, fit["px"]])
+
+func _leaks(text: String) -> bool:
+	return SoloWords.leaks(text) != ""
+
+func _solo(o: Dictionary) -> void:
+	ok(SoloWords.solo(o) and SoloWords.solo(m.opts), "the walk is a solo run (squad 1)")
+	var leaky := seen_lines.filter(_leaks)
+	var what := "solo: %d guide lines, no squad word %s" % [seen_lines.size(), str(leaky)]
+	ok(seen_lines.size() > 5 and leaky.is_empty(), what)
+	ok(seen_lines.any(func(t: String): return t.contains("hunter")), "solo: the rival line says hunter")
+	var bad_rows := []
+	for row: Array in FirstMatchGuide.rules()["lines"]:
+		var txt := String(FirstMatchGuide.rules()["solo_lines"].get(row[0], row[1]))
+		if SoloWords.leaks(txt) != "":
+			bad_rows.append(row[0])
+	ok(bad_rows.is_empty(), "solo: every guide line, with its solo version, is clean (%s)" % str(bad_rows))
+	var steps: Array = Content.rules("tutorial")["steps"]
+	ok(steps.all(func(s: Array): return SoloWords.leaks(String(s[1])) == ""), "the tutorial steps have no squad word")
+	var Loading := preload("res://scripts/ui/loading.gd")
+	var tips: Array = Loading.tips_for(m.opts)
+	ok(tips.size() > 10 and not tips.any(_leaks), "solo: %d loading tips, none about a squad" % tips.size())
+	ok(Loading.tips_for({"squad": 3}).size() > tips.size(), "trios: the squad tips stay")
+	_solo_hints()
+
+func _solo_hints() -> void:
+	var p: Hunter = m.player
+	Save.d["tutorial"] = {}
+	m.hud.msgs.clear()
+	var mob := m.spawn_mob("brute", p.pos + Vector3(5, 0, 0))
+	LastHitHint.kill(m, mob, p)
+	CarryHints.claimed(m, p, {"name": "Cindle", "species": "cindle"})
+	var shown: Array = m.hud.msgs.texts()
+	ok(LastHitHint.SOLO_KILL_TEXT in shown and not (LastHitHint.KILL_TEXT in shown), "solo: the solo last-hit hint")
+	ok(not shown.any(_leaks), "solo: no hint on the card has a squad word (%s)" % str(shown))
+	var full := Capture.full_text(m, p)
+	ok(Capture.mate_with_room(m, p) == null and not _leaks(full), "solo: full carry-out, no teammate (%s)" % full)
+
+func _trios() -> void:
+	var t := Match.new()
+	t.opts = {"squad": 3}
+	var g3 := FirstMatchGuide.new()
+	g3.m = t
+	g3._start("squad", m.player)
+	ok(g3.line.contains("squad"), "trios: the rival line still says squad (%s)" % g3.line)
+	t.free()

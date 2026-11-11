@@ -482,7 +482,7 @@ func status_for(p: Hunter) -> Dictionary:
 			if x["contested"]: t += "  ·  CONTESTED: clear the yard"
 			elif not mine: t += "  ·  a rival's uplink: hold the yard to take it"
 			elif int(x.get("crew", 0)) > 1: t += crew_text(int(x["crew"]))
-			else: t += "  ·  bring your squad: more of you charge it faster"
+			elif not SoloWords.solo(m.opts): t += "  ·  bring your squad: more of you charge it faster"
 			return {"text": t, "prog": float(x["prog"]), "col": Color("ff8a6a") if x["contested"] or not mine else ExitModels.UPLINK}
 		if x["state"] == "charging" and int(x["team"]) == p.team and x.get("draining", false) and p.flat_dist(x["pos"]) < 80.0:
 			# our uplink with nobody in its yard: the charge running out, and how long it has

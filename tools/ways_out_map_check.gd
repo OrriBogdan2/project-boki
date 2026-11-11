@@ -91,7 +91,7 @@ func _map(m: Match, L: Dictionary, id: String) -> void:
 	for st in sites:
 		var d: float = (st[1] as Vector2).distance_to(site)
 		var t: float = st[2] + float(mr["seat_window_s"])
-		var ring := Heart.ring_at(t, s)
+		var ring := minf(Heart.start_r_of(L, {"squad": 1}), Heart.ring_at(t, s))      # (solos: the smallest play space)
 		ok(d <= ring and d > final_r,
 			"%s: %s is %.1f m out, ring %.1f m at %.0f s, final ring %.1f m" % [tag, st[0], d, ring, t, final_r])
 
