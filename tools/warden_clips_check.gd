@@ -307,6 +307,7 @@ func _air_legs(id: String) -> void:
 	ok(snaps.is_empty(), "%s: landing mid-cast keeps the legs off the planted stance (%s)" % [id, str(snaps)])
 	for p in pair:
 		p[0].free()
+
 ## Owner 11-08 item 17: the out-of-charges dash (bul_lumber) looks like where it was pressed: the short ground dash
 ## on the ground, the heavy air lunge in the air; the air lunge gives way the moment he lands or opens the glider.
 func _air_pick(m: Node3D, an: HunterAnim, sync: WardenGlb.Sync, clips: WardenClips, st: Dictionary) -> void:
