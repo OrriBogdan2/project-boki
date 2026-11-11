@@ -281,7 +281,7 @@ func _default_match(main: Node) -> void:
 	m.set_process(false)
 	ok(m.rolling == null and m.ships.is_empty() and m.sess_t0 == 0.0, "without the option it's the fixed match")
 	var map_size := int(World.load_layout(World.layout_for_tier(0)).get("size", World.BIG_SIZE))
-	ok(absf(m.length - Data.MATCH["length"] * 1.7) < 0.01 and m.world.w == map_size and m.world.layout_id == World.layout_for_tier(0),
+	ok(absf(m.length - Heart.r("match_s")) < 0.01 and m.world.w == map_size and m.world.layout_id == World.layout_for_tier(0),
 			"same length (%.0f s) and map (%d tiles)" % [m.length, m.world.w])
 	var dock: Dictionary = {}
 	for x in m.exits.list:
