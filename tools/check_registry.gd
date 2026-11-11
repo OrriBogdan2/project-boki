@@ -221,6 +221,8 @@ const CHECKS := {
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
+	"--pet-block-check": ["res://tools/pet_block_check.gd", "pet_block_check", "check"],      # a Boki never blocks work
+	"--pet-block-shots": ["res://tools/pet_block_check.gd", "pet_block_check", "shots"],      # with --write-movie
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
