@@ -9,7 +9,8 @@ extends RefCounted
 ##   gone    the wisp stopped being a wisp some other way (revived, bled out)
 ## Online the stomper's game decides and sends ["stomp", stomper, wisp, "go" | why, style]; every game
 ## plays it, and the wisp's own game pins its wisp and, on "done", eliminates it.
-## How it looks is the stomper's stomp style (StompLook); the timing is the same for every style.
+## How the stomper moves is their stomp style (StompLook), the same timing for every style; the pin ring
+## and how the wisp goes (or gets free) are StompFx's.
 
 const COMMIT := 0.2        # s: hold interact this long on an enemy wisp to start it (a tap never commits you)
 const TIME := 3.0          # s, start to kill: Supervive's ~3 s execute (SUPERVIVE_DATA.md "Execute")
@@ -34,6 +35,7 @@ static func start(m: Match, h: Hunter, o: Hunter, style_id := "") -> void:
 	h.stomp = {"o": o, "t": 0.0, "at": h.pos, "o_at": o.pos, "style": sid}
 	h.finish_t = 0.0
 	o.set_meta("stomped_by", h)
+	m.fx.stomp.pin(o, h)
 	Life.trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
@@ -49,13 +51,14 @@ static func end(m: Match, h: Hunter, why: String) -> void:
 	if is_instance_valid(o) and o.has_meta("stomped_by") and o.get_meta("stomped_by") == h:
 		o.remove_meta("stomped_by")
 	Life.trace(m, "stomp end %s (%s)" % [h.pname, why])
+	if is_instance_valid(o):
+		m.fx.stomp.release(o, why)
 	if m.net_on and not h.remote:
 		m.net_event(["stomp", h.nid, o.nid if is_instance_valid(o) else "", why])
 	if why == "broken":
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
 		m.sfx("whoosh", h.pos, -6.0, 1.3)
 	elif why == "done" and is_instance_valid(o) and o.downed and not o.out:
-		m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
 		m.sfx("crit", o.pos, -2.0, 0.7)
 		if not o.remote:
 			m.eliminate(o, h, "executed")
@@ -82,7 +85,7 @@ static func tick(m: Match, dt: float) -> void:
 		var b0 := beat(h)
 		h.stomp["t"] = float(h.stomp["t"]) + dt
 		if fposmod(b0, 1.0) < SLAM and fposmod(beat(h), 1.0) >= SLAM:
-			_slam(m, h, o)
+			_slam(m, h)
 		if h.remote:
 			if float(h.stomp["t"]) > TIME + NET_GRACE: end(m, h, "gone")      # its game went quiet
 			continue      # its own game says how it ends
@@ -97,12 +100,10 @@ static func _pin(h: Hunter, at: Vector3) -> void:
 	h.pos = at
 	h.vel = Vector3.ZERO
 
-static func _slam(m: Match, h: Hunter, o: Hunter) -> void:
+static func _slam(m: Match, h: Hunter) -> void:
 	m.fx.dust(h.pos, 10)
 	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, Color(1, 0.8, 0.7, 0.6), 0.25)
 	m.sfx("thump", h.pos, -2.0, 0.85)
-	if is_instance_valid(o):
-		m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.5, -4.0)
 
 ## ["stomp", stomper, wisp, "go" | why, style] from the stomper's game.
 static func net_in(m: Match, x: Array) -> void:

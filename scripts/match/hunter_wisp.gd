@@ -6,15 +6,22 @@ extends RefCounted
 ##   hero --down--> pop in (hero hidden, Wisp puffs out) -> on (slow bob, trails heavily behind the hunter
 ##   and settles when they stop, a quiet hum)
 ##   on --revive--> pop out (Wisp brightens and fades, hero grows back from the look's hero_from with a squash) -> hero
-##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
+##   on --bleed out--> snuffed (the Wisp breaks into sparks)
+##   on --stomped--> collapse (StompFx: the white core gutters out, the Wisp shrinks into the ground, a
+##   small puff; no blast) -> gone. While a stomp pins it the Wisp is pressed flat on every slam, and a
+##   broken stomp lets it bob free.
 ## The look (colours, body, drift, hum, timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
 const IN := "in"
 const ON := "on"
 const OUT := "out"
+const COLLAPSE := "collapse"
 const POP_OVERSHOOT := 1.70158   # the "back" ease's overshoot: the pop swells a little past full size
 const POP_FROM := 0.3         # fraction of full size the Wisp pops in from
 const FLASH_BOOST := 3.0      # extra glow at the instant of a pop
+const PRESS_SQUASH := 0.45    # how much of its height a fully pressed Wisp loses (StompFx.press)
+const PRESS_DROP := 0.16      # m a fully pressed Wisp sinks toward the ground
+const CORE_PART := 0.4        # fraction of a collapse the core takes to gutter out; it shrinks away after
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
 ## size (a pop-out) and the Wisp.
@@ -29,6 +36,7 @@ static func tick(h: Hunter, dt: float) -> void:
 		IN: _pose_in(h, st, dt)
 		ON: _pose_on(h, st, dt)
 		OUT: _pose_out(h, st, dt)
+		COLLAPSE: _pose_collapse(h, st, dt)
 
 ## True while the hero model stays hidden (the Wisp stands in).
 static func hides(h: Hunter) -> bool:
@@ -42,6 +50,23 @@ static func node_of(h: Hunter) -> Node3D:
 static func mode_of(h: Hunter) -> String:
 	return String(_state(h)["mode"])
 
+## True while an executed Wisp is still collapsing (its hunter is shown though already out).
+static func collapsing(h: Hunter) -> bool:
+	return String(_state(h)["mode"]) == COLLAPSE
+
+## A stomp finished on this Wisp (StompFx, on every game): it collapses instead of breaking into sparks.
+static func collapse(h: Hunter) -> void:
+	var st := _state(h)
+	if st["mode"] == IN or st["mode"] == ON:
+		st["mode"] = COLLAPSE
+		st["t"] = 0.0
+		Sfx.loop_stop(hum_key(h))
+
+## A stomp on this Wisp broke (StompFx): it bobs up and settles, free again.
+static func bob_free(h: Hunter) -> void:
+	var st := _state(h)
+	st["free_at"] = float(st["t"])
+
 ## The key of this hunter's hum loop in Sfx.
 static func hum_key(h: Hunter) -> String:
 	return "wisp%d" % h.get_instance_id()
@@ -49,14 +74,17 @@ static func hum_key(h: Hunter) -> String:
 static func _state(h: Hunter) -> Dictionary:
 	if not h.has_meta("wisp"):
 		var fresh := {"mode": "", "t": 0.0, "node": null, "look": {}}
-		fresh.merge({"last": Vector3.ZERO, "lag": Vector3.ZERO, "base": Vector3.ONE})
+		fresh.merge({"last": Vector3.ZERO, "lag": Vector3.ZERO, "base": Vector3.ONE, "free_at": -9.0})
 		h.set_meta("wisp", fresh)
 	return h.get_meta("wisp")
 
 static func _advance(h: Hunter, st: Dictionary) -> void:
 	var mode := String(st["mode"])
 	var look: Dictionary = st["look"]
-	if h.out and (mode == IN or mode == ON):
+	if mode == COLLAPSE:
+		if float(st["t"]) >= float(look["collapse"]["time"]) and (h.out or not h.downed):
+			_finish(h, st)      # (a game that hasn't heard the "out" yet keeps the shrunk Wisp hidden)
+	elif h.out and (mode == IN or mode == ON):
 		_snuff(h, st)
 	elif h.downed and not h.out and (mode == "" or mode == OUT):
 		_pop_in(h, st)
@@ -85,6 +113,7 @@ static func _pop_in(h: Hunter, st: Dictionary) -> void:
 	st["look"] = look
 	st["mode"] = IN
 	st["t"] = 0.0
+	st["free_at"] = -9.0
 	st["last"] = h.position
 	st["lag"] = Vector3.ZERO
 	_pop_fx(h, look["pop_in"], float(look["hover"]))
@@ -154,10 +183,47 @@ static func _pose_in(h: Hunter, st: Dictionary, dt: float) -> void:
 
 static func _pose_on(h: Hunter, st: Dictionary, dt: float) -> void:
 	var node := st["node"] as Node3D
-	node.scale = Vector3.ONE
+	var press := StompFx.press(h)
+	node.scale = _pressed(press)
 	_set_glow(node, 1.0, 1.0)
 	_pose_body(h, st, dt)
+	node.position.y -= PRESS_DROP * press
+	_bob_free(st, node)
 	_hum(h, st)
+
+## The Wisp's scale pressed down by p (0..1): flatter and a little wider.
+static func _pressed(p: float) -> Vector3:
+	return Vector3(1.0 + 0.5 * PRESS_SQUASH * p, 1.0 - PRESS_SQUASH * p, 1.0 + 0.5 * PRESS_SQUASH * p)
+
+## Let go by a broken stomp: two bounces that die out, stretching up as it rises.
+static func _bob_free(st: Dictionary, node: Node3D) -> void:
+	var spec: Dictionary = (st["look"] as Dictionary)["free"]
+	var k := (float(st["t"]) - float(st["free_at"])) / float(spec["time"])
+	if k < 0.0 or k >= 1.0:
+		return
+	var up := absf(sin(k * TAU)) * (1.0 - k)
+	node.position.y += float(spec["hop"]) * up
+	node.scale *= Vector3(1.0 - 0.12 * up, 1.0 + 0.25 * up, 1.0 - 0.12 * up)
+
+## Stomped to the end: pressed flat while the white core gutters out, then shrinking into the ground,
+## and a small puff of motes as it goes. No sparks: nothing blows up.
+static func _pose_collapse(h: Hunter, st: Dictionary, dt: float) -> void:
+	var node := st["node"] as Node3D
+	if node == null:
+		return
+	var look: Dictionary = st["look"]
+	var spec: Dictionary = look["collapse"]
+	var secs := float(spec["time"])
+	var k := clampf(float(st["t"]) / secs, 0.0, 1.0)
+	var gutter := clampf(k / CORE_PART, 0.0, 1.0)
+	var shrink := clampf((k - CORE_PART) / (1.0 - CORE_PART), 0.0, 1.0)
+	node.scale = _pressed(gutter) * maxf(1.0 - shrink * shrink, 0.001)
+	node.position.y = (float(look["hover"]) - PRESS_DROP) * (1.0 - shrink)
+	_set_glow(node, 1.0, 1.0 - 0.5 * shrink)
+	(node.get_meta("mat") as ShaderMaterial).set_shader_parameter("core_out", gutter)
+	if float(st["t"]) - dt < secs and float(st["t"]) >= secs and h.visible:
+		h.m.fx.dust(h.position, int(spec["puff"]))
+		h.m.sfx(String(look["snuff"]["sfx"]), h.position, -10.0, 0.6)
 
 ## Slow and heavy: a slow bob, and the body stays behind in the world when the hunter moves (up to the
 ## look's drag), leaning back a little, then catches up over the look's settle time once they stop.

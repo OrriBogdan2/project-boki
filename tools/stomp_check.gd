@@ -10,6 +10,10 @@ extends RefCounted
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
+##  7. Looks (StompFx, HunterWisp): a pin ring tightens on the wisp and the wisp is pressed flat on the
+##     slams; a stun shatters the ring and the wisp bobs free; the finish collapses the wisp (shown
+##     though out, no burst or kill column) and the ring closes; all from the pool, no node made. The
+##     "stomp" event's go/broken/done plays the same on a game that only hears it.
 ## Never touches the save.
 
 var bad := 0
@@ -26,6 +30,16 @@ func _run(sec: float) -> void:
 	while t < sec:
 		m.step(Match.DT)
 		t += Match.DT
+
+## Steps and draws (HunterWisp and StompFx run in the draw), for the looks.
+func _look(sec: float) -> void:
+	var t := 0.0
+	while t < sec:
+		m.step(Match.DT)
+		t += Match.DT
+		for h in m.hunters:
+			h.render(Match.DT, 1.0)
+		m.fx.stomp.tick(Match.DT)
 
 func _spot(h: Hunter, at: Vector3) -> void:
 	h.teleport(at)
@@ -83,6 +97,7 @@ func run(main: Node) -> void:
 	var home := m.world.random_ground()
 	_check_lock(home)
 	_check_stun(home + Vector3(6, 0, 0))
+	_check_looks(home + Vector3(0, 0, -6))
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
 	_check_styles()
@@ -129,16 +144,62 @@ func _check_stun(at: Vector3) -> void:
 		_run(Match.DT)
 	ok(W.downed and not W.out and W.pos.distance_to(w0) > 0.2, "...and drifts again (%.2f m)" % W.pos.distance_to(w0))
 
+func _check_looks(at: Vector3) -> void:
+	var fx := m.fx.stomp
+	var nodes0 := fx.get_child_count()
+	_setup(at)
+	_look(0.3)
+	_commit()
+	_look(0.3)
+	var slot := fx.ring_of(W)
+	var r0 := float(slot.get("r", 0.0))
+	var hover := float(WispLook.get_look("")["hover"])
+	var low := 1.0
+	var t0 := m.time
+	while m.time - t0 < Stomp.TIME / Stomp.BEATS:
+		_look(Match.DT)
+		low = minf(low, HunterWisp.node_of(W).scale.y)
+	ok(slot.get("mode") == "pin" and float(slot["r"]) < r0 and r0 <= StompFx.RING_FROM,
+		"a pin ring tightens on the wisp (%.2f -> %.2f m)" % [r0, float(slot.get("r", 0.0))])
+	ok(low < 0.8, "the wisp is pressed flat on a slam (height x%.2f)" % low)
+	foe.hurt(5.0, m.player, {"stun": 0.6})
+	_look(Match.DT * 3)
+	var shards: Array = slot.get("shards", [])
+	ok(slot.get("mode") == "shatter" and shards.all(func(s): return (s as MeshInstance3D).visible)
+		and not (slot["ring"] as MeshInstance3D).visible, "a stun shatters the ring into arcs")
+	var high := 0.0
+	for i in 12:
+		_look(Match.DT)
+		high = maxf(high, HunterWisp.node_of(W).position.y)
+	ok(high > hover + 0.1, "...and the wisp bobs free (up to %.2f m, hovers at %.2f)" % [high, hover])
+	_look(0.6)
+	ok(fx.ring_of(W).is_empty() and slot["shards"].all(func(s): return not (s as MeshInstance3D).visible),
+		"...then the arcs are gone")
+
 func _check_finish(at: Vector3) -> void:
 	_setup(at)
+	_look(0.3)
+	var nodes0 := m.fx.stomp.get_child_count()
 	_commit()
 	var t0 := m.time
+	var radial := 0      # bursts and rings made in the step that ends it (the slams' rings come before)
 	while not W.out and m.time - t0 < Stomp.TIME + 1.0:
-		_run(Match.DT)
+		var radial0 := m.fx.radial
+		_look(Match.DT)
+		radial = m.fx.radial - radial0
 	var took := m.time - t0
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "left alone the stomp executes the wisp")
 	ok(absf(took - Stomp.TIME) <= 0.05, "at %.2fs (Stomp.TIME %.1fs)" % [took, Stomp.TIME])
 	ok(foe.stomp.is_empty(), "and the stomper is free again")
+	_look(Match.DT)
+	ok(HunterWisp.collapsing(W) and W.visible, "the finish collapses the wisp, shown though out")
+	ok(radial == 0, "...with no burst or kill column (%d new)" % radial)
+	ok(m.fx.stomp.ring_of(W).get("mode") == "close", "...and the ring closes on it")
+	_look(0.6)
+	var gone: bool = HunterWisp.node_of(W) == null and not HunterWisp.collapsing(W)
+	ok(gone and m.fx.stomp.ring_of(W).is_empty(), "then the wisp and its ring are gone")
+	ok(m.fx.stomp.get_child_count() == nodes0 and nodes0 == StompFx.POOL * (1 + StompFx.SHARDS),
+		"every stomp look comes from the pool (%d nodes, made once)" % nodes0)
 
 func _check_net(at: Vector3) -> void:
 	# the last wisp was executed (a knock now would wipe its team): the player stomps a rival instead
@@ -165,13 +226,18 @@ func _check_net(at: Vector3) -> void:
 	var pinned: bool = W.has_meta("stomped_by") and W.get_meta("stomped_by") == foe and W.pos.distance_to(w0) < 0.05
 	ok(pinned and foe.stomp["style"] == "thunder_stomp",
 		"a \"go\" from another game pins this game's wisp, in the sender's style")
+	_look(0.1)
+	ok(m.fx.stomp.ring_of(W).get("mode") == "pin", "...under a pin ring here too")
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "broken"])
 	ok(foe.stomp.is_empty() and W.downed and not W.out and not W.has_meta("stomped_by"),
 		"a \"broken\" lets it go alive")
+	ok(m.fx.stomp.ring_of(W).get("mode") == "shatter", "...and shatters its ring")
+	_look(0.6)
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "go", ""])
-	_run(0.5)
+	_look(0.5)
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "done"])
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "a \"done\" executes this game's wisp")
+	ok(HunterWisp.collapsing(W) and m.fx.stomp.ring_of(W).get("mode") == "close", "...collapsing it as here")
 	foe.remote = false
 
 func _check_styles() -> void:

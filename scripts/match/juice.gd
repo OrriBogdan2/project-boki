@@ -112,15 +112,17 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
 
-## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
+## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks, unless a
+## stomp finished their Wisp (its collapse is the look: nothing blows up).
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
 	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-	var c := h.pos + Vector3(0, 0.6, 0)
-	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
-	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
-	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
+	if not HunterWisp.collapsing(h):
+		var c := h.pos + Vector3(0, 0.6, 0)
+		m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
+		m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
+		m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
 	if credit == m.player and h != m.player:
 		m.sfx("kill", null, -3.0)
 		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)

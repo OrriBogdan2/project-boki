@@ -22,9 +22,12 @@ var sparks: Array[CPUParticles3D] = []    # velocity-stretched streaks (shaders/
 var si := 0
 var flash_pool: Array[MeshInstance3D] = []
 var fi := 0
+var stomp: StompFx                # the stomp's pin rings (made once, like the pools above)
 
 func _ready() -> void:
 	particles = PARTICLES * float(Settings.q("fx"))
+	stomp = StompFx.new()
+	add_child(stomp)
 	particle_mat = StandardMaterial3D.new()
 	particle_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	particle_mat.vertex_color_use_as_albedo = true
