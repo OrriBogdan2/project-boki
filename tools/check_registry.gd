@@ -231,7 +231,7 @@ const CHECKS := {
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],      # --shots-dir=<dir>
 	"--xp-tracker-shots": ["res://tools/xp_tracker_shots.gd", "xp_tracker_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
-	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],      # --shots-dir=<dir> --res=WxH
+	"--armour-bar-shots": ["res://tools/armour_bar_shots.gd", "armour_bar_shots", null],  # --shots-dir=<dir> --res=WxH
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
 	"--ping-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "ping"],
 	"--combo-mark-shots": ["res://tools/combo_mark_shots.gd", "combo_mark_shots", null],  # overhead combo tag strips
@@ -366,7 +366,7 @@ const CHECKS := {
 	"--boki-box-check": ["res://tools/boki_box_check.gd", "boki_box_check", null],      # summon ring + tags on the Boki
 	"--wisp-steal-check": ["res://tools/wisp_steal_check.gd", "wisp_steal_check", null],      # docs/decisions/0041
 	"--stolen-hud-check": ["res://tools/stolen_hud_check.gd", "stolen_hud_check", null],      # --shots-dir=<dir>
-	"--boki-carry-check": ["res://tools/boki_carry_check.gd", "boki_carry_check", null],      # --shots-dir=<dir> --res=WxH
+	"--boki-carry-check": ["res://tools/boki_carry_check.gd", "boki_carry_check", null],  # --shots-dir=<dir> --res=WxH
 	"--wisp-rules-check": ["res://tools/wisp_rules_check.gd", "wisp_rules_check", null],      # docs/decisions/0045
 	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],      # docs/decisions/0044
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
