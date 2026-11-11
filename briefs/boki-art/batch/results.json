@@ -111464,5 +111464,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_nettlynx_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_oarlet",
+    "name": "Oarlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_oarlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_murmurling",
+    "name": "Murmurling (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_murmurling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_nymphane",
+    "name": "Nymphane (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_nymphane_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_mumblet",
+    "name": "Mumblet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mumblet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_murmuron",
+    "name": "Murmuron (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_murmuron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_narfoil",
+    "name": "Narfoil (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_narfoil_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_mycroll",
+    "name": "Mycroll (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mycroll_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_olmlet",
+    "name": "Olmlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_olmlet_1.jpg",
+    "ok": true
   }
 ]
