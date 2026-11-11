@@ -7,7 +7,7 @@ var status: Label
 var ready_btn: Button
 var start_btn: Button
 var is_ready := false
-var mode_box: VBoxContainer      # the ModeCards row
+var mode_box: VBoxContainer      # the ModeCards stack
 
 func setup(o: Dictionary) -> void:
 	opts = o

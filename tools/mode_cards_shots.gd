@@ -51,8 +51,10 @@ func run(m: Node) -> void:
 		await main.get_tree().process_frame
 		_cards_into_view(home)
 		await _shot("panel_" + mode)
-	await main.show_screen("lobby", {})
-	await main.get_tree().create_timer(2.5).timeout
+	home.queue_free()
+	var lobby: Control = load("res://scripts/ui/lobby.gd").new()
+	var layer: CanvasLayer = main._layer(lobby)
+	layer.layer = 100      # over whatever the home left up
 	await _shot("lobby_solos")
 	print("MODE-CARDS-SHOT DONE")
 	main.get_tree().quit()
