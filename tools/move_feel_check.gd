@@ -45,6 +45,7 @@ const T := {
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
 	"air_reverse_dv":          [">=", 5.0, "m/s", "[owner 11-08] strong WASD air control"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
+	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] UE brakes a let-go the same under a cast: the widest cast stop vs plain stop gap over the 12"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
@@ -239,6 +240,7 @@ func run(main: Node) -> void:
 	_dash_exit()
 	_brake_exact()
 	_dash_curves()
+	_brake_cast()
 	_plain_dash()
 	_kit_dashes()
 	_abyss_updraft()
@@ -805,6 +807,47 @@ func _tender_glide() -> void:
 	rec("dash_curve_tender_air_dist", (P.pos.x - x0) / float(air["dist"]))
 	rec("dash_curve_tender_air_time", speeds.size() * DT / float(air["time"]))
 	rec("dash_curve_tender_air_exit_k", float(speeds[-1]) / float(speeds.max()))
+
+## Let go of the keys and press RMB in the same frame at full speed, all 12 Hunters: the source brakes a let-go
+## the same under a cast (UE CalcVelocity brakes whenever the keys are off; a cast's move scale only caps the
+## walk, a CastHold hover steers like the ground), so the stop slide must match the plain stop. A tap that
+## moves the Hunter itself (a step, a hop, a knock, leaving the ground) is printed and not compared.
+func _brake_cast() -> void:
+	var kit_was := P.arch
+	var gap := 0.0
+	for id in Arch.ids():
+		P.cls = Arch.weight(id)          # (set_arch swaps a kit from another class for the class's default)
+		P.set_arch(id)
+		var plain := _cast_stop(false)
+		var cast := _cast_stop(true)
+		var row := "brake_cast %-11s plain %.3f m %.3f s, cast %.3f m %.3f s" % [id, plain["dist"], plain["t"], cast["dist"], cast["t"]]
+		if cast["moved"]:
+			print("MFEEL note %s: RMB moves him itself, no stop compare" % row)
+			continue
+		var d := absf(float(cast["dist"]) - float(plain["dist"]))
+		gap = maxf(gap, d)
+		ok(d <= 0.05 and float(cast["t"]) > 0.0, row)
+	rec("brake_cast_gap_m", gap)
+	P.cls = "medium"
+	P.set_arch(kit_was)
+	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+
+## A run to full speed, then the keys off (and RMB pressed the same frame when cast): the stop's distance
+## and time, and whether the kit moved him (a dash, a knock, leaving the ground).
+func _cast_stop(cast: bool) -> Dictionary:
+	_reset(flat + Vector3(-3.0, 0, 0))
+	P.inp["move"] = Vector2(1, 0)
+	_steps(30)
+	var x0 := P.pos.x
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec"] = cast
+	var moved := false
+	var ts := -1.0
+	for i in 60:
+		m.step(DT)
+		moved = moved or P.roll_t > 0.0 or P.fly_t > 0.0 or P.knock_t > 0.0 or not P.grounded
+		if ts < 0.0 and _hv(P).length() < 0.05: ts = (i + 1) * DT
+	return {"dist": P.pos.x - x0, "t": ts, "moved": moved}
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
