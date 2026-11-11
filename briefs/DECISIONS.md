@@ -599,3 +599,5 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Mask-equip animation lasts ~5 s with readable text (owner 11-11).
 - Building placement keeps walkable clearance; no trapped Boki. Near water = auto-water + growth bonus; away = water it yourself. All farm blocks climbable (owner 11-11).
 - Pick-one panels: one click on the card takes it (owner 11-11).
+
+- 2026-11-11 (owner, 6:55 PM EST): KEEP Ringrove as is (current 2D + 3D) for now; its 3D model is good. Mycroll-line round 3 (Willow final / new Sporcupine, /home/boki/meshy/ringrove-options3) is PARKED: do not replace or regenerate Ringrove art or GLB.
