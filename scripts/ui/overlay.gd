@@ -5,7 +5,8 @@ extends CanvasLayer
 
 signal closed
 
-const SETTINGS_TABS := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+const SETTINGS_TABS := ["Main", "Controls", "Gameplay", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+const MAIN_TABS := 2            # the first tabs are always shown; the rest wait behind "More..."
 
 var root: Control
 var dim: ColorRect              # the blurred backdrop (UI.backdrop)
@@ -14,7 +15,9 @@ var fps_lbl: PerfOverlay
 var page := ""                  # "" when nothing is open
 var ctx := ""                   # title | home | town | match
 var stack: Array = []           # pages to go back to with Esc
-var tab := "Gameplay"
+var tab := "Main"
+var more_tabs := false          # the other settings tabs are showing
+var more_keys := false          # the less common key binds are showing
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
 var listen_lbl: Label = null
@@ -60,6 +63,8 @@ func admin_allowed() -> bool:
 	return not OS.has_feature("web") or Social.is_owner
 
 # ------------------------------------------------------------------ input
+var pause_acts: Array[Callable] = []   ## the Esc menu's numbered actions (keys 1-5)
+
 func _input(event: InputEvent) -> void:
 	if listening != "":
 		if event is InputEventKey and event.pressed and not event.echo:
@@ -95,6 +100,13 @@ func _input(event: InputEvent) -> void:
 		if (k == KEY_F1 or (k == KEY_QUOTELEFT and not typing)) and admin_allowed() and Game.main and ctx_now() != "title":
 			if page == "admin": close()
 			else: open_admin()
+			get_viewport().set_input_as_handled()
+			return
+	if page == "pause" and event is InputEventKey and event.pressed and not event.echo \
+			and not root.get_children().any(func(c): return c is UI.Modal):
+		var n := (event as InputEventKey).physical_keycode - KEY_1
+		if n >= 0 and n < pause_acts.size():
+			pause_acts[n].call()
 			get_viewport().set_input_as_handled()
 			return
 	if page != "" and (event.is_action_pressed("menu") or (event is InputEventJoypadButton and event.is_action_pressed("ui_cancel"))):
@@ -211,8 +223,8 @@ func close() -> void:
 	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
-## The Esc menu: Resume on top, the places you go most next, the rare ones as quiet links, and
-## leaving at the bottom.
+## The Esc menu: Continue, Settings, More... (the rarely used ones, folded), then leaving at the bottom.
+## Admin tools are not listed (F1 opens them for the owner).
 func open_pause(where: String) -> void:
 	ctx = where
 	Sfx.play("ui_open", null, -10.0)
@@ -220,68 +232,79 @@ func open_pause(where: String) -> void:
 	page = ""
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
-	var res: Button = _pause_item(v, "Resume", "next", close, "Esc", "Primary")
-	var psc = Game.main.screen_node() if where == "match" and Game.main else null
-	var practice: Practice = Practice.of(psc) if psc is Match else null
-	if practice:
-		_pause_item(v, "Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
-		_pause_item(v, "Practice ranks", "plus", func(): open_practice(practice.m.player))
-	if where != "match":
-		_pause_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
-	if where == "home" and Game.main:
-		_pause_item(v, "Training Grounds", "jump", func():
-			close()
-			Game.main.screen_node()._start_training())
-	_pause_item(v, "Settings", "gear", func():
-		if tab == "Controls": tab = "Gameplay"
-		open_settings())
-	_pause_item(v, "Controls", "dash", open_controls)
-	if where != "match":
-		_pause_item(v, "Save files", "satchel", open_saves)
-	# the rarely used ones: quiet text links in a row
-	var minor := HFlowContainer.new()
-	minor.add_theme_constant_override("h_separation", 4); minor.add_theme_constant_override("v_separation", 2)
-	if where == "home":
-		minor.add_child(UI.ghost("Change your look", func():
-			close()
-			Game.goto("hatch", {"create": true})))
+	var bw := 388.0
+	pause_acts.clear()
+	var item := func(txt: String, icon: String, cb: Callable, tier := "") -> Button:
+		var n := pause_acts.size() + 1
+		pause_acts.append(cb)
+		var b := UI.button(txt, cb, bw, icon)
+		if tier != "": b.theme_type_variation = tier
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		UI.with_key(b, str(n))
+		v.add_child(b)
+		return b
 	var scr = Game.main.screen_node() if Game.main else null
-	if where == "home" and scr:
-		minor.add_child(UI.ghost("Photo mode", func():
+	var open_set := func():
+		if tab == "Controls": tab = "Main"
+		open_settings()
+	var res: Button = item.call("Continue", "next", close, "Primary")
+	item.call("Settings", "gear", open_set)
+	var more: Button = item.call("More...", "satchel", func(): pass)
+	pause_acts[-1] = func(): more.pressed.emit()
+	var extra := GridContainer.new()        # two columns, so the open list still fits a 720p screen
+	extra.columns = 2
+	extra.add_theme_constant_override("v_separation", 0)
+	v.add_child(extra)
+	var add := func(txt: String, cb: Callable): extra.add_child(UI.ghost(txt, cb, bw / 2.0 - 2.0))
+	var practice: Practice = Practice.of(scr) if where == "match" and scr is Match else null
+	if practice:
+		add.call("Change Hunter", func():
 			close()
-			scr.photo.enter()))
+			PracticeHero.open(practice))
+		add.call("Practice ranks", func(): open_practice(practice.m.player))
+	add.call("Controls", open_controls)
+	if where != "match":
+		add.call("Inventory", open_inventory)
+		add.call("Save files", open_saves)
+		add.call("Save now", func():
+			Save.save_game()
+			Sfx.play("ui_open", null, -10.0))
+	if where == "home" and scr:
+		add.call("Training Grounds", func():
+			close()
+			scr._start_training())
+		add.call("Change your look", func():
+			close()
+			Game.goto("hatch", {"create": true}))
+		add.call("Photo mode", func():
+			close()
+			scr.photo.enter())
 	if scr is Match or (scr and scr.has_method("unstick")):  # Home/Interior: no class_name
-		minor.add_child(UI.ghost("I'm stuck", func():
+		add.call("I'm stuck", func():
 			close()
 			scr.unstick()
-			Sfx.play("whoosh")))
-	if admin_allowed():
-		minor.add_child(UI.ghost("Admin tools  (F1)", open_admin))
-	if minor.get_child_count() > 0:
-		v.add_child(minor)
-	v.add_child(UI.spacer(2))
+			Sfx.play("whoosh"))
+	UI.fold_more(more, [extra], "More...", "Less")
 	if where == "match":
-		var m = Game.main.screen_node()
+		var m = scr
 		var tut: bool = m.opts.get("tutorial", false) or m.opts.get("training", false)
 		var leave := func():
 			close()
 			Practice.leave(m, tut)
 		var ask := func(): LeaveMatch.ask(root, m, leave)
 		if tut:
-			_pause_item(v, "Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", ask)
+			item.call("Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", ask)
 		else:
-			var lb: Button = _pause_item(v, "Leave match", "back", ask, "", "Danger")
-			lb.tooltip_text = "You lose what you carry"
+			item.call("Leave match", "back", ask, "Danger").tooltip_text = "You lose what you carry"
 	else:
-		_pause_item(v, "Save and go to the main menu", "home", func():
+		item.call("Save and quit to menu", "home", func():
 			Save.save_game()
 			close()
 			RateCard.gate(root, func(): Game.goto("title")))
 	if not OS.has_feature("web"):
-		var q: Button = _pause_item(v, "Save and quit the game", "close", func():
+		item.call("Quit game", "close", func():
 			Save.save_game()
-			RateCard.gate(root, get_tree().quit), "", "Ghost")
-		q.add_theme_color_override("font_color", UI.MUTED)
+			RateCard.gate(root, get_tree().quit))
 	res.grab_focus.call_deferred()
 
 ## The quick-reference card under Esc; "Change keys" goes on to the rebinding list.
@@ -302,10 +325,18 @@ func open_settings() -> void:
 
 func _show_settings() -> void:
 	var v := _page("settings", "Settings", 720, true)
-	UI.shell_tabs(v, SETTINGS_TABS, tab, func(t):
-		tab = t
+	more_tabs = more_tabs or SETTINGS_TABS.find(tab) >= MAIN_TABS
+	var shown: Array = SETTINGS_TABS.slice(0, SETTINGS_TABS.size() if more_tabs else MAIN_TABS)
+	if not more_tabs:
+		shown.append("More...")
+	UI.shell_tabs(v, shown, tab, func(t):
+		if t == "More...":
+			more_tabs = true
+		else:
+			tab = t
 		_show_settings())
 	match tab:
+		"Main": _tab_main(v)
 		"Gameplay": _tab_gameplay(v)
 		"Controls": _tab_controls(v)
 		"Camera": _tab_camera(v)
@@ -320,6 +351,24 @@ func _show_settings() -> void:
 	var done := UI.with_key(UI.primary("Done", back, 120), "Esc")
 	UI.footer(v).add_child(done)
 	(v.get_meta("shell") as Control).set_meta("primary", done)
+
+## The quality presets, with what "Auto" would pick on this machine.
+func _quality_options() -> Array:
+	var auto_pick := Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()
+	var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[auto_pick]["name"])]]
+	for qk in Settings.QUALITY_ORDER:
+		qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
+	return qopts
+
+## What most players change: picture quality, window, volume. Keys are the next tab.
+func _tab_main(v: VBoxContainer) -> void:
+	_group(v, "Picture")
+	var redraw := func(): _show_settings.call_deferred()
+	_choice(v, "Graphics quality", "quality", _quality_options(), redraw, "From your next expedition")
+	_toggle(v, "Fullscreen", "fullscreen")
+	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD")
+	_group(v, "Volume")
+	_slider(v, "Master", "master", 0.0, 1.0)
 
 func _tab_gameplay(v: VBoxContainer) -> void:
 	_group(v, "You")
@@ -339,7 +388,7 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	_reticle_rows(v)
 	_group(v, "Boki")
 	var talk := [["quiet", "Quiet"], ["normal", "Normal"], ["chatty", "Chatty"]]
-	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: everything it notices")
+	_choice(v, "How much your Boki talks", "kin_chatter", talk, Callable(), "Quiet: only danger and your health. Chatty: all of it")
 	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
 		+ "Off: it walks beside you"
 	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
@@ -354,10 +403,12 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
+const BASIC_KEY_GROUPS := 2       # Moving and Fighting; the other key groups wait behind "More keys..."
+
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
-	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
-	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: you dash the way you're moving, or toward the cursor when standing still")
+	_toggle(v, "Quick cast", "cast_on_press", "Fire on press. Off: hold to aim, release to cast")
+	_toggle(v, "Dash toward the cursor", "dash_to_cursor", "Off: dash the way you are moving")
 	_toggle(v, "Tap to sneak", "crouch_toggle", "Tap the sneak key to start and stop, instead of holding it")
 	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
 	_toggle(v, "Movement readout", "move_readout", readout_tip)
@@ -374,18 +425,30 @@ func _tab_controls(v: VBoxContainer) -> void:
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
 	var shown := {}
+	var more := UI.ghost("More keys...", Callable())
+	var extra: Array = []
 	for g in groups:
+		var first_extra := v.get_child_count()
 		_group(v, String(g[0]))
 		for an in g[1]:
 			if not named.has(an):
 				continue
 			shown[an] = true
 			_bind_row(v, an, named[an])
+		if groups.find(g) >= BASIC_KEY_GROUPS:
+			extra.append_array(v.get_children().slice(first_extra))
 	var rest: Array = Settings.ACTIONS.filter(func(a): return not shown.has(String(a[0])))
 	if not rest.is_empty():
+		var first_rest := v.get_child_count()
 		_group(v, "Other")
 		for a in rest:
 			_bind_row(v, String(a[0]), String(a[1]))
+		extra.append_array(v.get_children().slice(first_rest))
+	v.add_child(more)
+	UI.fold_more(more, extra, "More keys...", "Fewer keys")
+	more.pressed.connect(func(): more_keys = extra[0].visible)
+	if more_keys:
+		more.pressed.emit()
 	_note(v, "Esc always opens the menu. Your gun also reloads by itself when you stop shooting.")
 
 func _tab_camera(v: VBoxContainer) -> void:
@@ -398,7 +461,6 @@ func _tab_camera(v: VBoxContainer) -> void:
 
 func _tab_audio(v: VBoxContainer) -> void:
 	_group(v, "Volume")
-	_slider(v, "Master", "master", 0.0, 1.0)
 	_slider(v, "Music", "music", 0.0, 1.0)
 	_slider(v, "Sound effects", "sfx", 0.0, 1.0)
 	_slider(v, "Ambience", "ambience", 0.0, 1.0, 0.05, "Wind, rain and the sea")
@@ -410,22 +472,15 @@ func _tab_audio(v: VBoxContainer) -> void:
 
 func _tab_video(v: VBoxContainer) -> void:
 	_group(v, "Display")
-	_toggle(v, "Fullscreen", "fullscreen")
 	if not OS.has_feature("web"):
 		_toggle(v, "V-sync", "vsync", "Stops tearing; can add a little input delay")
 	var fps := [[0, "None"], [30, "30"], [60, "60"], [120, "120"], [144, "144"]]
-	_choice(v, "Frame rate limit", "max_fps", fps)
+	_choice(v, "Frame rate cap", "max_fps", fps)
 	_group(v, "Quality")
-	var auto_pick := Settings.quality() if String(Settings.get_v("quality")) == "auto" else Settings.detect_quality()
-	var qopts := [["auto", "Auto (%s)" % String(Settings.QUALITY[auto_pick]["name"])]]
-	for qk in Settings.QUALITY_ORDER:
-		qopts.append([qk, String(Settings.QUALITY[qk]["name"])])
-	_choice(v, "Graphics quality", "quality", qopts, func(): _show_settings.call_deferred(),
-		"Grass, draw distance, cloud layers and particles change from your next expedition")
-	_choice(v, "Anti-aliasing", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]], Callable(), "Smooths jagged edges")
+	_choice(v, "Smooth edges", "msaa", [[0, "Off"], [2, "2x"], [4, "4x"]])
 	_toggle(v, "Shadows", "shadows")
-	_choice(v, "Frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
-		"Top right. The overlay adds frame time, draw calls, triangles and script costs")
+	_choice(v, "Show frame rate", "show_fps", [[0, "Hidden"], [1, "Frame rate"], [2, "Performance overlay"]], Callable(),
+		"Top right. The overlay adds draw calls and timings")
 	var modelled: Array = Arch.ORDER.filter(WardenGlb.has_model)
 	if not modelled.is_empty():
 		_group(v, "Hunter models")
@@ -441,8 +496,7 @@ func _tab_video(v: VBoxContainer) -> void:
 
 func _tab_access(v: VBoxContainer) -> void:
 	_group(v, "Readability")
-	_slider(v, "Interface size", "ui_scale", 0.75, 1.5, 0.05, "Menus and the HUD, on top of fitting your window")
-	_toggle(v, "Height cues", "depth_cues", "Shaded cliffs, lit edges, a shadow under every hunter (next expedition)")
+	_toggle(v, "Show heights clearly", "depth_cues", "Shaded cliffs and a shadow under each hunter")
 	_group(v, "Comfort")
 	_slider(v, "Screen shake", "screen_shake", 0.0, 1.0, 0.05, "Only big hits on you shake the view; 0 turns it off")
 	_toggle(v, "Fewer flashes", "reduce_flashes", "Softer full-screen flashes when you're hit or level up")
@@ -451,7 +505,8 @@ func _tab_access(v: VBoxContainer) -> void:
 func _tab_demo(v: VBoxContainer) -> void:
 	_group(v, "Recording")
 	var rec_hint := "Clean HUD hides tips and debug text and smooths the camera. %s cycles it in a match, %s orbits the camera with No HUD"
-	var rec_row := _row(v, "Recording mode", rec_hint % [Settings.key_cap("record"), Settings.key_cap("record_orbit")])
+	var rec_keys := [Settings.key_cap("record"), Settings.key_cap("record_orbit")]
+	var rec_row := _row(v, "Recording mode", rec_hint % rec_keys, "rec_level")
 	var rec_ob := OptionButton.new()
 	rec_ob.custom_minimum_size.x = 280
 	rec_ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -493,7 +548,7 @@ func _reticle_rows(v: VBoxContainer) -> void:
 	Settings.changed.connect(preview.queue_redraw.unbind(1))
 	v.get_child(v.get_child_count() - 1).add_child(preview)
 	_slider(v, "Size", "reticle_size", 0.5, 2.0)
-	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground")
+	var row := _row(v, "Colour", "High-vis yellow stands out best on busy ground", "reticle_col")
 	for id in Reticle.COLORS:
 		var sw := Button.new()
 		sw.custom_minimum_size = Vector2(26, 26)
@@ -517,8 +572,9 @@ func _group(v: VBoxContainer, txt: String) -> void:
 	v.add_child(UI.section(txt))
 
 ## One settings row: the name on the left (with an optional hint under it), the control on the right.
-func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
+func _row(v: VBoxContainer, label_txt: String, hint := "", key := "") -> HBoxContainer:
 	var r := UI.hbox(16)
+	r.set_meta("setting", key)
 	r.custom_minimum_size.y = 40
 	var lc := UI.vbox(1)
 	lc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -531,7 +587,7 @@ func _row(v: VBoxContainer, label_txt: String, hint := "") -> HBoxContainer:
 	return r
 
 func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
-	var r := _row(v, what)
+	var r := _row(v, what, "", "bind:" + an)
 	r.custom_minimum_size.y = 34
 	var sl := Settings.slots(an)
 	for slot in 2:
@@ -578,7 +634,7 @@ func _bind_text(code: String, slot: int) -> String:
 	return "Not set" if slot == 0 else "+ second key"
 
 func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: float, step := 0.05, hint := "") -> void:
-	var r := _row(v, label_txt, hint)
+	var r := _row(v, label_txt, hint, key)
 	var sl := HSlider.new()
 	sl.min_value = lo
 	sl.max_value = hi
@@ -605,7 +661,7 @@ func _slider(v: VBoxContainer, label_txt: String, key: String, lo: float, hi: fl
 	r.add_child(pct)
 
 func _toggle(v: VBoxContainer, label_txt: String, key: String, hint := "") -> void:
-	var r := _row(v, label_txt, hint)
+	var r := _row(v, label_txt, hint, key)
 	var cb := CheckButton.new()
 	cb.button_pressed = bool(Settings.get_v(key))
 	cb.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -617,7 +673,7 @@ func _note(v: VBoxContainer, txt: String) -> void:
 	v.add_child(UI.para(txt, UI.T_SMALL, UI.MUTED))
 
 func _choice(v: VBoxContainer, label_txt: String, key: String, opts: Array, then := Callable(), hint := "") -> void:
-	var r := _row(v, label_txt, hint)
+	var r := _row(v, label_txt, hint, key)
 	var ob := OptionButton.new()
 	ob.custom_minimum_size.x = 280
 	ob.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -953,14 +1009,6 @@ func _reload_home() -> void:
 	Game.goto("home")
 
 const INV_ICON := {"Items": "tonic", "Seeds": "seed", "Crops": "seed", "Furniture": "home", "Kin": "paw", "Field Book": "egg"}
-
-func _pause_item(v: Control, txt: String, icon: String, cb: Callable, key := "", tier := "") -> Button:
-	var b := UI.button(txt, cb, 388.0, icon)
-	if tier != "": b.theme_type_variation = tier
-	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	if key != "": UI.with_key(b, key)
-	v.add_child(b)
-	return b
 
 func _inv_cell(grid: GridContainer, title_txt: String, count_txt: String, desc: String, col: Color,
 		action_txt := "", action := Callable(), icon := "") -> void:

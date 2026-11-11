@@ -94,7 +94,7 @@ func _video_v5() -> void:
 		if int(v.get("msaa", 0)) == 2 and quality() == "medium": v["msaa"] = 0
 		v["video_v"] = 5
 
-## Settings > Video > Frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
+## Settings > Video > Show frame rate: "" hidden, "fps" the rate alone, "full" the performance overlay
 ## (show_fps was a toggle before, so a saved true is the plain rate).
 func fps_mode() -> String:
 	match int(v.get("show_fps", 0)):

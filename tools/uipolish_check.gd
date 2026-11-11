@@ -74,7 +74,7 @@ func _settings_read(src: Dictionary) -> void:
 		if _uses(src, String(k)).is_empty():
 			unread.append(k)
 	ok("every setting is read somewhere", unread.is_empty(), str(unread))
-	var tabs := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
+	var tabs := ["Main", "Controls", "Gameplay", "Camera", "Audio", "Video", "Accessibility", "Demo"]
 	ok("the settings menu shows the new tabs", Overlay.SETTINGS_TABS == tabs)
 
 func _removed(src: Dictionary) -> void:
@@ -186,6 +186,16 @@ func _screens() -> void:
 	await main.get_tree().process_frame
 	var off_menu := _off_look(Overlay.root, ours)
 	ok("Esc menu: every box is the menu look", off_menu.is_empty(), str(off_menu))
+	var shown := _shown_buttons()
+	var five := ["Continue", "Settings", "More...", "Save and quit to menu"]
+	if not OS.has_feature("web"): five.append("Quit game")
+	var lean := five.all(func(t): return shown.has(t)) and Overlay.pause_acts.size() == five.size()
+	lean = lean and not shown.any(func(t): return t.contains("Admin") or t == "Inventory")
+	ok("Esc menu: only Continue / Settings / More... / Save and quit / Quit, no Admin", lean, str(shown))
+	Overlay.pause_acts[2].call()
+	shown = _shown_buttons()
+	var folded := shown.has("Inventory") and shown.has("Save files") and shown.has("Less")
+	ok("Esc menu: key 3 opens More... (Inventory, Save files)", folded, str(shown))
 	var layer := UI.confirm(Overlay.root, "Leave?", "A test question.", "Leave", func(): pass)
 	await main.get_tree().process_frame
 	var with_badge := layer.find_children("*", "PanelContainer", true, false).size() >= 2
@@ -224,3 +234,8 @@ func _screens() -> void:
 	for i in 30:
 		await main.get_tree().process_frame
 	ok("farm: every box is the menu look", _off_look(home, ours).is_empty(), str(_off_look(home, ours)))
+
+## The labels of the Esc menu's buttons that are on screen.
+func _shown_buttons() -> Array:
+	var bs := Overlay.host.find_children("*", "Button", true, false).filter(func(b): return b.is_visible_in_tree())
+	return bs.map(func(b): return String(b.text))
