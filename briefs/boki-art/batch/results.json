@@ -110848,5 +110848,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_foalaround_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_fawngus",
+    "name": "Fawngus (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_fawngus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_filefin",
+    "name": "Filefin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_filefin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_fanpire",
+    "name": "Fanpire (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_fanpire_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_ermink",
+    "name": "Ermink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_ermink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_fizzlet",
+    "name": "Fizzlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_fizzlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_flarmink",
+    "name": "Flarmink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_flarmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_foldbat",
+    "name": "Foldbat (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_foldbat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_ghoulamari",
+    "name": "Ghoulamari (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_ghoulamari_1.jpg",
+    "ok": true
   }
 ]
