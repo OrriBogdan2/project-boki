@@ -113018,5 +113018,47 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_cisternmander_a_bk_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_mossbastion_c_bk",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_c_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_mossbastion_c_bk",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_c_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_terrarimit_a_bk",
+    "name": "Terrarimit (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_terrarimit_a_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_mossbastion_a_bk",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_a_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_mossbastion_a_bk",
+    "name": "Mossbastion (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_mossbastion_a_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_terrarimit_c_bk",
+    "name": "Terrarimit (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_terrarimit_c_bk_1.jpg",
+    "ok": true
   }
 ]
