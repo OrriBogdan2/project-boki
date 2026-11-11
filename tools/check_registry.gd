@@ -102,7 +102,8 @@ const CHECKS := {
 	"--hudref-check": ["res://tools/hudref_check.gd", "hudref_check", null],
 	# --shots-dir=<dir> [--size=WxH] (GPU)
 	# --shots-dir=<dir> (GPU)
-	"--fusion-topdown-shots": ["res://tools/fusion_topdown_shots.gd", "fusion_topdown_shots", null],
+	"--fusion-topdown-shots": ["res://tools/fusion_topdown_shots.gd", "fusion_topdown_shots", "shots"],
+	"--fusion-topdown-check": ["res://tools/fusion_topdown_shots.gd", "fusion_topdown_shots", "check"],
 	"--team-boki-shots": ["res://tools/team_boki_shots.gd", "team_boki_shots", null],
 	"--shake-check": ["res://tools/shake_check.gd", "shake_check", null],
 	"--cam-framing-check": ["res://tools/cam_framing_check.gd", "cam_framing_check", "check"],

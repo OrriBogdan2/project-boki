@@ -122,7 +122,7 @@ func _match() -> Array:
 	Match.prof_on = false
 	return fl
 
-## Every Hunter with a Boki fuses (the species picks the form), and the transformations play out before the run is timed.
+## Every Hunter with a Boki fuses (the species picks the form); the transformations play out before the timed run.
 func _merge_all(m: Match) -> void:
 	var species := ["pebbit", "zephyrak", "puddlet"]
 	var n := 0

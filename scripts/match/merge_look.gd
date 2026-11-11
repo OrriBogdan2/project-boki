@@ -117,19 +117,24 @@ func build() -> void:
 	mote.material_override = Models.glow_mat(glow)
 	mote.position = Vector3(0, 1.0 * sz, 0)
 	add_child(mote)
-	var torso: Node3D = h.model.get_node_or_null("Rig/Torso") if h.model else null
-	var parent: Node3D = self
-	if torso:
-		var old := torso.get_node_or_null(PARTS_NAME)
-		if old:
-			old.free()
-		parent = Node3D.new()
-		parent.name = PARTS_NAME
-		parent.scale = Vector3.ONE * float(form.get("part_k", 1.0))       # bigger and bolder than the hunter: the silhouette reads from above
-		torso.add_child(parent)
-		_box = parent
-	var base := Vector3.ZERO if torso else Vector3(0, -0.42, 0)       # the parts are placed relative to the torso origin
-	rec = MergeParts.build(parent, form, base)
+	var dressed := dress(h.model, form, self)
+	_box = dressed[0]
+	rec = dressed[1]
+
+## The silhouette parts on `model`'s torso, in a box scaled by the form's part_k (bigger and bolder than the hunter:
+## the silhouette reads from above), or under `fallback` for a model without a rig. Returns [box or null, record].
+static func dress(model: Node3D, form: Dictionary, fallback: Node3D) -> Array:
+	var torso: Node3D = model.get_node_or_null("Rig/Torso") if model else null
+	if torso == null:
+		return [null, MergeParts.build(fallback, form, Vector3(0, -0.42, 0))]       # (the parts are placed relative to the torso origin)
+	var old := torso.get_node_or_null(PARTS_NAME)
+	if old:
+		old.free()
+	var box := Node3D.new()
+	box.name = PARTS_NAME
+	box.scale = Vector3.ONE * float(form.get("part_k", 1.0))
+	torso.add_child(box)
+	return [box, MergeParts.build(box, form, Vector3.ZERO)]
 
 ## A colour wash and bright rim in the form's colour over every mesh of the hunter (one shared overlay material).
 func _wash_model(root: Node, glow: Color) -> void:
