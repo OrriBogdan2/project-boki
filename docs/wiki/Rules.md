@@ -571,6 +571,20 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`s
 | backpack_shop | [0, 25, 50, 90] |
 | bot_backpack | {"easy": 0.0, "medium": 0.25, "hard": 0.4, "expert": 0.55} |
 
+## evo_paths (`content/rules/evo_paths.json`)
+
+Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by species id. Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). level: the level the final is due. The end with more pips wins; tie: the stat lead; still tied: undecided.
+
+| Setting | Value |
+|---|---|
+| pips | {"stat_lead": 3, "lean_half": 1, "lean_full": 2, "tokens_max": 3, "care_trait": 1, "care_toy": 1, "ribbons_max": 2} |
+| pips_doc | stat_lead: the end whose key stat is higher. lean_half / lean_full: the end's type lean at lean_half_at of full / full (Evo.LEAN_FULL). tokens_max: one per worn path token of the end's path. care_trait: an end trait at trait_at or more. care_toy: the most-used toy (rec.toy_use) trains the end's key stat. ribbons_max: one per Cup Ribbon in the end's sports. |
+| lean_half_at | 0.5 |
+| trait_at | 0.6 |
+| lines | {"burrlet": {"stage": "Sporcupine", "level": 16, "ends": [{"form": "amanitusk", "name": "Amanitusk", "path": "fierce", "stat": "power", "type": "poison", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "ringrove", "name": "Ringrove", "path": "steadfast", "stat": "guard", "type": "grass", "traits": ["loyalty"], "sports": ["shove"]}]}, "cindle": {"stage": "Vespox", "level": 16, "ends": [{"form": "glaivyx", "name": "Glaivyx", "path": "fierce", "stat": "power", "type": "steel", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "lashyx", "name": "Lashyx", "path": "swift", "stat": "speed", "type": "dark", "traits": ["bravery"], "sports": ["dash", "relay"]}]}, "puddlet": {"stage": "Glassolotl", "level": 16, "ends": [{"form": "chandelotl", "name": "Chandelotl", "path": "curious", "stat": "focus", "type": "fairy", "traits": ["curiosity"], "sports": ["seek", "volley", "echo_steps", "lantern_match"]}, {"form": "geodelotl", "name": "Geodelotl", "path": "steadfast", "stat": "guard", "type": "rock", "traits": ["loyalty"], "sports": ["shove"]}]}, "zapple": {"stage": "Echolop", "level": 8, "ends": [{"form": "howlop", "name": "Howlop", "path": "fierce", "stat": "power", "type": "dark", "traits": ["bravery", "temper"], "sports": ["tumble"]}, {"form": "chimelop", "name": "Chimelop", "path": "curious", "stat": "focus", "type": "fairy", "traits": ["curiosity"], "sports": ["seek", "volley", "echo_steps", "lantern_match"]}]}} |
+| inks_doc | Ink lines: the held Ink alone decides (no pips); the card only previews the silhouette. ink item id -> form. |
+| inks | {"minkee": {"name": "Minkee", "forms": {"ember_ink": "Flarmink", "tide_ink": "Rippmink", "bloom_ink": "Blossmink", "storm_ink": "Voltmink", "frost_ink": "Rimink", "shadow_ink": "Umbrink", "lunar_ink": "Lunink", "prism_ink": "Prismink", "wyrm_ink": "Wyrmink"}}, "jarmit": {"name": "Jarmit", "forms": {"ember_ink": "Lanternmit", "storm_ink": "Stormit", "bloom_ink": "Terrarimit"}}} |
+
 ## farm_build (`content/rules/farm_build.json`)
 
 The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that you hammer (hold interact) and your Boki help build; the materials are spent a quarter at a time as the work goes; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is work swings (one hammer beat of yours is 0.8 s, one swing of a Boki is about 3 s at building skill 1).
