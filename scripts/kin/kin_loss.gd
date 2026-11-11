@@ -6,8 +6,9 @@ extends RefCounted
 ##     one that was on you stands beside your deathbox, one that was out fighting stays where it stood. Revived,
 ##     you run into it for the usual 3.5s cradle (KinDowned) and it is yours again. An enemy can scan it
 ##     like any knocked-out Boki (Capture); a teammate cannot. A scanned Boki sits in the captor's box (KinTrack).
-##   - At the end of the match the Boki's fate is written to the save by after_match(): "home", "ransom" (nobody took
-##     it) or "captured_by:<name>". A flagged Boki cannot be brought into a match until the market clears it.
+##   - At the end of the match the Boki's fate is written to the save by after_match(): "home" (nobody took it, or
+##     its taker is out: Limited Ways Out, docs/decisions/0051) or "captured_by:<name>" (the "ransom" flag is
+##     only on old saves). A flagged Boki cannot be brought into a match until the market clears it.
 ## A guarding Boki is a Kin in state "dazed" that has an owner (a wild dazed Boki has none), so it needs no flag
 ## of its own and the other games see it through the ordinary kin snapshot.
 
@@ -258,12 +259,12 @@ static func reclaimed(k: Kin) -> void:
 	if h.kin2 == k:
 		k.bench()
 
-## Where each of your lost Boki ends up when the match is over: [{uid, fate, holder, rec}]. fate is "ransom" (nobody
+## Where each of your lost Boki ends up when the match is over: [{uid, fate, holder, rec}]. fate is "home" (nobody
 ## took it, or its taker is out), "rival" (a rival who is still in has it), "squad" or "self".
 static func resolve(m) -> Array:
 	var out: Array = []
 	for L in m.player_lost:
-		var fate := "ransom"
+		var fate := "home"
 		var who := ""
 		var holder = L.get("holder")
 		if holder is Hunter:
@@ -271,7 +272,7 @@ static func resolve(m) -> Array:
 			if hh == m.player:
 				fate = "self"
 			elif hh.team == m.player.team:
-				fate = "squad" if not hh.out else "ransom"
+				fate = "squad" if not hh.out else "home"
 				who = hh.pname
 			elif not hh.out:
 				fate = "rival"
@@ -282,22 +283,15 @@ static func resolve(m) -> Array:
 # ------------------------------------------------------------------ after the match: the save
 ## The outcome string for a resolved fate.
 static func outcome_of(fate: String, holder: String) -> String:
-	match fate:
-		"rival":
-			return "captured_by:" + holder
-		"ransom":
-			return "ransom"
-	return "home"
+	return "captured_by:" + holder if fate == "rival" else "home"
 
 ## Writes what became of a Boki into the save. boki is its roster record; outcome is "home" (clears any
-## flag), "ransom" (at the Ransom House, waiting) or "captured_by:<player name>" (lost to that player).
+## flag) or "captured_by:<player name>" (lost to that player).
 ## The flags are plain optional fields: a save without them is a Boki that is fine.
 static func after_match(save: Dictionary, boki: Dictionary, outcome: String) -> void:
 	clear(boki)
 	var stamp := {"match": int(save.get("matches", 0)), "t": int(Time.get_unix_time_from_system())}
-	if outcome == "ransom":
-		boki["ransom"] = stamp
-	elif outcome.begins_with("captured_by:"):
+	if outcome.begins_with("captured_by:"):
 		stamp["by"] = outcome.substr("captured_by:".length())
 		boki["lost_to"] = stamp
 	elif outcome != "home":

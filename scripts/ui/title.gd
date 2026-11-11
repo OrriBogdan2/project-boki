@@ -477,7 +477,7 @@ func _build_ui() -> void:
 	var has: bool = not Save.d["roster"].is_empty()
 	col.add_child(UI.spacer(12 if has else 30))     # (with a save the menu has one more row: Demo match)
 	# the one big button: carry on where you left off, or start a new story
-	var b1 := _menu_main(("Continue" if has else "New game"), func(): Game.goto("home" if has else "prologue"))
+	var b1 := _menu_main(("Continue" if has else "New game"), _continue if has else func(): Game.goto("prologue"))
 	col.add_child(b1)
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
@@ -488,6 +488,8 @@ func _build_ui() -> void:
 		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
 		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
+	if has:
+		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
 	if Net.available():
 		items.append(["Play with friends", func(): Game.goto("lobby", {}), "bond"])
 	items.append(["Save files", func(): Overlay.ctx = "title"; Overlay.open_saves(), "satchel"])
@@ -572,6 +574,13 @@ func _resume_line() -> String:
 	var n := int(Save.d.get("matches", 0))
 	bits.append("%d expedition%s" % [n, "" if n == 1 else "s"] if n > 0 else "no expeditions yet")
 	return "  ·  ".join(bits)
+
+## Continue: back into the tutorial when it was left part-way, else to the farm.
+func _continue() -> void:
+	if TutorialResume.pending():
+		Game.start_match(TutorialResume.opts())
+	else:
+		Game.goto("home")
 
 func _menu_main(text: String, cb: Callable) -> Button:
 	var b := UI.button(text, cb)

@@ -8,14 +8,16 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 12
+const VERSION := 18
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11", 11: "_migrate_11_to_12"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14", 14: "_migrate_14_to_15",
+		15: "_migrate_15_to_16", 16: "_migrate_16_to_17", 17: "_migrate_17_to_18"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -73,21 +75,26 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"sleepovers": [],     # Boki visiting a friend for a day: {rec, to, name, t} (Sleepover)
+		"drills": {},         # best pass time in seconds per movement drill (MoveDrills)
+		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
+		"game_board": {},     # garden minigame results (MinigameHub); older saves start empty
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {},
+		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
+		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -138,6 +145,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"traits": tr,
 		"trust": 35.0,
 		"memory": [],
+		"bonds": {},          # uid -> -1..1, friends and rivals on the base (BaseLife)
 		"matches": 0, "wins": 0, "kos": 0,
 		"born": int(Time.get_unix_time_from_system()),
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
@@ -292,10 +300,54 @@ func _migrate_9_to_10(data: Dictionary) -> void:
 func _migrate_10_to_11(data: Dictionary) -> void:
 	HouseSave.migrate(data)
 
-## v11 -> v12: evolution by species (Evo, docs/decisions/0024). Levels and forms are kept, levels
-## stop at the cap, and each Boki keeps its old form name.
+## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
+## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
+## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
 func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
+	for r in data.get("roster", []):
+		if not r.has("bonds"):
+			r["bonds"] = {}
+
+## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
+func _migrate_12_to_13(data: Dictionary) -> void:
+	_migrate_11_to_12(data)
+	GardenZones.migrate(data)
+	for r in data.get("roster", []):
+		Care.ensure(r)
+
+## v13 -> v14: the movement drills keep a best time per drill (MoveDrills). The 12 -> 13 step runs again
+## first: a dev save from the line that used v13 for first-time hints gets the garden half it skipped.
+## The order from here on is docs/SAVE_CHAIN_0245.md; every step only adds what is missing.
+func _migrate_13_to_14(data: Dictionary) -> void:
+	_migrate_12_to_13(data)
+	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
+		data["drills"] = {}
+
+## v14 -> v15: the combat tutorial resumes (TutorialResume); a save that is past it is marked finished.
+func _migrate_14_to_15(data: Dictionary) -> void:
+	TutorialResume.migrate(data)
+
+## v15 -> v16: clans grow out of guilds. A save already in a guild becomes a plain member of the clan
+## with the same id; everyone else gets the empty dict (Social.clan_for). A clan it already has stays.
+func _migrate_15_to_16(data: Dictionary) -> void:
+	if typeof(data.get("clan", null)) == TYPE_DICTIONARY:
+		return
+	var gid := String(data.get("guild_id", ""))
+	var who := String(data.get("profile", {}).get("id", ""))
+	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}
+
+## v16 -> v17: the XP first-time lines have their "seen" flags (XpHints).
+func _migrate_16_to_17(data: Dictionary) -> void:
+	XpHints.migrate(data)
+
+## v17 -> v18: sleepovers. No Boki is away: d["sleepovers"] = [] (Sleepover).
+func _migrate_17_to_18(data: Dictionary) -> void:
+	if not data.has("sleepovers"):
+		data["sleepovers"] = []
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
@@ -442,6 +494,7 @@ func load_from(p: String) -> void:
 			if bak: bak.store_string(text)
 		if not migrate(parsed):
 			return
+	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
