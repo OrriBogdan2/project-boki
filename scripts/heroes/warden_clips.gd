@@ -6,6 +6,9 @@ extends RefCounted
 ## as the model's meta STATE), the kit keeps its timing: a keyed move's clip is seeked to the kit's own kmove_t, so a
 ## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
+## Data "stomp" {style, commit, clip}: the Hunter's own stomp (Stomp, StompLook), its commit clip on the 0.2 s hold
+## and its finisher seeked to the stomp's clock; any other style (a bought one) plays on the rig; a stomp that breaks
+## before its end cuts the clip at once.
 ##
 ## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
 ## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
@@ -35,6 +38,7 @@ const CROUCH_IN := 0.12      # s: the layer eases over the body when no dip carr
 const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
+const STOMP_END := 0.1       # s: a stomp that stops this close to its clip's end finished; earlier (or stunned) it broke
 static var _data := {}       # art name -> its parsed file ({} when it has none)
 
 var root: Node3D
@@ -84,6 +88,8 @@ var crouch_clip := ""        # the dip playing ("" none: turned round mid-dip, t
 var crouch_seek := 0.0       # s into it
 var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
+var commit_t := 0.0          # s into the stomp's commit hold (the state's act "windup")
+var stomp_at := -1.0         # s into the stomp clip last frame (-1: not stomping)
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -320,6 +326,9 @@ func _p(nm: String, v: Variant) -> void:
 ## What the state asks for: {clip, t (s, or -1: it plays on its own), upper} or {}; {"proc": true}: back to the rig.
 func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var st: Dictionary = d.get("states", {})
+	var stomp := _stomp(s, dt)
+	if not stomp.is_empty():
+		return stomp
 	for k in d.get("procedural", []):
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):
@@ -387,11 +396,36 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
 	return {}
 
+## The stomp's pick ({} when neither the commit nor the finisher runs). A stomp that stopped before its clip's end,
+## or with a stun on, was broken: the pick carries "cut" and the blend drops it this frame.
+func _stomp(s: Dictionary, dt: float) -> Dictionary:
+	var sd: Dictionary = d.get("stomp", {})
+	if sd.is_empty():
+		return {}
+	var beat := float(s.get("stomp", -1.0))
+	if beat < 0.0:
+		var end := lib.get_animation(String(sd["clip"])).length - STOMP_END
+		var cut := stomp_at >= 0.0 and (stomp_at < end or bool(s.get("stun", false)))
+		stomp_at = -1.0
+		commit_t = commit_t + dt if String(s.get("act", "")) == "windup" else 0.0
+		if commit_t > 0.0:
+			return {"clip": sd["commit"], "t": minf(commit_t, lib.get_animation(String(sd["commit"])).length - 0.001)}
+		return {"cut": true} if cut else {}
+	commit_t = 0.0
+	if String(s.get("stomp_style", "")) != String(sd["style"]):
+		stomp_at = -1.0
+		return {"proc": true}
+	stomp_at = minf(beat * Stomp.TIME / Stomp.BEATS, lib.get_animation(String(sd["clip"])).length - 0.001)
+	return {"clip": sd["clip"], "t": stomp_at}
+
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
 	var want := force
 	if want.is_empty():
 		want = _pick(s, dt) if not s.is_empty() else {"proc": true}
+	if want.get("cut", false):
+		want = _pick(s, 0.0)
+		_cut()
 	var proc := bool(want.get("proc", false))
 	proc_w = move_toward(proc_w, 1.0 if proc else 0.0, dt / FADE)
 	var flinching := not proc and bool(want.get("flinch", false))
@@ -424,6 +458,8 @@ func step(dt: float) -> void:
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
+			if act_w <= 0.0:
+				xf = float(chan)     # (nothing showing, as after a cut: no old clip to fade out of)
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
@@ -454,6 +490,12 @@ func step(dt: float) -> void:
 	_turn_to_heading(s, want, legs, dt)
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+
+## A broken stomp: the clip's weight goes this frame (no fade), whatever comes next starts from there.
+func _cut() -> void:
+	act_w = 0.0
+	up_w = 0.0
+	cur = ""
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
