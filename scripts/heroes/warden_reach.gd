@@ -10,6 +10,7 @@ extends RefCounted
 const TIP := "reach_tip"     # root meta: the world point the hand reaches to; unset (or INF) when the arm is home
 const IN_RATE := 14.0        # 1/s: the arm takes the aim line (0.07 s out of the wind-up)
 const OUT_RATE := 9.0        # 1/s: and gives it back to the clips (0.11 s)
+const GIRTH := 1.6          # x: the forearm's thickness once stretched to 3x and more (a long reach is no string)
 const RETRACT := 70.0        # skeleton units (m at size 1)/s: the hand comes home down the line (full reach 0.13 s)
 
 var skel: Skeleton3D
@@ -69,9 +70,10 @@ func apply(dt: float, world_tip: Vector3) -> void:
 	_lay(bones[2], now[2], elbow + dir * fore_len * stretch, dir, 1.0)
 
 ## Bone `bi` (the clip's pose `now`) laid at `at` along `dir` (its +Y), turned the shortest way so it keeps the
-## clip's roll, `stretch` along its length; mixed over the clip's pose by `w`.
+## clip's roll, `stretch` along its length (and thicker with it); mixed over the clip's pose by `w`.
 func _lay(bi: int, now: Transform3D, at: Vector3, dir: Vector3, stretch: float) -> void:
 	var along := now.basis.y.normalized()
 	var turn := Basis(Quaternion(along, dir)) if along.dot(dir) > -0.999 else Basis(now.basis.x.normalized(), PI)
-	var b := (turn * now.basis).scaled_local(Vector3(1.0, stretch, 1.0))
+	var girth := lerpf(1.0, GIRTH, clampf((stretch - 1.0) / 2.0, 0.0, 1.0))
+	var b := (turn * now.basis).scaled_local(Vector3(girth, stretch, girth))
 	skel.set_bone_global_pose(bi, now.interpolate_with(Transform3D(b, at), w))

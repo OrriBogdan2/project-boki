@@ -3,10 +3,10 @@ extends "res://tools/parity_reel.gd"
 ## camera, to see that the arm reads as his own and holds steady: the grab standing, the grab while strafing, a
 ## miss, and a plain run. Frames and the ffmpeg line as in tools/parity_reel.gd.
 
-const PARTS := ["rmb_hit", "rmb_strafe", "rmb_miss", "run"]
+const ARM_PARTS := ["rmb_hit", "rmb_strafe", "rmb_miss", "run"]
 
 func parts() -> Array:
-	return PARTS
+	return ARM_PARTS
 
 func _p_rmb_hit() -> void:
 	await _seg("RMB at the dummy, standing", 4.2, func(t: float) -> void:
