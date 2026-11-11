@@ -116950,5 +116950,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pose_filefin_cmp_dive_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px9e_scopeleon",
+    "name": "Scopeleon (pixel sprite 80, new card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9e_scopeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_rollguin",
+    "name": "Rollguin (pixel sprite 80, new card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9e_rollguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_rollguin",
+    "name": "Rollguin (pixel sprite 80, new card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9e_rollguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_bullsfrog",
+    "name": "Bullsfrog (pixel sprite 80, new card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9e_bullsfrog_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_scopeleon",
+    "name": "Scopeleon (pixel sprite 80, new card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9e_scopeleon_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_filefin",
+    "name": "Filefin (pixel sprite 80, new card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9e_filefin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_bullsfrog",
+    "name": "Bullsfrog (pixel sprite 80, new card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9e_bullsfrog_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9e_filefin",
+    "name": "Filefin (pixel sprite 80, new card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9e_filefin_1.jpg",
+    "ok": true
   }
 ]
