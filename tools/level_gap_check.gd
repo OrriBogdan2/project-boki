@@ -59,6 +59,10 @@ func run(main: Node, mode = "check") -> void:
 	mate.free()
 	var dl := absf(LevelGap.WARM.get_luminance() - LevelGap.COOL.get_luminance())
 	ok(dl > 0.25, "warm and cool differ in luminance, not hue alone")
+	var badge := Rect2(0, 0, 15, 15)
+	var up := LevelGap.cue_points(badge, 2)
+	var down := LevelGap.cue_points(badge, -2)
+	ok(up[0].y < up[1].y and down[0].y > down[1].y, "warm points up, cool points down")
 	ok(m.hud != null, "a match with a HUD")
 	if mode == "shots":
 		var fade = main.get("fade")
@@ -73,6 +77,9 @@ func run(main: Node, mode = "check") -> void:
 			ok(int(sh.get("gap", 99)) == want, "rival %d's plate drew with gap %s" % [i, str(sh.get("gap"))])
 		var img := main.get_viewport().get_texture().get_image()
 		img.save_png(dir.path_join("level_gap_%dp.png" % img.get_height()))
+		var plates := img.get_region(Rect2i(240, 90, 800, 120))
+		plates.resize(1600, 240, Image.INTERPOLATE_NEAREST)
+		plates.save_png(dir.path_join("level_gap_plates.png"))
 	print("LEVEL GAP CHECK DONE, failures: ", bad)
 	m.over = true
 	m.queue_free()

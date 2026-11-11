@@ -22,11 +22,13 @@ static func band(gap: int) -> int:
 static func tint(gap: int) -> Color:
 	return WARM if band(gap) > 0 else COOL
 
-## The triangle cue left of the badge `r`: points up for warm, down for cool.
-static func draw_cue(c: CanvasItem, r: Rect2, gap: int) -> void:
-	var up := band(gap) > 0
+## The triangle cue left of the badge `r`: apex first, up for warm, down for cool.
+static func cue_points(r: Rect2, gap: int) -> PackedVector2Array:
+	var d := -1.0 if band(gap) > 0 else 1.0      # screen y grows downward
 	var at := Vector2(r.position.x - TRI - 3.0, r.get_center().y)
-	var d := -1.0 if up else 1.0
-	var tri := PackedVector2Array([at + Vector2(0, -d * TRI), at + Vector2(-TRI, d * TRI), at + Vector2(TRI, d * TRI)])
+	return PackedVector2Array([at + Vector2(0, d * TRI), at + Vector2(-TRI, -d * TRI), at + Vector2(TRI, -d * TRI)])
+
+static func draw_cue(c: CanvasItem, r: Rect2, gap: int) -> void:
+	var tri := cue_points(r, gap)
 	c.draw_colored_polygon(tri, tint(gap))
 	c.draw_polyline(PackedVector2Array([tri[0], tri[1], tri[2], tri[0]]), HudStyle.SHADE_EDGE, 1.5, true)
