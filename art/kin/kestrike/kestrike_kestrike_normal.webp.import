@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://jocvw50o2bff"
-path="res://.godot/imported/kestrike_kestrike_normal.webp-d804ae4aef065d5ca2f5c3aef50e1936.ctex"
+path.s3tc="res://.godot/imported/kestrike_kestrike_normal.webp-d804ae4aef065d5ca2f5c3aef50e1936.s3tc.ctex"
+path.etc2="res://.godot/imported/kestrike_kestrike_normal.webp-d804ae4aef065d5ca2f5c3aef50e1936.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "77924082ed60bb3e85f5549fc8cf4746"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/kestrike/kestrike_kestrike_normal.webp"
-dest_files=["res://.godot/imported/kestrike_kestrike_normal.webp-d804ae4aef065d5ca2f5c3aef50e1936.ctex"]
+dest_files=["res://.godot/imported/kestrike_kestrike_normal.webp-d804ae4aef065d5ca2f5c3aef50e1936.s3tc.ctex", "res://.godot/imported/kestrike_kestrike_normal.webp-d804ae4aef065d5ca2f5c3aef50e1936.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

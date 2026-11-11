@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ntycc7ogci5n"
-path="res://.godot/imported/gibbelle_gibbelle_normal.webp-336de51f0428ecd2b7c7a1137f1e7a36.ctex"
+path.s3tc="res://.godot/imported/gibbelle_gibbelle_normal.webp-336de51f0428ecd2b7c7a1137f1e7a36.s3tc.ctex"
+path.etc2="res://.godot/imported/gibbelle_gibbelle_normal.webp-336de51f0428ecd2b7c7a1137f1e7a36.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "04ea5ccea5937fc3c2cbd6750c479ec0"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/kin/gibbelle/gibbelle_gibbelle_normal.webp"
-dest_files=["res://.godot/imported/gibbelle_gibbelle_normal.webp-336de51f0428ecd2b7c7a1137f1e7a36.ctex"]
+dest_files=["res://.godot/imported/gibbelle_gibbelle_normal.webp-336de51f0428ecd2b7c7a1137f1e7a36.s3tc.ctex", "res://.godot/imported/gibbelle_gibbelle_normal.webp-336de51f0428ecd2b7c7a1137f1e7a36.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -9,7 +9,8 @@ extends RefCounted
 const MAX_PILLAR := 4.0          # m, "short": a marker, not a skybeam
 const FIRST_PILLAR := 3          # Epic: the top two tiers get the beam
 const PILE := [20, 10, 6, 3, 1]  # a busy fight's drops per tier, Common to Legendary
-const BUDGET_PER_DROP := {"very_low": 1.0, "low": 1.0, "medium": 1.5, "high": 1.5, "ultra": 1.5}   # glow meshes per drop in the pile
+## Glow meshes per drop in the pile, per preset.
+const BUDGET_PER_DROP := {"very_low": 1.0, "low": 1.0, "medium": 1.5, "high": 1.5, "ultra": 1.5}
 
 var bad := 0
 
