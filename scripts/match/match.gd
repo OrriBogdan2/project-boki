@@ -1367,6 +1367,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 
 func _update_gear_fx(dt: float) -> void:
 	UtilityMore.pads(self, dt)
+	UtilityVfx.tick(self)
 	for sm in smokes.duplicate():
 		sm["t"] = float(sm["t"]) - dt
 		var n: Node3D = sm["node"]

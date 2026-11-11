@@ -1,0 +1,233 @@
+{
+	"items": {
+		"tonic": {"area": "self: the drinker, rising green motes while they drink", "does": "heals the drinker 42 after a 1 s open drink", "ends": "a green flash as the heal lands; the motes stop if a hit spills it"},
+		"deep_draught": {"area": "self: the drinker, slow blue drops and motes for the 5 s drink", "does": "heals the drinker to full; they crawl while drinking", "ends": "a big blue flash at full health; the drops stop if a hit spills it"},
+		"lostway_scroll": {"area": "self: pages turn round the reader for the 4 s read", "does": "sends the reader to a random spot on the map", "ends": "a lilac ghost where they stood and a flash where they land (_put); the pages stop if a hit spills it"},
+		"omen_draught": {"area": "self while drinking; then a ring pulses on each Blight Warden for the squad", "does": "shows the drinker's squad every Blight Warden for 30 s", "ends": "the warden rings stop pulsing after 30 s"},
+		"armor_kit": {"area": "self: steel sparks round the body for the 1.6 s repair", "does": "repairs the user's armor; they are open and slow while repairing", "ends": "a white-steel flash as the armor comes back; the sparks stop if a hit spills it"},
+		"medkit": {"area": "self: one green rise", "does": "heals 40 and adds 20 armor at once", "ends": "at once: the rise is the whole of it"},
+		"smoke": {"area": "the cloud itself (3.6 m, the gameplay edge of who it hides)", "does": "hides everyone inside it", "ends": "the cloud shrinks away over its last second (8 s)"},
+		"jump_pad": {"area": "the pad (its top sits low until it arms after 2 s, then pulses)", "does": "launches whoever steps on it, keeping their speed", "ends": "it blinks for its last 1.5 s (30 s, or 10 s after its first launch), then a puff"},
+		"gust_fan": {"area": "the fan pad (its top pulses while it stands)", "does": "throws whoever steps on it high up and along", "ends": "it blinks for its last 1.5 s (60 s), then a puff"},
+		"hawk_whistle": {"area": "its reach (120 m) flashes once as a ring round the user; each rival found wears a mark", "does": "shows every rival in reach for 4 s", "ends": "the mark over each rival goes when the 4 s reveal ends"},
+		"scanner": {"area": "its reach (26 m) flashes once as a ring round the user; each rival found wears a mark", "does": "shows every rival within 26 m for 3 s", "ends": "the mark over each rival goes when the 3 s reveal ends"},
+		"lookout_lantern": {"area": "the lantern totem and a faint ring in the owner's colour at its 14 m watch edge (gameplay)", "does": "shows every rival inside the ring; a rival inside wears a mark", "ends": "the totem shrinks away after 60 s, with a puff"},
+		"toss_satchel": {"area": "the satchel sitting in its 1.4 m patch (gameplay: step in to take it)", "does": "the first hurt body to step in heals 60% of its health over 5 s (a hit stops it)", "ends": "taken: a green rise and the patch shrinks; untaken it shrinks away after 30 s"},
+		"twin_gate": {"area": "two upright portals, their 2 m patches (gameplay) and a lit link between them", "does": "after 8 s everyone in each patch swaps to the other", "ends": "a lilac ghost where each body stood, a flash where it lands, and both portals close with a flash"},
+		"warp_seed": {"area": "the anomaly over its 1.6 m patch (gameplay)", "does": "a body that stays in it 1.5 s is thrown to a random spot; while held, lilac motes pull in round it", "ends": "the anomaly shrinks away after 30 s"},
+		"bounty_banner": {"area": "a flag on a tall pole over the carrier, seen by everyone, and their 1 m ring", "does": "shows the carrier to every rival for 2 min; live through it and the squad returns, plus gems", "ends": "the flag goes with a burst of gold coins (kept) or a red puff (fell)"},
+		"pilfer_pouch": {"area": "a 4 m ring at the aim (gameplay)", "does": "takes half the gems of every rival inside; coins fly off each one robbed", "ends": "at once: the ring flashes and fades"},
+		"hearth_lamp": {"area": "the lamp beacon where it is set (its own model and 3 m ring, Beacons)", "does": "stands a revive beacon your squad can use", "ends": "it stays until a squad uses it; the beacon's own look shows the revive"},
+		"revive_ember": {"area": "the beacon it lights at your feet (Beacons)", "does": "wakes every fallen squadmate where you stand", "ends": "at once: the beacon's revive look plays"},
+		"chest_key": {"area": "the chest it opens (or a ping on the nearest locked one)", "does": "opens a locked chest beside you", "ends": "at once: a gold glint at the lock, then the chest's own opening"},
+		"rift_key": {"area": "the sealed hatch it opens (or a ping on the nearest one)", "does": "opens a sealed Rift hatch beside you", "ends": "at once: a lilac glint at the lock, then the hatch's own opening"},
+		"blight_flask": {"area": "the patch (4.5 m, gameplay) with a dark band and lime bubbles at its edge", "does": "hurts the rivals inside while it lasts", "ends": "the patch shrinks away after 25 s"},
+		"cloud_raft": {"area": "the raft of cloud tiles itself", "does": "makes walkable ground over the void for 30 s", "ends": "it blinks for its last 1.5 s, then drops away"},
+		"shatter_charge": {"area": "a 3 m ring where it bursts (gameplay)", "does": "a charge that bursts and hurts the rivals in it (it truly explodes)", "ends": "at once: the burst"},
+		"shield_cell": {"area": "the user's shield shell (ShieldLook)", "does": "shields the user for 8 s", "ends": "the shell goes when the shield breaks or runs out"},
+		"skyfall_charge": {"area": "a 6 m ring at the aim that fills, a hot disc and a falling warhead (gameplay)", "does": "after the 5 s fuse it blasts the rivals inside (it truly explodes)", "ends": "the fill reaches the rim as the warhead lands; the ring goes after the blast"},
+		"stim": {"area": "self: speed streaks at the feet while it runs", "does": "makes the user faster for 6 s", "ends": "the streaks stop when the haste ends, with a last puff"},
+		"thorn_wall": {"area": "the wall with spikes along the top and out of both faces", "does": "blocks the way for 20 s", "ends": "it goes after 20 s"}
+	},
+	"moves": {
+		"tonic": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "8ff0a0", "c2": "ffffff", "c3": "325437"}
+		]},
+		"tonic_hold": {"fx": [
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 8, "speed": 1.4, "spread": 0.3, "grav": -1.0, "life": 0.6, "size": 0.05, "c": "8ff0a0", "c2": "ffffff", "c3": "325437"}
+		]},
+		"tonic_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.0, "life": 0.14, "c": "8ff0a0", "c2": "ffffff", "c3": "325437"},
+			{"p": "star", "y": 1.3, "n": 6, "speed": 1.8, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "8ff0a0", "c2": "ffffff", "c3": "325437"}
+		]},
+		"deep_draught": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "6fd0ff", "c2": "ffffff", "c3": "264859"}
+		]},
+		"deep_draught_hold": {"fx": [
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 6, "speed": 1.4, "spread": 0.3, "grav": -1.0, "life": 0.6, "size": 0.05, "c": "6fd0ff", "c2": "ffffff", "c3": "264859"},
+			{"p": "drop", "y": 1.4, "n": 3, "speed": 0.8, "spread": 0.8, "grav": 6.0, "drag": 1.0, "life": 0.7, "size": 0.07, "c": "6fd0ff", "c2": "ffffff", "shape": "disc", "radius": 0.3, "c3": "264859"}
+		]},
+		"deep_draught_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.4, "life": 0.14, "c": "6fd0ff", "c2": "ffffff", "c3": "264859"},
+			{"p": "star", "y": 1.3, "n": 8, "speed": 2.2, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "6fd0ff", "c2": "ffffff", "c3": "264859"},
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 12, "speed": 2.5, "spread": 0.3, "grav": -1.0, "life": 0.7, "size": 0.05, "c": "6fd0ff", "c2": "ffffff", "c3": "264859"}
+		]},
+		"lostway_scroll": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "f0e0a0", "c2": "ffffff", "c3": "544e37"}
+		]},
+		"lostway_scroll_hold": {"fx": [
+			{"p": "card", "y": 1.2, "n": 3, "speed": 0.6, "spread": 0.8, "grav": -0.5, "drag": 1.0, "life": 0.9, "size": 0.14, "c": "f0e0a0", "c2": "c9a0ff", "shape": "arc", "radius": 0.6, "c3": "544e37"}
+		]},
+		"lostway_scroll_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.2, "life": 0.14, "c": "c9a0ff", "c2": "ffffff", "c3": "463759"},
+			{"p": "star", "y": 1.0, "n": 8, "speed": 2.4, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "c9a0ff", "c2": "ffffff", "c3": "463759"}
+		]},
+		"omen_draught": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "c0a0ff", "c2": "ffffff", "c3": "433759"}
+		]},
+		"omen_draught_hold": {"fx": [
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 6, "speed": 1.4, "spread": 0.3, "grav": -1.0, "life": 0.6, "size": 0.05, "c": "c0a0ff", "c2": "ffffff", "c3": "433759"}
+		]},
+		"omen_draught_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.0, "life": 0.14, "c": "c0a0ff", "c2": "ffffff", "c3": "433759"},
+			{"p": "star", "y": 1.3, "n": 6, "speed": 1.8, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "c0a0ff", "c2": "ffffff", "c3": "433759"}
+		]},
+		"armor_kit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "dfe9f7", "c2": "ffffff", "c3": "4e5156"}
+		]},
+		"armor_kit_hold": {"fx": [
+			{"p": "shard", "y": 1.0, "n": 3, "speed": 0.8, "spread": 0.8, "grav": 0.0, "drag": 1.0, "life": 0.5, "size": 0.07, "c": "dfe9f7", "c2": "8fa0b4", "shape": "disc", "radius": 0.5, "c3": "4e5156"}
+		]},
+		"armor_kit_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.1, "life": 0.14, "c": "dfe9f7", "c2": "ffffff", "c3": "4e5156"},
+			{"p": "shard", "y": 1.1, "n": 10, "speed": 3.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.5, "size": 0.08, "c": "dfe9f7", "c2": "8fa0b4", "c3": "4e5156"}
+		]},
+		"medkit": {"fx": [
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 14, "speed": 2.2, "spread": 0.3, "grav": -1.0, "life": 0.7, "size": 0.05, "c": "8fe0a0", "c2": "ffffff", "c3": "324e37"},
+			{"p": "star", "y": 1.4, "n": 5, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "8fe0a0", "c2": "ffffff", "c3": "324e37"}
+		]},
+		"smoke": {"fx": [
+			{"p": "smoke", "y": 0.3, "n": 8, "speed": 2.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.6, "radius": 0.5, "c": "b8b0c8", "c3": "6a6478", "c2": "ffffff"}
+		]},
+		"jump_pad": {"fx": [
+			{"p": "smoke", "y": 0.1, "n": 3, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.3, "radius": 0.5, "c": "d8f0e4", "c3": "7a9088", "c2": "ffffff"}
+		]},
+		"jump_pad_hit": {"fx": [
+			{"p": "ember", "y": 0.2, "shape": "disc", "radius": 0.6, "way": "up", "n": 14, "speed": 6.0, "spread": 0.3, "grav": 4.0, "life": 0.45, "size": 0.06, "c": "8ff0c8", "c2": "ffffff", "c3": "325445"},
+			{"p": "smoke", "y": 0.1, "n": 4, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.35, "radius": 0.5, "c": "d8f0e4", "c3": "7a9088", "c2": "ffffff"}
+		]},
+		"jump_pad_end": {"fx": [
+			{"p": "smoke", "y": 0.2, "n": 4, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.35, "radius": 0.5, "c": "d8f0e4", "c3": "7a9088", "c2": "ffffff"},
+			{"p": "shard", "y": 0.3, "n": 5, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.4, "size": 0.06, "c": "8ff0c8", "c2": "ffffff", "c3": "325445"}
+		]},
+		"gust_fan": {"fx": [
+			{"p": "smoke", "y": 0.1, "n": 3, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.3, "radius": 0.5, "c": "e4f6ff", "c3": "7a90a0", "c2": "ffffff"}
+		]},
+		"gust_fan_hit": {"fx": [
+			{"p": "ember", "y": 0.2, "shape": "disc", "radius": 0.8, "way": "up", "n": 16, "speed": 7.0, "spread": 0.3, "grav": 2.0, "life": 0.5, "size": 0.05, "c": "9fe8ff", "c2": "ffffff", "c3": "375159"},
+			{"p": "smoke", "y": 0.1, "n": 5, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.4, "radius": 0.5, "c": "e4f6ff", "c3": "7a90a0", "c2": "ffffff"}
+		]},
+		"gust_fan_end": {"fx": [
+			{"p": "smoke", "y": 0.2, "n": 4, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.35, "radius": 0.5, "c": "e4f6ff", "c3": "7a90a0", "c2": "ffffff"},
+			{"p": "shard", "y": 0.3, "n": 5, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.4, "size": 0.06, "c": "9fe8ff", "c2": "ffffff", "c3": "375159"}
+		]},
+		"hawk_whistle": {"fx": [
+			{"p": "flare", "y": 1.8, "size": 0.8, "life": 0.14, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"},
+			{"p": "ember", "y": 1.6, "shape": "ball", "radius": 0.2, "way": "up", "n": 10, "speed": 4.0, "spread": 0.3, "grav": -2.0, "life": 0.8, "size": 0.05, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"}
+		]},
+		"hawk_whistle_hold": {"fx": [
+			{"p": "star", "y": 2.45, "n": 2, "speed": 0.2, "spread": 0.8, "grav": 0.0, "drag": 2.0, "life": 0.5, "size": 0.16, "c": "side", "c2": "ffffff", "shape": "disc", "radius": 0.18, "c3": "side"}
+		]},
+		"hawk_whistle_end": {"fx": [
+			{"p": "flare", "y": 2.45, "size": 0.4, "life": 0.1, "c": "side", "c2": "ffffff", "c3": "side"}
+		]},
+		"scanner": {"fx": [
+			{"p": "flare", "y": 1.6, "size": 0.8, "life": 0.14, "c": "9ab4ff", "c2": "ffffff", "c3": "353f59"}
+		]},
+		"scanner_hold": {"fx": [
+			{"p": "star", "y": 2.45, "n": 2, "speed": 0.2, "spread": 0.8, "grav": 0.0, "drag": 2.0, "life": 0.5, "size": 0.16, "c": "side", "c2": "ffffff", "shape": "disc", "radius": 0.18, "c3": "side"}
+		]},
+		"scanner_end": {"fx": [
+			{"p": "flare", "y": 2.45, "size": 0.4, "life": 0.1, "c": "side", "c2": "ffffff", "c3": "side"}
+		]},
+		"lookout_lantern": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "9ae0ff", "c2": "ffffff", "c3": "354e59"}
+		]},
+		"lookout_lantern_hold": {"fx": [
+			{"p": "star", "y": 2.45, "n": 2, "speed": 0.2, "spread": 0.8, "grav": 0.0, "drag": 2.0, "life": 0.5, "size": 0.16, "c": "side", "c2": "ffffff", "shape": "disc", "radius": 0.18, "c3": "side"}
+		]},
+		"lookout_lantern_end": {"fx": [
+			{"p": "smoke", "y": 0.5, "n": 4, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.35, "radius": 0.5, "c": "e0f4ff", "c3": "6a8090", "c2": "ffffff"}
+		]},
+		"toss_satchel": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "8fe0a0", "c2": "ffffff", "c3": "324e37"}
+		]},
+		"toss_satchel_hit": {"fx": [
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 14, "speed": 2.2, "spread": 0.3, "grav": -1.0, "life": 0.7, "size": 0.05, "c": "8fe0a0", "c2": "ffffff", "c3": "324e37"}
+		]},
+		"toss_satchel_end": {"fx": [
+			{"p": "smoke", "y": 0.3, "n": 3, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.3, "radius": 0.5, "c": "e0f4e4", "c3": "6a8070", "c2": "ffffff"}
+		]},
+		"twin_gate": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.6, "life": 0.14, "c": "c9a0ff", "c2": "ffffff", "c3": "463759"}
+		]},
+		"twin_gate_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.0, "life": 0.14, "c": "c9a0ff", "c2": "ffffff", "c3": "463759"},
+			{"p": "star", "y": 1.0, "n": 6, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "c9a0ff", "c2": "ffffff", "c3": "463759"}
+		]},
+		"twin_gate_end": {"fx": [
+			{"p": "flare", "y": 1.1, "size": 2.0, "life": 0.2, "c": "c9a0ff", "c2": "ffffff", "c3": "463759"}
+		]},
+		"warp_seed": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "b48cff", "c2": "ffffff", "c3": "3f3159"}
+		]},
+		"warp_seed_hold": {"fx": [
+			{"p": "ember", "y": 1.0, "shape": "gather", "radius": 0.9, "way": "up", "n": 6, "speed": 1.5, "spread": 0.3, "grav": 0.0, "life": 0.4, "size": 0.05, "c": "b48cff", "c2": "ffffff", "c3": "3f3159"}
+		]},
+		"warp_seed_hit": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.0, "life": 0.14, "c": "b48cff", "c2": "ffffff", "c3": "3f3159"},
+			{"p": "star", "y": 1.0, "n": 6, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "b48cff", "c2": "ffffff", "c3": "3f3159"}
+		]},
+		"warp_seed_end": {"fx": [
+			{"p": "shard", "y": 1.2, "n": 6, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.4, "size": 0.06, "c": "b48cff", "c2": "ffffff", "c3": "3f3159"}
+		]},
+		"bounty_banner": {"fx": [
+			{"p": "flare", "y": 1.6, "size": 0.8, "life": 0.14, "c": "ff6a5a", "c2": "ffffff", "c3": "59251f"},
+			{"p": "coin", "y": 1.6, "n": 6, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"}
+		]},
+		"bounty_banner_end": {"fx": [
+			{"p": "coin", "y": 1.8, "n": 14, "speed": 3.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.9, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"},
+			{"p": "smoke", "y": 1.6, "n": 3, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.3, "radius": 0.5, "c": "ff6a5a", "c3": "6a2a24", "c2": "ffffff"}
+		]},
+		"pilfer_pouch": {"fx": [
+			{"p": "smoke", "y": 1.0, "n": 3, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.3, "radius": 0.5, "c": "d0b080", "c3": "6a5a40", "c2": "ffffff"}
+		]},
+		"pilfer_pouch_hit": {"fx": [
+			{"p": "coin", "y": 1.4, "n": 10, "speed": 3.0, "spread": 0.8, "grav": 6.0, "drag": 1.0, "life": 0.7, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"}
+		]},
+		"hearth_lamp": {"fx": [
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 10, "speed": 1.8, "spread": 0.3, "grav": -1.0, "life": 0.8, "size": 0.05, "c": "ffb070", "c2": "ffffff", "c3": "593d27"}
+		]},
+		"revive_ember": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 1.2, "life": 0.14, "c": "ffe08a", "c2": "ffffff", "c3": "594e30"},
+			{"p": "ember", "y": 0.4, "shape": "disc", "radius": 0.45, "way": "up", "n": 14, "speed": 2.5, "spread": 0.3, "grav": -1.0, "life": 0.8, "size": 0.05, "c": "ffe08a", "c2": "ffffff", "c3": "594e30"}
+		]},
+		"chest_key": {"fx": [
+			{"p": "star", "y": 0.9, "n": 6, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"},
+			{"p": "coin", "y": 0.9, "n": 4, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "ffd27a", "c2": "ffffff", "c3": "59492a"}
+		]},
+		"rift_key": {"fx": [
+			{"p": "star", "y": 0.9, "n": 6, "speed": 1.5, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "b98aff", "c2": "ffffff", "c3": "403059"},
+			{"p": "flare", "y": 0.9, "size": 0.8, "life": 0.14, "c": "b98aff", "c2": "ffffff", "c3": "403059"}
+		]},
+		"blight_flask": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "c9e84a", "c2": "ffffff", "c3": "465119"}
+		]},
+		"cloud_raft": {"fx": [
+			{"p": "smoke", "y": 0.2, "n": 6, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.5, "radius": 0.5, "c": "f4faff", "c3": "8aa0b0", "c2": "ffffff"}
+		]},
+		"shatter_charge": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.5, "life": 0.14, "c": "ff9a5a", "c2": "ffffff", "c3": "59351f"}
+		]},
+		"shield_cell": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.8, "life": 0.14, "c": "7ac8ff", "c2": "ffffff", "c3": "2a4559"},
+			{"p": "shard", "y": 1.1, "n": 8, "speed": 2.0, "spread": 0.8, "grav": 2.0, "drag": 1.0, "life": 0.4, "size": 0.07, "c": "7ac8ff", "c2": "ffffff", "c3": "2a4559"}
+		]},
+		"skyfall_charge": {"fx": [
+			{"p": "flare", "y": 1.8, "size": 0.8, "life": 0.14, "c": "ff7a3a", "c2": "ffffff", "c3": "592a14"},
+			{"p": "ember", "y": 1.6, "shape": "ball", "radius": 0.2, "way": "up", "n": 10, "speed": 5.0, "spread": 0.3, "grav": -3.0, "life": 0.7, "size": 0.05, "c": "ff7a3a", "c2": "ffffff", "c3": "592a14"}
+		]},
+		"stim": {"fx": [
+			{"p": "flare", "y": 1.2, "size": 0.6, "life": 0.14, "c": "ffd76a", "c2": "ffffff", "c3": "594b25"}
+		]},
+		"stim_hold": {"fx": [
+			{"p": "ember", "y": 0.2, "shape": "disc", "radius": 0.35, "way": "back", "n": 8, "speed": 3.0, "spread": 0.3, "grav": 0.0, "life": 0.3, "size": 0.04, "c": "ffd76a", "c2": "ffffff", "c3": "594b25"}
+		]},
+		"stim_end": {"fx": [
+			{"p": "smoke", "y": 0.2, "n": 2, "speed": 1.5, "spread": 0.9, "grav": -0.4, "life": 0.8, "size": 0.25, "radius": 0.5, "c": "fff4d0", "c3": "8a7a50", "c2": "ffffff"}
+		]},
+		"thorn_wall": {"fx": [
+			{"p": "chunk", "y": 0.2, "n": 6, "speed": 2.5, "spread": 0.8, "grav": 8.0, "drag": 1.0, "life": 0.6, "size": 0.1, "c": "5a8a48", "c2": "3a5a30", "c3": "1f3019"}
+		]}
+	}
+}

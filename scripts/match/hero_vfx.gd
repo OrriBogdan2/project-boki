@@ -157,18 +157,21 @@ func _bone_pos(h: Hunter, bone: String, off: Vector3) -> Vector3:
 static func _vec(v: Array) -> Vector3:
 	return Vector3(float(v[0]), float(v[1]), float(v[2]))
 
-func _rec(h: Hunter, move: String) -> Dictionary:
-	return (data(h.arch).get("moves", {}) as Dictionary).get(move, {})
+## The recipe for `move` in the Hero's data, or in data file `file` ("belt/utility": the belt items, UtilityVfx).
+func _rec(h: Hunter, move: String, file := "") -> Dictionary:
+	return (data(file if file != "" else h.arch).get("moves", {}) as Dictionary).get(move, {})
 
 ## A moment of a Hero's kit: its sounds and its looks. `o` fills the sizes the data leaves to the kit (see _num:
 ## "r", "len", "w"), "k" is the move's charge 0..1, "flip" mirrors a sweep, a true key in `o` turns on the layers
-## that name it with "when" (a move's "full" or "hit" version).
+## that name it with "when" (a move's "full" or "hit" version), "set" reads the recipe from another data file
+## (local: each game plays those from its own sim).
 func play(h: Hunter, move: String, at: Vector3, dir: Vector2, o := {}) -> void:
-	var rec := _rec(h, move)
+	var file := String(o.get("set", ""))
+	var rec := _rec(h, move, file)
 	if rec.is_empty():
 		return
 	plays[move] = int(plays.get(move, 0)) + 1
-	if bool(rec.get("net", true)) and m.get("net_on") and not h.remote:
+	if bool(rec.get("net", true)) and file == "" and m.get("net_on") and not h.remote:
 		m.net_fx(["hvfx", h.nid, move, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.01), snappedf(dir.y, 0.01),
 				snappedf(float(o.get("k", 0.0)), 0.01), snappedf(float(o.get("len", 0.0)), 0.1),
 				snappedf(float(o.get("r", 0.0)), 0.1)])
@@ -224,9 +227,12 @@ func _num(layer: Dictionary, key: String, o: Dictionary, fallback := 1.0) -> flo
 		n *= 1.0 + float(layer[key + "_k"]) * float(o.get("k", 0.0))
 	return n
 
+## A palette key, a hex colour, or "side": the body's colour as the viewer sees it (SideColor: you, ally, rival).
 func _pal(h: Hunter, name_or_hex: Variant, fallback: String) -> Color:
 	var pal: Dictionary = data(h.arch).get("palette", {})
 	var key := String(name_or_hex) if name_or_hex != null else fallback
+	if key == "side":
+		return SideColor.of(m, h)
 	return Color(String(pal.get(key, key)))
 
 func _where(layer: Dictionary, h: Hunter, at: Vector3, dir: Vector2, o := {}) -> Vector3:
@@ -620,7 +626,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
 		return
-	var rec := _rec(h, move)
+	var rec := _rec(h, move, String(extra.get("set", "")))
 	var lod := lod_at(h.pos)
 	if rec.is_empty() or lod <= 0.0 or (h.unseen and h != m.get("player")):
 		return

@@ -58,6 +58,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
+			UtilityVfx.used(h, id)
 			return true
 		"repair":
 			h._fold_for_action()
@@ -65,11 +66,11 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
 			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
+			UtilityVfx.used(h, id)
 			return true
 		"mend":
 			h.heal(MEND_HP)
 			h.armor = minf(h.max_armor, h.armor + MEND_ARMOR)
-			m.fx.burst(h.pos + Vector3(0, 1.0, 0), col, 16, 3.0, 0.6, -3.0)
 			m.sfx("heal", h.pos, -2.0, 1.1)
 		"smoke":
 			var n := Models.gear_smoke()
@@ -82,6 +83,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			for o in m.hunters:
 				if o.team != h.team and not o.out and o.flat_dist(h) < rng:
 					o.reveal_t = maxf(o.reveal_t, float(d.get("time", 3.0)))
+					UtilityVfx.wear(o, id, float(d.get("time", 3.0)), func(): return o.reveal_t > 0.0)
 			m.fx.ring(h.pos, minf(rng, 40.0), Color(col, 0.6), 0.8)
 			m.sfx("ping", h.pos, 0.0, 0.8)
 		"pad", "field", "pilfer", "lamp", "ember":
@@ -92,6 +94,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			m.sfx("skill", h.pos, -4.0, 1.0)
 	# the instant ones are spent now, with a quick body beat; the channelled ones when they finish (tick)
 	UtilityPose.start(h, id)
+	UtilityVfx.used(h, id)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
 	if i < UtilityBelt.SLOTS and not (h.belt[i] as Dictionary).is_empty():
@@ -118,7 +121,7 @@ static func tick(h: Hunter, dt: float) -> void:
 						h.heal(hp * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
 					UtilityMore.drank(h, dd)
 					h.m.sfx("heal", h.pos, -2.0)
-					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color(dd.get("col", Color("8ff0a0"))), 14, 2.5, 0.5, -3.0)
+					UtilityVfx.play(h, h.drink_id, "hit")
 	if h.kit_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.kit_t = 0.0
@@ -129,4 +132,4 @@ static func tick(h: Hunter, dt: float) -> void:
 				if UtilityBelt.take(h, "armor_kit", 1) > 0:
 					h.armor = h.max_armor
 					h.m.sfx("shield", h.pos, -2.0, 1.2)
-					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color("dfe9f7"), 16, 2.5, 0.5, -3.0)
+					UtilityVfx.play(h, "armor_kit", "hit")

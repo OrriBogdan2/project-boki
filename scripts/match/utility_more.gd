@@ -17,10 +17,12 @@ extends RefCounted
 ## hunter in a gate or a seed is handled by its own game only if it set the item itself.
 
 const PAD_R := 0.8
+const BLINK_T := 1.5        # s: a pad blinks this long before it goes (like the Cloud Raft)
+const WARD_EVERY := 0.5     # s between a Lookout Lantern's looks round its ring
 
 static func start(h: Hunter, id: String, d: Dictionary) -> bool:
 	match String(d.get("use", "")):
-		"pad": _pad(h, d)
+		"pad": _pad(h, id, d)
 		"field": return _field(h, id, d)
 		"pilfer": _pilfer(h, d)
 		"lamp": Beacons.lamp(h.m, h.pos)
@@ -45,7 +47,7 @@ static func _spot(h: Hunter, dist: float) -> Vector3:
 	at.y = h.m.world.ground_at(at.x, at.z)
 	return at
 
-static func _pad(h: Hunter, d: Dictionary) -> void:
+static func _pad(h: Hunter, id: String, d: Dictionary) -> void:
 	var at := _spot(h, 1.6)
 	var n := Models.gear_pad(d.get("col", Color.WHITE))
 	n.position = at
@@ -53,7 +55,7 @@ static func _pad(h: Hunter, d: Dictionary) -> void:
 	h.m.gpads.append({
 		"pos": at, "t": float(d.get("life", 20.0)), "arm": float(d.get("arm", 0.0)),
 		"after": float(d.get("after", 0.0)), "push": float(d.get("push", 6.0)),
-		"lift": float(d.get("lift", 17.0)), "col": d.get("col", Color.WHITE), "node": n, "cd": {},
+		"lift": float(d.get("lift", 17.0)), "col": d.get("col", Color.WHITE), "node": n, "cd": {}, "id": id, "by": h,
 	})
 	h.m.sfx("throw", h.pos, -2.0, 1.2)
 
@@ -65,7 +67,9 @@ static func pads(m: Node, dt: float) -> void:
 		if float(gp["t"]) <= 0.0:
 			(gp["node"] as Node3D).queue_free()
 			m.gpads.erase(gp)
+			UtilityVfx.play(gp["by"], gp["id"], "end", gp["pos"])
 			continue
+		(gp["node"] as Node3D).visible = float(gp["t"]) > BLINK_T or int(m.time * 8.0) % 2 == 0
 		var top: Node3D = (gp["node"] as Node3D).get_node_or_null("Top")
 		if top: top.scale = Vector3.ONE * (1.0 + sin(m.time * 6.0) * 0.06) * (0.6 if float(gp["arm"]) > 0.0 else 1.0)
 		if float(gp["arm"]) > 0.0:
@@ -84,7 +88,7 @@ static func pads(m: Node, dt: float) -> void:
 				h.vel = Vector3(dir.x * sp, float(gp["lift"]), dir.y * sp)
 				h.grounded = false
 				h.glide_cd = 0.0
-				m.fx.burst(gp["pos"] + Vector3(0, 0.3, 0), gp["col"], 16, 5.0, 0.4, -2.0)
+				UtilityVfx.play(h, gp["id"], "hit", gp["pos"])
 				m.sfx("jump", h.pos, -2.0, 0.8)
 
 # ------------------------------------------------------------------ fields
@@ -94,17 +98,21 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 	var time := float(d.get("time", 10.0))
 	var r := float(d.get("r", 1.5))
 	var at := _spot(h, float(d.get("range", 1.6)))
+	var gone := func(p): UtilityVfx.play(h, id, "end", p)
 	match String(d.get("field", "")):
 		"gate":
 			var b := h.pos
 			var tick := func(_p, _z): pass
-			m.fields.add_kx(h, at, r, time, 1.0, col, tick, func(_p): _swap(m, at, b, r), null, "")
-			m.fields.add_kx(h, b, r, time, 1.0, col, tick, Callable(), null, "")
+			var swap := func(p):
+				_swap(m, id, at, b, r)
+				gone.call(p)
+			var za: Dictionary = m.fields.add_kx(h, at, r, time, 1.0, col, tick, swap, null, "")
+			UtilityLook.gate(za, m.fields.add_kx(h, b, r, time, 1.0, col, tick, gone, null, ""))
 		"seed":
 			var held := {}
 			var hold := float(d.get("hold", 1.5))
-			m.fields.add_kx(h, at, r, time, 0.25, col, func(p, _z): _seed_tick(m, p, r, hold, held),
-				Callable(), null, "")
+			UtilityLook.anomaly(m.fields.add_kx(h, at, r, time, 0.25, col,
+				func(p, _z): _seed_tick(m, id, p, r, hold, held), gone, null, ""))
 		"banner":
 			var key := "banner_%d" % h.team
 			var t0: float = m.time
@@ -112,14 +120,16 @@ static func _field(h: Hunter, id: String, d: Dictionary) -> bool:
 			h.reveal_t = maxf(h.reveal_t, time)
 			m.fx.word(h.pos + Vector3(0, 2.4, 0), "MOST WANTED", col)
 			m.add_feed("%s shows themselves to everyone" % h.pname)
-			m.fields.add_kx(h, h.pos, 1.0, time, 1.0, col, func(_p, _z): pass,
-				func(_p): _banner_end(m, h, d, key, t0), h, "")
+			UtilityLook.banner(m.fields.add_kx(h, h.pos, 1.0, time, 1.0, col, func(_p, _z): pass,
+				func(_p): _banner_end(m, h, d, key, t0), h, ""))
 		"ward":
-			m.fields.add_kx(h, at, 0.6, time, 0.5, col, func(p, _z): _ward_tick(m, h.team, p, r),
-				Callable(), null, "totem")
+			var team: int = h.team
+			UtilityLook.ward(m.fields.add_kx(h, at, 0.6, time, WARD_EVERY, col,
+				func(p, _z): _ward_tick(m, team, id, p, r), gone, null, "totem"), r, SideColor.of(m, h))
 		"pack":
 			var done := [false]
-			m.fields.add_kx(h, at, r, time, 0.2, col, func(p, z): _pack_tick(m, p, z, d, done), Callable(), null, "")
+			UtilityLook.pack(m.fields.add_kx(h, at, r, time, 0.2, col,
+				func(p, z): _pack_tick(m, id, p, z, d, done), gone, null, ""))
 	m.sfx("throw", h.pos, -2.0, 1.0)
 	return true
 
@@ -128,19 +138,20 @@ static func _near(m: Node, at: Vector3, r: float) -> Array:
 		var live: bool = not x.out and not x.downed and not x.remote
 		return live and x.flat_dist(at) < r + x.r and absf(x.pos.y - at.y) < 2.0)
 
-static func _put(m: Node, x: Node, p: Vector3) -> void:
+## Moves body `x` to `p` by item `id`: a ghost where it stood, the item's "hit" where it lands.
+static func _put(m: Node, id: String, x: Node, p: Vector3) -> void:
 	m.fx.ghost(x.position, x.face, Color("c9a0ff"), 0.6)
 	x.teleport(Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 	x.vel = Vector3.ZERO
-	m.fx.burst(x.pos + Vector3(0, 0.9, 0), Color("c9a0ff"), 12, 3.0, 0.4)
+	UtilityVfx.play(x, id, "hit")
 
-static func _swap(m: Node, a: Vector3, b: Vector3, r: float) -> void:
+static func _swap(m: Node, id: String, a: Vector3, b: Vector3, r: float) -> void:
 	var ina := _near(m, a, r)
 	var inb := _near(m, b, r)
 	for x in ina:
-		_put(m, x, b + (x.pos - a))
+		_put(m, id, x, b + (x.pos - a))
 	for x in inb:
-		_put(m, x, a + (x.pos - b))
+		_put(m, id, x, a + (x.pos - b))
 	if not ina.is_empty() or not inb.is_empty():
 		m.sfx("blink", a, -2.0, 0.9)
 
@@ -151,24 +162,26 @@ static func random_spot(m: Node) -> Vector3:
 			return p
 	return Vector3.INF
 
-static func warp(h: Hunter) -> void:
+static func warp(h: Hunter, id: String) -> void:
 	var p := random_spot(h.m)
 	if p != Vector3.INF:
-		_put(h.m, h, p)
+		_put(h.m, id, h, p)
 
-static func _seed_tick(m: Node, at: Vector3, r: float, hold: float, held: Dictionary) -> void:
+static func _seed_tick(m: Node, id: String, at: Vector3, r: float, hold: float, held: Dictionary) -> void:
 	var inside := _near(m, at, r)
 	for x in inside:
 		held[x.nid] = float(held.get(x.nid, 0.0)) + 0.25
+		UtilityVfx.wear(x, id, 0.3)
 		if float(held[x.nid]) >= hold:
 			held.erase(x.nid)
-			warp(x)
+			warp(x, id)
 	for k in held.keys():
 		if not inside.any(func(x): return x.nid == k):
 			held.erase(k)
 
 static func _banner_end(m: Node, h: Hunter, d: Dictionary, key: String, t0: float) -> void:
 	m.remove_meta(key)
+	UtilityVfx.play(h, String(d["id"]), "end")
 	if h.out or h.downed or m.time - t0 < float(d.get("time", 120.0)) - 1.5:
 		m.fx.word(h.pos + Vector3(0, 2.4, 0), "FELL", Color("ff6a5a"))
 		return
@@ -177,12 +190,13 @@ static func _banner_end(m: Node, h: Hunter, d: Dictionary, key: String, t0: floa
 	Beacons.pop(m, h.pos, h.team)
 	m.fx.word(h.pos + Vector3(0, 2.4, 0), "+%d gems" % int(d.get("reward", 0)), Color("ffd27a"))
 
-static func _ward_tick(m: Node, team: int, at: Vector3, r: float) -> void:
+static func _ward_tick(m: Node, team: int, id: String, at: Vector3, r: float) -> void:
 	for o in m.hunters:
 		if o.team != team and not o.out and o.flat_dist(at) < r:
 			o.reveal_t = maxf(o.reveal_t, 3.0)
+			UtilityVfx.wear(o, id, WARD_EVERY + 0.1)
 
-static func _pack_tick(m: Node, at: Vector3, z: Dictionary, d: Dictionary, done: Array) -> void:
+static func _pack_tick(m: Node, id: String, at: Vector3, z: Dictionary, d: Dictionary, done: Array) -> void:
 	if done[0]:
 		return
 	for x in _near(m, at, float(d.get("r", 1.4))):
@@ -190,6 +204,7 @@ static func _pack_tick(m: Node, at: Vector3, z: Dictionary, d: Dictionary, done:
 			continue
 		done[0] = true
 		z["t"] = 0.0
+		UtilityVfx.play(x, id, "hit")
 		_regen(m, x, x.max_hp * float(d.get("heal", 0.6)), float(d.get("hold", 5.0)), 0.5, x.hp)
 		m.sfx("heal", at, -2.0, 1.2)
 		return
@@ -216,6 +231,7 @@ static func _pilfer(h: Hunter, d: Dictionary) -> void:
 			o.gems -= n
 			took += n
 			m.fx.word(o.pos + Vector3(0, 2.2, 0), "-%d gems" % n, Color("d0b080"))
+			UtilityVfx.play(o, String(d["id"]), "hit")
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color("d0b080"), 16, 4.0, 0.6)
 	m.sfx("throw", h.pos, -2.0, 1.4)
 	if took > 0:
@@ -224,7 +240,7 @@ static func _pilfer(h: Hunter, d: Dictionary) -> void:
 ## The end of a drink: Lostway Scroll's warp, Omen Draught's wardens.
 static func drank(h: Hunter, d: Dictionary) -> void:
 	if d.get("warp", false):
-		warp(h)
+		warp(h, String(d["id"]))
 	if float(d.get("omen", 0.0)) > 0.0:
 		_omen(h.m, h.team, float(d["omen"]), d.get("col", Color.WHITE))
 
