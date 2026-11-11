@@ -1,19 +1,26 @@
 extends RefCounted
-## --wisp-shots --shots-dir=<dir>: review frames for the downed Wisp (docs/decisions/0019), in a live match
-## under xvfb with a renderer. The player is knocked, drifts, then is revived:
+## --wisp-shots --shots-dir=<dir> [--wisp-heroes=<id>,<id>]: review frames for the downed Wisp (docs/decisions/0019), in
+## a live match under xvfb with a renderer. The player is knocked, drifts, then is revived:
 ##   wisp_0_hero      standing, before the knock
-##   wisp_1_pop_a     the pop-in, first frames (flash and ring)
-##   wisp_2_pop_b     the pop-in settling (puff, Wisp small)
+##   wisp_1_fall      the hit and fall to the floor, mid-way
+##   wisp_2_puff      the puff: the hero gone, the Wisp swelling out
 ##   wisp_3_idle      the Wisp floating low with a steady glow, the hero gone
 ##   wisp_4_moving    the Wisp hanging back behind the moving hunter, leaning back
 ##   wisp_5_settle    the hunter stopped, the Wisp still catching up
 ##   wisp_6_mate      a teammate's Wisp beside the player's
-##   wisp_7_revive_a  the revive: the Wisp brightens, the hero small
-##   wisp_8_revive_b  the hero scaling up
+##   wisp_7_revive_a  the revive: the Wisp brightens, the hero small and low, getting up
+##   wisp_8_revive_b  the hero growing back as it stands up
 ##   wisp_9_hero      the hero back at full size
+## --wisp-heroes: each of those Heroes instead gets strip_<id>.jpg, cropped round the hero, one frame every STRIP_DT:
+## the top row from the knock through the fall, the puff and the Wisp swelling out, the bottom row the revive.
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
+const STRIP_DT := 0.05     # s between strip frames
+const FALL_CELLS := 13     # the knock to +0.6 s: the fall (the puff at HunterWisp.FALL_T) and the pop-in
+const RISE_CELLS := 11     # the revive to +0.5 s: the rise and the hero settling
+const CELL := 240          # px: a strip frame in the sheet
+const CROP := 0.3          # of the screen height: the square cropped round the hero for a strip frame
 
 var main: Node
 var m: Match
@@ -23,20 +30,35 @@ var lines: Array = []
 
 func run(main_node: Node) -> void:
 	main = main_node
+	var heroes: Array = []
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		if String(a).begins_with("--wisp-heroes="):
+			heroes = String(a).substr(14).split(",")
 	DirAccess.make_dir_recursive_absolute(dir)
 	await _setup()
+	if heroes.is_empty():
+		await _review()
+	for id in heroes:
+		await _strip(String(id))
+	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
+	for l in lines:
+		f.store_line(l)
+	f.close()
+	print("WISPSHOTS %d in %s" % [lines.size(), dir])
+	main.get_tree().quit(0)
+
+func _review() -> void:
 	await _go(0.4)
 	_take("wisp_0_hero", "The hero standing, before the knock")
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	m.knock(P, foe, {})
 	P.down_hp = 1e6
-	await _go(0.07)
-	_take("wisp_1_pop_a", "Pop-in, first frames: the flash and the ring where the hero was")
-	await _go(0.1)
-	_take("wisp_2_pop_b", "Pop-in settling: the puff drifts off, the Wisp grows to size")
+	await _go(0.15)
+	_take("wisp_1_fall", "The hit and fall: the hero going down on its death clip, still on screen")
+	await _go(0.23)
+	_take("wisp_2_puff", "The puff: the hero gone, ring and burst, the Wisp swelling out where it lay")
 	await _go(0.5)
 	_take("wisp_3_idle", "The Wisp idling low: round outline, team rim, white core, steady glow, the hero hidden")
 	await _go(0.5, Vector3(0.05, 0, 0.03))
@@ -46,21 +68,48 @@ func run(main_node: Node) -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	mate.teleport(P.pos + Vector3(2.0, 0, 0.0))
 	m.knock(mate, foe, {})
-	await _go(0.5)
+	await _go(0.7)
 	_take("wisp_6_mate", "A teammate's Wisp beside yours (the default look, tinted by team)")
 	m.revive_hunter(P, null)
 	await _go(0.08)
-	_take("wisp_7_revive_a", "Revive: the Wisp brightens as the hero pops back in, small and squashed")
+	_take("wisp_7_revive_a", "Revive: the Wisp brightens, the hero back small and low, squashed, getting up")
 	await _go(0.12)
-	_take("wisp_8_revive_b", "The hero scaling up, the Wisp fading")
+	_take("wisp_8_revive_b", "The hero growing back as it stands up, the Wisp fading")
 	await _go(0.6)
 	_take("wisp_9_hero", "The hero back at full size, no Wisp")
-	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
-	for l in lines:
-		f.store_line(l)
-	f.close()
-	print("WISPSHOTS %d in %s" % [lines.size(), dir])
-	main.get_tree().quit(0)
+
+## One Hero's fall and revive, frame by frame, in one image.
+func _strip(id: String) -> void:
+	P.reclass(Arch.weight(id), id)
+	P.hp = P.max_hp
+	await _go(0.6)
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var sheet := Image.create(CELL * FALL_CELLS, CELL * 2, false, Image.FORMAT_RGB8)
+	m.knock(P, foe, {})
+	P.down_hp = 1e6
+	for i in FALL_CELLS:
+		_cell(sheet, i, 0)
+		await _go(STRIP_DT)
+	await _go(0.5)
+	m.revive_hunter(P, null)
+	for i in RISE_CELLS:
+		_cell(sheet, i, 1)
+		await _go(STRIP_DT)
+	var file := "strip_%s.jpg" % id
+	sheet.save_jpg(dir.path_join(file), 0.9)
+	var rows := "top, the knock to +%.2f s (the puff at +%.2f s); bottom, the revive to +%.2f s" % [
+			STRIP_DT * (FALL_CELLS - 1), HunterWisp.FALL_T, STRIP_DT * (RISE_CELLS - 1)]
+	lines.append("%s: %s, every %.2f s: %s" % [file, id, STRIP_DT, rows])
+
+## The frame on screen now, cropped round the hero's middle, into the sheet at column i of row.
+func _cell(sheet: Image, i: int, row: int) -> void:
+	var img := main.get_viewport().get_texture().get_image()
+	img.convert(Image.FORMAT_RGB8)
+	var side := int(img.get_height() * CROP)
+	var at := main.get_viewport().get_camera_3d().unproject_position(P.position + Vector3(0, 0.6, 0))
+	var crop := img.get_region(Rect2i(int(at.x) - side / 2, int(at.y) - side / 2, side, side))
+	crop.resize(CELL, CELL, Image.INTERPOLATE_LANCZOS)
+	sheet.blit_rect(crop, Rect2i(0, 0, CELL, CELL), Vector2i(i * CELL, row * CELL))
 
 func _setup() -> void:
 	m = Match.new()
@@ -89,10 +138,8 @@ func _setup() -> void:
 			h.teleport(m.world.free_spot_near(away, [], 1.0, 0.4, 8.0))
 
 func _go(secs: float, drift := Vector3.ZERO) -> void:
-	var t := 0.0
-	while t < secs:
+	for i in roundi(secs / DT):
 		m.step(DT)
-		t += DT
 		P.pos += drift
 		P.prev = P.pos
 		m.cam.snap(P.pos)

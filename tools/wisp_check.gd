@@ -1,8 +1,9 @@
 extends RefCounted
 ## --wisp-check: a downed Hunter turns into a Wisp (docs/decisions/0019-downed-wisp.md). For all 12 heroes,
-## a bot teammate and the tutorial: down a hero, the Wisp spawns and the hero model hides, the Wisp
-## trails when it moves, a revive brings the hero back (scaled up from the pop) and frees the Wisp, and a
-## bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
+## a bot teammate and the tutorial: down a hero, it is hit and falls to the floor on its death clip (on screen,
+## FALL_T), then the Wisp puffs out and the hero model hides, the Wisp trails when it moves, a revive grows the
+## hero back as it stands up (the fall backwards) and frees the Wisp, a revive before the puff only stands it up,
+## and a bleed-out breaks it. The downed gameplay (downed flag, speed, hittable) is read untouched. Also the
 ## look data: every look has all its keys and real sounds, an unknown id gives the default Wisp, a look
 ## that lists only a few keys builds, and the saved id round-trips. Then the Boki wisp prototype (KinWisp):
 ## off by default (the Boki walks); on, every Boki rides as a critter-outline wisp orbiting its hunter at
@@ -27,6 +28,7 @@ func run(main_node: Node) -> void:
 	_spot = m.player.pos
 	for a in Arch.ids():
 		_hero_cycle(a)
+	_revive_mid_fall()
 	_bleed_out()
 	_teammate()
 	_boki_wisps()
@@ -66,8 +68,23 @@ func _frames(secs: float, drift := Vector3.ZERO) -> void:
 				h.pos += drift
 				h.prev = h.pos
 			h.render(DT, 1.0)
+		var clips := _clips(m.player)
+		if clips:
+			m.player.model.get_node("Warden/Sync").call("_process", DT)      # (no tree frames here: run the clips)
 
-## One hero: up, down (Wisp, hidden hero), moving, revived (hero grows back, Wisp gone).
+## The player's hand-keyed clips, or null (Gil has none).
+func _clips(h: Hunter) -> WardenClips:
+	var sync: Node = h.model.get_node_or_null("Warden/Sync") if h.model else null
+	return sync.get("clips") as WardenClips if sync else null
+
+## The head's height off the skeleton the clips pose, in the model's own frame (the camera's lean left out).
+func _head_y(h: Hunter) -> float:
+	var sk := WardenGlb.skeleton(h.model.get_node_or_null("Warden"))
+	var head := sk.global_transform * sk.get_bone_global_pose(WardenSkeleton.find(sk, "head")).origin
+	return (h.model.global_transform.affine_inverse() * head).y
+
+## One hero: up; knocked, it is hit and falls to the floor (on screen, no Wisp yet), then the puff hides it and the
+## Wisp swells out; moving; revived, it grows back as it stands up (the fall backwards) and the Wisp goes.
 func _hero_cycle(arch_id: String) -> void:
 	var p: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
@@ -78,14 +95,15 @@ func _hero_cycle(arch_id: String) -> void:
 	_frames(0.1)
 	ok(p.model.visible and HunterWisp.node_of(p) == null, tag + "up: the hero shows, no Wisp")
 	var base: Vector3 = p.model.scale
+	var stand := _head_y(p) if _clips(p) else 0.0
 	m.knock(p, foe, {})
 	p.down_hp = 1e6
-	_frames(0.05)
+	_fall(p, tag, stand)
 	var wisp := HunterWisp.node_of(p)
 	var spawned: bool = wisp != null and wisp.is_inside_tree() and wisp.get_parent() == p
-	ok(p.downed and spawned, tag + "downed: a Wisp spawns on the hunter")
+	ok(p.downed and spawned, tag + "downed: a Wisp puffs out on the hunter")
 	ok(not p.model.visible, tag + "downed: the hero model is hidden")
-	_frames(0.4)
+	_frames(0.3)
 	ok(HunterWisp.mode_of(p) == HunterWisp.ON, tag + "the pop-in ends and the Wisp idles")
 	ok(p.downed and not p.out, tag + "downed gameplay untouched: still downed, not out")
 	ok(Sfx.loop_on(HunterWisp.hum_key(p)), tag + "a downed Wisp hums")
@@ -102,9 +120,73 @@ func _hero_cycle(arch_id: String) -> void:
 	ok(not p.downed and p.model.visible and popping, tag + "revived: the hero is back, the pop-out plays")
 	ok(not Sfx.loop_on(HunterWisp.hum_key(p)), tag + "the revive stops the hum")
 	ok(p.model.scale.y < base.y * 0.95, tag + "the hero starts small (%.2f of full)" % (p.model.scale.y / base.y))
-	_frames(0.5)
+	_rise(p, tag, stand)
 	ok(HunterWisp.mode_of(p) == "" and HunterWisp.node_of(p) == null, tag + "the Wisp is gone after the pop-out")
 	ok(p.model.scale.is_equal_approx(base), tag + "the hero is back at full size")
+
+## The hit and fall: for FALL_T the hero stays on screen with no Wisp, its death clip running forward, and ends on
+## the floor; then the puff. A Hero with no clips (Gil) puffs at once.
+func _fall(p: Hunter, tag: String, stand: float) -> void:
+	var clips := _clips(p)
+	var dead := String(clips.d["states"]["dead"]) if clips else ""
+	var t := 0.0
+	var last := 0.0
+	var shown := true
+	var forward := true
+	while t < 1.0:
+		_frames(DT)
+		t += DT
+		if HunterWisp.node_of(p) != null:
+			break
+		shown = shown and p.model.visible
+		forward = forward and HunterWisp.fall_k(p) >= last and clips != null and clips.cur == dead
+		last = HunterWisp.fall_k(p)
+	if clips == null:
+		ok(t <= DT * 1.5, tag + "no clips: it puffs at once (%.2f s)" % t)
+		return
+	var timed := absf(t - HunterWisp.FALL_T) <= DT * 3.0
+	ok(timed and shown, tag + "the hero falls for %.2f s, on screen, before the puff" % t)
+	ok(forward, tag + "...playing its death clip (%s) forward" % dead)
+	var low := _head_y(p) / stand
+	ok(low < 0.55, tag + "...to the floor: the head at %.2f of its standing height at the puff" % low)
+
+## The rise: on screen from the first frame, the hero stands up off the floor (the death clip running back) and is
+## up when the pop-out ends.
+func _rise(p: Hunter, tag: String, stand: float) -> void:
+	var clips := _clips(p)
+	var last := 1.0
+	var back := true
+	var t := 0.0
+	while HunterWisp.mode_of(p) == HunterWisp.OUT and t < 1.0:
+		var k := HunterWisp.fall_k(p)
+		back = back and k <= last and p.model.visible and (clips == null or clips.cur == clips.d["states"]["dead"])
+		last = k
+		_frames(DT)
+		t += DT
+	ok(back and HunterWisp.fall_k(p) < 0.0, tag + "the rise plays the fall backwards over %.2f s, then it clears" % t)
+	if clips:
+		var up := _head_y(p) / stand
+		ok(up > 0.85, tag + "...and stands it up: the head at %.2f of its standing height" % up)
+
+## Revived before the puff (a beacon, a remote's flag clearing): no Wisp ever shows, the hero never shrinks, and it
+## gets up from where its fall had got to.
+func _revive_mid_fall() -> void:
+	var p: Hunter = m.player
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
+	p.reclass(Arch.weight("gunslinger"), "gunslinger")
+	p.hp = p.max_hp
+	_frames(0.1)
+	var base: Vector3 = p.model.scale
+	m.knock(p, foe, {})
+	_frames(0.1)
+	var k := HunterWisp.fall_k(p)
+	m.revive_hunter(p, null)
+	_frames(DT)
+	var from := HunterWisp.fall_k(p)
+	ok(k > 0.1 and k < 0.9 and absf(from - k) < 0.1, "revived mid-fall: the rise starts at %.2f of the fall" % from)
+	_frames(0.5)
+	var plain: bool = p.model.visible and p.model.scale.is_equal_approx(base)
+	ok(HunterWisp.node_of(p) == null and HunterWisp.fall_k(p) < 0.0 and plain, "...no Wisp, no shrink, up again")
 
 func _bleed_out() -> void:
 	var p: Hunter = m.player
@@ -131,7 +213,7 @@ func _teammate() -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == p.team and x != p)[0]
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != p.team)[0]
 	m.knock(mate, foe, {})
-	_frames(0.3)
+	_frames(0.5)
 	ok(HunterWisp.node_of(mate) != null and not mate.model.visible, "a teammate's downed state shows their Wisp")
 	var teammates_downed: bool = mate.downed
 	m.revive_hunter(mate, null)
@@ -145,7 +227,7 @@ func _tutorial() -> void:
 	var base: Vector3 = p.model.scale
 	_frames(0.2)
 	m.knock(p, null, {})
-	_frames(0.3)
+	_frames(0.5)
 	ok(p.downed and HunterWisp.node_of(p) != null and not p.model.visible, "tutorial: downed shows the Wisp")
 	var waited := 0.0
 	while p.downed and waited < 10.0:       # the tutorial brings you back after about 3 s of its own time
