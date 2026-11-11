@@ -31,6 +31,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
 ## Moves a kit doesn't name in full: a thing every Hero has, or built from a kind.
+const FIRE_HUE := Vector2(0.04, 0.2)    # hue (0..1) of orange through yellow: a look's colours stay out of it
 const CALLED_ELSEWHERE := ["hurt", "downed", "guard_shell", "string_idle", "string_draw", "fire_tap", "fire_arrow",
 	"fire_super", "fire_over", "fire_heavy", "fire_ult"]
 
@@ -46,6 +47,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
+		_looks(arch)
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -121,6 +123,28 @@ func _recipes(arch: String) -> void:
 			if st is AudioStreamWAV and (st as AudioStreamWAV).loop_mode != AudioStreamWAV.LOOP_DISABLED:
 				loops.append(s["n"])
 	ok(loops.is_empty(), "%s: every sound is a one-shot, nothing can outlive the match %s" % [arch, loops])
+
+## A look-dev flag ("look" picks one of "looks", HeroVfx.look_of) names a look that exists, a look only recolours keys
+## the palette already has, and none of a look's own colours is orange or yellow (Kael's black-red: Cinder owns fire).
+func _looks(arch: String) -> void:
+	var d := HeroVfx.data(arch)
+	var looks: Dictionary = d.get("looks", {})
+	if looks.is_empty():
+		return
+	ok(String(d.get("look", "")) == "" or looks.has(d["look"]), "%s: its look flag names a look" % arch)
+	var pal: Dictionary = d["palette"]
+	var stray: Array = []
+	var warm: Array = []
+	for nm: String in looks:
+		var cols: Dictionary = (looks[nm].get("palette", {}) as Dictionary).merged(looks[nm].get("model_glow", {}))
+		for k: String in cols:
+			if looks[nm].get("palette", {}).has(k) and not (pal.has(k) or k == "peak"):
+				stray.append(k)
+			var c := Color(str(cols[k])) if str(cols[k]).is_valid_html_color() else Color.BLACK
+			if c.s > 0.3 and c.v > 0.25 and c.h > FIRE_HUE.x and c.h < FIRE_HUE.y:
+				warm.append("%s.%s" % [nm, k])
+	ok(stray.is_empty(), "%s: a look only recolours its palette's keys %s" % [arch, stray])
+	ok(warm.is_empty(), "%s: no look colour is orange or yellow %s" % [arch, warm])
 
 func _sound_exists(sname: String) -> bool:
 	return ResourceLoader.exists("res://audio/%s.wav" % sname) or ResourceLoader.exists("res://audio/%s_1.wav" % sname)

@@ -26,6 +26,7 @@ const MAX_LIVE := 420          # GPU particles alive at once across the match
 const LOD_NEAR := 20.0         # m from the camera focus: full detail
 const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
+const PEAK := Color(1.0, 1.0, 1.0, 0.5)  # a fire's hottest part: halfway to white (a palette's "peak" in its place)
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
 const RIBBON_SAMPLES := 18     # points a mesh trail keeps
@@ -71,7 +72,16 @@ static func data(arch: String) -> Dictionary:
 		var path := "res://content/vfx/%s.json" % arch
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else {}
 		_data[arch] = parsed if parsed is Dictionary else {}
+		var pal: Dictionary = _data[arch].get("palette", {})
+		pal.merge(look_of(arch).get("palette", {}), true)
 	return _data[arch]
+
+## The Hero's chosen look variant (its data's "looks"[<"look">], {} for none): "palette" overrides the palette,
+## "model_glow" the archetype's (WardenGlb), "warden" keys of its warden_look.json entry. Look-dev only: the variants
+## not picked are deleted and the pick written in place.
+static func look_of(arch: String) -> Dictionary:
+	var d: Dictionary = data(arch)
+	return (d.get("looks", {}) as Dictionary).get(String(d.get("look", "")), {})
 
 ## Swaps in a Hero's data (checks and the reel: a synthetic recipe set); an empty dictionary reloads the file.
 static func set_data(arch: String, d: Dictionary) -> void:
@@ -461,6 +471,8 @@ func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
 	mt.set_shader_parameter("col2", _pal(h, layer.get("c2"), "hot"))
 	mt.set_shader_parameter("col3", _pal(h, layer.get("c3"), "char"))
+	var peak: Variant = data(h.arch).get("palette", {}).get("peak")
+	mt.set_shader_parameter("peak", Color(String(peak)) if peak != null else PEAK)
 	mt.set_shader_parameter("seed", randf() * SEED_MAX)
 	mt.set_shader_parameter("life", 0.0)
 	mt.set_shader_parameter("gain", view_k(h))

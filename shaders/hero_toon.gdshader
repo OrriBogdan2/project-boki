@@ -121,6 +121,13 @@ uniform float emit_flicker = 0.0;
 // the emission layer's colour (WardenGlb, the archetype's "model_glow" core; alpha 0: the layer's own painted colour):
 // the layer is then a mask, and its texels' paint takes the colour too, so the glow can change without a rebake (Sparkle)
 uniform vec4 emit_tint : source_color = vec4(1.0, 1.0, 1.0, 0.0);
+// the layer's weak texels dropped (model_glow "cut", 0..1): thinner cracks, glowing only where they are hottest
+uniform float emit_cut = 0.0;
+// a curse's char (a warden_look slot's): the skin round the emission layer's cracks (its mip char_reach, a blurred
+// mask) and the red-painted curse skin turn to char_col by char_k, unlit by the hot key, so only the cracks glow (Kael)
+uniform float char_k = 0.0;
+uniform float char_reach = 3.0;
+uniform vec4 char_col : source_color = vec4(0.03, 0.02, 0.02, 1.0);
 #include "res://shaders/noise.gdshaderinc"
 #include "res://shaders/vis.gdshaderinc"
 // The distance at which the match camera's 32 degree lens sees things this size on screen: the far_* terms' measure
@@ -168,6 +175,18 @@ void fragment() {
 	vec3 emit_c = vec3(0.0);
 	if (use_emit) {
 		emit_c = texture(emit_tex, UV).rgb;
+		if (char_k > 0.0 && use_tex) {
+			vec3 near = textureLod(emit_tex, UV, char_reach).rgb;
+			float crack = smoothstep(0.004, 0.14, max(near.r, max(near.g, near.b)));
+			vec3 tx = texture(albedo_tex, UV).rgb;
+			float curse = smoothstep(0.12, 0.3, tx.r - max(tx.g, tx.b));
+			float charred = char_k * max(crack, curse);
+			c = mix(c, char_col.rgb, charred);
+			heat *= 1.0 - charred;      // (the char does not glow: only the emission layer's cracks do)
+		}
+		if (emit_cut > 0.0) {
+			emit_c *= smoothstep(emit_cut, emit_cut + 0.15, max(emit_c.r, max(emit_c.g, emit_c.b)));
+		}
 		if (emit_tint.a > 0.0) {
 			float ek = max(emit_c.r, max(emit_c.g, emit_c.b));
 			// (a yellow piece keeps its own colour: Sparkle's hazard bands glow faintly as painted)
