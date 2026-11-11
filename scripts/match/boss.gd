@@ -721,15 +721,7 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	if dead:
-		death_t += delta
-		var k := clampf(death_t / 1.4, 0.0, 1.0)
-		model.position.y = -k * 1.5
-		model.rotation.z = k * 0.5
-		visible = k < 1.0
-		for mt in mats:
-			if mt is ShaderMaterial: mt.set_shader_parameter("flash", 1.0 - k)
-		for s in model.get_meta("segs", []):
-			(s as Node3D).visible = k < 0.6
+		visible = MobDissolve.step(self, delta)
 		return
 	model.visible = not buried
 	model.rotation.y = face
