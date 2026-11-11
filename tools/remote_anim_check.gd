@@ -1,3 +1,4 @@
+class_name RemoteAnimCheck
 extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
@@ -8,7 +9,7 @@ extends "res://tools/displace_net_check.gd"
 ## Once both games are up they run in lockstep, not on the wall clock: the host steps one DT, tells the guest,
 ## and goes on when the guest has stepped too; the guest also holds a step until the host's latest snapshot is in,
 ## so a cast takes as many frames as it needs and no real time, and times in the log are step counts (the same
-## on a slow box). --remote-anim-check=archer,mage runs only those kits.
+## on a slow box). --remote-anim-check=archer,mage runs only those kits; "stomp" and "skydive" run the rows of RemoteAnimStomp.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -39,7 +40,7 @@ var owed := 0                # guest: steps the host asked for and this game has
 var acks := 0                # host: steps the guest has taken
 var snap_t := 0.0            # host: its match time at its last snapshot; guest: the same, from the step message
 var sampled := -1            # the step _sample last looked at
-var kits: Array = ARCHS
+var kits: Array = ARCHS + ["stomp", "skydive"]
 
 func _init() -> void:
 	tag = "RANIM"
@@ -94,14 +95,19 @@ func _host() -> void:
 	Net.lobby_emit("ra", {"c": "lock"})
 	locked = true
 	await _run(0.2)     # (the guest locks on the message; both free-run until then)
-	for arch in kits:
+	var archs: Array = kits.filter(func(k): return k in ARCHS)
+	for arch in archs:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
-	for arch in kits:
+	for arch in archs:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
+	if "stomp" in kits:
+		await RemoteAnimStomp.host(self, G)
+	if "skydive" in kits:
+		await RemoteAnimStomp.skydive(self, G)
 	_finish()
 
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
@@ -209,6 +215,8 @@ func _on_msg(topic: String, data, from: String) -> void:
 				owed += 1
 				snap_t = float(data.get("t", 0.0))
 			"ack": acks += 1
+			"look":
+				Net.lobby_emit("dn_r", {"pos": [0, 0, 0], "look": RemoteAnimStomp.look(self)})
 			"mark":
 				log_rows.clear()
 				last_row = ["?", "?"]
@@ -232,6 +240,8 @@ func _sample() -> void:
 	sampled = steps
 	var H := _copy()
 	H.render(DT, 1.0)      # (Match's own render pass is off in the checks)
+	var wisp := m.ents_by_id.get("B", null) as Hunter
+	if wisp and not Net.is_host(): wisp.render(DT, 1.0)
 	if H.ak == null or H.anim == null:
 		return
 	var row := [H.ak.anim_id, H.anim.km_id]
