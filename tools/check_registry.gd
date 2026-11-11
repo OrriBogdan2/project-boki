@@ -156,7 +156,7 @@ const CHECKS := {
 	"--relay-cup-check": ["res://tools/relay_cup_check.gd", "relay_cup_check", null],      # GARDEN_MODERN 4.2
 	"--shove-check": ["res://tools/shove_check.gd", "shove_check", null],      # the Stump Shove, GARDEN.md 5.2
 	"--tumble-check": ["res://tools/tumble_check.gd", "tumble_check", null],      # Tumble, GARDEN_MODERN.md 4.2
-	"--garden-games-vfx-check": ["res://tools/garden_games_vfx_check.gd", "garden_games_vfx_check", null],  # garden_cues.gd
+	"--garden-games-vfx-check": ["res://tools/garden_games_vfx_check.gd", "garden_games_vfx_check", null],
 	"--seek-check": ["res://tools/seek_check.gd", "seek_check", null],      # Seek, GARDEN.md 5.3
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
 	"--echo-steps-check": ["res://tools/echo_steps_check.gd", "echo_steps_check", null],  # GARDEN_MODERN 4.2

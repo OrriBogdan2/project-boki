@@ -56,3 +56,15 @@ check: `--base-life-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
   toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
+- Game cues (`scripts/home/garden_cues.gd`): each garden game builds one small world cue set when it starts and
+  frees it when it ends; nothing goes on the HUD. Dash marks, Shove meter, Seek trail and Volley ring are teal and
+  magenta. The newer four share two pools (`Bursts` rings, `PopCue` labels) and use the Boki's type colour
+  (`GardenCues.type_colour`, the Field Book colour). Echo Steps: on the lead's beat its stone gets a ring; on your
+  beats one ring circles all four stones (it never shows which); a hit flashes bright, a miss dull and shrinking.
+  Tumble: the rival's tell is an icon over its head for the tell's 1.5 s (Rush double chevron toward your Boki,
+  Brace shield, Dodge hoop). Its alpha is the chance the tell is honest and it sways more the less sure it is, so
+  it reads as "probably". Relay Cup: a baton floats over each team's runner, blinking while a fumbled pass is
+  taken, and bursts at the next runner on every hand-off (bright when the pass lost no time). Show Ring: each
+  round's score pops over your Boki as the round ends ("Look 7.4"), and both totals pop after the Bond walk.
+  Check: `--garden-games-vfx-check` (each cue on the frame of its beat, at its spot, in its colour).
+  Clips: `--echo-steps-clip`, `--gameplay-media --media-clip=5` (Tumble), `6` (Relay) and `7` (Show Ring).

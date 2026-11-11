@@ -161,7 +161,7 @@ func _ready() -> void:
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
 		hshow = ShowRing.new(self)
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow]     # in this order: Tumble's ring needs the stump placed
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow]  # Tumble's ring needs the stump first
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():

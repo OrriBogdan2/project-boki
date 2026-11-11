@@ -267,7 +267,7 @@ class Bursts:
 	var mats: Array = []                # its glow material
 	var age: Array = []                 # s since it spawned
 	var life: Array = []                # s it lasts (0: idle)
-	var size: Array = []                # [from, to] scale
+	var grow: Array = []                # [from, to] scale
 	var tone: Array = []                # its colour, alpha at spawn
 	var next := 0
 	var spawns := 0
@@ -283,7 +283,7 @@ class Bursts:
 			mats.append(m)
 			age.append(0.0)
 			life.append(0.0)
-			size.append([1.0, 1.0])
+			grow.append([1.0, 1.0])
 			tone.append(Color.WHITE)
 
 	func spawn(at: Vector3, col: Color, from: float, to: float, secs: float) -> void:
@@ -295,7 +295,7 @@ class Bursts:
 		GardenCues.tint(mats[i], col, col.a)
 		age[i] = 0.0
 		life[i] = secs
-		size[i] = [from, to]
+		grow[i] = [from, to]
 		tone[i] = col
 		spawns += 1
 		last_at = at
@@ -307,7 +307,7 @@ class Bursts:
 				continue
 			age[i] += d
 			var k := minf(1.0, age[i] / life[i])
-			nodes[i].scale = Vector3.ONE * lerpf(size[i][0], size[i][1], k)
+			nodes[i].scale = Vector3.ONE * lerpf(grow[i][0], grow[i][1], k)
 			GardenCues.tint(mats[i], tone[i], tone[i].a * (1.0 - k))
 			if k >= 1.0:
 				life[i] = 0.0

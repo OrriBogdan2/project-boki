@@ -111,7 +111,8 @@ func _echo() -> void:
 		if on_beat and not r.mine():
 			n["lead"] += lit
 			var stone_at := es._stone_at(r.pattern[i]) + GardenCues.EchoCue.UP
-			if lit != 1 or not near(cue.beats.last_at, stone_at) or not same(cue.beats.last_col, Color(lead, GardenCues.BRIGHT)):
+			var lead_col := Color(lead, GardenCues.BRIGHT)
+			if lit != 1 or not near(cue.beats.last_at, stone_at) or not same(cue.beats.last_col, lead_col):
 				n["wrong"] += 1
 		elif lit != 0:
 			n["wrong"] += 1
@@ -125,7 +126,8 @@ func _echo() -> void:
 		if pressed >= 0:
 			n["hit"] += flashed
 			var flash_at := es._stone_at(pressed) + GardenCues.EchoCue.UP
-			if flashed != 1 or not near(cue.flashes.last_at, flash_at) or not same(cue.flashes.last_col, Color(you.lightened(0.35), 1.0)):
+			var hit_col := Color(you.lightened(0.35), 1.0)
+			if flashed != 1 or not near(cue.flashes.last_at, flash_at) or not same(cue.flashes.last_col, hit_col):
 				n["wrong"] += 1
 		elif closed:
 			n["miss"] += flashed
@@ -135,7 +137,7 @@ func _echo() -> void:
 			n["wrong"] += 1
 	var beats := int(EchoSteps.rules()["rounds"][0]) * int(EchoSteps.rules()["phrases"])
 	ok(n["lead"] == beats, "echo: the lead's stone lit on each of its %d beats (%d)" % [beats, n["lead"]])
-	ok(n["pulse"] == beats, "echo: the ring round the stones pulsed on each of your %d beats (%d)" % [beats, n["pulse"]])
+	ok(n["pulse"] == beats, "echo: the ring round the stones pulsed on your %d beats (%d)" % [beats, n["pulse"]])
 	ok(n["hit"] == beats - 1, "echo: a hit flashed on the frame of each of %d presses (%d)" % [beats - 1, n["hit"]])
 	ok(n["miss"] == 1, "echo: the beat left out flashed a miss as its window closed")
 	ok(n["wrong"] == 0, "echo: every cue on its frame, at its stone, in its colour (%d off)" % n["wrong"])
@@ -177,7 +179,7 @@ func _tumble() -> void:
 	ok(spans.size() >= TELLS, "tumble: %d tells watched" % spans.size())
 	ok(spans.all(func(s): return absf(s - tell_s) <= DT + 0.001),
 			"tumble: each icon showed for the tell's %.1f s to a frame %s" % [tell_s, str(spans)])
-	ok(wrong == 0, "tumble: the tell's move over the rival, in its colour, alpha = chance it is honest (%d off)" % wrong)
+	ok(wrong == 0, "tumble: the tell's move over the rival in its colour, alpha = its honesty (%d off)" % wrong)
 	tb._end(false)
 	ok(tb.cue == null and gone(cue.root), "tumble: the icon goes with the bout")
 
