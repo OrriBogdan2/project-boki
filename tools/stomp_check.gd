@@ -47,7 +47,10 @@ func _setup(at: Vector3) -> void:
 		m.revive_hunter(W, null)
 	for kk in [W.kin, W.kin2]:
 		if kk: (kk as Kin).dead = true
-	foe.hp = foe.max_hp; foe.armor = 0.0; foe.shield = 0.0; foe.stun_t = 0.0
+	foe.hp = foe.max_hp
+	foe.armor = 0.0
+	foe.shield = 0.0
+	foe.stun_t = 0.0
 	foe.launched_at = -9.0
 	_spot(W, at)
 	_spot(foe, at + Vector3(0.6, 0, 0))
@@ -93,7 +96,9 @@ func _check_lock(at: Vector3) -> void:
 	var f0 := foe.pos
 	var w0 := W.pos
 	for i in 40:
-		foe.inp["move"] = Vector2(1, 0); foe.inp["dash"] = true; foe.inp["fire"] = true
+		foe.inp["move"] = Vector2(1, 0)
+		foe.inp["dash"] = true
+		foe.inp["fire"] = true
 		W.inp["move"] = Vector2(-1, 0)
 		if i == 10: foe.impulse(Vector2(6, 0))       # a hit's shove
 		if i == 20: W.impulse(Vector2(0, 12))        # a knock on the wisp
@@ -105,7 +110,8 @@ func _check_lock(at: Vector3) -> void:
 	var hp0 := foe.hp
 	foe.hurt(20.0, m.player, {})
 	_run(Match.DT)
-	ok(foe.hp < hp0 - 10.0 and not foe.stomp.is_empty(), "damage lands on the stomper (%.0f -> %.0f) and the stomp holds" % [hp0, foe.hp])
+	ok(foe.hp < hp0 - 10.0 and not foe.stomp.is_empty(),
+		"damage lands on the stomper (%.0f -> %.0f) and the stomp holds" % [hp0, foe.hp])
 	Stomp.end(m, foe, "gone")
 
 func _check_stun(at: Vector3) -> void:
@@ -156,10 +162,12 @@ func _check_net(at: Vector3) -> void:
 	for i in 20:
 		W.inp["move"] = Vector2(1, 0)
 		_run(Match.DT)
-	ok(W.has_meta("stomped_by") and W.get_meta("stomped_by") == foe and W.pos.distance_to(w0) < 0.05 and foe.stomp["style"] == "thunder_stomp",
+	var pinned: bool = W.has_meta("stomped_by") and W.get_meta("stomped_by") == foe and W.pos.distance_to(w0) < 0.05
+	ok(pinned and foe.stomp["style"] == "thunder_stomp",
 		"a \"go\" from another game pins this game's wisp, in the sender's style")
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "broken"])
-	ok(foe.stomp.is_empty() and W.downed and not W.out and not W.has_meta("stomped_by"), "a \"broken\" lets it go alive")
+	ok(foe.stomp.is_empty() and W.downed and not W.out and not W.has_meta("stomped_by"),
+		"a \"broken\" lets it go alive")
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "go", ""])
 	_run(0.5)
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "done"])
@@ -181,7 +189,8 @@ func _check_styles() -> void:
 	Save.d["gems"] = 100
 	ok(not StompLook.buy("thunder_stomp"), "it can't be bought without the gems")
 	Save.d["gems"] = 1000
-	ok(StompLook.buy("thunder_stomp") and int(Save.d["gems"]) == 700 and StompLook.equip("thunder_stomp"), "bought for 300 gems and worn")
+	ok(StompLook.buy("thunder_stomp") and int(Save.d["gems"]) == 700 and StompLook.equip("thunder_stomp"),
+		"bought for 300 gems and worn")
 	m.player.ctrl = "local"
 	ok(StompLook.style_id(m.player) == "thunder_stomp" and StompLook.style_id(W) == StompLook.default_for(W.arch),
 		"the player stomps in it; a bot keeps its own")

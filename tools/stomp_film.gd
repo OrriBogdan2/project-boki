@@ -11,7 +11,7 @@ extends RefCounted
 const DT := 1.0 / 60.0
 const STUN_AT := 1.5          # s into the stunned take's stomp the stun lands
 const STUN_FOR := 1.0         # s of stun
-const SHOT_EVERY := 0.3       # s between the rival's plain hits on you (its own gun may stun, which would end the take early)
+const SHOT_EVERY := 0.3       # s between the rival's plain hits (its own gun may stun, ending the take early)
 const SHOT_DMG := 6.0
 
 var main: Node
@@ -73,12 +73,15 @@ func _take(take: String, stun: bool) -> void:
 	var W: Hunter = rivals[0]
 	var E: Hunter = rivals[1]
 	for kk in [W.kin, W.kin2, E.kin, E.kin2]:      # no Boki: E's could stun you and spoil the full take
-		if kk: (kk as Kin).dead = true; (kk as Kin).visible = false
+		if kk:
+			(kk as Kin).dead = true
+			(kk as Kin).visible = false
 	var at := _roomy()
 	for h in m.hunters:
 		if h != P and h != W and h != E and not h.out:
 			h.teleport(m.world.free_spot_near(at + Vector3(40, 0, 0), [], 1.0, 0.4, 20.0))
-	P.hp = P.max_hp; P.max_hp *= 3.0; P.hp = P.max_hp      # the shots must not knock P down mid-take
+	P.max_hp *= 3.0      # the hits must not knock P down mid-take
+	P.hp = P.max_hp
 	W.teleport(at)
 	P.teleport(at + Vector3(1.2, 0, 0.6))
 	E.teleport(at + Vector3(-5.0, 0, 3.0))

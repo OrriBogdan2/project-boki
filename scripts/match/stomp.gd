@@ -12,7 +12,7 @@ extends RefCounted
 ## How it looks is the stomper's stomp style (StompLook); the timing is the same for every style.
 
 const COMMIT := 0.2        # s: hold interact this long on an enemy wisp to start it (a tap never commits you)
-const TIME := 3.0          # s: start to kill, Supervive's ~3 s execute (docs/SUPERVIVE_DATA.md, "Execute": [wiki] + [footage])
+const TIME := 3.0          # s, start to kill: Supervive's ~3 s execute (SUPERVIVE_DATA.md "Execute")
 const BEATS := 3           # foot slams in TIME, one per beat
 const SLAM := 0.8          # where in a beat the foot lands (0..1)
 const NET_GRACE := 2.0     # s past TIME a stomp from another game may wait for its "done" before it's dropped here

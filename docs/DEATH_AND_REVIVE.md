@@ -18,7 +18,7 @@ ALIVE ──0 HP──► DOWNED (wisp) ──bleeds out / executed / team wiped
 | Bleed-out | Wisp drains on its own | **15s** | [patch] |
 | Ally revive | A teammate standing on your wisp fills the revive bar and pauses the drain; extra teammates speed it up | **4s**, back at 25% HP | [wiki] "a few seconds" / [est] |
 | Stomp | An enemy standing on a wisp drains it faster, pins it (it crawls at 40% of its normal wisp speed) and blocks the revive. Clear signal on both sides: pulsing red ring under the wisp, red fast-draining bar on its nameplate and squad frame, a crushing thud, "Standing on <name>" for the stomper, "<name> is on you!" plus a red screen-edge pulse for the wisp | ×2.5 drain, ×0.4 speed | [design] |
-| Execute | Enemy holds E on the wisp: they're locked in place for the finisher, then you're dead | **3s** | [footage] |
+| Execute (the stomp) | Enemy holds E on the wisp for 0.2 s and is committed to a stomp (`Stomp`, docs/decisions/0061): stomper and wisp are locked to their spots, the stomper has no move, attack, ability or dodge and takes damage as usual; a stun, a hex or a real knock or launch on the stomper breaks it and the wisp lives; otherwise the wisp dies at the end. Each Hunter stomps its own way (`StompLook`, content/rules/stomps.json); other stomps are a cosmetic bought with gems, same timing | **3s** | [wiki] + [footage] |
 | Takedown reward | Knocking or killing an enemy hunter (not a mob): the knocker and every teammate whose damage or CC landed on the victim in the last 4 s get their dash back (a one-charge dash refills, a multi-charge dash gains one charge) and the long-dash cooldown clears; only the knocker heals 5% of max health (`DashReset`, docs/decisions/0022). The local hunter gets the reset cue (softer for an assist) and a pop on the Shift icon. A hero's `dash.knock_refresh: false` opts out (none do) | +250 HP, +1 dash; multi-charge +1 | [patch] / owner (159) |
 | Last one standing | Knocking a team's last standing player wipes the team: no wisp, everyone left dies | — | [patch] |
 | Dead | Your **deathbox** drops with everything you carried. Abyss deaths drop it at the killer's last ground position, or at the edge you fell from | — | [patch] |
@@ -115,7 +115,7 @@ All names and multipliers are placeholders.
 | Alone | Bled out at 15.0s; box holds all loot (2,100 value) |
 | Ally holds E at box | Revived in 5.0s, 25% HP, loot back |
 | Ally shot mid-channel | Channel reset to 0 |
-| Enemy execute | Dead after 3.0s |
+| Enemy execute | Dead after 3.2s (0.2s hold + the 3.0s stomp) |
 | Enemy loots box | Window: take items one by one or smart loot |
 | Beacon | Back in 6.0s at the beacon, full HP, no loot, −25% damage for 12s, beacon used up |
 | Enemy steps on beacon | Paused at 33%, resumes when they leave |
@@ -135,3 +135,4 @@ All names and multipliers are placeholders.
 - Deathbox revives show the same filling ring at the box, with "<reviver> bringing back <name> 40%", plus a soft column of light and a shrinking ring over the box while it's channelled, a looping hum that rises in pitch as it fills, and a bright chime when it completes.
 - Online: `--revive-net-check` runs two games over a relay: the guest dies, the host revives it at the box (7.5s) and at a beacon (4s), and a gone soul takes no revive.
 - Checked by `--life-check` (box revive: 8s, the hum starts, a hit breaks it and stops the hum, the hum and light stay on mid-channel and stop after, the reviver kneels locked in place; stomp: pinned flag, stomper flag, ~6s death at ×2.5; loot window: items, take, smart loot).
+- Checked by `--stomp-check` (the hold commits it; neither stomper nor wisp moves through input, shoves and knocks; damage lands and the stomp holds; a stun cancels it and the wisp lives and drifts again; the kill lands at 3.0s; the online "stomp" event both ways; every Hunter's own style, buying and wearing the unlockable). Footage: `--stomp-film` (GPU).

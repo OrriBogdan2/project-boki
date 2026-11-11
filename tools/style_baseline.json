@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -388,7 +388,7 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 365,
+"long_line": 364,
 "nested_ternary": 7,
 "semicolon": 380,
 "shadow": 3
@@ -554,15 +554,15 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 27,
-"long_line": 92,
+"long_line": 91,
 "nested_ternary": 15,
 "semicolon": 47,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 40,
+"long_line": 39,
 "nested_ternary": 5,
-"semicolon": 100
+"semicolon": 98
 },
 "scripts/match/juice.gd": {
 "long_line": 1,

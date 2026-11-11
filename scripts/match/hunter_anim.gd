@@ -837,8 +837,10 @@ func update(dt: float, s: Dictionary) -> void:
 	# stomping a wisp: the stomp style's slams (StompLook)
 	if stomp_k > 0.01:
 		var sl := StompLook.legs(st_look, st_ph)
-		hl = lerpf(hl, sl.x, stomp_k); kl = lerpf(kl, sl.y, stomp_k)
-		hr = lerpf(hr, sl.z, stomp_k); kr = lerpf(kr, sl.w, stomp_k)
+		hl = lerpf(hl, sl.x, stomp_k)
+		kl = lerpf(kl, sl.y, stomp_k)
+		hr = lerpf(hr, sl.z, stomp_k)
+		kr = lerpf(kr, sl.w, stomp_k)
 	# reviving: down on one knee beside them
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
@@ -1579,9 +1581,11 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		var st_l := StompLook.hand(st_look, st_beat, sh_l, -1.0)
 		var st_r := StompLook.hand(st_look, st_beat, sh_r, 1.0)
 		if st_l != Vector3.INF:
-			fl = fl.lerp(st_l, stomp_k); free_l = maxf(free_l, stomp_k)
+			fl = fl.lerp(st_l, stomp_k)
+			free_l = maxf(free_l, stomp_k)
 		if st_r != Vector3.INF:
-			fr = fr.lerp(st_r, stomp_k); free_r = maxf(free_r, stomp_k)
+			fr = fr.lerp(st_r, stomp_k)
+			free_r = maxf(free_r, stomp_k)
 	# revive: the left hand reaches down over them
 	if revive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(0.05, -0.32, -0.3), revive_k)

@@ -95,7 +95,8 @@ static func legs(st: Dictionary, beat: float) -> Vector4:
 ## The body: Vector3(forward lean, shoulder turn, rise in metres).
 static func body(st: Dictionary, beat: float) -> Vector3:
 	var up := _up(beat)
-	return Vector3(float(st["lean"]) + float(st["crouch"]) * 0.1, float(st["twist"]) * up, float(st["hop"]) * up - float(st["crouch"]) * 0.12)
+	var crouch := float(st["crouch"])
+	return Vector3(float(st["lean"]) + crouch * 0.1, float(st["twist"]) * up, float(st["hop"]) * up - crouch * 0.12)
 
 ## Whether a style needs both hands (the weapon is put away for it).
 static func two_handed(st: Dictionary) -> bool:
