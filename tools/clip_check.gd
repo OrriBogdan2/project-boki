@@ -94,7 +94,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	var which := ""
 	var gun := m.get_node("Rig/Torso/Aim/Gun") as Node3D
 	for mi in gun.find_children("*", "MeshInstance3D", true, false):
-		# (an emptied Mag draws nothing: HunterAnim still shows it for the reload's motion)
+		# an emptied Mag draws nothing
 		if (mi as MeshInstance3D).is_visible_in_tree() and (mi as MeshInstance3D).mesh != null:
 			shown += 1
 			which += " " + String(gun.get_path_to(mi))
@@ -126,6 +126,7 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
+	out.append_array((dd.get("act", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
@@ -203,6 +204,14 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
 	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
+	var act_off := 0.0
+	for verb in dd.get("act", {}):
+		var pick := clips._pick({"act": verb, "act_t": 0.4}, 0.0)
+		var clip := String(dd["act"][verb])
+		ok(pick.get("clip") == clip and is_equal_approx(float(pick.get("t", -1.0)), 0.4),
+				"%s: the home %s plays its own clip, seeked to the verb's clock" % [id, verb])
+		act_off = maxf(act_off, absf(clips.lib.get_animation(clip).length - float(HunterVerbs.LENGTH[verb])))
+	ok(act_off <= 0.034, "%s: its garden clips last as long as the home verbs (off %.3f s)" % [id, act_off])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:

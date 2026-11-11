@@ -25,12 +25,18 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use;
+## its ground colours win over the theme's unless own_ground.
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	# a zone's own ground (ZoneLayout): never for sale, it has no gems
+	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
+		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
+	"cinderstep": {"name": "Cinderstep", "zone": true, "own_ground": true, "region": 1,
+		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -51,6 +57,8 @@ const CATALOG := {
 		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
 	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
+	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
+		"desc": "Grows four element snacks every few minutes. Walk over it to pick them. For feeding only."},
 	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
 	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true},
 	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true},
@@ -72,6 +80,10 @@ const CATALOG := {
 		"desc": "Flying and Rock Boki love to climb it. Trains Power."},
 	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "toy": true,
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
+	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
+		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
+		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
 	# work: the element. wood / stone: building materials (Save.d["mats"]) on top of the gems.
 	"job_board": {"name": "Job Board", "cat": "Work", "gems": 30, "block": true, "work": "board",
@@ -241,9 +253,12 @@ static func ensure(d: Dictionary) -> Dictionary:
 			(L["b"] as Dictionary).erase(b)
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
-	return L
+	SnackPatch.grant(d)
+	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
+	if not ZoneLayout.live.is_empty() and is_same(d, Save.d):
+		return ZoneLayout.live        # a built zone's Home is open: its island stands in for the save's
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 

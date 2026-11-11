@@ -27,7 +27,6 @@ const CATS := {
 	"hunter": [90, 10.0, "threat"],
 	"low_hp": [85, 22.0, "care"],
 	"collapse": [84, 50.0, "path"],
-	"cover": [75, 25.0, "care"],
 	"boss": [70, 45.0, "threat"],
 	"egg": [66, 30.0, "find"],
 	"pack": [60, 18.0, "threat"],
@@ -45,7 +44,7 @@ const LABELS := {"behind": "Behind you!", "sniper": "Sniper", "hunter": "Hunter"
 	"egg": "Rare Egg", "loot": "Loot", "wild": "Wild Boki", "exit": "Way out", "collapse": "Way out"}
 ## What its body does for each callout (KinPuppet reads the pose).
 const POSES := {"behind": "growl", "sniper": "alert", "hunter": "growl", "pack": "growl", "boss": "alert", "egg": "point",
-	"loot": "point", "wild": "point", "exit": "beckon", "collapse": "beckon", "low_hp": "whine", "cover": "guard", "goad": "cheer"}
+	"loot": "point", "wild": "point", "exit": "beckon", "collapse": "beckon", "low_hp": "whine", "goad": "cheer"}
 
 var k: Kin
 var m
@@ -278,7 +277,7 @@ func _best_callout() -> Dictionary:
 		var best_x: Dictionary = {}
 		var bxd := 1e9
 		for x in m.exits.list:
-			var usable: bool = m.exits.callable(x) or m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
+			var usable: bool = m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
 			if usable and o.flat_dist(x["pos"]) < bxd:
 				bxd = o.flat_dist(x["pos"]); best_x = x
 		if not best_x.is_empty():
@@ -290,8 +289,6 @@ func _best_callout() -> Dictionary:
 	# looking after you
 	if not o.downed and o.hp < o.max_hp * 0.35:
 		cands.append({"cat": "low_hp", "at": o.pos, "key": ""})
-	if not o.downed and not o.wpn.get("melee", false) and o.reload_t > 0.0 and threat is Hunter:
-		cands.append({"cat": "cover", "at": threat.pos, "key": ""})
 	if nature() == "bold" and threat is Hunter and threat.hp < threat.max_hp * 0.4 and not (threat as Hunter).downed:
 		cands.append({"cat": "goad", "at": threat.pos, "key": ""})
 	# the most important one that's allowed
@@ -457,7 +454,7 @@ func _almost_home() -> void:
 	if noted.has("almost_home") or m.exits == null:
 		return
 	var x: Dictionary = m.exits.active_for(h().team)
-	if x.is_empty() or not String(x["state"]) in ["open", "boarding"] or h().flat_dist(x["pos"]) > 7.0:
+	if x.is_empty() or String(x["state"]) != "open" or h().flat_dist(x["pos"]) > 7.0:
 		return
 	noted["almost_home"] = true
 	cheer_cd = 3.0
@@ -639,7 +636,7 @@ func _tut_tick() -> void:
 			m.kin_bark(k, txt, "tut", 4.0 if txt.length() < 60 else 7.0)
 		if to != Vector3.INF:
 			look = to; look_t = 2.0
-			pose = "point" if Tutorial.leads(id) else ("growl" if id in ["shoot", "throw", "kin1"] else "beckon")
+			pose = "point" if Tutorial.leads(id) else ("growl" if id in Tutorial.FOE_STEPS else "beckon")
 			pose_t = 1.6
 	# showing you how: a dash, a jump
 	guide["demo_t"] = float(guide["demo_t"]) - 0.4
