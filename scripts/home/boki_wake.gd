@@ -68,6 +68,7 @@ func mark(uid: String, at: Vector3, vel: Vector3, body: float) -> void:
 		s.back = Vector3(-vel.x, 0.0, -vel.z) / s.speed
 	s.body = minf(body, BODY_MAX)
 	s.fresh = true
+	set_process(true)
 
 ## Fades every mark toward its Boki's state, frees those faded out and writes the rest into the MultiMesh.
 func tick(delta: float) -> void:
@@ -92,6 +93,7 @@ func tick(delta: float) -> void:
 			shown += 1
 	multimesh.visible_instance_count = shown
 	visible = shown > 0
+	set_process(shown > 0)      # nothing left to fade: idle until the next mark
 
 ## Keeps the marks on the water: a mask of the water tiles (HomeLayout keys, 1 m each) with a dry border, which
 ## the shader fades the marks by. Called when the marks are made and whenever the water is repainted.
