@@ -216,7 +216,8 @@ func _match() -> void:
 	ok("a boss drops few items", float(bossn) / 200.0 <= 4.0, "%.2f a boss" % (float(bossn) / 200.0))
 	ok("boss gear is Rare or better, with a Brand and sometimes Legendary", not low and brand and legend > 0, "legend %d/200" % legend)
 	var per_chest := float(total["chest"]) / 40.0
-	ok("a boss drops fewer than a rich chest has junk, but better", float(bossn) / 200.0 <= maxf(per_chest, 3.0))
+	# (3 sure items now: its gear, a Brand and its Ink; the floor is the "few items" cap above)
+	ok("a boss drops fewer than a rich chest has junk, but better", float(bossn) / 200.0 <= maxf(per_chest, 4.0))
 	# 5. walking over a tuning applies it; gear goes into its slot and the old piece drops
 	for wp in m.wpicks.duplicate():
 		if is_instance_valid(wp["node"]): wp["node"].queue_free()
