@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://b1mj1hff70vnt"
-path="res://.godot/imported/boki_sleep_1.wav-ec112dc684b47e5f563a94d46c147213.sample"
+uid="uid://scyj7m2fk6y0"
+path="res://.godot/imported/boki_yawn_1.wav-2c3ffe1a3ef6cd7c72fa7d318979f7cf.sample"
 
 [deps]
 
-source_file="res://audio/boki_sleep_1.wav"
-dest_files=["res://.godot/imported/boki_sleep_1.wav-ec112dc684b47e5f563a94d46c147213.sample"]
+source_file="res://audio/boki_yawn_1.wav"
+dest_files=["res://.godot/imported/boki_yawn_1.wav-2c3ffe1a3ef6cd7c72fa7d318979f7cf.sample"]
 
 [params]
 
