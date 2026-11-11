@@ -1,11 +1,11 @@
 extends RefCounted
-## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
-## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then the Heart's final (heart_final: 8
-## squads, 24 Hunters with their Boki, fighting in and around the Heart ring with the Blight close), a farm run, the base demo
-## (BaseDemo plus two Boki: 6 Boki, toys, snacks, an egg) with a Dash run at BASE_RACE_AT, and a hub run. Every frame is
-## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
-## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
+## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy expedition (6
+## Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair on the map, a fight: two
+## rivals and a monster pack brought to you), then the Heart's final (heart_final: 8 squads, 24 Hunters with their
+## Boki, fighting in and around the Heart ring with the Blight close), a farm run, the base demo (BaseDemo plus two
+## Boki: 6 Boki, toys, snacks, an egg) with a Dash run at BASE_RACE_AT, and a hub run. Every frame is logged; each
+## part ends with summary lines and the costliest match step sections and meshes, and a frame over 100 ms and 3x
+## the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-base=60] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
