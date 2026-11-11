@@ -384,7 +384,10 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 		return
 	ev["text"] = Evo.describe(ev, k)
 	CareJournal.evolved(k, ev)
-	if ev["kind"] == "form": Care.dex_mark(k["species"], "caught")      # it evolved into a new species
+	if ev["kind"] == "form":
+		Care.dex_mark(k["species"], "caught")  # it evolved into a new species
+		if Evo.is_final(String(k["species"])):
+			ClanBoard.add("final")
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []
