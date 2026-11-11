@@ -195,12 +195,12 @@ func _body_stays_level(main: Node, k: Node3D, rig: BokiRig) -> void:
 	k.set_meta("kwork", "carry")
 	rig._pick_clip(0.016)
 	body.rotation.z = 0.16
-	rig._keep_flex()
+	rig._keep_flex(0.0)
 	ok(is_zero_approx(body.rotation.z), "a work clip keeps Body level")
 	var carry_at: Vector3 = BokiRig.FRAME[kin_id]["carry"]
 	ok(held.position.is_equal_approx(carry_at), "carrying, the load sits where it holds it, not over its head")
 	body.position.y = 0.3
-	rig._keep_flex()
+	rig._keep_flex(0.0)
 	var hovers: bool = BokiRig.FRAME[kin_id].get("hover", false)
 	ok(hovers == (rig._shadow != null), "a Boki that hovers has a ground shadow, one on legs has none")
 	if rig._shadow:

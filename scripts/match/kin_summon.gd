@@ -8,7 +8,8 @@ extends RefCounted
 ## At the end it folds back into the wisp, which stays dim until the cooldown is over. Summon again while
 ## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
-## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
+## Guardian window (KinGuardian): the same out-of-the-wisp form, started by the Hunter going down.
+## Online: the kin snapshot carries the seconds and the guardian flag (KinNet); the wisp flag swaps the form.
 
 const SHRINK_S := BokiWispPop.DURATION   # s: the fold back into the wisp
 const CALL_AT := "summon_call_at"   # meta on the Hunter: match time of the burst that last called
@@ -22,6 +23,8 @@ var shrink := 0.0     # s of the shrink back left
 var _folding := false # drawing: a fold pop has started for this shrink
 var cd := 0.0         # s until it can be summoned again
 var cd_full := 1.0    # s: the cooldown now running (longer after a knock-down), for the HUD ring
+var guardian := false # out to guard its downed hunter (KinGuardian), not by the Summon key
+var beat := -1        # the last guardian ring pulse drawn (drawing only)
 
 func _init(kin: Kin) -> void:
 	k = kin
@@ -46,6 +49,8 @@ func out() -> bool:
 
 ## How far it may wander from its hunter while summoned: short and fixed, a little longer for bold ones.
 func leash(aggression: float) -> float:
+	if guardian:
+		return float(KinGuardian.rules()["leash"])
 	return float(rules()["leash"]) + (aggression - 0.5) * 2.0 * float(rules()["leash_swing"])
 
 ## The Summon key: out of the wisp when ready, back early when out. False (and says why) when it can't.
@@ -66,7 +71,7 @@ static func press(h: Hunter) -> bool:
 	return true
 
 ## The wisp bursts into the full Boki beside its hunter, whole, for its window.
-func burst() -> void:
+func burst(window := dur, guard := false) -> void:
 	k.teleport(KinFollow.side_spot(k))
 	KinWisp.set_wisp(k, false)
 	k.hp = k.max_hp
@@ -74,10 +79,14 @@ func burst() -> void:
 	k.cmd = "follow"
 	k.fly = {}
 	k.vel = Vector3.ZERO
-	left = dur
+	left = window
+	guardian = guard
+	if guard:
+		KinGuardStance.land(k)
 
 ## The window is over (timer or sent back early): the shrink starts.
 func end() -> void:
+	guardian = false
 	left = 0.0
 	shrink = SHRINK_S
 
@@ -93,7 +102,11 @@ func knocked() -> bool:
 func tick(dt: float) -> void:
 	cd = maxf(0.0, cd - dt)
 	var o := k.owner_h
+	if guardian and (o == null or o.out or not o.downed):
+		guardian = false          # revived or gone: it finishes the window beside you as a plain summon
 	if left > 0.0:
+		if guardian:
+			KinGuardStance.track(k, dt)
 		left -= dt
 		if left <= 0.0:
 			end()
@@ -166,6 +179,7 @@ func _drop_pop() -> void:
 		k.model.visible = true
 
 func _back(cool: float) -> void:
+	guardian = false
 	left = 0.0
 	shrink = 0.0
 	cd = cool
@@ -184,5 +198,7 @@ func render() -> void:
 	elif _folding and shrink <= 0.0 and not k.wisp:
 		_folding = false          # left behind mid-fold: it stays the walking Boki
 		_drop_pop()
+	if guardian:
+		KinGuardian.pulse(k)
 	if k.wisp and k.model:
 		BokiWispLook.dim(k.model, cd > 0.0)

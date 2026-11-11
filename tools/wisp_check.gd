@@ -10,7 +10,8 @@ extends RefCounted
 ## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
 ## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
 ## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
-## a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
+## a dim wisp, a resting summon refuses, the snapshot carries it. Also the outline rule (round body with a
+## head, team rim, white core, low hover, no flicker, one mesh in one material). Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 

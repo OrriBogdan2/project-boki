@@ -1096,6 +1096,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		angry_at = by.owner_h
 	if calm and angry_at:
 		angry_since = m.time
+	if summon and summon.guardian:
+		d *= float(KinGuardian.rules()["damage_mult"])
 	if shield > 0.0 and d > 0.0:
 		var soak := minf(shield, d)
 		shield -= soak
@@ -1158,6 +1160,8 @@ func render(delta: float, alpha: float) -> void:
 			scan_by != null and Capture.active(scan_by), m.time - angry_since)
 	if state == "reviving" and comp and pose_now == "":
 		pose_now = "nudge"
+	if pose_now in ["", "guard", "whine"] and KinGuardStance.holding(self):
+		pose_now = "stance"
 	model.set_meta("pose", pose_now)
 	model.set_meta("happy", pose_now in ["cheer", "beckon"])
 	if on_you and owner_h and owner_h.model and not giant.is_empty() and not owner_h.gliding:

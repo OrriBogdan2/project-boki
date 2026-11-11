@@ -13,5 +13,6 @@
 	"knocked_cd_mult": 1.25,
 	"leash": 10.0,
 	"leash_swing": 2.0,
-	"rebloom_dist": 20.0
+	"rebloom_dist": 20.0,
+	"guardian": {"min_s": 8.0, "max_s": 15.0, "leash": 6.0, "damage_mult": 1.25, "pulse_s": 0.8}
 }

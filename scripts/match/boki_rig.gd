@@ -179,7 +179,7 @@ const CLIP_FACE := {
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
-const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy",
+const POSE_FACE := {"growl": "angry", "guard": "focus", "stance": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy",
 	"alert": "focus", "dazed": "sleepy", "scan": "sad"}
 ## Pose layers: lean (rad, forward), squat (0..1 of its height, negative stands tall), sway (rad, side to side),
 ## shiver (rad); `clip` and `rate` replace the idle, walk and run clips and their speed (a lifted Boki kicks).
@@ -217,6 +217,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _stance := 0.0             # 0..1: how far into the guardian stance (KinGuardStance) it stands
 var _pulse := 0
 var _lunging := false
 var _shot_left := 0.0
@@ -338,21 +339,26 @@ func _process(dt: float) -> void:
 	if not seen:
 		return
 	_flinch.update(root, dt)
-	_keep_flex()
+	_keep_flex(dt)
 	_track_speed(dt)
 	_pick_clip(dt)
 	_face_step(dt)
 
-## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
-## the jolt of a hit (KinFlinch) stay.
-func _keep_flex() -> void:
+## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll, the
+## jolt of a hit (KinFlinch), the pose layer and the guardian's low wide stance (KinGuardStance) stay.
+func _keep_flex(dt: float) -> void:
 	var girth := float(root.get_meta("girth", 1.0))
+	var st := KinGuardStance.row(String(KinPuppet.BODY.get(species, "blob")))
+	_stance = lerpf(_stance, 1.0 if String(root.get_meta("pose", "")) == "stance" else 0.0, 1.0 - exp(-10.0 * dt))
 	var squat: float = _layer["squat"]
 	var swing := _layer_t * SWAY_RATE
-	flex.rotation = _flinch.rot + Vector3(-float(_layer["lean"]) + cos(swing) * float(_layer["sway"]) * 0.4, 0.0,
+	flex.rotation = _flinch.rot + Vector3(float(st["rx"]) * _stance - float(_layer["lean"])
+		+ cos(swing) * float(_layer["sway"]) * 0.4, 0.0,
 		sin(swing) * float(_layer["sway"]) + sin(_layer_t * SHIVER_RATE) * float(_layer["shiver"]))
 	var wide := _flinch.wide * (1.0 + squat * 0.5)
-	flex.scale = Vector3(girth * wide, _flinch.tall * (1.0 - squat), lerpf(1.0, girth, 0.5) * wide)
+	flex.scale = Vector3(girth * wide * lerpf(1.0, float(st["sx"]), _stance),
+		_flinch.tall * (1.0 - squat) * lerpf(1.0, float(st["sy"]), _stance),
+		lerpf(1.0, girth, 0.5) * wide * lerpf(1.0, float(st["sz"]), _stance))
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
