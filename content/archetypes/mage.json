@@ -66,6 +66,7 @@
 	"rmb": {
 		"delivery": "projectile",
 		"name": "Storm Rod",
+		"card_range": "coil.range",
 		"short": "Rod",
 		"icon": "shock",
 		"col": "#7dffd8",
@@ -105,6 +106,7 @@
 	"e": {
 		"delivery": "burst",
 		"name": "Skycall",
+		"card_range": "reach",
 		"short": "Sky",
 		"icon": "updraft",
 		"col": "#b8f7ff",
@@ -131,6 +133,8 @@
 	},
 	"x": {
 		"name": "Kitefall",
+		"card_range": "range",
+		"again": "strike down at the cursor",
 		"short": "Fall",
 		"icon": "quake",
 		"col": "#ffd36a",
