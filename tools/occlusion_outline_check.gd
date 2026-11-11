@@ -51,6 +51,7 @@ func _expect(what: String, ok: bool) -> void:
 func _check() -> void:
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	var rival: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	Settings.v["quality"] = "medium"     # (auto may find Very Low on a software renderer, where it is off)
 	var g := _cliff_spot(m.cam.global_position - P.pos)      # you stand behind the map's tallest cliff
 	P.teleport(g)
 	mate.teleport(g + Vector3(1, 0, 0))

@@ -64,7 +64,6 @@ func run(main_node: Node) -> void:
 	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
 	_belt_items(m, P)
 	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
-	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
 	m.player.hp = 1.0                    # the low-health line: the milder filter, the heartbeat stays clear
 	m.player.armor = 0.0
 	m.music_dir.tick(m, 0.0)
@@ -218,6 +217,7 @@ func _belt_items(m: Match, P: Hunter) -> void:
 		_step(m, 0.3)
 		P.drink_t = 0.0
 		P.kit_t = 0.0
+		P.hp = P.max_hp
 		Sfx.loop_stop(BeltSfx.loop_key(P, id))
 
 func _belt_channel(m: Match, P: Hunter, id: String) -> void:
@@ -228,7 +228,7 @@ func _belt_channel(m: Match, P: Hunter, id: String) -> void:
 	_step(m, UtilityUse.channel(id, "time") + 0.1)
 	ok(not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "end")), "belt %s: ends with its end cue" % id)
 	UtilityBelt.set_slot(P, 0, id, 3, 0)
-	P.hp = 20.0
+	P.hp = P.max_hp - 10.0          # (hurt enough to drink, never near a down: the match runs around it)
 	P.armor = 0.0
 	UtilityUse.start(P, 0, id)
 	_step(m, 0.1)
@@ -292,7 +292,7 @@ func _check_zones(at: Vector3) -> void:
 	var inside := at + Vector3(30, 0, 0)
 	Sfx.set_room_zones([{"at": [inside.x, inside.z], "r": 5, "preset": "arch"}])
 	Sfx.move_listener(at)
-	ok(Sfx.room == "" and _step_bus(at) == "SFX", "outside a zone the sound plays dry (%s)" % _step_bus(at))
+	ok(Sfx.room == "" and _step_bus(at) == "SFXWorld", "outside a zone the sound plays dry (%s)" % _step_bus(at))
 	Sfx.move_listener(inside)
 	var wet := _step_bus(inside)
 	ok(Sfx.room == "arch" and wet == String(Sfx.ROOM_BUS), "inside a zone it goes through the room send (%s)" % wet)
@@ -301,10 +301,10 @@ func _check_zones(at: Vector3) -> void:
 	Sfx.move_listener(inside + Vector3(5.5, 0, 0))
 	ok(Sfx.room == "arch", "just past the edge it holds on (no flutter)")
 	Sfx.move_listener(at)
-	ok(Sfx.room == "" and _step_bus(at) == "SFX", "leaving the zone is dry again (%s)" % _step_bus(at))
+	ok(Sfx.room == "" and _step_bus(at) == "SFXWorld", "leaving the zone is dry again (%s)" % _step_bus(at))
 	ok(not AudioServer.is_bus_effect_enabled(bi, 0), "...and the send's reverb is off")
 	Sfx.move_listener(inside)
-	ok(Sfx.room == "arch" and Sfx._bus_for(null) == &"SFX", "a UI sound (no position) stays dry inside a zone")
+	ok(Sfx.room == "arch" and Sfx._bus_for(null, true) == "SFX", "a clear sound (no position) stays dry inside a zone")
 	Sfx.set_room_zones([])
 	for id in ["hollowcrown", "skyreach"]:
 		var zones: Array = World.load_layout(id).get("sound_zones", [])
