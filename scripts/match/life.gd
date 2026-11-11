@@ -10,12 +10,13 @@ class_name Life
 
 const R := {
 	"bleed_out": 15.0,          # [patch] seconds a wisp lasts on its own
-	"revive_radius": 1.6,       # [est] a teammate this close revives you
-	"revive_time": 4.0,         # [wiki "a few seconds"] [est]
-	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health
-	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] speed each 1st..4th+ person on a wisp adds (revive, stomp)
+	"revive_radius": 1.6,       # [est] a teammate this close revives you (source silent)
+	"revive_time": 4.0,         # [wiki "a few seconds"] [est] one teammate (docs/decisions/0022)
+	"revive_hp": 0.25,          # [design] back on your feet with a quarter of your health (wiki: "X%")
+	# 1 to 4 on a wisp: 1, 1.5, 1.75, 1.875x in all, for teammates reviving and enemies stomping alike
+	"crowd": [1.0, 0.75, 0.58, 0.47],  # [D] each of n Hunters on one wisp works at crowd[n-1] (0022)
 	"revive_decay": 0.5,        # [design] revive bar lost per second when nobody revives (the wiki)
-	"stomp_mult": 2.5,          # [design] an enemy standing on a wisp drains it this much faster and blocks the revive
+	"stomp_mult": 2.5,          # [design] one enemy on a wisp drains it this much faster and blocks the revive [wiki]
 	"stomp_slow": 0.4,          # [design] ...and pins it: the wisp drifts at this fraction of its normal speed
 	"stomp_commit": 0.2,        # [design] hold interact this long on an enemy wisp to start the stomp...
 	"stomp_time": 2.8,          # [footage] ...then you're locked in: about 3 s in all
@@ -80,6 +81,11 @@ static func team_standing(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted and not x.downed)
 
 # ------------------------------------------------------------------ wisps
+## How much faster n Hunters on one wisp revive (or stomp) it than one: the source's curve.
+static func crowd(n: int) -> float:
+	var c: Array = R["crowd"]
+	return n * float(c[mini(n, c.size()) - 1])
+
 ## Every frame, for each wisp: teammates on it revive it, enemies on it stomp it, otherwise it
 ## bleeds out.
 static func tick_wisps(m: Match, dt: float) -> void:

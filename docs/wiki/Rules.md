@@ -33,6 +33,11 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | crowd | [1.0, 0.75, 0.58, 0.47] | speed each 1st..4th+ person on a wisp adds (revive, stomp) |
 | revive_decay | 0.5 | revive bar lost per second when nobody revives (the wiki) |
 | stomp_mult | 2.5 | an enemy standing on a wisp drains it this much faster and blocks the revive |
+| revive_radius | 1.6 | a teammate this close revives you (source silent) |
+| revive_time | 4 | one teammate (docs/decisions/0022) |
+| revive_hp | 0.25 | back on your feet with a quarter of your health (wiki: "X%") |
+| crowd | [1.0, 0.75, 0.58, 0.47] | each of n Hunters on one wisp works at crowd (0022) |
+| stomp_mult | 2.5 | one enemy on a wisp drains it this much faster and blocks the revive |
 | stomp_slow | 0.4 | ...and pins it: the wisp drifts at this fraction of its normal speed |
 | stomp_commit | 0.2 | hold interact this long on an enemy wisp to start the stomp... |
 | stomp_time | 2.8 | ...then you're locked in: about 3 s in all |
@@ -927,8 +932,6 @@ The Dash, the first Boki-vs-Boki race (scripts/home/base_race.gd, briefs/design/
 | _doc | Box revives and revive beacons (docs/decisions/0018-box-revive-and-beacons.md; scripts/match/box_revive.gd, beacons.gd). Seconds and metres. |
 | box_revive_s | 7.5 |
 | _box_revive_s | hold interact at a teammate's deathbox this long to bring them back (owner: a 7-8 s exposed channel) |
-| box_diminish | [1.0, 0.75, 0.58, 0.47] |
-| _box_diminish | channel speed for the 1st, 2nd, 3rd, 4th+ box revive of the same Hunter in a match (the source's revive curve) |
 | beacon_s | 4 |
 | _beacon_s | stand on a beacon this long to bring back every dead teammate (owner: a short channel) |
 | beacon_hear_m | 120 |
