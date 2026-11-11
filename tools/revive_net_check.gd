@@ -13,6 +13,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match
+const REPLY_S := 30.0        # s for the guest to answer, on its clock (CheckClock: a busy box starves it)
 const SEED := 4242
 const KEYS := 1              # rift keys the guest carries into its first death (the belt holds one)
 
@@ -172,10 +173,10 @@ func _ask() -> Dictionary:
 	return await _say_do("ask", 0.0)
 
 func _reply() -> Dictionary:
-	var t := 0.0
-	while replies.is_empty() and t < 10.0:
+	var t0 := CheckClock.own_msec(guest_pid)
+	while (replies.is_empty() and CheckClock.own_msec(guest_pid) - t0 < REPLY_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.1)
-		t += 0.1
 	return replies[0] if not replies.is_empty() else {}
 
 # ------------------------------------------------------------------ the guest
