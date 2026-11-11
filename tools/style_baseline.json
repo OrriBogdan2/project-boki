@@ -77,7 +77,7 @@
 "semicolon": 1
 },
 "scripts/combat/verbs.gd": {
-"long_line": 29,
+"long_line": 28,
 "nested_ternary": 1,
 "semicolon": 11,
 "shadow": 1
@@ -599,7 +599,7 @@
 "shadow": 1
 },
 "scripts/match/kin_net.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 1
 },
 "scripts/match/kin_path.gd": {
@@ -825,9 +825,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 171,
-"nested_ternary": 32,
-"semicolon": 40,
+"long_line": 170,
+"nested_ternary": 30,
+"semicolon": 38,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -853,7 +853,7 @@
 "shadow": 1
 },
 "scripts/ui/kinbox_view.gd": {
-"long_line": 16,
+"long_line": 12,
 "nested_ternary": 4,
 "semicolon": 30,
 "shadow": 1
@@ -878,8 +878,8 @@
 "semicolon": 5
 },
 "scripts/ui/overlay.gd": {
-"long_line": 31,
-"semicolon": 23,
+"long_line": 29,
+"semicolon": 22,
 "shadow": 1
 },
 "scripts/ui/prologue.gd": {
@@ -910,7 +910,7 @@
 "scripts/ui/title.gd": {
 "long_line": 21,
 "nested_ternary": 2,
-"semicolon": 40
+"semicolon": 39
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -997,7 +997,7 @@
 "semicolon": 1
 },
 "tools/check_registry.gd": {
-"long_line": 7
+"long_line": 9
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
