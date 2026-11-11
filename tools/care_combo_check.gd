@@ -914,6 +914,7 @@ func tender() -> void:
 	var bid := "burr%d" % int(K.burrs[0]["id"]) if K.burrs.size() > 0 else ""
 	step(m, 0.1)
 	var tele: Dictionary = AimKit.entry(P, bid)
+	var field_n: Node3D = K.lk().held.get(bid, {}).get("n", null)
 	ok(
 			"mm RMB: the burst area shows under the foe at once, for everyone, filling",
 			AimKit.shown(P, bid)
@@ -922,6 +923,11 @@ func tender() -> void:
 			and is_equal_approx(float(tele.get("r", 0.0)), K.burst_radius())
 			and K.lk().showing(bid),
 			"r %.2f" % float(tele.get("r", 0.0)))
+	ok(
+			"mm RMB: the field is a lit rim (a band, no flat fill) whose edge is the burst radius",
+			float(tele.get("band", 0.0)) > 0.0 and float(tele.get("fill", -1.0)) < 0.0 and field_n != null
+				and is_equal_approx(field_n.scale.x, K.burst_radius()),
+			"band %.2f disc r %.2f" % [float(tele.get("band", 0.0)), field_n.scale.x if field_n else 0.0])
 	await _burr_build(m, P, T, K, bid)
 	await _free(m)
 	# --- Hearthlight: on her a 2.6 m ring with its own cast move; E again throws it to the cursor at once
@@ -1292,12 +1298,16 @@ func _burr_build(m: Match, P: Hunter, T: Hunter, K: TenderKit, bid: String) -> v
 			T.root_t <= 0.0 and K.burrs.size() == 1 and K.ult_look.showing(bid) and a1 > a0 + 0.3,
 			"root %.2f vine %.2f -> %.2f" % [T.root_t, a0, a1])
 	var h1 := T.hp
+	var roots0 := int(HeroVfx.of(m).plays.get("seed_root", 0))
 	step(m, 0.25)
 	ok(
 			"mm RMB: it roots at about 2.0 s of contact (by 2.1 s), damages and Kindles, the vine gone",
 			T.root_t > 0.0 and h1 - T.hp > 25.0 and K.kindle_on(T) >= 1 and K.burrs.is_empty()
 			and not K.ult_look.showing(bid),
 			"root %.2f dmg %.0f" % [T.root_t, h1 - T.hp])
+	ok(
+			"mm RMB: the root moment plays on the foe it takes (one per rooted foe)",
+			int(HeroVfx.of(m).plays.get("seed_root", 0)) - roots0 == 1)
 	# breaking contact: 1 s built, then 0.3 s out of reach unwinds it 0.6 s; back in, it needs 1.6 s more
 	T.root_t = 0.0
 	var home := T.pos

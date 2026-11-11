@@ -253,13 +253,26 @@ func _zones(main: Node) -> void:
 	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
 	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
 	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
-	var meeko := [["Meeko's seed disc", TenderKit.BURR_FILL, 0.9],
-		["Meeko's Hearthlight disc", TenderKit.HEARTH_FILL, 1.1]]
-	for d in meeko:
-		var raw := float(d[1]) * 0.18 * 1.6 * float(d[2])     # care_disc: body * 1.6 at the centre, cel steps of 0.25
-		ok(roundf((raw + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A, "%s: centre alpha at most %.2f" % [d[0], ZONE_CORE_A])
+	var hearth_a := TenderKit.HEARTH_FILL * 0.18 * 1.6 * 1.1     # care_disc: body * 1.6 at the centre, cel steps of 0.25
+	ok(roundf((hearth_a + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A,
+			"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A)
+	_meeko_field()
 	var sable_a: float = AimShapes.FILL_A * 0.2 * 2.0     # the band's tint inside, at the ult's brightest beat
 	ok(sable_a <= ZONE_CORE_A and ThiefUlt.RING_W > 0.0, "Sable's X: a ring band with a faint tint inside")
+
+## Meeko's Burrseed root field (tender.json "field"): leaf green, the whole inside up to the rim (care_disc's body
+## grows as 0.18 + 0.22 r^2 to r 0.89, where its rim starts) at most 0.25, and the burst's ring lands on its rim
+## (the ring shader's band ends at 0.9 of its size).
+func _meeko_field() -> void:
+	var d := HeroVfx.data("tender")
+	var fd: Dictionary = d["field"]
+	var pal: Dictionary = d["palette"]
+	var inner_a := float(fd["fill"]) * (0.18 + 0.22 * 0.89 * 0.89) * 1.6 * float(fd["a"])
+	ok(inner_a <= ZONE_CORE_A and Color(String(pal[fd["col"]])).is_equal_approx(Arch.color("tender")),
+			"Meeko's root field: leaf green, inside alpha at most %.2f to the rim (%.2f)" % [ZONE_CORE_A, inner_a])
+	var ring: Array = (d["moves"]["seed_burst"]["fx"] as Array).filter(func(l): return l["p"] == "ring")
+	ok(ring.size() == 1 and ring[0]["size"] == "r" and absf(float(ring[0]["size_x"]) * 0.9 - 1.0) < 0.01,
+			"Meeko's root field: the burst's ring lands on the burst radius")
 
 ## Her needles: one that misses stays in the ground with its thread; the bow's string stands down for a model's own.
 func _lisette(main: Node, V0: HeroVfx) -> void:
