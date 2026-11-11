@@ -10,7 +10,7 @@ extends RefCounted
 const XRAY: Shader = preload("res://shaders/kin_aura_xray.gdshader")
 const SCAN_S := 0.3            # s between scans for hurt rivals
 const HOLD_S := 0.4            # s a sensed rival stays revealed after the last scan that found them
-const STRENGTH := 1.0          # the outline's brightness (Boki shells sit at 0.6; this one has to cut through fog)
+const STRENGTH := 0.6          # the outline's brightness (as the Boki shells: brighter washes the body out)
 const GROW := 0.02             # m the shell stands off the body
 
 const TEAMS_META := "hawk_teams"   # on a sensed rival: a bit per team whose Lace senses them
