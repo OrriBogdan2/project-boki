@@ -3,7 +3,7 @@ import math
 
 import boki_clips
 import lunowl
-from boki_clips import add, bound_air, bound_land, hang_swing, s, seq, stance
+from boki_clips import add, bound_air, bound_land, from_mid_flight, hang_swing, s, seq, stance
 from lunowl import SIDES, TAIL_PTS, antenna_pts, on_wing, streamer_pts, v3
 
 LOOK_UP = 0.22     # its face is already a flat disc to the front: a little tilt up is enough for the high cameras
@@ -337,7 +337,7 @@ def ability(t):
     return p
 
 
-CLIPS = {"idle": (3.2, True, idle), "walk": (0.56, True, walk), "run": (16 / 30, True, run), "hop": (1.0, True, hop),
+CLIPS = {"idle": (3.2, True, idle), "walk": (0.56, True, walk), "run": (16 / 30, True, from_mid_flight(run)), "hop": (1.0, True, hop),
          "pet": (2.4, True, pet), "carry": (0.6, True, carry), "tend": (1.3, True, tend),
          "attack": (0.8, False, attack), "ability": (1.3, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}

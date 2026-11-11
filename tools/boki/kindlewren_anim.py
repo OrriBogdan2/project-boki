@@ -5,7 +5,7 @@ import numpy as np
 
 import boki_clips
 import kindlewren as kw
-from boki_clips import add, bound_air, bound_land, hang_swing, s, seq, stance
+from boki_clips import add, bound_air, bound_land, from_mid_flight, hang_swing, s, seq, stance
 from kindlewren import SIDES, TAIL_PTS, ankle, on_wing, v3, wing_frame
 
 LOOK_UP = 0.32     # tips the face up to the high cameras
@@ -357,7 +357,7 @@ def ability(t):
     return p
 
 
-CLIPS = {"idle": (3.0, True, idle), "walk": (0.6, True, walk), "run": (16 / 30, True, run), "hop": (1.0, True, hop),
+CLIPS = {"idle": (3.0, True, idle), "walk": (0.6, True, walk), "run": (16 / 30, True, from_mid_flight(run)), "hop": (1.0, True, hop),
          "pet": (2.4, True, pet), "carry": (0.66, True, carry), "tend": (1.2, True, tend),
          "attack": (0.7, False, attack), "ability": (1.1, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}

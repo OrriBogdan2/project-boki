@@ -35,6 +35,15 @@ def stance(t, ph=0.0, w=0.125):
     return -1 + 2 * k, math.sin(math.pi * k)
 
 
+MID_FLIGHT = 0.3125   # of the cycle: halfway from the first touch-down's lift-off (0.125) to the second (0.5)
+
+
+def from_mid_flight(bound):
+    """A `stance` bound clip started halfway through a hop. Godot holds a clip's first pose for a frame (its glTF keys
+    start at frame 1), so the hold lands in the air instead of freezing a planted foot."""
+    return lambda t: bound((t + MID_FLIGHT) % 1.0)
+
+
 def bound_air(t, w=0.125):
     """How high a body that touches down twice a cycle (a foot, or a tripod, each half) is between touch-downs, 0 to
     1: on the ground for the two stances of `stance`, a ballistic arc after each."""

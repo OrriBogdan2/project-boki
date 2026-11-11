@@ -4,7 +4,7 @@ import math
 
 import boki_clips
 import lodestick
-from boki_clips import add, bound_air, c, s, seq, stance
+from boki_clips import add, bound_air, c, from_mid_flight, s, seq, stance
 from lodestick import LEGS, SIDES, leg_pts, mir, v3
 
 LOOK_UP = 0.3      # the face tips up toward the high cameras
@@ -305,7 +305,7 @@ def tend(t):
     return p
 
 
-CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (16 / 30, True, run), "hop": (1.0, True, hop),
+CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (16 / 30, True, from_mid_flight(run)), "hop": (1.0, True, hop),
          "pet": (2.4, True, pet), "carry": (1.1, True, carry), "tend": (1.3, True, tend),
          "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}
