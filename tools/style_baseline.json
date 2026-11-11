@@ -10,8 +10,9 @@
 },
 "scripts/arch/arch_kit.gd": {
 "long_line": 31,
+"long_line": 26,
 "nested_ternary": 2,
-"semicolon": 9
+"semicolon": 6
 },
 "scripts/arch/feel.gd": {
 "long_line": 10,
@@ -35,6 +36,8 @@
 "long_line": 13,
 "semicolon": 1,
 "shadow": 1
+"long_line": 11,
+"semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
 "long_line": 10,
@@ -187,6 +190,7 @@
 },
 "scripts/core/sfx.gd": {
 "long_line": 7,
+"long_line": 5,
 "semicolon": 3,
 "shadow": 3
 },
@@ -391,7 +395,7 @@
 "scripts/main.gd": {
 "long_line": 387,
 "nested_ternary": 7,
-"semicolon": 407,
+"semicolon": 405,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -496,6 +500,7 @@
 "scripts/match/exit_models.gd": {
 "long_line": 24,
 "semicolon": 43
+"long_line": 23,
 },
 "scripts/match/exits.gd": {
 "long_line": 30,
@@ -558,6 +563,10 @@
 "long_line": 96,
 "nested_ternary": 19,
 "semicolon": 53,
+"history_comment": 33,
+"long_line": 91,
+"nested_ternary": 18,
+"semicolon": 49,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -624,9 +633,26 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
-"nested_ternary": 9,
-"semicolon": 28
+"long_line": 18,
+"semicolon": 9
+},
+"scripts/match/lairs_bots.gd": {
+"long_line": 2,
+"semicolon": 2
+},
+"scripts/match/lairs_demo.gd": {
+"long_line": 7,
+"semicolon": 6
+},
+"scripts/match/lairs_fight.gd": {
+"long_line": 8,
+"nested_ternary": 3,
+"semicolon": 3
+},
+"scripts/match/lairs_lock.gd": {
+"long_line": 17,
+"nested_ternary": 6,
+"semicolon": 8
 },
 "scripts/match/landmarks.gd": {
 "long_line": 24,
@@ -667,7 +693,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 282,
+"long_line": 281,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -831,7 +857,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 191,
+"long_line": 190,
 "nested_ternary": 39,
 "semicolon": 52,
 "shadow": 2
@@ -918,6 +944,7 @@
 "long_line": 21,
 "nested_ternary": 2,
 "semicolon": 40
+"semicolon": 39
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -952,16 +979,16 @@
 "semicolon": 7
 },
 "tools/airheal_check.gd": {
-"long_line": 2,
+"long_line": 1,
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 20
+"semicolon": 19
 },
 "tools/archetype_check.gd": {
-"long_line": 65,
-"semicolon": 71,
+"long_line": 64,
+"semicolon": 66,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -1122,6 +1149,7 @@
 "tools/move_feel_check.gd": {
 "history_comment": 1,
 "long_line": 34,
+"long_line": 30,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
