@@ -116,4 +116,4 @@ What changed (all first-time rules, no settings; base_mode, the garden, only):
 - **Top counters** (tonic, crops, wood, stone, fibre, coals) show only above 0 in the garden. An upgraded farm save had seven chips at 631 px, now three at 258 px.
 
 Before shots (GPU, old fixture: every counter seen): [hub](shots/ui-garden-declutter/before_hub_day5.jpg), [Glasswater](shots/ui-garden-declutter/before_glasswater_day5.jpg).
-Not changed (still on screen, each one group): the key row (folds after 3 uses of each key), the hub bar (hidden while the tutorial runs), the F prompt, the one Next line.
+Not changed (still on screen, each one group): the key row (folds after 3 uses of each key), the hub bar, the F prompt, the one Next line.
