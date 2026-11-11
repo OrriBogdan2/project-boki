@@ -97,3 +97,76 @@ row keeps its place until the integrator re-sorts the table.
 Strips: the before sheets are jobq `vfxq-before-<arch>`, the after sheets `vfxq-after-<arch>`
 (`/home/boki/jobq/done/<id>/out/`). Tenzo's before/after pair is on branch `ext/vfx-quality-strips` (not for merge) and
 linked from PR #14; Kael's X pair (`before_juggernaut_r.png`, `after_juggernaut_r.png`) is there too.
+## Scorecard: before (11-08) and re-score (11-09)
+Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
+carried from the code read, the strips are silent). **Before** is the 11-08 score from the `vfxq-before-*` strips.
+**After** is scored from the new reel strips only, by the same rubric.
+
+**What was rendered.** origin/main (d255acbee) has neither this doc nor most of the per-hero VFX jobs: they are READY
+branches, not merged. So the reels ran on a scratch merge of origin/main with every READY `ext/vfx-*` branch that
+merges cleanly: quality-base, ostra-abilities, tender, archer, thief, dredge, mage, rimewright-quality, dolm,
+bulwark, gunslinger, kael-polish (Cinder is already on main). Not in it: `ext/vfx-vex`, `vfx-breaker`,
+`vfx-lisette`, `vfx-motley`, `vfx-ryzz`, `vfx-sable` and `vfx-tarek` (older takes of the same heroes, they conflict
+with the READY ones). Two clashes had to be hand-fixed in the scratch tree (`HeroVfx` mode 8 taken by both
+dredge's `chain` and bulwark's `dome`, and a `shine` shader name used twice); both need fixing when those two
+branches are merged. The scores are therefore for "all READY VFX branches merged", not for main today. The worker's
+ground renders yellow, so read colours against that.
+
+Strips: `docs/art/vfx_rescore/<arch>.jpg`, every reel part stacked top to bottom (alphabetical: dash, e, hold, lmb, ...,
+r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader errors in the logs.
+
+| Hunter | arch | before | R | S | L | T | Sc | C | Snd | after | weakest ability left |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Vex | gunslinger | 15 | 5 | 3 | 3 | 3 | 4 | 4 | 4 | **26** | was 25 (LMB / held LMB: a thin faint tracer): fixed on ext/vfx-vex-tracer-0246, see below. Left: Shift Slipstep, faint streaks and a flat band behind her |
+| Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
+| Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 3 | 3 | 4 | 3 | **25** | E / RMB wedges: flat pale sectors with no leading edge; slugs small at match zoom |
+| Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
+| Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
+| Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
+| Albert | bulwark | 20 | 4 | 4 | 3 | 3 | 3 | 3 | 4 | **24** | LMB / RMB swing arcs still hot orange, not ivory (Kael's colour) |
+| Sparkle | mage | 20 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | LMB finger bolt: thin; Grounded's flat orange disc on the target |
+| Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
+| Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
+| Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
+
+Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
+Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
+Cinder 30, Kael 29); scoring all twelve from the strips with one hand puts them 1-2 lower. Neve went down one point
+(26 to 25): her Rimelock X reads as a screen-wide wash next to the others.
+
+Parity rule (DECISIONS: match the source's readability and polish, no explosions on dashes, a ground ring means
+gameplay): no Hunter's dash plays an explosion in these strips. Ground rings worth a check against a hitbox: Vex's
+Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a hitbox here.
+
+### Vex's rounds (ext/vfx-vex-tracer-0246, 2026-11-11): 25 -> 26
+Each rifle round, tapped or held, rides a tracer 0.34 m across at its head: her 0.3 m hit width (`HITBOX_SIZE.md`)
+plus a rim. It was 0.18 m, with 0.08 m of it visible. A hot pale-lime core line runs down most of its length, the body
+is her lime (`color`), a deep green rim holds it on sand, and the back 60% fades out in cel steps. The length stays
+2.6 m (about 1.5 bh, the footage's long thin yellow-green bolts). The muzzle star is lime with a pale core, 0.8 m for
+0.08 s, on the Gun's Muzzle (the rifle's mouth; it used to sit out on the round). The rifle's data colour (the shared
+muzzle flash and the end bursts) and her end sparks are lime too. Nothing new is built per shot: one pooled tracer and
+one pooled star per round, as before (`--gunslinger-combo-check` asserts that a second held string makes no nodes).
+The VVFx tracer mode draws these layers only when it is given an edge colour, so smears and hand trails (Sparkle's
+too) are unchanged. R 4 -> 5: the LMB and hold paths read at match zoom in their first frame; the other axes stand.
+Strips: `docs/art/vfx_rescore/gunslinger_rounds.jpg`, before on the left (origin/main + the 0.24.6 audio-vfx line)
+and after on the right. They show the full-range LMB frame (`--vv-shots --vv-hero=gunslinger --vv-only=lmb`) and the
+reel's lmb and hold sheets. They were rendered with the compat renderer (opengl3 under Xvfb, 1280x720): the GPU after
+reel could not be sent (the jobq relay failed to copy the tree four times), and the GPU before reel (jobq
+`20261111-213003-09415`) was still queued. The reel's dummy stands 4.5 m off, so its frames mostly catch a round at
+the muzzle or on the dummy. The full-range frame is where the tracer shows.
+On this line alone her RMB, Shift, E and X are still the ember-orange VVFx looks. ext/vfx-vex-data (READY, on no
+train) moves them to green fire and replaces this tracer with a HeroVfx ribbon; when it merges, keep this look in its
+`shot_trail` (one ribbon 0.34 m: body `main`, rim `deep`, core `hot`).
+
+## Backlog (remaining fixes, from the table)
+1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
+2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
+3. Vex LMB and hold: a wider, brighter tracer at match zoom. Done (ext/vfx-vex-tracer-0246, "Vex's rounds" above).
+4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
+5. Albert: ivory swing arcs for LMB/RMB.
+6. Kael: crimson Smash telegraph instead of the flat magenta box.
+7. Cinder: flame-coloured Ignite orb.
+8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
+9. Lace tap shots and Sparkle LMB: thicker trails.
+10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
