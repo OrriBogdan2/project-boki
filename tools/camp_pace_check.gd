@@ -9,6 +9,10 @@ extends RefCounted
 ##   - the median squad still in is level 5.5 or more at 5:15 and 7 or more at 8:00 (mean over seeds)
 ##   - the top squad is at most 2 levels over the median at 4:00 and 3 at 8:00, in 80% of seeds
 ##   - squadmates are within 1 level of each other at 4:00 in 80% of squads
+## First, one still match for the fight rules: a squad 2 levels up is left alone unless it is in a
+## fight, one 2 down is pressed, nobody starts a Hunter fight during the drop's farm; a bold bot goes
+## for a prize monster in its kill window that a rival is on, a timid one does not; a squad that saw
+## a rival holds its fire on a prize monster at 30%, then bursts.
 ## --pace-seeds=3,5,9 runs only those seeds (default 1 to 20). Never touches the save.
 
 const SEEDS := 20
@@ -34,6 +38,7 @@ func run(main: Node) -> void:
 	var seeds: Array = range(1, SEEDS + 1)
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--pace-seeds="): seeds = Array(a.substr(13).split(",")).map(func(x): return int(x))
+	await _rules(main)
 	var runs: Array = []
 	for sd in seeds:
 		runs.append(await _match(main, sd))
@@ -71,7 +76,8 @@ func _match(main: Node, sd: int) -> Dictionary:
 			mark += 1
 	for h in m.hunters:
 		# (at the cap the tally keeps counting what gain_xp no longer adds)
-		var gap := h.xp - XpRules.xp_total(h) if h.lvl >= Hunter.XP_TO.size() else absf(h.xp - XpRules.xp_total(h))
+		var gap: float = h.xp - XpRules.xp_total(h)
+		if h.lvl < Hunter.XP_TO.size(): gap = absf(gap)
 		r["untallied"] = maxf(float(r.get("untallied", 0.0)), gap)
 	_table(m, r)
 	print("PACE seed %d: %.0f s of match in %.0f s" % [sd, m.time, (Time.get_ticks_msec() - t0) / 1000.0])
@@ -86,9 +92,13 @@ func _mark(m: Match, r: Dictionary, i: int) -> void:
 	for t in r["alive"]:
 		r["alive"][t].append(m.hunters.any(func(h): return h.team == t and not h.out and not h.extracted))
 	if i == AT_230:
+		var by := {}
 		for h in m.hunters:
-			r["camp150"] += float(XpRules.tally(h).get("camp", {}).get("xp", 0.0))
+			for s in XpRules.SOURCES:
+				by[s] = float(by.get(s, 0.0)) + float(XpRules.tally(h).get(s, {}).get("xp", 0.0))
 			r["all150"] += XpRules.xp_total(h)
+		r["camp150"] = float(by.get("camp", 0.0))
+		lines.append("PACE seed %d: XP by 2:30 by source %s" % [r["seed"], str(by)])
 
 func _table(m: Match, r: Dictionary) -> void:
 	lines.append("PACE seed %d  squad ring    2:00 2:30 4:00 5:15 8:00 10:00   camp/mob/boss/knock XP" % r["seed"])
@@ -129,6 +139,46 @@ func _median_top(r: Dictionary, i: int) -> Array:
 	lv.sort()
 	var mid: float = lv[lv.size() / 2] if lv.size() % 2 == 1 else (lv[lv.size() / 2 - 1] + lv[lv.size() / 2]) / 2.0
 	return [mid, lv.back()]
+
+func _rules(main: Node) -> void:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 3, "squad": 3, "tier": 0, "length": 1e9, "seed": 7, "no_drop": true})
+	m.set_process(false)
+	var B: Dictionary = Camps.rules()["bots"]
+	var h: Hunter = m.hunters.filter(func(x): return x.team == 1)[0]
+	var up: Hunter = m.hunters.filter(func(x): return x.team == 2)[0]
+	var down: Hunter = m.hunters.filter(func(x): return x.team == 0)[0]
+	m.time = float(B["farm_until_s"]) - 1.0
+	var stale := BotCamps.reach_k(m, h, up, true)
+	h.hit_by[up.get_instance_id()] = m.time
+	ok(stale == 0.0 and BotCamps.reach_k(m, h, up, false) == 1.0,
+		"during the drop's farm a bot starts no Hunter fight, but answers one shooting at it now")
+	m.time = float(B["farm_until_s"]) + 10.0
+	h.lvl = 4
+	up.lvl = 6
+	down.lvl = 2
+	ok(BotCamps.reach_k(m, h, up, false) == 0.0, "after it, a squad 2 levels up is left alone")
+	up.hit_by[down.get_instance_id()] = m.time
+	ok(BotCamps.reach_k(m, h, up, false) == 1.0, "unless it is in a fight")
+	ok(BotCamps.reach_k(m, h, down, false) == float(B["press_k"]), "a squad 2 levels down is pressed")
+	var mb: Mob = m.spawn_mob("brute", h.pos + Vector3(6, 0, 0))
+	mb.hp = mb.max_hp * 0.2
+	mb.last_hit_by = up
+	up.teleport(mb.pos + Vector3(2, 0, 0))
+	h.ai["skill"] = float(B["steal"]["bold_skill"]) - 0.1
+	ok(BotCamps.steal(m, h) == null, "a timid bot leaves a rival's prize monster be")
+	h.ai["skill"] = 1.0
+	h.ai["steal_rolls"] = {mb.get_instance_id(): true}
+	ok(BotCamps.steal(m, h) == mb, "a bold bot (on a winning roll) goes for the last hit")
+	mb.hp = mb.max_hp * 0.29
+	var held := BotCamps.hold(m, h, mb)
+	m.time += float(B["hold"]["max_s"]) + 0.1
+	h.ai["abil_t"] = 5.0
+	ok(held and not BotCamps.hold(m, h, mb) and float(h.ai["abil_t"]) == 0.0,
+		"a rival near a prize monster at 30%: hold fire, then burst")
+	m.queue_free()
+	await main.get_tree().process_frame
 
 func _judge(runs: Array) -> void:
 	var n := float(runs.size())

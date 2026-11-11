@@ -154,13 +154,14 @@ static func goal(m: Match, h: Hunter) -> Vector3:
 ## another bot squad has it.
 static func _landed(m: Match, h: Hunter) -> void:
 	var here: int = m.biomes.hot.region_at(h.pos)
+	var picked := int(h.ai[REGION])
 	var taken := false
 	for o in m.hunters:
 		taken = taken or (o.team != h.team and int(o.ai.get(REGION, -1)) == here)
 	for o in m.hunters:
 		if o.team == h.team:
 			o.ai[LANDED] = true
-			if here != int(h.ai[REGION]):
+			if here != picked:
 				if taken or here < 0: o.ai.erase(REGION)
 				else: o.ai[REGION] = here
 
@@ -229,9 +230,14 @@ static func best_level(m: Match, team: int) -> int:
 
 # ------------------------------------------------------------------ fights and steals
 static func reach_k(m: Match, h: Hunter, o: Ent, provoked: bool) -> float:
-	if provoked or not (o is Hunter):
+	if not (o is Hunter):
 		return 1.0
 	var B := rules()
+	if m.time < float(B["farm_until_s"]):
+		# the drop's farm: camps first; a Hunter only while they are shooting at us
+		return 1.0 if m.time - float(h.hit_by.get(o.get_instance_id(), -99.0)) < FIGHT_S else 0.0
+	if provoked:
+		return 1.0
 	var gap := best_level(m, o.team) - best_level(m, h.team)
 	if gap >= int(B["gap"]) and not _in_fight(m, o as Hunter):
 		return 0.0
@@ -239,8 +245,6 @@ static func reach_k(m: Match, h: Hunter, o: Ent, provoked: bool) -> float:
 		return float(B["press_k"])
 	if m.camps == null:
 		return 1.0
-	if m.time < float(B["farm_until_s"]):
-		return 0.0      # the drop's farm: camps first, Hunters only when they start it
 	if best_level(m, h.team) % 2 == 1 and not _camp_near(m, h).is_empty():
 		return 0.0      # one short of an even level (or of 6): the camp first
 	return 1.0
