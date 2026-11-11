@@ -136,7 +136,6 @@ func _expedition(first: bool) -> void:
 	_check("lair_out-early", "match time 100 s, Lair seat not open", _moment(func(): _pin = 100.0), "")
 	var lair_at: float = Heart.rules()["quest"]["lair_open_s"]
 	_check("lair_out", "the Lair seat opens", _moment(func(): _pin = lair_at + 1.0), "lair_out")
-	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
 	_seats()
 	_check("after", "everything seen: quiet", _moment(func(): pass, 5.0), "")
@@ -159,11 +158,13 @@ func _heartspark() -> void:
 	ht.carrier = null
 	ht.state = Heart.S.CHARGING
 
-## The Uplink seat opens, then the Heart's final seat: one line each, once.
+## The Uplink seat opens (the player away from it), its outpost's two lines, then the Heart's final
+## seat: one line each, once. The Uplink seat is the only outpost that starts, and only once it is open.
 func _seats() -> void:
 	var up: float = Heart.rules()["quest"]["uplink_open_s"]
 	_check("uplink_out-early", "just before the Uplink seat opens", _moment(func(): _pin = up - 5.0, 3.0), "")
 	_check("uplink_out", "the Uplink seat opens", _moment(func(): _pin = up + 1.0), "uplink_out")
+	_outposts(up)
 	_check("final_out", "the final seat opens", _moment(func(): m.heart.state = Heart.S.FINAL, 3.0), "final_out")
 	_check("seat_grace", "the squad takes a seat", _moment(_take_seat), "seat_grace")
 
@@ -238,21 +239,19 @@ func _fight() -> Array:
 	mb.hp = 0.0
 	return shown.slice(n0).map(func(s): return s["id"])
 
-func _outposts() -> void:
-	var out: Array = m.exits.of_kind("outpost")
-	ok(not out.is_empty(), "the map has outposts")
-	var x: Dictionary = out[0]
-	_check("uplink-early", "next to an outpost not open yet", _moment(_beside.bind(x, 60.0)), "")
-	var late := maxf(151.0, float(x["open_at"]) + 1.0)      # past go-to-exit time: an outpost in reach keeps it quiet
-	_check("uplink", "next to an idle outpost", _moment(_beside.bind(x, late)), "uplink")
+func _outposts(up: float) -> void:
+	var x: Dictionary = m.exits.uplink_x()
+	ok(not x.is_empty(), "the map has an Uplink outpost")
+	_check("uplink-early", "next to the Uplink before it opens", _moment(_beside.bind(x, up - 5.0)), "")
+	_check("uplink", "next to the open Uplink, idle", _moment(_beside.bind(x, up + 2.0)), "uplink")
 	_check("defend", "own uplink charging", _moment(_charge.bind(x), 4.0), "defend")
 
 func _drop_gear() -> void:
 	m.spawn_gear(String(Gear.ALL.keys()[0]), 1, p.pos + Vector3(3, 0, 0))
 
+## Started the way the game starts it (started_at set), so the empty-yard drain can't fizzle it at once.
 func _charge(x: Dictionary) -> void:
-	x["state"] = "charging"
-	x["team"] = p.team
+	m.exits._start(x, p)
 
 func _beside(x: Dictionary, at_time: float) -> void:
 	_pin = at_time
@@ -261,6 +260,7 @@ func _beside(x: Dictionary, at_time: float) -> void:
 
 ## 151 s in, with the outposts moved out of sight (restored after).
 func _far_from_outposts_late() -> void:
+	_pin = maxf(151.0, float(FirstTimeHint.rules()["goexit_s"]) + 1.0)
 	var outs: Array = m.exits.of_kind("outpost")
 	var home: Array = outs.map(func(x): return x["pos"])
 	for x in outs:
