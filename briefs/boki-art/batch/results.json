@@ -117356,5 +117356,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_kingpinguin_ball2_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9f_rollguin",
+    "name": "Rollguin (pixel sprite 80, fat line)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9f_rollguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9f_rollguin",
+    "name": "Rollguin (pixel sprite 80, fat line)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9f_rollguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9f_pinguin",
+    "name": "Pinguin (pixel sprite 80, fat line)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9f_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9f_pinguin",
+    "name": "Pinguin (pixel sprite 80, fat line)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9f_pinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rollguin_fat",
+    "name": "Rollguin (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_rollguin_fat_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pinguin_fat",
+    "name": "Pinguin (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_pinguin_fat_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rollguin_fat",
+    "name": "Rollguin (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_rollguin_fat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_pinguin_fat",
+    "name": "Pinguin (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_pinguin_fat_3.jpg",
+    "ok": true
   }
 ]
