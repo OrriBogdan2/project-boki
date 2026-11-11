@@ -147,6 +147,7 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
+const GAITS := ["walk", "run"]      # the clips whose paws BokiPlant keeps planted
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
@@ -203,6 +204,12 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _skel: Skeleton3D
+var _plants := {}              # gait clip -> BokiPlant
+var _gait := ""                # the gait whose paws are planted: it eases out after the clip moves on
+var _gait_at := 0.0            # s into it
+var _gait_rate := 1.0
+var _gait_w := 0.0             # how far the planted timing is blended in
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -268,6 +275,9 @@ func _ready() -> void:
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
+	_skel = skeleton()
+	for g in GAITS:
+		_plants[g] = BokiPlant.of(species, model, _skel, g)
 	set_clip("idle")
 
 ## The model's skeleton.
@@ -304,6 +314,7 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
+	_plant_feet(dt)
 	_face_step(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
@@ -350,6 +361,24 @@ func _pick_clip(dt: float) -> void:
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
 	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+
+## Plants the walk's or run's paws (BokiPlant), easing in after the clip starts and out after it ends.
+func _plant_feet(dt: float) -> void:
+	if clip == _gait:
+		_gait_at = player.current_animation_position
+		_gait_rate = player.speed_scale
+		_gait_w = move_toward(_gait_w, 1.0, dt / FADE)
+	else:
+		_gait_at += dt * _gait_rate
+		_gait_w = move_toward(_gait_w, 0.0, dt / FADE)
+		if _gait_w == 0.0:
+			_gait = clip if clip in GAITS else ""
+	if _gait_w > 0.0:
+		plant(_gait, _gait_at, _gait_rate, _gait_w)
+
+## Poses `gait`'s legs at `at` s into it, playing at `rate` x, with the paws planted at this Boki's speed and size.
+func plant(gait: String, at: float, rate: float, weight := 1.0) -> void:
+	(_plants[gait] as BokiPlant).pose(_skel, at, rate, _speed, model.global_basis.z.length(), weight)
 
 func _start_shot(which: String) -> void:
 	_shot = which
