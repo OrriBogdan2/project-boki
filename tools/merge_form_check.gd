@@ -1072,7 +1072,7 @@ func _bots() -> void:
 	MergeKit.bot_use(P)
 	ok(not k.ulting(), "...and holds it with no foe near and time left")
 
-# ------------------------------------------------------------------ 11. read from the gameplay camera (the second visuals pass)
+# ---------------------------------------------------- 11. read from the gameplay camera
 
 ## The snapshot items of a hunter wearing a species' form, as another game receives them.
 func _worn_items(species: String) -> Array:
@@ -1093,7 +1093,7 @@ func _read() -> void:
 			hat = maxf(hat, ((mi as MeshInstance3D).global_transform * (mi as MeshInstance3D).get_aabb()).end.y)
 	for w in look.rec["wings"]:
 		var wy := (w as Node3D).global_position.y
-		ok(wy >= hat - 0.15 and wy < hat + 0.6, "...a wing joins at %.2f m, at the hat top (%.2f) so the top-down camera sees it and the silhouette holds" % [wy, hat])
+		ok(wy >= hat - 0.15 and wy < hat + 0.6, "...a wing joins at %.2f m, at the hat top (%.2f)" % [wy, hat])
 	# the colour wash: one overlay layer on each body mesh and none on the form's parts (the overdraw budget)
 	var washed := 0
 	var on_parts := 0
@@ -1102,14 +1102,16 @@ func _read() -> void:
 		if wash != null and wash.shader == MergeLook.WASH:
 			washed += 1
 			on_parts += 1 if parts.is_ancestor_of(mi) else 0
-	ok(washed == look._wash.size() and washed > 0 and on_parts == 0, "the colour wash is one layer per body mesh (%d) and none on the form's parts" % washed)
+	var one_layer := washed == look._wash.size() and washed > 0 and on_parts == 0
+	ok(one_layer, "the colour wash is one layer per body mesh (%d), none on the parts" % washed)
 	# Prism Shell: another game opens the same Mirror Step window (and its fan) when the dash is announced
 	var prism := _worn_items("puddlet")
 	var storm := _worn_items("zephyrak")
 	_fresh("pebbit")
 	m.net_on = false
 	var R := foe(m.player.pos + Vector3(0, 0, 8.0))
-	var cast := ["kcmd", "mcast", R.nid, R.pos.x, R.pos.y, R.pos.z, "dash|%.1f|%.1f|2.1|0.50" % [R.pos.x, R.pos.z - 4.0]]
+	var dash := "dash|%.1f|%.1f|2.1|0.50" % [R.pos.x, R.pos.z - 4.0]
+	var cast := ["kcmd", "mcast", R.nid, R.pos.x, R.pos.y, R.pos.z, dash]
 	KinNet.apply_hunter(R, storm)
 	KinNet.on_event(m, cast)
 	ok(m.verbs.mirrors.is_empty(), "a dash cast of a form without a mirror opens nothing")

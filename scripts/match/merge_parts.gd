@@ -78,7 +78,8 @@ static func _gravity_ring(parent: Node3D, rec: Dictionary, col: Color, glow: Col
 		rec["orbit"].append({"node": mote, "r": 0.82, "y": 0.5, "w": 1.9, "ph": TAU * float(i) / 3.0, "bob": 0.12})
 
 # ------------------------------------------------------------------ Stormwing
-const WING_ROOT := Vector3(0.24, 1.3, 0.2)       # m (torso space): where a wing joins, above the hat brim so the top-down camera sees the whole feather fan
+# m (torso space): where a wing joins, at the hat top so the top-down camera sees the whole fan
+const WING_ROOT := Vector3(0.24, 1.3, 0.2)
 static func _storm_wings(parent: Node3D, rec: Dictionary, col: Color, glow: Color, acc: Color, base: Vector3) -> void:
 	var feather := Models.toon(col.lerp(Color.WHITE, 0.15), true, 0.45)
 	var edge := Models.glow_mat(Color(acc, 0.95))
