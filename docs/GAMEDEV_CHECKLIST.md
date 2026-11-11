@@ -32,7 +32,7 @@ Use this list whenever a request is planned or reviewed. For each feature, ask w
 - [ ] **Overdraw:** limit stacked transparent layers (fog, tints, glows) and render heavy effects at lower resolution.
 - [ ] **Frustum and distance culling:** skip animation and FX updates for things off screen or far away. Use LOD with hysteresis for far models.
 - [ ] **Atlases and shared materials** for UI icons and sprites.
-- [ ] **Streaming:** when the map grows (rolling sessions), keep only nearby chunks active, with separate load and unload radii.
+- [ ] **Streaming:** when the map grows, keep only nearby chunks active, with separate load and unload radii.
 
 ## 3D and rendering
 - [ ] **Raycasts** for line of sight, gunfire and ground checks, using the real shot line (eye to chest), not a flat test.

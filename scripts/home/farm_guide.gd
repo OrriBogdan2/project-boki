@@ -2,9 +2,13 @@ class_name FarmGuide
 extends RefCounted
 ## The farm's guidance on screen (home.gd owns one): the Goals tracker in the top-right slot
 ## (GoalTracker), and while the tutorial runs, one prompt in the world over what to do next and one
-## line reminding you of the current goal, with a Skip button (Hob explains each step face to face:
-## HobTalk). The rules are FarmTutorial; none of it shows when
-## visiting. Skipping puts the house down as a site if it isn't, so a skipper isn't stuck.
+## line reminding you of the current goal, with a Skip button always on show (Hob explains each step face to
+## face: HobTalk). The rules are FarmTutorial; the one-time hints for what the steps no longer teach are
+## FarmHints. None of it shows when visiting. Skipping puts the house up, so a skipper isn't stuck.
+
+const PLACE_RINGS := 24       # tiles out from the suggested spot that the search for free ground goes
+const PLACE_STEPS := 24.0     # tries round each ring
+const DONE_TICK_S := 1.6      # s the "Done!" stays on the goal line before fading
 
 var h
 var tracker: PanelContainer = null
@@ -20,11 +24,15 @@ var asking := false
 var quiet := false      # set while you talk to Hob: the card, the goal line and the world prompts step aside
 var tree_t := 0.0
 var tree_at := Vector3.INF
-var tab_for := ""
+var hints: FarmHints
 var tree_what := ""
+var _cells: Array = []   # place_cells()'s answer, and what it was for
+var _cells_sig := ""
+var done_seen := -1     # steps done when last looked at (-1: not yet), to tick one off when it goes up
 
 func _init(home) -> void:
 	h = home
+	hints = FarmHints.new(home)
 
 func build_ui() -> void:
 	if h.root_ui == null:
@@ -49,6 +57,8 @@ func refresh() -> void:
 ## Steps the guidance aside (quiet) or back: the Goals card, the goal line, the world prompt and crop label.
 func set_quiet(on: bool) -> void:
 	quiet = on
+	if on:
+		FarmSpotlight.close()
 	for c in [tracker, hint_box, marker, crop_lbl]:
 		if is_instance_valid(c):
 			c.visible = not on
@@ -65,8 +75,6 @@ func tick(dt: float) -> void:
 		_poll()
 	_update_marker(dt)
 	_bubbles_under_lane(dt)
-	var want_page: bool = FarmTutorial.current() == "task" and FarmTutorial.stage("task") == "go"
-	FarmTaskGuide.hub_hint(h, want_page and h.panel_open == "")
 
 func _poll() -> void:
 	var was_done := bool(FarmTutorial.state()["done"])
@@ -74,18 +82,6 @@ func _poll() -> void:
 		FarmTutorial.detect()
 		if FarmTutorial.current() == "feed":
 			FarmTutorial.give_food()
-		var cur := FarmTutorial.current()
-		var tool := FarmTutorial.give_step_tool(cur) if cur != "" and h.panel_open == "" else ""
-		if tool != "":
-			h._toast(String(FarmTutorial.rules()["tool_toasts"].get(tool, "")))
-		if (cur == "buy" or cur == "sell") and cur != tab_for:
-			tab_for = cur      # the market opens on the tab the step wants
-			h.hmk.vendor_tab = "Seeds" if cur == "buy" else "Sell"
-		if cur == "buy":
-			var gave := FarmTutorial.give_seed_gems()
-			if gave > 0:
-				h._toast(String(FarmTutorial.rules()["gems_toast"]) % gave)
-				h._refresh_top()
 	var st := FarmTutorial.state()
 	if bool(st["done"]) and not was_done and not bool(st["skipped"]):
 		var gems := str(int(FarmTutorial.option("end_gems")))
@@ -96,6 +92,26 @@ func _poll() -> void:
 		refresh()
 	else:
 		_refresh_hint()
+	FarmSpotlight.sync(h, quiet)
+	_tick_off_done()
+	if not quiet:
+		hints.poll()
+
+## A green "Done!" on the goal line for a moment when a step has just been finished.
+func _tick_off_done() -> void:
+	var n := FarmTutorial.done_count()
+	var gained := done_seen >= 0 and n > done_seen
+	done_seen = n
+	if not gained or not is_instance_valid(hint_box):
+		return
+	var tick := UI.label("\u2713 Done!", 16, UI.GOOD, UI.semi)
+	var row := hint_box.get_child(0) as HBoxContainer
+	row.add_child(tick)
+	row.move_child(tick, 0)
+	var tw := tick.create_tween()
+	tw.tween_interval(DONE_TICK_S)
+	tw.tween_property(tick, "modulate:a", 0.0, 0.4)
+	tw.tween_callback(tick.queue_free)
 
 # ------------------------------------------------------------------ the hint line
 func hint_visible() -> bool:
@@ -110,8 +126,6 @@ func _refresh_hint() -> void:
 		_make_hint()
 		hint_box.visible = not quiet
 	var s := FarmTutorial.hint_text(id)
-	if id == "house" and FarmTutorial.stage(id) == "wait":
-		s = "%s (%s)" % [s, _site_progress()]
 	var grow := FarmCropGuide.growing()
 	if not grow.is_empty() and id != "crop":
 		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
@@ -132,18 +146,14 @@ func _clear_hint() -> void:
 		marker.queue_free()
 	marker = null
 
-func _site_progress() -> String:
-	var e := FarmHob.house_entry()
-	if e.is_empty() or not FarmSites.has_site(e):
-		return "done"
-	return "%d/%d swings" % [int(e["site"]["got"]), int(e["site"]["need"])]
-
 func _make_hint() -> void:
-	hint_box = UI.card(Color(0.06, 0.07, 0.11, 0.9), 10, 14)
+	hint_box = UI.card(Color(UI.NIGHT, 0.9), 10, 14)
 	UI.set_card_border(hint_box, Color(UI.GOLD, 0.5), 1)
 	hint_box.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	hint_box.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	hint_box.offset_top = 66      # under the top chips
+	# a line of text: the world under it stays clickable (the marked spot can sit there); its buttons still catch
+	hint_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var row := UI.hbox(14)
 	hint_box.add_child(row)
 	hint_lbl = UI.label("", 16, UI.INK, UI.semi)
@@ -169,14 +179,17 @@ func _skip_buttons() -> void:
 		asking = false
 		_skip_buttons(), 0))
 
-## Skips the tutorial: nothing is taken; the house is put down as a site if it isn't, with the materials it
-## needs handed over so it can still be built.
+## Skips the tutorial, losing nothing a player needs: the starter food and the end gems (FarmTutorial.skip),
+## and the house put down and standing (no materials or swings asked; the starting tools are on every new save).
 func skip() -> void:
 	asking = false
-	FarmTutorial.skip()
+	var gems := FarmTutorial.skip()
 	if FarmHob.house_entry().is_empty():
 		place_house()
-		FarmSites.refund(FarmSites.build_cost("house"))
+	if FarmSites.finish(FarmHob.house_entry()) and h.hb:
+		h.hb.apply(false)
+	if gems > 0:
+		h._toast(String(FarmTutorial.rules()["done_toast"]).replace("{gems}", str(gems)))
 	_clear_hint()
 	h.hob.sync()
 	h._refresh_top()
@@ -195,26 +208,58 @@ func place_house() -> bool:
 		hb.active = true
 	hb.take("house")
 	var found := false
-	var p := house_spot()
-	var sz := HomeLayout.size_of("house", 0)
-	for rad in 24:
-		for k in 24:
-			var a := float(k) / 24.0 * TAU
-			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5))
-			var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
-			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
-			if hb.fits(hb.held, cs):
-				hb.cells = cs
-				hb._check_cells()
-				found = hb.place_held()
-				break
-		if found:
-			break
+	var cs := place_cells()
+	if not cs.is_empty():
+		hb.cells = cs
+		hb._check_cells()
+		found = hb.place_held()
 	hb._drop_held()
 	hb.active = was_active
 	if not was_active:
 		hb.close_ui()
 	return found
+
+## The tiles the piece in hand should go on: the free ground nearest the tutorial's spot (the house's suggested
+## spot, or beside the house for the trough); [] when there is none. Kept until the layout changes.
+func place_cells() -> Array:
+	var hb: HomeBuild = h.hb
+	if hb.held.is_empty():
+		return []
+	var sig := "%s|%d|%d|%d" % [hb.held["id"], hb.ver, hb.L()["deco"].size(), Econ.feeders().size()]
+	if sig == _cells_sig:
+		return _cells
+	_cells_sig = sig
+	_cells = []
+	var feeder: bool = hb.held["kind"] == "feeder"
+	var he := FarmHob.house_entry()
+	var p := HomeLayout.deco_center(he) if feeder and not he.is_empty() else house_spot()
+	var sz := Vector2i(1, 1) if feeder else HomeLayout.size_of(String(hb.held["id"]), 0)
+	for rad in PLACE_RINGS:
+		for k in PLACE_STEPS:
+			var a := float(k) / PLACE_STEPS * TAU
+			var x := int(round(p.x + cos(a) * rad - sz.x * 0.5))
+			var z := int(round(p.z + sin(a) * rad - sz.y * 0.5))
+			var cs := HomeLayout.cells_of([x, z, x + sz.x - 1, z + sz.y - 1])
+			if hb.feeder_fits(cs[0], "") if feeder else hb.fits(hb.held, cs):
+				_cells = cs
+				return _cells
+	return _cells
+
+## Opens the build bar's tab and page that hold the tile for entry `id`, so the spotlight can light it.
+func show_tile(id: String) -> void:
+	var hb: HomeBuild = h.hb
+	for tab in hb._tabs():
+		if hb.entries.tab(tab).any(func(e: Dictionary) -> bool: return String(e.get("id", "")) == id):
+			if hb.cat != tab:
+				hb.cat = tab
+				hb._build_bar()
+			hb.bar.turn_to(id)
+			return
+
+## Where the ghost sits (the "mouse") to put the piece in hand on place_cells(): the middle of those tiles.
+func place_mouse() -> Vector2:
+	var cs := place_cells()
+	return Vector2.INF if cs.is_empty() else Vector2((cs[0].x + cs[-1].x + 1) * 0.5, (cs[0].y + cs[-1].y + 1) * 0.5)
 
 # ------------------------------------------------------------------ the world prompt
 ## Where a step's work is (its marker; Hob points there when he explains it).
@@ -222,16 +267,9 @@ func target(id: String) -> Vector3:
 	match id:
 		"chop":
 			return _nearest_wild("tree")
-		"stone":
-			return _nearest_wild("rock")
-		"buy", "sell":
-			var stalls := HomeLayout.fixtures(Save.d, "stall")
-			return HomeLayout.deco_center(stalls[0]) if not stalls.is_empty() else Vector3.INF
 		"house":
 			var e := FarmHob.house_entry()
 			return house_spot() if e.is_empty() else HomeLayout.deco_center(e)
-		"hammer":
-			return HomeLayout.deco_center(FarmHob.house_entry())
 		"feed":
 			var fs := Econ.feeders()
 			return Vector3(float(fs[0]["x"]), 0, float(fs[0]["z"])) if not fs.is_empty() else Vector3.INF
@@ -240,11 +278,6 @@ func target(id: String) -> Vector3:
 				return _water_spot()      # the patch goes by the water
 			var planted: bool = not h.plots.is_empty() and FarmTutorial.stage(id) != "patch_dry"
 			return h.plots[0].position if planted else Vector3.INF
-		"task":
-			var ke: Dictionary = h._kin_entry(Save.active_kin())
-			return (ke["node"] as Node3D).position if not ke.is_empty() else Vector3.INF
-		"hob":
-			return h.hob.pos
 		"expedition":
 			return h.spots["portal"]
 	return Vector3.INF

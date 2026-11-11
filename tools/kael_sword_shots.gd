@@ -6,6 +6,7 @@ extends "res://tools/warden_shots.gd"
 
 # guard to tip against his height: the v2 sheet and splash blade, 0.61 (DECISIONS: the size follows the splash)
 const WANT_FRAC := [0.5, 0.65]
+const ON_HILT := 0.1             # m: how far the sword hand's bone may sit off the hilt (v1's bound)
 const GRIP_PER_BLADE := 0.25     # the hilt behind the guard per blade length (kael_pieces: 0.15 / 0.61)
 const SWORD_POSES := [["carried", {}], ["walk", {"vel": 2.0}], ["run", {"vel": 4.6}],
 	["LMB swing 1", {"kmove": "jug_slash_r", "kmove_t": 0.1}],
@@ -87,9 +88,13 @@ func _measure() -> void:
 		var tip := (bl[1] as Node3D).global_position
 		var blade := root.distance_to(tip)
 		var hilt_end := root + (root - tip) * GRIP_PER_BLADE
+		var r := _hand_off(sk, root, hilt_end, "hand.R")
 		var l := _hand_off(sk, root, hilt_end, "hand.L")
-		print("SWORD %-16s blade %.3f m = %.3f of height, hand L %.3f off the hilt"
-				% [p[0], blade, blade / tall, l])
+		print("SWORD %-16s blade %.3f m = %.3f of height, hand R %.3f L %.3f off the hilt"
+				% [p[0], blade, blade / tall, r, l])
+		if r > ON_HILT:
+			print("FAIL: %s right hand %.3f m off the hilt" % [p[0], r])
+			fails += 1
 		if blade / tall < WANT_FRAC[0] or blade / tall > WANT_FRAC[1]:
 			print("FAIL: %s blade is %.3f of his height" % [p[0], blade / tall])
 			fails += 1

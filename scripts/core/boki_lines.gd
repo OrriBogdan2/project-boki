@@ -35,7 +35,7 @@ static func trigger(id: String) -> Dictionary:
 	var key := String(r["alias"].get(id, id))
 	return r["triggers"].get(key, {})
 
-## A species' element (its type, e.g. "venom"), which picks the extra flavour lines.
+## A species' element (its type, e.g. "poison"), which picks the extra flavour lines.
 static func element_of(species: String) -> String:
 	return String(Data.KIN.get(species, {}).get("type", ""))
 

@@ -256,12 +256,12 @@ func _vireo_lmb() -> void:
 	marks.append([0.05,
 			"full",
 			"lmb_fire",
-			"LMB release: the arm out, the fingertip crackling with teal arcs, gold sparks at her feet"])
-	marks.append([0.14, "full", "lmb_bolt", "LMB: the jagged teal bolt (about 1.2m) in flight, gold core", _bolt_spot])
+			"LMB release: the arm out, the fingertip crackling with pink arcs, gold sparks at her feet"])
+	marks.append([0.14, "full", "lmb_bolt", "LMB: the jagged pink bolt (about 1.2m) in flight, pale core", _bolt_spot])
 	marks.append([0.3,
 			"full",
 			"lmb_impact",
-			"LMB impact: teal splinters spray back toward her; the Static marker above the HP bar",
+			"LMB impact: pink splinters spray back toward her; the Static marker above the HP bar",
 			_on_target])
 	await _go(1.25, hold_fire, marks)
 	P.inp["fire"] = false
@@ -301,7 +301,7 @@ func _vireo_rmb() -> void:
 	marks.append([0.05,
 			"full",
 			"rmb_summon",
-			"RMB pressed: the copper Storm Rod arrives in her raised hand with a teal crackle and a ring"])
+			"RMB pressed: the copper Storm Rod arrives in her raised hand with a pink crackle and a ring"])
 	marks.append([0.5,
 			"full",
 			"rmb_aim",
@@ -315,12 +315,12 @@ func _vireo_rmb() -> void:
 	throw.append([0.18,
 			"full",
 			"rmb_impact",
-			"RMB impact: a gold blast, teal crackle and a shock ring, the target knocked back",
+			"RMB impact: a gold blast, pink crackle and a shock ring, the target knocked back",
 			_on_target])
 	throw.append([0.75,
 			"full",
 			"rmb_orb",
-			"The charge orb: a gold core in a teal shell with spinning bands, short teal arcs crackling off it",
+			"The charge orb: a pale core in a pink shell with spinning bands, short pink arcs crackling off it",
 			_orb_spot])
 	await _go(0.8, Callable(), throw)
 
@@ -336,35 +336,23 @@ func _vireo_dash() -> void:
 	P.do_dash()
 	var hold_d := func(_t: float): P.inp["dash_down"] = true
 	var marks := _strip("anim_dash",
-			"Shift: the charging crouch, the streak (her gold-teal after-images), re-forming on arrival",
-			[0.05, 0.3, 0.6])
-	marks.append([0.25,
+			"Shift: the charging crouch, the streak (her pink after-images), re-forming on arrival",
+			[0.05, 0.45, 0.9])
+	marks.append([0.4,
 			"full",
 			"dash_aim_mid",
 			"Shift held: rails out to max, the ticked end ring partway (the cursor plays no part)"])
-	marks.append([0.6, "full", "dash_aim_full", "Shift held to full: the end ring at 8.5m, past the 3m cursor"])
-	await _go(0.62, hold_d, marks)
+	marks.append([0.9, "full", "dash_aim_full", "Shift held to full: the end ring at 11m, past the 3m cursor"])
+	await _go(0.92, hold_d, marks)
 	P.inp["dash_down"] = false
 	var run := _strip("anim_dash", "", [0.06, 0.42, 0.6])
 	run.append([0.08,
 			"full",
 			"dash_run",
-			"Shift released: a lightning streak, the body a trail of her own gold-teal after-images"])
+			"Shift released: a lightning streak, the body a trail of her own pink after-images"])
 	run.append([0.46, "full", "dash_arrive",
 			"Shift arrival: she re-forms with a dust puff (no ring or burst: the hits are along the way)"])
 	await _go(0.8, Callable(), run, 6.0)
-	# the base air dash (her own variant): a tumble with teal after-images in her silhouette
-	await _reset(6.0, 6.0)
-	P.dashes = 0.0
-	P.do_dash()
-	var ex := _strip("anim_dash_ex",
-			"Air dash (her base dash variant): the tuck, the forward tumble, her teal after-images, the landing",
-			[0.02, 0.07, 0.14, 0.22, 0.36, 0.5])
-	ex.append([0.15,
-			"full",
-			"dash_ex",
-			"Air dash: her own teal after-images (her silhouette, not a shared pill) and the teal streak"])
-	await _go(0.6, Callable(), ex)
 	# the payoff: Wirerun through a Live target
 	await _reset(5.0)
 	K.add_spark(T, 4)
