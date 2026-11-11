@@ -61,6 +61,7 @@ func _glide(m: Match) -> Hunter:
 	_ready_all(h)
 	h.inp["glide"] = true
 	h.inp["glide_btn"] = true
+	h.inp["glide_press_only"] = true      # a player's keys (Match._gather_input): Space held never reopens it (0058)
 	h.inp["aim"] = ground + Vector3(FOE_DX, 0.9, 0)
 	for i in 30:
 		m.step(Match.DT)

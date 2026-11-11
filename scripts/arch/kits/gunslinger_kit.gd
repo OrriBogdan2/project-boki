@@ -289,8 +289,10 @@ func _round_end(at: Vector3, vel: Vector2) -> void:
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
 	if use_ex and h.dashes >= 1.0 and not h.grounded:
-		# an air tap: a slide of 2/3 the full hold's distance (source patch notes), spending a charge
+		# an air tap: a slide of 2/3 the full hold's distance (source patch notes), spending a charge. Under an open
+		# glider it folds it: _tick_slide ends a slide a glide press opened the glider on (item 4), not this one
 		h.dashes -= 1.0
+		h.gliding = false
 		var ad := float(dd["slide"]) * float(dd.get("air_k", 0.667))
 		var air_t := float(dd["slide_t"]) * 0.6
 		travel(ad, air_t, {"invuln": float(dd["invuln"])})

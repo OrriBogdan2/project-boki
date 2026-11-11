@@ -11,5 +11,13 @@
 			"reason": "Tidal Wave: he rides the wave down its line, untargetable, until it lands; the wave is his movement.",
 			"source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row."
 		}
+	},
+	"glide": {
+		"lmb": {"mode": "refuse", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Hunter.can_fire() refuses every weapon while gliding, as for every Hunter."},
+		"rmb": {"mode": "cast", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Grab Bag throws from a glide."},
+		"e": {"mode": "cast", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Riptide spins under the open glider."},
+		"x": {"mode": "fold", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Tidal Wave: he rides the wave down its line (the wave is his movement), so the glider folds."},
+		"q": {"mode": "cast", "source": "Gloves are ours; no source. Ours: a glove works in a glide."},
+		"dash": {"mode": "fold", "source": "Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Shift in a glide is the air dash and hands its speed back to the glider, as for every Hunter."}
 	}
 }

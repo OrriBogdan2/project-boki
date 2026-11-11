@@ -70,6 +70,7 @@ func start() -> void:
 		"air": not h.grounded
 	}
 	dash_was = true
+	h.gliding = false          # pressed under an open glider it folds it (tick() drops a hop a glide press opens it on)
 	_aim_hop()
 	k.play("breah_hop")
 	if not h.grounded:
