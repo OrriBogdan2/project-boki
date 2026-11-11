@@ -57,6 +57,7 @@ card and its fading copy show twice at once (`18`, `25`: the faded copy sits at 
 Nothing is cut by the window edge except these two, **both fixed here** (under 20 lines):
 1. **Level coin** (bottom-left of the vitals): centred at the portrait corner with a 30 px ring, so 6 px of it left the window to the left and below.
    `scripts/ui/hud_vitals.gd`: coin centre moved 8 px in (1 line). Before [11](ui_first15/1280x720/11_tutorial_00_land.jpg), after [35](ui_first15/1280x720/35_expedition_15s.jpg).
+   **Update:** its 0.35 s level-up pop still reached ~7 px past the window edge; now the popped coin grows inward (`HudVitals.coin_center`) and the gold burst ring spreads 9 px, so both stay inside at 1280x720 and 1920x1080 (the UI lays out in the same space). Shots: [1280x720](ui_first15_leftovers/coin_pop_1280x720_before_after.png), [1920x1080](ui_first15_leftovers/coin_pop_1920x1080_before_after.png) (left before, right after).
    (The 0.35 s pop on level-up still reaches past the edge by a few pixels.)
 2. **Hunter tile names on the Relics page**: `clip_text` cut "The Scrap King", "The Silver Thief", "The Stone Seer", "The Barnacle Knight", "The Void Jester" and more
    to "The Scrap Kin" etc. (84 px label). `scripts/home/home_classes.gd`: the name wraps to two lines (1 line). Before [31](ui_first15/1280x720/31_hunter_pick.jpg),
@@ -76,7 +77,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 - **Tutorial HUD (from the first frame):** Fever (resource bar), FIGHTING / FOLLOW (status under the portrait), COMMON / UNCOMMON (armour tier), AUTO, "from Boki",
   "CARRY OFF FOLLOW", "Relics / Leave" bar and the key `J`, the glider strip (4 unlabeled icons), belt slots 1-4, Q V X, "Box 0/3", seeds, the weapon class label
   "THE HIRED GUN · MEDIUM". Toasts name perks before any perk is explained: "Kindling!", "LEVEL 6 · Deep Magazine", "Quick Feed, Hotload".
-- **Results:** Knocks, Armor "Uncommon", Tidebloom seeds, "Into your armory", the name line "Hunter the Hired Gun" (the default player name is "Hunter").
+- **Results:** Knocks, Armor "Uncommon", Tidebloom seeds, "Into your armory", the name line "Hunter the Hired Gun" (the default player name is "Hunter"). **Fixed:** the creator and name card now start with an empty name box (hint "Type your name"); an unnamed player's line reads "The Hired Gun" (`HeroTitle.label`, `Save.UNNAMED`). Shots: [before](ui_first15_leftovers/results_before.jpg), [after](ui_first15_leftovers/results_after.jpg).
 - **Expedition panel:** Relic, The Meadow / Dusk Isles / The Hollow, "BOKI AT RISK", Solo / Duos / Trios, "Arena / Training area / Duel room", ability names (Hot, Cinderfall, Burr).
 - **Relics page:** Mastery, Colourway, Emote, Trail, Glider, Field Wing, Hot Streak, Boki Fusion.
 - **Plan your drop:** Boss lair, Vault, Rare Boki, Item cache, Skiff dock, Uplink outpost, Rift hatch, Shrine, Revive beacon, "Drop leader", "Pass the lead", Truce (on the HUD at landing).

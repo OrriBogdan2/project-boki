@@ -15,8 +15,11 @@ static func gender(archetype: String) -> String:
 static func personality(archetype: String) -> String:
 	return String(Arch.def(archetype).get("personality", "")).replace("\n", " ")
 
-## "Orri the Red Stitch" on the profile and results screens; the bare name when the body has no class.
+## "Orri the Red Stitch" on the profile and results screens; the bare name when the body has no class,
+## and just "The Red Stitch" for a player who never gave a name (Save.UNNAMED).
 static func label(player_name: String, archetype: String) -> String:
 	if not Arch.exists(archetype):
 		return player_name
+	if player_name.strip_edges() in ["", Save.UNNAMED]:
+		return "The %s" % title(archetype)
 	return "%s the %s" % [player_name, title(archetype)]   # titles are stored without "the"

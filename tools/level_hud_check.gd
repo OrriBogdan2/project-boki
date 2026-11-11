@@ -42,6 +42,15 @@ func run(main: Node) -> void:
 	ok(hud.lvl_pop > 0.0, "the portrait's badge pops (%.2f)" % hud.lvl_pop)
 	ok(hud.flash_t > 0.5 and hud.flash_col.g > hud.flash_col.b and hud.flash_col.a > 0.05, "the screen washes gold (%s)" % str(hud.flash_col))
 	ok(int(Sfx.last_played.get("level_up", -1000)) > last0, "the level-up sound plays")
+	# the pop stays inside the 18 px the HUD sits off the window edge (portrait at (18, h - 150), 112x132)
+	var pr := Rect2(Vector2(18, 720.0 - 18.0 - 132.0), Vector2(112, 132))
+	var worst := 0.0
+	for i in 21:
+		var rr := HudVitals.COIN_R * (1.0 + 0.35 * sin(float(i) / 20.0 * PI))
+		var bc := HudVitals.coin_center(pr, rr)
+		worst = maxf(worst, maxf(rr + 4.0 - bc.x, bc.y + rr + 4.0 - 720.0))
+	ok(worst <= 0.0, "the popped coin and its ring stay inside the window edge (%.1f px over)" % worst)
+	ok(pr.grow(6.0 + HudVitals.BURST_GROW).position.x - 2.0 >= 0.0, "the gold burst ring stays inside the edge")
 	# two levels in one go: each counts
 	P.gain_xp(float(Hunter.XP_TO[3]) - P.xp + 1.0)
 	ok(P.lvl == 4 and P.level_ups == ups0 + 3, "a big XP grant over two levels plays it for each (%d)" % (P.level_ups - ups0))

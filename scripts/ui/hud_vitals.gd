@@ -11,6 +11,8 @@ const BAR_W := 318.0       # px: health / armour width
 const HP_H := 16.0         # px: the health bar
 const AR_H := 5.0          # px: the armour strip under it
 const LVL_POP := 0.35      # s: the level coin's pop
+const COIN_R := 26.0       # px: the level coin's resting radius
+const BURST_GROW := 9.0    # px: the gold burst ring's spread (HUD sits 18 px off the edge)
 
 static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
@@ -93,6 +95,12 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 
+## The coin's centre: 14 px in from the portrait's bottom-left corner. A popped coin grows inward
+## (its centre slides by the extra radius), so its outer edge never passes the resting one.
+static func coin_center(pr: Rect2, r: float) -> Vector2:
+	var grown := r - COIN_R
+	return pr.position + Vector2(14.0 + grown, pr.size.y - 14.0 - grown)
+
 ## The run level on a coin over the portrait's corner, ringed by progress to the next level with a
 ## bright head dot; a level-up pops it and bursts a gold ring round the portrait.
 static func level_coin(H, pr: Rect2, p: Hunter) -> void:
@@ -105,10 +113,10 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 	var k: float = 1.0 - H.lvl_pop / LVL_POP
 	var sc := 1.0 + 0.35 * sin(k * PI) if H.lvl_pop > 0.0 else 1.0
 	if H.lvl_pop > 0.0:
-		H._rounded(pr.grow(6.0 + k * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
-		H._rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
-	var bc := pr.position + Vector2(14, pr.size.y - 14)      # inset: the ring reaches 30 px out, keep it in the window
-	var r := 26.0 * sc
+		H._rounded(pr.grow(6.0 + k * BURST_GROW), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
+		H._rounded(pr.grow(2.0 + k * BURST_GROW), Color(gold, 0.18 * (1.0 - k)), 14)
+	var r := COIN_R * sc
+	var bc := coin_center(pr, r)
 	# the coin sits in a notch of the frame: ringed in the frame's colour, a dark gap between
 	c.draw_circle(bc, r + 4.0, Color(p.accent(), 0.9))
 	c.draw_circle(bc, r + 2.0, HudStyle.SHADE_EDGE)
