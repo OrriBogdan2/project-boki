@@ -60,6 +60,21 @@ Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with far
 | words | {"bravery": ["braver", "shyer"], "loyalty": ["more loyal", "more independent"], "temper": ["hotter-tempered", "calmer"], "curiosity": ["more curious", "more settled"]} |
 | words_doc | per trait: [line when it rises, line when it falls], written as 'is getting <word>' in the Boki's journal. |
 
+## base_duo (`content/rules/base_duo.json`)
+
+Duo bonus for friends (GARDEN_MODERN.md section 5 rank 4, scripts/home/base_duo.gd): two Boki whose bond is at least friend_at do better together. Joy is a 0-100 need, pace a multiplier, times are seconds.
+
+| Setting | Value |
+|---|---|
+| friend_at | 0.6 |
+| friend_at_doc | bond (-1..1, rec['bonds']) at or above which a pair is a duo; below it no bonus. |
+| nap_joy | 6 |
+| nap_joy_doc | extra joy a Boki gets on waking from a nap it spent beside a duo friend (a nap alone gives +4 in home.gd). |
+| nap_min_s | 8 |
+| nap_min_s_doc | s beside the friend, asleep, for the nap to count as shared. |
+| handoff_pace | 1.06 |
+| handoff_pace_doc | Dash: a runner that starts a new stretch with a duo friend alongside (within base_race friend_near) hands off cleanly and runs it at this times the pace. |
+
 ## base_echo (`content/rules/base_echo.json`)
 
 Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN_MODERN.md section 4.2, game 2; scripts/home/echo_steps.gd). Only with farm_build.json base_mode on. The lead hops a pattern across the stones on the beat and you answer it with W, A, S, D; in the last round you lead and the rival copies. Hits and streaks score. Solo (the stones lead) with one rested Boki out, against the next rested Boki with two. Units: beats at bpm, milliseconds for the hit window, seconds otherwise; joy and trust are 0-100 points.
@@ -219,6 +234,28 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | train_doc | The Training post's solo lap (base_race.gd solo): Speed points per cheer grade (a miss is 0), +dojo per cheer that was not a miss with a Dojo built, x happy_mult at joy >= happy_at; the Boki needs min_food Full to start and spends food and the race's energy; joy moves by joy_great with any great cheer, else joy_else. Capped by level (Care.stat_cap). |
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
+
+## base_relay (`content/rules/base_relay.json`)
+
+Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd): three of your Boki against a visiting team of three on the Dash loop (base_race.json stretches and pace). Each runs one leg and hands the baton on at a mark; your two hand-offs are the Dash's cheer press on the timing bar. Prizes and the cup: garden_prizes.json 'relay'. Units: seconds; joy is 0-100 points, bonds -1..1.
+
+| Setting | Value |
+|---|---|
+| legs | [[0], [1], [2, 3]] |
+| legs_doc | Which base_race.json stretches each leg runs, in order: the straight, the water, the climb (with the jump to the line). A Boki is put on the leg it runs best relative to its team. |
+| handoff | {"great": 0.0, "good": 0.25, "miss": 0.6} |
+| handoff_doc | s the next runner loses taking the baton, by your press's grade (no press before the mark is a miss). |
+| fumble | 0.3 |
+| fumble_doc | s more when the two runners are rivals (base_race rival_at) and the press was not great. |
+| rival_grades | {"great": 3, "good": 5, "miss": 2} |
+| rival_grades_doc | Weights the visiting team's hand-off grade is rolled from. |
+| rival_team | Bramble Runners |
+| rival_team_doc | The visiting team's name on the card. Each of its Boki matches one of yours in species and has that Boki's stats times the cup round's min_ratio (garden_prizes.json cup.rounds), so the cup counts every win. |
+| close_step | 0.05 |
+| close_step_doc | A great or duo hand-off brings the two runners this much closer (rec bonds). |
+| gems_win | 8 |
+| gems_ran | 2 |
+| gems_doc | Gems to you when your team wins, or for any other relay. |
 
 ## base_seek (`content/rules/base_seek.json`)
 
@@ -658,7 +695,7 @@ Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/de
 | week_s | 604800 |
 | week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
 | cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
-| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}} |
+| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "relay": {"name": "Relay Cup", "first": "zipseed", "ribbon": "Relay Cup Ribbon", "colour": "#4ad6b0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 30}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 15}]}} |
 
 ## garden_trust (`content/rules/garden_trust.json`)
 
