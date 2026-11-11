@@ -29,3 +29,14 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 - **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).
+
+## Pilot loops (2026-11-11, animation-quality lane, ext/anim-pilot-loops-sm)
+
+The 8 loco clips (`walk_*`, `run_*`) are float-drift loops (`drift()` in `ostra_clips.py`). He floats, so there is no foot contact
+to judge: each cycle has two spring pulses, and on each one the box gives under him and kicks him on. The body dips, rebounds
+past rest and lags a beat along the travel, the box and spine lean into the travel, and the arms paddle once a cycle. The base
+pose stays the cycle's mean, so the runtime hover bob (KMovesStone) still rides on top. Meshy cannot rig a legless body, so
+these are keyed on the rig contract, not retargeted. Walk is 1.4 s, run 0.9 s, one length per ring.
+They went onto the committed glb with `glb_add_clips.py`. The rework body's `x_boxlid` rests elsewhere than the clip rig's:
+the loops hold it still, so the tool leaves that track out (it stops if a clip moves a bone whose rest differs).
+Strips: `~/art-review/anim-pilot-sm-1111/`.
