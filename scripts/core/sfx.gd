@@ -63,8 +63,18 @@ var players: Array[AudioStreamPlayer] = []
 var next := 0
 var cue_voice: AudioStreamPlayer
 var cue_plays := {}           # cue name -> times played (--knock-sfx-check)
-var listener := Vector3.ZERO   # set by the camera each frame
+var listener := Vector3.ZERO   # set by the camera each frame (move_listener)
 var hear_range := 22.0
+const ROOM_BUS := &"SFXRoom"      # the reverb send: sounds heard from inside a sound zone play through it
+const ROOM_EXIT_M := 1.5          # m: past a zone's edge before it lets go (no flutter on the line)
+## The two reverbs a zone can name: a small stone room and a big arch (size 0-1, damping 0-1, ms, wet 0-1).
+const ROOMS := {
+	"room": {"size": 0.3, "damping": 0.6, "predelay": 8.0, "wet": 0.22},
+	"arch": {"size": 0.8, "damping": 0.45, "predelay": 26.0, "wet": 0.3},
+}
+var room := ""                    # the preset the listener stands in, "" outdoors
+var _zones: Array = []
+var _zone_i := -1
 var sound_reach := {}       # sound -> metres it carries, past hear_range (content/sfx/<group>.json "reach")
 var last_played := {}
 var rng := RandomNumberGenerator.new()
@@ -87,11 +97,11 @@ var _muffle_fx: AudioEffectLowPassFilter
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for bn in ["Music", "SFX", "Ambience", "SFXWorld", "SFXFar", "SFXMuffled", "SFXPan"]:
+	for bn in ["Music", "SFX", "Ambience", "SFXWorld", "SFXFar", "SFXMuffled", "SFXPan", ROOM_BUS]:
 		AudioServer.add_bus()
 		var bi := AudioServer.bus_count - 1
 		AudioServer.set_bus_name(bi, bn)
-		AudioServer.set_bus_send(bi, {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld", "SFXPan": "SFXWorld"}.get(bn, "Master"))
+		AudioServer.set_bus_send(bi, {"SFXWorld": "SFX", "SFXFar": "SFXWorld", "SFXMuffled": "SFXWorld", "SFXPan": "SFXWorld", ROOM_BUS: "SFXWorld"}.get(bn, "Master"))
 	music_bus = AudioServer.get_bus_index("Music")
 	_setup_mix()
 	for i in 2:
@@ -162,6 +172,10 @@ func _setup_mix() -> void:
 	var lim := AudioEffectHardLimiter.new()
 	lim.ceiling_db = -2.0
 	AudioServer.add_bus_effect(sfx, lim)
+	var rv_room := AudioEffectReverb.new()
+	rv_room.dry = 1.0
+	AudioServer.add_bus_effect(AudioServer.get_bus_index(ROOM_BUS), rv_room)
+	AudioServer.set_bus_effect_enabled(AudioServer.get_bus_index(ROOM_BUS), 0, false)
 	var far := AudioServer.get_bus_index("SFXFar")
 	var lp := AudioEffectLowPassFilter.new()
 	lp.cutoff_hz = 1800.0
@@ -398,6 +412,7 @@ func set_layers(want: Dictionary) -> void:
 ## next screen's play_music / play_ambience, which crossfade them.
 func reset_scene_audio(fade := 1.2) -> void:
 	_cut_sting()
+	set_room_zones([])
 	if not layers.is_empty():
 		_stop_layers(fade)
 		music_name = ""
@@ -528,7 +543,7 @@ func _voice(pos, clear := false) -> AudioStreamPlayer:
 	return p
 
 ## Which bus a sound plays on: CLEAR ones straight to SFX; the rest through SFXWorld (dulled while you are
-## down), as SFXMuffled behind terrain or SFXFar when far.
+## down), as SFXMuffled behind terrain, SFXFar when far, or the room send while the listener is in a sound zone.
 func _bus_for(pos, clear := false) -> String:
 	if clear:
 		return "SFX"
@@ -536,7 +551,47 @@ func _bus_for(pos, clear := false) -> String:
 		return "SFXWorld"
 	if occlusion.blocked(pos, listener):
 		return "SFXMuffled"
-	return "SFXFar" if Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR else "SFXWorld"
+	return "SFXFar" if Vector2(pos.x - listener.x, pos.z - listener.z).length() > FAR else ("SFXWorld" if room.is_empty() else String(ROOM_BUS))
+
+## Reverb zones from the map JSON ("sound_zones": [{at: [tile x, tile y], r: metres, preset}]). Only
+## entering or leaving one touches the audio server; the rest is a distance test per camera frame.
+func set_room_zones(list: Array) -> void:
+	_zones = list
+	_zone_i = -1
+	_set_room("")
+
+func move_listener(pos: Vector3) -> void:
+	listener = pos
+	if _zones.is_empty() and room.is_empty():
+		return
+	var cur := _zone_i
+	if cur >= 0 and _zone_dist(cur) > float(_zones[cur]["r"]) + ROOM_EXIT_M:
+		cur = -1
+	if cur < 0:
+		for i in _zones.size():
+			if _zone_dist(i) <= float(_zones[i]["r"]):
+				cur = i
+				break
+	if cur != _zone_i:
+		_zone_i = cur
+		_set_room(String(_zones[cur]["preset"]) if cur >= 0 else "")
+
+func _zone_dist(i: int) -> float:
+	var at: Array = _zones[i]["at"]
+	return Vector2(float(at[0]) - listener.x, float(at[1]) - listener.z).length()
+
+func _set_room(preset: String) -> void:
+	room = preset
+	var bi := AudioServer.get_bus_index(ROOM_BUS)
+	AudioServer.set_bus_effect_enabled(bi, 0, not preset.is_empty())
+	if preset.is_empty():
+		return
+	var rv := AudioServer.get_bus_effect(bi, 0) as AudioEffectReverb
+	var d: Dictionary = ROOMS[preset]
+	rv.room_size = d["size"]
+	rv.damping = d["damping"]
+	rv.predelay_msec = d["predelay"]
+	rv.wet = d["wet"]
 
 ## pos: world position, or null for UI sounds. Repeats of one sound within 30ms are merged, and a
 ## burst of the same sound is capped and stacked quieter.
