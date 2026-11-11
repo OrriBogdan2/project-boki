@@ -205,6 +205,21 @@ const CHECKS := {
 	"--kin-loss-check": ["res://tools/kin_loss_check.gd", "kin_loss_check", null],
 	"--knock-sfx-check": ["res://tools/knock_sfx_check.gd", "knock_sfx_check", null],      # squad knock / finish cues
 	"--kin-form-check": ["res://tools/kin_form_check.gd", "kin_form_check", null],
+	"--gear-check": ["res://tools/gear_check.gd", "gear_check", null],
+	"--lair-lock-check": ["res://tools/lair_lock_check.gd", "lair_lock_check", null],
+	"--level-hud-check": ["res://tools/level_hud_check.gd", "level_hud_check", null],
+	"--pack-ui-check": ["res://tools/pack_ui_check.gd", "pack_ui_check", null],
+	"--life-check": ["res://tools/life_check.gd", "life_check", null],
+	"--swim-check": ["res://tools/swim_check.gd", "swim_check", null],
+	"--hero-check": ["res://tools/hero_check.gd", "hero_check", null],
+	"--keybind-check": ["res://tools/keybind_check.gd", "keybind_check", null],
+	"--mantle-check": ["res://tools/mantle_check.gd", "mantle_check", null],
+	"--balloon-check": ["res://tools/balloon_check.gd", "balloon_check", null],
+	"--weapon-check": ["res://tools/weapon_check.gd", "weapon_check", null],
+	"--hold-check": ["res://tools/hold_check.gd", "hold_check", null],
+	"--record-check": ["res://tools/record_check.gd", "record_check", null],
+	"--blight-check": ["res://tools/blight_check.gd", "blight_check", null],
+	"--raid-check": ["res://tools/raid_check.gd", "raid_check", null],
 	# level-up / ready: one body glow, no ring
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
 	"--heal-read-check": ["res://tools/heal_read_check.gd", "heal_read_check", null],      # every heal: one read
