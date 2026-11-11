@@ -1,0 +1,13 @@
+{
+ "doc": "The first-knock card (scripts/match/knock_tip.gd): the first time a new player is knocked down in each of their first two real Extractions, one two-line card in the message lane: what hurt them most, and one tip for it. showings: how many cards a save ever gets. gap: seconds without a hit after which the damage count starts over. far_m: metres; a hunter hitting from further than this is 'far'. sources: what hurt (blight, monster, rival, far, other) -> [name, tip]. In a tip {dash}, {throw} and {glide} are the player's keys.",
+ "showings": 2,
+ "gap": 10.0,
+ "far_m": 22.0,
+ "sources": {
+  "blight": ["the Blight", "Dash out of the red: tap {dash}."],
+  "monster": ["monsters", "Send your Boki at them: tap {throw}."],
+  "rival": ["another hunter", "Fight near your squad: two beat one."],
+  "far": ["a hunter far away", "Glide away: jump, then hold {glide}."],
+  "other": ["something else", "Glide away: jump, then hold {glide}."]
+ }
+}
