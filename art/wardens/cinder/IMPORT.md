@@ -69,3 +69,7 @@ The flame on the tail is not mesh: `smoke` and `bloom` on `anchor_tail_tip` in w
 fire point); `weapon_muzzle_l` is her left palm; `anchor_tank`, `anchor_vial_*` and `anchor_gun_mid` stay as contract names only. Her fire stream keeps the rules' NOZZLE.
 
 Walk and run pilot (2026-11-10): a Meshy rig retargeted onto her walk_f/run_f (rig clips, rig clips with the current arms carried, a513 Female Head-down Charge) lost the blind Fable judge to the current loops (walk 4.00 vs 2.75, run 4.50 vs 3.75 at best), so the shipped clips stay. The current planted foot already matches loco (2.15 and 4.55 m/s). Meshy's pose estimator rejects her whole mesh (hair and cloak hide the arms); it rigged once the tail was cut (x > 0.3) from the static export.
+**Anim slice3 (11-11), no change:** idle candidates retargeted from Meshy library actions 338, 335, 249 and 12 (Meshy API
+on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
+blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
+a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.
