@@ -5,6 +5,8 @@ extends Node
 ## passes lobby messages to everyone and match messages to the others in the same match.
 ## The match itself still runs on the player who pressed Start (the host), exactly like the
 ## browser version; the relay only forwards.
+## Rejoin (docs/decisions/0022-rejoin.md): a player who drops mid-match keeps their net id and their
+## Hunter's last snapshot here for HOLD_S; a game that comes back with the match's rejoin token gets both.
 ##
 ## Access: when BOKI_DISCORD_BOT_TOKEN, BOKI_GUILD_ID and BOKI_ALLOWED_ROLES are set, every player
 ## has to log in with Discord (the launcher does this) and hold one of the allowed roles in the
@@ -17,10 +19,13 @@ extends Node
 const CH_RELIABLE := 0
 const CH_FAST := 1
 const HELLO_TIMEOUT := 20.0
+const HOLD_S := 90.0       # s a dropped player's Hunter waits for them to rejoin
 
 var peer: ENetMultiplayerPeer
 var api: SceneMultiplayer
-var clients := {}          # peer id (int) -> {auth, pres, room, uid, name, t}
+var clients := {}          # peer id (int) -> {auth, pres, room, uid, name, t, nid, rj, st}
+var held := {}             # rejoin token -> {nid, room, uid, st, until}: dropped players' slots
+var next_nid := 1          # net ids are the relay's own: ENet reuses peer ids, a held slot must not clash
 var need_version := ""
 var auth_on := false
 var bot_token := ""
@@ -66,13 +71,19 @@ func _process(_dt: float) -> void:
 		var c: Dictionary = clients[id]
 		if not c["auth"] and now - float(c["t"]) > HELLO_TIMEOUT:
 			_deny(id, "Took too long to log in.")
+	for tok in held.keys():
+		if now > float(held[tok]["until"]):
+			held.erase(tok)
 
 # ------------------------------------------------------------------ connections
 func _on_join(id: int) -> void:
-	clients[id] = {"auth": false, "pres": {}, "room": "", "uid": "", "name": "", "t": Time.get_unix_time_from_system()}
+	clients[id] = {"auth": false, "pres": {}, "room": "", "uid": "", "name": "", "t": Time.get_unix_time_from_system(),
+		"nid": "", "rj": "", "st": {}}
 
 func _on_leave(id: int) -> void:
 	var was_authed: bool = clients.has(id) and clients[id]["auth"]
+	if was_authed and clients[id]["room"] != "" and clients[id]["rj"] != "":
+		_hold(clients[id])
 	clients.erase(id)
 	if was_authed:
 		print("relay: %d left (%d online)" % [id, _online()])
@@ -112,19 +123,23 @@ func _on_packet(id: int, bytes: PackedByteArray) -> void:
 				c["pres"] = d["d"]
 				_broadcast_peers()
 		"emit":
-			var out := {"k": "msg", "t": String(d.get("t", "")), "d": d.get("d"), "f": str(id)}
+			var out := {"k": "msg", "t": String(d.get("t", "")), "d": d.get("d"), "f": c["nid"]}
 			for other in clients:
 				if other != id and clients[other]["auth"]:
 					_send(other, out)
 		"join":
 			c["room"] = String(d.get("room", "")).substr(0, 64)
+			c["rj"] = String(d.get("rj", "")).substr(0, 64)
 		"leave":
 			c["room"] = ""
+			c["rj"] = ""
 		"memit":
 			if c["room"] == "":
 				return
 			var fast := String(d.get("t", "")) == "st"
-			var out := {"k": "msg", "t": String(d.get("t", "")), "d": d.get("d"), "f": str(id), "room": c["room"]}
+			if fast and typeof(d.get("d")) == TYPE_ARRAY:
+				_keep_own(c, d["d"])
+			var out := {"k": "msg", "t": String(d.get("t", "")), "d": d.get("d"), "f": c["nid"], "room": c["room"]}
 			for other in clients:
 				if other != id and clients[other]["auth"] and clients[other]["room"] == c["room"]:
 					_send(other, out, fast)
@@ -136,10 +151,52 @@ func _broadcast_peers() -> void:
 	for id in clients:
 		var c: Dictionary = clients[id]
 		if c["auth"] and not c["pres"].is_empty():
-			arr.append({"id": str(id), "p": c["pres"]})
+			arr.append({"id": c["nid"], "p": c["pres"]})
 	for id in clients:
 		if clients[id]["auth"]:
-			_send(id, {"k": "peers", "me": str(id), "peers": arr})
+			_send(id, {"k": "peers", "me": clients[id]["nid"], "peers": arr})
+
+# ------------------------------------------------------------------ rejoin
+## Keeps the newest copy of this player's own Hunter and Boki from their snapshot.
+func _keep_own(c: Dictionary, items: Array) -> void:
+	var mine := "P" + String(c["nid"])
+	for it in items:
+		if typeof(it) == TYPE_ARRAY and it.size() > 7 and (String(it[1]) == mine or String(it[1]) == mine + "k"):
+			c["st"][String(it[1])] = it
+
+## A player in a match dropped: keep their slot, and show the room their Hunter standing still.
+func _hold(c: Dictionary) -> void:
+	held[c["rj"]] = {"nid": c["nid"], "room": c["room"], "uid": c["uid"], "st": c["st"],
+		"until": Time.get_unix_time_from_system() + HOLD_S}
+	var h: Array = c["st"].get("P" + String(c["nid"]), []).duplicate()
+	if h.is_empty():
+		return
+	for i in [5, 6, 7]:      # the velocity: it stands where it was
+		h[i] = 0.0
+	for other in clients:
+		var o: Dictionary = clients[other]
+		if o["auth"] and o["room"] == c["room"] and o["nid"] != c["nid"]:
+			_send(other, {"k": "msg", "t": "st", "d": [h], "f": c["nid"], "room": c["room"]})
+
+## The slot a rejoin token holds: a dropped one, or a live connection the game lost (it restarted before
+## the relay noticed), which is cut. Empty when the token is unknown, expired or someone else's.
+func _take(tok: String, uid: String) -> Dictionary:
+	if tok == "":
+		return {}
+	if held.has(tok):
+		var s: Dictionary = held[tok]
+		if s["uid"] != uid:
+			return {}
+		held.erase(tok)
+		return s
+	for other in clients.keys():
+		var o: Dictionary = clients[other]
+		if o["auth"] and o["rj"] == tok and o["uid"] == uid:
+			var s := {"nid": o["nid"], "room": o["room"], "st": o["st"]}
+			o["rj"] = ""
+			_deny(other, "You rejoined from somewhere else.")
+			return s
+	return {}
 
 # ------------------------------------------------------------------ login
 func _hello(id: int, d: Dictionary) -> void:
@@ -147,6 +204,7 @@ func _hello(id: int, d: Dictionary) -> void:
 	if ver != need_version:
 		_deny(id, "Your game is out of date (you have %s, the server needs %s). Open the launcher to update." % [ver, need_version])
 		return
+	clients[id]["rj"] = String(d.get("rj", "")).substr(0, 64)
 	if not auth_on:
 		_admit(id, "", String(d.get("name", "Hunter")))
 		return
@@ -161,13 +219,25 @@ func _admit(id: int, uid: String, name: String) -> void:
 		return
 	var c: Dictionary = clients[id]
 	c["auth"] = true; c["uid"] = uid; c["name"] = name.substr(0, 32)
+	var back := _take(c["rj"], uid)
+	if back.is_empty():
+		c["rj"] = ""
+		c["nid"] = str(next_nid)
+		next_nid += 1
+	else:
+		c["nid"] = back["nid"]
+		c["room"] = back["room"]
+		c["st"] = back["st"]
 	# one connection per Discord account: a second login replaces the first
 	if uid != "":
 		for other in clients.keys():
 			if other != id and clients.has(other) and clients[other]["uid"] == uid:
 				_deny(other, "You logged in somewhere else.")
-	_send(id, {"k": "welcome", "me": str(id), "online": _online()})
-	print("relay: %d joined as %s (%d online)" % [id, c["name"], _online()])
+	var hi := {"k": "welcome", "me": c["nid"], "online": _online()}
+	if not back.is_empty():
+		hi["back"] = back["st"].values()
+	_send(id, hi)
+	print("relay: %d joined as %s (%d online)%s" % [id, c["name"], _online(), " rejoining" if hi.has("back") else ""])
 	_broadcast_peers()
 
 func _check_discord(id: int, tok: String) -> void:
