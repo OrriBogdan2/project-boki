@@ -69,17 +69,34 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the hit tick Match plays: armor rings, heavy hits thud, blades bite
+	# sound layers on top of the weapon's hit Match plays (HeroSfx.hit_sound): armor rings, empowered and
+	# big hits thud
 	if credit == p and target != p:
-		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
-		if melee:
-			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
 		if armor:
 			m.sfx("armor_hit", target.pos, -9.0)
-		if d >= 28.0 and not melee:
+		if d >= 28.0 or o.get("heavy", false) or o.get("payoff", false):
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
+
+## The damage number of a hit (Match.on_damage), only for hits that involve you: other fights nearby don't
+## spray digits over yours. Yours read biggest and brightest, an empowered hit (o.heavy, a payoff) and a
+## crit each have their own look (Fx.NUM_*), the hits you take and your Boki's are a size down.
+static func number(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, armor: bool) -> void:
+	var p: Hunter = m.player
+	var credit := _credit(by)
+	if credit != p and target != p:
+		return
+	var look := Fx.NUM_PLAIN
+	if o.get("crit", false):
+		look = Fx.NUM_CRIT
+	elif o.get("heavy", false) or o.get("payoff", false):
+		look = Fx.NUM_HEAVY
+	var kin := by is Kin and credit == p
+	if target == p or kin:
+		look = Fx.NUM_SMALL
+	var col := HudStyle.dmg_col(look, armor, target == p, kin)
+	m.fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, look)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.

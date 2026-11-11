@@ -136,6 +136,7 @@ static func floors_apply(m: Node, team: int) -> bool:
 const HITSTOP := [[0.0, 0.0], [0.0, 0.025], [0.035, 0.045], [0.05, 0.065], [0.07, 0.09], [0.10, 0.0]]
 const HS_CAP := 0.11           # at most this much freeze in any 0.5s per player
 const HS_WINDOW := 0.5
+const POINT_BLANK := 0.7      # this share of a shotgun volley's slugs on one body makes it an empowered hit
 const HS_MULTI := 0.25         # further hits on the same pair inside this get a third of their tier
 static var _pair_t := {}       # "a|b" -> last time
 static var _budget := {}       # nid -> [window start, spent]
@@ -150,7 +151,7 @@ static func tier(target: Ent, d: float, o: Dictionary) -> int:
 		return 4
 	var mh := maxf(1.0, target.max_hp)
 	var cc := float(o.get("stun", 0.0)) > 0.0 or float(o.get("root", 0.0)) > 0.0 or float(o.get("lift", 0.0)) > 0.0
-	if cc or d >= mh * 0.15:
+	if cc or d >= mh * 0.15 or o.get("heavy", false):
 		return 3
 	var kb: Vector2 = o.get("kb", Vector2.ZERO) if o.get("kb", null) is Vector2 else Vector2.ZERO
 	if d >= mh * 0.08 or kb.length() >= 8.0 or o.get("reflected", false):
@@ -177,7 +178,7 @@ static func hitstop(m: Node, by: Ent, target: Ent, d: float, o: Dictionary) -> i
 	var now := float(m.time)
 	var key := "%s|%s" % [by.get_instance_id() if by else 0, target.get_instance_id()]
 	var k := 1.0
-	if now - float(_pair_t.get(key, -9.0)) < HS_MULTI:
+	if now - float(_pair_t.get(key, -9.0)) < HS_MULTI and not o.get("heavy", false):
 		k = 1.0 / 3.0
 	if (o.get("echo", false)):
 		k = minf(k, 0.5)
