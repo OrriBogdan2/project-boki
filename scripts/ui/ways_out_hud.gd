@@ -95,6 +95,7 @@ static func draw(hud) -> void:
 		HeartRaidHud.draw(hud)      # a raid has one way out, the Heart ring: its own strip
 		return
 	var c: Control = hud.c
+	var back := HudScale.begin(hud, "ways_strip", c.size)      # (drawn in the minimap's bar, hangs from the top centre)
 	var sd := seats(m)
 	if not HudReveal.on(m, "seat_pips"):
 		if not _any_open(sd):
@@ -108,6 +109,7 @@ static func draw(hud) -> void:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
 	QuestTracker.draw(hud, r)
+	HudScale.begin(hud, back, c.size)
 
 static func _any_open(sd: Array) -> bool:
 	for s in sd:

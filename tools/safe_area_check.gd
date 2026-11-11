@@ -7,6 +7,7 @@ extends RefCounted
 ## panel, settings, inventory and Field Book from their controls.
 ## The Ways Out widgets (the strip, its one line, the quest tracker, the Gate prompt, the uplink's status and the
 ## Blight line) are checked in each of their states (the edge markers: --edge-marker-check).
+## --hud-scale=0.8..1.3 runs either at that HUD size (Settings hud_scale).
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
 ## and size (<dir>/<W>x<H>_<text %>_<screen>.png) and a contact sheet of them.
 
@@ -74,6 +75,8 @@ func run(mn: Node, mode: String) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			shots = String(a).substr(12)
+		if String(a).begins_with("--hud-scale="):      # (HUD size for this run only: nothing is saved)
+			Settings.v["hud_scale"] = float(String(a).substr(12))
 		if String(a).begins_with("--size="):
 			var wh := String(a).substr(7).split("x")
 			sizes = [Vector2i(int(wh[0]), int(wh[1]))]
@@ -150,6 +153,9 @@ func _hud() -> void:
 
 
 func _hud_at(win: Vector2i, sz: Vector2, screen: String, with_toasts := true) -> void:
+	for i in 3:      # (HUD size holds a corner's growth to what its neighbour leaves, read from the pass before)
+		m.hud.panels.queue_redraw()
+		await _frames(1)
 	SafeArea.seen.clear()
 	SafeArea.recording = true
 	m.hud.panels.queue_redraw()

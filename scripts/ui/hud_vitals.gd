@@ -95,8 +95,10 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 		bg = Color(0.05, 0.12, 0.06, 0.85) if grass else Color(0.08, 0.09, 0.12, 0.85)
 	var tw := TextCache.width(HudStyle.BIG, txt, 13)
 	var hr := Rect2(Vector2(sz.x * 0.5 - tw * 0.5 - 12, sz.y - 104), Vector2(tw + 24, 20))
+	var back := HudScale.begin(H, "status", sz)      # (centred above the bottom row, not part of the left block)
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
+	HudScale.begin(H, back, sz)
 
 ## The block's top-right corner: the XP bar's right end and top (popped and shaded). A centre-lane line that
 ## reaches left of it rises above it (HeartHud's Blight line on a narrow 1240 px logical screen).

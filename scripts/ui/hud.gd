@@ -135,7 +135,7 @@ func _place_msgs() -> void:
 	msgs.fight = in_fight()
 	loot.fight = msgs.fight
 	loot.visible = msgs.visible
-	msgs.top = 84.0
+	msgs.top = HudScale.from_edge(84.0)
 	if m.tut: TutorialHud.place_msgs(msgs, c.size)
 
 ## World labels (damage numbers, monster plates, the lairs' name boards) never print over
@@ -2665,10 +2665,10 @@ func _draw_map_lairs(inner: Rect2, to_map: Callable, on_map: Callable, hold: boo
 		var ph := fmod(m.time * 1.8, 1.0)
 		if on_map.call(pv, 4.0):
 			c.draw_arc(pv, 6.0 + ph * 12.0, 0, TAU, 24, Color(GOLD, 1.0 - ph), 2.5, true)
-			c.draw_set_transform(pv, 0.0, Vector2(0.8, 1.05))
+			c.draw_set_transform_matrix(HudScale.xf * Transform2D(0.0, Vector2(0.8, 1.05), 0.0, pv))
 			c.draw_circle(Vector2.ZERO, 6.5, Color(0, 0, 0, 0.75))
 			c.draw_circle(Vector2.ZERO, 5.0, Color("ffd36a"))
-			c.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			c.draw_set_transform_matrix(HudScale.xf)
 		else:
 			edge_mini.add(pv - inner.get_center(), GOLD)
 
