@@ -79,19 +79,6 @@ func _creator(tree: SceneTree) -> void:
 	hx.queue_free()
 	await tree.process_frame
 
-func _eggs(tree: SceneTree) -> void:
-	_fresh()
-	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	await tree.process_frame
-	hx._looks_good()
-	await _shot(tree, "hatch_eggs", 2.5)
-	hx._pick(3)
-	await _shot(tree, "hatch_mystery_picked", 1.2)
-	hx.queue_free()
-	await tree.process_frame
-
 ## What a new player sees: the hatch card, the creator with its first rows, then with More looks... open.
 func _first_screens(tree: SceneTree) -> void:
 	Save.d = Save.fresh()
@@ -156,6 +143,26 @@ func _mask(tree: SceneTree) -> void:
 	await _shot(tree, "mask_5_flash", 0.4)
 	await _shot(tree, "mask_6_you_as_vex", 0.6)
 	await _shot(tree, "mask_7_vex_intro", 2.2)
+	hx.queue_free()
+	await tree.process_frame
+
+func _eggs(tree: SceneTree) -> void:
+	_fresh()
+	Save.d["look"] = Unmasked.default_look()
+	tree.root.size = Vector2i(1280, 720)
+	var holder := Node.new()       # the portraits' home (the root is busy starting up)
+	holder.name = "KinPortraits"
+	tree.root.add_child.call_deferred(holder)
+	for i in 4: await tree.process_frame
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	hx._looks_good()
+	await _shot(tree, "eggs_pick_none", 2.5)
+	hx._pick(1)
+	await _shot(tree, "eggs_pick_starter", 0.6)
+	hx._pick(3)
+	await _shot(tree, "eggs_pick_mystery", 0.6)
 	hx.queue_free()
 	await tree.process_frame
 
