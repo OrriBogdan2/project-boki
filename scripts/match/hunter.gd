@@ -1051,7 +1051,7 @@ func do_dash() -> void:
 	Effects.run(effs, self, {"slot": "dodge", "ability": dodge_def.id if dodge_def else "dash", "level": ability_level("dash")})
 	CombatBus.ability_used.emit(self, dodge_def.id if dodge_def else "dash", "dodge")
 
-## The theme of the kin you brought ("poison", "fairy"...). Cosmetic only: it tints, never rules.
+## The theme of the kin you brought ("venom", "lunar"...). Cosmetic only: it tints, never rules.
 func kin_element() -> String:
 	if kin == null or (kin as Kin).dead:
 		return ""
@@ -2250,7 +2250,7 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		var flung := m.time - kb_t < 0.6 and pre_v.length() > 8.0
+		var flung: bool = m.time - kb_t < 0.6 and pre_v.length() > 8.0
 		if flung and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)

@@ -295,7 +295,8 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V._anchors.clear()
 	_clear(V)
 	V.play(P, "all", P.pos, Vector2.RIGHT)
-	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
+	# (minus one as before, and minus the sheen: the armour tier-up's own surface, never a recipe layer)
+	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 2, "every layer kind plays")
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)

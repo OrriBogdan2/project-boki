@@ -81,7 +81,7 @@
   "juggernaut_step_grass": 3.0,
   "juggernaut_step_stone": 3.0,
   "juggernaut_step_wood": 3.0,
-  "k_echo": 3.0,
+  "k_sound": 3.0,
   "key_get": -4.5,
   "kill": -3.5,
   "lw_bash_hit": 2.0,

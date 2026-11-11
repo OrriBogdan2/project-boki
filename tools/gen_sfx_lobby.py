@@ -138,12 +138,22 @@ def dolm(i):
     return sting(room(mix(knock(), at(knock() * 0.8, 0.13), tremor, gravel), 0.4))
 
 
+def gil(i):
+    """Gil: a potion bag shaken, a cork popping, a bubbling fizz rising, a glass clink."""
+    shake = S.grains(0.2, 70, 1500, 6000, 0.002, 0.006, 0.08) * 0.5
+    cork = at(S.kick(700, 300, 0.06, 0.004, 0.02) * 0.8, 0.14)
+    fizz = at(S.grains(0.35, 160, 3000, 9000, 0.001, 0.003, 0.25) * 0.4, 0.17)
+    clink = at(S.ring([2637, 3951], 0.3, [0.2, 0.12], [0.5, 0.3]), 0.3)
+    return sting(room(mix(shake, cork, fizz, clink), 0.35))
+
+
 def main():
     S.takes_cat('lobby_pick', pick, 2, 'ui')
     S.takes_cat('lobby_mate', mate, 2, 'ui')
     S.takes_cat('lobby_tick', tick, 3, 'ui')
     S.takes_cat('lobby_tick_urgent', tick_urgent, 3, 'ui')
-    for a in (gunslinger, archer, juggernaut, bulwark, ostra, ashwick, dredge, rimewright, tender, thief, mage, dolm):
+    for a in (gunslinger, archer, juggernaut, bulwark, ostra, ashwick, dredge, rimewright, tender, thief, mage, dolm,
+              gil):
         S.save_cat(a.__name__ + '_lock', a(0), 'signature')
 
 

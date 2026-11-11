@@ -365,9 +365,9 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 MOODS = ['happy', 'alert', 'unsure', 'sleepy', 'hurt']
 # Species theme -> the texture laid under its voice. crackle: Fire and sparks, burble: Water and venom,
 # rustle: Grass, spores and swarms, chime: Crystal, moon and sound; anything else stays a plain voice.
-TIMBRE = {'fire': 'crackle', 'electric': 'crackle', 'poison': 'burble', 'flying': 'burble',
-          'spore': 'rustle', 'grass': 'rustle', 'bug': 'rustle',
-          'crystal': 'chime', 'fairy': 'chime', 'sound': 'chime', 'ice': 'chime', 'rock': 'chime'}
+TIMBRE = {'ember': 'crackle', 'storm': 'crackle', 'venom': 'burble', 'tempest': 'burble',
+          'spore': 'rustle', 'bloom': 'rustle', 'swarm': 'rustle',
+          'prism': 'chime', 'lunar': 'chime', 'echo': 'chime', 'frost': 'chime', 'stone': 'chime'}
 # Per species: (vowel, signature motif as 3 pitch ratios). The motif is what makes a Pebbit and a
 # Cairnback tell apart even at the same size.
 SPECIES_VOICE = {

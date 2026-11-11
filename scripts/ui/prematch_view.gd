@@ -10,7 +10,7 @@ const DIGITS_MIN := 48         # px, the smallest countdown digits
 const PULSE_RATE := 0.012      # radians per ms of the last-seconds throb (about 2 beats a second)
 const PULSE_GROW := 0.12       # the digits swell by this much at the top of a beat
 const SAFE_MIN := 24          # px, the least margin at any window size
-const TICK_FROM := 5.0        # s left on your turn when the countdown ticks each second
+const TICK_FROM := 5.0        # s left on your turn when the digits warm to red (UiSfx ticks the seconds)
 const PULSE_FROM := 3.0       # s left on your turn when the countdown throbs red
 
 var pm: Prematch
@@ -21,7 +21,6 @@ var timer_label: Label
 var note_label: Label
 var banner: VBoxContainer
 var _pad: MarginContainer
-var _last_sec := -1
 var grid: GridContainer
 var squad_box: HBoxContainer
 var chat_log: VBoxContainer
@@ -174,10 +173,6 @@ func _tick_label() -> void:
 		caption.text = "%s IS PICKING" % String(m["name"]).to_upper()
 		note_label.text = "Your squad picks in turn, %d seconds each." % int(Prematch.TURN)
 	var mine := pm.my_turn() and not pm.locked
-	if s != _last_sec:
-		_last_sec = s
-		if mine and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
-			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.turn_left <= PULSE_FROM else 1.0)
 	_pulse(pm.turn_left if mine else Prematch.TURN)
 
 ## Digits warm to red below TICK_FROM and throb red below PULSE_FROM (your own turn only).
