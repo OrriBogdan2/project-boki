@@ -1,7 +1,8 @@
 class_name GoalTracker
 extends RefCounted
 ## The "Goals" card at the top right of the farm: what you are working towards, never the tutorial.
-## Rows come from four sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+## Rows come from five sources, caps and the title in content/rules/farm_tutorial.json "tracker":
+##   shelter   no Boki after the first hatch: where the Shelter is (leads; clears on adopting)
 ##   unlock    a Hunter's unlock challenge (ClassUnlock), for every Hunter not open yet
 ##   mastery   the goals of the Hunter you play that are not done
 ##   milestone a farm milestone not reached (FarmUnlocks)
@@ -9,13 +10,14 @@ extends RefCounted
 ## A row: {text, have, need, frac, ready, source}. Ready-to-claim rows lead; inside a source the
 ## closest to done comes first. The card is hidden when there are no rows.
 
-const SOURCE_ORDER := ["unlock", "mastery", "milestone", "level"]
+const SOURCE_ORDER := ["shelter", "unlock", "mastery", "milestone", "level"]
 
 static func cfg() -> Dictionary:
 	return FarmTutorial.rules()["tracker"]
 
 static func lines() -> Array:
-	var by_source := {"unlock": _unlocks(), "mastery": _mastery(), "milestone": _milestones(), "level": _level()}
+	var by_source := {"shelter": _shelter(), "unlock": _unlocks(), "mastery": _mastery(),
+			"milestone": _milestones(), "level": _level()}
 	var caps: Dictionary = cfg()["per_source"]
 	var picked: Array = []
 	for src in SOURCE_ORDER:
@@ -36,6 +38,12 @@ static func _closer(a: Dictionary, b: Dictionary) -> bool:
 static func _row(text: String, prog: Dictionary, source: String, ready := false) -> Dictionary:
 	return {"text": text, "have": int(prog["have"]), "need": int(prog["need"]), "frac": float(prog["frac"]),
 			"ready": ready, "source": source}
+
+static func _shelter() -> Array:
+	if not Lifeline.started() or Lifeline.boki_count() > 0:
+		return []
+	var key := "open" if Stalls.level() >= HomeMarket.tab_level("Shelter") else "locked"
+	return [_row(String(cfg()["shelter"][key]) % Shelter.price({}, true), _prog(0, 1), "shelter")]
 
 static func _unlocks() -> Array:
 	var out: Array = []
