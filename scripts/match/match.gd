@@ -121,6 +121,7 @@ var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
 var _finish_now := false
+var camp_smoke: CampSmoke = null
 var camps: Camps = null       # the monster camps: sizes, clears, rewards, comebacks (scripts/match/camps.gd)
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
@@ -404,6 +405,8 @@ func _start(o: Dictionary) -> void:
 				if not on.is_empty(): on[-1]["active"] = false
 				keep[0]["active"] = true
 		await spawn_plan.spawn_all()
+		camp_smoke = CampSmoke.new(self)       # (columns of smoke over the camps, during your drop)
+		add_child(camp_smoke)
 	if lairs: lairs.ensure_live()
 	if BlightDir.enabled(opts) and big and world.layout_id != "tutorial":
 		# the Blight: Wardens on the islands from the start, Skitters later (scripts/match/blight_dir.gd)
