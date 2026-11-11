@@ -229,6 +229,11 @@ func _cap(s: float) -> String:
 # ------------------------------------------------------------------ interacting
 ## What interact would do at an exit for this hunter, for Match._update_interact (or {}).
 ## Holding interact fills x.hold[nid]; letting go resets it.
+## A hunter not holding interact: whatever exit hold it had going is dropped (as interact_for does).
+func let_go(h: Hunter) -> void:
+	for x in list:
+		(x["hold"] as Dictionary).erase(h.nid)
+
 func interact_for(h: Hunter) -> Dictionary:
 	var want: bool = h.inp.get("interact", false)
 	var key := Settings.key_cap("interact")
@@ -346,7 +351,6 @@ func _call(x: Dictionary, h: Hunter) -> void:
 	var n: Node3D = x["node"]
 	var lamp := n.get_node("Beacon/Lamp") as MeshInstance3D
 	lamp.material_override = Models.toon(ExitModels.DOCK, false, 1.6)
-	n.get_node("Beacon/Flare").visible = true
 	(n.get_node("Sparks") as CPUParticles3D).emitting = true
 	(n.get_node("Beacon/Lever") as Node3D).rotation.x = 0.5
 	# loud: everyone hears the horn and sees the flare and the ping
@@ -454,7 +458,6 @@ func _depart(x: Dictionary) -> void:
 	x["aboard"] = []
 	var nd: Node3D = x["node"]
 	(nd.get_node("Beacon/Lamp") as MeshInstance3D).material_override = Models.toon(Color("6a5a40"))
-	nd.get_node("Beacon/Flare").visible = false
 	(nd.get_node("Sparks") as CPUParticles3D).emitting = false
 	(nd.get_node("Beacon/Lever") as Node3D).rotation.x = -0.5
 	m.sfx("whoosh", x["berth"], 0.0, 0.6)
@@ -468,7 +471,6 @@ func _close_dock(x: Dictionary) -> void:
 	for nm in ["LanternL", "LanternR"]:
 		var l := nd.get_node_or_null(nm) as MeshInstance3D
 		if l: l.material_override = Models.toon(Color("5a5048"))
-	(nd.get_node("Berth") as Node3D).visible = false
 	(nd.get_node("Beacon/Ring") as Node3D).visible = false
 	m.add_feed("%s has closed" % x["name"])
 	if m.hud and m.player and not m.player.out and not m.player.extracted:
@@ -672,7 +674,7 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 		OutpostLook.sway(n, m.time)
 	var near: bool = m.player != null and in_yard(x, m.player)
 	var charging: bool = x["state"] == "charging"
-	OutpostLook.rings(n, near or x["contested"], x["contested"], charging, float(x["prog"]))
+	OutpostLook.rings(n, near or x["contested"], charging, float(x["prog"]))
 
 func _open_lift(x: Dictionary) -> void:
 	x["state"] = "open"
@@ -765,6 +767,22 @@ func tick(dt: float) -> void:
 			"dock": _tick_dock(x, dt)
 			"hatch": _tick_hatch(x, dt)
 			"outpost": _tick_outpost(x, dt)
+		var who := occupant(x) if ExitSignal.phase(x, -1) == ExitSignal.ACTIVE else -1
+		ExitSignal.show(x, ExitSignal.phase(x, who), who, m.time)
+
+## The team of someone standing on a live exit (on the deck, at the hatch, in the yard), or -1.
+func occupant(x: Dictionary) -> int:
+	for h in m.hunters:
+		if not _live(h):
+			continue
+		match String(x["kind"]):
+			"dock":
+				if on_deck(x, h): return h.team
+			"hatch":
+				if h.flat_dist(x["pos"]) < HATCH_R: return h.team
+			"outpost":
+				if in_yard(x, h): return h.team
+	return -1
 
 ## Only one squad is left: their way out comes faster.
 func on_last_team() -> void:
@@ -774,8 +792,10 @@ func on_last_team() -> void:
 	for x in list:
 		if x["kind"] == "dock" and x["state"] == "called" and float(x["t"]) > RUSH_CALL_T:
 			x["t"] = RUSH_CALL_T
-	if m.player and not m.player.out and not m.player.extracted and m.hud:
-		m.hud.toast_small("Last squad: exits speed up", Color("8fe3c8"))
+	if m.player and not m.player.out and not m.player.extracted:
+		m.music_dir.last_squad()
+		if m.hud:
+			m.hud.toast_small("Last squad: exits speed up", Color("8fe3c8"))
 
 ## The admin menu's "exits ready now".
 func admin_ready() -> void:

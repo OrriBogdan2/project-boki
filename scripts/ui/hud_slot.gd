@@ -3,8 +3,8 @@ extends RefCounted
 ## One ability or item slot on the bottom bar: the frame (HudStyle.slot_frame), the icon, and while
 ## it isn't ready a dimmed icon, a dark sweep over the part still cooling (clipped to the slot) and
 ## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
-## pop when a press lands, a red shake when it can't, a ring when it comes back, and ResetPop's swell
-## when a reset hands it straight back. skill_slot adds
+## pop when a press lands, one red pulse of the frame when it can't (PressDeny), a ring when it comes
+## back, and ResetPop's swell when a reset hands it straight back. skill_slot adds
 ## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
 ## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
 ## Hud._skill_slot call these (the Boki slots in BokiHud go through the same two, so every slot on the bar looks alike).
@@ -12,7 +12,7 @@ extends RefCounted
 ## countdown text shown per slot on Hud.slot_text (checks read it).
 
 const READY_FLASH := 0.35      # s: the ring when a slot comes back
-const DENY_T := 0.35           # s: the red shake when a press can't go
+const DENY_T := 0.15           # s: the frame's one red pulse when a press can't go
 const POP_T := 0.3             # s: the pop when a press lands
 
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
@@ -34,16 +34,12 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		cd_secs: float, ready: bool, charges := -1, max_ch := 0, label := "") -> void:
 	var c: CanvasItem = H.c
 	var sfx_d: Dictionary = H.slot_fx.get(id, {})
-	var deny := 0.0
 	var pop := 0.0
 	if not sfx_d.is_empty():
 		var ft := float(sfx_d["t"])
-		if sfx_d["kind"] == "deny":
-			deny = clampf(1.0 - ft / DENY_T, 0.0, 1.0)
-			rect.position.x += sin(ft * 70.0) * 5.0 * deny
-		elif sfx_d["kind"] == "reset":
+		if sfx_d["kind"] == "reset":
 			rect = ResetPop.scaled(rect, ft)
-		else:
+		elif sfx_d["kind"] == "cast":
 			pop = clampf(1.0 - ft / POP_T, 0.0, 1.0)
 			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
 	var ctr := rect.get_center()
@@ -79,8 +75,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		HudStyle.ctext(c, Vector2(ctr.x, rect.position.y - 6), label, 11, Color(HudStyle.INK, 0.85), 3, HudStyle.BODY)
 	shown_keys[id] = key
 	if key != "": HudStyle.key_pill(c, Vector2(ctr.x, rect.end.y), key, col if ready else HudStyle.MUTED)
-	if deny > 0.0:
-		H._rounded(rect, Color(0.9, 0.15, 0.1, 0.22 * deny), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, deny), 3)
+	deny_pulse(H, id, rect)
 	if pop > 0.0:
 		var pop_edge := Color(col.lerp(Color.WHITE, 0.5), pop)
 		H._rounded(rect.grow((1.0 - pop) * 14.0), Color(1, 1, 1, 0.12 * pop), HudStyle.SLOT_RAD + 2, pop_edge, 3)
@@ -116,6 +111,14 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	shown_keys[id] = key
 	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
 
+## A refused press on slot `id` (PressDeny): its frame swells red and back once over DENY_T.
+static func deny_pulse(H, id: String, r: Rect2) -> void:
+	var fx: Dictionary = H.slot_fx.get(id, {})
+	if fx.get("kind", "") != "deny" or float(fx["t"]) >= DENY_T:
+		return
+	var k := sin(PI * float(fx["t"]) / DENY_T)
+	H._rounded(r.grow(3.0 * k), Color(0.9, 0.15, 0.1, 0.22 * k), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, k), 3)
+
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.
 static func sweep(c: CanvasItem, r: Rect2, frac: float, col: Color) -> void:
@@ -142,11 +145,9 @@ static func skill_slot(H, slot: String, id: String, r: Rect2, icon: String, key:
 	var can := p.can_level(slot)
 	if lv <= 0:
 		H.hover_spots.append([r, id])
-		var sfx_d: Dictionary = H.slot_fx.get(id, {})
-		if not sfx_d.is_empty() and sfx_d["kind"] == "deny":
-			r.position.x += sin(float(sfx_d["t"]) * 70.0) * 5.0 * clampf(1.0 - float(sfx_d["t"]) / DENY_T, 0.0, 1.0)
 		# R: a tag over the slot saying when it opens, so it never reads as just on cooldown
 		locked(H, id, r, icon, col, key, can, H.r_lock_text(p) if slot == "ult" else "")
+		deny_pulse(H, id, r)
 		if can:
 			RankMarks.mark(slot, r)
 		return

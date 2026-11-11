@@ -138,6 +138,24 @@ Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coa
 (the About tab), `--nest-demo=kin` (the Nook panel), `--training --no-drop --size-demo` (an XS and
 an XL Vespyx in a match, their rings showing the hitbox). `--normalize-size` sets `Unique.normalize`.
 
+## Species quirks (`BokiQuirks`)
+
+`content/rules/boki_quirks.json` holds the Bokidex's species details (owner 11-09): a one-line
+`quirk` for 120 kinds and a `sexNote` for 18, keyed by Bokidex id (a species' display name in lower
+case, so `basaltoad` reads `rampartoad`). The Field Book page shows both. A few are real behaviour:
+- `female_share`: the hatch-time sex roll (`BokiQuirks.sex_for`, from the egg's seed, in
+  `Save.new_kin` and after `Care.breed` inherits). Hivara and Mossgrade hatch only female,
+  Marchleaf and Lodestick 95% female, Buckleron always male. Every other kind keeps the coin flip,
+  and Boki already hatched keep the sex they have.
+- `food_rate`: the Rimeshrew's food need drains twice as fast (`Care.tick`).
+- `rain_joy`: joy per minute out in the farm rain (Effigeetle and Frigatee sulk, Mycroll and
+  Barrelmander perk up; `Care.tick`, not while asleep or indoors).
+- `storm_sense`: a Kestrike or Barokat near you warns once before each rain (`FarmChatter`, the
+  `rain_soon` lines); Home decides the next weather turn ahead (`rain_next`) so the warning is true.
+
+Not modelled yet: the "no sexes", "both sexes" and egg-temperature notes (the record only knows
+female and male), so those kinds roll half and half and the note explains.
+
 ## Later, with a server
 
 - The server mints ids, serials and editions; the client never does. Today's ids are made on the

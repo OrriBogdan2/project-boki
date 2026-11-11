@@ -54,7 +54,10 @@ func _max_e_first(P: Hunter) -> void:
 	ok(not P.can_level("kin"), "E can't rank past its max")
 	ok(P.ak.rank("kin") == e_max, "the kit reads E at rank %d" % P.ak.rank("kin"))
 	ok(pow1 < 0.0 or P.ak.power("kin") > pow1, "E hits harder at max rank (%.2f -> %.2f)" % [pow1, P.ak.power("kin")])
-	ok(P.ak.cd_k("kin") < cd1, "E recharges faster at max rank (%.2f -> %.2f)" % [cd1, P.ak.cd_k("kin")])
+	var cuts: bool = P.ak.rank_k("rank_cd", "kin", 0.0) < 1.0      # the source's E upgrade cuts it (Vex's doesn't)
+	var cd_max: float = P.ak.cd_k("kin")
+	ok(cd_max < cd1 if cuts else is_equal_approx(cd_max, cd1),
+		"E recharges faster at max rank where its rank_cd row cuts it, else the same (%.2f -> %.2f)" % [cd1, cd_max])
 
 ## 3: a bot's points are spent the moment it levels.
 func _bot_ranks(bot: Hunter) -> void:

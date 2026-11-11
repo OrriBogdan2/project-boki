@@ -23,7 +23,7 @@ class Config:
     port_min: int = 7777
     port_max: int = 7799
     fill_timeout: dict = field(default_factory=lambda: {"duel": 20.0, "arena": 30.0, "trio": 20.0})  # s
-    trio_slots: int = 12                  # players in an extraction match (4 trios); the server fills with bots
+    trio_slots: int = 18                  # players in an extraction match (6 trios: 2x Hollow Crown at 30 hunters); the server fills with bots
     token_ttl_s: float = 60.0             # a handed-out token nobody used is dropped after this
     ready_timeout_s: float = 30.0         # the server must print its ready line within this or is killed
     tokens_dir: str = "/run/boki"
