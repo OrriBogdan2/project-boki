@@ -14,5 +14,5 @@
 	"grow_secs_doc": "Seconds from put down (or from the last pick) until it is ripe; it keeps ripening while you are away, but only one batch waits at a time.",
 	"reach": 0.35,
 	"reach_doc": "Tiles beyond the patch's edge from which your feet pick the snacks.",
-	"rotate_doc": "Until the zones are built (only ridge is), the start garden's patch grows its four snacks and one more every ripening: the next food, in the order of the zone lists, that is not one of its four. rot on the patch's deco entry counts the ripenings."
+	"rotate_doc": "The start garden's patch grows its four snacks and one more every ripening: the next food, in the order of the zone lists, that is not one of its four. rot on the patch's deco entry counts the ripenings."
 }
