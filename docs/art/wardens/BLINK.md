@@ -29,3 +29,12 @@ under `head`, keyed in their clips); then add a `blink` block and the check cove
 - **kael** (Kael, juggernaut)
 - **tarek** (Tenzo, dolm)
 - **ostra** (Motley, ostra): `x_boxlid` is the box's lid, not an eyelid.
+
+## Lids that need art (blink on, but it does not read)
+Found with the open | closed shots (2026-11-11) and the .glb skin weights; the blink data stays, so it shows as soon
+as the mesh is fixed.
+- **cinder** (Cinder): `lid.R`/`lid.L` skin no vertices: the bones close, the eyes do not.
+- **dredge** (Grimble): `lid` skins no vertices: same. (His --warden-blink-shots close-up also frames his shoulder, not his face.)
+- **vex** (Vex): only `lid.L`; her right eye has no lid and stays open through the blink.
+- **hem** (Lace), **pip** (Meeko): the deepest closure in their own clips leaves a sliver of eye showing; deeper lid
+  keys (or a closed-eye shape) would give a full blink.
