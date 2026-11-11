@@ -165,9 +165,7 @@ static func _commit(verts: PackedVector3Array, norms: PackedVector3Array, uvs: P
 	arrs[Mesh.ARRAY_NORMAL] = norms
 	arrs[Mesh.ARRAY_TEX_UV] = uvs
 	arrs[Mesh.ARRAY_INDEX] = PackedInt32Array(idx)
-	var am := ArrayMesh.new()
-	am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+	return MeshArrays.build([arrs])
 
 static var _lathes := {}
 
@@ -819,21 +817,19 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	# a paraglider canopy that unfolds above the pack: an arched wing in stripes, with lines down to the harness
 	var glider := Node3D.new(); glider.name = "Glider"; glider.position = Vector3(0, 0.62, 0.12); glider.visible = false
 	torso.add_child(glider)
-	var canopy := MeshInstance3D.new()
 	var gskin := String(lk["glider"])
-	canopy.mesh = Gliders.mesh(gskin, team_col, hero_col)
-	canopy.material_override = vtoon_outlined()
-	canopy.position = Vector3(0, 1.05, 0.02)
-	glider.add_child(canopy)
 	glider.set_meta("skin", gskin)
 	var gtrail := Gliders.trail(gskin, team_col, hero_col)
 	if gtrail:
 		gtrail.position = Vector3(0, 1.0, 0.3)
 		glider.add_child(gtrail)
-	var m_line := toon(Color("5a4636"), false)
-	for sx in [-1.0, -0.4, 0.4, 1.0]:
-		part(glider, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
-	merge_static(glider)
+	var gset := _glider_set(gskin)
+	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()], [gset[1], toon(Color("5a4636"), false)]]:
+		var gmi := MeshInstance3D.new()
+		gmi.mesh = pc[0]
+		gmi.material_override = pc[1]
+		ShadowPolicy.judge(gmi)
+		glider.add_child(gmi)
 	var ring := MeshInstance3D.new(); ring.name = "TeamRing"; ring.mesh = flat_quad(1.0)
 	ring.material_override = ring_mat(team_col, 0.16); ring.position = Vector3(0, 0.04, 0)
 	root.add_child(ring)
@@ -849,18 +845,19 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	for nd in [hair_n, gear]:
 		torso.remove_child(nd); head.add_child(nd)
 		(nd as Node3D).position.y -= 0.68
-	merge_static(torso)
-	merge_static(head)
-	merge_static(hair_n)
-	merge_static(gear)
+	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
+	# they drive the .glb's bones; "Focus" is kept and drawn)
+	var drop := WardenGlb.will_dress(arch)
+	for nd in [torso, head, hair_n, gear]:
+		merge_static(nd, drop)
 	for nm in ["Skirt", "Cape", "Scarf", "PauldronL", "PauldronR", "Focus"]:
-		if torso.has_node(nm): merge_static(torso.get_node(nm))
+		if torso.has_node(nm): merge_static(torso.get_node(nm), drop and nm != "Focus")
 	for nm in ["LegL", "LegR"]:
-		merge_static(legs.get_node(nm))
-		merge_static(legs.get_node(nm + "/Knee"))
+		merge_static(legs.get_node(nm), drop)
+		merge_static(legs.get_node(nm + "/Knee"), drop)
 	for sd in ["L", "R"]:
 		for nd in arms[sd]:
-			merge_static(nd)
+			merge_static(nd, drop)
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
 	# the race's proportions: head size, how broad the body is, overall height
@@ -915,12 +912,11 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	var ck := float(CLASS_LOOK.get(cls, {}).get("size", 1.0))
 	var body := Arch.body(arch)
 	var size_k := float(body.get("size", 1.0)) * float(HeroGearPair.body(arch)["size"])
-	var bulk := float(body.get("bulk", 1.0))
 	var look_k := rs * ck * size_k * float(lk["height"])
-	root.scale = Vector3(bulk, 1.0, bulk) * float(Data.CLASSES[cls]["scale"]) * look_k
+	root.scale = Vector3.ONE * float(Data.CLASSES[cls]["scale"]) * look_k
 	# the ring under your feet is the real hitbox: its world radius is hit_r, whatever your size
 	var ring_k := 2.0 * Arch.hit_r(arch, Data.CLASSES[cls]) / (float(Data.CLASSES[cls]["scale"]) * look_k)
-	ring.scale = Vector3(1.0 / bulk, 1.0, 1.0 / bulk) * ring_k
+	ring.scale = Vector3.ONE * ring_k
 	var torso_node := root.find_child("Torso", true, false) as Node3D
 	if torso_node != null:
 		torso_node.scale.x *= float(body.get("chest", 1.0))
@@ -1267,9 +1263,34 @@ static func vtoon_outlined() -> ShaderMaterial:
 	m.next_pass = _outline_mat
 	return m
 
+## A skin's glider merged once (merge_static): [the canopy's arrays, colour weights still in them (Gliders.paint
+## colours each Hunter's), the strings' mesh (one for all)]. Merging both per Hunter was ~3.5 ms each.
+static var _glider_sets := {}
+static func _glider_set(gskin: String) -> Array:
+	if not _glider_sets.has(gskin):
+		var g := Node3D.new()
+		var canopy := MeshInstance3D.new()
+		var sheet := ArrayMesh.new()
+		sheet.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, Gliders.sheet(gskin))
+		canopy.mesh = sheet
+		canopy.material_override = vtoon_outlined()
+		canopy.position = Vector3(0, 1.05, 0.02)
+		g.add_child(canopy)
+		var m_line := toon(Color("5a4636"), false)
+		for sx in [-1.0, -0.4, 0.4, 1.0]:
+			part(g, cyl(0.008, 0.008, 1.0, 4), m_line, Vector3(0.42 * sx, 0.55, 0), Vector3.ONE, Vector3(0, 0, -0.62 * sx))
+		merge_static(g)
+		var got := {}
+		for ch in g.get_children():
+			got[(ch as MeshInstance3D).material_override == m_line] = (ch as MeshInstance3D).mesh
+		_glider_sets[gskin] = [(got[false] as Mesh).surface_get_arrays(0), got[true]]
+		g.free()
+	return _glider_sets[gskin]
+
 ## Bakes a node's plain mesh parts into one mesh per look, so a detailed character costs a handful
 ## of draw calls. Named parts (Head, ArmR, Halo, ...) and anything with children stay separate.
-static func merge_static(node: Node3D) -> void:
+## `discard`: those parts are only freed (a body nothing will draw).
+static func merge_static(node: Node3D, discard := false) -> void:
 	var groups := {}
 	var drop: Array = []
 	for ch in node.get_children():
@@ -1279,20 +1300,19 @@ static func merge_static(node: Node3D) -> void:
 		var mat: Material = mi.material_override
 		if mat == null or mi.mesh == null:
 			continue
+		if discard:
+			drop.append(mi)
+			continue
 		var key := _mat_key(mat)
 		if not groups.has(key):
-			groups[key] = {"mat": mat, "st": SurfaceTool.new(), "n": 0}
-			(groups[key]["st"] as SurfaceTool).begin(Mesh.PRIMITIVE_TRIANGLES)
-		var st: SurfaceTool = groups[key]["st"]
-		var pm := _with_part_y(mi.mesh, mi.transform)
-		for si in pm.get_surface_count():
-			st.append_from(pm, si, mi.transform)
-		groups[key]["n"] = int(groups[key]["n"]) + 1
+			groups[key] = {"mat": mat, "parts": []}
+		for arrs in _part_y_surfaces(mi.mesh, mi.transform):
+			(groups[key]["parts"] as Array).append([arrs, mi.transform])
 		drop.append(mi)
 	for key in groups:
 		var g: Dictionary = groups[key]
 		var mi := MeshInstance3D.new()
-		mi.mesh = (g["st"] as SurfaceTool).commit()
+		mi.mesh = MeshArrays.merge(g["parts"])     # (no SurfaceTool: it reads every part back from the GPU)
 		mi.material_override = g["mat"]
 		ShadowPolicy.judge(mi)       # a merged clump of small parts is still small (item 94)
 		node.add_child(mi)
@@ -1303,18 +1323,22 @@ static func merge_static(node: Node3D) -> void:
 ## A copy of a mesh whose UV2 holds the height range (bottom, top) the part spans once placed with
 ## xf, which the toon shader turns into the part's painted light-to-dark gradient and crease.
 static func _with_part_y(mesh: Mesh, xf := Transform3D.IDENTITY) -> ArrayMesh:
+	return MeshArrays.build(_part_y_surfaces(mesh, xf))
+
+## A mesh's surfaces as arrays with that height range in UV2 (and plain white colours when it has none).
+static func _part_y_surfaces(mesh: Mesh, xf: Transform3D) -> Array:
 	var ab := xf * mesh.get_aabb()
-	var am := ArrayMesh.new()
+	var out: Array = []
 	for si in mesh.get_surface_count():
-		var arrs := mesh.surface_get_arrays(si)
+		var arrs: Array = MeshArrays.of(mesh, si)
 		var n: int = (arrs[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
 		var uv2 := PackedVector2Array(); uv2.resize(n); uv2.fill(Vector2(ab.position.y, ab.end.y))
 		arrs[Mesh.ARRAY_TEX_UV2] = uv2
 		if arrs[Mesh.ARRAY_COLOR] == null:
 			var cw := PackedColorArray(); cw.resize(n); cw.fill(Color.WHITE)     # no baked occlusion: plain white
 			arrs[Mesh.ARRAY_COLOR] = cw
-		am.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrs)
-	return am
+		out.append(arrs)
+	return out
 
 static var _part_y_cache := {}
 ## Gives every toon-shaded part under `n` that isn't merged its own part range (in its own space).
@@ -1707,7 +1731,7 @@ static func gun_parts(gun: Node3D, weapon: String, m_gun: Material, m_dark: Mate
 			for k in 6:
 				part(gun, cyl(0.062, 0.062, 0.022, 12), cop, Vector3(0, 0.0, -0.06 - k * 0.075), Vector3.ONE, Vector3(PI / 2, 0, 0))
 			part(gun, cyl(0.075, 0.05, 0.07, 12), cop, Vector3(0, 0.0, -0.5), Vector3.ONE, Vector3(PI / 2, 0, 0))
-			part(gun, sphere(0.045, 10), glow.call(Color("9ff5e0")), Vector3(0, 0.0, -0.55))
+			part(gun, sphere(0.045, 10), glow.call(Color("ff8fd0")), Vector3(0, 0.0, -0.55))
 			part(gun, box(0.09, 0.05, 0.16), m_acc, Vector3(0, 0.05, 0.06))
 			grip.call(-0.02, 0.15)
 		"quill_rifle":

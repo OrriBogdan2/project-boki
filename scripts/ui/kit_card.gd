@@ -4,8 +4,7 @@ extends PanelContainer
 ## name, weight), then one row per ability (Passive, LMB, RMB, E, Dash, the hunter's ultimate, the Boki
 ## Fusion), each with its key cap, a big icon, its name and one short line. A row's "Details" opens that
 ## ability's page (preview, every rule) in the same frame (no scroll, no resizing: the card is always
-## SIZE). Used in the Arena / training (K) and on the expedition loadout (KitCard.strip, a compact row
-## that opens the full card).
+## SIZE). Used in the Arena / training (K). KitCard.strip is a compact row that opens the full card.
 
 const SIZE := Vector2(800, 620)
 const BODY_H := 468.0
@@ -27,7 +26,7 @@ static func _cap(slot: String) -> String:
 	if slot == "x":
 		return Settings.key_cap("hunter_ult")
 	if slot == "r":
-		return Settings.key_cap("hunter_ult" if KinCommand.class_ults() else "ultimate")
+		return Settings.key_cap("ultimate")
 	return String(KEYS[slot])
 
 const LABEL := {"dash": "Dash", "passive": "Passive", "lmb": "Attack", "rmb": "Right click", "e": "Utility", "r": "Ultimate",
@@ -142,7 +141,7 @@ func _row(slot: String) -> Control:
 		top.add_child(hw)
 	tv.add_child(top)
 	var line := String(info["line"])
-	if slot == "r" and kin_sp != "" and not KinCommand.class_ults():
+	if slot == "r" and kin_sp != "":
 		var bn := String(Data.KIN.get(kin_sp, {}).get("name", kin_sp))
 		line = "Fuse with your %s: its colour and type change your abilities." % bn
 	var ln := UI.label(short_line(line, String(info["name"])), 13, UI.MUTED)
@@ -212,7 +211,7 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 		"dash":
 			var sd: Dictionary = d["dash"]
 			out.merge({"name": String(sd["name"]), "icon": String(sd.get("icon", "dash")), "col": Color(String(sd.get("col", "#ffffff"))),
-				"tag": "%s charge%s · %ss" % [_charges(a), "" if _charges(a) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
+				"tag": "%s charge%s · %ss" % [_charges(a, sd), "" if _charges(a, sd) == "1" else "s", KinText.n(float(sd.get("cd", 9.0)))], "line": String(cd.get("dash", sd.get("desc", "")))}, true)
 			out["detail"] = [["", String(sd.get("desc", ""))]] + _ranks(a, "dash")
 		"passive":
 			var rd: Dictionary = d.get("resource", {})
@@ -268,16 +267,12 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": "Boki Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
-			# the Merge key is the Merge for every class; the class's own ultimate is held back behind
-			# boki_system.json class_ults until the hero-port work folds it into the kits
-			var sd: Dictionary = d.get("r", {})        # (a hero with no class R: only the Merge shows)
-			var on := KinCommand.class_ults() and not sd.is_empty()
-			out.merge({"name": String(sd["name"]) if on else "Fusion", "icon": String(sd.get("icon", "")) if on else "bond", "col": Color(String(sd.get("col", "#ffffff"))) if on else Color("ffd27a"),
-				"tag": ("level 6 · %ss · %ss fuse" % [KinText.n(float(sd.get("cooldown", 100.0))), KinText.n(float(sd.get("fuse", 0.45)))]) if on else "level 6 · full bond meter", "line": String(cd.get("r", "")) if on else "You and your Boki become one: its colour, its type, your abilities changed."}, true)
+			# the Merge key is the Merge for every class
+			out.merge({"name": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter", "line": "You and your Boki become one: its colour, its type, your abilities changed."}, true)
 			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
 				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
-				] + ([["Held back", "%s: %s (the Hunter's own ultimate, off while the Fusion is on %s)" % [String(sd["name"]), String(sd.get("desc", "")), Settings.key_cap("ultimate")]]] + _ranks(a, "ult") if not sd.is_empty() else [])
+				]
 	out["icon"] = ICON_FIX.get(out["icon"], out["icon"])
 	return out
 
@@ -339,8 +334,8 @@ static func _how(variants: Array) -> String:
 	var ways := variants.filter(func(k): return k in ["tap", "hold", "air"]).map(func(k): return String(k).capitalize())
 	return " / ".join(ways) + (" only" if ways.size() == 1 else "")
 
-static func _charges(a: String) -> String:
-	return str(int(Data.CLASSES.get(Arch.weight(a), {}).get("dashes", 1)))
+static func _charges(a: String, sd: Dictionary) -> String:
+	return str(int(sd.get("charges", Data.CLASSES.get(Arch.weight(a), {}).get("dashes", 1))))
 
 static func _wstat(st: Dictionary) -> String:
 	if st.get("melee", false):

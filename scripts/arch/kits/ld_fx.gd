@@ -592,8 +592,9 @@ func _pose(n: Node3D, at: Vector3, vel: Vector2, trail: float, width: float) -> 
 
 ## Grimble's arm stretched from a to b this step: a tube of purple flesh, thick at the shoulder end, thin and
 ## sinewy between, swelling at the forearm and turning to bone at the hook; it sags a little and its flesh
-## pulses (seen through walls). Stop calling and it goes.
-func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
+## pulses (seen through walls). `bend` bows its middle out that far (the flesh trailing or settling). Stop calling
+## and it goes.
+func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32, bend := Vector3.ZERO) -> void:
 	var e: Dictionary = arms.get(id, {})
 	if e.is_empty() or not is_instance_valid(e["node"]):
 		var im := ImmediateMesh.new()
@@ -627,7 +628,7 @@ func arm(id: String, a: Vector3, b: Vector3, col: Color, thick := 0.32) -> void:
 		var r := thick * 0.5 * lerpf(1.0, 0.5, sin(minf(k * 1.6, 1.0) * PI * 0.5))     # thick shoulder to thin sinew
 		r *= 1.0 + 0.55 * smoothstep(0.7, 1.0, k)                                      # the forearm swells at the hook
 		r *= 1.0 + 0.1 * sin(k * length * 4.0 - float(m.time) * 9.0)                   # the flesh pulses
-		rings.append([a.lerp(b, k) + Vector3.UP * sin(k * PI) * length * 0.035, r, k])
+		rings.append([a.lerp(b, k) + (Vector3.UP * length * 0.035 + bend) * sin(k * PI), r, k])
 	for j in ARM_SIDES:
 		var ang0 := TAU * j / ARM_SIDES
 		var ang1 := TAU * (j + 1) / ARM_SIDES
