@@ -98,8 +98,8 @@ func _pick(entries: Array) -> Dictionary:
 
 ## Makes a freshly spawned monster belong to its region: the region's version of it (name, colour,
 ## stats), a rarity, and mutations from the region's list. Rarity climbs with the tier and with how
-## dangerous the island is; rarer monsters roll more mutations.
-func dress(mb: Mob) -> void:
+## dangerous the island is (a named camp passes its tier's `rarity` instead); rarer monsters roll more mutations.
+func dress(mb: Mob, rarity := -1) -> void:
 	if mb == null or mb.mkind in ["warden", "glimmer"]:
 		return
 	var B := _biome(mb.pos)
@@ -118,11 +118,15 @@ func dress(mb: Mob) -> void:
 	# rarity: shift weight from common toward the top with the tier and the island's danger
 	var lift := float(int(m.tier) + _danger(mb.pos)) * float(B.get("danger_mult", 1.0))
 	var wts := [60.0 - lift * 12.0, 25.0 + lift * 4.0, 11.0 + lift * 5.0, 4.0 + lift * 3.0]
-	var ri := 0
-	var roll: float = rng.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
-	for i in 4:
-		roll -= maxf(1.0, wts[i])
-		if roll <= 0.0: ri = i; break
+	var ri := rarity
+	if ri < 0:
+		ri = 0
+		var roll: float = rng.randf() * (float(wts[0]) + float(wts[1]) + float(wts[2]) + float(wts[3]))
+		for i in 4:
+			roll -= maxf(1.0, wts[i])
+			if roll <= 0.0:
+				ri = i
+				break
 	var R: Dictionary = RARITY[ri]
 	# mutations
 	var muts: Array = []

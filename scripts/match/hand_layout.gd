@@ -32,7 +32,7 @@ static func stamp_ramp(w: World, R: Dictionary, ii: int) -> void:
 			if stair: w.authored_stairs[i] = d
 			else: w.authored_stairs.erase(i)
 
-## A hand-made layout's places, exactly where it lists them (World.hand): landings, chests, camps,
+## A hand-made layout's places, exactly where it lists them (World.hand): landings, chests, camps (also per region),
 ## wild Boki, breakables, weapons, the shrine, Warden posts and trap spots. Nothing is rolled here.
 static func place_spots(w: World, defs: Array) -> void:
 	w.shrine_spots.clear(); w.break_spots.clear(); w.weapon_spots.clear()
@@ -79,6 +79,19 @@ static func place_spots(w: World, defs: Array) -> void:
 			var q: Vector3 = at.call(a)
 			if q != Vector3.INF:
 				w.labels.append({"name": String(a[2]), "pos": q, "kind": "poi", "role": String(D.get("role", "")), "height": q.y})
+	# named camps (Camps): each region lists its own, with a fixed monster set, tier, timer and reward
+	for R in w.regions:
+		for cd in R.get("camps", []):
+			var q: Vector3 = at.call(cd["at"])
+			if q == Vector3.INF:
+				continue
+			w.camp_spots.append({
+				"pos": q,
+				"island": w.island[w.idx(int(q.x), int(q.z))],
+				"kind": Camps.KIND[int(cd["tier"])],
+				"def": cd,
+				"region": String(R["id"]),
+			})
 	# the exits stand exactly where the layout puts them, in the order they open
 	for ap in w.authored_portals:
 		var q: Vector3 = at.call([(ap as Vector2).x, (ap as Vector2).y])

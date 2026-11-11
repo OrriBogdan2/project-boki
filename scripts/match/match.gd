@@ -45,6 +45,7 @@ var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare E
 var truce: Truce = null     # emotes and truces between squads (see Truce)
 var skydrop: DropSquad = null  # the planning phase before the ship sets off, drop leaders and formations (see DropSquad)
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
+var camps: Camps = null       # the monster camps: fixed sets, tiers, respawn timers, rewards (see Camps)
 var time := 0.0
 var acc := 0.0
 var player: Hunter = null
@@ -974,41 +975,8 @@ func _apply_treat(k: Kin) -> void:
 		"treat_calm": k.trust = minf(100.0, k.trust + 12.0)
 
 func _spawn_mobs() -> void:
-	if net_on and not is_host:
-		return
-	for c in world.camp_spots:
-		await _slice()
-		var p: Vector3 = c["pos"]
-		var comp: Array
-		match String(c.get("kind", "normal")):
-			"heavy": comp = ["brute", "spitter", "skitter", "sentinel"]
-			"light":
-				var lr := rng.randf()
-				comp = ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
-			_:
-				var nr := rng.randf()
-				if nr < 0.15 * tier + 0.2:
-					comp = ["brute", "skitter", "bomber"]
-				elif nr < 0.5:
-					comp = ["skitter", "bomber", "spitter"]
-				elif nr < 0.75:
-					comp = ["sentinel", "skitter", "skitter"]
-				else:
-					comp = ["spitter", "skitter", "bomber"]
-		# a camp in a biome region spawns from that region's table instead
-		var bcomp: Array = biomes.camp_comp(c) if biomes else []
-		if not bcomp.is_empty(): comp = bcomp
-		var made: Array = []
-		for kk in comp:
-			var q := p
-			for _t in 20:
-				var cand := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
-				if not world.is_void(cand.x, cand.z) and not world.is_block(cand.x, cand.z):
-					q = Vector3(cand.x, world.ground_at(cand.x, cand.z), cand.z); break
-			var smb := spawn_mob(kk, q)
-			if biomes: biomes.dress(smb)
-			made.append(smb)
-		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
+	camps = Camps.new(self)
+	await camps.spawn_all()
 
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
@@ -3963,6 +3931,7 @@ func step(dt: float) -> void:
 	_prof("lairs")
 	if truce: truce.tick(dt)
 	if spawn_plan: spawn_plan.tick(dt)
+	if camps: camps.tick(dt)
 	_prof("truce_spawns")
 	_update_events()
 	_update_zones(dt)
@@ -5456,6 +5425,8 @@ func _net_ev(x, from: String) -> void:
 			BoxRevive.net_in(self, x)
 		"ht":
 			if heart: heart.net_in(x)
+		"camp":
+			if camps: camps.net_in(x)
 		"emo":
 			var eh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			if truce and eh: truce.emote(eh, String(x[2]), true)

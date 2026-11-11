@@ -143,6 +143,7 @@ func _add(D: Dictionary) -> void:
 	L["heard"] = {}
 	L["nodes"] = {"gate": gate, "dome": dome, "dial": dn, "label": lbl, "lever": lvn, "vent": vn, "beam": beam}
 	L["col"] = col
+	L["wake"] = float(D.get("wake", 0.0))     # match second its boss rises (the map's lairs[].wake; 0: at once)
 	# lairs stay dormant (empty, sealed for good) until SpawnPlan rolls them live: see plug_into
 	_tint_dormant(L, true)
 
@@ -180,7 +181,7 @@ func plug_into(plan: SpawnPlan) -> void:
 		for L in list:
 			plan.add_candidate("boss", L["c"], String(L["name"]))
 		plan.register("boss", {"pick": [1, list.size()]})
-	plan.set_spawner("boss", func(_p, cand): return activate_near(cand["pos"]),
+	plan.set_spawner("boss", func(_p, cand): return _go_live(_near(cand["pos"])),
 		func(cand): return String(_near(cand["pos"]).get("state", "")) == "cleared")
 	plugged = true
 
@@ -193,19 +194,33 @@ func _near(p: Vector3) -> Dictionary:
 		if d < bd: bd = d; best = L
 	return best if bd < 6.0 else {}
 
-func activate_near(p: Vector3) -> Dictionary:
-	var L := _near(p)
-	if not L.is_empty(): activate(L)
+## SpawnPlan picked this lair: live this match, its boss rising at the lair's wake time (tick), the same every
+## match. Until then it stays rusted shut and the map counts down to it.
+func _go_live(L: Dictionary) -> Dictionary:
+	if L.is_empty() or L["active"]:
+		return L
+	if float(L["wake"]) <= m.time:
+		activate(L)
+		return L
+	L["active"] = true
+	(L["nodes"]["label"] as Label3D).text = "%s\nWakes at %s" % [L["name"], clock(float(L["wake"]))]
 	return L
+
+## Seconds until a live lair's boss rises (0 once it has, or for a lair that is not live).
+func wake_left(L: Dictionary) -> float:
+	if not L["active"] or L["state"] != "dormant":
+		return 0.0
+	return maxf(0.0, float(L["wake"]) - m.time)
 
 ## Without a spawn plan (tests, odd modes) every lair is live.
 func ensure_live() -> void:
 	if not plugged:
 		for L in list: activate(L)
 
-## Wakes a lair up for this match: its boss asleep in the middle, guards at the gate, and its other way in.
+## Wakes a lair up now (its wake time come, tests, demos): its boss asleep in the middle, guards at the gate,
+## and its other way in.
 func activate(L: Dictionary) -> void:
-	if L["active"]:
+	if L["active"] and L["state"] != "dormant":
 		return
 	L["active"] = true
 	L["state"] = "sealed"
@@ -984,6 +999,8 @@ func tick(dt: float) -> void:
 	if list.is_empty():
 		return
 	for L in list:
+		if L["active"] and L["state"] == "dormant" and wake_left(L) <= 0.0:
+			activate(L)
 		_tick_dial(L, dt)
 		_tick_seal(L, dt)
 		_tick_lock(L, dt)
@@ -1073,8 +1090,16 @@ func _tick_seal(L: Dictionary, dt: float) -> void:
 		_push_out(L, e)
 		if e == m.player and m.hud and m.time - float(_told.get("seal", -9.0)) > 3.0:
 			_told["seal"] = m.time
-			m.hud.toast(("%s is sealed. Open its gate first" if L["state"] == "sealed" else "%s lies dormant this time. Its gate is rusted shut") % L["name"], color_of(L))
+			m.hud.toast(_shut_word(L), color_of(L))
 			m.sfx("shield", e.pos, -4.0, 1.4)
+
+## Why a lair keeps you out: sealed, its boss not risen yet, or not live this match.
+func _shut_word(L: Dictionary) -> String:
+	if L["state"] == "sealed":
+		return "%s is sealed. Open its gate first" % L["name"]
+	if L["active"]:
+		return "%s is still asleep. Its boss wakes at %s" % [L["name"], clock(float(L["wake"]))]
+	return "%s lies dormant this time. Its gate is rusted shut" % L["name"]
 
 ## Puts someone just outside a lair's walls, out the nearest side (or by the dial), set down still.
 func _push_out(L: Dictionary, e: Ent) -> void:

@@ -2727,7 +2727,7 @@ func _stamp_lair(D: Dictionary, ii: int) -> void:
 	islands[ii]["lair"] = true
 	lair_defs.append({"id": String(D.get("id", "lair%d" % lair_defs.size())), "name": String(D.get("name", "Boss Lair")),
 		"boss": String(D.get("boss", "colossus")), "c": c, "half": hf, "gate": gate, "gate_tiles": gate_tiles, "out": out,
-		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["dial"])})
+		"island": ii, "y": lv * LEVEL, "entry": D.get("entry", ["dial"]), "wake": float(D.get("wake", 0.0))})
 	labels.append({"name": String(D.get("name", "Boss Lair")), "pos": Vector3(c.x, 0, c.y), "kind": "lair", "role": "lair", "height": lv * LEVEL})
 
 ## Nothing else is placed inside a lair: no spawns, chests, camps, wild kin or loot lying about.
