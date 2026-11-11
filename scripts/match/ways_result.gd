@@ -23,6 +23,12 @@ static func how_line(r: Dictionary) -> String:
 		return "Your squad placed %s of %d. " % [ordinal(int(r["place"])), int(r["squads"])]
 	return ""
 
+## The one plain line when hiding earned nothing.
+static func hid_line(r: Dictionary) -> String:
+	if r.get("extracted", false) or not r.get("hid", false) or r.get("tutorial", false):
+		return ""
+	return "No placement pay: your squad never levelled up."
+
 static func ordinal(n: int) -> String:
 	var tail := n % 100
 	if tail < 11 or tail > 13:
@@ -33,7 +39,8 @@ static func ordinal(n: int) -> String:
 	return "%dth" % n
 
 ## Where `team` placed among the squads of `hunters` when the match ended for it: {} when one of its Hunters
-## left (a squad that left has a seat, not a place), else {place, squads}. A squad is over when its last
+## left (a squad that left has a seat, not a place), else {place, squads, hid}; `hid` is a squad no Hunter of
+## which reached place "min_level" (it hid; no placement pay). A squad is over when its last
 ## Hunter went out (met "died_at"); one with a Hunter still in or out the door ranks above any that is over;
 ## over at the same moment (the islands falling) is a tie. `now` is when the player's match ended.
 static func placing(hunters: Array, team: int, now: float) -> Dictionary:
@@ -50,7 +57,9 @@ static func placing(hunters: Array, team: int, now: float) -> Dictionary:
 	for t in ends:
 		if t != team and float(ends[t]) > mine:
 			above += 1
-	return {"place": above + 1, "squads": ends.size()}
+	var min_level := int(place_rules()["min_level"])
+	var hid := not hunters.any(func(h): return h.team == team and h.lvl >= min_level)
+	return {"place": above + 1, "squads": ends.size(), "hid": hid}
 
 ## Gems for a squad that did not leave: a few for every squad that went out before it, up to a cap.
 static func pay(place: int, squads: int) -> int:
@@ -59,7 +68,7 @@ static func pay(place: int, squads: int) -> int:
 
 ## Game.apply_result: placement pay into the save and the summary.
 static func settle(r: Dictionary, out: Dictionary) -> void:
-	if r.get("extracted", false) or r.get("tutorial", false) or int(r.get("place", 0)) <= 0:
+	if r.get("extracted", false) or r.get("tutorial", false) or int(r.get("place", 0)) <= 0 or r.get("hid", false):
 		return
 	out["place_gems"] = pay(int(r["place"]), int(r["squads"]))
 	Save.d["gems"] = int(Save.d["gems"]) + int(out["place_gems"])
