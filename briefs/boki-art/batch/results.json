@@ -111352,5 +111352,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_marchleaf_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_mirrolin",
+    "name": "Mirrolin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mirrolin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_maulangler",
+    "name": "Maulangler (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_maulangler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_malletary",
+    "name": "Malletary (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_malletary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_medushroom",
+    "name": "Medushroom (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_medushroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_meteorab",
+    "name": "Meteorab (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_meteorab_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_marimbite",
+    "name": "Marimbite (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_marimbite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_maracoil",
+    "name": "Maracoil (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_maracoil_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_morelkin",
+    "name": "Morelkin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_morelkin_1.jpg",
+    "ok": true
   }
 ]
