@@ -111912,5 +111912,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_slog_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_sloggoth",
+    "name": "Sloggoth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sloggoth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_soakybara",
+    "name": "Soakybara (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_soakybara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_snuffapi",
+    "name": "Snuffapi (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_snuffapi_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_snapler",
+    "name": "Snapler (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_snapler_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_spanglin",
+    "name": "Spanglin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_spanglin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_skidlet",
+    "name": "Skidlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_skidlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_sphinxblight",
+    "name": "Sphinxblight (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sphinxblight_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_stamproo",
+    "name": "Stamproo (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_stamproo_1.jpg",
+    "ok": true
   }
 ]
