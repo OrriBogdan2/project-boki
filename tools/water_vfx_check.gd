@@ -200,7 +200,8 @@ func _film(main: Node, hm, hero: String) -> void:
 	await tree.create_timer(0.3).timeout
 	_put(hm, Vector3(STREAM_X - 1.2, 0, STREAM_Z.y + 0.5))
 	# at home you are the Unmasked: the film wears the Hunter's own look, as in a match, so it shows them
-	var body: Node3D = Models.hunter(Data.class_of_save(), Data.TEAM_COLORS[0], hm._weapon(), "", Unmasked.mask_look(), hero)
+	var cls := Data.class_of_save()
+	var body: Node3D = Models.hunter(cls, Data.TEAM_COLORS[0], hm._weapon(), "", Unmasked.mask_look(), hero)
 	hm.player.queue_free()
 	hm.player = body
 	hm.add_child(body)
