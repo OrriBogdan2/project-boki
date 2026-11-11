@@ -32,5 +32,16 @@ radius 0.4 m when nobody is targeted yet, as on a remote client). The vertical r
 For each attacker: the tells read back off the telegraph nodes equal the real hit within 5 % (a stand-in
 at 95 % of every edge is hurt, at 105 % it is not, running the real attack); the fill reaches 1.0 on the
 hit frame and not before; the full tell is still up on that frame; the body glow peaks on it; the tint is
-the rival one; and an instant blow (lunge, slam, burst) leaves a hunter on foot (4.4 m/s) the time to step
+the rival one; the tell is up for the whole wind-up (lead >= wind-up); and an instant blow (lunge, slam, burst) leaves a hunter on foot (4.4 m/s) the time to step
 out while its shape is fixed.
+The attackers are read from `Data.MOBS`, so a mob added with an attack id that has no tell fails
+(lair bosses, attack `boss`, telegraph through `boss.gd`). Only the mob under test fights: the
+map's own camps are taken out each step, because a wandering skitter pushing the stand-in moved it off
+the edge probes.
+
+## Low and Very Low presets
+Nothing in a tell depends on the preset: the ground telegraph is the Fx telegraph shader (no particles,
+so the `fx` amount does not thin it), and the body glow is an albedo mix, so it still shows under Very
+Low's unshaded draw. At the default match camera (57 deg pitch, 32.2 m, 28 deg fov) the narrowest tell, the
+skitter lane (0.9 m + the target's radius on each side = 1.7 m), is about 1/9 of the screen height. Strips
+per preset: `--mob-tell-check --quality=low|very_low --shots-dir=<dir>`.
