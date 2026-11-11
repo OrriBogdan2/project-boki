@@ -110904,5 +110904,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_ghoulamari_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_furnacowary",
+    "name": "Furnacowary (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_furnacowary_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_geodemole",
+    "name": "Geodemole (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_geodemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gambitfin",
+    "name": "Gambitfin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gambitfin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_forgebrock",
+    "name": "Forgebrock (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_forgebrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_frigatee",
+    "name": "Frigatee (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_frigatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_geysirbara",
+    "name": "Geysirbara (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_geysirbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_galleotter",
+    "name": "Galleotter (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_galleotter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glacione",
+    "name": "Glacione (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glacione_1.jpg",
+    "ok": true
   }
 ]
