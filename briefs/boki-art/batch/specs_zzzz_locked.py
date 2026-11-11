@@ -84,3 +84,4 @@ DROP-={'v2s_ringrove_m','v2p_ringrove_m'}
 DROP-={'px9_glaivyx','px9_ringrove'}  # 11-11 pixel sprites
 DROP|={'on_pinguin_pena','on_pinguin_penb','on_pinguin_penc'}  # 11-11 owner: Kegling looks fine
 DROP|={'v2p_filefin_cmp_dive','v2p_filefin_cmp_rise','v2p_filefin_cmp_turn','v2p_scopeleon_cmp_climb','v2p_scopeleon_cmp_front','v2p_scopeleon_cmp_up'}  # 11-11 replaced by card poses pose_*_cmp_*
+DROP|={'v2s_kingpinguin_ball','v2p_kingpinguin_ball','px9e_kingpinguin'}  # 11-11 paused: ball Pipguin being redrawn in house style

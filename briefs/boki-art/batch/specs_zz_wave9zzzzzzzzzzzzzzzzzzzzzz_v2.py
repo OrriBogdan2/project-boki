@@ -2390,3 +2390,11 @@ for _k,_d in (('ball',"a huge heavy penguin whose whole round body is a polished
 V2SHEET_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg',_GC,_GN); SPECS[-1]['id']='v2s_kingpinguin_ball'; SPECS[-1]['runs']=4; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
 V2PORT_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg','final','tough',_GC,_GN,False,False,"curled into its ball shape mid-roll, head tucked, flippers in, about to strike"); SPECS[-1]['id']='v2p_kingpinguin_ball'
 SPECS.append({'id':'px9e_kingpinguin','name':'Kingpinguin (pixel sprite 80, ball body)','refs':['briefs/boki-art/cards/Kingpinguin.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
+
+# 11-11 OWNER: the ball Pipguin "looks too comical / not the same style". Keep the ball-body idea, redraw in the house look. Set jobs above paused.
+_PGB=("Keep this creature's idea exactly: a large heavy penguin whose round body is a polished marbled bowling ball, deep navy with white and red marble veins, "
+ "three finger-hole markings on its chest, small strong flippers, red feet. Redraw it in the calm house style: a natural penguin head and beak, calm confident "
+ "half-lidded eyes, closed beak or a slight smile, NO scowl, NO teeth, NO wide grin; thin outlines in a dark shade of the local colour, flat colours with one soft shade. ")
+for _k,_p in (('stand',"Standing planted and proud, facing three-quarter left."),('roll',"Leaning forward as it starts to roll, one flipper tucked, eyes on the target."),
+              ('rest',"Sitting heavily like a dropped bowling ball, flippers resting on its sides, looking at the viewer.")):
+    SPECS.append({'id':'pg_ball_'+_k,'name':'Pipguin ball body, house style '+_k,'refs':['briefs/boki-art/cards/Kingpinguin.jpg'],'runs':2,'aspect':'1:1','size':'2K','prompt':_EDIT.replace('Only change this:','Change only the drawing style and pose:') if False else _PGB+_p+" "+STYLE_V2('final','tough',False,False)+FRAME_V2})
