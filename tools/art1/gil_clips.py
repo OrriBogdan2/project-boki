@@ -376,6 +376,263 @@ LIE = m(TIPPED, hips=(6, 0, 0), head=(-6, 0, 18), hr=hand(0.26, 0.0, -0.18), br=
 C.bake("death", DOWN_T, [(0, LOOSE), (0.05, m(HIT_F, e="snap")), (0.24, TIPPED), (0.42, m(TIPPED, hips=(24, 0, -8))),
                          (0.78, m(LIE, e="in")), (DOWN_T, LIE)], over=on_back)
 
+# ---------------------------------------------------------------------- crouch, landing, stun, emote, revive, dive
+# the crouch is a cartoon sneak: knees deep, hunched over the bill held up close, the free hand up by his mouth as if
+# that hides him, the head low and darting; the sneak ring tiptoes on the balls of his boots
+CROUCH = m(LOOSE, pos=(0.0, -0.01, -0.1), hips=(-24, 0, 0), head=(20, 0, 0), tail=(-12, 0, 0),
+           hr=hand(0.0, 0.16, -0.2), br=(0.1, 0.9, 0.3), hl=lhand(-0.04, 0.14, -0.04), wl=(0, 0, -25),
+           fr=(AX + 0.04, 0.03, AZ), fl=(-AX - 0.04, -0.02, AZ), kr=(0.45, 1, 0), kl=(-0.45, 1, 0))
+CROUCH_DIP = m(CROUCH, pos=(0.0, -0.01, -0.125), hips=(-28, 0, 0), head=(24, 0, 0))
+CROUCH_T = 3.0
+
+
+def crouch_life(t, p):
+    """Breath, a peek over one shoulder and the other, a tail twitch: he is sure everyone can see him."""
+    T = CROUCH_T
+    breathe(t, p, T)
+    left = plateau(t, 0.3, 0.42, 0.9, 1.05, T, "snap")
+    right = plateau(t, 1.5, 1.62, 2.1, 2.3, T, "snap")
+    add(p, "head", (0, -6.0 * left + 6.0 * right, 30.0 * left - 30.0 * right))
+    add(p, "hips", (0, 0, 6.0 * left - 6.0 * right))
+    add(p, "tail", (0, 0, 22.0 * bump(t, 2.4, 2.7, T) * cyc(t, 12, T)))
+
+
+def sneak(T, dx, dy):
+    """The gait low and on tiptoe; the hands stay up where he put them, a small pump only."""
+    g = gait(T, 0.4 * (0.6 if dx else 1.0), 0.06, 0.56, dx, dy, -24.0 if dy >= 0 else -16.0, 0.008, 0.0,
+             waddle=0.6, turn=-dx * 16.0, sink=0.1)
+
+    def f(t, p):
+        g(t, p)
+        ph = t / T
+        lift_heel(p, "r", 10.0)
+        lift_heel(p, "l", 10.0)
+        p["head"] = (20.0 + 2.0 * math.cos(ph * tau * 2), 0, 4.0 * math.sin(ph * tau))
+        p["hr"] = hand(0.0, 0.16 + 0.02 * math.sin(ph * tau), -0.2)
+        p["br"] = CROUCH["br"]
+        p["hl"] = lhand(-0.04, 0.14 + 0.02 * math.sin(ph * tau + math.pi), -0.04)
+        p["wl"] = CROUCH["wl"]
+    return f
+
+
+C.bake("crouch_idle", CROUCH_T, [(0, CROUCH), (CROUCH_T, {})], over=crouch_life, loop=True)
+CROUCH_STEP = 0.4              # s a sneak cycle: stride 0.4 m over 0.56 of it, about the crouch speed (2.42 m/s at 0.55)
+for nm, (dx, dy) in DIRS.items():
+    C.bake("crouch_" + nm, CROUCH_STEP, [(0, CROUCH), (CROUCH_STEP, {})], loop=True, over=sneak(CROUCH_STEP, dx, dy))
+C.bake("crouch_in", 0.3, [(0, LOOSE), (0.12, m(CROUCH_DIP, e="out")), (0.3, CROUCH)])
+C.bake("crouch_out", 0.3, [(0, CROUCH), (0.1, m(LOOSE, pos=(0.0, 0.0, 0.01), e="out")), (0.3, LOOSE)])
+
+# a landing: the knees take it deep, both arms flung out like fins for balance, the chin straight back up, the tail
+# slapping down; a little bounce back up off it
+LAND = m(LOOSE, pos=(0.0, 0.01, -0.09), hips=(-16, 0, 0), head=(12, 0, 0), tail=(-30, 0, 0),
+         hr=hand(0.2, 0.08, -0.2), br=(0.6, 0.7, -0.2), hl=lhand(0.24, 0.04, -0.12), wl=(0, 0, -40),
+         kr=(0.35, 1, 0), kl=(-0.35, 1, 0))
+C.bake("land", 0.36, [(0, m(LAND, e="snap")), (0.06, LAND), (0.2, m(LOOSE, pos=(0.0, 0.0, 0.012), e="out")),
+                      (0.36, LOOSE)])
+
+# stunned: he sways round in a slow circle on locked knees, head lolling the other way, the bill drooping to the
+# ground, the free hand limp, the tail hanging; a gulp of air at the top of each circle
+STUN = m(LOOSE, pos=(0.0, 0.0, -0.03), hips=(-8, 0, 0), head=(-12, 0, 0), tail=(-20, 0, 0),
+         hr=hand(0.08, 0.06, -0.4), br=(0.1, 0.4, -0.9), hl=lhand(0.1, 0.0, -0.4), wl=(0, 0, 10))
+STUN_T = 1.2
+
+
+def daze(t, p):
+    T = STUN_T
+    add(p, "pos", (0.02 * cyc(t, 1, T), 0.02 * cyc(t, 1, T, math.pi / 2), 0))
+    add(p, "hips", (5.0 * cyc(t, 1, T, math.pi / 2), 7.0 * cyc(t, 1, T), 0))
+    add(p, "head", (-8.0 * cyc(t, 1, T, math.pi), -14.0 * cyc(t, 1, T, 0.6), 10.0 * cyc(t, 1, T, 1.4)))
+    add(p, "hl", (0.02 * cyc(t, 1, T, 0.4), 0, 0))
+    add(p, "tail", (0, 0, 12.0 * cyc(t, 1, T, 2.0)))
+
+
+C.bake("stun", STUN_T, [(0, STUN), (STUN_T, {})], over=daze, loop=True)
+
+# the emote: a fencer's salute he has been practising (the bill up before his face, a flourish down to the side),
+# then a bow far too deep, and back up into two giddy bounces, the fin-hand flapping and the tail going
+SALUTE = m(LOOSE, pos=(0.0, 0.0, 0.01), hips=(2, 0, 0), head=(10, 0, 0), hr=hand(-0.14, 0.14, 0.0),
+           br=(0.0, 0.08, 1.0), hl=lhand(0.0, -0.06, -0.3), fr=(AX + 0.0, 0.0, AZ), fl=(-AX - 0.0, -0.02, AZ),
+           frt=0.0, flt=0.0)
+FLOURISH = m(SALUTE, hips=(-4, 0, -6), hr=hand(0.2, 0.2, -0.24), br=(0.7, 0.6, -0.4), head=(6, 0, 4))
+BOW = m(FLOURISH, pos=(0.0, -0.03, -0.03), hips=(-40, 0, 0), head=(-14, 0, 0), tail=(30, 0, 0),
+        hl=lhand(-0.08, 0.12, -0.04), wl=(0, 0, -20), fl=(-AX - 0.02, -0.08, AZ))
+CHEER = m(LOOSE, hips=(-2, 0, 0), head=(16, 0, 0), hr=hand(0.1, 0.1, 0.1), br=(0.2, 0.4, 0.9),
+          hl=lhand(0.12, 0.04, 0.0))
+
+
+def giddy(t, p):
+    b = bump(t, 1.3, 1.5, 9.0) + bump(t, 1.5, 1.7, 9.0)
+    lift_heel(p, "r", 20.0 * b)
+    lift_heel(p, "l", 20.0 * b)
+    add(p, "pos", (0, 0, 0.04 * b))
+    w = plateau(t, 1.25, 1.35, 1.75, 1.95, 9.0)
+    add(p, "wl", (0, 0, 40.0 * w * cyc(t, 16, 2.0)))
+    add(p, "hl", (0, 0, 0.04 * w * cyc(t, 16, 2.0)))
+    add(p, "tail", (0, 0, 24.0 * w * cyc(t, 12, 2.0)))
+
+
+C.bake("emote", 2.0, [(0, LOOSE), (0.25, m(SALUTE, e="out")), (0.55, SALUTE), (0.72, m(FLOURISH, e="snap")),
+                      (0.9, m(BOW, e="io")), (1.15, BOW), (1.32, m(CHEER, e="out")), (1.75, CHEER), (2.0, LOOSE)],
+       over=giddy)
+
+# reviving a fallen Boki: down on one knee beside it, the swordfish laid across his lap, fanning it with the free hand
+# and patting it, now and then looking up for help; the clip plays once and holds on its last fan
+KNEEL = m(LOOSE, pos=(0.0, 0.02, -0.17), hips=(-30, 0, 0), head=(-6, 0, 0), tail=(-10, 0, 0),
+          hr=hand(0.0, 0.16, -0.26), br=(-0.6, 0.6, -0.4), hl=lhand(-0.06, 0.26, -0.2), wl=(0, 0, 0),
+          fr=(AX + 0.02, 0.12, AZ), fl=(-AX - 0.04, -0.14, AZ), fla=40.0, kr=(0.2, 1, 0), kl=(-0.2, 1, -0.6))
+REVIVE_T = 1.8
+
+
+def fan(t, p):
+    k = plateau(t, 0.0, 0.3, 9.0, 9.5, 9.0)
+    add(p, "hl", (0.04 * k * cyc(t, 6, REVIVE_T), 0, 0.05 * k * cyc(t, 6, REVIVE_T, math.pi / 2)))
+    add(p, "wl", (0, 0, 35.0 * k * cyc(t, 6, REVIVE_T)))
+    up = plateau(t, 0.8, 0.92, 1.2, 1.35, 9.0, "snap")
+    add(p, "head", (30.0 * up, 0, 14.0 * up))
+    add(p, "tail", (0, 0, 10.0 * cyc(t, 2, REVIVE_T)))
+
+
+C.bake("revive", REVIVE_T, [(0, LOOSE), (0.3, m(KNEEL, e="out")), (REVIVE_T, KNEEL)], over=fan)
+
+# a dive head first like a fish into water (Ground Swim's), both hands together ahead, the bill along them, the boots
+# together behind
+DIVE = m(LOOSE, rot=(-55, 0, 0), pos=(0.0, 0.0, 0.1), hips=(-8, 0, 0), head=(26, 0, 0), tail=(20, 0, 0),
+         hr=hand(-0.12, 0.3, 0.3), br=(0.0, 0.6, 0.8), hl=lhand(-0.12, 0.3, 0.3), wl=(0, 0, 0),
+         fr=(AX - 0.03, -0.3, AZ + 0.32), fl=(-AX + 0.03, -0.32, AZ + 0.3), fra=-40.0, fla=-40.0, frt=0.0, flt=0.0)
+
+# fusing with his Boki (mf_xform, 0.8 s): a gasp up onto his toes with the arms flung wide, drawn in tight, and out
+FUSE_GASP = m(CHEER, hips=(8, 0, 0), head=(24, 0, 0), hr=hand(0.3, 0.0, 0.05), br=(0.8, 0.2, 0.5),
+              hl=lhand(0.3, 0.0, 0.05), wl=(0, 0, -40), tail=(30, 0, 0))
+FUSE_TIGHT = m(CROUCH_DIP, hr=hand(-0.1, 0.08, -0.1), br=(0.0, 0.3, 1.0), hl=lhand(-0.1, 0.08, -0.1), tail=(-20, 0, 0))
+
+
+def tiptoe(t, p):
+    b = bump(t, 0.05, 0.4, 9.0)
+    lift_heel(p, "r", 26.0 * b)
+    lift_heel(p, "l", 26.0 * b)
+    add(p, "pos", (0, 0, 0.04 * b))
+
+
+C.bake("fuse", 0.8, [(0, LOOSE), (0.2, m(FUSE_GASP, e="out")), (0.42, m(FUSE_TIGHT, e="in")),
+                     (0.6, m(FUSE_GASP, hips=(-4, 0, 0), e="out")), (0.8, LOOSE)], over=tiptoe)
+
+# ---------------------------------------------------------------------- Grab Bag, Riptide, Ground Swim, Tidal Wave
+# Grab Bag (rmb): an eager overhand lob from the free hand, the potion gone on the press (the kit throws it then), a
+# hop of the front boot after it, the hand left waving it off
+TOSS_COCK = m(LOOSE, hips=(2, 0, -18), head=(8, 0, 14), hl=lhand(0.08, -0.14, 0.28), wl=(0, 0, 30), tail=(0, 0, 14),
+              hr=hand(0.06, 0.06, -0.3))
+TOSS = m(LOOSE, pos=(0.0, 0.03, -0.02), hips=(-10, 0, 16), head=(10, 0, -10), hl=lhand(-0.06, 0.36, 0.12),
+         wl=(0, 0, -30), tail=(0, 0, -16), hr=hand(0.1, -0.02, -0.32), fl=(-AX - 0.02, 0.1, AZ))
+C.bake("toss", 0.4, [(0, LOOSE), (0.04, m(TOSS_COCK, e="out")), (0.1, m(TOSS, e="snap")),
+                     (0.22, m(TOSS, hl=lhand(-0.04, 0.32, 0.02), wl=(0, 0, 20))), (0.4, LOOSE)],
+       over=lambda t, p: add(p, "wl", (0, 0, 30.0 * bump(t, 0.18, 0.4, 9.0) * cyc(t, 8, 0.4))))
+
+# Riptide (e): he winds the other way, then twirls on his toes, the swordfish out at arm's length, the free hand out
+# for balance, his head thrown back and the tail flying; a turn every SPIN_REV, held for as long as the kit spins
+SPIN_IN, SPIN_REV = 4 / 30, 0.4  # s: the wind-up, then one full turn (the loop the map holds from SPIN_IN)
+SPIN_WIND = m(GUARD, pos=(0.0, 0.0, -0.06), hips=(-6, 0, -40), head=(4, 0, 30), hr=hand(0.1, -0.1, -0.12),
+              br=(0.4, -0.8, 0.0), hl=lhand(0.1, 0.12, 0.0))
+TWIRL = m(LOOSE, pos=(0.0, 0.0, 0.0), hips=(6, -6, 0), head=(14, 0, 0), tail=(28, 0, 0),
+          hr=hand(0.36, 0.06, 0.04), br=(1.0, 0.12, 0.0), hl=lhand(0.3, 0.0, 0.06), wl=(0, 0, -30),
+          fr=(AX + 0.03, 0.02, AZ), fl=(-AX - 0.03, -0.02, AZ), frt=0.0, flt=0.0, kr=(0.2, 1, 0), kl=(-0.2, 1, 0))
+
+
+def turned(p, deg):
+    """All of him turned about up by deg: the root, the feet (model space) and their boots."""
+    c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+    for lab in ("r", "l"):
+        x, y, z = p["f" + lab]
+        p["f" + lab] = (x * c - y * s, x * s + y * c, z)
+        p["f" + lab + "t"] = p.get("f" + lab + "t", 0.0) + deg
+    x, y, z = p["pos"]
+    p["pos"] = (x * c - y * s, x * s + y * c, z)
+    r = p.get("rot", (0, 0, 0))
+    p["rot"] = (r[0], r[1], r[2] + deg)
+
+
+def twirl(t, p):
+    toes = A.ease(min(1.0, max(0.0, (t - 0.04) / (SPIN_IN - 0.04))), "io")
+    lift_heel(p, "r", 24.0 * toes)
+    lift_heel(p, "l", 24.0 * toes)
+    if t < SPIN_IN:
+        return
+    u = (t - SPIN_IN) / SPIN_REV
+    for lab, ph in (("r", 0.0), ("l", 0.5)):
+        add(p, "f" + lab, (0, 0, 0.035 * max(0.0, math.sin(tau * (u * 2 + ph)))))
+    add(p, "pos", (0, 0, 0.012 * math.cos(tau * u * 2)))
+    add(p, "tail", (0, 0, 10.0 * math.sin(tau * u)))
+    turned(p, 360.0 * u)
+
+
+SPIN_END = SPIN_IN + SPIN_REV
+C.bake("spin", SPIN_END, [(0, LOOSE), (0.08, m(SPIN_WIND, e="out")), (SPIN_IN, m(TWIRL, e="in")), (SPIN_END, TWIRL)],
+       over=twirl)
+
+# the spout let go (e again): he stamps out of the twirl into a thrust at the aim, the free hand thrown back, then
+# finds his feet
+SPOUT = m(LUNGE, pos=(0.0, 0.1, -0.11), hl=lhand(0.22, -0.3, 0.1), wl=(0, 0, -60), head=(18, 0, -30))
+C.bake("spout", 0.4, [(0, m(TWIRL, frt=0.0, flt=0.0)), (0.08, m(SPOUT, e="snap")), (0.2, SPOUT),
+                      (0.4, m(GUARD, e="io"))])
+
+# Ground Swim (dash, 0.4 s): a hop and a dive head first into the ground; under it only the back fin and the fork of
+# the tail cut the surface, sculling; then (surface) he bursts out arms up, lands in a squash and grins
+SWIM_IN, SWIM_STROKE = 4 / 30, 8 / 30   # s: the dive, then one stroke of the tail (the map holds the strokes from SWIM_IN)
+HOP = m(DIVE, rot=(-35, 0, 0), pos=(0.0, 0.05, 0.12))
+UNDER = m(DIVE, rot=(-88, 0, 0), pos=(0.0, -0.32, -0.16), head=(10, 0, 0), tail=(-20, 0, 0),
+          fr=(AX - 0.03, -0.42, -0.16), fl=(-AX + 0.03, -0.44, -0.14), fra=-80.0, fla=-80.0)
+
+
+def scull(t, p):
+    if t < SWIM_IN:
+        return
+    w = cyc(t - SWIM_IN, 1, SWIM_STROKE)
+    add(p, "hips", (0, 6.0 * w, 8.0 * w))
+    add(p, "tail", (0, 0, -30.0 * w))
+    add(p, "pos", (0.02 * w, 0, 0))
+
+
+SWIM_END = SWIM_IN + SWIM_STROKE
+C.bake("swim", SWIM_END, [(0, LOOSE), (0.08, m(HOP, e="out")), (SWIM_IN, m(UNDER, e="in")), (SWIM_END, UNDER)],
+       over=scull)
+TADA = m(CHEER, pos=(0.0, 0.04, 0.12), head=(22, 0, 0), hr=hand(0.2, 0.06, 0.2), br=(0.4, 0.3, 0.86),
+         hl=lhand(0.22, 0.04, 0.2), wl=(0, 0, -40), tail=(36, 0, 0),
+         fr=(AX + 0.02, 0.04, AZ + 0.1), fl=(-AX - 0.02, -0.02, AZ + 0.12), fra=-20.0, fla=-20.0)
+C.bake("surface", 0.45, [(0, UNDER), (0.12, m(TADA, e="out")), (0.24, m(LAND, e="in")), (0.3, LAND),
+                         (0.45, LOOSE)])
+
+# Tidal Wave (x, 1 s): he hops onto the crest and surfs it side-on, knees bent, both arms out, the swordfish up like
+# a banner and his mouth wide; a balance sway every SURF_SWAY; at the end he jumps off into a proud landing
+SURF_IN, SURF_SWAY = 4 / 30, 0.6
+SURF_TURN = 70.0               # deg: side-on to the line he surfs, the right boot leading
+# (in his own frame: a wide stance across him, which the turn lays along the line)
+SURF = m(LOOSE, pos=(0.0, 0.0, 0.04), hips=(-8, 0, -50), head=(18, 0, -40), tail=(10, 0, 0),
+         hr=hand(0.3, 0.0, 0.12), br=(0.5, 0.3, 0.8), hl=lhand(0.32, 0.0, 0.0), wl=(0, 0, -30),
+         fr=(AX + 0.12, 0.0, AZ + 0.08), fl=(-AX - 0.12, 0.0, AZ + 0.08), frt=0.0, flt=0.0,
+         kr=(0.6, 1, 0), kl=(-0.6, 1, 0))
+
+
+def ride(t, p):
+    turned(p, SURF_TURN * A.ease(min(1.0, max(0.0, (t - 0.07) / (SURF_IN - 0.07))), "out"))
+    if t < SURF_IN:
+        return
+    u = (t - SURF_IN) / SURF_SWAY
+    add(p, "hips", (4.0 * math.sin(tau * u * 2), 8.0 * math.sin(tau * u), 0))
+    add(p, "head", (0, -6.0 * math.sin(tau * u), 0))
+    add(p, "hl", (0, 0, 0.06 * math.sin(tau * u)))
+    add(p, "hr", (0, 0, -0.04 * math.sin(tau * u)))
+    add(p, "pos", (0, 0, 0.015 * math.sin(tau * u * 2)))
+    add(p, "tail", (0, 0, 18.0 * math.sin(tau * u * 2)))
+
+
+def hop_off(t, p):
+    turned(p, SURF_TURN * (1.0 - A.ease(min(1.0, t / 0.1), "out")))
+
+
+C.bake("surf", SURF_IN + SURF_SWAY, [(0, LOOSE), (0.07, m(CROUCH_DIP, e="out")), (SURF_IN, m(SURF, e="out")),
+                                     (SURF_IN + SURF_SWAY, SURF)], over=ride)
+C.bake("wave_land", 0.45, [(0, SURF), (0.1, m(TADA, e="out")), (0.2, m(LAND, e="in")),
+                           (0.3, m(LAND, hr=hand(0.1, 0.1, 0.1), br=(0.2, 0.4, 0.9))), (0.45, LOOSE)], over=hop_off)
+
 # ---------------------------------------------------------------------- export
 arm.animation_data_create()
 bpy.context.scene.render.fps = A.FPS      # (the exporter turns frames into seconds at the scene's rate)
