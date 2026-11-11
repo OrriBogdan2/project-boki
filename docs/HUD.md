@@ -59,7 +59,7 @@ drawn, the downed plate and status words show, cooldown text appears).
 
 ## Pop-up budget
 
-Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
+The rule book is [UI_STYLE.md](UI_STYLE.md) section 6; this table is the HUD's side of it. Owner playtest 11-09: "ally knocked is way too in your face". The rule now: nothing that pops up during
 a fight covers the middle of the screen or stays more than 2 s; edge-anchored, small, merged, few. "In a
 fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are owned elsewhere
 (`ext/tutorial-visibility`) and not covered here.
@@ -78,6 +78,10 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Abyss warning ("HOLD GLIDE TO LIFT") | centre, 26 px | while over the void | unchanged: it is the danger |
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
+| Floating words over hunters (`Fx.word`) | over the hunter, 34-46 px | 0.75 s | at most 2 in the air (`Fx.WORD_MAX`, the oldest drops); STUNNED / ROOTED / SLOWED / DAZED / GROUNDED words gone (the plate's status row shows them) |
+| "Your kit" card | was 356 px wide, right side over the fight | was 14 s after every landing | **Training Grounds only** (pinned on the left); K opens the kit card |
+| First-match guide line | top centre | one at a time | sits under the ways-out strip (was overlapping it) |
+| Bottom-left micro labels | 8-10 px over the slots | always | portrait caption, "from Boki", CARRY ON/OFF and the "UNLOCK" word gone (carry = the order word's colour, unlock = the gold rim) |
 
 ## Looting with a full inventory
 
