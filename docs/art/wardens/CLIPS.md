@@ -40,6 +40,9 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `emotes`: the clip each wheel emote (`Truce.EMOTES`) plays, {emote id: clip}, all eight, all different, each shorter than the 2.6 s bubble. A clip is one of the `.glb` or a gesture `g_<name>` keyed at load from `warden_anim/emote_gestures.json` (`WardenGestures`: degrees from the rig's rest, axes in that file's doc). Moving, it plays on the upper layer (the legs keep running); standing, a `.glb` clip owns the body and a gesture still only moves the upper body. An id off the wheel (the bots' replies) plays `states.emote`. Remote players get it from the existing `emo` event. `--clip-check` asserts the map; `--emote-shots` renders it.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
+- `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too. Every Hero lists `wade` and `swim` (water, `HunterSwim`): no clip is keyed for them, so HunterAnim's wading high knees and
+  swimming crawl (a flutter kick, a stroke in each hand the kit lets go of, the weapon held as on a run) play on the rig;
+  `--clip-check` walks every Hero through a pond (`tools/pond_walk.gd`), `--pond-shots` films it.
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
