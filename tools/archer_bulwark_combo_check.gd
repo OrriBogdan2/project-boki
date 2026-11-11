@@ -5,6 +5,8 @@ extends "res://tools/archetype_check.gd"
 
 const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 
+const CC := preload("res://tools/cc_probe.gd")
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -1047,6 +1049,8 @@ func _bulwark_combos() -> void:
 	P.do_dash()
 	var dashes_spent := dashes_before - P.dashes
 	var charge_cd := float(K.cd["rmb"])
+	var charge_took := CC.landed(m, P, T)
+	var charge_inv := P.inv_t > 0.0
 	step(m, 0.35, func(): P.inp["sec_hold"] = true)
 	P.inp["sec_hold"] = false
 	step(m, 0.2)
@@ -1058,6 +1062,10 @@ func _bulwark_combos() -> void:
 	ok(
 		"combo bulwark: a Crush stuns 1.0 s (footage: Knockout label up about 1 s), not the old 0.5",
 		T.stun_t > 0.5 and T.stun_t <= 1.0, "stun left %.2f" % T.stun_t
+	)
+	ok(
+		"combo bulwark parity: the Shield Charge is Invulnerable: damage, pull, knock and slow ignored",
+		charge_inv and charge_took == "", "invulnerable %s took hold: %s" % [str(charge_inv), charge_took]
 	)
 	ok(
 		"combo bulwark: the Shield Charge spends no dash charge and has its own 6 s cooldown",

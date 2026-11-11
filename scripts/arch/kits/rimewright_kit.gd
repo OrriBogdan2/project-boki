@@ -908,6 +908,10 @@ func icb() -> IceBody:
 	return ice
 
 
+## Sealed in Rimelock: invulnerable, pulls and slows included.
+func cc_proof() -> bool:
+	return not rime.is_empty()
+
 func ult_running() -> bool:
 	return not rime.is_empty()
 

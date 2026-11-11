@@ -148,7 +148,7 @@
 		"push": 8.0,
 		"lift": 0.4,
 		"stacks": 1,
-				"desc": "Crouch, then launch straight up and hang in the air, invulnerable, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
+				"desc": "Crouch, then launch straight up and hang in the air, shots passing through you, while a gold ring (8 body heights) shows where you can come down. Press again or attack to strike down as a bolt at your cursor inside the ring; with no second press you come down there by yourself after 2s. Everyone within 2.7m of the landing takes 22, is knocked back and gains 1 Static, and if any of them has Static, all of them take the highest count among them first (lightning arcs between them). Landing it on an enemy hunter fills your Boki bond."
 	},
 	"order": [
 		"sec",

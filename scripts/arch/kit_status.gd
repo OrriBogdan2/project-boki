@@ -47,6 +47,8 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 		_note_remote(e, kind, secs)
 		_show(e, kind, secs)
 		return
+	if e.cc_proof():
+		return
 	match kind:
 		"gnd":
 			var was := grounded(e)
