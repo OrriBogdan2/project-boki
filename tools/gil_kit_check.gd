@@ -29,8 +29,15 @@ func run(main_node: Node) -> void:
 	_riptide()
 	_wave()
 	await done(m)
+	await _combo_tag()
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The shared overhead combo tag checks (tools/combo_mark_check.gd): the splash marks show, count down, Beach flashes.
+func _combo_tag() -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gil")
 
 func _reset(dist := 6.0) -> void:
 	K._drop_holds()

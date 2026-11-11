@@ -1,6 +1,6 @@
 extends RefCounted
 ## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze, Sparkle's Static,
-## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, and Kael's Slam window (a knock
+## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, Gil's splash marks, and Kael's Slam window (a knock
 ## readies the Riposte) and Warchain hold (the pull):
 ## it reads the kit's own status (ArchKit.combo_read), so it shows while the status runs, counts down, is
 ## gone when the status ends, belongs only to the hunter who applied it, and the payoff hit flashes the body.
@@ -66,6 +66,7 @@ func _stacks(arch: String) -> int:
 	match arch:
 		"mage": return 2
 		"ashwick", "rimewright": return 1
+		"gil": return 2
 	return 3
 
 func apply(arch: String, K: ArchKit, T: Hunter) -> void:
@@ -76,6 +77,9 @@ func apply(arch: String, K: ArchKit, T: Hunter) -> void:
 		"ashwick": (K as AshwickKit).stoke(T)
 		"rimewright": (K as RimewrightKit).add_chill(T)
 		"tender": (K as TenderKit).add_kindle(T, 3)
+		"gil":                                                  # two different splash marks: one more Beaches
+			(K as GilKit)._mark(T, "fire", Color.WHITE)
+			(K as GilKit)._mark(T, "slime", Color.WHITE)
 		"juggernaut":                                           # the Slam hit them: a knock in 2s readies X
 			(K as JuggernautKit).slam_hit[T.get_instance_id()] = K.m.time
 			K.cd["x"] = 15.0
@@ -91,6 +95,7 @@ func payoff(arch: String, P: Hunter, K: ArchKit, T: Hunter) -> void:
 		"ashwick": (K as AshwickKit)._cinder_hit(T)          # the bonus damage on a burning foe
 		"rimewright": (K as RimewrightKit).splinter(T.pos, 1.0, 2.0, T)     # the Shatter on a Chilled knock
 		"tender": (K as TenderKit).add_kindle(T, 2)          # to full Kindle
+		"gil": (K as GilKit)._mark(T, "air", Color.WHITE)    # the third mark: Beached
 		"juggernaut":
 			T.hp = 4.0
 			T.hurt(10.0, P, {"src": "shot"})                   # a knock: the Riposte is ready again
