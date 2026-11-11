@@ -98,6 +98,118 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
 	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
 
+## The summon timer round the Boki box (KinSummon) while Boki ride as wisps, with one tag above it:
+##   SUMMONED  out: a ring in its glow colour drains with the seconds left (the seconds in the corner badge)
+##   RESTING   cooling down: a grey ring fills, with the seconds; the wisp is dim in the world
+##   READY     a flash for KinSummon.READY_FLASH_S seconds when the cooldown ends, then only the key cap stays
+##   STOLEN    a rival holds your Boki: the empty box says so
+## Nothing else is shown (the key cap only when pressing it does something). The tag is skipped while merged
+## (the Merge chip owns that spot).
+const SUMMON_GROW := 7.0     # px: the summon ring sits outside the bond ring
+
+## [ring fill 0..1, tag] for a Boki's summon: out drains, resting fills, ready is full ("READY" only in the flash).
+static func summon_view(s: KinSummon) -> Array:
+	if s.out():
+		return [clampf(s.left / s.dur, 0.0, 1.0), "SUMMONED"]
+	if s.cd > 0.0:
+		return [clampf(1.0 - s.cd / maxf(0.1, s.cd_full), 0.0, 1.0), "RESTING"]
+	return [1.0, "READY" if s.ready_flash > 0.0 else ""]
+
+## One of your Boki is held by a rival (a lost Boki someone caught: Match.player_lost).
+static func stolen(m, p: Hunter) -> bool:
+	if p != m.player:
+		return false
+	return m.player_lost.any(func(L): return is_instance_valid(L["holder"]) and (L["holder"] as Hunter).team != p.team)
+
+static func summon_ring(H, p: Hunter, r: Rect2) -> void:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k):
+		if stolen(H.m, p):
+			_chip(H, r, "STOLEN", HudStyle.HURT)
+		return
+	if k.summon == null or not (k.wisp or k.summon.out()):
+		return
+	var s := k.summon
+	var col: Color = Color.WHITE if k.summon.guardian else k.sp.get("glow", k.sp["color"])
+	var rr := r.grow(SUMMON_GROW)
+	var at := r.position + Vector2(2, -2)
+	var view := summon_view(s)
+	var tag := String(view[1])
+	if s.out():
+		_ring(H, rr, view[0], col, 3.0)
+		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
+		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.left), 13, col, H.big)
+		if s.guardian:
+			H._ctext(r.get_center() + Vector2(0, r.size.y * 0.5 + 18.0), "GUARDIAN", 9, col, H.big)
+	elif s.cd > 0.0:
+		_ring(H, rr, view[0], Color(HudStyle.MUTED, 0.8), 2.0)
+		H.c.draw_circle(at, 11.0, Color(0.03, 0.03, 0.05, 0.95))
+		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.cd), 12, HudStyle.MUTED, H.big)
+	else:
+		var pulse := 0.5 + 0.5 * sin(float(H.m.time) * 8.0) if tag != "" else 0.0
+		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * pulse), 2.0 + 2.0 * pulse)
+		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
+	if tag != "" and not KinMerge.active(p):
+		_chip(H, r, tag, HudStyle.MUTED if tag == "RESTING" else col)
+
+## The wisps you stole (KinSteal), one row each above the Boki box, up to the carry limit: the critter in its own
+## colours inside a thief-side ring, its carry passive at the share it gives (passive_k), and its one summon:
+## the summon key while ready, "OUT 4s" while it fights for you, "USED" once spent. Nothing when you carry none.
+const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
+const STOLEN_H := 24.0       # px: a row's height
+const STOLEN_ICON := 18.0    # px: the critter's side
+const STOLEN_LIFT := 30.0    # px: the lowest row's bottom above the box (clear of the chip at CHIP_LIFT)
+
+## What the last draw put on screen: one {"name", "passive", "state"} per row.
+static var stolen_shown: Array = []
+
+## "out" / "ready" / "used": where a stolen wisp's one summon stands.
+static func stolen_state(k: Kin) -> String:
+	if k.summon != null and k.summon.out():
+		return "out"
+	return "used" if k.stolen_summoned else "ready"
+
+## The rows for the wisps `h` carries, in the order KinSteal counts them.
+static func stolen_rows(h: Hunter) -> Array:
+	var out: Array = []
+	var share := float(KinSteal.rules()["passive_k"])
+	for k in h.m.kins:
+		if k.owner_h == h and KinSteal.stolen(k) and not k.dead and k.ks != null:
+			var passive := "no carry bonus"
+			if not k.ks.carry_passives.is_empty():
+				passive = KinText.passives(k.ks.carry_passives, share)
+			out.append({"kin": k, "name": String(k.rec.get("name", "Boki")), "state": stolen_state(k),
+				"passive": passive})
+	return out
+
+static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
+	stolen_shown.clear()
+	var y := r.position.y - STOLEN_LIFT
+	for row in stolen_rows(p):
+		var k: Kin = row["kin"]
+		var glow: Color = k.sp.get("glow", k.sp["color"])
+		var st := String(row["state"])
+		var box := Rect2(Vector2(r.end.x - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
+		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
+		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
+		var tex := KinPortrait.tex(k.rec, H.get_tree())
+		if tex != null:
+			H.c.draw_texture_rect(tex, Rect2(at - Vector2.ONE * STOLEN_ICON * 0.5, Vector2.ONE * STOLEN_ICON), false)
+		else:
+			H.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
+			H.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
+		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, HudStyle.ALLY, 2.0, true)
+		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
+		if st == "ready":
+			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
+		else:
+			var tag := "USED" if st == "used" else "OUT %ds" % ceili(k.summon.left)
+			var tw: float = HudStyle.BIG.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+			var tag_col: Color = HudStyle.MUTED if st == "used" else glow
+			HudStyle.text(H.c, Vector2(box.end.x - 6.0 - tw, box.position.y + 16.0), tag, 11, tag_col, 3)
+		stolen_shown.append({"name": row["name"], "passive": row["passive"], "state": st})
+		y -= STOLEN_H + 3.0
+
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if frac <= 0.0:

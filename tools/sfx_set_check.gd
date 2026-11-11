@@ -39,6 +39,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_wisp_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -153,6 +154,60 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## 7. The Boki wisp cues (KinSummon): a chirp for every body size, higher for a smaller one, and the
+## summon burst, end and killed cue per size (audible at 25 m), ready and grab, all in the boki set.
+func _wisp_cues() -> void:
+	var boki: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boki.json"))["sounds"]
+	var sizes := {}
+	for row in (KinSummon.rules()["table"] as Dictionary).values():
+		for size in row:
+			sizes[size] = true
+	var missing := []
+	for size in sizes:
+		var ks := KinSpec.new()
+		ks.size = size
+		if not boki.has(KinSummon.chirp_name(ks)):
+			missing.append(size)
+	for cue in ["wisp_ready", "wisp_grab"]:
+		if not boki.has(cue):
+			missing.append(cue)
+	for what in ["burst", "end", "killed"]:
+		for size in sizes:
+			var cue := "summon_%s_%s" % [what, size]
+			if not boki.has(cue):
+				missing.append(cue)
+			elif not _carries(cue):
+				missing.append(cue + " at 25 m")
+	var what := "wisp cues: a chirp per body size, summon burst/end/killed per size, ready, grab (missing %s)"
+	ok(missing.is_empty() and sizes.size() == 3, what % [missing])
+	var weight := []
+	for what_cue in ["burst", "end", "killed"]:
+		weight.append(_data("res://audio/summon_%s_small.wav" % what_cue).size())
+		weight.append(_data("res://audio/summon_%s_large.wav" % what_cue).size())
+	var longer := "a large summon cue runs longer than a small one (bytes %s)"
+	ok(weight[1] > weight[0] and weight[3] > weight[2] and weight[5] > weight[4], longer % [weight])
+	var pitch := []
+	for size in ["small", "medium", "large"]:
+		pitch.append(_zero_crossings(_data("res://audio/wisp_chirp_%s.wav" % size)))
+	var order := "wisp chirps rise as the body gets smaller (zero crossings %s)"
+	ok(pitch[0] > pitch[1] and pitch[1] > pitch[2], order % [pitch])
+
+## The sound is in a set's reach and still audible (not NAN, above -24 dB) 25 m from the listener: a rival's summon.
+func _carries(cue: String) -> bool:
+	var db: float = Sfx._distance_db(Vector3(25, 0, 0), float(Sfx.sound_reach.get(cue, 0.0)))
+	return not is_nan(db) and db > -24.0
+
+## Sign changes in a wav's samples: a cheap stand-in for its pitch.
+func _zero_crossings(data: PackedByteArray) -> int:
+	var n := 0
+	var prev := 0
+	for k in data.size() / 2:
+		var v := data.decode_s16(k * 2)
+		if (v < 0) != (prev < 0):
+			n += 1
+		prev = v
+	return n
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
