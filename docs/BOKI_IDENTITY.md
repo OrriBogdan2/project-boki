@@ -124,6 +124,15 @@ serial are never inherited.
   This is the hook for ranked play or lower tiers to neutralize size later: set the option when
   starting those matches.
 
+## Size at home: carrying (`HomeCarry`)
+
+Hold interact on a Boki to pick it up; press interact again to set it down; a tap is still a pat.
+By weight (`Unique.size_info`): up to 3.5 kg rides in your arms, up to 9 kg on your back, heavier ones
+are led beside you (hold again to let go). You walk at 90%. Brave ones wriggle, timid ones cling, a
+grumpy one (temper over 0.62) squirms free after 5 s. A Close-or-better bond gains 1 trust from its
+first carry of the day (3 s or more); the day is kept in `rec["carried_day"]` (absent on old saves,
+so no migration). Home only.
+
 ## Showing it to the player
 
 Following docs/POSITIONING.md (design branch): rarity shows in the Boki itself (its size, coat,
@@ -132,6 +141,11 @@ reads as field notes, plain sentences in the card's normal ink: "Stands 45 cm an
 Very large for a Vespyx (XL): few grow this big." and "Spotted with pale spots", then where it's
 from (origin, date, who first raised it, parents, its number "#0042 of Vespyx"). No gold serials,
 no coloured size badges. The Nesting Nook and Kin Burrow side panels show a three-line version.
+With two Boki picked, the Nook's preview card (`NookPreview`) shows what their egg would be, read from
+`Care.breed`'s inputs: both possible kinds pictured in the blended look (`Unique.blend_center`: the look
+`Unique.inherit` rolls around, plain coat), its size, the coats it can take, the lean head start
+(`Care.head_start`) and a note on an unstable mix. `--nest-demo=pair` opens it; `--nook-check` holds it to
+20 of 20 hatched babies.
 Player-facing words say *scanned* (the box and the Field Book say *caught*), not tamed (internal event names stay `caught`).
 
 Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`
@@ -164,3 +178,10 @@ female and male), so those kinds roll half and half and the note explains.
 - Provenance moves to the account service; the local log stays as a cache.
 - Importing offline Boki (ROADMAP §7g) keeps looks (`dna`) and memories but treats them as untradeable
   heirlooms.
+
+## Sex
+Every Boki is male or female, 50/50: `Unique.sex` hashes the seed, so hatches, breeding, wild and captured Boki, and old saves
+(v2 -> v3 migration, `Unique.ensure_sex`) all agree. The Boki card, hatch reveal and Field Book page show a small ♀ / ♂ icon.
+Only species with `"sex_forms": true` in `content/kin/<id>.json` have a separate female look: the Bellowary, Gongibbon,
+Kestrike, Lunowl and Murmurling lines (owner 11-08 20:20; the branching starter lines and Echolop get none)
+(`art/kin/<id>/<id>_f.glb`, routed by `BokiSex`); until that art exists they wear the base model. Check: `--boki-sex-check`.

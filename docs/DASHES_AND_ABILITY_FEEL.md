@@ -615,6 +615,16 @@ authors see what the game will do.
 | telegraph floor | core table, not data | 5.3 | fairness for community kin |
 | `windup` | read-only, computed | — | shown in the generated rules text (Phase 4) |
 
+### 5.10 The reset cue
+Every reset on a condition (a takedown or assist, Sable's empowered hit, knife and Encore, Sparkle's Blowout and
+mote, Cinder's knock refund, Kael's Riposte knock and Slam-knock, Vex's knock and Longneedle shave, Albert's
+whirl hit, Lace's wall pin, Grimble's hook, Meeko's carry) calls `ResetCue.play(hunter, path)`, and
+`content/rules/reset_cue.json` says which HUD slots each path flashes. Your own reset: a short bright flash on
+that slot, a small white glint on the chest (no burst or ring) and the reset sound once, even when two land at
+the same moment. A teammate's reset: the glint only, silent. Self-chosen refunds (an early release, a cancelled
+cast) and per-shot trickles (Meeko's kindle, Grimble's barge shave) stay quiet. `--kill-reset-check` fails if
+a path in code is missing from the rules or the other way round.
+
 ---
 
 ## 6. Open questions

@@ -4,6 +4,17 @@ Decision: briefs/DECISIONS.md 2026-11-09 "Soul-linked Boki". Spec only; no game 
 (8 banner steps, `content/rules/tutorial.json`, `Tutorial`, `TutorialDrive`, `TutorialHud`) and the wisp prototype
 (`ext/boki-wisp-proto`: `KinWisp`, `BokiWispLook`). Open questions are `boki-art/WISP_DESIGN_OPEN.md` Q1-Q9.
 
+## The course today (0.24.4, owner 11-10: "start by explaining you get 1 ability, force Vex RMB, then every ability")
+The tutorial now runs on the real run levels (`TutorialCamps`, `tutorial.json` "camps"): you land at level 1 with one
+point and every ability locked. `points` says so ("choose wisely: every level gives one more"); each `pick_*` step lets
+the point go only into its slot (`Hunter.can_level` asks `TutorialCamps.lets_level`; `TutorialHud` rings the gold +),
+then a camp to use it on pays the XP to the next level kill by kill (`Hunter.gain_xp` takes no other XP here). Order:
+land, points, pick_sec, sec, shoot, pick_dash, dash, exdash, glide, wallkick, crouch, gkey, pick_kin, kin, glove,
+hook (the Hook Glove pulls a Sentinel in), pick_ult, ult (fuse with the Boki on the last wave), ranks (levels 4-5
+were banked: spend them), wayout (the Ways Out hook: "a match has only a few ways out"), uplink, defend, extract.
+`--tutorial-fight-check` asserts the forced first pick, camp-only XP, every slot unlocked and every move used.
+The wisp beats below would replace `gkey` and the `ult` fuse's words when the wisp lands.
+
 ## Rules for every beat
 - One banner line (the `steps` array in `tutorial.json`, tokens `%T` Boki key, `%s` Boki name, `%F` interact). The cut tutorial's
   `Tutorial._stall` already pulses the pill after `NAG_T` (15 s) with no progress; that stays the only nag.
