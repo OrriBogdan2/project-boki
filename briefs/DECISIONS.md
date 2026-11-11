@@ -592,3 +592,4 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Kael RMB is a straight-line thrust with a short forward lunge, not a cone.
 - Kael LMB has no knockback.
 - Cutscenes/intro: click advances one beat, hold ~1 s skips all (owner 11-11).
+- Player creator: base body = featureless void silhouette with outline (non-anatomical); stronger M/F frames; layered outfits, every slot can be empty; much more customization (owner 11-11).
