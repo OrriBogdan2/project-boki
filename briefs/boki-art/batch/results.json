@@ -111408,5 +111408,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_morelkin_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_mossgrade",
+    "name": "Mossgrade (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mossgrade_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_mortarfly",
+    "name": "Mortarfly (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mortarfly_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_mothlet",
+    "name": "Mothlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mothlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_morelossus",
+    "name": "Morelossus (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_morelossus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_mossbastion",
+    "name": "Mossbastion (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_mossbastion_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_moatpole",
+    "name": "Moatpole (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_moatpole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_moundlet",
+    "name": "Moundlet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_moundlet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_nettlynx",
+    "name": "Nettlynx (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_nettlynx_1.jpg",
+    "ok": true
   }
 ]
