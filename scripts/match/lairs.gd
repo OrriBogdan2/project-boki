@@ -45,6 +45,8 @@ const EGG_APART := 4.5         # a boss's Rare Egg lands this far from its loot 
 const CARRY_PING_T := 5.0      # ... and so does whoever picks it up
 const LOCK_T := 90.0           # the longest a fight can keep you sealed in
 const VICTORY_T := 20.0        # after the kill the gate stays shut this long unless the lever is pulled (so campers at the gate wait it out)
+const BOSS_XP := 260.0         # the kill XP: the last-hit squad takes all of it ([?] no source number)
+const BOSS_XP_SHARE_R := 30.0   # teammates this close to the boss share it (DECISIONS 11-10 spec radius)
 const LEVER_R := 1.7           # reach to pull the gate lever
 const ALERT_R := 150.0         # everyone this close hears a lair fight start (and its boss fall)
 const UP_R := 1.5              # the escape updraft's radius
@@ -704,12 +706,11 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var sp := String(b.md.get("egg", ""))
 	if Data.KIN.has(sp):
 		drop_egg(L, Loot.rare_egg(sp, b.mkind), egg_at)
-	# XP for everyone who fought it: the most for the killer's squad
+	# XP is a kill reward (DECISIONS 11-10): the last-hit squad's members within SHARE_R of the boss get it all,
+	# so a squad that steals the last hit takes it; damage dealt earns nothing without the kill
 	for h in m.hunters:
-		if h.out or h.extracted or not inside(L, h.pos, 4.0):
-			continue
-		var share := 1.0 if killer and h.team == killer.team else (0.5 if float(b.damage_by.get(h.team, 0.0)) > b.max_hp * 0.1 else 0.2)
-		h.gain_xp(260.0 * share)
+		if killer and not h.out and not h.extracted and h.team == killer.team and h.flat_dist(b) <= BOSS_XP_SHARE_R:
+			h.gain_xp(BOSS_XP)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
