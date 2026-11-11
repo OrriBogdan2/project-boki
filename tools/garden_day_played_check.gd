@@ -6,7 +6,7 @@ extends RefCounted
 ## Never touches the real save.
 
 const WAIT_S := 30.0         # s to wait for a home to finish building
-const GAME_S := 90.0         # s (game time) one Dash or shove may take before the beat gives up
+const GAME_S := 90.0         # s (real time) one Dash or shove may take before the beat gives up
 const MAX_RACES := 12        # Dash races tried for the Crown
 const TIME_SCALE := 4.0      # game seconds per real second while a race or a walk runs
 const AWAY_S := 28800.0      # s: the simulated gap (8 hours)
@@ -26,27 +26,34 @@ func ok(cond: bool, what: String) -> void:
 func note(what: String) -> void:
 	print("GDAY NOTE %s" % what)
 
+## Seconds of wall time: a renderer runs slow frames, so the waits count real time.
+func _now() -> float:
+	return Time.get_ticks_msec() / 1000.0
+
 func _grab(label: String) -> void:
 	if dir == "":
 		return
-	await main.get_tree().process_frame
+	main.fade.reveal(0.01)      # the boot logo and the ink wipe stay up until asked
+	await _wait(1.5)
 	await main.get_tree().process_frame
 	shot_n += 1
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join("%02d_%s.png" % [shot_n, label]))
 	print("GDAY shot %02d_%s" % [shot_n, label])
 
 func _wait(secs: float) -> void:
+	var t0 := _now()
 	var t := 0.0
 	while t < secs:
 		await main.get_tree().process_frame
-		t += main.get_process_delta_time()
+		t = _now() - t0
 
 ## The home a goto started, once it is built and revealed; null on a timeout.
 func _arrived(was: Node):
+	var t0 := _now()
 	var t := 0.0
 	while t < WAIT_S:
 		await main.get_tree().process_frame
-		t += main.get_process_delta_time()
+		t = _now() - t0
 		var cur = Game.main.current
 		if cur != was and is_instance_valid(cur) and cur.get("hway") != null and cur.get("player") != null \
 				and cur.get("building") != true and cur.get("root_ui") != null and not Game.main.fade.covered:
@@ -167,10 +174,11 @@ func _dash_and_cup(bb) -> void:
 		if bb.hrace.run == null:
 			ok(false, "the Dash starts from the post (race %d)" % races)
 			break
+		var t0 := _now()
 		var t := 0.0
 		while bb.hrace.run != null and t < GAME_S:
 			await main.get_tree().process_frame
-			t += main.get_process_delta_time()
+			t = _now() - t0
 			if bb.hrace.run != null and bb.hrace.run.cheered < 3 and t > 1.0 + 3.0 * bb.hrace.run.cheered:
 				_press(bb.hrace)
 		if bb.hrace.run != null:
@@ -236,10 +244,11 @@ func _zone_move(bb) -> void:
 	bb._close_panel()
 	ok(bb.hway.send(k, "cinderstep") == "", "Moss is sent to Cinderstep")
 	Engine.time_scale = TIME_SCALE
+	var t0 := _now()
 	var t := 0.0
-	while bb.kins.has(k) and t < float(GardenZones.rules()["walk_s"]) * 2.0:
+	while bb.kins.has(k) and t < GAME_S:
 		await main.get_tree().process_frame
-		t += main.get_process_delta_time()
+		t = _now() - t0
 	Engine.time_scale = 1.0
 	ok(not bb.kins.has(k) and GardenZones.zone_of(moss) == "cinderstep", "it walks to the pad and goes (%.1f s)" % t)
 	await _grab("moss_leaving")
@@ -252,6 +261,8 @@ func _second_game(bb):
 	if hub == null:
 		return null
 	await _grab("hub")
+	hub._close_panel()
+	await _grab("hub_clear")
 	ok(hub.hway.hop("cinderstep"), "the Waystone hop to Cinderstep starts")
 	var cs = await _arrived(hub)
 	ok(cs != null and cs.zone == "cinderstep", "Cinderstep loads")
@@ -261,6 +272,8 @@ func _second_game(bb):
 	names.sort()
 	ok(names == ["Moss", "Pip"], "Cinderstep has Pip (with you) and Moss (lives there): %s" % str(names))
 	await _grab("cinderstep")
+	cs._close_panel()
+	await _grab("cinderstep_clear")
 	_rest_all()
 	await _wait(0.5)
 	var gems: int = int(Save.d["gems"])
@@ -272,10 +285,11 @@ func _second_game(bb):
 	if cs.hshove.run != null:
 		await _grab("shove")
 		Engine.time_scale = TIME_SCALE
+		var t0 := _now()
 		var t := 0.0
 		while cs.hshove.run != null and t < GAME_S:
 			await main.get_tree().process_frame
-			t += main.get_process_delta_time()
+			t = _now() - t0
 			if cs.hshove.run != null and cs.hshove.run.can_shove():
 				_press(cs.hshove)
 		Engine.time_scale = 1.0
