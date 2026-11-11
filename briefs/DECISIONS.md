@@ -577,3 +577,7 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - **Carry 2 into a match:** a lead (has the summon button) and a second (its carry passive also on). A key swaps the lead (short cooldown). The same passive from both does not stack (the stronger one counts).
 - **1 extra out:** one carry-out slot for a Boki claimed in the match: no passive, no summon, it only rides home. It can be stolen like other wisps when you're downed (extraction tension). Each Hunter has their own slots; when yours is full the kin points out a teammate with room. No shared team pool.
 - Stolen-wisp rule stays, capped so one Hunter never holds more than 4 wisps (2 own + carry-out + 1 stolen).
+
+## 2026-11-11 2:25 PM EST — Hollow Crown 2.0 + big hazard fields (owner)
+- Map is too small and too samey (305 m/side = 2x area but only 1.41x per side). Redo: ~500-600 m/side if GPU perf holds, irregular silhouette (no ring/pie, no repeated terrace pattern), every region built for a DIFFERENT fight type (sniping plateau, close-quarters ruins, vertical cliffs, open flanks, chokepoint bridges, forest ambush), skyline landmark per region. Job 20261111-192328-a3, branch ext/map-v2-1111.
+- Hazards are BIG, not small traps: some regions are ~60% lava (or deep water / ice) so squads must route and fight around them. Perks/items/Boki type give immunity or resistance (fire Boki or a lava perk = walk the lava). Applies to ext/region-hazards-1111 and the map v2 layout.
