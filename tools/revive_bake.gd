@@ -52,7 +52,13 @@ func _bake(holder: Node3D, id: String, art_name: String, out: String) -> void:
 	var fwd := (to_sk.basis * Vector3.FORWARD).normalized()
 	var up := (to_sk.basis * Vector3.UP).normalized()
 	var beats := maxi(1, roundi(base.length / BEAT))
-	var fit := _fit(sk, base, to_sk, fwd, up)
+	var hover = null      # (a hover: the root's pose the Rig gives it, as Sync plays the clips)
+	if bool(dd.get("rig_root", false)):
+		clips.force = {"clip": String(dd["crouch"]["idle"]), "t": 0.0}
+		for k in 10:
+			sync.call("_process", 1.0 / FPS)
+		hover = sk.get_bone_pose(WardenSkeleton.find(sk, "root"))
+	var fit := _fit(sk, base, to_sk, fwd, up, hover)
 	var bones := {}        # bone -> keys its position too
 	for b in ["hips", "head", "upper_arm.L", "forearm.L", "upper_arm.R", "forearm.R"]:
 		bones[sk.get_bone_name(WardenSkeleton.find(sk, b))] = false
@@ -89,13 +95,15 @@ func _bake(holder: Node3D, id: String, art_name: String, out: String) -> void:
 
 ## Where the hands go (their distance ahead, kept so the Wisp clears his knees, and their height: its top, or its
 ## side for a Hero smaller than it) and how far he leans so both hands reach it at REACH of the arm.
-func _fit(sk: Skeleton3D, base: Animation, to_sk: Transform3D, fwd: Vector3, up: Vector3) -> Dictionary:
+func _fit(sk: Skeleton3D, base: Animation, to_sk: Transform3D, fwd: Vector3, up: Vector3, hover: Variant) -> Dictionary:
 	var best := {}
 	for h in [WISP_HOVER + WISP_R * 0.6, WISP_HOVER + WISP_R * 0.3, WISP_HOVER]:
 		for li in 7:
 			var lean := LEAN + 0.08 * li
 			for di in 16:
 				var fit := {"d": MIN_AHEAD + 0.05 * di, "lean": lean, "h": h}
+				if hover != null:
+					fit["root"] = hover
 				var want := absf(_pose(sk, base, 0.0, fit, 0.0, to_sk, fwd, up))
 				if best.is_empty() or want < float(best["want"]) - 0.005:
 					best = fit
@@ -115,6 +123,8 @@ func _pose(sk: Skeleton3D, base: Animation, t: float, fit: Dictionary, press: fl
 			Animation.TYPE_ROTATION_3D: sk.set_bone_pose_rotation(bi, base.rotation_track_interpolate(tr, t))
 			Animation.TYPE_POSITION_3D: sk.set_bone_pose_position(bi, base.position_track_interpolate(tr, t))
 			Animation.TYPE_SCALE_3D: sk.set_bone_pose_scale(bi, base.scale_track_interpolate(tr, t))
+	if fit.has("root"):
+		sk.set_bone_pose(WardenSkeleton.find(sk, "root"), fit["root"])     # (data "rig_root": the Rig holds it up)
 	var side := up.cross(fwd).normalized()      # (his left)
 	_turn(sk, WardenSkeleton.find(sk, "hips"), Basis(side, float(fit["lean"]) + PRESS_LEAN * press))
 	_turn(sk, WardenSkeleton.find(sk, "head"), Basis(side, HEAD_DOWN))
