@@ -126,18 +126,22 @@ static func odds(m, h: Hunter) -> int:
 ## Where to run to help: the nearest rival a squadmate is fighting (Bot._choose targets it once it
 ## is in reach and in sight), or INF. A badly hurt bot stays out of it. The bot keeps to the rival
 ## it set off for while that fight lasts: with two fights either side it turned round every think.
-static func assist_goal(h: Hunter, a: Dictionary, fighting: Array) -> Vector3:
+## In reach of that rival and still no shot (it is up a ledge or behind a rock): go to the squadmate
+## instead, who has one. Walking at a spot it could not reach, a bot turned on the spot under it.
+static func assist_goal(m, h: Hunter, a: Dictionary, fighting: Array) -> Vector3:
 	if fighting.is_empty() or h.hp < h.max_hp * HELP_HP:
 		a.erase("assist")
 		return Vector3.INF
-	var held = a.get("assist")
-	if is_instance_valid(held) and fighting.has(held):
-		return held.pos
-	var best: Hunter = fighting[0]
-	for f in fighting:
-		if h.flat_dist(f) < h.flat_dist(best):
-			best = f
-	a["assist"] = best
+	var best = a.get("assist")
+	if not (is_instance_valid(best) and fighting.has(best)):
+		best = fighting[0]
+		for f in fighting:
+			if h.flat_dist(f) < h.flat_dist(best):
+				best = f
+		a["assist"] = best
+	var mate := nearest(m, h)
+	if h.flat_dist(best) < ASSIST_REACH and mate:
+		return mate.pos
 	return best.pos
 
 ## Would starting on rival `o` be a fight against more than we have here? Counted the way a player
