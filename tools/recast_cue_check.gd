@@ -3,7 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## abilities must be obvious and in your face"): after the first step the kit's recast_window() names the slot,
 ## a time left and a total, the world spot for the marker, and the local hunter's cue state carries it (so the slot
 ## pulse, "<KEY> AGAIN", the ring and the marker draw). Then: a window that runs out leaves "EXPIRED", an early
-## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges.
+## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foes' plate status rows
+## (--plate-status-check reads what the plates draw).
 
 const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
 
@@ -93,7 +94,7 @@ func _buffered() -> void:
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)
 
-## Marks/stacks/Daze reach the badge list with a time left: Thief Marks, Vex's Daze, Sparkle's Sparks.
+## Marks/stacks/Daze reach the cue's list with an icon and a time left: Thief Marks, Vex's Daze, Sparkle's Sparks.
 func _badges() -> void:
 	for hero in ["thief", "gunslinger", "mage"]:
 		var s := setup(hero, 6.0)
@@ -107,5 +108,6 @@ func _badges() -> void:
 		m.step(DT)
 		var marks: Array = P.ak.cue.get("marks", [])
 		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
-		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
+		var has_icon := mine.size() == 1 and String(mine[0]["icon"]) != ""
+		ok("%s: the foe's mark reaches its status row with an icon and time left" % hero, has_icon, str(mine))
 		await done(m)
