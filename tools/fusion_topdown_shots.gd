@@ -6,7 +6,7 @@ extends RefCounted
 ## --fusion-topdown-check (headless): every hero wears the Stormwing, and a depth raster down the match camera
 ## (CamRig's default pitch, no renderer needed) measures how much of the wings the hero's own body and hat hide,
 ## facing up, across and down the screen at both ends of the wing beat, and that the wings start at the head and
-## the halo just over it (the form's part_y). Prints FUSIONTOPDOWN ok/FAIL lines.
+## the halo just over it (the form's part_top). Prints FUSIONTOPDOWN ok/FAIL lines.
 
 const DT := 1.0 / 60.0
 const FORMS := [["pebbit", "titan"], ["zephyrak", "stormwing"], ["puddlet", "tidal_shell"]]
@@ -16,8 +16,8 @@ const SPACING := 3.2          # m between the wearer and the remote copy
 const CELL := 0.03            # m: one depth-raster cell (about a pixel of a hunter at the match zoom)
 const SHOWN_MIN := 0.9        # of the wings' cells in front of the body, every view (wings at the neck: ~0.83)
 const AREA_MIN := 0.7         # wing cells per body cell, every view: they carry the silhouette (Tender: 0.92)
-const ROOT_MAX := 0.0         # m the wing roots may sit over the head top (0.25-0.79 with no part_y: they float)
-const HALO_MAX := 1.0         # m from the head top up to the halo, clear of the hat (1.39-1.78 with no part_y)
+const ROOT_MAX := 0.0         # m the wing roots may sit over the head top (hips anchor: +0.25-0.79, float)
+const HALO_MAX := 1.0         # m from the head top up to the halo, clear of the hat (hips anchor: 1.39-1.78)
 
 func run(main: Node, mode := "shots") -> void:
 	if mode == "check":
