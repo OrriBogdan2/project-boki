@@ -1,6 +1,8 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
-	"extra_bones": {"x_breath": "hips"},
+	"extra_bones": {
+		"x_breath": "hips"
+	},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
 	],
@@ -24,7 +26,18 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6, "stride": [1.5, 1.2], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
+		"run_speed": 4.6,
+		"stride": [
+			1.5,
+			1.2
+		],
+		"foot_mps": [
+			1.62,
+			4.35
+		],
+		"arm_swing": {
+			"L": 0.5
+		}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -54,11 +67,13 @@
 	"kmoves": {
 		"jug_slash_r": {
 			"clip": "slash_r",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"jug_slash_l": {
 			"clip": "slash_l",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
@@ -68,7 +83,8 @@
 		},
 		"jug_wave": {
 			"clip": "wave",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"jug_slam": {
 			"clip": "slam"
@@ -79,6 +95,7 @@
 			"fade": 0.18
 		},
 		"jug_lunge": {
+			"fade": 0.05,
 			"clip": "lunge"
 		},
 		"jug_meteor": {
@@ -89,24 +106,30 @@
 			"clip": "meteor_land"
 		},
 		"jug_dash": {
+			"fade": 0.05,
 			"clip": "dash"
 		},
 		"jug_exdash": {
-			"clip": "exdash", "air_clip": "exdash"
+			"clip": "exdash",
+			"air_clip": "exdash",
+			"fade": 0.05
 		},
 		"jug_chain": {
 			"clip": "chain",
 			"air_legs": true
 		},
 		"jug_reel": {
+			"fade": 0.05,
 			"clip": "reel",
 			"hold_from": 0.25,
 			"heading": true
 		},
 		"jug_spin": {
+			"fade": 0.05,
 			"clip": "spin"
 		},
 		"jug_chainlunge": {
+			"fade": 0.05,
 			"clip": "chainlunge"
 		},
 		"jug_haul_wind": {
@@ -114,13 +137,16 @@
 			"hold_from": 0.15
 		},
 		"jug_haulslam": {
+			"fade": 0.05,
 			"clip": "haulslam"
 		},
 		"jug_guard": {
+			"fade": 0.05,
 			"clip": "guard",
 			"hold_from": 0.2
 		},
 		"jug_riposte": {
+			"fade": 0.05,
 			"clip": "riposte"
 		},
 		"jug_roar": {
@@ -131,7 +157,11 @@
 			"clip": "fusion"
 		}
 	},
-	"act": {"pat": "pet", "feed": "give", "cheer": "cheer"},
+	"act": {
+		"pat": "pet",
+		"feed": "give",
+		"cheer": "cheer"
+	},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",

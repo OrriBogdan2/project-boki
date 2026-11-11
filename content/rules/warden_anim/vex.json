@@ -95,6 +95,7 @@
 			"air_legs": true
 		},
 		"gunslinger_dash": {
+			"fade": 0.05,
 			"clip": "dash",
 			"legs_heading": true
 		},
@@ -108,12 +109,14 @@
 		},
 		"gunslinger_x": {
 			"clip": "x",
-			"upper": "moving"
+			"upper": "moving",
+			"fade": 0.05
 		},
 		"gunslinger_knock": {
 			"clip": "knock",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"mf_xform": {
 			"clip": "fusion"

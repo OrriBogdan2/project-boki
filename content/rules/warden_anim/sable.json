@@ -73,17 +73,20 @@
 		"thf_lmb_r": {
 			"clip": "lmb_r",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"thf_lmb_l": {
 			"clip": "lmb_l",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"thf_primed": {
 			"clip": "primed",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"thf_vault_r": {
 			"clip": "vault_r",
@@ -95,9 +98,11 @@
 			"clip": "vault_l",
 			"heading": true,
 			"heading_off": -1.5708,
-			"turn_max": 3.2
+			"turn_max": 3.2,
+			"fade": 0.05
 		},
 		"thf_vault_f": {
+			"fade": 0.05,
 			"clip": "vault_f"
 		},
 		"thf_vault_b": {
@@ -112,7 +117,8 @@
 			"heading": true,
 			"turn_max": 3.2,
 			"air_clip": "exdash",
-			"ground_clip": "vault_f"
+			"ground_clip": "vault_f",
+			"fade": 0.05
 		},
 		"thf_land": {
 			"clip": "land_v"
@@ -120,13 +126,15 @@
 		"thf_bola": {
 			"clip": "bola",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"thf_knife": {
 			"clip": "knife",
 			"air_legs": true
 		},
 		"thf_arrive": {
+			"fade": 0.05,
 			"clip": "arrive"
 		},
 		"thf_encore": {
@@ -146,7 +154,8 @@
 		"thf_flourish": {
 			"clip": "flourish",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"mf_xform": {
 			"clip": "fusion"

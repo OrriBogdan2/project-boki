@@ -71,13 +71,15 @@
 			"clip": "dart_l",
 			"lead": 0.07,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"tm_dart_heavy": {
 			"clip": "dart_heavy",
 			"lead": 0.08,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"tm_beam": {
 			"clip": "beam",
@@ -88,12 +90,14 @@
 			"clip": "spear_aim",
 			"hold_from": 0.12,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"tm_spear": {
 			"clip": "spear",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"tm_wall": {
 			"clip": "wall",
@@ -119,6 +123,7 @@
 			"heading": true
 		},
 		"tm_skate_stop": {
+			"fade": 0.05,
 			"clip": "skate_stop"
 		},
 		"tm_shatter": {
@@ -133,9 +138,11 @@
 			"air_legs": true
 		},
 		"tm_rime": {
+			"fade": 0.05,
 			"clip": "rime"
 		},
 		"tm_rime_carry": {
+			"fade": 0.05,
 			"clip": "rime_carry"
 		},
 		"tm_rime_hold": {

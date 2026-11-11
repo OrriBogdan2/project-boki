@@ -197,13 +197,15 @@
 			"clip": "shot_r",
 			"lead": 0.06,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"mm_shot_l": {
 			"clip": "shot_l",
 			"lead": 0.06,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"mm_shot_emp": {
 			"clip": "shot_emp",
@@ -220,7 +222,8 @@
 			"clip": "seed",
 			"lead": 0.06,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.04
 		},
 		"mm_hearth": {
 			"clip": "hearth",
@@ -234,13 +237,15 @@
 			"air_legs": true
 		},
 		"mm_skip": {
+			"fade": 0.05,
 			"clip": "skip",
 			"heading": true
 		},
 		"mm_float": {
 			"clip": "float",
 			"air_clip": "float",
-			"heading": true
+			"heading": true,
+			"fade": 0.05
 		},
 		"mm_pickup": {
 			"clip": "pickup"
@@ -255,13 +260,15 @@
 			"upper": true
 		},
 		"mm_kindled": {
+			"fade": 0.05,
 			"clip": "kindled",
 			"upper": true
 		},
 		"mm_call": {
 			"clip": "call",
 			"lead": 0.08,
-			"upper": true
+			"upper": true,
+			"fade": 0.05
 		},
 		"mm_call_hold": {
 			"clip": "call_hold",
@@ -269,6 +276,7 @@
 			"upper": true
 		},
 		"mm_call_end": {
+			"fade": 0.05,
 			"clip": "call_end",
 			"upper": true
 		},

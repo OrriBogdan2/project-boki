@@ -21,7 +21,7 @@ const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
-const FADE := 0.1            # s: one clip into the next, and into or out of an action
+const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides it)
 const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const STILL := 0.25          # m/s: below this he is standing
@@ -473,7 +473,7 @@ func step(dt: float) -> void:
 			if up_w <= 0.0:
 				xf_u = float(chan_u)     # (from the legs: no old clip to fade out of)
 		_p("seek_u%s/seek_request" % "ab"[chan_u], float(want.get("t", 0.0)))
-		up_w = move_toward(up_w, 1.0, dt / FADE)
+		up_w = move_toward(up_w, 1.0, dt / float(want.get("fade", FADE)))
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 	elif not proc and want.has("clip"):
 		var clip := String(want["clip"])

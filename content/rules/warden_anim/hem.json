@@ -81,23 +81,28 @@
 	},
 	"kmoves": {
 		"arc_draw": {
+			"fade": 0.05,
 			"clip": "draw",
 			"hold_from": 1.15,
 			"upper": true
 		},
 		"arc_tap": {
+			"fade": 0.05,
 			"clip": "tap",
 			"upper": true
 		},
 		"arc_loose": {
+			"fade": 0.03,
 			"clip": "loose",
 			"upper": true
 		},
 		"arc_perfect": {
+			"fade": 0.03,
 			"clip": "perfect",
 			"upper": true
 		},
 		"arc_super": {
+			"fade": 0.05,
 			"clip": "super",
 			"upper": true
 		},
@@ -113,20 +118,24 @@
 		"arc_heavy_wind": {
 			"clip": "heavy_wind",
 			"hold_from": 1.1,
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"arc_heavy": {
 			"clip": "heavy",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"arc_hail": {
+			"fade": 0.05,
 			"clip": "hail",
 			"upper": true
 		},
 		"pin_roll": {
 			"clip": "roll",
 			"heading": true,
-			"turn_max": 3.2
+			"turn_max": 3.2,
+			"fade": 0.05
 		},
 		"pin_walk": {
 			"clip": "spirit",
@@ -138,13 +147,16 @@
 			"heading": true,
 			"turn_max": 3.2,
 			"air_clip": "flick",
-			"ground_clip": "roll"
+			"ground_clip": "roll",
+			"fade": 0.05
 		},
 		"pin_ult_cast": {
+			"fade": 0.05,
 			"clip": "ult_cast",
 			"upper": true
 		},
 		"pin_ult_nock": {
+			"fade": 0.05,
 			"clip": "ult_nock",
 			"hold_from": 0.3,
 			"upper": true
@@ -154,6 +166,7 @@
 			"upper": true
 		},
 		"pin_ult_final": {
+			"fade": 0.05,
 			"clip": "ult_final",
 			"upper": true
 		},

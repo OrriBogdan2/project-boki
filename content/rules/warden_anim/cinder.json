@@ -90,7 +90,8 @@
 			"clip": "lance_stoke",
 			"hold_from": 0.5,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"as_lance_end": {
 			"clip": "lance_end",
@@ -111,7 +112,8 @@
 		"as_leap": {
 			"clip": "leap",
 			"heading": true,
-			"turn_max": 3.2
+			"turn_max": 3.2,
+			"fade": 0.05
 		},
 		"lw_hop": {
 			"clip": "hop",
@@ -121,9 +123,11 @@
 		},
 		"as_cloak": {
 			"clip": "cloak",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"lw_stoke": {
+			"fade": 0.05,
 			"clip": "stoke",
 			"upper": true
 		},
@@ -132,9 +136,11 @@
 			"hold_from": 0.22
 		},
 		"lw_land": {
+			"fade": 0.05,
 			"clip": "jet_land"
 		},
 		"lw_jump": {
+			"fade": 0.05,
 			"clip": "jump"
 		},
 		"mf_xform": {

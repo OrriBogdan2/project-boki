@@ -24,7 +24,10 @@
 	"hide_while_chain": [
 		"hook"
 	],
-	"free_arm": {"throw": "L", "shot": "R"},
+	"free_arm": {
+		"throw": "L",
+		"shot": "R"
+	},
 	"loco": {
 		"idle": "idle",
 		"stance": "stance",
@@ -42,9 +45,28 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.4, "stride": [1.3, 1.2], "foot_mps": [1.61, 5.01]
+		"run_speed": 4.4,
+		"stride": [
+			1.3,
+			1.2
+		],
+		"foot_mps": [
+			1.61,
+			5.01
+		]
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
+	"crouch": {
+		"idle": "crouch_idle",
+		"walk": {
+			"f": "crouch_f",
+			"b": "crouch_b",
+			"l": "crouch_l",
+			"r": "crouch_r"
+		},
+		"in": "crouch_in",
+		"out": "crouch_out",
+		"speed": 2.42
+	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
@@ -72,7 +94,8 @@
 			"clip": "reel",
 			"hold_from": 0.18,
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"dr_pullend": {
 			"clip": "pullend",
@@ -85,6 +108,7 @@
 			"air_legs": true
 		},
 		"dr_dive": {
+			"fade": 0.05,
 			"clip": "dive",
 			"hold_from": 0.12
 		},
@@ -92,12 +116,16 @@
 			"clip": "quake"
 		},
 		"dr_lunge": {
+			"fade": 0.05,
 			"clip": "lunge"
 		},
 		"dr_pounce": {
-			"clip": "pounce", "air_clip": "pounce"
+			"clip": "pounce",
+			"air_clip": "pounce",
+			"fade": 0.05
 		},
 		"dr_flex": {
+			"fade": 0.05,
 			"clip": "flex",
 			"upper": true
 		},
@@ -107,6 +135,7 @@
 			"air_legs": true
 		},
 		"dr_jump": {
+			"fade": 0.05,
 			"clip": "jump"
 		},
 		"dr_land": {

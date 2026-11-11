@@ -47,7 +47,18 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.8, "stride": [1.35, 1.55], "foot_mps": [3.1, 7.4], "arm_swing": {"L": 0.5}
+		"run_speed": 4.8,
+		"stride": [
+			1.35,
+			1.55
+		],
+		"foot_mps": [
+			3.1,
+			7.4
+		],
+		"arm_swing": {
+			"L": 0.5
+		}
 	},
 	"air": {
 		"rise": "jump",
@@ -78,18 +89,22 @@
 		},
 		"bul_smash": {
 			"clip": "lmb_slam",
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"bul_launch": {
+			"fade": 0.05,
 			"clip": "lmb_launch"
 		},
 		"bul_guard": {
 			"clip": "rmb_guard",
 			"upper": "moving",
 			"hold_from": 0.12,
-			"air_legs": true
+			"air_legs": true,
+			"fade": 0.05
 		},
 		"bul_break": {
+			"fade": 0.05,
 			"clip": "guard_break",
 			"upper": true
 		},
@@ -101,13 +116,16 @@
 			"clip": "shift_whirl"
 		},
 		"bul_charge": {
+			"fade": 0.05,
 			"clip": "shift_charge"
 		},
 		"bul_short": {
 			"clip": "dash_short"
 		},
 		"bul_lumber": {
-			"clip": "dash_air", "air_clip": "dash_air", "ground_clip": "dash_short"
+			"clip": "dash_air",
+			"air_clip": "dash_air",
+			"ground_clip": "dash_short"
 		},
 		"bul_crush": {
 			"clip": "crush",
@@ -122,10 +140,12 @@
 			"air_legs": true
 		},
 		"bul_ult_wind": {
+			"fade": 0.05,
 			"clip": "x_wind",
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
+			"fade": 0.05,
 			"clip": "x_slam"
 		},
 		"mf_xform": {
