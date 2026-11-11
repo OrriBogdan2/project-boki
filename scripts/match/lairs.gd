@@ -1173,6 +1173,20 @@ func sealed_lair(h: Hunter) -> Dictionary:
 			return L
 	return {}
 
+## Is this hunter in a boss fight: sealed in a lair whose boss is still up? (The lair, or {}.)
+func boss_fight(h: Hunter) -> Dictionary:
+	var L := sealed_lair(h)
+	if L.is_empty() or L.get("victory", false):
+		return {}
+	var b := boss_of(L)
+	return L if b and not b.dead and not b.dormant else {}
+
+## In a boss fight the boss is the target (decision 0061): a bot (and its Boki) leaves alone a rival
+## sealed in with it until that rival or their Boki lands a hit on it after the seal closed.
+func spares(h: Hunter, o: Hunter) -> bool:
+	var L := boss_fight(h)
+	return not L.is_empty() and float(h.hit_by.get(o.get_instance_id(), -1e9)) <= float(L["lock_at"])
+
 ## Seconds until the seal fails on its own.
 func lock_left(L: Dictionary) -> float:
 	return maxf(0.0, LOCK_T - (m.time - float(L.get("lock_at", m.time))))

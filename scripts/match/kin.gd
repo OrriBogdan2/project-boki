@@ -824,7 +824,8 @@ func _sim_active(dt: float) -> void:
 			target = null          # told to come back: it does not pick a fight on its own until a reason ends that
 		elif cmd == "chase" and chase_target != null:
 			target = chase_target
-		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 or rng.randf() < dt * 0.5:
+		elif target == null or target.dead or not target.hittable() or (target is Hunter and target.downed) or flat_dist(target) > brain.chase_range() + 3.0 \
+				or brain.spares(target) or rng.randf() < dt * 0.5:
 			target = brain.pick_target()
 	var wish := Vector2.ZERO
 	var spd := speed * BokiHit.move_k(self, 0.6) * (1.3 if haste_t > 0.0 else 1.0)
