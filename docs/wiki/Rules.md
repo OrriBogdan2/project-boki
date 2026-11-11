@@ -338,6 +338,14 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
 | demo_charge | 1 |
 
+## hud_reveal (`content/rules/hud_reveal.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| groups | {"vitals": {"from_match": 1, "what": "health, level and the XP bar"}, "abilities": {"from_match": 1, "what": "ability and weapon slots with their keys"}, "beat_clock": {"from_match": 1, "what": "the match clock under the minimap"}, "summon_ring": {"from_match": 1, "what": "the Boki card and its summon ring"}, "objective": {"from_match": 1, "what": "the minimap, waypoints and prompts"}, "seat_pips": {"from_match": 0, "first": "seat_open", "what": "the Ways Out strip, from the first open seat"}, "counters": {"from_match": 4, "what": "squads left, kills, knocks, gems"}, "feed": {"from_match": 4, "what": "the kill feed"}, "gear": {"from_match": 4, "what": "the gear panel"}, "squad": {"from_match": 4, "what": "squad frames"}, "perks": {"from_match": 4, "what": "the perk row"}, "weather": {"from_match": 4, "what": "the weather and sight chip"}, "pace_tags": {"from_match": 4, "what": "ahead / behind pace tags (no widget yet)"}, "plate_colours": {"from_match": 4, "what": "squad-coloured names on overhead plates"}} |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 

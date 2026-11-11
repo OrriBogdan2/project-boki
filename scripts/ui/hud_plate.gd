@@ -124,6 +124,10 @@ static func shield_frac(h: Hunter) -> float:
 	return clampf(h.shield / maxf(1.0, h.max_hp), 0.0, 1.0)
 
 ## Another hunter's plate. `show_name`: Hud's rule (allies always; rivals near, hovered or down).
+## The name's tint: the squad colour once plate colours are revealed (HudReveal), plain before.
+static func _name_tint(H, role: Color) -> Color:
+	return role if HudReveal.on(H.m, "plate_colours") else Color.WHITE
+
 func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if not sp.is_finite() or absf(sp.x) > 20000.0 or absf(sp.y) > 20000.0:
 		return
@@ -160,7 +164,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if word != "":
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, word_col)
 	elif show_name:
-		var name_col := Color(role.lerp(Color.WHITE, 0.55), 0.95)
+		var name_col := Color(_name_tint(H, role).lerp(Color.WHITE, 0.55), 0.95)
 		HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
 	if not sts.is_empty():
 		icon_row(c, Vector2(frame.end.x + 3.0, frame.get_center().y), sts)
@@ -277,7 +281,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(rev_w, 4.0)), HudStyle.REVIVE)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
 	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
-	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
+	var name_col := Color(_name_tint(H, role).lerp(Color.WHITE, 0.4), 0.9)
 	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), HeroTitle.of_hunter(h), HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
 	var line := "DOWN"

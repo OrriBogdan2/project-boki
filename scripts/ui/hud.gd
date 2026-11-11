@@ -831,6 +831,8 @@ func _draw_clock_bar(sz: Vector2, mm: Rect2) -> void:
 	var prog := clampf(m.time / maxf(1.0, m.length), 0.0, 1.0)
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2(r.size.x - 12, 2)), Color(1, 1, 1, 0.12))
 	c.draw_rect(Rect2(Vector2(r.position.x + 6, r.end.y - 5), Vector2((r.size.x - 12) * prog, 2)), BAD if left < 30.0 else Color("b9a6ff"))
+	if not HudReveal.on(m, "weather"):
+		return
 	# the raid condition (RaidLook), and how far you see under it
 	var rr := Rect2(Vector2(r.position.x, r.end.y + 4), Vector2(r.size.x, 20))
 	mm_bottom = rr.end.y

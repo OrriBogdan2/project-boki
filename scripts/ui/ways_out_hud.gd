@@ -113,6 +113,10 @@ static func draw(hud) -> void:
 		return
 	var c: Control = hud.c
 	var sd := seats(m)
+	if not HudReveal.on(m, "seat_pips"):
+		if not _any_open(sd):
+			return
+		HudReveal.see("seat_pips")      # the first open seat: the strip stays from now on
 	var w := CELL.x * 4.0 + SQUADS_W
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
@@ -122,6 +126,12 @@ static func draw(hud) -> void:
 	c.draw_line(Vector2(sx, r.position.y + 7), Vector2(sx, r.end.y - 7), Color(1, 1, 1, 0.14), 1.0)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
+
+static func _any_open(sd: Array) -> bool:
+	for s in sd:
+		if int(s["st"]) == St.OPEN:
+			return true
+	return false
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
