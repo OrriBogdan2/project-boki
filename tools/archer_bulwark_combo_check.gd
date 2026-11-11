@@ -3,6 +3,10 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+## degrees of hue a glow in Albert's swing crescent or Shield Slam fan may sit off his ivory (Arch.color): Kael's
+## orange is 24 off, his crimson 44
+const IVORY_HUE := 10.0
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -743,6 +747,22 @@ func _growth() -> void:
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
 
+## The glows (sweep, ribbon, flare) of one of Albert's moves that leave his ivory: a sweep's body must be his
+## signature colour itself (Arch.color), and every tone a glow names within IVORY_HUE degrees of its hue.
+func _off_ivory(move: String) -> Array:
+	var d := HeroVfx.data("bulwark")
+	var sig := Arch.color("bulwark")
+	var off: Array = []
+	for l: Dictionary in d["moves"][move]["fx"]:
+		if l["p"] == "sweep" and not Color(String(d["palette"][l.get("c", "main")])).is_equal_approx(sig):
+			off.append("sweep body " + String(l.get("c", "main")))
+		for key in ["c", "c2", "c3"]:
+			if l["p"] in ["sweep", "ribbon", "flare"] and l.has(key):
+				var tone := Color(String(d["palette"][l[key]]))
+				if absf(wrapf(tone.h - sig.h, -0.5, 0.5)) * 360.0 > IVORY_HUE:
+					off.append("%s %s %s" % [l["p"], key, l[key]])
+	return off
+
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)
 	var m: Match = r[0]
@@ -912,6 +932,8 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("swing", 0)) == 1
 		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
 		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
+	ok("bjorn vfx: the swing's crescent and trail are his ivory, not Kael's orange", _off_ivory("swing").is_empty(),
+		str(_off_ivory("swing")))
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -1137,6 +1159,8 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
 		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
+	ok("bulwark vfx: the Shield Slam fan and its flare are his ivory, not Kael's orange", _off_ivory("slam").is_empty(),
+		str(_off_ivory("slam")))
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
