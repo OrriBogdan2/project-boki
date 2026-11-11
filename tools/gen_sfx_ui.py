@@ -8,7 +8,8 @@ Several of these replace the older gameplay-era files under the same names (clic
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 The kill-XP cues come last, so every older take is unchanged: xp_tick (a tiny high tine when kill XP lands
 for you), steal_won (a quick bright rise, you took a monster another squad fought hardest) and
-steal_lost (a dull falling pair over a low bump: you were robbed of it).
+steal_lost (a dull falling pair over a low bump: you were robbed of it). ready_e (E back) is written last for
+the same reason.
 """
 import numpy as np
 import sfx_lib as S
@@ -177,6 +178,11 @@ def ready_boki(i):
     return finish(room(mix(rise, at(note, 0.22)), 0.5), 5200)
 
 
+def ready_e(i):
+    """E back: one soft felt tap on C6, over the ultimate's low pair, under the Boki's glass and the dash's tick."""
+    return finish(room(pluck(NOTE['C6'], 0.2, 0.05, 0.6), 0.35), 4600)
+
+
 def ready_dash(i):
     """Dash charge back: the shortest of the three, one dry wood tick with a small upward blip."""
     blip = S.sweep(900, 1500, 0.06) * env(N(0.06), 0.004, 0.02) * 0.6
@@ -225,6 +231,7 @@ def main():
     S.save_cat('xp_tick', xp_tick(0), 'ui')
     S.save_cat('steal_won', steal_won(0), 'ui')
     S.save_cat('steal_lost', steal_lost(0), 'ui')
+    S.save_cat('ready_e', ready_e(0), 'ui')
 
 
 if __name__ == '__main__':
