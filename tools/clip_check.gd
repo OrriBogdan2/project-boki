@@ -4,7 +4,8 @@ extends RefCounted
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each walk and run ring's
-## loops are one length, so the blended diagonals stay in step. Never touches the save.
+## loops are one length, so the blended diagonals stay in step, and a baked ring's pelvis stays in the forward loop's
+## range (no crouched side or back step). Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -18,6 +19,9 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
+const PELVIS_PHASES := 24     # samples round a loop when it is held against the forward loop's pelvis
+const PELVIS_DIP := 0.05      # m: a ring loop's pelvis may sit this far under the forward loop's lowest
+const PELVIS_RISE := 0.02     # m: and this far over its highest
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
@@ -49,6 +53,8 @@ func run(main: Node) -> void:
 		n += 1
 		await _hero(main, String(id), art_name)
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
+	for id in Arch.ids():      # (after every Hero: ostra's hit-mid-run check fails if this pass runs before it)
+		_pelvis(String(id))
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -206,6 +212,62 @@ func _rings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 				off += " %s %.3f" % [k, k_len]
 		var what := off if off != "" else " all match"
 		ok(off == "", "%s: the %s loops are one length (f %.3f s;%s)" % [id, gait, f_len, what])
+
+## A baked ring (`in_step`: its loops share the forward loop's length and strike key): every loop's pelvis stays inside
+## the forward loop's own range, from its lowest less PELVIS_DIP to its highest plus PELVIS_RISE.
+func _pelvis(id: String) -> void:
+	var loco: Dictionary = WardenClips.data(WardenGlb.art(id)).get("loco", {})
+	if not bool(loco.get("in_step", false)):
+		return
+	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
+	holder.add_child(m)
+	var clips: WardenClips = m.get_node("Warden/Sync").get("clips")
+	for gait in ["walk", "run"]:
+		var ring: Dictionary = loco.get(gait, {})
+		var f_anim := clips.lib.get_animation(String(ring["f"]))
+		var lo := INF
+		var hi := -INF
+		for i in PELVIS_PHASES:
+			var y := _pelvis_y(f_anim, clips.skel, f_anim.length * i / PELVIS_PHASES)
+			lo = minf(lo, y)
+			hi = maxf(hi, y)
+		var worst := 0.0
+		var where := ""
+		for k in ring:
+			if not clips.lib.has_animation(String(ring[k])):      # (the file check says which clip is missing)
+				continue
+			var anim := clips.lib.get_animation(String(ring[k]))
+			for i in PELVIS_PHASES:
+				var y := _pelvis_y(anim, clips.skel, anim.length * i / PELVIS_PHASES)
+				var out := maxf(lo - PELVIS_DIP - y, y - hi - PELVIS_RISE)
+				if out > worst:
+					worst = out
+					where = "%s @%d/%d" % [k, i, PELVIS_PHASES]
+		var what := "%s: the %s loops' pelvis stays in the forward range %.3f..%.3f (%s out by %.3f m)"
+		ok(worst <= 0.0, what % [id, gait, lo, hi, where if where != "" else "none", worst])
+	m.free()
+
+## The height of the hips (the midpoint of the two thigh heads, which hang from root) at time t of a clip (m).
+func _pelvis_y(anim: Animation, skel: Skeleton3D, t: float) -> float:
+	var thighs := Vector3.ZERO
+	for side in ["thigh.L", "thigh.R"]:
+		var head: Vector3 = _bone_key(anim, skel, side, Animation.TYPE_POSITION_3D, t)
+		thighs += head / 2.0
+	var q: Quaternion = _bone_key(anim, skel, "root", Animation.TYPE_ROTATION_3D, t)
+	var at: Vector3 = _bone_key(anim, skel, "root", Animation.TYPE_POSITION_3D, t)
+	return (at + q * thighs).y
+
+## A bone's keyed position or rotation at t, its rest pose where the clip has no track for it.
+func _bone_key(anim: Animation, skel: Skeleton3D, bone: String, type: int, t: float) -> Variant:
+	var bi := WardenSkeleton.find(skel, bone)
+	for i in anim.get_track_count():
+		if anim.track_get_type(i) != type or String(anim.track_get_path(i)).get_slice(":", 1) != skel.get_bone_name(bi):
+			continue
+		if type == Animation.TYPE_POSITION_3D:
+			return anim.position_track_interpolate(i, t)
+		return anim.rotation_track_interpolate(i, t)
+	var rest := skel.get_bone_rest(bi)
+	return rest.origin if type == Animation.TYPE_POSITION_3D else rest.basis.get_rotation_quaternion()
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0

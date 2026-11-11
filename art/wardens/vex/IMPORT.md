@@ -44,4 +44,6 @@ gridded front render); the scan's braid is cut and rebuilt on the spring chain. 
 
 walk and run b, l, r, fl, fr, bl, br (2026-11-11): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/vex/vex.glb OUT.glb 2.1 4.55`,
 then `python3 tools/art1/glb_add_clips.py art/wardens/vex/vex.glb OUT.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br`
-(judge: docs/art/wardens/dirloops/JUDGE.md).
+(judge: docs/art/wardens/dirloops/JUDGE.md). Re-baked 2026-11-11 with the hip held inside the forward loop's height range
+(DIP_MAX/DUTY_MIN in the script; `--clip-check` asserts it per loop). Her walk_f/run_f are main's (the v95 body); the pilot's Vex f loops were baked on the old body and are not on this build.
+Blender runs on hetzner: `jobq submit --app blender --tree . --out <dir> -- -b --factory-startup --python ...`.
