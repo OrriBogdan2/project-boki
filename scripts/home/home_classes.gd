@@ -107,8 +107,9 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 			var gp := ClassUnlock.challenge_progress(id)
 			c.add_child(UI.label("%d / %d" % [int(gp["have"]), int(gp["need"])] if st == "progress" else "Locked", 11,
 					ClassCard.GOAL_COL if st == "progress" else UI.FAINT))
-			if st == "progress":      # (no empty bar on a tile that hasn't started)
-				c.add_child(UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, TILE_W - 56.0, 5.0))
+			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, TILE_W - 56.0, 5.0)
+			gb.visible = st == "progress"      # (no empty bar on a tile that hasn't started)
+			c.add_child(gb)
 	card.tooltip_text = ClassCard.kit_tip(id)
 	if st != "open": card.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id)) + card.tooltip_text
 	if st == "locked": card.modulate = Color(0.62, 0.62, 0.68, 0.9)
