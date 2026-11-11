@@ -46,9 +46,13 @@ Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
 
 **Drawing other players' Hunters** (`scripts/match/net_smooth.gd`, decision 0039): each remote Hunter keeps
 its last six snapshots on its owner's clock (the `st` header) and is drawn 0.15 s behind the quickest
-arrival, on a Hermite curve between the two snapshots around that moment. Past the newest it runs on its
-last velocity for at most 0.25 s. A move faster than 40 m/s between two snapshots is a teleport and is drawn
-as one jump. `--remote-smooth-check` measures it over a relay with 80 ms ping, 20 ms jitter and 2% loss.
+arrival of the last second, on a Hermite curve between the two snapshots around that moment (each end's push
+along the step held to 3x the step, so it never runs past a stop). The drawn moment runs on our clock and only
+leans 10% faster or slower toward that mark, so an owner's hitch or a quicker arrival bends the speed instead of
+jumping the body. Past the newest it runs on its last velocity, easing to a stop within 0.25 s and never into
+the floor; if the late snapshot puts it behind its run-on, the miss is taken back as it moves on. A move faster
+than 40 m/s between two snapshots is a teleport and is drawn as one jump. `--remote-smooth-check` measures it
+over a relay with 80 ms ping, 20 ms jitter and 2% loss, both games stepping on the wall clock as in play.
 Boki and monsters still chase their newest snapshot (`Ent.net_follow`).
 
 ## Net.VERSION

@@ -25,3 +25,21 @@ snap, because a jittered snapshot often arrives after it is needed. Option 3 is 
 `scripts/match/net_smooth.gd` (NetSmooth), 3 lines in `Ent.net_follow`, 3 in `Match._net_apply`. Hunters
 only; Boki and monsters keep the old chase. No wire change, so no Net.VERSION bump. Remote Hunters are hit
 where they are drawn, now ~75 ms further behind their owner. Check: `--remote-smooth-check`.
+
+## Addendum 2026-11-11: the 0.24.4 gate reds (ext/remote-smooth-reds)
+
+`--remote-smooth-check` failed 5 rows under the gate's load (1 to 4 on a loaded worker). Two causes:
+
+- **The check:** it stepped each game one DT per frame, so on a loaded machine the two match clocks drifted
+  apart, which never happens in play (`Match._process` steps the frame's real time). It now steps both games
+  the same way and draws the body at the render alpha. Snaps and jerks skip frames longer than the 0.1 s step
+  cap (the game's own stutter), and "the whole run" means 20 frames a second or more, not 400 frames. The
+  lift may be one quick sweep (at most 0.25 s) when the snapshot before it was lost: 5 m over 0.2 s with both
+  ends at rest reads the same at 10 Hz as a standing dash.
+- **NetSmooth:** an owner whose clock lost time (a hitch past its step cap) left the drawn moment running past
+  the newest snapshot, and the 0.25 s run-on then jumped 4.8 m when the next one came in. Also: a lost
+  snapshot before a stop made the Hermite run past the stop and come back, a late snapshot pulled the run-on
+  back in one step, and a fall ran on 0.6 m into the floor. Fixes: `off` is the quickest arrival of the last
+  second, the drawn clock slews (10%) instead of jumping, the run-on eases to a stop, the tangents are held to
+  3x the step (Fritsch-Carlson), a run-on's miss is taken back with the body's own movement, and a run-on stops
+  on the floor. Wire shape unchanged (Net.VERSION as is).

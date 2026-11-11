@@ -5,10 +5,16 @@ extends RefCounted
 ## game. The relay here holds every packet 40 ms +-20 ms one way (80 ms ping, 20 ms jitter each way)
 ## and drops 2% of snapshots, keeping ENet's unreliable-ordered rule (a late snapshot behind a newer one
 ## is dropped). The host's Hunter runs, stops, turns, dashes, is lifted 5 m (a teleport), glides and is
-## knocked; the guest records where its game puts that Hunter every frame. Both clocks are the wall clock.
+## knocked; the guest records where its game draws that Hunter every frame. Both clocks are the wall clock:
+## each game steps its match the way Match._process does (the frame's real time, at most 0.1 s, in whole
+## DT steps) and draws the body between its last two steps, so a loaded machine's slow frames don't make
+## the two match clocks drift apart (they don't in the game; one DT per frame did, and the gate's reds
+## under load were that drift, not the line).
 ## Numbers (the drawn path against the true one, shifted by the best-fit delay):
-##   snaps      frames where the drawn body jumps more than SNAP_STEP; only the one teleport may
+##   snaps      frames where the drawn body moves faster than SNAP_STEP a DT; only the lift may (one jump, or
+##              a sweep of at most LIFT_SWEEP when the line lost the snapshot before it)
 ##   jerks      frames where the drawn speed changes by more than JERK_DV while the true one doesn't
+##              (snaps and jerks skip a frame longer than HITCH: that stutter is the game's own, not the line's)
 ##   backsteps  frames where the drawn body steps back against the way the true one moves
 ##   overshoot  frames where the drawn body is more than OFF_PATH from anywhere on the true path
 ## Lines: RSMOOTH ok|FAIL <what>, RSMOOTH <phase> <numbers>; the guest prints RSMOOTH guest pid=<pid>.
@@ -19,9 +25,12 @@ const START_S := 240.0        # s for the guest to come up and build its match
 const ONE_WAY_MS := 40        # ms: half the 80 ms ping
 const JITTER_MS := 20         # ms: each packet's one-way time is ONE_WAY_MS +- this
 const LOSS := 0.02            # share of snapshots the line loses
-const SNAP_STEP := 0.75       # m in one frame (45 m/s): faster than any run, dash or knock on screen
+const SNAP_STEP := 0.75       # m in one DT (45 m/s): faster than any run, dash or knock on screen
+const MIN_FPS := 20.0         # frames a second the guest draws at least (a loaded gate machine runs ~40, not 60)
+const HITCH := 0.1            # s: a frame longer than this is clipped by the match's own step cap
 const JERK_DV := 1.5          # m/s change of the drawn speed in one frame that the true path doesn't make
 const OFF_PATH := 0.3         # m from the true path that counts as an overshoot
+const LIFT_SWEEP := 0.25      # s the lift may be swept over when the snapshot before it was lost (two gaps)
 const LIFT := 5.0             # m the glide phase teleports the Hunter up
 const DN := preload("res://tools/displace_net_check.gd")
 
@@ -67,6 +76,10 @@ var dumped := false
 var rec: Array = []            # guest: [wall s, x, y, z] of the host's Hunter each frame
 var guest_pid := 0
 var dir := ""
+var acc := 0.0                 # s of real time the match hasn't stepped yet (Match.acc)
+var fsteps := 0                # steps taken in this frame (Match steps at most 6)
+var fw := 0.0                  # wall s of this frame
+var last_us := 0
 
 func ok(cond: bool, what: String, info := "") -> void:
 	print("RSMOOTH %s %s  %s" % ["ok  " if cond else "FAIL", what, info])
@@ -92,12 +105,16 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	dn.port = 7990 + OS.get_process_id() % 40
 	var relay := LagRelay.new()
 	relay.rng.seed = 80
 	relay.name = "Relay"
 	main.add_child(relay)
-	ok(relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK, "the lag relay listens on %d" % dn.port)
+	var up := false
+	for i in 40:       # the next port if another check's relay holds this one (a gate runs them side by side)
+		dn.port = 7990 + (OS.get_process_id() + i) % 40
+		up = relay.start(PackedStringArray(["--port=%d" % dn.port])) == OK
+		if up: break
+	ok(up, "the lag relay listens on %d" % dn.port)
 	ok(await dn._connect(), "the host is on the relay")
 	var cmd := "cd '%s' && %s --headless -- --remote-smooth-check=guest --rs-port=%d > '%s' 2>&1" % [
 		ProjectSettings.globalize_path("res://"), GODOT, dn.port, dir.path_join("guest.log")]
@@ -167,17 +184,38 @@ func _script(truth: Array) -> void:
 	m.displace.knock(P, Vector2(0, -9.0) * P.mass())      # 9 m/s: a solid hit, lifts it off its feet
 	await _host_run(1.2, "knock", truth)
 
+## Runs the host's match for `secs` of match time on the wall clock. A frame can end mid-call: the next
+## call (new inputs) takes the rest of its steps, and that call records the frame.
 func _host_run(secs: float, phase: String, truth: Array) -> void:
-	var t := 0.0
-	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
-		m.step(DT)
-		t += DT
+	var n := maxi(1, roundi(secs / DT))
+	while true:
+		while acc >= DT and n > 0 and fsteps < 6:
+			acc -= DT
+			fsteps += 1
+			n -= 1
+			for mb in m.mobs: mb.queue_free()
+			m.mobs.clear()
+			m.step(DT)
+		if n == 0:
+			return
 		if phase != "":
-			var p := m.player.pos
-			truth.append([Time.get_unix_time_from_system(), p.x, p.y, p.z, phase])
-		await main.get_tree().process_frame
+			var p := _drawn(m.player)
+			truth.append([fw, p.x, p.y, p.z, phase])
+		await _frame()
+
+## Waits one frame and adds its real time to the match's (Match._process: at most 0.1 s).
+func _frame() -> void:
+	await main.get_tree().process_frame
+	var us := Time.get_ticks_usec()
+	if last_us > 0:
+		acc += minf((us - last_us) / 1000000.0, HITCH)
+	last_us = us
+	fsteps = 0
+	fw = Time.get_unix_time_from_system()
+
+## Where the screen draws e this frame: between its last two steps (Ent.render's alpha).
+func _drawn(e: Ent) -> Vector3:
+	return e.prev.lerp(e.pos, acc / DT)
 
 func _finish() -> void:
 	Net.lobby_emit("rs", {"c": "done"})
@@ -205,7 +243,8 @@ func _report(truth: Array, drawn, lost: int) -> void:
 	var tot := {}
 	var phases := ["idle", "run", "dash", "glide", "knock", "all"]
 	for ph in phases:
-		tot[ph] = {"n": 0, "snaps": 0, "big": 0, "jerks": 0, "backsteps": 0, "overshoot": 0, "max_off": 0.0, "err": 0.0}
+		tot[ph] = {"n": 0, "snaps": 0, "big": 0, "jerks": 0, "backsteps": 0, "overshoot": 0, "max_off": 0.0, "err": 0.0,
+			"stray": 0, "top": 0.0, "true_top": 0.0}
 	var j := 0
 	for i in range(2, drawn.size()):
 		var w: float = float(drawn[i][0]) - lag
@@ -215,7 +254,10 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		var ph: String = truth[j][4]
 		var q := _p(drawn[i])
 		var step := q - _p(drawn[i - 1])
-		var dv := (step - (_p(drawn[i - 1]) - _p(drawn[i - 2]))).length() / DT
+		var dt1 := float(drawn[i][0]) - float(drawn[i - 1][0])
+		var dt0 := float(drawn[i - 1][0]) - float(drawn[i - 2][0])
+		var hitch := dt1 > HITCH or dt0 > HITCH or dt1 <= 0.0 or dt0 <= 0.0
+		var dv := 0.0 if hitch else (step / dt1 - (_p(drawn[i - 1]) - _p(drawn[i - 2])) / dt0).length()
 		var near_tele := absf(w - tele_w) < 0.35
 		var tv := _true_vel(truth, j)
 		var off := _off_path(truth, j, q)
@@ -223,10 +265,17 @@ func _report(truth: Array, drawn, lost: int) -> void:
 			var r: Dictionary = tot[k]
 			r["n"] += 1
 			r["err"] += q.distance_to(_true_at(truth, j, w))
-			if step.length() > SNAP_STEP: r["snaps"] += 1
-			if step.length() > LIFT * 0.8: r["big"] += 1
+			if step.length() > LIFT * 0.8:
+				r["big"] += 1          # (the lift counts on any frame, a hitched one too)
+				r["snaps"] += 1
+			elif not hitch and step.length() > SNAP_STEP * dt1 / DT:
+				r["snaps"] += 1
+				if not near_tele: r["stray"] += 1
 			if near_tele: continue
-			if dv > JERK_DV and _true_dv(truth, j) < JERK_DV: r["jerks"] += 1
+			if not hitch:
+				r["top"] = maxf(r["top"], step.length() / dt1)
+			r["true_top"] = maxf(r["true_top"], tv.length())
+			if not hitch and dv > JERK_DV and _true_dv(truth, j) < JERK_DV: r["jerks"] += 1
 			if tv.length() > 1.0 and step.dot(tv.normalized()) < -0.01: r["backsteps"] += 1
 			if off > OFF_PATH: r["overshoot"] += 1
 			r["max_off"] = maxf(r["max_off"], off)
@@ -236,15 +285,36 @@ func _report(truth: Array, drawn, lost: int) -> void:
 		var r: Dictionary = tot[ph]
 		var head := "RSMOOTH %-5s frames %4d  snaps %2d  jerks %3d" % [ph, r["n"], r["snaps"], r["jerks"]]
 		var err: float = r["err"] / maxf(1.0, r["n"])
-		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m" % [
-			r["backsteps"], r["overshoot"], r["max_off"], err])
+		print(head + "  backsteps %3d  overshoot %3d (max %.2f m)  mean err %.2f m  top %.0f m/s (true %.0f)" % [
+			r["backsteps"], r["overshoot"], r["max_off"], err, r["top"], r["true_top"]])
 	var a: Dictionary = tot["all"]
-	ok(a["n"] > 400, "the guest drew the whole run", "%d frames" % a["n"])
-	ok(a["big"] == 1 and a["snaps"] == 1, "the lift is one snap and nothing else snaps", "%d snaps" % a["snaps"])
+	var fps: float = a["n"] / maxf(0.001, w1 - w0 - 0.2)
+	ok(a["n"] > 0 and fps >= MIN_FPS and float(drawn[-1][0]) >= w1, "the guest drew the whole run",
+		"%d frames, %.0f a second" % [a["n"], fps])
+	var sweep := _lift_sweep(drawn, lag, tele_w)
+	ok(a["stray"] == 0 and sweep <= LIFT_SWEEP, "the lift is one jump or one quick sweep and nothing else snaps",
+		"%d snaps, %d away from the lift; the lift drawn in %.2f s" % [a["snaps"], a["stray"], sweep])
 	ok(a["jerks"] <= 15, "the drawn speed changes only where the true one does", "%d jerks" % a["jerks"])
 	ok(a["backsteps"] == 0, "the drawn body never steps back", "%d backsteps" % a["backsteps"])
 	ok(a["overshoot"] == 0, "the drawn body stays on the true path", "max %.2f m off" % a["max_off"])
 	ok(lag < 0.25, "drawn at most 250 ms behind", "%.0f ms" % (lag * 1000.0))
+
+## How long the drawn body took to rise through the lift: 0 when it went in one frame (however long the frame).
+## With the snapshot before the lift lost, two snapshots 0.2 s apart and 5 m apart with both ends at rest read
+## the same at 10 a second as a standing dash between them (18 m/s), so NetSmooth sweeps it; it must not take
+## longer than those two gaps.
+static func _lift_sweep(drawn: Array, lag: float, tele_w: float) -> float:
+	var lo := -1
+	for i in drawn.size():
+		var w: float = float(drawn[i][0]) - lag
+		if absf(w - tele_w) > 0.5:
+			continue
+		var y := float(drawn[i][2])
+		if y < 0.5:
+			lo = i
+		elif y > LIFT - 0.5 and lo >= 0:
+			return 0.0 if i == lo + 1 else float(drawn[i][0]) - float(drawn[lo][0])
+	return INF
 
 ## The delay (s) that best lines the drawn path up with the true one.
 func _best_lag(truth: Array, drawn: Array, w0: float, w1: float) -> float:
@@ -282,9 +352,11 @@ static func _true_vel(truth: Array, j: int) -> Vector3:
 static func _true_dv(truth: Array, j: int) -> float:
 	var top := 0.0
 	for i in range(maxi(2, j - 6), mini(truth.size(), j + 7)):
-		var v1 := _p(truth[i]) - _p(truth[i - 1])
-		var v0 := _p(truth[i - 1]) - _p(truth[i - 2])
-		top = maxf(top, (v1 - v0).length() / DT)
+		var dt1 := maxf(0.001, float(truth[i][0]) - float(truth[i - 1][0]))
+		var dt0 := maxf(0.001, float(truth[i - 1][0]) - float(truth[i - 2][0]))
+		var v1 := (_p(truth[i]) - _p(truth[i - 1])) / dt1
+		var v0 := (_p(truth[i - 1]) - _p(truth[i - 2])) / dt0
+		top = maxf(top, (v1 - v0).length())
 	return top
 
 ## How far q is from the true path within half a second of sample j.
@@ -306,13 +378,17 @@ func _guest() -> void:
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
-		for mb in m.mobs: mb.queue_free()       # (as on the host: nothing shoves the bodies)
-		m.mobs.clear()
-		m.step(DT)
+		while acc >= DT and fsteps < 6:
+			acc -= DT
+			fsteps += 1
+			for mb in m.mobs: mb.queue_free()       # (as on the host: nothing shoves the bodies)
+			m.mobs.clear()
+			m.step(DT)
 		var H: Ent = m.ents_by_id.get("P" + Net.host, null)
 		if H:
-			rec.append([Time.get_unix_time_from_system(), H.pos.x, H.pos.y, H.pos.z])
-		await main.get_tree().process_frame
+			var p := _drawn(H)
+			rec.append([fw, p.x, p.y, p.z])
+		await _frame()
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
