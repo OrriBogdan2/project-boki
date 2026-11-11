@@ -1,6 +1,7 @@
 // The Hero VFX surface looks (scripts/match/hero_vfx.gd), one shader, a mode per look. Premultiplied: rgb is what
 // glows on top and alpha is how much of the ground it covers, so hot edges add light while char and smoke stay
-// dark on bright ground. Every look burns away through noise instead of fading flat.
+// dark on bright ground. Every look burns away through noise instead of fading flat. Cel look: heat is drawn in
+// CEL_BANDS flat steps and shapes have hard (one-pixel, anti-aliased) edges.
 shader_type spatial;
 render_mode blend_premul_alpha, unshaded, cull_disabled, depth_draw_never, shadows_disabled, fog_disabled;
 
@@ -14,6 +15,8 @@ const int M_RIBBON = 4;     // a mesh trail: UV.x head (0) to tail (1), UV.y acr
 const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the camera: lightning when jag > 0, a thread at 0
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
+const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
+const float CEL_BANDS = 4.0;  // flat heat steps in a look: char, body, hot, white-hot
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -29,6 +32,7 @@ uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
 uniform float spin = 1.0;   // M_VORTEX: turns per second (negative: the other way)
 uniform bool stitch = false;  // M_SCORCH lane: a seam of cross-stitches instead of fire
+uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;  // art/vfx/noise.png: g fbm, b cell walls
 
 void vertex() {
 	if (billboard) {
@@ -54,10 +58,21 @@ float cracks(vec2 p) {
 	return f2 - f1;
 }
 
+// 0 below zero, 1 above, with a one-pixel anti-aliased step between: a cel edge at any size on screen
+float hard(float x) {
+	return clamp(x / max(fwidth(x), 1e-4) + 0.5, 0.0, 1.0);
+}
+
+// heat snapped to CEL_BANDS flat steps, the step edges anti-aliased
+float cel(float h) {
+	float s = h * CEL_BANDS;
+	return (floor(s) + hard(fract(s) - 0.5)) / CEL_BANDS;
+}
+
 // Fire by heat, 0..1: char, the body colour, the hot colour, nearly white. Everything hot is drawn with high
 // coverage, so it keeps its colour on bright ground instead of washing out to white.
 vec3 ramp(float h) {
-	h = clamp(h, 0.0, 1.0);
+	h = cel(clamp(h, 0.0, 1.0));
 	if (h < 0.3) { return mix(col3.rgb, col.rgb, h / 0.3); }
 	if (h < 0.72) { return mix(col.rgb, col2.rgb, (h - 0.3) / 0.42); }
 	return mix(col2.rgb, vec3(1.0), (h - 0.72) / 0.28 * 0.5);
@@ -72,7 +87,7 @@ vec4 sweep(vec2 uv) {
 	float n = fbm3(vec2(uv.x * 9.0 - TIME * 5.0 + seed, uv.y * 4.0 + TIME * 3.0));
 	float burn = smoothstep(0.2, 1.0, life);
 	float body = thick - uv.y + (n - 0.42) * 0.55 - burn * 0.75;
-	float a = smoothstep(0.0, 0.08, body);
+	float a = hard(body - 0.02);
 	float depth = clamp(uv.y / max(thick, 0.05), 0.0, 1.0);    // 0 at the edge, 1 at the licking tips
 	float lead = 1.0 - smoothstep(0.0, 0.12, behind);
 	float heat = 0.9 - depth * 0.75 + (n - 0.5) * 0.5 - burn * 0.45 + lead * 0.4;
@@ -152,7 +167,7 @@ vec4 skirt(vec2 uv) {
 	float n = fbm3(vec2(uv.x * 22.0 + seed, uv.y * 2.5 - TIME * 3.2));
 	float tall = 1.0 - smoothstep(0.1, 1.0, life);             // the wall sinks as it spends
 	float tongue = n * 1.35 + tall * 0.75 - uv.y * 1.5 - smoothstep(0.45, 1.0, life) * 0.7;
-	float a = smoothstep(0.0, 0.14, tongue);
+	float a = hard(tongue - 0.05);
 	float heat = tongue * 1.1 + 0.15 - uv.y * 0.25;
 	return vec4(ramp(heat) * a * 0.8, a * 0.8);
 }
@@ -165,7 +180,7 @@ vec4 flare(vec2 uv) {
 	float rag = fbm3(vec2(ang * 2.4 + seed, seed * 0.7)) * 0.75 + 0.35;
 	float open = smoothstep(0.0, 0.2, life);
 	float reach = rag * mix(0.35, 1.0, open) * (1.0 - life * 0.5);
-	float body = 1.0 - smoothstep(reach * 0.45, reach, d);
+	float body = hard(reach * 0.8 - d);
 	float core = 1.0 - smoothstep(0.0, reach * 0.55, d);
 	float fade = 1.0 - smoothstep(0.35, 1.0, life);
 	float holes = smoothstep(life - 0.1, life + 0.25, fbm3(p * 3.5 + seed) + 0.25);
@@ -177,7 +192,7 @@ vec4 ribbon(vec2 uv) {
 	float across = 1.0 - abs(uv.y * 2.0 - 1.0);
 	float n = fbm3(vec2(uv.x * 5.0 - TIME * 5.0 + seed, uv.y * 3.0));
 	float body = across * 1.4 + (n - 0.5) * 0.9 - uv.x * 0.9;
-	float a = smoothstep(0.08, 0.3, body);
+	float a = hard(body - 0.18);
 	float heat = across * across * (1.0 - uv.x) * 0.95 + (n - 0.5) * 0.3;
 	return vec4(ramp(heat) * a, a * mix(0.95, 0.35, uv.x));
 }
@@ -218,6 +233,25 @@ vec4 vortex(vec2 uv) {
 	return vec4(c * fade, a);
 }
 
+vec4 ring(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float d = length(p);
+	float round_u = atan(p.y, p.x) / 6.2832 * 2.0 + seed;     // two whole turns of the tiling noise: no seam
+	float go = 1.0 - pow(1.0 - min(life / 0.55, 1.0), 3.0);    // races out, then slows
+	float wob = texture(noise_tex, vec2(round_u, 0.2)).g;
+	float r = go * 0.9 + (wob - 0.5) * 0.08;
+	float w = mix(0.2, 0.03, go);
+	float band = hard(min(r - d, d - r + w));
+	float lead = hard(d - r + w * 0.4);                         // the outer edge, hot
+	float gaps = hard(texture(noise_tex, vec2(round_u * 1.5, go * 0.25)).b - life * 1.2 + 0.35);   // breaks up late
+	float fill = hard(r - w - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flat flash of dust inside, gone early
+	float fade = 1.0 - smoothstep(0.75, 1.0, life);
+	float a = (band * gaps + fill * (1.0 - band)) * fade;
+	vec3 c = mix(mix(col.rgb, col2.rgb, lead), mix(col2.rgb, vec3(1.0), 0.5), lead * (1.0 - hard(life - 0.2)));
+	c = mix(col3.rgb, c, band);
+	return vec4(c * a, a);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
@@ -227,6 +261,7 @@ void fragment() {
 	else if (mode == M_BOLT) { v = bolt(UV); }
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
+	else if (mode == M_RING) { v = ring(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;
