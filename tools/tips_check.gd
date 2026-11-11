@@ -49,7 +49,13 @@ func _table() -> void:
 		tidy = tidy and not TipPick.render(text).contains("{")
 		for tok in RegEx.create_from_string("\\{(\\w+)\\}").search_all(text):
 			tidy = tidy and InputMap.has_action(tok.get_string(1))
-	ok(tips.size() >= 28 and tips.size() <= 34, "about 30 tips (%d)" % tips.size())
+	var hints: Dictionary = R["hints"]
+	var hints_tidy := not hints.is_empty()
+	for h in hints.values():
+		hints_tidy = hints_tidy and String(h).length() <= 60 and not String(h).contains("\n")
+	ok(hints_tidy, "the hints are short one-liners (%d)" % hints.size())
+	var lines := tips.size() + hints.size()
+	ok(lines >= 28 and lines <= 34, "about 30 lines of text with the hints (%d)" % lines)
 	ok(ids.size() == tips.size(), "every tip has its own id")
 	ok(tidy, "one line each, a known trigger, keys only as {action} of a real action")
 	var n_trig := (R["triggers"] as Dictionary).size()

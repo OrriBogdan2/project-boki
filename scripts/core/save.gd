@@ -82,7 +82,7 @@ func fresh() -> Dictionary:
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {},
+		"tutorial": {"recast_seen": false},
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -443,6 +443,7 @@ func load_from(p: String) -> void:
 		if not migrate(parsed):
 			return
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	RecastHint.migrate(parsed)      # and this one
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]

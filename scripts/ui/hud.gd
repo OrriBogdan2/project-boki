@@ -145,9 +145,9 @@ func toast(text: String, col: Color) -> void:
 	msgs.push(text, col)
 
 ## A first-time hint, in the lane for longer (Match._tip says each once).
-func tip(text: String) -> void:
+func tip(text: String, life := TIP_LIFE) -> void:
 	if not Record.clean():
-		msgs.push(text, TIP_COL, MsgLane.NORMAL, TIP_LIFE)
+		msgs.push(text, TIP_COL, MsgLane.NORMAL, life)
 const TIP_COL := Color("f3e6c8")
 const TIP_LIFE := 6.0      # s a hint stays up
 const MSG_FIGHT_S := 4.0   # s after you were last hit that the message lane keeps to its fight budget
@@ -1869,7 +1869,9 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 		if not revs.is_empty():
 			_ctext(Vector2(sz.x * 0.5, sz.y * 0.32 + 84), "%s is reviving you  %d%%" % [(revs[0] as Hunter).pname, int(p.revive * 100.0)], 15, GOOD, big)
 	if Settings.get_v("tips") and not Record.clean():
-		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), "TIP  ·  " + TipPick.for_downed(p, m.time, m.opts.get("blight", true)), HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
+		var tip_line := "TIP  ·  " + TipPick.for_downed(p, m.time, m.opts.get("blight", true))
+		c.draw_multiline_string(body, Vector2(sz.x * 0.5 - 280.0, sz.y * 0.32 + 118.0), tip_line,
+				HORIZONTAL_ALIGNMENT_CENTER, 560.0, 14, 2, MUTED)
 
 ## Dead, but your team's still in it.
 func _draw_dead(sz: Vector2, p: Hunter) -> void:

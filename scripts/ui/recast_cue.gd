@@ -31,6 +31,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		cue["col"] = slot_col(k, String(w["slot"]))
 		cue["tick"] = 0
 		Sfx.play("ab_ready", null, -3.0, 0.0, 1.35)
+		RecastHint.opened(k, w)
 	elif w.is_empty() and was != "":
 		if float(cue.get("last", 1.0)) < RAN_OUT and not bool((cue.get("w", {}) as Dictionary).get("auto", false)):
 			cue["exp_slot"] = was

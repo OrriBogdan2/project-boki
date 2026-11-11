@@ -24,6 +24,7 @@ func _first(m: Match, P: Hunter, slot: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
+	await _first_hint()
 	for c in CASES:
 		await _window(String(c[0]), String(c[1]))
 	await _expired()
@@ -54,12 +55,48 @@ func _window(hero: String, slot: String) -> void:
 	var timed := not w.is_empty() and float(w["left"]) > 0.0 and float(w["total"]) > 0.0
 	var placed := at is Vector3 and (at as Vector3).is_finite()
 	ok("%s %s: reports its recast window" % [hero, slot], timed and placed, str(w))
+	var verb := RecastHint.verb(P.ak, slot)
+	ok("%s %s: the hint has the kit's own verb" % [hero, slot], verb != RecastHint.FALLBACK_VERB, verb)
 	m.step(DT)
 	var cw: Dictionary = P.ak.cue.get("w", {})
 	var key := RecastCue.key_of(slot)
 	ok("%s %s: the local cue carries it (slot, AGAIN key)" % [hero, slot],
 			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
 	await done(m)
+
+## The first recast window of a save says "<KEY> AGAIN to <verb>" once (RecastHint); a kit with no recast never does.
+func _first_hint() -> void:
+	Save.d = Save.fresh()
+	var s := setup("gunslinger", 6.0)
+	var m: Match = s[0]
+	var P: Hunter = s[1]
+	aim_at(P, (s[2] as Hunter).pos)
+	P.ak.use_e()
+	step(m, 1.5)
+	ok("gunslinger: a kit with no recast never opens the hint", P.ak.recast_window().is_empty()
+			and not Save.d["tutorial"][RecastHint.FLAG], str(Save.d["tutorial"]))
+	await done(m)
+	s = setup("thief", 6.0)
+	m = s[0]
+	P = s[1]
+	aim_at(P, (s[2] as Hunter).pos)
+	ok("thief: a new save has not seen it", not Save.d["tutorial"][RecastHint.FLAG])
+	P.ak.use_e()
+	_open(m, P, "e")
+	m.step(DT)
+	var want := "%s AGAIN to blink" % Settings.key_cap("signature")
+	ok("thief e: the first window sets the flag", Save.d["tutorial"][RecastHint.FLAG], str(Save.d["tutorial"]))
+	ok("the line is the key and the kit's own verb", RecastHint.line(P.ak, "e") == want, RecastHint.line(P.ak, "e"))
+	ok("and it never repeats in this save", RecastHint.opened(P.ak, P.ak.recast_window()) == "")
+	await done(m)
+	var old := {"matches": 4, "tutorial": {}}
+	RecastHint.migrate(old)
+	var young := {"matches": 0}
+	RecastHint.migrate(young)
+	var kept := {"matches": 4, "tutorial": {RecastHint.FLAG: false}}
+	RecastHint.migrate(kept)
+	ok("an old save that has played skips it; a new one sees it; the field is kept", old["tutorial"][RecastHint.FLAG]
+			and not young["tutorial"][RecastHint.FLAG] and not kept["tutorial"][RecastHint.FLAG])
 
 ## Ostra's seed left alone: the window runs out and the E slot shows EXPIRED (never closes silently).
 func _expired() -> void:
