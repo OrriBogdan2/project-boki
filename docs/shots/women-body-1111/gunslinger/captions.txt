@@ -1,0 +1,9 @@
+turnaround_game.png: gunslinger at the match camera (pitch 66, 23 m, fov 32), front, 3/4, side, back, 3/4 back; true pixels, then x3
+turnaround_close.png: gunslinger close, front, 3/4, side, back, 3/4 back
+front_34.png: gunslinger full length, front and three-quarter (as the sheet's two views)
+back_34.png: gunslinger full length, back and three-quarter back
+closeup.png: gunslinger head and shoulders, three-quarter front
+closeup_front.png: gunslinger head and shoulders, from the front
+poses_game.png: gunslinger at the match camera in idle, run, attack, cast, ult (true pixels, then x3)
+moves_close_1.png: gunslinger, left to right: run, run, other foot, shoot, recoil
+moves_close_2.png: gunslinger, left to right: dash, dash, low, dash, up, RMB throw

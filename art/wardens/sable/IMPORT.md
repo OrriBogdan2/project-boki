@@ -1,5 +1,9 @@
 # Sable (thief): import note
 
+## Women body pass 11-11 (ext/women-body-1111): the current sable.glb
+
+`~/meshy/v95/Sable/r2/body5/cand_3.glb` (pick.txt and sheet_sable.jpg beside it; cand_4 is the gentler alternative) is appeal4 `cand_6_motheye.glb` (the braid forward, the sly face, the solid grey/black moth eyes of the owner's 11-11 correction, a rounded bust) with a position+normal displacement: waist and shoulders in, hips, glute and bust fuller (max move 3.5 cm, area p95 1.16 / p99 1.31). Eyes and paint untouched. No wings: ext/sable-wings stays out of 0.24.5, and this build carries none (the spring_wing chains stay unweighted, as on appeal3 b). `art/wardens/src/sable_v95.json` reads it. The swap ran on ext/women-body-1111's older tree (d31afaa66), so the 0.24.5 glb's clips were copied back on by node name (tools/art1/glb_add_clips.py, same skeleton: the pet/give/cheer clips and the last frame the older swap dropped) and the glb's orphaned bytes dropped. Shots: docs/shots/women-body-1111/ (sheet_<name>.jpg is 0.24.5 against this build, front and side, rest pose).
+
 ## v95 swap, appeal3 body b with the bug eyes (2026-11-10, ext/sable-appeal-b): the current sable.glb
 
 The mesh is the owner's pick (11-10): Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes

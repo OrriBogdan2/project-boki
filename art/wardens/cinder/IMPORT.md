@@ -1,5 +1,9 @@
 # Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
+## Women body pass 11-11 (ext/women-body-1111): the current cinder.glb
+
+Owner 11-10: Cinder bust bigger. The body5 swap (`~/meshy/v95/Cinder/r2/body5/cand_2.glb`, a 2.6 cm dome over cand_5) came out of the swap's fit no bigger than cand_5 in game, so the build keeps 0.24.5's cand_5 glb (clips, x_breath, paint) and pushes the dome into its bind mesh instead: `python3 tools/art1/cinder_bust_dome.py IN.glb OUT.glb` (2.8 cm forward at the apex, zero slope at the chest wall, a little sag and spread; positions and normals only, 631 vertices). Run it again after any re-swap; the spec still reads cand_5. Shots: docs/shots/women-body-1111/ (sheet_<name>.jpg is 0.24.5 against this build, front and side, rest pose).
+
 `cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads

@@ -1,5 +1,9 @@
 # Vex (gunslinger): import note
 
+## Women body pass 11-11 (ext/women-body-1111): the current vex.glb
+
+`~/meshy/v95/Vex/r2/body5/cand_2.glb` (pick.txt and sheet_vex.jpg beside it; cand_1 is the gentler alternative): appeal3 cand_b with a position+normal displacement (waist and shoulders in, hips and bust fuller; area p95 1.18 / p99 1.44, 1 flip), same vertices and UVs. `art/wardens/src/vex_v95.json` reads it. The swap ran on ext/women-body-1111's older tree (d31afaa66), so the 0.24.5 glb's clips were copied back on by node name (tools/art1/glb_add_clips.py, same skeleton: the pet/give/cheer clips and the last frame the older swap dropped) and the glb's orphaned bytes dropped. Shots: docs/shots/women-body-1111/ (sheet_<name>.jpg is 0.24.5 against this build, front and side, rest pose).
+
 ## v95 swap, appeal3 body b (2026-11-10, ext/vex-appeal-b): the current vex.glb
 
 The mesh is the v95 master in the owner's appeal3 look, body variant b (owner pick 11-10: fuller bust, waist 3% narrower,
