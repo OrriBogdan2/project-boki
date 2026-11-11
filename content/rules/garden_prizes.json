@@ -191,6 +191,35 @@
 					"w": 10
 				}
 			]
+		},
+		"relay": {
+			"name": "Relay Cup",
+			"first": "zipseed",
+			"ribbon": "Relay Cup Ribbon",
+			"colour": "#4ad6b0",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 40
+				},
+				{
+					"kind": "snack",
+					"id": "puffcorn",
+					"w": 30
+				},
+				{
+					"kind": "item",
+					"id": "sunsap",
+					"w": 15
+				},
+				{
+					"kind": "snack",
+					"id": "tidebloom",
+					"w": 15
+				}
+			]
 		}
 	}
 }

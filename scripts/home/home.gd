@@ -2184,6 +2184,7 @@ func _label_for(it: Dictionary) -> String:
 		"egg": return ("Help the %s hatch!" if _egg_ready() else "Warm the %s") % _egg_label()
 		"yard": return "Train your partner"
 		"race": return hrace.label()
+		"relay": return hrace.relay.label()
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
@@ -2226,6 +2227,7 @@ func _use(it: Dictionary) -> void:
 			if not ak.is_empty(): _open_train(ak)
 		"nook": _open_nook()
 		"race": hrace.use()
+		"relay": hrace.relay.use()
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
