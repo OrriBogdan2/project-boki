@@ -229,6 +229,11 @@ func _cap(s: float) -> String:
 # ------------------------------------------------------------------ interacting
 ## What interact would do at an exit for this hunter, for Match._update_interact (or {}).
 ## Holding interact fills x.hold[nid]; letting go resets it.
+## A hunter not holding interact: whatever exit hold it had going is dropped (as interact_for does).
+func let_go(h: Hunter) -> void:
+	for x in list:
+		(x["hold"] as Dictionary).erase(h.nid)
+
 func interact_for(h: Hunter) -> Dictionary:
 	var want: bool = h.inp.get("interact", false)
 	var key := Settings.key_cap("interact")

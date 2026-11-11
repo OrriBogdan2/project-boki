@@ -34,11 +34,27 @@ named by a layer's `"when"` / `"unless"`) fill sizes: `"size": "r"` with `"size_
 | `string` | holds only: a thin glowing line through named anchors | `through`, `size`, `skip_if` (a model node that means it brings its own) |
 | `bolt` | a strip from A to B facing the camera: lightning with `jag` > 0 (0.3-0.7), a taut thread at 0 | `size` width, `len` along the aim, or `to` (an anchor), or the kit's `o.to` (a Vector3; local only, other games use `len`) |
 | `vortex` | a ground disc spinning inward to a dark core (`c3`) | `size` radius, `spin` turns/s (negative: the other way), `grow` |
-| `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, puffs, dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
+| `ring` | a shockwave racing out over the ground: a hard band with a hot lead edge, a flash of dust inside, breaking up as it spends | `size` radius it reaches |
+| `ember` / `smoke` / `chunk` / `shard` / `card` / `coin` / `star` / `drop` | GPU particles: hot streaks, cel puffs (lit `c`, shaded `c3`), dark debris, crisp crystals, tumbling cards burning from the edges, spinning metal glints, twinkling four-point stars, water drops | `n`, `speed`, `spread`, `way` up / fwd / back / along, `grav`, `drag`, `curl`, `shape` ball / line / disc / gather / arc, `burst` 1 all at once .. 0 over the life |
 
 All layers: `at` (`here`, `h` the body, or an anchor), `y`, `fwd`, `delay`, `life`, `c` / `c2` / `c3` (palette keys: body,
 hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB for anyone but the player), `pitch`,
 `pitch_k`, `var`, `delay`, `at`, `when` / `unless`.
+
+## The cel look
+Every effect in the game shares one cel pass, `shaders/cel.gdshaderinc`: `hard()` (a one-pixel anti-aliased edge),
+`cel()` (heat in `CEL_BANDS` flat steps), `cel_cover()` / `cel_glow()` (a soft cover or additive glow turned into flat
+steps with edges ragged by the noise) and `cel_ring()` (the shockwave ring: a hard band with a hot lead edge that
+breaks up as it spends). They sample `art/vfx/noise.png` (r billows, g fbm, b cell walls, baked by
+`python3 tools/gen_vfx_noise.py`) through the `vfx_noise` shader global in project.godot, so no material wires it.
+Smoke is a lumpy puff in two flat tones (`c` lit from screen up-left, `c3` shaded), eaten away by noise; it is near
+opaque, so a recipe needs fewer, smaller puffs than a soft smoke did.
+
+Who includes it: the data looks here (`hero_vfx.gdshader`, `hero_vfx_mote.gdshader`, ring layer `"p": "ring"`), the
+kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle / Vex, `KitShaders` Hem / Breaker,
+`care_disc` / `care_glow` Pip / Claire, `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
+tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) draw `cel_ring()`. A new effect shader
+includes the file and runs its cover and glow through `cel_cover()` / `cel_glow()` last.
 
 ## FX anchors
 `"anchors"` in the data names points on the Hero. Each resolves in order: `nodes` (empties on the .glb, e.g.

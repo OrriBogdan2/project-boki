@@ -23,6 +23,10 @@ const COMMITS := {
 	# which never bounces), so there is no angled hit to rebound. Open: see docs/MOVEMENT_FEEL.md.
 	"rimewright": ["bounce:sig/hold", "bounce:skill@"],
 }
+## Placed casts (not moves), tapped, per Hunter: the bounce sweep aims them back the way she came (at a chaser),
+## not at the wall. Neve's Rink Wall (E) rises at her height `reach` ahead and its blocks stand as columns: aimed
+## at the wall it stood just in front of it, and she met her own ice side-on instead of the wall at an angle.
+const CAST_BACK := {"rimewright": ["sig"]}
 const SETTLE := 2                   # steps a kick or bounce is given to show
 
 var main: Node
@@ -73,6 +77,10 @@ func _hunter(a: String) -> void:
 	m.queue_free()
 
 func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
+	# a Spirit Walk from the last case ends here: set_arch builds a new kit, but Hunter.spirit_t
+	# would outlive it and let her climb the wall face (fbf2e50d0) in every case after it
+	if P.ak and P.ak.get("spirit") != null:
+		P.ak.spirit.end("merge")
 	P.set_arch(arch)
 	P.unlock_all()
 	P.out = false
@@ -84,7 +92,7 @@ func _fresh(at: Vector3, grounded: bool, v := Vector3.ZERO) -> void:
 	for f in ["pad", "grap", "lfloat", "shove", "charge", "stomp", "abil_charge"]:
 		P.set(f, {})
 	for f in ["grap_cd", "mantle_cd", "roll_t", "glide_cd", "knock_t", "fly_t", "stun_t", "root_t", "wall_touch_t",
-			"fire_cd", "reload_t"]:
+			"fire_cd", "reload_t", "spirit_t"]:
 		P.set(f, 0.0)
 	P.kb_t = -9.0
 	P.wall_hit_v = Vector2.ZERO
@@ -138,7 +146,10 @@ func _kick_case(what: String) -> void:
 
 ## In the air with the wall within the hop's reach.
 func _at_wall() -> bool:
-	return not P.grounded and face - P.pos.x - P.r < WallMoves.FACE_REACH
+	# beside the face: not through it (a Spirit Walk ghosts terrain) and not up over its top
+	var gap: float = face - P.pos.x - P.r
+	return not P.grounded and gap < WallMoves.FACE_REACH and P.pos.x < face \
+		and P.pos.y < m.world.ground_at(face + 0.5, z0) - 0.1
 
 func _kicks() -> int:
 	return int(P.stats.get("wall_kicks", 0))
@@ -266,7 +277,8 @@ func _sweeps() -> void:
 				var lead := BOUNCE_V * maxf(t, 0.1)      # (it reaches the wall `t` after the button)
 				_fresh(Vector3(face - P.r - 0.02 - lead.x, low + START_UP, z0 - lead.y), false,
 						Vector3(BOUNCE_V.x, 0.0, BOUNCE_V.y))
-				P.inp["aim"] = P.pos + Vector3(ang.x, 0.0, ang.y) * 6.0  # (moves go where you aim)
+				var aim_k := -1.0 if tag in CAST_BACK.get(arch, []) else 1.0
+				P.inp["aim"] = P.pos + Vector3(ang.x, 0.0, ang.y) * 6.0 * aim_k  # (moves go where you aim)
 				P.inp[key] = true
 				if key == "sec" and hold:
 					P.inp["sec_hold"] = true

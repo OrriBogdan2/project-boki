@@ -18,7 +18,7 @@ const K := 8.0             # 1/s: Hunter.render's crouch rate
 const SPEED_K := 0.55      # Hunter: the walking speed crouched, of the archetype's run speed
 const PLANT := 0.45        # of the crouch speed, at least: what a planted foot carries back (under it the sneak skates)
 const PLANTED := 0.012     # m: a foot this close to its lowest over the sneak counts as down
-const LATER := ["juggernaut", "gil"]    # Kael: landing after art1-integ; Gil: his .glb has no clips yet
+const LATER := ["juggernaut"]    # Kael: landing after art1-integ
 const SKATES := ["tender"]  # Pip: her 0.16 m tiptoe stride skates even at the top rate (docs/DEBT.md)
 
 var bad := 0
@@ -40,7 +40,7 @@ func run(main: Node) -> void:
 		if dd.has("crouch"):
 			n += 1
 			await _hero(main, String(id), art_name)
-		elif not dd.is_empty():
+		elif dd.has("loco"):      # (no clips at all yet, as Gil: nothing to crouch with)
 			ok(id in LATER, "%s: has clips and a crouch" % id)
 	ok(n > 0, "at least one Hero has a crouch (%d)" % n)
 	print("CROUCH_CHECK_DONE, failures: ", bad)

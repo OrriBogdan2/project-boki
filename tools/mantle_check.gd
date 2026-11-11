@@ -82,6 +82,11 @@ func _rims() -> void:
 					var open_below := true
 					for dd in [1.1, 1.6, 2.2, 2.8, 3.4]:
 						if not w.is_void(g.x + d.x * dd + d.y * 0.4, g.z + d.y * dd + d.x * 0.4) or not w.is_void(g.x + d.x * dd - d.y * 0.4, g.z + d.y * dd - d.x * 0.4): open_below = false
+					# (and a real rim: flat ground for 4 m behind it, not a ledge under a higher terrace, where
+					# the float rightly carries you up onto the terrace; the 2x Hollow Crown has such ledges)
+					for dd in [1.0, 2.0, 3.0, 4.0]:
+						var back := w.ground_at(g.x - d.x * dd, g.z - d.y * dd)
+						if absf(back - w.ground_at(g.x, g.z)) > 0.3: open_below = false
 					if w.is_void(g.x + d.x * 1.6, g.z + d.y * 1.6) and not w.is_void(g.x, g.z) and k % 12 == trial and rim_ok and open_below:
 						at = g; dir = d; break
 				if at != Vector3.INF: break

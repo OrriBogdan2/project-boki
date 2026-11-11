@@ -434,6 +434,7 @@ func _bolt_end(s: Dictionary, at: Vector3, e: Ent, why: String, emp: bool) -> vo
 ## every Hunter. The sheet's air cartwheel, 8.4m held flat over 0.95s, flew far past the cast.
 func on_dash(use_ex: bool) -> bool:
 	var dd := dash_def()
+	use_ex = h.dashes < 1.0           # (a jump alone doesn't make it the long dash: Hunter.do_dash says so in the air)
 	if chain.hold_for_bolt(use_ex) or not spend_dash(use_ex):
 		return true
 	var air := use_ex or not h.grounded
@@ -510,7 +511,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 	var dir := h.roll_dir if h.roll_dir.length() > 0.1 else h.aim_dir()
 	play("thf_exdash" if air else chain.next_flip(dir))
 	var t := float(dd["time"])
-	m.sfx("thief_dash", h.pos, -3.0 if h.is_local() else -7.0, 1.0)
+	m.sfx(HeroSfx.dash_name(h), h.pos, -3.0 if h.is_local() else -7.0, 1.0)
 	if not empower:
 		return
 	haste_t = float(dd["haste_t"])
