@@ -22,3 +22,6 @@ Rig unchanged: `legs` 2.35, `neck` -0.05, `size` 0.922 in content/archetypes/arc
 
 Shots on the game rig (idle, run, draw, loose; front, 3/4, side, face): docs/shots/lace-appeal-b/. No tearing and no arm
 through the chest; the bow passes through her open left hand.
+
+## Body6 (2026-11-11, patch 0.24.6)
+Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/hem_v95.json`) onto the body6 pick cand_B from `~/meshy/v95/lace/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick).

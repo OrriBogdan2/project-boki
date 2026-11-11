@@ -62,3 +62,6 @@ Appeal4 (cand_5, ext/cinder-bust 7efd99345) in 0.24.5: that branch swapped onto 
 line's IDLE_AUDIT clips, so the 0.24.5 merge copied the line glb's 41 clips (spring tracks included) onto the cand_5
 body by node name (same skeleton, no rest drift) and added `x_breath` at the line's spot with the chest band
 1.00-1.32 m up, |x| under 0.17 m (kael_retarget.add_breath): 3288 vertices.
+
+## Body6 (2026-11-11, patch 0.24.6)
+Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/cinder_v95.json`) onto the body6 pick cand_B from `~/meshy/v95/Cinder/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick).

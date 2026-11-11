@@ -93,3 +93,10 @@ wisp springs stay in the rig, unweighted.
 The master is now `~/meshy/v95/Grimble/r2/appeal3/cand_b.glb` (the appeal3 face, calves slimmed 12%); spec and
 rig input (the pre-swap dredge.glb) are unchanged otherwise. Re-swapped with the frame-rounding fix, so dr_blast
 keeps its 2.1 s (`--dredge-combo-check`). Brought in for patch 0.24.6 on ext/hunters3d-0246.
+
+## Girls body6 (2026-11-11): Cinder, Sable, Vex, Lace, Sparkle
+The body6 picks of job 20261111-083301-a5 (`~/meshy/v95/<Name>/r2/body6/pick.txt`: Cinder B, Sable A, Vex A, Lace B,
+Sparkle B) only move vertex positions and normals of each girl's body5 pick, so each spec's `master` was pointed at the
+pick and re-swapped. Cinder and Lace use cut masters as before: `cinder_v95_body6_body.glb` takes the body6 positions
+onto the body5 `_body` mesh by exact vertex match, and `lace_v95_body6_body.glb` is the pick with only its body node.
+Sable got `tools/art1/sable_wings.py` again after the swap. Brought in for patch 0.24.6 on ext/hunters3d-0246.

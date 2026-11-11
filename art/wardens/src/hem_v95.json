@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Lace's v95 master (appeal3 body variant b with the owner-approved appeal3 face, ~/meshy/v95/lace/r2/appeal3/cand_b.glb, its separate bow left out: lace_v95_b_body.glb) onto hem.glb's skeleton, clips and anchors. hem.glb's own bow and arrow meshes stay. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The back needles ride the hips, the shoulder mask pauldron.L.",
- "master": "~/meshy/v95/lace/r2/appeal3/lace_v95_b_body.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Lace's v95 master (appeal3 body variant b with the owner-approved appeal3 face, ~/meshy/v95/lace/r2/appeal3/cand_b.glb, its separate bow left out: lace_v95_b_body.glb) onto hem.glb's skeleton, clips and anchors. hem.glb's own bow and arrow meshes stay. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders. The back needles ride the hips, the shoulder mask pauldron.L. Body6 pass (2026-11-11, job 20261111-083301-a5, patch 0.24.6): master now the body6 pick cand_B (~/meshy/v95/lace/r2/body6/pick.txt; basis body5 cand_1, positions+normals only, same UVs/vertex order), its body node only (bow/extra meshes dropped, buffer untouched) as lace_v95_body6_body.glb.",
+ "master": "~/meshy/v95/lace/r2/body6/lace_v95_body6_body.glb",
  "game": "art/wardens/hem/hem.glb",
  "tris": 13000,
  "head": {

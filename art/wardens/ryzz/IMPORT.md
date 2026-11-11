@@ -17,3 +17,6 @@ Source art: briefs/art-refs/ryzz_FINAL_sheet.png (master), ryzz_turnaround_apose
 The face and corset are projected from the art: the corset from the master (registered by its neon), the face from the first ryzz_head.png (git 3e988ae8 of ext/agent-briefs, her grin; kept as ~/meshy/ryzz_f/ryzz_head_nogum.png, because the later sheet paints the bubble and the bubble is geometry here).
 
 Run it all with INSTALL=1 ~/meshy/ryzz_f/build.sh [source]. No weapon: fingertips carry the FX points (weapon_muzzle, anchor_finger_L); rods anchor_rod_0..3.
+
+## Body6 (2026-11-11, patch 0.24.6)
+Re-swapped (`tools/art1/v95_swap.py`, spec `art/wardens/src/ryzz_v95.json`) onto the body6 pick cand_B from `~/meshy/v95/Sparkle/r2/body6/pick.txt` (positions and normals only, same UVs and vertex order as the body5 pick).
