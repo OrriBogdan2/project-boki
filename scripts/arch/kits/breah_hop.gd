@@ -247,6 +247,11 @@ func _pull() -> float:
 	return maxf(0.0, float(dd().get("leap_grav", Hunter.H_GRAV)) - Hunter.H_GRAV)
 
 func _tick_air(dt: float) -> void:
+	if bool(h.inp.get("jump", false)) and not h.grounded and (h.over_void() or h.pos.y - h.ground() > 0.9):
+		h.fly_t = 0.0       # a fresh Space press in a hop's flight ends the chain and opens the glider
+		drop()
+		h.do_jump()
+		return
 	var t := float(st["t"])
 	var T := float(st["T"])
 	AimKit.circle(

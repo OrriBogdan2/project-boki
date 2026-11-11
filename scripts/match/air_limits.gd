@@ -44,12 +44,13 @@ static func glide_locked(h: Hunter) -> bool:
 	return move_running(k, h)
 
 ## A kit move still inside its keys. A held move (a hold pose) counts only through the hold itself above,
-## so a pose left on its last key never blocks the glider.
+## so a pose left on its last key never blocks the glider; nor does a landing or arrival pose ("land": true:
+## a dash's arrival, which a glide press ends like the dash).
 static func move_running(k: ArchKit, h: Hunter) -> bool:
 	if k.anim_id == "" or k.anim_at <= maxf(maxf(h.dash_at, k.dash_press_at) + TRAVEL_JOIN_S, h.jump_at):
 		return false
 	var mv := HunterAnim.km_def(k.anim_id)
-	if mv.is_empty() or mv.get("hold", false):
+	if mv.is_empty() or mv.get("hold", false) or mv.get("land", false):
 		return false
 	var keys: Array = mv["keys"]
 	return k.m.time - k.anim_at < float((keys[-1] as Array)[0])

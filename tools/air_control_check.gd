@@ -134,22 +134,6 @@ func _match_items() -> void:
 		t += Match.DT
 	ok(t <= 0.2, "item 6: falling backward, holding W carries you forward in %.2fs" % t)
 
-## A ground tile with LANE m of flat, open ground east of it (no wall to stop a run, a dash or a glide).
-const LANE := 26
-func _open_lane() -> Vector3:
-	for z in range(4, w.h - 4):
-		for x in range(4, w.w - LANE - 4):
-			var lv := w.level[w.idx(x, z)]
-			var clear := true
-			for i in LANE:
-				var j := w.idx(x + i, z)
-				clear = clear and w.kind[j] == World.T_GROUND and w.level[j] == lv
-				clear = clear and not w.is_block(x + i + 0.5, z + 0.5)
-				if not clear: break
-			if clear:
-				return Vector3(x + 0.5, lv * World.LEVEL, z + 0.5)
-	return Vector3.INF
-
 ## Items 6/7: one chain holding D: run, Shift, jump out of it, a glide press, let go, land. The h-speed never
 ## drops more than 30% in one step (no sudden stop), never jumps up except as a dash starts (no spike),
 ## and the step after touchdown you are still moving.
