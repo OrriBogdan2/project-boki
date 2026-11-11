@@ -529,7 +529,7 @@ func _sync_deco() -> void:
 		var e: Dictionary = want[u]
 		if not nodes.has(u):
 			var n := make_deco(e)
-			Models.merge_static(n, false, true)      # its plain parts: a mesh per material (~400 fewer farm draws)
+			Models.merge_static(n, false, true)      # its plain parts: a mesh per material
 			n.set_meta("sig", _sig(e))
 			_place_node(n, e)
 			h.add_child(n)
