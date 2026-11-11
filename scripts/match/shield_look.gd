@@ -98,6 +98,11 @@ static func _rim_on(h: Hunter, col: Color) -> void:
 		var ink := _ink(own, col)
 		inks.append(ink)
 		(mt as Material).next_pass = ink
+	for shell in WardenMerge.inks(h.model) if h.model else []:
+		saved[shell] = (shell as MeshInstance3D).material_override
+		var ink := _ink(saved[shell], col)
+		inks.append(ink)
+		(shell as MeshInstance3D).material_override = ink
 	h.set_meta("shield_rim_saved", saved)
 	h.set_meta("shield_rim_inks", inks)
 	h.set_meta(META, col)
@@ -106,7 +111,11 @@ static func _rim_on(h: Hunter, col: Color) -> void:
 static func _rim_off(h: Hunter) -> void:
 	var saved: Dictionary = h.get_meta("shield_rim_saved", {})
 	for mt in saved:
-		if is_instance_valid(mt):
+		if not is_instance_valid(mt):
+			continue
+		if mt is MeshInstance3D:
+			(mt as MeshInstance3D).material_override = saved[mt]      # (a joined ink shell: WardenMerge)
+		else:
 			(mt as Material).next_pass = saved[mt]
 	for ink in h.get_meta("shield_rim_inks", []):
 		if _spare.size() < SPARE_MAX:
