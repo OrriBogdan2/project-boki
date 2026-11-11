@@ -13,5 +13,7 @@
   3
  ],
  "price": 35,
- "desc": "A cloud that hides everyone inside it, like tall grass, for 8s."
+ "desc": "A cloud that hides everyone inside it, like tall grass, for 8s.",
+ "move": "throw",
+ "cast": 0.4
 }

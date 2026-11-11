@@ -324,6 +324,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var v = s.get(k, null)
 		if (v is bool and v) or (v is float and v >= 0.0):
 			return {"proc": true}
+	if float(s.get("util", -1.0)) >= 0.0:      # a belt item's throw, place or read (UtilityPose): the rig's free hand
+		return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
 	var km := String(s.get("kmove", ""))

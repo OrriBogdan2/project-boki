@@ -26,7 +26,8 @@ extends RefCounted
 ## update() takes a state dictionary; every key is optional:
 ##   vel (Vector3) face (yaw) grounded gliding diving rolling dash_dir (Vector2, world) dash_kind
 ##   ("phase" "roll" "charge" "lunge" "skate"; from the class when left out) crouch (0..1) ledge
-##   mantle (0..1, -1 when not) reload (0..1, -1) drink (0..1, -1) stomp (0..1, -1) recoil (0..1)
+##   mantle (0..1, -1 when not) reload (0..1, -1) drink (0..1, -1)
+##   util (0..1, -1) util_move stomp (0..1, -1) recoil (0..1)
 ##   flash (0..1) fired (seconds since the last shot) wid (weapon id) swing_n (counts swings)
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
 ##   cast (seconds since an ability went off) cast_slot hit_t (seconds since a hit) hit_dir
@@ -200,6 +201,9 @@ var carry_k := 0.0             # running with the weapon in one hand
 var gun_vis := 1.0
 var emote_k := 0.0
 var drink_k := 0.0
+var util_k := 0.0            # a throw, place or read beat (UtilityPose): how much, hand, head pitch
+var util_hand := Vector3.ZERO
+var util_head := 0.0
 var idle_t := 0.0              # how long you've stood still
 var back := 1.0
 
@@ -1060,7 +1064,7 @@ func update(dt: float, s: Dictionary) -> void:
 		var eh := _emote_head(em_t) * emote_k
 		var lock := 0.85
 		head.rotation.y = head_look + fh.y + eh.y - yaw * lock - legs_yaw * 0.0
-		head.rotation.x = -pitch * 0.55 * (1.0 - tuck) + sin(ph * 2.0 + 0.6) * 0.03 * r1 - drink_k * 0.35 + fh.x + eh.x - tuck * 0.4 + flinch.x * 0.1
+		head.rotation.x = -pitch * 0.55 * (1.0 - tuck) + sin(ph * 2.0 + 0.6) * 0.03 * r1 - drink_k * 0.35 + util_head + fh.x + eh.x - tuck * 0.4 + flinch.x * 0.1
 		head.rotation.z = -roll * 0.5 + sin(t * 0.9 + seed_ph) * 0.03 * still + fh.z + eh.z + stun_k * sin(t * 3.1 + 1.2) * 0.2
 		head.rotation += ws.head
 	# ================================================================ SHOULDER PIECES
@@ -1436,6 +1440,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		drink_k = smoothstep(0.0, 0.2, drink) * (1.0 - smoothstep(0.85, 1.0, drink))
 		free_l = maxf(free_l, drink_k)
 		ap -= drink_k * 0.5
+	# a throw, place or read: the same free hand (UtilityPose)
+	var up := float(s.get("util", -1.0))
+	var um := String(s.get("util_move", ""))
+	util_k = UtilityPose.weight(um, up) if up >= 0.0 else 0.0
+	util_hand = UtilityPose.hand(um, up)
+	util_head = UtilityPose.head(um, up) if up >= 0.0 else 0.0
+	free_l = maxf(free_l, util_k)
 	# fidget: weapon check, stretch
 	var fp2 := clampf(fidget_t / maxf(fidget_dur, 0.01), 0.0, 1.0)
 	var fk := sin(fp2 * PI) if fidget != "" else 0.0
@@ -1606,6 +1617,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	# drink: flask to the mouth
 	if drink_k > 0.0:
 		fl = fl.lerp(sh_l + Vector3(0.16, 0.2, -0.17), drink_k)
+	if util_k > 0.0:
+		fl = fl.lerp(sh_l + util_hand, util_k)
 	# fidgets with a free hand
 	var ff := _fidget_hands()
 	if ff.w > 0.0:

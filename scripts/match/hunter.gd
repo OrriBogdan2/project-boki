@@ -1796,6 +1796,8 @@ func heal(n: float) -> void:
 var drink_t := 0.0
 var drink_id := "tonic"        # which belt drink is being drunk (UtilityUse)
 var kit_t := 0.0
+var beat_id := ""              # the instant belt item whose body beat is playing (UtilityPose)
+var beat_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)
 var stomp: Dictionary = {}      # committed stomp on an enemy wisp: {o, t, hits} (see Life)
@@ -3038,7 +3040,7 @@ func _anim_state(stretch: float) -> void:
 	s["mantle"] = mk
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
 	s["reload"] = (1.0 - reload_t / maxf(0.1, float(wpn["reload"]))) if reload_t > 0.0 and not wpn.get("melee", false) else -1.0
-	s["drink"] = (1.0 - drink_t / UtilityUse.channel(drink_id, "time")) if drink_t > 0.0 else -1.0
+	UtilityPose.fill(self, s)      # "drink", or "util" with "util_move"
 	s["recoil"] = recoil
 	s["flash"] = clampf(flash_t / 0.12, 0.0, 1.0)
 	s["fired"] = idle_fire
