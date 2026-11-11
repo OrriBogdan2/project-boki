@@ -455,6 +455,12 @@ How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the so
 | dmg_k | {"summoned": 1.0, "wild": 1.0} |
 | cc | ["stun", "root", "slow", "burn", "blight"] |
 | execute | True |
+## boki_forms (`content/rules/boki_forms.json`)
+
+Second forms of a Boki (docs/boki/GEODEMOLE_FORMS.md). A Boki with an entry here shows its 'cracked' look instead of its base look while its health is below damaged_below (fraction of max) in a match, or while it is sick at home. Same Boki, same stats: a look swap only. 'art' names the approved 2D art; 'model' is the 3D model file, empty until it exists, and then the base look is used for both forms.
+
+| damaged_below | 0.4 |
+| forms | {"geodemole": {"base": {"art": "geodemole-3-art", "model": ""}, "cracked": {"art": "geodemole-r-3-art", "model": ""}}} |
 
 ## boki_lines (`content/rules/boki_lines.json`)
 
