@@ -229,6 +229,21 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Water: shallow edges and deep ponds (parity table, Nov 11)
+
+Only the farm's ponds are water you move through (`scripts/home/home_water.gd`; the edge ring of a pond is shallow, the middle deep). Match maps have no wadeable water: their pools and falls are set dressing and a hunter runs over them at land values. Source side: the game-data dump (`briefs/supervive-data/supervive_physics.md`) overrides no swim or water setting in the movement component (no swim speed, no water speed multiplier, no water physics volume), the kit data and the hero footage notes (`briefs/hero-ref`) never mention crossing water, and no public page we could read gives a water rule. Nothing settles any cell on the source side, so every one is [?] and ours stand. No `hunter_move.json` const and no `--move-feel-check` row was added: the check only takes rows the source settles.
+
+Ours below are the farm's constants (run `SPEED` 5.0 m/s, `JUMP_V` 6.8 m/s, `H_GRAV` 14.7 m/s²; jump height = v²/2g). `--swim-check` reads the speeds through a window that spans the shoreline, so it prints 3.5 wading and 3.3 swimming; the steady values are the products in the table.
+
+| Move | Source, shallow | Source, deep | Ours, shallow (wade) | Ours, deep (swim) |
+|---|---|---|---|---|
+| Run speed | [?] | [?] | 0.68x walk (`WADE_SPEED`): 3.4 m/s | 0.5x walk (`SWIM_SPEED`): 2.5 m/s |
+| Dash length | [?] | [?] | land length (the dash ignores water) | no dash |
+| Jump height | [?] | [?] | land height, 1.57 m | kick up at 0.85x lift (`BREACH_V`): 5.78 m/s, 1.14 m |
+| Glide take-off | [?] | [?] | as on land: a second Space in the air, or hold 0.1 s (`GLIDE_ENGAGE`) | as on land once the kick has you airborne; from the lower apex |
+
+What to do when the source gets a value: put it in `hunter_move.json` as a named const, read it from `HomeWater`, and add a `--move-feel-check` row for it.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
