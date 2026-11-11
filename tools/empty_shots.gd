@@ -1,6 +1,7 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir> [--shot-size=1920x1080]: review screenshots of the Empty creator (Male / Female,
-## three heights, builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). 
+## three heights, builds, hollow styles, every Ghost close up), the Relics viewer and the first-Relic moment (xvfb
+## with a renderer).
 ## Add --only=creator|first|viewer|mask|shroud|feet|farm to take one group (shroud: the creator from front, side and
 ## back, the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and
 ## walking; farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check 
@@ -68,6 +69,12 @@ func _creator(tree: SceneTree) -> void:
 		hx.preview_yaw = PI
 		hx._show_create()
 		await _shot(tree, file, 0.8)
+	for ghost in Unmasked.GHOSTS.size():
+		hx.look = Unmasked.default_look()
+		hx.look.merge({"ghost": ghost, "glow": 4, "aura": 0}, true)
+		hx._show_create()
+		hx.zoom = 1.0
+		await _shot(tree, "ghost_%02d_%s" % [ghost, String(Unmasked.GHOSTS[ghost]).to_lower().replace(" ", "_")], 1.5)
 	hx.queue_free()
 	await tree.process_frame
 

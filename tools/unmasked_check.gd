@@ -126,6 +126,17 @@ func _model(main: Node) -> void:
 	ok(int(sm.get_shader_parameter("shape")) == 2 and int(sm.get_shader_parameter("ghost")) == 3
 		and (sm.get_shader_parameter("glow") as Color).is_equal_approx(Unmasked.GLOWS[2]),
 		"the hollow's shape, ghost features and glow follow the look")
+	var drawn := 0
+	for g in Unmasked.GHOSTS.size():
+		var m := _build({"unmasked": true, "ghost": g})
+		var gm: ShaderMaterial = (m.find_child("Hollow", true, false) as MeshInstance3D).material_override
+		drawn += int(int(gm.get_shader_parameter("ghost")) == g)
+		m.free()
+	var names := {}
+	for g in Unmasked.GHOSTS:
+		names[g] = true
+	ok(Unmasked.GHOSTS.size() >= 10 and names.size() == Unmasked.GHOSTS.size() and drawn == names.size(),
+		"%d distinct ghost face marks, each one reaching the void shader (owner item 153b)" % drawn)
 	var woman := _build({"unmasked": true, "gender": 0})
 	var man := _build({"unmasked": true, "gender": 1})
 	var w_sh := (woman.get_node("Rig/Torso/ArmLPivot") as Node3D).position.x

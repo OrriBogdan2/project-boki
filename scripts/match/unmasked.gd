@@ -17,7 +17,8 @@ const BUILD_WIDTH := [0.86, 1.0, 1.16]      # Models.hunter's body width for eac
 const BUILD_BULK := [0.9, 1.0, 1.14]        # and the race bulk on top: thicker limbs, a fuller torso
 const HOLLOWS := ["Oval", "Relic", "Torn", "Crescent"]
 const GLOWS := [Color("8ae8ff"), Color("ff9a5a"), Color("b48cff"), Color("ff7ab0"), Color("ffd36a"), Color("7affc4")]
-const GHOSTS := ["None", "Eyes", "Whole face", "Stitched"]
+const GHOSTS := ["None", "Eyes", "Whole face", "Stitched", "Smile", "Tears", "Third eye", "Cracked", "Runes", "Many eyes",
+	"Fanged", "Hollow stare"]     # the missing features, faint on the void (owner item 153b)
 const AURA := ["None", "Faint", "Strong"]
 const AURA_COUNT := [0, 16, 40]       # specks drifting round the head, shoulders and shroud
 const SHROUDS := Shrouds.LABELS

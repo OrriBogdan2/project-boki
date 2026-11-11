@@ -6,7 +6,7 @@ shader_type spatial;
 render_mode unshaded, shadows_disabled, cull_back, depth_draw_opaque, blend_mix;
 
 uniform int shape = 0;                 // 0 oval, 1 mask, 2 torn, 3 crescent
-uniform int ghost = 1;                 // 0 none, 1 eyes, 2 full face, 3 stitched
+uniform int ghost = 1;                 // Unmasked.GHOSTS: 0 none .. 11 hollow stare
 uniform vec2 extent = vec2(0.85, 0.9); // rad round the head: the shape's half size
 uniform float lift = 0.08;             // rad: the face sits this far below the head's middle
 uniform vec4 glow : source_color = vec4(0.55, 0.85, 1.0, 1.0);
@@ -69,39 +69,139 @@ float ring(vec2 p, vec2 c, vec2 r, float w) {
 	return exp(-pow(abs(length((p - c) / r) - 1.0) * min(r.x, r.y) / w, 2.0));
 }
 
-float ghosts(vec2 p) {
-	if (ghost == 0) {
-		return 0.0;
+const vec2 EYE = vec2(0.33, 0.14);     // the right eye's centre (the left mirrors it)
+
+// The almond eye outlines; m is the face point mirrored onto the right half.
+float eyes(vec2 m) {
+	return ring(m, EYE, vec2(0.2, 0.09), 0.018);
+}
+
+// Brows, nose, its base and the mouth line: the outline of a whole face.
+float whole_face(vec2 p, vec2 m) {
+	float g = 0.8 * seg(m, EYE + vec2(-0.2, 0.2), EYE + vec2(0.18, 0.24), 0.016);
+	g += 0.7 * seg(p, vec2(0.0, 0.08), vec2(0.03, -0.24), 0.016);
+	g += 0.7 * seg(p, vec2(-0.07, -0.26), vec2(0.07, -0.26), 0.016);
+	return g + 0.7 * seg(p, vec2(-0.2, -0.46), vec2(0.2, -0.46), 0.016);
+}
+
+// Dashed seams where the eyes and mouth were sewn shut.
+float stitches(vec2 p, vec2 m) {
+	float dash = step(0.5, fract(p.x * 9.0));
+	float g = seg(m, EYE - vec2(0.2, 0.0), EYE + vec2(0.2, 0.0), 0.016) * dash;
+	for (int k = -2; k <= 2; k++) {
+		vec2 c = EYE + vec2(float(k) * 0.08, 0.0);
+		g += 0.8 * seg(m, c + vec2(0.0, -0.05), c + vec2(0.0, 0.05), 0.012);
 	}
-	float g = 0.0;
-	for (int i = 0; i < 2; i++) {
-		float sx = i == 0 ? -1.0 : 1.0;
-		vec2 eye = vec2(0.33 * sx, 0.14);
-		// almond eye outlines
-		g += ring(p, eye, vec2(0.2, 0.09), 0.018);
-		if (ghost >= 2) {
-			g += 0.8 * seg(p, eye + vec2(-0.2 * sx, 0.2), eye + vec2(0.18 * sx, 0.24), 0.016);
-		}
-	}
-	if (ghost >= 2) {
-		g += 0.7 * seg(p, vec2(0.0, 0.08), vec2(0.03, -0.24), 0.016);
-		g += 0.7 * seg(p, vec2(-0.07, -0.26), vec2(0.07, -0.26), 0.016);
-		g += 0.7 * seg(p, vec2(-0.2, -0.46), vec2(0.2, -0.46), 0.016);
-	}
-	if (ghost == 3) {
-		// stitched: dashed seams where the features were sewn shut
-		for (int i = 0; i < 2; i++) {
-			float sx = i == 0 ? -1.0 : 1.0;
-			float d = seg(p, vec2(0.33 * sx - 0.2, 0.14), vec2(0.33 * sx + 0.2, 0.14), 0.016);
-			g += d * step(0.5, fract(p.x * 9.0));
-			for (int k = -2; k <= 2; k++) {
-				vec2 c = vec2(0.33 * sx + float(k) * 0.08, 0.14);
-				g += 0.8 * seg(p, c + vec2(0.0, -0.05), c + vec2(0.0, 0.05), 0.012);
-			}
-		}
-		g += seg(p, vec2(-0.22, -0.36), vec2(0.22, -0.36), 0.016) * step(0.5, fract(p.x * 9.0));
+	return g + seg(p, vec2(-0.22, -0.36), vec2(0.22, -0.36), 0.016) * dash;
+}
+
+// A wide grin and nothing else: the lower arc of a broad oval, its corners curling up.
+float smile(vec2 p, vec2 m) {
+	float g = ring(p, vec2(0.0, -0.12), vec2(0.46, 0.32), 0.02) * smoothstep(-0.2, -0.3, p.y);
+	return g + seg(m, vec2(0.4, -0.24), vec2(0.5, -0.14), 0.018);
+}
+
+// The eyes, each spilling a glowing streak down the cheek that ends in a drop.
+float tears(vec2 m) {
+	float g = eyes(m);
+	g += 0.9 * seg(m, vec2(0.3, 0.04), vec2(0.34, -0.42), 0.02);
+	return g + exp(-pow(length(m - vec2(0.345, -0.48)) / 0.045, 2.0));
+}
+
+// The eyes and a third one upright in the brow, with a lit pupil.
+float third_eye(vec2 p, vec2 m) {
+	float g = eyes(m) + ring(p, vec2(0.0, 0.46), vec2(0.07, 0.15), 0.018);
+	return g + exp(-pow(length(p - vec2(0.0, 0.46)) / 0.035, 2.0));
+}
+
+// Porcelain cracks running across where the face was: one jagged line top to chin, two branches.
+float cracked(vec2 p) {
+	float g = seg(p, vec2(-0.1, 0.62), vec2(0.05, 0.3), 0.014);
+	g += seg(p, vec2(0.05, 0.3), vec2(-0.05, 0.05), 0.014);
+	g += seg(p, vec2(-0.05, 0.05), vec2(0.12, -0.2), 0.014);
+	g += seg(p, vec2(0.12, -0.2), vec2(0.04, -0.52), 0.014);
+	g += 0.8 * seg(p, vec2(0.05, 0.3), vec2(0.3, 0.2), 0.012) + 0.8 * seg(p, vec2(0.3, 0.2), vec2(0.48, 0.32), 0.012);
+	return g + 0.8 * seg(p, vec2(-0.05, 0.05), vec2(-0.34, -0.1), 0.012)
+		+ 0.8 * seg(p, vec2(-0.34, -0.1), vec2(-0.52, -0.04), 0.012);
+}
+
+// One glyph: a stem with two arms raised from its middle, s its half height.
+float rune(vec2 p, vec2 c, float s) {
+	float g = seg(p, c - vec2(0.0, s), c + vec2(0.0, s), 0.016);
+	return g + seg(p, c, c + vec2(-0.7, 0.7) * s, 0.016) + seg(p, c, c + vec2(0.7, 0.7) * s, 0.016);
+}
+
+// Glyphs where the eyes, brow and mouth were.
+float runes(vec2 p, vec2 m) {
+	float g = rune(m, EYE, 0.11) + ring(p, vec2(0.0, 0.44), vec2(0.07, 0.07), 0.016);
+	g += seg(p, vec2(-0.2, -0.4), vec2(0.2, -0.4), 0.016);
+	for (int k = -1; k <= 1; k++) {
+		g += seg(p, vec2(float(k) * 0.13, -0.4), vec2(float(k) * 0.13 + 0.04, -0.5), 0.014);
 	}
 	return g;
+}
+
+// Five small eyes scattered over the face, each with a lit pupil.
+float many_eyes(vec2 p) {
+	vec3 at[5] = {vec3(-0.36, 0.24, 0.12), vec3(0.3, 0.32, 0.09), vec3(0.06, 0.02, 0.1),
+		vec3(-0.22, -0.3, 0.08), vec3(0.36, -0.18, 0.11)};
+	float g = 0.0;
+	for (int i = 0; i < 5; i++) {
+		vec2 c = at[i].xy;
+		g += ring(p, c, vec2(1.0, 0.5) * at[i].z, 0.014) + exp(-pow(length(p - c) / (0.22 * at[i].z), 2.0));
+	}
+	return g;
+}
+
+// A jaw's outline and a row of pointed teeth, the two at the corners long fangs.
+float fanged(vec2 p, vec2 m) {
+	float g = ring(p, vec2(0.0, -0.08), vec2(0.5, 0.5), 0.018) * smoothstep(-0.12, -0.24, p.y);
+	g += 0.9 * seg(p, vec2(-0.3, -0.32), vec2(0.3, -0.32), 0.014);
+	for (int k = 0; k < 4; k++) {
+		float x = 0.04 + float(k) * 0.075;
+		g += 0.8 * seg(m, vec2(x, -0.32), vec2(x + 0.035, -0.4), 0.012);
+		g += 0.8 * seg(m, vec2(x + 0.035, -0.4), vec2(x + 0.07, -0.32), 0.012);
+	}
+	return g + seg(m, vec2(0.33, -0.32), vec2(0.3, -0.5), 0.016);
+}
+
+// The ghost features (GHOSTS in scripts/match/unmasked.gd): x is how much they glow, y how much of the void they
+// black out (the deep sockets of Hollow stare).
+vec2 ghosts(vec2 p) {
+	vec2 m = vec2(abs(p.x), p.y);
+	if (ghost >= 1 && ghost <= 3) {
+		float g = eyes(m);
+		if (ghost >= 2) {
+			g += whole_face(p, m);
+		}
+		return vec2(ghost == 3 ? g + stitches(p, m) : g, 0.0);
+	}
+	if (ghost == 4) {
+		return vec2(smile(p, m), 0.0);
+	}
+	if (ghost == 5) {
+		return vec2(tears(m), 0.0);
+	}
+	if (ghost == 6) {
+		return vec2(third_eye(p, m), 0.0);
+	}
+	if (ghost == 7) {
+		return vec2(cracked(p), 0.0);
+	}
+	if (ghost == 8) {
+		return vec2(runes(p, m), 0.0);
+	}
+	if (ghost == 9) {
+		return vec2(many_eyes(p), 0.0);
+	}
+	if (ghost == 10) {
+		return vec2(fanged(p, m), 0.0);
+	}
+	if (ghost == 11) {
+		float socket = ellipse(m - EYE - vec2(0.0, -0.02), vec2(0.17, 0.15));
+		return vec2(exp(-pow(socket / 0.02, 2.0)), smoothstep(0.0, -0.05, socket));
+	}
+	return vec2(0.0);
 }
 
 // One layer of stars at this parallax depth.
@@ -149,7 +249,9 @@ void fragment() {
 		col += glow.rgb * 0.08 * neb * inner;
 		col += stars_col * inner;
 		// ghost features hang a little way back
-		col += glow.rgb * 0.55 * ghosts(p + par * depth * 0.3);
+		vec2 g = ghosts(p + par * depth * 0.3);
+		col = mix(col, deep.rgb * 0.3, clamp(g.y, 0.0, 1.0));
+		col += glow.rgb * 0.55 * g.x;
 	}
 	// the bright lip of the socket
 	float rim = exp(-pow(d / 0.03, 2.0));
