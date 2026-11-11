@@ -100,6 +100,41 @@ What drives the misses is the pace, not the seat plans: 6 squads are left at 2:0
 and 0.3 at 10:00 (the spec 2-4), so 44 of 50 finals open early on the last-squad rush (docs/PACING_1111.md on
 ext/verify-expedition-pacing saw the same early wipe with no Ways Out bots). heart.json is not tuned here (task 9).
 
+## The end phase (ext/combat-blight-endgame)
+DECISIONS 2026-11-10: everyone without an earned exit plays last team standing as the Blight closes. Measured first
+with `--ways-out-sim` (10 trios, Hollow Crown, 0.24.5 + ext/ways-out-sim, seeds 1-10): 9 of 10 matches were down to
+one squad before the tide's last close at 10:00 (at 5:54-9:56), so the end played out once (2 squads, settled 13 s
+after 10:00); no timeout, nobody apart. To play the end itself, `--final=4` lands 4 squads, jumps the clock to 8:30
+and sets each squad down inside the ring: on the held 48 m ring 7 of 10 settled within 90 s of 10:00, 2 timed out
+and 3 fell with no winner, one pair stood 62 s apart, 9 Blight downs in the safe ring. Why: bots below The Crown's
+raised Heart ground never found its two ramps (the tile path's window was too tight), a Boki keeps reviving its
+owner out in the Blight (no bleed while it revives), and Blight mobs fight in the final.
+
+The rule (heart.json `end_*`; `Heart.ring_at`, `tick_dmg`, `end_phase`):
+- **Final circle.** At the last close (10:00, as the final seat opens) the Blight closes on from `tide_r1` (48 m,
+  The Crown) to `end_r` over `end_close_s`: 28 m round the Heart on the 2x Hollow Crown by 11:00 (0.33 m/s, a
+  Hunter runs 13x faster), then holds. 28 m keeps the raised Heart ground, both its ramps (23 m out) and a strip of
+  its foot inside, so the way in never lies in the Blight; the 6 m Heart ring is its middle. The spec's 12 m (and
+  16 and 25 m) were run: they cut off the ramps or the ground below them and caught bots on their way in. The Heart
+  Gate (34 m) goes under at about 10:43: the "leave small" choice ends as the last fight starts.
+- **Damage ramp.** Outside, a tick deals the last stage's damage at 10:00 (3 ticks down a medium Hunter), ramping
+  to `end_dmg_k` (2x, 2 ticks) by 11:00. In the end phase the Blight also wears down the down health of those it
+  downed itself (out in 1-2 ticks); one a rival downed keeps the usual bleed, edge past them or not. Its creatures
+  inside the ring burrow and none come up for a squad inside it (BlightDir): the final circle is squad against squad.
+- **At zero (12:00)**, squads still in and the final seat not taken: the islands fall on all of them. Both lose: no
+  winner, no MAJOR, a tie for place (WaysResult), as LIMITED_WAY_OUTS rev 2 section 6 says. Not sudden death (the
+  circle closing to nothing, last one standing wins): the Heart ring picks the winner.
+- **Bots.** BotWays drops the spark seat once the Blight closes over the Gate; `Bot._grid_path` retries a failed tight
+  window in a wide one (`PATH_SLACK` 8, then 24 tiles), so a bot below the raised ground finds a ramp.
+
+Result, same seeds: `--final=4` 10 of 10 settled within 90 s (11-87 s), no timeout, every final seat taken, longest
+apart 14 s; one Blight down in the safe-ring window while a final was fought (a bot 20 m out in the Blight 5 s after
+it stood inside), no squad died to the Blight in the safe ring. Real 10 trios: 10 of 10 settled within 90 s (9 before
+10:00, one +3 s), no timeout, nobody apart, no such down. Left (DEBT): a lone last squad does not always take the
+rush final (one real run fell at 12:00 with it on the low ground). Checks: --heart-check (the ring through the end),
+--blight-check (the ramp, the downed), --ways-out-map-ui-check (the dashed ring), --bot-ways-check (the Gate),
+--ways-out-sim (`WAYS end` lines and sum; the sim does not repeat a match run to run).
+
 ## Seat looks (ext/vfx-ways-out-seats)
 Every seat reads from across the island with one of five looks: locked (dim stub, countdown glyph), open (tall clear
 beam in neutral light), in use (the using squad's colour, ring filling with the hold), taken (the beam sinks in 0.7 s,
