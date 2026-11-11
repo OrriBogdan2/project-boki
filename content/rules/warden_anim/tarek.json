@@ -52,7 +52,8 @@
 			"L": 0.5,
 			"R": 0.5
 		},
-		"in_step": true
+		"in_step": true,
+		"cadence": 0.85
 	},
 	"crouch": {
 		"idle": "crouch_idle",
