@@ -416,6 +416,11 @@ func _all() -> void:
 		"len %.1f, %.1f deg off the real fan" % [float(cone.get("len", 0.0)), off]
 	)
 	ok("gun: fire held, the lines breathe back in between shots", narrowed >= 5.0, "closed %.1f deg" % narrowed)
+	ok(
+		"gun: the fan rests at 20 degrees and blooms to 30 at most (footage 20 rested, 30 firing)",
+		absf(float(P.wpn["fan_deg"]) - 20.0) < 0.01
+		and absf(float(P.wpn["fan_deg"]) + float(P.wpn["bloom_max_deg"]) - 30.0) < 0.01
+	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	var col: Color = cone.get("col", Color.BLACK)
 	ok(

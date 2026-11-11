@@ -19,7 +19,7 @@
 		"sfx": "shotgun",
 		"pellet_floor": 0.457,
 		"bloom_deg": 10.0,
-		"bloom_max_deg": 15.0,
+		"bloom_max_deg": 10.0,
 		"bloom_recover": 24.0,
 		"bloom_wait": 0.1,
 		"desc": "Seven slugs in a tight fan that slow and stop at 6.3m, a shot every half second. One slug landing still hurts. Each shot kicks the spread wide and it breathes back tight in about half a second, so a patient shot lands far more slugs.",
