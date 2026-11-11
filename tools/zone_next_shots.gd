@@ -43,7 +43,8 @@ func run(main_node: Node) -> void:
 		await _grab("%d_closing" % sz.x)
 		var site: Vector3 = m.heart.site
 		var d := Vector2(home.x - site.x, home.z - site.z).normalized()
-		m.player.teleport(m.world.free_spot_near(site + Vector3(d.x, 0, d.y) * (Heart.tide_r(m) + OUT_M), [], 1.0, 0.45, 12.0))
+		var out := site + Vector3(d.x, 0, d.y) * (Heart.tide_r(m) + OUT_M)
+		m.player.teleport(m.world.free_spot_near(out, [], 1.0, 0.45, 12.0))
 		await _grab("%d_outside" % sz.x)
 		m.player.teleport(home)
 	main.get_tree().quit(0)
