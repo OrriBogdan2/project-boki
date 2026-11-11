@@ -134,7 +134,7 @@ func fire(c: Dictionary) -> void:
 		h.gliding = false
 		h.fly_t = 0.0
 		h.vel = Vector3(h.vel.x * 0.25, minf(h.vel.y, 0.0), h.vel.z * 0.25)
-		k.m.sfx("glide", h.pos, -6.0, 0.7)
+		k.m.sfx("dolm_glide_fold", h.pos, -6.0)
 	var ck := charge_k(float(c["t"])) if c.get("hold", false) else 0.0
 	var air: bool = c.get("air", false) or not h.grounded
 	if not air and not c.get("hold", false):

@@ -34,7 +34,8 @@
   "archer_step_snow": "step",
   "archer_hurt": "grunt",
   "archer_down": "grunt",
-  "archer_death": "grunt"
+  "archer_death": "grunt",
+  "archer_deadeye": "impact"
  },
  "signature": [
   "archer_thread_twang"

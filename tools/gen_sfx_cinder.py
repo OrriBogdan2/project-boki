@@ -269,6 +269,27 @@ def death():
     return mix(cry, vent, gutter)
 
 
+# ------------------------------------------------------------------ cloak blast
+def flashover_pop():
+    """The flashover's flare: a bright crack over a low whump and a short gust of hot air."""
+    return mix(crack(0.06, 1800, 9000, 0.02) * 0.9, kick(240, 55, 0.4, 0.05, 0.16) * 1.1,
+               S.hiss(0.5, 600, 4200, 0.01, 0.14) * 0.5)
+
+
+def cloak_shield():
+    """The ember cloak closing round her: a rising warm sweep, a soft gust and a few settling sparks."""
+    sw = lpf(S.sweep(160, 420, 0.38, 'saw'), 1500) * shape(0.38, 0.12, 0.05, 0.2)
+    return mix(sw * 0.7, bpf(noise(0.4), 400, 2600) * shape(0.4, 0.1, 0.05, 0.22) * 0.5,
+               at(S.rattle(0.25, 60, 2500, 6000, 0.5, 0.08) * 0.35, 0.12))
+
+
+# ------------------------------------------------------------------ kit cues (the Hunter's own, in place of the shared ab_ready)
+def ready():
+    """A knocked-down ember flaring back up: a short warm rising sweep, a hiss of heat and a few sparks."""
+    sw = lpf(S.sweep(200, 520, 0.3, 'saw'), 1600) * env(N(0.3), 0.06, 0.12)
+    return mix(sw * 0.7, S.hiss(0.3, 1500, 5000, 0.03, 0.1) * 0.4, at(S.rattle(0.18, 50, 2500, 7000, 0.5, 0.06) * 0.4, 0.1))
+
+
 def build():
     S.save_cat('lw_pilot', pilot(), 'cast')
     S.takes_cat('lw_roar', roar, 3, 'fire')
@@ -291,6 +312,9 @@ def build():
     S.takes_cat('ashwick_hurt', hurt, 3, 'grunt')
     S.save_cat('ashwick_down', down(), 'grunt')
     S.save_cat('ashwick_death', death(), 'grunt')
+    S.save_cat('ashwick_flashover', flashover_pop(), 'impact')
+    S.save_cat('ashwick_cloak_shield', cloak_shield(), 'cast')
+    S.save_cat('ashwick_ready', ready(), 'cast')
 
 
 if __name__ == '__main__':
