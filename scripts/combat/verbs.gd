@@ -15,6 +15,7 @@ var tethers: Array = []   # {a, b: Ent, max, t, dmg, stun, col, node, pw}
 var traps: Array = []     # {at, r, team, arm, t, effects, caster, ctx, node, col}
 var terrain: Array = []   # {tiles: [[i, kind, level]], t, node, warned}
 var drags: Array = []     # {ent, from, to, t, dur, h}
+var yanked: Array = []    # {hunter, to, t, dur}: a hunter in flight from a yank, set down at `to` when it ends
 var decoys: Array = []    # {pos, team, t, node, owner}
 
 const WALL_TH := 0.32      # half thickness of a barrier
@@ -275,6 +276,11 @@ func yank(ent: Ent, to: Vector3, dur: float, hop := 1.2) -> void:
 		h.roll_t = 0.0
 		h.launch_to(to + Vector3(0, 0.3, 0), dur)
 		h.knock_t = 0.0
+		for y in yanked:
+			if y["hunter"] == h:
+				yanked.erase(y)
+				break
+		yanked.append({"hunter": h, "to": to, "t": 0.0, "dur": maxf(0.12, dur)})
 		return
 	if ent.mass() >= 6.0:
 		return          # too heavy to drag (wardens, sentinels)
@@ -542,6 +548,17 @@ func tick(dt: float) -> void:
 		ent.grounded = false
 		if k >= 1.0:
 			drags.erase(dg)
+	for y in yanked.duplicate():
+		var h: Hunter = y["hunter"]
+		y["t"] = float(y["t"]) + dt
+		if not is_instance_valid(h) or h.dead:
+			yanked.erase(y)
+		elif float(y["t"]) >= float(y["dur"]) and h.pad.is_empty():
+			# the arc ends at the hook's spot and stops there: no launch speed left to slide it into the caster
+			var to: Vector3 = y["to"]
+			h.pos = Vector3(to.x, h.pos.y, to.z)
+			h.vel = Vector3(0.0, minf(h.vel.y, 0.0), 0.0)
+			yanked.erase(y)
 	for dc in decoys.duplicate():
 		dc["t"] = float(dc["t"]) - dt
 		if float(dc["t"]) <= 0.0:

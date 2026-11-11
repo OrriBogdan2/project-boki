@@ -42,7 +42,7 @@ On the Return order a Boki heavier than `follow.shoulder_max_mass` (1.2: the lar
 guards at your side. Smaller ones still ride your shoulder or pack.
 - The spot is `guard_side_m` (1.7 m) out, square to your facing. It keeps that flank as you move, and takes
   the other one when that flank is void, a block, or a step off your level.
-- It is never closer than `guard_min_m` (1.2 m), and its feet are never below yours: it hops with your jumps.
+- It is never closer than `guard_min_m` (1.2 m), and it stays on the ground under its own nav: your jumps do not lift it.
 - When you glide or cross a gap it can't walk, or both flanks are blocked, it curls up on your back. It goes
   back to its flank when you land.
 - Code: `KinFollow.guard_tick` / `guard_spot` / `onto`, `Kin.big()`. Tuning: `content/rules/boki_system.json` "follow".
