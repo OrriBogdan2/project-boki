@@ -28,7 +28,7 @@ func run(main: Node) -> void:
 			out = a.substr(12)
 	DirAccess.make_dir_recursive_absolute(out)
 	if main.get("fade") != null:
-		main.fade.reveal(0.01)
+		await main.fade.reveal(0.01)      # the boot splash stays up until it is gone (else the first strip is the logo)
 	_stage(main)
 	for id in HUNTERS:
 		var rows: Array = []
