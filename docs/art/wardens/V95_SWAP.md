@@ -38,12 +38,23 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
-## Relaxing a finished glb without a re-swap
-`blender -b --factory-startup --python tools/art1/relax_glb.py -- art/wardens/<id>/<id>.glb OUT.glb` imports the game .glb on its own
-armature, runs skin_relax with `CUTS` 0 (nothing cut or capped: the triangle count stays) and `MAX_ITER` 800, `RINGS` 2 (the defaults, 60
-and 1, stop near 6x), and exports with the swap's settings. About 30 minutes a Hero. Copy it over the .glb, `godot --headless --path . --import`,
-run `--stretch-check --wardens=<arch>` and put the worst in `content/rules/stretch_held.json`. Done 2026-11-11 for vex, kael, hem (Lace)
-and cinder. Run it on the merged .glb if a branch added clips to one of these after.
+## Relaxing a finished glb without a re-swap (`tools/art1/glb_relax.py`)
+`blender -b --factory-startup --python tools/art1/glb_relax.py -- art/wardens/src/<name>_v95.json` runs skin_relax on the
+.glb the spec names (`game`) with the spec's `relax` overrides and writes back only JOINTS_0 and WEIGHTS_0: mesh, clips,
+anchors and paint stay byte for byte, and the triangle count cannot change (`CUTS` must be 0). It welds the export's UV-seam
+copies for the relax, so both copies keep one set of weights. A re-export through the glTF importer does not: on 2026-11-11 a
+first pass that way (relax_glb.py, removed) left 3.7k to 5.5k seam vertices per Hero with different weights on each side,
+so the seams open in motion, and `--stretch-check` cannot see it (it measures triangle edges only). Run it once per bake
+(a second run relaxes the relaxed weights again), `godot --headless --path . --import`, then `--stretch-check --wardens=<arch>`
+and put the new worst in `content/rules/stretch_held.json`. About 17 minutes a Hero at 800 passes.
+Done 2026-11-11 for the four below; their specs carry the settings used (`MAX_ITER` 800, `RINGS` 4; Kael `RINGS` 2, which
+ends lower for him: 6.36 against 7.21 in skin_relax's own measure). Worst stretch over all clips, `--stretch-check`:
+
+TABLE
+
+What stays over 5x on Kael and Hem is the inner knee: the knees touch at rest, so weights alone stop there. A rip of the
+knees in a swap re-run is the next step (docs/DEBT.md "Skin stretch"). If a branch adds clips to one of these glbs, re-run
+`--stretch-check` on the merge; the weights do not need a re-run.
 
 ## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
