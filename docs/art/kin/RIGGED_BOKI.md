@@ -37,6 +37,10 @@ Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and do
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
 asserts every rigged species has all twelve, with the five game clips timed to those beats and no T-pose frame.
 Look at them with `--boki-home-shots`. Faces (`BokiRig.FACES`): neutral,
+Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend. In a match the attack and the ability play as `lunge` (0.42 s, release at 0.12 s) and `cast` (0.56 s, release at 0.2 s),
+retimed at load from the keyed ones (`BokiSwing`; decision 0040): `Kin` holds the bite or the skill until the release
+frame. A Blender pass should key these two per species (same names and release times) and drop the retime.
+Faces (`BokiRig.FACES`): neutral,
 happy, sad, sleepy, angry, focus, cheer, bliss, asleep, chew. Set by the metas `kstate`, `happy`, `pulse`, `pose`,
 `dazed` (as for `KinPuppet`), plus `kwork`, `kact` and `face`.
 
