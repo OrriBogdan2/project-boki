@@ -33,7 +33,7 @@ static func grounded_left(e: Ent) -> float:
 ## body belongs to one of them. `toast`: the caster shows its own tell, so no overhead word, and the
 ## player's toast reads this instead (what Grounded takes away from a Dredge reeling, say).
 static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toast := "") -> void:
-	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0:
+	if e == null or not is_instance_valid(e) or e.dead or secs <= 0.0 or SummonCc.immune(e, kind):
 		return
 	var m: Node = e.m
 	if m == null:
