@@ -31,7 +31,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] |
 | Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
-| Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
+| Kael | RMB air slam disc, reach | **2.4**, 0.8 ahead (straight down) | 1.2 bh (2.16), cursor to ~5 | owner 11-10 down slam (ext/jugg-downslam), not a gap |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
