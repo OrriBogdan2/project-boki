@@ -268,6 +268,7 @@ const CHECKS := {
 	"--garden-trust-check": ["res://tools/garden_trust_check.gd", "garden_trust_check", null],      # trust from care
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],      # news at home: Boki come to look
+	"--legendary-check": ["res://tools/legendary_check.gd", "legendary_check", null],      # legendary Boki
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
 	"--boki-sex-check": ["res://tools/boki_sex_check.gd", "boki_sex_check", null],      # sex 50/50, female looks only on chosen species
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
