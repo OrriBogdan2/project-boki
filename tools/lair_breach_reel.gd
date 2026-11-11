@@ -40,6 +40,7 @@ func run(main: Node) -> void:
 	while m.time < 26.0:
 		for h in m.hunters:
 			h.ctrl = "idle"
+			h.inp["move"] = Vector2.ZERO      # (an idle hunter keeps its last input: walking off the edge)
 			h.hp = h.max_hp
 		m.step(Match.DT)
 	m.set_process(true)
