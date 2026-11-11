@@ -3,6 +3,7 @@
 One line per region: landmark (what you name it by from afar) · terrain · cover · why you go · source role it stands for.
 Built by `tools/make_hollowcrown.py` (purposes and loot leans in its `regions` list); checked by `--hot-zone-check`.
 Each match also picks one region (not the Crown) as the **hot drop zone**: loot there rolls a rarity step better, it's ringed on the drop map and minimap, and one bot squad usually heads there (`scripts/match/hot_zone.gd`).
+Each region also has its own low ambience bed (`bed` in that list: heights wind, shore water, woods insects, the Heart's hum; docs/AUDIO.md).
 
 - **The Crown** (gloom): rune ring over the vault · broken stone crown, a lv 4 terrace round the lv 8 Throne, two Gaol lair rocks · sparse gloom grass on the terrace edges · the vault, the two boss Gaols, the richest chests, the most Blight · the Heart (center vault).
 - **Frostgate** (frost): hooded ice statue · the Keep's high ground (lv 6) over the Gate Span, open Rimefield below · almost bare, cover is the Keep's walls · best armor on the map (armor ×1.6) · base camp.

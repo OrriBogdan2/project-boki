@@ -29,7 +29,7 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
   hand (+)            true: nothing is placed by dice. No auto stairs, no random rocks, no random
                       chests/camps/breakables/spawns: only what the layout lists. The match seed only
                       rolls spawn plan picks, live lairs, loot, the Blight and the weather.
-  regions (+)         [{id, name, purpose, biome, islands: [ids]}] named regions (map legend, docs)
+  regions (+)         [{id, name, purpose, biome, bed, islands: [ids]}] named regions (map legend, docs; bed: ambience)
   islands[]           id, name, role, region, biome, danger, poi, noise (coast wobble), sheer arcs
     shapes            circle / ellipse / rect / capsule / poly (+, [[x,z],...]) each with "lv";
                       the first shape is the outline, later ones raise tiers inside it
@@ -282,24 +282,30 @@ for _iid, _more in MORE.items():
 
 # One line each in docs/MAP_REGIONS.md. "loot" leans chests on top of the biome's lean (BiomeRun):
 # slot weights multiply, rarity steps add. Every region can be the match's hot drop zone (HotZone).
+# "bed" is its own low ambience (audio/amb_<bed>.ogg, MusicDir): heights wind, shore water, woods insects,
+# the Heart's hum.
 regions = [
-    dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne", "gaol_sw"],
+    dict(id="crown", name="The Crown", biome="gloom", bed="heart", islands=["crown", "gaol_ne", "gaol_sw"],
          purpose="The vault on the Throne, two boss Gaols and the richest chests, under the most Blight."),
-    dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"], loot={"slots": {"armor": 1.6}},
+    dict(id="frostgate", name="Frostgate", biome="frost", bed="heights", islands=["frostgate"],
+         loot={"slots": {"armor": 1.6}},
          purpose="The best armor on the map, and the Keep's high ground over the Gate Span."),
-    dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}},
+    dict(id="cinder", name="Cinder Steps", biome="ember", bed="heights", islands=["cinder"],
+         loot={"slots": {"glove": 1.6}},
          purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on."),
-    dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
+    dict(id="storm", name="Stormbreak", biome="storm", bed="heights", islands=["storm"],
          purpose="The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."),
-    dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"],
+    dict(id="thorn", name="Thornwood", biome="bloom", bed="woods", islands=["thorn"],
          purpose="The Boki nest and the Thornhive lair; tall-grass ambushes and an uplink by the nest."),
-    dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"],
+    dict(id="lark", name="Larkhollow", biome="meadow", bed="shore", islands=["lark"],
          purpose="Wild Boki graze in the Hollow; a calm place to catch one, with a skiff dock out."),
-    dict(id="highwatch", name="Highwatch", biome="frost", islands=["highwatch"], loot={"slots": {"boots": 1.8}},
+    dict(id="highwatch", name="Highwatch", biome="frost", bed="heights", islands=["highwatch"],
+         loot={"slots": {"boots": 1.8}},
          purpose="The Lookout over the Gaol and the Watch Road, boots, and an uplink out."),
-    dict(id="duskmoor", name="Duskmoor", biome="storm", islands=["duskmoor"], loot={"slots": {"passive": 2.0}},
+    dict(id="duskmoor", name="Duskmoor", biome="storm", bed="shore", islands=["duskmoor"],
+         loot={"slots": {"passive": 2.0}},
          purpose="Relics in the Moor Chapel ruins, and a skiff dock out."),
-    dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"],
+    dict(id="saltmere", name="Saltmere", biome="bloom", bed="shore", islands=["saltmere"],
          purpose="Salt caches along the dry river, the outer ring's most chests, and an uplink out."),
 ]
 
