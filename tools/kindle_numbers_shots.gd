@@ -15,13 +15,22 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	if main.current:
+		main.current.queue_free()      # (the title screen Main opened)
+		main.current = null
+		for i in 2:
+			await main.get_tree().process_frame
 	var sc = load("res://tools/support_check.gd").new()
 	sc.main = main
 	var r: Array = sc.setup("tender", 5.0)
 	var m: Match = r[0]
+	main.current = m
 	var P: Hunter = r[1]
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
+	var fade = main.get("fade")
+	if fade != null:
+		await fade.reveal(0.01)
 	P.inp["fire"] = true
 	var lines: Array = []
 	var t := 0.0
