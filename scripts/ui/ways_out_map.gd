@@ -116,6 +116,8 @@ static func badge(c: Control, pv: Vector2, r: float, i: int, s: Dictionary, now:
 # ------------------------------------------------------------------ the maps
 static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> void:
 	var m: Match = hud.m
+	if m.heart == null:
+		return      # (no Ways Out: the tutorial, training, a duel)
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	for i in 4:
@@ -129,6 +131,8 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 
 static func full_map(fm) -> void:
 	var m: Match = fm.m
+	if m.heart == null:
+		return      # (no Ways Out: the tutorial, training, a duel)
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	var area: Rect2 = fm.rect.grow(-14.0)

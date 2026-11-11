@@ -131,7 +131,8 @@ func _fewer() -> void:
 			"%d of %d spots" % [tr.chests.size(), tr_spots])
 	tr.queue_free()
 	var tu: Match = await build(5, {"tutorial": true, "teams": 1})
-	ok("tutorial: exactly one chest, the chest step's", tu.chests.size() == 1 and tu.chests[0].get("tut", false),
+	# (ext/tutorial-abilities dropped the chest step, so the tutorial island has no chest at all)
+	ok("tutorial: no chests (the tutorial has no chest step)", tu.chests.is_empty(),
 			"%d chests, the map has %d spots" % [tu.chests.size(), tu.world.chest_spots.size()])
 	tu.queue_free()
 	await main.get_tree().process_frame

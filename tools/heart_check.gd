@@ -161,7 +161,7 @@ func _early_seat(main: Node) -> void:
 	m2.step(Match.DT)
 	ok(W.wall.wall.visible and is_equal_approx(W.wall.wall.scale.x, Heart.tide_r(m2)),
 		"the Blight wall stands on the ring (%.0f m)" % W.wall.wall.scale.x)
-	ok(Heart.next_r(m2) < Heart.tide_r(m2) and Heart.next_r(m2) > float(rl["tide_r1"]),
+	ok(Heart.next_r(m2) < Heart.tide_r(m2) and Heart.next_r(m2) > float(rl["tide_r1"]) * W.ways_scale,
 		"the next ring is smaller than the ring now (%.0f m)" % Heart.next_r(m2))
 	var embers := W.wall.embers
 	var rich := float(Settings.q("fx")) > BlightWall.RICH_FX
@@ -169,7 +169,7 @@ func _early_seat(main: Node) -> void:
 		"embers only on presets that can afford them, inside the budget")
 	m2.time = 0.0
 	m2.step(Match.DT)
-	ok(not W.wall.wall.visible and is_equal_approx(Heart.next_r(m2), float(rl["tide_r0"])),
+	ok(not W.wall.wall.visible and is_equal_approx(Heart.next_r(m2), float(rl["tide_r0"]) * W.ways_scale),
 		"before the tide: no wall, and the first ring is the next ring")
 	_free(m2)
 	m.time = 0.0

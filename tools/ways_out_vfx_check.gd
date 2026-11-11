@@ -111,6 +111,8 @@ func _heart(main: Node) -> void:
 	ok(_txt(g0) != "" and _txt(r0) != "", "both Heart seats start locked (%s, %s)" % [_txt(g0), _txt(r0)])
 	var base := _nodes(m.ways_vfx._root)
 	m.time = float(rl["wake_s"]) - m.sess_t0
+	# (wait by the Heart: out in the tide its damage downs the player before the spark is charged)
+	m.player.teleport(H.site + Vector3(3, 0, 0))
 	_run(m, float(rl["charge_s"]) + 1.0)
 	var g1: Array = gate.call()
 	var opened := g1 != g0 and _txt(g1) == "" and _h(g1) > 20.0
@@ -148,7 +150,7 @@ func _heart(main: Node) -> void:
 # ------------------------------------------------------------------ 3. quest seats
 func _quest(main: Node) -> void:
 	var m := _match(main, 8202)
-	var x: Dictionary = m.exits.of_kind("outpost").filter(func(o): return not o.get("tut", false))[0]
+	var x: Dictionary = m.exits.uplink_x()
 	var at: Vector3 = x["pos"]
 	_run(m, 0.3)
 	var base := _nodes(m.ways_vfx._root)
@@ -167,7 +169,7 @@ func _quest(main: Node) -> void:
 	_run(m, WaysOutLook.COLLAPSE_S + 0.8)
 	var u3 := _look(m, at)
 	ok(float(u3[2]) == 0.0 and u3 != u2, "the lift used: taken, beam gone")
-	var L: Dictionary = m.lairs.list[0]
+	var L: Dictionary = m.exits.seats.lair.ref      # the Sealed Lair (the only lair that is a way out)
 	var up: Vector3 = L["up"]
 	var vis := func(): return m.ways_vfx.beacon_at(up).node.visible
 	L["state"] = "dormant"
@@ -195,12 +197,13 @@ func _quest(main: Node) -> void:
 	ok(_nodes(m.ways_vfx._root) == base, "no node made or freed over every quest change (%d)" % base)
 	# the tide: a seat far from the Heart late in the match is covered, whatever it was
 	m.time = Heart.r("tide_start_s") + Heart.r("tide_close_s") - m.sess_t0
-	var live := m.exits.of_kind("outpost").filter(func(o2): return not o2.get("tut", false) and not o2.get("taken"))
-	var o: Dictionary = live[-1]
+	# (the outpost that is not the Uplink seat, lit for the test: the seat itself was taken above)
+	var o: Dictionary = m.exits.of_kind("outpost").filter(func(o2): return not o2.get("tut", false) and not o2.get("seat", false))[0]
+	o["dark"] = false
 	var far: Vector3 = o["pos"]
 	var rd: Dictionary = WaysOutLook.uplink(m, o)
 	var out_m := Vector2(far.x - m.heart.site.x, far.z - m.heart.site.z).length()
-	var inside := out_m <= Heart.r("tide_r1")
+	var inside := out_m <= Heart.r("tide_r1") * m.heart.ways_scale
 	ok(inside or int(rd["st"]) == St.LOST, "a seat the closed tide covers reads lost (%.0f m out)" % out_m)
 	m.queue_free()
 

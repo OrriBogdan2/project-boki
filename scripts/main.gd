@@ -2083,7 +2083,7 @@ func _extract_check() -> void:
 		print("EXCHECK FAIL no uplink outpost on the map"); get_tree().quit(); return
 	var P: Hunter = m.player
 	var R: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
-	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var o: Dictionary = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	P.teleport(o["pos"] + Vector3(0.6, 0, 0.6))
 	run.call(m, 2.0, func(): P.inp["interact"] = true)
