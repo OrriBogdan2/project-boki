@@ -6811,3 +6811,4 @@ READY ext/w0246-anim 1ebf4587d 0.24.6 wave anim: merged 73 / held 18 / supersede
 READY ext/balance-sim-1111 16be1a05d (0.24.7: --duel-sim 12x12 bot duels + tools/duel_sim_report.py, docs/BALANCE_1111.md; parity commits for review: 532c6f5d9 Vex Longneedle 36->24, 33f505028 Kael Warchain 8->6; findings: burn ticks skip armour+CombatBus, Cinder carpet held by burst cap; base 92df78ce4 (0245))
 READY ext/ui-plain-words-menus 4a4b79567 (plain words on Results, Expedition panel, Relics page; table in UI_FIRST15.md)
 READY ext/anim-lace-release-snap a6d014b1b (archer release snap: 0.04 s blend-in for tap/loose/super, clip-check asserts blend over within 0.05 s of spawn, before/after strip)
+READY ext/ui-stale-text-pass 3d1678156 (stale player-facing text: README/wiki controls, revive, shimmer, renderer; evo form roots + 3 rare species; Data.MATCH dead keys; loading tips via key_cap; dead doc paths; DEBT line dropped)
