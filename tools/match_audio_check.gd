@@ -50,6 +50,7 @@ func run(main_node: Node) -> void:
 	ok(once.is_empty(), "a one-shot of a looping file does not loop (%d looping pool voices)" % once.size())
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
+	_voice_cap(P)
 	_ult_cues(m, P)
 	await _glider(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
@@ -72,6 +73,68 @@ func run(main_node: Node) -> void:
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## The voice cap (content/rules/sfx_voices.json): a bus past its cap gives up its cheapest voice for a more
+## valuable sound, or drops the new one; your own sounds, warnings and recasts are never stolen.
+const NEAR_SOUNDS := ["rifle", "smg", "thump", "hit", "crit", "shotgun", "sniper", "boom", "hit_heavy", "slash_hit",
+	"armor_hit", "kill", "knock", "dash", "jump", "land"]
+func _voice_cap(P: Hunter) -> void:
+	Sfx.listener = P.pos
+	var far := P.pos + Vector3(12, 0, 0)      # past FAR (9 m), inside hearing: the SFXFar bus
+	var near := P.pos + Vector3(6, 0, 0)
+	var cap_far := SfxVoices.cap("SFXFar")
+	var cap_near := SfxVoices.cap("SFX")
+	_quiet()
+	for i in cap_far + 3:
+		_play("step0", far)
+	var far_n := Sfx.voices_on("SFXFar")
+	ok(far_n <= cap_far, "far footsteps flood: the far bus holds %d of %d" % [far_n, cap_far])
+	var before := Sfx.stolen
+	_play("rifle", far)
+	ok(Sfx.stolen == before + 1 and Sfx.voices_on("SFXFar") == cap_far, "a far gunshot takes a far footstep's voice")
+	_quiet()
+	for i in cap_far:
+		_play(NEAR_SOUNDS[i], far)
+	before = Sfx.dropped
+	_play("step1", far)
+	ok(Sfx.dropped == before + 1 and Sfx.voices_on("SFXFar") == cap_far,
+			"a far footstep is dropped when the far bus holds better")
+	_quiet()
+	for i in cap_near + 4:
+		_play(NEAR_SOUNDS[i], near)
+	var near_n := Sfx.voices_on("SFX")
+	ok(near_n <= cap_near, "a near flood stays within the cap (%d of %d)" % [near_n, cap_near])
+	_play("hit", P.pos)
+	_play("warn")
+	_play("recall")
+	ok(Sfx.voices_on("SFX") <= cap_near + 3 and _prio_count(SfxVoices.KEEP) == 3,
+			"your hit, a warning and a recall cue all play on a full bus")
+	_quiet()
+	for i in cap_near:
+		_play(NEAR_SOUNDS[i], P.pos)
+	before = Sfx.dropped
+	_play("rifle", near)
+	_play("step0", near)
+	var kept := _prio_count(SfxVoices.KEEP)
+	ok(kept == cap_near and Sfx.dropped == before + 2,
+			"a bus full of your own sounds: none stolen (%d kept), others dropped" % kept)
+	_quiet()
+
+func _play(sname: String, pos = null) -> void:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	Sfx.play(sname, pos, 0.0, 0.0)
+
+func _prio_count(prio: int) -> int:
+	var c := 0
+	for i in Sfx.players.size():
+		if Sfx.players[i].playing and Sfx.prios[i] == prio:
+			c += 1
+	return c
+
+func _quiet() -> void:
+	for p in Sfx.players:
+		p.stop()
 
 ## An ultimate is heard before it is seen: a rival's cue carries 40 m (not 70) with the rival tag, yours has the
 ## ally tag, all through the match's own pool voices (so the match leaving tears them down with the rest).
