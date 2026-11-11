@@ -92,7 +92,8 @@ to highest within 1/16 cycle, give or take 0.03 m), so the dip can't come back.
 Worst ankle miss 0.0025 m; every ring one length (clip-check). Strip, game renderer, side view, 8 phase-aligned frames
 a loop, forward on top: `pelvis/vex_walk_strip.jpg`, `pelvis/vex_run_strip.jpg`, `pelvis/tarek_walk_strip.jpg`,
 `pelvis/tarek_run_strip.jpg` (`--clip-shots --warden=dolm --yaw=90 --fps=16 --size=320`, frame round(i*len/8*16); the first
-clip of a run catches the boot splash, so render a throwaway clip first). Tarek, read off the strips: every loop's hip
+clip of a run catches the boot splash, so render a throwaway clip first: Tarek's walk_f row shows the splash in its
+first five columns; the re-render, job 20261111-135126-08852, sat in the GPU queue over an hour). Tarek, read off the strips: every loop's hip
 rides level with walk_f/run_f in the same column, no crouched frame; run_l/r read as a light bounding side step (the
 short stance below), run_b/bl/br stand taller than the leaning run_f, as the band allows (it bounds under and over).
 
