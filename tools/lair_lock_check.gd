@@ -295,8 +295,11 @@ func _prize_lairs(main: Node, map_id: String) -> void:
 		_spot(Q, L["gate_c"] + Vector3(L["out"].x, 0, L["out"].y) * 40.0)
 		var xp0 := [P.xp, C.xp, Q.xp]
 		_kill(L, P, C)
-		var paid: bool = P.xp > xp0[0] and C.xp > xp0[1] and Q.xp == xp0[2]
-		ok(paid, "%s: the %s kill pays the last hit's squad, not the rival" % [map_id, L["name"]])
+		var gain := [P.xp - xp0[0], C.xp - xp0[1], Q.xp - xp0[2]]
+		# (the rival's gain is only the Hunter's slow time trickle over the half second around the kill)
+		var paid: bool = gain[0] >= KillXp.BOSS_XP and gain[1] >= KillXp.BOSS_XP and gain[2] < 2.0
+		var what := "%s: %s kill pays the last hit's squad, not the rival" % [map_id, L["name"]]
+		ok(paid, what + " (%.1f, %.1f, %.1f)" % gain)
 		ok(not dropped.is_empty(), "%s: and drops its pile" % L["name"])
 		_run(Lairs.VICTORY_T + 1.0)
 		_spot(P, L["up"])
