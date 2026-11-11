@@ -1,5 +1,5 @@
 {
-	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it.",
+	"desc": "Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `starters` (Lace, Kael or Vex) on the first-Relic screen, wears it at the first portal and plays the tutorial as it. After its first finished expedition the player picks one of `second_picks` as the second Relic (the one already taken is not offered); a starter not taken and not in `second_picks` opens at that same moment. Every other Hunter opens through its own challenge in `unlock`, counted across all your expeditions whoever you play; a challenge with `after` also waits until that many Hunters are open. A done challenge never opens a Hunter by itself: the player holds the button on the Hunters screen for `hold_s` seconds. `mastery` lists each Hunter's goals, counted only in expeditions played as that Hunter; each one done is a mastery level and a cosmetic reward. Rewards are cosmetic only (`reward_kinds`). Ids are Hunter ids, never display names. Every number is a placeholder until the owner tunes it. `looks` are features a Hunter leaves on your own character at home once its mastery reaches `level` (shape `eyes` or `scar`, colour `col`); the creator keeps or fades each (MasteryLook).",
 	"starters": ["archer", "juggernaut", "gunslinger"],
 	"starter_picks": 1,
 	"second_picks": ["juggernaut", "ashwick", "tender"],
@@ -133,5 +133,9 @@
 			{"stat": "rings", "target": 15, "text": "Fly through 15 air rings", "reward": {"kind": "glider", "id": "lantern_moth", "name": "Lantern Moth"}},
 			{"stat": "revives", "target": 3, "text": "Revive 3 teammates", "reward": {"kind": "banner", "id": "tidelight", "name": "Tidelight"}}
 		]
-	}
+	},
+	"looks": [
+		{"id": "vex_glow", "hunter": "gunslinger", "level": 2, "name": "Green eye glow", "shape": "eyes", "col": "#5dff8a"},
+		{"id": "kael_scar", "hunter": "juggernaut", "level": 3, "name": "White-hot scar", "shape": "scar", "col": "#fff0d2"}
+	]
 }

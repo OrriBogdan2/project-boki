@@ -189,12 +189,13 @@ func sim(dt: float) -> void:
 		if grounded and hv.length() <= spd * 1.3 and (m.world.is_void(ahead.x, ahead.y) or (m.lairs and not m.lairs.lair_of(Vector3(ahead.x, pos.y, ahead.y)).is_empty())):
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
-	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	var pre_dir := Vector2(vel.x, vel.z)
+	var pre_v := pre_dir.length()
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
-		m.on_wall_slam(self)
+		m.on_wall_slam(self, pre_dir / pre_v)
 		hurt(8.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
@@ -368,7 +369,7 @@ func shriek(at_h: Ent) -> void:
 func shriek_fx() -> void:
 	shriek_t = m.time
 	m.sfx("v_warden", pos, 2.0, 1.75)
-	m.sfx("k_echo", pos, -2.0, 0.6)
+	m.sfx("blight_rumble", pos, -2.0)
 	m.fx.ring(pos, 6.0, Color("ff5a2a"), 0.6)
 	m.fx.ring(pos, 10.0, Color("ff8a4a"), 0.9)
 	m.fx.burst(pos + Vector3(0, 2.0, 0), BlightModels.EMBER, 26, 5.0, 0.7, -2.0)
@@ -390,7 +391,7 @@ func _strike() -> void:
 	# an ember bolt from the lamp
 	var o := pos + Vector3(atk_dir.x * 0.7, 2.0, atk_dir.y * 0.7)
 	m.spawn_shot(self, o, atk_dir * 9.0, float(md["dmg"]) * dmg_mult, 10.0 / 9.0, 0.34, BlightModels.EMBER_HOT, {"mob": true, "kb": 2.0, "burn": 1.0 if lvl > 0.6 else 0.0})
-	m.sfx("k_venom", pos, -6.0, 0.7)
+	m.sfx("k_poison", pos, -6.0, 0.7)
 
 ## Burrows away quietly (BlightDir despawns idle Blight far from everyone).
 func burrow() -> void:
