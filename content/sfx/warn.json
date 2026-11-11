@@ -2,6 +2,8 @@
  "group": "warn",
  "name": "Warnings",
  "script": "tools/gen_sfx_warn.py",
- "sounds": {"warn_heartbeat": "ui", "warn_tick": "ui", "blight_rumble": "cast"},
+ "sounds": {"warn_heartbeat": "ui", "warn_tick": "ui", "blight_rumble": "cast", "board_hum": "loop", "board_cancel": "ui", "depart_sting": "cast"},
+ "reach": {"depart_sting": 60},
+ "loops": ["board_hum"],
  "signature": []
 }
