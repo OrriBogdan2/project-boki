@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://b3836sn8kcpym"
-path="res://.godot/imported/boki_fuse.wav-b83f80e015a138eb45ec5a09659249c9.sample"
+uid="uid://do2my4xu1777g"
+path="res://.godot/imported/boki_evolve.wav-f0f802fcde47595466f3c3c85a269e7c.sample"
 
 [deps]
 
-source_file="res://audio/boki_fuse.wav"
-dest_files=["res://.godot/imported/boki_fuse.wav-b83f80e015a138eb45ec5a09659249c9.sample"]
+source_file="res://audio/boki_evolve.wav"
+dest_files=["res://.godot/imported/boki_evolve.wav-f0f802fcde47595466f3c3c85a269e7c.sample"]
 
 [params]
 

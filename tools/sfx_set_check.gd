@@ -24,6 +24,7 @@ extends RefCounted
 ##  15. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
 ##      an unknown species falls back to the generic cues, and no two species share a happy take
 ##  16. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
+##   7. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -60,6 +61,7 @@ func run(main: Node) -> void:
 	_belt()
 	_boki_cues()
 	_boki_wired()
+	_fusion_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -266,6 +268,22 @@ func _hit_targets() -> void:
 			if _data(t).size() / 2 > 0.25 * 44100:
 				long.append(t.get_file())
 	ok(long.is_empty(), "hit targets: every take is under 0.25 s, a layer not a hit (long: %s)" % [long])
+## 7. Every Fusion type and form names a cue that has its sound; the release, timeout and evolution cues exist.
+func _fusion_cues() -> void:
+	var cues := {}
+	for t in (MergeForm.data()["types"] as Dictionary).values():
+		cues[String(t["cue"])] = true
+	for f in DirAccess.get_files_at("res://content/merge_forms"):
+		cues[String(MergeForm.kit_form(f.get_basename())["cue"])] = true
+	var missing := []
+	for c in cues:
+		if not Sfx.ensure("boki_fuse_" + c):
+			missing.append(c)
+	for c in ["boki_fuse_end", "boki_fuse_tired", "boki_evolve"]:
+		if not Sfx.ensure(c):
+			missing.append(c)
+	ok(missing.is_empty() and cues.size() >= 16,
+		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
