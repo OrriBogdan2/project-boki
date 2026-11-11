@@ -25,6 +25,7 @@ const ELIM_SHRINK := 0.6      # fraction of its size the Wisp keeps as it reache
 const ELIM_BOX_FROM := 0.4    # fraction of its size the deathbox grows in from during the beat
 const HIT_RISE := 0.3         # m the hit knocks the Wisp up before it falls
 const BOX_IN := 0.15          # m above the box's spot the Wisp falls to (inside the crate)
+const BOX_REACH := 2.0        # m: a box further off (abyss, sky train) is not fallen into
 
 ## Runs every render frame, before the hero's own basis is built: advances the state and poses the hero's
 ## size (a pop-out) and the Wisp.
@@ -138,6 +139,7 @@ static func _elim_start(h: Hunter, st: Dictionary) -> void:
 	st["box"] = box if not box.is_empty() and Life.soul_here(h.m, box) else {}
 	st["mode"] = ELIM
 	st["t"] = 0.0
+	st.erase("from")
 	Sfx.loop_stop(hum_key(h))
 	h.m.sfx(String(spec["hit_sfx"]), h.position, -8.0)
 
@@ -259,14 +261,20 @@ static func _pose_elim(h: Hunter, st: Dictionary) -> void:
 	mat.set_shader_parameter("core_col", st["kcol"] if hit else heart)
 	var fall := clampf((k - ELIM_HIT) / (1.0 - ELIM_HIT), 0.0, 1.0)
 	_set_glow(node, 1.0, lerpf(1.0, ELIM_DIM, fall))
+	if not st.has("from"):
+		st["from"] = node.position
+	var from: Vector3 = st["from"]
+	var to := Vector3(from.x, BOX_IN, from.z)
 	var box := st["box"] as Dictionary
-	var floor_y := 0.0
 	if box.has("pos"):
-		floor_y = (box["pos"] as Vector3).y - h.position.y
+		var off := (box["pos"] as Vector3) - h.position
+		if Vector2(off.x, off.z).length() <= BOX_REACH:
+			to = off + Vector3(0, BOX_IN, 0)
 	var top := float(look["hover"]) + HIT_RISE
 	if hit:
 		node.position.y = lerpf(float(look["hover"]), top, sin(k / ELIM_HIT * PI * 0.5))
 	else:
-		node.position.y = lerpf(top, floor_y + BOX_IN, fall * fall)
+		var f2 := fall * fall
+		node.position = Vector3(lerpf(from.x, to.x, f2), lerpf(top, to.y, f2), lerpf(from.z, to.z, f2))
 	node.scale = Vector3.ONE * lerpf(1.0, ELIM_SHRINK, fall)
 	_box_scale(st, lerpf(ELIM_BOX_FROM, 1.0, _back(k)))

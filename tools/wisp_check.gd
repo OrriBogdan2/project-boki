@@ -141,6 +141,7 @@ func _elim_beat(p: Hunter, foe: Hunter, wisp: Node3D, mat: ShaderMaterial) -> vo
 	var rim_kept := true
 	var round_body := true
 	var lowest := INF
+	var last_at := Vector3.INF
 	var popped := false
 	var shown := true
 	var t := 0.0
@@ -159,6 +160,7 @@ func _elim_beat(p: Hunter, foe: Hunter, wisp: Node3D, mat: ShaderMaterial) -> vo
 		var sc := wisp.scale
 		round_body = round_body and is_equal_approx(sc.x, sc.y) and is_equal_approx(sc.y, sc.z)
 		lowest = minf(lowest, wisp.position.y)
+		last_at = wisp.global_position
 	ok(beats == 1, "elimination: the beat plays once (%d)" % beats)
 	ok(shown, "elimination: the Wisp shows through the beat, the hero stays hidden")
 	var heart := "elimination: the hit shows the killer's colour in the heart (%d frames)" % hit_frames
@@ -167,6 +169,9 @@ func _elim_beat(p: Hunter, foe: Hunter, wisp: Node3D, mat: ShaderMaterial) -> vo
 	ok(round_body, "elimination: it only scales evenly, the round outline holds")
 	var hover := float(WispLook.get_look("")["hover"])
 	ok(lowest < hover - 0.1, "elimination: the Wisp falls toward the box (%.2f m)" % lowest)
+	var box_at: Vector3 = Life.box_of(m, p).get("pos", Vector3.INF)
+	var miss := Vector2(last_at.x - box_at.x, last_at.z - box_at.z).length()
+	ok(miss < 0.3, "elimination: the Wisp lands in its box (%.2f m off)" % miss)
 	ok(popped, "elimination: the Wisp pops at the end of the beat")
 
 ## The Wisp's elimination pop rings on the hunter (fx.radial counts every hunter's bursts, so it can't tell).
