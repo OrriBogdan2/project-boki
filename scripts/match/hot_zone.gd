@@ -14,6 +14,8 @@ const BOT_PICK := 0.35
 ## How near (m) another squad must be to the hot zone's landing for a bot leader to look elsewhere.
 const CROWD_R := 25.0
 const COL := Color("ff8a3a")
+const CAPTION := "HOT ZONE  ·  better loot"
+const CAPTION_PX := 13
 
 var w: World = null
 var region_of := PackedInt32Array()   # island index -> region index (-1: none)
@@ -71,9 +73,12 @@ func full_map(fm, kk: float) -> void:
 	for k in zone.size():
 		var pv: Vector2 = fm.to_screen(zone[k]["c"])
 		fm.hud.c.draw_arc(pv, float(zone[k]["r"]) * kk, 0.0, TAU, 48, Color(COL, 0.85), 3.0)
-		if k == 0:
-			var top := pv - Vector2(0, float(zone[k]["r"]) * kk + 8.0)
-			fm.hud._ctext(top, "HOT ZONE  ·  better loot", 13, COL, fm.hud.big)
+	if not zone.is_empty():
+		fm.label(CAPTION, caption_at(fm, kk), CAPTION_PX, COL, true)      # (FullMap reserved its spot)
+
+## Where the caption sits on the full map at zoom `kk`: just over the first ring.
+func caption_at(fm, kk: float) -> Vector2:
+	return fm.to_screen(zone[0]["c"]) - Vector2(0, float(zone[0]["r"]) * kk + 8.0)
 
 ## The hot zone on the minimap: a ring round each of its islands in view.
 func minimap(hud, to_map: Callable, on_map: Callable) -> void:
