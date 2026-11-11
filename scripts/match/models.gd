@@ -626,6 +626,7 @@ static func hunter(cls: String, team_col: Color, weapon: String, outfit := "", a
 	return root
 
 static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", appearance := {}, arch := "") -> Node3D:
+	var _p0 := Time.get_ticks_usec()
 	var um := Unmasked.is_look(appearance)       # your own character: the hunter rig without a hunter's gear
 	var lk: Dictionary
 	var race: Dictionary
@@ -698,6 +699,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	painted(m_gun, 3, 0.12, 0.1, 0.1); painted(m_gold, 3, 0.1, 0.0, 0.0); painted(m_steel, 3, 0.14, 0.12, 0.14); m_steel.set_shader_parameter("sky_ao", 0.12)
 	painted(m_bone, 0, 0.3, 0.2, 0.2); painted(m_wood, 2, 0.2, 0.2, 0.2)
 	m_acc.set_shader_parameter("gloss", 0.12)
+	var _p1 := Time.get_ticks_usec()
 	var rig := Node3D.new(); rig.name = "Rig"; root.add_child(rig)
 	var legs := Node3D.new(); legs.name = "Legs"; rig.add_child(legs)
 	var bw: float = lk["build"]
@@ -742,6 +744,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			part(torso, cyl(0.08, 0.08, 0.06, 12), m_acc, Vector3(0.2 * sx, 0.56, 0.27 * bw), Vector3.ONE, Vector3(0, 0, PI / 2))
 	if not um: _class_marks(torso, cls, bw, m_acc, m_trim)      # (the shroud covers the back it would sit on)
 	# head: the sculpted head (jaw, cheeks, brow, chin per race and gender) with its face
+	var _p2 := Time.get_ticks_usec()
 	var hk := HeroKit.head_key(rid, fem)
 	part(torso, HeroKit.head(hk), m_skin, Vector3(0, 0.86, 0), Vector3.ONE, Vector3.ZERO, "Head")
 	if rid == "human" and not um:
@@ -759,6 +762,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	else:
 		_race_hair(hair_n, rid, int(lk["hair"]), m_hair, hair_c, skin_c, cov in ["hood", "helm"])
 	_race_parts(torso, rid, m_skin, m_hair, m_dark, skin_c, hair_c, hero_col)
+	var _p3 := Time.get_ticks_usec()
 	var gear := Node3D.new(); gear.name = "Gear"; torso.add_child(gear)
 	# the arms and the gun move together from the shoulders ("Aim"), for recoil, reloads and poses
 	var aim := Node3D.new(); aim.name = "Aim"; aim.position = Vector3(0, 0.5, 0.0); torso.add_child(aim)
@@ -805,8 +809,10 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		"m": {"body": m_body, "shirt": m_shirt, "pants": m_pants, "leather": m_leather, "skin": m_skin, "hair": m_hair, "dark": m_dark, "acc": m_acc,
 			"gold": m_gold, "gun": m_gun, "hero": m_hero, "trim": m_trim, "steel": m_steel, "glow": m_glow, "glow_soft": m_glow_soft, "bone": m_bone,
 			"wood": m_wood, "fur": m_fur, "feather": m_feather, "cloak": m_cloak, "hat": m_hat}}
+	var _p4 := Time.get_ticks_usec()
 	if um: Unmasked.dress(ctx, appearance)
 	else: HeroGear.dress(arch, ctx)
+	var _p5 := Time.get_ticks_usec()
 	gun_parts(gun, weapon, m_gun, m_dark, m_acc)
 	gun.scale = Vector3.ONE * float(CLASS_LOOK.get(cls, {}).get("weapon", 1.0))     # heavies carry big guns
 	if not gun.has_node("Mag"):
@@ -848,6 +854,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		(nd as Node3D).position.y -= 0.68
 	# a Warden drawn from its .glb hides this body: its loose parts are dropped, not merged (the pivots stay,
 	# they drive the .glb's bones; "Focus" is kept and drawn)
+	var _p6 := Time.get_ticks_usec()
 	var drop := WardenGlb.will_dress(arch)
 	for nd in [torso, head, hair_n, gear]:
 		merge_static(nd, drop)
@@ -861,6 +868,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 			merge_static(nd, drop)
 	if weapon not in ["twin_blades", "arc_bolts"]:
 		merge_static(gun)      # (the twin blades' second dagger is handed to the left hand by HunterAnim)
+	var _p7 := Time.get_ticks_usec()
 	# the race's proportions: head size, how broad the body is, overall height
 	var hkk := float(race["head"]) * (1.06 if arch == "thief" else 1.12)    # big-headed like a hero brawler (faces read from the match camera), heroic not chibi; the thief leaner
 	hkk *= float(lk["head"]) * float(Arch.body(arch).get("head", 1.0))      # the Warden's head size
@@ -903,7 +911,10 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 		sm.set_shader_parameter("shadow_tint", Color(0.6, 0.6, 0.86))
 		sm.set_shader_parameter("light_tint", Color(1.08, 1.0, 0.9))
 		hero_look(sm)
+	var _p8 := Time.get_ticks_usec()
 	WardenGlb.dress(root, arch, lk)      # its 3D model, when it has one and uses it (else this procedural one)
+	var _p9 := Time.get_ticks_usec()
+	print("PROFH %s mats=%.1f legs/torso=%.1f head/hair=%.1f arms=%.1f gear=%.1f gun/glider=%.1f merge=%.1f post=%.1f glb=%.1f" % [arch, (_p1-_p0)/1000.0, (_p2-_p1)/1000.0, (_p3-_p2)/1000.0, (_p4-_p3)/1000.0, (_p5-_p4)/1000.0, (_p6-_p5)/1000.0, (_p7-_p6)/1000.0, (_p8-_p7)/1000.0, (_p9-_p8)/1000.0])
 	root.set_meta("race", rid)
 	root.set_meta("cls", cls)
 	root.set_meta("arch", arch)
@@ -1298,8 +1309,6 @@ static func merge_static(node: Node3D, discard := false) -> void:
 	var drop: Array = []
 	for ch in node.get_children():
 		if not (ch is MeshInstance3D) or ch.get_child_count() > 0 or not String(ch.name).begins_with("@"):
-			continue
-		if not ch.visible:
 			continue
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
@@ -2079,7 +2088,6 @@ static func kin(species: String, rec := {}) -> Node3D:
 	var acc: String = rec.get("acc", "")
 	if acc != "" and Data.ACCS.has(acc):
 		accessory(body, acc, Goods.wear_col(rec))
-	PrizeBoard.dress(body, rec)      # a rosette for each Cup Ribbon (garden games)
 	var pup: Node = KinPuppet.new(); pup.set("species", species)
 	root.add_child(pup)
 	if int(rec.get("level", 1)) < 4 and (rec.get("forms", []) as Array).is_empty() and not rec.is_empty():
@@ -2644,10 +2652,11 @@ static func deathbox(col: Color) -> Node3D:
 # ------------------------------------------------------------------ world legend: interactable icons
 ## Everything you can use out in the world (not loot, not breakables) wears a small floating badge
 ## with a symbol, in one colour per kind, so it reads at a glance from the match camera:
-## shrines (blessing, teal), chest keys (brass), eggs (warm gold), revive beacons (mint). Loot is
-## gold / rarity coloured with a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
-const ICON_COLS := {"bless": Color("5fd0b0"), "ckey": Color("f2c84a"), "egg": Color("ffc04a"),
-	"revive": Color("6ae8a0")}
+## shrines (blessing, teal), exits (hatches violet, uplinks cyan), rift keys (violet, like the
+## hatch they open), eggs (warm gold), revive beacons (mint). Loot is gold / rarity coloured with
+## a pillar and a ground pool; breakables are matte with no glow; decor stays low-contrast.
+const ICON_COLS := {"bless": Color("5fd0b0"), "hatch": Color("b98aff"), "key": Color("b98aff"), "ckey": Color("f2c84a"),
+	"egg": Color("ffc04a"), "revive": Color("6ae8a0"), "dock": Color("ffb84a")}
 static var _icon_tex := {}
 
 ## Is the point (x, y) (-1..1, y up) inside the white symbol for this kind?
@@ -2655,7 +2664,10 @@ static func _icon_sym(kind: String, x: float, y: float) -> bool:
 	match kind:
 		"bless":     # a four-point sparkle
 			return pow(absf(x), 0.5) + pow(absf(y + 0.02), 0.5) < 0.86
-		"ckey":
+		"hatch", "dock":   # an arrow up and out
+			if y >= -0.02 and y <= 0.56 and absf(x) < 0.48 * (0.56 - y) / 0.58: return true
+			return absf(x) < 0.15 and y > -0.56 and y < 0.0
+		"key", "ckey":
 			var d := Vector2(x, y - 0.24).length()
 			if d < 0.27 and d > 0.12: return true
 			if absf(x) < 0.075 and y < 0.0 and y > -0.6: return true

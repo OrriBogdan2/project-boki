@@ -426,11 +426,7 @@ func _warm_jobs() -> void:
 
 # ------------------------------------------------------------------ choosing a job
 func _night() -> bool:
-	return is_night(h.day_t)
-
-## Is the day clock (0..1, 0.25 morning, 0.75 dusk) in the night?
-static func is_night(day_t: float) -> bool:
-	return sin((day_t - 0.25) * TAU) < -0.2
+	return sin((h.day_t - 0.25) * TAU) < -0.2
 
 ## A free kin looks for work. True if it took a job.
 func pick(k: Dictionary) -> bool:

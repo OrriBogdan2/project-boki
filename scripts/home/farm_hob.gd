@@ -115,7 +115,7 @@ func _call_out(dt: float) -> void:
 	call_t -= dt
 	var talk: Dictionary = rules()["talk"]
 	var met := bool(FarmBuilder.state().get("met", false))
-	var line := "" if met or FarmTutorial.base() else String(talk["call"])      # in the base your Boki calls you
+	var line := "" if met else String(talk["call"])
 	if chat.offer_due():
 		line = String(talk["call_offer"])
 	if call_t > 0.0 or chat.busy() or line == "":
