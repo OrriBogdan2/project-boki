@@ -16,7 +16,7 @@ const LAND_WAIT_S := 12.0      # s on the ground at most waiting for the last bo
 const FIGHT_S := 15.0          # s of game time with all 30 hunters on top of you
 const EXTRACT_S := 25.0        # s the uplink and the lift may take before the run gives up
 const CHARGE_S := 6.0          # s the uplink charges (monster waves, a contested yard) before its lift opens
-const AFTER_S := 3.0           # s run on after you rode the lift (the results coming up)
+const AFTER_S := 3.0           # s run on after you rode the lift, unless the match ends first (1.6 s real time)
 const FIGHT_R := Vector2(5.0, 14.0)      # m: the ring the other hunters are put on
 const FAR_M := 60.0            # m from the camera: an emitter this far off is out of any view the match uses
 const PHASES := ["ride", "drop", "land", "fight", "extract"]
@@ -26,6 +26,7 @@ var _pipes := 0                # pipeline compilations so far (Forward+/Mobile; 
 var _bench = preload("res://tools/perf_bench.gd").new()      # its HUD draw hook (hud_us: the last canvas draw)
 var _uplink := {}
 var _rode_at := -1.0
+var _hunters := 0
 
 func run(main_node: Node) -> void:
 	main_node.add_child(self)
@@ -51,6 +52,9 @@ func _on_added(n: Node) -> void:
 	_added[k] = int(_added.get(k, 0)) + 1
 
 func _process(delta: float) -> void:
+	if _rode_at >= 0.0 and not _end and (not is_instance_valid(m) or m.over):
+		_finish()      # the match ended behind the lift (Match._end_soon): what came before it is the report
+		return
 	if m != null and not frames.is_empty() and not _end:
 		var lf: Dictionary = frames[-1]
 		lf["phys"] = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
@@ -120,6 +124,7 @@ func _bring_hunters() -> void:
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * r, [], 0.6, 0.5, 8.0)
 		var h: Hunter = others[i]
 		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	_hunters = m.hunters.size()
 	print("HITCH fight: %d hunters round you at t=%.2f" % [others.size(), m.time])
 	_census()
 
@@ -171,7 +176,7 @@ func _finish() -> void:
 	lines.append("PROFILE renderer=%s driver=%s adapter=%s window=%s quality=%s hunters=%d" % [
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_current_rendering_driver_name(),
 		RenderingServer.get_video_adapter_name(), str(get_window().size), str(Settings.get_v("quality")),
-		m.hunters.size()])
+		_hunters])
 	lines.append("PROFILE load %.0f ms, %d shader compiles while loading" % [load_ms, load_compiles])
 	lines.append("PROFILE phase  frames   p50   p95   p99    max  >33ms | sim  vis other rend phys rest  gpu  hud " +
 		"| draws  bound")
