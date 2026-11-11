@@ -41,8 +41,10 @@ static func host(c: RemoteAnimCheck, G: Hunter) -> void:
 	at = B.pos
 	Stomp.start(c.m, P, B)
 	seen = await _see(c, SEE_S)
-	c.ok(seen["stomp"] and seen["style"] == sid, "stomp: the guest's copy of the stomper stomps in its style (%s)" % sid, str(seen))
-	c.ok(seen["k"] > 0.7 and seen["beat"] >= 0.0, "stomp: and plays the stomp pose (k %.2f, beat %.2f)" % [seen["k"], seen["beat"]])
+	c.ok(seen["stomp"] and seen["style"] == sid,
+		"stomp: the guest's copy of the stomper stomps in its style (%s)" % sid, str(seen))
+	c.ok(seen["k"] > 0.7 and seen["beat"] >= 0.0,
+		"stomp: and plays the stomp pose (k %.2f, beat %.2f)" % [seen["k"], seen["beat"]])
 	c.ok(seen["by"] and seen["lies"], "stomp: the wisp's copy is marked stomped and shows as a wisp")
 	for i in 60:
 		P.inp["move"] = Vector2(1, 0)
@@ -50,18 +52,21 @@ static func host(c: RemoteAnimCheck, G: Hunter) -> void:
 		await c._run(RemoteAnimCheck.DT)
 	seen = await _see(c, 0.2)
 	c.ok(c._v(seen["at"]).distance_to(p_at) < MOVED and P.pos.distance_to(p_at) < 0.05,
-		"stomp: the stomper is locked in its spot, on the host and on the guest's copy", "host %.2f m" % P.pos.distance_to(p_at))
+		"stomp: the stomper is locked in its spot, on the host and on the guest's copy",
+		"host %.2f m" % P.pos.distance_to(p_at))
 	c.ok(c._v(seen["bat"]).distance_to(at) < MOVED and B.pos.distance_to(at) < 0.05,
 		"stomp: the wisp is held in its spot on both too", "host %.2f m" % B.pos.distance_to(at))
 	P.hurt(5.0, B, {"stun": 0.6})
 	seen = await _see(c, SEE_S)
-	c.ok(P.stomp.is_empty() and not seen["stomp"], "stomp: a stun on the stomper cuts the stomp on the guest's copy too", str(seen))
+	c.ok(P.stomp.is_empty() and not seen["stomp"],
+		"stomp: a stun on the stomper cuts the stomp on the guest's copy too", str(seen))
 	c.ok(seen["k"] < GONE_K and seen["down"] and not seen["out"] and not seen["by"],
 		"stomp: the pose eases out (k %.2f), the wisp lives on the guest and is let go" % seen["k"], str(seen))
 	await c._run(0.8)      # (the stun runs out)
 	Stomp.start(c.m, P, B)
 	seen = await _see(c, Stomp.TIME * 0.5)
-	c.ok(seen["stomp"] and not seen["out"], "stomp: a second stomp is on the guest halfway, the wisp still down", str(seen))
+	c.ok(seen["stomp"] and not seen["out"],
+		"stomp: a second stomp is on the guest halfway, the wisp still down", str(seen))
 	seen = await _see(c, Stomp.TIME * 0.5 + 0.3)
 	c.ok(not seen["stomp"] and seen["out"] and B.out,
 		"stomp: left alone it ends and the wisp is executed on the guest too", str(seen))
@@ -90,7 +95,8 @@ static func skydive(c: RemoteAnimCheck, G: Hunter) -> void:
 		"skydive: the guest's copy of a diving hunter plays the skydive (k %.2f)" % seen["dk"], str(seen))
 	P.diving = false
 	seen = await _see(c, SEE_S)
-	c.ok(not seen["dive"] and seen["dk"] < 0.5, "skydive: and stops when the glider opens (k %.2f)" % seen["dk"], str(seen))
+	c.ok(not seen["dive"] and seen["dk"] < 0.5,
+		"skydive: and stops when the glider opens (k %.2f)" % seen["dk"], str(seen))
 	P.dropping = false
 	P.gliding = false
 	P.teleport(c.home)

@@ -9,7 +9,8 @@ extends "res://tools/displace_net_check.gd"
 ## Once both games are up they run in lockstep, not on the wall clock: the host steps one DT, tells the guest,
 ## and goes on when the guest has stepped too; the guest also holds a step until the host's latest snapshot is in,
 ## so a cast takes as many frames as it needs and no real time, and times in the log are step counts (the same
-## on a slow box). --remote-anim-check=archer,mage runs only those kits; "stomp" and "skydive" run the rows of RemoteAnimStomp.
+## on a slow box). --remote-anim-check=archer,mage runs only those kits; "stomp" and "skydive" are the rows of
+## RemoteAnimStomp.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
