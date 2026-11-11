@@ -1,6 +1,6 @@
 extends RefCounted
-## --see-through-check (owner 11-11, "trees disappear when you get too close"): renders a tree and a
-## stand-in hunter from the match camera's angle, with see-through on and off. A tree beside the
+## --see-through-check: renders a tree and a stand-in hunter from the match camera's angle, with
+## see-through (SeeThrough) on and off. A tree beside the
 ## hunter or behind them stays pixel-for-pixel solid; a tree between the camera and the hunter
 ## dithers only a small patch (the hunter shows through) and keeps most of itself. Needs a renderer
 ## (the suite's xvfb + opengl3), not --headless.

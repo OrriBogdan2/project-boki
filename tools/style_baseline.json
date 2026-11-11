@@ -98,7 +98,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 54
+"long_line": 52
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -504,7 +504,7 @@
 "scripts/match/flora.gd": {
 "long_line": 59,
 "nested_ternary": 2,
-"semicolon": 54,
+"semicolon": 52,
 "shadow": 1
 },
 "scripts/match/fx.gd": {
@@ -738,8 +738,8 @@
 "semicolon": 86
 },
 "scripts/match/train_route.gd": {
-"long_line": 3,
-"semicolon": 6,
+"long_line": 2,
+"semicolon": 5,
 "shadow": 1
 },
 "scripts/match/truce.gd": {
@@ -758,7 +758,7 @@
 "scripts/match/world.gd": {
 "long_line": 78,
 "nested_ternary": 9,
-"semicolon": 174,
+"semicolon": 172,
 "shadow": 2
 },
 "scripts/server/relay.gd": {
@@ -823,8 +823,8 @@
 "scripts/ui/hud.gd": {
 "history_comment": 2,
 "long_line": 185,
-"nested_ternary": 37,
-"semicolon": 45,
+"nested_ternary": 35,
+"semicolon": 44,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -1181,7 +1181,7 @@
 "semicolon": 1
 },
 "tools/train_check.gd": {
-"long_line": 11,
+"long_line": 10,
 "semicolon": 7
 },
 "tools/unique_check.gd": {
