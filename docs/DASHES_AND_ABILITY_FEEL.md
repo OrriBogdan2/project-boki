@@ -522,6 +522,15 @@ Rules (the stacking caps, `cap` in the rules):
 - Cap: every body takes at most 110ms of hold in any 0.5s however many hit it, and every offline global freeze
   (`Match.freeze_frame`: hits, parries, armor breaks, the ult moment) spends the player's same budget.
 - The shake of heavy hits on you starts at most once per 0.5s; inside that gap more only raise its strength.
+- Take the max, never the sum. Within 0.25s, further hits on the same pair get a third of their
+  tier (multi-hit rule). Echoes (`repeat`) use half.
+- Projectiles never freeze the attacker (Capcom). Melee freezes both, and the victim shakes along the
+  hit direction (Sakurai). The shake starts big and shrinks.
+- Cap: 110ms in any 0.5s per player.
+- A press inside the freeze is never lost: it acts on the first step after it, as if made then (Shift,
+  Space, E and R latch in `pending_input`; an LMB tap is held by DashFlow's press buffer). `--hitstop-input-check`.
+- The spike tier is a bit longer than SUPERVIVE-era Kinfall's current max of 75ms. It's still short
+  of fighting-game values (8-16f), because a third player can act during it (Sakurai's free-for-all point).
 
 ### 5.5 Camera: almost no shake (owner rule, replaces the old table)
 
