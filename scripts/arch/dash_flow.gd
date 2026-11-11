@@ -7,6 +7,8 @@ extends RefCounted
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 ## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
 ## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md).
+## A press during a mantle (the ledge rise) goes by the one table every hero shares, content/rules/mantle_press.json:
+## "fire" goes mid-climb, "buffer" (the default) waits for the top.
 
 const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]
@@ -22,7 +24,12 @@ const MOVES := ["ground", "air", "jump"]
 ## carries a reason and a source.
 const COMBINE := {"jump": "fire", "into": "fire", "hold": "keep"}
 
+## The moves routed in a mantle beside SLOTS; each reads the Hunter.inp key of its own name.
+const MANTLE_MOVES := ["dash", "jump"]
+
 static var _files := {}     # hero id -> its content/dash_flow file (empty when it has none)
+const MANTLE_FILE := "res://content/rules/mantle_press.json"
+static var _mantle_rows: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(MANTLE_FILE))
 
 var kit: ArchKit
 var held := {}              # slot -> seconds it has waited since the dash ended, or since its press at a CC's end
@@ -42,6 +49,14 @@ static func file_of(hero: String) -> Dictionary:
 		var parsed = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
 		_files[hero] = parsed if parsed is Dictionary else {}
 	return _files[hero]
+
+## The mantle row for a press of `input` (a SLOTS or MANTLE_MOVES entry): mode, seen, source ({} when it has none).
+static func mantle_row(input: String) -> Dictionary:
+	return _mantle_rows.get(input, {})
+
+## What a press of `input` does in a mantle: "fire" or "buffer" (the default).
+static func mantle_mode(input: String) -> String:
+	return String(mantle_row(input).get("mode", "buffer"))
 
 ## The row for a press of `slot` during a ground or air dash, missing fields filled from DEFAULT_ROW.
 static func row_of(hero: String, slot: String, in_air: bool) -> Dictionary:
@@ -88,6 +103,9 @@ func route(dt: float) -> void:
 	var fire_down := bool(h.inp.get("fire", false))
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
+	if h.mantling():
+		_route_mantle(fire_pressed)
+		return
 	if not dashing:
 		_route_cc(fire_pressed)
 		_release(dt)
@@ -105,6 +123,11 @@ func route(dt: float) -> void:
 func take_x() -> bool:
 	if _replaying:
 		return false
+	if kit.h.mantling():
+		if mantle_mode("x") != "buffer":
+			return false
+		held["x"] = 0.0
+		return true
 	if not _sync():
 		return _hold_for_cc("x") or _press_mid_jump("x")
 	return _press("x") == "buffer"
@@ -162,6 +185,23 @@ func _route_jump(fire_pressed: bool) -> void:
 		var key: String = KEY_OF[slot]
 		if h.inp.get(key, false) and _press_mid_jump(slot):
 			h.inp[key] = false
+
+## Presses made in a mantle: an input whose mantle row says "buffer" is held for the top. A fire key held from before
+## the rise is left to its hold row; a fresh press keeps it up until the top.
+func _route_mantle(fire_pressed: bool) -> void:
+	var h := kit.h
+	if (fire_pressed or held.has("lmb")) and mantle_mode("lmb") == "buffer":
+		held["lmb"] = 0.0
+		h.inp["fire"] = false
+	for slot in KEY_OF:
+		var key: String = KEY_OF[slot]
+		if h.inp.get(key, false) and mantle_mode(slot) == "buffer":
+			held[slot] = 0.0
+			h.inp[key] = false
+	for move in MANTLE_MOVES:
+		if h.inp.get(move, false) and mantle_mode(move) == "buffer":
+			held[move] = 0.0
+			h.inp[move] = false
 
 func _press_mid_jump(slot: String) -> bool:
 	if kit.h.grounded or String(jump_row_of(kit.id, slot)["mode"]) != "buffer":
@@ -243,4 +283,4 @@ func _replay(slot: String) -> void:
 		"dash", "jump":
 			h.inp[slot] = true
 		_:
-			h.inp[KEY_OF[slot]] = true
+			h.inp[KEY_OF.get(slot, slot)] = true      # (a mantle's held dash or jump: its own key)

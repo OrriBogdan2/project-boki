@@ -8,10 +8,11 @@ const Shots := preload("res://tools/boki_rig_shots.gd")
 const SPECIES_LIST := ["cindle", "puddlet", "burrlet", "glintmole", "rimeshrew",
 	"zephyrak", "pebbit", "cairnback", "wisplet", "gloamshell",
 	"selenfin", "zapple", "hivara", "glomwort", "kestrike", "kindlewren", "lodestick", "marchleaf", "mossgrade",
-	"nettlynx", "thrumbird", "caecilith"]
+	"nettlynx", "thrumbird", "caecilith", "lilybara", "umbrathere"]
 var kin_id := "cindle"
 const CLIPS := ["idle", "walk", "run", "attack", "ability", "hop", "sleep", "eat", "pet", "chop", "mine", "carry",
-	"tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace", "dodge", "stonehop", "spin"]
+	"tend", "win", "sulk", "push", "settle", "nap", "wake", "munch", "nudge", "climb", "splash", "rush", "brace",
+	"dodge", "stonehop", "spin"]
 const GAME_CLIPS := BokiHomePoses.GAME_CLIPS
 const T_POSE := 0.02           # rad: a frame whose every bone is this close to the bind pose is a T-pose
 const T_FRAMES := 8            # frames sampled over a game clip
@@ -130,6 +131,15 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 		ok(_clip_for(rig, "kact", act) == act, "kact %s" % act)
 	ok(_clip_for(rig, "kwork", "chop") == "chop", "kwork picks a work clip")
 	ok(_clip_for(rig, "kact", "pet") == "pet", "kact pet")
+	for c in ["sulk", "push", "win"]:
+		ok(_clip_for(rig, "kact", c) == c, "kact %s" % c)
+	rig.root.set_meta("kact", "win")
+	rig._pick_clip(0.016)
+	rig.player.stop()
+	rig._pick_clip(0.016)
+	ok(rig.clip != "win", "a win plays once, then it hops or idles")
+	rig.root.remove_meta("kact")
+	ok(rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE, "win does not loop")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")

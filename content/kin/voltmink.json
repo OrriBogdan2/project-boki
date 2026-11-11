@@ -1,0 +1,29 @@
+{
+	"id": "voltmink",
+	"note": "Home and economy data only. The kin itself (stats, abilities, merge, carry, looks) is content/kin_v2/sentrikat.json.",
+	"size": {
+		"cm": 38,
+		"kg": 1.1,
+		"_doc": "base height (cm) and weight (kg) of an average one; each kin rolls its own (Unique, docs/BOKI_IDENTITY.md)"
+	},
+	"shiny": {
+		"color": "#90a490",
+		"belly": "#edf4c9",
+		"glow": "#b0daea"
+	},
+	"work": {
+		"spark": 3,
+		"tide": 2,
+		"haul": 1
+	},
+	"line": {
+		"dex": "voltmink",
+		"stage": 2,
+		"stages": 2,
+		"prev": [
+			"ermink"
+		],
+		"next": [],
+		"_doc": "its evolution line in the dex; the game evolves by affinity form within a species, so the line is data only"
+	}
+}

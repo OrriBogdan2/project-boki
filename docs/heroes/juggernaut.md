@@ -49,7 +49,7 @@ Updated by ext/kitfix-dancer-juggernaut (server update 5) against the footage re
 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
-| Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal | Duration is ours |
+| Passive, Rage | none | Damage fills Rage (a Searing Wave 3x as fast); full = Enraged 6s: +15% damage, +12% dash recharge, +20% cooldown speed, a roar. A knock heals 20% of the knocked hunter's max health, with a green heal column and a red screen tint for you | Fighting Spirit: damage makes you Empowered; knocks heal [D] (supervive_kits.md Brall; the green heal column [F]) | Duration and the 20% are ours (the data gives no number); the shared takedown reset adds its own 5% of his health on top, asserted: "the kit's knock heal is exactly 20%..." and "...adds its own 5%..." |
 | LMB, Greatsword | tap, hold | Wide (175 degree) slashes of 8 every 0.34s, alternating, a two-tone crescent (magenta edge, flame-yellow fill), double at the tip with a white star; hold: a ring round the body fills, then a red crescent of flame (Searing Wave) flies past the cursor to max range (6 to 10m, 12 to 28) | Quick Attack: alternating 180 degree two-tone crescents, a tip star; hold: a red crescent bolt past the cursor | As the source |
 | RMB tap, Finishing Slam | tap | A 0.6s aimed wind-up (blade cocked low behind) behind a short magenta strike lane everyone sees, then a 4m strike: 26, +50% under 35% (foes that low wear a red outline while the Smash is ready); its sweet spot is the far tip (2.4 to 4.2m within 18 degrees): knock that foe within 2s and the Gilded Riposte (X) is ready again | Execution Slam: red outline on executable foes, a short magenta lane, about 2.4 bh, a sweet-spot knock resets Retaliation | As the source; the crash fold is gone (see "Ult choice") |
 | RMB hold, Lunge | hold, release | A crouched, coiled wind-up; a lane grows ahead (4.5 to 7.5m) with a fill and turns magenta with a flash and a ping at full (0.8s); a rising whine; the cursor ring fills; you walk at 80% and can jump while charging (footage: the Heavy Attack hold is slower than his runs; docs/MOVEMENT_FEEL.md); release flings you forward into the first foe: 14 to 20, a huge white burst and a red slash across them; striking nothing doubles the cooldown | Charge Dash: red lane growing, magenta at full, about 5m, 559 to 771 | Owner: fling far, so the length grows with the charge |
@@ -407,6 +407,16 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Gilded Riposte (X) guard | lane 3.6 m x 1.8 m, filling over 0.65 s | strip 3.6 x 1.8 from where he stood | everyone | strip ahead | ok |
 
 Decision: the Smash cone follows the owner's rule (true hit shape) where the source drew a short lane.
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/juggernaut.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the slash, as on the ground | blocked | stays open | footage: a slash at the top of the Air Slam jump (`juggernaut.md` 6) |
+| RMB, tap or hold | the Air Slam (Meteor Drop): its own slot and cooldown, not the Execution Slam or the Lunge | the same: folds the glider, dives from the glide height and lands | folds, a slam never waits for it | data: Obsidian Slam (WHILE AIRBORNE), own cooldown slot; footage 0251-0300 |
+| E | the chain throw, as on the ground (the pull runs on) | the same | stays open | silent |
+| Shift | the class long dash `jug_exdash`, no charge spent | the same | closes, reopens after | footage has no air Shift (`juggernaut.md` 9: open) |
 
 ## Engine notes
 

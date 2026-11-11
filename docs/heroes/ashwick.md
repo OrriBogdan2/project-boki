@@ -96,7 +96,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 | X lift-off ring | LOW | (b) | the ember puffs and wave stay (footage f25); the AimKit disc shown to everyone is gone (it hit nothing). "ult cast: lifts off in its ember puffs, no aim disc" |
 | X aim / recast | ok | (c) | matches |
 | Passive Flashover | ok | (c) | matches |
-| Passive knock heal and ram charge | LOW | (c) | wiki-only (no tooltip line); kept, flagged as ours in "Assumptions" |
+| Passive knock heal and ram charge | LOW | (c) | the data has no knock heal (Felix's card; the one ram charge back is sourced, SERVER_UPDATE6 patch note); the 16% heal is ours-only, kept, listed on the owner card, see "Assumptions" |
 | Dash -> ability rows | MED | (a) | the hose keeps its hold through the ram (item 51, 15ca4857); the ground dash -> LMB buffer text corrected per ext/dash-buffer-source (26bcd138) |
 
 ## Footage gaps, Nov 9 re-check
@@ -163,6 +163,8 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 - The ram can't be steered once it starts and has no wind-up; it goes toward the cursor (the footage shows the cursor side).
 - The pull of the cloak reaches the whole 4.5m ring and needs line of sight; dragged foes stop at walls.
 - The shield's size follows the wiki numbers (the footage doesn't show them); it lasts 3s.
+- The knock heal (16% of his max health) is ours-only: the data's Felix passive has no heal. It stacks on purpose with the shared
+  takedown reset (DashReset, 5%), 21% in all; "passive: the knock heal is 16%..." and "...21% in all" assert both.
 - Ablaze lasts 3s on its own; a fresh stoke refreshes it.
 - The hose has no fuel and nothing reloads (the source shows no fuel bar; no reload exists in the game). The 0.35s relight gap and the self-slow after release are the only limits.
 - The pilot flame is cyan in our palette too (it reads as cool against warm fire); the burn pips use our own flame shape.
@@ -308,6 +310,16 @@ Rule (DECISIONS items 4, 8, 50, 96): a ring, disc or burst on the ground means g
 | Flue Flight lift-off | ember ring r 2.2 m | burst 2.2 m | everyone | ember ring at lift-off (about 2.16 m) | kept (owner call recorded earlier); extra scorch removed |
 
 Suggestion (not built): none.
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/ashwick.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the Torch Lance, as on the ground | blocked | stays open | silent |
+| RMB | the Cinder Shot, as on the ground | the same | stays open | silent |
+| E | the Furnace Cloak, as on the ground | the same | stays open | silent |
+| Shift | the class long dash (`lw_hop`), no charge spent | the same | closes, reopens after | silent (`linwick.md` 5: none in the source) |
 
 ## Engine notes
 The hose is simulated on the match step (`scripts/arch/kits/ashwick_hose.gd`); a puff stops at a wall (`World.occupy`) and hurts

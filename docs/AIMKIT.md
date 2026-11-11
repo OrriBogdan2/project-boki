@@ -265,3 +265,4 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
+- **The old helpers.** `ArchKit.tele_circle`/`tele_lane` are deleted; use AimKit (`fuse` and `charge_ring` in ArchKit are examples).

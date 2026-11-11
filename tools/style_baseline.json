@@ -50,8 +50,7 @@
 "long_line": 3
 },
 "scripts/arch/oomph.gd": {
-"long_line": 1,
-"shadow": 1
+"long_line": 1
 },
 "scripts/combat/ability_def.gd": {
 "long_line": 6
@@ -432,7 +431,7 @@
 },
 "scripts/match/biome_run.gd": {
 "long_line": 25,
-"semicolon": 60
+"semicolon": 59
 },
 "scripts/match/blight.gd": {
 "long_line": 5,
@@ -510,7 +509,7 @@
 "scripts/match/fx.gd": {
 "long_line": 12,
 "nested_ternary": 1,
-"semicolon": 25,
+"semicolon": 23,
 "shadow": 2
 },
 "scripts/match/gear.gd": {
@@ -553,10 +552,10 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 27,
-"long_line": 92,
-"nested_ternary": 15,
-"semicolon": 47,
+"history_comment": 24,
+"long_line": 91,
+"nested_ternary": 14,
+"semicolon": 48,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -571,7 +570,7 @@
 },
 "scripts/match/kin.gd": {
 "long_line": 30,
-"nested_ternary": 7,
+"nested_ternary": 6,
 "semicolon": 19
 },
 "scripts/match/kin_command.gd": {
@@ -600,7 +599,7 @@
 "shadow": 1
 },
 "scripts/match/kin_net.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 1
 },
 "scripts/match/kin_path.gd": {
@@ -619,9 +618,26 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
-"nested_ternary": 9,
-"semicolon": 28
+"long_line": 18,
+"semicolon": 9
+},
+"scripts/match/lairs_bots.gd": {
+"long_line": 2,
+"semicolon": 2
+},
+"scripts/match/lairs_demo.gd": {
+"long_line": 7,
+"semicolon": 6
+},
+"scripts/match/lairs_fight.gd": {
+"long_line": 8,
+"nested_ternary": 3,
+"semicolon": 3
+},
+"scripts/match/lairs_lock.gd": {
+"long_line": 17,
+"nested_ternary": 6,
+"semicolon": 8
 },
 "scripts/match/landmarks.gd": {
 "long_line": 23,
@@ -634,9 +650,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
-"nested_ternary": 19,
-"semicolon": 142,
+"long_line": 216,
+"nested_ternary": 18,
+"semicolon": 141,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {
@@ -662,9 +678,9 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 280,
+"long_line": 278,
 "nested_ternary": 12,
-"semicolon": 276,
+"semicolon": 273,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -707,7 +723,7 @@
 "history_comment": 1,
 "long_line": 13,
 "nested_ternary": 1,
-"semicolon": 19,
+"semicolon": 16,
 "shadow": 1
 },
 "scripts/match/ruin_walls.gd": {
@@ -862,8 +878,8 @@
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 16,
-"semicolon": 10,
+"long_line": 20,
+"semicolon": 7,
 "shadow": 2
 },
 "scripts/ui/lobby.gd": {
@@ -876,7 +892,7 @@
 "semicolon": 5
 },
 "scripts/ui/overlay.gd": {
-"long_line": 32,
+"long_line": 30,
 "semicolon": 24,
 "shadow": 1
 },
@@ -977,9 +993,12 @@
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
-"long_line": 33,
+"long_line": 31,
 "semicolon": 15,
 "shadow": 1
+},
+"tools/camps_check.gd": {
+"long_line": 21
 },
 "tools/capture_check.gd": {
 "long_line": 29,
@@ -1105,7 +1124,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 30,
+"long_line": 31,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
@@ -1147,8 +1166,8 @@
 },
 "tools/rolling_check.gd": {
 "history_comment": 1,
-"long_line": 44,
-"semicolon": 18
+"long_line": 43,
+"semicolon": 16
 },
 "tools/rolling_sim.gd": {
 "long_line": 25,

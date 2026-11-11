@@ -76,8 +76,11 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 ## Per-slot table
 | Slot | Input | Aim and telegraph | What it does (ours) | Anim (KMovesStone) | Sound |
 |---|---|---|---|---|---|
-| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
+| Passive Molten Guard | punch | none (the shield glow; the gold ring was removed: not a hit area) | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
 | Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 16m, 25 deg widening to 40 over 2s | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
+| LMB tap: boulder | tap (under 0.28s) | the shared aim line; flies its full 11m (AimMode.MAX) | 9 dmg, a molten tumbling boulder with an ember trail; bursts with a red ground ring (the true 0.9 m splash), splashing foes within 0.9m for half | `breah_throw` | `br_throw`, `br_boulder_hit` |
+| Passive Molten Guard | punch | a gold ring under her | a punch that sends any of her rocks flying (Stone Row, Basalt Spine or a leap's rock in the lane) gives a shield stack of 18, up to 4, 6s; one stack per punch whatever the number of rocks | none | none |
+| Passive Tremor Sense | sneak (crouch) | a pale cone toward the cursor, 25 deg widening to 40 and 18m lengthening to 25m over 2s of sneaking | foes in the cone show through walls and fog as a molten ring, refreshed every 0.5s | `breah_sense` on a find | `br_sense` |
 | LMB tap: boulder | tap (under 0.28s) | the shared aim line; flies its full 11m (AimMode.MAX) | 9 dmg, a molten tumbling boulder with an ember trail; bursts with a red ground ring, splashing foes within 0.9m for half | `breah_throw` | `br_throw`, `br_boulder_hit` |
 | LMB hold: punch | hold, release | from the hold: a pale lane 4.2m by 1.8m with 3 chevrons toward the cursor, filling; the cursor charge ring; the fist glows molten orange, hotter with the charge | 12-24 dmg to foes in the lane, knockback 6-11, a 0.6m step, a dust ring and molten spray at the lane's end on the hit; into a wall = 0.9s stun (stars); every rock of the team in the lane flies, and rocks lined up further along the aim (gaps up to 2.8m, to 12m) follow one after another, 0.08s apart. Held as long as you like (no timeout): full stays full until you let go | `breah_wind` (hold), `breah_punch` | `br_wind`, `br_punch`, `br_launch`, `br_burst` |
 | RMB Quakefall (owner item 61) | tap, or a short hold | tap: nothing shows, it lands on the release. Hold: everyone sees a red circle a hop (2.5m plus what the hop keeps of his run) ahead, radius 3.82-4.5m, its sweet spot growing 0.9-1.8m; the cursor charge ring; both fists glow molten; the charge is capped at 0.45s (0.2 tap window + 0.25) and fires by itself there | tap: no hop, nothing vertical: an instant slam 1.6m ahead, radius 3.82m (0.85 of the hold's), 14 dmg, centre x1.2 and 0.5s stun. Hold: a real 0.6s jump arc, 2.5m forward and 0.66m up, keeping half his ground speed; the move keys bend it by up to 1.3 m/s (about 0.8m at the landing); he slams as he lands: 14-30 by charge, full circle and centre at the cap, centre x1.2 and stun 0.5-1.2s (stars), rocks in the ring fly outward, foes in the air are spiked (+40%, +20 over the abyss). Jump while holding: the bigger leap (3.2m, 1.57m up). Punch while holding: a 1.5m lunge. Air press: dive and slam on landing; from a glide the glider folds. Over the abyss the plunge stops `void_drop` (3m) under the nearest lip: no slam, he falls on at the abyss pace with the glider free (owner 11-10: low, never dunked; `--tenzo-edge-check`) | `breah_crouch`, `breah_slam` (hop, smash at 0.6s), `breah_slam_land` (tap, air), `breah_leap`, `breah_dive`, `breah_lunge` | `br_slam`, `br_leap` |
@@ -86,7 +89,7 @@ the reason. Asserts: `--dolm-combo-check` (`audit tarek: ...`, `rock ...`, `glid
 | X Basalt Spine (level 6, 45s) | tap, or hold and drag, release | while X is held (yours only): a pale line 12m long, bent in a shallow arc (25 degrees end to end, the middle bowing away from her), with inward chevrons and a centre ring, at the cursor (up to 11m), across the aim; dragging the cursor 0.8m+ from the centre swings it round the centre toward the cursor. On release everyone sees molten cracks along it for 0.2s | 9 rocks of hers erupt from the centre outward over 0.4s with flame bursts: foes within 1.6m are slowed 35% for 1s (1 damage), bodies on the line are moved to their side of it. The rocks stand 7s, block foes and their shots, carry and climb like hers, and fly when punched, slammed or dashed into (a punch along the ridge sweeps it); one cast's rocks deal at most 40 to any one hunter. They are Stone Row's own rocks (same length, top and thickness), lying along the arc, one rock deep. Over the abyss the rocks are ground (Ent.over_void reads StoneStand.top_under): she and any hunter can land on the ridge and walk along it with no fall or abyss sink while the rocks stand, and fall as normal when they crumble. A rock on a different level of ground than the ridge is left out; it never calls HeroZones.bridge (no tiles change). A stun, knock or merge while aiming cancels it unspent | `breah_spine_aim` (hold), `breah_spine` | `br_spine` |
 | Merge (the `ultimate` action; its key from Settings.key_cap) | (Boki Merge) | | | | |
 
-Rank 3: Quakefall gives a Molten Guard stack (18, the same stacks the punch gives, up to 4, a gold ring) per slam that catches
+Rank 3: Quakefall gives a Molten Guard stack (18, the same stacks the punch gives, up to 4) per slam that catches
 something; Rock Hop takes a second charge and each hop goes a third further; Stone Row raises an extra row of three behind the first (the source's "extra Rock Wall").
 
 **Unfolded:** the kit pass had folded the source's Tetraform into Stone Row rank 3 (a centre-out second row that slowed, and a
@@ -107,16 +110,14 @@ The 14 ranked gaps of briefs/hero-ref/breah.md section 5 (written at main 4f8297
 | 6 | Landslide: rock rides ahead, slow | owner override | Rock Hop (owner item 111, OWNER_REVIEW_1103, replaces the single dash): a rock bursts up under him, no rock ahead. The rolling rock keeps the source's parts: `rock_range` 6, `slow_t` 1.5, `kb` 8. `crash: the rock rolls on and hits: shred and a slow` |
 | 7 | Boulder look, burst ring | closed | red ground ring and a 0.9m splash for half damage. `small: the boulder's burst splashes the foe beside it` |
 | 8 | Rockwave placement | closed | 3.4m (1.9 bh) ahead, curve 0.45m, a 0.2s red flash first. `e: a red ground flash before the rocks`, `e: the row is a slight curve 3.4m ahead...` |
-| 9 | Passive cone | open (one number) | cone drawn while sneaking, 25 -> 40 degrees over 2s: `passive: sneaking shows a pale cone ahead`, `passive: the cone widens 25 -> 40 degrees over 2s of sneaking`. Two gaps: the length is a fixed 16m (8.9 bh), and breah.md (0693-0725, 0697.jpg) has it about 10-14 bh long (18-25m), and the card says it also lengthens with the hold. Ours only widens. Suggestion, not built: `passive.len` 18 growing to 25 over the same 2s `grow` (a second number beside `len`); `dolm.json` is in flight (ext/anim-time-tenzo, ext/tenzo-playtest-1108, ext/rank-parity-b) |
+| 9 | Passive cone | closed | cone drawn while sneaking, 25 -> 40 degrees and `passive.len` 18 -> 25m (10-14 bh, breah.md 0693-0725, 0697.jpg) over the same 2s `grow`, so it widens and lengthens with the hold (the card says both; the footage only shows it grows a little, so the end values are the sheet's 10 and 14 bh); the telegraph and the foe test both read `sight_len()` each tick. `passive: the cone is 18m long at the start and 25m...`, `passive: the length grows steadily with the hold`, `passive: a foe 21.5m out is past the cone at the start of the grow and inside it at the end` |
 | 10 | RMB charge length, cooldown | owner override | charge capped at 0.45s (owner item 61, Quakefall review above); cooldown 11s is the owner's tooltip data (Audit row "RMB cooldown 9 vs 11") |
 | 11 | Slam animation, scorch | closed | item 14: `breah_crouch` while held, `breah_slam` re-keyed, `scorch_t` 1.0. `anim: the charge is a crouch (breah_crouch)`, `rmb: ... the dark red crater lingering about 1s`. In flight: ext/anim-time-tenzo (timing only) |
 | 12 | Shield ring | closed | a gold ring on every Molten Guard stack (`dolm_kit.gd` guard ring) |
 | 13 | Tetraform | owner override | X is Basalt Spine (owner item 15): rocks erupt centre-out over 0.4s, slow 35% for 1s, hold-drag sets the angle. E rank 3 stays the plain extra row |
 | 14 | Sfx | n/a | the footage was not transcribed |
 
-Nothing built in this pass: the one open row is a number in `dolm.json`, and every file a Tenzo fix would touch
-(`dolm.json`, `dolm_kit.gd`, `breah_slam.gd`, `kmoves_stone.gd`, `breah_combo_check.gd`) is changed by an unmerged
-Tenzo branch.
+Row 9 was the one open row; ext/tenzo-cone-grow closes it (stacked on ext/gaps-dolm). Rows 6, 10 and 13 stay owner overrides.
 
 ## Quakefall review (owner review item 14, Nov 3)
 - **Before:** the hop was the shared dash motion (2m in 0.15s, 13 m/s, height held flat), so the release read as a quick
@@ -318,6 +319,17 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
 - Code: StoneStand.top_for (the height a rock blocks the body moving now: its top for its caster, a full wall for others),
   StoneStand.mover (set and cleared by Hunter around its move step), StoneStand.climb (caster only).
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/dolm.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the boulder throw, as on the ground | blocked | stays open | silent |
+| RMB, tap or hold | the Quakefall plunge: slams where she lands (a jump while charging still leaps forward) | the same: folds the glider, plunges at 32.5 m/s, slams where she lands | folds, never blocks it | DECISIONS 2026-11-07; data: jump while charging leaps |
+| E | Stone Row needs ground under the rocks: nothing in a fall or a glide; the first inch of a jump still fits | nothing | stays open | data: Rockwave, only castable over ground |
+| Shift | the class long dash `breah_exdash`, no charge spent | the same | closes, reopens after | the footage has no air dash |
+
 ## Engine notes
 - Rocks are Verbs walls with `top` 2.2m and `th` 0.42 (HeroZones.rock). Verbs.wall_blocks asks StoneStand.top_for how
   tall a rock is for the body moving (Rock ownership above); Ent.ground reads StoneStand.top_under; Hunter's move step
@@ -329,3 +341,19 @@ Code `scripts/arch/kits/breah_hop.gd` (BreahHop); numbers `dash` in `content/arc
   each rock event carries its own direction, so the arc needs no new Net field (Net.VERSION unchanged).
 - Basalt Spine: `scripts/arch/kits/breah_spine.gd` (BreahSpine). Its hold field is `phase == "aim"`, cleared by
   `DolmKit._drop_holds()` through `spine.drop()`. Main sends only the X press, so BreahSpine._held() reads the local key (tests hold it with `inp["x_down"]`).
+
+## Telegraph audit (owner rules: a ring, disc or burst on the ground means gameplay; a telegraph shows the true hit area)
+Branch `ext/telegraph-audit-b`. Drawn = what AimKit/fx draws; Hit = the number the kit tests; Enemy sees = other players see the tell (`all`, hostile-tinted, local; a remote machine only gets the `net_ring` echo, see Engine notes). The `telegraph == hit` asserts are in `tools/breah_combo_check.gd` (`--dolm-combo-check`).
+
+| Ability | Shape | Drawn | Hit | Timing | Enemy sees | Source read | Action |
+|---|---|---|---|---|---|---|---|
+| LMB tap boulder | disc (burst) | splash ring 0.9 m | `foes_in` 0.9 m (+ body r) | on impact | local fx | red burst on landing | kept (true) |
+| LMB punch | lane | 4.2 m x 1.8 m, 3 chevrons | lane test 4.2 x 1.8 | the hold | owner only | pale lane | kept; the 1.0-1.6 m dust ring on the blow is removed (cosmetic) |
+| RMB Quakefall | circle + sweet spot | r = `radius(c)` 3.82-4.5, core `core(c)` 0.9-1.8 | same (`foes_in(at, r)`, core stun) | the hold, fills with charge | yes (`all`) + `net_ring` r | red circle ahead while charging | kept; assert drawn r/core == slam r/core. The inner 0.55 x rock-burst ring is removed |
+| Shift Rock Hop | circle | landing r 1.8 | `land_r` 1.8 (nudge and crash) | through each hop | yes (`all`) | landing spot shown | kept; assert drawn r == `land_r` |
+| E Stone Row | discs | one per rock, r 0.65 (was 0.75) | rock length 1.3, half = 0.65 | 0.2 s, then the rocks rise | yes (`all`) | red flash where each rock rises | fixed to half the rock length; the 2.0 m `net_ring` round her removed (it showed nothing hit) |
+| X Basalt Spine | span (cracks) | crack line along the 12 m ridge | rocks on the line (len 1.3 across); a 1.6 m slow-and-1-damage at each rise | 0.2 s tell, rise over 0.4 s | yes (`all`) | orange cracks and puffs along the line | cracks kept (source); the 1.2 m `net_ring` at the centre removed. Suggestion: draw the 1.6 m slow band |
+| Passive Molten Guard | none | (was a 1.0-1.2 m gold ring on a shield stack) | no area | | | gold shield glow | rings removed (a shield is not an area) |
+| Passive Tremor Sense | cone | pale cone 16 m, 25 deg widening to 40 | info only, no hit | while sneaking | owner only | cone | kept |
+
+Not matched, left alone: the remote echo of Stone Row and Spine is now only the rocks themselves (no `net_ring`). Suggestion for the owner (not built): a Net cone/line message so a remote enemy sees the punch lane and the crack line before the rocks rise.

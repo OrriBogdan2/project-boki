@@ -47,6 +47,7 @@ const DISCORD := "https://discord.gg/nbeBaU7xt"        # the playtest server (ne
 const WEAPONS := {"thief": "arc_bolts", "gil": "swordfish", "archer": "longbow", "mage": "coilcaster", "gunslinger": "quill_rifle", "juggernaut": "greatsword", "bulwark": "tower_shield", "dredge": "shotgun", "ashwick": "flamethrower", "tender": "lantern_crook", "rimewright": "hoar_fan", "dolm": "rubble_fists", "ostra": "tether_lantern"}
 
 func _ready() -> void:
+	DemoQuick.restore()                 # back from a quick start: the real save again
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
@@ -482,6 +483,9 @@ func _build_ui() -> void:
 	# no subtext under the main button
 	col.add_child(UI.spacer(6 if has else 18))
 	var items: Array = []
+	if Net.can_rejoin():
+		# the online match this game dropped out of is still holding our Hunter (docs/decisions/0022-rejoin.md)
+		items.append(["Rejoin match", _rejoin, "bond"])
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
 	if has:
@@ -533,6 +537,13 @@ func _build_ui() -> void:
 	keys.offset_right = -28; keys.offset_top = -44; keys.offset_bottom = -16
 	root.add_child(keys)
 	b1.grab_focus()
+
+func _rejoin() -> void:
+	var o: Dictionary = await Net.rejoin_match()
+	if o.is_empty():
+		Game.goto("title")
+	else:
+		Game.start_match(o)
 
 ## The menu's item labels in order (the main button first): read by --title-check.
 func menu_labels() -> Array:

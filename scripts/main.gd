@@ -693,6 +693,8 @@ func _ready() -> void:
 		show_screen("prologue", {"then": "title"})    # test: the opening story
 	elif "--creator" in args:
 		show_screen("hatch", {"create": true})    # test: the hunter creator
+	elif DemoQuick.arg(args) != "":
+		DemoQuick.start(DemoQuick.arg(args))    # --demo=expedition|farm|hatch: a quick start for filming
 	elif "--demo-match" in args:
 		# the title screen's Demo match (tooling: screenshots of it); other match flags still apply
 		var dm := Match.demo_opts()
@@ -789,6 +791,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				Match.prefetch([Match.HUD_SCRIPT])
 				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
+				opts["squad_intro"] = true      # a real start: the squad on the skyship deck first (SquadIntro)
 				ld.setup(opts)
 				add_child(ld)
 				_ld = ld
@@ -796,7 +799,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
 				get_viewport().disable_3d = true
 				await ld.shown
-				ld.want = 0.04
+				ld.advance(0.04)
 				if gen != _gen:
 					get_viewport().disable_3d = false
 					ld.queue_free()
@@ -809,7 +812,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# build in short slices so the loading screen keeps moving, then draw everything once
 				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
 				await m.start_staged(opts, func(f: float, stage: String):
-					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.advance(0.04 + 0.66 * f)
 					ld.set_stage(stage))
 				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
@@ -817,7 +820,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 					return
 				if not opts.has("net"): m.set_process(false)
 				ld.set_stage("graphics")
-				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				await m.warm_up(func(f: float): ld.advance(0.7 + 0.28 * f))
 				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
@@ -3240,7 +3243,7 @@ func _drop_check() -> void:
 	var D: DropSquad = m.skydrop
 	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
 	print("DCHECK planning=%s plan_t=%.1f riding=%s leader=%s map open=%s" % [D.planning, D.plan_t, P.riding, D.leader(P.team).pname, m.hud.map_open()])
-	if not D.planning or absf(D.plan_t - DropSquad.PLAN_T) > 0.01 or not P.riding or D.leader(P.team) != P or not m.hud.map_open():
+	if not D.planning or absf(D.plan_t - DropFeel.plan_s) > 0.01 or not P.riding or D.leader(P.team) != P or not m.hud.map_open():
 		ok = false; print("DCHECK FAIL planning phase did not start right")
 	# a ping placed on the map (the same path a click takes)
 	var target: Vector3 = m.world.spawns[0]
@@ -3257,7 +3260,7 @@ func _drop_check() -> void:
 	var bot_pings := m.pings.filter(func(q): return q.has("by") and (q["by"] as Hunter).ctrl == "bot").size()
 	var acks := m.truce.shown.filter(func(e): return e["id"] == "omw").size() if m.truce else 0
 	print("DCHECK planning lasted %.2fs, match clock %.2f -> %.2f, bot pings %d, bot replies %d, events %s" % [steps * Match.DT, t0, m.time, bot_pings, acks, str(D.events)])
-	if absf(steps * Match.DT - DropSquad.PLAN_T) > 0.1 or m.time != t0: ok = false; print("DCHECK FAIL planning length / clock")
+	if absf(steps * Match.DT - DropFeel.plan_s) > 0.1 or m.time != t0: ok = false; print("DCHECK FAIL planning length / clock")
 	if bot_pings < 1: ok = false; print("DCHECK FAIL bots never pinged")
 	# a follower can't jump by themselves while the leader is aboard
 	var f0: Hunter = mates[0]
@@ -3379,7 +3382,7 @@ func _drop_check() -> void:
 	gm.world.free(); gm.free()
 	# rare kin only at the live rare-kin points, one at each
 	var rare: Array = m.kins.filter(func(k): return k.has_meta("rare"))
-	var live: Array = sp.active_of("rare_kin")
+	var live: Array = sp.active_of("rare_kin").filter(func(cc): return not cc.has("camp"))   # (guarded: --camps-check)
 	var stray := 0
 	for k in rare:
 		var near := false

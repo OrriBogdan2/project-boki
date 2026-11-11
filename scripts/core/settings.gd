@@ -13,6 +13,8 @@ const DEFAULTS := {
 	"quality": "auto", "quality_found": "",
 	# gameplay
 	"damage_numbers": true, "tips": true, "lobby_enabled": true, "kin_chatter": "normal", "mod_mode": false, "bot_diff": "auto",
+	# the Boki wisp prototype (KinWisp): in expeditions Boki ride as wisps at your shoulder instead of walking
+	"boki_wisps": false,
 	# Warden id -> "procedural": that Warden keeps its procedural model instead of its 3D one (WardenGlb)
 	"warden_models": {},
 	# how keys behave (Controls)
@@ -47,32 +49,33 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
 ##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   ·  occlusion: cliffs and big rocks hide what's behind them from the renderer (Occluders)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "occlusion": false},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "occlusion": false},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "occlusion": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occlusion": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "occlusion": true},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -148,6 +151,7 @@ const ACTIONS := [
 	["fire", "Weapon attack"], ["secondary", "Hunter ability (right click)"], ["dash", "Hunter dash"], ["jump", "Jump (hold to glide)"], ["glide", "Glide (hold in the air)"], ["crouch", "Sneak"],
 	["gear1", "Glove 1"], ["gear2", "Glove 2 (in a match; V plays fetch at home)"], ["signature", "Hunter utility (E)"],
 	["throw", "Boki: tap to send out or call back, hold for the order wheel"],
+	["summon", "Summon your Boki out of its wisp (wisps on); again: back"],
 	["hunter_ult", "Hunter ultimate"], ["ultimate", "Fuse with your Boki (needs a full bond meter)"],
 	["base", "Base to a teammate (squads)"], ["interact", "Use, scan, revive, pet"],
 	["util1", "Utility belt slot 1 (a tonic to start)"], ["util2", "Utility belt slot 2 (an armor kit to start)"],
@@ -303,8 +307,8 @@ func apply(k: String) -> void:
 				DisplayServer.window_set_mode(want)
 		"vsync":
 			if not OS.has_feature("web"):
-				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if v[k] else DisplayServer.VSYNC_DISABLED)
-		"max_fps": Engine.max_fps = int(v[k])
+				DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if Record.vsync(v[k]) else DisplayServer.VSYNC_DISABLED)
+		"max_fps": Engine.max_fps = Record.frame_cap(int(v[k]))
 		"msaa":
 			var m := int(v[k])
 			get_tree().root.msaa_3d = Viewport.MSAA_4X if m >= 4 else (Viewport.MSAA_2X if m >= 2 else Viewport.MSAA_DISABLED)
@@ -522,7 +526,8 @@ func conflicts(ev: InputEvent, except := "") -> Array:
 	return out
 
 ## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
+const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"],
+	["details", "summon"]]
 func _shared_ok(a: String, b: String) -> bool:
 	for p in SHARED_OK:
 		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true

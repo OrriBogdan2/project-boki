@@ -48,16 +48,6 @@ const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
-# The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
-# itself near the ground (or earlier on jump) for a slower, floatier last stretch.
-const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
-const DROP_FALL := 4.2
-const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
-const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
-const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
-const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -230,6 +220,7 @@ var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
 var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
+var dive_hold := false        # this dive is the held one (DropFeel.tick_canopy): letting go of crouch opens the canopy
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -379,8 +370,8 @@ func _kit_from_weapon() -> void:
 ## Your kin with you on the Return order, settled in: its carry passives are on. A big Boki curls up on
 ## your back while you glide, and its passives are off for that time.
 func kin_carry_on() -> bool:
-	if kin == null or not (kin as Kin).carried():
-		return false
+	if kin == null or not (kin as Kin).carried() or (kin as Kin).owner_h != self:
+		return false      # (its wisp may be stolen: KinSteal)
 	return not ((kin as Kin).carry_style() == "mount" and gliding)
 
 ## Riding the giant Fusion form right now (a Boki on the Return order guards at your side, never under you).
@@ -399,6 +390,7 @@ func _refresh_kin_stats() -> void:
 		if kin_carry_on():
 			for ps in k.ks.carry_passives:
 				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
+	KinSteal.add_passives(self, out)
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):
 			out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
@@ -1839,9 +1831,7 @@ func sim(dt: float) -> void:
 		if remote:
 			net_follow(dt)
 		else:
-			pos = m.ship_pos_of(m.ship_of(self)) + Vector3(0, -1.2, 0)
-			prev = pos
-			vel = Vector3.ZERO
+			SkyDeck.hold(self)      # on the deck at your squad slot
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
 			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "ult", "fire", "skill", "swap"]:
@@ -1919,8 +1909,6 @@ func sim(dt: float) -> void:
 	# gloves need no point: Gloves
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	if not downed and not dropping and not out:
-		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2058,7 +2046,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (HunterMove.sneak_speed if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
@@ -2087,11 +2075,11 @@ func _physics(dt: float) -> void:
 		# drifts on when you let go of the keys
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
-		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
+		if loco.since > 0.0 and not dropping:     # the step the glider opens keeps your velocity exactly (item 8)
 			hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(hv, mv * gs, gs, carry, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
-			gs = DIVE_SPEED if diving else DROP_SPEED
+			gs = DropFeel.top_speed(diving)
 			if not DropLaunch.locked(self):
 				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
@@ -2142,9 +2130,9 @@ func _physics(dt: float) -> void:
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := 5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length())
 		if dropping:
-			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
+			vel.y = DropFeel.fall_vy(vel.y, diving, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
 		elif glide_dive.on:
@@ -2203,18 +2191,18 @@ func _physics(dt: float) -> void:
 	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
 	if step_up > 0.0 and mv.length() > 0.3:
 		# walking into a single terrace steps you up it smoothly, no hop
-		step_vis -= step_up - pos.y
 		pos.y = step_up
 		prev.y = pos.y
 		var fw := mv.normalized() * spd * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
-	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
-		# caught on a corner: slip sideways around it rather than sticking
+	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and (hv.length() > 1.0 or mv.length() > 0.3):
+		# caught on a corner: slip sideways around it rather than sticking (the keys' own pull counts
+		# when the corner has already eaten the speed: running at a wall corner used to crawl past it)
 		var moved := Vector2(pos.x - x0, pos.z - z0).length()
-		var want := hv.length() * dt
+		var want := maxf(hv.length(), spd * mv.length()) * dt
 		if moved < want * 0.35:
-			var dn := hv.normalized()
+			var dn := (hv if hv.length() > 1.0 else mv).normalized()
 			# (try first the side that leads away from what stopped you, never round toward it)
 			var wn := -Vector2(pre_v.x if b1 > 0.0 else 0.0, pre_v.y if b2 > 0.0 else 0.0)
 			var sides := [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]
@@ -2225,6 +2213,9 @@ func _physics(dt: float) -> void:
 				if _occ(tx, tz, guard) == 0.0:
 					pos.x = tx; pos.z = tz
 					break
+	if (b1 > 0.0 or b2 > 0.0) and step_up == 0.0 and spirit_t <= 0.0 and _occ(pos.x, pos.z, false) > 0.0:
+		var out_to: Vector2 = m.world.eject(pos.x, pos.z, r, pos.y)     # inside a wall or prop: out to the nearest free spot
+		pos.x = out_to.x; pos.z = out_to.y
 	# a safety net: pushing to move for a second without going anywhere means something has us
 	# wedged, so step out to the nearest open ground
 	if grounded and mv.length() > 0.3 and stun_t <= 0.0 and root_t <= 0.0 and not remote and grap.is_empty():
@@ -2392,8 +2383,8 @@ func _deploy() -> void:
 		return
 	diving = false
 	glide_k = 0.0
-	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
-	vel.y = maxf(vel.y, DEPLOY_POP)
+	# (movefeel) the canopy bites: your fall checks hard, then settles to the canopy's sink
+	vel.y = maxf(vel.y, DropFeel.pop_vy)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
@@ -2426,11 +2417,7 @@ func _update_glide(dt: float) -> void:
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
-		if diving:
-			var void_below: bool = m.world.is_void(pos.x, pos.z)
-			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (drop_follow != null and not drop_follow.diving):
-				_deploy()
+		DropFeel.tick_canopy(self)       # dive or canopy (crouch held dives; it opens by itself near the ground)
 		if pos.y < -1.5:
 			dropping = false
 			diving = false
@@ -2621,8 +2608,8 @@ func _try_ledge_grab(dt: float) -> void:
 ## (ledge rise) One step of rising up a ledge: sets vel.y and returns true while it lasts. Your
 ## horizontal speed is the ordinary air steering (_physics): keys and momentum work the whole way,
 ## and the wall itself (World.occupy) is all that holds you to the face while you push into it.
-## Over the top you pop up a little toward wherever you're holding. Moving off the face, a dash, a
-## fresh glide press, a stun or a knock end it. A jump during the rise flings you (_ledge_fling).
+## Over the top you pop up a little toward your keys. Moving off the face, a fresh glide press, a stun or a
+## knock end it. A press in the rise goes by its mantle row (DashFlow); a jump flings you (_ledge_fling).
 const LRISE_PUSH := MantleCarry.APPROACH_DOT     # home.gd's ledge rise reads this (keys this far into the wall)
 const LRISE_SPEED := 14.0      # [footage] the fastest rise from deep in the abyss (HunterMove.rise_vy)
 const LRISE_MIN := 4.0         # [est] up speed walking into a ledge starts its rise with
@@ -2644,7 +2631,7 @@ func _ledge_rise(dt: float, mv: Vector2) -> bool:
 	var drift := Vector2(pos.x, pos.z).distance_to(lf.get("last", Vector2(pos.x, pos.z))) > 1.5 or not _face_near(float(lf["lip"]))
 	lf["last"] = Vector2(pos.x, pos.z)
 	var on_top := grounded and pos.y >= float(lf["lip"]) - 0.05     # stepped onto the top before the pop: topped out
-	if off or drift or gliding or downed != bool(lf["downed"]) or out or roll_t > 0.0 or stun_t > 0.0 or kb_t > float(lf.get("kb0", kb_t)) \
+	if off or drift or gliding or downed != bool(lf["downed"]) or out or stun_t > 0.0 or kb_t > float(lf.get("kb0", kb_t)) \
 			or fly_t > 0.0 or (grounded and not on_top) or dropping or float(lf["t"]) > float(lf["max_t"]) or (glide_now and not bool(lf["g0"])):
 		lfloat = {}
 		return false
@@ -2958,7 +2945,7 @@ func add_stat(k: String, n := 1) -> void:
 	stats[k] = int(stats.get(k, 0)) + n
 var unseen := false           # hidden from the local player (in a bush, or behind a wall)
 
-var step_vis := 0.0            # eases the model up a terrace you just stepped onto
+var drawn_y := INF             # m: where StepSmooth draws the body (INF until it first draws)
 ## The sniper's aiming laser while it winds up, and the minigun's barrels spinning.
 var laser: MeshInstance3D
 func _render_weapon_fx(delta: float) -> void:
@@ -3122,10 +3109,8 @@ func render(delta: float, alpha: float) -> void:
 	super.render(delta, alpha)
 	if LOCAL_RENDER_LEAD and is_local() and freeze_t <= 0.0 and not remote:
 		position = render_pos(alpha)
-	if absf(step_vis) > 0.001:
-		position.y += step_vis
-		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
+	StepSmooth.ease(self, delta)
+	visible = (not out or WardenClips.dying(self)) and not extracted and SkyDeck.drawn(self) and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
@@ -3151,6 +3136,7 @@ func render(delta: float, alpha: float) -> void:
 		update_lip()
 	_render_weapon_fx(delta)
 	DropReticle.tick(self, delta)
+	DropFeel.ribbon(self)
 	var rig: Node3D = model.get_node("Rig")
 	var torso: Node3D = rig.get_node("Torso")
 	if anim == null or anim.model != model:

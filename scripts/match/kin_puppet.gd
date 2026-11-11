@@ -11,7 +11,7 @@ extends Node
 ##
 ## It reads a few metas on the kin root, all optional:
 ##   "dazed" (bool) "happy" (bool) "pulse" (set to Time msec when an ability goes off)
-##   "kstate": "" | "attack" (lunging) | "sleep" | "perch" (riding a shoulder)
+##   "kstate": "" | "attack" (lunging) | "sleep" | "faint" (downed, lies as asleep) | "perch" (riding a shoulder)
 ##   "quirk" (Unique: its idle habit, played now and then while it stands still) "girth" (width)
 ##   "pose": body language in a match (KinCompanion): "growl" (low, ears back, tail up, shivering),
 ##   "guard", "alert" (tall, ears up), "point" (leaning in, a paw up), "whine" (ears and tail down),
@@ -44,6 +44,7 @@ var eye_base: Array[Vector3] = []
 var t := 0.0
 var blink_t := 2.0
 var blink_k := 0.0
+var lids := 0.0        # eyes held shut, 0..1 (BokiWispPop: eyes open last, close first)
 var y_prev := 0.0
 var vy := 0.0
 var vy_prev := 0.0
@@ -178,7 +179,7 @@ func _process(dt: float) -> void:
 	var ks := String(root.get_meta("kstate", ""))
 	var ek := 1.0 - exp(-8.0 * dt)
 	att_k = lerpf(att_k, 1.0 if ks == "attack" else 0.0, 1.0 - exp(-18.0 * dt))
-	sleep_k = lerpf(sleep_k, 1.0 if ks == "sleep" else 0.0, 1.0 - exp(-3.0 * dt))
+	sleep_k = lerpf(sleep_k, 1.0 if ks in ["sleep", "faint"] else 0.0, 1.0 - exp(-3.0 * dt))
 	perch_k = lerpf(perch_k, 1.0 if ks == "perch" else 0.0, ek)
 	happy_k = lerpf(happy_k, 1.0 if happy else 0.0, ek)
 	air = lerpf(air, clampf(vy * 0.4, -1.0, 1.0), 1.0 - exp(-10.0 * dt))
@@ -302,6 +303,7 @@ func _process(dt: float) -> void:
 		shut = 1.0
 	elif happy:
 		shut = maxf(shut, 0.45)
+	shut = maxf(shut, lids)
 	for i in eyes.size():
 		var b := eye_base[i]
 		eyes[i].scale = Vector3(b.x * (1.0 + shut * 0.15), b.y * maxf(0.08, 1.0 - shut), b.z)

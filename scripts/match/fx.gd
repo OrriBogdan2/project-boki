@@ -22,6 +22,10 @@ var sparks: Array[CPUParticles3D] = []    # velocity-stretched streaks (shaders/
 var si := 0
 var flash_pool: Array[MeshInstance3D] = []
 var fi := 0
+## reuse lists for the effects that used to make and free a mesh each time (FxPool)
+var ring_pool: FxPool
+var ghost_pool: FxPool
+var beam_pool: FxPool
 
 func _ready() -> void:
 	particles = PARTICLES * float(Settings.q("fx"))
@@ -71,10 +75,36 @@ func _ready() -> void:
 		add_child(l)
 		num_pool.append(l)
 	_build_sparks()
+	_build_pools()
 	# no effect casts a shadow: rings, telegraphs, decals, particles, bolts (item 94, ShadowPolicy)
 	ShadowPolicy.off(self)
 	child_entered_tree.connect(ShadowPolicy.off)
 	ShadowPolicy.watch_particles(get_tree())     # and no particle system anywhere in the match does
+
+func _build_pools() -> void:
+	ring_pool = FxPool.new(self, _make_ring, 24)
+	ghost_pool = FxPool.new(self, _make_ghost, 12)
+	beam_pool = FxPool.new(self, _make_beam, 8)
+
+func _mesh_node(mesh: Mesh, mat: Material) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = mat
+	return mi
+
+func _make_ring() -> MeshInstance3D:
+	var mat := Models.ring_mat(Color.WHITE, 0.12)
+	mat.set_shader_parameter("wash", 1.0)
+	mat.set_shader_parameter("halo", 1.0)
+	return _mesh_node(Models.flat_quad(2.0), mat)
+
+func _make_ghost() -> MeshInstance3D:
+	return _mesh_node(Models.capsule(0.3, 1.25), Models.glow_mat(Color.WHITE))
+
+func _make_beam() -> MeshInstance3D:
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/light_shaft.gdshader")
+	return _mesh_node(QuadMesh.new(), m)      # QuadMesh's default size is 1 x 1
 
 func _build_sparks() -> void:
 	var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
@@ -173,31 +203,24 @@ func impact(at: Vector3, dir: Vector3, col: Color, power := 1.0, crit := false, 
 
 ## A straight bolt of light from a to b that flares and fades (a rail shot, a beam ability): a soft
 ## camera-facing ribbon (shaders/light_shaft.gdshader) with a white-hot core line inside it.
-var _beam_sh: Shader
 func beam(a: Vector3, b: Vector3, col: Color, width := 0.45, dur := 0.28) -> void:
-	if _beam_sh == null:
-		_beam_sh = load("res://shaders/light_shaft.gdshader")
 	var ln := a.distance_to(b)
 	if ln < 0.2:
 		return
 	var axis := (b - a) / ln
 	for k in 2:
-		var mi := MeshInstance3D.new()
-		var qm := QuadMesh.new(); qm.size = Vector2(1, 1)
-		mi.mesh = qm
-		var m := ShaderMaterial.new(); m.shader = _beam_sh
+		var mi := beam_pool.take()
+		var m := mi.material_override as ShaderMaterial
 		m.set_shader_parameter("color", col if k == 0 else col.lerp(Color.WHITE, 0.75))
 		m.set_shader_parameter("intensity", 2.2 if k == 0 else 3.0)
 		mi.material_override = m
 		var w := width * (1.0 if k == 0 else 0.3)
 		var x_axis := axis.cross(Vector3.UP if absf(axis.y) < 0.95 else Vector3.RIGHT).normalized() * w
 		var z_axis := x_axis.cross(axis).normalized()
-		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		add_child(mi)
 		mi.global_transform = Transform3D(Basis(x_axis, axis * ln, z_axis), (a + b) * 0.5)
 		var tw := mi.create_tween()
 		tw.tween_method(func(v: float) -> void: m.set_shader_parameter("intensity", v), 2.2 if k == 0 else 3.0, 0.0, dur).set_ease(Tween.EASE_IN)
-		tw.tween_callback(mi.queue_free)
+		tw.tween_callback(beam_pool.give.bind(mi))
 
 ## Readability: every particle burst is thinned out, so effects mark what happened without
 ## burying the fight under confetti.
@@ -249,17 +272,11 @@ func dash_trail(h) -> void:
 var ghosts: Array = []
 const GLOW_DUR := 0.5      # s: a body glow's life
 const GLOW_RISE := 1.4     # m/s: how fast it drifts up
-var _ghost_mesh: Mesh
 
 ## A fading after-image of a dashing hunter.
 func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
-	if _ghost_mesh == null:
-		_ghost_mesh = Models.capsule(0.3, 1.25)
-	var mi := MeshInstance3D.new()
-	mi.mesh = _ghost_mesh
-	mi.material_override = Models.glow_mat(Color(col, 0.55))
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	var mi := ghost_pool.take()
+	mi.material_override.set_shader_parameter("color", Color(col, 0.55))
 	mi.global_position = at + Vector3(0, 0.7 * scl, 0)
 	mi.rotation.y = yaw
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
@@ -375,13 +392,8 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	if own_look:
 		return
 	radial += 1
-	var mi := MeshInstance3D.new()
-	mi.mesh = Models.flat_quad(2.0)
-	mi.material_override = Models.ring_mat(col, 0.12)
-	mi.material_override.set_shader_parameter("wash", 1.0)
-	mi.material_override.set_shader_parameter("halo", 1.0)
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	var mi := ring_pool.take()
+	mi.material_override.set_shader_parameter("color", col)
 	mi.global_position = at + Vector3(0, 0.08, 0)
 	mi.scale = Vector3.ONE * 0.1
 	rings.append({"node": mi, "t": 0.0, "dur": dur, "r": radius, "col": col})
@@ -461,6 +473,8 @@ func cone(at: Vector3, d: Vector2, length: float, col: Color) -> void:
 
 # ---- telegraphs
 func _tele_mesh(col: Color, shape: int) -> MeshInstance3D:
+	# not pooled: callers keep the handle (tweens, is_instance_valid guards) after it ends, so a reused
+	# node could be ended or moved by its old owner; telegraphs are per attack, not per shot
 	var mi := MeshInstance3D.new()
 	var mat := ShaderMaterial.new()
 	mat.shader = TELEGRAPH
@@ -535,7 +549,7 @@ func _process(delta: float) -> void:
 		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
 		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
 		if k >= 1.0:
-			mi.queue_free(); rings.erase(rg)
+			ring_pool.give(mi); rings.erase(rg)
 	for f in flashes.duplicate():
 		f["t"] += delta
 		var mi: MeshInstance3D = f["node"]
@@ -552,4 +566,4 @@ func _process(delta: float) -> void:
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
-			gm.queue_free(); ghosts.erase(g)
+			ghost_pool.give(gm); ghosts.erase(g)

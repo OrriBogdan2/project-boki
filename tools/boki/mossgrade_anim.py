@@ -198,5 +198,7 @@ CLIPS.update({
     "chop": (1.2, True, eight(chop)),
     "mine": (1.1, True, eight(mine)),
 })
+import boki_react
+CLIPS.update({n: (sec, lp, eight(fn)) for n, (sec, lp, fn) in boki_react.react().items()})
 HIDE_AT = {"prop_berry": (0, 0.14, 0.60)}
 BONES = _bones()

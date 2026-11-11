@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet, win, sulk, push), and plays the face on top
+## of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -104,6 +104,14 @@ const FRAME := {
 		"hover": true,
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
+	"lilybara": {"head": Vector3(0, 0.40, -0.34), "top": 0.6, "carry": Vector3(0, 0.5, 0.14),
+		"ear_tip": Vector3(0.11, 0.56, -0.23), "tail_tip": Vector3(0, 0.295, 0.5), "tip_bone": "tail2", "hip": 0.17,
+		"marks": {"left flank": Vector3(-0.25, 0.27, 0.1), "right flank": Vector3(0.25, 0.27, 0.1),
+			"back": Vector3(0, 0.46, 0.14), "chest": Vector3(0, 0.27, -0.22)}},
+	"umbrathere": {"head": Vector3(0, 0.466, -0.157), "top": 0.76, "carry": Vector3(0, 0.28, -0.19), "hip": 0.18,
+		"ear_tip": Vector3(0.057, 0.551, -0.157), "tail_tip": Vector3(0.124, 0.029, 0.304), "tip_bone": "tail3",
+		"marks": {"left flank": Vector3(-0.16, 0.24, 0.0), "right flank": Vector3(0.16, 0.24, 0.0),
+			"back": Vector3(0, 0.31, 0.15), "chest": Vector3(0, 0.29, -0.14)}},
 }
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
@@ -149,7 +157,7 @@ const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
 	"rush", "brace", "dodge", "stonehop", "spin"]
-const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend", "sulk", "push"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
 ## Blend shapes each expression pushes.
@@ -168,7 +176,7 @@ const FACES := {
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
-	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
+	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus", "win": "happy", "sulk": "sad", "push": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
@@ -271,7 +279,8 @@ func _ready() -> void:
 	player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	BokiHomeClips.install(species, player, skeleton())
 	for n in LOOPED:
-		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
+		if player.has_animation(n):       # (an older glb may lack the react clips sulk/push)
+			player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
 	_copy_coat()
@@ -368,13 +377,15 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
+	if String(root.get_meta("kstate", "")) == "faint":           # a downed Boki lies still, eyes shut
+		return "sleep"
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
 		return work
 	var act := String(root.get_meta("kact", ""))
-	if act != "":
+	if act != "" and not (act == "win" and clip == "win" and not player.is_playing()):       # a win plays once
 		return act
 	if _shot_left > 0.0:
 		return _shot
@@ -388,6 +399,10 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if String(root.get_meta("kstate", "")) == "faint":
+		return "asleep"
+	if _flinch.jolt > 0.3:
+		return "sad"
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")

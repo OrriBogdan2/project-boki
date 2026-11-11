@@ -19,4 +19,4 @@ Option 2. `AimMode` decides where a shot goes: the per-shot `Hunter.shot_aim` fi
 - Default behaviour is unchanged for every existing weapon.
 - No Net change: shots already sync their life, and telegraphs are local visuals.
 - Check: `--aimkit-check`.
-- Debt: `ArchKit.tele_circle`/`tele_lane` remain until the kits move over (docs/DEBT.md).
+- Debt: `ArchKit.tele_circle`/`tele_lane` are gone; `Fx.telegraph_*` remains for non-kit code (docs/DEBT.md).

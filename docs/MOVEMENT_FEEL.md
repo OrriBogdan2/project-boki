@@ -159,7 +159,8 @@ Other checks:
 - **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
-  - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
+  - Letting go: moving 0.9m out from the face, a fresh glide press, a stun or a knock ends the rise.
+  - Presses in the rise (`content/rules/mantle_press.json`, read by `DashFlow`, the same for every hero): a dash goes and the rise carries it over the top; a jump flings (below); LMB, RMB, E and R wait for the top.
   - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
   - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you to 0.9m over the top at 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (just over the top, at run speed).
   - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
@@ -266,7 +267,7 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **Feathering**: the glider no longer cools in the air, and a lift's first 0.3s heats like a level glide (was 0.4x). The slower gravity had made coasting between taps so cheap that feathering went 4.8x as far as holding; it is 2.0x now.
 
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
-- **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
+- **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive, and holding crouch under the canopy folds it back into the dive until you let go or reach 10 m (decision 0049; the numbers are in `content/rules/drop.json`, read by `DropFeel`). This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
@@ -300,6 +301,14 @@ source number either way.
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
+## Snag audit (`--snag-check`, decision 0022)
+
+12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
+## Steps: the drawn body and the camera never jolt (`StepSmooth`, `--step-smooth-check`)
+- Stepping onto a one-terrace lip snaps the body up (`Hunter` step_up, 0.8 m in one step), and a run down a flight of stairs is a fall. Both stay exactly as they were for hit boxes and ledge rules: only the drawn node eases.
+- `StepSmooth.ease` chases the body's y at most `step_max_speed` 4.4 m/s (0.073 m a frame), never further than `step_lag_up` / `step_lag_down` behind. Higher than a step above the ground (`step_free_from` 0.9 to `step_free_to` 1.5 m: a jump, a glide, a fall) the body is drawn where it is. The camera follows the drawn y. All in `FeelConfig` ("Steps").
+- Feet: `FootPlant` (ext/anim-foot-plant) reads the drawn body and leaves a body more than its 0.08 m slack off the ground alone, so it plants once the ease has settled and the two never stack.
+- The check runs Vex, Albert and Sable on the Hollow Crown through the real frame: up and back down three raised terraces (laid on open ground, as the map joins its terraces with stairs) and a four-step flight. No frame-to-frame drawn y jump over 0.08 m, camera y over 0.05 m. Before: 0.80 m (drawn, the collision snap), and 0.18 m once eased at the old rate.
 
 ## Not touched
 

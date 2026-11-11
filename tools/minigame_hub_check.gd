@@ -73,9 +73,12 @@ func _title() -> void:
 			var k := Save.new_kin("zapple", "Pip")
 			Save.d["roster"].append(k)
 			Save.d["active"] = k["uid"]
+		var old: Node = main.screen_node()
 		main.show_screen("title", {})
-		for i in 6:
+		for i in 120:      # (under the fade the old title stays the screen for a while)
 			await main.get_tree().process_frame
+			if main.screen_node() != old and i >= 6:
+				break
 		var labels: Array = main.screen_node().menu_labels()
 		var how := "there with a save" if with_save else "absent without a Boki"
 		ok(labels.has("Play with your Boki") == with_save, "title: the entry is %s (%s)" % [how, labels])

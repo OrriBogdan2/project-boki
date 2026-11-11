@@ -11,6 +11,7 @@ extends RefCounted
 ##   [--bench-zone=<garden zone id or all>]  adds a "zone_<id>" part per zone: nine Boki out (6 residents,
 ##   the partner, 2 visitors), judged against the budget in content/rules/garden_zones.json ("BENCH budget"
 ##   lines say ok or FAIL, and the run exits 1 on any FAIL); the hub part is judged against the hub budget
+##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -34,9 +35,13 @@ var base_secs := 60.0
 var out_path := ""
 var zone := ""
 var failed := false      # a budget line said FAIL: the exit code carries it
+var hunters := 6
+var wisps := false
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
+var created := {}        # node name -> count, nodes that entered the tree from the fight on (BENCH created)
+var fought := false
 const HITCH_MS := 100.0
 var vp: RID
 
@@ -64,6 +69,8 @@ func setup(main_node: Node) -> void:
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
 		if a.begins_with("--bench-zone="): zone = a.substr(13)
+		if a.begins_with("--bench-hunters="): hunters = maxi(2, int(a.substr(16)))
+		if a == "--boki-wisps": wisps = true
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
 	main.get_window().size = view
@@ -74,7 +81,8 @@ func setup(main_node: Node) -> void:
 
 func _finish() -> void:
 	var win := main.get_window()
-	print("BENCH quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [Settings.quality(),
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [hunters,
+		wisps, Settings.quality(),
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
 		win.size.y, win.scaling_3d_scale])
 	if out_path != "":
@@ -84,8 +92,8 @@ func _finish() -> void:
 
 func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": ceili(hunters / 2.0), "squad": 2, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -105,12 +113,13 @@ func _match() -> Array:
 	_hook_hud(m)
 	main.get_tree().node_added.connect(func(n: Node):
 		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+		added[k] = int(added.get(k, 0)) + 1
+		if fought:
+			created[k] = int(created.get(k, 0)) + 1)
 	Match.prof_on = true
 	Match.prof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := false
 	var P: Hunter = m.player
 	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
 	while is_instance_valid(m) and m.time < secs:
@@ -133,6 +142,12 @@ func _match() -> Array:
 		last = now
 	_summary("match", fl)
 	_emitters()
+	var made := created.keys()
+	made.sort_custom(func(a, b): return created[a] > created[b])
+	var total := 0
+	for k in made: total += int(created[k])
+	var top := made.slice(0, 12).map(func(k): return "%s %d" % [k, created[k]])
+	print("BENCH created in the fight: %d nodes, %s" % [total, ", ".join(top)])
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
@@ -158,7 +173,7 @@ func _farm(part: String, params: Dictionary) -> void:
 	if part == "hub": Content.rules("farm_build")["base_mode"] = true      # the hub only exists in base mode
 	var was = main.current
 	Game.goto("home", params)
-	while main.current == was or main.current.get("root_ui") == null or main.fade.covered:
+	while main.current == was or main.current == null or main.current.get("root_ui") == null or main.fade.covered:
 		await main.get_tree().process_frame      # the home is built and the ink wipe is off it
 	for i in 30:
 		await main.get_tree().process_frame
@@ -412,3 +427,33 @@ func _meshes() -> void:
 	ks.sort_custom(func(a, b): return by[a][1] > by[b][1])
 	var top := ks.slice(0, 12).map(func(k): return "%s: %d, %.1fk, %d" % [k, by[k][0], by[k][1] / 1000.0, by[k][2]])
 	print("BENCH heaviest meshes (name: instances, total tris k, shadow casters): " + ", ".join(top))
+	_owners()
+
+## Draw passes per piece of the open scene (its direct children, the grouping the draw fixes work on): a
+## visible mesh or MultiMesh costs one pass per surface, two where its material has an outline next_pass.
+func _owners() -> void:
+	var by := {}
+	var scene: Node = main.current
+	for n in scene.find_children("*", "GeometryInstance3D", true, false):
+		var gi := n as GeometryInstance3D
+		var mesh: Mesh = null
+		if gi is MeshInstance3D:
+			mesh = gi.mesh
+		elif gi is MultiMeshInstance3D and gi.multimesh:
+			mesh = gi.multimesh.mesh
+		if mesh == null or not gi.is_visible_in_tree():
+			continue
+		var passes := 0
+		for si in mesh.get_surface_count():
+			var mat: Material = gi.material_override if gi.material_override else mesh.surface_get_material(si)
+			passes += 2 if mat and mat.next_pass else 1
+		var top: Node = gi
+		var under: Node = gi      # the level below `top`: the home's world root holds most pieces
+		while top.get_parent() != scene:
+			under = top
+			top = top.get_parent()
+		var key := "%s/%s" % [String(top.name).rstrip("0123456789@"), String(under.name).rstrip("0123456789@")]
+		by[key] = int(by.get(key, 0)) + passes
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	print("BENCH draw passes by owner: " + ", ".join(ks.slice(0, 20).map(func(k): return "%s %d" % [k, by[k]])))

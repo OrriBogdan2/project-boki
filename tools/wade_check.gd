@@ -112,7 +112,7 @@ func _fire(zc: int) -> void:
 		t += DT
 	ok(t <= OUT_SECS, "it is on dry ground after %.2f s (the bar is %.0f s)" % [t, OUT_SECS])
 	_step(k, k["goal"])
-	ok(float(k["wade"]["shake"]) > 0.0, "and it shakes the water off")
+	ok(float(k["wade"]["shake_t"]) > 0.0, "and it shakes the water off")
 
 func _paddle(zc: int) -> void:
 	var k := _kin(2)

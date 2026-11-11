@@ -1,0 +1,123 @@
+{
+	"grammar": 1,
+	"id": "dreadnoyak",
+	"name": "Dreadnoyak",
+	"animals": [
+		"Colossal icebreaker yak"
+	],
+	"theme": "frost",
+	"flavor": "Colossal icebreaker yak, ice-armour hull.",
+	"colors": {
+		"body": "#c4cdd9",
+		"belly": "#e8eef4",
+		"glow": "#bad0dd"
+	},
+	"look": {
+		"ears": "fin",
+		"body": "drop",
+		"tail": "wisp",
+		"feet": "none",
+		"aura": "wind"
+	},
+	"body": {
+		"size": "medium",
+		"reach": 1.4,
+		"mass": 1.1,
+		"gait": {
+			"hop_rate": 4.25,
+			"hop_height": 0.2,
+			"pace": 0.95
+		}
+	},
+	"stats": {
+		"kin_hp": 6,
+		"kin_damage": 2,
+		"kin_speed": 6,
+		"owner_max_hp": 3,
+		"owner_shield": 3
+	},
+	"personality": {
+		"bravery": 0.64,
+		"loyalty": 0.67,
+		"temper": 0.21,
+		"curiosity": 0.4
+	},
+	"ai": {
+		"aggression": 0.5,
+		"loyalty": 0.65,
+		"caution": 0.45,
+		"role": "controller"
+	},
+	"carry": {
+		"style": "perch",
+		"name": "Still Water",
+		"on_shot": {
+			"effects": [
+				{
+					"type": "slow",
+					"duration": 0.6
+				}
+			]
+		},
+		"passives": [
+			{
+				"stat": "glide",
+				"amount": 0.15
+			}
+		]
+	},
+	"throw": {
+		"effects": [
+			{
+				"type": "slow",
+				"duration": 1.5,
+				"strength": 0.5
+			}
+		]
+	},
+	"active": "gale_lance",
+	"auto": "thorn_patch",
+	"merge": "stormwing",
+	"evolution": {
+		"root": "Drea",
+		"paths": [
+			{
+				"affinity": "fierce",
+				"nodes": [
+					"fierce_form"
+				]
+			},
+			{
+				"affinity": "steadfast",
+				"nodes": [
+					"steadfast_form"
+				]
+			},
+			{
+				"affinity": "curious",
+				"nodes": [
+					"curious_form"
+				]
+			},
+			{
+				"affinity": "swift",
+				"nodes": [
+					"swift_form"
+				]
+			}
+		]
+	},
+	"voice": {
+		"line": "severe and terse",
+		"syllables": [
+			"Dread",
+			"noyak"
+		]
+	},
+	"egg": {
+		"name": "Dreadnoyak Egg",
+		"temper": "Patient",
+		"desc": "Something patient is in here.",
+		"play": "Pins foes down and breaks up their pushes."
+	}
+}

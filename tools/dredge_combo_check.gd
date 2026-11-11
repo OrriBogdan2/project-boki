@@ -662,6 +662,7 @@ func _all() -> void:
 	var q0 := K.quakes
 	P.ak.use_e()
 	var land_seen := false
+	var land_r := 0.0
 	var anchor_seen := false
 	var vy := 0.0
 	var te := 0.0
@@ -669,7 +670,9 @@ func _all() -> void:
 		ak.step(m, ak.DT)
 		te += ak.DT
 		vy = minf(vy, P.vel.y)
-		if AimKit.shown(P, "e_land"): land_seen = true
+		if AimKit.shown(P, "e_land"):
+			land_seen = true
+			land_r = float(AimKit.entry(P, "e_land").get("r", 0.0))
 		if K.fx.shown("dive_anchor%d" % P.get_instance_id()): anchor_seen = true
 	var high: float = ak.dmg(T) - hp0
 	ok(
@@ -677,6 +680,10 @@ func _all() -> void:
 		"vy %.1f drift %.2f" % [vy, P.pos.x - home.x]
 	)
 	ok("air smash: the landing ring shows while you fall, the anchor falls with you", land_seen and anchor_seen)
+	ok(
+		"telegraph == hit: the air smash's landing ring is its quake radius (drawn r == quake_r)",
+		absf(land_r - float(K.e_def()["quake_r"])) < 0.01, "%.2f" % land_r
+	)
 	ok(
 		"air smash: it lands where you land, a ring of damage and stun",
 		K.quakes == q0 + 1 and high > 0.0 and T.stun_t > 0.5, "quakes %d stun %.2f" % [K.quakes - q0, T.stun_t]
@@ -864,7 +871,14 @@ func _all() -> void:
 		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp > mh0 * 0.5 + mh0 * 0.15,
 		"res %.0f maxhp %.1f hp %.1f" % [K.res, P.max_hp, P.hp]
 	)
+	# ours-only heal (the data's Feed the Beast gives max health only): 16% on top of the stack's +2.5%
+	ok("passive: the knock heal is 16% of max health (ours-only, the data has none)",
+		absf(P.hp - (mh0 * 0.525 + P.max_hp * 0.16)) < 0.5, "hp %.1f maxhp %.1f" % [P.hp, P.max_hp])
 	var hp1 := P.hp
+	DashReset.takedown(P, T)
+	ok("passive: with the takedown reset's 5% a knock heals 21% in all, no more",
+		absf(P.hp - (hp1 + P.max_hp * 0.05)) < 0.5, "hp %.1f -> %.1f" % [hp1, P.hp])
+	hp1 = P.hp
 	K.on_knock(T, false)
 	ok("passive: an assist stacks but does not heal", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
 	for i in 12: K.on_knock(T, false)

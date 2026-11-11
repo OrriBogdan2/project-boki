@@ -84,6 +84,8 @@ ext/vfx-pass (merges ext/vfx-archer), ext/supervive-movement (`pin_spirit.gd`).
 | Shift | long dash | In the air or out of charges: a 4.2 m flick with a sideways tumble (`pin_flick`) and a green streak | (base dash) | Our per-hero base dash variant |
 | E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 15 s: the game data wins over the footage's 8.3 s (audit row "E cooldown 9 vs 15", `e.cooldown`) |
 | X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane and a ticked ring at her feet; three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
+| E | tap | Hail Wall: lobbed up (0.35 s, everyone sees the arc), then 4.4 s of rain on an arc round her, 120 degrees, at the cursor distance (2-9 m), 1.8 m deep: 5 per 0.5 s, slow 35%, blight (healing barely takes) with blue burn flames. Seven translucent green panels with fletch posts, a ground glow, arrows streaking down | Rain of Arrows: an arc concentric to the hunter, about 120 degrees, at the cursor distance, about 4.4 s | Cooldown 9 s (source 8.3 s with RMB 9 s: the same ratio to our RMB) |
+| X | tap (level 6) | Starpiercer: no cast lock; the next 3 bow shots within 6 s need no draw. Each LMB press nocks 0.5 s, then looses a big arrow (head as wide as its hit, a red thread trail, 90 m/s so 18 m takes 0.2 s like the source's beam) that pierces every foe to 18 m (1.5x Empowered), knocks back 4 and strips 10 armor: 18, 18, then 25 on the last, which finishes a hunter it leaves under 12%. Cooldown 36 s. Telegraph: the arrow's lane (no ring at her feet, the lane is the hit); three pips and a glowing bow everyone sees; the cast sound carries the whole map | Primal Forces: next 3 shots empowered (no charge, 6 s, piercing, longer range, knockback, armor shred, the final shot executes) | Damage scaled down from the source's ratio (a beam is about a Supercharged arrow there; here 0.3x, final 1.39x the beam as the source's 1.41x) so the ult then a merge never takes a full-health light hunter down. Deadeye stays: it is the Focus payoff on a rooted foe, not a three-shot window, so nothing is unfolded |
 | R | - | the Boki Merge | - | R is the Merge for every hero |
 
 ## Assumptions (the footage is silent; the owner can correct these)
@@ -258,6 +260,18 @@ Clip re-keys for the model (tools/art1/hem_clips.py, on the unmerged ravel-v2 re
 Suggestions (ours, not built): the release snap keys (0.04-0.06 s) land inside the 0.1 s blend-in, so the string hand
 snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`arc_super` would show the full snap.
 
+## In the air
+
+What each slot does cast mid-jump (rising), mid-fall and out of a glide. Rule: the source decides (DECISIONS 2026-11-07); where it is silent, any ability casts mid-jump as on the ground (owner item 51, `content/dash_flow/archer.json`); no glider opens during an ability (162b) and an open one is never folded by that rule. LMB out of a glide is blocked for every Hunter (`Hunter.can_fire`; the source is silent on it, open question). X is not covered here. Asserted for LMB, RMB and E in `--air-limits-check` (section 4).
+
+| Slot | Mid-jump and mid-fall | Out of a glide | Glider | Source |
+|---|---|---|---|---|
+| LMB | the draw and shot, as on the ground (a draw carries through a jump, item 51) | blocked | stays open | silent |
+| RMB tap | nothing, as on the ground (Heartpiercer is hold only; no air Plunge) | nothing | - | data: hold to charge |
+| RMB hold | the Heavy Shot, charged and loosed in the air | the same | stays open | data: Heartpiercer |
+| E | Rain of Arrows, as on the ground | the same | stays open | silent |
+| Shift | rising or falling: the 4.2 m flick `pin_flick`, no charge spent. Out of a glide: the Spirit Walk roll `pin_roll`, spending a charge (`ex = use_ex and not gliding`) | the roll | closes, reopens after | the source has one Phase Walk and no air dash row; the flick is ours. Open: the glide case matches it, the jump and fall case does not |
+
 ## Engine notes
 - Kit: `scripts/arch/kits/archer_kit.gd` (wiring), `pin_draw.gd` (draw stages, reticle, perfect, overdraw), `pin_spirit.gd` (Spirit Walk), `pin_fx.gd` (pooled effects), `pin_needle.gd` (the Heavy Shot's held needle), `kit_shaders.gd` / `kit_meshes.gd` (our shaders and meshes), `scripts/match/pin_bjorn_weapons.gd` (the recurve bow model), `scripts/match/kmoves_pin_bjorn.gd` (moves). Data: `content/archetypes/archer.json`, `content/weapons/longbow.json` (`draw`, `overdraw_t`, `overdraw_k`, `quick_k`, `aim`).
 - Hunter hooks: `ArchKit.draw_rate()` scales the bow's draw; `draw_bonus(t)` sets `h.shot_aim` (AimMode: stage 1 cursor, stage 2 max) and the damage factor; `Hunter.spirit_t` makes `World.occupy(..., ghost)` and the block push-out skip rocks, trees and barriers.
@@ -270,3 +284,15 @@ snap is about half weight on screen; a 0.05 s FADE for `arc_tap`/`arc_loose`/`ar
 - Looks: her moments are recipes in content/vfx/archer.json (docs/HERO_VFX.md): silver needles with red thread, missed needles left in the ground with their threads, a glowing thread string, seams across the ground.
 
 ## Payoff
+## Telegraph audit (owner rules: a ring, disc or burst on the ground means gameplay; a telegraph shows the true hit area)
+Branch `ext/telegraph-audit-b-rebased`. Drawn = what AimKit/fx draws; Hit = the number the kit tests; Enemy sees = other players see the tell (`all`, hostile-tinted, local; a remote machine only gets the `net_ring` echo, see Engine notes). The `telegraph == hit` asserts are in `tools/archer_bulwark_combo_check.gd` (`--archer-combo-check`), `tools/pin_bjorn_ult_check.gd`.
+
+| Ability | Shape | Drawn | Hit | Timing | Enemy sees | Source read | Action |
+|---|---|---|---|---|---|---|---|
+| LMB draw | line | thin line to the cursor, `draw_tgt` 0.85 ring on the target, `draw_mark` 0.22 | arrow is a projectile; the rings mark the target/draw stage only | the draw | owner only | thin line | kept (reticle, not a ground area); the 1.3 m `net_ring` on reaching Supercharged is removed |
+| RMB Heavy Shot | lane | `rmb_bar` lane, length grows with the draw | the needle's flight | the draw | owner only | red needle path | kept |
+| Shift Spirit Walk | none | no area | no hit | | | | nothing drawn |
+| E Hail Wall | arc wall | radius = cursor distance (2-9 m), 120 deg, 1.8 m deep, 7 panels | `AimMode.in_arc(radius, 120 deg, width 1.8)` (+ body r) | 0.35 s tell, then 4.4 s of rain | yes (`all`) | arc of arrows | matched; assert drawn radius/deg/thick == the rain's |
+| X Starpiercer | lane | 18 m x 0.5 m, fills with the 0.5 s nock | pierce beam 18 m, width 0.5 | the 0.5 s nock | owner only | beam line | kept; the 0.9 m `x_ring` crosshair ring at her feet is removed (cosmetic) and the check asserts the lane width == data |
+
+Suggestion (not built): the beam lane could be `all` so a foe sees the nock; the source shows no enemy tell for the empowered window, so it stays owner-only.

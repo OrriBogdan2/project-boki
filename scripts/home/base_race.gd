@@ -282,6 +282,7 @@ var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
+var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var heard: Array = []          # per runner: the stretch last heard, plus the stretch count once home
 var relay: BaseRelay           # the Relay Cup on this loop, from its stand at the far corner
 
@@ -394,6 +395,7 @@ func entrants() -> Array:
 	return out.slice(0, 4)
 
 func use() -> void:
+	release()
 	var ks := entrants()
 	if ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
@@ -402,6 +404,7 @@ func use() -> void:
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
+	release()
 	var k: Dictionary = h._kin_entry(rec)
 	var T: Dictionary = rules()["train"]
 	if k.is_empty() or k.get("busy", false) or k.has("indoors"):
@@ -465,6 +468,9 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
+		if card_t <= 0.0:
+			let_go(held)
+			held = []
 	relay.tick(d)
 	if run == null:
 		return
@@ -537,6 +543,7 @@ func _end(finished: bool) -> void:
 			GardenSfx.result(h, res)
 			h._emote(h._kin_entry(res["win"]), "♥", true)
 			h._emote(h._kin_entry(res["lose"]), "…", true)
+			held = hold(h, res)
 		else:
 			_solo_card(settle_solo(solo_rec, _grades()))
 		Save.save_game()
@@ -598,6 +605,38 @@ func show_card(title: String, lines: Array) -> void:
 		rows.append([l[0], 14, l[1]])
 	card = result_card(h, rows)
 	card_t = float(rules()["card_s"])
+
+## Plays a BokiRig clip (win, sulk, push; "" stops it) on a kin's Boki: rigged ones only, the rest ignore it.
+static func act(k: Dictionary, which: String) -> void:
+	var n := k["node"] as Node3D
+	if which == "":
+		n.remove_meta("kact")
+	else:
+		n.set_meta("kact", which)
+
+## The result of a minigame ({win, lose}): the winner shows it, the loser sulks, both stay put until `let_go`.
+static func hold(home, res: Dictionary) -> Array:
+	var ks: Array = []
+	for who in [["win", "win"], ["lose", "sulk"]]:
+		var k: Dictionary = home._kin_entry(res[who[0]])
+		k["busy"] = true
+		act(k, who[1])
+		ks.append(k)
+	return ks
+
+## A new Dash, lap or Shove ends the last result pose early, so its winner and loser can play again.
+func release() -> void:
+	let_go(held)
+	held = []
+	if h.get("hshove") != null:
+		BaseRace.let_go(h.hshove.held)
+		h.hshove.held = []
+
+static func let_go(ks: Array) -> void:
+	for k in ks:
+		k["busy"] = false
+		k["t"] = 1.5
+		act(k, "")
 
 ## A minigame's result card at the top of the screen: rows of [text, size, colour]. Shared with the Stump Shove,
 ## Seek and Spark Volley.

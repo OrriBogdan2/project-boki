@@ -164,7 +164,6 @@ func _rock_end(s: Dictionary, at: Vector3, e: Ent, _why: String, src: String) ->
 	x["burst_done"] = true
 	var blast := float(rd["blast"])
 	m.fx.ring(at, blast, Color("3a7cff"), 0.3)
-	m.fx.ring(at, blast * 0.55, Color("d8ecff"), 0.18)
 	m.fx.burst(at + Vector3(0, 0.4, 0), Color(0.23, 0.49, 1.0, 0.9), 22, 6.0, 0.5, 8.0, 1.2)
 	KitLooks.of(m).impact(AimMode.ground(m, at), blast * 0.8, 0.4, 0.6)
 	m.fx.flash(at + Vector3(0, 0.6, 0), Color("9ad0ff"), 0.7, 0.08)
@@ -221,8 +220,6 @@ func _tick(dt: float) -> void:
 	tell = "full" if n >= 6 else ("half" if n > 0 else "")
 	if shield_stacks > 0 and m.time - shield_at > float(d["passive"]["guard"]["t"]):
 		shield_stacks = 0
-	if shield_stacks > 0 and h.shield > 0.0 and fmod(m.time, 0.3) < dt:
-		m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.0, Color("d8ecff"), 0.28)      # the Molten Guard ring
 	if dive:
 		_tick_dive()
 	hop.tick(dt)
@@ -278,16 +275,15 @@ func dive_speed() -> float:
 		return 0.0
 	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 
-## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
-## it through walls and fog.
+## Tremor Sense: sneaking shows a narrow cone ahead that widens and lengthens the longer you sneak, and
+## the foes in it through walls and fog.
 func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
 		sneak_t += dt
 		if h.is_local():
-			var pd: Dictionary = d["passive"]
 			AimKit.cone(
 				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
+				{"len": sight_len(), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
 			)
 			sight_t -= dt
 			if sight_t <= 0.0:
@@ -297,9 +293,16 @@ func _tick_sight(dt: float) -> void:
 		sight_t = 0.0
 		sneak_t = 0.0
 
+## The cone's current angle (degrees) and length (m): both grow from start to end over `grow` seconds of sneaking.
 func sight_deg() -> float:
+	return _sight_grow("deg")
+
+func sight_len() -> float:
+	return _sight_grow("len")
+
+func _sight_grow(key: String) -> float:
 	var pd: Dictionary = d["passive"]
-	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
+	return lerpf(float(pd[key][0]), float(pd[key][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
 ## Rock Hop (AimKit's telegraphs go with them through drop_holds).
@@ -318,11 +321,11 @@ func _drop_holds() -> void:
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
-	var pd: Dictionary = d["passive"]
+	var reach := sight_len()
 	for o in m.hunters:
 		if o.team == h.team or not is_instance_valid(o) or o.dead or o.downed: continue
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
+		if to.length() > reach or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
 		m.fx.ring(o.pos, 0.9, Color("3a7cff"), 0.55)
 		m.fx.ring(o.pos, 0.5, Color("d8ecff"), 0.4)
@@ -503,11 +506,10 @@ func _punch(k: float) -> void:
 	if landed == 0:
 		_punch_impact(h.pos + Vector3(dir.x, 0, dir.y) * float(pd["len"]), dir, k)
 
-## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): a ring of dust,
-## a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
+## The fist's blow landing on the hit frame (on each foe it caught, or at the lane's end): no ring (a ring means
+## a hit area), a molten spray thrown on along the punch and a hot chip burst, bigger the longer she held.
 func _punch_impact(at: Vector3, dir: Vector2, k: float) -> void:
 	var fwd := Vector3(dir.x, 0.25, dir.y)
-	m.fx.ring(at, 1.0 + 0.6 * k, Color(0.56, 0.61, 0.72, 0.95), 0.3)
 	m.fx.burst(at + Vector3(0, 0.5, 0), Color(0.23, 0.49, 1.0, 0.9), int(8 + 10 * k), 5.0, 0.35, 6.0, 1.3, fwd, 60.0)
 	m.fx.burst(at + Vector3(0, 0.2, 0), Color(0.56, 0.61, 0.72, 0.9), int(6 + 6 * k), 3.0, 0.45, 3.0, 1.6)
 	m.fx.spark(at + Vector3(0, 0.6, 0), fwd, Color("9ad0ff"), int(6 + 6 * k), 8.0, 50.0, 0.25, 8.0, 1.1)
@@ -644,7 +646,6 @@ func guard_stack() -> void:
 	shield_at = m.time
 	h.shield = maxf(h.shield, float(gd["shield"]) * shield_stacks)
 	h.shield_t = float(gd["t"])
-	m.fx.ring(h.pos + Vector3(0, 0.1, 0), 1.2, Color("d8ecff"), 0.35)
 
 # ------------------------------------------------------------------ E: Stone Row
 ## The row's spots: 3 rocks in a slight curve across the aim (the outer two set back), and at rank 3 an
@@ -689,7 +690,11 @@ func cast_e() -> bool:
 	for j in spots.size():
 		var p: Vector3 = spots[j][0]
 		AimKit.circle(
-			h, "e_tell%d" % j, {"at": p, "r": 0.75, "fill": 1.0, "col": Color("3a7cff"), "all": true, "dur": tell}
+			h, "e_tell%d" % j,
+			{
+				"at": p, "r": float(rock_def()["len"]) * 0.5, "fill": 1.0, "col": Color("3a7cff"),
+				"all": true, "dur": tell,
+			}
 		)
 		m.fx.spark(p + Vector3(0, 0.1, 0), Vector3.UP, COBALT, 4, 3.0, 40.0, 0.2, 2.0, 0.8)
 	m.sfx("br_crack", h.pos, -3.0, 1.0)
@@ -697,7 +702,6 @@ func cast_e() -> bool:
 		var p2: Vector3 = spots[j][0]
 		m.later(tell, func(): if is_instance_valid(h) and not KinMerge.active(h): _raise(p2, dir))
 	m.later(tell, _raise_feel)
-	net_ring(h.pos, 2.0, col_of(ed))
 	return true
 
 func _raise(p: Vector3, dir: Vector2) -> void:

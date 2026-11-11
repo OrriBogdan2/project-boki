@@ -8,8 +8,8 @@ extends RefCounted
 ##   milestone a farm milestone not reached (FarmUnlocks)
 ##   level     the next farm level, always last
 ## A row: {text, have, need, frac, ready, source}. Ready-to-claim rows lead; inside a source the
-## closest to done comes first. The card is hidden when there are no rows. It shows one line, "Next: ...",
-## and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
+## closest to done comes first. The card is hidden when there are no rows, and in recording mode. It
+## shows one line, "Next: ...", and the whole list while `all` is on (the G key, FarmGuide.toggle_goals).
 
 const SOURCE_ORDER := ["first_day", "unlock", "mastery", "milestone", "level"]
 
@@ -110,6 +110,8 @@ static func build() -> PanelContainer:
 	box.offset_left = -316
 	box.offset_right = -16
 	box.offset_top = 14
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	Record.hide_in_clean(box)
 	var v := UI.vbox(7)
 	box.add_child(v)
 	if not all:

@@ -43,7 +43,6 @@ const SLAB_GAP := 0.06         # s between ice plates under the skate
 const FROST_EVERY := 3         # ice plates between two frost patches left on the ground behind her
 const SLAB_LEAD := 0.5         # m ahead of her middle a plate forms (under the leading blade)
 const SLAB_LIFE := 3.0         # s a plate stays before it fades (the owner's "a few seconds")
-const SHATTER_R := 2.7         # m, the Shatter's spike starburst (about 1.5 body heights)
 const PUSH_T := 0.1           # s from letting go of RMB to the release: both palms drive forward (tm_spear)
 const SPEAR_ARC := 0.25        # m the driven spear's low flight bows above the line from her palms to the ground
 const SPEAR_AHEAD := 0.9       # m in front of her chest of the spear's head end; its shaft runs back to her palms
@@ -79,6 +78,7 @@ func add_chill(t: Ent) -> void:
 	var key := t.get_instance_id()
 	var fresh := not chilled(t)
 	chill[key] = {"t": t, "left": float(d["passive"].get("chill_t", 4.0))}
+	if t.remote: KitStatus.apply(t, "chl", float(chill[key]["left"]), 1.0, true, "", h.nid)
 	if fresh:
 		vfx("chill", t.pos)
 
@@ -112,6 +112,7 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 				delay,
 				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
 		chill.erase(t.get_instance_id())
+		if t.remote: KitStatus.apply(t, "chl", 0.0, 0.0, true, "", h.nid)
 		return
 	add_chill(t)
 	if String(o.get("ab", "")) == "fan":
@@ -136,7 +137,7 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	CombatBus.tech.emit(h, "rimewright")
 	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
-	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
+	lk().burst("spikes", at, {"r": r, "dur": 0.7})
 	vfx("shatter", at)
 	play_soft("tm_shatter")
 	for f in foes_in(at, r):
@@ -559,7 +560,7 @@ func rmb_hold_tick(t: float) -> void:
 	AimKit.circle(
 			h, "rmb",
 			{
-				"range": float(ld["range"]), "r": float(ld["zone_r"]), "ticks": true, "star": true,
+				"range": float(ld["range"]), "r": float(ld["burst_r"]), "ticks": true, "star": true,
 				"col": Color("dffcff")})
 	if not spear_aim:
 		spear_aim = true
@@ -645,7 +646,7 @@ func _spear_land(at0: Vector3) -> void:
 	var at := ground(at0)
 	zone_n += 1
 	zones.append({"at": at, "left": float(ld["delay"]), "total": float(ld["delay"]), "id": zone_n})
-	lk().burst("spikes", at, {"r": 1.1, "dur": 0.35})
+	lk().burst("spikes", at, {"r": float(ld["impact_r"]), "dur": 0.35})
 	vfx("spear_land", at, null, {"r": float(ld["zone_r"])})        # shards, a frosted ground and the chill puff
 	m.sfx("rime_zone", at, -1.0, 0.85)
 	m.sfx("rimewright_chime", at, -5.0, 0.9)          # the spinning crystal
@@ -1082,7 +1083,7 @@ func _rime_crash(k: float) -> void:
 	last_stunned = stunned
 	stats["crashes"] += 1
 	ulk().burst("pillar", h.pos, {"r": 1.4, "dur": 0.5})
-	ulk().burst("spikes", h.pos, {"r": 3.6, "dur": 0.55})
+	ulk().burst("spikes", h.pos, {"r": radius, "dur": 0.55})
 	vfx("rime_crash", h.pos, null, {"r": radius})
 	m.sfx("rime_crash", at, 1.0, 1.0)
 	play("tm_rime_crash")

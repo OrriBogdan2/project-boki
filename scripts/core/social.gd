@@ -18,6 +18,7 @@ var guild_progress: Dictionary = {} # project -> gems put in
 var _keep: Array = []
 var _last_publish := -1e9
 var _busy := {}                     # operations in flight, so a double click can't run one twice
+var store_stub := Callable()        # checks only: answers the store calls as (method, args, cb) without a page
 
 const PROJECTS := {
 	"hall": {"name": "Guild Hall", "goal": 600, "perk": "+10% gems from every expedition you make it out of."},
@@ -25,6 +26,8 @@ const PROJECTS := {
 	"shrine": {"name": "Boki Shrine", "goal": 500, "perk": "Your partner gains 1 extra trust after every expedition."},
 	"lighthouse": {"name": "Lighthouse", "goal": 800, "perk": "Glide 25% longer."},
 }
+const ROLES := ["founder", "officer", "member"]   # a clan's ranks; what you like to do in it is taste, not permission
+const CLAN_CAP := 24                # members a clan shows (the store query's limit)
 const STRANDED_DAYS := 3.0          # a listing that vanished without a sale is handed back after this
 
 func _ready() -> void:
@@ -83,6 +86,9 @@ static func say_of(v, def := "Someone", n := 16) -> String:
 
 # ------------------------------------------------------------------ plumbing
 func _call(method: String, args: Array, cb: Callable) -> void:
+	if store_stub.is_valid():
+		store_stub.call(method, args, cb)
+		return
 	var js = JavaScriptBridge.get_interface("kinBridge")
 	if js == null:
 		cb.call_deferred("")
@@ -276,6 +282,7 @@ func refresh_guild(cb := Callable()) -> void:
 		guild = g
 		guild["id"] = gid
 		Save.d["guild_name"] = g["name"]
+		_keep_clan(gid, g)
 		load_progress(gid, guild, func(prog: Dictionary):
 			guild_progress = prog
 			_store_perks()
@@ -332,13 +339,31 @@ func _store_perks() -> void:
 	Save.d["guild_perks"] = perks
 	Save.save_game()
 
+## My clan is the guild I'm in: same id, plus a rank and a corner seed. Saves that joined before clans exist
+## get theirs here; my roster doc is rewritten so a member who joined before clans shows up in the list.
+func _keep_clan(gid: String, g: Dictionary) -> void:
+	var clan := dict_of(Save.d.get("clan"))
+	if txt_of(clan.get("id")) != gid:
+		clan = clan_for(gid, me, "member", now_ms())
+	if txt_of(g.get("founder")) == me and me != "":
+		clan["role"] = "founder"
+	elif clan["role"] == "founder":
+		clan["role"] = "member"        # the guild doc says someone else founded it
+	Save.d["clan"] = clan
+	set_doc("clanroster/%s_%s" % [gid, me], {"guild": gid, "role": clan["role"], "joined": clan["joined"],
+		"corner_seed": clan["corner_seed"], "last_seen": now_ms()})
+
+## A fresh clan record. The corner seed picks your plot in the shared base (the same for the same two ids).
+static func clan_for(gid: String, who: String, role: String, joined: float) -> Dictionary:
+	return {"id": gid, "role": role, "corner_seed": (who + gid).hash() % 1000000, "joined": joined}
+
 func create_guild(name_txt: String, motto: String, cb: Callable) -> void:
 	if busy("guild"):
 		return
 	_busy["guild"] = true
 	var gid := "g" + str(Time.get_ticks_usec() % 100000000) + str(randi() % 1000)
 	set_doc("guilds/" + gid, {"name": say_of(name_txt, "Guild", 24), "motto": say_of(motto, "", 60), "founder": me, "created": now_ms(),
-		"color": Color.from_hsv(randf(), 0.5, 0.9).to_html(false), "built": []}, func(okk: bool):
+		"color": Color.from_hsv(randf(), 0.5, 0.9).to_html(false), "built": [], "open": true}, func(okk: bool):
 		_busy.erase("guild")
 		if not okk:
 			cb.call(false)
@@ -350,6 +375,7 @@ func join_guild(gid: String, cb: Callable) -> void:
 		return
 	_busy["guild"] = true
 	Save.d["guild_id"] = gid
+	Save.d["clan"] = clan_for(gid, me, "member", now_ms())
 	guild = {"id": gid}
 	_last_publish = -1e9
 	publish_profile(true)
@@ -366,7 +392,11 @@ func join_guild(gid: String, cb: Callable) -> void:
 
 ## Leaving keeps what you put in with the guild you gave it to (it stops counting until you're back).
 func leave_guild(cb: Callable) -> void:
+	var gid := my_guild_id()
+	if gid != "":
+		del_doc("clanroster/%s_%s" % [gid, me])
 	Save.d["guild_id"] = ""
+	Save.d["clan"] = {}
 	guild = {}
 	guild_progress = {}
 	_store_perks()
@@ -383,6 +413,20 @@ func list_guilds(cb: Callable) -> void:
 func guild_members(gid: String, cb: Callable) -> void:
 	query("profiles", [["guild", "==", gid]], "", "asc", 24, func(rows: Array):
 		cb.call(rows.map(func(r): return {"id": r["id"], "d": clean_island(r["data"])})))
+
+## The founder opens the clan to anyone or closes it to new members.
+func set_open(gid: String, open: bool, cb: Callable) -> void:
+	get_doc("guilds/" + gid, func(g: Dictionary):
+		if g.is_empty() or txt_of(g.get("founder")) != me:
+			cb.call(false)
+			return
+		g["open"] = open
+		set_doc("guilds/" + gid, g, cb))
+
+## cb gets the clan's roster: [{id, role, joined, corner_seed}], cleaned (see clean_roster).
+func clan_roster(gid: String, founder: String, cb: Callable) -> void:
+	query("clanroster", [["guild", "==", gid]], "", "asc", CLAN_CAP, func(rows: Array):
+		cb.call(clean_roster(rows, gid, founder)))
 
 ## Puts gems into a guild project. Each member keeps their own running total, so nobody overwrites anybody.
 func contribute(project: String, gems: int, cb: Callable) -> void:
@@ -630,7 +674,29 @@ static func clean_guild(d: Dictionary) -> Dictionary:
 		if PROJECTS.has(k) and not built.has(k): built.append(String(k))
 	return {"name": say_of(d.get("name"), "Guild", 24), "motto": say_of(d.get("motto"), "", 60),
 		"color": col if col.is_valid_html_color() else "f2a24a", "founder": txt_of(d.get("founder")),
-		"created": num_of(d.get("created")), "built": built}
+		"created": num_of(d.get("created")), "built": built, "open": d.get("open", true) != false}
+
+## Roster docs are untrusted. A row stays only if it is this clan's and has a known rank; "founder" is only
+## believed for the guild doc's founder; at most CLAN_CAP rows, one per member.
+static func clean_roster(rows: Array, gid: String, founder: String) -> Array:
+	var out: Array = []
+	var seen := {}
+	for r in rows:
+		var d := dict_of(dict_of(r).get("data"))
+		var id := txt_of(dict_of(r).get("id"))
+		var who := id.trim_prefix(gid + "_")
+		var role := txt_of(d.get("role"))
+		var mine: bool = txt_of(d.get("guild")) == gid and id.begins_with(gid + "_")
+		if not mine or not ROLES.has(role) or who == "" or seen.has(who):
+			continue
+		seen[who] = true
+		if role == "founder" and who != founder:
+			role = "member"
+		out.append({"id": who, "role": role, "joined": maxf(0.0, num_of(d.get("joined"))),
+			"corner_seed": clampi(int_of(d.get("corner_seed")), 0, 999999)})
+		if out.size() >= CLAN_CAP:
+			break
+	return out
 
 ## Another player's island snapshot is untrusted data: keep only what drawing it needs, in safe shapes.
 static func clean_island(d: Dictionary) -> Dictionary:

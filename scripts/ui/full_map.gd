@@ -324,7 +324,7 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var def: Dictionary = sp.cats.get(cnd["cat"], {})
 		var st := sp.state_for(cnd, team)
 		var col: Color = def.get("col", Color.WHITE)
-		marker(c, String(def.get("shape", "star")), pv, s, col, st)
+		marker(c, "camp" if cnd.has("camp") else String(def.get("shape", "star")), pv, s, col, st)
 		if pv.distance_to(mp) < s + 4.0:
 			_hover = cnd
 	if not _hover.is_empty():
@@ -333,6 +333,7 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		var line := String(def.get("name", "?"))
 		if String(_hover["name"]) != "": line += "  ·  " + String(_hover["name"])
 		var what: String = {"unknown": "Might be here: scout it to find out", "active": "Here this match", "empty": "Nothing here this match", "taken": "Already taken"}[st]
+		if _hover.has("camp") and st == "active": what = "In a Great Camp: clear it and the Boki floats free"
 		var pv := to_screen(_hover["pos"])
 		var wv := maxf(hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x, hud.body.get_string_size(what, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 20.0
 		var r := Rect2(pv + Vector2(14, -42), Vector2(wv, 44))
@@ -365,9 +366,21 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 		"taken":
 			c.draw_polyline(PackedVector2Array([pv + Vector2(-s * 0.7, 0), pv + Vector2(-s * 0.15, s * 0.6), pv + Vector2(s * 0.85, -s * 0.7)]), Color("8fe0a0"), 2.5, true)
 
-## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), else a star.
+## Category icons: a paw (rare kin), a chest (vault), a crate (cache), a skull (boss lair), a Great Camp's
+## three flames with a small paw (a guarded rare kin), else a star.
 func icon(c: Control, shape: String, p: Vector2, s: float, col: Color) -> void:
 	match shape:
+		"camp":
+			c.draw_rect(Rect2(p + Vector2(-s, s * 0.55), Vector2(s * 2.0, s * 0.3)), col)
+			for i in 3:
+				var x := (i - 1) * s * 0.6
+				var tip := s * (1.3 if i == 1 else 0.9)
+				var base := p + Vector2(x, s * 0.5)
+				var half := Vector2(s * 0.3, 0)
+				var flame := PackedVector2Array([base - half, base - Vector2(0, tip), base + half])
+				c.draw_colored_polygon(flame, col)
+			c.draw_circle(p + Vector2(s * 0.95, s * 0.95), s * 0.55, Color(0, 0, 0, 0.8))
+			Icons.draw(c, "paw", p + Vector2(s * 0.95, s * 0.95), s * 0.45, col)
 		"paw":
 			Icons.draw(c, "paw", p, s, col)
 		"vault":

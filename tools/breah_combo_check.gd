@@ -197,6 +197,11 @@ func _breah() -> void:
 		AimKit.shown(P, "e_tell0") and bool(AimKit.entry(P, "e_tell0").get("all", false)) and rocks(m).size() == 0,
 		"rocks %d" % rocks(m).size()
 	)
+	ok(
+		"telegraph == hit: each Stone Row flash is the rock's footprint (drawn r == half its length)",
+		absf(float(AimKit.entry(P, "e_tell0").get("r", 0.0)) - float(K.rock_def()["len"]) * 0.5) < 0.01,
+		str(AimKit.entry(P, "e_tell0").get("r"))
+	)
 	step(m, 0.25)
 	var rs := rocks(m)
 	var along: Array = rs.map(func(w): return K.rock_mid(w).x - home.x)
@@ -351,6 +356,12 @@ func _breah() -> void:
 			(e1.get("at", Vector2.ZERO) as Vector2).x - (home.x + 2.5)
 		) < 0.3,
 		str(e1.get("at"))
+	)
+	ok(
+		"telegraph == hit: the slam circle and sweet spot are the radius and core the slam hits (drawn r == hit r)",
+		absf(float(e1.get("r", 0.0)) - K.slam.radius(float(e1.get("fill", 0.0)))) < 0.01
+			and absf(float(e1.get("core", 0.0)) - K.slam.core(float(e1.get("fill", 0.0)))) < 0.01,
+		"%s %s fill %s" % [e1.get("r"), e1.get("core"), e1.get("fill")]
 	)
 	ok("rmb hold: she can walk slowly while charging", absf(K.move_k() - 0.55) < 0.01, "%.2f" % K.move_k())
 	ok("anim: the charge is a crouch (breah_crouch)", K.anim_id == "breah_crouch")
@@ -680,12 +691,41 @@ func _breah() -> void:
 	var c1 := AimKit.entry(P, "sight")
 	step(m, 2.1, func(): P.inp["crouch"] = true)
 	var c2 := AimKit.entry(P, "sight")
-	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 15.0)
+	var pdef: Dictionary = K.d["passive"]
+	var mid_t := 0.5 * float(pdef["grow"])
+	var len_a := float(c1.get("len", 0.0))
+	var len_end := float(c2.get("len", 0.0))
+	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and len_a >= 15.0)
 	ok(
 		"passive: the cone widens 25 -> 40 degrees over 2s of sneaking",
 		float(c1.get("deg", 0.0)) < 28.0 and absf(float(c2.get("deg", 0.0)) - 40.0) < 0.5,
 		"%.1f -> %.1f" % [float(c1.get("deg", 0)), float(c2.get("deg", 0))]
 	)
+	ok(
+		"passive: the cone is 18m long at the start and 25m (10-14 bh at 1.8m) at the end of the grow",
+		float(pdef["len"][0]) == 18.0 and float(pdef["len"][1]) == 25.0 and len_a < 19.5
+			and absf(len_end - 25.0) < 0.05,
+		"%.2f -> %.2f" % [len_a, len_end]
+	)
+	K.sneak_t = 0.0
+	var lens: Array[float] = []
+	for i in 5:
+		K.sneak_t = mid_t * 2.0 * float(i) / 4.0
+		lens.append(K.sight_len())
+	var steady := true
+	for i in range(1, lens.size()):
+		steady = steady and absf((lens[i] - lens[i - 1]) - (lens[1] - lens[0])) < 0.001 and lens[i] > lens[i - 1]
+	ok("passive: the length grows steadily with the hold", steady, str(lens))
+	T.teleport(P.pos + Vector3(21.5, 0, 0))
+	K.sneak_t = 0.0
+	var seen_early := K.stonesight()
+	K.sneak_t = 2.0 * mid_t
+	var seen_late := K.stonesight()
+	ok(
+		"passive: a foe 21.5m out is past the cone at the start of the grow and inside it at the end",
+		seen_early == 0 and seen_late == 1, "early %d late %d" % [seen_early, seen_late]
+	)
+	T.teleport(home + Vector3(8.0, 0, 0))
 	var s_front := K.stonesight()
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
@@ -1037,6 +1077,11 @@ func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Cal
 	ok(
 		"dash: the landing spot shows for everyone through the hop",
 		AimKit.shown(P, "leap") and bool(AimKit.entry(P, "leap").get("all", false))
+	)
+	ok(
+		"telegraph == hit: the hop's landing circle is its landing hit radius (drawn r == land_r)",
+		absf(float(AimKit.entry(P, "leap").get("r", 0.0)) - float(K.hop.dd()["land_r"])) < 0.01,
+		str(AimKit.entry(P, "leap").get("r"))
 	)
 	var peak := [0.0]
 	var skid := [false]

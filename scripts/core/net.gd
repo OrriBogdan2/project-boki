@@ -21,6 +21,7 @@ var m: Node = null            # the Match while online
 var out_hits: Array = []
 var out_events: Array = []
 var send_t := 0.0
+var _kin_form := 0            # my Boki's wisp/shrink form last frame (_kin_form_changed)
 var host_send_t := 0.0
 var seen := {}                # nid -> last time we heard about it
 var _msg_cb = null
@@ -30,6 +31,15 @@ var enet: NetEnet = null      # desktop connection to the relay
 var server_addr := ""         # "host:port" of the relay (desktop)
 var token := ""               # Discord access token from the launcher
 var deny_reason := ""         # why the server refused us, for the lobby to show
+## Rejoin (docs/decisions/0022-rejoin.md): the match this game is in is kept in REJOIN_FILE, so after a crash
+## or a lost connection the title can offer it back while the relay still holds the Hunter.
+const REJOIN_FILE := "user://rejoin.json"
+const REJOIN_S := 90.0        # s the relay holds a dropped Hunter (RelayServer.HOLD_S)
+const REJOIN_SEEN_S := 5.0    # s between refreshes of the file's last-seen time while in a match
+var rejoin := {}              # {server, tok, start (the lobby's start message), seen (unix s)}
+var rejoining := false        # the next hello asks for the Hunter back
+var back: Array = []          # our Hunter's and Boki's snapshot the relay handed back, until the match uses them
+var _seen_t := 0.0
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -37,6 +47,11 @@ func _ready() -> void:
 		if a.begins_with("--token="): token = a.substr(8)
 	if server_addr == "":
 		server_addr = OS.get_environment("BOKI_SERVER")
+	var saved = null
+	if FileAccess.file_exists(REJOIN_FILE):
+		saved = JSON.parse_string(FileAccess.get_file_as_string(REJOIN_FILE))
+	if typeof(saved) == TYPE_DICTIONARY and String(saved.get("server", "")) == server_addr:
+		rejoin = saved
 
 ## Online play is possible here: the browser room, or a relay server on desktop.
 func available() -> bool:
@@ -98,13 +113,17 @@ func _start_native() -> void:
 		if enet.connected: break
 		await get_tree().create_timer(0.1).timeout
 	if enet and enet.connected:
-		enet.send({"k": "hello", "ver": VERSION, "tok": token, "name": Save.d.get("name", "Hunter")})
+		var hi := {"k": "hello", "ver": VERSION, "tok": token, "name": Save.d.get("name", "Hunter")}
+		if rejoining:
+			hi["rj"] = rejoin["tok"]
+		enet.send(hi)
 
 func _on_enet(d: Dictionary) -> void:
 	match String(d.get("k", "")):
 		"welcome":
 			me = String(d.get("me", ""))
 			mode = "server"
+			back = d.get("back", [])
 			if not my_presence.is_empty():
 				enet.send({"k": "pres", "d": my_presence})
 			peers_changed.emit()
@@ -148,23 +167,36 @@ func _on_js_msg(args) -> void:
 	var data = parsed.get("d", null)
 	if topic in ["st", "hit", "ev"]:
 		if m and is_instance_valid(m) and in_match:
+			if topic == "ev" and typeof(data) == TYPE_ARRAY:
+				for x in data: _cast_in(x)
 			m.net_receive(topic, data, from)
 		return
 	message.emit(topic, data, from)
 
 # ------------------------------------------------------------------ match
-func begin_match(name: String, host_peer: String, match_node: Node) -> void:
+func begin_match(name: String, host_peer: String, match_node: Node, start_msg := {}) -> void:
 	match_name = name
 	host = host_peer
 	m = match_node
 	in_match = true
+	if not CombatBus.ability_used.is_connected(_on_cast):
+		CombatBus.ability_used.connect(_on_cast)
 	out_hits.clear(); out_events.clear(); seen.clear()
 	if enet:
-		enet.send({"k": "join", "room": name})
+		if not rejoining:
+			# not randi(): the match seeds the global stream with its shared seed, so every player would roll the same
+			var tok := Crypto.new().generate_random_bytes(16).hex_encode()
+			rejoin = {"server": server_addr, "tok": tok, "start": start_msg}
+		rejoining = false
+		_save_rejoin()
+		enet.send({"k": "join", "room": name, "rj": rejoin["tok"]})
 	elif Bridge.js:
 		Bridge.js.joinMatch(name)
 
 func end_match() -> void:
+	# leaving on purpose gives the slot up; a lost connection keeps the file so the title can offer it
+	if enet and mode != "":
+		forget_rejoin()
 	flush()
 	in_match = false
 	m = null
@@ -184,6 +216,36 @@ func owner_of(nid: String) -> String:
 
 func owns(nid: String) -> bool:
 	return owner_of(nid) == me
+
+## My Boki just bloomed, shrank or fell back into its wisp: send my snapshot now, not on the next 0.1 s beat.
+func _kin_form_changed() -> bool:
+	var k = m.player.kin if m.player else null
+	var form: int = (int(k.wisp) + 2 * int(k.summon.shrink > 0.0)) if k and k.summon else 0
+	var changed: bool = form != _kin_form
+	_kin_form = form
+	return changed
+
+## A Boki's ability (k1 active, k2 auto) cast by a body this game owns: tell the others at once.
+func _on_cast(caster: Node, ability: String, slot: String) -> void:
+	if not (in_match and online() and slot in ["k1", "k2"] and caster is Ent):
+		return
+	var e: Ent = caster
+	if e.remote or not owns(e.nid):
+		return
+	event(["kab", e.nid, ability, slot])
+	flush()
+
+## The same cast on this game: the ability bus fires for the remote body, and its name floats up.
+func _cast_in(x) -> void:
+	if typeof(x) != TYPE_ARRAY or x.size() < 4 or String(x[0]) != "kab":
+		return
+	var e: Ent = m.ents_by_id.get(String(x[1]), null)
+	var def := KinLib.ability(String(x[2]))
+	if not is_instance_valid(e) or not e.remote or def == null:
+		return
+	CombatBus.ability_used.emit(e, def.id, String(x[3]))
+	if e is Kin and m.player and e.flat_dist(m.player) < 20.0:
+		m.fx.word(e.pos + Vector3(0, 1.3 + e.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 
 func hit(target_nid: String, d: Array) -> void:
 	out_hits.append([target_nid] + d)
@@ -219,11 +281,58 @@ func _chunks(topic: String, items: Array, header = null) -> void:
 	if cur.size() > (0 if header == null else 1):
 		_emit(topic, cur)
 
+# ------------------------------------------------------------------ rejoin
+## A match this game dropped out of is still held for it on the relay (as far as this game can tell).
+func can_rejoin() -> bool:
+	if not native_available() or rejoin.is_empty():
+		return false
+	return Time.get_unix_time_from_system() - float(rejoin["seen"]) < REJOIN_S
+
+## Reconnects asking for our Hunter back. Returns the match options to start (Game.start_match), or {} when
+## the relay no longer holds it (then the saved match is forgotten).
+func rejoin_match() -> Dictionary:
+	if enet:
+		enet.close()
+		_on_enet_closed("")
+	rejoining = true
+	back = []
+	_start_native()
+	for i in 100:
+		if mode == "server" or not started: break
+		await get_tree().create_timer(0.1).timeout
+	if back.is_empty():
+		rejoining = false
+		forget_rejoin()
+		return {}
+	var d: Dictionary = rejoin["start"]
+	return {"net": d, "seed": int(d["seed"]), "teams": int(d["teams"]), "squad": int(d["squad"]),
+		"tier": int(d.get("tier", 0))}
+
+func forget_rejoin() -> void:
+	rejoin = {}
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(REJOIN_FILE))
+
+func _save_rejoin() -> void:
+	rejoin["seen"] = Time.get_unix_time_from_system()
+	var f := FileAccess.open(REJOIN_FILE, FileAccess.WRITE)
+	if f:
+		f.store_string(JSON.stringify(rejoin))
+
 func tick(dt: float) -> void:
 	if not online() or m == null:
 		return
+	_seen_t -= dt
+	if _seen_t <= 0.0 and not rejoin.is_empty():
+		_seen_t = REJOIN_SEEN_S
+		_save_rejoin()
 	send_t -= dt
 	host_send_t -= dt
+	if _kin_form_changed():
+		send_t = 0.0
+	for k in m.kins:
+		if k.remote and k.summon:
+			k.summon.left = maxf(0.0, k.summon.left - dt)       # (their copy of the timer runs between snapshots)
+			k.summon.cd = maxf(0.0, k.summon.cd - dt)
 	if send_t <= 0.0:
 		send_t = 0.1
 		var mine: Array = m.net_snapshot(true)
