@@ -79,7 +79,7 @@ const CHECKS := {
 	"--kin-form-check": ["res://tools/kin_form_check.gd", "kin_form_check", null],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
-	"--dash-slope-check": ["res://tools/dash_slope_check.gd", "dash_slope_check", null],      # dash over ramps, a step, a crest
+	"--dash-slope-check": ["res://tools/dash_slope_check.gd", "dash_slope_check", null],      # ramps, step, crest
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],      # two-step abilities report their window
 	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],      # --shots-dir=<dir>
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],      # each Hunter dashes four ways (GPU)
