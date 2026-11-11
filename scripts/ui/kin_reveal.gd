@@ -206,12 +206,11 @@ func _place_card() -> void:
 	info.grow_vertical = Control.GROW_DIRECTION_BOTH
 
 func _info_card() -> PanelContainer:
-	var card := PanelContainer.new()       # the theme's torn void panel with the neon edge
+	var card := PanelContainer.new()       # the theme's panel
 	card.custom_minimum_size = Vector2(400, 0)
 	var v := UI.vbox(8); card.add_child(v)
 	var head := UI.hbox(10)
-	var nm := UI.title(String(sp["name"]), 30, UI.DARK_INK)
-	nm.add_theme_stylebox_override("normal", UI.title_tab())
+	var nm := UI.title(String(sp["name"]), UI.T_TITLE)
 	nm.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	head.add_child(nm)
 	head.add_child(UI.fill())

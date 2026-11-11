@@ -468,7 +468,7 @@ func _build_ui() -> void:
 	lt.texture = load("res://art/brand/logo_wordmark.png")
 	lt.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	lt.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	lt.custom_minimum_size = Vector2(500, 244)
+	lt.custom_minimum_size = Vector2(430, 210)      # (the whole column, Quit included, inside the 5% safe area at 16:9)
 	lt.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo = lt
 	logo.name = "Logo"
@@ -503,12 +503,7 @@ func _build_ui() -> void:
 		if ch == logo: continue
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
-	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
-	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
-	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
-	root.add_child(ver)
+	# bottom right: what this is (the build is on the playtest chip), and how to drive the menu without a mouse
 	# a small playtest chip low in the corner, clear of the splash's hero: the build and the Discord link
 	var news := UI.glass(8, 6)
 	news.name = "News"

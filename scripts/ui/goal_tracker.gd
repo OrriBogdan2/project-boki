@@ -105,7 +105,7 @@ static func build() -> PanelContainer:
 	var rows := lines()
 	if rows.is_empty():
 		return null
-	var box := UI.glass(12, 14, 0.5)
+	var box := UI.glass(12)
 	box.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	box.offset_left = -316
 	box.offset_right = -16

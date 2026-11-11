@@ -1,7 +1,7 @@
 class_name VoidPortrait
 extends Control
-## The cracked-mask window of the "Void & Masks" look (UI_STYLE.md on ext/agent-briefs): a Boki over a
-## deep starfield, a torn neon frame and teal cracks running in from the corners. The starfield and
+## A Boki's portrait window (docs/UI_STYLE.md): the Boki over a deep starfield in a thin frame, with
+## the logo egg's teal cracks running in from the corners. The starfield and
 ## cracks are fixed per window size and drawn as canvas shapes, so it costs nothing per frame.
 
 const STARS := 26                       # specks in the sky
@@ -14,7 +14,9 @@ const CRACKS := [                       # polylines in 0..1 of the window: from 
 	[Vector2(0.0, 1.0), Vector2(0.12, 0.92), Vector2(0.1, 0.84)],
 ]
 
-var _sky := UiTorn.make(SKY_TOP, 3.0)
+const RAD := 8                          # corner radius (UI.R_CARD; a literal so this file loads before UI)
+
+var _sky := UiFrame.raised(SKY_TOP, RAD)
 
 ## A window `px` square showing this Boki.
 static func of(rec: Dictionary, tree: SceneTree, px := 96.0) -> VoidPortrait:
@@ -44,7 +46,10 @@ func _draw() -> void:
 
 ## The frame and the teal cracks, over the creature.
 class Cracks extends Control:
-	var frame := UiTorn.make(Color(0, 0, 0, 0), 3.0, 1.0)
+	var frame := UiFrame.raised(Color(0, 0, 0, 0), VoidPortrait.RAD)
+	func _init() -> void:
+		frame.edge = Color(UI.ACCENT, 0.45)
+		frame.lit = 0.0
 	func _draw() -> void:
 		draw_style_box(frame, Rect2(Vector2.ZERO, size))
 		for c in VoidPortrait.CRACKS:

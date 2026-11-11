@@ -10,9 +10,9 @@ extends RefCounted
 ## widget file without reaching into hud.gd.
 
 # ------------------------------------------------------------------ colour roles
-const INK := Color("f3eee2")              # main text
-const MUTED := Color("a9b0bf")            # secondary text, empty things
-const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
+const INK := UI.INK                       # main text (the menus' token)
+const MUTED := UI.MUTED                   # secondary text, empty things
+const SHADE := Color(0.05, 0.06, 0.09, 0.86)    # frame backing behind bars and slots (ink navy, UI.NIGHT)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
 const SELF := Color("9be36e")             # your own health (leaf green)
 const ALLY := Color("63c7ff")             # your squad's health (sky blue)
@@ -33,7 +33,7 @@ const HURT := Color("ff6a5a")             # damage you take
 const HURT_KIN := Color("ffa08a")         # damage your Boki takes
 const GOLD := Color("ffd27a")             # levels, points to spend
 const COOLING := Color("ff8f6b")          # a slot that isn't ready: its frame and short countdowns
-const KEY_BG := Color(0.06, 0.035, 0.09, 0.95)
+const KEY_BG := Color(0.05, 0.06, 0.09, 0.95)
 
 # ------------------------------------------------------------------ fonts
 const BIG: Font = preload("res://fonts/LilitaOne-Regular.ttf")    # numbers, names, labels
