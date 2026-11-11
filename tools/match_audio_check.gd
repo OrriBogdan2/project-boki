@@ -193,7 +193,7 @@ func _belt_channel(m: Match, P: Hunter, id: String) -> void:
 	_step(m, 0.1)
 	ok(Sfx.loop_on(key), "belt %s: loops while it channels" % id)
 	Sfx.last_played.erase(BeltSfx.cue(id, "end"))
-	_step(m, Hunter.KIT_TIME + 0.1)
+	_step(m, UtilityUse.channel(id, "time") + 0.1)
 	ok(not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "end")), "belt %s: ends with its end cue" % id)
 	UtilityBelt.set_slot(P, 0, id, 3, 0)
 	P.hp = 20.0
