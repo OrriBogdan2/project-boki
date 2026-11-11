@@ -4416,6 +4416,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Lean.face(leaned)["name"], pct])
 	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
 	_garden_xp(rec, "feed", res["love"])
+	if res.get("learned", false): _toast("%s: %s" % [Care.food_name(f), FoodJournal.effect(f)])
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
@@ -5175,14 +5176,11 @@ func _open_feed(rec: Dictionary) -> void:
 		v.add_child(row)
 	for f in Care.FOODS:
 		var n := int(Save.d["items"].get(f, 0))
-		if n > 0: row_for.call(f, n, Care.FOODS[f]["desc"])
+		if n > 0: row_for.call(f, n, FoodJournal.line(f))
 	for f in Data.CROPS:
 		var n := int(Save.d["crops"].get(f, 0))
 		if n > 0:
-			var aff := ""
-			for af in Evo.AFF:
-				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
-			row_for.call(f, n, aff + "Fills it up.")
+			row_for.call(f, n, FoodJournal.line(f))
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
 	var any := GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
 			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or not rows.is_empty()

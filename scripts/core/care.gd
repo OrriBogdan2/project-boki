@@ -436,6 +436,7 @@ static func feed(rec: Dictionary, f: String) -> Dictionary:
 		joy += 22.0
 		fill *= Unique.FAV_FILL       # its favourite food: a little more filling too
 		out["new"] = discover(rec, "food")
+	out["learned"] = FoodJournal.learn(f)
 	var was := need(rec, "food")
 	change(rec, "food", fill)
 	change(rec, "joy", joy)

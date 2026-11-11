@@ -107,6 +107,7 @@ func fresh() -> Dictionary:
 		"raid_out": [],       # loadout pieces out on an expedition right now
 		"feeders": [],        # troughs on the farm: {id, kind, x, z, food: [keys], auto}
 		"feeder_inv": {},     # feeders bought but not set down yet
+		"foods_fed": [],      # foods any Boki has eaten: their effect shows instead of "?" (FoodJournal)
 		"furniture": {"journal": 1, "gramophone": 1},   # house pieces in storage: the empty house's two useful ones
 		"graves": [],         # kin that died, with their memories (Econ.kin_dies)
 		"farm_lvl": 0,        # Kin Cottage expansions: room for 6 / 8 / 10 / 12 kin out on the farm (KinBox)
@@ -462,6 +463,7 @@ func load_from(p: String) -> void:
 			return
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	FoodJournal.migrate(parsed)      # keyed by its own field, so no version bump
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]

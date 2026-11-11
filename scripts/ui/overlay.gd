@@ -671,7 +671,7 @@ func open_inventory() -> void:
 			cell.call("Tonics", "×%d" % int(Save.d["items"].get("tonic", 0)), "Heal 40% in a match (belt key %s)." % Settings.key_cap("util1"), Color("8ff0a0"), "", Callable(), "tonic")
 			for f in Care.FOODS:
 				var fn := int(Save.d["items"].get(f, 0))
-				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, Care.FOODS[f]["desc"] + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
+				if fn > 0: cell.call(Care.FOODS[f]["name"], "×%d" % fn, FoodJournal.line(f) + " Feed it from a Boki's card.", Care.FOODS[f]["col"])
 			for id in GardenItems.ids():
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
@@ -694,12 +694,13 @@ func open_inventory() -> void:
 				if n <= 0: continue
 				empty = false
 				var ck: String = k
-				cell.call(Data.CROPS[k]["name"], "×%d" % n, Data.CROPS[k]["desc"], Data.CROPS[k]["color"], "Feed to your partner", func():
+				cell.call(Data.CROPS[k]["name"], "×%d" % n, FoodJournal.line(k), Data.CROPS[k]["color"], "Feed to your partner", func():
 					var ak := Save.active_kin()
 					if ak.is_empty() or int(Save.d["crops"].get(ck, 0)) <= 0: return
 					Save.d["crops"][ck] = int(Save.d["crops"][ck]) - 1
 					CareJournal.fed(ak, ck, Evo.eat(ak, ck))
 					Save.remember(ak, "fed", "was fed a %s" % Data.CROPS[ck]["name"].to_lower(), 4.0)
+					FoodJournal.learn(ck)
 					Sfx.play("kin_happy")
 					Save.save_game()
 					open_inventory())

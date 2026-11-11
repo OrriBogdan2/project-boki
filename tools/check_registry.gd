@@ -274,6 +274,7 @@ const CHECKS := {
 	"--home-verbs-check": ["res://tools/home_verbs_check.gd", "home_verbs_check", null],
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],  # news at home
+	"--food-journal-check": ["res://tools/food_journal_check.gd", "food_journal_check", null],      # a food shows ? until fed once
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
 	"--boki-sex-check": ["res://tools/boki_sex_check.gd", "boki_sex_check", null],      # sex 50/50, female looks only on chosen species
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
