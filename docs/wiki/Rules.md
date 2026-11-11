@@ -455,6 +455,7 @@ How Hunter kits hit a Boki (BokiHit, docs/decisions/0047). Source parity: the so
 | dmg_k | {"summoned": 1.0, "wild": 1.0} |
 | cc | ["stun", "root", "slow", "burn", "blight"] |
 | execute | True |
+
 ## boki_idle (`content/rules/boki_idle.json`)
 
 
@@ -1078,11 +1079,6 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | _wake_s | the Heart wakes and its one Heartspark starts charging (the early seat unlocks) |
 | charge_s | 75 |
 | _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
-| _doc | The Heart loop (docs/decisions/0023-heartspark.md; scripts/match/heart.gd). Every number of the prototype lives here. Seconds and metres. |
-| charge_s | 75 |
-| _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
-| cool_s | 90 |
-| _cool_s | after a carrier extracts, the Heart cools down this long, then charges a new Heartspark (owner: start at 90 s) |
 | pickup_hold_s | 1.5 |
 | _pickup_hold_s | hold interact (F) on a charged Heartspark this long to take it |
 | pickup_r | 2.2 |
@@ -1114,11 +1110,6 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |
 | tide_next_s | 60 |
 | _tide_next_s | the dashed ring on the maps is where the tide will be this many seconds from now |
-| gate_hold_s | 2.5 |
-| _gate_hold_s | the carrier holds interact at the open gate this long to leave with the Heartspark |
-| tide_start_s | 15 |
-| tide_close_s | 240 |
-| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this |
 | tide_r0 | 130 |
 | tide_r1 | 34 |
 | tide_boost | 0.55 |
@@ -1136,9 +1127,6 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
 | place | {"_doc": "placement pay for a squad that did not leave (spec task 5, Game.apply_result)", "gems_per_squad_below": 5, "gems_max": 40, "min_level": 2, "_min_level": "a squad whose Hunters are all still below this run level at the end hid all match and gets no placement gems"} |
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
-| tide_heat | 0.06 |
-| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
-| reward | {"seeds": {"emberberry": 2, "sunroot": 2, "mindmint": 2, "tidebloom": 2}, "_seeds": "the four evolution foods, so any affinity can be pushed", "goods": {"heartwood": 1, "starstone": 1}, "_goods": "rare evolution materials (market goods)", "trust": 12.0, "_trust": "bond/trust added to the carrier's Boki (and each Boki that stood with the squad gets a share)", "gems": 60} |
 | demo_charge | 1 |
 
 ## hunter_move (`content/rules/hunter_move.json`)
@@ -1297,22 +1285,6 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | wear_rarity | {"bell": "common", "bow": "common", "leafhat": "common", "scarf": "uncommon", "crown": "uncommon", "goggles": "uncommon", "cape": "rare", "tophat": "rare", "collar": "uncommon", "charm": "epic"} |
 | finds | {"material": 0.25, "trophy_per_boss": 1, "ink": 0.05} |
 | finds_doc | Per expedition you make it out of: the chance of one rare material (weighted by restock), and trophies per boss you helped kill. ink: the chance of one Ink of any type (weighted by restock), rare on purpose; a boss with an 'ink' in its def (Data.MOBS) also gives its own Ink to the hunter who killed it. |
-
-## mask_moment (`content/rules/mask_moment.json`)
-
-Putting on a Relic (MaskBeat, scripts/ui/mask_beat.gd): build-up, the Relic rising to the face, a cut to black and silence, flashes of the fallen Hunter with a whisper, the snap back with an impact and a ripple of light, a pose, the name and title, and a sting. Times in seconds. 'full' is the first Mask (and every first time); 'short' is a later Mask on the farm. After the first one the player can skip.
-
-| Setting | Value |
-|---|---|
-| full | {"build_s": 1.2, "rise_s": 1.4, "black_s": 0.7, "memory_s": [0.3, 0.28, 0.36], "reveal_s": 1.6, "push_in": 0.7} |
-| short | {"build_s": 0.5, "rise_s": 0.8, "black_s": 0.45, "memory_s": [0.38], "reveal_s": 1.5, "push_in": 0.6} |
-| times_doc | build_s: the world quiets, the camera eases in, swell and heartbeat. rise_s: the Relic lifts to the face in slow motion while a ghostly porcelain face flickers over yours. black_s: the hard silence after contact. memory_s: one entry per memory frame of the fallen Hunter (their painted art). reveal_s: the snap back to the end (pose, name and title, sting). push_in: how far the camera eases in (0..1 of the way to the face). |
-| music_duck_db | -30 |
-| heart_gaps_s | [0.62, 0.5, 0.4, 0.32] |
-| punch_fov | 5 |
-| whispers | {"gunslinger": "Another job. Another mark on the tally.", "juggernaut": "The blade is hungry. Feed it, or it feeds on you.", "archer": "Every mask I sewed, I will cut loose.", "bulwark": "Hold on. The shore is close.", "mage": "One day I give the storm back.", "ashwick": "Bottled Blight. Drink up.", "dredge": "Come down where it's quiet.", "tender": "Stay close to the light.", "rimewright": "Skate. Don't look down at the ice.", "dolm": "Stone remembers what eyes forget.", "ostra": "Go on, laugh. I'll keep it.", "thief": "I only meant to take a look.", "gil": "Ooh, what does this one do?"} |
-| sting_semitones | {"gunslinger": 0, "juggernaut": -5, "archer": 3, "bulwark": -7, "mage": 5, "ashwick": 2, "dredge": -9, "tender": 7, "rimewright": 4, "dolm": -3, "ostra": 1, "thief": 6, "gil": 8} |
-| sting_doc | Each Hunter's sting is the same rising motif in their own key (semitones from A3). |
 
 ## merge_forms (`content/rules/merge_forms.json`)
 
@@ -1552,7 +1524,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | glide_carry | {"carry_drag": 3.0, "default": 12.0, "archer": 9.0} |
 | dash | {"jump_keep": 0.75} |
 | dash_speed | {"archer": 0.7} |
-| _doc | The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section). Created by the Kael job; merge with the movement/air job's file (same Tuning.of reader). |
+| _doc | The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section). |
+| vex_air_dash | {"_note": "Vex's air dash look (GunslingerKit): the lime fire ribbon her body draws through the barrel roll, and the burst of sparks it leaves from. Distance and timing stay her dash data's.", "fire_width_m": 0.34, "fire_life_s": 0.3, "fire_rise_m": 0.9, "fire_col": "b8f03c", "fire_hot_col": "eaffa8", "burst_sparks": 12} |
 | kael | {"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.", "tap_dmg_k": 0.6, "tap_range_k": 0.8, "tap_windup_s": 0.45, "tap_cooldown_s": 1.2, "ult_carry_k": 0.8, "ult_carry_decay_per_s": 1.6, "ult_up_min_mps": 1.0, "ult_up_bonus_mps": 2.2, "chain_lunge_deg": 25.0} |
 
 ## tutorial (`content/rules/tutorial.json`)
