@@ -102,6 +102,8 @@ func _shots(dir: String) -> void:
 	var tree := main.get_tree()
 	DirAccess.make_dir_recursive_absolute(dir.path_join("frames"))
 	main.get_window().size = Vector2i(1280, 720)
+	if main.fade:
+		main.fade.reveal(0.05)     # the boot splash stays up when a tool builds a scene by hand
 	var holder := _stage()
 	var cam := Camera3D.new()
 	cam.fov = 40.0
