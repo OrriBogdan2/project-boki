@@ -59,6 +59,7 @@ var guide: FarmGuide = null        # the Goals card and the farm tutorial on scr
 var toys: HomeToys = null        # the base's balls, posts and tubs, played with on their own (home_toys.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var race: BaseRace = null     # the Dash start post by the Training post (base_race.gd)
+var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
@@ -167,6 +168,7 @@ func _ready() -> void:
 	hg = HomeGather.new(self)
 	hw = HomeWork.new(self)
 	toys = HomeToys.new(self)
+	if visit.is_empty() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
 		guide = FarmGuide.new(self)
@@ -1337,6 +1339,7 @@ func _move_kin(d: float) -> void:
 	whistle_cd = maxf(0.0, whistle_cd - d)
 	talk_cd = maxf(0.0, talk_cd - d)
 	_separate_kin(d)
+	if life: life.step(d)
 	for k in kins:
 		if k.get("busy", false):
 			continue
@@ -1409,6 +1412,8 @@ func _move_kin(d: float) -> void:
 				pass
 			elif hw and hw.pick(k):
 				pass      # off to a job it's suited to
+			elif life:
+				life.choose(k)      # the base: it lives its own life (BaseLife)
 			elif night and randf() < 0.6:
 				if here == world.island_of(spots["house"].x, spots["house"].z) and randf() < 0.45:
 					# some sleep indoors
@@ -5167,7 +5172,7 @@ func _separate_kin(d: float) -> void:
 			if j == i: continue
 			var b: Dictionary = act[j]
 			var diff := ap - Vector2(b["pos"].x, b["pos"].z)
-			var need := _kin_r(a) + _kin_r(b)
+			var need := (_kin_r(a) + _kin_r(b)) * (life.pile(a, b) if life else 1.0)
 			var dl := diff.length()
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001
