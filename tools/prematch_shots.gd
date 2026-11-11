@@ -8,7 +8,8 @@ const MOMENTS := [["full", 10.0], ["chat", 10.0], ["red", 2.0], ["locked", 0.0]]
 
 ## The visible controls under `node` (not its frame) that stick out of `area` less the view's title-safe
 ## margin, as "Class at rect". Inside a ScrollContainer a control is judged by that container's rect, so a
-## row that has to scroll (or sits under the next widget) fails like one off the screen.
+## row that has to scroll (or sits under the next widget) fails like one off the screen. The chat log
+## scrolls by design and is not judged.
 func outside(node: Node, area: Rect2) -> Array:
 	var pv = load("res://scripts/ui/prematch_view.gd")
 	var margin := float(maxi(pv.SAFE_MIN, int(area.size.y * pv.SAFE_FRAC)))
@@ -20,6 +21,7 @@ func outside(node: Node, area: Rect2) -> Array:
 		if scroller != null:
 			box = scroller.get_global_rect()
 		var shown: bool = c.get_parent() != node and c.is_visible_in_tree() and c.size.x > 0.0
+		shown = shown and scroller != node.chat_scroll
 		if shown and not box.encloses(c.get_global_rect()):
 			bad.append("%s at %s" % [c.get_class(), c.get_global_rect()])
 	return bad
@@ -70,6 +72,6 @@ func run(main: Node) -> void:
 		var win := main.get_window().size
 		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
 		main.get_viewport().get_texture().get_image().save_png(path)
-		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
+		var bad := outside(view, main.get_viewport().get_visible_rect())
 		print("PREMATCHSHOT %s outside the safe area: %d %s" % [path, bad.size(), bad.slice(0, 3)])
 	tree.quit()
