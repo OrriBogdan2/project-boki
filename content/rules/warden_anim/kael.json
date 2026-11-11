@@ -1,5 +1,6 @@
 {
 	"doc": "Kael v2's clips (art/wardens/kael/kael.glb: the first Kael's 49 hand-keyed clips retargeted by tools/art1/kael_retarget.py) and which game state plays which (scripts/heroes/warden_clips.gd). One file per Hero, so ART-1 branches never touch shared code.",
+	"extra_bones": {"x_breath": "hips"},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
 	],
@@ -7,9 +8,10 @@
 		"spring_hangwarchain"
 	],
 	"loco": {
+		"blend_rate": 7.5,
 		"idle": "idle",
 		"stance": "stance",
-		"stance_after": 6.0,
+		"stance_after": 4.0,
 		"walk": {
 			"f": "walk_f",
 			"b": "walk_b",
@@ -23,7 +25,7 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 4.6
+		"run_speed": 4.6, "stride": [1.5, 1.2], "bob": [1.0, 0.55], "foot_mps": [1.62, 4.35], "arm_swing": {"L": 0.5}
 	},
 	"crouch": {
 		"idle": "crouch_idle",
@@ -198,6 +200,7 @@
 			0.8
 		]
 	],
+	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
 	"procedural": [
 		"ledge",
 		"mantle",

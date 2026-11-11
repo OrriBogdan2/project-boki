@@ -14,6 +14,9 @@ The current model is **owner-authoritative per entity**, not server-authoritativ
   the rest to the host.
 - Owners send **snapshots** of what they own. Anyone who hits something they don't own sends the hit to
   its owner, which applies it. One-off happenings (effects, catches, chests, hexes) go as events.
+- So shots are the shooter's call: the shooter's game flies the shot against its own view of the target,
+  and a hit there is a hit. Other games only draw a copy, spawned when the event arrives (about 0.2 s late
+  at 100/150 ms pings). `--lagcomp-check` proves no hit is lost over a slow line (lag relay, two games).
 
 A move to a server-authoritative model (clients send inputs only) is planned in
 `docs/ARCHITECTURE_PLAN.md` on the `design` branch. Nothing of it is built yet.
@@ -43,6 +46,13 @@ lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `po
 | `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `hex`, `knock`, `out`, `catch` / `caught`, `chest`, and more |
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
+
+**Drawing other players' Hunters** (`scripts/match/net_smooth.gd`, decision 0039): each remote Hunter keeps
+its last six snapshots on its owner's clock (the `st` header) and is drawn 0.15 s behind the quickest
+arrival, on a Hermite curve between the two snapshots around that moment. Past the newest it runs on its
+last velocity for at most 0.25 s. A move faster than 40 m/s between two snapshots is a teleport and is drawn
+as one jump. `--remote-smooth-check` measures it over a relay with 80 ms ping, 20 ms jitter and 2% loss.
+Boki and monsters still chase their newest snapshot (`Ent.net_follow`).
 
 ## Net.VERSION
 

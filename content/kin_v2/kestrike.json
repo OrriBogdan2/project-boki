@@ -6,7 +6,7 @@
 		"Kestrel",
 		"Copper lightning rod"
 	],
-	"theme": "storm",
+	"theme": "electric",
 	"flavor": "A kestrel with a copper crest that draws lightning. It hangs still in the wind, then strikes like the bolt it caught.",
 	"colors": {
 		"body": "#b5653a",
