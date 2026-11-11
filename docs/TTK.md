@@ -14,26 +14,26 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 <!-- ttk:table -->
 | Hunter (source) | Row | Ours s | Source s | Ours / source | Verdict |
 |---|---|---|---|---|---|
-| gunslinger (Ghost) | LMB rank 0 | 8.07 | 2.48 | 3.25 | FAIL |
-| gunslinger (Ghost) | LMB rank max | 8.07 | 2.48 | 3.25 | FAIL |
-| gunslinger (Ghost) | combo rank 0 | 1.77 | 1.92 | 0.92 | ok |
-| gunslinger (Ghost) | combo rank max | 1.37 | 1.76 | 0.78 | FAIL |
+| gunslinger (Ghost) | LMB rank 0 | 5.47 | 2.48 | 2.20 | FAIL |
+| gunslinger (Ghost) | LMB rank max | 5.47 | 2.48 | 2.20 | FAIL |
+| gunslinger (Ghost) | combo rank 0 | 2.20 | 1.92 | 1.15 | ok |
+| gunslinger (Ghost) | combo rank max | 1.87 | 1.76 | 1.06 | ok |
 | juggernaut (Brall) | LMB rank 0 | 8.45 | 12.95 | 0.65 | FAIL |
 | juggernaut (Brall) | LMB rank max | 8.45 | 12.95 | 0.65 | FAIL |
-| juggernaut (Brall) | combo rank 0 | 3.48 | 7.70 | 0.45 | FAIL |
-| juggernaut (Brall) | combo rank max | 1.15 | 7.00 | 0.16 | FAIL |
+| juggernaut (Brall) | combo rank 0 | 4.22 | 7.70 | 0.55 | FAIL |
+| juggernaut (Brall) | combo rank max | 4.15 | 7.00 | 0.59 | FAIL |
 | ashwick (Felix) | LMB rank 0 | 4.87 | 6.20 | 0.78 | FAIL |
-| ashwick (Felix) | LMB rank max | 4.72 | 6.20 | 0.76 | FAIL |
+| ashwick (Felix) | LMB rank max | 4.62 | 6.20 | 0.74 | FAIL |
 | ashwick (Felix) | combo rank 0 | 3.03 | 4.00 | 0.76 | FAIL |
 | ashwick (Felix) | combo rank max | 1.83 | 3.00 | 0.61 | FAIL |
 | mage (Joule) | LMB rank 0 | 10.42 | 13.60 | 0.77 | FAIL |
 | mage (Joule) | LMB rank max | 10.42 | 13.60 | 0.77 | FAIL |
-| mage (Joule) | combo rank 0 | 7.32 | 9.00 | 0.81 | ok |
-| mage (Joule) | combo rank max | 4.07 | 6.40 | 0.64 | FAIL |
+| mage (Joule) | combo rank 0 | 1.53 | 9.00 | 0.17 | FAIL |
+| mage (Joule) | combo rank max | 1.27 | 6.40 | 0.20 | FAIL |
 | bulwark (Oath) | LMB rank 0 | 4.88 | 6.75 | 0.72 | FAIL |
 | bulwark (Oath) | LMB rank max | 4.88 | 6.75 | 0.72 | FAIL |
-| bulwark (Oath) | combo rank 0 | 4.12 | 5.85 | 0.70 | FAIL |
-| bulwark (Oath) | combo rank max | 3.65 | 5.00 | 0.73 | FAIL |
+| bulwark (Oath) | combo rank 0 | 4.08 | 5.85 | 0.70 | FAIL |
+| bulwark (Oath) | combo rank max | 4.18 | 5.00 | 0.84 | ok |
 | thief (Shiv) | LMB rank 0 | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | LMB rank max | 4.68 | 4.95 | 0.95 | ok |
 | thief (Shiv) | combo rank 0 | 4.22 | 4.95 | 0.85 | ok |
@@ -56,9 +56,9 @@ PARITY FIRST (briefs/DECISIONS.md 2026-11-07). `godot --headless --path . -- --t
 | Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |
 |---|---|---|---|---|
 | gunslinger (Ghost) | rmb | 0.143 | 0.128 | 1.11 |
-| gunslinger (Ghost) | e | 0.234 | 0.157 | 1.49 |
+| gunslinger (Ghost) | e | 0.156 | 0.157 | 0.99 |
 | juggernaut (Brall) | rmb | 0.169 | 0.101 | 1.67 |
-| juggernaut (Brall) | dash | 0.175 | 0.038 | 4.60 |
+| juggernaut (Brall) | dash | 0.058 | 0.038 | 1.53 |
 | juggernaut (Brall) | e | 0.052 | 0.023 | 2.23 |
 | ashwick (Felix) | rmb | 0.131 | 0.082 | 1.59 |
 | ashwick (Felix) | dash | 0.104 | 0.148 | 0.70 |
