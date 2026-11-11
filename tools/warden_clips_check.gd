@@ -181,8 +181,9 @@ func _hunter(art_name: String, id: String, prefix: String) -> void:
 	ok(tris <= MAX_TRIS, "%s: %d triangles, the budget %d" % [art_name, tris, MAX_TRIS])
 	m.free()
 
-## The three shared actions (stomp, revive, drink): a Hunter with a clip for it plays it, timed to the game's clock;
-## one without keeps the procedural pose. Motley, Albert, Sparkle and Sable have all three.
+## The three shared actions (stomp, revive, drink): a Hunter with a clip for it plays it, timed to the game's clock
+## (the clips' lengths are --clip-check's rows, every Hero's); one without keeps the procedural pose. Motley, Albert,
+## Sparkle and Sable have all three.
 func _finishers() -> void:
 	for id in ["ostra", "bulwark", "mage", "thief"]:
 		var art_name := WardenGlb.art(id)
@@ -193,14 +194,10 @@ func _finishers() -> void:
 		var lib: AnimationLibrary = clips.lib
 		var sts: Dictionary = cfg["states"]
 		var proc: Array = cfg.get("procedural", [])
-		for k in [["stomp", float(Life.R["stomp_cycle"])], ["drink", UtilityUse.channel("tonic", "time")]]:
-			var nm := String(sts.get(k[0], ""))
+		for k in ["stomp", "drink"]:
+			var nm := String(sts.get(k, ""))
 			var has := nm != "" and lib.has_animation(nm)
-			ok(has and not k[0] in proc, "%s: a %s clip, off the procedural list" % [art_name, k[0]])
-			if has:
-				var secs := lib.get_animation(nm).length
-				var fits := absf(secs - float(k[1])) < 0.04
-				ok(fits, "%s: the %s clip is %.2f s (the game's %.2f)" % [art_name, k[0], secs, k[1]])
+			ok(has and not k in proc, "%s: a %s clip, off the procedural list" % [art_name, k])
 		var rv := String(sts.get("reviving", ""))
 		var loops := lib.has_animation(rv) and lib.get_animation(rv).loop_mode == Animation.LOOP_LINEAR
 		ok(loops, "%s: the revive kneel loops" % art_name)
@@ -419,8 +416,8 @@ func _air(id: String) -> void:
 	holder.add_child(m)
 	var w := m.get_node_or_null("Warden")
 	var sync := w.get_node("Sync") as WardenGlb.Sync if w else null
-	if WardenClips.data(art_name).is_empty():
-		m.free()           # (a Hero with no keyed clips yet, Gil: the rig's procedural pose, nothing to tilt)
+	if not WardenClips.data(art_name).has("loco"):
+		m.free()           # (a Hero with no keyed clips yet, Gil: his map holds only the weapon, nothing to tilt)
 		return
 	if sync == null or sync.clips == null:
 		ok(false, "%s: plays its clips" % art_name)

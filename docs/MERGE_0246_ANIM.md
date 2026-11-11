@@ -78,6 +78,18 @@ branch's clips or 0245's data):
   carry_drop mesh, the Boki carry socket on Albert, Dolm's breah_throw snap, Ashwick's as_cloak length.
 - gil: plays its clips (a check that walks every Hero; Gil has no keyed clips in 0245).
 
+ext/anim-w0246-reds (stacked on this branch) takes the 27 to 0: 14 closed in the maps, the code or the check, 13 need
+Blender and stand in --clip-check's OPEN table (reported, not failed; a stale entry fails) with docs/DEBT.md entries.
+- maps: Tarek breah_throw `fade` 0.05 (the snap), Albert `carry_fwd` 1.6 (the Boki clear of the v95 chest), Lace and
+  Sparkle land `hop.w` 0.65 (the hop's dip on the run).
+- code: WardenClips ignores a heading turn while planted (Sable's vault turned her feet; thief rooted).
+- checks whose assumption was wrong: rooted feet measure the idle's sway over its whole loop (Kael); the stroke rate
+  is the signal's period, not its peak count (Kael, Motley); Meeko's blade rides his sun, so its tip is not held to the
+  hand (in the water and on land); Gil has a clip map with only a weapon; --warden-clips-check's drink length row was
+  --clip-check's again (dropped).
+- OPEN (Blender): the 8 drink clips, Cinder as_cloak, the 3 pops (jug_riposte, dr_lunge, mage_lmb_l), Sable's
+  carry_drop mesh.
+
     clip-check: CLIP FAIL archer jump run: the landing dips  m (the hop's dip, at least ), lowest at  s
     clip-check: CLIP FAIL ashwick: every clip lasts as long as its kit move (worst  s, as_cloak, clip  s, keys  s)
     clip-check: CLIP FAIL bulwark: its drink clip lasts the game's  s

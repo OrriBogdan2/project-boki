@@ -36,12 +36,21 @@ const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
 const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
-## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
-const STAND_OPEN := {
+## Rows only a re-key in Blender closes (docs/DEBT.md): "<id>:<clip or move>" -> what. Reported, not failed, and
+## failed once the row passes, so the entry goes with the fix. The standing loops are docs/art/IDLE_AUDIT.md's.
+const OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
 	"bulwark:stance": "head seam 4.2 deg, 1.6 s long",
 	"ostra:idle": "x_fing seams 11-13 deg",
 	"ostra:stance": "x_fing seams 12-16 deg",
+	"bulwark:drink": "keyed 1.10 s", "tender:drink": "keyed 1.10 s", "dolm:drink": "keyed 1.10 s",
+	"dredge:drink": "keyed 1.10 s", "rimewright:drink": "keyed 1.10 s", "mage:drink": "keyed 1.10 s",
+	"thief:drink": "keyed 1.10 s", "ostra:drink": "keyed 1.10 s",
+	"ashwick:as_cloak": "the baked clip is 0.233 s, cinder_clips.py keys 0.36 s",
+	"juggernaut:jug_riposte:pop": "its first key sits far off the guard",
+	"dredge:dr_lunge:pop": "its first key sits far off dr_shot's last",
+	"mage:mage_lmb_l:pop": "its first key sits far off the run",
+	"thief:carry_drop": "the v95 body blends the pistols' weights (0.8 on the hand at most): no rigid piece to drop",
 }
 
 var bad := 0
@@ -51,6 +60,14 @@ func ok(cond: bool, what: String) -> void:
 	print("CLIP %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
 		bad += 1
+
+## A row that may stand in OPEN under `key`.
+func ok_or_open(cond: bool, key: String, what: String) -> void:
+	if not OPEN.has(key):
+		ok(cond, what)
+		return
+	print("CLIP open %s [%s]%s" % [what, OPEN[key], " (now passes: drop it from OPEN)" if cond else ""])
+	ok(not cond, "%s: OPEN entry still needed" % key)
 
 func run(main: Node) -> void:
 	Save.no_write = true
@@ -125,7 +142,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(shown == 0, "%s: one weapon drawn (%d procedural pieces showing:%s)" % [id, shown, which])
 	_sliders(id, sync)
 	_sway(id, m, sync, dd)
-	await _on_blade(id, m, sync, clips)
+	await _on_blade(id, m, sync, clips, dd)
 	# "bone_scale" (item 137): the size holds over every clip that keys the bone
 	for nm in dd.get("bone_scale", {}):
 		var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -136,7 +153,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	await _handover(id, m, sync, clips, dd)
 	_snaps(id, m, clips, dd)
 	await _carry(id, m, sync, clips, dd)
-	await _pond(id, m, sync, clips)
+	await _pond(id, m, sync, clips, dd)
 	_recoil(id, m, sync, clips, dd)
 	var reach := StrikeReach.new()
 	await reach.hero(id, m, sync, dd, holder.get_tree())
@@ -219,7 +236,7 @@ func _sway(id: String, m: Node3D, sync: Node, dd: Dictionary) -> void:
 
 ## Each mapped kit move: its clip lasts as long as the move's keys (a held move: at least to its last key).
 ## The idle and stance loops: the last key meets the first on every track (no pop at the loop), and the loop is
-## long enough to carry a breath. Entries in STAND_OPEN are reported, not failed.
+## long enough to carry a breath. Entries in OPEN are reported, not failed.
 func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	for clip in ["idle", "stance"]:
 		var anim_name := String(dd.get("loco", {}).get(clip, clip))
@@ -246,13 +263,7 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		var good := worst <= 1.0 and anim.length >= STAND_MIN
 		var what := "%s: %s loop seam %.1fx the limit (worst %s), %.1f s long (min %.1f)" % [
 				id, clip, worst, where if where != "" else "none", anim.length, STAND_MIN]
-		var key := "%s:%s" % [id, clip]
-		if STAND_OPEN.has(key):
-			var stale := " (now passes: drop it from STAND_OPEN)" if good else ""
-			print("CLIP open %s [%s]%s" % [what, STAND_OPEN[key], stale])
-			ok(not good, "%s: STAND_OPEN entry still needed" % key)
-		else:
-			ok(good, what)
+		ok_or_open(good, "%s:%s" % [id, clip], what)
 
 ## The ways down, running and standing (tools/jump_land_check.gd), printed as "JL" rows. The jump: the take-off and
 ## the apex read (the pose turns), every jump reads like the first (the rise clip starts over). Every way: the landing
@@ -383,6 +394,10 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		var end_t := float(def["keys"][-1][0])
 		var length := clips.lib.get_animation(String(moves[km]["clip"])).length
 		var off := maxf(end_t - length, 0.0) if moves[km].has("hold_from") else absf(length - end_t)
+		if OPEN.has("%s:%s" % [id, km]):
+			var what := "%s: the %s clip lasts as long as its kit move (clip %.3f s, keys %.3f s)"
+			ok_or_open(off <= 0.034, "%s:%s" % [id, km], what % [id, km, length, end_t])
+			continue
 		if off > worst:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
@@ -408,10 +423,18 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			continue
 		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else UtilityUse.channel("tonic", "time")
 		var dur := clips.lib.get_animation(String(st[k])).length
-		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
+		ok_or_open(absf(dur - want) <= 0.034, "%s:%s" % [id, k], "%s: its %s clip lasts the game's %.2f s (clip %.2f s)"
+				% [id, k, want, dur])
+
+## A blade whose tip is a companion's anchor (Meeko's lantern hangs from his orbiting sun: WardenCompanions) rides
+## the companion, not a hand: the Muzzle-on-the-tip rows hold for it, --meeko-orbit-check holds the orbit.
+func _tip_rides_companion(dd: Dictionary) -> bool:
+	var tip := String((dd.get("blade", {}) as Dictionary).get("tip", ""))
+	return ((dd.get("companions", {}) as Dictionary).get("list", []) as Array).any(
+			func(c: Dictionary) -> bool: return (c.get("anchors", []) as Array).has(tip))
 
 ## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand.
-func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -436,7 +459,10 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			n += 1
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
-	ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
+	if _tip_rides_companion(dd):
+		print("CLIP note %s: the blade rides its companion, not a hand (%.3f m off the bone)" % [id, drift])
+	else:
+		ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
 
 ## The clips keep rotations only on the contract bones, so MantleLook's sliders (bone offsets) stay on under them; and
 ## the death state has its time on screen.
@@ -486,7 +512,9 @@ func _rooted(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictiona
 	var worst := 0.0
 	var where := ""
 	var sway := 0.0      # (the idle's own weight shift moves a heavy Hero's feet; a cast adds to it)
-	for k in 45:
+	# (over the idle's whole loop: the legs stay on it through every move below, wherever in the loop a move falls)
+	for k in maxi(45, ceili(clips.lib.get_animation(String(dd["loco"]["idle"])).length / DT)):
+		clips.still_t = 0.0
 		sync.call("_process", DT)
 		await holder.get_tree().process_frame
 		sway = maxf(sway, _foot_dist(sk, feet, rest))
@@ -555,6 +583,7 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	var last := Vector3.INF
 	var worst := 0.0
 	var where := ""
+	var held := {}      # the worst of each move OPEN lists, judged on its own row
 	for st in seq:
 		var t := 0.0
 		var i := 0
@@ -574,7 +603,9 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 				for j in range(maxi(i - 2, 0), mini(i + 3, path.size())):      # (a frame or two either way: the fade)
 					clip_step = maxf(clip_step, float(path[j]))
 				var over := p.distance_to(last) - clip_step
-				if over > worst:
+				if OPEN.has("%s:%s:pop" % [id, st[0]]):
+					held[st[0]] = maxf(over, float(held.get(st[0], 0.0)))
+				elif over > worst:
 					worst = over
 					where = "%s @%.2f" % [st[0], t]
 			last = p
@@ -583,6 +614,9 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 	var height := 1.6 * absf(m.scale.y)
 	ok(worst <= POP * height, "%s: moves hand over without a pop (worst %.3f m over the clip's own, %s; limit %.3f)"
 			% [id, worst, where, POP * height])
+	for km in held:
+		var what := "%s: %s takes over without a pop (%.3f m over the clip's own; limit %.3f)"
+		ok_or_open(float(held[km]) <= POP * height, "%s:%s:pop" % [id, km], what % [id, km, held[km], POP * height])
 	ok(clips.proc_w <= 0.0, "%s: the clips own the body after the run" % id)
 	s["kmove"] = "no_such_move"
 	for k in 12:
@@ -801,7 +835,7 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 		var bare := not clips.drop.is_empty()
 		for h in clips.drop:
 			bare = bare and h[0].mesh == h[2] and _tris(h[2]) < _tris(h[1])
-		ok(bare, "%s: the weapon modelled into the hand leaves the shown mesh" % id)
+		ok_or_open(bare, "%s:carry_drop" % id, "%s: the weapon modelled into the hand leaves the shown mesh" % id)
 	ok(plain < 0.02 or stride >= plain * 0.75,
 			"%s: the legs keep stepping under it (%.2f m of stride, %.2f m without)" % [id, stride, plain])
 	s["kmove"] = "rs_done"
@@ -858,7 +892,7 @@ func _stride(sync: Node, sk: Skeleton3D) -> float:
 ## The pond walk (tools/pond_walk.gd): the right move for each depth. Wading is the run with the knees hauled up (higher
 ## than the rig's plain walk at that speed); swimming is a flutter kick and, in a hand the kit lets go of, a stroke,
 ## both at the pace of the swim (slower treading water); the weapon stays in its hand; the clips stand aside.
-func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
+func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var bi := {}
 	for b in ["hand.L", "upper_arm.L", "shin.L", "shin.R"]:
@@ -917,7 +951,7 @@ func _pond(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			"%s: %s (%.1f strokes/s swimming, %.1f treading)" % [id,
 			"its free hand strokes at the swim pace" if strokes else "both hands stay on the weapon",
 			stroke[0], stroke[1]])
-	ok(held[0] <= FX_ON_BLADE and held[1] <= 2.0 * HunterAnim.WEAPON_SLACK,
+	ok(held[0] <= FX_ON_BLADE and (held[1] <= 2.0 * HunterAnim.WEAPON_SLACK or _tip_rides_companion(dd)),
 			"%s: the weapon stays in its hand in the water (%.3f m off the tip, %.3f m off the hand)" % [
 			id, held[0], held[1]])
 	var ends: Array = rows.filter(func(r): return r["phase"] in ["swim", "tread", "wade"])
@@ -938,20 +972,27 @@ func _range(rows: Array, phase: String, bone: String, axis: int) -> float:
 			hi = maxf(hi, (r[bone] as Vector3)[axis])
 	return hi - lo
 
-## Cycles a second of one limb signal over a phase, after the ease-in (a swing up through the middle of its range
-## and back down past a quarter of it counts once, so a jitter does not).
+## Cycles a second of one limb signal over a phase, after the ease-in: one over the shortest lag the signal repeats
+## itself at (its autocorrelation's first peak at least half the tallest), so a flick inside a stroke counts once.
 func _rate(rows: Array, phase: String, bone: String, axis: int) -> float:
 	var sel: Array = rows.filter(func(r): return r["phase"] == phase)
 	sel = sel.slice(mini(18, sel.size() - 1))
 	var vals: Array = sel.map(func(r): return (r[bone] as Vector3)[axis])
-	var lo := float(vals.min())
-	var hi := float(vals.max())
-	var cycles := 0
-	var up := false
+	var mean := 0.0
 	for v in vals:
-		if float(v) > lerpf(lo, hi, 0.65) and not up:
-			up = true
-			cycles += 1
-		elif float(v) < lerpf(lo, hi, 0.35):
-			up = false
-	return cycles / maxf(0.01, vals.size() * DT)
+		mean += float(v) / vals.size()
+	var corr: Array = []      # by lag, each over the samples that overlap
+	for lag in int(vals.size() * 0.75):
+		var sum := 0.0
+		for i in vals.size() - lag:
+			sum += (float(vals[i]) - mean) * (float(vals[i + lag]) - mean)
+		corr.append(sum / (vals.size() - lag))
+	var best := 0.0
+	for lag in range(2, corr.size() - 1):
+		if float(corr[lag]) >= float(corr[lag - 1]) and float(corr[lag]) > float(corr[lag + 1]):
+			best = maxf(best, float(corr[lag]))
+	for lag in range(2, corr.size() - 1):
+		if float(corr[lag]) >= float(corr[lag - 1]) and float(corr[lag]) > float(corr[lag + 1]) \
+				and float(corr[lag]) >= 0.5 * best and best > 0.0:
+			return 1.0 / (lag * DT)
+	return 0.0
