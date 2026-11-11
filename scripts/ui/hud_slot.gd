@@ -48,6 +48,7 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 	if ready and not was:
 		H.ready_flash[id] = READY_FLASH
 	H.ready_was[id] = ready
+	ReadyCues.watch(H, id, ready, cd_secs)
 	var cooling := cd_frac > 0.0 and cd_secs > 0.0 and not ready
 	var frame_state := "cooling" if cooling else "off"
 	HudStyle.slot_frame(c, rect, col, "ready" if ready else frame_state)

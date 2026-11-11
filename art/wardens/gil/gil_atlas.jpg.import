@@ -3,9 +3,11 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://clwthvycocw64"
-path="res://.godot/imported/gil_atlas.jpg-b3e8f375f9fd1b85f151fe0497d59f86.ctex"
+path.s3tc="res://.godot/imported/gil_atlas.jpg-b3e8f375f9fd1b85f151fe0497d59f86.s3tc.ctex"
+path.etc2="res://.godot/imported/gil_atlas.jpg-b3e8f375f9fd1b85f151fe0497d59f86.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
 "md5": "d433319cc7026a5fea30f7a029243b4e"
@@ -14,11 +16,11 @@ generator_parameters={
 [deps]
 
 source_file="res://art/wardens/gil/gil_atlas.jpg"
-dest_files=["res://.godot/imported/gil_atlas.jpg-b3e8f375f9fd1b85f151fe0497d59f86.ctex"]
+dest_files=["res://.godot/imported/gil_atlas.jpg-b3e8f375f9fd1b85f151fe0497d59f86.s3tc.ctex", "res://.godot/imported/gil_atlas.jpg-b3e8f375f9fd1b85f151fe0497d59f86.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

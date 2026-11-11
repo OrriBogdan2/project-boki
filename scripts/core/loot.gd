@@ -28,6 +28,15 @@ const VALUABLES := {
 	"kin_idol": {"name": "Boki Idol", "col": Color("ffb0d0"), "value": 58, "rar": 3, "desc": "A little carved Boki. Collectors pay a lot."},
 	"crown_shard": {"name": "Crown Shard", "col": Color("ffd23f"), "value": 105, "rar": 4, "desc": "A piece of an old crown. Worth a fortune."},
 	"soul_ember": {"name": "Soul Ember", "col": Color("9ff0e0"), "value": 140, "rar": 4, "desc": "A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back."},
+	# a locked garden zone's first key (GardenZones.wayseed): banked as a bag item at home, never sold
+	"wayseed_glasswater": {"name": "Glasswater Wayseed", "col": Color("6fd0e8"), "value": 150, "rar": 4,
+		"desc": "A seed that wants clear water. Carry it to the Waystone with a Boki leaning Water, Ice or Crystal."},
+	"wayseed_cinderstep": {"name": "Cinderstep Wayseed", "col": Color("e07a3a"), "value": 150, "rar": 4,
+		"desc": "A seed warm to hold. Carry it to the Waystone with a Boki leaning Fire, Rock, Steel or Dragon."},
+	"wayseed_hushwood": {"name": "Hushwood Wayseed", "col": Color("9a7ae0"), "value": 150, "rar": 4,
+		"desc": "A seed that hums at dusk. Carry it to the Waystone with a Boki leaning Dark, Psychic or Poison."},
+	"wayseed_ridge": {"name": "Kitewind Wayseed", "col": Color("f2d45a"), "value": 150, "rar": 4,
+		"desc": "A seed that tugs at the wind. Carry it to the Waystone with a Boki leaning Flying or Electric."},
 	# worth more than anything else you can carry, so smart loot and a full pack always keep it
 	"rare_egg": {"name": "Rare Egg", "col": Color("ffcf4a"), "value": 400, "rar": 4, "desc": "A boss's egg, big and glowing gold. Carry it home and it hatches into a rare Boki."},
 }
@@ -38,6 +47,9 @@ static func rare_egg(sp: String, boss := "") -> Dictionary:
 
 static func is_rare_egg(it: Dictionary) -> bool:
 	return String(it.get("t", "")) == "val" and String(it.get("id", "")) == "rare_egg"
+
+static func is_wayseed(it: Dictionary) -> bool:
+	return String(it.get("t", "")) == "val" and String(it.get("id", "")).begins_with("wayseed_")
 
 ## What a piece of gear is worth by rarity (Common..Legendary).
 const GEAR_VALUE := [3, 8, 18, 36, 70]
@@ -88,6 +100,7 @@ static func col_of(it: Dictionary) -> Color:
 
 static func icon_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
+		if is_wayseed(it): return "seed"
 		return "bond" if String(it.get("id", "")) == "soul_ember" else ("egg" if is_rare_egg(it) else "gem")
 	return Gear.icon_of(String(it.get("id", "")))
 
@@ -95,6 +108,7 @@ static func icon_of(it: Dictionary) -> String:
 static func sub_of(it: Dictionary) -> String:
 	if String(it.get("t", "")) == "val":
 		if is_rare_egg(it): return "Rare Egg  ·  carry it home and it hatches a rare Boki"
+		if is_wayseed(it): return "Wayseed  ·  carry it home: it wakes a garden zone"
 		return "Treasure  ·  sells for %d gems" % sell_price(it) if String(it.get("id", "")) != "soul_ember" else "Revives a Boki at the Soul Shrine"
 	var id := String(it.get("id", ""))
 	if not Gear.ALL.has(id): return "Gear"
