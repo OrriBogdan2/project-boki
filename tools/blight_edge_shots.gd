@@ -36,7 +36,7 @@ func run(main_node: Node) -> void:
 	_crop_take("minimap", Rect2i(0, 0, 250, 250), 2.0, "The minimap: the ring, the dashed next ring, the Heart")
 	m.heart.hit_t = -99.0
 	m.hud.full_map.open()
-	m.time = 0.0 - m.sess_t0
+	m.time = 0.0
 	await _go(0.3)
 	_take("full_map", "The drop map before the tide starts: the first ring, dashed")
 	m.hud.full_map.close()
@@ -84,12 +84,12 @@ func _setup() -> void:
 func _view(file: String, ring: float, pitch: float, caption: String) -> void:
 	var rl := Heart.rules()
 	var k := (float(rl["tide_r0"]) - ring) / (float(rl["tide_r0"]) - float(rl["tide_r1"]))
-	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * k - m.sess_t0
+	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * k
 	m.cam.pitch = pitch
 	m.cam.yaw = atan2(-out.x, -out.y)
 	m.cam.yaw_to = m.cam.yaw
 	await _go(0.25)
-	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * k - m.sess_t0
+	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * k
 	_take(file, caption)
 	await _cost(file)
 

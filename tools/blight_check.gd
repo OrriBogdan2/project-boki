@@ -364,11 +364,11 @@ func _tide(main: Node) -> void:
 	var k := float(Data.CLASSES["medium"]["hp"]) / float(rl["tide_src_hp"])
 	var t0 := float(rl["tide_start_s"])
 	var close := float(rl["tide_close_s"])
-	m.time = t0 - 1.0 - m.sess_t0
+	m.time = t0 - 1.0
 	ok(Heart.tide_stage(m) == -1, "no tide stage before the tide starts")
 	var stages_ok := true
 	for st in Heart.TIDE_STAGES:
-		m.time = t0 + close * (st + 0.5) / Heart.TIDE_STAGES - m.sess_t0
+		m.time = t0 + close * (st + 0.5) / Heart.TIDE_STAGES
 		var want: float = TIDE_SRC[st] * k
 		stages_ok = stages_ok and Heart.tide_stage(m) == st and is_equal_approx(Heart.tide_dmg(st), want)
 		var ttk := ""
@@ -379,10 +379,10 @@ func _tide(main: Node) -> void:
 		print("BLIGHT tide stage %d from %.0fs: %.2f a tick (source %.0f), full health dies in%s"
 			% [st, from, Heart.tide_dmg(st), TIDE_SRC[st], ttk])
 	ok(stages_ok, "the close runs the source's 11 stages, each at its damage scaled by health")
-	m.time = t0 + close * 3.0 - m.sess_t0
+	m.time = t0 + close * 3.0
 	ok(Heart.tide_stage(m) == Heart.TIDE_STAGES - 1, "the last stage holds once the ring is closed")
 	# a live tick: stage 2, the player outside the ring loses the stage's damage, the armor stays
-	m.time = t0 + close * 2.5 / Heart.TIDE_STAGES - m.sess_t0
+	m.time = t0 + close * 2.5 / Heart.TIDE_STAGES
 	var P: Hunter = m.player
 	var far := H.site + Vector3(Heart.tide_r(m) + 20.0, 0, 0)
 	P.teleport(m.world.free_spot_near(far, [], 1.0, 0.45, 15.0))
