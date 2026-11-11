@@ -26,9 +26,6 @@ const BURR_SAMPLE := 0.25            # m between the ground reads along the char
 const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
 const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const PUSH_EASE := 10.0              # 1/s; the view push-out follows the aim distance, settling in ~0.3 s, no jumps
-const BURR_SAMPLE := 0.25            # m between the ground reads along the charge's flight (a tile is 1 m)
-const BURR_RIDE := 0.25              # m: the least height the charge keeps over the ground, so it rides up slopes
-const BURR_WALL_DEG := 50.0          # deg: a rise steeper than this (stairs are 39) and over World.STEP is a wall
 const SKID_LEN := 2.2                # m, the faint streaks at a slide's start
 const SKID_SPREAD := 0.28            # m off the path's centre line
 const SKID_WIDTH := 0.1
@@ -674,10 +671,6 @@ func _end_needle() -> void:
 	needle = {}
 	e_t = 0.0
 	AimKit.hide(h, "e")
-
-## While the Longneedle charges she aims along the capped line, not the cursor (ZERO otherwise: free).
-func aim_lock() -> Vector2:
-	return needle.get("dir", Vector2.ZERO)
 
 func _tick_needle(dt: float) -> void:
 	var ed := e_def()
