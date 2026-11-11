@@ -43,3 +43,9 @@ Checks (2026-11-11): `--warden-glb-check` 183/0 failed, `--warden-model-check` 1
 --wardens=dolm` still flags all 48 clips (worst 19.5x in fuse, run_f 10.0x, idle 5.0x, mostly the thighs and hips;
 skin_relax's own worst edge 19.4x after 59 passes): not under 1.3x, as for Kael and Grimble. No tearing, arm or
 chest clipping shows in the turnaround, idle, run or kit poses.
+
+## Re-swap on the current rig (2026-11-11, patch 0.24.6)
+The appeal3 swap above was made on a pre-IDLE_AUDIT tarek.glb, whose clips had no `x_breath` bone, so on current main
+`--warden-glb-check` rejected it ("variant bone x_breath missing") and Tarek fell back to the procedural model. Re-swapped
+with the same spec (`art/wardens/src/tarek_v95.json`) onto main's tarek.glb as the rig input (fresh WORK): same master,
+12999 tris, 48 clips, `x_breath` kept.
