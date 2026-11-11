@@ -242,6 +242,8 @@ static func come_round(k: Kin, rescued: bool) -> void:
 	k.down_void = false
 	var from := k.pos
 	k._hop_on()
+	if k.owner_h.kin2 == k:
+		k.bench()         # a second that went down out front goes back in the satchel (docs/decisions/0091)
 	KinLoss.reclaimed(k)
 	k.m.fx.burst(k.owner_h.pos + Vector3(0, 1.5, 0), k.sp["color"], 12 if rescued else 8, 2.5)
 	k.m.fx.ring(from, 1.2, Color(k.sp["color"], 0.8), 0.3)
