@@ -14,7 +14,6 @@ const FARM_COLS := 2
 static var page := 0
 static var query := ""
 static var filter := "all"
-static var sort_key := "species"
 static var sel := ""
 static var confirm := ""            # uid waiting on "release?"
 static var renaming := false
@@ -103,29 +102,17 @@ func _build() -> void:
 	fo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	fo.custom_minimum_size.x = 120
 	fr.add_child(fo)
-	var so := OptionButton.new()
-	for i in KinBox.SORTS.size():
-		if String(KinBox.SORTS[i][0]) == "slot": continue
-		so.add_item("By " + String(KinBox.SORTS[i][1]).to_lower())
-		so.set_item_metadata(so.item_count - 1, KinBox.SORTS[i][0])
-		if String(KinBox.SORTS[i][0]) == sort_key: so.select(so.item_count - 1)
-	so.item_selected.connect(func(i: int): sort_key = String(so.get_item_metadata(i)))
-	so.tooltip_text = "The order Sort uses"
-	so.fit_to_longest_item = false
-	so.clip_text = true
-	so.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	so.custom_minimum_size.x = 120
-	fr.add_child(so)
 	rc.add_child(fr)
+	rc.add_child(KinFilter.new(refresh))
 	var sr := UI.hbox(6)
 	var sb := UI.button("Sort this box", func():
-		KinBox.sort_page(page, sort_key)
+		KinBox.sort_page(page, KinFilter.sort)
 		_done("Sorted %s by %s" % [KinBox.page_name(page), _sort_name()]))
 	sb.tooltip_text = "Lay out this page's Boki in that order"
 	sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sb)
 	var sa := UI.button("Sort every box", func():
-		KinBox.sort_all(sort_key)
+		KinBox.sort_all(KinFilter.sort)
 		page = 0
 		_done("Every box sorted by %s, from the first page" % _sort_name()))
 	sa.tooltip_text = "Lay out every boxed Boki in that order, filling pages from the first"
@@ -147,8 +134,8 @@ func _build() -> void:
 
 func _sort_name() -> String:
 	for s in KinBox.SORTS:
-		if String(s[0]) == sort_key: return String(s[1]).to_lower()
-	return sort_key
+		if String(s[0]) == KinFilter.sort: return String(s[1]).to_lower()
+	return KinFilter.sort
 
 func _say(t: String, col := UI.GOLD) -> void:
 	if not is_instance_valid(msg): return
@@ -224,7 +211,7 @@ func _build_tabs(bk: Array) -> void:
 		var n := bk.filter(func(r): return KinBox.page_of(r) == p).size()
 		var hits := 0
 		if _searching():
-			hits = bk.filter(func(r): return KinBox.page_of(r) == p and KinBox.matches(r, query, filter)).size()
+			hits = bk.filter(func(r): return KinBox.page_of(r) == p and _match(r)).size()
 		var pp: int = p
 		var t := "%d" % (p + 1) + ("·%d" % hits if hits > 0 else "")
 		var b := UI.choice(t, p == page, func(): page = pp; renaming = false; refresh())
@@ -269,7 +256,10 @@ func _build_name() -> void:
 		name_row.add_child(rb)
 
 func _searching() -> bool:
-	return query.strip_edges() != "" or (filter != "all" and filter != "")
+	return query.strip_edges() != "" or (filter != "all" and filter != "") or KinFilter.type != ""
+
+func _match(rec: Dictionary) -> bool:
+	return KinBox.matches(rec, query, filter) and KinFilter.type_ok(String(rec["species"]))
 
 ## One cell: a kin (or an empty place) on the farm or in a box cell.
 func _cell(rec: Dictionary, where: String, slot: int) -> Control:
@@ -323,7 +313,7 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	nm.position = Vector2(-2, 53)
 	nm.size = Vector2(CELL.x - 4, 16)
 	stack.add_child(nm)
-	if _searching() and not KinBox.matches(rec, query, filter):
+	if _searching() and not _match(rec):
 		c.modulate = Color(1, 1, 1, 0.22)
 	var tags := Mutations.tags(rec)
 	c.tooltip_text = "%s the %s%s\nLevel %d  ·  trust %d%s\nClick to see it, drag to move, right click to send it %s" % [rec["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(rec),
