@@ -329,7 +329,7 @@ func _label_rect(txt: String, at: Vector2, px: int) -> Rect2:
 	return Rect2(at + Vector2(-tw * 0.5 - 3.0, -px * 0.95), Vector2(tw + 6.0, px * 1.25))
 
 ## The marker centres on screen this frame: every spawn spot (each one shows, scouted or not), way out and
-## the Heart's site and gate.
+## Ways Out seat (the Heart and its Gate among them) with the spot of its word.
 func _marker_spots() -> void:
 	_spots.clear()
 	if m.spawn_plan:
@@ -338,9 +338,13 @@ func _marker_spots() -> void:
 	if m.exits:
 		for x in m.exits.list:
 			_spots.append(to_screen(x["pos"]))
-	if m.heart and m.heart.site != Vector3.INF:
-		_spots.append(to_screen(m.heart.site))
-		_spots.append(to_screen(m.heart.gate))
+	if m.heart:
+		var at := WaysOutMap.sites(m)
+		var r := WaysOutMap.badge_r(k())
+		for i in at.size():
+			if at[i] != Vector3.INF:
+				_spots.append(to_screen(at[i]))
+				_spots.append(to_screen(at[i]) + Vector2(0, WaysOutMap.word_dy(i, r)))
 
 ## Where a region name goes: the first of its tries (NAME_SHIFTS) that keeps it off every marker, so an icon
 ## never sits on the name; its own spot when none does.

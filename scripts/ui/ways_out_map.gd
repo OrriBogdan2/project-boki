@@ -129,6 +129,15 @@ static func minimap(hud, inner: Rect2, to_map: Callable, on_map: Callable) -> vo
 		elif int(sd[i]["st"]) <= WaysOutHud.St.USE:
 			hud._edge_arrow(inner, inner.get_center(), pv, color_of(sd[i]))
 
+## A seat badge's radius on the full map at its zoom `k` (px).
+static func badge_r(k: float) -> float:
+	return clampf(8.0 + k * 0.8, 12.0, 18.0)
+
+## Where seat i's word sits from its badge on the full map: over the Heart Gate (its own name is under it),
+## under the rest. FullMap keeps region names off it.
+static func word_dy(i: int, r: float) -> float:
+	return -r - 16.0 if i == 1 else r + 30.0
+
 static func full_map(fm) -> void:
 	var m: Match = fm.m
 	if m.heart == null:
@@ -136,14 +145,14 @@ static func full_map(fm) -> void:
 	var at := sites(m)
 	var sd := WaysOutHud.seats(m)
 	var area: Rect2 = fm.rect.grow(-14.0)
-	var r := clampf(8.0 + fm.k() * 0.8, 12.0, 18.0)
+	var r := badge_r(fm.k())
 	for i in 4:
 		if at[i] == Vector3.INF:
 			continue
 		var pv: Vector2 = fm.to_screen(at[i])
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
-			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
+			var dy := word_dy(i, r)
 			fm.label_near(word(i, sd[i]), pv + Vector2(0, dy), 11, color_of(sd[i]), signf(dy))
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
 
