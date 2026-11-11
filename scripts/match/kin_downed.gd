@@ -227,9 +227,6 @@ static func anim_state(h: Hunter, s: Dictionary) -> void:
 	if id.begins_with("rs_"):
 		s["kmove"] = id
 		s["kmove_t"] = t
-	elif String(s.get("kmove", "")).begins_with("rs_"):
-		s.erase("kmove")
-		s.erase("kmove_t")
 
 ## Back on your feet with a share of health: rescued (run into it) or recovered on its own.
 static func come_round(k: Kin, rescued: bool) -> void:

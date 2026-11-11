@@ -208,9 +208,6 @@ static func anim_state(hunter: Hunter, s: Dictionary) -> void:
 	if id.begins_with("mf_"):
 		s["kmove"] = id
 		s["kmove_t"] = hunter.m.time - at
-	elif String(s.get("kmove", "")).begins_with("mf_"):
-		s.erase("kmove")
-		s.erase("kmove_t")
 
 # ------------------------------------------------------------------ bots
 ## How a bot plays the window: the ultimate when foes are in its range or the window is about to close (its hero kit is the bot's usual play).
