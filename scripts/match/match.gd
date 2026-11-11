@@ -1738,6 +1738,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 	if tags.is_empty():
 		tags = [String(o.get("src", "primary")) if o.get("src", "") != "" else "primary"]
 	if o.get("stun", 0.0) > 0.0: tags = tags + ["stun"]
+	if o.get("ab", "") != "": tags = tags + ["ab:" + String(o["ab"])]      # which cast hit
 	CombatBus.hit_landed.emit(by, target, d, tags)
 	KinFollow.on_damage(target, by, d)
 	var crit: bool = o.get("crit", false)
