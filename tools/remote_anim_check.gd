@@ -225,4 +225,5 @@ func _sample() -> void:
 	last_prev_t = H.anim.km_prev_t
 	if row != last_row or restart:
 		last_row = row
-		log_rows.append([int(float(steps) * DT * 1000.0) if locked else int(Time.get_unix_time_from_system() * 1000.0), row[0], row[1]])
+		var ms := int(float(steps) * DT * 1000.0) if locked else int(Time.get_unix_time_from_system() * 1000.0)
+		log_rows.append([ms, row[0], row[1]])
