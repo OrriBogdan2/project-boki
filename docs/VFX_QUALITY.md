@@ -147,7 +147,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 
 | Hunter | arch | before | R | S | L | T | Sc | C | Snd | after | weakest ability left |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
+| Vex | gunslinger | 15 | 5 | 3 | 3 | 3 | 4 | 4 | 4 | **26** | was 25 (LMB / held LMB: a thin faint tracer): fixed on ext/vfx-vex-tracer-0246, see below. Left: Shift Slipstep, faint streaks and a flat band behind her |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
 | Grimble | dredge | 16 | 4 | 4 | 4 | 3 | 3 | 4 | 3 | **25** | E / RMB wedges: flat pale sectors with no leading edge; slugs small at match zoom |
@@ -169,10 +169,30 @@ Parity rule (DECISIONS: match the source's readability and polish, no explosions
 gameplay): no Hunter's dash plays an explosion in these strips. Ground rings worth a check against a hitbox: Vex's
 Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a hitbox here.
 
+### Vex's rounds (ext/vfx-vex-tracer-0246, 2026-11-11): 25 -> 26
+Each rifle round, tapped or held, rides a tracer 0.34 m across at its head: her 0.3 m hit width (`HITBOX_SIZE.md`)
+plus a rim. It was 0.18 m, with 0.08 m of it visible. A hot pale-lime core line runs down most of its length, the body
+is her lime (`color`), a deep green rim holds it on sand, and the back 60% fades out in cel steps. The length stays
+2.6 m (about 1.5 bh, the footage's long thin yellow-green bolts). The muzzle star is lime with a pale core, 0.8 m for
+0.08 s, on the Gun's Muzzle (the rifle's mouth; it used to sit out on the round). The rifle's data colour (the shared
+muzzle flash and the end bursts) and her end sparks are lime too. Nothing new is built per shot: one pooled tracer and
+one pooled star per round, as before (`--gunslinger-combo-check` asserts that a second held string makes no nodes).
+The VVFx tracer mode draws these layers only when it is given an edge colour, so smears and hand trails (Sparkle's
+too) are unchanged. R 4 -> 5: the LMB and hold paths read at match zoom in their first frame; the other axes stand.
+Strips: `docs/art/vfx_rescore/gunslinger_rounds.jpg`, before on the left (origin/main + the 0.24.6 audio-vfx line)
+and after on the right. They show the full-range LMB frame (`--vv-shots --vv-hero=gunslinger --vv-only=lmb`) and the
+reel's lmb and hold sheets. They were rendered with the compat renderer (opengl3 under Xvfb, 1280x720): the GPU after
+reel could not be sent (the jobq relay failed to copy the tree four times), and the GPU before reel (jobq
+`20261111-213003-09415`) was still queued. The reel's dummy stands 4.5 m off, so its frames mostly catch a round at
+the muzzle or on the dummy. The full-range frame is where the tracer shows.
+On this line alone her RMB, Shift, E and X are still the ember-orange VVFx looks. ext/vfx-vex-data (READY, on no
+train) moves them to green fire and replaces this tracer with a HeroVfx ribbon; when it merges, keep this look in its
+`shot_trail` (one ribbon 0.34 m: body `main`, rim `deep`, core `hot`).
+
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
 2. Neve X: shrink the screen-wide cyan wash to the hit area; texture the dash path tiles.
-3. Vex LMB and hold: a wider, brighter tracer at match zoom.
+3. Vex LMB and hold: a wider, brighter tracer at match zoom. Done (ext/vfx-vex-tracer-0246, "Vex's rounds" above).
 4. Tenzo LMB and hold: a bigger punch and a visible charge for the hold.
 5. Albert: ivory swing arcs for LMB/RMB.
 6. Kael: crimson Smash telegraph instead of the flat magenta box.

@@ -407,15 +407,16 @@ static func _shown_under(node: Node3D, model: Node3D) -> bool:
 
 # ------------------------------------------------------------------ riders
 ## A look riding on a match shot (the dictionary in m.shots) until it ends; then on_end(at, hit) runs.
-## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail).
+## kind: "bolt" (a jagged arc ribbon), "tracer" (a hot needle and a cooling tail; with an `edge` colour, a hot
+## core line down a body rimmed in it).
 func ride(sd: Dictionary, kind: String, col: Color, col2: Color, length := 1.2, width := 0.3,
-		on_end := Callable()) -> void:
+		on_end := Callable(), edge := NO_EDGE) -> void:
 	var n: Node3D
 	if kind == "tracer":
 		n = _take("tracer", func(): return _mi(_ribbon_mesh(), _mat(M_TRACER)))
 	else:
 		n = _take("arc", func(): return _mi(_ribbon_mesh(), _mat(M_ARC)))
-	_look(n, col, col2)
+	_look(n, col, col2, edge)
 	var mi := sd.get("node") as Node3D
 	if mi != null and is_instance_valid(mi):
 		mi.visible = false            # the stock orb goes: this look is the round
