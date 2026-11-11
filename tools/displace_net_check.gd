@@ -6,6 +6,7 @@ extends RefCounted
 ## same flat training strip; the host plays each ability first on a local bot, then on the guest's hunter,
 ## and the guest reports where its own game put it. Cinder's cloak pull, Grimble's reel, Motley's Trade,
 ## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
+## A Boki's pull and spike (KinExec) move the player on their own game the same way, there by the next snapshot.
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
 ## of the air on their own game, with the landing stun a bot gets (GlideSpike).
@@ -19,6 +20,7 @@ const TOL := 0.5             # m: the player's own game puts it within this of w
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
 const PARK := Vector3(0, 0, -9.0)   # m from home: where the guest waits while the bot takes its turn
+const SNAP_S := 0.12         # s: one snapshot send (Net.tick, 0.1 s, which also flushes the "ev" moves) and a frame
 
 var main: Node
 var bad := 0
@@ -36,6 +38,7 @@ var watch: Ent = null         # the first tow on this body, as the host's mirror
 var seen := {}
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
+var early := {}              # the guest's reply one snapshot after a Boki move on it
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
@@ -106,10 +109,17 @@ func _host() -> void:
 	await _case(G, B, "ostra", Vector3(8.0, 0, 0), _ostra, 2.2, "Motley's Trade")
 	await _case(G, B, "mage", Vector3(7.0, 0, 0), _vireo, 2.4, "Sparkle's Skycall drag", "slide")
 	await _case(G, B, "bulwark", Vector3(1.7, 0, 0), _bjorn, 1.2, "Mossy's shield push", "push")
+	await _case(G, B, "bulwark", Vector3(8.0, 0, 0), _boki_pull, 1.2, "a Boki pull")
+	ok(_v(early.get("pos", [0, 0, 0])).x < home.x + 7.9 or float(early.get("vx", 0.0)) < -1.0,
+		"a Boki pull: the player's own game moves them within one snapshot",
+		"x %.2f vx %.1f" % [_v(early.get("pos", [0, 0, 0])).x - home.x, float(early.get("vx", 0.0))])
 	await _zedran(G)
 	await _hazard(G, B)
 	await _knock_extras(G, B)
-	await _glide_spike(G, B)
+	await _glide_spike(G, B, func(t: Hunter): m.displace.spike(t, -16.0, m.player), "a dunk")
+	await _glide_spike(G, B, _boki_spike, "a Boki spike")
+	ok(bool(early.get("shot", false)), "a Boki spike: the player is spiked on their own game within one snapshot",
+		"vy %.1f" % float(early.get("vy", 0.0)))
 	_finish()
 
 func _finish() -> void:
@@ -212,6 +222,28 @@ func _bjorn(t: Hunter) -> void:
 	P.inp["sec_hold"] = false
 	await _run(DT)
 
+## A Boki's pull (KinExec, a pull with no gap) from 8 m, short of the caster (a body in the way stops it); on
+## the guest, what its game says a snapshot later.
+func _boki_pull(t: Hunter) -> void:
+	var st := StageSpec.parse({"delivery": {"type": "burst", "origin": "here", "radius": 4.0},
+		"effects": [{"type": "pull", "strength": 8.0, "to": "center"}]}, "", GrammarReport.new())
+	await _boki(st, t)
+
+## A Boki's spike (KinExec's spike modifier) on an airborne body.
+func _boki_spike(t: Hunter) -> void:
+	var st := StageSpec.parse({"delivery": {"type": "burst", "origin": "here", "radius": 2.5},
+		"effects": [{"type": "damage", "amount": 1.0}], "modifiers": [{"type": "spike"}]}, "", GrammarReport.new())
+	await _boki(st, t)
+
+func _boki(st: StageSpec, t: Hunter) -> void:
+	var cx := {"m": m, "caster": m.player, "power": 1.0, "k": 1.0, "_radius": 4.0}
+	KinExec.apply_foe(st.effects, t, cx, m.player.pos, st)
+	await _run(DT)
+	if t.remote:
+		await _run(SNAP_S)
+		await _ask()
+		early = replies[0] if not replies.is_empty() else {}
+
 ## Kael's Warchain hooks the player and pulls Kael to them; the player stays put (a self-pull).
 func _zedran(G: Hunter) -> void:
 	var P := m.player
@@ -296,21 +328,20 @@ func _knock_extras(G: Hunter, B: Hunter) -> void:
 		"hit: the burn's length and the slow's strength reach the player (4 s, 40%)",
 		"burn %.2f slow_k %.2f" % [_got("burn"), _got("slow_k")])
 
-## A dunk (Displace.spike at 16 m/s) on a glider 10 m up: the bot and the player are both spiked, fall and
-## land stunned for GlideSpike.land_stun; unspiked, a glider would still be in the air.
-func _glide_spike(G: Hunter, B: Hunter) -> void:
-	var P := m.player
+## `spike` (a dunk: Displace.spike at 16 m/s, or a Boki's spike) on a glider 10 m up: the bot and the player
+## are both spiked, fall and land stunned for GlideSpike.land_stun; unspiked, a glider would still be in the air.
+func _glide_spike(G: Hunter, B: Hunter, spike: Callable, what: String) -> void:
 	var at := home + Vector3(4.0, 10.0, -3.0)
 	_fresh(B)
 	_glide(B, at)
 	await _run(0.2)
 	stun_on = B
 	stun_max = 0.0
-	m.displace.spike(B, -16.0, P)
+	await spike.call(B)
 	await _run(1.6)
 	var bot_stun := stun_max
 	stun_on = null
-	ok(B.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: a dunk spikes a gliding bot",
+	ok(B.grounded and bot_stun >= GlideSpike.land_stun - 0.05, "glide spike: %s spikes a gliding bot" % what,
 		"stun %.2f grounded %s" % [bot_stun, B.grounded])
 	B.teleport(home + Vector3(-6.0, 0, 9.0))
 	Net.lobby_emit("dn", {"c": "glide", "at": [at.x, at.y, at.z]})
@@ -319,11 +350,11 @@ func _glide_spike(G: Hunter, B: Hunter) -> void:
 		await _run(0.1)
 		t += 0.1
 	ok(G.gliding, "glide spike: the host sees the player gliding")
-	m.displace.spike(G, -16.0, P)
+	await spike.call(G)
 	await _run(1.8)
 	await _ask()
 	ok(_got("air") == 0.0 and absf(_got("stun_max") - bot_stun) < 0.15,
-		"glide spike: the dunk spikes the player out of the air on their own game, like the bot",
+		"glide spike: %s spikes the player out of the air on their own game, like the bot" % what,
 		"player stun %.2f air %.0f, bot %.2f" % [_got("stun_max"), _got("air"), bot_stun])
 	await _place(G, home + PARK)
 
@@ -428,7 +459,7 @@ func _say() -> void:
 		var P := m.player
 		Net.lobby_emit("dn_r", {
 			"pos": [P.pos.x, P.pos.y, P.pos.z], "hp": P.hp, "stun_max": stun_max, "burn": P.burn_t, "slow_k": P.slow_k,
-			"air": 0.0 if P.grounded else 1.0})
+			"air": 0.0 if P.grounded else 1.0, "vx": P.vel.x, "vy": P.vel.y, "shot": P.shot_down})
 
 # ------------------------------------------------------------------ both
 func _connect() -> bool:

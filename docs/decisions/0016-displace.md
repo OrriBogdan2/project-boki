@@ -16,7 +16,7 @@ Option 2. Kits keep their rules (who, when, how far) and hand the motion to Disp
 
 ## Consequences
 - Sync shape changed: Net.VERSION needs a bump (main picks it). `["zone", "tp"]` is gone (it became `["disp", "tp"]`).
-- Reserved files still move remote bodies on this game only: `kin_exec.gd` (pull impulse, spike, swap) and `merge_augment.gd` (shove); see docs/DEBT.md.
+- Reserved files still move remote bodies on this game only: `kin_exec.gd` (swap; its pull impulse and spike go through Displace) and `merge_augment.gd` (shove); see docs/DEBT.md.
 - A hit on a remote body now also carries `Displace.HIT_EXTRAS` (wall stun, steer, heavy, dr, burn time, slow strength, Blight) as a 14th field, so a knock lands the same on its owner's game. A tow's `unroll` ends the dash the body was in on the owner's game (Bjorn's push).
 - World hazards (BiomeRun) run on every game: each hurts, pulls and slows only the bodies it owns (fields with `"own"`), so a player online is hit once.
 - Check `--displace-net-check` (two games over the relay); the hero combo checks cover the bot side.

@@ -19,6 +19,7 @@ extends RefCounted
 ##   depth    followup depth                                hits   {n}: units touched by this delivery (MAX_HITS)
 
 const MOVERS := ["dash", "leap", "blink"]
+const SPIKE_VY := -16.0      # m/s: a spiked airborne foe falls at least this fast (Displace.spike)
 
 ## Does the ability move the body that casts it (a dash, leap or blink)? A Boki on you does those itself.
 static func moves_caster(ab: AbilitySpec) -> bool:
@@ -779,7 +780,7 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 			o["stun"] = maxf(float(o.get("stun", 0.0)), float(spike.params["stun"]))
 		o.erase("lift")
 		m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", KinRules.cat_color("control"), true)
-		f.vel.y = -16.0
+		m.displace.spike(f, SPIKE_VY, by)
 	# a hook's yank goes first (then the hit, so its stun lands on the way in)
 	for e in post:
 		if e.type == "pull" and float(e.params["gap"]) > 0.0:
@@ -832,7 +833,8 @@ static func _post(e: PartSpec, f: Ent, cx: Dictionary, center: Vector3, k: float
 				m.sfx("grab", anchor, -1.0, 1.1)
 			elif rel.length() > 0.4:
 				var r := maxf(1.0, float(cx.get("_radius", 4.0)))
-				f.impulse(rel.normalized() * float(pr["strength"]) * k * clampf(rel.length() / r + 0.3, 0.4, 1.0), 1.0)
+				var kb := rel.normalized() * float(pr["strength"]) * k * clampf(rel.length() / r + 0.3, 0.4, 1.0)
+				m.displace.knock(f, kb, 1.0)
 		"mark":
 			KinRules.mark(f, String(pr["mode"]), float(pr["duration"]), float(pr["amount"]))
 			if String(pr["mode"]) == "reveal":
