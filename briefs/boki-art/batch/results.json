@@ -111968,5 +111968,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_stamproo_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_sporcupine",
+    "name": "Sporcupine (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sporcupine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_starcap",
+    "name": "Starcap (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_starcap_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_terrarimit",
+    "name": "Terrarimit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_terrarimit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_stormit",
+    "name": "Stormit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_stormit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_spirevark",
+    "name": "Spirevark (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_spirevark_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_sundormouse",
+    "name": "Sundormouse (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sundormouse_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_teapotamus",
+    "name": "Teapotamus (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_teapotamus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_thrumbird",
+    "name": "Thrumbird (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_thrumbird_1.jpg",
+    "ok": true
   }
 ]
