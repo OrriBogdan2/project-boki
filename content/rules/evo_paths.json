@@ -1,5 +1,5 @@
 {
-	"desc": "Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by species id. Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). level: the level the final is due. The end with more pips wins; tie: the stat lead; still tied: undecided.",
+	"desc": "Path meter for branching finals (scripts/core/evo_path.gd; briefs/design/GARDEN_MODERN.md section 3; docs/decisions/0022). Lines are keyed by the species that branches in content/rules/evolve.json; the swap, its level and the Ink lines are Evo's (decision 0024). Each end: form id (art at art/kin/<form>/<form>.glb, missing = the Boki waits), path (the affinity of its path tokens, garden_items.json), stat (its key stat, Care.STATS), type (its second type, lean.json), traits (any at trait_at or more gives a care pip), sports (games whose Cup Ribbons count, garden_prizes.json ids). The end with more pips wins; tie: the stat lead; still tied: undecided.",
 	"pips": {
 		"stat_lead": 3,
 		"lean_half": 1,
@@ -13,9 +13,7 @@
 	"lean_half_at": 0.5,
 	"trait_at": 0.6,
 	"lines": {
-		"burrlet": {
-			"stage": "Sporcupine",
-			"level": 16,
+		"sporcupine": {
 			"ends": [
 				{
 					"form": "amanitusk",
@@ -46,9 +44,7 @@
 				}
 			]
 		},
-		"cindle": {
-			"stage": "Vespox",
-			"level": 16,
+		"vespox": {
 			"ends": [
 				{
 					"form": "glaivyx",
@@ -80,9 +76,7 @@
 				}
 			]
 		},
-		"puddlet": {
-			"stage": "Glassolotl",
-			"level": 16,
+		"glassolotl": {
 			"ends": [
 				{
 					"form": "chandelotl",
@@ -116,8 +110,6 @@
 			]
 		},
 		"zapple": {
-			"stage": "Echolop",
-			"level": 8,
 			"ends": [
 				{
 					"form": "howlop",
@@ -150,31 +142,6 @@
 					]
 				}
 			]
-		}
-	},
-	"inks_doc": "Ink lines: the held Ink alone decides (no pips); the card only previews the silhouette. ink item id -> form.",
-	"inks": {
-		"minkee": {
-			"name": "Minkee",
-			"forms": {
-				"ember_ink": "Flarmink",
-				"tide_ink": "Rippmink",
-				"bloom_ink": "Blossmink",
-				"storm_ink": "Voltmink",
-				"frost_ink": "Rimink",
-				"shadow_ink": "Umbrink",
-				"lunar_ink": "Lunink",
-				"prism_ink": "Prismink",
-				"wyrm_ink": "Wyrmink"
-			}
-		},
-		"jarmit": {
-			"name": "Jarmit",
-			"forms": {
-				"ember_ink": "Lanternmit",
-				"storm_ink": "Stormit",
-				"bloom_ink": "Terrarimit"
-			}
 		}
 	}
 }

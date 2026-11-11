@@ -105,12 +105,12 @@ func _tokens_and_stay() -> void:
 	ok(GardenItems.take_off(rec, "galeribbon") and rec["path"].size() == 2 and int(Save.d["items"]["galeribbon"]) == 1,
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
-	rec["level"] = 4
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 4 grows a form")
+	rec["level"] = 6      # a mutation level (Evo.on_level); its form swap is the path meter's (EvoPath)
+	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 6 grows a part")
 	GardenItems.apply(rec, "stayleaf")
-	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
+	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not grow")
 	var off := GardenItems.take_off(rec, "stayleaf")
-	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
+	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it grows again")
 
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")

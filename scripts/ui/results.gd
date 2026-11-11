@@ -49,8 +49,13 @@ func show_result(r: Dictionary) -> void:
 	var head := UI.vbox(6)
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
-	if not won:
-		head.add_child(UI.para("Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
+	var hows := {"skiff": "Flew out on the skiff from %s. ", "hatch": "Slipped out through a rift hatch. ",
+		"uplink": "Rode the lift out of %s. "}
+	var how_line := String(hows.get(String(r.get("how", "")), ""))
+	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
+	var how := (how_line if won else "Everything you carried stays out in the islands.").strip_edges()
+	if how != "":
+		head.add_child(UI.para(how, UI.T_BODY, UI.MUTED))
 	v.add_child(head)
 	# the three numbers that matter, big and counting up, on one strip; the rest behind Details
 	var secs := int(r.get("time", 0))

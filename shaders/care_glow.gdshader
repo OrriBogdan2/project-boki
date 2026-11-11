@@ -7,6 +7,7 @@ uniform vec4 color : source_color = vec4(1.0);
 uniform float alpha = 1.0;
 uniform float fade_end = 1.0;     // 1: fades toward UV.y = 1; 0: even
 uniform float orb = 0.0;          // 1: a ball (fresnel fade) instead of a strip
+#include "res://shaders/cel.gdshaderinc"
 void fragment() {
 	float side = 1.0 - abs(UV.x * 2.0 - 1.0);
 	float along = mix(1.0, 1.0 - UV.y, fade_end);
@@ -18,6 +19,6 @@ void fragment() {
 		a = clamp(f * 1.4, 0.0, 1.0);
 		core = f * f;
 	}
-	ALBEDO = mix(color.rgb, vec3(1.0), core * 0.25);
-	ALPHA = clamp(a * color.a * alpha, 0.0, 1.0);
+	ALBEDO = mix(color.rgb, vec3(1.0), hard(core - 0.5) * 0.25);
+	ALPHA = cel_cover(clamp(a * color.a * alpha, 0.0, 1.0), UV * 0.5);     // cel steps, ragged edges
 }

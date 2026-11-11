@@ -14,7 +14,7 @@ const SOURCE_NAMES := {"stat": "stat lead", "lean": "lean", "tokens": "tokens", 
 ## Adds the meter (or the Ink preview) to v. refresh() redraws the card after Evolve.
 static func block(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:
 	for p in EvoPath.ink_previews(rec):
-		v.add_child(UI.section("With %s" % String(p["ink"]).capitalize(), UI.FAINT.lightened(0.2)))
+		v.add_child(UI.section("With %s" % String(p["ink_name"]), UI.FAINT.lightened(0.2)))
 		v.add_child(_sil(p["form"], p["name"]))
 		if not EvoPath.has_art(p["form"]):
 			v.add_child(UI.para("Art not in the game yet: it will wait.", 12, UI.FAINT))

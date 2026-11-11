@@ -23,6 +23,12 @@ decides alone), and Curious finals (Chandelotl, Chimelop) use Focus, not Speed. 
 (`art/kin/<form>/<form>.glb`) is missing; a worn Stayleaf blocks. Inks (Minkee, Jarmit) only preview.
 
 ## Consequences
-New lazy record fields, no migration: `rec.toy_use` (toy id -> plays, for the toy habit) and `rec.final`
-(the chosen final form id). `rec.ribbons` is read as written by ext/garden-prizes-cups (empty until then).
-Today no final has art, so every Boki at its level shows the form and waits.
+New lazy record fields, no migration: `rec.toy_use` (toy id -> plays, for the toy habit). `rec.ribbons` is read
+as written by ext/garden-prizes-cups (empty until then).
+
+On main's evolution by species (docs/decisions/0024, merged 11-11 as ext/garden-path-meter-rebased): the swap is
+Evo's. Lines in `evo_paths.json` are keyed by the species that branches in `evolve.json` (Sporcupine, Vespox,
+Glassolotl, Zapple), the level is that line's, and its two ends are the same two species. Such a line never
+evolves by level alone: "Evolve now" calls `Evo.try_evolve(rec, "path")`, which takes the meter's winner instead
+of the leading affinity. The Ink previews read `evolve.json`'s item options and the market goods. Today no
+middle form or final has data and art, so only Zapple shows the meter, and every Boki at its level waits.

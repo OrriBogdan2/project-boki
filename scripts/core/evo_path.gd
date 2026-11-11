@@ -3,9 +3,9 @@ class_name EvoPath
 ## Each final of a line is one end; pips come from five sources (stat lead, element lean, worn path tokens,
 ## care, Cup Ribbons), all tuned in content/rules/evo_paths.json. The end with more pips is the form; a tie
 ## goes to the stat lead, and with that tied too the Boki waits. Ink lines have no pips, only a preview.
+## The swap itself is Evo's (docs/decisions/0024): the meter only picks the end, at the level evolve.json gives.
 
 const SOURCES := ["stat", "lean", "tokens", "care", "ribbons"]
-const ART := "res://art/kin/%s/%s.glb"
 
 static func rules() -> Dictionary:
 	return Content.rules("evo_paths")
@@ -50,13 +50,16 @@ static func winner(rec: Dictionary) -> int:
 		return 0 if a > b else 1
 	return _stat_lead(rec, line(rec)["ends"])
 
-## Its final is due: a branching line, at or past the line's level, not evolved yet.
+## The level its final is due at (evolve.json's line for its species).
+static func level(rec: Dictionary) -> int:
+	return int(Evo.rules()["lines"].get(String(rec.get("species", "")), {}).get("level", 1))
+
+## Its final is due: a branching line, at or past the line's level (once it evolves, its species has no line).
 static func due(rec: Dictionary) -> bool:
-	var ln := line(rec)
-	return not ln.is_empty() and int(rec.get("level", 1)) >= int(ln["level"]) and String(rec.get("final", "")) == ""
+	return not line(rec).is_empty() and int(rec.get("level", 1)) >= level(rec)
 
 static func has_art(form: String) -> bool:
-	return ResourceLoader.exists(ART % [form, form])
+	return Evo.has_art(form)
 
 ## Why "Evolve now" can't happen now ("" when it can): "stay", "undecided" or "art".
 static func blocked(rec: Dictionary) -> String:
@@ -67,26 +70,45 @@ static func blocked(rec: Dictionary) -> String:
 		return "undecided"
 	return "" if has_art(String(line(rec)["ends"][w]["form"])) else "art"
 
-## Evolve now: the Boki takes the winning final. False (nothing changes) when it is not due or blocked.
-static func evolve(rec: Dictionary) -> bool:
+## The final Evo.next_for(rec, "path") swaps to: the winner once due, art or not; "" when not due or undecided.
+static func pick(rec: Dictionary) -> String:
+	var w := winner(rec)
+	return String(line(rec)["ends"][w]["form"]) if due(rec) and w >= 0 else ""
+
+## The affinity of the end that is `form` ("" for none), for Evo's event line.
+static func path_of(rec: Dictionary, form: String) -> String:
+	for e in line(rec).get("ends", []):
+		if String(e["form"]) == form:
+			return String(e["path"])
+	return Evo.leading(rec)
+
+## Evolve now: the Boki takes the winning final (Evo.try_evolve "path"), and the event is queued for the
+## home island to play. {} (nothing changes) when it is not due or blocked.
+static func evolve(rec: Dictionary) -> Dictionary:
 	if not due(rec) or blocked(rec) != "":
-		return false
-	rec["final"] = String(line(rec)["ends"][winner(rec)]["form"])
-	return true
+		return {}
+	var ev := Evo.try_evolve(rec, "path")
+	if not ev.is_empty():
+		ev["text"] = Evo.describe(ev, rec)
+		rec.get_or_add("pending_evo", []).append(ev)
+	return ev
 
 ## The player has met this form (Field Book), so its card shows its shape and name, not a black '?'.
 static func known(form: String) -> bool:
 	var e := Care.dex_entry(form)
 	return bool(e.get("seen", false)) or bool(e.get("caught", false))
 
-## Ink lines: for each Ink in the bag, the form it would make ([{ink, form, name}]); [] for other species.
+## Ink lines (evolve.json "item" options): for each Ink in the market goods, the form it would make
+## ([{ink, ink_name, form, name}]); [] for other species.
 static func ink_previews(rec: Dictionary) -> Array:
-	var ln: Dictionary = rules()["inks"].get(String(rec.get("species", "")), {})
+	var ln: Dictionary = Evo.rules()["lines"].get(String(rec.get("species", "")), {})
 	var out := []
-	for ink in ln.get("forms", {}):
-		if int(Save.d.get("items", {}).get(ink, 0)) > 0:
-			var nm := String(ln["forms"][ink])
-			out.append({"ink": ink, "form": nm.to_lower(), "name": nm})
+	for o in ln.get("into", []):
+		var ink := String(o.get("item", ""))
+		if ink != "" and Goods.have("good:" + ink) > 0:
+			var form := String(o["id"])
+			var nm := String(Data.KIN.get(form, {}).get("name", form.capitalize()))
+			out.append({"ink": ink, "ink_name": Goods.name_of("good:" + ink), "form": form, "name": nm})
 	return out
 
 static func _stat_lead(rec: Dictionary, ends: Array) -> int:
