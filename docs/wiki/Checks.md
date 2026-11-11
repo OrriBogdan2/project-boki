@@ -49,7 +49,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--mapcheck-authored` | The authored map over 20 seeds: every island reachable, every point of interest on solid ground, nothing walled off |
 | `--biome-check` | An expedition on the authored map: what each biome spawned, rarities and hazards, then a minute of play |
 | `--drop-check` | The planning phase, pings, squad formation, passing the lead, separating, and randomised spawns |
-| `--extract-check` | Every way out: skiff (waves, rival boarding), rift hatch (keys, losing and looting a key), uplink (stalls, completes, the lift) |
+| `--extract-check` | The uplink outposts: stalls, crew rate, completes, the lift, drain and fizzle (the Heart: `--heart-check`) |
 | `--boss-check` | Lair locks (dial, runes, ward stones), the ward, each boss's phases and enrage, the Rare Egg from the pack to the Incubator; bots can work a dial |
 | `--boss-ttk` | Balance probe: a bot squad fights each boss for real and prints the time to kill |
 | `--life-check` | The down, death and revive rules step by step, with hunters placed by hand |
@@ -58,13 +58,16 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--truce-check` | Truce offers and answers, no targeting during a truce, betrayal breaks and marks, shared uplink yards |
 | `--duel-check` | The duel room: autopilot against the sparring bot through Hunter, behaviour, glove and difficulty changes |
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
+| `--camp-clear-check` | PvE pacing: every Hunter clears a skitter, spitter and brute camp at level 1 and 5 inside the time limit, and the slowest/fastest spread may not get worse (`--arch=<id>` for one Hunter) |
+| `--armor-parity-check` | Armour matches the source per docs/ARMOUR_PARITY.md: reduction and durability by tier, the progress ratios, damage taken fills progress, no refill, revive on a broken Common piece, Grimble's no-bloom armour bonus |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
 | `--iv-check` | IV rolls, stable IVs for old saves, breeding passes 3 of 5, the Rare Egg floor, caps, save round trip |
-| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent, unstable mixes |
+| `--nook-check` | Nesting Nook gate (Grown, friends, rested, one egg), the stronger parent's lean head start, a habit from each parent |
+| `--unstable-mix-check` | Nook unstable mix: 20 clashing and 20 calm couples bred, low joy plus the extra-care tag, the day of care that clears it, the 18-type table |
 | `--incubator-check` | Rare Eggs in the Incubator: cradles, buying more, warming (Ember Boki, coals), hatching |
 | `--hatch-check` | Hatching is a quiet, personal moment: the Boki wakes, looks round and at you, no bursts or flashes; then the first Relic: Vex's Relic drifts to you, "Put on the Relic" (the interact key) makes you Vex, and her ability clips fit a 1280x720 screen |
 | `--economy-check` | Full backpack swaps, smart loot, extracting fills the armory, feeders feed (also while away), starving to a grave, the Soul Shrine |
@@ -83,6 +86,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
+| `--mob-damage-check` | PvE: a level-1 and level-5 Hunter standing still in each monster, camp mix and lair, never fighting back. Prints the seconds to fall, damage per hit and per second (docs/EXPEDITION_SPEC.md section 13). Asserts that every damaging row fells them within 90 s over 3 or more hits, the Glimmerkin never hurts anyone, and a lone Puffbomb blows up once |
 
 ## Tooling flags
 
