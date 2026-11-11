@@ -8,7 +8,7 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 12
+const VERSION := 13
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
@@ -16,7 +16,7 @@ const LOG_CAP := 200
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
 		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
-		11: "_migrate_11_to_12"}
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -298,6 +298,11 @@ func _migrate_11_to_12(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		if not r.has("bonds"):
 			r["bonds"] = {}
+
+## v12 -> v13: shaping items. Every Boki gets its worn-token slots and loose points (Care.ensure fills them in).
+func _migrate_12_to_13(data: Dictionary) -> void:
+	for r in data.get("roster", []):
+		Care.ensure(r)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

@@ -58,6 +58,7 @@ var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
 var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
 var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
+var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
@@ -160,7 +161,8 @@ func _ready() -> void:
 		hvolley = BaseVolley.new(self)
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho]     # in this order: Tumble's ring needs the stump placed
+		hshow = ShowRing.new(self)
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow]     # in this order: Tumble's ring needs the stump placed
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -2187,6 +2189,7 @@ func _label_for(it: Dictionary) -> String:
 		"volley": return hvolley.label()
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
+		"show": return hshow.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2228,6 +2231,7 @@ func _use(it: Dictionary) -> void:
 		"volley": hvolley.use()
 		"tumble": htumble.use()
 		"echo": hecho.use()
+		"show": hshow.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -3106,6 +3110,7 @@ func _open_kin(rec: Dictionary) -> void:
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
 			more.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 			c2.add_child(more)
+			c2.add_child(UI.ghost("Prizes and cups", func(): PrizeBoard.open(self), 0, "info"))
 		"Growth":
 			var lead := Evo.leading(rec)
 			var lv := int(rec["level"])
@@ -4329,6 +4334,12 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var nm: String = rec["name"]
+	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
+		if res["look"]: _swap_kin_model(k)
+		_toast(res["text"])
+		Save.save_game()
+		_refresh_top()
+		return
 	if res["hate"]:
 		_say(k, BokiLines.say(rec, "fed_no"))
 		if res["new"]: _toast("You found out %s won't eat %s" % [nm, Care.food_name(f)])
@@ -5103,6 +5114,8 @@ func _open_feed(rec: Dictionary) -> void:
 			for af in Evo.AFF:
 				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
+	any = GardenItemRows.add_bag(v, rec, func(id: String): _care_feed(rec, id)) or any
+	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
