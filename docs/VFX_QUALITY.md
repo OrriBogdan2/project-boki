@@ -49,7 +49,7 @@ top of the signature colour. Any new hard-coded colour in a kit needs a comment 
 |---|---|
 | KinExec tinted every kit stage with the damage-category orange-red, so every Hunter's rings, cones and hits were red/orange | `ArchKit.cx` sets `hero_col = Arch.color(id)`; `KinExec._color` and the hit burst use it (Boki stages keep category colours) |
 | Enemy projectiles were lerped toward red `#ff5a3a` | `Oomph.shot_look` keeps the shooter's colour, lightened; enemy reads by size ×1.3 and halo |
-| `Fx.ring` was a thin flat band with a linear fade | `ring.gdshader` gains `wash` (inner fill) and `halo` (glow + hot core); ring alpha eases `1-k²` |
+| `Fx.ring` was a thin flat band with a linear fade | ring alpha eases `1-k²`; drawn since by `hero_vfx.gdshader` mode ring (`cel_ring`: hard band, hot lead edge, dust flash) |
 | `Fx.flash` lasted 0.06–0.08 s (1–2 frames) and flickered | `FLASH_MIN` 0.1 s |
 | `Fx.bolt` drew flat glow boxes that popped off | segments are fading `beam`s |
 | Tenzo's kit hard-coded molten red/orange | recoloured to cobalt in `dolm_kit`, `breah_*`, `rock_look` (FX only; the rock body stays sandstone) |
