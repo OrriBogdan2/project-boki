@@ -292,7 +292,7 @@ Seconds from the input at 60 Hz, printed as `AKTIME` lines by `tools/bjorn_anim_
 | Faultline slam (X) | wind 0.4, plant 0.2 | same | same; 0.04 s blend into the slam |
 Suggestions, not built (parity first): the recall catch lands at 0.17 s, before the clip's catch key (0.3 s); the ult streak `lead` is 0.2 s against about 0.4 s in the footage.
 
-## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesBjorn ids per ability; timed to 5 fps footage frames)
 ## Animations (KMovesBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|

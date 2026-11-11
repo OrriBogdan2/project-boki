@@ -63,7 +63,7 @@ const T := {
 	"dash_curve_tender_air_exit_k":   ["~", [0.4, 0.65], "x", "[footage] floats out at 40-65% of the burst"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
-	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
+	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed and the walk takes it"],
 	"coyote_frames":           [">=", 7.0, "frames", "Hunter.COYOTE 0.12s: latest press after a walk-off (none in the source)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "Hunter.JUMP_BUFFER 0.12s: earliest press before landing (source silent)"],
 	"jump_buffer_dash_frames": [">=", 7.0, "frames", "the same window across the end of an air dash that lands"],
@@ -338,7 +338,7 @@ func _face_turn() -> void:
 ## The three reference knocks (docs/MOVEMENT_FEEL.md "Knock distance") on a light, a medium and a heavy
 ## target, through Displace (the synced knock path): every class slides the same distance.
 const REF_KNOCKS := {"knock_kael_slam_m": 6.0, "knock_albert_charge_m": 11.0, "knock_grimble_anchor_m": 0.0}
-const ANCHOR_SPIKE := -16.0     # dredge_kit _slammed: m.displace.spike(f, -16)
+const ANCHOR_SPIKE := -16.0     # dredge_kit _slammed: m.displace.spike(f, -16, h)
 func _knock() -> void:
 	var spread := 0.0
 	for key in REF_KNOCKS:
@@ -353,7 +353,7 @@ func _knock() -> void:
 			if REF_KNOCKS[key] > 0.0:
 				m.displace.knock(P, Vector2(float(REF_KNOCKS[key]), 0.0))
 			else:
-				m.displace.spike(P, ANCHOR_SPIKE)
+				m.displace.spike(P, ANCHOR_SPIKE, null)
 			_steps(90)
 			var d := P.pos.x - x0
 			print("MFEEL knock %s on %s: %.3f m" % [key, c, d])

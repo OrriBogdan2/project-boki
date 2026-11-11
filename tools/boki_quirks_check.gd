@@ -125,7 +125,7 @@ func _rain_warning() -> void:
 func _field_book(main: Node) -> void:
 	var v := VBoxContainer.new()
 	main.add_child(v)
-	DexView.detail(v, "hivara", main.get_tree())
+	DexView.detail(v, "hivara", main.get_tree(), func(_f): pass)
 	var texts: Array = v.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	ok(texts.has(BokiQuirks.quirk("hivara")) and texts.has(BokiQuirks.sex_note("hivara")),
 		"the Field Book page shows its quirk and sex note")

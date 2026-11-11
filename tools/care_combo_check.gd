@@ -1450,12 +1450,20 @@ func rimewright() -> void:
 	ok(
 			"tm passive: knocking a Chilled foe Shatters them after a beat",
 			T.downed and K.splinter_log > s1 and T2.hp < hh, "downed %s" % str(T.downed))
-	var want: float = float(K.d["passive"]["splinter_dmg"]) * K.power("passive")
-	ok(
-			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
-			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
-	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
+	# --- the Shatter is damage only (data): no slow, no fresh Chill; numbers as the data/footage ratios
+	var pd: Dictionary = Arch.def("rimewright")["passive"]
 	K.chill.erase(T2.get_instance_id())
+	T2.slow_t = 0.0
+	T2.hp = T2.max_hp
+	K.splinter(T2.pos, float(pd["splinter_dmg"]), float(pd["splinter_r"]))
+	ok(
+			"tm passive (data): Shatter 37 in 3m after 0.4s, 8 darts -> 60; no slow and no Chill from it",
+			float(pd["splinter_dmg"]) == 37.0 and float(pd["splinter_r"]) == 3.0
+			and float(pd["splinter_delay"]) == 0.4 and float(pd["fan_splinter"]) == 60.0
+			and int(pd["fan_hits"]) == 8 and T2.hp < T2.max_hp
+			and T2.slow_t <= 0.3 and not K.chilled(T2),   # 0.28: the big-hit stagger
+			"slow_t %.2f chilled %s" % [T2.slow_t, str(K.chilled(T2))])
+	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
 	K.fan_hits.clear()
 	# off to the side, clear of the downed foe
 	var ahead := (T.pos - P.pos).normalized().rotated(Vector3.UP, PI / 2.0)
@@ -1484,17 +1492,6 @@ func rimewright() -> void:
 	ok(
 			"tm passive: Chill lasts 4s and a new hit refreshes it",
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
-	# --- the Shatter is damage only (data): no slow, no fresh Chill; numbers as the data/footage ratios
-	var pd: Dictionary = Arch.def("rimewright")["passive"]
-	T2.slow_t = 0.0
-	T2.hp = T2.max_hp
-	K.splinter(T2.pos, float(pd["splinter_dmg"]), float(pd["splinter_r"]))
-			"tm passive (data): Shatter 37 in 3m after 0.4s, 8 darts -> 60; no slow and no Chill from it",
-			float(pd["splinter_dmg"]) == 37.0 and float(pd["splinter_r"]) == 3.0
-			and float(pd["splinter_delay"]) == 0.4 and float(pd["fan_splinter"]) == 60.0
-			and int(pd["fan_hits"]) == 8 and T2.hp < T2.max_hp
-			and T2.slow_t <= 0.3 and not K.chilled(T2),   # 0.28: the big-hit stagger
-			"slow_t %.2f chilled %s" % [T2.slow_t, str(K.chilled(T2))])
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)

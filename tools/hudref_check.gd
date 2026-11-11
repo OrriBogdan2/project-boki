@@ -7,7 +7,8 @@ extends RefCounted
 ##   5. an ability cooling down shows its countdown on the slot
 ##   6. key caps come from Settings.key_cap, one Merge slot, an X tile for the hunter ultimate
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
-##   7. the low-health wash grows with missing health and leans toward the side the last hits came from
+##   8. empty gear and belt slots stay hidden; holding the info key shows every gear slot
+##   9. the low-health wash grows with missing health and leans toward the side the last hits came from
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -272,9 +273,10 @@ func _check_deny(P: Hunter) -> void:
 	P.stun_t = 0.0
 	flow.held.clear()
 
-## 7. Empty gear slots and belt slots stay hidden: only filled ones are drawn; holding the info key shows all
+## 8. Empty gear slots and belt slots stay hidden: only filled ones are drawn; holding the info key shows all
 ## the gear slots and one plain line per item.
 func _check_gear_reveal(P: Hunter) -> void:
+	var hud = P.m.hud
 	P.gear = Gear.empty_slots()
 	P.belt = UtilityBelt.empty()
 	await hud.panels.draw
@@ -300,9 +302,10 @@ func _check_gear_reveal(P: Hunter) -> void:
 	P.gear = Gear.empty_slots()
 	P.belt = UtilityBelt.empty()
 
-## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
+## 9. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
 ## Hud.hurt_from, the real path) weights the left edge, and a second later the wash is even again.
 func _check_wash(P: Hunter) -> void:
+	var hud = P.m.hud
 	var hp_was := P.hp
 	P.hp = P.max_hp * 0.5
 	var above := HurtWash.strength(P)

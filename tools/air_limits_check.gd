@@ -10,7 +10,7 @@ extends RefCounted
 ##  4. The "In the air" tables of Vex, Kael, Lace, Cinder, Meeko and Tenzo (docs/heroes/*.md): LMB, RMB tap, RMB
 ##     hold and E cast mid-jump and mid-fall as on the ground (Kael's RMB goes to his own Air Slam slot), none
 ##     fire out of a glide on LMB (the glider shuts the weapon), and Tenzo's RMB folds the glider and slams.
-##  4. CC lockouts (CcLockout, content/rules/cc_lockouts.json, docs/COMBAT.md), one assert per row fixed on
+##  5. CC lockouts (CcLockout, content/rules/cc_lockouts.json, docs/COMBAT.md), one assert per row fixed on
 ##     11-09: Grounded or rooted, a held glide never opens in a fall; rooted, Space doesn't jump; stunned, no
 ##     crouch and no tonic; Dazed, no dash, jump or RMB (a Daze locks like a stun).
 
@@ -276,12 +276,14 @@ func _cast_table(m: Match, home: Vector3, arch: String) -> void:
 	m.player.teleport(home)
 	_steps(m, 40)
 
-## 4. What a status forbids, on the first hero (the table is the same for every Hunter).
+## 5. What a status forbids, on the first hero (the table is the same for every Hunter).
 func _cc(m: Match, home: Vector3, arch: String) -> void:
+	var h: Hunter = m.player
 	for kind in ["gnd", "root"]:
 		_clear(h)
 		h.teleport(home + Vector3(0, HEIGHT, 0))
 		h.vel = Vector3.ZERO
+		h.grounded = false
 		_lock(h, kind, 2.0)
 		h.inp["glide"] = true
 		var opened := false
@@ -304,8 +306,10 @@ func _cc(m: Match, home: Vector3, arch: String) -> void:
 	ok(not h.crouch and h.drink_t <= 0.0, "%s stunned: no crouch (%s) and no tonic (drink %.2f)" % [
 		arch, h.crouch, h.drink_t])
 	_land(m, h, home)
+	_ready_all(h)
 	_lock(h, "daze", 1.0)
 	var dashes0 := h.dashes
+	var cd0: Dictionary = h.ak.cd.duplicate()
 	h.inp["dash"] = true
 	h.inp["sec"] = true
 	h.inp["sec_hold"] = true
@@ -323,10 +327,14 @@ func _lock(h: Hunter, kind: String, secs: float) -> void:
 		"daze": KitStatus.apply(h, "rat", secs)
 
 func _land(m: Match, h: Hunter, home: Vector3) -> void:
+	_clear(h)
 	h.stun_t = 0.0
 	h.root_t = 0.0
 	h.set_meta("gnd_until", 0.0)
 	KitStatus.clear_rattled(h)
+	h.gliding = false
+	h.teleport(home)
+	h.vel = Vector3.ZERO
 	_steps(m, 30)
 
 func run(main: Node) -> void:

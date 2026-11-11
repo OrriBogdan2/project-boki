@@ -96,7 +96,6 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
-
 ## A camp's alert (MobAlert): fires once when an idle monster sees a Hunter, not again within the
 ## camp's gap; five camps each alert once, the pool stays within its voices; an idle camp murmurs near the listener.
 func _mob_alerts(m: Match, P: Hunter) -> void:
@@ -124,18 +123,21 @@ func _mob_alerts(m: Match, P: Hunter) -> void:
 	var idle: Mob = m.spawn_mob("brute", P.pos + Vector3(-6.0, 0, 0))
 	idle.st = "idle"
 	idle.murmur_t = 0.0
+	Sfx.listener = P.pos
 	var sang := MobAlert.murmur(idle, 0.0)
 	ok(sang and idle.murmur_t >= MobAlert.MURMUR_GAP.x, "an idle camp near you murmurs, then waits")
 	idle.murmur_t = 0.0
 	Sfx.listener = P.pos + Vector3(60.0, 0, 0)
 	ok(not MobAlert.murmur(idle, 0.0), "...and stays quiet when you are far off")
 
+## Footsteps and landings are placed, weighted and within reach.
 func _footsteps(m: Match, P: Hunter) -> void:
 	var e: Hunter = null
 	for h in m.hunters:
 		if h.team != P.team and e == null: e = h
 	ok(e != null and _cam(m) != null, "setup: an enemy Hunter and a camera to hear from")
 	if e == null:
+		return
 	var reach := float(MoveSfx.rules()["step_reach_m"])
 	e.unseen = false
 	e.crouch = false
@@ -174,7 +176,9 @@ func _probe(P: Hunter, at: Vector3, make: Callable, who: Hunter = P):
 	for p in Sfx.voices():
 		p.stop()
 		p.stream = null
+	Sfx.last_played.clear()
 	Sfx.recent.clear()
+	Sfx.listener = P.pos
 	var home := who.pos
 	who.pos = at
 	make.call()

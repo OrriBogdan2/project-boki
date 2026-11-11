@@ -15,9 +15,9 @@ func anim_time() -> void:
 	await _mend_times()
 	_clip_blends()
 
-## The time of the n-th key of `move` in the footage-timed keys (KMovesPinBjorn).
+## The time of the n-th key of `move` in the footage-timed keys (KMovesBjorn).
 func _key_t(move: String, n: int) -> float:
-	return float(((KMovesPinBjorn.MOVES[move] as Dictionary)["keys"][n] as Array)[0])
+	return float(((KMovesBjorn.MOVES[move] as Dictionary)["keys"][n] as Array)[0])
 
 ## Steps until `done` is true or `limit` s pass; the s it took (-1 when it never did).
 func _until(m: Match, done_when: Callable, limit := 1.0) -> float:

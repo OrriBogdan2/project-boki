@@ -239,7 +239,7 @@ and the attack key does nothing from a glide (`Hunter.can_fire`).
 Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bow source, but which way the
 source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
 
-## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
+## Animations (KMovesPin ids per ability; timed to 5 fps footage frames)
 ## Animations (KMovesPin ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
 |---|---|---|
