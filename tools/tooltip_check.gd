@@ -27,6 +27,7 @@ func _hero(id: String) -> void:
 	var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/%s.json" % id))
 	var typed := _numbers_in(_strings(raw, []))
 	ok(typed.is_empty(), "%s: no typed number in its text on disk (%s)" % [id, ", ".join(typed.slice(0, 6))])
+	ok(not (raw as Dictionary).has("tip"), "%s: no text-only figures (a \"tip\" block the kit code never reads)" % id)
 	var kit := Arch.def(id)
 	var strings := _strings(kit, [])
 	ok(strings.all(func(s): return not "{" in s), "%s: every token filled" % id)
@@ -61,13 +62,14 @@ func _strings(o: Variant, out: Array) -> Array:
 		out.append(o)
 	return out
 
-## The numbers in these strings, as text, after the labels are taken out.
+## The numbers in these strings, as text, after the labels and any unfilled {tokens} are taken out.
 func _numbers_in(strings: Array) -> Array:
 	var label := RegEx.create_from_string(LABEL)
 	var num := RegEx.create_from_string(NUMBER)
+	var token := RegEx.create_from_string("\\{[^}]*\\}")
 	var out: Array = []
 	for s in strings:
-		for m in num.search_all(label.sub(String(s), "", true)):
+		for m in num.search_all(label.sub(token.sub(String(s), "", true), "", true)):
 			out.append(m.get_string())
 	return out
 
@@ -79,8 +81,8 @@ func _known(kit: Dictionary, id: String) -> Array:
 	for slot in ArchText.SLOT_BASE:
 		for what in ["cd", "cd2", "cd3", "dmg2", "dmg3"]:
 			out.append(ArchText.rank_value(kit, what, slot))
-	_leaves(Data.weapon_stats(Arch.signature(id)), out)
 	var w := Data.weapon_stats(Arch.signature(id))
+	_leaves(w, out)
 	if w.has("rate"):
 		out.append(1.0 / maxf(0.05, float(w["rate"])))
 	out.append(float(Data.CLASSES.get(Arch.weight(id), {}).get("dashes", 1)))
@@ -96,6 +98,7 @@ func _leaves(o: Variant, out: Array) -> void:
 			_leaves(v, out)
 	elif o is float or o is int:
 		out.append(float(o))
+		out.append(float(o) - 1.0)        # "{path-1%}": a multiplier's gain
 
 ## True when `n` is a known figure, within the rounding a tooltip shows (0.05; a percent is the figure x100).
 func _in(known: Array, n: float) -> bool:

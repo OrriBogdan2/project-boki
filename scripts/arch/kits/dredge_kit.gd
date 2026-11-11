@@ -202,7 +202,7 @@ func _tick(dt: float) -> void:
 	tell = ""
 	if res >= res_max():
 		tell = "full"
-	elif res >= 5.0:
+	elif res >= float(res_def().get("tell_half", 5.0)):
 		tell = "half"
 	self_pips(int(res_max()), int(res), res >= res_max(), dt)
 	if stop_t > 0.0: _tick_stop(dt)
@@ -634,7 +634,7 @@ func _anchor_dust(at: Vector3) -> void:
 func _stun_t() -> float:
 	var ed := e_def()
 	var bonus := float(ed["rank3_stun"]) if rank("kin") >= 3 else 0.0
-	return float(ed["stun"]) + 0.1 * float(maxi(0, rank("kin") - 1)) + bonus
+	return float(ed["stun"]) + float(ed.get("stun_rank", 0.1)) * float(maxi(0, rank("kin") - 1)) + bonus
 
 ## True when the foe stands over the abyss.
 func over_abyss(f: Ent) -> bool:

@@ -1246,9 +1246,11 @@ parity change to a cooldown, range or damage reaches every tooltip on its own.
 - `{rmb.pin.dmg.0}` the number at that path (array steps are numbers); `{e.slow%}` the same x100.
 - `{cd.sec}` `{cd2.sec}` `{cd3.sec}`: the slot's cooldown, at rank 2 and at rank 3 (`sec` = RMB, `dash`, `kin` = E),
   from `rank_cd` or the default step (10% a rank, dash 15%); `{dmg2.sec%}` `{dmg3.sec%}`: the damage gained.
-- `"tip"` holds the few figures only a tooltip states (secs / metres / pct / n, numbered per ability). They are
-  not read by the kit code: when you tune the real value, change the matching `tip` entry too (DEBT).
+- `{dash.walk_k-1%}`: a multiplier's gain as a percent (1.1 -> 10); `{weapon.primary.rate}`: the signature
+  weapon's file (`content/weapons/<signature>.json`).
+- No text-only figures: a number a tooltip states is a field the kit code reads (`e_def().get("wide_rank3", 1.3)`,
+  the old literal kept as the default). A figure that falls out of play (a knock's distance) is worded, not typed.
 - Digits that name rather than count stay typed: "Rank 2", "level 6", "360 Smash".
 - `tools/arch_text.py` is the same fill for the wiki (`gen_wiki.py`). `--tooltip-check` fails when a typed
-  digit is left in the text on disk, a token is unfilled, or a number on any card, rank line or pick line is not
-  in that kit's data.
+  digit is left in the text on disk, a token is unfilled, the file has a `tip` block, or a number on any card, rank
+  line or pick line is not in that kit's data.

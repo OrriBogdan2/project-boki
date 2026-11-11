@@ -464,7 +464,7 @@ func _burst(t: Ent) -> void:
 	# the flare: a swirl of starlight snaps out over the area, then a root beam holds on each foe
 	vfx("seed_burst", at, null, {"r": rr})
 	m.sfx("tend_root", at, 0.0, 1.0)
-	var root := float(sd["root"]) + (0.3 if rank("sec") >= 3 else 0.0)
+	var root := float(sd["root"]) + (float(sd.get("root_r3", 0.3)) if rank("sec") >= 3 else 0.0)
 	for f in foes_in(at, rr):
 		f.hurt(
 				float(sd["burst_dmg"]) * power("sec"), h,

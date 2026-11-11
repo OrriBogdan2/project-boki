@@ -48,13 +48,10 @@
 		"sockets": {"hit": "add", "ctrl": "add", "ctrl_cap": "soft", "util": "add"}},
 	"x": {"name": "Tidal Wave", "short": "Wave", "icon": "dash", "col": "#2a8cff", "cooldown": 90.0, "unlock": 6,
 		"range": 14.0, "width": 3.6, "time": 1.0, "dmg": 18.0, "lift": 9.0, "knockup": 1.0, "slow_k": 0.5, "slow": 2.0, "shield": 40.0, "shield_t": 3.0,
-		"desc": "Call a wave and surf its crest {x.range}m toward the cursor in {x.time}s; you can't be targeted while you ride it. Every foe it rolls over takes {x.dmg}, is knocked up for {x.time}s, then slowed {x.slow_k%}% for {x.slow}s. You land with a {x.shield} shield for {x.shield_t}s."},
+		"desc": "Call a wave and surf its crest {x.range}m toward the cursor in {x.time}s; you can't be targeted while you ride it. Every foe it rolls over takes {x.dmg}, is knocked up for {x.knockup}s, then slowed {x.slow_k%}% for {x.slow}s. You land with a {x.shield} shield for {x.shield_t}s."},
 	"order": ["sec", "dash", "kin", "sec", "dash", "sec", "kin", "gear"],
-	"rank2": {"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s per charge, damage +{dmg2.sec%}%.", "dash": "Rank 2: cooldown {cd.dash}s -> {tip.dash.secs_1}s, surfacing radius +{tip.dash.metres_1}m.", "kin": "Rank 2: cooldown {e.cooldown}s -> {cd2.kin}s, damage +{dmg2.kin%}%."},
-	"rank3": {"sec": "the next two potions in the bag show", "dash": "surfacing also slows {dmg3.dash%}% for {tip.dash.secs_2}s", "kin": "the spout pulls foes to its line"},
-	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%.", "dash": "Rank 3: cooldown {cd.dash}s -> {dash.dist}s.", "kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, damage +{dmg3.kin%}%."},
-	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"},
-	"tip": {
-		"dash": {"secs_1": 7.0, "metres_1": 0.3, "secs_2": 1.0}
-	}
+	"rank2": {"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s per charge, damage +{dmg2.sec%}%.", "dash": "Rank 2: cooldown {cd.dash}s -> {cd2.dash}s.", "kin": "Rank 2: cooldown {e.cooldown}s -> {cd2.kin}s, damage +{dmg2.kin%}%."},
+	"rank3": {"sec": "the next two potions in the bag show", "dash": "cooldown {cd3.dash}s", "kin": "the spout pulls foes to its line"},
+	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%.", "dash": "Rank 3: cooldown {cd.dash}s -> {cd3.dash}s.", "kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, damage +{dmg3.kin%}%."},
+	"tells": {"half": "blue splash marks over the target, one per different effect", "full": "three splash marks: the next different effect Beaches them; the next potion glows in his hand", "dash_spent": "a fin cutting the ground, dash pip dark"}
 }

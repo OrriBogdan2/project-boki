@@ -45,6 +45,7 @@
 		"desc": "Rivals under half health are seen through cover within {resource.sense_r}m."
 	},
 	"dash": {
+		"orb_t": 4.0,
 		"id": "spirit_walk",
 		"name": "Spirit Walk",
 		"icon": "vanish",
@@ -55,7 +56,7 @@
 		"time": 2.8,
 		"time_rank3": 0.5,
 		"walk_k": 1.1,
-		"desc": "A quick dodge roll in the direction you move (or aim), then {dash.time}s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move {tip.dash.pct_1%}% faster. Walking into something leaves a spirit orb there for {tip.dash.secs_1}s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.",
+		"desc": "A quick dodge roll in the direction you move (or aim), then {dash.time}s as a spirit: rocks, trees, pillars and ability barriers don't stop you (cliffs and ledges still do); you move {dash.walk_k-1%}% faster. Walking into something leaves a spirit orb there for {dash.orb_t}s: anyone who touches it walks as a spirit too. Taking damage ends it. If it ends while you're inside something you are put back where you went in.",
 		"inside_boost": 0.33,
 		"ally_r": 6.0
 	},
@@ -98,6 +99,7 @@
 		}
 	},
 	"e": {
+		"wide_rank3": 1.3,
 		"delivery": "zone",
 		"name": "Hail Wall",
 		"short": "Hail",
@@ -157,14 +159,10 @@
 	],
 	"rank_cd": {"sec": [1, 0.8125, 0.625], "dash": [1, 0.8947, 0.7895], "kin": [1, 0.8667, 0.6]},
 	"rank_dmg": {"sec": [1, 1.2, 1.4], "dash": [1, 1, 1], "kin": [1, 1.3, 1.6]},
-	"rank3": {"sec": "Heavy Shot flies {rmb.pin.range_rank3}m farther; a wall stun gives a dash charge", "dash": "Spirit Walk lasts {dash.time_rank3}s longer, is {dash.inside_boost%}% faster inside something (fading) and allies near you walk with you", "kin": "the Hail Wall is {tip.e.pct_1%}% wider"},
+	"rank3": {"sec": "Heavy Shot flies {rmb.pin.range_rank3}m farther; a wall stun gives a dash charge", "dash": "Spirit Walk lasts {dash.time_rank3}s longer, is {dash.inside_boost%}% faster inside something (fading) and allies near you walk with you", "kin": "the Hail Wall is {e.wide_rank3-1%}% wider"},
 	"rank2": {"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s, damage +{dmg2.sec%}%.", "dash": "Rank 2: recharge {cd.dash}s -> {cd2.dash}s per charge.", "kin": "Rank 2: cooldown {e.cooldown}s -> {cd2.kin}s, damage +{dmg2.kin%}%."},
-	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; flies {rmb.pin.range_rank3}m farther and a wall stun gives a dash charge.", "kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, damage +{dmg3.kin%}%; the Hail Wall is {tip.e.pct_1%}% wider.", "dash": "Rank 3: recharge {cd.dash}s -> {cd3.dash}s per charge; Spirit Walk lasts {dash.time_rank3}s longer, is {dash.inside_boost%}% faster inside something (fading), allies within {dash.ally_r}m walk too."},
+	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; flies {rmb.pin.range_rank3}m farther and a wall stun gives a dash charge.", "kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, damage +{dmg3.kin%}%; the Hail Wall is {e.wide_rank3-1%}% wider.", "dash": "Rank 3: recharge {cd.dash}s -> {cd3.dash}s per charge; Spirit Walk lasts {dash.time_rank3}s longer, is {dash.inside_boost%}% faster inside something (fading), allies within {dash.ally_r}m walk too."},
 	"tells": {
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
-	},
-	"tip": {
-		"dash": {"pct_1": 0.1, "secs_1": 4.0},
-		"e": {"pct_1": 0.3}
 	}
 }

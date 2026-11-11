@@ -613,7 +613,7 @@ func lunge_k(t: float) -> float:
 
 ## Every Smash's damage: its rank, and +20% more at rank 2 and again at rank 3.
 func smash_k() -> float:
-	return 1.0 + 0.2 * float(clampi(rank("sec") - 1, 0, 2))
+	return 1.0 + float(rmb_def()["slam"].get("rank_k", 0.2)) * float(clampi(rank("sec") - 1, 0, 2))
 
 ## The Meteor Drop's own cooldown, 2.4s shorter at rank 3.
 func air_cooldown() -> float:

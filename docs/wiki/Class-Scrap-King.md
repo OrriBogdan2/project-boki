@@ -64,7 +64,7 @@ What the in-game kit card (K) says.
 | RMB: Abyssal Hand | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
 | E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
 | Hunter ultimate: Brass Broadside | Brass Broadside (level 6): charge a fan while you walk slowly, then two waves of heavy brass slugs with Anti-Heal. |
-| Weapon: Shotgun | Seven slugs in a tight fan that stop 20m out, a shot every half second. Hits from behind hurt more. |
+| Weapon: Shotgun | Seven slugs in a tight fan that stop 6.3m out, a shot every 0.5s. Hits from behind hurt more. |
 
 ### Abilities in full
 
@@ -87,7 +87,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 12s -> 10.8s. | cooldown 12s -> 9.6s; hitting a foe takes half of it off. |
-| Dash (Shift) | recharge 10s -> 8.5s per charge; the air pounce 12.5s -> 10.5s. | recharge 10s -> 7s, the air pounce 12.5s -> 8.5s; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
+| Dash (Shift) | recharge 10s -> 8.5s per charge; the air pounce 2s shorter. | recharge 10s -> 7s, the air pounce 2s shorter again; pellet hits trim 0.25s off the recharge, and a dash resets the gun's spread. |
 | E | cooldown 7s -> 6.3s, damage +15%, stun +0.1s. | cooldown 7s -> 5.6s, damage +30%, stun +0.2s; double damage on a foe over the abyss and +0.2s stun more. |
 
 **Suggested level-up order** (what bots follow): RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > RMB > E > Dash (Shift) > Glove (Q).
@@ -97,7 +97,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | brass glints along the shoulder drum from 5 stacks |
-| Armed / full | 10 stacks: a brass halo ring at the feet and a bell within 20m |
+| Armed / full | 10 stacks: a brass halo ring at the feet and a bell foes nearby hear |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

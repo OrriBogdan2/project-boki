@@ -82,7 +82,7 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
+**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of 4.5m the way you face (two charges, a third at rank 2): 9 damage to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
@@ -101,7 +101,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | +20% damage on every Smash. | +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less (7.2s -> 4.8s). |
+| RMB | +20% damage on every Smash. | +20% more damage on every Smash, and the Meteor Drop rests 2.4s less than its 7.2s. |
 | Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 6.4s per charge; a shot dodged through the Rampage feeds your Rage. |
 | E | cooldown 12.8s -> 11.2s. | cooldown 12.8s -> 8s. |
 
@@ -112,7 +112,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Moment | Tell |
 |---|---|
 | Building up | red heat glowing through the pauldrons as Rage fills, steam from half |
-| Armed / full | Enraged: a red shell, the hunter swells, a roar within 25m; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
+| Armed / full | Enraged: a red shell, the hunter swells, a roar foes nearby hear; a magenta strike lane while a Smash winds up; a red outline on anyone wounded enough to finish; a gold glow and a white strip ahead of him while he guards |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

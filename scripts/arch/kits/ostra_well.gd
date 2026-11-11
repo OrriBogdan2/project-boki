@@ -14,7 +14,7 @@ extends RefCounted
 const DOME_COL := Color("a8e4ff")
 const DISC_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
-const TICK := 0.1                       # s between damage ticks
+const TICK := 0.1                       # s between damage ticks (data: x.tick)
 const HOLD_R := 0.25                    # m from the centre where a caught body stops being drawn in
 const GATHER_Y := 2.4                   # m over his ground point: the orb above his raised hands
 
@@ -151,7 +151,7 @@ func _tick_open(dt: float) -> void:
 	(disc.get_node("Core") as Node3D).visible = swollen
 	tick_left -= dt
 	if tick_left <= 0.0:
-		tick_left += TICK
+		tick_left += float(xd().get("tick", TICK))
 		_tick_catch(left)
 	if left <= 0.0:
 		_close()

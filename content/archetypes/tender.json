@@ -33,7 +33,7 @@
 		"rmb": "Burrseed: a {rmb.windup}s wind-up, then the seed flies at the cursor; it sticks to a foe and vines them to you; {rmb.seed.unwind}s in your reach roots them.",
 		"e": "Hearthlight: a healing ring on you; press again to throw it to the cursor.",
 		"dash": "Relay Step: a quick hop where you move; in the air, a long floaty glide.",
-		"passive": "Carrier: run into a downed teammate to carry up to {tip.passive.n_1}; a hit or a stun drops them.",
+		"passive": "Carrier: run into a downed teammate to carry up to {passive.max}; a hit or a stun drops them.",
 		"weapons": {
 			"lantern_crook": "Hold to push embers from alternating hands that fly past the cursor; each hit on a foe adds Kindle."
 		},
@@ -56,7 +56,7 @@
 	},
 	"passive": {
 		"name": "Carrier",
-		"desc": "Run into a downed teammate to shoulder them (up to {passive.max}; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them and can't pick anyone up for {resource.dur}s. Your embers Kindle foes (up to {resource.max}, {resource.dur}s): each stack adds {tip.passive.n_2} damage to your embers, and an ember into a Kindled foe winds Hearthlight back {resource.refund}s ({resource.emp_refund}s for a long-range ember).",
+		"desc": "Run into a downed teammate to shoulder them (up to {passive.max}; never one an enemy is standing on). While you carry them they don't bleed out and can't be stomped. Press crouch to set them down. If you take damage or are stunned, you drop them and can't pick anyone up for {passive.lock}s. Your embers Kindle foes (up to {resource.max}, {resource.dur}s): each stack adds {resource.per_stack} damage to your embers, and an ember into a Kindled foe winds Hearthlight back {resource.refund}s ({resource.emp_refund}s for a long-range ember).",
 		"max": 2,
 		"pick_r": 1.1,
 		"pick_speed": 0.6,
@@ -71,7 +71,7 @@
 		"dist": 3.6,
 		"time": 0.2,
 		"invuln": 0.12,
-		"desc": "A quick skip about {dash.dist}m where you move; in the air, a long floaty glide of about {tip.dash.metres_1}m (its own {dash.air.cd}s cooldown).",
+		"desc": "A quick skip about {dash.dist}m where you move; in the air, a long floaty glide of about {dash.air.dist}m (its own {dash.air.cd}s cooldown).",
 		"air": {
 			"dist": 13.3,
 			"time": 0.95,
@@ -103,12 +103,12 @@
 			"unwind": 2.0,
 			"leash": 15.0,
 			"burst_r": 2.2,
-			"r3_k": 2.0,
+			"r3_k": 2.0, "root_r3": 0.3,
 			"burst_dmg": 32.0,
 			"root": 1.1
 		},
 		"variants": {
-			"tap": "Press: a fixed {rmb.windup}s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed ({rmb.seed.speed} m/s) sticks to the first foe it hits ({rmb.seed.dmg} damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within {rmb.seed.leash}m of you. After {rmb.seed.unwind}s of that it bursts: {rmb.seed.burst_dmg} damage and root {rmb.seed.root}s to them and every foe within {rmb.seed.burst_r}m ({tip.rmb.metres_1}m at rank {tip.rmb.n_1}), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off."
+			"tap": "Press: a fixed {rmb.windup}s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed ({rmb.seed.speed} m/s) sticks to the first foe it hits ({rmb.seed.dmg} damage): a vine runs from you to them and a violet disc the size of the burst shows under them, filling while they stay within {rmb.seed.leash}m of you. After {rmb.seed.unwind}s of that it bursts: {rmb.seed.burst_dmg} damage and root {rmb.seed.root}s to them and every foe within {rmb.seed.burst_r}m ({rmb.seed.r3_k}x as wide at rank 3), and each is Kindled. Out of your reach the disc empties twice as fast as it filled, and when it is empty the seed falls off."
 		},
 		"sockets": {
 			"hit": "add",
@@ -135,7 +135,7 @@
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A {e.radius}m ring of warm light round you for {e.time}s: it heals teammates inside {e.over} over its life, then blooms to heal them {e.burst} more (a soft glow, not a blast). Press E again to throw it to the cursor (up to {e.reach}m, it lands almost at once and widens to {e.thrown_radius}m): for {e.toss_boost_t}s its healing is {e.every%}% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
+		"desc": "A {e.radius}m ring of warm light round you for {e.time}s: it heals teammates inside {e.over} over its life, then blooms to heal them {e.burst} more (a soft glow, not a blast). Press E again to throw it to the cursor (up to {e.reach}m, it lands almost at once and widens to {e.thrown_radius}m): for {e.boost_t}s its healing is {e.boost%}% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -157,9 +157,9 @@
 		"gear"
 	],
 	"rank3": {
-		"sec": "the roots last {tip.rmb.secs_1}s longer and the burst is twice as wide",
+		"sec": "the roots last {rmb.seed.root_r3}s longer and the burst is twice as wide",
 		"dash": "picking up a teammate refreshes your long air dash",
-		"kin": "the thrown light's healing boost is {e.toss_boost_t%}% instead of {e.boost%}%"
+		"kin": "the thrown light's healing boost doubles (from {e.boost%}%)"
 	},
 	"rank2": {
 		"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s, damage +{dmg2.sec%}%.",
@@ -167,13 +167,13 @@
 		"kin": "Rank 2: cooldown {e.cooldown}s -> {cd2.kin}s, healing +{dmg2.kin%}%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; the roots last {tip.rmb.secs_1}s longer and the burst is twice as wide.",
-		"kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, healing +{dmg3.kin%}%; the thrown light's healing boost is {e.toss_boost_t%}% instead of {e.boost%}%.",
+		"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; the roots last {rmb.seed.root_r3}s longer and the burst is twice as wide.",
+		"kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, healing +{dmg3.kin%}%; the thrown light's healing boost doubles (from {e.boost%}%).",
 		"dash": "Rank 3: recharge {cd.dash}s -> {cd3.dash}s; picking up a teammate refreshes your long air dash."
 	},
 	"tells": {
 		"half": "ember sparks over the foes she has Kindled, one per stack",
-		"full": "a foe at {tip.card.n_1} Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",
+		"full": "a foe at {resource.max} Kindle burns bright; a stuck Burrseed shows its violet disc under them, filling, for everyone",
 		"dash_spent": "dash pip dark"
 	},
 	"lmb_note": "Ember Cast",
@@ -192,11 +192,5 @@
 		"land_r": 0.9,
 		"self_when_solo": true,
 		"desc": "Cast it with the cursor on a teammate within {x.range}m ({x.heal_ps} body heights; the ring and a line show when it is ready): a tether of light heals them {x.heal_ps} a second for {x.time}s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
-	},
-	"tip": {
-		"passive": {"n_1": 2.0, "n_2": 0.7},
-		"dash": {"metres_1": 13.0},
-		"rmb": {"metres_1": 4.4, "n_1": 3.0, "secs_1": 0.3},
-		"card": {"n_1": 5.0}
 	}
 }

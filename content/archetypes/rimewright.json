@@ -32,7 +32,7 @@
 		"weapons": {
 			"hoar_fan": "Hold for a barrage of slow darts that curve onto the foe at your cursor, ending in three large ones."
 		},
-		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a {tip.x.metres_1}m slowing rink; it cracks open at {x.hold}s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
+		"x": "Rimelock (hunter ultimate, level 6): sealed in ice, invulnerable and rooted, inside a {x.radius}m slowing rink; it cracks open at {x.hold}s (or on a late recast) to stun everyone in it. A recast earlier ends it with no stun."
 	},
 	"signature": "hoar_fan",
 	"resource": {
@@ -45,11 +45,11 @@
 	},
 	"passive": {
 		"name": "Hoarfrost",
-		"desc": "Your damaging abilities Chill foes for {passive.chill_t}s (a Chilled foe shows frost). Eight darts on the same foe Shatter them: a starburst of ice spikes, {rmb.lance.burst_dmg} damage to everyone within {tip.passive.metres_1}m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them {passive.splinter_delay}s later: {passive.splinter_dmg} damage to everyone within {passive.splinter_r}m, plus Chill.",
+		"desc": "Your damaging abilities Chill foes for {passive.chill_t}s (a Chilled foe shows frost). {passive.fan_hits} darts on the same foe Shatter them: a starburst of ice spikes, {passive.fan_splinter} damage to everyone within {passive.fan_r}m. Knocking a Chilled hunter, or felling a Chilled monster, Shatters them {passive.splinter_delay}s later: {passive.splinter_dmg} damage to everyone within {passive.splinter_r}m, plus Chill.",
 		"splinter_dmg": 37.0,
 		"splinter_r": 3.0,
 		"splinter_delay": 0.4,
-		"fan_splinter": 60.0,
+		"fan_splinter": 60.0, "fan_r": 2.4,
 		"fan_hits": 8,
 		"chill_t": 4.0
 	},
@@ -116,11 +116,11 @@
 		"icon": "dome",
 		"col": "#9af0e6",
 		"cooldown": 17.0,
-		"hp": 200.0,
+		"hp": 200.0, "hp_r3": 40.0,
 		"slide": 4.5,
 		"time": 4.5,
 		"push": 5.0,
-		"desc": "A {e.tell}s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor ({e.slide} to {e.travel}m), widening from {e.reach}m to {e.slide}m, stopping enemy shots ({e.hp} HP) and shoving foes it touches. It stands {e.time}s in all. Press E again while it slides to freeze it in place for {e.frozen_t}s.",
+		"desc": "A {e.tell}s sparkle at your feet, then a narrow block of ice erupts just ahead and slides toward the cursor ({e.travel_min} to {e.travel}m), widening from {e.length}m to {e.length_max}m, stopping enemy shots ({e.hp} HP) and shoving foes it touches. It stands {e.time}s in all. Press E again while it slides to freeze it in place for {e.frozen_t}s.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -147,9 +147,9 @@
 		"gear"
 	],
 	"rank3": {
-		"sec": "the spear's detonation hits {tip.rmb.pct_1%}% harder",
+		"sec": "the spear's detonation hits {rmb.lance.r3_dmg_k-1%}% harder",
 		"dash": "a Skate over the Abyss lays ice underfoot that holds for {dash.ice_time}s",
-		"kin": "the wall is {tip.e.n_1} points tougher"
+		"kin": "the wall is {e.hp_r3} points tougher"
 	},
 	"rank2": {
 		"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s, damage +{dmg2.sec%}%.",
@@ -157,13 +157,13 @@
 		"kin": "Rank 2: cooldown {e.cooldown}s -> {cd2.kin}s, wall strength +{dmg2.kin%}%."
 	},
 	"rank_next": {
-		"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; the detonation hits {tip.rmb.pct_1%}% harder.",
+		"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s, damage +{dmg3.sec%}%; the detonation hits {rmb.lance.r3_dmg_k-1%}% harder.",
 		"dash": "Rank 3: recharge {cd.dash}s -> {cd3.dash}s; a Skate over the Abyss lays ice underfoot that holds for {dash.ice_time}s.",
-		"kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, wall strength +{dmg3.kin%}%; +{tip.e.n_1} wall strength."
+		"kin": "Rank 3: cooldown {e.cooldown}s -> {cd3.kin}s, wall strength +{dmg3.kin%}%; +{e.hp_r3} wall strength."
 	},
 	"tells": {
 		"half": "a frost glow on foes that grows with each dart",
-		"full": "at {tip.card.n_1} darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
+		"full": "at {passive.fan_hits} darts the foe Shatters in ice spikes; a landed spear shows its slow zone and fill to everyone",
 		"dash_spent": "skate blades dark, dash pip dark"
 	},
 	"x": {
@@ -185,13 +185,6 @@
 		"slow_base": 0.15,
 		"slow_per_s": 0.12,
 		"slow_max": 0.55,
-		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an {x.radius}m rink snaps out round you. Cast from a skate, the statue slides on along your skate ({tip.x.pct_1%}% faster than the skate, about {tip.x.metres_2}m, easing to a stop over {x.carry_t}s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay ({x.slow_base%}% up to {x.slow_max%}%). Its cracks glow brighter as it builds; at {x.hold}s it cracks open: {x.dmg} damage and a {x.stun}s ice-block stun to every foe in the rink you can see. Recast in the last {x.late}s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
-	},
-	"tip": {
-		"x": {"metres_1": 7.2, "pct_1": 0.05, "metres_2": 6.3},
-		"passive": {"metres_1": 2.4},
-		"rmb": {"pct_1": 0.45},
-		"e": {"n_1": 40.0},
-		"card": {"n_1": 8.0}
+		"desc": "Cast it: your body turns to ice from the feet up, a frozen statue: invulnerable and rooted, your facing locked as you cast, and an {x.radius}m rink snaps out round you. Cast from a skate, the statue slides on along your skate ({x.carry_k-1%}% faster than the skate, easing to a stop over {x.carry_t}s, no steering), then you are rooted; recast (or Shift) to break out early. Foes in it are Chilled and slowed more the longer they stay ({x.slow_base%}% up to {x.slow_max%}%). Its cracks glow brighter as it builds; at {x.hold}s it cracks open: {x.dmg} damage and a {x.stun}s ice-block stun to every foe in the rink you can see. Recast in the last {x.late}s to set it off early at two thirds; any earlier and the shell just breaks with no stun."
 	}
 }

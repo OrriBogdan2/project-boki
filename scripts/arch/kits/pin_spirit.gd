@@ -18,7 +18,7 @@ var snap_backs := 0               # times it ended inside something and put her 
 var passed := 0                # steps spent inside something (checks)
 var orbs: Array = []           # spirit orbs left where she walked into something: {pos, t, node}
 var granted: Array = []        # others the orbs gave a Spirit Walk to: [hunter, seconds left]
-const ORB_T := 4.0             # s an orb stays
+const ORB_T := 4.0             # s an orb stays (data: dash.orb_t)
 const ORB_R := 0.9             # m touch radius
 
 func _init(kit: ArcherKit) -> void:
@@ -77,7 +77,7 @@ func _drop_orb(at: Vector3) -> void:
 	n.visible = true
 	n.global_position = at + Vector3(0, 0.9, 0)
 	n.scale = Vector3.ONE * 1.4
-	orbs.append({"pos": at, "t": ORB_T, "node": n})
+	orbs.append({"pos": at, "t": float(k.dash_def().get("orb_t", ORB_T)), "node": n})
 	k.vfx("spirit_orb", at)
 
 ## The orbs and the walks they gave (run every step, walking or not).

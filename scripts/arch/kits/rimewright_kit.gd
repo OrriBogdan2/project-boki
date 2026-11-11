@@ -125,7 +125,11 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), _fan_r(pd), t))
+
+## The eight-dart Shatter's reach: "fan_r", else four fifths of a knock's.
+func _fan_r(pd: Dictionary) -> float:
+	return float(pd.get("fan_r", float(pd["splinter_r"]) * 0.8))
 
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
@@ -734,7 +738,7 @@ func _raise_wall(dir: Vector2, travel_d: float) -> void:
 	var g: float = m.world.ground_at(at.x, at.z)
 	if g <= World.VOID + 1.0 or m.world.is_block(at.x, at.z):
 		at = h.pos + Vector3(dir.x, 0, dir.y) * 1.0
-	var hp := float(ed["hp"]) + (40.0 if rank("kin") >= 3 else 0.0)
+	var hp := float(ed["hp"]) + (float(ed.get("hp_r3", 40.0)) if rank("kin") >= 3 else 0.0)
 	var w: Dictionary = m.verbs.add_wall(
 			h, at, dir,
 			{

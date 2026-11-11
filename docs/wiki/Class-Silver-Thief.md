@@ -78,9 +78,9 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +10% per Mark. The empowered shot adds 2, the Bola 1. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
+**Marks (passive).** Every shot that hits puts a Mark on the target (no cap, each lasting 4s and refreshed by the next): your shots on them deal +10% per Mark. The empowered shot adds 2, the Bola one. A knock heals you 15% of your health on top of the usual knock heal (25% in all) and bursts a crimson star on them; an assist heals 25%.
 
-**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals 2.3 times a shot and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: the empowered bonus +20%; rank 3: +40%.
+**Vault (dash, Shift, 4.5s cooldown).** A sideways cartwheel of 4.5m the way you move in about half a second (the same from a jump, its speed carried on to the landing; shots pass through it; you can shoot mid-flip) and +18% speed for 2s. Your next shot within 3s is empowered (a gold glint in your throwing hand, flaring as you land): it flies 12% further and deals +134% damage and puts 2 Marks on them (Marks add to it as to any shot); firing it ends the speed. Landing it gives the Vault back at once. Rank 2: that bonus is 20% bigger; rank 3: twice that.
 
 **Bola (RMB, 7s cooldown).**
 
@@ -89,7 +89,7 @@ What the in-game kit card (K) says.
 
 **Shadow Knife (E, 15s cooldown).** Throw a dagger to your cursor (14m at most): it sticks in the first foe on the way (8 damage, slowed 50% for 2.5s) or lands where you aimed. Press E again to blink to it at once, leaving a trail of afterimages; after 6s you step to it anyway.
 
-**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands every 0.2s at each foe inside it (10 at most): 4 each, 6 from the outer band (past 4m), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
+**Encore (hunter ultimate, from level 6, 24s cooldown).** A violet ring grows round you (0.4s) to 5.4m and rides with you; she dances, and for 2s a blade flies from her hands on each beat at each foe inside it (10 at most): 4 each, +2 in the outer band (the last quarter of its reach), which also blights them for 6s (healing barely takes). You keep moving, shooting and dashing; casting it gives the Vault back, and every blade refreshes your Marks. Allies are untouched.
 
 ### Ranks
 
@@ -98,7 +98,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | damage +50%. | cooldown 7s -> 4.8s, damage +50%; flies 1m further after the first foe, and two foes caught pool their Marks. |
-| Dash (Shift) | the empowered bonus +20%. | the empowered bonus +40% in all, and the speed boost is half again as big. |
+| Dash (Shift) | the empowered bonus +20%. | the empowered bonus twice the rank 2 gain in all, and the speed boost is half again as big. |
 | E | cooldown 15s -> 10.7s. | cooldown 10.7s; sticking refunds 25% of the cooldown (50% in a foe), and a knife that sticks in a foe gives the Vault back. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > RMB > E > Glove (Q).

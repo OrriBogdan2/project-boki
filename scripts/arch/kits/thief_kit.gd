@@ -34,7 +34,7 @@ const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
 const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
-const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
+const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (source: 850 -> 950 units; dash.emp_range)
 ## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
 ## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
 const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
@@ -277,7 +277,7 @@ func _tick_aim_line() -> void:
 	if not h.is_local() or h.wid != "arc_bolts" or busy() or KinMerge.active(h):
 		AimKit.hide(h, "aim_glow")
 		return
-	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if primed_t > 0.0 else 1.0))
+	var to := AimMode.point(h, float(h.wpn.get("range", 12.0)) * (emp_range_k() if primed_t > 0.0 else 1.0))
 	if primed_t > 0.0:
 		AimKit.line(h, "aim", {"to": to, "col": EMP_LINE, "alpha": 1.6, "lw": 0.13})
 		AimKit.line(h, "aim_glow", {"to": to, "col": EMP_LINE, "alpha": 0.35, "lw": 0.34, "arrow": false})
@@ -330,6 +330,10 @@ func vault_haste() -> float:
 	var boost := float(dash_def().get("haste", 0.3))
 	return boost * (float(dash_def().get("haste_r3", 1.5)) if rank("dash") >= 3 else 1.0)
 
+## How much further the empowered bolt flies (a multiplier).
+func emp_range_k() -> float:
+	return float(dash_def().get("emp_range", EMP_RANGE_K))
+
 ## The empowered bonus's rank growth: +20% at rank 2 and again at rank 3.
 func prime_rank_k() -> float:
 	return 1.0 + float(dash_def().get("prime_rank", 0.2)) * float(clampi(rank("dash") - 1, 0, 2))
@@ -374,7 +378,7 @@ func _bolt() -> void:
 	var right := Vector2(-d.y, d.x)
 	var off := right * HAND_OFF * (1.0 if hand == 1 else -1.0)
 	var start: Vector3 = (sd["pos"] as Vector3) + Vector3(off.x, 0, off.y)
-	var rng := float(h.wpn.get("range", 12.0)) * (EMP_RANGE_K if emp else 1.0)
+	var rng := float(h.wpn.get("range", 12.0)) * (emp_range_k() if emp else 1.0)
 	var to := AimMode.point(h, rng)
 	var v := Vector2(to.x - start.x, to.z - start.z)
 	var spd := (sd["vel"] as Vector2).length()

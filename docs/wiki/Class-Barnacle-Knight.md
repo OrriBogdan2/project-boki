@@ -78,20 +78,20 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Guard (passive).** Damage your aegis blocks becomes Guard (1 per 2 blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1 (8 damage).
+**Guard (passive).** Damage your aegis blocks becomes Guard (0.5 per point blocked, max 100); at 50 your Shield Charge ends in a Shield Slam (push 12, stun 0.6s, spends 50). Crushed: any knock of yours (Crushing Blow, 360 Smash, Shield Charge, Shield Slam) that drives a foe into a wall or another foe stuns it 1 (8 damage).
 
-**360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash (0.17s) that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
+**360 Smash (dash, Shift, 8s cooldown).** 360 Smash: a hard 3.5m dash at 20.5m/s that slides on through one full spin of the hammer around you (2.2m): 24 damage, push 7. With the aegis raised it's a Shield Charge on its own 6s cooldown (it spends no dash charge): 4.2m behind the aegis, invulnerable for its length, 10 damage and push 11 (into a wall or a foe: Crushed). Shift while winding up a Crushing Blow: a short plain dash, the blow still charging.
 
 **Aegis (RMB, 6s cooldown).**
 
 - *Hold:* Raise the aegis: a curved gold shield with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
-- *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).
+- *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6s (spends 50).
 
 **Mending Ground (E, 12s cooldown).** A green light column comes down for 1s on your hammer (on you with the hammer in hand), then the zone round it heals allies inside 2 every 0.5s for 4s, following the hammer, and ends in a burst of 18; if your aegis is raised the burst mends it 60. A downed teammate inside is a third of the way back up at the burst.
 
-**Faultline (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the 16m lane shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
+**Faultline (hunter ultimate, from level 6, 40s cooldown).** Plant and raise the hammer (0.4s, the lane, 4 cells of 4m, shows to everyone), then slam (planted 0.2s more; then you move freely while it runs): the fissure races down the lane, striking each foe on it (4, stun 0.5s), and the ground erupts cell by cell to the far end, throwing each foe up once (18, slowed 50% for 1.5s). A wall or a raised ledge stops it. A glowing scar stays 10s and slows foes on it 20%.
 
 ### Ranks
 
@@ -99,9 +99,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | shield HP +25% (160 -> 200). | shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken. |
-| Dash (Shift) | recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s. | recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further. |
-| E | healing +25% (burst 18 -> 22). | cooldown 12s -> 8s, healing +50% in all. |
+| RMB | shield HP +25% of its 160. | shield HP +25% more; regen 20 -> 30 per second, regen starts 2s -> 1.4s after a hit and the aegis is back 3s -> 2s after it breaks. |
+| Dash (Shift) | recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s, 1.5s shorter. | recharge 8s -> 5s; the Shield Charge cooldown 1.5s shorter again; a 360 Smash that hits refunds it; both dashes go 1m further. |
+| E | healing +25%. | cooldown 12s -> 8s, healing +25% more again. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > Glove (Q).
 
@@ -109,8 +109,8 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Moment | Tell |
 |---|---|
-| Building up | three rune pips over the helm light at 33 / 66 / 100 Guard |
-| Armed / full | a gold crest light and a hotter aegis; a 0.3s flare before a Slam |
+| Building up | three rune pips over the helm light as Guard fills to 100 |
+| Armed / full | a gold crest light and a hotter aegis; a flare before a Slam |
 | Dash spent | dash pips dark |
 
 <!-- /gen:kit -->

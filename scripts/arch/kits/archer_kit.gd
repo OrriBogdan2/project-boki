@@ -345,7 +345,7 @@ func in_e() -> bool:
 	return not rain.is_empty()
 
 func _arc_deg() -> float:
-	return float(e_def().get("deg", 120.0)) * (1.3 if rank("kin") >= 3 else 1.0)
+	return float(e_def().get("deg", 120.0)) * (float(e_def().get("wide_rank3", 1.3)) if rank("kin") >= 3 else 1.0)
 
 func cast_e() -> bool:
 	var ed := e_def()

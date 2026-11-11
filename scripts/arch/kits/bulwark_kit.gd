@@ -90,7 +90,7 @@ func cd_k(slot: String) -> float:
 
 ## Mending Ground heals 25% more at rank 2 and another 25% at rank 3.
 func heal_k() -> float:
-	return 1.0 + 0.25 * float(rank("kin") - 1)
+	return 1.0 + float(e_def().get("heal_rank", 0.25)) * float(rank("kin") - 1)
 
 func full_ready() -> bool:
 	return res >= float(res_def().get("slam", 50.0))
@@ -768,7 +768,7 @@ func on_dash(use_ex: bool) -> bool:
 		# Surf), on its own cooldown (the RMB slot's), invulnerable for its length, a heavier knock; with 50
 		# Guard it ends in a Shield Slam
 		if not spend_rmb(): return true
-		var dist := float(dd["charge"]) + (1.0 if rank("dash") >= 3 else 0.0)
+		var dist := float(dd["charge"]) + (float(dd.get("rank3_far", 1.0)) if rank("dash") >= 3 else 0.0)
 		var t := dist / float(dd["charge_speed"])
 		var t_felt := t * float(dash_feel()["time"])
 		travel(dist, t, {"invuln": t_felt + 0.08, "shove": true, "shove_kb": float(dd["charge_kb"]), "shove_dmg": float(dd["charge_dmg"]), "trail": "dust", "dir": h.aim_dir()})
@@ -797,7 +797,7 @@ func on_dash(use_ex: bool) -> bool:
 			m.later(0.07 * i, func(): if is_instance_valid(h): m.fx.dust(h.pos, 5))
 		return true
 	# 360 Smash: a short fixed dash in the aim (or move) direction, then ONE full spin hit around him
-	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
+	var dist2 := float(dd["whirl"]) + (float(dd.get("rank3_far", 1.0)) if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
 	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})

@@ -2,15 +2,16 @@ class_name ArchText
 extends RefCounted
 ## The one formatter for ability text. A hero's tooltip strings (content/archetypes/<id>.json) carry no
 ## typed numbers: each is a token, "{rmb.pin.dmg.0}" a number at that path in the same file, "{e.slow%}"
-## the same as a percent (x100), "{cd2.sec}" / "{cd3.sec}" the cooldown at rank 2 / 3 and "{dmg2.sec%}" the
-## damage gain, both from rank_cd / rank_dmg with the game's default steps (ArchKit.cd_k, Effects.level_k).
+## the same as a percent (x100), "{dash.walk_k-1%}" a multiplier's gain as a percent, "{weapon.primary.rate}"
+## from the signature weapon's file, "{cd2.sec}" / "{cd3.sec}" the cooldown at rank 2 / 3 and "{dmg2.sec%}"
+## the damage gain, both from rank_cd / rank_dmg with the game's default steps (ArchKit.cd_k, Effects.level_k).
 ## Content loads archetypes through fill() once, so every reader (kit card, HUD tip, pick screen, practice,
-## viewer) gets the filled text. "tip" holds the few figures only a tooltip states.
+## viewer) gets the filled text. A figure the kit code uses lives in this file and the code reads it from here.
 
 const SLOT_BASE := {"sec": ["rmb", "cooldown"], "dash": ["dash", "cd"], "kin": ["e", "cooldown"]}
 # default cooldown cut per rank past the first (rank_cd overrides)
 const CD_STEP := {"sec": 0.1, "kin": 0.1, "dash": 0.15}
-static var _token := RegEx.create_from_string("\\{([a-z0-9_.]+)(%?)\\}")
+static var _token := RegEx.create_from_string("\\{([a-z0-9_.]+)(-1)?(%?)\\}")
 
 ## Replace every token in every string under `node` (a Dictionary or Array), in place; `kit` is the whole file.
 static func fill(kit: Dictionary, node: Variant = null) -> void:
@@ -29,7 +30,8 @@ static func text(s: String, kit: Dictionary) -> String:
 		var v := number(kit, m.get_string(1))
 		var shown := "{?%s}" % m.get_string(1)
 		if not is_nan(v):
-			shown = fmt(v * 100.0 if m.get_string(2) == "%" else v, m.get_string(1).begins_with("cd"))
+			v -= 1.0 if m.get_string(2) == "-1" else 0.0
+			shown = fmt(v * 100.0 if m.get_string(3) == "%" else v, m.get_string(1).begins_with("cd"))
 		out = out.replace(m.get_string(), shown)
 	return out
 
@@ -39,6 +41,8 @@ static func number(kit: Dictionary, path: String) -> float:
 	if seg[0] in ["cd", "cd2", "cd3", "dmg2", "dmg3"] and seg.size() == 2:
 		return rank_value(kit, seg[0], seg[1])
 	var cur: Variant = kit
+	if seg[0] == "weapon":
+		cur = {"weapon": weapon(String(kit.get("signature", "")))}
 	for s in seg:
 		if cur is Dictionary and cur.has(s):
 			cur = cur[s]
@@ -47,6 +51,12 @@ static func number(kit: Dictionary, path: String) -> float:
 		else:
 			return NAN
 	return float(cur) if (cur is float or cur is int) else NAN
+
+## The signature weapon's file (content/weapons/<id>.json), for "{weapon.primary.range}" tokens.
+static func weapon(id: String) -> Dictionary:
+	var path := "res://content/weapons/%s.json" % id
+	var w: Variant = JSON.parse_string(FileAccess.get_file_as_string(path)) if FileAccess.file_exists(path) else null
+	return w if w is Dictionary else {}
 
 ## "cd": the slot's base cooldown, "cd2"/"cd3": at that rank; "dmg2"/"dmg3": the damage gained (a fraction).
 static func rank_value(kit: Dictionary, what: String, slot: String) -> float:
