@@ -1,10 +1,11 @@
 extends "res://tools/displace_net_check.gd"
 ## --remote-anim-check: the kit move a Hunter plays on its own game plays on the other player's game too.
 ## Two real games over the desktop relay (the --displace-net-check harness, which this extends): the host's
-## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, and the guest's copy of it
-## (a remote hunter fed only by the snapshots, KitMoveNet's kit move id~n or clear) must start the same HunterAnim move
-## within LAG_TOL, and play nothing the host did not. Both games log every change of the move (the kit's
-## id and HunterAnim's), compared per cast. Lines: RANIM ok|FAIL <what>, then the unlike casts.
+## hunter casts each of its 12 kits' LMB, RMB, E, R and dash, tapped and held, plus the CUTS (a hold move
+## cancelled), and the guest's copy of it (a remote hunter fed only by the snapshots, KitMoveNet's kit move id~n
+## or clear) must start, and drop, the same HunterAnim move within LAG_TOL, and play nothing the host did not.
+## Both games log every change of the move (the kit's id and HunterAnim's), compared per cast.
+## Lines: RANIM ok|FAIL <what>, then the unlike casts.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
 const MIN_LIFE := 0.15       # s: a move replaced sooner than this never makes a snapshot
@@ -12,6 +13,10 @@ const SKEW := 0.05           # s: clocks of two processes on one machine
 const SETTLE := 1.6          # s after the release for the move to play out and the snapshots to land
 const HOLD := 0.8            # s a held key stays down
 const KEYS := ["lmb", "rmb", "e", "r", "dash"]
+## Holds a kit cancels by clearing its move id (Albert's raised shield, Lace's Heavy Shot draw, Kael's Lunge
+## wind-up): held CUT_AT s, then cut as a Boki merge cuts them (KinMerge), the key let go after.
+const CUTS := ["archer rmb", "bulwark rmb", "juggernaut rmb"]
+const CUT_AT := 0.6          # s: past every RMB hold threshold (0.1-0.3 s) plus a snapshot, so the hold move shows
 const ARCHS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage", "ostra",
 	"rimewright", "tender", "thief"]
 
@@ -38,15 +43,19 @@ func _host() -> void:
 		for key in KEYS:
 			for held in ([false] if key in ["e", "r"] else [false, true]):
 				await _cast(G, arch, key, held)
+			if "%s %s" % [arch, key] in CUTS:
+				await _cast(G, arch, key, true, true)
 	for arch in ARCHS:
 		ok(int(played.get(arch, 0)) > 0, "%s: some cast plays a kit move (else nothing was compared)" % arch)
 		ok(not unlike.has(arch), "%s: the guest's copy plays what the host's does" % arch,
 			"unlike: %s" % str(unlike.get(arch, [])))
 	_finish()
 
-func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
+func _cast(G: Hunter, arch: String, key: String, held: bool, cut := false) -> void:
 	var P := m.player
 	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	if cut:
+		what = "%s %s cut" % [arch, key]
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
@@ -62,7 +71,7 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	last_row = ["?", "?"]
 	Net.lobby_emit("ra", {"c": "mark"})
 	await _run(0.2)
-	await _press(key, held)
+	await _press(key, held, cut)
 	await _run(SETTLE)
 	var mine := log_rows.duplicate()
 	replies.clear()
@@ -79,10 +88,13 @@ func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	n += 1
 	print("%s %s  %d moves, worst lag %.2f s" % [tag, what, cmp["moves"], cmp["lag"]])
 
-## One key for the kit: tapped (one step) or held for HOLD s, then let go. E gets a flick of the aim (Sparkle's drag).
-func _press(key: String, held: bool) -> void:
+## One key for the kit: tapped (one step) or held for HOLD s (CUT_AT, then cut), then let go. E gets a flick of the
+## aim (Sparkle's drag).
+func _press(key: String, held: bool, cut := false) -> void:
 	var P := m.player
 	var secs := HOLD if held else DT
+	if cut:
+		secs = CUT_AT
 	var flick := P.pos + Vector3(6.0, 0, 4.0)
 	match key:
 		"lmb": P.inp["fire"] = true
@@ -99,6 +111,9 @@ func _press(key: String, held: bool) -> void:
 		t += DT
 		if key != "lmb" or not held: P.inp["fire"] = false
 		P.inp["sec"] = false
+	if cut:
+		MergeAugment.drop_class_holds(P)
+		P.ak.drop_holds()
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
