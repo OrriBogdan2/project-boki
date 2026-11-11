@@ -24,7 +24,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 	"moves": {
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
-			{"p": "bolt", "len": 4.0, "jag": 0.4},
+			{"p": "bolt", "len": 4.0, "jag": 0.4}, {"p": "portal", "size": 1.4},
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
@@ -99,7 +99,7 @@ func _recipes(arch: String) -> void:
 				if layer.has(key) and not pal.has(layer[key]):
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
-			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
+			var flare_big: bool = layer["p"] in ["flare", "portal"] and big > MAX_FLARE
 			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):

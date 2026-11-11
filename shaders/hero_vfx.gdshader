@@ -17,6 +17,7 @@ const int M_BOLT = 6;       // a strip from A (UV.x 0) to B (1), facing the came
 const int M_VORTEX = 7;     // a disc on the ground spinning inward to a dark core: UV across the quad
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
+const int M_PORTAL = 9;     // a small upright portal facing the camera: UV across the quad
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -233,6 +234,28 @@ vec4 ring(vec2 uv) {
 	return vec4(c * a, a);
 }
 
+// A seam opened in the air: an upright almond, pointed at both ends, that opens from a slit, holds and closes back
+// to one. A lit lip (col2 on the very edge, col behind it), a dark inside (col3) lit toward the lip and crossed by
+// laces of col, a cel halo of col round it.
+vec4 portal(vec2 uv) {
+	vec2 p = vec2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0);
+	float open = smoothstep(0.0, 0.22, life) * (1.0 - smoothstep(0.7, 1.0, life));
+	float half_w = 0.5 * open * pow(max(1.0 - p.y * p.y, 0.0), 0.7);
+	float e = abs(p.x) / max(half_w, 1e-3);            // 0 on the seam, 1 on the lip
+	float sway = (fbm3(vec2(p.y * 2.0 - TIME * 0.8, seed)) - 0.5) * 0.1;
+	float inner = hard(0.6 + sway - e);
+	float lip = hard(1.0 - e) * (1.0 - inner);
+	float edge = hard(e - 0.82) * lip;
+	float lace_a = abs(fract((p.y + p.x * 1.6) * 1.5 + seed) - 0.5);
+	float lace_b = abs(fract((p.y - p.x * 1.6) * 1.5 + seed) - 0.5);
+	float lace = max(hard(0.04 - lace_a), hard(0.04 - lace_b)) * inner;
+	float halo = cel_cover((1.0 - smoothstep(1.0, 2.2, e)) * (1.0 - hard(1.0 - e)) * 0.8 * open, uv + seed);
+	vec3 deep = mix(col3.rgb, col.rgb * 0.7, cel(smoothstep(0.2, 0.6, e)));
+	vec3 c = deep * inner * (1.0 - lace) + col.rgb * (lace + halo) + mix(col.rgb, col2.rgb, edge) * lip;
+	float fade = 1.0 - smoothstep(0.85, 1.0, life);
+	return vec4(c * fade, clamp(inner * 0.9 + lip + halo * 0.5, 0.0, 1.0) * fade);
+}
+
 void fragment() {
 	vec4 v;
 	if (mode == M_SWEEP) { v = sweep(UV); }
@@ -243,6 +266,7 @@ void fragment() {
 	else if (mode == M_VORTEX) { v = vortex(UV); }
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
+	else if (mode == M_PORTAL) { v = portal(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;
