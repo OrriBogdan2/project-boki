@@ -164,13 +164,13 @@ islands = [
          areas=[[110, 262, "The Graze"]],
          fill=dict(chests=6, camps=["light", "light", "normal", "normal"], landings=10, breakables=6, weapons=1, wardens=2)),
     # ---- THORNWOOD (forest ambush): a lv 2 wood packed with groves and tall grass, lanes cut between its
-    # places; Bramble Rise (lv 5) in the north holds the Thornhive. The Boki nest is in the west glade.
+    # places; Bramble Rise (lv 6, stairs only) in the north holds the Thornhive. The Boki nest is in the west glade.
     dict(id="thorn", name="Thornwood", role="nest", region=4, biome="bloom", danger=1, poi=[130, 410], noise=0.07,
          shapes=[poly([(38, 346), (105, 342), (170, 346), (222, 362), (230, 410), (206, 452), (168, 446), (150, 466), (92, 460),
                        (52, 432), (30, 392)], 2),
-                 poly([(108, 348), (162, 352), (172, 376), (146, 390), (110, 382)], 5)],
+                 poly([(108, 348), (162, 352), (172, 376), (146, 390), (110, 382)], 6)],
          sheer=[[30, 90]],
-         ramps=[up(130, 398, "n", 4, 2, 5), up(186, 372, "w", 3, 2, 5)],
+         ramps=[up(130, 398, "n", 4, 2, 6), up(186, 372, "w", 3, 2, 6)],
          wild=[[62, 404], [66, 410], [58, 412]],
          areas=[[140, 368, "Bramble Rise"], [62, 408, "Nest Glade"]],
          groves=95,

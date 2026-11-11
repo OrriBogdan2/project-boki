@@ -9,7 +9,7 @@ Each match also picks one region (not the Crown) as the **hot drop zone**: loot 
 - **Frostgate** (frost) · sniping · hooded ice statue · a 260 m bare ice shelf (lv 10) with the walled Keep, the Rimefield (lv 4) under it · best armor (×1.6), uplink A in the Rimefield.
 - **Highwatch** (frost, slate tint) · towers · stone lighthouse · four rock towers (lv 6, 9, 11 and the Lantern at 14) over a lv 2 yard · boots (×1.8), the highest ground on the map.
 - **Larkhollow** (meadow) · open plains · giant tree · lv 0 plain with low swells and boulder clusters, wide necks to Highwatch and Thornwood · wild Boki graze, the most landings, uplink B in the open.
-- **Thornwood** (bloom) · forest ambush · blossom arch · a lv 2 wood packed with groves and tall grass, Bramble Rise (lv 5) · the Boki nest, the Thornhive lair.
+- **Thornwood** (bloom) · forest ambush · blossom arch · a lv 2 wood packed with groves and tall grass, Bramble Rise (lv 6) · the Boki nest, the Thornhive lair.
 - **Saltmere** (bloom, salt tint) · water edges · white salt obelisk · a lv 2 rim round a sunken lagoon (lv 0), one causeway, a cache islet · salt caches.
 - **Stormbreak** (storm) · chokepoint bridges · twisting crystal spire · five shards over the Hollow, the Shrine Table (lv 6) · the shrine; every way across the middle.
 - **Duskmoor** (storm, ash-violet tint) · close-quarters maze · standing-stone ring · a ruin maze round the raised Moor Chapel (lv 4) · relics (×2.0).
