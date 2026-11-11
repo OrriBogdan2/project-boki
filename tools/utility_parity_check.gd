@@ -27,13 +27,20 @@ func run(host: Node) -> void:
 	main.add_child(m)
 	m.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 9001, "no_drop": true, "raid": "clear"})
 	m.set_process(false)
+	for mb in m.mobs: mb.queue_free()         # the camps stay out of it: only the belt items hurt anyone here
+	m.mobs.clear()
 	var P: Hunter = m.player
 	var foe: Hunter = m.hunters.filter(func(x): return x != P)[0]
+	foe.ctrl = "idle"                        # a bot would walk out of the blast and the patch
 	_banner(m, P, foe)
 	_skyfall(m, P, foe)
 	_blight(m, P, foe)
 	print("UTIL DONE, failures: %d" % bad)
 	host.get_tree().quit(1 if bad > 0 else 0)
+
+## Fields the belt put down: the biome's own lava vents come and go on their own clock.
+func _patches(m: Match) -> int:
+	return m.fields.list.filter(func(f): return f["ctx"]["slot"] != "lava").size()
 
 func _steps(m: Match, secs: float) -> void:
 	for i in int(secs / Match.DT): m.step(Match.DT)
@@ -76,9 +83,9 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	ok(foe.hp >= foe.max_hp - 0.5, "...nothing lands for 5 s")
 	_steps(m, 1.0)
 	ok(foe.downed or foe.out or foe.dead, "the blast knocks a full-health rival outright (hp %.0f)" % foe.hp)
-	ok(m.fields.list.size() >= 1, "then the ground burns (a fire patch)")
+	ok(_patches(m) >= 1, "then the ground burns (a fire patch)")
 	_steps(m, 3.5)
-	ok(m.fields.list.is_empty(), "...for 3 s")
+	ok(_patches(m) == 0, "...for 3 s")
 
 func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.out = false
@@ -96,6 +103,6 @@ func _blight(m: Match, P: Hunter, foe: Hunter) -> void:
 	ok(foe.blight_t > 0.0 and foe.hp + foe.armor < foe.max_hp + foe.max_armor,
 			"a rival in the patch is blighted and hurt")
 	_steps(m, 35.0)
-	ok(m.fields.list.size() >= 1, "the patch is still there after 37 s")
+	ok(_patches(m) >= 1, "the patch is still there after 37 s")
 	_steps(m, 4.0)
-	ok(m.fields.list.is_empty(), "...and gone after 40 s")
+	ok(_patches(m) == 0, "...and gone after 40 s")
