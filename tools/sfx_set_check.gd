@@ -15,14 +15,15 @@ extends RefCounted
 ##      pick their own, a change crossfades over 20 s, at most 2 loops sound at once through a day with rain
 ##      and a walk by a pond, the pond follows the distance to water, beds sit on the Ambience bus, and the
 ##      garden never plays amb_match
-##   7. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
-##   7. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
-##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
+##  10. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
+##  11. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
+##  12. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
 ##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd plays no stock cue
-##   7. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
-##   7. the Boki set has a k_<type> cast cue on file for every Boki type (KinParts.THEMES)
-##   7. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
+##  13. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
+##  14. the Boki set has a k_<type> cast cue on file for every Boki type (KinParts.THEMES)
+##  15. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
 ##      an unknown species falls back to the generic cues, and no two species share a happy take
+##  16. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -57,6 +58,8 @@ func run(main: Node) -> void:
 	_hit_targets()
 	_ambience()
 	_belt()
+	_boki_cues()
+	_boki_wired()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -64,9 +67,6 @@ func run(main: Node) -> void:
 func _ambience() -> void:
 	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
 		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
-	_boki_cues()
-	print("SFXSET DONE, failures: %d" % bad)
-	main.get_tree().quit(1 if bad > 0 else 0)
 
 func _boki_cues() -> void:
 	var missing := []
@@ -377,6 +377,15 @@ func _belt() -> void:
 	var src := FileAccess.get_file_as_string("res://scripts/match/utility_use.gd")
 	var stock_left := STOCK.filter(func(c): return src.contains('sfx("%s"' % c))
 	ok(stock_left.is_empty(), "belt: utility_use.gd plays no stock cue %s" % [stock_left])
+
+## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
+func _boki_wired() -> void:
+	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
+		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
+	for cue in wired:
+		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
+		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
 
 func _takes(sname: String) -> Array:
 	var out := []
