@@ -37,6 +37,7 @@ func _new_save() -> Dictionary:
 	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	d["egg"] = {"a": recs[0]["uid"], "b": recs[1]["uid"], "m": 99999, "t": Time.get_unix_time_from_system() + HATCH_S}
 	Save.d = d
+	HomeLayout.new_fs(d, 7)      # one island every run (a new save rolls its own)
 	HomeLayout.ensure(d)
 	return d
 
