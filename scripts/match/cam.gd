@@ -41,10 +41,13 @@ var follow_mode := "supervive"
 var pan := Vector3.ZERO
 var base := Vector3.ZERO      # the followed point, before the cursor pan
 ## (movefeel) Follow: tight across (FOLLOW_XZ, ~0.07s) so the hunter stays centred [footage] and
-## stops dead with you; softer up and down so falls and glides don't jolt the view. While gliding
-## Match sets lead_vel (your flat velocity) and the view leans a little ahead of you.
+## stops dead with you; softer while the view rises so lifts and glides don't jolt it, as tight as across
+## while you stand or come down, so a landing doesn't drift on. While gliding Match sets lead_vel (your flat
+## velocity) and the view leans a little ahead of you.
 const FOLLOW_XZ := 15.0       # 1/s (was 8: ~0.65m behind you at a run, drifting on after a stop)
-const FOLLOW_Y := 3.5
+const FOLLOW_Y := 3.5         # 1/s, the view rising while you're in the air
+const FOLLOW_Y_TIGHT := FOLLOW_XZ  # 1/s, the view's height while you stand or it comes down: a landing settles at once
+const STAND_TOL := 0.15       # m above the standing height that still counts as standing (a step down a flight)
 const GLIDE_LEAD := 0.2       # seconds of glide velocity to lean ahead...
 const GLIDE_LEAD_MAX := 1.8   # ...capped (m)
 const GLIDE_LEAD_EASE := 3.0  # 1/s, so the lean eases in and out instead of popping
@@ -160,7 +163,9 @@ func lean_to(rel: Vector3) -> Vector3:
 	var amt := minf((l - float(fm[0])) * float(fm[1]), float(fm[2]) * maxf(1.0, zoom)) * lead
 	return dir * maxf(0.0, minf(amt, _cast_room(Vector2(dir.x, dir.z), 0.0)))
 
-func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
+## Eases the view onto `p`. stand_y: the height the body stands at (HunterMove.stand_y); the view's height
+## follows that, not the body, so a jump or a fall never reads as moving forward or back on screen.
+func follow(p: Vector3, delta: float, mouse_lead := true, stand_y := INF) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
 	var lean_k := float(rr[2])
@@ -189,15 +194,22 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
 	if follow_mode == "dynamic" and mouse_lead and not Record.clean():
 		pan = want_pan
-	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
-	# far up in the sky you stay on screen
-	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
+	# the focus sits a little below where you stand (so the ground reads), but never more than 4m below
+	# you, so even far up in the sky you stay on screen
+	var at_y := minf(p.y, stand_y)
+	var want := Vector3(p.x, maxf(maxf(at_y * 0.6, at_y - 4.0), p.y - 4.0), p.z)
 	if p.y < 0.0:
 		want.y = p.y      # below island level: the view goes down with you, so you stay centred and the same size [reference footage]
 	# across follows briskly; up and down follows softer, so falls and glides don't jolt the view
 	# normal play: movefeel's tight follow; recording mode: its own slower, smoother rates
 	var kxz := 1.0 - exp(-(float(rr[0]) if Record.clean() else FOLLOW_XZ) * delta)
-	var ky := 1.0 - exp(-(float(rr[1]) if Record.clean() else FOLLOW_Y) * delta)
+	# soft only while the view rises (a lift, an updraft): standing or coming down it stays on you, so a fall
+	# never reads as sliding back on screen and a landing doesn't drift on
+	var tight := (is_finite(stand_y) and p.y <= stand_y + STAND_TOL) or want.y < base.y
+	var y_rate := FOLLOW_Y_TIGHT if tight else FOLLOW_Y
+	if Record.clean():
+		y_rate = float(rr[1])
+	var ky := 1.0 - exp(-y_rate * delta)
 	base = Vector3(lerpf(base.x, want.x, kxz), lerpf(base.y, want.y, ky), lerpf(base.z, want.z, kxz))
 	lead_off = lead_off.lerp((lead_vel * GLIDE_LEAD).limit_length(GLIDE_LEAD_MAX), 1.0 - exp(-GLIDE_LEAD_EASE * delta))
 	_tick_cast(delta)

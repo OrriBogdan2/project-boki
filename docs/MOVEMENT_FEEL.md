@@ -251,6 +251,21 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 **Suggestion (not built, parity):** a run is 4.4-4.9 m/s, so a plain run-and-jump bounces only when it meets the wall between 20 and about 26-35 degrees off the normal (`BOUNCE_MIN_INTO` 4 m/s and `BOUNCE_HEAD_ON_DEG` 20 are our estimates, no source number). Tenzo's and Claire's runs didn't bounce at 25 degrees (they are slowest in the air). If the source bounces off a walking jump, drop `BOUNCE_MIN_INTO` to about 3 m/s.
 
+## One movement profile in every mode (`--fall-parity-check`, docs/decisions/0060, owner 11-11)
+
+Every mode moves through the same numbers and the same step functions. The match modes (tutorial, expedition, Training Area, duel, arena) all run `Hunter._physics`, and none of them overrides gravity, friction, air control, landing or slopes. The farm (`Home._move_player`) uses the same profile: `content/rules/hunter_move.json` (run speed, accel, brake, fall cap, step_down), `content/rules/tuning.json` (air and glide), `Hunter.JUMP_V` and `H_GRAV`, through `HunterMove.walk` (the ground step), `HunterMove.fall` (gravity), `HunterMove.sticks` (the downhill stick) and `Loco.air_step`.
+
+- **A fall only moves you down.** Gravity changes vel.y and nothing else. A landing keeps the horizontal speed you had in the air (never more), then the walking brake stops a let-go in ~0.37 m from a run.
+- **Down a flight or a ramp your feet stay on it.** A standing body whose ground drops `step_down` (0.45 m, the source's MaxStepHeight) or less in a step stays grounded. Before, anything over 5 cm was a fall: 19-32 air steps down a flight, and a let-go there slid 1.3-1.6 m. A terrace (0.8 m) is still a fall. Walk-up still uses `World.STEP` (0.32 m), and so do Boki and monsters.
+- **The view follows the ground you stand on** (`CamRig.follow`'s stand height, `HunterMove.stand_y`). A jump doesn't move it. Standing, or whenever it comes down, it follows as tightly as it does across (15/s). It is soft (3.5/s) only while it rises (glide lifts, updrafts). Before, a fall drew you sliding down the screen and a landing kept scrolling ~0.7 m forward. Now that drift is about 0.03 m. The farm camera already ignored your height.
+- **The same jump arc everywhere:** 54 steps in the air and a 1.52 m apex on flat ground in the tutorial, the expedition, the Training Area and the farm.
+
+`--fall-parity-check` runs the same drops in each of the four places: 3 m and 10 m straight falls, the same falls with the keys held and let go on landing, a running jump, a walk down a test flight, and (match) the view after a 10 m landing.
+
+Differences that remain, by design:
+- **Farm:** no coyote time and no jump buffer (match: 0.12 s each), no step-up onto a single terrace while walking (the farm's ledge float in the air does that), and no abyss fall easing (the farm's abyss returns you instead). It has no frost grip either.
+- **Feel lab** (`--feel-lab`, `scripts/feel/`): a stand-alone CharacterBody3D lab for trying tunables (FeelConfig). It is not a game mode and does not follow this profile.
+
 ## Physics pass: SUPERVIVE's game data (`physics76`)
 
 Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMove`; values and sources are in SUPERVIVE_DATA.md.

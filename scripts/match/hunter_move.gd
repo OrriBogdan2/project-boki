@@ -1,11 +1,13 @@
 class_name HunterMove
 extends RefCounted
-## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the ground stop, dash exit,
+## Per-hunter run speed, ground acceleration and tall-ledge climbing, plus the step-down, ground stop, dash exit,
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
-## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
+## ([game data]: SUPERVIVE's movement settings, uu converted to metres). The one movement profile: the match
+## (tutorial, expedition, training, duel) and the farm walk, fall and stand through these (docs/MOVEMENT_FEEL.md).
 
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
+static var step_down: float = _phys["step_down"]
 static var brake_decel: float = _phys["brake"]
 static var ground_friction: float = _phys["ground_friction"]
 static var dash_exit_run: float = _phys["dash_exit_run"]
@@ -59,6 +61,29 @@ static func brake_rate(speed: float) -> float:
 ## knock or kit step slides out under the same rule. grip < 1 on ice.
 static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)
+
+## One ground step toward `wish` (keys x run speed): accelerate onto it, or the walking brake with no keys.
+## grip < 1 on ice.
+static func walk(hv: Vector2, wish: Vector2, accel: float, grip: float, dt: float) -> Vector2:
+	if wish.length() < 0.001:
+		return brake(hv, grip, dt)
+	return Loco.accel_to(hv, wish, accel * grip, 0.0, brake_rate(hv.length()) * grip, dt)
+
+## Vertical speed after one falling step: gravity down to `cap` (fall_cap). Only vel.y: a fall never
+## touches the horizontal speed, and a landing keeps what you had in the air.
+static func fall(vy: float, cap: float, dt: float) -> float:
+	return maxf(vy - Hunter.H_GRAV * dt, -cap)
+
+## A standing body whose ground drops `drop` metres in a step stays on it (down a flight, a ramp or a stone):
+## more than step_down is a fall.
+static func sticks(drop: float) -> bool:
+	return drop <= step_down
+
+## The height a hunter stands at for the camera: the ground under it, or where it last stood over the void,
+## so a jump or a fall moves the view only with the ground (CamRig.follow).
+static func stand_y(h: Hunter) -> float:
+	var g := h.ground()
+	return g if g > World.VOID + 1.0 else h.last_gy
 
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.
