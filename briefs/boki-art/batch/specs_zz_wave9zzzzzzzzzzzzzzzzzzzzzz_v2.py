@@ -2270,3 +2270,32 @@ _SK=[('Soakybara','mid','cute',[
 for _n,_st,_ar,_ops in _SK:
     for _k,_d in zip('abcd',_ops):
         ON_CHANGE(_n,_C%_n,_st,_ar,False,True,_d,runs=2,tag='_'+_k); SPECS[-1]['id']='opt_'+_n.lower()+'_'+_k+'_bk'
+
+# 11-11 OWNER PICKS (all 1st except Geyserbara 3rd), cards live: Terrarimit opt_a_bk_2 (glass terrarium shell), Mossbastion/Mosstodon opt_a_bk_2 (moss coat),
+# Cisternmander/Vatmander opt_b_bk_2 (water sacs), Crofthollow opt_b_bk_2 (sickle horns), Briarlynx shave_a_2, Soakybara opt_d_bk_1 (water bubble),
+# Geysirbara opt_b_bk_1 (steam coat), Kestrike female fopt_kestrike_line_1, Pavonazar female fopt_pavonazar_ring_2.
+# Sheets (3 runs) + portraits (3 runs) from the new cards, ids *_bk2.
+for _n,_st,_ar,_dk,_fu,_pose in (
+  ('Terrarimit','final','cute',0,0,"scuttling sideways toward the viewer, claws raised, ferns visible inside its glass shell"),
+  ('Mossbastion','final','majestic',0,1,"plodding forward slowly, head low, long moss mane swaying"),
+  ('Cisternmander','final','tough',1,0,"rearing its front half up, mouth open, water sacs on its back bulging"),
+  ('Crofthollow','final','tough',0,1,"head lowered and turned, sickle horns forward, one front hoof pawing the ground"),
+  ('Briarlynx','final','tough',0,1,"sitting upright like a guardian statue, vine tail curled round its feet"),
+  ('Soakybara','mid','cute',0,1,"floating sleepily in its water bubble, eyes half closed, paws drifting"),
+  ('Geysirbara','final','tough',0,1,"standing broad, head raised, thick steam pouring off its shoulders"),
+  ('Kestrike_female','mid','cute',0,1,"perched, wings half open, looking over her shoulder"),
+  ('Pavonazar_female','final','majestic',0,1,"walking with her train sweeping behind her, head high under her crown ring")):
+    _cd='briefs/boki-art/cards/'+_n+'.jpg'
+    V2SHEET_NEW(_n,_cd,_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_bk2'; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
+    V2PORT_NEW(_n,_cd,_st,_ar,_GC,_GN,bool(_dk),bool(_fu),_pose); SPECS[-1]['id']='v2p_'+_n.lower()+'_bk2'
+# Earlier forms that must follow the new finals: Crofthorn (-> Crofthollow sickle horns) and Dribbara (baby -> Soakybara bubble -> Geyserbara steam). Options, 3 x 2.
+_n0=len(SPECS)
+OPT('Crofthorn','mid','tough',False,True,_C%'Crofthorn',[
+ "no rocks, no moss and no grass on its back. It is the younger form of the highland bull with huge sickle horns: its horns are shorter, just starting to curve into sickle blades, dark iron-grey with bright tips, and a short ridge of straw-coloured bristles runs down its spine.",
+ "no rocks, no moss and no grass on its back. A young shaggy highland calf-bull with a long hay-coloured fringe over its eyes and two short curved horn hooks like little sickles, dark iron-grey. Playful, mid-trot.",
+ "no rocks, no moss and no grass on its back. A sturdy young highland bull with two forward-curving iron-grey horns shaped like small scythe blades and a thick straw-blond mane over its shoulders."])
+OPT('Dribbara','baby','cute',False,True,_C%'Dribbara',[
+ "no puddle and no lily pad on its back. A tiny round baby capybara sitting inside a small clear water bubble just big enough for it, a few little air bubbles around, happy face.",
+ "no puddle and no lily pad on its back. A tiny round baby capybara with damp sleek fur, a single big clear water droplet balanced on top of its head, and pale turquoise ripple-ring markings on its sides.",
+ "no puddle and no lily pad on its back. A tiny round baby capybara blowing one big clear soap-like water bubble from its mouth, a puff of warm steam rising from its fluffy back."])
+for _s in SPECS[_n0:]: _s['id']+='_bk'
