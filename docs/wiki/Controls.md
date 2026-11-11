@@ -82,10 +82,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | L | Boki order: hold this position | `kin_hold` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
 | Shift / Mouse 5 | Hunter dash | `dash` | yes |
-| Space | Jump (hold to glide) | `jump` | yes |
-| Shift | Hunter dash | `dash` | yes |
 | Space | Jump (again in the air: glide) | `jump` | yes |
-| Mouse 5 / Mouse 4 | Glide (press in the air, keep it down) | `glide` | yes |
 | R | Hunter ultimate | `hunter_ult` | yes |
 | X | Fuse with your Boki (needs a full bond meter) | `ultimate` | yes |
 | 1 | Utility belt slot 1 (a tonic to start) | `util1` | yes |

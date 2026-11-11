@@ -82,14 +82,12 @@ What the in-game kit card (K) says.
 
 **Rage (passive).** Damage you deal fills Rage (a Searing Wave fills it three times as fast); it cools after 3s out of a fight. Full, you're Enraged for 6s: +15% damage, +12% dash recharge and +20% cooldown speed, with the red shell and the hunter swelling. Knocking a hunter heals you 20% of their health (killing a monster, 20% of its).
 
-**Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 4.5m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 **Rampage (dash, Shift, 10.4s cooldown).** A quick dash attack of about 3.6m the way you face (2 charges, a third at rank 2): 9 to foes along it; the tip at its end hits twice as hard, 18 and a big knock. A knock gives a charge back. At rank 3 a shot dodged through it feeds your Rage.
 
 **Smash (RMB, 2s cooldown).**
 
 - *Tap:* Finishing Slam: a 0.6s wind-up you aim freely (everyone sees the strike lane), then a 4m strike ahead: 26 and push 6; foes under 35% (outlined in red while the Smash is ready) take +50%. Its sweet spot, the far tip dead ahead, hits 40% harder. Knock a hunter within 2s of hitting them with it and the Gilded Riposte is ready again.
-- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 7.5m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
-- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 5.4m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You can jump while you charge. Strike nothing and the cooldown doubles.
+- *Hold:* Lunge: the blade levelled ahead at the aim, low and ready (the lane grows ahead of you, magenta and flashing at full, 0.8s), held as long as you like; release to fling yourself 4.5 -> 5.4m forward into the first foe: 14 -> 20. At full the levelled blade flashes white once a second: let go on the flash for 20% more distance. You walk at 80% while you charge, and can jump. Strike nothing and the cooldown doubles.
 - *In the air:* Meteor Drop: a disc shows under your cursor (5m at most). Press and you hang over it for a beat, the blade raised (everyone sees where you'll land), then slam straight down onto it: a 2.6m burst, 18 and slow 40% for 1.5s; the inner ring (1.2m) takes +50% and is stunned 0.8s. You rise from the crouch over half a second. It has its own cooldown, 7.2s, so a Smash right before it does not hold it back.
 - *During E:* With the Warchain: press while it pulls you, or as you arrive, for a Cinder Spin at once (2.6m, 18, blights 5s); charge and then pull for a Haul Slam where you arrive (2.8m, 16 -> 30, stun 0.25 -> 0.6); charge while it's attached and let go for a Chain Lunge along it (x1.25 and a short stun).
 
@@ -106,9 +104,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | +20% damage on every Smash. | +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less (7.2s -> 4.8s). |
 | Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 6.4s per charge; a shot dodged through the Rampage feeds your Rage. |
 | E | cooldown 12.8s -> 11.2s. | cooldown 12.8s -> 8s. |
-| RMB | cooldown 2s -> 1.8s, damage +15%; +20% damage on every Smash. | cooldown 2s -> 1.6s, damage +30%; +40% damage on every Smash in all, and the Meteor Drop rests 2.4s less. |
-| Dash (Shift) | recharge 10.4s -> 8.8s per charge; a third charge. | recharge 10.4s -> 7.3s; a shot dodged through the Rampage feeds your Rage. |
-| E | cooldown 12.8s -> 11.2s, damage +15%. | cooldown 12.8s -> 8s, damage +30%. |
 
 **Suggested level-up order** (what bots follow): Dash (Shift) > RMB > E > RMB > Dash (Shift) > RMB > E > Glove (Q).
 

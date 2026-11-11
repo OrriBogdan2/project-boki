@@ -70,10 +70,8 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
-| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
-| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | Passive: Hawk Sense | Hawk Sense: rivals under half health within 22m show through walls and fog for your team. |
-| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
+| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |
@@ -103,9 +101,6 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | RMB | cooldown 16s -> 13s, damage +20%. | cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge. |
 | Dash (Shift) | recharge 9.5s -> 8.5s per charge. | recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
 | E | cooldown 15s -> 13s, damage +30%. | cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider. |
-| RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
-| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 9.5s -> 6.7s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
-| E | cooldown 15s -> 12.8s, damage +15%. | cooldown 15s -> 12s, damage +30%; the Hail Wall is 30% wider. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 
