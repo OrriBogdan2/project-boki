@@ -66,6 +66,15 @@ func _last_shot(m: Match, P: Hunter) -> Dictionary:
 		if m.shots[i]["by"] == P: return m.shots[i]
 	return {}
 
+## How far a shot flies past its muzzle: its sweep starts at the body (ShotOrigin), so the muzzle lead is off.
+func _flight(sd: Dictionary) -> float:
+	var lead := 0.0
+	if sd.has("muzzle"):
+		var mz: Vector3 = sd["muzzle"]
+		var st: Vector3 = sd["start"]
+		lead = Vector2(mz.x - st.x, mz.z - st.z).length()
+	return float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length() - lead
+
 func _dash(m: Match, P: Hunter, hold_s: float, each := Callable()) -> void:
 	P.inp["dash_down"] = true
 	P.do_dash()
@@ -123,8 +132,7 @@ func _mage() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
-			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
+			not sd.is_empty() and absf(_flight(sd) - 13.0) < 0.5, "%.1f m" % _flight(sd))
 	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
@@ -697,7 +705,7 @@ func _gunslinger() -> void:
 	var sd := _last_shot(m, P)
 	ac.step(m, 0.03)
 	ok("LMB: rounds fly the full 11m past a near cursor",
-			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 11.0) < 0.6)
+			not sd.is_empty() and absf(_flight(sd) - 11.0) < 0.6, "%.1f m" % _flight(sd))
 	ok("LMB: each round is an ember tracer (a pooled rider)", VVFx.of(m).riders.size() >= 1)
 	KitStatus.apply(T, "rat", 3.0)
 	var o := {"src": "shot"}
