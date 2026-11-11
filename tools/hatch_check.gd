@@ -139,6 +139,9 @@ func _creator_rows(tree: SceneTree) -> void:
 	for i in 4: await tree.process_frame
 	ok(shown.call() == Unmasked.ROWS and _find_button(hx.create_box, "More looks...") == null,
 		"it opens all %d rows and the button goes" % Unmasked.ROWS.size())
+	var gone := ["Folk", "Race", "Face", "Hair", "Nose", "Skin"]
+	ok(gone.all(func(t): return not _texts(hx.create_box).has(t)),
+		"no race, face, hair or skin row (the Empty has marks, not features)")
 	await _polish(tree, hx)
 	hx.queue_free()
 	await tree.process_frame

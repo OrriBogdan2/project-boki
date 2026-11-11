@@ -41,7 +41,6 @@ func run(m: Node) -> void:
 	_own_person()
 	await _silhouettes(tree)
 	_save_round_trip()
-	await _creator_step(tree)
 	if shots != "":
 		await _shot_settings(tree)
 		await _shot_across(tree)
@@ -320,43 +319,6 @@ func _write(path: String, d: Dictionary) -> void:
 	var f := FileAccess.open(path, FileAccess.WRITE)
 	f.store_string(JSON.stringify(d))
 	f.close()
-
-# ---------------------------------------------------------------- 8. the slider creator
-## The new-game flow and Change your look are main's Unmasked creator (--unmasked-check,
-## --class-unlock-check); the slider CreatorPanel is checked on its own until it is wired in.
-func _creator_step(tree: SceneTree) -> void:
-	var c := CreatorPanel.make(PlayerLook.neutral(), ClassUnlock.open_ids())
-	var ui := CanvasLayer.new()
-	main.add_child(ui)
-	ui.add_child(c)
-	for i in 4: await tree.process_frame
-	ok(_find_text(c, "Randomise") != null and _find_text(c, "Looks good") != null,
-			"Randomise and Looks good are there, so a player who doesn't mind is through in one click")
-	await _shot(tree, "creator_body", 30)
-	var before: Dictionary = c.look.duplicate(true)
-	c.randomise()
-	ok(c.look != before and (c.look["sliders"] as Dictionary).values().all(func(v): return v >= 0.0 and v <= 1.0),
-			"Randomise makes a new person, every slider in range")
-	c.show_tab("Face")
-	await _shot(tree, "creator_face", 12)
-	c.show_tab("Colours")
-	await _shot(tree, "creator_colours", 12)
-	var made := [{}]
-	c.done.connect(func(lk: Dictionary): made[0] = lk)
-	var want: Dictionary = c.look.duplicate(true)
-	(_find_text(c, "Looks good") as Button).pressed.emit()
-	for i in 3: await tree.process_frame
-	ok(PlayerLook.clean(made[0]) == PlayerLook.clean(want), "Looks good hands back the look it shows")
-	ui.queue_free()
-	for i in 3: await tree.process_frame
-
-func _find_text(nd: Node, txt: String) -> Control:
-	if nd is Button and (nd as Button).text == txt:
-		return nd
-	for ch in nd.get_children():
-		var f := _find_text(ch, txt)
-		if f: return f
-	return null
 
 func _shot(tree: SceneTree, file: String, frames := 25) -> void:
 	if shots == "": return
