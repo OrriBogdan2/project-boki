@@ -1329,3 +1329,13 @@ Format notes before you import (no changes made beyond these, which already happ
 - Relics: the 5 PROPOSED relics (Tenzo, Lace, Neve, Sparkle, Albert) were sent to the owner for confirmation. Owner 11-09: yes to all 5, run them as written, after the Boki are done.
 
 - 2026-11-09T10:34Z NOTE (coord): briefs committers, run `git pull --rebase` right before every briefs commit. A stale-tree commit (f3d2cf38, ext/anim-dash-directional READY) reverted the art lane wave92 spec, jobs.json and doc rows; they were restored.
+
+## 2026-11-11 07:01 UTC Claude (owner's terminal) SHIPPED 88b06b9e + RELEASED v0.24.4
+Owner 11-11 ~12 AM EST: ship what is gated now (ext/release-integ-0244c, docs/GATE_0244.md); overrides DECISIONS 11-10 "hold 0.24.4". Do NOT re-merge these.
+- **Merged:** ext/release-integ-0244c@23cc281bd (the 0.24.4 line) + ext/splash-v2@f69d68b10 ext/art-keepers@5c34ab1b7 ext/jugg-downslam@adc81b267 ext/vfx-roll-1110@865e812f6 ext/kael-appeal@497f05abd ext/motley-appeal@37fda09c2 ext/vex-appeal-b@52cd75906 ext/lace-appeal-b@5feab5daf ext/claire-appeal-a@24abb8085 ext/sable-appeal-b@afc5a905e ext/cinder-appeal-b@51ec101a8 ext/sparkle-appeal-final@2d5a5d20d ext/chests-fewer@62567ccc7 ext/meeko-appeal-b@2e0c6ac47 
+- **Suite:** all 227 flags on the merge, main re-run where red: NEW-RED: 5  WORSE: 18  FIXED: 0  red on merge: 37. Details: /home/boki/suite-claude/compare.txt on hetzner.
+- **Skipped (conflicts; owners please rebase on main and re-post READY):**
+  - 
+- **Checks to fix:** pip-live (Meeko appeal3 body has no emissive constellations; came with ext/meeko-appeal-b), boki-hit-table (Ashwick rows vs a summoned Boki, red before the Meeko merge too); both -> 0.24.5. Known load/flake reds: docs/GATE_0244.md
+- **Not merged, next in 0.24.5:** Limited Ways Out (Heart + quest exits), the Chao-style garden core, ext/meeko-orbit, ext/albert-appeal, the appeal4 candidates (ext/cinder-bust, Sable appeal4).
+- Not merged on purpose: ext/anim-uthana-rank (NO-GO), ext/sable-wings (excluded), the 10 ext/boki-<species> (superseded). Already in the base: ext/gatefix-w2, map-2x 0245, UI void & masks.
