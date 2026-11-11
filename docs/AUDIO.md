@@ -53,6 +53,12 @@ You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.p
 ## Run stingers
 Four short one-shots in the expedition score's key (A minor, `tools/compose.py` `STINGS`, rendered to `audio/sting_<name>.ogg`, each under 2.5 s): `extract` (you got out), `out` (taken out, or the islands fell), `last` (the last squad standing is yours) and `home` (back on the farm after a run). `Sfx.sting(name)` plays one on the Music bus, one at a time. `MusicDir` fires `extract`/`out` the moment the run is ending and `last` from `Exits.on_last_team`, and the layered stems fall away under it (to nothing at the end, to a sliver for `last`, then back). A sting still ringing when the match leaves is cut by `Sfx.reset_scene_audio`, so it never runs into the results music. `Home` plays `home` once after a run (it clears `Game.last_result`). `--sting-check` asserts one sting per outcome.
 
+## Chop and mine sounds (`content/sfx/chop.json`, `tools/gen_sfx_chop.py`)
+Played by `HomeGather._hit_sound` (each hit) and `finish` (the last), the same places the leaves, chips and crack marks react:
+- **Tree**: `axe_bite` (3 takes) on every hit; `trunk_creak` from the second hit, pitched higher and louder as the hits add up; `tree_down` (whoosh, then the thud) when it falls.
+- **Boulder**: `pick_strike` (3 takes) on every hit; `rock_crack`, pitched lower and louder as it weakens; `rock_break` on the last.
+`--sfx-set-check` row 9 checks the files, their levels and that HomeGather plays only sounds that exist.
+
 ## Capture sounds (`content/sfx/capture.json`, `tools/gen_sfx_capture.py`)
 All wired in `scripts/match/capture.gd`, so a rival's game plays them from the same net events (`scan_start`, `scan_stop`, `scan_done`) as the local one:
 - **Scan hum**: the looping `revive_hum` on `Sfx.loop_start`, pitch rising from `rise_pitch[0]` to `[1]` with the scan fill, heard `hear_range` (26 m).
