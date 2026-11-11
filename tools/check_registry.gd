@@ -362,6 +362,7 @@ const CHECKS := {
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
 	"--party-client-check": ["res://tools/party_client_check.gd", "party_client_check", null],      # docs/specs/PARTY.md, fake matchmaker
+	"--party-view-check": ["res://tools/party_view_check.gd", "party_view_check", null],      # the party screen
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 }
 
