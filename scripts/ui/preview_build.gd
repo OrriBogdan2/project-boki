@@ -39,7 +39,8 @@ static func model(hunter_id: String) -> Node3D:
 	_lock.unlock()
 	return done if done != null else _hunter(hunter_id)
 
-## The main-thread half of a build: the .glb read, the neutral rig and the .glb's bones checked, one Warden a frame.
+## The main-thread half of a build: the .glb read collected and the neutral rig known, one Warden a frame. (The
+## worker checks the .glb's bones against the rig: opening the file costs 15-75 ms.)
 static func _prepared(hunter_id: String) -> bool:
 	if not WardenGlb.fetched(hunter_id) or Engine.get_process_frames() == last_frame:
 		return false
@@ -62,7 +63,6 @@ static func _hunter(hunter_id: String) -> Node3D:
 	return m
 
 static func _ask(hunter_id: String) -> void:
-	WardenGlb.will_dress(hunter_id)       # (reads the .glb's bones now: the worker only reads what is known)
 	_lock.lock()
 	_queue.append(hunter_id)
 	_pending[hunter_id] = true

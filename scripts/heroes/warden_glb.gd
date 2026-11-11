@@ -553,12 +553,17 @@ static func fetch_for(opts: Dictionary) -> void:
 		for a in Arch.ids():
 			fetch(String(a))
 
-## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
+## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't). A
+## finished read is collected here, on the main thread, so a worker's build only reads the scene cache.
 static func fetched(arch: String) -> bool:
 	fetch(arch)
+	if not uses_model(arch):
+		return true
 	var p := path(arch)
-	return not uses_model(arch) or SharedCache.read(_scenes, p) != null \
-			or ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS
+	var status := ResourceLoader.load_threaded_get_status(p)
+	if status == ResourceLoader.THREAD_LOAD_LOADED:
+		_scene(arch)
+	return SharedCache.read(_scenes, p) != null or status != ResourceLoader.THREAD_LOAD_IN_PROGRESS
 
 ## Whether the Warden's neutral rig rest is known yet (else the next build measures it first: a build of its own).
 static func has_rest(arch: String) -> bool:
