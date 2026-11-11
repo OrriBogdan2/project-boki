@@ -468,7 +468,6 @@ func open_feeder(f: Dictionary) -> void:
 	fill_b.disabled = Econ.room_in(f) <= 0
 	fill_b.tooltip_text = "Fills it with kibble and everyday crops from your pantry (never treats or rare crops)"
 	UI.footer(v).add_child(fill_b)
-	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
 	if fd["auto"]:
 		var on: bool = f.get("auto", true)
