@@ -194,6 +194,25 @@ def block(name, key, body):
 
 # ------------------------------------------------------------------ shared data
 ARCH = content("archetypes")
+
+def fill_ability_text(root, o):
+    """Archetype texts hold {key:action} (the game fills the player's own key) and {slot.field} (a number from the same JSON): the wiki shows the default keys."""
+    keys = {"dash": "Shift", "secondary": "RMB", "signature": "E", "fire": "LMB"}
+    def one(m):
+        t = m.group(1)
+        if t.startswith("key:"):
+            return keys[t[4:]]
+        v = root
+        for part in t.split("."):
+            v = v[part]
+        return ("%.2f" % v).rstrip("0").rstrip(".")
+    if isinstance(o, dict):
+        return {k: fill_ability_text(root, v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [fill_ability_text(root, v) for v in o]
+    return re.sub(r"\{([^}]+)\}", one, o) if isinstance(o, str) else o
+
+ARCH = {a: fill_ability_text(d, d) for a, d in ARCH.items()}
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
 WEAPONS = content("weapons")

@@ -1021,6 +1021,15 @@ Owner: "why does it show me rank 3 but not rank 2 when it's rank 1?" Every arche
 the next rank first, then rank 3 after it; the HUD ability tooltip ("Next · Rank 2: ..."), the
 rank line ("next rank: ...") and the kit card's detail page ("Ranks: Rank 2 ... Rank 3 ...") use it.
 
+### Ability words: one reader
+
+`AbilityText` (`scripts/arch/ability_text.gd`) is the only code that reads a slot's name, short name,
+one-line text and full description from `content/archetypes/*.json`. The HUD slot and tooltip, the kit
+card and strip, the viewer, the pick and the E hint all call it. Texts hold `{key:action}` (the
+player's own key via `Settings.key_cap`, never a letter: `dash`, `secondary`, `signature`, `fire`) and
+`{slot.field}` (a number from the same JSON, e.g. `{e.time}`). `--ability-text-check` holds all twelve
+kits to one name and one set of numbers in every context, with the keys rebound.
+
 ## Kits2: the Thief and the Juggernaut ported from SUPERVIVE (Nov 1)
 
 Owner: "do you think Thief and Juggernaut can be better too?", then: port them "as accurately as

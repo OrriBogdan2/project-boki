@@ -757,21 +757,17 @@ func slot_info(slot: String) -> Dictionary:
 	match slot:
 		"sec", "utility":
 			var sd := rmb_def()
-			var lines: Array = []
-			for v in ["tap", "hold", "air", "during_e", "full"]:
-				if (sd.get("variants", {}) as Dictionary).has(v):
-					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["rmb"]) if ch_rmb < 1.0 else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["e"]), "cd_max": float(sd.get("cooldown", 14.0)) * cd_k("kin"), "charges": 1 if float(cd["e"]) <= 0.0 else 0, "max_charges": 1, "verb": "e",
 				"ready": float(cd["e"]) <= 0.0 or (e_t > 0.0 and e_recastable()), "up": e_t, "full": e_payoff_ready()}, true)
 		"r", "ult":
 			var sd := r_def()
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": float(cd["r"]), "cd_max": r_cooldown(), "charges": 1 if float(cd["r"]) <= 0.0 else 0, "max_charges": 1, "verb": "r",
 				"ready": float(cd["r"]) <= 0.0 and int(h.slot_lv.get("ult", 0)) > 0, "bonded": bonded_glow, "up": r_t, "fuse": float(fuse.get("t", 0.0))}, true)
 		"x":
@@ -780,7 +776,7 @@ func slot_info(slot: String) -> Dictionary:
 			var sd := dash_def()
 			var dmax := h.max_dashes()
 			var owed := floorf(maxf(h.dashes, 0.0)) + 1.0 - h.dashes        # charges owed: over 1 after a long slide
-			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("name", "")).split(" ")[0], "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": String(sd.get("desc", "")),
+			out.merge({"name": AbilityText.name_of(id, slot), "short": AbilityText.short_name(id, slot), "icon": String(sd.get("icon", "dash")), "col": col_of(sd), "desc": AbilityText.full(id, slot),
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 

@@ -17,8 +17,8 @@
 		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
 		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
 		"rmb": "Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it.",
-		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
-		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
+		"e": "Longneedle: stand still {e.charge}s while the line narrows, then fire a long beam through walls and everything in it.",
+		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor {x.delay}s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
 		"weapons": {
 			"quill_rifle": "Full-auto minigun out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers)."
 		}
@@ -51,7 +51,7 @@
 		"slide": 7.0,
 		"slide_t": 0.55,
 		"hold_cost": 0.4,
-		"desc": "Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
+		"desc": "Tap: a {dash.roll}m skid that bleeds off over {dash.roll_t}s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
 		"air_k": 0.667
 	},
 	"rmb": {
@@ -78,7 +78,7 @@
 			"wall_daze": 0.6
 		},
 		"variants": {
-			"tap": "Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
+			"tap": "Tap {key:secondary}: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
 			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer."
 		},
 		"sockets": {
