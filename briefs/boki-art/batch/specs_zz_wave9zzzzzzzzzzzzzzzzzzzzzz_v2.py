@@ -2198,3 +2198,9 @@ for _n,_x in (('Malletary',''),('Meteorab',''),('Blastopuff',''),('Voltmink'," F
               ('Barokit'," Nothing floats above it: no extra clouds or smears."),('Hourachnid_female'," The hourglass sand is red in every view, as on the card.")):
     V2SHEET_NEW(_n,'briefs/boki-art/cards/'+_n+'.jpg',_GC,_GN); SPECS[-1]['id']='v2s_'+_n.lower()+'_rc'; SPECS[-1]['runs']=4
     SPECS[-1]['prompt']+=_NOGHOST+" Same colours and lightness as the card. No ground line or floor under the views."+_x
+
+# 11-11 promoted lighter cards: Tiltster = rv_tiltster_light2_2, Rimink = rv_rimink_light2_2. Sheet + portrait to match (hero comes from the portrait).
+for _n,_st,_ar,_fu in (('Tiltster','final','tough',0),('Rimink','mid','sleek',1)):
+    _cd=_O+'rv_'+_n.lower()+'_light2_2.jpg'
+    SPECS.append({'id':'v2s_'+_n.lower()+'_lt','name':_n+' (sheet, lighter card)','refs':[_LM[_n]['sheet'],_cd],'runs':3,'aspect':'16:9','size':'2K','prompt':RS_SHEET(_n,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'))+_NOGHOST})
+    SPECS.append({'id':'v2p_'+_n.lower()+'_lt','name':_n+' (portrait, lighter card)','refs':['briefs/boki-art/portraits/light/'+_n+'.jpg',_cd],'runs':3,'aspect':'1:1','size':'2K','prompt':RS_PORTRAIT(_n,_st,_ar,_GC.replace('image 1','image 2'),_GN.replace('image 1','image 2'),False,bool(_fu))+" Use the light finish of image 2: thin mid-tone outlines, light flat shading."})
