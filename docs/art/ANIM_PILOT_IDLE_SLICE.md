@@ -11,16 +11,21 @@ or small slides, so the seam/slide numbers come from `--clip-check`.
 
 | Hunter | Slot | Current | Best Meshy | Verdict |
 |---|---|---|---|---|
-| Lace (hem) | idle | 3.8 | a338 4.2 (a249 4.1) | **ship a338**: long still hold, small head change |
+| Lace (archer, art hem) | idle | 3.8 | a338 4.2 (a249 4.1) | **ship a338**: long still hold, small head change |
 | Lace | death | **4.0** | a183 3.4 | keep current (quiet knee, fold, flat) |
-| Kael | idle | 3.9 | a335 4.5 | **ship a335**: wide, low, braced, sword ready |
+| Kael (juggernaut) | idle | 3.9 | a335 4.5 | **ship a335**: wide, low, braced, sword ready |
 | Kael | death | **4.2** | a183 4.0 | keep current (knee, face-down slam) |
-| Vex | idle | 3.8 | a338 4.3 | **ship a338**: weight on one leg, relaxed contrapposto |
+| Vex (gunslinger) | idle | 3.8 | a338 4.3 | **ship a338**: weight on one leg, relaxed contrapposto |
 | Vex | death | **3.9** | a183 3.7 | keep current |
-| Albert | idle, death | - | - | not run: Meshy rejects his mesh ("could not be rigged", an1 breaker_rig). His gait stays the generated giant stride (`tools/art1/breaker_gait.py`) |
+| Albert (bulwark, art breaker) | idle, death | - | - | not run: Meshy rejects his mesh ("could not be rigged", an1 breaker_rig). His gait stays the generated giant stride (`tools/art1/breaker_gait.py`) |
 
 Rejected across hunters: arms-flare idle (a12 / a249 variants), curl-into-a-ball deaths (a189, a8), flinch-then-late-fall deaths.
 
 Notes: the judge found Vex's head scan subtle and Lace's bow partly hidden behind her body in a338. The
 Meshy idles are long (Lace 7.9 s, Kael 11.3 s), so the long holds the audit asks for fit.
 Sheets and mp4s: `/home/boki/anim/pilot4/renders/blind/` (key.json maps letters to clips).
+
+Checks on the shipped clips (11-11): `--clip-check` 0 failures, idle loop seams 0.0x the limit for archer (7.9 s),
+juggernaut (11.3 s) and gunslinger (7.9 s). `--idle-shots --wardens=archer,juggernaut,gunslinger` on jobq gpu
+(job 20261111-041846-25040) rendered clean: no pops at f000 against the last frame. Kael's a335 dips into a deep
+forward brace mid-loop, which is the stance the judge scored.
