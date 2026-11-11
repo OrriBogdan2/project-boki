@@ -12,7 +12,7 @@ Every row the 0.24.4 re-audit left open, branch ready or `[?]` was re-read again
 | Vex | Held Slipstep 10.3 m vs 7 m | **done** `ext/feel-vex-hold-dash` 25f65d942 | no line |
 | Vex | R cast range 14 `[?]` | **owner** | not determinable (ext/slice-ranges-source 1fbc35948: in range at 5 bh, no clamp seen); 14 stands |
 | Kael | Riders: fireblast 30% slow, Chain Lunge stun .35, Haul Slam stun | **done** `ext/parity-kael-cc-riders` 75e706c4a | no line; DECISIONS 2026-11-07 "keep NONE" settles the Haul owner question |
-| Kael | Slam angle 70 `[?]` | **done** `ext/parity-kael-slam-lane` 704b7636e | no line; the source is a 0.72 m lane, not a cone (hero-ref 0157) |
+| Kael | Slam angle 70 `[?]` | **done** `ext/parity-kael-slam-lane` 704b7636e | no line; the source is a 0.72 m lane, not a cone (hero-ref 0157, measured); ext/slice-ranges-source calls the angle not determinable without that measure: take the lane |
 | Kael | Warchain leash 24 m `[?]` | **owner** | not determinable (ext/feel-warchain-leash 68f8b9a7a, frames 0301-0366); 24 m kept |
 | Kael | `rmb.drop.radius` pinned 2.2, data 2.4 (owner) | **done** `ext/parity-kael-drop-pin` baa8eadd1 | no line |
 | Lace | E reach 9 vs 10.8 | **done** `ext/lace-ranges-source` e026ace6b | no line; ext/parity-ranges-slice b0fae9f8e pins the same 10.8: merge one |
