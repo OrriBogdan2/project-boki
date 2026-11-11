@@ -45,8 +45,6 @@ var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
 var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
-const GLIDE_CATCH := 0.2       # s after the Rampage's drive in which a glide opened still leaves at its carry
-var drive := {}                # the last Rampage drive in the air: {dir, end (m.time)}, until a glide or GLIDE_CATCH
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
 var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
@@ -158,7 +156,6 @@ func _tick_look(dt: float) -> void:
 func _tick(dt: float) -> void:
 	_tick_look(dt)
 	_tick_trail()
-	_tick_glide_catch()
 	var rd := res_def()
 	if enraged_t > 0.0:
 		enraged_t -= dt
@@ -499,24 +496,10 @@ func _rampage(dir: Vector2) -> void:
 					"trail": "dust", "dir": dir, "curved": true})
 	vfx("dash_go", h.pos, dir, {"len": float(dd["dist"]) * float(dash_feel()["dist"])})
 	m.later(t * 0.85, func(): if is_instance_valid(h) and not h.downed: _tip())
-	drive = {"dir": dir, "end": m.time + h.roll_t}
-
-## Jump, Shift, Space is a fast way to travel: a glide opened in the drive takes its speed
-## (Hunter._dash_into_glide); one opened up to GLIDE_CATCH after it still leaves at the glide carry.
-func _tick_glide_catch() -> void:
-	if drive.is_empty():
-		return
-	if h.gliding:
-		var hv := Vector2(h.vel.x, h.vel.z)
-		var way: Vector2 = hv.normalized() if hv.length() > 0.5 else drive["dir"]
-		hv = way * maxf(hv.length(), Loco.glide_carry(h.arch))
-		h.vel.x = hv.x
-		h.vel.z = hv.y
-	if h.gliding or h.grounded or m.time - float(drive["end"]) > GLIDE_CATCH:
-		drive = {}
 
 ## The air Rampage keeps a jump's rise (under gravity) and holds his height from its top: the drive never cuts the
-## jump short, so a Space after it still has the air to glide.
+## jump short, so a Space after it still has the air to glide. (Space in the drive glides off at its speed:
+## Hunter._dash_into_glide; no glide lock after it, so jump > Shift > Space is a fast way to travel.)
 func dash_vy(dt: float) -> float:
 	return maxf(h.vel.y - Hunter.H_GRAV * dt, 0.0)
 

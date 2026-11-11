@@ -1,7 +1,7 @@
 extends RefCounted
 ## --kael-shift-check: owner 11-11 on Kael's Shift (the Rampage): a fast short movement dash first that also hits.
 ## Running, a dash and a second one back to back never drop below the run; in the air it keeps his speed and height
-## and no glider shows without Space; jump > Shift > Space glides off fast, Space in the drive or just after it.
+## and no glider shows without Space; jump > Shift > Space glides off fast in the drive, and after it with no lock.
 ## Prints AKCHECK lines (tools/archetype_check.gd's harness).
 
 const AKCheck := preload("res://tools/archetype_check.gd")
@@ -101,8 +101,8 @@ func _air_dash() -> void:
 			at_once and slowest >= run_v * RUN_K, "at once %s slowest %.2f run %.2f" % [at_once, slowest, run_v])
 	A.ok("kael shift: no glider in or after the air Rampage without Space", not glider)
 
-## Jump > Shift > Space: in the drive the glider takes the drive's speed; just after it (no wind-down lock), it
-## leaves at the glide carry. Either chain covers more ground in 1.4s than a plain jump > Space glide.
+## Jump > Shift > Space: in the drive the glider takes the drive's speed; just after it, it opens at once (no
+## wind-down lock) at the speed he has. Either chain covers more ground in 1.4s than a plain jump > Space glide.
 func _jump_shift_glide() -> void:
 	var plain := _glide_run(-1.0)
 	var in_drive := _glide_run(0.08)
@@ -110,10 +110,10 @@ func _jump_shift_glide() -> void:
 	var carry := Loco.glide_carry(P.arch)
 	A.ok("kael shift: Space in the drive glides off at the drive's speed",
 			bool(in_drive["open"]) and float(in_drive["v"]) > carry, str(in_drive))
-	A.ok("kael shift: Space just after the drive opens the glider at the glide carry",
-			bool(after["open"]) and float(after["v"]) >= carry * 0.95, str(after))
+	A.ok("kael shift: Space just after the drive opens the glider at once, still faster than the run",
+			bool(after["open"]) and float(after["v"]) > P.base_speed, str(after))
 	A.ok("kael shift: jump > Shift > glide goes further than jump > glide",
-			float(in_drive["d"]) > float(plain["d"]) + 4.0 and float(after["d"]) > float(plain["d"]) + 3.0,
+			float(in_drive["d"]) > float(plain["d"]) + 6.0 and float(after["d"]) > float(plain["d"]) + 2.0,
 			"plain %.1f in drive %.1f after %.1f m" % [float(plain["d"]), float(in_drive["d"]), float(after["d"])])
 
 ## Running, jump, Shift 0.15s up (none if `space_at` < 0), Space `space_at` s after Shift (0.25s after the jump

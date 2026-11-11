@@ -242,10 +242,10 @@ ultimate (now the X cooldown).
   hit radius 0.428 (`body.hit_r`, docs/HITBOX_SIZE.md).
 - Nameplate height 2.75 m (`body.plate`, `Arch.plate_y`).
 - Rampage: 4.5 m in 0.17 s from the press, the run carried in and out (owner 11-11: no planted dip), then a short
-  low recovery (owner 113.8; keys end at 0.9 s). In the air it keeps a jump's rise and holds his height from its top; Space in the drive
-  glides off at its speed, Space up to 0.2 s after it at the glide carry (`GLIDE_CATCH`); no glide lock after it. The
-  air tip is a tilted slash at his body, not the flat crescent ahead (owner 11-11: it read as a glider opening).
-  Its after-images are his own orange flame streaks.
+  low recovery (owner 113.8; keys end at 0.9 s). In the air it keeps a jump's rise and holds his height from its
+  top; Space in the drive glides off at its speed (25-33 m/s), and there is no glide lock after it. The air tip is a
+  tilted slash at his body, not the flat crescent ahead (owner 11-11: it read as a glider opening). Its after-images
+  are his own orange flame streaks.
 - The Enraged look is embers and dark drips on his body; no ground disc or light under him.
 
 ## Assumptions (where the footage is silent; easy to change in content/archetypes/juggernaut.json)
