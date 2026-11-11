@@ -404,21 +404,24 @@ func tick(d: float) -> void:
 	run.step(d, holding)
 	if run.ears() and not was_ears:
 		h._emote(who, "!", true)
-		Sfx.play("ping", null, -6.0)
+		GardenSfx.cue("fish_bite", who["pos"])
 	if run.state != last:
 		_entered(run.state)
+	if run.state == Run.S.REEL:
+		GardenSfx.reel(rock.position, holding)
 	_draw_water()
 	if run.over():
 		_end(true)
 
 func _entered(s: Run.S) -> void:
+	if last == Run.S.AIM:
+		GardenSfx.cue("fish_cast", rock.position)      # every cast leaves the aim, onto a glint or empty water
+	if last == Run.S.REEL:
+		GardenSfx.reel_stop()
 	last = s
 	bar.visible = s == Run.S.REEL
 	match s:
-		Run.S.WAIT:
-			Sfx.play("splash", null, -10.0)
 		Run.S.REEL:
-			Sfx.play("splash", null, -4.0)
 			h._toast("Hooked! Hold and let go to keep the line in the band")
 		Run.S.SHOW:
 			var c: Dictionary = run.casts[-1]
@@ -429,6 +432,7 @@ func _entered(s: Run.S) -> void:
 				got = "Landed %s!" % GardenPrizes.entry_name(c["catch"])
 			h._toast("Cast %d of %d: %s" % [run.casts.size(), int(rules()["casts"]), got])
 			h._emote(who, "♥" if c["how"] == "caught" else "…", true)
+			GardenSfx.cue("fish_catch" if c["how"] == "caught" else "fish_miss", who["pos"])
 
 ## m along the cast and m to its side, from the rock, as a point on the water.
 func _water(along: float, side: float) -> Vector3:
@@ -491,6 +495,7 @@ func _open_bar() -> void:
 
 func _end(finished: bool) -> void:
 	var res := settle(run) if finished else {}
+	GardenSfx.reel_stop()
 	who["busy"] = false
 	who["t"] = 1.5
 	if is_instance_valid(bar):

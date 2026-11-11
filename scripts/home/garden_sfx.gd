@@ -1,7 +1,8 @@
 class_name GardenSfx
 extends RefCounted
 ## The sounds of the garden minigames (the Dash, Stump Shove, Seek, Spark Volley, Tumble, Echo Steps, the Show
-## Ring and the Relay Cup; docs/AUDIO.md). Every cue goes through cue(), which plays it through Sfx at the Boki,
+## Ring, the Relay Cup, Kite Tow, Glint Fishing and Lantern Match; docs/AUDIO.md). Every cue goes through cue(),
+## which plays it through Sfx at the Boki,
 ## quiet under the garden ambience, and counts it in `heard` so the checks can assert each cue fires once per event.
 
 const DB := -6.0                      # dB: the garden sounds sit under the Boki voices
@@ -11,6 +12,7 @@ const SNIFF_NEAR := 12.0              # m from the scent where the sniffing loop
 const PUSH_DELAY := 0.25              # s after a Tumble clash until the loser's paws scuff back
 const REVEAL_S := 1.2                 # s of the Show Ring's card reveal before the crowd answers
 const GRADE := {"great": "perfect", "good": "good", "miss": "miss"}
+const REEL_PITCH := [0.85, 1.15]      # the reel's ratchet letting line out, and winding in while you hold
 const SIZE := {"XS": "small", "S": "small", "M": "medium", "L": "large", "XL": "large"}
 
 static var heard := {}                # cue name -> times played, for the checks
@@ -40,6 +42,10 @@ static func fanfare(home, win: Dictionary, lose: Dictionary) -> void:
 	var huff := func(): cue("garden_sulk_" + _size(lose["rec"]), lose["pos"])
 	home.get_tree().create_timer(SULK_DELAY).timeout.connect(huff)
 
+## A lone winner's fanfare in its size, with no Boki to huff (Kite Tow beats the Gale Kite, not a Boki).
+static func solo_win(rec: Dictionary, pos) -> void:
+	cue("garden_win_" + _size(rec), pos)
+
 ## Tumble: the exchange lands with the move that decided it, then the loser scuffs back unless it was dead level.
 static func clash(home, move: String, pos, pushed: bool) -> void:
 	cue("tumble_clash_" + move, pos)
@@ -62,3 +68,12 @@ static func sniff(pos, metres_off: float) -> void:
 
 static func sniff_stop() -> void:
 	Sfx.loop_stop("seek_sniff")
+
+## Glint Fishing: the reel's ratchet while a glint is on the line, quicker while you hold. Call every frame of the reel.
+static func reel(pos, holding: bool) -> void:
+	if not Sfx.loop_on("fish_reel"):
+		heard["fish_reel"] = int(heard.get("fish_reel", 0)) + 1
+	Sfx.loop_hold("fish_reel", "fish_reel", pos, DB, REEL_PITCH[1 if holding else 0])
+
+static func reel_stop() -> void:
+	Sfx.loop_stop("fish_reel")

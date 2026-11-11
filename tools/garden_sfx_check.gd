@@ -1,6 +1,8 @@
 extends RefCounted
 ## --garden-sfx-check: the garden minigame sounds (scripts/home/garden_sfx.gd, docs/AUDIO.md), each cue once per event.
 ##   1. the names: three grades, three sizes (small, medium, large from the Boki's size tag), every file exists
+##      (Kite Tow, Glint Fishing and Lantern Match count their own cues in --kite-check, --glint-fishing-check
+##      and --lantern-check)
 ##   2. the Stump Shove: a three-beat countdown (tick, tick, go), one crowd cheer for the press (perfect), one
 ##      thump at most, one win fanfare and one loser huff in the winner's and loser's size
 ##   3. the Dash: a good, a perfect and a missed press each play their own crowd cheer once; one finish
@@ -62,11 +64,13 @@ func _names() -> void:
 				silent.append(p + tail)
 	ok(silent.is_empty(), "every cheer, fanfare and huff sound exists (missing %s)" % [silent])
 	var cues: Array = ["tumble_push", "tumble_ringout", "echo_hit", "echo_miss", "echo_streak", "show_reveal",
-			"show_crowd", "relay_handoff", "relay_fumble", "relay_finish"]
+			"show_crowd", "relay_handoff", "relay_fumble", "relay_finish", "kite_flap", "kite_ring", "kite_updraft",
+			"kite_finish", "fish_cast", "fish_bite", "fish_reel", "fish_catch", "fish_miss", "lantern_flip",
+			"lantern_match", "lantern_miss", "lantern_win"]
 	for move in BaseTumble.rules()["moves"]:
 		cues.append("tumble_clash_" + move)
-	ok(cues.all(func(c): return Sfx.ensure(c)), "every Tumble, Echo Steps, Show Ring and Relay cue exists (%d)"
-			% cues.size())
+	var cues_ok := cues.all(func(c): return Sfx.ensure(c))
+	ok(cues_ok, "every Tumble, Echo Steps, Show Ring, Relay, Kite, Fishing and Lantern cue exists (%d)" % cues.size())
 
 func _count(sname: String) -> int:
 	return int(GardenSfx.heard.get(sname, 0))

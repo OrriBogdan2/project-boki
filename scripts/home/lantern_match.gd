@@ -27,6 +27,7 @@ const CAP_R := 0.11                          # m, a prop glowcap's radius
 const UI_RING := 150.0                       # px, the panel ring's radius
 const UI_CAP := 54.0                         # px, a panel cap button's size
 const DARK := Color("2a2340")                # a closed cap on the panel
+const RIVAL_PITCH := 0.88                    # the rival's caps sound a little lower than yours
 
 static func rules() -> Dictionary:
 	return Content.rules("lantern_match")
@@ -73,6 +74,7 @@ class Board:
 	var sniff_t := 0.0              # s until its next sniff
 	var foe_t := 0.0                # s until the rival opens its next cap
 	var ver := 0                    # bumped on every change the panel shows
+	var heard: Array = []           # what the player should hear since the view last drained it: [sound, turn]
 
 	func _init(me: Dictionary, rival: Dictionary, r: RandomNumberGenerator) -> void:
 		R = LanternMatch.rules()
@@ -151,6 +153,7 @@ class Board:
 	func _open(i: int) -> void:
 		open.append(i)
 		saw[i] = true
+		heard.append(["lantern_flip", turn])
 		if versus() and rng.randf() < LanternMatch.mem_p(foe):
 			mem[i] = true
 		ver += 1
@@ -161,10 +164,13 @@ class Board:
 				matched[c] = true
 			pairs[turn] += 1
 			open.clear()                              # a match keeps the turn
+			heard.append(["lantern_match", turn])
 			if not versus() and not matched.has(false):
+				heard.append(["lantern_win", turn])     # the whole ring lit: a round won
 				_deal()
 		else:
 			shut_t = float(R["reveal_s"])
+			heard.append(["lantern_miss", turn])
 
 	func step(dt: float) -> void:
 		if flash_t > 0.0:
@@ -340,7 +346,7 @@ func _start(ks: Array) -> void:
 	rng.randomize()
 	board = Board.new(ks[0]["rec"], ks[1]["rec"] if ks.size() > 1 else {}, rng)
 	_board_panel()
-	Sfx.play("whoosh", null, -8.0)
+	GardenSfx.countdown(h, ks[0]["pos"])
 
 func _board_panel() -> void:
 	var v: VBoxContainer = h._new_panel(PANEL, 520.0)
@@ -368,8 +374,8 @@ func _board_panel() -> void:
 	shown_ver = -1
 
 func _pick(i: int) -> void:
-	if board != null and board.pick(i):
-		Sfx.play("click", null, -10.0)
+	if board != null:
+		board.pick(i)
 
 func tick(d: float) -> void:
 	state_t += d
@@ -379,6 +385,7 @@ func tick(d: float) -> void:
 				_end(false)
 				return
 			board.step(d)
+			_hear()
 			_show()
 			if board.over():
 				_end(true)
@@ -387,6 +394,12 @@ func tick(d: float) -> void:
 				if is_instance_valid(card):
 					card.queue_free()
 				go(S.IDLE)
+
+## The board's sounds since the last tick, at your Boki; the rival's caps a little lower.
+func _hear() -> void:
+	for e in board.heard:
+		GardenSfx.cue(String(e[0]), players[0]["pos"], RIVAL_PITCH if int(e[1]) == 1 else 1.0)
+	board.heard.clear()
 
 ## Repaints the panel when the board changed or the clock ticked a second.
 func _show() -> void:
@@ -421,6 +434,8 @@ func _end(finished: bool) -> void:
 		k["busy"] = false
 		k["t"] = 1.5
 	if finished:
+		_hear()
+		_result_sound(res)
 		h._close_panel()
 		go(S.RESULT)
 		_card(res)
@@ -431,6 +446,17 @@ func _end(finished: bool) -> void:
 	board = null
 	players = []
 	buttons.clear()
+
+## Versus: the winner's fanfare and the loser's huff (none on a draw). Solo: your Boki's fanfare, or the crowd's "aww".
+func _result_sound(res: Dictionary) -> void:
+	if players.size() > 1:
+		if not res["draw"]:
+			var order: Array = players if res["won"] else [players[1], players[0]]
+			GardenSfx.fanfare(h, order[0], order[1])
+	elif res["won"]:
+		GardenSfx.solo_win(players[0]["rec"], players[0]["pos"])
+	else:
+		GardenSfx.crowd("miss", players[0]["pos"])
 
 func _card(res: Dictionary) -> void:
 	if is_instance_valid(card):

@@ -10,7 +10,8 @@ extends RefCounted
 ##   6. the machine: no move is refused, every session is five casts, early, late and empty-water casts
 ##      end as such, and the bot's sessions last about two minutes
 ##   7. settle: each catch is banked (items to the bag, snacks to the pantry), joy, energy, a memory line
-##   8. on the rock: Glasswater has the rock and a session started there runs to a result card
+##   8. on the rock: Glasswater has the rock and a session started there runs to a result card, its sounds once
+##      per event (garden_sfx.gd): cast, bite warning, the reel loop per hook, catch or miss per cast
 ## Never touches the real save.
 
 const SESSIONS := 120
@@ -247,15 +248,47 @@ func _on_rock() -> void:
 	for k in gw.kins:
 		k.erase("indoors")
 		k["busy"] = false
+	GardenSfx.heard.clear()
 	gf.use()
 	ok(gf.run != null, "a session starts with your partner")
+	var r: GlintFishing.Run = gf.run
 	var t := 0.0
 	while gf.run != null and t < float(GlintFishing.rules()["max_s"]) + 30.0:
-		gf.holding = fmod(t, 1.0) < 0.5
-		gf.tick(0.1)
-		t += 0.1
-	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, pressing every second)" % t)
+		gf.holding = _hands(r)
+		gf.tick(DT)
+		t += DT
+	ok(gf.run == null and is_instance_valid(gf.card), "it ends with a result card (%.1f s, bot hands)" % t)
+	_sounds(r)
 	Content.rules("farm_build")["base_mode"] = false
+
+## The bot's hold for the rock's session (as _play, no reaction delay): aim at the first glint, hook when the
+## ears go up, keep the line near the middle.
+func _hands(r: GlintFishing.Run) -> bool:
+	match r.state:
+		GlintFishing.Run.S.AIM:
+			return not (r.held and absf(r.reach() - float(r.glints[0]["d"])) < AIM_M)
+		GlintFishing.Run.S.WAIT:
+			return r.ears()
+		GlintFishing.Run.S.REEL:
+			return r.tension < 0.5
+	return false
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
+## The session's sounds (garden_sfx.gd), once per event: a cast per cast, the reel per glint hooked (and stopped
+## after), the Boki's bite warning at least once per hook, a catch per glint landed and a miss per cast lost.
+func _sounds(r: GlintFishing.Run) -> void:
+	var n := r.casts.size()
+	var landed := r.caught().size()
+	var hooked := r.casts.filter(func(c): return c["how"] in ["caught", "slip"]).size()
+	ok(_heard("fish_cast") == n, "sound: a cast per cast (%d)" % n)
+	var ends := [_heard("fish_catch"), _heard("fish_miss")]
+	ok(ends == [landed, n - landed], "sound: a catch per glint landed, a miss per cast lost (%s)" % [ends])
+	var reels := _heard("fish_reel")
+	ok(reels == hooked and not Sfx.loop_on("fish_reel"), "sound: the reel per hook, off after (%d)" % hooked)
+	var bites := _heard("fish_bite")
+	ok(bites >= hooked and bites <= n, "sound: the bite warning before every hook (%d, %d hooks)" % [bites, hooked])
 
 func _arrived(was: Node):
 	var t := 0.0

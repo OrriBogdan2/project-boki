@@ -4,7 +4,8 @@ extends RefCounted
 ## has made no progress for 3 s), two Boki sitting on each other for 3 s, and any Boki standing inside the house,
 ## a toy, water or any other block it can't enter. Zero stuck and zero inside is the pass bar; overlaps are printed
 ## and counted (two Boki sharing a toy or a pile may brush), not failed. Never touches the real save.
-## It sweeps the start garden and Kitewind Ridge; `--nav-zone=<id>` runs it in that garden zone (garden_zones.json) instead.
+## It sweeps the start garden and Kitewind Ridge; `--nav-zone=<id>` runs it in that garden zone
+## (garden_zones.json) instead.
 
 const SIM_SECS := 600.0        # s of game time (10 in-game minutes)
 const DT := 0.25               # s per step
@@ -172,7 +173,8 @@ func _sweep(theme: String) -> void:
 	overlaps = 0
 	_save(theme)
 	home = await _open_home()
-	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, home.kins.size()])
+	var cast := home.kins.size()
+	ok(cast == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, cast])
 	_stage()
 	var cases := 0
 	var t := 0.0

@@ -15,9 +15,12 @@
   "show_reveal": "ui", "show_crowd": "boki",
   "relay_handoff": "boki", "relay_fumble": "boki", "relay_finish": "boki",
   "garden_chime_stat": "boki", "garden_chime_level": "boki", "garden_chime_evolve": "boki",
-  "garden_hop": "boki", "garden_wake": "boki"
+  "garden_hop": "boki", "garden_wake": "boki",
+  "kite_flap": "step", "kite_ring": "ui", "kite_updraft": "boki", "kite_finish": "boki",
+  "fish_cast": "ui", "fish_bite": "boki", "fish_reel": "loop", "fish_catch": "boki", "fish_miss": "boki",
+  "lantern_flip": "ui", "lantern_match": "ui", "lantern_miss": "ui", "lantern_win": "boki"
  },
  "signature": [],
  "replaces": [],
- "loops": ["garden_strain", "garden_sniff"]
+ "loops": ["garden_strain", "garden_sniff", "fish_reel"]
 }

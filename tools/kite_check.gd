@@ -17,7 +17,8 @@ extends RefCounted
 ##  10. a won lap pays the kite prize table (Zipseed, Windfloss), the first win of the day and garden XP
 ##      (garden_xp.json, triple on the first win); three wins run Sprout, Bloom, Crown to the Cup Ribbon;
 ##      a loss pays play XP and starts the cup over
-##   6. on the base: no kite stand on a meadow island; on a ridge island a flight runs to a result card
+##   6. on the base: no kite stand on a meadow island; on a ridge island a flight runs to a result card, and
+##      its sounds play once per event (garden_sfx.gd): flaps, updrafts, rings passed and missed, the landing
 ## Never touches the real save.
 
 const SEEDS := 8
@@ -267,6 +268,35 @@ func _cup() -> void:
 			"a lost lap: %d play XP and the cup starts over" % lost["xp"])
 	Save.d = Save.fresh()
 
+## Bot hands for the stand's flight (Input steers in game): odd rings flown straight through, even ones
+## missed wide, and over each vent while a flap is spent.
+func _hands(r: BaseKite.Run) -> void:
+	if r.next >= r.rings.size():
+		return
+	var v := _next_vent(r)
+	if not v.is_empty() and r.flaps < r.flaps_max and float(v["s"]) < r.ring_at(r.next):
+		r.off = float(v["off"])
+	else:
+		r.off = float(r.rings[r.next]) + (0.0 if r.next % 2 == 1 else float(BaseKite.rules()["max_off"]))
+	r.vel = 0.0
+
+func _heard(sname: String) -> int:
+	return int(GardenSfx.heard.get(sname, 0))
+
+## The flight's sounds (garden_sfx.gd), once per event: a flap per Space, an updraft per flap a vent gave back,
+## a ring chime per ring passed, the crowd's "aww" per ring missed, one landing, a fanfare only on a win.
+func _sounds(r: BaseKite.Run, foe: Dictionary, flapped: int) -> void:
+	ok(flapped > 0 and _heard("kite_flap") == flapped, "sound: a flap per Space (%d)" % flapped)
+	ok(_heard("kite_updraft") == r.refunds, "sound: an updraft per flap a vent gave back (%d)" % r.refunds)
+	var rings := [_heard("kite_ring"), _heard("garden_cheer_miss")]
+	ok(rings == [r.hits, r.misses], "sound: a chime per ring passed, an aww per ring missed (%s)" % [rings])
+	var won := r.time() <= BaseKite.rival_time(foe, r.lap)
+	var wins := 0
+	for k in GardenSfx.heard:
+		if String(k).begins_with("garden_win_"):
+			wins += int(GardenSfx.heard[k])
+	ok(_heard("kite_finish") == 1 and wins == (1 if won else 0), "sound: one landing, a fanfare only on a win")
+
 ## Three Boki on a stock farm (a Training post) whose island has the given theme.
 func _on_base(theme: String) -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
@@ -300,15 +330,26 @@ func _on_base(theme: String) -> void:
 			ok(kt.find(at) == {"kind": "kite"}, "ridge: the stand offers a flight")
 			for k in home.kins:
 				k.erase("indoors")
+			GardenSfx.heard.clear()
 			kt.use()
 			ok(kt.flying() and kt.hoops.size() == 12 and kt.flier["rec"] == Save.active_kin(),
 					"ridge: your partner takes off with twelve rings up")
+			var r: BaseKite.Run = kt.run
+			var foe: Dictionary = kt.foe
+			var flapped := 0
 			var t := 0.0
+			var peak_s := float(BaseKite.rules()["flap_v"]) / float(BaseKite.rules()["lift_g"])
 			while kt.flying() and t < MAX_S:
-				kt.tick(0.1)
-				t += 0.1
+				_hands(r)
+				var ahead := (r.ring_at(mini(r.next, 11)) - r.s) / r.speed
+				var low := r.lift < float(BaseKite.rules()["high_lift"]) * 0.5 and r.climb <= 0.0
+				if r.next < 12 and r.high[r.next] and low and ahead <= peak_s and kt.flap():
+					flapped += 1
+				kt.tick(0.05)
+				t += 0.05
 			ok(not kt.flying() and is_instance_valid(kt.card) and kt.hoops.is_empty(),
 					"ridge: the lap lands on a result card (%.1f s)" % t)
+			_sounds(r, foe, flapped)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame

@@ -521,7 +521,7 @@ func track_at(s: int, f: float, side: float) -> Vector3:
 	var a := _corner(s)
 	var fwd := (_corner(s + 1) - a).normalized()
 	var p := a.lerp(_corner(s + 1), f) + Vector3(-fwd.z, 0, fwd.x) * side
-	p.y = ground(p) + _lift(String(stretches(run.tw)[s]["kind"]), f)
+	p.y = ground(p) + _lift(String(stretches(run.tw if run else {})[s]["kind"]), f)
 	return p
 
 ## The facing (rotation.y) of a runner on stretch s.
