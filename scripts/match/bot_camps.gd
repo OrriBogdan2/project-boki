@@ -16,6 +16,7 @@ extends RefCounted
 ##   BotCamps.goal(m, h) -> Array             [position, kind] for Bot._choose, or [] for none
 ##   BotCamps.hold_burst(m, h, tgt) -> bool   keep the abilities for the prize monster's kill window
 ##   BotCamps.fight_reach(m, h, o, reach, provoked) -> float   how far h reaches for rival o (0: leave it)
+##   BotCamps.kin_leaves(m, own, o) -> bool   a bot's Boki leaves rival o alone (its Hunter would)
 ##   BotCamps.pace_level(t) -> int            the level a squad is asked to have at match time t
 
 static func _rules() -> Dictionary:
@@ -210,6 +211,13 @@ static func fight_reach(m: Match, h: Hunter, o: Hunter, reach: float, provoked: 
 	if on_camp and (opening or next % 2 == 0 or next == int(Hunter.ULT_AT[0])):
 		return 0.0
 	return reach * (float(F["press_k"]) if gap <= -float(F["gap"]) else 1.0)
+
+## A bot's Boki leaves rival o alone when its Hunter would not reach for o (fight_reach is 0) and o has
+## not hit it. Without this the Boki, which likes a Hunter target, started the fights its Hunter avoids.
+static func kin_leaves(m: Match, own: Hunter, o: Hunter) -> bool:
+	if own.ctrl != "bot" or own.last_hit_by == o or own.last_hit_by == o.kin:
+		return false
+	return fight_reach(m, own, o, 1.0, false) <= 0.0
 
 # ------------------------------------------------------------------ steals
 ## A camp's prize monster: its Brute or Camp Chief (spec 6.6).

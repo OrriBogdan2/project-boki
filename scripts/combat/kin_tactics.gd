@@ -71,6 +71,8 @@ func pick_target() -> Ent:
 			continue
 		if not k.walkable_to(f.pos):
 			continue
+		if f is Hunter and own and BotCamps.kin_leaves(k.m, own, f):
+			continue      # a bot's Boki picks no fight its Hunter would not (levels and camps: spec 6.8)
 		var s := -d
 		if f == attacker: s += 2.0 + loyalty * _r("guard_owner_per_loyalty", 4.0)
 		if f == k.target: s += 1.5
