@@ -273,6 +273,8 @@ const CHECKS := {
 	# lobby screenshots + safe-area scan at the window size
 	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],
 	"--loading-check": ["res://tools/loading_check.gd", "loading_check", null],      # the loading screen: splash, tip, bar
+	"--ride-pick-check": ["res://tools/ride_pick_check.gd", "ride_pick_check", "check"],      # the Boki riding with you
+	"--ride-pick-shots": ["res://tools/ride_pick_check.gd", "ride_pick_check", "shots"],      # --shots-dir=<dir> (GPU)
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],      # bots wear gamer tags
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],

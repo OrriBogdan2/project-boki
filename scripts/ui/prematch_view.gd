@@ -1,7 +1,7 @@
 extends Control
 ## The pre-match lobby screen (rules: Prematch): wait for everyone to load, then pick your Hunter on
-## your turn while your squad picks theirs, plan with text chat (and a voice hook). Once the whole
-## squad has picked, the picks lock and the match loads.
+## your turn while your squad picks theirs, see and swap the Boki riding with you (RidePick), plan with
+## text chat (and a voice hook). Once the whole squad has picked, the picks lock and the match loads.
 
 const TIMER_SIZE := 88        # px, the countdown digits
 const SAFE_FRAC := 0.04       # fraction of the window height kept clear on every side (title-safe)
@@ -24,6 +24,7 @@ var _pad: MarginContainer
 var _last_sec := -1
 var grid: GridContainer
 var squad_box: HBoxContainer
+var ride_box: VBoxContainer
 var chat_log: VBoxContainer
 var chat_scroll: ScrollContainer
 var chat_in: LineEdit
@@ -94,6 +95,9 @@ func _ready() -> void:
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
 	sc.add_child(grid)
+	ride_box = UI.vbox(0)
+	root.add_child(ride_box)
+	_fill_ride()
 	_build_chat(root)
 	_talk(false)
 	_fit_safe_area()
@@ -147,6 +151,18 @@ func _process(delta: float) -> void:
 		set_process(false)
 		Game.goto("match", pm.launch_opts())
 
+## Your riding Boki (RidePick): swap it until the picks lock. Online the lobby already told everyone
+## which Boki you bring, so it stays as you joined with.
+func _fill_ride() -> void:
+	for c in ride_box.get_children():
+		c.queue_free()
+	var why := ""
+	if pm.locked:
+		why = "Locked in."
+	elif pm.opts.has("net"):
+		why = "Online: you bring the Boki you joined with."
+	ride_box.add_child(RidePick.build(self, why, _fill_ride))
+
 ## The countdown and the line under the title; redraws the hunters and squad when the turn moves on.
 func _tick_label() -> void:
 	if pm.turn != _shown_turn:
@@ -155,6 +171,7 @@ func _tick_label() -> void:
 		_fill_squad()
 		if pm.locked:
 			chat_in.release_focus()
+			_fill_ride()
 	var m := pm.picker()
 	var s := int(ceil(maxf(pm.turn_left, 0.0)))
 	timer_label.text = "" if m.is_empty() else "0:%02d" % s
