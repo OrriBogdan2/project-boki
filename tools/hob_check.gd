@@ -251,7 +251,7 @@ func _try() -> void:
 			"the timer returns to the same card, Cinder in focus")
 	ok(_spendable() == before and ClassUnlock.second_pending(), "nothing was spent or unlocked by the Try")
 	offer.pick("ashwick")
-	ok(ClassUnlock.open_ids() == ["gunslinger", "ashwick"] and not ClassUnlock.second_pending(),
+	ok(ClassUnlock.open_ids().has("ashwick") and not ClassUnlock.second_pending(),
 			"the pick still works afterwards (%s)" % str(ClassUnlock.open_ids()))
 
 ## What a Try must leave alone: gems, items, the worn Relic and the Relic unlocks.

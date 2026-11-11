@@ -4,6 +4,8 @@ extends "res://tools/hero_pair_check.gd"
 ## fresh dummy strip with the real kit; nothing here calls the event itself. Also: every Hunter has a drill, with
 ## a line, a source tag and live key caps.
 
+## Hunters still without a signature drill (docs/DEBT.md): Gil came in 0.24.5, after the drills.
+const NO_DRILL := ["gil"]
 const DIST := {"archer": 7.0, "juggernaut": 6.0, "bulwark": 2.4, "thief": 8.0, "mage": 5.0, "gunslinger": 6.0,
 		"dolm": 6.0, "ashwick": 3.0, "dredge": 4.0, "ostra": 6.0, "rimewright": 6.0, "tender": 6.0}
 var seen := 0
@@ -17,7 +19,7 @@ func drills(main_node: Node) -> void:
 	main = main_node
 	_texts()
 	CombatBus.tech.connect(_on_tech)
-	for id in Arch.ids():
+	for id in DIST:
 		for right in [false, true]:
 			var got := await _run(id, right)
 			ok("tech %s: %s" % [id, "the correct input fires it once" if right else "the near miss does not"],
@@ -25,7 +27,9 @@ func drills(main_node: Node) -> void:
 	CombatBus.tech.disconnect(_on_tech)
 
 func _texts() -> void:
-	for id in Arch.ids():
+	var missing: Array = Arch.ids().filter(func(a): return not DIST.has(a) and not NO_DRILL.has(a))
+	ok("every Hunter has a drill or is in NO_DRILL", missing.is_empty(), str(missing))
+	for id in DIST:
 		var st := SignatureDrill.step(id)
 		var d := SignatureDrill.def(id)
 		ok("drill %s: a line with its key caps and a source tag" % id,

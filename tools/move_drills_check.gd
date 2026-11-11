@@ -92,7 +92,7 @@ func _dive_bot(f: int) -> void:
 	P.inp["jump"] = f == 0 or f == 11        # the glider opens on a second press (as the glide bot)
 	P.inp["glide"] = f in [0, 1, 2] or f >= 11
 	P.inp["move"] = flat.normalized() if flat.length() > 0.5 else Vector2.ZERO
-	P.inp["crouch"] = flat.length() < 7.0
+	P.inp["crouch"] = flat.length() < 3.0      # (0245's dive drops steeply: start it close)
 
 func _dive_idle_bot(_f: int) -> void:
 	P.inp["glide"] = false

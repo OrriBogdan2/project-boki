@@ -29,7 +29,8 @@ func run(main: Node) -> void:
 func _text() -> void:
 	for id in Arch.ids():
 		var plan := KitDrill.steps(id)
-		var every := plan.size() == KitDrill.SLOTS.size() + 1      # the five slots and the tech
+		var tech := 0 if SignatureDrill.def(id).is_empty() else 1      # (Gil has no drill yet: docs/DEBT.md)
+		var every := plan.size() == KitDrill.SLOTS.size() + tech      # the five slots and the tech
 		for st in plan:
 			every = every and String(st["line"]).length() > 3 and String(st["key"]) != "?"
 		ok(every, "%s: a line and a key for every slot" % id)

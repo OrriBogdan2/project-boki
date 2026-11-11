@@ -252,7 +252,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 201,
 "nested_ternary": 27,
 "semicolon": 243,
 "shadow": 3
@@ -475,7 +475,7 @@
 "long_line": 2
 },
 "scripts/match/capture.gd": {
-"long_line": 11,
+"long_line": 10,
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
@@ -862,7 +862,7 @@
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 26,
+"long_line": 16,
 "semicolon": 10,
 "shadow": 2
 },
