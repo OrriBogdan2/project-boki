@@ -7,7 +7,7 @@
 	"weight": "medium",
 	"body": {"size": 0.893, "chest": 1.0, "hit_r": 0.416, "head": 0.72, "legs": 2.3, "torso": 0.92, "shoulder": 0.8, "neck": -0.02, "build": 1.12},
 	"color": "#b8f03c",
-	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take 90% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
+	"clip": {"lines": {"dash": "Skid or slide, and keep shooting.", "lmb": "Full-auto rifle. Dazed foes take {resource.rattle_k%}% more.", "rmb": "Fire the charge from your cannon; its blast Dazes.", "e": "Stand still, then fire a beam through walls.", "x": "Call a burning shell down on the cursor.", "passive": "Knock a Hunter down and Slipstep comes back.", "r": "Fuse with your Boki."}},
 	"model_glow": {"core": "#3dff3a", "edge": "#2fd24a", "strength": 1.5},
 	"fantasy": "The ember-rifle skirmisher. Bounces a spiked charge off the wall so its blast throws a foe back into her rifle, slides around while still shooting, and finishes with one long needle of light.",
 	"silhouette": "the long scarf streaming behind, the bandolier of spiked charges across the chest and the long-shrouded rifle",
@@ -17,10 +17,10 @@
 		"dash": "Slipstep: tap to skid, hold to slide further; you can shoot the whole time and it goes where you move, not where you aim.",
 		"passive": "Hot Streak: knocking a hunter down gives Slipstep back. An ability that lands gives you a little lifesteal for a few seconds.",
 		"rmb": "Burr Charge: tap to fire it from your arm-cannon along your aim. A direct hit hurts and Dazes the foe. Where it meets a wall or the ground it blasts a cone back at you, hurting and Dazing everyone in it.",
-		"e": "Longneedle: stand still 0.6s while the line narrows, then fire a long beam through walls and everything in it.",
-		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor 1.6s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
+		"e": "Longneedle: stand still {tip.e.secs_1}s while the line narrows, then fire a long beam through walls and everything in it.",
+		"x": "Cinderfall (ultimate, level 6): a shell lands at your cursor {x.delay}s after the tap, hardest in the centre, and leaves a burning, slowing patch. Everyone can see where it will fall.",
 		"weapons": {
-			"quill_rifle": "Full-auto rifle out to full range. Long strings lose punch; Dazed foes take 90% more (big gold numbers)."
+			"quill_rifle": "Full-auto rifle out to full range. Long strings lose punch; Dazed foes take {resource.rattle_k%}% more (big gold numbers)."
 		}
 	},
 	"signature": "quill_rifle",
@@ -36,7 +36,7 @@
 	},
 	"passive": {
 		"name": "Hot Streak",
-		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for 3.5s, one flat level however many foes it hits: while it burns your damage heals you for 6%, rifle included. Your rifle does 90% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch."
+		"desc": "Knocking a hunter down gives Slipstep back at once. Each ability that lands (a Burr Charge blast, Longneedle) lights Fever for {resource.wait}s, one flat level however many foes it hits: while it burns your damage heals you for {resource.vamp%}%, rifle included. Your rifle does {resource.rattle_k%}% more to a Dazed foe (the numbers turn big and gold), and a string on a Dazed foe doesn't lose its punch."
 	},
 	"dash": {
 		"id": "slipstep",
@@ -51,7 +51,7 @@
 		"slide": 7.0,
 		"slide_t": 0.55,
 		"hold_cost": 0.4,
-		"desc": "Tap: a 4.8m skid that bleeds off over 0.45s, the way you're moving (not where you aim). Hold: a 7m low slide that takes 40% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides 2/3 of the full hold's distance (4.7m) and still spends a charge.",
+		"desc": "Tap: a {dash.roll}m skid that bleeds off over {dash.roll_t}s, the way you're moving (not where you aim). Hold: a {dash.slide}m low slide that takes {dash.hold_cost%}% longer to come back, with no refund for letting go early. You keep shooting through either, and the body keeps aiming. A knock gives it back. In the air a tap slides {tip.dash.n_1}/{tip.dash.n_2} of the full hold's distance ({tip.dash.metres_1}m) and still spends a charge.",
 		"air_k": 0.667
 	},
 	"rmb": {
@@ -77,8 +77,8 @@
 			"wall_daze": 0.6
 		},
 		"variants": {
-			"tap": "Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies 10.5m along your aim, past the cursor, and goes off on the first foe it strikes: 22 damage and Dazed 1.4s.",
-			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a 6m, 100° cone shows back toward you for 0.9s. Then it blasts: 16 damage, a big shove along the cone, Dazed 1.4s. A hunter shoved into more terrain is stunned 0.7s and Dazed 0.6s longer."
+			"tap": "Tap RMB: it fires from the launcher on her arm-cannon on the press. The charge flies {rmb.burr.range}m along your aim, past the cursor, and goes off on the first foe it strikes: {rmb.burr.hit_dmg} damage and Dazed {rmb.burr.cone_rattle}s.",
+			"full": "Where it hits a wall, or the ground at the end of the lane, it sticks and a {rmb.burr.cone_len}m, {rmb.burr.cone_deg}° cone shows back toward you for {rmb.burr.fuse}s. Then it blasts: {rmb.burr.cone_dmg} damage, a big shove along the cone, Dazed {rmb.burr.cone_rattle}s. A hunter shoved into more terrain is stunned {rmb.burr.wall_stun}s and Dazed {rmb.burr.wall_daze}s longer."
 		},
 		"sockets": {
 			"hit": "add",
@@ -105,7 +105,7 @@
 		"rattle_k": 0.2,
 		"shave": 0.2,
 		"shave_rank3": 0.3,
-		"desc": "Stand still and charge for 0.6s: a wide line out to 18m narrows to a thin core. The line locks to where you pressed and turns toward your aim at 90 degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside 5m. Then a heavy beam, 1.8m wide, fires through cover and everything in its line: 36 damage, 20% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes 20% off its cooldown (30% per hunter hit at rank 3).",
+		"desc": "Stand still and charge for {e.charge}s: a wide line out to {e.range}m narrows to a thin core. The line locks to where you pressed and turns toward your aim at {e.turn_deg_s} degrees a second at most, so a flick can't drag it; your view pulls out along it the further you aim, not at all inside {e.view_near_m}m. Then a heavy beam, {tip.e.metres_1}m wide, fires through cover and everything in its line: {e.dmg} damage, {e.rattle_k%}% more on a Dazed foe, and a Dazed hunter hit is Skewered. The recoil shoves you back a step. Hitting a hunter takes {e.rattle_k%}% off its cooldown ({e.shave_rank3%}% per hunter hit at rank {tip.e.n_1}).",
 		"sockets": {
 			"hit": "add",
 			"ctrl": "add",
@@ -132,7 +132,7 @@
 		"tick_dmg": 3.0,
 		"slow": 0.3,
 		"slow_t": 0.6,
-		"desc": "Tap: fire a shell straight up. It comes down 1.6s later exactly where your cursor was (up to 14m), and everyone sees its 3.4m disc fill until it lands. The impact deals 24 to everyone on the disc, 50% more in the hot centre. Then the patch burns for 3s: 3 every 0.5s and a 30% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
+		"desc": "Tap: fire a shell straight up. It comes down {x.delay}s later exactly where your cursor was (up to {x.range}m), and everyone sees its {x.radius}m disc fill until it lands. The impact deals {x.dmg} to everyone on the disc, {x.core_k%}% more in the hot centre. Then the patch burns for {x.zone_t}s: {x.tick_dmg} every {x.tick}s and a {x.slow%}% slow to anyone standing in it. You move and shoot freely the whole time. Landing the impact on an enemy hunter fills your Boki bond; the burn does not."
 	},
 	"order": [
 		"sec",
@@ -147,12 +147,16 @@
 	],
 	"rank_cd": {"sec": [1, 0.8333, 0.6667], "dash": [1, 0.8696, 0.7391], "kin": [1, 1, 1]},
 	"rank_dmg": {"sec": [1, 1, 1], "dash": [1, 1, 1], "kin": [1, 1.2, 1.4]},
-	"rank3": {"sec": "resets when you knock a hunter", "dash": "a burst of speed for 2s when a slide ends", "kin": "every hunter hit takes 30% off the cooldown"},
-	"rank2": {"sec": "Rank 2: cooldown 6.5s -> 5.4s.", "dash": "Rank 2: recharge 8.5s -> 7.4s.", "kin": "Rank 2: damage +20%."},
-	"rank_next": {"sec": "Rank 3: cooldown 6.5s -> 4.3s; it resets when you knock a hunter.", "dash": "Rank 3: recharge 8.5s -> 6.3s; +25% speed for 2s when a slide ends.", "kin": "Rank 3: damage +40%; every hunter hit takes 30% off the cooldown (20% once at ranks 1 and 2)."},
+	"rank3": {"sec": "resets when you knock a hunter", "dash": "a burst of speed for {tip.dash.secs_1}s when a slide ends", "kin": "every hunter hit takes {e.shave_rank3%}% off the cooldown"},
+	"rank2": {"sec": "Rank 2: cooldown {rmb.cooldown}s -> {cd2.sec}s.", "dash": "Rank 2: recharge {cd.dash}s -> {cd2.dash}s.", "kin": "Rank 2: damage +{dmg2.kin%}%."},
+	"rank_next": {"sec": "Rank 3: cooldown {rmb.cooldown}s -> {cd3.sec}s; it resets when you knock a hunter.", "dash": "Rank 3: recharge {cd.dash}s -> {cd3.dash}s; +{tip.dash.pct_1%}% speed for {tip.dash.secs_1}s when a slide ends.", "kin": "Rank 3: damage +{dmg3.kin%}%; every hunter hit takes {e.shave_rank3%}% off the cooldown ({e.rattle_k%}% once at ranks {e.self_slow} and {tip.e.n_2})."},
 	"tells": {
 		"half": "a lit Fever pip over the bar while the lifesteal runs",
 		"full": "the same lit pip and a heat shimmer",
 		"dash_spent": "an ember afterimage and faint skid streaks"
+	},
+	"tip": {
+		"e": {"secs_1": 0.6, "metres_1": 1.8, "n_1": 3.0, "n_2": 2.0},
+		"dash": {"n_1": 2.0, "n_2": 3.0, "metres_1": 4.7, "secs_1": 2.0, "pct_1": 0.25}
 	}
 }

@@ -1237,3 +1237,18 @@ games' heroes). Mechanics only: every name, number, text, look and sound in the 
 - A damage ratio takes `"per": "<path of the divisor>"` (e.g. slam damage per LMB damage) and a tolerance.
 - Change a number on purpose: edit the JSON and the row together, and say which source or owner call moved it.
 - Run: `godot --headless -- --kit-parity-check` (temp `XDG_DATA_HOME`).
+
+## Tooltip numbers come from the data (ui-tooltip-from-data)
+A hero's ability text in `content/archetypes/<id>.json` has no typed numbers. Each figure is a token that
+`ArchText` (`scripts/arch/arch_text.gd`, loaded once by `Content`) fills from the same file, so the kit card,
+the Practice kit page, the HUD tip, the viewer and the pick line all show what the kit really does, and a
+parity change to a cooldown, range or damage reaches every tooltip on its own.
+- `{rmb.pin.dmg.0}` the number at that path (array steps are numbers); `{e.slow%}` the same x100.
+- `{cd.sec}` `{cd2.sec}` `{cd3.sec}`: the slot's cooldown, at rank 2 and at rank 3 (`sec` = RMB, `dash`, `kin` = E),
+  from `rank_cd` or the default step (10% a rank, dash 15%); `{dmg2.sec%}` `{dmg3.sec%}`: the damage gained.
+- `"tip"` holds the few figures only a tooltip states (secs / metres / pct / n, numbered per ability). They are
+  not read by the kit code: when you tune the real value, change the matching `tip` entry too (DEBT).
+- Digits that name rather than count stay typed: "Rank 2", "level 6", "360 Smash".
+- `tools/arch_text.py` is the same fill for the wiki (`gen_wiki.py`). `--tooltip-check` fails when a typed
+  digit is left in the text on disk, a token is unfilled, or a number on any card, rank line or pick line is not
+  in that kit's data.

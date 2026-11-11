@@ -268,11 +268,12 @@ static func slot_text(a: String, slot: String) -> Dictionary:
 			out.merge({"name": "Boki Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "Boki system", "line": "Your Boki fuses with you; its kind decides the form."}, true)
 			out["detail"] = [["", "%s is not a Hunter ability here: it is the Boki Fusion. Your Boki fuses with you and its kind sets the Fusion form." % Settings.key_cap("ultimate")]]
 		"r":
+			var surge := MergeForm.surge_spec().duration
 			# the Merge key is the Merge for every class
 			out.merge({"name": "Fusion", "icon": "bond", "col": Color("ffd27a"), "tag": "level 6 · full bond meter", "line": "You and your Boki become one: its colour, its type, your abilities changed."}, true)
 			out["detail"] = [["Fusion", "Press %s with a full bond meter (it fills as your Boki lands hits, as you hit what it marked, and on combos). You take the Boki's colour and silhouette, and every ability of yours changes for the Fusion by its type and power." % Settings.key_cap("ultimate")],
 				["Boki out?", "It leaps back through anything in its way and fuses you in mid-air."],
-				["No Boki", "A downed or lost Boki: only a weak 3 second surge."],
+				["No Boki", "A downed or lost Boki: only a weak %ss surge." % ArchText.fmt(surge)],
 				]
 	out["icon"] = ICON_FIX.get(out["icon"], out["icon"])
 	return out

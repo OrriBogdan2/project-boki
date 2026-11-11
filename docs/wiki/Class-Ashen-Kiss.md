@@ -64,11 +64,11 @@ What the in-game kit card (K) says.
 | RMB: Cinder Shot | Hold to aim, release: a cinder that flies its full 14m, slows the foe and spreads the burn. |
 | E: Furnace Cloak | On the press, a blast of heat round you drags nearby foes in and wraps you in a fire shield. |
 | Hunter ultimate: Flue Flight | Flue Flight (level 6): fly toward the cursor and steer, laying a lava carpet that slows and burns; press it again to land. Your stream of fire is off while you fly. |
-| Weapon: Torch Lance | Hold to pour fire from your hand 6m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
+| Weapon: Torch Lance | Hold to pour fire from your hand 6.1m ahead; the stream trails behind a sweep and hits harder on a burning foe and chips its health. |
 
 ### Abilities in full
 
-**Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 2% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (4%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 25% more from the stream and the cinder (40% once Flashed over), and the stream also takes 1.5% (2.5%) of their health a second. A knock heals you 16% of your health.
+**Flashover (passive).** Your fire builds Char on foes (it all falls off after 5s). At 31 Char the foe is Ablaze: 3s of burning for 2% of their health a second, one flame over their head. Fed again to full Char they Flash over: a fiercer burn (4%), three flames and a glow. Anything that stokes a foe already burning upgrades it. A burning foe takes 25% more from the stream and the cinder (40% once Flashed over), and the stream also takes 2% (2%) of their health a second. A knock heals you 16% of your health.
 
 **Soot Ram (dash, Shift, 9s cooldown).** A quick, short head-first dash (fastest at the start) the way you move that stops on the first foe: 16 damage, a heavy shove (you bounce back a little) and 17 Char (half a Flashover). Two charges. A knock restores one charge only. In the air it is a long, fast poof that launches you far and keeps your speed.
 
@@ -87,7 +87,7 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
 | RMB | cooldown 7s -> 5.8s, damage +25%. | cooldown 7s -> 4.7s, damage +50%; a second charge. |
-| Dash (Shift) | recharge 9s -> 8.25s per charge. | recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s. |
+| Dash (Shift) | recharge 9s -> 8.3s per charge. | recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s. |
 | E | cooldown 10.5s -> 8.9s, damage and shield +25%. | cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%). |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > RMB > Dash (Shift) > E > Glove (Q).
