@@ -236,7 +236,7 @@
 				"id": "out",
 				"needs": ["toy"],
 				"title": "Head out or stay",
-				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing."},
+				"hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing. Later, the Waystone in your hub wakes the next zone."},
 				"world": {"go": "Portal"}
 			}
 		]

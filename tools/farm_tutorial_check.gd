@@ -106,6 +106,7 @@ func _base_tutorial() -> void:
 			one_line = one_line and not String(t).contains("\n")
 		one_line = one_line and not FarmTutorial.hint_text(String(st["id"])).contains("{")
 	ok(one_line, "one banner line per step, no leftover tokens")
+	ok(FarmTutorial.hint_text("out").contains("Waystone"), "the last hint points at the Waystone")
 	ok(FarmTutorial.current() == "meet", "it starts with meeting your Boki")
 	FarmTutorial.event("play")
 	ok(FarmTutorial.current() == "meet", "a later step done early does not count")

@@ -121,6 +121,7 @@ func _stage() -> void:
 	home._sync_fixtures()
 	home.day_t = DAY_START
 	ok(home.kins.size() == 6 and home.life != null, "six Boki live on a base_mode farm (%d)" % home.kins.size())
+	ok(home.bridges.values().all(func(b): return b["built"] or not b.has("sign")), "no unbuilt bridge sign")
 	ok(home.toys.toys().size() == 3 and not SnackPatch.entry(Save.d).is_empty(), "three toys and the snack patch stand")
 
 func _step() -> void:
