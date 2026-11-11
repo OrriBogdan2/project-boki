@@ -162,6 +162,11 @@ const CHECKS := {
 	"--hunter-gpu-bench": ["res://tools/hunter_gpu_bench.gd", "hunter_gpu_bench", null],      # 6 Hunters, 4 Boki
 	"--texture-budget-check": ["res://tools/texture_budget_check.gd", "texture_budget_check", null],
 	"--match-profile": ["res://tools/match_profile.gd", "match_profile", null],      # GPU: a 30-hunter match, per phase
+	"--hot-zone-check": ["res://tools/hot_zone_check.gd", "hot_zone_check", null],      # map regions, hot drop zone
+	"--air-rings-check": ["res://tools/air_rings_check.gd", "air_rings_check", null],      # lanes, lifts, bots
+	"--air-rings-shots": ["res://tools/air_rings_shots.gd", "air_rings_shots", null],      # --shots-dir=<dir>, GPU
+	"--region-shots": ["res://tools/region_shots.gd", "region_shots", null],      # --shots-dir=<dir>, GPU
+	"--perf-bench": ["res://tools/perf_bench.gd", "perf_bench", null],      # item 94
 	# draw calls, tris, shadow lights, frame ms
 	"--perf-budget-check": ["res://tools/perf_budget_check.gd", "perf_budget_check", null],
 	"--perf-overlay-check": ["res://tools/perf_overlay_check.gd", "perf_overlay_check", null],
