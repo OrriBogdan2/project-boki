@@ -37,7 +37,23 @@ Nothing here comes from SUPERVIVE's files.
   - Glide turn rate.
   - Drop dive speed.
   - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump keeps the glider open, so **no variable jump height** was added.
-  - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
+  - Coyote time, jump buffer or a wall-kick press window. See "Jump grace" below.
+
+## Jump grace
+
+How early or late a jump press still counts. `[game data]` here is briefs/supervive-data/supervive_physics.md
+(ext/agent-briefs); `[est]` is ours. No source number exists for any row, so none changed (rule: a row changes
+only for a source value). `--move-feel-check` asserts the match rows (`coyote_jump_*`, `buffer_jump_*`).
+
+| Window | Ours (match) | Ours (feel prototype) | Source | Evidence |
+|---|---|---|---|---|
+| Coyote: jump after running off a ledge | 0.12 s (`hunter.gd` walk-off sets `coyote`); +0.05 / +0.10 s jump, +0.15 s doesn't | 0.1 s (`FeelConfig.coyote_time`) | none: `bCanWalkOffLedges` false, so the source never walks off a ledge to need one (we allow it, owner ruling) | [est]; [game data] has no coyote field |
+| Jump buffer: jump pressed before landing | 0.12 s (`Hunter.JUMP_BUFFER`); 0.05 / 0.10 s before landing jump on landing, 0.15 s doesn't | 0.12 s (`FeelConfig.jump_buffer`) | none: `JumpCooldown` and `AirJumpPressDuration` are named but sit in the encrypted code | [est]; [game data] names only |
+| Wall kick, late press (after leaving the wall) | 0.2 s (`hunter.gd` `wall_touch_t`), or any time you face a wall within `WallMoves.FACE_REACH` 0.4 m | none (no wall kick) | none: `bCanWallJump` is the tall-ledge climb, not a press window | [est] |
+| Wall kick, early press (before reaching the wall) | only the 0.4 m `FACE_REACH`: further out an air press opens the glider (or buffers a landing jump), never a kick on contact | none | none | [est] |
+
+Footage can't settle these: a video shows the jump, not the frame the button went down. UE CharacterMovement
+defaults aren't cited, since the data names no field for these windows.
 
 ## Targets and results
 
