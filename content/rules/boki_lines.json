@@ -125,7 +125,7 @@
 					"I was hoping you'd come.",
 					"Hey, stay a while?"
 				],
-				"poison": [
+				"venom": [
 					"Hey, my tail missed you.",
 					"Hello, no stinging, promise."
 				],
@@ -133,31 +133,31 @@
 					"Hi, I grew a mushroom!",
 					"Hello, spores and all."
 				],
-				"steel": [
+				"titan": [
 					"Slow hello, big friend.",
 					"Hello, I've been waiting."
 				],
-				"bug": [
+				"swarm": [
 					"Buzz, hello!",
 					"Hi, the hive says hi."
 				],
-				"psychic": [
+				"gravity": [
 					"Hi, I rolled over!",
 					"Heavy hello!"
 				],
-				"crystal": [
+				"prism": [
 					"Hi, see my colours?",
 					"Hello, shimmer shimmer."
 				],
-				"fairy": [
+				"lunar": [
 					"Hoo, hello!",
 					"Hi, I was up all night."
 				],
-				"sound": [
+				"echo": [
 					"I heard you coming!",
 					"Hi, my ears found you!"
 				],
-				"flying": [
+				"tempest": [
 					"Hey, fast hello!",
 					"Zoom, I'm here!"
 				]
@@ -218,7 +218,7 @@
 					"I could sleep like this.",
 					"Hehe, that's nice."
 				],
-				"poison": [
+				"venom": [
 					"Mind my stinger, hehe.",
 					"Soft paws, sharp tail."
 				],
@@ -226,31 +226,31 @@
 					"Careful, I'm prickly!",
 					"Mind my cap, hehe."
 				],
-				"steel": [
+				"titan": [
 					"Scratch my shell, please.",
 					"Mm, steady and calm."
 				],
-				"bug": [
+				"swarm": [
 					"Bzzz, that's nice.",
 					"Happy buzzing!"
 				],
-				"psychic": [
+				"gravity": [
 					"Scratch my plates!",
 					"Mm, right on the armour."
 				],
-				"crystal": [
+				"prism": [
 					"I'm glowing pink now.",
 					"My frills are happy."
 				],
-				"fairy": [
+				"lunar": [
 					"Soft feathers, soft hands.",
 					"Hoo, that's nice."
 				],
-				"sound": [
+				"echo": [
 					"My ears love that.",
 					"Scratch behind the big ears!"
 				],
-				"flying": [
+				"tempest": [
 					"Quick, scratch faster!",
 					"Wind in my fins, nice."
 				]
@@ -659,7 +659,7 @@
 					"Ripe, like a good mushroom.",
 					"It grew faster than me!"
 				],
-				"crystal": [
+				"prism": [
 					"Ooh, it shines like me!",
 					"Such a pretty colour!"
 				]
@@ -689,7 +689,7 @@
 					"Soak it up.",
 					"Happy plants."
 				],
-				"crystal": [
+				"prism": [
 					"Water, my favourite thing!",
 					"Can I have some too?"
 				],
@@ -723,11 +723,11 @@
 					"Strong walls, strong home.",
 					"Nearly there!"
 				],
-				"steel": [
+				"titan": [
 					"I'll carry the heavy stones.",
 					"Solid as a mountain."
 				],
-				"bug": [
+				"swarm": [
 					"Busy as a bee!",
 					"The hive builds best."
 				]
@@ -757,11 +757,11 @@
 					"One more, then a break.",
 					"I'm good at this."
 				],
-				"bug": [
+				"swarm": [
 					"Buzzing right along.",
 					"Work, work, buzz."
 				],
-				"steel": [
+				"titan": [
 					"Slow and steady.",
 					"Steady work, steady home."
 				]
@@ -818,7 +818,7 @@
 					"Look, a puddle!",
 					"Rain makes me sleepy."
 				],
-				"poison": [
+				"venom": [
 					"Rain washes my sting off.",
 					"Wet fox, grumpy fox."
 				],
@@ -826,31 +826,31 @@
 					"Rain makes my cap grow!",
 					"Mushroom weather, finally!"
 				],
-				"steel": [
+				"titan": [
 					"My shell keeps me dry.",
 					"Rain bounces off me."
 				],
-				"bug": [
+				"swarm": [
 					"Rain grounds my wings.",
 					"Wet wings, no flying."
 				],
-				"psychic": [
+				"gravity": [
 					"I'll roll through puddles!",
 					"Rain can't dent me."
 				],
-				"crystal": [
+				"prism": [
 					"Rain feels like home!",
 					"Water, water everywhere!"
 				],
-				"fairy": [
+				"lunar": [
 					"The moon is hiding.",
 					"Rain dims the sky."
 				],
-				"sound": [
+				"echo": [
 					"Rain is so loud!",
 					"I can hear every drop."
 				],
-				"flying": [
+				"tempest": [
 					"Storm weather, love it!",
 					"Thunder weather, yes!"
 				]
@@ -880,7 +880,7 @@
 					"Stay close in the dark.",
 					"Can you see the stars?"
 				],
-				"poison": [
+				"venom": [
 					"Night is for sneaking.",
 					"My tail glows at night."
 				],
@@ -888,31 +888,31 @@
 					"My spores glow at night.",
 					"Mushrooms love the dark."
 				],
-				"steel": [
+				"titan": [
 					"The mountains sleep too.",
 					"Steady night, steady sleep."
 				],
-				"bug": [
+				"swarm": [
 					"The hive's asleep.",
 					"Even bees need sleep."
 				],
-				"psychic": [
+				"gravity": [
 					"Night feels heavier somehow.",
 					"Curl up time."
 				],
-				"crystal": [
+				"prism": [
 					"I glow in moonlight.",
 					"Rainbows sleep at night."
 				],
-				"fairy": [
+				"lunar": [
 					"My favourite time, night!",
 					"The moon is out, hoo!"
 				],
-				"sound": [
+				"echo": [
 					"I hear everything at night.",
 					"Bats love the dark."
 				],
-				"flying": [
+				"tempest": [
 					"The wind sings at night.",
 					"Fast asleep, ha."
 				]
@@ -942,7 +942,7 @@
 					"Bet I can jump higher.",
 					"Did you eat yet?"
 				],
-				"poison": [
+				"venom": [
 					"Want to see my stinger?",
 					"I stung a stick today."
 				],
@@ -950,31 +950,31 @@
 					"I'm growing a new mushroom.",
 					"Smell my cap, it's earthy."
 				],
-				"steel": [
+				"titan": [
 					"Slow down, friend.",
 					"I climbed a big rock."
 				],
-				"bug": [
+				"swarm": [
 					"I found sweet flowers.",
 					"Bzz, wanna hear a buzz?"
 				],
-				"psychic": [
+				"gravity": [
 					"Bet I'm heavier than you.",
 					"Wanna see me roll?"
 				],
-				"crystal": [
+				"prism": [
 					"I changed colour again.",
 					"Look, I'm sparkly today."
 				],
-				"fairy": [
+				"lunar": [
 					"Did you see the moon?",
 					"I don't sleep much."
 				],
-				"sound": [
+				"echo": [
 					"Did you hear that?",
 					"I heard a secret."
 				],
-				"flying": [
+				"tempest": [
 					"Race you, ready?",
 					"I'm the fastest here."
 				]
@@ -1383,11 +1383,11 @@
 					"Here I go!",
 					"Leave it to me!"
 				],
-				"flying": [
+				"tempest": [
 					"Faster than the wind!",
 					"Zoom!"
 				],
-				"steel": [
+				"titan": [
 					"Coming through!",
 					"Nothing stops me!"
 				]
@@ -1603,11 +1603,11 @@
 					"Another one down!",
 					"Teamwork!"
 				],
-				"poison": [
+				"venom": [
 					"The venom got them!",
 					"Stung and done."
 				],
-				"psychic": [
+				"gravity": [
 					"Flattened!",
 					"Heavy hit, ha!"
 				]
@@ -1772,11 +1772,11 @@
 					"Careful, a rival!",
 					"Stay close, enemy near."
 				],
-				"sound": [
+				"echo": [
 					"I hear footsteps!",
 					"Someone's breathing nearby."
 				],
-				"fairy": [
+				"lunar": [
 					"I see them, hoo!",
 					"Eyes on a Hunter!"
 				]
@@ -1887,11 +1887,11 @@
 					"That glows!",
 					"Mine, I mean, yours!"
 				],
-				"crystal": [
+				"prism": [
 					"Ooh, it sparkles like me!",
 					"Shiny, shiny, shiny!"
 				],
-				"bug": [
+				"swarm": [
 					"Sweeter than honey!",
 					"Bzz, treasure!"
 				]
@@ -1948,7 +1948,7 @@
 					"Take a breath, I'm here.",
 					"My turn to fight!"
 				],
-				"steel": [
+				"titan": [
 					"Hide behind my shell!",
 					"I'm a wall."
 				]
@@ -2112,7 +2112,7 @@
 					"Out of the storm!",
 					"Faster, please!"
 				],
-				"flying": [
+				"tempest": [
 					"Even I can't outfly that!",
 					"Bad wind, go!"
 				]
@@ -2195,7 +2195,7 @@
 					"All I've got!",
 					"Now you see it!"
 				],
-				"poison": [
+				"venom": [
 					"Taste my sting!",
 					"A little venom for you!"
 				],
@@ -2203,31 +2203,31 @@
 					"Spores, go!",
 					"Achoo, spore cloud!"
 				],
-				"steel": [
+				"titan": [
 					"Stand behind me!",
 					"Nothing moves me!"
 				],
-				"bug": [
+				"swarm": [
 					"Swarm them!",
 					"Buzz off, all of you!"
 				],
-				"psychic": [
+				"gravity": [
 					"Down you go!",
 					"Feel the pull!"
 				],
-				"crystal": [
+				"prism": [
 					"Rainbow, go!",
 					"Light it up!"
 				],
-				"fairy": [
+				"lunar": [
 					"Moonlight, now!",
 					"By the moon!"
 				],
-				"sound": [
+				"echo": [
 					"Hear this!",
 					"Echo, echo!"
 				],
-				"flying": [
+				"tempest": [
 					"Gale force!",
 					"Ride the wind!"
 				]
