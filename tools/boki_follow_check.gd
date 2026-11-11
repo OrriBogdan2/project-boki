@@ -318,8 +318,8 @@ func _carried() -> void:
 
 # ------------------------------------------------------------------ 7. a big Boki guards at your side
 ## Owner 11-08: on the Return order a Boki too big for your shoulder is never under or in you. Every step
-## of a run, a jump, a turn and a glide: on its flank it stays at least guard_min_m from you with its feet
-## never below yours; off its flank it is up on your back. A blocked flank sends it to the other one.
+## of a run, a jump, a turn and a glide: on its flank it stays at least guard_min_m from you and on its own
+## ground (your jumps never lift it); off its flank it is up on your back. A blocked flank sends it to the other one.
 func _guard_watch(P: Hunter, k: Kin, st: Dictionary) -> void:
 	var near := KinFollow._r("guard_min_m")
 	if k.state != "shoulder":
@@ -328,7 +328,8 @@ func _guard_watch(P: Hunter, k: Kin, st: Dictionary) -> void:
 	if k.beside:
 		st["side"] += 1
 		st["min"] = minf(st["min"], P.flat_dist(k))
-		if P.flat_dist(k) < near - 0.01 or k.pos.y < P.pos.y - 0.01:
+		var floor_y: float = k.m.world.ground_at(k.pos.x, k.pos.z)
+		if P.flat_dist(k) < near - 0.01 or absf(k.pos.y - floor_y) > 0.05:
 			st["bad"] += 1
 	elif k.seen_pos().y < P.pos.y + 1.0:
 		st["bad"] += 1
