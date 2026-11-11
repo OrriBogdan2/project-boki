@@ -2224,3 +2224,24 @@ SPECS.append({'id':'fopt_pavonazar_ring','name':'Pavonazar female + crown ring',
   'prompt':_EDIT+"add her legendary crown ring: a thin floating ring of bronze and green eye-spot feathers hovering just above her head crest, not touching it. Nothing else changes."})
 SPECS.append({'id':'fopt_pavonazar_line','name':'Pavonazar female, closer to the male','refs':['briefs/boki-art/cards/Pavonazar_female.jpg','briefs/boki-art/cards/Pavonazar.jpg'],'runs':2,'aspect':'1:1','size':'2K',
   'prompt':_EDIT+"her colours and crown. Keep her peahen shape, pose and short rounded train, but recolour her in muted versions of the male's palette in image 2: dusky violet-blue body, soft lilac and dull gold eye-spots, and give her a smaller version of his floating gold crown ring above her head. Same face and eyes."})
+
+# 11-11 OWNER: too many Boki with scenery on their backs. Rework Terrarimit, Mosstodon (Mossbastion), Vatmander (Cisternmander);
+# Briarlynx kept but shaved down; Geyserbara kept. Cairnback held back: it has an in-game 3D model and its ability throws its own cairn stones.
+# 3 directions x 2 runs each, ids opt_<name>_<k>_bk. Body-grown signature instead of a landscape.
+_n0=len(SPECS)
+OPT('Terrarimit','final','cute',False,False,_C%'Terrarimit',[
+ "no tree, no house and no flowers on its back. Its shell is now a clear glass terrarium bubble grown as its own shell, round and smooth, with just a few small ferns and moss sealed neatly inside the glass. The crab body, face and claws stay as they are.",
+ "no tree, no house and no flowers on its back. Its shell is now a big green pitcher-plant cup grown from its own body, with a curled lid flap and red veins, like a carnivorous plant it lives in. The crab body, face and claws stay as they are.",
+ "no tree, no house and no flowers on its back. Its shell is now a large smooth seed pod, glossy brown with a pale green split seam and one small curled sprout at the tip. The crab body, face and claws stay as they are."])
+OPT('Mossbastion','final','majestic',False,False,_C%'Mossbastion',[
+ "it is a giant water-bear, not a turtle: no shell, no rocks and nothing growing up from its back. Eight thick stubby legs, the round tube snout, and its whole body covered in a soft short velvet moss coat like fur, with a long mane of hanging moss over its head and shoulders.",
+ "it is a giant water-bear, not a turtle: no shell, no rocks and nothing growing up from its back. Its back is one big smooth rounded moss cushion like a giant velvety moss ball, with a few tiny white star flowers sitting flat in it. Eight stubby legs, round tube snout.",
+ "it is a giant water-bear, not a turtle: no shell, no rocks and no plants at all. Plump bare velvet-green body with paler lichen rosette markings as a flat pattern, eight pillar-thick legs, and a big round snout opening ringed with small soft teeth. Massive and calm."])
+OPT('Cisternmander','final','tough',True,False,_C%'Cisternmander',[
+ "no reeds, no moss mound and no rocks on its back. Its spine forms one smooth round stone basin as part of its body, holding clear water with just two lily pads floating in it. Same salamander body, face and feathery gills.",
+ "no reeds, no moss, no rocks and no basin. Instead clear water is stored in a row of round translucent blue sacs along its back like water balloons, and its feathery gills are shaped like lily pads. Same salamander body and face.",
+ "no reeds, no moss, no rocks and no basin. Its back carries a tall sail fin made of overlapping lily-pad shaped plates, green with pale veins, and its throat is a big round water pouch. Same salamander body and face."])
+for _s in SPECS[_n0:]: _s['id']+='_bk'
+for _k,_t in (('a',"the bramble cape on its back only: make it much smaller, just a short bramble mane over the shoulders with a small patch of the hedge-maze pattern and two roses. Its body, legs, face, antlers and vine tail stay the same."),
+              ('b',"the bramble cape on its back only: remove the cape completely. Keep only a short bramble ruff around the neck with one rose, and the vine tail. Its body, legs, face and antlers stay the same.")):
+    SPECS.append({'id':'shave_briarlynx_'+_k,'name':'Briarlynx shaved down '+_k,'refs':[_C%'Briarlynx'],'runs':2,'aspect':'1:1','size':'2K','prompt':_EDIT+_t})
