@@ -25,7 +25,8 @@ DOC = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'docs', 'SF
 STYLE = ('Stylized cel-shaded fantasy action game sound effect, punchy, clean, close and dry, '
          'single short one-shot, no music, no voice: ')
 
-# name: (category, takes incl. the base file, seconds requested per take, prompt)
+# name: (category, takes incl. the base file, seconds requested per take, prompt[, trim cap in seconds])
+# The cap is for sounds shorter than the API's 0.5 s minimum (pin_patter plays dozens of times per Hail Wall).
 PLAN = {
     'dodge': ('dash', 4, 0.6,
         'a quick airy whoosh of a body sidestepping as an arrow zips past the ear, bright glassy shimmer at the '
@@ -95,6 +96,8 @@ PLAN = {
     'tend_ember': ('fire', 4, 0.5, 'a small ember flicked from the hand, soft crackling fire puff'),
     'dj_bolt': ('fire', 4, 0.6, 'a spinning arc bolt thrown, whirring electric zip with a crackle'),
     'lw_roar': ('fire', 4, 0.66, 'a burst of flame roaring from an open hand, whooshing fire jet'),
+    'pin_patter': ('impact', 4, 0.5,
+        'one small arrow striking packed dirt, a single tiny dry thock, very short', 0.2),
     # frequent impacts
     'rimewright_dart_hit': ('impact', 4, 0.5,
         'an ice dart shattering on a target, crisp icy crack with tinkling shards'),
@@ -158,7 +161,8 @@ def trim(x, max_s):
 
 
 def build(name, fresh):
-    cat, n, secs, prompt = PLAN[name]
+    cat, n, secs, prompt = PLAN[name][:4]
+    cap = PLAN[name][4] if len(PLAN[name]) > 4 else secs
     for i in range(n):
         clip = name if i == 0 else '%s_%d' % (name, i)
         raw = os.path.join(RAW, clip + '.mp3')
@@ -171,7 +175,7 @@ def build(name, fresh):
             os.rename(raw, raw + '.silent')
             print('silent:', clip)
             continue
-        C.save(clip, trim(x, secs), rms_db=CATS[cat], peak_db=PEAK_DB)
+        C.save(clip, trim(x, cap), rms_db=CATS[cat], peak_db=PEAK_DB)
 
 
 if __name__ == '__main__':

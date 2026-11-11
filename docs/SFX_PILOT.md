@@ -9,13 +9,17 @@ A trial of AI-generated sound effects next to the synthesised ones (docs/AUDIO.m
 
 ## What was made (2,816 credits)
 Prompts, categories and take counts are `PLAN` in `tools/gen_sfx_el.py`. A/B page: `/home/boki/art-review/sfx-1110/index.html` (old synthesised vs new, per take).
-- **Dodge (new, wired):** `dodge` + 3 takes (category dash). `Match.on_perfect_dodge` played the pitched-up `dash`; it now plays `dodge`. The "miss" side is the same moment (a shot passing through the dash), so it is one sound.
+- **Dodge (new, wired):** `dodge` + 3 takes (category dash). `Match.on_perfect_dodge` played the pitched-up `dash`; it now plays `dodge`. The "miss" side is the same moment (a shot passing through the dash), so it is one sound. It is listed in `content/sfx/combat.json` (shared combat sounds), so `--sfx-set-check` covers its file and level.
 - **Archer (Hem), the thinnest kit:** every kit sound except `pin_patter` (0.12 s, under the API's 0.5 s minimum): the bow (`pin_loose`, `pin_loose_super`, `pin_draw`, `pin_stage`, `pin_perfect`, `pin_super`, `pin_overdraw`), Heavy Shot (`pin_heavy_draw`, `pin_heavy`, `pin_heavy_hit`), `pin_super_hit`, Hail Wall (`pin_hail`, `pin_rain`), Spirit Walk (`pin_spirit`, `pin_spirit_end`), Starpiercer (`pin_ult_cast`, `pin_ult_nock`, `pin_ult_beam`, `pin_ult_final`) and the signature `archer_thread_twang`.
 - **Kael (juggernaut) chain / drop / ult:** `jug_chain`, `juggernaut_chain_bite`, `jug_taut`, `jug_reel`, `juggernaut_chain_rattle`, `jug_drop`, `jug_meteor`, `jug_guard`, `jug_riposte`, `jug_ting`.
 - **The other kits' main weapon:** `bjorn_throw`, `br_throw`, `dr_shot`, `vn_rifle`, `vv_bolt`, `os_orb`, `rime_shard`, `tend_ember`, `dj_bolt`, `lw_roar`.
 - **Frequent impacts:** `rimewright_dart_hit`, `dj_encore_hit`, `br_boulder_hit`, `bjorn_block`.
 
 Every replaced sound keeps its name and take count, so no loader, set or kit change was needed and no stale take is left behind.
+
+## Not done
+- `pin_patter` (one arrow of the Hail Wall rain, 0.12 s): planned in `PLAN` with a 0.2 s trim cap (the API's minimum request is 0.5 s), 4 takes = 80 credits, which would bring the tally to 2,896. The 11-11 follow-up ran on worker w2, which has no API key, so nothing was sent. To make it, run `python3 tools/gen_sfx_el.py pin_patter` on hetzner.
+- The A/B page was rebuilt on w2 from git (old = origin/main, new = this branch), at the same path. The raw clip cache (`RAW`) is on hetzner only.
 
 ## Notes
 - About 1 clip in 13 came back silent or near-silent. Those were counted, set aside in `raw/rejected` and re-rolled; `build` now skips any clip under 1% peak.
