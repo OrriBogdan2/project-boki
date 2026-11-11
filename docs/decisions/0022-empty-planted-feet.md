@@ -31,5 +31,5 @@ turn on the spot re-steps when a leg cannot reach.
   warden_stance.gd (its idle leg offsets fade with the gait).
 - No Net or save change: the Empty is local to the farm, nothing synced reads the leg angles.
 - The boot has no ankle, so the body rises onto the toe to push off (hip 0.43 -> 0.485 m at the rig's
-  size, a 5 to 6 cm bob); the hips come down again in the air. Crouch-walking still adds a knee bend after
-  the solve, so a crouched walk slides a little (not gated).
+  size, a 5 to 6 cm bob); the hips come down again in the air. Crouched, the hip heights come down by the
+  crouch (gait key `crouch`) and the solve bends the knees, so a crouched foot stays planted too (gated).
