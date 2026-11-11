@@ -1,7 +1,7 @@
 extends "res://tools/parity_reel.gd"
 ## --dredge-arm-reel --reel-hero=dredge --shots-dir=<dir> [--reel-only=<part>]: Grimble's Abyssal Hand at the match
-## camera (owner playtest 11-11: the arm must read as his own arm and must not flail): the grab standing, the grab
-## while strafing, a miss, and a plain run. Frames and the ffmpeg line as in tools/parity_reel.gd.
+## camera, to see that the arm reads as his own and holds steady: the grab standing, the grab while strafing, a
+## miss, and a plain run. Frames and the ffmpeg line as in tools/parity_reel.gd.
 
 const PARTS := ["rmb_hit", "rmb_strafe", "rmb_miss", "run"]
 

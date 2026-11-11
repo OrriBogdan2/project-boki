@@ -10,7 +10,7 @@ extends RefCounted
 const TIP := "reach_tip"     # root meta: the world point the hand reaches to; unset (or INF) when the arm is home
 const IN_RATE := 14.0        # 1/s: the arm takes the aim line (0.07 s out of the wind-up)
 const OUT_RATE := 9.0        # 1/s: and gives it back to the clips (0.11 s)
-const RETRACT := 70.0        # skeleton units (m at size 1) per s: the hand coming home down the line (full reach 0.13 s)
+const RETRACT := 70.0        # skeleton units (m at size 1)/s: the hand comes home down the line (full reach 0.13 s)
 
 var skel: Skeleton3D
 var bones: Array = []        # [upper arm, forearm, hand] bone indices
@@ -51,7 +51,10 @@ func apply(dt: float, world_tip: Vector3) -> void:
 		to = to.limit_length(maxf(own, to.length() - RETRACT * dt))
 		tip = shoulder + to
 	var home := not out and to.length() <= own + 0.001
-	w = move_toward(w, 0.0 if home else 1.0, (OUT_RATE if home else IN_RATE) * dt)
+	if home:
+		w = move_toward(w, 0.0, OUT_RATE * dt)
+	else:
+		w = move_toward(w, 1.0, IN_RATE * dt)
 	if w <= 0.0:
 		tip = Vector3.INF
 		return

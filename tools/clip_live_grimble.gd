@@ -77,7 +77,7 @@ func run(main: Node) -> void:
 	print("LIVE clips seen: ", seen.keys())
 	ok(seen.has("throw") and seen.has("reel"), "the throw and the reel play their clips")
 	ok(hook_min > 0.9, "his own slime hand and crescent are what reach out, never shrunk (%.2f)" % hook_min)
-	ok(off_line < 0.05, "the reaching arm lies straight on the line to its tip, the clips can't swing it (%.3f m)" % off_line)
+	ok(off_line < 0.05, "the reaching arm lies straight on the line to its tip, no clip swings it (%.3f m)" % off_line)
 	# (the grip, 0.45 m at his size, plus up to a step of the hook's flight)
 	ok(grip_off < 0.8, "his hand is at the tip it reaches to (%.2f m)" % grip_off)
 	ok(longest > 5.0, "the arm stretches out to the foe 7 m off (%.1f m)" % longest)

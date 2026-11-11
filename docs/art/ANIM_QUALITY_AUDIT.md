@@ -61,6 +61,14 @@ clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dr
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out.
 
+## Reaching arm (`WardenReach`)
+
+Data `"reach": {"bones": [upper arm, forearm, hand], "grip": m}` lets a kit stretch the model's own arm to a world point
+(root meta `WardenReach.TIP`): the upper arm and forearm lie straight on the line from the shoulder, the forearm stretches so
+the hand sits `grip` short of the point, and the clips can't swing it meanwhile; it eases in (14/s), comes home down the line
+and eases back into the clips (9/s). Grimble's Abyssal Hand (owner playtest 11-11: it didn't read as his arm and flailed while
+the drawn tube grew from a wrist the clips kept swinging). `--clip-live-grimble` asserts the line and the grip.
+
 ## Per Hunter, before to after
 
 Slide is the share of the move speed (lower is better). Counter is +1 natural, -1 pacing. Clip speed is the feet's

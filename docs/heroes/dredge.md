@@ -68,7 +68,7 @@ Nothing was built on this branch: the only row not closed is in flight, and ever
 | 5 | Who is Grounded during the reel | closed | the caster gets `KitStatus` "gnd" for the reel, the foe stays stunned and lands not Grounded (b1aa67fe3). Assert "reel: Grimble is Grounded while he reels, the foe is stunned" |
 | 6 | Anchor Drop forward hop | in flight | main has the 0.38 s wind-up and the lift on the toes only, no forward travel. ext/anim-time-grimble adds `hop` 1.8 m over 0.2 s from 0.14 s (`_hop` in `dredge_kit.gd`, `dredge.json` e) with its own check; merge that, build nothing here |
 | 7 | Anchor slam "giant fist" | open | the ground slam draws the filling cone, crescent, dust and stun spirals; the translucent falling anchor (`LDFx.anchor_drop`) is only used by the air smash. Not built: `dredge_kit.gd` and `ld_fx.gd` are in flight. Suggestion for after the merges: call `anchor_drop` onto the cone centre in `_anchor` |
-| 8 | Grapnel line | closed on main, polish in flight | the hook is his stretched arm now (DECISIONS v2), drawn through rocks (`ld_arm.gdshader` depth test off; 74006733e). ext/grimble-hook-arm adjusts the arm look in `ld_fx.gd` |
+| 8 | Grapnel line | closed | the hook is his own model's arm stretched out (`WardenReach`, owner playtest 11-11); where it runs through rock a silhouette is drawn on top (`ld_arm.gdshader` depth test off) |
 | 9 | Grasp scoops wisps | closed | downed hunters the hook passes are reeled in (b1aa67fe3). Assert "wisp: a downed hunter the hook passes is scooped up with the catch" |
 | 10 | Barge start burst and scorch | owner override | DECISIONS "No bursts, rings or discs on dashes, landings or resets"; OWNER_REVIEW_1103 item 8 (no explosions on dashes). The barge keeps its turf clods and after-images |
 | 11 | Shotgun range and fan | closed | `shotgun.json` fan 30, bloom to 15, range 6.3 m (b1aa67fe3). Assert "parity gun: the slugs stop at 6.3 m with the cursor at 2 m" |
@@ -85,7 +85,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--dre
 
 | Row | Sev | Verdict | Where / why |
 |---|---|---|---|
-| RMB name and look (Abyssal Hand) | HIGH | (b) | renamed everywhere (data, card, kit text, docs, checks, wiki); the look is his mutated bone-hook arm stretching out (LDFx `arm`: bruised-purple flesh, a bone ridge, bone at the end; the `hook` prop), purple sludge dripping off it, snapping back after a miss or the reel; no rope, chain or claw (Nov 7 owner decision) |
+| RMB name and look (Abyssal Hand) | HIGH | (b) | renamed everywhere (data, card, kit text, docs, checks, wiki); the look is his own mutated arm stretching out (owner playtest 11-11: `WardenReach` lays the model's right arm straight on the line to the hook and stretches the forearm, so his slime hand and bone crescent do the grabbing; the drawn tube and the `hook` prop are gone), purple sludge dripping off it, coming home down the line after a miss or the reel; no rope, chain or claw (Nov 7 owner decision) |
 | RMB pulling online (`remote`) | HIGH | (c) | owned by ext/online-displace; not touched here |
 | RMB walking while reeling | MED | (b) | braced: he shuffles at 20% (`fly_slow`) instead of walking at full speed, between the owner's fallback (rooted) and the wiki's physics pull (the shuffle still swings the body). "reel audit: braced, he shuffles at a fifth of his walk ..." |
 | RMB cooldown | LOW | (c) | fine (the kit's scale) |
@@ -187,7 +187,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 |---|---|---|
 | Fire a burst, pause briefly, then pause 1s | volley 1 on the aim line, 2-3 fanned wider; after 0.3s off still fanned; after 1s off the next volley is aimed again | "gun: the first volley of a burst flies straight down the aim line"; "gun: the volleys after it fan out"; "gun: a short pause keeps the fan"; "gun: after a pause past the reset beat the next volley is aimed again" (`tools/dredge_gun_check.gd`) |
 | Hold the gun | a shot every 0.5s, the spread's edge lines out to 6.3m, the body rocks back; idle, one aim line | "gun: a shot every half second"; "gun: the spread's edge lines lie on the ground out to the slug range"; "gun: each shot rocks the body back (dr_shot)"; "gun: idle, the cone folds into one aim line" |
-| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the stretched arm shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: the stretched arm is drawn (through rocks)" |
+| Abyssal Hand hit | reel begins; you are Grounded, they are stunned; the stretched arm shows | "abyssal hand: hooks the first foe, reel begins"; "reel: Grimble is Grounded while he reels, the foe is stunned"; "reel: his own arm reaches to the foe (the model's reach tip on it)"; "cliff: the stretch of arm inside the cliff is drawn through it"; `--clip-live-grimble` "the reaching arm lies straight on the line to its tip" |
 | Wait for the arrival | foe lands at your feet (not Grounded), "HAULED"; your Grounded ends | "abyssal hand: foe arrives at your feet and does not land Grounded"; "reel: Grimble's own Grounded ends with the reel" |
 | During the reel: RMB, E, the gun | denied (only the barge works) | "reel: a second Abyssal Hand is denied"; "reel: E is denied while reeling"; "reel: the gun is locked" |
 | During the reel: barge | works; the reel continues | "reel: the barge still works" |
@@ -254,7 +254,7 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
 ## Look and sound
 - Effects (`scripts/arch/kits/ld_fx.gd`; `shaders/ld_fx.gdshader` alpha-blended bodies with `ld_fx_glow.gdshader` glow cores,
   `ld_anchor.gdshader`, `ld_arm.gdshader`): hot pink slug streaks that hang as solid violet dots with dark cores; a brass muzzle
-  flash; the stretched bone-hook arm (purple flesh swelling on each haul, a bone hook at its end, sludge drips, snapping back), drawn through rocks; the brass
+  flash; his own right arm stretched to the hook (`scripts/heroes/warden_reach.gd`: eased in from the coil-back, held on the aim line so no clip swings it, home down the line after), sludge drips, a dark silhouette where it runs through rock; the brass
   and iron chain ring at his feet while he reels; the ground slam's seafoam telegraph cone filling under his raised, glowing
   brass fist, then cracked ground under the fist and across the area; a seafoam crescent sweep, the dust cloud and seafoam stun spirals; the chain landing ring, brass sunburst and
   scorch of the air smash (he rides the anchor down); clods of turf torn up where the lunge sets off, iron and brass
