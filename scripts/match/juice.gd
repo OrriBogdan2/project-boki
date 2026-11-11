@@ -69,17 +69,34 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
 	if ability:
 		AbilityFx.hit(m, target, by, d, o)
-	# sound layers on top of the hit tick Match plays: armor rings, heavy hits thud, blades bite
+	# sound layers on top of the weapon's hit Match plays (HeroSfx.hit_sound): armor rings, empowered and
+	# big hits thud
 	if credit == p and target != p:
-		var melee: bool = by is Hunter and bool((by as Hunter).wpn.get("melee", false))
-		if melee:
-			m.sfx("slash_hit", target.pos, -5.0 if d >= 20.0 else -8.0)
 		if armor:
 			m.sfx("armor_hit", target.pos, -9.0)
-		if d >= 28.0 and not melee:
+		if d >= 28.0 or o.get("heavy", false) or o.get("payoff", false):
 			m.sfx("hit_heavy", target.pos, -7.0)
 	elif target == p and armor:
 		m.sfx("armor_hit", null, -12.0, 0.85)
+
+## The damage number of a hit (Match.on_damage), only for hits that involve you: other fights nearby don't
+## spray digits over yours. Yours read biggest and brightest, an empowered hit (o.heavy, a payoff) and a
+## crit each have their own look (Fx.NUM_*), the hits you take and your Boki's are a size down.
+static func number(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, armor: bool) -> void:
+	var p: Hunter = m.player
+	var credit := _credit(by)
+	if credit != p and target != p:
+		return
+	var look := Fx.NUM_PLAIN
+	if o.get("crit", false):
+		look = Fx.NUM_CRIT
+	elif o.get("heavy", false) or o.get("payoff", false):
+		look = Fx.NUM_HEAVY
+	var kin := by is Kin and credit == p
+	if target == p or kin:
+		look = Fx.NUM_SMALL
+	var col := HudStyle.dmg_col(look, armor, target == p, kin)
+	m.fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, look)
 
 ## A gun going off (Hunter._emit_shot): the muzzle flash and embers, sized by how hard the round
 ## hits (a shotgun's whole volley, a sniper slug), for any gun the player can see.
@@ -101,7 +118,7 @@ static func shot(h: Hunter, start: Vector3, dir2: Vector2) -> void:
 static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var tc: Color = SideColor.of(m, h)
 	var c := h.pos + Vector3(0, 0.9, 0)
 	m.fx.flash(c, Color(1.0, 0.95, 0.85), 1.1, 0.16)
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.35), 22, 11.0, 75.0, 0.4, 14.0, 1.5)
@@ -111,18 +128,20 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
 	if credit == m.player and h != m.player:
 		m.sfx("knock_confirm", null, -6.0)
+		KnockCallout.say(m, "knock", h)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
-	var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var tc: Color = SideColor.of(m, h)
 	var c := h.pos + Vector3(0, 0.6, 0)
 	m.fx.spark(c, Vector3.UP, tc.lerp(Color.WHITE, 0.5), 26, 14.0, 14.0, 0.7, -2.0, 1.6)
 	m.fx.burst(c, Color(tc, 0.8), 18, 3.0, 0.9, -4.0, 1.4)
 	m.fx.ring(h.pos, 2.6, Color(tc, 0.85), 0.5)
 	if credit == m.player and h != m.player:
 		m.sfx("kill", null, -3.0)
+		KnockCallout.say(m, "out", h)
 		if m.hud: m.hud.flash(Color(tc, 1.0), 0.14)
 
 ## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short

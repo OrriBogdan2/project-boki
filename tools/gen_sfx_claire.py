@@ -430,7 +430,7 @@ def build():
     A = 'rimewright_'
     S2.takes_cat('rime_shard', dart, 3, 'fire')
     S2.takes_cat('rime_beam', beam, 3, 'fire')
-    S2.takes_cat(A + 'dart_hit', dart_hit, 3, 'impact')
+    S2.takes_cat(A + 'hit', dart_hit, 3, 'impact')
     S2.save_cat('rime_spear_aim', spear_aim(), 'cast')
     S2.save_cat('rime_lance', lance(), 'cast')
     S2.takes_cat('rime_zone', zone, 3, 'impact')

@@ -140,19 +140,20 @@ func tick(dt: float, a: HunterAnim, s: Dictionary) -> void:
 	hip = Vector3(_hip.x * side, _hip.y, _hip.z) * _idle_w + _fid_hip * fe
 	var free_l := (1.0 + side) * 0.5      # the weight on the right leaves the left one free
 	var free_r := 1.0 - free_l
-	hip_l = Vector2(_free_leg.x * free_l + _knee * 0.5, -_free_leg.y * free_l - _knee) * _idle_w
-	hip_r = Vector2(_free_leg.x * free_r + _knee * 0.5, -_free_leg.y * free_r - _knee) * _idle_w
-	spread = _spread * _idle_w
+	var legs_w := _idle_w * (1.0 - a.gait.gait_k) if a.gait != null else _idle_w      # the Empty's gait owns its legs
+	hip_l = Vector2(_free_leg.x * free_l + _knee * 0.5, -_free_leg.y * free_l - _knee) * legs_w
+	hip_r = Vector2(_free_leg.x * free_r + _knee * 0.5, -_free_leg.y * free_r - _knee) * legs_w
+	spread = _spread * legs_w
 	arm_l = _arm_l * _idle_w
 	breath_k = lerpf(1.0, _breath_amp, _w)
 	_tick_carry(dt, a, s)
 
-## The signature carry's weight: off at once when they fire, reload, drink or fidget with the weapon.
+## The signature carry's weight: off at once when they fire, drink or fidget with the weapon.
 func _tick_carry(dt: float, a: HunterAnim, s: Dictionary) -> void:
 	if not _has_carry:
 		return
 	var firing := float(s.get("fired", 99.0)) < AIM_HOLD or float(s.get("charge", 0.0)) > 0.0 or a.aim_k > 0.5
-	var busy := float(s.get("reload", -1.0)) >= 0.0 or a.fidget in ["weapon", "stretch"] or a.drink_k > 0.0
+	var busy := a.fidget in ["weapon", "stretch"] or a.drink_k > 0.0
 	var want := 0.0 if firing or busy else 1.0
 	var rate := RELEASE if want < _carry_k else float(_blend.get("rate", 7.0))
 	_carry_k = want if a.snap else lerpf(_carry_k, want, 1.0 - exp(-rate * dt))
