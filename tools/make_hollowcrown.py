@@ -51,6 +51,8 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     wardens (+)       [[x,z]] Blight Warden posts (how many stand: rolled by danger)
     traps (+)         [[x,z]] where the region's traps go (which trap: the biome's list)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
+    hazard_areas (+)  [{kind, poly:[[x,z],...]}] terrain hazards on flat ground (lava, deep water, ice,
+                      static, bramble; content/rules/terrain_hazards.json, TerrainHazards): see HAZARD_AREAS
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
   pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
@@ -291,6 +293,18 @@ CAMPS = {
     "duskmoor": [[175, 173, "normal"], [172, 195, "light"], [197, 169, "light"]],
 }
 for _iid, _camps in CAMPS.items(): BY[_iid]["camps"] = _camps
+# Terrain hazard areas (owner 11-11): ground that changes the way across a region, each on one flat
+# terrace and clear of every spot, stair foot and exit (check_hazards). The matching Boki type walks it
+# safely (content/rules/terrain_hazards.json).
+HAZARD_AREAS = {
+    "cinder": [dict(kind="lava", poly=[(44, 95), (50, 94), (56, 95), (58, 99), (54, 102), (47, 101), (47, 105)]),
+               dict(kind="lava", poly=[(25, 90), (30, 89), (31, 94), (28, 97), (25, 96)])],
+    "frostgate": [dict(kind="ice", poly=[(107, 46), (113, 45), (115, 49), (112, 54), (107, 53)])],
+    "saltmere": [dict(kind="deep_water", poly=[(24.5, 169), (29, 167), (30.5, 170), (30.5, 176), (25, 177), (24.5, 173)])],
+    "storm": [dict(kind="static", poly=[(178, 134), (184, 134), (186, 137), (182, 140), (178, 139)])],
+    "thorn": [dict(kind="bramble", poly=[(106, 160), (111, 159), (113, 163), (110, 166), (105, 165)])],
+}
+for _iid, _hz in HAZARD_AREAS.items(): BY[_iid]["hazard_areas"] = _hz
 
 # One line each in docs/MAP_REGIONS.md. "loot" leans chests on top of the biome's lean (BiomeRun):
 # slot weights multiply, rarity steps add. Every region can be the match's hot drop zone (HotZone).
@@ -493,6 +507,8 @@ def scale_layout():
         for k in POINT_KEYS:
             if k in d: d[k] = [sc_pt(p) for p in d[k]]
         if "shrine" in d: d["shrine"] = sc_pt(d["shrine"])
+        for A in d.get("hazard_areas", []):
+            A["poly"] = [[round(x * K, 1), round(z * K, 1)] for x, z in A["poly"]]
     for G in glides:
         G["take"] = sc_pt(G["take"]); G["land"] = sc_pt(G["land"])
     for L in lairs: L["at"] = sc_pt(L["at"])
@@ -697,6 +713,49 @@ def check(lv, owner, stairs):
         assert owner.get((int(B["from"][0]), int(B["from"][1]))) == B["a"], B
     return probs
 
+HAZARD_CLEAR = 2.5      # m: a hazard area keeps this far from every spot, exit and stair foot (you're never set down in one)
+
+def hazard_cells(A):
+    """The tiles a hazard area covers: those whose centre is inside its outline (TerrainHazards does the same)."""
+    xs = [p[0] for p in A["poly"]]; zs = [p[1] for p in A["poly"]]
+    return [(x, z) for z in range(int(min(zs)), int(max(zs)) + 1) for x in range(int(min(xs)), int(max(xs)) + 1)
+            if shape_d({"poly": A["poly"]}, x + 0.5, z + 0.5) < 1.0]
+
+def check_hazards(lv, owner, stairs):
+    """Each hazard area sits on one terrace of its own island, off stairs and bridges, clear of spots, exits,
+    stair feet and lairs, and never cuts its island in two: every spot can still be walked to around it."""
+    probs = []
+    exits = [e[:2] for e in outposts]
+    for d in islands:
+        for A in d.get("hazard_areas", []):
+            cells = set(hazard_cells(A))
+            what = "%s %s" % (d["id"], A["kind"])
+            if not cells: probs.append("%s covers no tiles" % what); continue
+            if {lv.get(c) for c in cells} - {lv.get(next(iter(cells)))} or any(lv.get(c, -2) == -2 or owner.get(c) != d["id"] for c in cells):
+                probs.append("%s isn't on one terrace of its island" % what)
+            if any(c in stairs for c in cells): probs.append("%s covers a stair" % what)
+            spots = [p for k in ("landings", "chests", "camps", "breakables", "weapons", "wild", "wardens", "traps") for p in d.get(k, [])]
+            spots += exits + [d["shrine"]] if "shrine" in d else exits
+            for R in d.get("ramps", []):
+                dx, dz = DIRS[R["dir"]]
+                spots.append([R["at"][0] - dx * 2, R["at"][1] - dz * 2])
+            for L in lairs:
+                if L["island"] == d["id"]: spots.append(L["at"])
+            spots += [G["take"] for G in glides if G["a"] == d["id"]] + [G["land"] for G in glides if G["b"] == d["id"]]
+            for p in spots:
+                if any(math.hypot(c[0] + 0.5 - p[0], c[1] + 0.5 - p[1]) < HAZARD_CLEAR for c in cells):
+                    probs.append("%s too close to %s" % (what, p[:2]))
+            # around it: the island minus every hazard still reaches all of its spots from one of them
+            ground = {q: l for q, l in lv.items() if owner.get(q) == d["id"] and l != -2 and q not in cells}
+            reach = _walk(ground, (int(spots[0][0]), int(spots[0][1])))
+            for p in spots:
+                if (int(p[0]), int(p[1])) in ground and (int(p[0]), int(p[1])) not in reach:
+                    probs.append("%s cuts off %s" % (what, p[:2]))
+    return probs
+
+HAZARD_LOOK = {"lava": (255, 90, 20), "deep_water": (40, 90, 220), "ice": (210, 245, 255), "static": (255, 240, 90),
+               "bramble": (90, 60, 30)}
+
 def preview(path, lv, owner, stairs):
     from PIL import Image, ImageDraw
     S = 4
@@ -730,6 +789,9 @@ def preview(path, lv, owner, stairs):
         for c in d.get("wardens", []):
             dr.ellipse([c[0] * S - 2, c[1] * S - 2, c[0] * S + 2, c[1] * S + 2], fill=(160, 0, 200))
         dr.text((d["poi"][0] * S - 20, d["poi"][1] * S), d["name"], fill=(255, 255, 255))
+        for A in d.get("hazard_areas", []):
+            for q in hazard_cells(A):
+                dr.rectangle([q[0] * S, q[1] * S, q[0] * S + S - 1, q[1] * S + S - 1], fill=HAZARD_LOOK[A["kind"]])
     for L in lairs:
         cx, cz = L["at"]; h = L["half"]
         dr.rectangle([(cx - h) * S, (cz - h) * S, (cx + h + 1) * S, (cz + h + 1) * S], outline=(255, 80, 60), width=2)
@@ -1094,6 +1156,7 @@ def main():
     probs = check(lv, owner, stairs)
     tp, stops, legs, loop = check_train(lv, owner)
     probs += tp
+    probs += check_hazards(lv, owner, stairs)
     for b, share, tg in cover_report(C, lv, owner):
         print('cover %-7s %5.1f %%  (target %.1f-%.1f %%)' % (b, share * 100, tg[0] * 100, tg[1] * 100))
     print('cover patches', len(C.patches), 'clumps', sum(len(p['clumps']) for p in C.patches))

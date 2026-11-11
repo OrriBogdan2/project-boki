@@ -73,6 +73,18 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 **Getting around:** 9 bridges, 14 glide routes, a sky train with 10 stops (Lark Halt, Frost Halt, Watch Halt, Eyrie Halt, Storm Halt, Moor Halt, Bramble Halt, Salt Halt, Ash Halt, Cinder Halt).
 
+### Terrain hazards
+
+Ground that changes the way across a region. Your active Boki's type (or, for deep water, a swimmer) walks it safely; bots go round what theirs can't handle.
+
+| Hazard | Where | Does | Safe with |
+|---|---|---|---|
+| Lava Field | Cinder Steps | Burning | Ember type |
+| Deep Water | Saltmere | Slow, weak hits, short of breath | Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak |
+| Ice Sheet | Frostgate | No footing | Frost type |
+| Static Flats | Stormbreak | Shocks | Storm type, Tempest type |
+| Bramble | Thornwood | Slow, scratches | Bloom type, Spore type |
+
 ### Rolled each match
 
 | What | Live per match | Candidate spots |

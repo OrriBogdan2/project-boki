@@ -1662,7 +1662,7 @@ func kin_bark(k: Kin, txt: String, cat: String, life := 0.0) -> void:
 	if k.owner_h == player:
 		var s := "kin_happy"
 		if cat in ["refuse", "hesitate", "scared", "revive_low", "ignore", "low_hp", "yelp", "comfort", "sniper"]: s = "kin_unsure"
-		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm"]: s = "kin_alert"
+		elif cat in ["callout", "wild", "behind", "hunter", "pack", "boss", "egg", "loot", "exit", "collapse", "storm", "cover", "hazard_risk"]: s = "kin_alert"
 		sfx(s, null, -3.0, Unique.voice(k.rec))     # in its own voice, above the louder combat layer
 	elif player and k.owner_h and k.owner_h.team == player.team and cat in ["behind", "hunter", "sniper", "pack", "boss", "egg"]:
 		sfx("kin_alert", k.pos, -8.0, Unique.voice(k.rec))   # a squadmate's Boki calling something out

@@ -31,3 +31,10 @@ Each region lists its vendors in `regions[].shops` ([x, z, stock], `tools/make_h
 - **Saltmere**: Salt Market: Lostway Scroll, Bounty Banner, Skyfall Charge, Magpie Pouch, Wayfarer's Satchel, Second Wind.
 
 Every shop also sells Tonic and Armor kit. The ward perks only come from shops (perk orbs never drop them) and keep that biome hazard off you: Emberwalk (lava vents and pools), Sure Foot (ice patches), Grounded (storm rods), Spore Mask (spore pods). The big hazard fields of map v2 should honour the same `ward` key (`BiomeRun.warded`).
+
+**Terrain hazards** (`HAZARD_AREAS` in `tools/make_hollowcrown.py`; `TerrainHazards`, values in `content/rules/terrain_hazards.json`, decision 0060): ground that changes the way across a region, each with a bright edge, clear of every spot, stair foot and exit, never cutting an island off. Your active Boki's type walks it safely (a shield chip on the HUD says so), it tells you when one is near and whether it can handle it, and bots go round what theirs can't. Protection is the best single source: a ward perk, the Boki that is out, or both are the same as one (decision 0060); a carried second Boki or a downed one adds nothing.
+- **Cinder Steps**: two lava fields (east of the camp, and by the west rim) burn you. Ember Boki: safe.
+- **Frostgate**: an ice sheet in the yard south of the Keep's west stair: no footing, you slide. Frost Boki: full footing (ice patches too).
+- **Saltmere**: the river's north reach is deep water: slow, weaker hits, and you drown once your breath runs out. Swimmers (Soakybara, Frigatee, Barrelmander, Prismander, Selenfin, Zephyrak): swim faster, no drowning.
+- **Stormbreak**: static flats south-east of the shrine stair charge up and shock (damage, short stun) every few seconds. Storm and Tempest Boki: no shock.
+- **Thornwood**: a bramble patch by the north camp slows and scratches. Bloom and Spore Boki: untouched.
