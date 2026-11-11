@@ -1051,22 +1051,23 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
-		if tvy < 0.0 and -P.vel.y >= 0.9 * Hunter.DIVE_FALL: tvy = (i + 1) * DT
-		if tst < 0.0 and P.vel.x >= 0.9 * Hunter.DIVE_SPEED: tst = (i + 1) * DT
+		if tvy < 0.0 and -P.vel.y >= 0.9 * DropFeel.dive_fall: tvy = (i + 1) * DT
+		if tst < 0.0 and P.vel.x >= 0.9 * DropFeel.dive_speed: tst = (i + 1) * DT
 		if not P.diving: break
 	rec("drop_dive_vy_t", tvy if tvy > 0.0 else 9.0)
 	rec("drop_dive_steer_t", tst if tst > 0.0 else 9.0)
 	# deploy on a press (well above the auto height)
 	_reset(flat + Vector3(0, 40.0, 0), false)
 	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
-	P.vel = Vector3(0, -Hunter.DIVE_FALL, 0)
+	P.vel = Vector3(0, -DropFeel.dive_fall, 0)
 	_steps(5)
 	P.inp["jump"] = true
 	var fd := -1; var ts := -1.0
 	for i in 60:
 		m.step(DT)
 		if fd < 0 and not P.diving: fd = i + 1
-		if ts < 0.0 and not P.diving and absf(-P.vel.y - Hunter.DROP_FALL) <= 0.1 * Hunter.DROP_FALL: ts = (i + 1) * DT
+		if ts < 0.0 and not P.diving and absf(-P.vel.y - DropFeel.canopy_fall) <= 0.1 * DropFeel.canopy_fall:
+			ts = (i + 1) * DT
 	rec("drop_deploy_frames", fd)
 	rec("drop_deploy_settle_t", ts if ts > 0.0 else 9.0)
 	# steer under the canopy
@@ -1075,12 +1076,12 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(0, 1)
 		m.step(DT)
-		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.DROP_SPEED: tg = (i + 1) * DT
+		if tg < 0.0 and P.vel.z >= 0.9 * DropFeel.canopy_speed: tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
 	# land and move off straight away
 	_reset(flat + Vector3(0, 3.0, 0), false)
 	P.dropping = true; P.diving = false; P.gliding = true
-	P.vel = Vector3(0, -Hunter.DROP_FALL, 0)
+	P.vel = Vector3(0, -DropFeel.canopy_fall, 0)
 	var landed := false
 	for i in 120:
 		m.step(DT)
