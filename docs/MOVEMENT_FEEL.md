@@ -229,6 +229,47 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## 8 directions: W up the screen, no diagonal bonus (`tools/move_feel_dirs.gd`)
+
+The keys become a world direction in one place for the match (`Match._gather_input`) and one for the
+garden (`Home._move_player`), the same way: `Vector2(get_axis(left, right), get_axis(up, down))`,
+normalised only when longer than 1 (so a stick's partial push keeps its length, and a key diagonal is
+exactly 1), then rotated by the camera's yaw, which only the skyship ride and the drop turn (the match
+camera and the garden camera sit at yaw 0, looking north). There is no deadzone on keys. World north
+(-z) is straight up the screen because `CamRig` places the camera on +z at its pitch; no roll, no twist.
+The glide steers toward `move x glide speed`, the class dash takes `move.normalized()` (`ArchKit.dash_dir`),
+so every consumer of the keys sees the same unit vector.
+
+Measured on the match camera (style supervive, pitch 66, cursor pan off so the hunter is on the screen's
+centre line), medium class, through the real keyboard path (`Match._process`), 2026-11-11, origin/main
+d255acbee. Nothing needed fixing: there was no skew and no speed bonus before this pass; the rows pin it.
+
+| Key | Screen heading (deg, 0 = right, 90 = up) | Ideal (the projected world line) | World off (deg) | Ground speed (m/s) | Glide speed (m/s) | Dash speed (m/s) |
+|---|---|---|---|---|---|---|
+| W | 90.0 | 90.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S | -90.0 | -90.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| A | 180.0 | 180.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| D | 0.0 | 0.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| W+D | 42.5 | 42.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| W+A | 137.5 | 137.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S+D | -42.5 | -42.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S+A | -137.5 | -137.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+
+A diagonal reads 42.5 degrees on screen, not 45, because the pitched camera foreshortens the up-down
+axis (atan(sin 66) = 42.4; the glide at 25 m reads 42.2 for the same reason). The source's angled camera
+does the same: a 45-degree world diagonal is a flatter diagonal on screen. The check rows (`--move-feel-check`):
+
+| Key | Target | Source |
+|---|---|---|
+| dir_ground / dir_glide _screen_err_deg | <= 1 deg, worst of 8 | [footage] W runs straight up the screen |
+| dir_ground / dir_glide / dir_dash _world_err_deg | <= 1 deg, worst of 8 | keys -> world: no skew from the yaw or the axes |
+| dir_ground / dir_glide / dir_dash _speed_spread | <= 1% (fastest vs slowest) | [game data] normalised input, a diagonal is no faster |
+
+The dash row fires the press as one sim step: while the check drives frames by hand inside one engine
+frame, a key's "just pressed" never clears, so a real Shift would stay pressed into every later run and
+dash before the keys are read (toward the cursor). The garden has no separate row: it is the same
+expression and the same camera class at yaw 0.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
