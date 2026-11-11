@@ -30,6 +30,13 @@ Hero live in `tools/art1/` (Kael is the pilot).
   hips on top: `dive_tilt` (deg forward in a plunge, default 105: head-down), `glide_tilt` (deg forward under the
   glider, default 12: the legs trail), `glide_bank` (deg into a glider turn, default 28). A clip that already leans
   sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
+- `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
+  4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
+  the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
+  standing, `moving` s while he runs on (default `dur`), `rate` times the clip's speed (default 1). The source is up and
+  moving ~0.15 s after any touchdown, so `moving` stays near 0.1. `--clip-check` measures the jump, the drop, a glide's
+  end and a kerb through the clips (take-off, apex, dip, legs back, recovery: the JL rows); `--jump-land-shots --way=`
+  films them at the match camera (docs/art/anim_audit/LANDING_WEIGHT.md).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `air_legs` (a play that has been in the air goes on the torso only: the fall legs under it, then the legs' own layer once he lands, to the move's end; audit and strips in [../air_cast/AIR_CAST_POSES.md](../air_cast/AIR_CAST_POSES.md))}.
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes), `ground_clip` / `air_clip` (the clip when the move starts on the ground / in the air: a dash looks different by where it was pressed; an air-started clip gives way to the glide or the landing)}.

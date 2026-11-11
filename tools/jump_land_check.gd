@@ -1,9 +1,10 @@
 extends RefCounted
-## The plain jump through a Hero's hand-keyed clips (part of --clip-check): the game's arc (tools/jump_land_shots.gd)
-## fed to the clips, running and standing, twice over. Measures what the player sees at the match camera: the take-off
-## reads within 0.1 s of the press (the pose leaves the run), it reads the same on the next jump (the rise clip starts
-## over), the apex turns the pose (rise into fall), the landing dips at once and the body is back on the run quickly:
-## no long recovery, and running, the legs are not held by the land clip. Prints "JL <id> <run|still> ..." per Hero.
+## A Hero's ways down through his hand-keyed clips (part of --clip-check): the game's arcs (tools/jump_land_shots.gd:
+## the plain jump, twice over, the terrace drop, a glide's end and a kerb) fed to the clips, running and standing.
+## Measures what the player sees at the match camera: the take-off reads within 0.1 s of the press (the pose leaves the
+## run), it reads the same on the next jump (the rise clip starts over), the apex turns the pose (rise into fall), the
+## landing dips at once (a small dip off the hop, the deep crouch off the drop and the glide, nothing off the kerb) and
+## the body is back on the run quickly: no long recovery, and running, the legs are not held by the land clip.
 
 const DT := 1.0 / 30.0
 const READ_AT := 0.1          # s after the press the take-off has to show
@@ -15,15 +16,16 @@ const RUN_REF := 0.3          # s of the run-up before the press whose lowest hi
 
 var ids_seen := 0
 
-## {off, again, apex, dip, dip_t, legs, back, settle} per variant, all in deg, m or s.
-static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool) -> Dictionary:
+## {off, again, apex, dip, dip_t, legs, back, held, settle} per way and variant, all in deg, m or s ("held": the most
+## the land clip owned the body after touchdown; off, again and apex only mean something on the jump).
+static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool, way: String) -> Dictionary:
 	var shots := preload("res://tools/jump_land_shots.gd")
 	var skel := WardenGlb.skeleton(m.get_node("Warden"))
 	var hips_bi := WardenSkeleton.find(skel, "hips")
-	var air := 2.0 * Hunter.JUMP_V / Hunter.H_GRAV
-	var r := {}
+	var air: float = shots.air_time(way)
+	var r := {"again": 0.0, "held": 0.0}
 	var first_off: Array = []
-	for jump in 2:
+	for jump in (2 if way == "jump" else 1):
 		var t := -0.6
 		var before: Array = []
 		var apex_in: Array = []
@@ -35,7 +37,7 @@ static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool) ->
 		var back := -1.0
 		var settle := -1.0
 		while t < air + 1.0:
-			var s: Dictionary = shots.arc(t, running)
+			var s: Dictionary = shots.arc(t, running, way)
 			m.set_meta(WardenClips.STATE, s)
 			sync.call("_process", DT)
 			var y := skel.get_bone_global_pose(hips_bi).origin.y
@@ -63,6 +65,7 @@ static func measure(m: Node3D, sync: Node, clips: WardenClips, running: bool) ->
 					dip_t = since
 				if clips.act_w > 0.5:
 					legs = since
+				r["held"] = maxf(r["held"], clips.act_w)
 				if back < 0.0 and since > DT and clips.act_w <= 0.0:
 					back = since
 				if y < run_y - SETTLE_M:
