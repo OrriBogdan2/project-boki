@@ -5,7 +5,7 @@
 	"sounds": {
 		"rime_shard": "fire",
 		"rime_beam": "fire",
-		"rimewright_dart_hit": "impact",
+		"rimewright_hit": "impact",
 		"rime_spear_aim": "cast",
 		"rime_lance": "cast",
 		"rime_zone": "impact",

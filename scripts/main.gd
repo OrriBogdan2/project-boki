@@ -113,6 +113,9 @@ func _ready() -> void:
 				if String(a2).begins_with("--farm-seed="): fseed = int(String(a2).substr(12))
 			Save.no_write = true
 			Save.d = HomeGather.demo_save(a.substr(12) if a.length() > 12 else "empty", fseed)
+		if a == "--base-demo":      # a made-up base to show (GARDEN.md 9.8), never the real save
+			Save.no_write = true
+			Save.d = BaseDemo.save()
 		if a.begins_with("--test-kin="):
 			# test: a save with one kin "species:level:trust", ready to play at home
 			var tk := a.substr(11).split(":")
@@ -130,6 +133,10 @@ func _ready() -> void:
 		if a.begins_with("--bot-diff="): opts["bot_diff"] = a.substr(11)
 		if a == "--perk-demo": opts["perk_demo"] = true
 		if a.begins_with("--exit-demo="): opts["exit_demo"] = a.substr(12); opts["no_drop"] = true
+		if a == "--heart-demo" or a.begins_with("--heart-demo="):
+			opts["heart_demo"] = a.substr(13) if a.length() > 13 else "ready"
+			opts["no_drop"] = true
+			opts["heart"] = true
 		if a == "--truce-demo": opts["truce_demo"] = true; opts["no_drop"] = true
 		if a.begins_with("--teammate-demo="): opts["teammate_demo"] = a.substr(16); opts["no_drop"] = true
 		if a.begins_with("--demo-kin="): opts["demo_kin"] = a.substr(11)      # test: bring this species (level/trust via --demo-kin-lv=)
@@ -158,16 +165,6 @@ func _ready() -> void:
 		if a.begins_with("--raid-demo="): opts["raid"] = a.substr(12); opts["raid_demo"] = true; opts["no_drop"] = true    # a raid condition's look (RaidLook)
 		if a == "--blight-demo": opts["blight_demo"] = "all"; opts["no_drop"] = true      # a Warden's light and a Skitter pack (BlightDir.demo)
 		if a.begins_with("--blight-demo="): opts["blight_demo"] = a.substr(14); opts["no_drop"] = true
-	if "--check" in args:
-		var CheckT = load("res://tools/check.gd")
-		var bad := 0
-		for f in CheckT.new()._scan("res://scripts"):
-			var sc = load(f)
-			if sc == null or not sc.can_instantiate():
-				print("FAIL ", f); bad += 1
-		print("CHECK DONE, failures: ", bad)
-		get_tree().quit()
-		return
 	if Array(args).any(func(a): return String(a).begins_with("--grammar-check")):
 		# tooling: parse every kin grammar file (docs/KIN_GRAMMAR.md) and print structural errors;
 		# --grammar-check=<root> checks another folder (e.g. res://tests/grammar_fixtures/broken)
@@ -227,84 +224,6 @@ func _ready() -> void:
 				if o != sm.player:
 					o.teleport(sm.world.spawns[-1]); o.ctrl = "idle"
 			return
-	if "--perch-check" in args:
-		# tooling: for each perch, start on the island next to its updraft chain, jump, glide into the
-		# short column, then the tall one, then onto the perch. Reports who made it and how high.
-		var pm := Match.new()
-		add_child(pm)
-		pm.start({"teams": 2, "squad": 1, "tier": 0, "seed": 31, "no_drop": true, "length": 1e9, "autoplay": true})
-		pm.set_process(false)
-		for mb in pm.mobs: mb.queue_free()
-		pm.mobs.clear()
-		var ph: Hunter = pm.hunters[0]
-		for o in pm.hunters:
-			o.ctrl = "idle"
-			if o != ph: o.teleport(pm.world.spawns[-1])
-		ph.ctrl = "local"
-		var chains := {"spire": [Vector2(127, 93), Vector2(130, 89)], "emberspire": [Vector2(72, 100), Vector2(78, 92)], "eye": [Vector2(124, 124), Vector2(130, 128)], "needle": [Vector2(146, 48), Vector2(139, 43)]}
-		var ok := 0
-		for pid in chains:
-			var pi := -1
-			for ii in pm.world.islands.size():
-				if String(pm.world.islands[ii].get("id", "")) == pid: pi = ii
-			var steps: Array = chains[pid]
-			var u1: Vector2 = steps[0]
-			# the nearest ground to the first column that isn't a perch
-			var start := Vector3.INF; var bd := 1e9
-			for z in range(int(u1.y) - 10, int(u1.y) + 11):
-				for x in range(int(u1.x) - 10, int(u1.x) + 11):
-					if not pm.world.inb(x, z) or pm.world.kind[pm.world.idx(x, z)] != World.T_GROUND: continue
-					var isl := pm.world.island_of(x, z)
-					if pm.world.islands[isl].get("perch", false): continue
-					var d := Vector2(x + 0.5, z + 0.5).distance_to(u1)
-					if d < bd: bd = d; start = Vector3(x + 0.5, pm.world.ground_at(x + 0.5, z + 0.5), z + 0.5)
-			ph.teleport(start); ph.vel = Vector3.ZERO; ph.grounded = true; ph.glide_fuel = 1.0; ph.pad = {}
-			var goal := pm.world._poi(pi)
-			var stage := 0; var t := 0.0; var top_y := 0.0; var made := false
-			while t < 14.0:
-				var tgt: Vector2 = steps[stage] if stage < steps.size() else Vector2(goal.x, goal.z)
-				var to := tgt - Vector2(ph.pos.x, ph.pos.z)
-				ph.inp["move"] = to.normalized() if to.length() > 0.4 else Vector2.ZERO
-				ph.inp["jump"] = t < 0.1 or (ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) != pi)
-				ph.inp["glide"] = t > 0.25
-				pm.step(Match.DT); t += Match.DT
-				top_y = maxf(top_y, ph.pos.y)
-				var up: Dictionary = pm.world.updraft_at(ph.pos)
-				if stage < steps.size() and not up.is_empty() and ph.pos.y > float(up["top"]) - 0.6:
-					stage += 1
-				if ph.grounded and pm.world.island_of(ph.pos.x, ph.pos.z) == pi:
-					made = true; break
-				if ph.out: break
-			if made: ok += 1
-			print("PERCH %s: %s in %.1fs, highest %.1fm (perch top %.1fm)" % [pid, "made it" if made else "FAILED", t, top_y, goal.y])
-			ph.out = false; ph.hp = ph.max_hp
-		print("PERCHCHECK done, %d of %d reached" % [ok, chains.size()])
-		get_tree().quit()
-		return
-	if "--biome-check" in args:
-		# tooling: an expedition on the authored map; what each biome spawned, then a minute of play
-		var bm := Match.new()
-		add_child(bm)
-		bm.start({"teams": 4, "squad": 1, "tier": int(opts.get("tier", 1)), "seed": int(opts.get("seed", 9)), "no_drop": true, "autoplay": true})
-		bm.set_process(false)
-		var by := {}
-		var rar := [0, 0, 0, 0]; var nm := 0
-		for mb in bm.mobs:
-			var b := bm.world.biome_at(mb.pos.x, mb.pos.z)
-			if not by.has(b): by[b] = []
-			by[b].append(String(mb.md["name"]))
-			rar[int(mb.get_meta("rarity", 0))] += 1
-			if not (mb.get_meta("muts", []) as Array).is_empty(): nm += 1
-		for b in by:
-			print("BIOME %s: %d mobs, e.g. %s" % [b, by[b].size(), ", ".join((by[b] as Array).slice(0, 6))])
-		var hk := {}
-		for hz in bm.biomes.hazards: hk[hz["kind"]] = int(hk.get(hz["kind"], 0)) + 1
-		print("BIOME rarity common/uncommon/rare/elite %s, mutated %d of %d; hazards %s" % [str(rar), nm, bm.mobs.size(), str(hk)])
-		for i in int(60.0 / Match.DT):
-			bm.step(Match.DT)
-		print("BIOME sim ok, time %.0f, mobs left %d, fields %d" % [bm.time, bm.mobs.filter(func(x): return not x.dead).size(), bm.fields.list.size()])
-		get_tree().quit()
-		return
 	if "--arch-lineup" in args or "--showcase" in args or "--arch-matrix" in args or "--arch-heads" in args:
 		add_child(load("res://tests/arch_gallery.gd").new())
 		return
@@ -313,11 +232,6 @@ func _ready() -> void:
 		return
 	if "--art-stats" in args:
 		load("res://tests/art_stats.gd").stats()
-		get_tree().quit()
-		return
-	if "--hair-check" in args:
-		var hb: int = load("res://tests/hair_gallery.gd").check()
-		print("HAIR CHECK DONE, failures: ", hb)
 		get_tree().quit()
 		return
 	if "--pack-gallery" in args:
@@ -352,47 +266,7 @@ func _ready() -> void:
 		load("res://tools/speaktest.gd").new().run()
 		get_tree().quit()
 		return
-	if "--kinbox-check" in args:
-		var kbc = load("res://tools/kinbox_check.gd").new()      # the farm cap, the Kin Burrow and rare mutations
-		set_meta("kinbox_check", kbc)      # kept alive while it waits on frames
-		kbc.run(self)
-		return
 	if CheckRegistry.run(self, args):      # registered checks (tools/check_registry.gd)
-		return
-	if "--revive-check" in args:
-		var rvc = load("res://tools/revive_check.gd").new()      # bot squadmates pick you up first
-		set_meta("revive_check", rvc)
-		rvc.run(self)
-		return
-	if "--weapon-clip-check" in args:
-		var wcc = load("res://tools/weapon_clip_check.gd").new()      # no held weapon ever dips into the ground
-		set_meta("weapon_clip_check", wcc)
-		wcc.run(self)
-		return
-	if "--farm-start-check" in args:
-		set_meta("farm_start_check", load("res://tools/farm_start_check.gd").new()); get_meta("farm_start_check").run(self); return      # a new farm: empty island, placing, chopping, stations, old saves (kept in meta: the check awaits, so it must stay referenced)
-	if "--work-check" in args:
-		var wkc = load("res://tools/work_check.gd").new()      # kin at work: jobs, stations, priorities, shimmer odds
-		set_meta("work_check", wkc)
-		wkc.run(self)
-		return
-	if "--polish-check" in args:
-		load("res://tools/polish_check.gd").new().run(self)      # polish pass: drop families, stair flights, chest look, see-through
-		return
-	if "--boki-system-check" in args:
-		load("res://tools/boki_system_check.gd").new().run(self)      # Boki commands (throw, recall, hold/follow, C), the downed Boki, the Merge
-		return
-	if "--merge-form-check" in args:
-		load("res://tools/merge_form_check.gd").new().run(self)      # merge forms: transformation, kit swap, ultimates, shell, no tiers, net, bots
-		return
-	if "--boki-follow-check" in args:
-		load("res://tools/boki_follow_check.gd").new().run(self)      # the Boki follows you: leash, glide hops, Sic / Call back, the wheel, mounts
-		return
-	if "--capture-check" in args:
-		load("res://tools/capture_check.gd").new().run(self)      # capture by scan, the box, the Field Book, the net events
-		return
-	if "--teammate-check" in args:
-		load("res://tools/teammate_check.gd").new().run(self)      # Boki as teammates: following, callouts, caring, the tutorial guide
 		return
 	if "--unique-check" in args:
 		load("res://tools/unique_check.gd").new().run(self)      # every kin its own: rolls, inheritance, ids, migration, size
@@ -459,8 +333,6 @@ func _ready() -> void:
 	if "--obstacle-check" in args:
 		load("res://tools/obstacle_slide_check.gd").new().run(self)    # walking past and around trees and rocks: no sticking, no pull
 		return
-	if "--airheal-check" in args:
-		load("res://tools/airheal_check.gd").new().run(self)    # heals and abilities in the air, drinking is a risk
 	if "--train-check" in args:
 		load("res://tools/train_check.gd").new().run(self)      # riding the sky train, and being hit by it
 		return
@@ -691,7 +563,8 @@ func _ready() -> void:
 		var dm := Match.demo_opts()
 		dm.merge(opts, true)
 		show_screen("match", dm)
-	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.get("rolling", false):
+	elif "--match" in args or opts.has("raid_demo") or opts.has("blight_demo") or opts.has("heart_demo") \
+			or opts.get("rolling", false):
 		show_screen("match", opts)
 	elif "--duel" in args:
 		show_screen("match", Match.duel_opts())
@@ -788,7 +661,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# half-built world every frame only slows the build (see Match.warm_up for the drawing)
 				get_viewport().disable_3d = true
 				await ld.shown
-				ld.want = 0.04
+				ld.advance(0.04)
 				if gen != _gen:
 					get_viewport().disable_3d = false
 					ld.queue_free()
@@ -801,7 +674,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				# build in short slices so the loading screen keeps moving, then draw everything once
 				# behind it, a batch a frame, so no shader compiles mid-drop (see Match.warm_up)
 				await m.start_staged(opts, func(f: float, stage: String):
-					ld.want = maxf(ld.want, 0.04 + 0.66 * f)
+					ld.advance(0.04 + 0.66 * f)
 					ld.set_stage(stage))
 				get_viewport().disable_3d = false
 				if not is_instance_valid(m) or not m.is_inside_tree():
@@ -809,7 +682,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 					return
 				if not opts.has("net"): m.set_process(false)
 				ld.set_stage("graphics")
-				await m.warm_up(func(f: float): ld.want = maxf(ld.want, 0.7 + 0.28 * f))
+				await m.warm_up(func(f: float): ld.advance(0.7 + 0.28 * f))
 				ld.set_stage("ready")
 				# hold the match still while the bar finishes, except online where everyone runs together
 				await ld.finish()
@@ -853,6 +726,8 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 			current.set("visit", opts.get("visit", {}))
 			current.set("visit_id", String(opts.get("visit_id", "")))
 			current.set("spawn", String(opts.get("spawn", "")))
+			current.set("zone", GardenZones.landing(opts))
+			current.set("play_hub", bool(opts.get("play_hub", false)))
 			add_child(current)
 		"interior":
 			var In = load("res://scripts/home/interior.gd")
@@ -1147,11 +1022,16 @@ func _economy_check() -> void:
 		line.append("%.1fd: %s (food %d, %.0fh starving, trust %d)" % [days, st if st != "" else "fine", int(Care.need(r2, "food")), Care.starve_h(r2), int(r2["trust"])])
 	print("ECON  starving timeline: " + "  |  ".join(line))
 	var sick: Dictionary = Save.d["roster"][0]
-	ok.call(not died and Care.starve_stage(sick) == "sick", 
-			"natural_death off: 14 days unfed is sick at worst, never dead (%s)" % Care.starve_stage(sick))
-	for meal in 12: Care.feed(sick, "kibble"); Care.feed(sick, "kibble"); Care.tick(sick, 1200.0)
-	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"], 
-			"four hours of regular meals bring it back from sick (%s, %.0fh)" % [Care.starve_stage(sick), Care.starve_h(sick)])
+	var stage := Care.starve_stage(sick)
+	ok.call(not died and stage == "sick",
+		"natural_death off: 14 days unfed is sick at worst, never dead (%s)" % stage)
+	for meal in 12:
+		Care.feed(sick, "kibble")
+		Care.feed(sick, "kibble")
+		Care.tick(sick, 1200.0)
+	ok.call(Care.starve_stage(sick) in ["", "weak", "refuse"],
+		"four hours of regular meals bring it back from sick (%s, %.0fh)"
+		% [Care.starve_stage(sick), Care.starve_h(sick)])
 	Econ.kin_dies(sick, "starved")      # graves still come from old saves and other losses
 	ok.call(Econ.graves().size() >= 1 and String(Econ.graves()[0]["cause"]) == "starved" and String(Econ.graves()[0]["name"]) == "Pip", "a grave with its name (%d graves, %d memories)" % [Econ.graves().size(), (Econ.graves()[0]["mem"] as Array).size() if Econ.graves().size() > 0 else 0])
 	# 6. the Soul Shrine brings one back, changed
@@ -1552,11 +1432,6 @@ func _ability_check() -> void:
 	m.spawn_shot(T, P.pos + Vector3(1.0, 0.95, 0), Vector2(-30, 0), 20.0, 0.3, 0.15, Color.RED, {})
 	_ac_run(m, 0.25)
 	_ac("light phase: shots pass", P.phase_t >= 0.0 and P.hp >= php2, "hp %.0f -> %.0f" % [php2, P.hp])
-	# Medium: the roll reloads
-	ready.call("medium", home2, Vector2(1, 0))
-	P.ammo = 0
-	P.do_dash()
-	_ac("medium roll reloads", P.ammo > 0, "ammo %d" % P.ammo)
 	# Heavy: the charge bowls the target back
 	ready.call("heavy", T.pos + Vector3(-2.2, 0, 0), Vector2(1, 0))
 	var tx := T.pos.x
@@ -2040,9 +1915,9 @@ func _duel_check() -> void:
 	print("DUEL CHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 
-## Headless check of every way out: call a skiff (monster waves come, a rival can board too, it
-## leaves with whoever's on deck), open a rift hatch with a key (and lose a key to a deathbox, then
-## loot it back), and charge an uplink (a rival in the yard stalls it, it completes, the lift opens).
+## Headless check of the uplink outposts (the Heart has --heart-check): charge one (a rival in the
+## yard stalls it, more of your squad charge it faster, it completes, the lift opens), and an empty
+## yard drains it until it fizzles and cools down.
 func _extract_check() -> void:
 	var ok := true
 	var fresh := func(sq: int) -> Match:
@@ -2072,144 +1947,13 @@ func _extract_check() -> void:
 	var done := func(mm: Match):
 		mm.over = true       # the end-of-match timer must not take us to the results screen
 		mm.queue_free()
-	# ---- 1. the skiff
+	# ---- 1. the uplink
 	var m: Match = fresh.call(2)
+	if m.exits.of_kind("outpost").is_empty():
+		print("EXCHECK FAIL no uplink outpost on the map"); get_tree().quit(); return
 	var P: Hunter = m.player
-	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
 	var R: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
-	var docks := m.exits.of_kind("dock")
-	print("EXCHECK exits: %d docks, %d hatches, %d outposts" % [docks.size(), m.exits.of_kind("hatch").size(), m.exits.of_kind("outpost").size()])
-	if docks.is_empty() or m.exits.of_kind("hatch").is_empty() or m.exits.of_kind("outpost").is_empty():
-		print("EXCHECK FAIL a kind of exit is missing"); ok = false
-	var d: Dictionary = docks[0]
-	m.time = float(d["open_at"]) + 1.0
-	P.teleport(d["pos"] + Vector3(0.3, 0, 0.3))
-	var t0 := m.time
-	var pings_before := m.pings.size()
-	run.call(m, 2.5, func(): P.inp["interact"] = true)
-	P.inp["interact"] = false
-	var flare: bool = (ExitSignal.phase(d, -1) == ExitSignal.ACTIVE
-			and (d["node"] as Node3D).get_node("Signal").scale.y >= 1.0)
-	print("EXCHECK skiff: state=%s after holding %.1fs, arrives in %.0fs; loud: map pings +%d, flare=%s" % [d["state"], m.time - t0, float(d["t"]), m.pings.size() - pings_before, flare])
-	if d["state"] != "called" or m.pings.size() <= pings_before or not flare: ok = false; print("EXCHECK FAIL skiff not called (or not loud)")
-	# the waves come in: hold everyone where they are (a brute could knock the idle test hunters
-	# off the landing) but leave the monsters be, to count them
-	P.set_meta("pin", P.pos); mate.set_meta("pin", mate.pos); R.set_meta("pin", R.pos)
-	run.call(m, 30.0, func():
-		for h in [P, mate, R]:
-			if not h.out: h.teleport(h.get_meta("pin")); h.vel = Vector3.ZERO; h.hp = h.max_hp)
-	var waves := m.mobs.filter(func(x): return not x.dead and int(x.get_meta("exit", -1)) == int(d["i"])).size()
-	print("EXCHECK skiff: waves=%d monsters alive from them=%d t left=%.0f" % [int(d["waves"]), waves, float(d["t"])])
-	if int(d["waves"]) < 2 or waves <= 0: ok = false; print("EXCHECK FAIL no monster waves")
-	# the player and a rival step on the deck; the teammate stays on the pier's foot (not aboard)
-	for mb in m.mobs: mb.dead = true; mb.visible = false
-	P.teleport(d["berth"]); R.teleport(d["berth"] + Vector3(0.8, 0, 0.4))
-	mate.teleport(d["pos"])
-	for h in [P, R, mate]: h.set_meta("pin", h.pos)
-	while d["state"] == "called" and m.time - t0 < 80.0: run.call(m, Match.DT, calm.bind(m))
-	print("EXCHECK skiff: state=%s (boarding %.0fs) player %.1fm from the berth (y %.2f vs %.2f) downed=%s out=%s" % [d["state"], float(d["t"]), P.flat_dist(d["berth"]), P.pos.y, d["berth"].y, P.downed, P.out])
-	run.call(m, 1.0, calm.bind(m))
-	print("EXCHECK skiff: aboard=%s" % str((d["aboard"] as Array).map(func(x): return x.pname)))
-	while d["state"] == "boarding" and m.time - t0 < 100.0: run.call(m, Match.DT, calm.bind(m))
-	print("EXCHECK skiff: left. player extracted=%s how=%s where=%s  rival extracted=%s  mate (on the pier) extracted=%s" % [P.extracted, m.result.get("how", ""), m.result.get("where", ""), R.extracted, mate.extracted])
-	if not P.extracted or m.result.get("how", "") != "skiff" or not R.extracted or mate.extracted: ok = false; print("EXCHECK FAIL skiff boarding")
-	done.call(m)
-	await get_tree().process_frame
-	# ---- 2. the rift hatch: a key press turns it (the key is spent), it opens 10s later, three drop through
-	m = fresh.call(3)
-	P = m.player
-	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
-	mate = mates[0]
-	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
-	R = rivals[0]
-	var hx: Dictionary = m.exits.of_kind("hatch")[0]
-	var hp: Vector3 = hx["pos"]
-	var press := func(h: Hunter, sec: float):
-		run.call(m, sec, func(): h.inp["interact"] = true)
-		h.inp["interact"] = false
-		run.call(m, Match.DT)
-	R.rift_keys = 0
-	R.teleport(hp + Vector3(0.6, 0, 0.6))
-	press.call(R, 0.5)
-	print("EXCHECK hatch: without a key: state=%s rival extracted=%s" % [hx["state"], R.extracted])
-	if hx["state"] != "sealed" or R.extracted: ok = false; print("EXCHECK FAIL hatch opened without a key")
-	R.teleport(m.world.random_ground())
-	# a key in a deathbox: the teammate dies carrying one, the player loots it
-	mate.rift_keys = 1
-	mate.lives = 1
-	# its box lands clear of the hatch: a revive prompt there would beat the hatch's
-	mate.teleport(m.world.free_spot_near(hp + Vector3(6.0, 0, 0), [], 0.5, 0.4, 6.0))
-	m.eliminate(mate, R, "knocked out", true)
-	var bx := Life.box_of(m, mate)
-	print("EXCHECK hatch: teammate died with a key: their keys=%d box keys=%d" % [mate.rift_keys, int(bx.get("keys", -1))])
-	if mate.rift_keys != 0 or int(bx.get("keys", 0)) != 1: ok = false; print("EXCHECK FAIL key not in the box")
-	P.rift_keys = 0
-	var got_key := false
-	for it in Life.box_items(m, P, bx):
-		if it["key"] == "keys": Life.take_item(m, P, bx, it); got_key = true
-	print("EXCHECK hatch: looted the box: player keys=%d" % P.rift_keys)
-	if not got_key or P.rift_keys != 1: ok = false; print("EXCHECK FAIL couldn't loot the key")
-	var pings0 := m.pings.size()
-	# the prompt: with a key, "F: Unlock with Rift Key"
-	P.teleport(hp + Vector3(0.7, 0, 0.5))
-	var pr := m.exits.interact_for(P)
-	print("EXCHECK hatch: prompt with a key: %s" % pr.get("label", ""))
-	if String(pr.get("act", "")) != "open" or not String(pr.get("label", "")).contains("Unlock with Rift Key"): ok = false; print("EXCHECK FAIL hatch key prompt")
-	t0 = m.time
-	press.call(P, 0.3)
-	print("EXCHECK hatch: key pressed: state=%s keys left=%d opens in %.1fs player extracted=%s new map pings=%d" % [hx["state"], P.rift_keys, float(hx["t"]), P.extracted, m.pings.size() - pings0])
-	if hx["state"] != "unlocking" or P.rift_keys != 0 or P.extracted or m.pings.size() != pings0: ok = false; print("EXCHECK FAIL hatch key press")
-	# no way in before the 10 s are up: pressing, or standing right on it
-	P.teleport(hp + Vector3(0.2, 0, 0.1))
-	run.call(m, 4.0, func(): P.inp["interact"] = true)
-	P.inp["interact"] = false
-	var st: Dictionary = m.exits.status_for(P)
-	print("EXCHECK hatch: 4s on: state=%s %.1fs left, player extracted=%s, HUD: %s" % [hx["state"], float(hx["t"]), P.extracted, st.get("text", "")])
-	if P.extracted or hx["state"] != "unlocking" or not String(st.get("text", "")).contains("opening"): ok = false; print("EXCHECK FAIL hatch entered before it opened")
-	P.teleport(hp + Vector3(1.4, 0, 0.0))
-	while hx["state"] == "unlocking" and m.time - t0 < 15.0: run.call(m, Match.DT)
-	print("EXCHECK hatch: opened after %.1fs, %d uses" % [m.time - t0, int(hx.get("uses", 0))])
-	if hx["state"] != "open" or absf(m.time - t0 - 10.0) > 0.6 or int(hx.get("uses", 0)) != 3: ok = false; print("EXCHECK FAIL hatch didn't open after 10s with 3 uses")
-	# three drop through: the player by pressing, a rival and his teammate by walking in
-	P.teleport(hp + Vector3(1.0, 0, 0.0))      # (back at the hatch: something may have nudged you while it opened)
-	press.call(P, 0.2)
-	var u1 := int(hx["uses"])
-	var R2: Hunter = rivals[1]
-	R.teleport(hp + Vector3(0.3, 0, 0.2)); run.call(m, 0.2)
-	R2.teleport(hp + Vector3(-0.2, 0, 0.3)); run.call(m, 0.2)
-	var R3: Hunter = rivals[2]
-	R3.teleport(hp + Vector3(0.2, 0, -0.3)); run.call(m, 0.4)
-	print("EXCHECK hatch: player in=%s (uses then %d), rival in=%s, rival 2 in=%s, 4th in=%s, state=%s how=%s" % [P.extracted, u1, R.extracted, R2.extracted, R3.extracted, hx["state"], m.result.get("how", "")])
-	if not P.extracted or u1 != 2 or m.result.get("how", "") != "hatch" or not R.extracted or not R2.extracted or R3.extracted or hx["state"] != "sealed": ok = false; print("EXCHECK FAIL hatch: three drop through, then it seals")
-	done.call(m)
-	await get_tree().process_frame
-	# ---- 2b. a bot with a key: walks up, turns it, waits it out, and its squad drops through
-	m = fresh.call(2)
-	hx = m.exits.of_kind("hatch")[0]
-	hp = hx["pos"]
-	var B: Hunter = m.hunters.filter(func(x): return x != m.player)[0]
-	var BM: Hunter = m.hunters.filter(func(x): return x.team == B.team and x != B)[0]
-	for h in m.hunters:
-		if h.team != B.team: h.teleport(m.world.spawns[0] if hp.distance_to(m.world.spawns[0]) > 40.0 else m.world.spawns[-1])
-	for h in [B, BM]:
-		h.ctrl = "bot"; h.ai["leave"] = true
-		h.teleport(m.world.free_spot_near(hp + Vector3(4.0, 0, 3.0), [hp], 2.0, 0.5, 6.0))
-	B.rift_keys = 1; BM.rift_keys = 0
-	m.time = m.length - 160.0       # late: everyone's heading home
-	t0 = m.time
-	var opened_at := -1.0
-	while not (B.extracted and BM.extracted) and m.time - t0 < 60.0:
-		run.call(m, Match.DT, calm.bind(m))
-		if opened_at < 0.0 and hx["state"] == "unlocking": opened_at = m.time - t0
-	print("EXCHECK hatch bots: key turned at %.1fs, bot out=%s, its teammate out=%s, keys left=%d, after %.1fs" % [opened_at, B.extracted, BM.extracted, B.rift_keys, m.time - t0])
-	if opened_at < 0.0 or not B.extracted or not BM.extracted or B.rift_keys != 0: ok = false; print("EXCHECK FAIL bots and the hatch")
-	done.call(m)
-	await get_tree().process_frame
-	# ---- 3. the uplink
-	m = fresh.call(2)
-	P = m.player
-	R = m.hunters.filter(func(x): return x.team != P.team)[0]
-	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var o: Dictionary = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	P.teleport(o["pos"] + Vector3(0.6, 0, 0.6))
 	run.call(m, 2.0, func(): P.inp["interact"] = true)
@@ -2229,7 +1973,7 @@ func _extract_check() -> void:
 	if p1 <= 0.1 or not o["contested"] or absf(pb - pa) > 0.001: ok = false; print("EXCHECK FAIL contest")
 	R.remove_meta("pin")
 	R.teleport(m.world.random_ground())
-	t0 = m.time
+	var t0 := m.time
 	while o["state"] == "charging" and m.time - t0 < 60.0:
 		run.call(m, 0.5, calm.bind(m))
 	print("EXCHECK uplink: state=%s after %.0fs more, waves=%d prog=%.2f contested=%s player in yard=%s (%.1fm) downed=%s" % [o["state"], m.time - t0, int(o["waves"]), float(o["prog"]), o["contested"], m.exits.in_yard(o, P), P.flat_dist(o["pos"]), P.downed])
@@ -2242,13 +1986,13 @@ func _extract_check() -> void:
 	if not P.extracted or m.result.get("how", "") != "uplink": ok = false; print("EXCHECK FAIL lift")
 	done.call(m)
 	await get_tree().process_frame
-	# ---- 3b. one of the squad charges the uplink; more of you in the yard charge it faster (and a
+	# ---- 1b. one of the squad charges the uplink; more of you in the yard charge it faster (and a
 	# rival still stalls it however many of you there are). Squadmate bots come and hold the yard.
 	m = fresh.call(3)
 	P = m.player
 	var crew: Array = m.hunters.filter(func(x): return x.team == P.team)
 	R = m.hunters.filter(func(x): return x.team != P.team)[0]
-	o = m.exits.of_kind("outpost")[0]
+	o = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	for i in crew.size():
 		var h: Hunter = crew[i]
@@ -2295,7 +2039,7 @@ func _extract_check() -> void:
 	print("EXCHECK uplink crew: the bot held the yard %.1fs of the last 16s (%.1fm from the mast)" % [yb_in, YB.flat_dist(o["pos"])])
 	if yb_in < 8.0 or not m.exits.in_yard(o, YB): ok = false; print("EXCHECK FAIL bot didn't hold the yard")
 	YB.ctrl = "idle"; YB.inp["move"] = Vector2.ZERO
-	# ---- 3c. nobody in the yard: the charge drains (shown on the HUD and over the yard); at nothing
+	# ---- 1c. nobody in the yard: the charge drains (shown on the HUD and over the yard); at nothing
 	# the uplink flickers, shuts off, and after a cooldown can be started again
 	# (everyone else idle and well clear of the yard: a squadmate or rival anywhere near it would keep
 	# it from draining)
@@ -2336,15 +2080,8 @@ func _extract_check() -> void:
 	if String(o["state"]) != "idle" or not m.exits.startable(o): ok = false; print("EXCHECK FAIL uplink not startable again")
 	done.call(m)
 	await get_tree().process_frame
-	# ---- 4. docks close late, one stays open
-	m = fresh.call(2)
-	var closing := m.exits.of_kind("dock").filter(func(x): return float(x["close_at"]) < 1e8).size()
-	m.time = m.length - 25.0
-	run.call(m, 0.5)
-	var still := m.exits.of_kind("dock").filter(func(x): return x["state"] != "closed")
-	print("EXCHECK docks: %d close during the match, %d still open near the end; a call now takes %.0fs" % [closing, still.size(), m.exits.call_time()])
-	if still.size() != 1 or m.exits.call_time() > 10.0: ok = false; print("EXCHECK FAIL closing")
-	done.call(m)
+	# ---- 3d. the Uplink quest seat (tools/uplink_seat_check.gd)
+	if not await load("res://tools/uplink_seat_check.gd").new().check(self, fresh, run, done): ok = false
 	print("EXCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()
 
@@ -2440,7 +2177,7 @@ func _truce_check() -> void:
 	# sharing an uplink
 	T.marked.clear()
 	T.make(0, 1)
-	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
 	m.exits.act(o, "start", A[0])
 	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)
@@ -3363,7 +3100,7 @@ func _drop_check() -> void:
 	var D: DropSquad = m.skydrop
 	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
 	print("DCHECK planning=%s plan_t=%.1f riding=%s leader=%s map open=%s" % [D.planning, D.plan_t, P.riding, D.leader(P.team).pname, m.hud.map_open()])
-	if not D.planning or absf(D.plan_t - DropSquad.PLAN_T) > 0.01 or not P.riding or D.leader(P.team) != P or not m.hud.map_open():
+	if not D.planning or absf(D.plan_t - DropFeel.plan_s) > 0.01 or not P.riding or D.leader(P.team) != P or not m.hud.map_open():
 		ok = false; print("DCHECK FAIL planning phase did not start right")
 	# a ping placed on the map (the same path a click takes)
 	var target: Vector3 = m.world.spawns[0]
@@ -3380,7 +3117,7 @@ func _drop_check() -> void:
 	var bot_pings := m.pings.filter(func(q): return q.has("by") and (q["by"] as Hunter).ctrl == "bot").size()
 	var acks := m.truce.shown.filter(func(e): return e["id"] == "omw").size() if m.truce else 0
 	print("DCHECK planning lasted %.2fs, match clock %.2f -> %.2f, bot pings %d, bot replies %d, events %s" % [steps * Match.DT, t0, m.time, bot_pings, acks, str(D.events)])
-	if absf(steps * Match.DT - DropSquad.PLAN_T) > 0.1 or m.time != t0: ok = false; print("DCHECK FAIL planning length / clock")
+	if absf(steps * Match.DT - DropFeel.plan_s) > 0.1 or m.time != t0: ok = false; print("DCHECK FAIL planning length / clock")
 	if bot_pings < 1: ok = false; print("DCHECK FAIL bots never pinged")
 	# a follower can't jump by themselves while the leader is aboard
 	var f0: Hunter = mates[0]
