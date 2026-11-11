@@ -14,8 +14,9 @@ extends RefCounted
 ## Headless (nothing drawn) the time is the scripts' alone and a frame over BUDGET_MS fails, except a frame that
 ## built a Mask's model on the main thread (nothing runs off it there; PreviewBuild allows one a frame, reported
 ## with its time). On a real GPU the models are built on a worker thread and every frame is judged, builds
-## included. Every scenario also counts the 3D previews rendering at once. Under xvfb with a software rasterizer
-## every frame also pays the raster, so the times are reported, not judged.
+## included; a slow frame names its script time and the pipelines compiled while drawing it. Every scenario also
+## counts the 3D previews rendering at once. Under xvfb with a software rasterizer every frame also pays the
+## raster, so the times are reported, not judged.
 ##   xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --mask-lag-check
 
 const BUDGET_MS := 33.0        # ms: two frames at 60 fps, the item's target
@@ -98,6 +99,7 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 	var plain: Array = []
 	var builds: Array = []
 	var views := 0
+	var pipes := _pipelines()
 	var last_us := Time.get_ticks_usec()
 	act.call()
 	var t0 := last_us
@@ -109,7 +111,10 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 		(builds if built else plain).append((now - last_us) / 1000.0)
 		if not built and judging and now - last_us > int(BUDGET_MS * 1000.0):
 			var n := plain.size() + builds.size()
-			print("MASKLAG   %s: frame %d took %.1f ms" % [scenario, n, (now - last_us) / 1000.0])
+			var scripts_ms := Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+			print("MASKLAG   %s: frame %d took %.1f ms (scripts %.1f ms, %d pipelines compiled drawing)" % [
+					scenario, n, (now - last_us) / 1000.0, scripts_ms, _pipelines() - pipes])
+		pipes = _pipelines()
 		last_us = now
 		views = maxi(views, _live_views(home))
 	plain.sort()
@@ -137,3 +142,9 @@ func _live_views(n: Node) -> int:
 		if mode == SubViewport.UPDATE_ALWAYS or mode == SubViewport.UPDATE_WHEN_VISIBLE:
 			live += 1
 	return live
+
+## Pipelines Forward+ compiled while drawing so far (2D, and 3D surfaces nobody built ahead): a frame that compiles
+## some waits on the driver. The Compatibility renderer counts none.
+func _pipelines() -> int:
+	return RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_CANVAS) \
+		+ RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW)
