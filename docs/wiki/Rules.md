@@ -328,6 +328,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`s
 | Setting | Value |
 |---|---|
 | doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Sparkle's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. Cinder (ashwick) is taken off it too: his Soot Ram is the source's measured ~3.4m in 0.33s and his poof 6.8m in 0.28s, set as-is in content/archetypes/ashwick.json (KIT_PARITY item 11). Dancer (thief) is taken off it: her Cartwheel is the source's measured one (owner review item 7: 4.5m in 0.48s on the ground, 8.4m over 0.95s from a jump), set as-is in content/archetypes/thief.json. curve (optional): the hero's measured ground dash speed over the dash, [u, k] knots, u = share of the dash's time, k = speed against the dash's mean (mean 1, so the distance holds), fitted to the hero-ref frame tracks (docs/SUPERVIVE_FEEL.md, docs/decisions/0025); the dash then hands over through HunterMove.dash_exit. Heroes with no curve dash at a constant speed. thief's curve is her ground Cartwheel only (the air one holds its speed to the landing); bulwark's is the 360 Smash only. |
+| doc | Global feel for every hunter's dash (Shift), applied on top of each kit's own numbers in content/archetypes. dist: multiplier on distance. time: multiplier on duration (speed = dist / time). Owner, Nov 2: dashes were too fast and too far in general, Sparkle's should go further: its lane is drawn from its own numbers, so its distance is raised in content/archetypes/mage.json (4-7m to 5-8.5m) and only its time is scaled here. Cinder (ashwick) is taken off it too: his Soot Ram is the source's measured ~3.4m in 0.33s and his poof 6.8m in 0.28s, set as-is in content/archetypes/ashwick.json (KIT_PARITY item 11). Dancer (thief) is taken off it: her Cartwheel is the source's measured one (owner review item 7: 4.5m in 0.48s on the ground, 8.4m over 0.95s from a jump), set as-is in content/archetypes/thief.json. Kael (juggernaut) is taken off it: his Rampage is the footage's measured ~3.6m in 0.2s and his Lunge 4.5 to 5.4m, set as-is in content/archetypes/juggernaut.json (docs/heroes/juggernaut.md, footage gaps 3 and 6). |
 | default | {"dist": 0.85, "time": 1.15} |
 | mage | {"dist": 1.0, "time": 1.15} |
 | thief | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.0], [0.36, 1.84], [1, 0.25]]} |
@@ -351,6 +352,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save wears Vex first (`s
 | dash_min | 4 |
 | dash_max | 6 |
 | pen_r | 3 |
+| juggernaut | {"dist": 1.0, "time": 1.0} |
 
 ## equal (`content/rules/equal.json`)
 
