@@ -1,8 +1,8 @@
 extends RefCounted
-## --tutorial-clean-check: the tutorial course has nothing random on it. After the build the only chest
-## is the one the tutorial places, and no crates, pots, shrines, wild kin or mobs are out; the world
-## makes no spots for them. Then a scripted run of the whole course: the scripted chest opens and the
-## course never brings any wild kin or extra chest or breakable. And the tutorial's cooldowns run four times
+## --tutorial-clean-check: the tutorial course has nothing random on it. After the build there is no
+## chest, and no crates, pots, shrines, wild kin or mobs are out; the world makes no spots for them
+## (the course's glove lies on the ground). Then a scripted run of the whole course: it never brings
+## any wild kin, chest or breakable. And the tutorial's cooldowns run four times
 ## quicker, while a real match's and a training match's do not.
 
 var bad := 0
@@ -39,7 +39,7 @@ func _built(m: Match) -> void:
 	var w := m.world
 	ok(w.chest_spots.is_empty() and w.break_spots.is_empty() and w.wild_spots.is_empty() and w.shrine_spots.is_empty(),
 			"the world makes no chest, breakable, wild or shrine spots")
-	ok(m.chests.size() == 1 and m.chests[0].get("tut", false), "one chest, the tutorial's own (%d)" % m.chests.size())
+	ok(m.chests.is_empty(), "no chests (%d)" % m.chests.size())
 	ok(m.breaks.is_empty(), "no crates, pots or kegs (%d)" % m.breaks.size())
 	ok(m.shrines.is_empty(), "no shrines (%d)" % m.shrines.size())
 	var wild := m.kins.filter(func(k): return k.is_wild()).size()
@@ -58,17 +58,16 @@ func _cd_after(m: Match, secs: float) -> float:
 
 func _run_course(m: Match) -> void:
 	var t := 0.0
-	var extra_chests := 0
+	var chests := 0
 	var extra_breaks := 0
 	var wild := 0
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
 		m.step(Match.DT)
 		t += Match.DT
-		extra_chests = maxi(extra_chests, m.chests.filter(func(c): return not c.get("tut", false)).size())
+		chests = maxi(chests, m.chests.size())
 		extra_breaks = maxi(extra_breaks, m.breaks.size())
 		wild = maxi(wild, m.kins.filter(func(k): return k.is_wild()).size())
 	ok(m.player.extracted, "the course runs to the exit (%.0fs)" % t)
-	ok(m.chests.any(func(c): return c.get("tut", false) and c["open"]), "the scripted chest opened")
-	ok(extra_chests == 0 and extra_breaks == 0, "no other chest or breakable ever appeared")
+	ok(chests == 0 and extra_breaks == 0, "no chest or breakable ever appeared")
 	ok(wild == 0, "no wild kin ever appeared (%d)" % wild)
