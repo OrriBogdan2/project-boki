@@ -112689,5 +112689,61 @@
     "run": 4,
     "file": "briefs/boki-art/batch/out/v2s_hourachnid_female_rc_4.jpg",
     "ok": true
+  },
+  {
+    "id": "v2s_rimink_lt",
+    "name": "Rimink (sheet, lighter card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_rimink_lt_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rimink_lt",
+    "name": "Rimink (portrait, lighter card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_rimink_lt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rimink_lt",
+    "name": "Rimink (portrait, lighter card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_rimink_lt_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rimink_lt",
+    "name": "Rimink (sheet, lighter card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_rimink_lt_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_rimink_lt",
+    "name": "Rimink (sheet, lighter card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_rimink_lt_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_tiltster_lt",
+    "name": "Tiltster (portrait, lighter card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_tiltster_lt_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_tiltster_lt",
+    "name": "Tiltster (portrait, lighter card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_tiltster_lt_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_rimink_lt",
+    "name": "Rimink (portrait, lighter card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_rimink_lt_1.jpg",
+    "ok": true
   }
 ]
