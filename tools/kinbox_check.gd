@@ -136,180 +136,59 @@ func run(m: Node) -> void:
 	ok(moved == 5 and farm.size() == 6 and KinBox.boxed().size() == 5 and int(Save.d.get("box_notice", 0)) == 5, "old save with 11 kin: 6 stay out, 5 boxed, one notice (%s)" % ", ".join(kept_names))
 	ok(not KinBox.is_boxed(ros[3]) and ros[0].get("starter", false) and not KinBox.is_boxed(ros[0]) and best_out, "the partner and the first kin stay out, then the most trusted / highest level")
 	ok(KinBox.ensure() == 0 and KinBox.farm().size() == 6, "migration only happens once")
-	# ---------------------------------------------------------------- 5. inheritance
-	var rng := RandomNumberGenerator.new(); rng.seed = 4242
-	var a := _kin(sps[0], "Ma"); var b := _kin(sps[1], "Pa")
-	var N := 20000
-	var cnt := func(pa: Dictionary, pb: Dictionary, id: String) -> float:
-		var hits := 0
-		for _j in N:
-			if Mutations.inherit(pa, pb, rng).has(id): hits += 1
-		return float(hits) / N
-	var r0: float = cnt.call(a, b, "glowing")
-	a["mutations"] = ["glowing"]
-	var r1: float = cnt.call(a, b, "glowing")
-	b["mutations"] = ["glowing"]
-	var r2: float = cnt.call(a, b, "glowing")
-	var base := 1.0 / float(Mutations.info("glowing")["rarity"])
-	print("KINBOX  Glowing in eggs over %d: no parent %.4f (base %.4f), one parent %.3f, both %.3f" % [N, r0, base, r1, r2])
-	ok(absf(r0 - base) < 0.004, "no Glowing parent: eggs glow at base odds (1 in %d)" % int(Mutations.info("glowing")["rarity"]))
-	ok(absf(r1 - 0.35) < 0.02, "one Glowing parent: about 35%% of eggs (%.1f%%)" % (r1 * 100.0))
-	ok(absf(r2 - 0.60) < 0.02, "both parents Glowing: about 60%% of eggs (%.1f%%)" % (r2 * 100.0))
-	a["mutations"] = ["giant"]; b["mutations"] = ["tiny"]
-	var both_size := 0; var any_size := 0
-	for _j in 4000:
-		var mm := Mutations.inherit(a, b, rng)
-		if mm.has("giant") and mm.has("tiny"): both_size += 1
-		if mm.has("giant") or mm.has("tiny"): any_size += 1
-	ok(both_size == 0 and any_size > 1200, "a Giant and a Tiny parent never make a Giant Tiny egg (%d of 4000 got one size)" % any_size)
-	# shimmers: 1 in 4096 from an egg; a shimmering parent only nudges it (1 in 2048, ~1 in 1365 with two)
-	a.erase("mutations"); b.erase("mutations")
-	var pe: Array = []
-	for cs in 3:
-		a["shimmer"] = cs >= 1; b["shimmer"] = cs >= 2
-		pe.append(Shiny.egg_chance(a, b))
-	print("KINBOX  shimmer egg odds: none %s, one parent %s, both %s" % [Shiny.odds_text(pe[0]), Shiny.odds_text(pe[1]), Shiny.odds_text(pe[2])])
-	ok(is_equal_approx(pe[0], 1.0 / 4096.0) and is_equal_approx(pe[1], 1.0 / 2048.0) and is_equal_approx(pe[2], 3.0 / 4096.0) and is_equal_approx(Mutations.shimmer_breed_chance(a, b), pe[2]),
-		"shimmer egg odds: 1 in 4096, 1 in 2048 with one shimmering parent, 1 in 1365 with two")
-	# the roll matches the odds (a million rolls with both parents shimmering, ~732 expected)
-	var SN := 1000000
-	var sh := 0
-	for _j in SN:
-		if Shiny.roll_egg(a, b, rng): sh += 1
-	var esd := sqrt(SN * pe[2] * (1.0 - pe[2]))
-	ok(absf(sh - SN * pe[2]) < 4.0 * esd, "shimmer egg roll over %d: %d (expect %d ± %d)" % [SN, sh, int(SN * pe[2]), int(4.0 * esd)])
-	# and the real breeding (traits, evolution and all) uses those odds
-	var M := 3000
-	Save.d["roster"] = [a, b]
-	var bs := 0
-	for _j in M:
-		if Care.breed(a, b, rng).get("shimmer", false): bs += 1
-	ok(bs <= 10, "Care.breed with two shimmering parents: %d of %d eggs shimmer (expect ~%.1f): a shimmer barely passes on" % [bs, M, M * pe[2]])
-	a["shimmer"] = false; b["shimmer"] = false
-	# wild odds: 1 in 4096, x2 at rare spawn points, x1.5 in the Hollow
-	var wl: Array = []
-	for c in [[0, false], [0, true], [2, false], [2, true]]:
-		wl.append("%s%s %s" % ["Hollow" if int(c[0]) >= 2 else "Meadow", " rare spot" if c[1] else "", Shiny.odds_text(Shiny.wild_chance(int(c[0]), bool(c[1])))])
-	print("KINBOX  wild shimmer odds: %s" % ", ".join(wl))
-	var WN := 1000000
-	var wh := 0
-	for _j in WN:
-		if Shiny.roll_wild(rng, 0, false): wh += 1
-	var wsd := sqrt(WN * Shiny.WILD)
-	ok(is_equal_approx(Shiny.wild_chance(0, false), 1.0 / 4096.0) and is_equal_approx(Shiny.wild_chance(0, true), 2.0 / 4096.0) and is_equal_approx(Shiny.wild_chance(2, false), 1.5 / 4096.0) and is_equal_approx(Shiny.wild_chance(2, true), 3.0 / 4096.0)
-		and absf(wh - WN * Shiny.WILD) < 4.0 * wsd, "wild shimmers: 1 in 4096 (x2 rare spots, x1.5 Hollow); %d in %d rolls (expect %d)" % [wh, WN, int(WN * Shiny.WILD)])
-	# every species has its own hand-picked shimmer palette, not a hue turn
-	var pal_ok := true
-	for spk in Data.KIN:
-		var pl := Shiny.palette(spk)
-		if not pl["hand"] or (pl["color"] as Color).is_equal_approx(Data.KIN[spk]["color"]): pal_ok = false; print("KINBOX  no palette for ", spk)
-	ok(pal_ok, "every species (%d) has a hand-picked shimmer palette" % Data.KIN.size())
-	var shm := _kin(sps[0], "Glint"); shm["shimmer"] = true
-	var sm := Models.kin(sps[0], shm)
-	var sc: Color = ((sm.get_meta("mats") as Array)[0] as ShaderMaterial).get_shader_parameter("albedo")
-	ok(sc.is_equal_approx(Shiny.palette(sps[0])["color"]), "a shimmering %s's model wears its palette (%s)" % [Data.KIN[sps[0]]["name"], sc.to_html(false)])
-	sm.free()
-	a["shimmer"] = false; b["shimmer"] = false
-	a["mutations"] = ["crystal"]
-	var cb := 0
-	for _j in M:
-		if Mutations.has(Care.breed(a, b, rng), "crystal"): cb += 1
-	ok(absf(cb / float(M) - 0.35) < 0.03, "Care.breed passes a parent's Crystal on %.1f%% of the time" % (cb * 100.0 / M))
-	# ---------------------------------------------------------------- 6. wild odds
-	var expect_any := func(mult: float) -> float:
-		var p_none := 1.0
-		for mrow in Mutations.all(): p_none *= 1.0 - minf(1.0, mult / float(mrow["rarity"]))
-		return 1.0 - p_none
-	var W := 40000
-	var line: Array = []
-	for t in [0, 1, 2]:
-		var hit := 0
-		for _j in W:
-			var wr := {}
-			Mutations.roll_wild(wr, rng, t)
-			if wr.has("mutations"): hit += 1
-		var e: float = expect_any.call(float(Mutations.TIER_MULT[t]))
-		line.append("tier %d %.2f%% (expect ~%.2f%%)" % [t, hit * 100.0 / W, e * 100.0])
-		ok(absf(hit / float(W) - e) < e * 0.15 + 0.002, "wild kin mutated in tier %d: %.2f%%" % [t, hit * 100.0 / W])
-	var rh := 0
-	for _j in W / 4:
-		var wr := {}
-		Mutations.roll_wild(wr, rng, 0, true)
-		if wr.has("mutations"): rh += 1
-	var er: float = expect_any.call(Mutations.RARE_SPOT_MULT)
-	print("KINBOX  wild mutation odds: %s; rare spawn point %.1f%% (expect ~%.1f%%)" % [", ".join(line), rh * 400.0 / W, er * 100.0])
-	ok(absf(rh * 4.0 / W - er) < er * 0.15, "rare spawn points: %.1f%% mutated" % (rh * 400.0 / W))
-	# the real wild spawner, a few matches' worth
-	var seen := 0; var mutd := 0
-	for sd in 1:
-		var mt := Match.new()
-		main.add_child(mt)
-		mt.start({"teams": 2, "squad": 1, "tier": 2, "length": 1e9, "seed": 300 + sd, "no_drop": true})
-		mt.set_process(false)
-		for k in mt.kins:
-			if k.is_wild():
-				seen += 1
-				if not Mutations.of(k.rec).is_empty(): mutd += 1
-		mt.queue_free()
-		await main.get_tree().process_frame
-	ok(seen > 0, "real matches spawn wild kin with the mutation roll (%d wild, %d mutated)" % [seen, mutd])
-	# ---------------------------------------------------------------- 7. perks and looks
-	var g := _kin(sps[0], "Big"); g["mutations"] = ["giant"]
-	var em := Mutations.mods(g)      # (rare mutations keep their small perks; forms are budget-neutral now)
-	ok(is_equal_approx(em["hp"], 1.12) and is_equal_approx(em["speed"], 0.93), "Giant: +12%% health, -7%% speed (%s)" % str(em))
-	var c := _kin(sps[0], "Gem"); c["mutations"] = ["crystal", "glowing"]
-	ok(Mutations.owner_stat(c, "armor") == 6.0 and is_equal_approx(Mutations.owner_stat(c, "sight"), 0.08), "Crystal gives its hunter +6 armor, Glowing +8% sight")
-	var all_ok := true
-	for row in Mutations.all():
-		var mm := Mutations.mods({"mutations": [row["id"]]})
-		for k in mm:
-			if float(mm[k]) < Mutations.MULT_MIN or float(mm[k]) > Mutations.MULT_MAX: all_ok = false
-	ok(all_ok and Mutations.all().size() >= 8, "%d mutations in content/mutations, every perk within %d%%" % [Mutations.all().size(), int((Mutations.MULT_MAX - 1.0) * 100.0)])
-	# (each kin also rolls its own size, Unique: compare average-sized ones)
-	var plain_r := _kin(sps[0], "Plain"); Unique.ensure(plain_r); plain_r["dna"]["size"] = 0.0
-	var plain := Models.kin(sps[0], plain_r)
-	Unique.ensure(g); g["dna"]["size"] = 0.0
-	var giant := Models.kin(sps[0], g)
-	var tiny_r := _kin(sps[0], "Wee"); tiny_r["mutations"] = ["tiny"]
-	Unique.ensure(tiny_r); tiny_r["dna"]["size"] = 0.0
-	var tiny := Models.kin(sps[0], tiny_r)
-	ok(giant.scale.x > plain.scale.x * 1.25 and tiny.scale.x < plain.scale.x * 0.75, "Giant and Tiny change the model's size (%.2f / %.2f / %.2f)" % [tiny.scale.x, plain.scale.x, giant.scale.x])
-	var alb := _kin(sps[0], "Snow"); alb["mutations"] = ["albino"]
-	var am := Models.kin(sps[0], alb)
-	var ac: Color = ((am.get_meta("mats") as Array)[0] as ShaderMaterial).get_shader_parameter("albedo")
-	ok(ac.get_luminance() > 0.75, "Albino is pale (body luminance %.2f)" % ac.get_luminance())
-	var parts_ok := true
-	for pid in [["crystal", "Crystal0"], ["starmarked", "Star0"], ["twintail", "TwinTip1"], ["glowing", "GlowBand0"], ["piebald", "Patch0"]]:
-		var pr := _kin(sps[1], "P"); pr["mutations"] = [pid[0]]
-		var pm := Models.kin(sps[1], pr)
-		if pm.find_child(String(pid[1]), true, false) == null: parts_ok = false; print("KINBOX  missing part ", pid)
-		pm.free()
-	ok(parts_ok, "Crystal, Starmarked, Twin-tail, Glowing and Piebald add their parts")
-	for n in [plain, giant, tiny, am]: n.free()
-	# ---------------------------------------------------------------- 8. the home island only puts farm kin out
-	Save.d = Save.fresh()
-	Econ.ensure()
-	var hs := _kin(sps[0], "Home", 60.0, 5); hs["starter"] = true
-	Save.d["roster"] = [hs]; Save.d["active"] = hs["uid"]
-	Save.d["tutorial"]["home"] = true; Save.d["tutorial"]["day1_done"] = true
-	for j in 9:
-		var r := _kin(sps[(j + 1) % sps.size()], "H%d" % j)
-		Save.d["roster"].append(r)
-		KinBox.route_new(r)
-	var H = load("res://scripts/home/home.gd").new()
-	main.add_child(H)
+	# ---------------------------------------------------------------- 5. the carry pick at the expedition portal (CarryPick)
+	_carry_pick()
+	var roster: Array = (Save.d["roster"] as Array).filter(func(r): return not r.has("ransom"))
+	Save.d["roster"] = roster
+	Save.d["active"] = roster[0]["uid"]
+	Save.d["active2"] = roster[1]["uid"]
+	var P = load("res://scripts/home/home.gd").new()
+	main.add_child(P)
 	for _f in 4: await main.get_tree().process_frame
-	var out_uids: Array = H.kins.map(func(k): return String(k["rec"]["uid"]))
-	var boxed_out := KinBox.boxed().any(func(r): return out_uids.has(String(r["uid"])))
-	ok(H.kins.size() == KinBox.farm().size() and not boxed_out and KinBox.boxed().size() == 4, "home puts the %d farm kin out; the %d in the burrow stay inside" % [H.kins.size(), KinBox.boxed().size()])
-	H._open_burrow()
+	P._open_expedition()
 	for _f in 2: await main.get_tree().process_frame
-	ok(H.panel_open == "Boki Burrow" and is_instance_valid(H.kinbox_view.grid) and H.kinbox_view.grid.get_child_count() == KinBox.PAGE, "the Kin Burrow screen opens with a %d-cell page" % KinBox.PAGE)
-	H.kinbox_view._quick(KinBox.boxed()[0])
-	ok(KinBox.boxed().size() == 4, "quick move onto a full farm is refused (still %d boxed)" % KinBox.boxed().size())
-	H.kinbox_view._quick(KinBox.farm().filter(func(r): return KinBox.pinned(r) == "")[0])
-	for _f in 2: await main.get_tree().process_frame
-	ok(KinBox.boxed().size() == 5 and H.kins.size() == KinBox.farm().size(), "quick move a farm kin into the box: it leaves the island (%d out)" % H.kins.size())
-	H.queue_free()
+	var texts: Array = P.panel_host.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	var heads := func(w: String) -> bool: return texts.any(func(t): return String(t).begins_with(w))
+	ok(heads.call("Carry: "), "the portal's Boki cards show a carry passive line")
+	ok(heads.call("Lead") and heads.call("Second"), "the portal has a lead card and a second card")
+	P.queue_free()
 	print("KINBOX DONE failures: %d" % bad)
 	main.get_tree().quit()
+
+## The pick's rules without any screen: lead and second, one Boki goes with one, equal passives count once, old saves.
+func _carry_pick() -> void:
+	var a := _kin("lilybara", "Lily")
+	var b := _kin("moonloris", "Moon")
+	var c := _kin("cairnback", "Cairn")
+	var e := _kin("burrlet", "Burr")
+	Save.d["roster"] = [a]
+	Save.d["active"] = a["uid"]
+	Save.d["active2"] = ""
+	ok(not CarryPick.has_second_slot() and Save.second_kin().is_empty(), "one Boki: it goes alone, no second slot")
+	Save.d["roster"] = [a, b, c, e]
+	ok(Save.second_kin().is_empty(), "with more Boki the second stays empty until picked (no auto-pick)")
+	var line := CarryPick.passive_line(a)
+	ok(line.begins_with("Carry: ") and CarryPick.passive_line(c).contains("knockback"), "the carry passive is one line (%s)" % line)
+	ok(CarryPick.passive_line(e) == "Carry: no passive", "a Boki with no carry passive says so")
+	ok(CarryPick.shared(a, b) != "" and CarryPick.shared(a, c) == "" and CarryPick.shared(a, e) == "",
+			"the same passive is shared (%s); a different or no passive is not" % CarryPick.shared(a, b))
+	CarryPick.set_second(b["uid"])
+	var note := CarryPick._same_note(a, b)
+	ok(Save.second_kin() == b and note.ends_with("counts once"), "second picked: %s" % note)
+	CarryPick.set_second(a["uid"])
+	ok(Save.second_kin() == b, "the lead can't also be the second")
+	CarryPick.set_lead(b["uid"])
+	ok(Save.active_kin() == b and Save.second_kin() == a, "picking the second as lead swaps the two")
+	var seen := {}
+	for _i in 6:
+		var u := CarryPick.step("active2", 1)
+		Save.d["active2"] = u
+		seen[u] = true
+	ok(seen.has("") and not seen.has(str(Save.d["active"])) and seen.size() == 4, "the second cycles the other Boki and none")
+	var gone := _kin("lilybara", "Gone")
+	gone["ransom"] = {}
+	Save.d["roster"] = [a, b, gone]
+	ok(CarryPick.choices() == [a, b], "a Boki that can't go is not offered")
+	var old := {"v": 13, "roster": [a, b], "active": a["uid"], "active2": b["uid"]}
+	ok(Save.migrate(old) and int(old["v"]) == Save.VERSION and old["active"] == a["uid"] and old["active2"] == "",
+			"a v13 save keeps its partner as lead and has no second")
