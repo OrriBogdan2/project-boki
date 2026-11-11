@@ -170,12 +170,13 @@ func _breah_dash() -> void:
 	)
 	await _go(0.4, Callable(), air)
 
-## Basalt Spine: the ridge of real rocks, one rock deep, centre-out (tap across the aim).
+## Basalt Spine: the ridge of real rocks, one rock deep, centre-out (tap across the aim). Aimed up the
+## screen so the whole 21m lies across the view, as in the source's f0590.
 func _breah_spine() -> void:
 	await _reset(14.0)
 	P.lvl = 6
 	P.ak.cd["x"] = 0.0
-	_aim(home + Vector3(5.0, 0, 0))
+	_aim(home + Vector3(0, 0, -5.0))
 	P.inp["x_down"] = false
 	HunterKeys.ult_pressed(P)
 	var at_ridge := func(): return (P.ak as DolmKit).spine.center + Vector3(0, 0.6, 0)
