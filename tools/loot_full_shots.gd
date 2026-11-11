@@ -2,7 +2,7 @@ extends RefCounted
 ## --loot-full-shots --shots-dir=<dir> [--size=WxH]: screenshots of looting with a full backpack (run under xvfb with a
 ## renderer). 1: a deathbox beside the hold window (your backpack, the clicked thing held in red, Swap and
 ## Drop). 2: the same box right after a swap. 3: a ground item's swap window with the red full outline.
-## 4: a deathbox with gear (rarity names, better/worse arrows). <dir>/captions.txt gets "file: caption" per file.
+## 4: a deathbox with gear (rarity names, better/worse arrows). 5: ground gear's compare card over the prompt. <dir>/captions.txt gets "file: caption" per file.
 
 var main: Node
 var m: Match
@@ -62,12 +62,22 @@ func run(main_node: Node) -> void:
 	await _shot("box_compare", "Deathbox with gear: names in rarity colour, slot and effect on one line, "
 		+ "a green better or red worse arrow against what you wear (tip shows it), Take best key from Settings")
 	m.hud.close_loot()
+	await _ground_compare(p)
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for c in captions:
 		f.store_line(c)
 	f.close()
 	print("LOOTFULLSHOTS %d in %s" % [captions.size(), dir])
 	main.get_tree().quit(0)
+
+## Standing at better boots on the ground while wearing worse ones: the compare card over the prompt.
+func _ground_compare(p: Hunter) -> void:
+	m.spawn_gear("windstep_boots", 4, p.pos + Vector3(0.6, 0, 0))
+	var wp: Dictionary = m.wpicks[m.wpicks.size() - 1]
+	m.interact = {"kind": "weapon", "wp": wp, "label": m._pickup_label(p, wp), "col": Loot.col_of(Pack.ground_item(wp))}
+	await _frames(8)
+	await _shot("ground_compare", "Gear on the ground for a worn slot: above the prompt, what it replaces and where, "
+		+ "then each changed number, better in green, worse in red")
 
 func _frames(k: int) -> void:
 	for i in k:

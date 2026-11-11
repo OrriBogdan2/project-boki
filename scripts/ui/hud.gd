@@ -1763,6 +1763,7 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
 			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
 			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+			GroundCompare.draw(c, sz.x * 0.5, y - 28.0, p, it)
 			if prog > 0.0:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}

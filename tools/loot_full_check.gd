@@ -118,6 +118,7 @@ func run(main: Node) -> void:
 	var names := labels.filter(func(l): return (l as Label).get_theme_color("font_color") == grow["col"])
 	ok(names.size() >= 1, "box gear row: the name is in its rarity colour")
 	gcard.free()
+	_ground_compare(P)
 	print("LOOT FULL CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -164,3 +165,24 @@ func _merged_drops(m: Match, P: Hunter) -> void:
 	print("LOOTFULL drops on this map: %d monsters -> %d pickups, %d chests -> %d, %d props -> %d" % [
 		m.mobs.size(), from_mobs, m.chests.size(), chest_n, m.breaks.size(), prop_n])
 	print("LOOTFULL gem value on the ground %d, gear/treasure on the ground %d" % [total, m.wpicks.size()])
+
+## Gear on the ground for a worn slot: the card over the prompt names the piece and slot it replaces,
+## then one line per changed number marked better or worse; nothing for an empty slot or a valuable.
+func _ground_compare(P: Hunter) -> void:
+	var slot := Gear.slot_on(P, "windstep_boots")
+	P.gear[slot] = {}
+	var at := {"kind": "weapon", "wp": {"gear": "windstep_boots", "rar": 3}}
+	ok(GroundCompare.lines(P, at).is_empty(), "ground gear for an empty slot: no compare card")
+	ok(GroundCompare.lines(P, {"kind": "weapon", "wp": {"item": Loot.valuable("old_coin"), "val": 1}}).is_empty(),
+		"a ground valuable: no compare card")
+	P.gear[slot] = {"id": "windstep_boots", "rar": 0}
+	var ls := GroundCompare.lines(P, at)
+	var head := String(ls[0][0]) if ls.size() > 0 else ""
+	ok(ls.size() >= 2 and head.begins_with("Replaces ") and head.contains(InvText.slot_label(slot)),
+		"ground gear for a worn slot: names what it replaces and where (%s)" % head)
+	var better := ls.slice(1).filter(func(l): return String(l[0]).ends_with("(better)"))
+	ok(better.size() == ls.size() - 1, "a higher rarity: every changed line says better (%d)" % better.size())
+	P.gear[slot] = {"id": "windstep_boots", "rar": 3}
+	at["wp"] = {"gear": "windstep_boots", "rar": 0}
+	var worse := GroundCompare.lines(P, at).slice(1).filter(func(l): return String(l[0]).ends_with("(worse)"))
+	ok(worse.size() >= 1, "a lower rarity: its lines say worse (%d)" % worse.size())
