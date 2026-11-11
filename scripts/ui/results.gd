@@ -288,7 +288,8 @@ func _unhandled_input(e: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		Game.goto("home")
 
-## Behind the card: your squad on a little island, in their poses if you made it out, as dimmed Wisps if not.
+## Behind the card: your squad on a little island, each on its win beat if you made it out and its lose beat if
+## not, the eliminated as dimmed Wisps (ResultsStage).
 func _stage(r: Dictionary, s: Dictionary) -> void:
 	var squad: Array = r.get("squad", [])
 	if squad.is_empty():
