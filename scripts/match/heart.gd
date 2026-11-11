@@ -138,10 +138,6 @@ var _spark: Node3D
 var _beam: MeshInstance3D
 var _beam_mat: ShaderMaterial
 var _halo: MeshInstance3D
-var _gate_node: Node3D
-var _gate_mat: ShaderMaterial
-var _gate_beam: MeshInstance3D
-var _final_mat: ShaderMaterial
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -560,13 +556,6 @@ func _build() -> void:
 	ring.material_override = Models.ring_mat(COL, 0.04)
 	ring.position = Vector3(0, 0.35, 0)
 	h.add_child(ring)
-	# the Heart ring of the final seat: dim until the Heart opens
-	_final_mat = Models.ring_mat(COL, 0.08)
-	var fr := MeshInstance3D.new()
-	fr.mesh = Models.flat_quad(r("final_r") * 2.0)
-	fr.material_override = _final_mat
-	fr.position = Vector3(0, 0.3, 0)
-	h.add_child(fr)
 	# the Heartspark: a small bright mote that grows as it charges
 	_spark = Node3D.new()
 	_root.add_child(_spark)
@@ -580,27 +569,15 @@ func _build() -> void:
 	_beam.material_override = _beam_mat
 	_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_root.add_child(_beam)
-	# the Heart Gate: two pale pillars and a disc of light, dark until the Heartspark is carried
-	_gate_node = Node3D.new()
-	_gate_node.position = gate
-	_root.add_child(_gate_node)
+	# the Heart Gate: two pale pillars (its light and the Heart ring are WaysOutVfx seats)
+	var gate_node := Node3D.new()
+	gate_node.position = gate
+	_root.add_child(gate_node)
 	var stone := Models.toon(Color("cfc6c8"))
 	for sgn in [-1.0, 1.0]:
-		Models.part(_gate_node, Models.cyl(0.32, 0.4, 3.2, 10), stone, Vector3(sgn * r("gate_r") * 0.8, 1.6, 0))
+		Models.part(gate_node, Models.cyl(0.32, 0.4, 3.2, 10), stone, Vector3(sgn * r("gate_r") * 0.8, 1.6, 0))
 		var knob := Vector3(sgn * r("gate_r") * 0.8, 3.4, 0)
-		Models.part(_gate_node, Models.sphere(0.34, 10), Models.toon(GLASS, false, 0.5), knob)
-	_gate_mat = Models.ring_mat(GATE_COL, 0.08)
-	var gr := MeshInstance3D.new()
-	gr.mesh = Models.flat_quad(r("gate_r") * 2.2)
-	gr.material_override = _gate_mat
-	gr.position = Vector3(0, 0.12, 0)
-	_gate_node.add_child(gr)
-	_gate_beam = MeshInstance3D.new()
-	_gate_beam.mesh = Models.cyl(0.2, 0.5, 14.0, 10)
-	_gate_beam.material_override = Models.glow_mat(Color(GATE_COL, 0.2))
-	_gate_beam.position = Vector3(0, 7.0, 0)
-	_gate_beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_gate_node.add_child(_gate_beam)
+		Models.part(gate_node, Models.sphere(0.34, 10), Models.toon(GLASS, false, 0.5), knob)
 
 func _update_nodes() -> void:
 	if _root == null:
@@ -629,10 +606,6 @@ func _update_nodes() -> void:
 	if state == S.CHARGING:
 		hs = f
 	_halo.scale = Vector3.ONE * (0.8 + 0.4 * hs)
-	var open := spark_live() and carrier != null
-	_gate_mat.set_shader_parameter("color", Color(GATE_COL, 0.9 if open else 0.18))
-	_gate_beam.visible = open
-	_final_mat.set_shader_parameter("color", Color(COL, 0.5 + 0.4 * final_prog if state == S.FINAL else 0.08))
 
 func stop() -> void:
 	if _root and is_instance_valid(_root):

@@ -45,6 +45,8 @@ func build() -> void:
 		var L: Dictionary = m.lairs.list[rng.randi_range(0, m.lairs.list.size() - 1)]
 		m.lairs.activate(L)
 		L["seat"] = true
+		L["seat_open"] = q("lair_open_s") - m.sess_t0      # (match times WaysOutLook reads)
+		L["shut_at"] = q("lair_shut_s") - m.sess_t0
 		at = L["c"]
 		lair = QuestSeat.new(m, "lair", L, q("lair_open_s"), q("lair_shut_s"))
 	var outs: Array = m.exits.of_kind("outpost")
@@ -59,6 +61,7 @@ func build() -> void:
 		o["dark"] = not is_same(o, x)
 	x["seat"] = true
 	x["open_at"] = q("uplink_open_s") - m.sess_t0
+	x["shut_at"] = q("uplink_shut_s") - m.sess_t0
 	uplink = QuestSeat.new(m, "uplink", x, q("uplink_open_s"), q("uplink_shut_s"))
 
 ## The outpost the Uplink runs on (before the pick: the first outpost, the old rule).

@@ -74,3 +74,12 @@ max 40) goes through `Game.apply_result` into `gems`. `KinLoss.resolve`: "nobody
 `home` (was `ransom`); results show one line per Boki, "came home" or "held by <name>". No save-shape change, no Net change.
 The skiff and hatch lines are gone from the screen (task 3 deletes those exits). Open: `Ransom.lose`'s non-rival branch
 is no longer reached from a match.
+
+## Seat looks (ext/vfx-ways-out-seats)
+Every seat reads from across the island with one of five looks: locked (dim stub, countdown glyph), open (tall clear
+beam in neutral light), in use (the using squad's colour, ring filling with the hold), taken (the beam sinks in 0.7 s,
+the seat goes dark), lost (low dark haze: the tide covers it or its window shut). `WaysOutLook` maps a seat's own state
+to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBeacon` draws it (one column shader
+`seat_beam.gdshader`, one ring, one glyph, two materials made once); `WaysOutVfx` owns the beacons. No bursts and no
+rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
+outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
