@@ -104,7 +104,8 @@ func _clip(m: Match, f: Dictionary, mode: String, out: String, label: String) ->
 			t += Match.DT
 			if vin == 0.0 and (to_face < h.r + 0.35 or not h.lfloat.is_empty()):
 				vin = hv
-			if not topped and vin > 0.0 and h.pos.y >= top - 0.15 and (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3:
+			var over := h.pos.y >= top - 0.15 and (Vector2(h.pos.x, h.pos.z) - face).dot(dv) > 0.3
+			if not topped and vin > 0.0 and over and h.lfloat.is_empty():     # (after the rise hands back)
 				topped = true
 				vlip = Vector2(h.vel.x, h.vel.z).length()
 		await _frame(m)
