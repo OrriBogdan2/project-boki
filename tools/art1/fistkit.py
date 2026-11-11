@@ -146,21 +146,23 @@ class Clips:
         self.rig = Rig(arm)
         self.arm = arm
         self.lengths = {}
+        self.rates = {}        # clip -> keys a second, the clips not keyed at FPS
 
-    def bake(self, name, dur, keys, loop=False, over=None):
+    def bake(self, name, dur, keys, loop=False, over=None, fps=FPS):
         """keys: [(t, pose)]; over(t, pose) edits the pose per frame (breath, sway, a gait). loop: the last frame is the
-        first one again, so a loop never pops."""
+        first one again, so a loop never pops. fps: keys a second; a clip not at FPS is keyed one per frame at its own
+        rate (fine_export.py)."""
         rig = self.rig
         act = bpy.data.actions.new(name)
         act.use_fake_user = True
-        n = int(round(dur * FPS)) + 1
+        n = int(round(dur * fps)) + 1
         names = [b for b in rig.b.keys() if not b.startswith("spring_")]
         rot = {b: np.empty((n, 4), np.float32) for b in names}
         lips = ("lip.L", "lip.R")
         loc = {b: np.zeros((n, 3), np.float32) for b in ("root",) + lips}
         scl = {b: np.ones((n, 3), np.float32) for b in ("x_breath",) if b in rig.b}
         for f in range(n):
-            t = 0.0 if loop and f == n - 1 else min(f / FPS, dur)
+            t = 0.0 if loop and f == n - 1 else min(f / fps, dur)
             pose = evaluate(keys, t)
             if over:
                 over(t, pose)
@@ -204,5 +206,7 @@ class Clips:
             curves('pose.bones["%s"].location' % b, a, b)
         for b, a in scl.items():
             curves('pose.bones["%s"].scale' % b, a, b)
-        self.lengths[name] = (n - 1) / FPS
+        self.lengths[name] = (n - 1) / fps
+        if fps != FPS:
+            self.rates[name] = fps
         return act

@@ -6,7 +6,8 @@ extends RefCounted
 ##    foot is planted (m/s and % of the speed), the clip's own speed, hip bob, arm swing against the legs, how far
 ##    the arms reach;
 ##  - the loop seam of walk_f, run_f and the idle, and the pop from the idle into the walk and the walk into the run;
-##  - the two attacks of anim_shots.gd: the weapon hand's travel and how long an arm stands out sideways.
+##  - the two attacks of anim_shots.gd, a game frame (FRAME) apart: the weapon hand's travel, the largest one-frame hand
+##    jump, and how long an arm stands out sideways.
 ## Prints one line per Hunter and writes every number to --json.
 
 const DT := 1.0 / 30.0
@@ -22,6 +23,11 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const FRAME := 1.0 / 60.0    # s: an attack is read a game frame (the physics tick) apart
+## The attack gate: a hand moves at most this many body heights in one frame. Their strikes are keyed at 60 fps (at 30,
+## the slerp between two keys swung the hand off its path: 0.55 and 0.47); what is left is the speed their kit beats
+## ask: the slam drops 1.5 body heights in 0.08 s, the punch drives 1.1 in 0.05 s. The others are listed open.
+const MAX_JUMP := {"bulwark": 0.4, "dolm": 0.45}
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -90,6 +96,12 @@ func _hero(main: Node, id: String) -> void:
 			top["peaks"]])
 	if not id in NO_LEGS:
 		_gate(id, top)
+	for nm in row["attacks"]:
+		var at: Dictionary = row["attacks"][nm]
+		if at["jump"] > MAX_JUMP.get(id, INF):
+			print("FAIL %s %s: the hand jumps %.2f body heights in one frame at %.3f s (limit %.2f)"
+					% [id, nm, at["jump"], at["jump_t"], MAX_JUMP[id]])
+			bad += 1
 	m.free()
 
 func _gate(id: String, top: Dictionary) -> void:
@@ -267,28 +279,31 @@ func _touch(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String) -> flo
 	return float(best) / (fr.size() - 1)
 
 func _attack(sync: Node, clips: WardenClips, sk: Skeleton3D, clip: String, hgt: float) -> Dictionary:
-	var fr := _clip_frames(sync, clips, sk, clip, 24)
+	var length := clips.lib.get_animation(clip).length
+	var fr := _clip_frames(sync, clips, sk, clip, ceili(length / FRAME) + 1)
 	var path := {"L": 0.0, "R": 0.0}
 	var out_frames := 0
 	var out_side := {"L": 0, "R": 0}
 	var jump := 0.0
+	var jump_t := 0.0
 	for i in fr.size():
 		for side in ["L", "R"]:
 			if i > 0:
 				var step := ((fr[i]["hand." + side] as Vector3) - (fr[i - 1]["hand." + side] as Vector3)).length()
 				path[side] += step
-				jump = maxf(jump, step)
+				if step > jump:
+					jump = step
+					jump_t = length * i / (fr.size() - 1)
 		for side in ["L", "R"]:
 			out_side[side] += int(_t_posed(fr[i], side))
 		if _t_posed(fr[i], "L") or _t_posed(fr[i], "R"):
 			out_frames += 1
 	var weapon := "R" if path["R"] >= path["L"] else "L"
 	var loose: String = "L" if weapon == "R" else "R"
-	var length := clips.lib.get_animation(clip).length
 	return {"length": length, "weapon_hand": weapon, "weapon_travel": path[weapon] / hgt,
 			"free_travel": path[loose] / hgt, "t_pose": float(out_frames) / fr.size(),
 			"t_free": float(out_side[loose]) / fr.size(),
-			"jump": jump / hgt}
+			"jump": jump / hgt, "jump_t": jump_t}
 
 func _t_posed(p: Dictionary, side: String) -> bool:
 	var d: Vector3 = (p["forearm." + side] as Vector3) - (p["upper_arm." + side] as Vector3)

@@ -14,6 +14,7 @@ from mathutils import Vector
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import anim_kit as A
+import fine_export
 
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
@@ -127,7 +128,7 @@ TH_OUT = dict(pos=(0, 0.06, -0.03), rot=(-20, 4, 20), head=(12, 0, -14), gr=sp(-
               fing_r=0.05, thumb_r=0.1, fra=-14.0, fr=(AX, -0.08, AZ + 0.01), fl=(-AX, 0.09, AZ), e="io")
 C.bake("lmb_throw", 0.5, [(0, CARRY), (0.07, merged(TH_BACK, e="io")), (0.11, TH_TOP), (0.19, TH_OUT),
                           (0.3, dict(rot=(-14, 2, 16), gr=sp(0.04, 0.34, -0.2), fing_r=0.25)),
-                          (0.5, merged(CARRY, FREE, rot=(0, 0, 0), fra=0.0))])
+                          (0.5, merged(CARRY, FREE, rot=(0, 0, 0), fra=0.0))], fps=60)
 # the recall: the empty hand goes out for it, the catch rocks him back on his heels
 C.bake("lmb_recall", 0.484, [(0, merged(CARRY, FREE)),
                              (0.176, dict(rot=(-8, 0, 12), head=(4, 0, -10), gr=sp(-0.03, 0.42, 0.02), gd=(0, 0.9, 0.4), ga=(0, -0.4, 0.9), er=(1, 0, -0.3), fing_r=0.0, thumb_r=0.0)),
@@ -159,7 +160,7 @@ C.bake("lmb_hold", 0.2 + SPIN_T, [(0, CARRY), (0.2, merged(WIND, gr=(0.58, 0.0, 
 UP = merged(WIND, OVER, rot=(9, 0, -8))
 IMP = dict(pos=(0, 0.1, -0.05), rot=(-24, 3, 8), hips=(-6, 0, 6), head=(12, 0, -6), gr=sp(-0.1, 0.44, -0.3), gd=(-0.12, 0.8, -0.58), ga=(0.05, 0.58, 0.8), er=(0.9, 0.2, -0.3),
            fr=(AX, -0.11, AZ + 0.02), fl=(-AX, 0.12, AZ), fra=-20.0, e="io")
-C.bake("lmb_slam", 0.5, [(0, UP), (0.08, IMP), (0.16, dict(pos=(0, 0.1, -0.06), rot=(-26, 3, 8), e="io")), (0.5, merged(STANCE, fra=0.0))])
+C.bake("lmb_slam", 0.5, [(0, UP), (0.08, merged(IMP, e="lin")), (0.16, dict(pos=(0, 0.1, -0.06), rot=(-26, 3, 8), e="io")), (0.5, merged(STANCE, fra=0.0))], fps=60)
 # the perfect launch (0.85 s): the ball leaves the ground, feet tucked under, and lands drum-first
 C.bake("lmb_launch", 0.85, [(0, UP),
                             (0.09, dict(pos=(0, 0.06, 0.08), rot=(-8, 0, 6), gr=sp(0.0, 0.2, 0.42), gd=(0.05, 0.3, 0.95), ga=(0, 0.95, -0.3), fr=(AX, -0.08, AZ + 0.02), fl=(-AX, 0.1, AZ + 0.05), e="io")),
@@ -299,10 +300,10 @@ if OUT_GLB != "-":
         st = tr.strips.new(act.name, 0, act)
         ad.action = None
     bpy.ops.object.select_all(action="SELECT")
-    bpy.ops.export_scene.gltf(filepath=OUT_GLB, export_format="GLB", use_selection=True, export_apply=False, export_animations=True,
-                              export_animation_mode="NLA_TRACKS", export_skins=True, export_yup=True, export_materials="EXPORT",
-                              export_image_format="JPEG", export_jpeg_quality=93, export_extras=False, export_force_sampling=True,
-                              export_frame_step=1, export_optimize_animation_size=False, export_def_bones=False,
-                              export_vertex_color="MATERIAL")
+    fine_export.export(arm, C.rates, OUT_GLB, dict(
+        export_format="GLB", use_selection=True, export_apply=False, export_animations=True, export_animation_mode="NLA_TRACKS",
+        export_skins=True, export_yup=True, export_materials="EXPORT", export_image_format="JPEG", export_jpeg_quality=93,
+        export_extras=False, export_force_sampling=True, export_frame_step=1, export_optimize_animation_size=False,
+        export_def_bones=False, export_vertex_color="MATERIAL"))
     print("exported", os.path.getsize(OUT_GLB))
 print("clips", json.dumps(C.lengths))
