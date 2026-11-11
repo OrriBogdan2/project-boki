@@ -58,8 +58,10 @@ Still differs:
 - Backstab +50% and a 16% heal on a knock are ours (wiki), not in [D].
 
 Seen in the reel: the slugs hang as violet dots at the stop line like the footage; the arm reaches out, grabs and
-drags (HOOKED); the cone telegraph and slam read; the Broadside's fan is a flat-edged amber wedge where the
-footage's is a pale rounded fan [F]; the hero is smaller in frame than the source's view.
+drags (HOOKED); the cone telegraph and slam read; the Broadside's fan was a flat-edged amber wedge where the
+footage's is a pale rounded fan [F]: each wave is now a pale gold fan on the hit arc whose bright rounded edge runs out
+with the slugs (ext/vfx-grimble-broadside, vfx reel strips; this MP4 not re-shot); the hero is smaller in frame than
+the source's view.
 
 ## Neve the Snowglide (`rimewright`, source Celeste)
 [rimewright.mp4](rimewright.mp4)

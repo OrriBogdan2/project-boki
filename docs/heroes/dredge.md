@@ -215,7 +215,7 @@ Where the footage and the wiki are silent, we picked the most likely behaviour (
 | A Boki merge mid-reel, mid-wind-up or mid-charge | the rope goes, no landing; no slam; no wave | "merge hold: dredge's reel ends with the merge, the rope is freed, nobody lands Grounded"; "merge hold: dredge's Anchor wind-up is dropped, no slam mid-merge"; "merge hold: dredge's Broadside is dropped, no wave mid-merge" |
 | X below level 6 | nothing | "ult: no cast below level 6" |
 | X | a slow walk, the charge move, a growing fan everyone sees that turns with the aim, 21s cooldown | "ult cast: the charge move plays, its own cooldown starts (21s)"; "ult telegraph: a 105 degree fan everyone sees, growing over the charge"; "ult: he walks slowly through the charge (about 30% of his speed)"; "ult: he walks slower still while the waves go (about 20%), and keeps turning to the cursor" |
-| X, then wait | wave 1 at 1.1s, wave 2 at 1.7s, six slugs each (spawn_shot) | "ult: one press, two waves of six slugs through spawn_shot"; "ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later" |
+| X, then wait | wave 1 at 1.1s, wave 2 at 1.7s, six slugs each (spawn_shot), each wave's fan look on the hit arc | "ult: one press, two waves of six slugs through spawn_shot"; "ult look: each wave draws its fan on the hit arc (105 degrees, out to 5.9m), for the other games too"; "ult beats: wave 1 at the end of the 1.1s charge, wave 2 0.6s later" |
 | X point blank / at 4.6m | all twelve slugs and Anti-Heal / two a wave | "ult payoff: point blank, all six slugs of each wave land"; "ult payoff: 4 a slug, no back bonus"; "ult payoff: the slugs leave Anti-Heal"; "ult payoff: at 4.6m fewer slugs land" |
 | X at nobody / into a hunter | no bond / a hit, once per cast | "ult bond: nothing for waves that hit nobody"; "ult bond: 12 slugs land, the cast still counts once (a hit: 0.6)" |
 | Reel, then X | the hauled foe takes every slug | "ult combo: reel the foe in, then the Broadside lands (10+ slugs)" |
@@ -266,10 +266,12 @@ Measured in the match by `tools/dredge_timing_check.gd` (run by `--dredge-combo-
   `dr_hop`, Brass Broadside (`dr_blast_charge`: junk crammed in and a crank ratcheting; `dr_blast`, pitched down for wave 2),
   coins for every Salvage stack and a hauled foe (`dredge_coin_jingle`) and for loot he pockets (`dredge_pickup`, with a wheezy
   chuckle), skittery claw footsteps and a wheezy, creaturely wordless voice (`dredge_hurt`, `_down`, `_death`).
-- Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan in saturated brass, sparks arcing between his fists
+- Brass Broadside (`scripts/arch/kits/dredge_blast.gd`): the growing fan in his coin gold, sparks arcing between his fists
   while charging, six big orbs per wave with a dark core and a smear (`LDFx.volley`: saturated brass for wave 1, violet for wave
   2) that fly the whole fan in the shot's 0.2s and hang at its edge fading for 0.35s as the source's orbs do (f35-f38), a
-  sunburst at the fists and a crescent sweep across the fan per wave, a violet flicker rising from each target.
+  sunburst at the fists, and per wave a pale gold fan on the exact hit arc (105 degrees, 5.9m) with a bright edge that runs
+  out with the slugs over a faint inside (`content/vfx/dredge.json` `broadside_wave`, a HeroVfx ring with an `arc`; other
+  games get it as the `hvfx` event), a violet flicker rising from each target.
 
 ## Engine notes
 The reel is a Displace "haul" tow (`scripts/combat/displace.gd`, decision 0016): the body moves in small steps toward wherever

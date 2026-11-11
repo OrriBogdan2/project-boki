@@ -383,8 +383,8 @@ func _dredge_r() -> void:
 		var off := home_aim - P.pos
 		_aim(P.pos + off.rotated(Vector3.UP, swing))
 	await _go(2.4, cast, _sheet("r",
-			"R, the Broadside: the fan grows on the hit arc, each wave's pale fan runs out with its slugs; the aim swings "
-			+ "between the waves", [0.6, 1.1, 1.22, 1.27, 1.33, 1.45, 1.82, 1.88, 2.0]), 3.0)
+			"R, the Broadside: the fan grows on the hit arc, each wave's pale fan runs out with its slugs; the "
+			+ "aim swings between the waves", [0.6, 1.1, 1.22, 1.27, 1.33, 1.45, 1.82, 1.88, 2.0]), 3.0)
 	await _go(GAP)
 
 func _archer_miss() -> void:

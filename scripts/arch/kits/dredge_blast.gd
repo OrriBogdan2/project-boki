@@ -108,7 +108,8 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "col": Arch.color("dredge"), "col2": WAVE_COL[1], "alpha": FAN_ALPHA, "hot": 0.15 * kc})
+		"fill": kc, "all": true, "col": Arch.color("dredge"), "col2": WAVE_COL[1], "alpha": FAN_ALPHA,
+		"hot": 0.15 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
