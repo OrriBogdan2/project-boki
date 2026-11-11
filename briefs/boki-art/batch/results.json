@@ -113676,5 +113676,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/opt_crofthorn_b_bk_2.jpg",
     "ok": true
+  },
+  {
+    "id": "on_crofthollow_xbale",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_crofthollow_xbale_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dribbara_xsplash",
+    "name": "Dribbara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_dribbara_xsplash_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dribbara_xdrops",
+    "name": "Dribbara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_dribbara_xdrops_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthollow_xbell",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_crofthollow_xbell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthorn_xbell",
+    "name": "Crofthorn (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_crofthorn_xbell_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthorn_xmill",
+    "name": "Crofthorn (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_crofthorn_xmill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_crofthollow_xwheat",
+    "name": "Crofthollow (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/on_crofthollow_xwheat_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "on_dribbara_xfloat",
+    "name": "Dribbara (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/on_dribbara_xfloat_1.jpg",
+    "ok": true
   }
 ]
