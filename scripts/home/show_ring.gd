@@ -21,7 +21,8 @@ const LURE_SIDE := 0.9                        # m from the walk line to each lur
 const STRAY_S := 1.2                          # s either side of a lure over which it veers toward it
 const ROUND_MAX := 10.0                       # points a round gives at most
 const TRICK_PRESSES := 3
-const TOTAL_DELAY := 0.9                      # s after the Bond score that both totals pop
+const TOTAL_DELAY := 1.4                      # s after the Bond score that both totals pop: as it fades
+const TOTAL_SPREAD := 0.8                     # m each total sits out from the pair's middle, so they never overlap
 
 static func rules() -> Dictionary:
 	return Content.rules("show_ring")
@@ -417,8 +418,11 @@ func _pop(ended: Run.Phase) -> void:
 		Run.Phase.BOND:
 			cue.pop(at, "Bond %.1f" % bond(shown, run.calls), col)
 			var s := run.scores()
+			var mid: Vector3 = (pair[0]["pos"] + pair[1]["pos"]) * 0.5
 			for i in 2:
-				cue.pop(pair[i]["pos"], "%.1f" % float(s[i]["total"]), GardenCues.type_colour(run.recs[i]), TOTAL_DELAY)
+				var out: Vector3 = (pair[i]["pos"] - mid).normalized() * TOTAL_SPREAD
+				var tone := GardenCues.type_colour(run.recs[i])
+				cue.pop(pair[i]["pos"] + out, "%.1f" % float(s[i]["total"]), tone, TOTAL_DELAY)
 
 ## After the round `ended`: the show ends, or the next round is set up (the Boki in place) and the
 ## ended round's score pops over them.
