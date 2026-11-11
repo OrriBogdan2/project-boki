@@ -111072,5 +111072,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_gravitank_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_hatstag",
+    "name": "Hatstag (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_hatstag_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gravadillo",
+    "name": "Gravadillo (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gravadillo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_hivara",
+    "name": "Hivara (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_hivara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_hourachnid",
+    "name": "Hourachnid (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_hourachnid_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gramofrill",
+    "name": "Gramofrill (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gramofrill_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gravigrub",
+    "name": "Gravigrub (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gravigrub_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_harvantis",
+    "name": "Harvantis (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_harvantis_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_kayak",
+    "name": "Kayak (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kayak_1.jpg",
+    "ok": true
   }
 ]
