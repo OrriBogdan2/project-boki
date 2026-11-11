@@ -583,53 +583,32 @@ func _scan(m) -> void:
 
 func _lair(m) -> void:
 	var P: Hunter = m.player
-	var LS: Array = m.lairs.list.filter(func(L): return L["active"] and L["state"] == "sealed" and (L["entry"] as Array).has("dial"))
+	var LS: Array = m.lairs.list.filter(func(L): return L["active"] and L["state"] == "sealed" and L.has("seal_at"))
 	if LS.is_empty():
-		LS = m.lairs.list.filter(func(L): return L["state"] == "sealed" and (L["entry"] as Array).has("dial"))
+		LS = m.lairs.list.filter(func(L): return L["state"] == "sealed" and L.has("seal_at"))
 		if not LS.is_empty(): m.lairs.activate(LS[0])
 	if LS.is_empty():
-		note_bad("no sealed lair with a dial"); return
+		note_bad("no sealed lair with a Gate Seal")
+		return
 	var L: Dictionary = LS[0]
 	print("TOUR lair %s (%s)" % [L["name"], L["boss"]])
-	var dp: Vector3 = L["dial"]
-	# stand within reach of the dial (Lairs.DIAL_R): the lectern and the lair wall are solid, so a spot
-	# that lands inside one gets pushed out beyond reach (seen: 2.6 m away, the dial never started)
-	var o3 := Vector3(L["out"].x, 0, L["out"].y)
-	var s3 := Vector3(-L["out"].y, 0, L["out"].x)
-	var in_reach := false
-	for off in [o3 * 0.9, s3 * 0.9, -s3 * 0.9, -o3 * 0.9, o3 * 1.2 + s3 * 0.6, o3 * 0.6]:
-		var at: Vector3 = dp + off
-		P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
-		await frames(3)
-		if P.flat_dist(dp) < Lairs.DIAL_R - 0.3 and absf(P.pos.y - dp.y) < 1.2:
-			in_reach = true; break
-	print("TOUR dial reach: %.2f m, dy %.2f, in reach %s" % [P.flat_dist(dp), P.pos.y - dp.y, in_reach])
-	if not in_reach: note_bad("no standable spot within reach of the dial (%.1f m away)" % P.flat_dist(dp))
+	var at: Vector3 = LairBreach.stand(L)
+	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	m.cam.snap(P.pos)
 	for g in L["guards"]: if is_instance_valid(g): g.dead = true; g.visible = false
 	await mwait(1.0)
 	await shot("lair_gate")
-	# the dial: press as the needle crosses a lit arc
-	var w0 := Time.get_ticks_msec()
-	var shots_dial := 0
-	await key("interact", 0.05)
-	var dial_t0: float = m.time
-	while L["state"] == "sealed" and m.time - dial_t0 < 40.0 and Time.get_ticks_msec() - w0 < 600000:
-		var on := false
-		if float(L["jam"]) <= 0.0 and float(L["grace"]) <= 0.0:
-			var nxt: float = float(L["needle"]) + float(L["dir"]) * float(m.lairs.speed_of(L)) * 0.05
-			for t in L["targets"]:
-				if not t["hit"] and absf(wrapf(nxt - float(t["a"]), -PI, PI)) <= float(t["w"]) * 0.5 - 0.06: on = true
-		if m.lairs.puzzle_of(P).is_empty() and float(L["jam"]) <= 0.0: on = true
-		if on:
-			await key("interact", 0.02)
-			if shots_dial < 2: shots_dial += 1; await shot("lair_dial_%d" % shots_dial)
-		else:
-			await get_tree().process_frame
-	print("TOUR dial: state %s lock %d fails %d (%.1f m from the dial, user %s)" % [L["state"], int(L["lock"]), int(L["fails"]), P.flat_dist(dp), str(L["user"].pname) if L["user"] != null else "none"])
+	# the Gate Seal: knocked down a stage at a time (a camera tour: the damage is dealt for you)
+	var seal: Mob = m.lairs.breach.seal_of(L)
+	for k in range(1, LairBreach.STAGES + 1):
+		if seal == null or seal.dead: break
+		seal.hurt(seal.max_hp / LairBreach.STAGES + 1.0, P, {"src": "shot"})
+		await mwait(0.6)
+		if k < LairBreach.STAGES: await shot("lair_crack_%d" % k)
+	print("TOUR breach: state %s, stage %d" % [L["state"], int(L.get("seal_stage", 0))])
 	if L["state"] == "sealed":
-		note_bad("couldn't open the dial in 40 s (fails %d) - opening it" % int(L["fails"]))
-		m.lairs.open(L, P, "dial")
+		note_bad("the Gate Seal didn't open the gate - opening it")
+		m.lairs.open(L, P, "breach")
 	await mwait(0.8)
 	await shot("lair_open")
 	# step in: the boss wakes, the seal drops

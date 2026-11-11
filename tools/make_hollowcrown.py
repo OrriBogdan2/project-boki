@@ -382,9 +382,9 @@ glides = [
 ]
 
 lairs = [
-    dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="gaol_ne", at=[157, 66], half=7, gate="s", entry=["dial", "runes"]),
-    dict(id="forge", name="The Sunken Forge", boss="colossus", island="gaol_sw", at=[60, 150], half=7, gate="e", entry=["dial"]),
-    dict(id="hive", name="The Thornhive", boss="brood", island="thorn", at=[127, 172], half=7, gate="w", entry=["dial", "wards"]),
+    dict(id="eyrie", name="Stormcrown Eyrie", boss="serpent", island="gaol_ne", at=[157, 66], half=7, gate="s", entry=["breach", "runes"]),
+    dict(id="forge", name="The Sunken Forge", boss="colossus", island="gaol_sw", at=[60, 150], half=7, gate="e", entry=["breach"]),
+    dict(id="hive", name="The Thornhive", boss="brood", island="thorn", at=[127, 172], half=7, gate="w", entry=["breach", "wards"]),
 ]
 # exits: two walled uplink outposts 42-50 m (design grid; 59-71 m on the map) from the Heart
 # (tools/ways_out_sites.py has the rule).

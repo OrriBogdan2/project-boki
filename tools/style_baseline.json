@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -619,7 +619,7 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
+"long_line": 47,
 "nested_ternary": 9,
 "semicolon": 28
 },
@@ -756,7 +756,7 @@
 "shadow": 1
 },
 "scripts/match/world.gd": {
-"long_line": 77,
+"long_line": 76,
 "nested_ternary": 9,
 "semicolon": 172,
 "shadow": 2
@@ -1085,9 +1085,9 @@
 "semicolon": 4
 },
 "tools/loop_tour.gd": {
-"long_line": 23,
+"long_line": 21,
 "nested_ternary": 1,
-"semicolon": 39
+"semicolon": 36
 },
 "tools/mantle_check.gd": {
 "long_line": 18,
