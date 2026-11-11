@@ -21,8 +21,9 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt
+  (`rimewright` is listed below as open). `ostra` hovers by design and has his own gate (`HOVER`): at full stick his box
+  trails his hips by at least 0.1 m and treads (swings) at least 0.03 m through the loop.
 
 ## What is wrong with all of them
 
@@ -152,8 +153,13 @@ posts scroll at the move speed).
 ![mage rmb, before (top) and after (bottom): 8 frames, side view](anim_audit/mage_rmb.jpg)
 
 **Motley (`ostra`)**
-1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). Unchanged: needs new clips.
-2. orb holds an arm sideways for 100 % of the clip, snap for 75 % and flings the free arm 1.64 body heights.
+1. Legs never step: he hovers along (foot speed 0 against 4.65 m/s, slide 100 %). He floats by design (docs/heroes/ostra.md),
+   so the fix is the source's glide, not steps: the box hung on his spring trailed the hips by -0.08 m at a run (it led) and
+   did not tread (0.00 m); now it trails 0.23 m and treads 0.12 m (ext/anim-motley-legs-arm, the `swing` channel and `tread`
+   in tools/art1/ostra_clips.py).
+2. orb held an arm sideways for 100 % of the clip (now 4 %: the first frame, still the idle's spread arms), the free arm
+   travelling 0.61 body heights (now 0.13): the hand throws from his ruff on the kit's beats and the deck stays in at his chest.
+   snap still holds an arm sideways 79 % (elbows out round the orb) and flings the free arm 1.73 body heights.
 3. No arm swing (reach 0.03).
 
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
@@ -183,10 +189,10 @@ posts scroll at the move speed).
 
 Split into backlog items per Hunter (role build):
 
-- `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
+- `ostra`: the snap's elbows out (79 % sideways) and its free-arm fling.
 - `rimewright`: a gait clip with a real stride (skate now).
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
-- Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
+- Arm use in attacks: `thief` (vault_r) holds an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm; `ostra`'s orb: keyed in); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.

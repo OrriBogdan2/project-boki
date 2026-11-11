@@ -26,7 +26,9 @@ cuts are the source's seconds (our base cooldowns equal the source's tier-I ones
 
 ## Design
 Weight Medium (145 hp), floats: body 0.9 (content "body"), hovering about 0.3m over his ground point with a slow
-+-0.03m bob at 0.6 Hz, legs at a tenth of a step (no step cycle, no footsteps), the hem trailing. The hover is visual
++-0.03m bob at 0.6 Hz, no step cycle and no footsteps: gliding he stays upright and leads, and what hangs under him (the box on
+its spring, the hem) trails 12 degrees at a walk and 22 at a run and treads (a kick along the way he goes twice a loop, a sway
+across it once), as the source's hem trails (`--anim-audit` HOVER: the box at least 0.1m behind his hips at full stick, 0.23 now). The hover is visual
 only: his hitbox and ring stay on the ground, so it never dodges low shots. Fixed weapon Tether Lantern (`content/weapons/tether_lantern.json`): a pale crook with a curled
 hook, a brass-caged lantern with a teal flame round a void-glass core, two violet shards beside it (hero_arms.gd). Palette
 pearl and sea teal `#7fe0d0`, with void violet `#b06bff` for what he throws and pink `#ff4fd8` for Swollen. Payoff COLLAPSE.

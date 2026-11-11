@@ -22,8 +22,8 @@ const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const NO_LEGS := ["ostra", "rimewright"]     # they hover and skate, no foot steps (Neve's gait clip: a backlog item)
-## A hover Hunter's gate instead (docs/heroes/ostra.md: he glides, the hem trailing): at full stick the lower body under him
-## trails his hips by at least MIN_TRAIL and treads (swings fore-aft or sideways through the loop) at least MIN_TREAD.
+## A hover Hunter's gate instead (docs/heroes/ostra.md: he glides, the hem trailing): at full stick the lower body
+## under him trails his hips by at least MIN_TRAIL and treads (swings fore-aft or sideways) at least MIN_TREAD.
 const HOVER := {"ostra": "x_box"}
 const MIN_TRAIL := 0.1       # m behind the hips
 const MIN_TREAD := 0.03      # m of swing
@@ -178,8 +178,8 @@ func _gait(m: Node3D, sync: Node, clips: WardenClips, sk: Skeleton3D, s: float) 
 		out.merge(_trail(fr))
 	return out
 
-## The HOVER bone against the hips: how far it trails (m, mean; + behind, he moves along -Z) and treads (the wider of its
-## fore-aft and side swing, m).
+## The HOVER bone against the hips: how far it trails (m, mean; + behind, he moves along -Z) and treads (the
+## wider of its fore-aft and side swing, m).
 func _trail(fr: Array) -> Dictionary:
 	var back: Array = []
 	var side: Array = []
