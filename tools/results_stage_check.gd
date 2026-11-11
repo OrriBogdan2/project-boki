@@ -1,9 +1,9 @@
 extends RefCounted
-## --results-stage-check: the squad stage behind the results card (ResultsStage). Every Hunter has a win and a lose
-## beat its GLB plays (WardenBeats). In a squad that got out every Hunter plays its own win beat with its Boki beside
-## it; in one that did not, a Hunter still in plays its lose beat with no Boki and one that got out its win; the
-## eliminated are dimmed Wisps either way; a Hunter whose GLB has no clips stands in its idle. A trio, a duo and a
-## solo load and free all their models with the screen.
+## --results-stage-check: the squad stage behind the results card (ResultsStage). The roster carries each member's
+## fate; every Hunter with clips has a win and a lose beat its GLB plays (WardenBeats). In a squad that got out
+## every Hunter plays its own win beat with its Boki beside it; in one that did not, a Hunter still in plays its
+## lose beat with no Boki and one that got out its win; the eliminated are dimmed Wisps either way; a Hunter whose
+## GLB has no clips stands in its idle. A trio, a duo and a solo load and free all their models with the screen.
 ## --results-stage-shots --shots-dir=<dir>: the results screen for a trio that got out and one that did not (needs a
 ## renderer).
 
@@ -33,6 +33,7 @@ func run(main: Node, mode := "check") -> void:
 	if mode == "shots":
 		await _shots(main)
 	else:
+		_roster()
 		_beats_exist()
 		await _stages(main)
 		await _screen(main)
@@ -47,6 +48,22 @@ func _squad(archs: Array, fates: Array = []) -> Array:
 		out.append({"arch": archs[i], "name": "H%d" % i, "you": i == 0, "kin": Save.new_kin("zapple"),
 				"eliminated": fate == "out", "extracted": fate == "left"})
 	return out
+
+## The roster the match hands the results: the player's team only, each member's "eliminated" and "extracted".
+func _roster() -> void:
+	var hunters: Array = []
+	for team in [0, 0, 0, 1]:
+		var h := Hunter.new()
+		h.team = team
+		hunters.append(h)
+	hunters[1].out = true
+	hunters[2].extracted = true
+	var fates: Array = ResultsStage.roster(hunters, hunters[0]).map(
+			func(m): return [m["you"], m["eliminated"], m["extracted"]])
+	ok(fates == [[true, false, false], [false, true, false], [false, false, true]],
+			"the roster: the player's team, each one's eliminated and extracted (%s)" % [fates])
+	for h: Hunter in hunters:
+		h.free()
 
 ## Every Hunter whose GLB has clips has a win and a lose beat among them. A GLB without clips (Gil's, today) has
 ## no beats: HunterAnim poses its rig, and the stage stands it in its idle (the "idle" case).
