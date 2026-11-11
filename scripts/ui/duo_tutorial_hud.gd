@@ -66,7 +66,8 @@ func _bubble(sz: Vector2) -> void:
 		c.draw_colored_polygon(tail, Color(BUBBLE, BUBBLE.a * a))
 	var name_w := font.get_string_size(tu.guide.pname + ":", HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_PX).x
 	var base := r.position + Vector2(14, 25)
-	c.draw_string(font, base, tu.guide.pname + ":", HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_PX, Color(MINT.darkened(0.45), a))
+	var name_col := Color(MINT.darkened(0.45), a)
+	c.draw_string(font, base, tu.guide.pname + ":", HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_PX, name_col)
 	c.draw_string(font, base + Vector2(name_w, 0), " " + tu.line, HORIZONTAL_ALIGNMENT_LEFT, -1, TEXT_PX,
 		Color(BUBBLE_INK, a))
 

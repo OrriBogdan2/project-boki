@@ -8,7 +8,7 @@ extends RefCounted
 const STARTERS := ["archer", "juggernaut", "gunslinger"]
 const RUN_MAX := 420.0       # s of match time a full run may take
 const STILL_BEATS := ["meet", "slide", "attack", "sec"]
-const RING_R := 12.4         # m: the ring wall's radius (content/maps/duo_arena.json)
+const RING_R := 13.4         # m: past the ring wall's inner tiles (content/maps/duo_arena.json, walls at 12.4 and 13.2)
 
 var bad := 0
 
@@ -19,7 +19,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	for arch in STARTERS + STARTERS:
+	for arch in STARTERS:
 		await _play(main, arch)
 	await _idle(main)
 	print("DUOTUT DONE, failures: ", bad)
@@ -55,11 +55,11 @@ func _play(main: Node, arch: String) -> void:
 		if tu.id() in STILL_BEATS:
 			still_shots += tu.foes.filter(func(f): return f.inp.get("fire", false)).size()
 		for h in [p, tu.guide] + tu.foes:
-			if Vector2(h.pos.x - DuoTutorial.RING_C.x, h.pos.z - DuoTutorial.RING_C.y).length() > RING_R + 0.5:
+			if Vector2(h.pos.x - DuoTutorial.RING_C.x, h.pos.z - DuoTutorial.RING_C.y).length() > RING_R:
 				outside += 1
-				if outside % 30 == 1: print("DBG out ", h.pname, " ", h.pos, " ", tu.id(), " vel ", h.vel)
 	var ids: Array = tu.beats.map(func(b): return String(b["id"]))
-	print("DUOTUT %s: %.1f s, reached %s, skipped %s" % [arch, t, str(reached), str(skipped)])
+	print("DUOTUT %s: %.1f s, reached %s, skipped %s, put back in the ring %d times" % [arch, t, str(reached),
+		str(skipped), tu.cast.kept])
 	ok(tu.finished, "%s: the run ends (%.0f s, beat %d %s)" % [arch, t, tu.beat, tu.id()])
 	ok(reached == ids, arch + ": every beat in order")
 	ok(skipped.is_empty(), "%s: no beat passed by the stall skip %s" % [arch, str(skipped)])

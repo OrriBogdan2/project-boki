@@ -10,12 +10,15 @@ const FOLLOW_SLACK := 1.2    # m she lets you drift before she walks after you
 const STRAFE_HZ := 0.9       # rad/s of a strafing rival's side-to-side
 const WILD_AHEAD := 5.0      # m in front of you the wild Boki turns up
 const WILD_HP := 0.3         # of its health the wild Boki arrives with (two or three hits)
+const KEEP_R := 12.9         # m from the ring's centre: past this a hunter is in or over the wall (its tiles start ~12)
+const BACK_R := 11.5         # m from the centre such a hunter is put back at
 
 var tu: DuoTutorial
 var m: Match
 var foe_mode := "still"
 var guide_mode := "follow"
 var _down_t := {}            # rival -> s it has been down
+var kept := 0                # times a hunter was put back inside the ring (a hard knock over the wall)
 
 func _init(owner_tut: DuoTutorial) -> void:
 	tu = owner_tut
@@ -69,6 +72,18 @@ func tick(dt: float) -> void:
 	for i in tu.foes.size():
 		_foe(tu.foes[i], i, dt)
 	_guide()
+	for h in [m.player, tu.guide] + tu.foes:
+		_keep_in(h)
+
+## The ring is closed: a hunter knocked into or over the wall lands back on the floor beside it.
+func _keep_in(h: Hunter) -> void:
+	var off := Vector2(h.pos.x, h.pos.z) - DuoTutorial.RING_C
+	if off.length() <= KEEP_R:
+		return
+	kept += 1
+	var back := DuoTutorial.RING_C + off.normalized() * BACK_R
+	h.teleport(Vector3(back.x, m.world.ground_at(back.x, back.y), back.y))
+	h.vel = Vector3.ZERO
 
 func _foe(f: Hunter, i: int, dt: float) -> void:
 	f.reveal_t = maxf(f.reveal_t, 0.3)       # (always in sight: nothing hides in a sparring ring)
