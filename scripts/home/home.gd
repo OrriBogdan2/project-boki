@@ -1385,6 +1385,7 @@ func _move_player(d: float) -> void:
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
 	ps.merge(verbs.step(d))
 	ps.merge(water.anim_state())
+	ps["idle_break"] = true
 	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	ps.merge(carry.anim_state())
 	if air and not gliding and gh > World.VOID + 1.0:

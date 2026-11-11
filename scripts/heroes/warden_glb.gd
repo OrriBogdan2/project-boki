@@ -216,6 +216,7 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	sync.setup(root, skel, rest)
 	glb.add_child(sync)
 	sync.use_clips(glb, art(arch))
+	sync.idle_break = WardenBreak.make(root, skel, arch)
 	sync.square_blade = float(Arch.body(arch).get("bulk", 1.0)) != 1.0
 	var mats: Array = root.get_meta("mats", [])
 	mats.append_array(_toon(glb, lk, MantleLook.warden(arch), look(art(arch)), arch))
@@ -942,6 +943,7 @@ class Sync extends Node:
 	var built: Array = []         # the rig's weapon and prow last hidden (ids; _keep_one_weapon)
 	var mood: WardenMood          # a face on glass and a hanging companion, when the art has them
 	var companions: WardenCompanions   # floating companions cut out of the body (Meeko's sun and cloud), or null
+	var idle_break: WardenBreak   # the one beat this Hunter breaks a long idle with (WardenBreak), or null
 	var hide_out: Array = []      # bone indices that shrink away while CHAIN_OUT
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
@@ -1013,6 +1015,10 @@ class Sync extends Node:
 			WardenGlb._skinned_weapon(root)
 			WardenGlb._hide_shield(root)
 
+	func _input(event: InputEvent) -> void:
+		if idle_break and event.is_pressed() and not event.is_echo():
+			idle_break.press()
+
 	func _process(dt: float) -> void:
 		_keep_one_weapon()
 		if clips:
@@ -1022,6 +1028,8 @@ class Sync extends Node:
 			apply()
 			apply_blade()
 		FootPlant.bones(root, skel, leg_bones, dt)
+		if idle_break:
+			idle_break.step(dt, root.get_meta(WardenClips.STATE, {}))
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		if companions:
