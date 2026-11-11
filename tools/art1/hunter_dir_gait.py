@@ -15,7 +15,8 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Vector
 
-SRC, OUT, WALK, RUN = sys.argv[sys.argv.index("--") + 1:][:4]
+SRC, OUT, WALK, RUN, *MORE = sys.argv[sys.argv.index("--") + 1:]
+BUILD = [d for d in (MORE[0] if MORE else "b,l,r").split(",") if d]   # the directions to rebuild; "" only measures
 SPEED = {"walk": float(WALK), "run": float(RUN)}   # game m/s (warden_anim loco); the model is in game metres
 FPS = 48            # keys per second
 CONTACT = 0.012     # m: a sole vert this close to the floor is planted
@@ -26,7 +27,7 @@ SWAY = 0.018        # m: and the pelvis rides over it
 REACH = 1.1        # leg lengths: the most a stance sole travels (a short leg takes a shorter stance, not a crouch)
 PIVOT_MAX = 65.0   # deg: how far a sole may pivot on its heel or toe to stay in reach
 TOE_UP, HEEL_UP = 10.0, 30.0   # deg: the sole's pitch at the strike and at the push (mirrored walking backwards)
-DIRS = {"b": Vector((0, -1, 0)), "l": Vector((-1, 0, 0)), "r": Vector((1, 0, 0))}
+DIRS = {"f": Vector((0, 1, 0)), "b": Vector((0, -1, 0)), "l": Vector((-1, 0, 0)), "r": Vector((1, 0, 0))}
 LEGS = ("thigh", "shin", "foot")
 LEG_BONES = ["%s.%s" % (n, s) for n in LEGS for s in "LR"]
 
@@ -114,6 +115,7 @@ def read(clip):
         out.append(dict(basis={pb.name: (pb.location.copy(), pb.rotation_quaternion.copy()) for pb in PB},
                         hips=PB["hips"].matrix.copy(), root=PB["root"].matrix.copy(),
                         low={s: float(verts(FOOT[s])[:, 2].min()) for s in "LR"},
+                        co={s: verts(FOOT[s]) for s in "LR"},
                         ankle={s: PB["foot." + s].head.copy() for s in "LR"},
                         hc=(PB["thigh.L"].head + PB["thigh.R"].head) / 2))
     floor = float(np.percentile([k["low"][s] for k in out for s in "LR"], 20))
@@ -327,6 +329,22 @@ def bake(name, g, src):
                                                         drop.min(), drop.max(), src["strike"]))
 
 
+def measure(name, src, speed):
+    """The shipped loop's floor: the speed under each planted sole against the loco speed, and the pelvis's rise and fall."""
+    sp = []
+    for s in "LR":
+        for k in range(src["n"]):
+            a, b = src["keys"][k], src["keys"][(k + 1) % src["n"]]
+            both = (a["co"][s][:, 2] < src["floor"] + CONTACT) & (b["co"][s][:, 2] < src["floor"] + CONTACT)
+            if both.any():
+                sp.append(float(np.linalg.norm((b["co"][s][both, :2] - a["co"][s][both, :2]).mean(0))) * FPS)
+    sp = np.array(sp) if sp else np.zeros(1)
+    hz = np.array([k["hc"].z for k in src["keys"]])
+    print("WAS %s %d keys %.3f s duty %.2f; planted sole median %.2f p10 %.2f p90 %.2f m/s vs loco %.2f; hip height %.3f..%.3f"
+          % (name, src["n"], src["n"] / FPS, src["duty"], np.median(sp), np.percentile(sp, 10), np.percentile(sp, 90), speed,
+             hz.min(), hz.max()))
+
+
 made = []
 for gait in ("walk", "run"):
     fwd = read(gait + "_f")
@@ -335,12 +353,17 @@ for gait in ("walk", "run"):
     for k in DIRS:
         name = "%s_%s" % (gait, k)
         src = read(name)
+        measure(name, src, SPEED[gait])
+        if k not in BUILD:
+            continue
         old = action(name)
         old.name = name + "_was"
         arm.animation_data.action = None
         bake(name, Gait(gait, k, fwd), src)
         made.append(name)
 arm.animation_data.action = None
+if not made:
+    raise SystemExit(0)
 for ac in list(bpy.data.actions):
     if ac.name not in made:
         bpy.data.actions.remove(ac)
