@@ -796,7 +796,7 @@ func do_jump() -> void:
 		jump_at = m.time
 		grounded = false
 		coyote = 0.0
-		m.sfx("jump", pos, -6.0)
+		MoveSfx.jump(self, -6.0)
 		m.fx.dust(pos, 2)                   # (movefeel) a little kick of dust off the ground
 		return
 	if air_jumps < int(owner_stat("extra_jumps")) and not gliding:
@@ -804,7 +804,7 @@ func do_jump() -> void:
 		air_jumps += 1
 		vel.y = JUMP_V
 		m.fx.dust(pos, 4)
-		m.sfx("jump", pos, -4.0, 1.2)
+		MoveSfx.jump(self, -4.0, 1.2)
 		return
 	if wall_moves.try_kick(self):
 		return
@@ -914,6 +914,8 @@ func _glider_sfx(which: String) -> void:
 		skin = String(model.get_node("Rig/Torso/Glider").get_meta("skin", "classic"))
 	var vol := (-3.0 if is_local() else -9.0) if which == "open" else (-8.0 if is_local() else -14.0)
 	Sfx.play_stream(Gliders.sound(skin, which), pos, vol)
+	if which == "open":
+		m.sfx(HeroSfx.weighted(self, "glide_open", ""), pos, vol)
 
 ## The class's dodge (Shift), as described by its ability data: a dash, plus anything else in its
 ## effect list (the heavy class's charge shoves people).
@@ -1139,6 +1141,7 @@ func dash_with(e: Dictionary) -> void:
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
 	m.sfx(HeroSfx.dash_name(self), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
+	MoveSfx.dash(self)
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
@@ -2024,7 +2027,7 @@ func _pad_fly(dt: float) -> void:
 		pad = {}
 		squash = 0.12 if ledge else 0.3
 		m.fx.dust(pos, 3 if ledge else 8)
-		m.sfx("land", pos, -12.0 if ledge else -8.0)
+		MoveSfx.land(self, -12.0 if ledge else -8.0)
 
 ## Where a mantle has you at progress k (0..1): up the face with an ease-out (a quick pull that
 ## slows near the top), then over the lip with a small hop and an ease-in-out onto the top. The
@@ -2307,13 +2310,13 @@ func _physics(dt: float) -> void:
 				m.fx.dust(pos, 6)
 				squash = 0.15
 				land_t = 0.2
-				m.sfx("land", pos, -10.0)
+				MoveSfx.land(self, maxf(HeroSfx.land_db(-fv), -12.0))
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
 				# and a soft thud; no lockout, you keep moving the same step
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
-				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
+				MoveSfx.land(self, HeroSfx.land_db(-fv) + (0.0 if is_local() else -6.0))
 			if fv < -17.0:
 				# a long drop lands hard: a thud, a puff of dust and a short stagger
 				m.fx.dust(pos, 12)
@@ -2723,7 +2726,7 @@ func _ledge_fling() -> void:
 	mantle_cd = 0.3
 	air_t = 0.0        # (held Space opens the glider a beat later, as after any jump)
 	stats["flings"] = int(stats.get("flings", 0)) + (1 if timed else 0)
-	m.sfx("jump", pos, -6.0)
+	MoveSfx.jump(self, -6.0)
 	if timed:
 		m.sfx("whoosh", pos, -6.0 if is_local() else -12.0, 1.3)
 		m.fx.ghost(position, face, Color("e6f6ff"), float(cdat["scale"]))
@@ -3181,7 +3184,7 @@ func render(delta: float, alpha: float) -> void:
 		anim.update(_anim_dt, anim_s)
 		_anim_dt = 0.0
 	if posed and anim.stepped and not downed and not crouch:
-		Sfx.step(pos, -14.0 if is_local() else -20.0)
+		MoveSfx.footstep(self)
 	if posed and anim.slammed and not downed:
 		# a heavy coming down hard: a ring of dust where they land
 		m.fx.dust(pos, 12)
@@ -3208,7 +3211,6 @@ func render(delta: float, alpha: float) -> void:
 		if step_t <= 0.0:
 			step_t = 0.32
 			m.fx.dust(pos, 2)
-			Juice.footstep(self)
 	# (the rig's squash, the skydive and lying downed are posed by HunterAnim)
 	glide_k = move_toward(glide_k, 1.0 if gliding and not plunging() else 0.0, delta * (7.0 if gliding else 9.0))
 	var gl: Node3D = torso.get_node("Glider")

@@ -1112,6 +1112,17 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
 | demo_charge | 1 |
 
+## hunter_foley (`content/rules/hunter_foley.json`)
+
+
+
+| _doc | Each Hunter's quiet foley layer under its steps and dashes (MoveSfx, docs/AUDIO.md). One row per archetype: note = what makes the sound (from its final design); step_db / dash_db = that Hunter's level trim in dB (its sounds are <arch>_foley and <arch>_foley_dash, made by tools/gen_sfx_foley.py). A step's foley follows the Hunter's speed: walk_db quieter at a standstill, full level at its base run speed. Foley is carried to step_reach_m like the step itself; at most voice_cap foley sounds start per voice_window_ms across all Hunters, so a crowd of 30 stays readable. base_db: the level before the role (own/ally/enemy) and fight trims MoveSfx.level adds. |
+| base_db | -6 |
+| walk_db | -8 |
+| voice_cap | 5 |
+| voice_window_ms | 200 |
+| rows | {"dredge": {"note": "Grimble: the junk hoard on his back rattles and clinks (chests, tin, coins, a dull bell)", "step_db": 0.0, "dash_db": 0.0}, "bulwark": {"note": "Albert: barnacle armour clanks, plate on plate and shell crunch", "step_db": 0.0, "dash_db": 0.0}, "rimewright": {"note": "Neve: skate blades hiss on the ground", "step_db": 2.0, "dash_db": 0.0}, "juggernaut": {"note": "Kael: the chain at his collar and wrists", "step_db": 0.0, "dash_db": 0.0}, "ashwick": {"note": "Cinder: living-fire hair and molten seams crackle", "step_db": 0.0, "dash_db": 0.0}, "thief": {"note": "Sable: coat and buckle on steps, moth wings flutter on dashes", "step_db": -2.0, "dash_db": 2.0}, "archer": {"note": "Lace: porcelain joints click, the wooden control cross knocks", "step_db": 0.0, "dash_db": 0.0}, "dolm": {"note": "Tenzo: pebbles and the floating eye stones, a soft jade ring", "step_db": 0.0, "dash_db": 0.0}, "gunslinger": {"note": "Vex: brass ammo strap and the coin chain jingle", "step_db": 0.0, "dash_db": 0.0}, "mage": {"note": "Sparkle: copper coils at the wrists spit static", "step_db": -1.0, "dash_db": 0.0}, "ostra": {"note": "Motley: tiny jester bells and a flick of cards", "step_db": 0.0, "dash_db": 0.0}, "tender": {"note": "Meeko: the glass globe tinks, a raindrop drips", "step_db": 1.0, "dash_db": 0.0}} |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
@@ -1314,6 +1325,23 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | weights | {"common": 6, "uncommon": 3, "rare": 1} |
 | mutation_mult | 5 |
 | pool | {"wisplet": "common", "zapple": "common", "kindlewren": "common", "glintmole": "common", "rimeshrew": "common", "mossgrade": "common", "gloamshell": "common", "marchleaf": "common", "glomwort": "common", "sentrikat": "common", "basaltoad": "common", "murmurling": "common", "kestrike": "uncommon", "nettlynx": "uncommon", "thrumbird": "uncommon", "lodestick": "uncommon", "opalisk": "uncommon", "kilnbadger": "uncommon", "hoarheron": "uncommon", "orchisloth": "uncommon", "caecilith": "uncommon", "velvorm": "uncommon", "gibbelle": "uncommon", "moonloris": "uncommon", "threadwyrm": "uncommon", "selenfin": "rare", "casquebill": "rare", "nacrolin": "rare", "tuatrune": "rare"} |
+
+## move_sfx (`content/rules/move_sfx.json`)
+
+
+
+| _doc | A Hunter's movement sounds (MoveSfx, docs/AUDIO.md). step_db: a footstep's level before the role and the fight; role_db: added for you (own), a friend (ally) and an enemy, so enemies are heard coming; fight_db: added while the Hunter hit, swung or cast within fight_s seconds (subtle in a fight); step_reach_m: how far a footstep carries (a landing, a dash and the glider carry the usual 22 m); surface_layer_db: the ground's step under a jump or landing, relative to it. Pitch: a Hunter taller than ref_height_m sounds lower (pitch_per_m), clamped to pitch_min..pitch_max. height_m: Kael 2.05 and Neve 1.56 from the owner; the rest are the height chart (tools/warden_model_check.gd) x 1.6 m. |
+| step_db | -17 |
+| role_db | {"own": 0.0, "ally": -1.0, "enemy": 6.0} |
+| fight_db | -4 |
+| fight_s | 2.5 |
+| step_reach_m | 14 |
+| surface_layer_db | -6 |
+| ref_height_m | 1.6 |
+| pitch_per_m | 0.25 |
+| pitch_min | 0.8 |
+| pitch_max | 1.2 |
+| height_m | {"juggernaut": 2.05, "rimewright": 1.56, "bulwark": 2.4, "dredge": 2.37, "ostra": 1.89, "ashwick": 1.86, "gunslinger": 1.74, "dolm": 1.74, "mage": 1.73, "archer": 1.71, "thief": 1.57, "tender": 0.96} |
 
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
