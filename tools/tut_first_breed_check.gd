@@ -141,8 +141,8 @@ func _world() -> void:
 	await _sim(home, 0.5)
 	ok(home.panel_open == "Breeding" and FirstBreed.seen(), "arriving opens the card, and it is marked seen")
 	var texts := _texts(home.panel_host)
-	ok(texts.any(func(t): return t.begins_with("Two Grown Boki")) and texts.has("THEIR EGG")
-			and texts.any(func(t): return t.contains("Pair them")),
+	var says := func(head: String) -> bool: return texts.any(func(t): return t.begins_with(head))
+	ok(says.call("Two Grown Boki") and says.call("The egg will be") and texts.any(func(t): return t.contains("Pair them")),
 			"the card: the one-line explanation, the preview, a Pair them button")
 	_press(home.panel_host, "Pair them")
 	await main.get_tree().process_frame

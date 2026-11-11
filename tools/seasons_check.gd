@@ -115,15 +115,16 @@ func _snacks() -> void:
 		d["layout"] = HomeLayout.fresh()
 		d["layout"]["deco"] = [e]
 		var t := _week_of(s["zone"]) * WEEK + 3600.0
-		e["t"] = t - grow
+		e[SnackPatch.RIPE_KEY] = t - grow
 		var got := SnackPatch.harvest(d, t)
 		var others := true
 		for o in _seasons():
 			if o["snack"] != s["snack"]:
 				others = others and not got.has(o["snack"])
 		var four: Array = SnackPatch.rules()["snacks"]
-		ok(got.size() == four.size() + 1 and got.has(s["snack"]) and int(d["crops"][s["snack"]]) == 1,
-				"%s season: the patch grows %s" % [s["zone"], s["snack"]])
+		# the four and the season's snack (0245's patch may add its rotating extra, SnackPatch.extra)
+		ok(four.all(func(f): return got.has(f)) and got.has(s["snack"]) and int(d["crops"][s["snack"]]) == 1,
+				"%s season: the patch grows %s (%s)" % [s["zone"], s["snack"], got])
 		ok(others, "%s season: no other season's snack" % s["zone"])
 
 ## Crowns three cup rounds in `game` at time t; returns the Crown's result.

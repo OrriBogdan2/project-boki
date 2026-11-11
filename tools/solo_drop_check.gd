@@ -1,8 +1,8 @@
 extends RefCounted
 ## --solo-drop-check: the expedition panel's Solo / Trios pick (ExpMode). The options each pick starts
-## a match with, the team and squad counts that match really builds (solo 20x1, trios 7x3), no allies
-## and 19 rivals in a solo drop, the rolling session sizing its waves for either, and a solo match
-## running 30 s with the player and the bots still sane.
+## a match with, the team and squad counts that match really builds (Data.MATCH_PLAYERS: solo 30x1, trios
+## 10x3), no allies and 29 rivals in a solo drop, the rolling session sizing its waves for either, and a solo
+## match running 30 s with the player and the bots still sane.
 
 var bad := 0
 var main: Node
@@ -36,7 +36,8 @@ func _counts(mode: String, teams: int, squad: int) -> void:
 
 func _solo_run() -> void:
 	_start("solo", {"autoplay": true})      # (the player is bot-driven: a plain jump falls in the abyss)
-	ok(m.hunters.filter(func(h): return h != m.player and h.team != m.player.team).size() == 19, "solo: 19 enemy bots")
+	var foes := m.hunters.filter(func(h): return h != m.player and h.team != m.player.team)
+	ok(foes.size() == Data.MATCH_PLAYERS - 1, "solo: everyone else is an enemy bot")
 	var t := 0.0
 	while t < 30.0:
 		if m.player.riding: m.ship_jump(m.player, true)
@@ -77,8 +78,8 @@ func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
 	ok(not ExpMode.is_solo(), "trios are the default")
-	_counts("trio", 7, 3)
-	_counts("solo", 20, 1)
+	_counts("trio", ceili(Data.MATCH_PLAYERS / 3.0), 3)
+	_counts("solo", Data.MATCH_PLAYERS, 1)
 	_solo_run()
 	_rolling()
 	await _panel()

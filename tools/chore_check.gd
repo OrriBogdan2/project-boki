@@ -78,7 +78,7 @@ func run(m: Node) -> void:
 			var kind := BaseChore.label(k)
 			var who := String(k["rec"]["name"])
 			var fsm: Fsm = k["life"]
-			var lines: Array = k["rec"].get("journal", [])
+			var lines: Array = k["rec"].get("journal", []).filter(func(e): return not e.has("stat"))     # not StatCause's
 			if not lines.is_empty() and not is_same(lines.back(), last_line.get(who, null)):
 				writes[who] = int(writes.get(who, 0)) + 1
 				last_line[who] = lines.back()

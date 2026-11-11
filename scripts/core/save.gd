@@ -309,6 +309,7 @@ func _migrate_11_to_12(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		if not r.has("bonds"):
 			r["bonds"] = {}
+	FirstBreed.migrate(data)      # a save that has already bred never sees the first-breeding prompt
 	if not data.has("clan"):
 		# clans grow out of guilds: a save in a guild becomes a plain member of the clan with that id (Social.clan_for)
 		var gid := String(data.get("guild_id", ""))
