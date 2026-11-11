@@ -1,6 +1,6 @@
 {
 	"palette": {
-		"main": "#2ee6c0", "hot": "#b8fff0", "white": "#f2fffc", "void": "#06030c", "deep": "#0b5a50",
+		"main": "#2ee6c0", "hot": "#b8fff0", "white": "#f2fffc", "void": "#06030c", "deep": "#0b5a50", "char": "#06231f",
 		"mist": "#6fa89e"
 	},
 	"moves": {

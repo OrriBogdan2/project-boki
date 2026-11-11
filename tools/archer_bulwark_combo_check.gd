@@ -1379,7 +1379,8 @@ func _bulwark_combos() -> void:
 	ok("bjorn small: Mending Ground doesn't repair a broken aegis", K.shield_hp < 1.0, "shield %.0f" % K.shield_hp)
 	ok(
 		"bjorn small: a downed teammate inside Mending Ground starts reviving",
-		K.kickstarts == ks0 + 1 and A.revive >= 0.3,
+		# the burst gives 0.35, then the bar decays while nobody revives (life.gd revive_decay)
+		K.kickstarts == ks0 + 1 and A.revive >= 0.2,
 		"revive %.2f" % A.revive
 	)
 	A.downed = false

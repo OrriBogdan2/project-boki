@@ -20,6 +20,8 @@ func run() -> void:
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
 	var home: Vector3 = r[4]
+	P.wpn = P.wpn.duplicate()
+	P.wpn["aimed_first"] = false      # the fan itself: the opening volley is aimed (aimed_first), the rest fan
 	var w: Dictionary = P.wpn
 	var pel := int(w["pellets"])
 	var full: float = float(w["dmg"]) * pel * m.dmg_mult(P)
@@ -40,7 +42,7 @@ func run() -> void:
 		ak.fresh(T)
 		T.teleport(home + Vector3(d, 0, 0))
 		T.face = FACE_TOWARD
-		P.wbloom = 0.001      # a burst's follow-up volley: the fan at rest (the opening volley is aimed, aimed_first)
+		P.wbloom = 0.0
 		P.fire_cd = 0.0
 		ak.aim_at(P, T.pos)
 		P.inp["fire"] = true
