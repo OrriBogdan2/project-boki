@@ -71,19 +71,6 @@ func _creator(tree: SceneTree) -> void:
 	hx.queue_free()
 	await tree.process_frame
 
-func _eggs(tree: SceneTree) -> void:
-	_fresh()
-	Save.d["look"] = Unmasked.default_look()
-	var hx = load("res://scripts/ui/hatch.gd").new()
-	main.add_child(hx)
-	await tree.process_frame
-	hx._looks_good()
-	await _shot(tree, "hatch_eggs", 2.5)
-	hx._pick(3)
-	await _shot(tree, "hatch_mystery_picked", 1.2)
-	hx.queue_free()
-	await tree.process_frame
-
 ## What a new player sees: the hatch card, the creator with its first rows, then with More looks... open.
 func _first_screens(tree: SceneTree) -> void:
 	Save.d = Save.fresh()
