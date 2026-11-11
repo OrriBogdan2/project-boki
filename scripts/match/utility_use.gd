@@ -65,7 +65,6 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		"mend":
 			h.heal(MEND_HP, col)
 			h.armor = minf(h.max_armor, h.armor + MEND_ARMOR)
-			m.sfx("heal", h.pos, -2.0, 1.1)
 		"smoke":
 			var n := Models.gear_smoke()
 			n.position = h.pos

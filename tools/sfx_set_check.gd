@@ -20,15 +20,14 @@ extends RefCounted
 ##  12. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
 ##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd plays no stock cue
 ##  13. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
-##  14. the Boki set has a k_<type> cast cue on file for every Boki type (KinParts.THEMES)
-##  15. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
+##  14. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
 ##      an unknown species falls back to the generic cues, and no two species share a happy take
-##  16. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
-##  17. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
-##  18. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
-##  19. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
+##  15. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
+##  16. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
+##  17. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
+##  18. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
 ##      drops, and stops on a heal, a down or out
-##  20. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
+##  19. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -134,8 +133,6 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
-	if group == "boki":
-		_boki_type_cues(sounds)
 	if group == "boki_voices":
 		_boki_voices(d["sounds"])
 
@@ -181,14 +178,6 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
-
-## 7. Every Boki type has a cast cue (k_<type>, played by Kin._cast), listed in the set and on file.
-func _boki_type_cues(sounds: Dictionary) -> void:
-	var lacking := []
-	for t in KinParts.THEMES:
-		if t != "none" and not (sounds.has("k_" + t) and not _takes("k_" + t).is_empty()):
-			lacking.append(t)
-	ok(lacking.is_empty(), "boki: every type has a cast cue file (missing %s)" % [lacking])
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
 ## files the set lists under "kit_files" (paths under scripts/arch/kits/).

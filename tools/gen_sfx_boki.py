@@ -371,7 +371,8 @@ TIMBRE = {'ember': 'crackle', 'storm': 'crackle', 'venom': 'burble', 'tempest': 
 # Per species: (vowel, signature motif as 3 pitch ratios). The motif is what makes a Pebbit and a
 # Cairnback tell apart even at the same size.
 SPECIES_VOICE = {
-    'burrlet': ('eh', (1, 1.26, 1.12)), 'cairnback': ('oh', (1, 0.84, 0.84)), 'cindle': ('eh', (1, 1.5, 1.19)),
+    'burrlet': ('eh', (1, 1.26, 1.12)), 'caecilith': ('uh', (1, 0.84, 1.19)), 'gibbelle': ('ee', (1, 1.68, 1.26)),
+    'cairnback': ('oh', (1, 0.84, 0.84)), 'cindle': ('eh', (1, 1.5, 1.19)),
     'glintmole': ('ee', (1, 1.12, 1.5)), 'gloamshell': ('uh', (1, 0.9, 1.07)), 'glomwort': ('uh', (1, 1.19, 1.41)),
     'hivara': ('eh', (1, 1, 1.26)), 'kestrike': ('ee', (1, 1.78, 1.34)), 'kindlewren': ('ee', (1, 1.33, 1.67)),
     'lodestick': ('ah', (1, 0.94, 1.12)), 'marchleaf': ('eh', (1, 1.12, 1.26)), 'mossgrade': ('mm', (1, 0.89, 1)),
