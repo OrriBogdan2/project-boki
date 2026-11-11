@@ -131,6 +131,7 @@ func run(m: Node) -> void:
 	var k: Dictionary = home._kin_entry(rec)
 	ok(not k.is_empty(), "the Boki is out on the farm")
 	await _welcome(home, k)
+	home._close_panel()      # an hour away opens the "While you were away" card; a rank moment waits for it
 	KinBondMoment.tick(home)
 	ok(home.panel_open == "" and int(rec.get("bond_seen", -1)) == Care.bond_index(rec),
 		"the rank it arrives with is where it starts: no moment (%s)" % Care.bond(rec)[1])
