@@ -814,6 +814,17 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | barks | {"you_knock": ["Nice!", "Down they go!", "Textbook.", "Ha! Did you see that?"], "guide_knock": ["Got one!", "Sorry! Not sorry.", "My little sun did most of that."], "you_down": ["Up you get. Happens to me all the time.", "Shake it off, I've got you."], "foe_back": ["Aaand they're back.", "They always come back. It's kind of sweet."]} |
 | skip | ["We'll come back to that. Probably.", "Let's skip ahead. I won't tell.", "Fine, moving on. This part's better anyway."] |
 
+## decor_comfort (`content/rules/decor_comfort.json`)
+
+Decor with a purpose (briefs/design/GARDEN_MODERN.md section 5 rank 7; scripts/home/decor_comfort.gd). Every decoration in the build catalog has one comfort tag (HomeLayout.CATALOG comfort: cosy, bright, wild or quiet). A zone holding need decorations of one tag gets that tag's small named effect, listed on its Waystone card. No scores: an effect is on or off.
+
+| Setting | Value |
+|---|---|
+| need | 3 |
+| need_doc | Decorations of one comfort tag a zone needs before that tag's effect is on. |
+| effects | {"cosy": {"name": "Snug naps", "does": "naps restore joy", "nap_joy": 6.0, "nap_joy_doc": "Joy per minute a napping Boki gains (without it a nap only slows joy's fall, Care.tick)."}, "bright": {"name": "Sunny patch", "does": "the snack patch ripens faster", "grow": 0.75, "grow_doc": "Share of snack_patch.json grow_secs the patch takes to ripen."}, "wild": {"name": "Wild welcome", "does": "wild visitors come more often", "visit": 2.0, "visit_doc": "Times garden_visitor.json chance a look brings a visitor."}, "quiet": {"name": "Calm air", "does": "fewer squabbles", "clash": 0.5, "clash_doc": "Times base_life.json clash, the chance two hot tempers squabble."}} |
+| effects_doc | One per tag: name and does are shown on the zone card; the number is the effect's size. |
+
 ## equal (`content/rules/equal.json`)
 
 
