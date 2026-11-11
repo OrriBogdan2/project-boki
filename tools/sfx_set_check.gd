@@ -284,8 +284,10 @@ func _garden() -> void:
 
 ## 10. The garden's moments: own cues, counted through GardenSfx.heard, and no "unlock" where they play.
 func _garden_moments() -> void:
-	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_cup", "garden_evolve"]
-	ok(cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty()), "moments: all five cues have files")
+	var cues := ["garden_egg", "garden_friends", "garden_chime_part", "garden_evolve", "garden_visit_in",
+			"garden_visit_out", "garden_season"] + GardenSfx.CUPS
+	var filed := cues.all(func(c): return Sfx.ensure(c) and not _takes(c).is_empty())
+	ok(filed, "moments: all %d cues have files" % cues.size())
 	var a := {"uid": "moment_a"}
 	var b := {"uid": "moment_b"}
 	BaseLife.befriended.clear()
@@ -318,16 +320,15 @@ func _garden_moments() -> void:
 	build["base_mode"] = was_base
 	var res := {"game": GardenPrizes.ids()[0], "items": [], "first": false, "round": "", "ribbon": false,
 			"reset": false}
-	var cups := int(GardenSfx.heard.get("garden_cup", 0))
-	GardenPrizes.rows(res.merged({"round": "Sprout"}, true))
-	GardenPrizes.rows(res.merged({"round": "Crown", "ribbon": true}, true))
-	ok(int(GardenSfx.heard.get("garden_cup", 0)) == cups + 1, "moments: the Crown card plays garden_cup, a round not")
-	var sites := {"base_life.gd": "garden_friends", "home_incubator.gd": "garden_egg", "garden_prizes.gd": "garden_cup",
-			"kin_bond_moment.gd": "garden_friends", "home.gd": "garden_evolve"}
+	_cup_rounds(res)
+	var sites := {"base_life.gd": "\"garden_friends\"", "home_incubator.gd": "\"garden_egg\"",
+			"garden_prizes.gd": "GardenSfx.cup(", "kin_bond_moment.gd": "\"garden_friends\"",
+			"home.gd": "\"garden_evolve\"",
+			"garden_visitor.gd": "\"garden_visit_out\"", "garden_sfx.gd": "\"garden_season\""}
 	var off := []
 	for f in sites:
 		var src := FileAccess.get_file_as_string("res://scripts/home/" + f)
-		if not src.contains("\"%s\"" % sites[f]):
+		if not src.contains(sites[f]):
 			off.append(f)
 		elif f != "home.gd" and src.contains("Sfx.play(\"unlock\""):
 			off.append(f + " unlock")
@@ -337,6 +338,20 @@ func _garden_moments() -> void:
 		if body.contains("\"unlock\""):
 			off.append(fn)
 	ok(off.is_empty(), "moments: every site names its cue and none plays unlock %s" % [off])
+
+## Each cup round's card plays its own fanfare once (Sprout, Bloom, Crown); a card with no round none.
+func _cup_rounds(res: Dictionary) -> void:
+	var rounds: Array = GardenPrizes.rules()["cup"]["rounds"]
+	ok(rounds.size() == GardenSfx.CUPS.size(), "moments: one cup fanfare per cup round (%d)" % rounds.size())
+	var before := GardenSfx.CUPS.map(func(c): return int(GardenSfx.heard.get(c, 0)))
+	GardenPrizes.rows(res)
+	for i in rounds.size():
+		var last: bool = i == rounds.size() - 1
+		GardenPrizes.rows(res.merged({"round": rounds[i]["name"], "ribbon": last, "keepsake": ""}, true))
+	var each := true
+	for i in GardenSfx.CUPS.size():
+		each = each and int(GardenSfx.heard.get(GardenSfx.CUPS[i], 0)) == before[i] + 1
+	ok(each, "moments: Sprout, Bloom and Crown cards each play their own cup fanfare once, a card with no round none")
 
 func _takes(sname: String) -> Array:
 	var out := []

@@ -6,6 +6,7 @@ extends RefCounted
 ##   3. the twist applies to the in-season game (the weekly format wins for its own game) and reaches the Runs
 ##   4. the snack patch grows the season snack only in its season
 ##   5. the in-season game's Crown gives the keepsake once a season; other games' Crowns do not
+##   6. entering the zone in season plays garden_season once; coming out of a house there, the hub or another zone not
 ## Never touches the real save.
 
 const WEEK := 604800.0
@@ -25,6 +26,7 @@ func run(m: Node) -> void:
 	_twists()
 	_snacks()
 	_keepsake()
+	_sting()
 	print("SEASONS DONE, failures: %d" % bad)
 	m.get_tree().quit(1 if bad > 0 else 0)
 
@@ -49,6 +51,8 @@ func _data() -> void:
 		var what := "%s: snack %s is a crop the patch lacks" % [s["zone"], s["snack"]]
 		ok(crop and GardenPrizes.ids().has(s["game"]), what)
 	ok(zones.size() == 5 and _seasons().size() == 5, "five zones take turns")
+	var real := zones.keys().all(func(z): return GardenZones.ids().has(z))
+	ok(real, "each season's zone is a garden zone: %s" % [zones.keys()])
 
 func _rotation() -> void:
 	var weeks := int(GardenSeasons.rules()["weeks"])
@@ -124,6 +128,26 @@ func _snacks() -> void:
 		ok(got.count(s["snack"]) == 1 and int(d["crops"][s["snack"]]) == 1,
 				"%s season: the patch grows %s" % [s["zone"], s["snack"]])
 		ok(others, "%s season: no other season's snack" % s["zone"])
+
+## GardenSfx.zone_in as Home opens: the sting once on entering the zone in season (from the hub or another zone).
+func _sting() -> void:
+	var build: Dictionary = FarmUnlocks.rules()
+	var was_base: bool = build["base_mode"]
+	build["base_mode"] = true
+	var on := String(GardenSeasons.season()["zone"])
+	var off: String = GardenZones.ids().filter(func(z): return z != on)[0]
+	var heard := func(): return int(GardenSfx.heard.get("garden_season", 0))
+	var before: int = heard.call()
+	GardenSfx.zone_in(on, GardenZones.HUB)
+	ok(heard.call() == before + 1, "entering %s in its season plays garden_season once" % on)
+	GardenSfx.zone_in(on, on)
+	GardenSfx.zone_in(off, GardenZones.HUB)
+	GardenSfx.zone_in(GardenZones.HUB, on)
+	ok(heard.call() == before + 1, "out of a house in %s, into %s or the hub: no sting" % [on, off])
+	build["base_mode"] = false
+	GardenSfx.zone_in(on, off)
+	ok(heard.call() == before + 1, "with the garden off: no sting")
+	build["base_mode"] = was_base
 
 ## Crowns three cup rounds in `game` at time t; returns the Crown's result.
 func _crown(me: Dictionary, game: String, t: float) -> Dictionary:

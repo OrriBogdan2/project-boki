@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://cg4ad1vbnfgxo"
-path="res://.godot/imported/garden_cup.wav-dd935ca2447cf8ea54bd692eb834e799.sample"
+uid="uid://sad6finsascm"
+path="res://.godot/imported/garden_season.wav-fd5e4924a2d14af66255923fa1bb1b29.sample"
 
 [deps]
 
-source_file="res://audio/garden_cup.wav"
-dest_files=["res://.godot/imported/garden_cup.wav-dd935ca2447cf8ea54bd692eb834e799.sample"]
+source_file="res://audio/garden_season.wav"
+dest_files=["res://.godot/imported/garden_season.wav-fd5e4924a2d14af66255923fa1bb1b29.sample"]
 
 [params]
 

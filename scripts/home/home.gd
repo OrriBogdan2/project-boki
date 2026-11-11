@@ -131,6 +131,7 @@ func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
 	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
 	elif zone == GardenZones.HUB: visit = HubLayout.island()
+	if not _visiting(): GardenSfx.zone_in(zone, GardenZones.here)
 	GardenZones.here = "" if _visiting() else zone
 	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

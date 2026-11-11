@@ -16,8 +16,9 @@
   "relay_handoff": "boki", "relay_fumble": "boki", "relay_finish": "boki",
   "garden_chime_stat": "boki", "garden_chime_level": "boki", "garden_chime_evolve": "boki",
   "garden_hop": "boki", "garden_wake": "boki",
-  "garden_egg": "boki", "garden_friends": "boki", "garden_chime_part": "boki", "garden_cup": "boki",
-  "garden_evolve": "boki"
+  "garden_egg": "boki", "garden_friends": "boki", "garden_chime_part": "boki", "garden_evolve": "boki",
+  "garden_cup_sprout": "boki", "garden_cup_bloom": "boki", "garden_cup_crown": "boki",
+  "garden_visit_in": "boki", "garden_visit_out": "boki", "garden_season": "boki"
  },
  "signature": [],
  "replaces": [],
