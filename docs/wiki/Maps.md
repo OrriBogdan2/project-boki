@@ -60,6 +60,15 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Highwatch | landing | Frost | quiet | 6 | The Lookout |
 | Duskmoor | landing | Storm | quiet | 18 | Moor Chapel |
 | Saltmere | landing | Bloom | quiet | 34 | Salt River |
+| The Crown | heart | Gloom | dangerous | 52 |  |
+| Frostgate | camp | Frost | contested | 12 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 27 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 26 |  |
+| Thornwood | nest | Bloom | contested | 66 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 37 | The Hollow |
+| Highwatch | landing | Frost | quiet | 3 | The Lookout |
+| Duskmoor | landing | Storm | quiet | 14 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 32 | Salt River |
 
 ### Boss lairs
 

@@ -3240,7 +3240,7 @@ func _drop_check() -> void:
 	var D: DropSquad = m.skydrop
 	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
 	print("DCHECK planning=%s plan_t=%.1f riding=%s leader=%s map open=%s" % [D.planning, D.plan_t, P.riding, D.leader(P.team).pname, m.hud.map_open()])
-	if not D.planning or absf(D.plan_t - DropSquad.PLAN_T) > 0.01 or not P.riding or D.leader(P.team) != P or not m.hud.map_open():
+	if not D.planning or absf(D.plan_t - DropFeel.plan_s) > 0.01 or not P.riding or D.leader(P.team) != P or not m.hud.map_open():
 		ok = false; print("DCHECK FAIL planning phase did not start right")
 	# a ping placed on the map (the same path a click takes)
 	var target: Vector3 = m.world.spawns[0]
@@ -3257,7 +3257,7 @@ func _drop_check() -> void:
 	var bot_pings := m.pings.filter(func(q): return q.has("by") and (q["by"] as Hunter).ctrl == "bot").size()
 	var acks := m.truce.shown.filter(func(e): return e["id"] == "omw").size() if m.truce else 0
 	print("DCHECK planning lasted %.2fs, match clock %.2f -> %.2f, bot pings %d, bot replies %d, events %s" % [steps * Match.DT, t0, m.time, bot_pings, acks, str(D.events)])
-	if absf(steps * Match.DT - DropSquad.PLAN_T) > 0.1 or m.time != t0: ok = false; print("DCHECK FAIL planning length / clock")
+	if absf(steps * Match.DT - DropFeel.plan_s) > 0.1 or m.time != t0: ok = false; print("DCHECK FAIL planning length / clock")
 	if bot_pings < 1: ok = false; print("DCHECK FAIL bots never pinged")
 	# a follower can't jump by themselves while the leader is aboard
 	var f0: Hunter = mates[0]
@@ -3379,7 +3379,7 @@ func _drop_check() -> void:
 	gm.world.free(); gm.free()
 	# rare kin only at the live rare-kin points, one at each
 	var rare: Array = m.kins.filter(func(k): return k.has_meta("rare"))
-	var live: Array = sp.active_of("rare_kin")
+	var live: Array = sp.active_of("rare_kin").filter(func(cc): return not cc.has("camp"))   # (guarded: --camps-check)
 	var stray := 0
 	for k in rare:
 		var near := false

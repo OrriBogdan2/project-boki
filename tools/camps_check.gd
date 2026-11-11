@@ -6,7 +6,8 @@ extends RefCounted
 ## within 30 m; a knock pays 40 + 15 x the victim's level. The last kill clears the camp: one toast,
 ## one bundle where it fell, no drops of the monsters' own; a stealer takes it. A cleared camp comes
 ## back once, one size up, 150 s later with nobody near, not after 7:00, under the cap. Never
-## touches the save.
+## touches the save. Two of the five rare Boki picks are guarded: on Great Camps outside the hot zone,
+## announced, nothing to scan while the camp is live, then a wild rare Boki at its centre for any squad.
 
 const SIZE_XP := {"small": 60.0, "camp": 110.0, "great": 190.0, "chief": 260.0}
 
@@ -250,5 +251,46 @@ func _hot(main: Node) -> void:
 			var hot: bool = m.biomes != null and int(c["region"]) >= 0 and int(c["region"]) == m.biomes.hot.hot
 			good = good and int(c["size"]) == (mini(base + 1, ids.size() - 1) if hot else base)
 			if hot: checked += 1
+		_guarded(m, s)
 		m.queue_free()
 	ok(good and checked > 0, "hot-zone camps are one size up, the rest at their kind's size (%d hot)" % checked)
+
+## Seed s: two guarded rare Boki picks, both on Great Camps out of the hot zone, the same in every game;
+## nothing to scan while the camp is live, a wild rare Boki at its centre once it is cleared.
+func _guarded(m: Match, s: int) -> void:
+	var sp := m.spawn_plan
+	var g: Array = sp.active_of("rare_kin").filter(func(c): return c.has("camp"))
+	var picks := sp.active_of("rare_kin").size()
+	ok(picks == 5 and g.size() == 2, "seed %d: 5 rare Boki picks, 2 of them guarded (%d)" % [s, g.size()])
+	var great := true
+	for c in g:
+		var camp: Dictionary = m.camps.camps[int(c["camp"])]
+		great = great and Camps.size_def(int(camp["size"]))["id"] == "great" and int(camp["region"]) != m.biomes.hot.hot
+		var at_camp := (camp["pos"] as Vector3).distance_to(c["pos"]) < 0.01
+		great = great and at_camp and sp.state_for(c, m.player.team) == "active"
+	ok(great, "seed %d: both on Great Camps outside the hot zone, announced at the camp" % s)
+	var again := SpawnPlan.new(m)
+	again.build(World.load_layout(m.world.layout_id))
+	again.roll(m.seed_val)
+	var mine: Array = g.map(func(c): return c["camp"])
+	var theirs: Array = again.cands.filter(func(c): return c.has("camp")).map(func(c): return c["camp"])
+	ok(mine == theirs, "seed %d: every game rolls the same guarded camps" % s)
+	if g.is_empty():
+		return
+	var c0: Dictionary = g[0]
+	var camp0: Dictionary = m.camps.camps[int(c0["camp"])]
+	var P: Hunter = m.player
+	P.pos = (camp0["pos"] as Vector3) + Vector3(1, 0, 0)
+	var ms := _camp_mobs(camp0)
+	for i in ms.size() - 1: ms[i].hurt(1e6, P)
+	sp._t = 0.0
+	sp.tick(0.1)
+	var near: Array = m.kins.filter(func(k): return k.has_meta("rare") and k.flat_dist(camp0["pos"]) < 4.0)
+	ok(c0["ref"] == null and near.is_empty(), "seed %d: no Boki to scan while its camp is live" % s)
+	_kill_camp(m, camp0, P)
+	sp._t = 0.0
+	sp.tick(0.1)
+	var k = c0["ref"]
+	var loose: bool = k is Kin and (k as Kin).is_wild() and k.has_meta("rare") and (k as Kin).owner_h == null
+	loose = loose and (k as Kin).flat_dist(camp0["pos"]) < 2.0
+	ok(loose, "seed %d: cleared, a wild rare Boki floats free at the camp for any squad" % s)

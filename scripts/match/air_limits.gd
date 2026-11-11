@@ -3,7 +3,7 @@ extends RefCounted
 ## What you may do in the air: items 162 and 162b.
 ## - The opening drop (skyship or tutorial) is steering only: the glide heading and the dive. No dash, jump,
 ##   ability, glove, belt item, weapon or Boki throw until you land; the HUD greys the slots meanwhile. Space
-##   only deploys the canopy out of the dive.
+##   only deploys the canopy out of the dive, and crouch held folds it back into the dive (DropFeel.tick_canopy).
 ## - The glider never opens during an ability or attack animation (a wind-up, a hold, a cast, a dash, a kit
 ##   move's recovery). Held glide opens it the moment the animation ends, with the speed it left you, so the
 ##   momentum carries into the glide. A move that travels (a dash, a Lunge) ends with its travel, and a kit's
@@ -11,10 +11,10 @@ extends RefCounted
 ##   dashglide_reopen_frames, --airdash-glide-check). A jump off the ground ends the move it left (a slam's
 ##   recovery doesn't hold the glider shut after you jump out of it). An open glider is never folded by this rule.
 
-## Every press the drop ignores (move, aim and glide stay: they steer).
+## Every press the drop ignores (move, aim and glide stay: they steer; crouch is the dive).
 const TRAVEL_JOIN_S := 0.05      # s: a kit move started this close after a travel or Shift press is that move's
 const DROP_KEYS := ["dash", "jump", "fire", "sec", "sec_hold", "sig", "skill", "ult", "throw", "kin_ab", "swap",
-		"util1", "util2", "util3", "util4", "gear1", "gear2", "crouch", "interact"]
+		"util1", "util2", "util3", "util4", "gear1", "gear2", "interact"]
 
 ## The opening drop, in the air: nothing but steering.
 static func drop_locked(h: Hunter) -> bool:

@@ -587,7 +587,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 
 | Setting | Value |
 |---|---|
-| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. |
+| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. guard_size: the size whose camps guard a rare Boki (the map's spawn_points.rare_kin.guarded says how many): it floats free at the camp's centre when the camp is cleared (scripts/match/spawn_plan.gd). |
 | kind_size | {"light": "small", "normal": "camp", "heavy": "great", "chief": "chief"} |
 | sizes | [{"id": "small", "name": "Small Camp", "n": 2, "armor": 25, "orb": 0.0}, {"id": "camp", "name": "Camp", "n": 3, "big": "sentinel", "armor": 50, "orb": 0.5}, {"id": "great", "name": "Great Camp", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 0}, {"id": "chief", "name": "Camp Chief", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 1, "big_rar": 1}] |
 | small | ["skitter", "spitter", "bomber"] |
@@ -597,6 +597,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | back_until_s | 420 |
 | max_mobs | 85 |
 | spread | 1.8 |
+| guard_size | great |
 
 ## capture (`content/rules/capture.json`)
 
@@ -682,6 +683,24 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | mage | {"dist": 1.0, "time": 1.15} |
 | gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
 | archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
+
+## drop (`content/rules/drop.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The opening drop (docs/decisions/0049-drop-height.md, EARLY_CAMPS_DROP.md section 3): the skyship, the squad launch, the dive, the canopy, the landing, and what the local player sees and hears on the way down. Read by DropFeel; DropLaunch, DropReticle, DropSquad, DropView and GliderSfx take their numbers from it. Metres, seconds, m/s, degrees. |
+| ship | {"doc": "height: the ship's flight height (owner call 1; 140 is the grander alternative). speed: along its line. ride_cam_dist / launch_cam_dist: how far back the camera sits aboard and in the launch. plan_s: the planning phase before it sets off.", "height": 110.0, "speed": 14.0, "ride_cam_dist": 60.0, "launch_cam_dist": 26.0, "plan_s": 12.0} |
+| launch | {"doc": "speed: along the ship's heading. lift: up out of the hatch. lock_s: no keys for this long (45 m carried). separate_after_s: Separate can break you off from here.", "speed": 18.0, "lift": 8.0, "lock_s": 2.5, "separate_after_s": 1.5} |
+| dive | {"doc": "fall / speed: the dive's sink and top flat speed. vy_rate: 1/s, how fast it reaches its sink. accel: m/s^2 toward the keys.", "fall": 20.0, "speed": 16.0, "vy_rate": 7.0, "accel": 52.0} |
+| canopy | {"doc": "fall / speed / vy_rate / accel: as the dive's, under the open glider. brake: m/s^2 slowing or turning back, dive or canopy. pop_vy: the fall checks to this as the canopy catches. open_h: it opens by itself this high above the ground. void_open_y: and at this height over the void.", "fall": 5.0, "speed": 9.0, "vy_rate": 9.0, "accel": 30.0, "brake": 30.0, "pop_vy": -1.6, "open_h": 10.0, "void_open_y": 7.0} |
+| flare | {"doc": "Below height the glider flares the fall down to fall, at rate 1/s.", "height": 4.0, "fall": 2.2, "rate": 6.0} |
+| land | {"doc": "The soft landing: dust particles and the model's squash. No ring (a ground ring means gameplay).", "dust": 14, "squash": 0.45} |
+| view | {"doc": "The local player's dive view: the field of view widens by widen_deg over widen_s and the camera tips tilt_deg further down; both ease back over back_s when the canopy opens.", "widen_deg": 10.0, "widen_s": 0.4, "tilt_deg": 12.0, "back_s": 0.5} |
+| cloud | {"doc": "One cloud sheet at height (world y) for the local player: crossing it is haze_s of white and a whoosh. scale / drift / cover / alpha: the sheet's look (cloud_layer.gdshader).", "height": 60.0, "haze_s": 0.3, "scale": 0.035, "drift": 0.05, "cover": 0.5, "alpha": 0.6} |
+| wind | {"doc": "pitch_low / pitch_high: the wind loop's pitch at a standstill and at the dive's full speed. streak_from: fall speed (m/s) where the screen-edge streaks start; they are full at the dive's fall. snap_db: the canopy's snap in the drop.", "pitch_low": 0.8, "pitch_high": 1.3, "streak_from": 6.0, "snap_db": 0.0} |
+| ribbon | {"doc": "Each Hunter's team-colour ribbon in the dive: width in metres, trail_s seconds of its velocity long.", "width": 0.14, "trail_s": 0.4} |
 
 ## equal (`content/rules/equal.json`)
 
