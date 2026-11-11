@@ -1,0 +1,8 @@
+{
+	"palette": {"main": "#ffc832", "hot": "#fff4cc", "char": "#ffe08a"},
+	"moves": {
+		"broadside_wave": {"fx": [
+			{"p": "ring", "arc": 105, "size": "r", "size_x": 1.11, "life": 0.45, "c": "main", "c2": "hot", "c3": "char"}
+		]}
+	}
+}

@@ -14,9 +14,7 @@ const WAVE_COL := [Color("ff9a14"), Color("8a4dff")]     # wave 1 saturated bras
 const WAVE_CORE := [Color("fff0c0"), Color("ffe0a0")]
 const WAVE_DARK := [Color("5a2e04"), Color("2a1260")]    # each slug's dark core
 const WAVE_PITCH := [1.0, 0.82]
-## the fan on the ground: Dredge's brass, saturated so it can't read white on bright grass, and how strong
-## its fill and rim are over AimKit's defaults
-const FAN_COL := Color("f08c14")
+## how strong the charge fan's fill and rim are over AimKit's defaults (it is drawn in his signature gold)
 const FAN_ALPHA := 1.8
 ## s each slug's look hangs at the fan edge fading. Like the source's orbs (f35-f38) the looks always fly the
 ## whole fan, even when the slug itself stops on a foe up close, so the wave reads as a fan.
@@ -110,7 +108,7 @@ func _charge_looks(kc: float) -> void:
 	var grow := 1.0 - pow(1.0 - kc, 2.0)
 	var reach := maxf(0.6, float(x["range"]) * grow)
 	AimKit.cone(h, "x_fan", {"dir": blast["dir"], "len": reach, "deg": float(x["fan_deg"]),
-		"fill": kc, "all": true, "col": FAN_COL, "col2": WAVE_COL[1], "alpha": FAN_ALPHA, "hot": 0.15 * kc})
+		"fill": kc, "all": true, "col": Arch.color("dredge"), "col2": WAVE_COL[1], "alpha": FAN_ALPHA, "hot": 0.15 * kc})
 	if not k.tells_visible() or randf() > 0.5:
 		return
 	var hand_l := _hand(-1.0)
@@ -158,16 +156,9 @@ func _slug_hit(wave: int, e: Ent, why: String, dmg: float) -> void:
 	m.fx.burst(e.pos + Vector3(0, 0.6, 0), Color("b48aff"), 4, 2.0, 0.5, -4.0, 0.8, Vector3.UP, 20.0)
 	HeroUlt.landed(k, e)
 
-## A wave goes: a brass sunburst at his fists, a crescent sweep across the fan, a heavy thump and a shove
-## of the camera back toward him.
+## A wave goes: a brass sunburst at his fists, a pale gold fan on the hit arc whose bright edge runs out with the
+## slugs (content/vfx/dredge.json "broadside_wave", sent to the other games too), a heavy thump.
 func _wave_fx(i: int, at: Vector3, dir: Vector2) -> void:
-	var x := xd()
 	k.fx.sunburst(at, 1.9, WAVE_COL[i % 2], WAVE_CORE[i % 2], 0.3, true)
-	k.fx.crescent(
-		h.pos + Vector3(0, 0.3, 0), dir, float(x["fan_deg"]), float(x["range"]), WAVE_COL[i % 2], WAVE_DARK[i % 2],
-		0.32
-	)
-	AimKit.cone(h, "x_fan", {"dir": dir, "len": float(x["range"]), "deg": float(x["fan_deg"]), "edges": true,
-		"all": true, "col": FAN_COL, "alpha": FAN_ALPHA, "dur": 0.25})
+	k.vfx("broadside_wave", h.pos, dir, {"r": float(xd()["range"])})
 	m.sfx("dr_blast", h.pos, 0.0, WAVE_PITCH[i % 2])
-	k.net_ring(at, float(x["range"]) * 0.5, WAVE_COL[i % 2])

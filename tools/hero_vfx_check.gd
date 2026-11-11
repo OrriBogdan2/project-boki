@@ -25,7 +25,7 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 		"all": {"fx": [{"p": "sweep", "size": 2.0}, {"p": "scorch", "size": 2.0}, {"p": "skirt", "size": 1.5},
 			{"p": "flare", "size": 1.5, "near": true}, {"p": "ribbon", "at": "tip"}, {"p": "thread", "len": 2.0},
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
-			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
+			{"p": "vortex", "size": 2.0}, {"p": "ring", "size": 2.0, "arc": 105}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
 			{"p": "drop", "n": 24}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
@@ -261,7 +261,11 @@ func _core_kinds(main: Node, m: Match, V: HeroVfx, P: Hunter) -> void:
 	V._anchors.clear()
 	_clear(V)
 	V.play(P, "all", P.pos, Vector2.RIGHT)
-	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size() - 1, "every layer kind plays")
+	ok(_visible_nodes(V) >= HeroVfx.MODES.size() + HeroVfx.LOOKS.size(), "every layer kind plays")
+	var ring_mode: int = HeroVfx.MODES["ring"]
+	var rings := V.live.filter(func(e): return (e["mat"] as ShaderMaterial).get_shader_parameter("mode") == ring_mode)
+	var half := float((rings[0]["mat"] as ShaderMaterial).get_shader_parameter("arc")) if rings.size() == 1 else 0.0
+	ok(is_equal_approx(half, deg_to_rad(52.5)), "a ring with an arc is a fan of that arc (half %.3f rad)" % half)
 	for i in 40:
 		V.play(P, "all", P.pos, Vector2.RIGHT)
 	ok(V.live_n <= HeroVfx.MAX_LIVE, "a pile-up of every kind stays at the live cap (%d)" % V.live_n)

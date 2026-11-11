@@ -7,6 +7,7 @@ extends RefCounted
 
 const BURST := preload("res://tools/ult_burst.gd")
 const FACE_AWAY := PI / 2.0         # a target east of Grimble facing this way shows him its back
+const RING_REACH := 0.9             # share of a ring look's size its band runs out to (hero_vfx.gdshader ring)
 
 var ak = null
 var ok_fn: Callable
@@ -60,6 +61,7 @@ func _charge_and_waves() -> void:
 	ak.step(m, 0.2)
 	P.teleport(home)
 	var shots0: int = m.shot_n
+	var looks0 := int(HeroVfx.of(m).plays.get("broadside_wave", 0))
 	_cast(P, home + Vector3(4, 0, 0))
 	ok(
 		"ult cast: the charge move plays, its own cooldown starts (21s)",
@@ -100,6 +102,18 @@ func _charge_and_waves() -> void:
 		"ult: one press, two waves of six slugs through spawn_shot",
 		B.waves == 2 and m.shot_n - shots0 >= 12 and not B.running(),
 		"waves %d shots %d" % [B.waves, m.shot_n - shots0]
+	)
+	var x: Dictionary = K.x_def()
+	var look: Dictionary = HeroVfx.data("dredge")["moves"]["broadside_wave"]
+	var fan_look: Dictionary = look["fx"][0]
+	var reach := RING_REACH * float(fan_look["size_x"]) * float(x["range"])
+	ok(
+		"ult look: each wave draws its fan on the hit arc (105 degrees, out to 5.9m), for the other games too",
+		int(HeroVfx.of(m).plays.get("broadside_wave", 0)) - looks0 == 2 and fan_look["p"] == "ring"
+			and is_equal_approx(float(fan_look["arc"]), float(x["fan_deg"])) and absf(reach - float(x["range"])) < 0.05
+			and bool(look.get("net", true)),
+		"plays %d arc %.0f reach %.2f" % [int(HeroVfx.of(m).plays.get("broadside_wave", 0)) - looks0,
+			float(fan_look["arc"]), reach]
 	)
 	ok(
 		"ult bond: nothing for waves that hit nobody", _owed(P) == 0.0 and B.casts == 1,

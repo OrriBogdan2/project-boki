@@ -452,6 +452,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
+			mt.set_shader_parameter("arc", deg_to_rad(float(layer.get("arc", 360.0))) * 0.5)   # a ring's fan
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)

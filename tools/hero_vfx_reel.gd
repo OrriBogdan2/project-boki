@@ -370,6 +370,23 @@ func _dredge_hook() -> void:
 			[0.15, 0.3, 0.45, 0.6, 0.9, 1.2, 1.5, 1.8, 2.2]), 3.0)
 	await _go(GAP)
 
+## Grimble's Broadside: the fan grows through the charge, each wave's fan runs out with its slugs; the aim swings
+## 40 degrees between the waves, so the second fan goes the new way.
+func _dredge_r() -> void:
+	await _reset(5.0)
+	var home_aim := T.pos
+	var cast := func(t: float):
+		if _at(t, 0.1):
+			P.ak.cd["x"] = 0.0
+			P.ak.cast_ult()
+		var swing := clampf((t - 1.35) / 0.3, 0.0, 1.0) * deg_to_rad(40.0)
+		var off := home_aim - P.pos
+		_aim(P.pos + off.rotated(Vector3.UP, swing))
+	await _go(2.4, cast, _sheet("r",
+			"R, the Broadside: the fan grows on the hit arc, each wave's pale fan runs out with its slugs; the aim swings "
+			+ "between the waves", [0.6, 1.1, 1.22, 1.27, 1.33, 1.45, 1.82, 1.88, 2.0]), 3.0)
+	await _go(GAP)
+
 func _archer_miss() -> void:
 	await _reset(8.0)
 	var off := home + Vector3(5.5, 0, -2.5)

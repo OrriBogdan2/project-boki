@@ -26,7 +26,7 @@ uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
 uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
-uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
+uniform float arc = 1.0;    // M_SCORCH cone, M_RING: half angle (rad; M_RING from PI is whole). M_SKIRT: the share of the circle it covers
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
@@ -224,10 +224,12 @@ vec4 vortex(vec2 uv) {
 vec4 ring(vec2 uv) {
 	float go = 1.0 - pow(1.0 - min(life / 0.55, 1.0), 3.0);    // races out, then slows
 	vec2 ring_v = cel_ring(uv, go, life, seed);
-	float d = length(uv * 2.0 - 1.0);
+	vec2 p = uv * 2.0 - 1.0;
+	float d = length(p);
 	float fill = hard(go * 0.9 - mix(0.2, 0.03, go) - d) * 0.25 * (1.0 - hard(life - 0.35));   // a flash of dust inside
 	float fade = 1.0 - smoothstep(0.75, 1.0, life);
-	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade;
+	float span = arc < 3.14 ? hard(arc - abs(atan(p.x, p.y))) : 1.0;     // a fan: only the arc ahead
+	float a = (ring_v.x + fill * (1.0 - ring_v.x)) * fade * span;
 	vec3 c = mix(mix(col.rgb, col2.rgb, ring_v.y), mix(col2.rgb, vec3(1.0), 0.5), ring_v.y * (1.0 - hard(life - 0.2)));
 	c = mix(col3.rgb, c, ring_v.x);
 	return vec4(c * a, a);
