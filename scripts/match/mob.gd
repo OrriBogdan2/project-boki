@@ -3,6 +3,7 @@ extends Ent
 ## Monsters. Each attack is telegraphed on the ground before it lands.
 
 var mkind := "skitter"
+var damage_by := {}          # Hunter team -> damage dealt to it: who did the most (lair XP shares, KillCues steals)
 var md: Dictionary = {}
 var st := "idle"            # idle | chase | windup | lunge | recover
 var st_t := 0.0
@@ -95,6 +96,12 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			if st == "idle":
 				st = "chase"
 	return dealt
+
+## Every point that lands counts for the dealer's team, the killing blow too (Ent.hurt calls this before _on_zero).
+func _took(d: float, by: Ent) -> void:
+	var dealer: Ent = (by as Kin).owner_h if by is Kin and (by as Kin).owner_h else by
+	if dealer is Hunter:
+		damage_by[dealer.team] = float(damage_by.get(dealer.team, 0.0)) + d
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
 	stagger_t = 2.2 if mkind == "warden" or md.get("boss", false) else 3.0
@@ -262,13 +269,14 @@ func sim(dt: float) -> void:
 		if grounded and hv.length() <= spd * 1.3 and m.world.is_void(ahead.x, ahead.y):
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
-	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	var pre_dir := Vector2(vel.x, vel.z)
+	var pre_v := pre_dir.length()
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
-		m.on_wall_slam(self)
+		m.on_wall_slam(self, pre_dir / pre_v)
 		hurt(10.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)

@@ -28,6 +28,7 @@ extends RefCounted
 ##  18. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
 ##  19. the low-health heartbeat (LowHpCue, content/rules/low_hp.json) starts under the line, speeds up as health
 ##      drops, and stops on a heal, a down or out
+##   7. the Blight rumble is played where it belongs (WIRED), is in a set, and exists
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -36,6 +37,9 @@ const REACH_MIN := 5.0         # m: below this a sound would not carry past its 
 const STOCK := ["heal", "build", "cloak", "ping", "throw", "pickup", "shield", "skill"]   # shared cues the belt used
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
+
+## Sound -> the scripts that must play it (a sound that exists but is never played is silence).
+const WIRED := {"blight_rumble": ["match/blight.gd", "match/blight_dir.gd"]}   # (the Boki ones: _boki_wired)
 
 var bad := 0
 var levels := {}
@@ -55,6 +59,8 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_dash_air()
+	_cue_table()
+	_wired()
 	_fallback()
 	_ult_cues()
 	_garden_names()
@@ -68,6 +74,7 @@ func run(main: Node) -> void:
 	_gloves()
 	_ui_cues()
 	_low_hp()
+	_pickups()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -87,6 +94,20 @@ func _boki_cues() -> void:
 	for theme in KinLib.TYPE_OF_THEME:
 		types[KinLib.TYPE_OF_THEME[theme]] = true
 	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
+## The mix pass's cue table (content/rules/sfx_cues.json): every named sound has a file and the dB is a sane trim.
+func _cue_table() -> void:
+	var mix = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_mix.json"))
+	var cues: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/sfx_cues.json"))["cues"]
+	var off := []
+	for sname in cues:
+		var db := float(cues[sname])
+		if _takes(String(sname)).is_empty() or db < -float(mix["max_trim_db"]) or db > float(mix["max_boost_db"]):
+			off.append(sname)
+	ok(not cues.is_empty() and off.is_empty(),
+		"the cue table: %d sounds on file, each within the trim/boost caps %s" % [cues.size(), off])
+	var d: Dictionary = mix["duck"]
+	var dips := float(d["ult_db"]) < 0.0 and float(d["knock_db"]) < 0.0
+	ok(dips and float(d["back_s"]) <= 1.2, "the ducking rules dip and come back in about a second")
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -290,6 +311,22 @@ func _fusion_cues() -> void:
 			missing.append(c)
 	ok(missing.is_empty() and cues.size() >= 16,
 		"%d Fusion cues and the end, tired, evolve sounds on file (missing %s)" % [cues.size(), missing])
+## Each sound in WIRED is in a set and its script(s) play it by name.
+func _wired() -> void:
+	var listed := {}
+	for f in DirAccess.get_files_at("res://content/sfx"):
+		if f.ends_with(".json"):
+			var d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/" + f))
+			if d is Dictionary:
+				listed.merge(d.get("sounds", {}))
+	var unplayed := []
+	for sname in WIRED:
+		if not listed.has(sname) or not Sfx.ensure(sname):
+			unplayed.append(sname + " (no set or file)")
+		for f in WIRED[sname]:
+			if not FileAccess.get_file_as_string("res://scripts/" + String(f)).contains('"%s"' % sname):
+				unplayed.append("%s not in %s" % [sname, f])
+	ok(unplayed.is_empty(), "%d warning sounds are wired %s" % [WIRED.size(), unplayed])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -448,6 +485,31 @@ func _ui_cues() -> void:
 		if _takes(String(n)).is_empty():
 			missing.append(n)
 	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
+## 7. Pickups by item category (content/rules/pickup_sfx.json): every category, gear kind, treasure, belt
+## item and ground kind maps to a sound that exists, and the key cue is kept.
+func _pickups() -> void:
+	var r: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PickupSfx.RULES))
+	var cats: Dictionary = r["cues"]
+	var cues := cats.values()
+	for c in (r["gear_kind"] as Array) + [r["valuable"], r["belt"]] + (r["kinds"] as Dictionary).values():
+		ok(cats.has(c), "pickup category %s has a cue" % c)
+	var kinds := Gear.SLOT_NAMES.size()
+	ok((r["gear_kind"] as Array).size() == kinds, "a pickup category for each of the %d gear kinds" % kinds)
+	var silent := cues.filter(func(s): return not Sfx.ensure(String(s)))
+	ok(silent.is_empty(), "every pickup category has its sound file (missing %s)" % [silent])
+	ok(Sfx.ensure("key_get"), "the key cue key_get is kept")
+	var wrong := []
+	for gid in Gear.ALL:
+		if not cues.has(PickupSfx.of_gear(String(gid))):
+			wrong.append(gid)
+	for vid in Loot.VALUABLES:
+		if not cues.has(PickupSfx.of(Loot.valuable(String(vid)))):
+			wrong.append(vid)
+	for iid in UtilityBelt.ALL:
+		if not cues.has(PickupSfx.of_kind(String(iid))):
+			wrong.append(iid)
+	ok(wrong.is_empty(), "every gear piece, treasure and belt item has a cue (%s)" % [wrong])
+	ok(Sfx.ensure("use_tonic") and Sfx.ensure("use_armor_kit"), "tonic drink and armour-kit repair have own sounds")
 
 func _takes(sname: String) -> Array:
 	var out := []

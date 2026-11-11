@@ -13,6 +13,8 @@ extends RefCounted
 const HIT_COL := Color("fff0d2")
 const HURT_COL := Color("ff7a5c")       # hits on you read hotter
 const TARGET_DB := -9.0                 # dB: the target layer sits quietly under the weapon's own hit sound
+const SHELL_FLASH_T := 0.12             # s a hit on armour keeps the body flash shell-coloured
+const BREAK_FLASH_T := 0.3              # s the body holds then fades its flash when the armour breaks
 const FAR := 24.0                       # beyond this from the player nothing is drawn for a hit
 const ARMOR_BREAK_DB := -3.0            # dB: the armour crack as heard from another Hunter's break
 const ARMOR_BREAK_DB_VICTIM := 2.0      # dB: the same crack on your own armour, louder so you know it's gone
@@ -70,6 +72,11 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary, crit: b
 	if ability: power = maxf(power, 1.3)       # an ability hit always lands big
 	var cls := HitClass.of(target, armor)
 	HitClass.draw(m.fx, cls, at, dir, HitClass.tint(target, cls, col), power, crit)
+	# the body tells which it was: an armour hit flashes the shell's colour, a health hit white (a break keeps its own)
+	if armor:
+		target.shell_t = maxf(target.shell_t, SHELL_FLASH_T)
+	elif target.shell_t < SHELL_FLASH_T:
+		target.shell_t = 0.0
 	# the body flinches along the hit (Ent.flinch: drawn only, springs back); big things barely move
 	var heft := maxf(1.0, float(target.get("r")) * 1.6) if target.get("r") != null else 1.0
 	target.flinch = (target.flinch + dir * (0.05 + 0.045 * power) * (1.4 if crit else 1.0) / heft).limit_length(0.3)
@@ -124,6 +131,8 @@ static func knock(m: Match, h: Hunter, credit: Ent) -> void:
 	m.fx.dust(h.pos, 14)
 	HeroVfx.of(m).play(h, "downed", h.pos, h.aim_dir())
 	_squad_cue(m, h, credit, "knock_confirm", -6.0)
+	if h != m.player:
+		Sfx.duck_for("knock", h.pos)         # (your own knock ducks in Match.knock)
 
 ## Someone taken out for good (Match.eliminate): their light goes up in a column of sparks.
 static func kill(m: Match, h: Hunter, credit: Ent) -> void:
@@ -145,11 +154,14 @@ static func _squad_cue(m: Match, h: Hunter, credit: Ent, cue: String, vol_db: fl
 	Sfx.play(cue, null, vol_db, 0.0)
 	return true
 
-## Armor broken (Match.on_armor_break): a burst of blue shards and a glassy crack, and a short
-## freeze for whoever broke it (Feel tier 3: 0.045s).
+## Armor broken (Match.on_armor_break): the body cracks (it holds the shell's flash for BREAK_FLASH_T, then fades)
+## and the shell falls off it in shards, with a glassy sound; no ring, no burst. A short freeze for whoever broke it
+## (Feel tier 3: 0.045s).
 static func armor_break(m: Match, h: Hunter, credit: Ent) -> void:
 	if m == null or m.fx == null:
 		return
+	h.shell_t = BREAK_FLASH_T
+	h.flash_t = maxf(h.flash_t, BREAK_FLASH_T)
 	var c := Vector3(h.pos.x, h.hit_y() + 1.0, h.pos.z)
 	m.fx.flash(c, Color("9ad8ff"), 0.8, 0.14)
 	m.fx.spark(c, Vector3.UP, Color("b8e6ff"), 20, 9.0, 100.0, 0.35, 16.0, 1.2)
