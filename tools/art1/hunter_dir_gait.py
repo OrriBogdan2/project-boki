@@ -17,6 +17,7 @@ from mathutils import Matrix, Vector
 
 SRC, OUT, WALK, RUN, *MORE = sys.argv[sys.argv.index("--") + 1:]
 BUILD = [d for d in (MORE[0] if MORE else "b,l,r").split(",") if d]   # the directions to rebuild; "" only measures
+LENGTH = {"walk": float(MORE[1]) if len(MORE) > 1 else 0.0, "run": float(MORE[2]) if len(MORE) > 2 else 0.0}   # s, 0 = the f loop's
 SPEED = {"walk": float(WALK), "run": float(RUN)}   # game m/s (warden_anim loco); the model is in game metres
 FPS = 48            # keys per second
 CONTACT = 0.012     # m: a sole vert this close to the floor is planted
@@ -163,7 +164,7 @@ class Gait:
 
     def __init__(self, gait, k, fwd):
         self.speed = SPEED[gait]
-        self.n, self.floor = fwd["n"], fwd["floor"]
+        self.n, self.floor = round(LENGTH[gait] * FPS) or fwd["n"], fwd["floor"]
         self.period = self.n / FPS
         self.duty = min(fwd["duty"], REACH * LEG / (self.speed * self.period))
         self.d = DIRS[k]
@@ -236,7 +237,7 @@ def pose(g, src, ph, feet, drop):
         pb.location, pb.rotation_quaternion = la.lerp(lb, u), qa.slerp(qb, u)
     for name in ["root"] + LEG_BONES:
         PB[name].matrix_basis = Matrix()
-    fk = g.fwd["keys"][int((g.fwd["strike"] + ph * g.n) % g.n)]
+    fk = g.fwd["keys"][int((g.fwd["strike"] + ph * g.fwd["n"]) % g.fwd["n"])]
     mid = ph - g.duty / 2                                 # 0 at the right foot's mid stance
     onto = math.cos(mid * math.tau)                       # +1 weight on the right foot, -1 on the left
     rest_q = REST["root"].to_quaternion()
