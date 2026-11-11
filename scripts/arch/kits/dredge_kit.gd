@@ -26,6 +26,7 @@ const WORD_COL := Color("c0b0a0")      # the grey of a hook's misses (MISS, SNAG
 const BRASS := Color("e0a040")
 const IRON := Color("3a3f48")
 const ANCHOR_COL := LDFx.ANCHOR_RIM    # coin gold: the anchor's rim, its telegraphs and its stun
+const TELL_ALPHA := 0.7                # his cone tells' strength: fill under 0.25 at the apex (HeroVfx lights it)
 const STUN_DARK := Color("5a3a08")     # the stun spiral's dark band
 const STOP_CARRY := 3.0                # m/s at most kept out of a barge
 const HAUL_T := 0.26                   # s per hand-over-hand haul (dr_reel); the chain yanks taut on each
@@ -559,7 +560,7 @@ func _tick_wind(dt: float) -> void:
 	var k := 1.0 - wind / float(ed["windup"])
 	AimKit.cone(h, "e_tell", slam_tell(k))
 	if tells_visible():
-		HeroVfx.of(m).hold(h, "anchor_wind", k, {"r": float(ed["radius"])})     # the raised fist, the cone's edge
+		HeroVfx.of(m).hold(h, "anchor_wind", k, {"r": float(ed["radius"]), "dir": slam_dir})     # fist, cone, its front
 	if wind <= 0.0:
 		wind = 0.0
 		AimKit.hide(h, "e_tell")
@@ -582,7 +583,7 @@ func slam_tell(k: float) -> Dictionary:
 	var ed := e_def()
 	return {
 		"dir": slam_dir, "len": float(ed["radius"]), "deg": float(ed["angle"]), "fill": clampf(k, 0.0, 1.0),
-		"all": true, "col": ANCHOR_COL, "alpha": 1.8, "hot": 0.5 * k
+		"all": true, "col": ANCHOR_COL, "alpha": TELL_ALPHA, "hot": 0.5 * k
 	}
 
 ## The slam: his fist into the ground in front, on this frame: the cone's damage and stun, cracks, dust and a

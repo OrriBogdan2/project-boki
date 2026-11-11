@@ -15,7 +15,7 @@ const WAVE_PITCH := [1.0, 0.82]
 ## the fan on the ground: coin gold (the signature), and how strong its fill and rim are over AimKit's defaults
 const FAN_COL := DredgeKit.ANCHOR_COL
 const FAN_HOT := Color("fff0b0")
-const FAN_ALPHA := 1.8
+const FAN_ALPHA := DredgeKit.TELL_ALPHA
 
 var k: DredgeKit
 var h: Hunter

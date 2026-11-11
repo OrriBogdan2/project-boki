@@ -14,12 +14,13 @@ const SURFACE: Shader = preload("res://shaders/hero_vfx.gdshader")
 const MOTES: Shader = preload("res://shaders/hero_vfx_motes.gdshader")
 const MOTE: Shader = preload("res://shaders/hero_vfx_mote.gdshader")
 const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "thread": 5, "bolt": 6, "vortex": 7,
-	"ring": 8, "sheen": 9}
+	"ring": 8, "sheen": 9, "wedge": 11}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
 const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
-	"ring": 6, "sheen": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
+	"ring": 6, "sheen": 6, "wedge": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6,
+	"drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
 const TRAIL_MAX := 2.0         # s a projectile's trail may follow it
 const MAX_LIVE := 420          # GPU particles alive at once across the match
@@ -346,7 +347,7 @@ func _surface_node(kind: String) -> Node3D:
 			strip.size = Vector2.ONE
 			strip.center_offset = Vector3(0.5, 0, 0)          # from the origin along +X: A at 0, B at 1
 			mi.mesh = strip
-		"vortex", "ring":
+		"vortex", "ring", "wedge":
 			var disc := PlaneMesh.new()
 			disc.size = Vector2.ONE
 			mi.mesh = disc
@@ -372,6 +373,13 @@ func _arc(deg: float) -> ArrayMesh:
 		st.add_vertex(way * SWEEP_INNER)
 	_arcs[key] = st.commit()
 	return _arcs[key]
+
+## A wedge's shape on its material: `arc` degrees wide, `extent` metres to the rim, its front reaching the rim after
+## `lead` of its life. Returns the quad's scale.
+func _wedge(mt: ShaderMaterial, layer: Dictionary, extent: float, lead: float) -> Vector3:
+	mt.set_shader_parameter("arc", deg_to_rad(float(layer.get("arc", 60.0))) * 0.5)
+	mt.set_shader_parameter("reach_t", clampf(lead, 0.0, 1.0))
+	return Vector3(extent * 2.0, 1.0, extent * 2.0)
 
 ## An open unit cylinder: UV.x round it, UV.y from the foot to the top.
 func _cylinder() -> ArrayMesh:
@@ -482,6 +490,10 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			s1 = s0 * float(layer.get("grow", 1.0))
 			p.y += SCORCH_LIFT
 			mt.set_shader_parameter("spin", float(layer.get("spin", 1.0)))
+		"wedge":
+			s0 = _wedge(mt, layer, extent, _num(layer, "lead", o, 0.0) / _num(layer, "life", o, 0.4))
+			s1 = s0
+			p.y += SCORCH_LIFT
 	mi.global_position = p
 	mi.global_transform.basis = b * Basis.from_scale(s0)
 	_paint(mt, layer, h)
@@ -668,6 +680,12 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if lod < 1.0 and bool(layer.get("near", false)):
 			continue
 		var kind := String(layer["p"])
+		if kind == "wedge":
+			var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
+			_paint(mi.material_override, layer, h)
+			mi.scale = _wedge(mi.material_override, layer, _num(layer, "size", o), 1.0)
+			layers.append({"node": mi, "layer": layer, "n": 0})
+			continue
 		if kind == "string" or kind == "chain":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
 				var mode: int = CHAIN_MODE if kind == "chain" else MODES["ribbon"]
@@ -684,7 +702,8 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		node.emitting = true
 		live_n += n
 		layers.append({"node": node, "layer": layer, "n": n})
-	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "to": o.get("to")}
+	holds[key] = {"h": h, "last": m.time, "k": k, "layers": layers, "at": o.get("at"), "to": o.get("to"),
+			"dir": o.get("dir")}
 
 func _tick_holds() -> void:
 	for key: String in holds.keys():
@@ -704,8 +723,20 @@ func _tick_holds() -> void:
 				_reaim(node, lay["layer"], aim)
 			elif lay["layer"]["p"] == "chain":
 				_draw_chain(lay, hunter, e)
+			elif lay["layer"]["p"] == "wedge":
+				_hold_wedge(lay, hunter, e, aim)
 			else:
 				_draw_string(lay, hunter)
+
+## A held wedge (a wind-up's area): on the ground under him, along the kit's locked "dir" (else the aim), its front at
+## the hold's charge, so it reaches the rim on the frame the move hits.
+func _hold_wedge(lay: Dictionary, h: Hunter, e: Dictionary, aim: Vector2) -> void:
+	var mi: MeshInstance3D = lay["node"]
+	var dir: Vector2 = aim if e["dir"] == null else e["dir"]
+	var at: Vector3 = h.pos if e["at"] == null else e["at"]
+	at.y = m.world.ground_at(at.x, at.z) + SCORCH_LIFT
+	mi.global_transform = Transform3D(Basis(Vector3.UP, atan2(dir.x, dir.y)).scaled(mi.scale), at)
+	(mi.material_override as ShaderMaterial).set_shader_parameter("life", clampf(float(e["k"]), 0.0, 1.0))
 
 ## A hold's emitter turned to the aim now, so a stream along it follows a sweep (the particles already out keep
 ## their own way, as a hose's fire does).

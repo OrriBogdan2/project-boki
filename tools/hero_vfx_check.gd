@@ -4,8 +4,9 @@ extends RefCounted
 ## anchors fall back from the model's node to the Gun to the body; pools and live particles stay capped; distance
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
-## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low. And the status looks
+## a held stream turns with the aim, a projectile trail follows its node and ends with it; a held wedge lies on its
+## locked direction with its front at the charge, and Grimble's wedges are his hit cones to the content numbers.
+## Claire's scarf tails hang from their anchor, follow it, stream behind a run and are off at Low. And the status looks
 ## (scripts/combat/status_looks.gd): every plain status brings its own look onto the body that has it, and only that.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
@@ -28,7 +29,8 @@ const TEST := {"palette": {"main": "#ff8040", "hot": "#ffe080", "char": "#201008
 			{"p": "bolt", "len": 4.0, "jag": 0.4},
 			{"p": "vortex", "size": 2.0}, {"p": "ember", "n": 40}, {"p": "smoke", "n": 12}, {"p": "chunk", "n": 10},
 			{"p": "shard", "n": 20}, {"p": "card", "n": 10}, {"p": "coin", "n": 20}, {"p": "star", "n": 20},
-			{"p": "drop", "n": 24}]},
+			{"p": "drop", "n": 24}, {"p": "wedge", "size": 2.0, "arc": 90}]},
+		"cone": {"fx": [{"p": "wedge", "size": "r", "arc": 110}]},
 		"stream": {"fx": [{"p": "ember", "n": 20, "way": "fwd", "lift": 0.0}]},
 		"rope": {"fx": [{"p": "chain", "at": "tip", "size": 0.2}]},
 		"shot": {"fx": [{"p": "ribbon", "size": 0.2, "life": 1.5, "tail": 0.15}]}}}
@@ -64,10 +66,46 @@ func run(main: Node) -> void:
 	_statuses(m, P)
 	_tier_up(m, V, P)
 	await _core_kinds(main, m, V, P)
+	_wedges(m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## A held wedge (a wind-up's area) lies on the ground along the kit's locked direction, `r` to its rim, its front at
+## the hold's charge so it reaches the rim on the hit; Grimble's wedges are exactly his E and X cones, and the
+## Broadside's front reaches the rim when the slugs do.
+func _wedges(m: Match, V: HeroVfx, P: Hunter) -> void:
+	var uniforms := HeroVfx.SURFACE.get_shader_uniform_list().map(func(u): return u["name"])
+	ok("reach_t" in uniforms, "the looks' shader compiles with the wedge's front (%d uniforms)" % uniforms.size())
+	HeroVfx.set_data(P.arch, TEST)
+	_clear(V)
+	P.inp["aim"] = P.pos + Vector3(4, 0, 0)
+	V.hold(P, "cone", 0.4, {"r": 3.0, "dir": Vector2(0, 1)})
+	V._tick_holds()
+	var w: MeshInstance3D = V.holds.values()[0]["layers"][0]["node"]
+	var mt: ShaderMaterial = w.material_override
+	var fwd := w.global_basis.z.normalized()
+	ok(w.visible and fwd.distance_to(Vector3(0, 0, 1)) < 0.01 and absf(w.global_basis.z.length() - 6.0) < 0.01,
+			"a held wedge lies along its locked direction, not the aim, 3 m to its rim (%s)" % fwd)
+	ok(is_equal_approx(float(mt.get_shader_parameter("life")), 0.4) and float(mt.get_shader_parameter("reach_t")) == 1.0
+			and is_equal_approx(float(mt.get_shader_parameter("arc")), deg_to_rad(55.0)), "its front is the charge")
+	m.time += HeroVfx.HOLD_LINGER + 0.1
+	V._tick_holds()
+	ok(not w.visible, "and goes when the asks stop")
+	_clear(V)
+	HeroVfx.set_data(P.arch, {})
+	var moves: Dictionary = HeroVfx.data("dredge")["moves"]
+	var arch: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/archetypes/dredge.json"))
+	var ed: Dictionary = arch["e"]
+	var x: Dictionary = arch["x"]
+	for mv in ["anchor_wind", "anchor_slam", "broadside_wave"]:
+		var lay: Dictionary = (moves[mv]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
+		var deg := float(x["fan_deg"]) if mv == "broadside_wave" else float(ed["angle"])
+		ok(lay["size"] == "r" and float(lay["arc"]) == deg, "dredge %s: the wedge is the hit cone (r, %d deg)" % [mv, deg])
+	var wave: Dictionary = (moves["broadside_wave"]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
+	var fly := (float(x["range"]) - DredgeBlast.MUZZLE) / float(x["speed"])
+	ok(absf(float(wave["lead"]) - fly) < 0.02, "the Broadside's front reaches the rim with the slugs (%.2f s)" % fly)
 
 ## The moves a Hero's kit asks for (from its scripts' source).
 func _called(arch: String) -> Dictionary:

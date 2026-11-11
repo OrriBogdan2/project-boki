@@ -19,6 +19,7 @@ const int M_SHEEN = 9;      // a band of light climbing a body-shaped capsule, f
 const int M_THREAD = 5;     // a loose thread lying on the ground: UV.y from where it is tied (0) to its end (1)
 const int M_RING = 8;       // a shockwave racing out over the ground: UV across the quad
 const int M_CHAIN = 10;     // a held chain: UV.x counts links from the hand, UV.y across; life is its tension 0..1
+const int M_WEDGE = 11;     // a cone's area on the ground, apex at the centre, pointing +UV.y: UV across the quad
 
 uniform int mode = 0;
 uniform vec4 col : source_color = vec4(1.0, 0.5, 0.1, 1.0);    // the body of the look
@@ -28,7 +29,8 @@ uniform float life = 0.0;   // 0..1 through the look
 uniform float seed = 0.0;
 uniform float gain = 1.0;   // the viewer's share of it (HeroVfx.view_k: allies' effects sit dimmer)
 uniform int shape = 0;      // M_SCORCH: 0 disc, 1 lane, 2 cone
-uniform float arc = 1.0;    // M_SCORCH cone: half angle (rad). M_SKIRT: the share of the circle it covers
+uniform float arc = 1.0;    // M_SCORCH cone, M_WEDGE: half angle (rad). M_SKIRT: the share of the circle it covers
+uniform float reach_t = 1.0;  // M_WEDGE: share of its life the front takes to the rim (1: a hold, life is the front)
 uniform float aspect = 1.0; // M_SCORCH lane: length / width, so the fissures keep their size
 uniform bool billboard = false;
 uniform float jag = 0.0;    // M_BOLT: how far the strike wanders sideways (share of the strip's width)
@@ -249,6 +251,31 @@ vec4 vortex(vec2 uv) {
 	return vec4(c * fade, a);
 }
 
+// A cone's area, never a solid sheet: a soft inside (coverage 0.04 at the apex, 0.22 by the rim), a dark char line
+// and a lit rim on its exact edge, and a bright ragged front running out from the apex that reaches the rim on the
+// hit (after `reach_t` of its life); the rim flashes there and the whole look burns away.
+vec4 wedge(vec2 uv) {
+	vec2 p = uv * 2.0 - 1.0;
+	float d = length(p);
+	float ang = abs(atan(p.x, p.y));
+	float edge = min(1.0 - d, d * sin(max(arc - ang, 0.0)));     // to the rim or the nearer side, 0 on the edge
+	if (edge <= 0.0 || ang > arc) { return vec4(0.0); }
+	float n = fbm3(vec2(ang * 3.0 + seed, d * 4.0 - TIME * 2.0));
+	float go = min(life / max(reach_t, 0.01), 1.0);
+	float behind = hard(go - d + (n - 0.5) * 0.06);
+	float after = reach_t >= 1.0 ? 0.0 : clamp((life - reach_t) / (1.0 - reach_t), 0.0, 1.0);
+	float gone = smoothstep(after * 1.3 - 0.3, after * 1.3, n + 0.15);
+	float fill = mix(0.04, 0.22, smoothstep(0.0, 1.0, d)) * behind;
+	float rim = (1.0 - hard(edge - 0.035)) * mix(0.75, 1.0, behind);
+	float char_line = hard(edge - 0.035) * (1.0 - hard(edge - 0.06)) * 0.45;
+	float front = (1.0 - smoothstep(0.0, 0.07, abs(go - d + (n - 0.5) * 0.06))) * (1.0 - smoothstep(0.0, 0.18, after));
+	float flash = 1.0 - smoothstep(0.0, 0.35, after);
+	vec3 rim_c = mix(col.rgb, col2.rgb, 0.4 + 0.6 * flash);
+	vec3 c = col.rgb * fill + col3.rgb * char_line + rim_c * rim + mix(col2.rgb, vec3(1.0), 0.5) * front * 1.4;
+	float a = max(max(fill, char_line), max(rim, front));
+	return vec4(c, a) * gone;
+}
+
 vec4 ring(vec2 uv) {
 	float go = 1.0 - pow(1.0 - min(life / 0.55, 1.0), 3.0);    // races out, then slows
 	vec2 ring_v = cel_ring(uv, go, life, seed);
@@ -273,6 +300,7 @@ void fragment() {
 	else if (mode == M_RIBBON) { v = ribbon(UV); }
 	else if (mode == M_RING) { v = ring(UV); }
 	else if (mode == M_CHAIN) { v = chain(UV); }
+	else if (mode == M_WEDGE) { v = wedge(UV); }
 	else { v = thread(UV); }
 	ALBEDO = v.rgb * gain;
 	ALPHA = v.a * gain;
