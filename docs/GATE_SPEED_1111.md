@@ -338,3 +338,31 @@ mid-run leaves the legs on the run (foot slide off by 0.41 m)", the non-determin
 already in `docs/DEBT.md`. So that flip follows the import: the gate's cold import per run (section 5)
 draws a new copy each time, and an import cache keeps whichever copy it has. `--prologue-check` 1/2 on both
 trees: a skip takes 2.4 to 2.8 s (budget 400 ms, `CheckClock`) on a free box, so it is not load.
+
+## 10. Seeds (rpc1, job 20261111-135014-a1)
+
+rpc1: 32 cores, load 20 to 27 from other sessions. Each check alone, the gate's engine arguments, 900 s limit.
+
+- **`CheckRegistry.run` seeds the global stream from the flag** (`seed(hash(flag))`) before the check starts.
+  Game code that rolls on it (`BaseLife`, AI, loot) rolls the same on every run of a check. A serial pass of the
+  gate's 278 flags on the seeded tree took 10650 s of check time (177.5 min one at a time). The 13 flags that
+  were red, or redder than the earlier passes, ran again on the same tree without the seed: the same rc and
+  FAIL count for 12 of them.
+- **`--new-player-flow-check`**: without the seed, it failed a different step each run ("there is a skiff
+  to take", "seven knocks hatch it", "'Head out together' opens the tutorial match"). With its seed it fails
+  the skiff every run (3 of 3): that expedition has no dock. That is a real game question (the first
+  expedition can roll without a dock) and is left for the match owner. The check used to crash on `docks[0]`
+  and wait for the watchdog. It now returns after the FAIL, so the count is 1 (the same as 0245).
+- **`--chore-check` root**: with the global seed alone it was red in 1 of 7 runs. In that run Mole's fetch
+  chores gave up (5 of 6 ended, 0 journal lines). `HomeLayout.ensure` rolls a new farm-start island every run
+  (`new_fs`, its own `randomize()`), so the toy and the ball sometimes land where Mole cannot reach. The check
+  now pins the island, the uids (likes) and the rolls after the home's real build frames: 6 of 6 green, and
+  green on the rebased tree. Fetch counts still differ (59 to 74) because of wall-clock stamps and per-object
+  RNGs, so the home is not fully repeatable.
+- **Not done**: putting the game's own `randomize()` RNGs (20 sites) on the global stream would make the home
+  repeatable in checks. It is not safe as it stands: `match.gd:280` and `main.gd:2175` seed the global stream in
+  play, so island seeds drawn from it after a match would repeat. It needs a check-only seed hook. Owner decision.
+- **Still flaky here**: `--remote-smooth-check` was 1 FAIL in 5 of 5 runs on rpc1, a different assertion each
+  run (backsteps, snaps, jerks, 0.34 m off the path), with or without the seed. On rpc3 it was 0/0 in one run.
+  Its two games are timed against each other on the wall clock.
+
