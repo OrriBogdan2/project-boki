@@ -49,6 +49,7 @@ static var pending_toast := ""
 var popped := -1                       # uid of the deco just placed (its node gets the pop)
 var debug_m := Vector2.INF             # tooling: where the "mouse" is, for screenshots
 
+const CUT_WIDTH := 0.5    # m: clear room either side of a corner-cutting shortcut, so a Boki never clips a corner
 const BASE_BIOME := {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")}
 
 func _init(home) -> void:
@@ -298,6 +299,7 @@ func _apply_theme() -> void:
 	h.world.biome = b
 	for isl in h.world.islands:
 		isl["region_fixed"] = int(t.get("region", 0))
+		if t.has("style"): isl["biome"] = t["style"]
 
 func _apply_paint() -> void:
 	var w: World = h.world
@@ -677,10 +679,10 @@ func _solid_at(x: float, z: float) -> bool:
 	return not w.inb(ix, iz) or w.kind[w.idx(ix, iz)] != World.T_GROUND
 
 ## Nothing solid along the way (with a kin's width either side).
-func clear_line(a: Vector2, b: Vector2) -> bool:
+func clear_line(a: Vector2, b: Vector2, width := 0.28) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.3) + 1
-	var side := Vector2(-d.y, d.x).normalized() * 0.28 if d.length() > 0.001 else Vector2.ZERO
+	var side := Vector2(-d.y, d.x).normalized() * width if d.length() > 0.001 else Vector2.ZERO
 	for i in range(1, n + 1):
 		var p := a + d * (float(i) / n)
 		if _solid_at(p.x, p.y) or _solid_at(p.x + side.x, p.y + side.y) or _solid_at(p.x - side.x, p.y - side.y):
@@ -715,7 +717,7 @@ func steer(k: Dictionary, pos: Vector3, goal: Vector3) -> Vector3:
 	while not pts.is_empty() and pp.distance_to(pts[0]) < 0.45:
 		pts.pop_front()
 	# cut corners the grid doesn't need: skip ahead while the next-but-one point is in plain sight
-	if pts.size() > 1 and clear_line(pp, pts[1]):
+	if pts.size() > 1 and clear_line(pp, pts[1], CUT_WIDTH):
 		pts.pop_front()
 	if pts.is_empty():
 		return goal

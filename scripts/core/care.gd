@@ -82,6 +82,8 @@ const FOODS := {
 	"kibble": {"name": "Boki kibble", "col": Color("c8a26a"), "food": 30.0, "joy": 0.0, "price": 6, "desc": "Plain and filling."},
 	"sweetbun": {"name": "Sweet bun", "col": Color("f6c6a0"), "food": 18.0, "joy": 18.0, "price": 14, "desc": "A treat. Makes any Boki happy."},
 	"tonicbrew": {"name": "Pep brew", "col": Color("8ff0a0"), "food": 6.0, "joy": 4.0, "energy": 35.0, "price": 18, "desc": "Wakes a tired Boki right up."},
+	"chimebun": {"name": "Chime bun", "col": Color("f0a040"), "food": 16.0, "joy": 8.0, "price": 16,
+		"desc": "A bun that hums."},
 }
 const LEAN_HEAD_START := 0.5     # share of the stronger parent's lean a hatchling starts with
 const PLAYS := ["fetch", "brush", "bath", "chat", "pet"]

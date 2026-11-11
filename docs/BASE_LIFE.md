@@ -55,3 +55,15 @@ check: `--base-life-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
   toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.
+- Walking on the farm (`--garden-nav-check`: 6 Boki, every toy and a house, 600 s of game time at 0.25 s a step, logs
+  stuck (3 s wanting to move with no progress), overlap (3 s) and standing inside a block; zero stuck and zero inside
+  is the bar). What keeps them moving: `scripts/home/kin_avoid.gd` bends a walker round parked Boki (asleep, in the
+  tub, held, at a toy or bowl; they also hold their ground in `_separate_kin`), steps a boxed-in walker out and
+  drops its errand (toy walk, chore) if that repeats; `HomeToys.stand` keeps a toy's standing place off anyone parked
+  or on their way there, and a toy with a sleeper beside it is left alone; `HomeBuild.steer` cuts corners only where
+  0.5 m either side is clear. Overlaps are printed and counted, not failed: a runner cornered at an island rim in
+  tag is caught on top of (a rim-flee fix made tag catches rarer and `--base-life-check` flaky, so it was left).
+
+## Kitewind Ridge (GARDEN.md 10.2, step 7d)
+
+A zone is a home theme (`HomeLayout.THEMES`, `"zone": true`, not sold in the Island tab); the zone system will point a zone at its theme. `"ridge"` carries the ground colours, `style` (`storm`: the world's MultiMesh flora set for its trees, rocks and undergrowth, set on the island by `HomeBuild._apply_theme`) and `track` (the Dash course). On a ridge island: the Updraft vent toy (`toy_vent`, liked by Flying, Electric, Fairy and Sound leans), the snack patch grows `puffcorn`, `tonicbrew`, `starfruit` and `chimebun` (snack_patch.json `zone_snacks`; prepared foods go to the items store, `SnackPatch.shelve`), and the Dash runs `base_race.json` `tracks.ridge` (two glide gaps, an updraft climb that every ridge type rides). `--garden-nav-check` sweeps both themes, `--race-check` both courses, `--snack-patch-check` the ridge patch, `--ridge-shots --shots-dir=<dir>` makes day, night and course shots, and `--perf-bench --bench-secs=0 --bench-theme=ridge` benches the zone part.
