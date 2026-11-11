@@ -23,7 +23,10 @@
   "bk_thrumbird_happy": "boki", "bk_thrumbird_alert": "boki", "bk_thrumbird_unsure": "boki", "bk_thrumbird_sleepy": "boki", "bk_thrumbird_hurt": "boki",
   "bk_wisplet_happy": "boki", "bk_wisplet_alert": "boki", "bk_wisplet_unsure": "boki", "bk_wisplet_sleepy": "boki", "bk_wisplet_hurt": "boki",
   "bk_zapple_happy": "boki", "bk_zapple_alert": "boki", "bk_zapple_unsure": "boki", "bk_zapple_sleepy": "boki", "bk_zapple_hurt": "boki",
-  "bk_zephyrak_happy": "boki", "bk_zephyrak_alert": "boki", "bk_zephyrak_unsure": "boki", "bk_zephyrak_sleepy": "boki", "bk_zephyrak_hurt": "boki"
+  "bk_zephyrak_happy": "boki", "bk_zephyrak_alert": "boki", "bk_zephyrak_unsure": "boki", "bk_zephyrak_sleepy": "boki", "bk_zephyrak_hurt": "boki",
+  "bk_caecilith_happy": "boki", "bk_caecilith_alert": "boki", "bk_caecilith_unsure": "boki", "bk_caecilith_sleepy": "boki", "bk_caecilith_hurt": "boki",
+  "bk_lilybara_happy": "boki", "bk_lilybara_alert": "boki", "bk_lilybara_unsure": "boki", "bk_lilybara_sleepy": "boki", "bk_lilybara_hurt": "boki",
+  "bk_umbrathere_happy": "boki", "bk_umbrathere_alert": "boki", "bk_umbrathere_unsure": "boki", "bk_umbrathere_sleepy": "boki", "bk_umbrathere_hurt": "boki"
  },
  "signature": [],
  "replaces": []

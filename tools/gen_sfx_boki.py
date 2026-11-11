@@ -277,6 +277,10 @@ SPECIES_VOICE = {
     'nettlynx': ('ah', (1, 1.41, 1.12)), 'pebbit': ('oh', (1, 1, 0.89)), 'puddlet': ('uh', (1, 1.26, 1.5)),
     'rimeshrew': ('ee', (1, 1.68, 1.5)), 'selenfin': ('oh', (1, 1.12, 1.33)), 'thrumbird': ('eh', (1, 1.19, 1.19)),
     'wisplet': ('ee', (1, 1.5, 1.78)), 'zapple': ('ah', (1, 1.33, 1)), 'zephyrak': ('ee', (1, 1.5, 2.0)),
+    # added later: appended, not sorted in, so the takes above keep their random draws
+    'caecilith': ('mm', (1, 0.84, 1.12)),     # a low, curious hum from under the ground
+    'lilybara': ('oh', (1, 1.06, 0.94)),      # a slow, contented bath sigh
+    'umbrathere': ('uh', (1, 0.89, 0.79)),    # a brooding, falling grumble
 }
 
 
@@ -348,7 +352,7 @@ def species_voice(sp, mood, i):
 
 
 def species_names():
-    return sorted(SPECIES_VOICE)
+    return list(SPECIES_VOICE)
 
 
 def voice_sets():
