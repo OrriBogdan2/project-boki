@@ -107,7 +107,8 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
-## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide); a hanging wing (Sable's moth wings)
+## raises up behind her instead, set by WardenWings (idle, air, emote, the Vault's flips and the Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air, Grimble's stretched hook
@@ -1123,9 +1124,12 @@ class Springs:
 	const FOLD := 0.75          # radians a folded wing tips back about the side axis through its root
 	const TUCK := 0.8           # and turns in behind the back about the vertical
 	const FLARE := 1.15         # radians a flared wing swings out to her side about the front-back axis
+	const RAISE := 2.4          # radians a hanging wing (Sable's moth wings) swings back and up about the side axis
+								# through its root when raised: tip up and leaning back, clear of the coat and braid
+	const SPREAD := 0.45        # and then out to her side about the front-back axis (the open V of a moth's wings)
 	var skel: Skeleton3D
 	var chains: Array = []      # {ids: bone indices root -> tip, pts, prev: joint positions (world), wing}
-	var fold := 0.0             # how far the wing chains are folded (1) or flared (-1) (WING_FOLD)
+	var fold := 0.0             # wing chains folded (1) or flared, a hanging one raised (-1) (WING_FOLD)
 	var wind_t := 0.0
 	var calm := false           # no ripple (a check measuring how a chain settles)
 	var still := false          # no ripple: a statue pose (data "still": Claire's Rimelock)
@@ -1182,8 +1186,11 @@ class Springs:
 				var up := 1.0 if r1.origin.y >= r0.origin.y else -1.0
 				if fold > 0.0:
 					turn = Transform3D(Basis(Vector3.RIGHT, up * FOLD * fold) * tip_in, Vector3.ZERO)
-				else:
+				elif up > 0.0:
 					turn = Transform3D(Basis(Vector3.BACK, up * out * FLARE * fold), Vector3.ZERO)
+				else:      # (a hanging wing raises: back past horizontal, then out; WardenWings)
+					turn = Transform3D(Basis(Vector3.BACK, out * SPREAD * fold) * Basis(Vector3.RIGHT, RAISE * fold),
+							Vector3.ZERO)
 				turn = Transform3D(Basis.IDENTITY, r0.origin) * turn * Transform3D(Basis.IDENTITY, -r0.origin)
 			for bi in ids:
 				var r: Transform3D = turn * base * skel.get_bone_global_rest(int(bi))

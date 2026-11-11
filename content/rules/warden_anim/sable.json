@@ -23,6 +23,7 @@
 	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["thf_lmb_r", 0.45], ["thf_lmb_l", 0.45], ["thf_vault_r", 0.48], ["thf_primed", 0.3], ["thf_vault_f", 0.48], ["thf_lmb_r", 0.3], ["thf_vault_twist", 0.48], ["thf_bola", 0.75], ["thf_knife", 0.45], ["thf_encore", 0.4], ["thf_encore_dance", 1.6], ["thf_reset", 0.4]],
+	"wings": {"doc": "Her moth wings: folded down most of the time, raised open behind her now and then (scripts/heroes/warden_wings.gd, docs/SABLE_WINGS.md). Seconds unless named.", "idle_gap_s": [8, 15], "idle_hold_s": [1.6, 3.0], "open_s": 1.1, "close_s": 0.8, "quick_s": 0.22, "run_close_s": 0.3, "fold_speed": 3.0, "air_open": 0.85, "air_delay_s": 0.12, "flutter": 0.06, "flutter_hz": 1.6},
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "brow.L", "brow.R", "lid.L", "lid.R", "mouth.L", "mouth.R"]
 }
