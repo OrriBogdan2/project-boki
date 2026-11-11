@@ -3,6 +3,8 @@ extends RefCounted
 ## What the farm's interact prompt (InteractPrompt) shows for Home's target `it`: a short verb, what it
 ## works on, and a detail line. A line that only informs (you can't use it yet) has no verb.
 
+const CARE_LINE_M := 2.4      # m above a Boki's feet where its care line sits (over its want bubble)
+
 static func item(h: Node, it: Dictionary) -> Dictionary:
 	if h._visiting():
 		return _visiting(h, it)
@@ -18,7 +20,7 @@ static func item(h: Node, it: Dictionary) -> Dictionary:
 			var nm: String = Data.BUILDINGS[it["b"]]["name"]
 			return _building(it["b"], nm) if h.lots[it["b"]]["built"] else {"verb": "Build", "who": nm}
 		"bridge": return {"verb": "Build", "who": "Bridge", "note": "to %s" % Data.ISLES[it["isle"]]["name"]}
-		"kin": return KinWants.prompt(it["k"]["rec"], h.POND_EDGE.x > -100.0)
+		"kin": return care(h, it["k"])
 		"egg": return {"verb": "Hatch" if h._egg_ready() else "Warm", "who": h._egg_label()}
 		"yard": return {"verb": "Train", "who": "Partner"}
 		"nook": return {"verb": "Pair", "who": "Nook", "note": "two Boki for an egg"}
@@ -42,6 +44,21 @@ static func item(h: Node, it: Dictionary) -> Dictionary:
 		"echo": return h.hecho.label()
 		"show": return h.hshow.label()
 	return {}
+
+## The care line over a Boki you stand next to: pet (or what it needs soothing with), feed, play and
+## pick up (a held interact key, HomeCarry), each with its key; what can't be done now is greyed.
+## A tap of the interact key does the lit one of the first two.
+static func care(h: Node, k: Dictionary) -> Dictionary:
+	var rec: Dictionary = k["rec"]
+	var pond: bool = h.POND_EDGE.x > -100.0
+	var soothes := KinWants.action(rec, pond) != "feed"
+	var hungry_empty := Care.want(rec) == "food" and KinWants.best_food(rec) == ""
+	var lift := "Hold: Let go" if h.carry.k == k else ("Hold: Lead" if HomeCarry.mode_for(rec) == "lead" else "Hold: Pick up")
+	return {"more": [
+		["interact", KinWants.prompt(rec, pond)["verb"] if soothes else "Pet", soothes],
+		["interact", "Feed (no food)" if hungry_empty else "Feed", not soothes],
+		["play", "Play", not k.has("fetch")],
+		["interact", lift, h.carry.k == k or h.carry.can_lift(k)]]}
 
 static func _visiting(h: Node, it: Dictionary) -> Dictionary:
 	match it["kind"]:

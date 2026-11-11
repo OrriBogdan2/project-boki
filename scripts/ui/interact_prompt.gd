@@ -5,11 +5,13 @@ extends PanelContainer
 ## an optional detail line, and a ring round the keycap that fills while a hold action is held.
 ## Whoever picks the target (Match, Home, Town, Interior) shows exactly one dictionary; hide when none.
 ## Fields: action (default "interact"), verb ("" for a line that only informs), who, note, hold (a hold
-## action: the ring shows), frac (0..1 ring fill), col, more ([[action, what], ...] extra keys beside it).
+## action: the ring shows), frac (0..1 ring fill), col, more ([[action, what, ok], ...] extra keys beside it;
+## ok false greys one out, it can't be done now). With no verb and no note, the more keys are the whole line.
 
 const RING_PAD := 9.0        # px between the keycap and the ring
 const RING_W := 3.0          # px: ring thickness
 const MATCH_BOTTOM := 210.0  # px from the screen's bottom to the match prompt's bottom edge (clear of the kit bar)
+const GREY_A := 0.35         # alpha of a more key that can't be done now
 
 ## The ring round the keycap: a faint full circle, and the held part on top.
 class Ring extends Control:
@@ -60,7 +62,8 @@ func _init() -> void:
 
 ## Shows the prompt for `it` (a dictionary with the fields above), or hides it for an empty one.
 func show_for(it: Dictionary) -> void:
-	if it.is_empty() or (String(it.get("verb", "")) == "" and String(it.get("note", "")) == ""):
+	var more: Array = it.get("more", [])
+	if it.is_empty() or (String(it.get("verb", "")) == "" and String(it.get("note", "")) == "" and more.is_empty()):
 		visible = false
 		return
 	var verb := String(it.get("verb", ""))
@@ -68,8 +71,8 @@ func show_for(it: Dictionary) -> void:
 	var col: Color = it.get("col", UI.GOLD)
 	var has_key := verb != ""
 	var key := Settings.key_cap(String(it.get("action", "interact")))
-	var more: Array = it.get("more", [])
-	var sig := "%s|%s|%s|%s|%s|%s" % [has_key, key, verb, who, it.get("note", ""), str(more)]
+	var caps := more.map(func(m): return Settings.key_cap(String(m[0])))
+	var sig := "%s|%s|%s|%s|%s|%s|%s" % [has_key, key, verb, who, it.get("note", ""), str(more), str(caps)]
 	if sig != _sig:
 		_sig = sig
 		ring.visible = has_key
@@ -79,6 +82,7 @@ func show_for(it: Dictionary) -> void:
 		line.visible = has_key
 		_note.text = String(it.get("note", ""))
 		_note.visible = _note.text != ""
+		line.get_parent().visible = has_key or _note.visible
 		_note.add_theme_color_override("font_color", UI.INK if not has_key else UI.MUTED)
 		_rebuild_more(more)
 		ring.custom_minimum_size = _cap.get_combined_minimum_size() + Vector2.ONE * RING_PAD * 2.0
@@ -92,9 +96,11 @@ func show_for(it: Dictionary) -> void:
 func _rebuild_more(more: Array) -> void:
 	for ch in _more.get_children():
 		ch.free()
-	var pairs: Array = more.map(func(p): return [Settings.key_cap(String(p[0])), p[1]])
-	if not pairs.is_empty():
-		_more.add_child(UI.key_hints(pairs, 14, UI.INK))
+	for m in more:
+		var one := UI.key_hints([[Settings.key_cap(String(m[0])), m[1]]], 14, UI.INK)
+		if m.size() > 2 and not m[2]:
+			one.modulate.a = GREY_A
+		_more.add_child(one)
 
 ## What the match's interact target `it` (Match.interact) shows: its fields plus how far the hold has got.
 ## One prompt at a time: while a tutorial tip card pops in, the prompt yields to it (unless a hold is under way).
@@ -121,3 +127,8 @@ static func match_item(m: Match, p: Hunter, it: Dictionary) -> Dictionary:
 ## Bottom-centre of `vp` with its bottom edge at `y`.
 func place(vp: Vector2, y: float) -> void:
 	position = Vector2((vp.x - size.x) * 0.5, y - size.y)
+
+## Centred over the world point `at` (its bottom edge there); hidden when `at` is behind the camera.
+func place_over(cam: Camera3D, at: Vector3) -> void:
+	visible = visible and not cam.is_position_behind(at)
+	position = cam.unproject_position(at) - Vector2(size.x * 0.5, size.y)

@@ -90,12 +90,16 @@ func tick(d: float, interact: Dictionary, can: bool) -> bool:
 	pending = {}
 	return true
 
+## True when holding the key on `who` would pick it up (or lead it) now.
+func can_lift(who: Dictionary) -> bool:
+	return k.is_empty() and not (who.get("busy", false) or who.has("fetch") or who.has("bath") or who.has("leap"))
+
 ## The held key reached HOLD_S on a Boki: pick it up, lead it, or let it go.
 func press_hold(who: Dictionary) -> void:
 	if who == k:
 		_let_go(who, h.ppos)
 		return
-	if not k.is_empty() or who.get("busy", false) or who.has("fetch") or who.has("bath") or who.has("leap"):
+	if not can_lift(who):
 		return
 	k = who
 	mode = mode_for(who["rec"])
