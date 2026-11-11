@@ -7,6 +7,7 @@ extends RefCounted
 ## Shows the card for arriving in the hub or a zone: what the stations made, then the journals.
 static func card(h) -> void:
 	var lines := CareJournal.arrival(Work.catch_up())
+	BaseHud.arrived(lines)      # the base HUD's "what changed" row
 	if not lines.is_empty():
 		h._show_when_free(lines)
 
