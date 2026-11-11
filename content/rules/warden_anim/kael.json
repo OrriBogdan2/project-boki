@@ -258,5 +258,6 @@
 	"blade": {
 		"root": "anchor_blade_root",
 		"tip": "weapon_muzzle"
-	}
+	},
+	"lockin": {"clip": "stance", "dur": 1.3, "rate": 1.0, "fade": 0.35, "settle": 0.45}
 }

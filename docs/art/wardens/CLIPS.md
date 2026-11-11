@@ -46,6 +46,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
   The clip is seeked to the kit's own `kmove_t` (times `rate`), so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `emotes`: the clip each wheel emote (`Truce.EMOTES`) plays, {emote id: clip}, all eight, all different, each shorter than the 2.6 s bubble. A clip is one of the `.glb` or a gesture `g_<name>` keyed at load from `warden_anim/emote_gestures.json` (`WardenGestures`: degrees from the rig's rest, axes in that file's doc). Moving, it plays on the upper layer (the legs keep running); standing, a `.glb` clip owns the body and a gesture still only moves the upper body. An id off the wheel (the bots' replies) plays `states.emote`. Remote players get it from the existing `emo` event. `--clip-check` asserts the map; `--emote-shots` renders it.
+- `lockin`: the pre-match lobby pose when you pick the Hunter ({clip, from (s, 0), dur (s, 1-1.5), rate, fade (s in,
+  0.2), settle (s back to the idle, 0.35)}): a window of an existing clip at about its own speed, then the idle. Each
+  Hunter's beat: Vex flips the coin and catches it, Kael hoists the sword onto his shoulder (his `stance`), Lace draws
+  the string taut (`draw`), Motley slams his lid and bursts out bowing, Sable spins her pistols into a stage bow, Neve
+  spins on the spot, Meeko grins at her lantern and hops, Sparkle cocks finger guns, Tenzo tosses and catches a pebble,
+  Cinder cackles over a flame, Albert laughs and pats his hull, Grimble rears up at his monocle. The art lane owes real
+  clips for the weakest: Kael's hoist (today a crossfade into `stance`), and Vex's coin and Tenzo's pebble, both too
+  small to read at the lobby's stage size.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too. Every Hero lists `wade` and `swim` (water, `HunterSwim`): no clip is keyed for them, so HunterAnim's wading high knees and
   swimming crawl (a flutter kick, a stroke in each hand the kit lets go of, the weapon held as on a run) play on the rig;
