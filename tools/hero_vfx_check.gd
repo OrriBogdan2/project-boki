@@ -14,7 +14,7 @@ const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave
 ## data must answer.
 const KIT_FILES := {
 	"archer": ["archer_kit", "pin_"], "ashwick": ["ashwick_"], "bulwark": ["bulwark_kit", "bjorn_"],
-	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gunslinger": ["gunslinger_"],
+	"dolm": ["dolm_kit", "breah_"], "dredge": ["dredge_"], "gil": ["gil_"], "gunslinger": ["gunslinger_"],
 	"juggernaut": ["juggernaut_"], "mage": ["mage_"], "ostra": ["ostra_"], "rimewright": ["rimewright_"],
 	"tender": ["tender_"], "thief": ["thief_"]}
 ## The synthetic recipes the runtime parts play: one layer of every kind.

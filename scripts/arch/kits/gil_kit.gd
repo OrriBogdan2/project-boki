@@ -207,16 +207,21 @@ func on_dash(use_ex: bool) -> bool:
 		return true
 	if not spend_dash(false):
 		return true
-	travel(float(dd["dist"]), float(dd["time"]), {"trail": "dust"})
-	swim_t = float(dd["time"]) * float(dash_feel()["time"])
-	m.fx.burst(h.pos, col_of(dd), 12, 3.0, 0.4, 8.0)
+	swim_t = float(dd["time"]) * float(dash_feel()["time"])      # (before the dash: own_dash_trail reads it)
+	travel(float(dd["dist"]), float(dd["time"]))
+	# head first into the ground: the body goes fully under (gil_dive) and only the wake shows on top
+	play("gil_dive")
+	vfx("dive", h.pos, h.roll_dir, {"len": h.roll_speed * h.roll_t})
 	return true
+
+## Under the ground there is no body to leave after-images: the wake is the trail.
+func own_dash_trail() -> bool:
+	return swim_t > 0.0
 
 func _surface() -> void:
 	var dd := dash_def()
-	m.fx.ring(h.pos, float(dd["radius"]), col_of(dd), 0.4)
-	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col_of(dd), 22, 5.0, 0.5, 10.0)
-	m.sfx("whoosh", h.pos, -3.0, 0.8)
+	play("gil_surface")
+	vfx("surface", h.pos, h.aim_dir(), {"r": float(dd["radius"])})
 	for f in foes_in(h.pos, float(dd["radius"])):
 		var o := {"lift": float(dd["lift"]), "stun": float(dd["knockup"]), "dr": true, "src": "abil", "ab": "dodge"}
 		o["tags"] = ["dodge", "surface"]
@@ -366,9 +371,9 @@ func _tick(dt: float) -> void:
 			puddles.erase(pd)
 	if swim_t > 0.0:
 		swim_t -= dt
-		m.fx.burst(ground(h.pos) + Vector3(0, 0.1, 0), col_of(dash_def()), 2, 1.5, 0.3, 4.0)
 		if swim_t <= 0.0:
 			_surface()
+	_end_stale_hold()
 	if spin_t >= 0.0:
 		_tick_spin(dt)
 	_tick_lines(spouts, dt)
@@ -390,6 +395,18 @@ func _tick(dt: float) -> void:
 
 func _drop_holds() -> void:
 	spin_t = -1.0
+	_end_stale_hold()
+
+## The held poses (under the ground, spinning, on the wave) stay on until their move replaces them; one whose
+## move was cut short (a merge, a death) lets go here.
+func _end_stale_hold() -> void:
+	var stale := false
+	match anim_id:
+		"gil_dive": stale = swim_t <= 0.0
+		"gil_spin": stale = spin_t < 0.0
+		"gil_surf": stale = wave.is_empty()
+	if stale:
+		anim_id = ""
 
 # ------------------------------------------------------------------ bots
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:

@@ -1,0 +1,34 @@
+{
+	"palette": {"main": "4aa8ff", "hot": "e8f8ff", "char": "0c2a4a", "smoke": "9fc8e8",
+		"water": "3ad0ff", "foam": "f2fbff", "deep": "1a4f8a", "wave": "2a8cff",
+		"dirt": "7a5c3a", "dirt_hot": "b8946a", "dirt_char": "2e2014"},
+	"anchors": {
+		"blade_tip": {"nodes": ["weapon_muzzle"], "gun": [0.0, 0.015, -1.0], "body": [0.3, 1.1, 1.0]},
+		"blade_root": {"nodes": ["anchor_blade_root"], "bone": "hand.R", "body": [0.3, 1.0, 0.2]},
+		"hand_l": {"bone": "hand.L", "off": [0.0, 0.06, 0.0], "body": [-0.35, 1.0, 0.2]},
+		"wake": {"body": [0.0, 0.1, 0.0]}
+	},
+	"moves": {
+		"dive": {"sfx": [{"n": "splash", "db": -3, "pitch": 0.85}, {"n": "dr_dive", "db": -8, "pitch": 1.25}],
+			"fx": [{"p": "ring", "at": "h", "size": 1.1, "life": 0.32, "c": "water", "c2": "foam"},
+				{"p": "drop", "at": "h", "y": 0.3, "way": "up", "n": 16, "speed": 5.0, "spread": 0.55, "grav": 14.0, "life": 0.5, "size": 0.07, "c": "water", "c2": "foam"},
+				{"p": "chunk", "at": "h", "y": 0.1, "way": "up", "n": 8, "speed": 4.0, "spread": 0.6, "grav": 16.0, "life": 0.5, "size": 0.08, "c": "dirt", "c3": "dirt_char"},
+				{"p": "smoke", "at": "h", "y": 0.2, "way": "up", "n": 3, "speed": 1.0, "spread": 0.6, "life": 0.45, "size": 0.45, "c": "dirt_hot", "c3": "dirt", "near": true},
+				{"p": "scorch", "shape": "lane", "len": "len", "w": 0.9, "life": 1.4, "c": "deep", "c2": "water", "c3": "dirt_char"},
+				{"p": "ribbon", "at": "wake", "life": 0.62, "tail": 0.32, "size": 0.85, "c": "water", "c2": "foam"},
+				{"p": "ring", "at": "h", "delay": 0.08, "size": 0.85, "life": 0.3, "c": "water", "c2": "foam"},
+				{"p": "ring", "at": "h", "delay": 0.17, "size": 0.85, "life": 0.3, "c": "water", "c2": "foam"},
+				{"p": "ring", "at": "h", "delay": 0.26, "size": 0.85, "life": 0.3, "c": "water", "c2": "foam"},
+				{"p": "chunk", "at": "h", "delay": 0.12, "y": 0.1, "way": "up", "n": 4, "speed": 3.0, "spread": 0.5, "grav": 16.0, "life": 0.4, "size": 0.07, "c": "dirt", "c3": "dirt_char", "near": true},
+				{"p": "drop", "at": "h", "delay": 0.12, "y": 0.15, "way": "up", "n": 6, "speed": 3.5, "spread": 0.5, "grav": 14.0, "life": 0.4, "size": 0.06, "c": "water", "c2": "foam"},
+				{"p": "chunk", "at": "h", "delay": 0.24, "y": 0.1, "way": "up", "n": 4, "speed": 3.0, "spread": 0.5, "grav": 16.0, "life": 0.4, "size": 0.07, "c": "dirt", "c3": "dirt_char", "near": true},
+				{"p": "drop", "at": "h", "delay": 0.24, "y": 0.15, "way": "up", "n": 6, "speed": 3.5, "spread": 0.5, "grav": 14.0, "life": 0.4, "size": 0.06, "c": "water", "c2": "foam"}]},
+		"surface": {"sfx": [{"n": "splash", "db": -1, "pitch": 0.75}, {"n": "br_rise", "db": -7, "pitch": 1.3}],
+			"fx": [{"p": "ring", "at": "h", "size": "r", "life": 0.42, "c": "water", "c2": "foam"},
+				{"p": "skirt", "at": "h", "size": "r", "size_x": 0.8, "tall": 1.5, "life": 0.4, "c": "water", "c2": "foam"},
+				{"p": "flare", "at": "h", "y": 0.8, "size": 2.0, "grow": 1.3, "life": 0.18, "c": "water", "c2": "foam"},
+				{"p": "drop", "at": "h", "y": 0.3, "way": "up", "n": 28, "speed": 7.5, "spread": 0.45, "grav": 15.0, "life": 0.7, "size": 0.08, "c": "water", "c2": "foam"},
+				{"p": "chunk", "at": "h", "y": 0.1, "way": "up", "n": 10, "speed": 5.5, "spread": 0.55, "grav": 16.0, "life": 0.6, "size": 0.1, "c": "dirt", "c3": "dirt_char"},
+				{"p": "smoke", "at": "h", "y": 0.3, "shape": "disc", "radius": 1.0, "way": "up", "n": 4, "speed": 1.2, "spread": 0.5, "life": 0.5, "size": 0.5, "c": "smoke", "c3": "deep", "near": true}]}
+	}
+}
