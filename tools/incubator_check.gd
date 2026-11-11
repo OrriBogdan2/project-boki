@@ -178,7 +178,7 @@ func run(m: Node) -> void:
 	for e in Incubator.eggs(): e["heat"] = Incubator.HEAT_NEED
 	H.hw.scan()
 	ok(not H.hw.jobs.any(func(j): return String(j["kind"]) == "warm"), "with every egg ready there's nothing to warm")
-	ok(H.hinc.prompt().begins_with("Hatch"), "walking up says: %s" % H.hinc.prompt())
+	ok(H.hinc.prompt().get("verb") == "Hatch", "walking up says: %s" % H.hinc.prompt())
 	H.queue_free()
 	print("INCUBATOR CHECK DONE, failures: ", bad)
 	main.get_tree().quit()

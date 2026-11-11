@@ -85,6 +85,7 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) at the right edge, where your inventory was: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
+- Interact prompt (InteractPrompt, `scripts/ui/interact_prompt.gd`): one widget for the match, farm, town and indoors: the live key cap (`Settings.key_cap`), a short verb, the target, an optional detail line, and a ring on the cap that fills for hold actions. Only the picked target (InteractPick) is ever shown. Check: `--interact-prompt-check`.
 
 ## Two-step abilities (RecastCue)
 

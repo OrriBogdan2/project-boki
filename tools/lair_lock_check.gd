@@ -179,7 +179,7 @@ func run(main: Node) -> void:
 		_spot(P, G["lever"] - gout * 0.8)
 		_run(0.1)
 		var it := m.lairs.interact_for(P)
-		ok(String(it.get("what", "")) == "lever" and String(it.get("label", "")).contains("Open the gate"), "by the gate inside, the lever offers: '%s'" % String(it.get("label", "")))
+		ok(String(it.get("what", "")) == "lever" and String(it.get("verb", "")) == "Open gate", "by the gate inside, the lever offers: '%s'" % String(it.get("verb", "")))
 		# a rival just outside the wall by the lever can't pull it through the stones
 		var qs: Vector3 = Q.pos
 		Q.pos = G["lever"] + gout * 1.4; Q.pos.y = float(G["lever"].y)

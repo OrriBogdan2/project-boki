@@ -236,7 +236,6 @@ func let_go(h: Hunter) -> void:
 
 func interact_for(h: Hunter) -> Dictionary:
 	var want: bool = h.inp.get("interact", false)
-	var key := Settings.key_cap("interact")
 	var best := {}
 	for x in list:
 		if not want:
@@ -251,15 +250,15 @@ func interact_for(h: Hunter) -> Dictionary:
 				match String(x["state"]):
 					"idle":
 						if m.time < float(x["open_at"]):
-							best = {"label": "The skiff dock opens in %s" % _cap(float(x["open_at"]) - m.time)}
+							best = {"note": "The skiff dock opens in %s" % _cap(float(x["open_at"]) - m.time)}
 						elif m.time >= float(x["close_at"]):
-							best = {"label": "This dock has closed"}
+							best = {"note": "This dock has closed"}
 						else:
-							best = {"act": "call", "need": CALL_HOLD, "label": "Hold %s to sound the horn and call a skiff  ·  loud: monsters and rivals will come" % key}
-					"called": best = {"label": "Skiff on its way  ·  hold the dock, then board at the pier"}
-					"boarding": best = {"label": "The skiff is in! Get on its deck  ·  leaves in %ds" % int(ceil(x["t"]))}
-					"gone": best = {"label": "The skiff just left. The dock is ready again in %ds" % int(ceil(x["t"]))}
-					"closed": best = {"label": "This dock has closed"}
+							best = {"act": "call", "need": CALL_HOLD, "verb": "Call skiff", "hold": true, "note": "Loud: monsters and rivals will come"}
+					"called": best = {"note": "Skiff on its way  ·  hold the dock, then board at the pier"}
+					"boarding": best = {"note": "The skiff is in! Get on its deck  ·  leaves in %ds" % int(ceil(x["t"]))}
+					"gone": best = {"note": "The skiff just left. The dock is ready again in %ds" % int(ceil(x["t"]))}
+					"closed": best = {"note": "This dock has closed"}
 			"hatch":
 				var hp: Vector3 = x["pos"]
 				if h.flat_dist(hp) > HATCH_R or absf(h.pos.y - hp.y) > 1.2:
@@ -267,13 +266,13 @@ func interact_for(h: Hunter) -> Dictionary:
 				match String(x["state"]):
 					"sealed":
 						if h.rift_keys > 0:
-							best = {"act": "open", "need": KEY_HOLD, "label": "%s: Unlock with Rift Key  ·  opens in %ds, 3 can drop through (you have %d key%s)" % [key, int(HATCH_UNLOCK_T), h.rift_keys, "" if h.rift_keys == 1 else "s"]}
+							best = {"act": "open", "need": KEY_HOLD, "verb": "Unlock", "note": "Rift Key  ·  opens in %ds, 3 can drop through (you have %d)" % [int(HATCH_UNLOCK_T), h.rift_keys]}
 						else:
-							best = {"label": "Needs a Rift Key  ·  vaults, bosses, elite monsters"}
+							best = {"note": "Needs a Rift Key  ·  vaults, bosses, elite monsters"}
 					"unlocking":
-						best = {"label": "The hatch is opening  ·  %ds  ·  hold out" % int(ceil(float(x["t"])))}
+						best = {"note": "The hatch is opening  ·  %ds  ·  hold out" % int(ceil(float(x["t"])))}
 					"open":
-						best = {"act": "enter", "need": KEY_HOLD, "label": "%s: Drop through  ·  %d of %d left" % [key, int(x["uses"]), HATCH_USES]}
+						best = {"act": "enter", "need": KEY_HOLD, "verb": "Drop through", "note": "%d of %d left" % [int(x["uses"]), HATCH_USES]}
 			"outpost":
 				var cp: Vector3 = x["pos"]
 				if h.flat_dist(cp) > 1.9 or absf(h.pos.y - cp.y) > 1.5:
@@ -281,13 +280,13 @@ func interact_for(h: Hunter) -> Dictionary:
 				match String(x["state"]):
 					"idle":
 						if m.time < float(x["open_at"]):
-							best = {"label": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
+							best = {"note": "The uplink comes online in %s" % _cap(float(x["open_at"]) - m.time)}
 						else:
-							best = {"act": "start", "need": START_HOLD, "label": "Hold %s to start the uplink  ·  monsters will attack the outpost" % key}
-					"charging": best = {"label": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
-					"fizzling": best = {"label": "The uplink lost its charge and is shutting off"}
-					"open": best = {"label": "The lift is open! Step into the light"}
-					"spent": best = {"label": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
+							best = {"act": "start", "need": START_HOLD, "verb": "Start uplink", "hold": true, "note": "Monsters will attack the outpost"}
+					"charging": best = {"note": "Uplink %d%%  ·  hold the yard (more of you charge it faster)%s" % [int(x["prog"] * 100.0), "  ·  CONTESTED" if x["contested"] else crew_text(int(x.get("crew", 0)))]}
+					"fizzling": best = {"note": "The uplink lost its charge and is shutting off"}
+					"open": best = {"note": "The lift is open! Step into the light"}
+					"spent": best = {"note": "The uplink is cooling down: %ds" % int(ceil(x["t"]))}
 		if not best.is_empty():
 			best["kind"] = "exit"
 			best["x"] = x

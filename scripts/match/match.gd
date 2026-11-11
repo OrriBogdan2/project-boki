@@ -54,6 +54,7 @@ var feed: Array = []        # kill feed lines {text, t}
 var pings: Array = []       # {pos, col, t}
 var bubbles: Array = []     # {ent, text, t, cat}
 var interact := {}          # what F would do right now for the local player
+var interact_pick := InteractPick.new()      # which F target wins when several overlap (InteractPick)
 var paused := false
 var duel: Duel = null
 var arena: Arena = null   # the Arena (opts "arena") or the Training Grounds's practice tools
@@ -1417,22 +1418,20 @@ func take_pick(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		_take_gear(h, wp, from_net)
 
 ## What pressing interact on a ground item will do, for the prompt.
-func _pickup_label(h: Hunter, wp: Dictionary) -> String:
+func pickup_prompt(h: Hunter, wp: Dictionary) -> Dictionary:
 	var it := Pack.ground_item(wp)
-	var k := Settings.key_cap("interact")
-	var nm := Loot.name_of(it)
 	var fill := "%d/%d" % [h.pack.size(), h.pack_cap]
 	var gid := String(it.get("id", ""))
 	var cur: Dictionary = h.gear[Gear.slot_on(h, gid)] if Gear.ALL.has(gid) else {}
 	var into_hand := Gear.ALL.has(gid) and (cur.is_empty() or Loot.value(it) > Loot.value(Loot.gear(String(cur["id"]), int(cur["rar"]))) or not Pack.wants(h, it))
 	if opts.get("training", false):
-		return "Press %s to take %s  ·  %s" % [k, nm, Loot.sub_of(it)]
+		return {"verb": "Take", "note": Loot.sub_of(it)}
 	if into_hand:
 		var swap_txt := ("  ·  yours goes in your pack (%s)" % fill) if not cur.is_empty() else ""
-		return "Press %s to wear %s  ·  %s%s" % [k, nm, Loot.sub_of(it), swap_txt]
+		return {"verb": "Wear", "note": Loot.sub_of(it) + swap_txt}
 	if Pack.room(h):
-		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
-	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
+		return {"verb": "Pack", "note": "%s  ·  %s" % [fill, Loot.sub_of(it)]}
+	return {"verb": "Swap", "note": "Backpack full (%s)  ·  swaps out something" % fill}
 
 ## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
 ## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
@@ -4221,14 +4220,14 @@ func _update_interact(dt: float) -> void:
 		if not h.stomp.is_empty():
 			if h == player:
 				var so: Hunter = h.stomp["o"]
-				interact = {"kind": "stomping", "label": "Stomping %s  ·  locked in" % so.pname, "col": Color("ff8a6a")}
+				interact = {"kind": "stomping", "note": "Stomping %s  ·  locked in" % so.pname, "col": Color("ff8a6a")}
 			continue
 		var want: bool = h.inp.get("interact", false)
 		if not want:
 			h.swap_hold = false
-		var best := {}
-		# 1. wisps, as in Supervive: standing on a downed teammate revives them and standing on a
+		# the wisps, as in Supervive: standing on a downed teammate revives them and standing on a
 		# downed enemy stomps them (both in Life.tick_wisps); holding interact executes them
+		var cs: Array = []
 		for o in hunters:
 			if o == h or not o.downed or o.out or h.flat_dist(o) > Life.R["revive_radius"]:
 				continue
@@ -4236,77 +4235,27 @@ func _update_interact(dt: float) -> void:
 				if o.remote:
 					_rev_out[o.nid] = float(_rev_out.get(o.nid, 0.0)) + dt / Life.R["revive_time"]
 					o.revive += dt / Life.R["revive_time"]
-				if h == player and best.is_empty():
+				if h == player:
 					# your own revive bar, so you know it's working (and when it's blocked)
-					if o.get_meta("stomped", false):
-						best = {"kind": "revive", "ent": o, "label": "An enemy is standing on %s: revive blocked. Knock them off!" % o.pname, "col": Color("ff6a5a")}
-					else:
-						best = {"kind": "revive", "ent": o, "label": "Reviving %s  ·  stay in the ring" % o.pname, "col": Color("9ee2a0")}
+					var blocked: bool = o.get_meta("stomped", false)
+					var rv := {"kind": "revive", "ent": o, "col": Color("ff6a5a") if blocked else Color("9ee2a0")}
+					rv.merge({"note": "An enemy is standing on them  ·  knock them off"} if blocked else {"verb": "Reviving", "hold": true, "note": "Stay in the ring"})
+					cs.append(InteractPick.cand(rv, o.pos, o, o.pname, true))
 			elif not o.remote:
-				best = {"kind": "finish", "ent": o, "label": "Hold %s to stomp %s  (you'll be locked in)" % [Settings.key_cap("interact"), o.pname], "col": Color("ff8a6a")}
+				cs.append(InteractPick.cand({"kind": "finish", "ent": o, "verb": "Stomp", "hold": true, "note": "You'll be locked in", "col": Color("ff8a6a")}, o.pos, o, o.pname))
+		if want or h == player:       # nobody reads a bot's prompt: skip the scans (40 hunters)
+			cs.append_array(InteractPick.gather(self, h))
+		var best := interact_pick.pick(h, cs, h.inp.get("aim") if h == player else null, want, time)
 		if not want or best.get("kind", "") != "finish":
 			h.finish_t = 0.0
-		# 1b. deathboxes: bring a teammate back while their soul is there, or take everything
-		if best.is_empty():
-			for b in boxes:
-				if h.flat_dist(b["pos"]) > 1.5 or absf(h.pos.y - float(b["pos"].y)) > 1.4:
-					continue
-				var o: Hunter = b["owner"]
-				if o.team == h.team and o != h and Life.soul_here(self, b):
-					best = {"kind": "boxrev", "box": b, "label": BoxRevive.prompt(h, o), "col": Color("9ee2a0")}
-					break
-				if not b["empty"]:
-					var whose: String = "your box" if o == h else o.pname + "'s box"
-					var open_now: bool = h == player and hud != null and hud.loot_is(b)
-					var lt := ("Press %s again to smart loot  ·  click items to take them" % Settings.key_cap("interact")) if open_now else ("Press %s to open %s  ·  twice to smart loot" % [Settings.key_cap("interact"), whose])
-					best = {"kind": "loot", "box": b, "label": lt if h == player else "Hold %s to loot %s" % [Settings.key_cap("interact"), whose], "col": Life.box_color(b)}
-					break
 		if best.get("kind", "") not in ["boxrev", "loot"] or not want:
 			h.box_t = 0.0
 		if not want:
 			h.set_meta("loot_hold", false)
 			h.set_meta("box_broke", false)
-			if h != player:              # nobody reads a bot's prompt: skip the scans (40 hunters)
+			if h != player:              # nobody reads a bot's prompt: the scans ran only for a held key
 				if exits: exits.let_go(h)
 				continue
-		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
-		if best.is_empty() and not opts.get("training", false):
-			for k in kins:
-				if KinLoss.scannable_by(h, k) and h.flat_dist(k) < float(Capture.rules()["range"]):
-					best = {"kind": "catch", "ent": k, "label": CaptureHud.prompt(h, k)}
-					break
-		# 3. wear gear lying on the ground (tunings are taken by walking over them)
-		if best.is_empty():
-			var bd := 1.5
-			for wp in wpicks:
-				var d: float = h.flat_dist(wp["pos"])
-				if d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("gear"):
-					bd = d
-					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
-				elif d < bd and absf(h.pos.y - float(wp["pos"].y)) < 1.2 and wp.has("val") and h == player:
-					bd = d
-					best = {"kind": "weapon", "wp": wp, "label": _pickup_label(h, wp), "col": Loot.col_of(Pack.ground_item(wp))}
-		# 4. open a chest
-		if best.is_empty():
-			for c in chests:
-				if not c["open"] and h.flat_dist(c["pos"]) < 1.6:
-					best = KeyChest.prompt(h, c)
-					break
-		# 4. pray at a shrine
-		if best.is_empty():
-			for sh in shrines:
-				if not sh["used"] and h.flat_dist(sh["pos"]) < 1.8:
-					best = {"kind": "shrine", "shrine": sh, "label": "Hold " + Settings.key_cap("interact") + " to pray: heal, a blessing and a perk"}
-					break
-		# 5. the exits: call a skiff, unlock a hatch, start an uplink
-		if exits:
-			# (using an exit beats picking up a weapon or opening a chest that happens to be there)
-			var ex := exits.interact_for(h)
-			if best.is_empty() or (ex.has("act") and String(best.get("kind", "")) in ["weapon", "chest", "locked", "shrine"]): best = ex
-		# 6. the lairs: work a gate's dial, light a rune
-		if lairs:
-			var lx := lairs.interact_for(h)
-			if not lx.is_empty() and (best.is_empty() or not String(best.get("kind", "")) in ["revive", "finish", "boxrev", "loot", "catch", "exit"]): best = lx
 		if h == player:
 			interact = best
 		if best.is_empty() or not want:

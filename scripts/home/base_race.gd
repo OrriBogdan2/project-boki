@@ -193,8 +193,8 @@ func build() -> void:
 func near(p2: Vector2) -> bool:
 	return node.visible and run.is_empty() and p2.distance_to(Vector2(node.position.x, node.position.z)) < POST_REACH
 
-func prompt() -> String:
-	return "Start a Dash race"
+func prompt() -> Dictionary:
+	return {"verb": "Start", "who": "Dash race"}
 
 ## Lines up the Boki out on the farm (the one you have out first) and starts the race.
 func start() -> void:

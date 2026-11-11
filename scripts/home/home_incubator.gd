@@ -145,10 +145,10 @@ func nearest_ready(p: Vector3) -> Dictionary:
 	return best
 
 ## What walking up to it says.
-func prompt() -> String:
-	var rd := Incubator.ready_eggs()
-	if not rd.is_empty():
-		return "Hatch the %s!" % Incubator.egg_name(nearest_ready(h.ppos))
+func prompt() -> Dictionary:
+	if not Incubator.ready_eggs().is_empty():
+		return {"verb": "Hatch", "who": Incubator.egg_name(nearest_ready(h.ppos))}
 	if Incubator.count() == 0:
-		return "Incubator (empty: Rare Eggs from boss lairs hatch here)"
-	return "Incubator: %d warming%s" % [Incubator.eggs().size(), (", %d on the shelf" % Incubator.shelf().size()) if not Incubator.shelf().is_empty() else ""]
+		return {"verb": "Open", "who": "Incubator", "note": "empty: Rare Eggs from boss lairs hatch here"}
+	var shelf := Incubator.shelf().size()
+	return {"verb": "Open", "who": "Incubator", "note": "%d warming%s" % [Incubator.eggs().size(), (", %d on the shelf" % shelf) if shelf > 0 else ""]}

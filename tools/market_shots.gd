@@ -17,7 +17,7 @@ func _shot(shot_name: String, caption: String, keep_panel := false) -> void:
 		home._close_panel()
 	home.set_process(false)
 	if home.hover_box: home.hover_box.visible = false
-	home.prompt_box.visible = false
+	home.prompt.visible = false
 	await main.get_tree().process_frame
 	await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()

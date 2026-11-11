@@ -14,6 +14,7 @@ var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
 var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
+var prompt := InteractPrompt.new()      # the one interact prompt (InteractPrompt)
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
 
@@ -46,6 +47,7 @@ func setup(match_node: Match) -> void:
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(c)
 	c.draw.connect(_draw_all)
+	add_child(prompt)
 	add_child(msgs)
 	abyss_fx = ABYSS_FX.new()      # (movefeel) the abyss closing in: under the HUD, local player only
 	add_child(abyss_fx)
@@ -306,8 +308,10 @@ func _draw_all() -> void:
 			_draw_drop_prompt(sz, p)
 		if not p.riding and not map_open():
 			_draw_squad_pings(p)
+		prompt.show_for({} if p.riding or m.interact.is_empty() else InteractPrompt.match_item(p, m.interact))
+		prompt.place(sz, sz.y - 212.0)      # px: where the old prompt sat, above the ability bar
 		if not p.riding:
-			_draw_prompt(sz, p)
+			_draw_exit_status(sz)
 			if m.lairs and not p.out and not map_open():
 				_draw_lair_dial(sz, p)
 			if not map_open() and not mouse_on_panel(): _draw_crosshair(p)
@@ -1768,28 +1772,8 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 			_text(r.position + Vector2(bs - 7, bs + 1), str(n), 11, INK, big)
 		x += bs + 6.0
 
-func _draw_prompt(sz: Vector2, p: Hunter) -> void:
-	var it := m.interact
-	var y := sz.y - 222.0
-	if not it.is_empty():
-		var prog := 0.0
-		match it["kind"]:
-			"revive": prog = it["ent"].revive
-			"finish": prog = p.finish_t / Life.R["stomp_commit"]
-			"stomping": prog = float(p.stomp.get("t", 0.0)) / Life.R["stomp_time"]
-			"boxrev": prog = p.box_t / BoxRevive.time_for(it["box"]["owner"])
-			"loot": prog = p.box_t / Life.R["loot_time"]
-			"catch": prog = CaptureHud.progress(p)
-			"chest": prog = it["chest"]["prog"]
-			"exit": prog = float(it["x"]["hold"].get(p.nid, 0.0)) / float(it["need"]) if it.has("need") else 0.0
-			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
-		var s: String = it["label"]
-		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
-		if prog > 0.0:
-			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
-	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
+func _draw_exit_status(sz: Vector2) -> void:
+	var st: Dictionary = m.exits.status_for(m.player) if m.exits else {}
 	if not st.is_empty():
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])

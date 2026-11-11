@@ -83,11 +83,12 @@ func find(p2: Vector2) -> Dictionary:
 			if dd < bd: bd = dd; best = {"kind": "wild", "i": i, "what": what, "d": dd}
 	return best
 
-func label(it: Dictionary) -> String:
+func label(it: Dictionary) -> Dictionary:
 	var t := tool_for(String(it["what"]))
 	if not has_tool(t):
-		return "Needs a%s %s (Market, Farm tab)" % ["n" if t == "axe" else "", String(TOOLS[t]["name"]).to_lower()]
-	return "Chop the tree" if it["what"] == "tree" else "Mine the boulder"
+		var nm := String(TOOLS[t]["name"]).to_lower()
+		return {"note": "Needs a%s %s (Market, Farm tab)" % ["n" if t == "axe" else "", nm]}
+	return {"verb": "Chop", "who": "Tree"} if it["what"] == "tree" else {"verb": "Mine", "who": "Boulder"}
 
 func use(it: Dictionary) -> void:
 	if h.water.swimming:

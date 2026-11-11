@@ -27,8 +27,7 @@ var spots: Array = []           # {kind, pos, label}
 var interact: Dictionary = {}
 # ui
 var root_ui: Control
-var prompt_box: PanelContainer
-var prompt_lbl: Label
+var prompt := InteractPrompt.new()      # the one interact prompt
 var panel_host: CenterContainer
 var panel_open := ""
 var decorating := false         # Decorate.active, kept here for the tile checks
@@ -110,7 +109,7 @@ func _build_room() -> void:
 	Models.part(self, Models.box(W * 0.5 - 0.8, 0.35, 0.2), wall, Vector3((W * 0.5 - 0.8) * 0.5, 0.17, D + 0.1))
 	Models.part(self, Models.box(W * 0.5 - 0.8, 0.35, 0.2), wall, Vector3(W - (W * 0.5 - 0.8) * 0.5, 0.17, D + 0.1))
 	Models.part(self, Models.box(1.4, 0.03, 0.8), Models.toon(Color("8a6a3a"), false), Vector3(W * 0.5, 0.015, D - 0.4))
-	spots.append({"kind": "door", "pos": Vector3(W * 0.5, 0, D - 0.4), "label": "Go outside"})
+	spots.append({"kind": "door", "pos": Vector3(W * 0.5, 0, D - 0.4), "say": {"verb": "Go out"}})
 # ------------------------------------------------------------------ furniture on the grid
 static func footprint(id: String, r: int) -> Vector2i:
 	var sz: Array = Data.FURN[id]["size"]
@@ -158,7 +157,7 @@ func _rebuild_decor() -> void:
 		if visit.is_empty():
 			_occupy(i)
 			if RoomPieces.is_usable(e["id"]):
-				spots.append({"kind": e["id"], "pos": n.position, "label": RoomPieces.USES[e["id"]]})
+				spots.append({"kind": e["id"], "pos": n.position, "say": RoomPieces.USES[e["id"]]})
 
 ## Marks the tiles of piece i as taken (rugs and cushions can be walked over, so they are not).
 func _occupy(i: int) -> void:
@@ -296,14 +295,10 @@ func _find_interact() -> void:
 		if dd < bd: bd = dd; best = s
 	for k in kins:
 		var dd := Vector2(k["pos"].x - ppos.x, k["pos"].z - ppos.z).length()
-		if dd < bd: bd = dd; best = {"kind": "kin", "k": k, "label": "Pet %s" % k["rec"]["name"]}
+		if dd < bd: bd = dd; best = {"kind": "kin", "k": k, "say": {"verb": "Pet", "who": k["rec"]["name"]}}
 	interact = best
-	prompt_box.visible = not best.is_empty() and panel_open == ""
-	if prompt_box.visible:
-		prompt_lbl.text = Settings.key_cap("interact") + "  " + String(best["label"])
-		prompt_box.reset_size()
-		var vp := get_viewport().get_visible_rect().size
-		prompt_box.position = Vector2((vp.x - prompt_box.size.x) * 0.5, vp.y - 120.0)
+	prompt.show_for({} if best.is_empty() or panel_open != "" else best["say"])
+	prompt.place(get_viewport().get_visible_rect().size, get_viewport().get_visible_rect().size.y - 70.0)
 
 func _use(it: Dictionary) -> void:
 	Sfx.play("click")
@@ -371,11 +366,7 @@ func _build_ui() -> void:
 	sub.name = "Gems"
 	th.add_child(sub)
 	root_ui.add_child(top)
-	prompt_box = UI.glass(10, 16)
-	prompt_lbl = UI.label("", 18, UI.GOLD, UI.big)
-	prompt_lbl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	prompt_box.add_child(prompt_lbl)
-	root_ui.add_child(prompt_box)
+	root_ui.add_child(prompt)
 	if visit.is_empty():
 		deco_btn = UI.primary("Decorate  (%s)" % Settings.key_cap("build"), func(): dec.toggle(), 200)
 		deco_btn.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)

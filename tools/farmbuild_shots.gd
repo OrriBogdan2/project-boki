@@ -17,7 +17,7 @@ func _shot(name: String, caption: String) -> void:
 		await main.get_tree().process_frame
 		hm.set_process(false)      # (the hover card and the prompt come back every frame otherwise)
 		if hm.hover_box: hm.hover_box.visible = false
-		hm.prompt_box.visible = false
+		hm.prompt.visible = false
 		await main.get_tree().process_frame
 	var img := main.get_viewport().get_texture().get_image()
 	if hm: hm.set_process(true)

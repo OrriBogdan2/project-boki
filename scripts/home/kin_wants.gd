@@ -54,18 +54,18 @@ static func action(rec: Dictionary, pond: bool) -> String:
 		"clean": return "bath" if pond else "brush"
 	return "pet"
 
-## The one-line prompt when you stand next to it.
-static func line(rec: Dictionary, pond: bool) -> String:
+## The prompt (InteractPrompt) when you stand next to it: what F does (action above) and why.
+static func prompt(rec: Dictionary, pond: bool) -> Dictionary:
 	var nm := String(rec["name"])
 	match Care.want(rec):
 		"food":
 			if best_food(rec) == "":
-				return "%s is hungry: you have no food" % nm
-			return "%s is hungry: give food" % nm
-		"energy": return "%s is sleepy: tuck it in" % nm
-		"clean": return "%s is dirty: %s" % [nm, "give a bath" if pond else "brush it"]
-		"joy": return "%s is lonely: pet it" % nm
-	return "Pet " + nm
+				return {"verb": "Pet", "who": nm, "note": "hungry: you have no food"}
+			return {"verb": "Feed", "who": nm, "note": "hungry"}
+		"energy": return {"verb": "Tuck in", "who": nm, "note": "sleepy"}
+		"clean": return {"verb": "Bathe" if pond else "Brush", "who": nm, "note": "dirty"}
+		"joy": return {"verb": "Pet", "who": nm, "note": "lonely"}
+	return {"verb": "Pet", "who": nm}
 
 ## Every frame: shows the most urgent wants, hides the rest, and plays the happy answer.
 static func update(home: Node, dt: float, now: float) -> void:
