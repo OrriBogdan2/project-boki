@@ -422,7 +422,7 @@ func _chip_numbers(a: String) -> void:
 		_numbers_in(Arch.def(a)[slot], have)
 		for c in chips[slot]:
 			for m in num.search_all(String(c)):
-				if not have.any(func(v): return is_equal_approx(v, float(m.get_string())):
+				if not have.any(func(v): return is_equal_approx(v, float(m.get_string()))):
 					bad.append("%s %s" % [slot, c])
 	ok("kit card chips quote the kit's numbers: %s" % a, bad.is_empty(), ", ".join(bad))
 
