@@ -113,8 +113,8 @@ static func interact_for(m: Match, h: Hunter, want: bool, dt: float) -> Dictiona
 		return {}
 	var key := Settings.key_cap("interact")
 	var own := near.home_h == h
-	if not own and count(h) >= int(r["carry_max"]):
-		var full := "Hands full: you carry %d stolen wisps" % count(h)
+	if not own and not KinPair.room_for_stolen(h):
+		var full := "Hands full: you carry %d wisps" % KinPair.wisps(h)
 		return {"kind": "wisp", "ent": near, "label": full, "col": Color("a2a8bb")}
 	var held := float(h.get_meta("wgrab", 0.0)) + dt if want else 0.0
 	h.set_meta("wgrab", held)
@@ -132,7 +132,7 @@ static func interact_for(m: Match, h: Hunter, want: bool, dt: float) -> Dictiona
 
 ## Into a hunter's orbit: home if it is theirs, else stolen. Refused when it is not loose or their hands are full.
 static func grab(k: Kin, h: Hunter) -> bool:
-	if not loose(k) or h.downed or h.out or (h != k.home_h and count(h) >= int(rules()["carry_max"])):
+	if not loose(k) or h.downed or h.out or (h != k.home_h and not KinPair.room_for_stolen(h)):
 		return false
 	k.loose_t = 0.0
 	_ride_with(k, h)

@@ -221,9 +221,9 @@ static func stolen_rows(h: Hunter) -> Array:
 				"passive": passive})
 	return out
 
-static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
+static func stolen_wisps(H, p: Hunter, r: Rect2, above := 0.0) -> void:
 	stolen_shown.clear()
-	var y := r.position.y - STOLEN_LIFT
+	var y := r.position.y - STOLEN_LIFT - above
 	for row in stolen_rows(p):
 		var k: Kin = row["kin"]
 		var glow: Color = k.sp.get("glow", k.sp["color"])
@@ -231,13 +231,7 @@ static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
 		var box := Rect2(Vector2(r.end.x - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
 		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
 		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
-		var tex := KinPortrait.tex(k.rec, H.get_tree())
-		if tex != null:
-			H.c.draw_texture_rect(tex, Rect2(at - Vector2.ONE * STOLEN_ICON * 0.5, Vector2.ONE * STOLEN_ICON), false)
-		else:
-			H.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
-			H.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
-		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, SideColor.ally(), 2.0, true)
+		BokiCarry.icon(H, k.rec, k.sp["color"], SideColor.ally(), at)
 		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
 		if st == "ready":
 			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)

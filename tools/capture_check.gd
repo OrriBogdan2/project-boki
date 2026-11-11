@@ -214,12 +214,12 @@ func _box() -> void:
 	_fresh()
 	var P := m.player
 	var cap := Capture.box_cap()
-	ok(cap == int(Content.rules("capture")["box_capacity"]) and cap == 3, "the box holds %d (from content/rules/capture.json)" % cap)
+	ok(cap == int(Content.rules("capture")["box_capacity"]) and cap == 1, "the box holds %d (from content/rules/capture.json)" % cap)
 	for i in cap:
 		P.caught.append(Save.new_kin("puddlet", "Filler%d" % i, 10 + i))
 	var k := wild()
 	ok(Capture.block_reason(P, k).contains("Box full"), "a full box blocks the scan (\"%s\")" % Capture.block_reason(P, k))
-	ok(CaptureHud.box_text(P) == "Box 3/3", "the HUD shows the box (%s)" % CaptureHud.box_text(P))
+	ok(CaptureHud.box_text(P) == "Box 1/1", "the HUD shows the box (%s)" % CaptureHud.box_text(P))
 	begin(P)
 	ok(not Capture.active(P) and Capture.state(P).is_empty(), "...holding the key does not start one")
 	ok(Capture.release(m, P, 0) and P.caught.size() == cap - 1, "Release lets a capsule go (%d left)" % P.caught.size())

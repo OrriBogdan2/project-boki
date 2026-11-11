@@ -26,7 +26,7 @@ static func draw(hud, p: Hunter, wr: Rect2) -> Rect2:
 	boki(hud, p, Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX)))
 	var br := Rect2(Vector2(x0 + 2.0 * (BOX + GAP), y), Vector2(BOX, BOX))
 	BokiHud.summon_ring(hud, p, br)
-	BokiHud.stolen_wisps(hud, p, br)
+	BokiHud.stolen_wisps(hud, p, br, BokiCarry.draw(hud, p, br))
 	return Rect2(Vector2(x0, y), Vector2(3.0 * BOX + 2.0 * GAP, BOX))
 
 static func rar_col(g: Dictionary) -> Color:

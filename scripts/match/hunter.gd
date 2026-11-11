@@ -382,12 +382,7 @@ func owner_stat(stat: String) -> float:
 	return float(_kst.get(stat, 0.0))
 
 func _refresh_kin_stats() -> void:
-	var out := {}
-	var k: Kin = kin
-	if k and k.ks:
-		if kin_carry_on():
-			for ps in k.ks.carry_passives:
-				out[ps["stat"]] = float(out.get(ps["stat"], 0.0)) + float(ps["amount"])
+	var out := KinPair.passives(self)
 	KinSteal.add_passives(self, out)
 	if not merge_st.is_empty():
 		for ps in KinMerge.passives(self):

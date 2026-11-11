@@ -339,7 +339,7 @@ func _tab_controls(v: VBoxContainer) -> void:
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
 	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
 		["Fighting", [
-			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "hunter_ult", "ultimate",
+			"fire", "secondary", "gear1", "gear2", "signature", "throw", "summon", "swap_kin", "hunter_ult", "ultimate",
 			"util1", "util2", "util3", "util4", "util5", "util6", "base",
 		] + KinKeys.ids()],
 		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],

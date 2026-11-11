@@ -22,10 +22,14 @@ static func poll(h: Hunter, paused: bool) -> bool:
 			var q: Array = h.inp.get("kin_keys", [])
 			q.append(ORDERS[action])
 			h.inp["kin_keys"] = q
+	if Input.is_action_just_pressed("swap_kin"):
+		h.inp["kin_swap"] = true
 	return Input.is_action_just_pressed(SUMMON)
 
 ## The queued orders, on the fixed step (with KinCommand.apply_pick).
 static func apply(h: Hunter) -> void:
+	if h.inp.erase("kin_swap"):
+		h.swap_kin()
 	var q: Array = h.inp.get("kin_keys", [])
 	if q.is_empty():
 		return
