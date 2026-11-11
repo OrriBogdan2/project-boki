@@ -113865,5 +113865,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/v2p_kestrike_female_bk3_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9d_terrarimit",
+    "name": "Terrarimit (pixel sprite 80, new design)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9d_terrarimit_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_terrarimit",
+    "name": "Terrarimit (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_terrarimit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9d_mossbastion",
+    "name": "Mossbastion (pixel sprite 80, new design)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9d_mossbastion_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dribbara_bk3",
+    "name": "Dribbara (V2 sheet from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2s_dribbara_bk3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_dribbara_bk3",
+    "name": "Dribbara (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_dribbara_bk3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dribbara_bk3",
+    "name": "Dribbara (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_dribbara_bk3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_dribbara_bk3",
+    "name": "Dribbara (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_dribbara_bk3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthorn_bk3",
+    "name": "Crofthorn (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_crofthorn_bk3_2.jpg",
+    "ok": true
   }
 ]
