@@ -1498,6 +1498,22 @@ The plain statuses on a Hunter's body (scripts/combat/status_looks.gd, docs/STAT
 
 | statuses | {"stun": {"look": "stars", "col": "#fff27a", "dark": "#6a5410", "y": 2.25, "size": 1.0, "pace": 1.0, "why": "any stun: bright stars spinning fast round the head"}, "daze": {"look": "halo", "col": "#ffb36a", "dark": "#6a3410", "y": 2.55, "size": 1.0, "pace": 1.0, "why": "Vex's Daze: a tilted ring of crystals wobbling high over the head"}, "root": {"look": "stakes", "col": "#9a6aff", "dark": "#2e1a5a", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Meeko's root (her violet): thorns driven into the ground round the feet"}, "gnd": {"look": "cords", "col": "#e0a03a", "dark": "#5a3a10", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Grounded (the Bola, Warchain reel): cords wound round the legs"}, "slow": {"look": "anklets", "col": "#b8a8ff", "dark": "#2a2460", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "any slow: weighted rings sliding down the legs to the ground"}, "chill": {"look": "frost", "col": "#7fd0ff", "dark": "#2f6ac0", "hot": "#effcff", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Neve's Chill: an ice shell round the body with crystals jutting from it"}, "burn": {"look": "flames", "col": "#ff6a1a", "dark": "#2a100a", "hot": "#ffd23a", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "burning (Cinder's Ignite and Ablaze, any burn): flame tongues licking up the body"}, "static": {"look": "arcs", "col": "#1fc6dc", "dark": "#0a3a44", "hot": "#ff3fb4", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Sparkle's Static: teal bolts with a pink core jumping across the body"}, "antiheal": {"look": "streaks", "col": "#ff3df0", "dark": "#3a0a30", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "Anti-Heal (Kael's spin, Cinder's cloak, Grimble's slugs, Lace's Hail Wall): magenta streaks draining up out of the body"}, "sick": {"look": "wisps", "col": "#f0ecff", "dark": "#4a4458", "y": 0.0, "size": 1.0, "pace": 1.0, "why": "resurrection sickness: a pale ring at the feet and pale wisps sinking round the body"}} |
 
+## status_stacking (`content/rules/status_stacking.json`)
+
+
+
+| _doc | How a status behaves when two casters put it on one body (docs/COMBAT.md, Status stacking). combine: strongest = the bigger strength wins, never added or multiplied; add = stack counts add. time: longest = the longer of what is left and the new time (never extended past it); refresh = every new hit resets it to the full time. owner: target = one count on the body for every caster; caster = one count per caster. |
+| slow | {"combine": "strongest", "time": "longest"} |
+| burn | {"combine": "strongest", "time": "longest"} |
+| stun | {"time": "longest"} |
+| root | {"time": "longest"} |
+| static | {"combine": "add", "time": "refresh", "owner": "target"} |
+| shatter | {"combine": "add", "time": "refresh", "owner": "target"} |
+| chill | {"combine": "strongest", "time": "refresh", "owner": "target"} |
+| char | {"combine": "add", "time": "refresh", "owner": "target"} |
+| ignite | {"combine": "strongest", "time": "longest", "owner": "target"} |
+| mark | {"combine": "add", "time": "refresh", "owner": "caster"} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 

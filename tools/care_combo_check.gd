@@ -1524,7 +1524,7 @@ func rimewright() -> void:
 			"tm passive: the knock's Shatter deals the data's damage to the neighbour (and Chills them)",
 			hh - T2.hp >= want - 0.5 and K.chilled(T2), "neighbour -%.1f, data %.1f" % [hh - T2.hp, want])
 	# --- no Chill, no Shatter: knocking an unchilled foe only knocks
-	K.chill.erase(T2.get_instance_id())
+	Stacks.clear(T2, "chill")
 	K.fan_hits.clear()
 	# off to the side, clear of the downed foe
 	var ahead := (T.pos - P.pos).normalized().rotated(Vector3.UP, PI / 2.0)
@@ -1555,7 +1555,7 @@ func rimewright() -> void:
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
 	# --- the Shatter is damage only (data): no slow, no fresh Chill; numbers as the data/footage ratios
 	var pd: Dictionary = Arch.def("rimewright")["passive"]
-	K.chill.erase(T2.get_instance_id())
+	Stacks.clear(T2, "chill")
 	T2.slow_t = 0.0
 	T2.hp = T2.max_hp
 	K.splinter(T2.pos, float(pd["splinter_dmg"]), float(pd["splinter_r"]))

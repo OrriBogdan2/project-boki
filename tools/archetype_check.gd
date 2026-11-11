@@ -118,6 +118,7 @@ func fresh(T: Hunter) -> void:
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
 	T.armor_tier = 0; T.armor_xp = 0.0     # hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
 	T.set_meta("marks", {})
+	T.stacks.clear()
 
 func dmg(T: Hunter) -> float:
 	return T.max_hp - T.hp
