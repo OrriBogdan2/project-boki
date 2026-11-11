@@ -3,14 +3,16 @@ extends RefCounted
 ## bowl_three.png (three hungry Boki at the bowl: one eating, the others queued in the ring) and bowl_next.png
 ## (the next one's turn). Never touches the real save.
 
-const AT := Vector3(3.0, 0.0, -2.5)      # m from the landing where the bowl goes
+const AT := Vector3(5.0, 0.0, 3.0)        # m from the landing where the bowl goes
 const SECS := 25.0                       # s before a frame is taken anyway
 
 var main: Node
+var home: Node
 var dir := ""
 
 func _grab(file: String) -> void:
-	await main.get_tree().process_frame
+	home._close_panel()      # the arrival cards (today's wishes) would cover the frame
+	for _i in 3: await main.get_tree().process_frame
 	main.get_viewport().get_texture().get_image().save_png(dir.path_join(file + ".png"))
 	print("BOWLSHOT ", file)
 
@@ -42,7 +44,7 @@ func run(main_node: Node) -> void:
 	d["crops"]["emberberry"] = 3
 	HomeLayout.new_fs(d, 5)
 	Save.d = d
-	var home = await main._hb_home()
+	home = await main._hb_home()
 	while home.building:      # the farm builds over several frames under the ink wipe
 		await main.get_tree().process_frame
 	main.fade.reveal(0.01)
@@ -52,7 +54,11 @@ func run(main_node: Node) -> void:
 	home.hb._sync_deco()
 	home.ppos = FeedBowl.at(bowl) + Vector3(0.5, 0, 4.0)
 	home.player.position = home.ppos
-	for k in home.kins:
+	for i in home.kins.size():
+		var k: Dictionary = home.kins[i]
+		var a := float(i) * TAU / 3.0
+		k["pos"] = home.world.free_spot_near(FeedBowl.at(bowl) + Vector3(cos(a), 0, sin(a)) * 5.0, [], 0.6)
+		(k["node"] as Node3D).position = k["pos"]
 		k["t"] = 0.0
 	for _i in 3: FeedBowl.drop(home, bowl)
 	var at_bowl := func() -> bool:
