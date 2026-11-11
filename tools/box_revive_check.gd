@@ -72,6 +72,7 @@ func run(main: Node) -> void:
 	m.set_process(false)
 	for mb in m.mobs: mb.queue_free()
 	m.mobs.clear()
+	m.biomes = null          # no map hazards: a spore pod's cloud by the box would break every channel
 	for h in m.hunters:
 		h.ctrl = "idle"
 		h.inp["move"] = Vector2.ZERO
