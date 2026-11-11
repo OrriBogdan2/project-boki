@@ -2398,3 +2398,21 @@ _PGB=("Keep this creature's idea exactly: a large heavy penguin whose round body
 for _k,_p in (('stand',"Standing planted and proud, facing three-quarter left."),('roll',"Leaning forward as it starts to roll, one flipper tucked, eyes on the target."),
               ('rest',"Sitting heavily like a dropped bowling ball, flippers resting on its sides, looking at the viewer.")):
     SPECS.append({'id':'pg_ball_'+_k,'name':'Pipguin ball body, house style '+_k,'refs':['briefs/boki-art/cards/Kingpinguin.jpg'],'runs':2,'aspect':'1:1','size':'2K','prompt':_EDIT.replace('Only change this:','Change only the drawing style and pose:') if False else _PGB+_p+" "+STYLE_V2('final','tough',False,False)+FRAME_V2})
+
+# 11-11 OWNER: Pipguin = calm fat ball (pg_ball_stand_2, live). Rollguin back to the ORIGINAL fat round design (cards/Rollguin_old4.jpg) but less comic,
+# matching Pipguin's look; Kegling smaller and fatter to match. Options 3 x 2 each. Pipguin set + sprite from the new card.
+_PLINE=(" It belongs to one evolution line with the final form, a calm heavy penguin whose round body is a polished marbled bowling ball (navy with white and red marble veins, three finger holes). "
+ "Draw it in that same calm house style: natural penguin head and beak, calm eyes, no scowl, no grin, no teeth, thin outlines in a dark shade of the local colour, flat colours with one soft shade, nothing worn. ")
+for _k,_d in (('a',"Keep this exact round fat design, pose and colours (navy back with pale spots, cream belly, small red crest, sliding on its belly over snow) and only make it calmer and less cartoony."),
+              ('b',"Keep its round fat body and red crest, but standing upright like a plump ball, its navy back starting to show faint white-and-red marble veins like a young bowling ball."),
+              ('c',"Keep its round fat body and red crest, tobogganing on its belly, its back now a smooth navy dome with three small finger-hole markings and faint marble veins.")):
+    SPECS.append({'id':'rg_fat_'+_k,'name':'Rollguin fat, house style '+_k,'refs':['briefs/boki-art/cards/Rollguin_old4.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of Rollguin, the creature in image 1, a middle-stage penguin. "+_d+_PLINE+STYLE_V2('mid','cute',False,False)+FRAME_V2})
+for _k,_d in (('a',"Make it a much smaller, rounder, fatter chick: a near-spherical fluffy grey-and-white body, tiny flippers and feet, its red neck marking as a band of red feathers, sitting."),
+              ('b',"Make it a tiny fat chick shaped like a bowling pin lying down, round belly, short stubby flippers, red feather band at the neck, waddling."),
+              ('c',"Make it a tiny round chick like a small ball of down, navy cap and back, white face and belly, a red feather band at the neck, big calm eyes, standing on tiny red feet.")):
+    SPECS.append({'id':'kg_fat_'+_k,'name':'Kegling smaller and fatter '+_k,'refs':['briefs/boki-art/cards/Pinguin.jpg'],'runs':2,'aspect':'1:1','size':'2K',
+      'prompt':"Draw one single character illustration of Kegling, the baby penguin in image 1, keeping its colours and face. "+_d+" The creature is small in the frame's sense of proportion: big head, short body, clearly a baby. "+_PLINE+STYLE_V2('baby','cute',False,True)+FRAME_V2})
+V2SHEET_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg',_GC,_GN); SPECS[-1]['id']='v2s_kingpinguin_ball2'; SPECS[-1]['runs']=4; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
+V2PORT_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg','final','tough',_GC,_GN,False,False,"leaning forward as it starts to roll, one flipper tucked, calm focused eyes"); SPECS[-1]['id']='v2p_kingpinguin_ball2'
+SPECS.append({'id':'px9f_kingpinguin','name':'Kingpinguin (pixel sprite 80, calm ball)','refs':['briefs/boki-art/cards/Kingpinguin.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
