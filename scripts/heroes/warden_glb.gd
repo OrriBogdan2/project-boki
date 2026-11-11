@@ -944,6 +944,7 @@ class Sync extends Node:
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
+	var _dt_acc := 0.0            # s since the bones last followed the rig
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -1007,6 +1008,14 @@ class Sync extends Node:
 			WardenGlb._hide_shield(root)
 
 	func _process(dt: float) -> void:
+		# a hunter out of view or off screen poses its rig every few frames (Hunter.render): the bones follow it then,
+		# the skipped time added in, instead of retargeting an unchanged rig every frame (7 ms a frame, 30 hunters)
+		_dt_acc += dt
+		var h := root.get_parent() as Hunter
+		if h and not h.anim_posed:
+			return
+		dt = _dt_acc
+		_dt_acc = 0.0
 		_keep_one_weapon()
 		if clips:
 			_play(dt)
@@ -1029,9 +1038,24 @@ class Sync extends Node:
 			for bi in hide_out:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
+	## Every mapped bone onto its rig node's pose. Each local pose is worked out against its parent's pose as set (a
+	## pose keeps no shear, so that can differ from the rig's), kept here, not read back from the skeleton: a global pose
+	## read after a set recomputed the dirty bones and told every BoneAttachment3D, once per mapped bone.
 	func apply() -> void:
+		var real := {}
 		for l in links:
-			skel.set_bone_global_pose(int(l[0]), _rig_pose(l))
+			var bi := int(l[0])
+			var par := _real(skel.get_bone_parent(bi), real)
+			skel.set_bone_pose(bi, par.affine_inverse() * _rig_pose(l))
+			real[bi] = par * skel.get_bone_pose(bi)
+
+	## A bone's skeleton-space pose as set this frame: from real, else its parent's times its local pose (kept in real).
+	func _real(bi: int, real: Dictionary) -> Transform3D:
+		if bi < 0:
+			return Transform3D.IDENTITY
+		if not real.has(bi):
+			real[bi] = _real(skel.get_bone_parent(bi), real) * skel.get_bone_pose(bi)
+		return real[bi]
 
 	func _rig_pose(l: Array) -> Transform3D:
 		var now := WardenGlb.model_xf(root, l[1])

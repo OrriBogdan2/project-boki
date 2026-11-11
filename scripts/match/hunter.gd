@@ -3007,6 +3007,7 @@ func _on_kin_thrown(_k: Node, owner: Node) -> void:
 var anim_s := {}
 var _anim_dt := 0.0
 var _anim_n := 0
+var anim_posed := true      # this frame's render posed the rig: a 3D hero's bones follow it then (WardenGlb.Sync)
 const DODGE_ANIM := {"light": "phase", "medium": "roll", "heavy": "charge"}
 
 ## The dodge pose HunterAnim plays. Claire's skate has its own, so the light-dash lean does not stack
@@ -3172,6 +3173,7 @@ func render(delta: float, alpha: float) -> void:
 		if unseen or not visible: every = 6
 		elif not m.cam.on_screen(position): every = 3
 	var posed := _anim_n % every == 0
+	anim_posed = posed
 	if posed:
 		_anim_state(stretch)
 		anim.update(_anim_dt, anim_s)
