@@ -2368,3 +2368,19 @@ for _n,_st,_ar,_dk,_poses in (
         # 11-11 correction: the dex hero is cut from the CARD (refresh_names.py: hero(e['card'])), so these are card poses, ref = sheet.
         ON_POSE(_n,_LM[_n]['sheet'],_st,_ar,_dk,False,_p,_KEEP[_n]); SPECS[-1]['id']='pose_'+_n.lower()+'_cmp_'+_k; SPECS[-1]['runs']=2
         SPECS[-1]['prompt']+=" The creature fills most of the square frame in both width and height."
+
+# 11-11 OWNER picks: Rollguin on_rollguin_pena_2, Kingpinguin (Pipguin) on_kingpinguin_penc_2 (interim), Bullsfrog pose_bullsfrog_diag_1,
+# Scopeleon pose_scopeleon_cmp_up_2, Filefin pose_filefin_cmp_turn_2 (cards live), Murmuron female sheet v2s_murmuron_female_bk4_1.
+# Rollguin: new sheet + portrait. Pixel sprites for the five new cards.
+V2SHEET_NEW('Rollguin','briefs/boki-art/cards/Rollguin.jpg',_GC,_GN); SPECS[-1]['id']='v2s_rollguin_pen'; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
+V2PORT_NEW('Rollguin','briefs/boki-art/cards/Rollguin.jpg','mid','sleek',_GC,_GN,False,False,"standing up after a slide, shaking snow off, flippers out, looking at the viewer"); SPECS[-1]['id']='v2p_rollguin_pen'
+for _n in ('Rollguin','Bullsfrog','Scopeleon','Filefin'):
+    SPECS.append({'id':'px9e_'+_n.lower(),'name':_n+' (pixel sprite 80, new card)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
+# OWNER: redo Pipguin, "cooler, not just a Pokemon with bowling balls behind him". Final of Kegling (pin-shaped chick) > Rollguin (belly slide, ball holes).
+# Must NOT read as Empoleon: no crown, no trident or spike horns, no blue-and-gold emperor scheme. Born-with parts only. 4 directions x 2.
+_PG=" It is the powerful final form of a bowling-themed penguin line; keep its dark navy back, white belly and a touch of red. Not cartoony: natural penguin anatomy, calm confident expression, house finish (thin dark-colour outlines, flat colour, one soft shade). No crown, no trident, no spikes on the head, nothing worn."
+for _k,_d in (('ball',"a huge heavy penguin whose whole round body is a polished marbled bowling ball, deep navy with swirling white and red marble veins, three finger-hole markings on its chest; small strong flippers; it curls up and rolls to strike."),
+              ('pin',"a tall lean penguin whose body is shaped like a giant bowling pin: white with two red neck stripes as natural markings, narrow head and neck, broad base; its flippers are heavy club-like blades; it stands like the pin that never falls."),
+              ('storm',"a sleek streamlined speed penguin built to slide, glossy navy back with a white-and-red marbled swirl like a bowling ball, a sharp keel of hard ice-blue scales along its belly for sliding, a red stripe over its eyes like a racing mask."),
+              ('strike',"a broad champion penguin with a thick white chest, its dark back carrying a pattern of ten white pin-shaped markings arranged in the bowling triangle, a short red crest, heavy powerful flippers and feet, mid-throw stance as if hurling itself down a lane.")):
+    ON_CHANGE('Kingpinguin',_C%'Kingpinguin','final','tough',False,False,_d+_PG,runs=2,tag='_x'+_k)
