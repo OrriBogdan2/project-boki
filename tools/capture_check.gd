@@ -3,7 +3,7 @@ extends RefCounted
 ##   1. gating: only a knocked-out wild Boki can be scanned
 ##   2. the flow: hold 0.4s commits, then 4s runs on its own (let go), you are rooted and cannot shoot
 ##   3. one active Boki: the captured one is only a capsule in the box, never in the world
-##   4. interruptions: crowd control and a dash cancel it, plain damage does not; the daze timer waits
+##   4. interruptions: crowd control, Space (no hop) and a dash cancel it, plain damage does not; the daze timer waits
 ##   5. the box: capacity 3 from the rules, shown on the HUD, a full box blocks, Release frees a place
 ##   6. your own Boki does not finish a dazed wild Boki
 ##   7. the Field Book: logged on sight with a place; the v3 save migration
@@ -174,9 +174,10 @@ func _interrupts() -> void:
 			ok(false, "%s: the scan did not start" % why)
 			continue
 		run_for(0.5)
-		if why == "stun":
+		if why == "jump":
 			var text := CaptureHud.prompt(P, k)
-			ok(text.contains("(%s to cancel)" % Settings.key_cap("jump")), "the prompt names Space: " + text)
+			var names_key := text.contains("(%s to cancel)" % Settings.key_cap("jump"))
+			ok(names_key, "the scan prompt names the jump key (\"%s\")" % text)
 		match why:
 			"stun": P.stun_t = 0.4
 			"root": P.root_t = 0.4
@@ -188,7 +189,7 @@ func _interrupts() -> void:
 		run_for(0.1)
 		P.inp["dash"] = false
 		if why == "jump":
-			ok(P.grounded and P.jump_at < 0.0, "Space cancels the scan and does not also hop")
+			ok(P.grounded and P.jump_at < 0.0, "...and that press does not also hop")
 		P.inp["jump"] = false
 		if why == "damage" or why == "nudge":
 			ok(Capture.active(P) and k.scan_by == P, "%s does not interrupt the scan" % ("a shove under 8 m/s" if why == "nudge" else "plain damage"))

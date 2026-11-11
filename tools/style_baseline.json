@@ -475,7 +475,7 @@
 "long_line": 2
 },
 "scripts/match/capture.gd": {
-"long_line": 11,
+"long_line": 9,
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
@@ -787,7 +787,7 @@
 "shadow": 1
 },
 "scripts/ui/capture_hud.gd": {
-"long_line": 5
+"long_line": 4
 },
 "scripts/ui/dex_view.gd": {
 "long_line": 10,

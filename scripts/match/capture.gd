@@ -183,9 +183,10 @@ static func cancel(m, h: Hunter, why: String) -> void:
 	if k is Kin and is_instance_valid(k):
 		(k as Kin).scan_by = null
 		_send(m, "scan_stop", h, k, 0.0)
-	if why in ["jump", "dash", "cc"]:               # (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+	# (the player-facing interruptions; a hunter leaving or a Boki gone is quiet)
+	if why in ["jump", "dash", "cc"]:
 		if h.is_local() and m.hud:
-			var lead := ("Scan interrupted" if why == "cc" else "Scan cancelled")
+			var lead := "Scan interrupted" if why == "cc" else "Scan cancelled"
 			m.hud.toast("%s: hold %s beside it to try again" % [lead, Settings.key_cap("interact")], Color("ffd89a"))
 		m.sfx("scan_fail", h.pos, 0.0)
 

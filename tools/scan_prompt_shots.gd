@@ -4,6 +4,9 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const RUN_S := 1.5         # s into the scan before the picture
+## A 1v1 with no drop and no end, the same seed as --capture-check.
+const MATCH_OPTS := {"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true,
+		"demo_kin": "cindle"}
 
 func run(main: Node) -> void:
 	var dir := ""
@@ -13,7 +16,7 @@ func run(main: Node) -> void:
 	Save.no_write = true
 	var m := Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4243, "no_drop": true, "demo_kin": "cindle"})
+	await m.start(MATCH_OPTS)
 	m.set_process(false)
 	var fade = main.get("fade")
 	if fade != null: await fade.reveal(0.01)
