@@ -349,8 +349,8 @@ func slam_combo() -> void:
 
 ## Owner 11-11, E > jump RMB > E: E on a hooked chain pressed in the Meteor Drop (its hang, or its dive) pulls him at
 ## once, the drop riding the pull with its circle straight under him; it then falls straight down from where the
-## pull leaves him, beside the foe, who is knocked down. In the Finishing Slam's wind-up E still waits for the strike
-## (owner 11-10), then goes at once.
+## pull leaves him, beside the foe, who is knocked down. In the Finishing Slam's wind-up E still waits for the strike,
+## as the owner asked 11-10, then goes at once.
 func pull_waits() -> void:
 	var g := _rig()
 	var m: Match = g["m"]
@@ -393,9 +393,9 @@ func pull_waits() -> void:
 		_until(m, func(): return D.phase == "recover", 1.0)
 		var moved := Vector2(D.last_drop.x - press_at.x, D.last_drop.z - press_at.z).length()
 		var down := Vector2(D.last_drop.x - W.last_arrival.x, D.last_drop.z - W.last_arrival.z).length()
-		A.ok("jug E > jump RMB > E (E in the %s): it falls straight down where the pull left him, knocking the foe down" % at,
-				D.drops == drops0 + 1 and moved > 3.0 and down < 0.15 and D.last_hit == D.last_drop and hp0 - T.hp >= 18.0
-				and T.stun_t > 0.0,
+		A.ok("jug E > jump RMB > E (E in the %s): it falls straight down where the pull left him, knocking the foe down"
+				% at, D.drops == drops0 + 1 and moved > 3.0 and down < 0.15 and D.last_hit == D.last_drop
+				and hp0 - T.hp >= 18.0 and T.stun_t > 0.0,
 				"moved %.1f m, %.2f m off the arrival, foe took %.0f stun %.2f" % [moved, down, hp0 - T.hp, T.stun_t])
 	_fresh(m, P, K, home)
 	A.fresh(T)

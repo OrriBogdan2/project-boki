@@ -332,8 +332,8 @@ func _juggernaut_tether_hold() -> void:
 			[0.5, 0.9, 1.4, 1.9, 2.4, 2.62, 2.7, 2.9, 3.4]), 1.0)
 	await _go(GAP)
 
-## E on the dummy, jump, RMB in the air, E again (owner 11-11): the pull hauls him and the Meteor Drop through the air,
-## its circle under him, and it slams straight down where he arrives, beside the dummy.
+## E on the dummy, jump, RMB in the air, E again, as the owner plays it: the pull hauls him and the Meteor Drop
+## through the air, its circle under him, and it slams straight down where he arrives, beside the dummy.
 func _juggernaut_e_rmb_e() -> void:
 	await _reset(7.0)
 	var K: JuggernautKit = P.ak

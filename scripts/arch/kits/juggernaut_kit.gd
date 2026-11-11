@@ -644,8 +644,8 @@ func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
 ## The Slam winding up or a Lunge flinging: E's pull on a hooked chain waits for it, then goes at once. The
-## Meteor Drop never holds it: in the air the pull carries the drop (owner 11-11: E > jump RMB > E moves it mid-air),
-## and in the recovery the pull ends it, as a jump or a dash does.
+## Meteor Drop never holds it: in the air the pull carries the drop, so E > jump RMB > E moves it mid-air as the
+## owner asked 11-11, and in the recovery the pull ends it, as a jump or a dash does.
 func _pull_waits() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty()
 

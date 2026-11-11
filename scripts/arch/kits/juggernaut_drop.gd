@@ -5,7 +5,7 @@ extends RefCounted
 ## the Lunge). Press: his drift stops, a beat of hang with the blade hauled overhead (`hang`, <= 0.1s), then a fast
 ## straight drop to the ground under him (no dive across, no leap, no extra height). The hit is a small circle
 ## centred where he lands, no aim offset: he gets there first by moving or Shift, or mid-drop by Shift or E on a
-## hooked Warchain (owner 11-11, E > jump RMB > E), which carry him and the drop then falls from where they leave him.
+## hooked Warchain (E > jump RMB > E), which carry him, and the drop then falls from where they leave him.
 ## Shown to everyone from the press: everyone in it is knocked down and anyone airborne is spiked to the ground
 ## (Displace.spike); a crack, a shock ring, cel dust and debris, a shake for those nearby and a deep boom. Then a
 ## recovery rising from the crouch. Owned by JuggernautKit.
