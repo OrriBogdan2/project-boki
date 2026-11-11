@@ -201,10 +201,11 @@ func _finish(sid: String) -> void:
 	if STOP_AFTER.has(sid):
 		last_stop = stop(STOP_AFTER[sid])
 	step += 1
-	var resumed := sid == "land" and TutorialResume.last_beat() != ""
+	var test: bool = m.opts.get("tut_test", false)      # (a scripted run neither resumes nor saves a beat)
+	var resumed := sid == "land" and not test and TutorialResume.last_beat() != ""
 	if resumed:
 		_skip_to(TutorialResume.step_after(TutorialResume.last_beat()))
-	else:
+	elif not test:
 		TutorialResume.remember(sid)
 	if step == 1:
 		for a in OS.get_cmdline_user_args():
