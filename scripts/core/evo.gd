@@ -85,6 +85,8 @@ static func leading(rec: Dictionary) -> String:
 		"curious": float(rec["aff"]["curious"]) + float(tr.get("curiosity", 0.5)) * 10.0,
 		"swift": float(rec["aff"]["swift"]) + float(sp.get("speed", 6.5)) / 8.0 * 6.0,
 	}
+	for t in rec.get("path", []):
+		score[GardenItems.aff_of(t)] += float(GardenItems.rules()["pip"])
 	var best := "fierce"; var bv := -1e9
 	for k in ["fierce", "steadfast", "curious", "swift"]:
 		if score[k] > bv: bv = score[k]; best = k
@@ -159,6 +161,8 @@ static func use_ink(rec: Dictionary, ink: String) -> Dictionary:
 ## Called each time a kin gains a level. Returns what changed, or {} if nothing did.
 static func on_level(rec: Dictionary, rng: RandomNumberGenerator = null) -> Dictionary:
 	ensure(rec)
+	if rec.get("stay", false):
+		return {}
 	var lv := int(rec.get("level", 1))
 	if rng == null:
 		rng = RandomNumberGenerator.new(); rng.seed = hash(str(rec.get("uid", "")) + str(lv))

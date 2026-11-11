@@ -305,11 +305,14 @@ func _migrate_11_to_12(data: Dictionary) -> void:
 		if not r.has("bonds"):
 			r["bonds"] = {}
 
-## v12 -> v13: garden zones. Bramblebank is open and every Boki lives there (GardenZones); a v12 save from
-## either line gets the other half of v12 first (both steps are idempotent).
+## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
 func _migrate_12_to_13(data: Dictionary) -> void:
 	_migrate_11_to_12(data)
 	GardenZones.migrate(data)
+	for r in data.get("roster", []):
+		Care.ensure(r)
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

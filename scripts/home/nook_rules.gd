@@ -35,7 +35,9 @@ static func pair_why(a: Dictionary, b: Dictionary) -> String:
 static func preview(dv: VBoxContainer, a: Dictionary, b: Dictionary) -> void:
 	var na: String = Data.KIN[a["species"]]["name"]
 	var nb: String = Data.KIN[b["species"]]["name"]
+	var locket: String = NestItems.plan(a, b)["species"]
 	var kinds := na if na == nb else "%s or a %s" % [na, nb]
+	if locket != "": kinds = Data.KIN[locket]["name"]
 	dv.add_child(UI.para("The egg will be a %s, with a blend of their personalities." % kinds, 12, UI.MUTED))
 	var lean: Dictionary = Care.stronger(a, b).get("lean", {})
 	if not lean.is_empty():

@@ -3103,7 +3103,7 @@ func _open_kin(rec: Dictionary) -> void:
 		var mt := UI.tag(Mutations.name_of(mid), UI.MUTED)      # plain: rarity shows on the Boki itself
 		mt.tooltip_text = Mutations.perk_text(mid)
 		hx.add_child(mt)
-	UI.shell_tabs(v, ["Care", "Training", "Growth", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
+	UI.shell_tabs(v, ["Care", "Training", "Growth", "Family", "About"], kin_tab, func(t): kin_tab = t; _open_kin(rec))
 	var row := func(parent: Control, label_txt: String, frac: float, c: Color, right := "", lw := 92.0) -> void:
 		var r := UI.hbox(10)
 		var l := UI.label(label_txt, UI.T_SMALL, UI.MUTED); l.custom_minimum_size.x = lw
@@ -3120,6 +3120,7 @@ func _open_kin(rec: Dictionary) -> void:
 	var c2 := UI.vbox(8); c2.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	cols.add_child(c1); cols.add_child(c2)
 	match kin_tab:
+		"Family": FamilyView.fill(rec, c1, c2, get_tree(), func(k): _open_kin(k))
 		"About":
 			# what makes it itself, and where it came from (AboutView: Unique and Save.register)
 			c1.add_child(UI.section("Who it is"))
@@ -4365,6 +4366,12 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var nm: String = rec["name"]
+	if res.has("text"):          # a shaping item (GardenItems): the exact change, nothing of a meal
+		if res["look"]: _swap_kin_model(k)
+		_toast(res["text"])
+		Save.save_game()
+		_refresh_top()
+		return
 	if res["hate"]:
 		_say(k, BokiLines.say(rec, "fed_no"))
 		if res["new"]: _toast("You found out %s won't eat %s" % [nm, Care.food_name(f)])
@@ -4832,6 +4839,7 @@ func _nook_pair(a: Dictionary, b: Dictionary, dv: VBoxContainer) -> void:
 	dv.add_child(IvView.compare(a, b, 100.0))
 	dv.add_child(IvView.pass_on(a, b))
 	NookRules.preview(dv, a, b)
+	NestItemRows.add(dv, a, b, _open_nook)
 	var br := UI.hbox(8)
 	br.add_child(UI.ghost("Clear picks", func(): nook_pick = []; _open_nook()))
 	dv.add_child(br)
@@ -4861,6 +4869,7 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.d["egg"] = {"a": rec["uid"], "b": ok["uid"], "sp": esp, "m": int(Save.d["matches"]) + 1, "t": Time.get_unix_time_from_system() + 600.0}
 	rec["bred_t"] = Time.get_unix_time_from_system(); ok["bred_t"] = rec["bred_t"]
 	Save.d["egg"]["gift"] = Mentor.take_gift()      # a retired mentor's gift for this egg ({} if none)
+	NestItems.lay(Save.d["egg"], rec, ok)      # placed nest items go on the egg and are used up
 	Save.remember(rec, "egg", "had an egg with %s" % ok["name"], 2.0)
 	Save.remember(ok, "egg", "had an egg with %s" % rec["name"], 2.0)
 	Save.save_game()
@@ -4955,8 +4964,9 @@ func _hatch_nest_egg() -> void:
 		_refresh_nest()
 		return
 	var rng := RandomNumberGenerator.new(); rng.randomize()
-	var baby := Care.hatch_rare(egg, rng) if rare else Care.breed(a, b, rng, _egg_species())
+	var baby := Care.hatch_rare(egg, rng) if rare else Care.breed(a, b, rng, _egg_species(), NestItems.inherit_n(egg))
 	Mentor.apply(baby, egg.get("gift", {}))
+	if not rare: NestItems.hatched(baby, egg, a, b)
 	Save.d["egg"] = {}
 	_hatch_play(baby, rare, String(egg.get("boss", "")), NEST_AT, nest.get_node("Shell") if is_instance_valid(nest) else null)
 
@@ -4987,6 +4997,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	else:
 		Save.remember(baby, "born", "hatched in the nest on your farm", 0.0)
 	Progress.add("hatched")
+	NestItems.drop_down(baby)
 	Save.d["roster"].append(baby)
 	Save.register(baby)           # its serial, you as its trainer, and "hatched" in the log
 	KinBox.route_new(baby)        # a repeat of a kind already on the farm goes to the Kin Burrow (unless it's rare)
@@ -5139,7 +5150,9 @@ func _open_feed(rec: Dictionary) -> void:
 			for af in Evo.AFF:
 				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
-	if rows.is_empty():
+	var any := GardenItemRows.add_bag(v, rec, func(id: String): _care_feed(rec, id)) or not rows.is_empty()
+	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
+	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
 
 func _open_train(rec: Dictionary) -> void:
