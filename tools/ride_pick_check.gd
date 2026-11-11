@@ -23,6 +23,7 @@ func run(main: Node, mode: String = "check") -> void:
 		return
 	_rules()
 	_lines()
+	_card()
 	await _panel(main)
 	await _lobby(main)
 	print("RIDEPICK DONE, failures: %d" % bad)
@@ -62,6 +63,34 @@ func _lines() -> void:
 		ok(c == KinText.carry(ks) and c != "", "%s carry line: %s" % [r["species"], c])
 		var want := "Summon: out %d s, rest %d s" % [int(t.x), int(t.y)]
 		ok(s.begins_with(want), "%s summon window: %s" % [r["species"], s])
+
+## The portal card's numbers for two species, worked out by hand from the rules, not from the helpers.
+func _card() -> void:
+	var well: Dictionary = Save.d["roster"][0]      # cindle, raised hard: all needs high, trained stats
+	well["needs"] = {"food": 80.0, "energy": 80.0, "joy": 80.0, "clean": 80.0}
+	well["trust"] = 50.0
+	well["stats"] = {"power": 25, "guard": 12, "speed": 8, "focus": 40}
+	var poor: Dictionary = Save.d["roster"][1]      # zapple, neglected: low needs, no training
+	poor["needs"] = {"food": 20.0, "energy": 20.0, "joy": 20.0, "clean": 20.0}
+	poor["trust"] = 50.0
+	poor["stats"] = {"power": 0, "guard": 0, "speed": 0, "focus": 0}
+	# condition 80 -> x1.1: damage 1+25*.004, health 1+12*.005, speed 1+8*.0025, skill 40*.3% faster
+	# condition 20 -> x0.82
+	var good := "Care: +21% damage, +17% health, +2% speed, skill 12% faster"
+	ok(RidePick.care_line(well) == good, "well-raised care line: " + RidePick.care_line(well))
+	var bad_care := "Care: -18% damage, -18% health"
+	ok(RidePick.care_line(poor) == bad_care, "neglected care line: " + RidePick.care_line(poor))
+	for r in [well, poor]:
+		var ks := KinLib.kin(String(r["species"]))
+		var cell: Array = KinSummon.rules()["table"][String(ks.ai["role"])][ks.size]
+		var lean: Dictionary = Evo.AFF[Evo.leading(r)]
+		var tip := RidePick.tip(r, "x")
+		var want := "Summon: out %d s, rest %d s" % [int(cell[0]), int(cell[1])]
+		ok(RidePick.summon_line(r).begins_with(want), "%s summon tempo from the table (%s %s): %s" % [
+			r["species"], ks.ai["role"], ks.size, RidePick.summon_line(r)])
+		var leans := "Leans %s: %s" % [lean["name"], lean["why"]]
+		ok(tip.contains(RidePick.summon_line(r)) and tip.contains(RidePick.care_line(r)) and tip.contains(leans),
+			"%s hover card carries summon, care and lean" % r["species"])
 
 func _tiles(root: Node) -> Array:
 	var out: Array = []

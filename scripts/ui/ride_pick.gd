@@ -1,7 +1,8 @@
 class_name RidePick
 extends RefCounted
 ## Who rides with you, in one place before you leave (the expedition panel at home and the pre-match
-## lobby): the riding Boki's portrait, its carry passive, its summon window (KinSummon) and a swap from
+## lobby): the riding Boki's portrait, its carry passive, its summon window (KinSummon), what its care
+## gives it on the run and which way it leans (the same lines in each swap tile's hover card) and a swap from
 ## your garden roster. The rider is Save "active" (Save.active_kin), the Boki the match brings.
 ## How many ride: COUNT. One is the current rule (Match.TWO_KIN off, KinSummon: one Boki per Hunter);
 ## DECISIONS 2026-11-09 leaves more open ("default is one"), so this only shows it.
@@ -42,6 +43,30 @@ static func summon_line(rec: Dictionary) -> String:
 	var t := KinSummon.times(KinLib.kin(String(rec["species"])))
 	return "Summon: out %d s, rest %d s%s" % [int(t.x), int(t.y), "" if wisps() else "  (with Boki wisps on)"]
 
+## "Care: +4% damage, +10% health, skill 3% faster": what its raising gives it on the run (Care.match_mods:
+## trained Power, Guard, Speed, Focus, how it is feeling and its bond). Quiet stats are left out.
+static func care_line(rec: Dictionary) -> String:
+	var m := Care.match_mods(rec)
+	var bits := PackedStringArray()
+	for pair in [["dmg", "damage"], ["hp", "health"], ["speed", "speed"]]:
+		var pct := roundi((float(m[pair[0]]) - 1.0) * 100.0)
+		if pct != 0:
+			bits.append("%+d%% %s" % [pct, pair[1]])
+	var cd := roundi((1.0 - float(m["cd"])) * 100.0)
+	if cd != 0:
+		bits.append("skill %d%% faster" % cd)
+	return "Care: " + (", ".join(bits) if not bits.is_empty() else "no bonus yet")
+
+## "Leans Fierce: fights hard": the form it is growing toward (Evo.leading).
+static func lean_line(rec: Dictionary) -> String:
+	var a: Dictionary = Evo.AFF[Evo.leading(rec)]
+	return "Leans %s: %s" % [a["name"], a["why"]]
+
+## Hover text for one Boki in the swap row: name, summon tempo, care and lean.
+static func tip(rec: Dictionary, title: String) -> String:
+	var head := "%s  ·  level %d" % [title, int(rec.get("level", 1))]
+	return "\n".join([head, summon_line(rec), care_line(rec), lean_line(rec)])
+
 ## The panel. locked_why: "" lets you swap; otherwise why you can't now (shown in place of the swap row).
 ## changed runs after a swap so the caller can rebuild.
 static func build(host: Node, locked_why: String, changed: Callable) -> Control:
@@ -77,6 +102,8 @@ static func _rider(host: Node, rec: Dictionary) -> Control:
 	info.add_child(UI.label("Level %d  ·  trust %d" % [int(rec.get("level", 1)), int(rec["trust"])], 12, UI.MUTED))
 	info.add_child(UI.para(carry_line(rec), 12, KinRules.cat_color("sustain").lerp(UI.INK, 0.35)))
 	info.add_child(UI.para(summon_line(rec), 12, UI.TEAL))
+	info.add_child(UI.para(care_line(rec), 12, UI.GOLD))
+	info.add_child(UI.para(lean_line(rec), 12, UI.MUTED))
 	return card
 
 ## Your garden Boki as little portraits: click one to make it the rider.
@@ -91,7 +118,7 @@ static func _swap_row(host: Node, rec: Dictionary, changed: Callable) -> Control
 		var sp: Dictionary = Data.KIN[r["species"]]
 		var t := UI.tile_card(uid == String(rec["uid"]), func(): if swap(uid): changed.call(), 2, Color(sp["color"]))
 		var title := Data.kin_title(String(r["name"]), String(sp["name"]))
-		t.tooltip_text = "%s  ·  level %d" % [title, int(r.get("level", 1))]
+		t.tooltip_text = tip(r, title)
 		t.set_meta("swap_uid", uid)
 		t.add_child(KinPortrait.view(r, host.get_tree(), SWAP_PIC))
 		row.add_child(t)
