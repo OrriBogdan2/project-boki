@@ -36,7 +36,6 @@ var dash_hit := {}
 var buried := false
 var anim_kind := ""          # what the model is doing: slam, throw, roar, spit, dash, burrow
 var anim_k := 0.0
-var damage_by := {}          # team -> damage dealt, for credit
 var orbit := 1.0
 
 const COL := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood": Color("b6ff6a")}
@@ -73,12 +72,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 			return 0.0
 	if invul_t > 0.0:
 		d *= 0.15
-	var real: Ent = by
-	if by is Kin and (by as Kin).owner_h: real = (by as Kin).owner_h
-	var dealt := super.hurt(d, by, opts)
-	if real and dealt > 0.0:
-		damage_by[real.team] = float(damage_by.get(real.team, 0.0)) + dealt
-	return dealt
+	return super.hurt(d, by, opts)
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:
 	_clear_attack()
@@ -221,7 +215,7 @@ func sim(dt: float) -> void:
 		tgt = _pick_target()
 	cd -= dt
 	next_cd -= dt
-	var spd: float = float(md["speed"]) * (1.25 if enraged else 1.0) * slow_mult(0.55)
+	var spd: float = float(md["speed"]) * (1.25 if enraged else 1.0) * slow_mult()
 	var wish := Vector2.ZERO
 	if stun_t > 0.0 or stagger_t > 0.0:
 		if atk != "" and stagger_t > 0.0: _clear_attack()

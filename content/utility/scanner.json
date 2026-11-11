@@ -13,5 +13,7 @@
   2
  ],
  "price": 50,
- "desc": "Reveals every rival hunter within 26 tiles for 3s, through walls and grass."
+ "desc": "Reveals every rival hunter within 26 tiles for 3s, through walls and grass.",
+ "time": 3.0,
+ "range": 26.0
 }

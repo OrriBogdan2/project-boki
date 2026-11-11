@@ -148,8 +148,7 @@ static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
 		t.burn_t = maxf(t.burn_t, float(r.get("burn_for", 3.0))); t.burn_dps = maxf(t.burn_dps, float(r["burn"])); t.burn_by = h
 	if r.has("slow_k"):
-		t.slow_k = maxf(t.slow_k, float(r["slow_k"])) if t.slow_t > 0.0 else float(r["slow_k"])
-		t.slow_t = maxf(t.slow_t, float(r.get("slow_s", 1.5)))
+		t.add_slow(float(r.get("slow_s", 1.5)), float(r["slow_k"]))
 	if r.has("kb"):
 		t.impulse(h.dir_to(t) * float(r["kb"]))      # a negative shove pulls it toward you
 	if r.has("leech") and not h.downed:
