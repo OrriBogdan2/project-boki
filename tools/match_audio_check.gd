@@ -145,7 +145,7 @@ func _carry(m: Match, P: Hunter) -> void:
 		R.pos = P.pos + Vector3(d, 0, 0)
 		Sfx.last_played.clear()
 		CarrySfx.stolen(m, R, B)
-		var hears := d < float(Sfx.sound_reach["carry_take"])
+		var hears: bool = d < float(Sfx.sound_reach["carry_take"])
 		ok(Sfx.last_played.has("carry_take") == hears,
 				"steal: a squad %.0f m from the thief %s the take" % [d, "hears" if hears else "does not hear"])
 	R.pos = P.pos + Vector3(2, 0, 0)
