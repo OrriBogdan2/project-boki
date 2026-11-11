@@ -147,6 +147,28 @@ static func next_for(rec: Dictionary, how: String, item := "") -> String:
 		if lead in path if path is Array else String(path) == lead: return String(o["id"])
 	return String(fits[0]["id"])
 
+## What evolves it next (the Boki card's Next form): {"how": "level", "level": its evolve level},
+## {"how": "item", "inks": the Inks that work}, {"how": "trade"}, {"how": "soon"} while the form it
+## would take has no art, or {} for a last form. The form is the one try_evolve would pick.
+static func next_way(rec: Dictionary) -> Dictionary:
+	var line: Dictionary = rules()["lines"].get(String(rec.get("species", "")), {})
+	if line.get("into", []).is_empty():
+		return {}
+	var inks: Array = []
+	for o in line["into"]:
+		var ink := String(o.get("item", ""))
+		if ink != "" and has_art(next_for(rec, "item", ink)):
+			inks.append(ink)
+	if not inks.is_empty():
+		return {"how": "item", "inks": inks}
+	if has_art(next_for(rec, "trade")):
+		return {"how": "trade"}
+	var at := rec.duplicate()       # as if it had reached its evolve level
+	at["level"] = int(line.get("level", 1))
+	if has_art(next_for(at, "level")):
+		return {"how": "level", "level": int(line["level"])}
+	return {"how": "soon"}
+
 ## Evolves it if `how` allows and the art exists. Returns the event, or {} if it didn't (or waits).
 static func try_evolve(rec: Dictionary, how: String, item := "") -> Dictionary:
 	ensure(rec)
