@@ -35,6 +35,7 @@ func _kin(species: String, nm: String, bravery: float, temper: float, trust: flo
 	rec["traits"]["bravery"] = bravery
 	rec["traits"]["temper"] = temper
 	rec["trust"] = trust
+	rec["uid"] = "b_check_" + nm      # Home._personality hashes the uid into the Boki's pace: a random one moved the lead row
 	Save.d["roster"].append(rec)
 	return rec
 
@@ -65,6 +66,7 @@ func _walk(k: Dictionary, secs: float) -> float:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	seed(7)      # Save.new_kin rolls each Boki's traits and looks
 	var d := Save.fresh()
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
@@ -80,6 +82,8 @@ func run(m: Node) -> void:
 	HomeLayout.ensure(d)
 	home = await main._hb_home()
 	home.set_process(false)      # the check drives the frames itself
+	seed(7)      # after the sliced build: how many frames it takes (and the randf they spend) varies with load
+	home.world.rng.seed = 7
 	_sizes(mid, big)
 	home.ppos = Vector3(38.0, 0.0, 30.0)
 	home.pface = 0.0
@@ -192,10 +196,26 @@ func _trust(brave: Dictionary, wary: Dictionary) -> void:
 func _lead(rec: Dictionary) -> void:
 	var c: HomeCarry = home.carry
 	var k := _put(rec)
+	for o in home.kins:
+		if o != k:      # the others (set down at your feet above) stay out of the walk: the row is about the lead
+			o["pos"] = home.world.free_spot_near(home.ppos + Vector3(-8.0, 0.0, 0.0), [], 0.8)
+			(o["node"] as Node3D).position = o["pos"]
+			o["hold_t"] = 10.0
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
 	var far := _walk(k, 4.0)
 	ok(far < 3.0, "it follows beside you as you walk (%.2f m behind at most)" % far)
+	var gait := float(k["pers"]["speed"])
+	k["pers"]["speed"] = 0.82      # the heaviest gait (Home._personality, gravity kinds)
+	k["pos"] = home.world.free_spot_near(home.ppos + Vector3(0.0, 0.0, 4.0), [], 0.8)
+	var top := 0.0
+	for i in 10:
+		c.tick(STEP, {}, true)
+		home._move_kin(STEP)
+		top = maxf(top, Vector2(k["vel"].x, k["vel"].z).length())
+	var lead_mps: float = home.SPEED * HomeCarry.SPEED_K
+	ok(top > lead_mps, "a heavy one left behind catches up faster than you lead (%.1f vs %.1f m/s)" % [top, lead_mps])
+	k["pers"]["speed"] = gait
 	c.press_hold(k)
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
 
