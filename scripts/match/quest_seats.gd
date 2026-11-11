@@ -209,7 +209,7 @@ func _leave_lair(s: QuestSeat) -> void:
 		if up or m.lairs.inside(L, h.pos, 0.5):
 			m._extract(h, HOW_LAIR, String(L["name"]))
 
-## The Sealed Lair shut unused: its gate closes again (Lairs._tick_seal walks anyone inside out).
+## The Sealed Lair shut unused: its gate closes again (LairsLock._tick_seal walks anyone inside out).
 func _reseal(L: Dictionary) -> void:
 	L["state"] = "sealed"
 	L["user"] = null
