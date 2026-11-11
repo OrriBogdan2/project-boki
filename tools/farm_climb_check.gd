@@ -39,12 +39,19 @@ func run(main: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="): shots = String(a).substr(12)
 	if shots != "":
-		await _media(main, int(seeds[0]), shots)
+		await _media(main, _clip_seed(), shots)
 		seeds = []
 	for sd in seeds:
 		await _island(main, int(sd))
 	print("FCLIMB DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
+
+## The clip's island: the first seed with a ridge and wild water both (the drop shows).
+func _clip_seed() -> int:
+	for sd in range(1, 400):
+		var kinds: Array = HomeLayout.fs_plan(sd, HomeLayout.fs_scale(sd)).map(func(f): return f["kind"])
+		if "cliff" in kinds and ("pond" in kinds or "stream" in kinds): return sd
+	return 1
 
 func _island(main: Node, seed: int) -> void:
 	var hm = await _load(main, seed)
