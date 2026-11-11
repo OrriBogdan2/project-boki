@@ -1,0 +1,10 @@
+{
+ "group": "shop",
+ "name": "In-match shops",
+ "script": "tools/gen_sfx_shop.py",
+ "sounds": {
+  "shop_near": "ui", "shop_open": "ui", "shop_close": "ui", "shop_buy_s": "ui", "shop_buy_m": "ui",
+  "shop_buy_l": "ui", "shop_broke": "ui"
+ },
+ "signature": []
+}
