@@ -356,6 +356,8 @@ const CHECKS := {
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	# Boki wisp trail, sparkle, orbit
 	"--wisp-cosmetic-check": ["res://tools/wisp_cosmetic_check.gd", "wisp_cosmetic_check", null],
+	"--wisp-follow-check": ["res://tools/wisp_follow_check.gd", "wisp_follow_check", null],      # riding wisp
+	"--wisp-follow-shots": ["res://tools/wisp_follow_shots.gd", "wisp_follow_shots", null],      # GPU strips
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
