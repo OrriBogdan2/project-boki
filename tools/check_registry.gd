@@ -39,6 +39,8 @@ const CHECKS := {
 	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
 	"--kit-parity-check": ["res://tools/kit_parity_check.gd", "kit_parity_check", null],
+	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
+	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--tutorial-text-check": ["res://tools/tutorial_text_check.gd", "tutorial_text_check", null],

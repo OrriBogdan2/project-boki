@@ -713,6 +713,8 @@ func _cloak_blast() -> void:
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
+func recast_left() -> float: return jet.left()
+func recast_slot() -> String: return "x"
 func ult_running() -> bool: return jet.running()
 ## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
 func recast_window() -> Dictionary:
