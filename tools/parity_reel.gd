@@ -5,7 +5,8 @@ extends "res://tools/hero_vfx_reel.gd"
 ## row of key caps along the bottom lights up with the keys being pressed. Frames go to <dir>/frames/NNNNN.jpg at
 ## FRAME_FPS (run it under jobq --needs gpu, which returns the out dir); cut a clip off the box:
 ##   ffmpeg -framerate 30 -i <dir>/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p reel.mp4
-## REEL_MARK lines give the frame each part starts on. Never writes the save.
+## REEL_MARK lines give the frame each part starts on. Never writes the save. Parts outside SEQUENCE play only by
+## --reel-only: rmb_ground and rmb_air (an RMB at the dummy, then one past it, from the ground or a jump's top).
 
 const SEQUENCE := ["lmb_tap", "lmb_hold", "rmb", "e", "r", "dash_ground", "dash_air", "glide", "mantle"]
 const FRAME_FPS := 30                   # saved frames per second (every 2nd step of the 60 Hz match)
@@ -44,10 +45,9 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in SEQUENCE:
-		if only == "" or part == only:
-			print("REEL_MARK %d %s" % [frames, part])
-			await Callable(self, "_p_" + part).call()
+	for part: String in (SEQUENCE if only == "" else [only]):
+		print("REEL_MARK %d %s" % [frames, part])
+		await Callable(self, "_p_" + part).call()
 	print("REEL_DONE %d frames in %s" % [frames, frame_dir])
 	main.get_tree().quit(0)
 
@@ -133,6 +133,26 @@ func _p_rmb() -> void:
 	await _seg("RMB, then again", 4.0, func(t: float) -> void:
 		P.inp["sec"] = _in(t, 0.2) or _in(t, 2.0)
 		P.inp["sec_hold"] = _in(t, 0.2, 0.7) or _in(t, 2.0, 0.7))
+
+func _p_rmb_ground() -> void:
+	await _seg("RMB at the dummy, then past it", 4.0, func(t: float) -> void:
+		P.inp["sec"] = _rmb_shot(t, 0.2, false) or _rmb_shot(t, 2.0, true))
+
+func _p_rmb_air() -> void:
+	await _seg("Jump, RMB at the dummy; jump, RMB past it", 4.0, func(t: float) -> void:
+		P.inp["jump"] = _in(t, 0.2) or _in(t, 2.0)
+		P.inp["sec"] = _rmb_shot(t, 0.5, false) or _rmb_shot(t, 2.3, true))
+
+## True for an RMB press at `when`, with the cooldown cleared; aimed 4 m to the dummy's side just before it
+## when `past`.
+func _rmb_shot(t: float, when: float, past: bool) -> bool:
+	if past and t >= when - 0.2:
+		_aim(T.pos + Vector3(0, 0, 4.0))
+	if not _in(t, when):
+		return false
+	P.ak.cd["rmb"] = 0.0
+	P.ak.ch_rmb = 1.0
+	return true
 
 func _p_e() -> void:
 	await _seg("E, then the recast", 4.0, func(t: float) -> void:
