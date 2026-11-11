@@ -1,6 +1,6 @@
 class_name GardenPrizes
 extends RefCounted
-## Prizes and cups for the four garden games (content/rules/garden_prizes.json, GARDEN_MODERN.md 4.4).
+## Prizes and cups for the garden games (content/rules/garden_prizes.json, GARDEN_MODERN.md 4.4).
 ## A win by the Boki you backed rolls the game's prize table, adds the day's first-win item, and moves that
 ## Boki along the weekly cup: Sprout, Bloom, Crown, three wins in a row against rivals the data calls stronger.
 ## The Crown gives the game's Cup Ribbon (rec.ribbons) and the cup prize, once a game a week for each Boki.

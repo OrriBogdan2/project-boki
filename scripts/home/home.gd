@@ -61,6 +61,7 @@ var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base
 var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
+var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
@@ -170,10 +171,11 @@ func _ready() -> void:
 		hshove = BaseShove.new(self)
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
+		hshow = ShowRing.new(self)
 		hecho = EchoSteps.new(self)
 		hfish = GlintFishing.new(self)
 		htumble = BaseTumble.new(self)
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hfish]     # in this order: Tumble's ring needs the stump placed
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish]     # in this order: Tumble's ring needs the stump placed
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -2221,6 +2223,7 @@ func _label_for(it: Dictionary) -> String:
 		"fishing": return hfish.label()
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
+		"show": return hshow.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2264,6 +2267,7 @@ func _use(it: Dictionary) -> void:
 		"waystone": hway.use()
 		"tumble": htumble.use()
 		"echo": hecho.use()
+		"show": hshow.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
