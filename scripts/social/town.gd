@@ -154,6 +154,7 @@ func _build_guild() -> void:
 	var fp := Models.ferry_post(); fp.position = Vector3(28, 0, 45.5); fp.rotation.y = PI; add_child(fp)
 	_spot("ferry", Vector3(28, 0, 45.5), "Take the ferry", 2.2)
 	_spot("roster", Vector3(24.2, 0, 44.0), "Read the member roll", 2.2)
+	_spot("league", Vector3(31.8, 0, 44.0), "Read the league board", 2.2)
 	topbar.text = "Guild isle"
 	Social.get_guild(gid, func(g: Dictionary):
 		if not is_inside_tree(): return
@@ -521,6 +522,7 @@ func _use(it: Dictionary) -> void:
 		"notices": _open_notices()
 		"guilds": _open_guilds()
 		"roster": _open_roster()
+		"league": _open_league()
 		"visit": _open_visits()
 		"member":
 			var m = it.get("data")
@@ -712,6 +714,36 @@ func _open_roster() -> void:
 
 func _rank_key(ranks: Dictionary, id: String) -> String:
 	return "%d%s" % [Social.ROLES.find(ranks[id]), id]
+
+## This season's league table (current members only) and the clan egg everyone fills together.
+func _open_league() -> void:
+	var v := _new_panel("League board", 480)
+	var rules := "Each expedition you make it out of scores %d, up to %d a day. A new season starts every Monday."
+	v.add_child(UI.label(rules % [ClanLeague.SCORES["extract"], ClanLeague.DAY_CAP], 14, UI.MUTED))
+	var list := _loading(v)
+	ClanLeague.load_table(gid, String(guild_doc.get("founder", "")), func(res: Dictionary):
+		if not _clear(list): return
+		var names := {}
+		for m in members: names[m["id"]] = m["d"]["name"]
+		for r in res["table"]:
+			var col := UI.GOLD if r["id"] == Social.me else UI.INK
+			_row(list, "%s  ·  %d" % [names.get(r["id"], "A member"), r["pts"]], col)
+		if res["table"].is_empty():
+			list.add_child(UI.label("No points yet this season.", 14, UI.MUTED))
+		var total: int = res["total"]
+		var goal := ClanLeague.EGG_GOAL
+		list.add_child(UI.label("Clan egg: %d of %d" % [mini(total, goal), goal], 15, UI.GOLD))
+		list.add_child(UI.bar(float(total) / goal, UI.GOLD, 440, 10))
+		if gid != Social.my_guild_id():
+			return
+		var b := UI.button("Take your clan egg", func():
+			var sp := ClanLeague.claim_egg(total)
+			if sp != "":
+				Sfx.play("build")
+				_toast("Your %s is waiting at the Incubator" % Data.egg_name(sp))
+			if panel_open == "League board": _open_league(), 300)
+		b.disabled = not ClanLeague.can_claim(total)
+		list.add_child(b))
 
 # ---- guild projects
 func _open_project(k: String) -> void:

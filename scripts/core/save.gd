@@ -90,6 +90,7 @@ func fresh() -> Dictionary:
 		"music": [],
 		"guild_perks": [],
 		"clan": {},           # my clan: {id, role, corner_seed, joined}; empty when in none (id equals guild_id)
+		"clan_egg": "",       # the league season whose clan egg I took (ClanLeague), "" if none yet
 		"bridges": [],
 		"gh_plots": _empty_plots(4),
 		"stats": {"kills": 0, "best_kills": 0, "best_gems": 0, "caught": 0, "knocks": 0},
@@ -300,8 +301,9 @@ func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
 
 ## v12 -> v13: clans grow out of guilds. A save already in a guild becomes a plain member of the clan
-## with the same id; everyone else gets the empty dict (Social.clan_for).
+## with the same id; everyone else gets the empty dict (Social.clan_for). No clan egg taken yet.
 func _migrate_12_to_13(data: Dictionary) -> void:
+	data["clan_egg"] = ""
 	var gid := String(data.get("guild_id", ""))
 	var who := String(data.get("profile", {}).get("id", ""))
 	data["clan"] = Social.clan_for(gid, who, "member", 0.0) if gid != "" else {}

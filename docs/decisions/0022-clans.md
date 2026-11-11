@@ -30,7 +30,16 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
 - Closing is checked in the join button only (the store has no rules); a forged join can at worst put a name on
   a roll, never touch another save.
 - `Social.store_stub` lets `--clan-check` run Social against an in-memory store.
-- Debt (docs/DEBT.md): focus, officers, founder hand-off, kick, invite links, base, league, chat.
+- Debt (docs/DEBT.md): focus, officers, founder hand-off, kick, invite links, chat, the rest listed there.
 - Slice 2 (the shared base): the ferry on the guild isle opens `ClanBase` (scripts/home/clan_base.gd), a visit to
   an island built from the members' published snapshots plus `clanbase/<gid>` (read only, cleaned by
   `Social.clean_clanbase`: one showcase Boki per current member, 12 at most). No new writes, no save change.
+- Slice 3 (league and clan egg, `ClanLeague`, scripts/core/clan_league.gd): each member writes one score doc a
+  season, `clanleague/<gid>_<season>_<me> = {guild, season, pts, day, day_pts}` (one writer per doc, as
+  `contrib`). Seasons are Monday-to-Sunday UTC weeks (`w<n>`). An expedition you make it out of scores 10
+  (`Game.apply_result` calls `ClanLeague.score`), at most 200 a day. The table and the clan egg read only
+  current roster members' docs, points clamped to a season's most (1400). At 300 clan points each member
+  can take one egg a season (a Rare Egg of a species picked from the clan and season) into their own
+  Incubator; `Save.d["clan_egg"]` keeps the season taken, so leaving and joining another clan gives no
+  second. Added to the same v12 -> v13 step (unreleased). The egg claim trusts the store's total: a forged
+  doc can at worst give one egg a season early.

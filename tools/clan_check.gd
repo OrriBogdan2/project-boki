@@ -1,14 +1,18 @@
 extends RefCounted
-## --clan-check: clans, slices 1 and 2 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
+## --clan-check: clans, slices 1 to 3 (docs/specs/CLANS.md, docs/decisions/0022-clans.md), on a fake store.
 ##   1. clean_roster drops other clans' rows, unknown ranks and repeats, doubts a forged founder, clamps, caps at 24
 ##   2. founding a clan makes you its founder; joining makes you a member with a roster doc; both round-trip
 ##   3. only the founder can close the clan to newcomers; the flag reads back
 ##   4. leaving deletes the roster doc and clears the clan
-##   5. an old save (v11, no clan) loads: in a guild it becomes a member of the clan, otherwise no clan
+##   5. an old save (v11, no clan) loads: in a guild it becomes a member of the clan, otherwise no clan, no egg taken
 ##   6. clean_clanbase: one showcase Boki per current member, a 13th is dropped, forged numbers are clamped
 ##   7. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
 ##      (read the log for errors; two predate clans: the startup OptionButton theme line and the farm's
 ##      exit leak of HomeBuild/HomeMarket/HomeTrade)
+##   8. league points: seasons turn on Monday; a member scores at most DAY_CAP a day, a new day starts afresh,
+##      a stale season's doc counts for nothing, and no clan scores nothing
+##   9. the league table sums current roster members only, once each, forged points clamped
+##  10. the clan egg: not before the goal, one per member per season (also after hopping clans), into the Incubator
 
 const OLD_SAVE := "user://clan_check_old.json"
 var docs := {}
@@ -120,6 +124,7 @@ func _old_saves() -> void:
 	_write(old)
 	Save.load_from(OLD_SAVE)
 	ok(Save.d["clan"] == {} and Save.d["gems"] == old["gems"], "an old save in no guild gets no clan")
+	ok(Save.d["clan_egg"] == "" and Save.fresh()["clan_egg"] == "", "...and no clan egg taken, like a new save")
 	old.erase("guild_id")
 	_write(old)
 	Save.load_from(OLD_SAVE)
@@ -188,6 +193,71 @@ func _base(main: Node) -> void:
 	for i in 30:
 		await tree.process_frame
 
+func _league_doc(who: String) -> Dictionary:
+	return docs.get("clanleague/g7_%s_%s" % [ClanLeague.season_now(), who], {})
+
+func _scoring() -> void:
+	var day := 86400.0
+	var thu_sun := [ClanLeague.season_key(0.0), ClanLeague.season_key(3 * day + 1.0)]
+	ok(thu_sun == ["w0", "w0"], "Thursday to Sunday is one season")
+	var mon_sun := [ClanLeague.season_key(4 * day), ClanLeague.season_key(11 * day - 1.0)]
+	ok(mon_sun == ["w1", "w1"], "...and Monday starts the next")
+	Save.d["guild_id"] = ""
+	ClanLeague.score("extract")
+	ok(not docs.keys().any(func(k): return String(k).begins_with("clanleague/")), "no clan, no points")
+	Save.d["guild_id"] = "g7"
+	ClanLeague.score("extract", 30)
+	ClanLeague.score("extract")
+	ok(_league_doc("alice").get("pts") == ClanLeague.DAY_CAP, "30 extracts in one day stop at %d" % ClanLeague.DAY_CAP)
+	var mine: Dictionary = _league_doc("alice")
+	mine["day"] = int(mine["day"]) - 1
+	ClanLeague.score("extract")
+	var after: Dictionary = _league_doc("alice")
+	var step: int = ClanLeague.SCORES["extract"]
+	ok(after["pts"] == ClanLeague.DAY_CAP + step and after["day_pts"] == step, "a new day scores again")
+	after["season"] = "w0"
+	ClanLeague.score("extract")
+	ok(_league_doc("alice")["pts"] == step, "a doc from another season counts for nothing")
+	ClanLeague.score("bribe", 99)
+	ok(_league_doc("alice")["pts"] == step, "an unknown kind scores nothing")
+
+func _table() -> void:
+	var season := ClanLeague.season_now()
+	docs["clanroster/g7_alice"] = {"guild": "g7", "role": "founder"}
+	docs["clanroster/g7_bob"] = {"guild": "g7", "role": "member"}
+	var rows := [
+		_row("g7_%s_alice" % season, {"guild": "g7", "season": season, "pts": 120}),
+		_row("g7_%s_bob" % season, {"guild": "g7", "season": season, "pts": 1e15}),
+		_row("g7_%s_bob" % season, {"guild": "g7", "season": season, "pts": 50}),
+		_row("g7_%s_carl" % season, {"guild": "g7", "season": season, "pts": 90}),
+		_row("g7_w1_alice", {"guild": "g7", "season": "w1", "pts": 90}),
+		_row("g7_%s_alice" % season, {"guild": "g8", "season": season, "pts": 90}),
+	]
+	var res := ClanLeague.clean_table(rows, "g7", season, ["alice", "bob"])
+	var ids: Array = res["table"].map(func(r): return r["id"])
+	ok(ids == ["bob", "alice"] and res["total"] == ClanLeague.SEASON_CAP + 120,
+		"members only, once each, forged points clamped (%s, %d)" % [ids, res["total"]])
+	docs["clanleague/g7_%s_carl" % season] = {"guild": "g7", "season": season, "pts": 90}
+	docs["clanleague/g7_%s_bob" % season] = {"guild": "g7", "season": season, "pts": 40}
+	var got := []
+	ClanLeague.load_table("g7", "alice", func(r): got.append(r))
+	var step: int = ClanLeague.SCORES["extract"]
+	ok(got.size() == 1 and got[0]["total"] == 40 + step, "the store's table leaves out a non-member (%s)" % [got])
+
+func _egg() -> void:
+	Save.d["guild_id"] = "g7"
+	var before := Incubator.count()
+	ok(ClanLeague.claim_egg(ClanLeague.EGG_GOAL - 1) == "", "no egg before the clan fills it")
+	var sp := ClanLeague.claim_egg(ClanLeague.EGG_GOAL)
+	var want := ClanLeague.egg_species("g7", ClanLeague.season_now())
+	ok(sp == want and Incubator.count() == before + 1, "a full egg gives one %s egg" % sp)
+	ok(ClanLeague.claim_egg(ClanLeague.EGG_GOAL * 9) == "", "a second claim in the season gives nothing")
+	Save.d["guild_id"] = "g8"
+	var again := ClanLeague.claim_egg(ClanLeague.EGG_GOAL)
+	ok(again == "" and Incubator.count() == before + 1, "nor does another clan's egg")
+	Save.d["clan_egg"] = "w0"
+	ok(ClanLeague.claim_egg(ClanLeague.EGG_GOAL) != "", "a new season gives a new one")
+
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
@@ -200,6 +270,10 @@ func run(main: Node) -> void:
 	_leaving()
 	_old_saves()
 	_showcase()
+	Save.d = Save.fresh()
+	_scoring()
+	_table()
+	_egg()
 	Save.d = Save.fresh()
 	await _base(main)
 	print("CLAN DONE, failures: %d" % bad)
