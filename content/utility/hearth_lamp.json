@@ -1,0 +1,17 @@
+{
+ "id": "hearth_lamp",
+ "name": "Hearth Lamp",
+ "short": "Lamp",
+ "icon": "heart",
+ "col": "ffb070",
+ "use": "lamp",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  0,
+  1
+ ],
+ "price": 110,
+ "desc": "Sets a revive beacon where you stand. Any squad can use it, once."
+}
