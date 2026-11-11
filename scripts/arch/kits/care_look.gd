@@ -224,12 +224,12 @@ func _build(kind: String) -> Node3D:
 ## Ice shards stuck in a body, tips out: one per dart stack (keep shows the first n). Spread round the body by
 ## the golden angle at staggered heights, so any count reads from the match camera.
 func _build_shards(n: Node3D) -> void:
-	var mat := ice_mat(Color("bff7ef"), 0.95, 0.4, Color("ffffff"))
+	var mat := ice_mat(Color("6fd8ff"), 0.95, 0.2, Color("e8ffff"))
 	for i in SHARDS:
 		var a := float(i) * 2.39996
 		var out := Vector3(cos(a), 0.55 - 0.25 * float(i % 3), sin(a)).normalized()
 		var tip := Vector3(cos(a) * 0.3, 0.55 + 0.17 * float(i % 4), sin(a) * 0.3)
-		var s := _off(Models.part(n, Models.crystal(0.07, SHARD_LEN - 0.04 * float(i % 3), 4), mat, tip))
+		var s := _off(Models.part(n, Models.crystal(0.09, SHARD_LEN - 0.04 * float(i % 3), 4), mat, tip))
 		s.basis = Basis(Quaternion(Vector3.UP, out))
 		s.position += out * SHARD_LEN * 0.3
 
@@ -542,7 +542,7 @@ func _show_shards(n: Node3D, p: Dictionary) -> void:
 		mi.scale = Vector3.ONE * (maxf(0.05, grow) if i == shown - 1 else 1.0)
 		i += 1
 	var mt := (n.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
-	mt.set_shader_parameter("glow", 0.4 + 1.4 * float(shown) / float(SHARDS))
+	mt.set_shader_parameter("glow", 0.2 + 0.8 * float(shown) / float(SHARDS))
 	mt.set_shader_parameter("alpha", float(p.get("a", 1.0)))
 
 func drop(key: String) -> void:

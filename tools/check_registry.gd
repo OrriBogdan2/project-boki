@@ -168,6 +168,7 @@ const CHECKS := {
 	"--ryzz-live-check": ["res://tools/ryzz_live_check.gd", "ryzz_live_check", null],
 	"--clip-live-claire-check": ["res://tools/clip_live_claire_check.gd", "clip_live_claire_check", null],
 	"--claire-skate-shots": ["res://tools/claire_skate_shots.gd", "claire_skate_shots", null],
+	"--neve-feel-film": ["res://tools/neve_feel_film.gd", "neve_feel_film", null],
 	"--neve-shots": ["res://tools/neve_shots.gd", "neve_shots", null],      # --shots-dir=<dir>
 	"--boki-guard-shots": ["res://tools/boki_guard_shots.gd", "boki_guard_shots", null],      # --shots-dir=<dir>
 	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
