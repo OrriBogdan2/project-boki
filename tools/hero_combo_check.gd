@@ -94,6 +94,17 @@ func _growth() -> void:
 			"L1 %.2f L10 %.2f" % [d1, d10])
 
 # ------------------------------------------------------------------ Sparkle
+## The next puff of Static sparks on `T` (content/vfx/mage.json "static", every MageKit.STATIC_GAP): its particles.
+func _static_puff(m: Match, T: Ent) -> int:
+	var V := HeroVfx.of(m)
+	var was := int(V.plays.get("static", 0))
+	var made := V.motes.size()
+	for i in 10:
+		ac.step(m, 0.05)
+		if int(V.plays.get("static", 0)) > was:
+			return int(V.motes[-1]["n"]) if V.motes.size() > made else 0
+	return 0
+
 func _mage() -> void:
 	var r: Array = ac.setup("mage", 4.0, "", true)
 	var m: Match = r[0]
@@ -121,7 +132,10 @@ func _mage() -> void:
 	ok("LMB: the bolt reaches 13m with the cursor at 2m",
 			not sd.is_empty() and absf(float(sd["life0"]) * (sd["vel"] as Vector2).length() - 13.0) < 0.5,
 			"%.1f m" % (float(sd.get("life0", 0.0)) * (sd.get("vel", Vector2.ZERO) as Vector2).length()))
-	ok("LMB: the round is a jagged bolt (a pooled rider)", VVFx.of(m).riders.size() >= 1)
+	var orb: Node3D = sd.get("node")
+	var rides := HeroVfx.of(m).ribbons.any(func(e): return e["follow"] == orb and orb != null)
+	ok("LMB: the round is a jagged bolt (a HeroVfx trail on the shrunk round)",
+			rides and orb.scale.x < 0.01 and orb.visible, "trail %s" % rides)
 	var a1 := K.anim_id
 	ac.step(m, 0.85)
 	_fire(m, P)
@@ -141,14 +155,16 @@ func _mage() -> void:
 	ok("Static: a marker over the head shows the count",
 			not mk.is_empty() and int(mk["n"]) == K.spark_n(T) and K.spark_n(T) >= 1 and (mk["node"] as Node3D).visible,
 			"%s n %d" % [mk.keys(), K.spark_n(T)])
-	var sparks_1 := ((mk["node"] as Node3D).get_node("Sparks") as CPUParticles3D).amount if not mk.is_empty() else 0
 	var n_1 := K.spark_n(T)
+	Sfx.listener = P.pos               # (the camera's focus: the looks thin with distance from it)
+	var sparks_1 := _static_puff(m, T)
 	K.add_spark(T, 4 - n_1)
-	ac.step(m, 0.05)
+	var sparks_4 := _static_puff(m, T)
 	mk = VVFx.of(m).markers.get("vs%d" % T.get_instance_id(), {})
-	var sparks_4 := ((mk["node"] as Node3D).get_node("Sparks") as CPUParticles3D).amount if not mk.is_empty() else 0
 	var high := float((mk["node"] as Node3D).global_position.y - T.position.y) if not mk.is_empty() else 0.0
-	var grows := sparks_1 == 2 * n_1 and sparks_4 == 8
+	var V := HeroVfx.of(m)
+	var share := float(Settings.q("fx")) * V.lod_at(T.position) * V.view_k(P)
+	var grows := sparks_1 == int(2 * n_1 * share) and sparks_4 == int(8 * share)
 	ok("Static: 4 = Live, the sparks grow 2 a stack (to 8)",
 			K.live(T) and int(mk.get("n", 0)) == 4 and grows,
 			"%d -> %d" % [sparks_1, sparks_4])
