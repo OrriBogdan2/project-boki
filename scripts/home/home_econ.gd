@@ -133,6 +133,8 @@ func tick(d: float) -> void:
 		var was := String(told.get(rec["uid"], ""))
 		if st != was:
 			told[rec["uid"]] = st
+			if st == "" and Care.STARVE_INFO.has(was) and not h._kin_entry(rec).is_empty():
+				KinAiling.perk_up(h, h._kin_entry(rec))
 			if st != "":
 				var k: Dictionary = h._kin_entry(rec)
 				if not k.is_empty():
