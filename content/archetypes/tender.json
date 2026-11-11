@@ -50,7 +50,8 @@
 		"refund": 0.2,
 		"emp_idle": 1.0,
 		"falloff": 0.5,
-		"col": "#ffb347"
+		"col": "#ffb347",
+		"num_cols": ["#ffe3a0", "#ffcf6e", "#ffb347", "#ff9a3a", "#ff7f2a"]
 	},
 	"passive": {
 		"name": "Carrier",

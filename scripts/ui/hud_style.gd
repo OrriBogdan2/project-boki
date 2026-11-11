@@ -162,11 +162,12 @@ static func ctext(c: CanvasItem, p: Vector2, s: String, font_size: int, col: Col
 	text(c, Vector2(p.x - w * 0.5, p.y), s, font_size, col, ol, font)
 
 ## Floating damage number colour: by who was hit and how (Match picks, Fx draws).
-static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool) -> Color:
+## hit: a plain hit's colour; a kit may tint it per hit through the hit's "num_col" (Meeko's Kindle ramp).
+static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool, hit := HIT) -> Color:
 	if on_you: return HURT
 	if on_your_kin: return HURT_KIN
 	if crit: return CRIT_ARMOR if armor_hit else CRIT
-	return HIT_ARMOR if armor_hit else HIT
+	return HIT_ARMOR if armor_hit else hit
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}

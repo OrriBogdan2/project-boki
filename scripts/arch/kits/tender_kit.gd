@@ -96,10 +96,16 @@ func res_frac() -> float: return float(best_kindle()) / float(res_def().get("max
 func res_text() -> String: return "%d/%d" % [best_kindle(), int(res_def().get("max", 5))]
 func full_ready() -> bool: return false
 
+## Embers ramp per Kindle stack, and the hit's damage number warms with the stacks it landed on
+## (the resource's "num_cols", cream to ember, one per stack; no stack keeps the plain hit colour).
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
-	if String(o.get("src", "")) == "shot":
-		return dmg + float(res_def().get("per_stack", 1.0)) * float(kindle_on(t))
-	return dmg
+	if String(o.get("src", "")) != "shot":
+		return dmg
+	var n := kindle_on(t)
+	o.erase("num_col")
+	if n > 0:
+		o["num_col"] = Color(String((res_def()["num_cols"] as Array)[n - 1]))
+	return dmg + float(res_def().get("per_stack", 1.0)) * float(n)
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
