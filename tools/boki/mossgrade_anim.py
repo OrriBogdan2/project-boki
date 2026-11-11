@@ -1,6 +1,6 @@
 """Mossgrade's skeleton and the clips that are its own: eight legs in a slow wave, flowers that bud and bloom."""
 import mossgrade
-from boki_clips import LOOK_UP, SHARED, add, c, ear_pose, eat_ground, mouth_tool, part_bones, pet, s, seq, sweep
+from boki_clips import LOOK_UP, SHARED, add, c, ear_pose, eat_ground, mouth_tool, part_bones, pet, s, seq
 from mossgrade import FLOWERS, LEGS, SIDES, v3
 
 BUD = 0.6          # the flowers' size in everyday clips; 1 is the open bloom they are modelled as
@@ -40,7 +40,7 @@ def legs(p, t, rate, swing, lift, spread=0.0):
     for sd, sx in SIDES:
         for k, (leg, paw, _, _) in enumerate(LEGS):
             ph = (3 - k) * 0.22 + (0.5 if sd == "R" else 0.0)
-            a = sweep(t, rate, ph)
+            a = s(t, rate, ph)
             up = max(0.0, c(t, rate, ph))
             add(p, "%s.%s" % (leg, sd), rx=a * swing, rz=sx * LEG_OUT * (up * lift + spread))
             add(p, "%s.%s" % (paw, sd), rx=-a * swing * 0.6 + up * lift * 1.2)
@@ -72,7 +72,7 @@ def eight(fn, size=BUD, sway=0.08):
 def shuffle(t):
     """Walk: a slow, contented eight-legged shuffle, the barrel rolling a little, the head swaying along."""
     p = {}
-    legs(p, t, 1, 0.46, 0.22)
+    legs(p, t, 1, 0.38, 0.22)
     p["root_at"] = (0, 0.004 * s(t, 2, 0.1), 0)
     add(p, "root", ry=0.035 * s(t, 1), rz=0.03 * s(t, 1, 0.25))
     add(p, "spine", ry=-0.04 * s(t, 1, 0.1), rx=0.015 * s(t, 2))
@@ -86,7 +86,7 @@ def shuffle(t):
 def scurry(t):
     """Run: its idea of hurrying, the same wave at a bustle, the whole barrel jiggling on top of it."""
     p = {}
-    legs(p, t, 2, 0.75, 0.32)
+    legs(p, t, 2, 0.55, 0.32)
     bounce = abs(s(t, 4))
     p["root_at"] = (0, 0.016 * bounce, 0)
     p["root_sc"] = (1 - 0.03 * bounce, 1 + 0.05 * bounce, 1 - 0.02 * bounce)
