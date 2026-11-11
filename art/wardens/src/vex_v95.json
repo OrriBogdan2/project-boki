@@ -27,7 +27,7 @@
   "ankle.L": [-0.13, -0.16, 0.14]
  },
  "detach": [["forearm.R", "thigh.R"], ["forearm.R", "hips"], ["forearm.R", "shin.R"]],
- "relax": {"CUTS": 0},
+ "relax": {"CUTS": 0, "MAX_ITER": 400, "RINGS": 4},
  "past_wrist": {"R": "forearm.R", "L": "hand.L"},
  "spread": "rig",
  "smooth": 12,
