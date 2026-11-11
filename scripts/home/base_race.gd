@@ -482,10 +482,10 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
-	relay.tick(d)
 		if card_t <= 0.0:
 			let_go(held)
 			held = []
+	relay.tick(d)
 	if run == null:
 		return
 	run.step(d)

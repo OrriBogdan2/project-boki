@@ -468,8 +468,7 @@ func _home_start(k: Dictionary) -> void:
 	if not m.go(S.REACT, "homecoming"):
 		return
 	var kind := greet_kind(k["rec"])
-	var toy = k.get("life_at") if was == S.PLAY else null
-	k["life_home"] = {"phase": "run", "t": 0.0, "was": was, "kind": kind, "toy": toy,
+	k["life_home"] = {"phase": "run", "t": 0.0, "was": was, "kind": kind,
 		"goal": h._seat(k, h.spots["portal"], float(R["home"]["stop"][kind]))}
 	k["life_run"] = true
 	h._emote(k, "!", true)
@@ -512,8 +511,8 @@ func _home_end(k: Dictionary, m: Fsm, hm: Dictionary) -> void:
 	m.go(S.ROAM, "greeted")
 	if hm["was"] == S.NAP:
 		_nap(k, "back to bed")
-	elif hm["was"] == S.PLAY and m.can(S.PLAY):
-		_play(k, hm["toy"])
+	elif hm["was"] == S.PLAY and m.can(S.PLAY) and h.toys.pick(k, true):
+		m.go(S.PLAY, "back to a toy")      # HomeToys walks it to one again
 
 # ------------------------------------------------------------------ helpers
 ## Not asleep time: night is for napping, except for nocturnal Boki.

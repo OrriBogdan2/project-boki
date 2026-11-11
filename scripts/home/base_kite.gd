@@ -237,7 +237,7 @@ func use() -> void:
 		vent_nodes.append(vn)
 	_paint_hoops()
 	_place_flier()
-	Sfx.play("garden_start", stand.position, BaseRace.GARDEN_DB)
+	GardenSfx.countdown(h, stand.position)
 
 ## Esc lands the kite with no result; true when the flight took the press.
 func input(event: InputEvent) -> bool:
@@ -254,12 +254,12 @@ func tick(d: float) -> void:
 	if run == null:
 		return
 	if Input.is_action_just_pressed("jump") and run.flap():
-		Sfx.play("jump", flier["pos"], BaseRace.GARDEN_DB)
+		Sfx.play("jump", flier["pos"], GardenSfx.DB)
 	var passed := run.step(d, Input.get_axis("left", "right"))
 	if passed == "vent":
 		h._toast("Updraft! A flap back (%d left)" % run.flaps)
 	elif passed != "":
-		Sfx.play("garden_cheer" if passed == "hit" else "garden_miss", flier["pos"], BaseRace.GARDEN_DB)
+		GardenSfx.crowd("great" if passed == "hit" else "miss", flier["pos"])
 		_paint_hoops()
 	_place_flier()
 	if run.over():
@@ -337,7 +337,7 @@ func _end(finished: bool) -> void:
 	vent_nodes = []
 	kite = null
 	if finished:
-		Sfx.play("garden_win", land, BaseRace.GARDEN_DB)
+		GardenSfx.won(flier["rec"], land)
 		h._emote(flier, "♥", true)
 		_card(res)
 		h._play_evolutions.call_deferred()     # a level the garden XP brought plays its form

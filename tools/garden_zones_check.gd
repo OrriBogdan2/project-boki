@@ -523,7 +523,7 @@ func _unlock_part(m: Node) -> void:
 	ok(ash["journal"].any(func(e): return CareJournal.text(e) == "woke Cinderstep"), "its journal says so")
 	ok(hub.hway.node.get_node("Stone2").get_meta("open") and hub.hway.node.has_node("Cap2"), "its stone is lit")
 	ok(not GardenZones.attune("cinderstep")["ok"], "an open zone cannot be woken again")
-	var lines: Array = ZoneCards._open_lines("cinderstep").map(func(l): return (l as Label).text)
+	var lines: Array = ZoneCards.open_lines("cinderstep").map(func(l): return (l as Label).text)
 	ok(lines.has("Woken by Ash"), "its card names the founder")
 	_lair_and_trader_part()
 	Content.rules("farm_build")["base_mode"] = false
