@@ -188,6 +188,15 @@ Conversions: damage by the ratio to the orb (9 for the data's 263): Snap 277 -> 
 | Passive proc | `ostra_empower` | `anim_os_empower` |
 | X | `ostra_well` (wind-up, held), `ostra_well_snap` (held while it pulls), `ostra_well_end` | `anim_os_well` (`--strip-w=760` shows the dome and the well beside him) |
 
+## Engine notes
+- Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
+  HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
+- Net: the seed travels as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
+  Nightwell runs on the caster's game like the seed's pop: hits carry the stun, and every caught body (a player online on
+  their own game) is drawn to the centre by a Displace "glide" tow.
+- Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
+  adds no hold field (nothing to drop on a merge).
+
 ## Animation timing (Nov 10: parity pass against the 5 fps footage; 10 fps for the ult)
 
 Every slot measured three ways: the source from briefs/hero-ref/ostra.md (one frame = 0.2 s, the ult strip 0.1 s), the
@@ -215,12 +224,3 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 | R | the Boki Merge (`mf_xform`, ours) | 0.80 | same | no source |
 
 Not in the slots: `ostra_flurry` is cut (no caller, `--dead-kmoves-check`); `ostra_empower` (Swollen, 0.9 s) has no source frame.
-
-## Engine notes
-- Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
-  HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
-- Net: the seed travels as `["zone", ...]` events; Trade's moves go through Displace (`["disp", "tp", ...]`, decision 0016).
-  Nightwell runs on the caster's game like the seed's pop: hits carry the stun, and every caught body (a player online on
-  their own game) is drawn to the centre by a Displace "glide" tow.
-- Nightwell: `scripts/arch/kits/ostra_well.gd` (OstraWell); its looks are pooled KitLooks kinds `well_dome` and `well`. It
-  adds no hold field (nothing to drop on a merge).
