@@ -10,7 +10,8 @@ extends RefCounted
 ## remote Boki into a wisp and back. The summon (KinSummon): every species has a window and cooldown in the
 ## uptime band; Summon bursts the wisp into the full Boki on its AI with a short leash, damage never ends
 ## it, a knock-down turns it back into a wisp with the longer cooldown, the window ends in a shrink back to
-## a dim wisp, a resting summon refuses, the snapshot carries it. Prints PASS/FAIL.
+## a dim wisp, a resting summon refuses, the snapshot carries it; the Field Book, Boki card and loadout
+## show the summon's own window and cooldown with the rules' plain line. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
 
@@ -233,7 +234,7 @@ func _summon_data() -> void:
 	ok(KinSummon.times(KinLib.kin("cindle")) == Vector2(8, 60), "summon: Cindle (small bruiser) is out 8 s, rests 60 s")
 	_dex_row()
 
-## The Field Book card's summon row shows the numbers the summon uses, with the right tag.
+## The Field Book card's summon row shows the numbers the summon uses, with the plain line its window picks.
 func _dex_row() -> void:
 	var ids: Array = KinLib.kin_ids().filter(func(id): return Data.KIN.has(id))
 	ids.sort_custom(func(a, b): return KinSummon.times(KinLib.kin(a)).x < KinSummon.times(KinLib.kin(b)).x)
@@ -242,9 +243,31 @@ func _dex_row() -> void:
 		var row := DexView.summon_row(spk)
 		var txt := (row.find_child("SummonText", true, false) as Label).text
 		ok(txt == "Summon %d s / rest %d s" % [int(t.x), int(t.y)], "dex: %s card reads '%s'" % [spk, txt])
-		var tag := (row.get_child(2).get_child(0) as Label).text
-		ok(row.get_child_count() == 3 and tag == KinSummon.tag(t.x).to_upper(), "dex: %s card tag is %s" % [spk, tag])
+		var line := (row.find_child("SummonLine", true, false) as Label).text
+		ok(line != "" and line == KinSummon.card_line(t.x), "dex: %s card line is '%s'" % [spk, line])
 		row.free()
+	var short_l := KinSummon.card_line(KinSummon.times(KinLib.kin(ids[0])).x)
+	var long_l := KinSummon.card_line(KinSummon.times(KinLib.kin(ids[-1])).x)
+	ok(short_l == "Short summon, strong" and long_l == "Long summon, steady",
+		"dex: the rules' thresholds give the shortest '%s', the longest '%s'" % [short_l, long_l])
+
+## The Boki card (garden, the In a match rows, compact and full) and the expedition loadout row show the
+## live summon's own window and cooldown.
+func _card_rows(k: Kin) -> void:
+	var hm: Node3D = load("res://scripts/home/home.gd").new()
+	var want := "Summon %d s / rest %d s" % [int(k.summon.dur), int(k.summon.cd_base)]
+	var cards: Array = [UI.vbox(4), UI.vbox(4), hm._kin_pick_row("Partner", k.rec, "active")]
+	hm._kin_match_rows(k.rec, cards[0], true)
+	hm._kin_match_rows(k.rec, cards[1], false)
+	for i in cards.size():
+		var l := cards[i].find_child("SummonText", true, false) as Label
+		var cl := cards[i].find_child("SummonLine", true, false) as Label
+		var where: String = ["Boki card", "In a match page", "loadout row"][i]
+		var line := cl.text if cl else "no line"
+		ok(l != null and l.text == want and line == KinSummon.card_line(k.summon.dur),
+			"card: %s shows '%s' (%s)" % [where, want, line])
+		cards[i].free()
+	hm.free()
 
 ## The summon itself, on the player's Cindle with Boki wisps on.
 func _summon() -> void:
@@ -254,6 +277,7 @@ func _summon() -> void:
 	var p: Hunter = m.player
 	var k: Kin = p.kin
 	var s := k.summon
+	_card_rows(k)
 	ok(Settings.key_cap("summon") != "?" and Settings.ACTIONS.any(func(a): return a[0] == "summon"),
 		"summon: a rebindable Summon action with a key cap (%s)" % Settings.key_cap("summon"))
 	ok(KinSummon.press(p) and not k.wisp and k.state == "active" and k.model.name != "BokiWisp",

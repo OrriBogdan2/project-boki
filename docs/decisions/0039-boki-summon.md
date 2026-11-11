@@ -25,3 +25,6 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 ## Consequences
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
+- Cards: the Field Book species page, the garden Boki card (In a match rows) and the expedition loadout row show
+  `Summon N s / rest N s` from `KinSummon.times` (the same cell the summon reads) and a plain line picked by
+  `card_lines` thresholds in boki_summon.json ("Short summon, strong" / "Long summon, steady") (DexView.summon_row).

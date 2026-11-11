@@ -2932,6 +2932,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 		ab_row.call(Settings.key_caps("ultimate"), "Fusion: " + ud.display_name, " ".join(KinText.merge(ud, kspec != null and kspec.carry_style == "mount")), Color("ffd84a").lerp(UI.INK, 0.3))
 	if kspec == null:
 		return
+	c2.add_child(DexView.summon_row(String(rec["species"])))
 	var lines: Array = [[KinText.carry(kspec), KinRules.cat_color("sustain").lerp(UI.INK, 0.35)]]
 	var ob := KinText.owner_bonus(KinLib.owner_bonus(kspec, rec))
 	if ob != "": lines.append(["Owner bonus while it's your Boki: " + ob, Color("ffd84a").lerp(UI.INK, 0.35)])
@@ -3437,6 +3438,7 @@ func _kin_pick_row(label_t: String, rec: Dictionary, key: String) -> Control:
 		al.tooltip_text = al.text
 		al.mouse_filter = Control.MOUSE_FILTER_PASS
 		info.add_child(al)
+		info.add_child(DexView.summon_row(String(rec["species"])))
 	row.add_child(info)
 	var next_b := UI.icon_button("next", func(): cycle.call(1), "Next Boki", 12.0)
 	next_b.size_flags_vertical = Control.SIZE_SHRINK_CENTER

@@ -257,7 +257,7 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	parent.add_child(r)
 
 ## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
-## itself reads), a ring icon and the Burst / Steady tag.
+## itself reads), a ring icon and the plain line (KinSummon.card_line). The Boki card and loadout show it too.
 static func summon_text(spk: String) -> String:
 	var t := KinSummon.times(KinLib.kin(spk))
 	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
@@ -268,7 +268,9 @@ static func summon_row(spk: String) -> Control:
 	var l := UI.label(summon_text(spk), UI.T_SMALL, UI.INK)
 	l.name = "SummonText"
 	r.add_child(l)
-	r.add_child(UI.tag(KinSummon.tag(KinSummon.times(KinLib.kin(spk)).x), UI.MUTED))
+	var cl := UI.label(KinSummon.card_line(KinSummon.times(KinLib.kin(spk)).x), UI.T_SMALL, UI.MUTED)
+	cl.name = "SummonLine"
+	r.add_child(cl)
 	return r
 
 ## One or two lines about the species (its flavour text, cut at the second sentence).
