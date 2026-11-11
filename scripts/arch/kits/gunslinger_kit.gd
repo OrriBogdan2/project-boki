@@ -174,11 +174,6 @@ func teardown() -> void:
 func move_k() -> float:
 	return 1.0 - float(e_def()["self_slow"]) if not needle.is_empty() else 1.0
 
-## The Longneedle's line is near-planted: it turns toward the cursor at e.turn_deg_s
-## deg/s at most (cast to shot).
-func aim_lock() -> Vector2:
-	return needle.get("dir", Vector2.ZERO)
-
 ## The rifle can't fire while a dry drum refills (_tick_mag).
 func fire_ok() -> bool:
 	return not dry
