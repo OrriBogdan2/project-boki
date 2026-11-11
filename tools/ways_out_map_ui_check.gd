@@ -139,9 +139,12 @@ func run(main: Node) -> void:
 	var want := lerpf(Heart.r("tide_r0"), Heart.r("tide_r1"), ahead) * H.ways_scale
 	ok(is_equal_approx(Heart.next_r(m), want) and Heart.next_r(m) < Heart.tide_r(m),
 		"mid close: the dashed ring is tide_next_s ahead and smaller")
-	m.time = t0 + Heart.r("tide_close_s") + 50.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), Heart.r("tide_r1") * H.ways_scale),
-		"once the ring holds there is no smaller one")
+	m.time = Heart.last_close() + 10.0 - m.sess_t0
+	ok(is_equal_approx(Heart.next_r(m), Heart.ring_at(m.sess_time() + Heart.r("tide_next_s"), H.ways_scale))
+		and Heart.next_r(m) < Heart.tide_r(m), "in the end phase the dashed ring still leads the close")
+	m.time = Heart.last_close() + Heart.r("end_close_s") + 10.0 - m.sess_t0
+	ok(is_equal_approx(Heart.next_r(m), Heart.r("end_r") * H.ways_scale) and Heart.next_r(m) == Heart.tide_r(m),
+		"once the final circle holds there is no smaller one")
 	# ---------------------------------------------------------------- 8. the real HUD
 	m.player.out = true
 	m.hud.full_map.open()

@@ -313,6 +313,8 @@ func _spawn_tick(dt: float) -> void:
 		var anchor: Hunter = hs[0]
 		if not anchor.grounded or anchor.over_void():
 			continue
+		if Heart.end_phase(m) and Heart.tide_out(m, anchor.pos) <= 0.0:
+			continue      # (the end phase: nothing comes up for a squad inside the ring)
 		if m.lairs and not m.lairs.lair_of(anchor.pos, 2.0).is_empty():
 			continue
 		var l := level(anchor.pos, team)
@@ -370,13 +372,18 @@ func _burrow_spot(anchor: Hunter, team: int) -> Vector3:
 			fallback = p
 	return fallback
 
-## Idle Skitters far from everyone burrow away, so the map doesn't fill up.
+## Idle Skitters far from everyone burrow away, so the map doesn't fill up. In the end phase every Blight
+## inside the ring does (Heart.end_phase: the final circle is squad against squad).
 func _despawn_tick() -> void:
+	var clear := Heart.end_phase(m)
 	for b in m.mobs:
-		if not (b is Blight) or b.dead or b.mkind != "bl_skitter":
+		if not (b is Blight) or b.dead:
 			continue
 		var bb: Blight = b
-		if bb.st != "idle" or bb.heard != Vector3.INF or bb.idle_t < 20.0:
+		if clear and Heart.tide_out(m, bb.pos) <= 0.0:
+			bb.burrow()
+			continue
+		if bb.mkind != "bl_skitter" or bb.st != "idle" or bb.heard != Vector3.INF or bb.idle_t < 20.0:
 			continue
 		var far := true
 		for h in m.hunters:
