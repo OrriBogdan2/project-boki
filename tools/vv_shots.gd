@@ -422,7 +422,7 @@ func _vireo_timing() -> void:
 		if tt > 0.05:
 			_aim(home + Vector3(4.0, 0, 0))
 	await _go(2.2, drag, _strip("timing_e_drag",
-			"E dragged 1.0 s: the arm stays up through the count (was down from 1.4 s), snaps at the strike (1.8 s)",
+			"E dragged 1.0 s: the arm stays up through the count and snaps at the strike (1.8 s)",
 			[0.3, 0.9, 1.3, 1.6, 1.78, 1.9, 2.15]))
 
 func _vireo_owner1103() -> void:

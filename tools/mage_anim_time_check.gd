@@ -11,6 +11,7 @@ const CLIP_TOL := 0.04       # s: the GLB samples its clips at 30 fps, so a leng
 const FRAMES := 2.5          # a kit event lands "on the press" within this many frames
 const RMB_KEY := 0.06        # clip s: the rmb clip's release key (tools/art1/ryzz_clips.py)
 const FULL := 0.999          # a clip owns the body at this weight
+const RUN_TOL := 1.2       # m: two frames of the streak (40 m/s over 1/60 s); the travel stops on a frame
 var C                        # the combo check (ok, ac)
 var m: Match
 var P: Hunter
@@ -57,6 +58,9 @@ func _settle(secs: float) -> void:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 	K.strikes.clear()
+	K.sparks.clear()               # no Static, no reset boost carried from the last move into the next
+	K.reset_dash_boost = false
+	T.hp = T.max_hp
 	T.teleport(home + Vector3(30, 0, 8))
 	P.teleport(home)
 	P.dashes = P.max_dashes()
@@ -76,9 +80,9 @@ func _rec(secs: float, each := Callable()) -> Array:
 		_frame()
 		var live := c.cur
 		if live == "" and c.up_w > 0.0:
-			live = c.cur_u
+			live = String(c._node("anim_u").animation)
 		out.append({"t": m.time - t0, "id": K.anim_id, "at": m.time - K.anim_at, "w": maxf(c.act_w, c.up_w),
-				"clip": live, "ph": K.ult.phase(), "x": P.pos.x, "hp": T.hp})
+				"clip": live, "ph": K.ult.phase(), "x": P.pos.x, "z": P.pos.z, "hp": T.hp})
 	return out
 
 ## The first frame's t where `pred` holds (-1 when none).
@@ -171,7 +175,7 @@ func _rod(rel: float) -> Dictionary:
 	var rec := {"full": -1.0, "coil": -1.0}
 	P.inp["sec_hold"] = true
 	K.press_rmb()
-	var s := _rec(2.0, func(t: float) -> void:
+	var s := _rec(2.5, func(t: float) -> void:
 		P.inp["sec_hold"] = rel < 0.0 or t < rel
 		if K.rod_full and float(rec["full"]) < 0.0:
 			rec["full"] = t
@@ -224,14 +228,20 @@ func _wire_run(hold_s: float, foe: float) -> Dictionary:
 	var hp0 := T.hp
 	P.inp["dash_down"] = true
 	P.do_dash()
-	var s := _rec(1.6, func(t: float) -> void:
+	var spot := home + Vector3(foe, 0, 0)
+	var s := _rec(2.2, func(t: float) -> void:
+		T.teleport(spot)               # the Arena dummy walks back toward her: held on its spot in the lane
+		T.inv_t = 0.0                  # and open to the hit (its landing grace, match.on_drop_landed)
 		C.ac.aim_at(P, T.pos)
 		P.inp["dash_down"] = t < hold_s)
 	var go := _play(s, "mage_dash_go")
 	var land := _play(s, "mage_dash_land")
 	var crouch := _in(s, "mage_dash")
 	var hit := _first(s, func(f: Dictionary) -> bool: return float(f["hp"]) < hp0)
-	var dist := float(_at(s, land + DT)["x"]) - home.x if land > 0.0 else 0.0
+	var fa := _at(s, go - DT)
+	var fb := _at(s, land + DT)
+	var flat := Vector2(float(fb["x"]) - float(fa["x"]), float(fb["z"]) - float(fa["z"]))
+	var dist := flat.length() if land > 0.0 else 0.0
 	var run_t := land - go
 	var out := _out(s, land)
 	var drop := _drop(s, crouch, go) if crouch >= 0.0 and go > 0.0 else -1.0
@@ -256,8 +266,9 @@ func _wire() -> void:
 			float(a["crouch"]) >= 0.0 and float(a["crouch"]) <= BLEND_IN and float(a["drop"]) < 0.0
 			and absf(float(a["go"]) - 0.9) <= DT * 2.0, "crouch in %.2f let go %.2f go %.2f" % [a["crouch"],
 				a["drop"], a["go"]])
-	C.ok("Sparkle timing Wirerun: the full run goes 13 m at 40 m/s (the owner's; source ~32)",
-			absf(float(a["dist"]) - 13.0) < 0.6 and absf(float(a["run"]) - 13.0 / 40.0) <= DT * 2.0
+	var feel_t := float(K.dash_feel()["time"])     # the global dash feel (rules/dash_feel.json) slows every dash
+	C.ok("Sparkle timing Wirerun: the full run goes 13 m at 40 m/s (the owner's; source ~32) times the dash feel",
+			absf(float(a["dist"]) - 13.0) < RUN_TOL and absf(float(a["run"]) - 13.0 / 40.0 * feel_t) <= DT * 2.0
 			and float(a["land"]) > float(a["go"]),
 			"%.1f m in %.2f s" % [a["dist"], a["run"]])
 	C.ok("Sparkle timing Wirerun: the pass hit lands inside the streak, on the go clip",
@@ -268,8 +279,8 @@ func _wire() -> void:
 			and float(a["out"]) < float(a["land"]) + float(a["len"]) + HAND_BACK,
 			"land %.2f len %.2f out %.2f" % [a["land"], a["len"], a["out"]])
 	var b := _wire_run(0.0, 5.0)
-	C.ok("Sparkle timing Wirerun: a tap runs 7.5 m at 40 m/s within a few frames (a hold is the player's choice)",
-			absf(float(b["dist"]) - 7.5) < 0.6 and absf(float(b["run"]) - 7.5 / 40.0) <= DT * 2.0
+	C.ok("Sparkle timing Wirerun: a tap runs 7.5 m at 40 m/s times the dash feel within a few frames",
+			absf(float(b["dist"]) - 7.5) < RUN_TOL and absf(float(b["run"]) - 7.5 / 40.0 * feel_t) <= DT * 2.0
 			and float(b["go"]) <= DT * 4.0, "go %.2f, %.1f m in %.2f s" % [b["go"], b["dist"], b["run"]])
 
 ## One Skycall: E held `drag` s from the press then let go, the strike's beats from the press.
