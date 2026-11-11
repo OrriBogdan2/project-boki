@@ -397,6 +397,7 @@ const CHECKS := {
 	"--interact-pick-check": ["res://tools/interact_pick_check.gd", "interact_pick_check", null],    # which F wins
 	"--interact-prompt-check": ["res://tools/interact_prompt_check.gd", "interact_prompt_check", null],
 	"--care-prompt-check": ["res://tools/care_prompt_check.gd", "care_prompt_check", null],
+	"--care-prompt-shots": ["res://tools/care_prompt_shots.gd", "care_prompt_shots", null],      # --shots-dir=<dir>
 	"--interact-prompt-shots": ["res://tools/interact_prompt_shots.gd", "interact_prompt_shots", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold
