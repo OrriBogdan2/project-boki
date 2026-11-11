@@ -83,6 +83,7 @@ var land_t := 99.0
 var hit_seen := 99.0
 var last_emote := ""
 var upper_move := false      # the move is an upper-body one (keyed "upper"), even standing: the aim lead stays on
+var beats := {}              # "beats": the win, lose and board beats the .glb can play (WardenBeats)
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
@@ -167,6 +168,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 				a.remove_track(i)
 	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
 	drop = WardenCarry.held(sk, d.get("carry_drop", []))
+	beats = WardenBeats.build(lib, sk, glb, d.get("beats", {}))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -402,6 +404,12 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	var lock := float(s.get("lockin_t", -1.0))
 	if lock >= 0.0 and d.has("lockin"):
 		return _lockin_at(lock)
+	var bt := String(s.get("beat", ""))
+	if beats.has(bt):
+		var b: Dictionary = beats[bt]
+		var length := lib.get_animation(String(b["clip"])).length
+		return {"clip": b["clip"], "t": WardenBeats.time_of(length, float(b["loop_from"]), float(s.get("beat_t", 0.0))),
+				"upper": b["upper"]}
 	var em := String(s.get("emote", ""))
 	if em != "" and st.has("emote"):
 		var clip := String((d.get("emotes", {}) as Dictionary).get(em, st["emote"]))

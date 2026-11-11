@@ -44,5 +44,18 @@
 			"swap_aim": "L",
 			"swap": {"L": 0.0, "R": 0.22},
 			"snap": {"L": 0.1, "R": 0.1}
+		},
+		"beats": {
+			"win": {"clip": "emote"},
+			"lose": {"clip": "downed"},
+			"board": {
+				"pose": {
+					"head": [0, -10, 12],
+					"upper_arm.R": [-35, 0, 5],
+					"forearm.R": [-135, 0, 0],
+					"upper_arm.L": [15, 0, -20],
+					"forearm.L": [-20, 0, 0]
+				}
+			}
 		}
 }

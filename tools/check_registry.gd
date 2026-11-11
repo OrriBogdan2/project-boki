@@ -202,6 +202,7 @@ const CHECKS := {
 	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],      # the lobby lock-in poses (GPU)
 	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
 	"--layer-verify": ["res://tools/layer_verify.gd", "layer_verify", null],      # the layers over walk and run
+	"--result-pose-shots": ["res://tools/result_pose_shots.gd", "result_pose_shots", null],      # every Hunter's win, lose and board beat
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets

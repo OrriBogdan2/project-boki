@@ -30,5 +30,17 @@
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "pauldron.L", "pauldron.R", "fing_a1.R", "fing_a2.R", "fing_b1.R", "fing_b2.R", "thumb1.R", "thumb2.R", "bow", "bow_t", "bow_b", "bow_s", "arrow", "brow.L", "brow.R", "lid.L", "lid.R"],
 	"carry_stow": ["bow"],
 	"heart_hand": "R",
-	"lockin": {"clip": "draw", "dur": 1.25, "rate": 1.0}
+	"lockin": {"clip": "draw", "dur": 1.25, "rate": 1.0},
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [0, 30, 6],
+				"upper_arm.L": [-20, 0, -20],
+				"forearm.L": [-120, 0, 0],
+				"upper_arm.R": [10, 0, 0]
+			}
+		}
+	}
 }

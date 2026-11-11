@@ -259,5 +259,17 @@
 		"root": "anchor_blade_root",
 		"tip": "weapon_muzzle"
 	},
-	"lockin": {"clip": "stance", "dur": 1.3, "rate": 1.0, "fade": 0.35, "settle": 0.45}
+	"lockin": {"clip": "stance", "dur": 1.3, "rate": 1.0, "fade": 0.35, "settle": 0.45},
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [-5, -40, 0],
+				"upper_arm.R": [5, 0, 8],
+				"forearm.R": [-22, 0, 0],
+				"upper_arm.L": [8, 0, -6]
+			}
+		}
+	}
 }

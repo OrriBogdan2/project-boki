@@ -236,5 +236,17 @@
 		"speed": 2.42
 	},
 	"carry_stow": ["x_weapon", "x_shield"],
-	"carry_fwd": 1.35
+	"carry_fwd": 1.35,
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [-5, 20, 0],
+				"upper_arm.R": [-35, 0, 55],
+				"forearm.R": [-25, 0, 0],
+				"upper_arm.L": [5, 0, -10]
+			}
+		}
+	}
 }

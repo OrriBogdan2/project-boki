@@ -32,5 +32,18 @@
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"],
 	"carry_stow": ["gatling", "launcher"],
 	"lockin": {"clip": "emote", "from": 0.2, "dur": 1.45, "rate": 1.0},
-	"recoil": {"deg": 2.0, "settle": 0.07}
+	"recoil": {"deg": 2.0, "settle": 0.07},
+	"beats": {
+		"win": {"clip": "emote"},
+		"lose": {"clip": "downed"},
+		"board": {
+			"pose": {
+				"head": [10, 0, -8],
+				"upper_arm.R": [0, 0, 35],
+				"forearm.R": [0, 0, -80],
+				"upper_arm.L": [-25, 0, -40],
+				"forearm.L": [-125, 0, 0]
+			}
+		}
+	}
 }

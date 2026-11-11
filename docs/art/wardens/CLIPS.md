@@ -56,6 +56,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   Cinder cackles over a flame, Albert laughs and pats his hull, Grimble rears up at his monocle. The art lane owes real
   clips for the weakest: Kael's hoist (today a crossfade into `stance`), and Vex's coin and Tenzo's pebble, both too
   small to read at the lobby's stage size.
+- `beats`: the result beats (`scripts/heroes/warden_beats.gd`), win / lose / board: `{clip}` (an existing clip: win is each Hunter's own emote, lose its downed clip) or `{pose: {bone: [pitch, yaw, roll]}}` degrees on hips, head and arms from the rig's rest (arm x- raises forward, right arm z+ and left arm z- go out; board is a pose in the Hunter's own manner). The state keys `beat` and `beat_t` play one: the results card (win/lose) and a skiff deck while boarding (`Exits.board_t`). `--clip-check` asserts all three are mapped. `--result-pose-shots` + `tools/result_pose_strip.py` shoot the strip of all twelve (docs/shots/result_poses.png).
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too. Every Hero lists `wade` and `swim` (water, `HunterSwim`): no clip is keyed for them, so HunterAnim's wading high knees and
   swimming crawl (a flutter kick, a stroke in each hand the kit lets go of, the weapon held as on a run) play on the rig;

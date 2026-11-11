@@ -23,6 +23,7 @@ const SEAM_M := 0.01           # and move it this far
 const SNAP_MPS := 8.0          # m/s: an arm bone this fast at a clip's start is a strike or release snapping in
 const FRAME := 1.0 / 60.0      # s: the game frame the kit clock steps by
 const RING_DT := 1.0 / 60.0   # s: a ring's loops may differ this much in length (the BlendSpace2D runs them unsynced)
+const POSE_MIN_DEG := 25       # a keyed result pose turns at least one bone this far from the rest
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
 const JL_READ_DEG := 15.0      # deg: a take-off or an apex turns some bone at least this far (it reads on screen)
 const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ from the first by this much
@@ -106,6 +107,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_jump_land(id, m, sync, clips, dd)
 	_emotes(id, dd, clips)
 	_rings(id, dd, clips)
+	_beats(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -134,8 +136,37 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	m.free()
 	await _flinch(id)
 
+## The result beats (WardenBeats): win, lose and board each map to a clip the .glb plays that is its own (no two beats
+## share one), the state's "beat" picks it, and a keyed pose really moves the arms and head off the rest.
+func _beats(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var mapped := 0
+	var picked := 0
+	var used: Array = []
+	for nm in WardenBeats.NAMES:
+		var b: Dictionary = clips.beats.get(nm, {})
+		mapped += 1 if not b.is_empty() else 0
+		var pick := clips._pick({"beat": nm, "beat_t": 0.7}, 0.0)
+		picked += 1 if not b.is_empty() and pick.get("clip", "") == b["clip"] else 0
+		if not b.is_empty():
+			used.append(b["clip"])
+	var own: bool = used.size() == 3 and used[0] != used[1] and used[1] != used[2] and used[0] != used[2]
+	ok(mapped == 3 and picked == 3 and own,
+			"%s: win, lose, board mapped to own clips (%d, %d picked: %s)" % [id, mapped, picked, str(used)])
+	for nm in dd.get("beats", {}):
+		if not dd["beats"][nm].has("pose") or not clips.lib.has_animation("beat_" + String(nm)):
+			continue
+		var a := clips.lib.get_animation("beat_" + String(nm))
+		var most := 0.0
+		for i in a.get_track_count():
+			var rest := a.rotation_track_interpolate(i, 0.0)
+			most = maxf(most, rad_to_deg(rest.angle_to(a.rotation_track_interpolate(i, WardenBeats.INTRO))))
+		ok(most >= POSE_MIN_DEG, "%s: the %s pose turns a bone %.0f deg (min %d)" % [id, nm, most, POSE_MIN_DEG])
+
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
+	for b in (dd.get("beats", {}) as Dictionary).values():
+		if b.has("clip"):
+			out.append(b["clip"])
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
 		for k in ["clip", "air_clip", "ground_clip"]:
 			if mv.has(k):
