@@ -368,7 +368,7 @@ func _start(o: Dictionary) -> void:
 	Beacons.place(self)
 	if Heart.enabled(opts):
 		heart = Heart.new(self)
-		heart.setup()
+		heart.setup(layout)
 	await _slice()
 	if not opts.get("arena", false):
 		await _spawn_breakables()

@@ -90,6 +90,14 @@ func run_authored(id: String, seeds: Array) -> void:
 		var n_ex := 0
 		for ek in ["portals", "docks", "outposts", "hatches"]: n_ex += (L.get(ek, []) as Array).size()
 		if w.portal_spots.size() != n_ex: probs.append("exits %d of %d" % [w.portal_spots.size(), n_ex])
+		# the Heart site (tools/ways_out_sites.py checks its bands and the Blight ring rule when the map is generated)
+		if L.has("heart"):
+			var hp: Array = L["heart"]
+			if w.is_block(float(hp[0]), float(hp[1])): probs.append("the Heart site %s is not on open ground" % [hp])
+			var wide_hp: Array = WideLayout.widen(L)["heart"]
+			var pad := Vector2.ONE * WideLayout.WIDE_PAD
+			if Vector2(wide_hp[0], wide_hp[1]) != Vector2(hp[0], hp[1]) + pad:
+				probs.append("the wide layout does not move the Heart site with the map")
 		# spawn fairness: how far the nearest other spawn island is, for each spawn island
 		var by := {}
 		for sp in w.spawns: by[w.island_of(sp.x, sp.z)] = sp

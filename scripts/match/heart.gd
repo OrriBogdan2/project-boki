@@ -59,12 +59,15 @@ static func enabled(opts: Dictionary) -> bool:
 # ------------------------------------------------------------------ the tide (read by BlightDir)
 ## The tide ring's radius in metres at this match time (0 before it starts: no ring).
 static func tide_r(m: Match) -> float:
-	if m.heart == null:
+	if m.heart == null or m.sess_time() < r("tide_start_s"):
 		return 0.0
-	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
-	if t < 0.0:
-		return 0.0
-	return lerpf(r("tide_r0"), r("tide_r1"), clampf(t, 0.0, 1.0))
+	return ring_at(m.sess_time(), m.heart.ways_scale)
+
+## The tide ring's radius t seconds into a match on a map of ways_scale k (the radius it starts at
+## before the tide moves).
+static func ring_at(t: float, k: float) -> float:
+	var f := clampf((t - r("tide_start_s")) / r("tide_close_s"), 0.0, 1.0)
+	return lerpf(r("tide_r0"), r("tide_r1"), f) * k
 
 ## 0 inside the ring, 1 forty metres past it.
 static func tide_out(m: Match, p: Vector3) -> float:
@@ -115,6 +118,7 @@ static func tide_dmg(stage: int) -> float:
 var m: Match
 var site := Vector3.INF
 var gate := Vector3.INF
+var ways_scale := 1.0          # the map's "ways_scale": tide radii and gate_dist stretch with it (1.412 on the 2x map)
 var state := S.ASLEEP
 var trail: Array[String] = []    # "time from>to why", every move of the state (the checks read it)
 var refused := 0               # edges NEXT turned down: always 0 in a sane run
@@ -148,34 +152,48 @@ func _init(match_node: Match) -> void:
 func host() -> bool:
 	return not m.net_on or m.is_host
 
-## Picks the Heart site (one of the biggest islands, by the match seed), puts the gate near it and
-## builds the nodes.
-func setup() -> void:
+## Puts the Heart on the map's authored "heart" site (else one of the biggest islands, by the match seed),
+## the Gate gate_dist from it at a seeded angle clear of the uplink outposts, and builds the nodes.
+func setup(layout: Dictionary) -> void:
 	var w := m.world
 	if w.islands.is_empty():
 		return
 	_rng.seed = int(m.seed_val) * 17 + 4242
-	var isl: Array = []
-	for i in w.islands.size():
-		isl.append(i)
-	isl.sort_custom(func(a, b): return float(w.islands[a]["r"]) > float(w.islands[b]["r"]))
-	var ii: int = isl[_rng.randi() % mini(3, isl.size())]
-	var c: Vector2 = w.islands[ii]["c"]
+	ways_scale = float(layout.get("ways_scale", 1.0))
+	var c: Vector2
+	if layout.has("heart"):
+		c = Vector2(float(layout["heart"][0]) + 0.5, float(layout["heart"][1]) + 0.5)
+	else:
+		var isl: Array = range(w.islands.size())
+		isl.sort_custom(func(a, b): return float(w.islands[a]["r"]) > float(w.islands[b]["r"]))
+		c = w.islands[isl[_rng.randi() % mini(3, isl.size())]]["c"]
 	site = w.free_spot_near(Vector3(c.x, 0.0, c.y), [], 1.0, 0.9, 10.0)
 	spark_pos = site
-	var best := Vector3.INF
+	gate = _pick_gate(w)
+	_build()
+
+## The first of 16 angles from a seeded start whose spot is on the Heart's island and gate_clear from
+## every uplink outpost; failing that, the first one on that island, then the first spot found.
+func _pick_gate(w: World) -> Vector3:
+	var ii := w.island_of(site.x, site.z)
+	var clear := float(rules()["map"]["gate_clear"]) * ways_scale
+	var outposts := w.exit_defs.filter(func(ed): return ed["kind"] == "outpost")
+	var near := Vector3.INF
+	var any := Vector3.INF
 	var a0 := _rng.randf() * TAU
 	for k in 16:
 		var a := a0 + TAU * k / 16.0
-		var want := site + Vector3(cos(a), 0.0, sin(a)) * r("gate_dist")
+		var want := site + Vector3(cos(a), 0.0, sin(a)) * r("gate_dist") * ways_scale
 		var p := w.free_spot_near(want, [site], 8.0, 0.9, 3.0)
-		if Vector2(p.x - want.x, p.z - want.z).length() < 3.5 and w.island_of(p.x, p.z) == ii:
-			best = p
-			break
-		if best == Vector3.INF:
-			best = p
-	gate = best
-	_build()
+		if any == Vector3.INF:
+			any = p
+		if Vector2(p.x - want.x, p.z - want.z).length() >= 3.5 or w.island_of(p.x, p.z) != ii:
+			continue
+		if outposts.all(func(ed): return Vector2(p.x - ed["pos"].x, p.z - ed["pos"].z).length() >= clear):
+			return p
+		if near == Vector3.INF:
+			near = p
+	return near if near != Vector3.INF else any
 
 # ------------------------------------------------------------------ the state
 func go(to: S, why: String) -> bool:

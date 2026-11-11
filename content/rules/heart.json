@@ -47,6 +47,19 @@
  "_tide_tick_s": "seconds between tide hits (the source gives a per-stage value and no rate: read as per second)",
  "tide_heat": 0.06,
  "_tide_heat": "extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away",
+ "map": {
+  "_doc": "where the seats sit (spec section 8): metres on the 216 m design; a map's \"ways_scale\" (1.412 on the 305 m Hollow Crown) stretches these, the tide radii and gate_dist, never times. tools/ways_out_sites.py (the generators) and --ways-out-map-check enforce them",
+  "seat_window_s": 150.0,
+  "_seat_window_s": "a quest seat's site stays inside the tide ring this long after it opens (and lies outside the final ring)",
+  "uplink_band": [42.0, 50.0],
+  "_uplink_band": "the two uplink outposts stand this far from the Heart",
+  "uplink_apart_deg": 90.0,
+  "_uplink_apart_deg": "degrees round the Heart between the two outposts (opposite sides; exactly opposite is impossible with gate_clear)",
+  "gate_clear": 60.0,
+  "_gate_clear": "the seeded Heart Gate keeps this far from every uplink outpost",
+  "gate_arc_min_deg": 30.0,
+  "_gate_arc_min_deg": "whole degrees of Gate angle that must be on ground and gate_clear from both outposts"
+ },
  "reward": {
   "_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is about 5x minor",
   "minor": {
