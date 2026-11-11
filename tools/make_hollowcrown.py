@@ -134,7 +134,7 @@ islands = [
                      (262, 76, 262, 78), (214, 72, 215, 73), (208, 92, 209, 93), (380, 80, 381, 81)),
          chests=[[394, 53]],
          areas=[[394, 53, "Frostgate Keep"], [290, 96, "Rimefield"], [300, 50, "The Shelf"]],
-         fill=dict(chests=7, camps=["light", "normal", "normal", "heavy"], landings=8, breakables=9, weapons=2, wardens=3, traps=1)),
+         fill=dict(chests=5, camps=["light", "normal", "normal", "heavy"], landings=8, breakables=9, weapons=2, wardens=3, traps=1)),
     # ---- HIGHWATCH (towers): four rock towers over a low yard (lv 2): the Spur (lv 9), the Bellcliff
     # (lv 11), the Ward (lv 6) and the Lantern (a lv 8 ledge, then lv 14: the map's highest ground). One
     # flight up each; tower tops see each other, so fights go up and across.
@@ -149,7 +149,7 @@ islands = [
          rocks=rocks((96, 76, 97, 76), (102, 86, 103, 86), (50, 110, 51, 110), (120, 136, 121, 137), (64, 152, 65, 152)),
          chests=[[99, 80], [56, 116], [117, 126], [78, 158]],
          areas=[[99, 82, "The Lantern"], [117, 132, "Bellcliff"], [56, 116, "The Spur"]],
-         fill=dict(chests=3, camps=["normal", "light"], landings=6, breakables=6, weapons=1, wardens=2, traps=1)),
+         fill=dict(chests=2, camps=["heavy", "light"], landings=6, breakables=6, weapons=1, wardens=2, traps=1)),
     # ---- LARKHOLLOW (open plains): the widest open ground, low (lv 0) with a few gentle swells (lv 1)
     # and boulder clusters. Ways in from three sides; wild Boki graze in the middle.
     dict(id="lark", name="Larkhollow", role="landing", region=5, biome="meadow", danger=0, poi=[110, 262], noise=0.08,
@@ -162,7 +162,7 @@ islands = [
                      (40, 286, 41, 287), (186, 244, 186, 246)),
          wild=[[100, 262], [106, 268], [96, 270], [112, 258], [90, 256]],
          areas=[[110, 262, "The Graze"]],
-         fill=dict(chests=7, camps=["light", "light", "normal", "normal"], landings=10, breakables=6, weapons=1, wardens=2)),
+         fill=dict(chests=6, camps=["light", "light", "normal", "normal"], landings=10, breakables=6, weapons=1, wardens=2)),
     # ---- THORNWOOD (forest ambush): a lv 2 wood packed with groves and tall grass, lanes cut between its
     # places; Bramble Rise (lv 5) in the north holds the Thornhive. The Boki nest is in the west glade.
     dict(id="thorn", name="Thornwood", role="nest", region=4, biome="bloom", danger=1, poi=[130, 410], noise=0.07,
@@ -174,7 +174,7 @@ islands = [
          wild=[[62, 404], [66, 410], [58, 412]],
          areas=[[140, 368, "Bramble Rise"], [62, 408, "Nest Glade"]],
          groves=95,
-         fill=dict(chests=8, camps=["light", "normal", "normal", "heavy"], landings=7, breakables=8, weapons=1, wardens=3, traps=2)),
+         fill=dict(chests=7, camps=["light", "normal", "normal", "heavy"], landings=7, breakables=8, weapons=1, wardens=3, traps=2)),
     # ---- SALTMERE (water edges): a lv 2 salt rim round a sunken lagoon (lv 0, the hazard branch's deep
     # water), one causeway across it and a cache islet in the east pool.
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[290, 490], noise=0.06,
@@ -189,7 +189,7 @@ islands = [
          ramps=[up(266, 500, "s", 3, 0, 2), up(310, 484, "n", 3, 0, 2), up(256, 486, "w", 3, 0, 2), up(326, 500, "e", 3, 0, 2)],
          chests=[[314, 492]],
          areas=[[290, 490, "The Lagoon"]],
-         fill=dict(chests=5, camps=["normal"], landings=4, breakables=6, wardens=1, traps=1)),
+         fill=dict(chests=4, camps=["normal"], landings=4, breakables=6, wardens=1, traps=1)),
     # ---- DUSKMOOR (close quarters): a ruin maze of broken walls on 10 m cells (maze()) round the raised
     # Moor Chapel floor (lv 4). Short sightlines everywhere; relics in the ruins.
     dict(id="duskmoor", name="Duskmoor", role="landing", region=7, biome="storm", danger=1, poi=[418, 430], noise=0.05,
@@ -201,7 +201,7 @@ islands = [
          maze=dict(x=366, z=388, cols=12, rows=10, cell=9, seed=7, keep=(404, 416, 432, 444)),
          chests=[[418, 430]],
          areas=[[418, 430, "Moor Chapel"]],
-         fill=dict(chests=6, camps=["light", "normal", "normal"], landings=3, breakables=9, weapons=1, wardens=2, traps=2)),
+         fill=dict(chests=6, camps=["light", "normal", "heavy"], landings=3, breakables=9, weapons=1, wardens=2, traps=2)),
     # ---- STORMBREAK (chokepoints): five shards over the Hollow, bridges only. The Shrine Table (lv 6) on
     # the biggest; every way across the middle of the map is a narrow bridge.
     dict(id="storm", name="Stormbreak", role="shrine", region=3, biome="storm", danger=1, poi=[300, 368], noise=0.05,
@@ -236,7 +236,7 @@ islands = [
          crates=[[420, 250], [421, 250], [420, 251]],
          chests=[[500, 244], [474, 168]],
          areas=[[498, 240, "The Kilns"], [414, 300, "Forge Yard"]],
-         fill=dict(chests=9, camps=["light", "normal", "normal", "heavy"], landings=6, breakables=9, weapons=2, wardens=3, traps=2)),
+         fill=dict(chests=8, camps=["light", "normal", "normal", "heavy"], landings=6, breakables=9, weapons=2, wardens=3, traps=2)),
 ]
 
 BY = {d["id"]: d for d in islands}
