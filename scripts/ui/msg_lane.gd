@@ -1,6 +1,6 @@
 class_name MsgLane
 extends Control
-## The one lane for short messages on screen: toasts, pickups, level-ups, hints and the lines the
+## The one lane for short messages on screen: toasts, pickups, hints and the lines the
 ## tutorial holds back. Every screen has one (the match HUD, the farm, the town, a house; UI.toast finds
 ## or makes it). Messages stack down a fixed column under `top`, so two never sit on top of each other;
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once

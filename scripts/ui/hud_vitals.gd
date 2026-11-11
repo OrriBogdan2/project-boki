@@ -1,16 +1,18 @@
 class_name HudVitals
 extends RefCounted
 ## The bottom-left vitals block: your portrait framed in your class colour with the run level on a
-## coin ringed by XP, then to its right your health as a big number over a thick segmented bar
-## (same segments and chip as your overhead plate), armour as a strip under it with its number and
-## tier, shields past the end of health, the merged form's shell, and the archetype resource under
-## that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## coin and the XP bar under the ability row, then to its right your health as a big number over a
+## thick segmented bar (same segments and chip as your overhead plate), armour as a strip under it
+## with its number and tier, shields past the end of health, the merged form's shell, and the
+## archetype resource under that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, armor_lerp, hover_spots); this file only draws.
 
 const BAR_W := 318.0       # px: health / armour width
 const HP_H := 16.0         # px: the health bar
 const AR_H := 5.0          # px: the armour strip under it
 const LVL_POP := 0.35      # s: the level coin's pop
+const XP_H := 8.0          # px: the XP bar's height
+const XP_GAP := 2.0        # px from the portrait's bottom edge down to the XP bar
 
 static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
@@ -75,6 +77,7 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	if p.ak and p.ak.has_meter():
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
 	_hidden_tag(H, sz, p)
+	H.lvl_cue.card(H, x0, y0 - 22.0)
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
 static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
@@ -93,8 +96,8 @@ static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:
 	H._rounded(hr, bg, 10)
 	HudStyle.text(H.c, hr.position + Vector2(12, 15), txt, 13, fg)
 
-## The run level on a coin over the portrait's corner, ringed by progress to the next level with a
-## bright head dot; a level-up pops it and bursts a gold ring round the portrait.
+## The run level on a coin over the portrait's corner with the XP bar running out of it (xp_bar); a
+## level-up pops the coin (the rest of the moment is LevelUpCue's).
 static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
 	var gold := HudStyle.GOLD
@@ -104,21 +107,14 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 	H.lvl_pop = maxf(0.0, H.lvl_pop - H.get_process_delta_time())
 	var k: float = 1.0 - H.lvl_pop / LVL_POP
 	var sc := 1.0 + 0.35 * sin(k * PI) if H.lvl_pop > 0.0 else 1.0
-	if H.lvl_pop > 0.0:
-		H._rounded(pr.grow(6.0 + k * 22.0), Color(0, 0, 0, 0), 16, Color(gold, 1.0 - k), 4)
-		H._rounded(pr.grow(2.0 + k * 10.0), Color(gold, 0.18 * (1.0 - k)), 14)
-	var bc := pr.position + Vector2(14, pr.size.y - 14)      # inset: the ring reaches 30 px out, keep it in the window
+	var bc := pr.position + Vector2(14, pr.size.y - 14)      # inset: the coin reaches 30 px out, keep it in the window
+	xp_bar(H, Vector2(bc.x + 18.0, pr.end.y + XP_GAP), pr.end.x + 16.0 + BAR_W, p)
 	var r := 26.0 * sc
 	# the coin sits in a notch of the frame: ringed in the frame's colour, a dark gap between
 	c.draw_circle(bc, r + 4.0, Color(p.accent(), 0.9))
 	c.draw_circle(bc, r + 2.0, HudStyle.SHADE_EDGE)
 	c.draw_circle(bc, r, Color(0.03, 0.03, 0.05, 0.97))
-	c.draw_arc(bc, r - 3.0, 0, TAU, 48, Color(1, 1, 1, 0.12), 4.0, true)
-	var xf := p.xp_frac()
-	c.draw_arc(bc, r - 3.0, -PI / 2, -PI / 2 + TAU * xf, 48, gold, 4.0, true)
-	if xf > 0.01 and xf < 0.999:
-		var ha := -PI / 2 + TAU * xf
-		c.draw_circle(bc + Vector2(cos(ha), sin(ha)) * (r - 3.0), 3.6, Color(1.0, 0.97, 0.85))
+	c.draw_arc(bc, r - 3.0, 0, TAU, 48, Color(gold, 0.55), 2.0, true)
 	var lvl_col := HudStyle.INK if H.lvl_pop <= 0.0 else HudStyle.INK.lerp(gold, 1.0 - k)
 	HudStyle.ctext(c, bc + Vector2(0, 9.0 * sc), str(p.lvl), int(26.0 * sc), lvl_col)
 	if p.skill_pts > 0:
@@ -127,7 +123,16 @@ static func level_coin(H, pr: Rect2, p: Hunter) -> void:
 		c.draw_circle(pts_at, 10.0 + pulse, gold)
 		var pts_txt := "+%d" % p.skill_pts if p.skill_pts > 1 else "+"
 		HudStyle.ctext(c, pts_at + Vector2(0, 5), pts_txt, 13, Color(0.1, 0.07, 0.02), 0)
-	# the archetype's name under the portrait instead of just the class
-	if p.ak:
-		var arch_txt := Arch.name_of(p.arch).to_upper() + "  ·  " + String(p.cdat["name"]).to_upper()
-		HudStyle.text(c, pr.position + Vector2(36, pr.size.y + 14), arch_txt, 10, Color(Arch.color(p.arch), 0.9))
+
+## Progress to the next level: a long gold bar out of the level coin, under the ability row, from `at`
+## to `x1`. It brightens while the level-up moment is on.
+static func xp_bar(H, at: Vector2, x1: float, p: Hunter) -> void:
+	var r := Rect2(at, Vector2(x1 - at.x, XP_H))
+	var gold := HudStyle.GOLD
+	H._rounded(r.grow(2.0), HudStyle.SHADE, 4)
+	H.c.draw_rect(r, Color(gold, 0.16))
+	var fill := Rect2(r.position, Vector2(r.size.x * p.xp_frac(), XP_H))
+	H.c.draw_rect(fill, gold.lerp(Color.WHITE, 0.5) if H.lvl_cue.t > 0.0 else gold)
+	if fill.size.x > 2.0:
+		var head := Rect2(Vector2(fill.end.x - 2.0, r.position.y - 1.0), Vector2(2.0, XP_H + 2.0))
+		H.c.draw_rect(head, Color(1.0, 0.97, 0.85))
