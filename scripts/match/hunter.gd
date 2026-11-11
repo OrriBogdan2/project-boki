@@ -540,7 +540,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 		if d >= 1.0 and opts.get("src", "") != "heat":
 			_interrupt_consume()
 	if armor > 0.0 and not shelled and opts.get("src", "") not in ["fall", "burn", "heat"]:
-		d *= 1.0 - float(ARMOR_TIERS[armor_tier][3])
+		d *= 1.0 - float(ARMOR_TIERS[armor_tier][2])
 		# your kin's armor stats make it wear more slowly; armor_k = a hit's bonus damage to armor only
 		var wear := d * float(opts.get("armor_k", 1.0))
 		armor = maxf(0.0, armor - wear * (1.0 - minf(0.6, owner_stat("armor") + kin_pt("owner_armor"))))
@@ -2951,14 +2951,12 @@ func _gate(key: String, slot: String, fb: String) -> void:
 
 var base_armor := 50.0
 ## Armor evolves through a run, like the source's: damage you deal to and take from rival hunters
-## fills it (monsters count a third), and a knock adds a big chunk. A tier raises the reduction and,
-## at the top two, the durability; new plates arrive full. Tier colour shows on everyone's armor bar.
-## Rows: name, colour, progress to reach it (the source's 2k/3.6k/12k/20k x 0.11), damage reduction,
-## durability x the Common piece (source 2,500 / 2,500 / 2,500 / 3,000 / 3,500).
-const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.0, 0.20, 1.0], ["Uncommon", Color("7fe08a"), 220.0, 0.25, 1.0],
-	["Rare", Color("5fb6ff"), 396.0, 0.30, 1.0], ["Epic", Color("c27cff"), 1320.0, 0.35, 1.2],
-	["Legendary", Color("ffbf3a"), 2200.0, 0.35, 1.4]]
-const ARMOR_KNOCK_XP := 140.0
+## fills it (ArmorXp: monsters and Boki build none), and a knock adds a chunk. A tier raises the
+## reduction and, at the top two, the durability; new plates arrive full. Tier colour shows on
+## everyone's armor bar. Rows: name, colour, damage reduction, durability x the Common piece (source
+## 2,500 / 2,500 / 2,500 / 3,000 / 3,500). Progress to reach a tier: ArmorXp.thresholds.
+const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.20, 1.0], ["Uncommon", Color("7fe08a"), 0.25, 1.0],
+	["Rare", Color("5fb6ff"), 0.30, 1.0], ["Epic", Color("c27cff"), 0.35, 1.2], ["Legendary", Color("ffbf3a"), 0.35, 1.4]]
 var armor_xp := 0.0
 var armor_tier := 0
 var dmg_taken := 0.0
@@ -2970,7 +2968,7 @@ var revives := 0              # teammates you picked up
 func armor_gain(xp: float) -> int:
 	armor_xp += xp
 	var up := -1
-	while armor_tier < ARMOR_TIERS.size() - 1 and armor_xp >= float(ARMOR_TIERS[armor_tier + 1][2]):
+	while armor_tier < ARMOR_TIERS.size() - 1 and armor_xp >= float(ArmorXp.thresholds[armor_tier + 1]):
 		armor_tier += 1
 		up = armor_tier
 	if up >= 0:
@@ -2983,14 +2981,15 @@ func armor_gain(xp: float) -> int:
 func armor_frac() -> float:
 	if armor_tier >= ARMOR_TIERS.size() - 1:
 		return 1.0
-	var a := float(ARMOR_TIERS[armor_tier][2]); var b := float(ARMOR_TIERS[armor_tier + 1][2])
+	var a := float(ArmorXp.thresholds[armor_tier])
+	var b := float(ArmorXp.thresholds[armor_tier + 1])
 	return clampf((armor_xp - a) / (b - a), 0.0, 1.0)
 
 func armor_col() -> Color:
 	return ARMOR_TIERS[armor_tier][1]
 
 func refresh_gear() -> void:
-	max_armor = round(base_armor * float(ARMOR_TIERS[armor_tier][4])) + gear_stat("armor")
+	max_armor = round(base_armor * float(ARMOR_TIERS[armor_tier][3])) + gear_stat("armor")
 	armor = minf(armor, max_armor)
 	Gear.apply_worn(self)
 

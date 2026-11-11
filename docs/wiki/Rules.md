@@ -43,6 +43,22 @@ From `Life.R` (`scripts/match/life.gd`); the full flow is on [Expeditions](Exped
 | sickness_time | 12 | resurrection sickness |
 | sickness_dmg | 0.75 | -25% damage dealt |
 
+## armor_xp (`content/rules/armor_xp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Armour progress (scripts/match/armor_xp.gd, docs/ARMOUR_PARITY.md Progress). Only damage dealt to and taken from rival Hunters fills it; monsters and Boki build none; no level XP comes from any of it. thresholds_source: the source's cumulative damage to reach Uncommon, Rare, Epic, Legendary, in source damage points (docs/SUPERVIVE_DATA.md section 3, 1.04 data). Ours = round(source x our_health / source_health): our_health is the Medium class's base health (scripts/core/data.gd), source_health the source's median base health (SUPERVIVE_DATA section 5). Rates are progress per point of damage after armour. knock_source_damage: the chunk a knock adds, in source damage points (the source counts knocks, amount unpublished). |
+| thresholds_source | [2000, 3600, 12000, 20000] |
+| our_health | 145 |
+| source_health | 1030 |
+| dealt | 1 |
+| taken | 1 |
+| monster | 0 |
+| boki | 0 |
+| knock_source_damage | 1000 |
+
 ## boki_lines (`content/rules/boki_lines.json`)
 
 What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words in one bubble (punctuation and symbols don't count); act_words = the most words in one action, which a young Boki says after its name; bubble_s = seconds a bubble stays up; cooldown_s = seconds a Boki waits between lines (a trigger marked direct answers something you did and skips the wait); no_repeat = how many of its own last lines a Boki never repeats; min_lines = the fewest general lines a trigger may have; grown_stage = the speech stage (Care.speech) from which a Boki says lines instead of its name. tones = how a young Boki says its name, by feeling ({A} first syllable, {a} lower, {b} second syllable, {F} full name, {f} lower, {U} upper; KinSpeak.fill). sounds = noises a tone may use besides the name. alias = old trigger names that share another's lines. triggers: feel (a tone), word (the one word a stage-1 Boki adds), acts (what it does), lines._ (anyone) and lines.<element> (extra lines for a Boki of that element, the species' type).
