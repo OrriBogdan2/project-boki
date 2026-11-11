@@ -15,7 +15,8 @@ const EPS := 0.0005
 ## The heights follow the owner's final height chart (Nov 8, ext/hero-heights) where it moved a Warden off its sheet.
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
-	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 1.9, "width": [1.3, 5.2], "moves": "bul_"},
+	# (Albert appeal3, owner 11-10: the big helmet and masts stand 1.3x the old top, as wide)
+	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 2.47, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
 	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
@@ -120,7 +121,7 @@ func _anim(id: String) -> void:
 	var rest := _pose(an, m, "", 0.0)
 	var still: Array = []
 	var moves: Array = []
-	for t in [HunterAnim.KMOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
+	for t in [HunterAnim.KMOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES, KMovesVV.MOVES, KMovesStone.MOVES,
 			KMovesCare.MOVES, KMovesPair.MOVES]:
 		for mv in t:
 			if String(WARDENS[id]["moves"]) != "" and String(mv).begins_with(WARDENS[id]["moves"]): moves.append(mv)
