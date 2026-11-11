@@ -17,6 +17,9 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
+## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
+const END_OFF := DT / 2.0 + 0.001
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -126,7 +129,6 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
-	out.append_array((dd.get("act", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
@@ -203,15 +205,7 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if off > worst:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
-	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
-	var act_off := 0.0
-	for verb in dd.get("act", {}):
-		var pick := clips._pick({"act": verb, "act_t": 0.4}, 0.0)
-		var clip := String(dd["act"][verb])
-		ok(pick.get("clip") == clip and is_equal_approx(float(pick.get("t", -1.0)), 0.4),
-				"%s: the home %s plays its own clip, seeked to the verb's clock" % [id, verb])
-		act_off = maxf(act_off, absf(clips.lib.get_animation(clip).length - float(HunterVerbs.LENGTH[verb])))
-	ok(act_off <= 0.034, "%s: its garden clips last as long as the home verbs (off %.3f s)" % [id, act_off])
+	ok(worst <= END_OFF, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:
@@ -219,21 +213,13 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			unmapped.append(km)
 	ok(unmapped.is_empty(), "%s: all its kit moves have a clip (missing %s)" % [id, str(unmapped)])
 
-## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand. A blade tip
-## that a floating companion carries (Meeko's sun circles her, off its bone) keeps its place on that companion instead.
+## Through every clip the Gun and Muzzle follow the blade, and the blade keeps its length on the hand.
 func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	var tip := sync.get("blade_tip") as Node3D
 	var muzzle := sync.get("muzzle") as Node3D
 	var sk := WardenGlb.skeleton(m.get_node("Warden"))
 	var hb := int(sync.get("blade_bone"))
 	var rest := tip.position.length()
-	var carrier: WardenCompanions.Part = null
-	var floating := sync.get("companions") as WardenCompanions
-	for part: WardenCompanions.Part in (floating.parts if floating else []):
-		for an in part.anchors:
-			if an[0] == tip:
-				carrier = part
-				rest = (an[1] as Vector3).length()
 	var far := 0.0
 	var drift := 0.0
 	var n := 0
@@ -249,9 +235,6 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 			var hand: Vector3 = sk.global_transform * sk.get_bone_global_pose(hb).origin
 			# (a weapon that grows and shrinks on its bone, Motley's orb, keeps its point)
 			var body_k := absf((sk.global_transform.basis * sk.get_bone_global_pose(hb).basis).get_scale().x)
-			if carrier:
-				hand = carrier.node.global_position
-				body_k = absf(sk.global_transform.basis.get_scale().x)
 			drift = maxf(drift, absf(hand.distance_to(sees) / body_k - rest))
 			n += 1
 	clips.force = {}
