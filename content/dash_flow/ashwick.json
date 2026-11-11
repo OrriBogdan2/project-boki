@@ -29,9 +29,9 @@
 	"hold": {
 		"lmb": {"ground": {"mode": "keep", "source": "Data: the flamethrower is a hold, the 0.35s gap is between uses; Pyro Pounce: no fire during it. Footage (0159-0161): upright out of the bash with the nozzle already on the aim. Ours: held through the ram the stream goes out and roars again the step it ends: no pilot, no relight gap. Flue Flight is no dash here (owner item 66): LMB is off for the whole flight, ignored, not buffered, a press ticks softly, and the lance lights as usual the step it ends."}, "air": {"mode": "keep", "source": "As on the ground: held through the poof, the stream is back the step it ends."}, "jump": {"mode": "keep", "source": "Ours: the hose keeps burning through a jump."}},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Data: Embry Bolt is a plain cast with no dash rule (briefs/supervive-data/supervive_kits.md:41). Footage: a 0.4 s aim lane while Felix keeps moving (briefs/hero-ref/linwick.md:57-58, frames 0073-0074, 0102-0103, 0131); no Shift pressed inside it (bash frames 0143-0144, 0159-0161, briefs/hero-ref/linwick.md:267-276). Kept: the hold carries through (owner: every interaction chains)."},
+			"air": {"mode": "keep", "source": "Not determinable. No air bash is shown (briefs/hero-ref/linwick.md:323); the jetpack is his only air move (briefs/hero-ref/linwick.md:278-279). Kept: the hold carries through (owner: every interaction chains)."},
+			"jump": {"mode": "keep", "source": "Not determinable. No jump is shown (briefs/hero-ref/linwick.md:285-286, :323). Kept: the hold carries through (owner: every interaction chains)."}
 		}
 	}
 }
