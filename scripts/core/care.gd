@@ -187,7 +187,9 @@ static func tick(rec: Dictionary, secs: float, sleeping := false, raining := fal
 	var floors := sulky()
 	if floors.is_empty():
 		# the part of this stretch spent with nothing in it counts toward starving
-		var help := (RECOVER_NAP if sleeping else 0.0) + (RECOVER_FRIEND if friend else 0.0)
+		var help := 0.0
+		if sleeping: help += RECOVER_NAP
+		if friend: help += RECOVER_FRIEND
 		starve_step(rec, secs, maxf(0.0, secs - f0 / maxf(0.0001, rate)) if float(nd["food"]) <= 0.0 else 0.0, help)
 	nd["clean"] = clampf(float(nd["clean"]) - DECAY["clean"] * mins * (0.2 if sleeping else 1.0), 0.0, 100.0)
 	if sleeping:
