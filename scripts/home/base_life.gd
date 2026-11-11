@@ -91,7 +91,9 @@ func machine(k: Dictionary) -> Fsm:
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
-		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
+		m.on_exit(S.NAP, func(_to: int) -> void:
+			k.erase("life_pile")
+			BaseDuo.woke(k))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
 		k["life"] = m
@@ -253,6 +255,7 @@ func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 		if o != k and o.has("life") and (o["life"] as Fsm).is_in(S.NAP) and float(o.get("nap_t", 0.0)) > 0.0 \
 				and _dist(k, o) < PILE_JOIN * 1.5:
 			add_bond(k["rec"], o["rec"], float(R["bond_nap"]) * dt * 0.5)      # each of the pair adds half
+			BaseDuo.nap_beside(k, o, dt)
 
 ## HomeToys runs the play (walk, play, squabble, finish); the machine only shows it and lets go when it is done.
 func _play_tick(k: Dictionary, m: Fsm, _dt: float) -> void:
