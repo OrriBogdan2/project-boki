@@ -11,6 +11,7 @@ extends RefCounted
 ##      back from out and merges mid-air, and without a Boki it is only a weak surge
 ##   8. the net snapshot round trip (KinNet): a Boki out, carried, downed and fused survive the wire; the kcmd event
 ##   9. the net version moved for the new snapshot shape
+##  10. the Boki's cries (BokiLifeSfx): one as it goes down, one as it leaps into a Fusion
 
 var bad := 0
 var m: Match
@@ -114,7 +115,8 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "snap", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "snap",
+			"net", "cries"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -630,3 +632,17 @@ func _net() -> void:
 		Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0,
 		"the net version moved for the new snapshot shape (%s)" % Net.VERSION
 	)
+
+# ------------------------------------------------------------------ 10. the Boki's cries
+func _cries() -> void:
+	_fresh()
+	var heard := BokiLifeSfx.heard
+	var downs := int(heard.get("down", 0))
+	(m.player.kin as Kin).go_down()
+	ok(int(heard.get("down", 0)) == downs + 1, "a Boki that goes down cries out once (boki_downed)")
+	_fresh()
+	var fuses := int(heard.get("fuse", 0))
+	(m.player.kin as Kin).stow()
+	m.player.ult = 1.0
+	ok(KinMerge.press(m.player) and int(heard.get("fuse", 0)) == fuses + 1,
+			"a Boki leaping into a Fusion cries out once (boki_fuse)")
