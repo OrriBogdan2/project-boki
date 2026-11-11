@@ -194,6 +194,8 @@ static func match_counts(r: Dictionary) -> Dictionary:
 		if typeof(ms[k]) == TYPE_INT:
 			out[k] = int(ms[k])
 	var escaped := bool(r.get("extracted", false))
+	out["matches"] = 1      # (per Hunter for the Stats tab, HunterStats)
+	out["damage"] = int(r.get("damage", 0))
 	out["knocks"] = int(r.get("knocks", 0))
 	out["revives"] = int(r.get("revives", 0))
 	out["extracts"] = 1 if escaped else 0
