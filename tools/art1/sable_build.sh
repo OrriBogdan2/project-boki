@@ -16,4 +16,6 @@ $B -b --python "$WT/tools/art1/sable_clips.py" -- stage/c/sable.blend stage/c/sa
 grep -E "^clips|^exported|Traceback" -A6 stage/clips.log | cut -c1-260 | head
 ls -la stage/c/sable_out.glb
 grep -q Traceback stage/clips.log && { echo "clips failed"; exit 1; }
+# walk_f/run_f are the motion-pilot loops (IMPORT.md "Pilot loops"), not sable_clips.py's keys: carry them over from the committed glb
+python3 "$WT/tools/art1/glb_add_clips.py" stage/c/sable_out.glb "$WT/art/wardens/sable/sable.glb" walk_f,run_f || exit 1
 cp stage/c/sable_out.glb "$WT/art/wardens/sable/sable.glb"
