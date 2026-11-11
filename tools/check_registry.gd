@@ -372,6 +372,7 @@ const CHECKS := {
 	"--belt-hud-check": ["res://tools/belt_hud_check.gd", "belt_hud_check", null],      # six-slot belt on the HUD
 	"--belt-hud-shots": ["res://tools/belt_hud_shots.gd", "belt_hud_shots", null],      # --shots-dir=<dir>
 	"--utility-parity-check": ["res://tools/utility_parity_check.gd", "utility_parity_check", null],  # belt vs source
+	"--colour-vision-check": ["res://tools/colour_vision_check.gd", "colour_vision_check", null],      # side palettes, settings
 	"--roster-check": ["res://tools/roster_check.gd", "roster_check", null],      # docs/boki/ROSTER_50.md stubs
 	"--evo-check": ["res://tools/evo_check.gd", "evo_check", null],      # evolution rules, Inks, bred sex
 	"--roster-shots": ["res://tools/roster_shots.gd", "roster_shots", null],      # the 50 lined up

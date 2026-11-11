@@ -14,9 +14,6 @@ const INK := Color("f3eee2")              # main text
 const MUTED := Color("a9b0bf")            # secondary text, empty things
 const SHADE := Color(0.05, 0.03, 0.08, 0.86)    # frame backing behind bars and slots (void violet)
 const SHADE_EDGE := Color(0.0, 0.0, 0.02, 0.95)  # segment gaps and outlines
-const SELF := Color("9be36e")             # your own health (leaf green)
-const ALLY := Color("63c7ff")             # your squad's health (sky blue)
-const FOE := Color("ff5a4a")              # rivals' health (coral red)
 const LOW := Color("ffa13c")              # health shifts toward this as it runs low (yours and allies')
 const DOWNED := Color("ffb36a")           # a downed hunter's bleed-out bar
 const STOMPED := Color("ff3a2a")          # ... while someone is finishing them
@@ -59,14 +56,14 @@ const KEY_FS := 12             # key label size
 ## A hunter's health colour as seen by `viewer`: you, your squad, or a rival.
 static func role_col(viewer: Hunter, h: Hunter) -> Color:
 	if viewer == null or h == viewer:
-		return SELF
-	return ALLY if h.team == viewer.team else FOE
+		return SideColor.you()
+	return SideColor.ally() if h.team == viewer.team else SideColor.foe()
 
 ## Health fill for a role at a fraction of max: yours and allies' warm toward LOW under half, and
 ## pulse under a third; rivals stay red (a low rival pulses brighter instead).
 static func hp_fill(role: Color, frac: float, time: float) -> Color:
 	var pulse := 0.5 + 0.5 * sin(time * 9.0)
-	if role == FOE:
+	if role == SideColor.foe():
 		return role.lerp(Color.WHITE, 0.25 * pulse) if frac < 0.3 else role
 	var col := role.lerp(LOW, clampf((0.55 - frac) / 0.3, 0.0, 1.0))
 	return col.lerp(Color.WHITE, 0.2 * pulse) if frac < 0.3 else col
