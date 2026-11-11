@@ -99,6 +99,7 @@ var ring: MeshInstance3D = null   # the team-coloured ring under it
 var comp: KinCompanion = null     # the teammate side: callouts, caring, where it walks (owned kin only)
 var wisp := false                 # rides as a wisp at its hunter's shoulder (KinWisp): no AI, carry passives always on
 var summon: KinSummon = null      # its summon out of the wisp (owned kin only)
+var follow: WispFollow = null     # how its riding wisp keeps to its orbit point (KinWisp)
 var home_h: Hunter = null         # its own hunter; owner_h is its carrier while its wisp is stolen (KinSteal)
 var loose_t := 0.0                # s its wisp floats loose, free to grab (KinSteal)
 var stolen_summoned := false      # a thief used its one summon this match (KinSteal)
@@ -1076,7 +1077,7 @@ func render(delta: float, alpha: float) -> void:
 	visible = not dead and state != "bench" and state != "away" and not (state == "downed" and down_void) and not (owner_h and (owner_h.out or owner_h.extracted or owner_h.riding) and not KinLoss.guarding(self)) and not KinMerge.inside(self)
 	visible = visible or (loose_t > 0.0 and not dead)       # (a loose wisp of a hunter who died)
 	KinDowned.render(self, delta)
-	if not model or KinWisp.render(self):
+	if not model or KinWisp.render(self, alpha):
 		return
 	var body: Node3D = model.get_node("Body")
 	var shell: Node3D = model.get_node_or_null("Body/Shell")

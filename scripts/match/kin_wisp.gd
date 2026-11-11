@@ -67,10 +67,13 @@ static func ride(k: Kin, dt: float) -> bool:
 	_summon_key(k)
 	k.pos = k.owner_h.pos + Vector3(0, 1.5, 0)
 	k.prev = k.pos
+	var follow := _follow(k)
+	follow.step(_angle(k, follow, k.m.time), k.m.world, k.m.time, dt)
 	return true
 
-## Its look on screen: orbiting its hunter at shoulder height, facing along the orbit, hopping. True when it drew.
-static func render(k: Kin) -> bool:
+## Its look on screen: orbiting its hunter at shoulder height (WispFollow: a spring behind its orbit point, out of
+## the level), facing along the orbit, hopping; `alpha` of the way between the last two steps. True when it drew.
+static func render(k: Kin, alpha: float) -> bool:
 	if k.summon:
 		k.summon.render()
 	if k.wisp and KinSteal.loose(k) and k.model:
@@ -81,18 +84,29 @@ static func render(k: Kin) -> bool:
 		return false
 	if k.ring:
 		k.ring.visible = false
+	var follow := _follow(k)
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
-	var orbit: Dictionary = BokiWispCosmetics.worn(o)["orbit"]
-	var a: float = TAU * (k.m.time * orbit["hz"] + float(k.model.get_meta("phase", 0.0)))
-	k.global_position = orbit_spot(orbit, a, o.position, y)
+	var drawn_at: float = k.m.time - (1.0 - alpha) * Match.DT        # s: between the last two steps, as drawn
+	var a := _angle(k, follow, drawn_at)
+	k.global_position = follow.drawn(y, k.m.world, alpha)
 	if k.summon and k.summon.fly > 0.0:
 		k.global_position = k.summon.streak(k.global_position)
 		k.m.fx.burst(k.global_position, k.sp.get("glow", k.sp["color"]), 1, 0.4)
 	k.model.rotation.y = atan2(sin(a), -cos(a))
 	k.model.scale = Vector3.ONE
-	BokiWispLook.pose(k.model, k.m.time)
+	BokiWispLook.pose(k.model, drawn_at)
 	return true
+
+## Its follow spring: made on its first ride, and again for a new carrier (their orbit style).
+static func _follow(k: Kin) -> WispFollow:
+	if k.follow == null or k.follow.h != k.owner_h:
+		k.follow = WispFollow.new(k.owner_h)
+	return k.follow
+
+## Its angle (rad) round the orbit at match time `at_time`.
+static func _angle(k: Kin, follow: WispFollow, at_time: float) -> float:
+	return TAU * (at_time * float(follow.orbit["hz"]) + float(k.model.get_meta("phase", 0.0)))
 
 ## Where a wisp is at orbit angle a (rad) round a hunter standing at `centre`, its shoulder `y` high. The orbit
 ## style (BokiWispCosmetics) gives the radius in metres, a constant rise and a wave of `waves` dips a lap.
