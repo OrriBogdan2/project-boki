@@ -55,7 +55,8 @@ func _contents(rig: BokiRig) -> void:
 		var a := rig.player.get_animation(c)
 		ok(a != null and a.length > 0.1, "clip %s" % c)
 	for c in BokiRig.LOOPED:
-		ok(rig.player.get_animation(c).loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
+		var a := rig.player.get_animation(c)
+		ok(a != null and a.loop_mode == Animation.LOOP_LINEAR, "%s loops" % c)
 	_game_clips(rig)
 	for s in SHAPES:
 		ok(rig.face.find_blend_shape_by_name(s) >= 0, "blend shape %s" % s)
@@ -139,7 +140,8 @@ func _states(main: Node, k: Node3D, rig: BokiRig) -> void:
 	rig._pick_clip(0.016)
 	ok(rig.clip != "win", "a win plays once, then it hops or idles")
 	rig.root.remove_meta("kact")
-	ok(rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE, "win does not loop")
+	ok(rig.player.has_animation("win") and rig.player.get_animation("win").loop_mode == Animation.LOOP_NONE,
+			"win does not loop")
 	ok(BokiRig.work_clip({}) == "", "no job, no work clip")
 	ok(BokiRig.work_clip({"job": {"phase": "work", "kind": "ore"}}) == "mine", "an ore job mines")
 	ok(BokiRig.work_clip({"job": {"phase": "to", "kind": "chop"}}) == "carry", "taking it home carries")
