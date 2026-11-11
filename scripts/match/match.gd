@@ -1513,7 +1513,7 @@ func _collide_breaks() -> void:
 			if absf(e.pos.y - bp.y) > 0.6:
 				continue
 			var d := Vector2(e.pos.x - bp.x, e.pos.z - bp.z)
-			var mind: float = e.r + 0.36
+			var mind: float = e.hull_r() + 0.36
 			var l := d.length()
 			if l >= mind:
 				continue
@@ -1522,7 +1522,7 @@ func _collide_breaks() -> void:
 				continue
 			var nrm := d / l if l > 0.0001 else Vector2(1, 0)
 			var push := nrm * (mind - l)
-			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.r, e.pos.y, e.grounded) == 0.0:
+			if world.occupy(e.pos.x + push.x, e.pos.z + push.y, e.hull_r(), e.pos.y, e.grounded) == 0.0:
 				e.pos.x += push.x; e.pos.z += push.y
 
 ## Wild Boki are scarce on purpose (owner's call): catching one should feel like a goal, not a
@@ -2864,7 +2864,7 @@ func shot_stance_y(e: Ent) -> float:
 
 ## Shots flying between these heights (x..y) hit this body.
 func shot_band(e: Ent) -> Vector2:
-	var top: float = 1.5 if e is Hunter else maxf(0.9, e.r * 2.2)
+	var top: float = Arch.hit_h(e.arch) if e is Hunter else maxf(0.9, e.r * 2.2)
 	var fy := shot_stance_y(e)
 	return Vector2(fy - 0.45, fy + top + 0.9)
 
@@ -4032,7 +4032,7 @@ func _separate() -> void:
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
-			var mind := a.r + b.r
+			var mind := a.hull_r() + b.hull_r()
 			var l := d.length()
 			if l < mind and l > 0.0001:
 				var push := d / l * (mind - l) * 0.5
@@ -4042,9 +4042,9 @@ func _separate() -> void:
 				var pa := -push * (wa / tot) * 2.0
 				var pb := push * (wb / tot) * 2.0
 				# bodies push each other around, but never off an edge
-				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.r, a.pos.y, a.grounded) == 0.0:
+				if world.occupy(a.pos.x + pa.x, a.pos.z + pa.y, a.hull_r(), a.pos.y, a.grounded) == 0.0:
 					a.pos.x += pa.x; a.pos.z += pa.y
-				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.r, b.pos.y, b.grounded) == 0.0:
+				if world.occupy(b.pos.x + pb.x, b.pos.z + pb.y, b.hull_r(), b.pos.y, b.grounded) == 0.0:
 					b.pos.x += pb.x; b.pos.z += pb.y
 
 ## --hold-demo (screenshots): every hunter in a row by you, each holding interact for something

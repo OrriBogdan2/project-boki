@@ -14,7 +14,7 @@
 	"plate_offset": 1.85,
 	"body": {
 		"size": 0.68,
-		"hit_r": 0.34,
+		"hit_r": 0.352, "hit_h": 1.04, "body_r": 0.34,
 		"head": 0.78,
 		"legs": 0.98,
 		"torso": 1.02,

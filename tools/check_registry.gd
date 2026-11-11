@@ -274,6 +274,8 @@ const CHECKS := {
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
 	# kit hits on Boki (BokiHit)
 	"--boki-hit-table-check": ["res://tools/boki_hit_table_check.gd", "boki_hit_table_check", null],
+	"--hurtbox-check": ["res://tools/hurtbox_check.gd", "hurtbox_check", null],      # per-Hunter hurtbox radius and height
+	"--hurtbox-shots": ["res://tools/hurtbox_shots.gd", "hurtbox_shots", null],      # --shots-dir=<dir>
 	"--hitbox-size-shots": ["res://tools/hitbox_size_shots.gd", "hitbox_size_shots", null],
 	"--toy-check": ["res://tools/toy_check.gd", "toy_check", null],      # base toys (GARDEN.md 4)
 	"--stat-up-vfx-check": ["res://tools/stat_up_vfx_check.gd", "stat_up_vfx_check", "check"],      # StatGlint
