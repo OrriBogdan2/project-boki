@@ -16,7 +16,7 @@ and into each other. Plants his hammer where the fight is and heals the squad th
 
 ## How it plays
 
-1. **Hold RMB** to raise his **aegis**, a curved ivory dome: it has its own health, regenerates, and
+1. **Hold RMB** to raise his **aegis**, a curved pale-gold dome: it has its own health, regenerates, and
    blocks from the front while you walk slower. Damage it blocks becomes **Guard**.
 2. Let go (or tap) to **Bash**. At 50 Guard the Bash is a **Shield Slam** that stuns.
 3. **Tap LMB** to throw the hammer where your cursor is (up to 9m): it stays planted under a gold
@@ -84,7 +84,7 @@ What the in-game kit card (K) says.
 
 **Aegis (RMB, 6s cooldown).**
 
-- *Hold:* Raise the aegis: a curved ivory dome with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
+- *Hold:* Raise the aegis: a curved pale-gold dome with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.
 - *Tap:* A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.
 - *In the air:* Shield Surf: hold to block from the front while gliding.
 - *Resource full:* Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50).

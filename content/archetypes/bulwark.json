@@ -127,7 +127,7 @@
 			"wait_rank3": 1.4,
 			"lock": 3.0,
 			"lock_rank3": 2.0,
-			"len": 4.2,
+			"len": 4.0,
 			"arc": 140.0,
 			"slow": 0.6,
 			"push": 2.0,
@@ -143,7 +143,7 @@
 		},
 		"surf_heat": 1.25,
 		"variants": {
-			"hold": "Raise the aegis: a curved ivory dome with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
+			"hold": "Raise the aegis: a curved pale-gold dome with 160 HP that regenerates; it blocks shots from the front and you walk slower. With it up, Shift is the Shield Charge on this slot's 6s cooldown.",
 			"tap": "A tap only raises and lowers the aegis; the Bash is the Shield Charge on Shift.",
 			"air": "Shield Surf: hold to block from the front while gliding.",
 			"full": "Guard 50+: the Shield Charge ends in a Shield Slam, 18 damage, push 12 and stun 0.6 (spends 50)."

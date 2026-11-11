@@ -10,7 +10,7 @@ extends Node3D
 ##   perfect window is open. It never stops until he lets go: the charge motion only, the damage comes on the release
 ## - the 360 Smash's red-orange-gold spiral ring at its hit radius, the dash's gold chevron wake (his own after-image)
 ##   (the swing's crescent, the Slam fan, the full flare, the Crushed stars: HeroVfx, content/vfx/bulwark.json)
-## - his aegis: an ivory dome over the raised wall (HeroVfx "aegis", a shell), rising out of the ground, flashing on
+## - his aegis: a pale-gold dome over the raised wall (HeroVfx "aegis", a shell), rising out of the ground, flashing on
 ##   a block or a push, cracking as it weakens (the verbs wall underneath keeps the blocking; its plain slab is
 ##   hidden), with a pulsing double chevron in front of it showing its push
 ## The aegis's moments and Mending Ground are HeroVfx data too.
