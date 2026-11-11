@@ -36,9 +36,9 @@
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 9,
+"long_line": 8,
 "nested_ternary": 1,
-"semicolon": 8
+"semicolon": 6
 },
 "scripts/arch/kits/dolm_kit.gd": {
 "nested_ternary": 1
