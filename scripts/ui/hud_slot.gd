@@ -3,7 +3,7 @@ extends RefCounted
 ## One ability or item slot on the bottom bar: the frame (HudStyle.slot_frame), the icon, and while
 ## it isn't ready a dimmed icon, a dark sweep over the part still cooling (clipped to the slot) and
 ## a big countdown in the middle; charge pips along the bottom edge, the key on a pill under it, a
-## pop when a press lands, one red pulse of the frame when it can't (PressDeny), a ring when it comes
+## pop when a press lands, a shake and dim when it can't (PressDeny), a ring when it comes
 ## back, and ResetPop's swell when a reset hands it straight back. skill_slot adds
 ## run levels on top: locked (padlock, UNLOCK when a point can open it, LV 6 on R), rank pips over
 ## it, and a gold + to spend a point (RankMarks; click it or Alt + the key). Hud._ab_slot /
@@ -12,7 +12,10 @@ extends RefCounted
 ## countdown text shown per slot on Hud.slot_text (checks read it).
 
 const READY_FLASH := 0.35      # s: the ring when a slot comes back
-const DENY_T := 0.15           # s: the frame's one red pulse when a press can't go
+const DENY_T := 0.25           # s: the slot's shake and dim when a press can't go
+const SHAKE_PX := 3.0          # px: how far the shake swings either way at its start
+const COOL_T := 0.75           # s: COOL_TEXT over a cooling slot after a refused press (fades out)
+const COOL_TEXT := "On cooldown"
 const POP_T := 0.3             # s: the pop when a press lands
 
 static var shown_keys := {}    # slot id -> the key cap last drawn under it (checks read it)
@@ -21,7 +24,7 @@ static var shown_keys := {}    # slot id -> the key cap last drawn under it (che
 static func decay(H, delta: float) -> void:
 	for id in H.slot_fx.keys():
 		H.slot_fx[id]["t"] = float(H.slot_fx[id]["t"]) + delta
-		if float(H.slot_fx[id]["t"]) > ResetPop.LEN: H.slot_fx.erase(id)
+		if float(H.slot_fx[id]["t"]) > maxf(ResetPop.LEN, COOL_T): H.slot_fx.erase(id)
 	for id in H.ready_flash.keys():
 		H.ready_flash[id] = float(H.ready_flash[id]) - delta
 		if float(H.ready_flash[id]) <= 0.0: H.ready_flash.erase(id)
@@ -39,6 +42,8 @@ static func ab_slot(H, id: String, rect: Rect2, icon: String, key: String, col: 
 		var ft := float(sfx_d["t"])
 		if sfx_d["kind"] == "reset":
 			rect = ResetPop.scaled(rect, ft)
+		elif sfx_d["kind"] == "deny" and ft < DENY_T:
+			rect.position.x += SHAKE_PX * sin(ft * TAU * 3.0 / DENY_T) * (1.0 - ft / DENY_T)
 		elif sfx_d["kind"] == "cast":
 			pop = clampf(1.0 - ft / POP_T, 0.0, 1.0)
 			rect = rect.grow(-rect.size.x * 0.08 * sin(pop * PI))
@@ -111,13 +116,22 @@ static func locked(H, id: String, r: Rect2, icon: String, col: Color, key: Strin
 	shown_keys[id] = key
 	HudStyle.key_pill(c, Vector2(r.get_center().x, r.end.y), key, lcol if can else Color(HudStyle.MUTED, 0.6))
 
-## A refused press on slot `id` (PressDeny): its frame swells red and back once over DENY_T.
+## A refused press on slot `id` (PressDeny): the slot dims (a dark veil, a thin red edge) over DENY_T while ab_slot
+## shakes it, and a cooling slot gets a small "On cooldown" pill over it for COOL_T (the locked slots' tag look).
 static func deny_pulse(H, id: String, r: Rect2) -> void:
 	var fx: Dictionary = H.slot_fx.get(id, {})
-	if fx.get("kind", "") != "deny" or float(fx["t"]) >= DENY_T:
+	if fx.get("kind", "") != "deny":
 		return
-	var k := sin(PI * float(fx["t"]) / DENY_T)
-	H._rounded(r.grow(3.0 * k), Color(0.9, 0.15, 0.1, 0.22 * k), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, k), 3)
+	var ft := float(fx["t"])
+	if ft < DENY_T:
+		var k := 1.0 - ft / DENY_T
+		H._rounded(r, Color(0.0, 0.0, 0.02, 0.45 * k), HudStyle.SLOT_RAD, Color(1.0, 0.35, 0.3, 0.6 * k), 2)
+	if fx.get("cooling", false) and ft < COOL_T:
+		var a := minf(1.0, 3.0 * (1.0 - ft / COOL_T))
+		var tw := HudStyle.BIG.get_string_size(COOL_TEXT, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x + 12.0
+		var tr := Rect2(Vector2(r.get_center().x - tw * 0.5, r.position.y - 20.0), Vector2(tw, 15))
+		H._rounded(tr, Color(HudStyle.KEY_BG, 0.95 * a), 5, Color(HudStyle.MUTED, 0.8 * a), 1)
+		HudStyle.ctext(H.c, Vector2(r.get_center().x, tr.end.y - 3), COOL_TEXT, 11, Color(HudStyle.INK, a), 0)
 
 ## The part of a slot still cooling: a slice from 12 o'clock, clockwise, cut to the slot's square so
 ## it never spills past the frame.

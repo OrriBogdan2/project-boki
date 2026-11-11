@@ -282,7 +282,7 @@ func press_rmb() -> void:
 		return
 	if rmb_press_extra():
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0
@@ -299,6 +299,15 @@ func _release_rmb() -> void:
 	c["hold"] = rmb_t >= float(rmb_def().get("hold", 0.3)) and not c.get("air", false)
 	c["variant"] = describe_rmb_variant(c)
 	fire_rmb(c)
+
+## The RMB slot as the bar shows it (slot_info "ready": a charge, the kit's own lock-out): on cooldown the press is
+## refused before it starts anything (no hold pose, wind-up, sound or step) and the bar shows the deny.
+## Every RMB press goes through here: the player's, a bot's, DashFlow's held one and a kit's own buffer.
+func rmb_open() -> bool:
+	if bool(slot_info("sec")["ready"]):
+		return true
+	h._ab_feedback("sec", "deny")
+	return false
 
 ## The RMB charge. False (with the deny buzz) when none is ready.
 func spend_rmb(silent := false) -> bool:

@@ -3411,6 +3411,10 @@ func _gather_input() -> void:
 			aimable = false
 		if a[0] == "signature" and player.ak != null and player.ak.e_on_press():
 			aimable = false       # a self-centred E goes off on the press (no cursor preview)
+		var pressed: bool = Input.is_action_just_pressed(a[0]) and not paused
+		if aimable and pressed and not player.slot_info(AIM_SLOT.get(a[0], "sec"))["ready"]:
+			pending_input[a[1]] = true      # on cooldown: no aim preview, the press is refused at once (on the bar)
+			continue
 		if aimable:
 			# hold to see where it will land, let go to cast it
 			if Input.is_action_just_pressed(a[0]) and not paused:
@@ -5731,6 +5735,7 @@ func _tips() -> void:
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
 var aim_hold := ""
+const AIM_SLOT := {"signature": "k1", "ultimate": "r", "gear1": "q", "gear2": "v"}      # aimed key -> its slot_info id
 var ind_range: MeshInstance3D
 var ind_area: MeshInstance3D
 var ind_fill: MeshInstance3D

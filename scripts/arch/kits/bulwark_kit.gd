@@ -668,7 +668,7 @@ func press_rmb() -> void:
 	if busy() or ult.planted():
 		h._ab_feedback("sec", "deny")
 		return
-	if rmb_down:
+	if rmb_down or not rmb_open():
 		return
 	rmb_down = true
 	rmb_t = 0.0

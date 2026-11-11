@@ -1721,7 +1721,7 @@ func _ab_feedback(slot: String, kind: String) -> void:
 	if not is_local() or m.hud == null or not m.hud.has_method("ability_feedback"):
 		return
 	if kind == "deny":
-		PressDeny.raise(m.hud, slot)
+		PressDeny.raise(m.hud, slot, float(slot_info(slot).get("cd", 0.0)) > 0.0)
 		return
 	m.hud.ability_feedback(slot, kind)
 	m.sfx("skill", null, -9.0, 1.15)
