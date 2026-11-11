@@ -51,8 +51,8 @@ Camps: 19 live camps a run (the match rolls which of the map's camp spots are li
 seed2 10/11/12, seed3 13/13/13, seed4 11/12/12, seed5 9/15/16. So the camps are gone by about 2:00 and the Blight does not move
 anyone to them later. Knocks per run 30-51; squads left at the end 2 (seeds 2-5), 1 (seed 1, stood alone from 9:19), 0 at 12:00 in all.
 Heart: wakes 4:00 and the spark is charged 5:15 in every run (75 s charge), then it lies READY to the end: nobody carried it.
-Heart final opens 10:00 (seed 1: 9:19, last squad). The Sealed Lair seat opens at 2:00 and its boss was dead at 1:55-2:49 in four runs
-(awake at 1:16-2:04, wards broken from 0:33), so the seat opened on a cleared lair and nobody took it. The Uplink was used once (seed 5,
+Heart final opens 10:00 (seed 1: 9:19, last squad). The Sealed Lair seat opens at 2:00 and its boss died at 1:55-2:49 in four runs
+(awake at 1:16-2:04), so the seat opens on a lair already cleared or a minute from it, and nobody took it. The Uplink was used once (seed 5,
 3 Hunters, 7:40). Extractions per run: 0, 0, 0, 0, 3 (of 30). The tide ring (Heart.tide_r) closes continuously 1:30 to 10:00, 176 m at
 2:00 and 48 m at 10:00 on this map; it is not five beats.
 `--bot-sanity-check`: 1 flagged window in two runs (run 1 seed 3 bot at lair_dial, 46 facing flips; run 2 seed 5 bot on roam, 22 flips),
@@ -67,15 +67,15 @@ the hot-zone winner is one to two levels up at 4:00, never three; first Small Ca
 | | spec (mid drop / hot zone) | measured (median squad of those still in, five runs) |
 |---|---|---|
 | landed to first damage | not specified | 1-5 s median, worst squad 7-58 s |
-| first level-up (L2) | first Small Camp, level 2 | 0:20-0:27, 5 s after the first camp clear |
+| first level-up (L2) | first Small Camp, level 2 | 0:20-0:27, 1-2 s after the first camp clear |
 | first camp clear | | 0:19-0:26; 5th at 0:37-0:44 |
 | first L4 / first L6 (ultimate) | L4 at 2:45 / ultimate not before 2:30, 5:15 on pace | L4 0:39-0:49, L6 0:55-1:51 (one Hunter, not a squad mean) |
 | squad level at 2:00 | L4 / L5 | 4.0-5.0 (range 2.7-6.0): on the spec |
 | squad level at 4:00 | L5 / L6-7 | 6.0-8.0 (max 8.0): at or over the hot-zone winner |
 | squad level at 5:15 | L6 / L7 | 6.3-8.0 |
 | squad level at 8:00 / 10:00 | L7-8 / L8-9 | 8.2-9.0 / 8.3-9.3 |
-| first knock | "before 2:30 at least 85% of XP is camps" | 0:28-0:40, 10 s after the last squad lands |
-| lair boss | Sealed Lair 2:00, "300 XP, no steals once the gate seals" | dead 1:55-2:49 (4 of 5 runs) |
+| first knock | "before 2:30 at least 85% of XP is camps" | 0:28-0:40, as the last squad lands (0:30) |
+| lair boss | Sealed Lair 2:00, "300 XP, no steals once the gate seals" | dead 1:55-2:49 (4 of 5 runs); the 5th never |
 | Heart wake / spark / final | 4:00 / 5:15 / 10:00 | 4:00 / 5:15 / 10:00 (exact) |
 | Blight | five beats 2:00-10:00 (EARLY_CAMPS) | one continuous tide, 184 m at 1:30 to 48 m at 10:00 |
 | last squad | the squeeze to the end | 1 squad stood in only 1 of 5; the rest end with 2 squads on the island fall |
@@ -83,13 +83,13 @@ the hot-zone winner is one to two levels up at 4:00, never three; first Small Ca
 ## The three biggest gaps
 1. **The match is played out by about 2:30, not by 12:00.** Bots land (0:13-0:30), hit something within 5 s, knock Hunters from 0:28,
    clear 8-13 of 19 camps by 2:00 and have half the squads eliminated by 1:38-3:38 (squads left <= 5), and the lair boss is dead by
-   1:55-2:49 before its own seat opens at 2:00. The pace table assumes camps carry the first 4 minutes; here they are done in 2.
+   1:55-2:49, around the time its own seat opens at 2:00. The pace table assumes camps carry the first 4 minutes; here they are done in 2.
    Squads that survive are L6-8 at 4:00 and L8-9 by 8:00: one to two levels over the table from 4:00 on, with the ultimate (first L6 at
    0:55-1:51) 3-4 minutes before the 5:15 target. Cause on this tree: the old XP rules (trickle + damage XP + 90 per knock), which the
    DECISIONS entry removes; the early-camps branch with those rules is not merged with Ways Out, so the two have never been run together.
 2. **The ways out are never used, so the squeeze, the Heartspark race and the last-squad finish are unmeasured.** 4 of 5 matches
    end with zero extractions and the fifth with 3 of 30. The Heartspark is READY from 5:15 and never carried (the early seat is taken
-   by nobody in five runs); the Sealed Lair seat opens on an already cleared lair; the Heart final opens at 10:00 and nobody leaves; seeds
+   by nobody in five runs); the Sealed Lair seat opens on a lair already (nearly) cleared; the Heart final opens at 10:00 and nobody leaves; seeds
    2-5 reach the island fall with two squads alive. Bots do not have a working Ways Out plan (or the seats are unreachable for them), so the
    expedition clock after 5:00 is empty: the only thing playing it is the tide. This blocks reading the 6:00-12:00 pacing at all.
 3. **The Blight's closes are a slow ring that does not push anyone.** The spec's pacing hangs on five beats (2:00, 4:00, 6:00, 8:00,
