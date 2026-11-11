@@ -99,7 +99,8 @@
 			"legs_heading": true
 		},
 		"gunslinger_dash_ex": {
-			"clip": "dash_ex"
+			"clip": "dash_ex",
+			"air_clip": "dash_ex"
 		},
 		"gunslinger_e": {
 			"clip": "e",

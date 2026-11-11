@@ -239,6 +239,7 @@
 		},
 		"mm_float": {
 			"clip": "float",
+			"air_clip": "float",
 			"heading": true
 		},
 		"mm_pickup": {

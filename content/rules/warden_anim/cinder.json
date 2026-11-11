@@ -116,7 +116,8 @@
 		"lw_hop": {
 			"clip": "hop",
 			"heading": true,
-			"turn_max": 3.2
+			"turn_max": 3.2,
+			"air_clip": "hop"
 		},
 		"as_cloak": {
 			"clip": "cloak",

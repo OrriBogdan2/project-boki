@@ -48,6 +48,7 @@ var alt_on := false          # this play of a move takes its "alt" clip
 var alt_km := ""
 var alt_t := 0.0
 var air_cast := false        # this play of the move has been in the air ("air_legs")
+var from_air := false        # this play of the move started off the ground ("air_clip", "ground_clip")
 var cur := ""                # the clip on the live channel
 var chan := 0                # which channel is live, 0 or 1
 var xf := 0.0                # the crossfade between the channels (0: channel a)
@@ -395,7 +396,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
 	return {}
 
-## A keyed move's clip and time ({} once a move that does not hold has played out).
+## A keyed move's clip and time ({} once a move that does not hold has played out, or an air-started move is over).
+## "ground_clip" / "air_clip": the clip when the move starts on the ground / in the air
+## (a dash picks its look by where it was pressed; the kit's timing, hitbox and distance stay the same).
 func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("lead": the cock is skipped, so the hit pose lands on the kit's hit)
 	var tt := float(s.get("kmove_t", 0.0)) + float(mv.get("lead", 0.0))
@@ -403,10 +406,14 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on
 		air_cast = false
+		from_air = not bool(s.get("grounded", true))
 	air_cast = air_cast or not bool(s.get("grounded", true))
 	alt_km = km
 	alt_t = tt
+	if from_air and mv.has("air_clip") and _air_over(s):
+		return {}          # an air dash gives way to the glide or the landing below
 	var clip := String(mv["alt"] if mv.has("alt") and alt_on else mv["clip"])
+	clip = String(mv.get("air_clip" if from_air else "ground_clip", clip))
 	var length := lib.get_animation(clip).length
 	# (a lead clip holds its last frame rather than ending before the move does)
 	if mv.has("lead"):
@@ -431,6 +438,10 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	return {"clip": clip, "t": tt, "upper": up, "heading": bool(mv.get("heading", false)),
 			"fade": float(mv.get("fade", FADE)), "legs_heading": bool(mv.get("legs_heading", false)),
 			"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
+
+## An air-started move is over once he lands or opens the glider: the clip fades into the land or glide pose.
+static func _air_over(s: Dictionary) -> bool:
+	return bool(s.get("grounded", true)) or bool(s.get("gliding", false))
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})

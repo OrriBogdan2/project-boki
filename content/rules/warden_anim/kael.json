@@ -92,7 +92,7 @@
 			"clip": "dash"
 		},
 		"jug_exdash": {
-			"clip": "exdash"
+			"clip": "exdash", "air_clip": "exdash"
 		},
 		"jug_chain": {
 			"clip": "chain",

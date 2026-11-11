@@ -31,9 +31,32 @@
 			"r": "run_r"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 5.0, "stride": [1.5, 1.2], "foot_mps": [1.51, 5.16], "arm_swing": {"L": 0.5, "R": 0.5}
+		"run_speed": 5.0,
+		"stride": [
+			1.5,
+			1.2
+		],
+		"foot_mps": [
+			1.51,
+			5.16
+		],
+		"arm_swing": {
+			"L": 0.5,
+			"R": 0.5
+		}
 	},
-	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
+	"crouch": {
+		"idle": "crouch_idle",
+		"walk": {
+			"f": "crouch_f",
+			"b": "crouch_b",
+			"l": "crouch_l",
+			"r": "crouch_r"
+		},
+		"in": "crouch_in",
+		"out": "crouch_out",
+		"speed": 1.16
+	},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
@@ -88,7 +111,9 @@
 		"breah_exdash": {
 			"clip": "dash_air",
 			"heading": true,
-			"turn_max": 3.2
+			"turn_max": 3.2,
+			"air_clip": "dash_air",
+			"ground_clip": "dash_hop"
 		},
 		"breah_raise": {
 			"clip": "e_row",
