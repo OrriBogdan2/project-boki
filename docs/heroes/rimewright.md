@@ -39,7 +39,7 @@ The 10 ranked gaps of briefs/hero-ref/tamsin.md section 4, marked on main d255ac
 |---|---|---|---|
 | 1 | LMB pattern | closed: no pause; the 4 + 3 large barrage is the game data's, kept over the 5 fps footage | 74447a97b, f6250bd1; "a steady stream, one dart every 0.18 s with no pause", "the source's barrage" |
 | 2 | Homing strength and shape | closed: bowed darts turn in late (up to 12 rad/s) onto the foe nearest the cursor | e5c73480c; "the bowed darts curve back onto the foe". In flight, asserts only: ext/neve-dart-homing, ext/parity-neve-skate-home |
-| 3 | Shatter payoff size | closed: `fan_splinter` 60 = 15x a 4 dart, 2.7 m spike starburst, frost glow grows per dart | 74447a97b; "the frost glow on the foe shows the stacks", "8 darts on one foe Shatter them" (-60). In flight, not this row: ext/neve-chill-shatter (knock tell) |
+| 3 | Shatter payoff size | closed: `fan_splinter` 60 = 15x a 4 dart, 2.7 m spike starburst, frost glow grows per dart | 74447a97b; "the stacks show on your FAN badge", "8 darts on one foe Shatter them" (-60). In flight, not this row: ext/neve-chill-shatter (knock tell) |
 | 4 | Spear lands at the cursor, long delay | closed: lands at the clamped cursor, slow zone with a spinning crystal, detonates 1.8 s later as the big hit (18 landing, 60 detonation) | 74447a97b; owner items 13/28 (a palm push at 18 m/s instead of the footage's 45 m/s); the "tm RMB" rows |
 | 5 | Ice Wall spawn and growth | closed: 1.8 m block erupts 1 bh ahead, widens to 4.5 m while it slides, shoves foes, stops shots. Owner override: travel +50% (up to 16.2 m, 3.6 s) and it stands 4.5 s, not the footage's about 3 s | OWNER_REVIEW_1103 item 13; the "tm E" rows. The freeze recast is the wiki's. In flight, look only: ext/neve-lmb-celeste |
 | 6 | Darts while skating | open: straight beams (done), but normal damage; the footage shows 56 vs 35 (1.6x), the wiki says 2x, the tooltip data has no bonus. Removed in the data pass | "darts while skating are straight beams at normal damage". Fix is in rimewright_kit.gd and rimewright.json, both in flight |
@@ -139,7 +139,7 @@ card ease out, speed x carry_t x 2/3). Asserted by the `tm X move` / `end` / `le
 | Interaction | Check (`--rimewright-combo-check` unless noted) |
 |---|---|
 | A steady stream of equal darts, slow and bowed, curving onto the foe at the cursor | "a steady stream ...", "every dart the same", "darts come out slowly ...", "the bowed darts curve back ..." |
-| Darts Chill; the frost glow grows; 8 Shatter | "the frost glow on the foe shows the stacks", "8 darts on one foe Shatter them" |
+| Darts Chill; the frost glow grows (seen by others; hers is the FAN badge); 8 Shatter | "the stacks show on your FAN badge", "8 darts on one foe Shatter them" |
 | A knock on a Chilled foe Shatters them | "knocking a Chilled foe Shatters them after a beat" |
 | Skate: the push-off, straight beams at normal damage, the stride loop, over a ledge, the hockey stop and refund; rank 3 lays ice over the Abyss | the "tm Shift" rows |
 | Ice Spear: ring at the cursor while held, lands there, slows and Chills in the zone, detonates at 1.8s with a freeze; two charges on 10.2s; rank 3 hits 45% harder | the "tm RMB" rows |
