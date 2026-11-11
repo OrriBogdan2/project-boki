@@ -121,3 +121,34 @@ off speed; at 55 both hold.
 Was (current, one length each, no diagonals): Albert walk b/l/r 0.5 s, sole 1.13-1.22 vs 1.0 model m/s, hip 2 cm over
 walk_f's; run b/l/r 0.375 s, 2.8 vs 2.4; Neve walk b/l/r 1.5 s and run b/l/r 1.0 s, soles 0.2-0.6 m/s against
 2.2 / 4.6 (her old skate strokes, stance 0.6-0.94).
+
+### Blind Fable judge (Albert, Neve)
+
+Game renderer (`--clip-shots`, yaw 110, 16 fps; Albert `--dist=11 --at=1.4`), 8 frames a loop under the forward loop;
+current and new in a seeded random A/B order, the judge saw only the sheets. Scores slide / contact / weight / match /
+look, 1-5; pass = none under 3. Diagonals have no current loop (the ring blended two neighbours): judged alone.
+
+| loop | new | current | kept |
+|---|---|---|---|
+| Albert walk_b | 4 4 4 4 3 | 3 3 3 3 3 | new |
+| Albert walk_l | 4 4 4 4 3 | 3 3 3 3 3 | new |
+| Albert walk_r | 3 3 3 3 3 "dip f3-4" | 4 4 4 4 3 | new (see below) |
+| Albert run_b | 4 4 4 4 3 | 3 3 3 4 4 | new |
+| Albert run_l | 3 3 3 3 4 "f1-3 crouch, shield to ground" | 4 4 4 4 3 | new (see below) |
+| Albert run_r | 3 3 3 3 4 | 4 4 4 4 3 | new (see below) |
+| Albert walk fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 4 3 | - | new |
+| Albert run fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 4 3 | - | new |
+| Neve walk_b | 4 4 4 3 3 | 3 4 3 2 2 "near-idle shuffle" | new |
+| Neve walk_l, walk_r | 4 4 4 3 3 | 3 4 3 2 2 | new |
+| Neve run_b | 3 4 3 3 3 | 3 4 3 2 2 | new |
+| Neve run_l | 4 4 4 3 4 | 3 4 3 2 2 | new |
+| Neve run_r | 4 4 3 3 3 | 3 4 3 3 3 | new |
+| Neve walk fl, fr / bl, br | 4 4 4 4 4 / 4 4 4 3 3 | - | new |
+| Neve run fl, fr / bl, br | 4 4 4 4 4 / 3 4 3 3 3 | - | new |
+
+New wins 9 of 12 pairs; every new loop passes. Albert's walk_r, run_l and run_r lost to current. Kept anyway: the
+current ones are 0.5 / 0.375 s against walk_f 0.75 and run_f 0.625, so with them the ring is not one length
+(`--clip-check` fails, `in_step` can't hold) and strafing stays out of step with the new gait, the break this pass
+is for. The low frames the judge marks are the forward loop's own hip dip at the same phase (run_f vaults low, then
+flies), which reads as a crouch on a side run. Next: a side-run hip curve of its own within the clip-check band, or
+the owner keeps current for those three and drops Albert's `in_step`.
