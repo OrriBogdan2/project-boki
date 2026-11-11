@@ -22,7 +22,7 @@
 		"gunslinger_dash": {"clip": "dash", "legs_heading": true, "fade": 0.05, "rate": 1.25},
 		"gunslinger_dash_ex": {"clip": "dash_ex", "air_clip": "dash_ex"},
 		"gunslinger_e": {"clip": "e", "air_legs": true},
-		"gunslinger_x": {"clip": "x", "upper": "moving", "fade": 0.05},
+		"gunslinger_x": {"clip": "x", "upper": "moving", "fade": 0.05, "rate": 0.667},
 		"gunslinger_knock": {"clip": "knock", "upper": "moving", "air_legs": true, "fade": 0.05},
 		"mf_xform": {"clip": "fusion"}
 	},

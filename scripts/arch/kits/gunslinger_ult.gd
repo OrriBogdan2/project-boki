@@ -9,8 +9,9 @@ extends RefCounted
 
 const FALL := "fall"
 const BURN := "burn"
-const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
-                                 # the source's raise, then fire
+const FIRE_T := 0.2              # s after the tap the shot leaves: the source's raise, then fire (footage 0195-0197:
+                                 # the barrel up on the cast frame, the shot a frame later); the x clip's kick key
+                                 # (clip 0.133 s) lands here at its vex.json rate 0.667
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const CHAR := Color("2a1018")    # the disc's scorched inside
