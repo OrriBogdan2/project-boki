@@ -1403,7 +1403,7 @@ func _move_kin(d: float) -> void:
 				continue
 			if to_me < 0.6 or float(k["called_t"]) <= 0.0:
 				var arrived := to_me < 0.6
-				k.erase("called_t"); k.erase("call_slot")
+				k.erase("called_t"); k.erase("call_slot"); k.erase("call_pace")
 				if arrived:
 					k["hold_t"] = 1.4; k["joy_t"] = 0.9; k["t"] = randf_range(2.5, 4.0)
 					_emote(k, "♥" if float(k["rec"]["trust"]) > 55.0 else "♪")
@@ -1501,7 +1501,7 @@ func _move_kin(d: float) -> void:
 			aim = KinAvoid.around(kins, k, pos, aim, d)
 			var to := Vector2(aim.x - pos.x, aim.z - pos.z)
 			if Vector2(goal.x - pos.x, goal.z - pos.z).length() > 0.4 and to.length() > 0.01:
-				wish = to.normalized() * (4.4 if (k.has("fetch") or k.has("called_t") or k.has("led")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0)) * wade.speed(k, pos)
+				wish = to.normalized() * (4.4 * float(k.get("call_pace", 1.0)) if (k.has("fetch") or k.has("called_t") or k.has("led")) else (3.6 if k.has("chase") else 2.4)) * _care_speed(rec) * float(pers.get("speed", 1.0)) * wade.speed(k, pos)
 		var hv := Vector2(k["vel"].x, k["vel"].z)
 		hv += (wish - hv) * (1.0 - exp(-8.0 * d))
 		var nx := pos.x + hv.x * d
@@ -1841,6 +1841,9 @@ func _whistle() -> void:
 	whistle_cd = 1.6
 	_whistle_sound()
 	_whistle_ring()
+	if life:
+		life.whistle.press()      # the base: your partner comes, hold for the nearest other Boki
+		return
 	var my_isle := world.island_of(ppos.x, ppos.z)
 	var n := kins.size()
 	var inside: Array = []
@@ -2332,6 +2335,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		else: HomeHero.open(self)
 		get_viewport().set_input_as_handled()
 		return
+	if event.is_action_released("whistle") and life:
+		life.whistle.release()
 	if event.is_action_pressed("whistle") and panel_open == "" and not chat_open and visit.is_empty() and train.is_empty() and not Overlay.is_open():
 		_whistle()
 		get_viewport().set_input_as_handled()
