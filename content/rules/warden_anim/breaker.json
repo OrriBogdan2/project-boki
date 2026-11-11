@@ -142,8 +142,9 @@
 			"hold_from": 0.4
 		},
 		"bul_ult_slam": {
-			"fade": 0.05,
-			"clip": "x_slam"
+			"clip": "x_slam",
+			"lead": 0.07,
+			"fade": 0.04
 		},
 		"mf_xform": {
 			"clip": "fuse"

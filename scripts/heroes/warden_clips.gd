@@ -480,6 +480,7 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 	# ("rate": the clip's seconds per kit second, so a clip keyed longer than the move still ends with it;
 	# "lead": the cock is skipped, so the hit pose lands on the kit's hit)
 	var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("rate", 1.0)) + float(mv.get("lead", 0.0))
+	tt = maxf(tt, 0.0)      # (a lead under zero holds the first frame that long)
 	# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 	if km != alt_km or tt < alt_t:
 		alt_on = not alt_on
