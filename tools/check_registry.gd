@@ -19,6 +19,7 @@ const CHECKS := {
 	"--spectate-shots": ["res://tools/spectate_check.gd", "spectate_check", "shots"],      # --shots-dir=<dir>
 	"--fuse-hud-check": ["res://tools/fuse_hud_check.gd", "fuse_hud_check", null],      # the Fusion on the Boki box
 	"--fuse-hud-shots": ["res://tools/fuse_hud_check.gd", "fuse_hud_check", "shots"],      # --shots-dir=<dir>
+	"--camp-clear-check": ["res://tools/camp_clear_check.gd", "camp_clear_check", null],      # PvE pacing: 12 hunters vs 3 camps at level 1 and 5
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
