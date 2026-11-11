@@ -6,7 +6,7 @@ extends RefCounted
 ## none add KICK_RISE of height to the jump you are on; keys away push you off it. A hop only starts up to
 ## HOP_CLIMB_CAP above where you took off, so a four-terrace wall is climbable with a mantle on top and a
 ## five-terrace one stays sheer however long you dance. Near a wall a capped press does nothing (it never
-## opens the glider: the glide button or a held glide still does). Bounce: hitting a
+## opens the glider: the glide button still does). Bounce: hitting a
 ## wall at an angle with speed in the air (a dash, a glide, a boosted jump) rebounds you off it;
 ## head-on you just stop, as ever, and a jump there kicks.
 
@@ -92,7 +92,8 @@ func _at_wall(h: Hunter) -> bool:
 func hit(h: Hunter, hit_v: Vector2, wall_top: float) -> void:
 	if h.grounded or h.remote or h.dropping or h.mantling() or h.m.time - h.kb_t < BOUNCE_KNOCK_QUIET:
 		return
-	if wall_top - h.pos.y <= Hunter.MANTLE_REACH or not h.shove.is_empty() or not h.charge.is_empty():
+	var ramming := h.roll_t > 0.0 and not h.shove.is_empty()      # (a shove outlives the dash: only its run is a ram)
+	if wall_top - h.pos.y <= Hunter.MANTLE_REACH or ramming or not h.charge.is_empty():
 		return
 	var into := -hit_v.dot(h.wall_n)
 	if into < BOUNCE_MIN_INTO or into > hit_v.length() * cos(deg_to_rad(BOUNCE_HEAD_ON_DEG)):

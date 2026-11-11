@@ -112,7 +112,7 @@ func tick() -> void:
 	var t := h.draw_t
 	var drawing := t >= 0.0 and h.wpn.has("draw")
 	var s := stage_t()
-	var col := Color(String(k.d.get("color", "#e8483e")))
+	var col := Arch.color(h.arch)
 	if h.wpn.has("draw") and not drawing and k.tells_visible() and h.can_fire():
 		AimKit.line(h, "draw_rest", {"from": line_start(), "alpha": LINE_A, "col": col.lightened(0.35), "lw": REST_LW})
 	if drawing:
@@ -121,7 +121,6 @@ func tick() -> void:
 		if was < s.y and t >= s.y:
 			k.m.sfx("pin_super", h.pos, -3.0 if h.is_local() else -7.0)
 			h.flash_t = 0.12           # the whole body flashes once
-			k.net_ring(h.pos, 1.3, k.res_col())
 		if was < over_t() and t >= over_t():
 			k.m.sfx("pin_overdraw", h.pos, -10.0, 0.9)
 			k.play("arc_over")

@@ -3,13 +3,18 @@ extends RefCounted
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
 ## on the map, a fight: two rivals and a monster pack brought to you), then a farm run. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
-## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
+## frame over 33 ms and 2x the 30 before it names the nodes that entered the tree in it.
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
-##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
+##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium] [--bench-stress]
+##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+## --bench-stress: the 60-actor load (10 trios = 30 Hunters, every Boki kept out beside its Hunter, no fight).
+##   [--bench-hunters=6] (squads of 2) [--boki-wisps] (every Boki rides as a wisp, KinWisp)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
+## The gate: a match p99 over P99_SLACK times the one recorded for this adapter, load, quality and length in
+## tools/perf_baseline.json exits 1 (BENCH GATE FAIL). Record a new baseline by editing that file from a run.
 
 const DT := 1.0 / 60.0
-const VIEW := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
+var view := Vector2i(640, 360)     # small window: a software rasterizer's fill time; counts are the same
 const FIGHT_AT := 8.0               # s: when the fight is brought to you
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
@@ -17,38 +22,86 @@ var main: Node
 var secs := 60.0
 var farm_secs := 20.0
 var out_path := ""
+var teams := 3            # --bench-teams / --bench-squad: 10 trios is the Extraction budget (30 Hunters)
+var squad := 2
+var hunters := 6          # --bench-hunters (squads of 2): teams x squad unless set
+var stress := false       # --bench-stress: 30 Hunters with all 30 Boki out, nothing brought to you
+const STRESS_OUT_S := 2.0           # s between sends: a Boki back on its Hunter's shoulder is sent out again
+var wisps := false
 var rows := PackedStringArray()
 var hud_us := 0
 var added := {}          # node name -> count, nodes that entered the tree this frame (named on a hitch)
-const HITCH_MS := 100.0
+const SLOW_MS := 33.0               # a frame over this counts as a hitch in the summary (under 30 fps)
+const BASELINE := "res://tools/perf_baseline.json"
+const P99_SLACK := 1.15             # the gate: match p99 may be at most 15% over the baseline
+var match_p99 := 0.0
 var vp: RID
 
 func run(main_node: Node) -> void:
+	setup(main_node)
+	await _match()
+	await _farm()
+	_finish()
+
+## Reads the --bench-* arguments and sizes the window; --perf-budget-check shares it.
+func setup(main_node: Node) -> void:
 	main = main_node
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a.begins_with("--bench-view="):
+			var wh := a.substr(13).split("x")
+			view = Vector2i(int(wh[0]), int(wh[1]))
+		if a.begins_with("--bench-teams="): teams = int(a.substr(14))
+		if a.begins_with("--bench-squad="): squad = int(a.substr(14))
+		if a.begins_with("--bench-hunters="):
+			hunters = maxi(2, int(a.substr(16)))
+			teams = ceili(hunters / 2.0)
+			squad = 2
+		if a == "--boki-wisps": wisps = true
+	stress = "--bench-stress" in OS.get_cmdline_user_args()
+	if stress:
+		teams = 10
+		squad = 3
+	if stress or not OS.get_cmdline_user_args().any(func(a): return a.begins_with("--bench-hunters=")):
+		hunters = teams * squad
 	Save.no_write = true
 	Save.d["tutorial"]["home"] = true
-	main.get_window().size = VIEW
+	main.get_window().size = view
 	main.get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
-	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,draws,tris,objects,nodes")
-	await _match()
-	await _farm()
-	print("BENCH quality=%s renderer=%s adapter=%s" % [Settings.quality(),
-		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name()])
+	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
+
+func _finish() -> void:
+	var win := main.get_window()
+	print("BENCH hunters=%d boki_wisps=%s quality=%s renderer=%s adapter=%s window=%dx%d 3d_scale=%.2f" % [hunters,
+		wisps, Settings.quality(),
+		RenderingServer.get_current_rendering_method(), RenderingServer.get_video_adapter_name(), win.size.x,
+		win.size.y, win.scaling_3d_scale])
 	if out_path != "":
 		var fa := FileAccess.open(out_path, FileAccess.WRITE)
 		if fa: fa.store_string("\n".join(rows) + "\n")
-	main.get_tree().quit()
+	main.get_tree().quit(_gate())
 
-func _match() -> void:
+## 1 when the match p99 regressed past P99_SLACK of the baseline for this setup, else 0.
+func _gate() -> int:
+	var key := "%s|%dx%d%s|%s|%ds" % [RenderingServer.get_video_adapter_name(), teams, squad,
+		" stress" if stress else "", Settings.quality(), int(secs)]
+	var base = JSON.parse_string(FileAccess.get_file_as_string(BASELINE)) if FileAccess.file_exists(BASELINE) else {}
+	if not (base is Dictionary and base.has(key)):
+		print("BENCH GATE no baseline for '%s'" % key)
+		return 0
+	var cap := float(base[key]["p99"]) * P99_SLACK
+	print("BENCH GATE %s: match p99 %.1f ms, cap %.1f (baseline %.1f +15%%)" % [
+		"PASS" if match_p99 <= cap else "FAIL", match_p99, cap, float(base[key]["p99"])])
+	return 0 if match_p99 <= cap else 1
+
+func _match() -> Array:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"teams": teams, "squad": squad, "total": hunters, "raid": "ash", "blight": true,
+		"no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle", "seed": 4101, "boki_wisps": wisps}, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -71,9 +124,12 @@ func _match() -> void:
 		added[k] = int(added.get(k, 0)) + 1)
 	Match.prof_on = true
 	Match.prof.clear()
+	Match.vprof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := false
+	var fought := stress
+	var out_at := 0.0
+	var boki_out := 0
 	var P: Hunter = m.player
 	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
 	while is_instance_valid(m) and m.time < secs:
@@ -81,26 +137,76 @@ func _match() -> void:
 		if not fought and m.time >= FIGHT_AT:
 			_bring_fight(m)
 			fought = true
+		if stress and m.time >= out_at:
+			out_at = m.time + STRESS_OUT_S
+			boki_out = _boki_out(m)
 		var t0 := Time.get_ticks_usec()
-		m.step(DT)
-		m._process(DT)
+		m._process(DT)        # one frame as the game runs it: one DT step, then the visuals (it stepped twice before)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
 		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
-		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
-			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
+		if fl.size() > 30 and wall > SLOW_MS and wall > 2.0 * _avg(fl.slice(-31, -1), "wall"):
+			print("BENCH hitch t=%.2f %.0f ms (script %.1f, top %s %.1f, render cpu %.1f), new nodes: %s" % [
+				m.time, wall, script_ms, Match.prof_top, Match.prof_top_us / 1000.0, fl[-1]["rcpu"],
 				added])
 		added.clear()
 		last = now
 	_summary("match", fl)
+	if stress:
+		print("BENCH stress: %d Hunters, %d Boki out at the last send" % [m.hunters.size(), boki_out])
+	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
 	print("BENCH match step sections (ms per frame): " + ", ".join(per))
+	var vk := Match.vprof.keys()
+	vk.sort_custom(func(a, b): return Match.vprof[a] > Match.vprof[b])
+	print("BENCH match visual sections (ms per frame): " + ", ".join(vk.slice(0, 8).map(
+		func(k): return "%s %.2f" % [k, Match.vprof[k] / 1000.0 / fl.size()])))
 	_meshes()
 	Match.prof_on = false
+	if "--bench-ablate" in OS.get_cmdline_user_args():
+		await _ablate()
+	return fl
+
+## --bench-ablate: what each script's _process and each engine node class's internal process costs, by
+## turning it off for a few frames (process ms, against a fresh reference each time).
+func _ablate() -> void:
+	var by := {}
+	for n in main.get_tree().root.find_children("*", "", true, false):
+		var k := ""
+		if n.get_script() != null and n.is_processing():
+			k = (n.get_script() as Script).resource_path.get_file()
+		elif n is AnimationMixer or n is CPUParticles3D or n is Skeleton3D or n is GPUParticles3D:
+			k = n.get_class()
+		if k != "":
+			if not by.has(k): by[k] = []
+			by[k].append(n)
+	var cost := {}
+	for k in by:
+		var ref := await _proc_ms(20)
+		for n in by[k]: _set_on(n, false)
+		cost[k] = ref - await _proc_ms(20)
+		for n in by[k]: if is_instance_valid(n): _set_on(n, true)
+	var ks := cost.keys()
+	ks.sort_custom(func(a, b): return cost[a] > cost[b])
+	print("BENCH ablate (script or class: nodes, ms saved off): " + ", ".join(ks.slice(0, 14).map(
+		func(k): return "%s: %d, %.2f" % [k, by[k].size(), cost[k]])))
+
+func _set_on(n: Node, on: bool) -> void:
+	if n.get_script() != null:
+		n.set_process(on)
+	else:
+		n.set_process_internal(on)
+
+func _proc_ms(frames: int) -> float:
+	var s := 0.0
+	for i in frames:
+		await main.get_tree().process_frame
+		s += Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+	return s / frames
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
@@ -114,6 +220,19 @@ func _bring_fight(m: Match) -> void:
 		var a := TAU * i / MOBS.size()
 		var at: Vector3 = m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 6.0, [], 1.0, 0.5, 6.0)
 		m.spawn_mob(MOBS[i], Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+
+## --bench-stress: sends every Hunter's shouldered Boki out beside it; returns how many are out.
+func _boki_out(m: Match) -> int:
+	var n := 0
+	for k in m.kins:
+		var kn := k as Kin
+		if kn.owner_h == null or kn.dead:
+			continue
+		if kn.state == "shoulder":
+			kn.throw_to(kn.owner_h.pos + Vector3(2.5, 0.0, 1.5))
+		elif kn.state == "active":
+			n += 1
+	return n
 
 func _farm() -> void:
 	Game.goto("home")
@@ -136,12 +255,13 @@ func _frame(part: String, i: int, wall: float, script_ms: float) -> Dictionary:
 	var f := {"wall": wall, "script": script_ms, "proc": Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
 		"hud": hud_us / 1000.0,
 		"rcpu": RenderingServer.viewport_get_measured_render_time_cpu(vp) + RenderingServer.get_frame_setup_time_cpu(),
+		"gpu": RenderingServer.viewport_get_measured_render_time_gpu(vp),
 		"draws": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
 		"tris": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
 		"objs": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME),
 		"nodes": int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))}
-	rows.append("%s,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d" % [part, i, wall, script_ms, f["proc"], f["hud"],
-		f["rcpu"], f["draws"], f["tris"], f["objs"], f["nodes"]])
+	rows.append("%s,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%.3f,%d,%d,%d,%d" % [part, i, wall, script_ms, f["proc"], f["hud"],
+		f["rcpu"], f["gpu"], f["draws"], f["tris"], f["objs"], f["nodes"]])
 	return f
 
 ## Times the HUD's canvas draw (it redraws every frame) by wrapping its draw callback, as --perf-probe does.
@@ -171,17 +291,36 @@ func _summary(part: String, fl: Array) -> void:
 	var sc: Array = fl.map(func(f): return float(f["script"]))
 	sc.sort()
 	var p99 := float(w[int((w.size() - 1) * 0.99)])
+	if part == "match": match_p99 = p99
 	var sc99 := float(sc[int((sc.size() - 1) * 0.99)])
-	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps)" % [part, fl.size(), _avg(fl, "wall"),
-		p99, 1000.0 / maxf(low, 0.001)])
-	print("BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, render cpu %.2f ms" % [
-		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu")])
+	print("BENCH %s: %d frames, wall avg %.1f ms, p99 %.1f ms (1%% low %.1f fps), %d frames over %d ms" % [part,
+		fl.size(), _avg(fl, "wall"), p99, 1000.0 / maxf(low, 0.001), w.filter(func(x): return x > SLOW_MS).size(),
+		SLOW_MS])
+	var cpu_line := "BENCH %s cpu: match script avg %.2f ms p99 %.2f ms, process %.2f ms, hud %.2f ms, " + \
+		"render cpu %.2f ms, gpu %.2f ms"
+	print(cpu_line % [
+		part, _avg(fl, "script"), sc99, _avg(fl, "proc"), _avg(fl, "hud"), _avg(fl, "rcpu"), _avg(fl, "gpu")])
 	print("BENCH %s scene: draws %.0f, tris %.0fk, objects %.0f, nodes %.0f, emitters %d, lights %d, shadowed %d" % [
 		part, _avg(fl, "draws"), _avg(fl, "tris") / 1000.0, _avg(fl, "objs"), _avg(fl, "nodes"),
 		_count("GPUParticles3D") + _count("CPUParticles3D"), _count("Light3D"), _shadow_lights()])
 	print("BENCH %s memory: textures %.0f MB, buffers %.0f MB" % [part,
 		Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0,
 		Performance.get_monitor(Performance.RENDER_BUFFER_MEM_USED) / 1048576.0])
+
+## Particle systems still emitting (a GPU one simulates every frame even off screen), by owner name.
+func _emitters() -> void:
+	var by := {}
+	for cls in ["GPUParticles3D", "CPUParticles3D"]:
+		for n in main.get_tree().root.find_children("*", cls, true, false):
+			if not n.get("emitting"):
+				continue
+			var up := String(n.get_parent().name).rstrip("0123456789@")
+			var key := "%s/%s" % [up, String(n.name).rstrip("0123456789@")]
+			by[key] = int(by.get(key, 0)) + 1
+	var ks := by.keys()
+	ks.sort_custom(func(a, b): return by[a] > by[b])
+	print("BENCH emitting particles (%d): %s" % [by.values().reduce(func(a, b): return a + b, 0),
+		", ".join(ks.slice(0, 10).map(func(k): return "%s %d" % [k, by[k]]))])
 
 func _count(cls: String) -> int:
 	return main.get_tree().root.find_children("*", cls, true, false).size()
@@ -219,3 +358,13 @@ func _meshes() -> void:
 	ks.sort_custom(func(a, b): return by[a][1] > by[b][1])
 	var top := ks.slice(0, 12).map(func(k): return "%s: %d, %.1fk, %d" % [k, by[k][0], by[k][1] / 1000.0, by[k][2]])
 	print("BENCH heaviest meshes (name: instances, total tris k, shadow casters): " + ", ".join(top))
+	var em := {}
+	for n in main.get_tree().root.find_children("*", "CPUParticles3D", true, false):
+		var p := n as CPUParticles3D
+		var key := "%s/%s%s" % [String(p.get_parent().name).rstrip("0123456789@"), String(p.name).rstrip("0123456789@"),
+			"" if p.emitting and p.is_visible_in_tree() else " (idle)"]
+		em[key] = int(em.get(key, 0)) + 1
+	var ek := em.keys()
+	ek.sort_custom(func(a, b): return em[a] > em[b])
+	print("BENCH CPU particle emitters (parent/name: count): " + ", ".join(ek.slice(0, 10).map(
+		func(k): return "%s: %d" % [k, em[k]])))

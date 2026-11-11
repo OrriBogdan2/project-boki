@@ -6,13 +6,17 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
-##   7. footsteps: a Hunter walked over every surface of the Hollow Crown (and the sky train's deck on
-##      Skyreach) plays the cue for it: its own set on grass, stone, wood and snow, the weight class's
-##      steps on sand, water and metal, a little louder the heavier it is
-##   8. jump, land and wall kick exist for every weight class an archetype has, HeroSfx.weighted picks them,
-##      a heavy hunter's glider open has its own layer, and a landing gets louder the faster the fall
 ##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
+##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
+##   8. mobs and bosses: every kind that attacks has its own mob_<kind>_atk and _hit, each boss its _tell,
+##      and no sound played by mob.gd or boss.gd is a Boki cue (k_*), so a Boki rename cannot silence them
+##   9. footsteps: a Hunter walked over every surface of the Hollow Crown (and the sky train's deck on
+##      Skyreach) plays the cue for it: its own set on grass, stone, wood and snow, the weight class's
+##      steps on sand, water and metal, a little louder the heavier it is
+##  10. jump, land and wall kick exist for every weight class an archetype has, HeroSfx.weighted picks them,
+##      a heavy hunter's glider open has its own layer, and a landing gets louder the faster the fall
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -40,6 +44,7 @@ func run(main: Node) -> void:
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
+	_ult_cues()
 	await _steps(main)
 	_weighted()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -70,6 +75,8 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "mob":
+		_check_mobs(sounds)
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -108,6 +115,24 @@ func _kit_names(arch: String, extra: Array) -> void:
 				silent.append(sname)
 	ok(silent.is_empty(), "%s: every sound its kit plays exists (silent: %s)" % [arch, silent])
 
+## 8. Mob and boss attack sounds are their own (mob_*, boss_*), not borrowed Boki cues.
+func _check_mobs(sounds: Dictionary) -> void:
+	var gaps := []
+	for kind in Data.MOBS:
+		if kind.begins_with("bl_") or Data.BOSSES.has(kind) or Data.MOBS[kind]["attack"] == "none": continue
+		for part in ["atk", "hit"]:
+			if not sounds.has("mob_%s_%s" % [kind, part]): gaps.append("mob_%s_%s" % [kind, part])
+	for kind in Data.BOSSES:
+		if not sounds.has("boss_%s_tell" % kind): gaps.append("boss_%s_tell" % kind)
+	ok(gaps.is_empty(), "every attacking mob has a cue and impact, every boss a wind-up tell (missing %s)" % [gaps])
+	var re := RegEx.create_from_string("sfx\\(\"([a-z0-9_]+)\"[,)]")
+	var borrowed := []
+	for f in ["mob.gd", "boss.gd"]:
+		for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/match/" + f)):
+			var sname := hit.get_string(1)
+			if sname.begins_with("k_") or not Sfx.ensure(sname): borrowed.append(sname)
+	ok(borrowed.is_empty(), "mob.gd and boss.gd play no k_ cue and only sounds that exist (%s)" % [borrowed])
+
 ## 6. Heavy sounds that carry, and held sounds that loop.
 func _reach_and_loops(group: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -134,6 +159,27 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 		if absf(last - first) > SEAM_MAX or absf(last) < mid * 0.02:
 			rough.append("%s seam %.3f, end %.3f of %.3f" % [sname, absf(last - first), absf(last), mid])
 	ok(rough.is_empty(), "%s: %d loops repeat seamlessly %s" % [group, (d.get("loops", []) as Array).size(), rough])
+
+## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
+func _ult_cues() -> void:
+	var names := ["ult_tag_ally", "ult_tag_foe"]
+	for arch in Arch.ids():
+		if not (Arch.def(arch).get("x", {}) as Dictionary).is_empty():
+			names.append(arch + "_ult_cue")
+	var wrong := []
+	for sname in names:
+		var reach: float = Sfx.sound_reach.get(sname, 0.0)
+		var carries := reach > Sfx.hear_range and reach <= REACH_MAX and reach == float(Sfx.sound_reach["ult_tag_foe"])
+		if not (Sfx.ensure(sname) and carries):
+			wrong.append("%s %.0f m" % [sname, reach])
+	ok(names.size() == 14 and wrong.is_empty(), "%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
+	var press := FileAccess.get_file_as_string("res://scripts/arch/hero_ult.gd")
+	var cue := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var wired := press.contains("UltCue.cast(k)") and cue.contains("\"ucast\"")
+	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
+	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
+	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
@@ -182,7 +228,7 @@ func _data(path: String) -> PackedByteArray:
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
 
-## 7. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
+## 9. Footsteps on every surface: a ground tile for each, a Hunter of each weight class on it.
 const WEIGHT_ARCH := {"light": "archer", "medium": "dolm", "heavy": "ashwick"}
 const STEP_VOL := -17.0       # dB: step_db in content/rules/move_sfx.json
 
@@ -246,7 +292,7 @@ func _surface_tiles(w: World, train: SkyTrain) -> Dictionary:
 				out[surf] = p
 	return out
 
-## 8. Movement by weight: every archetype's class has its variants and gets them; louder landings from faster falls.
+## 10. Movement by weight: every archetype's class has its variants and gets them; louder landings from faster falls.
 func _weighted() -> void:
 	var picked := []
 	var missing := []
