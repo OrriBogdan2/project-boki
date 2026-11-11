@@ -266,20 +266,13 @@ func _prep(hero: String, key: String, dt: float) -> void:
 	spot_i += 1
 	if P.arch != hero:
 		P.reclass(Arch.weight(hero), hero, Arch.signature(hero))     # the hero's own model (set_arch keeps the last)
-	P.set_arch(hero)        # a fresh kit for every press: nothing a case left out (a thrown hammer) carries over
 	_rest(key)
 	m.hitstop = 0.0
 	m.slowmo = 0.0
-	var n := 0
-	var least := int(ceil(SETTLE_S / dt))
-	while n < int(ceil(SETTLE_MAX_S / dt)):
-		_aim_at_target()
-		m._process(dt)
-		await main.get_tree().process_frame
-		n += 1
-		var still := _quiet() == "" and not _posing(dt)
-		km_last = P.anim.km.duplicate()
-		if n >= least and still: break
+	await _settle(dt)       # the last case's move plays out on the kit that started it
+	P.set_arch(hero)        # then a fresh kit: nothing that move left behind (a thrown hammer) stays
+	_rest(key)
+	await _settle(dt)
 	_rest(key)
 	noisy = false
 	var nodes := main.get_tree().get_node_count()
@@ -300,6 +293,19 @@ func _prep(hero: String, key: String, dt: float) -> void:
 		if unrest == "" and posing: unrest = "posing"
 		km_last = P.anim.km.duplicate()
 	pose_rest = pose_last
+
+## Steps the match until the hunter and its pose are at rest: SETTLE_S at least, SETTLE_MAX_S at most.
+func _settle(dt: float) -> void:
+	var n := 0
+	var least := int(ceil(SETTLE_S / dt))
+	while n < int(ceil(SETTLE_MAX_S / dt)):
+		_aim_at_target()
+		m._process(dt)
+		await main.get_tree().process_frame
+		n += 1
+		var still := _quiet() == "" and not _posing(dt)
+		km_last = P.anim.km.duplicate()
+		if n >= least and still: break
 
 ## Standing on the spot, still, full charges and ammo, the foe back in front.
 func _rest(key: String) -> void:
