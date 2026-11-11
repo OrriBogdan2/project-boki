@@ -1,0 +1,20 @@
+{
+	"desc": "How a Boki answers a pat by personality (scripts/home/pet_react.gd, used by home.gd and interior.gd). Four kinds, picked from its traits: shy (low bravery), proud (high temper), playful (curious), sleepy (the rest). Each plays a short beat from the existing clips plus one mood icon, pays joy and trust, and pays at most `cap` times a farm day (the window is care.json care_day_s); past the cap it only looks at you.",
+	"shy_bravery": 0.4,
+	"proud_temper": 0.62,
+	"playful_curiosity": 0.5,
+	"again_s": 15.0,
+	"again_s_doc": "s within which a shy Boki's second pat counts as the one it leans into; later it flinches again.",
+	"love_joy": 7.0,
+	"love_joy_doc": "extra joy when the Boki's favourite play is being petted (before this a pat gave 12 to those and 5 to the rest).",
+	"hold_s": 1.0,
+	"away_m": 4.0,
+	"away_m_doc": "m a proud Boki walks off after its one pat.",
+	"kinds": {
+		"playful": {"icon": "♪", "joy": 5.0, "trust": 1.0, "cap": 3, "hold_s": 1.4, "roll_s": 0.7},
+		"shy": {"icon": "♥", "first_icon": "!", "joy": 5.0, "trust": 1.5, "cap": 2, "hold_s": 1.2, "flinch_s": 0.6},
+		"proud": {"icon": "★", "joy": 5.0, "trust": 1.0, "cap": 1, "hold_s": 0.8},
+		"sleepy": {"icon": "z", "joy": 5.0, "trust": 0.5, "cap": 2, "hold_s": 1.2, "nap_s": 8.0}
+	},
+	"_units": "joy: need points; trust: multiplies garden_trust.json pet (itself on its own cooldown); cap: paying pats per farm day; *_s: seconds."
+}
