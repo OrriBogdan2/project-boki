@@ -356,8 +356,9 @@ func _shelter_row() -> void:
 	Save.d["roster"] = []
 	ok(has.call(), "with 0 Boki after the first hatch the card has a Shelter row")
 	var row: Dictionary = GoalTracker.lines().filter(func(r): return r["source"] == "shelter")[0]
-	ok(GoalTracker.lines()[0] == row and String(row["text"]).contains(str(Shelter.price({}, true))),
-			"the Shelter row leads and names the stray fee: %s" % row["text"])
+	var unready := GoalTracker.lines().filter(func(r): return not bool(r["ready"]))
+	ok(unready[0] == row and String(row["text"]).contains(str(Shelter.price({}, true))),
+			"the Shelter row leads the rows still to work on and names the stray fee: %s" % row["text"])
 	var sig := GoalTracker.signature()
 	Save.d["tutorial"]["hatched"] = false
 	ok(not has.call(), "a new save that has not hatched yet gets no Shelter row")
