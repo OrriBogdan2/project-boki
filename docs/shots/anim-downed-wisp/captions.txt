@@ -1,0 +1,4 @@
+compat_strip_gunslinger.jpg: Vex. Top row: the knock to +0.60 s, every 0.05 s (the hit, the fall to the floor, the puff at +0.30 s, the round Wisp swelling out). Bottom row: the revive to +0.50 s (the hero grows back from the floor pose and stands up while the Wisp brightens away).
+compat_strip_bulwark.jpg: Albert, the same rows.
+compat_strip_tender.jpg: Meeko, the same rows.
+All three: --wisp-shots --wisp-heroes=gunslinger,bulwark,tender under Xvfb with the Compatibility renderer on llvmpipe (no GPU on rpc7): poses and timing are true, materials and transparency are not (dithered). The Forward+ GPU strips are jobq 20261111-220307-29623.
