@@ -1,0 +1,14 @@
+{
+ "group": "water",
+ "name": "Moving through water",
+ "script": "tools/gen_sfx_water.py",
+ "sounds": {
+  "water_land_light": "dash",
+  "water_land_medium": "dash",
+  "water_land_heavy": "dash",
+  "water_dash": "dash",
+  "water_stroke": "step",
+  "water_wade": "loop"
+ },
+ "loops": ["water_wade"]
+}

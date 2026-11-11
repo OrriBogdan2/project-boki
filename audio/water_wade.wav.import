@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://csftcvoxxfi23"
-path="res://.godot/imported/swim_1.wav-4c567779334592505f73e90779d9aa06.sample"
+uid="uid://y3t22b4co6mf"
+path="res://.godot/imported/water_wade.wav-e50adee122a6e693da7962eeb99b365b.sample"
 
 [deps]
 
-source_file="res://audio/swim_1.wav"
-dest_files=["res://.godot/imported/swim_1.wav-4c567779334592505f73e90779d9aa06.sample"]
+source_file="res://audio/water_wade.wav"
+dest_files=["res://.godot/imported/water_wade.wav-e50adee122a6e693da7962eeb99b365b.sample"]
 
 [params]
 

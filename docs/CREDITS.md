@@ -49,3 +49,6 @@ All sound effects are original synthesis in code (`tools/gen_*sfx*.py`, `tools/s
 
 ### ext/sfx-step-surfaces (sand, water, metal footsteps)
 - Synthesised, no samples (`tools/gen_sfx_steps.py`).
+
+### ext/sfx-water (landing splash, dash spray, wading loop, swim stroke)
+- Synthesised, no samples (`tools/gen_sfx_water.py`). Replaces the farm's old `swim` stroke files, which had no recorded source.
