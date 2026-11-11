@@ -200,6 +200,8 @@ const CHECKS := {
 	# the plain jump, match camera
 	"--jump-land-shots": ["res://tools/jump_land_shots.gd", "jump_land_shots", null],
 	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],      # the lobby lock-in poses (GPU)
+	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
+	"--layer-verify": ["res://tools/layer_verify.gd", "layer_verify", null],      # the layers over walk and run
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],
 	"--boki-rig-shots": ["res://tools/boki_rig_shots.gd", "boki_rig_shots", null],      # rigged Boki review sheets

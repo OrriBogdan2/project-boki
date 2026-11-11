@@ -62,3 +62,10 @@ Appeal4 (cand_5, ext/cinder-bust 7efd99345) in 0.24.5: that branch swapped onto 
 line's IDLE_AUDIT clips, so the 0.24.5 merge copied the line glb's 41 clips (spring tracks included) onto the cand_5
 body by node name (same skeleton, no rest drift) and added `x_breath` at the line's spot with the chest band
 1.00-1.32 m up, |x| under 0.17 m (kael_retarget.add_breath): 3288 vertices.
+From the scan: body, face, horns, shards. The scan welded her forearms to the hip plates: `part_arms` cuts that seam and closes both sides.
+Added: the spined tail (9 spring bones, `cinder_pieces.py`), hair cards with ember ends (a curtain as wide as her back, to her waist: the final turnaround), curved lizard horns swept back past her crown (`HORN_PTS`), orange eyes painted over the scan's dark sockets (`paint_eyes`), heel jets on `jet.*`
+(`flame-jet`, for Flue Flight). The seams are the emission map, white-yellow core to orange; `PipStars.pulse` brightens it while she casts.
+The flame on the tail is not mesh: `smoke` and `bloom` on `anchor_tail_tip` in warden_look.json. `weapon_muzzle` is her right palm, the dominant one (the kit's
+fire point); `weapon_muzzle_l` is her left palm; `anchor_tank`, `anchor_vial_*` and `anchor_gun_mid` stay as contract names only. Her fire stream keeps the rules' NOZZLE.
+
+Walk and run pilot (2026-11-10): a Meshy rig retargeted onto her walk_f/run_f (rig clips, rig clips with the current arms carried, a513 Female Head-down Charge) lost the blind Fable judge to the current loops (walk 4.00 vs 2.75, run 4.50 vs 3.75 at best), so the shipped clips stay. The current planted foot already matches loco (2.15 and 4.55 m/s). Meshy's pose estimator rejects her whole mesh (hair and cloak hide the arms); it rigged once the tail was cut (x > 0.3) from the static export.

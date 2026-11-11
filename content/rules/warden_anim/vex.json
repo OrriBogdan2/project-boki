@@ -31,5 +31,6 @@
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink", "wade", "swim"],
 	"upper": ["hips", "head", "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R", "fingers.L", "thumb.L", "brow.L", "brow.R", "lid.L", "launcher", "gatling", "coin"],
 	"carry_stow": ["gatling", "launcher"],
-	"lockin": {"clip": "emote", "from": 0.2, "dur": 1.45, "rate": 1.0}
+	"lockin": {"clip": "emote", "from": 0.2, "dur": 1.45, "rate": 1.0},
+	"recoil": {"deg": 2.0, "settle": 0.07}
 }

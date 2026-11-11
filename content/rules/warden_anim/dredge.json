@@ -186,6 +186,7 @@
 		"wade",
 		"swim"
 	],
+	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [
 		"hips",
 		"head",

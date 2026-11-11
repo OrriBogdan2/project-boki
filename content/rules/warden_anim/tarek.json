@@ -69,18 +69,21 @@
 	"kmoves": {
 		"breah_throw": {
 			"clip": "lmb_throw",
-			"air_legs": true
+			"air_legs": true,
+			"upper": "moving"
 		},
 		"breah_wind": {
 			"clip": "lmb_wind",
 			"hold_from": 0.24,
 			"air_legs": true,
-			"fade": 0.05
+			"fade": 0.05,
+			"upper": "moving"
 		},
 		"breah_punch": {
 			"clip": "lmb_punch",
 			"air_legs": true,
-			"fade": 0.05
+			"fade": 0.05,
+			"upper": "moving"
 		},
 		"breah_crouch": {
 			"fade": 0.05,
@@ -154,7 +157,7 @@
 		"downed": "downed",
 		"reviving": "revive",
 		"dead": "death",
-		"dead_t": 1.6,
+		"dead_t": 2.6,
 		"stun": "stun",
 		"emote": "emote_toss",
 		"hit": {
