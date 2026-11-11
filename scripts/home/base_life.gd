@@ -9,9 +9,11 @@ extends RefCounted
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
 ## squabbles over a toy or clashing tempers build rivalry, kept as rec["bonds"] = {uid: -1..1}. Friends greet and
-## nap in a pile; rivals stare and huff. A Boki that would thrive in another open zone sometimes goes
-## and waits at the return pad with a bubble: it looks at the pad (HubWaystone.pad) the way it comes
-## to look at a newcomer, and E on it sends it (HubWaystone.answer); ignored, it wanders off.
+## nap in a pile; rivals stare and huff. A Boki about to nap walks to a free nap spot of its zone
+## (garden_zones.json nap: a sunny rock, under a tree, by the water); a friend lies down beside its friend's spot.
+## A Boki that would thrive in another open zone sometimes goes and waits at the return pad with a bubble:
+## it looks at the pad (HubWaystone.pad) the way it comes to look at a newcomer, and E on it sends it
+## (HubWaystone.answer); ignored, it wanders off.
 ##
 ## The farm keeps its own drivers (a whistle, petting, a job, a bath, the house, the feeders' walk): while one of
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
@@ -37,6 +39,9 @@ const GREET := 2.5         # m: friends this close greet each other
 const PILE_JOIN := 1.0     # m: close enough to a napping friend to lie down with it
 const PILE_WALK := 8.0     # s a Boki walks to a pile before it naps where it is
 const GRUMPY := 30.0       # joy need below which a Boki naps alone
+const SPOT_AT := 0.5       # m: close enough to its nap spot to lie down
+const SPOT_SNAP := 3.0     # m a nap spot may move to the nearest open ground (a farm island is the save's own)
+const BESIDE := 0.8        # m: the least gap between a spot and the place beside it
 
 var h                      # the home (home.gd): kins, world, day_t, ppos, emotes
 var R: Dictionary          # content/rules/base_life.json
@@ -94,6 +99,7 @@ func machine(k: Dictionary) -> Fsm:
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void:
 			k.erase("life_pile")
+			k.erase("life_spot")
 			BaseDuo.woke(k))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
@@ -245,6 +251,15 @@ func _tick(k: Dictionary, dt: float) -> void:
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
+	if k.has("life_spot") and nap <= 0.0:
+		var at: Vector3 = k["life_spot"]["pos"]
+		k["goal"] = at
+		var there := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() < SPOT_AT
+		if there or m.since >= float(R["spot_walk"]):
+			if not there:
+				k.erase("life_spot")      # did not get there: naps where it is and leaves the spot free
+			_lie_down(k)
+		return
 	if k.has("life_pile") and nap <= 0.0:
 		var to: Dictionary = k["life_pile"]
 		k["goal"] = to["pos"]
@@ -314,7 +329,10 @@ func _nap(k: Dictionary, why: String) -> void:
 	if not m.go(S.NAP, why):
 		return
 	k.erase("eat")
-	if Care.need(k["rec"], "joy") >= GRUMPY:
+	var social := Care.need(k["rec"], "joy") >= GRUMPY
+	var claims := _spot_claims() if social else {}
+	var spot := _beside_friend(k, claims)
+	if spot.is_empty() and social:
 		var best := {}
 		var top := float(R["friend_at"]) * 0.5
 		for o in _near(k, true):
@@ -327,7 +345,62 @@ func _nap(k: Dictionary, why: String) -> void:
 			k["t"] = PILE_WALK
 			note_parent(k, best, "napped beside")
 			return
-	_lie_down(k)
+	if spot.is_empty():
+		spot = _free_spot(k, _spot_claims())
+	if spot.is_empty():
+		_lie_down(k)
+		return
+	k["life_spot"] = spot
+	k["t"] = float(R["spot_walk"])
+
+## The open zone's nap spots, [kind, tile x, tile z] (garden_zones.json nap); none at the hub.
+static func nap_spots() -> Array:
+	return [] if GardenZones.here == GardenZones.HUB else GardenZones.info(GardenZones.current()).get("nap", [])
+
+## Who holds which place: Vector2i(spot, 0 on it or 1 beside it) -> the Boki walking to or napping there.
+func _spot_claims() -> Dictionary:
+	var out := {}
+	for o in h.kins:
+		if o.has("life_spot"):
+			out[Vector2i(int(o["life_spot"]["i"]), int(o["life_spot"]["slot"]))] = o
+	return out
+
+## The place beside the spot of the friend (bond friend_at or more, a parent weighs in) it likes most, or {}.
+func _beside_friend(k: Dictionary, claims: Dictionary) -> Dictionary:
+	var best := {}
+	var top := float(R["friend_at"])
+	for at: Vector2i in claims:
+		var o: Dictionary = claims[at]
+		var liking := regard(k, o, float(R["parent_weight"]))
+		if at.y == 0 and not claims.has(Vector2i(at.x, 1)) and liking >= top and _reach(k, o["life_spot"]["pos"]):
+			top = liking
+			best = o
+	if best.is_empty():
+		return {}
+	note_parent(k, best, "napped beside")
+	var on: Vector3 = best["life_spot"]["pos"]
+	return {"i": best["life_spot"]["i"], "slot": 1, "pos": h.world.free_spot_near(on, [on], BESIDE, 0.45, SPOT_SNAP)}
+
+## The nearest free nap spot within reach on its island, or {}.
+func _free_spot(k: Dictionary, claims: Dictionary) -> Dictionary:
+	var spots := nap_spots()
+	var best := {}
+	var top := INF
+	for i in spots.size():
+		var tile := Vector3(float(spots[i][1]) + 0.5, 0.0, float(spots[i][2]) + 0.5)
+		var at: Vector3 = h.world.free_spot_near(tile, [], 1.0, 0.45, SPOT_SNAP)
+		var d := Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length()
+		if not claims.has(Vector2i(i, 0)) and _reach(k, at) and d < top:
+			top = d
+			best = {"i": i, "slot": 0, "pos": at}
+	return best
+
+## Open ground on its island within spot_reach.
+func _reach(k: Dictionary, at: Vector3) -> bool:
+	var w = h.world
+	return not w.is_void(at.x, at.z) and not w.is_block(at.x, at.z) \
+		and w.island_of(at.x, at.z) == w.island_of(k["pos"].x, k["pos"].z) \
+		and Vector2(at.x - k["pos"].x, at.z - k["pos"].z).length() <= float(R["spot_reach"])
 
 func _lie_down(k: Dictionary) -> void:
 	k["nap_t"] = randf_range(R["nap"][0], R["nap"][1])

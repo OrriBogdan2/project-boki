@@ -17,6 +17,13 @@ check: `--base-life-check`.
   (`friend_at`) greet with a heart and walk over to a napping friend to pile up; rivals (`rival_at`) stare and huff.
   Old saves get an empty map per Boki in the v11 -> v12 save migration (`Save._migrate_11_to_12`).
 - Night: every Boki naps till dawn except `Work.NOCTURNAL` species.
+- Nap spots: each zone lists a few in `garden_zones.json` `nap` ([kind, tile x, tile z]: a sunny rock, under a tree,
+  by the water). A Boki about to nap walks to the nearest free one within `spot_reach` (one Boki on it), giving up
+  after `spot_walk` s; a friend (`friend_at`, a parent weighs in) prefers the place beside its friend's spot, then a
+  napping friend nearby (the pile), then a free spot; with none it naps where it stands. A spot moves up to 3 m to
+  open ground, so Bramblebank's per-save island keeps its spots. Claims live on the runtime Boki (`life_spot`),
+  nothing is saved. Checks: `--base-life-check` (walk, beside, a third spot), `--garden-zones-check` (spots on
+  open ground in each built zone).
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1
   lands.

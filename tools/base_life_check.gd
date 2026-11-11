@@ -3,8 +3,9 @@ extends RefCounted
 ## real farm (home.gd _move_kin at 4 steps a second, BaseLife at 10 Hz) with one toy. Two hot tempers and two calm
 ## ones: at least one friend pair and one rival pair form, no state but Nap lasts over 90 s, the fourth Boki's
 ## arrival brings the others over (React), at night the three day Boki nap while the nocturnal Zapple stays up,
-## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map. Never
-## touches the real save.
+## no machine refuses a transition, bonds are symmetric, and a v11 save's Boki gain an empty bonds map. Then nap
+## spots: a tired Boki walks to a free one, its friend lies down beside it, a third takes another. Never touches
+## the real save.
 
 const SIM_SECS := 600.0      # 10 simulated minutes
 const DT := 0.25             # s per farm step (the machines tick at 10 Hz inside it)
@@ -43,6 +44,50 @@ func _gather(home, at: Vector3) -> void:
 	for k in home.kins:
 		k["pos"] = home.world.free_spot_near(at + Vector3(randf_range(-2, 2), 0, randf_range(-2, 2)), [], 0.8)
 		(k["node"] as Node3D).position = k["pos"]
+
+## Nap spots (garden_zones.json nap, set here around the gathering place: the farm island is random).
+func _spots_part(home, center: Vector3) -> void:
+	var zone: Dictionary = GardenZones.info(GardenZones.start())
+	var kept: Array = zone["nap"]
+	var cx := int(center.x)
+	var cz := int(center.z)
+	zone["nap"] = [["sunny rock", cx + 4, cz], ["under a tree", cx - 4, cz + 3]]
+	var life: BaseLife = home.life
+	home.day_t = 0.4
+	for k in home.kins:
+		k["nap_t"] = 0.0
+		life.machine(k).go(BaseLife.S.ROAM, "test")
+		k["rec"]["bonds"] = {}
+		Care.need(k["rec"], "joy")
+		k["rec"]["needs"]["joy"] = 90.0
+	_gather(home, center)
+	var keys: Array = home.kins.map(func(k): return k["rec"].keys())
+	var a: Dictionary = home.kins[0]
+	var b: Dictionary = home.kins[1]
+	var c: Dictionary = home.kins[2]
+	BaseLife.add_bond(a["rec"], b["rec"], 0.6)
+	for k in [a, b, c]:
+		life._nap(k, "tired")
+	var sa: Dictionary = a.get("life_spot", {})
+	var sb: Dictionary = b.get("life_spot", {})
+	var sc: Dictionary = c.get("life_spot", {})
+	ok(not sa.is_empty() and int(sa["slot"]) == 0, "a tired Boki heads for a free nap spot")
+	ok(not sb.is_empty() and sb["i"] == sa.get("i") and int(sb["slot"]) == 1,
+		"its friend (bond 0.6) takes the place beside it")
+	ok(not sc.is_empty() and sc["i"] != sa.get("i") and int(sc["slot"]) == 0, "a third Boki takes the other spot")
+	var t := 0.0
+	while t < float(life.R["spot_walk"]) + 1.0 and [a, b, c].any(func(k): return float(k.get("nap_t", 0.0)) <= 0.0):
+		home._move_kin(DT)
+		t += DT
+	var on := [a, b, c].filter(func(k): return k.has("life_spot") and float(k["nap_t"]) > 0.0 \
+		and BaseLife._dist(k, {"pos": k["life_spot"]["pos"]}) < BaseLife.SPOT_AT * 2.0)
+	ok(on.size() == 3, "all three walked there and lie down on their places in %.1f s (%d of 3)" % [t, on.size()])
+	var was := BaseLife.bond(a["rec"], b["rec"])
+	for i in 20:
+		home._move_kin(DT)
+	ok(BaseLife.bond(a["rec"], b["rec"]) > was, "napping side by side, the friends' bond grows")
+	ok(home.kins.map(func(k): return k["rec"].keys()) == keys, "nothing of it is saved: the records gain no key")
+	zone["nap"] = kept
 
 func run(m: Node) -> void:
 	main = m
@@ -118,6 +163,7 @@ func run(m: Node) -> void:
 	ok(pip_awake >= night_frames * 0.5,
 		"the nocturnal Zapple stays up at night (%d of %d frames)" % [pip_awake, night_frames])
 	ok(refused == 0, "no machine refused a transition (%d)" % refused)
+	_spots_part(home, center)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
