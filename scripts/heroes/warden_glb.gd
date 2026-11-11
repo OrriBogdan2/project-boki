@@ -1039,8 +1039,8 @@ class Sync extends Node:
 				skel.set_bone_pose_scale(int(bi), Vector3.ONE * 0.001)
 
 	## Every mapped bone onto its rig node's pose. Each local pose is worked out against its parent's pose as set (a
-	## pose keeps no shear, so that can differ from the rig's), kept here, not read back from the skeleton: a global pose
-	## read after a set recomputed the dirty bones and told every BoneAttachment3D, once per mapped bone.
+	## pose keeps no shear, so that can differ from the rig's), kept here, not read back from the skeleton: a global
+	## pose read after a set recomputed the dirty bones and told every BoneAttachment3D, once per mapped bone.
 	func apply() -> void:
 		var real := {}
 		for l in links:

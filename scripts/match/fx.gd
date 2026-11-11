@@ -14,7 +14,7 @@ var bi := 0
 var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
 var rings: Array = []         # {node, t, dur, r}
-var ring_pool: Array[MeshInstance3D] = []      # finished rings, hidden: the next ring() reuses one (a fight makes dozens)
+var ring_pool: Array[MeshInstance3D] = []      # finished rings, hidden: ring() reuses one (a fight makes dozens)
 var teles: Array = []
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
