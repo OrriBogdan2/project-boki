@@ -124,8 +124,10 @@ func _contract(a: String) -> void:
 	var unskinned := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
-		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
-		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
+		# cut out of the body, Meeko's sun and cloud)
+		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) \
+				or String(mi.name).begins_with(WardenCompanions.PREFIX)
 		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
@@ -152,7 +154,7 @@ func _kmoves(a: String) -> void:
 	var count := 0
 	var dead: Array = []
 	for t in [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES, KMovesDJ.MOVES]:
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]:
 		for mv in t:
 			count += 1
 			var moved := {}
