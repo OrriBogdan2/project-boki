@@ -2,8 +2,8 @@ extends RefCounted
 ## --mask-lag-check: frame times while Mask cards are on screen and while one is accepted (item 88). Each
 ## scenario opens a screen on the farm, times every frame for a few seconds and reports the slowest, the median
 ## and how many went over the budget:
-##   masks_first   the session's first Masks screen: reported, not judged (the first menu of a session pays
-##                 one-time costs: fonts, themes)
+##   masks_first   the session's first Masks screen, once MenuWarm drew the first menu's one-time costs (fonts,
+##                 themes, the first 3D draws) as the farm's covered build does
 ##   masks_open    the Masks screen (12 tiles, the viewer's turntable and its ability clips)
 ##   masks_switch  clicking another Mask on that screen
 ##   reveal        a new Mask's reveal (its splash and clips)
@@ -48,10 +48,13 @@ func run(m: Node) -> void:
 	_new_save()
 	home = await main._hb_home()
 	var tree: SceneTree = main.get_tree()
+	await MenuWarm.draw(home.root_ui)      # what the farm's covered build does (no cover here)
+	await tree.process_frame
+	ok(home.root_ui.find_children("*", "HunterViewer", true, false).is_empty(), "MenuWarm's stand-in is gone")
 	for i in SETTLE_FRAMES:
 		await tree.process_frame
 	home._close_panel()
-	await _time("masks_first", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS, false)
+	await _time("masks_first", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS)
 	home._close_panel()
 	await _time("masks_open", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS)
 	await _time("masks_switch", func(): HomeClasses._show(home, "juggernaut"), MASKS_VIEWS)
@@ -93,7 +96,7 @@ func _offer_scenarios(tree: SceneTree) -> void:
 
 ## Runs `act` at the start of a frame and times the frames that follow. A frame that built a Mask's model on the
 ## main thread (headless only; PreviewBuild: at most one a frame) is reported apart: tens of ms, once per model.
-func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> void:
+func _time(scenario: String, act: Callable, max_views := -1) -> void:
 	var tree: SceneTree = main.get_tree()
 	await tree.process_frame
 	var plain: Array = []
@@ -123,7 +126,7 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 	print("MASKLAG %-13s frames=%3d  max=%7.1f ms  median=%6.1f ms  model builds=%d (max %.1f ms)  views=%d" % [
 			scenario, plain.size() + builds.size(), worst, float(plain[plain.size() / 2]), builds.size(), build_max,
 			views])
-	if judging and judged:
+	if judging:
 		var what := "%s: no frame over %d ms outside a model build (%.1f)" % [scenario, int(BUDGET_MS), worst]
 		ok(worst <= BUDGET_MS, what)
 	if max_views >= 0:
