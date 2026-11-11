@@ -61,6 +61,12 @@ func _tick(dt: float) -> void:
 	fx.tick_shots()
 	_tick_bow()
 
+## Swapped out (a practice class change): the walk ends with the kit, or nothing would count spirit_t down
+## and the body would keep passing through rocks and barriers.
+func teardown() -> void:
+	spirit.end("swap")
+	super()
+
 ## The bow's own looks: the glowing thread string, and thread gathering at the nock while she draws.
 func _tick_bow() -> void:
 	if not tells_visible():
