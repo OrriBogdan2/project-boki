@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes (owner pick 11-10), ~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb, onto sable.glb's skeleton, clips and anchors. Her pistols are fused to her hands in the master: rigid on hand.R/hand.L. The long moth/bunny ears, braid, coat tails and tail feathers are rigid on the head/hips (the old spring chains stay in the rig, unweighted). Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres) read on tools/art1/v95_grid.py's renders.",
- "master": "~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Sable's v95 master, her body5 pick cand_3 (~/meshy/v95/Sable/r2/body5/cand_3.glb: appeal4 cand_6 with the 11-11 body pass, positions+normals only, same UVs and vertex order; solid grey/black moth eyes, no iris, no sclera), onto sable.glb's skeleton, clips and anchors. Her pistols are fused to her hands in the master: rigid on hand.R/hand.L. The long moth/bunny ears, braid, coat tails and tail feathers are rigid on the head/hips (the old spring chains stay in the rig, unweighted). Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres) read on tools/art1/v95_grid.py's renders.",
+ "master": "~/meshy/v95/Sable/r2/body5/cand_3.glb",
  "game": "art/wardens/sable/sable.glb",
  "tris": 13000,
  "head": {
