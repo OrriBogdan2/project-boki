@@ -102,7 +102,8 @@ func _wedges(m: Match, V: HeroVfx, P: Hunter) -> void:
 	for mv in ["anchor_wind", "anchor_slam", "broadside_wave"]:
 		var lay: Dictionary = (moves[mv]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
 		var deg := float(x["fan_deg"]) if mv == "broadside_wave" else float(ed["angle"])
-		ok(lay["size"] == "r" and float(lay["arc"]) == deg, "dredge %s: the wedge is the hit cone (r, %d deg)" % [mv, deg])
+		ok(lay["size"] == "r" and float(lay["arc"]) == deg,
+				"dredge %s: the wedge is the hit cone (r, %d deg)" % [mv, deg])
 	var wave: Dictionary = (moves["broadside_wave"]["fx"] as Array).filter(func(l): return l["p"] == "wedge")[0]
 	var fly := (float(x["range"]) - DredgeBlast.MUZZLE) / float(x["speed"])
 	ok(absf(float(wave["lead"]) - fly) < 0.02, "the Broadside's front reaches the rim with the slugs (%.2f s)" % fly)
