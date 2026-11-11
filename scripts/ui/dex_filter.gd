@@ -42,8 +42,8 @@ static func matches(spk: String) -> bool:
 	if zone != "" and not mine.any(func(t): return (zones().get(zone, {}).get("types", []) as Array).has(t)):
 		return false
 	match status:
-		"seen": return DexView.seen(spk) or DexView.caught(spk)
-		"caught": return DexView.caught(spk)
+		"seen": return FieldBook.form_seen(spk) or FieldBook.form_caught(spk)
+		"caught": return FieldBook.form_caught(spk)
 		"owned": return owned(spk)
 	return true
 

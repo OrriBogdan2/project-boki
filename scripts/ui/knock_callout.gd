@@ -42,7 +42,7 @@ static func say(m: Match, kind: String, victim: Hunter, confirm := false) -> voi
 		callout = KnockCallout.new()
 		host.add_child(callout)
 	callout.push("KNOCKED" if kind == "knock" else "ELIMINATED", victim.pname.left(NAME_MAX),
-		KNOCK_COL if kind == "knock" else HudStyle.FOE)
+		KNOCK_COL if kind == "knock" else SideColor.foe())
 
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

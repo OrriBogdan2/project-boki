@@ -75,8 +75,8 @@ static func type_counts() -> Dictionary:
 	var out := {}
 	for spk in Data.KIN:
 		var c: Vector2i = out.get(type_of(spk), Vector2i.ZERO)
-		c.x += int(seen(spk) or caught(spk))
-		c.y += int(caught(spk))
+		c.x += int(FieldBook.form_seen(spk))
+		c.y += int(FieldBook.form_caught(spk))
 		out[type_of(spk)] = c
 	return out
 

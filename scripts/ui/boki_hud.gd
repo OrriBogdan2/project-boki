@@ -166,7 +166,7 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
 	if k == null or not is_instance_valid(k):
 		if stolen(H.m, p):
-			_chip(H, r, "STOLEN", HudStyle.HURT)
+			chip(H, r, "STOLEN", HudStyle.HURT)
 		return
 	if k.summon == null or not (k.wisp or k.summon.out()):
 		return
@@ -189,7 +189,7 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * pulse), 2.0 + 2.0 * pulse)
 		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
 	if tag != "" and not KinMerge.active(p):
-		_chip(H, r, tag, HudStyle.MUTED if tag == "RESTING" else col)
+		chip(H, r, tag, HudStyle.MUTED if tag == "RESTING" else col)
 
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
