@@ -336,6 +336,7 @@ func _check_gear_reveal(P: Hunter) -> void:
 	ok(spots.call("gslot:") == 0, "a new hunter: no gear slots drawn")
 	var armor: String = Gear.ids_for(2)[0]
 	P.gear[2] = {"id": armor, "rar": 0}
+	Save.d["hud_reveal"]["gear"] = true      # (set straight in, no pick-up: the staged HUD's gear group, HudReveal)
 	await hud.panels.draw
 	await main.get_tree().process_frame
 	ok(GearPanel.shown(P) == [2] and spots.call("gslot:") == 1, "one armor piece: only the armor slot is drawn")

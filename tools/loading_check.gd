@@ -1,5 +1,5 @@
 extends RefCounted
-## --loading-check: the loading screen (scripts/ui/loading.gd). All 12 Hunters resolve a splash, a tip
+## --loading-check: the loading screen (scripts/ui/loading.gd). All 13 Hunters resolve a splash, a tip
 ## and a map name; then a real expedition load runs with the screen up and the bar is sampled every
 ## frame: it only moves forward, in steps small enough to read as smooth, passes the build and the
 ## graphics warm-up stages in order, and is full when the screen leaves.
@@ -32,7 +32,7 @@ func run(main: Node) -> void:
 ## Every Hunter: a splash that loads, a tip from the tip set (also with the Blight off), the map's name.
 func _hunters() -> void:
 	var ids := Arch.ids()
-	ok(ids.size() == 12, "12 Hunters (%d)" % ids.size())
+	ok(ids.size() >= 13, "all 13 Hunters, Gil too (%d)" % ids.size())
 	for ak in ids:
 		var ld: Node = load(LOADING).new()
 		ld.setup({"teams": 10, "squad": 3, "tier": 0, "arch": ak})
@@ -83,7 +83,9 @@ func _real_load(main: Node) -> void:
 	for i in range(1, shown.size()):
 		if shown[i][0] < shown[i - 1][0]: back += 1
 		if shown[i][1] < shown[i - 1][1]: want_back += 1
-		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S: jumps += 1
+		# (the last step to a full bar is LoadingScreen.finish: the match is ready, nothing to wait out, playtest 11-09)
+		var done: bool = shown[i][0] >= 1.0
+		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S and not done: jumps += 1
 	ok(back == 0, "the bar never goes backwards (%d frames did)" % back)
 	ok(want_back == 0, "the stage target never goes backwards (%d frames did)" % want_back)
 	ok(jumps == 0, "the bar never jumps more than %d%% in a normal frame (%d did)" % [int(MAX_STEP * 100.0), jumps])
