@@ -12,6 +12,8 @@ const CHECKS := {
 	# first: it wraps the other flags on the line (a second launch of a bench or check)
 	"--warm-twice": ["res://tools/warm_twice.gd", "warm_twice", null],      # a second launch, for benches
 	"--boki-keys-check": ["res://tools/boki_keys_check.gd", "boki_keys_check", null],      # quick Boki command keys
+	"--carry-two-check": ["res://tools/carry_two_check.gd", "carry_two_check", null],      # 2 Boki in, 1 carry-out
+	"--carry-two-clip": ["res://tools/carry_two_check.gd", "carry_two_check", "clip"],      # --shots-dir=<dir>
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
 	"--kael-sword-check": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "check"],      # item 131b
