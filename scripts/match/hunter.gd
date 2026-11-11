@@ -1058,6 +1058,7 @@ func kin_element() -> String:
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
 var roll_speed := DASH_SPEED
+var turn_cost := TurnCost.new()     # what a sharp turn costs a chained dash (owner 11-11)
 var dash_rest := Vector2.ZERO  # metres: the dash's own last moment, riding on the step that hands it over
 var wedged_t := 0.0
 
@@ -1099,6 +1100,7 @@ func dash_with(e: Dictionary) -> void:
 	if e.has("dir") and (e["dir"] as Vector2).length() > 0.01:
 		d = e["dir"]
 	roll_dir = d.normalized()
+	turn_cost.start(Vector2(vel.x, vel.z), roll_dir, base_speed, m.time)     # turning against your speed costs it
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
@@ -2064,15 +2066,17 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = Loco.dash_hv(roll_dir * roll_speed, arch)     # its speed per hunter (tuning.json)
+		hv = turn_cost.step(Loco.dash_hv(roll_dir * roll_speed, arch), dt, m.time)     # its speed per hunter (tuning.json)
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():
 			_pass_along()
-		if roll_t <= 0.0 and grounded:
+		if roll_t <= 0.0:
 			var run_v := HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
-			dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
-			hv = run_v
+			var air_v := turn_cost.hand_over(hv, run_v)      # a sharp turn hands over less (TurnCost)
+			if grounded:
+				dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
+			hv = run_v if grounded else air_v
 	elif fly_t > 0.0:
 		fly_t -= dt
 	elif knock_t > 0.0:
