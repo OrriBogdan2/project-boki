@@ -14,6 +14,7 @@
  ],
  "price": 35,
  "desc": "Move 35% faster for 6s.",
+ "hint": "a short burst of speed",
  "effects": [
   {
    "type": "haste",

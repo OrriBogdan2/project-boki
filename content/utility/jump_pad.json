@@ -14,6 +14,7 @@
  ],
  "price": 35,
  "desc": "Set down a pad. After 2s it launches anyone who steps on it, high. It lasts 30s, or 10s after its first use.",
+ "hint": "a pad that launches you high",
  "arm": 2.0,
  "life": 30.0,
  "after": 10.0,

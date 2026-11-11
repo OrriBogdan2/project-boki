@@ -14,6 +14,7 @@
  ],
  "price": 50,
  "desc": "Smashes into a patch of Blight at the spot you aim at: rivals in it burn and slow for 25s.",
+ "hint": "burns rivals in a patch you aim at",
  "effects": [
   {
    "type": "zone",

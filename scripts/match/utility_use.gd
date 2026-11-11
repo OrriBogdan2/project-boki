@@ -2,9 +2,10 @@ class_name UtilityUse
 extends RefCounted
 ## What each belt item does when you press its key (UtilityBelt holds the charges). Item data is in
 ## content/utility/*.json; "use" picks the behaviour:
-##   drink   a tonic: a short, open channel ("time"), then "heal" of your health (default 40%); Deep Draught,
-##           Lostway Scroll (warp) and Omen Draught (omen) are drinks too (UtilityMore.drank)
-##   repair  an armor kit: the same channel, then armor to full (Hunter.KIT_TIME)
+##   drink   a tonic: a short, open channel (its "channel" time, heal in hp), or a shop drink with its own
+##           "time" and "heal" (share of max health); Deep Draught, Lostway Scroll (warp) and Omen Draught
+##           (omen) are drinks too (UtilityMore.drank)
+##   repair  an armor kit: the same channel, then armor to full
 ##   mend    heal 40 and 20 armor at once
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
@@ -19,13 +20,22 @@ const MEND_HP := 40.0
 const MEND_ARMOR := 20.0
 
 ## One number of an item's "channel" data (time s, move = speed multiplier while channelling, heal hp).
-static func channel(id: String, key: String) -> float:
-	return float((UtilityBelt.def(id).get("channel", {}) as Dictionary).get(key, 1.0))
+static func channel(id: String, key: String, fallback := 1.0) -> float:
+	return float((UtilityBelt.def(id).get("channel", {}) as Dictionary).get(key, fallback))
+
+## Seconds a drink takes: its "channel" time, else its own "time" (the shop drinks).
+static func drink_time(id: String) -> float:
+	return channel(id, "time", float(UtilityBelt.def(id).get("time", 1.0)))
+
+## Health a drink restores: the channel's hp, or a shop drink's "heal" share of max health (0: none).
+static func drink_heal(h: Hunter, id: String) -> float:
+	var d: Dictionary = UtilityBelt.def(id)
+	return channel(id, "heal", 0.0) if d.has("channel") else float(d.get("heal", 0.0)) * h.max_hp
 
 ## The speed multiplier for a hunter who is drinking or repairing (1.0 otherwise).
 static func channel_move(h: Hunter) -> float:
 	if h.drink_t > 0.0:
-		return channel("tonic", "move")
+		return channel(h.drink_id, "move", 0.45)
 	return channel("armor_kit", "move") if h.kit_t > 0.0 else 1.0
 
 static func use_of(id: String) -> String:
@@ -34,7 +44,7 @@ static func use_of(id: String) -> String:
 ## Is there anything for this item to do right now? (A tonic at full health buzzes instead.)
 static func can_use(h: Hunter, id: String) -> bool:
 	match use_of(id):
-		"drink": return float(UtilityBelt.def(id).get("heal", DRINK_HEAL)) <= 0.0 or h.hp < h.max_hp - 0.5
+		"drink": return drink_heal(h, id) <= 0.0 or h.hp < h.max_hp - 0.5
 		"repair": return h.armor < h.max_armor - 0.5
 		"mend": return h.hp < h.max_hp - 0.5 or h.armor < h.max_armor - 0.5
 		"ember", "field": return UtilityMore.can_use(h, id)
@@ -51,7 +61,7 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 		"drink":
 			h._fold_for_action()
 			h.drink_id = id
-			h.drink_len = float(d.get("time", Hunter.DRINK_TIME))
+			h.drink_len = drink_time(id)
 			h.drink_t = h.drink_len
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
@@ -107,9 +117,9 @@ static func tick(h: Hunter, dt: float) -> void:
 				h.drink_t = 0.0
 				var dd := UtilityBelt.def(h.drink_id)
 				if UtilityBelt.take(h, h.drink_id, 1) > 0:
-					var frac := float(dd.get("heal", DRINK_HEAL))
-					if frac > 0.0:
-						h.heal(h.max_hp * frac * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
+					var hp := drink_heal(h, h.drink_id)
+					if hp > 0.0:
+						h.heal(hp * (1.0 + 0.4 * float(h.perk_n("remedy")) + h.gear_stat("tonic")))
 					UtilityMore.drank(h, dd)
 					h.m.sfx("heal", h.pos, -2.0)
 					h.m.fx.burst(h.pos + Vector3(0, 1.2, 0), Color(dd.get("col", Color("8ff0a0"))), 14, 2.5, 0.5, -3.0)

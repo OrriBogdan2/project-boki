@@ -30,6 +30,7 @@
   "key": "you pick up a chest key",
   "uplink": "you walk near an outpost that can start",
   "defend": "an uplink of yours is charging",
+  "belt": "a kind of utility lands in your belt (once per kind, never in a fight: 3 s out of combat first); the line comes from the item's hint in content/utility",
   "goexit": "a few minutes into a match with no outpost close",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
@@ -45,5 +46,6 @@
  "void_s": 0.35,
  "sight_m": 40.0,
  "fight_quiet_s": 2.0,
+ "belt_calm_s": 3.0,
  "poll_s": 0.25
 }

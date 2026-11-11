@@ -1791,7 +1791,7 @@ func heal(n: float) -> void:
 ## The belt and what each item does: UtilityBelt, UtilityUse.
 var drink_t := 0.0
 var drink_id := "tonic"        # which belt drink is being drunk, and how long it takes (UtilityUse)
-var drink_len := DRINK_TIME
+var drink_len := 1.0            # s the drink in hand takes
 var kit_t := 0.0
 var vuln_fx_t := 0.0            # paces the pulsing "vulnerable" tell while drinking or repairing
 var finish_t := 0.0             # holding interact over a downed enemy (until the stomp commits)

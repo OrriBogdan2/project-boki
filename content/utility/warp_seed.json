@@ -14,6 +14,7 @@
  ],
  "price": 60,
  "desc": "Plants a warp. Stand in it for 1.5s and you are thrown to a random spot on the map. Lasts 30s.",
+ "hint": "a warp to a random spot",
  "field": "seed",
  "range": 2.0,
  "time": 30.0,

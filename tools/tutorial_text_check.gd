@@ -42,10 +42,24 @@ func _steps(file: String, rows: Array, id_of: Callable, texts_of: Callable) -> v
 		for pair in texts_of.call(row):
 			_lint("%s %s %s" % [file, id, pair[0]], String(pair[1]), seen)
 
+## The first-time line of every belt item (FirstTimeHint.belt_text): "<Item>: <few words>. Press <key>".
+## The words come from the item's "hint" in content/utility, the key from the player's bindings.
+func _belt_lines() -> void:
+	var issued: Dictionary = Equal.rules()["issue"]
+	for id in UtilityBelt.stock_ids():
+		var hint := String(UtilityBelt.def(id).get("hint", ""))
+		var where := "utility %s hint" % id
+		ok(hint != "", "%s: missing (a new player would not know what it does)" % where)
+		_lint(where, "%s: %s" % [UtilityBelt.name_of(id), hint], {})
+		var line := "%s: %s. Press %s" % [UtilityBelt.name_of(id), hint, Settings.key_cap("util1")]
+		ok(line.split(" ", false).size() <= MAX_WORDS, "%s: over %d words: %s" % [where, MAX_WORDS, line])
+		if not issued.has(id):
+			ok(FirstTimeHint.belt_text(id, 0) == line, "%s: not name, hint, key: %s" % [where, line])
+
 func run(m: Node) -> void:
 	main = m
 	var tut: Dictionary = Content.rules("tutorial")
-	var detail: Dictionary = tut["detail"]
+	var detail: Dictionary = tut.get("detail", {})
 	_steps("tutorial", tut["steps"], func(r): return String(r[0]), func(r):
 		var out := [["title", r[1]]]
 		if detail.has(r[0]): out.append(["detail", detail[r[0]]])
@@ -57,5 +71,6 @@ func run(m: Node) -> void:
 		for h in r["hints"]:
 			out.append(["hint " + h, r["hints"][h]])
 		return out)
+	_belt_lines()
 	print("TUTTEXT %s (%d problems)" % ["ok" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(1 if bad > 0 else 0)

@@ -97,6 +97,11 @@ func _log() -> void:
 		var line := FirstTimeHint.text(String(id))
 		if lines.any(func(l): return l.contains(line)):
 			on.append(id)
+	for i in UtilityBelt.SLOTS:
+		var item := String((p.belt[i] as Dictionary).get("id", ""))
+		var belt_line := FirstTimeHint.belt_text(item, i)
+		if belt_line != "" and lines.any(func(l): return l.contains(belt_line)):
+			on.append(FirstTimeHint.belt_id(item))
 	if on.size() > max_on_screen:
 		max_on_screen = maxi(max_on_screen, on.size())
 	for id in on:
@@ -135,6 +140,7 @@ func _expedition(first: bool) -> void:
 	_check("crouch", "match time 41 s on open ground", _moment(func(): _pin = 41.0), "crouch")
 	_check("orders", "Boki sent 14 m out", _moment(_send_boki), "orders")
 	_check("utility", "foe close: nothing for 2 s, then the line", _fight(), "utility")
+	_belt()
 	_outposts()
 	_check("goexit", "151 s, no outpost close", _moment(_far_from_outposts_late, 0.0), "goexit")
 	_check("after", "everything seen: quiet", _moment(func(): pass, 5.0), "")
@@ -145,6 +151,53 @@ func _expedition(first: bool) -> void:
 	ok(early.is_empty(), "no hint in the first 2 s of a fight (%s)" % str(early.map(func(h): return h["id"])))
 	ok(max_on_screen <= 1, "never more than one hint on screen (max %d)" % max_on_screen)
 	ok(_unique(ids), "each hint showed once (%s)" % ",".join(ids))
+
+## A utility kind landing in the belt: told once, with its slot's key, 3 s out of a fight; keys are not.
+func _belt() -> void:
+	_pin = -1.0      # the clock runs: "3 s out of combat" counts a hit taken in match time
+	for mb in m.mobs:      # the utility moment's foe may still be about
+		mb.queue_free()
+	m.mobs.clear()
+	_settle()
+	var n0 := shown.size()
+	UtilityBelt.grant(p, "blight_flask")
+	var foe := m.spawn_mob("skitter", p.pos)
+	foe.hp = 1e6      # it stays for the whole window
+	foe.max_hp = 1e6
+	foe.teleport(p.pos + Vector3(7, 0, 0))
+	_anchor = p.pos
+	for i in 6:
+		foe.teleport(p.pos + Vector3(7, 0, 0))      # it stays close (a skitter may wander off)
+		_secs(1.0)
+	_check("belt-fight", "a flask lands in a fight: nothing", _since(n0), "")
+	m.mobs.erase(foe)
+	foe.queue_free()
+	_secs(2.0)
+	_anchor = Vector3.INF
+	_check("belt-calm", "the foe falls, 2 s calm: nothing yet", _since(n0), "")
+	_secs(3.0)      # 3 s of calm plus the poll and the last hit's slack
+	_check("belt-flask", "3 s out of combat: its line", _since(n0), "belt_blight_flask")
+	var line := FirstTimeHint.belt_text("blight_flask", UtilityBelt.slot_of(p, "blight_flask"))
+	var cap := Settings.key_cap("util3")
+	ok(line.begins_with("Blight Flask: ") and line.ends_with("Press " + cap), "the line: '%s'" % line)
+	_settle()
+	UtilityBelt.take(p, "armor_kit", 9)      # frees a slot: the belt holds four
+	UtilityBelt.grant(p, "chest_key")
+	UtilityBelt.grant(p, "smoke")
+	_secs(MOMENT_S + 3.0)
+	_check("belt-next", "a key and a smoke bomb land: the bomb", _since(n0 + 1), "belt_smoke")
+	UtilityBelt.take(p, "blight_flask", 9)
+	UtilityBelt.grant(p, "blight_flask")
+	_settle()
+	_secs(MOMENT_S + 3.0)
+	_check("belt-again", "a kind you were told of: never again", _since(n0 + 2), "")
+	for id in ["blight_flask", "smoke"]:
+		UtilityBelt.take(p, id, 9)
+	_pin = QUIET_TIME
+
+## The hint ids shown since the n-th one.
+func _since(n: int) -> Array:
+	return shown.slice(n).map(func(s): return s["id"])
 
 func _unique(a: Array) -> bool:
 	var seen := {}
@@ -241,6 +294,8 @@ func _second_expedition() -> void:
 	Save.d = JSON.parse_string(JSON.stringify(Save.d))
 	var kept := FirstTimeHint.ids("match").all(func(id): return FirstTimeHint.seen(String(id)))
 	ok(kept, "the seen hints survive the save round-trip")
+	var told := FirstTimeHint.seen("belt_blight_flask") and FirstTimeHint.seen("belt_smoke")
+	ok(told, "the belt lines survive the save round-trip")
 	_start()
 	_pin = 41.0
 	m.spawn_mob("skitter", p.pos + Vector3(5, 0, 0))

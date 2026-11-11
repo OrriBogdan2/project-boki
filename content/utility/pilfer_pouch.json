@@ -14,6 +14,7 @@
  ],
  "price": 60,
  "desc": "Raccoons raid the spot you aim at and carry off half the gems of every rival standing there.",
+ "hint": "raccoons steal gems where you aim",
  "range": 8.0,
  "r": 4.0,
  "take": 0.5

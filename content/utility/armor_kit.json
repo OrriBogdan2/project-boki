@@ -14,6 +14,7 @@
  ],
  "price": 40,
  "desc": "Repairs your armor to full. You are open while you repair.",
+ "hint": "repairs your armor",
  "channel": {
   "time": 1.6,
   "move": 0.45,

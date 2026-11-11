@@ -14,6 +14,7 @@
  ],
  "price": 45,
  "desc": "Toss a health pack that lies for 30s. Whoever grabs it heals for 60% of their health over 5s.",
+ "hint": "a health pack to share",
  "field": "pack",
  "range": 6.0,
  "time": 30.0,

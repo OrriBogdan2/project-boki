@@ -14,6 +14,7 @@
  ],
  "price": 40,
  "desc": "Drink for 1s: for 30s your squad sees every Blight Warden and where the Blight is gathering.",
+ "hint": "shows where the Blight gathers",
  "time": 1.0,
  "heal": 0.0,
  "omen": 30.0

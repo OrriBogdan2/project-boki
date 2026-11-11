@@ -14,6 +14,7 @@
  ],
  "price": 45,
  "desc": "Over open air only: a cloud platform you can stand on, there for 30s.",
+ "hint": "a cloud to stand on over open air",
  "effects": [
   {
    "type": "bridge",

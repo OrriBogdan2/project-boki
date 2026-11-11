@@ -12,6 +12,7 @@ var m: Match
 var _poll_t := 0.0
 var _void_t := 0.0
 var _fight_t := -1.0      # s since a foe came close (-1: none close)
+var _calm_t := 99.0       # s since a fight last touched the player (a foe or rival close, or a hit taken)
 var _last := ""           # the line of the hint shown last, while it may still be on screen
 
 func _init(match_node: Match) -> void:
@@ -32,6 +33,7 @@ func tick(dt: float) -> void:
 	if _poll_t > 0.0:
 		return
 	_poll_t = float(r["poll_s"])
+	_calm_t = 0.0 if _fighting(p, float(r["near_m"]) * 1.5, float(r["poll_s"])) else _calm_t + float(r["poll_s"])
 	if _hint_up() or (_fight_t >= 0.0 and _fight_t < float(r["fight_quiet_s"])):
 		return      # one line on screen at a time, and none in the first seconds of a fight
 	for id in FirstTimeHint.ids("match"):
@@ -40,6 +42,24 @@ func tick(dt: float) -> void:
 		if _due(String(id), p, r):
 			FirstTimeHint.show(id, _say)
 			return      # one at a time
+	if _calm_t >= float(r["belt_calm_s"]) and m.tut == null:
+		_belt_hint(p)
+
+## The first time a kind of utility sits in the player's belt: its line with its slot's key, once per save.
+func _belt_hint(p: Hunter) -> void:
+	for i in UtilityBelt.SLOTS:
+		var id := String((p.belt[i] as Dictionary).get("id", ""))
+		var line := FirstTimeHint.belt_text(id, i)
+		if line != "" and not FirstTimeHint.seen(FirstTimeHint.belt_id(id)):
+			FirstTimeHint.mark(FirstTimeHint.belt_id(id))
+			_say(line)
+			return
+
+## In a fight: a foe or a rival hunter close, or a hit taken within the last `since` seconds.
+func _fighting(p: Hunter, dist: float, since: float) -> bool:
+	if _fight_on(p, dist) or m.time - p.hurt_at < since:
+		return true
+	return m.hunters.any(func(h): return h.team != p.team and not h.out and p.flat_dist(h) < dist)
 
 func _say(line: String) -> void:
 	_last = line

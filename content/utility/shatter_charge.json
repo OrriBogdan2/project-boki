@@ -14,6 +14,7 @@
  ],
  "price": 45,
  "desc": "Thrown. A beat after it lands it strips most of the armor of rivals close by and slows them for 2s.",
+ "hint": "thrown to strip rivals' armor",
  "effects": [
   {
    "type": "area",

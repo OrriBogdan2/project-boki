@@ -14,6 +14,7 @@
  ],
  "price": 60,
  "desc": "Calls a blast down on the spot you aim at. It lands after 5s: leave.",
+ "hint": "calls a blast where you aim",
  "effects": [
   {
    "type": "telegraph",

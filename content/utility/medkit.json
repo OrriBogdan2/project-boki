@@ -13,5 +13,6 @@
   3
  ],
  "price": 45,
- "desc": "Heals 40 health and mends 20 armor at once."
+ "desc": "Heals 40 health and mends 20 armor at once.",
+ "hint": "heals health and armor at once"
 }

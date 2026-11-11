@@ -14,6 +14,7 @@
  ],
  "price": 60,
  "desc": "Opens a gate where you aim and one at your feet. After 8s everything standing in each gate swaps places.",
+ "hint": "two gates that swap places",
  "field": "gate",
  "range": 9.0,
  "time": 8.0,

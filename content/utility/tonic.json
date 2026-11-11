@@ -14,6 +14,7 @@
  ],
  "price": 30,
  "desc": "Drink for a second to heal. You are open while you drink.",
+ "hint": "heals you over a second",
  "channel": {
   "time": 1.0,
   "move": 1.0,

@@ -14,6 +14,7 @@
  ],
  "price": 40,
  "desc": "A long, slow drink that restores all your health. You are open and slowed for 5s, and a hit spills it.",
+ "hint": "a slow drink for full health",
  "time": 5.0,
  "heal": 1.0
 }

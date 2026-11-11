@@ -41,6 +41,19 @@ static func text(id: String) -> String:
 		raw = raw.replace("{%s}" % action, Settings.key_cap(action))
 	return raw
 
+## The id a belt item's first-time line is remembered under (one per kind, in the same Save.d.tutorial.hints).
+static func belt_id(item: String) -> String:
+	return "belt_" + item
+
+## "<Item>: <what it does>. Press <its belt key>" for an item in belt slot `slot`; the words are the item's
+## "hint" in content/utility. "" for a key, an item with no hint, and the everyday issue (tonic, armor kit:
+## the tutorial teaches those).
+static func belt_text(item: String, slot: int) -> String:
+	var hint := String(UtilityBelt.def(item).get("hint", ""))
+	if hint == "" or slot < 0 or Equal.rules()["issue"].has(item):
+		return ""
+	return "%s: %s. Press %s" % [UtilityBelt.name_of(item), hint, Settings.key_cap(UtilityBelt.KEYS[slot])]
+
 ## Shows the hint through toast(text) if this save has not had it; then never again. True if shown.
 static func show(id: String, toast: Callable) -> bool:
 	if seen(id):

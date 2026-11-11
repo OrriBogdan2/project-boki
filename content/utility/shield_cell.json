@@ -14,6 +14,7 @@
  ],
  "price": 45,
  "desc": "A 40-point shield around you for 8s.",
+ "hint": "a short shield around you",
  "effects": [
   {
    "type": "shield",
