@@ -51,12 +51,14 @@ const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too f
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 # The opening drop (ext/drop-parity): the squad's rocket launch (DropLaunch, item 163), then the glider as
 # SUPERVIVE's high glide: GLIDE_SPEED, HunterMove.glide_accel and the pull toward its height target (DropFeel).
-const DIVE_FALL := 5.0         # m/s the launch (and the tutorial's skydive) falls at: a 70 m start lands in 18-22 s (owner)
+# m/s the launch (and the tutorial's skydive) falls at: a 70 m start lands in 18-22 s (owner)
+const DIVE_FALL := 5.0
 const DROP_FALL := 3.5         # [game data] GlideDownwardForceMinZVelocity -350 uu/s: the sink high over the ground
 const DIVE_VY_RATE := 7.0      # [est] the fall reaches its speed in ~0.3s
 const DROP_VY_RATE := 9.0      # [est] the canopy settles to its sink in ~0.2s after it opens
 const DEPLOY_POP := -1.6       # [est] the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 3.5          # [game data] GlideDiveCancelDistance 350 uu: a dive ends and the glide catches you this high
+# m: [game data] GlideDiveCancelDistance 350 uu, a dive ends and the glide catches you this high
+const DEPLOY_H := 3.5
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
