@@ -97,6 +97,10 @@ func machine(k: Dictionary) -> Fsm:
 		k["life"] = m
 	return k["life"]
 
+## How fast `rec` loses joy: a Boki thriving in this zone loses it more slowly (garden_zones.json thrive).
+static func joy_rate(rec: Dictionary) -> float:
+	return float(GardenZones.rules()["thrive"]["joy_rate"]) if GardenZones.thrives(rec) else 1.0
+
 ## Moves every machine on; called each frame from home.gd _move_kin, ticks at 10 Hz.
 func step(d: float) -> void:
 	whistle.step(d)
