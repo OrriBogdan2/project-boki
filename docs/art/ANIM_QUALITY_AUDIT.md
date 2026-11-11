@@ -182,7 +182,7 @@ posts scroll at the move speed).
    measured by adding it to the list for this run) 1.47 -> 0.04, 21 -> 0 %, 25 -> 17 %. The pistol arm (2.12 and 1.75 body
    heights, jump 0.53 and 0.50) and the dash (4.5 m in 0.48 s) are unchanged. In the old model frame vault_r read free
    2.62 -> 2.23, sideways 54 -> 29 %, any arm 58 -> 50 %: the whole-body roll of the cartwheel counted as the arm.
-   ![thief vault_r at the match camera, before (top) and after](anim_audit/thief_vault.jpg)
+   ![thief vault_r at the match camera, before (top) and after, 8 frames (GPU jobq 20261111-160007-08120, 20261111-155841-11263)](anim_audit/thief_vault.jpg)
 3. Idle to walk first-pose gap 0.20.
 
 ![thief walk and run, before and after](anim_audit/thief.jpg)
