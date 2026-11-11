@@ -65,7 +65,11 @@ for job in spec:
             hh = F["h"]
             m = (abs(Pw[:, 2] - (F["z0"] + fz * hh)) < 0.04 * hh) & (abs(Pw[:, 0] - px_) < 0.07 * hh)
             if m.sum() > 50:
-                px_, py_ = float(np.median(Pw[m, 0])), float(np.median(Pw[m, 1]))
+                if job.get("front_pivot"):
+                    sel = Pw[m]; sel = sel[sel[:, 1] < np.percentile(sel[:, 1], 25)]
+                    px_, py_ = float(np.median(sel[:, 0])), float(np.median(sel[:, 1]))
+                else:
+                    px_, py_ = float(np.median(Pw[m, 0])), float(np.median(Pw[m, 1]))
         root.location = -Vector((px_, py_, F["z0"]))
         if view in ("face", "face34"):
             lens, cz, span = 85, F["h"] * fz, H * fs
