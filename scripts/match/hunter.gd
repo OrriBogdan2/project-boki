@@ -1058,7 +1058,7 @@ func kin_element() -> String:
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
 var roll_speed := DASH_SPEED
-var turn_cost := TurnCost.new()     # what a sharp turn costs a chained dash (owner 11-11)
+var turn_cost := TurnCost.new()     # what a sharp turn costs a chained dash
 var dash_rest := Vector2.ZERO  # metres: the dash's own last moment, riding on the step that hands it over
 var wedged_t := 0.0
 
@@ -1100,7 +1100,7 @@ func dash_with(e: Dictionary) -> void:
 	if e.has("dir") and (e["dir"] as Vector2).length() > 0.01:
 		d = e["dir"]
 	roll_dir = d.normalized()
-	turn_cost.start(Vector2(vel.x, vel.z), roll_dir, base_speed, m.time)     # turning against your speed costs it
+	turn_cost.start(Vector2(vel.x, vel.z), roll_dir, base_speed, m.time)
 	roll_speed = float(e.get("speed", DASH_SPEED))
 	roll_t = float(e.get("time", DASH_TIME))
 	move_kind = String(e.get("kind", "dash"))
@@ -2066,7 +2066,8 @@ func _physics(dt: float) -> void:
 	var cur := hv.length()
 	if roll_t > 0.0:
 		roll_t -= dt
-		hv = turn_cost.step(Loco.dash_hv(roll_dir * roll_speed, arch), dt, m.time)     # its speed per hunter (tuning.json)
+		# its speed per hunter (tuning.json), less what turning against your speed costs (TurnCost)
+		hv = turn_cost.step(Loco.dash_hv(roll_dir * roll_speed, arch), dt, m.time)
 		if not shove.is_empty():
 			_shove_along()
 		if not dash_pass.is_empty():
