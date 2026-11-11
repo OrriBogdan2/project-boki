@@ -70,10 +70,8 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Ranged marksman: time each bow draw, pin foes to walls with Heavy Shots, and watch hurt rivals through cover. |
-| Passive: Hawk Sense | Hawk Sense: rivals under half health show through cover. |
-| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | Passive: Hawk Sense | Hawk Sense: rivals under half health within 22m show through walls and fog for your team. |
-| Dash: Spirit Walk | Spirit Walk: a dodge roll, then 2.8s walking through rocks, trees and barriers. |
+| Dash: Spirit Walk | Spirit Walk (2 charges): a dodge roll, then 2.8s walking through rocks, trees and barriers. |
 | LMB | Hold to draw: Empowered lands at the cursor, Supercharged flies past it; let go right on the flash for a faster next draw. |
 | RMB: Heavy Shot | Hold to draw a Heavy Shot, let go to loose it: it knocks back and pins foes to walls. |
 | E: Hail Wall | Rain arrows on a curved wall at the cursor distance: damage, slow and a burn that blocks healing. |

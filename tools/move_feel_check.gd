@@ -63,7 +63,7 @@ const T := {
 	"dash_curve_tender_air_exit_k":   ["~", [0.4, 0.65], "x", "[footage] floats out at 40-65% of the burst"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
-	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed and the walk takes it"],
+	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"coyote_frames":           [">=", 7.0, "frames", "Hunter.COYOTE 0.12s: latest press after a walk-off (none in the source)"],
 	"jump_buffer_frames":      [">=", 7.0, "frames", "Hunter.JUMP_BUFFER 0.12s: earliest press before landing (source silent)"],
 	"jump_buffer_dash_frames": [">=", 7.0, "frames", "the same window across the end of an air dash that lands"],

@@ -9,9 +9,9 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 31,
+"long_line": 30,
 "nested_ternary": 2,
-"semicolon": 9
+"semicolon": 6
 },
 "scripts/arch/feel.gd": {
 "long_line": 10,
@@ -33,8 +33,7 @@
 },
 "scripts/arch/kits/archer_kit.gd": {
 "long_line": 13,
-"semicolon": 1,
-"shadow": 1
+"semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
 "long_line": 10,
@@ -51,8 +50,7 @@
 "long_line": 3
 },
 "scripts/arch/oomph.gd": {
-"long_line": 1,
-"shadow": 1
+"long_line": 1
 },
 "scripts/combat/ability_def.gd": {
 "long_line": 6
@@ -99,14 +97,14 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 54
+"long_line": 50
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
 "semicolon": 10
 },
 "scripts/core/evo.gd": {
-"long_line": 15,
+"long_line": 14,
 "semicolon": 4
 },
 "scripts/core/exchange.gd": {
@@ -116,7 +114,7 @@
 "semicolon": 5
 },
 "scripts/core/game.gd": {
-"long_line": 8,
+"long_line": 7,
 "nested_ternary": 1,
 "semicolon": 4
 },
@@ -136,9 +134,9 @@
 "semicolon": 1
 },
 "scripts/core/kin_speak.gd": {
-"long_line": 9,
+"long_line": 4,
 "nested_ternary": 4,
-"semicolon": 46
+"semicolon": 18
 },
 "scripts/core/kinbox.gd": {
 "long_line": 7,
@@ -253,9 +251,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 209,
-"nested_ternary": 29,
-"semicolon": 247,
+"long_line": 204,
+"nested_ternary": 28,
+"semicolon": 241,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -341,9 +339,9 @@
 },
 "scripts/kin/kin_exec.gd": {
 "history_comment": 1,
-"long_line": 32,
-"nested_ternary": 4,
-"semicolon": 31,
+"long_line": 31,
+"nested_ternary": 3,
+"semicolon": 27,
 "shadow": 2
 },
 "scripts/kin/kin_lib.gd": {
@@ -354,12 +352,12 @@
 "long_line": 10
 },
 "scripts/kin/kin_spec.gd": {
-"long_line": 17,
+"long_line": 12,
 "semicolon": 3,
 "shadow": 1
 },
 "scripts/kin/kin_text.gd": {
-"long_line": 26,
+"long_line": 25,
 "nested_ternary": 5
 },
 "scripts/kin/merge_augment.gd": {
@@ -389,9 +387,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 387,
+"long_line": 377,
 "nested_ternary": 7,
-"semicolon": 407,
+"semicolon": 391,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -464,19 +462,18 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 24,
-"nested_ternary": 1,
+"long_line": 23,
 "semicolon": 49
 },
 "scripts/match/bot_kin.gd": {
 "long_line": 4
 },
 "scripts/match/cam.gd": {
-"history_comment": 3,
+"history_comment": 1,
 "long_line": 2
 },
 "scripts/match/capture.gd": {
-"long_line": 11,
+"long_line": 10,
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
@@ -495,10 +492,10 @@
 },
 "scripts/match/exit_models.gd": {
 "long_line": 24,
-"semicolon": 43
+"semicolon": 39
 },
 "scripts/match/exits.gd": {
-"long_line": 30,
+"long_line": 21,
 "nested_ternary": 1,
 "semicolon": 20
 },
@@ -509,13 +506,12 @@
 "shadow": 1
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
-"nested_ternary": 1,
-"semicolon": 27,
+"long_line": 10,
+"semicolon": 25,
 "shadow": 2
 },
 "scripts/match/gear.gd": {
-"long_line": 5
+"long_line": 4
 },
 "scripts/match/gear_drops.gd": {
 "long_line": 3,
@@ -554,24 +550,23 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 38,
+"history_comment": 27,
 "long_line": 96,
-"nested_ternary": 19,
-"semicolon": 53,
+"nested_ternary": 15,
+"semicolon": 49,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 41,
-"nested_ternary": 6,
-"semicolon": 102
+"long_line": 40,
+"nested_ternary": 5,
+"semicolon": 100
 },
 "scripts/match/juice.gd": {
 "long_line": 1,
-"nested_ternary": 2,
-"semicolon": 1
+"nested_ternary": 2
 },
 "scripts/match/kin.gd": {
-"long_line": 31,
+"long_line": 30,
 "nested_ternary": 7,
 "semicolon": 19
 },
@@ -580,8 +575,7 @@
 "semicolon": 2
 },
 "scripts/match/kin_companion.gd": {
-"long_line": 8,
-"nested_ternary": 1,
+"long_line": 5,
 "semicolon": 15
 },
 "scripts/match/kin_downed.gd": {
@@ -616,10 +610,6 @@
 "scripts/match/kin_strike.gd": {
 "long_line": 4
 },
-"scripts/match/kin_voice.gd": {
-"long_line": 21,
-"semicolon": 2
-},
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
@@ -629,7 +619,7 @@
 "semicolon": 28
 },
 "scripts/match/landmarks.gd": {
-"long_line": 24,
+"long_line": 23,
 "nested_ternary": 1,
 "semicolon": 25
 },
@@ -638,11 +628,11 @@
 "semicolon": 3
 },
 "scripts/match/match.gd": {
-"history_comment": 4,
-"long_line": 222,
-"nested_ternary": 19,
-"semicolon": 146,
-"shadow": 9
+"history_comment": 3,
+"long_line": 211,
+"nested_ternary": 18,
+"semicolon": 141,
+"shadow": 7
 },
 "scripts/match/merge_look.gd": {
 "long_line": 6
@@ -654,7 +644,7 @@
 "long_line": 23
 },
 "scripts/match/merge_xform.gd": {
-"long_line": 5
+"long_line": 4
 },
 "scripts/match/mob.gd": {
 "long_line": 12,
@@ -669,7 +659,7 @@
 "scripts/match/models.gd": {
 "long_line": 282,
 "nested_ternary": 12,
-"semicolon": 276,
+"semicolon": 272,
 "shadow": 3
 },
 "scripts/match/music_dir.gd": {
@@ -708,13 +698,6 @@
 "semicolon": 5,
 "shadow": 1
 },
-"scripts/match/rolling.gd": {
-"history_comment": 1,
-"long_line": 13,
-"nested_ternary": 1,
-"semicolon": 19,
-"shadow": 1
-},
 "scripts/match/ruin_walls.gd": {
 "long_line": 19,
 "nested_ternary": 1,
@@ -730,7 +713,7 @@
 },
 "scripts/match/sky_train.gd": {
 "long_line": 11,
-"semicolon": 10
+"semicolon": 9
 },
 "scripts/match/spawn_plan.gd": {
 "long_line": 8,
@@ -755,22 +738,15 @@
 "scripts/match/weapon_ups.gd": {
 "long_line": 1
 },
-"scripts/match/wide_layout.gd": {
-"long_line": 7,
-"semicolon": 3,
-"shadow": 1
-},
 "scripts/match/world.gd": {
 "long_line": 78,
 "nested_ternary": 9,
-"semicolon": 175,
+"semicolon": 171,
 "shadow": 2
 },
 "scripts/server/relay.gd": {
-"long_line": 4,
-"nested_ternary": 1,
-"semicolon": 1,
-"shadow": 1
+"long_line": 3,
+"nested_ternary": 1
 },
 "scripts/shot.gd": {
 "long_line": 3,
@@ -797,23 +773,23 @@
 "scripts/ui/dex_view.gd": {
 "long_line": 10,
 "nested_ternary": 2,
-"semicolon": 16
+"semicolon": 15
 },
 "scripts/ui/egg_hatch.gd": {
 "long_line": 10,
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 36,
+"long_line": 34,
 "nested_ternary": 4,
-"semicolon": 10,
+"semicolon": 8,
 "shadow": 1
 },
 "scripts/ui/gear_panel.gd": {
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 30,
+"long_line": 29,
 "nested_ternary": 2,
 "semicolon": 66
 },
@@ -831,9 +807,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 191,
-"nested_ternary": 39,
-"semicolon": 52,
+"long_line": 188,
+"nested_ternary": 38,
+"semicolon": 49,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -856,7 +832,7 @@
 },
 "scripts/ui/kin_reveal.gd": {
 "long_line": 4,
-"semicolon": 15,
+"semicolon": 12,
 "shadow": 2
 },
 "scripts/ui/kinbox_view.gd": {
@@ -866,27 +842,27 @@
 "shadow": 1
 },
 "scripts/ui/kit_card.gd": {
-"long_line": 31,
-"nested_ternary": 5,
+"long_line": 29,
+"nested_ternary": 3,
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 27,
-"semicolon": 10,
+"long_line": 25,
+"semicolon": 9,
 "shadow": 2
 },
 "scripts/ui/lobby.gd": {
-"long_line": 12,
+"long_line": 10,
 "nested_ternary": 2,
-"semicolon": 4
+"semicolon": 3
 },
 "scripts/ui/map_paint.gd": {
 "long_line": 1,
 "semicolon": 5
 },
 "scripts/ui/overlay.gd": {
-"long_line": 32,
-"semicolon": 24,
+"long_line": 29,
+"semicolon": 23,
 "shadow": 1
 },
 "scripts/ui/prologue.gd": {
@@ -905,14 +881,10 @@
 "shadow": 1
 },
 "scripts/ui/scenery.gd": {
-"long_line": 8,
+"long_line": 6,
 "nested_ternary": 1,
-"semicolon": 8,
+"semicolon": 4,
 "shadow": 1
-},
-"scripts/ui/session_row.gd": {
-"long_line": 4,
-"semicolon": 1
 },
 "scripts/ui/title.gd": {
 "long_line": 21,
@@ -952,16 +924,16 @@
 "semicolon": 7
 },
 "tools/airheal_check.gd": {
-"long_line": 2,
+"long_line": 1,
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 20
+"semicolon": 19
 },
 "tools/archetype_check.gd": {
 "long_line": 65,
-"semicolon": 71,
+"semicolon": 66,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -986,7 +958,7 @@
 "semicolon": 25
 },
 "tools/boki_follow_check.gd": {
-"long_line": 34,
+"long_line": 33,
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
@@ -1002,10 +974,10 @@
 "semicolon": 1
 },
 "tools/check_registry.gd": {
-"long_line": 61
+"long_line": 59
 },
 "tools/dredge_combo_check.gd": {
-"long_line": 2,
+"long_line": 1,
 "shadow": 1
 },
 "tools/economy_floor_check.gd": {
@@ -1023,7 +995,7 @@
 },
 "tools/farm_tutorial_check.gd": {
 "history_comment": 1,
-"long_line": 21,
+"long_line": 20,
 "semicolon": 2
 },
 "tools/farmbuild_check.gd": {
@@ -1036,7 +1008,7 @@
 "shadow": 1
 },
 "tools/gear_check.gd": {
-"long_line": 24,
+"long_line": 23,
 "semicolon": 1,
 "shadow": 1
 },
@@ -1053,7 +1025,7 @@
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {
-"long_line": 12,
+"long_line": 11,
 "semicolon": 7
 },
 "tools/hero_pair_check.gd": {
@@ -1079,7 +1051,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 8,
+"long_line": 7,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {
@@ -1092,7 +1064,7 @@
 "semicolon": 31
 },
 "tools/lair_lock_check.gd": {
-"long_line": 22,
+"long_line": 21,
 "nested_ternary": 1,
 "semicolon": 11
 },
@@ -1125,7 +1097,7 @@
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
-"long_line": 13,
+"long_line": 12,
 "semicolon": 2,
 "shadow": 1
 },
@@ -1144,8 +1116,8 @@
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
-"long_line": 31,
-"semicolon": 4,
+"long_line": 22,
+"semicolon": 2,
 "shadow": 1
 },
 "tools/polish_check.gd": {
@@ -1171,16 +1143,6 @@
 "tools/rig_standard_check.gd": {
 "long_line": 1
 },
-"tools/rolling_check.gd": {
-"history_comment": 1,
-"long_line": 44,
-"semicolon": 18
-},
-"tools/rolling_sim.gd": {
-"long_line": 25,
-"nested_ternary": 2,
-"semicolon": 7
-},
 "tools/shot_vertical_check.gd": {
 "long_line": 4,
 "semicolon": 12
@@ -1199,7 +1161,7 @@
 "semicolon": 11
 },
 "tools/teammate_check.gd": {
-"long_line": 29,
+"long_line": 28,
 "semicolon": 24
 },
 "tools/title_check.gd": {
@@ -1208,7 +1170,7 @@
 },
 "tools/train_check.gd": {
 "long_line": 11,
-"semicolon": 7
+"semicolon": 6
 },
 "tools/unique_check.gd": {
 "long_line": 49,
