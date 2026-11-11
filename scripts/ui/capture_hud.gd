@@ -41,6 +41,10 @@ static func dazed_label(H, k: Kin, sp: Vector2) -> void:
 		H._arc(sp + Vector2(0, -10), 20.0, frac if scanning else 1.0, Capture.BEAM_COL, 4.0)
 		H._ctext(sp + Vector2(0, -52), "Scanning…", 13, Capture.BEAM_COL, H.big)
 		return
+	if p != null and FirstCapture.marked(p, k):
+		var y := -80.0 + 3.0 * sin(H.m.time * 5.0)      # the first-time marker: a bobbing arrow
+		var tri := PackedVector2Array([Vector2(-7, y - 9), Vector2(7, y - 9), Vector2(0, y)])
+		H.c.draw_colored_polygon(tri + PackedVector2Array([sp, sp, sp]), H.GOLD)
 	if p != null and k.dazed_t < 1e8:
 		H._ctext(sp + Vector2(0, -18), "%ds" % int(ceil(k.dazed_t)), 13, Color(H.INK, 0.85), H.big)
 	if p != null and p.flat_dist(k) < float(Capture.rules()["range"]) + 3.0:
