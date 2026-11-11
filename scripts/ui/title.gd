@@ -65,6 +65,7 @@ func _ready() -> void:
 	cam.make_current()
 	_place_cam(0.0)
 	_build_ui()
+	PreviewBuild.warm()      # (starts reading the next Mask screen's models)
 
 # ---------------------------------------------------------------- light, sky and haze
 func _sky() -> void:
