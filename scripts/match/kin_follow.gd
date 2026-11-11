@@ -36,7 +36,7 @@ static func side_spot(k: Kin) -> Vector3:
 ## Is the Boki fighting alongside you right now? Orders are never refused in a fight (Kin.throw_to).
 static func in_combat(k: Kin, p: Vector3) -> bool:
 	var o := k.owner_h
-	if o != null and k.m.time - o.hurt_at < 3.0:
+	if o != null and InCombat.is_in(o):
 		return true
 	var rad := _r("combat_radius")
 	for f in k.m.foes_of(k.team, false):
