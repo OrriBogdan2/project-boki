@@ -70,10 +70,10 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Acceleration | 162,500 force on mass 100 | glide_accel 16.25 m/s² | [D]; hunter_move.json | match |
 | Catch (fall to glide) | not documented | 0.183 s | MFEEL `glide_catch_t` | unknown |
 | Steering | target speeds not decoded | turn 420°/s; 90° in 0.383 s, reverse in 0.600 s | [F] decision 0027; MFEEL | unknown (footage-tuned) |
-| Sink | glide gravity factor not decoded | 1.4 m/s | MFEEL `glide_sink` | unknown |
+| Sink | glide gravity factor not decoded; footage checked 11-11, none measurable: no long steady glide on disk (hetzner /home/boki/svvid abilities video 1174 s + its hero-ref frames, Tetra guide 300 s; refs/supervive-mantle Joule 1v4 42 s, owner clip 34 s). The abyss-tinted seconds are a storm zone (Tetra 16, 122, 240-243 s) and a fight over the abyss with the camera swinging (owner clip 12-20 s); the one glide the hero-ref notes name (Elluna, 706.8 s) is a step off the practice range's edge | 1.4 m/s, hunter_move.json `glide_sink` | owner: 2.2 fell faster than the source; MFEEL `glide_sink`, `--glider-heat-check` | unknown |
 | Height hold | 8.5 m over the ground, sinks 3.5 m/s above it | glide_height 8.5, glide_pull_vy 3.5 | [D]; hunter_move.json | match |
 | Drop into speed (swoop) | height trades for speed | never | owner 11-08 item 8 | off (ruling) |
-| Heat | coefficients not decoded | tuned; `--glider-heat-check` | [D] undecoded | unknown |
+| Heat | coefficients not decoded; [F] a level glide ~14 s to the hot ring (Tom Kick's guide, docs/SUPERVIVE_FEEL.md; not on disk to recount); the same footage check as Sink | 9 s from the open to overheat, hunter_move.json `glide_heat_s` (x the archetype's glide_cap); a lift heats 4x as fast | owner 11-02 "lasts too long, not punishing enough" outranks the footage; MFEEL `glide_overheat_s`, `--glider-heat-check` | off (owner) / unknown (coefficients) |
 | Overheat | burns; the glider closes | opens at any heat, burns, lifts at half strength | [W]; owner item 63 | off (ruling) |
 | Dive | −32.5 m/s, force 350,000, steer 0.25, cancel under 3.5 m, 10 s | dive_vy 32.5, dive_accel 35, dive_steer 0.25, dive_cancel_h 3.5, dive_timeout 10 | [D]; hunter_move.json | match |
 | Spike (knocked out of a glide) | stun 0.7 s on landing; slam threshold not decoded | land stun 0.7 s; slam numbers [est] | [W]; hunter_move.json `glide_spike` | match / unknown (slam) |
@@ -131,7 +131,7 @@ The windows read one frame shorter at 30 fps only because a press can land on a 
 3. **Farm dash** is the class dodge, not the kit's dash (3.5 m in 0.15 s against 4.1 m in 0.52 s for the same Hunter in a match).
 4. **Dash curves** for 9 kits are not decoded: they run on the global ×0.85 / ×1.15 (KIT_PARITY gap 4; also gaps 9, 11, 13).
 5. **Air control** (owner 11-08) and **no swoop** (owner 11-08) are rulings against the data; **walking off ledges** and **glider at any heat** too.
-6. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle the first three.
+6. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle steering; glide sink and heat were looked for on 11-11 (ext/feel-glide-sink-heat) and no footage on disk holds a long steady glide, so they need a new clip: three level glides over ground of known drop and one held to the hot ring.
 7. **Rail grinding** and the **mini mantle** are not modelled.
 8. The farm avatar's facing turns per step (not blended between steps); the interior and town movers still step on frame time.
 9. `--feel-golden-check`: the traces carry shoves from mobs and wild Boki that walk into the Hunter (`Match._separate`), so `crouch_walk` does not replay identically run to run (3–5 of 13 differ in position, never in velocity), and clearing mobs before each script shifts 45 traces. It needs mobs and wild Boki cleared and one full re-record, together with the 72 drifts the RC already carries.

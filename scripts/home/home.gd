@@ -1271,7 +1271,7 @@ func _move_player(d: float) -> void:
 			# (the match's lift: Hunter.abyss_lift_vy). The farm never had it: you only sank
 			pvy = Hunter.abyss_lift_vy(pvy, _abyss_lip() - py, d)
 		elif gliding and pvy <= 0.0:
-			pvy = move_toward(pvy, -Hunter.GLIDE_SINK, Loco.glide_catch * d)
+			pvy = move_toward(pvy, -HunterMove.glide_sink, Loco.glide_catch * d)
 		else:
 			pvy = maxf(pvy - GRAV * d, -HunterMove.fall_max)
 		py += pvy * d
