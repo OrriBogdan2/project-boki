@@ -331,6 +331,7 @@ const CHECKS := {
 	"--rejoin-check": ["res://tools/rejoin_check.gd", "rejoin_check", null],      # relay + 2 games, ~4 min
 	# 2 games, relay: kit statuses
 	"--status-net-check": ["res://tools/status_net_check.gd", "status_net_check", null],
+	"--summon-net-check": ["res://tools/summon_net_check.gd", "summon_net_check", null],     # 2 games, relay
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
