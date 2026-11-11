@@ -215,18 +215,21 @@ func _juggernaut_lunge() -> void:
 			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]), 3.0)
 	await _go(GAP)
 
+## Owner 11-11: W held toward the cursor the whole way, the cursor past the dummy: the press stops him dead and the
+## slam goes straight down under him, never on toward the cursor.
 func _juggernaut_drop() -> void:
-	await _reset(2.4)
+	await _reset(4.4)
 	var K: JuggernautKit = P.ak
 	var drop := func(t: float):
-		P.inp["jump"] = t < DT
-		if _at(t, 0.3):
+		P.inp["move"] = Vector2(1, 0) if t < 0.9 else Vector2.ZERO
+		P.inp["jump"] = _at(t, 0.15)
+		if _at(t, 0.45):
 			K.press_rmb()
-		_aim(T.pos)
+		_aim(T.pos + Vector3(4.0, 0, 0))
 	await _go(3.0, drop, _sheet("drop",
-			"RMB in the air, Meteor Drop: the jump, the press near its top (the hit circle under him), "
-			+ "the short hang, the straight drop, the ground cracking, the shock ring and cel dust",
-			[0.15, 0.31, 0.36, 0.42, 0.48, 0.55, 0.7, 1.0, 1.6]), 2.0)
+			"RMB in the air, Meteor Drop, W held toward the cursor all the way: the jump forward, the press "
+			+ "(the hit circle straight under him), he stops dead, the straight drop, the ground cracking",
+			[0.2, 0.4, 0.46, 0.52, 0.6, 0.7, 0.85, 1.1, 1.6]), 2.0)
 	await _go(GAP)
 
 func _juggernaut_dash() -> void:
@@ -329,8 +332,8 @@ func _juggernaut_tether_hold() -> void:
 			[0.5, 0.9, 1.4, 1.9, 2.4, 2.62, 2.7, 2.9, 3.4]), 1.0)
 	await _go(GAP)
 
-## E on the dummy, jump, RMB in the air: the Meteor Drop lands straight under him; E pressed in the drop pulls him
-## in the moment it lands.
+## E on the dummy, jump, RMB in the air, E again (owner 11-11): the pull hauls him and the Meteor Drop through the air,
+## its circle under him, and it slams straight down where he arrives, beside the dummy.
 func _juggernaut_e_rmb_e() -> void:
 	await _reset(7.0)
 	var K: JuggernautKit = P.ak
@@ -344,9 +347,9 @@ func _juggernaut_e_rmb_e() -> void:
 			K.use_e()
 		_aim(T.pos)
 	await _go(3.0, combo, _sheet("e_rmb_e",
-			"E > jump > RMB > E: the hook, the jump, the drop's circle under him, the slam straight down, "
-			+ "the pull the moment it lands",
-			[0.3, 0.7, 0.86, 0.95, 1.05, 1.2, 1.4, 1.7, 2.2]), 3.5)
+			"E > jump > RMB > E: the hook, the jump, the drop's circle under him, E hauls him and the drop "
+			+ "through the air, the slam straight down where he arrives",
+			[0.3, 0.7, 0.86, 0.95, 1.05, 1.15, 1.3, 1.5, 2.0]), 3.5)
 	await _go(GAP)
 
 ## Shift in the Finishing Slam's wind-up: the Slam Drive down the locked lane, the Slam landing where it arrives.
