@@ -157,6 +157,35 @@
 					"w": 10
 				}
 			]
+		},
+		"lantern": {
+			"name": "Lantern Match",
+			"first": "hush_truffle",
+			"ribbon": "Lantern Match Cup Ribbon",
+			"colour": "#b48cff",
+			"cup_prize": "puzzlenut",
+			"table": [
+				{
+					"kind": "item",
+					"id": "peekbox",
+					"w": 40
+				},
+				{
+					"kind": "item",
+					"id": "hush_truffle",
+					"w": 30
+				},
+				{
+					"kind": "snack",
+					"id": "glowcap",
+					"w": 20
+				},
+				{
+					"kind": "item",
+					"id": "hushpearl",
+					"w": 10
+				}
+			]
 		}
 	}
 }

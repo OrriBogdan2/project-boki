@@ -521,14 +521,6 @@ Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.
 | verbs_doc | Journal verb by use; an item's own verb wins. |
 | items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}, {"id": "fourfold_bun", "name": "Fourfold Bun", "family": "stat", "use": "eaten", "effect": {"kind": "stat_all", "n": 1}, "sources": ["Mixing Bowl: any two different bites"]}, {"id": "bramble_honey", "name": "Bramble Honey", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["grass", "bug", "spore"], "share": 0.5, "hold_days": 7}, "sources": ["Bramblebank golden ripening", "Mixing Bowl: 3 snacks of one type"]}, {"id": "glassdew", "name": "Glassdew", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["water", "ice", "crystal"], "share": 0.5, "hold_days": 7}, "sources": ["Glasswater ripening", "Glint Fishing", "Mixing Bowl: 3 snacks of one type"]}, {"id": "cinderbrittle", "name": "Cinderbrittle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["fire", "rock", "steel", "dragon"], "share": 0.5, "hold_days": 7}, "sources": ["Cinderstep ripening", "Tumble cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "hush_truffle", "name": "Hush Truffle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["dark", "psychic", "poison"], "share": 0.5, "hold_days": 7}, "sources": ["Hushwood ripening", "Lantern Match", "Mixing Bowl: 3 snacks of one type"]}, {"id": "windfloss", "name": "Windfloss", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["flying", "electric", "fairy", "sound"], "share": 0.5, "hold_days": 7}, "sources": ["Kitewind ripening", "Echo Steps cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "dare_pepper", "name": "Dare Pepper", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "bravery", "by": 0.04}, "sources": ["Cinderstep patch"]}, {"id": "lullwort_tea", "name": "Lullwort Tea", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "temper", "by": -0.04}, "sources": ["Glasswater patch"]}, {"id": "peekbox", "name": "Peekbox", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "curiosity", "by": 0.04}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "twinbun", "name": "Twinbun", "family": "personality", "use": "eaten", "effect": {"kind": "twin", "trait": "loyalty", "by": 0.04, "bond": 0.1}, "sources": ["Bramblebank patch", "Mixing Bowl: 2 sweet buns"]}] |
 
-## garden_recipes (`content/rules/garden_recipes.json`)
-
-The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out.
-
-| Setting | Value |
-|---|---|
-| recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
-
 ## garden_prizes (`content/rules/garden_prizes.json`)
 
 Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).
@@ -540,7 +532,15 @@ Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/de
 | week_s | 604800 |
 | week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
 | cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
-| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}} |
+| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "lantern": {"name": "Lantern Match", "first": "hush_truffle", "ribbon": "Lantern Match Cup Ribbon", "colour": "#b48cff", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "peekbox", "w": 40}, {"kind": "item", "id": "hush_truffle", "w": 30}, {"kind": "snack", "id": "glowcap", "w": 20}, {"kind": "item", "id": "hushpearl", "w": 10}]}} |
+
+## garden_recipes (`content/rules/garden_recipes.json`)
+
+The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out.
+
+| Setting | Value |
+|---|---|
+| recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
 
 ## garden_trust (`content/rules/garden_trust.json`)
 
@@ -633,6 +633,43 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | auto_rate_per_aggression | 0.6 |
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
+
+## lantern_match (`content/rules/lantern_match.json`)
+
+Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6, scripts/home/lantern_match.gd). Only with farm_build.json base_mode on. Twelve glowcaps in a ring flash in pairs, then go dark; open two at a time to find the pairs. Your Boki sniffs every so often and points at the partner of the last cap you opened, if it saw that cap. Solo against the clock, or turn by turn against a Boki. Units: seconds, probabilities 0-1, joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| colours | ["#ffd166", "#7ee0ff", "#c69cff", "#8cf0a0", "#ff8fb1", "#ffa65c"] |
+| colours_doc | One glow colour per pair; the ring holds two caps of each (so 12 caps). |
+| flash_s | 0.6 |
+| flash_doc | When a ring is dealt each pair glows for flash_s seconds in turn, then all go dark; the clock waits while it flashes. |
+| time_s | 90 |
+| time_doc | The clock in seconds. Versus: whoever holds more pairs when it runs out (or the ring is cleared) wins; a tie is a draw. |
+| solo_goal | 18 |
+| solo_doc | Solo: a cleared ring deals a fresh one (and flashes again); find solo_goal pairs before the clock runs out to win. |
+| reveal_s | 0.9 |
+| reveal_doc | Two caps that do not match stay lit this long, then go dark. In versus the turn then passes; a match keeps the turn. |
+| sniff_s | 6 |
+| sniff_per_focus | 0.02 |
+| sniff_curiosity | 1 |
+| sniff_doc | Seconds between your Boki's sniffs: sniff_s / ((1 + Focus points * sniff_per_focus) * (1 + (curiosity - 0.5) * sniff_curiosity)), at least sniff_min. 50 Focus sniffs twice as often; a fully curious Boki half as often again. |
+| sniff_min | 1 |
+| see | 0.4 |
+| see_per_focus | 0.008 |
+| see_doc | Chance your Boki notices a pair while it flashes: see + Focus points * see_per_focus, at most 1. Every cap opened in play it always sees. |
+| foe_mem | 0.45 |
+| foe_mem_per_focus | 0.008 |
+| foe_mem_doc | Versus: the chance the rival Boki remembers a cap it has seen (in the flash or opened by anyone): foe_mem + its Focus points * foe_mem_per_focus, at most 0.95. |
+| foe_s | 0.8 |
+| foe_doc | Seconds the rival Boki takes before each cap it opens. |
+| energy | 6 |
+| win_joy | 10 |
+| win_trust | 3 |
+| lose_joy | -6 |
+| gems | 4 |
+| gems_doc | Gems to you when a game ends (win or not). |
+| card_s | 6 |
 
 ## lean (`content/rules/lean.json`)
 
