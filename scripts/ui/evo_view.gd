@@ -11,17 +11,17 @@ static func next_block(rec: Dictionary, parent: VBoxContainer) -> void:
 	parent.add_child(UI.label(String(nf["line"]), UI.T_HEAD, UI.INK, UI.big))
 	if not nf.has("goal"):
 		return
-	var row := UI.hbox(10)
-	var now := UI.label("Lv %d" % int(rec["level"]), UI.T_SMALL, UI.MUTED)
-	now.custom_minimum_size.x = 92.0
-	row.add_child(now)
+	var row := UI.hbox(10)       # laid out like the card's other bar rows: 92 px label, bar, 64 px value
+	var level_label := UI.label("Lv %d" % int(rec["level"]), UI.T_SMALL, UI.MUTED)
+	level_label.custom_minimum_size.x = 92.0
+	row.add_child(level_label)
 	var bar := UI.bar(float(nf["frac"]), UI.ACCENT, 150, 8)
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(bar)
-	var goal := UI.label("Lv %d" % int(nf["goal"]), 12, UI.MUTED, UI.semi)
-	goal.custom_minimum_size.x = 64.0
-	goal.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	row.add_child(goal)
+	var goal_label := UI.label("Lv %d" % int(nf["goal"]), 12, UI.MUTED, UI.semi)
+	goal_label.custom_minimum_size.x = 64.0
+	goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(goal_label)
 	parent.add_child(row)
 
 ## What the block shows: {"line"} and, while a form with art is ahead, "goal" (the level the bar fills
@@ -59,8 +59,8 @@ static func _xp_share(rec: Dictionary, start_lv: int, goal: int) -> float:
 		return 1.0
 	var earned := float(rec.get("xp", 0))
 	var span := 0.0
-	for at in range(start_lv, goal):
-		span += Game.xp_need(at)
-		if at < lv:
-			earned += Game.xp_need(at)
+	for step_lv in range(start_lv, goal):
+		span += Game.xp_need(step_lv)
+		if step_lv < lv:
+			earned += Game.xp_need(step_lv)
 	return clampf(earned / span, 0.0, 1.0)
