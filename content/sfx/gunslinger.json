@@ -3,6 +3,8 @@
  "name": "Vex",
  "script": "tools/gen_sfx_vex.py",
  "sounds": {
+  "gunslinger_charge_tick": "cast",
+  "gunslinger_charge_full": "cast",
   "vn_rifle": "fire",
   "gunslinger_spinup": "signature",
   "gunslinger_grenade_thunk": "signature",

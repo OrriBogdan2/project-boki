@@ -4,7 +4,8 @@ extends RefCounted
 ##   2. every take sits at its category's loudness (content/rules/sfx_levels.json) and under the peak ceiling
 ##   3. a Hunter set has its wordless voice (hurt, down, death), its dash, footsteps on every surface,
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
-##   4. every cue that Hunter's kit emits (m.sfx, payoff and armed sounds, content/vfx moves) is one of its own
+##   4. every cue that Hunter's kit emits (m.sfx, payoff and armed sounds, content/vfx moves, the charge-hold
+##      tick and ping) is one of its own
 ##   5. a Hunter with no set falls back to the shared sounds
 ##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
@@ -19,6 +20,8 @@ const REACH_MIN := 5.0         # m: below this a sound would not carry past its 
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 # m.sfx("x"), armed_fx(word, slot, "x") and payoff_fx(at, word, col, "x"): the sound is group 1 (empty = shared)
 const CUE_CALLS := "(?:\\.sfx\\(|armed_fx\\([^,)]*,[^,)]*,\\s*|payoff_fx\\([^,]+,[^,]+,[^,]+,\\s*)\"([a-z0-9_]*)\""
+# the Hunters whose weapon or kit winds up a charge: ArchKit plays <arch>_charge_tick and <arch>_charge_full
+const CHARGERS := ["archer", "mage", "gunslinger", "juggernaut", "bulwark", "dolm", "ostra", "thief"]
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
 var bad := 0
@@ -112,6 +115,8 @@ func _kit_names(arch: String, extra: Array, own: Dictionary) -> void:
 	for mv in moves:
 		for e in moves[mv].get("sfx", []):
 			_cue(String(e["n"]), "move %s:%s" % [mv, e["n"]], own, holes)
+	for w in (["_charge_tick", "_charge_full"] if arch in CHARGERS else []):
+		_cue(arch + w, "charge hold " + w, own, holes)
 	ok(holes.is_empty(), "%s: every cue its kit emits is its own sound and exists (holes: %s)" % [arch, holes])
 
 func _cue(sname: String, what: String, own: Dictionary, holes: Array) -> void:

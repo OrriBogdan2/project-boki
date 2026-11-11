@@ -345,6 +345,17 @@ def haul_slam():
     return mix(kick(130, 38, 0.55, 0.04, 0.18) * 1.1, crack(0.1, 500, 4500, 0.04) * 0.8, at(S.rattle(0.3, 60, 1800, 6000, 0.5, 0.08) * 0.5, 0.05))
 
 
+# ------------------------------------------------------------------ charge hold (was the shared tick and ping)
+def charge_tick():
+    """An iron heartbeat: a low thump with a ring of steel over it, quickening as the charge fills."""
+    return mix(kick(115, 58, 0.1, 0.02, 0.05) * 0.9, S.ring([620, 1480], 0.1, [0.04, 0.03], [0.3, 0.2]))
+
+
+def charge_full():
+    """The forge at full heat: a deep strike and a long low ring of iron."""
+    return mix(kick(95, 44, 0.3, 0.03, 0.12) * 0.8, S.ring([220, 440, 660], 0.55, [0.25, 0.18, 0.12], [0.5, 0.4, 0.3]), crack(0.05, 700, 4500, 0.02) * 0.5)
+
+
 def build():
     takes('jug_slash', slash, 3, 'fire')
     takes('juggernaut_blade_hiss', blade_hiss, 2, 'signature')
@@ -377,7 +388,8 @@ def build():
     save('jug_spin', spin(), 'cast')
     save('jug_lunge_go', lunge_go(), 'cast')
     save('jug_haul_slam', haul_slam(), 'impact')
-
+    save('juggernaut_charge_tick', charge_tick(), 'cast')
+    save('juggernaut_charge_full', charge_full(), 'cast')
 
 if __name__ == '__main__':
     build()

@@ -3,6 +3,8 @@
 	"name": "Motley",
 	"script": "tools/gen_sfx_motley.py",
 	"sounds": {
+		"ostra_charge_tick": "cast",
+		"ostra_charge_full": "cast",
 		"os_orb": "fire",
 		"os_orb_hot": "fire",
 		"os_prime": "cast",
