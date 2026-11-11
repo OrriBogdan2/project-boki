@@ -3,7 +3,8 @@ extends RefCounted
 ## A clan's shared base (docs/specs/CLANS.md sections 3 and 5.2). Going there is a visit (home.gd's visit
 ## path) to an island built from the clan: every member gets a corner with a signpost, a little of their
 ## house decor and some of their Boki, all from the island snapshot they already publish (no new writes);
-## the showcase wall shows the Boki in clanbase/<gid>, cleaned by Social.clean_clanbase.
+## the showcase wall shows the Boki in clanbase/<gid>, cleaned by Social.clean_clanbase, under the week's
+## goal (ClanBoard).
 
 const SLOTS := 24               # corner places round the island; at least Social.CLAN_CAP so every member fits
 const KIN_BUDGET := 24          # corner Boki on the island at most (each runs the farm kin AI), split across members
@@ -13,18 +14,29 @@ const DECOR_AT := [Vector3(1.0, 0, 0.4), Vector3(-1.0, 0, 0.4)]
 const RING := 0.62              # corners sit at this fraction of the home island's radius
 const DECOR_SCALE := 0.45       # house furniture is room-sized; shrunk to sit beside a signpost
 const WALL_GAP := 0.9           # metres between Boki on the showcase wall
+const BOARD_Y := 2.7            # metres: middle of the weekly-goal board on top of the wall
+const BOARD_W := 2.6            # metres: width of that board
+const BAR_W := 2.2              # metres: the goal bar when full
+const BAR_H := 0.12             # metres: height of the goal bar
+const TOP := 3                  # members named on the board
 
-## Reads the clan's members, roll and base doc, then goes there. The house gifts go to the founder.
+## Reads the clan's members, roll, base doc and board, pays your share of a reached goal, then goes there.
+## The house gifts go to the founder.
 static func open(gid: String, gdoc: Dictionary) -> void:
 	var founder := Social.txt_of(gdoc.get("founder"))
 	Social.guild_members(gid, func(members: Array):
 		Social.clan_roster(gid, founder, func(roll: Array):
 			Social.get_doc("clanbase/" + gid, func(d: Dictionary):
-				Game.goto("home", {"visit": snapshot(gid, gdoc, members, roll, d), "visit_id": founder}))))
+				ClanBoard.read(gid, members.map(func(m): return m["id"]), func(b: Dictionary):
+					ClanBoard.claim(gid, b)
+					var snap := snapshot(gid, gdoc, members, roll, d, b)
+					Game.goto("home", {"visit": snap, "visit_id": founder})))))
 
 ## The visit snapshot: shaped like Social.clean_island's, named for the clan; its Boki are the corners' Boki.
-## members: [{id, d}] as Social.guild_members gives them; roll: Social.clan_roster rows; base_doc: raw clanbase doc.
-static func snapshot(gid: String, gdoc: Dictionary, members: Array, roll: Array, base_doc: Dictionary) -> Dictionary:
+## members: [{id, d}] as Social.guild_members gives them; roll: Social.clan_roster rows; base_doc: raw clanbase doc;
+## board: ClanBoard.read's.
+static func snapshot(gid: String, gdoc: Dictionary, members: Array, roll: Array, base_doc: Dictionary,
+		board: Dictionary) -> Dictionary:
 	var cs := corners(gid, members, roll)
 	var kin: Array = []
 	for c in cs:
@@ -34,7 +46,7 @@ static func snapshot(gid: String, gdoc: Dictionary, members: Array, roll: Array,
 	snap["name"] = Social.say_of(gdoc.get("name"), "Clan", 24)
 	snap["guild"] = gid
 	snap["roster"] = kin
-	snap["clan_base"] = {"corners": cs, "showcase": Social.clean_clanbase(base_doc, ids)["showcase"]}
+	snap["clan_base"] = {"corners": cs, "showcase": Social.clean_clanbase(base_doc, ids)["showcase"], "board": board}
 	return snap
 
 ## One corner per member: {id, name, slot, kin, decor}. A member's corner seed (from the roll, or the one
@@ -85,7 +97,8 @@ static func draw(home: Node3D, world: World, kins: Array, base: Dictionary) -> v
 		_corner(root, corner, at, a)
 		_gather(world, kins, String(corner["id"]), at)
 	var wall_at := world.free_spot_near(Vector3(mid.x, 0, mid.y), taken, 3.0)
-	_wall(root, base["showcase"], names, wall_at)
+	var wall := _wall(root, base["showcase"], names, wall_at)
+	_board(wall, base["board"], names)
 
 ## A signpost with the member's name, facing the middle, and their decor beside it.
 static func _corner(root: Node3D, corner: Dictionary, at: Vector3, a: float) -> void:
@@ -115,7 +128,7 @@ static func _gather(world: World, kins: Array, who: String, at: Vector3) -> void
 		kd["pos"] = p
 
 ## A long shelf with each showcased Boki standing on it, its name and its keeper's (names: member id -> name).
-static func _wall(root: Node3D, wall: Array, names: Dictionary, at: Vector3) -> void:
+static func _wall(root: Node3D, wall: Array, names: Dictionary, at: Vector3) -> Node3D:
 	var holder := Node3D.new()
 	holder.name = "ShowcaseWall"
 	holder.position = at
@@ -143,3 +156,39 @@ static func _wall(root: Node3D, wall: Array, names: Dictionary, at: Vector3) -> 
 		tag.pixel_size = 0.006
 		tag.position = Vector3(x, 0.3, 0.32)
 		holder.add_child(tag)
+	return holder
+
+## The week's goal on a board atop the wall: the clan's points against the goal as a bar, and the top three.
+static func _board(holder: Node3D, b: Dictionary, names: Dictionary) -> void:
+	var board := Node3D.new()
+	board.name = "ClanBoard"
+	board.position = Vector3(0, BOARD_Y, -0.35)
+	holder.add_child(board)
+	Models.part(board, Models.box(BOARD_W, 1.0, 0.1), Models.toon(Color("8a5a35")), Vector3.ZERO)
+	var fill := clampf(float(b["total"]) / float(b["goal"]), 0.0, 1.0)
+	Models.part(board, Models.box(BAR_W, BAR_H, 0.04), Models.toon(Color("3b2a1c")), Vector3(0, 0.22, 0.06))
+	if fill > 0.0:
+		var bar_at := Vector3((fill - 1.0) * BAR_W * 0.5, 0.22, 0.08)
+		Models.part(board, Models.box(BAR_W * fill, BAR_H, 0.04), Models.toon(Color("f2c14a")), bar_at)
+	var head := "This week: %d / %d" % [b["total"], b["goal"]]
+	if b["done"]:
+		head += "   Goal reached: %d gems each" % int(ClanBoard.rules()["reward_gems"])
+	var lines: Array = [head]
+	var shares: Array = b["shares"]
+	for i in mini(TOP, shares.size()):
+		var s: Dictionary = shares[i]
+		lines.append("%d. %s  %d" % [i + 1, names.get(s["id"], s["id"]), s["pts"]])
+	var goal := Label3D.new()
+	goal.name = "Goal"
+	goal.text = lines.pop_front()
+	goal.font_size = 26
+	goal.pixel_size = 0.006
+	goal.position = Vector3(0, 0.38, 0.07)
+	board.add_child(goal)
+	var top := Label3D.new()
+	top.name = "Top"
+	top.text = "\n".join(lines)
+	top.font_size = 24
+	top.pixel_size = 0.006
+	top.position = Vector3(0, -0.12, 0.07)
+	board.add_child(top)

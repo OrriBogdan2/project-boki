@@ -171,6 +171,7 @@ static func settle(rn: Dictionary) -> Dictionary:
 		_rival(lo, win)
 		_rival(win, lo)
 	var gems := int(r["gems_backed_win"]) if win == backed else int(r["gems_other_win"])
+	if win == backed: ClanBoard.add("cup")       # the garden cup for the clan board
 	Save.d["gems"] = int(Save.d["gems"]) + gems
 	var line := "%s will remember winning the Dash." % win["name"]
 	if win != backed:
