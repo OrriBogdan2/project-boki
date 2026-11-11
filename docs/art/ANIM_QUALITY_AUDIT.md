@@ -65,6 +65,7 @@ its strike key: his snap keeps both palms through the shove (the source's releas
 full orb lets its casting arm go at 0.2 s and the Trade lob at 0.22 s, so the arm hangs on the recovery instead of holding its
 elbow out.
 clip sources in tools/art1 are unchanged). Done for `juggernaut` (slam, meteor: the sword stays in the right hand as on his v2 splash, the off arm hangs; `t_free` 33 % to 0 and free-hand travel 1.7 to 0.8 and 1.0 to 0.3 body heights; `haulslam` keeps its arms, the chain hand), `ashwick` (lance, shot), `dredge` (throw, shot) and `tender` (seed, shot_r).
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `dolm` (lmb_throw, lmb_punch).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out. It measures every clip a Hunter's data names in
 `free_arm`, not only the two shown in the strips, and gates three things: the free arm out for at most 10 % of the clip; the
@@ -135,7 +136,12 @@ posts scroll at the move speed).
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
 2. Arms swung with their own side's leg (counter -0.86, fixed to +0.72).
-3. lmb_punch and lmb_throw fling the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump.
+3. lmb_punch and lmb_throw flung the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump. Fixed: the free (left)
+   arm hangs by data (free arm 1.31 to 0.38 and 1.53 to 0.68 body heights), and the hand path is re-timed by
+   `tools/art1/glb_retime.py` (no Blender): the punch's drive arrives at 0.11 s, not 0.05, and the throw's fling at 0.15,
+   not 0.13, so the hand covers the same path over four frames (jump 0.67 to 0.35, 0.40 to 0.34). The boulder still leaves at
+   the kit's 0.13 s, the punch's hit stays on its kit key. The poses are the same;
+   `tarek_clips.py` carries the new key times for the next Blender bake (which replaces the glb: do not re-run the tool on it).
 
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
 
@@ -214,6 +220,8 @@ Split into backlog items per Hunter (role build):
 - Arm use in attacks: `ostra`, `mage` hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.
 - Arm use in attacks: `ashwick`, `ostra`, `tender`, `dredge`, `mage`, `thief` (vault_r) hold an arm sideways; `dolm` jumps a hand 0.4 to 0.67 body heights in one frame.
+- Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
+  jumps a hand 0.5 to 0.64 body heights in one frame (`dolm` done: re-timed, jump 0.35).
 - `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
 - `bulwark`: at 3.4 m/s (between the walk and run clips) the blend slides 2.7 m/s; the gate only reads the run.
 - `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.

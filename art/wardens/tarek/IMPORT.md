@@ -25,6 +25,11 @@ walk gait (1.0 s). glb_swap.py closes both loops. Licence: tencent-hunyuan-commu
 and needs a separate licence above 1M MAU, so legal signs off before these ship. Revert to the hand-keyed clips by
 skipping the two swap lines.
 
+Without Blender, the lmb_punch/lmb_throw hand re-time (ext/anim-hand-tenzo) is re-applied to a glb baked from the OLD key times
+(punch 0.05/0.12, throw 0.07/0.13/0.24). A bake from the current tarek_clips.py already has it, so do not run these on it:
+    python3 tools/art1/glb_retime.py art/wardens/tarek/tarek.glb lmb_punch 0:0,0.11:0.05,0.16:0.12
+    python3 tools/art1/glb_retime.py art/wardens/tarek/tarek.glb lmb_throw 0:0,0.05:0.07,0.15:0.13,0.26:0.24
+
 tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
 --rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.
 
