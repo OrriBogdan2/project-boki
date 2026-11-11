@@ -616,6 +616,10 @@
 "scripts/match/kin_strike.gd": {
 "long_line": 4
 },
+"scripts/match/kin_voice.gd": {
+"long_line": 21,
+"semicolon": 2
+},
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
@@ -634,10 +638,10 @@
 "semicolon": 3
 },
 "scripts/match/match.gd": {
-"history_comment": 3,
-"long_line": 221,
-"nested_ternary": 18,
-"semicolon": 145,
+"history_comment": 4,
+"long_line": 222,
+"nested_ternary": 19,
+"semicolon": 146,
 "shadow": 9
 },
 "scripts/match/merge_look.gd": {
@@ -809,7 +813,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 29,
+"long_line": 30,
 "nested_ternary": 2,
 "semicolon": 66
 },
@@ -1071,7 +1075,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 7,
+"long_line": 8,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {
