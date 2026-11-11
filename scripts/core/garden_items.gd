@@ -75,6 +75,12 @@ static func apply(rec: Dictionary, id: String, pick := "") -> Dictionary:
 	_remember(rec, id, String(pv["text"]))
 	return pv
 
+## A copy of rec as it would be after the preview pv (for what the change leads to, as the path meter).
+static func after(rec: Dictionary, pv: Dictionary) -> Dictionary:
+	var then := rec.duplicate(true)
+	_write(then, pv["deltas"])
+	return then
+
 static func _write(rec: Dictionary, deltas: Dictionary) -> void:
 	for key in deltas:
 		var after: Variant = deltas[key][1]
@@ -194,7 +200,7 @@ static func take_off(rec: Dictionary, id: String) -> bool:
 static func feed(rec: Dictionary, id: String) -> Dictionary:
 	var pv := apply(rec, id)
 	return {"ok": pv["ok"], "love": false, "hate": false, "full": false, "new": false, "lean": "",
-			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": item(id)["effect"]["kind"] == "rinse"}
+			"text": ("%s: %s" % [item_name(id), pv["text"]]), "look": item(id)["effect"]["kind"] in ["rinse", "sweet"]}
 
 static func _no(why: String) -> Dictionary:
 	return {"ok": false, "text": why, "deltas": {}, "look": false}
@@ -308,7 +314,7 @@ static func fed(id: String) -> bool:
 ## The line the items list shows under an item in the bag.
 static func bag_hint(id: String) -> String:
 	if fed(id):
-		return "Shapes a Boki: feed it from its card."
+		return "Shapes a Boki: hold it near one to see the change, or feed it from its card."
 	return "Goes in the Nesting Nook with a pair."
 
 ## The path an item's token pushes toward ("" for other items).

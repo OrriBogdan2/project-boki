@@ -30,6 +30,8 @@ const CHECKS := {
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],      # GARDEN_MODERN 1.2
 	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
 	"--evo-path-check": ["res://tools/evo_path_check.gd", "evo_path_check", null],      # GARDEN_MODERN.md 3
+	"--item-card-check": ["res://tools/item_card_check.gd", "item_card_check", "check"],      # GARDEN_MODERN.md 1.3
+	"--item-card-shots": ["res://tools/item_card_check.gd", "item_card_check", "shots"],      # --shots-dir=<dir>, GPU
 	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--stat-budget-check": ["res://tools/stat_budget_check.gd", "stat_budget_check", null],      # decision 0022

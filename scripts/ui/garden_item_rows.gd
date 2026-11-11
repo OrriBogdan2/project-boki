@@ -5,8 +5,10 @@ extends RefCounted
 
 ## Adds a row for each shaping item in the bag. feed(id) gives the item to the Boki. A sweet gets a row per
 ## lean type it can be eaten for and a Twinbun one for the Boki's closest friend of `mates` (other Boki's
-## records); both are used directly and used(result) runs after.
-static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Callable, used: Callable) -> bool:
+## records); both are used directly and used(result) runs after. peek(id, pick) runs when a row is hovered or
+## focused (the preview card; not for the Twinbun, which needs a pair).
+static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Callable, used: Callable,
+		peek: Callable) -> bool:
 	var any := false
 	for id in GardenItems.ids():
 		var n := int(Save.d["items"].get(id, 0))
@@ -19,11 +21,11 @@ static func add_bag(v: VBoxContainer, rec: Dictionary, mates: Array, feed: Calla
 			for t in e["types"]:
 				var line := String(GardenItems.preview(rec, id, t)["text"])
 				var head := "%s: %s" % [title, Lean.face(t)["name"]]
-				_row(v, head, line, "Feed", func(): used.call(GardenItems.use(rec, id, t)))
+				_row(v, head, line, "Feed", func(): used.call(GardenItems.use(rec, id, t)), peek.bind(id, t))
 		elif e["kind"] == "twin":
 			_twin(v, rec, id, title, mates, used)
 		else:
-			_row(v, title, String(GardenItems.preview(rec, id)["text"]), "Feed", feed.bind(id))
+			_row(v, title, String(GardenItems.preview(rec, id)["text"]), "Feed", feed.bind(id), peek.bind(id, ""))
 	return any
 
 static func _twin(v: VBoxContainer, rec: Dictionary, id: String, title: String, mates: Array, used: Callable) -> void:
@@ -48,12 +50,18 @@ static func add_worn(v: VBoxContainer, rec: Dictionary, changed: Callable) -> vo
 					GardenItems.take_off(rec, id)
 					changed.call())
 
-static func _row(v: VBoxContainer, title: String, desc: String, btn: String, act: Callable) -> void:
+static func _row(v: VBoxContainer, title: String, desc: String, btn: String, act: Callable,
+		peek := Callable()) -> void:
 	var row := UI.hbox(10)
 	var info := UI.vbox(2)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	info.add_child(UI.label(title, 16))
 	info.add_child(UI.label(desc, 12, UI.MUTED))
 	row.add_child(info)
-	row.add_child(UI.button(btn, act, 100))
+	var b := UI.button(btn, act, 100)
+	row.add_child(b)
+	if peek.is_valid():
+		row.mouse_filter = Control.MOUSE_FILTER_PASS
+		for sig in [row.mouse_entered, b.mouse_entered, b.focus_entered]:
+			sig.connect(peek)
 	v.add_child(row)

@@ -31,3 +31,14 @@ dead end. The check fails above 2.0x.
 
 Default taken: "about 2x" is the limit. The alternative is a tighter limit (1.5x), which means
 roughly 1.5x the XP above.
+
+## Shaping items: the preview card
+
+Hold a shaping item (Hold on it in the bag) and walk up to a Boki, or point at its row in the Boki's feed menu:
+`ItemPreviewCard` (scripts/ui/item_preview_card.gd) slides in with every change drawn as a ghost. It shows the stat
+bars with the real gain after caps, the budget and lean rings, and on a branching line the path meter (both finals
+as silhouettes, pips before and after, the verdict, and a Why? list of pip sources). For a second the Boki tries the
+change on: its new colour or the path token. Interact there gives the item; walking away from that Boki ends the
+hold, and the item stays in the bag. The card does no math of its own: it reads `GardenItems.preview`/`after`,
+`EvoPath.pips` and `StatBudget`. `ItemHold` (scripts/home/item_hold.gd) owns the held item; distances and times are
+in content/rules/garden_items.json `hold`. Check: `--item-card-check`; shots: `--item-card-shots --shots-dir=<dir>`.

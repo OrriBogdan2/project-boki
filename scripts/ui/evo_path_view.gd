@@ -15,7 +15,7 @@ const SOURCE_NAMES := {"stat": "stat lead", "lean": "lean", "tokens": "tokens", 
 static func block(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:
 	for p in EvoPath.ink_previews(rec):
 		v.add_child(UI.section("With %s" % String(p["ink_name"]), UI.FAINT.lightened(0.2)))
-		v.add_child(_sil(p["form"], p["name"]))
+		v.add_child(sil(p["form"], p["name"]))
 		if not EvoPath.has_art(p["form"]):
 			v.add_child(UI.para("Art not in the game yet: it will wait.", 12, UI.FAINT))
 	var ln := EvoPath.line(rec)
@@ -25,9 +25,9 @@ static func block(rec: Dictionary, v: VBoxContainer, refresh: Callable) -> void:
 	var pips := EvoPath.pips(rec)
 	v.add_child(UI.section("Path meter", UI.FAINT.lightened(0.2)))
 	var tug := UI.hbox(8)
-	tug.add_child(_sil(ends[0]["form"], ends[0]["name"]))
-	tug.add_child(_bar(EvoPath.total(pips[0]), EvoPath.total(pips[1])))
-	tug.add_child(_sil(ends[1]["form"], ends[1]["name"]))
+	tug.add_child(sil(ends[0]["form"], ends[0]["name"]))
+	tug.add_child(tug_bar(EvoPath.total(pips[0]), EvoPath.total(pips[1])))
+	tug.add_child(sil(ends[1]["form"], ends[1]["name"]))
 	v.add_child(tug)
 	for i in 2:
 		var line_t := "%s %d: %s" % [_name(ends[i]), EvoPath.total(pips[i]), _sources(pips[i], ends[i])]
@@ -69,7 +69,7 @@ static func _sources(list: Array, e: Dictionary) -> String:
 		parts.append("%s %d" % [what, int(p["count"])])
 	return ", ".join(parts)
 
-static func _sil(form: String, nm: String) -> Control:
+static func sil(form: String, nm: String) -> Control:
 	var box := UI.vbox(2)
 	var shape := Panel.new()
 	shape.custom_minimum_size = SIL
@@ -81,7 +81,7 @@ static func _sil(form: String, nm: String) -> Control:
 	box.add_child(UI.label(nm if EvoPath.known(form) else "?", UI.T_SMALL, UI.MUTED))
 	return box
 
-static func _bar(a: int, b: int) -> Control:
+static func tug_bar(a: int, b: int) -> Control:
 	var bar := UI.hbox(0)
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
