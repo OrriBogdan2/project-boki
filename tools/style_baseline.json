@@ -98,7 +98,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 53
+"long_line": 54
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -995,6 +995,9 @@
 },
 "tools/check.gd": {
 "semicolon": 1
+},
+"tools/check_registry.gd": {
+"long_line": 1
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,

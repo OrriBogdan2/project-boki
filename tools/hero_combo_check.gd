@@ -1065,8 +1065,9 @@ func _gunslinger() -> void:
 	K.ch_rmb = 0.0
 	P.hp = 40.0
 	T.hp = 0.0
-	T.downed = true
-	K.on_deal(T, 5.0, {"src": "abil", "ab": "k1"})
+	K.on_knock(T, false)
+	ok("Assist: no Slipstep or Burr reset (knocks only)", P.dashes < 1.0 and float(K.cd["rmb"]) > 0.0)
+	K.on_knock(T, true)      # (KnockCredit.settle calls it for the knocker)
 	ok("Knock: no Slipstep or heal from the kit (both are DashReset's, so nothing double-fires)",
 			P.hp < 41.0 and P.dashes < 0.5, "hp %.1f, dashes %.2f" % [P.hp, P.dashes])
 	ok("Knock at rank 3: Burr Charge resets", K.ch_rmb >= 1.0 and float(K.cd["rmb"]) == 0.0)

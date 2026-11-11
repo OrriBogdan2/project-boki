@@ -331,6 +331,7 @@ func tick_status(dt: float) -> void:
 			burn_acc = maxf(burn_acc - BURN_EVERY, 0.0) if burn_t > 0.0 else 0.0
 			if not remote:
 				hp -= lump
+				KnockCredit.note(m, burn_by, self)      # a burn is damage inside the assist window too
 				m.fx.number(pos + Vector3(0, 1.4, 0), lump, Color("ff9a4a"), false)
 				if hp <= 0.0:
 					_on_zero(burn_by, {"src": "burn"})
