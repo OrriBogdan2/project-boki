@@ -113921,5 +113921,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2s_crofthorn_bk3_2.jpg",
     "ok": true
+  },
+  {
+    "id": "v2p_dribbara_bk3",
+    "name": "Dribbara (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_dribbara_bk3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthollow_bk3",
+    "name": "Crofthollow (V2 sheet from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2s_crofthollow_bk3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_crofthorn_bk3",
+    "name": "Crofthorn (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_crofthorn_bk3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_crofthollow_bk3",
+    "name": "Crofthollow (V2 portrait from card)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/v2p_crofthollow_bk3_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_crofthorn_bk3",
+    "name": "Crofthorn (V2 portrait from card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/v2p_crofthorn_bk3_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthollow_bk3",
+    "name": "Crofthollow (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_crofthollow_bk3_4.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2p_dribbara_bk3",
+    "name": "Dribbara (V2 portrait from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2p_dribbara_bk3_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_crofthorn_bk3",
+    "name": "Crofthorn (V2 sheet from card)",
+    "run": 4,
+    "file": "briefs/boki-art/batch/out/v2s_crofthorn_bk3_4.jpg",
+    "ok": true
   }
 ]
