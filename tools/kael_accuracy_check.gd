@@ -317,7 +317,7 @@ func slam_combo() -> void:
 	A.step(m, 0.1)
 	var t2_up := T2.pos.y - P.pos.y
 	A.ok("jug combo: the landing knocks down and spikes the airborne foe beside him to the ground",
-			D.spiked == 1 and fall <= -10.0 and T2.stun_t > 0.0 and t2_up < 0.3 and A.dmg(T2) >= 18.0,
+			D.spiked == 1 and fall <= -10.0 and T2.stun_t > 0.0 and t2_up < 0.3 and A.dmg(T2) >= 14.0,
 			"spiked %d vy %.1f stun %.2f %.2f m up took %.0f" % [D.spiked, fall, T2.stun_t, t2_up, A.dmg(T2)])
 	A.ok("jug combo: the chain still holds the foe after the slam", W.hooked() and W.target == T, W.state)
 	_air(m, P, 0.12)

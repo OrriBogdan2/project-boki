@@ -37,10 +37,14 @@ no such upgrade). LMB and the passive have no tiers in the data and do not rank;
 
 ## Scaling
 
-Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam 52, Spin 54, Flame Step 18
-with tip 36, R 130) is kept as ratios: slash 8 (tip 16), Slam 26, Lunge 14 to 22, Meteor 18, Spin 18, Rampage 7
-with tip 14, Gilded Riposte 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
-Chains, so ours is 22s against the Warchain's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
+Time to knock (docs/TTK.md, PARITY FIRST): each hit is the source's share of a target, Brall's number over the
+source's 1285 mean Base HP times our 154 mean health: slash 5.2 (43), Searing Wave 7.7 -> 12.8 (fireblast 107),
+Slam 15.6 (130), Lunge 7.1 -> 10.1 (84), Meteor 10.5 (88), Spin 11.9 (99), Rampage 2 along it + tip 4 (49 for the
+whole dash attack; the tip doubling is ours), Warchain 3.6 (30). The Haul Slam (8 -> 15.1) has no source number and
+keeps its place beside the Lunge (x0.5 with it). Pinned as ratios to the slash in content/rules/kit_parity.json.
+Before that the kit was kept as ratios to the footage's numbers (slash 8, Slam 26, Lunge 14 to 22, Meteor 18,
+Spin 18, Rampage 9 with tip 18), 1.5 to 4.6x the source per hit. The Gilded Riposte (43) is an ult,
+left out of the TTK combo and not tuned here. Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
 specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 7.2s slot (9s against the Smash's 2.5s, kept as the
 ratio 3.6x of our 2s), 2.4s shorter at rank 3 (the -3s as a third of its cooldown); the Rampage tip no longer stuns into
 a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Warchain loses its refund for the data's
@@ -123,7 +127,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
 | LMB tip 2.0x | LOW | (b) | 1.6x (the footage's 151 / 94). "juggernaut LMB tap: a slash, 1.6x at the tip ..." |
 | LMB hold Shift-cancel, self-release | MED | (a)+(b) | Shift keeps the charge (item 51, 53820b53); the self-release at full + 0.5 s is gone (the owner's hold scales; no data rule) |
-| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 10.4 s (0.8 x 13) |
+| Shift numbers | LOW | (b) | 2 along it, tip 4 (the data's 49 = 1.14x a slash for pass and tip together; docs/TTK.md), cooldown 10.4 s (0.8 x 13) |
 | Air dash shove | LOW | (b) | no shove (no source) |
 | R cooldown / damage | MED | (b) | 36 s (0.8 x 45) and 43 (the data's 230 = 5.35x a slash) |
 | R fx (guard ring, self-shake) | LOW | (b)+(c) | the guard-start ring is gone; the shake is ext/no-shake's |
