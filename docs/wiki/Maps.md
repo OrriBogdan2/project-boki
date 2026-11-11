@@ -7,12 +7,12 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
-| The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
+| Training Grounds | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 305 x 305 | 11 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
 
-## The Arena
+## Training Grounds
 
 The practice arena: one round floor ringed by low ruin walls with four gates, four 2x2 stone blocks to slam people into, a raised dais on the north side for high ground, two patches of tall grass, and a small bench islet to the south across a short bridge (where the generator puts spawn points; the arena itself teleports you to the floor). No monsters, chests or breakables are spawned on it.
 
@@ -20,7 +20,7 @@ The practice arena: one round floor ringed by low ruin walls with four gates, fo
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Arena | grove | Meadow | quiet | 2 |  |
+| Training Grounds | grove | Meadow | quiet | 2 |  |
 | Bench | grove | Meadow | quiet | 0 |  |
 
 **Getting around:** 1 bridges.
