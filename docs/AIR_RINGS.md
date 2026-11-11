@@ -20,6 +20,14 @@ air rings lay readable air routes between regions and up to high ground. Code: `
 Both give a whoosh, a ring flash and the "rings" stat (the Ring Runner challenge). Rings are the same on every
 peer; each peer runs them for the hunters it moves, so nothing new is synced.
 
+## Telling them apart (shape first, colour second)
+Colour-blind safe: the two kinds differ in outline, not only in hue (both on the shared cel material, no new shader).
+- **Glide ring:** a *hexagon* standing across the lane, with a trail of flat *arrowheads* on the lane pointing to the
+  next ring (to the landing, for the last ring), so from the ring you are in you see where the next one is.
+- **Lift ring:** a *round* hoop lying flat, with three *cones* pointing up over it.
+Three meshes a ring; the hoop's cel material, the arrowhead trail (by length) and the cone stack are shared.
+Stills: `--air-rings-shots` (match camera and Cam.skydive), `docs/shots/vfx-air-rings-read/`.
+
 ## Map data (content/maps/hollowcrown.json, written by tools/make_hollowcrown.py)
 Re-placing the routes for a new layout means editing two lists in the generator, nothing in code:
 - `glides[]` with `rings: true` is an **air lane**: `{name, a, b, take, land, rings}`. One entry runs both ways

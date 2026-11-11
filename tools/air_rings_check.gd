@@ -45,6 +45,7 @@ func run(main: Node) -> void:
 		(P.kin as Kin).stow()
 	P.ctrl = "local"
 	_layout()
+	_look()
 	for i in m.air_rings.lanes.size():
 		_fly(i, false)
 		_fly(i, true)
@@ -57,6 +58,27 @@ func run(main: Node) -> void:
 	ok(bot_lifts >= 2, "bots take lift rings by themselves (%d)" % bot_lifts)
 	print("AIRRINGS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
+
+## The two kinds differ in shape, not only colour: a glide ring is a hexagon with arrowheads along the lane
+## stopping short of the next ring; a lift ring is round with cones rising over it. Three meshes a ring.
+func _look() -> void:
+	var bad_look := 0
+	for rg in m.air_rings.list:
+		var node: Node3D = rg["node"]
+		var hoop := (node.get_node("Ring") as MeshInstance3D).mesh as TorusMesh
+		var arrows := node.get_node_or_null("Arrows") as MeshInstance3D
+		if node.get_child_count() != 3 or arrows == null or hoop.rings != (32 if rg["lift"] else 6):
+			bad_look += 1
+			continue
+		var next := m.air_rings._ahead(rg)
+		var span := arrows.mesh.get_aabb()
+		if not rg["lift"] and span.end.z > next - AirRings.ARROW_START * 0.5:
+			bad_look += 1
+	ok(bad_look == 0, "glide rings: hexagon + arrow trail; lift rings: round + cones (%d wrong)" % bad_look)
+	var kinds := {}
+	for rg in m.air_rings.list:
+		kinds[((rg["node"] as Node3D).get_node("Arrows") as MeshInstance3D).mesh] = true
+	ok(kinds.size() <= 6, "arrowhead meshes are shared by trail length (%d distinct)" % kinds.size())
 
 func _park(h: Hunter) -> void:
 	h.teleport(Vector3(-500, 50, -500))

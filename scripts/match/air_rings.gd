@@ -12,6 +12,14 @@ const GLIDE_COL := Color("5ad0f0")     # cyan: speed
 const LIFT_COL := Color("ffd27a")      # warm gold, the updraft column's colour: height
 const BODY_Y := 0.8                    # m: a hunter's body over its feet (what goes through a ring)
 const TIP_R := 9.0                     # m: the first time you come this close to a ring, the tip shows
+const HEX_SCALE := 1.1                 # a glide ring's hexagon circumradius, of look_r (its flats then sit near look_r)
+const ARROW_START := 2.5               # m: first arrowhead of a glide ring's trail, from the ring
+const ARROW_STEP := 3.2                # m between arrowheads on the trail
+const ARROW_LEN := 1.3                 # m: one arm of an arrowhead
+const ARROW_SWEEP := 0.75              # rad: how far an arm sweeps back from the lane
+const CONE_R := 0.7                    # m: base radius of the lowest cone over a lift ring
+const CONE_H := 0.9                    # m: height of each cone
+const CONE_STEP := 1.1                 # m between cones, rising over the ring
 const CLIMB_EASE := 2.5                # 1/s and m/s per m: the lane pulls you to its height (as a wind road does)
 
 var n := 0                     # rings flown through this match (SIMSTAT)
@@ -90,13 +98,25 @@ func _init(m: Match) -> void:
 	_m = m
 	for rg in m.world.rings:
 		var lift: bool = rg.get("lift", false)
-		var node := ring_node(lift)
+		var node := ring_node(lift, _ahead(rg))
 		node.position = rg["pos"]
 		if not lift:
 			node.rotation.y = atan2(float(rg["dir"].x), float(rg["dir"].y))
 		m.add_child(node)
 		list.append({"pos": rg["pos"], "dir": rg["dir"], "lift": lift, "lane": _lane_of(rg), "node": node, "cd": {},
 			"top": rg.get("top", 0.0), "onto": rg.get("onto", Vector3.INF)})
+
+## How far the next ring of this lane is from `rg` (the landing, for the last one): the length of its trail.
+func _ahead(rg: Dictionary) -> float:
+	if rg.get("lift", false):
+		return 0.0
+	var best: float = Vector3(rg["b"].x - rg["pos"].x, 0, rg["b"].z - rg["pos"].z).length()
+	for o in _m.world.rings:
+		if o != rg and o.get("a") == rg["a"] and o.get("b") == rg["b"]:
+			var d := Vector2(o["pos"].x - rg["pos"].x, o["pos"].z - rg["pos"].z)
+			if d.dot(rg["dir"]) > 0.0:
+				best = minf(best, d.length())
+	return best
 
 func _lane_of(rg: Dictionary) -> int:
 	if not rg.has("a"):
@@ -107,25 +127,78 @@ func _lane_of(rg: Dictionary) -> int:
 	lanes.append({"a": rg["a"], "b": rg["b"]})
 	return lanes.size() - 1
 
-## A ring: a glowing hoop that reads from across the map, standing up along its lane (cyan) or lying
-## flat over its updraft (gold), with a faint film across it. Static: rings don't spin.
-static func ring_node(lift: bool) -> Node3D:
+## A ring tells its kind by shape as well as colour. A glide ring (cyan) is a hexagon standing across its lane
+## with a trail of arrowheads pointing along the lane to the next ring (or the landing); a lift ring (gold)
+## is a round hoop lying flat over its updraft with a stack of arrowheads rising above it. Static: rings don't
+## spin. `ahead` is the distance to the next ring along the lane (the trail's length), 0 for a lift ring.
+static func ring_node(lift: bool, ahead := 0.0) -> Node3D:
 	var root := Node3D.new()
 	var col := LIFT_COL if lift else GLIDE_COL
-	var radius := r("look_r")
+	var radius := r("look_r") * (1.0 if lift else HEX_SCALE)
 	var tube := TorusMesh.new()
 	tube.inner_radius = radius - 0.16
 	tube.outer_radius = radius + 0.16
-	tube.rings = 32
+	tube.rings = 32 if lift else 6
 	tube.ring_segments = 8
 	var tilt := Vector3.ZERO if lift else Vector3(PI / 2, 0, 0)
-	var hoop := Models.part(root, tube, Models.toon(col, true, 0.9), Vector3.ZERO, Vector3.ONE, tilt, "Ring")
+	var hoop := Models.part(root, tube, _mat(col, true), Vector3.ZERO, Vector3.ONE, tilt, "Ring")
 	hoop.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var film_mat := Models.glow_mat(Color(col.lightened(0.4), 0.14))
-	var film := Models.part(root, Models.cyl(radius - 0.12, radius - 0.12, 0.02, 24), film_mat,
+	var film := Models.part(root, _film(radius - 0.12, lift), film_mat,
 		Vector3.ZERO, Vector3.ONE, Vector3.ZERO if lift else Vector3(PI / 2, 0, 0), "Film")
 	film.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var marks := _lift_marks() if lift else _trail(ahead)
+	if marks != null:
+		var arrows := Models.part(root, marks, _mat(col.lightened(0.25), false), Vector3.ZERO, Vector3.ONE,
+			Vector3.ZERO, "Arrows")
+		arrows.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return root
+
+## The film across a ring: a disc, or a hexagon to match a glide ring's hoop.
+static func _film(radius: float, lift: bool) -> Mesh:
+	if lift:
+		return Models.cyl(radius, radius, 0.02, 24)
+	var hex := CylinderMesh.new()
+	hex.top_radius = radius
+	hex.bottom_radius = radius
+	hex.height = 0.02
+	hex.radial_segments = 6
+	return hex
+
+static var _mats := {}         # "color|outline" -> the cel material, shared by every ring of that look
+static var _marks := {}        # trail length in arrowheads (or "lift") -> its merged mesh
+
+static func _mat(c: Color, outline: bool) -> ShaderMaterial:
+	var key := "%s|%s" % [c.to_html(), outline]
+	if not _mats.has(key):
+		_mats[key] = Models.toon(c, outline, 0.9)
+	return _mats[key]
+
+## Arrowheads lying flat along the lane (local +Z) every ARROW_STEP m from the ring toward the next one.
+static func _trail(ahead: float) -> Mesh:
+	var count := int((ahead - 2.0 * ARROW_START) / ARROW_STEP) + 1
+	if count < 1:
+		return null
+	if not _marks.has(count):
+		var st := SurfaceTool.new()
+		var bar := Models.box(ARROW_LEN, 0.12, 0.3)
+		for k in count:
+			var z := ARROW_START + ARROW_STEP * k
+			for side in [-1.0, 1.0]:
+				var t := Transform3D(Basis(Vector3.UP, side * ARROW_SWEEP), Vector3(-side * ARROW_LEN * 0.4, 0.0, z))
+				st.append_from(bar, 0, t)
+		_marks[count] = st.commit()
+	return _marks[count]
+
+## Three cones pointing up, rising over a lift ring.
+static func _lift_marks() -> Mesh:
+	if not _marks.has("lift"):
+		var st := SurfaceTool.new()
+		for k in 3:
+			var cone := Models.cyl(0.0, CONE_R - 0.12 * k, CONE_H, 8)
+			st.append_from(cone, 0, Transform3D(Basis.IDENTITY, Vector3(0, CONE_STEP * (k + 1), 0)))
+		_marks["lift"] = st.commit()
+	return _marks["lift"]
 
 ## Every step, after the hunters move: rings flown through, and the hold of the last glide ring.
 func tick(dt: float) -> void:
