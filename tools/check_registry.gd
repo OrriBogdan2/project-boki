@@ -45,6 +45,8 @@ const CHECKS := {
 	"--capture-check": ["res://tools/capture_check.gd", "capture_check", null],
 	"--teammate-check": ["res://tools/teammate_check.gd", "teammate_check", null],
 	"--airheal-check": ["res://tools/airheal_check.gd", "airheal_check", null],
+	"--safe-area-check": ["res://tools/safe_area_check.gd", "safe_area_check", "check"],
+	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
@@ -275,6 +277,7 @@ const CHECKS := {
 	"--loading-check": ["res://tools/loading_check.gd", "loading_check", null],      # the loading screen: splash, tip, bar
 	"--ride-pick-check": ["res://tools/ride_pick_check.gd", "ride_pick_check", "check"],      # the Boki riding with you
 	"--ride-pick-shots": ["res://tools/ride_pick_check.gd", "ride_pick_check", "shots"],      # --shots-dir=<dir> (GPU)
+	"--prematch-shots": ["res://tools/prematch_shots.gd", "prematch_shots", null],      # lobby shots + its own safe-area scan
 	"--hero-title-check": ["res://tools/hero_title_check.gd", "hero_title_check", null],
 	"--bot-names-check": ["res://tools/bot_names_check.gd", "bot_names_check", null],      # bots wear gamer tags
 	"--bot-names-shots": ["res://tools/bot_names_shots.gd", "bot_names_shots", null],
