@@ -55,6 +55,7 @@ func run(main: Node) -> void:
 		ok(shown_name.begins_with(HeroTitle.base_name(id) + " the ") and not shown_name.contains("the The"),
 				"%s shows as '%s', with no gender line" % [id, shown_name])
 	_lore_check()
+	_results_name_line(main)
 	print("HEROTITLE CHECK DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -100,3 +101,16 @@ func _old_name_in(text: String) -> String:
 
 func _all_titles() -> Array:
 	return Arch.ids().map(func(id): return HeroTitle.title(id))
+
+## The results screen puts the player name in the outcome ("Hunter made it out"),
+## never the player name as if it were a title ("Hunter the Hired Gun").
+func _results_name_line(main: Node) -> void:
+	var screen: Control = load("res://scripts/ui/results.gd").new()
+	main.add_child(screen)
+	screen.show_result({"extracted": true, "knocks": 1, "armor_tier": 1, "time": 60.0})
+	var texts: Array = screen.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	var player := String(Save.d.get("name", "Hunter"))
+	var want := "%s made it out" % player.substr(0, 16)
+	ok(texts.has(want), "results: the title is '%s'" % want)
+	ok(not texts.any(func(t): return String(t).begins_with(player + " the ")), "results: no 'Name the Title' line")
+	screen.queue_free()
