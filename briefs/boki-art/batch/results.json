@@ -112773,5 +112773,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/v2p_tiltster_lt_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px9c_tiltster",
+    "name": "Tiltster (pixel sprite 80, lighter card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9c_tiltster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9c_rimink",
+    "name": "Rimink (pixel sprite 80, lighter card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9c_rimink_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9c_tiltster",
+    "name": "Tiltster (pixel sprite 80, lighter card)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9c_tiltster_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9c_rimink",
+    "name": "Rimink (pixel sprite 80, lighter card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9c_rimink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "gclean_meteorab_rc",
+    "name": "Meteorab (sheet: erase ghost row)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/gclean_meteorab_rc_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "gclean_meteorab_rc",
+    "name": "Meteorab (sheet: erase ghost row)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/gclean_meteorab_rc_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "gclean_meteorab_rc",
+    "name": "Meteorab (sheet: erase ghost row)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/gclean_meteorab_rc_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_meteorab_rc2",
+    "name": "Meteorab (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_meteorab_rc2_1.jpg",
+    "ok": true
   }
 ]
