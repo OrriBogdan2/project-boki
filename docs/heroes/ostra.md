@@ -275,7 +275,9 @@ clip that far in on the kit's clock (docs/art/wardens/CLIPS.md); kit numbers unt
 | X (`ostra_well`) | a hand thrust on the press, a 1.0 s dome [f23-f32] | arms out 0.13, held from 0.27, dome 1.0 s | same | matches |
 | X opens (`ostra_well_snap`) | the vortex opens, he is free [f33] | 0.00 / 0.03 / 0.57, free at the open | same | matches; asserted |
 | R | the Boki Merge (`mf_xform`, ours) | 0.80 | same | no source |
-Not in the slots: `ostra_flurry` has no caller on main; `ostra_empower` (Swollen, 0.9 s) has no source frame.
+
+Not in the slots: `ostra_flurry` is cut (no caller, `--dead-kmoves-check`); `ostra_empower` (Swollen, 0.9 s) has no source frame.
+
 ## Engine notes
 - Kit `scripts/arch/kits/ostra_kit.gd`; looks `kit_looks.gd` (pooled skins, aura, stun crown, column); the seed's drum in
   HeroZones.seed_visual (shaders/void_glass.gdshader). Every shot goes through spawn_shot.
