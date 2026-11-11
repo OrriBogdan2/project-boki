@@ -3,7 +3,7 @@
 	"id": "stormcoat",
 	"name": "Resonance",
 	"flavor": "Echolop hums over you for 6s: 30% faster, every dash back, and each shot echoes to a second foe.",
-	"theme": "echo",
+	"theme": "sound",
 	"duration": 6,
 	"passives": [
 		{

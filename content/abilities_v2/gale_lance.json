@@ -4,7 +4,7 @@
 	"name": "Gale Lance",
 	"short": "Lance",
 	"flavor": "Zephyrak spears 8m through the air, shocking everything it passes, then bursts in a ring of wind that throws foes back and arcs lightning to two more.",
-	"theme": "tempest",
+	"theme": "flying",
 	"tier": 1,
 	"from": "kin",
 	"range": 8,

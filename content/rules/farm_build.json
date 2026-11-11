@@ -1,5 +1,7 @@
 {
 	"desc": "The farm building pass (docs/decisions/0004-farm-building.md). Farm level is points from play; items unlock by farm level or a milestone; new buildings are construction sites that you hammer (hold interact) and your Boki help build; the materials are spent a quarter at a time as the work goes; buildings upgrade L1 to L3. Units: gems and materials are counts, labour is work swings (one hammer beat of yours is 0.8 s, one swing of a Boki is about 3 s at building skill 1).",
+	"base_mode": false,
+	"base_mode_doc": "GARDEN.md section 8: true shrinks the farm to the Boki base. Build mode shows only Buildings, Garden and Island; no axe, pickaxe or wild chopping; no work stations, wild or haul jobs (Boki knacks still run the plot, mend and incubator chores); no Exchange, Sell tab, tools or crop-chain goods at the market. Nothing is deleted: false changes nothing, and saves are untouched either way.",
 	"points": {"extracts": 3.0, "bosses": 6.0, "caught": 2.0, "hatched": 2.0, "harvested": 0.25, "built": 2.0, "fb_built": 2.0},
 	"points_doc": "Farm points = sum(stat * weight). 'built' counts the lot buildings you built, 'fb_built' the buildings Boki finished on the farm.",
 	"levels": [0, 6, 16, 30, 48, 70],

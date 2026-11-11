@@ -50,14 +50,14 @@
 		"flavor": "No Boki at your side: a weak burst of resolve. 3s of 10% more damage, speed and faster abilities."
 	},
 	"types": {
-		"venom": {
+		"poison": {
 			"style": "nova",
 			"parts": [
 				"fangs",
 				"tail",
 				"crest"
 			],
-			"word": "VENOM",
+			"word": "POISON",
 			"rider": {
 				"burn": 5.0,
 				"burn_for": 3.0
@@ -86,14 +86,14 @@
 				"slow_s": 1.4
 			}
 		},
-		"gravity": {
+		"psychic": {
 			"style": "quake",
 			"parts": [
 				"plates",
 				"spikes",
 				"halo"
 			],
-			"word": "GRAVITY",
+			"word": "PSYCHIC",
 			"rider": {
 				"kb": -3.5
 			},
@@ -102,14 +102,14 @@
 				"kb": -4.0
 			}
 		},
-		"prism": {
+		"crystal": {
 			"style": "prism",
 			"parts": [
 				"crest",
 				"halo",
 				"wings"
 			],
-			"word": "PRISM",
+			"word": "CRYSTAL",
 			"rider": {
 				"chain": 0.35
 			},
@@ -118,14 +118,14 @@
 				"chain": 0.35
 			}
 		},
-		"lunar": {
+		"fairy": {
 			"style": "spiral",
 			"parts": [
 				"halo",
 				"wings",
 				"crest"
 			],
-			"word": "LUNAR",
+			"word": "FAIRY",
 			"rider": {
 				"leech": 0.06
 			},
@@ -134,14 +134,14 @@
 				"leech": 0.06
 			}
 		},
-		"echo": {
+		"sound": {
 			"style": "storm",
 			"parts": [
 				"antennae",
 				"crest",
 				"wings"
 			],
-			"word": "ECHO",
+			"word": "SOUND",
 			"rider": {
 				"chain": 0.3
 			},
@@ -150,14 +150,14 @@
 				"chain": 0.3
 			}
 		},
-		"ember": {
+		"fire": {
 			"style": "pillar",
 			"parts": [
 				"horns",
 				"crest",
 				"tail"
 			],
-			"word": "EMBER",
+			"word": "FIRE",
 			"rider": {
 				"burn": 7.0,
 				"burn_for": 2.5
@@ -168,14 +168,14 @@
 				"burn_for": 2.5
 			}
 		},
-		"frost": {
+		"ice": {
 			"style": "bloom",
 			"parts": [
 				"spikes",
 				"crest",
 				"halo"
 			],
-			"word": "FROST",
+			"word": "ICE",
 			"rider": {
 				"slow_k": 0.35,
 				"slow_s": 1.8
@@ -186,14 +186,14 @@
 				"slow_s": 1.6
 			}
 		},
-		"storm": {
+		"electric": {
 			"style": "storm",
 			"parts": [
 				"wings",
 				"crest",
 				"antennae"
 			],
-			"word": "STORM",
+			"word": "ELECTRIC",
 			"rider": {
 				"chain": 0.4
 			},
@@ -202,14 +202,14 @@
 				"chain": 0.4
 			}
 		},
-		"stone": {
+		"rock": {
 			"style": "quake",
 			"parts": [
 				"plates",
 				"horns",
 				"spikes"
 			],
-			"word": "STONE",
+			"word": "ROCK",
 			"rider": {
 				"kb": 4.5
 			},
@@ -218,14 +218,14 @@
 				"kb": 5.0
 			}
 		},
-		"bloom": {
+		"grass": {
 			"style": "bloom",
 			"parts": [
 				"crest",
 				"wings",
 				"halo"
 			],
-			"word": "BLOOM",
+			"word": "GRASS",
 			"rider": {
 				"leech": 0.07
 			},
@@ -234,14 +234,14 @@
 				"leech": 0.07
 			}
 		},
-		"shadow": {
+		"dark": {
 			"style": "spiral",
 			"parts": [
 				"horns",
 				"wings",
 				"tail"
 			],
-			"word": "SHADOW",
+			"word": "DARK",
 			"rider": {
 				"slow_k": 0.2,
 				"slow_s": 1.2,
@@ -253,14 +253,14 @@
 				"slow_s": 1.2
 			}
 		},
-		"titan": {
+		"steel": {
 			"style": "quake",
 			"parts": [
 				"horns",
 				"plates",
 				"spikes"
 			],
-			"word": "TITAN",
+			"word": "STEEL",
 			"rider": {
 				"kb": 5.5
 			},
@@ -269,14 +269,14 @@
 				"kb": 6.0
 			}
 		},
-		"swarm": {
+		"bug": {
 			"style": "storm",
 			"parts": [
 				"antennae",
 				"wings",
 				"spikes"
 			],
-			"word": "SWARM",
+			"word": "BUG",
 			"rider": {
 				"burn": 3.5,
 				"burn_for": 2.0,
@@ -288,14 +288,14 @@
 				"burn_for": 2.0
 			}
 		},
-		"tempest": {
+		"flying": {
 			"style": "storm",
 			"parts": [
 				"wings",
 				"crest",
 				"halo"
 			],
-			"word": "TEMPEST",
+			"word": "FLYING",
 			"rider": {
 				"chain": 0.45
 			},
