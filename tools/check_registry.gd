@@ -24,7 +24,8 @@ const CHECKS := {
 	"--ways-out-sfx-check": ["res://tools/ways_out_sfx_check.gd", "ways_out_sfx_check", null],      # the Ways Out calls
 	"--carry-boki-check": ["res://tools/carry_boki_check.gd", "carry_boki_check", null],      # lifting a Boki
 	"--emote-shots": ["res://tools/emote_shots.gd", "emote_shots", null],      # the emote wheel, Hunters side by side
-	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],      # the Heartspark carry layer
+	# the Heartspark carry layer
+	"--carry-pose-check": ["res://tools/carry_pose_check.gd", "carry_pose_check", null],
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--item-pages-check": ["res://tools/item_pages_check.gd", "item_pages_check", null],      # GARDEN_MODERN.md 5
@@ -191,7 +192,8 @@ const CHECKS := {
 	# Meeko's sun and cloud orbit her, bob, clear the wings
 	"--meeko-orbit-check": ["res://tools/meeko_orbit_check.gd", "meeko_orbit_check", null],
 	"--meeko-orbit-shots": ["res://tools/meeko_orbit_shots.gd", "meeko_orbit_shots", null],   # frames of that orbit
-	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],      # glide, turn, dive, close, air dash (GPU)
+	# glide, turn, dive, close, air dash (GPU)
+	"--glide-shots": ["res://tools/glide_shots.gd", "glide_shots", null],
 	"--pond-shots": ["res://tools/pond_shots.gd", "pond_shots", null],      # every Hunter on the pond walk (wade, swim)
 	"--idle-break-check": ["res://tools/idle_break_check.gd", "idle_break_check", null],      # WardenBreak
 	"--idle-break-shots": ["res://tools/idle_break_shots.gd", "idle_break_shots", null],      # WardenBreak frames
@@ -204,7 +206,8 @@ const CHECKS := {
 	"--lockin-shots": ["res://tools/lockin_shots.gd", "lockin_shots", null],      # the lobby lock-in poses (GPU)
 	"--recoil-shots": ["res://tools/recoil_shots.gd", "recoil_shots", null],      # the shot kick, before and after
 	"--layer-verify": ["res://tools/layer_verify.gd", "layer_verify", null],      # the layers over walk and run
-	"--result-pose-shots": ["res://tools/result_pose_shots.gd", "result_pose_shots", null],      # every Hunter's win, lose and board beat
+	# every Hunter's win, lose and board beat
+	"--result-pose-shots": ["res://tools/result_pose_shots.gd", "result_pose_shots", null],
 	"--rooted-shots": ["res://tools/rooted_shots.gd", "rooted_shots", null],      # rooted Hunters casting, legs planted
 	"--crouch-check": ["res://tools/crouch_check.gd", "crouch_check", null],
 	"--crouch-shots": ["res://tools/crouch_shots.gd", "crouch_shots", null],

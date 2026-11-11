@@ -3682,7 +3682,8 @@ func _play_evolutions() -> void:
 	n.remove_child(lbl)
 	nn.add_child(lbl)
 	if k.has("say") and is_instance_valid(k["say"]):
-		n.remove_child(k["say"]); nn.add_child(k["say"])
+		n.remove_child(k["say"])
+		nn.add_child(k["say"])
 	k.erase("bubble")
 	k["node"] = nn
 	var seen := EvolveMoment.on_screen(cam, at) and EvolveMoment.has_model(nn)
@@ -4925,7 +4926,8 @@ func _make_egg(rec: Dictionary, ok: Dictionary) -> void:
 	Save.save_game()
 	_close_panel()
 	_refresh_nest()
-	nesting = NookMoment.play(self, fx, kins, [rec["uid"], ok["uid"]], nest, Data.KIN[esp]["color"], Care.unstable_mix(rec, ok))
+	nesting = NookMoment.play(self, fx, kins, [rec["uid"], ok["uid"]], nest, Data.KIN[esp]["color"],
+			UnstableMix.unstable(rec, ok))
 	if nesting == null:
 		fx.burst(NEST_AT + Vector3(0, 0.6, 0), Color("ff8fb0"), 24, 3.0)
 	Sfx.play("unlock")

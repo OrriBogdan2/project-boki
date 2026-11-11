@@ -717,8 +717,9 @@ func _loco(s: Dictionary, dt: float) -> void:
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
 	var diving := bool(s.get("diving", false))
+	var gliding := bool(s.get("gliding", false)) or diving
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	glide_w = move_toward(glide_w, 1.0 if diving or bool(s.get("gliding", false)) else 0.0, dt / AIR_FADE)
+	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
 	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)

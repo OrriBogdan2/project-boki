@@ -3,7 +3,7 @@ extends RefCounted
 ## The beat when two Boki are paired at the Nesting Nook (briefs/design/GARDEN.md section 6), about 4 s,
 ## in the world: both walk to the nest, face each other, nuzzle (their happy hop), circle the nest once,
 ## settle side by side (their nap), and the egg fades in between them with a soft glow. An unstable mix
-## (Care.unstable_mix) gets a wobble on the egg. The camera eases in the way the evolve moment's does.
+## (UnstableMix.unstable) gets a wobble on the egg. The camera eases in the way the evolve moment's does.
 ## Any key skips to the end. It is only a show: the egg and the save are made before it starts and it
 ## writes nothing. Boki that are far, busy or away get no beat (play returns null): the egg just appears.
 
