@@ -14,8 +14,9 @@ func _shot(shot_name: String) -> void:
 
 func _cards_into_view(home: Node) -> void:
 	var sc: ScrollContainer = home._panel_scroll()
-	if sc:
-		sc.scroll_vertical = int(sc.get_v_scroll_bar().max_value)
+	for c in sc.find_children("*", "PanelContainer", true, false):
+		if c.has_meta("mode"):
+			sc.ensure_control_visible(c)
 
 func run(m: Node) -> void:
 	main = m
@@ -50,7 +51,8 @@ func run(m: Node) -> void:
 		await main.get_tree().process_frame
 		_cards_into_view(home)
 		await _shot("panel_" + mode)
-	main.show_screen("lobby", {})
+	await main.show_screen("lobby", {})
+	await main.get_tree().create_timer(2.5).timeout
 	await _shot("lobby_solos")
 	print("MODE-CARDS-SHOT DONE")
 	main.get_tree().quit()
