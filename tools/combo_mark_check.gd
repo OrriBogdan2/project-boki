@@ -1,7 +1,7 @@
 extends RefCounted
 ## The overhead combo tag (scripts/ui/combo_mark.gd) for Sable's Marks, Vex's Daze, Sparkle's Static,
-## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, Gil's splash marks, and Kael's Slam window (a knock
-## readies the Riposte) and Warchain hold (the pull):
+## Cinder's Ignite (Ablaze/Flashover), Neve's Chill and Meeko's Kindle, Gil's splash marks, and Kael's Slam
+## window (a knock readies the Riposte) and Warchain hold (the pull):
 ## it reads the kit's own status (ArchKit.combo_read), so it shows while the status runs, counts down, is
 ## gone when the status ends, belongs only to the hunter who applied it, and the payoff hit flashes the body.
 ## Run from each kit's combo check: `await load(...).new().run(ok, ac, "thief")`.
