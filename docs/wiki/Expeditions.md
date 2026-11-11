@@ -22,6 +22,8 @@ want to land (bots ping too). Then the skyship crosses the map.
   squad lands together. **P** passes the lead to a squadmate riding with you (or click a name on the map).
 - **Jump** jumps out of the rocket early: you free-fall (slower than the rocket) and **Jump** again opens
   your glider to travel further. Anyone still aboard the ship at the far side is launched.
+- The first launch shows a one-line hint, once per save each: the leader (or a solo) "You steer the rocket",
+  a rider how to jump out and open the glider. It goes as soon as you steer, jump out or land.
 - Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
