@@ -112024,5 +112024,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_thrumbird_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_tinbrock",
+    "name": "Tinbrock (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_tinbrock_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_tiltster",
+    "name": "Tiltster (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_tiltster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_tidalisk",
+    "name": "Tidalisk (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_tidalisk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_tesselamb",
+    "name": "Tesselamb (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_tesselamb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_thistlynx",
+    "name": "Thistlynx (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_thistlynx_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_thunderstrich",
+    "name": "Thunderstrich (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_thunderstrich_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_terrasloth",
+    "name": "Terrasloth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_terrasloth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_vespox",
+    "name": "Vespox (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_vespox_1.jpg",
+    "ok": true
   }
 ]
