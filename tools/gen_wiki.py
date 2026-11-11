@@ -799,6 +799,7 @@ def gen_dash_flow():
             ours = _dash_ours(row, INTO_DASH_MODE) if row else "the kit's own handling (no row yet)"
             rows.append([hero, "%s -> dash" % label, _src(row), ours])
         rows += _combo_rows(hero, f)
+        rows += [[hero, g["pair"], g["source"], g["ours"]] for g in f.get("glide", [])]
     body = ("One row per hero and pair, read from `content/dash_flow/<hero>.json` by `DashFlow` "
             "(`scripts/arch/dash_flow.gd`, docs/decisions/0010-dash-ability-flow.md). A dash pair with no row buffers the "
             "press to the dash's end. \"Source\" is what the source hero does; \"Ours\" is what the game does now.\n\n"
@@ -810,7 +811,9 @@ def gen_dash_flow():
             "LMB is a held input (source parity): held through a dash, RMB, E, the ult or a glove, fire resumes "
             "the frame that slot's lock ends, with no re-press, and a hold kit (a draw, a charge, a hose) is holding "
             "again by then with no stale release. `--held-fire-resume-check` measures it for every Hunter and slot; "
-            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n")
+            "the 'hold LMB through' rows below note where a hero's kit has its own say.\n\n"
+            "The glide rows (`glide` in the same file) say what a fresh glide press does after a dash, an ability and "
+            "during a hold; the numbers come from `--airdash-glide-check`.\n\n")
     body += table(["Hero", "Pair", "Source", "Ours"], rows)
     body += ("\n## Air dash against ground dash (owner item 183)\n\nEvery Hunter's air dash is its ground dash or a special "
              "one the source has, never the generic long dash on a charged press. \"same\" = the same move, clip and charge; "
