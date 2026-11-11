@@ -53,6 +53,8 @@
 			"tender": "Healer: her lantern keeps you and your Boki going.",
 			"ashwick": "Area: bottled fire that takes the ground."
 		},
+		"signature": {"juggernaut": "rmb", "ashwick": "rmb", "tender": "e"},
+		"signature_doc": "The second-Relic pick's reel: the ability it loops between the attack and the dash (else the Hunter's clip preview).",
 		"build_menu": "Open the build menu",
 		"bye": "Bye",
 		"shows_doc": "A line's show: stall, house (the house or its spot), tree (the nearest tree), portal. Hob points at it and the camera looks for show_s seconds, then comes back."

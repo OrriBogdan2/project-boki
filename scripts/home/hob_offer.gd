@@ -116,7 +116,8 @@ func focus(i: int) -> void:
 	for c in preview.get_children():
 		c.queue_free()
 	reel.clear()
-	for slot in ["lmb", preview_slot(id), "dash"]:
+	var sig := String((rules.get("signature", {}) as Dictionary).get(id, preview_slot(id)))
+	for slot in ["lmb", sig, "dash"]:
 		var clip := AbilityClip.make(id, slot, CLIP)
 		preview.add_child(clip)
 		reel.append(clip)
