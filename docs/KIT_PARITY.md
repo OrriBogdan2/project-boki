@@ -301,7 +301,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 17 | Ostra's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
 | 19 | Ours-only riders: Chill slow, Shred, Pip's shield | Remove, or owner keeps | kit JSON, kits | S, owner |
-| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 19 dash-flow rows have no source `[?]` (Hem 8, Ryzz 5, Tarek 6), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
+| 20 | Jump 6.8 vs 7.5 m/s (deliberate, sourced below); 11 dash-flow rows have no source `[?]` (Ryzz 5, Tarek 6; Hem's 8 sourced 11-11), listed below | Jump sourced and checked; rows marked `[?]`, not guessed | content/dash_flow, tools/move_feel_check.gd | S |
 
 ## Item 20: jump speed and the unsourced flow rows
 
@@ -311,11 +311,10 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 
 | Hero | Rows `[?]` |
 |---|---|
-| Hem (`archer`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
 | Ryzz (`mage`) | `hold.rmb.{ground,air,jump}` (3, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`, ours) |
 | Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
-Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+Hem (11-11, ext/lace-cancels-1111): all 8 now name their source. `hold.lmb.*` is the owner's (item 51 names her draw); `hold.rmb.*`, `dash.{ground,air}.q`, and every roll row (`dash.{ground,air}.{lmb,rmb,e,x}`, the old "can be cast in the walk" texts had no source line) plus the new `into_dash.rmb` carry `[?]` at the head of their `source` and run item 51's default; `--archer-combo-check` (`lace cancels`) asserts the tags and the pairs. Also still `[?]` and already marked "Not determinable" in their own `source`: Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
 
 ## Health
 

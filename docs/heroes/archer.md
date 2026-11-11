@@ -187,31 +187,41 @@ Light class, 124 HP: tap 15, Empowered 30, Supercharged 60, overdrawn 30, full H
 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
-Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+Sources: [D] briefs/supervive-data/supervive_kits.md (Myth), [F] the footage study briefs/hero-ref/pin.md (5 fps:
+one frame is 0.2 s, so a buffer shorter than that can't be seen), [W] the wiki page linked above, owner = DECISIONS /
+OWNER_REVIEW_1103. **[?]** means no frame, card line or wiki line shows the pair: ours runs owner item 51's default
+(combine: every ability casts mid-dash and mid-jump, holds keep through both, Shift or a jump moves out of any
+ability) and nothing was guessed. Re-walked 11-11 on the 0.24.5 line with ext/lace-1111 (Heavy Shot from the bow
+mouth, roll 3.375 m in 0.27 s); every row's "Ours" is asserted by `--archer-combo-check` (`lace cancels: ...`,
+tools/lace_cancels_check.gd) and, for the Shift and jump rows, `--dash-flow-check` (content/dash_flow/archer.json,
+full texts in [dash_interactions.md](dash_interactions.md)). Any pair not in the table: both (ArchKit has no shared
+cast lock), except that every press is ignored, not buffered, while stunned or downed, and the attack key does
+nothing from a glide (`Hunter.can_fire`).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| LMB draw (held) | RMB | not shown; one bow, and the Heavy Shot's "charge pose is like the LMB draw" | both: two draws run at once and each looses on its own release | **mismatch, not fixed**: one bow can't hold two arrows, but the source's answer (the press cancels the draw, is ignored, or waits) isn't shown. Flagged below | [F] 0264-0269, 0494 |
-| RMB held (Heavy Shot) | LMB | not shown | both, as above | **mismatch, not fixed** (same row) | |
-| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | unsettled | [F] 0457, 0498 |
-| LMB draw, RMB held | jump | not shown | the draw carries through the jump | owner | item 51 (content/dash_flow `hold`) |
-| LMB draw | X | "a self-buff with no cast lock" | the draw is dropped with no arrow; a still-held LMB nocks the first empowered shot at once (0.3 s) | unsettled (the clip's cast at f33 isn't mid-draw) | [F] ult f33 |
+| Roll (Shift, 0.27 s), ground or air | LMB, RMB, E, X, Q | not shown: "whether you can shoot during it" is open; the air roll isn't shown | each goes mid-roll (`fire`) | [?] (item 51) | [F] pin.md:247, 322-331; [D] :75, 78 |
+| Spirit Walk (2.8 s after the roll) | LMB, RMB, E, X | not shown (same open question); only damage is said to end it | each goes and she walks on; damage, a merge or time end it | [?] (item 51) | [F] pin.md:119-121, 247 |
+| LMB draw (held) | RMB | not shown; one bow, and the Heavy Shot's "charge pose is like the LMB draw" | both: two draws run at once and each looses on its own release | **mismatch, left to ext/lace-one-bow** | [F] 0264-0269, 0494 |
+| RMB held (Heavy Shot) | LMB | not shown | both, as above | **mismatch, left to ext/lace-one-bow** (same row) | |
+| LMB draw | E | not shown (Rain of Arrows is a tap with no reticle before the cast) | both: the wall goes up and the draw keeps charging | [?] | [F] 0457, 0498 |
+| LMB draw | X | "Tap. It's a self-buff with no cast lock"; nothing on a draw under way | the draw is dropped with no arrow; the held LMB nocks the first empowered shot at once (0.5 s) | [?] (the clip's cast at f33 isn't mid-draw) | [F] pin.md:251-256, ult f33 |
+| LMB draw | Shift, jump | not shown | the draw carries through and charges on; let go mid-roll and it looses as the roll ends | owner | item 51 names her draw (`hold.lmb`, `into_dash.lmb`) |
+| RMB held | E, X | not shown (0498 has the Heavy Shot charging under a Rain already down: E first, then RMB) | both: the wall goes up / three shots empowered, the hold carries on | [?] | [F] 0498 |
+| RMB held | Shift, jump | not shown | the roll or jump goes at once, the hold carries through | [?] (item 51) | `into_dash.rmb`, `hold.rmb` |
 | RMB held | its own end | "Max hold duration after cast increased from 1.5 >>> 3.0 seconds" | 3.0 s, then it looses by itself | match (what the source does at 3 s isn't stated) | [W] |
 | E (instant) | any | instant: no wind-up, no lock | instant: everything goes at once | match | [F] 0457 |
-| X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.3 s, then the beam | match (no charge; the nock length is a timing note) | [F] ult; thebackdash |
-| X window | walk, Spirit Walk | "she can walk between shots" | shots kept through Spirit Walk; she walks between them | match | [F] ult |
-| X window | RMB, E | not shown | both | unsettled | |
-| Glide | LMB | not shown | ignored | unsettled | |
-| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | unsettled | |
+| X window (3 shots, 6 s) | LMB | "empowered arrows need no charge"; the clip still shows a 0.4-0.8 s draw | a press nocks for 0.5 s, then the beam | match (no charge; the nock sits in the clip's 0.4-0.8 s) | [F] ult; thebackdash |
+| X window | walk | "she can walk between shots" | she walks between them | match | [F] ult |
+| X window | Spirit Walk | not shown | shots kept through Spirit Walk | [?] | |
+| X window | RMB, E | not shown | both | [?] | |
+| Glide | LMB | not shown | ignored | [?] | |
+| Glide | RMB, E, X | not shown | each goes (the Heavy Shot always starts a draw) | [?] | |
 
-Fixes made: none. The draw-plus-Heavy-Shot row is a clear fault against a one-bow source, but which way the
-source resolves it is not shown, so it waits for the owner or a frame (see the suggestion in the pass report).
+Changes 11-11: no mode changed (none of the old rows contradicts a frame or card line). The dash-flow rows that
+claimed "can be started / cast in the walk" for RMB, E and X had no line in the data or the footage behind them;
+they are now [?] with what the source does say, and the 8 rows with no source (`hold.lmb/rmb`, `dash.*.q`) name
+theirs (KIT_PARITY item 20). The draw-plus-Heavy-Shot row stays as it is for ext/lace-one-bow.
 
 ## Animations (KMovesPinBjorn ids per ability; timed to 5 fps footage frames)
 | Ability | Move id(s) | Notes |
