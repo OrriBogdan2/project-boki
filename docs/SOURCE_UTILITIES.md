@@ -8,6 +8,9 @@ Source currency is gold ("Coin" from 1.0). Ours is run gems. Proposed gem prices
 
 ## 1. Source utilities, mapped to Boki
 
+The Boki and Status columns are the Nov 8 audit, before the builds below; what each item does now is in
+"Every belt item: source vs ours" near the end.
+
 Status: **have** = we have an equivalent. **differs** = we have one, but it works differently (see notes). **missing** = we don't have it. **skip** = it needs a system Boki doesn't have.
 
 ### 1a. Sold in the source's shops (final version)
@@ -43,7 +46,7 @@ Status: **have** = we have an equivalent. **differs** = we have one, but it work
 | Prophet's Potion | Channel for 1s: your team sees future storm locations for 30s [W-Prophet] | World, uncommon [W-Prophet] | **Omen Draught** | **have** |
 | Vive Packs | Throws a health pack that lasts up to 30s. Whoever picks it up heals 140 HP/s for 5s, until hit. If they're in the air, it also bounces them up. 2 charges [W-VivePacks] | World, epic [W-VivePacks] | **Toss Satchel** | **have** |
 | Gold Key | Points to the nearest golden chest and opens it. Can also open a vault instantly [W-GoldKey] | World, rare [W-GoldKey] | `chest_key` Chest Key | **have**. Ours pings and opens locked chests. It doesn't open vaults. |
-| Evil Key | Points to the nearest evil chest (exotic loot). Dropped by PvP combat [W-EvilKey] | PvP drop [W-EvilKey] | `rift_key` Rift Key (nearest) | **differs**. Ours opens an extraction hatch. Keep. |
+| Evil Key | Points to the nearest evil chest (exotic loot). Dropped by PvP combat [W-EvilKey] | PvP drop [W-EvilKey] | `rift_key` Rift Key (nearest) | **gone** on the 0.24.6 line: 0.24.5's Ways Out has no hatches for it to open. |
 | Orb of Life / Orb of Revival | Revives your team; revives at full HP from 1.03 [P-1.03]. Final-boss reward from Season 2 [P-S2] | Boss only [P-S2] | **Revive Ember** | **have** |
 | Tome of Knowledge / Codex of Mass Enlightenment | 1s channel. The Tome gives +20% of a level's XP (Academy only); the Codex gives the team +1 level [W-Tome][W-Codex] | World | — | **skip** [?]: only if Boki gets in-match levels |
 | Little Cook, Snowball, Chonker Cannon, Penguin Egg, Avalanche, Present, Tree Costume, Money Tree | Event and power-era fun items, e.g. Little Cook makes 8 consumables over 32s, cooldown 150s [W-LittleCook]. They are listed as consumables [W-Consumables], but the only final-version notes are Little Cook buffs in 1.02 [P-1.02] | Vaults, bosses, events | — | **skip for now**: seasonal; revisit for events |
@@ -126,8 +129,8 @@ Behaviour brought in line with the source, each number in the item's JSON `src` 
 
 - Six belt slots: 1 and 2 pinned to the tonic and the armor kit (`slot` in their JSON), 3 to 6 open.
   Pinned items stack to 8. The home belt picks the open slots only (`UtilityBelt.free_slot`).
-- Tonic: 1.0 s drink, no slow, a flat 42 health (`heal_hp`; the source's 300 over our HP ratio).
-- Armor kit: 1.6 s at 45% speed, repairs 80 / 40 / 30% of the armor bar by armor tier (`repair`).
+- Tonic: 1.0 s drink, no slow, a flat 42 health (`channel.heal`; the source's 300 over our HP ratio).
+- Armor kit: 1.6 s at 45% speed, repairs 80 / 40 / 30% of the armor bar by armor tier (`channel.repair`).
 - Deep Draught slows you to 40% for its 5 s. Thorn Wall stacks to 10.
 - Skyfall Charge: 5 s fuse, a lethal blast (690) then a 3 s fire patch on the spot.
 - Bounty Banner: knocked under it you are out at once (no wisp, no spare life) and the knocker
@@ -154,7 +157,7 @@ The rest of the Nov 9 list, each number in the item's JSON `src` field (source n
 - Thorn Wall: you are rooted 2 s and the wall rises when the root ends.
 - Revive sickness: 12 s after any beacon revive (Hearth Lamp included) now cuts healing by a quarter as
   well as damage (`sickness_heal` in Life). It is a status on the plate and the squad row (heart icon, seconds
-  left) and rides the hunter snapshot (`sk` pair in HunterNet, Net.VERSION 0.26.1).
+  left) and rides the hunter snapshot (`sk` pair in HunterNet; Net.VERSION 0.26.1 there, 0.26.3 on the 0.24.6 line).
 - Tonic: lifts anti-heal (blight) before its heal, so the heal is whole.
 - Bounty Banner: each knock the squad makes takes 15 s off the timer (the source gives no number; assists
   and kills count only through the knock).
@@ -186,7 +189,7 @@ cast, moving while it runs, a dash and a hit; then ours. Checked row by row by `
 | Gust Fan, Skyfall Charge, Shatter Charge, Blight Flask, Lookout Lantern, Toss Satchel, Hearth Lamp, Warp Seed, Hawk Whistle, Bounty Banner, Revive Ember | thrown or placed; no cast, slow or cancel noted on any page [W-Fan][W-Nuke][W-EMP][W-DeathCircle][W-ScanGren][W-VivePacks][W-Beacon][W-ABH][W-PocketUAV][W-MostWanted] | at once, one charge spent; run and air momentum kept; usable mid-air and mid-dash; a hit changes nothing | have. Mid-air and mid-dash in the source [?]. Most Wanted takes no slot and fires on pickup [W-MostWanted]; ours is a belt item (ext/utility-parity) |
 | Warp Seed, stepping in | "players will begin to channel for a short time before teleporting" [W-ABH] | stand in it 1.5 s | have |
 | Toss Satchel, picking up | "picked up while airborne, it will launch the target upwards" [W-VivePacks] | a body in the air is thrown up | have |
-| Chest Key, Rift Key (Gold Key, Evil Key) | "Activating points near the closest ... chest" [W-GoldKey][W-EvilKey], no cast | at once | have (not in MOVES: needs a lock) |
+| Chest Key (Gold Key) | "Activating points near the closest ... chest" [W-GoldKey], no cast | at once | have (not in MOVES: needs a lock) |
 | Medkit, Shield cell, Swift draught | ours only | at once, run kept | ours |
 | Silence | "no abilities, powers or consumables" [S-data §4]; the final ally recall gives a damage and CC cut, not a silence [P-1.03] | no silence in Boki | n/a |
 
@@ -194,6 +197,48 @@ Not changed, for the owner: the source's Vulnerable is double damage ("Gliding p
 [W-Gliding], "Vulnerable: takes 2x" [S-data §4]); ours is 1.2x while drinking, repairing or reviving a box
 (`Hunter.CONSUME_VULN`, shared with the box revive). Changing it is a one-line parity fix that also changes
 box revives, so it is left for a decision.
+
+## Every belt item: source vs ours (0.24.6 line, ext/utility-parity-0246)
+
+One row per item id in `content/utility/`, as built on the 0.24.6 train (0.24.5's belt code plus the
+three parity branches above). Ours is read from the item's JSON: a drink's or a repair's numbers sit in its
+`channel` block (`time` s, `move` = speed share while it runs, `heal` hp, `heal_max` share of max health,
+`repair` share of the armor bar by armor tier), as 0.24.5 laid them out; docs/CONSUMABLES.md has the
+drink and repair rows in more detail. Gems are run gems (section 1's price rule); HP over the ratio 7.2.
+Checked by `--utility-parity-check`, `--equal-check` (slots, tonic, kit) and `--airheal-check` (the drink's cost).
+
+| Item (`id`) | Source | Ours | Verdict |
+|---|---|---|---|
+| Tonic (`tonic`) | Vive Brew: 304 HP after a 1 s drink, Vulnerable, damage cancels it, cleanses anti-heal; slot 1, stack 8, 200 gold [W-ViveBrew][W-Consumables] | slot 1, stack 8, 30 gems; 1.0 s at full speed, a flat 42 HP (304 / 7.2), lifts blight first; a hit or a dash spills it and keeps it | match, but for Vulnerable (ours x1.2, the source's 2x: owner card) and chained drinks on hold [P-1.02] |
+| Armor kit (`armor_kit`) | Portable Armor Repair: "a short cast", 1 bar a press, from 1.04 80 / 40 / 30% on grey / green / blue; slot 2, stack 8, 400 gold [W-PAR][P-1.04] | slot 2, stack 8, 40 gems; 1.6 s at 45% speed, puts back 80 / 40 / 30% of the armor bar by armor tier | match on amount, slot and stack; 1.6 s and the slow are ours [?] |
+| Deep Draught (`deep_draught`) | Hypervive: 5 s, 60% slow, Vulnerable, then full HP; damage cancels it; stack 1, 1,000 gold [W-Hypervive] | stack 1, 40 gems; 5 s at 40% speed, then all your health; a hit spills it | match |
+| Lostway Scroll (`lostway_scroll`) | Anywhere But Here: channel 4 s, then a random spot inside the next circle; world only, stack 1 [W-ABH] | stack 1, 60 gems; a 4 s read at full speed, then a random spot on the map; a hit spills it | differs: no circle in Boki |
+| Omen Draught (`omen_draught`) | Prophet's Potion: channel 1 s, your team sees future storm spots for 30 s [W-Prophet] | stack 2, 40 gems; a 1 s drink, then 30 s of every Blight Warden and where the Blight gathers, squad only | match, Blight for storm |
+| Twin Gate (`twin_gate`) | Two-Way Teleporter / Group Teleport: a portal at the aim and one at your feet; after 8 s reactivate to swap everything in each; stack 2, 3,000 gold [W-2Way][P-S2] | stack 2, 60 gems; gates 9 m out and at your feet (2 m radius) for 30 s; a second press after 8 s swaps both and closes them, no charge | match; 30 s open is ours [?] |
+| Warp Seed (`warp_seed`) | Pocket Anomaly: step in, channel briefly, then a random spot; gone after a timer; stack 3, 3,000 gold [W-ABH][P-1.02][P-S2] | stack 3, 60 gems; set 2 m out for 30 s, stand in it 1.5 s to be thrown to a random spot | match; timer and channel are ours [?] |
+| Cloud Raft (`cloud_raft`) | Emergency Platform: over abyss or hazards only, a 30 s platform that refills ally gliders and gives vision; casts after 0.3 s and floats you meanwhile; 1,500 gold [W-EmPlatform][P-1.03] | stack 2, 45 gems; over the abyss only; you hang for the 0.3 s cast, then a 5 x 5 m raft forms under you for 30 s and cools the gliders of squadmates on or near it (2 a second) | match, no vision part |
+| Spring pad (`jump_pad`) | Jump Pad: arms after 2 s, lasts 30 s or 10 s after its first use; dashing in keeps momentum and adds a little; stack 2, 3,000 gold [W-JumpPad][P-S2] | stack 2, 35 gems; arms after 2 s, 30 s or 10 s after first use; a rider keeps the faster of its own speed and the pad's push | match; the small boost [?] |
+| Gust Fan (`gust_fan`) | Deployable Fan: launches anyone who touches it, 60 s, 2 charges, 750 or 3,000 HP [W-Fan] | stack 2, 40 gems; 60 s, launches anyone on it; 104 HP (750 / 7.2), a rival's bullet stops in it and hurts it | match on the wiki's lower HP |
+| Skyfall Charge (`skyfall_charge`) | Tactical Nuke: lands after 5 s, 5,000 damage, fire 720/s for 3 s; hurts you and allies, destroys beacons and basecamps; 3,000 gold [W-Nuke] | stack 1, 60 gems; 5 s telegraph, 690 in 6 m (lethal), then 3 s of fire (50 every 0.5 s); hurts you and your squad, razes revive beacons | match |
+| Shatter Charge (`shatter_charge`) | EMP / Disruption Grenade: bursts 0.3 s after landing, shreds 1,600 armor, slows enemies 30% for 2 s [W-EMP] | stack 3, 45 gems; bursts 0.3 s after the aim, 3 m: shreds 60% of armor and slows 2 s, foes only | match; the shred is a share, not a number |
+| Blight Flask (`blight_flask`) | Storm Grenade: a storm pocket that grows 15 s, holds 10 s, shrinks 15 s; blocks all healing [W-DeathCircle][P-2.0x] | stack 2, 50 gems; a 4.5 m patch for 40 s: 6 a second, a slow, and blight (healing in it barely takes) | match on length and anti-heal; no grow and shrink |
+| Lookout Lantern (`lookout_lantern`) | Scanner Ward: vision 60 s, reveals stealthed foes, 3 s linger; anyone can pick it up; stack 4 [W-ScanGren] | stack 4, 40 gems; shows every rival within 14 m for 60 s (3 s linger); after 2 s anyone who steps on it takes it onto their belt | match |
+| Toss Satchel (`toss_satchel`) | Vive Packs: a pack that lasts up to 30 s; the picker heals 140 HP/s for 5 s until hit; in the air it bounces them up; 2 charges [W-VivePacks] | stack 2, 45 gems; thrown 6 m, 30 s; the first body in it heals 60% of its health over 5 s (a hit stops it); a body in the air is thrown up 14 m/s | match; 60% stands in for 700 HP |
+| Thorn Wall (`thorn_wall`) | Spike Wall: root yourself 2 s to build a wall that hurts by the toucher's speed; stack 10 [W-SpikeWall][P-Feb19] | stack 10, 40 gems; rooted 2 s, then a 6 m wall (200 HP, 20 s) rises 2 m ahead; a touch costs 10 and slows | match; the touch is flat, not by speed |
+| Pilfer Pouch (`pilfer_pouch`) | Mass Heist: channel 1.5 s at a target; raccoons steal 50% of a hunter's gold and loot from unopened vaults [W-MassHeist] | stack 1, 60 gems; rooted 1.5 s, then half the gems of every rival within 4 m of the aim (8 m out) go and its locked chests are emptied | differs: the gems and loot are lost, the thief gains nothing |
+| Bounty Banner (`bounty_banner`) | Most Wanted: a 2 min timer that reveals you; live and your allies are revived with a reward; knocks, kills and assists shorten it; knocked, you go straight out; 3,000 gold [W-MostWanted] | stack 1, 60 gems; you show to every rival for 120 s; live and the squad returns plus 150 gems; each squad knock takes 15 s off; knocked under it you are out and the knocker takes the gems | match; the 15 s cut is ours (no source number) [?] |
+| Hearth Lamp (`hearth_lamp`) | Mobile Respawn Beacon: a squad respawn beacon; 6 s revive, then 12 s of sickness (-25% damage and healing); 8,000 gold [W-Beacon][P-1.0] | stack 1, 110 gems; a revive beacon where you stand; 12 s of sickness (-25% damage and healing), a heart status on the plate and squad row | match |
+| Revive Ember (`revive_ember`) | Orb of Life / Revival: revives your team, full HP from 1.03; a final-boss reward [P-1.03][P-S2] | stack 1, never sold; every fallen squadmate wakes where you stand; a rare chest find | match; found in chests, not from a boss |
+| Hawk Whistle (`hawk_whistle`) | Pocket UAV / Oracle: marks enemy hunters on your squad's map for a short time; stack 2, 1,500 gold; out of shops in 2.02 [W-PocketUAV][P-2.02] | stack 2, 45 gems; reveals rivals within 120 m for 4 s | differs: a wide radius, not the whole map; time [?] |
+| Seeker flare (`scanner`) | none (nearest: Pocket UAV, above) | stack 2, 50 gems; reveals rivals within 26 m of you for 3 s | ours, kept beside the Hawk Whistle |
+| Smoke bomb (`smoke`) | Ethereal Smoke: you and allies get stealth and +50 speed for 30 s; breaks in combat, near foes or on a dash [W-EthSmoke][P-Jan8] | stack 3, 35 gems; a 3.6 m cloud for 8 s that hides everyone in it | differs, kept (section 1b) |
+| Chest Key (`chest_key`) | Gold Key: points to the nearest golden chest and opens it; opens a vault at once [W-GoldKey] | found only, never sold; pings the nearest locked chest, opens the one beside you | have; no vaults to open |
+| Mending kit (`medkit`) | none (Elixir of Health, gone by 1.0) | stack 3, 45 gems; at once 40 HP and 20 armor | ours |
+| Shield cell (`shield_cell`) | none | stack 3, 45 gems; at once 40 shield for 8 s | ours |
+| Swift draught (`stim`) | none (Elixir of Speed, gone by 1.0) | stack 3, 35 gems; at once +35% speed for 6 s | ours |
+
+Gone on this line: the Rift Key (`rift_key`, the source's Evil Key) went with 0.24.5's Ways Out (no
+hatches); a stash that still holds one gets its price back in gems (`EqualMigrate`).
 
 ## Sources
 
