@@ -60,13 +60,13 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Albert | E zone radius | **2.3** (was 3.5) | green disc 1.3 h (2.34) | **fixed** |
 | Albert | R lane | 16 x 4.5 | 9 bh x 2.5 bh (16.2 x 4.5) | match |
 | Sparkle | RMB range | 13 | 7.5 bh (13.5) | match |
-| Sparkle | E radius, reach, slide | 1.5, 11, 3.4 | circle ~2 bh across (radius 1.8), -, ~4 bh (7.2) | differ 17% and 53%, kept: mage.md set 1.5 as the hit on purpose; [?] |
+| Sparkle | E radius, reach, slide | **1.8** (was 1.5), 11, 3.4 | circle ~2 bh across at placement `0184` and strike `0190` (radius 1.8), -, ~4 bh over ~1 s at `0197`-`0224` (7.2) | radius **fixed** (re-measured 11-11; the 1.5 had no owner line); slide differs 53%, kept: owner item 9b ("wasn't that drastic in the game") |
 | Sparkle | R radius, range | 2.7, 14.4 | ring 1.5 bh (2.7), 8 bh | match |
 | Sable | RMB range, lane | 7 + 3.8, **1.8 wide** (was 1.4) | lane 5.5-6 bh (9.9-10.8), 1 bh wide (1.8) | **fixed** (width) |
 | Sable | E range | 14 | landed at 9 bh (16.2), max not seen | [?] |
 | Sable | R ring | 5.4 (rim band outer 25%) | 3 bh (5.4); the first sheet's 3.5 bh is superseded | match |
 
-Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall slide (owner item 9b). Ideas of ours stay out of the build.
 
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
