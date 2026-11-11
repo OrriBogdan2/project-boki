@@ -4,6 +4,7 @@ extends RefCounted
 ##   2. every other kind waits for a hold (Tab or the map key), or for its own reason to matter
 ##   3. the draw code gates only kinds MapDetail lists, and every detail kind is gated somewhere
 ##   4. in a match: the nearest exit and an awake lair matter, a far exit and a dormant lair do not
+##   5. the full map's key (MapKey) lists exactly the kinds on the map now, and the minimap never draws it
 ## Never touches the save.
 
 const EXPECT_DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
@@ -72,3 +73,35 @@ func _match(main: Node) -> void:
 		ok(not MapDetail.lair_matters(m, L), "a dormant lair waits for a hold")
 		L["state"] = "awake"
 		ok(MapDetail.lair_matters(m, L), "an awake lair shows by itself")
+	_key(m)
+
+func _key(m: Match) -> void:
+	var tm := TrainMap.new()
+	var all := MapKey.kinds(m, tm)
+	var mate := MapKey._mate(m)
+	ok(mate != null and "squad" in all and "exit" in all, "a fresh match's key: %s" % ", ".join(all))
+	ok(("hot" in all) == not m.biomes.hot.zone.is_empty(), "hot zone listed only when the map has one")
+	var halts: bool = m.skytrain != null and not tm.halts(m.skytrain).is_empty()
+	ok(("stop" in all) == halts, "train stops listed only when the map has them")
+	ok(all.all(func(k): return MapKey.KINDS.any(func(e): return e[0] == k)), "every listed kind has a word")
+	mate.out = true
+	ok(not "squad" in MapKey.kinds(m, tm), "a squadmate who is out leaves the key")
+	mate.out = false
+	var kin: Kin = m.player.kin
+	if kin != null:
+		kin.state = "flying"
+		ok("boki" in MapKey.kinds(m, tm), "your Boki, out and about, is in the key")
+		kin.state = "downed"
+		ok(not "boki" in MapKey.kinds(m, tm), "your Boki, down, is not")
+	var zone: Array = m.biomes.hot.zone
+	m.biomes.hot.zone = []
+	ok(not "hot" in MapKey.kinds(m, tm), "no hot zone, no row")
+	m.biomes.hot.zone = zone
+	var exits: Array = m.exits.list
+	m.exits.list = []
+	ok(not "exit" in MapKey.kinds(m, tm), "no exits, no row")
+	m.exits.list = exits
+	var gated := FileAccess.get_file_as_string("res://scripts/ui/hud.gd")
+	ok(not gated.contains("MapKey"), "the minimap (hud.gd) never draws the key")
+	var full := FileAccess.get_file_as_string("res://scripts/ui/full_map.gd")
+	ok(full.contains("MapKey.draw"), "the full map draws the key")
