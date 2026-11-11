@@ -8,7 +8,8 @@ extends RefCounted
 ## Sparkle's Skycall drag, Mossy's shield push; Kael's Warchain pulls Kael to the player (not the player).
 ## Then the hit path: a hazard striking on both games hurts the player once; a knock's wall stun, a burn's
 ## length and a slow's strength reach the player's own game. Last, a dunk on a gliding player spikes them out
-## of the air on their own game, with the landing stun a bot gets (GlideSpike).
+## of the air on their own game, with the landing stun a bot gets (GlideSpike), and a player diving under
+## their glider (GlideDive) plunges in the dive pose on the host's screen too (hunter flag bit 20).
 ## Lines: DISPNET ok|FAIL <what>; the guest prints DISPNET guest pid=<pid>.
 
 const GODOT := "/usr/local/bin/godot"
@@ -110,6 +111,7 @@ func _host() -> void:
 	await _hazard(G, B)
 	await _knock_extras(G, B)
 	await _glide_spike(G, B)
+	await _glide_dive(G)
 	_finish()
 
 func _finish() -> void:
@@ -327,6 +329,24 @@ func _glide_spike(G: Hunter, B: Hunter) -> void:
 		"player stun %.2f air %.0f, bot %.2f" % [_got("stun_max"), _got("air"), bot_stun])
 	await _place(G, home + PARK)
 
+## The guest holds crouch under its glider 30 m up: the host's copy of it plunges (GlideDive.on from the
+## flag bit), is posed in the dive and not the glide, and comes out of it when the guest's dive ends.
+func _glide_dive(G: Hunter) -> void:
+	Net.lobby_emit("dn", {"c": "dive", "at": [home.x + 4.0, home.y + 30.0, home.z - 3.0]})
+	var plunged := false
+	var posed := 0.0
+	var t := 0.0
+	while not (plunged and not G.plunging()) and t < 6.0:
+		await _run(DT)
+		t += DT
+		G.render(DT, 1.0)      # (Match's own render pass is off in the checks)
+		plunged = plunged or G.plunging()
+		if G.plunging() and G.anim and not G.anim_s.get("gliding", true): posed = maxf(posed, G.anim.dive_k)
+	ok(plunged, "glide dive: the host sees the player plunge (the dive's flag bit)")
+	ok(posed > 0.5, "glide dive: the host draws the player in the dive pose, not the glide", "dive_k %.2f" % posed)
+	ok(not G.plunging(), "glide dive: the pose ends when the player's dive ends", "%.1f s" % t)
+	await _place(G, home + PARK)
+
 ## A body gliding at `at` with a cool glider and the glide held.
 static func _glide(T: Hunter, at: Vector3) -> void:
 	T.teleport(at)
@@ -414,6 +434,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 			if m and m.player:
 				var a: Array = data["at"]
 				_fresh(m.player)
+				m.player.inp["crouch"] = false
 				m.player.teleport(Vector3(a[0], a[1], a[2]))
 				_say()
 		"ask": _say()
@@ -421,6 +442,11 @@ func _on_msg(topic: String, data, _from: String) -> void:
 			if m and m.player:
 				_fresh(m.player)
 				_glide(m.player, _v(data["at"]))
+		"dive":
+			if m and m.player:
+				_fresh(m.player)
+				_glide(m.player, _v(data["at"]))
+				m.player.inp["crouch"] = true
 		"strike": _strike(_v(data["at"]))
 
 func _say() -> void:

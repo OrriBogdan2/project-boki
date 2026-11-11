@@ -26,8 +26,8 @@ and costs no new bind. A dedicated bind stays open as the alternative if the own
 - `scripts/match/glide_dive.gd` (new), `HunterMove.dive_*`, eight lines in `hunter.gd`.
 - `GlideLift.sink` caps the swoop at `GLIDE_MAX - GLIDE_SPEED` so pulling out of a 32.5 m/s dive tops
   out at the glide's max instead of ~80 m/s.
-- Net.VERSION bump: no. The dive changes velocity, which the snapshot already carries; the folded pose
-  is local-only until `diving` joins the snapshot.
+- Net.VERSION bump: no at first (the snapshot already carries the velocity); 0.24.6 adds the dive as
+  hunter flag bit 20 so other players' copies plunge in the folded pose (`--displace-net-check`).
 - Checks: `--move-feel-check` rows `dive_*` assert each source number; docs/MOVEMENT_FEEL.md and
   docs/SUPERVIVE_FEEL.md updated.
 - Debt: the dive cancels 3.5 m up but the canopy can't brake 32.5 m/s in that height, so you land hard
