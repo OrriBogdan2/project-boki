@@ -16,7 +16,6 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 | Setting | Value | Meaning |
 |---|---|---|
 | players | 30 | hunters in an expedition (solos, duos or trios) |
-| length | 360 | seconds until the islands fall |
 | down_hp | 100 | so about 40 seconds downed before you bleed out |
 
 ## Down, death and revive
@@ -367,6 +366,69 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
 
+## heart (`content/rules/heart.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Limited Ways Out (docs/decisions/0051-limited-ways-out.md, briefs/specs/LIMITED_WAY_OUTS.md): every time, window, reward, placement pay and bot knob of the one extraction mode. The Heart's two seats run in scripts/match/heart.gd; the quest seats, results pay and bots read their blocks here when they are built. Seconds (session clock), metres. |
+| match_s | 720 |
+| _match_s | the islands fall this many seconds in (the default match length, every map size) |
+| wake_s | 240 |
+| _wake_s | the Heart wakes and its one Heartspark starts charging (the early seat unlocks) |
+| charge_s | 75 |
+| _charge_s | a Heartspark takes this long to charge at the Heart, visible to everyone (map marker + world beam) the whole time |
+| pickup_hold_s | 1.5 |
+| _pickup_hold_s | hold interact (F) on a charged Heartspark this long to take it |
+| pickup_r | 2.2 |
+| carrier_slow | 0.15 |
+| _carrier_slow | the carrier moves this much slower (owner: about 15%) |
+| carrier_reveal | True |
+| _carrier_reveal | the carrier shows on every player's map and in the world while they hold it |
+| gate_dist | 24 |
+| _gate_dist | the Heart Gate stands this far from the Heart, on solid ground |
+| gate_r | 2.4 |
+| gate_hold_s | 4 |
+| _gate_hold_s | the carrier holds interact at the Gate this long; a rival's hit resets it |
+| gate_take_r | 8 |
+| _gate_take_r | the early seat takes every member of the carrier's squad this close to the Gate (downed ones too) |
+| final_s | 600 |
+| _final_s | the Heart opens its final seat: hold the Heart ring to leave |
+| final_r | 6 |
+| _final_r | radius of the Heart ring around the Heart |
+| final_hold_s | 20 |
+| _final_hold_s | one Hunter alone fills the ring in this long; more of the squad fill it faster (Exits.UPLINK_CREW: 3 hold it in about 11 s) |
+| final_drain_s | 20 |
+| _final_drain_s | an empty ring drains from full to nothing in this long; a standing rival in it stalls it |
+| rush_k | 2 |
+| _rush_k | the last squad standing: the final seat opens at once and fills this much faster |
+| end_after_final_s | 15 |
+| _end_after_final_s | once the final seat is taken the islands fall this many seconds later |
+| tide_start_s | 90 |
+| tide_close_s | 510 |
+| _tide_close_s | the Blight's tide closes from tide_r0 down to tide_r1 between tide_start_s and tide_start_s + this, then holds |
+| tide_next_s | 60 |
+| _tide_next_s | the dashed ring on the maps is where the tide will be this many seconds from now |
+| tide_r0 | 130 |
+| tide_r1 | 34 |
+| tide_boost | 0.55 |
+| _tide_boost | added to the Blight's strength outside the tide ring (so they hit harder and are tougher there), scaled by how far out |
+| tide_dmg | [[0, 3.0], [1, 6.0], [2, 50.0], [10, 450.0]] |
+| _tide_dmg | outside the ring a standing Hunter takes this flat damage each tick, by stage: the source's death circle curve (stage, damage at source health), linear between its keys. The close is split into the source's 11 stages (0-10), equal in length; the last one holds once the ring is closed |
+| tide_src_hp | 1290 |
+| _tide_src_hp | the source's base health for a medium Hunter: the curve is scaled by our medium health over this, so a stage takes as long to kill as there |
+| tide_tick_s | 1 |
+| _tide_tick_s | seconds between tide hits (the source gives a per-stage value and no rate: read as per second) |
+| tide_heat | 0.06 |
+| _tide_heat | extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away |
+| map | {"_doc": "where the seats sit (spec section 8): metres on the 216 m design; a map's \"ways_scale\" (1.412 on the 305 m Hollow Crown) stretches these, the tide radii and gate_dist, never times. tools/ways_out_sites.py (the generators) and --ways-out-map-check enforce them", "seat_window_s": 150.0, "_seat_window_s": "a quest seat's site stays inside the tide ring this long after it opens (and lies outside the final ring)", "uplink_band": [42.0, 50.0], "_uplink_band": "the two uplink outposts stand this far from the Heart", "uplink_apart_deg": 90.0, "_uplink_apart_deg": "degrees round the Heart between the two outposts (opposite sides; exactly opposite is impossible with gate_clear)", "gate_clear": 60.0, "_gate_clear": "the seeded Heart Gate keeps this far from every uplink outpost", "gate_arc_min_deg": 30.0, "_gate_arc_min_deg": "whole degrees of Gate angle that must be on ground and gate_clear from both outposts"} |
+| reward | {"_doc": "paid to each Hunter who leaves by a Heart seat: minor = the early seat (Heart Gate), major = the final seat (Heart ring). Major is about 5x minor", "minor": {"egg": false, "seeds": {"emberberry": 1, "sunroot": 1, "mindmint": 1, "tidebloom": 1}, "goods": {"heartwood": 1}, "gems": 40, "trust": 6.0}, "major": {"egg": true, "seeds": {"emberberry": 3, "sunroot": 3, "mindmint": 3, "tidebloom": 3}, "goods": {"heartwood": 2, "starstone": 2}, "gems": 150, "trust": 20.0}} |
+| quest | {"_doc": "the two quest seats (spec task 4, Exits/lairs.gd): one squad each, used once", "lair_open_s": 120.0, "lair_shut_s": 330.0, "lair_fight_max_s": 90.0, "_lair_fight_max_s": "a fight already sealed in when the Lair shuts may run this long", "uplink_open_s": 360.0, "uplink_shut_s": 480.0, "uplink_hold_s": 40.0, "_uplink_hold_s": "one Hunter alone; Exits.UPLINK_CREW scales it for two and three", "uplink_steal_s": 5.0, "uplink_lift_s": 15.0, "warn_before_shut_s": 30.0} |
+| place | {"_doc": "placement pay for a squad that did not leave (spec task 5, Game.apply_result)", "gems_per_squad_below": 5, "gems_max": 40, "min_level": 2, "_min_level": "a squad whose Hunters are all still below this run level at the end hid all match and gets no placement gems"} |
+| bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
+| demo_charge | 1 |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
@@ -408,7 +470,7 @@ The Hunter viewer (HunterViewer: the Relics screen, the Relic moments, the revea
 | Setting | Value |
 |---|---|
 | _doc | Chests, keys and the bush mimic (docs/decisions/0007-keys-and-cover.md; scripts/match/key_run.gd, chest_loot.gd, shrubling.gd). There is one chest type. It is locked: opening it costs one key. Keys come from monsters: in every region the number of key carriers equals the number of chests there. Which monsters carry them is rolled per match on its own seeded stream (seed_mul / seed_add). |
-| chest | {"keep": 0.6, "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).", "hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "rift_key_min_bonus": 2, "rift_key_odds": 0.35, "soul_ember_odds": 0.3} |
+| chest | {"keep": 0.6, "keep_doc": "Share of the map's chests and of the item caches a match places (owner 11-10: about 40% fewer). Vaults are not cut. KeyChest.thin drops the most crowded map chests first. Change it with the bonus key odds in chest_keys.json (the --keys-check surplus).", "hold_s": 1.1, "gems": [7, 9], "gem_base": 4, "seed_odds": 0.85, "valuable_odds": 0.7, "valuable_tier": 1, "tonic_odds": 0.7, "table": "chest", "tier_bonus": [0, 0, 1], "soul_ember_min_bonus": 2, "soul_ember_odds": 0.3} |
 | keys | {"seed_mul": 7717, "seed_add": 31, "no_carry": ["ward", "glimmer", "warden", "sentinel"], "glint_h": 1.9, "pickup_pull": 2.2, "cap": 3, "cap_doc": "Chest keys one hunter can hold (a belt stack). Past it a key stays on the ground, glinting."} |
 | shrubling | {"count": [1, 3], "biomes": ["bloom", "meadow", "gloom", "storm"], "min_patches": 3, "sprint_r": 18.0, "min_gap": 22.0, "landing_clear": 14.0, "exit_clear": 10.0, "hp": 26.0, "tier_hp": 0.5, "relax_r": 7.0, "alert_t": 0.4, "flee_speed": 6.5, "weave_amp": 0.5, "weave_amp_seen": 0.95, "weave_hz": 1.7, "repath_s": 0.7, "hide_clear_r": 8.5, "hide_los_r": 5.0, "dive_t": 0.35, "expose_s": 1.2, "tell_s": [5.0, 10.0], "grounded_speed": 0.55, "gems": 6} |
 | cover | {"biome_targets": {"bloom": [0.15, 0.2], "meadow": [0.085, 0.12], "gloom": [0.04, 0.075], "storm": [0.02, 0.04], "ember": [0.015, 0.032], "frost": [0.0, 0.01]}} |
@@ -672,15 +734,16 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 
 | Setting | Value |
 |---|---|
-| doc | The first-match tutorial (scripts/match/tutorial.gd). steps: [id, the one banner line]. detail: a plain-words second line under it (%X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %W swing or shoot, %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A an ability's name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step (the right click with a hold, the Boki starting out). labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down). fight_foes: the last fight's monsters per starter, so each starter's fight beats take 30-60 s (--tutorial-fight-check). cds: the share of its usual time every ability and dash cooldown takes here (0.25 = four times quicker); each is also ready again when a step starts, is retried or its action lands. need: how many times a step's action must land, shown as 1/3 on the pill. |
-| steps | [["land", "Steer down to the meadow"], ["move", "Walk to the glowing beam"], ["dash", "Dash across the gap"], ["exdash", "Jump, then dash in mid-air"], ["glide", "Jump, press %J again to glide"], ["crouch", "Climb up, then hold to crouch"], ["pickup", "Pick up the item"], ["gkey", "Send %s out"], ["rank", "You levelled up!"], ["shoot", "Shoot the monster"], ["sig", "Use %A on the group"], ["utility", "Use %A"], ["throw", "Tap to send %s at the monster"], ["orders", "Hold to give %s an order"], ["kin1", "Watch %s use %A"], ["key", "Grab the key"], ["chest", "Open the chest with the key"], ["fight", "Beat all the monsters"], ["goexit", "Go to the outpost"], ["uplink", "Capture the uplink mast"], ["defend", "Defend the outpost"], ["extract", "Step into the light"]] |
-| detail | {"gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.", "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.", "sig": "%X", "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.", "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.", "key": "Chests are locked. Walk over the key to pick it up.", "chest": "Chests need a key. Hold %F next to it to open it. This uses up the key.", "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!", "defend": "Stay inside the circle. Step out and the capture slips back!"} |
-| alt | {"utility_hold": "Tap, then hold, to use %A", "throw_back": "Tap to call %s back", "shoot_draw": "Hold to draw, let go to loose", "shoot_melee": "Step in and swing at it", "throw_send": "Tap again to send %s at the monster"} |
-| need | {"shoot": 3, "sig": 2, "utility": 2, "throw": 2} |
+| doc | The first-match tutorial (scripts/match/tutorial.gd, TutorialCamps). The hunter lands at level 1 with one ability point and every ability locked, the same as a real run; each pick_<slot> step lets only that slot take a point (its key, the glowing slot or Alt + key) and waits for it, and each camp's kills pay the XP for the next level (camps: the step that spawns it, its monsters, the level its last kill reaches, 0 for none; row = in a line in front of you). steps: [id, the one banner line]. detail: a plain-words second line under it (%L the step's ability in the kit's own words, %X the E ability in words, %R the rank-up keys, %N the E ability's name, %U the ultimate's level, %F interact). %J jump, %G glide, %E the E key, %T the Boki key, %s the Boki's name, %A the step's ability name; the step's key shows as a key cap beside the line. alt: the line for a variant of a step. labels: the marker's caption per step. mob: how the tutorial's monsters differ from real ones (hp and size up, damage and attack tempo down; camp_hp replaces hp for the camps, so their kills come quickly). fight_foes: the last fight's monsters per starter (the ult step). cds: the share of its usual time every ability, dash and glove cooldown takes here. need: how many times a step's action must land, shown as 1/3 on the pill. 'wayout' is the Ways Out hook: the one step the limited-ways-out work swaps for its own exit beat. |
+| steps | [["land", "Steer down to the meadow"], ["points", "You start with 1 ability point"], ["pick_sec", "Unlock %A"], ["sec", "Hit the monsters with %A"], ["shoot", "Now shoot them down"], ["pick_dash", "Level 2! Unlock %A"], ["dash", "Dash across the gap"], ["exdash", "Jump, then dash in mid-air"], ["glide", "Jump, press %J again to glide"], ["wallkick", "Jump at the cliff, then again"], ["crouch", "Hold to crouch and scout"], ["gkey", "Send %s at the monsters"], ["pick_kin", "Level 3! Unlock %A"], ["kin", "Hit the line with %A"], ["glove", "Grab the glove"], ["hook", "Hook the Sentinel to you"], ["pick_ult", "Level 6! Unlock your ultimate"], ["ult", "Fuse with %s and win"], ["ranks", "Spend your spare points"], ["wayout", "Few ways out: reach the Uplink"], ["uplink", "Capture the uplink mast"], ["defend", "Defend the outpost"], ["extract", "Step into the light"]] |
+| detail | {"points": "Choose wisely: every level gives one more. Monsters give XP when they fall.", "pick_sec": "%L", "pick_dash": "%L", "pick_kin": "%L", "pick_ult": "Fuse with %s: one body, its power and yours, for a while.", "shoot": "%L", "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.", "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.", "wallkick": "A jump against a wall kicks you up it.", "crouch": "Crouching shows what lies far ahead.", "gkey": "%T sends %s at a monster. Tap again to call it back.", "glove": "Gloves need no points. %Q uses this one.", "hook": "It shoots from afar. Your glove drags it to your feet.", "ranks": "Ranks make an ability stronger: %R, or click a gold +.", "wayout": "A match has only a few ways out. This one is the Uplink at the outpost.", "uplink": "Stay inside the circle until it's yours. Step out and the capture slips back!", "defend": "Stay inside the circle. Step out and the capture slips back!"} |
+| alt | {"sec_hold": "Tap, then hold, to use %A", "shoot_draw": "Hold to draw, let go to loose", "shoot_melee": "Step in and swing at them"} |
+| need | {} |
 | cds | 0.25 |
-| mob | {"hp": 8.0, "scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6} |
+| mob | {"hp": 8.0, "scale": 1.4, "dmg": 0.1, "windup": 1.8, "cd": 1.6, "camp_hp": 2.5} |
 | fight_foes | {"archer": ["skitter", "spitter", "skitter", "skitter", "spitter", "skitter", "skitter"], "juggernaut": ["skitter", "spitter", "skitter", "spitter", "skitter", "skitter", "spitter", "skitter"], "gunslinger": ["skitter", "spitter", "skitter", "skitter", "spitter", "skitter", "skitter"]} |
-| labels | {"land": "Land here", "move": "Walk here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "crouch": "Lookout", "pickup": "Item", "key": "Key", "chest": "Chest", "goexit": "Outpost", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
+| labels | {"land": "Land here", "dash": "Dash across", "exdash": "Air dash", "glide": "Glide here", "wallkick": "Climb", "crouch": "Lookout", "glove": "Glove", "wayout": "Uplink", "uplink": "Uplink", "defend": "Outpost", "extract": "Lift"} |
+| camps | {"sec": {"foes": ["skitter", "skitter"], "to": 2}, "gkey": {"foes": ["skitter", "skitter"], "to": 3}, "kin": {"foes": ["skitter", "skitter", "skitter"], "to": 4, "row": true}, "hook": {"foes": ["sentinel", "skitter"], "to": 6, "far": true}, "ult": {"foes": [], "to": 0}} |
 
 ## warden_look (`content/rules/warden_look.json`)
 
