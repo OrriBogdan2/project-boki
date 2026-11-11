@@ -48,16 +48,6 @@ const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
-# The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
-# itself near the ground (or earlier on jump) for a slower, floatier last stretch.
-const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
-const DROP_FALL := 4.2
-const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
-const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
-const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
-const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -184,7 +174,7 @@ var glide_dive := GlideDive.new()      # the glider's plunge while crouch is hel
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
-var land_t := 0.0
+var land_t := 0.0             # s left of a Hard Landing's lock: no attack, no ability (HardLanding)
 var ghost_t := 0.0
 var step_t := 0.0
 var gliding := false
@@ -230,6 +220,7 @@ var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
 var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
+var dive_hold := false        # this dive is the held one (DropFeel.tick_canopy): letting go of crouch opens the canopy
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -1922,8 +1913,6 @@ func sim(dt: float) -> void:
 	# gloves need no point: Gloves
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	if not downed and not dropping and not out:
-		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2090,11 +2079,11 @@ func _physics(dt: float) -> void:
 		# drifts on when you let go of the keys
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
-		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
+		if loco.since > 0.0 and not dropping:     # the step the glider opens keeps your velocity exactly (item 8)
 			hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(hv, mv * gs, gs, carry, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
-			gs = DIVE_SPEED if diving else DROP_SPEED
+			gs = DropFeel.top_speed(diving)
 			if not DropLaunch.locked(self):
 				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
@@ -2145,9 +2134,9 @@ func _physics(dt: float) -> void:
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := 5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length())
 		if dropping:
-			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
+			vel.y = DropFeel.fall_vy(vel.y, diving, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
 		elif glide_dive.on:
@@ -2297,14 +2286,13 @@ func _physics(dt: float) -> void:
 			var was_drop := dropping     # (movefeel) the drop's own landing has its feedback (Match.on_drop_landed)
 			if dropping:
 				dropping = false
+				m.on_drop_landed(self)      # (reads `diving`: the dive held to the ground is a Hard Landing)
 				diving = false
-				m.on_drop_landed(self)
 			if shot_down:
 				GlideSpike.land(self)
-			if fv < -11.0 or cur > spd * 1.3:
+			if (fv < -11.0 or cur > spd * 1.3) and land_t <= 0.0:
 				m.fx.dust(pos, 6)
 				squash = 0.15
-				land_t = 0.2
 				m.sfx("land", pos, -10.0)
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
@@ -2312,11 +2300,10 @@ func _physics(dt: float) -> void:
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
 				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
-			if fv < -17.0:
-				# a long drop lands hard: a thud, a puff of dust and a short stagger
+			if fv < -17.0 and land_t <= 0.0:
+				# a long fall lands hard: a puff of dust and a deeper squash
 				m.fx.dust(pos, 12)
 				squash = 0.25
-				land_t = 0.32
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V
@@ -2395,8 +2382,8 @@ func _deploy() -> void:
 		return
 	diving = false
 	glide_k = 0.0
-	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
-	vel.y = maxf(vel.y, DEPLOY_POP)
+	# (movefeel) the canopy bites: your fall checks hard, then settles to the canopy's sink
+	vel.y = maxf(vel.y, DropFeel.pop_vy)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
@@ -2429,11 +2416,7 @@ func _update_glide(dt: float) -> void:
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
-		if diving:
-			var void_below: bool = m.world.is_void(pos.x, pos.z)
-			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (drop_follow != null and not drop_follow.diving):
-				_deploy()
+		DropFeel.tick_canopy(self)       # dive or canopy (crouch held dives; it opens by itself near the ground)
 		if pos.y < -1.5:
 			dropping = false
 			diving = false
@@ -3154,6 +3137,7 @@ func render(delta: float, alpha: float) -> void:
 		update_lip()
 	_render_weapon_fx(delta)
 	DropReticle.tick(self, delta)
+	DropFeel.ribbon(self)
 	var rig: Node3D = model.get_node("Rig")
 	var torso: Node3D = rig.get_node("Torso")
 	if anim == null or anim.model != model:

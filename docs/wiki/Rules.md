@@ -555,6 +555,23 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | _doc | Rows of the HUD buff stack (scripts/ui/buff_stack.gd), in draw order. on: hunter (field on the Hunter), kit (field on the archetype kit, only when `arch` is the hero), buff (a kin buff in Hunter.kbuffs: amount, time left), owner (how many Boki owner passives apply). time: field holding the seconds left (draws the draining ring; it is also the active test when there is no value). value: field that must be above 0 for the row to show. stacks: show floor(value) as the count. |
 | rows | [{"id": "swift", "name": "Swift", "icon": "dash", "col": "ffd76a", "time": "haste_t"}, {"id": "vault", "name": "Vault", "icon": "dash", "col": "ffd76a", "on": "kit", "arch": "thief", "time": "haste_t"}, {"id": "cloak", "name": "Unseen", "icon": "cloak", "col": "b9c4ff", "time": "cloak_t"}, {"id": "crit", "name": "Critical", "icon": "burst", "col": "ffd23f", "time": "crit_t"}, {"id": "phase", "name": "Phase", "icon": "vanish", "col": "c9a8ff", "time": "phase_t"}, {"id": "guard", "name": "Guarded", "icon": "anchor", "col": "f2e6cf", "time": "guard_t"}, {"id": "shield", "name": "Shield", "icon": "brightshield", "col": "d8ecff", "value": "shield", "time": "shield_t"}, {"id": "enraged", "name": "Enraged", "icon": "haymaker", "col": "ff5a4a", "on": "kit", "arch": "juggernaut", "time": "enraged_t"}, {"id": "swollen", "name": "Swollen", "icon": "dome", "col": "ff9ad0", "on": "kit", "arch": "ostra", "time": "swollen_t"}, {"id": "fever", "name": "Fever: heals from damage", "icon": "heart", "col": "ff9a5c", "on": "kit", "arch": "gunslinger", "value": "res", "time": "res_wait", "stacks": true}, {"id": "kin_speed", "name": "Boki: faster", "icon": "breeze", "col": "9ae8ff", "on": "buff", "value": "move_speed"}, {"id": "kin_damage", "name": "Boki: more damage", "icon": "cleave", "col": "ff9a5a", "on": "buff", "value": "damage"}, {"id": "kin_rate", "name": "Boki: faster fire", "icon": "barrage", "col": "ffd76a", "on": "buff", "value": "fire_rate"}, {"id": "carry", "name": "Boki passive", "icon": "paw", "col": "8fe0a0", "on": "owner", "stacks": true}] |
 
+## camps (`content/rules/camps.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. |
+| kind_size | {"light": "small", "normal": "camp", "heavy": "great", "chief": "chief"} |
+| sizes | [{"id": "small", "name": "Small Camp", "n": 2, "armor": 25, "orb": 0.0}, {"id": "camp", "name": "Camp", "n": 3, "big": "sentinel", "armor": 50, "orb": 0.5}, {"id": "great", "name": "Great Camp", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 0}, {"id": "chief", "name": "Camp Chief", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 1, "big_rar": 1}] |
+| small | ["skitter", "spitter", "bomber"] |
+| back_s | 150 |
+| back_clear_r | 30 |
+| back_safe_s | 60 |
+| back_until_s | 420 |
+| max_mobs | 85 |
+| spread | 1.8 |
+
 ## capture (`content/rules/capture.json`)
 
 Capture by scan (docs/decisions/0002). A wild Boki that is knocked out (dazed) can be scanned: hold the interact key for hold_s to commit, then the scan runs by itself for scan_s. Times in seconds, distances in metres.
@@ -639,6 +656,25 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | mage | {"dist": 1.0, "time": 1.15} |
 | gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
 | archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
+
+## drop (`content/rules/drop.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | The opening drop (docs/decisions/0049-drop-height.md, EARLY_CAMPS_DROP.md section 3): the skyship, the squad launch, the dive, the canopy, the landing, and what the local player sees and hears on the way down. Read by DropFeel; DropLaunch, DropReticle, DropSquad, DropView and GliderSfx take their numbers from it. Metres, seconds, m/s, degrees. |
+| ship | {"doc": "height: the ship's flight height (owner call 1; 140 is the grander alternative). speed: along its line. ride_cam_dist / launch_cam_dist: how far back the camera sits aboard and in the launch. plan_s: the planning phase before it sets off.", "height": 110.0, "speed": 14.0, "ride_cam_dist": 60.0, "launch_cam_dist": 26.0, "plan_s": 12.0} |
+| launch | {"doc": "speed: along the ship's heading. lift: up out of the hatch. lock_s: no keys for this long (45 m carried). separate_after_s: Separate can break you off from here.", "speed": 18.0, "lift": 8.0, "lock_s": 2.5, "separate_after_s": 1.5} |
+| dive | {"doc": "fall / speed: the dive's sink and top flat speed. vy_rate: 1/s, how fast it reaches its sink. accel: m/s^2 toward the keys.", "fall": 20.0, "speed": 16.0, "vy_rate": 7.0, "accel": 52.0} |
+| canopy | {"doc": "fall / speed / vy_rate / accel: as the dive's, under the open glider. brake: m/s^2 slowing or turning back, dive or canopy. pop_vy: the fall checks to this as the canopy catches. open_h: it opens by itself this high above the ground. void_open_y: and at this height over the void.", "fall": 5.0, "speed": 9.0, "vy_rate": 9.0, "accel": 30.0, "brake": 30.0, "pop_vy": -1.6, "open_h": 10.0, "void_open_y": 7.0} |
+| flare | {"doc": "Below height the glider flares the fall down to fall, at rate 1/s.", "height": 4.0, "fall": 2.2, "rate": 6.0} |
+| land | {"doc": "The soft landing: dust particles and the model's squash. No ring (a ground ring means gameplay).", "dust": 14, "squash": 0.45} |
+| hard_landing | {"doc": "A Hard Landing (opening drop only): the dive key held through the last 10 m keeps the canopy shut and you hit the ground at dive speed. Every monster within radius m (not lair bosses, Hunters or Boki) takes damage from you and is stunned stun_s; you move slow_k slower and cannot attack or use abilities for lock_s. The boom carries hear_m and pings rivals' minimaps inside that. Yours only: the camera dips dip_m and springs back over dip_s, with hitstop_s of hit-stop. The ring is drawn at radius for ring_s; dust particles, chunks of chunk_mat (breakables.json debris), a crack crack_m across for crack_s. The reticle shows the hint below hint_h m in the dive. Bots land hard bot_chance of the time when their spot is within bot_camp_m of a live camp.", "radius": 6.0, "damage": 30.0, "stun_s": 1.5, "lock_s": 0.4, "slow_k": 0.5, "hear_m": 60.0, "dip_m": 0.5, "dip_s": 0.22, "hitstop_s": 0.06, "ring_s": 0.35, "dust": 36, "chunks": 6, "chunk_mat": "clay", "crack_m": 2.0, "crack_s": 4.0, "squash": 0.6, "hint_h": 30.0, "bot_chance": 0.5, "bot_camp_m": 8.0} |
+| view | {"doc": "The local player's dive view: the field of view widens by widen_deg over widen_s and the camera tips tilt_deg further down; both ease back over back_s when the canopy opens.", "widen_deg": 10.0, "widen_s": 0.4, "tilt_deg": 12.0, "back_s": 0.5} |
+| cloud | {"doc": "One cloud sheet at height (world y) for the local player: crossing it is haze_s of white and a whoosh. scale / drift / cover / alpha: the sheet's look (cloud_layer.gdshader).", "height": 60.0, "haze_s": 0.3, "scale": 0.035, "drift": 0.05, "cover": 0.5, "alpha": 0.6} |
+| wind | {"doc": "pitch_low / pitch_high: the wind loop's pitch at a standstill and at the dive's full speed. streak_from: fall speed (m/s) where the screen-edge streaks start; they are full at the dive's fall. snap_db: the canopy's snap in the drop.", "pitch_low": 0.8, "pitch_high": 1.3, "streak_from": 6.0, "snap_db": 0.0} |
+| ribbon | {"doc": "Each Hunter's team-colour ribbon in the dive: width in metres, trail_s seconds of its velocity long.", "width": 0.14, "trail_s": 0.4} |
 
 ## equal (`content/rules/equal.json`)
 
@@ -759,12 +795,13 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 
 | Setting | Value |
 |---|---|
-| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first two real Extractions of a save. matches: how many Extractions get it. gap: seconds of quiet between two lines. squad_range: metres at which another squad counts as close. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]. In the text %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %s the Boki's name. |
+| doc | The first-match guide (scripts/match/first_match_guide.gd): one plain 'what to do next' line at a time in the first real Extractions of a save. matches: how many Extractions get every line. camp_matches: how many get the camp lines (pick, camp); the guide stops after them. gap: seconds of quiet between two lines. squad_range: metres at which another squad counts as close. close_at: the part of the match left when the Blight line shows. lines: [id, text, longest it stays in seconds]. In the text %F is the interact key, %T the Boki key, %R the rank-up keys, %N the ability's name, %s the Boki's name. |
 | matches | 2 |
+| camp_matches | 3 |
 | gap | 1.5 |
 | squad_range | 45 |
 | close_at | 0.4 |
-| lines | [["land", "Pick a landing spot: steer your glide to an island", 20.0], ["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["squad", "Another squad is close: fight them, or slip away quietly", 12.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0]] |
+| lines | [["pick", "Pick a camp and ping it", 14.0], ["land", "Pick a landing spot: steer your glide to an island", 20.0], ["camp", "Clear the camp to level up", 90.0], ["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["squad", "Another squad is close: fight them, or slip away quietly", 12.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0]] |
 
 ## garden_daily (`content/rules/garden_daily.json`)
 
@@ -1308,12 +1345,12 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 
 | Setting | Value |
 |---|---|
-| _doc | Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones. sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan. |
+| _doc | Perk orbs (scripts/match/perk_orbs.gd). Perks are found in the match as floating orbs: chests drop 1, shrines 1 or 2, bosses a fan of 3 different ones, a cleared camp 1 (Camps). sources: n = [min, max] orbs, lean = how much each kind of perk is favoured at that source (flat = stats, weapon = weapon upgrades and brands, kit = the old kit passives), fan = the orbs form a fan and taking one fades the others for you only. kinds lists the perk ids in each kind (ids come from Data.PERKS). weights scale one perk up or down inside its kind. bot_want is how much a bot wants each perk (higher is taken first); a bot never takes two from one fan. |
 | take_radius | 1.2 |
 | bot_radius | 16 |
 | fan_radius | 2.4 |
 | fan_spread | 0.7 |
-| sources | {"chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}}, "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}}, "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}}, "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}} |
+| sources | {"chest": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 1.5}}, "shrine": {"n": [1, 2], "lean": {"flat": 3.0, "weapon": 0.6, "kit": 1.5}}, "boss": {"n": [3, 3], "fan": true, "lean": {"flat": 1.0, "weapon": 4.0, "kit": 0.5}}, "brute": {"n": [1, 1], "lean": {"flat": 1.0, "weapon": 3.0, "kit": 0.5}}, "camp": {"n": [1, 1], "lean": {"flat": 1.5, "weapon": 3.0, "kit": 1.0}}} |
 | kinds | {"flat": ["secondwind", "featherfall", "tailwind", "toughskin", "quickhands", "scavenger", "keen", "fleet", "plating", "focus", "remedy", "overcharge"], "weapon": ["hotload", "deepmag", "quickfeed", "longreach", "brand_fire", "brand_frost", "brand_storm", "brand_venom", "brand_void"], "kit": ["field_kit", "magpie", "satchel", "spyglass", "tinker_roll"]} |
 | weights | {"brand_fire": 0.7, "brand_frost": 0.7, "brand_storm": 0.7, "brand_venom": 0.7, "brand_void": 0.7, "overcharge": 0.6, "remedy": 0.8} |
 | bot_want | {"default": 1.5, "brand_fire": 3.0, "brand_frost": 2.8, "brand_storm": 3.0, "brand_venom": 2.8, "brand_void": 2.6, "hotload": 2.6, "keen": 2.5, "quickfeed": 2.2, "toughskin": 2.4, "plating": 2.2, "secondwind": 2.0, "longreach": 1.8, "deepmag": 1.6, "quickhands": 1.7, "tinker_roll": 1.5, "magpie": 1.0, "scavenger": 1.0, "satchel": 0.8, "spyglass": 0.9, "overcharge": 1.2} |
@@ -1618,6 +1655,18 @@ Boki wading (GARDEN.md section 4, scripts/home/boki_wade.gd; only while farm_bui
 | _doc | Wisp looks (docs/decisions/0019-downed-wisp.md): what a downed Hunter turns into. Add a look = add an entry under 'looks'; any key left out comes from 'default'. A look is chosen by its id in Save.d['look']['wisp']. Every look keeps the round outline (round = Hunter, critter = Boki). Colours: 'team' (the hunter's side colour, SideColor: you, ally, foe) or a hex string. core.rim_width is the fraction of the radius in the rim colour. body: radius and squash of the round body, head the radius of the head on top. hover is the body centre's height; drag how far the body trails behind the hunter, settle the seconds it takes to catch up (heavy), lean the tilt in radians at full drag. Times in seconds, sizes in metres, sfx names from Sfx.NAMES, hum.db the hum's level. |
 | default | default |
 | looks | {"default": {"name": "Wisp", "desc": "A round soul-light in your team's colour with a white heart, slow and heavy.", "core": {"rim": "team", "color": "ffffff", "rim_width": 0.3, "glow": 1.3}, "body": {"radius": 0.3, "squash": 0.85, "head": 0.16}, "hover": 0.4, "bob": 0.04, "bob_hz": 0.45, "drag": 0.45, "settle": 0.5, "lean": 0.35, "hum": {"sfx": "wisp_hum", "db": -14.0}, "pop_in": {"time": 0.25, "ring": 1.4, "burst": 14, "sfx": "scan_pop"}, "pop_out": {"time": 0.3, "ring": 1.8, "burst": 18, "sfx": "revive", "hero_from": 0.6, "squash": 0.25}, "snuff": {"burst": 24, "sfx": "hit"}}} |
+
+## xp (`content/rules/xp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd. |
+| share_r | 30 |
+| knock | {"base": 40, "per_level": 15} |
+| camp_mob | {"skitter": 30, "bomber": 30, "spitter": 30, "sentinel": 50, "brute": 100, "chief": 170} |
+| stray | 8 |
 
 ## Combos
 
