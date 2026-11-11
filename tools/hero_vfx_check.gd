@@ -5,9 +5,16 @@ extends RefCounted
 ## thins and then drops a look; allies sit dimmer; a hold stops by itself; a move arrives from another game. Then, on a
 ## synthetic recipe set with one layer of every kind: a bone anchor follows the hand, prewarm makes one of every kind,
 ## a held stream turns with the aim, a projectile trail follows its node and ends with it. Claire's scarf tails hang
-## from their anchor, follow it, stream behind a run and are off at Low.
+## from their anchor, follow it, stream behind a run and are off at Low. The drop rocket's looks (DropRocket): its
+## trail, the puff where a Hunter jumps out and the dust where it lands.
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
+const ROCKET_AT := 6.0         # s into the ship's run when the squad launches: over the islands on ROCKET_SEED
+const ROCKET_SEED := 4242
+const ROCKET_RIDE := 1.5       # s ridden before the trail is measured: past the rocket's speed-up
+const ROCKET_TRAIL_M := 10.0   # m of trail at least behind the dive by then, so it reaches up the skydive view
+const SETTLE_TOP_V := 5.0      # m/s: the landing dust is never faster than this (it settles, it does not blast)
+const STREAK_PILE := 40        # streaks asked for at once: the pool still caps them
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
 const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
@@ -61,6 +68,7 @@ func run(main: Node) -> void:
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
+	await _rocket(main)
 	print("HEROVFX %s" % ("OK" if bad == 0 else "%d failed" % bad))
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -372,3 +380,155 @@ func _scarf(main: Node) -> void:
 	S.prewarm(P.pos)
 	ok(S.made == 3, "the loading screen draws one more ribbon (its shader compiles then), pooled after")
 	S.prewarm_end()
+
+## The drop rocket (DropRocket): a thin trail in the squad colour from the nozzle that runs out after the landing, from
+## the shared ribbon pool, as long at any frame rate, none at the very-low preset; a puff where a Hunter jumps out and
+## dust settling where it lands, on Fx's dust pool, no ring or burst, also when another game's flags say so.
+func _rocket(main: Node) -> void:
+	var was: Variant = Settings.v.get("quality", "auto")
+	Settings.v["quality"] = "high"
+	var m := _rocket_match(main)
+	var V := HeroVfx.of(m)
+	var P: Hunter = m.player
+	m.ship_jump(P)
+	var r: DropRocket = P.rocket
+	var e: Dictionary = V.ribbons[-1] if not V.ribbons.is_empty() else {}
+	var nozzle: Node3D = e.get("follow")
+	ok(r != null and nozzle != null and nozzle.get_parent() == r.node, "the launch starts a trail from the nozzle")
+	if nozzle == null:
+		return
+	var col: Color = Data.TEAM_COLORS[P.team % Data.TEAM_COLORS.size()]
+	ok((e["mat"] as ShaderMaterial).get_shader_parameter("col") == col and float(e["width"]) <= DropRocket.TRAIL_W,
+			"the trail is in the squad colour and thin (%.2f m)" % float(e["width"]))
+	_ride(m, V, ROCKET_RIDE)
+	var pts: Array = e["pts"]
+	var up: Vector3 = (pts[-1][0] as Vector3) - (pts[0][0] as Vector3)
+	ok((pts[0][0] as Vector3).distance_to(nozzle.global_position) < 0.01, "its head rides the nozzle")
+	ok(up.y > 0.0 and up.length() >= ROCKET_TRAIL_M, "it streams up behind the dive (%.1f m)" % up.length())
+	_rocket_out(m, r)
+	var high_dots := _rocket_land(m, V, r)
+	await main.get_tree().process_frame
+	_ride(m, V, DropRocket.TRAIL_S + 0.1)
+	ok(not (e["node"] as Node3D).visible, "the trail runs out after the landing, back to the pool")
+	_streaks(V)
+	m.queue_free()
+	Settings.v["quality"] = DropRocket.TRAIL_OFF
+	m = _rocket_match(main)
+	V = HeroVfx.of(m)
+	m.ship_jump(m.player)
+	r = m.player.rocket
+	ok(r != null and V.ribbons.is_empty(), "no trail at the very-low preset")
+	for h: Hunter in r.riders:
+		h.remote = true          # another game flew it down: its riders' flags say they landed with it
+		h.riding = false
+		h.grounded = true
+	var radial0: int = m.fx.radial
+	var riders: Array = r.riders.duplicate()
+	r.tick(Match.DT)
+	for h: Hunter in riders:
+		h.remote = false
+	var dust := _settles(m.fx)
+	ok(r.done and dust.size() == 1 and m.fx.radial == radial0, "the flags say they landed: the same dust here")
+	if dust.size() == 1:
+		ok((dust[0] as CPUParticles3D).amount < high_dots, "fewer dots at very low (%d, %d at high)"
+				% [(dust[0] as CPUParticles3D).amount, high_dots])
+	m.queue_free()
+	Settings.v["quality"] = was
+
+## A three-a-side squad match, everyone aboard the skyship ROCKET_AT seconds into its run.
+func _rocket_match(main: Node) -> Match:
+	var m := Match.new()
+	main.add_child(m)
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": ROCKET_SEED})
+	m.set_process(false)
+	m.skydrop.planning = false
+	for i in int(ROCKET_AT / Match.DT):
+		m.step(Match.DT)
+	return m
+
+## Match steps with the looks' frames between them (the tree isn't running frames here).
+func _ride(m: Match, V: HeroVfx, secs: float) -> void:
+	for i in maxi(1, int(round(secs / Match.DT))):
+		m.step(Match.DT)
+		V._process(Match.DT)
+
+## Jumping out, here and as another game's flags: a small puff where they let go, no ring and no burst.
+func _rocket_out(m: Match, r: DropRocket) -> void:
+	var mates: Array = r.riders.filter(func(x: Hunter): return x != m.player)
+	var radial0 := m.fx.radial
+	var puff: CPUParticles3D = m.fx.bursts[m.fx.bi]
+	var at := r.pos
+	m.skydrop.detach(mates[0])
+	ok(puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01,
+			"jumping out leaves a small puff where they let go (%d dots)" % puff.amount)
+	var far: Hunter = mates[1]
+	far.remote = true
+	far.riding = false
+	far.dropping = true
+	puff = m.fx.bursts[m.fx.bi]
+	at = r.pos
+	r.tick(Match.DT)
+	far.remote = false
+	ok(not r.riders.has(far) and puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01,
+			"another game's flags say one jumped out: the same puff here")
+	ok(m.fx.radial == radial0, "no ring and no burst on jumping out")
+
+## The rocket comes down: dust settles round it, low and slow, and no ring or burst from it or the riders'
+## touchdowns. Returns the dust's dots.
+func _rocket_land(m: Match, V: HeroVfx, r: DropRocket) -> int:
+	var added := -1
+	for i in int(20.0 / Match.DT):
+		var radial0 := m.fx.radial
+		_ride(m, V, Match.DT)
+		if r.done:
+			added = m.fx.radial - radial0
+			break
+	ok(added == 0, "the landing adds no ring or burst, nor do the riders' touchdowns")
+	var dust := _settles(m.fx).filter(func(p: CPUParticles3D): return m.player.flat_dist(p.global_position) < 8.0)
+	ok(dust.size() == 1, "dust settles where it lands, round the squad that stepped out")
+	if dust.size() != 1:
+		return 0
+	var p: CPUParticles3D = dust[0]
+	var ground := m.world.ground_at(p.global_position.x, p.global_position.z)
+	ok(p.initial_velocity_max <= SETTLE_TOP_V and p.gravity.y > -2.0 and p.global_position.y - ground < 0.5,
+			"low and slow, sinking back: not a blast (%.1f m/s, %d dots)" % [p.initial_velocity_max, p.amount])
+	return p.amount
+
+## Fx's dust emitters running a landing's settle (dust that outlives a step's puff).
+func _settles(fx: Fx) -> Array:
+	return fx.bursts.filter(func(p: CPUParticles3D): return p.color == Fx.DUST and p.lifetime > 1.0 and p.emitting)
+
+## A streak keeps a point a step, not a frame, so it is as long at 30 fps as at 144; a later one reuses a pooled
+## ribbon; a pile of them stays within the pool.
+func _streaks(V: HeroVfx) -> void:
+	var made := V.made
+	var slow := _streak_span(V, 30.0)
+	ok(V.made == made, "a later trail reuses the pooled ribbon (no new node)")
+	var fast := _streak_span(V, 144.0)
+	ok(absf(fast - slow) < slow * 0.15, "as long at 144 fps as at 30 (%.1f m, %.1f m)" % [fast, slow])
+	var dots: Array = []
+	for i in STREAK_PILE:
+		var dot := Node3D.new()
+		V.add_child(dot)
+		dots.append(dot)
+		V.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
+	ok((V.pools["ribbon"] as Array).size() <= int(HeroVfx.POOL["ribbon"]), "%d trails at once stay in the pool (%d)"
+			% [STREAK_PILE, (V.pools["ribbon"] as Array).size()])
+	for dot: Node3D in dots:
+		dot.queue_free()
+	_clear(V)
+
+## How long a streak behind a node diving at the rocket's speed is after a second at `fps`.
+func _streak_span(V: HeroVfx, fps: float) -> float:
+	var dot := Node3D.new()
+	V.add_child(dot)
+	V.streak(dot, Color.WHITE, DropRocket.TRAIL_W, DropRocket.TRAIL_S)
+	var e: Dictionary = V.ribbons[-1]
+	for i in int(fps):
+		dot.global_position += Vector3.DOWN * DropRocket.FALL / fps
+		V._process(1.0 / fps)
+	var pts: Array = e["pts"]
+	var span := (pts[-1][0] as Vector3).distance_to(pts[0][0])
+	dot.queue_free()
+	_clear(V)
+	return span
