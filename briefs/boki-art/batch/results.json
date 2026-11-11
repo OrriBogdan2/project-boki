@@ -111128,5 +111128,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_kayak_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_kerchick",
+    "name": "Kerchick (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kerchick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_jibbatross",
+    "name": "Jibbatross (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_jibbatross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_hydrangor",
+    "name": "Hydrangor (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_hydrangor_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_howlop",
+    "name": "Howlop (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_howlop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_jarmit",
+    "name": "Jarmit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_jarmit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_jerbit",
+    "name": "Jerbit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_jerbit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_jerbolt",
+    "name": "Jerbolt (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_jerbolt_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_kestrike",
+    "name": "Kestrike (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_kestrike_1.jpg",
+    "ok": true
   }
 ]
