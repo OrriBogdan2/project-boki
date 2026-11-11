@@ -12,9 +12,11 @@ import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import fistkit as A  # noqa: E402
+import skin_relax  # noqa: E402
 
 a = sys.argv[sys.argv.index("--") + 1:]
 OUT_BLEND, OUT_GLB = a[0], a[1]
+RELAX = {"CUTS": 0, "MAX_ITER": 800, "RINGS": 2}     # skin_relax: weights only (no cut-and-cap holes), longer and wider than its default
 arm = bpy.data.objects["Armature"]
 REST = {b.name: b.head_local.copy() for b in arm.data.bones}
 AX = float(REST["foot.R"].x)
@@ -482,6 +484,9 @@ C.bake("emote_toss", 2.2, [(0, LOOSE), (0.3, EM1), (0.5, m(EM2, e="out")), (0.95
 # Fusion: fists to the ground, the stone rises through him, he stands into it arms wide
 C.bake("fuse", 0.8, [(0, LOOSE), (0.22, m(SPAIM, pos=(0, 0, -0.5))), (0.5, m(HEAVE, pos=(0, 0, 0.04), hr=hand(0.56, 0.1, 0.44), hl=lhand(0.56, 0.1, 0.44), jaw=0.7, lip=1.0, e="out")), (0.66, m(HEAVE, pos=(0, 0, 0.0))), (0.8, LOOSE)])
 
+for k, v in RELAX.items():
+    setattr(skin_relax, k, v)
+skin_relax.relax(arm)       # (the shipped tarek.glb got the same from tools/art1/glb_relax.py)
 bpy.context.scene.render.fps = A.FPS
 arm.animation_data_create()
 arm.animation_data.action = bpy.data.actions["idle"]

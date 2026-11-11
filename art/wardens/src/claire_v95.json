@@ -23,7 +23,9 @@
   "ice"
  ],
  "relax": {
-  "CUTS": 0
+  "CUTS": 0,
+  "MAX_ITER": 800,
+  "RINGS": 2
  },
  "joints": {
   "pelvis": [
