@@ -210,6 +210,11 @@ static func ghost(text: String, cb: Callable, minw := 0.0, icon := "") -> Button
 	b.theme_type_variation = "Ghost"
 	return b
 
+## Gives this button its own press sound ("" for none, when the action plays its own once it lands).
+static func sounding(b: Button, sound: String) -> Button:
+	b.set_meta("snd", sound)
+	return b
+
 ## A red-outlined button for things that can't be undone (pair it with confirm()).
 static func danger(text: String, cb: Callable, minw := 0.0, icon := "") -> Button:
 	var b := button(text, cb, minw, icon)

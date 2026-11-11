@@ -638,11 +638,11 @@ func _open_guilds() -> void:
 		var hb := UI.hbox(8)
 		var gid0 := Social.my_guild_id()
 		hb.add_child(UI.button("Go to the guild isle", func(): Game.goto("town", {"mode": "guild", "gid": gid0}), 240))
-		hb.add_child(UI.button("Leave the guild", func():
+		hb.add_child(UI.sounding(UI.button("Leave the guild", func():
 			_lock()
 			Social.leave_guild(func():
 				_toast("You left the guild")
-				if panel_open == "Guild registry": _open_guilds()), 200))
+				if panel_open == "Guild registry": _open_guilds()), 200), "ui_clan_leave"))
 		if String(Social.guild.get("founder", "")) == Social.me:
 			var open_now: bool = Social.guild.get("open", true)
 			hb.add_child(UI.button("Open to anyone" if not open_now else "Close to newcomers", func():
@@ -656,17 +656,20 @@ func _open_guilds() -> void:
 		var nm := LineEdit.new(); nm.placeholder_text = "Guild name"; nm.max_length = 24; nm.custom_minimum_size.x = 200
 		var mo := LineEdit.new(); mo.placeholder_text = "Motto (optional)"; mo.max_length = 60; mo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(nm); row.add_child(mo)
-		row.add_child(UI.button("Found it", func():
+		row.add_child(UI.sounding(UI.button("Found it", func():
 			if nm.text.strip_edges().length() < 3:
+				Sfx.play("ui_deny")
 				_toast("Pick a name of at least 3 letters")
 				return
 			_lock()
 			var gname := Social.say_of(nm.text, "Guild", 24)
 			Social.create_guild(gname, mo.text, func(okk: bool):
 				if okk:
-					Sfx.play("unlock")
+					Sfx.play("ui_clan_found")
 					_toast("%s is founded" % gname)
-				if panel_open == "Guild registry": _open_guilds()), 120))
+				else:
+					Sfx.play("ui_deny")
+				if panel_open == "Guild registry": _open_guilds()), 120), ""))
 		v.add_child(row)
 	v.add_child(UI.section("Guilds"))
 	var list := _loading(v)
@@ -685,12 +688,12 @@ func _open_guilds() -> void:
 			var rid: String = r["id"]
 			row.add_child(UI.button("Visit", func(): Game.goto("town", {"mode": "guild", "gid": rid}), 90))
 			if Social.guild.is_empty() and g["open"]:
-				row.add_child(UI.button("Join", func():
+				row.add_child(UI.sounding(UI.button("Join", func():
 					_lock()
 					Social.join_guild(rid, func(_okk):
-						Sfx.play("unlock")
+						Sfx.play("ui_clan_join")
 						_toast("Welcome to %s" % g["name"])
-						if panel_open == "Guild registry": _open_guilds()), 90)))
+						if panel_open == "Guild registry": _open_guilds()), 90), "")))
 
 ## Who is in this clan and what rank they hold. Members who joined before ranks existed read as members.
 func _open_roster() -> void:

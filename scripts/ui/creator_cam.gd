@@ -9,6 +9,7 @@ const NEAR_CAM := Vector3(0.3, 1.36, 3.7)      # m: the head and shoulders, the 
 const NEAR_LOOK := Vector3(0.3, 1.28, 1.6)
 const HEAD_Y := 1.35                           # m: head height of an average hunter (taller ones scale it)
 const WHEEL_STEP := 0.15                       # zoom per wheel notch
+const TURN_TICK := 0.35                        # rad of drag-turn per notch sound (about 20 degrees)
 
 ## Where the camera stands at this zoom, for a hunter this tall (Unmasked.HEIGHT_SCALE).
 static func cam_pos(zoom: float, height_scale: float) -> Vector3:
@@ -26,3 +27,11 @@ static func wheel(zoom: float, event: InputEvent) -> float:
 		MOUSE_BUTTON_WHEEL_UP: return minf(1.0, zoom + WHEEL_STEP)
 		MOUSE_BUTTON_WHEEL_DOWN: return maxf(0.0, zoom - WHEEL_STEP)
 	return zoom
+
+## Ticks once per TURN_TICK of dragging you round. acc is the turn since the last tick; returns the new one.
+static func turn_tick(acc: float, turned: float) -> float:
+	acc += absf(turned)
+	if acc < TURN_TICK:
+		return acc
+	Sfx.play("ui_turn", null, -8.0)
+	return fmod(acc, TURN_TICK)

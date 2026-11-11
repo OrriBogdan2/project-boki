@@ -75,7 +75,7 @@ func _row(row: Array) -> HBoxContainer:
 		l.tooltip_text = row[3]
 		l.mouse_filter = Control.MOUSE_FILTER_STOP
 	hr.add_child(l)
-	hr.add_child(UI.icon_button("back", func(): _step(key, -1, opts.size()), "Previous", 12.0))
+	hr.add_child(_arrow("back", "Previous", key, -1, opts.size()))
 	var i := int(look[key])
 	if opts[0] is Color:
 		var sw := Panel.new()
@@ -89,17 +89,24 @@ func _row(row: Array) -> HBoxContainer:
 		val.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		hr.add_child(val)
-	hr.add_child(UI.icon_button("next", func(): _step(key, 1, opts.size()), "Next", 12.0))
+	hr.add_child(_arrow("next", "Next", key, 1, opts.size()))
 	var die := UI.icon_button("die", func(): _reroll(key, opts.size()), "Pick another at random", 12.0)
+	UI.sounding(die, "ui_dice")
 	die.set_meta("die", key)
 	hr.add_child(die)
 	return hr
+
+## A step arrow: it ticks higher the further along the row's values the look lands (not a click too).
+func _arrow(icon: String, tip: String, key: String, d: int, n: int) -> Button:
+	var b := UI.icon_button(icon, Callable(), tip, 12.0)
+	b.pressed.connect(func(): _step(key, d, n))
+	return b
 
 func _preset_row() -> HBoxContainer:
 	var hr := UI.hbox(4)
 	for nm in PRESETS:
 		var preset_name: String = nm
-		var b := UI.button(preset_name, func(): use_preset(preset_name))
+		var b := UI.sounding(UI.button(preset_name, func(): use_preset(preset_name)), "ui_preset")
 		b.add_theme_font_size_override("font_size", 13)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		hr.add_child(b)
@@ -123,14 +130,14 @@ var _redo_btn: Button
 
 func _foot() -> HBoxContainer:
 	var br := UI.hbox(8)
-	_undo_btn = UI.ghost("Undo", undo, 0.0, "back")
-	_redo_btn = UI.ghost("Redo", redo, 0.0, "next")
+	_undo_btn = UI.sounding(UI.ghost("Undo", undo, 0.0, "back"), "ui_undo")
+	_redo_btn = UI.sounding(UI.ghost("Redo", redo, 0.0, "next"), "ui_redo")
 	br.add_child(_undo_btn)
 	br.add_child(_redo_btn)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	br.add_child(gap)
-	br.add_child(UI.ghost("Random", func(): _apply(Unmasked.random_look()), 0.0, "swap"))
+	br.add_child(UI.sounding(UI.ghost("Random", func(): _apply(Unmasked.random_look()), 0.0, "swap"), "ui_dice"))
 	br.add_child(UI.primary("Looks good", func(): done.emit(), 150))
 	_sync_buttons()
 	return br
@@ -146,14 +153,13 @@ func _apply(next: Dictionary) -> void:
 func _step(key: String, d: int, n: int) -> void:
 	var next := look.duplicate(true)
 	next[key] = posmod(int(look[key]) + d, n)
-	Sfx.play("hover", null, -6.0)
+	UiSfx.tick(float(next[key]) / maxf(n - 1, 1.0))
 	_apply(next)
 
 ## Another value for this row only (never the one it has now).
 func _reroll(key: String, n: int) -> void:
 	var next := look.duplicate(true)
 	next[key] = (int(look[key]) + 1 + randi() % maxi(1, n - 1)) % n
-	Sfx.play("hover", null, -6.0)
 	_apply(next)
 
 func use_preset(preset_name: String) -> void:

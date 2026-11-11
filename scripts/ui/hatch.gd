@@ -351,6 +351,7 @@ func _end_intro() -> void:
 		_after_create()
 
 var turning := false
+var turn_acc := 0.0           # rad turned since the last drag notch sound
 var zoom := 0.0               # the creator's camera: 0 the whole body, 1 the face
 func _unhandled_input(event: InputEvent) -> void:
 	if stage == "create" and preview:
@@ -359,7 +360,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			turning = event.pressed
 		elif event is InputEventMouseMotion and turning:
-			preview.rotation.y += event.relative.x * 0.012
+			var turned: float = event.relative.x * 0.012
+			preview.rotation.y += turned
+			turn_acc = CreatorCam.turn_tick(turn_acc, turned)
 			return
 	if stage == "warm" and ((event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or event.is_action_pressed("jump")):
 		_tap_egg()

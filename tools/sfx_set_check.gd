@@ -11,6 +11,10 @@ extends RefCounted
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. the creator and the clan screens: every button of the creator card has one sound (one handler, one
+##      sound name, the right one), step ticks rise with the value, the turn drag ticks once per notch, and
+##      the clan registry's Found / Join / Leave each play their own sound once (the press stays silent
+##      where the result plays it)
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -39,6 +43,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_creator_clans(main)
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -217,3 +222,84 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 9. The creator and the clan screens.
+func _creator_clans(main: Node) -> void:
+	var card := CreatorCard.make(Unmasked.default_look(), true)
+	main.add_child(card)
+	var foot := ["Undo", "Redo"]
+	var wrong := []
+	var seen := 0
+	var buttons: Array = card.find_children("*", "Button", true, false)
+	buttons = buttons.filter(func(b): return not (b as Button).text in foot) \
+			+ buttons.filter(func(b): return (b as Button).text in foot)
+	for b: Button in buttons:
+		var heard := _press(b)
+		var want := _creator_sound(b)
+		seen += 1
+		if heard != [want] or b.pressed.get_connections().size() != 1:
+			wrong.append("%s %s -> %s, want %s" % [b.text, b.get_meta("die", ""), heard, want])
+	# arrows and a die per row, the presets, Undo, Redo, Random and Looks good
+	var expect := Unmasked.ROWS.size() * 3 + CreatorCard.PRESETS.size() + 4
+	ok(seen == expect and wrong.is_empty(), "%d creator buttons make one right sound each (wrong: %s)" % [seen, wrong])
+	card.queue_free()
+	var short := CreatorCard.make(Unmasked.default_look(), false)
+	main.add_child(short)
+	var all: Array = short.find_children("*", "Button", true, false)
+	var more := all.filter(func(b): return (b as Button).text == "More looks...")
+	ok(more.size() == 1 and _press(more[0]) == ["click"], "More looks... clicks once")
+	short.queue_free()
+	_step_pitch(main)
+	_turn_ticks()
+	_clan_registry()
+
+## What this creator button should play: its own sound, or the value tick for an arrow.
+func _creator_sound(b: Button) -> String:
+	if b.has_meta("die"):
+		return "ui_dice"
+	if CreatorCard.PRESETS.has(b.text):
+		return "ui_preset"
+	return {"Undo": "ui_undo", "Redo": "ui_redo", "Random": "ui_dice", "Looks good": "ui_confirm"}.get(b.text, "hover")
+
+## The sound names one press makes.
+func _press(b: Button) -> Array:
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+	b.pressed.emit()
+	return Sfx.last_played.keys()
+
+## The pitch of the sound just played.
+func _last_pitch() -> float:
+	return Sfx.players[(Sfx.next - 1 + Sfx.POOL) % Sfx.POOL].pitch_scale
+
+func _step_pitch(main: Node) -> void:
+	var card := CreatorCard.make(Unmasked.default_look(), true)
+	main.add_child(card)
+	card.look["colour"] = 0
+	var pitches := []
+	for d in [1, 3]:
+		Sfx.last_played.clear()
+		card._step("colour", d, 5)
+		pitches.append(_last_pitch())
+	card.queue_free()
+	ok(pitches[0] > 0.9 and pitches[0] < pitches[1], "a step's tick rises with the value (%s)" % [pitches])
+
+func _turn_ticks() -> void:
+	Sfx.last_played.clear()
+	var acc := CreatorCam.turn_tick(0.0, CreatorCam.TURN_TICK * 0.5)
+	var quiet := Sfx.last_played.is_empty()
+	acc = CreatorCam.turn_tick(acc, -CreatorCam.TURN_TICK * 0.6)
+	ok(quiet and Sfx.last_played.keys() == ["ui_turn"] and acc < CreatorCam.TURN_TICK * 0.2,
+			"dragging you round ticks once per notch, either way")
+
+## The clan registry (scripts/social/town.gd) needs the whole town, so its three buttons are read from source.
+func _clan_registry() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/social/town.gd")
+	var cues := {"ui_clan_found": 1, "ui_clan_join": 1}
+	var once := true
+	for cue in cues:
+		once = once and src.count('Sfx.play("%s")' % cue) == 1
+	var leave_at := src.find('UI.button("Leave the guild"')
+	var silent := src.count('), ""))') >= 2 and src.find('"ui_clan_leave"', leave_at) > leave_at
+	ok(once and silent and not src.contains('Sfx.play("unlock")'),
+			"clan found, join and leave each play their own sound once")

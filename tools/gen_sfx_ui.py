@@ -4,6 +4,9 @@ Everything is a felt-mallet pluck (a marimba or kalimba tine: a sine with a quie
 fade-in, a short fall) in C major pentatonic, low-passed to stay round, with a small room behind it.
 Press = a short tap, hover = a tiny high tick, confirm = a rising pair, back = a falling pair, deny = a
 muted low double bump, open/close = an airy rise or fall under a pluck, tabs = a wood tick.
+The character creator and the clan screens add: dice = a wood rattle, preset = a rolled triad, undo/redo =
+a short glide down/up, turn = a low wood notch, and clan found / join / leave = a rising arpeggio, a
+welcome, a falling trio.
 Several of these replace the older gameplay-era files under the same names (click, hover, pickup,
 unlock, ping, level_up); reset_a/b/c are untouched (tools/gen_reset_sfx.py).
 """
@@ -134,6 +137,63 @@ def charge(i):
     return finish(mix(low * 0.5, high * 0.2, pluck(NOTE['G5'], d, 0.4, 0.2) * 0.15 * u), 3000)
 
 
+# ---------------------------------------------------------------- the creator and the clan screens
+def dice(i):
+    """A little rattle: five wood ticks tumbling down in pitch, then a soft settle."""
+    f = 1000 * jit(i, 0.03)
+    ticks = [at(mix(pluck(f * 0.93 ** k, 0.05, 0.012, 0.4), 0.3 * lpf(noise(0.02), 2400) * env(N(0.02), 0.001, 0.006)),
+                0.045 * k + 0.004 * k * k) for k in range(5)]
+    settle = at(pluck(NOTE['G5'] * jit(i, 0.02), 0.2, 0.05, 0.5), 0.26)
+    return finish(room(mix(*ticks, settle * 0.8), 0.35), 4200)
+
+
+def preset(i):
+    """A starter look picked: a soft three-note roll, up."""
+    j = jit(i)
+    notes = [at(pluck(NOTE[n] * j, 0.34, 0.08), 0.045 * k) for k, n in enumerate(['C5', 'E5', 'G5'])]
+    return finish(room(mix(*notes), 0.55), 4200)
+
+
+def glide(f0, f1, i):
+    j = jit(i)
+    tone = S.sweep(f0 * j, f1 * j, 0.16) * env(N(0.16), 0.003, 0.05)
+    return finish(room(mix(tone * 0.55, 0.5 * pluck(f1 * j * 2, 0.16, 0.03, 0.2)), 0.3), 3400)
+
+
+def undo(i):
+    return glide(NOTE['A5'], NOTE['E5'], i)
+
+
+def redo(i):
+    return glide(NOTE['E5'], NOTE['A5'], i)
+
+
+def turn(i):
+    """One notch of a drag turning you round."""
+    f = 520 * jit(i, 0.04)
+    return finish(mix(pluck(f, 0.07, 0.014, 0.4), 0.3 * pluck(f * 0.5, 0.07, 0.02, 0.2)), 3000)
+
+
+def clan_found(i):
+    """A clan founded: a low root, then a rising fifth and octave, a held shimmer."""
+    arp = [at(pluck(NOTE[n], 0.6 if k < 3 else 1.0, 0.12 if k < 3 else 0.3), 0.1 * k)
+           for k, n in enumerate(['C4', 'G4', 'C5', 'G5'])]
+    sparkle = at(S.chime(NOTE['G6'], 0.9, 0.3, ((1.0, 0.6), (2.76, 0.2))) * 0.22, 0.32)
+    return finish(room(mix(*arp, sparkle), 0.8), 5000)
+
+
+def clan_join(i):
+    """Welcome in: two close notes and a high settle."""
+    return finish(room(mix(pluck(NOTE['G5'], 0.3, 0.07), at(pluck(NOTE['A5'], 0.3, 0.07), 0.07),
+                           at(pluck(NOTE['D6'], 0.6, 0.2), 0.15)), 0.65), 4800)
+
+
+def clan_leave(i):
+    """Out the door: three notes falling, muted."""
+    notes = [at(pluck(NOTE[n], 0.3, 0.07), 0.09 * k) for k, n in enumerate(['D6', 'A5', 'E5'])]
+    return finish(room(mix(*notes), 0.5), 2800)
+
+
 # ---------------------------------------------------------------- write
 def main():
     S.takes_cat('click', click, 3, 'ui')
@@ -150,6 +210,14 @@ def main():
     S.save_cat('level_up', level_up(0), 'ui')
     S.takes_cat('ping', ping, 2, 'ui')
     S.save_cat('ui_charge', charge(0), 'ui')
+    S.takes_cat('ui_dice', dice, 2, 'ui')
+    S.takes_cat('ui_preset', preset, 2, 'ui')
+    S.takes_cat('ui_undo', undo, 2, 'ui')
+    S.takes_cat('ui_redo', redo, 2, 'ui')
+    S.takes_cat('ui_turn', turn, 3, 'ui')
+    S.save_cat('ui_clan_found', clan_found(0), 'ui')
+    S.save_cat('ui_clan_join', clan_join(0), 'ui')
+    S.save_cat('ui_clan_leave', clan_leave(0), 'ui')
 
 
 if __name__ == '__main__':

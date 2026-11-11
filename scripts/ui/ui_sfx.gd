@@ -26,6 +26,8 @@ static func _tick(s: Slider) -> void:
 	var now := Time.get_ticks_msec()
 	if now - int(s.get_meta("tick_at", -1000)) < SLIDER_GAP_MS: return
 	s.set_meta("tick_at", now)
-	var span := maxf(s.max_value - s.min_value, 0.0001)
-	var pitch := 0.9 + 0.3 * (s.value - s.min_value) / span
-	Sfx.play("hover", null, -8.0, 0.0, pitch)
+	tick((s.value - s.min_value) / maxf(s.max_value - s.min_value, 0.0001))
+
+## The tick of a value changing: higher the further along its range (0 to 1) it sits.
+static func tick(frac: float) -> void:
+	Sfx.play("hover", null, -8.0, 0.0, 0.9 + 0.3 * frac)
