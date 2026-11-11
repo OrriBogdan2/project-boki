@@ -9,8 +9,9 @@ check: `--base-life-check`.
   React (a newcomer). The table is `BaseLife.TABLE`; guards: Play needs a placed toy, PlayWith needs it awake,
   Nap ends only when its nap clock runs out. Every non-Nap state has a cap in `max`; a Boki that roamed `max.roam`
   seconds is bored and picks something (tag, a toy, else a nap).
-- home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed). While one has a
-  Boki its machine waits. home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
+- home.gd keeps its own drivers (whistle, petting, jobs, baths, the house, feeders, walking to bed, and ComeLook's
+  news: `k["look"]`). While one has a Boki its machine waits, so a Boki that went to look at a Rare Egg you brought
+  home carries on in the state it was in (`--homecoming-react-check`). home.gd asks `choose()` after its care and job picks, in place of the old wander/tag/nap
   choices; `step()` ticks every machine at 10 Hz; `pile()` lets napping friends lie close in `_separate_kin`.
 - Bonds: `rec["bonds"] = {uid: -1..1}`, the same both ways (`BaseLife.add_bond`). Tag catches and napping side by
   side raise it; a squabble (two hot tempers meeting at a toy or in tag, or a rival at the toy) lowers it. Friends
