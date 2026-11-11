@@ -142,7 +142,7 @@ func sim(dt: float) -> void:
 	if remote:
 		st_t -= dt
 		net_follow(dt)
-		_net_telegraph()
+		_net_telegraph(dt)
 		return
 	cd -= dt
 	st_t -= dt
@@ -160,21 +160,13 @@ func sim(dt: float) -> void:
 			if tgt and is_instance_valid(tgt) and md["attack"] in ["lunge", "spit"]:
 				if st_t > float(md["windup"]) * 0.4:
 					atk_dir = atk_dir.slerp(dir_to(tgt), dt * 4.0)
-					if tele:
-						m.fx.aim_telegraph(tele, pos, atk_dir)
-			if tele:
-				m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
+			MobTell.update(self)
 			if mkind == "bl_warden":
 				cone_a = atan2(atk_dir.x, atk_dir.y)
 			if st_t <= 0.0:
 				_strike()
 		"lunge":
-			vel.x = atk_dir.x * 11.0; vel.z = atk_dir.y * 11.0
-			for e in m.foes_of(team):
-				if lunge_hit.has(e.nid): continue
-				if flat_dist(e) < e.r + r + 0.3 and absf(e.pos.y - pos.y) < 1.2:
-					lunge_hit[e.nid] = true
-					e.hurt(float(md["dmg"]) * dmg_mult, self, {"kb": atk_dir * 3.0, "src": "mob", "tags": ["blight"]})
+			vel.x = atk_dir.x * MobTell.LUNGE_SPEED; vel.z = atk_dir.y * MobTell.LUNGE_SPEED
 			if st_t <= 0.0:
 				st = "recover"; st_t = 0.5
 				vel.x *= 0.2; vel.z *= 0.2
@@ -190,12 +182,13 @@ func sim(dt: float) -> void:
 			hv = Vector2.ZERO
 		vel.x = hv.x; vel.z = hv.y
 	var pre_v := Vector2(vel.x, vel.z).length()
-	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
+	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0 and KnockWall.tall(m, self, bump_top):
 		kb_time = -9.0
 		stun_t = maxf(stun_t, 1.0)
 		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
 		m.on_wall_slam(self)
 		hurt(8.0, last_hit_by, {"src": "wall"})
+	MobTell.linger(self, dt)
 	body_vertical(dt)
 	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
 	if mkind == "bl_warden" and st != "windup":
