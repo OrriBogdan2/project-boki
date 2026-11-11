@@ -375,10 +375,27 @@ func _ostra() -> void:
 	)
 	reset.call()
 	K.cd["e"] = 0.0
-	var hp_fizz := T.hp
-	K.cast_e()
-	step(m, float(K.e_def()["grow"]) + float(K.e_def()["hold_full"]) + 0.2)
-	ok("e: left unpopped at full size for 10s it fizzles out harmlessly", K.seed.is_empty() and T.hp >= hp_fizz)
+	var hp_idle := T.hp
+	K.use_e()
+	var cd_cast := float(K.cd["e"])
+	step(m, float(K.e_def()["grow"]) + 60.0)
+	ok(
+		"e: no fizzle: a full seed left a whole minute is still there at full size, harmless",
+		not K.seed.is_empty() and K.seed_k() >= 0.99 and T.hp >= hp_idle and K.e_recastable(),
+		"seed %s k %.2f" % [not K.seed.is_empty(), K.seed_k()]
+	)
+	ok(
+		"e: the cooldown starts on the plant (it has run out by the minute, the pop is not waited for)",
+		cd_cast > 0.0 and float(K.cd["e"]) <= 0.0 and K.in_e(),
+		"cd at plant %.1f now %.1f" % [cd_cast, float(K.cd["e"])]
+	)
+	ok("e: the data lists no timer: no hold_full cap in the def", not K.e_def().has("hold_full"))
+	ok("e: a merge does not take the waiting seed", _merge(P) and not K.seed.is_empty())
+	step(m, 2.0)
+	P.downed = true
+	K._tick(0.016)
+	P.downed = false
+	ok("e: going down ends the seed with no damage", K.seed.is_empty() and T.hp >= hp_idle and not K.in_e())
 	# Snap > seed > pop: the combo the kit is built around
 	reset.call()
 	T.teleport(home + Vector3(6.0, 0, 0))
@@ -569,6 +586,7 @@ func _ostra() -> void:
 		"charge %.2f" % K.charge
 	)
 	_dash_moves(K)
+	_ranks(P, K)
 	# ---- every move, sound and look exists
 	var moves := [
 		"ostra_orb", "ostra_orb_hot", "ostra_snap_wind", "ostra_snap", "ostra_swap_aim", "ostra_swap", "ostra_swap_air",
@@ -690,6 +708,27 @@ func _orb_parity(m: Match, P: Hunter, home: Vector3, K: OstraKit) -> void:
 	aim_at(P, home + Vector3(3.0, 0, 0))
 
 ## keyed length inside the quickest Trade (Swollen); the arrival's pop starts once it lands.
+## Upgrade parity (docs/heroes/ostra.md): rank 2 = source tier II, rank 3 = tiers III + IV.
+func _ranks(P: Hunter, K: OstraKit) -> void:
+	var up: Array = []
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var ps := K.power("sec")
+	var pk := K.power("kin")
+	for rk in [1, 2, 3]:
+		for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = rk
+		up.append([float(K.rmb_def()["cooldown"]) * K.cd_k("sec"), K.power("sec") / ps, P.dash_regen(),
+				float(K.e_def()["cooldown"]) * K.cd_k("kin"), K.power("kin") / pk])
+	for sl in ["sec", "dash", "kin"]: P.slot_lv[sl] = 1
+	var near := func(a: float, b: float) -> bool: return absf(a - b) < 0.06
+	ok("upgrade parity: Snap cooldown 10 -> 8.5 -> 7, damage +20% / +40%",
+			near.call(up[1][0], 8.5) and near.call(up[2][0], 7.0)
+			and near.call(up[1][1], 1.2) and near.call(up[2][1], 1.4), str(up))
+	ok("upgrade parity: Trade recharge 9.5 -> 8 -> 6.5",
+			near.call(up[1][2], 8.0) and near.call(up[2][2], 6.5), str(up))
+	ok("upgrade parity: Brimseed damage +10% / +20%, cooldown 10 -> 10 -> 8",
+			near.call(up[1][3], 10.0) and near.call(up[2][3], 8.0)
+			and near.call(up[1][4], 1.1) and near.call(up[2][4], 1.2), str(up))
+
 func _dash_moves(K: OstraKit) -> void:
 	var ids := ["ostra_swap", "ostra_swap_air"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,

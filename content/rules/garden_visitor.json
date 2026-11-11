@@ -1,0 +1,21 @@
+{
+	"desc": "Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/garden_visitor.gd). While you are in a zone, every check_s seconds of farm time and with no visitor and none due to wait, a wild Boki may wander in: one of the common species that has a rigged model, whose theme is in the zone's group, when the zone has a toy it likes (toys.json likes) and at least residents of the group living there. It stays one garden day (care.json care_day_s), plays your games as one more Boki, and eats only what you hand it. feeds meals of its favourite make it leave an egg (or, with room in the zone, ask to stay as a new Boki). Save.d visitor = {rec, zone, t, fed, notes, next}, a lazy key with no save bump.",
+	"check_s": 60.0,
+	"check_s_doc": "Seconds of farm time between looks at whether a visitor comes.",
+	"chance": 0.3,
+	"chance_doc": "Chance a look brings a visitor when the zone suits one: about one every three minutes in a zone that does.",
+	"residents": 2,
+	"residents_doc": "Residents of the visitor's type group a zone needs.",
+	"feeds": 3,
+	"feeds_doc": "Favourite meals it takes before it leaves an egg or asks to stay.",
+	"gap_s": 300.0,
+	"gap_s_doc": "Seconds after one leaves before the next may come (one garden day).",
+	"groups": {
+		"bramblebank": ["bloom", "swarm", "spore"],
+		"glasswater": ["prism", "frost"],
+		"cinderstep": ["ember", "stone", "titan", "gravity"],
+		"hushwood": ["shadow", "lunar", "venom"],
+		"ridge": ["storm", "tempest", "echo"]
+	},
+	"groups_doc": "Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json."
+}
