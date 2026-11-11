@@ -11,8 +11,9 @@ one commit per fix, with the source branch named.
 
 ## Pass 1 (2026-11-11 ~09:30-10:30 UTC): w0246-feel b4933b647 (78 merges), w0246-misc eb2b8857c (47 merges)
 
-Then w0246-ui f88d90a3a (46 merges) appeared and was scanned too. combat-a, anim, boki, tutorial, garden, sfx, vfx: not on
-origin yet.
+Pass 2 (~10:10-10:40): w0246-ui 7758c7198 (READY, 46 merges), w0246-combat-a c557d3f1c (READY, 69), w0246-garden
+73c831e62 (READY, 31): scanned and spot-checked, import clean, no fix needed so far. Not on origin yet: anim, boki,
+tutorial, sfx, vfx (the plan's waves 2, 4, 6, 8, 9), and the rest of combat.
 
 ### Fixed
 
@@ -20,8 +21,18 @@ origin yet.
 |---|---|---|---|---|
 | 1 | feel | ext/dash-curves-b d7e924199 | Sable's fitted Cartwheel curve: the thief_kit `curved` dash, the dash_feel.json `thief` curve and the 3 `dash_curve_thief_*` rows in --move-feel-check. The resolution kept 0.24.5's hand-set VAULT_CURVE (merge e1142afea) | The charge Cartwheel runs on the fitted curve on the ground and in the air (0.24.5's item 183 rule: the air one is the ground one), VAULT_CURVE/VAULT_MEAN deleted, rows back |
 | 2 | feel | ext/fps-feel cbdde0a86 | All of its movement code (merge 52e12c542 took only tools/fps_feel_check.gd, which was then red: 20 FAIL at the wave tip, jump apex 1.517 m against the [game data] 1.573 m) | HunterMove.fall (gravity at the step's mean speed) and the exp-form dash steer. Its dash_end_step is not ported: 0.24.5's HunterMove.dash_rest already does the dash's last part step |
-| 3 | 4 | misc | ext/telegraph-audit-b-rebased d42fe2ce6 | Its owner-rule ring cuts ("a ground ring means gameplay"): Tenzo's decorative fist, Molten Guard and blast rings, Breah's spine crack ring, Lace's ult self ring, and Tenzo's rock tell sized to the rock (`len * 0.5`, not 0.75). Merge e6a0de29c kept 0.24.5's dolm_kit (recoloured blue) and lost them | Cuts replayed on 0.24.5's colours |
-| 3 | misc | ext/boki-state-clips 6791e0ddc | The resolution dropped its flinch layer (KinFlinch from 0.24.5 does the jolt) but kept `if _hit_k > 0.3: return "sad"` in BokiRig._clip_face: `_hit_k` is undeclared, so boki_rig.gd does not parse and every rigged Boki falls back | The sad face reads KinFlinch's jolt (`_flinch.jolt`) |
+| 3 | misc | ext/boki-state-clips 6791e0ddc | The resolution swapped its flinch layer for 0.24.5's KinFlinch but kept `if _hit_k > 0.3: return "sad"` in BokiRig._clip_face. `_hit_k` is undeclared, so **boki_rig.gd does not parse** | The sad face reads `KinFlinch.jolt` (new, set in _pose) |
+| 4 | misc | ext/boki-state-clips 6791e0ddc | The same merge (7e66135b8) replaced 0.24.5's kstate line with `_puppet_state()` and lost `var on_you := ...` above it. The carry code still reads on_you, so **kin.gd does not parse** (with it, 77 dependent scripts fail to compile) | Declaration back |
+| 5 | misc | ext/telegraph-one-system f24474927 | It deleted ArchKit.tele_circle/tele_lane and moved every kit to AimKit, but Gil (in 0.24.5, cut after it) still calls them: **gil_kit.gd does not parse** | Gil's landing circle, spout lane and wave lane are AimKit one-offs (`dur` = the old tween time; the wave's never ended before, now it lasts the wave's run) |
+| 6 | misc | ext/telegraph-audit-b-rebased d42fe2ce6 | Its owner-rule ring cuts ("a ground ring means gameplay"): Tenzo's inner blast ring, Molten Guard pulse, fist-blow and self rings, Breah's spine crack net ring, Lace's ult self ring; and Tenzo's rock tell sized to the rock (`len * 0.5`, not 0.75 m). Merge e6a0de29c kept 0.24.5's blue-recoloured dolm_kit and lost them | Cuts replayed on 0.24.5's colours |
+
+The feel wave's notes (docs/MERGE_0246_FEEL.md, ef129ac71) list fixes 1 and 2 as "0.24.5 code kept", with no
+reason given. Both sides fit together: 0.24.5's rule (the air Cartwheel is the ground one) holds on the fitted curve, and
+fps-feel's gravity step does not touch 0.24.5's dash_rest. The wave also kept fps-feel's check while dropping
+its code. If the integrator wants the wave's pick, drop the single commit.
+
+Misc wave tip import: 3 parse errors (fixes 3-5), 0 after. Feel, combat-a c557d3f1c, garden 73c831e62, ui
+7758c7198: `godot --headless --import` gives 0 script errors.
 
 ### Open (not changed here; owner or wave job to decide)
 
@@ -35,12 +46,21 @@ origin yet.
 | feel | ext/feel-reversal | Held and reverted by the wave (790dbe6a3): its friction-turn walk broke the WASD direction rows. Accepted | |
 | feel | tools/move_feel_check.gd | Order-dependent: a thief-only change (fix 1 alone) flips slow_land/slow_end vs haste_land/haste_end, brake_cast and other Hunters' standing-dash rows. Those rows read state an earlier section leaves behind, so their pass/fail does not say much. Worth a check-hygiene pass (reset per section) | three runs: wave tip, fix 1 only, fix 1+2 |
 | feel | (move-feel-check at the wave tip) | 14 FAIL in total (15 with both fixes, a different set: see the row above), including the owner-facing glide_press_held_s 0.433 s (want >= 1.0: jump, let go, press and hold, the glider must stay open) and jump_buffer_dash_frames 3 (want >= 7). Not compared with 0.24.5 in this pass | |
+| misc | ext/boki-state-clips + ext/boki-react-clips-rebased | With fixes 3-5, --boki-state-check has 24 FAIL, all one row: "<species> nap plays nap (got settle)". boki-react-clips plays a settle lead-in before nap, and boki-state-clips' check asks for nap straight after the blend. The check needs to step past the lead-in. --boki-react-check: 10 FAIL "rigged <species>: primitive body" (not traced; it may be the fresh-worktree glb import) | misc audit-fix branch |
 | misc | ext/boki-state-clips | The merge commit also added 21 Godot `.import` files under docs/shots/cinder-bust and albert-appeal (editor output for doc images; docs/shots should not be imported) | merge 7e66135b8 --stat |
 | misc | ext/perf-fight-pools 907d1f4e4 | Its bolt pool (Fx.bolt_pool, _make_bolt) is not in the merge; 0.24.5's Fx.bolt draws pooled beams, and perf_throttle_check was trimmed to match. Looks deliberate; no note in the wave | merge d02b24b52 |
 
 Checks run on ext/w0246-audit-fix (feel + fixes 1-2), headless with --audio-driver Dummy: --move-feel-check 15 FAIL (tip 14; the Sable rows pass: peak_u 0.362, peak_k 1.837, exit_k 0.276), --fps-feel-check 9 FAIL (tip 20), --air-control-check 1 FAIL (item 7, worst step loss 82%; Sable's jump > Shift reach 7.0 m against a median of 8.7 m passes), --bulwark-combo-check 2 FAIL (aegis, above), health --strict OK. The tip was not run against 0.24.5 for these checks, so NEW-RED vs 0245 is not settled here.
 
+Misc audit-fix branch (fixes 3-6): --gil-kit-check 38/0, --dolm-combo-check 178/0, --support-check 222/0,
+--archer-combo-check 168/0, health --strict OK.
+
 ### Checked and fine
+
+Combat-a: parity-downed-numbers' crowd() curve replaces 0.24.5's extra_reviver (same rule) and keeps diminish();
+ArchKit.rank_k is one function with both sides' callers; level growth rows kept. Garden: kite, Kitewind track
+stretches, zone snacks and GardenPrizes rows are all on the tip, moved into base_kite/base_race/base_relay.
+
 
 UI wave: tonic and armor kit numbers kept through ui-belt-six's rewrite (42 HP, 1.0 s, kit move 0.45), the
 legendaries close the Field Book (by tier), spectate cycle on Spectate, keybinds-1108 merged as SUPERSEDED (history
@@ -52,4 +72,5 @@ Kael's Lunge walk (cast-move-a: `hold_move` is 0.24.5's `walk_k` 0.8), Vex's nee
 GunslingerKit.aim_lock, 53bb881b9), --step-up-check and --train-ride-check (in the registry, not main.gd), the
 Shift dash rule (dash_feel.json: 0.24.5's parity default 1.0/1.0 and the 0.85/1.15 rows kept; Albert's row is
 1.0/1.0 as the parity default, not dash-curves-b's 0.85/1.15 from its older base), save VERSION 15 with every
-migration 1-14, Grimble's hook (0.24.5's speed 17 + windup 0.2 kept, feel-grimble-reel's pull_speed 9 and stop_gap 0.1 taken), the Boki species and clip lists in boki_rig_check, boki_system_check's parts.
+migration 1-14, Grimble's hook (0.24.5's speed 17 + windup 0.2 kept,
+feel-grimble-reel's pull_speed 9 and stop_gap 0.1 taken), the Boki species and clip lists in boki_rig_check, boki_system_check's parts.
