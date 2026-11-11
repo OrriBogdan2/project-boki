@@ -94,6 +94,8 @@ const T := {
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
 	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
 	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
+	"dive_feather_speed":      [">=", 8.0, "m/s", "0061: 1s drop under the lip, then glide: speed 0.5s on"],
+	"dive_feather_m":          [">=", 7.0, "m", "...and the ground it covers in the 1s after the open"],
 	"ledge_rise_t":            ["<=", 0.45, "s", "[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
 	"ledge_rise_vy_max":       ["<=", 7.0, "m/s", "[game data] suction cap 2.5 m/s: a rise never outruns the jump"],
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
@@ -959,6 +961,23 @@ func _feather() -> void:
 		m.step(DT); fr += 1
 		if P.gliding: break
 	rec("feather_toggle_frames", fr if closed else 9.0)
+	# going down and feathering up: glide out at island level, let go for 1s, then press the glider again
+	_reset(start, false)
+	P.last_gy = lip
+	P.air_t = 1.0
+	P.gliding = true
+	P.vel = Vector3(-Hunter.GLIDE_SPEED, 0.0, 0.0)
+	P.inp["glide_press_only"] = true
+	var open_x := 0.0
+	for i in 60 + 60:
+		P.inp["move"] = Vector2(-1, 0)
+		P.inp["jump"] = i == 60
+		P.inp["glide"] = i >= 60
+		m.step(DT)
+		if i == 60: open_x = P.pos.x
+		if i == 90: rec("dive_feather_speed", Vector2(P.vel.x, P.vel.z).length())
+	rec("dive_feather_m", absf(P.pos.x - open_x))
+	P.inp["glide_press_only"] = false
 
 # ---------------------------------------------------------------- the ledge rise and fling
 ## A straight wall two terraces (1.6m) high with level open ground in front: jump at it pushing in.
