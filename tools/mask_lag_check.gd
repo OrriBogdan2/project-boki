@@ -2,8 +2,8 @@ extends RefCounted
 ## --mask-lag-check: frame times while Mask cards are on screen and while one is accepted (item 88). Each
 ## scenario opens a screen on the farm, times every frame for a few seconds and reports the slowest, the median
 ## and how many went over the budget:
-##   masks_first   the session's first Masks screen: reported, not judged (the first menu of a session pays
-##                 one-time costs: fonts, themes)
+##   masks_first   the session's first Masks screen (its one-time costs, fonts, styles and the first preview's
+##                 meshes, are paid under the farm's loading wipe: PreviewWarm)
 ##   masks_open    the Masks screen (12 tiles, the viewer's turntable and its ability clips)
 ##   masks_switch  clicking another Mask on that screen
 ##   reveal        a new Mask's reveal (its splash and clips)
@@ -15,9 +15,14 @@ extends RefCounted
 ## built a Mask's model (PreviewBuild allows one a frame; reported with its time). Every scenario also counts the
 ## 3D previews rendering at once. Under xvfb with a software rasterizer every frame also pays the raster, so the
 ## times are reported, not judged.
+## The farm loads under the ink wipe as in play, so PreviewWarm has built every Mask's preview once and rehearsed
+## the Masks screen before the first scenario: the check asserts that, and that no frame that builds a preview
+## goes over BUILD_MS. `--cold` loads the farm without the wipe (nothing warmed, nothing judged about builds):
+## the numbers a first preview cost before PreviewWarm, to compare.
 ##   xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --mask-lag-check
 
 const BUDGET_MS := 33.0        # ms: two frames at 60 fps, the item's target
+const BUILD_MS := 50.0         # ms a frame that builds a warmed Mask's preview may take headless (cold: 120-230)
 const SECS := 2.5              # s each scenario is timed headless
 const DRAWN_SECS := 12.0       # s with a software rasterizer: a frame there costs 0.2-0.7 s
 const SETTLE_FRAMES := 30      # frames the farm gets to load its last pieces before the first scenario
@@ -27,6 +32,7 @@ var main: Node
 var bad := 0
 var headless := false
 var home = null
+var cold := false              # --cold: the farm loads with no wipe over it, so nothing is warmed
 
 func ok(cond: bool, what: String) -> void:
 	print("MASKLAG %s %s" % ["ok  " if cond else "FAIL", what])
@@ -37,15 +43,20 @@ func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
 	headless = DisplayServer.get_name() == "headless"
-	if main.fade:
+	cold = OS.get_cmdline_user_args().has("--cold")
+	if main.fade and cold:
 		main.fade.reveal(0.05)
 	_new_save()
+	var load_us := Time.get_ticks_usec()
 	home = await main._hb_home()
 	var tree: SceneTree = main.get_tree()
+	_report_warm((Time.get_ticks_usec() - load_us) / 1000.0)
+	if main.fade:
+		main.fade.reveal(0.05)
 	for i in SETTLE_FRAMES:
 		await tree.process_frame
 	home._close_panel()
-	await _time("masks_first", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS, false)
+	await _time("masks_first", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS, not cold)
 	home._close_panel()
 	await _time("masks_open", func(): HomeClasses.open(home, "gunslinger"), MASKS_VIEWS)
 	await _time("masks_switch", func(): HomeClasses._show(home, "juggernaut"), MASKS_VIEWS)
@@ -56,6 +67,27 @@ func run(m: Node) -> void:
 	await _offer_scenarios(tree)
 	print("MASKLAG DONE (%s), failures: %d" % ["headless: scripts only" if headless else "drawn", bad])
 	tree.quit(1 if bad > 0 else 0)
+
+## What the farm's load warmed under the wipe (PreviewWarm.farm, from Home's sliced build) and how long the
+## whole load took. Cold, nothing may be warm: the numbers are the old first-preview costs.
+func _report_warm(load_ms: float) -> void:
+	var ids := Arch.ids()
+	var warm := ids.filter(func(a): return PreviewWarm.warm.has(String(a)))
+	print("MASKLAG farm load %.0f ms (%s); previews warmed: %d of %d in %.0f ms" % [load_ms,
+			"no wipe, cold" if cold else "under the wipe", warm.size(), ids.size(), PreviewWarm.last_ms])
+	if cold:
+		ok(warm.is_empty() and PreviewWarm.rehearsed.is_empty(), "cold: a farm loaded with no wipe warms nothing")
+		return
+	ok(warm.size() == ids.size(), "the farm's load built every Mask's preview once (%d of %d)" % [warm.size(),
+			ids.size()])
+	ok(PreviewWarm.rehearsed.has(PreviewWarm.RELICS), "the farm's load rehearsed the Masks screen")
+	var left := 0
+	for c in home.find_children("*", "CanvasLayer", false, false):
+		if (c as CanvasLayer).layer == PreviewWarm.UNDER_LAYER and not c.is_queued_for_deletion():
+			left += 1
+	ok(left == 0, "the rehearsed screen is gone once the farm is up")
+	var noted: bool = home.has_meta("hunter_viewer") or home.has_meta("hunters_sel")
+	ok(not noted, "the rehearsal left the farm's notes alone")
 
 ## Vex worn, the first expedition done: the second Mask is on offer.
 func _new_save() -> void:
@@ -108,13 +140,15 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 		views = maxi(views, _live_views(home))
 	plain.sort()
 	var worst := float(plain[-1]) if not plain.is_empty() else 0.0
+	var median := float(plain[plain.size() / 2]) if not plain.is_empty() else 0.0
 	var build_max := float(builds.max()) if not builds.is_empty() else 0.0
 	print("MASKLAG %-13s frames=%3d  max=%7.1f ms  median=%6.1f ms  model builds=%d (max %.1f ms)  views=%d" % [
-			scenario, plain.size() + builds.size(), worst, float(plain[plain.size() / 2]), builds.size(), build_max,
-			views])
+			scenario, plain.size() + builds.size(), worst, median, builds.size(), build_max, views])
 	if headless and judged:
 		var what := "%s: no frame over %d ms outside a model build (%.1f)" % [scenario, int(BUDGET_MS), worst]
 		ok(worst <= BUDGET_MS, what)
+	if headless and judged and not cold and not builds.is_empty():
+		ok(build_max <= BUILD_MS, "%s: no preview build frame over %d ms (%.1f)" % [scenario, int(BUILD_MS), build_max])
 	if max_views >= 0:
 		ok(views <= max_views, "%s: at most %d 3D previews render a frame (%d)" % [scenario, max_views, views])
 
