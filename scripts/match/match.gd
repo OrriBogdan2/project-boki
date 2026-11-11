@@ -37,6 +37,7 @@ var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
+var crouch_hint: CrouchHint = null   # the one-line crouch lesson near the first quiet camp (once per save)
 var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
 var exits: Exits = null     # the ways out: skiff docks, rift hatches, outpost uplinks (see Exits)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
@@ -273,6 +274,7 @@ func _start(o: Dictionary) -> void:
 	if not ["tutorial", "duel", "arena"].any(func(k): return o.get(k, false)): BokiRig.fetch_common()
 	if o.get("tutorial", false): tut = Tutorial.new(self)
 	guide = FirstMatchGuide.for_match(self, o)
+	crouch_hint = CrouchHint.for_match(self, o)
 	seed_val = int(o.get("seed", randi()))
 	rng.seed = seed_val
 	seed(seed_val)
@@ -3988,6 +3990,7 @@ func step(dt: float) -> void:
 		_update_training(dt)
 	_update_rules(dt)
 	if guide: guide.tick(dt)
+	if crouch_hint: crouch_hint.tick(dt)
 	_prof("rest")
 	if net_on:
 		_net_rev_t -= dt

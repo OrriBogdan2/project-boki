@@ -43,6 +43,13 @@ static func note_run(r: Dictionary) -> void:
 		return
 	last = triggers(r.get("stats", {}), r.get("used", {}), String(r.get("why", "")), float(r.get("time", 0.0)))
 
+## A tip's text by id, with its keys filled in (the in-match hints read their line from the table).
+static func text(id: String) -> String:
+	for t in rules()["tips"]:
+		if t["id"] == id:
+			return render(String(t["text"]))
+	return ""
+
 ## The tip for the loading screen. blight: false drops the tips that talk about the Blight.
 static func for_loading(blight: bool) -> String:
 	return pick(last, blight)

@@ -120,13 +120,17 @@ func _done(lid: String, p: Hunter) -> bool:
 
 ## The line in the banner lane at the top-centre (the tutorial's lane: the two never show together).
 func draw(h, sz: Vector2) -> void:
-	if line == "":
+	draw_line(h, sz, line, _t)
+
+## One banner line, faded in over its first quarter second (the crouch hint draws through this too).
+static func draw_line(h, sz: Vector2, text: String, t: float) -> void:
+	if text == "":
 		return
 	var r: Rect2 = TutorialHud.lanes(sz)["banner"]
-	var a := clampf(_t / 0.25, 0.0, 1.0)
+	var a := clampf(t / 0.25, 0.0, 1.0)
 	h._panel(r, Color(TutorialHud.PANEL.r, TutorialHud.PANEL.g, TutorialHud.PANEL.b, TutorialHud.PANEL.a * a), 14)
 	h.c.draw_rect(r, Color(MINT, 0.7 * a), false, 2.0)
-	var w := TutorialText.wrap(h.big, line, int(r.size.y * 0.42), r.size.x - 28.0, 2)
+	var w := TutorialText.wrap(h.big, text, int(r.size.y * 0.42), r.size.x - 28.0, 2)
 	var y: float = r.get_center().y - (w["lines"].size() - 1) * float(w["px"]) * 0.6 + float(w["px"]) * 0.36
 	for ln in w["lines"]:
 		h._ctext(Vector2(r.get_center().x, y), String(ln), int(w["px"]), Color(1, 1, 1, a), h.big)
