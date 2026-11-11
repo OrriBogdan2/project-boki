@@ -167,7 +167,7 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	if not ghost:
 		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
 			var g := ground_at(x + o.x, z + o.y)
-			if g > y + STEP:
+			if g > y + STEP and g > y + STEP + stair_slope(x, z, x + o.x, z + o.y):      # (a stair's rise: no wall)
 				worst = maxf(worst, g)
 				hit = true
 	if hit:
@@ -177,6 +177,18 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 		if ground_at(x, z) <= VOID + 1.0:
 			return -1.0
 	return 0.0
+
+## Is (x, z) on a flight of stairs? Its ground is a slope (rising LEVEL per metre), not a wall or a ledge.
+func on_stairs(x: float, z: float) -> bool:
+	var ix := int(floor(x)); var iz := int(floor(z))
+	return inb(ix, iz) and stairs.has(idx(ix, iz))
+
+## How far the ground may rise or fall between (x0, z0) and (x, z) and still be one walkable slope: the stairs'
+## rise over that distance when either end is on a flight, or 0 off stairs, where any rise is a wall or ledge.
+func stair_slope(x0: float, z0: float, x: float, z: float) -> float:
+	if not (on_stairs(x, z) or on_stairs(x0, z0)):
+		return 0.0
+	return LEVEL * Vector2(x - x0, z - z0).length()
 
 const BLOCK_BODY := 0.7      # a body's radius against rocks, trees and walls, as a share of its radius
 const BLOCK_SKIN := 0.004    # push_out_blocks leaves this much room, so the spot it gives is free
