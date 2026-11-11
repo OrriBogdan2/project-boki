@@ -66,10 +66,11 @@ func stuck(p: Vector3) -> bool:
 		return stuck(p)
 	return true
 
-## Frees whoever is boxed in where they stand now (you wedged on every side), whatever the reach map says.
+## Steps you out when you are wedged on every side: to open ground if you are stuck or have no room to stand.
 func free_player() -> void:
 	_begin()
-	_move_player()
+	if stuck(h.ppos) or not h.world._fits(h.ppos.x, h.ppos.z, PLAYER_R):
+		_move_player()
 
 ## The nearest tile centre (out to SEARCH_TILES) you can walk to from the door with room for a body r wide.
 func open_spot(p: Vector3, r: float) -> Vector3:
