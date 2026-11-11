@@ -21,6 +21,7 @@ extends RefCounted
 ## teammate's quieter than a rival's, your own one level wherever the camera is.
 ## And the carry cues (CarrySfx): the swap's two notes in order, a claim's lock-in, a steal heard by its owner, the
 ## thief and a squad nearby but not across the map, and one take per burst (MIN_GAP).
+## And a broken cast's wind-up sound ends within 0.1 s, one interrupt per kit (tools/match_audio_interrupts.gd).
 
 var main: Node
 var fails := 0
@@ -84,6 +85,7 @@ func run(main_node: Node) -> void:
 	await _glider(P, "yours")
 	await _hover(P, "yours")
 	var other: Hunter = m.hunters.filter(func(x): return x != P and not x.out)[0]
+	await load("res://tools/match_audio_interrupts.gd").new().run(self, m, P, other)
 	other.remote = true
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")

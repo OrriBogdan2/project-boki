@@ -228,6 +228,16 @@ A weapon under 0.15 s a round (`FireSfx.HELD_RATE`: the Quill Rifle, rifle, SMG,
 | hoar_fan `rime_shard` (0.24 s) | 4; -6.2 / -20.9 | 3; -7.3 / -24.1 |
 
 Whole-burst peak (the first shot) is unchanged to within 0.7 dB (-3.4 to -4.9 dBFS) and never clips; a hold is 3 to 7 dB lower in RMS, so it reads as a rattle with a crack on top rather than a smear. Not built: a shorter "hold" take per weapon (would let the cap pass every round; costs new files), and the voice priority table of `ext/sfx-voice-limits` (not on main; the cap here is per emitter and does not depend on it).
+- `Sfx.play` returns a handle to its pool voice (-1 when nothing played); `Sfx.cut(handle)` fades just that sound out
+  (`CUT_FADE` 0.05 s) if the voice still plays it, `Sfx.sounding(handle)` says whether it does.
+- Broken casts (`scripts/arch/kit_windup.gd`): a kit plays an interruptible wind-up's sound through
+  `KitWindup.play(kit, slot, name, db)` (or `KitWindup.keep` for a HeroVfx move's, `HeroVfx.last_voice`), and where a
+  stun or a knock breaks the cast it calls `KitWindup.broken(kit, slot)`: the wind-up voice stops and the caster hears
+  `cast_broken` (ui set). One per kit: Albert's Faultline plant, Grimble's Anchor Drop, Vex's Longneedle, Kael's
+  Finishing Slam, Motley's Shard Snap, Sparkle's Wirerun, Meeko's Hearth Call, Sable's Bola, Neve's spear push,
+  Cinder's Flue Flight, Lace's bow draw, Tenzo's Quake Fist. Not cut, since nothing breaks them: Vex's Cinderfall (the
+  shell is fired at the tap) and Motley's Nightwell (a stun frees him, the well goes on). `--match-audio-check` breaks
+  each and wants its voice silent within 0.1 s.
 
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
