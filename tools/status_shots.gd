@@ -8,6 +8,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const ROWS := ["none", "stun", "daze", "root", "gnd", "slow", "chill", "burn", "static", "antiheal", "sick"]
+const BOKI := "pebbit"         # a grey-brown Boki: no status colour to hide in
 const BOKI_ROWS := ["none", "stun", "root", "gnd", "slow", "daze"]
 const GROUNDS := {"grass": null, "light": Color("d8cfb0"), "dark": Color("2b2824")}
 const FRAMES := 5
@@ -50,10 +51,12 @@ func run(main_node: Node) -> void:
 	F.teleport(base)
 	N.teleport(base + Vector3(1.8, 0, 0))
 	if with_boki:
-		boki = m.give_kin(N, Save.new_kin("zapple", "Pip"))
+		boki = m.give_kin(P, Save.new_kin(BOKI, "Pip"))
 		boki.state = "active"
 		boki.set_meta("summoned", true)
 		F.teleport(base + Vector3(-30, 0, -30))
+		N.teleport(base + Vector3(-30, 0, 30))
+		P.teleport(base + Vector3(1.8, 0, 0))      # (the clean Hunter is the player, its owner)
 	var rows: Array = BOKI_ROWS if with_boki else ROWS
 	var carrier: Ent = boki if with_boki else F
 	var tag := "boki_" if with_boki else ""

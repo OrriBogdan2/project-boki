@@ -35,6 +35,11 @@ kind in the summon's `immune` list.
 - Leash: after a knock or pull past the summon's leash the normal follow brings it back; no extra rule.
 - Hunter Wisps (downed) are not summons and keep their own rules.
 
+## What it looks like
+A summoned Boki under stun, root, slow or Daze wears the same body look as a Hunter (docs/STATUS_LOOKS.md), in the
+same colours and pace, sized to its body, so a player can see why their Boki stopped. Grounded shows nothing since
+it never lands.
+
 ## Wiring
 `SummonCc.summoned(e)` is true for a Kin with the `summoned` meta or whose `summon` (KinSummon, branch
 ext/wisp-summon) is out. The branch needs no change: it is read by duck typing. Online, `Net.VERSION` and the save

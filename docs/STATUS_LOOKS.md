@@ -23,6 +23,14 @@ Chill, Sparkle's Static). `put()` for a remote body's kit status (KitStatus `kst
 to another game, shown for the status's length. A third player's game sees only kit statuses on a body neither
 owns: plain timers are not in the synced state (that would be a Net shape change).
 
+**On a summoned Boki.** The crowd control a summoned Boki takes (docs/specs/SUMMON_CC.md: stun, root, slow, Daze;
+Grounded never lands) wears the Hunter's look, rig, colours and pace. Only the size differs (`StatusLooks.body_k`):
+across it is the Boki's model scale x its girth x 0.7, up it is its model scale x 0.8 m / 2 m, so a ground or body
+look (thorns, rings) wraps its squat body, and a look over the head (stars, the Daze ring) keeps its shape and sits
+as far over the Boki's head as over a Hunter's; a giant ridden Boki's look grows with it. A stunned Boki keeps the
+puppet's squint but not its own circling stars (model meta `starry`), so it shows one ring of stars, the shared one.
+Mobs keep the flat 0.8.
+
 **Cost.** One rig of 3-12 meshes per (body, status) shown, shared meshes and unshaded materials, pooled per status;
 nothing is built per frame once warm, and nothing draws past 34 m from the camera focus. A body with no status
 costs one cheap test per frame.
@@ -31,7 +39,11 @@ costs one cheap test per frame.
 that body only, uses at most 16 meshes, goes when the status ends, all ten fit one body from the pool, a hit sent
 to another game shows and ends, and nothing draws far away. `--status-shots --shots-dir=<dir>` (GPU) writes one
 sheet per ground (map grass, a pale floor, a dark floor): a row per status, 5 crops 0.2 s apart, the carrier on
-the left and a clean Hunter beside it.
+the left and a clean Hunter beside it; with `--boki` the carrier is a summoned Boki (rows none, stun, root, Grounded,
+slow, Daze; the Grounded row stays empty). `--hero-vfx-check` also puts each of the four on a summoned Boki and a
+Hunter at once and asserts the Boki's look comes up and goes, matches the Hunter's colours and pace, sits over
+the Boki's head or round its body, the puppet's stars stay off, Grounded shows nothing, and a remote Boki shows
+what it is sent.
 
 ## Scores (11-09, match camera, 1280x720)
 
