@@ -171,7 +171,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
-	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values())
+	WardenGestures.add(lib, sk, glb, (d.get("emotes", {}) as Dictionary).values() + [d.get("summon_call", "")])
 	drop = WardenCarry.held(sk, d.get("carry_drop", []))
 	beats = WardenBeats.build(lib, sk, glb, d.get("beats", {}))
 	tree = AnimationTree.new()
@@ -444,6 +444,10 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			var vel: Vector3 = s.get("vel", Vector3.ZERO)
 			var moving := Vector2(vel.x, vel.z).length() >= STILL
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
+	var gest := String(d.get("summon_call", ""))
+	var call_t := float(s.get("call_t", 99.0))
+	if gest != "" and call_t < lib.get_animation(gest).length:
+		return {"clip": gest, "t": call_t, "upper": true}      # the summon call: arms only, legs and aim carry on
 	land_t += dt
 	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
 	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker

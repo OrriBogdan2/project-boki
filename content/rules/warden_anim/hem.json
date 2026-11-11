@@ -42,5 +42,6 @@
 				"upper_arm.R": [10, 0, 0]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_point_l"
 }

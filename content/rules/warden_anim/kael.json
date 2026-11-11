@@ -265,5 +265,6 @@
 				"upper_arm.L": [8, 0, -6]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_raise_r"
 }

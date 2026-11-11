@@ -45,5 +45,6 @@
 				"forearm.L": [-125, 0, 0]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_point_r"
 }

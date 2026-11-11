@@ -212,5 +212,6 @@
 				"upper_arm.R": [20, 0, 15]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_fling_r"
 }

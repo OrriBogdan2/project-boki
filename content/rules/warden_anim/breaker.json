@@ -242,5 +242,6 @@
 				"upper_arm.L": [5, 0, -10]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_slam_r"
 }

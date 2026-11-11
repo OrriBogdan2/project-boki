@@ -2,7 +2,8 @@ extends "res://tools/clip_shots.gd"
 ## --emote-shots --shots-dir=<dir> [--wardens=a,b,c,d] [--emotes=truce,wave] [--at=0.5,1.0] [--speed=0] [--size=320]:
 ## the emote wheel through the game's own hand-off (the state's emote and emote_t, as Truce shows them). One image per
 ## emote and moment, <dir>/<emote>_<t>.png, the Hunters side by side. --speed=4 runs them forward at 4 m/s, so the
-## legs keep running under the gesture. An id off the wheel plays the Hero's own "emote" clip. Needs a renderer.
+## legs keep running under the gesture. An id off the wheel plays the Hero's own "emote" clip; "call" is the summon
+## call (the state's call_t, KinSummon). Needs a renderer.
 
 const DT := 1.0 / 30.0
 const GAP := 1.3       # m between Hunters
@@ -51,8 +52,9 @@ func run(main: Node) -> void:
 
 func _state(model: Node3D, em: String, t: float, speed: float) -> void:
 	var face := model.rotation.y
-	model.set_meta(WardenClips.STATE, {"grounded": true, "face": face, "emote": em, "emote_t": t,
-			"vel": Vector3(-sin(face), 0.0, -cos(face)) * speed})
+	var gesture := em == "call"
+	model.set_meta(WardenClips.STATE, {"grounded": true, "face": face, "emote": "" if gesture else em,
+			"emote_t": t, "call_t": t if gesture else 99.0, "vel": Vector3(-sin(face), 0.0, -cos(face)) * speed})
 
 ## Stand (or run) a moment, start the emote, and grab it at each time.
 func _play(models: Array, em: String, times: Array, speed: float, out: String) -> void:

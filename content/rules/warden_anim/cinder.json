@@ -41,5 +41,6 @@
 				"upper_arm.L": [8, 0, -12]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_fling_r"
 }

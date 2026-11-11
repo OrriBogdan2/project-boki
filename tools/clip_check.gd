@@ -109,6 +109,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_emotes(id, dd, clips)
 	_rings(id, dd, clips)
 	_beats(id, dd, clips)
+	_summon_call(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -324,6 +325,25 @@ func _emote_plays(clips: WardenClips, emote: String, clip: String) -> bool:
 	s["emote_t"] = clips.lib.get_animation(clip).length + 0.01
 	return still.get("clip", "") == clip and bool(still.get("upper", false)) == gesture \
 			and bool(moving.get("upper", false)) and clips._pick(s, 0.0).get("clip", "") != clip
+
+## The summon call (warden_anim "summon_call"): a gesture of about 0.3 s on the upper layer, so he runs and aims under
+## it; a kit move owns the arms, so it never plays over one; once it has ended nothing of it plays.
+func _summon_call(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var clip := String(dd.get("summon_call", ""))
+	var anim := clips.lib.get_animation(clip) if clips.lib.has_animation(clip) else null
+	ok(anim != null and absf(anim.length - 0.3) < 0.05 and _keys_upper(anim, dd),
+			"%s: summon call %s is ~0.3 s, upper bones only" % [id, clip])
+	if anim == null:
+		return
+	var s := {"call_t": 0.1, "vel": Vector3(0, 0, -4)}
+	var run := clips._pick(s, 0.0)
+	s["kmove"] = String(dd.get("kmoves", {}).keys()[0])
+	var cast := clips._pick(s, 0.0)
+	s.erase("kmove")
+	s["call_t"] = anim.length + 0.01
+	var over: bool = run.get("clip", "") == clip and bool(run.get("upper", false)) and cast.get("clip", "") != clip
+	ok(over and clips._pick(s, 0.0).get("clip", "") != clip,
+			"%s: the call plays on the upper layer, not over a cast, then ends" % id)
 
 ## A gesture (it keys only a few bones) moves nothing outside the upper layer's bones.
 func _keys_upper(anim: Animation, dd: Dictionary) -> bool:

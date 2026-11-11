@@ -59,5 +59,6 @@
 				"forearm.L": [-95, 0, 25]
 			}
 		}
-	}
+	},
+	"summon_call": "g_call_fling_l"
 }
