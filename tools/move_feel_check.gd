@@ -71,7 +71,9 @@ const T := {
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
 	"glide_open_press_frames": ["<=", 1.0, "frames", "[wiki/guide] hold jump in the air to glide; a second press opens at once"],
-	"glide_open_hold_s":       ["<=", 0.12, "s", "tap/hold split for Space; a tap is ~0.1s"],
+	"glide_press_held_s":      [">=", 1.0, "s", "owner 11-08: jump, let go, press again and hold: it opens and stays open"],
+	"glide_hold_opens":        ["<=", 0.0, "", "owner 11-08: Space held 2 s from the jump never opens the glider"],
+	"albert_lmb_hold_glides":  ["<=", 0.0, "", "owner 11-08: Albert holding LMB and Space never glides"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t":           ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
 	"glide_start_vy":          ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
@@ -433,10 +435,12 @@ func _glide() -> void:
 	_steps(8)
 	P.inp["jump"] = true; P.inp["glide"] = true
 	var f := -1
-	for i in 10:
+	var held := 0.0
+	for i in 70:
 		m.step(DT)
 		P.inp["glide"] = true
 		if f < 0 and P.gliding: f = i + 1
+		if P.gliding and i >= 10: held += DT
 	rec("glide_open_press_frames", f)
 	# opened while still rising from the jump: the canopy never carries the rise on
 	_reset(flat)
@@ -453,15 +457,29 @@ func _glide() -> void:
 	var gv := HunterMove.glide_start_vy
 	ok(is_equal_approx(ga, 16.25), "glide_accel = GlideTargetXYForce 162,500 / Mass 100 (%s)" % ga)
 	ok(is_equal_approx(gv, 0.85), "glide_start_vy = GlideStartFallSpeedMin 85 uu/s (%s)" % gv)
-	# hold Space from the jump press
+	rec("glide_press_held_s", held)
+	# hold Space from the jump press: never a glide (the hold only keeps an open glider open)
 	_reset(flat)
 	P.inp["jump"] = true
-	var th := -1.0
-	for i in 60:
+	var opened := false
+	for i in 120:
 		P.inp["glide"] = true
 		m.step(DT)
-		if th < 0.0 and P.gliding: th = (i + 1) * DT
-	rec("glide_open_hold_s", th)
+		opened = opened or P.gliding
+	rec("glide_hold_opens", 1.0 if opened else 0.0)
+	# Albert with the swing held (LMB) and Space from the jump: no glide either
+	var kit_was := P.arch
+	P.set_arch("bulwark")
+	_reset(flat)
+	P.inp["jump"] = true
+	opened = false
+	for i in 120:
+		P.inp["fire"] = true
+		P.inp["glide"] = true
+		m.step(DT)
+		opened = opened or P.gliding
+	rec("albert_lmb_hold_glides", 1.0 if opened else 0.0)
+	P.set_arch(kit_was)
 	# the dedicated glide button held while you're airborne (stepping off, falling)
 	_reset(flat + Vector3(0, 6.0, 0), false)
 	_steps(3)
@@ -1019,6 +1037,7 @@ func _abyss_updraft() -> void:
 		P.vel.y = -8.0
 		var bounce := -9.0
 		for i in 100:
+			P.inp["jump"] = i == 0     # (the press opens it: a held Space never does)
 			P.inp["glide"] = true
 			m.step(DT)
 			bounce = maxf(bounce, P.pos.y - lip)
@@ -1131,6 +1150,7 @@ func _feather() -> void:
 					holding = false          # let go: coast on the lift
 				elif not P.gliding and depth > 1.5:
 					holding = true           # dipped: tap it open again
+			P.inp["jump"] = holding and not P.inp["glide"]     # (a fresh press opens it: a held Space never does)
 			P.inp["glide"] = holding
 			m.step(DT)
 			if P.out or P.grounded or P.glide_fuel <= 0.01:
@@ -1148,6 +1168,7 @@ func _feather() -> void:
 	m.step(DT)
 	var closed := not P.gliding
 	P.inp["glide"] = true
+	P.inp["jump"] = true     # (the press opens it: a held Space never does)
 	var fr := 0
 	for i in 5:
 		m.step(DT); fr += 1
