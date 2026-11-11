@@ -23,29 +23,35 @@ func run(main: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	var P: Hunter = m.player
-	# bots plan no lairs in a match's first 25 s: play those off camera, everyone standing still
-	m.set_process(false)
-	for h in m.hunters:
-		h.ctrl = "idle"
-	while m.time < 26.0:
-		m.step(Match.DT)
-	m.set_process(true)
 	var L: Dictionary = m.lairs.list.filter(func(x): return x["boss"] == "colossus")[0]
 	m.lairs.activate(L)
 	var out := Vector3(L["out"].x, 0, L["out"].y)
 	var side := Vector3(-out.z, 0, out.x)
 	var crew: Array = m.hunters.filter(func(x): return x.team == P.team)
+	var spots: Array = []
+	for i in crew.size():
+		spots.append(LairBreach.stand(L) + out * 6.0 + side * (i - 1) * 1.6)
+	for mb in m.mobs:
+		if not mb.dead and mb.mkind != "gate" and not (mb is Boss) and mb.flat_dist(L["seal_at"]) < 25.0:
+			mb.dead = true
+			mb.visible = false
+	# bots plan no lairs in a match's first 25 s: play those off camera, everyone standing still and whole
+	m.set_process(false)
+	while m.time < 26.0:
+		for h in m.hunters:
+			h.ctrl = "idle"
+			h.hp = h.max_hp
+		m.step(Match.DT)
+	m.set_process(true)
 	for i in crew.size():
 		var h: Hunter = crew[i]
 		if h.ai.is_empty(): h.ai = m.bot_brain.new_mind(m.rng, 0.8)
 		h.ctrl = "bot"
 		h.lvl = maxi(h.lvl, 8)
 		h.ai["boss_hunt"] = true
-		var at: Vector3 = LairBreach.stand(L) + out * 6.0 + side * (i - 1) * 1.6
-		h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+		h.teleport(Vector3(spots[i].x, m.world.ground_at(spots[i].x, spots[i].z), spots[i].z))
 	for h in m.hunters:
 		if h.team != P.team:
-			h.ctrl = "idle"
 			h.teleport(m.world.spawns[-1])
 	m.cam.snap(P.pos)
 	print("LAIR_BREACH_REEL filming from movie frame %d" % Engine.get_process_frames())
@@ -55,6 +61,8 @@ func run(main: Node) -> void:
 	while frame < int((LIMIT_S + AFTER_S) * 60.0):
 		for h in crew:
 			h.hp = maxf(h.hp, h.max_hp * 0.5)      # (a film of the breach, not of a wipe)
+		if frame == 0:
+			print("LAIR_BREACH_REEL crew %s" % str(crew.map(func(h): return "%s out %s" % [h.pname, h.out])))
 		var now := int(L.get("seal_stage", 0))
 		if now > stage:
 			stage = now
