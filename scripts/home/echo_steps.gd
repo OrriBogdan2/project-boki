@@ -9,6 +9,11 @@ extends RefCounted
 ## score. With two rested Boki out it is a versus against the second (it leads); with one, a solo where
 ## the stones lead. Tuning: content/rules/base_echo.json.
 ##
+## The first dance on a save opens with one slow practice phrase (rules "practice"): the lead hops four
+## beats, each stone showing its key as it lights, you answer on a beat bar that draws each beat's
+## window. No prize; the interact key skips it, and either way round one follows. Never again
+## (Save.d.tutorial.echo_practice).
+##
 ## Time is the audio clock: the beat bed's playback position (EchoSteps._clock), never frame time, so
 ## presses are judged against what you hear. The dance is one explicit state machine
 ## (briefs/STATE_MACHINES.md), Run.state: only Run.go() writes it, and a move the TABLE lacks is refused
@@ -32,6 +37,10 @@ const TONE_AMP := 30000.0                     # a generated tone's peak, of the 
 const KEYS := ["up", "left", "down", "right"]  # the move action that answers on each stone (W, A, S, D)
 const STONE_AT := [Vector3(0, 0, -1), Vector3(-1, 0, 0), Vector3(0, 0, 1), Vector3(1, 0, 0)]
 const STONE_COL := [Color("7ad0ff"), Color("8ae07a"), Color("ffb05a"), Color("e08aff")]
+const KEY_LIFT := 0.45                        # m above a stone its practice key cap floats
+const KEY_DIM := 0.3                          # alpha of a practice key cap while its stone is dark
+const BAR_SIZE := Vector2(420, 22)            # px, the practice beat bar
+const PRACTICE_LINE := "Send your Boki to the same stones on the beat."
 const YOU := 0
 const RIVAL := 1
 
@@ -75,6 +84,7 @@ class Run:
 	var R: Dictionary
 	var recs: Array
 	var versus := false
+	var practice := false           # the first dance's slow phrase: rules "practice" over the rest
 	var rng: RandomNumberGenerator
 	var state := S.CALL
 	var refused := 0                # moves the TABLE turned down
@@ -97,8 +107,12 @@ class Run:
 	var events: Array = []          # [kind, side, stone] for the base to show: hop, hit, fixed, kept, miss
 	var end_t := 0.0                # s on the clock the dance ended
 
-	func _init(you: Dictionary, rival: Dictionary, r: RandomNumberGenerator) -> void:
+	func _init(you: Dictionary, rival: Dictionary, r: RandomNumberGenerator, slow := false) -> void:
 		R = EchoSteps.rules()
+		practice = slow
+		if practice:
+			R = R.duplicate()
+			R.merge(R["practice"], true)
 		recs = [you, rival]
 		versus = not rival.is_empty()
 		rng = r
@@ -119,7 +133,7 @@ class Run:
 		return b * beat_s
 
 	func you_lead() -> bool:
-		return round_i == (R["rounds"] as Array).size() - 1
+		return not practice and round_i == (R["rounds"] as Array).size() - 1
 
 	## Is it your turn to press: answering, or making the pattern in the last round.
 	func mine() -> bool:
@@ -314,6 +328,7 @@ static func tone(hz: float, decay: float, secs: float, every := 0.0) -> AudioStr
 var h                          # the Home screen
 var middle: Node3D = null
 var stones: Array = []         # MeshInstance3D per stone
+var caps: Array = []           # Label3D per stone: its key, shown in the practice
 var glow: Array = [0.0, 0.0, 0.0, 0.0]   # s of glow left per stone
 var voices: Array = []         # AudioStreamPlayer per stone, playing its note
 var bed: AudioStreamPlayer = null
@@ -322,12 +337,14 @@ var dancers: Array = []        # the home's kin entries: you, the rival ({} solo
 var hops: Array = []           # per side: [from, to, start s on the clock]
 var acts: Array = [["", 0.0], ["", 0.0]]   # per side: the rig clip it plays and the clock s it ends
 var clock := 0.0               # s since the bed started, from its playback position
+var bed_beat := 0.0            # s a beat in the bed's stream (the practice is slower)
 var bed_pos := 0.0             # the bed's last playback position (to count its loops)
 var bed_loops := 0
 var bar_s := 0.0               # s in one loop of the bed
 var seen := -1                 # the phase the readout last showed (Run.phase_key)
 var readout: Control = null
 var lbl: Label = null
+var bar: Control = null        # the practice beat bar
 var card: Control = null
 var card_t := 0.0
 
@@ -340,6 +357,7 @@ func place() -> void:
 		middle.queue_free()
 	middle = null
 	stones = []
+	caps = []
 	if h.YARD_AT.x < -100.0:
 		return
 	middle = Node3D.new()
@@ -361,6 +379,15 @@ func place() -> void:
 		mi.position = STONE_AT[s] * SPREAD + Vector3(0, STONE_H * 0.5, 0)
 		middle.add_child(mi)
 		stones.append(mi)
+		var cap := Label3D.new()
+		cap.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		cap.font_size = 64
+		cap.outline_size = 12
+		cap.modulate = STONE_COL[s].lightened(0.3)
+		cap.position = mi.position + Vector3(0, KEY_LIFT, 0)
+		cap.visible = false
+		middle.add_child(cap)
+		caps.append(cap)
 
 func find(p2: Vector2) -> Dictionary:
 	if run != null or not is_instance_valid(middle):
@@ -381,18 +408,28 @@ func use() -> void:
 	for k in dancers:
 		if not k.is_empty():
 			k["busy"] = true
+	GardenSfx.cue("garden_go", null)
+	var tut: Dictionary = Save.d["tutorial"]
+	var first: bool = not tut.get("echo_practice", false)
+	tut["echo_practice"] = true
+	_begin(first)
+
+## Starts the practice phrase (slow) or the dance proper, on a fresh clock.
+func _begin(slow: bool) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
-	run = Run.new(dancers[YOU]["rec"], dancers[RIVAL].get("rec", {}), rng)
+	run = Run.new(dancers[YOU]["rec"], dancers[RIVAL].get("rec", {}), rng, slow)
 	hops = [[_spot(YOU), _spot(YOU), 0.0], [_spot(RIVAL), _spot(RIVAL), 0.0]]
+	for s in caps.size():
+		caps[s].text = Settings.key_cap(KEYS[s])
+		caps[s].visible = slow
 	_sound_up()
 	_open_readout()
-	GardenSfx.cue("garden_go", null)
 
 ## The notes and the bed: generated once a dance; the bed's position is the dance's clock.
 func _sound_up() -> void:
 	var R := rules()
-	var beat := 60.0 / float(R["bpm"])
+	var beat := run.beat_s
 	if voices.is_empty():
 		for s in 4:
 			var v := AudioStreamPlayer.new()
@@ -403,9 +440,11 @@ func _sound_up() -> void:
 			voices.append(v)
 		bed = AudioStreamPlayer.new()
 		bed.bus = "SFX"
-		bed.stream = tone(float(R["bed_hz"]), float(R["bed_decay"]), beat * 4.0, beat)
 		bed.volume_db = float(R["bed_db"])
 		h.add_child(bed)
+	if bed_beat != beat:
+		bed.stream = tone(float(R["bed_hz"]), float(R["bed_decay"]), beat * 4.0, beat)
+		bed_beat = beat
 	bar_s = beat * 4.0
 	clock = 0.0
 	bed_pos = 0.0
@@ -430,6 +469,9 @@ func input(event: InputEvent) -> bool:
 	if event.is_action_pressed("menu"):
 		_end(false)
 		return true
+	if run.practice and event.is_action_pressed("interact"):
+		_begin(false)
+		return true
 	for s in 4:
 		if event.is_action_pressed(KEYS[s]):
 			run.press(_clock(), s)
@@ -453,11 +495,17 @@ func tick(d: float) -> void:
 		glow[s] = maxf(0.0, glow[s] - d)
 		var m: StandardMaterial3D = stones[s].material_override
 		m.emission_energy_multiplier = float(R["glow_energy"]) * glow[s] / float(R["glow_s"])
+		caps[s].modulate.a = maxf(KEY_DIM, glow[s] / float(R["glow_s"]))
 	_place(now)
+	if is_instance_valid(bar):
+		bar.queue_redraw()
 	if run.phase_key() != seen:
 		_phase_turn(now)
 	if run.over():
-		_end(true)
+		if run.practice:
+			_begin(false)
+		else:
+			_end(true)
 
 func _show(e: Array, now: float) -> void:
 	var side: int = e[1]
@@ -533,6 +581,8 @@ func _who(side: int) -> String:
 	return String(dancers[side]["rec"]["name"]) if not dancers[side].is_empty() else "the stones"
 
 func _line() -> String:
+	if run.practice:
+		return PRACTICE_LINE
 	var n := (rules()["rounds"] as Array).size()
 	var head := "Round %d of %d" % [run.round_i + 1, n]
 	var what := ""
@@ -549,6 +599,8 @@ func _line() -> String:
 	return "%s  ·  %s\n%s" % [head, what, tally]
 
 func _open_readout() -> void:
+	if is_instance_valid(readout):
+		readout.queue_free()
 	readout = UI.card(Color(0.06, 0.07, 0.1, 0.92), 12, 14)
 	readout.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	readout.grow_horizontal = Control.GROW_DIRECTION_BOTH
@@ -557,10 +609,19 @@ func _open_readout() -> void:
 	readout.offset_bottom = -64
 	var col := UI.vbox(6)
 	readout.add_child(col)
-	lbl = UI.label("", 15)
+	lbl = UI.label(_line(), 15)
 	col.add_child(lbl)
-	col.add_child(UI.label("%s %s %s %s on the stones, %s to stop" % [Settings.key_cap("up"), Settings.key_cap("left"),
-			Settings.key_cap("down"), Settings.key_cap("right"), Settings.key_cap("menu")], 12, UI.MUTED))
+	bar = null
+	if run.practice:
+		bar = Control.new()
+		bar.custom_minimum_size = BAR_SIZE
+		bar.draw.connect(_draw_bar.bind(bar))
+		col.add_child(bar)
+	var keys := "%s %s %s %s on the stones" % [Settings.key_cap("up"), Settings.key_cap("left"),
+			Settings.key_cap("down"), Settings.key_cap("right")]
+	if run.practice:
+		keys += ", %s to skip" % Settings.key_cap("interact")
+	col.add_child(UI.label("%s, %s to stop" % [keys, Settings.key_cap("menu")], 12, UI.MUTED))
 	h.root_ui.add_child(readout)
 	seen = -1
 
@@ -572,6 +633,8 @@ func _end(finished: bool) -> void:
 			k["t"] = float(rules()["rest_s"])
 			(k["node"] as Node3D).remove_meta("kact")
 	acts = [["", 0.0], ["", 0.0]]
+	for cap in caps:
+		cap.visible = false
 	bed.stop()
 	if is_instance_valid(readout):
 		readout.queue_free()
@@ -600,3 +663,22 @@ func _card(res: Dictionary) -> void:
 		card.queue_free()
 	card = BaseRace.result_card(h, rows)
 	card_t = float(rules()["card_s"])
+
+## The practice beat bar: this phase's beats left to right, each with the window a press counts in
+## (the "good" band), and the clock's marker sweeping over them.
+func _draw_bar(c: Control) -> void:
+	if run == null:
+		return
+	var w := c.size.x
+	var ht := c.size.y
+	var n := run.pattern.size()
+	var t0 := run.at(run.first) - run.beat_s * 0.5
+	var span := run.beat_s * n
+	c.draw_rect(Rect2(0, ht * 0.3, w, ht * 0.4), Color(1, 1, 1, 0.1))
+	for i in n:
+		var t := run.at(run.first + i)
+		var x0 := (t - run.window - t0) / span * w
+		c.draw_rect(Rect2(x0, ht * 0.2, run.window * 2.0 / span * w, ht * 0.6), Color(UI.ACCENT, 0.55))
+		c.draw_rect(Rect2((t - t0) / span * w - 1.0, ht * 0.1, 2.0, ht * 0.8), UI.GOLD)
+	var mx := clampf((clock - t0) / span, 0.0, 1.0) * w
+	c.draw_rect(Rect2(mx - 3.0, 0, 6.0, ht), UI.INK)

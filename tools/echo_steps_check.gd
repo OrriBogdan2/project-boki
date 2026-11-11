@@ -10,6 +10,9 @@ extends RefCounted
 ##   7. the machine: no move refused, the phases in order, RESULT goes nowhere
 ##   8. settle: versus winner and loser, a solo's gems
 ##   9. on the base: no stones with base_mode off; with it on, a dance starts and ends with a card
+##  10. the practice: one slow phrase of 4 beats the lead calls, perfect presses hit all 4; on the base
+##      the first dance opens with it (key caps on the stones, a rebind shows, the line, the beat bar),
+##      it pays nothing and round one follows, never again; a skip goes straight to round one
 ## Never touches the real save.
 
 const DT := 1.0 / 60.0           # s per step of the fake clock
@@ -41,6 +44,7 @@ func run(m: Node) -> void:
 	_rival()
 	_machine()
 	_settle()
+	_practice()
 	await _on_base()
 	print("ECHO DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -69,7 +73,9 @@ func _dance(you: Dictionary, rival: Dictionary, offset: float, skip := Callable(
 		seed_ := 7) -> EchoSteps.Run:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = seed_
-	var r := EchoSteps.Run.new(you, rival, rng)
+	return _play(EchoSteps.Run.new(you, rival, rng), offset, skip, wrong)
+
+func _play(r: EchoSteps.Run, offset: float, skip := Callable(), wrong := false) -> EchoSteps.Run:
 	var t := 0.0
 	while not r.over() and t < LEN_HIGH * 2.0:
 		var nt := t + DT
@@ -234,6 +240,20 @@ func _settle() -> void:
 	ok(not sres["good"] and int(Save.d["gems"]) == gems + int(EchoSteps.rules()["gems_ran"]),
 			"settle: a poor solo (10 of 40) pays the small gems")
 
+func _practice() -> void:
+	var R := EchoSteps.rules()
+	var r := EchoSteps.Run.new(_kin(_species(false), "Pip", 0, 0.0), {}, RandomNumberGenerator.new(), true)
+	ok(r.practice and r.beat_s > 60.0 / float(R["bpm"]) and r.pattern.size() == 4 and not r.you_lead(),
+			"practice: 4 beats at %.0f bpm (the dance %d), the lead calls" % [60.0 / r.beat_s, int(R["bpm"])])
+	_play(r, 0.0)
+	ok(r.over() and r.hits[0] == 4 and r.beats[0] == 4 and r.refused == 0,
+			"practice: perfect presses hit %d of %d, then it is over" % [r.hits[0], r.beats[0]])
+
+func _key(code: Key) -> InputEventKey:
+	var e := InputEventKey.new()
+	e.physical_keycode = code
+	return e
+
 func _on_base() -> void:
 	var rules: Dictionary = FarmUnlocks.rules()
 	var d := Save.fresh()
@@ -266,8 +286,10 @@ func _on_base() -> void:
 				"on: four stones offer a dance")
 		for k in home.kins:
 			k.erase("indoors")
+		await _first_dance(es)
 		es.use()
-		ok(es.run != null and es.run.versus and is_instance_valid(es.readout), "on: a versus starts with two Boki")
+		ok(es.run != null and not es.run.practice and es.run.versus and is_instance_valid(es.readout),
+				"on: the next dance is a versus straight away (the practice never repeats)")
 		var press := InputEventAction.new()
 		press.action = "up"
 		press.pressed = true
@@ -287,6 +309,68 @@ func _on_base() -> void:
 		es.tick(0.1)
 		ok(es.run == null and is_instance_valid(es.card), "on: the dance ends with a result card")
 		ok(not you.has_meta("kact"), "on: and nobody keeps a dance clip")
+		Save.d["tutorial"].erase("echo_practice")
+		es.use()
+		var skip := InputEventAction.new()
+		skip.action = "interact"
+		skip.pressed = true
+		ok(es.run.practice and es.input(skip), "skip: the interact key is taken in the practice")
+		ok(not es.run.practice and es.run.round_i == 0 and es.run.state == EchoSteps.Run.S.CALL
+				and not es.caps[0].visible, "skip: straight to round one, the key caps gone")
+		var stop := InputEventAction.new()
+		stop.action = "menu"
+		stop.pressed = true
+		es.input(stop)
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## The first dance on a save: the practice with "up" rebound to I, then round one, nothing paid.
+func _first_dance(es: EchoSteps) -> void:
+	var up := InputMap.action_get_events("up")
+	InputMap.action_erase_events("up")
+	InputMap.action_add_event("up", _key(KEY_I))
+	var gems := int(Save.d["gems"])
+	var you: Dictionary = es.h.hrace.entrants()[0]["rec"]
+	var energy := float(you["needs"]["energy"])
+	var memories: int = you.get("memory", []).size()
+	es.use()
+	ok(es.run != null and es.run.practice and Save.d["tutorial"].get("echo_practice", false),
+			"practice: the first dance opens with it, marked done at once")
+	var texts: Array = es.caps.map(func(c: Label3D): return c.text)
+	var want: Array = EchoSteps.KEYS.map(func(a: String): return Settings.key_cap(a))
+	ok(texts == want and texts[0] == "I" and es.caps.all(func(c: Label3D): return c.visible),
+			"practice: each stone shows its key, the rebind too (%s)" % " ".join(texts))
+	ok(es.lbl.text == EchoSteps.PRACTICE_LINE and is_instance_valid(es.bar), "practice: the one line and the beat bar")
+	var hint: Label = es.readout.get_child(0).get_child(-1)
+	ok(hint.text.begins_with("I ") and hint.text.contains(Settings.key_cap("interact") + " to skip"),
+			"practice: the key row shows the rebind and the skip (%s)" % hint.text)
+	await main.get_tree().process_frame
+	var lit := -1
+	var t := 0.0
+	while not es.run.over() and t < LEN_HIGH:
+		t += DT
+		es.run.step(t)
+		for e in es.run.events:
+			if lit < 0 and e[0] == "hop" and e[1] == EchoSteps.RIVAL:
+				lit = e[2]
+				es._show(e, t)
+				es.run.events.clear()
+				es.tick(DT)
+				var dark: Label3D = es.caps[(lit + 1) % 4]
+				ok(es.caps[lit].modulate.a > EchoSteps.KEY_DIM and is_equal_approx(dark.modulate.a, EchoSteps.KEY_DIM),
+						"practice: the stone the lead hops on lights its key, the others stay dim")
+				break
+		es.run.events.clear()
+	ok(lit >= 0 and es.run.over(), "practice: the lead hops the stones, then the phrase ends")
+	es.tick(DT)
+	InputMap.action_erase_events("up")
+	for e in up:
+		InputMap.action_add_event("up", e)
+	ok(es.run != null and not es.run.practice and es.run.round_i == 0, "practice: round one follows it")
+	ok(int(Save.d["gems"]) == gems and float(you["needs"]["energy"]) == energy
+			and you.get("memory", []).size() == memories, "practice: no gems, energy or memory for it")
+	var stop := InputEventAction.new()
+	stop.action = "menu"
+	stop.pressed = true
+	es.input(stop)
