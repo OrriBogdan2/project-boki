@@ -13,7 +13,7 @@ Owner, 11-11: "bot is trying to kill me when hes in the boss fight". A bot seale
 3. Keep hunter-first targeting, only lower hunter scores: still shoots the player when the boss is far.
 
 ## Decision
-Option 2. "In a boss fight" is `Lairs.boss_fight(h)`: sealed in a lair whose boss is up (not the post-kill victory lock). `Lairs.spares(h, o)` reads the lair's `grudges`, which `_tick_lock` fills while sealed: a fighter whose `last_hit_by` is a rival sealed in with them and whose `hurt_at` is after `lock_at`. A hit from before the seal doesn't count. Bot._choose skips spared rivals; the fight's boss is always in reach and outranks its adds. It also covers finishing a downed rival and the revive "danger" pick, and the bot's Boki (`KinTactics.spares`): it kept meleeing the player all fight.
+Option 2. "In a boss fight" is `Lairs.boss_fight(h)`: sealed in a lair whose boss is up (not the post-kill victory lock). `Lairs.spares(h, o)` reads the lair's `grudges`, which `Lairs.on_damage` (one line in `Match.on_damage`, beside the truce's) fills during the fight: a rival hunter sealed in with the target, hitting them directly. A hit from before the seal doesn't count (`lock_in` starts the list empty). Bot._choose skips spared rivals; the fight's boss is always in reach and outranks its adds. It also covers finishing a downed rival and the revive "danger" pick, and the bot's Boki (`KinTactics.spares`): it kept meleeing the player all fight.
 
 ## Consequences
-`scripts/match/bot.gd`, `scripts/match/lairs.gd`, `scripts/combat/kin_tactics.gd`, `scripts/match/kin.gd`. No Net or save change. Check: `--boss-focus-check`.
+`scripts/match/bot.gd`, `scripts/match/lairs.gd`, one line in `scripts/match/match.gd`, `scripts/combat/kin_tactics.gd`, `scripts/match/kin.gd`. No Net or save change. Check: `--boss-focus-check`.

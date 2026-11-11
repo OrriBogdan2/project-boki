@@ -1188,13 +1188,14 @@ func spares(h: Hunter, o: Hunter) -> bool:
 	var L := boss_fight(h)
 	return not L.is_empty() and not (L["grudges"].get(h, {}) as Dictionary).has(o)
 
-## Who has hit whom inside the seal: a fighter whose last hit came from a rival sealed in with them,
-## the rival themselves (not their Boki, which picks its own fights), after the seal closed.
-func _note_grudges(L: Dictionary, ins: Array) -> void:
-	for h in ins:
-		var by: Ent = h.last_hit_by
-		if by is Hunter and by.team != h.team and ins.has(by) and h.hurt_at > float(L["lock_at"]):
-			(L["grudges"].get_or_add(h, {}) as Dictionary)[by] = true
+## Match.on_damage: a rival sealed in with a fighter hits them, themselves (not their Boki, which picks
+## its own fights). Remembered for the rest of the fight (spares).
+func on_damage(target: Ent, by: Ent) -> void:
+	if not (target is Hunter and by is Hunter) or by.team == target.team:
+		return
+	var L := boss_fight(target)
+	if not L.is_empty() and (L["sealed_in"] as Array).has(by):
+		(L["grudges"].get_or_add(target, {}) as Dictionary)[by] = true
 
 ## Seconds until the seal fails on its own.
 func lock_left(L: Dictionary) -> float:
@@ -1234,7 +1235,6 @@ func _tick_lock(L: Dictionary, dt: float) -> void:
 			m.hud.toast(("THE SEAL BREAKS  ·  %s HEALS AND SLEEPS" if wiped else "THE SEAL FAILS  ·  %s RESETS") % String(b.md["name"]).to_upper(), color_of(L))
 		reset_boss(b)
 		return
-	_note_grudges(L, ins)
 	_hold_seal(L, b)
 
 ## While sealed, those inside stay in and those outside stay out (anyone riding the escape updraft
