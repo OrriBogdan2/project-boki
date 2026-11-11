@@ -84,14 +84,14 @@ to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBea
 rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
 outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
 
-From afar (ext/vfx-ways-out-read): the match camera frames about 15 m round the player (66 deg down, 23 m back, a
-32 deg lens), so no beam or wall farther off is ever in frame, however tall. `WaysOutPins` (scripts/ui/ways_out_pins.gd)
+From afar (ext/vfx-ways-out-read): the match camera frames about 15 m round the player (66 deg down, 23 m back, a 32
+deg lens), so no beam or wall farther off is ever in frame, however tall. `WaysOutPins` (scripts/ui/ways_out_pins.gd)
 puts a pin on the play box's edge for every seat still to be had (locked, open, in use) within 90 m and off screen:
-the map badge (its shape, colour and countdown arc; the using squad's colour), the word and the distance. The Heart
-ring's locked pin waits while the Gate is still to be had; the open ring's pin replaces the Heart's FINAL waypoint
-(the charging Heart keeps its own). The Blight's wall within 70 m gets a crimson bar on the edge toward it, heavier
-as it nears. Canvas draws only, the same at every preset. The maps' Lair and Uplink badges (and so the pins) now
-stand on QuestSeats' seeded Sealed Lair and Uplink (they stood on the first lair and the outpost farthest from it),
-and only the Sealed Lair's own fight puts its seat in use. Check: --ways-out-map-ui-check section 9. Shots:
---ways-out-vfx-shots, each state at 8, 20, 40 and 60 m at the match camera with a fight beside the player, per
---quality (docs/shots/vfx-ways-out-read/).
+the map badge (its shape, colour and countdown arc; the using squad's colour) under a beam while open or in use, the
+word and the distance. The Heart ring's locked pin waits while the Gate is still to be had; the open ring's pin
+replaces the Heart's FINAL waypoint (the charging Heart keeps its own). The Blight's wall within 70 m gets a crimson
+bar on the edge toward it, heavier as it nears. Canvas draws only, the same at every preset. The maps' Lair and Uplink
+badges (and so the pins) now stand on QuestSeats' seeded Sealed Lair and Uplink (they stood on the first lair and the
+outpost farthest from it), and only the Sealed Lair's own fight puts its seat in use. Check: --ways-out-map-ui-check
+section 9. Shots: --ways-out-vfx-shots, each state at 8, 20, 40 and 60 m at the match camera with a fight beside the
+player, per --quality (docs/shots/vfx-ways-out-read/).
