@@ -460,6 +460,9 @@ func _ready() -> void:
 	if "--move-feel-check" in args:
 		load("res://tools/move_feel_check.gd").new().run(self)    # movement, jump, glide, drop and camera timings vs docs/MOVEMENT_FEEL.md
 		return
+	if "--aim-latency-check" in args:
+		load("res://tools/aim_latency_check.gd").new().run(self)    # a scripted mouse move: the reticle and the aim point sit under it within one physics tick
+		return
 	if "--wallhug-check" in args:
 		load("res://tools/wallhug_check.gd").new().run(self)    # pressed against an island side from the abyss: caught, not sunk
 		return

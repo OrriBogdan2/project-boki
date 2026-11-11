@@ -11,11 +11,11 @@
 "scripts/arch/arch_kit.gd": {
 "long_line": 28,
 "nested_ternary": 2,
-"semicolon": 6
+"semicolon": 9
 },
 "scripts/arch/feel.gd": {
-"long_line": 9,
-"nested_ternary": 1,
+"long_line": 10,
+"nested_ternary": 2,
 "semicolon": 5
 },
 "scripts/arch/hero_demo.gd": {
@@ -32,11 +32,12 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 11,
-"semicolon": 1
+"long_line": 12,
+"semicolon": 2,
+"shadow": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 9,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -98,14 +99,14 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 52
+"long_line": 54
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
 "semicolon": 10
 },
 "scripts/core/evo.gd": {
-"long_line": 14,
+"long_line": 15,
 "semicolon": 4
 },
 "scripts/core/exchange.gd": {
@@ -135,9 +136,9 @@
 "semicolon": 1
 },
 "scripts/core/kin_speak.gd": {
-"long_line": 4,
+"long_line": 9,
 "nested_ternary": 4,
-"semicolon": 18
+"semicolon": 46
 },
 "scripts/core/kinbox.gd": {
 "long_line": 7,
@@ -180,12 +181,12 @@
 "semicolon": 1
 },
 "scripts/core/settings.gd": {
-"long_line": 15,
+"long_line": 16,
 "nested_ternary": 1,
 "semicolon": 4
 },
 "scripts/core/sfx.gd": {
-"long_line": 5,
+"long_line": 6,
 "semicolon": 3,
 "shadow": 3
 },
@@ -252,9 +253,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
-"nested_ternary": 27,
-"semicolon": 243,
+"long_line": 211,
+"nested_ternary": 29,
+"semicolon": 248,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -340,9 +341,9 @@
 },
 "scripts/kin/kin_exec.gd": {
 "history_comment": 1,
-"long_line": 31,
-"nested_ternary": 3,
-"semicolon": 27,
+"long_line": 32,
+"nested_ternary": 4,
+"semicolon": 31,
 "shadow": 2
 },
 "scripts/kin/kin_lib.gd": {
@@ -353,12 +354,12 @@
 "long_line": 10
 },
 "scripts/kin/kin_spec.gd": {
-"long_line": 12,
+"long_line": 17,
 "semicolon": 3,
 "shadow": 1
 },
 "scripts/kin/kin_text.gd": {
-"long_line": 25,
+"long_line": 26,
 "nested_ternary": 5
 },
 "scripts/kin/merge_augment.gd": {
@@ -388,9 +389,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 365,
+"long_line": 388,
 "nested_ternary": 7,
-"semicolon": 380,
+"semicolon": 407,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -425,7 +426,7 @@
 "scripts/match/arena.gd": {
 "long_line": 22,
 "nested_ternary": 2,
-"semicolon": 36
+"semicolon": 37
 },
 "scripts/match/arena_demo.gd": {
 "long_line": 2
@@ -463,7 +464,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
+"long_line": 24,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -493,13 +494,13 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 7,
-"semicolon": 9
+"long_line": 25,
+"semicolon": 47
 },
 "scripts/match/exits.gd": {
-"long_line": 10,
+"long_line": 33,
 "nested_ternary": 1,
-"semicolon": 13
+"semicolon": 20
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
@@ -510,11 +511,11 @@
 "scripts/match/fx.gd": {
 "long_line": 12,
 "nested_ternary": 1,
-"semicolon": 25,
+"semicolon": 27,
 "shadow": 2
 },
 "scripts/match/gear.gd": {
-"long_line": 4
+"long_line": 5
 },
 "scripts/match/gear_drops.gd": {
 "long_line": 3,
@@ -553,16 +554,16 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 27,
-"long_line": 92,
-"nested_ternary": 15,
-"semicolon": 47,
+"history_comment": 38,
+"long_line": 95,
+"nested_ternary": 19,
+"semicolon": 53,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
-"long_line": 40,
-"nested_ternary": 5,
-"semicolon": 100
+"long_line": 41,
+"nested_ternary": 6,
+"semicolon": 102
 },
 "scripts/match/juice.gd": {
 "long_line": 1,
@@ -570,7 +571,7 @@
 "semicolon": 1
 },
 "scripts/match/kin.gd": {
-"long_line": 30,
+"long_line": 31,
 "nested_ternary": 7,
 "semicolon": 19
 },
@@ -579,7 +580,7 @@
 "semicolon": 2
 },
 "scripts/match/kin_companion.gd": {
-"long_line": 5,
+"long_line": 8,
 "nested_ternary": 1,
 "semicolon": 15
 },
@@ -615,6 +616,10 @@
 "scripts/match/kin_strike.gd": {
 "long_line": 4
 },
+"scripts/match/kin_voice.gd": {
+"long_line": 21,
+"semicolon": 2
+},
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
@@ -624,20 +629,20 @@
 "semicolon": 28
 },
 "scripts/match/landmarks.gd": {
-"long_line": 23,
+"long_line": 24,
 "nested_ternary": 1,
 "semicolon": 25
 },
 "scripts/match/life.gd": {
-"long_line": 12,
+"long_line": 13,
 "semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
+"long_line": 221,
 "nested_ternary": 19,
-"semicolon": 142,
-"shadow": 7
+"semicolon": 145,
+"shadow": 9
 },
 "scripts/match/merge_look.gd": {
 "long_line": 6
@@ -662,7 +667,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 280,
+"long_line": 282,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -738,8 +743,8 @@
 "semicolon": 86
 },
 "scripts/match/train_route.gd": {
-"long_line": 2,
-"semicolon": 5,
+"long_line": 3,
+"semicolon": 6,
 "shadow": 1
 },
 "scripts/match/truce.gd": {
@@ -756,9 +761,9 @@
 "shadow": 1
 },
 "scripts/match/world.gd": {
-"long_line": 77,
+"long_line": 78,
 "nested_ternary": 9,
-"semicolon": 172,
+"semicolon": 175,
 "shadow": 2
 },
 "scripts/server/relay.gd": {
@@ -792,14 +797,14 @@
 "scripts/ui/dex_view.gd": {
 "long_line": 10,
 "nested_ternary": 2,
-"semicolon": 15
+"semicolon": 16
 },
 "scripts/ui/egg_hatch.gd": {
 "long_line": 10,
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 34,
+"long_line": 36,
 "nested_ternary": 4,
 "semicolon": 10,
 "shadow": 1
@@ -808,7 +813,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 29,
+"long_line": 30,
 "nested_ternary": 2,
 "semicolon": 66
 },
@@ -816,15 +821,19 @@
 "long_line": 2,
 "semicolon": 3
 },
+"scripts/ui/hold_skip.gd": {
+"long_line": 2,
+"nested_ternary": 1
+},
 "scripts/ui/hub_bar.gd": {
 "long_line": 2,
 "semicolon": 4
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 174,
-"nested_ternary": 33,
-"semicolon": 43,
+"long_line": 191,
+"nested_ternary": 39,
+"semicolon": 52,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -846,8 +855,8 @@
 "semicolon": 3
 },
 "scripts/ui/kin_reveal.gd": {
-"long_line": 4,
-"semicolon": 12,
+"long_line": 5,
+"semicolon": 15,
 "shadow": 2
 },
 "scripts/ui/kinbox_view.gd": {
@@ -857,12 +866,12 @@
 "shadow": 1
 },
 "scripts/ui/kit_card.gd": {
-"long_line": 29,
-"nested_ternary": 3,
+"long_line": 31,
+"nested_ternary": 5,
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 26,
+"long_line": 27,
 "semicolon": 10,
 "shadow": 2
 },
@@ -881,18 +890,18 @@
 "shadow": 1
 },
 "scripts/ui/prologue.gd": {
-"long_line": 23,
+"long_line": 24,
 "nested_ternary": 1,
-"semicolon": 33,
+"semicolon": 40,
 "shadow": 1
 },
 "scripts/ui/reset_pop.gd": {
 "long_line": 1
 },
 "scripts/ui/results.gd": {
-"long_line": 25,
+"long_line": 26,
 "nested_ternary": 6,
-"semicolon": 38,
+"semicolon": 43,
 "shadow": 1
 },
 "scripts/ui/scenery.gd": {
@@ -906,9 +915,9 @@
 "semicolon": 1
 },
 "scripts/ui/title.gd": {
-"long_line": 21,
+"long_line": 22,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 41
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -943,16 +952,16 @@
 "semicolon": 7
 },
 "tools/airheal_check.gd": {
-"long_line": 1,
+"long_line": 2,
 "semicolon": 2
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 19
+"semicolon": 20
 },
 "tools/archetype_check.gd": {
 "long_line": 65,
-"semicolon": 70,
+"semicolon": 71,
 "shadow": 1
 },
 "tools/arena_check.gd": {
@@ -973,7 +982,7 @@
 "semicolon": 25
 },
 "tools/boki_follow_check.gd": {
-"long_line": 33,
+"long_line": 34,
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
@@ -987,6 +996,9 @@
 },
 "tools/check.gd": {
 "semicolon": 1
+},
+"tools/check_registry.gd": {
+"long_line": 1
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
@@ -1063,7 +1075,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 7,
+"long_line": 8,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {
@@ -1076,7 +1088,7 @@
 "semicolon": 31
 },
 "tools/lair_lock_check.gd": {
-"long_line": 21,
+"long_line": 22,
 "nested_ternary": 1,
 "semicolon": 11
 },
@@ -1105,7 +1117,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 30,
+"long_line": 32,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
@@ -1181,7 +1193,7 @@
 "semicolon": 1
 },
 "tools/train_check.gd": {
-"long_line": 10,
+"long_line": 11,
 "semicolon": 7
 },
 "tools/unique_check.gd": {
