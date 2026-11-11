@@ -117209,5 +117209,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pg_ball_stand_2.jpg",
     "ok": true
+  },
+  {
+    "id": "px9f_kingpinguin",
+    "name": "Kingpinguin (pixel sprite 80, calm ball)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9f_kingpinguin_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9f_kingpinguin",
+    "name": "Kingpinguin (pixel sprite 80, calm ball)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9f_kingpinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rg_fat_a",
+    "name": "Rollguin fat, house style a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rg_fat_a_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "v2s_kingpinguin_ball2",
+    "name": "Kingpinguin (V2 sheet from card)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/v2s_kingpinguin_ball2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kg_fat_c",
+    "name": "Kegling smaller and fatter c",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kg_fat_c_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kg_fat_b",
+    "name": "Kegling smaller and fatter b",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/kg_fat_b_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "kg_fat_b",
+    "name": "Kegling smaller and fatter b",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kg_fat_b_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "kg_fat_a",
+    "name": "Kegling smaller and fatter a",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/kg_fat_a_2.jpg",
+    "ok": true
   }
 ]
