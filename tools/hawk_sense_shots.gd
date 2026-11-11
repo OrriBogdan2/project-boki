@@ -1,11 +1,11 @@
 extends RefCounted
 ## --hawk-sense-shots: review screenshots of Lace's Hawk Sense (HawkSense) in a live match (xvfb with a
 ## renderer), into --shots-dir=<dir>. A rival stands just behind one of the map's rocks, seen from Lace's camera
-## 9 m to the south: at full health they are hidden; under the health line they are revealed and their outline
+## 6 m to the south: at full health they are hidden; under the health line they are revealed and their outline
 ## in Lace's colour shows through the rock. Each as the full frame and a 3x crop round the rock. Never touches
 ## the save.
 
-const BACK := 9               # tiles south of the rock Lace stands (the camera looks north over her)
+const BACK := 6               # tiles south of the rock Lace stands (the camera looks north over her)
 const CROP := Vector2i(220, 160)   # px round the rock, scaled 3x
 
 var main: Node
@@ -48,7 +48,7 @@ func run(main_node: Node) -> void:
 		img.save_png(dir.path_join("hawk_%s.png" % label))
 		var c := Vector2i(m.cam.unproject_position(rock + Vector3(0, 0.8, 0)) * Vector2(img.get_size())
 			/ main.get_viewport().get_visible_rect().size)
-		var crop := img.get_region(Rect2i(c - CROP / 2, CROP))
+		var crop := img.get_region(Rect2i(c - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size())))
 		crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_LANCZOS)
 		crop.save_png(dir.path_join("hawk_%s_zoom.png" % label))
 	main.get_tree().quit(0)
