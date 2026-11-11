@@ -15,7 +15,8 @@ _Generated from `scripts/core/data.gd`, `scripts/match/life.gd`, `content/rules`
 
 | Setting | Value | Meaning |
 |---|---|---|
-| players | 30 | hunters in an expedition (solos, duos or trios) |
+| players | 30 | hunters in a trios expedition (squads of three) |
+| solo players | 20 | hunters in a solos expedition |
 | down_hp | 100 | so about 40 seconds downed before you bleed out |
 
 ## Down, death and revive

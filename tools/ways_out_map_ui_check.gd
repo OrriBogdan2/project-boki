@@ -132,10 +132,10 @@ func run(main: Node) -> void:
 	H._force(Heart.S.WAITING, "test")
 	var t0: float = Heart.r("tide_start_s")
 	m.time = 10.0 - m.sess_t0
-	ok(is_equal_approx(Heart.next_r(m), Heart.r("tide_r0") * H.ways_scale),
-		"before the tide the dashed ring is the first ring")
-	m.time = t0 + 100.0 - m.sess_t0
-	var ahead := (100.0 + Heart.r("tide_next_s")) / Heart.r("tide_close_s")
+	ok(is_equal_approx(Heart.next_r(m), minf(H.start_r, Heart.r("tide_r0") * H.ways_scale)),
+		"before the close the dashed ring is the play space the match starts with")
+	m.time = t0 + 300.0 - m.sess_t0         # (the closing ring is inside the play space by now)
+	var ahead := (300.0 + Heart.r("tide_next_s")) / Heart.r("tide_close_s")
 	var want := lerpf(Heart.r("tide_r0"), Heart.r("tide_r1"), ahead) * H.ways_scale
 	ok(is_equal_approx(Heart.next_r(m), want) and Heart.next_r(m) < Heart.tide_r(m),
 		"mid close: the dashed ring is tide_next_s ahead and smaller")

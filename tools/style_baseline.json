@@ -252,7 +252,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 201,
 "nested_ternary": 27,
 "semicolon": 243,
 "shadow": 3
@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -867,7 +867,7 @@
 "shadow": 2
 },
 "scripts/ui/lobby.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 2,
 "semicolon": 4
 },
