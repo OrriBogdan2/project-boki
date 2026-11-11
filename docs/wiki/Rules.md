@@ -482,6 +482,21 @@ What Boki say (BokiLines, docs/BOKI_TALK.md). tuning: max_words = the most words
 | rain_joy | {"_doc": "joy gained (or lost) per minute at home while it rains", "effigeetle": -1.5, "frigatee": -1.0, "mycroll": 1.0, "barrelmander": 1.0} |
 | storm_sense | {"_doc": "seconds before rain starts that it starts warning about it", "kestrike": 25.0, "barokat": 25.0} |
 
+## boki_summon (`content/rules/boki_summon.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Boki summon (KinSummon, decision 0039): [window s, cooldown s] by the species' ai.role and body.size (briefs/boki-art/WISP_DESIGN_OPEN.md Q1). Uptime = window / (window + cooldown) stays in uptime_band. |
+| table | {"bruiser": {"small": [8, 60], "medium": [10, 65], "large": [12, 70]}, "skirmisher": {"small": [7, 55], "medium": [9, 60], "large": [11, 65]}, "trickster": {"small": [8, 55], "medium": [10, 60], "large": [12, 65]}, "controller": {"small": [11, 65], "medium": [13, 70], "large": [15, 75]}, "tank": {"small": [14, 75], "medium": [16, 80], "large": [18, 85]}, "support": {"small": [16, 80], "medium": [18, 85], "large": [20, 90]}} |
+| fallback | [10, 60] |
+| uptime_band | [0.09, 0.2] |
+| knocked_cd_mult | 1.25 |
+| leash | 10 |
+| leash_swing | 2 |
+| rebloom_dist | 20 |
+
 ## boki_system (`content/rules/boki_system.json`)
 
 The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, follow, the downed Boki, the leashes. Distances in metres, times in seconds, hp as a share of max health.
@@ -504,6 +519,17 @@ The Boki command system (docs/decisions/0001, 0002): G sic / call back / wheel, 
 | follow_doc | stuck_s: seconds without progress before the hop back. hop_on_air_s: seconds you are off the ground before it hops on (when it cannot walk where you land). hop_off_steady_s: seconds steady on the ground before it hops off again. disengage_range: m; after an explicit Follow in a fight, a foe hitting the Boki or you from this close sends it back into the fight. away_dist: farther than this and a G tap is Call back (else Sic). combat_radius: a foe this close to you or the target means a fight (orders are never refused). path_window: tiles of margin round the trip for the A* search. path_every_s: seconds between searches; path_goal_moved: tiles the goal may move before it searches early; path_fail_backoff_s: wait after a search that found nothing; path_lookahead: path tiles checked ahead for a straight line. separation_r: m it keeps from you. shoulder_max_mass: a Boki heavier than this (body.mass) is too big to sit on you; on the Return order it guards at your side instead. guard_side_m: m from you to that guard spot, square to where you face; guard_min_m: m it never comes closer than (never under or in you). |
 | wheel | {"deadzone_px": 30, "pop_s": 0.14, "radius_px": 92} |
 | charge_impact | {"radius_k": 1.35, "stun_add": 0.3, "kb_k": 1.4} |
+
+## boki_wisp_cosmetics (`content/rules/boki_wisp_cosmetics.json`)
+
+The Boki wisp's cosmetic line: a trail, a sparkle colour and an orbit style (never the outline).
+
+| Setting | Value |
+|---|---|
+| _doc | Boki wisp cosmetics (DECISIONS 2026-11-09, docs/decisions/0038-boki-wisp-proto.md): a second line beside the Hunter Wisp looks. Three picks, each an id in Save.d['look']['boki_wisp'][line]. They only change the sparkles and the orbit, never the critter outline (BokiWispLook's body) and never the sparkle count. Add an option = add an entry. Sizes in metres, times in seconds. Sparkle 'own' = the Boki's glow colour lifted; otherwise a hex string. |
+| trail | {"default": "stardust", "options": {"stardust": {"name": "Stardust", "desc": "Sparkles drift down where it has been.", "life": 0.6, "speed": 0.12, "gravity": [0, -0.25, 0], "size": [0.025, 0.055]}, "ember_rise": {"name": "Ember Rise", "desc": "Sparkles float up like warm ash.", "life": 0.8, "speed": 0.08, "gravity": [0, 0.35, 0], "size": [0.02, 0.05]}, "dew_drizzle": {"name": "Dew Drizzle", "desc": "Quick little drops that fall straight down.", "life": 0.45, "speed": 0.03, "gravity": [0, -1.1, 0], "size": [0.02, 0.04]}, "comet_tail": {"name": "Comet Tail", "desc": "A long, tight tail of larger sparks.", "life": 1.0, "speed": 0.0, "gravity": [0, 0, 0], "size": [0.04, 0.07]}}} |
+| sparkle | {"default": "own", "options": {"own": {"name": "Own Glow", "desc": "The sparkles take your Boki's glow colour.", "color": "own"}, "sunbeam": {"name": "Sunbeam", "desc": "Warm gold sparkles.", "color": "ffd86a"}, "rosewater": {"name": "Rosewater", "desc": "Soft pink sparkles.", "color": "ff9ec7"}, "seafoam": {"name": "Seafoam", "desc": "Cool mint sparkles.", "color": "8ff0d0"}}} |
+| orbit | {"default": "shoulder_loop", "options": {"shoulder_loop": {"name": "Shoulder Loop", "desc": "A steady lap at shoulder height.", "radius": 0.6, "hz": 0.35, "rise": 0.0, "wave": 0.0, "waves": 0}, "halo_loop": {"name": "Halo Loop", "desc": "A wide, slow lap above your head.", "radius": 0.75, "hz": 0.25, "rise": 0.35, "wave": 0.0, "waves": 0}, "weave": {"name": "Weave", "desc": "Dips and climbs three times a lap.", "radius": 0.65, "hz": 0.4, "rise": 0.1, "wave": 0.2, "waves": 3}}} |
 
 ## Bond meter (`content/rules/bond.json`)
 
