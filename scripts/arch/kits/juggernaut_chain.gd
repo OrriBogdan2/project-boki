@@ -332,8 +332,8 @@ func _bow(aside: float) -> Vector3:
 func _draw_preview() -> void:
 	var h := k.h
 	var aimed := _aimed()
-	if not h.is_local() or absf(aimed) < PREVIEW_MIN or k.lunging():
-		return                      # (and nothing ahead of him while the Smash is held)
+	if not h.is_local() or absf(aimed) < PREVIEW_MIN or k.rmb_down or k.lunging():
+		return                      # (and nothing ahead of him from the Smash's press to the Lunge's end)
 	var ed := data()
 	var y := h.pos.y + PREVIEW_Y
 	var pos := Vector2(h.pos.x, h.pos.z)
