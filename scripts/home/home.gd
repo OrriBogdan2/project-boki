@@ -2628,7 +2628,7 @@ func _open_welcome() -> void:
 # ---- farm
 ## How long until the next stage, for a watered plant.
 func _grow_left(arr: String, d: Dictionary) -> String:
-	var need := Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0)
+	var need := FarmCropGuide.stage_time(Data.WATER_TIME * (0.5 if arr == "gh_plots" else 1.0))
 	var left := int(ceil(need - (Time.get_unix_time_from_system() - float(d.get("wt", 0.0)))))
 	return "%ds" % maxi(1, left)
 

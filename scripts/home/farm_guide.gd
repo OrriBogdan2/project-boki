@@ -157,12 +157,6 @@ func _refresh_hint() -> void:
 	var s := FarmTutorial.hint_text(id)
 	if id == "house" and FarmTutorial.stage(id) == "wait":
 		s = "%s (%s)" % [s, _site_progress()]
-	var grow := {} if FarmTutorial.base() else FarmCropGuide.growing()
-	if not grow.is_empty() and id != "crop":
-		s += "  (Your seed is ripe in %ds)" % int(ceil(float(grow["left"])))
-	elif id == "crop" and not grow.is_empty():
-		s = s.replace("{secs}", str(int(ceil(float(grow["left"])))))
-	s = s.replace("{secs}", "a few")
 	hint_lbl.text = "%d/%d  %s" % [FarmTutorial.done_count() + 1, FarmTutorial.steps().size(), s]
 	# a long hint wraps at about 600 px (under the chips, clear of the Goals card) instead of running wide
 	var fw := hint_lbl.get_theme_font("font").get_string_size(hint_lbl.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 6.0
@@ -336,7 +330,8 @@ func _nearest_wild(what: String) -> Vector3:
 			tree_at = at
 	return tree_at
 
-## A growth bar and countdown over the first patch while a seed grows, whatever step is showing.
+## Only a small growth bar over the first patch while a seed grows, whatever step is showing: no words and no
+## countdown (briefs/DECISIONS.md: show only what's needed right now).
 func _update_crop_label() -> void:
 	var g := {} if FarmTutorial.base() else FarmCropGuide.growing()
 	if g.is_empty() or not FarmTutorial.active() or h.plots.size() <= int(g["plot"]):
@@ -345,16 +340,16 @@ func _update_crop_label() -> void:
 		return
 	if not is_instance_valid(crop_lbl):
 		crop_lbl = Label3D.new()
-		crop_lbl.font_size = 48
+		crop_lbl.font_size = 30
 		crop_lbl.pixel_size = 0.0095
-		crop_lbl.outline_size = 14
-		crop_lbl.modulate = Color("8fe0a0")
+		crop_lbl.outline_size = 8
+		crop_lbl.modulate = Color("8fe0a0", 0.8)
 		crop_lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		crop_lbl.no_depth_test = true
 		h.add_child(crop_lbl)
 	crop_lbl.visible = true
-	crop_lbl.text = "Growing\n" + FarmCropGuide.bar_text(g)
-	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 2.2, 0)
+	crop_lbl.text = FarmCropGuide.bar_text(g)
+	crop_lbl.position = (h.plots[int(g["plot"])] as Node3D).position + Vector3(0, 1.4, 0)
 
 func _update_marker(dt: float) -> void:
 	if quiet:

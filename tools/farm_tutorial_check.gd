@@ -62,6 +62,7 @@ func run(m: Node, mode := "") -> void:
 	await _world()
 	await _spotlight()
 	await _farm2()
+	await _ripe_gate()
 	await _base_mode()
 	await _base_tutorial()
 	print("FTUT DONE, failures: %d" % bad)
@@ -859,6 +860,49 @@ func _farm2() -> void:
 	home.hb.toggle()
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## The pick prompt waits for a ripe crop: while the seed grows no hint, Hob line, marker or patch prompt says
+## to pick it (or counts down), only a wordless growth bar shows; once the farm tick ripens it, "Pick it" comes up.
+func _ripe_gate() -> void:
+	var home = await _home(1)
+	var L := HomeLayout.of(Save.d)
+	_add_house(L)
+	(L["deco"] as Array).append({"u": HomeLayout._next_uid(L), "id": "crop_patch", "x": 44, "z": 30, "r": 0})
+	home._build_plots()
+	for s in FarmTutorial.steps():
+		if not ["crop", "sell", "expedition"].has(String(s["id"])):
+			FarmTutorial.state()["did"][String(s["id"])] = true
+	Save.d["plots"][0] = {"crop": "tidebloom", "stage": 0, "wt": 0.0}
+	home.guide._refresh_hint()
+	home.guide._update_marker(0.0)
+	ok(FarmTutorial.stage("crop") == "water" and not home.guide.hint_lbl.text.to_lower().contains("pick")
+			and (home.guide.crop_lbl == null or not home.guide.crop_lbl.visible),
+			"planted, not watered: water it, no pick prompt and no growth bar ('%s')" % home.guide.hint_lbl.text)
+	home._water("plots", 0)
+	home.guide._refresh_hint()
+	home.guide._update_marker(0.0)
+	var hint := home.guide.hint_lbl.text as String
+	var plot_lbl: String = home._label_for({"kind": "plot", "arr": "plots", "i": 0})
+	var marker_on: bool = is_instance_valid(home.guide.marker) and home.guide.marker.visible
+	ok(FarmTutorial.current() == "crop" and FarmTutorial.stage("crop") == "grow", "watered: the crop step waits while it grows")
+	ok(not hint.to_lower().contains("pick") and not hint.to_lower().contains("ripe"),
+			"growing: the banner neither says to pick it nor counts down ('%s')" % hint)
+	ok(not FarmTutorial.hint_text("crop").to_lower().contains("pick") and not marker_on,
+			"growing: no 'Pick it' for Hob to say and no floating marker over the patch")
+	ok(not plot_lbl.begins_with("Harvest"), "growing: the patch's own prompt is no harvest ('%s')" % plot_lbl)
+	var bar: Label3D = home.guide.crop_lbl
+	ok(bar != null and bar.visible and bar.text.strip_edges() != "" and bar.text.replace("▰", "").replace("▱", "") == "",
+			"growing: only a wordless growth bar over the patch ('%s')" % (bar.text if bar else "none"))
+	Save.d["plots"][0]["wt"] = Time.get_unix_time_from_system() - FarmCropGuide.stage_time(Data.WATER_TIME) - 1.0
+	home._farm_tick()
+	home.guide._refresh_hint()
+	home.guide._update_marker(0.0)
+	hint = home.guide.hint_lbl.text
+	marker_on = is_instance_valid(home.guide.marker) and home.guide.marker.visible
+	ok(FarmTutorial.stage("crop") == "pick" and hint.contains("pick it") and marker_on
+			and home.guide.marker.text.begins_with("Pick it") and not home.guide.crop_lbl.visible,
+			"ripe: now 'Pick it' shows, banner and marker, and the bar goes ('%s')" % hint)
+	ok(String(home._label_for({"kind": "plot", "arr": "plots", "i": 0})).begins_with("Harvest"), "and the patch says Harvest")
 
 func _note_label(hb) -> Label3D:
 	for c in hb.ghost_cells.get_children():

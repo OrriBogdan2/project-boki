@@ -149,7 +149,7 @@
 				"patch_dry": "Crops grow in patches. Press {build} and place one. Away from water, you water it yourself.",
 				"plant": "Press {interact} at the patch to plant a seed.",
 				"water": "Press {interact} at the patch to water it.",
-				"grow": "Your seed is growing. Ripe in {secs}s. Wait by the patch, then pick it ({interact}).",
+				"grow": "Your seed is growing. Wait by the patch.",
 				"pick": "It's ripe! Press {interact} to pick it."
 			},
 			"world": {
@@ -157,7 +157,7 @@
 				"patch_dry": "",
 				"plant": "Plant a seed",
 				"water": "Water it",
-				"grow": "Growing",
+				"grow": "",
 				"pick": "Pick it"
 			},
 			"spot": {
