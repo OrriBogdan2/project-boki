@@ -743,6 +743,22 @@ How every NPC talks (NpcDialogue, NpcBeacon, FarmTalk): a box at the bottom with
 | speakers_desc | Each NPC: name, short (the edge arrow's label), role (under the name), voice_hz (blip pitch), head and tag (m above the feet: the camera's aim and the name tag), portrait_at and portrait_dist (m: the rendered close-up's aim height and distance), glow (outline colour). |
 | speakers | {"hob": {"name": "Hob Brackenridge", "short": "Hob", "role": "Builder", "voice_hz": 150.0, "head": 2.2, "tag": 3.2, "portrait": "res://art/portraits/hob_{mood}.png", "portrait_at": 2.0, "portrait_dist": 2.2, "glow": "ffd79a"}, "pell": {"name": "Pell", "short": "Pell", "role": "Freed soul, your guide", "voice_hz": 420.0, "head": 1.4, "tag": 2.1, "portrait": "res://art/portraits/pell_{mood}.png", "portrait_at": 1.15, "portrait_dist": 2.4, "glow": "9fd8ff"}} |
 
+## move_sfx (`content/rules/move_sfx.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | A Hunter's movement sounds (MoveSfx, docs/AUDIO.md). step_reach_m: how far another Hunter's footsteps carry (a landing, a dash and the glider carry the usual 22 m). Weight: a Hunter taller than ref_height_m sounds lower (pitch_per_m) and louder (db_per_m) on its footsteps and landings, clamped to pitch_min..pitch_max and +-db_max. height_m: Kael 2.05 and Neve 1.56 from the owner; the rest are the height chart (tools/warden_model_check.gd) x 1.6 m. |
+| step_reach_m | 14 |
+| ref_height_m | 1.6 |
+| pitch_per_m | 0.25 |
+| db_per_m | 6 |
+| pitch_min | 0.8 |
+| pitch_max | 1.2 |
+| db_max | 4 |
+| height_m | {"juggernaut": 2.05, "rimewright": 1.56, "bulwark": 2.4, "dredge": 2.37, "ostra": 1.89, "ashwick": 1.86, "gunslinger": 1.74, "dolm": 1.74, "mage": 1.73, "archer": 1.71, "thief": 1.57, "tender": 0.96} |
+
 ## perk_orbs (`content/rules/perk_orbs.json`)
 
 
