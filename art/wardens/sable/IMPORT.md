@@ -1,6 +1,6 @@
 # Sable (thief): import note
 
-## v95 swap, appeal4 cand_2 (2026-11-11, ext/sable-appeal4): the current sable.glb
+## v95 swap, appeal4 cand_6 (cand_2 + moth eyes + curvier, 2026-11-11, ext/sable-appeal4): the current sable.glb
 
 Owner 11-10 ("looks kind of boyish, maybe bigger breasts and hair showing"). The mesh is the worker's pick of three candidates (the owner has not
 picked): `~/meshy/v95/Sable/r2/appeal4/cand_2.glb` (pick.txt and cmp_fem.png beside it), the appeal3 body b with the bug eyes
@@ -13,7 +13,15 @@ round pupils): `~/meshy/v95/Sable/r2/appeal4/cand_2_motheye.glb` is cand_2 with 
 (`appeal4/tools/eye_moth.py`: a dark orb, a soft bounce low, a sheen and one crisp catchlight where cand_2's was; lashes, liner and lids
 kept). The swap reused the cand_2 bake's mesh and UVs and re-baked just the changed texels (`appeal4/tools/eye_rebake.py`, then
 `atlas_repack.py`), so the fit, weights and slots match the cand_2 swap (one eye triangle moved hair -> skin). The spec's master
-is the moth-eye glb; a fresh WORK reproduces it. Candidates 1 (milder) and 3 (widest grin, bigger bust) are
+is the moth-eye glb; a fresh WORK reproduces it. Curvier (owner 11-11: "all the girls a bit curvier, bigger boobs, tighter waist, not weird from
+the side; sable's boobs exposed in the middle part curvy too"): `cand_6_motheye.glb` is the moth-eye glb with only positions and
+normals moved (cj/20261111-025118-a5/scr/sdeform.py, the same rounded dome as Cinder's cand_5): each breast up to 3.4 cm forward with
+zero slope at the chest wall and a fuller lower curve, the inner radius reaching into the jacket opening plus a soft centre cleft so the
+exposed skin shows two rounded inner curves; the lapels, pendant, laces and braid ride the same field; arms masked; waist 5 % in
+(saturating so the holsters only translate). Triangle area p95 1.28x. Eyes, face and texture untouched. Sheet:
+~/art-review/cinder-bust-round-1111/cmp_bust_round.png (cand_4 is the milder no-cleft option). This one is a full re-fit. Checks: `--warden-glb-check` PASS, `--warden-model-check` PASS,
+`--stretch-check --wardens=thief` 47 clips flagged as on cand_2 (worst 23.53x encore_dance, was 23.44x); wings re-applied (root 3 cm back,
+cards tipped 26 deg). Shots: docs/shots/sable-appeal4/ (re-rendered; moth eyes intact). Candidates 1 (milder) and 3 (widest grin, bigger bust) are
 drop-ins: change `master` in the spec.
 `tools/art1/v95_swap.py` put it on her own skeleton, 47 clips and anchors with `art/wardens/src/sable_v95.json`
 (docs/art/wardens/V95_SWAP.md):
