@@ -618,7 +618,8 @@ func juggernaut(a) -> void:
 	P.inp["fire"] = false
 	A.step(m, 0.3)
 	A.ok("juggernaut LMB tap: a slash, 1.6x at the tip (the footage's 151 / 94)",
-			near >= 7.0 and A.dmg(T) >= near * 1.5 and K.waves == 0, "near %.0f tip %.0f" % [near, A.dmg(T)])
+			near >= float(K.d["lmb"]["dmg"]) * 0.85 and A.dmg(T) >= near * 1.5 and K.waves == 0,
+			"near %.0f tip %.0f" % [near, A.dmg(T)])
 	A.fresh(T)
 	T.teleport(home + Vector3(7.0, 0, 0))
 	A.aim_at(P, T.pos)
@@ -663,7 +664,8 @@ func juggernaut(a) -> void:
 			str(lane))
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
-			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
+			winding and early <= 0.0 and A.dmg(T) >= float(sl["dmg"]) * 0.9 and K.last_variant == "tap",
+			"took %.0f" % A.dmg(T))
 	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
 			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
 	P.teleport(home)
@@ -680,7 +682,8 @@ func juggernaut(a) -> void:
 	A.tap(m, P)
 	A.step(m, 0.7)
 	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
-			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
+			hp0 - T.hp >= float(sl["dmg"]) * (1.0 + float(sl["low_k"])) * 0.9
+			and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
 	A.ok("juggernaut RMB: short cooldown (2s)",
 			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
 	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
@@ -852,8 +855,8 @@ func juggernaut(a) -> void:
 	P.ak.use_e()
 	A.step(m, 0.3)
 	A.ok("juggernaut E: Warchain hooks (no blight: the data puts Anti-Heal on the spin), cooldown waits",
-			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0 and A.dmg(T) >= 7.0
-			and float(K.cd["e"]) <= 0.0,
+			K.warchain.hooked() and K.warchain.target == T and T.blight_t <= 0.0
+			and A.dmg(T) >= float(K.d["e"]["dmg"]) * 0.85 and float(K.cd["e"]) <= 0.0,
 			"blight %.1f cd %.1f" % [T.blight_t, float(K.cd["e"])])
 	P.ak.use_e()
 	A.step(m, 0.08)
