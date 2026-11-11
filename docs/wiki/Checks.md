@@ -58,6 +58,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--blight-check` | The Blight's strength curve, Warden posts, the landing grace period, noise drawing Skitters, a level-1 hunter can win early |
 | `--raid-check` | Raid conditions roll fairly and repeatably, practice modes stay clear, sight shrinks, the armor kit key works |
 | `--bot-sanity-check` | Over seeded matches, no bot spins, spams jump or dash, or hangs in the air |
+| `--bot-ring-check` | A 30-bot trios match through the whole Blight close (sped up): no bot goes down to the tide with no rival near, and every bot still up ends inside |
 | `--teammate-check` | Your Boki as a teammate: keeping close, callouts, caring, the tutorial guide |
 | `--kinbox-check` | The farm cap and the Burrow: moving, sorting, releasing, overflow from old saves, mutation inheritance and odds |
 | `--unique-check` | Every Boki is its own: deterministic rolls, the bell curve and tails, inheritance, ids, save migration, size effects |
