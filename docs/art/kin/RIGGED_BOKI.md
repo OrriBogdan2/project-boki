@@ -116,4 +116,5 @@ walks 1.4x and 2.2x it, so 6 steps/s keeps up with a stroll), on the ground as l
 and lifting off on whole keys, its speed carried one key into the air either side; the leg is re-solved by IK, the
 paw keeps its world turn, the mesh and the other clips are untouched. Their rows above are after it (scale 1).
 Zapple run at scale 0.8 and its 7.6 m/s match speed is at full cadence: 34% (`OVER` 0.35). Strips:
-`docs/art/kin/boki_gait/plant_<id>_before.png` and `plant_<id>_after.png`.
+`docs/art/kin/boki_gait/plant_<id>_before.jpg` and `plant_<id>_after.jpg` (top row 2.4 m/s, bottom row the match
+speed: runs, so only zapple's changed; xvfb opengl3, the GPU queue was 122 deep).
