@@ -227,6 +227,8 @@ const CHECKS := {
 	"--hatch-check": ["res://tools/hatch_check.gd", "hatch_check", null],      # the hatch: a quiet, personal moment
 	# the black egg: pool, mutations, hidden basket
 	"--mystery-egg-check": ["res://tools/mystery_egg_check.gd", "mystery_egg_check", null],
+	"--ult-glow-check": ["res://tools/ult_glow_check.gd", "ult_glow_check", null],      # ready glow, cast flash
+	"--ult-glow-shots": ["res://tools/ult_glow_shots.gd", "ult_glow_shots", null],      # --shots-dir=<dir>
 	"--ultbond-check": ["res://tools/ultbond_check.gd", "ultbond_check", null],      # keys, bond hook, release
 	"--far-props-check": ["res://tools/far_props_check.gd", "far_props_check", null],      # far rocks and trees batched
 	"--wallmove-check": ["res://tools/wallmove_check.gd", "wallmove_check", null],
