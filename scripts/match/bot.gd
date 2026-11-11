@@ -333,6 +333,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		inp["glide"] = h.ai["skill"] > 0.15
 		if back != Vector2.ZERO:
 			inp["move"] = back
+	BotRing.run_in(m, h)
 	# unstick
 	if Vector2(h.pos.x - a["last_pos"].x, h.pos.z - a["last_pos"].z).length() < 0.03 and move.length() > 0.5:
 		a["stuck"] += dt
@@ -426,7 +427,7 @@ func _revive_plan(m: Match, h: Hunter) -> Dictionary:
 		if o == h or o.team != h.team or not o.downed or o.out or o.extracted:
 			continue
 		var d := h.flat_dist(o)
-		if d > RV_RANGE or m.world.is_void(o.pos.x, o.pos.z):
+		if d > RV_RANGE or m.world.is_void(o.pos.x, o.pos.z) or BotRing.must_run(m, o):
 			continue
 		var sc := d - (8.0 if o == m.player else 0.0)
 		if sc < bs: bs = sc; best = o
@@ -705,6 +706,8 @@ func _choose(m: Match, h: Hunter) -> void:
 		for k in m.kins:
 			if k.is_wild() and k.state == "wild" and not k.dead and h.flat_dist(k) < 7.0 and (k.angry_at == h or randf() < 0.5):
 				best = k; break
+	if BotRing.must_run(m, h):
+		best = null        # the Blight's wall is here: run in, no fighting at the edge now
 	a["tgt"] = best
 	if best:
 		return
@@ -852,6 +855,10 @@ func _choose(m: Match, h: Hunter) -> void:
 	if goal != a["goal"] and a["goal"] != Vector3.INF and not gk in URGENT_GOALS and goal.distance_to(a["goal"]) > 3.0 \
 			and goal.distance_to(a.get("prev_goal", Vector3.INF)) < 1.0 and m.time - float(a.get("goal_set_t", -99.0)) < GOAL_STICK:
 		goal = a["goal"]; gk = String(a["goal_kind"])
+	var in_ring := BotRing.clamp_goal(m, h, goal)       # past the coming ring: a way in instead
+	if in_ring != goal:
+		goal = in_ring
+		gk = "ring"
 	if goal != a["goal"] and (a["goal"] == Vector3.INF or goal.distance_to(a["goal"]) > 3.0):
 		a["prev_goal"] = a["goal"]
 		a["goal_set_t"] = m.time

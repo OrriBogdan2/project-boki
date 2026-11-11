@@ -43,5 +43,5 @@ There is no "very low" preset (Low, Medium, High, Ultra), so Low is the cheap pa
 - The source's raw values against our ~9x smaller health (stage 2 would kill in 3 s instead of 26 s).
 
 ## Known gaps
-Bots ignore the Heart. Online path is implemented but untested with real peers. `--heart-demo[=ready|carry|gate|cool|charging]`
+Bots ignore the Heart but keep inside the tide (BotRing, scripts/match/bot_ring.gd; `--bot-ring-check`). Online path is implemented but untested with real peers. `--heart-demo[=ready|carry|gate|cool|charging]`
 and `--heart-check` cover the offline loop.
