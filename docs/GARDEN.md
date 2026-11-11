@@ -13,6 +13,7 @@ never reached a first form. Now the farm gives kin XP too: `content/rules/garden
 | Pet, once per 20 s (favourite play) | 1 (2) |
 | Fetch (favourite play) | 3 (6) |
 | Training yard, per point scored | 1 |
+| A garden game (Kite Tow so far): played / won / first win of the day | 8 / 15 / 45 |
 
 Stat gains are unchanged. An expedition gives 40, +40 for a win, +10 a knock.
 

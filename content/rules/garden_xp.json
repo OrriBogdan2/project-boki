@@ -4,5 +4,7 @@
  "pet": 1, "pet_love": 2,
  "fetch": 3, "fetch_love": 6,
  "drill_per_point": 1,
+ "game": 8, "game_win": 15, "first_win_mult": 3,
+ "game_doc": "A garden minigame (brief 2.5): game to the Boki that played, game_win instead when it won, times first_win_mult on the first win of the day in that game (GardenPrizes first).",
  "pace": {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0}
 }

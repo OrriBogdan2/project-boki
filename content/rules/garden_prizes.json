@@ -1,5 +1,5 @@
 {
-	"desc": "Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).",
+	"desc": "Garden minigame prizes (Dash, Stump Shove, Seek, Spark Volley, Kite Tow) and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).",
 	"day_s": 86400,
 	"day_doc": "Seconds in a garden day: the first-win item comes once per day per game.",
 	"week_s": 604800,
@@ -155,6 +155,25 @@
 					"kind": "item",
 					"id": "shellbark_chew",
 					"w": 10
+				}
+			]
+		},
+		"kite": {
+			"name": "Kite Tow",
+			"first": "zipseed",
+			"ribbon": "Kite Tow Cup Ribbon",
+			"colour": "#8fd3f4",
+			"cup_prize": "galeribbon",
+			"table": [
+				{
+					"kind": "item",
+					"id": "zipseed",
+					"w": 55
+				},
+				{
+					"kind": "item",
+					"id": "windfloss",
+					"w": 45
 				}
 			]
 		}

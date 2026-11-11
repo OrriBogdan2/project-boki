@@ -1263,7 +1263,7 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or holding Space, or the glide key) opens the glider
-	var jump_now := can_act and Input.is_action_just_pressed("jump")
+	var jump_now := can_act and Input.is_action_just_pressed("jump") and not (hkite and hkite.flying())
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
@@ -2843,7 +2843,7 @@ func _kin_act(k: Dictionary) -> void:
 		"brush": _care_brush(rec)
 		_: _pet_kin(k)
 
-## Farm XP for a kin (GardenXp); a form or mutation it earns plays out as soon as nothing is open.
+## Farm XP for a kin (GardenXp): a form or mutation it earns plays out as soon as nothing is open.
 func _garden_xp(rec: Dictionary, action: String, love: bool, points := 0) -> void:
 	GardenXp.give(rec, action, love, points)
 	_play_evolutions.call_deferred()
@@ -5127,8 +5127,10 @@ func _open_feed(rec: Dictionary) -> void:
 				if Evo.AFF[af]["food"] == f: aff = "Leans it %s: its colour shifts. " % String(Evo.AFF[af]["name"]).to_lower()
 			row_for.call(f, n, aff + "Fills it up.")
 	var mates: Array = kins.map(func(k): return k["rec"]).filter(func(r): return r["uid"] != rec["uid"])
-	any = GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id),
-			func(res: Dictionary): _after_feed(_kin_entry(rec), "", res); _open_feed(rec)) or any
+	var refeed := func(res: Dictionary):
+		_after_feed(_kin_entry(rec), "", res)
+		_open_feed(rec)
+	any = GardenItemRows.add_bag(v, rec, mates, func(id: String): _care_feed(rec, id), refeed) or any
 	GardenItemRows.add_worn(v, rec, func(): _open_feed(rec))
 	if not any:
 		v.add_child(UI.label("Nothing to feed it. Harvest crops, or buy kibble and buns at the market stall.", 15))
