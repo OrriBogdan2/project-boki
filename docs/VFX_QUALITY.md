@@ -117,6 +117,7 @@ on the radius) and --tender-combo-check (band, disc on the radius, one `seed_roo
 
 Scored as the 11-09 table (all READY VFX branches merged), with the RMB strip re-read: shape 3 -> 4. Before/after RMB
 sheets (three dummies in the burst): `docs/shots/vfx-meeko-ult-field/xvfb_{before,after}_rmb.jpg` (local xvfb, green
-arena ground); GPU reels jobq `meeko-field-before` 20261111-200528-06761 (RMB, one dummy) and `meeko-field-after2`
-20261111-201340-26693 (whole reel). Built on main + ext/vfx-zone-rims, without ext/vfx-tender, so the other parts in
+arena ground); GPU after sheet `gpu_after_rmb.jpg` from jobq `meeko-field-after2` 20261111-201340-26693 (whole reel, rp1-1, rc 0,
+yellow ground: the grass reads through the field); GPU before `meeko-field-before` 20261111-200528-06761 (RMB, one
+dummy) was still queued. Built on main + ext/vfx-zone-rims, without ext/vfx-tender, so the other parts in
 these reels still show main's gold and cyan.
