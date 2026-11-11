@@ -1,6 +1,7 @@
 # Audio: sound sets, loudness and buses
 
 How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py`, `tools/gen_ambience.py` and `tools/gen_garden_ambience.py`.
+How the game's sound effects are made, named, levelled and played. Music is in `tools/compose.py`; ambience beds in `tools/gen_ambience.py` (below).
 
 ## Making sounds
 - Sounds are **synthesised in code** (numpy/scipy, `pip install numpy scipy`), one script per group: `tools/gen_sfx_<group>.py` (e.g. `gen_sfx_vex.py`, `gen_sfx_boki.py`, `gen_sfx_ui.py`). Each one imports `tools/sfx_lib.py`, calls `S.reseed(<its own seed>)` and writes `audio/<name>.wav` (44.1 kHz mono 16-bit). Then `godot --headless --import`.
@@ -78,3 +79,13 @@ One bed for the part of the day on the home clock (`Home.day_t`): `amb_garden_mo
 - `ready_ult` (R back), `ready_boki` (Boki ability back) and `ready_dash` (a charge back after all were spent) are three short, quiet UI sounds in the ui set. `ReadyCues.watch` (called from `HudSlot.ab_slot`) plays each once, only on the local hunter's own bar, at `QUIET_DB` so they stay under combat music; none in the first 5 s of a match or while downed. `--ready-cue-check` covers it.
 ## Status cues
 `StatusSfx` (`scripts/match/status_sfx.gd`, numbers in `content/rules/status_sfx.json`) gives every status a short start cue on the affected body (Ignite, Chill, Static, Slow, Stun, Root, Ground, Daze, Anti-Heal) and a quiet loop for the long ones (Ignite's crackle, Static's buzz), stopped when the status runs out or is cleansed. Static's cue climbs per stack. Yours (on your body, or put there by you or your Boki) play `mine_db` louder. A refresh of a running status is silent. Voice caps: `cue_cap` cues per `cue_window_ms`, `loop_cap` loops at once. New sounds come from `tools/gen_status_sfx.py`; Ignite and Static reuse Cinder's `as_ignite` and Sparkle's `mage_zap`. `--status-sfx-check` covers it.
+## Ambience beds
+`Sfx.play_ambience` holds one main bed (`amb_match` wind in a match, `amb_title` on the title, `amb_home` on the farm); `Sfx.amb_layer` fades extra beds by place, 4 times a second (`MusicDir` -> `AmbBeds`, no allocation per tick). `tools/gen_ambience.py` writes them (seamless stereo Ogg loops, original synthesis; `amb_rain` is from `gen_music.py`):
+
+| bed | plays when |
+|---|---|
+| `amb_abyss`, `amb_ruins` | near a void edge or gliding; among walls (`MusicDir`) |
+| `amb_meadow`, `amb_cliffs` | on meadow/bloom islands; on frost/ember/storm/gloom rock. Nine samples round you vote, so the bed fades over the last metres of its island |
+| `amb_water` | on the shore islands (`AmbBeds.WATER_ISLANDS`: Saltmere), over that island's own bed |
+| `amb_gust`, `amb_rain` | the raid condition (`AmbBeds.GUST` / `RAIN`): ash storm is all gust, dusk and fog bring rain |
+| `amb_blight` | a low rumble that follows `BlightDir.level` where you stand (up toward the core, up with the session's age) and climbs in the last 90 s before the islands fall |
