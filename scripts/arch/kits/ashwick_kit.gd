@@ -19,8 +19,7 @@ extends ArchKit
 ##   in it.
 
 const FLAME_CYAN := Color("6fe8ff")    # the pilot flame: a cool spark in her palm against warm fire
-const BOLT_COL := Color("ff4a6a")      # Cinder Shot's red-pink body
-const BOLT_CORE := Color("ffe070")
+const BOLT_CORE := Color("ffe070")     # Cinder Shot's hot core (its body is the RMB slot's flame orange)
 const SKULL_COL := Color("ff6a2a")
 const PIP_COL := Color("ff9a3a")
 const PILOT_CORE := Color("c8f8ff")
@@ -439,7 +438,7 @@ func rmb_hold_tick(_t: float) -> void:
 	var rdf := rmb_def()
 	var ln := AimMode.dist(h, float(rdf["range"]), AimMode.MAX)
 	AimKit.lane(
-		h, "rmb", {"len": ln, "width": float(rdf["size"]) * 2.0, "col": Color("fff4e6"), "col2": BOLT_COL,
+		h, "rmb", {"len": ln, "width": float(rdf["size"]) * 2.0, "col": Color("fff4e6"), "col2": col_of(rdf),
 				"alpha": 0.9, "tip": true}
 	)
 
@@ -465,12 +464,12 @@ func fire_rmb(c: Dictionary) -> void:
 	var n0: int = m.shots.size()
 	run_own(stg, cx("rmb", "cinder_shot", aim(), {"on_foe": func(f: Ent, _c: Dictionary): _cinder_hit(f)}))
 	if m.shots.size() > n0:
-		fx.ride(m.shots[-1], "cinder", BOLT_COL, BOLT_CORE, 1.6, 0.5, _bolt_end)
-		HeroVfx.of(m).trail(h, "shot_trail", m.shots[-1]["node"])
+		var sd: Dictionary = m.shots[-1]
+		fx.ride(sd, "cinder", col_of(rdf), BOLT_CORE, 1.6, 0.5, _bolt_end, tip() - (sd["pos"] as Vector3))
 	vfx("shot")
 	m.sfx("lw_bolt", h.pos, -2.0, 1.0)
 
-## A cinder that ran its full length without a hit fizzles there in a small blue-white ring (sheet 0133).
+## A cinder that ran its full length without a hit fizzles there in a small flare (sheet 0133), in her fire.
 func _bolt_end(at: Vector3, expired: bool) -> void:
 	bolt_ends.append([at, expired])
 	if bolt_ends.size() > 8: bolt_ends.pop_front()
@@ -488,7 +487,7 @@ func _cinder_hit(f: Ent) -> void:
 	if cur > 0:
 		var bonus := float(rdf["dmg"]) * power("sec") * (ignite_k(f) - 1.0)
 		f.hurt(bonus, h, {"src": "flame", "ab": "utility", "tags": ["flame"], "melee": false})
-	# the impact: a red flash and an ember shower (sheet 0076-0079)
+	# the impact: a flash and an ember shower (sheet 0076-0079), in her kit's fire
 	vfx("shot_hit", f.pos)
 	m.sfx("lw_bolt_hit", f.pos, -1.0, 1.0)
 	Feel.hitstop(m, h, f, float(rdf["dmg"]), {})
