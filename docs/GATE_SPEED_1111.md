@@ -102,12 +102,8 @@ Roots found and fixed on this branch:
 then the 1200 s limit (the guest had a CPU for 336 s and waited 750 s for one). On 0245 and before
 `CheckChild.hold`: every case FAIL from the first step. So it is no longer wrong under load, only slow.
 
-`--remote-smooth-check` never measured anything on the gate, so nobody knows its numbers on a free box. Its
-record is stamped with wall time on both games, so on a box at load 43 the 4 FAIL can be the load, the game,
-or both. A second run (through `jobq`, which ran it on this same box) gave 25 snaps and 191 jerks but the same
-7.06 m and 395 ms, so those two do not look like load. It needs one run on a free box before anyone reads
-them as a net regression. I kept the fix: a check
-that fails for "no record" hides the same numbers.
+`--remote-smooth-check`'s 4 FAIL were the host game's drawing, not the net code: with the host not drawing it is
+green (section 9).
 
 `CheckClock` takes out the time a thread waits for a CPU. It cannot take out that the work itself runs 2 to
 4 times slower when 100 runnable threads share 16 cores (caches, memory bandwidth, hyperthreads). A CPU budget
@@ -253,6 +249,11 @@ slow passes into reds, which is the opposite of deterministic.
   code 1, which flags count as a check run, the covered list names flags of one script, the check clock
   stays behind the wall clock.
 
+- Second round (rpc3, section 9): `displace_net_check`, `remote_smooth_check`, `revive_net_check` turn the
+  host's drawing off (`displace_net_check.run` also serves remote-anim and online-displace);
+  `perf_throttle_check` shuts its far bot's glider; `snack_patch_check`, `feed_check`, `tutorial_idle_check`,
+  `farm_tutorial_check` wait for the home's UI on `CheckClock`.
+
 ## 7. For the owner (I did not touch other sessions' processes)
 
 - Orphans holding wrapper slots and RAM: online-displace servers and `udp_delay.py` proxies, displace-net
@@ -262,28 +263,78 @@ slow passes into reds, which is the opposite of deterministic.
 
 ## 8. Left
 
-- **5 passes on 0245 were not run.** One full pass took 210 min on the box today, so the flake list comes
-  from 1 full pass per tree, a 22-flag second pass, single reruns and the gate's history. With the tool
-  patch in and the box free, `SUITE_COVERED=0 suite-fast.sh` 5 times gives the full list.
-- **The tool patch is not installed** and no real cron run, worker lane or `qjob` lane was run with it.
-  `qjob` still turns a failed submit into a result.
-- **CPU budgets on a loaded box**: `--hit-shape-check` (60 s) and `--base-demo-check` (10 s) still fail at
-  load 100. Either the gate runs with fewer lanes than cores are free, or budget checks move to `jobq`.
-  Owner decision. Not done: raising the budgets (that would weaken them).
-- **Wall-clock waits not converted** (same pattern as `--hob-check`, not seen failing in my passes):
-  `hatch_check`, `tutorial_idle_check`, `snack_patch_check`, `feed_check` and `farm_tutorial_check` line 618
-  (60 s home waits), `mask_moment_check`, `hitch_check`, `title_check`, `remote_anim_check` (`LAG_TOL`),
-  `remote_smooth_check` (20 s dump wait). `--prologue-check` still times out in `_play` under load.
-  `--remote-anim-check` fails on its `LAG_TOL` (0.3 s of wall time between the two games): 6 FAIL on 0245,
-  8 here, both at the 1200 s limit.
+- **5 full passes on 0245 were not run.** The flake list comes from 2 full passes per tree (hetzner `run1`/
+  `after1`, rpc3 section 9), 3 reruns of the flip list and 2 of every count change on rpc3, and the gate's
+  history. A full A/B pass takes 54 min on rpc3 at 10 lanes, so 5 more are about 4.5 h of that box.
+- **The tool patch is not installed** and no real cron run, worker lane or `qjob` lane was run with it
+  (rpc3 has no `boki-tools`, so it was not tried against the real files either). `qjob` still turns a
+  failed submit into a result.
+- **CPU budgets on a loaded box**: `--hit-shape-check` (60 s) and `--base-demo-check` (10 s) are green at
+  load 17 to 25 on 32 cores (30 s, 6 s) and fail at load 100. Owner decision: fewer lanes than free cores,
+  or budget checks on `jobq`. Not done: raising the budgets (that would weaken them).
+- **Wall-clock waits not converted** (not seen failing): `hatch_check`, `mask_moment_check`, `hitch_check`,
+  `title_check`, `remote_smooth_check` (20 s dump wait).
+- **Checks that draw for nothing**: every check runs under xvfb + llvmpipe, and a check that steps the
+  match one frame at a time pays for a software-drawn frame each step. The net checks no longer draw
+  (section 9: remote-anim 1200 s to 272 s). The other non-visual checks would gain the same, but each needs
+  a look at whether it reads anything drawn (shots, `--perf-*`, `--hitch-check` do). Not done here.
 - **Game bugs the checks point at, not fixed here** (game rules or god files): a new player's first Boki
   hates emberberry in about 1 save of 19, and then the farm tutorial's feed step refuses its own food
   (`Care.ensure` likes, `farm_tutorial.json` `start_food`); `match.gd:5231` freed instance in the guest;
   the `loose` int against Dictionary in `--base-life-check`; `hob_check.gd:181` script error on 0245;
-  `tools/exit_signal_shots.gd:90` still sets `rift_keys` and calls `_open_hatch` (both gone).
-- **Roots not found**: the count flips listed at the end of section 3.
+  `tools/exit_signal_shots.gd:90` still sets
+  `rift_keys` and calls `_open_hatch` (hatches are gone since 2f37df6df, the tool needs its hatch part cut);
+  `--online-displace-check` "Meeko Hearth Call pull, guest: the ends agree (37.14 offline, 0.00 other)" in
+  every run on 0245 and here.
+- **Roots not found**: section 9's flake list.
 - **Not done**: a parse bisect per branch in `merge-candidate.sh` (which branch broke the merged tree),
   shards for the slowest checks (no gain while the sum over the lanes is the bound).
-- Scratch left in place for whoever continues: `/tmp/gs1111` (logs of all passes, `ana.py`) and the trees
-  under `/home/boki/cj/20261111-074008-a5/tmp/`. A checkout needs `godot --headless --import` once before
-  checks see the new classes (`CheckClock`, `CheckChild`).
+- Scratch: `/tmp/gs1111` on hetzner (first attempt), `/tmp/gs-a1` on rpc3 (logs, `results.tsv`,
+  `bin/run1.sh`, `bin/ana.py`, the base worktree). A checkout needs `godot --headless --import` once
+  before checks see the new classes (`CheckClock`, `CheckChild`).
+
+## 9. Second pass on rpc3 (2026-11-11, 13:30 to 15:10Z)
+
+rpc3: 32 cores, 503 GB, load 17 before my runs, 48 to 60 during the full pass (mostly mine). Each check
+alone, xvfb + opengl3, `LP_NUM_THREADS=2`, a fresh `XDG_DATA_HOME`, 1200 s limit. Base: a worktree of
+`origin/ext/release-integ-0245` 2723685892 with the branch's `.godot` copied in and re-imported (both trees
+share one import, see `--clip-check` below).
+
+**Full pass, both trees interleaved flag by flag, longest first, 10 lanes** (per-flag numbers: the `rpc3_*`
+columns of `GATE_SPEED_1111_times.tsv`): 54 min wall for the two trees together.
+
+| tree | flags | sum of flag s | timeouts (124) | red |
+|---|---|---|---|---|
+| 0245 2723685892 | 281 | 16078 | 4 (+ `--watchdog-check`, a flag 0245 does not have: an unknown flag hangs 1200 s) | 52 |
+| this branch | 281 | 11193 | 1 (`--remote-anim-check`, started before the draw fix) | 47 |
+
+NEW-RED against 0245: none. Two one-off reds in the pass, both green in 4 of 4 reruns on each tree:
+`--market-check` ("a lot nobody bid on comes back") and `--tutorial-clean-check` ("the course runs to the
+exit (600s)"). Count changes in the pass that flip on 0245 too (2 reruns per tree): `--hatch-check` 7/8,
+`--new-player-flow-check` 2/3, `--tutorial-fight-check` 0/1/4 (bot-driven course; which abilities the
+archer uses differs). `--incubator-check`, `--title-check`, `--work-check`: 1200 s timeout on 0245, red in
+82 to 127 s here with the same count (`CheckWatchdog`). Red on 0245 only in the pass: `--hitch-check`,
+`--lair-lock-check`, `--results-ways-check` (one-pass flips, code this branch does not touch), `--hob-check`
+(fixed here, section 3).
+
+**What the free box showed (single runs, then fixed):**
+
+| flag | before | root | fix | after |
+|---|---|---|---|---|
+| `--remote-anim-check` | 124, 42 FAIL, 1200 s | the host game draws every step with llvmpipe at well under 60 fps, so 0.1 s of game time takes 0.3 to 0.5 s of wall time while the lag between the games is measured on the wall clock. Headless: 0/0, 96 casts, 270 s | the net checks' host does not draw (`RenderingServer.render_loop_enabled = false`, as `prologue_check` already does) | 0/0, 272 s |
+| `--remote-smooth-check` | 1/5, 85 s (395 ms behind, 39 snaps) | the same | the same | 0/0, 32 s (1 snap, 8 jerks, 0.16 m, 200 ms) |
+| `--displace-net-check` | 1/1, 240 to 267 s ("a 4 s burn" arrives as 2.8 s) | the same | the same | 0/0, 62 s |
+| `--revive-net-check` | 0/0, 176 s | the same (slow only) | the same | 0/0, 46 to 63 s |
+| `--online-displace-check` | 1/2 to 1/3, 403 to 438 s | the dedicated server and proxy do not draw; the reds are the game (Meeko, every run) and Kael's Warchain (some runs) | none | 1/4, 570 s |
+| `--perf-throttle-check` | 1/5 here (7 of 7 runs), 1/1 on 0245 | its far bot is pinned (teleport, grounded, roam) but its glider was left as the monster phase's steps had it; in some runs the bot opened it, a glider is never calm, 4 cases FAIL together | the setup shuts the glider | 1/1 (the shadow case, red on 0245 too) |
+| `--hit-shape-check`, `--base-demo-check` | 0/0, 30 s and 6 s | CPU budgets: fine on a free box | none | |
+| `--snack-patch`, `--feed`, `--tutorial-idle`, `--farm-tutorial` | not seen failing | 60 s wall waits for the home's UI, built in frame slices (CPU) | `CheckClock` | |
+
+Count flips from section 3 rerun 3 times on this branch: `--chore-check`, `--garden-nav-check`,
+`--garden-visitor-check`, `--mask-moment-check` 0/0 in all (green since the 0.24.5 integration fixes,
+which the first attempt's `run1` tree did not have); `--music-leave-check` 0/2 in all (two script errors,
+0245 too); `--perf-throttle-check` 1/5 in all (above); `--clip-check` 1/1 in all and on 0245: "ostra: a hit
+mid-run leaves the legs on the run (foot slide off by 0.41 m)", the non-deterministic `ostra.glb` import
+already in `docs/DEBT.md`. So that flip follows the import: the gate's cold import per run (section 5)
+draws a new copy each time, and an import cache keeps whichever copy it has. `--prologue-check` 1/2 on both
+trees: a skip takes 2.4 to 2.8 s (budget 400 ms, `CheckClock`) on a free box, so it is not load.
