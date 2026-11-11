@@ -593,8 +593,8 @@ func make_hunter(id: String, team: int, cls: String, pname: String, ctrl: String
 		h.apply_kin_bonus()        # its owner bonus points (max health, armor, shield, regen, speed)
 		if Mutations.owner_stat(kin_rec, "armor") > 0.0:
 			h.refresh_gear(); h.armor = h.max_armor      # a Crystal kin hardens its hunter's armor
-	if TWO_KIN and not kin_rec2.is_empty() and not kin_rec.is_empty():
-		# (retired) everyone brought two kin: the second waited on the bench until you swapped
+	if not kin_rec2.is_empty() and not kin_rec.is_empty():
+		# the second Boki: in the satchel, its carry passive on (KinSlots), swapped in with the swap key
 		var k2 := Kin.new()
 		k2.init_kin(self, id + "k2", kin_rec2["species"], kin_rec2, h)
 		add_child(k2)
@@ -626,9 +626,6 @@ func player_altitude() -> float:
 		return 0.0
 	var g := world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else player.last_gy
 	return maxf(0.0, player.pos.y - g)
-
-## One kin per expedition: a short, readable kit. Flip back on to bring a benched second kin again.
-const TWO_KIN := false
 
 func my_kit() -> Dictionary:
 	return {"weapon": String(opts.get("weapon", Save.d.get("weapon", ""))), "perk": "", "arch": String(opts.get("arch", Save.d.get("arch", "")))}
@@ -787,8 +784,8 @@ func make_bot(t: int, at: Vector3, names: Array, mate := {}) -> Hunter:
 		brec = (held["rec"] as Dictionary).duplicate(true)
 		names.erase(bname)
 	var cls := Arch.weight(String(bk.get("arch", "")))
-	var own_kin := bot_kin_record() if rng.randf() < 0.6 else {}
-	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, own_kin)
+	rng.randf()      # (the old roll for a bot's second Boki: kept so the match's stream doesn't shift)
+	var h := make_hunter(next_id("b"), t, cls, bname, "bot", brec, at, bk, bot_kin_record())      # bots bring two too
 	if not held.is_empty() and h.kin:
 		(h.kin as Kin).lost_uid = String(brec.get("uid", ""))
 		(h.kin as Kin).lost_from = "you"
@@ -2274,7 +2271,7 @@ func on_kin_swap(h: Hunter, now_k: Kin, _was: Kin) -> void:
 	sfx("swap", h.pos, -4.0)
 	if h == player:
 		train["_swapped"] = true
-		if hud: hud.toast("%s is out" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
+		if hud: hud.toast("%s leads" % now_k.rec.get("name", Data.KIN[now_k.species]["name"]), now_k.sp["color"])
 
 func on_bond_ready(h: Hunter) -> void:
 	if h.kin and is_instance_valid(h.kin) and not h.kin.dead:
@@ -4407,7 +4404,8 @@ func _catch(h: Hunter, k: Kin) -> void:
 		net_event(["caught", k.nid, h.nid, rec, (k.lost_owner as Hunter).nid if k.lost_owner is Hunter else ""])
 	KinTrack.on_caught(self, h, k, rec)
 	if h == player:
-		add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN[k.species]["name"], h.caught.size(), Capture.box_cap()])
+		add_feed(Capture.caught_line(h, rec))
+		CarryHints.claimed(self, h, rec)
 		if player.kin and player.kin.state != "downed":
 			BokiChatter.say(self, player.kin, "caught")
 
@@ -5603,7 +5601,8 @@ func _net_ev(x, from: String) -> void:
 			if player and String(x[2]) == player.nid and typeof(x[3]) == TYPE_DICTIONARY:
 				var rec: Dictionary = x[3]
 				player.caught.append(rec)
-				add_feed("%s is in your box (%d/%d). Extract to bring it home." % [Data.KIN.get(String(rec.get("species", "cindle")), Data.KIN["cindle"])["name"], mini(player.caught.size(), Capture.box_cap()), Capture.box_cap()])
+				add_feed(Capture.caught_line(player, rec))
+				CarryHints.claimed(self, player, rec)
 			var cap = ents_by_id.get(String(x[2]), null)
 			var own = ents_by_id.get(String(x[4]), null) if x.size() > 4 else null
 			if cap is Hunter and own is Hunter and typeof(x[3]) == TYPE_DICTIONARY:
@@ -5670,11 +5669,16 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 	return best
 
 func _tip(key: String, text: String) -> void:
+	tip_once(key, text)
+
+## A first-time hint: shows `text` the first time `key` comes up in this save; true if it showed.
+func tip_once(key: String, text: String) -> bool:
 	var seen: Dictionary = Save.d["tutorial"]
 	if seen.get(key, false) or hud == null:
-		return
+		return false
 	seen[key] = true
 	hud.tip(text)
+	return true
 
 func _tips() -> void:
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
@@ -5695,6 +5699,7 @@ func _tips() -> void:
 		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
 			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+	CarryHints.swap(self)
 	var k: Kin = player.kin
 	if k == null:
 		return
