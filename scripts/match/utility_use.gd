@@ -8,7 +8,7 @@ extends RefCounted
 ##   smoke   a cloud that hides everyone in it
 ##   pad     a launch pad on the ground
 ##   scan    reveal rival hunters nearby
-##   key     a Rift Key or chest key: open the lock beside you, or ping the nearest one (BeltKeys)
+##   key     a chest key: open the locked chest beside you, or ping the nearest one (BeltKeys)
 ##   fx      run the item's "effects" list through Effects (haste, shield, ...)
 ## The drink and repair take time and spill if you are hit (Hunter._interrupt_consume): nothing is
 ## spent unless they finish. The rest take effect at once and spend one charge.
@@ -45,7 +45,10 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 	var d: Dictionary = UtilityBelt.def(id)
 	var col: Color = d.get("col", Color.WHITE)
 	if use_of(id) == "key":
-		return BeltKeys.use(h, id)       # the lock spends the key when it opens
+		var opened := BeltKeys.use(h, id)       # the lock spends the key when it opens
+		if opened:
+			UtilityPose.start(h, id)
+		return opened
 	match use_of(id):
 		"drink":
 			h._fold_for_action()
@@ -84,7 +87,8 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			Effects.run((d.get("effects", []) as Array).duplicate(true), h,
 					{"slot": "utility", "ability": id, "level": 1})
 			m.sfx("skill", h.pos, -4.0, 1.0)
-	# the instant ones are spent now; the channelled ones when they finish (tick)
+	# the instant ones are spent now, with a quick body beat; the channelled ones when they finish (tick)
+	UtilityPose.start(h, id)
 	h.reveal_t = maxf(h.reveal_t, 0.6)
 	UtilityBelt.take(h, id, 1)
 	if i < UtilityBelt.SLOTS and not (h.belt[i] as Dictionary).is_empty():
@@ -107,6 +111,9 @@ static func _pad(h: Hunter, col: Color) -> void:
 ## Every step: a drink or repair in progress runs down, then spends its charge. Knocked out of it
 ## (down, stunned, rolling, gliding) and it spills with nothing used.
 static func tick(h: Hunter, dt: float) -> void:
+	if h.beat_t > 0.0:
+		var spilled: bool = h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out
+		h.beat_t = 0.0 if spilled else maxf(0.0, h.beat_t - dt)
 	if h.drink_t > 0.0:
 		if h.downed or h.stun_t > 0.0 or h.roll_t > 0.0 or h.gliding or h.out:
 			h.drink_t = 0.0
