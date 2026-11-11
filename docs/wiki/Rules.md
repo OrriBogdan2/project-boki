@@ -1474,6 +1474,13 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | glide_carry | {"carry_drag": 3.0, "default": 12.0, "archer": 9.0} |
 | dash | {"jump_keep": 0.75} |
 | dash_speed | {"archer": 0.7} |
+## summon_cc (`content/rules/summon_cc.json`)
+
+What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.
+
+| Setting | Value |
+|---|---|
+| immune | ["gnd"] |
 
 ## tutorial (`content/rules/tutorial.json`)
 
