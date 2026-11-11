@@ -41,6 +41,7 @@ const DONE_T := 0.9        # s of the step-done sting
 const LOOKOUT_R := 4.2     # m: the lookout's top is 3.6 wide; any grounded height within this counts
 const CROUCH_HOLD := 1.5   # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
+const DOWN_T := 3.0        # s a downed player waits before the beat starts again
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
@@ -164,9 +165,8 @@ func update(dt: float) -> void:
 		_enter()
 	if p.downed:
 		down_t += dt
-		if down_t > 3.0:
-			down_t = 0.0
-			m.revive_hunter(p, null)
+		if down_t > DOWN_T:
+			retry()
 	if p.kin and p.kin.state == "downed":
 		p.kin.down_t = minf(p.kin.down_t, 0.5)     # (a Boki that got knocked out here comes round at once)
 	t += dt
@@ -192,7 +192,7 @@ func update(dt: float) -> void:
 	if wait > 0.0:
 		wait -= dt
 		return
-	if done:
+	if done and not p.downed:      # (a downed player never passes a beat: the beat starts again instead)
 		_finish(sid)
 	if step < steps().size():
 		_words()
@@ -302,9 +302,9 @@ func _enter() -> void:
 		"sec", "gkey", "kin", "hook", "ult":
 			camps.spawn(sid)
 		"glove":
-			var at := stop("pickup")
-			m.spawn_gear("grapple", 1, at, "", false)
-			m.wpicks[-1]["tut"] = true
+			if ground_item().is_empty():      # (a retry keeps the glove that is still there)
+				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
+				m.wpicks[-1]["tut"] = true
 		"wayout":
 			var o := outpost()
 			if not o.is_empty():
@@ -387,7 +387,7 @@ func _is_done(sid: String, dt: float) -> bool:
 			return false
 		"gkey":
 			var k: Kin = p.kin
-			flag = flag or k == null or k.st_throws > throws0 or k.state == "downed"
+			flag = flag or k == null or k.st_throws > throws0
 			seen["boki"] = seen.get("boki", false) or flag
 			return _camp_done(sid)
 		"kin":
@@ -661,6 +661,42 @@ func card_up() -> bool:
 func respawn() -> Vector3:
 	_refresh(m.player)          # (a fall is a retry: every move is ready for it)
 	return last_stop if last_stop != Vector3.INF else stop("land")
+
+## The player went down or fell: this beat starts again with a one-line tip (content/rules/tutorial.json
+## "retry"). The step, the last stop, the picks and the save stay as they were; the player is healed and put
+## back at the last stop, the Boki is up and healed, and the beat's counters and camp begin again.
+func retry() -> void:
+	var p := m.player
+	if p.downed:
+		m.revive_hunter(p, null)
+	p.hp = p.max_hp
+	p.armor = p.max_armor
+	p.vel = Vector3.ZERO
+	p.teleport(respawn())
+	var k: Kin = p.kin
+	if k != null and k.state == "downed":
+		KinDowned.come_round(k, false)
+	if k != null:
+		k.hp = k.max_hp
+	down_t = 0.0
+	if id() != "ult":
+		flag = false      # (the fuse is once a run: its full meter came with the pick)
+	_clear_foes()
+	wait = 0.0
+	_enter()
+	if id() == "shoot":
+		camps.spawn("sec")      # (shoot finishes the sec step's camp)
+	if m.hud:
+		var tips: Dictionary = Content.rules("tutorial")["retry"]
+		m.hud.toast(_fill(String(tips.get(id(), tips["default"]))), Color("f3eee2"))
+
+## The beat's monsters go without paying. Its camp's XP ledger starts over too, so the monsters cleared here
+## never pay and the camp the beat brings back pays only what is left to its level: a retry never pays twice.
+func _clear_foes() -> void:
+	for mb in m.mobs:
+		if not mb.dead:
+			mb.vanish()
+	camps.ledger.clear()
 
 ## A weapon hit of yours on a monster (Match).
 func on_hit() -> void:

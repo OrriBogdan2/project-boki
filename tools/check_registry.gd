@@ -241,6 +241,8 @@ const CHECKS := {
 	# Skip on every step
 	"--tutorial-skip-check": ["res://tools/tutorial_skip_check.gd", "tutorial_skip_check", null],
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment
+	# down or fall: the beat starts again
+	"--tutorial-retry-check": ["res://tools/tutorial_retry_check.gd", "tutorial_retry_check", null],
 	# fight beats per starter
 	"--tutorial-fight-check": ["res://tools/tutorial_fight_check.gd", "tutorial_fight_check", null],
 	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # arrival modals, top bar

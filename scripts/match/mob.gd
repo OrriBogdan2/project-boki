@@ -66,6 +66,11 @@ func mass() -> float:
 	if mkind == "sentinel": return 50.0
 	return 6.0 if mkind == "warden" else (3.0 if mkind == "brute" else 1.0)
 
+## Gone without a kill (no XP, loot or death event): a tutorial beat that starts again clears its monsters.
+func vanish() -> void:
+	die()
+	_cancel_tele()
+
 func _on_zero(by: Ent, opts: Dictionary) -> void:
 	die()
 	_cancel_tele()
