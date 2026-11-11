@@ -329,6 +329,17 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Dashing off a ledge (`HunterMove.dash_off_ledge`, decision 0046)
+Walking off a ledge is always allowed (DECISIONS), and so is dashing off one. A ground dash that crosses an edge keeps
+its own course (distance and speed curve) but falls as it goes: the height hold is only for dashes pressed in the air.
+It ends in the air with the shared dash exit, the kit's ground pose for it stops there, and the glider and the air
+dash are free at once (a kit's own gap between dashes still applies: Grimble's barges go a beat apart).
+`--move-feel-check` dashes every kit off a 3.2 m terrace (tools/move_feel_ledge.gd; Vex held, Grimble's three barges and
+Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed (or the end of the dash's
+own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
+no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
+no travel of his own) must set him down below the edge.
+
 ## Walking while attacking (fire-move parity, 2026-11-09)
 Share of the plain run while LMB is held, during each charge or hold, and just after release. Measured in the
 real match step: ground walk speed on a flat strip, 60 Hz, steady part only. Sources: `[data]` = the tooltips in
