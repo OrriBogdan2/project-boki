@@ -350,6 +350,7 @@ const CHECKS := {
 	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],
 	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],      # Q8 carry passive stacking
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
+	"--summon-leash-check": ["res://tools/summon_leash_check.gd", "summon_leash_check", null],      # the summon lane and leash
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	# Boki wisp trail, sparkle, orbit
 	"--wisp-cosmetic-check": ["res://tools/wisp_cosmetic_check.gd", "wisp_cosmetic_check", null],

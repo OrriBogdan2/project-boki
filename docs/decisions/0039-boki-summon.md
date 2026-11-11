@@ -36,3 +36,9 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
   falls back into its wisp (not on the next 0.1 s beat); a remote Boki's summon timer counts down between snapshots.
   `--summon-net-check` (two games over the relay): burst, both casts, the kill, the shrink and the timer read the same on
   the other game within 150 ms (seen 15-40 ms; before the fix: no casts, bursts up to 250 ms, timer 0.2 s stale).
+- One summon lane (Q3): a Hunter has one summoned Boki out at a time, a stolen one included
+  (`KinSummon.lane_busy`). Summon while another Boki is out, or while resting, is refused with the denied
+  cue (warn sound, red shake); Summon while your own is out stays the early recall. The leash (Q7) is in the
+  rules with its unit and reason; `--summon-leash-check` covers the lane and the leash through a chase past
+  it, a dash, a glide and a knock. The ordered chase and guard keep today's longer leashes (the 20 m re-bloom
+  still cuts them): "controlled exactly like the out Boki". Alternative: refuse the press while your own is out too.
