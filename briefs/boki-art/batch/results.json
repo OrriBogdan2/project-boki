@@ -111744,5 +111744,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_rimink_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_reelacine",
+    "name": "Reelacine (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_reelacine_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rimekit",
+    "name": "Rimekit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rimekit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rimefang",
+    "name": "Rimefang (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rimefang_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rimeshrew",
+    "name": "Rimeshrew (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rimeshrew_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_reapant",
+    "name": "Reapant (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_reapant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_ribbonwyrm",
+    "name": "Ribbonwyrm (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_ribbonwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rippmink",
+    "name": "Rippmink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rippmink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_rollguin",
+    "name": "Rollguin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_rollguin_1.jpg",
+    "ok": true
   }
 ]
