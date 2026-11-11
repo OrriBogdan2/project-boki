@@ -271,7 +271,6 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	UtilityBelt.issue(self)
 	pack_cap = Equal.base_pack()
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
-	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	HunterMove.apply(self)
@@ -309,7 +308,6 @@ func reclass(c: String, a: String, w := "") -> void:
 	LevelGrowth.reset(self)      # your levels' health comes along to the new class
 	max_armor = round(float(cdat["hp"]) * ARMOR_DUR); armor = max_armor; base_armor = max_armor
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
-	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
 	r = Arch.hit_r(arch, cdat)
@@ -2058,7 +2056,7 @@ func _physics(dt: float) -> void:
 		_grapple(dt)
 		return
 	var mv: Vector2 = inp["move"] if stun_t <= 0.0 and root_t <= 0.0 else Vector2.ZERO
-	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (0.55 if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
+	var spd := base_speed * (1.35 if haste_t > 0.0 else 1.0) * (0.4 * (Life.R["stomp_slow"] if get_meta("stomped", false) else 1.0) if downed else 1.0) * slow_mult(0.65) * (0.88 if reload_t > 0.0 else 1.0) * _fire_slow() * UtilityUse.channel_move(self) * (HunterMove.CROUCH_K if crouch else 1.0) * (1.0 + gear_stat("speed")) * (_mount_speed() if mounted() and grounded else 1.0) * _chase_mod(mv)
 	spd *= KinDowned.carry_speed(self)
 	var hv := Vector2(vel.x, vel.z)
 	var cur := hv.length()
@@ -2115,10 +2113,7 @@ func _physics(dt: float) -> void:
 		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
-			if (mv * spd).length() >= 0.001:
-				hv = Loco.accel_to(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
-			else:
-				hv = HunterMove.brake(hv, grip, dt)
+			hv = HunterMove.walk(hv, mv * spd, ground_accel, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
 			# (feathering) just after letting go of the glider you keep its speed and steering
 			var gsf := GLIDE_SPEED * (1.0 + gear_stat("glide_speed"))

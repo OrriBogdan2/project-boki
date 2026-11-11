@@ -52,7 +52,7 @@ func drop_y() -> float:
 ## The hunter's basis, tipped forward into a stroke while moving (upright treading water when still).
 func tilt(b: Basis, speed: float) -> Basis:
 	if k <= 0.01: return b
-	return b * Basis(Vector3.RIGHT, -STROKE_TILT * k * clampf(speed / maxf(0.1, h.SPEED * SWIM_SPEED), 0.0, 1.0))
+	return b * Basis(Vector3.RIGHT, -STROKE_TILT * k * clampf(speed / maxf(0.1, h.walk_speed() * SWIM_SPEED), 0.0, 1.0))
 
 ## Splashes, strokes and sounds as you go in, swim about and climb out.
 func step(wdep: int, d: float, mv: Vector2, air: bool) -> void:

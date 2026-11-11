@@ -2,8 +2,6 @@ extends Node3D
 ## The home island: walk around the farm, tend crops, cook, shop, spend time with your kin,
 ## and step through the portal to start an expedition.
 
-const SPEED := 5.0
-
 var world: World
 ## Under the ink wipe the farm builds in slices (see _ready): true until it's whole; Main holds the
 ## reveal until then.
@@ -117,7 +115,6 @@ var sun_l: DirectionalLight3D
 var p_anim: HunterAnim = null
 var crouch_on := false          # crouching (the match's crouch key and its tap-to-toggle setting)
 var p_crouch_k := 0.0           # the crouched pose, eased in and out
-const CROUCH_SPEED := 0.55      # walking speed crouched (the same as in a match)
 var lamps: Array = []           # OmniLight3D
 var day_t := 0.3                # 0..1, 0.25 is morning, 0.5 noon, 0.75 dusk
 var rain: CPUParticles3D
@@ -1231,6 +1228,10 @@ func start_dash(dir: Vector2, speed: float, time: float) -> void:
 func _ground_h(x: float, z: float) -> float:
 	return world.ground_at(x, z)
 
+## Your hero's walk (m/s), the same as in a match (HunterMove.speed).
+func walk_speed() -> float:
+	return HunterMove.speed(String(Save.d.get("arch", "")))
+
 func _move_player(d: float) -> void:
 	if not climb.is_empty():
 		_climb_step(d)
@@ -1265,8 +1266,7 @@ func _move_player(d: float) -> void:
 	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
 	# the match hunter's movement (Loco, HunterMove) at this hero's run speed and accel: it feels the same here
-	var row := HunterMove.of(String(Save.d.get("arch", "")))
-	var run := float(row["speed"]) * water.speed_mul(wdep, air) * carry.speed_mul()      # (carrying a Boki is slower)
+	var run := walk_speed() * water.speed_mul(wdep, air) * carry.speed_mul()      # (carrying a Boki is slower)
 	if dash_t > 0.0:
 		dash_t -= d
 		hv = Loco.dash_hv(dash_v, String(Save.d.get("arch", "")))
@@ -1275,10 +1275,9 @@ func _move_player(d: float) -> void:
 		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
-	elif mv.length() > 0.001:
-		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
 	else:
-		hv = HunterMove.brake(hv, 1.0, d)
+		var want := mv * run * (HunterMove.CROUCH_K if crouching else 1.0)
+		hv = HunterMove.walk(hv, want, HunterMove.accel(String(Save.d.get("arch", ""))), 1.0, d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos
@@ -1292,11 +1291,11 @@ func _move_player(d: float) -> void:
 	elif not _mantle(ppos.x, nz, oz, air): hv.y = 0.0
 	pvel = Vector3(hv.x, 0, hv.y)
 	# caught on a corner: slip around it. Boxed in on every side: step out to open ground.
-	if not air and mv.length() > 0.3 and Vector2(ppos.x - p0.x, ppos.z - p0.z).length() < SPEED * d * 0.3:
+	if not air and mv.length() > 0.3 and Vector2(ppos.x - p0.x, ppos.z - p0.z).length() < walk_speed() * d * 0.3:
 		var dn := mv.normalized()
 		var slid := false
 		for side in [Vector2(-dn.y, dn.x), Vector2(dn.y, -dn.x)]:
-			var t: Vector2 = Vector2(ppos.x, ppos.z) + (side * 0.8 + dn * 0.4) * SPEED * d
+			var t: Vector2 = Vector2(ppos.x, ppos.z) + (side * 0.8 + dn * 0.4) * walk_speed() * d
 			if world.occupy(t.x, t.y, 0.38, py, true) == 0.0:
 				ppos.x = t.x; ppos.z = t.y; slid = true
 				break
@@ -1628,7 +1627,7 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		var timed := left <= Hunter.LRISE_WINDOW
 		lfl = {}
 		var hv := Vector2(pvel.x, pvel.z)
-		var spd := Hunter.FLING_SPEED if timed else SPEED
+		var spd := Hunter.FLING_SPEED if timed else walk_speed()
 		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
 		pvel = Vector3(hv.x, 0, hv.y)
 		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
@@ -1639,8 +1638,9 @@ func _ledge_float(d: float, mv: Vector2) -> bool:
 		pvy = Hunter.LRISE_POP
 		if mv.length() > 0.3:
 			var hv := Vector2(pvel.x, pvel.z)
-			if hv.dot(dir) < SPEED * 0.9: hv += dir * (SPEED * 0.9 - hv.dot(dir))
-			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < SPEED * 0.6: hv += n * (SPEED * 0.6 - hv.dot(n))
+			var run := walk_speed()
+			if hv.dot(dir) < run * 0.9: hv += dir * (run * 0.9 - hv.dot(dir))
+			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < run * 0.6: hv += n * (run * 0.6 - hv.dot(n))
 			pvel = Vector3(hv.x, 0, hv.y)
 	else:
 		pvy = HunterMove.rise_vy(pvy, left, 1.0, Hunter.LRISE_SPEED, d)

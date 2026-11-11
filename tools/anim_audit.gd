@@ -12,7 +12,7 @@ extends RefCounted
 const DT := 1.0 / 30.0
 const WARM_S := 1.0          # s of locomotion before a sample, so the blends have settled
 const SAMPLE_S := 2.4        # s of locomotion sampled
-const SPEEDS := [2.2, 3.4, 4.65]     # m/s: walk, a jog, full stick (content/rules/hunter_move.json)
+const SPEEDS := [2.2, 3.4, 5.39]     # m/s: walk, a jog, full stick (HunterMove.speed)
 const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own height range
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose

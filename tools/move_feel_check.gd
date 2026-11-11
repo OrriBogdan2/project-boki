@@ -30,12 +30,12 @@ const T := {
 	"ground_reverse_t":        ["<=", 0.19, "s", "[game data] a full reverse at 47-54 m/s2"],
 	"ground_turn90_t":         ["<=", 0.13, "s", "[game data] a 90-degree turn at 47-54 m/s2"],
 	"ground_shed_dist":        ["~", [1.25, 1.55], "m", "[game data] brake 2/s + 22.2 m/s2: 10 m/s slides 1.44m"],
-	"ground_shed_keys_m":      ["~", [0.95, 1.2], "m", "[game data] the same brake down to the run, keys held: 1.07m"],
+	"ground_shed_keys_m":      ["~", [0.85, 1.05], "m", "[game data] the same brake to a 5.28 m/s run, keys held: 0.955m"],
 	"face_turn180_t":          ["~", [0.12, 0.17], "s", "[game data] RotationRate yaw 1280 deg/s: a 180 in 0.14s"],
 	"face_turn20_t":           ["<=", 0.04, "s", "[game data] the same fixed rate: a 20-degree flick lands in ~0.02s"],
-	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
-	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
-	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
+	"speed_light":             ["~", [5.1, 5.7], "m/s", "[game data] MoveSpeed 445-485 uu/s x body_scale 1.16 (0061)"],
+	"speed_medium":            ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
+	"speed_heavy":             ["~", [5.1, 5.7], "m/s", "[game data] per hunter, at body_scale"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
 	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
@@ -243,7 +243,10 @@ func _ground() -> void:
 	for c in ["light", "medium", "heavy"]:
 		_reset(flat)
 		P.cls = c
-		P.base_speed = float(Data.CLASSES[c]["speed"])
+		var of_weight := Arch.ids().filter(func(a: String) -> bool: return Arch.weight(a) == c)
+		var hero: String = of_weight[0]
+		P.base_speed = HunterMove.speed(hero)
+		P.ground_accel = HunterMove.accel(hero)
 		P.inp["move"] = Vector2(1, 0)
 		var first := -1; var t95 := -1.0
 		for i in 40:
@@ -297,7 +300,7 @@ func _ground() -> void:
 				if _hv(P).length() <= (top + 0.02 if keys.x > 0.0 else 0.02): break
 			rec("ground_shed_keys_m" if keys.x > 0.0 else "ground_shed_dist", P.pos.x - xs)
 	P.cls = "medium"
-	P.base_speed = float(Data.CLASSES["medium"]["speed"])
+	HunterMove.apply(P)
 
 ## The body turns to the cursor at the source's fixed yaw rate: a flick lands at once, a 180 in ~0.14s.
 func _face_turn() -> void:

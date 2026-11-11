@@ -8,7 +8,7 @@ extends "res://tools/clip_shots.gd"
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
-const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
+const RUN_MPS := 5.39      # m/s: full stick, HunterMove.speed (a 465 uu/s row at body_scale)
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
 const SIDE_YAW := -PI / 2.0     # facing screen right

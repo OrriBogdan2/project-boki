@@ -55,7 +55,7 @@ func _walk(k: Dictionary, secs: float) -> float:
 	var far := 0.0
 	for i in int(secs / STEP):
 		var turn := float(i) * STEP * 2.0      # a small circle, so the island never runs out
-		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		home.ppos += Vector3(sin(turn), 0.0, cos(turn)) * home.walk_speed() * home.carry.speed_mul() * STEP
 		home.player.position = home.ppos
 		home.carry.tick(STEP, {}, true)
 		home._move_kin(STEP)

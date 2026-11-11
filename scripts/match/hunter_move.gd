@@ -27,6 +27,8 @@ static var dive_accel: float = _phys["dive_accel"]
 static var dive_steer: float = _phys["dive_steer"]
 static var dive_cancel_h: float = _phys["dive_cancel_h"]
 static var dive_timeout: float = _phys["dive_timeout"]
+static var body_scale: float = _rules["body_scale"]      # our hunter's height over the source's (speed and accel)
+const CROUCH_K := 0.55      # share of the walk speed while crouched (match and farm)
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -40,11 +42,25 @@ static func rules() -> Dictionary:
 static func of(arch: String) -> Dictionary:
 	return _rules.get(arch, _rules["default"])
 
+## This archetype's walk speed (m/s): its source MoveSpeed at our body scale. Every mode reads it.
+static func speed(arch: String) -> float:
+	return float(of(arch)["speed"]) * body_scale
+
+## This archetype's ground acceleration (m/s^2), at the same scale so reaching the walk takes the source's time.
+static func accel(arch: String) -> float:
+	return float(of(arch)["accel"]) * body_scale
+
 ## Sets the hunter's run speed and acceleration for its archetype.
 static func apply(h: Hunter) -> void:
-	var row := of(h.arch)
-	h.base_speed = float(row["speed"])
-	h.ground_accel = float(row["accel"])
+	h.base_speed = speed(h.arch)
+	h.ground_accel = accel(h.arch)
+
+## One step of walking on the ground, shared by the match and the farm: toward `want` (m/s) at `acc`, speed over
+## it shed under the walking brake; with no keys, the brake alone. grip < 1 on ice.
+static func walk(hv: Vector2, want: Vector2, acc: float, grip: float, dt: float) -> Vector2:
+	if want.length() < 0.001:
+		return brake(hv, grip, dt)
+	return Loco.accel_to(hv, want, acc * grip, 0.0, brake_rate(hv.length()) * grip, dt)
 
 ## True when this hunter can mantle a double-high ledge (Archer and Juggernaut).
 static func climbs_tall(h: Hunter) -> bool:
