@@ -35,7 +35,7 @@
 		"all": {"source": "Footage: the bow is drawn and loosed on the release; nothing shows a re-press after a cast.", "ours": "A cast that stops the bow drops the draw with no arrow; the key still down redraws the step she is free (0 frames). Starpiercer owns LMB while it runs; the draw is back the step it ends."}
 	},
 	"window": {"source": "Hem (pin.md 322-327): Spirit Walk's roll lasts 0.1-0.15 s, under one 5 fps frame; no press inside it is shown, so nothing resolves the window below a frame."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

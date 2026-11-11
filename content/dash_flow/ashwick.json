@@ -38,7 +38,7 @@
 		"x": {"source": "Data: reactivating ends the flight early; LMB is off for the whole flight.", "ours": "Held through Flue Flight, the lance lights the step the flight ends (pilot, then the roar), no relight gap (0 frames). E, RMB and a glove never stop the hose."}
 	},
 	"window": {"source": "Cinder (linwick.md 0159-0161): LMB resumes on the frame after the bash with the nozzle already on the aim (0.2 s bash, charges 0.4 s apart); the follow-up never falls later than one frame."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

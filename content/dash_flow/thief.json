@@ -24,7 +24,7 @@
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
 	},
 	"window": {"source": "Sable (dancer.md 131-136, 452; 10 fps): hit at 0187, Cartwheel at 0193 and the empowered shot out in the same frame (it hits at 0194): LMB fires inside the 0.3 s dash (fire row); no gap resolves."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

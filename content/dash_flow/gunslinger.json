@@ -24,7 +24,7 @@
 		"q": {"mode": "fire", "source": "Not in the source; the glove keeps running."}
 	},
 	"window": {"source": "Vex (venator.md 87-92): fires the rifle inside Combat Slide (0149-0151 of the 0116-0153 slide, 0.45 s): a fire row, nothing waits for the window."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

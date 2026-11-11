@@ -104,7 +104,7 @@
 		"all": {"source": "Data: nothing ends a held Molten Greatsword charge; the key is a held input. Footage card: 'Dash while attacking'.", "ours": "A cast that stops the blade (E, RMB, the ult, a glove) drops the Searing Wave charge with nothing thrown; the key still down starts a fresh hold the step he is free (--held-fire-resume-check: 0 frames)."}
 	},
 	"window": {"source": "Kael (juggernaut.md 0371-0420): Quick Dash chains 0.4 s apart over 3 charges, 0.3 s drive and 0.35 s recovery; no slash inside and no dropped press. OWNER_REVIEW_1103 item 24 asks for about 0.1 s, within the frame."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

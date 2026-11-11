@@ -33,7 +33,7 @@
 		"x": {"source": "briefs/hero-ref/vireo.md:19: 'The ult is PRESS, then reactivate.' LMB is not the source's way down.", "ours": "LMB held from before the cast does not bring her down (a fresh press or X does, MageUlt fire_free); the hang runs its 1.7 s and the held key fires again the step she lands (0 frames)."}
 	},
 	"window": {"source": "Ryzz (vireo.md 460-470, 10 fps): Surge arrives at 32.6 s, is ready at 33.0 s (0165) and the next Surge goes at 33.4 s (0168): chains wait for the reset; no buffered press is shown."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

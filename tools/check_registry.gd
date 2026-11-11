@@ -58,12 +58,14 @@ const CHECKS := {
 	"--launch-arc-check": ["res://tools/launch_arc_check.gd", "launch_arc_check", null],
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],      # item 63
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],      # item 33 (1108)
-	"--glide-hit-check": ["res://tools/glide_hit_check.gd", "glide_hit_check", null],      # shot, knocked, stunned, reeled under the glider
+	# shot, knocked, stunned, reeled under the glider
+	"--glide-hit-check": ["res://tools/glide_hit_check.gd", "glide_hit_check", null],
 	"--glider-canopy-check": ["res://tools/glider_canopy_check.gd", "glider_canopy_check", null],
 	"--glider-canopy-shots": ["res://tools/glider_canopy_shots.gd", "glider_canopy_shots", null],
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
 	"--equal-migrate-check": ["res://tools/equal_check.gd", "equal_check", "migrate"],
-	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],      # first press after a panel closes
+	# first press after a panel closes
+	"--panel-input-check": ["res://tools/panel_input_check.gd", "panel_input_check", null],
 	"--backpack-check": ["res://tools/backpack_check.gd", "backpack_check", null],      # backpack tiers, at risk
 	"--practice-hero-check": ["res://tools/practice_hero_check.gd", "practice_hero_check", null],
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
@@ -111,10 +113,13 @@ const CHECKS := {
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
 	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],      # --shots-dir=<dir>
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],  # each Hunter dashes four ways (GPU)
-	"--dash-slope-check": ["res://tools/dash_slope_check.gd", "dash_slope_check", null],      # dash over ramps, a step, a crest
+	# dash over ramps, a step, a crest
+	"--dash-slope-check": ["res://tools/dash_slope_check.gd", "dash_slope_check", null],
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
-	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],      # the cursor on or under your own body
-	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],      # key to picture, every hero
+	# the cursor on or under your own body
+	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],
+	# key to picture, every hero
+	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],
 	"--yaw-lock-check": ["res://tools/yaw_lock_check.gd", "yaw_lock_check", null],      # body turn per slot
 	"--boki-moves-check": ["res://tools/boki_moves_check.gd", "boki_moves_check", null],      # move tiles
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],      # --shots-dir=<dir>
@@ -127,7 +132,8 @@ const CHECKS := {
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
-	"--reticle-latency": ["res://tools/reticle_latency.gd", "reticle_latency", null],      # frames the reticle and aim trail the cursor (GPU)
+	# frames the reticle and aim trail the cursor (GPU)
+	"--reticle-latency": ["res://tools/reticle_latency.gd", "reticle_latency", null],
 	"--hit-marker-check": ["res://tools/hit_marker_check.gd", "hit_marker_check", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
 	"--hold-pose-check": ["res://tools/hold_pose_check.gd", "hold_pose_check", null],      # hold poses need the key
@@ -139,10 +145,14 @@ const CHECKS := {
 	"--dash-flow-check": ["res://tools/dash_flow_check.gd", "dash_flow_check", null],      # dash -> ability rows
 	# docs/decisions/0022
 	"--cc-exit-buffer-check": ["res://tools/cc_exit_buffer_check.gd", "cc_exit_buffer_check", null],
-	"--held-fire-resume-check": ["res://tools/held_fire_resume_check.gd", "held_fire_resume_check", null],      # LMB held through a slot
-	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],      # a tap inside a hit-stop goes when it ends
-	"--air-cast-check": ["res://tools/air_cast_check.gd", "air_cast_check", null],      # cast at a jump's top: momentum per slot
-	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],      # Space in a dash, Shift in a jump
+	# LMB held through a slot
+	"--held-fire-resume-check": ["res://tools/held_fire_resume_check.gd", "held_fire_resume_check", null],
+	# a tap inside a hit-stop goes when it ends
+	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],
+	# cast at a jump's top: momentum per slot
+	"--air-cast-check": ["res://tools/air_cast_check.gd", "air_cast_check", null],
+	# Space in a dash, Shift in a jump
+	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],
 	"--same-frame-check": ["res://tools/same_frame_check.gd", "same_frame_check", null],      # two presses, one step
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--pad-check": ["res://tools/pad_check.gd", "pad_check", null],      # jump pads and updrafts (PadFlight)
@@ -152,7 +162,8 @@ const CHECKS := {
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
-	"--glide-cast-check": ["res://tools/glide_cast_check.gd", "glide_cast_check", null],      # docs/heroes/dash_interactions.md, "From the glider"
+	# docs/heroes/dash_interactions.md, "From the glider"
+	"--glide-cast-check": ["res://tools/glide_cast_check.gd", "glide_cast_check", null],
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
@@ -226,7 +237,8 @@ const CHECKS := {
 	"--loot-full-check": ["res://tools/loot_full_check.gd", "loot_full_check", null],      # full-inventory looting
 	"--inventory-check": ["res://tools/inventory_check.gd", "inventory_check", null],      # in-match inventory
 	"--inv-shots": ["res://tools/inv_shots.gd", "inv_shots", null],      # --shots-dir=<dir>, --resolution
-	"--pickup-reach-check": ["res://tools/pickup_reach_check.gd", "pickup_reach_check", null],      # ground pickup reach
+	# ground pickup reach
+	"--pickup-reach-check": ["res://tools/pickup_reach_check.gd", "pickup_reach_check", null],
 	"--loot-full-shots": ["res://tools/loot_full_shots.gd", "loot_full_shots", null],      # --shots-dir=<dir>
 	"--dash-slot-shots": ["res://tools/dash_slot_shots.gd", "dash_slot_shots", null],
 	"--reticle-shots": ["res://tools/reticle_shots.gd", "reticle_shots", "reticle"],
@@ -256,7 +268,8 @@ const CHECKS := {
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
-	"--tip-text-check": ["res://tools/tip_text_check.gd", "tip_text_check", null],      # glide wording: double press, keys from Settings
+	# glide wording: double press, keys from Settings
+	"--tip-text-check": ["res://tools/tip_text_check.gd", "tip_text_check", null],
 	"--tutorial-hud-check": ["res://tools/tutorial_hud_check.gd", "tutorial_hud_check", null],      # one voice
 	"--tutorial-idle-check": ["res://tools/tutorial_idle_check.gd", "tutorial_idle_check", null],      # no idle moment
 	# fight beats per starter
@@ -333,7 +346,8 @@ const CHECKS := {
 	"--expedition-shots": ["res://tools/expedition_shots.gd", "expedition_shots", null],      # --expedition-shots=<dir>
 	"--void-ui-shots": ["res://tools/void_ui_shots.gd", "void_ui_shots", null],      # --void-ui-shots=<dir>
 	"--market-shots": ["res://tools/market_shots.gd", "market_shots", null],      # --market-shots=<dir>
-	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],      # no ally is moved or hit with a status
+	# no ally is moved or hit with a status
+	"--ally-cc-check": ["res://tools/ally_cc_check.gd", "ally_cc_check", null],
 	"--displace-net-check": ["res://tools/displace_net_check.gd", "displace_net_check", null],     # 2 games, relay
 	# 2 games, relay, docs/decisions/0018
 	"--revive-net-check": ["res://tools/revive_net_check.gd", "revive_net_check", null],
@@ -380,16 +394,21 @@ const CHECKS := {
 	"--mask-moment-check": ["res://tools/mask_moment_check.gd", "mask_moment_check", null],      # also --shots-dir=
 	"--hob-check": ["res://tools/hob_check.gd", "hob_check", null],      # Hob in person, the second Mask; --shots-dir=
 	"--kit-drill-check": ["res://tools/kit_drill_check.gd", "kit_drill_check", null],      # the first-time kit drill
-	"--fps-parity-check": ["res://tools/fps_parity_check.gd", "fps_parity_check", null],      # same input script at 30/60/144 fps
-	"--knock-moment-check": ["res://tools/knock_moment_check.gd", "knock_moment_check", null],      # 12 Hunters, LMB/RMB/Shift held at the knock
+	# same input script at 30/60/144 fps
+	"--fps-parity-check": ["res://tools/fps_parity_check.gd", "fps_parity_check", null],
+	# 12 Hunters, LMB/RMB/Shift held at the knock
+	"--knock-moment-check": ["res://tools/knock_moment_check.gd", "knock_moment_check", null],
 	"--mask-lag-check": ["res://tools/mask_lag_check.gd", "mask_lag_check", null],      # frame times, Mask screens
 	"--camera-fast-check": ["res://tools/camera_fast_check.gd", "camera_fast_check", "check"],      # locked follow
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
 	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],      # shots at point blank
-	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],      # mashing LMB never beats holding
-	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],      # press -> first motion or shot
+	# mashing LMB never beats holding
+	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],
+	# press -> first motion or shot
+	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],      # lips up to the step height
-	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving and landing on the moving cars
+	# leaving and landing on the moving cars
+	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

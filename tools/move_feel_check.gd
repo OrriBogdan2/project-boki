@@ -39,7 +39,8 @@ const T := {
 	"reverse_vs_source":       ["~", [0.98, 1.03], "x", "[game data] A to D, 95% run: ln(1+2Fv/a)/2F + .95v/a"],
 	"cut90_vs_source":         ["~", [0.97, 1.10], "x", "[game data] cut to 10 deg: ln(1/tan 5deg)/(F+a/v), 60 Hz +5%"],
 	"cut90_min_speed":         [">=", 0.97, "x", "[game data] a cut arcs at run speed (MaxWalkSpeed cap)"],
-	"speed_light":             ["~", [4.4, 4.9], "m/s", "[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
+	"speed_light":             ["~", [4.4, 4.9], "m/s",
+		"[game data] per-hunter MoveSpeed 445-485 uu/s (content/rules/hunter_move.json)"],
 	"speed_medium":            ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	"speed_heavy":             ["~", [4.4, 4.9], "m/s", "[game data] per hunter"],
 	# (move-speed bonuses: one MoveSpeed attribute in the data, so they add; slows multiply the total)
@@ -47,13 +48,15 @@ const T := {
 	"haste_bonus_slow_x":      ["~", [0.80, 0.82], "x", "haste 0.35 under a 40% slow: 1.35 x 0.6"],
 	"haste_cap_mps":           ["~", [6.95, 7.0], "m/s", "[game data] MaxMoveSpeed 700 uu/s"],
 	"jump_input_frames":       ["<=", 1.0, "frames", "press to lift-off, same sim step"],
-	"jump_apex":               ["~", [1.2, 1.6], "m", "[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
+	"jump_apex":               ["~", [1.2, 1.6], "m",
+		"[game data] 1.9m; under 1.6 so jump + mantle stays below 4 terraces"],
 	"jump_speed_vs_source":    ["~", [0.85, 1.0], "x", "[game data] JumpZVelocity 7.5; ours 6.8 (terraces)"],
 	"jump_airtime":            ["~", [0.85, 1.05], "s", "[game data] JumpZVelocity 750 at gravity 1470 uu/s2: 1.02s"],
 	"air_carry_m":             [">=", 3.0, "m", "[game data] FallingLateralFriction 0.375: the run-up carries"],
 	"air_reverse_dv":          [">=", 5.0, "m/s", "[owner 11-08] strong WASD air control"],
 	"dash_exit_run":           ["~", [0.95, 1.05], "x", "[game data] no hard stop: hands over at run speed"],
-	"brake_cast_gap_m":        ["<=", 0.05, "m", "[game data] UE brakes a let-go the same under a cast: the widest cast stop vs plain stop gap over the 12"],
+	"brake_cast_gap_m":        ["<=", 0.05, "m",
+		"[game data] UE brakes a let-go the same under a cast: the widest cast stop vs plain stop gap over the 12"],
 	"dash_exit_slide_m":       ["~", [0.2, 0.5], "m", "[game data] then the walking stop"],
 	# the fitted ground dash curves (docs/SUPERVIVE_FEEL.md "Dash speed curves"): peak share of the dash, peak
 	# speed against the mean, distance kept, hand-over to the walk at or under run speed
@@ -71,12 +74,16 @@ const T := {
 	"dash_curve_tender_air_exit_k":   ["~", [0.4, 0.65], "x", "[footage] floats out at 40-65% of the burst"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_time":                ["~", [0.95, 1.08], "x", "the curve runs in the kit's own (feel-scaled) time"],
-	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed and the walk takes it"],
-	"coyote_frames":           [">=", 7.0, "frames", "hunter_move.json coyote_s 0.12s: latest press after a walk-off (none in the source)"],
-	"jump_buffer_frames":      [">=", 7.0, "frames", "hunter_move.json jump_buffer_s 0.12s: earliest press before landing (source silent)"],
+	"dash_curve_exit_run":            ["<=", 1.05, "x",
+		"[footage] the skid falls through run speed, the walk takes it"],
+	"coyote_frames":           [">=", 7.0, "frames",
+		"coyote_s 0.12s: latest press after a walk-off (none in the source)"],
+	"jump_buffer_frames":      [">=", 7.0, "frames",
+		"jump_buffer_s 0.12s: earliest press before landing (source silent)"],
 	"jump_buffer_dash_frames": [">=", 7.0, "frames", "the same window across the end of an air dash that lands"],
 	"dash_jump_eaten":         ["<=", 0.0, "frames", "a jump pressed on any frame of a ground dash fires that step"],
-	"slow_land_0p1s":          ["~", [0.69, 0.71], "x", "[game data] the cap steps at once; the body brakes to it (22.2 m/s2 + 2/s x v): ~0.05s"],
+	"slow_land_0p1s":          ["~", [0.69, 0.71], "x",
+		"[game data] the cap steps at once; the body brakes to it (22.2 m/s2 + 2/s x v): ~0.05s"],
 	"slow_land_0p3s":          ["~", [0.69, 0.71], "x", "[game data] and holds there"],
 	"slow_end_0p1s":           ["~", [0.99, 1.01], "x", "[game data] back up at MaxAcceleration 47-54 m/s2 (~0.03s)"],
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
@@ -87,20 +94,24 @@ const T := {
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
-	"glide_open_press_frames": ["<=", 1.0, "frames", "[wiki/guide] hold jump in the air to glide; a second press opens at once"],
-	"glide_press_held_s":      [">=", 1.0, "s", "owner 11-08: jump, let go, press again and hold: it opens and stays open"],
+	"glide_open_press_frames": ["<=", 1.0, "frames",
+		"[wiki/guide] hold jump in the air to glide; a second press opens at once"],
+	"glide_press_held_s":      [">=", 1.0, "s", "owner 11-08: jump, let go, press and hold: it opens, stays open"],
 	"glide_hold_opens":        ["<=", 0.0, "", "owner 11-08: Space held 2 s from the jump never opens the glider"],
 	"albert_lmb_hold_glides":  ["<=", 0.0, "", "owner 11-08: Albert holding LMB and Space never glides"],
 	"glide_open_button_frames": ["<=", 1.0, "frames", "dedicated glide button: no tap/hold ambiguity"],
 	"glide_catch_t":           ["<=", 0.20, "s", "[guide] opens 'instantly'; the catch rate is ours (max locked)"],
 	"glide_start_vy":          ["~", [0.85, 1.4], "m/s", "[game data] GlideStartFallSpeedMin: opened rising, it falls"],
 	"glide_speed":             ["~", [4.5, 5.5], "m/s", "[game data] MaxGlide 500 uu/s +-10% (item 163)"],
-	"glide_sink":              ["~", [1.2, 1.6], "m/s", "floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
-	"glide_turn90_t":          ["~", [0.3, 0.6], "s", "[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
+	"glide_sink":              ["~", [1.2, 1.6], "m/s",
+		"floatier than [spec] 2-4 eyeball / [est] 2.2 (owner: sank too fast)"],
+	"glide_turn90_t":          ["~", [0.3, 0.6], "s",
+		"[game data] GlideTargetXYForce 162,500 / Mass 100: turn inertia"],
 	"glide_reverse_t":         ["~", [0.45, 0.8], "s", "[game data] the same 16.25 m/s^2 brakes a reversal in ~0.6 s"],
 	"glide_brake_ratio":       ["<=", 0.80, "x", "steering against heading brakes momentum (speed vs letting go)"],
 	"glide_high_sink":         ["~", [3.3, 3.6], "m/s", "[game data] GlideDownwardForce: above 8.5m"],
-	"glide_swoop_speed":       ["<=", 5.3, "m/s", "[owner 11-08 item 8] a high glide's pull-down never turns into speed"],
+	"glide_swoop_speed":       ["<=", 5.3, "m/s",
+		"[owner 11-08 item 8] a high glide's pull-down never turns into speed"],
 	"dive_vy":                 ["~", [32.0, 32.5], "m/s", "[game data] GlideDiveZTargetSpeed -3250 uu/s, crouch held"],
 	"dive_vy_t":               ["~", [0.6, 0.9], "s", "[game data] GlideDiveZForceMax 350,000 / Mass 100 = 35 m/s^2"],
 	"dive_steer_ratio":        ["~", [0.2, 0.3], "x", "[game data] GlideDiveXYForceMultiplier 0.25 of the glide steer"],
@@ -109,27 +120,36 @@ const T := {
 	"dive_swoop_speed":        ["<=", 6.0, "m/s", "[owner 11-08 item 8] pulling out of a dive adds no speed"],
 	"dive_land_vy":            ["<=", 4.0, "m/s", "[game data] held down: catches 3.5 m up, lands at the sink"],
 	"dive_release_glide_t":    ["~", [0.3, 0.7], "s", "[game data] let go high up: the usual catch, back gliding"],
-	"dashglide_open_speed":    [">=", 12.0, "m/s", "[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
-	"dashglide_1s_speed":      ["<=", 9.0, "m/s", "[owner 11-08 item 9] glide drag: dash speed bleeds back toward cruise"],
+	"dashglide_open_speed":    [">=", 12.0, "m/s",
+		"[wiki] gliding right after a lateral impulse keeps momentum and increases glide speed"],
+	"dashglide_1s_speed":      ["<=", 9.0, "m/s",
+		"[owner 11-08 item 9] glide drag: dash speed bleeds back toward cruise"],
 	"dashglide_2s_speed":      ["<=", 6.5, "m/s", "[owner 11-08 item 9] ...within 1-2 s"],
 	"dashglide_reopen_frames": ["<=", 1.0, "frames", "glider is back the step the dash ends while glide is held"],
 	"reglide_frames":          ["<=", 1.0, "frames", "glide-cancel then re-hold reopens at once"],
-	"abyss_lift_t":            ["<=", 1.0, "s", "[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
+	"abyss_lift_t":            ["<=", 1.0, "s",
+		"[footage] back at island level (balloon line, 0.5m under the lip) ~1s after opening 4m deep"],
 	"abyss_bounce_m":          [">=", 1.5, "m", "[est] a bouncy lift from 6m deep"],
 	"abyss_kill_depth":        ["~", [17.0, 18.0], "m", "[game data] AbyssHeight -1750 uu: 17.5m under ground level"],
 	"abyss_recover_depth":     [">=", 15.0, "m", "deepest a terminal fall can still glide out"],
 	"abyss_tint_lip":          ["<=", 0.02, "", "no tint gliding at island level"],
 	"abyss_tint_half":         [">=", 0.6, "", "[footage] tint deepens as you sink; owner: unmistakable early"],
 	"abyss_tint_end":          [">=", 0.95, "", "full dark/red right before the point of no return"],
-	"abyss_tint_rising":       ["<=", 0.02, "", "[footage D1] off while the glider lifts you back up, even below the lip"],
-	"feather_toggle_frames":   ["<=", 1.0, "frames", "feathering: glider closes and reopens the step you let go / press again, no toggle penalty"],
+	"abyss_tint_rising":       ["<=", 0.02, "",
+		"[footage D1] off while the glider lifts you back up, even below the lip"],
+	"feather_toggle_frames":   ["<=", 1.0, "frames",
+		"feathering: glider closes and reopens the step you let go / press again, no toggle penalty"],
 	"feather_hold_m":          [">=", 0.0, "m", "holding glide over the abyss until the heat runs out (reference)"],
-	"feather_m":               [">=", 0.0, "m", "tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
-	"feather_gain":            [">=", 1.15, "x", "[est] skilled feathering covers more ground than holding when heat is the limit"],
-	"ledge_rise_t":            ["<=", 0.45, "s", "[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
+	"feather_m":               [">=", 0.0, "m",
+		"tap-feathering over the abyss (lift taps, coast the gaps) until the heat runs out"],
+	"feather_gain":            [">=", 1.15, "x",
+		"[est] skilled feathering covers more ground than holding when heat is the limit"],
+	"ledge_rise_t":            ["<=", 0.45, "s",
+		"[game data] a 1.6m wall from a jump: jump-paced, suction lifts the rest"],
 	"ledge_rise_vy_max":       ["<=", 7.0, "m/s", "[game data] suction cap 2.5 m/s: a rise never outruns the jump"],
 	"ledge_rise_peak_m":       [">=", 0.2, "m", "no jump: you clear the lip with a small pop (height over the top)"],
-	"ledge_fling_early_m":     [">=", 0.0, "m", "a jump as the rise starts: a weak fling (distance onto the top, reference)"],
+	"ledge_fling_early_m":     [">=", 0.0, "m",
+		"a jump as the rise starts: a weak fling (distance onto the top, reference)"],
 	"ledge_fling_timed_m":     [">=", 1.5, "m", "[est] a jump in the window near the top: a real fling onto the top"],
 	# a glider on a cliff face, a ruin wall or a Tenzo rock (UE CharacterMovementComponent slide, no source row
 	# for the glider itself [?]): the part of its speed into the wall is dropped, the part along it kept, no
@@ -141,16 +161,20 @@ const T := {
 	"glide_wall_flips":        ["<=", 0.0, "n", "along-wall speed sign flips over 1 s, every angled hit: no jitter"],
 	"glide_wall_bounce_mps":   ["<=", 0.3, "m/s", "fastest frame moving away from the wall after any hit: no rebound"],
 	"ledge_fling_timed_up_m":  [">=", 0.7, "m", "[est] ...and it goes higher than topping out with no jump"],
-	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
-	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
+	"ledge_fling_gain":        [">=", 1.5, "x",
+		"[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
+	"ledge_window_s":          [">=", 0.08, "s",
+		"[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
 	# three ledge heights x walk / jump / glide (docs/MOVEMENT_FEEL.md "Ledge mantle timing"): the rise from
 	# the catch to the top, and the speed over the lip against the source's floor
 	"ledge_jump_1.6_t":        ["<=", 0.35, "s", "[footage] rim to top ~0.2s; two terraces from a running jump"],
 	"ledge_jump_2.4_t":        ["<=", 0.35, "s", "[footage] rim to top ~0.2s; three terraces from a running jump"],
 	"ledge_glide_1.6_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; two terraces from a glide"],
 	"ledge_glide_2.4_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; three terraces from a glide"],
-	"ledge_glide_3.2_t":       ["<=", 0.35, "s", "[footage] rim to top ~0.2s; four terraces from a glide (a jump never catches them)"],
-	"ledge_jump_1.6_keep":     [">=", 1.0, "x", "[game data] over the lip at least max(0.6x the approach, 3.5 m/s): MiniMantleXYSpeedTarget"],
+	"ledge_glide_3.2_t":       ["<=", 0.35, "s",
+		"[footage] rim to top ~0.2s; four terraces from a glide (a jump never catches them)"],
+	"ledge_jump_1.6_keep":     [">=", 1.0, "x",
+		"[game data] over the lip at least max(0.6x the approach, 3.5 m/s): MiniMantleXYSpeedTarget"],
 	"ledge_jump_2.4_keep":     [">=", 1.0, "x", "[game data] the same floor, three terraces from a running jump"],
 	"ledge_glide_1.6_keep":    [">=", 1.0, "x", "[game data] the same floor, two terraces from a glide"],
 	"ledge_glide_2.4_keep":    [">=", 1.0, "x", "[game data] the same floor, three terraces from a glide"],
@@ -175,12 +199,15 @@ const T := {
 	"cam_dive_land_view":      ["<=", 0.3, "x", "ground under a plunge, screens below centre"],
 	"cam_land_step":           ["<=", 0.1, "x", "zoom-out lost on landing's first step: no pop"],
 	"cam_land_left_05":        ["<=", 0.35, "x", "zoom-out left 0.5 s after landing: eased back"],
-	"view_across_m":           ["~", [22.0, 25.0], "m", "ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
+	"view_across_m":           ["~", [22.0, 25.0], "m",
+		"ground across a 16:9 screen at the focus (camcal: ~17 hunter silhouettes across, as in gameplay frames)"],
 	# (the reference body is the plain medium hunter since Vex took her own proportions: at the same camera it
 	# measures 6.56% where the old reference, the default medium Warden at plain size, measured 6.07%, so the
 	# range moved up by that 0.46; the camera did not change)
-	"hunter_screen_pct":       ["~", [5.45, 6.65], "%", "medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
-	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%", "feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
+	"hunter_screen_pct":       ["~", [5.45, 6.65], "%",
+		"medium hunter, feet to head straight up, as a share of screen height (camcal: its on-screen silhouette ~10.5%, as in gameplay frames; feelfix leans characters back 20 deg toward the camera, which shortens the straight-up measure from ~6.9% to ~5.5%)"],
+	"hunter_feet_below_pct":   ["~", [1.5, 5.0], "%",
+		"feet below the screen centre, as a share of screen height (camcal: ~3% in gameplay frames)"],
 }
 
 var results := {}
@@ -341,7 +368,8 @@ func _ground() -> void:
 		rec("ground_stop_dist", P.pos.x - x0)
 		# reversal
 		_reset(flat + Vector3(-2.5, 0, 0)); P.base_speed = top
-		P.inp["move"] = Vector2(1, 0); _steps(20)
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
 		P.inp["move"] = Vector2(-1, 0)
 		var tr := -1.0
 		for i in 40:
@@ -350,7 +378,8 @@ func _ground() -> void:
 		rec("ground_reverse_t", tr)
 		# 90 degree turn
 		_reset(flat + Vector3(-2.5, 0, -2.5)); P.base_speed = top
-		P.inp["move"] = Vector2(1, 0); _steps(20)
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
 		P.inp["move"] = Vector2(0, 1)
 		var t90 := -1.0
 		for i in 40:
@@ -386,14 +415,16 @@ func _turns() -> void:
 		P.cls = Arch.weight(id)
 		P.set_arch(id)
 		_reset(flat + Vector3(-2.5, 0, 0))
-		P.inp["move"] = Vector2(1, 0); _steps(20)
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
 		var v := _hv(P).length()
 		var a := P.ground_accel
 		P.inp["move"] = Vector2(-1, 0)
 		var tr := _cross(func() -> float: return -P.vel.x, 0.95 * v)
 		rec("reverse_vs_source", tr / (log(1.0 + 2.0 * F * v / a) / (2.0 * F) + 0.95 * v / a), id)
 		_reset(flat + Vector3(-2.5, 0, -2.5))
-		P.inp["move"] = Vector2(1, 0); _steps(20)
+		P.inp["move"] = Vector2(1, 0)
+		_steps(20)
 		P.inp["move"] = Vector2(0, 1)
 		var low := [v]
 		var t90 := _cross(func() -> float:

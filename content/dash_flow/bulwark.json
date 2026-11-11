@@ -35,7 +35,7 @@
 		"all": {"source": "Hero sheet bjorn.md:69: 'Hold to charge. Release swings.' No button-up rule anywhere in the data or footage.", "ours": "Another ability ends the Crushing Blow's hold with no swing; the key still down starts a fresh hold the step he is free (0 frames). Before: the button had to come up first (owner item 30's cancel rule), so a held LMB never came back after an RMB, E or glove."}
 	},
 	"window": {"source": "Breaker (bjorn.md 0370-0372): the dash arrives in one frame with the spin on arrival; the footage has no dash into an ability, so the shared one-frame bound stands."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

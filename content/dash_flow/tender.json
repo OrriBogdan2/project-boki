@@ -34,7 +34,7 @@
 		}
 	},
 	"window": {"source": "Pip (mooshmoosh.md 321, 340; 30 fps crops): every dash comes 0.1-0.3 s after a jump and the air dash lasts 0.6 s; no ability pressed inside a dash is shown."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

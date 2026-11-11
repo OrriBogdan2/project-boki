@@ -39,7 +39,7 @@
 		"all": {"source": "Data: Quake Fist is hold and release, no timeout; the key is a held input.", "ours": "A cast that stops the fists drops the charge with no punch; the key still down starts a fresh hold the step she is free (0 frames)."}
 	},
 	"window": {"source": "Tarek (breah.md 0985-0997, 246-249 s): dash at 0985/0986, the KNOCK beam at 0989-0990; with the RMB hop's own 0.4 s, the RMB press fell within a frame of the dash's end and was kept."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",

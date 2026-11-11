@@ -35,7 +35,7 @@
 		}
 	},
 	"window": {"source": "Claire (tamsin.md 66-79): Skate 0169-0296 is a hold and darts cast inside it become beams (0239-0245): a fire row; no buffered press to time."},
-	"glide": [
+	"glide_rows": [
 		{
 			"pair": "air dash -> glide press",
 			"source": "Owner rule, briefs/DECISIONS.md 2026-11-08: Shift cancels into glide instantly for every Hunter; glide opens only on a press, never a hold. Source rows for this dash: the air dash rows above.",
