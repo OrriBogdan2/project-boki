@@ -4,8 +4,9 @@ extends RefCounted
 ## from the telegraph nodes themselves and compared with where the attack really lands, found by
 ## running the attack against a stand-in just inside (95%) and just outside (105%) of the tell's edges;
 ## the fill reaches 1.0 on the hit frame (and the full tell stays up a moment); the body glow brightens
-## to its peak on that frame; the tell wears the rival tint; and an instant blow leaves time to step out.
-## The glimmerkin never attacks and must show no tell.
+## to its peak on that frame; the tell is up for the whole wind-up (lead >= wind-up); the tell wears the
+## rival tint; and an instant blow leaves time to step out. Every attack id in Data.MOBS must have a tell;
+## the glimmerkin never attacks and must show no tell.
 ## With --shots-dir=<dir>: one strip per monster at wind-up 25 / 60 / 100 % (mob_tell_<kind>.png).
 
 var main: Node
@@ -16,7 +17,6 @@ var home := Vector3.ZERO
 var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
-const MOBS := ["skitter", "spitter", "brute", "warden", "bomber", "sentinel"]
 const NEAR := 0.95          # probe just inside an edge
 const FAR := 1.05           # probe just outside it
 const WALK := 4.4           # m/s, a hunter on foot (Data.CLASSES)
@@ -36,7 +36,11 @@ func run(main_node: Node) -> void:
 	home = r[4]
 	var P: Hunter = r[1]
 	P.teleport(home + Vector3(-6, 0, 9))        # off every lane
-	for k in MOBS:
+	var kinds: Array = []
+	for k in Data.MOBS:
+		if not Data.MOBS[k]["attack"] in ["none", "boss"]: kinds.append(k)    # lair bosses: boss.gd wind-ups
+	_coverage(kinds)
+	for k in kinds:
 		_mob(k)
 	_glimmer()
 	var shots := ""
@@ -65,6 +69,13 @@ func _wind(kind: String, at: Vector3) -> Mob:
 	mb.tgt = null                       # the aim stays east: the test moves the stand-in, not the mob
 	return mb
 
+## Only `mb` fights: the map's own camps (a wandering skitter) would push the stand-in off its probe.
+func _alone(mb: Mob) -> void:
+	for o in m.mobs.duplicate():
+		if o != mb:
+			m.mobs.erase(o)
+			o.queue_free()
+
 ## What the player sees: the lanes and circles on the ground, read back off the telegraph nodes.
 func _seen(mb: Mob) -> Array:
 	var out: Array = []
@@ -88,6 +99,7 @@ func _hurts(kind: String, at: Vector3) -> bool:
 	var t := 0.0
 	while t < secs:
 		m.step(DT)
+		_alone(mb)
 		t += DT
 	return ak.dmg(T) > 0.0
 
@@ -148,9 +160,11 @@ func _mob(kind: String) -> void:
 	var struck := false
 	var kept := true
 	m.step(DT)                            # (the tell is made on the first step of the wind-up)
+	var lead := mb.st_t + DT if not mb.tele.is_empty() else 0.0     # s from the tell showing to the hit
 	for i in int(windup / DT) + 8:
 		var nodes := mb.tele.duplicate()      # (a bomber clears its own on the hit frame)
 		m.step(DT)
+		_alone(mb)
 		mb.render(DT, 1.0)
 		fills.append(float((nodes[0] as MeshInstance3D).material_override.get_shader_parameter("progress")))
 		glows.append(_glow(mb))
@@ -164,6 +178,7 @@ func _mob(kind: String) -> void:
 	lands = lands and (fills.size() < 3 or fills[fills.size() - 3] < 0.999)
 	ok("%s: the fill reaches 1 on the hit frame, not before" % kind, lands, "%.3f -> %.3f" % [f_prev, f_last])
 	ok("%s: the tell stays up on the hit frame" % kind, kept)
+	ok("%s: the tell shows for its whole wind-up" % kind, lead >= windup - 1e-4, "lead %.2f s, wind-up %.2f s" % [lead, windup])
 	var rising := true
 	for i in range(1, glows.size() - 1):
 		if glows[i] < glows[i - 1]: rising = false
@@ -184,6 +199,15 @@ func _gap(a: Color, b: Color) -> float:
 
 func _glow(mb: Mob) -> float:
 	return float(mb.mats[0].get_shader_parameter("flash")) if not mb.mats.is_empty() else -1.0
+
+## Every mob that attacks is covered: its attack id has a tell (the shape checks then run per mob).
+func _coverage(kinds: Array) -> void:
+	var missing: Array = []
+	for k in kinds:
+		var atk := String(Data.MOBS[k]["attack"])
+		if not MobTell.TELL_COL.has(atk):
+			missing.append("%s/%s" % [k, atk])
+	ok("every mob attack id has a telegraph (%d mobs)" % kinds.size(), missing.is_empty(), ", ".join(missing))
 
 func _glimmer() -> void:
 	var mb := m.spawn_mob("glimmer", home + Vector3(2, 0, 0))
