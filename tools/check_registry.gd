@@ -380,6 +380,7 @@ const CHECKS := {
 	"--point-blank-check": ["res://tools/point_blank_check.gd", "point_blank_check", null],      # shots at point blank
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],      # mashing LMB never beats holding
 	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],      # press -> first motion or shot
+	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],      # lips up to the step height
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

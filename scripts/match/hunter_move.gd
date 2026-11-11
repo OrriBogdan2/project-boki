@@ -39,6 +39,7 @@ static var floor_snap: float = _phys["floor_snap"]
 static var walkable_tan: float = tan(deg_to_rad(float(_phys["walkable_angle"])))
 static var speed_cap: float = _phys["speed_cap"]
 static var haste: float = _phys["haste"]
+static var step_height: float = _phys["step_height"]      # m: a lip this high is walked over
 const CHASE_BONUS := 0.18      # share of run speed: heading at whoever took your kin
 
 const OVER_RUN := 1.01     # UE IsExceedingMaxSpeed: speed past 1.01x the wanted speed counts as over it
