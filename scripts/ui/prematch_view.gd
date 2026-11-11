@@ -32,8 +32,12 @@ var talk_btn: Button
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
 
-const COLUMNS := 4          # Hunter cards per row
+const COLUMNS := 5          # Hunter cards per row (13 Hunters fit in 3 rows)
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
+const CARD_PAD := 10        # px, inside a card
+const GRID_GAP := 12        # px, between cards
+const PIC_MAX := 84.0       # px, a card's portrait at full size
+const PIC_MIN := 48.0       # px, the smallest card portrait (the name and role stack is about this tall)
 const LOG_H := 84.0         # px, the most the chat log grows to (it scrolls past that)
 
 ## A small padlock for a shut Hunter: a body and a shackle.
@@ -85,14 +89,15 @@ func _ready() -> void:
 	squad_box = UI.hbox(10)
 	strip.add_child(squad_box)
 	var sc := ScrollContainer.new()
+	sc.resized.connect(_fit_cards)
 	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	root.add_child(sc)
 	grid = GridContainer.new()
 	grid.columns = COLUMNS
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	grid.add_theme_constant_override("h_separation", GRID_GAP)
+	grid.add_theme_constant_override("v_separation", GRID_GAP)
 	sc.add_child(grid)
 	_build_chat(root)
 	_talk(false)
@@ -192,7 +197,7 @@ func _pulse(left: float) -> void:
 
 ## Keeps the whole screen inside a title-safe margin, so the countdown shows at every window size;
 ## smaller windows get smaller digits. The declutter layout has no side column, so the Hunter grid
-## keeps COLUMNS at every size (4 x CARD_MIN_W fits the 1240 logical px UI).
+## keeps COLUMNS at every size and _fit_cards sizes the portraits so every row shows without scrolling.
 func _fit_safe_area() -> void:
 	var win := get_viewport_rect().size
 	var m := maxi(SAFE_MIN, int(win.y * SAFE_FRAC))
@@ -220,18 +225,29 @@ func _fill_hunters() -> void:
 		c.queue_free()
 	for ak in Arch.ids():
 		grid.add_child(_tile(String(ak)))
+	_fit_cards()
+
+## Card portraits sized so all the rows fit the room the grid has (PIC_MAX at most, PIC_MIN at least).
+func _fit_cards() -> void:
+	var rows := ceili(Arch.ids().size() / float(COLUMNS))
+	var room: float = grid.get_parent().size.y - GRID_GAP * (rows - 1)
+	var px := clampf(floorf(room / rows) - 2 * CARD_PAD, PIC_MIN, PIC_MAX)
+	for card in grid.get_children():
+		card.get_meta("pic").custom_minimum_size = Vector2(px, px)
 
 ## One card: portrait, name, role word. Stats and the unlock quest are the tooltip. A shut Hunter is dim
 ## with a padlock.
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
-	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
+	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), CARD_PAD, Arch.color(ak))
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var row := UI.hbox(10)
 	card.add_child(row)
-	row.add_child(ClassCard.portrait(ak))
+	var pic := ClassCard.portrait(ak)
+	card.set_meta("pic", pic)
+	row.add_child(pic)
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL

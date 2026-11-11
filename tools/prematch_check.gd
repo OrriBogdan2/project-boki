@@ -270,3 +270,5 @@ func _declutter(view: Control) -> void:
 	ok(not view.talk_btn.visible, "no hold-to-talk without a voice transport and a human squadmate")
 	var fits: Array = load("res://tools/prematch_shots.gd").new().outside(view, Rect2(Vector2.ZERO, view.size))
 	ok(fits.is_empty(), "every element sits inside the screen's safe margin (%s)" % [fits.slice(0, 2)])
+	var room: Rect2 = view.grid.get_parent().get_global_rect()
+	ok(room.encloses(view.grid.get_global_rect()), "every Hunter row shows without scrolling (grid %s in %s)" % [view.grid.get_global_rect(), room])
