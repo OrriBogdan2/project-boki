@@ -142,7 +142,21 @@ static func _dash(h: Hunter) -> void:
 			h.m.sfx("ab_slam", h.pos, -4.0, 0.8)
 			h.m.fx.dust(h.pos, 8)
 		"reflect":
-			st["dash"]["mirror"] = h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]), "dmg_k": float(d["dmg_k"]), "color": col.to_html(false)})
+			st["dash"]["mirror"] = _mirror(h, d, col)
+
+## The reflect dash's window: the fan and its ring, turning shots for `window` seconds.
+static func _mirror(h: Hunter, d: Dictionary, col: Color) -> Dictionary:
+	return h.m.verbs.add_mirror(h, {"arc": float(d["arc"]), "radius": float(d["radius"]), "time": float(d["window"]),
+		"dmg_k": float(d["dmg_k"]), "color": col.to_html(false)})
+
+## KinNet.apply_hunter, on another game: a remote wearer whose snapshot starts a dash (the roll bit) opens the
+## same reflect window here, so the fan shows and turns this game's shots as it does on theirs.
+static func remote_dash(h: Hunter, f: Dictionary) -> void:
+	var rolling := h.roll_t > 0.0
+	var d: Dictionary = MergeForm.aug_of(f).get("dash", {})
+	if rolling and not bool(h.get_meta("mf_dashing", false)) and String(d.get("kind", "")) == "reflect":
+		_mirror(h, d, f["glow"])
+	h.set_meta("mf_dashing", rolling)
 
 static func _apply(h: Hunter, t: Ent, dmg: float, r: Dictionary) -> void:
 	if r.has("burn"):
