@@ -24,10 +24,11 @@ func _read(hero: Dictionary, spec: String) -> float:
 	var parts := spec.split(":")
 	return _num(JSON.parse_string(FileAccess.get_file_as_string("res://content/%s.json" % parts[0])), parts[1])
 
-## "ok" on the source value, "OWNER" on the row's `owner` note with `ours` still pinned, else "FAIL".
+## "ok" on the source value, "OWNER" when the row pins `ours` (its `owner` note says why) and we still hold it,
+## else "FAIL" (an `owner` note without `ours` is a known gap, kept failing).
 func _verdict(r: Dictionary, got: float) -> String:
 	if not is_nan(got) and absf(got - float(r["value"])) <= float(r["tol"]) + 1e-6: return "ok"
-	if r.has("owner") and not is_nan(got) and absf(got - float(r["ours"])) <= 1e-6: return "OWNER"
+	if r.has("ours") and not is_nan(got) and absf(got - float(r["ours"])) <= 1e-6: return "OWNER"
 	return "FAIL"
 
 func run(host: Node) -> void:
@@ -41,7 +42,7 @@ func run(host: Node) -> void:
 			got /= _read(hero, String(r["per"]))
 			label += "/" + String(r["per"])
 		var verdict := _verdict(r, got)
-		var note := " owner: " + String(r["owner"]) if verdict == "OWNER" else ""
+		var note := " owner: " + String(r["owner"]) if r.has("owner") else ""
 		var src := "source %s +-%s (%s)" % [r["value"], r["tol"], r["evidence"]]
 		print("PARITY %s %s: %s, %s%s" % [verdict, label, got, src, note])
 		if verdict == "FAIL": bad += 1
