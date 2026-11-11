@@ -60,7 +60,7 @@ func _real_load(main: Node) -> void:
 	opts["arch"] = "mage"
 	main.show_screen("match", opts)
 	var tree := main.get_tree()
-	var shown: Array = []          # [prog, want, frame seconds] per frame
+	var shown: Array = []          # [prog, want, frame seconds, stage] per frame
 	var stages: Array = []
 	var waited := 0.0
 	while waited < TIMEOUT_S:
@@ -69,7 +69,7 @@ func _real_load(main: Node) -> void:
 		waited += dt
 		var ld := _screen(main)
 		if ld:
-			shown.append([float(ld.prog), float(ld.want), dt])
+			shown.append([float(ld.prog), float(ld.want), dt, String(ld.stage_label)])
 			if stages.is_empty() or stages[-1] != String(ld.stage_label): stages.append(String(ld.stage_label))
 		elif not shown.is_empty() and main.current is Match and (main.current as Match).is_processing():
 			break
@@ -83,7 +83,9 @@ func _real_load(main: Node) -> void:
 	for i in range(1, shown.size()):
 		if shown[i][0] < shown[i - 1][0]: back += 1
 		if shown[i][1] < shown[i - 1][1]: want_back += 1
-		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S: jumps += 1
+		if shown[i][0] - shown[i - 1][0] > MAX_STEP and shown[i][2] < HITCH_S:
+			jumps += 1
+			print("LOADING jump at frame %d (%s): %.2f -> %.2f in %.3f s" % [i, shown[i][3], shown[i - 1][0], shown[i][0], shown[i][2]])
 	ok(back == 0, "the bar never goes backwards (%d frames did)" % back)
 	ok(want_back == 0, "the stage target never goes backwards (%d frames did)" % want_back)
 	ok(jumps == 0, "the bar never jumps more than %d%% in a normal frame (%d did)" % [int(MAX_STEP * 100.0), jumps])
