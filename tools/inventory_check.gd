@@ -130,12 +130,10 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	m.boxes.append(bx)
 	m.hud.open_loot(bx)
 	await _frames(main, 4)
-	var loot: PanelContainer = m.hud.loot_panel
-	var inv: PanelContainer = m.hud.pack_panel
-	ok(m.hud.pack_open() and loot.get_global_rect().end.x <= inv.get_global_rect().position.x + 1.0,
-		"looting: your inventory opens at the right, the box side by side to its left")
+	var texts := _texts(m.hud.loot_panel)
+	ok(not m.hud.pack_open() and texts.has("WORN") and texts.has(Loot.name_of(p.pack[0])),
+		"looting: one window, what you wear marked in place above your backpack (no second inventory window)")
 	m.hud.close_loot()
-	ok(not m.hud.pack_open(), "closing the box closes it again")
 
 func _reopen(main: Node, m: Match) -> LoadoutPanel:
 	m.hud.close_pack()
