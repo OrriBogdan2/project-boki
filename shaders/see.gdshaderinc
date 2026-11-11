@@ -11,10 +11,10 @@ uniform bool see_on = false;
 
 const float SEE_MAX = 0.5;        // share of pixels dropped at the circle's heart: half, never gone
 const float SEE_A_Y = 0.85;       // m above the hunter's feet the circle is centred on (mid-body)
-const float SEE_A_R = 1.15;       // m: the circle's radius at the hunter's distance (head to feet)
+const float SEE_A_R = 0.9;        // m: the circle's radius at the hunter's distance (head to feet from above)
 const float SEE_B_Y = 0.35;       // m: the same for a Boki
-const float SEE_B_R = 0.7;
-const float SEE_EDGE = 0.45;      // m the circle's edge softens over
+const float SEE_B_R = 0.6;
+const float SEE_EDGE = 0.4;       // m the circle's edge softens over
 const float SEE_FRONT = 0.35;     // m a pixel must be nearer the camera than the target to thin
 const float SEE_BAYER[16] = float[16](0.0, 8.0, 2.0, 10.0, 12.0, 4.0, 14.0, 6.0, 3.0, 11.0, 1.0, 9.0, 15.0, 7.0, 13.0, 5.0);
 

@@ -24,7 +24,7 @@ func run(main: Node) -> void:
 		_done(main)
 		return
 	_stage(main)
-	var beside := await _case(Vector3(2.7, 0, 0.3))
+	var beside := await _case(Vector3(2.2, 0, 0.3))
 	ok(beside[0] > 400, "the tree beside the hunter is in frame (%d px)" % beside[0])
 	ok(beside[1] == 0, "a tree beside the hunter stays fully solid (%d px change)" % beside[1])
 	var behind := await _case(Vector3(0.2, 0, -2.2))
