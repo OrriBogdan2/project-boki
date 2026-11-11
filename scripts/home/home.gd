@@ -3126,10 +3126,8 @@ func _open_kin(rec: Dictionary) -> void:
 			if String(rec.get("title", "")) != "":
 				c2.add_child(UI.para("%s %s  ·  came back from the Soul Shrine" % [rec["name"], rec["title"]], 12, Color("bff8ec")))
 		"Training":
-			c1.add_child(UI.section("Stats  ·  cap %d" % Care.stat_cap(rec), UI.FAINT.lightened(0.2)))
-			for st in Care.STATS:
-				row.call(c1, Care.STATS[st]["name"], float(rec["stats"][st]) / float(Care.stat_cap(rec)), Care.STATS[st]["col"], str(int(rec["stats"][st])))
-			c1.add_child(UI.para("Train at the yard to raise them. Higher bonds raise the cap.", 12, UI.FAINT))
+			c1.add_child(UI.section("Stats", UI.FAINT.lightened(0.2)))
+			StatBudgetView.fill(c1, rec)
 			c2.add_child(UI.section("In a match", UI.FAINT.lightened(0.2)))
 			_kin_match_rows(rec, c2, true)
 			var more := UI.ghost("Full details", func(): _open_kin_match(rec), 0, "info")
