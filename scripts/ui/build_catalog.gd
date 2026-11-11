@@ -172,6 +172,17 @@ func _fill_tiles() -> void:
 	for e in entries.slice(page * per_page, page * per_page + per_page):
 		_tiles.add_child(_tile(e))
 
+## Where to point at entry `id`: its tile when it is on show and not in hand, else the tab that holds it
+## (the tutorial spotlight lights this). An empty Rect2 once it is in hand.
+func spot_rect(id: String, tab: String) -> Rect2:
+	for t in _tiles.get_children():
+		if t.get_meta("entry", "") == id and not t.is_queued_for_deletion():
+			return Rect2() if bool(t.get_meta("on", false)) else (t as Control).get_global_rect()
+	for b in _tabs_row.find_children("*", "Button", true, false):
+		if b.get_meta("tab", "") == tab and not b.is_queued_for_deletion():
+			return (b as Control).get_global_rect()
+	return Rect2()
+
 func _empty_text() -> String:
 	if _query != "":
 		return "Nothing matches \"%s\"" % _query
@@ -183,6 +194,8 @@ func _tile(e: Dictionary) -> Control:
 	var cb: Callable = e["cb"]
 	var tile := UI.tile_card(bool(e.get("on", false)), cb, 5)
 	tile.custom_minimum_size = TILE
+	tile.set_meta("entry", String(e.get("id", "")))
+	tile.set_meta("on", bool(e.get("on", false)))
 	tile.tooltip_text = String(e.get("tip", ""))
 	var col := UI.vbox(2)
 	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
