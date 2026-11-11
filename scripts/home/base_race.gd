@@ -308,6 +308,7 @@ func _cheer_hit(grade: String) -> void:
 	h._emote(kins_in[0], {"great": "★", "good": "♪", "miss": "?"}[grade], true)
 	if grade != "miss":
 		Sfx.play("jump", (kins_in[0]["node"] as Node3D).position, -8.0)
+		h.verbs.play("cheer")
 	drill = {}
 	if is_instance_valid(bar):
 		bar.queue_free()
