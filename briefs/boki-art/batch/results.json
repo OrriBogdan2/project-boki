@@ -110960,5 +110960,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_glacione_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_glassolotl",
+    "name": "Glassolotl (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glassolotl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glazolm",
+    "name": "Glazolm (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glazolm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gloamshell",
+    "name": "Gloamshell (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gloamshell_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gilabacus",
+    "name": "Gilabacus (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gilabacus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glaciammoth",
+    "name": "Glaciammoth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glaciammoth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glaciatee",
+    "name": "Glaciatee (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glaciatee_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glintmole",
+    "name": "Glintmole (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glintmole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glomworth",
+    "name": "Glomworth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glomworth_1.jpg",
+    "ok": true
   }
 ]
