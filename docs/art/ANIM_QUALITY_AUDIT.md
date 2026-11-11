@@ -21,8 +21,9 @@ at the run ring), fixes the cause they share, and lists what is left per Hunter.
   camera, 8 frames each. The walk and run use the live hand-off seen from the side with floor posts that scroll at the
   move speed, so a sliding foot slides against them. The "before" is a frozen copy of this branch's parent.
 - The gate is `--anim-audit` itself (registered in tools/check_registry.gd): slide over 25 % of the run speed, or a
-  counter under 0.3 on a Hunter with legs, fails. `ostra` and `rimewright` have no stepping legs and are exempt, and
-  are listed below as open.
+  counter under 0.3 on a Hunter with legs, fails. `ostra` has no stepping legs and is exempt, and
+  is listed below as open. Each row also prints the slide at the sole (`sole`: the lower of the heel and toe, from
+  the skinned foot verts), which a heel-to-toe pinned gait reads truer than the ankle; it is not gated.
 
 ## What is wrong with all of them
 
@@ -159,7 +160,10 @@ posts scroll at the move speed).
 ![ostra walk and run, before and after](anim_audit/ostra.jpg)
 
 **Neve (`rimewright`)**
-1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Unchanged: needs a new gait clip.
+1. Legs do not step: she skates (clip foot speed 0.4 m/s against 4.65 m/s, slide 90 %). Fixed 2026-11-11
+   (`ext/anim-neve-stride`): walk_f/run_f and seven directional loops on the pilot gait recipe, soles pinned at her
+   loco speed over her 0.867 model scale; run slide 24 % (sole 21 %), arms 0.97, now inside the gate
+   (art/wardens/claire/IMPORT.md).
 2. Arms barely move in a gait (reach 0.14 and 0.01).
 3. Nothing else is wrong: loop seams and the idle gap (0.06) are clean.
 
@@ -184,7 +188,6 @@ posts scroll at the move speed).
 Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
-- `rimewright`: walk_f/run_f and the seven directional loops are a real stride now (soles pinned at 2.2 / 4.6 m/s, `ext/anim-neve-stride`); the audit's ankle metric still reads her run at 35 % slide (DEBT), so she stays out of its gate.
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.

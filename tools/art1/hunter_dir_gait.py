@@ -20,7 +20,8 @@ from mathutils import Matrix, Vector
 SRC, OUT, WALK, RUN, *MORE = sys.argv[sys.argv.index("--") + 1:]
 BUILD = [d for d in (MORE[0] if MORE else "b,l,r,fl,fr,bl,br").split(",") if d]   # the directions to rebuild; "" only measures
 LENGTH = {"walk": float(MORE[1]) if len(MORE) > 1 else 0.0, "run": float(MORE[2]) if len(MORE) > 2 else 0.0}   # s, 0 = the f loop's
-SPEED = {"walk": float(WALK), "run": float(RUN)}   # game m/s (warden_anim loco); the model is in game metres
+SPEED = {"walk": float(WALK), "run": float(RUN)}   # model m/s: the game's loco m/s over the model's in-game scale
+                                                  # (Neve stands at 0.867: 2.2 / 4.6 m/s in game are 2.54 / 5.31 here)
 FPS = 48            # keys per second
 CONTACT = 0.012     # m: a sole vert this close to the floor is planted
 TURN = 40.0         # deg: the most the pelvis turns into the move, the chest stays on the source clip's facing
@@ -31,6 +32,7 @@ REACH = 0.8        # leg lengths: the most a stance sole travels (a longer step 
 SWING = 0.2        # leg lengths: the highest a swing sole lifts
 RIDE = {"walk": 0.985, "run": 0.95}   # leg lengths: the hip over a planted leg (a walk stands tall, a run rides a bent knee)
 G = 9.8            # m/s2: a flown step rises and falls on it
+MEET = 0.95        # of the loco speed: how fast a swing foot comes back to meet the floor (1: no scuff at the strike)
 PIVOT_MAX = 65.0   # deg: how far a sole may pivot on its heel or toe to stay in reach
 TOE_UP, HEEL_UP = 10.0, 30.0   # deg: the sole's pitch at the strike and at the push (mirrored walking backwards)
 DIRS = {"f": Vector((0, 1, 0)), "b": Vector((0, -1, 0)), "l": Vector((-1, 0, 0)), "r": Vector((1, 0, 0))}
@@ -205,7 +207,7 @@ class Gait:
             return home + self.lean + self.d * (front - self.travel * u) + off, pitch, True
         s = (ph - self.duty) / (1 - self.duty)
         span = self.speed * (1 - self.duty) * self.period
-        m0, m1 = -0.3 * span, -0.6 * span                    # (a Hermite pass: it leaves the floor folding up, meets it near speed)
+        m0, m1 = -0.3 * span, -MEET * span                   # (a Hermite pass: it leaves the floor folding up, meets it near speed)
         h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
         x = h[0] * (front - self.travel) + h[1] * m0 + h[2] * front + h[3] * m1
         side_out = self.face.to_3x3() @ Vector((sgn * 0.012 * math.sin(s * math.pi), 0, 0))
