@@ -52,6 +52,12 @@ const T := {
 	"dash_curve_juggernaut_peak_k":   ["~", [1.6, 1.8], "x", "[footage] Brall peak 17.1 m/s, mean 9.8 (fit 1.73)"],
 	"dash_curve_archer_peak_u":       ["~", [0.36, 0.52], "", "[footage] Myth roll peaks 0.15s into 0.33s"],
 	"dash_curve_archer_peak_k":       ["~", [1.7, 1.95], "x", "[footage] Myth peak 18.4 m/s, mean 9.9 (fit 1.86)"],
+	"dash_curve_dredge_peak_u":       ["~", [0.0, 0.1], "", "[footage] Kingpin's push is at full speed from the start"],
+	"dash_curve_dredge_peak_k":       ["~", [1.3, 1.5], "x", "[footage] Kingpin 14.6 m/s for 0.3s, mean 9.8 (fit 1.42)"],
+	"dash_curve_mage_peak_u":         ["~", [0.0, 0.1], "", "[footage] Joule's Surge is flat from the start"],
+	"dash_curve_mage_peak_k":         ["~", [1.0, 1.12], "x", "[footage] Joule 33 m/s, mean 29.5 (fit 1.07)"],
+	"dash_curve_ashwick_peak_u":      ["~", [0.05, 0.18], "", "[footage] Felix's ram peaks 0.07s into 0.65s"],
+	"dash_curve_ashwick_peak_k":      ["~", [1.6, 1.95], "x", "[footage] Felix peak 16.5 m/s, mean 11.2 (fit 1.88; steps miss the tip)"],
 	"dash_curve_dist":                ["~", [0.95, 1.05], "x", "the curve's mean is 1: the kit distance holds"],
 	"dash_curve_exit_run":            ["<=", 1.05, "x", "[footage] the skid falls through run speed into the walk"],
 	"coyote_frames":           [">=", 6.0, "frames", "FeelConfig coyote_time 0.1s (walked off a rim over the void)"],
@@ -661,35 +667,44 @@ func _dash_exit() -> void:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer"]:
+	for id in ["gunslinger", "juggernaut", "archer", "dredge", "mage", "ashwick"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
 		var speeds: Array[float] = []
-		var x0 := 0.0
-		for i in 90:
-			var x_was := P.pos.x
+		var p0 := Vector3.ZERO
+		var want := 0.0
+		for i in 120:
+			var pos_was := P.pos
 			var was_rolling := P.roll_t > 0.0
 			m.step(DT)
 			P.inp["dash"] = false
 			if P.ak.curved.is_empty() and speeds.is_empty():
 				continue
-			if speeds.is_empty(): x0 = x_was
+			if speeds.is_empty():
+				p0 = pos_was
+				want = _curve_dist(id)
 			speeds.append(P.roll_speed)
 			if was_rolling and P.roll_t <= 0.0:
 				break
 		print("MFEEL dash curve: %s, %d steps" % [id, speeds.size()])
-		var dd := P.ak.dash_def()
-		var feel := P.ak.dash_feel()
 		var mean := 0.0
 		for v in speeds: mean += v / speeds.size()
 		var peak := speeds.max() as float
 		rec("dash_curve_%s_peak_u" % id, (speeds.find(peak) + 0.5) / speeds.size())
 		rec("dash_curve_%s_peak_k" % id, peak / mean)
-		rec("dash_curve_dist", (P.pos.x - x0) / (float(dd.get("roll", dd.get("dist"))) * float(feel["dist"])))
+		rec("dash_curve_dist", Vector2(P.pos.x - p0.x, P.pos.z - p0.z).length() / want)
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
 	P.reclass(cls_was, kit_was)
+
+## The metres a fitted hero's dash is set to cover: the kit's distance under the dash feel, or for Sparkle's
+## Wirerun (a lane length from the charge, along the aim) the length its run took.
+func _curve_dist(id: String) -> float:
+	if id == "mage":
+		return float(P.ak.curved["speed"]) * float(P.ak.curved["t0"])
+	var dd := P.ak.dash_def()
+	return float(dd.get("roll", dd.get("dist"))) * float(P.ak.dash_feel()["dist"])
 
 ## Owner rule: explosions are for blasts that do something. A plain dash on the ground and one in the air spawn
 ## no particle burst and no ring (Fx.radial), only a dust puff and after-images.
