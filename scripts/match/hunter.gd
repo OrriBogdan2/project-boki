@@ -3041,6 +3041,7 @@ func _anim_state(stretch: float) -> void:
 	s["crouch"] = crouch_k
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
+	s["wisp_fall"] = HunterWisp.fall_k(self)      # downed: the fall to the Wisp and the rise from it
 	s["ledge"] = grap.size() > 0
 	s["mantle"] = _rise_k() if not lfloat.is_empty() else -1.0
 	s["stomp"] = (fmod(float(stomp["t"]), Life.R["stomp_cycle"]) / Life.R["stomp_cycle"]) if not stomp.is_empty() else -1.0
@@ -3094,8 +3095,6 @@ func _anim_state(stretch: float) -> void:
 		for e in m.truce.shown:
 			if e["h"] == self:
 				em = String(e["id"]); et = float(e["t"])
-	s["dead"] = out
-	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["extract_t"] = WardenClips.leave_t(self)
 	s["emote"] = em
 	s["emote_t"] = et

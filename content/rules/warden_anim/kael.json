@@ -173,6 +173,7 @@
 		"reviving": "revive",
 		"dead": "death",
 		"dead_t": 1.5,
+		"floor_t": 1.33,
 		"stun": "stun",
 		"emote": "emote",
 		"hit": {

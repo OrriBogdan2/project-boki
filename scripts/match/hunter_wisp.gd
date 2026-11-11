@@ -3,15 +3,21 @@ extends RefCounted
 ## A downed Hunter shows as a Wisp instead of the hero (docs/decisions/0019-downed-wisp.md). Purely
 ## presentation: it follows Hunter.downed and Hunter.out and changes nothing about timers, speed, revive
 ## or targeting. Per hunter, tick() runs a small state machine:
-##   hero --down--> pop in (hero hidden, Wisp puffs out) -> on (slow bob, trails heavily behind the hunter
-##   and settles when they stop, a quiet hum)
-##   on --revive--> pop out (Wisp brightens and fades, hero grows back from the look's hero_from with a squash) -> hero
-##   on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
-## The look (colours, body, drift, hum, timing) is WispLook's data. State lives in the hunter's meta "wisp".
+##   hero --down--> fall (hit, it falls to the floor: its death clip up to the data's floor_t, over FALL_T)
+##   -> pop in (a puff: the hero hides, the Wisp swells out) -> on (slow bob, trails heavily behind the
+##   hunter and settles when they stop, a quiet hum)
+##   on --revive--> pop out (Wisp brightens and fades; the hero grows back from the look's hero_from with a
+##   squash and stands up: the fall played backwards) -> hero
+##   fall or on --bleed out or executed--> snuffed (the Wisp breaks into sparks)
+## A Hero with no fall (no clips: Gil, or a procedural model) puffs at once. The look (colours, body, drift,
+## hum, pop timing) is WispLook's data. State lives in the hunter's meta "wisp".
 
+const FALL := "fall"
 const IN := "in"
 const ON := "on"
 const OUT := "out"
+const DOWN := [FALL, IN, ON]    # the modes of a downed hunter
+const FALL_T := 0.3             # s: the hit and fall to the floor before the puff (the source shows the wisp by ~0.4 s)
 const POP_OVERSHOOT := 1.70158   # the "back" ease's overshoot: the pop swells a little past full size
 const POP_FROM := 0.3         # fraction of full size the Wisp pops in from
 const FLASH_BOOST := 3.0      # extra glow at the instant of a pop
@@ -42,6 +48,16 @@ static func node_of(h: Hunter) -> Node3D:
 static func mode_of(h: Hunter) -> String:
 	return String(_state(h)["mode"])
 
+## How far the hero is through its fall: 0 standing .. 1 on the floor, held there while the Wisp stands in and
+## run back by the rise; -1 when up. HunterAnim's state "wisp_fall": the Hero's clips seek their death clip by it.
+static func fall_k(h: Hunter) -> float:
+	var st := _state(h)
+	match String(st["mode"]):
+		FALL: return minf(float(st["t"]) / FALL_T, 1.0)
+		IN, ON: return 1.0
+		OUT: return float(st["rise"]) * (1.0 - _out_k(st))
+	return -1.0
+
 ## The key of this hunter's hum loop in Sfx.
 static func hum_key(h: Hunter) -> String:
 	return "wisp%d" % h.get_instance_id()
@@ -56,12 +72,14 @@ static func _state(h: Hunter) -> Dictionary:
 static func _advance(h: Hunter, st: Dictionary) -> void:
 	var mode := String(st["mode"])
 	var look: Dictionary = st["look"]
-	if h.out and (mode == IN or mode == ON):
+	if h.out and mode in DOWN:
 		_snuff(h, st)
 	elif h.downed and not h.out and (mode == "" or mode == OUT):
-		_pop_in(h, st)
-	elif not h.downed and (mode == IN or mode == ON):
+		_fall(h, st)
+	elif not h.downed and mode in DOWN:
 		_pop_out(h, st)
+	elif mode == FALL and float(st["t"]) >= FALL_T:
+		_pop_in(h, st)
 	elif mode == IN and float(st["t"]) >= float(look["pop_in"]["time"]):
 		st["mode"] = ON
 	elif mode == OUT and float(st["t"]) >= float(look["pop_out"]["time"]):
@@ -73,16 +91,24 @@ static func _look_id(h: Hunter) -> String:
 static func _team_col(h: Hunter) -> Color:
 	return SideColor.of(h.m, h)      # the colour of the hunter's ring and downed marker
 
-static func _pop_in(h: Hunter, st: Dictionary) -> void:
+## Knocked down: the hero is hit and falls to the floor first (the clips play it from fall_k).
+static func _fall(h: Hunter, st: Dictionary) -> void:
 	_free_node(st)
 	if st["mode"] == OUT:
 		_restore_hero(h, st)
-	var look := WispLook.get_look(_look_id(h))
+	st["look"] = WispLook.get_look(_look_id(h))
+	st["mode"] = FALL
+	st["t"] = 0.0
+	if h.model == null or float(h.model.get_meta(WardenClips.FLOOR_T, 0.0)) <= 0.0:
+		_pop_in(h, st)
+
+## The puff at the end of the fall: the hero hides and the Wisp swells out.
+static func _pop_in(h: Hunter, st: Dictionary) -> void:
+	var look: Dictionary = st["look"]
 	var node := WispLook.build(look, _team_col(h))
 	node.position = Vector3(0, float(look["hover"]), 0)
 	h.add_child(node)
 	st["node"] = node
-	st["look"] = look
 	st["mode"] = IN
 	st["t"] = 0.0
 	st["last"] = h.position
@@ -91,6 +117,7 @@ static func _pop_in(h: Hunter, st: Dictionary) -> void:
 
 static func _pop_out(h: Hunter, st: Dictionary) -> void:
 	var look: Dictionary = st["look"]
+	st["rise"] = fall_k(h)      # (revived before the fall ended: the rise starts from there)
 	st["mode"] = OUT
 	st["t"] = 0.0
 	st["base"] = h.model.scale if h.model else Vector3.ONE
@@ -191,16 +218,22 @@ static func _hum(h: Hunter, st: Dictionary) -> void:
 	var hum: Dictionary = (st["look"] as Dictionary)["hum"]
 	Sfx.loop_hold(hum_key(h), String(hum["sfx"]), h.pos, float(hum["db"]))
 
+## How far the pop-out is, 0..1.
+static func _out_k(st: Dictionary) -> float:
+	return clampf(float(st["t"]) / float((st["look"] as Dictionary)["pop_out"]["time"]), 0.0, 1.0)
+
+## The Wisp brightens away while the hero, standing up through the rise, grows back; a hero revived before the
+## puff never shrank and only gets up.
 static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
-	var look: Dictionary = st["look"]
-	var spec: Dictionary = look["pop_out"]
-	var k := clampf(float(st["t"]) / float(spec["time"]), 0.0, 1.0)
+	var spec: Dictionary = (st["look"] as Dictionary)["pop_out"]
+	var k := _out_k(st)
 	var node := st["node"] as Node3D
-	if node:
-		node.scale = Vector3.ONE * (1.0 + 0.6 * k)
-		_set_glow(node, 1.0 + FLASH_BOOST * k, 1.0 - k)
-		_pose_body(h, st, dt)
-	# the hero grows back from HERO_FROM, squashing flat as it lands and springing up
+	if node == null:
+		return
+	node.scale = Vector3.ONE * (1.0 + 0.6 * k)
+	_set_glow(node, 1.0 + FLASH_BOOST * k, 1.0 - k)
+	_pose_body(h, st, dt)
+	# the hero grows back from hero_from, squashing flat as it lands and springing up
 	var grow := lerpf(float(spec["hero_from"]), 1.0, _back(k))
 	var squash := float(spec["squash"]) * sin(k * PI)
 	var base: Vector3 = st["base"]

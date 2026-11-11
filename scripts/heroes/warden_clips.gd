@@ -23,6 +23,8 @@ extends RefCounted
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
+const FLOOR_T := "clip_floor_t"   # root meta: s into the death clip where a downed Hero lies (0: no fall to a Wisp)
+const FALL_FADE := 0.05      # s: into the fall to a Wisp and the rise back (quick: the knock is a hit)
 const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, then take-off), before the model hides
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides it)
@@ -403,6 +405,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"proc": true}
 	if bool(s.get("dead", false)) and st.has("dead"):
 		return {"clip": st["dead"], "t": float(s.get("dead_t", 0.0))}
+	var fall := float(s.get("wisp_fall", -1.0))
+	if fall >= 0.0 and st.has("floor_t"):      # downed (HunterWisp): the death clip to the floor, the rise runs it back
+		return {"clip": st["dead"], "t": fall * float(st["floor_t"]), "fade": FALL_FADE}
 	var xt := float(s.get("extract_t", -1.0))
 	if xt >= 0.0:
 		return _extract_pick(xt)

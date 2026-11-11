@@ -995,7 +995,9 @@ class Sync extends Node:
 		wall = WardenWall.make(root, skel) if clips else null
 		if clips:
 			_look_pose()
-			root.set_meta(WardenClips.DEATH_T, float((dd.get("states", {}) as Dictionary).get("dead_t", 0.0)))
+			var states: Dictionary = dd.get("states", {})
+			root.set_meta(WardenClips.DEATH_T, float(states.get("dead_t", 0.0)))
+			root.set_meta(WardenClips.FLOOR_T, float(states.get("floor_t", 0.0)))
 		if clips and bool(dd.get("rig_root", false)):
 			rig_root = links.filter(func(l): return int(l[0]) == WardenSkeleton.find(skel, "root"))
 			leg_bones.clear()       # a hover (Motley): no feet on the ground to plant
