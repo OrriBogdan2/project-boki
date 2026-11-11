@@ -485,8 +485,8 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	T.teleport(home + Vector3(2.0, 0, 0))
 	aim_at(P, T.pos)
 	var sd: Dictionary = K.rmb_def()["shield"]
-	ok("bjorn shield: the wall is 40% longer (4.2 m)", absf(float(sd["len"]) - 4.2) < 0.01,
-		"len %.2f" % float(sd["len"]))
+	ok("bjorn shield: the wall is the source's width, 2.2 body heights (row 8: 3.96 m)",
+		absf(float(sd["len"]) - 2.2 * AimKit.BH) < 0.05, "len %.2f" % float(sd["len"]))
 	var x0 := T.pos.x
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
@@ -504,9 +504,16 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn shield: a foe walking into the raised wall is pushed back at least its push distance",
 		K.pushes >= 1 and moved >= float(sd["push"]) - 0.05, "pushed %d moved %.2f" % [K.pushes, moved])
 	ok("bjorn shield: a push flashes the wall", K.fx.aegis_hit > 0.0 or K.fx.push_flash > 0.0 or K.pushes >= 1)
-	ok("bjorn shield: the wall is built of plates (solid, not a flat slab) and bigger",
-		K.fx.aegis.get_child_count() >= 30 and K.fx.AEGIS_H >= 1.3 * 1.3 - 0.01 and K.fx.aegis.visible,
-		"parts %d height %.2f" % [K.fx.aegis.get_child_count(), K.fx.AEGIS_H])
+	var dome: MeshInstance3D = K.fx.aegis
+	var look: Dictionary = HeroVfx.data("bulwark")["moves"]["aegis"]["fx"][0]
+	var chord := K.fx.aegis_size.x * 2.0 * sin(deg_to_rad(float(look["arc"])) * 0.5)
+	var pane: ShaderMaterial = dome.material_override
+	ok("bjorn shield: the wall is a dome (HeroVfx shell) as wide as the wall that blocks",
+		dome.visible and pane.get_shader_parameter("mode") == HeroVfx.MODES["dome"]
+		and absf(chord - float(sd["len"])) < 0.1, "chord %.2f len %.2f" % [chord, float(sd["len"])])
+	ok("bjorn shield: the dome is pale gold, his ability colour (row 8, DECISIONS 11-08)",
+		(pane.get_shader_parameter("col") as Color).is_equal_approx(Color(String(Arch.def("bulwark")["color"]))),
+		str(pane.get_shader_parameter("col")))
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the chevron is gone", not AimKit.shown(P, "aegis_push") and not K.fx.aegis.visible)
