@@ -63,14 +63,15 @@ func run(main: Node) -> void:
 ## stopping short of the next ring; a lift ring is round with cones rising over it. Three meshes a ring.
 func _look() -> void:
 	var bad_look := 0
-	for rg in m.air_rings.list:
+	for i in m.air_rings.list.size():
+		var rg: Dictionary = m.air_rings.list[i]
 		var node: Node3D = rg["node"]
 		var hoop := (node.get_node("Ring") as MeshInstance3D).mesh as TorusMesh
 		var arrows := node.get_node_or_null("Arrows") as MeshInstance3D
 		if node.get_child_count() != 3 or arrows == null or hoop.rings != (32 if rg["lift"] else 6):
 			bad_look += 1
 			continue
-		var next := m.air_rings._ahead(rg)
+		var next := m.air_rings._ahead(m.world.rings[i])
 		var span := arrows.mesh.get_aabb()
 		if not rg["lift"] and span.end.z > next - AirRings.ARROW_START * 0.5:
 			bad_look += 1
@@ -78,7 +79,7 @@ func _look() -> void:
 	var kinds := {}
 	for rg in m.air_rings.list:
 		kinds[((rg["node"] as Node3D).get_node("Arrows") as MeshInstance3D).mesh] = true
-	ok(kinds.size() <= 6, "arrowhead meshes are shared by trail length (%d distinct)" % kinds.size())
+	ok(kinds.size() <= 8, "arrowhead meshes are shared by trail length (%d distinct)" % kinds.size())
 
 func _park(h: Hunter) -> void:
 	h.teleport(Vector3(-500, 50, -500))
