@@ -294,6 +294,22 @@ Source = `supervive_kits.md` on origin/ext/agent-briefs ([D]); amounts are in [H
 | Belt: Shield cell | 40 for 8 s | no source item (UTILITY_PARITY: ours only) | ours, keep |
 | Perk orbs | none give a shield (`perk_orbs.json`) | none | match |
 | Two shields at once | larger amount, longer time; Tenzo stacks add | not stated | `[?]` |
+## Blockers and crossers
+
+One rule for what stops what: `content/rules/blockers.json`, read by `scripts/combat/blockers.gd` (shots in `Verbs.shot_check`, bodies in `Verbs.wall_blocks`, beams and fissures through `Blockers.cut`, pulls through `Blockers.body_stops`). `--blocker-check` fires each crosser at each blocker. Source (PARITY FIRST): Brightshield blocks all damage from the front; Frozen Barricade blocks projectiles and bodies; Tetra's rocks are terrain; the Railgun and Abyssal Grasp pierce terrain, Phase Walk goes through walls and objects; placed walls still stop the Abyssal Hand (DECISIONS); Swap is a lob. Blockers: **shield** = Albert's raised aegis and every carried wall (Bracewall, Mass Guard), front only; **rock** = Tenzo's rocks (Stone Row, Basalt Spine); **ice** = Neve's Rink Wall; **wall** = placed walls (Barrier Glove, Prism Wall, kin walls); **guard** = Kael's Riposte guard. Own-side walls let their side's shots through unless they block all. stop / pass / - (can't meet).
+
+| Crosser | Class | shield | rock | ice | wall | guard |
+|---|---|---|---|---|---|---|
+| every projectile (LMB weapons, kit shots, Boki shots) | solid | stop | stop | stop | stop | stop |
+| Grimble's Abyssal Hand (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Vex's Longneedle (pierces terrain) | pierce | stop | pass | stop | stop | stop |
+| Kael's Warchain (bites the wall it meets) | solid | stop | stop | stop | stop | stop |
+| Cinder's Furnace Cloak pull (needs sight) | solid | stop | stop | stop | stop | stop |
+| Albert's Faultline cells | solid | stop | stop | stop | stop | stop |
+| every knockback | solid | stop | stop | stop | stop | stop |
+| every dash | body | - | stop | stop | stop | - |
+| Lace's Spirit Walk (through walls and objects, not terrain ledges) | phase | - | pass | pass | pass | - |
+| Motley's Trade (a high lob, then a swap) | lob | pass | pass | pass | pass | pass |
 
 ## Readability
 
