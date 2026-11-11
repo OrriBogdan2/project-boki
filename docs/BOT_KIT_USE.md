@@ -85,3 +85,18 @@ Both runs below use `--bot-kit-use=<arch>` (seeds 3, 5, 9, 120 s, both fighters 
 | Tenzo Stone Row | 0 rock hits / 10 rocks raised, 7 launched | 4 rock hits / 31 raised, 27 launched |
 
 The Snap did not change: the bots' general aim already leads the target by the weapon's speed, so the cast aimed the same way; with the lead held through the wind-up it lands as often (28 of 38). Cinder's flamethrower and Meeko's R are in the bullets above (ext/bot-kit-cinder-meeko).
+
+## The landing gate (ext/bot-kit-lands)
+
+`ext/bot-kit-use-a` reached main (11-09); `ext/bot-kit-use` and `-b` did not (named in the stuck-integ READY lines, never merged), so main kept the counting gaps above. `ext/bot-kit-lead-casts` and `ext/bot-kit-cinder-meeko` (11-11) fixed the four Hunters but were two unmerged branches; this branch carries both, and adds the gate.
+
+**Gate.** Each duel (each seed) must land every damage slot at least once in its first 90 s (`LAND_T`), not just the three seeds summed: LMB for every Hunter (a hit tagged `primary`, a `shot`, or a cast `ab:primary`, which is how Cinder's `flame` stream now counts, so the kit's `hose_hits` test counter is gone), plus `LANDS` per Hunter: Cinder Cinder Shot and Furnace Cloak (`ab:utility`, `ab:k1`), Meeko Burrseed (`ab:utility`; her R heals, so it stays an `ultimate` press), Tenzo Quakefall and Stone Row rocks (`ab:rmb`, `ab:rock`), Motley Shard Snap and Brimseed (`ab:rmb`, `ab:e`). A miss prints `KITUSE FAIL <arch> seed <n>: '<key>' lands no hit in 90 s`.
+
+**Stone Row.** The gate failed Tenzo on seed 5 in a `--bot-kit-use=dolm` run (no rock hit in the duel; 8 rock hits over all three; one seed's RNG depends on the runs before it, so a single-Hunter run and the full run differ). Traced: the row went up 3 times in 90 s for both fighters, and after it rose the bot never punched it, because the row blocks the shot line and the shared bot brain only holds LMB with a clear shot. Now, in `dolm_kit.gd` only: while any rock stands, the bot checks every step (not only with LMB held) whether its nearest rock lines up with the foe's lead spot (the rock's own speed and range), aims the punch from that rock to the spot, and only when the foe is past the rock (a rock only flies away from her); and it raises the row whenever the foe is 3.5 to 9 m away with a shot line (was 60% of those thinks).
+
+| (seeds 3, 5, 9, 120 s, full run) | Before this branch | After |
+|---|---|---|
+| Tenzo Stone Row rock hits | 6 | 12 (each seed lands by 90 s) |
+| Tenzo Quakefall hits | 30 | 32 |
+
+Every Hunter passes the gate on seeds 3, 5, 9, and Tenzo, Motley and Cinder on seeds 1, 2, 4, 6, 7, 8 too. The one red left is Gil's `rmb press` (above), red on origin/main too. bot.gd does not grow: the Cinder reach hook is 2 lines, and two comments next to it were merged.

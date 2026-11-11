@@ -67,7 +67,6 @@ var cloaks := 0
 var blasts := 0
 var pulled := 0
 var flame_ticks := 0
-var hose_hits := 0              # (tests) foe-ticks the stream landed on
 var bash_hits := 0
 var fizzles := 0
 var bolt_ends: Array = []       # (tests) where each Cinder Shot ended: [at, expired]
@@ -409,7 +408,6 @@ func _flame_tick(tick: float) -> void:
 			continue
 		var dmg: float = float(ld["dps"]) * tick * ignite_k(f) + f.max_hp * ignite_pct(f) * tick
 		f.hurt(dmg, h, {"src": "flame", "ab": "primary", "tags": ["flame"], "melee": false})
-		hose_hits += 1
 		add_char(f, float(ld["char_tick"]))
 		if flame_ticks % 2 == 0 and tells_visible():
 			vfx("lance_hit", f.pos)
