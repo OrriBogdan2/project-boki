@@ -1,6 +1,6 @@
 {
- "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Grimble's v95 master onto dredge.glb's skeleton, clips and anchors. Points are in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders.",
- "master": "~/meshy/v95/Grimble/v95.glb",
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Grimble's v95 master, appeal3 candidate b (the appeal3 face, calves slimmed 12%), onto dredge.glb's skeleton, clips and anchors. Points are in the fit frame (his front +Y, his right +X, soles on z 0, the master's metres), read on tools/art1/v95_grid.py's renders.",
+ "master": "~/meshy/v95/Grimble/r2/appeal3/cand_b.glb",
  "game": "art/wardens/dredge/dredge.glb",
  "tris": 13000,
  "head": {"centre": [-0.01, 0.32, 1.27], "r": 0.17},
