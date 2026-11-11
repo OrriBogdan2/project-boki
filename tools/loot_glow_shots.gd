@@ -3,6 +3,7 @@ extends RefCounted
 ## through jobq --needs gpu). One shot per ground: grass (the map as it is), stone (a grey slab under the
 ## drops) and shadow (a canopy over them casting its shadow). On each: one drop of every rarity, Common to
 ## Legendary, left to right, and a deathbox holding a Legendary on the right. <dir>/captions.txt names the files.
+## --quality=low|medium|high|ultra picks the preset (default high); file names carry it.
 
 const DT := 1.0 / 60.0
 const SPACING := 2.2          # m between drops
@@ -12,6 +13,7 @@ var main: Node
 var m: Match
 var P: Hunter
 var dir := ""
+var quality := "high"
 var lines: Array = []
 
 func run(main_node: Node) -> void:
@@ -19,6 +21,10 @@ func run(main_node: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
+		elif String(a).begins_with("--quality="):
+			quality = String(a).substr(10)
+	Save.no_write = true
+	Settings.v["quality"] = quality
 	DirAccess.make_dir_recursive_absolute(dir)
 	m = Match.new()
 	main.add_child(m)
@@ -35,15 +41,15 @@ func run(main_node: Node) -> void:
 	P.teleport(at + Vector3(0, 0, 3.0))
 	_row(at)
 	await _go(0.8)
-	_take("loot_grass", "Common to Legendary on grass at match zoom, a Legendary deathbox on the right")
+	_take("loot_grass_" + quality, "Common to Legendary on grass at match zoom, a Legendary deathbox on the right")
 	var slab := _plate(at, 14.0, 0.06, STONE)
 	await _go(0.4)
-	_take("loot_stone", "The same row on a grey stone slab")
+	_take("loot_stone_" + quality, "The same row on a grey stone slab")
 	slab.queue_free()
 	var canopy := _plate(at + Vector3(0, 4.5, -1.0), 18.0, 0.3, Color("303030"))
 	canopy.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
 	await _go(0.6)
-	_take("loot_shadow", "The same row under a canopy, in its shadow")
+	_take("loot_shadow_" + quality, "The same row under a canopy, in its shadow")
 	canopy.queue_free()
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
