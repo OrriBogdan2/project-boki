@@ -7,6 +7,9 @@ extends RefCounted
 ##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
+##   8. the match HUD's lane is single: six banners fired in one frame (a Boki line, Ways Out, a steal, a
+##      level-up, a pickup, a Boki status) show one at a time, most important first, each its minimum
+##      time; the pickup waiting behind them is dropped
 ## Never touches the save.
 
 var bad := 0
@@ -139,12 +142,14 @@ func _wiring() -> void:
 	m.hud.toast("Bramble Isle", Color.GOLD)
 	m.hud.toast_small("Chest key found", Color.WHITE)
 	m.hud.level_up(3)
-	ok(lane.count() == 3 and lane.texts().has("LEVEL 3  ·  +1 skill point"),
-		"Hud.toast, toast_small and level_up all land in the HUD's lane (%s)" % str(lane.texts()))
+	lane._process(0.01)
+	ok(lane.count() == 2 and lane.texts() == ["Bramble Isle"] and lane.single,
+		"Hud.toast and level_up land in the HUD's single lane, the small line behind the level-up goes (%s)" % str(lane.texts()))
 	lane.clear()
 	m.hud.tip("Hold left click to shoot")
 	ok(lane.count() == 1, "a hint lands in the same lane")
 	ok(lane.get_parent() == m.hud, "the lane is part of the HUD")
+	_burst(m)
 	m.queue_free()
 	var farm := Control.new()
 	main.add_child(farm)
@@ -153,6 +158,55 @@ func _wiring() -> void:
 	ok(str(MsgLane.of(farm).texts()) == str(["Not enough wood  x2"]) and UI.toast_busy(farm),
 		"UI.toast (the farm, town, houses) uses a lane too, repeats merged")
 	farm.queue_free()
+
+# ------------------------------------------------------------------ 8. six banners in one frame
+const STEP := 0.05     # s per simulated frame
+
+func _burst(m: Match) -> void:
+	var lane: MsgLane = m.hud.msgs
+	lane.clear()
+	lane.fight = false
+	m.hud.toast_small("Dropped it", Color.WHITE)                              # Boki line, LOW
+	m.hud.toast("Uplink started: hold the yard", Color.CYAN)                  # Ways Out, NORMAL
+	lane.push("Rook stole the Warden", StealCall.LOSER_COL, MsgLane.HIGH)     # a boss steal, HIGH
+	m.hud.level_up(3)                                                         # HIGH
+	m.hud.toast_small("Chest key found", Color.WHITE)                         # pickup, LOW
+	m.hud.toast("Your Boki is resting", Color.CYAN)                           # Boki status, NORMAL
+	var order: Array[String] = []
+	var shown_s: Array[float] = []
+	var most := 0
+	var overlap := false
+	var t := 0.0
+	while lane.count() > 0 and t < 30.0:
+		lane._process(STEP)
+		lane.fight = false
+		t += STEP
+		var now := lane.texts()
+		most = maxi(most, now.size())
+		var live: Array[Rect2] = []
+		for ch in lane.get_children():
+			if ch is Control and not ch.is_queued_for_deletion() and (ch as Control).modulate.a > 0.0:
+				live.append((ch as Control).get_rect())
+		overlap = overlap or not _no_overlap(live) or live.size() > 1
+		if now.is_empty():
+			continue
+		if order.is_empty() or order.back() != now[0]:
+			order.append(now[0])
+			shown_s.append(0.0)
+		shown_s[-1] += STEP
+	var want: Array[String] = ["Dropped it", "Rook stole the Warden", "LEVEL 3  ·  +1 skill point",
+		"Uplink started: hold the yard", "Your Boki is resting"]
+	ok(most == 1 and not overlap, "six in one frame: one banner at a time, never two cards on screen")
+	ok(order == want, "six in one frame: most important first, the pickup behind them dropped (%s)" % str(order))
+	ok(shown_s.size() == 5 and shown_s.all(func(s): return s >= MsgLane.MIN_SHOW),
+		"six in one frame: each stays its minimum %.1fs (%s)" % [MsgLane.MIN_SHOW, str(shown_s)])
+	if shown_s.size() == 5:
+		var cut := MsgLane.MIN_SHOW + MsgLane.FADE_OUT
+		ok(absf(shown_s[0] - cut) < 2.0 * STEP,
+			"six in one frame: the Boki line is cut short at its minimum (%.2fs, want %.2fs)" % [shown_s[0], cut])
+		ok(absf(shown_s[1] - MsgLane.LIFE[MsgLane.HIGH]) < 2.0 * STEP and absf(shown_s[3] - MsgLane.LIFE[MsgLane.NORMAL]) < 2.0 * STEP,
+			"six in one frame: nothing more important waiting, a banner keeps its full life (%s)" % str(shown_s))
+	lane.clear()
 
 # ------------------------------------------------------------------ 7. world labels yield
 func _yield() -> void:

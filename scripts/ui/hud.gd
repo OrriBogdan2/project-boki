@@ -13,7 +13,7 @@ var plates := HudPlate.new()     # overhead plates' chip, flash, armour-break an
 var hit_crit := false
 var hurt_t := 0.0
 var mates := MateAlerts.new()  # a teammate down, back or lost: their squad row and a faint line
-var msgs := MsgLane.new()      # every short message on screen: toasts, level-ups, hints
+var msgs := MsgLane.new(true)  # every short message on screen, one banner at a time: toasts, level-ups, hints
 var minimap: ImageTexture
 var map_paint: Texture2D = null   # the painted map (MapPaint), when it's ready
 

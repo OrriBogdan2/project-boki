@@ -6,6 +6,9 @@ extends Control
 ## a repeat of one on show or waiting merges into it ("Ember  x3"); at most MAX_SHOWN show at once
 ## (FIGHT_SHOWN in a fight, see `fight`) and the rest wait, the most important first; each lives a
 ## short while (FIGHT_LIFE at most in a fight). A low-priority line that waits too long is dropped.
+## The match HUD's lane is `single`: one banner at a time, so several landing at once (a level-up, a
+## steal, a Ways Out call, a Boki line) never overlap. A banner stays at least MIN_SHOW; then a more
+## important one waiting cuts it short, and low lines waiting behind a more important one are dropped.
 
 enum { LOW, NORMAL, HIGH }
 const MAX_SHOWN := 3
@@ -20,10 +23,12 @@ const CLOSE_UP := 12.0          # 1/s: how fast the cards below slide up when on
 const WIDE := 0.45              # of the screen width: the widest a card gets before its line wraps
 const FIGHT_SHOWN := 2          # lines on show at most while the player is in a fight
 const FIGHT_LIFE := 2.0         # s: the longest a line lives in a fight (a hint's own life aside)
+const MIN_SHOW := 0.9           # s a single-lane banner stays before a more important one may cut it short
 
 var top := 100.0                ## px from the top of the screen where the column starts
 var right_edge := 0.0           ## 0: the column is centred; else its right edge, in px
 var fight := false              ## true while the player is in a fight (Hud sets it): fewer, shorter lines
+var single := false             ## true: one banner at a time (the match HUD)
 var hold := false:              ## true: nothing new comes in (the tutorial banner has the floor)
 	set(v):
 		hold = v
@@ -31,7 +36,8 @@ var hold := false:              ## true: nothing new comes in (the tutorial bann
 var _shown: Array[Dictionary] = []
 var _waiting: Array[Dictionary] = []
 
-func _init() -> void:
+func _init(one := false) -> void:
+	single = one
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -140,17 +146,30 @@ func _process(delta: float) -> void:
 		w["wait"] = float(w["wait"]) + delta
 		if int(w["prio"]) == LOW and float(w["wait"]) > STALE:
 			_waiting.remove_at(i)
+	if single and not _waiting.is_empty():
+		_make_way()
 	_promote()
 	_layout(delta)
 
+## Single lane: a more important line waiting drops the low ones waiting and, once the banner on show
+## has had its MIN_SHOW, starts that banner's fade.
+func _make_way() -> void:
+	var top_prio := int(_waiting[_best()]["prio"])
+	for i in range(_waiting.size() - 1, -1, -1):
+		if int(_waiting[i]["prio"]) == LOW and top_prio > LOW:
+			_waiting.remove_at(i)
+	if _shown.is_empty():
+		return
+	var e: Dictionary = _shown[0]
+	var t := float(e["t"])
+	if top_prio > int(e["prio"]) and t >= MIN_SHOW and _life(e) > t + FADE_OUT:
+		e["life"] = t + FADE_OUT
+		e["own_life"] = true
+
 ## Moves waiting lines onto free rows, the most important first (oldest first within a priority).
 func _promote() -> void:
-	while not hold and not _waiting.is_empty() and _shown.size() < (FIGHT_SHOWN if fight else MAX_SHOWN):
-		var best := 0
-		for i in _waiting.size():
-			if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
-				best = i
-		var e: Dictionary = _waiting.pop_at(best)
+	while not hold and not _waiting.is_empty() and _shown.size() < _cap():
+		var e: Dictionary = _waiting.pop_at(_best())
 		e["box"] = _card(e)
 		add_child(e["box"])
 		_shown.append(e)
@@ -211,6 +230,20 @@ func _fit(l: Label, px: int) -> void:
 
 func _label_text(e: Dictionary) -> String:
 	return String(e["text"]) if int(e["n"]) < 2 else "%s  x%d" % [e["text"], e["n"]]
+
+## Lines on show at most now.
+func _cap() -> int:
+	if single:
+		return 1
+	return FIGHT_SHOWN if fight else MAX_SHOWN
+
+## The waiting line to show next: the most important, the oldest within a priority.
+func _best() -> int:
+	var best := 0
+	for i in _waiting.size():
+		if int(_waiting[i]["prio"]) > int(_waiting[best]["prio"]):
+			best = i
+	return best
 
 ## The waiting line to drop when too many wait: the oldest of the lowest priority.
 func _lowest() -> int:
