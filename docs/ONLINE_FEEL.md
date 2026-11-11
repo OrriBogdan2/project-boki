@@ -73,8 +73,11 @@ The no-delay baseline (`=0`) ends within 0.52 m of offline everywhere and shows 
   clock at ~0.6x the headless guest's, so the guest ran Kael on all the time, which two real games never do.
   `_run` now steps by the wall clock as `Match._process` does (as many steps a frame as real time asks, at most
   0.1 s behind). No tolerance changed. 37/0 in 3 runs headless and 3 under xvfb.
-- Still red on main and here: `--online-displace-check` Kael self-pull and sling "ends agree" (1 or 2 rows a
-  run, 0.78 to 0.85 m against the offline bot run, the bar is 0.75; see "Ends agree" above). Same on main's
-  scripts, so not this fix.
+- `--online-displace-check` Kael self-pull and sling "ends agree" (1 or 2 rows a run, 0.78 to 0.85 m against
+  the offline bot run, the bar is 0.75) stay red with this fix alone, as on main. That is the check's setup
+  (the bot's stale copy shoves the guest before the pull), fixed by ext/feel-online-hearth-call: with both,
+  40/0 in 3 runs at 100 ms and Kael's ends 0.03 to 0.27 m from offline.
+- Under xvfb run the check with `--rendering-driver opengl3`, as the suite does. On Vulkan (llvmpipe) on a
+  loaded box the guest's answers never reached the host (every row red from the first, the same in 3 runs).
 - Not measured: a mover owned by the host with the caster on the guest (every row has the host casting, so
   the guest is the one moved); Kael's Warchain on a bot (that is the offline reference).
