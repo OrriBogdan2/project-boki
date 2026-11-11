@@ -75,6 +75,10 @@ gone one's pair goes back to the pool, and one drawn while the match loads compi
 `Juice.hit` flashes the body cyan (`Ent.SHELL_FLASH`) for a hit that lands on armour and white for one on health;
 `Juice.armor_break` holds the cyan flash for `BREAK_FLASH_T` and sheds shards. No ring or burst (a ground ring means gameplay).
 The HUD strip flashes white as it loses some. Reel: `--hero-vfx-reel --reel-only=armour`. Check: `--hero-vfx-check`.
+## Armour tier-up
+`HeroVfx.tier_up(h, tier)` (called from `Match._armor_up`) is the one look that is not a recipe: a `sheen` (a band of light climbing a
+body-shaped capsule that faces the camera, so it reads from above) climbs the Hunter in 0.4 s in the new tier's colour (`Hunter.ARMOR_TIERS`), one per tier-up, for
+everyone (it rides `"hvfx"` as move `armor_up`, the tier in the charge slot). None on an armour break; no ring, no burst.
 
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes

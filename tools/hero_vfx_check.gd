@@ -61,6 +61,7 @@ func run(main: Node) -> void:
 	_armour(m, P)
 	_net(m, V, P)
 	_statuses(m, P)
+	_tier_up(m, V, P)
 	await _core_kinds(main, m, V, P)
 	await _lisette(main, V)
 	await _scarf(main)
@@ -461,3 +462,33 @@ func _statuses(m: Match, P: Hunter) -> void:
 	F.teleport(P.pos + Vector3(StatusLooks.LOD_FAR + 4.0, 0, 0))
 	ok(not L.showing(F, "stun"), "status looks: nothing draws past LOD_FAR")
 	F.stun_t = 0.0
+
+## The armour tier-up sheen: one per tier-up (the real path, Match._armor_up), coloured by the new tier, climbing the
+## body for SHEEN_LIFE; a break and a gain that stays inside the tier draw none; another game's tier-up arrives too.
+func _tier_up(m: Match, V: HeroVfx, P: Hunter) -> void:
+	_clear(V)
+	V.plays.clear()
+	var sheens := func() -> Array:
+		return (V.pools.get("sheen", []) as Array).filter(func(n: Node3D) -> bool: return n.visible)
+	P.armor_xp = 0.0
+	P.armor_tier = 0
+	ok(P.armor_gain(10.0) < 0, "a gain inside the tier is no tier-up")
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen without a tier-up")
+	for tier in range(1, Hunter.ARMOR_TIERS.size()):
+		_clear(V)
+		V.plays.clear()
+		P.armor_gain(float(Hunter.ARMOR_TIERS[tier][2]) - P.armor_xp)
+		m._armor_up(P)
+		var made: Array = sheens.call()
+		ok(made.size() == 1 and int(V.plays.get("armor_up", 0)) == 1, "tier %d: one sheen" % tier)
+		var col := Color.BLACK
+		if made.size() == 1:
+			col = (made[0].material_override as ShaderMaterial).get_shader_parameter("col")
+		ok(col.is_equal_approx(Hunter.ARMOR_TIERS[tier][1]), "tier %d: the new tier's colour" % tier)
+	ok(V.live.size() == 1 and is_equal_approx(float(V.live[0]["dur"]), 0.4), "the sheen sweeps in 0.4 s")
+	_clear(V)
+	V.plays.clear()
+	m.on_armor_break(P, null)
+	ok(sheens.call().is_empty() and int(V.plays.get("armor_up", 0)) == 0, "no sheen on an armour break")
+	V.net_in(["fx", "hvfx", P.nid, "armor_up", P.pos.x, P.pos.y, P.pos.z, 0.0, 0.0, 2.0, 0.0, 0.0])
+	ok(sheens.call().size() == 1, "a rival's tier-up arrives from another game")
