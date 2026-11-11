@@ -26,7 +26,7 @@ Source: Brall, `Upg:` lines. Slots the source gives no cooldown or damage upgrad
 
 | Slot | Source upgrade | Ours before (rank 2 / 3) | Ours after (rank 2 / 3) |
 |---|---|---|---|
-| RMB Smash | +20% damage x2; Meteor Drop rests 2.4s less at IV | cooldown 1.8s / 1.6s, damage +15% / +30% on top of Smash +20% / +40%; drop 7.2s / 4.8s | cooldown 2s flat, Smash damage +20% / +40%; drop 7.2s / 4.8s |
+| RMB Smash | +20% damage x2; Meteor Drop rests 2.4s less at IV | cooldown 1.8s / 1.6s, damage +15% / +30% on top of Smash +20% / +40%; drop 7.2s / 4.8s | cooldown 2.5s flat, Smash damage +20% / +40%; drop 9s / 6s |
 | Space Rampage | -1.6s recharge x2 (a 3rd charge), tier IV: a dodged shot feeds Rage | 8.8s / 7.3s (the old text said 9s -> 7.6s) | 8.8s / 6.4s; 3rd charge at 2, dodge feeds Rage at 3 |
 | E Warchain | -1.6s cooldown x2, tier IV: -3.2s more | 11.2s / 8.0s in play (the text said 9.5s -> 8.3s / 5.9s), damage +15% / +30% | 11.2s / 8.0s, damage unchanged (source has none) |
 
@@ -36,8 +36,8 @@ Brall's scale (slash 20 with tip +20, Execution Slam 70, Lunge 45, Obsidian Slam
 with tip 36, R 130) is kept as ratios: slash 8 (tip 16), Slam 26, Lunge 14 to 22, Meteor 18, Spin 18, Rampage 7
 with tip 14, Gilded Riposte 34 (the footage's 396 against a 94 slash, 4.2x; its 21.7s cooldown is about 2.3 Tether
 Chains, so ours is 22s against the Warchain's 9.5s). Rank 2 is the shared step (cooldown -10%, damage +15%); rank 3 carries the level 2-4
-specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 7.2s slot (9s against the Smash's 2.5s, kept as the
-ratio 3.6x of our 2s), 2.4s shorter at rank 3 (the -3s as a third of its cooldown); the Rampage tip no longer stuns into
+specials. Data pass (SERVER_UPDATE7): the Meteor Drop has its own 9s slot, 3s shorter at rank 3 (the
+source's numbers since docs/BALANCE_1111.md, which put the kit's 0.8x cooldowns back to 1.0x); the Rampage tip no longer stuns into
 a wall; the Rampage starts on 2 charges and takes the third at rank 2; the Warchain loses its refund for the data's
 -2s three times (12.5% of its cooldown each, merged: 12.5% at rank 2, 37.5% at rank 3); every Smash gets +20% at rank 2 and
 again at rank 3.
@@ -88,7 +88,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 |---|---|---|---|
 | E pull model (facing, input, slingshot) | HIGH | (a) | ext/zedran-warchain 1ae768d5: an impulse that input and facing curve, backing away slingshots; "jug chain pull: ..." asserts. Speed 22 m/s (footage 5 bh / 0.4 s) over the wiki's 19: the game data has none |
 | E tether extend | MED | (a) | 1ae768d5 / 95c291c8: pays out to 24 m and holds there; the length is ours `[?]` (no data, no frame shows a limit; 24 m kept), see "Warchain" |
-| E range / cooldown | MED | (b) | cooldown 12.8 s (the data's 16 s at the kit's 0.8x), ranks still -12.5% / -37.5% (8 s at rank 3 = 0.8 x the data's 10 s) |
+| E range / cooldown | MED | (b) | cooldown 16 s (the data's, BALANCE_1111; was 0.8x), ranks -12.5% / -37.5% (10 s at rank 3, the data's) |
 | E pull exits | LOW | (a) | kept and re-asserted under the new model ("jug pull: Shift exits ...", "... a jump exits ...") |
 | E hooked-foe blight | LOW | (b) | no Anti-Heal from the hook alone; the spin blights who it hits (the data's Scorching Spin). "juggernaut E: Warchain hooks (no blight ...)" |
 | RMB hold auto-fire, perfect release | HIGH | (a) | ext/parity e6429ccb: held indefinitely, a perfect window at full then once a second (+20%); "jug parity rmb: ..." |
@@ -99,7 +99,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--jug
 | RMB during pull / arrival | LOW | (a) | the RMB interaction rows pass under the new pull model (Cinder Spin, Haul Slam, Chain Lunge asserts) |
 | LMB tip 2.0x | LOW | (b) | 1.6x (the footage's 151 / 94). "juggernaut LMB tap: a slash, 1.6x at the tip ..." |
 | LMB hold Shift-cancel, self-release | MED | (a)+(b) | Shift keeps the charge (item 51, 53820b53); the self-release at full + 0.5 s is gone (the owner's hold scales; no data rule) |
-| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 10.4 s (0.8 x 13) |
+| Shift numbers | LOW | (b) | 9 along it, tip 18 (the data's 49 = 1.14x a slash), cooldown 13 s (the data's, BALANCE_1111; was 0.8x) |
 | Air dash shove | LOW | (b) | no shove (no source) |
 | X cooldown / damage | MED | (b) | 36 s (0.8 x 45) and 43 (the data's 230 = 5.35x a slash) |
 | X fx (guard ring, self-shake) | LOW | (b)+(c) | the guard-start ring is gone; the shake is ext/no-shake's |
@@ -283,7 +283,7 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The slam lands where you aim in the air | footage 0263, 0286 | yes | Built (5m reach), asserted |
 | Brall climbs double-height walls by jumping while facing them | wiki passive; data bCanWallJump (supervive_physics.md:67) | no | Built on main: `climb_tall` in content/rules/hunter_move.json, read by hunter_move.gd |
 | Dodging shots during the dash builds Empowered (top rank) | owner's game data | no | Built at rank 3: the perfect-dodge hook feeds 15 Rage |
-| The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 7.2s, 4.8s at rank 3; the Smash stays ready |
+| The Obsidian Slam has its own cooldown slot (9s, -3s at the top) | owner's game data | n/a | Built: 9s, 6s at rank 3; the Smash stays ready |
 | The Flame Step tip does not stun into walls | owner's game data | n/a | Built: the wall stun is gone |
 | Turning is restricted when the dash follows an RMB | wiki patch 05.02.25 | no | Not built (a turn lock reads as lag in our camera); Assumption 7 |
 | The ult: 0.65s of invulnerability, then the strike | wiki R | yes (ult f33-f39) | Built: blocks every hit and its crowd control; asserted |
