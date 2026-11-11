@@ -259,8 +259,8 @@ func rimewright() -> void:
 		"rimes +%d" % (int(K.stats["rimes"]) - rimes0))
 	step(m, 0.25)
 	var ring: Dictionary = AimKit.entry(P, "x")
-	ok("tm X: sealed in, the 8.3 m rink (the source's 4 bh + 15%) shown to everyone, the cast move",
-		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 8.3) < 0.05
+	ok("tm X: sealed in, the 7.47 m rink (the source's 4 bh + 15%, then owner playtest 11-11: 10% smaller) shown to everyone, the cast move",
+		not K.rime.is_empty() and bool(ring.get("all", false)) and absf(float(ring.get("r", 0.0)) - 7.47) < 0.05
 		and K.ulk().showing("rink") and K.icb().active() and K.anim_id in ["tm_rime", "tm_rime_hold"], K.anim_id)
 	ok("tm X: its own cooldown (80 s, game data) starts on the cast, no bond for the cast",
 		absf(float(K.cd["x"]) - 80.0) < 0.5
