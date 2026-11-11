@@ -17,4 +17,9 @@ const NAMES := [
 	"os_pop", "os_empower", "br_spine", "br_rumble", "br_crumble", "os_well", "os_well_hum",
 ]
 ## The shortest gap (ms) before one of these can play again, next to Sfx.MIN_GAP (Hero sound sets add theirs).
-const MIN_GAP := {}
+const MIN_GAP := {
+	# the steal cues (StealSfx): prize monsters dropping together cry once a kind, two quick steals sting once
+	"steal_cry_bomber": 400, "steal_cry_brute": 400, "steal_cry_glimmer": 400, "steal_cry_sentinel": 400,
+	"steal_cry_skitter": 400, "steal_cry_spitter": 400, "steal_cry_warden": 400,
+	"steal_reel": 300, "steal_won": 1500, "steal_lost": 1500,
+}

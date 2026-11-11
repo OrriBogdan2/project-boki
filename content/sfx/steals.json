@@ -1,0 +1,15 @@
+{
+ "group": "steals",
+ "name": "Last-hit steal cues",
+ "script": "tools/gen_sfx_steals.py",
+ "sounds": {
+  "steal_cry_bomber": "grunt", "steal_cry_brute": "grunt", "steal_cry_glimmer": "grunt", "steal_cry_sentinel": "grunt",
+  "steal_cry_skitter": "grunt", "steal_cry_spitter": "grunt", "steal_cry_warden": "grunt",
+  "steal_reel": "heavy_impact", "steal_won": "cast", "steal_lost": "cast"
+ },
+ "signature": [],
+ "reach": {
+  "steal_cry_bomber": 40, "steal_cry_brute": 40, "steal_cry_glimmer": 40, "steal_cry_sentinel": 40,
+  "steal_cry_skitter": 40, "steal_cry_spitter": 40, "steal_cry_warden": 40, "steal_reel": 40
+ }
+}
