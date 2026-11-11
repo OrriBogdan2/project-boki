@@ -4382,6 +4382,7 @@ func _catch(h: Hunter, k: Kin) -> void:
 	k.visible = false
 	var rec: Dictionary = k.rec.duplicate(true)
 	rec["caught_at"] = where_at(k.pos)       # provenance: where it was caught (Save.register)
+	rec["caught_at"]["hunter"] = HeroTitle.base_name(h.arch)      # and who carried it out
 	if k.lost_from != "":
 		# someone's lost kin: it keeps who it is, and we remember who has it now
 		rec["lost_from"] = k.lost_from

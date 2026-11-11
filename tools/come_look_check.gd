@@ -133,6 +133,54 @@ func _newcomer(rare: bool) -> void:
 	var same := others.keys().all(func(nm): return _mem_size(nm) == others[nm])
 	ok(same, "%s: nobody else wrote a line" % tag)
 
+## A claimed Boki rides home (CarryArrival): `crowded` = the garden already has its cap out, so it goes to the Burrow.
+func _carried_home(crowded: bool) -> void:
+	var tag := "a carried-out Boki, garden %s" % ("full" if crowded else "has room")
+	var roster: Array = Save.d["roster"].slice(0, KinBox.farm_cap() if crowded else 5)
+	for r in roster:
+		r.erase("boxed")
+	Save.d["roster"] = roster
+	home._spawn_kin()
+	FarmChatter._known.clear()
+	for k in home.kins:
+		FarmChatter._known[String(k["rec"]["uid"])] = true
+	var rec := Save.new_kin(String(Data.KIN.keys()[8]), "Ridge")
+	rec["caught_at"] = {"map": "Skyreach", "hunter": "Albert"}
+	Game.apply_result({"extracted": true, "caught": [rec], "stats": {}})
+	var mine: Dictionary = Save.d["roster"][-1]
+	var uid := String(mine["uid"])
+	ok(CarryArrival.pending == [uid], "%s: the result marks it as carried home" % tag)
+	var memory := String(mine["memory"][-1]["text"])
+	ok(memory == "came home from Skyreach with Albert", "%s: its memory line is '%s'" % [tag, memory])
+	home._close_panel()
+	if not crowded:
+		home._spawn_kin()
+		_gather(home.ppos)
+	FarmChatter._look_t = 0.0
+	FarmChatter.tick(home, 0.01)
+	ok(CarryArrival.pending.is_empty(), "%s: the garden took the news" % tag)
+	var card := "%s came home" % mine["name"]
+	ok(home.panel_open == card, "%s: its arrival card opens ('%s')" % [tag, home.panel_open])
+	home._close_panel()
+	var words := " ".join(CarryArrival.card_lines(mine))
+	ok(words.contains("Skyreach") and words.contains("Albert"), "%s: the card names map and Hunter" % tag)
+	var says := "names" if crowded else "leaves out"
+	ok(words.contains("Burrow") == crowded, "%s: the card %s the Burrow" % [tag, says])
+	if crowded:
+		ok(KinBox.is_boxed(mine) and ComeLook._looks.all(func(l): return l["kind"] != "boki"),
+			"%s: it is in the Burrow: nobody comes to look at a Boki that is not there" % tag)
+		return
+	var who := {}
+	for k in home.kins:
+		if String(k["rec"]["uid"]) == uid:
+			who = k
+	var gap := (who["pos"] as Vector3).distance_to(home.ppos)
+	ok(not who.is_empty() and gap < 4.0, "%s: it stands at the arrival point (%.1f m)" % [tag, gap])
+	var came: Array = ComeLook._looks.map(func(l): return l["k"])
+	ok(came.size() == ComeLook.MAX_LOOKERS and not came.has(who), "%s: three residents come to look" % tag)
+	var res := _watch(who["pos"])
+	ok(res["spoke"].size() >= 1, "%s: they chatter (%s)" % [tag, ",".join(res["spoke"].keys())])
+
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
@@ -178,5 +226,7 @@ func run(m: Node) -> void:
 	FarmChatter._look_t = 0.0
 	FarmChatter.tick(home, 0.01)
 	ok(ComeLook._looks.is_empty(), "the same trip is not news twice")
+	await _carried_home(false)
+	await _carried_home(true)
 	print("COMELOOK done, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)

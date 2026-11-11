@@ -125,6 +125,7 @@ static func _welcome(h) -> void:
 			_known[uid] = true
 			arrived.append(k)
 	ComeLook.loot_home(h)
+	CarryArrival.arrive(h, arrived)
 	if first or arrived.is_empty():
 		return
 	ComeLook.event(h, ComeLook.arrival_kind(arrived[0]["rec"]), arrived[0]["pos"], arrived[0])
