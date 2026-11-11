@@ -3,7 +3,10 @@ extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## the body does. A match hit (KinFlinch, "hit" meta) jolts Flex over
+## whatever clip runs, and the eased _hit_k shows the sad face; a downed Boki
+## (kstate "faint") lies in the sleep clip at DOWN_SPEED with its eyes shut, then a quick hop
+## clip for GETUP_S when it comes round: no clip of its own is baked (docs/art/kin/RIGGED_BOKI.md).
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -105,6 +108,8 @@ const FRAME := {
 		"marks": {"left flank": Vector3(-0.105, 0.2, 0.05), "right flank": Vector3(0.105, 0.2, 0.05),
 			"back": Vector3(0, 0.3, 0.05), "chest": Vector3(0, 0.26, -0.14)}},
 }
+const DOWN_SPEED := 0.6       # x: the sleep clip's pace while knocked out, a slow breath
+const GETUP_S := 0.3          # s: the hop it springs up with when it comes round
 ## m/s a foot on the ground moves back at speed 1 and model scale 1: [walk, run]. Measured by --boki-anim-audit.
 const STRIDE := {
 	"cindle": [0.80, 1.60],
@@ -148,6 +153,8 @@ const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
+const HIT_WINDOW := 0.15      # s a hit keeps the flinch asked for
+const HIT_RATE := 8.0         # 1/s the flinch eases in and out at (in within 0.13 s, never a pop)
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -194,6 +201,11 @@ var _speed := 0.0
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
+var _hit_left := 0.0           # s of the flinch still asked for
+var _hit_k := 0.0              # the flinch layer, 0..1
+var _hit_n := 0               # the hit count (KinFlinch) last frame
+var _flinch_was := false      # the hunter-side flinch pose last frame
+var _was_down := false
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -341,9 +353,23 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
+	# its own hit (KinFlinch counts them), or its hunter's (KinCompanion's flinch pose)
+	var hits: int = int((root.get_meta("hit", {"n": 0}) as Dictionary)["n"])
+	var flinching := String(root.get_meta("pose", "")) == "flinch"
+	if hits != _hit_n or (flinching and not _flinch_was):
+		_hit_left = HIT_WINDOW
+	_hit_n = hits
+	_flinch_was = flinching
+	_hit_left -= dt
+	_hit_k = move_toward(_hit_k, 1.0 if _hit_left > 0.0 else 0.0, HIT_RATE * dt)
+	var down := String(root.get_meta("kstate", "")) == "faint"
+	if _was_down and not down:
+		_shot = "hop"
+		_shot_left = GETUP_S
+	_was_down = down
 	var want := _state_clip()
 	set_clip(want)
-	player.speed_scale = 1.0
+	player.speed_scale = DOWN_SPEED if down else 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
@@ -356,7 +382,7 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if String(root.get_meta("kstate", "")) in ["sleep", "faint"]:
 		return "sleep"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
@@ -376,6 +402,10 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if String(root.get_meta("kstate", "")) == "faint":
+		return "asleep"
+	if _hit_k > 0.3:
+		return "sad"
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")

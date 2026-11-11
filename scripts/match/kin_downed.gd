@@ -262,6 +262,7 @@ static func scoop_k(k: Kin) -> float:
 	return clampf(k.rescue_t / maxf(0.01, float(rules()["rescue_s"])), 0.0, 1.0)
 
 # ------------------------------------------------------------------ how it shows
+const LIE_ROLL := 1.4     # rad: how far a knocked-out Boki rolls onto its side (KinPuppet and BokiRig pose the rest)
 const BEACON_H := 3.2     # m: the marker pillar over a downed Boki
 
 ## The marker over a downed Boki: a pillar in your team colour that your squad can see from afar.

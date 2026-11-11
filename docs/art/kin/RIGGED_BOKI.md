@@ -37,6 +37,29 @@ them; a prop named in the species' `GLOW_PIECES` wears the glow (Lunowl's dazzle
 `boki_coat` (atlas, ink), `boki_glow` (the species' glow), `boki_face` (lids, brows, mouth), `boki_eye`. Face LODs
 stay off (`FACE_LOD_BIAS`): Godot cuts them from the rest pose, where the lids lie folded.
 
+## State coverage
+
+Every one of the 21 rigged species has all 13 clips (`--boki-rig-check`), so a state is covered the same way on each; the
+gaps were in what asked for them. `--boki-state-check` cycles every state below on every species and asserts the
+clip (or layer) plays, is not the rest pose (a T-pose), is not frozen, and shows within 0.2 s (`BokiRig.FADE` 0.14 s
+crossfade; the flinch eases in over 0.125 s). `--boki-state-check --shots-dir=<dir>` draws `states.png`, a species-by-state sheet.
+
+| State | Where | Asked by | Shows |
+|---|---|---|---|
+| idle, walk, run | both | speed | `idle`, `walk`, `run` |
+| nap | garden | `kstate` sleep (Home `nap_t`) | `sleep`, eyes shut |
+| eat | garden | `kact` eat (`KinAct`, at the bowl) | `eat`, chewing face |
+| pet | garden | `kact` pet (`KinAct`, held and joyful) | `pet`, bliss face |
+| play | garden | `happy` (Home `joy_t`) | `hop`, happy face |
+| work (chop, mine, carry, tend) | garden | `kwork` | the work clip |
+| attack, ability | match | `kstate` attack, `pulse` | `attack`, `ability` |
+| perch | match | `kstate` perch | `idle` (the shoulder pose is on `Kin`) |
+| hit | match | a `KinFlinch` hit (any damage event), or pose `flinch` (its hunter hit) | KinFlinch jolt on Flex over the running clip, sad face while the hit is fresh |
+| faint | match | `kstate` faint (downed) | `sleep` at 0.6x (a slow breath) with the eyes shut, rolled onto its side by `Kin` (`KinDowned.LIE_ROLL`); on revive the `hop` clip for 0.3 s as the get-up, then idle. No clip of its own is baked: a dedicated `down` clip per species is the alternative |
+
+The 29 primitive species (`KinPuppet`): idle, walk, run, attack (`att_k`), nap (`sleep_k`), faint (`down_k`: a per-plan slump `DOWN_T`, eyes shut, slow breath, limbs tucked, and a 0.3 s spring `getup_k` on revive; `--kin-downed-check`), perch (`perch_k`),
+play (`happy_k`), hit (the KinFlinch jolt, and the ears-and-squash kick on its hunter's flinch pose). They have no eat or pet pose beyond Home's chew squash and the joy wiggle.
+
 Checks and review: `--boki-rig-check`; `--boki-rig-shots --shots-dir=<dir>`, then `tools/boki/review_gifs.sh <dir>`.
 
 Hit flinch: the glbs carry no hit clip. Every damage event to a Boki (owned, wild, summoned; not burn or other

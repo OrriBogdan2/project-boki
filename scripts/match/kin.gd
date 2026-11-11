@@ -1095,7 +1095,7 @@ func render(delta: float, alpha: float) -> void:
 		body.rotation.x = 0.0
 		return
 	var on_you := state == "shoulder" and not beside
-	model.set_meta("kstate", "perch" if on_you else ("attack" if lunge_t > 0.0 else ""))
+	model.set_meta("kstate", _puppet_state(on_you))
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
 	if state == "reviving" and comp and pose_now == "":
@@ -1143,9 +1143,9 @@ func render(delta: float, alpha: float) -> void:
 	body.position.y = absf(sin(hop_ph)) * (0.14 if moving else 0.03) + (0.12 if lunge_t > 0.0 else 0.0)
 	var sq := squash
 	body.scale = Vector3(1.0 + sq * 0.4, 1.0 - sq * 0.45, 1.0 + sq * 0.4)
-	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
+	model.set_meta("dazed", state == "dazed" or stun_t > 0.0)
 	if state in ["downed", "dazed"]:
-		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
+		body.rotation.z = lerpf(body.rotation.z, KinDowned.LIE_ROLL if state == "downed" else 0.0, delta * 6.0)
 		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
@@ -1158,6 +1158,14 @@ func render(delta: float, alpha: float) -> void:
 	_render_demo()
 	Capture.dissolve(self)
 	KinDowned.scoop_pose(self)
+
+## The "kstate" meta the puppets read (KinPuppet, BokiRig).
+func _puppet_state(on_you: bool) -> String:
+	if on_you:
+		return "perch"
+	if state == "downed":
+		return "faint"
+	return "attack" if lunge_t > 0.0 else ""
 
 ## A little show-and-tell for the tutorial: a dash, a jump, a hop (KinCompanion.demo).
 func _render_demo() -> void:
