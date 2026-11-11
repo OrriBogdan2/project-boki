@@ -320,6 +320,7 @@ const CHECKS := {
 	# 2 games, laggy relay
 	"--remote-smooth-check": ["res://tools/remote_smooth_check.gd", "remote_smooth_check", null],
 	"--lagcomp-check": ["res://tools/lagcomp_check.gd", "lagcomp_check", null],      # 2 games, lag relay
+	"--online-feel-check": ["res://tools/online_feel_check.gd", "online_feel_check", null],     # 2 games, 100 ms delay
 	"--breaker-proof-shots": ["res://tools/breaker_proof_shots.gd", "breaker_proof_shots", null],
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
