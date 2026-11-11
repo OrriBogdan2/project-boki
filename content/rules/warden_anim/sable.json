@@ -1,5 +1,5 @@
 {
-	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock.",
+	"doc": "Sable's hand-keyed clips (art/wardens/sable/sable.glb) and which game state plays which (scripts/heroes/warden_clips.gd). The walk and run rings are the pilot loops (art/wardens/sable/IMPORT.md): foot_mps is --anim-audit's clip speed with the stride applied. Twin flintlocks, one skinned to each hand; the Vault's flips and the Encore dance run on the kit's own clock.",
 	"skinned_weapon": true,
 	"extra_bones": {"lid.L": "head", "lid.R": "head", "brow.L": "head", "brow.R": "head", "mouth.L": "head", "mouth.R": "head", "foot.L": "shin.L", "foot.R": "shin.R"},
 	"blade": {"root": "anchor_blade_root", "tip": "weapon_muzzle"},
@@ -7,7 +7,7 @@
 		"idle": "idle", "stance": "stance", "stance_after": 6.0,
 		"walk": {"f": "walk_f", "b": "walk_b", "l": "walk_l", "r": "walk_r"},
 		"run": {"f": "run_f", "b": "run_b", "l": "run_l", "r": "run_r"},
-		"walk_speed": 2.2, "run_speed": 4.6, "stride": [1.5, 1.5], "foot_mps": [1.02, 3.18], "arm_swing": {"L": 0.5, "R": 0.5}
+		"walk_speed": 2.2, "run_speed": 4.6, "stride": [1.25, 1.5], "foot_mps": [1.77, 4.13], "arm_swing": {"L": 0.4, "R": 0.4}
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 2.42},
 	"air": {"rise": "rise", "fall": "fall", "glide": "glide", "dive": "fall"},

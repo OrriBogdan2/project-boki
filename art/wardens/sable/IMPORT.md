@@ -16,6 +16,23 @@ feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trouser
 Lost against the v2 build below: the antenna, braid, wing and coat-tail spring chains stay in the rig but carry no mesh, the
 hip knives, the procedural pistols and the wing alpha cards.
 
+## Pilot loops (2026-11-11, animation-quality lane, ext/anim-pilot-loops-sm)
+
+The walk and run rings (`walk_*`, `run_*`) are motion-pilot loops, not `sable_clips.py`'s keys. The source is a Meshy auto-rig of
+this model (5 credits, its walking and running clips), retargeted onto the rig contract with the anim-tarek-pilot recipe
+(`~/anim/pilot-sm`, outside git). On the old body that forward pair won the blind Fable rubric, walk 4.2 against 2.2 and run
+3.8 against 2.7. Its skinned soles ran at 2.6 and 6.9 m/s against the 2.2 and 4.6 the game moves her at, though, so the loops that
+ship are replanted with `tools/art1/hunter_dir_gait.py`: the upper body, hip height and lean stay the pilot's, and the soles
+are pinned to the ground at exactly 2.2 and 4.6 m/s, in all four directions (Meshy gives forward only):
+
+    blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- PILOT.glb OUT.glb 2.2 4.6 f,b,l,r
+    python3 tools/art1/glb_add_clips.py art/wardens/sable/sable.glb OUT.glb walk_,run_
+
+One length per ring: walk 0.833 s, run 0.5 s. `sable_build.sh` and the v95 swap both carry the loops over from the committed glb.
+`--anim-audit --wardens=thief` reads the ankle, not the sole, and a sole that rolls from heel to toe reads slow there, so
+`content/rules/warden_anim/sable.json` keeps a stride gain and `foot_mps` set from the audit's clip speed (docs/DEBT.md).
+Not shipped: the unpinned Meshy forward pair, which is the one the blind rubric scored. Strips: `~/art-review/anim-pilot-sm-1111/`.
+
 ## Previous build: v2 (2026-11-06)
 
 The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-briefs; its index.md and "Notes for 3D" win). Built by script from sable_v2_turnaround.jpg, with sable_v2_master_sheet.jpg for detail; nothing is hand-edited in Blender.
