@@ -66,7 +66,8 @@ func _stand(at: Vector3) -> void:
 	home.ppos = at
 	home.player.position = at
 
-## A boulder the player can stand beside and reach with nothing else in the way (the Boki far off).
+## A boulder the player can stand beside and reach with nothing else in the way (the Boki far off),
+## where the Boki has open ground to step aside onto.
 func _rock_to_mine(pet: Dictionary) -> int:
 	_put(pet, HomeLayout.LANDING + Vector3(30, 0, 30))
 	for i in home.hb.wild_t:
@@ -77,9 +78,17 @@ func _rock_to_mine(pet: Dictionary) -> int:
 			continue
 		_stand(b)
 		home._find_interact()
-		if int(home.interact.get("i", -1)) == i:
+		if int(home.interact.get("i", -1)) == i and _room_to_side(i):
 			return i
 	return -1
+
+## Open ground from the Boki's spot out to where it steps aside (not a nook against a wall or another rock).
+func _room_to_side(rock: int) -> bool:
+	for side in [OFF_LANE, OFF_LANE + 0.6, OFF_LANE + 1.2]:
+		var at := _in_front(rock, IN_FRONT, side)
+		if home.world.occupy(at.x, at.z, 0.3, 0.0, true) != 0.0 or home.world.is_void(at.x, at.z):
+			return false
+	return true
 
 func _rock_center(i: int) -> Vector3:
 	var w: World = home.world
@@ -87,10 +96,13 @@ func _rock_center(i: int) -> Vector3:
 
 ## The Boki in front of you, between you and the boulder.
 func _block(rock: int, pet: Dictionary, ahead := IN_FRONT, side := OFF_LANE) -> void:
-	var to_rock: Vector3 = (_rock_center(rock) - home.ppos).normalized()
-	_put(pet, home.ppos + to_rock * ahead + Vector3(-to_rock.z, 0, to_rock.x) * side)
+	_put(pet, _in_front(rock, ahead, side))
 	pet["hold_t"] = 0.0
 	pet.erase("joy_t")
+
+func _in_front(rock: int, ahead: float, side: float) -> Vector3:
+	var to_rock: Vector3 = (_rock_center(rock) - home.ppos).normalized()
+	return home.ppos + to_rock * ahead + Vector3(-to_rock.z, 0, to_rock.x) * side
 
 func _lane_gap(rock: int, pet: Dictionary) -> float:
 	var p2 := Vector2(home.ppos.x, home.ppos.z)
