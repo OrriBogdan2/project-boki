@@ -31,7 +31,7 @@ the next time the game starts, and `--uipolish-check` asserts that.
 | `cam_style` | Camera | `cam.gd`, `match.gd` | new Camera tab (was a Gameplay group) |
 | `cam_follow` | Camera | `cam.gd`, `match.gd` | |
 | `cam_lead` | Camera | `match.gd` -> `cam.gd` | |
-| `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (buses) | |
+| `master`, `music`, `sfx`, `ambience` | Audio > Volume | `settings.gd` (`BUSES`: one per bus) | letting go of a slider plays `Sfx.play_sample` through its bus |
 | `reset_cue` | Audio > Sounds | `sfx.gd` | moved from Gameplay, renamed "Ability ready again" |
 | `mute_unfocused` | Audio > Window | `settings.gd` | |
 | `fullscreen`, `vsync`, `max_fps` | Video > Display | `settings.gd` | |

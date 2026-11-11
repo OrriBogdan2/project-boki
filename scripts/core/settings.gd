@@ -33,6 +33,8 @@ const DEFAULTS := {
 }
 ## Settings that no longer exist (docs/SETTINGS_AUDIT.md). They are dropped from the settings file
 ## the first time it's written after they went.
+## The volume settings and the audio bus each one sets (the buses are made in Sfx._ready).
+const BUSES := {"master": "Master", "music": "Music", "sfx": "SFX", "ambience": "Ambience"}
 const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 
 ## Graphics presets (Video → Quality). High is the game's full look; Very Low, Low and Medium trade
@@ -288,11 +290,10 @@ func reset_all() -> void:
 	changed.emit("")
 
 func apply(k: String) -> void:
+	if BUSES.has(k):
+		Sfx.set_bus(BUSES[k], float(v[k]))
+		return
 	match k:
-		"master": AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(v[k]), 0.0001)))
-		"music": Sfx.set_bus("Music", float(v[k]))
-		"sfx": Sfx.set_bus("SFX", float(v[k]))
-		"ambience": Sfx.set_bus("Ambience", float(v[k]))
 		"fullscreen":
 			# browsers only allow fullscreen from a click, so the web build doesn't restore it at startup
 			if OS.has_feature("web") and not _started:
