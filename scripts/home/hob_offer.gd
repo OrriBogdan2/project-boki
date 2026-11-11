@@ -128,6 +128,11 @@ func focus(i: int) -> void:
 	show_clip(0)
 	take_button.text = String(rules["offer_take"]).replace("{name}", HeroTitle.base_name(id))
 
+## The ability a Mask's preview shows: the first of its "clip" block's "preview", else its attack.
+static func preview_slot(hunter_id: String) -> String:
+	var own: Array = (Arch.def(hunter_id).get("clip", {}) as Dictionary).get("preview", [])
+	return String(own[0]) if not own.is_empty() else "lmb"
+
 ## Shows the k-th clip of the reel from its start; the others wait (a clip not built yet keeps building).
 func show_clip(k: int) -> void:
 	reel_i = posmod(k, reel.size())
