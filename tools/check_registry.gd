@@ -61,6 +61,7 @@ const CHECKS := {
 	# level-up / ready: one body glow, no ring
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
+	"--mob-damage-check": ["res://tools/mob_damage_check.gd", "mob_damage_check", null],      # camp time-to-fall table
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	# two-step abilities report their window
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
