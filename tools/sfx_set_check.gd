@@ -11,6 +11,8 @@ extends RefCounted
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. every breakable material breaks with its own sound in 3 takes or more, a powder keg has its own fuse hiss
+##      (as long as its fuse) and blast, and every chest tier opens with its own lid creak (content/sfx/breakables.json)
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -39,6 +41,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_breakables()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -179,6 +182,33 @@ func _dash_air() -> void:
 	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
 	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 
+## 9. The props you smash and the chests you open play their own sounds, never a shared stand-in.
+func _breakables() -> void:
+	var set_src := FileAccess.get_file_as_string("res://content/sfx/breakables.json")
+	var own: Dictionary = JSON.parse_string(set_src)["sounds"]
+	var rules := Breakables.rules()
+	var used := {}
+	var wrong := []
+	for mat in rules["debris"]:
+		var sname := String(rules["debris"][mat]["sound"])
+		if not own.has(sname) or _takes(sname).size() < 3 or used.has(sname):
+			wrong.append("%s: %s" % [mat, sname])
+		used[sname] = true
+	ok(wrong.is_empty(), "%d materials break with their own sound in 3 takes (wrong: %s)" % [used.size(), wrong])
+	for kind_s in rules["kinds"]:
+		var ex: Dictionary = rules["kinds"][kind_s].get("explosive", {})
+		if ex.is_empty():
+			continue
+		var secs := _length(String(ex["fuse_sound"]))
+		var mine := own.has(String(ex["fuse_sound"])) and own.has(String(ex["blast_sound"]))
+		ok(mine and absf(secs - float(ex["fuse"])) < 0.01,
+				"%s: its own fuse hiss (%.2f s for a %.2f s fuse) and blast" % [kind_s, secs, ex["fuse"]])
+	var lids: Array = ChestLoot.R()["creak"]
+	var odd := lids.filter(func(s): return not own.has(s) or lids.count(s) > 1)
+	var ends: bool = ChestLoot.creak(0) == lids[0] and ChestLoot.creak(lids.size() + 2) == lids[-1]
+	ok(lids.size() >= 2 and odd.is_empty() and ends,
+			"%d chest tiers open with their own lid creak, the last for richer (wrong: %s)" % [lids.size(), odd])
+
 func _takes(sname: String) -> Array:
 	var out := []
 	var paths: Array = ["res://audio/%s.wav" % sname]
@@ -205,6 +235,12 @@ func _measure(path: String) -> Dictionary:
 			cnt += 1
 	var rms := sqrt(sum / maxf(1.0, cnt))
 	return {"peak": linear_to_db(maxf(pk, 1e-6)), "rms": linear_to_db(maxf(rms, 1e-6))}
+
+## A 16-bit mono wav's length in seconds (the sample rate from its header).
+func _length(sname: String) -> float:
+	var path := "res://audio/%s.wav" % sname
+	var rate := FileAccess.get_file_as_bytes(path).decode_u32(24)
+	return _data(path).size() / 2.0 / maxf(1.0, rate)
 
 ## The 16-bit PCM samples of a wav file (its "data" chunk).
 func _data(path: String) -> PackedByteArray:
