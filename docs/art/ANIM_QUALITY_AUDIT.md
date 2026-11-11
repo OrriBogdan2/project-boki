@@ -67,6 +67,7 @@ to the hang of that clip instead. A value `{"L": 0.0, "R": 0.1}` lets each arm g
 its strike key: his snap keeps both palms through the shove (the source's release beat) and lets both go at 0.1 s, the
 full orb lets its casting arm go at 0.2 s and the Trade lob at 0.22 s, so the arm hangs on the recovery instead of holding its
 elbow out.
+clip sources in tools/art1 are unchanged). Done for `ashwick` (lance, shot), `dredge` (throw, shot), `tender` (seed, shot_r) and `dolm` (lmb_throw, lmb_punch).
 `--anim-audit` reports `t_free` (share of frames the free arm is raised 60 degrees or more and sideways) next to `t_pose`
 (either arm); `t_pose` stays up where the weapon arm itself reaches out. It measures every clip a Hunter's data names in
 `free_arm`, not only the two shown in the strips, and gates three things: the free arm out for at most 10 % of the clip; the
@@ -131,7 +132,12 @@ posts scroll at the move speed).
 **Tenzo (`dolm`)**
 1. Feet slid 38 % of the run speed and 54 % of the walk (fixed: 18 % and 25 %); the stride was half of the move.
 2. Arms swung with their own side's leg (counter -0.86, fixed to +0.72).
-3. lmb_punch and lmb_throw fling the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump.
+3. lmb_punch and lmb_throw flung the free arm 1.3 to 1.5 body heights with a 0.4 to 0.67 hand jump. Fixed: the free (left)
+   arm hangs by data (free arm 1.31 to 0.38 and 1.53 to 0.68 body heights), and the hand path is re-timed by
+   `tools/art1/glb_retime.py` (no Blender): the punch's drive arrives at 0.11 s, not 0.05, and the throw's fling at 0.15,
+   not 0.13, so the hand covers the same path over four frames (jump 0.67 to 0.35, 0.40 to 0.34). The boulder still leaves at
+   the kit's 0.13 s, the punch's hit stays on its kit key. The poses are the same;
+   `tarek_clips.py` carries the new key times for the next Blender bake (which replaces the glb: do not re-run the tool on it).
 
 ![dolm walk and run, before and after](anim_audit/dolm.jpg)
 
@@ -230,3 +236,8 @@ Strips: `--anim-shots` has a `start` strip (idle to a run, first 0.27 s at 30 fp
 ![archer start, before and after](anim_audit/start_archer.jpg)
 ![gunslinger start, before and after](anim_audit/start_gunslinger.jpg)
 ![mage start, before and after](anim_audit/start_mage.jpg)
+- Arm use in attacks: `ostra`, `mage`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge` done: free arm); `bulwark`
+  jumps a hand 0.5 to 0.64 body heights in one frame (`dolm` done: re-timed, jump 0.35).
+- `tender`: the stride cap (foot speed 3.9 of 4.65), and a stronger counter-swing (+0.39).
+- `gunslinger` and `bulwark`: slide 23 % and 19 % at a run, near the gate's 25 %.
+- Idle to walk first-pose gaps over 0.25 (`dredge`, `ashwick`, `juggernaut`, `archer`, `gunslinger`, `mage`).
