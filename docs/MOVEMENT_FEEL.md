@@ -517,6 +517,46 @@ Causes traced and cleared, with where each would have cost a frame:
 Found by the check and fixed on the side: `VVFx.echo` (Vex's dash after-image) read mesh instances the model had since freed (a muzzle flash, an old weapon) and spammed "previously freed instance" errors on every echo frame; the pair is now skipped and its ghost hidden.
 
 - **Town and interior on `FarmStep`, facing blended** (decision 0049). Both walked on the frame time with their own constants (town speed 5.0, jump 8.5 at gravity 26; room speed 4.2, an exponential ease). They now step in `Match.DT` steps with the hero's row (`speed`, `accel`, the walking brake, `turn_rate`) and the town jumps with `Hunter.JUMP_V` and `H_GRAV`, coyote time and the buffer included. The farm, town and room draw their facing between the last two steps' facings. `--move-rate-check` gained town and room rows (run, stop, jump, graces) and a facing assert: through a reversal at 144 fps no frame turns the drawn facing by more than `turn_rate` allows in that frame.
+## 8 directions: W up the screen, no diagonal bonus (`tools/move_feel_dirs.gd`)
+
+The keys become a world direction in one place for the match (`Match._gather_input`) and one for the
+garden (`Home._move_player`), the same way: `Vector2(get_axis(left, right), get_axis(up, down))`,
+normalised only when longer than 1 (so a stick's partial push keeps its length, and a key diagonal is
+exactly 1), then rotated by the camera's yaw, which only the skyship ride and the drop turn (the match
+camera and the garden camera sit at yaw 0, looking north). There is no deadzone on keys. World north
+(-z) is straight up the screen because `CamRig` places the camera on +z at its pitch; no roll, no twist.
+The glide steers toward `move x glide speed`, the class dash takes `move.normalized()` (`ArchKit.dash_dir`),
+so every consumer of the keys sees the same unit vector.
+
+Measured on the match camera (style supervive, pitch 66, cursor pan off so the hunter is on the screen's
+centre line), medium class, through the real keyboard path (`Match._process`), 2026-11-11, origin/main
+d255acbee. Nothing needed fixing: there was no skew and no speed bonus before this pass; the rows pin it.
+
+| Key | Screen heading (deg, 0 = right, 90 = up) | Ideal (the projected world line) | World off (deg) | Ground speed (m/s) | Glide speed (m/s) | Dash speed (m/s) |
+|---|---|---|---|---|---|---|
+| W | 90.0 | 90.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S | -90.0 | -90.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| A | 180.0 | 180.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| D | 0.0 | 0.0 | 0.00 | 4.550 | 5.000 | 23.000 |
+| W+D | 42.5 | 42.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| W+A | 137.5 | 137.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S+D | -42.5 | -42.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+| S+A | -137.5 | -137.5 | 0.00 | 4.550 | 5.000 | 23.000 |
+
+A diagonal reads 42.5 degrees on screen, not 45, because the pitched camera foreshortens the up-down
+axis (atan(sin 66) = 42.4; the glide at 25 m reads 42.2 for the same reason). The source's angled camera
+does the same: a 45-degree world diagonal is a flatter diagonal on screen. The check rows (`--move-feel-check`):
+
+| Key | Target | Source |
+|---|---|---|
+| dir_ground / dir_glide _screen_err_deg | <= 1 deg, worst of 8 | [footage] W runs straight up the screen |
+| dir_ground / dir_glide / dir_dash _world_err_deg | <= 1 deg, worst of 8 | keys -> world: no skew from the yaw or the axes |
+| dir_ground / dir_glide / dir_dash _speed_spread | <= 1% (fastest vs slowest) | [game data] normalised input, a diagonal is no faster |
+
+The dash row fires the press as one sim step: while the check drives frames by hand inside one engine
+frame, a key's "just pressed" never clears, so a real Shift would stay pressed into every later run and
+dash before the keys are read (toward the cursor). The garden has no separate row: it is the same
+expression and the same camera class at yaw 0.
 
 ## Not touched
 

@@ -14,6 +14,7 @@ var flat := Vector3.ZERO        # a flat open spot (6m clear all round)
 const SOURCE_JUMP_V := 7.5      # m/s, [game data] JumpZVelocity 750 uu/s
 const DT := 1.0 / 60.0
 const WARDEN_SKIN := preload("res://tools/warden_skin.gd")
+const DIRS := preload("res://tools/move_feel_dirs.gd")      # the W A S D and diagonal rows
 ## The framing is measured on one fixed body: the plain medium hunter (no Warden's shape or class size, so it
 ## doesn't move when the default medium Warden's proportions do), holding the medium class's default rifle.
 const REF_WEAPON := "quill_rifle"
@@ -242,6 +243,7 @@ func run(main: Node) -> void:
 	_screen_scale()
 	_e2e()
 	load("res://tools/dash_refill_check.gd").run(self)
+	bad += DIRS.new(m, flat, _reset).run()      # W A S D and the diagonals, on screen and in speed
 	_standing_dash()          # last: it swaps the kit and model the framing rows measure
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
