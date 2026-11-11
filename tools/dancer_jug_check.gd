@@ -633,56 +633,7 @@ func juggernaut(a) -> void:
 			K.waves == 1 and midk > 0.2 and A.dmg(T) >= 20.0 and T.slow_t > 0.0 and K.res > 45.0,
 			"mid %.2f took %.0f rage %.0f" % [midk, A.dmg(T), K.res])
 	K.res = 0.0
-	# RMB tap: the Finishing Slam winds up (aim it), then hits; +50% under 35%; its sweet spot is the payoff
-	P.teleport(home)
-	A.fresh(T)
-	T.teleport(home + Vector3(2.6, 0, 0))
-	A.aim_at(P, T.pos)
-	K.ch_rmb = 1.0
-	K.cd["rmb"] = 0.0
-	A.tap(m, P)
-	var early := A.dmg(T)
-	var winding := not K.slam_w.is_empty()
-	A.step(m, 0.3)
-	var lane: Dictionary = AimKit.entry(P, "slam")
-	var sl: Dictionary = K.rmb_def()["slam"]
-	var mv: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))["moves"]
-	var lm: Dictionary = K.d["lmb"]
-	A.ok("juggernaut move art: slash arc %.0f, slam cone %.0f, true sizes" % [lm["arc"], sl["angle"]],
-			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
-			and is_equal_approx(float(mv["slam_hit"]["fx"][0]["arc"]), float(sl["angle"]))
-			and is_equal_approx(float(_fx(mv["slam_hit"], "sweep")["arc"]), float(sl["angle"]))
-			and not mv["slash"]["fx"][0].has("size_x") and not mv["drop_hit"]["fx"][0].has("size_x")
-			and not mv["drop_hit"]["fx"][1].has("size_x")
-			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
-			"")
-	A.ok("juggernaut RMB tap: strike cone drawn = hit (%.1f m, %.0f deg)" % [sl["radius"], sl["angle"]],
-			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "cone"
-			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
-			and is_equal_approx(float(lane.get("deg", 0.0)), float(sl["angle"])),
-			str(lane))
-	A.step(m, 0.4)
-	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
-			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
-	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
-			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
-	P.teleport(home)
-	A.fresh(T)
-	T.teleport(home + Vector3(1.2, 0, 0))
-	A.aim_at(P, T.pos)
-	K.ch_rmb = 1.0
-	K.cd["rmb"] = 0.0
-	T.hp = T.max_hp * 0.3
-	var hp0 := T.hp
-	m.step(A.DT)
-	A.ok("juggernaut RMB ready: the wounded (under 35%) are outlined red",
-			AimKit.shown(P, "exec%d" % T.get_instance_id()))
-	A.tap(m, P)
-	A.step(m, 0.7)
-	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
-			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
-	A.ok("juggernaut RMB: short cooldown (2s)",
-			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
+	_jug_thrust(m, P, T, K, home, lv)
 	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
 	# his plain runs (briefs/hero-ref/juggernaut.md, locomotion; docs/MOVEMENT_FEEL.md)
 	A.step(m, 1.0)
@@ -968,6 +919,102 @@ func juggernaut(a) -> void:
 
 # ------------------------------------------------------------------ combinations (--kit-combo-check)
 
+## RMB tap, the Finishing Thrust: a straight strip, drawn = hit; he lunges rmb.slam.step forward, a foe off the
+## strip's side is missed, the wounded take +50%, the far tip is the sweet spot, and a wall or a ledge stops the lunge.
+func _jug_thrust(m: Match, P: Hunter, T: Hunter, K: JuggernautKit, home: Vector3, lv: int) -> void:
+	var sl: Dictionary = K.rmb_def()["slam"]
+	var mv: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))["moves"]
+	var lm: Dictionary = K.d["lmb"]
+	A.ok("juggernaut move art: slash arc %.0f, thrust strip %.1f m wide, true sizes" % [lm["arc"], sl["width"]],
+			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
+			and is_equal_approx(float(_fx(mv["slam_hit"], "scorch")["w"]), float(sl["width"]))
+			and String(_fx(mv["slam_hit"], "scorch")["shape"]) == "lane"
+			and not mv["slash"]["fx"][0].has("size_x") and not mv["drop_hit"]["fx"][0].has("size_x")
+			and not mv["drop_hit"]["fx"][1].has("size_x")
+			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
+			"")
+	var step_m := float(sl["step"])
+	A.ok("juggernaut RMB tap: the lunge is short (1.5-2.5 m) and snappy", step_m >= 1.5 and step_m <= 2.5
+			and float(sl["step_t"]) <= 0.2, "%.1f m in %.2fs" % [step_m, float(sl["step_t"])])
+	_thrust(m, P, K, T, home, home + Vector3(3.6, 0, 0))
+	var early := A.dmg(T)
+	var winding := not K.slam_w.is_empty()
+	A.step(m, 0.3)
+	var lane: Dictionary = AimKit.entry(P, "slam")
+	A.ok("juggernaut RMB tap: a straight strike strip, drawn = hit (%.1f x %.1f m)" % [sl["len"], sl["width"]],
+			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "lane"
+			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["len"]))
+			and is_equal_approx(float(lane.get("width", 0.0)), float(sl["width"])),
+			str(lane))
+	A.step(m, 0.4)
+	var went := P.pos.x - home.x
+	A.ok("juggernaut RMB tap: the Finishing Thrust winds up, then lunges %.1f m and lands" % step_m,
+			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap" and absf(went - step_m) < 0.2
+			and absf(P.pos.z - home.z) < 0.1, "took %.0f, went %.2f m" % [A.dmg(T), went])
+	A.ok("juggernaut RMB: the far tip is the sweet spot and marks the foe for the Riposte reset",
+			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
+	# a line, not a cone: 1.2 m off it at 2.5 m out (inside the old 70-degree cone) is missed
+	_thrust(m, P, K, T, home, home + Vector3(2.5, 0, 1.2))
+	A.step(m, 0.7)
+	A.ok("juggernaut RMB tap: a narrow line, not a cone (a foe 1.2 m off it is missed)", A.dmg(T) <= 0.0,
+			"took %.0f" % A.dmg(T))
+	# the wounded up close: the step stops at their body
+	P.teleport(home)
+	A.fresh(T)
+	T.teleport(home + Vector3(1.2, 0, 0))
+	A.aim_at(P, T.pos)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	T.hp = T.max_hp * 0.3
+	var hp0 := T.hp
+	m.step(A.DT)
+	A.ok("juggernaut RMB ready: the wounded (under 35%) are outlined red",
+			AimKit.shown(P, "exec%d" % T.get_instance_id()))
+	A.tap(m, P)
+	A.step(m, 0.7)
+	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close, the step stops at the body",
+			hp0 - T.hp >= 36.0 and K.sweet_spots == 1 and P.pos.x - home.x < 0.5,
+			"dealt %.0f spots %d went %.2f" % [hp0 - T.hp, K.sweet_spots, P.pos.x - home.x])
+	A.ok("juggernaut RMB: short cooldown (2s)",
+			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
+	_thrust_terrain(m, P, K, T, home, lv)
+
+## A wall 1.5 m ahead stops the lunge short of it and the strip at it; a drop 1.5 m ahead stops the lunge on the edge.
+func _thrust_terrain(m: Match, P: Hunter, K: JuggernautKit, T: Hunter, home: Vector3, lv: int) -> void:
+	var W: World = m.world
+	var ix := int(floor(home.x)) + 2
+	var iz := int(floor(home.z))
+	for dz in range(-1, 2):
+		W.level[W.idx(ix, iz + dz)] = lv + 3
+	_thrust(m, P, K, T, home, home + Vector3(3.2, 0, 0))
+	A.step(m, 0.7)
+	var went := P.pos.x - home.x
+	A.ok("juggernaut RMB tap: a wall stops the lunge short of it and the strip at it (no hit through it)",
+			went > 0.5 and went < 1.5 - P.r + 0.05 and A.dmg(T) <= 0.0, "went %.2f took %.0f" % [went, A.dmg(T)])
+	for dz in range(-1, 2):
+		W.level[W.idx(ix, iz + dz)] = lv - 2
+		W.level[W.idx(ix + 1, iz + dz)] = lv - 2
+	_thrust(m, P, K, T, home, home + Vector3(-6.0, 0, 0))
+	A.step(m, 1.0)
+	went = P.pos.x - home.x
+	A.ok("juggernaut RMB tap: he never lunges off a ledge (stops at its edge, still on top)",
+			went > 0.5 and went < 1.5 and P.grounded and absf(P.pos.y - home.y) < 0.05,
+			"went %.2f y %.2f" % [went, P.pos.y - home.y])
+	for dz in range(-1, 2):
+		W.level[W.idx(ix, iz + dz)] = lv
+		W.level[W.idx(ix + 1, iz + dz)] = lv
+
+## A Thrust tapped from `home` along +x, the foe fresh at `foe_at`.
+func _thrust(m: Match, P: Hunter, K: JuggernautKit, T: Hunter, home: Vector3, foe_at: Vector3) -> void:
+	P.teleport(home)
+	P.vel = Vector3.ZERO
+	A.fresh(T)
+	T.teleport(foe_at)
+	A.aim_at(P, home + Vector3(6.0, 0, 0))
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.tap(m, P)
+
 ## His mean ground speed walking north for 0.4 s after a 0.4 s run-up, `each` called every step.
 func _walk_v(m: Match, P: Hunter, each: Callable) -> float:
 	var walk := func():
@@ -1050,16 +1097,16 @@ func combos(a) -> void:
 	A.ok("combo jug: E > E > hold RMB = Cinder Spin on the press (no Haul Slam, no second move)",
 			spun_on_press and K.spins == spins0 + 1 and K.haul_slams == 1,
 			"spins %d slams %d" % [K.spins, K.haul_slams])
-	# E attached, RMB tapped (not pulling): a normal Finishing Slam
+	# E attached, RMB tapped (not pulling): a normal Finishing Thrust
 	A.step(m, 1.0)
 	hook.call()
 	A.tap(m, P)
-	A.ok("combo jug: E > RMB tap = Finishing Slam", not K.slam_w.is_empty() and K.last_variant == "tap")
+	A.ok("combo jug: E > RMB tap = Finishing Thrust", not K.slam_w.is_empty() and K.last_variant == "tap")
 	A.ok("combo jug: the attached Warchain draws as a link chain",
 			is_instance_valid(DJFx.of(m).chains.get("war%d" % P.get_instance_id(), {}).get("node"))
 			and (DJFx.of(m).chains["war%d" % P.get_instance_id()]["node"] as Node3D).visible)
 	A.step(m, 0.8)
-	# the Finishing Slam's sweet spot, then a knock within 2s: the Riposte (X) is ready again, a heal, a dash back
+	# the Finishing Thrust's sweet spot, then a knock within 2s: the Riposte (X) is ready again, a heal, a dash back
 	P.lvl = maxi(P.lvl, 6)
 	P.slot_lv["ult"] = 1
 	P.teleport(home)
@@ -1259,7 +1306,7 @@ func merge_holds() -> void:
 	A.ok("merge hold jug: no charge left behind",
 			K.lmb_t < 0.0 and K.lmb_buf <= 0.0 and P.mel_hold <= 0.0, "lmb_t %.2f" % K.lmb_t)
 	await A.done(m)
-	# the Finishing Slam winding up
+	# the Finishing Thrust winding up
 	# (a control first: what the merge's own transformation does to a foe this close, with no slam)
 	r = A.setup("juggernaut", 2.6, "cindle")
 	m = r[0]
@@ -1280,7 +1327,7 @@ func merge_holds() -> void:
 	P.merge_cd = 0.0
 	A.aim_at(P, T.pos)
 	A.tap(m, P)
-	A.ok("merge hold jug: the Finishing Slam is winding up", not K.slam_w.is_empty())
+	A.ok("merge hold jug: the Finishing Thrust is winding up", not K.slam_w.is_empty())
 	KinMerge.cast(P)
 	A.step(m, 1.0)
 	A.ok("merge hold jug: the wound-up slam does not land",

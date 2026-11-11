@@ -6,7 +6,7 @@ extends RefCounted
 ##   primed      the same, ending on the Primed hit landing (VAULT RESET, the payoff)
 ##   bola        the Thief's Bola catching two dummies: Grounded, TANGLED
 ##   juggernaut  greatsword slashes fill Rage (the shoulder glow), the Enraged form
-##   sweetspot   then a Finishing Slam winds up and lands its sweet spot (--hold-shot: the wind-up)
+##   sweetspot   then a Finishing Thrust winds up and lands its sweet spot (--hold-shot: the wind-up)
 ##   encore / encorehit   Sable's X: the ring growing (the telegraph), then a volley landing (the impact)
 ##   riposte / ripostehit Kael's X: the guard with its strip (the telegraph), then the cleave landing
 ##   wave        the greatsword held into a Searing Wave (--hold-shot: at full charge)
@@ -175,7 +175,7 @@ static func tick(A: Arena, dt: float) -> void:
 			at_t = float(A.get_meta("bp_at", 9.0)) + 0.12
 		"juggernaut", "sweetspot":
 			# greatsword slashes fill Rage (the shoulder glow) into the Enraged form; (sweetspot) then a
-			# Finishing Slam winds up (the warning) and lands its sweet spot
+			# Finishing Thrust winds up (the warning) and lands its sweet spot
 			if t < 0.05:
 				if P.arch != "juggernaut" or P.wid != "greatsword": A.set_arch("juggernaut", "greatsword")
 				A.set_kin("cindle")

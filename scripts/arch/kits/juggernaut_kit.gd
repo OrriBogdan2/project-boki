@@ -8,8 +8,8 @@ extends ArchKit
 ##   knocked hunter's health (a monster kill, of the monster's).
 ## - LMB (Greatsword): quick slashes that hit twice as hard at the tip; hold for a Searing Wave (it
 ##   fills Rage fast).
-## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Slam behind a magenta strike lane (more to
-##   the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
+## - RMB, Smash (Adaptive Strike): tap a wound-up Finishing Thrust, a short lunge down a narrow magenta
+##   strip (more to the wounded, who are outlined red while it's ready; a foe knocked within 2s of its sweet spot makes
 ##   the Gilded Riposte ready again: the payoff, T4, pay_rage), hold a charged Lunge (a crouched
 ##   wind-up, a lane that grows and turns magenta at full, a rising whine; you can jump while charging;
 ##   release flings you forward, a miss doubles the cooldown), in the air a Meteor Drop straight down, its hit
@@ -30,6 +30,9 @@ const WAVE_EDGE := Color("ff9a3a")     # ... its orange inner edge
 const WAVE_FULL := Color("ffc23a")     # ... gold-hot at full charge
 const LUNGE_REACH := 0.6               # m: the Lunge reaches this far past touching (lane = body + this, each side)
 const BUFFER := 0.12                   # s: a press this close before a heavy move ends goes off when it does
+const THRUST_PROBE := 0.25             # m: the Finishing Thrust samples the ground this often along its strip
+const THRUST_RISE := 0.8               # m: ground this much higher than the last sample is a wall (stops it)
+const THRUST_DROP := 0.6               # m: ground this much lower is a ledge (the step stops at its edge)
 
 var enraged_t := 0.0
 var aura: Node3D = null        # the Enraged look: a red shell, a glow, the hunter grown bigger
@@ -40,14 +43,14 @@ var lmb_buf := 0.0
 var bot_wave_t := 0.0
 var slash_n := 0
 var slash_at := -9.0
-var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the press), pinned (to dir: E went)}
+var slam_w := {}               # the Finishing Thrust winding up: {t, dir (at the press), pinned (to dir: E went)}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
 var rmb_queued_at := -9.0      # a Smash pressed while a heavy move ran (BUFFER)
 var e_held := false            # E pressed on a hooked chain while a Smash owned the body: the pull goes as it ends
 var dash_held := false         # Shift pressed during a move whose into_dash row holds it to the move's end
-var slam_hit := {}             # foe id -> when the Finishing Slam hit them (a knock within 2s resets X)
+var slam_hit := {}             # foe id -> when the Finishing Thrust hit them (a knock within 2s resets X)
 var riposte: JuggernautUlt     # X, the ultimate
 var sweet_spots := 0           # (tests, demo)
 var waves := 0
@@ -219,7 +222,7 @@ func lunge_charging() -> bool:
 	return held and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false)
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
-## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
+## way, if the Finishing Thrust hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
 ## enemy resets Volcanic Rebuke", any hit, not only the sweet spot).
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
@@ -287,7 +290,7 @@ func _wk() -> float:
 	return h.wup_dmg * m.dmg_mult(h)
 
 ## A Boki merge starting (ArchKit's single cleanup hook) drops everything held or wound up: the Searing
-## Wave charge, the Finishing Slam's wind-up, an armed Haul Slam and a running Gilded Riposte (guard or
+## Wave charge, the Finishing Thrust's wind-up, an armed Haul Slam and a running Gilded Riposte (guard or
 ## cleave). Nothing fires and nothing is left over.
 func _drop_holds() -> void:
 	riposte.drop()
@@ -701,7 +704,8 @@ func in_dash() -> bool:
 
 ## A held pose ends with its hold (a charge dropped without a release must not freeze the body).
 func _end_held_poses() -> void:
-	var over := (anim_id == "jug_wave_wind" and lmb_t < 0.0) or (anim_id == "jug_lunge_wind" and not rmb_down) \
+	var lunge_wind_over := anim_id == "jug_lunge_wind" and not rmb_down and slam_w.is_empty()
+	var over := (anim_id == "jug_wave_wind" and lmb_t < 0.0) or lunge_wind_over \
 			or (anim_id == "jug_haul_wind" and haul.is_empty()) or (anim_id == "jug_meteor" and not meteor.airborne())
 	if over:
 		anim_id = ""
@@ -727,9 +731,9 @@ func fire_rmb(c: Dictionary) -> void:
 		var held_t := float(c.get("t", 0.0))
 		_lunge(lunge_k(held_t), perfect_window(held_t) >= 0)
 	else:
-		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
+		# the Finishing Thrust winds up first, the blade levelled (you keep aiming); everyone sees its strip
 		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
-		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
+		play("jug_lunge_wind")
 		vfx("slam_tell")
 
 func _tick_slam(dt: float) -> void:
@@ -737,43 +741,75 @@ func _tick_slam(dt: float) -> void:
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
 		slam_w = {}          # interrupted
 		return
-	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
+	# the narrow magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
 	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
-			"all": true}
-	if pin != Vector2.ZERO:
-		cone["dir"] = pin
-	AimKit.cone(h, "slam", cone)
+	var dd := h.aim_dir() if pin == Vector2.ZERO else pin
+	AimKit.lane(h, "slam", {"dir": dd, "len": float(thrust_reach(dd)["len"]), "width": float(sl["width"]),
+			"fill": wk, "col": SLASH_OUT, "all": true})
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
 		slam_w = {}
-		_slam(pin)
+		_slam(dd)
 
-## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
-## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
-func _slam(pin := Vector2.ZERO) -> void:
-	var sd := rmb_def()
-	var sl: Dictionary = sd["slam"]
-	var dd := h.aim_dir() if pin == Vector2.ZERO else pin
+## How far the Finishing Thrust goes along `dir` from where he stands: {"go": the step he lunges, "len": the
+## strip the blade reaches}. A wall or a ledge face stops both; a drop stops the step at its edge (the blade
+## still reaches out over it); the first foe in the strip stops the step at their body.
+func thrust_reach(dir: Vector2) -> Dictionary:
+	var sl: Dictionary = rmb_def()["slam"]
+	var reach := float(sl["len"])
+	var go := float(sl["step"])
+	var gy := h.pos.y
+	var s := THRUST_PROBE
+	while s <= reach:
+		var q := h.pos + Vector3(dir.x, 0, dir.y) * s
+		var g: float = m.world.ground_at(q.x, q.z)
+		if m.world.is_block(q.x, q.z) or g > gy + THRUST_RISE:
+			reach = s
+			go = minf(go, s - h.r)
+			break
+		if g < gy - THRUST_DROP:
+			go = minf(go, s - THRUST_PROBE)
+		else:
+			gy = g
+		s += THRUST_PROBE
+	for f in _thrust_foes(h.pos, dir, reach):
+		go = minf(go, Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).dot(dir) - f.r - h.r)
+	return {"go": maxf(0.0, go), "len": reach}
+
+## Everyone in the strip `reach` long ahead of `from` along `dir`.
+func _thrust_foes(from: Vector3, dir: Vector2, reach: float) -> Array:
+	var width := float(rmb_def()["slam"]["width"])
+	return m.foes_of(h.team).filter(func(f: Ent) -> bool:
+		return f.hittable() and absf(f.pos.y - from.y) < 2.0 and AimMode.in_lane(from, dir, reach, width, f.pos, f.r))
+
+## The Finishing Thrust: a short, snappy lunge along `dir` and a straight strip struck ahead; the wounded (under
+## 35%) take +50%; a foe at the far tip of the strip is the sweet spot (the payoff), and a knock on that foe within
+## 2s makes the Gilded Riposte ready again.
+func _slam(dir: Vector2) -> void:
+	var sl: Dictionary = rmb_def()["slam"]
+	var reach := thrust_reach(dir)
+	var step_t := float(sl["step_t"])
+	var go := float(reach["go"])
+	# the hand-over slide after the step counts toward it, so he stops where the reach said (short of a ledge)
+	go -= HunterMove.slide(minf(go / step_t, h.base_speed * HunterMove.dash_exit_run))
+	if go > 0.05:
+		h.dash_with({"type": "dash", "speed": go / step_t, "time": step_t, "invuln": 0.0, "dir": dir, "trail": "dust"})
 	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()},
 			{"type": "push", "strength": float(sl["push"]), "from": "caster"}]
-	var stg := stage("rmb",
-			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+	var stg := stage("rmb", {"delivery": {"type": "beam", "range": float(reach["len"]), "width": float(sl["width"])},
+			"effects": effs})
 	var from := h.pos
 	var paid := {}
-	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
-	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
+	var c := cx("rmb", "finishing_slam", from + Vector3(dir.x, 0, dir.y) * float(reach["len"]),
+			{"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
 			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
-		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
-		var sw: Array = sl["sweet"]
-		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
-		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
+		var sweet := Vector2(f.pos.x - from.x, f.pos.z - from.z).dot(dir) + f.r >= float(sl["sweet"])
 		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
 			# the data's "edge hits do more": the far tip lands sweet_k harder
@@ -782,11 +818,16 @@ func _slam(pin := Vector2.ZERO) -> void:
 		if sweet and not paid.has("x"):
 			paid["x"] = true
 			sweet_spots += 1
-			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dd, f)
-			vfx("slam_sweet", f.pos, dd)
-		slam_hit[f.get_instance_id()] = m.time}))
+			payoff_fx(f.pos, "SWEET SPOT", res_col(), "pay_rage", dir, f)
+			vfx("slam_sweet", f.pos, dir)
+		slam_hit[f.get_instance_id()] = m.time})
+	m.fx.own_look = true            # the Hero's own look (slam_hit): the shared hit bursts stay out
+	for f in _thrust_foes(from, dir, float(reach["len"])):
+		KinExec.apply_foe(stg.effects, f, c, from, stg)
+	m.fx.own_look = false
 	AimKit.hide(h, "slam")
-	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
+	play("jug_lunge")
+	vfx("slam_hit", from, dir, {"len": float(reach["len"]), "w": float(sl["width"])})
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 ## The Lunge let go at charge `k`; `perfect`: in a perfect window, it flings him lunge.perfect_k further.
@@ -966,7 +1007,7 @@ func recast_window() -> Dictionary:
 		return {}
 	return RecastCue.window("e", warchain.tether_t, float(warchain.data()["time"]), warchain.anchor)
 
-## RecastCue's badge: a foe the Finishing Slam hit; a knock on them in time resets the Riposte.
+## RecastCue's badge: a foe the Finishing Thrust hit; a knock on them in time resets the Riposte.
 func combo_marks(out: Array) -> void:
 	super(out)
 	var reset_t := float(rmb_def()["slam"].get("reset_t", 2.0))
@@ -1039,14 +1080,14 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 	elif int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and slam_w.is_empty():
-		if dist < 3.2:
+		if dist < float(rmb_def()["slam"]["len"]) - 0.6:
 			h.inp["aim"] = tgt.pos
-			h.inp["sec"] = true # the Finishing Slam (best on the wounded)
+			h.inp["sec"] = true # the Finishing Thrust (best on the wounded)
 		elif dist < 7.0 and randf() < 0.45:
 			h.inp["aim"] = tgt.pos
 			h.inp["sec"] = true
 			bot_hold["rmb"] = rmb_charge_full() + PERFECT_LEAD       # a full charge let go in the perfect window
-	# keep the wound-up slam on them while it winds up
+	# keep the wound-up Thrust on them while it winds up
 	if not slam_w.is_empty():
 		h.inp["aim"] = tgt.pos
 	# Rampage in: the tip is the sweet spot, so dash from about a dash length out, facing them

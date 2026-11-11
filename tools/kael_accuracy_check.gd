@@ -340,7 +340,7 @@ func slam_combo() -> void:
 			"exit %s hauls %d foe %.0f > %.0f at %.1f m" % [W.exits, K.haul_slams, hp0, T.hp, P.flat_dist(T)])
 	await A.done(m)
 
-## E's pull on a hooked chain pressed while a Smash runs (the air slam's hang, the Finishing Slam's wind-up) is
+## E's pull on a hooked chain pressed while a Smash runs (the air slam's hang, the Finishing Thrust's wind-up) is
 ## kept and goes the moment it lands, never lost and never fighting the slam's own movement.
 func pull_waits() -> void:
 	var g := _rig()

@@ -193,9 +193,9 @@ func _juggernaut_slam() -> void:
 			K.press_rmb()
 		_aim(T.pos)
 	await _go(2.5, slam, _sheet("slam",
-			"RMB tap, Finishing Slam: the wind-up gathers at the blade, the strike opens a burning "
-			+ "cone, debris, sweet spot on the dummy, fissures cool",
-			[0.3, 0.6, 0.72, 0.76, 0.82, 0.92, 1.1, 1.5, 2.2]), 1.5)
+			"RMB tap, Finishing Thrust: the blade levels as the strip fills, a short lunge, the thrust "
+			+ "burns a straight strip, sweet spot on the dummy at its tip, the strip cools",
+			[0.2, 0.4, 0.5, 0.54, 0.6, 0.7, 0.9, 1.3, 2.0]), 1.5)
 	await _go(GAP)
 
 func _juggernaut_lunge() -> void:

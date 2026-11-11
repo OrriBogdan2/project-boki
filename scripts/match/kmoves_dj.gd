@@ -17,20 +17,7 @@ const MOVES := {
 		[0.32, {"blade": Vector3(1.7, 0.05, 0.0), "bw": 0.8, "y": -0.7, "p": -0.25, "lw": 0.8,
 				"legs": [0.8, -0.9, -0.5, -0.3]}],
 		[0.6, {}]]},
-	# Finishing Slam (footage 0155-0158): 0.6s of wind-up, the blade cocked low behind and the body
-	# coiled, rising onto the front foot, the strike at 0.6 (the hit), then a heavy recovery
-	"jug_slam": {"keys": [
-		[0.0, {}],
-		[0.3, {"blade": Vector3(-1.2, -0.4, 1.4), "bw": 1.0, "rad": 0.4, "p": 0.1, "y": 0.75, "lift": -0.1, "lw": 1.0,
-				"legs": [0.9, -1.4, -0.3, -0.7], "sq": 0.2}],
-		[0.56, {"blade": Vector3(-1.5, -0.3, 1.5), "bw": 1.0, "rad": 0.45, "p": 0.18, "y": 0.95, "lift": -0.12,
-				"lw": 1.0, "legs": [1.0, -1.5, -0.35, -0.8], "sq": 0.28}],
-		[0.62, {"blade": Vector3(1.1, -0.35, 1.4), "bw": 1.0, "rad": 0.6, "p": -0.55, "y": -0.6, "lift": -0.05,
-				"sq": -0.2, "lw": 1.0, "legs": [1.15, -0.7, -0.75, -0.25]}],
-		[0.85, {"blade": Vector3(1.2, -0.4, 1.4), "bw": 0.9, "rad": 0.55, "p": -0.45, "y": -0.5, "lw": 1.0,
-				"legs": [1.0, -0.8, -0.6, -0.3]}],
-		[1.15, {}]]},
-	# the Lunge, held as long as RMB is held, ready to lunge: he sinks onto the loaded
+	# the Lunge, held as long as RMB is held (and the Finishing Thrust's wind-up): he sinks onto the loaded
 	# back leg and levels the blade forward at the aim, leaning in behind it
 	"jug_lunge_wind": {"hold": true, "keys": [
 		[0.0, {}],

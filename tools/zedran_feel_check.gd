@@ -388,7 +388,7 @@ func rmb_rows() -> void:
 	A.tap(m, P)
 	var slam_in_throw := not K.slam_w.is_empty() and K.last_variant == "tap"
 	A.step(m, 0.4)
-	A.ok("jug RMB row: throwing + tap = Finishing Slam, the chain still bites", slam_in_throw and W.hooked())
+	A.ok("jug RMB row: throwing + tap = Finishing Thrust, the chain still bites", slam_in_throw and W.hooked())
 	A.step(m, 0.6)
 	# Pulling + press: the spin goes on the press (no wait for a release), once
 	_settle(m, P, K, home)
@@ -424,7 +424,7 @@ func rmb_rows() -> void:
 	A.tap(m, P)
 	var slam_after := not K.slam_w.is_empty() and K.last_variant == "tap"
 	A.step(m, 0.8)
-	A.ok("jug RMB row: after the window, tap = Finishing Slam; beside the foe it's a body hit (no sweet spot)",
+	A.ok("jug RMB row: after the window, tap = Finishing Thrust; beside the foe it's a body hit (no sweet spot)",
 			slam_after and K.sweet_spots == sweet0, "sweet %d" % (K.sweet_spots - sweet0))
 	# a wall pull that leaves a foe 3.2m off: the Slam's sweet spot is there
 	_settle(m, P, K, home)
@@ -442,7 +442,7 @@ func rmb_rows() -> void:
 	var gap := P.flat_dist(T)
 	A.tap(m, P)
 	A.step(m, 0.8)
-	A.ok("jug RMB row: a wall pull that leaves the foe 2.4-4.2m ahead gives the Slam its sweet spot",
+	A.ok("jug RMB row: a wall pull that leaves the foe foe at the far tip gives the Thrust its sweet spot",
 			K.sweet_spots == sweet0 + 1, "gap %.2f spots %d" % [gap, K.sweet_spots - sweet0])
 	for dz in range(-2, 3):
 		for dx in range(7, 9):
@@ -562,7 +562,7 @@ func _into_dash(m: Match, P: Hunter, K: JuggernautKit, home: Vector3) -> void:
 	P.dashes = 3.0
 	P.do_dash()
 	A.step(m, 0.1)
-	var drove := P.dashes < 2.5 and P.roll_t > 0.0 and not K.slam_w.is_empty() and K.anim_id == "jug_slam"
+	var drove := P.dashes < 2.5 and P.roll_t > 0.0 and not K.slam_w.is_empty() and K.anim_id == "jug_lunge_wind"
 	P.inp["move"] = Vector2.ZERO
 	A.step(m, 0.7)
 	var ran := P.pos.x - from.x

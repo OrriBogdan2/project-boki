@@ -1,7 +1,7 @@
 class_name JuggernautDrop
 extends RefCounted
 ## Kael's airborne Smash, the Meteor Drop (`rmb.drop` in content/archetypes/juggernaut.json): a down slam, owner
-## spec 11-10. Only from the air (he must already be jumping or falling; on the ground RMB is the Finishing Slam or
+## spec 11-10. Only from the air (he must already be jumping or falling; on the ground RMB is the Finishing Thrust or
 ## the Lunge). Press: his drift stops, a beat of hang with the blade hauled overhead (`hang`, <= 0.1s), then a fast
 ## straight drop to the ground under him (no dive across, no leap, no extra height). The hit is a small circle
 ## a little ahead of where he lands, in the facing at the press, shown to everyone from the press: everyone in it

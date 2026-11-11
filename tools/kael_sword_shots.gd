@@ -16,8 +16,6 @@ const SWORD_POSES := [["carried", {}], ["walk", {"vel": 2.0}], ["run", {"vel": 4
 	["Lunge hold 0.45", {"kmove": "jug_lunge_wind", "kmove_t": 0.45}],
 	["Lunge hold 1.20", {"kmove": "jug_lunge_wind", "kmove_t": 1.2}],
 	["Lunge", {"kmove": "jug_lunge", "kmove_t": 0.2}],
-	["Slam wind-up", {"kmove": "jug_slam", "kmove_t": 0.56}],
-	["Slam", {"kmove": "jug_slam", "kmove_t": 0.7}],
 	["Rampage drive", {"kmove": "jug_dash", "kmove_t": 0.21}],
 	["Rampage tip", {"kmove": "jug_dash", "kmove_t": 0.38}],
 	["Rampage drag", {"kmove": "jug_dash", "kmove_t": 0.6}],

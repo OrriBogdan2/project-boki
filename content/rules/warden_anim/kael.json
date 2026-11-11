@@ -64,9 +64,6 @@
 		"jug_wave": {
 			"clip": "wave"
 		},
-		"jug_slam": {
-			"clip": "slam"
-		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
 			"hold_from": 0.45,
@@ -193,10 +190,6 @@
 		[
 			"jug_riposte",
 			0.3
-		],
-		[
-			"jug_slam",
-			0.8
 		]
 	],
 	"procedural": [
