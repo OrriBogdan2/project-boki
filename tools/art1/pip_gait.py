@@ -4,7 +4,7 @@ each step carries a short float (she is small and light: a skipping trot and a b
 pinned to a floor that passes under her at her loco speed, and the soles are set on the floor from the skinned verts.
 Everything above the root (arms, the sun and cloud on the pauldrons, head, ears, wings) is her old clip's, resampled
 by step phase, so her carry and personality stay hand-keyed; the root keeps its old turn and gets a new bob.
-  python3 tools/art1/pip_feet_weights.py art/wardens/pip/pip.glb      # the paws on the foot bones first
+  python3 tools/art1/pip_feet_weights.py art/wardens/pip/pip.glb      # the old body only: its paws onto the foot bones
   blender -b --factory-startup --python tools/art1/pip_gait.py -- art/wardens/pip/pip.glb OUT.glb
   python3 tools/art1/glb_add_clips.py art/wardens/pip/pip.glb OUT.glb \
       walk_f,walk_b,walk_l,walk_r,run_f,run_b,run_l,run_r
@@ -17,24 +17,35 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 SRC, OUT = sys.argv[sys.argv.index("--") + 1:][:2]
-SIZE = 0.68         # game metres per model metre (content/archetypes/tender.json body size)
+SIZE = 0.646        # game metres per model metre: the v95 appeal3 body's skeleton scale in the game (the old body's 0.68)
+PLAY = 1.0          # x: the rate the game plays these loops at loco speed (warden_anim/pip.json foot_mps is loco / PLAY)
+WAS = 0.68          # the scale the judged pilot was baked at: its stance sweep in model m is kept
 FPS = 48            # keys per second: a run stance is 0.06 s
 CONTACT = 0.006     # model m: a sole vert this close to the floor is planted
 TAU = math.tau
 # Per gait. speed: game m/s (warden_anim/pip.json loco). period: s for a left + right pair. duty: the part of the
 # period a foot is planted (under 0.5: a float between steps). ahead: the share of the stance sweep in front of the
 # hip. lift: swing foot's peak, model m. sink: the root's mean drop, bob: its rise in the float, model m.
-# toe_up at the strike and heel_up at the push, degrees.
+# toe_up at the strike and heel_up at the push, degrees. catch: the swing foot's speed back at the strike, of the
+# floor's (0.9: it meets the floor near its speed, so the paw does not skid on landing; the judged pilot had 0.6 and
+# heel_up 30 / 40 from push 0.6 / 0.55, which --anim-audit reads as a slide at the strike and the push).
 GAITS = {
-    "walk": dict(speed=2.2, period=0.42, duty=0.34, ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=6.0,
-                   heel_up=30.0, push=0.6),
-    "run": dict(speed=4.55, period=0.34, duty=0.24, ahead=0.55, lift=0.085, sink=-0.075, bob=0.02, toe_up=4.0,
-                  heel_up=40.0, push=0.55),
+    "walk": dict(speed=2.2 / PLAY, period=16 / FPS, duty=0.34 * 0.42 * FPS / 16 * SIZE * PLAY / WAS,
+                 ahead=0.52, lift=0.05, sink=-0.06, bob=0.012, toe_up=6.0, heel_up=20.0, push=0.7, catch=0.9),
+    "run": dict(speed=4.55 / PLAY, period=13 / FPS, duty=0.24 * 0.34 * FPS / 13 * SIZE * PLAY / WAS,
+                ahead=0.55, lift=0.085, sink=-0.055, bob=0.02, toe_up=4.0, heel_up=25.0, push=0.7, catch=0.9),
 }
-# heading in degrees (as pip_clips.py's gait(): l is her left, -x) and the period's share: her legs reach less
-# behind and to the side than ahead, so those steps are shorter and quicker at the same speed
+# One loop length per gait (walk 16 keys, run 13: 0.333 and 0.271 s) in every heading: the BlendSpace2D plays the ring
+# unsynced, so loops of different lengths drift out of step on a diagonal (docs/MERGE_0246_ANIM.md). Each heading's
+# share scales the stance, not the loop: her legs reach less behind and to the side than ahead, so those steps plant
+# for less of the period (a shorter sweep under her) and float longer. The stance time and sweep match the judged pilot
+# (walk f 0.42 s, run f 0.34 s at duty 0.34 / 0.24, b x0.8, l/r x0.62, baked at WAS and played at 1); the period is
+# the common one, and the floor runs at loco / PLAY, so the duty takes SIZE * PLAY / WAS to keep the sweep in model m.
+# heading in degrees (as pip_clips.py's gait(): l is her left, -x) and the stance's share
 HEADINGS = {"f": (0.0, 1.0), "b": (180.0, 0.8), "l": (90.0, 0.62), "r": (-90.0, 0.62)}
 LEGS = ("thigh", "shin", "foot")
+START = 0.25        # share of the step pair each loop opens at: near the passing pose, so idle to walk does not pop
+                    # (one key count per gait, so f, b, l and r open on the same phase and the ring stays in step)
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.context.scene.render.fps = FPS
@@ -72,8 +83,10 @@ def verts(idx):
 
 
 def foot_idx(side):
+    """The paw: verts the foot bone weighs most (the v95 body's bone-heat weights stay under 0.5 on the foot)."""
     g = body.vertex_groups["foot." + side].index
-    return np.array([v.index for v in body.data.vertices if any(e.group == g and e.weight > 0.5 for e in v.groups)], int)
+    return np.array([v.index for v in body.data.vertices
+                     if v.groups and max(v.groups, key=lambda e: e.weight).group == g], int)
 
 
 FOOT = {s: foot_idx(s) for s in "LR"}
@@ -145,7 +158,7 @@ def foot_path(g, side, ph, off):
         pitch = g["toe_up"] * (1 - smooth(0.0, 0.2, u)) - g["heel_up"] * smooth(g["push"], 1.0, u) ** 1.4
         return Vector((ankle.x, ankle.y, 0.0)) + d * (front - travel * u) + off, pitch * d.y, True
     s = (ph - duty) / (1 - duty)
-    m0, m1 = -0.3 * v * (1 - duty) * period, -0.6 * v * (1 - duty) * period
+    m0, m1 = -0.3 * v * (1 - duty) * period, -g["catch"] * v * (1 - duty) * period
     h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
     y = h[0] * (front - travel) + h[1] * m0 + h[2] * front + h[3] * m1
     pitch = -g["heel_up"] + (g["heel_up"] + g["toe_up"]) * smooth(0.1, 0.9, s)
@@ -212,6 +225,8 @@ def bake(name, g):
                 on = feet[s]["planted"]
                 miss = max(miss, feet[s]["miss"] if on else 0.0)
                 ext[0 if on else 1] = max(ext[0 if on else 1], feet[s]["ext"])
+    lead = int(round(n * START))                         # the loop opens on the passing pose (feet under her), not a strike
+    keys = keys[lead:] + keys[:lead]
     keys.append(keys[0])
     act = bpy.data.actions.new(name)
     act.use_fake_user = True
@@ -245,7 +260,7 @@ for gait_name, gait in GAITS.items():
     for tag, (heading, share) in HEADINGS.items():
         h = math.radians(heading)
         bake("%s_%s" % (gait_name, tag), dict(gait, d=Vector((-math.sin(h), math.cos(h), 0.0)),
-                                               period=gait["period"] * share))
+                                               duty=gait["duty"] * share))
 arm.animation_data.action = None
 for ac in list(bpy.data.actions):
     if ac.name.rsplit("_", 1)[0] not in GAITS:

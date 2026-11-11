@@ -1,5 +1,6 @@
 extends "res://tools/clip_shots.gd"
-## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
+## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240] [--close] [--loops]: every Hunter's
+## walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
 ## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
@@ -21,6 +22,7 @@ const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
 var close := false
+var loops := false   # --loops: only the walk and run rings (f, b, l, r keyed) and the blended diagonals fl, fr
 ## The two attacks each strip shows: the primary shots and one more (clip names of content/rules/warden_anim).
 const ATTACKS := {
 	"archer": ["loose", "perfect"], "ashwick": ["lance", "shot"], "bulwark": ["lmb_throw", "lmb_slam"],
@@ -42,6 +44,7 @@ func run(main: Node) -> void:
 		if a.begins_with("--frames="): frames = int(a.substr(9))
 		if a.begins_with("--size="): frame_px = int(a.substr(7))
 		if a == "--close": close = true
+		if a == "--loops": loops = true
 	if main.get("fade") != null:
 		main.fade.reveal(0.01)
 	main.get_window().size = Vector2i(frame_px, frame_px)
@@ -94,6 +97,10 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	model.rotation.y = SIDE_YAW
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
+	if loops:
+		await _rings(model, sync, clips, dir, frames)
+		model.queue_free()
+		return
 	await _loco(model, sync, dir.path_join("start"), RUN_MPS, frames, 0.0, START_FPS)
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames, WARM_S, LOCO_FPS)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames, WARM_S, LOCO_FPS)
@@ -114,10 +121,25 @@ func _close_cam(sk: Skeleton3D) -> void:
 	cam.position = Vector3(0, 1.0 * k, 12.0 * k)
 	cam.look_at(Vector3(0, 1.0 * k, 0))
 
+## --loops: each ring's four keyed loops, then the diagonals ahead-left and ahead-right through the game's hand-off
+## (the BlendSpace2D mixes f with l or r: loops of one length stay in step).
+func _rings(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	var lc: Dictionary = clips.d["loco"]
+	for gait in ["walk", "run"]:
+		var ring: Dictionary = lc.get(gait, {})
+		for k in ["f", "b", "l", "r"]:
+			if ring.has(k) and clips.lib.has_animation(String(ring[k])):
+				await _keyed(model, sync, clips, dir.path_join("%s_%s" % [gait, k]), String(ring[k]), frames)
+		var mps := WALK_MPS if gait == "walk" else RUN_MPS
+		await _loco(model, sync, dir.path_join("%s_fl" % gait), mps, frames, WARM_S, LOCO_FPS, PI / 4.0)
+		await _loco(model, sync, dir.path_join("%s_fr" % gait), mps, frames, WARM_S, LOCO_FPS, -PI / 4.0)
+
 ## The game's own locomotion hand-off: the state carries the speed, WardenClips blends and scales the walk or run.
-func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, warm_s: float, fps: float) -> void:
+## `turn`: the move heading off her facing (rad, + her left).
+func _loco(model: Node3D, sync: Node, dir: String, mps: float, frames: int, warm_s: float, fps: float,
+		turn := 0.0) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
-	var fw := Vector3(-sin(SIDE_YAW), 0.0, -cos(SIDE_YAW))
+	var fw := Vector3(-sin(SIDE_YAW + turn), 0.0, -cos(SIDE_YAW + turn))
 	model.set_meta(WardenClips.STATE, {})
 	(sync.get("clips") as WardenClips).loco_pos = Vector2.ZERO
 	for k in int(WARM_S / DT):
