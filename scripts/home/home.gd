@@ -76,6 +76,7 @@ var toys: HomeToys = null        # the base's balls, posts and tubs, played with
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
+var hwatch: HomeHatchWatch = null   # the nest egg's last 20 s and its hatch (home_hatch_watch.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
@@ -1091,6 +1092,7 @@ func _process(delta: float) -> void:
 	GardenWishes.tick(self, d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	if hwatch: hwatch.tick(d)
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
@@ -4129,6 +4131,8 @@ func _setup_care() -> void:
 	if not _visiting():
 		hinc = HomeIncubator.new(self)
 		hinc.build()
+		hwatch = HomeHatchWatch.new(self)
+		add_child(hwatch)
 	if not visit.is_empty():
 		_refresh_nest()
 		if HubLayout.is_hub(visit): ZoneAway.card(self)      # the hub: nobody lives there; the card covers every zone
@@ -4218,10 +4222,6 @@ func _care_tick(d: float) -> void:
 	if care_save > 20.0:
 		care_save = 0.0
 		Save.save_game()
-	# a little life: an egg wobbles when it's close, dusty kin shed a little dust
-	if is_instance_valid(nest) and _egg_ready():
-		var sh: Node3D = nest.get_node("Shell")
-		sh.rotation.z = sin(Time.get_ticks_msec() / 90.0) * 0.12 * (1.0 if fmod(Time.get_ticks_msec() / 1000.0, 3.0) < 0.6 else 0.0)
 
 ## The thought bubble over each kin that wants something (KinWants), and the sleeping badge by the door.
 func _update_bubbles(d: float) -> void:
@@ -5049,6 +5049,7 @@ func _hatch_play(baby: Dictionary, rare: bool, boss: String, at: Vector3, hide: 
 	eh.scale = Vector3.ONE * 1.2
 	add_child(eh)
 	eh.start()
+	if hwatch: hwatch.on_hatch(eh, baby)
 	var zoom0: float = cam.zoom_to
 	cam.zoom_to = 0.5
 	eh.done.connect(func():
