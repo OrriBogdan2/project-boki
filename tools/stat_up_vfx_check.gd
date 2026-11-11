@@ -132,7 +132,7 @@ func _shots() -> void:
 	var spinner: Dictionary = home.kins[1]
 	_put(striker, at)
 	_put(spinner, at + Vector3(1.3, 0, 0.6))
-	home.ppos = at + Vector3(0.6, 0, 2.6)
+	home.ppos = at + Vector3(3.2, 0, 1.0)      # (the player off to the side, out of the way)
 	home.player.position = home.ppos
 	home.cam.zoom_to = 0.5
 	home.cam.zoom = 0.5

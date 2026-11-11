@@ -12,9 +12,10 @@ const LIFE := 1.3        # s a glint lasts
 const POP_S := 0.12      # s it takes to grow to full size
 const FADE_FROM := 0.6   # share of LIFE after which it fades out
 const HEAD_Y := 1.2      # m above the Boki's feet where it starts
-const RISE := 0.55       # m it climbs over its life
-const ICON_PX := 15.0    # px: icon half-size on screen
-const GAP_PX := 34.0     # px between icons of a merged glint
+const RISE_PX := 40.0    # px it climbs on screen over its life (on screen, so the top-down camera shows it too)
+const ICON_PX := 13.0    # px: icon half-size on screen
+const TOKEN := Color(0.06, 0.07, 0.12, 0.62)   # the dark disc behind each icon, readable on any ground
+const GAP_PX := 40.0     # px between icons of a merged glint
 const MOTE_Y := 0.9      # m: where the motes start (the heal motes' height)
 
 var h                    # the Home screen
@@ -81,15 +82,16 @@ func _draw() -> void:
 		return
 	for g in glints:
 		var u := float(g["t"]) / LIFE
-		var at := (g["k"]["node"] as Node3D).global_position + Vector3(0, HEAD_Y + RISE * ease(u, 0.4), 0)
+		var at := (g["k"]["node"] as Node3D).global_position + Vector3(0, HEAD_Y, 0)
 		if cam.is_position_behind(at):
 			continue
 		var alpha := 1.0 - clampf((u - FADE_FROM) / (1.0 - FADE_FROM), 0.0, 1.0)
 		var px := ICON_PX * minf(1.0, float(g["t"]) / POP_S)
 		var stats: Array = g["stats"]
-		var left := cam.unproject_position(at) - Vector2(GAP_PX * (stats.size() - 1) * 0.5, 0)
+		var left := cam.unproject_position(at) - Vector2(GAP_PX * (stats.size() - 1) * 0.5, RISE_PX * ease(u, 0.4))
 		for i in stats.size():
 			var col: Color = Care.STATS[stats[i]]["col"]
 			var p := left + Vector2(GAP_PX * i, 0)
-			draw_circle(p, px * 1.25, Color(col, 0.25 * alpha))
+			draw_circle(p, px * 1.45, Color(TOKEN, TOKEN.a * alpha))
+			draw_arc(p, px * 1.45, 0.0, TAU, 24, Color(col, 0.85 * alpha), 2.0, true)
 			Icons.draw(self, ICON[stats[i]], p, px, Color(col.lightened(0.25), alpha))
