@@ -5,16 +5,18 @@ extends ArchKit
 ## are pooled in CareLook and UltLook; the moves are KMovesCare "mm_" entries.
 ## Passive Carrier: run into a downed teammate to carry them. LMB Ember Cast: embers pushed from
 ## alternating hands Kindle foes.
-## RMB Burrseed sticks, then roots. Shift Relay Step. E Hearthlight heals; press again to toss it.
+## RMB Burrseed sticks and vines a foe to her; 2 s in reach roots them. Shift Relay Step.
+## E Hearthlight heals; press again to toss it.
 ## X Hearth Call (level 6): a 5 s healing tether to a teammate; a downed one is pulled home and stood up.
 ## R is the Boki Merge.
 
 const THRUST_T := 0.08         # s into mm_shot_r / _l when the arm is straight out (the hand flashes then)
 const PUFF_N := 4              # dust grains in the tiny puff at a ground hop's take-off and landing
 const BLOOM_DB := -8.0         # dB: the Hearthlight's closing chime sits well under the fight
+const STICK_FLASH := 0.5       # s the light column falls over a foe as a Burrseed sticks
 
 var kind := {}                 # target instance id -> {t: Ent, n: int, left: float}
-var burrs: Array = []          # seeds stuck to foes: {t: Ent, left, total: float, id: int}
+var burrs: Array = []          # seeds stuck to foes: {t: Ent, build: float (s of reach so far), id: int}
 var burr_n := 0
 # the light: {pos, mode: self|flying|latched|ground, to, who, left, tick, boost, node, revived}
 var hearth := {}
@@ -212,7 +214,8 @@ func _tick_carry(dt: float) -> void:
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		if h.stun_t > 0.0 or h.root_t > 0.0 or Hex.active(h):
+		# the source's triggers: a stun, or damage (on_take); a root or hex holds
+		if h.stun_t > 0.0:
 			drop_all(true)
 			return
 		var down := bool(h.inp.get(SETDOWN, false))
@@ -407,37 +410,51 @@ func burst_radius() -> float:
 	return float(seed_def["burst_r"]) * (r3_k if rank("sec") >= 3 else 1.0)
 
 func _stick(e: Ent) -> void:
-	var sd: Dictionary = rmb_def()["seed"]
 	burr_n += 1
-	burrs.append({"t": e, "left": float(sd["delay"]), "total": float(sd["delay"]), "id": burr_n})
-	# the area shows at once: a disc the size of the burst under them, and a light column falling
-	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": float(sd["delay"]) + 0.1, "ent": e})
+	burrs.append({"t": e, "build": 0.0, "id": burr_n})
+	lk().burst("column", e.pos, {"col": Color("8a5cff"), "r": 1.0, "dur": STICK_FLASH, "ent": e})
 	m.sfx("tend_stick", e.pos, -3.0, 1.0)
 	vfx("seed_stick", e.pos)
 
+## A stuck seed builds toward the root while the foe stays in her reach (`leash`), and roots at `build`
+## seconds (about 2 s, so it can be escaped: owner playtest). Out of reach, or with her down, it unwinds at
+## `unwind` times the rate; empty there, the seed falls off. The vine from her to them and the disc
+## under them show how far it has built, for everyone.
 func _tick_burrs(dt: float) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
+	var need := float(sd["build"])
 	for b in burrs.duplicate():
 		var tv = b["t"]     # untyped first: a freed foe can't be assigned to a typed var
 		var t: Ent = tv if is_instance_valid(tv) else null
 		var key := "burr%d" % int(b["id"])
-		if t == null or t.dead:
-			burrs.erase(b)
+		var gone := t == null or t.dead
+		var held := not gone and not (h.dead or h.downed) and h.pos.distance_to(t.pos) <= float(sd["leash"])
+		b["build"] = float(b["build"]) + (dt if held else -dt * float(sd["unwind"]))
+		if gone or (float(b["build"]) <= 0.0 and not held):
+			_burr_off(b)
 			continue
-		b["left"] = float(b["left"]) - dt
-		var k := 1.0 - float(b["left"]) / maxf(0.01, float(b["total"]))
-		# the area rides on the foe (Assumption: it sticks to them), filling toward the root
+		var k := clampf(float(b["build"]) / need, 0.0, 1.0)
 		lk().keep(
 				key, "disc", t.pos,
 				{
 					"r": burst_radius(), "col": Color("7a4aff"), "rim": Color("c9a0ff"), "fill": 1.2,
 					"sweep": k, "pattern": 3.0, "spin": m.time * 0.8, "a": 0.9})
 		AimKit.circle(h, key, {"at": t.pos, "r": burst_radius(), "fill": k, "all": true, "col": Color("b98aff")})
-		if float(b["left"]) <= 0.0:
-			burrs.erase(b)
-			lk().drop(key)
-			AimKit.hide(h, key)
+		# the vine: faint as it sticks, thickening toward the root; coral and slack out of reach
+		ulk().keep(
+				key, "tether", h.pos + Vector3(0, 0.9, 0),
+				{"b": t.pos + Vector3(0, 0.8, 0), "col": col_of(rmb_def()) if held else Color("ff8a6a"),
+				"a": lerpf(0.3, 0.9, k) if held else 0.25})
+		if k >= 1.0:
+			_burr_off(b)
 			_burst(t)
+
+func _burr_off(b: Dictionary) -> void:
+	var key := "burr%d" % int(b["id"])
+	burrs.erase(b)
+	lk().drop(key)
+	ulk().drop(key)
+	AimKit.hide(h, key)
 
 func _burst(t: Ent) -> void:
 	var sd: Dictionary = rmb_def()["seed"]
@@ -477,12 +494,20 @@ func cast_e() -> bool:
 func e_recastable() -> bool:
 	return not hearth.is_empty() and not bool(hearth.get("tossed", false))
 
+## RecastCue: the light is the marker; left alone it flares by itself (no "EXPIRED").
+func recast_window() -> Dictionary:
+	var w := super()
+	if not w.is_empty():
+		w["at"] = hearth_center()
+		w["auto"] = true
+	return w
+
 ## E again: the light is thrown to the cursor (clamped to its reach) almost at once.
 func e_recast() -> bool:
 	if hearth.is_empty() or hearth.get("tossed", false):
 		return true
 	var ed := e_def()
-	var to := AimMode.point(h, float(ed["reach"]), AimMode.CURSOR, 0.0)
+	var to := AimMode.place(h, float(ed["reach"]))
 	# carrying someone: a toss aimed at yourself lands on them
 	var cs := carrying()
 	if not cs.is_empty() and Vector2(to.x - h.pos.x, to.z - h.pos.z).length() < 2.0:
@@ -783,8 +808,7 @@ func _call_end(done: bool) -> void:
 		ult_look.drop("tether")
 	if not done or who == null:
 		stats["broken"] += 1
-		m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", Color("ff8a6a"), false)
-		m.sfx("knock", h.pos, -8.0, 1.5)
+		_call_snap(who)
 		if anim_id == "mm_call_hold":
 			anim_id = ""
 		return
@@ -801,6 +825,16 @@ func _call_end(done: bool) -> void:
 	m.sfx("tender_cheer", h.pos, -3.0, 1.0)              # she cheers when her light mends someone
 	vfx("mended", at)
 	play("mm_call_end")
+
+
+## The tether snaps where everyone can see it: coral sparks at her hand and at the far end, and the word.
+func _call_snap(who: Hunter) -> void:
+	var snap := Color("ff8a6a")
+	m.fx.burst(CareUtil.hand_at(h, false), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	if who != null:
+		m.fx.burst(who.pos + Vector3(0, 1.1, 0), snap, 8, 3.0, 0.5, 4.0, 0.8, Vector3.UP, 60.0)
+	m.fx.word(h.pos + Vector3(0, 2.4, 0), "BROKEN", snap, false)
+	m.sfx("knock", h.pos, -8.0, 1.5)
 
 
 ## Pulls a downed teammate to her side and stands them up (Displace and the "rev" event: an online

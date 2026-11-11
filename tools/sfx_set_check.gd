@@ -6,12 +6,16 @@ extends RefCounted
 ##      at least one weapon "fire" sound and its listed signature sounds, and HeroSfx picks them up
 ##   4. every literal m.sfx("...") in that Hunter's kit (and its listed helper files) names a sound that exists
 ##   5. a Hunter with no set falls back to the shared sounds
-##   6. "reach" (metres a heavy sound carries) names sounds of the set, between hear_range and REACH_MAX;
+##   6. "reach" (metres a sound carries) names sounds of the set, between REACH_MIN and REACH_MAX;
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
+##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
+##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
+##   8. dash_air per Hunter and the no-charge tick
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
 const VOICE := ["hurt", "down", "death"]
+const REACH_MIN := 5.0         # m: below this a sound would not carry past its own source
 const REACH_MAX := 80.0        # m: past this a sound would carry over most of the island
 const SEAM_MAX := 0.05         # the jump at a loop's seam, as a share of full scale
 
@@ -32,6 +36,9 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	_dash_air()
+	_fallback()
+	_ult_cues()
 	_garden_names()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
@@ -106,9 +113,9 @@ func _reach_and_loops(group: String, d: Dictionary) -> void:
 	var wrong := []
 	for sname in reach:
 		var m := float(reach[sname])
-		if not sounds.has(sname) or m < Sfx.hear_range or m > REACH_MAX:
+		if not sounds.has(sname) or m < REACH_MIN or m > REACH_MAX:
 			wrong.append("%s %.0f m" % [sname, m])
-	ok(wrong.is_empty(), "%s: %d sounds carry further (wrong: %s)" % [group, reach.size(), wrong])
+	ok(wrong.is_empty(), "%s: %d sounds with their own reach (wrong: %s)" % [group, reach.size(), wrong])
 	var rough := []
 	for sname in d.get("loops", []):
 		var takes := _takes(String(sname))
@@ -139,6 +146,28 @@ func _garden_names() -> void:
 	var named := seen.size() >= 12 and silent.is_empty()
 	ok(named, "garden minigames: %d sound names, all exist (silent: %s)" % [seen.size(), silent])
 
+## 7. The ultimate cast cue: heard in range by everyone, ally or rival, from the ult's own position.
+func _ult_cues() -> void:
+	var names := ["ult_tag_ally", "ult_tag_foe"]
+	for arch in Arch.ids():
+		if not (Arch.def(arch).get("x", {}) as Dictionary).is_empty():
+			names.append(arch + "_ult_cue")
+	var wrong := []
+	for sname in names:
+		var reach: float = Sfx.sound_reach.get(sname, 0.0)
+		var carries := reach > Sfx.hear_range and reach <= REACH_MAX and reach == float(Sfx.sound_reach["ult_tag_foe"])
+		if not (Sfx.ensure(sname) and carries):
+			wrong.append("%s %.0f m" % [sname, reach])
+	ok(names.size() == Arch.ids().size() + 2 and wrong.is_empty(),
+			"%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
+	var press := FileAccess.get_file_as_string("res://scripts/arch/hero_ult.gd")
+	var cue := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
+	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
+	var wired := press.contains("UltCue.cast(k)") and cue.contains("\"ucast\"")
+	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
+	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
+	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
 	var h := Hunter.new()
@@ -146,6 +175,23 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## 7. Every Hunter's dash has an air variant that HeroSfx picks with no floor under it, and the no-charge tick exists.
+func _dash_air() -> void:
+	var h := Hunter.new()
+	var picked := {}
+	for arch in Arch.ids():
+		h.arch = arch
+		h.grounded = false
+		picked[arch] = HeroSfx.dash_name(h)
+		h.grounded = true
+		picked[arch] += " " + HeroSfx.dash_name(h)
+	h.free()
+	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
+	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
+	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
+	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 
 func _takes(sname: String) -> Array:
 	var out := []
