@@ -103,8 +103,8 @@ no kit draws its own recast HUD.
   while a recast is open: `slot` is `e`, `x`, `dash` or `lmb`; `at` is what the recast triggers (the seed, the
   knife, the hammer, the landing spot); `armed` false shows WAIT (a minimum hold); `auto` means the window fires by
   itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total, icon,
-  ready)` for every foe carrying the kit's mark, stack or Daze (shown in that foe's plate status row). `_tick_recast` runs `RecastCue.track` for the
-  local hunter only.
+  ready)` for every foe carrying the kit's mark, stack or Daze (shown in that foe's plate status row).
+  `_tick_recast` runs `RecastCue.track` for the local hunter only.
 - **Slot.** The slot pulses in the ability colour (`slot_col`), a timer ring empties (red under `WARN` = 0.6 s),
   and a big "<KEY> AGAIN" sits over it on a dark pill; the key is `Settings.key_cap` of the live InputMap action.
   A window that ran out (not used, not `auto`) shows EXPIRED for 0.9 s.
@@ -116,7 +116,8 @@ no kit draws its own recast HUD.
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Marks: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Marks:
+Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 marks); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).

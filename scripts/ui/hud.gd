@@ -413,7 +413,7 @@ func _draw_world_labels() -> void:
 			_bar(br, bfrac, Color("e0b0ff") if mb.stagger_t > 0.0 else Color("ff8a6a"))
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
-			_status_row(sp + Vector2(0, 16), mb)
+			_status_row(sp + Vector2(0, 18), mb)
 	# gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
 	# already drawn this frame step up above it, so a few drops side by side stay readable.
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
