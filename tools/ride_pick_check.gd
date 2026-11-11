@@ -7,6 +7,7 @@ extends RefCounted
 
 var bad := 0
 const EXPEDITION := {"teams": 10, "squad": 2, "tier": 0}
+const SHOT_PX := Vector2i(2560, 1080)     # px: the UI scales by height and the Hunter grid takes ~1150 of 1280
 const SPECIES := ["cindle", "zapple", "mossgrade", "selenfin", "burrlet"]
 
 func ok(cond: bool, what: String) -> void:
@@ -102,6 +103,9 @@ func _lobby(main: Node) -> void:
 	Prematch.deal_mates(o)
 	var view := await _view(main, o)
 	ok(_tiles(view.ride_box).size() == RidePick.choices().size(), "the lobby shows the swap row while picks are open")
+	var col: float = (view.ride_box.get_parent() as Control).custom_minimum_size.x
+	var need: float = view.ride_box.get_combined_minimum_size().x
+	ok(need <= col, "the panel fits the lobby side column (%d of %d px)" % [need, col])
 	var to: Control = _tiles(view.ride_box)[0]
 	var uid := String(to.get_meta("swap_uid"))
 	to.gui_input.emit(_click())
@@ -133,6 +137,9 @@ func _shots(main: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	if main.fade: main.fade.reveal(0.05)      # the boot splash still covers a screen made straight from a tool
+	main.get_window().size = SHOT_PX
+	await main.get_tree().process_frame      # the root is still adding Main: KinPortrait can't hang its holder yet
 	Settings.set_v("boki_wisps", true, false)
 	var o := EXPEDITION.duplicate()
 	Prematch.deal_mates(o)
