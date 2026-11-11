@@ -326,11 +326,11 @@ func _armor_levels() -> void:
 	ok(not ArmorHud.tip(P).is_empty() and String(ArmorHud.tip(P)[2][0]).begins_with("Next"),
 			"the HUD tip names the next level")
 	for i in 3: B.hurt(100.0, P, {"src": "shot"})
-	ok(P.armor_tier >= 1 and P.max_armor > base,
-			"enough damage levels your armor up: more plates (%.0f -> %.0f)" % [base, P.max_armor])
-	ok(is_equal_approx(P.max_armor, round(P.base_armor * (1.0 + Hunter.ARMOR_TIER_BONUS * P.armor_tier))),
-			"each level adds %d%% of the base armor" % int(Hunter.ARMOR_TIER_BONUS * 100.0))
-	ok(B.armor_tier == 0, "the one who was hit does not level")
+	ok(P.armor_tier >= 1 and float(Hunter.ARMOR_TIERS[P.armor_tier][3]) > float(Hunter.ARMOR_TIERS[0][3]),
+			"enough damage levels your armor up: a bigger reduction (plates %.0f -> %.0f)" % [base, P.max_armor])
+	ok(is_equal_approx(P.max_armor, round(P.base_armor * float(Hunter.ARMOR_TIERS[P.armor_tier][4]))),
+			"plates follow the tier's durability (docs/ARMOUR_PARITY.md)")
+	ok(B.armor_xp > 0.0, "damage taken from a rival fills armor progress too (source)")
 	var xp0 := P.armor_xp
 	var mob: Mob = m.spawn_mob("skitter", P.pos + Vector3(3, 0, 0))
 	mob.hurt(30.0, P, {"src": "shot"})
