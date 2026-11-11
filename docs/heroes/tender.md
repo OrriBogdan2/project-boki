@@ -8,6 +8,7 @@ Internal design doc (was "Linnet"; the id and file names stay `tender`). Source 
 | Slot | Input | What it does (ours) | Source behaviour | Difference and why |
 |---|---|---|---|---|
 | Passive Bearer | run into a downed teammate | Carry up to 2 downed teammates; they don't bleed and can't be stomped; no slow while you carry; crouch sets them down; damage or a stun drops them, a root or hex does not (no stun on you, 4s lockout). Never one a rival is standing on. Embers Kindle foes (up to 5, 4s): +0.72 damage per stack (about +45% at 5), and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s Empowered) | Soulpack + Moon Burn | Mana return becomes cooldown wind-back (no mana here) |
+| Passive Bearer | run into a downed teammate | Carry up to 2 downed teammates; they don't bleed and can't be stomped; no slow while you carry; crouch sets them down; damage, a stun or hex drop (a root does not)s them (no stun on you, 4s lockout). Never one a rival is standing on. Embers Kindle foes (up to 5, 4s): +0.72 damage per stack (about +45% at 5), and an ember into a Kindled foe winds Hearthlight back 0.2s (0.4s Empowered) | Soulpack + Moon Burn | Mana return becomes cooldown wind-back (no mana here) |
 | LMB Ember Cast | hold | No weapon: an ember pushed out of one hand, then the other, every 0.4s; it flies its full 12m, past the cursor (`"aim": "max"`). After 1s without firing, the next ember is Empowered: 40% further, double wind-back, its own two-handed push and chime | Crescent Bolt | Same; the range is the footage's 7-8 bh (about 13 m) less a little |
 | RMB Burrseed | press; a fixed 1s wind-up, then it throws itself (owner item 118) | Wind-up: half speed, a short 6m dotted lane along the aim (AimKit `dotted`), a ring round her and a coiled pose; not a hold, letting go does nothing; a stun, Hex or going down loses the throw, not the charge. At the end, along the aim of that moment: a fast seed (30 m/s) sticks to the first foe (9 damage) and a vine runs from her to them. A violet disc the size of the burst shows under them at once for everyone, filling while they stay within 15m of her (`leash`), the vine thickening; after 2s of that (`build`, owner 11-10) it flares: 32 damage and a 1.1s root in 2.2m, with root beams, and Kindles all. Out of her reach, or with her down, it unwinds twice as fast (`unwind`), the vine faint and coral; empty there, the seed falls off. 10.5s cooldown (the data's 11.5 : 12 against Hearthlight). Rank 3: the root lasts 0.3s longer and the burst is twice as wide (4.4m) | Darkside Binding / Bound by Fate | The wiki's 2s, held by her reach (owner 11-10: the footage's 0.7s "procs way too fast"); escaped by dashing or running out of 15m |
 | Shift Relay Step | tap (in the air: her long glide) | A skip where you move, 3.6m in 0.2s (Elluna's ground dash, off the global dash feel). In the air: Elluna's long floaty glide, 13.3m over 0.95s (a 0.1s ramp, a 0.4s burst at about 17 m/s, then a float out easing to 45% of that, held up while it floats; the move keys steer it at 3 rad/s; `dash.air`). The glide is airborne only: on the ground with the hop spent, Shift is refused. No bonus for passing through a teammate (data pass). Rank 3: picking up a teammate refreshes the air dash | Lunar Dash | Goes in the movement direction (footage); the "Dash toward the cursor" setting covers the other preference. Both dashes copy Elluna's distances and timings (owner 18:20, replacing item 24's 3x rule); see "Dashes: Elluna's numbers and ours" |
@@ -76,6 +77,7 @@ Every ability projectile, thrown object and travelling zone (basic attacks are i
 |---|---|---|---|---|
 | A teammate being stomped can't be picked up | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes | "a teammate being stomped can't be scooped up" |
 | Damage or a stun drops them (not a root or hex) with a 4s no-pickup lock (no stun on you, no carry slow: data pass); the Carrier shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (existing) | `--support-check` Bearer rows |
+| Damage or a stun drops them with a 4s no-pickup lock (a root does not: the data lists damage and a stun only) (no stun on you, no carry slow: data pass); the Carrier shield is cut (owner, 2026-11-07: no ours-only riders) | [wiki](https://supervive.wiki.gg/wiki/Elluna) | no | yes (existing) | `--support-check` Bearer rows |
 | The Empowered shot after a pause: more range, double return | [wiki](https://supervive.wiki.gg/wiki/Elluna), card | card only | yes | "after a pause the next ember is Empowered" |
 | Embers fly to max range, past the cursor | footage | yes | yes | "the ember flies its full range past the cursor" |
 | Bound by Fate shows a lane to max range while aiming and fires on release | footage | yes | yes | "held, a dotted lane..."; "nothing leaves while it is held" |
@@ -256,3 +258,29 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Burrseed (Darkside Binding) | Data: a shot that deals damage on hit, then roots the target and nearby enemies after a delay. | Sticks to the first foe (hunter, Boki or monster), passes allies, ends on walls; the root bursts round the stuck foe. Matches. |
 | E Hearthlight (Moonlight Blessing) | Data: reactivate to throw the zone to the target; it attaches to any ally it passes through. | The thrown light flies to the cursor, passes foes and walls, and latches onto the first ally it passes. Matches. |
 | Shift Relay Step | Data (Lunar Dash): a plain dash. | Passes through teammates; hits nobody. Matches. |
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| Passive Bearer (carry) | stun | [D] being stunned drops them, no re-pick for 4 s | drops them, 4 s lock | match |
+| Passive Bearer | damage | [D] taking too much damage drops them | any damage drops them | [?] the threshold isn't given |
+| Passive Bearer | root | [D] lists damage and a stun only | **was** a drop with the lock; **now** she keeps them | fixed (`--tender-combo-check` "Carrier: a root does not drop them") |
+| Passive Bearer | knock with no damage | [?] | kept | [?] |
+| RMB Burrseed (1 s wind-up) | stun (and Hex, down) | [O] item 118 | the throw is lost, the charge kept | match (owner) |
+| RMB Burrseed | knock, root | [?] | ignored, the seed goes | [?] |
+| Shift air glide | stun (and down) | [?] | the glide ends | [?] |
+| E Hearthlight | stun | [D] only the R channel is cancelled by a stun | the light stays lit | match |
+| E recast (the toss) | stun | [?] | refused while stunned (shared rule), the light stays on her | [?] |
+| X Hearth Call (5 s channel) | stun | [D] cancelled if she is stunned | breaks (BROKEN) | match |
+| X Hearth Call | down | [D] cancelled if she is knocked | breaks | match |
+| X Hearth Call | range | [D] cancelled if she moves too far | breaks past the 12.6 m ring | match |
+| X Hearth Call | the teammate goes down | [D] the spell continues and revives them | it continues and stands them up at the end | match |
+| X Hearth Call | knock, root | [?] (a knock only matters if it carries her out of range) | ignored | [?] |
+| X Hearth Call, a broken channel | cooldown | [?] | stays spent (`HeroUlt.press`) | [?] |
