@@ -53,13 +53,19 @@ func _calm_then_wobble() -> void:
 	await _farm(120.0)
 	await _wait(func(): return false, 1.0)
 	ok(home.hwatch.watchers.is_empty(), "two minutes out: nobody is sent for")
+	var greeter: Dictionary = home.kins[2]
+	greeter["called_t"] = 3.0      # running over to say hello (KinWelcome), as when you come home to the egg
 	Save.d["egg"]["t"] = Time.get_unix_time_from_system() + 12.0
 	var peak := [0.0]
 	await _wait(func():
 		peak[0] = maxf(peak[0], absf(home.nest.get_node("Shell").rotation.z))
 		return peak[0] > 0.0, 6.0)
 	ok(peak[0] > 0.0, "12 s out: the egg wobbles (peak %.2f)" % peak[0])
-	ok(home.hwatch.watchers.size() >= 2, "12 s out: the Boki are sent to watch (%d)" % home.hwatch.watchers.size())
+	ok(not home.hwatch.watchers.has(greeter), "a Boki busy saying hello is not sent for yet")
+	var w: Array = home.hwatch.watchers
+	await _wait(func(): return w.size() >= 3 or home.hwatch.left() <= 0.0, 11.0)
+	ok(w.size() == 3 and w.has(greeter) and home.hwatch.left() > 0.0,
+		"before it is ready all 3 are sent to watch, the greeter once its hello is done (%d)" % w.size())
 	ok(home.panel_open == "" and not home.building_now, "you are not held: no panel, no cutscene yet")
 
 func _gather_and_hatch() -> void:

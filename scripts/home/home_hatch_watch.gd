@@ -20,7 +20,6 @@ var h                                  # the Home screen
 var watchers: Array = []               # kin entries standing round the egg
 var gathered := 0                      # how many had arrived when the hatch started (for the check)
 var _egg_key := ""                     # which egg the state below belongs to
-var _called := false                   # the watchers were sent for
 var _ready_t := 0.0                    # s since the egg became ready
 var _hatching: EggHatch = null
 
@@ -52,8 +51,7 @@ func tick(d: float) -> void:
 	_wobble(lf)
 	if lf > LEAD_S or _hatching != null or _ready_t > GIVE_UP_S:
 		return
-	if not _called:
-		_called = true
+	if watchers.size() < MAX_WATCHERS:
 		_pick(egg)
 	_gather()
 	if lf > 0.0:
@@ -75,23 +73,26 @@ func _wobble(lf: float) -> void:
 	var amp := lerpf(0.0, 0.12, k)
 	sh.rotation.z = sin(sec * 11.0) * amp * (1.0 if fmod(sec, period) < 0.6 else 0.0)
 
-## Who comes: Boki on the egg's island and close to it, friends of the parents first.
+## Who comes: Boki on the egg's island and close to it, friends of the parents first. Asked again each tick
+## while the ring has room, so one that was busy (running to say hello as you came home) joins once it is free.
 func _pick(egg: Dictionary) -> void:
 	var nest_isle: int = h.world.island_of(h.NEST_AT.x, h.NEST_AT.z)
 	var parents := [String(egg.get("a", "")), String(egg.get("b", ""))]
-	var pool: Array = h.kins.filter(func(k): return _can_watch(k, nest_isle, parents))
+	var pool: Array = h.kins.filter(func(k): return not watchers.has(k) and _can_watch(k, nest_isle, parents))
+	if pool.is_empty():
+		return
 	pool.sort_custom(func(x, y):
 		var tx := _tier(x, parents)
 		var ty := _tier(y, parents)
 		return tx < ty or (tx == ty and _dist(x) < _dist(y)))
-	watchers = pool.slice(0, MAX_WATCHERS)
-	for i in watchers.size():
-		var k: Dictionary = watchers[i]
-		var a := (float(i) / maxf(1.0, watchers.size() - 1.0) - 0.5) * 2.4 + PI * 0.5      # an arc on the front side
-		k["watch"] = h.NEST_AT + Vector3(cos(a), 0.0, sin(a)) * RING_R
+	for k in pool.slice(0, MAX_WATCHERS - watchers.size()):
 		for busy_key in ["chase", "task", "fetch"]:
 			k.erase(busy_key)
 		h._emote(k, "!")
+		watchers.append(k)
+	for i in watchers.size():
+		var a := (float(i) / maxf(1.0, watchers.size() - 1.0) - 0.5) * 2.4 + PI * 0.5      # an arc on the front side
+		watchers[i]["watch"] = h.NEST_AT + Vector3(cos(a), 0.0, sin(a)) * RING_R
 
 func _can_watch(k: Dictionary, nest_isle: int, parents: Array) -> bool:
 	if k.get("busy", false) or k.has("indoors") or k.has("leap") or k.has("job") or k.has("bath") or k.has("called_t"):
@@ -136,7 +137,6 @@ func _release() -> void:
 		k.erase("watch")
 		k["t"] = randf_range(1.0, 3.0)
 	watchers.clear()
-	_called = false
 	_egg_key = ""
 
 ## The hatching has begun (Home._hatch_play): watchers cheer and the parents come to the baby.
