@@ -1065,17 +1065,19 @@ func combos(a) -> void:
 	P.ak.press_rmb()
 	A.step(m, 0.5, func():
 		P.inp["sec_hold"] = true
-		P.inp["move"] = Vector2(-1, 0))
+		P.inp["move"] = Vector2(-0.7, 0.7))       # (back and aside: the pull's arc would show if anything did)
 	P.inp["move"] = Vector2.ZERO
 	var walked := x0 - P.pos.x
+	var arc: Dictionary = K.fx().chains.get("war%darc" % P.get_instance_id(), {})
+	var no_arc := float(arc.get("t", -9.0)) < m.time - 0.1
 	var aim20 := Vector2(1, 0).rotated(deg_to_rad(20.0))
 	A.aim_at(P, P.pos + Vector3(aim20.x, 0, aim20.y) * 6.0)
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
 	var lunge_dir: Vector2 = K.lunge.get("dir", Vector2.ZERO)
-	A.ok("combo jug: E > hold RMB: no pull toward the chain, the Lunge goes where he aims, the chain kept",
-			walked > 1.0 and lunge_dir.dot(aim20) > 0.99 and K.warchain.hooked(),
-			"walked back %.2f lunge %s chain %s" % [walked, lunge_dir, K.warchain.state])
+	A.ok("combo jug: E > hold RMB: no pull toward the chain, no pull arc ahead, the Lunge goes where he aims",
+			walked > 0.7 and lunge_dir.dot(aim20) > 0.99 and K.warchain.hooked() and no_arc,
+			"walked back %.2f lunge %s chain %s arc %s" % [walked, lunge_dir, K.warchain.state, not no_arc])
 	# ... and no lock: past the chain's length with RMB held it breaks instead of holding him (shortened to 7 m here)
 	A.step(m, 1.5)
 	hook.call()
