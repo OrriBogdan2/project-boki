@@ -3,8 +3,6 @@ extends RefCounted
 ## What a slain monster leaves behind. It spills out when the dissolve is mostly gone
 ## (MobDissolve.begin says when), so the body reads first and the loot after.
 
-const BOSS_GEM_DROPS := 4     # a lair boss's gems come as this many big drops (same total)
-
 ## Everything `mb` leaves where it fell: a carried chest key and the big ones' perk orbs always, and when
 ## `loot` (not in the void, not its own blast) gems, armor, gear tunings, valuables, seeds and a Rift Key.
 static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:
@@ -22,12 +20,8 @@ static func spill(m: Match, mb: Mob, credit: Ent, loot: bool) -> void:
 
 static func _loot(m: Match, mb: Mob, credit: Ent) -> void:
 	var at := mb.pos
-	# a lair boss pays its gems out as a few big ones (fewer drops, each worth having); the rest scatter small
-	var gn := int(mb.md["gems"])
-	var big_n := BOSS_GEM_DROPS if mb is Boss else gn
-	var gem_v := int(round(3 * float(m.T["loot"]) * float(gn) / float(big_n)))
-	for i in big_n:
-		m.drop("gem", at + Vector3(0, 0.6, 0), gem_v)
+	# the gems come as one pile (DropMerge)
+	DropMerge.gems(m, at + Vector3(0, 0.6, 0), int(mb.md["gems"]), int(round(3 * float(m.T["loot"]))))
 	if mb.md.get("stag", false) and not (mb is Boss) and m.rng.randf() < 0.6:
 		m.drop("armor", at + Vector3(0, 0.6, 0), 25)
 	# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
