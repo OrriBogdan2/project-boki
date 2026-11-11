@@ -24,6 +24,7 @@ var m: Match
 var camps: Array = []        # {id, pos, island, size (index in sizes), state, mobs, back_t, region, paid {team: xp}}
 var comebacks := 0           # (tests and the rolling sim)
 var _tick_t := 0.0
+var _mark_i := 0            # next of XpRules.MARKS to log
 
 static func rules() -> Dictionary:
 	if _rules.is_empty():
@@ -101,6 +102,8 @@ func _clear(c: Dictionary, last: Mob, by: Hunter, team: int) -> void:
 	c["back_t"] = m.time + float(rules()["back_s"]) if first else -1.0
 	var p := last.pos if not m.world.is_void(last.pos.x, last.pos.z) else (c["pos"] as Vector3)
 	_bundle(size_def(int(c["size"])), p, by)
+	XpRules.note_camp_clear(m, by)
+	XpRules.steal_check(m, by, c["paid"])
 	var xp := int(c["paid"].get(team, 0.0))
 	show_clear(m, team, int(c["size"]), xp)
 	if m.net_on: m.net_event(["campclr", team, int(c["size"]), xp])
@@ -126,6 +129,9 @@ func tick(dt: float) -> void:
 	if _tick_t > 0.0 or (m.net_on and not m.is_host):
 		return
 	_tick_t = 1.0
+	if _mark_i < XpRules.MARKS.size() and m.time >= XpRules.MARKS[_mark_i]:
+		XpRules.log_hunters(m, "t=%d" % int(XpRules.MARKS[_mark_i]))
+		_mark_i += 1
 	for c in camps:
 		if c["state"] != State.CLEARED or m.time < float(c["back_t"]):
 			continue
