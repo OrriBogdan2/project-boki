@@ -3,7 +3,8 @@ extends "res://tools/hero_pair_check.gd"
 ## dummy through the real match code: the Fencer chain (steps, third-hit slow), the Grab Bag (the shuffled bag, each
 ## vial's effect, hold range, the air drop), Fish Out of Water (three marks Beach), Ground Swim (hittable, surfacing
 ## knocks up), Riptide (spin damage, the spout's knockup, longer spin = wider spout) and Tidal Wave (untargetable,
-## knockup then slow, lands with a shield).
+## knockup then slow, lands with a shield). Every look is his own HeroVfx set (content/vfx/gil.json); the splash
+## marks and the spout's window show through RecastCue.
 
 var m: Match
 var P: Hunter
@@ -28,6 +29,7 @@ func run(main_node: Node) -> void:
 	_swim()
 	_riptide()
 	_wave()
+	_looks()
 	await done(m)
 	print("PAIRCHECK gil DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
@@ -189,6 +191,9 @@ func _beach() -> void:
 		top["stun"] = maxf(top["stun"], t["stun"])
 		if i < 2:
 			ok("Fish Out of Water: vial %d leaves a mark (%d)" % [i + 1, K.marks_on(T)], K.marks_on(T) == before + 1)
+			var badge := _badge()
+			ok("Fish Out of Water: the foe's SPLASH badge counts %d, gold only one short" % (i + 1),
+				int(badge.get("n", 0)) == i + 1 and bool(badge.get("ready", false)) == (i == 1), str(badge))
 	ok("Fish Out of Water: three different marks within 5 s Beach the dummy (0.75 s stun)", top["stun"] >= 0.6,
 		"stun %.2f" % top["stun"])
 	ok("Fish Out of Water: 8 s per target", float(K.beach_at.get(T.get_instance_id(), 0.0)) - m.time > 7.0)
@@ -221,6 +226,10 @@ func _riptide() -> void:
 	_reset(7.0)
 	K.use_e()
 	step(m, 0.3)
+	var win := K.recast_window()
+	ok("Riptide: the spout's E AGAIN window runs the 2 s spin and sends itself",
+		win.get("slot") == "e" and absf(float(win.get("total", 0.0)) - 2.0) < 0.01 and bool(win.get("auto", false))
+		and float(win["left"]) < 1.8, str(win))
 	K.e_recast()
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
@@ -259,3 +268,18 @@ func _wave() -> void:
 		P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
+
+## Gil's foe badge from RecastCue's report, {} when there is none.
+func _badge() -> Dictionary:
+	var out: Array = []
+	K.combo_marks(out)
+	for b: Dictionary in out:
+		if b["e"] == T and b["label"] == "SPLASH":
+			return b
+	return {}
+
+## Every look the kit drew went through his own HeroVfx set, and each of its moves played.
+func _looks() -> void:
+	var plays: Dictionary = HeroVfx.of(m).plays
+	var unplayed := (HeroVfx.data("gil")["moves"] as Dictionary).keys().filter(func(k): return not plays.has(k))
+	ok("Looks: every move in content/vfx/gil.json played through the kit", unplayed.is_empty(), str(unplayed))
