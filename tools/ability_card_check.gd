@@ -1,6 +1,6 @@
 extends RefCounted
 ## --ability-card-check: the ability card says what the data says (docs/decisions: ability cards).
-##   1. for every Hunter (12 or more) and every kit slot: name = the data's name, key = Settings.key_cap, cooldown and range
+##   1. for every Hunter and every kit slot: name = the data's name, key = Settings.key_cap, cooldown and range
 ##      = the numbers in content/archetypes (the dash's "cd", the others' "cooldown", the "card_range" path)
 ##   2. exactly the two-step abilities say "Press <key> again to ...", and no one-press ability does
 ##   3. the HUD's card (the kit's live slot_info at rank 1) shows the same numbers as the menus' card
