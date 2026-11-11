@@ -123,8 +123,10 @@ it, and its number among its kind.
   one parent and a favourite play from the other. A clashing pair hatches low on joy.
 - **Rare Eggs.** Each lair boss guards a Rare Egg (see [Expeditions](Expeditions.md#boss-lairs)).
   Bring it home and it goes into the **Incubator** by the Nook (5 cradles, up to 8 bought). It warms
-  for 2 expeditions or about 8 minutes at home; an Ember Boki at the brazier doubles that, and Ember
-  Coals from the Kiln add as much again. It hatches a rare species with 3 IVs of 26 or better.
+  for 20 minutes of play (garden or match; time with the game closed does not count). You see it on the
+  egg: it glows brighter, cracks open in three stages and wobbles harder. An Ember Boki at the brazier
+  doubles the pace, and Ember Coals from the Kiln add as much again. It hatches a rare species with 3
+  IVs of 26 or better.
 - **Your first egg** is one of three starters (or the mystery egg): see [Getting started](Getting-Started.md).
 
 The farm only has room for so many Boki (6 at first, more with expansions); the rest sleep in the
