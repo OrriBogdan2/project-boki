@@ -111016,5 +111016,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_glomworth_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_gongibbon",
+    "name": "Gongibbon (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gongibbon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glockodile",
+    "name": "Glockodile (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glockodile_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_grainspin",
+    "name": "Grainspin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_grainspin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gongrowl",
+    "name": "Gongrowl (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gongrowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gloamspire",
+    "name": "Gloamspire (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gloamspire_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_grammite",
+    "name": "Grammite (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_grammite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_glomwort",
+    "name": "Glomwort (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_glomwort_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_gravitank",
+    "name": "Gravitank (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_gravitank_1.jpg",
+    "ok": true
   }
 ]
