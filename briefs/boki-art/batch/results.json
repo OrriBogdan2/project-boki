@@ -111296,5 +111296,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_lockwren_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_lunowl",
+    "name": "Lunowl (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lunowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lodestaff",
+    "name": "Lodestaff (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lodestaff_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lurklet",
+    "name": "Lurklet (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lurklet_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_luckhop",
+    "name": "Luckhop (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_luckhop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lyrewing",
+    "name": "Lyrewing (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lyrewing_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lanternmit",
+    "name": "Lanternmit (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lanternmit_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lunink",
+    "name": "Lunink (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lunink_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_marchleaf",
+    "name": "Marchleaf (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_marchleaf_1.jpg",
+    "ok": true
   }
 ]
