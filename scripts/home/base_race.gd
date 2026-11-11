@@ -355,7 +355,7 @@ func _post_model() -> void:
 	sign_t.font_size = 28
 	sign_t.pixel_size = 0.004
 	sign_t.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	sign_t.position = Vector3(0.3, _ground(post.position) + 1.92, 0)
+	sign_t.position = Vector3(0.3, ground(post.position) + 1.92, 0)
 	post.add_child(sign_t)
 
 static func mat(c: Color) -> StandardMaterial3D:
