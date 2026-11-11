@@ -92,6 +92,12 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
   toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
   2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
   --shots-dir=<dir>` takes the same screens with a real renderer.
+- The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
+  eight states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
+  uplink far off (edge marker), the last way out (alive, and dead with the "Ways out left" line), the Gate prompt,
+  and out past the Blight ring. The Gate prompt names the Gate, so it has no marker. Edge markers (`MarkerDir`)
+  sit right of the squad column and above the prompt row, their label kept inside the margin; the check sweeps 16
+  directions with the longest label. A marker floats over a toast for the toast's 2 s; that is not counted.
 
 ## Looting with a full inventory
 

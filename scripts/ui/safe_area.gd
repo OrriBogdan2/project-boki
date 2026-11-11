@@ -24,10 +24,14 @@ static func begin(group_name: String) -> void:
 	group = group_name
 
 static func note(r: Rect2) -> void:
-	if recording and group != "":
-		if not seen.has(group):
-			seen[group] = []
-		seen[group].append(r)
+	note_as(group, r)
+
+## `r` under a group of its own: for widgets drawn outside the panel pass (the Ways Out strip, markers, prompts).
+static func note_as(group_name: String, r: Rect2) -> void:
+	if recording and group_name != "":
+		if not seen.has(group_name):
+			seen[group_name] = []
+		seen[group_name].append(r)
 
 ## The groups (name -> Array of Rect2) found under `root`: its visible controls, looking inside any that fill the
 ## screen (a full-rect backdrop or container) for the real ones.

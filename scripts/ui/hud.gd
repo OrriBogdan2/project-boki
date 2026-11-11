@@ -891,14 +891,18 @@ func _draw_waypoint(at: Vector3, label: String, col: Color) -> void:
 		c.draw_arc(gp, 28.0 + bob, 0, TAU, 28, Color(col, 0.85), 4.0, true)
 	else:
 		# kept inside the play area: under the tutorial panel, above the ability bar
-		var ctr := Vector2(sz.x * 0.5, sz.y * 0.47)
-		var hx := sz.x * 0.5 - 70.0; var hy := sz.y * 0.24
-		var t := minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
-		var edge := ctr + d * t + d * bob * 0.5
+		var edge := MarkerDir.edge_point(sz, d) + d * bob * 0.5
 		var perp := Vector2(-d.y, d.x)
-		c.draw_colored_polygon(PackedVector2Array([edge + d * 44.0, edge - d * 12.0 + perp * 28.0, edge - d * 12.0 - perp * 28.0]), Color(0, 0, 0, 0.5))
+		var back := edge - d * MarkerDir.ARROW_BACK
+		var wing := perp * MarkerDir.ARROW_WING
+		var tip := edge + d * MarkerDir.ARROW_TIP
+		c.draw_colored_polygon(PackedVector2Array([tip, back + wing, back - wing]), Color(0, 0, 0, 0.5))
 		c.draw_colored_polygon(PackedVector2Array([edge + d * 38.0, edge - d * 9.0 + perp * 23.0, edge - d * 9.0 - perp * 23.0]), col)
-		_ctext(edge - d * 62.0, "%s  %dm" % [label, dist], 22, col, big)
+		var line := "%s  %dm" % [label, dist]
+		var lr := MarkerDir.label_rect(edge, d, TextCache.width(big, line, MarkerDir.LABEL_FS), sz)
+		_ctext(MarkerDir.label_base(lr), line, MarkerDir.LABEL_FS, col, big)
+		SafeArea.note_as("waypoint", MarkerDir.arrow_rect(edge, d))
+		SafeArea.note_as("waypoint", lr)
 
 ## An uplink on the minimap: the outpost's banner post (OutpostGlyph). Bright when it's usable, grey
 ## when not; a pulsing ring while it's going.
@@ -1768,8 +1772,11 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 				_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
 	if not st.is_empty():
-		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
-		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
+		var sy := maxf(sz.y * 0.2, msgs.bottom() + 30.0)      # (under the message lane, like the killcam line)
+		var sw := TextCache.width(big, String(st["text"]), 24)
+		SafeArea.note_as("exit_status", Rect2(Vector2(sz.x * 0.5 - sw * 0.5, sy - 22.0), Vector2(sw, 42.0)))
+		_ctext(Vector2(sz.x * 0.5, sy), String(st["text"]), 24, st["col"], big)
+		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sy + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 
 func _draw_crosshair(p: Hunter) -> void:
 	var mp := c.get_local_mouse_position()

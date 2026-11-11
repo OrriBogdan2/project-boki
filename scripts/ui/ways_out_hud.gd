@@ -10,7 +10,7 @@ enum St {LOCKED, OPEN, USE, TAKEN, LOST}
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
 const CELL := Vector2(86.0, 40.0)
 const SQUADS_W := 112.0
-const TOP_Y := 8.0
+const TOP_Y := SafeArea.MARGIN
 const PIP_R := 7.0
 const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
 const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
@@ -115,6 +115,7 @@ static func draw(hud) -> void:
 	var sd := seats(m)
 	var w := CELL.x * 4.0 + SQUADS_W
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
+	SafeArea.note_as("ways_strip", r)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
 	for i in 4:
 		_cell(c, Rect2(r.position + Vector2(CELL.x * i, 0), CELL), sd[i], m.time)
@@ -164,10 +165,13 @@ static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 		c.draw_line(Vector2(tx - 1, r.position.y + 12), Vector2(tx + nw + 1, r.position.y + 12), col, 1.5)
 
 # ------------------------------------------------------------------ the Heart Gate prompt
+static func is_gate_prompt(it: Dictionary) -> bool:
+	return it.get("kind", "") == "heart" and it.get("act", "") == "leave"
+
 ## What the carrier sees at the Gate: the live key, "Leave now: small reward", the hold bar (rules gate_hold_s),
 ## one line under it. `it` is the Heart's interact dictionary; false when it is not the carrier's leave prompt.
 static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
-	if it.get("kind", "") != "heart" or it.get("act", "") != "leave":
+	if not is_gate_prompt(it):
 		return false
 	var c: Control = hud.c
 	var key := Settings.key_cap("interact")
@@ -177,6 +181,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var w := kw + 10.0 + mw + 26.0
 	var x := sz.x * 0.5 - w * 0.5
 	var edge := Color(Heart.GATE_COL, 0.7)
+	SafeArea.note_as("gate_prompt", Rect2(Vector2(x, y - 22), Vector2(w, 40)))      # (the box and its hold bar)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 9, edge, 1), Rect2(Vector2(x, y - 22), Vector2(w, 34)))
 	HudStyle.key_pill(c, Vector2(x + 13 + kw * 0.5, y - 5), key, Heart.GATE_COL)
 	HudStyle.text(c, Vector2(x + 13 + kw + 10, y), main, 16, HudStyle.INK)
@@ -185,6 +190,7 @@ static func gate_prompt(hud, sz: Vector2, y: float, it: Dictionary) -> bool:
 	var stay := stay_line(hud.m)
 	var sw := TextCache.width(HudStyle.BODY, stay, 13) + 20.0
 	var back := Rect2(Vector2(mid - sw * 0.5, y + 22), Vector2(sw, 20))
+	SafeArea.note_as("gate_stay", back)
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 7, Color(0, 0, 0, 0), 0), back)
 	HudStyle.ctext(c, Vector2(mid, y + 37), stay, 13, HudStyle.INK, 3, HudStyle.BODY)
 	return true

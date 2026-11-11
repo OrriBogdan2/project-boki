@@ -3,6 +3,8 @@ extends RefCounted
 ## 2560x1080 ultrawide, 1024x640). At each, every group (a registered HUD panel, or a top-level control of a
 ## screen) sits inside SafeArea's margin and no two groups of one screen overlap. The match HUD is read from
 ## SafeArea's registry; the pick (prematch), pause, results, farm HUD and expedition panel from their controls.
+## The Ways Out widgets (the strip, its one line, the Gate prompt, the uplink's status, the Blight line and the
+## edge markers) are checked in each of their states, and every direction an edge marker can point.
 ## --safe-area-shots [--size=WxH] --shots-dir=<dir>: the same run with a real renderer, one PNG per screen
 ## and size (<dir>/<W>x<H>_<screen>.png) and a contact sheet of them.
 
@@ -37,6 +39,7 @@ func run(mn: Node, mode: String) -> void:
 	if main.fade:
 		await main.fade.reveal(0.01)
 	await _hud()
+	await _ways_out()
 	await _screens()
 	await _farm()
 	print("SAFEAREA DONE, failures: ", bad)
@@ -83,14 +86,117 @@ func _hud() -> void:
 		await _judge("pause", win, SafeArea.groups_of(Overlay.host, sz), sz)
 		Overlay.close()
 
-func _hud_at(win: Vector2i, sz: Vector2, screen: String) -> void:
+func _hud_at(win: Vector2i, sz: Vector2, screen: String, with_toasts := true) -> void:
 	SafeArea.seen.clear()
 	SafeArea.recording = true
 	m.hud.panels.queue_redraw()
 	await _frames(4)
 	SafeArea.recording = false
-	SafeArea.seen["toasts"] = m.hud.msgs.rects()
+	if with_toasts and not m.hud.map_open():      # (the full map hides the lane)
+		SafeArea.seen["toasts"] = m.hud.msgs.rects()
 	await _judge(screen, win, SafeArea.seen.duplicate(), sz)
+
+# ------------------------------------------------------------------ the Ways Out widgets
+const WAYS_STATES := ["locked", "unlocked", "quest_racing", "uplink_far", "last_way_out", "last_way_out_dead",
+		"gate_prompt", "outside_ring"]
+const WAYS_GROUP := {"locked": "ways_strip", "unlocked": "waypoint", "quest_racing": "exit_status",
+		"uplink_far": "waypoint", "last_way_out": "ways_strip", "last_way_out_dead": "ways_line",
+		"gate_prompt": "gate_prompt", "outside_ring": "blight_line"}
+const MARKER_STATES := ["unlocked", "uplink_far"]      # a marker floats over a toast for its 2 s: not counted
+const EDGE_ANGLES := 16
+const BELT := ["vitals", "abilities", "weapon", "gear", "kin"]      # what a marker's box must stay off
+
+func _ways_out() -> void:
+	for win: Vector2i in sizes:
+		var sz := await _resize(win)
+		var prompt: Array = []
+		for st: String in WAYS_STATES:
+			_ways_set(st)
+			await _hud_at(win, sz, "ways_" + st, st not in MARKER_STATES)
+			ok(SafeArea.seen.has(WAYS_GROUP[st]), "%dx%d ways_%s: draws its %s" % [win.x, win.y, st, WAYS_GROUP[st]])
+			if st == "gate_prompt":
+				prompt = SafeArea.seen["gate_prompt"] + SafeArea.seen["gate_stay"]
+		_ways_set("locked")
+		await _hud_at(win, sz, "ways_locked")
+		_edge_sweep(win, sz, prompt)
+
+## Puts the match in one Ways Out state: seats on the clock, the Heart, the outposts, where the player stands.
+func _ways_set(st: String) -> void:
+	var P: Hunter = m.player
+	var H: Heart = m.heart
+	var q: Dictionary = Heart.rules()["quest"]
+	var foe: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
+	var out_x: Dictionary = m.exits.list.filter(func(x): return x["kind"] == "outpost")[0]
+	m.hud.full_map.close()
+	P.inp["interact"] = false
+	H.interact_for(P)      # (a released key clears the Gate's hold, so each size starts it afresh)
+	H.carrier = null
+	H.early_team = -1
+	H.final_team = -1
+	H.final_prog = 0.0
+	H.charge = 0.0
+	H._force(Heart.S.ASLEEP, "check")
+	P.out = false
+	m.interact = {}
+	out_x["state"] = "idle"
+	m.sess_t0 = 30.0 - m.time
+	P.teleport(m.world.free_spot_near(H.site + Vector3(14, 0, 10), [], 1.0, 0.45, 6.0))
+	match st:
+		"unlocked":
+			m.sess_t0 = float(q["lair_open_s"]) + 40.0 - m.time
+			H.charge = Heart.r("charge_s")
+			H._force(Heart.S.READY, "check")
+		"quest_racing", "uplink_far":
+			m.sess_t0 = float(q["uplink_open_s"]) + 20.0 - m.time
+			out_x["state"] = "charging"
+			out_x["prog"] = 0.4
+			out_x["contested"] = st == "quest_racing"
+			out_x["team"] = (foe if st == "quest_racing" else P).team
+			if st == "quest_racing":
+				P.teleport(m.world.free_spot_near(out_x["pos"], [], 1.0, 0.45, 6.0))
+			else:
+				P.teleport(m.world.free_spot_near(out_x["pos"] + Vector3(60, 0, 0), [], 1.0, 0.45, 6.0))
+		"last_way_out", "last_way_out_dead":
+			m.sess_t0 = Heart.r("final_s") + 30.0 - m.time
+			H.early_team = foe.team
+			H.final_team = P.team
+			H.final_prog = 0.4
+			H.charge = Heart.r("charge_s")
+			H._force(Heart.S.FINAL, "check")
+			P.out = st == "last_way_out_dead"
+		"gate_prompt":
+			H.charge = Heart.r("charge_s")
+			H.carrier = P
+			H._force(Heart.S.CARRIED, "check")
+			P.teleport(H.gate + Vector3(0, 0, 3.0))
+			P.inp["interact"] = true
+			H.hold(P, H.interact_for(P), 1.7)
+			m.interact = H.interact_for(P)
+		"outside_ring":
+			m.sess_t0 = float(Heart.r("tide_start_s")) + float(Heart.r("tide_close_s")) - m.time
+			H._force(Heart.S.CHARGING, "check")
+			P.teleport(m.world.free_spot_near(H.site + Vector3(Heart.tide_r(m) + 25.0, 0, 0), [], 1.0, 0.45, 6.0))
+	m.cam.snap(P.pos)
+	m.hud.toast("Picked up a long-range rifle", Color.WHITE)
+	m.hud.c.queue_redraw()
+
+## An edge marker pointing every way round, with the longest label: inside the margin, off the bottom row and
+## off the Gate prompt (`prompt`, its boxes), at this size.
+func _edge_sweep(win: Vector2i, sz: Vector2, prompt: Array) -> void:
+	var avoid: Array = prompt.duplicate()
+	for g in BELT:
+		avoid.append_array(SafeArea.seen.get(g, []))
+	var safe := SafeArea.inner(sz).grow(0.5)
+	var label_w := TextCache.width(m.hud.big, "Wolfgang has the Heartspark  9999m", MarkerDir.LABEL_FS)
+	var bad_dirs: Array = []
+	for i in EDGE_ANGLES:
+		var d := Vector2.from_angle(TAU * i / EDGE_ANGLES)
+		var edge := MarkerDir.edge_point(sz, d)
+		for r: Rect2 in [MarkerDir.arrow_rect(edge, d), MarkerDir.label_rect(edge, d, label_w, sz)]:
+			if not safe.encloses(r) or avoid.any(func(o: Rect2): return r.intersects(o)):
+				bad_dirs.append(i)
+	var what := "%dx%d edge markers, %d directions: inside the margin, off the bottom row and the Gate prompt %s"
+	ok(bad_dirs.is_empty(), what % [win.x, win.y, EDGE_ANGLES, bad_dirs])
 
 func _screens() -> void:
 	for win: Vector2i in sizes:
@@ -113,7 +219,7 @@ func _farm() -> void:
 		var sz := await _resize(win)
 		await main.get_tree().create_timer(0.6).timeout
 		home._close_panel()      # (a Boki's evolve card can open by itself: it is a panel, not the farm HUD)
-		await _frames(2)
+		await main.get_tree().create_timer(0.3).timeout      # the key row steps off the hub bar on a 0.2 s beat
 		await _judge("farm", win, SafeArea.groups_of(home.root_ui, sz), sz)
 		home._open_expedition()
 		await main.get_tree().create_timer(0.8).timeout
