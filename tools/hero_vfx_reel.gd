@@ -12,7 +12,7 @@ extends "res://tools/combo51_shots.gd"
 
 const HERO_PARTS := {"juggernaut": ["lmb", "wave", "slam", "lunge", "drop", "dash", "e", "spin", "r", "rage", "voice"],
 	"archer": ["string", "lmb", "miss", "super", "heavy", "dash", "e", "r", "voice"],
-	"dredge": ["hook"]}
+	"dredge": ["lmb", "hook"]}
 const GENERIC := ["lmb", "rmb", "dash", "e", "r"]
 const GAP := 0.7               # s of quiet between parts
 const SHEET_CROP := Vector2i(440, 300)    # px of each sheet frame
@@ -346,6 +346,18 @@ func _archer_lmb() -> void:
 	await _go(2.6, shots, _sheet("lmb",
 			"LMB: a tap needle, then the Empowered draw: thread gathering at the nock, the needle with its "
 			+ "red thread trailing, the hit on the dummy", [0.06, 0.14, 0.3, 0.9, 1.3, 1.53, 1.58, 1.65, 1.8]), 3.0)
+	await _go(GAP)
+
+## Grimble's gun at the dummy: fire held for four volleys (the spread lines kick wide on each and breathe back
+## between), let go so they close and fold to the aim line, then one tap fired tight.
+func _dredge_lmb() -> void:
+	await _reset(5.5)
+	var shots := func(t: float):
+		P.inp["fire"] = t < 1.75 or (t >= 3.0 and t < 3.05)
+		_aim(T.pos)
+	await _go(4.0, shots, _sheet("lmb",
+			"LMB: four held volleys (the spread lines kick wide, breathe in between), let go (they close and fold), "
+			+ "a tight tap", [0.05, 0.3, 0.55, 0.8, 1.3, 1.9, 2.3, 2.8, 3.1]), 3.0)
 	await _go(GAP)
 
 ## Grimble's RMB at the dummy: the arm stretches out, the hook bites, the reel hauls it in.

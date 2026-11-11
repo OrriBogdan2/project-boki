@@ -1,7 +1,8 @@
 extends RefCounted
 ## The scattergun's burst for --dredge-combo-check (docs/heroes/dredge.md): the first volley of a
-## burst flies straight down the aim line, the next ones fan out, a short pause keeps the fan, and after the
-## 0.7 s reset beat the next volley is aimed again.
+## burst flies straight down the aim line, the next ones fan out (at least the rested fan: the bloom breathes back
+## between held shots, ADR 0022), a short pause keeps the fan, and after the 0.7 s reset beat the next volley is
+## aimed again.
 
 const SHORT_PAUSE := 0.3            # s off the trigger, under the reset beat (rate 0.5 + 0.2)
 const LONG_PAUSE := 1.0             # s off the trigger, past the reset beat
@@ -29,9 +30,10 @@ func run() -> void:
 	_release(m, P, LONG_PAUSE)
 	spreads.append_array(_hold(m, P, 1))
 	var info := str(spreads)
+	var half := float(P.wpn["fan_deg"]) * 0.5 - 0.5    # the rested fan's half angle (the bloom breathes back to it)
 	ok("gun: the first volley of a burst flies straight down the aim line", spreads[0] < 0.5, info)
-	ok("gun: the volleys after it fan out", spreads[1] > 10.0 and spreads[2] > spreads[1], info)
-	ok("gun: a short pause keeps the fan", spreads[3] > 10.0, info)
+	ok("gun: the volleys after it fan out", spreads[1] > half and spreads[2] > half, info)
+	ok("gun: a short pause keeps the fan", spreads[3] > half, info)
 	ok("gun: after a pause past the reset beat the next volley is aimed again", spreads[4] < 0.5, info)
 	await ak.done(m)
 

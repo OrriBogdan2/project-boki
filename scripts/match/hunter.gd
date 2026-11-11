@@ -1290,6 +1290,7 @@ var safe_pos := Vector3.INF    # the last solid ground you stood on, well away f
 ## Weapon state that builds up while you fire (Supervive-style): per-shot bloom, a sniper's
 ## wind-up, a minigun's spin, a rifle's sustained-fire falloff, and a sword's charge.
 var wbloom := 0.0              # extra spread in degrees from firing; recovers once you stop
+var burst_fresh := true        # the trigger was off for rate + 0.2 s: an aimed_first gun's next volley flies on the aim line
 var warm_t := 0.0              # sniper wind-up left; the shot goes when it runs out
 var spin := 0.0                # minigun spin, 0 to 1; it only fires fully spun
 var spun_t := 0.0              # how long the minigun has been firing (it tightens up)
@@ -1459,10 +1460,11 @@ func _tick_weapon(dt: float) -> void:
 		elif warm_t <= 0.0:
 			warm_t = 0.0
 			_release()
-	# per-shot bloom recovers once you've stopped firing for a beat (an aimed-first gun snaps back to its aimed shot)
-	if wbloom > 0.0 and idle_fire > float(wpn["rate"]) + 0.2:
-		var drop: float = INF if wpn.get("aimed_first", false) else float(wpn.get("bloom_recover", 20.0)) * dt
-		wbloom = maxf(0.0, wbloom - drop)
+	# per-shot bloom recovers once you've stopped firing for a beat (`bloom_wait` s; the shotgun breathes between shots)
+	if wbloom > 0.0 and idle_fire > float(wpn.get("bloom_wait", float(wpn["rate"]) + 0.2)):
+		wbloom = maxf(0.0, wbloom - float(wpn.get("bloom_recover", 20.0)) * dt)
+	if idle_fire > float(wpn["rate"]) + 0.2:
+		burst_fresh = true
 	if idle_fire > 0.35 or reload_t > 0.0:
 		sus_n = 0
 	if not strike_at_end.is_empty():
@@ -1645,7 +1647,7 @@ func _emit_shot() -> void:
 		# a shotgun throws the same fixed fan every time, wider with each shot in a row. However
 		# few slugs land, the first one on a target still does a good share of the whole volley
 		var fan: float = deg_to_rad(float(wpn.get("fan_deg", 23.0)) + wbloom) if wpn.has("fan_deg") else float(wpn.get("fan", 0.4))
-		if wbloom == 0.0 and wpn.get("aimed_first", false):
+		if burst_fresh and wpn.get("aimed_first", false):
 			fan = 0.0           # the first volley of a burst goes straight down the aim line
 		extra["pg"] = "%s_%d" % [nid, shot_n]
 		extra["pn"] = pel
@@ -1657,6 +1659,7 @@ func _emit_shot() -> void:
 		m.spawn_shot(self, start, Vector2(cos(a), sin(a)) * spd, dmg, life, wpn["size"], wpn["color"], extra)
 	if wpn.has("bloom_deg"):
 		wbloom = minf(float(wpn.get("bloom_max_deg", 6.0)), wbloom + float(wpn["bloom_deg"]))
+	burst_fresh = false
 	m.sfx(wpn["sfx"], pos, -2.0 if is_local() else -6.0)
 	Juice.shot(self, start, Vector2(cos(a), sin(a)))
 
