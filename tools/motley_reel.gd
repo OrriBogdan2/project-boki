@@ -5,11 +5,11 @@ extends "res://tools/parity_reel.gd"
 ## lands him on top. Frames go to <dir>/frames/NNNNN.jpg (run under jobq --needs gpu); REEL_MARK gives each part's
 ## first frame. Never writes the save.
 
-const PARTS := ["e", "trade", "ledge"]
+const MOTLEY_PARTS := ["e", "trade", "ledge"]
 const LEDGE_RISE := 2          # terraces the ledge stands over the ground he throws from (at least)
 
 func parts() -> Array:
-	return PARTS
+	return MOTLEY_PARTS
 
 func run(main_node: Node) -> void:
 	main = main_node
@@ -27,7 +27,7 @@ func run(main_node: Node) -> void:
 	P.lvl = 6
 	for slot in P.slot_lv:
 		P.slot_lv[slot] = 3
-	for part: String in PARTS:
+	for part: String in MOTLEY_PARTS:
 		if only == "" or part == only:
 			print("REEL_MARK %d %s" % [frames, part])
 			await Callable(self, "_m_" + part).call()
@@ -80,6 +80,7 @@ func _m_ledge() -> void:
 	await _go(4.0, func(t: float) -> void:
 		_aim(c["aim"])
 		P.inp["dash"] = _in(t, 0.6))
+	print("REEL_LEDGE from y %.2f to %s" % [float(c["start"].y), str(P.pos)])
 	P.inp["move"] = Vector2.ZERO
 	cam_at = Vector3.ZERO
 
