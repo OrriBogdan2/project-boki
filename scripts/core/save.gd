@@ -8,14 +8,15 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 12
+const VERSION := 14
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11", 11: "_migrate_11_to_12"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
+		11: "_migrate_11_to_12", 12: "_migrate_12_to_13", 13: "_migrate_13_to_14"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -73,16 +74,18 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"zones": GardenZones.fresh(),   # the garden's zones: which are open (GardenZones)
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
 		"treat": "",
 		"plots": _empty_plots(4),
 		"plot_cap": 4,
+		"game_board": {},     # garden minigame results (MinigameHub); older saves start empty
 		"matches": 0,
 		"extracts": 0,
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
-		"tutorial": {},
+		"tutorial": {"gfd": {"did": {}, "paid": false}},      # the first-day list (GardenFirstDay)
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
 		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
@@ -138,6 +141,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"traits": tr,
 		"trust": 35.0,
 		"memory": [],
+		"bonds": {},          # uid -> -1..1, friends and rivals on the base (BaseLife)
 		"matches": 0, "wins": 0, "kos": 0,
 		"born": int(Time.get_unix_time_from_system()),
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
@@ -292,10 +296,29 @@ func _migrate_9_to_10(data: Dictionary) -> void:
 func _migrate_10_to_11(data: Dictionary) -> void:
 	HouseSave.migrate(data)
 
-## v11 -> v12: evolution by species (Evo, docs/decisions/0024). Levels and forms are kept, levels
-## stop at the cap, and each Boki keeps its old form name.
+## v11 -> v12: evolution by species (Evo, docs/decisions/0024: levels and forms are kept, levels stop at the
+## cap, each Boki keeps its old form name) and base life (every Boki starts with no friends or rivals,
+## rec["bonds"] = {}). One chain for both lines (docs/decisions/0060-garden-save-chain.md): each step only
+## adds what is missing, so 0.24.4's v12 (Evo, no bonds) and a garden dev v12 (bonds, no Evo) both load.
 func _migrate_11_to_12(data: Dictionary) -> void:
 	Evo.migrate(data)
+	for r in data.get("roster", []):
+		if not r.has("bonds"):
+			r["bonds"] = {}
+
+## v12 -> v13: garden zones (Bramblebank is open and every Boki lives there, GardenZones) and shaping items
+## (every Boki gets its worn-token slots and loose points, Care.ensure). A v12 save from either line gets the
+## other half of v12 first (every step only adds what is missing).
+func _migrate_12_to_13(data: Dictionary) -> void:
+	_migrate_11_to_12(data)
+	GardenZones.migrate(data)
+	for r in data.get("roster", []):
+		Care.ensure(r)
+
+## v13 -> v14: carry 2 in (docs/decisions/0061-carry-pick.md). The lead is the current partner ("active"), the
+## second starts empty: a save that auto-picked or once chose a second no longer brings one until you pick.
+func _migrate_13_to_14(data: Dictionary) -> void:
+	data["active2"] = ""
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,
@@ -442,6 +465,7 @@ func load_from(p: String) -> void:
 			if bak: bak.store_string(text)
 		if not migrate(parsed):
 			return
+	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
@@ -495,27 +519,13 @@ func active_kin() -> Dictionary:
 				break
 	return k
 
-## The kin you bring as your second (benched, swapped in with X). "none" means bring only one.
-## If you haven't picked, your most trusted other kin comes along.
+## The second Boki you carry, or {} when you picked none (or the pick is gone, held or the lead). CarryPick sets it.
 func second_kin() -> Dictionary:
-	var a := str(d.get("active", ""))
 	var b := str(d.get("active2", ""))
-	if b == "none":
-		return {}
 	var k := kin(b)
-	if not k.is_empty() and b != a and KinLoss.selectable(k):
-		return k
-	var best: Dictionary = {}
-	for r in d["roster"]:
-		if r["uid"] == a or not KinLoss.selectable(r): continue
-		# kin out on the farm first; one asleep in the Kin Burrow only if nobody else is around
-		var better: bool = best.is_empty() or (best.get("boxed", false) and not r.get("boxed", false)) \
-			or (best.get("boxed", false) == r.get("boxed", false) and float(r.get("trust", 0.0)) > float(best.get("trust", 0.0)))
-		if better:
-			best = r
-	if not best.is_empty():
-		d["active2"] = best["uid"]
-	return best
+	if k.is_empty() or b == str(d.get("active", "")) or not KinLoss.selectable(k):
+		return {}
+	return k
 
 func remember(k: Dictionary, kind: String, text: String, trust_delta := 0.0) -> void:
 	if k.is_empty():
