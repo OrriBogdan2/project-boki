@@ -263,11 +263,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 		if rest > 0.0:
 			hk["trust"] = clampf(float(hk["trust"]) + rest, 0.0, 100.0)
 		if Save.has_building("dojo"):
-			hk["xp"] = int(hk.get("xp", 0)) + 40
-			while int(hk["level"]) < Evo.cap() and int(hk["xp"]) >= 100 * int(hk["level"]):
-				hk["xp"] = int(hk["xp"]) - 100 * int(hk["level"])
-				Evo.level_up(hk)
-				_evolve(hk, out)
+			Evo.add_xp(hk, Evo.dojo_xp(), func(): _evolve(hk, out))
 	# records for the trophy hall
 	var stt: Dictionary = d["stats"]
 	stt["kills"] = int(stt.get("kills", 0)) + int(r.get("kills", 0))
@@ -339,15 +335,10 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	for nd in Care.MATCH_COST:
 		Care.change(k, nd, Care.MATCH_COST[nd] * (1.0 if lead else 0.7))
 	Care.change(k, "joy", 8.0 if won else -8.0)
-	var xp := 40 + (40 if won else 0) + int(r.get("knocks", 0)) * 10
-	if not lead: xp = int(xp * 0.7)
+	var xp := Evo.run_xp(won, int(r.get("knocks", 0)), lead)
 	if treat == "treat_xp": xp = int(xp * 1.5)
-	k["xp"] = int(k.get("xp", 0)) + xp
-	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= Evo.XP_PER_LEVEL * int(k["level"]):
-		k["xp"] = int(k["xp"]) - Evo.XP_PER_LEVEL * int(k["level"])
-		Evo.level_up(k)
+	if Evo.add_xp(k, xp, func(): _evolve(k, out)) > 0:
 		out["levelup"] = true
-		_evolve(k, out)
 	if lead:
 		out["trust_delta"] = float(k["trust"]) - before
 

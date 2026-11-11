@@ -81,7 +81,7 @@ static func _xp_frac(rec: Dictionary, goal: int) -> float:
 	var lv := int(rec["level"])
 	if lv >= goal:
 		return 1.0
-	var span := Evo.XP_PER_LEVEL * ((goal - 1) * goal - (lv - 1) * lv) / 2
+	var span := Evo.xp_between(lv, goal)
 	return clampf(float(rec.get("xp", 0)) / float(span), 0.0, 1.0)
 
 static func _ink_row(rec: Dictionary, ink: String, to: String, refresh: Callable) -> HBoxContainer:

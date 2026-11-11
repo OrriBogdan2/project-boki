@@ -1,5 +1,11 @@
 {
- "desc": "Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (Grown 8 for the first form, Elder 16 for the second) (a level-up at or past it). 'into': the options; 'stat' picks a branch by the higher trained stat (power/guard/speed) when it evolves, a tie by its affinity (fierce power, steadfast guard, swift speed), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.",
+ "desc": "Evolution (scripts/core/evo.gd). Each entry is a Boki species id and what it evolves into. 'level': the level it evolves at (Grown 8 for the first form, Elder 16 for the second; the starter lines cindle, puddlet and burrlet take their first form at 5) (a level-up at or past it). 'into': the options; 'stat' picks a branch by the higher trained stat (power/guard/speed) when it evolves, a tie by its affinity (fierce power, steadfast guard, swift speed), 'item' needs that Ink used on it (any level), 'trade' needs it traded to another player. Ids that have no data yet are the owner's roster names in lower case. A Boki never evolves into a species without data and a model (art/kin/<id>/<id>.glb and a BokiRig FRAME row); it waits, and evolves once the art exists.",
+ "xp": {
+  "base": 18,
+  "power": 1.5,
+  "dojo_day": 40,
+  "doc": "XP a Boki needs to go from level L to L + 1: round(base x L^power) (Evo.xp_to). Replaces 100 x L, which put a Lv 16 evolution about 80 days out. Run XP is 40, +40 for a win, +10 per knock, x0.7 when it was not the lead (Evo.run_xp); a Boki resting at home with a Dojo gets dojo_day more after each run. docs/GARDEN_XP.md has the table and the two-hour estimate."
+ },
  "cap": 100,
  "cap_doc": "The highest level a Boki can reach.",
  "lines": {
@@ -49,7 +55,7 @@
      "id": "sporcupine"
     }
    ],
-   "level": 8
+   "level": 5
   },
   "sporcupine": {
    "into": [
@@ -70,7 +76,7 @@
      "id": "vespox"
     }
    ],
-   "level": 8
+   "level": 5
   },
   "vespox": {
    "into": [
@@ -91,7 +97,7 @@
      "id": "glassolotl"
     }
    ],
-   "level": 8
+   "level": 5
   },
   "glassolotl": {
    "into": [

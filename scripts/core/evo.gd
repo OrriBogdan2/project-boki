@@ -107,12 +107,56 @@ static func form_name(rec: Dictionary) -> String:
 static func rules() -> Dictionary:
 	return Content.rules("evolve")
 
-## XP a Boki needs at level L to reach L+1 is XP_PER_LEVEL * L (Game's match results).
-const XP_PER_LEVEL := 100
-
 ## The highest level a Boki can reach.
 static func cap() -> int:
 	return int(rules()["cap"])
+
+## XP a Boki needs to go from `level` to the next (content/rules/evolve.json "xp").
+static func xp_to(level: int) -> int:
+	var x: Dictionary = rules()["xp"]
+	return roundi(float(x["base"]) * pow(float(level), float(x["power"])))
+
+## XP from the start of level `from` to the start of level `to`.
+static func xp_between(from: int, to: int) -> int:
+	var total := 0
+	for lv in range(from, to):
+		total += xp_to(lv)
+	return total
+
+## XP one expedition gives a Boki: 40, +40 for a win, +10 per knock, x0.7 when it was not the lead.
+static func run_xp(won: bool, knocks: int, lead: bool) -> int:
+	var xp := 40 + (40 if won else 0) + knocks * 10
+	return xp if lead else int(xp * 0.7)
+
+## XP a Boki resting at home with a Dojo gets after each expedition.
+static func dojo_xp() -> int:
+	return int(rules()["xp"]["dojo_day"])
+
+## Gives XP and levels it up as far as it goes (never past the cap); `on_level` runs after each level.
+## Returns how many levels it gained.
+static func add_xp(rec: Dictionary, xp: int, on_level := Callable()) -> int:
+	rec["xp"] = int(rec.get("xp", 0)) + xp
+	var gained := 0
+	while int(rec["level"]) < cap() and int(rec["xp"]) >= xp_to(int(rec["level"])):
+		rec["xp"] = int(rec["xp"]) - xp_to(int(rec["level"]))
+		level_up(rec)
+		gained += 1
+		if on_level.is_valid():
+			on_level.call()
+	return gained
+
+## Save v12 -> v13: XP is kept as the same share of the way to the next level (the XP per level
+## changed from 100 x L to Evo.xp_to), so nobody loses progress and nobody levels twice on the spot.
+static func migrate_xp(data: Dictionary) -> void:
+	var recs: Array = (data.get("roster", []) as Array).duplicate()
+	for L in data.get("lost_kin", []):
+		if typeof(L) == TYPE_DICTIONARY and typeof(L.get("rec")) == TYPE_DICTIONARY: recs.append(L["rec"])
+	for rec in recs:
+		if typeof(rec) != TYPE_DICTIONARY or not rec.has("xp"):
+			continue
+		var lv := maxi(int(rec.get("level", 1)), 1)
+		var share := clampf(float(rec["xp"]) / (100.0 * lv), 0.0, 0.999)
+		rec["xp"] = int(share * xp_to(lv))
 
 ## One level more, never past the cap.
 static func level_up(rec: Dictionary) -> void:

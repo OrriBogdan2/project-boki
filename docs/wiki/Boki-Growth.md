@@ -18,13 +18,13 @@ Each species evolves into the next at its own level, with an Ink used on it, or 
 | Ermink | Lunink | Lunar Ink |  |
 | Ermink | Prismink | Prism Ink |  |
 | Ermink | Wyrmink | Wyrm Ink |  |
-| Mycroll | Sporcupine | level 8 |  |
+| Mycroll | Sporcupine | level 5 |  |
 | Sporcupine | Amanitusk | level 16 |  |
 | Sporcupine | Ringrove | level 16 |  |
-| Vespyx | Vespox | level 8 |  |
+| Vespyx | Vespox | level 5 |  |
 | Vespox | Glaivyx | level 16 |  |
 | Vespox | Lashyx | level 16 |  |
-| Prismander | Glassolotl | level 8 |  |
+| Prismander | Glassolotl | level 5 |  |
 | Glassolotl | Chandelotl | level 16 |  |
 | Glassolotl | Geodelotl | level 16 |  |
 | Teapotamus | Puffamus | level 8 |  |

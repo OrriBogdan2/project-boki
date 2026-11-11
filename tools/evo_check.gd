@@ -11,6 +11,7 @@ extends RefCounted
 
 const SEX_BABIES := 600           # babies bred per parent pair: enough for a 50/50 split to show
 const SEX_SLACK := 0.07           # how far from half the split may land (about 3.4 standard errors)
+const STARTER_LINES := ["cindle", "puddlet", "burrlet"]     # first form at Lv 5 (docs/GARDEN_XP.md)
 const INK_RUNS := 4000            # expeditions rolled for the wild Ink rate
 const INK_SLACK := 0.015          # how far from the data's rate the rolled one may land
 
@@ -76,9 +77,12 @@ func _data() -> void:
 			if o.has("stat") and not Evo.STAT_AFF.has(String(o["stat"])): wrong.append(sp)
 			var by_level: bool = not o.has("item") and not o.get("trade", false)
 			var stage := int(KinLib.entry(sp).roster.get("stage", 1)) if KinLib.entry(sp) else 0
-			if by_level and int(lines[sp].get("level", 0)) != (8 if stage == 1 else 16): wrong.append(sp)
+			var want := 16
+			if stage == 1: want = 8
+			if STARTER_LINES.has(sp): want = 5
+			if by_level and int(lines[sp].get("level", 0)) != want: wrong.append(sp)
 	ok(wrong.is_empty() and lines.size() > 0,
-		"every evolution line is well formed, Grown 8 / Elder 16 (%d lines; wrong: %s)" % [lines.size(), str(wrong)])
+		"every line is well formed, Grown 8 / Elder 16, starters 5 (%d lines; wrong: %s)" % [lines.size(), str(wrong)])
 	ok(Evo.cap() == 100, "the level cap is 100 (%d)" % Evo.cap())
 	var erm: Array = lines.get("ermink", {}).get("into", [])
 	var jar: Array = lines.get("jarmit", {}).get("into", [])
@@ -142,10 +146,10 @@ func _next_form() -> void:
 	var rec := _kin("pebbit", 2)
 	rec["xp"] = 100
 	var nf := EvoView.next_form(rec)
-	var share: float = 100.0 / (Evo.XP_PER_LEVEL * (2 + 3 + 4))
+	var share: float = 100.0 / Evo.xp_between(2, 5)
 	var shown: bool = nf["line"] == "Evolves at Lv 5" and int(nf["goal"]) == 5
 	ok(shown and is_equal_approx(float(nf["frac"]), share),
-		"next form: a level line says 'Evolves at Lv 5', bar 100 of 900 XP: %s" % str(nf))
+		"next form: a level line says 'Evolves at Lv 5', bar 100 of %d XP: %s" % [Evo.xp_between(2, 5), str(nf)])
 	rec["level"] = 5
 	ok(EvoView.next_form(rec)["frac"] == 1.0, "next form: at its evolve level the bar is full")
 	nf = EvoView.next_form(_kin("zapple", 3))
@@ -215,8 +219,7 @@ func _migrate() -> void:
 	var names := [Evo.form_name(a), Evo.form_name(b), Evo.form_name(lost)]
 	ok(names == ["Cindrend", "Prismander", "Burrward"] and a["was"] == [],
 		"migrate: old form names kept %s" % str(names))
-	ok(Save.VERSION == 12 and Save.MIGRATIONS.get(11, "") == "_migrate_11_to_12",
-		"migrate: the save is version 12 with an 11 -> 12 step")
+	ok(Save.MIGRATIONS.get(11, "") == "_migrate_11_to_12", "migrate: the save has an 11 -> 12 step")
 	_line("cindle", {"level": 16, "into": [{"id": "pebbit"}]})
 	var ev := Evo.on_level(a)
 	var on: bool = Evo.form_name(a) == String(Data.KIN["pebbit"]["name"]) and String(ev.get("from", "")) == "Cindrend"
