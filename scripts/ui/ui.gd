@@ -140,14 +140,20 @@ static func label(text: String, size := 16, col := INK, font: Font = null) -> La
 	l.add_theme_color_override("font_color", col)
 	if font:
 		l.add_theme_font_override("font", font)
-	# short labels sit on one line; only real sentences wrap (a wrapping label in a row collapses to nothing)
-	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if text.length() > 48 else TextServer.AUTOWRAP_OFF
+	# short labels sit on one line; only real sentences wrap
+	if text.length() > 48:
+		wrap(l)
 	return l
 
 ## Body text that wraps: the usual muted line under a heading.
 static func para(text: String, size := T_SMALL, col := MUTED) -> Label:
-	var l := label(text, size, col)
+	return wrap(label(text, size, col))
+
+## Makes l wrap at words and take the row's free width: a wrapping label has no width of its own, so
+## in a row without it it collapses to one letter per line (the Soul Shrine's vertical text, 11-11).
+static func wrap(l: Label) -> Label:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return l
 
 static func title(text: String, size := 34, col := INK) -> Label:

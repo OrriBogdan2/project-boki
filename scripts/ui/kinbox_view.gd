@@ -97,7 +97,7 @@ func _build() -> void:
 		fo.set_item_metadata(i, fopts[i][0])
 		if String(fopts[i][0]) == filter: fo.select(i)
 	fo.item_selected.connect(func(i: int): filter = String(fo.get_item_metadata(i)); refresh())
-	fo.tooltip_text = "Show only some Boki (the rest dim; page tabs count the matches)"
+	fo.tooltip_text = "Show only some Boki"
 	fo.fit_to_longest_item = false
 	fo.clip_text = true
 	fo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -121,14 +121,14 @@ func _build() -> void:
 	var sb := UI.button("Sort this box", func():
 		KinBox.sort_page(page, sort_key)
 		_done("Sorted %s by %s" % [KinBox.page_name(page), _sort_name()]))
-	sb.tooltip_text = "Lay out this page's Boki in that order"
+	sb.tooltip_text = "Sort this page in that order"
 	sb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sb)
 	var sa := UI.button("Sort every box", func():
 		KinBox.sort_all(sort_key)
 		page = 0
 		_done("Every box sorted by %s, from the first page" % _sort_name()))
-	sa.tooltip_text = "Lay out every boxed Boki in that order, filling pages from the first"
+	sa.tooltip_text = "Sort every box in that order"
 	sa.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sr.add_child(sa)
 	rc.add_child(sr)
@@ -326,8 +326,8 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	if _searching() and not KinBox.matches(rec, query, filter):
 		c.modulate = Color(1, 1, 1, 0.22)
 	var tags := Mutations.tags(rec)
-	c.tooltip_text = "%s the %s%s\nLevel %d  ·  trust %d%s\nClick to see it, drag to move, right click to send it %s" % [rec["name"], (" ".join(tags) + " ") if not tags.is_empty() else "", Evo.form_name(rec),
-		int(rec.get("level", 1)), int(rec.get("trust", 0)), "  ·  your partner" if String(rec["uid"]) == str(Save.d.get("active", "")) else "", "to the burrow" if where == "farm" else "to the farm"]
+	c.tooltip_text = "%s the %s%s  ·  Lv %d%s" % [rec["name"], (" ".join(tags) + " ") if not tags.is_empty() else "",
+		Evo.form_name(rec), int(rec.get("level", 1)), "  ·  partner" if String(rec["uid"]) == str(Save.d.get("active", "")) else ""]
 	var r: Dictionary = rec
 	c.gui_input.connect(func(e: InputEvent):
 		if e is InputEventMouseButton and e.pressed:
@@ -394,11 +394,8 @@ func _build_detail() -> void:
 	var rec := Save.kin(sel)
 	if rec.is_empty():
 		detail.add_child(UI.section("The Boki Burrow"))
-		for t in ["Your farm has room for %d Boki. Everyone else sleeps here, safe and warm: Boki in the burrow don't get hungry, don't need looking after and don't wander." % KinBox.farm_cap(),
-				"Click a Boki to see it. Drag it to the farm, into a box, or onto another Boki to swap them. Right click sends it straight across.",
-				"New Boki go to the farm when there's room. Repeats of a kind you already have out go to the burrow, unless they shimmer or carry a rare mutation.",
-				"Your partner and your first Boki always stay out. Pick a sleeping Boki for an expedition and it comes out to go with you."]:
-			var l := UI.label(t, 13, UI.MUTED); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		for t in ["Boki here sleep safe: no food, no care.", "Click one to see it. Drag to move it; right click sends it across."]:
+			var l := UI.para(t, 13)
 			l.custom_minimum_size.x = 270
 			detail.add_child(l)
 		return

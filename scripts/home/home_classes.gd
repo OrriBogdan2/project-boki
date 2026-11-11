@@ -25,8 +25,7 @@ static func open(home: Node, sel := "") -> void:
 	home.set_meta("hunters_sel", sel)
 	home.set_meta("hero_hover", sel)          # (K opens its kit card)
 	var v: VBoxContainer = home._new_panel(TITLE, 1210, true)
-	UI.subtitle(v, "Who you play. Every Hunter opens with its own challenge, then hold to unlock it. "
-			+ "K: the full kit card.")
+	UI.subtitle(v, "Pick who you play. Finish a Hunter's challenge, then hold it to unlock.")
 	var cols := UI.hbox(16)
 	v.add_child(cols)
 	var left := UI.vbox(10)
@@ -107,8 +106,7 @@ static func _tile(home: Node, id: String, on: bool) -> PanelContainer:
 			var gb := UI.bar(float(gp["frac"]), ClassCard.GOAL_COL, TILE_W - 56.0, 5.0)
 			gb.set_meta("tile_bar", id)
 			c.add_child(gb)
-	card.tooltip_text = ClassCard.kit_tip(id)
-	if st != "open": card.tooltip_text = ("Locked: %s\n" % ClassUnlock.requirement(id)) + card.tooltip_text
+	if st != "open": card.tooltip_text = ClassUnlock.requirement(id)
 	if st == "locked": card.modulate = Color(0.62, 0.62, 0.68, 0.9)
 	elif st == "progress": card.modulate = Color(0.82, 0.82, 0.88, 0.96)
 	return card

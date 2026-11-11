@@ -246,7 +246,6 @@ func _tile(ak: String) -> PanelContainer:
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
 	else:
 		col.add_child(UI.label(role, 13, UI.MUTED))
-	card.tooltip_text = HunterViewer.stat_line(ak) + "\n" + ClassCard.kit_tip(ak)
 	if not open:
 		row.add_child(Padlock.new())
 		card.modulate = Color(0.55, 0.55, 0.6, 0.8)
