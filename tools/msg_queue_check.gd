@@ -144,7 +144,7 @@ func _wiring() -> void:
 	m.hud.level_up(3)
 	lane._process(0.01)
 	ok(lane.count() == 2 and lane.texts() == ["Bramble Isle"] and lane.single,
-		"Hud.toast and level_up land in the HUD's single lane, the small line behind the level-up goes (%s)" % str(lane.texts()))
+		"Hud.toast and level_up land in the HUD's single lane, the small line behind goes (%s)" % str(lane.texts()))
 	lane.clear()
 	m.hud.tip("Hold left click to shoot")
 	ok(lane.count() == 1, "a hint lands in the same lane")
@@ -204,7 +204,9 @@ func _burst(m: Match) -> void:
 		var cut := MsgLane.MIN_SHOW + MsgLane.FADE_OUT
 		ok(absf(shown_s[0] - cut) < 2.0 * STEP,
 			"six in one frame: the Boki line is cut short at its minimum (%.2fs, want %.2fs)" % [shown_s[0], cut])
-		ok(absf(shown_s[1] - MsgLane.LIFE[MsgLane.HIGH]) < 2.0 * STEP and absf(shown_s[3] - MsgLane.LIFE[MsgLane.NORMAL]) < 2.0 * STEP,
+		var full: bool = absf(shown_s[1] - MsgLane.LIFE[MsgLane.HIGH]) < 2.0 * STEP \
+			and absf(shown_s[3] - MsgLane.LIFE[MsgLane.NORMAL]) < 2.0 * STEP
+		ok(full,
 			"six in one frame: nothing more important waiting, a banner keeps its full life (%s)" % str(shown_s))
 	lane.clear()
 
