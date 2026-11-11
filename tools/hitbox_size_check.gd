@@ -6,6 +6,10 @@ extends RefCounted
 
 var bad := 0
 const BAND := Vector2(0.85, 1.15)
+# Kael and Albert were trimmed ~7% (owner, 11-11): body size stays under SIZE_MAX, and the nameplate keeps
+# its height per unit of size (PLATE_PER_SIZE m), so it rides over the smaller model as before.
+const SIZE_MAX := {"juggernaut": 0.94, "bulwark": 1.87}
+const PLATE_PER_SIZE := {"juggernaut": 2.74, "bulwark": 1.3}
 
 func ok(cond: bool, what: String) -> void:
 	print("HBCHECK %s %s" % ["ok  " if cond else "FAIL", what])
@@ -75,6 +79,11 @@ func run(main: Node) -> void:
 		var drawn_z := (ring.mesh as PlaneMesh).size.y * 0.5 * ring.global_transform.basis.z.length()
 		var same := absf(drawn - hr) < 0.002 and absf(drawn_z - hr) < 0.002
 		ok(same, "%s: ground circle radius %.3f = hit_r %.3f" % [a, drawn, hr])
+		if SIZE_MAX.has(a):
+			var sz := float(Arch.body(a)["size"])
+			ok(sz <= SIZE_MAX[a], "%s: body size %.3f is trimmed (max %.2f)" % [a, sz, SIZE_MAX[a]])
+			var per := HudPlate.plate_offset(h) / sz
+			ok(absf(per - PLATE_PER_SIZE[a]) < 0.02, "%s: nameplate %.2f m = %.2f per size (%.2f)" % [a, HudPlate.plate_offset(h), per, PLATE_PER_SIZE[a]])
 		if hr < lo:
 			lo = hr
 			lo_a = a
