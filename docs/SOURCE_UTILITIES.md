@@ -78,6 +78,7 @@ This replaces the random `pool`/`stock` roll in content/rules/shops.json (ext/sh
 - Prices in brackets are proposals (gems = 30 + gold/100). For world-only source items I used the price of their closest sold item.
 - **Alternative (not chosen):** no shared staples, each item in exactly one shop. I didn't choose it because it forces every squad to one shop for heals.
 - If more shops are added later, split the longest list (Swift Stall) first.
+- **The panel** (`ShopPanel`): the shop's name with its set under it ("Armor and repairs, the same every match"), then one row per item: icon, name, one plain line from live data (`ShopStock.line_of`: your current tier for upgrades, what it does and how many you carry otherwise) and the price as the Buy button. A row you can't buy is greyed and shows the missing gems ("Need 35") or the reason. It scrolls when long and stays inside the 12 px safe margin and above the belt at every window size (`--shops-check`).
 - **Owner's word wins over the source:** Lostway Scroll, Omen Draught, Thorn Wall, Shatter Charge, Blight Flask and Toss Satchel were world-only in the source. The owner said to sell them, so they're in shops. They can also stay in chest loot.
 
 ## 4. What each source region was for

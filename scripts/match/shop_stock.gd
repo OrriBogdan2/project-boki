@@ -8,6 +8,8 @@ extends RefCounted
 ## For other parts: ShopStock.price(h, row), can_buy(h, row) (a reason, "" when fine), owned(h, row)
 ## and sell(h, row) (takes the gems, hands over the item; true on success).
 
+const NO_GEMS := "Not enough gems"      # can_buy's reason when the price is more than the hunter's gems
+
 static var _rules: Dictionary = {}
 
 static func rules() -> Dictionary:
@@ -65,15 +67,27 @@ static func name_of(row: Dictionary) -> String:
 		"boots": return "%s  (%s)" % [String(Gear.ALL[r]["name"]), String(Data.RARITY[int(row["rar"])]["name"])]
 		_: return String(Data.PERKS[r]["name"])
 
-static func desc_of(row: Dictionary) -> String:
+## The row's one plain line, from live data: where the hunter stands now for upgrades, what it does
+## (and how many they carry) for everything else.
+static func line_of(h, row: Dictionary) -> String:
 	var r := ref(String(row["id"]))
+	var n := owned(h, row)
 	match kind_of(String(row["id"])):
-		"util": return String(UtilityBelt.def(r).get("desc", ""))
-		"repair": return "Armor back to full, on the spot."
-		"armor_up": return "Raises your armor to its next tier (more plates)."
-		"backpack": return "A bigger pack: more room for what you carry home."
-		"boots": return Gear.desc_of(r, int(row["rar"]))
-		_: return String(Data.PERKS[r]["desc"])
+		"repair": return "Armor %d/%d. Back to full on the spot." % [int(h.armor), int(h.max_armor)]
+		"armor_up":
+			var top := Hunter.ARMOR_TIERS.size() - 1
+			var next := String(Hunter.ARMOR_TIERS[mini(n + 1, top)][0])
+			return _next_line(String(Hunter.ARMOR_TIERS[n][0]), n < top, "%s armor" % next)
+		"backpack": return _next_line(Backpacks.name_of(n), n < Backpacks.top(), Backpacks.label(n + 1))
+		"boots": return ("Worn. " if n > 0 else "") + Gear.desc_of(r, int(row["rar"]))
+		"util": return _carried(n, String(UtilityBelt.def(r).get("desc", "")))
+		_: return _carried(n, String(Data.PERKS[r]["desc"]))
+
+static func _next_line(now: String, more: bool, next: String) -> String:
+	return "Now %s. Next: %s." % [now, next] if more else "Now %s, the top tier." % now
+
+static func _carried(n: int, desc: String) -> String:
+	return desc if n == 0 else "You have %d. %s" % [n, desc]
 
 static func icon_of(row: Dictionary) -> String:
 	var r := ref(String(row["id"]))
@@ -114,7 +128,7 @@ static func price(h, row: Dictionary) -> int:
 			var base := int((rs.get("perk_price", {}) as Dictionary).get(kind, 60))
 			return base + int(rs.get("perk_stack_extra", 0)) * h.perk_n(r)
 
-## How many the hunter holds (belt charges, perk stacks), for the shop's "owned" column.
+## How many the hunter holds (belt charges, perk stacks; the tier for upgrades), for line_of and bots.
 static func owned(h, row: Dictionary) -> int:
 	var r := ref(String(row["id"]))
 	match kind_of(String(row["id"])):
@@ -124,16 +138,6 @@ static func owned(h, row: Dictionary) -> int:
 		"boots": return 1 if _worn_boots(h, r, int(row["rar"])) else 0
 		"perk": return h.perk_n(r)
 		_: return int(h.armor)
-
-## The owned column as words: a count for stackable things, the current level for upgrades.
-static func owned_text(h, row: Dictionary) -> String:
-	var n := owned(h, row)
-	match kind_of(String(row["id"])):
-		"repair": return "Armor %d/%d" % [int(h.armor), int(h.max_armor)]
-		"armor_up": return "Tier: %s" % String(Hunter.ARMOR_TIERS[n][0])
-		"backpack": return "Pack: %s" % Backpacks.name_of(n)
-		"boots": return "Worn" if n > 0 else "Owned 0"
-		_: return "Owned %d" % n
 
 static func _worn_boots(h, gid: String, rar: int) -> bool:
 	var cur: Dictionary = h.gear[3]
@@ -146,7 +150,7 @@ static func can_buy(h, row: Dictionary) -> String:
 	if cost < 0:
 		return "Maxed"
 	if int(h.gems) < cost:
-		return "Not enough gems"
+		return NO_GEMS
 	match kind_of(String(row["id"])):
 		"util": return "" if UtilityBelt.has_room(h, r) else "Belt full"
 		"repair": return "" if h.armor < h.max_armor else "Armor is full"
