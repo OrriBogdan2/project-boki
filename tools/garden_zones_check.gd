@@ -47,6 +47,7 @@ func run(m: Node) -> void:
 	await _move_part(m)
 	await _glasswater_part(m)
 	await _cinderstep_part(m)
+	await _hushwood_part(m)
 	await _reload_part(m)
 	_thrive_part()
 	await _unlock_part(m)
@@ -425,6 +426,39 @@ func _cinderstep_part(m: Node) -> void:
 		and crack.material_override == terrace.material_override,
 		"terraces and glowing cracks, one batch each on one material (%s)" % str(kinds))
 	Content.rules("farm_build")["base_mode"] = false
+## Hushwood (GARDEN.md 10.2, 10.3): woken with its Wayseed and a Dark lean, then its own island: gloom ground,
+## a dig patch and a Training post, a patch of Dark, Psychic and Poison snacks, lantern moss and its motes.
+func _hushwood_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	var pip: Dictionary = Save.d["roster"][0]
+	ok(not GardenZones.attune("hushwood")["ok"], "Hushwood sleeps without its two keys")
+	Save.add_item(GardenZones.wayseed("hushwood"), 1)
+	pip["lean"] = {"dark": float(GardenZones.rules()["lean_key"])}
+	ok(GardenZones.attune("hushwood")["ok"] and GardenZones.is_open("hushwood") and _seeds("hushwood") == 0,
+		"a Hushwood Wayseed and a Dark lean wake it")
+	Game.goto("home", {"zone": "hushwood"})
+	var hw = await _arrived(m, Game.main.current)
+	ok(hw != null and ZoneLayout.built("hushwood") and HomeLayout.of(Save.d)["theme"] == "hushwood",
+		"Hushwood loads on its own gloom ground")
+	if hw == null:
+		return
+	var ids: Array = hw.toys.toys().map(func(t): return t["id"])
+	ok(ids.has("toy_dig") and hw.YARD_AT.x > -100.0, "a dig patch and a Training post (%s)" % ", ".join(ids))
+	var grown := {}
+	for f in SnackPatch.snacks(Save.d):
+		grown[Content.rules("lean")["foods"][f]] = true
+	ok(GardenZones.info("hushwood")["types"].all(func(t): return grown.has(t)),
+		"its patch grows Dark, Psychic and Poison snacks")
+	var moss: MultiMeshInstance3D = hw.find_child("LanternMoss", false, false)
+	var spec: Dictionary = GardenZones.info("hushwood")["build"]["moss"]
+	var motes: Array = hw.find_children("MossMotes*", "CPUParticles3D", false, false)
+	ok(moss != null and moss.multimesh.instance_count > int(spec["count"]) / 2 and motes.size() == int(spec["motes"]),
+		"lantern moss in one batch (%d tufts) and %d mote emitters" % [moss.multimesh.instance_count if moss else 0,
+			motes.size()])
+	ok(hw.find_child("mushroom_0", false, false) != null, "its scatter has mushrooms")
+	Content.rules("farm_build")["base_mode"] = false
+
 ## Thriving is a lean in the zone's types or a matching trait over 0.6; joy, toy training and the daily pull follow.
 func _thrive_part() -> void:
 	Content.rules("farm_build")["base_mode"] = true

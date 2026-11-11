@@ -2,7 +2,8 @@ class_name ZoneDress
 extends RefCounted
 ## What a built zone (ZoneLayout) puts on its ground besides the layout's own things: the shallows
 ## (one translucent sheet over the channel the tiles say, if it has one) and a scatter: Flora crystal
-## stacks, reeds and pebbles, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
+## stacks, reeds, pebbles, mushrooms (they glow on a gloom island), ferns and flowers, the plain slabs of
+## KINDS_BOX (stepped stone terraces, glowing cracks) and lantern moss with a few drifting mote emitters.
 ## The scatter is MultiMesh, one batch per kind and shape, and every instance of a kind shares one
 ## cached Flora material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
 ## Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
@@ -13,7 +14,7 @@ const SHEET_COLOUR := Color(0.36, 0.78, 0.86, 0.55)
 const KEEP_OUT := 2.2          # m round the landing, the pad and a zone's stump that scatter stays away from
 const TRIES := 40              # spots tried per prop before giving up on it
 const SHAPES := 1              # Flora shapes used per kind (one batch each)
-const KINDS_FLORA := ["crystal", "reed", "pebble"]
+const KINDS_FLORA := ["crystal", "reed", "pebble", "mushroom", "fern", "flower"]
 const SHORE := ["crystal", "reed"]     # kinds that crowd the shallows' edge
 ## Slab kinds, one unit box scaled per instance and lit by Flora's shared rock material (the box has no
 ## vertex colours, so each instance's colour is its whole colour; alpha 0 glows day and night). size: m
@@ -24,6 +25,16 @@ const KINDS_BOX := {
 	"crack": {"size": Vector3(1.4, 0.03, 0.12), "steps": 1, "clear": 0.4, "colour": Color(1.0, 0.36, 0.1, 0.0)},
 }
 const STEP_IN := 0.6           # a terrace's upper slab, as a fraction of the one under it
+const MOSS_RANGE := Vector2(12.0, 9.0)   # m east-west and north-south of the landing the moss clumps may lie
+const MOSS_SPREAD := 2.2       # m a tuft may lie from its clump's centre
+const MOSS_R := 0.11           # m, a moss tuft's radius
+const MOSS_FLAT := 0.5         # of its radius: tufts are low
+const MOSS_GLOW := 0.7         # toon-shader glow of the moss (0 flat, 1 lit from within)
+const MOSS_COLOUR := Color("4fb8a0")
+const MOTE_COLOUR := Color("b8fff0")
+const MOTE_LIFE := 5.0         # s a drifting mote lives
+const MOTE_RISE := 0.12        # m/s the motes drift up
+const MOTE_AREA := 1.6         # m, half-width of the square a mote emitter fills
 
 ## Called once the zone's world is built; does nothing outside a built zone.
 static func place(h) -> void:
@@ -40,6 +51,8 @@ static func place(h) -> void:
 		shallow = Rect2(r[0], r[1], r[2] - r[0] + 1, r[3] - r[1] + 1)
 		_sheet(h, shallow)
 	_scatter(h, B["scatter"], shallow)
+	if B.has("moss"):
+		_moss(h, B["moss"], int(B["seed"]))
 
 static func _sheet(h, tiles: Rect2) -> void:
 	var m := MeshInstance3D.new()
@@ -130,3 +143,52 @@ static func _batch(h, mesh: Mesh, mat: Material, list: Array, label: String, tin
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	mi.name = label
 	h.add_child(mi)
+
+## Lantern moss (GARDEN.md 10.2, Hushwood): tufts gathered in a few clumps on free ground, one MultiMesh on one
+## glowing material, and a mote emitter over each of the first clumps.
+static func _moss(h, M: Dictionary, seed: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed
+	var clumps: Array = []
+	for i in TRIES * int(M["clumps"]):
+		if clumps.size() >= int(M["clumps"]):
+			break
+		var c := HomeLayout.LANDING + Vector3(rng.randf_range(-MOSS_RANGE.x, MOSS_RANGE.x), 0,
+			rng.randf_range(-MOSS_RANGE.y, MOSS_RANGE.y))
+		if _moss_free(h.world, c):
+			clumps.append(c)
+	if clumps.is_empty():
+		return
+	var tufts: Array = []
+	for i in TRIES * int(M["count"]) / 6:
+		if tufts.size() >= int(M["count"]):
+			break
+		var at: Vector3 = clumps[i % clumps.size()] + Vector3(rng.randf_range(-MOSS_SPREAD, MOSS_SPREAD), 0,
+			rng.randf_range(-MOSS_SPREAD, MOSS_SPREAD))
+		if _moss_free(h.world, at):
+			at.y = h.world.ground_at(at.x, at.z)
+			var s := rng.randf_range(0.6, 1.4)
+			tufts.append(Transform3D(Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(s, s * MOSS_FLAT, s)), at))
+	_batch(h, Models.sphere(MOSS_R, 8), Models.toon(MOSS_COLOUR, false, MOSS_GLOW), tufts, "LanternMoss", Color.WHITE)
+	for i in mini(int(M["motes"]), clumps.size()):
+		h.add_child(_motes(clumps[i], i))
+
+static func _moss_free(w: World, p: Vector3) -> bool:
+	return not w.is_void(p.x, p.z) and w.occupy(p.x, p.z, 0.4, 0.0, true) == 0.0
+
+static func _motes(at: Vector3, n: int) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.name = "MossMotes%d" % n
+	p.position = at + Vector3(0, 0.3, 0)
+	p.amount = 8
+	p.lifetime = MOTE_LIFE
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = Vector3(MOTE_AREA, 0.1, MOTE_AREA)
+	p.direction = Vector3.UP
+	p.spread = 20.0
+	p.initial_velocity_min = MOTE_RISE
+	p.initial_velocity_max = MOTE_RISE * 2.0
+	p.gravity = Vector3.ZERO
+	p.mesh = Models.sphere(0.03, 6)
+	p.material_override = Models.toon(MOTE_COLOUR, false, 1.0)
+	return p

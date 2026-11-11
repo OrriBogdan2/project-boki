@@ -56,8 +56,9 @@ func _open_home() -> Node:
 	hm.zone = zone
 	main.add_child(hm)
 	main.current = hm
-	for i in 2:
+	for i in 600:      # under the ink wipe Home builds in slices: wait for the whole island
 		await main.get_tree().process_frame
+		if i >= 1 and not hm.building: break
 	return hm
 
 ## Every plaything and the house on the built farm, round the landing.

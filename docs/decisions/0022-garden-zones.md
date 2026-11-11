@@ -73,3 +73,9 @@ Hub hints (GARDEN.md 10): the hub shows three first-time hints through the messa
 `garden_zones.json` "hub_hints"): the Waystone ring, the nest corner and a sleeping zone's two keys, one at a
 time, once per save in `Save.d["tutorial"]["hub_hints"]` (an existing free-form dict, so no migration).
 The garden tutorial's closing Waystone hint stays its own. `--hub-hints-check` covers it.
+
+Hushwood (GARDEN.md 10.7 step 7c): a `build` entry like Glasswater and Cinderstep (ZoneLayout, nothing saved
+but its patch timer), on the `hushwood` theme (gloom flora, pinned at dusk by its `clock`). Its lantern moss
+and mote emitters are ZoneDress data (`build.moss`). The earlier ZoneLook draft (its own island saved in
+`Save.d["zones"][id]["layout"]`) was not taken: one zone-island system, no new save key. It opens by the
+usual two keys (a Wayseed from a bloom or gloom lair or the trader, a Dark/Psychic/Poison lean).
