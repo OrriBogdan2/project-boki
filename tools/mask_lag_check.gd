@@ -2,8 +2,8 @@ extends RefCounted
 ## --mask-lag-check: frame times while Mask cards are on screen and while one is accepted (item 88). Each
 ## scenario opens a screen on the farm, times every frame for a few seconds and reports the slowest, the median
 ## and how many went over the budget:
-##   masks_first   the session's first Masks screen: reported, not judged (the first menu of a session pays
-##                 one-time costs: fonts, themes)
+##   masks_first   the session's first Masks screen: its frames reported, not judged (the first menu of a
+##                 session pays one-time costs: fonts, themes); its model builds judged (warmed during the load)
 ##   masks_open    the Masks screen (12 tiles, the viewer's turntable and its ability clips)
 ##   masks_switch  clicking another Mask on that screen
 ##   reveal        a new Mask's reveal (its splash and clips)
@@ -18,6 +18,7 @@ extends RefCounted
 ##   xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --mask-lag-check
 
 const BUDGET_MS := 33.0        # ms: two frames at 60 fps, the item's target
+const WARM_BUILD_MS := 66.0    # ms: the first Masks screen's build frames once the load warmed them (cold: 120-230)
 const SECS := 2.5              # s each scenario is timed headless
 const DRAWN_SECS := 12.0       # s with a software rasterizer: a frame there costs 0.2-0.7 s
 const SETTLE_FRAMES := 30      # frames the farm gets to load its last pieces before the first scenario
@@ -40,6 +41,7 @@ func run(m: Node) -> void:
 	if main.fade:
 		main.fade.reveal(0.05)
 	_new_save()
+	PreviewBuild.warm()      # what the title does on launch: the worn Mask's .glb starts reading
 	home = await main._hb_home()
 	var tree: SceneTree = main.get_tree()
 	for i in SETTLE_FRAMES:
@@ -115,6 +117,9 @@ func _time(scenario: String, act: Callable, max_views := -1, judged := true) -> 
 	if headless and judged:
 		var what := "%s: no frame over %d ms outside a model build (%.1f)" % [scenario, int(BUDGET_MS), worst]
 		ok(worst <= BUDGET_MS, what)
+	if headless and scenario == "masks_first":
+		var warm := "masks_first: the worn Mask's previews were warmed in the load: no build over %d ms (%.1f)"
+		ok(build_max <= WARM_BUILD_MS, warm % [int(WARM_BUILD_MS), build_max])
 	if max_views >= 0:
 		ok(views <= max_views, "%s: at most %d 3D previews render a frame (%d)" % [scenario, max_views, views])
 
