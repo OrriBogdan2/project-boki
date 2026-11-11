@@ -31,8 +31,8 @@ the same build. Shares are steadier. Read a difference under about 0.1 on three 
 | 1 | Squadmates run their own errands, islands apart | easy: no mate within 30 m 21% of the time, nearest mate 19 m on average; half of all knocks happen with no mate within 30 m | fixed |
 | 2 | Hurt bots walk around unhealed with tonics on the belt | calm, under 70% health, heal in the belt, not drinking: 71% of that time (medium) | fixed |
 | 3 | A bot loots or wanders next to a squadmate's fight | 70% of squadmates within 35 m join (medium), 52% (expert); `t=80 OatmealRaider fights sourpatch_; duskrunner is 7 m away doing 'chest'` | fixed |
-| 4 | No disengage: bots trade to zero with heals left | 94% of knocked bots still had a heal; `low 1.1 s (backing off 0.0 s), heals left 4` | fixed for expert, weak below |
-| 5 | Each bot shoots its own target | same target as a fighting squadmate 81% (medium) | fixed, small |
+| 4 | No disengage: bots trade to zero with heals left | 94% of knocked bots still had a heal; `low 1.1 s (backing off 0.0 s), heals left 4` | expert: fixed; medium and easy: weak (second pass: leave on the hits coming in) |
+| 5 | Each bot shoots its own target | same target as a fighting squadmate 81% (medium) | fixed, small; second pass holds a fresh pick |
 | 6 | One bot leaves for the way out or crashes a rival uplink, the other two do not | each bot rolled on its own | fixed |
 | 7 | Belt items other than the tonic are never used in a fight | the belt was only read with no target | wired, small (bots seldom carry them) |
 | 8 | Fights taken and kept while outnumbered | 66% of knocks are against more rivals than squad nearby | partly: no unprovoked start; knocks unchanged |
@@ -118,16 +118,60 @@ t=82 kn1ghtowl knocked by sk8rboi_: low 4.9 s (backing off 1.0 s), heals left 4,
 - **Extraction is unchanged**: 0 to 3 of 30. Only four seats leave by design (docs/decisions/0051), but most
   squads never try.
 
+## Second pass (same day): leaving on what is coming, holding a target, two twitches
+
+Measured against the first pass's head (e88b9dfa8), not against `bot_plain`: 730 s expeditions on jobq
+workers, base medium 2, easy 3, expert 3; branch medium 4, easy 3, expert 4.
+
+- **Leave on the hits coming in** (`BotRetreat.down_in`): a bot keeps a damage rate (health and armor, smoothed
+  over 0.6 s). When that rate would put it down within 0.8 s + 1.6 s per point of skill (easy 1.2 s, expert
+  2.3 s), it counts as losing even at high health, and it stays out at least 2 s before it thinks again. Under
+  focus fire from three rivals that is near full health. In a 1v1 trade the old health mark still decides.
+- **Hold a fresh pick** (`BotSquad.held`): for 2.5 s after it picks a rival, a bot scores that rival +14 instead
+  of +6.
+- **Don't drop the current rival when the odds turn**: `outnumbered` was meant to stop a bot starting a fight,
+  but it also dropped the rival a bot was already fighting. A trace of 32 target flips in a 330 s run found 4 of
+  them came from this (11 were the rival leaving team vision, 13 were out-scored, 4 were reach or height). It now
+  only applies to a new pick.
+- **Assist under a ledge**: in reach of the rival with no shot, a helper goes to its squadmate instead of walking
+  at a spot it cannot reach (the `assist` facing twitch from the first pass).
+- **Roam wobble**: one sanity run flagged a follower with goal `roam` turning on the spot for 25 s. It was walking
+  onto a squad lead that was busy, or to the lead's leftover wander spot. A follower now follows the lead's live
+  roam goal, and within 6 m of a busy lead it waits on one spot (`roam` joins the goals a bot stops on).
+
+| Measure (mean per expedition) | Medium base | branch | Easy base | branch | Expert base | branch |
+|---|---|---|---|---|---|---|
+| Fights that turned (under 50%) and were survived | 0.42 | 0.41 | 0.52 | 0.50 | 0.39 | 0.50 |
+| Low in a fight with a heal unused | 0.64 | 0.80 | 0.83 | 0.84 | 0.59 | 0.49 |
+| Knocked with heals left | 0.81 | 0.90 | 0.89 | 0.96 | 0.83 | 0.79 |
+| Target changes per fight minute | 9.0 | 6.4 | 5.3 | 6.4 | 8.4 | 7.4 |
+| Engages started outnumbered | 0.28 | 0.27 | 0.26 | 0.20 | 0.30 | 0.24 |
+| Knocked against more rivals than squad | 0.68 | 0.68 | 0.72 | 0.62 | 0.63 | 0.65 |
+| Calm and hurt with a heal unused | 0.09 | 0.28 | 0.20 | 0.32 | 0.18 | 0.19 |
+| Knocked hunters brought back | 0.66 | 0.53 | 0.65 | 0.67 | 0.87 | 0.87 |
+| Extracted (of 30) | 0.0 | 1.75 | 0.67 | 2.0 | 0.33 | 0.25 |
+
+How to read it: with three or four runs a side, only a gap above about 0.1 means anything. Expert bots survive more
+of the fights that turned (0.39 to 0.50). Medium target changes fell by a quarter. Neither of these held on
+easy, which is the tier with the smallest window. Medium "calm and hurt" rose, but one of its runs had only 14 calm
+hurt seconds, and the first pass measured the same rule anywhere from 0.03 to 0.58. Medium extraction rose from a
+base of two runs with nobody out. Treat that as noise until more runs agree.
+
+Bot sanity (`--bot-sanity-check`, three seeds of 150 s): the 25 s roam wobble did not come back in four branch
+runs. Two runs had one or two single-window flags (`keyhunt`, or `roam` while crossing to an island). Those are the
+kinds the base flags too, and that base run was clean.
+
 ## Left
 
-1. Leave a fight on what is coming, not on health (above).
-2. Hold the called target for a few seconds; measure flips only where two or more rivals are in reach.
-3. Easy squads: one bot should break off to bring a mate back once the rival squad is down a hunter.
-4. More squads heading for a way out in the last third of the match.
-5. Kiting, ability timing and loot choice need their own probe rows.
-6. Three medium runs in fourteen still had a squad apart 14% to 22% of the time (see The check).
-7. The `assist` facing twitch the sanity probe flagged (see Other checks).
-8. Not duplicated here, in flight elsewhere: dodging (ext/combat-bot-dodge-rebased), ring and downed play
+1. Easy bots still mostly fail to get out: their window (1.2 s) is shorter than a turn under focus fire. To change
+   that, easy would need a bigger window, at the cost of the gap between tiers.
+2. Easy squads go down together (knocked hunters brought back stayed at 0.65 to 0.67 this pass).
+3. More squads heading for a way out in the last third of the match.
+4. Kiting, ability timing and loot choice need their own probe rows.
+5. Medium squads apart 14% to 22% of the time on some runs (see The check).
+6. Most of the remaining target changes come from the rival dropping out of team vision. A short memory of a
+   rival's last seen spot would cover it.
+7. Not duplicated here, in flight elsewhere: dodging (ext/combat-bot-dodge-rebased), ring and downed play
    (ext/combat-bots-ring, ext/combat-bots-downed), Boki summons (ext/bot-boki-summon).
 
 ## The check

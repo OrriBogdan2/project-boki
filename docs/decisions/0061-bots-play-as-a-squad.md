@@ -32,7 +32,7 @@ A squad with a player on it keeps to the player: bots regroup to them and roam w
 
 ## Consequences
 - No Net change and no save change: bots are simulated on the host, and the new state is in the bot's own mind
-  dictionary (`rt_wise`, `rt_t0`, `regroup`).
+  dictionary (`rt_wise`, `rt_t0`, `regroup`; second pass: `rt_rate`, `rt_left`, `rt_at`, `tgt_t`, `guard`).
 - Fights are more often three against three, and a bot leaves a fight it is losing. Time to kill is short (the last
   third of a health bar lasts about a second under focus fire), so a retreat often fails; see the doc for the rate.
 - New check `--bot-human-check` (tools/bot_human_check.gd): one headless expedition; fails if hurt bots stop
