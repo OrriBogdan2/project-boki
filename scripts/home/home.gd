@@ -10,6 +10,7 @@ var world: World
 var building := false
 var cam: CamRig
 var evolving: EvolveMoment      # the form change in play, while it plays (the camera leans toward it)
+var nesting: NookMoment         # the pairing beat at the Nook, while it plays (any key skips it)
 var fx: Fx
 var ui: CanvasLayer
 var root_ui: Control
