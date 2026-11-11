@@ -234,6 +234,7 @@ func _sole_y(m: Node3D) -> float:
 ## Item 81: at every height, build and sex the soles rest on the ground, standing and across a walk cycle.
 func _feet(main: Node) -> void:
 	var worst := 0.0
+	var worst_body := ""
 	var cases := 0
 	var tree := main.get_tree()
 	for g in 2:
@@ -250,12 +251,14 @@ func _feet(main: Node) -> void:
 					if i == 59 or (walking and i % 4 == 0):
 						lows.append(_sole_y(m))
 				for y in lows:
-					worst = maxf(worst, absf(y))
+					if absf(y) > worst:
+						worst = absf(y)
+						worst_body = "sex %d height %d build %d" % [g, h, b]
 				cases += 1
 				m.free()
 				await tree.process_frame
 	ok(worst <= FOOT_TOLERANCE, ("feet stay on the ground at min/mid/max height, every build and both sexes, idle and "
-		+ "walking (%d bodies, worst %.1f cm)") % [cases, worst * 100.0])
+		+ "walking (%d bodies, worst %.1f cm, %s)") % [cases, worst * 100.0, worst_body])
 
 ## Items 79b and 80: an older Empty (a skin colour, an outfit, motes) loads as one with a shroud and an aura.
 func _shroud_migration() -> void:
