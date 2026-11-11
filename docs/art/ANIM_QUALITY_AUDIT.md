@@ -184,7 +184,7 @@ posts scroll at the move speed).
 Split into backlog items per Hunter (role build):
 
 - `ostra`: legs that step (hover now), and an attack arm that is not a T-pose.
-- `rimewright`: a gait clip with a real stride (skate now).
+- `rimewright`: walk_f/run_f and the seven directional loops are a real stride now (soles pinned at 2.2 / 4.6 m/s, `ext/anim-neve-stride`); the audit's ankle metric still reads her run at 35 % slide (DEBT), so she stays out of its gate.
 - `dredge` and `juggernaut`: hip bob of 15 to 17 cm at a run.
 - Arm use in attacks: `ostra`, `thief` (vault_r) hold an arm sideways (`ashwick`, `tender`, `dredge`, `mage` done: free arm); `bulwark`
   and `dolm` jump a hand 0.4 to 0.67 body heights in one frame.

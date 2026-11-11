@@ -31,3 +31,5 @@ fail is tender's hit flash, the same on the base), --warden-model-check 157/157.
 Stretch check: all 49 clips over 1.3 (worst 6.61 revive, idle 6.01, run_f 3.15), almost all
 in `hips`; before the braid fix: worst 8.01, idle 6.35, run_f 5.72. The relax runs with CUTS 0 (no holes), as Lace, Sparkle and Meeko, so a stretched
 edge stays rather than a hole; it is not reworked here.
+
+walk and run, on foot (2026-11-11): the Meshy-rig retarget of ext/anim-pilot-albert-neve (`walk_f`, `run_f`, copied with `glb_add_clips.py` onto this v95 body, same rig) re-pinned with `tools/art1/hunter_dir_gait.py` on a Hetzner Blender job (`jobq submit --app blender --tree <tree> --out <dir> -- -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb 2.2 4.6 f`), then `... 2.2 4.6 b,l,r,fl,fr,bl,br` on the result; every planted sole 2.2 / 4.6 m/s (100 % within 5 %), seams 0, diagonals in step with the forward loop. Her skate stays `skate*`/`tm_skate`. `loco.stride` [1.4, 1.3] in claire.json: walk slide 19 %, run 35 % on the audit's ankle metric (DEBT).
