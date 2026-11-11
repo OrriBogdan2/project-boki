@@ -233,7 +233,8 @@ func _check_keys(P: Hunter) -> void:
 	var merge_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "r")
 	ok(merge_slots.size() == 1, "one Merge slot only (the Boki box on the right)")
 	var throw_slots: Array = hud.hover_spots.filter(func(x): return String(x[1]) == "throw")
-	ok(throw_slots.size() == (1 if P.kin else 0), "the G slot is drawn once, not again beside the utility belt (%d)" % throw_slots.size())
+	ok(throw_slots.size() == (1 if P.kin else 0),
+		"the G slot is drawn once, not again beside the utility belt (%d)" % throw_slots.size())
 	P.lvl = int(Hunter.ULT_AT[0])
 	P.ak.cd["x"] = 12.3
 	await hud.panels.draw
