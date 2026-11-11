@@ -124,5 +124,5 @@ func _visible() -> void:
 	ok(board.get_child_count() == 16, "the board lists table, first-win item and cup for each of the four games")
 	board.free()
 	var rows := GardenPrizes.rows({"game": "dash", "items": [{"kind": "snack", "id": "puffcorn"}], "first": true,
-			"round": "", "ribbon": true, "reset": false})
+			"round": "", "ribbon": true, "reset": false, "keepsake": ""})
 	ok(rows.size() == 2, "a Crown result card shows the prize and the ribbon")

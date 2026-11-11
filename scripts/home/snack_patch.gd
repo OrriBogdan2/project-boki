@@ -2,8 +2,9 @@ class_name SnackPatch
 extends RefCounted
 ## The garden's one snack patch (briefs/design/GARDEN.md section 10 question 1, default). With base_mode on, a save has
 ## exactly one patch (granted to storage if there is none, put down in the Garden tab). It ripens four element snacks
-## on a timer (content/rules/snack_patch.json) and walking over it picks them up for the pantry, to feed the lean
-## foods. Never sold, no seeds, no watering. The timer is the deco entry's "t" (unix seconds of the last pick).
+## and the season's snack (GardenSeasons) on a timer (content/rules/snack_patch.json) and walking over it picks
+## them up for the pantry, to feed the lean foods. Never sold, no seeds, no watering. The timer is the deco
+## entry's "t" (unix seconds of the last pick).
 
 const ID := "snack_patch"
 
@@ -32,33 +33,42 @@ static func entry(d: Dictionary) -> Dictionary:
 static func ripe(e: Dictionary, now: float) -> bool:
 	return not e.is_empty() and now - float(e.get("t", now)) >= float(rules()["grow_secs"])
 
+## The snacks one ripening yields at `now`: the four, plus the season's snack (GardenSeasons).
+static func snacks(now: float) -> Array:
+	return rules()["snacks"] + [GardenSeasons.snack(now)]
+
 ## Picks the ripe snacks into the pantry. Returns the snack ids picked ([] when not ripe).
 static func harvest(d: Dictionary, now: float) -> Array:
 	var e := entry(d)
 	if not ripe(e, now):
 		return []
 	e["t"] = now
-	var got: Array = (rules()["snacks"] as Array).duplicate()
+	var got := snacks(now)
 	for s in got:
 		d["crops"][s] = int(d["crops"].get(s, 0)) + 1
 	return got
 
-## Part of the deco signature, so the model changes when it ripens.
+## Part of the deco signature, so the model changes when it ripens or the season turns.
 static func sig(e: Dictionary) -> String:
-	return "r" if String(e["id"]) == ID and ripe(e, Time.get_unix_time_from_system()) else ""
+	if String(e["id"]) != ID:
+		return ""
+	var now := Time.get_unix_time_from_system()
+	return ("r" if ripe(e, now) else "") + GardenSeasons.snack(now)
 
-## Four little beds, each with its snack's colour: sprouts while growing, fat berries once ripe.
+## Four little beds and the season's bed in the middle, each with its snack's colour: sprouts while growing,
+## fat berries once ripe.
 static func model(e: Dictionary) -> Node3D:
 	var n := Node3D.new()
-	var is_ripe := ripe(e, Time.get_unix_time_from_system())
+	var now := Time.get_unix_time_from_system()
+	var is_ripe := ripe(e, now)
 	Models.part(n, Models.box(1.9, 0.08, 1.9), Models.toon(Color("7a5a3a"), false), Vector3(0, 0.04, 0))
-	var snacks: Array = rules()["snacks"]
-	for i in snacks.size():
-		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45)
+	var grown := snacks(now)
+	for i in grown.size():
+		var at := Vector3((i % 2) * 0.9 - 0.45, 0, floori(i * 0.5) * 0.9 - 0.45) if i < 4 else Vector3.ZERO
 		var leaf := Models.toon(Color("5f9a45"))
 		Models.part(n, Models.sphere(0.2, 8), leaf, at + Vector3(0, 0.22, 0), Vector3(1, 0.7, 1))
 		if is_ripe:
-			var col: Color = Data.CROPS[snacks[i]]["color"]
+			var col: Color = Data.CROPS[grown[i]]["color"]
 			Models.part(n, Models.sphere(0.13, 8), Models.toon(col), at + Vector3(0, 0.5, 0))
 	return n
 
