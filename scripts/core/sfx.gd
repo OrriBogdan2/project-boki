@@ -291,7 +291,8 @@ func set_muffle(on: bool) -> void:
 ## Tooling (--match-audio-check): the muffle as the bus has it right now.
 func muffle_state() -> Dictionary:
 	var bus := AudioServer.get_bus_index("SFXWorld")
-	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus), "hz": _muffle_fx.cutoff_hz}
+	return {"fx": AudioServer.is_bus_effect_enabled(bus, 0), "db": AudioServer.get_bus_volume_db(bus),
+		"hz": _muffle_fx.cutoff_hz}
 
 # ------------------------------------------------------------------ layered music
 ## The expedition's score is four stems of one piece (tools/compose.py LAYERS), all playing in step;
@@ -555,16 +556,30 @@ func play(sname: String, pos = null, vol_db := 0.0, pitch_var := 0.07, pitch := 
 	times.append(now)
 	recent[sname] = times
 	last_played[sname] = now
+	_start(p, _take(sname), v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
+
+## Starts sname on a voice at pos (placed, so it pans) at exactly vol_db and returns the voice, or null when
+## the cap drops it. No distance falloff and no repeat gap: the caller sets the level and keeps the one voice
+## (IncomingHitSfx: a flurry of hits on you is one voice). The cap and the bus (so the downed muffle) apply.
+func play_voice(sname: String, pos, vol_db: float, pitch := 1.0):
+	if not streams.has(sname) and not _lazy(sname):
+		return null
+	var p = _voice(sname, pos)
+	if p != null:
+		_start(p, _take(sname), vol_db, pitch)
+	return p
+
+## The stream to play for sname: a different take from last time when it has several.
+func _take(sname: String) -> AudioStream:
 	var st = streams[sname]
 	if st is Array:
-		# a different take from last time
 		var arr: Array = st
 		var i := rng.randi_range(0, arr.size() - 1)
 		if arr.size() > 1 and i == int(last_take.get(sname, -1)):
 			i = (i + 1) % arr.size()
 		last_take[sname] = i
 		st = arr[i]
-	_start(p, _once(st), v, pitch * (1.0 + rng.randf_range(-pitch_var, pitch_var)))
+	return _once(st)
 
 ## A pool voice is never reused while it plays, so a looping file sent through play() would sound
 ## forever, past the match and into the farm: owner item 103, the Boki rescue's revive_hum. One-shots
