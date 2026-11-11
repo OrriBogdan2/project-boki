@@ -111856,5 +111856,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_selenfin_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_scythant",
+    "name": "Scythant (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_scythant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_selenwhale",
+    "name": "Selenwhale (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_selenwhale_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_siegephant",
+    "name": "Siegephant (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_siegephant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_shinobant",
+    "name": "Shinobant (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_shinobant_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_seamwyrm",
+    "name": "Seamwyrm (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_seamwyrm_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_skateron",
+    "name": "Skateron (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_skateron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_sirencada",
+    "name": "Sirencada (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_sirencada_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_slog",
+    "name": "Slog (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_slog_1.jpg",
+    "ok": true
   }
 ]
