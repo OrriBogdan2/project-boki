@@ -124,6 +124,7 @@ const CHECKS := {
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--fusion-states-check": ["res://tools/fusion_states_check.gd", "fusion_states_check", null],  # merge form x state
 	"--fusion-strips": ["res://tools/fusion_strips.gd", "fusion_strips", null],      # 5 fps per form
+	"--merge-anim-check": ["res://tools/merge_anim_check.gd", "merge_anim_check", null],      # merged clips = unmerged
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
 	"--pip-live-check": ["res://tools/pip_live_check.gd", "pip_live_check", null],      # Pip's clips in a real match
@@ -170,6 +171,7 @@ const CHECKS := {
 	"--hero-vfx-reel": ["res://tools/hero_vfx_reel.gd", "hero_vfx_reel", null],
 	# the per-Hunter parity reels (docs/parity_reel)
 	"--parity-reel": ["res://tools/parity_reel.gd", "parity_reel", null],
+	"--merge-reel": ["res://tools/merge_reel.gd", "merge_reel", null],      # one Hunter merged, its moves, unmerged
 	"--hero-vfx-gallery": ["res://tools/hero_vfx_gallery.gd", "hero_vfx_gallery", null],      # every look, side by side
 	"--ostra-orb-shots": ["res://tools/ostra_orb_shots.gd", "ostra_orb_shots", null],      # item 60 screenshots
 	"--title-check": ["res://tools/title_check.gd", "title_check", null],      # the title: menu, key art, frame budget
