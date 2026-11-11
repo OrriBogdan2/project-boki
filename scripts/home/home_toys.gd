@@ -290,6 +290,11 @@ func pose(k: Dictionary, n: Node3D, d: float) -> void:
 			n.set_meta("pose", "comfort")
 			if randf() < d * 1.2:
 				h.fx.burst(tp + Vector3(0, 0.6, 0), Color("ffb066"), 2, 0.8, 0.9, -1.0)
+		"toy_vent":
+			body.position.y = 0.55 + sin(s * 2.0) * 0.12
+			n.set_meta("pose", "alert")
+			if randf() < d * 3.0:
+				h.fx.burst(tp + Vector3(0, 0.2, 0), Color("cfeeff"), 3, 1.2, 0.8, -1.0)
 		"toy_dig":
 			body.position.y = absf(sin(s * 10.0)) * 0.05
 			body.rotation.x = -0.45 + sin(s * 10.0) * 0.12

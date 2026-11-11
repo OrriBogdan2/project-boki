@@ -25,8 +25,10 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use;
-## its ground colours win over the theme's unless own_ground.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use. A "zone"
+## theme belongs to a garden zone (briefs/design/GARDEN.md 10.2) and is not sold in the Island tab: style is
+## the flora set its scatter uses (Flora.STYLES) and track the Dash course there (base_race.json "tracks").
+## The region's ground colours win over the theme's unless own_ground.
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
@@ -37,6 +39,8 @@ const THEMES := {
 		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
 	"cinderstep": {"name": "Cinderstep", "zone": true, "own_ground": true, "region": 1,
 		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
+	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
+		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
@@ -82,6 +86,8 @@ const CATALOG := {
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
 	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
 		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"toy_vent": {"name": "Updraft vent", "cat": "Base", "gems": 22, "toy": true,
+		"desc": "Flying, Electric, Fairy and Sound Boki love to hover on its rising air. Trains Speed."},
 	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
 		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.

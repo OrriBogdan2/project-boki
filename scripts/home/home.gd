@@ -65,6 +65,7 @@ var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base
 var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
 var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var chimes: HomeChimes = null     # a Boki's chime when it gains a stat, level or change (home_chimes.gd)
+var hkite: BaseKite = null       # the Kite Tow stand on Kitewind Ridge (base_kite.gd), base_mode only
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
@@ -184,8 +185,9 @@ func _ready() -> void:
 		htumble = BaseTumble.new(self)
 		hecho = EchoSteps.new(self)
 		hshow = ShowRing.new(self)
+		hkite = BaseKite.new(self)
 		# in this order: Tumble's ring needs the stump placed
-		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish]
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish, hkite]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -1238,7 +1240,7 @@ func _move_player(d: float) -> void:
 	var mv := Vector2.ZERO
 	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() \
 			and not (hecho and hecho.run)
-	if can_act:
+	if can_act and not (hkite and hkite.flying()):
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
 	var dg := _dodge()
@@ -1313,7 +1315,7 @@ func _move_player(d: float) -> void:
 	gh = _ground_h(ppos.x, ppos.z)
 	air = py > gh + 0.001 or pvy > 0.0
 	# jump; in the air, a second press (or the glide key) opens the glider; holding Space never does
-	var jump_now := can_act and Input.is_action_just_pressed("jump")
+	var jump_now := can_act and Input.is_action_just_pressed("jump") and not (hkite and hkite.flying())
 	if jump_now and not air:
 		pvy = water.breach(JUMP_V) if water.swimming else JUMP_V      # from deep water: a kick up and out
 		air = true
@@ -2258,6 +2260,7 @@ func _label_for(it: Dictionary) -> String:
 		"tumble": return htumble.label()
 		"echo": return hecho.label()
 		"show": return hshow.label()
+		"kite": return hkite.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2303,6 +2306,7 @@ func _use(it: Dictionary) -> void:
 		"show": hshow.use()
 		"fishing": hfish.use()
 		"waystone": hway.use()
+		"kite": hkite.use()
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
@@ -2918,7 +2922,7 @@ func _kin_act(k: Dictionary) -> void:
 		"brush": _care_brush(rec)
 		_: _pet_kin(k)
 
-## Farm XP for a kin (GardenXp); a form or mutation it earns plays out as soon as nothing is open.
+## Farm XP for a kin (GardenXp): a form or mutation it earns plays out as soon as nothing is open.
 func _garden_xp(rec: Dictionary, action: String, love: bool, points := 0) -> void:
 	GardenXp.give(rec, action, love, points)
 	_play_evolutions.call_deferred()
@@ -4616,8 +4620,8 @@ func _finish_training() -> void:
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)
 	var aff: String = {"power": "fierce", "guard": "steadfast", "speed": "swift", "focus": "curious"}[stat]
 	Evo.add(rec, aff, 2.0)
-	_garden_xp(rec, "drill", false, pts)
 	if gained > 0: CareJournal.note(rec, "trained %s at the yard: +%d" % [String(Care.STATS[stat]["name"]).to_lower(), gained])
+	_garden_xp(rec, "drill", false, pts)
 	if Care.care_day(rec, "trained"):
 		Save.remember(rec, "trained", "trained %s with you at the yard" % String(Care.STATS[stat]["name"]).to_lower(), 1.0)
 	Save.save_game()

@@ -4,7 +4,7 @@ extends RefCounted
 ## has made no progress for 3 s), two Boki sitting on each other for 3 s, and any Boki standing inside the house,
 ## a toy, water or any other block it can't enter. Zero stuck and zero inside is the pass bar; overlaps are printed
 ## and counted (two Boki sharing a toy or a pile may brush), not failed. Never touches the real save.
-## `--nav-zone=<id>` runs it in that garden zone (garden_zones.json) instead of Bramblebank.
+## It sweeps the start garden and Kitewind Ridge; `--nav-zone=<id>` runs it in that garden zone (garden_zones.json) instead.
 
 const SIM_SECS := 600.0        # s of game time (10 in-game minutes)
 const DT := 0.25               # s per step
@@ -13,6 +13,7 @@ const PROGRESS := 0.12         # m moved in a step window that counts as progres
 const WANT_DIST := 0.5         # m: a goal farther than this is a wish to move
 const OVERLAP_K := 0.6         # of the two body radii: closer than this is overlapping
 const CAST := ["zapple", "puddlet", "cindle", "kilnbadger", "lodestick", "marchleaf"]
+const THEMES := ["meadow", "ridge"]     # the start garden and Kitewind Ridge (GARDEN.md 10.2)
 const SEED := 5
 
 var zone := ""         # --nav-zone=: the zone to sweep ("" the start zone)
@@ -30,7 +31,7 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-func _save() -> void:
+func _save(theme: String) -> void:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
 	for i in CAST.size():
@@ -44,6 +45,7 @@ func _save() -> void:
 	d["tutorial"] = {"home": true, "day1_done": true, "hatched": true, "intro": true}
 	d["gems"] = 1000
 	HomeLayout.new_fs(d, SEED)
+	HomeLayout.ensure(d)["theme"] = theme
 	if zone != "":
 		d["zones"][zone] = {"open": true}
 	Save.d = d
@@ -156,9 +158,21 @@ func run(m: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--nav-zone="):
 			zone = a.substr(11)
-	_save()
+	for theme in (THEMES if zone == "" else ["meadow"]):
+		await _sweep(theme)
+	FarmUnlocks.rules()["base_mode"] = false
+	print("GARDENNAV DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _sweep(theme: String) -> void:
+	track.clear()
+	lap.clear()
+	logged.clear()
+	waded.clear()
+	overlaps = 0
+	_save(theme)
 	home = await _open_home()
-	ok(home.kins.size() == CAST.size() and home.life != null, "%d Boki on a base_mode farm" % home.kins.size())
+	ok(home.kins.size() == CAST.size() and home.life != null, "%s: %d Boki on a base_mode farm" % [theme, home.kins.size()])
 	_stage()
 	var cases := 0
 	var t := 0.0
@@ -167,10 +181,8 @@ func run(m: Node) -> void:
 		home._move_kin(DT)
 		t += DT
 		cases += _watch(t)
-	ok(cases == 0, "no Boki stuck or inside a block in %.0f s (%d cases); %d overlaps" % [SIM_SECS, cases, overlaps])
-	ok(not waded.is_empty(), "%d Boki waded through the stream and nobody stuck in it" % waded.size())
-	FarmUnlocks.rules()["base_mode"] = false
+	var what := "%s: none stuck or inside a block in %.0f s" % [theme, SIM_SECS]
+	ok(cases == 0, "%s (%d cases); %d overlaps" % [what, cases, overlaps])
+	ok(not waded.is_empty(), "%s: %d Boki waded through the stream and nobody stuck in it" % [theme, waded.size()])
 	home.queue_free()
 	await main.get_tree().process_frame
-	print("GARDENNAV DONE, failures: %d" % bad)
-	main.get_tree().quit(1 if bad > 0 else 0)

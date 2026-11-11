@@ -2,7 +2,8 @@ extends RefCounted
 ## --race-check: the Dash (scripts/home/base_race.gd, briefs/design/GARDEN.md 5.1 and 9.4).
 ##   1. 20 headless races of 3 Boki with random Speed, joy and species, a random backed Boki and
 ##      random cheer grades: the one with the highest expected pace wins at least 60% of them
-##   2. leans: a water lean swims faster, a flying lean glides the gap faster, neither helps elsewhere
+##   2. leans: a water lean swims faster, a flying lean glides the gap faster, neither helps elsewhere; on
+##      Kitewind Ridge's course (base_race.json "tracks") every ridge type rides the updraft faster, water does not
 ##   3. friends run side by side (closer than strangers), rivals bump
 ##   4. a settled race: the winner's joy and trust go up, the loser's joy down, both remember it,
 ##      you get gems, the two grow apart (bonds)
@@ -13,6 +14,8 @@ extends RefCounted
 ##   8. weekly twists: a twist's pace multiplier shows on its stretch only, wild widens the wobble, a lap
 ##      under a twist still finishes, a won Dash pins the winner on the showcase wall and the sign shows the twist
 ##   9. the Training post drill still runs on the shared timing bar: three presses, then it ends
+##  10. parts 1 to 3 run on both courses (the garden's and the ridge's); a ridge base lays out the ridge course
+##      and runs a race on it to a result card
 ## Never touches the real save.
 
 const RACES := 20
@@ -32,14 +35,19 @@ func ok(cond: bool, what: String) -> void:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	for theme in ["meadow", "ridge"]:
+		Save.d = Save.fresh()
+		HomeLayout.ensure(Save.d)["theme"] = theme
+		print("RACE course: %s, %d stretches" % [theme, BaseRace.stretches().size()])
+		_favourites()
+		_leans()
+		_friends_rivals()
 	Save.d = Save.fresh()
-	_favourites()
-	_leans()
-	_friends_rivals()
 	_settle()
 	_twists()
 	_formats()
 	await _on_base()
+	await _ridge_base()
 	print("RACE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -91,15 +99,22 @@ func _leans() -> void:
 	var fly := _kin(walker, "Fly", 10, 60.0)
 	swim["lean"] = {"water": 1.0}
 	fly["lean"] = {"flying": 1.0}
-	var st: Array = BaseRace.rules()["stretches"]
-	var water := -1
-	var jump := -1
-	for i in st.size():
-		if st[i]["kind"] == "water": water = i
-		if st[i]["kind"] == "jump": jump = i
+	var kinds: Array = BaseRace.stretches().map(func(st): return st["kind"])
+	var water := kinds.find("water")
+	var jump := kinds.find("jump")
 	var base0 := BaseRace.stretch_pace(plain, 0)
-	ok(BaseRace.stretch_pace(swim, water) > BaseRace.stretch_pace(plain, water) * 1.2, "a water lean swims faster")
+	if water >= 0:
+		ok(BaseRace.stretch_pace(swim, water) > BaseRace.stretch_pace(plain, water) * 1.2, "a water lean swims faster")
 	ok(BaseRace.stretch_pace(fly, jump) > BaseRace.stretch_pace(plain, jump) * 1.2, "a flying lean glides the gap")
+	var rise := kinds.find("updraft")
+	if rise >= 0:
+		for t in BaseRace.rules()["updraft_types"]:
+			var air := _kin(walker, "Air", 10, 60.0)
+			air["lean"] = {t: 1.0}
+			var rides := BaseRace.stretch_pace(air, rise) > BaseRace.stretch_pace(plain, rise) * 1.2
+			ok(rides, "the %s lean rides the updraft" % t)
+		var same := is_equal_approx(BaseRace.stretch_pace(swim, rise), BaseRace.stretch_pace(plain, rise))
+		ok(same, "a water lean does not")
 	var flat := is_equal_approx(BaseRace.stretch_pace(swim, 0), base0) \
 			and is_equal_approx(BaseRace.stretch_pace(fly, 0), base0)
 	ok(flat, "leans don't help on the straight")
@@ -159,7 +174,7 @@ func _settle() -> void:
 
 func _twists() -> void:
 	var rec := _kin("zapple", "Tw", 10, 60.0)
-	var st: Array = BaseRace.rules()["stretches"]
+	var st: Array = BaseRace.stretches()
 	var tw := {"mult": {"water": 0.5}}
 	for i in st.size():
 		var want := 0.5 if st[i]["kind"] == "water" else 1.0
@@ -203,9 +218,8 @@ func _formats() -> void:
 			var slower := BaseRace.expected_time(plain, t) > BaseRace.expected_time(plain)
 			ok(slower, "format %s lengthens a plain Boki's lap" % t["id"])
 
-func _on_base() -> void:
-	var rules: Dictionary = FarmUnlocks.rules()
-	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+## Three Boki on a stock farm (a Training post) whose island has the given theme.
+func _base_save(theme: String) -> Dictionary:
 	var d := Save.fresh()
 	for i in 3:
 		var k := _kin(["zapple", "cindle", "zapple"][i], ["Pip", "Ash", "Bo"][i], 10, 70.0)
@@ -215,7 +229,13 @@ func _on_base() -> void:
 			d["active"] = k["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	d["layout"] = HomeLayout.fresh()      # the full stock farm, with a Training post
-	Save.d = d
+	d["layout"]["theme"] = theme
+	return d
+
+func _on_base() -> void:
+	var rules: Dictionary = FarmUnlocks.rules()
+	ok(not FarmUnlocks.base_mode(), "base_mode is off in the shipped rules")
+	Save.d = _base_save("meadow")
 	HomeLayout.ensure(Save.d)
 	var off = await main._hb_home()
 	ok(off.hrace == null, "off: no race post on the farm")
@@ -260,6 +280,33 @@ func _on_base() -> void:
 		ok(is_instance_valid(race.wall) and race.wall.get_child_count() > 1, "on: the wall shows the frame")
 	await _drill(home)
 	rules["base_mode"] = false
+	home.queue_free()
+	await main.get_tree().process_frame
+
+## A ridge base: the race post lays the ridge course (its updraft strip is there) and a race on it ends with a card.
+func _ridge_base() -> void:
+	FarmUnlocks.rules()["base_mode"] = true
+	Save.d = _base_save("ridge")
+	HomeLayout.ensure(Save.d)
+	var home = await main._hb_home()
+	for f in SETTLE_FRAMES:
+		if is_instance_valid(home.root_ui):
+			break
+		await main.get_tree().process_frame
+	home._close_panel()
+	var race: BaseRace = home.hrace
+	var strips := race.post.get_children().filter(func(c): return c is MeshInstance3D and c.mesh is BoxMesh).size()
+	ok(strips >= BaseRace.stretches().size() and BaseRace.stretches().any(func(st): return st["kind"] == "updraft"),
+			"ridge: the post lays out the ridge course (%d strips)" % strips)
+	for k in home.kins:
+		k.erase("indoors")
+	race.use()
+	var t := 0.0
+	while race.run != null and t < MAX_S:
+		race.tick(0.1)
+		t += 0.1
+	ok(race.run == null and is_instance_valid(race.card), "ridge: a race on it ends with a result card (%.1f s)" % t)
+	FarmUnlocks.rules()["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
 
