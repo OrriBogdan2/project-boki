@@ -66,6 +66,9 @@ const T := {
 	"dash_curve_bulwark_peak_u":      ["~", [0.4, 0.6], "", "[footage] Oath Smash peaks 0.17s into 0.33s"],
 	"dash_curve_bulwark_peak_k":      ["~", [1.12, 1.3], "x", "[footage] Oath peak 530 px/s, mean 436"],
 	"dash_curve_bulwark_exit_k":      ["~", [0.62, 0.8], "x", "[footage] Oath slides on into the spin (fit 0.66)"],
+	"dash_curve_thief_peak_u":        ["~", [0.28, 0.44], "", "[footage] Shiv peaks in the 3rd-4th 1/15s of 8"],
+	"dash_curve_thief_peak_k":        ["~", [1.7, 1.9], "x", "[footage] Shiv peak 415 px/s, mean 235"],
+	"dash_curve_thief_exit_k":        ["~", [0.22, 0.4], "x", "[footage] Shiv runs down into the run (fit 0.25)"],
 	"dash_curve_tender_air_dist":     ["~", [0.9, 1.1], "x", "Meeko's glide: dash.air.dist 13.3m (footage 11-15)"],
 	"dash_curve_tender_air_time":     ["~", [0.9, 1.08], "x", "[footage] Elluna air dash 0.8-1.1s (0.95)"],
 	"dash_curve_tender_air_exit_k":   ["~", [0.4, 0.65], "x", "[footage] floats out at 40-65% of the burst"],
@@ -968,7 +971,7 @@ func _dash_exit() -> void:
 func _dash_curves() -> void:
 	var kit_was := P.arch
 	var cls_was := P.cls
-	for id in ["gunslinger", "juggernaut", "archer", "bulwark"]:
+	for id in ["gunslinger", "juggernaut", "archer", "bulwark", "thief"]:
 		P.reclass(Arch.weight(id), id)
 		_reset(flat + Vector3(-3.0, 0, 0))
 		P.inp["move"] = Vector2(1, 0)
@@ -997,9 +1000,9 @@ func _dash_curves() -> void:
 		var want := float(dd.get("whirl", dd.get("roll", dd.get("dist")))) * float(feel["dist"])
 		rec("dash_curve_dist", (P.pos.x - x0) / want)
 		rec("dash_curve_exit_run", _hv(P).length() / P.base_speed)
-		if id == "bulwark":
+		if id in ["bulwark", "thief"]:
 			# the kit's own time and the speed the curve ends on (its last step against the dash's mean)
-			var t := float(dd["whirl"]) / float(dd["whirl_speed"])
+			var t := float(dd["whirl"]) / float(dd["whirl_speed"]) if id == "bulwark" else float(dd["time"])
 			t *= float(feel["time"])
 			rec("dash_curve_time", speeds.size() * DT / t)
 			rec("dash_curve_%s_exit_k" % id, float(speeds[-1]) / (want / t))
