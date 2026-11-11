@@ -201,13 +201,14 @@ func _items(m: Match) -> void:
 	for id in UtilityBelt.stock_ids():
 		h.pos = _vendor_of(m, "gear")["pos"]
 		bot.reveal_t = 0.0
-		if not _fresh(h, id) and id != "revive_ember":
+		var needs_air: bool = UtilityBelt.def(id).get("float", false)      # Cloud Raft: open air only (--utility-parity-check)
+		if not _fresh(h, id) and id != "revive_ember" and not needs_air:
 			smoke.append(id)
 		UtilityUse.tick(h, 30.0)
 	ok("every belt item can be used without a crash", smoke.is_empty(), str(smoke))
 	# drinks
 	_fresh(h, "deep_draught")
-	var len5: bool = is_equal_approx(h.drink_t, 5.0) and is_equal_approx(h.drink_len, 5.0)
+	var len5: bool = is_equal_approx(h.drink_t, 5.0) and is_equal_approx(UtilityUse.channel(h.drink_id, "time"), 5.0)
 	UtilityUse.tick(h, 6.0)
 	var healed: bool = h.hp >= h.max_hp - 0.5 and UtilityBelt.count(h, "deep_draught") == 0
 	ok("Deep Draught takes 5s and heals to full", len5 and healed)

@@ -62,7 +62,8 @@ var wid := "rifle"
 var wpn: Dictionary = {}
 var ctrl := "bot"             # local | bot | remote
 var inp := {"move": Vector2.ZERO, "aim": Vector3.ZERO, "fire": false, "dash": false, "jump": false,
-	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false, "util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
+	"throw": false, "skill": false, "sig": false, "interact": false, "util1": false, "util2": false, "util3": false,
+	"util4": false, "util5": false, "util6": false, "glide": false, "glide_press_only": false, "ult": false,
 	"sec": false, "sec_hold": false, "crouch": false, "gear1": false, "gear2": false, "swap": false}
 var base_speed := 5.4
 var ground_accel := GROUND_ACCEL     # per hunter (HunterMove)
@@ -1838,7 +1839,8 @@ func sim(dt: float) -> void:
 			SkyDeck.hold(self)      # on the deck at your squad slot
 			if ctrl == "local" and inp["jump"]:
 				m.ship_jump(self)
-			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "fire", "skill", "swap"]:
+			for k in ["jump", "dash", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "fire",
+					"skill", "swap"]:
 				inp[k] = false
 		return
 	tick_status(dt)
@@ -1901,8 +1903,8 @@ func sim(dt: float) -> void:
 		BoxRevive.guard_inputs(self)
 	# mid-stomp you're committed: none of your own buttons do anything until it ends
 	if not stomp.is_empty():
-		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4", "util5", "util6",
-				"gear1", "gear2", "fire", "throw", "kin_ab"]:
+		for kk in ["dash", "jump", "sig", "skill", "sec", "ult", "swap", "util1", "util2", "util3", "util4",
+				"util5", "util6", "gear1", "gear2", "fire", "throw", "kin_ab"]:
 			inp[kk] = false
 		inp["move"] = Vector2.ZERO
 	# inputs
@@ -1970,7 +1972,8 @@ func sim(dt: float) -> void:
 		use_ultimate()
 	trigger(dt)
 	inp["kin_ab"] = false
-	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1", "gear2", "skill", "swap"]:
+	for k in ["dash", "jump", "sig", "util1", "util2", "util3", "util4", "util5", "util6", "ult", "sec", "gear1",
+			"gear2", "skill", "swap"]:
 		inp[k] = false
 	_physics(dt)
 	var ad := aim_dir()

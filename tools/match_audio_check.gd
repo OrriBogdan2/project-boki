@@ -178,6 +178,7 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 ## then play their end cue, or the cancel cue when spilt (BeltSfx, content/rules/belt_sfx.json).
 func _belt_items(m: Match, P: Hunter) -> void:
 	Sfx.listener = P.pos
+	P.inv_t = 99.0       # a camp's hit would spill a channel before its end or cancel cue
 	for id in BeltSfx.items():
 		var start := BeltSfx.cue(id, "start")
 		Sfx.listener = P.pos       # a Warp Seed or Lostway Scroll earlier moved the user

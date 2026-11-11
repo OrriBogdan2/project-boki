@@ -187,7 +187,7 @@ func _gate(m: Match, P: Hunter, foe: Hunter) -> void:
 	_steps(m, 4.0)
 	ok(not UtilityBelt.use_id(P, "twin_gate"), "...pressing it again before 8 s does nothing")
 	_steps(m, 5.0)
-	ok(P.flat_dist(home) < 1.0 and foe.flat_dist(far) < 1.0, "...and nothing swaps by itself (%.1f %.1f)" % [P.flat_dist(home), foe.flat_dist(far)])
+	ok(P.flat_dist(home) < 1.0 and foe.flat_dist(far) < 1.0, "...and nothing swaps by itself")
 	ok(UtilityBelt.use_id(P, "twin_gate"), "the second press, once armed, swaps")
 	_steps(m, 0.2)
 	ok(P.flat_dist(far) < 2.0 and foe.flat_dist(home) < 2.0, "...you and the rival trade places")
