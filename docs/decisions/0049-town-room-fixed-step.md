@@ -16,3 +16,6 @@ Option 2. `FarmStep.walk` is the one ground-speed step (row speed and accel, the
 
 ## Consequences
 Town and room walk at the hero's run speed (4.55 by default) and turn at `turn_rate`; the town jump is higher (about 1.52 m against 1.39). `--move-rate-check` gains `town` and `room` rows and a facing assert. No Net or save change (the town's presence still sends the stepped position and facing).
+
+## Addendum (2026-11-11): drawn at the present
+`FarmStep` drew the body between its last two steps, a step behind; a match draws its own Hunter at the present (`Hunter.render_pos`). The farm, town and room now use the same lead: the last step carried on by the time since. The facing stays blended between steps (alternative: lead it too, which makes the first frame of a turn jump a whole step at 144 fps). Like the match, a lead can sit up to one step's fall below the ground on the frame of a landing. `--move-rate-check` asserts the drawn body is at the present at 30, 60 and 144 fps.
