@@ -766,6 +766,7 @@ func _build_bridges() -> void:
 		var br: Dictionary = bridges[k]
 		var node := Node3D.new(); add_child(node)
 		br["node"] = node
+		if FarmUnlocks.base_mode() and not br["built"]: continue      # side isles retired in the base (GARDEN.md 10.7 step 11)
 		var sgp: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var sg := Models.signpost([isd["name"]]); sg.position = Vector3(sgp.x, 0, sgp.y); add_child(sg)
 		br["sign"] = sg
@@ -2063,7 +2064,7 @@ func _find_interact() -> void:
 		var d := p2.distance_to(Vector2(dp.x, dp.z))
 		if d < (1.8 if l["built"] else 2.4) and d < bd + 0.4: bd = d; best = {"kind": "lot", "b": b}
 	for k in bridges:
-		if bridges[k]["built"]:
+		if bridges[k]["built"] or FarmUnlocks.base_mode():
 			continue
 		var sg: Vector2 = HomeLayout.isle_bridge(world, k)["sign"]
 		var d := p2.distance_to(sg)
