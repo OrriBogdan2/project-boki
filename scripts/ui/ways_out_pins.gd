@@ -17,7 +17,7 @@ const BEAM_H := 24.0       # ...and its height
 const GAP := 44.0          # px: a pin that would sit on an earlier one moves along the edge by this
 const FS := 17             # px, a pin's line
 
-static var _placed := PackedVector2Array()    # this frame's pins (cleared, not reallocated)
+static var _placed := PackedVector2Array()    # where this frame's pins sit (for _place)
 
 static func draw(hud) -> void:
 	var m: Match = hud.m
