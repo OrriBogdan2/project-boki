@@ -2245,3 +2245,12 @@ for _s in SPECS[_n0:]: _s['id']+='_bk'
 for _k,_t in (('a',"the bramble cape on its back only: make it much smaller, just a short bramble mane over the shoulders with a small patch of the hedge-maze pattern and two roses. Its body, legs, face, antlers and vine tail stay the same."),
               ('b',"the bramble cape on its back only: remove the cape completely. Keep only a short bramble ruff around the neck with one rose, and the vine tail. Its body, legs, face and antlers stay the same.")):
     SPECS.append({'id':'shave_briarlynx_'+_k,'name':'Briarlynx shaved down '+_k,'refs':[_C%'Briarlynx'],'runs':2,'aspect':'1:1','size':'2K','prompt':_EDIT+_t})
+
+# 11-11 OWNER: Crofthollow line (cottage + tree on its back) should lose the scenery, "a weapon or something else instead".
+# Farm-tool theme (croft = small farm), every part grown from its body. Final first; Crofthorn (baby/mid) follows the pick.
+_n0=len(SPECS)
+OPT('Crofthollow','final','tough',False,True,_C%'Crofthollow',[
+ "no cottage, no tree, no hill and no grass on its back. Its two horns have grown into one huge sweeping curved blade like a plough share across its brow, dark iron-grey with a worn bright edge, and its shaggy orange coat hangs long like a hay fringe over its eyes. Head lowered, ready to charge.",
+ "no cottage, no tree, no hill and no grass on its back. Its horns have grown long and curved into two great sickle blades, dark iron-grey with bright edges, and a ridge of stiff straw-coloured bristles runs down its spine like a threshing comb. Standing broad and planted.",
+ "no cottage, no tree, no hill and no grass on its back. Its horns curl forward into two heavy pitchfork-like tines on each side, and its shaggy coat is braided at the shoulders like bound wheat sheaves, golden at the tips. Its hooves are big and hammer-heavy."])
+for _s in SPECS[_n0:]: _s['id']+='_bk'
