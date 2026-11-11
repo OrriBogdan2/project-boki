@@ -10,6 +10,9 @@ How the game's sound effects are made, named, levelled and played. Music and amb
 - Held sounds (a minigun spin, a charge hum): write them with `S.save_loop(name, x, cat)`, which cross-fades the tail into the head and skips the end fades, list them under `"loops"`, and play them with `Sfx.loop_start` / `loop_stop`.
 - Variety: write takes with `S.takes_cat(name, fn, 3, cat)` (`name.wav` + `name_1..3.wav`); `Sfx` picks a different take each time.
 
+## Hit by target
+The weapon's own hit sound says whose hit landed; a short quiet layer under it (`Juice.TARGET_DB`) says what it landed on. `HitClass.of` picks the class, `HitClass.SOUND` the sound (`tools/gen_sfx_targets.py`, set `content/sfx/targets.json`): `hit_armour` a bright crack and ring, `hit_body` a dull thump, `hit_boki` a soft squeak in the Boki voice range, `hit_monster` a wet crunch, `hit_wall` a dull thud when your shot ends on a wall or terrain. `--sfx-set-check` checks every class has its sound and that each take stays under 0.25 s.
+
 ## Loudness
 Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (table: `content/rules/sfx_levels.json`): RMS over the audible part, peak ceiling -1 dBFS. The `vol_db` at the call site then only says intent (a quiet tell, a big ult), never fixes a file that is too loud.
 
