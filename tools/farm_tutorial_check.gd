@@ -25,6 +25,7 @@ func _new_save(kin_count := 1) -> Dictionary:
 	var d := Save.fresh()
 	for i in kin_count:
 		var k := Save.new_kin(["zapple", "cindle"][i], ["Pip", "Ash"][i])
+		k["uid"] = "ftut%d" % i      # its likes are seeded from the uid: a random one hates the tutorial's food now and then
 		k["level"] = 5
 		Care.ensure(k)
 		d["roster"].append(k)
