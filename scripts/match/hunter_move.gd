@@ -4,6 +4,8 @@ extends RefCounted
 ## fall, glide, dive and mantle tunables every hunter shares, from content/rules/hunter_move.json
 ## ([game data]: SUPERVIVE's movement settings, uu converted to metres).
 
+const SWEEP := 0.5              # share of the block radius one push-out piece of a step may cover
+
 static var _rules: Dictionary = _load()
 static var _phys: Dictionary = _rules["physics"]
 static var brake_decel: float = _phys["brake"]
@@ -205,10 +207,16 @@ static func mantle_launch(run_speed: float) -> float:
 
 ## "About to land": falling, with the ground no further than the jump buffer (and a step more) of falling away,
 ## and never further than 0.9 m. A jump pressed then waits for the landing instead of opening the glider.
+## Holding its height (a flat air dash a hair off the ground) counts for what the buffer's own fall covers.
 ## `height` is metres above the ground.
 static func near_landing(vy: float, height: float) -> bool:
+	if vy > 0.0:
+		return false
 	var lead := jump_buffer_s + 0.02
-	return vy < 0.0 and height < maxf(0.9, (0.5 * Hunter.H_GRAV * lead - vy) * lead)
+	var fall := (0.5 * Hunter.H_GRAV * lead - vy) * lead
+	if vy == 0.0:
+		return height < fall
+	return height < maxf(0.9, fall)
 
 ## Where a body wanting to be at p ends up once it's pushed straight out of every barrier that blocks
 ## it (a Tenzo rock, a raised wall; Verbs.wall_blocks), as World.push_out_blocks does for rock tiles:
@@ -232,6 +240,24 @@ static func push_out_walls(h: Hunter, p: Vector2) -> Vector3:
 		p = c + d.normalized() * (reach + World.BLOCK_SKIN)
 		top = maxf(top, wt)
 	return Vector3(p.x, p.y, top)
+
+## push_out_walls(push_out_blocks) for a step from the body to tgt, in pieces no longer than SWEEP of its
+## block radius: a fast dash's step would otherwise end deep in a tile or past a thin barrier's line and be
+## pushed out of the wrong side (it caught on the seams of a row of rocks, or went through). Walks are one piece.
+static func push_out_swept(h: Hunter, tgt: Vector2) -> Vector3:
+	var from := Vector2(h.pos.x, h.pos.z)
+	var pieces := maxi(1, ceili(from.distance_to(tgt) / (h.r * World.BLOCK_BODY * SWEEP)))
+	var step := (tgt - from) / pieces
+	var p := from
+	var top := 0.0
+	var pushed := false
+	for i in pieces:
+		var pw := push_out_walls(h, h.m.world.push_out_blocks(p.x + step.x, p.y + step.y, h.r, h.pos.y))
+		pushed = pushed or Vector2(pw.x, pw.y) != p + step
+		p = Vector2(pw.x, pw.y)
+		top = maxf(top, pw.z)
+	# nothing in the way: tgt itself (the pieces' sum drifts by float rounding, which would read as a push)
+	return Vector3(p.x, p.y, top) if pushed else Vector3(tgt.x, tgt.y, 0.0)
 
 ## The keys' velocity against the wall the last step's walk pressed into (n: out of it, zero for
 ## none): its part into the wall is dropped, so the whole run-up goes along the face and you slide at

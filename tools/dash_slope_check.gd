@@ -192,6 +192,13 @@ func _pop(rows: Array, n: int) -> float:
 	for i in mini(n, rows.size()): top = maxf(top, rows[i][1])
 	return top
 
+## The lowest ground under the body over the first `n` rows.
+func _lowest(rows: Array, n: int) -> float:
+	var lo: float = rows[0][4]
+	for i in mini(n, rows.size()):
+		lo = minf(lo, rows[i][4])
+	return lo
+
 func _air(rows: Array, n: int) -> float:
 	var a := 0
 	for i in mini(n, rows.size()):
@@ -219,11 +226,15 @@ func _hero(map: String, hero: String) -> void:
 		# an arc to higher ground (a hop up the ramp) may peak that much higher
 		var rise := maxf(0.0, rows[end][4] - rows[0][4])
 		var fall := maxf(0.0, rows[0][4] - rows[end][4])
-		# a hop down a slope falls further
-		var air_extra := sqrt(2.0 * fall / Hunter.H_GRAV) if hero in HOPS else 0.0
+		var hop_fall := 0.0
+		if hero in HOPS:
+			# a hop down a slope falls further, and its skid runs off the crest's ledge (decision 0046): the drop
+			# under the whole watch is airtime and height over the ground below
+			hop_fall = maxf(fall, rows[0][4] - _lowest(rows, MAX_N))
+		var air_extra := sqrt(2.0 * hop_fall / Hunter.H_GRAV)
 		var good := absf(d - fd) <= fd * TOL
 		if not hero in HOVERS:
-			good = good and pop <= fpop + rise + POP_TOL and air <= fair + air_extra + AIR_TOL
+			good = good and pop <= fpop + rise + hop_fall + POP_TOL and air <= fair + air_extra + AIR_TOL
 		print("DSLOPE %-11s %-10s %-6s dist %5.2f m  pop %4.2f m  air %4.2f s  %+4.0f%%  %s" % [
 			map, hero, case, d, pop, air, (d / fd - 1.0) * 100.0, "ok" if good else "FAIL"
 		])
