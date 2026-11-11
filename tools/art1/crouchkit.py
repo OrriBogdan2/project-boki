@@ -24,6 +24,7 @@ def on_toes(z, ankle, foot, pit):
 def sneak(hold, heading, cfg, upper):
     """One cycle of the sneak along heading (deg, + left of facing). cfg: ankle, foot (ankle to ball, m), width, stride (a step's reach, m), lift, toe (the planted heel's
     lift), swing (how much the foot trails as it leaves the ground, 1 by default), share (of the cycle a foot stays down), sway (m the hips swing over the planted foot), bob (m), twist (rad of hips against shoulders).
+    set: of the swing, the end where the foot comes straight down instead of skidding in (0 by default).
     upper(p, u, c1, s2, d) sets the Hero's own hands, head and face on p; d is the heading's unit vector."""
     h = math.radians(heading)
     d = Vector((-math.sin(h), math.cos(h), 0))
@@ -41,7 +42,8 @@ def sneak(hold, heading, cfg, upper):
             pit = cfg["toe"] + 0.55 * max(0.0, k - 0.55) / 0.45 * fwd
             return base + d * s * stride + Vector((0, 0, cfg["foot"] * math.sin(pit))), pit
         k = (ph - share) / (1 - share)      # the swing: low, the toe reaching for the next quiet step
-        sm = k * k * (3 - 2 * k)
+        kr = min(k / (1 - cfg.get("set", 0.0)), 1.0)    # the reach is over by then: the foot sets straight down
+        sm = kr * kr * (3 - 2 * kr)
         s = -1 + 2 * sm
         z = cfg["lift"] * math.sin(k * math.pi)
         pit = cfg["toe"] + cfg.get("swing", 1.0) * ((0.55 * fwd + 0.3) * (1 - k) * (1 - k) + 0.15 * math.sin(k * math.pi))

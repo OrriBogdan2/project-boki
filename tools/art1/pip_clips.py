@@ -4,7 +4,9 @@ the lantern: she keeps it close, checks the dark over her shoulder, and when she
 hit throws the ears first, a landing is a bounce.
 The lantern hangs from her right fist on spring_hanglantern_* (the runtime's hang chain), so the right hand is posed as a hook: G is the ring's
 pivot, BE the way the fingers point. The left hand is free; "Lh" turns it from the chest's frame.
-Run: blender -b --python tools/art1/pip_clips.py -- <pip_art1.blend> <out.glb> [clip,clip]"""
+Run: blender -b --python tools/art1/pip_clips.py -- <pip_art1.blend> <out.glb> [clip,clip]
+Or from the game's glb (the swapped body keeps this rig, so its clips solve back exactly): -- art/wardens/pip/pip.glb <out.glb> clip,clip re-bakes
+only those clips and keeps the rest, the meshes and the FX points as they are."""
 import math
 import os
 import sys
@@ -165,7 +167,10 @@ HUDDLE = {
     "FL": (-0.125, 0.14, A + 0.03), "FR": (0.135, -0.12, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
     "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.3, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
 }
-TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
+# the sneak: a 0.22 m stride is about her reach in the huddle (the front leg 0.93 straight); at T 0.44 and share 0.5 the
+# planted foot keeps up with the crouch speed at warden_anim/pip.json "speed" 1.4, about 8 light steps a second;
+# set: the toe lands straight down, not skidding in
+TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.22, "lift": 0.05, "toe": 0.4, "share": 0.5, "set": 0.35, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.44, "toe_out": 0.12}
 
 
 def huddle(u):
@@ -392,7 +397,15 @@ class Extras:
 
 if __name__ == "__main__":
     a = sys.argv[sys.argv.index("--") + 1:]
-    bpy.ops.wm.open_mainfile(filepath=a[0])
+    if a[0].endswith(".glb"):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        bpy.context.scene.render.fps = FPS       # (keyed at 30: import at the scene rate, or every clip loses frames)
+        bpy.ops.import_scene.gltf(filepath=a[0])
+        for act in bpy.data.actions:      # (the importer's range stops a key short: each clip keeps its last key)
+            ks = [kp.co.x for fc in act.fcurves for kp in fc.keyframe_points]
+            act.use_frame_range, act.frame_start, act.frame_end = True, round(min(ks)), round(max(ks))
+    else:
+        bpy.ops.wm.open_mainfile(filepath=a[0])
     arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
     grip = tuple(K.GRIP)
     rig = {"grip_rest": grip, "blade_rest": (0, 0, -1), "edge_rest": (0, 1, 0), "pelvis": float(K.J["hips"][2]), "hilt_l": 0.05, "dz": SZ - 1.072, "ankle": A, "ankle_keys": A,
@@ -406,6 +419,8 @@ if __name__ == "__main__":
     for c in clips():
         if wanted and c.name not in wanted:
             continue
+        if c.name in bpy.data.actions:
+            bpy.data.actions.remove(bpy.data.actions[c.name])
         ex.start(c)
         bake(arm, c, sol, ex)
         names.append((c.name, round(c.dur, 3)))
