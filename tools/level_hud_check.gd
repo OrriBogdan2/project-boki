@@ -107,7 +107,8 @@ func _growth(main: Node, arch: String) -> void:
 			info += "L%d hp+%.2f ap+%.3f " % [lvl, P.max_hp - hp0, LevelGrowth.ap(P) - ap0]
 	var hp_up := P.max_hp / base_hp - 1.0
 	var tip := LevelGrowth.tip(P)
-	ok(step_ok and P.lvl == 10, "%s: every level adds 6%% health and 3.9%% ability power (straight lines) %s" % [arch, info])
+	ok(step_ok and P.lvl == 10,
+		"%s: every level adds 6%% health and 3.9%% ability power (straight lines) %s" % [arch, info])
 	ok(absf(hp_up - 0.54) < 0.001 and absf(LevelGrowth.ap(P) - 1.351) < 0.0001,
 		"%s: by level 10: +%.0f%% health, ability power x%.2f" % [arch, hp_up * 100.0, LevelGrowth.ap(P)])
 	ok(P.perks.is_empty() and is_equal_approx(float(P.wpn["dmg"]), dmg0),

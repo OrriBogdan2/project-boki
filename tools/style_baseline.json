@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 28,
+"long_line": 27,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -36,7 +36,7 @@
 "semicolon": 1
 },
 "scripts/arch/kits/bulwark_kit.gd": {
-"long_line": 9,
+"long_line": 8,
 "nested_ternary": 1,
 "semicolon": 8
 },
@@ -98,7 +98,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 53
+"long_line": 48
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -252,9 +252,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 209,
-"nested_ternary": 29,
-"semicolon": 247,
+"long_line": 203,
+"nested_ternary": 27,
+"semicolon": 243,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -388,9 +388,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 387,
+"long_line": 365,
 "nested_ternary": 7,
-"semicolon": 405,
+"semicolon": 380,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -479,7 +479,6 @@
 "semicolon": 1
 },
 "scripts/match/drop_squad.gd": {
-"history_comment": 1,
 "long_line": 3,
 "semicolon": 5
 },
@@ -493,13 +492,13 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 23,
-"semicolon": 43
+"long_line": 7,
+"semicolon": 9
 },
 "scripts/match/exits.gd": {
-"long_line": 30,
+"long_line": 10,
 "nested_ternary": 1,
-"semicolon": 20
+"semicolon": 13
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
@@ -508,7 +507,7 @@
 "shadow": 1
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 1,
 "semicolon": 25,
 "shadow": 2
@@ -553,10 +552,10 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 33,
-"long_line": 92,
-"nested_ternary": 18,
-"semicolon": 49,
+"history_comment": 24,
+"long_line": 88,
+"nested_ternary": 15,
+"semicolon": 46,
 "shadow": 4
 },
 "scripts/match/hunter_anim.gd": {
@@ -570,7 +569,7 @@
 "semicolon": 1
 },
 "scripts/match/kin.gd": {
-"long_line": 30,
+"long_line": 29,
 "nested_ternary": 7,
 "semicolon": 19
 },
@@ -619,8 +618,8 @@
 "semicolon": 1
 },
 "scripts/match/lairs.gd": {
-"long_line": 49,
-"nested_ternary": 9,
+"long_line": 48,
+"nested_ternary": 8,
 "semicolon": 28
 },
 "scripts/match/landmarks.gd": {
@@ -634,7 +633,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 217,
+"long_line": 216,
 "nested_ternary": 19,
 "semicolon": 142,
 "shadow": 7
@@ -662,7 +661,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 281,
+"long_line": 280,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -822,9 +821,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 190,
-"nested_ternary": 39,
-"semicolon": 52,
+"long_line": 172,
+"nested_ternary": 33,
+"semicolon": 43,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -847,7 +846,7 @@
 },
 "scripts/ui/kin_reveal.gd": {
 "long_line": 4,
-"semicolon": 15,
+"semicolon": 12,
 "shadow": 2
 },
 "scripts/ui/kinbox_view.gd": {
@@ -883,7 +882,7 @@
 "scripts/ui/prologue.gd": {
 "long_line": 23,
 "nested_ternary": 1,
-"semicolon": 34,
+"semicolon": 33,
 "shadow": 1
 },
 "scripts/ui/reset_pop.gd": {
@@ -948,10 +947,10 @@
 },
 "tools/archer_bulwark_combo_check.gd": {
 "long_line": 8,
-"semicolon": 19
+"semicolon": 18
 },
 "tools/archetype_check.gd": {
-"long_line": 65,
+"long_line": 63,
 "semicolon": 70,
 "shadow": 1
 },

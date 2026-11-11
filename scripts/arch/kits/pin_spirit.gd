@@ -123,7 +123,8 @@ static func inside_of(x: Hunter) -> bool:
 	var w: World = x.m.world
 	if w.is_block(x.pos.x, x.pos.z) or in_terrain(x):
 		return true
-	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, x.pos.x, x.pos.z, x.hull_r() * 0.6, x.pos.y) > 0.0
+	var reach := x.hull_r() * 0.6
+	return not w.dyn_walls.is_empty() and Verbs.wall_blocks(w.dyn_walls, x.pos.x, x.pos.z, reach, x.pos.y) > 0.0
 
 static func in_terrain(x: Hunter) -> bool:
 	for o in [Vector2.ZERO, Vector2(x.r, 0), Vector2(-x.r, 0), Vector2(0, x.r), Vector2(0, -x.r)]:

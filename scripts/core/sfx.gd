@@ -355,7 +355,8 @@ func match_voices() -> int:
 	for key in loops:
 		if is_instance_valid(loops[key]["p"]): n += 1
 	for c in get_children():
-		if (c is AudioStreamPlayer or c is AudioStreamPlayer3D) and c.playing and not c in players and not c in music and c != amb:
+		var ours: bool = c in players or c in music or c == amb
+		if (c is AudioStreamPlayer or c is AudioStreamPlayer3D) and c.playing and not ours:
 			n += 1          # also a stem or bed or loop still fading out
 	return n
 

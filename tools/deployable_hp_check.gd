@@ -89,7 +89,8 @@ func _neve() -> void:
 	press_e(m, P)
 	step(m, 0.4)
 	var w: Dictionary = K.wall.get("w", {})
-	ok("neve wall: raised, 200 hp (owner 11-08 over the source 70), 4.5 s", not w.is_empty() and stands(w, 200.0, 3.8, 4.5))
+	ok("neve wall: raised, 200 hp (the owner's 11-08 number, not the source 70), 4.5 s",
+			not w.is_empty() and stands(w, 200.0, 3.8, 4.5))
 	P.teleport(r[3] - Vector3(4.0, 0, 0))
 	var took := shoot_until(m, T, P, func(): return not m.verbs.walls.has(w), 6.0)
 	ok("neve wall: a foe's LMB breaks it", took > 0.0 and took < 4.0, "%.1fs" % took)

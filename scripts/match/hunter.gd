@@ -49,12 +49,14 @@ const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too f
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
 # The opening drop (ext/drop-parity): the squad's rocket launch (DropLaunch, item 163), then the glider as
 # SUPERVIVE's high glide: GLIDE_SPEED, GLIDE_ACCEL and the pull toward its height target (DropFeel).
-const DIVE_FALL := 5.0         # m/s the launch (and the tutorial's skydive) falls at: a 70 m start lands in 18-22 s (owner)
+# m/s the launch (and the tutorial's skydive) falls at: a 70 m start lands in 18-22 s (owner)
+const DIVE_FALL := 5.0
 const DROP_FALL := 3.5         # [game data] GlideDownwardForceMinZVelocity -350 uu/s: the sink high over the ground
 const DIVE_VY_RATE := 7.0      # [est] the fall reaches its speed in ~0.3s
 const DROP_VY_RATE := 9.0      # [est] the canopy settles to its sink in ~0.2s after it opens
 const DEPLOY_POP := -1.6       # [est] the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 3.5          # [game data] GlideDiveCancelDistance 350 uu: a dive ends and the glide catches you this high
+# [game data] GlideDiveCancelDistance 350 uu: a dive ends and the glide catches you this high
+const DEPLOY_H := 3.5
 ## Armor (docs/ARMOUR_PARITY.md): while it has durability it takes its tier's share off every hit
 ## (ARMOR_TIERS), then what gets through hurts your health and wears the durability by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -1143,7 +1145,9 @@ func _pass_along(dt: float) -> void:
 	var end := _dash_end(dt)
 	for f in m.foes_of(team):
 		if dash_pass.is_empty(): return
-		if dash_pass["hit"].has(f.get_instance_id()) or Swept.dist(f.pos, pos, end) > r + f.r + float(dash_pass.get("w", 0.8)) * 0.5 or absf(f.pos.y - pos.y) > 1.4:
+		var reach := r + f.r + float(dash_pass.get("w", 0.8)) * 0.5
+		var off := Swept.dist(f.pos, pos, end) > reach or absf(f.pos.y - pos.y) > 1.4
+		if dash_pass["hit"].has(f.get_instance_id()) or off:
 			continue
 		dash_pass["hit"][f.get_instance_id()] = true
 		if dash_pass.get("kx") is Callable:
@@ -1852,7 +1856,9 @@ func sim(dt: float) -> void:
 	tick_status(dt)
 	if grounded:
 		air_peak = pos.y
-	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote", "jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t", "glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
+	for k in ["base_cd", "weak_t", "dash_buf", "hit_heat_t", "ex_cd", "reveal_t", "inv_t", "fire_cd", "coyote",
+			"jump_buf", "mantle_cd", "grap_cd", "sig_cd", "cloak_t", "haste_t", "fortify_t", "recoil", "muzzle_t",
+			"glide_cd", "bless_t", "crit_t", "sick_t", "phase_t"]:
 		set(k, maxf(0.0, get(k) - dt))
 	if shield_t > 0.0:
 		shield_t -= dt
@@ -2166,7 +2172,8 @@ func _physics(dt: float) -> void:
 		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
 	# take over); only bots keep an edge guard (a walk only: a shove still takes them over)
-	var guard: bool = ctrl == "bot" and grounded and roll_t <= 0.0 and knock_t <= 0.0 and m.time - kb_t > 0.6 and hv.length() <= spd * 1.25
+	var guard: bool = ctrl == "bot" and grounded and roll_t <= 0.0 and knock_t <= 0.0 and m.time - kb_t > 0.6
+	guard = guard and hv.length() <= spd * 1.25
 	# horizontal with walls; mantle onto ledges you run or fall into
 	var x0 := pos.x; var z0 := pos.z
 	var pre_v := Vector2(vel.x, vel.z)
@@ -2186,7 +2193,8 @@ func _physics(dt: float) -> void:
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
 	if po.distance_squared_to(tgt) > 1e-10:
 		block_n = (po - tgt).normalized()
-		rock_b = m.world.ground_at(tgt.x - block_n.x * hull_r() * 0.7, tgt.y - block_n.y * hull_r() * 0.7) + World.BLOCK_H
+		var back := block_n * hull_r() * 0.7
+		rock_b = m.world.ground_at(tgt.x - back.x, tgt.y - back.y) + World.BLOCK_H
 		var hvb := Vector2(vel.x, vel.z)
 		var into := hvb.dot(block_n)
 		if into < 0.0:
@@ -2253,7 +2261,8 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
+		var flung: bool = m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote
+		if flung and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
@@ -2863,7 +2872,8 @@ var base_armor := 50.0
 ## everyone's armor bar. Rows: name, colour, damage reduction, durability x the Common piece (source
 ## 2,500 / 2,500 / 2,500 / 3,000 / 3,500). Progress to reach a tier: ArmorXp.thresholds.
 const ARMOR_TIERS := [["Common", Color("dfe9f7"), 0.20, 1.0], ["Uncommon", Color("7fe08a"), 0.25, 1.0],
-	["Rare", Color("5fb6ff"), 0.30, 1.0], ["Epic", Color("c27cff"), 0.35, 1.2], ["Legendary", Color("ffbf3a"), 0.35, 1.4]]
+	["Rare", Color("5fb6ff"), 0.30, 1.0], ["Epic", Color("c27cff"), 0.35, 1.2],
+	["Legendary", Color("ffbf3a"), 0.35, 1.4]]
 var armor_xp := 0.0
 var armor_tier := 0
 var dmg_taken := 0.0

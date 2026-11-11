@@ -116,7 +116,9 @@ func step(m: Match, secs: float, each := Callable()) -> void:
 func fresh(T: Hunter) -> void:
 	T.hp = T.max_hp; T.stun_t = 0.0; T.root_t = 0.0; T.slow_t = 0.0; T.burn_t = 0.0; T.vel = Vector3.ZERO; T.reveal_t = 0.0; T.cc_immune_t = 0.0
 	T.dr = {}; T.dr_stun = false; T.knock_t = 0.0
-	T.armor_tier = 0; T.armor_xp = 0.0     # hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	# hits taken level armour now (docs/ARMOUR_PARITY.md): keep the dummy on Common
+	T.armor_tier = 0
+	T.armor_xp = 0.0
 	T.set_meta("marks", {})
 
 func dmg(T: Hunter) -> float:
@@ -544,7 +546,8 @@ func _bulwark() -> void:
 	var php := P.hp
 	m.spawn_shot(T, T.pos + Vector3(-0.6, 0.95, 0), Vector2(-30, 0), 30.0, 0.5, 0.15, Color.RED, {})
 	step(m, 0.3, func(): P.inp["sec_hold"] = true)
-	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.can_fire(), "hp %.0f" % P.hp)
+	ok("bulwark RMB hold: shield blocks, no swing", not K.wall.is_empty() and P.hp >= php and not P.can_fire(),
+			"hp %.0f" % P.hp)
 	P.inp["sec_hold"] = false
 	step(m, 0.1)
 	ok("bulwark RMB release: lowered", K.wall.is_empty())
@@ -555,7 +558,8 @@ func _bulwark() -> void:
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_res() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s",
+			not K.has_res() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)
