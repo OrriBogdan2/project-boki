@@ -144,7 +144,7 @@ static func full_map(fm) -> void:
 		if area.has_point(pv):
 			badge(fm.hud.c, pv, r, i, sd[i], m.time)
 			var dy := -r - 16.0 if i == 1 else r + 30.0    # the Gate's own label sits below it
-			HudStyle.ctext(fm.hud.c, pv + Vector2(0, dy), word(i, sd[i]), 11, color_of(sd[i]), 3)
+			fm.label_near(word(i, sd[i]), pv + Vector2(0, dy), 11, color_of(sd[i]), signf(dy))
 	draw_line(fm.hud, Vector2(fm.rect.get_center().x, fm.rect.position.y + 22.0))
 
 # ------------------------------------------------------------------ the dead and the watching
