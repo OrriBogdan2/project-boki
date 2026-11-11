@@ -5,6 +5,8 @@ extends RefCounted
 ## Care stats, the element lean (a lean speeds up the stretch that suits it) and mood, plus a random
 ## wobble. You cheer for one Boki with three timed presses on the Training post's drill bar
 ## (TimingDrill). The winner gets a heart, joy and trust; losers sulk and remember; you get a few gems.
+## The first time two Boki can run, the post offers a practice lap once (Save.d.tutorial.first_race):
+## the gold glows at each mark and the result card says what the race changed.
 ## Tuning lives in content/rules/race.json.
 ##
 ## The race itself (new_run, step, cheer, settle) is plain data, so --race-check runs it headless.
@@ -17,6 +19,7 @@ const CLIMB_H := 0.7                        # top of the climb (metres); the gap
 const HOP_H := 0.8                          # extra height of the jump over the gap (metres)
 const CARD_S := 6.0                         # how long the result card stays up (seconds)
 const MAX_RUNNERS := 4
+const FIRST := "first_race"                 # Save.d.tutorial key: the practice lap was offered
 
 static var _rules := {}
 static var _course: Array = []              # stretches with "a", "b" (Vector2), "len", "start"
@@ -31,6 +34,8 @@ var bar: Control = null
 var bar_draw: Control = null
 var card: Control = null
 var card_t := 0.0
+var offer: Control = null                   # the first-visit practice lap offer
+var guide := false                          # this race is the practice lap: the gold glows, the card explains
 
 func _init(home) -> void:
 	h = home
@@ -196,15 +201,30 @@ func near(p2: Vector2) -> bool:
 func prompt() -> String:
 	return "Start a Dash race"
 
-## Lines up the Boki out on the farm (the one you have out first) and starts the race.
+## Starts the race; the first time two Boki can run, it offers a practice lap first (once per save).
 func start() -> void:
+	if is_instance_valid(offer):
+		return
+	if not Save.d["tutorial"].get(FIRST, false) and _runners().size() >= 2:
+		Save.d["tutorial"][FIRST] = true      # offered once, taken or skipped
+		_offer()
+		return
+	_begin(false)
+
+## The Boki out on the farm that can run, the one you have out first.
+func _runners() -> Array:
 	var ak := Save.active_kin()
 	var out: Array = h.kins.filter(func(k): return _can_run(k))
 	out.sort_custom(func(a, b): return a["rec"] == ak and b["rec"] != ak)
-	kins_in = out.slice(0, MAX_RUNNERS)
+	return out.slice(0, MAX_RUNNERS)
+
+## Lines up the runners and starts the race; the practice lap glows at each mark and explains its card.
+func _begin(practice: bool) -> void:
+	kins_in = _runners()
 	if kins_in.size() < 2:
 		h._toast("The Dash needs two Boki out on the farm")
 		return
+	guide = practice
 	var recs: Array = []
 	for k in kins_in:
 		h._care_start(k)
@@ -215,12 +235,39 @@ func start() -> void:
 	h._toast("Cheer %s on: press %s at each of the three marks" % [recs[0]["name"], Settings.key_cap("interact")])
 	Sfx.play("whoosh", null, -8.0)
 
+## The first walk up to the post: a one-line card with Practice lap and Skip.
+func _offer() -> void:
+	var c := UI.card(Color(0.06, 0.07, 0.1, 0.92), 14, 14)
+	c.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.offset_top = 90
+	var v := UI.vbox(8)
+	c.add_child(v)
+	v.add_child(UI.label("A practice lap with your Boki?", 18, UI.ACCENT_HI))
+	var how := "You back a Boki and cheer it on with %s at three marks: press when the gold glows."
+	v.add_child(UI.label(how % Settings.key_cap("interact"), 14))
+	var row := UI.hbox(10)
+	row.add_child(UI.primary("Practice lap", func(): _answer(true)))
+	row.add_child(UI.ghost("Skip", func(): _answer(false)))
+	v.add_child(row)
+	h.root_ui.add_child(c)
+	offer = c
+
+func _answer(practice: bool) -> void:
+	offer.queue_free()
+	offer = null
+	if practice:
+		_begin(true)
+
 func _can_run(k: Dictionary) -> bool:
 	var n: Node3D = k["node"]
 	return not k.has("indoors") and not k.has("leap") and n.visible and not k.get("busy", false)
 
 ## A press while racing goes to the cheer bar (or closes the card); true when it was used.
 func input(event: InputEvent) -> bool:
+	if is_instance_valid(offer) and event.is_action_pressed("menu"):
+		_answer(false)
+		return true
 	if run.is_empty() and card == null:
 		return false
 	if not event.is_action_pressed("interact"):
@@ -300,8 +347,15 @@ func _open_bar() -> void:
 	bar = b
 
 func _draw_bar() -> void:
-	if not drill.is_empty():
-		TimingDrill.draw(bar_draw, drill)
+	if drill.is_empty():
+		return
+	if guide:
+		# the practice lap: the gold glows while a press counts
+		var w := bar_draw.size.x
+		var z := float(drill["zone"])
+		var glow := Rect2(w * (z - TimingDrill.GOOD) - 4, 0, w * TimingDrill.GOOD * 2.0 + 8, bar_draw.size.y)
+		bar_draw.draw_rect(glow, Color(UI.GOLD, 0.3))
+	TimingDrill.draw(bar_draw, drill)
 
 func _cheer_hit(grade: String) -> void:
 	cheer(run, grade)
@@ -329,6 +383,7 @@ func _finish() -> void:
 	_show_card(res)
 	run = {}
 	kins_in = []
+	guide = false
 
 func _show_card(res: Dictionary) -> void:
 	_close_card()
@@ -346,6 +401,9 @@ func _show_card(res: Dictionary) -> void:
 		col.add_child(UI.label("%d.  %s   %s" % [i + 1, order[i]["name"], mood], 15, UI.INK if i == 0 else UI.MUTED))
 	col.add_child(UI.label("+%d gems" % int(res["gems"]), 15, UI.ACCENT))
 	col.add_child(UI.para(String(res["memory"]), 12, UI.FAINT))
+	if guide:
+		var why := "Joy and trust move with the result, and backing the winner pays more gems"
+		col.add_child(UI.para(why, 12, UI.MUTED))
 	h.root_ui.add_child(c)
 	UI.pop_in(c)
 	card = c
