@@ -13,7 +13,7 @@
 		"range": 7.0,
 		"size": 0.2,
 		"color": "#ffb04a",
-		"sfx": "smg",
+		"sfx": "lw_roar",
 		"desc": "Hold to pour fire from your hand 7m ahead: the stream trails behind a sweep, narrow at the palm and billowing at the end. It burns as long as you hold. It builds Char; at full Char the foe goes Ablaze."
 	},
 	"utility": ""

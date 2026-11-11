@@ -228,6 +228,51 @@ func _drop_holds() -> void:
 		_end_pull(false)
 	broadside.drop()
 
+## The scattergun: each new volley rocks the body back, flashes the muzzle and dresses its slugs (pink
+## streaks that hang as violet dots where they stop). While firing, the spread's two edge lines lie on the
+## ground out to the slug range; idle, they fold into one aim line to the cursor (sheet gap 4).
+func _tick_gun() -> void:
+	if h.wid != "shotgun" or KinMerge.active(h):
+		return
+	if h.shot_n != shot_seen:
+		shot_seen = h.shot_n
+		shot_at = m.time
+		volleys += 1
+		_dress_volley()
+	if not pull.is_empty() or h.downed:
+		return
+	var w: Dictionary = h.wpn
+	if m.time - shot_at < IDLE_T or bool(h.inp.get("fire", false)):
+		AimKit.cone(
+			h, "spread",
+			{
+				"len": float(w["range"]), "deg": float(w.get("fan_deg", 30.0)) + h.wbloom, "edges": true, "inner": 0.6,
+				"col": Color("fff0f6"), "alpha": 0.8
+			}
+		)
+	else:
+		AimKit.line(h, "spread_idle", {"col": Color("fff0f6"), "alpha": 0.7})
+
+func _dress_volley() -> void:
+	play("dr_shot")
+	var d2 := h.aim_dir()
+	var mz := h.pos + Vector3(d2.x, 0, d2.y) * 1.05 + Vector3(0, 1.0, 0)
+	fx.orb(mz, BRASS, BRASS_HOT, 0.75, 0.07)          # a brass muzzle flash, one frame
+	fx.sunburst(mz, 0.6, Color("ff8a3a"), BRASS_HOT, 0.08, true)
+	if not tells_visible():
+		return
+	var key := "%s_%d" % [h.nid, h.shot_n]
+	var i: int = m.shots.size() - 1
+	var seen := 0
+	while i >= 0 and seen < 14:
+		var sd: Dictionary = m.shots[i]
+		i -= 1
+		seen += 1
+		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
+			continue
+		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
+			if expired: fx.dot(at, SLUG_REST, 0.26))
+
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():
 		return
