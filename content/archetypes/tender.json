@@ -70,7 +70,7 @@
 		"dist": 4.2,
 		"time": 0.174,
 		"invuln": 0.12,
-		"desc": "A quick skip about 3.6m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).",
+		"desc": "A quick skip about 4.2m where you move; in the air, a long floaty glide of about 13m (its own 14s cooldown).",
 		"air": {
 			"dist": 13.3,
 			"time": 0.95,
