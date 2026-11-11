@@ -31,6 +31,7 @@ func run(main_node: Node) -> void:
 		main.get_tree().quit(1)
 		return
 	var key := "rescue%d" % k.get_instance_id()
+	_mob_alerts(m, P)
 	# the Boki goes down beside you and you run into it: the rescue's hum starts and follows the carry
 	k.pos = P.pos + Vector3(0.6, 0, 0)
 	k.state = "active"
@@ -89,6 +90,39 @@ func _ult_cues(m: Match, P: Hunter) -> void:
 	UltCue.cast(P.ak)
 	heard = Sfx.last_played.has("ult_tag_ally") and Sfx.last_played.has(P.arch + "_ult_cue")
 	ok(heard, "your own team's cue has the ally tag")
+
+## A camp's alert (MobAlert): fires once when an idle monster sees a Hunter, not again within the
+## camp's gap; five camps each alert once, the pool stays within its voices; an idle camp murmurs near the listener.
+func _mob_alerts(m: Match, P: Hunter) -> void:
+	var sk: Mob = m.spawn_mob("skitter", P.pos + Vector3(4.0, 0, 0))
+	sk.st = "idle"
+	sk.tgt = null
+	var start := Time.get_ticks_msec()
+	var seen := false
+	for i in 150:
+		m.step(Match.DT)
+		if sk.st == "chase":
+			seen = true
+			break
+	var at := int(MobAlert.last.get(MobAlert._cell(sk.camp), 0))
+	ok(seen and at >= start, "an idle skitter that sees you alerts (state %s)" % sk.st)
+	ok(not MobAlert.aggro(sk), "...and its camp does not alert again within %d ms" % MobAlert.ALERT_GAP_MS)
+	var played := 0
+	var kinds: Array = MobAlert.ALERT.keys()
+	for i in 5:
+		var mb: Mob = m.spawn_mob(kinds[i + 1], P.pos + Vector3(30.0 + 12.0 * i, 0, 30.0))
+		played += int(MobAlert.aggro(mb)) + int(MobAlert.aggro(mb))
+	ok(played == 5, "five camps alert once each, twice-asked still once (%d)" % played)
+	var busy := Sfx.players.filter(func(p): return p.playing).size()
+	ok(busy <= Sfx.POOL, "the voice pool holds with five camps (%d of %d)" % [busy, Sfx.POOL])
+	var idle: Mob = m.spawn_mob("brute", P.pos + Vector3(-6.0, 0, 0))
+	idle.st = "idle"
+	idle.murmur_t = 0.0
+	var sang := MobAlert.murmur(idle, 0.0)
+	ok(sang and idle.murmur_t >= MobAlert.MURMUR_GAP.x, "an idle camp near you murmurs, then waits")
+	idle.murmur_t = 0.0
+	Sfx.listener = P.pos + Vector3(60.0, 0, 0)
+	ok(not MobAlert.murmur(idle, 0.0), "...and stays quiet when you are far off")
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

@@ -49,6 +49,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Always through `Sfx.play(name, pos, vol_db)` / `m.sfx(...)` (one-shots, pooled, distance falloff, far sounds muffled) or `Sfx.loop_start(key, name, pos)` / `loop_set` / `loop_stop` (held sounds). Never a new `AudioStreamPlayer`.
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - **Squad cues** (`Sfx.CUES`: `knock_confirm` when you or a squadmate down a rival Hunter, `elim_confirm` when one is finished; wired in `Juice.knock` / `Juice.kill`): played flat (not positional) on their own voice, so footsteps and the combat crowd never steal or thin them. Rivals' kills, friendly knocks and mobs play nothing. `--knock-sfx-check`.
+- A monster camp's tell (`MobAlert`, `scripts/match/mob_alert.gd`): when an idle monster sees a Hunter its kind's `v_<kind>` voice plays pitched as an alert (small kinds high, heavy kinds low), at most once per camp per 3 s; idle monsters within 16 m of the listener murmur the same voice quiet and low every 5-9 s. Checked in `--match-audio-check`.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
 ## Ultimate cast cues
