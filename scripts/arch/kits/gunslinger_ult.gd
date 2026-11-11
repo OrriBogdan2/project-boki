@@ -5,12 +5,16 @@ extends RefCounted
 ## One tap: the rifle snaps straight up and fires a shell into the sky. It comes down exactly where the cursor
 ## was (clamped to its range) after a fixed fall. Everyone sees the ground disc fill with its hot centre the whole
 ## time, a fair window to step out. The impact hits everyone on the disc, harder in the centre, and leaves a
-## burning patch that hurts and slows for a few seconds. Vex is free to move and shoot throughout.
+## burning patch that hurts and slows for a few seconds. Vex stands through the shot (COMMIT), then is free to move
+## and shoot while it falls.
 
 const FALL := "fall"
 const BURN := "burn"
 const FIRE_T := 0.14             # s after the tap the shot leaves: the clip's kick key (the barrel is up at 0.1),
                                  # the source's raise, then fire
+const COMMIT := 0.76             # s she is held from the tap: the source's ~0.8 s, rifle raised, fired and lowered
+                                 # (briefs/hero-ref/venator.md, R 4: 561.8-562.4 s); the x clip (0.6 s) hands the
+                                 # body back (+ WardenClips.FADE_LOCO) on the same frame, under one 0.2 s footage frame
 const DROP_T := 0.8              # s: the shell is seen falling through the column for the last part of the fall
 const DROP_H := 16.0             # m: where the shell is first seen above the disc
 const CHAR := Color("2a1018")    # the disc's scorched inside
@@ -49,6 +53,7 @@ func cast() -> bool:
 	shell["n"] = casts
 	shells.append(shell)
 	kit.play("gunslinger_x")
+	kit.commit_end = float(kit.m.time) + COMMIT
 	# the disc and the column show at once; the shot leaves the raised barrel on the clip's kick (_fire)
 	var r := float(xd["radius"])
 	var delay := float(xd["delay"])
