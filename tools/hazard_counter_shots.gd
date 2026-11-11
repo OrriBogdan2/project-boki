@@ -36,6 +36,12 @@ func run(m: Node) -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	home._open_expedition()
+	await main.get_tree().process_frame
+	var is_head := func(l) -> bool: return String((l as Label).text).to_lower() == "boki you bring"
+	var head: Label = home.panel_host.find_children("*", "Label", true, false).filter(is_head)[0]
+	for sc in home.panel_host.find_children("*", "ScrollContainer", true, false):
+		var box := sc as ScrollContainer
+		box.scroll_vertical += int(head.global_position.y - box.global_position.y) - 8
 	await _shot("portal_carry_pick")
 	home.kin_tab = "Training"
 	home._open_kin(d["roster"][0])

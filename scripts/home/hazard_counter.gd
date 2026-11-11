@@ -23,7 +23,7 @@ static func line(spk: String) -> String:
 	return "" if nouns.is_empty() else "Walks %s safely" % " and ".join(nouns)
 
 ## The hazards' icons and the line in one row; adds nothing for a Boki that counters nothing.
-static func add_row(parent: Control, spk: String, px := 15.0, font := 12) -> void:
+static func add_row(parent: Control, spk: String, px := 18.0, font := 12) -> void:
 	var kinds := kinds_of(spk)
 	if kinds.is_empty():
 		return
@@ -34,6 +34,7 @@ static func add_row(parent: Control, spk: String, px := 15.0, font := 12) -> voi
 	var l := UI.label(line(spk), font, UI.MUTED)
 	l.autowrap_mode = TextServer.AUTOWRAP_OFF
 	l.clip_text = true
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	r.add_child(l)
 	r.tooltip_text = "Hazard ground on the map: your Boki keeps you safe in it."
 	r.mouse_filter = Control.MOUSE_FILTER_PASS
