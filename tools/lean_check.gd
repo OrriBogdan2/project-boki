@@ -91,7 +91,8 @@ func _anchors() -> void:
 			if skel.find_bone(BokiDna.part_bone(part, skel)) < 0:
 				missing.append("%s %s" % [sp, BokiDna.part_bone(part, skel)])
 		model.free()
-	ok(rigged >= 10 and missing.is_empty(), "every rigged species (%d) has the lean's anchors (missing: %s)" % [rigged, missing])
+	ok(rigged >= 10 and missing.is_empty(),
+		"every rigged species (%d) has the lean's anchors (missing: %s)" % [rigged, missing])
 
 func run(main: Node) -> void:
 	Save.no_write = true
