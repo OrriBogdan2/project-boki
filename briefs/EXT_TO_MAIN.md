@@ -7015,3 +7015,4 @@ READY ext/ui-match-phase e80ab98ca8d09ff0e7a0b95eab7abf552e34ad7f (match phase m
 READY ext/ui-first15-0245 1fc0218da (first 15 on 0.24.5, top 3 fixed)
 READY ext/ui-edge-markers-one 5531cbe90 (one edge-marker widget)
 READY ext/vfx-meeko-kindle-numbers 5f98db03e (Meeko's LMB damage numbers warm toward ember and grow with the Kindle stack via HudStyle.dmg_col; tender.md gap 9 closed; tender-combo-check + hudref-check pass; plain/warm shots in docs/shots/meeko-kindle-numbers)
+READY ext/tut-dodge-grounds aba19251f (dodge drill on the Training Grounds)
