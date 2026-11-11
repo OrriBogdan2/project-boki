@@ -44,6 +44,9 @@ func run(m: Node) -> void:
 	PreviewBuild.warm()      # what the title does on launch: the worn Mask's .glb starts reading
 	home = await main._hb_home()
 	var tree: SceneTree = main.get_tree()
+	await MenuWarm.draw(home.root_ui)      # what the farm's covered build does (no cover here)
+	await tree.process_frame
+	ok(home.root_ui.find_children("*", "HunterViewer", true, false).is_empty(), "MenuWarm's stand-in is gone")
 	for i in SETTLE_FRAMES:
 		await tree.process_frame
 	home._close_panel()
