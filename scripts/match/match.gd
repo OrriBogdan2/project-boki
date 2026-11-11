@@ -3319,8 +3319,8 @@ func cam_lead_vel() -> Vector3:
 	return Vector3(player.vel.x, 0.0, player.vel.z) * ahead
 
 func _gather_input() -> void:
-	if player == null or player.out or opts.get("tut_test", false):
-		return       # (the tutorial test drives the player itself)
+	if player == null or player.out or opts.get("tut_test", false) or opts.get("duo_test", false):
+		return       # (the tutorial tests drive the player themselves)
 	var mv := Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 	if mv.length() > 1.0:
 		mv = mv.normalized()

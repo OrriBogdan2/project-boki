@@ -1,7 +1,7 @@
 class_name DuoTutorialDrive
 extends RefCounted
 ## Test driver: plays the 2v2 tutorial (DuoTutorial) as a player would, so the whole run can be checked
-## headless (--duo-tutorial-check) and filmed (--duo-tutorial --duo-test). One plain move per beat:
+## headless (--duo-tutorial-check), watched (--duo-tutorial --duo-test) and filmed (--gameplay-media clip 9). One plain move per beat:
 ## walk to the guide, slide, hit the first rival, cast, slide out of shots, hit the marked rival, send
 ## the Boki, knock out and scan the wild one, stand on the guide's wisp, merge, then fight.
 
@@ -10,7 +10,6 @@ const REACH_MELEE := 1.6     # m a blade swings from
 const REACH_RANGED := 7.0    # m a gun or bow shoots from
 const DODGE_KEEP := 7.0      # m from the rivals while they poke
 const RMB_HOLD := 0.5        # s the right click is held each try
-const FILM_TAIL := 4.0       # s of the end card a filmed run keeps
 
 static var _last_beat := -1
 
@@ -22,8 +21,6 @@ static func drive(m: Match, tu: DuoTutorial) -> void:
 	if tu.beat != _last_beat:
 		_last_beat = tu.beat
 		print("DUO beat %d %s t=%.1f" % [tu.beat, tu.id(), m.time])
-	if tu.finished and tu.end_t > FILM_TAIL and m.opts.get("duo_test", false):
-		m.get_tree().quit()      # (a filmed run: the end card stood, done)
 	if tu.finished or tu.gap_t > 0.0 or p.downed:
 		return
 	var pulse := fmod(m.time, 0.5) < 0.1      # a tap: pressed for a few steps every half second

@@ -45,7 +45,7 @@ var _knocked := {}           # rivals knocked this beat
 var _dazed_said := false     # the capture beat's "it's dazed" line is out
 
 ## The match options: the ring, you and nobody else (the tutorial places the other three). test: the
-## driver plays it (DuoTutorialDrive) with a stock Boki, and the game quits after the end card.
+## driver plays it (DuoTutorialDrive) with a stock Boki.
 static func opts(arch_id := "", test := false) -> Dictionary:
 	var o := {"arena": true, "training": true, "duo_tut": true, "arena_map": "duo_arena", "teams": 1, "squad": 1,
 		"tier": 0, "length": 1e9, "seed": 4747, "no_drop": true, "fresh_t": 0.0}
