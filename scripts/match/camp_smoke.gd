@@ -23,6 +23,10 @@ var _look_t := 0.0
 func _init(match_node: Match) -> void:
 	m = match_node
 
+func _ready() -> void:
+	for strands in [1, 2, 3]:
+		_texture(strands)       # drawn now, under the loading screen, not as the drop starts
+
 func _process(dt: float) -> void:
 	tick(dt)
 
