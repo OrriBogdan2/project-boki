@@ -9,6 +9,9 @@ extends RefCounted
 ## quieter in a fight, out to the step reach and silent past it or while crouched; landings are placed.
 ## Hunter foley: every Hunter has its foley row and sounds, it plays under a run step and a dash, louder the
 ## faster it moves, heard out to the step reach, and a crowd of 30 starts no more than the voice cap.
+## The ultimate-ready chime (UltReadyCue): once per R coming back, only for you (never a rival's or a
+## teammate's R), never on a match's first look, held while you're down until you're up, and set lower
+## under a kill callout.
 
 var main: Node
 var fails := 0
@@ -23,7 +26,7 @@ func ok(cond: bool, what: String) -> void:
 func run(main_node: Node) -> void:
 	main = main_node
 	Save.d["music"] = Save.d.get("music", [])
-	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
+	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"demo_kin": "cindle"})
 	for i in 6:
 		await main.get_tree().process_frame
@@ -63,6 +66,7 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	await _ult_chime(m, P)
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -334,6 +338,53 @@ func _mob_alerts(m: Match, P: Hunter) -> void:
 	idle.murmur_t = 0.0
 	Sfx.listener = P.pos + Vector3(60.0, 0, 0)
 	ok(not MobAlert.murmur(idle, 0.0), "...and stays quiet when you are far off")
+
+func _ult_chime(m: Match, P: Hunter) -> void:
+	var mate: Hunter = null
+	var rival: Hunter = null
+	for h in m.hunters:
+		if h != P and h.team == P.team: mate = h
+		elif h.team != P.team: rival = h
+	ok(P.ak != null and not P.ak.x_def().is_empty() and mate != null and rival != null,
+		"setup: you have an R, a teammate and a rival")
+	if mate == null or rival == null or P.ak == null:
+		return
+	P.ctrl = "local"          # (a bot could cast it the step it's back; you hold no keys here)
+	var fresh := UltReadyCue.new()
+	for h in [P, mate, rival]:
+		h.lvl = maxi(h.lvl, int(Hunter.ULT_AT[0]))
+		h.ak.cd["x"] = 0.0
+	fresh.tick(m)
+	ok(fresh.plays == 0, "a match's first look at an R already ready is quiet")
+	var cue: UltReadyCue = m.ult_cue
+	_step(m, 0.1)
+	var before := cue.plays
+	P.ak.cd["x"] = 0.8
+	mate.ak.cd["x"] = 0.3
+	rival.ak.cd["x"] = 0.3
+	_step(m, 0.5)
+	ok(HeroUlt.ready(mate.ak) and HeroUlt.ready(rival.ak) and cue.plays == before,
+		"a teammate's and a rival's R coming back stays quiet (%d chimes)" % (cue.plays - before))
+	_step(m, 0.5)
+	ok(cue.plays == before + 1, "your R coming back chimes once (%d)" % (cue.plays - before))
+	_step(m, 1.0)
+	ok(cue.plays == before + 1, "...and only once while it stays ready (%d)" % (cue.plays - before))
+	m.knock(P, rival, {})
+	P.ak.cd["x"] = 0.3
+	_step(m, 0.6)
+	ok(P.downed and HeroUlt.ready(P.ak) and cue.plays == before + 1, "back while you're down: no chime yet")
+	m.revive_hunter(P, mate)
+	_step(m, 0.1)
+	ok(cue.plays == before + 2, "...it plays once you're up (%d)" % (cue.plays - before))
+	await main.get_tree().create_timer(0.2).timeout      # (Sfx spaces repeats in real ms)
+	Sfx.play("kill")
+	P.ak.cd["x"] = 0.05
+	_step(m, 0.1)
+	var want := UltReadyCue.VOL_DB + UltReadyCue.UNDER_CALLOUT_DB
+	var under := Sfx.players.filter(func(p): return p.playing and p.stream == Sfx.streams[UltReadyCue.SOUND])
+	ok(cue.plays == before + 3 and under.any(func(p): return is_equal_approx(p.volume_db, want)),
+		"right after a kill callout it plays %.0f dB down" % UltReadyCue.UNDER_CALLOUT_DB)
+	P.ctrl = "bot"
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0
