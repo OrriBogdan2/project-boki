@@ -111240,5 +111240,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_lanternlong_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_lensling",
+    "name": "Lensling (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lensling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lanterloris",
+    "name": "Lanterloris (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lanterloris_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_latchling",
+    "name": "Latchling (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_latchling_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lockatara",
+    "name": "Lockatara (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lockatara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_loafhopper",
+    "name": "Loafhopper (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_loafhopper_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lanceron",
+    "name": "Lanceron (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lanceron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lodestick",
+    "name": "Lodestick (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lodestick_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_lockwren",
+    "name": "Lockwren (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_lockwren_1.jpg",
+    "ok": true
   }
 ]
