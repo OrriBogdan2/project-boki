@@ -13,6 +13,9 @@ const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave
 const HUE_OFF := 40.0          # deg round the colour wheel from its Hunter's: past this an ability colour is off
 const PALE_S := 0.3            # saturation under which a colour is a pale tint, free on any Hunter
 const MEANING := {"bulwark": ["rmb", "e"], "tender": ["e"]}   # colours that mean something: a shield's blue, heals
+## The colour hex a kit drawing from its table still keeps: only the named colours that mean something (Sable: the
+## empowered tell's gold her card names, her knock heal's green).
+const KIT_MEANING := {"thief": ["EMP_LINE", "GLINT_CORE", "HEAL", "HEAL_WORD"]}
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -50,6 +53,7 @@ func run(main: Node) -> void:
 	for arch: String in HeroVfx.heroes():
 		_recipes(arch)
 	_colours()
+	_kit_hex()
 	var m: Match = flow._match(main, "juggernaut")
 	await main.get_tree().process_frame
 	var P: Hunter = m.player
@@ -72,11 +76,18 @@ func run(main: Node) -> void:
 func _called(arch: String) -> Dictionary:
 	var called := {}
 	var re := RegEx.create_from_string("(?:vfx\\(|(?:hold|trail)\\(\\w+(?:\\.\\w+)?, |play\\(h, )\"(\\w+)\"")
+	for src: String in _kit_sources(arch):
+		for hit in re.search_all(src):
+			called[hit.get_string(1)] = true
+	return called
+
+## The source of a Hero's kit scripts (KIT_FILES).
+func _kit_sources(arch: String) -> Array:
+	var out: Array = []
 	for f in DirAccess.get_files_at("res://scripts/arch/kits"):
 		if f.ends_with(".gd") and (KIT_FILES.get(arch, []) as Array).any(func(pre): return f.begins_with(pre)):
-			for hit in re.search_all(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f)):
-				called[hit.get_string(1)] = true
-	return called
+			out.append(FileAccess.get_file_as_string("res://scripts/arch/kits/" + f))
+	return out
 
 ## Every Hunter's abilities wear its ability colour (docs/HERO_VFX.md "Ability colours"): the LMB (its weapon), each
 ## slot's colour and its kit table's main colour sit on that hue, except the colours that mean something (MEANING).
@@ -87,17 +98,29 @@ func _colours() -> void:
 		var cols := {"lmb": Content.weapon(Arch.signature(arch)).primary.get("color", Color.WHITE) as Color}
 		for slot: String in ["dash", "rmb", "e", "x"]:
 			cols[slot] = Color(String((Arch.def(arch)[slot] as Dictionary).get("col", "#ffffff")))
-		if Arch.def(arch).has("palette"):
-			cols["palette"] = Arch.fx_col(arch, "main")
+		for key: String in Arch.def(arch).get("palette", {}):
+			cols["palette " + key] = Arch.fx_col(arch, key)
 		for slot: String in cols:
 			var c: Color = cols[slot]
 			var gap := rad_to_deg(absf(angle_difference(c.h * TAU, want.h * TAU)))
 			if c.s >= PALE_S and gap > HUE_OFF and not slot in MEANING.get(arch, []):
 				off.append("%s %s" % [arch, slot])
 	ok(off.is_empty(), "every Hunter's LMB/RMB/E/R/dash colour is on its ability colour %s" % [off])
-	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col]
-	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm")],
-			"Vex's, Sparkle's and Tenzo's kits draw from their colour tables")
+	var read := [GunslingerKit.main_col, MageKit.main_col, DolmKit.main_col, ThiefKit.main_col]
+	ok(read == [Arch.color("gunslinger"), Arch.color("mage"), Arch.color("dolm"), Arch.color("thief")],
+			"Vex's, Sparkle's, Tenzo's and Sable's kits draw from their colour tables")
+
+## A kit that draws from its table keeps no colour hex in its code but the named ones that mean something
+## (KIT_MEANING): a hex anywhere else is a look gone off its table.
+func _kit_hex() -> void:
+	var re := RegEx.create_from_string("(?m)^(?:const (\\w+) := )?.*Color\\(\"#?[0-9a-fA-F]{6}")
+	for arch: String in KIT_MEANING:
+		var stray: Array = []
+		for src: String in _kit_sources(arch):
+			for hit in re.search_all(src):
+				if not hit.get_string(1) in KIT_MEANING[arch]:
+					stray.append(hit.get_string().strip_edges().left(60))
+		ok(stray.is_empty(), "%s's kit keeps no colour hex but the named ones that mean something %s" % [arch, stray])
 
 ## Everything the data promises is really there, and everything the kit asks for is in the data.
 func _recipes(arch: String) -> void:
