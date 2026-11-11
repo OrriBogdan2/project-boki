@@ -88,6 +88,7 @@ func recast_window() -> Dictionary:
 		w["at"] = seed["pos"]
 		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
 	return w
+func recast_at() -> Vector3: return seed["pos"] if not seed.is_empty() else Vector3.INF
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()

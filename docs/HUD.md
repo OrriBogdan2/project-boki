@@ -107,3 +107,7 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+
+## Recast marker
+
+While a recast is open, `RecastMarker` (scripts/ui/recast_marker.gd) puts a thin ground ring (`AimKit.ring`, the rim only, no fill) in the Hunter's colour on the thing the second press triggers, with its key over it. Only the caster sees it. It fades over the last 0.5 s of the window and costs two draw surfaces (the outlined key; the ring is pooled AimKit geometry). A kit opts in with `recast_at()` (`Vector3.INF` = none open), `recast_key()` (the action whose key shows, default `signature`) and `recast_left()` (default `e_t`; < 0 = no time limit). Done for Motley's seed, Meeko's Hearthlight, Albert's thrown hammer (attack key) and Sable's dagger. Check: `--recast-marker-check`; screenshots: `--recast-marker-shots --shots-dir=<dir>`.
