@@ -4,6 +4,7 @@
 	"springs": {
 		"spring_mane": {"pull": [0.3, 0.12], "damp": 0.72, "limit": 0.6, "limit_in": 0.0}
 	},
+	"free_arm": {"slam": "L", "meteor": "L"},
 	"hide_while_chain": [
 		"spring_hangwarchain_0"
 	],

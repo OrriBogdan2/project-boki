@@ -95,6 +95,11 @@ func _hero(main: Node, id: String) -> void:
 			row["attacks"][nm] = _attack(sync, clips, sk, String(nm), hgt, rest)
 		var spec: Variant = clips.d["free_arm"][nm]
 		_gate_free(id, String(nm), row["attacks"][nm], _aim_hold(clips, String(nm)), spec is Dictionary)
+	for nm in row["attacks"]:
+		if clips.d.get("free_arm", {}).has(nm) and row["attacks"][nm]["t_free"] > MAX_FREE:
+			print("FAIL %s %s: the free arm stands out for %d%% of the clip (limit %d%%)" % [id, nm,
+					round(100.0 * row["attacks"][nm]["t_free"]), round(100.0 * MAX_FREE)])
+			bad += 1
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
 	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,

@@ -976,6 +976,15 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | kael | {"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.", "tap_dmg_k": 0.6, "tap_range_k": 0.8, "tap_windup_s": 0.45, "tap_cooldown_s": 1.2, "ult_carry_k": 0.8, "ult_carry_decay_per_s": 1.6, "ult_up_min_mps": 1.0, "ult_up_bonus_mps": 2.2, "chain_lunge_deg": 25.0} |
 | perf | {"bot_replan_s": 0.1, "boki_retarget_s": 0.2, "actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0}, "anim_far_every": 2, "anim_off_every": 10, "hero_anim_near_m": 48.0, "hero_anim_far_every": 2, "hero_anim_off_every": 4, "bot_belt_s": 0.1} |
 
+## tuning (`content/rules/tuning.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The one shared file for movement and feel numbers (owner 2026-11-08). One section per system; each value says its unit in its key or note. Read through Tuning.of(section). Created by the Kael job; merge with the movement/air job's file (same Tuning.of reader). |
+| kael | {"_note": "Kael (juggernaut). Tap strike: a tap of RMB is always an overhead forward strike (Brall's quick RMB); with the Smash ready it is the full Finishing Slam, otherwise a lighter one on its own short cooldown. Ult: the Gilded Riposte keeps his momentum.", "tap_dmg_k": 0.6, "tap_range_k": 0.8, "tap_windup_s": 0.45, "tap_cooldown_s": 1.2, "ult_carry_k": 0.8, "ult_carry_decay_per_s": 1.6, "ult_up_min_mps": 1.0, "ult_up_bonus_mps": 2.2, "chain_lunge_deg": 25.0} |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 
