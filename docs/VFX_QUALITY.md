@@ -177,6 +177,31 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 5. Albert: ivory swing arcs for LMB/RMB.
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
-8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
+8. Meeko, Grimble: zones as a lit rim over a faint inside (X root field, E/RMB wedges). Sable: done, see below.
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
+
+## Sable Encore and E rebuilt (11-11, ext/vfx-sable-encore)
+Built on origin/main + the 0.24.6 audio-vfx train (`ext/w0246-audio-vfx`, which holds this doc's re-score);
+`ext/vfx-thief` (the 11-08 take the 24 was scored on) is not merged: it conflicts in 8 files with main's later Sable
+work, so `content/vfx/thief.json` starts here with only the moves below. In her violet `#9a5cff` (palette main 9a5cff,
+hot e4d2ff, deep 5a2ad0), on the zone rule:
+- **X Encore:** the AimKit ring stays the gameplay line on the exact reach (5.4 m); its outer band (past `rim` 0.75,
+  the outer 25% per KIT_PARITY) now glows violet toward that edge over a faint inside (AimKit circle `glow`). Data:
+  `encore` (a ring racing out to the reach as it grows, then glints and shards off the full edge), `encore_edge` (a
+  hold riding the edge: rising glints, sparks), `encore_hit` (inside: a small flare; from the band, the payoff: a
+  slash along the blade's way, a white flare, violet shards). The gold rim colour is gone.
+- **E Shadow Knife:** the arrival circle is a thin lit violet rim on its 1.6 m radius over a faint inside, glints
+  rising off its edge (`knife_mark`, own screen); `knife_stick` opens it with a ring and a flare; `blink` (the
+  arrival, the payoff) is a white-violet flare, stars and shards off the circle's edge (the cyan afterimages stay).
+- Shared fix found on the strips: `AimGeo.sector`/`ring` gave `quad()` its corners out of order, so every radial
+  gradient (discs, cones, bands) showed a sawtooth of spokes; now smooth.
+
+Strips (jobq GPU, `--hero-vfx-reel --reel-hero=thief`, `tools/vfx_reel/thief.gd`, rc 0, no script errors): before
+20261111-202900-05838 (the merged base + the reel script), after 20261111-211455-25170 (a first after run,
+20261111-202940-22945, showed a dark smoke blob on the blink and the spoke artefact, both fixed).
+`docs/art/vfx_rescore/thief_r_before.jpg`, `thief_r_after.jpg`, `thief_e_before.jpg`, `thief_e_after.jpg`.
+
+| Hunter | arch | before | R | S | L | T | Sc | C | Snd | after | weakest ability left |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Sable | thief | 24 | 4 | 4 | 4 | 3 | 4 | 4 | 3 | **26** | the edge glints are faint at match zoom; the knife circle is only on her own screen (others see the stick ring and the arrival) |
