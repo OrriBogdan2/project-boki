@@ -426,7 +426,7 @@ with the nearest passives and pulses. The merged ability patches are placeholder
 
 | today | grammar home |
 |---|---|
-| `type` element (venom, spore, ...) | `theme` (cosmetic) + presets |
+| `type` element (poison, grass, ...) | `theme` (cosmetic) + presets |
 | `stats` hp dmg speed range | `stats` points (hp, damage, speed) + `body.reach` |
 | `traits` | `personality` |
 | `ai` aggression loyalty caution + `style` (unused by code) | `ai` weights + `role` |

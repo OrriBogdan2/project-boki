@@ -3,7 +3,7 @@
 	"id": "thornwake",
 	"name": "Sporewake",
 	"flavor": "Mycroll grows into a giant toadstool beast for 8s. Its stomps root everything around it.",
-	"theme": "spore",
+	"theme": "grass",
 	"duration": 8,
 	"passives": [
 		{

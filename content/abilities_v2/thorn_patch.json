@@ -4,7 +4,7 @@
 	"name": "Spore Patch",
 	"short": "Spores",
 	"flavor": "On its own, when foes bunch up, Mycroll puffs a 4s spore cloud on them: slowed and taking damage while inside.",
-	"theme": "spore",
+	"theme": "grass",
 	"tier": 1,
 	"from": "kin",
 	"range": 7,

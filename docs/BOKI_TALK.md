@@ -9,7 +9,7 @@ What a Boki says out loud, at home and in a match. All of it is data in `content
 - **Never the same line twice in a row.** Each Boki remembers its last `no_repeat` (10) lines and never says one of them again. If it has said every line it has for that moment, it says the one it said longest ago.
 - **Not all the time.** After a line, a Boki waits `cooldown_s` (6 s) before it speaks up again. A trigger marked `direct` (it's answering something you did, or a warning you need) skips the wait.
 - **The speech stages stay** (`Care.speech`). Below `grown_stage` (2), a Boki only says its name in a tone, plus a little action: "Cin-cin~ (purrs softly)". At stage 1 it sometimes adds the trigger's one word: "More! Cin-cin~ (purrs softly)". From stage 2 it says real lines.
-- **Flavour.** A trigger can have extra lines for an element (the species' type: venom, spore, titan, swarm, gravity, prism, lunar, echo, tempest). A Boki of that element can say them as well as the general ones.
+- **Flavour.** A trigger can have extra lines for an element (the species' type: poison, grass, steel, bug, ground, fairy, ghost, psychic, flying). A Boki of that element can say them as well as the general ones.
 
 ## The file
 

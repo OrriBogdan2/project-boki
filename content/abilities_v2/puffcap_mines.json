@@ -4,7 +4,7 @@
 	"name": "Puffcap Mines",
 	"short": "Mines",
 	"flavor": "Mycroll plants three puffcaps in a triangle. Step on one and it bursts: rooted 1.4s inside a lingering spore cloud.",
-	"theme": "spore",
+	"theme": "grass",
 	"tier": 1,
 	"from": "kin",
 	"range": 8,

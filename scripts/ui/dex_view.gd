@@ -13,15 +13,23 @@ extends RefCounted
 
 ## Each type's badge colour and name (the glyphs are drawn by TypeIcon).
 const TYPES := {
-	"spore": {"name": "Spore", "col": Color("9ccf6a")},
-	"titan": {"name": "Titan", "col": Color("cbb48a")},
-	"venom": {"name": "Venom", "col": Color("b98cff")},
-	"swarm": {"name": "Swarm", "col": Color("f2c24a")},
-	"gravity": {"name": "Gravity", "col": Color("8f8cff")},
-	"prism": {"name": "Prism", "col": Color("ff9fd0")},
-	"lunar": {"name": "Lunar", "col": Color("cfdcff")},
-	"echo": {"name": "Echo", "col": Color("6fb6ff")},
-	"tempest": {"name": "Tempest", "col": Color("6fe0cf")},
+	"normal": {"name": "Normal", "col": Color("b8b09c")},
+	"fire": {"name": "Fire", "col": Color("ff7a3a")},
+	"water": {"name": "Water", "col": Color("4ab0ff")},
+	"grass": {"name": "Grass", "col": Color("9ccf6a")},
+	"electric": {"name": "Electric", "col": Color("ffe14a")},
+	"ice": {"name": "Ice", "col": Color("a6eeff")},
+	"rock": {"name": "Rock", "col": Color("a8b0c4")},
+	"ground": {"name": "Ground", "col": Color("8f8cff")},
+	"flying": {"name": "Flying", "col": Color("6fe0cf")},
+	"dragon": {"name": "Dragon", "col": Color("7a6cff")},
+	"dark": {"name": "Dark", "col": Color("6a5a7a")},
+	"poison": {"name": "Poison", "col": Color("b98cff")},
+	"bug": {"name": "Bug", "col": Color("f2c24a")},
+	"steel": {"name": "Steel", "col": Color("cbb48a")},
+	"ghost": {"name": "Ghost", "col": Color("cfdcff")},
+	"fairy": {"name": "Fairy", "col": Color("ff9fd0")},
+	"psychic": {"name": "Psychic", "col": Color("6fb6ff")},
 }
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
@@ -326,37 +334,37 @@ static func draw_type(ci: CanvasItem, t: String, c: Vector2, r: float, alpha := 
 	var P := func(x: float, y: float) -> Vector2: return c + Vector2(x, y) * s
 	var w := maxf(1.2, r * 0.16)
 	match t:
-		"spore":       # a toadstool
+		"grass":       # a toadstool
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.9, 0.0), P.call(-0.6, -0.6), P.call(0.0, -0.85), P.call(0.6, -0.6), P.call(0.9, 0.0)]), ink)
 			ci.draw_rect(Rect2(P.call(-0.22, 0.0), Vector2(0.44, 0.8) * s), ink)
-		"titan":       # a peak
+		"steel":       # a peak
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.95, 0.75), P.call(-0.15, -0.8), P.call(0.25, -0.1), P.call(0.45, -0.4), P.call(0.95, 0.75)]), ink)
-		"venom":       # a drop
+		"poison":      # a drop
 			var pts := PackedVector2Array()
 			for i in 16:
 				var a := PI * i / 15.0
 				pts.append(P.call(cos(a) * 0.6, 0.25 + sin(a) * 0.6))
 			pts.append(P.call(0.0, -0.9))
 			ci.draw_colored_polygon(pts, ink)
-		"swarm":       # a honeycomb cell
+		"bug":         # a honeycomb cell
 			var hx := PackedVector2Array()
 			for i in 6:
 				var a := TAU * i / 6.0 + PI / 6.0
 				hx.append(P.call(cos(a) * 0.82, sin(a) * 0.82))
 			ci.draw_colored_polygon(hx, ink)
-		"gravity":     # a weight pressing down
+		"ground":      # a weight pressing down
 			ci.draw_line(P.call(0.0, -0.9), P.call(0.0, 0.2), ink, w, true)
 			ci.draw_colored_polygon(PackedVector2Array([P.call(-0.45, 0.0), P.call(0.45, 0.0), P.call(0.0, 0.55)]), ink)
 			ci.draw_line(P.call(-0.8, 0.8), P.call(0.8, 0.8), ink, w, true)
-		"prism":       # a cut gem
+		"fairy":       # a cut gem
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.0, -0.95), P.call(0.75, 0.0), P.call(0.0, 0.95), P.call(-0.75, 0.0)]), ink)
-		"lunar":       # a crescent
+		"ghost":       # a crescent
 			ci.draw_circle(P.call(0.0, 0.0), s * 0.82, ink)
 			ci.draw_circle(P.call(0.35, -0.25), s * 0.68, Color(col.darkened(0.15), alpha))
-		"echo":        # rings of sound
+		"psychic":     # rings of sound
 			for k in 3:
 				ci.draw_arc(P.call(-0.55, 0.0), s * (0.35 + k * 0.42), -0.9, 0.9, 10, ink, w, true)
-		"tempest":     # a bolt
+		"flying", "electric":     # a bolt
 			ci.draw_colored_polygon(PackedVector2Array([P.call(0.25, -0.95), P.call(-0.55, 0.15), P.call(-0.05, 0.15), P.call(-0.3, 0.95), P.call(0.55, -0.2), P.call(0.05, -0.2)]), ink)
 		_:
 			ci.draw_circle(c, s * 0.45, ink)
