@@ -83,3 +83,10 @@ to a look (Heart gate and ring, a lair's updraft, an outpost's uplink); `SeatBea
 `seat_beam.gdshader`, one ring, one glyph, two materials made once); `WaysOutVfx` owns the beacons. No bursts and no
 rings on a change. The quest seats read optional `seat_open` (lair) / `open_at` (outpost) and `shut_at` times and the
 outpost's `taken` flag; spec task 4 sets them. Check: --ways-out-vfx-check; shots: --ways-out-vfx-shots (GPU).
+
+**Colour vision (ext/ui-ways-out-colourblind).** Every Ways Out colour goes through `SideColor`: a squad's or a rival's seat
+is `SideColor.of_team(viewer, team)`, the neutral ones (Heart, Gate, calls, tide, seat states, beams) are `SideColor.tone(key)`
+rows of the palette table, the default row full and the others only where it would sit on their rival colour (tritan: magenta
+Heart and Gate). Squad and rival never read by hue alone: the beacon's text (`OURS` / `RIVAL`), the strip's word and pip
+(disc / diamond), the map badge's centre mark and the minimap banner (plain / swallow-tailed). Check: --colour-vision-check
+(rows 4a, 4b); shots per palette: --ways-out-palette-shots (GPU).
