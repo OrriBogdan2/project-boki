@@ -1,5 +1,5 @@
 class_name NookRules
-## The Nesting Nook's gate and preview (docs: briefs/design/GARDEN.md section 6). A base-only player can
+## The Nesting Nook's gate (docs: briefs/design/GARDEN.md section 6). A base-only player can
 ## meet every gate: both Grown, both friends, both rested since their last egg, one egg in the nest.
 
 const GROWN_LV: int = Care.STAGES[2][0]     # the level a Boki is Grown
@@ -30,19 +30,3 @@ static func pair_why(a: Dictionary, b: Dictionary) -> String:
 	if why == "": why = can_pair(b)
 	if why == "" and not friends(a, b): why = "%s and %s need to be friends" % [a["name"], b["name"]]
 	return why
-
-## The Nook's side panel for a pair: the two possible species, the lean head start, the unstable note.
-static func preview(dv: VBoxContainer, a: Dictionary, b: Dictionary) -> void:
-	var na: String = Data.KIN[a["species"]]["name"]
-	var nb: String = Data.KIN[b["species"]]["name"]
-	var kinds := na if na == nb else "%s or a %s" % [na, nb]
-	dv.add_child(UI.para("The egg will be a %s, with a blend of their personalities." % kinds, 12, UI.MUTED))
-	var lean: Dictionary = Care.stronger(a, b).get("lean", {})
-	if not lean.is_empty():
-		var top: String = lean.keys().reduce(func(x, y): return x if float(lean[x]) >= float(lean[y]) else y)
-		var line := "Head start: it takes after %s's lean toward %s." % [Care.stronger(a, b)["name"], top]
-		dv.add_child(UI.para(line, 12, UI.MUTED))
-	if Care.unstable_mix(a, b):
-		dv.add_child(UI.para("An unstable mix: it hatches low on joy and needs more care for a day.", 12, UI.MUTED))
-	var why := pair_why(a, b)
-	if why != "": dv.add_child(UI.para(why, 12, UI.BAD))

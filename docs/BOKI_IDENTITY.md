@@ -132,6 +132,11 @@ reads as field notes, plain sentences in the card's normal ink: "Stands 45 cm an
 Very large for a Vespyx (XL): few grow this big." and "Spotted with pale spots", then where it's
 from (origin, date, who first raised it, parents, its number "#0042 of Vespyx"). No gold serials,
 no coloured size badges. The Nesting Nook and Kin Burrow side panels show a three-line version.
+With two Boki picked, the Nook's preview card (`NookPreview`) shows what their egg would be, read from
+`Care.breed`'s inputs: both possible kinds pictured in the blended look (`Unique.blend_center`: the look
+`Unique.inherit` rolls around, plain coat), its size, the coats it can take, the lean head start
+(`Care.head_start`) and a note on an unstable mix. `--nest-demo=pair` opens it; `--nook-check` holds it to
+20 of 20 hatched babies.
 Player-facing words say *scanned* (the box and the Field Book say *caught*), not tamed (internal event names stay `caught`).
 
 Screenshot hooks: `--kinbox-demo=unique` (eight Echolop from XS to XL, every coat), `--nest-demo=card-about`
