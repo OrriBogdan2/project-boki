@@ -85,7 +85,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	for c in named:
 		if not clips.lib.has_animation(String(c)):
 			missing.append(c)
-	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
+	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s; glb_add_clips.py restores)"
+			% [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
 	_standing(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
@@ -112,10 +113,14 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	m.free()
 	await _flinch(id)
 
+## Every clip name the file holds anywhere (a swap that drops one leaves the Hero silently procedural): the kit moves
+## (and their "alt"), loco, crouch, air, land, home acts (pat, feed, cheer), states (hit front and back), weapon_out.
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
 	for mv in (dd.get("kmoves", {}) as Dictionary).values():
 		out.append(mv["clip"])
+		if mv.has("alt"):
+			out.append(mv["alt"])
 	var lc: Dictionary = dd.get("loco", {})
 	out.append(lc.get("idle"))
 	out.append(lc.get("stance"))
@@ -126,11 +131,16 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array([cr["idle"], cr["in"], cr["out"]])
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
+	out.append(dd.get("land", {}).get("clip"))
 	out.append_array((dd.get("act", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
 			out.append(v)
+		elif v is Dictionary:
+			out.append_array([v["front"], v["back"]])
+	if dd.has("weapon_out"):
+		out.append(dd["weapon_out"]["clip"])
 	return out
 
 ## A body on a spring (data "sway") lags a change of speed, leans away from it, and settles.
