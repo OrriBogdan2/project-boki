@@ -104,6 +104,10 @@ Found as glowing perk orbs during an expedition: walk into one to take it. Chest
 | Storm Brand | Every 4th hit arcs to 2 more foes. | 1 |
 | Venom Brand | Your hits poison and slow. | 1 |
 | Hollow Brand | Your hits heal you for 8% of the damage. | 1 |
+| Emberwalk | Lava vents and their pools don't burn you. | 1 |
+| Sure Foot | Ice doesn't make you slide. | 1 |
+| Grounded | Storm rods' lightning can't strike you. | 1 |
+| Spore Mask | Spore pods don't hurt or slow you. | 1 |
 
 ## Without a class kit
 

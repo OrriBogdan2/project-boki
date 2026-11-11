@@ -15,3 +15,19 @@ The drop map shows every monster camp as a campfire (1, 2 or 3 flames by size, a
 - **Highwatch** (frost): stone lighthouse · a lv 4 lookout shelf over the Gaol and the Watch Road · bare frost, rocks for cover · the Lookout, boots (boots ×1.8), an uplink out · outpost.
 - **Duskmoor** (storm): standing-stone ring · low moor with the raised (lv 2) ruined Moor Chapel floor and its broken walls · grass in the ruins' lee · relics (passive ×2.0), a skiff dock out · ruins / vault-lite.
 - **Saltmere** (bloom): white salt obelisk · a dry salt river between two lv 2 banks · grass along both banks · salt caches (the outer ring's most chests), an uplink out · riverside landing.
+
+## Shops
+
+Each region lists its vendors in `regions[].shops` ([x, z, stock], `tools/make_hollowcrown.py`, written to `content/maps/hollowcrown.json`); the stocks are themes in `content/rules/shops.json`, the same every match, bought with the gems picked up this run. Re-placing a shop for a new layout is one edit of its region's list: a spot that lands off the region's open ground moves to the nearest open tile of that region within `snap_tiles` (`Shops.spot`), and `--region-shops-check` fails if a region ends with none, more than two, or a shop on someone else's land. Vendors show on the drop map, the full map (legend) and the minimap (a detail kind: on a hold, or once in view). Bots buy belt items and repairs, and upgrades (armor tier, rarer gear, perks) once they hold more than the upgrade reserve.
+
+- **The Crown**: Crown Exchange (premium: prices ×1.5, Epic gear): Mirror, Vortex and Skyhook gloves, the Gale Cloak, Hollow and Storm Brands, Keen Edge.
+- **Frostgate**: Frostgate Armory: armor tiers, repairs, the three armor pieces, Shield cell, Plating, Sure Foot (ice ward).
+- **Cinder Steps**: Kiln Forge (gloves: Power, Rocket, Blink, Fissure, Hook; Shatter Charge; Emberwalk, the lava ward) and Tuning Bench (weapon tunings, Ember Brand, Tinker's Roll, Quick Hands).
+- **Stormbreak**: Stormbreak Outfitters: backpack, Quickstep and Windstep boots, the movers (Spring pad, Stim, Cloud Raft, Gust Fan), Grounded (lightning ward).
+- **Thornwood**: Thornwood Snares: Smoke, Thorn Wall, Blight Flask, Pilfer Pouch, Venom Brand, Spore Mask (spore ward).
+- **Larkhollow**: Larkhollow Provisions: the heals (Medkit, Deep Draught, Hearth Lamp, Toss Satchel) and healing perks.
+- **Highwatch**: Lookout Post: scouting (Scanner, Lookout Lantern, Hawk Whistle, Omen Draught), Skylark boots, Brass Spyglass, Featherfall.
+- **Duskmoor**: Chapel Relics: the passive gloves (Focus, Cooling, Glider, Hover), Twin Gate, Warp Seed, Clear Mind, Overcharge.
+- **Saltmere**: Salt Market: Lostway Scroll, Bounty Banner, Skyfall Charge, Magpie Pouch, Wayfarer's Satchel, Second Wind.
+
+Every shop also sells Tonic and Armor kit. The ward perks only come from shops (perk orbs never drop them) and keep that biome hazard off you: Emberwalk (lava vents and pools), Sure Foot (ice patches), Grounded (storm rods), Spore Mask (spore pods). The big hazard fields of map v2 should honour the same `ward` key (`BiomeRun.warded`).

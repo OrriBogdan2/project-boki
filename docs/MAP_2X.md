@@ -17,7 +17,7 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 | Highwatch | done | Boots ×1.8, the Lookout, an uplink. |
 | Duskmoor | done | Relics (passive ×2.0) in the Moor Chapel ruins, a skiff dock. |
 | Saltmere | done | The outer ring's most chests along the salt river, an uplink. |
-| A shop as a reason to go | missing (big) | No in-match shops exist yet; that is the separate "Utilities and shops" order (each shop a fixed set). |
+| A shop as a reason to go | done | Every region lists its own vendors (`regions[].shops`, 10 on the Hollow Crown: a premium one in the Crown, two in Cinder Steps, one elsewhere), each a fixed stock that fits the region; see docs/MAP_REGIONS.md "Shops". |
 | No flat filler | done | Every region has 3-5 terrace levels; land more than 12 m from any feature (terrace edge, cover, rock, chest, camp, landing): 0-0.6 % per region. Only the two Gaol islands are one level (10 % and 6 % open), and they hold the boss lair arenas. |
 | No jump-pad-only floating islands (BIGGER_MAP note) | done | Shardfall (pad-only perch, kept by map-regions) is removed in the merge. |
 | Hot drop zone per match, on drop map and minimap | done | `scripts/match/hot_zone.gd`: one non-Crown region per match from the shared match seed, +1 rarity step, ringed and labelled on the drop/full map and ringed on the minimap; bot squads weigh it. `--hot-zone-check`. |
