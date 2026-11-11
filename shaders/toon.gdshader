@@ -6,6 +6,12 @@ shader_type spatial;
 uniform vec4 albedo : source_color = vec4(1.0);
 uniform bool use_vertex_color = false;
 uniform bool vertex_ao = false;    // characters: the vertex colour holds baked ambient occlusion (HeroKit)
+// Glider canopies (Gliders.paint): the vertex colour holds weights of three colours, so one mesh per skin
+// wears each Hunter's own (plain vec4s, no source_color: the colours mix as the vertex colours did).
+uniform bool vertex_mix = false;
+uniform vec4 mix_r = vec4(1.0);
+uniform vec4 mix_g = vec4(1.0);
+uniform vec4 mix_b = vec4(1.0);
 uniform float flash : hint_range(0.0, 1.0) = 0.0;
 uniform vec4 flash_color : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform float rim_amount = 0.35;
@@ -129,7 +135,8 @@ void fragment() {
 		t = mix(vec3(lum), t, tex_sat);
 		c *= mix(t, painted, band * recolor);
 		if (use_vertex_color) { c *= mix(vec3(1.0), COLOR.rgb, color_tint * (1.0 - band * recolor)); }
-	} else if (use_vertex_color) { c *= COLOR.rgb; }
+	} else if (vertex_mix) { c *= mix_r.rgb * COLOR.r + mix_g.rgb * COLOR.g + mix_b.rgb * COLOR.b; }
+	else if (use_vertex_color) { c *= COLOR.rgb; }
 	else if (vertex_ao) { c *= COLOR.rgb; }
 	float mk = 0.0;
 	if (mark_kind > 0) {

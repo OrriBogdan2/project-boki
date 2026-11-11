@@ -1,8 +1,8 @@
 extends RefCounted
-## --load-trim-check: what build.hunters no longer does on the main thread. A glider canopy's sheet is built
-## once per skin and only recoloured per Hunter (same geometry, the skin's colours on it). A duel reads only
+## --load-trim-check: what build.hunters no longer does on the main thread. A glider canopy's mesh is built
+## once per skin, and each Hunter's material paints the skin's colours on it. A duel reads only
 ## your Warden's .glb; a match with rival squads reads every Warden's and every common Boki's on loader
-## threads from its start. A Hunter's glider shares its strings' mesh and paints its own canopy. A Warden
+## threads from its start. Hunters share their glider's canopy and strings meshes. A Warden
 ## drawn from its .glb keeps the rig nodes that drive its bones but none of the hidden procedural body's
 ## loose parts; set to procedural, the same Warden still merges its body.
 
@@ -21,16 +21,12 @@ func run(main: Node) -> void:
 func _gliders() -> void:
 	for g in Gliders.LIST:
 		var id := String(g["id"])
-		var a := Gliders.mesh(id, Color("d04040"), Color("3060c0"))
-		var sheets := Gliders._sheets.size()
-		var b := Gliders.mesh(id, Color("40c060"), Color("e0b030"))
-		var va: PackedVector3Array = a.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-		var vb: PackedVector3Array = b.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-		var same := Gliders._sheets.size() == sheets and va == vb
-		_ok("%s: a second Hunter's canopy reuses the sheet, same geometry" % id, same)
-		var cols: PackedColorArray = b.surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		_ok("%s: a second canopy is the skin's same mesh" % id, Gliders.mesh(id) == Gliders.mesh(id))
+		var weights: PackedColorArray = Gliders.mesh(id).surface_get_arrays(0)[Mesh.ARRAY_COLOR]
+		var m := Gliders.paint(Models.vtoon_outlined(), id, Color("40c060"), Color("e0b030"))
 		var cloth := Gliders.col(String(g["cloth"]), Color("40c060"), Color("e0b030"))
-		_ok("%s: the canopy wears its own cloth colour" % id, Array(cols).any(func(c): return _near(c, cloth)))
+		var worn: bool = m.get_shader_parameter("vertex_mix") and _near(m.get_shader_parameter("mix_r"), cloth)
+		_ok("%s: the canopy wears its own cloth colour" % id, worn and Array(weights).any(func(c): return c.r > 0.5))
 
 func _near(a: Color, b: Color) -> bool:
 	return absf(a.r - b.r) + absf(a.g - b.g) + absf(a.b - b.b) < 0.02
@@ -62,10 +58,8 @@ func _loose(n: Node) -> int:
 		c += _loose(ch)
 	return c
 
-func _glider_meshes(m: Node3D) -> Array:
-	var gl := m.get_node("Rig/Torso/Glider")
-	var mis := gl.get_children().filter(func(c): return c is MeshInstance3D)
-	return mis.map(func(c): return c.mesh)
+func _glider_parts(m: Node3D) -> Array:
+	return m.get_node("Rig/Torso/Glider").get_children().filter(func(c): return c is MeshInstance3D)
 
 func _bodies(main: Node) -> void:
 	var a := "gunslinger"
@@ -73,16 +67,20 @@ func _bodies(main: Node) -> void:
 		_ok("Vex is drawn from her .glb", false)
 		return
 	var look := PlayerLook.random()      # (one look for both Hunters below: the same glider skin)
+	look["glider"] = "classic"           # its stripe is the team's colour
 	var m := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[0], Arch.signature(a), "", look, a)
 	main.add_child(m)
 	_ok("a .glb Warden keeps its rig nodes", RIG.all(func(p): return m.has_node(p)))
 	_ok("a .glb Warden keeps no hidden loose parts (%d)" % _loose(m), _loose(m) == 0)
 	var m2 := Models.hunter(Arch.weight(a), Data.TEAM_COLORS[1], Arch.signature(a), "", look, a)
-	var g1 := _glider_meshes(m)
-	var g2 := _glider_meshes(m2)
+	var g1 := _glider_parts(m)
+	var g2 := _glider_parts(m2)
 	_ok("a glider is its canopy and its strings", g1.size() == 2 and g2.size() == 2)
-	var shared: bool = g1[1] == g2[1] and g1[0] != g2[0]
-	_ok("Hunters share the strings' mesh, each paints its own canopy", shared)
+	var shared: bool = g1[0].mesh == g2[0].mesh and g1[1].mesh == g2[1].mesh
+	_ok("Hunters share the canopy's and strings' meshes", shared)
+	var c1: Color = g1[0].material_override.get_shader_parameter("mix_g")
+	var c2: Color = g2[0].material_override.get_shader_parameter("mix_g")
+	_ok("each Hunter's canopy material wears its own team's colours", not _near(c1, c2))
 	m.free()
 	m2.free()
 	WardenGlb.set_model(a, false)
