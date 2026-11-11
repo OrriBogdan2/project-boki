@@ -283,11 +283,16 @@ static func _shape(c: Dictionary, fem: bool) -> void:
 		(c["p" + sd.to_lower()] as Node3D).position.x *= shoulder
 	if not fem:
 		return
+	# slimmer legs: the parts are thinned, not the joints, so a bent leg keeps its length (EmptyGait solves on it)
+	var slim := Transform3D(Basis.from_scale(Vector3(0.9, 1.0, 0.9)), Vector3.ZERO)
 	var legs := torso.get_parent().get_node("Legs")
 	for nm in ["LegL", "LegR"]:
 		var leg := legs.get_node(nm) as Node3D
 		leg.position.x *= 1.12
-		leg.scale = Vector3(0.9, 1.0, 0.9)
+		var knee := leg.get_node("Knee") as Node3D
+		for piece in leg.get_children() + knee.get_children():
+			if piece != knee:
+				(piece as Node3D).transform = slim * (piece as Node3D).transform
 
 ## The Empty's torso: the hunter torso drawn into an hourglass for a woman (a slim waist, a fuller bust
 ## and hips) or a broad, square chest for a man.
