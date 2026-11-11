@@ -118,6 +118,7 @@ func _counts(G: Grounds) -> void:
 func _sites(m: Match, G: Grounds) -> void:
 	var off := 0
 	var tight := 99.0
+	var tight_at := ""
 	var shown := 0
 	for i in G.stations.size():
 		var s: Dictionary = G.stations[i]
@@ -127,9 +128,12 @@ func _sites(m: Match, G: Grounds) -> void:
 		if (s["label"] as Label3D).visible:
 			shown += 1
 		for j in range(i + 1, G.stations.size()):
-			tight = minf(tight, at.distance_to((G.stations[j] as Dictionary)["at"]))
+			var gap := at.distance_to((G.stations[j] as Dictionary)["at"])
+			if gap < tight:
+				tight = gap
+				tight_at = "%s %s / %s" % [s["kind"], s["id"], (G.stations[j] as Dictionary)["id"]]
 	ok("every pedestal stands on a perch", off == 0, "%d off" % off)
-	ok("pedestals are 1.5m+ apart", tight >= 1.5, "closest %.2f" % tight)
+	ok("pedestals are 1.5m+ apart", tight >= 1.5, "closest %.2f (%s)" % [tight, tight_at])
 	ok("no name drawn from afar", shown == 0, "%d shown" % shown)
 
 func _use_all(m: Match, G: Grounds) -> void:
