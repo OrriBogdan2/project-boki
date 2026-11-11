@@ -10,7 +10,7 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 | Sky train is the fast travel: winding loop, every region, stops that matter | done | A 938 m closed loop with 10 halts (one per outer region, Eyrie and Ash Halts for the Crown's Gaols); a lap is 177 s; every leg rides faster than running it (`check_train`). Each stop's deck sits level with its pier (7 of 10 piers are on 1.6-3.2 m terraces), so you step on and off. |
 | The Crown: a reason to go | done | The vault on the Throne, two boss Gaols, the richest chests (most Blight). |
 | Frostgate | done | Best armor (armor ×1.6 region lean on the frost biome's ×1.8) and the Keep's high ground. Leans slots, not rarity: "gold" armor there comes from the Crown/hot zone steps. |
-| Cinder Steps | done | Gloves and weapon tunings (glove ×1.6), a camp to level on. |
+| Cinder Steps | done | Gloves and weapon tunings (glove ×1.6), three camps to level on (light, normal, heavy). |
 | Stormbreak | done | The shrine, boots (storm biome ×1.8), Storm Halt. (Its Shardfall pad went, see below.) |
 | Thornwood | done | The Boki nest (Boki habitat), the Thornhive lair, an uplink. |
 | Larkhollow | done | Wild Boki graze in the Hollow (Boki habitat), a skiff dock. |
@@ -22,6 +22,17 @@ Design: docs/decisions/0022-hollow-crown-2x.md. Regions: docs/MAP_REGIONS.md. Sh
 | No jump-pad-only floating islands (BIGGER_MAP note) | done | Shardfall (pad-only perch, kept by map-regions) is removed in the merge. |
 | Hot drop zone per match, on drop map and minimap | done | `scripts/match/hot_zone.gd`: one non-Crown region per match from the shared match seed, +1 rarity step, ringed and labelled on the drop/full map and ringed on the minimap; bot squads weigh it. `--hot-zone-check`. |
 | …and it changes from match to match | partial (small) | It is re-picked from each match's seed, so it repeats the last match's region 1 time in 8. ext/hot-zone's "never twice in a row" needed a lobby field and a Net bump; dropped with its duplicate HotZone. |
+
+## Camps (28, was 19)
+Laid out in `CAMPS` in tools/make_hollowcrown.py (one table, design coordinates), asserted by `--camp-layout-check` on the generated map. 12 light, 9 normal, 7 heavy = 79 monsters (2 / 3 / 4 each).
+
+| Region | Camps |
+|---|---|
+| Larkhollow, Highwatch, Duskmoor, Saltmere | 2 light + 1 normal (the normal is the nearest to the centre) |
+| Frostgate, Cinder Steps, Stormbreak, Thornwood | 1 light + 1 normal + 1 heavy (heavy nearest the centre, light farthest) |
+| The Crown | 3 heavy + 1 normal (the normal farthest); none on the Throne or the Gaols |
+
+Rules, all asserted: camps in a region 30-70 m apart (every pair); 14 m from a train halt; 20 m from a lair gate, a vault point and a way-out seat (dock, outpost, hatch); cover (tall grass or a rock, tree, wall) within 12 m; within 190 m of the map centre; on flat, level, clear ground (2 tiles each way: no slope, stair or prop). Camps were moved to meet a rule, the check was not loosened: every camp of the old 19 moved (the 2x land and the 30-70 m spacing leave no old spot in place); the Frostgate light camp was moved a second time off a Warden post (9 m rule).
 
 ## Merge notes
 - ext/hot-zone and ext/map-regions both built a `HotZone`. The build's (map-regions) stays: region based, no Net change, region loot leans, bot drop weighting. ext/hot-zone's island version, `content/rules/hot_zone.json`, the lobby `hot` field and its Net bump are dropped.
