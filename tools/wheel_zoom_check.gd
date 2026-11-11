@@ -31,6 +31,7 @@ func run(main: Node) -> void:
 	Save.d = d
 	_view_zoom()
 	await _viewer(main)
+	await _results(main)
 	await _match(main)
 	print("WHEELZOOM DONE, failures: %d" % bad)
 	tree.quit()
@@ -46,6 +47,21 @@ func _view_zoom() -> void:
 	ok(is_equal_approx(z.want, float(r["min"])), "and stops at the closest (%.2f)" % z.want)
 	for i in 100: z.wheel(_wheel(MOUSE_BUTTON_WHEEL_DOWN))
 	ok(is_equal_approx(z.want, float(r["max"])), "wheel down stops at the furthest (%.2f)" % z.want)
+	var p := ViewZoom.new()
+	p.pad(0.1, 0.1, 1.0)
+	ok(p.want == 1.0, "pad: stick and trigger inside the dead zone do nothing")
+	p.pad(-1.0, 0.0, 0.1)
+	ok(p.want < 1.0, "pad: right stick up zooms in (%.2f)" % p.want)
+	var w0 := p.want
+	p.pad(0.0, -1.0, 0.1)
+	ok(p.want > w0, "pad: the left trigger zooms out (%.2f)" % p.want)
+	w0 = p.want
+	p.pad(0.0, 1.0, 0.1)
+	ok(p.want < w0, "pad: the right trigger zooms in (%.2f)" % p.want)
+	p.pad(-1.0, 1.0, 100.0)
+	ok(is_equal_approx(p.want, float(r["min"])), "pad: held, it stops at the closest (%.2f)" % p.want)
+	p.pad(1.0, -1.0, 100.0)
+	ok(is_equal_approx(p.want, float(r["max"])), "pad: and at the furthest (%.2f)" % p.want)
 
 func _viewer(main: Node) -> void:
 	var tree := main.get_tree()
@@ -76,6 +92,30 @@ func _viewer(main: Node) -> void:
 	v.tick(5.0)
 	ok(v.cam.position.distance_to(at) > d0, "zoomed out, past its framing (%.2f m)" % v.cam.position.distance_to(at))
 	host.queue_free()
+
+func _results(main: Node) -> void:
+	var tree := main.get_tree()
+	var scr: Control = load("res://scripts/ui/results.gd").new()
+	main.add_child(scr)
+	scr.show_result({"place": 3, "squads": 10})
+	for i in 5: await tree.process_frame
+	ok(scr.cam != null, "results: the island camera is up")
+	if scr.cam == null:
+		scr.queue_free()
+		return
+	var at: Vector3 = scr.CAM_AT
+	var d0: float = scr.cam.position.distance_to(at)
+	var e := _wheel(MOUSE_BUTTON_WHEEL_UP)
+	for i in 3: scr._unhandled_input(e)
+	for i in 60: scr._process(DT)
+	var d1: float = scr.cam.position.distance_to(at)
+	ok(d1 < d0 - 0.3, "results: the wheel moves the camera in (%.2f -> %.2f m)" % [d0, d1])
+	for i in 100: scr._unhandled_input(_wheel(MOUSE_BUTTON_WHEEL_DOWN))
+	for i in 120: scr._process(DT)
+	var d2: float = scr.cam.position.distance_to(at)
+	var far := d0 * float(ViewZoom.rules()["max"])
+	ok(is_equal_approx(d2, far), "results: wheel down stops at the furthest (%.2f m)" % d2)
+	scr.queue_free()
 
 func _match(main: Node) -> void:
 	var tree := main.get_tree()

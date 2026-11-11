@@ -28,11 +28,15 @@ func wheel(event: InputEvent) -> bool:
 func tick(dt: float) -> void:
 	var r := rules()
 	if Input.get_connected_joypads().size() > 0:
-		var sy := Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y)
 		var tr := Input.get_joy_axis(0, JOY_AXIS_TRIGGER_RIGHT) - Input.get_joy_axis(0, JOY_AXIS_TRIGGER_LEFT)
-		var v := _dead(sy) - _dead(tr)
-		want = clampf(want + v * float(r["pad_rate"]) * dt, float(r["min"]), float(r["max"]))
+		pad(Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y), tr, dt)
 	k = lerpf(k, want, 1.0 - exp(-float(r["ease"]) * dt))
+
+## The pad for `dt` s: right stick y (up, negative, zooms in) and right-minus-left trigger (positive zooms in).
+func pad(stick_y: float, trig: float, dt: float) -> void:
+	var r := rules()
+	var v := _dead(stick_y) - _dead(trig)
+	want = clampf(want + v * float(r["pad_rate"]) * dt, float(r["min"]), float(r["max"]))
 
 func _dead(x: float) -> float:
 	return x if absf(x) > STICK_DEAD else 0.0
