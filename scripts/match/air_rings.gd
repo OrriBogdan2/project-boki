@@ -6,7 +6,8 @@ extends RefCounted
 ## carries you across a gap far wider than one glider's heat. A lift ring lies flat over a map updraft
 ## marked "ring" at the foot of high ground: hop into it and it throws you up with the glider open, and
 ## the updraft carries you to the top. Every ring is fixed by the map; tuning is content/rules/air_rings.json.
-## Each peer runs the rings for the hunters it moves (remote ones are skipped), like the rest of movement.
+## Each peer runs the rings for the hunters it moves, like the rest of movement; for the ones another peer
+## moves it only plays the pass's sound (AirRingSfx).
 
 const GLIDE_COL := Color("5ad0f0")     # cyan: speed
 const LIFT_COL := Color("ffd27a")      # warm gold, the updraft column's colour: height
@@ -17,6 +18,7 @@ const CLIMB_EASE := 2.5                # 1/s and m/s per m: the lane pulls you t
 var n := 0                     # rings flown through this match (SIMSTAT)
 var list: Array = []           # {pos, dir: Vector2, lift: bool, lane: int, node, cd: {nid: time}, top, onto (lifts)}
 var lanes: Array = []          # {a, b}: each ringed lane's ring line (ring centres), for the hold and the maps
+var sfx: AirRingSfx
 var _m: Match
 var _slip := {}                # Hunter -> {until: time, speed: m/s, lane: int}
 
@@ -88,6 +90,7 @@ static func _lay_lane(w: World, take: Vector3, land: Vector3) -> void:
 
 func _init(m: Match) -> void:
 	_m = m
+	sfx = AirRingSfx.new(m)
 	for rg in m.world.rings:
 		var lift: bool = rg.get("lift", false)
 		var node := ring_node(lift)
@@ -131,18 +134,21 @@ static func ring_node(lift: bool) -> Node3D:
 func tick(dt: float) -> void:
 	_tip()
 	for h in _m.hunters:
-		if h.remote or h.grounded or h.out or h.downed or h.riding or not h.pad.is_empty():
+		if h.grounded or h.out or h.downed or h.riding or not h.pad.is_empty():
 			continue
 		var body: Vector3 = h.pos + Vector3.UP * BODY_Y
 		for rg in list:
 			if _through(rg, body) and float(rg["cd"].get(h.nid, -9.0)) <= _m.time:
 				rg["cd"][h.nid] = _m.time + r("cd")
-				if rg["lift"]:
+				if h.remote:
+					sfx.passed(h, rg)        # its own game throws it: here only the sound
+				elif rg["lift"]:
 					_lift(h, rg)
 				else:
 					_boost(h, rg)
 	for h in _slip.keys():
 		_hold(h, dt)
+	sfx.tick(list)
 
 func _through(rg: Dictionary, body: Vector3) -> bool:
 	var c: Vector3 = rg["pos"]
@@ -181,7 +187,7 @@ func _cool(h: Hunter, rg: Dictionary, col: Color) -> void:
 	var c: Vector3 = rg["pos"]
 	_m.fx.ring(c, r("look_r"), col, 0.3)
 	_m.fx.burst(c, col.lightened(0.5), 14, 4.0, 0.35, 0.0)
-	_m.sfx("whoosh", c, -2.0 if h == _m.player else -10.0, 1.3)
+	sfx.passed(h, rg)
 
 ## While the hold lasts and you keep gliding: never slower than the ring threw you, and on a lane, eased
 ## to its height (so a lane up to higher ground carries you up it). Your keys still steer.
