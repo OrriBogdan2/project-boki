@@ -101,7 +101,7 @@ uniform float far_aa = 0.0;
 uniform float far_clamp = 0.0;
 uniform float far_rim_soft = 0.0;
 uniform float far_glow = 0.0;
-// Who and what, on the body (docs/COMBAT_CLARITY.md): side_rim is a thin hard edge on the silhouette in the viewer's
+// Who and what, on the body (docs/COMBAT_CLARITY.md): side_rim is a band round the silhouette in the viewer's
 // side colour (SideColor: an ally cool blue, a rival hostile red; alpha 0 = none, your own body), outside the
 // signature band. tell tints the body (BodyTell): a crowd control's colour pulsing tell_hz times a second while it
 // lasts, or the Hunter's signature colour fading after a cast (rgb the colour, a the strength).
@@ -290,10 +290,11 @@ void fragment() {
 			+ (gf - gc) * step(0.0001, glow);
 	}
 	if (side_rim.a > 0.0) {
+		// (a band, not a hairline: a Hunter is ~40 px tall at the match camera)
 		float sw = fwidth(nv) * 1.5;
-		float se = smoothstep(0.8 - sw, 0.9 + sw, 1.0 - nv) * side_rim.a * (1.0 - fog) * (1.0 - flash);
-		ALBEDO = mix(ALBEDO, side_rim.rgb, se * 0.85);
-		EMISSION += side_rim.rgb * se * 0.7;
+		float se = smoothstep(0.45 - sw, 0.72 + sw, 1.0 - nv) * side_rim.a * (1.0 - fog) * (1.0 - flash);
+		ALBEDO = mix(ALBEDO, side_rim.rgb, se * 0.9);
+		EMISSION += side_rim.rgb * se;
 	}
 	if (tell.a > 0.0) {
 		float tk = tell.a * (tell_hz > 0.0 ? 0.6 + 0.4 * sin(TIME * tell_hz * 6.2832) : 1.0);
