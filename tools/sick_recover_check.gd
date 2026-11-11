@@ -82,7 +82,8 @@ func _medicine(r: Dictionary) -> void:
 	Save.d["crops"]["puffcorn"] = 1
 	ok(KinWants.best_food(r) == "puffcorn", "a sick Boki is offered the Puffcorn first")
 	var res := Care.feed(r, "puffcorn")
-	ok(res.get("cured", false) and Care.starve_stage(r) == "" and not Care.ailing(r), "one Puffcorn snack cures a sick Boki at once")
+	var well_now: bool = Care.starve_stage(r) == "" and not Care.ailing(r)
+	ok(res.get("cured", false) and well_now, "one Puffcorn snack cures a sick Boki at once")
 	var well := Save.new_kin("cindle", "Well")
 	res = Care.feed(well, "puffcorn")
 	ok(not res.get("cured", false), "...a well Boki just has a snack")
