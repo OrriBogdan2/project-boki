@@ -17,6 +17,14 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+const JL_READ_DEG := 15.0      # deg: a take-off or an apex turns some bone at least this far (it reads on screen)
+const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ from the first by this much
+const JL_HOP_DIP_M := 0.015    # m: the hips drop at least this far off a plain jump (the source's small dip)
+const JL_DIP_M := 0.03         # m: and at least this far off a terrace drop or a glide's end, the deep crouch...
+const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same stance
+const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
+                               # moving ~0.15 s after any touchdown: the landing never holds the run)
+const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -88,6 +96,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	ok(missing.is_empty(), "%s: the file's %d clips are in the .glb (missing %s)" % [id, named.size(), str(missing)])
 	_timings(id, dd, clips)
 	_standing(id, dd, clips)
+	_jump_land(id, m, sync, clips, dd)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -187,6 +196,47 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+
+## The ways down, running and standing (tools/jump_land_check.gd), printed as "JL" rows. The jump: the take-off and
+## the apex read (the pose turns), every jump reads like the first (the rise clip starts over). Every way: the landing
+## dips at once (the hop a little, the drop and the glide's end deeper: HunterAnim.land_tier; Motley's hips ride his
+## spring: no dip to read), a kerb plays no landing, running the legs are back within JL_FREE_S, and the body is back
+## within the data's promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
+func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var jl := preload("res://tools/jump_land_check.gd")
+	var ld: Dictionary = dd.get("land", {})
+	for running: bool in [true, false]:
+		var hop_dip := 0.0
+		for way: String in ["jump", "drop", "glide", "kerb"]:
+			var r: Dictionary = jl.measure(m, sync, clips, running, way)
+			var tag := "%s %s" % [way, "run" if running else "still"]
+			print("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f dip_t=%.2f legs=%.2f back=%.2f held=%.2f settle=%.2f"
+					% [id, tag, r["off"], r["again"], r["apex"], r["dip"], r["dip_t"], r["legs"], r["back"], r["held"],
+					r["settle"]])
+			if way == "jump":
+				ok(r["off"] >= JL_READ_DEG and r["apex"] >= JL_READ_DEG,
+						"%s %s: take-off (%.0f deg) and apex (%.0f deg) read" % [id, tag, r["off"], r["apex"]])
+				ok(r["again"] <= JL_AGAIN_DEG, "%s %s: the next jump takes off like the first (%.1f deg off)"
+						% [id, tag, r["again"]])
+				hop_dip = -r["dip"]
+			if way == "kerb":
+				ok(r["held"] <= 0.0, "%s %s: a step down plays no landing (clip weight %.2f)" % [id, tag, r["held"]])
+				continue
+			if not dd.has("sway"):
+				var deep := way != "jump"
+				var need := maxf(JL_DIP_M, hop_dip * JL_DEEPER) if deep else JL_HOP_DIP_M
+				ok(r["dip"] <= -need and r["dip_t"] <= jl.DIP_WINDOW,
+						"%s %s: the landing dips %.3f m (%s, at least %.3f), lowest at %.2f s"
+						% [id, tag, -r["dip"], "the deep crouch" if deep else "the hop's dip", need, r["dip_t"]])
+			var tier: Dictionary = ld.get("drop" if way != "jump" else "hop", {})
+			var hold := float(tier.get("moving", tier.get("dur", 0.0))) if running else float(tier.get("dur", 0.0))
+			var promise := hold + WardenClips.FADE_LOCO + jl.DT
+			ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
+					"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
+					% [id, tag, r["back"], promise, JL_BACK_MAX])
+			if running:
+				ok(r["legs"] <= JL_FREE_S, "%s %s: the legs are the run's again by %.2f s (max %.2f), no hold"
+						% [id, tag, r["legs"], JL_FREE_S])
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
