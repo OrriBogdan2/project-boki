@@ -440,7 +440,7 @@ func on_dash(use_ex: bool) -> bool:
 	var air := use_ex or not h.grounded
 	var extra := {"invuln": 0.1} if use_ex else {"invuln": float(dd["invuln"]), "phase": 0.3}
 	travel(float(dd["dist"]), float(dd["time"]), extra)
-	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
+	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air, "from_air": not h.grounded}
 	_vaulted(air, _empowers(use_ex))
 	return true
 
@@ -460,8 +460,11 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
-		h.roll_t = 0.0
+	if bool(vault["from_air"]) and h.grounded and float(vault["t"]) > 0.12:
+		h.roll_t = 0.0            # touched down: she lands out of it at most at her run, as any dash ends
+		var keep := HunterMove.dash_exit(Vector2(h.vel.x, h.vel.z), h.run_speed)
+		h.vel.x = keep.x
+		h.vel.z = keep.y
 		return
 	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
 
