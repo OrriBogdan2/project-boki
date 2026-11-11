@@ -119,7 +119,6 @@ var chase: Hunter = null       # whoever has your kin: you run faster toward the
 var box_t := 0.0               # holding interact at a deathbox
 var box_rev_at := -9.0         # last time we were channelling a deathbox revive (BoxRevive)
 var hurt_at := -9.0            # last time a hit landed (channels like a box revive break on it)
-var pace_dt := 0.0              # sim time a far, calm bot skipped (HunterPace)
 var hit_k := 1.0               # how hard the last hit was (Oomph): scales the flinch
 var hit_shake := 0.0           # the model's hit-shake left (Oomph.render_hit)
 var hit_from := Vector2.ZERO   # which way the last hit pushed
@@ -730,12 +729,11 @@ func _render_balloon(delta: float) -> void:
 		string.scale = Vector3(1, len, 1)
 
 ## Knockback is a clean, predictable shove: it sets your speed along its direction (it doesn't
-## stack with whatever you were doing) and never pops you into the air unless the attack says so.
-## Then the source's physics carry it (HunterMove.knock_step); dash and abilities stay usable.
+## stack with whatever you were doing), you slide for a fixed moment without control, and it never
+## pops you into the air unless the attack says so.
 var knock_t := 0.0
 var launched_at := -9.0        # when a hard shove or a launch last hit you (Capture.controlled: it interrupts a rescue or a scan)
 var knock_steer := 0.3         # how much WASD bends a knockback (the attack decides: 0.3 to 0.5)
-var knock_slide := false       # a real knock is sliding; without it a kit's or tow's knock_t only holds the keys off
 func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if fortify_t > 0.0:
 		return
@@ -752,14 +750,12 @@ func impulse(kbv: Vector2, lift := -1.0) -> void:
 	if s > 4.0:
 		kb_t = m.time
 	var dir := k / k.length()
-	if s > 2.5:
-		s *= HunterMove.knock_launch
-		knock_t = HunterMove.knock_max
-		knock_slide = true
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(dir)
 	hv += dir * (maxf(along, s) - along)
 	vel.x = hv.x; vel.z = hv.y
+	if s > 2.5:
+		knock_t = clampf(0.1 + s * 0.02, 0.12, 0.35)
 	if lift >= 0.0:
 		vel.y = maxf(vel.y, minf(9.0, lift / mass()))
 		grounded = false
@@ -892,7 +888,6 @@ func _open_glider() -> void:
 		return
 	gliding = true
 	_glide_armed = false
-	knock_t = 0.0                 # the glider's own rules take over from a knock
 	grounded = false
 	_glider_sfx("open")
 	vel.y = Loco.glide_start(vel.y)
@@ -1060,6 +1055,7 @@ func kin_element() -> String:
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
 var roll_speed := DASH_SPEED
+var dash_rest := Vector2.ZERO  # metres: the dash's own last moment, riding on the step that hands it over
 var wedged_t := 0.0
 
 ## World.occupy, with the sky train in it: on a car's deck you walk freely (the deck is your floor,
@@ -1830,6 +1826,9 @@ const GATES := [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", 
 const GEAR_KEYS := ["gear1", "gear2"]       # the two gear slots' inputs (consts: no strings built per step)
 
 func sim(dt: float) -> void:
+	if dt <= 0.0:
+		prev = pos                  # a far, calm bot's off step (SimLod)
+		return
 	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:
@@ -2070,14 +2069,19 @@ func _physics(dt: float) -> void:
 			_shove_along()
 		if not dash_pass.is_empty():
 			_pass_along()
-		if roll_t <= 0.0:
-			if grounded:
-				hv = HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+		if roll_t <= 0.0 and grounded:
+			var run_v := HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+			dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
+			hv = run_v
 	elif fly_t > 0.0:
 		fly_t -= dt
-	elif knock_t > 0.0 and not gliding:
+	elif knock_t > 0.0:
 		knock_t -= dt
-		hv = HunterMove.knock_step(self, hv, mv, spd, dt)
+		hv = hv.move_toward(Vector2.ZERO, 6.0 * dt)
+		# directional influence: hold a key to bend the knockback, never to cancel it
+		if mv.length() > 0.1:
+			var spd0 := hv.length()
+			hv = (hv + mv * spd0 * knock_steer * 4.0 * dt).limit_length(spd0)
 	elif gliding:
 		# the glider keeps the speed you bring into it (a dash or a pad into a glide carries) and
 		# drifts on when you let go of the keys
@@ -2173,7 +2177,8 @@ func _physics(dt: float) -> void:
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
-	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
+	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
+	dash_rest = Vector2.ZERO
 	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below
@@ -2268,7 +2273,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - World.STEP:     # down a slope or a step your feet stay on it; more is a fall
+	if grounded and g < pos.y - 0.05:
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = 0.12

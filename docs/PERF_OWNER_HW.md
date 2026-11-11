@@ -76,7 +76,8 @@ of it, this branch adds:
    They are now made behind the loading screen (`Gliders.warm_sounds` in WarmUp).
    - PC hitch-check, landing at Low on both sides: worst frame 169 → 104 ms, landing stall 135 → 60 ms, land median
      56 → 47 ms.
-3. **HunterPace** (decision 0048): offline, a bot Hunter more than 60 m from you that is grounded, not fighting and
+3. **HunterPace** (decision 0048; replaced in ext/perf-owner-hw-rebased by main's SimLod, decision 0022, which
+   steps far, calm bots at 20 Hz from 45 m, so the numbers below are HunterPace's, not re-measured): offline, a bot Hunter more than 60 m from you that is grounded, not fighting and
    not hit in the last 3 s runs its sim every 2nd step, with the skipped time added. It is the Hunter version of the
    train's KinPace.
    - PC real match: Hunter sim 9.49 → 6.71 ms a frame, median 37.1 → 30.3 ms, p99 91.3 → 71.4 ms (both without

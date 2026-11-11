@@ -1,6 +1,7 @@
 # 0048: Far, calm bot Hunters step at 30 Hz (HunterPace)
 
-- **Status:** accepted
+- **Status:** superseded by 0022 (SimLod): main's 0.24.4 already steps far (45 m+), calm bots at 20 Hz, think
+  and sim together; ext/perf-owner-hw-rebased dropped HunterPace rather than stack the two
 - **Date:** 2026-11-10
 - **Area:** movement (sim cost)
 

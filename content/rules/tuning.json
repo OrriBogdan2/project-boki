@@ -7,7 +7,6 @@
 	"dash": {"jump_keep": 0.75},
 	"dash_speed": {"archer": 0.7},
 	"perf": {
-		"bot_replan_s": 0.1,
 		"boki_retarget_s": 0.2,
 		"actor_far_m": {"very_low": 0.0, "low": 36.0, "medium": 48.0, "high": 56.0},
 		"anim_far_every": 2,

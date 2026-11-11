@@ -1,8 +1,9 @@
 class_name KinPace
 ## Companion Boki out of a fight think at 10 Hz. Near you, a calm Boki re-plans the way to its spot beside its
-## Hunter every THINK_S and walks every step; far from you (Bot.FAR_M) its whole sim runs every FAR_EVERY steps
-## with the skipped time added in, as Bot.tick does for far bots. A Boki with a foe, or whose Hunter was just
-## hit or is fighting, runs every step. Off-line only: a client would see its Boki step at 10 Hz.
+## Hunter every THINK_S and walks every step; far from you (SimLod.FAR_M) its whole sim runs every FAR_EVERY steps
+## with the skipped time added in (on top of SimLod, which hands it its far bot's 20 Hz steps: still 10 Hz). A
+## Boki with a foe, or whose Hunter was just hit or is fighting, runs every step. Off-line only: a client would
+## see its Boki step at 10 Hz.
 
 const THINK_S := 0.1           # s between a calm Boki's walk plans (10 Hz)
 const FAR_EVERY := 6           # sim steps per update for a calm Boki far from you (10 Hz at 60 steps a second)
@@ -12,7 +13,8 @@ const HURT_S := 3.0            # s after its Hunter is hit that a Boki counts as
 static func step(k: Kin, dt: float) -> float:
 	var acc := k.pace_dt + dt
 	var off_beat := (int(k.m.time / Match.DT) + k.get_instance_id()) % FAR_EVERY != 0
-	if off_beat and acc < dt * FAR_EVERY and _calm_far(k):
+	# (Match.DT, not dt: a far bot's SimLod step hands its Boki 3 steps' time at once)
+	if off_beat and acc < Match.DT * FAR_EVERY and _calm_far(k):
 		k.pace_dt = acc
 		return 0.0
 	k.pace_dt = 0.0
@@ -34,4 +36,4 @@ static func _calm_far(k: Kin) -> bool:
 		return false
 	if not (k.state == "active" or k.state == "shoulder") or k.m.time - o.hurt_at < HURT_S:
 		return false
-	return o.ai.get("tgt") == null and o.flat_dist(me) > Bot.FAR_M
+	return o.ai.get("tgt") == null and o.flat_dist(me) > SimLod.FAR_M

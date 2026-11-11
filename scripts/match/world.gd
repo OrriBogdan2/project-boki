@@ -5,7 +5,7 @@ extends Node3D
 
 const VOID := -1.0e9
 const LEVEL := 0.8      # height of one terrace
-static var STEP: float = HunterMove.step   # how high you walk up, or down, without a jump (hunter_move.json)
+const STEP := 0.32      # how high you can walk up without jumping
 const BLOCK_H := 3.0
 
 enum { T_VOID, T_GROUND, T_BLOCK }
@@ -1825,9 +1825,6 @@ func _undergrowth(groups: Dictionary, x: int, z: int, r: RandomNumberGenerator) 
 ## clean cut. Purely visual: they sit in the air beside the edge, below the ground you stand on, and
 ## stay clear of bridges, stairs, pads, updrafts and the sky train's loop.
 func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
-	var tc := Vector2.INF; var tr := 0.0
-	if not train_route.is_empty():
-		tc = train_route["center"]; tr = float(train_route["r"])
 	for z in h:
 		await _slice()
 		for x in w:
@@ -1835,7 +1832,8 @@ func _cliff_rocks(groups: Dictionary, r: RandomNumberGenerator) -> void:
 			if kind[i] == T_VOID or bridge.has(i) or stairs.has(i) or edge_dist(x, z, 1) != 1 or r.randf() > 0.16:
 				continue
 			var cp := Vector2(x + 0.5, z + 0.5)
-			if tc != Vector2.INF and absf(cp.distance_to(tc) - tr) < 4.5:
+			var tn := TrainRoute.near(self, cp.x, cp.y)
+			if tn != Vector3.INF and absf(tn.y) < 4.5:
 				continue
 			var clear := true
 			for pd in pads:

@@ -18,8 +18,6 @@ const CHECKS := {
 	"--kael-sword-shots": ["res://tools/kael_sword_shots.gd", "kael_sword_shots", "shots"],      # --shots-dir=<dir>
 	"--glide-hold-check": ["res://tools/glide_hold_check.gd", "glide_hold_check", null],  # holding Space never glides
 	"--air-control-check": ["res://tools/air_control_check.gd", "air_control_check", null],      # one movement model
-	# --shots-dir=<dir> (GPU)
-	"--knock-feel-shots": ["res://tools/knock_feel_check.gd", "knock_feel_check", "shots"],
 	"--glider-heat-check": ["res://tools/glider_heat_check.gd", "glider_heat_check", null],      # item 63
 	"--mesh-arrays-check": ["res://tools/mesh_arrays_check.gd", "mesh_arrays_check", null],      # item 33 (1108)
 	"--equal-check": ["res://tools/equal_check.gd", "equal_check", "all"],
@@ -128,6 +126,8 @@ const CHECKS := {
 	"--warm-stamp-check": ["res://tools/warm_stamp_check.gd", "warm_stamp_check", null],      # warm-up kept on disk
 	"--load-trim-check": ["res://tools/load_trim_check.gd", "load_trim_check", null],      # build.hunters trims
 	"--warden-shots": ["res://tools/warden_shots.gd", "warden_shots", null],      # models beside sheets
+	# no clip stretches a skinned edge past 1.3x
+	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
@@ -142,8 +142,6 @@ const CHECKS := {
 	"--clip-live-grimble": ["res://tools/clip_live_grimble.gd", "clip_live_grimble", null],      # Grimble, the same
 	"--motley-live-check": ["res://tools/motley_live_check.gd", "motley_live_check", null],      # the jack, live
 	"--motley-card-shots": ["res://tools/motley_card_shots.gd", "motley_card_shots", null],      # the card vs him
-	# no clip stretches a skinned edge past 1.3x
-	"--stretch-check": ["res://tools/stretch_check.gd", "stretch_check", null],
 	"--parity-strip": ["res://tools/parity_strip.gd", "parity_strip", null],      # our move vs footage frames (GPU)
 	"--clip-shots": ["res://tools/clip_shots.gd", "clip_shots", null],      # a Hero's hand-keyed clips, frame by frame
 	"--idle-shots": ["res://tools/idle_shots.gd", "idle_shots", null],      # every Hunter standing still (IDLE_AUDIT)
@@ -212,6 +210,7 @@ const CHECKS := {
 	"--mantle-clip": ["res://tools/mantle_clip.gd", "mantle_clip", null],
 	"--cliff-mantle-check": ["res://tools/cliff_mantle_check.gd", "cliff_mantle_check", null],
 	"--wall-size-check": ["res://tools/wall_size_check.gd", "wall_size_check", null],  # no lone posts
+	"--crowd-check": ["res://tools/crowd_check.gd", "crowd_check", null],  # 40 hunters: colours, naps, models once
 	"--hitbox-size-check": ["res://tools/hitbox_size_check.gd", "hitbox_size_check", null],
 	# measured reach, width and arc of every input
 	"--hit-shape-check": ["res://tools/hit_shape_check.gd", "hit_shape_check", null],
@@ -267,7 +266,12 @@ const CHECKS := {
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
+	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold
+	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],      # TrainMap
+	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],      # --shots-dir=<dir>
+	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],      # --shots-dir=<dir>
 	"--box-revive-shots": ["res://tools/box_revive_shots.gd", "box_revive_shots", null],      # --shots-dir=<dir>
+	"--train-halts-shots": ["res://tools/train_halts_shots.gd", "train_halts_shots", null],      # --shots-dir=<dir>
 	"--shield-check": ["res://tools/shield_check.gd", "shield_check", null],      # shields never hide a Hunter
 	"--clarity-shots": ["res://tools/clarity_shots.gd", "clarity_shots", null],      # 2v2, one down, --shots-dir=
 	"--rate-card-check": ["res://tools/rate_card_check.gd", "rate_card_check", null],      # item 189

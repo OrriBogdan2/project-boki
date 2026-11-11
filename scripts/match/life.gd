@@ -32,6 +32,7 @@ const RIVAL_BOX := Color("d0473c")    # a rival's box: red, on the box, the map 
 const BOX_BODY := Color("5a5560")     # Models.deathbox's body before its owner tint
 const OWNER_TINT := 0.6               # how far the body leans to the owner's colour (0..1)
 const OWNER_RING_M := 2.4             # metres across the owner's ring round a box
+const TRAIN_BOX_REACH := 40.0         # m: a sky train kill over the abyss drops the box on ground this near the hit
 
 ## Box colour by what's inside: grey, blue, purple, gold.
 const BOX_TIERS := [[0, Color("b8b4ac")], [12, Color("6ab8ff")], [35, Color("c08aff")], [80, Color("ffb64a")]]
@@ -187,7 +188,7 @@ static func box_spot(m: Match, h: Hunter, why: String) -> Vector3:
 	var at := h.pos
 	if why == "train" and m.world.is_void(at.x, at.z):
 		# hit by the sky train over the abyss: the box lands on the nearest ground to where they were hit
-		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, 14.0)
+		var near: Vector3 = m.world.free_spot_near(at, [], 1.0, 0.4, TRAIN_BOX_REACH)
 		if not m.world.is_void(near.x, near.z):
 			at = near
 	if why == "abyss" or m.world.is_void(at.x, at.z) or at.y < m.world.ground_at(at.x, at.z) - 1.0:

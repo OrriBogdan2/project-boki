@@ -29,8 +29,8 @@ Extraction load in mind (10 trios, 30 Hunters, their Boki, monsters and VFX).
 | Rig shadows and Boki ink outline | off screen or past `actor_far_m`: no shadow, and a Boki draws without its ink pass | as above |
 | Boki out of a fight (`KinPace`) | re-plans its walk at 10 Hz; far from you (past 45 m), calm, its whole sim runs at 10 Hz with the skipped time added in | `KinPace.THINK_S`, `FAR_EVERY`; off-line only |
 | Hunter, Boki and monster visuals (`Match._render_lod`) | beyond 34 m x zoom from the camera focus every 4th frame | Hunters: off on Ultra |
-| Bot decisions | past 45 m from you every 3rd step, past 90 m every 6th, each bot on its own step | `Bot.FAR_EVERY`, `FAR2_EVERY` |
-| Bot route (`Bot._steer`) | the way to the goal is re-planned every 0.1 s, the heading every step | perf `bot_replan_s` |
+| Bot decisions and sim (`SimLod`, decision 0022) | far (45 m+) and calm: thinks and sims every 3rd step with the skipped time; past 90 m it re-picks goals half as often | `SimLod.EVERY`, `THINK_FAR_K` |
+| Bot route (`Bot._steer`) | the straight-line test toward a goal tile reruns every 0.3 s, a tile path every 2 s; the aim pulls forward at most 3 waypoints a step | `Bot.LINE_RECHECK_S`, `PATH_REPLAN_S`, `PULL_PER_STEP` |
 | Boki with nothing to fight | looks for a foe every 0.15-0.25 s | perf `boki_retarget_s` |
 | Bot belt (`BeltKeys.tick`) | a bot looks for a blocked key every 0.1 s, each bot on its own step; you every step | perf `bot_belt_s` |
 | Bot interact (`Match._update_interact`) | a bot that isn't pressing interact skips the box, item, chest, shrine and lair scans | - |

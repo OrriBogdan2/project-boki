@@ -1094,7 +1094,7 @@ func _clear_spot(at: Vector3) -> Vector3:
 	return Vector3(p.x, maxf(p.y, world.ground_at(p.x, p.z)), p.z)
 
 func _spawn_chests() -> void:
-	for cs in world.chest_spots:
+	for cs in [] if tut else KeyChest.thin(world.chest_spots):      # the tutorial's one chest is its chest step's
 		await _slice()
 		add_chest(cs["pos"])
 	for sp in world.shrine_spots:
@@ -1453,26 +1453,6 @@ func _pickup_label(h: Hunter, wp: Dictionary) -> String:
 	if Pack.room(h):
 		return "Press %s to pack %s  (%s)  ·  %s" % [k, nm, fill, Loot.sub_of(it)]
 	return "Backpack full (%s)  ·  %s to swap something out for %s" % [fill, k, nm]
-
-func _update_wpicks(dt: float) -> void:
-	for wp in wpicks:
-		var n: Node3D = wp["node"]
-		var sp: Node3D = n.get_node("Spin")
-		sp.rotation.y += dt * 1.6
-		sp.position.y = 0.7 + sin(time * 2.4 + float(wp["pos"].x)) * 0.08
-	# tunings are taken by walking over them; bots also grab gear that beats what they wear
-	for h in hunters:
-		if h.out or h.downed or h.dropping or h.riding or h.remote:
-			continue
-		for wp in wpicks:
-			if wp.has("val") or h.flat_dist(wp["pos"]) >= 1.4 or absf(h.pos.y - float(wp["pos"].y)) >= 1.0:
-				continue
-			if wp.has("tune") and (h.flat_dist(wp["pos"]) < 1.1 or h.ctrl == "bot"):
-				take_pick(h, wp)
-				break
-			if wp.has("gear") and h.ctrl == "bot" and GearDrops.bot_wants(h, String(wp["gear"]), int(wp["rar"])):
-				take_pick(h, wp)
-				break
 
 ## Air rings: anyone flying through one gets thrown forward along their own heading, the glider
 ## pops open and gets a little fuel back, so a chain of rings carries you across a long gap.
@@ -2794,6 +2774,8 @@ func _update_shots(dt: float) -> void:
 		var n := int(ceil(step.length() / 0.25))
 		var hit := false
 		var sx: Dictionary = s["x"]
+		var near := _shot_targets(s, p, step.length() + float(s["r"]) + HIT_SLACK)      # once a step, not per 0.25 m
+		var nbrk := Breakables.near(breaks, p, step.length() + float(s["r"]) + Breakables.HIT_R)
 		for i in n:
 			p += step / n
 			if sx.has("lob"):
@@ -2839,13 +2821,13 @@ func _update_shots(dt: float) -> void:
 			elif vr == "bounce":
 				p = s["pos"]
 				hit = true; break
-			var bh := _shot_break(s, p)
+			var bh := _shot_break(s, p, nbrk)
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
 				_shot_end(s, p, null)
 				hit = true; break
-			for e in _shot_targets(s):
+			for e in near:
 				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and (shot_height_ok(e, p.y) or shot_from_above_ok(s, e, p.y)):
 					if sx.has("hitset"):
 						# piercing / boomerang shots hit each thing once per pass and fly on
@@ -2924,15 +2906,21 @@ func shot_band(e: Ent) -> Vector2:
 	var fy := shot_stance_y(e)
 	return Vector2(fy - 0.45, fy + top + 0.9)
 
-func _shot_break(s: Dictionary, p: Vector3) -> Dictionary:
-	for b in breaks:
-		if not b["dead"] and absf(p.y - (float(b["pos"].y) + 0.4)) < 0.75 and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < 0.36 + float(s["r"]):
+## (`cands`: Breakables.near for this step; the whole list was most of a 2x match's shot time.)
+func _shot_break(s: Dictionary, p: Vector3, cands: Array) -> Dictionary:
+	for b in cands:
+		if not b["dead"] and absf(p.y - (float(b["pos"].y) + 0.4)) < 0.75 and Vector2(b["pos"].x - p.x, b["pos"].z - p.z).length() < Breakables.HIT_R + float(s["r"]):
 			return b
 	return {}
 
-func _shot_targets(s: Dictionary) -> Array:
+## (Only those whose flat distance from `at` is under reach plus their radius: a shot checks the few
+## it can reach this step, not all 150 things in a 40-hunter match.)
+func _shot_targets(s: Dictionary, at := Vector3.ZERO, reach := INF) -> Array:
 	var x: Dictionary = s["x"]
 	var out: Array = []
+	if reach < INF:
+		return _shot_targets(s).filter(func(e: Ent) -> bool:
+			return Vector2(e.pos.x - at.x, e.pos.z - at.z).length() < reach + e.r)
 	if x.has("lob"):
 		return out       # a lobbed shell sails over everyone and comes down where it was aimed
 	if x.get("cos", false):
@@ -3917,9 +3905,10 @@ func step(dt: float) -> void:
 		KinCommand.apply_pick(player)
 		KinKeys.apply(player)
 	_prof("pre")
+	SimLod.plan(self, dt)           # far, calm bots step at 20 Hz (decision 0022)
 	for h in hunters:
-		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted:
-			bot_brain.tick(self, h, dt)
+		if h.ctrl == "bot" and not h.remote and not h.out and not h.extracted and SimLod.step_dt(h, dt) > 0.0:
+			bot_brain.tick(self, h, SimLod.step_dt(h, dt))
 	Capture.tick(self, dt)          # a running scan roots its hunter, after the bots have decided
 	_prof("bots")
 	if skytrain: skytrain.tick(dt)
@@ -3934,9 +3923,7 @@ func step(dt: float) -> void:
 		arena.after_think()
 		arena.tick(dt)
 	_prof("train")
-	for h in hunters:
-		var hd := HunterPace.step(h, dt)
-		if hd > 0.0: h.sim(hd)
+	for h in hunters: h.sim(SimLod.step_dt(h, dt))
 	_prof("hunters")
 	if opts.get("autoplay", false) and int(time * 60.0) % 15 == 0:
 		for h in hunters:
@@ -3946,7 +3933,7 @@ func step(dt: float) -> void:
 			h.set_meta("hist", hist)
 	if skydrop: skydrop.tick(dt)
 	_prof("drop")
-	for k in kins: k.sim(dt)
+	for k in kins: k.sim(SimLod.kin_dt(k, dt))
 	_prof("kins")
 	for mb in mobs: mb.sim(dt)
 	if blight: blight.tick(dt)
@@ -3960,7 +3947,7 @@ func step(dt: float) -> void:
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)
-	_update_wpicks(dt)
+	Wpicks.update(self, dt)
 	PerkOrbs.update(self, dt)
 	_update_gear_fx(dt)
 	_update_pads(dt)
@@ -4310,6 +4297,9 @@ func _update_interact(dt: float) -> void:
 		if not want:
 			h.set_meta("loot_hold", false)
 			h.set_meta("box_broke", false)
+			if h != player:              # nobody reads a bot's prompt: skip the scans (40 hunters)
+				if exits: exits.let_go(h)
+				continue
 		# 2. scan a knocked-out wild kin (Capture; not in training: practice kin go home with nobody)
 		if best.is_empty() and not opts.get("training", false):
 			for k in kins:
