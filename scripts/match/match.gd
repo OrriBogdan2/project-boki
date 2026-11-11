@@ -1810,6 +1810,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 			credit.kin.comp.on_knock(h.pos)
 		if credit == player:
 			_reward_moment(h.pos)
+			StompHints.downed(self, h)
 			if player.kin and player.kin.state != "downed":
 				BokiChatter.say(self, player.kin, "kill")
 	else:
@@ -5386,6 +5387,7 @@ func _net_ev(x, from: String) -> void:
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)
+					StompHints.downed(self, who)
 				_check_team(player.team if player else -9)
 		"out":
 			who = ents_by_id.get(String(x[1]), null)

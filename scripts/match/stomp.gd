@@ -38,6 +38,8 @@ static func start(m: Match, h: Hunter, o: Hunter, style_id := "") -> void:
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
 		m.hud.toast("%s is stomping you! Only a stun on them saves you" % h.pname, Color("ff6a5a"))
+	elif m.player:
+		StompHints.started(m, h, o)
 	if m.net_on and not h.remote:
 		m.net_event(["stomp", h.nid, o.nid, "go", sid])
 

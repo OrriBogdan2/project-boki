@@ -10,6 +10,8 @@ extends RefCounted
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
+##  7. Hints (StompHints): the first rival you down names the stomp key, the first teammate stomped near you
+##     says a stun breaks it; once per save, one line each, nothing for a far teammate, tips off or a stomp on you.
 ## Never touches the save.
 
 var bad := 0
@@ -83,6 +85,7 @@ func run(main: Node) -> void:
 	var home := m.world.random_ground()
 	_check_lock(home)
 	_check_stun(home + Vector3(6, 0, 0))
+	_check_hints(home + Vector3(12, 0, 0))
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
 	_check_styles()
@@ -197,3 +200,50 @@ func _check_styles() -> void:
 	var a := StompLook.legs(StompLook.style("thunder_stomp"), 0.4)
 	var b := StompLook.legs(StompLook.style(StompLook.default_for("archer")), 0.4)
 	ok(a.distance_to(b) > 0.2, "styles pose differently mid-lift")
+
+func _seen(flag: String) -> bool:
+	return Save.d["tutorial"].get(flag, false)
+
+func _check_hints(at: Vector3) -> void:
+	Save.d["tutorial"] = {}
+	_setup(at)
+	_spot(m.player, at + Vector3(3, 0, 3))
+	m.revive_hunter(W, null)
+	ok(not _seen(StompHints.DOWN_FLAG), "no stomp hint before a rival is down")
+	m.knock(foe, m.player, {})
+	ok(_seen(StompHints.DOWN_FLAG), "downing a rival shows the stomp-key hint")
+	var key := Settings.key_cap("interact")
+	Save.d["tutorial"] = {}
+	m.hud.msgs.clear()
+	m.revive_hunter(foe, null)
+	m.knock(foe, m.player, {})
+	var lines: Array = m.hud.msgs.texts().filter(func(t: String): return t.contains("stomp"))
+	ok(lines.size() == 1 and lines[0].contains(key), "...one line with the key (%s)" % str(lines))
+	m.revive_hunter(foe, null)
+	var n: int = m.hud.msgs.count()
+	m.knock(foe, m.player, {})
+	ok(m.hud.msgs.count() == n, "...and only once per save")
+	m.revive_hunter(foe, null)
+	_setup(at)
+	_spot(m.player, at + Vector3(3, 0, 3))
+	ok(not _seen(StompHints.SAVE_FLAG), "no save hint before a stomp")
+	_commit()
+	ok(_seen(StompHints.SAVE_FLAG), "a teammate stomped near you: the stun hint")
+	Stomp.end(m, foe, "gone")
+	var texts := [StompHints.SAVE_TEXT, StompHints.DOWN_TEXT]
+	ok(not texts.any(func(t: String): return SoloWords.leaks(t) != ""), "neither line has a squad word")
+	Save.d["tutorial"] = {}
+	_setup(at)
+	_spot(m.player, at + Vector3(StompHints.NEAR + 10.0, 0, 0))
+	_commit()
+	ok(not _seen(StompHints.SAVE_FLAG), "a teammate stomped far from you: nothing")
+	Stomp.end(m, foe, "gone")
+	Settings.v["tips"] = false
+	_setup(at)
+	_spot(m.player, at + Vector3(3, 0, 3))
+	_commit()
+	m.revive_hunter(foe, null)
+	m.knock(foe, m.player, {})
+	ok(not _seen(StompHints.SAVE_FLAG) and not _seen(StompHints.DOWN_FLAG), "tips off: no stomp hint")
+	Settings.v["tips"] = true
+	m.revive_hunter(foe, null)
