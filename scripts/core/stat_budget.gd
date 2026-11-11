@@ -10,8 +10,8 @@ static func rules() -> Dictionary:
 static func ensure(rec: Dictionary) -> void:
 	if not rec.has("stat_frac"):
 		rec["stat_frac"] = {}
-	if not rec.has("loose"):
-		rec["loose"] = {}
+	if typeof(rec.get("loose")) != TYPE_DICTIONARY:
+		rec["loose"] = {}      # stat -> points taken out of it, waiting to go back in (an old int is dropped)
 
 static func cap(rec: Dictionary) -> int:
 	var r := rules()

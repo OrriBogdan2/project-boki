@@ -135,7 +135,6 @@ static func ensure(rec: Dictionary) -> void:
 	if not rec.has("path"):
 		rec["path"] = []           # path tokens it wears (GardenItems)
 		rec["stay"] = false        # wearing a Stayleaf: no new forms
-		rec["loose"] = 0           # points taken out of its stats, waiting to go back in
 	if not rec.has("hold"):
 		rec["hold"] = {}           # lean type -> garden days it is kept (GardenItems sweets)
 	Unique.ensure(rec)          # its inborn size, looks and habits (old saves: fixed by the kin's id)

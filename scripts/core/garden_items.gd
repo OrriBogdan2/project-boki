@@ -330,6 +330,8 @@ static func _loose(rec: Dictionary, n: int) -> Dictionary:
 	var take := mini(n, now)
 	if take <= 0:
 		return _no("no trained points to loosen")
-	var loose := int(rec["loose"])
+	var was: Dictionary = rec["loose"].duplicate()
+	var after := was.duplicate()
+	after[best] = int(was.get(best, 0)) + take
 	return _yes("%d %s points come out as loose points" % [take, Care.STATS[best]["name"]],
-			{"stats." + best: [now, now - take], "loose": [loose, loose + take]})
+			{"stats." + best: [now, now - take], "loose": [was, after]})
