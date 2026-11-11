@@ -16,7 +16,7 @@ const EPS := 0.0005
 ## height_3d: the 3D model's top where something stands over the head the procedural one doesn't have.
 const WARDENS := {
 	# (Albert appeal3, owner 11-10: the big helmet and masts stand 1.3x the old top, as wide)
-	"bulwark": {"hit_r": 0.46, "height": 1.5, "height_3d": 2.47, "width": [1.3, 5.2], "moves": "bul_"},
+	"bulwark": {"hit_r": 0.46, "height": 1.2, "height_3d": 1.78, "width": [1.3, 5.2], "moves": "bul_"},
 	"archer": {"hit_r": 0.392, "height": 1.07, "width": [0.5, 1.15], "moves": "arc_"},     # (slim, per her r3 art)
 	# gunslinger: Vex is slim and her minigun hugs her hip
 	"gunslinger": {"hit_r": 0.416, "height": 1.09, "width": [0.5, 1.15], "moves": "gunslinger_"},   # (slim)
