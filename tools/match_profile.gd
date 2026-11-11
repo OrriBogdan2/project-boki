@@ -18,10 +18,12 @@ const EXTRACT_S := 25.0        # s the uplink and the lift may take before the r
 const CHARGE_S := 6.0          # s the uplink charges (monster waves, a contested yard) before its lift opens
 const AFTER_S := 3.0           # s run on after you rode the lift (the results coming up)
 const FIGHT_R := Vector2(5.0, 14.0)      # m: the ring the other hunters are put on
+const FAR_M := 60.0            # m from the camera: an emitter this far off is out of any view the match uses
 const PHASES := ["ride", "drop", "land", "fight", "extract"]
 
 var _added := {}               # "Control"/"VFX"/"3D"/"other" -> nodes that entered the tree this frame
 var _pipes := 0                # pipeline compilations so far (Forward+/Mobile; Compatibility counts none)
+var _bench = preload("res://tools/perf_bench.gd").new()      # its HUD draw hook (hud_us: the last canvas draw)
 var _uplink := {}
 var _rode_at := -1.0
 
@@ -51,9 +53,12 @@ func _process(delta: float) -> void:
 	if m != null and not frames.is_empty() and not _end:
 		var lf: Dictionary = frames[-1]
 		lf["phys"] = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
-		lf["nav"] = Performance.get_monitor(Performance.TIME_NAVIGATION_PROCESS) * 1000.0
 		lf["gpu"] = RenderingServer.viewport_get_measured_render_time_gpu(vp_rid)
 		lf["added"] = _added.duplicate()
+		if _bench.vp != vp_rid:
+			_bench.vp = vp_rid
+			_bench._hook_hud(m)
+		lf["hud"] = _bench.hud_us / 1000.0
 		var p := 0
 		for info in [RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_DRAW,
 				RenderingServer.RENDERING_INFO_PIPELINE_COMPILATIONS_SPECIALIZATION,
@@ -128,6 +133,20 @@ func _census() -> void:
 	var ks := by.keys()
 	ks.sort_custom(func(a, b): return by[a] > by[b])
 	print("PROFILE processing nodes: " + ", ".join(ks.slice(0, 16).map(func(k): return "%s %d" % [k, by[k]])))
+	var cam := get_viewport().get_camera_3d()
+	var em := {}      # owner -> [emitting CPU particle systems, their particles, how many are over FAR_M from the camera]
+	for n in get_tree().root.find_children("*", "CPUParticles3D", true, false):
+		var p := n as CPUParticles3D
+		if not p.emitting or not p.is_visible_in_tree(): continue
+		var k := "%s/%s" % [String(p.get_parent().get_parent().name).rstrip("0123456789@"), String(p.get_parent().name).rstrip("0123456789@")]
+		var e: Array = em.get(k, [0, 0, 0])
+		e[0] += 1; e[1] += p.amount
+		if cam and cam.global_position.distance_to(p.global_position) > FAR_M: e[2] += 1
+		em[k] = e
+	var ek := em.keys()
+	ek.sort_custom(func(a, b): return em[a][1] > em[b][1])
+	print("PROFILE emitting CPU particles (owner: systems, particles, past %.0f m): " % FAR_M + ", ".join(ek.slice(0, 14).map(
+		func(k): return "%s: %d, %d, %d" % [k, em[k][0], em[k][1], em[k][2]])))
 
 ## Your squad's uplink started with you on its lift spot, nearly charged, so the waves come, it opens and you ride.
 func _start_uplink() -> void:
@@ -150,7 +169,8 @@ func _finish() -> void:
 		RenderingServer.get_current_rendering_method(), RenderingServer.get_current_rendering_driver_name(),
 		RenderingServer.get_video_adapter_name(), str(get_window().size), str(Settings.get_v("quality")), m.hunters.size()])
 	lines.append("PROFILE load %.0f ms, %d shader compiles while loading" % [load_ms, load_compiles])
-	lines.append("PROFILE phase  frames   p50   p95   p99    max  >33ms | sim  vis other rend phys rest  gpu | draws  bound")
+	lines.append("PROFILE phase  frames   p50   p95   p99    max  >33ms | sim  vis other rend phys rest  gpu  hud | draws  bound")
+	lines.append("PROFILE   (medians, ms; hud is the HUD's canvas draw, inside other or rest)")
 	for ph in PHASES:
 		var fl: Array = frames.filter(func(f): return f["phase"] == ph)
 		if not fl.is_empty(): lines.append(_phase_line(ph, fl))
@@ -179,13 +199,13 @@ func _phase_line(ph: String, fl: Array) -> String:
 	var pc := func(q: float) -> float: return w[mini(w.size() - 1, int(w.size() * q))]
 	var over := w.filter(func(x): return x > HITCH_MS).size()
 	var a := {}
-	for k in ["sim", "vis", "other", "render", "phys", "rest", "gpu", "draws"]:
+	for k in ["sim", "vis", "other", "render", "phys", "rest", "gpu", "hud", "draws"]:
 		a[k] = _median(fl, k)
 	var cpu: float = a["sim"] + a["vis"] + a["other"] + a["render"] + a["phys"]
 	var bound := "GPU" if a["gpu"] > cpu else "CPU"
-	var line := "PROFILE %-7s %5d %5.1f %5.1f %5.1f %6.1f %5d | %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f | %5.0f  %s" % [
+	var line := "PROFILE %-7s %5d %5.1f %5.1f %5.1f %6.1f %5d | %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f %4.1f | %5.0f  %s" % [
 		ph, fl.size(), pc.call(0.5), pc.call(0.95), pc.call(0.99), w[-1], over, a["sim"], a["vis"], a["other"],
-		a["render"], a["phys"], a["rest"], a["gpu"], a["draws"], bound]
+		a["render"], a["phys"], a["rest"], a["gpu"], a["hud"], a["draws"], bound]
 	for key in ["secs", "vsecs"]:      # the average ms per frame of each sim / visuals section
 		var tot := {}
 		for f in fl:
@@ -212,6 +232,7 @@ func _cause(f: Dictionary) -> String:
 	elif top == "scripts" and int(f.get("added", {}).get("UI", 0)) > 0: kind = "UI build"
 	elif int(f.get("added", {}).get("VFX", 0)) > 4 and top != "sim": kind = "VFX spawn"
 	var s := "%s: " % kind + ", ".join(parts.keys().map(func(k): return "%s %.1f" % [k, parts[k]]))
+	s += " (hud draw %.1f)" % float(f.get("hud", 0.0))
 	s += "  compiles %d, new materials %d, nodes added %s" % [compiles, (f["new"] as Array).size(), str(f.get("added", {}))]
 	for key in ["secs", "vsecs"]:
 		var d: Dictionary = f.get(key, {})
