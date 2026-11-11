@@ -244,6 +244,9 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
 | Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m/.17 s (F), off the dash feel, cd 8 | match |
 | Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open |
+| R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells x 4 m = 8.9 bh x 2.5 bh as the sheet, strike 2 (31/192 of the throw) + stun .5, eruption 25 (396/192), slow 50% 1.5 s, cd 40 | match; 0.8x cd; stun length, slow strength and duration are not given in [D] (kept ours); damage re-scaled to the data ratios |
+| Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m, 24 (364/192 of the throw), push 7, cd 8 | match; knock distance not given in [D] or the sheet |
+| Passive | Wall knock Stuns [D] | Crushed: any knock into a wall or foe stuns .5, 8 dmg; Guard meter and Shield Slam cut (owner 11-07) | match (gap 15 closed); stun length not given in [D] |
 | Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | Mending Ground: r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | Faultline: 4 cells, stun .5, cd 40 | match; 0.8x cd |
