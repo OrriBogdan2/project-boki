@@ -108,7 +108,8 @@ const WEAPON_OFF := "weapon_offhand"
 const SHIELD_PATH := "Rig/Torso/ArmLPivot/Elbow/Hand/Shield"
 const SHIELD := "shield"        # a shield modelled in the left hand's Shield node's space (Breaker's prow)
 ## Root meta HunterAnim sets while a Warden skates (0..1): the spring chains named "wing" fold back (Claire);
-## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide, Sable's flips and Encore).
+## below 0 they flare open instead, from a kit move's "wg" channel (-1: wide); a hanging wing (Sable's moth wings)
+## raises up behind her instead, set by WardenWings (idle, air, emote, the Vault's flips and the Encore).
 const WING_FOLD := "wing_fold"
 const WEAPON_THROWN := "weapon_thrown"   # an empty on a skinned weapon: the frame of the piece that leaves the hand
 ## Root meta a kit sets while a runtime piece of the weapon is out (Kael's chain in the air, Grimble's stretched hook
