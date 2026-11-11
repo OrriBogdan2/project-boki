@@ -2193,7 +2193,7 @@ func _extract_check() -> void:
 	m = fresh.call(2)
 	P = m.player
 	R = m.hunters.filter(func(x): return x.team != P.team)[0]
-	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var o: Dictionary = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	P.teleport(o["pos"] + Vector3(0.6, 0, 0.6))
 	run.call(m, 2.0, func(): P.inp["interact"] = true)
@@ -2232,7 +2232,7 @@ func _extract_check() -> void:
 	P = m.player
 	var crew: Array = m.hunters.filter(func(x): return x.team == P.team)
 	R = m.hunters.filter(func(x): return x.team != P.team)[0]
-	o = m.exits.of_kind("outpost")[0]
+	o = m.exits.uplink_x()
 	m.time = float(o["open_at"]) + 1.0
 	for i in crew.size():
 		var h: Hunter = crew[i]
@@ -2320,6 +2320,10 @@ func _extract_check() -> void:
 	if String(o["state"]) != "idle" or not m.exits.startable(o): ok = false; print("EXCHECK FAIL uplink not startable again")
 	done.call(m)
 	await get_tree().process_frame
+	# ---- 3d. the Uplink quest seat (tools/uplink_seat_check.gd)
+	if not await load("res://tools/uplink_seat_check.gd").new().check(self, fresh, run, done): ok = false
+	# ---- 3e. one seat per squad (tools/one_seat_check.gd)
+	if not await load("res://tools/one_seat_check.gd").new().check(self, fresh, run, done): ok = false
 	# ---- 4. docks close late, one stays open
 	m = fresh.call(2)
 	var closing := m.exits.of_kind("dock").filter(func(x): return float(x["close_at"]) < 1e8).size()
@@ -2421,7 +2425,7 @@ func _truce_check() -> void:
 	# sharing an uplink
 	T.marked.clear()
 	T.make(0, 1)
-	var o: Dictionary = m.exits.of_kind("outpost")[0]
+	var o: Dictionary = m.exits.uplink_x()
 	m.time = maxf(m.time, float(o["open_at"]) + 1.0)
 	m.exits.act(o, "start", A[0])
 	spots[A[0]] = o["pos"] + Vector3(1.0, 0, 0.8)

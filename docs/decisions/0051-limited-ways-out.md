@@ -30,4 +30,31 @@ is not on main; the table is local and moves to `Fsm` once that merges.
 heart.gd rewritten (cooldown loop deleted), heart_hud.gd reads the enum, match.gd wiring only (+1 net line:
 `heart.on_last_team()`). `how` is `heart_early` / `heart_final`. Net.VERSION 0.25.2: "ht" "s" carries the state
 int, early/final squads, ring progress and rush; new "ht" "take" (each game takes its own Hunters of that squad).
-No save change. Checks: --heart-check (early seat), new --heart-seats-check (squad take, final, order, rush, Net).
+No save change. Check: --heart-check (both seats, every edge of the state table, rush, Net).
+
+## The quest seats (spec task 4)
+`QuestSeats` (scripts/match/quest_seats.gd, `Exits.seats`, null outside the mode) owns the schedule from heart.json
+"quest"; each seat is one `QuestSeat` machine (quest_seat.gd): LOCKED > OPEN <> IN_USE > TAKEN | SHUT, the same
+NEXT / `go()` / `_force()` shape as the Heart. The pick is the match seed's alone (every game makes it): the Sealed
+Lair is one of all the lairs (woken if the spawn plan left it asleep), the Uplink the outpost farthest from it, the
+other outposts dark. The host polls the lair and outpost it already runs and moves the states; clients mirror
+`["xc", "seat", kind, state, team, out]` (Net.VERSION 0.25.3). What a state does to the world each game does itself:
+a LOCKED lair keeps its gate shut (a crack before 2:00 is remembered and opens it at 2:00); the boss killer's squad
+TAKEs it and leaves (`how` "lair") when one of it steps into the updraft or the victory lock ends, its downed in the
+lair too, rivals not; unused at 5:30 its gate seals again. The Uplink starts only 6:00-8:00, its lift carries the
+finishing squad alone (and their downed in the yard), then it is "closed"; a charge still running at 8:00 is SHUT.
+Not done here: late joiners get the seat state only on its next change; the HUD strip, the map marks and the bots'
+seat plans are the later tasks. Checks: --lair-lock-check section 5, --extract-check section 3d
+(tools/uplink_seat_check.gd).
+
+## One seat per squad (OneSeat)
+`OneSeat` (scripts/match/one_seat.gd, `Exits.one_seat`) is the rule's one home. Each seat, in every game, calls
+`taken(how, team, where, col, at, reach)` when it fires (Heart `_leave`, the lair's `_leave_lair`, the Uplink's first
+TAKEN): it marks the squad used and puts each of this game's own living members not in the seat on a `late_s` clock
+(heart.json, 20 s). `tick` extracts one who `reach`es the seat in time (the seat's own reward), and sends home one who
+does not: gems, seeds and caught Boki dropped, `out` + `gone`, the result "left behind"; their Boki is never lost. A
+used squad is refused every other seat (`spent`: Heartspark pick, ring crew, Uplink start, prompts). No new Net message
+(each game handles its own Hunters from the seat events it already gets). The HUD draws the countdown through
+`HeartHud.world_labels`. Not done: bots left behind are not steered to the seat; the lair race is not blocked while
+the grace runs (a boss fight cannot end in 20 s); the final ring's islands fall 15 s after it is taken, so the grace is
+15 s there in practice. Check: --extract-check section 3e (tools/one_seat_check.gd).
