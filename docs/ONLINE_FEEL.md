@@ -95,3 +95,8 @@ docs/GATE_0244.md had `--remote-smooth-check` at 5 failures on both trees. Run o
 Measured after all three: 4 runs at once at load ~35 (2 `--headless`, 2 xvfb), 0 failures each. 7 snapshots
 lost (the 2%), 1 snap (the lift), 3-7 jerks, 0 backsteps, 0 overshoot (max 0.03 m off the path), drawn 200-205 ms
 behind, 0 ms of either game's clock lost to stalls.
+Left: in 12 runs since all three fixes, one headless run had 1 backstep at the end of the knock slide. A snapshot
+was lost or late while the true body slowed, NetSmooth ran the body on at its last velocity (RUN_ON), and the next
+snapshot pulled it back 0.14 m. That is NetSmooth's own edge, not load (0 ms stalls in that run). It is in
+docs/DEBT.md: the fix (blend the correction instead of jumping back) touches the same code as ext/feel-online-150's
+jitter buffer, so it should come after that lands.
