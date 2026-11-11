@@ -116866,5 +116866,61 @@
     "run": 2,
     "file": "briefs/boki-art/batch/out/pose_bullsfrog_bow_2.jpg",
     "ok": true
+  },
+  {
+    "id": "pose_scopeleon_cmp_up",
+    "name": "Scopeleon (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_scopeleon_cmp_up_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scopeleon_cmp_up",
+    "name": "Scopeleon (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_scopeleon_cmp_up_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scopeleon_cmp_front",
+    "name": "Scopeleon (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_scopeleon_cmp_front_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scopeleon_cmp_front",
+    "name": "Scopeleon (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_scopeleon_cmp_front_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scopeleon_cmp_climb",
+    "name": "Scopeleon (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_scopeleon_cmp_climb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_scopeleon_cmp_climb",
+    "name": "Scopeleon (owner note: new pose, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/pose_scopeleon_cmp_climb_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_filefin_cmp_turn",
+    "name": "Filefin (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_filefin_cmp_turn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "pose_filefin_cmp_rise",
+    "name": "Filefin (owner note: new pose, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/pose_filefin_cmp_rise_1.jpg",
+    "ok": true
   }
 ]
