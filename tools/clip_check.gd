@@ -17,6 +17,9 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+## s: a clip ends on the 30 fps frame nearest its kit move's last key (half a frame, plus float slack), so a clip one
+## frame short (Grimble's 2.07 s blast after the v95 re-export, kit 2.1 s) fails instead of snapping to idle early
+const END_OFF := DT / 2.0 + 0.001
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -202,7 +205,7 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if off > worst:
 			worst = off
 			where = "%s, clip %.3f s, keys %.3f s" % [km, length, end_t]
-	ok(worst <= 0.034, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
+	ok(worst <= END_OFF, "%s: every clip lasts as long as its kit move (worst %.3f s, %s)" % [id, worst, where])
 	var unmapped: Array = []
 	var pre: String = {"juggernaut": "jug_"}.get(id, "")
 	for km in KMovesDJ.MOVES:
