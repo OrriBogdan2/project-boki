@@ -30,7 +30,17 @@ content: leaving or never joining costs nothing. Size cap 24, as the spec's defa
 - Closing is checked in the join button only (the store has no rules); a forged join can at worst put a name on
   a roll, never touch another save.
 - `Social.store_stub` lets `--clan-check` run Social against an in-memory store.
-- Debt (docs/DEBT.md): focus, officers, founder hand-off, kick, invite links, base, league, chat.
+- Debt (docs/DEBT.md): focus, invite links, league, chat (officers, hand-off and removal: slice 3; base: slice 2).
 - Slice 2 (the shared base): the ferry on the guild isle opens `ClanBase` (scripts/home/clan_base.gd), a visit to
   an island built from the members' published snapshots plus `clanbase/<gid>` (read only, cleaned by
   `Social.clean_clanbase`: one showcase Boki per current member, 12 at most). No new writes, no save change.
+- Slice 3 (ranks): a rank is what the guild doc says (`Social.rank_of`): its `founder`, and a new `officers`
+  list (cleaned by `clean_guild`); a member's own roster row no longer decides its rank, so a forged "officer"
+  reads as member. Only the founder writes the guild doc (`_founder_edit`): make an officer or a member again,
+  or hand the founder role to an officer (the founder field moves, the old founder joins `officers`). Removal
+  writes no one else's doc: founder and officers list removed ids in their own `clanout/<gid>_<me>` =
+  `{guild, ids}` (48 at most). `Social.removed_from` believes a removal only while its author outranks the
+  member now, and skips an officer the founder removed; `clean_roster` drops the removed. The removed
+  member's game sees it on its next `refresh_guild` and leaves (row deleted), and its Join refuses. A forged
+  write can at worst put a name back on the roll. No save change (the rank was already in `Save.d["clan"]`),
+  no Net change. Alternative not taken: a removal list in the guild doc (officers would share its writes).

@@ -18,9 +18,10 @@ const WALL_GAP := 0.9           # metres between Boki on the showcase wall
 static func open(gid: String, gdoc: Dictionary) -> void:
 	var founder := Social.txt_of(gdoc.get("founder"))
 	Social.guild_members(gid, func(members: Array):
-		Social.clan_roster(gid, founder, func(roll: Array):
+		Social.clan_roster(gid, gdoc, func(roll: Array, gone: Dictionary):
+			var kept := members.filter(func(m): return not gone.has(m["id"]))
 			Social.get_doc("clanbase/" + gid, func(d: Dictionary):
-				Game.goto("home", {"visit": snapshot(gid, gdoc, members, roll, d), "visit_id": founder}))))
+				Game.goto("home", {"visit": snapshot(gid, gdoc, kept, roll, d), "visit_id": founder}))))
 
 ## The visit snapshot: shaped like Social.clean_island's, named for the clan; its Boki are the corners' Boki.
 ## members: [{id, d}] as Social.guild_members gives them; roll: Social.clan_roster rows; base_doc: raw clanbase doc.

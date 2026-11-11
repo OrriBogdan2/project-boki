@@ -6,7 +6,11 @@ extends RefCounted
 ##   4. leaving deletes the roster doc and clears the clan
 ##   5. an old save (v11, no clan) loads: in a guild it becomes a member of the clan, otherwise no clan
 ##   6. clean_clanbase: one showcase Boki per current member, a 13th is dropped, forged numbers are clamped
-##   7. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
+##   7. ranks (slice 3): only the founder makes officers and members and hands the founder role to an officer
+##      (who takes the guild doc's founder field; the old founder becomes an officer); founder and officers remove
+##      only those below them; a removed member's game leaves on refresh and can't rejoin; forged ranks, forged
+##      removals and a forged officers list change nothing
+##   8. the clan base opens headless from a fake store with 3 members: 3 corners, their Boki, the wall
 ##      (read the log for errors; two predate clans: the startup OptionButton theme line and the farm's
 ##      exit leak of HomeBuild/HomeMarket/HomeTrade)
 
@@ -57,7 +61,7 @@ func _cleaning() -> void:
 		_row("g1_a", {"guild": "g1", "role": "officer"}),
 		_row("g1_g", {"guild": "g1", "role": 4}),
 	]
-	var out := Social.clean_roster(rows, "g1", "f")
+	var out := Social.clean_roster(rows, "g1", Social.clean_guild({"founder": "f"}))
 	var ids: Array = out.map(func(r): return r["id"])
 	ok(ids == ["a", "e", "f"], "bad rank, other clan, wrong doc id, repeat and non-text rank are dropped (%s)" % [ids])
 	var roles: Array = out.map(func(r): return r["role"])
@@ -66,7 +70,7 @@ func _cleaning() -> void:
 	var many := []
 	for i in 40:
 		many.append(_row("g1_m%d" % i, {"guild": "g1", "role": "member"}))
-	ok(Social.clean_roster(many, "g1", "").size() == Social.CLAN_CAP, "at most %d members show" % Social.CLAN_CAP)
+	ok(Social.clean_roster(many, "g1", {}).size() == Social.CLAN_CAP, "at most %d members show" % Social.CLAN_CAP)
 
 func _joining() -> void:
 	docs["guilds/g1"] = {"name": "Old Pond", "founder": "bob", "built": []}
@@ -79,7 +83,8 @@ func _joining() -> void:
 	ok(mine.get("role") == "member" and mine.get("guild") == "g1", "a roster doc is written on join")
 	docs["clanroster/g1_bob"] = {"guild": "g1", "role": "founder"}
 	var got := []
-	Social.clan_roster("g1", "bob", func(r): got.append_array(r.map(func(x): return x["id"])))
+	Social.clan_roster("g1", Social.clean_guild(docs["guilds/g1"]), func(r, _gone):
+		got.append_array(r.map(func(x): return x["id"])))
 	ok(got == ["alice", "bob"], "the roster reads back both members")
 	ok(not Social.busy("guild"), "the join finished")
 
@@ -126,6 +131,76 @@ func _old_saves() -> void:
 	ok(Save.d["clan"] == {}, "one from before guilds loads too")
 	ok(Save.fresh()["clan"] == {}, "a new save starts with no clan")
 	DirAccess.remove_absolute(OLD_SAVE)
+
+## Runs one Social call as `who` and returns what its cb got.
+func _as(who: String, act: Callable) -> bool:
+	Social.me = who
+	var res := []
+	act.call(func(okk: bool): res.append(okk))
+	Social.me = "alice"
+	return res == [true]
+
+## cb-free reads of clan g7 as the store has it now.
+func _roll() -> Dictionary:
+	var out := {}
+	Social.clan_roster("g7", Social.clean_guild(docs["guilds/g7"]), func(r: Array, _gone):
+		for x in r: out[x["id"]] = x["role"])
+	return out
+
+func _ranks(main: Node) -> void:
+	docs["guilds/g7"] = {"name": "Ranks", "founder": "alice", "built": []}
+	for who in ["alice", "bob", "carl", "dina"]:
+		docs["clanroster/g7_" + who] = {"guild": "g7", "role": "member"}
+	docs["clanroster/g7_carl"]["role"] = "officer"
+	ok(_roll() == {"alice": "founder", "bob": "member", "carl": "member", "dina": "member"},
+		"a member's own row claiming officer still reads as member")
+	ok(not _as("carl", func(cb): Social.set_officer("g7", "carl", true, cb)), "a member can't make himself officer")
+	ok(_as("alice", func(cb): Social.set_officer("g7", "bob", true, cb)) and _roll()["bob"] == "officer",
+		"the founder makes an officer")
+	ok(not _as("bob", func(cb): Social.set_officer("g7", "dina", true, cb)), "an officer can't make officers")
+	var forged := Social.clean_guild({"founder": "alice", "officers": ["alice", "bob", "bob", 7, ""]})
+	ok(forged["officers"] == ["bob"], "a guild doc's officer list drops the founder, repeats and junk")
+	# removing
+	ok(not _as("dina", func(cb): Social.remove_member("g7", "carl", cb)), "a member can't remove a member")
+	docs["clanout/g7_dina"] = {"guild": "g7", "ids": ["carl", "alice"]}
+	docs["clanout/g7_bob"] = {"guild": "g7", "ids": ["alice"]}
+	ok(_roll().size() == 4, "forged removals (a member's list, an officer listing the founder) remove nobody")
+	docs.erase("clanout/g7_dina")
+	docs.erase("clanout/g7_bob")
+	ok(not _as("bob", func(cb): Social.remove_member("g7", "alice", cb)), "an officer can't remove the founder")
+	ok(_as("bob", func(cb): Social.remove_member("g7", "carl", cb)) and not _roll().has("carl"),
+		"an officer removes a member: off the roll")
+	# carl's own game: leaves on refresh, can't rejoin
+	Save.d["guild_id"] = "g7"
+	Save.d["clan"] = Social.clan_for("g7", "carl", "member", 0.0)
+	Social.me = "carl"
+	Social.refresh_guild()
+	await main.get_tree().process_frame
+	ok(Save.d["guild_id"] == "" and Save.d["clan"] == {} and not docs.has("clanroster/g7_carl"),
+		"the removed member's game leaves the clan and deletes its row")
+	var rejoined := []
+	Social.join_guild("g7", func(okk): rejoined.append(okk))
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(rejoined == [false] and Save.d["guild_id"] == "", "...and can't join it again")
+	Social.me = "alice"
+	ok(_as("alice", func(cb): Social.set_officer("g7", "dina", true, cb)) and
+		not _as("bob", func(cb): Social.remove_member("g7", "dina", cb)), "an officer can't remove another officer")
+	ok(_as("alice", func(cb): Social.set_officer("g7", "dina", false, cb)) and _roll()["dina"] == "member",
+		"the founder makes an officer a member again")
+	# handing over
+	ok(not _as("alice", func(cb): Social.hand_founder("g7", "dina", cb)), "the founder role goes only to an officer")
+	ok(not _as("bob", func(cb): Social.hand_founder("g7", "bob", cb)), "an officer can't take it")
+	ok(_as("alice", func(cb): Social.hand_founder("g7", "bob", cb)), "the founder hands it to an officer")
+	var g := Social.clean_guild(docs["guilds/g7"])
+	ok(g["founder"] == "bob" and g["officers"] == ["alice"] and _roll()["alice"] == "officer",
+		"the guild doc's founder moves; the old founder is an officer")
+	ok(not _as("alice", func(cb): Social.set_officer("g7", "dina", true, cb)), "the old founder can't make officers")
+	ok(_as("alice", func(cb): Social.remove_member("g7", "dina", cb)) and not _roll().has("dina"),
+		"the old founder, now an officer, removes a member")
+	ok(_as("bob", func(cb): Social.remove_member("g7", "alice", cb)) and _roll().keys() == ["bob", "dina"],
+		"the founder removes an officer, whose removals then stop holding")
+	Save.d = Save.fresh()
 
 func _write(d: Dictionary) -> void:
 	var f := FileAccess.open(OLD_SAVE, FileAccess.WRITE)
@@ -200,6 +275,7 @@ func run(main: Node) -> void:
 	_leaving()
 	_old_saves()
 	_showcase()
+	await _ranks(main)
 	Save.d = Save.fresh()
 	await _base(main)
 	print("CLAN DONE, failures: %d" % bad)
