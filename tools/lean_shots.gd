@@ -64,7 +64,8 @@ func _row(sp: String, foods: Array) -> Image:
 		var k := rigged_kin(sp, recs[i])
 		vp.add_child(k)
 		k.position = Vector3((i - (recs.size() - 1) * 0.5) * gap, 0, 0)
-		k.basis = Basis(Vector3.RIGHT, -LEAN) * Basis(Vector3.UP, PI * 0.8) * Basis.from_scale(Vector3.ONE * FARM_BOKI_SCALE)
+		var turn := Basis(Vector3.RIGHT, -LEAN) * Basis(Vector3.UP, PI * 0.8)
+		k.basis = turn * Basis.from_scale(Vector3.ONE * FARM_BOKI_SCALE)
 		var rig := k.get_node("Body/Flex/BokiRig") as BokiRig
 		rig.manual = true
 		await RenderingServer.frame_post_draw
