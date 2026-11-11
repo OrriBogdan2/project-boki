@@ -15,7 +15,7 @@ The save has to say which zones are open and where each Boki lives, and an old s
    and is Bramblebank's. A zone gets its own layout entry when its build (step 7) needs one.
 
 ## Decision
-Option 2, migration v13 -> v14 (`GardenZones.migrate`): Bramblebank open, every Boki in it. One scene
+Option 2, migration v12 -> v13 (`GardenZones.migrate`): Bramblebank open, every Boki in it. One scene
 per zone through `Game.goto("home", {"zone": id})`, the same way a visit passes `{"visit": ...}`; only
 the zone you are in is built. The hub is a fixed island (`HubLayout.island()`) shown through the visit
 path, so the farm systems run there only for what you own: BaseLife walks your partner and, while an
