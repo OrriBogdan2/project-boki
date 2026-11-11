@@ -7013,3 +7013,4 @@ READY ext/anim-unmasked-feet d7fca3ed3 (needs 0.24.5: EmptyGait solved a woman's
 READY ext/feel-boki-displace-net bfa4e864a (Boki pull and spike go through Match.displace online; branched from origin/main with origin/ext/release-integ-0245 merged in (fast-forward, the 0.24.5 line). --displace-net-check 46/0 (5 FAIL on the old code), --boki-system-check rc 0, --online-displace-check 40/1 (Kael Warchain sling red, known), health --strict OK, gen_wiki --check 50 unchanged. Net.VERSION unchanged. DEBT Displace line trimmed, not removed: swap, ally lift, merge_augment left)
 READY ext/ui-match-phase e80ab98ca8d09ff0e7a0b95eab7abf552e34ad7f (match phase machine drives HUD text)
 READY ext/ui-first15-0245 1fc0218da (first 15 on 0.24.5, top 3 fixed)
+READY ext/ui-edge-markers-one 5531cbe90 (one edge-marker widget)
