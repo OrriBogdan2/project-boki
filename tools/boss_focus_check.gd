@@ -2,8 +2,8 @@ extends RefCounted
 ## --boss-focus-check: a bot sealed in a boss fight focuses the boss (decision 0061). A rival bot and
 ## the player stand in a lair together. With the boss asleep the bot goes for the player (the control);
 ## once the boss wakes and the seal closes, the bot (and its Boki) fight only the boss, though the player
-## hit it just before the seal and the player's Boki hits it inside; when the player hits it inside the seal, it turns on the player. Never touches
-## the save.
+## hit it just before the seal and the player's Boki hits it inside; when the player hits it inside the
+## seal, it turns on the player. Never touches the save.
 
 const FIGHT_T := 6.0      # s of boss fight watched
 const TURN_T := 1.5       # s the bot gets to turn on the player after the player's hit
@@ -83,8 +83,9 @@ func run(main: Node) -> void:
 		if B.ai["tgt"] == P: on_p += 1
 		if B.ai["tgt"] == boss: on_boss += 1
 	var hit_p := float(P.hit_by.get(B.get_instance_id(), -1e9)) > float(F["lock_at"]) + REPICK_T + 0.5
-	ok(on_p == 0 and not hit_p and P.kin != null, "%.0f s of boss fight: past its next think the bot never targets the player"
-		% FIGHT_T + " (%d ticks; the player's Boki hit it), nor do it or its Boki hit them" % on_p)
+	ok(on_p == 0 and not hit_p and P.kin != null, "%.0f s of boss fight: past its next think" % FIGHT_T
+		+ " the bot never targets the player (%d ticks; the player's Boki hit it)" % on_p
+		+ ", nor do it or its Boki hit them")
 	ok(on_boss > n * 0.8, "it targets the boss %d%% of the fight" % (100 * on_boss / maxi(1, n)))
 	# ---- 3. the player starts it inside the seal: the bot fights back
 	_spot(P, m.lairs._floor_spot(F, B.pos + side * 3.0, 0.0))      # (within a provoked bot's reach)
