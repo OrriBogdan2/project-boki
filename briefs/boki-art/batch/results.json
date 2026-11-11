@@ -110792,5 +110792,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_dynaboa_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_effigoon",
+    "name": "Effigoon (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_effigoon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_dribbara",
+    "name": "Dribbara (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_dribbara_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_embrook",
+    "name": "Embrook (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_embrook_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_effigeetle",
+    "name": "Effigeetle (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_effigeetle_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_eclipsowl",
+    "name": "Eclipsowl (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_eclipsowl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_druzemole",
+    "name": "Druzemole (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_druzemole_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_echolop",
+    "name": "Echolop (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_echolop_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_foalaround",
+    "name": "Foalaround (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_foalaround_1.jpg",
+    "ok": true
   }
 ]
