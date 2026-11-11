@@ -720,7 +720,8 @@ func _gunslinger() -> void:
 	P.inp["sec_hold"] = true           # the key staying down changes nothing
 	P.ak.press_rmb()
 	ok("RMB tap: thrown on the press, nothing held, no lane shown",
-			not K.rmb_down and K.burrs.size() == 1 and K.anim_id == "gunslinger_rmb" and AimKit.entry(P, "rmb").is_empty(),
+			not K.rmb_down and K.burrs.size() == 1 and K.anim_id == "gunslinger_rmb"
+			and AimKit.entry(P, "rmb").is_empty(),
 			"%s, %d in flight" % [K.anim_id, K.burrs.size()])
 	P.inp["sec_hold"] = false
 	m.step(DT)
@@ -729,7 +730,8 @@ func _gunslinger() -> void:
 	ok("RMB direct hit: damage + Dazed, no cone, the charge is spent",
 			K.direct_hits == 1 and ac.dmg(T) >= 20.0 and KitStatus.rattled(T) and K.rattles == 0 and K.burrs.is_empty(),
 			"took %.1f hits %d rattles %d burrs %d" % [ac.dmg(T), K.direct_hits, K.rattles, K.burrs.size()])
-	ok("RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash", T.flash_t > 0.12, "%.2f" % T.flash_t)
+	ok("RMB direct hit: the struck foe's body is held lit longer than a plain hit's 0.12 s flash", T.flash_t > 0.12,
+			"%.2f" % T.flash_t)
 	var rifle := {"src": "shot"}
 	ok("RMB direct hit: the Dazed foe takes the rifle's +90%", is_equal_approx(K.outgoing(T, 10.0, rifle), 19.0))
 	# 3b. thrown with the foe off the lane: it lands at the lane's end on the ground, shows the cone, blasts
@@ -745,12 +747,14 @@ func _gunslinger() -> void:
 	ac.step(m, 0.5)
 	var b0: Dictionary = K.burrs[0] if not K.burrs.is_empty() else {}
 	ok("RMB: sticks on the ground at the lane's end",
-			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"]) and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
+			not b0.is_empty() and float(b0["fuse"]) >= 0.0 and not bool(b0["wall"])
+			and absf(_flat(b0["pos"], home) - 10.5) < 1.2,
 			"at %.1f" % (_flat(b0.get("pos", home), home)))
 	var cone_id := ("burr%d" % (b0["node"] as Node3D).get_instance_id()) if not b0.is_empty() else ""
 	var ce := AimKit.entry(P, cone_id)
 	ok("RMB: the cone shows back toward you, for everyone",
-			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9 and absf(float(ce["len"]) - 6.0) < 0.01)
+			not ce.is_empty() and bool(ce["all"]) and (ce["dir"] as Vector2).x < -0.9
+			and absf(float(ce["len"]) - 6.0) < 0.01)
 	ok("RMB: the cone drawn is the cone that hits (length %.1f, %.0f degrees)" % [bd["cone_len"], bd["cone_deg"]],
 			is_equal_approx(float(ce.get("len", 0.0)), float(bd["cone_len"]))
 			and is_equal_approx(float(ce.get("deg", 0.0)), float(bd["cone_deg"])), str(ce.get("deg", -1)))
@@ -907,7 +911,8 @@ func _gunslinger() -> void:
 	P.do_dash()
 	m.step(DT)
 	ok("dash table: the slide and the air roll fire LMB, DashFlow says so",
-			String(DashFlow.row_of("gunslinger", "lmb", false)["mode"]) == "fire" and String(DashFlow.row_of("gunslinger", "lmb", true)["mode"]) == "fire" and K.fires_in_dash())
+			String(DashFlow.row_of("gunslinger", "lmb", false)["mode"]) == "fire"
+			and String(DashFlow.row_of("gunslinger", "lmb", true)["mode"]) == "fire" and K.fires_in_dash())
 	P.inp["fire"] = true
 	m.step(DT)
 	P.inp["fire"] = false
@@ -919,7 +924,8 @@ func _gunslinger() -> void:
 	ac.step(m, 0.8)
 	var gk: Array = (HunterAnim.km_def("gunslinger_dash")["keys"] as Array)
 	ok("dash anim: Slipstep's move runs about 0.85 s, its own id (not Wirerun's)",
-			absf(float((gk[-1] as Array)[0]) - 0.85) < 0.2 and "gunslinger_dash" != "mage_dash_go", "%.2f" % float((gk[-1] as Array)[0]))
+			absf(float((gk[-1] as Array)[0]) - 0.85) < 0.2 and "gunslinger_dash" != "mage_dash_go",
+			"%.2f" % float((gk[-1] as Array)[0]))
 	# small mechanics (the wiki's fine print, docs/heroes/gunslinger.md "Small mechanics")
 	P.teleport(home)
 	ac.step(m, 0.3)
@@ -946,7 +952,8 @@ func _gunslinger() -> void:
 	K.add_fever(1)
 	K.add_fever(1)
 	ok("small: Fever is one flat level of 6% (a second ability hit adds nothing)",
-			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and K.res_wait > 3.0, "%.2f %.2f" % [K.res, K.fever_k()])
+			K.res == 1.0 and is_equal_approx(K.fever_k(), 0.06) and K.res_wait > 3.0,
+			"%.2f %.2f" % [K.res, K.fever_k()])
 	var hp_before := P.hp
 	P.hp = 50.0
 	K.on_deal(T, 100.0, {"src": "shot"})

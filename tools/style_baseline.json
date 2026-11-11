@@ -1037,7 +1037,7 @@
 "semicolon": 3
 },
 "tools/hero_combo_check.gd": {
-"long_line": 12,
+"long_line": 5,
 "semicolon": 7
 },
 "tools/hero_pair_check.gd": {
