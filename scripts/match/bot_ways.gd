@@ -130,8 +130,8 @@ static func _lair(m: Match, h: Hunter, t: float) -> Variant:
 
 static func _spark(m: Match, h: Hunter, t: float, own: bool) -> Variant:
 	var hr: Heart = m.heart
-	if hr.early_team >= 0:
-		return "gone"
+	if hr.early_team >= 0 or not inside(m, hr.gate):
+		return "gone"      # (taken, or the end phase is closing over the Gate: no carrying the spark out into it)
 	var c: Hunter = hr.carrier
 	if c and c.team == h.team:
 		return [hr.gate, "gate"] if c == h else [_around(m, hr.gate, h, ESCORT_R), "seat"]

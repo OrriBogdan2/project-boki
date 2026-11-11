@@ -1038,11 +1038,23 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 			return false
 	return true
 
-## Breadth-first search over walkable tiles (a window around the trip), returning tile centres.
+## Tiles of slack round the trip a tile path may use: a tight window first, then one wide enough to
+## reach a ramp beside a cliff (The Crown's raised Heart has two, 23 m out east and west).
+const PATH_SLACK := [8, 24]
+
+## A walkable tile path from a to b (tile centres), [] when none: in the tight window, else the wide one.
 func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
+	for slack: int in PATH_SLACK:
+		var p := _grid_path_in(m, a, b, slack)
+		if not p.is_empty():
+			return p
+	return []
+
+## Breadth-first search over walkable tiles in a window `slack` tiles round the trip, returning tile centres.
+func _grid_path_in(m: Match, a: Vector2i, b: Vector2i, slack: int) -> Array:
 	var W: World = m.world
-	var lo := Vector2i(mini(a.x, b.x) - 8, mini(a.y, b.y) - 8)
-	var hi := Vector2i(maxi(a.x, b.x) + 8, maxi(a.y, b.y) + 8)
+	var lo := Vector2i(mini(a.x, b.x) - slack, mini(a.y, b.y) - slack)
+	var hi := Vector2i(maxi(a.x, b.x) + slack, maxi(a.y, b.y) + slack)
 	var prev := {a: a}
 	var q: Array = [a]
 	var found := false

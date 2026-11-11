@@ -463,7 +463,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 23,
+"long_line": 21,
 "nested_ternary": 1,
 "semicolon": 49
 },

@@ -107,6 +107,10 @@ func _fall_through(m: Match) -> void:
 	ok(in_ring and String(g[1]) == "ring",
 		"every early seat gone: the final, inside the Heart ring (%s)" % str(g.slice(1)))
 	m.heart.early_team = -1
+	m.time = Heart.last_close() + Heart.r("end_close_s") - m.sess_t0
+	g = BotWays.goal(m, h)
+	ok(not BotWays.inside(m, m.heart.gate) and not g.is_empty() and String(g[1]) == "ring",
+		"the end phase closing over the Gate: the spark seat is gone, the final (%s)" % str(g.slice(1)))
 
 func _ring(m: Match) -> void:
 	m.time = 400.0 - m.sess_t0
