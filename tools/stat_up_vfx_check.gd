@@ -24,7 +24,7 @@ func run(m: Node, mode: String = "check") -> void:
 	FarmTutorial.skip()
 	home = await main._hb_home()
 	for i in 600:
-		if home.player != null and home.kins.size() == 2:
+		if home.player != null and home.stat_glint != null and home.kins.size() == 2:
 			break
 		await main.get_tree().process_frame
 	home.day_t = 0.5
@@ -101,6 +101,7 @@ func _new_save() -> Dictionary:
 	var at := HomeLayout.LANDING
 	var post := {"u": HomeLayout._next_uid(lay), "id": "training_post", "x": int(at.x) - 4, "z": int(at.z) - 7, "r": 0}
 	lay["deco"].append(post)
+	d["tutorial"]["home"] = true      # (after the island is made: no Welcome home panel over the shots)
 	return d
 
 ## n frames. Two after a gain: a timer resumes after the frame's _process, so StatGlint sees it the next one.
@@ -126,7 +127,6 @@ func _shots() -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	if main.fade:
 		main.fade.reveal(0.05)
-	home._close_panel()
 	var at: Vector3 = home.YARD_KIN
 	var striker: Dictionary = home.kins[0]
 	var spinner: Dictionary = home.kins[1]
