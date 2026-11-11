@@ -44,7 +44,8 @@ var coins := DredgeCoins.new()  # the hoard's spill on a hit
 var pull := {}                  # hold: the reel {t (the foe), tow (its Displace record), ally, wisp, from, scoop}
 var hook_hold: CastHold         # throw to the end of the reel or the miss: height held, a slow walk in flight
 var hook_aloft := false        # the hand left mid-jump: the air steers and his run-up carries on
-var flying := false             # hold: the hook is in the air
+var flying := false             # hold: the hook is in the air (from the coil-back on)
+var coil := 0.0                 # hold: the coil-back before the arm shoots out (`rmb.windup`): time left
 var hook_sd := {}               # the hook's shot while it flies
 var snap_t := 0.0               # the arm snapping back: time left
 var snap_tip := Vector3.ZERO    # ... and where the hook was when it began
@@ -207,6 +208,7 @@ func _tick(dt: float) -> void:
 	if stop_t > 0.0: _tick_stop(dt)
 	if wind > 0.0: _tick_wind(dt)
 	if not dive.is_empty(): _tick_dive(dt)
+	if coil > 0.0: _tick_coil(dt)
 	if flying: _tick_hook()
 	if snap_t > 0.0: _tick_snap(dt)
 	if not pull.is_empty(): _tick_pull(dt)
@@ -225,6 +227,7 @@ func _drop_holds() -> void:
 	AimKit.hide(h, "e_tell")
 	dive = {}
 	flying = false
+	coil = 0.0
 	hook_sd = {}
 	scoop = []
 	hook_hold = null
@@ -327,6 +330,23 @@ func fire_rmb(c: Dictionary) -> void:
 	var carry := Vector2(h.vel.x, h.vel.z).length() / h.base_speed if hook_aloft else 0.0
 	hook_hold = CastHold.hover_slow(h, clampf(carry, float(rdf["fly_slow"]), 1.0))
 	play("dr_throw")
+	m.sfx("dr_throw", h.pos, -2.0, 1.0)
+	coil = float(rdf["windup"])
+
+## The coil-back: the readable cue before a slow hook. A stun or a knock down in it cancels the throw.
+func _tick_coil(dt: float) -> void:
+	coil -= dt
+	if h.stun_t > 0.0 or h.downed:
+		coil = 0.0
+		flying = false
+		hook_hold = null
+	elif coil <= 0.0:
+		coil = 0.0
+		_launch_hook()
+
+## The arm shoots out once the coil-back is over.
+func _launch_hook() -> void:
+	var rdf := rmb_def()
 	var hook := {"type": "projectile", "speed": float(rdf["speed"]), "range": float(rdf["range"]), "size": 0.24}
 	var stg := stage("rmb", {"delivery": hook,
 		"effects": [{"type": "damage", "amount": float(rdf["dmg"])}]})
@@ -351,7 +371,6 @@ func fire_rmb(c: Dictionary) -> void:
 		if sn is Node3D and is_instance_valid(sn):
 			(sn as Node3D).visible = false          # the hand and the arm are drawn by the kit
 			hook_sd["node"] = null
-	m.sfx("dr_throw", h.pos, -2.0, 1.0)
 
 ## The hook in flight: the arm stretched from his forearm to the bone hook, drawn through rocks. It also
 ## catches an ally in its path (reeled in to safety) and scoops up any wisp (downed hunter) it passes.

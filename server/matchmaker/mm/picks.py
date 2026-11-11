@@ -8,8 +8,8 @@ import random
 TURN_S = 10.0        # seconds each Hunter has on their pick turn
 LOAD_WAIT_S = 60.0   # seconds picking waits for everyone to load before it starts anyway
 # The Hunter ids, Arch.ORDER in the game (scripts/arch/arch.gd); a test checks them against content/archetypes.
-HUNTERS = ("gunslinger", "juggernaut", "ashwick", "tender", "dolm", "archer", "dredge", "rimewright", "mage",
-           "bulwark", "thief", "ostra")
+HUNTERS = ("archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright",
+           "mage", "thief", "ostra", "gil")
 
 
 class PickPhase:

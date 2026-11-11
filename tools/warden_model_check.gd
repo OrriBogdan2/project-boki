@@ -27,18 +27,19 @@ const WARDENS := {
 	"dolm": {"hit_r": 0.388, "height": 1.09, "height_3d": 1.08, "width": [0.7, 1.5], "moves": "breah_"},
 	# (Motley: body size 0.9, owner Nov 4: bigger and more menacing; its sheet's 1.09x was at 0.74)
 	# (Motley's top counts his hover: 0.3 m, the source's (HOVER_H), puts it 0.1x over his box; the cards widen him)
-	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.26, "width": [0.5, 1.6], "moves": "ostra_"},
+	# (height_3d: the appeal3 model's cap points flop out to the sides, not up over his crown; was 1.26)
+	"ostra": {"hit_r": 0.412, "height": 1.28, "height_3d": 1.2, "width": [0.5, 1.6], "moves": "ostra_"},
 	# (Claire, the v2 design: the ears stand over her head; at the chart's 0.96x she is slim, as Vex)
 	"rimewright": {"hit_r": 0.38, "height": 0.96, "height_3d": 1.06, "width": [0.5, 1.25], "moves": "tm_"},
-	# (Cinder v2: her built lizard horns stand over her head; the chart's taller Cinder is wider by as much)
-	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.22, "width": [0.7, 1.75], "moves": "as_"},
+	# (Cinder v95 appeal3 b: short curled horns, lower than v2's; the chart's taller Cinder is wider by as much)
+	"ashwick": {"hit_r": 0.376, "height": 1.16, "height_3d": 1.15, "width": [0.7, 1.75], "moves": "as_"},
 	# (Kael v2 on his long-legged rig, the owner's height; height_3d: his wild mane over his head)
 	"juggernaut": {"hit_r": 0.428, "height": 1.31, "height_3d": 1.32, "width": [1.0, 2.0], "moves": "jug"},
-	# (Grimble: the head at his old height, the hoard towers over it)
-	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.7, "width": [1.3, 2.4], "moves": "dr_"},
+	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
+	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
-	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears, the locked design's taller ears)
-	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.76, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears; the appeal3 v95 swap's ears stand lower: 0.71)
+	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
 	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
 	# yet, so "moves" is "" and the rig's generic poses play)
 	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.956, "width": [0.5, 1.5], "moves": ""},

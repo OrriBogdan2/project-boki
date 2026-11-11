@@ -10,6 +10,7 @@ extends RefCounted
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
+##   8. dash_air per Hunter and the no-charge tick
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -35,6 +36,7 @@ func run(main: Node) -> void:
 			_check_set("res://content/sfx/" + f)
 			sets += 1
 	print("SFXSET %d sound sets" % sets)
+	_dash_air()
 	_fallback()
 	_ult_cues()
 	print("SFXSET DONE, failures: %d" % bad)
@@ -142,7 +144,8 @@ func _ult_cues() -> void:
 		var carries := reach > Sfx.hear_range and reach <= REACH_MAX and reach == float(Sfx.sound_reach["ult_tag_foe"])
 		if not (Sfx.ensure(sname) and carries):
 			wrong.append("%s %.0f m" % [sname, reach])
-	ok(names.size() == 14 and wrong.is_empty(), "%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
+	ok(names.size() == Arch.ids().size() + 2 and wrong.is_empty(),
+			"%d ult cues exist and carry (wrong: %s)" % [names.size(), wrong])
 	var press := FileAccess.get_file_as_string("res://scripts/arch/hero_ult.gd")
 	var cue := FileAccess.get_file_as_string("res://scripts/arch/ult_cue.gd")
 	var match_src := FileAccess.get_file_as_string("res://scripts/match/match.gd")
@@ -158,6 +161,23 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## 7. Every Hunter's dash has an air variant that HeroSfx picks with no floor under it, and the no-charge tick exists.
+func _dash_air() -> void:
+	var h := Hunter.new()
+	var picked := {}
+	for arch in Arch.ids():
+		h.arch = arch
+		h.grounded = false
+		picked[arch] = HeroSfx.dash_name(h)
+		h.grounded = true
+		picked[arch] += " " + HeroSfx.dash_name(h)
+	h.free()
+	# (a Hunter with no dash of its own yet, as Gil, plays the shared dash both ways: item 5's fallback)
+	var want := func(a): return "%s_dash_air %s_dash" % [a, a] if Sfx.ensure("%s_dash" % a) else "dash dash"
+	var wrong := Arch.ids().filter(func(a): return picked[a] != want.call(a))
+	ok(wrong.is_empty(), "%d Hunters: dash in the air and on the ground differ (wrong: %s)" % [picked.size(), wrong])
+	ok(Sfx.ensure("dash_empty"), "the no-charge tick exists")
 
 func _takes(sname: String) -> Array:
 	var out := []

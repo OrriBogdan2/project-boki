@@ -26,8 +26,11 @@ func run(main_node: Node) -> void:
 	main.get_tree().quit(1 if fails > 0 else 0)
 
 func go(screen: String, opts := {}) -> Node:
+	var was: Node = main.current
 	Game.goto(screen, opts)
 	for i in 6:
+		await main.get_tree().process_frame
+	while main.current == was:      # (with a window the old screen stays current until the 0.3 s fade covers it)
 		await main.get_tree().process_frame
 	return main.current
 
