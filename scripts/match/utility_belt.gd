@@ -2,8 +2,9 @@ class_name UtilityBelt
 extends RefCounted
 ## The utility belt (docs/decisions/0005-equal-footing.md): four slots on keys 1 to 4, each
 ## holding one kind of item with charges. It replaces the old "kit" gear slot and the heal / armor
-## kit keys. Items live in content/utility/*.json (name, icon, col, desc, use, cd, max charges per
-## slot, bring[] = the most you can bring in by difficulty tier, price).
+## kit keys. Items live in content/utility/*.json (name, icon, col, desc, hint = the few words of the
+## first-time belt line (FirstTimeHint.belt_text), use, cd, max charges per slot, bring[] = the most you
+## can bring in by difficulty tier, price).
 ##
 ## Keys (Rift Keys, chest keys) are belt items too: one slot per key type, found in the match only,
 ## never brought or sold (BeltKeys).
