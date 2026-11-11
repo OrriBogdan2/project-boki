@@ -20,6 +20,7 @@ func run(main: Node) -> void:
 	await _area(main, tree, false, "gunslinger")
 	await _area(main, tree, true, "gunslinger")
 	await _area(main, tree, false, "archer")
+	await _area(main, tree, false, "juggernaut")
 	print("KITDRILL %s" % ("FAIL %d" % bad if bad > 0 else "OK"))
 	tree.quit(1 if bad > 0 else 0)
 
@@ -81,7 +82,7 @@ func _walk(k: KitDrill, hunter: String) -> void:
 func _area(main: Node, tree: SceneTree, skip: bool, hunter: String) -> void:
 	var d := Save.fresh()
 	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
-	d["cls"] = "medium"
+	d["cls"] = Arch.weight(hunter)
 	d["arch"] = hunter
 	d["classes"] = ClassUnlock.legacy()
 	Save.d = d
