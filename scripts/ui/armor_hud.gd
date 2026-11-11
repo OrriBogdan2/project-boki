@@ -8,10 +8,25 @@ extends RefCounted
 
 const POP := 0.5               # seconds the badge pops after a level-up
 const RADIUS := 19.0           # px: the badge at rest
+const NOTE_PX := 14            # px: the first-time hint's text
 
 ## Makes the badge pop (a level-up, or a hint pointing at it).
 static func pop(hud) -> void:
 	hud.set_meta("armor_pop", POP)
+
+## The first-time armour hint (ArmourHint, via Hud.tip "armor"): one line just over the armour
+## readout at `at`, fading out over its last second.
+static func note(hud, at: Vector2) -> void:
+	var n: Array = hud.get_meta("armor_note", [])
+	if n.is_empty():
+		return
+	var left: float = float(n[1]) - hud.get_process_delta_time()
+	hud.set_meta("armor_note", [n[0], left] if left > 0.0 else [])
+	var a := clampf(left, 0.0, 1.0)
+	var tw: float = HudStyle.BIG.get_string_size(n[0], HORIZONTAL_ALIGNMENT_LEFT, -1, NOTE_PX).x
+	hud.c.draw_style_box(HudStyle.box(Color(HudStyle.SHADE, 0.86 * a), 8, Color(0, 0, 0, 0), 0),
+			Rect2(at + Vector2(-8, -17), Vector2(tw + 16, 24)))
+	HudStyle.text(hud.c, at, n[0], NOTE_PX, Color(hud.TIP_COL, a))
 
 ## The badge at the portrait's bottom-right corner: a shield in the tier's colour ringed by progress.
 static func badge(hud, pr: Rect2, p: Hunter) -> void:
