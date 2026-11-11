@@ -476,6 +476,14 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
 
+## summon_cc (`content/rules/summon_cc.json`)
+
+What crowd control does to a summoned Boki (docs/specs/SUMMON_CC.md). Every kind lands exactly as on a Hunter (Ent.hurt, KitStatus, Displace, Verbs) except the kinds listed here, which a summon shrugs off.
+
+| Setting | Value |
+|---|---|
+| immune | ["gnd"] |
+
 ## tutorial (`content/rules/tutorial.json`)
 
 
