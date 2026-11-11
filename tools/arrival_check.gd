@@ -2,7 +2,8 @@ extends RefCounted
 ## --arrival-check: the first minutes' declutter (briefs/UI_DECLUTTER_PLAN.md, sections 4 and 5).
 ##   1. results: three big numbers, no armor tile, the rest behind "Details", the way home on screen
 ##   2. the arrival queue: modals open one at a time, in order, and wait while something else is open
-##   3. the top bar's counters show from the first time you have some (old saves see them all)
+##   3. the top bar's counters show from the first time you have some (old saves see them all); the four
+##      materials share one chip
 ##   4. the key row: each hint goes after 3 uses; whistle and build wait for the tutorial's end
 
 var main: Node
@@ -99,6 +100,11 @@ func _chips() -> void:
 	ok(TopChips.shows("wood", 0), "chips: and stays when it is spent")
 	Save.d["tutorial"] = {"hatched": true, "home": true}      # a save that had seen the farm before
 	ok(TopChips.shows("coals", 0) and TopChips.shows("tonic", 0), "chips: an old save sees them all")
+	var row := HBoxContainer.new()
+	TopChips.add_to(row)
+	ok(row.get_child_count() == 3, "chips: tonics, crops and one Materials chip (not a chip per material), got %d"
+			% row.get_child_count())
+	row.free()
 
 func _keys() -> void:
 	Save.d["tutorial"] = {"home": true, "day1_done": true}      # tutorial over

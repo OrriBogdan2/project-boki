@@ -1,16 +1,20 @@
 class_name TopChips
 extends RefCounted
 ## The farm top bar's counters. Name and gems show from the start; each other counter shows from the first
-## time you have any of it, and stays. A save that had already seen the farm before this existed shows all.
+## time you have any of it, and stays. The four building materials share one chip (their sum, broken down in
+## its tooltip) that shows once any of them has. A save that had already seen the farm before this existed
+## shows all.
 
 const MAT := Color("d8b07a")      # building materials
 const COUNTERS := [
 	["tonic", "tonic", "%d", Color("ff8a9a"), "Tonics: drink one (1) on an expedition to heal"],
 	["crops", "seed", "%d", UI.GOOD, "Crops you've harvested"],
-	["wood", "dash", "%d wood", MAT, "Wood: chop trees in the wild with an axe, or a Lumber Camp. Pays for buildings."],
-	["stone", "dash", "%d stone", MAT, "Stone: mine boulders with a pickaxe, or a Quarry. Pays for buildings."],
-	["fibre", "dash", "%d fibre", MAT, "Fibre: from harvests and from clearing the wild. Pays for buildings."],
-	["coals", "dash", "%d coals", MAT, "Ember Coals: from a Kiln. They pay for upgrades."],
+]
+const MATERIALS := [      # [id, name, where it comes from]: the Materials chip's rows
+	["wood", "Wood", "chop trees in the wild with an axe, or a Lumber Camp"],
+	["stone", "Stone", "mine boulders with a pickaxe, or a Quarry"],
+	["fibre", "Fibre", "from harvests and from clearing the wild"],
+	["coals", "Ember Coals", "from a Kiln"],
 ]
 
 static func have(id: String) -> int:
@@ -24,7 +28,7 @@ static func shows(id: String, count: int) -> bool:
 	var tut: Dictionary = Save.d["tutorial"]
 	if not tut.has("chips_seen"):
 		tut["chips_seen"] = {}
-		for c in COUNTERS:
+		for c in COUNTERS + MATERIALS:
 			if tut.get("home", false):
 				tut["chips_seen"][c[0]] = true
 	var seen: Dictionary = tut["chips_seen"]
@@ -37,3 +41,13 @@ static func add_to(row: Node) -> void:
 		var n := have(String(c[0]))
 		if shows(String(c[0]), n):
 			row.add_child(UI.chip(String(c[1]), String(c[2]) % n, c[3], String(c[4]), 14))
+	var total := 0
+	var seen := false
+	var tip: Array = ["Materials: wood, stone and fibre pay for buildings, Ember Coals for upgrades"]
+	for mt in MATERIALS:
+		var n := have(String(mt[0]))
+		total += n
+		seen = shows(String(mt[0]), n) or seen      # (asked for each, so each is marked seen)
+		tip.append("%s  %d  ·  %s" % [mt[1], n, mt[2]])
+	if seen:
+		row.add_child(UI.chip("hammer", str(total), MAT, "\n".join(tip), 14))
