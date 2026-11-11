@@ -131,8 +131,11 @@ func move_k() -> float:
 	if not swap.is_empty():
 		return (swap["hold"] as CastHold).slow_k
 	var casting := not snap.is_empty() or snap_rec > 0.0
-	var k := 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
-	return k * (1.0 + boost_k if boost_t > 0.0 else 1.0)
+	return 1.0 - float(rmb_def()["snap"]["cast_slow"]) if casting else 1.0
+
+## Snap rank 3's burst of speed ([game data] +50 on the cast, +100 on a hit).
+func speed_bonus() -> float:
+	return boost_k if boost_t > 0.0 else 0.0
 
 ## Snap rank 3: a burst of speed on the cast, a bigger one when it hits (the later one replaces it).
 func _boost(k: float) -> void:

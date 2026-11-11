@@ -186,7 +186,7 @@ func thief(a) -> void:
 					K.glint.global_position.distance_to(K.hand_pos(K.hand == 0)) if K.glint else -1.0])
 	var far := 4.5        # the sheet's measured 4.5m (she is off the global dash feel)
 	A.ok("dancer dash: Vault cartwheels about 4.5m, speeds +18%, empowers",
-			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.move_k() > 1.15
+			absf(P.flat_dist(home) - far) < 0.6 and K.primed_t > 0.0 and K.speed_bonus() > 0.15
 			and P.dashes < d0 - 0.5 and wheel in ["thf_vault_l", "thf_vault_r"],
 		"moved %.1f primed %.2f anim %s" % [P.flat_dist(home), K.primed_t, wheel])
 	var gold: Dictionary = AimKit.entry(P, "aim")

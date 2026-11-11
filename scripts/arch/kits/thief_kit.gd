@@ -322,8 +322,8 @@ func _net_glint(dt: float) -> void:
 	glint_net_t = GLINT_NET_EVERY
 	net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 
-func move_k() -> float:
-	return 1.0 + (vault_haste() if haste_t > 0.0 else 0.0)
+func speed_bonus() -> float:
+	return vault_haste() if haste_t > 0.0 else 0.0
 
 ## Vault's speed boost; the last rank makes it half again as big.
 func vault_haste() -> float:
