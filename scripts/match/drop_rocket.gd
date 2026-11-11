@@ -17,6 +17,8 @@ const VOID_EJECT_Y := 7.0      # m: still over the abyss at island level, everyo
 const SEAT_GAP := 1.3          # m between the squad as it steps out where the rocket hit
 const BOT_LEAD_T := 0.5        # s: a bot leader aims to be over its spot this long before the rocket hits
 const STEP := 0.1              # s, projection step for the landing marker
+const SEAT_OUT := 1.0          # m from the rocket's axis to a rider's feet: they cling on outside the hull (0.75)
+const SEAT_DOWN := 1.0         # m from the rocket's middle down to a rider's feet, so their heads stay under the fins
 
 var m: Match
 var team := 0
@@ -53,7 +55,7 @@ func tick(dt: float) -> void:
 	for h in riders.duplicate():
 		if not is_instance_valid(h) or h.out or (h.remote and not h.riding):
 			riders.erase(h)      # (left, or jumped out on their own machine: the flags say so)
-			if is_instance_valid(h): h.rocket = null
+			if is_instance_valid(h): _unseat(h)
 	if riders.is_empty():
 		_end()
 		return
@@ -131,7 +133,7 @@ func detach(h: Hunter, dive := true) -> bool:
 	if m.skydrop.is_lead(h) and riders.size() > 1:
 		m.skydrop.pass_lead(h, riders[1] if riders[0] == h else riders[0])
 	riders.erase(h)
-	h.rocket = null
+	_unseat(h)
 	h.riding = false
 	h.dropping = true
 	h.diving = dive
@@ -154,7 +156,7 @@ func _impact(at: Vector3) -> void:
 	m.sfx("land", at, 0.0, 0.6)
 	var taken: Array = []
 	for h in riders:
-		h.rocket = null
+		_unseat(h)
 		if h.remote:
 			continue
 		var spot: Vector3 = m.world.free_spot_near(at, taken, SEAT_GAP, 0.45, 6.0)
@@ -170,7 +172,7 @@ func _impact(at: Vector3) -> void:
 func _end() -> void:
 	done = true
 	for h in riders:
-		h.rocket = null
+		_unseat(h)
 	riders.clear()
 	if is_instance_valid(node):
 		node.queue_free()
@@ -179,6 +181,23 @@ func _place_node() -> void:
 	node.position = pos
 	var d := vel.normalized() if vel.length() > 0.5 else Vector3.DOWN
 	node.basis = Basis(Quaternion(Vector3.DOWN, d))
+
+## A rider is drawn clinging on to the hull, facing it, in a gap between two fins, in the "ride" pose
+## (WardenDropPose); glued to the rocket as it is drawn rather than to the hunter's smoothed position.
+func seat(h: Hunter) -> void:
+	var i := riders.find(h)
+	if i < 0 or h.model == null:
+		return
+	var a := PI / 3.0 + TAU * i / 3.0       # (the fins stand at 0, 120 and 240 degrees round it)
+	var out := node.basis * Vector3(sin(a), 0.0, cos(a))
+	var up := node.basis.y
+	h.model.position = node.position + out * SEAT_OUT - up * SEAT_DOWN - h.position
+	h.model.basis = Basis(up.cross(out), up, out) * Basis.from_scale(h.model.scale)
+
+static func _unseat(h: Hunter) -> void:
+	h.rocket = null
+	if h.model:
+		h.model.position = Vector3.ZERO
 
 ## Where it hits if it keeps its course: {"at", "void"} (the landing marker everyone aboard sees).
 func project() -> Dictionary:

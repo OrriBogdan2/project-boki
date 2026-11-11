@@ -3018,6 +3018,8 @@ func _anim_state(stretch: float) -> void:
 	s["grounded"] = grounded and pad.is_empty()
 	s["gliding"] = gliding and not plunging()
 	s["diving"] = plunging()
+	s["skydive"] = diving
+	s["rocket"] = rocket != null
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
@@ -3116,7 +3118,7 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and not extracted and not (riding and rocket == null) and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
@@ -3138,6 +3140,8 @@ func render(delta: float, alpha: float) -> void:
 	# riding a mount: you sit up on its back
 	var ride := (kin as Kin).ride_height() if mounted() and not downed else 0.0
 	model.position.y = lerpf(model.position.y, ride, minf(1.0, delta * 12.0))
+	if rocket:
+		rocket.seat(self)
 	if remote:
 		update_lip()
 	_render_weapon_fx(delta)

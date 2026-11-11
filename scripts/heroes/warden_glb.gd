@@ -944,6 +944,7 @@ class Sync extends Node:
 	var look_pose: Array = []     # [bone index, position, scale]: the player's sliders under the clips (_look_pose)
 	var rig_root: Array = []      # data "rig_root": the root bone stays on the Rig under the clips (a hover)
 	var square_blade := false     # a body "bulk" narrows the root on x and z only: unshear the blade (_square_blade)
+	var drop_pose: WardenDropPose  # the drop's shared ride and skydive poses over the clips or the rig, or null
 
 	func setup(model: Node3D, skeleton: Skeleton3D, rest: Dictionary) -> void:
 		root = model
@@ -957,7 +958,8 @@ class Sync extends Node:
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
 		springs.setup(skel)
-		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
+		orbits.setup(skel)
+		drop_pose = WardenDropPose.make(root, skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
 	## Plays the Hero's clips when its art has them; and finds a skinned weapon's FX points.
 	func use_clips(glb: Node3D, art_name: String) -> void:
@@ -1013,6 +1015,8 @@ class Sync extends Node:
 			springs.still = clips.cur in clips.d.get("still", [])
 		else:
 			apply()
+			if drop_pose:
+				drop_pose.step(dt)
 			apply_blade()
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
@@ -1076,6 +1080,8 @@ class Sync extends Node:
 						_rig_pose(l), w))
 		for l in rig_root:
 			skel.set_bone_global_pose(int(l[0]), WardenGlb.retarget(WardenGlb.model_xf(root, l[1]), l))
+		if drop_pose:
+			drop_pose.step(dt)
 		if sway:
 			sway.step(dt)
 		if w < 1.0:

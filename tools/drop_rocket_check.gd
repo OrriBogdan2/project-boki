@@ -5,6 +5,7 @@ extends RefCounted
 ##  3. Jumping out and opening the glider at once goes further than jumping out and free-falling.
 ##  4. Nobody lands in a wall, under the ground or on top of a squadmate (several launches, steered ones too).
 ##  5. A bot leader flies the rocket to its landing spot (within BOT_SPOT_M).
+##  6. Aboard, everyone is drawn clinging on outside the hull, each in their own seat; jumping out lets go of it.
 
 const TOGETHER_M := 4.0          # m: the widest gap between two squadmates who rode it down
 const FAST_FALL := 8.0           # m/s: a free fall is still at least this fast
@@ -12,6 +13,8 @@ const BOT_SPOT_M := 8.0          # m from a bot leader's landing spot
 const LAUNCHES := [2.0, 6.0, 10.0, 14.0]      # s into the ship's run, for check 4
 const STEER_S := 1.5             # s the leader holds the keys in check 4
 const STEERS := [Vector2.ZERO, Vector2(1, 0), Vector2(0, -1), Vector2(-0.7, 0.7)]
+const HULL_R := 0.75             # m: the rocket's body radius (DropRocket._model)
+const SEAT_GAP_M := 1.0          # m at least between two riders' feet
 
 var bad := 0
 var main: Node
@@ -73,15 +76,30 @@ func _free_fall() -> void:
 	var r: DropRocket = m.player.rocket
 	for i in int(1.5 / Match.DT):
 		m.step(Match.DT)
+	_seats(r)
 	m.skydrop.detach(m.player)
 	for i in int(1.0 / Match.DT):
 		m.step(Match.DT)
 	var P: Hunter = m.player
+	P.render(Match.DT, 1.0)
+	ok(P.model.position == Vector3.ZERO, "jumping out lets go of the rocket (the body back on the hunter)")
 	ok(P.dropping and P.diving and P.rocket == null, "jumping out is a free fall")
 	var fall := -P.vel.y
 	var what := "the free fall (%.1f m/s) is slower than the rocket (%.1f m/s), still fast" % [fall, -r.vel.y]
 	ok(fall < -r.vel.y and fall > FAST_FALL, what)
 	ok(P.pos.y > r.pos.y + 5.0, "a second later you're above the rocket (%.1f m vs %.1f m)" % [P.pos.y, r.pos.y])
+
+func _seats(r: DropRocket) -> void:
+	var feet: Array = []
+	for h in r.riders:
+		(h as Hunter).render(Match.DT, 1.0)
+		var at: Vector3 = (h as Hunter).model.global_position - r.node.position
+		var out := (at - r.node.basis.y * at.dot(r.node.basis.y)).length()
+		ok(h.visible and out > HULL_R and out < HULL_R + 1.0,
+				"%s rides on show, clinging on %.2f m from the rocket's axis" % [h.pname, out])
+		for f in feet:
+			ok(at.distance_to(f) > SEAT_GAP_M, "%s has a seat of their own (%.2f m to the next)" % [h.pname, at.distance_to(f)])
+		feet.append(at)
 
 ## Flat distance from where you jump out to where you come down (or drop below the islands).
 func _jump_out_dist(glide: bool) -> float:
