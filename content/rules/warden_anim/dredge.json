@@ -136,7 +136,9 @@
 			"front": "hit_f",
 			"back": "hit_b",
 			"dur": 0.42
-		}
+		},
+		"stomp": "stomp",
+		"drink": "drink"
 	},
 	"flow": [
 		[
@@ -177,15 +179,7 @@
 		]
 	],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "flex", "refuse": "g_cross"},
-	"procedural": [
-		"ledge",
-		"mantle",
-		"stomp",
-		"base",
-		"drink",
-		"wade",
-		"swim"
-	],
+	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
 	"recoil": {"deg": 4.0, "settle": 0.11},
 	"upper": [
 		"hips",
