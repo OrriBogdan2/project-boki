@@ -83,6 +83,8 @@ func _dive() -> void:
 	m.skydrop.planning = false
 	m.player.riding = false
 	m.player.dropping = true
+	var up_at := at + Vector3(70, 90, 90)        # 114 m out: inside the smoke's 160 m
+	m.player.pos = up_at
 	m.camp_smoke.tick(0.1)
 	m.hud.visible = false
 	var cam := Camera3D.new()
@@ -90,6 +92,6 @@ func _dive() -> void:
 	cam.fov = 70.0
 	main.add_child(cam)
 	cam.make_current()
-	cam.position = at + Vector3(110, 90, 130)
+	cam.position = up_at
 	cam.look_at(at + Vector3(0, 25, 0))
 	await _grab("dive_smoke", 12)
