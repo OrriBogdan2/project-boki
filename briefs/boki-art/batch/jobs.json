@@ -46385,6 +46385,28 @@
     "prompt": "Redraw the creature in image 1 as a hand-pixelled sprite from a 2008 Nintendo DS monster-collecting RPG, drawn on an 80 by 80 pixel canvas and shown enlarged with crisp square pixels, every sprite pixel a clearly visible block of the same size. It only has to look good and be recognisable, not exact: simplify hard. Keep the overall body shape, the two or three main colours and ONE standout feature; drop every small pattern, thin line and tiny detail. Big readable shapes, a slightly larger head and eyes. Dark coloured one-pixel outline, at most 12 colours, each colour area a base tone plus one shadow tone and a tiny highlight, no anti-aliasing blur, no gradients, no dithering, no glow. Friendly idle stance in three-quarter view facing left, whole body in frame, centred, filling most of the image. Every part belongs to its body; add no clothing, scarf, hat or held item; body stripes stay body markings. Pure flat white background, nothing else: no ground, no shadow, no text, no border, no grid lines, one creature only. Make it chunky: thicken every leg, horn, fin and tail to at least three sprite pixels wide, merge many small legs or spines into a few bold ones, and keep strong contrast between the body and its outline so it reads at a small size."
   },
   {
+    "id": "rv_tiltster_light2",
+    "name": "Tiltster (review: light2)",
+    "refs": [
+      "briefs/boki-art/cards/Tiltster.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the rendering only. Make the grey shell plates a lighter, flatter steel grey with one simple lighter band per plate and no metallic gradients; make the outline thinner and a medium blue-grey instead of near-black. The pinball playfield on its back stays a BRIGHT saturated blue with its bumpers and lights, the antenna tips stay glowing light blue, the face, eyes, claws, pose and every part stay exactly the same."
+  },
+  {
+    "id": "rv_rimink_light2",
+    "name": "Rimink (review: light2)",
+    "refs": [
+      "briefs/boki-art/cards/Rimink.jpg"
+    ],
+    "runs": 3,
+    "aspect": "1:1",
+    "size": "2K",
+    "prompt": "Edit image 1: keep everything exactly the same: the same creature, design, pose, colours, style, line and plain background. Only change this: the outlines and shading only. Every outline becomes thinner and a medium blue-grey instead of dark navy. The dark band on its neck and the dark tail tip become a medium slate blue, clearly lighter than now but still the darkest colour on it. Shade the white coat with only a few small pale blue shapes. The ice crystals, face, eyes, pose and every part stay exactly the same."
+  },
+  {
     "id": "portrait_canvastross_p83",
     "name": "Canvastross (portrait)",
     "refs": [

@@ -2180,3 +2180,12 @@ _PXTHICK=(" Make it chunky: thicken every leg, horn, fin and tail to at least th
  " and keep strong contrast between the body and its outline so it reads at a small size.")
 for _n in ('Chainipede','Geodemole','Druzemole','Skateron','Tidalisk','Lanceron','Reapant','Zephyrak','Umbrathere','Barostorm'):
     SPECS.append({'id':'px9b_'+_n.lower(),'name':_n+' (pixel sprite 80, chunky redo)','refs':['briefs/boki-art/cards/'+_n+'.jpg'],'runs':3,'aspect':'1:1','size':'1K','prompt':_PX8+_PXTHICK})
+
+# 11-11 lighter finish, round 2. rv_tiltster_light_2 is close (keeps the blue playfield); rv_rimink_light_* barely changed.
+# Narrower asks: name exactly which tones move and what must stay.
+RV_EDIT('Tiltster','light2',"the rendering only. Make the grey shell plates a lighter, flatter steel grey with one simple lighter band per plate and no metallic gradients; "
+ "make the outline thinner and a medium blue-grey instead of near-black. The pinball playfield on its back stays a BRIGHT saturated blue with its bumpers and lights, "
+ "the antenna tips stay glowing light blue, the face, eyes, claws, pose and every part stay exactly the same.",runs=3)
+RV_EDIT('Rimink','light2',"the outlines and shading only. Every outline becomes thinner and a medium blue-grey instead of dark navy. The dark band on its neck and the dark tail tip "
+ "become a medium slate blue, clearly lighter than now but still the darkest colour on it. Shade the white coat with only a few small pale blue shapes. "
+ "The ice crystals, face, eyes, pose and every part stay exactly the same.",runs=3)
