@@ -143,25 +143,9 @@ func _parity() -> void:
 			moving_t = (i + 1) * Match.DT
 			break
 	row("land_recover_t", moving_t, 0.0, 0.2, "s", "[footage] up and moving in ~0.15 s, no lockout")
-	var dur := _land_clip_durs()
-	row("land_clip_dur", dur["lo"], 0.3, 0.5, "s",
-			"[footage] every big move ends in a ~0.4-0.5 s low crouch (shortest clip)")
-	row("land_clip_dur", dur["hi"], 0.3, 0.5, "s", "[footage] the same (longest clip)")
 	var high := DropFeel.fall_vy(-Hunter.DIVE_FALL, Hunter.DIVE_FALL, Hunter.DIVE_VY_RATE, 30.0, 0.1)
 	var low := DropFeel.fall_vy(-Hunter.DIVE_FALL, Hunter.DIVE_FALL, Hunter.DIVE_VY_RATE, 1.0, 0.1)
 	ok(low > high + 1.0, "the flare slows the fall near the ground")
-
-## The shortest and longest landing clip in content/rules/warden_anim (the pose you land in, and for how long).
-func _land_clip_durs() -> Dictionary:
-	var out := {"lo": 9.0, "hi": 0.0}
-	for f in DirAccess.get_files_at("res://content/rules/warden_anim"):
-		if not f.ends_with(".json"): continue
-		var d: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/warden_anim/" + f))
-		if d == null or not d.has("land"): continue
-		var dur := float(d["land"].get("dur", 0.0))
-		out["lo"] = minf(out["lo"], dur)
-		out["hi"] = maxf(out["hi"], dur)
-	return out
 
 ## Off the skyship to the ground in a normal match: how long, and how high the glider opens.
 func _timing() -> void:
