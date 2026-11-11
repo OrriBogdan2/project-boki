@@ -3064,12 +3064,14 @@ func _anim_state(stretch: float) -> void:
 	s["squash"] = squash
 	s["stretch"] = stretch
 	s["kin_on_shoulder"] = kin != null and (kin as Kin).state == "shoulder"
-	# reviving a teammate: standing on their wisp
+	# reviving a teammate: standing on their wisp (the clips turn to it)
 	var rv := false
+	s["revive_dir"] = Vector2.ZERO
 	if grounded and not downed:
 		for o in m.hunters:
 			if o != self and o.downed and o.team == team and self in (o.get_meta("revivers", []) as Array):
 				rv = true
+				s["revive_dir"] = Vector2(o.pos.x - pos.x, o.pos.z - pos.z)
 				break
 	s["reviving"] = rv or box_reviving()
 	s["act"] = holding()

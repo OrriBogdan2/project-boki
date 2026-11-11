@@ -11,6 +11,8 @@ extends RefCounted
 ##   wisp_7_revive_a  the revive: the Wisp brightens, the hero small
 ##   wisp_8_revive_b  the hero scaling up
 ##   wisp_9_hero      the hero back at full size
+## With --revivers=<arch>,<arch>: instead, per Hero, the player stands on a teammate's Wisp and revives it:
+##   revive_<arch>_a / _b  1.0 s and 2.2 s into the 4 s revive (the Hero's `revive` clip, turned to the Wisp)
 ## <dir>/captions.txt gets "file: caption" per file.
 
 const DT := 1.0 / 60.0
@@ -27,6 +29,12 @@ func run(main_node: Node) -> void:
 		if String(a).begins_with("--shots-dir="):
 			dir = String(a).substr(12)
 	DirAccess.make_dir_recursive_absolute(dir)
+	for a in OS.get_cmdline_user_args():
+		if String(a).begins_with("--revivers="):
+			for arch in String(a).substr(11).split(","):
+				await _revive(arch)
+			_done()
+			return
 	await _setup()
 	await _go(0.4)
 	_take("wisp_0_hero", "The hero standing, before the knock")
@@ -55,6 +63,28 @@ func run(main_node: Node) -> void:
 	_take("wisp_8_revive_b", "The hero scaling up, the Wisp fading")
 	await _go(0.6)
 	_take("wisp_9_hero", "The hero back at full size, no Wisp")
+	_done()
+
+## The player as `arch` beside a downed teammate, the Wisp off to the side: he turns to it and revives it.
+func _revive(arch: String) -> void:
+	if m:
+		m.queue_free()
+	await _setup(arch)
+	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
+	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
+	var at := P.pos + Vector3(0.8, 0, -0.3)
+	mate.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	m.knock(mate, foe, {})
+	mate.down_hp = 1e6
+	await _go(1.0)
+	_take("revive_%s_a" % arch, "%s 1.0 s into the revive: turned to the Wisp, the hands on it" % arch)
+	await _go(1.2)
+	_take("revive_%s_b" % arch, "%s 2.2 s in: the press beat" % arch)
+	var clips: WardenClips = P.model.get_node("Warden/Sync").get("clips")
+	print("REVIVESHOT %s (%s) reviving=%s clip=%s act=%.2f progress=%.2f" % [arch, P.arch, P.anim_s.get("reviving"),
+			clips.cur, clips.act_w, mate.revive])
+
+func _done() -> void:
 	var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 	for l in lines:
 		f.store_line(l)
@@ -62,10 +92,13 @@ func run(main_node: Node) -> void:
 	print("WISPSHOTS %d in %s" % [lines.size(), dir])
 	main.get_tree().quit(0)
 
-func _setup() -> void:
+func _setup(arch := "") -> void:
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true})
+	var opts := {"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true}
+	if arch != "":
+		opts["arch"] = arch
+	await m.start(opts)
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:

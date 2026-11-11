@@ -192,7 +192,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun"]
+	return nm in ["fall", "glide", "stun"] or nm == d.get("states", {}).get("reviving")
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
@@ -360,8 +360,6 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 				"turn_max": float(mv.get("turn_max", HEADING_MAX)), "heading_off": float(mv.get("heading_off", 0.0))}
 	if km != "":
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
-	if bool(s.get("reviving", false)) and st.has("reviving"):
-		return {"clip": st["reviving"], "t": -1.0}
 	if bool(s.get("stun", false)) and st.has("stun"):
 		return {"clip": st["stun"], "t": -1.0}
 	var em := String(s.get("emote", ""))
@@ -381,6 +379,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		var running := Vector2(vel.x, vel.z).length() >= STILL or not bool(s.get("grounded", true))
 		# (a chip hit on the move flinches the spine and arms, the legs keep running; still or a stagger: whole body)
 		return {"clip": hd["front" if dir.dot(fw) >= 0.0 else "back"], "t": hit, "flinch": running and not heavy}
+	# (on a Wisp: kneels over it, turned to it; a hit flinches out of it, a step or a dash walks out)
+	if bool(s.get("reviving", false)) and st.has("reviving") and not _moving(s):
+		return {"clip": st["reviving"], "t": -1.0, "face_to": s.get("revive_dir", Vector2.ZERO)}
 	return {}
 
 func step(dt: float) -> void:
@@ -460,7 +461,10 @@ func step(dt: float) -> void:
 func _turn_to_heading(s: Dictionary, want: Dictionary, legs_only: bool, dt: float) -> void:
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var goal := 0.0
-	if (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
+	var to: Vector2 = want.get("face_to", Vector2.ZERO)
+	if to != Vector2.ZERO:
+		goal = wrapf(atan2(-to.x, -to.y) - float(s.get("face", 0.0)), -PI, PI)
+	elif (bool(want.get("heading", false)) or legs_only) and Vector2(vel.x, vel.z).length() > HEADING_MIN:
 		goal = wrapf(atan2(-vel.x, -vel.z) - float(s.get("face", 0.0)) + float(want.get("heading_off", 0.0)), -PI, PI)
 		var most := LEGS_MAX if legs_only else float(want.get("turn_max", HEADING_MAX))
 		goal = clampf(goal, -most, most)

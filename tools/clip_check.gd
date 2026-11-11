@@ -17,6 +17,8 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+const WISP_TOP := 0.72         # m: the hands come down to this (a Wisp's top, wisp_looks.json hover + body, with slack)
+const REACH_AHEAD := 0.25      # m: and reach at least this far in front of him
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -109,6 +111,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	_revive_reach(id, m, sync, clips, dd)
+	_revive_breaks(id, m, sync, clips, dd)
 	m.free()
 	await _flinch(id)
 
@@ -160,23 +164,9 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 		if not clips.lib.has_animation(anim_name):
 			continue
 		var anim := clips.lib.get_animation(anim_name)
-		var worst := 0.0
-		var where := ""
-		for t in anim.get_track_count():
-			var n := anim.track_get_key_count(t)
-			if n < 2 or anim.track_get_key_time(t, n - 1) < anim.length - 0.001:
-				continue
-			var gap := 0.0
-			match anim.track_get_type(t):
-				Animation.TYPE_ROTATION_3D:
-					var q0: Quaternion = anim.track_get_key_value(t, 0)
-					gap = rad_to_deg(q0.angle_to(anim.track_get_key_value(t, n - 1))) / SEAM_DEG
-				Animation.TYPE_POSITION_3D:
-					var p0: Vector3 = anim.track_get_key_value(t, 0)
-					gap = p0.distance_to(anim.track_get_key_value(t, n - 1)) / SEAM_M
-			if gap > worst:
-				worst = gap
-				where = String(anim.track_get_path(t)).get_slice(":", 1)
+		var seam := _seam(anim)
+		var worst := float(seam[0])
+		var where := String(seam[1])
 		var good := worst <= 1.0 and anim.length >= STAND_MIN
 		var what := "%s: %s loop seam %.1fx the limit (worst %s), %.1f s long (min %.1f)" % [
 				id, clip, worst, where if where != "" else "none", anim.length, STAND_MIN]
@@ -187,6 +177,86 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 			ok(not good, "%s: STAND_OPEN entry still needed" % key)
 		else:
 			ok(good, what)
+
+## How far a loop's last key is from its first, in units of SEAM_DEG / SEAM_M, worst track: [worst, bone].
+func _seam(anim: Animation) -> Array:
+	var worst := 0.0
+	var where := ""
+	for t in anim.get_track_count():
+		var n := anim.track_get_key_count(t)
+		if n < 2 or anim.track_get_key_time(t, n - 1) < anim.length - 0.001:
+			continue
+		var gap := 0.0
+		match anim.track_get_type(t):
+			Animation.TYPE_ROTATION_3D:
+				var q0: Quaternion = anim.track_get_key_value(t, 0)
+				gap = rad_to_deg(q0.angle_to(anim.track_get_key_value(t, n - 1))) / SEAM_DEG
+			Animation.TYPE_POSITION_3D:
+				var p0: Vector3 = anim.track_get_key_value(t, 0)
+				gap = p0.distance_to(anim.track_get_key_value(t, n - 1)) / SEAM_M
+		if gap > worst:
+			worst = gap
+			where = String(anim.track_get_path(t)).get_slice(":", 1)
+	return [worst, where]
+
+## The reviver's clip (states "reviving", played standing on a teammate's Wisp, decision 0019): a loop that closes
+## with no pop and is no longer than a revive, the hands come down onto the Wisp in front of him, the left on his left.
+func _revive_reach(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var clip := String(dd.get("states", {}).get("reviving", ""))
+	if not clips.lib.has_animation(clip):
+		return
+	var anim := clips.lib.get_animation(clip)
+	var seam := _seam(anim)
+	ok(anim.loop_mode == Animation.LOOP_LINEAR and float(seam[0]) <= 1.0 and anim.length <= Life.R["revive_time"],
+			"%s: %s loops (%.1f s, seam %.1fx the limit at %s), within a %.0f s revive" % [
+			id, clip, anim.length, seam[0], seam[1], Life.R["revive_time"]])
+	var hands := [m.get_node(String(WardenGlb.BONES["hand.L"])), m.get_node(String(WardenGlb.BONES["hand.R"]))]
+	var low := INF
+	var ahead := INF
+	var crossed := false
+	clips.force = {"clip": clip, "t": 0.0}
+	for k in 10:
+		sync.call("_process", DT)      # (faded in from the clip before: then only the clip)
+	var t := 0.0
+	while t < anim.length:
+		clips.force = {"clip": clip, "t": t}
+		sync.call("_process", DT)
+		var l: Vector3 = (hands[0] as Node3D).global_position
+		var r: Vector3 = (hands[1] as Node3D).global_position
+		low = minf(low, maxf(l.y, r.y))
+		ahead = minf(ahead, -maxf(l.z, r.z))
+		crossed = crossed or l.x > r.x
+		t += DT
+	clips.force = {}
+	ok(low <= WISP_TOP and ahead >= REACH_AHEAD and not crossed,
+			"%s: both hands come down to %.2f m (Wisp top %.2f), %.2f m ahead (min %.2f), not crossed" % [
+			id, low, WISP_TOP, ahead, REACH_AHEAD])
+
+## On a Wisp he plays the revive clip turned to it; a hit flinches at once, a step or a dash walks out of it.
+func _revive_breaks(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var st: Dictionary = dd.get("states", {})
+	if not st.has("reviving"):
+		return
+	var s := {"vel": Vector3.ZERO, "face": 0.0, "grounded": true, "reviving": true, "revive_dir": Vector2(1, 0)}
+	m.set_meta(WardenClips.STATE, s)
+	for k in 40:
+		sync.call("_process", DT)
+	var on: bool = clips.cur == st["reviving"] and clips.act_w >= 1.0
+	ok(on and absf(clips.head_turn + PI / 2.0) < 0.05, "%s: on a Wisp plays %s (%s), turned to it (%.2f rad, want %.2f)"
+			% [id, st["reviving"], clips.cur, clips.head_turn, -PI / 2.0])
+	s["hit_t"] = 0.0
+	sync.call("_process", DT)
+	ok(clips.cur == st["hit"]["front"] or clips.cur == st["hit"]["back"], "%s: a hit breaks the revive at once (%s)"
+			% [id, clips.cur])
+	s["hit_t"] = 99.0
+	for k in 20:
+		sync.call("_process", DT)
+	s["vel"] = Vector3(0, 0, -8.0)
+	s["rolling"] = true
+	for k in 12:
+		sync.call("_process", DT)
+	ok(clips.act_w <= 0.0 or clips.cur != st["reviving"], "%s: a dash breaks the revive (act %.2f, %s)"
+			% [id, clips.act_w, clips.cur])
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
