@@ -71,7 +71,8 @@ func _hero(id: String) -> void:
 	var hips := WardenSkeleton.find(sk, "hips")
 	var z := [INF, -INF]
 	await _step(m, SETTLE_S, func():
-		var at := (sk.global_transform * (sk.get_bone_global_pose(shin).origin - sk.get_bone_global_pose(hips).origin)).z
+		var below := sk.get_bone_global_pose(shin).origin - sk.get_bone_global_pose(hips).origin
+		var at := (sk.global_transform.basis * below).z
 		z[0] = minf(z[0], at)
 		z[1] = maxf(z[1], at))
 	var mote: Vector3 = P.model.get_meta(WardenCarry.MOTE, Vector3.INF)
