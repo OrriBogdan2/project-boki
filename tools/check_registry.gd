@@ -342,6 +342,10 @@ const CHECKS := {
 	"--demo-quick-check": ["res://tools/demo_quick_check.gd", "demo_quick_check", null],      # quick starts
 	"--sparkle-dash-check": ["res://tools/sparkle_dash_check.gd", "sparkle_dash_check", null],  # Wirerun, no carry
 	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],      # press -> first motion or shot
+	"--server-check": ["res://tools/server_check.gd", "server_check", null],      # a match server, players, refusals
+	"--server-e2e-check": ["res://tools/server_e2e_check.gd", "server_e2e_check", null],      # matchmaker + server
+	"--duel-queue-check": ["res://tools/duel_queue_check.gd", "duel_queue_check", null],      # LIVE: the EU matchmaker
+	"--join-": ["res://tools/join_client.gd", "join_client", null],      # a headless player for the server checks
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).

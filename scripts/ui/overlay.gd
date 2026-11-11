@@ -351,6 +351,12 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
 		+ "Off: it walks beside you"
 	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
+	if OnlineSession.configured():
+		_group(v, "Online")
+		var regions := [["auto", "Nearest"]]
+		for r in OnlineSession.regions():
+			regions.append([String(r["id"]), String(r.get("name", r["id"]))])
+		_choice(v, "Server region", "region", regions, Callable(), "Nearest: whichever server answers fastest")
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")

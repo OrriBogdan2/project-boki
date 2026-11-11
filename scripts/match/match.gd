@@ -1133,7 +1133,7 @@ func _spawn_breakables() -> void:
 				pad.position = dq
 				add_child(pad)
 				var lbl := Label3D.new()
-				lbl.text = "DUEL ROOM\n%s to enter" % Settings.key_cap("interact")
+				lbl.text = "DUEL RING\n%s to enter" % Settings.key_cap("interact")
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
 				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it
@@ -2190,7 +2190,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
-	if credit == player:
+	if player and credit == player:   # a dedicated server has no player
 		if tut: tut.kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
@@ -4429,7 +4429,7 @@ func _update_training(dt: float) -> void:
 		return
 	if duel_pad != Vector3.INF and player.flat_dist(duel_pad) < 1.3 and not player.downed:
 		if Input.is_action_just_pressed("interact") and not paused:
-			Game.start_match(duel_opts())
+			DuelRing.open(self)
 			return
 	train_t += dt
 	if player.downed and train_t > 2.0:
@@ -4916,6 +4916,16 @@ func _watch_death() -> void:
 ## The teammate the camera follows while you're dead, or null.
 func spectating() -> Hunter:
 	return recap.watched()
+
+## Online: the match server called the result (OnlineSession) or the line to it dropped (Net).
+func net_over(won: bool, why := "server") -> void:
+	if over or result.get("ending", false) or player == null:
+		return
+	result = {"extracted": won, "why": why}
+	_end_soon(1.0)
+
+func net_lost() -> void:
+	net_over(false, "lost")
 
 ## Leave while dead and waiting on your team.
 func give_up() -> void:
