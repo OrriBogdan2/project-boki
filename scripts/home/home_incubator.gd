@@ -133,6 +133,7 @@ func tick(d: float) -> void:
 			if ready_ids.has(id): continue
 			ready_ids[id] = true
 			h.fx.burst(slot_pos(int(e.get("slot", 0))) + Vector3(0, 0.4, 0), Color("ffd36a"), 18, 2.4)
+			GardenSfx.cue("garden_egg", slot_pos(int(e.get("slot", 0))))
 			h._toast("A %s in the Incubator is ready to hatch!" % Incubator.egg_name(e))
 
 ## The ready egg nearest to p ({} if none).
