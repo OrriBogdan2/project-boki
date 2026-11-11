@@ -1150,6 +1150,7 @@ func _spawn_breakables() -> void:
 					continue
 				dq.y = world.ground_at(dq.x, dq.z)
 				duel_pad = dq
+				duel_hint = DuelRingHint.make(self)
 				var pad := Models.jump_pad(Color("ff8a7a"))
 				pad.position = dq
 				add_child(pad)
@@ -4455,6 +4456,7 @@ var train := {}
 var train_t := 0.0
 
 var duel_pad := Vector3.INF
+var duel_hint: DuelRingHint = null      # the first-visit hint (null when this save has had it)
 
 ## The Demo match's landing grace: for the first fresh_t seconds after you land (Bot.fresh), until you
 ## hurt something yourself, nothing targets you (bots, even ones your Boki picked a fight with, and
@@ -4488,6 +4490,8 @@ static func duel_opts() -> Dictionary:
 func _update_training(dt: float) -> void:
 	if player == null:
 		return
+	if duel_hint and not duel_hint.tick():
+		duel_hint = null
 	if duel_pad != Vector3.INF and player.flat_dist(duel_pad) < 1.3 and not player.downed:
 		if Input.is_action_just_pressed("interact") and not paused:
 			Game.start_match(duel_opts())
