@@ -6,7 +6,7 @@ extends RefCounted
 ## so every species keeps its own rest shape and mover. `TWEAK` is the per species part.
 
 ## Cycles (and so beats) are whole numbers per clip, so each loop closes on itself.
-const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5}
+const BEAT := {"munch": 0.5, "nudge": 1.0, "climb": 0.8, "splash": 0.45, "brace": 0.5, "swim": 0.8, "paddle": 0.5}
 ## species -> clip -> {"amp": factor on the whole motion, "bones": {bone: [rx, ry, rz] held through it}}.
 const TWEAK := {
 	"cairnback": {"nudge": {"amp": 0.6}, "climb": {"amp": 0.55}, "splash": {"amp": 0.6}},
@@ -333,3 +333,45 @@ func _spin(u: float) -> void:
 		_:
 			add("spine", 0.3 * up * amp)
 	tail(0.7 * up * amp)
+
+## Swim (a Water type in water over half its height, BokiRig): the body lies level, legs tucked back, a wave runs
+## down the tail and the fins (ears, or wings for a legless one) scull; it bobs twice a stroke.
+func _swim(u: float) -> void:
+	var c := TAU * u * float(_n)
+	move.y = 0.012 * sin(2.0 * c) * amp
+	add("root", 0.0, 0.0, 0.04 * sin(c) * amp)
+	add("spine", 0.0, 0.1 * sin(c + 1.2) * amp)
+	add("head", 0.08, -0.12 * sin(c + 1.2) * amp)
+	both("fleg1", -0.9 * amp + 0.08 * sin(c))
+	both("hleg1", -0.7 * amp)
+	both("ear1", 0.0, 0.0, 0.25 * sin(2.0 * c) * amp)
+	wings(0.3 * sin(c) * amp, 0.2)
+	for i in TAIL.size():
+		add(TAIL[i], 0.0, (0.2 + 0.08 * float(i)) * sin(c - 0.7 * float(i)) * amp)
+
+## Paddle (any other Boki in water over half its height): nose and head up out of the water, the front legs (or
+## wings) stroke in turn, the hind legs kick against them; each stroke lifts it a little.
+func _paddle(u: float) -> void:
+	var c := TAU * u * float(_n)
+	var s := sin(c)
+	move.y = 0.02 * sin(2.0 * c) * amp
+	add("root", 0.35 * amp, 0.0, 0.05 * s * amp)
+	add("neck", 0.1 * amp)
+	add("head", 0.25 * amp)
+	both("ear1", -0.15, 0.0, -0.1)
+	match plan:
+		"quad":
+			add("fleg1.L", (0.5 + 0.8 * s) * amp)
+			add("fleg1.R", (0.5 - 0.8 * s) * amp)
+			add("fleg2.L", -0.5 * maxf(0.0, cos(c)) * amp)
+			add("fleg2.R", -0.5 * maxf(0.0, -cos(c)) * amp)
+			add("hleg1.L", (-0.3 - 0.5 * s) * amp)
+			add("hleg1.R", (-0.3 + 0.5 * s) * amp)
+		"bird":
+			wings((0.45 + 0.4 * s) * amp, 0.3 * cos(c) * amp)
+			add("hleg1.L", 0.4 * s * amp)
+			add("hleg1.R", -0.4 * s * amp)
+		_:
+			add("spine", 0.15 * amp, 0.2 * s * amp)
+			wings((0.4 + 0.35 * s) * amp, 0.2)
+	tail(0.25 * sin(TAU * u) * amp)
