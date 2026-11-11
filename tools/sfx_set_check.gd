@@ -12,6 +12,7 @@ extends RefCounted
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
+##   7. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -40,6 +41,7 @@ func run(main: Node) -> void:
 	_ult_cues()
 	_boki_cues()
 	_pickups()
+	_hit_targets()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -173,6 +175,21 @@ func _ult_cues() -> void:
 	wired = wired and match_src.contains("\"ucast\": UltCue.net_in")
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
+
+## 7. Each target class has its own short layer (Juice plays HitClass.SOUND[class] under the weapon's hit).
+func _hit_targets() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/targets.json"))
+	var sounds: Dictionary = set_d.get("sounds", {}) if set_d is Dictionary else {}
+	var names := HitClass.SOUND.values()
+	var missing := names.filter(func(n): return not sounds.has(n) or not Sfx.ensure(n))
+	var all := names.size() == HitClass.WALL + 1 and missing.is_empty()
+	ok(all, "hit targets: all %d classes have a sound (missing %s)" % [names.size(), missing])
+	var long := []
+	for n in names:
+		for t in _takes(n):
+			if _data(t).size() / 2 > 0.25 * 44100:
+				long.append(t.get_file())
+	ok(long.is_empty(), "hit targets: every take is under 0.25 s, a layer not a hit (long: %s)" % [long])
 
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
