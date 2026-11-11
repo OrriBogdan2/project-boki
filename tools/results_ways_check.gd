@@ -12,13 +12,15 @@ class H extends Node:
 	var team := 0
 	var out := false
 	var extracted := false
+	var lvl := 2
 
 func ok(cond: bool, what: String) -> void:
 	print("RESULTSWAYS %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond: bad += 1
 
-func _h(team: int, out := false, died := -1.0, left := false) -> H:
+func _h(team: int, out := false, died := -1.0, left := false, lvl := 2) -> H:
 	var h := H.new()
+	h.lvl = lvl
 	h.team = team
 	h.out = out
 	h.extracted = left
@@ -47,6 +49,7 @@ func run(main: Node) -> void:
 	_pay_and_lines()
 	_real_match(main)
 	_apply()
+	_hiding()
 	await _screen(main)
 	print("RESULTSWAYS DONE, failures: %d" % bad)
 	main.get_tree().quit(0 if bad == 0 else 1)
@@ -156,6 +159,24 @@ func _apply() -> void:
 	out = Game.apply_result(_res({}))
 	ok(not out.has("place_gems"), "no place in the result (a match with no squads to rank): no pay")
 
+## A squad all still at run level 1 at the end is paid nothing and the screen says why; one that levelled is paid.
+func _hiding() -> void:
+	var hs: Array = [_h(0, true, 100.0, false, 1), _h(0, true, 90.0, false, 1), _h(1, true, 50.0)]
+	ok(WaysResult.placing(hs, 0, 100.0).get("hid", false), "a squad all at level 1 hid")
+	hs[1].lvl = 2
+	var levelled := WaysResult.placing(hs, 0, 100.0)
+	ok(not levelled.get("hid", true), "one Hunter past level 1 and the squad levelled")
+	Save.d = Save.fresh()
+	var g0 := int(Save.d["gems"])
+	var out := Game.apply_result(_res({"place": 1, "squads": 10, "hid": true}))
+	ok(not out.has("place_gems") and int(Save.d["gems"]) == g0, "a hiding squad placing 1st of 10 gets no gems")
+	out = Game.apply_result(_res({"place": 1, "squads": 10, "hid": false}))
+	ok(int(out.get("place_gems", 0)) == 40, "a levelled squad is paid as before")
+	var line := WaysResult.hid_line(_res({"place": 1, "squads": 10, "hid": true}))
+	ok(line.contains("never levelled"), "the line says why")
+	ok(WaysResult.hid_line(_res({"place": 1, "hid": false})) == "", "no line for a levelled squad")
+	ok(WaysResult.hid_line(_res({"extracted": true, "hid": true})) == "", "no line for a squad that left")
+
 func _screen(main: Node) -> void:
 	Save.d = Save.fresh()
 	var r := _res({"place": 3, "squads": 10})
@@ -167,6 +188,15 @@ func _screen(main: Node) -> void:
 		_has(t, "Your squad placed 3rd of 10") and _has(t, "Placement pay: 35 gems"),
 		"the lost screen shows the placing and the pay"
 	)
+	ok(not _has(t, "never levelled"), "a levelled squad's screen has no hiding line")
+	scr.queue_free()
+	Save.d = Save.fresh()
+	scr = load("res://scripts/ui/results.gd").new()
+	main.add_child(scr)
+	scr.show_result(_res({"place": 3, "squads": 10, "hid": true}))
+	t = _texts(scr, [])
+	ok(_has(t, "No placement pay: your squad never levelled up."), "the hiding screen says why")
+	ok(not _has(t, "Placement pay:"), "and shows no pay")
 	scr.queue_free()
 	Save.d = Save.fresh()
 	var rw := _res({"extracted": true, "how": "heart_final", "where": "the Heart", "gems": 150,

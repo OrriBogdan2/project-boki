@@ -96,7 +96,9 @@
  "place": {
   "_doc": "placement pay for a squad that did not leave (spec task 5, Game.apply_result)",
   "gems_per_squad_below": 5,
-  "gems_max": 40
+  "gems_max": 40,
+  "min_level": 2,
+  "_min_level": "a squad whose Hunters are all still below this run level at the end hid all match and gets no placement gems"
  },
  "bots": {
   "_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed",

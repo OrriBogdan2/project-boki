@@ -59,6 +59,8 @@ func show_result(r: Dictionary) -> void:
 	head.add_child(UI.para(WaysResult.how_line(r) + tail, UI.T_BODY, UI.MUTED))
 	if int(s.get("place_gems", 0)) > 0:
 		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
+	if WaysResult.hid_line(r) != "":
+		head.add_child(UI.label(WaysResult.hid_line(r), UI.T_BODY, UI.MUTED))
 	if won and s.has("heart"):
 		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
 	v.add_child(head)
