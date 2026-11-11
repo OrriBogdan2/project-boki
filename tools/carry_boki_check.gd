@@ -228,7 +228,7 @@ func _lead(rec: Dictionary) -> void:
 	var far := _walk(k, 4.0)
 	ok(far < 3.0, "it follows beside you as you walk (%.2f m behind at most)" % far)
 	var pace := float(k["led"])
-	var top: float = home.SPEED * HomeCarry.SPEED_K * float(Content.rules("home_lead")["top_k"])
+	var top: float = home.walk_speed() * HomeCarry.SPEED_K * float(Content.rules("home_lead")["top_k"])
 	ok(pace >= BokiRig.RUN_SPEED and pace <= top + 0.01, "its pace (%.1f m/s) is a run, up to %.1f" % [pace, top])
 	c.press_hold(k)
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
