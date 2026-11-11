@@ -29,7 +29,7 @@ func _new_save() -> Dictionary:
 		k["traits"]["temper"] = 0.3
 		d["roster"].append(k)
 	d["active"] = d["roster"][0]["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	return d
 
 ## Everyone fed, rested and clean; joy as given, so only play can be on their minds.
@@ -162,7 +162,7 @@ func _solo_home(id: String, species: String):
 	Care.ensure(k)
 	d["roster"].append(k)
 	d["active"] = k["uid"]
-	d["tutorial"] = {"hatched": true, "intro": true}
+	d["tutorial"] = {"hatched": true, "intro": true, "day1_done": true}      # no base tutorial (Lead)
 	Save.d = d
 	var at := HomeLayout.LANDING
 	var lay := HomeLayout.ensure(d)
