@@ -290,7 +290,8 @@ def run_player(sim, rules, p, seed):
     extra = sim["families_extra"]
     for item, n in st["items"].items():
         f = rules["items"][item][0] if item in rules["items"] else extra.get(item)
-        if f:
+        f = {"look": "looks"}.get(f, f)  # garden_items.json says "look" (Glowmoss Sprig)
+        if f in fam:
             fam[f] += n
     out.update(fam=fam, level=boki.level, stats=dict(boki.stats), zones=len(st["open"]), winner=last,
                garden_xp=st["garden_xp"] / sim["days"], run_xp=st["run_xp"] / sim["days"])
