@@ -35,3 +35,8 @@ The owner's v2 redesign (2026-11-06; briefs/art-refs/sable_v2 on ext/agent-brief
 walk_fl, walk_fr, walk_bl, walk_br, run_fl, run_fr, run_bl, run_br, run_r (2026-11-11; the judge kept only these): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/sable/sable.glb OUT.glb 1.39 2.9`
 (the speed / 1.4, the game's rate cap her `loco.foot_mps` hits, / 1.13, what her `loco.stride` 1.5 adds to a planted sole), then
 `python3 tools/art1/glb_add_clips.py art/wardens/sable/sable.glb OUT.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl,run_br,run_r` (judge: docs/art/wardens/dirloops/JUDGE.md).
+
+walk_b, run_b, run_l (2026-11-11, second pass; the judge kept only these): the hand-keyed loops re-strided,
+`blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- sable.glb B.glb 1.39 2.9 b+,l+`, then
+`glb_add_clips.py sable.glb B.glb walk_b,run_b,run_l` and the diagonals walk_bl, walk_br, run_bl, run_br copied back
+after it (prefix match: walk_b replaces walk_bl/walk_br too).

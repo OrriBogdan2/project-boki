@@ -41,6 +41,11 @@ Clips in 0.24.4: the swap ran on main's cinder.glb, before the docs/art/IDLE_AUD
 onto the swapped body by node name (same skeleton: no rest drift) and added `x_breath` with kael_retarget.py's
 `add_breath` at her own spot (0.283 m over hips) and chest band (1.0-1.32 m up, |x| under 0.17 m): 3363 vertices.
 
-walk_fl, walk_br, run_fl, run_br (2026-11-11; the judge kept only these): `blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/cinder/cinder.glb OUT.glb 2.26 5.19`
-(her `loco.foot_mps`: the game plays the ring at speed / foot_mps, so the soles land at 2.2 and 4.6 m/s), then
-`python3 tools/art1/glb_add_clips.py art/wardens/cinder/cinder.glb OUT.glb walk_fl,walk_br,run_fl,run_br` (judge: docs/art/wardens/dirloops/JUDGE.md).
+Directional loops (2026-11-11, second pass; the judge kept only these): run_b re-strided from the hand-keyed loop, and
+walk_fl, walk_fr, walk_bl, walk_br, run_fl, run_fr, run_bl on the recipe. On main's model:
+`blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- cinder.glb B.glb 2.26 5.19 b+` and
+`... -- cinder.glb DIAG.glb 2.26 5.19 fl,fr,bl,br` (her `loco.foot_mps`: the game plays the ring at speed / foot_mps, so
+the soles land at 2.2 and 4.6 m/s), then `glb_add_clips.py cinder.glb B.glb run_b` first and
+`glb_add_clips.py cinder.glb DIAG.glb walk_fl,walk_fr,walk_bl,walk_br,run_fl,run_fr,run_bl` after (prefix match: run_b
+would replace run_bl). Her foot jets are scaled down in every loco clip; the recipe keys bone scale since this pass
+(the first pass's fl/br showed them full size). Judge: docs/art/wardens/dirloops/JUDGE.md.

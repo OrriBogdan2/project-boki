@@ -151,3 +151,67 @@ Not passed, and why:
 - The recipe's side steps and Cinder's fr/bl read as a wide straddle or a lunge next to the hand-keyed loops. The
   turned pelvis plus `WIDEN` spreads the feet, and her heavy, low-duty run (stance 0.15) loses the drive.
 - Stills at 150 px cap contact at 3. The judge could not see sinking or hovering.
+
+## Cinder and Sable, second pass: restride, jets, blind judge again (2026-11-11, ext/anim-dirloops-cinder-sable-2)
+
+The first pass lost every side and back step to the hand-keyed loops on look (straddle, lunge). So for b/l/r the
+recipe now also offers **restride** (`b+`): the shipped loop as keyed, with only each ankle pushed along the move,
+away from its own stance middle, until a planted sole travels at the bake speed. The leg is solved again with the
+shipped knee direction and foot angle, and the pelvis dips (2.5 cm at most, `DIP_OK`) where the longer stance outreaches
+the leg. Where even that leaves a planted ankle more than 1 cm short (`MISS_OK`), the stretch backs off.
+
+| loop | planted sole, hand-keyed -> restride (bake speed) |
+|---|---|
+| Cinder walk_b / l / r | 2.23 / 1.79 / 1.80 -> 2.26 / 2.26 / 2.26 (2.26) |
+| Cinder run_b / l / r | 4.72 / 3.79 / 3.83 -> 5.19 / 4.53 / 4.55 (5.19) |
+| Sable walk_b / l / r | 0.60 / 0.56 / 0.58 -> 1.07 / 1.06 / 1.13 (1.39) |
+| Sable run_b / l / r | 1.92 / 1.99 / 1.94 -> 2.59 / 2.70 / 2.78 (2.90) |
+
+**Bug fixed: Cinder's foot jets.** Every hand-keyed loco clip scales her `jet.0`/`jet.1` bones to (0.25, 0.06, 0.25).
+The recipe keyed only location and rotation, so its loops (incl. the first pass's shipped walk/run fl and br) showed the
+jets full size, as blades under her feet. It now keys bone scale from the source clip.
+
+**Sheets.** Blender Workbench on lavapipe (Vulkan, CPU), 360 px a frame, 8 frames a loop from key 0. The floor is a
+0.25 m checker that scrolls at the bake speed, so a planted sole holds its tile. All rows are main's model plus the
+clips (`glb_add_clips.py`): a model re-exported from Blender skins Cinder's feet wrong. The GPU queue was stuck (oldest
+gpu job 7 h). The judge is a Fable subagent, blind (seeded A/B order). Its scores are contact / weight / seam / look:
+
+| clip | restride | current | winner |
+|---|---|---|---|
+| Cinder walk_b | 3/3/4/3 | 3/3/4/3 | tie: current kept |
+| Cinder walk_l | 3/3/4/3 | 3/3/4/4 | current (restride straddles wide) |
+| Cinder walk_r | 3/3/4/3 | 3/3/4/3 | tie: current kept |
+| **Cinder run_b** | 3/4/4/4 | 3/3/4/3 | **restride** (knee drive, compact scissor) |
+| Cinder run_l | 3/3/4/2 | 3/4/4/4 | current (restride over-lunges) |
+| Cinder run_r | 3/3/3/2 | 3/4/4/4 | current (legs tangle) |
+| **Sable walk_b** | 4/4/4/4 | 4/3/4/3 | **restride** |
+| Sable walk_l | 3/3/4/3 | 4/4/4/4 | current (overreaches sideways) |
+| Sable walk_r | 3/3/3/2 | 4/4/4/4 | current (wide straddle) |
+| **Sable run_b** | 4/4/4/4 | 4/3/4/3 | **restride** (run lean, push-off) |
+| **Sable run_l** | 4/4/4/4 | 4/3/4/3 | **restride** (cleaner leg cross) |
+| Sable run_r | 3/3/3/2 | 3/3/4/3 (first-pass recipe) | first pass kept |
+
+Cinder's diagonals, re-baked with the jets fixed. There is no current clip, so a diagonal is kept if no score is under 3:
+
+| ring | fl | fr | bl | br |
+|---|---|---|---|---|
+| Cinder walk | 3/3/4/3 pass | 3/3/4/3 pass | 3/3/4/3 pass | 3/3/4/3 pass |
+| Cinder run | 3/4/4/3 pass | 3/4/4/3 pass | 3/3/4/3 pass | 3/3/3/2 FAIL (splits) |
+
+Shipped:
+- Cinder: run_b restride, plus walk fl/fr/bl/br and run fl/fr/bl. run_br goes back to the b+r blend; it was shipped in
+  the first pass with the jet bug.
+- Sable: walk_b, run_b and run_l restride, plus the first pass's diagonals and run_r.
+
+Sheets: `cinder_sable/pass2_*.jpg`; the first pass's Cinder sheets are removed (they showed the jet bug). Contact
+stays at 3 for every row, current or new: even with the scrolling floor, the stills don't let the judge tell a 20%
+slide from none. The table above is the measure.
+
+Gate on this tree:
+- `--anim-audit`: ashwick (Cinder) 13% and thief (Sable) 18%, under the 25% limit. dolm and gunslinger fail, as in the
+  stacked branch's NOTE. `gil` hits a SCRIPT ERROR because it has no Warden clips.
+- `--clip-check`: 1 FAIL, Ostra's import flake (DEBT); every Cinder/Sable pelvis row is ok.
+- `--ashwick-combo-check` 125/0, `--dancer-combo-check` 144/0.
+
+Not passed: restride on side steps. Cinder's are already wide hand-keyed straddles, and a longer stance reads as a lunge.
+The next try is a crossover side step, with the trail foot passing in front, and the stance shortened rather than stretched.
