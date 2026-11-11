@@ -112850,5 +112850,61 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/v2s_meteorab_rc2_3.jpg",
     "ok": true
+  },
+  {
+    "id": "fopt_pavonazar_ring",
+    "name": "Pavonazar female + crown ring",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fopt_pavonazar_ring_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_kestrike_line",
+    "name": "Kestrike female in her line's colours",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fopt_kestrike_line_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_kestrike_line",
+    "name": "Kestrike female in her line's colours",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fopt_kestrike_line_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_kestrike_soft",
+    "name": "Kestrike female, softer male colours",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fopt_kestrike_soft_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_pavonazar_line",
+    "name": "Pavonazar female, closer to the male",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fopt_pavonazar_line_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_pavonazar_ring",
+    "name": "Pavonazar female + crown ring",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/fopt_pavonazar_ring_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_kestrike_soft",
+    "name": "Kestrike female, softer male colours",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fopt_kestrike_soft_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "fopt_pavonazar_line",
+    "name": "Pavonazar female, closer to the male",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/fopt_pavonazar_line_1.jpg",
+    "ok": true
   }
 ]
