@@ -2121,7 +2121,8 @@ func _physics(dt: float) -> void:
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
 				var wv := HunterMove.along_wall(mv * spd, slide_n)      # walk along the wall you touch
-				hv = Loco.accel_to(hv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
+				var bv := HunterMove.along_wall(hv, slide_n)            # the body's into-wall speed dropped too
+				hv = Loco.accel_to(bv, wv, ground_accel * grip, 0.0, HunterMove.brake_rate(hv.length()) * grip, dt)
 			else:
 				hv = HunterMove.brake(hv, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:
@@ -2708,6 +2709,7 @@ func _face_near(lip: float) -> bool:
 func teleport(p: Vector3) -> void:
 	super(p)
 	MantleCarry.forget(self)
+	slide_n = Vector2.ZERO      # (the wall the last step pressed is not here)
 
 ## A jump during a ledge rise: in the window near the top, a strong fling (higher, faster, a whoosh);
 ## earlier, a weaker one. Either way toward the keys you hold (or up and onto the ledge with none).
