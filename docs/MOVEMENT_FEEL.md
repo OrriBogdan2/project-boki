@@ -247,8 +247,8 @@ Measured round trip, client to host and back: 149-162 ms (the 100 ms of weather 
 - **The later cells are local gates, the same offline:** Kael's LMB shows its wave-charge look once the hold becomes a charge (13), his RMB is the tap/hold split (its pose on the hold threshold, a charge spark at 4), Lace's RMB draw pose waits for the 0.15 s tap guard (10; ext/input-latency-check starts it on the press), Vex's RMB first spark at 3 and Cinder's aim at 1 (the kit's first hold tick).
 - **How the check keeps the comparison fair:** the same dice for both runs (Kael's charge sparks are a coin flip a tick), the offline bot stands idle and no Boki run about, the camp's monsters are cleared, and looks are counted only at the pressing Hunter.
 
-## The Summon key: press to burst (`--summon-press-check`)
-The Summon key (`KinSummon`, Boki wisps on) goes off like your own abilities. The press is read in `Match._gather_input` and acted on in the fixed step of the same frame, so the wisp bursts into the Boki on tick 0. The Boki is not the Hunter's body, so a dash, a cast or a recast window doesn't hold it. The check plays Sparkle (still, dash), Meeko (Hearthlight's recast window) and Neve (Rime's cast pose) with a Cindle wisp on --cast-predict-check's two games. It reads press to the first tick the burst shows (the wisp gone, a burst spawned):
+## The Boki key on a wisp: press to burst (`--summon-press-check`)
+G is the single Boki button (DECISIONS Controls; the 11-10 design review, fix 6): with Boki riding as wisps a G tap bursts the wisp into the full Boki (`KinSummon`), a tap again sends it back, a hold opens the order wheel. There is no separate summon action any more (an old saved Summon bind is dropped by `KeyMigrate` step 6). The burst goes off like your own abilities: `KinCommand.poll` reads the press in `Match._gather_input` and it is acted on in the fixed step of the same frame, so the wisp bursts on tick 0 (a tap is otherwise judged on release; the release of the press that burst is no tap, so it never sends the Boki straight back). The Boki is not the Hunter's body, so a dash, a cast or a recast window doesn't hold it. The check plays Sparkle (still, dash), Meeko (Hearthlight's recast window) and Neve (Rime's cast pose) with a Cindle wisp on --cast-predict-check's two games. It reads press to the first tick the burst shows (the wisp gone, a burst spawned), and that the Boki is still out when the watch ends:
 
 | Case | Offline | Online, 100 ms (rtt 160-170 ms measured) |
 |---|---|---|
@@ -256,7 +256,7 @@ The Summon key (`KinSummon`, Boki wisps on) goes off like your own abilities. Th
 | In hit-stop (0.1 s, the longest tier) | 7 (117 ms): the press waits out the freeze and goes on the first step after, within the 0.15 s shared buffer (`DashFlow.BUFFER_S`) | no hit-stop online (the sim never stops) |
 
 - **No game change was needed.** Each game owns its own Boki, so nothing in the summon path waits for the host and `Net.VERSION` is unchanged.
-- **Summon and G never swallow each other:** pressed in the same frame, both come through. Summon pressed during a G hold bursts the Boki, and the hold still opens the order wheel. Summon with the wheel open sends the Boki back, and the wheel stays open until G comes up. Default keys C and G don't clash. Every key name shown goes through `Settings.key_cap`.
+- **G alone (offline rows):** a tap on the wisp bursts it and letting go keeps it out; a tap again sends it back into the wisp (cooldown on); a hold on the wisp bursts it on the press and the hold opens the order wheel on the summoned Boki, letting go picks and keeps it out; a hold while out only opens the wheel; a wisp on cooldown stays a wisp (the press says so). The HUD ring shows the Boki key through `Settings.key_cap("throw")`; `--keybind-check` covers the dropped action and the old-settings migration.
 
 ## Not touched
 

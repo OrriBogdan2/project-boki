@@ -100,7 +100,8 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 
 ## The summon timer round the Boki box (KinSummon) while Boki ride as wisps. Out: a ring in its glow colour
 ## drains with the seconds left. Resting: a grey ring refills, with the seconds. Ready: a soft pulse and the
-## Summon key. The seconds or key sit in a badge on the box's top-left corner (the rank badge has the right).
+## Boki key (G: a tap bursts it). The seconds or key sit in a badge on the box's top-left corner (the rank
+## badge has the right).
 const SUMMON_GROW := 7.0     # px: the summon ring sits outside the bond ring
 static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	var k: Kin = p.kin
@@ -120,7 +121,7 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 		H._ctext(at + Vector2(0, 5), "%d" % ceili(s.cd), 12, HudStyle.MUTED, H.big)
 	else:
 		_ring(H, rr, 1.0, Color(col, 0.6 + 0.4 * sin(float(H.m.time) * 4.0)), 2.0)
-		HudStyle.key_pill(H.c, at, Settings.key_cap("summon"), col)
+		HudStyle.key_pill(H.c, at, Settings.key_cap("throw"), col)
 
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:

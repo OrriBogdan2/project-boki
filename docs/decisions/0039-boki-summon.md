@@ -1,6 +1,6 @@
 # 0039: Boki summon out of the wisp
 
-- **Status:** accepted (prototype, behind the boki_wisps setting)
+- **Status:** accepted (prototype, behind the boki_wisps setting); input amended 2026-11-11 (see below)
 - **Date:** 2026-11-09
 - **Area:** match flow, networking, input
 
@@ -25,4 +25,13 @@ Left out on purpose: guardian summon, stealing, the reveal on a killed summon, b
 ## Consequences
 - Net.VERSION 0.28.0: kin snapshot indices 25-27 = window, shrink, cooldown seconds (KinNet).
 - kin.gd +6 lines (field, tick, knock-down hook), match.gd +5 (input wiring). `--wisp-check` covers it.
-- Press timing: `--summon-press-check` (the burst on the press frame, offline and at 100 ms; G never swallowed).
+- Press timing: `--summon-press-check` (the burst on the press frame, offline and at 100 ms).
+
+## Amendment 2026-11-11: the summon is on G
+The 11-10 design review (fix 6) held DECISIONS Controls to its word: G is the single Boki button. Option 1 is in
+after all, the `summon` action (C) is gone. `KinCommand.poll` returns "summon" the frame G is pressed on a wisp
+(the burst still lands on tick 0, buffered through casts and dashes as before, since it is not the Hunter's body);
+the release of that press is no tap. A tap while summoned sends it back (`KinCommand.tap` -> `KinSummon.press`);
+a hold opens the order wheel as ever. `KeyMigrate` step 6 (keys6_v) drops a saved Summon bind, default or custom.
+`--summon-press-check` G rows: tap, tap again, hold on the wisp, hold while out, cooldown; `--keybind-check`:
+no summon action, old-settings migration.

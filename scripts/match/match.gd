@@ -3764,8 +3764,8 @@ func _gather_input() -> void:
 	PingInput.poll(self, map_up)
 	if paused:
 		player.inp["move"] = Vector2.ZERO
-	if KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel) == "tap":       # G: tap sics / calls back, hold opens the order wheel
-		pending_input["throw"] = true
+	var g := KinCommand.poll(player, get_process_delta_time(), paused or map_up or on_panel)      # G: a press on a wisp bursts it, a tap sics / calls back / sends it back, a hold opens the order wheel
+	if g != "": pending_input[g] = true
 	player.inp["interact"] = Input.is_action_pressed("interact")
 	if lairs and not lairs.puzzle_of(player).is_empty():
 		var pad := Input.get_connected_joypads().size() > 0 and (Input.is_joy_button_pressed(0, JOY_BUTTON_A) or Input.is_joy_button_pressed(0, JOY_BUTTON_X))
@@ -3827,8 +3827,6 @@ func _gather_input() -> void:
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
 		HunterKeys.ult_pressed(player)
-	if Input.is_action_just_pressed("summon") and not paused:
-		pending_input["summon"] = true      # Boki wisps: KinSummon.press on the fixed step
 
 func _unhandled_input(event: InputEvent) -> void:
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):

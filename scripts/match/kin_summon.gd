@@ -1,11 +1,12 @@
 class_name KinSummon
 extends RefCounted
 ## The Boki summon (DECISIONS 2026-11-09, briefs/boki-art/WISP_DESIGN_OPEN.md Q1/Q3/Q5/Q7, decision 0039).
-## With Boki riding as wisps (KinWisp) the Summon key bursts the wisp into the full Boki for its species'
-## window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
+## With Boki riding as wisps (KinWisp) the Boki key (G, KinCommand) bursts the wisp into the full Boki for
+## its species' window: its normal AI (KinTactics, the orders on the Boki key, its own ability) on a short leash. Damage
 ## never ends the window; being knocked down does: it turns straight back into a wisp with a longer cooldown.
-## At the end it shrinks back into the wisp, which stays dim until the cooldown is over. Summon again while
-## it is out sends it back early (full cooldown). One summon at a time: one Boki per hunter in a match.
+## At the end it shrinks back into the wisp, which stays dim until the cooldown is over. A G tap while it is
+## out sends it back early (full cooldown); a G hold gives it orders as ever. One summon at a time: one Boki
+## per hunter in a match.
 ## Numbers: content/rules/boki_summon.json (the role x size table). HUD ring: BokiHud.summon_ring.
 ## Online: the kin snapshot carries the seconds (KinNet); the wisp flag swaps the form.
 
@@ -47,7 +48,8 @@ func out() -> bool:
 func leash(aggression: float) -> float:
 	return float(rules()["leash"]) + (aggression - 0.5) * 2.0 * float(rules()["leash_swing"])
 
-## The Summon key: out of the wisp when ready, back early when out. False (and says why) when it can't.
+## The Boki key on a wisp (G press) or a summoned Boki (G tap): out of the wisp when ready, back early
+## when out. False (and says why) when it can't.
 static func press(h: Hunter) -> bool:
 	var k: Kin = h.kin
 	if k == null or k.summon == null or h.downed or h.out or h.riding or h.dropping:

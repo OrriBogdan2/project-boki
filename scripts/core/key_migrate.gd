@@ -11,6 +11,7 @@ extends RefCounted
 ##           if its new key is already a custom key of another action.
 ##   step 5  Middle mouse left the Boki key (throw) for the new ping key: a saved throw binding drops it, and
 ##           ping starts unbound if middle mouse is another action's custom key.
+##   step 6  The Summon key folded into the Boki key (G tap): a saved "summon" binding is dropped, whatever it was.
 
 static func _code(k: int) -> String:
 	return "key:%d" % k
@@ -44,6 +45,9 @@ static func run(s: Dictionary) -> void:
 	if int(s.get("keys5_v", 0)) < 1:
 		_mmb_to_ping(ks)
 		s["keys5_v"] = 1
+	if int(s.get("keys6_v", 0)) < 1:
+		ks.erase("summon")
+		s["keys6_v"] = 1
 
 static func _steps_one_to_three(s: Dictionary, ks: Dictionary) -> void:
 	if int(s.get("keys2_v", 0)) < 1:
