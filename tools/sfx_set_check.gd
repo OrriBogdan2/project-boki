@@ -20,6 +20,7 @@ extends RefCounted
 ##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
 ##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd plays no stock cue
 ##   7. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
+##   7. the Boki set has a k_<type> cast cue on file for every Boki type (KinParts.THEMES)
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -102,6 +103,8 @@ func _check_set(path: String) -> void:
 	_reach_and_loops(group, d)
 	if Arch.ids().has(group):
 		_check_hunter(group, d)
+	if group == "boki":
+		_boki_type_cues(sounds)
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -123,6 +126,14 @@ func _check_hunter(arch: String, d: Dictionary) -> void:
 	var want := [arch + "_dash", arch + "_step_wood", arch + "_hurt"]
 	ok(picked == want, "%s: HeroSfx picks its own (%s)" % [arch, picked])
 	_kit_names(arch, d.get("kit_files", []))
+
+## 7. Every Boki type has a cast cue (k_<type>, played by Kin._cast), listed in the set and on file.
+func _boki_type_cues(sounds: Dictionary) -> void:
+	var lacking := []
+	for t in KinParts.THEMES:
+		if t != "none" and not (sounds.has("k_" + t) and not _takes("k_" + t).is_empty()):
+			lacking.append(t)
+	ok(lacking.is_empty(), "boki: every type has a cast cue file (missing %s)" % [lacking])
 
 ## 4. Every literal sound name the kit plays exists (a typo plays silence): <arch>_kit.gd plus the helper
 ## files the set lists under "kit_files" (paths under scripts/arch/kits/).

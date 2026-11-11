@@ -89,6 +89,8 @@ const CHECKS := {
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
+	"--kin-type-fx-check": ["res://tools/kin_type_fx_check.gd", "kin_type_fx_check", null],      # 18 type accents
+	"--kin-type-sheet": ["res://tools/kin_type_sheet.gd", "kin_type_sheet", null],      # --shots-dir=<dir>
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	# Bokidex quirks, sex ratios
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],
