@@ -110736,5 +110736,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_cubbat_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_domeleon",
+    "name": "Domeleon (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_domeleon_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_dreadmonite",
+    "name": "Dreadmonite (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_dreadmonite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_dreadnoyak",
+    "name": "Dreadnoyak (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_dreadnoyak_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_dobsabre",
+    "name": "Dobsabre (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_dobsabre_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_crofthorn",
+    "name": "Crofthorn (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_crofthorn_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_dragonkite",
+    "name": "Dragonkite (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_dragonkite_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_crofthollow",
+    "name": "Crofthollow (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_crofthollow_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_dynaboa",
+    "name": "Dynaboa (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_dynaboa_1.jpg",
+    "ok": true
   }
 ]
