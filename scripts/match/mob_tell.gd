@@ -47,10 +47,14 @@ static func _lane(o: Vector3, d: Vector2, start: float, length: float, width: fl
 	var from := o + Vector3(d.x, 0.0, d.y) * (start - pad)
 	return {"lane": true, "from": from, "dir": d, "len": length + 2.0 * pad, "width": width + 2.0 * pad}
 
-## The path of a bolt: it hits what comes within its radius (and the hit slack) of its centre line.
+## The path of a bolt: it hits what comes within its radius (and the hit slack) of its centre, so the
+## lane is its centre line grown by that much on every side, the far end too. A shot flies whole
+## Match.DT steps until its life is spent, so it can go up to one step past speed * life.
 static func _bolt(o: Vector3, d: Vector2, bolt: Dictionary, pad: float) -> Dictionary:
-	var reach := float(bolt["speed"]) * float(bolt["life"])
-	return _lane(o, d, MUZZLE, reach, 2.0 * (float(bolt["size"]) + Match.HIT_SLACK), pad)
+	var steps := ceili(float(bolt["life"]) / Match.DT - 1e-4)
+	var reach := float(bolt["speed"]) * Match.DT * steps
+	var rim := float(bolt["size"]) + Match.HIT_SLACK
+	return _lane(o, d, MUZZLE - rim, reach + 2.0 * rim, 2.0 * rim, pad)
 
 static func contains(sh: Dictionary, p: Vector3) -> bool:
 	if sh["lane"]:

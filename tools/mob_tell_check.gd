@@ -2,7 +2,7 @@ extends RefCounted
 ## --mob-tell-check: every monster attack can be dodged by watching its tell (docs/MOB_TELLS.md).
 ## For skitter, spitter, brute, warden, bomber and sentinel: the ground tell the player sees is read back
 ## from the telegraph nodes themselves and compared with where the attack really lands, found by
-## running the attack against a stand-in just inside (95%) and just outside (105%) of the tell's edges;
+## running the attack against a stand-in just inside (95%) and just outside (105%, and 2 cm) of the tell's edges;
 ## the fill reaches 1.0 on the hit frame (and the full tell stays up a moment); the body glow brightens
 ## to its peak on that frame; the tell is up for the whole wind-up (lead >= wind-up); the tell wears the
 ## rival tint; and an instant blow leaves time to step out. Every attack id in Data.MOBS must have a tell;
@@ -19,6 +19,7 @@ var n := 0
 const DT := 1.0 / 60.0
 const NEAR := 0.95          # probe just inside an edge
 const FAR := 1.05           # probe just outside it
+const EDGE := 0.02          # m past the drawn edge: a hunter standing there is never hit
 const WALK := 4.4           # m/s, a hunter on foot (Data.CLASSES)
 
 func ok(what: String, cond: bool, info := "") -> void:
@@ -113,17 +114,18 @@ func _probes(sh: Dictionary) -> Array:
 		var L: float = sh["len"]
 		var hw: float = sh["width"] * 0.5
 		for sd in [-1.0, 1.0]:
-			for f in [[NEAR, true], [FAR, false]]:
-				var q: Vector2 = Vector2(s.x, s.z) + d * L * 0.9 + nv * hw * f[0] * sd
+			for f in [[hw * NEAR, true], [hw * FAR, false], [hw + EDGE, false]]:
+				var q: Vector2 = Vector2(s.x, s.z) + d * L * 0.9 + nv * float(f[0]) * sd
 				out.append([Vector3(q.x, s.y, q.y), f[1], "side"])
-		for f in [[NEAR, true], [FAR, false]]:
-			var q2: Vector2 = Vector2(s.x, s.z) + d * L * f[0]
+		for f in [[L * NEAR, true], [L * FAR, false], [L + EDGE, false]]:
+			var q2: Vector2 = Vector2(s.x, s.z) + d * float(f[0])
 			out.append([Vector3(q2.x, s.y, q2.y), f[1], "end"])
 	else:
 		var c: Vector3 = sh["at"]
+		var r := float(sh["r"])
 		for a in [0.0, 2.1, 4.2]:
-			for f in [[NEAR, true], [FAR, false]]:
-				out.append([c + Vector3(cos(a), 0, sin(a)) * float(sh["r"]) * f[0], f[1], "edge"])
+			for f in [[r * NEAR, true], [r * FAR, false], [r + EDGE, false]]:
+				out.append([c + Vector3(cos(a), 0, sin(a)) * float(f[0]), f[1], "edge"])
 	return out
 
 func _mob(kind: String) -> void:
