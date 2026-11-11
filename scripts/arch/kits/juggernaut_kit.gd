@@ -42,7 +42,8 @@ var lmb_buf := 0.0
 var bot_wave_t := 0.0
 var slash_n := 0
 var slash_at := -9.0
-var slam_w := {}               # the Finishing Slam winding up: {t, dir (at the press), pinned (to dir: E went)}
+var slam_w := {}               # the Finishing Slam winding up: {t, t0 (its wind-up, s), dir (at the press),
+                               # pinned (to dir: E went), dk/rk (damage/reach k: below 1 for the tap strike)}
 var lunge := {}                # the running Lunge: {end, dir, k, hit}
 var warchain: JuggernautChain  # E (its state machine)
 var meteor: JuggernautDrop     # the airborne Smash
@@ -71,6 +72,7 @@ func _setup() -> void:
 	warchain = JuggernautChain.new(self)
 	meteor = JuggernautDrop.new(self)
 	cd["air"] = 0.0             # the Meteor Drop's own cooldown slot
+	cd["tap"] = 0.0             # the tap strike's own short cooldown (a tap while the Smash rests)
 
 func full_ready() -> bool:
 	return false               # no resource-full Smash: Enraged buffs everything instead
@@ -738,6 +740,9 @@ func fire_rmb(c: Dictionary) -> void:
 		return
 	var spin: bool = c.get("e", false)
 	var dropping: bool = c.get("air", false) and not spin
+	if not spin and not dropping and not c.get("hold", false) and ch_rmb < 1.0:
+		_tap_strike()               # the Smash rests: a tap is still an overhead strike, lighter, on its own cooldown
+		return
 	if dropping:
 		if not spend_air(): return
 	elif not spend_rmb():
@@ -752,10 +757,26 @@ func fire_rmb(c: Dictionary) -> void:
 		var held_t := float(c.get("t", 0.0))
 		_lunge(lunge_k(held_t), perfect_window(held_t) >= 0)
 	else:
-		# the Finishing Slam winds up first (you keep aiming); everyone sees the warning over you
-		slam_w = {"t": float(rmb_def()["windup"]), "dir": h.aim_dir()}
-		play("jug_slam")                # keyed to the wind-up: the strike lands at 0.6s
-		vfx("slam_tell")
+		_start_slam(1.0, 1.0, float(rmb_def()["windup"]))
+
+## The Finishing Slam winds up first (you keep aiming); everyone sees the warning over you. `dk`/`rk` scale its
+## damage and reach (1 for the Slam, rmb.tap_strike's for the tap strike).
+func _start_slam(dk: float, rk: float, windup: float) -> void:
+	slam_w = {"t": windup, "t0": windup, "dir": h.aim_dir(), "dk": dk, "rk": rk}
+	play("jug_slam")                # keyed to the Slam's wind-up: the strike lands at 0.6s...
+	anim_at -= float(rmb_def()["windup"]) - windup      # ...so a shorter one starts the clip that much in
+	vfx("slam_tell")
+
+## A tap while the Smash rests, as the source's quick RMB reads to the owner: the lighter strike in
+## rmb.tap_strike, on its own short cooldown, no charge spent.
+func _tap_strike() -> void:
+	if float(cd["tap"]) > 0.0:
+		h._ab_feedback("sec", "deny")
+		return
+	var ts: Dictionary = rmb_def()["tap_strike"]
+	cd["tap"] = float(ts["cooldown"])
+	h._ab_feedback("sec", "cast")
+	_start_slam(float(ts["dmg_k"]), float(ts["reach_k"]), float(ts["windup"]))
 
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
@@ -764,45 +785,49 @@ func _tick_slam(dt: float) -> void:
 		return
 	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
-	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
+	var wk := 1.0 - clampf(float(slam_w["t"]) / float(slam_w["t0"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
-	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
-			"all": true}
+	var cone := {"len": float(sl["radius"]) * float(slam_w["rk"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk,
+			"col": SLASH_OUT, "all": true}
 	if pin != Vector2.ZERO:
 		cone["dir"] = pin
 	AimKit.cone(h, "slam", cone)
 	HeroVfx.of(m).hold(h, "slam_wind", wk)
 	if float(slam_w["t"]) <= 0.0:
+		var wind := slam_w
 		slam_w = {}
-		_slam(pin)
+		_slam(pin, float(wind["dk"]), float(wind["rk"]))
 
 ## The Finishing Slam: a heavy cone; the wounded (under 35%) take +50%; a foe in the sweet spot (the far
 ## tip, dead ahead) is the payoff, and a knock on that foe within 2s makes the Gilded Riposte ready again.
-func _slam(pin := Vector2.ZERO) -> void:
+## `dk`/`rk`: the damage and reach k of the strike (below 1 for the tap strike).
+func _slam(pin := Vector2.ZERO, dk := 1.0, rk := 1.0) -> void:
 	var sd := rmb_def()
 	var sl: Dictionary = sd["slam"]
 	var dd := h.aim_dir() if pin == Vector2.ZERO else pin
-	var effs: Array = [{"type": "damage", "amount": float(sl["dmg"]) * smash_k()},
+	var dmg := float(sl["dmg"]) * smash_k() * dk
+	var effs: Array = [{"type": "damage", "amount": dmg},
 			{"type": "push", "strength": float(sl["push"]), "from": "caster"}]
 	var stg := stage("rmb",
-			{"delivery": {"type": "cone", "radius": float(sl["radius"]), "angle": float(sl["angle"])}, "effects": effs})
+			{"delivery": {"type": "cone", "radius": float(sl["radius"]) * rk, "angle": float(sl["angle"])},
+					"effects": effs})
 	var from := h.pos
 	var paid := {}
 	var at := aim() if pin == Vector2.ZERO else h.pos + Vector3(pin.x, 0, pin.y) * float(sl["radius"])
 	run_own(stg, cx("rmb", "finishing_slam", at, {"no_floor": true, "on_foe": func(f: Ent, _c: Dictionary):
 		if not is_instance_valid(f): return
 		if not f.dead and f.max_hp > 0.0 and f.hp / f.max_hp < float(sl["low"]):
-			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["low_k"]) * power("sec"), h,
+			f.hurt(dmg * float(sl["low_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "execute"], "crit": true, "melee": true})
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "EXECUTE", Color("ffd0a0"), true)
 		var to := Vector2(f.pos.x - from.x, f.pos.z - from.z)
 		var sw: Array = sl["sweet"]
-		var in_band := to.length() >= float(sw[0]) and to.length() <= float(sw[1]) + f.r
+		var in_band := to.length() >= float(sw[0]) * rk and to.length() <= float(sw[1]) * rk + f.r
 		var sweet := in_band and absf(rad_to_deg(dd.angle_to(to.normalized()))) <= float(sl["sweet_deg"])
 		Feel.hitstop(m, h, f, 30.0, {"melee": true, "payoff": sweet, "heavy": true})
 		if sweet and not f.dead:
 			# the data's "edge hits do more": the far tip lands sweet_k harder
-			f.hurt(float(sl["dmg"]) * smash_k() * float(sl["sweet_k"]) * power("sec"), h,
+			f.hurt(dmg * float(sl["sweet_k"]) * power("sec"), h,
 					{"src": "abil", "ab": "utility", "tags": ["utility", "sweet"], "melee": true})
 		if sweet and not paid.has("x"):
 			paid["x"] = true
@@ -811,7 +836,7 @@ func _slam(pin := Vector2.ZERO) -> void:
 			vfx("slam_sweet", f.pos, dd)
 		slam_hit[f.get_instance_id()] = m.time}))
 	AimKit.hide(h, "slam")
-	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"])})
+	vfx("slam_hit", h.pos, dd, {"r": float(sl["radius"]) * rk})
 
 ## The hold: a charged dash attack into the first foe in its path; a miss doubles the cooldown.
 ## The Lunge let go at charge `k`; `perfect`: in a perfect window, it flings him lunge.perfect_k further.
