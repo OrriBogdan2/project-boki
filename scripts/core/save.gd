@@ -318,6 +318,7 @@ func _migrate_12_to_13(data: Dictionary) -> void:
 	if typeof(data.get("drills", null)) != TYPE_DICTIONARY:
 		data["drills"] = {}      # the movement drills' best time per drill (MoveDrills)
 	TutorialResume.migrate(data)      # a save past the tutorial has finished it (no resume offered)
+	XpHints.migrate(data)             # the two XP first-time lines' "seen" flags
 
 ## v6 -> v7: equal footing in matches. Armor and kit pieces in the armory become gems and farm
 ## materials, the glove-turned-utility pieces become stash charges, backpack upgrades are refunded,

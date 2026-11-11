@@ -2208,6 +2208,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	if biomes: biomes.on_mob_dead(mb)
 	KeyCarry.on_mob_dead(self, mb)
 	if lairs: lairs.on_mob_dead(mb, credit)
+	XpHints.on_mob_dead(self, mb, credit, _o)
 	var big_mob: bool = mb.mkind in ["brute", "warden"] or mb.md.get("boss", false)
 	sfx("die_big" if big_mob else "die_small", mb.pos, -5.0, randf_range(0.9, 1.15))
 	if credit == player: sfx("kill", null, -12.0, 1.4)
@@ -5630,6 +5631,7 @@ func _process_net_revives() -> void:
 
 # ------------------------------------------------------------------ first-time tips
 var _tip_t := 0.0
+var tips_live := false         # a first-time tip may show right now (set by _tips each frame)
 
 ## Screenshot demos: moves the player (once) to the nearest open, level stretch of ground at least
 ## 6m from the start's clutter (the duel pad and its post, the glove stands) and returns a spot
@@ -5684,6 +5686,7 @@ func _tip(key: String, text: String) -> void:
 	hud.tip(text)
 
 func _tips() -> void:
+	tips_live = false
 	if player == null or player.out or player.riding or opts.get("autoplay", false) or not Settings.get_v("tips") or Record.clean():
 		return
 	_tip_t += get_process_delta_time()
@@ -5691,6 +5694,7 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
+	tips_live = true
 	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	if _tip_t > 14.0:
 		if player.ak:

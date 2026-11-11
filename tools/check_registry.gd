@@ -242,6 +242,7 @@ const CHECKS := {
 	"--arrival-check": ["res://tools/arrival_check.gd", "arrival_check", null],      # arrival modals, top bar
 	"--journal-check": ["res://tools/journal_check.gd", "journal_check", null],      # journal, away card
 	"--arrival-shots": ["res://tools/arrival_shots.gd", "arrival_shots", null],      # --shots-dir=<dir>
+	"--xp-hint-check": ["res://tools/xp_hint_check.gd", "xp_hint_check", null],      # the two XP first-time lines
 	"--uipolish-check": ["res://tools/uipolish_check.gd", "uipolish_check", null],     # settings, menu look
 	"--armour-hint-check": ["res://tools/armour_hint_check.gd", "armour_hint_check", null],      # the first armour hint
 	"--msg-queue-check": ["res://tools/msg_queue_check.gd", "msg_queue_check", null],     # one message lane
