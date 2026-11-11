@@ -1,6 +1,15 @@
 # Vex (gunslinger): import note
 
-## v95 swap, appeal3 body b (2026-11-10, ext/vex-appeal-b): the current vex.glb
+## v95 swap, body7 candidate A (2026-11-11, ext/vex-body7-1111): the current vex.glb
+
+Owner 11-11: the body6 pass read too pinup on the full body, so Vex is the ref-athletic body7 A,
+`~/meshy/v95/Vex/r2/body7/cand_A.glb` (front waist, hip and thigh widths within 2% of the vex_v2 turnaround, 0 flipped
+triangles; same vertices, UVs and face as appeal3 `cand_b`, see `_body7_check.txt` beside the raw files). Only `master` in
+`art/wardens/src/vex_v95.json` changed; the swap is the same command, run from the game .glb as it was before the first swap
+(`git show 52cd75906^:art/wardens/vex/vex.glb` as WORK/game.glb), then the garden clips put back with
+`tools/art1/glb_add_clips.py ... pet,give,cheer`. 13.1k tris. Shots: docs/shots/vex-body7/.
+
+## Previous: appeal3 body b (2026-11-10, ext/vex-appeal-b)
 
 The mesh is the v95 master in the owner's appeal3 look, body variant b (owner pick 11-10: fuller bust, waist 3% narrower,
 the left jacket flap lying on the belly, a stray hair strand by her right eye tucked behind the skin) with the
