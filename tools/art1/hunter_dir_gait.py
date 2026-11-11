@@ -1,13 +1,15 @@
-"""A Hunter's walk/run back and side loops on the animation pilot's recipe (tools/art1/breaker_gait.py on
+"""A Hunter's walk/run back, side and diagonal loops on the animation pilot's recipe (tools/art1/breaker_gait.py on
 ext/anim-pilot-albert-neve, the Tarek/Vex walk_f/run_f of ext/anim-tarek-pilot): a closed left + right cycle, each
 stance sole pinned to a floor that passes under him at his loco speed, the soles set on the floor from the skinned
-foot verts. Each loop takes its length, right-foot strike, duty, stride centre, lift, bob and floor from the shipped
-forward loop, so the walk and run rings blend in step (the diagonals) and never pop in height. A side step turns the
-pelvis TURN degrees into the move (the feet pass, never cross) while the chest keeps the source clip's facing.
-The upper body (arms, head, weapon, springs) is the shipped clip of that direction, resampled to the new length and
-put in phase with the new legs.
+foot verts. Each loop takes its length, right-foot strike key, fore-aft lean and floor from the shipped forward loop,
+so a ring's neighbours blend in step. A stance never travels further than an upright leg reaches (REACH): a step
+longer than that is flown. The hip rides a set height over the planted leg (RIDE) and dips only where a stride end
+outreaches it, so mid stance stands tall. Off the forward line the pelvis turns up to
+TURN degrees into the move (back half: its back to the move), so the feet pass and never cross, while the chest keeps
+the source clip's facing. The upper body (arms, head, weapon, springs) is the shipped clip of that direction (a
+diagonal takes the forward or back one), resampled to the new length and put in phase with the new legs.
   blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED
-  python3 tools/art1/glb_add_clips.py SRC.glb OUT.glb walk_b,walk_l,walk_r,run_b,run_l,run_r"""
+  python3 tools/art1/glb_add_clips.py SRC.glb OUT.glb walk_b,walk_l,...,run_br"""
 import math
 import sys
 
@@ -16,19 +18,23 @@ import numpy as np
 from mathutils import Matrix, Vector
 
 SRC, OUT, WALK, RUN, *MORE = sys.argv[sys.argv.index("--") + 1:]
-BUILD = [d for d in (MORE[0] if MORE else "b,l,r").split(",") if d]   # the directions to rebuild; "" only measures
+BUILD = [d for d in (MORE[0] if MORE else "b,l,r,fl,fr,bl,br").split(",") if d]   # the directions to rebuild; "" only measures
 LENGTH = {"walk": float(MORE[1]) if len(MORE) > 1 else 0.0, "run": float(MORE[2]) if len(MORE) > 2 else 0.0}   # s, 0 = the f loop's
 SPEED = {"walk": float(WALK), "run": float(RUN)}   # game m/s (warden_anim loco); the model is in game metres
 FPS = 48            # keys per second
 CONTACT = 0.012     # m: a sole vert this close to the floor is planted
-TURN = 40.0         # deg: the pelvis turns into a side step, the chest stays on the source clip's facing
+TURN = 40.0         # deg: the most the pelvis turns into the move, the chest stays on the source clip's facing
 WIDEN = 0.035       # m: each foot steps this much wider in a side step
 ROLL = 4.0          # deg: the pelvis rolls onto the planted foot (the weight shift)
 SWAY = 0.018        # m: and the pelvis rides over it
-REACH = 1.1        # leg lengths: the most a stance sole travels (a short leg takes a shorter stance, not a crouch)
+REACH = 0.8        # leg lengths: the most a stance sole travels (a longer step is flown: a shorter stance, not a crouch)
+SWING = 0.2        # leg lengths: the highest a swing sole lifts
+RIDE = {"walk": 0.985, "run": 0.95}   # leg lengths: the hip over a planted leg (a walk stands tall, a run rides a bent knee)
+G = 9.8            # m/s2: a flown step rises and falls on it
 PIVOT_MAX = 65.0   # deg: how far a sole may pivot on its heel or toe to stay in reach
 TOE_UP, HEEL_UP = 10.0, 30.0   # deg: the sole's pitch at the strike and at the push (mirrored walking backwards)
 DIRS = {"f": Vector((0, 1, 0)), "b": Vector((0, -1, 0)), "l": Vector((-1, 0, 0)), "r": Vector((1, 0, 0))}
+DIRS.update({a + b: (DIRS[a] + DIRS[b]).normalized() for a in "fb" for b in "lr"})
 LEGS = ("thigh", "shin", "foot")
 LEG_BONES = ["%s.%s" % (n, s) for n in LEGS for s in "LR"]
 
@@ -167,17 +173,23 @@ class Gait:
         self.n, self.floor = round(LENGTH[gait] * FPS) or fwd["n"], fwd["floor"]
         self.period = self.n / FPS
         self.duty = min(fwd["duty"], REACH * LEG / (self.speed * self.period))
+        self.shift = round(fwd["strike"] * self.n / fwd["n"])   # the right strike falls on the forward loop's key
         self.d = DIRS[k]
-        self.yaw = -TURN * self.d.x                        # (z up: a right step turns the pelvis clockwise)
+        off = math.degrees(math.atan2(self.d.x, self.d.y))    # the move: 0 ahead, 90 to his right, 180 back
+        into = min(abs(off), TURN) if abs(off) <= 90 else -min(180 - abs(off), TURN)
+        self.yaw = -math.copysign(1.0, off) * into         # (z up: a right step turns the pelvis clockwise)
         self.face = rot("Z", self.yaw)
         self.widen = WIDEN * abs(self.d.x)
         self.along = self.face.to_3x3().inverted() @ self.d   # the path in the pelvis's frame
         self.travel = self.speed * self.duty * self.period
         a = fwd["keys"][fwd["strike"]]["ankle"]["R"].y
         b = fwd["keys"][fwd["lift_at"]]["ankle"]["R"].y
-        self.centre = 0.5 * (a + b)                        # the stance's middle, m ahead of the root (forward loop)
-        self.lift = min(max(fwd["swing"], 0.04), 0.14)
-        self.fwd = fwd
+        hips = float(np.mean([key["hc"].y for key in fwd["keys"]]))
+        self.lean = Vector((0, min(max(0.5 * (a + b) - hips, -0.04), 0.04), 0))   # the stance's middle ahead of the hips
+        self.lift = min(max(fwd["swing"], 0.04), SWING * LEG)
+        flown = max(0.0, 0.5 - self.duty) * self.period    # s in the air between two stances
+        self.hip = self.floor + SOLE["R"][3] + RIDE[gait] * LEG
+        self.bob = min(0.05, G * flown * flown / 8)
 
     def path(self, side, ph, off):
         """One foot at phase ph (0 = its strike): the flat-foot ankle place, its pitch and whether it is planted."""
@@ -190,7 +202,7 @@ class Gait:
         if ph < self.duty:
             u = ph / self.duty
             pitch = roll * (TOE_UP * (1 - smooth(0.0, 0.16, u)) - HEEL_UP * smooth(0.7, 1.0, u) ** 1.4)
-            return home + self.d * (self.centre + front - self.travel * u) + off, pitch, True
+            return home + self.lean + self.d * (front - self.travel * u) + off, pitch, True
         s = (ph - self.duty) / (1 - self.duty)
         span = self.speed * (1 - self.duty) * self.period
         m0, m1 = -0.3 * span, -0.6 * span                    # (a Hermite pass: it leaves the floor folding up, meets it near speed)
@@ -199,7 +211,7 @@ class Gait:
         side_out = self.face.to_3x3() @ Vector((sgn * 0.012 * math.sin(s * math.pi), 0, 0))
         pitch = roll * (-HEEL_UP + (HEEL_UP + TOE_UP) * smooth(0.08, 0.92, s))
         lift = Vector((0, 0, self.lift * math.sin(s ** 0.75 * math.pi) ** 0.9))
-        return home + self.d * (self.centre + x) + side_out + lift + off * (1 - smooth(0.0, 0.6, s)), pitch, False
+        return home + self.lean + self.d * x + side_out + lift + off * (1 - smooth(0.0, 0.6, s)), pitch, False
 
     def place(self, side, flat, pitch):
         """The ankle and foot turn for a sole that pivots on its heel (toe up) or its toe (heel up)."""
@@ -219,7 +231,10 @@ class Gait:
         ankle, turn = self.place(side, flat, pitch)
         while (ankle - hip).length > 0.995 * LEG and abs(pitch) < PIVOT_MAX:
             pitch = pitch + 4.0 * sign if pitch * sign >= 0 else 0.0
-            ankle, turn = self.place(side, flat, pitch)
+            nearer = self.place(side, flat, pitch)
+            if (nearer[0] - hip).length >= (ankle - hip).length:   # (a heel pivot lowers the ankle: past a point it costs reach)
+                break
+            ankle, turn = nearer
         return ankle, turn
 
 
@@ -237,7 +252,6 @@ def pose(g, src, ph, feet, drop):
         pb.location, pb.rotation_quaternion = la.lerp(lb, u), qa.slerp(qb, u)
     for name in ["root"] + LEG_BONES:
         PB[name].matrix_basis = Matrix()
-    fk = g.fwd["keys"][int((g.fwd["strike"] + ph * g.fwd["n"]) % g.fwd["n"])]
     mid = ph - g.duty / 2                                 # 0 at the right foot's mid stance
     onto = math.cos(mid * math.tau)                       # +1 weight on the right foot, -1 on the left
     rest_q = REST["root"].to_quaternion()
@@ -245,7 +259,8 @@ def pose(g, src, ph, feet, drop):
     src_rot = (src_q @ rest_q.inverted()).to_euler("ZXY")   # (the source's pelvis pitch and roll; its yaw is ours)
     src_rot.z = 0.0
     turn = g.face @ rot("Y", ROLL * onto) @ src_rot.to_matrix().to_4x4() @ REST["root"].to_3x3().to_4x4()
-    want = Vector((SWAY * onto, 0.0, fk["hc"].z + drop))        # the hip centre at the forward loop's height
+    height = g.hip - g.bob * math.cos(2 * mid * math.tau)   # a flown step: lowest over each stance, highest between
+    want = Vector((SWAY * onto, 0.0, height + drop))
     PB["root"].matrix = Matrix.Translation(want - turn.to_3x3() @ HIP_IN_ROOT) @ turn
     layer.update()
     hips = a["hips"].to_quaternion().slerp(b["hips"].to_quaternion(), u)    # the chest keeps the source's facing
@@ -265,7 +280,7 @@ def pose(g, src, ph, feet, drop):
             miss = leg_ik(side, ankle, turn, pole)
             low = float(verts(FOOT[side])[:, 2].min()) - g.floor
             if planted or low < 0:                        # the sole on the floor from the skinned verts: no hover, no sink
-                ankle.z -= low
+                ankle.z -= low - (PB["foot." + side].head.z - ankle.z)   # (less what a leg that fell short hangs above it)
                 miss = leg_ik(side, ankle, turn, pole)
             now = verts(FOOT[side])
             both = ((now[:, 2] < g.floor + CONTACT) & (was["co"][:, 2] < g.floor + CONTACT)
@@ -282,13 +297,13 @@ def pose(g, src, ph, feet, drop):
 def bake(name, g, src):
     feet = {s: dict(co=verts(FOOT[s]), planted=False, off=Vector()) for s in "LR"}
     drop = np.zeros(g.n)
-    for lap in range(4):     # lap 0 hands each swing its start; laps 1-2 dip the pelvis where a long step outreaches the leg
+    for lap in range(5):     # lap 0 hands each swing its start; laps 1-3 dip the pelvis where a step outreaches the leg
         keys, soles, miss = [], [], np.zeros(g.n)
         for k in range(g.n):
-            miss[k] = pose(g, src, k / g.n, feet, drop[k])
+            miss[k] = pose(g, src, (k - g.shift) % g.n / g.n, feet, drop[k])
             keys.append({pb.name: (pb.location.copy(), pb.rotation_quaternion.copy()) for pb in PB})
             soles.append({s: (feet[s]["planted"], feet[s]["co"].copy()) for s in "LR"})
-        if lap in (1, 2) and miss.max() > 0.003:
+        if lap in (1, 2, 3) and miss.max() > 0.003:
             need = miss * 1.15
             w = max(1, g.n // 12)                         # (widened, then smoothed round the loop: a dip, not a jolt)
             need = np.max([np.roll(need, i) for i in range(-w, w + 1)], 0)
@@ -324,10 +339,10 @@ def bake(name, g, src):
             if p0 and p1 and both.any():
                 speeds.append(float(np.linalg.norm((v1[both, :2] - v0[both, :2]).mean(0))) * FPS)
     sp = np.array(speeds) if speeds else np.zeros(1)
-    print("GAIT %s %d keys %.3f s duty %.2f; planted sole %.2f m/s (%.0f%% within 5%% of %.2f); worst ankle miss %.4f m, "
-          "pelvis dip %.3f..%.3f m; source strike key %d" % (name, g.n + 1, g.period, g.duty, np.median(sp),
-                                                        100 * np.mean(np.abs(sp / g.speed - 1) < 0.05), g.speed, worst,
-                                                        drop.min(), drop.max(), src["strike"]))
+    print("GAIT %s %d keys %.3f s duty %.2f; planted sole %.2f m/s (%.0f%% within 5%% of %.2f, p90 off %.2f); worst ankle "
+          "miss %.4f m, hip %.3f m, pelvis dip %.3f..%.3f m, bob %.3f; right strike key %d" % (
+              name, g.n + 1, g.period, g.duty, np.median(sp), 100 * np.mean(np.abs(sp / g.speed - 1) < 0.05), g.speed,
+              np.percentile(np.abs(sp - g.speed), 90), worst, g.hip, drop.min(), drop.max(), g.bob, g.shift))
 
 
 def measure(name, src, speed):
@@ -348,19 +363,18 @@ def measure(name, src, speed):
 
 made = []
 for gait in ("walk", "run"):
-    fwd = read(gait + "_f")
+    shipped = {k: read("%s_%s" % (gait, k)) for k in "fblr"}
+    fwd = shipped["f"]
     print("FWD %s_f %d keys floor %.3f strike %d lift %d duty %.2f swing %.3f" % (
         gait, fwd["n"], fwd["floor"], fwd["strike"], fwd["lift_at"], fwd["duty"], fwd["swing"]))
-    for k in DIRS:
+    for k in shipped:
+        measure("%s_%s" % (gait, k), shipped[k], SPEED[gait])
+    for k in BUILD:
         name = "%s_%s" % (gait, k)
-        src = read(name)
-        measure(name, src, SPEED[gait])
-        if k not in BUILD:
-            continue
-        old = action(name)
-        old.name = name + "_was"
+        if k in shipped:
+            action(name).name = name + "_was"
         arm.animation_data.action = None
-        bake(name, Gait(gait, k, fwd), src)
+        bake(name, Gait(gait, k, fwd), shipped[k[0]])
         made.append(name)
 arm.animation_data.action = None
 if not made:
