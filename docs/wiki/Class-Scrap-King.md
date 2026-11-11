@@ -59,7 +59,7 @@ What the in-game kit card (K) says.
 | Slot | Card text |
 |---|---|
 | Loop | Brawler who reels you in: hook a foe to your feet, smash them, finish them up close. |
-| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. A knock heals you. |
+| Passive: Salvage | Salvage: knocks and assists add health, up to 10 stacks. |
 | Dash: Barge | A short, low lunge the way you move, clawing the ground; a pounce, further, in the air. It works while you reel. |
 | RMB: Abyssal Hand | Your abyssal arm reaches through rocks and cliffs, grabs the first body it meets and reels it to your feet, stunned, while you stand braced. |
 | E: Anchor Drop | Raise your fist and slam it into the ground in front of you, the area shown as it comes down: damage and a long stun. In the air you smash straight down. |
@@ -68,7 +68,7 @@ What the in-game kit card (K) says.
 
 ### Abilities in full
 
-**Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more. Knocking a hunter heals you 16% of your health.
+**Salvage (passive).** Each knock or assist adds a Salvage stack (+2.5% health, 10 at most); being downed costs one. Hits on a hunter's back deal 50% more.
 
 **Barge (dash, Shift, 10s cooldown).** A quick, short lunge the way you move, low to the ground, clawing at it and hauling yourself along; three charges chain a beat apart. It touches nobody. In the air it is a pounce that goes 35% further, on its own 12.5s recharge (2s less per rank). It is usable while reeling someone in. Just after the Anchor your turn is limited to 35 degrees.
 
