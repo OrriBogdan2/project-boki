@@ -18,6 +18,7 @@ const SLIDE := 0.5                            # m the pair slides along the push
 const TILT := 0.5                             # rad the stump leans at full balance
 const CREAK_AT := 0.5                         # balance (0..1) at which the stump first creaks
 const REACH := 1.6                            # m from the stump to start a bout
+const FIRST := "first_shove"                  # Save.d.tutorial: the practice bout ran (FirstRound)
 
 static func rules() -> Dictionary:
 	return Content.rules("base_shove")
@@ -132,6 +133,7 @@ var card: Control = null
 var card_t := 0.0
 var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 var creaked := false           # the lean creak has played this bout
+var practice := false          # the first practice bout: ends at the first press, no gain, no cost
 var cue: GardenCues.ShoveCue = null   # the push meter over the stump while a bout runs
 
 func _init(home) -> void:
@@ -203,6 +205,10 @@ func use() -> void:
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s once, with the marker in the gold, to shove" % Settings.key_cap("interact"))
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
+	practice = FirstRound.due(FIRST, "shove")
+	if practice:
+		FirstRound.take(FIRST)
+		bar.lbl.text = FirstRound.line("when the marker is in the gold to shove")
 	_place_pair()
 	creaked = false
 	cue = GardenCues.ShoveCue.new(h, stump.position + Vector3(0, STUMP_H, 0))
@@ -223,6 +229,9 @@ func input(event: InputEvent) -> bool:
 		GardenSfx.crowd(r, stump.position)
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
+		if practice:
+			h._toast("That's a shove: gold pushes hardest. " + FirstRound.DONE)
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -267,6 +276,8 @@ func _place_pair() -> void:
 	stump.rotation.z = -run.balance * TILT
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice bout never pays out
+	practice = false
 	var res := settle(run) if finished else {}
 	for k in pair:
 		k["busy"] = false

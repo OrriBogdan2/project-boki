@@ -83,6 +83,8 @@ func _list() -> void:
 func _bot() -> void:
 	Save.d = _fresh_save()
 	Save.d["tutorial"]["day1_done"] = true      # the guided tutorial stays out of it
+	for f in ["first_race", "first_shove", "first_seek", "first_volley"]:      # past the practice rounds (FirstRound)
+		Save.d["tutorial"][f] = true
 	Save.d["items"]["kibble"] = 3
 	var rules: Dictionary = Content.rules("farm_build")
 	rules["base_mode"] = true
@@ -139,6 +141,7 @@ func _race(home) -> void:
 		race.tick(0.1)
 		t += 0.1
 	ok(GardenFirstDay.did("race"), "bot: a finished race ticks 'race' (%.0f s)" % t)
+	race.tick(float(BaseRace.rules()["card_s"]) + 1.0)      # the card goes and lets the pair go
 
 ## Two Boki asleep side by side: the pile.
 func _nap(home, a: Dictionary, b: Dictionary) -> void:
