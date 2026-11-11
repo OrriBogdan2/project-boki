@@ -1,5 +1,5 @@
 extends "res://tools/dash_flow_check.gd"
-## --dash-momentum-check[=<id>,<id>] (docs/decisions/0060, a jump dash on Vex flew far): for every Hunter, the
+## --dash-momentum-check[=<id>,<id>] (docs/decisions/0061, a jump dash on Vex flew far): for every Hunter, the
 ## Shift dash covers the same distance on the ground, in the air (high up, so it never lands mid-dash), off a jump
 ## at its apex, within LIMIT of the ground dash's; with no charge left the long dash does the same on the ground,
 ## high up and off a jump. Once any of them ends the speed it hands over is never above the hunter's own run speed

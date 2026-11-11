@@ -179,7 +179,7 @@ func _chain() -> void:
 		if i > 0 and not (dashing and hs > prev):
 			worst_gain = maxf(worst_gain, hs - prev)
 		if i > 0 and prev > 0.5 and was_dashing and not dashing:
-			# the step a dash ends it hands over at the run speed (docs/decisions/0060): a drop to
+			# the step a dash ends it hands over at the run speed (docs/decisions/0061): a drop to
 			# the run is the hand-over, not a stop; below it would be
 			end_short = end_short or hs < minf(prev, h.run_speed) * 0.95
 		elif i > 0 and prev > 0.5:

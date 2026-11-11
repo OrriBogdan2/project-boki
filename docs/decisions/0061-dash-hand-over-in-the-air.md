@@ -1,4 +1,4 @@
-# 0060: A dash hands over at run speed in the air too
+# 0061: A dash hands over at run speed in the air too
 
 - **Status:** accepted
 - **Date:** 2026-11-11
@@ -6,7 +6,7 @@
 
 ## Problem
 Owner 11-11 on the release build: "a jump dash on Vex went super far". A Shift that ended in the air kept its
-full speed (owner 11-08, 0053: "air drag bleeds it"), and `Loco.air_step` bleeds speed over the run cap at only
+full speed (owner 11-08, decision 0053: "air drag bleeds it"), and `Loco.air_step` bleeds speed over the run cap at only
 2/s. A 20-25 m/s dash then flew on for 5-12 m: Vex's jump dash with no charge left (the long dash) landed 18.5 m
 from a high start, Gil's 19.8 m, Mage's handed over 34.8 m/s. A jump out of a ground dash kept 75% of the dash
 (14 m/s for Vex), and some kits set their own speed after the dash (Bulwark's spin +6 m/s, Ashwick's poof, the
