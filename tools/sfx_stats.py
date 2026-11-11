@@ -1,6 +1,7 @@
 """Measures sound effects so a mix pass can be judged by numbers, not just by ear.
 
     python3 tools/sfx_stats.py [dir=audio] [--json out.json] [--compare before.json]
+    python3 tools/sfx_stats.py --ults [dir=audio]     markdown table of every ult sound's tail (docs/AUDIO.md)
 
 Per .wav file it reports:
   peak   peak level in dBFS
@@ -9,6 +10,12 @@ Per .wav file it reports:
   edge   the very first 1 ms's level relative to the peak (dB): high means it starts with a click
   cent   spectral centroid in Hz (energy weighted): lower is darker and calmer
   hf     share of energy above 4 kHz, in percent
+
+--ults lists each Warden's ult sounds by role (cast, impact, loop) with
+  t40    seconds until the 5 ms RMS envelope last stands above -40 dB of the peak
+  tail   t40 minus the time of the envelope's maximum (how long it rings after the hit)
+  crest  peak minus RMS, in dB
+and the median of the other ten Wardens per role.
 """
 import json, os, sys, wave
 import numpy as np
@@ -51,8 +58,56 @@ def stats(x, sr):
     }
 
 
+# Warden -> role -> ult sounds (casts and impacts one-shot, loops held); Gil's X has no sound of its own.
+ULTS = {
+    "Pin": {"cast": ["pin_ult_cast"], "impact": ["pin_ult_final"]},
+    "Cinder": {"cast": ["lw_jet"], "impact": ["lw_jet_land"]},
+    "Bjorn": {"cast": ["bjorn_ult_wind"], "impact": ["bjorn_ult_slam"], "loop": ["bjorn_ult_rumble"]},
+    "Tenzo": {"impact": ["br_spine"]},
+    "Dredge": {"cast": ["dr_blast_charge"], "impact": ["dr_blast"]},
+    "Vex": {"cast": ["vn_nuke_fire"], "impact": ["vn_nuke_boom"], "loop": ["vn_nuke_burn"]},
+    "Kael": {"impact": ["jug_meteor"]},
+    "Vv": {"cast": ["vv_ult_rise"], "impact": ["vv_ult_slam"], "loop": ["vv_ult_hum"]},
+    "Ostra": {"cast": ["os_well"], "loop": ["os_well_hum"]},
+    "Neve": {"cast": ["rime_lock"], "impact": ["rime_crash"]},
+    "Tender": {"cast": ["tend_call"], "impact": ["tend_arrive"], "loop": ["tend_call_hum"]},
+    "Sable": {"cast": ["dj_encore"], "impact": ["dj_encore_hit"], "loop": ["dj_encore_whirr"]},
+}
+
+
+def tail(x, sr):
+    """(t40, tail) in seconds, see the module doc."""
+    win = max(1, int(sr * 0.005))
+    env = np.sqrt(np.convolve(x * x, np.ones(win) / win, mode='same'))
+    above = np.nonzero(env > np.max(np.abs(x)) * 0.01)[0]
+    return above[-1] / sr, (above[-1] - int(np.argmax(env))) / sr
+
+
+def ult_table(d):
+    rows, by_role = [], {}
+    for hero, roles in ULTS.items():
+        for role, names in roles.items():
+            for n in names:
+                x, sr = load(os.path.join(d, n + ".wav"))
+                s = stats(x, sr)
+                t40, tl = tail(x, sr)
+                row = (hero, role, n, t40, tl, s["peak"] - s["rms"])
+                rows.append(row)
+                if hero not in ("Tenzo", "Neve"):
+                    by_role.setdefault(role, []).append(row)
+    print("| Warden | role | sound | t40 s | tail s | crest dB |\n|---|---|---|---|---|---|")
+    for r in rows:
+        print("| %s | %s | %s | %.2f | %.2f | %.1f |" % r)
+    for role, rs in by_role.items():
+        med = [float(np.median([r[i] for r in rs])) for i in (3, 4, 5)]
+        print("| median of the other ten | %s | | %.2f | %.2f | %.1f |" % ((role,) + tuple(med)))
+
+
 def main():
     args = sys.argv[1:]
+    if '--ults' in args:
+        args.remove('--ults')
+        return ult_table(args[0] if args else os.path.join(os.path.dirname(__file__), '..', 'audio'))
     out = cmp = None
     if '--json' in args:
         i = args.index('--json'); out = args[i + 1]; del args[i:i + 2]
