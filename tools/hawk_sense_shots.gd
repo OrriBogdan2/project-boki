@@ -44,7 +44,7 @@ func run(main_node: Node) -> void:
 		var sensed := (P.ak as ArcherKit).sense.senses(foe)
 		print("HAWKSHOTS %s: sensed %s, drawn %s, hidden by sight %s" % [label, sensed, foe.visible, foe.unseen])
 		img.save_png(dir.path_join("hawk_%s.png" % label))
-		var c := Vector2i(m.cam.unproject_position(rock + Vector3(0, 0.8, 0)) * Vector2(img.get_size())
+		var c := Vector2i(m.cam.unproject_position(rock + Vector3(0, 0.8, -1.0)) * Vector2(img.get_size())
 			/ main.get_viewport().get_visible_rect().size)
 		var crop := img.get_region(Rect2i(c - CROP / 2, CROP).intersection(Rect2i(Vector2i.ZERO, img.get_size())))
 		crop.resize(CROP.x * 3, CROP.y * 3, Image.INTERPOLATE_LANCZOS)

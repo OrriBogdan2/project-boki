@@ -87,7 +87,8 @@ func _outline_on(f: Hunter, e: Dictionary) -> void:
 	if f.model == null or lp == null or int(lp.get("team")) != k.h.team:
 		return
 	for mi: MeshInstance3D in f.model.find_children("*", "MeshInstance3D", true, false):
-		if mi.material_overlay == null and not ShieldLook.see_through(mi):   # (no ground ring or glow shell)
+		var own := mi.material_override as ShaderMaterial      # (ground rings and glow shells get no outline)
+		if mi.material_overlay == null and not (own and own.shader in [Models.GLOW, Models.RING, Models.AURA]):
 			mi.material_overlay = _mat
 			e["meshes"].append(mi)
 
