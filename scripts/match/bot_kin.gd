@@ -76,7 +76,7 @@ static func summon(m: Match, h: Hunter, tgt: Ent, abil: float, dt: float) -> voi
 
 ## A fight worth the Boki, and the bot is not running from it.
 static func _summon_moment(m: Match, h: Hunter, tgt: Ent) -> bool:
-	if h.downed or h.hp < h.max_hp * SUMMON_HP or Hex.active(h) or String(h.ai.get("goal_kind", "")) == "flee":
+	if h.downed or h.hp < h.max_hp * SUMMON_HP or String(h.ai.get("goal_kind", "")) == "flee":
 		return false
 	if tgt and not tgt.dead and tgt.hittable() and h.flat_dist(tgt) < SUMMON_RANGE:
 		if (tgt is Hunter and not tgt.downed) or (tgt is Mob and tgt.mkind == "brute"):

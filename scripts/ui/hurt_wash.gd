@@ -1,7 +1,7 @@
 class_name HurtWash
 extends RefCounted
 ## Low health: a red wash creeping in from the screen edges, deeper as health runs out, and heavier in a
-## soft arc on the edge the last second's hits came from (Hud.hurt_dirs), easing back to even. It is
+## soft arc on the edge the last second's hits came from (Hud.dmg_dir.hits), easing back to even. It is
 ## clear in the middle and faint at the edge, so aim lines and telegraphs read through it.
 
 const BELOW := 0.35        # share of max health: the wash shows under this
