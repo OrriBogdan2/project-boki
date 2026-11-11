@@ -2,7 +2,7 @@
 
 One table per area: the source's value, ours, where each comes from, and a status. Mechanics and numbers only.
 
-- **Status:** `match` (same number or within measuring error), `off` (differs; "ruling" = the owner chose it), `unknown` (the source value is not decoded or not documented, so ours is an estimate).
+- **Status:** `match` (same number or within measuring error), `off` (differs; "ruling" = the owner chose it), `unknown` (the source value is not decoded or not documented, so ours is an estimate), `[?]` (the data does not settle what the row means, so nothing is built on it).
 - **Source of truth tags:** `[D]` the source's game data (briefs/supervive-data/supervive_physics.md, 100 uu = 1 m), `[W]` its wiki, `[F]` a footage frame count (docs/MOVEMENT_FEEL.md, docs/SUPERVIVE_FEEL.md), `[est]` ours, tuned.
 - **Ours** is a data row (file named) or a measurement by a check: `MFEEL` = `--move-feel-check`, `RATE` = `--move-rate-check` (both on the real step; 2026-11-10, branch ext/move-parity-1).
 - The match steps at 60 Hz (`Match.DT`). Since decision 0048 the farm does too.
@@ -94,7 +94,7 @@ Per-kit dashes are the kits' own (content/archetypes/*.json `dash`); the source'
 | Walkable slope | WalkableFloorAngle 50° | terraces and stairs, no free slopes | [D]; map grammar | off (different terrain model) |
 | Walking off a ledge | bCanWalkOffLedges false | allowed | [D] | off (ruling: our maps are terraces) |
 | Mantle | reach 1.5 m, pull 1.75M on mass 100, rise cap 2.5 m/s, exit 0.6× run (min 3.5 m/s) | MANTLE_REACH 1.5, mantle_pull 175, mantle_vy_cap 2.5, mantle_launch_keep 0.6 / min 3.5 | [D]; hunter_move.json; `--mantle-check`, `--cliff-mantle-check` | match |
-| Mini mantle | 0.75 s row | no row of ours | [D] | unknown (not mapped) |
+| Mini mantle | MiniMantlePostLaunchDuration 0.75 s, MiniMantleForwardForceSpeedDeltaMultiplier 8, XYSpeedTarget 0.6 / 350 uu/s; no height row (no mini-mantle height band in the data) | the exit speed held 0.75 s in the air after the lip (`MantleCarry.MINI_S`, held firm instead of the ×8 force); no separate low-lip mantle | [D]; `scripts/match/mantle_carry.gd`; `--cliff-mantle-check` | [?] (the 0.75 s is a post-launch window, not a mantle length; a low-lip band is not in the data) |
 | Ledge rise and fling | not documented | rise 0.333 s; a timed jump flings 3.24 m; window 0.233 s | MFEEL `ledge_*` | unknown (ours [est]) |
 | Wall kick, wall bounce | none found in the data | every kit has both | `--wallmove-check` | off (ours, kept) |
 | Rail grinding | in the source | not modelled | [D] | off (missing) |
@@ -132,6 +132,6 @@ The windows read one frame shorter at 30 fps only because a press can land on a 
 4. **Dash curves** for 9 kits are not decoded: they run on the global ×0.85 / ×1.15 (KIT_PARITY gap 4; also gaps 9, 11, 13).
 5. **Air control** (owner 11-08) and **no swoop** (owner 11-08) are rulings against the data; **walking off ledges** and **glider at any heat** too.
 6. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle the first three.
-7. **Rail grinding** and the **mini mantle** are not modelled.
+7. **Rail grinding** is not modelled. **Mini mantle** [?]: its 0.75 s post-launch hold is `MantleCarry`; a short mantle for low lips needs a height band the data does not have (MantleZDiffMax and the suction curves are named but not decoded), so none is modelled.
 8. The farm avatar's facing turns per step (not blended between steps); the interior and town movers still step on frame time.
 9. `--feel-golden-check` (done, ext/feel-golden-determinism): every script now runs in a cleared space (mobs, wild and own Boki freed and every other Hunter parked idle 80 m away before each step; seed 1109, the Hunter placed fresh), and the golden was re-recorded once. Three runs in a row: 117 traces, drift 0.000 m / 0.000 m/s each.
