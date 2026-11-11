@@ -229,6 +229,7 @@ Hunter unlocks and mastery (docs/decisions/0005). A new save picks one of `start
 | mage | {"dist": 1.0, "time": 1.15} |
 | gunslinger | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.01], [0.09, 1.81], [0.13, 1.81], [1, 0.13]]} |
 | archer | {"dist": 1.0, "time": 1.0, "curve": [[0, 0.17], [0.44, 1.86], [1, 0.12]]} |
+| ashwick | {"dist": 1.0, "time": 1.0, "curve": [[0, 1.36], [0.3, 1.36], [0.31, 0.92], [0.88, 0.92], [1, 0]]} |
 
 ## equal (`content/rules/equal.json`)
 
