@@ -3,10 +3,10 @@ extends RefCounted
 ## base_mode farm. A Boki crossing it walks at the wade speed in the shallow edge and the deep speed in the middle
 ## (never stopped) and shakes off coming out; a Water type that goes in lingers playing the splash clip and gains
 ## joy; a Fire type dropped mid-stream is on dry ground within 2 s. Marks (BokiWake): a ripple ring under each Boki
-## in the water and a V behind each one moving, all in one MultiMesh, sized by body, gone once they are out and
-## never made on Very Low. Never touches the real save.
-## --shots-dir=<dir> adds a GPU strip (wade_strip.png): a Zapple wading across, a Puddlet paddling and a Kilnbadger
-## stepping out, six frames a second apart.
+## in the water and a V behind each one moving, all in one MultiMesh, sized by body, kept off the bank, gone once
+## they are out and never made on Very Low. Never touches the real save.
+## --shots-dir=<dir> adds a GPU strip (wade_strip.png): a Zapple wading along the stream (its ripple ring and V wake),
+## a Puddlet paddling and a Kilnbadger stepping out, six frames a second apart.
 ## (The nav sweep, --garden-nav-check, covers getting stuck with the whole base running.)
 
 const DT := 1.0 / 30.0         # s per step
@@ -139,6 +139,8 @@ func _paddle(zc: int) -> void:
 ## The ripple count follows the Boki in the water (0, 1, 3, then back to 1 and 0) and a V shows only behind
 ## the ones moving; one MultiMesh draws them all and no ring node is made per ripple.
 func _marks(zc: int) -> void:
+	var keep: Variant = Settings.v.get("quality")
+	Settings.v["quality"] = "medium"      # (auto picks Very Low on a software renderer, and Very Low makes none)
 	var rings0: int = home.fx.rings.size()
 	ok(_mark_stage(zc, [], []) == [0, 0], "no marks while every Boki is on dry ground")
 	ok(_mark_stage(zc, [0], [0]) == [1, 1], "one Boki walking in the water: one ring, one V")
@@ -148,12 +150,15 @@ func _marks(zc: int) -> void:
 	var nodes: int = home.find_children("BokiWake", "MultiMeshInstance3D", false, false).size()
 	ok(drawn == 5 and nodes == 1 and home.fx.rings.size() == rings0,
 		"one MultiMesh draws all %d marks (%d nodes, %d Fx rings made)" % [drawn, nodes, home.fx.rings.size() - rings0])
+	var x := int(HomeLayout.LANDING.x)
+	var in_stream := marks.mask.get_pixelv(Vector2i(x, zc) - marks.mask_origin).r
+	var on_bank := marks.mask.get_pixelv(Vector2i(x, zc + 2) - marks.mask_origin).r
+	ok(in_stream > 0.5 and on_bank < 0.5, "the marks keep to the water: the stream is in their mask, its bank is not")
 	ok(_mark_stage(zc, [2], []) == [1, 0], "two step out: one ring left, and no V once it stands still")
 	ok(_mark_stage(zc, [], []) == [0, 0] and not marks.visible, "all out: the marks stop and nothing is drawn")
 	_body_sizes(zc)
 	marks.queue_free()
 	home.wade.marks = null
-	var keep: Variant = Settings.v.get("quality")
 	Settings.v["quality"] = "very_low"
 	_mark_stage(zc, [0], [0])
 	ok(home.wade.marks == null, "Very Low makes no marks")
@@ -200,7 +205,7 @@ func _body_sizes(zc: int) -> void:
 ## Six frames of the three Boki at the stream, one image across. Needs a rendering display (jobq --needs gpu).
 func _strip(dir: String, zc: int) -> void:
 	var x := HomeLayout.LANDING.x
-	_only(0, Vector3(x - 2.5, 0, zc + 3.0))
+	_only(0, Vector3(x - 5.0, 0, zc + 0.5))
 	_only(1, Vector3(x + 0.5, 0, zc + 0.5))
 	_only(2, Vector3(x + 2.5, 0, zc + 3.0))
 	for k in home.kins:
@@ -215,7 +220,7 @@ func _strip(dir: String, zc: int) -> void:
 	var frames: Array = []
 	var gap := 50
 	for i in gap * FRAMES:
-		home.kins[0]["goal"] = Vector3(x - 2.5, 0, zc - 5.0)
+		home.kins[0]["goal"] = Vector3(x + 6.0, 0, zc + 0.5)
 		home.kins[2]["goal"] = Vector3(x + 2.5, 0, zc - 5.0) if i < gap else home.kins[2]["goal"]
 		for k in home.kins:
 			k["t"] = 999.0

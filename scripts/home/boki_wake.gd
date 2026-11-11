@@ -3,9 +3,9 @@ extends MultiMeshInstance3D
 ## The marks Boki leave in pond water (BokiWade): a ripple ring under each Boki in the water, a wave running
 ## out from its body every ripple_secs, and a short V wake opening behind it while it moves. Every mark is a
 ## quad in this one MultiMesh, so all of them together are one draw call (shaders/boki_wake.gdshader draws
-## the ring or the V). Sized by the Boki's body. The pool is made once, when the first Boki steps in, and
-## never on Very Low. A Boki's marks fade out once BokiWade stops marking it: it left the water (or was
-## carried off).
+## the ring or the V, faded out past the water's edge). Sized by the Boki's body. The pool is made once, when
+## the first Boki steps in, and never on Very Low. A Boki's marks fade out once BokiWade stops marking it: it
+## left the water (or was carried off).
 
 const SLOTS := 16            # Boki marked at once (GARDEN.md 10.6 has 9 out in a zone); more go unmarked
 const RING_R := 0.7          # m: the ring's outer radius for a size-1 body (its waves start at the body's edge)
@@ -13,7 +13,7 @@ const WAKE_L := 1.4          # m: how far the V reaches behind a size-1 body
 const WAKE_SPREAD := 0.75    # the V's width at its end over its length: arms about 20 degrees off the line
 const BOW := 0.25            # m ahead of a size-1 body's centre where the V's arms meet
 const WAKE_MIN := 0.3        # m/s: slower than this leaves no V
-const WAKE_FULL := 1.2       # m/s: from this speed (about a wading walk) the V shows fully
+const WAKE_FULL := 0.9       # m/s: from this speed the V shows fully (a walk through deep water is about 1.1)
 const MARK_Y := 0.075        # m above the ground: over the pond's surface (0.05) and its swell
 const BODY_MAX := 2.6        # the biggest body a mark grows for (a big evolved partner)
 const FADE_S := 0.35         # s for a mark to fade in or out
@@ -31,6 +31,8 @@ class Slot:
 	var wake := 0.0                # 0..1: how strongly its V shows
 
 var slots: Array[Slot] = []
+var mask: Image                   # the water the marks are clipped to: one texel per 1 m tile, 1 for water
+var mask_origin := Vector2i.ZERO  # the tile at the mask's first texel
 
 func _init(period: float) -> void:
 	name = "BokiWake"
@@ -90,6 +92,30 @@ func tick(delta: float) -> void:
 			shown += 1
 	multimesh.visible_instance_count = shown
 	visible = shown > 0
+
+## Keeps the marks on the water: a mask of the water tiles (HomeLayout keys, 1 m each) with a dry border, which
+## the shader fades the marks by. Called when the marks are made and whenever the water is repainted.
+func clip_to(tiles: Dictionary) -> void:
+	if tiles.is_empty():
+		return
+	var cells: Array[Vector2i] = []
+	for key in tiles:
+		cells.append(HomeLayout.unkey(key))
+	var low := cells[0]
+	var high := cells[0]
+	for c in cells:
+		low = low.min(c)
+		high = high.max(c)
+	low -= Vector2i.ONE
+	var span := high - low + Vector2i(2, 2)
+	mask = Image.create_empty(span.x, span.y, false, Image.FORMAT_R8)
+	mask_origin = low
+	for c in cells:
+		mask.set_pixelv(c - low, Color.WHITE)
+	var mat := material_override as ShaderMaterial
+	mat.set_shader_parameter("water_mask", ImageTexture.create_from_image(mask))
+	mat.set_shader_parameter("mask_origin", Vector2(low))
+	mat.set_shader_parameter("mask_span", Vector2(span))
 
 ## Where a Boki's ring lies on the water and how wide it is.
 func ring_place(s: Slot) -> Transform3D:

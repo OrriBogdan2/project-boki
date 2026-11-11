@@ -88,6 +88,8 @@ func _mark(k: Dictionary, pos: Vector3, n: Node3D) -> void:
 			return
 		marks = BokiWake.new(float(rules()["ripple_secs"]))
 		h.add_child(marks)
+		if h.hb:
+			marks.clip_to(h.hb.L()["water"])
 	marks.mark(String(k["rec"]["uid"]), pos, k["vel"], n.scale.x)
 
 ## A lingering paddler stays put playing, gaining joy, until its time is up or something else claims it.
