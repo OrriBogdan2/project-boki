@@ -88,7 +88,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
 4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
-5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
+5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit. **Done in ext/ui-relics-names:** tiles read the name with `the <Title>` smaller under it, the tile column is 38% of the window width (460-600 px), an unlocked tile drops the 'Unlocked' line, all 13 Hunters show without scrolling at 1280x720 and 1920x1080 ([shots](shots/ui-relics-names), software render: the GPU worker was lost 3x), `--hero-grid-check` asserts it. The right column and Mastery still scroll.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.
 8. **Glossary pass** for section 4: explain a term at its first appearance or use plain words.
