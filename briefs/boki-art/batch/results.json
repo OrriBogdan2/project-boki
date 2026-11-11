@@ -112199,5 +112199,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_zippelith_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9b_skateron",
+    "name": "Skateron (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_skateron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_skateron",
+    "name": "Skateron (pixel sprite 80, chunky redo)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9b_skateron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_geodemole",
+    "name": "Geodemole (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_geodemole_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_reapant",
+    "name": "Reapant (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_reapant_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_skateron",
+    "name": "Skateron (pixel sprite 80, chunky redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/px9b_skateron_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_lanceron",
+    "name": "Lanceron (pixel sprite 80, chunky redo)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/px9b_lanceron_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_reapant",
+    "name": "Reapant (pixel sprite 80, chunky redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/px9b_reapant_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9b_druzemole",
+    "name": "Druzemole (pixel sprite 80, chunky redo)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/px9b_druzemole_3.jpg",
+    "ok": true
   }
 ]
