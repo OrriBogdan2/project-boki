@@ -177,6 +177,7 @@ func sim(dt: float) -> void:
 	if dead:
 		return
 	tick_status(dt)
+	StealSfx.tick(self)
 	_tick_teles(dt)
 	_tick_hazards(dt)
 	_tick_flying(dt)

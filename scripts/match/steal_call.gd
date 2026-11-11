@@ -19,7 +19,8 @@ static func top_team(mb: Mob) -> int:
 			return int(t)
 	return -1
 
-## The one line `viewer_team` reads for `mb` dying to `killer`, as {text, col, prio, icon}; {} for none.
+## The one line `viewer_team` reads for `mb` dying to `killer`, as {text, col, prio, icon, won}; {} for none.
+## `won`: the viewer's squad took the kill (its sting, StealSfx).
 ## `carried`: it held a chest key when it died.
 static func line(mb: Mob, killer: Hunter, viewer_team: int, carried: bool) -> Dictionary:
 	if killer == null or (KeyBonus.mob_source(mb) == "monster" and not carried):
@@ -32,9 +33,9 @@ static func line(mb: Mob, killer: Hunter, viewer_team: int, carried: bool) -> Di
 	var icon := "key" if carried else ""
 	if viewer_team == lost:
 		var text := "%s stole the %s" % [killer.pname, name_txt.trim_prefix("The ")]
-		return {"text": text, "col": LOSER_COL, "prio": prio, "icon": icon}
+		return {"text": text, "col": LOSER_COL, "prio": prio, "icon": icon, "won": false}
 	if viewer_team == killer.team:
-		return {"text": "Stolen: %s" % name_txt, "col": STEALER_COL, "prio": prio, "icon": icon}
+		return {"text": "Stolen: %s" % name_txt, "col": STEALER_COL, "prio": prio, "icon": icon, "won": true}
 	return {}
 
 ## Called as `mb` dies, before its key drops (the carrying mark goes with the drop).
@@ -44,3 +45,4 @@ static func on_dead(m: Match, mb: Mob, killer: Ent) -> void:
 	var s := line(mb, killer as Hunter, m.player.team, KeyCarry.carries(mb))
 	if not s.is_empty():
 		m.hud.msgs.push(s["text"], s["col"], s["prio"], 0.0, s["icon"])
+		StealSfx.sting(s["won"])
