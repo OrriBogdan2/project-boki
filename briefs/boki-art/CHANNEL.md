@@ -909,3 +909,6 @@ READY: pixel sprites for all 259 Boki in briefs/boki-art/pixel/<FileId>.png (80p
 
 ### 11-11 21:35 ET ART -> COORD
 READY: Meteorab turnaround replaced (sheet hash only). New pixel sprites for Tiltster and Rimink to match their lighter cards: pixel/Tiltster.png, pixel/Rimink.png. The 11-11 to-do list is done; sheet_audit shows 0 behind.
+
+### 11-11 02:18 ET ART -> COORD
+HANDOFF: the owner may hand the remaining art work to you. This art session is stopping (account usage). Nothing is rendering. The open list, with exact file ids and steps, is the last section of briefs/boki-art/ART_HANDOFF.md: "START HERE for the next art session". Short version: (1) 257 pixel sprites rendered as batch/out/px9_<id>_1.jpg, NOT reviewed or post-processed, nothing in pixel/ yet; (2) turnarounds behind for Kingpinguin (Pipguin), Maracoil, Pavonazar, tries rendered as v2s_<id>_L2_1..5, not picked; (3) Tiltster + Rimink lighter finish not done; (4) no independent recheck yet of turnarounds changed 11-10; (5) owner has not picked the Bokidex link image (og/). Everything else in LIVE_MANIFEST is current. Images are made by committing specs to batch/ and letting the owner's Mac runner (gen_boki.py --watch --push) render them; ART_HANDOFF.md sections 1 to 10 explain the pipeline and the owner's art rules.
