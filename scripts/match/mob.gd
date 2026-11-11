@@ -71,6 +71,12 @@ func _on_zero(by: Ent, opts: Dictionary) -> void:
 	_cancel_tele()
 	m.on_mob_dead(self, by, opts)
 
+## Gone without a kill: no XP, no drops, no feed and no Net event (the offline tutorial's retry clears its
+## camp this way).
+func vanish() -> void:
+	die()
+	_cancel_tele()
+
 func _cancel_tele() -> void:
 	if tele:
 		m.fx.end_telegraph(tele)

@@ -41,6 +41,7 @@ const DONE_T := 0.9        # s of the step-done sting
 const LOOKOUT_R := 4.2     # m: the lookout's top is 3.6 wide; any grounded height within this counts
 const CROUCH_HOLD := 1.5   # s of crouching at the lookout
 const RANK_WAIT_T := 20.0  # s before the ranks step moves on by itself
+const DOWN_T := 3.0        # s a downed player lies there before the tutorial picks them up (the fight goes on)
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
@@ -164,7 +165,7 @@ func update(dt: float) -> void:
 		_enter()
 	if p.downed:
 		down_t += dt
-		if down_t > 3.0:
+		if down_t > DOWN_T:
 			down_t = 0.0
 			m.revive_hunter(p, null)
 	if p.kin and p.kin.state == "downed":
@@ -262,13 +263,46 @@ func _runners(p: Hunter) -> Array:
 	return out
 ## Carrying on from a saved beat (_skip_to set its last stop and picks): back at that stop, with what it needs.
 func _restore() -> void:
-	m.player.teleport(respawn())
+	_back()
 	if id() == "chest" and m.player.chest_keys == 0:
 		m.player.chest_keys = 1
-	if id() == "shoot":
-		camps.spawn("sec")      # (shoot finishes the sec step's camp)
 	if m.hud:
 		m.hud.toast("Back where you left off. Skip any time from the menu", MINT)
+
+## The player fell into the abyss: this beat starts again, with its one-line tip (content/rules/tutorial.json
+## "retry"). The step, the levels and the save stay as they were; the player is up, healed and back at the last
+## stop, the Boki comes round, and the beat's counters and camp start again. The camp's ledger starts again
+## with it, so the camp brought back pays only what is left to its level: once in all. (A down in a fight is
+## not a retry: DOWN_T, then the fight goes on.)
+func retry() -> void:
+	var p := m.player
+	if p.downed:
+		down_t = 0.0
+		m.revive_hunter(p, null)
+	p.hp = p.max_hp
+	p.armor = p.max_armor
+	p.vel = Vector3.ZERO
+	if p.kin and p.kin.state == "downed":
+		KinDowned.come_round(p.kin, false)
+	flag = false
+	wait = 0.0
+	camps.clear()
+	_back()
+	_enter()
+	if m.hud:
+		m.hud.toast(retry_tip(), MINT)
+
+## The one line a retry of this beat shows.
+func retry_tip() -> String:
+	var tips: Dictionary = Content.rules("tutorial")["retry"]
+	return _fill(String(tips.get(id(), tips["default"])))
+
+## Back at the last stop, with this beat's camp there (shoot finishes the sec step's camp; the other camp
+## steps bring theirs in _enter).
+func _back() -> void:
+	m.player.teleport(respawn())
+	if id() == "shoot":
+		camps.spawn("sec")
 
 func _enter() -> void:
 	var p := m.player
@@ -302,9 +336,9 @@ func _enter() -> void:
 		"sec", "gkey", "kin", "hook", "ult":
 			camps.spawn(sid)
 		"glove":
-			var at := stop("pickup")
-			m.spawn_gear("grapple", 1, at, "", false)
-			m.wpicks[-1]["tut"] = true
+			if ground_item().is_empty():      # (a retry finds the glove still lying there)
+				m.spawn_gear("grapple", 1, stop("pickup"), "", false)
+				m.wpicks[-1]["tut"] = true
 		"wayout":
 			var o := outpost()
 			if not o.is_empty():

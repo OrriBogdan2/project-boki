@@ -91,6 +91,15 @@ func spawn(sid: String) -> void:
 			tu.tank(mb, c.has("to"))
 			ledger.append({"mb": mb, "to": int(c.get("to", 0)), "paid": false})
 
+## A retry: the camp goes without a kill (no XP) and the ledger starts again, so the camp brought back pays
+## only what is left to its level.
+func clear() -> void:
+	for e: Dictionary in ledger:
+		if is_instance_valid(e["mb"]) and not (e["mb"] as Mob).dead:
+			(e["mb"] as Mob).vanish()
+	ledger.clear()
+	count = 0
+
 ## Each kill pays its share of what is left to the camp's level; the last one tips it over.
 func update() -> void:
 	for e: Dictionary in ledger:
