@@ -1767,10 +1767,14 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 				if "--simtest" in OS.get_cmdline_user_args(): print("ARMOR %s -> %s" % [credit.pname, Hunter.ARMOR_TIERS[lv][0]])
 	var mine := credit == player or (target == player)
 	var armor_hit: bool = o.get("armor", false) or (target is Hunter and (target as Hunter).armor > 0.5)
-	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player)
+	var warm := Color(0, 0, 0, 0)       # (a kit's tint for its own plain hits: Meeko's Kindle)
+	if credit is Hunter and (credit as Hunter).ak and not credit.remote:
+		warm = (credit as Hunter).ak.num_warm(target, o)
+	if crit or target == player: warm.a = 0.0
+	var col := HudStyle.dmg_col(crit, armor_hit, target == player, target is Kin and target.owner_h == player, warm)
 	# only numbers that involve you: other fights nearby don't spray digits over yours
 	if mine:
-		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit)
+		fx.number(target.pos + Vector3(0, 1.5 if target is Hunter else 1.0, 0), d, col, crit, "", warm.a)
 	# archetype passives feed on what happens (Marks, Chambers, Rage, Focus...)
 	if credit is Hunter and (credit as Hunter).ak and target != credit and not credit.remote:
 		(credit as Hunter).ak.note_hit(target)

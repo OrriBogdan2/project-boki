@@ -835,6 +835,7 @@ func tender() -> void:
 	ok(
 			"mm passive: embers Kindle the foe and a foot glow grows on them", K.kindle_on(T) >= 3 and shown_glow,
 			"kindle %d" % K.kindle_on(T))
+	_kindle_numbers(m, K, T)
 	ok("mm passive: an ember into a Kindled foe winds Hearthlight back", K.cd["e"] < 7.0, "e %.2f" % K.cd["e"])
 	ok(
 			"mm LMB: looks are pooled (no new nodes per ember)", K.lk().made - made0 <= 3,
@@ -1083,6 +1084,34 @@ func tender() -> void:
 ## in 0.2 s (after the dash feel), the air glide its measured 13.3 m over 0.95 s peaking about 17 m/s, 3-4x the
 ## hop's distance and about 5x its time; each plays its own move (item 35), sized to its dash, and no other kit
 ## plays those moves.
+## Her LMB damage numbers warm and grow per Kindle stack (the shared HudStyle.dmg_col path); crits, hurt and
+## other sources keep their look.
+func _kindle_numbers(m: Match, K: TenderKit, T: Hunter) -> void:
+	var shot := {"src": "shot"}
+	var blues: Array = []
+	for n in range(0, 6):
+		K.kind[T.get_instance_id()] = {"t": T, "n": n, "left": 3.0}
+		blues.append(HudStyle.dmg_col(false, false, false, false, K.num_warm(T, shot)).b)
+	var stepped := HudStyle.dmg_col(false, false, false, false, K.num_warm(T, shot)).is_equal_approx(K.res_col())
+	for i in range(1, blues.size()):
+		stepped = stepped and blues[i] < blues[i - 1]
+	ok(
+			"mm numbers: the LMB number colour steps toward ember with the Kindle stack",
+			stepped and is_equal_approx(blues[0], HudStyle.HIT.b), str(blues))
+	var w: Color = K.num_warm(T, shot)
+	ok(
+			"mm numbers: crit, hurt and other-source numbers keep their look",
+			HudStyle.dmg_col(true, false, false, false, w) == HudStyle.CRIT
+			and HudStyle.dmg_col(false, false, true, false, w) == HudStyle.HURT
+			and HudStyle.dmg_col(false, false, false, true, w) == HudStyle.HURT_KIN
+			and HudStyle.dmg_col(false, false, false, false, K.num_warm(T, {"src": "abil"})) == HudStyle.HIT)
+	var size_of := func(at: Vector3, grow: float) -> int:
+		m.fx.number(at, 20.0, HudStyle.HIT, false, "", grow)
+		return (m.fx.nums[-1]["node"] as Label3D).font_size
+	var grown: int = size_of.call(T.pos + Vector3(30, 0, 0), 1.0)
+	var big: int = grown - size_of.call(T.pos + Vector3(60, 0, 0), 0.0)
+	ok("mm numbers: a full stack grows the number a little", big > 0 and big <= 12, "+%d px" % big)
+
 func _dashes_cute() -> void:
 	var r: Array = sc.setup("tender", 20.0)
 	var m: Match = r[0]

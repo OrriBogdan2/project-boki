@@ -87,6 +87,12 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		return dmg + float(res_def().get("per_stack", 1.0)) * float(kindle_on(t))
 	return dmg
 
+## Her LMB numbers warm toward her ember colour (and grow a little) with the Kindle stack that boosted the hit.
+func num_warm(t: Ent, o: Dictionary) -> Color:
+	if String(o.get("src", "")) != "shot":
+		return Color(0, 0, 0, 0)
+	return Color(res_col(), float(kindle_on(t)) / float(res_def().get("max", 5)))
+
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t == null or t.team == h.team:
 		return
