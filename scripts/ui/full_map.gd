@@ -508,7 +508,7 @@ func _enemies(c: Control, team: int) -> void:
 			continue
 		var allied: bool = m.truce != null and m.truce.allied(team, h.team)
 		c.draw_circle(pv, 6.0, Color(0, 0, 0, 0.6))
-		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else BAD)
+		c.draw_circle(pv, 4.5, Color("f4f1e6") if allied and not marked else SideColor.foe())
 
 func _squad(c: Control, team: int) -> void:
 	for h in m.hunters:

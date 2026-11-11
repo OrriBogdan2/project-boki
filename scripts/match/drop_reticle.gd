@@ -88,7 +88,7 @@ func _update(h: Hunter, delta: float) -> void:
 	var land := project(h, h.inp["move"])
 	var at: Vector3 = land["at"]
 	var over_void: bool = land["void"]
-	var col: Color = RED if over_void else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
+	var col: Color = RED if over_void else SideColor.of(h.m, h)
 	var pulse := 1.0 + 0.07 * sin(t * TAU * PULSE_HZ)
 	_place(at, RADIUS * pulse, col, h.pos.y, 1.0)
 	tag.visible = over_void
