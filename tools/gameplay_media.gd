@@ -483,13 +483,16 @@ func _farm_build() -> void:
 	await _farm_aim(home, Vector2(o.x + 5.5, o.y + 5.5), 1.5)
 	hb.place_held()
 	await _farm_hold(home, 1.0)
-	hb.toggle()
+	if not hb.active:
+		hb.toggle()
 	hb.held = {"kind": "deco", "id": "pillar", "r": 0, "from": -1}
 	hb._make_ghost()
 	_farm_kin_at(kin, pocket)
 	await _farm_aim(home, Vector2(pocket.x + 0.5, pocket.y + 1.5), 2.5)
 	hb._drop_held()
-	hb.toggle()
+	hb.debug_m = Vector2.INF
+	if hb.active:
+		hb.toggle()
 	room.put(hb, "pillar", pocket + Vector2i(0, 1))
 	hb.apply(false)
 	_farm_kin_at(kin, pocket)
