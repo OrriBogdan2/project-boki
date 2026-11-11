@@ -74,6 +74,17 @@ func clear() -> void:
 	_shown.clear()
 	_waiting.clear()
 
+## Takes a line off the lane, on show or waiting (a hint the player has just acted on).
+func remove(text: String) -> void:
+	for i in range(_shown.size() - 1, -1, -1):
+		if _shown[i]["text"] == text:
+			(_shown[i]["box"] as Control).queue_free()
+			_shown.remove_at(i)
+	for i in range(_waiting.size() - 1, -1, -1):
+		if _waiting[i]["text"] == text:
+			_waiting.remove_at(i)
+	_promote()
+
 ## Lines on show plus lines waiting.
 func count() -> int:
 	return _shown.size() + _waiting.size()

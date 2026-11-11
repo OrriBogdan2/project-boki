@@ -6,6 +6,8 @@ extends RefCounted
 ##  4. Nobody lands in a wall, under the ground or on top of a squadmate (several launches, steered ones too).
 ##  5. A bot leader flies the rocket to its landing spot (within BOT_SPOT_M).
 ##  6. Aboard, everyone is drawn clinging on outside the hull, each in their own seat; jumping out lets go of it.
+##  7. The hints, once per save each: the leader's "You steer the rocket" at launch, gone when they steer;
+##     a rider's "Ride along, or ... jump out", gone when they jump out; a solo sees only the leader line.
 
 const TOGETHER_M := 4.0          # m: the widest gap between two squadmates who rode it down
 const FAST_FALL := 8.0           # m/s: a free fall is still at least this fast
@@ -25,14 +27,15 @@ func ok(cond: bool, what: String) -> void:
 	if not cond:
 		bad += 1
 
-## A three-a-side squad match, the planning phase skipped, everyone aboard, `ride` seconds into the run.
-func _start(ride: float) -> void:
+## A `squad`-a-side match (three by default), the planning phase skipped, everyone aboard, `ride` seconds
+## into the run.
+func _start(ride: float, squad := 3) -> void:
 	if m:
 		m.queue_free()
 		await main.get_tree().process_frame
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1500.0, "seed": 4242})
+	m.start({"teams": 2, "squad": squad, "tier": 0, "length": 1500.0, "seed": 4242})
 	m.set_process(false)
 	m.skydrop.planning = false
 	for i in int(ride / Match.DT):
@@ -166,6 +169,40 @@ func _bot_leader() -> void:
 	ok(gap <= TOGETHER_M, "with the bot leading, the squad still lands together (%.1f m)" % gap)
 	_clean_landing("bot leader")
 
+## The lane's lines now, on show (the hint is the only line at launch, so it shows at once).
+func _lane() -> String:
+	return " | ".join(m.hud.msgs.texts()) if m.hud else ""
+
+func _hints() -> void:
+	Settings.v["tips"] = true
+	var seen: Dictionary = Save.d["tutorial"]
+	seen.erase("rocket_lead")
+	seen.erase("rocket_ride")
+	await _start(6.0)
+	m.ship_jump(m.player)
+	ok(_lane().contains("You steer the rocket: "), "the leader's hint at launch [%s]" % _lane())
+	ok(not _lane().contains("Ride along"), "the leader doesn't get the rider's hint")
+	_land(0.2, Vector2(1, 0))
+	ok(not _lane().contains("You steer"), "the leader's hint goes once they steer [%s]" % _lane())
+	await _start(6.0)
+	m.ship_jump(m.player)
+	ok(not _lane().contains("You steer"), "the leader's hint is once per save")
+	await _start(6.0)
+	m.skydrop.pass_lead(m.player, _squad().filter(func(h): return h.ctrl == "bot")[0])
+	m.ship_jump(m.skydrop.leader(m.player.team), true)
+	ok(_lane().contains("Ride along, or "), "a rider's hint at launch [%s]" % _lane())
+	m.step(Match.DT)
+	ok(_lane().contains("Ride along"), "the rider's hint stays while they ride")
+	m.skydrop.detach(m.player)
+	m.step(Match.DT)
+	ok(not _lane().contains("Ride along"), "the rider's hint goes once they jump out [%s]" % _lane())
+	seen.erase("rocket_lead")
+	seen.erase("rocket_ride")
+	await _start(6.0, 1)
+	m.ship_jump(m.player)
+	var solo := _lane().contains("You steer the rocket") and not _lane().contains("Ride along")
+	ok(solo and m.player.rocket.riders.size() == 1, "a solo (one seat) sees only the leader line [%s]" % _lane())
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -174,6 +211,7 @@ func run(mn: Node) -> void:
 	await _glide_further()
 	await _no_clipping()
 	await _bot_leader()
+	await _hints()
 	if m:
 		m.queue_free()
 	print("ROCKET DONE, failures: %d" % bad)

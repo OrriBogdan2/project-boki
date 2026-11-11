@@ -25,6 +25,8 @@ var _ack := []                # bot acknowledgements due {h, at, id}
 var clock := 0.0              # runs through the planning phase too (the match clock waits)
 var events: Array = []        # what happened, for tests
 var chests_hidden := false    # no chests show while you ride the ship and drop in (KeyChest.show_all)
+var _hint := ""               # the rocket hint on show, until the player acts (_tick_hint)
+var _hint_steer := false      # true: it is the leader's "you steer" line
 
 func _init(match_node: Match) -> void:
 	m = match_node
@@ -196,8 +198,7 @@ func launch(l: Hunter, from_net := false) -> void:
 		m.net_event(["rkt", l.nid])
 	if m.player and r.riders.has(m.player):
 		m.sfx("whoosh", null, -2.0)
-		if m.hud:
-			m.hud.toast("%s to jump out  ·  then %s again for your glider" % [Settings.key_cap("jump"), Settings.key_cap("jump")], Color("cfeaff"))
+		_show_hint(r)
 
 ## The heading the skydive camera sits behind: the squad rocket's launch heading (north-up without one).
 func drop_yaw(h: Hunter) -> float:
@@ -258,3 +259,31 @@ func tick(dt: float) -> void:
 		var r: DropRocket = rockets[t]
 		if not r.done:
 			r.tick(dt)
+	if _hint != "":
+		_tick_hint()
+
+## The rocket's first-time hint (once per save each, DECISIONS 11-08): the leader (or a solo) steers it, a
+## rider rides along or jumps out. It goes when the player acts (_tick_hint).
+func _show_hint(r: DropRocket) -> void:
+	if not Settings.get_v("tips"):
+		return
+	_hint_steer = is_lead(m.player) or r.riders.size() == 1
+	var text := "You steer the rocket: %s%s%s%s" % [Settings.key_cap("up"), Settings.key_cap("left"),
+		Settings.key_cap("down"), Settings.key_cap("right")]
+	var tip_key := "rocket_lead"
+	if not _hint_steer:
+		text = "Ride along, or %s to jump out and fall; %s opens the glider" % [Settings.key_cap("jump"),
+			Settings.key_cap("glide")]
+		tip_key = "rocket_ride"
+	_hint = ""
+	if m.hud != null and m.tip_once(tip_key):
+		m.hud.tip(text)
+		_hint = text
+
+## Hides the rocket hint once the player acts: steers (the leader), passes the lead, jumps out or lands.
+func _tick_hint() -> void:
+	var p: Hunter = m.player
+	var moved: bool = p.inp.get("move", Vector2.ZERO).length() > 0.1
+	if p.rocket == null or (_hint_steer and (moved or not is_lead(p))):
+		if m.hud: m.hud.msgs.remove(_hint)
+		_hint = ""
