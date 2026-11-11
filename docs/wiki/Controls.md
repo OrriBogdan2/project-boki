@@ -78,6 +78,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | C | Summon your Boki out of its wisp (wisps on); again: back | `summon` | yes |
 | Middle mouse | Ping for your squad: a spot, an enemy or loot (on the map too) | `ping` | yes |
 | B | Base to a teammate (squads) | `base` | yes |
+| C | Swap your lead and second Boki (in a match) | `swap_kin` | yes |
 | Shift | Hunter dash | `dash` | yes |
 | Space | Jump (hold to glide) | `jump` | yes |
 | Mouse 5 / Mouse 4 | Glide (hold in the air) | `glide` | yes |

@@ -82,7 +82,7 @@ func _setup_input() -> void:
 	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
-	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
+	_key("swap_kin", [KEY_Z])                 # in a match: swap your lead and second Boki (Z is Separate in the drop)
 	_key("dash", [KEY_SHIFT])
 	_key("jump", [KEY_SPACE])
 	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # press Mouse 5 (the front side button) in the air and hold to glide, like a second Space press; never jumps
