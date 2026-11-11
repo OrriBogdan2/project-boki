@@ -54,7 +54,7 @@
 		},
 		"rmb": {
 			"mode": "fire",
-			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) along the strike's aim, the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the dive comes down onto the marker from where it took him; its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift goes the step it ends (at most 0.3s)."
+			"source": "Data: 'turning restricted after RMB into Shift' (patch 05.02.25): RMB into Shift is a combo, the dash going the strike's way. Ours: Shift in the Slam's wind-up is a Slam Drive: the drive goes at once (no crouch) down the strike's locked lane (owner 11-11), the overhead pose kept, and the Slam lands where it arrives. In a Meteor Drop's hang the air dash goes and the drop falls straight down from where it took him, its circle under him (owner 11-11); its recovery dashes at once. A Lunge or the dive is a dash of its own: Shift pressed anywhere in it goes the step it ends (at most 0.3s)."
 		},
 		"e": {
 			"mode": "cancel",
@@ -97,7 +97,7 @@
 		"x": {
 			"mode": "lock",
 			"reason": "The source plants him through the guard: no jump until the counter has struck.",
-			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautUlt holds him down); in the recovery after it a jump goes at once and ends it."
+			"source": "Data: 'become Invulnerable, then strike back' (0.65s); footage ult f33-f38: 'movement during the guard looks locked; he stays planted'. Ours: no jump in the guard or the cleave (JuggernautKit.gate_inputs drops the press); in the recovery after it a jump goes at once and ends it."
 		}
 	}
 }

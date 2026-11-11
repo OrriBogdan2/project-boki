@@ -267,7 +267,20 @@ func busy() -> bool:
 ## Owner 113.2: a held Smash never opens the glider on a jump, nor do the Riposte's guard and cleave. Its last
 ## beat, the recovery, is open: a glide there ends the rest of it.
 func no_glide() -> bool:
-	return rmb_down or meteor.airborne() or (riposte != null and riposte.move_k() <= 0.0)
+	return rmb_down or (riposte != null and riposte.move_k() <= 0.0)
+
+## The Meteor Drop's hang and dive: Space held from a press in them never opens the glider mid-slam.
+func locks_glide() -> bool:
+	return meteor.airborne()
+
+## Planted in the guard and the cleave: no jump (source: "can no longer jump while using Volcanic Rebuke"). A Lunge
+## is a dash of its own: Shift in it goes the step it ends (_dash_waits), not lost to the hunter's short buffer.
+func gate_inputs() -> void:
+	if riposte.move_k() <= 0.0:
+		h.inp["jump"] = false
+	if h.inp["dash"] and not lunge.is_empty():
+		dash_held = true
+		h.inp["dash"] = false
 
 ## The Meteor Drop resting: a press in the air is the Smash as on the ground (a Slam, or a charge to pull into a
 ## Haul Slam), never a dead press.

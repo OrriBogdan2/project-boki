@@ -277,9 +277,9 @@ From the wiki's ability page and patch notes (https://supervive.wiki.gg/wiki/Bra
 | The chain's cooldown drops 2s three times | owner's game data | n/a | Built: 12.5% at rank 2, 37.5% at rank 3 (the hook refund is gone) |
 | The tether stays attached while you walk (about 2.5s+) | footage 0305-0317; wiki 5s | yes | Built (5s), drawn as a link chain |
 | The Fiery Lunge doubles its cooldown if nothing is struck | wiki RMB | n/a | Built, asserted |
-| The Execution Slam aims freely during its cast, with a warning over the head | wiki patch 05.02.25 | yes (lane at 0157) | Built: free aim, and a strike lane everyone sees |
+| The Execution Slam aims freely during its cast, with a warning over the head | wiki patch 05.02.25 | yes (lane at 0157) | Differs (owner 11-11): the lane locks at the press and everyone sees it |
 | Execution: x1.5 under 35% | wiki patch 05.02.25 | yes (red outline 0154) | Built, plus the red outline while the Smash is ready |
-| The dash has wind-down frames: no glide straight out of it | wiki patch 05.02.25 | n/a | Built (kits2), asserted |
+| The dash has wind-down frames: no glide straight out of it | wiki patch 05.02.25 | n/a | Built on the Lunge (0.35 s), asserted; off the Rampage (owner 11-11) |
 | A knock restores one dash charge (not all) | wiki Shift | n/a | Built |
 | Flame Step's tip deals double | wiki Shift | yes (0401) | Built |
 | Obsidian Slam's centre ring stuns and deals +50% | wiki RMB | yes | Built |
@@ -305,38 +305,88 @@ Also ours (no footage): the pull exits (Shift, a jump) and the 0.12s input buffe
 
 What a second press does during the first action's wind-up, active part and recovery: **cancels** it (the first
 ends), **both** (the second goes now and the first runs on), **waits** (buffered, and for how long) or **ignored**.
-Dash rows (Shift either way) are in [dash_interactions.md](dash_interactions.md), not repeated here. Sources: [D]
-briefs/supervive-data/supervive_kits.md, [F] the footage sheet (5 fps: one frame is 0.2 s, so a buffer shorter than
-that can't be seen), [W] the wiki page linked above, owner = DECISIONS / OWNER_REVIEW_1103. Ours is origin/main
-d255acbee, read in the code and probed headless (cancel-matrix pass, 11-09). **Unsettled** means no frame, card
-line or wiki line shows the pair: ours stays as it is and nothing was guessed. Any pair not in the table: both
-(ArchKit has no shared cast lock), except that every press is ignored, not buffered, while stunned or downed,
-and the attack key does nothing from a glide (`Hunter.can_fire`).
+"Space" is the jump on the ground and the glide press in the air (it is one key). Sources: [D]
+briefs/supervive-data/supervive_kits.md, [F] the footage sheet briefs/hero-ref/juggernaut.md (5 fps: one frame is
+0.2 s, so a buffer shorter than that can't be seen), [W] the wiki page linked above, owner = DECISIONS /
+OWNER_REVIEW_1103 / the owner's 11-11 Kael notes (ext/kael-owner-1111, ext/kael-shift-1111). Ours is
+ext/kael-cancels-1111 (origin/main 88b06b9e7 with ext/kael-shift-1111 8b498afbb merged), re-walked 11-11: every
+slot pressed in every phase of every other slot, ground and air, through the player's own keys in a headless probe.
+**Unsettled** means no frame, card line or wiki line shows the pair: ours stays as it is and nothing was guessed.
+Every press is ignored, not buffered, while stunned or downed, and the attack key does nothing from a glide
+(`Hunter.can_fire`). The Chain Lunge is gone (owner 11-11), so it has no rows. The rows marked **fixed** and
+**corrected** are asserted as `jug cancel: ...` in `--juggernaut-combo-check` (tools/kael_cancels_check.gd).
 
 | First (phase) | Second | Source | Ours | Verdict | Evidence |
 |---|---|---|---|---|---|
-| RMB Finishing Slam, wind-up (0.6 s) | LMB | not shown | both: the slash goes at once (the wind-up doesn't hold the blade) | unsettled | [W] gives a 0.55 s cast time, nothing on presses in it |
-| Slam wind-up, Lunge, Meteor Drop and its 0.5 s recovery | RMB | not shown | waits: a press in the last 0.12 s goes when the move ends; earlier presses are ignored | unsettled | |
+| RMB Finishing Slam, wind-up (0.6 s, planted, lane locked at the press) | LMB | not shown | both: the slash goes at once, the wind-up runs on | unsettled | [W] gives a 0.55 s cast time, nothing on presses in it |
+| Slam wind-up; Lunge fling; Meteor Drop hang to recovery | RMB | not shown | waits: a press in the last 0.12 s goes as the move ends; earlier presses are ignored | unsettled | `jug buffer:`, `jug meteor:` |
+| Lunge fling; Meteor Drop hang to recovery | LMB | not shown | waits the same way (last 0.12 s) | unsettled | |
 | Slam wind-up | E | not shown | both: the hook flies, the Slam strikes the way it was started | owner | `jug 113.5` |
-| Slam wind-up | jump | not shown | both: a 0.8 m hop, the wind-up goes on | unsettled | |
-| Slam wind-up | X | not shown | both: the guard starts and the wind-up runs on under it | unsettled (flagged below) | |
-| RMB held (Lunge charge) | jump | not shown | the Lunge goes from the air along the aim | owner | interaction table |
-| RMB held | glide | not shown | shut | owner | `jug 113.2` |
-| RMB held, chain hooked | E | the source has only the spin in the pull | pull, then a Haul Slam on arrival | ours (flagged below) | [D] |
-| Lunge, Meteor Drop (active) | LMB | not shown | waits 0.12 s, then the slash | unsettled | |
-| Lunge end (wind-down) | glide | "winddown frames where Brall can't immediately enter a glider state" | shut for 0.35 s after the Lunge | match (the length is ours: the patch gives no number) | [W] patch 05.02.25 |
-| E Warchain, pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Cinder Spin at once, the pull goes on | match | [D] |
+| Slam wind-up | Space | not shown | both: a full jump; the wind-up runs on and the Slam strikes down its locked lane from the air | unsettled (**corrected**: was "a 0.8 m hop") | `jug cancel: Space in the Slam's wind-up ...` |
+| Slam wind-up | X | not shown | both: the guard starts and the wind-up strikes under it | unsettled (flagged below) | |
+| Slam wind-up | Shift | "turning restricted after RMB into Shift": RMB into Shift is a combo | Slam Drive: the drive goes at once down the locked lane, the Slam lands where it arrives | match (owner 11-11: kept, not yet judged) | [W] patch 05.02.25; dash_flow `into_dash.rmb` |
+| RMB held (Lunge charge) | LMB, X | not shown | both: the slash or the guard goes, the charge holds | unsettled | |
+| RMB held | E | the source has only the spin in the pull | the throw goes, the charge holds; hooked, E pulls and the arrival is a Haul Slam | ours (flagged below) | [D]; `combo jug: E > hold RMB > E` |
+| RMB held | Space | not shown | the jump goes, the charge holds, the Lunge flings from the air along the aim; no glider while held | owner | Assumption 6; `jug 113.2` |
+| RMB held | Shift | not shown | the Rampage goes, the charge carries through it | ours (item 51) | dash_flow `hold.rmb` |
+| Lunge fling (0.2 to 0.3 s) | E | not shown | both: the throw goes, the fling runs on | unsettled | |
+| Lunge fling | Shift | "turning restricted after RMB into Shift": RMB into Shift is a combo | Shift anywhere in the fling drives a Rampage the step it ends | match (**fixed**: a press before the last 0.18 s was lost) | [W] patch 05.02.25; `jug cancel: Shift early in the Lunge's fling ...` |
+| Lunge fling | Space | not shown | the jump ends the fling at once (a miss: the cooldown doubles); the glider stays shut 0.35 s | unsettled (flagged below) | `jug cancel: Space in the Lunge's fling ...` |
+| Lunge end (wind-down) | glide | "winddown frames where Brall can't immediately enter a glider state" | shut for 0.35 s after the Lunge | match (the length is ours: the patch gives no number) | [W] patch 05.02.25; `jug cancel: no glider straight out of a Lunge ...` |
+| Meteor Drop hang (0.08 s) | Shift | not shown | the air dash goes at once; the drop then falls straight down from where it took him | ours (item 51) | `jug meteor: Shift in the hang ...` |
+| Meteor Drop dive | Shift | not shown | held, goes as he lands | ours (item 51) | dash_flow `into_dash.rmb` |
+| Meteor Drop hang, dive | Space | the Air Slam slams him down (no glider in 0251-0300) | the glider stays shut until he lands | match (**fixed**: Space opened the glider mid-drop) | [F] 0251-0300; `jug cancel: Space in the Meteor Drop's hang or dive ...` |
+| Meteor Drop hang, dive | E | not shown | a throw goes at once; on a hooked chain the pull waits for the landing | owner | owner 11-10 |
+| Meteor Drop hang, dive | X | not shown | both: the guard goes up, the drop lands | unsettled | |
+| Meteor Drop recovery (0.5 s) | Shift, Space, E (hooked) | not shown | each goes at once and ends it | ours (item 51) | `jug meteor: Shift early in the recovery ...` |
+| E Warchain, throwing | LMB, RMB, Shift, Space, X | not shown | both: each goes, the chain flies on and still bites | unsettled | `jug RMB row: throwing + tap ...` |
+| E throwing | E | "reactivate to pull" | the press is kept: the pull starts the step it hooks | unsettled (the early press is ours) | [D] |
 | E hooked | E | "reactivate to pull yourself to the target" | pulls | match | [D] |
-| X Gilded Riposte, guard and cleave (0.65 s) | jump | "Brall can no longer jump while using Volcanic Rebuke" | ignored until the cleave lands; in the recovery a jump goes at once | match | [W] hotfix 08.21.2024; content/dash_flow `into_jump.x` |
-| X guard and cleave | LMB, RMB | not shown | ignored (busy) | unsettled | [F] ult f33-f38 (planted) |
+| E hooked | RMB tap | not shown | Finishing Slam; the chain stays on | unsettled | `combo jug: E > RMB tap` |
+| E hooked | RMB hold | not shown | a plain Lunge along the aim, the chain kept; past its length it breaks | owner | owner 11-11; `combo jug: E > hold RMB ...` |
+| E hooked | LMB, Shift, Space, X | not shown | both: the chain stays on | unsettled | |
+| E pulling | RMB | Scorching Spin "DURING Feysteel Chain pull" | Cinder Spin at once, the pull goes on | match | [D] |
+| E arriving (0.25 s) | RMB | RMB on arrival spins | Cinder Spin | match | [F] 0333-0336 |
+| E pulling | LMB | not shown | waits: swings on arrival | unsettled | `jug buffer: a slash pressed late in the pull ...` |
+| E pulling | Shift | not shown (owner: "cancel or exit per the source") | cancels: the Rampage drives at once with the pull's speed | owner | dash_flow `into_dash.e` |
+| E pulling | Space | not shown | cancels: he jumps out of the pull | ours | |
+| E pulling | X | not shown | the guard goes up; the cleave goes as the hauled foe comes into reach | owner | `jug 113.7` |
+| E pulling | E | not shown | ignored | unsettled | |
+| X Gilded Riposte, guard (0.65 s) | Space | "Brall can no longer jump while using Volcanic Rebuke" | ignored | match | [W] hotfix 08.21.2024; [F] ult f33-f38 |
+| X cleave (about 0.1 s) | Space | the same line | ignored | match (**fixed**: a jump went through the cleave and cut its lunge) | `jug cancel: Space in the Riposte's cleave ...` |
+| X recovery (0.35 s) | Space, Shift | not shown | each goes at once and ends it | ours | dash_flow `into_jump.x`, `into_dash.x` |
+| X guard and cleave | Shift | planted through the guard | held, goes the step the cleave lands | match | [F] ult f33-f38; dash_flow `into_dash.x` |
+| X guard | LMB | not shown | ignored | unsettled | [F] ult f33-f38 (planted) |
+| X cleave | LMB | not shown | waits: the slash swings as it lands | unsettled (**corrected**: was "ignored") | `jug cancel: LMB in the cleave ...` |
+| X guard and cleave | RMB | not shown | ignored (busy) | unsettled | [F] ult f33-f38 (planted) |
 | X guard and cleave | E | not shown | ignored, except a held chain hauls him in | owner | `jug 113.7` |
 | X guard and cleave | glide | not shown | shut; open in the last 0.35 s, which a glide ends | owner | `jug 113.2` |
-| LMB slash, recovery (about 0.32 s) | LMB | not shown | waits 0.25 s, then the next slash | unsettled | |
-| LMB slash recovery | RMB, E | not shown | both: the Slam or the hook goes at once | unsettled | |
-| LMB held (Searing Wave charge) | jump | not shown | the charge goes on through the jump | ours | content/dash_flow `hold.lmb` |
-| LMB held | RMB, E | not shown | both: the charge goes on | unsettled | |
+| LMB slash, recovery (0.34 s) | LMB | "PRESS for a series of quick melee attacks" | waits 0.25 s, then the next slash | unsettled (the buffer length) | [D] |
+| LMB slash recovery | RMB, E, X, Space | not shown | both: each goes at once | unsettled | |
+| LMB slash recovery | Shift | card: "Dash while attacking in your facing direction" | both: the Rampage goes at once | match | [F] Quick Dash card; dash_flow `into_dash.lmb` |
+| LMB held (Searing Wave charge) | Space, Shift | card: "Dash while attacking"; [D]: nothing ends the charge | the charge goes on through the jump or the drive | match | dash_flow `hold.lmb` |
+| LMB held | RMB, E, X | not shown | both: the charge goes on | unsettled | |
+| Rampage drive, ground (about 0.17 s) | LMB | Flame Step is itself the attack; no slash inside it in 0372-0377 | waits: the slash swings as the drive ends | unsettled | dash_flow `dash.ground.lmb` |
+| Rampage drive, ground | RMB, E | not shown | both: the Smash or the throw starts mid-drive, the drive carries on | unsettled | dash_flow `dash.ground.rmb`, `.e` |
+| Rampage drive, ground or air | X | the guard is planted; the sheet's combo is "dive with Quick Dash, then the guard" | cancels: X ends the dash and the guard goes up | match | [F] ult f33-f38; dash_flow `dash.*.x` |
+| Rampage drive, air | RMB | Obsidian Slam is the RMB "while airborne" | cancels: the Meteor Drop's hang begins at once | match | [D]; dash_flow `dash.air.rmb` |
+| Rampage drive, air | LMB / E | not shown | waits to the drive's end / goes mid-drive | unsettled | dash_flow `dash.air.*` |
+| Rampage drive | Shift | "3 charges, 0.4 s between uses" | waits: the next drive goes the step this one ends (about 0.18 s apart) | differs (flagged below) | [F] Quick Dash; owner 11-11 ground dash chain |
+| Rampage drive | Space | the patch's "winddown frames" (no glider straight out of a dash) | ground: a jump out with the drive's speed; air: Space glides off at once, no lock after it | owner 11-11 (over the patch) | `--kael-shift-check`; `jug cancel: ... Space in an air Rampage glides at once` |
 
-Fixes made: none (every source line above already matches).
+Fixes made 11-11: Space in the Riposte's cleave no longer jumps (source line; our own `into_jump.x` row already said
+so); Shift anywhere in a Lunge goes as it ends (our `into_dash.rmb` row already said so; the hunter's 0.18 s dash
+buffer swallowed earlier presses); Space in the Meteor Drop's hang or dive no longer opens the glider (the drop is
+in `locks_glide`, so the held-Space path that bypassed `no_glide` sees it). Rows corrected to what the game does:
+Slam wind-up + Space, cleave + LMB.
+
+Flagged, not changed (no source line settles them):
+- Slam wind-up + X: the Slam still strikes under the guard.
+- Slam wind-up + Space: the owner's 11-11 "planted" may also mean no jump in the wind-up.
+- Space in the Lunge's fling counts as a miss and doubles the cooldown.
+- Rampage x2: the footage spaces uses 0.4 s apart; ours chains them as the drive ends (the owner's 11-11 dash chain).
+- X while gliding: the guard goes up and he glides on until the cleave; the source guard is planted.
+- The Haul Slam is ours (the source has only the spin in the pull).
 
 ## Combinations
 
@@ -361,7 +411,7 @@ All are scripted in `--kit-combo-check` (also inside `--archetype-check`) and `-
 | RMB hold that strikes nothing | Smash cooldown doubles | `combo jug: RMB hold miss = cooldown x2` |
 | In the air with the Smash ready, RMB | straight down (no sideways travel), the hit circle centred under him whatever the aim, foes in it knocked down and foes past it not | `juggernaut RMB air: the down slam lands under him, its hit circle centred there` |
 | E, jump, air RMB, jump, hold RMB, E | the slam spikes and knocks down, the chain holds, the jump ends the recovery, the held Smash arms the Haul Slam, the pull arrives and it lands | `jug combo: ...` (tools/kael_accuracy_check.gd) |
-| Rampage or Lunge, then glide | no glider for the wind-down | `combo jug: Rampage winds down (no instant glide)` |
+| Lunge, then glide | no glider for the wind-down (0.35 s); the Rampage has none (owner 11-11) | `jug cancel: no glider straight out of a Lunge ...` |
 | Rooted or Grounded, E | no chain | `combo jug: rooted = no Warchain`, `combo jug: Grounded = no Warchain` |
 | A stun while chained | breaks the chain | `combo jug: stun breaks the Warchain` |
 | Enraged | faster cooldowns | `combo jug: Enraged hastes the Smash` |
