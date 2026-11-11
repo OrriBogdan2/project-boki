@@ -76,11 +76,11 @@ func _cycle() -> void:
 	v = BokiHud.summon_view(s)
 	ok(v[0] == 1.0 and v[1] == "", "the flash happens once: then the ring is full and quiet (%s)" % [v])
 	KinSummon.press(p)
-	p.kin.hurt(p.kin.max_hp * 5.0, null)
+	var thief: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]
+	p.kin.hurt(p.kin.max_hp * 5.0, thief)      # a rival's kill: the longer cooldown (0044)
 	_frames(0.1)
 	v = BokiHud.summon_view(s)
-	ok(v[1] == "RESTING" and s.cd_full > 74.0 and v[0] < EPS, "knocked down: RESTING, longer 75 s cooldown (%s)" % [v])
-	var thief: Hunter = m.hunters.filter(func(x: Hunter): return x.team != p.team)[0]
+	ok(v[1] == "RESTING" and s.cd_full > 74.0 and v[0] < EPS, "rival kill: RESTING, 75 s cooldown (%s)" % [v])
 	ok(not BokiHud.stolen(m, p), "STOLEN: not while nobody holds your Boki")
 	m.player_lost.append({"uid": "x", "kin": null, "holder": thief, "rec": {}})
 	ok(BokiHud.stolen(m, p), "STOLEN: a rival holds your Boki")
