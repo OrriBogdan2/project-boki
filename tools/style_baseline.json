@@ -504,8 +504,16 @@
 },
 "scripts/match/exits.gd": {
 "long_line": 30,
+"long_line": 6,
+"semicolon": 13
+},
+"scripts/match/exits_flow.gd": {
+"long_line": 7,
 "nested_ternary": 1,
-"semicolon": 20
+"semicolon": 7
+},
+"scripts/match/exits_look.gd": {
+"long_line": 17
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
