@@ -6,14 +6,16 @@ extends RefCounted
 ## squad clears its region smallest camp first until home_s, then plays the usual objectives and
 ## detours to a live camp close by while it is at or below the pace level. It stays together (XP
 ## only reaches a squadmate close to the kill), skips a camp a stronger squad is on, and leaves when
-## the Blight is close or the camp is not safe for the next minute. Squads with a person in them
-## follow the person instead. Bots earn XP the way Hunters do: nothing here pays any.
+## the Blight is close or the camp is not safe for the next minute. It starts no fight with a squad
+## two levels up, nor while a camp would bring its next even level. Squads with a person in them
+## follow the person to camps instead. Bots earn XP the way Hunters do: nothing here pays any.
 ##
 ## Public API:
 ##   BotCamps.pick(m, h, picks) -> Vector3    the camp to ping from the drop map (INF: none free)
 ##   BotCamps.reachable(m, h, at) -> bool     the ship's run lets h's squad glide down onto `at`
 ##   BotCamps.goal(m, h) -> Array             [position, kind] for Bot._choose, or [] for none
 ##   BotCamps.hold_burst(m, h, tgt) -> bool   keep the abilities for the prize monster's kill window
+##   BotCamps.fight_reach(m, h, o, reach, provoked) -> float   how far h reaches for rival o (0: leave it)
 ##   BotCamps.pace_level(t) -> int            the level a squad is asked to have at match time t
 
 static func _rules() -> Dictionary:
@@ -100,7 +102,7 @@ static func _camp_to_ping(camps: Array) -> Dictionary:
 static func goal(m: Match, h: Hunter) -> Array:
 	if m.camps == null or m.biomes == null or m.skydrop == null:
 		return []
-	var squad: Array = m.hunters.filter(func(x): return x.team == h.team and not x.out and not x.extracted)
+	var squad := _squad(m, h.team)
 	if squad.is_empty() or squad.any(func(x): return x.ctrl != "bot"):
 		return []        # (a person leads their squad)
 	var lead: Hunter = squad[0]
@@ -112,9 +114,24 @@ static func goal(m: Match, h: Hunter) -> Array:
 	var c := _camp_for(m, lead, squad, rivals)
 	if c.is_empty():
 		return []
+	lead.ai["camp_t"] = m.time
 	if h != lead and h.flat_dist(lead) > float(_rules()["together_r"]):
 		return [lead.pos, "camp"]       # (stay together: XP only reaches a squadmate close to the kill)
-	return [c["pos"], "camp"]
+	return [_spot(c, h), "camp"]
+
+## Where to walk for a camp: its nearest monster still up (they chase and wander), else its centre.
+static func _spot(c: Dictionary, h: Hunter) -> Vector3:
+	var at: Vector3 = c["pos"]
+	var bd := INF
+	for mb in c["mobs"]:
+		if is_instance_valid(mb) and not mb.dead and h.flat_dist(mb) < bd:
+			bd = h.flat_dist(mb)
+			at = mb.pos
+	return at
+
+## A team's Hunters still in the match.
+static func _squad(m: Match, team: int) -> Array:
+	return m.hunters.filter(func(x): return x.team == team and not x.out and not x.extracted)
 
 ## The camp this squad is after: until home_s its region's smallest live one (kept until it is gone),
 ## later the nearest within reach while the squad is at or below the pace level.
@@ -133,7 +150,7 @@ static func _camp_for(m: Match, lead: Hunter, squad: Array, rivals: Array) -> Di
 		var near := C.nearest_live(lead.pos, float(R["detour_r"]))
 		if not near.is_empty(): live = [near]
 	for c in live:
-		if _stronger_on(c["pos"], squad, rivals) or _blight_near(m, c["pos"], float(R["blight_r"])):
+		if _taken(c, squad, rivals, home) or _blight_near(m, c["pos"], float(R["blight_r"])):
 			continue
 		lead.ai["camp_id"] = c["id"]
 		return c
@@ -157,17 +174,42 @@ static func _rivals(m: Match, squad: Array) -> Array:
 	return m.hunters.filter(func(x): return x.team != squad[0].team and not x.out and not x.extracted \
 		and squad.any(func(o): return o.flat_dist(x) < r))
 
-## A squad with more levels than ours is at the camp.
-static func _stronger_on(at: Vector3, squad: Array, rivals: Array) -> bool:
+## A squad with more levels than ours is at the camp. Outside our own region an even squad has it too
+## (the camp was theirs first; two even squads on one camp starve both).
+static func _taken(c: Dictionary, squad: Array, rivals: Array, home: int) -> bool:
 	var theirs := {}
+	var r := float(_rules()["rival_r"])
 	for x in rivals:
-		if x.flat_dist(at) < float(_rules()["rival_r"]): theirs[x.team] = int(theirs.get(x.team, 0)) + x.lvl
+		if x.flat_dist(c["pos"]) < r: theirs[x.team] = int(theirs.get(x.team, 0)) + x.lvl
 	var mine := 0
 	for x in squad: mine += x.lvl
+	if c["region"] != home: mine -= 1
 	return theirs.values().any(func(v): return v > mine)
 
 static func _blight_near(m: Match, p: Vector3, r: float) -> bool:
 	return m.blight != null and m.mobs.any(func(mb): return mb is Blight and not mb.dead and mb.flat_dist(p) < r)
+
+# ------------------------------------------------------------------ fights
+## How far bot h reaches for rival Hunter o, from the reach Bot would use (spec 6.8). None for a
+## squad fight.gap or more levels above ours, unless it was hurt in the last busy_s (it is already
+## in a fight). None while our squad is on a camp and either the opening (home_s) is still running or
+## it is one short of an even level or the ultimate. press_k times further for a squad fight.gap or
+## more below. A rival that hit h is always fought.
+static func fight_reach(m: Match, h: Hunter, o: Hunter, reach: float, provoked: bool) -> float:
+	var mine := _squad(m, h.team)
+	if provoked or m.camps == null or mine.is_empty():
+		return reach
+	var F: Dictionary = _rules()["fight"]
+	var theirs := _squad(m, o.team)
+	var gap := _level(theirs) - _level(mine)
+	if gap >= float(F["gap"]) and not theirs.any(func(x): return m.time - x.hurt_at < float(F["busy_s"])):
+		return 0.0
+	var next := int(_level(mine)) + 1
+	var on_camp: bool = m.time - float(mine[0].ai.get("camp_t", -INF)) < float(F["camp_s"])
+	var opening: bool = m.time < float(_rules()["home_s"])
+	if on_camp and (opening or next % 2 == 0 or next == int(Hunter.ULT_AT[0])):
+		return 0.0
+	return reach * (float(F["press_k"]) if gap <= -float(F["gap"]) else 1.0)
 
 # ------------------------------------------------------------------ steals
 ## A camp's prize monster: its Brute or Camp Chief (spec 6.6).

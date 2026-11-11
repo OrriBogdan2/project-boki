@@ -675,6 +675,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
+		reach = BotCamps.fight_reach(m, h, o, reach, provoked)       # (levels decide who to fight: spec 6.8)
 		var bounty: bool = m.rolling != null and o.has_meta("bounty")
 		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
