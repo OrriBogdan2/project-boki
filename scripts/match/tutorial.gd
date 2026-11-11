@@ -264,6 +264,8 @@ func _restore() -> void:
 	m.player.teleport(respawn())
 	if id() == "chest" and m.player.chest_keys == 0:
 		m.player.chest_keys = 1
+	if id() == "shoot":
+		camps.spawn("sec")      # (shoot finishes the sec step's camp)
 	if m.hud:
 		m.hud.toast("Back where you left off. Skip any time from the menu", MINT)
 

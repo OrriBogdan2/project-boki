@@ -149,13 +149,15 @@ func _home():
 ## What a finished farm tutorial leaves that the player needs.
 func _farm_snap() -> Dictionary:
 	var d := Save.d
-	var kibble := int(FarmTutorial.rules()["start_food"]["kibble"])
+	var food: Dictionary = FarmTutorial.food()
+	var base := FarmTutorial.base()
 	return {
 		"done": not FarmTutorial.active(),
 		"axe": HomeGather.has_tool("axe"),
 		"pickaxe": HomeGather.has_tool("pickaxe"),
-		"house": not FarmHob.house_entry().is_empty(),
-		"food": int(d["items"].get("kibble", 0)) >= kibble,
+		# the house up, or in the garden the toy down (FarmGuide.skip)
+		"house": FarmTutorial.toy_spot().x != INF if base else not FarmHob.house_entry().is_empty(),
+		"food": food.keys().all(func(k): return int(d["items"].get(k, 0)) >= int(food[k])),
 		"boki": (d["roster"] as Array).size(),
 		"hunters": ClassUnlock.open_ids().size() > 0 or ClassUnlock.all_open(),
 	}
@@ -167,7 +169,10 @@ func _farm_full() -> Dictionary:
 		FarmTutorial.give_step_tool(String(s["id"]))
 		FarmTutorial.mark(String(s["id"]))
 	FarmTutorial.give_food()
-	home.guide.place_house()
+	if FarmTutorial.base():
+		home.guide.place_toy()      # (the garden has no house step: its tutorial ends at the toy)
+	else:
+		home.guide.place_house()
 	var snap := _farm_snap()
 	home.queue_free()
 	await _frames()
@@ -175,7 +180,8 @@ func _farm_full() -> Dictionary:
 
 func _farm(tag: String) -> void:
 	var full := await _farm_full()
-	ok(full["done"] and full["axe"] and full["pickaxe"] and full["house"] and full["food"] and full["boki"] == 1,
+	var tools: bool = FarmTutorial.base() or (full["axe"] and full["pickaxe"])      # (no tool steps in the garden)
+	ok(full["done"] and tools and full["house"] and full["food"] and full["boki"] == 1,
 			"%s: a full playthrough ends with the house, both tools, the food and the Boki (%s)" % [tag, str(full)])
 	var steps := FarmTutorial.steps()
 	var cost := FarmSites.build_cost("house")
@@ -197,7 +203,7 @@ func _farm(tag: String) -> void:
 		var snap := _farm_snap()
 		var diff := "" if snap == full else str(snap)
 		ok(snap == full, "%s '%s': skipping leaves what a full run does %s" % [tag, id, diff])
-		if not had_house:
+		if not had_house and not FarmTutorial.base():
 			var wood_ok: bool = FarmSites.have("wood") >= wood0 + int(cost.get("wood", 0))
 			var mats: bool = wood_ok and FarmSites.have("stone") >= stone0 + int(cost.get("stone", 0))
 			ok(mats, "%s '%s': the house site comes with its wood and stone" % [tag, id])

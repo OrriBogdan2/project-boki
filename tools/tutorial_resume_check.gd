@@ -106,7 +106,7 @@ func _resume_each() -> void:
 		ok(m.player.kin != null, "%s: your Boki is with you" % tag)
 		if tu.id() == "chest":
 			ok(m.player.chest_keys > 0, "%s: the chest key is in hand" % tag)
-		if tu.id() in ["shoot", "sig", "utility", "throw", "kin1", "fight"]:
+		if tu.id() in ["sec", "shoot", "gkey", "kin", "hook", "ult"]:
 			ok(m.mobs.any(func(x): return not x.dead), "%s: the foes are there" % tag)
 		ok(String(Save.d["tutorial"]["tut_beat"]) == beat, "%s: resuming leaves the saved beat alone" % tag)
 		m.free()
