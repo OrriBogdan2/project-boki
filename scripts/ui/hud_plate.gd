@@ -153,7 +153,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, H.m.time), ch, shield_frac(h), fl * 0.6)
 	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(viewer, h))
 	# the name, or what's being done to them (stunned, rooted ...) in its colour
 	var sts := statuses(h)
 	var word := ""
@@ -173,7 +173,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "chip": ch, "lvl": h.lvl, "gap": LevelGap.of(viewer, h), "lvl_pop": float(s["lvl_pop"])}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -244,8 +244,9 @@ func _armor(c: CanvasItem, h: Hunter, r: Rect2, s: Dictionary) -> bool:
 ## frame (over where the bars start, so it reads with the health). A rounded tab in the hunter's
 ## role colour with the number in our display font; it grows into a wider pill at 10+, takes a gold
 ## rim once their ultimate is open (level 6+), and when they level up it swells, flashes gold and
-## throws a gold ring (`pop` 1 -> 0 over LVL_POP_T).
-static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, pop := 0.0) -> void:
+## throws a gold ring (`pop` 1 -> 0 over LVL_POP_T). A rival's `gap` (their level minus the viewer's,
+## LevelGap) of 2+ either way tints the tab and adds a triangle.
+static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, pop := 0.0, gap := 0) -> void:
 	var ult_open := lvl >= int(Hunter.ULT_AT[0])
 	var txt := str(lvl)
 	var k := 1.0 - pop
@@ -260,8 +261,13 @@ static func level_badge(c: CanvasItem, corner: Vector2, lvl: int, role: Color, p
 		rim = rim.lerp(HudStyle.GOLD, snappedf(pop, 0.25))     # in steps, so only a few style boxes get cached
 	var rim_w := 2 if ult_open or pop > 0.0 else 1
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE_EDGE, 6, HudStyle.SHADE_EDGE, 0), r.grow(1.5))
-	c.draw_style_box(HudStyle.box(Color(role.darkened(0.62), 0.98), 5, rim, rim_w), r)
+	var band := LevelGap.band(gap)
+	var fill := Color(role.darkened(0.62), 0.98) if band == 0 else LevelGap.tint(gap)
+	c.draw_style_box(HudStyle.box(fill, 5, rim, rim_w), r)
 	var tcol: Color = (HudStyle.GOLD if ult_open else HudStyle.INK).lerp(HudStyle.GOLD, pop)
+	if band != 0:
+		LevelGap.draw_cue(c, r, gap)
+		tcol = Color(0.08, 0.05, 0.02) if band > 0 else Color.WHITE
 	HudStyle.ctext(c, ctr + Vector2(0, 4.5 * sc), txt, int(12.0 * sc), tcol, 3)
 
 ## A downed hunter's plate: the bleed-out bar (amber, red while being finished), revive progress
@@ -282,7 +288,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 		var rev_w := w * clampf(h.revive, 0.0, 1.0)
 		c.draw_rect(Rect2(br.position + Vector2(0, br.size.y - 4.0), Vector2(rev_w, 4.0)), HudStyle.REVIVE)
 	var pop := float(s["lvl_pop"]) / LVL_POP_T
-	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop)
+	level_badge(c, Vector2(frame.position.x + 2.0, frame.end.y - 1.0), h.lvl, role, pop, LevelGap.of(H.m.player, h))
 	var name_col := Color(role.lerp(Color.WHITE, 0.4), 0.9)
 	HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), h.pname, HudStyle.PLATE_NAME_FS, name_col)
 	var revs: Array = h.get_meta("revivers", [])
