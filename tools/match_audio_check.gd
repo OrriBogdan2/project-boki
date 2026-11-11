@@ -4,6 +4,7 @@ extends RefCounted
 ## fired through the one-shot pool (the old bug); the match ends mid-channel (extracted), the game goes
 ## back to the farm, and after the fades nothing the match started is still playing (Sfx.match_voices).
 ## Also: a held loop stops on its own once its owner stops asking (the owner frozen or freed mid-channel).
+## A solos match plays no squad cue (squad ping, teammate down/back alerts); the same events with a squadmate do.
 ## And the glider: each state (open, glide, dive, overheat, fold) plays its cue once, yours and another player's.
 
 var main: Node
@@ -18,6 +19,7 @@ func ok(cond: bool, what: String) -> void:
 
 func run(main_node: Node) -> void:
 	main = main_node
+	await _solos()
 	Save.d["music"] = Save.d.get("music", [])
 	Game.goto("match", {"autoplay": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"demo_kin": "cindle"})
@@ -182,3 +184,38 @@ func _step(m: Match, secs: float) -> void:
 func _on_farm() -> bool:
 	var sc: Script = main.current.get_script() if is_instance_valid(main.current) else null
 	return sc != null and sc.resource_path.ends_with("home/home.gd")
+
+## Solos: nobody is on your squad, so none of the squad's sounds play: your own ping is silent, and a rival
+## going down or back up raises no teammate alert. Then a squadmate joins and the same events sound.
+func _solos() -> void:
+	var opts := {"autoplay": true, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "demo_kin": "cindle"}
+	opts.merge(Data.mode_opts("solos"))
+	opts["teams"] = 4
+	Game.goto("match", opts)
+	for i in 6:
+		await main.get_tree().process_frame
+	var m: Match = main.current
+	m.set_process(false)
+	var P: Hunter = m.player
+	var rivals: Array = m.hunters.filter(func(x): return x != P)
+	ok(not Life.has_mates(m, P) and not rivals.is_empty(), "solos: %d rivals, nobody on your squad" % rivals.size())
+	Sfx.last_played.clear()
+	for kind in ["", "enemy", "loot"]:
+		m.squad_ping(P, P.pos + Vector3(5, 0, 0), true, kind)
+	m.hud.mates.track(m.hud, P, 0.1)
+	m.knock(rivals[0], P, {})
+	_step(m, 0.5)
+	m.hud.mates.track(m.hud, P, 0.1)
+	ok(not Sfx.last_played.has("ping") and m.hud.mates.lines.is_empty(),
+			"solos: your ping and a rival down make no squad cue (%s)" % [Sfx.last_played.keys()])
+	m.kin_ping(P.kin, P.pos, Color.WHITE, "x")
+	ok(not Sfx.last_played.has("ping"), "solos: your Boki's callout marker is silent too")
+	rivals[1].team = P.team
+	Sfx.last_played.clear()
+	m.squad_ping(P, P.pos + Vector3(5, 0, 0), true)
+	m.hud.mates.track(m.hud, P, 0.1)
+	m.knock(rivals[1], rivals[0], {})
+	_step(m, 0.5)
+	m.hud.mates.track(m.hud, P, 0.1)
+	ok(Sfx.last_played.has("ping") and Sfx.last_played.has("warn"),
+			"...with a squadmate the ping and 'teammate down' sound (%s)" % [Sfx.last_played.keys()])

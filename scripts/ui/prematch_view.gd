@@ -175,7 +175,7 @@ func _tick_label() -> void:
 	var mine := pm.my_turn() and not pm.locked
 	if s != _last_sec:
 		_last_sec = s
-		if mine and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
+		if mine and pm.squad.size() > 1 and pm.turn_left > 0.0 and pm.turn_left <= TICK_FROM:
 			Sfx.play("click", null, 0.0, 0.0, 1.5 if pm.turn_left <= PULSE_FROM else 1.0)
 	_pulse(pm.turn_left if mine else Prematch.TURN)
 
