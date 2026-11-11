@@ -17,6 +17,7 @@
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.drop.radius", "value": 2.2, "tol": 0.22, "evidence": "F Obsidian Slam: purple disc about 1.2 bh radius at the cursor (1 bh = 1.8 m)"},
 		{"hero": "juggernaut", "slot": "RMB", "field": "rmb.spin.radius", "value": 2.2, "tol": 0.22, "evidence": "F Scorching Spin: magenta ring about 1.2 bh radius"},
 		{"hero": "thief", "slot": "RMB", "field": "rmb.bola.lane_w", "value": 1.8, "tol": 0.18, "evidence": "F Trickshot lane about 1 bh wide = 1.8 m (hero-ref/dancer.md)"},
-		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"}
+		{"hero": "bulwark", "slot": "E", "field": "e.radius", "value": 2.34, "tol": 0.23, "evidence": "F Purify Zone green disc about 1.3 h radius = 2.34 m (hero-ref/bjorn.md)"},
+		{"hero": "archer", "slot": "E", "field": "e.reach", "value": 10.8, "tol": 0.72, "evidence": "F Rain of Arrows: pin clip frame 0498, wall centred on the cursor 6.0 +-0.4 bh from the hunter (1 bh = 1.8 m); a frame lower bound, the clamp was not reached (frame 0457: 4.9 bh)"}
 	]
 }

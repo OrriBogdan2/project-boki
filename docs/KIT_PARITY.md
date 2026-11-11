@@ -34,9 +34,9 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
 | Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
-| Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
-| Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] |
-| Lace | R range, width | 18, 0.5 | not in the footage | [?] |
+| Lace | RMB range | 14 | farthest hit seen 4 bh (7.2 m, low charge, 0270-0273); charge bar 3.3 bh (0494); no full charge lands far | Not determinable. Clips checked: pin 0264-0275, 0490-0497 (the only Myth clip; no other hero-ref clip shows Myth firing); supervive_kits.md and supervive_physics.md give no range |
+| Lace | E arc, reach | 120, 9 -> 10.8 | 120, wall centred on the cursor at 6.0 +-0.4 bh = 10.8 m (0498; 0457: 4.9 bh) | arc match; reach was below the frame lower bound, now 10.8 and pinned in kit_parity.json (`e.reach`); the clamp above it is not determinable |
+| Lace | R range, width | 18, 0.5 | Primal Forces beam tip 7.3 +-0.4 bh = 13.1 m (0574, one frame, 2 bh past the hit); the Supercharged line runs >=6 bh and is cut by a pillar (0168) | Not determinable. Kept 18 / 0.5: 13.1 m is a lower bound, a tip drawn short of the range is not excluded, and the beam glow is ~1.1 m wide (0574), which is not the hit width. Clips checked: pin 0168-0169, 0570-0604 (only Myth clip; the old /home/claude/svvid/ult/pin frames are gone) |
 | Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] |
 | Cinder | E radius | 4.5 | 2.5 bh (4.5) | match |
 | Cinder | R carpet, ring, flight | 1.8, 2.2, 22.7 | 1 bh, 1.2 bh, 16-18 | width, ring match; flight longer (owner item 20) |
