@@ -75,6 +75,7 @@ var catch_prog := 0.0             # (net) 5.0 once a client has asked the host t
 var scan_by: Hunter = null        # who is scanning it right now: its daze timer waits (Capture)
 var scan_at := -9.0               # when that was last confirmed (a scan whose hunter vanished lets go after a few seconds)
 var angry_at: Ent = null
+var angry_since := 0.0            # m.time it first got angry (KinWildPose's startle)
 var power := 1.0                  # treat bonus
 var events := []                  # things that happened this match, written to memory afterwards
 var lines := {}                   # personalised barks, if the AI wrote any
@@ -1088,10 +1089,13 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 	var bh := BokiHit.take(self, d, opts)
 	d = float(bh[0])
 	opts = bh[1]
+	var calm := angry_at == null
 	if is_wild() and by and by is Hunter:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
 		angry_at = by.owner_h
+	if calm and angry_at:
+		angry_since = m.time
 	if shield > 0.0 and d > 0.0:
 		var soak := minf(shield, d)
 		shield -= soak
@@ -1150,7 +1154,8 @@ func render(delta: float, alpha: float) -> void:
 	var striking := lunge_t > 0.0 or wind_do.is_valid()
 	model.set_meta("kstate", "perch" if on_you else ("attack" if striking else ""))
 	# body language (KinPuppet): growl, point, whine, cheer...
-	var pose_now: String = comp.pose if comp else ""
+	var pose_now: String = comp.pose if comp else KinWildPose.pose(state, angry_at != null, t("bravery") < 0.45,
+			scan_by != null and Capture.active(scan_by), m.time - angry_since)
 	if state == "reviving" and comp and pose_now == "":
 		pose_now = "nudge"
 	model.set_meta("pose", pose_now)
@@ -1199,7 +1204,7 @@ func render(delta: float, alpha: float) -> void:
 	model.set_meta("dazed", state in ["downed", "dazed"] or stun_t > 0.0)
 	if state in ["downed", "dazed"]:
 		body.rotation.z = lerpf(body.rotation.z, 1.4 if state == "downed" else 0.0, delta * 6.0)
-		body.rotation.y += delta * (4.0 if state == "dazed" else 0.0)
+		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
 	else:
 		body.rotation.z = lerpf(body.rotation.z, 0.0, delta * 8.0)
 		body.rotation.y = lerpf(body.rotation.y, 0.0, delta * 8.0)
