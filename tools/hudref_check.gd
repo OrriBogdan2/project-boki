@@ -9,6 +9,7 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
+##   9. your knock and elimination callout (KnockCallout) stacks, carries the name and expires
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
 
@@ -204,7 +205,52 @@ func run(main_node: Node) -> void:
 	await _check_keys(P)
 	_check_deny(P)
 	await _check_gear_reveal(P)
+	_check_callout(m, P, hud)
 	_done()
+
+## 7. Your knocks and eliminations put a short callout near the centre (KnockCallout): the word in its
+## colour with the victim's name, stacked for quick knocks, gone after KnockCallout.LIFE, and none for
+## a knock someone else makes.
+func _check_callout(m: Match, P: Hunter, hud) -> void:
+	var foes: Array = m.hunters.filter(func(x): return x.team != P.team and not x.downed and not x.out)
+	ok(foes.size() >= 3, "three rivals still standing for the callout (%d)" % foes.size())
+	if foes.size() < 3:
+		return
+	var mates: Array = m.hunters.filter(func(x): return x != P and x.team == P.team)
+	m.knock(mates[0], foes[2], {})        # a rival knocks your teammate
+	var callout := _callout_of(hud)
+	ok(callout == null or callout.lines.is_empty(), "a knock by someone else puts up no callout")
+	m.knock(foes[0], P, {})
+	m.knock(foes[1], P, {})
+	m.eliminate(foes[2], P, "shot", true)
+	callout = _callout_of(hud)
+	ok(callout != null and callout.lines.size() == 3, "two knocks and an elimination stack three lines")
+	if callout == null or callout.lines.size() != 3:
+		return
+	var words: Array = callout.lines.map(func(e): return e["word"])
+	ok(words == ["KNOCKED", "KNOCKED", "ELIMINATED"], "the words are KNOCKED, KNOCKED, ELIMINATED (%s)" % str(words))
+	var names: Array = callout.lines.map(func(e): return e["name"])
+	ok(names[0] == foes[0].pname.left(KnockCallout.NAME_MAX) and names[2] == foes[2].pname.left(KnockCallout.NAME_MAX),
+		"each line carries its victim's name")
+	ok(callout.lines[0]["col"] == KnockCallout.KNOCK_COL and callout.lines[2]["col"] == HudStyle.FOE,
+		"knocked is the pink-magenta accent, eliminated the rival red")
+	callout.tick(KnockCallout.LIFE * 0.5)
+	ok(callout.lines.size() == 3, "still up half way through")
+	callout.tick(KnockCallout.LIFE)
+	ok(callout.lines.is_empty() and KnockCallout.LIFE <= 1.2, "gone after %.1fs: transient only" % KnockCallout.LIFE)
+	for i in KnockCallout.MAX_LINES + 1:
+		callout.push("KNOCKED", "N%d" % i, KnockCallout.KNOCK_COL)
+	var last: Array = callout.lines.map(func(e): return e["name"])
+	ok(last == ["N1", "N2", "N3"], "a fourth line pushes the oldest off (%s)" % str(last))
+	var low := KnockCallout.TOP + (KnockCallout.WORD_PX + KnockCallout.GAP) * (KnockCallout.MAX_LINES - 1)
+	ok(KnockCallout.TOP - KnockCallout.WORD_PX > 0.5 and low < 0.75,
+		"the stack sits under the centre, clear of the lane and bottom HUD (%.2f..%.2f)" % [KnockCallout.TOP, low])
+
+func _callout_of(hud) -> KnockCallout:
+	for ch in hud.get_children():
+		if ch is KnockCallout:
+			return ch
+	return null
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
 ## right-side Boki box); every hunter has an X tile with a lock until level 6 and a cooldown after a cast.

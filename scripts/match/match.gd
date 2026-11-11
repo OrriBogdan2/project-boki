@@ -5385,6 +5385,7 @@ func _net_ev(x, from: String) -> void:
 				if by is Hunter and by.team != who.team: XpRules.pay_squad(self, by, XpRules.knock_xp(who))
 				if by == player:
 					player.knocks += 1
+					KnockCallout.say(self, "knock", who, true)
 					_reward_moment(who.pos)
 				_check_team(player.team if player else -9)
 		"out":
@@ -5395,6 +5396,7 @@ func _net_ev(x, from: String) -> void:
 				if by is Hunter: DashReset.takedown(by, who)
 				if by == player:
 					player.kills += 1
+					KnockCallout.say(self, "out", who, true)
 				add_feed(out_text(who.pname, String(x[3])))
 				if who.kin:
 					who.kin.dead = true
