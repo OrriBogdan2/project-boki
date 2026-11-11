@@ -40,19 +40,6 @@ const TIPS := [
 	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
 	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
 ]
-## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
-const LORE := [
-	"Everyone born since the Hollowing is born without a face. We call ourselves the Empty.",
-	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
-	"Malgrave the Beloved never aged, and never forgot her vault. Under the Crown, it was always the Wyrm.",
-	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
-	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
-	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
-	"Skyfolk, beasts and humans all lost their faces alike. The sky doesn't ask who you were.",
-	"One wish waits in the Wyrmheart: remake the world, or rule it. Every Hunter wants it. So does the Wyrm.",
-	"Not every Mask has a face. Some are a compass, a jar, a pair of skates, and they remember just as much.",
-	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
-]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
 const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
 const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
@@ -77,7 +64,6 @@ var sub := ""
 var mode_line := ""
 var raid := ""           # the raid condition this expedition rolled ("" when it doesn't roll one)
 var tip := ""
-var lore := ""
 var map_name := ""       # the map this expedition is on ("" when unknown)
 var party: Array = []    # your squad, [{name, arch, you}] (Prematch.squad_of)
 var arch := ""           # the Hunter whose splash fills the screen
@@ -121,7 +107,6 @@ func setup(opts: Dictionary) -> void:
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
 	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
 	tip = tips[randi() % tips.size()]
-	lore = LORE[randi() % LORE.size()]
 	arch = String(opts.get("arch", Arch.of_save()))
 	splash_path = Portraits.art_path(arch, true)
 	if splash_path != "":
@@ -193,8 +178,7 @@ func _draw() -> void:
 	var cx := sz.x * 0.5
 	var tw_ := minf(660.0, sz.x - 60.0)
 	var lines := UI.body.get_multiline_string_size(tip, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 15, 3).y
-	var lore_h := UI.body.get_multiline_string_size(lore, HORIZONTAL_ALIGNMENT_CENTER, tw_ - 40.0, 14, 3).y + 12.0
-	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (40.0 + lines + lore_h), tw_, 40.0 + lines + lore_h)
+	var card := Rect2(cx - tw_ * 0.5, sz.y - 24.0 - (44.0 + lines), tw_, 44.0 + lines)
 	var bw := minf(480.0, sz.x - 80.0)
 	var br := Rect2(cx - bw * 0.5, card.position.y - 30.0, bw, 6)
 	# text: the block's height from its first line, so a short window lifts it clear of the bar
@@ -229,7 +213,6 @@ func _draw() -> void:
 	c.draw_style_box(_glass(af), card)
 	_text(Vector2(cx, card.position.y + 22), "TIP", UI.caps, 11, Color(UI.ACCENT, a), 2)
 	_wrap(Vector2(cx, card.position.y + 26), tip, 15, tw_ - 40.0, Color(UI.INK, a * 0.85))
-	_wrap(Vector2(cx, card.position.y + 30.0 + lines), lore, 14, tw_ - 40.0, Color(UI.TEAL, a * 0.75))
 	_squad_row(Vector2(cx, sz.y * 0.1), a)
 
 ## Your squad's portraits and names across the top: who you are dropping with.

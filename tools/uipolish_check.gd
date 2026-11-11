@@ -74,8 +74,9 @@ func _settings_read(src: Dictionary) -> void:
 		if _uses(src, String(k)).is_empty():
 			unread.append(k)
 	ok("every setting is read somewhere", unread.is_empty(), str(unread))
-	var tabs := ["Gameplay", "Controls", "Camera", "Audio", "Video", "Accessibility", "Demo"]
-	ok("the settings menu shows the new tabs", Overlay.SETTINGS_TABS == tabs)
+	var tabs := ["Gameplay", "Controls", "Audio", "Video", "Accessibility"]
+	# (Camera lives in Gameplay now; Demo is the owner's, added by settings_tabs())
+	ok("the settings menu shows the five player tabs", Overlay.SETTINGS_TABS == tabs)
 
 func _removed(src: Dictionary) -> void:
 	for k in Settings.REMOVED:
@@ -200,7 +201,7 @@ func _screens() -> void:
 	var title: Node = await _go("title")
 	ok("title screen: every box is the menu look", _off_look(title, ours).is_empty(), str(_off_look(title, ours)))
 	Overlay.ctx = "title"
-	for t in Overlay.SETTINGS_TABS:
+	for t in Overlay.settings_tabs():
 		Overlay.tab = t
 		Overlay.open_settings()
 		await main.get_tree().process_frame

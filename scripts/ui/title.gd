@@ -484,9 +484,8 @@ func _build_ui() -> void:
 	var items: Array = []
 	# the Arena: every archetype's kit against dummies and a sparring bot, no save needed
 	items.append(["Training Grounds", func(): Game.start_match(Match.arena_opts()), "knock"])
-	if has:
-		# one click to a match made for filming: Duos with a bot squadmate who leads the drop to a boss lair
-		# next to an uplink, clear weather, no Blight, the usual rivals (Match.demo_opts)
+	if has and Overlay.admin_allowed():
+		# the owner's filming match (Match.demo_opts): not a player's menu item
 		items.append(["Demo match", func(): Game.start_match(Match.demo_opts()), "updraft"])
 	if has:
 		items.append(["Play with your Boki", func(): Game.goto("home", {"play_hub": true}), "bond"])
@@ -503,13 +502,7 @@ func _build_ui() -> void:
 		if ch == logo: continue
 		UI.pop_in(ch, 0.9 + i * 0.07)
 		i += 1
-	# bottom corners: what this is, and how to drive the menu without a mouse
-	var ver := UI.label("v" + Net.VERSION, 13, Color(1, 1, 1, 0.45))
-	ver.autowrap_mode = TextServer.AUTOWRAP_OFF
-	ver.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	ver.offset_left = 28; ver.offset_top = -40; ver.offset_bottom = -18
-	root.add_child(ver)
-	# a small playtest chip low in the corner, clear of the splash's hero: the build and the Discord link
+	# bottom right: the build and the Discord link on a small chip, and how to drive the menu without a mouse
 	var news := UI.glass(8, 6)
 	news.name = "News"
 	news.mouse_filter = Control.MOUSE_FILTER_STOP

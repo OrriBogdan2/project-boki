@@ -499,10 +499,8 @@ static func pop_in(c: Control, delay := 0.0) -> void:
 static func card(col := CARD, pad := 14, rad := R_CARD) -> PanelContainer:
 	var p := PanelContainer.new()
 	var opaque := col.a > 0.6 and rad < R_PILL
+	# a plain rounded frame: only the panel around it is torn, so cards never read as boxes in boxes
 	var sb := UiFrame.raised(col, rad, 6 if opaque else 0, RIM if opaque else Color(0, 0, 0, 0))
-	if rad < R_PILL:
-		sb = UiTorn.make(col, 3.0, 0.0, 0.5 if opaque else 0.0)      # a torn card, speckle at its edge
-		sb.shadow = 6 if opaque else 0
 	sb.lit = 0.05 if opaque else 0.0
 	p.add_theme_stylebox_override("panel", sb.padded(pad, pad))
 	return p

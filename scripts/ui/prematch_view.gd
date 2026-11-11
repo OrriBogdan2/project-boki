@@ -13,6 +13,8 @@ const SAFE_MIN := 24          # px, the least margin at any window size
 const TICK_FROM := 5.0        # s left on your turn when the countdown ticks each second
 const PULSE_FROM := 3.0       # s left on your turn when the countdown throbs red
 
+const SIDE_W := 300.0      # px: the squad and chat column
+
 var pm: Prematch
 var voice := VoiceChat.new()
 var title_label: Label
@@ -94,6 +96,7 @@ func _ready() -> void:
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 12)
 	grid.add_theme_constant_override("v_separation", 12)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL      # (so the cards' expand flags have room to use)
 	sc.add_child(grid)
 	ride_box = UI.vbox(0)
 	root.add_child(ride_box)

@@ -80,16 +80,19 @@ What made the menus feel blocky, samey and hard to get through:
 
 ## 2. Rules
 
-1. **One strong title per panel**, with at most one short subtitle line under it (what the screen is
-   for, or the one number that matters). No ornaments.
+1. **One strong title per panel**, with at most one short subtitle line under it, and only when the
+   title alone doesn't say what the screen is for (the Esc menu, Save files, the Market and the
+   Inventory have none). No ornaments.
 2. **Three type sizes.** `T_TITLE` 34 (Lilita One) for the panel title, `T_HEAD` 20 (Lilita One) for
    card and item names, `T_BODY` 16 (Rubik) for everything you read, `T_SMALL` 14 for secondary
    lines. Section eyebrows are `section()` (12, bold, spaced caps).
-3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`). Panels, cards,
+3. **Fewer boxes, one frame.** Every box is a `UiFrame` (`scripts/ui/ui_frame.gd`). Panels,
    buttons, tiles, popups and tooltips use its subclass `UiTorn` (`scripts/ui/ui_torn.gd`): a torn
    outline (`jag`), optional blotches, speckle, runes, tally marks and cracks (`grain`), a teal-to-magenta
    neon edge (`glow`, its thickness `glow_w`), the `ticket` notches and parchment `nails`. Shapes are
-   cached per rect, so a box costs no more per frame than a plain one. Wells, tracks and pills stay plain `UiFrame` (`UiFrame.sunk`).
+   cached per rect, so a box costs no more per frame than a plain one. Cards (`card()`), wells, tracks
+   and pills stay plain `UiFrame`: only the panel around them is torn, so a list never reads as torn
+   boxes inside a torn box (UI_SIMPLIFY_1110.md).
    Radii come from `R_PANEL` 18, `R_CARD` 12, `R_CTRL` 10, `R_SMALL` 6, `R_PILL`. Cards have no
    outline unless they are *selected*. Group with spacing and eyebrows before reaching for a card.
 4. **Three button tiers.** `primary()` (the magenta ticket, pink text): the one thing the screen is for,
@@ -103,7 +106,9 @@ What made the menus feel blocky, samey and hard to get through:
    right, tabs under the title, body, footer actions bottom right with the primary last and an Enter
    keycap on it. Esc always closes or goes back.
 7. **Tabs, not long lists.** Group options into tabs (`shell_tabs`) and groups (`section`). Tabs are a
-   segmented control, visibly different from buttons.
+   segmented control, visibly different from buttons. Five tabs at most: Settings is Gameplay (with
+   the camera), Controls, Audio, Video, Accessibility (Demo only for the owner); the inventory is
+   Items, Farm, Kin, Field Book.
 8. **Sensible defaults.** The panel opens with the primary focused (or the first control), the last
    tab you used, and the current choice highlighted.
 9. **Confirm only what can't be undone** (delete a save, leave a match, sell or salvage an Epic or
