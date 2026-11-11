@@ -88,3 +88,8 @@ be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's
 Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
+
+## Grimble (`dredge`, 2026-11-11): appeal3 candidate b (`art/wardens/src/grimble_v95.json`)
+The master is now `~/meshy/v95/Grimble/r2/appeal3/cand_b.glb` (the appeal3 face, calves slimmed 12%); spec and
+rig input (the pre-swap dredge.glb) are unchanged otherwise. Re-swapped with the frame-rounding fix, so dr_blast
+keeps its 2.1 s (`--dredge-combo-check`). Brought in for patch 0.24.6 on ext/hunters3d-0246.
