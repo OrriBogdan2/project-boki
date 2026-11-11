@@ -3,8 +3,8 @@ extends RefCounted
 ## Quiet growth: every level a hunter reaches makes them a little tougher (max health) and their
 ## abilities a little stronger (ability power), with no banner. Both grow in a straight line, the same
 ## share every level, as in the source (content/rules/level_growth.json, docs/ABILITIES.md). The level
-## badge flashes and its tooltip shows the totals (LevelGrowth.tip). Weapon growth is separate:
-## WeaponPath on even levels.
+## badge flashes and its tooltip shows the totals (LevelGrowth.tip). Levels grow nothing else: no weapon
+## bonuses, only ability ranks.
 ##
 ##   LevelGrowth.hp_pct(lvl) / ap_pct(lvl)   the total share gained by that level (0 at level 1)
 ##   LevelGrowth.apply(h)                    brings a hunter's max health up to their level's growth

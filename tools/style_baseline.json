@@ -98,7 +98,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 52
+"long_line": 53
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -1020,7 +1020,7 @@
 "shadow": 1
 },
 "tools/gear_check.gd": {
-"long_line": 24,
+"long_line": 23,
 "semicolon": 1,
 "shadow": 1
 },
@@ -1124,8 +1124,8 @@
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
-"long_line": 31,
-"semicolon": 4,
+"long_line": 22,
+"semicolon": 2,
 "shadow": 1
 },
 "tools/polish_check.gd": {
