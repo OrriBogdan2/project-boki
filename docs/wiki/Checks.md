@@ -84,6 +84,7 @@ Before a pull request, run at least `--check` and `--simtest`; if you touched Bo
 | `--simtest [--seed=N]` | A whole match on autopilot, printed; must end without script errors |
 | `--hitch-check` *(window)* | A seeded expedition through loading, drop and landing; fails on a stalled frame or a late shader compile |
 | `--load-check` *(window)* | The same, stopping at the reveal to judge the loading screen |
+| `--mob-damage-check` | PvE: a level-1 and level-5 Hunter standing still in each monster, camp mix and lair, never fighting back. Prints the seconds to fall, damage per hit and per second (docs/EXPEDITION_SPEC.md section 13). Asserts that every damaging row fells them within 90 s over 3 or more hits, the Glimmerkin never hurts anyone, and a lone Puffbomb blows up once |
 
 ## Tooling flags
 
