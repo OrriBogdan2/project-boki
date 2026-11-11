@@ -10,7 +10,7 @@ extends RefCounted
 ##      outside the final ring
 ## Never touches the save.
 
-const MAPS := {"hollowcrown": 305.0 / 216.0, "skyreach": 1.0}   # map -> ways_scale (its size over the 216 m design)
+const MAPS := ["hollowcrown", "skyreach"]   # each map's ways_scale is its size over the 216 m design
 const SEEDS := [5101, 5102]
 
 var bad := 0
@@ -27,7 +27,7 @@ func run(main: Node) -> void:
 		var L := World.load_layout(id)
 		ok(L.has("heart"), "%s authors a heart site" % id)
 		var ws := float(L.get("ways_scale", 1.0))
-		ok(absf(ws - MAPS[id]) < 0.01, "%s ways_scale %.3f" % [id, ws])
+		ok(absf(ws - float(L.get("size", 216)) / 216.0) < 0.01, "%s ways_scale %.3f" % [id, ws])
 		var gates: Array = []
 		for sd in SEEDS:
 			var m := Match.new()

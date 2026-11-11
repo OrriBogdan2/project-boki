@@ -146,7 +146,7 @@ islands = [
          sheer=[[300, 360]],
          ramps=[up(68, 85, "e", 4, 2, 8), up(99, 104, "n", 3, 8, 14), up(56, 136, "n", 3, 2, 9),
                 up(94, 132, "e", 3, 2, 11), up(73, 180, "n", 3, 2, 6)],
-         rocks=rocks((96, 76, 97, 76), (102, 86, 103, 86), (50, 110, 51, 110), (120, 136, 121, 137), (64, 152, 65, 152)),
+         rocks=rocks((96, 76, 98, 76), (102, 86, 104, 86), (50, 110, 52, 110), (120, 136, 121, 137), (64, 152, 66, 152)),
          chests=[[99, 80], [56, 116], [117, 126], [78, 158]],
          areas=[[99, 82, "The Lantern"], [117, 132, "Bellcliff"], [56, 116, "The Spur"]],
          fill=dict(chests=2, camps=["heavy", "light"], landings=6, breakables=6, weapons=1, wardens=2, traps=1)),
@@ -158,7 +158,7 @@ islands = [
                        (52, 330), (34, 292), (50, 270), (16, 252)], 0),
                  circle(62, 250, 11, 1), circle(118, 236, 13, 1), circle(150, 292, 12, 1), circle(92, 296, 10, 1), circle(178, 262, 9, 1)],
          sheer=[[150, 210]],
-         rocks=rocks((60, 232, 61, 233), (62, 233, 62, 234), (138, 256, 140, 257), (100, 278, 101, 279), (170, 300, 171, 300),
+         rocks=rocks((60, 232, 61, 233), (62, 233, 62, 234), (138, 256, 140, 257), (100, 278, 101, 279), (170, 300, 172, 300),
                      (40, 286, 41, 287), (186, 244, 186, 246)),
          wild=[[100, 262], [106, 268], [96, 270], [112, 258], [90, 256]],
          areas=[[110, 262, "The Graze"]],
@@ -677,6 +677,9 @@ def check(lv, owner, stairs):
         for R in d.get("rocks", []):      # a boulder half over the void is clipped to a post
             if any((x, z) not in lv for x in range(R[0], R[2] + 1) for z in range(R[1], R[3] + 1)):
                 probs.append("%s rock %s over the void" % (d["id"], R))
+            touch = [Q for Q in d["rocks"] if Q is not R and R[0] <= Q[2] + 1 and Q[0] <= R[2] + 1 and R[1] <= Q[3] + 1 and Q[1] <= R[3] + 1]
+            if not touch and (R[2] - R[0] + 1) * (R[3] - R[1] + 1) < 3:     # (tools/wall_size_check.gd: no block piece under 3 tiles)
+                probs.append("%s rock %s under 3 tiles" % (d["id"], R))
     for L in lairs:
         cx, cz = L["at"]; h = L["half"]
         lvs = set(); own = set()
