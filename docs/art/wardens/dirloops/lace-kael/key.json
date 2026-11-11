@@ -1,0 +1,178 @@
+{
+ "pair01": {
+  "hero": "archer",
+  "clip": "walk_b",
+  "X": "old",
+  "Y": "new",
+  "speed": "walk",
+  "dir": "b"
+ },
+ "pair02": {
+  "hero": "archer",
+  "clip": "walk_l",
+  "X": "old",
+  "Y": "new",
+  "speed": "walk",
+  "dir": "l"
+ },
+ "pair03": {
+  "hero": "archer",
+  "clip": "walk_r",
+  "X": "new",
+  "Y": "old",
+  "speed": "walk",
+  "dir": "r"
+ },
+ "solo04": {
+  "hero": "archer",
+  "clip": "walk_fl",
+  "X": "new"
+ },
+ "solo05": {
+  "hero": "archer",
+  "clip": "walk_fr",
+  "X": "new"
+ },
+ "solo06": {
+  "hero": "archer",
+  "clip": "walk_bl",
+  "X": "new"
+ },
+ "solo07": {
+  "hero": "archer",
+  "clip": "walk_br",
+  "X": "new"
+ },
+ "pair08": {
+  "hero": "archer",
+  "clip": "run_b",
+  "X": "old",
+  "Y": "new",
+  "speed": "run",
+  "dir": "b"
+ },
+ "pair09": {
+  "hero": "archer",
+  "clip": "run_l",
+  "X": "new",
+  "Y": "old",
+  "speed": "run",
+  "dir": "l"
+ },
+ "pair10": {
+  "hero": "archer",
+  "clip": "run_r",
+  "X": "new",
+  "Y": "old",
+  "speed": "run",
+  "dir": "r"
+ },
+ "solo11": {
+  "hero": "archer",
+  "clip": "run_fl",
+  "X": "new"
+ },
+ "solo12": {
+  "hero": "archer",
+  "clip": "run_fr",
+  "X": "new"
+ },
+ "solo13": {
+  "hero": "archer",
+  "clip": "run_bl",
+  "X": "new"
+ },
+ "solo14": {
+  "hero": "archer",
+  "clip": "run_br",
+  "X": "new"
+ },
+ "pair15": {
+  "hero": "juggernaut",
+  "clip": "walk_b",
+  "X": "old",
+  "Y": "new",
+  "speed": "walk",
+  "dir": "b"
+ },
+ "pair16": {
+  "hero": "juggernaut",
+  "clip": "walk_l",
+  "X": "old",
+  "Y": "new",
+  "speed": "walk",
+  "dir": "l"
+ },
+ "pair17": {
+  "hero": "juggernaut",
+  "clip": "walk_r",
+  "X": "old",
+  "Y": "new",
+  "speed": "walk",
+  "dir": "r"
+ },
+ "solo18": {
+  "hero": "juggernaut",
+  "clip": "walk_fl",
+  "X": "new"
+ },
+ "solo19": {
+  "hero": "juggernaut",
+  "clip": "walk_fr",
+  "X": "new"
+ },
+ "solo20": {
+  "hero": "juggernaut",
+  "clip": "walk_bl",
+  "X": "new"
+ },
+ "solo21": {
+  "hero": "juggernaut",
+  "clip": "walk_br",
+  "X": "new"
+ },
+ "pair22": {
+  "hero": "juggernaut",
+  "clip": "run_b",
+  "X": "new",
+  "Y": "old",
+  "speed": "run",
+  "dir": "b"
+ },
+ "pair23": {
+  "hero": "juggernaut",
+  "clip": "run_l",
+  "X": "old",
+  "Y": "new",
+  "speed": "run",
+  "dir": "l"
+ },
+ "pair24": {
+  "hero": "juggernaut",
+  "clip": "run_r",
+  "X": "new",
+  "Y": "old",
+  "speed": "run",
+  "dir": "r"
+ },
+ "solo25": {
+  "hero": "juggernaut",
+  "clip": "run_fl",
+  "X": "new"
+ },
+ "solo26": {
+  "hero": "juggernaut",
+  "clip": "run_fr",
+  "X": "new"
+ },
+ "solo27": {
+  "hero": "juggernaut",
+  "clip": "run_bl",
+  "X": "new"
+ },
+ "solo28": {
+  "hero": "juggernaut",
+  "clip": "run_br",
+  "X": "new"
+ }
+}
