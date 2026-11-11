@@ -17,6 +17,8 @@ Source tags follow SUPERVIVE_FEEL.md / SUPERVIVE_DATA.md:
 - `[footage]` is a frame measurement from SUPERVIVE_FEEL.md.
 - `[spec]` is docs/EXPEDITION_SPEC.md.
 - `[est]` is our own estimate, tuned for feel and labelled as such.
+- `[game data]` is the decoded source data (briefs/supervive-data on ext/agent-briefs).
+- `[unseen]` means the footage we have does not show it; nothing was changed on it.
 
 Nothing here comes from SUPERVIVE's files.
 
@@ -234,3 +236,20 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
 - The network protocol. Movement runs on the owning machine, and remote hunters still use `net_follow`.
 - Landing performance (branch `landhitch`).
+
+## The knock moment (`--knock-moment-check`; `KnockMoment`, scripts/match/knock_moment.gd)
+
+The instant a Hunter is knocked (`Match.knock`), measured for all 12 Hunters holding LMB, RMB and Shift, with every key tapped again right after. One line per row: the source, ours, and what changed.
+
+| Row | Source | Ours (now) | Changed |
+|---|---|---|---|
+| Held LMB (fire, bow draw, sword charge) | [footage] the victim shows the knock star and is a Wisp two frames later (5 fps), no shot of theirs follows; a knocked body has no attacks | `can_fire()` is false from the knock step; the draw, a buffered swing tap, the sniper wind-up and a sword charge are dropped on that step, nothing fires in the 0.5 s after | the bow draw and the buffered swing tap were cleared on the next tick, now on the knock step |
+| Held RMB (a charge or aimed hold) | [game data] a knock cancels a held channel outright ("canceled if ... stunned, knocked"); it never completes | the hold is dropped on the knock step, no cast, the HUD's hold ring shuts | **fixed**: the kit's tick released the hold on the knock, which cast it (5 of the 7 Hunters with a hold open at the knock cast from the Wisp) |
+| Buffered presses (a Shift or jump waiting for a move to end, presses parked during a dash) | [game data] nothing pressed before the knock goes off after it (the channel rule, above) | `dash_buf`, `jump_buf` and the dash-flow parking lot are cleared on the knock step | **fixed**: a press parked during a dash replayed 0.15 s after the knock (a deny buzz the player never asked for) |
+| Dash in flight | [game data] the knocked body moves under its own rule from the knock (a knocked movement multiplier, 0.45 on rails); [est] so the dash ends where the knock lands it | `roll_t` ends on the knock step; a dash's carried speed is cut (the hit's own knockback still carries); the Wisp slides 0.05 m after (target under 0.5 m) | **fixed**: the dash carried the Wisp 2.3-4.4 m past the knock |
+| Glide | [game data] knocked movement is its own rule | the glider folds on the knock step (`can` needs not downed); unchanged | no |
+| Camera | [unseen] every clip we have is the attacker's view (constant zoom, no desaturation on their side; the red tint after Kael's execute is his Empowered); the victim's own view is not in the footage | 0.3 s at 0.55x time, a red flash, audio ducked, no zoom, no desaturation [est] | no (not measured) |
+| Wisp control | [game data] the knocked body keeps moving under its multiplier from the knock; [footage] the victim is a Wisp within 0.2-0.4 s | the keys move the Wisp on step 1 after the knock (0.4x speed); the pop-in starts on the knock step and is done at 0.28 s | no |
+
+Still different, noted for a later pass: a **stun** also releases a held RMB into its cast (`ArchKit.tick`), where the source cancels it ("canceled if stunned"); kit flights (`fly_t`) are the kits' own and were not audited here.
+

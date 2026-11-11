@@ -2220,7 +2220,7 @@ func cancel_abilities(h: Hunter) -> void:
 func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
-	cancel_abilities(h)
+	KnockMoment.cut(self, h)      # every held or buffered input stops on this step
 	h.downed = true
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
