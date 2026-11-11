@@ -4,7 +4,7 @@
 locked, unlocked, early seat used; the Uplink open, raced, won; the Blight's wall), columns 8 / 20 / 40 / 60 m at
 the match camera with two rivals fighting beside the player. Each frame is captioned.
 
-- `before_low.jpg`: the 0.24.5 line as merged. At 20-60 m nothing in the play view says where a quest seat is or
+- `before_low.jpg`: the 0.24.5 line as merged (an earlier row order: the Heart rows first). At 20-60 m nothing in the play view says where a quest seat is or
   what state it is in; the charging Heart's pink waypoint is the only far marker, the used Gate and the Blight's wall
   have none (the camera frames about 15 m round the player, so no beam or wall that far is ever in frame).
 - `sheet_low.jpg`, `sheet_high.jpg`: with WaysOutPins. Each seat still to be had gets a pin on the edge toward it
