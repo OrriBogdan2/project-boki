@@ -6,6 +6,7 @@ extends RefCounted
 ##   - the Heart Gate (dim until the Heartspark is carried, then lit), the Heart ring's progress once it opens;
 ##   - the Blight's tide ring closing on the Heart, and the next ring it closes to (dashed);
 ##   - out past the ring: a crimson tint, a line saying so and a red pulse on every hit.
+##     (the first time the tide closes, also an edge arrow to the ring for a few seconds: WaysHints)
 
 const TIDE_COL := Color(0.75, 0.2, 0.35, 0.8)
 const NEXT_COL := Color(0.95, 0.55, 0.65, 0.7)    # the dashed ring the tide closes to next
@@ -59,6 +60,8 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		var box := Rect2(Vector2(inset, inset), sz - Vector2(inset, inset) * 2.0)
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
 	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
+	if WaysHints.arrow_due(m):
+		hud._draw_waypoint(ht.site + Vector3(0, 1.0, 0), "The circle", Heart.COL)
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
 	hud._ctext(Vector2(sz.x * 0.5, sz.y * 0.8), line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)
 

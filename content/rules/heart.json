@@ -116,7 +116,7 @@
  },
  "hints": {
   "_doc": "first-time one-line hints for a new player (scripts/match/ways_hints.gd), each once per save, in the message lane: tide when the Blight first closes, quest when a quest seat first opens, heart when the Heart wakes",
-  "tide": "The Blight is closing in on the Heart: stay inside its ring",
+  "tide": "The Blight is closing. Get inside the circle.",
   "quest": "A way out is open: the first squad to finish its quest leaves",
   "heart": "The Heart is awake: carry its spark to the Gate and your squad leaves early"
  },
