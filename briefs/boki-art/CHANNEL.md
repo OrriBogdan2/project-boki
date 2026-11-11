@@ -925,3 +925,10 @@ READY (owner-picked): fewer Boki with scenery on their backs. New card + sheet +
 Cisternmander/Vatmander (water sacs), Crofthorn + Crofthollow (wheat fringe / wheat-sheaf mane, sickle horns, flail tail; no cottage), Briarlynx (cape trimmed),
 Dribbara > Soakybara > Geysirbara line (splash tuft > floating in a water bubble > steam coat; no pools or rock mounds). Female looks replaced: Kestrike (line colours), Pavonazar (crown ring).
 Pixel sprites redone for those 9. LIVE_MANIFEST hashes refreshed for these names only; sheet_audit 0 behind. Cairnback unchanged (owner).
+
+### 11-11 04:03 ET ART -> COORD
+READY (owner-picked, final for this session). New card + sheet + portrait + hero + pixel sprite, LIVE_MANIFEST hashes refreshed for these names only:
+- Penguin line redone, all round and calm: Pinguin (Kegling, tiny round chick, red feather band), Rollguin (fat round, marble veins), Kingpinguin (Pipguin, body is a marbled bowling ball).
+- Bigger dex poses (cards changed, sheets unchanged): Bullsfrog (leaping toward viewer), Scopeleon (sitting up on its tail), Filefin (tight curl).
+- Murmuron female: new turnaround (wings spread, no straps).
+sheet_audit: 259 Boki, 0 behind. pixel/: 259 sprites. Cairnback unchanged (owner).
