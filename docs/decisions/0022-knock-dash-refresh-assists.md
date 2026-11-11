@@ -18,7 +18,7 @@ every charge and nobody else, and Vex's kit refilled Slipstep on its own as well
 Option 2. Recipients are the knocker plus every teammate whose damage or CC landed on the victim in the last
 `ASSIST_WINDOW` (4 s). One-charge dash: full refill. Two or more charges: +1 charge (never past max). The
 long-dash cooldown clears for each. Only the knocker heals (our 5%, unchanged). An assist plays the cue
-`ASSIST_CUE_DB` quieter. A hero's `dash.knock_refresh: false` in content opts out (none do; default on).
+`assist_softer_db` quieter (content/rules/reset_cue.json, ResetCue). A hero's `dash.knock_refresh: false` in content opts out (none do; default on).
 Kills run the same rule as knocks, as before. Each game refreshes only the hunters it owns.
 
 ## Consequences
