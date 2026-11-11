@@ -19,6 +19,7 @@ const TILE_MAX := 100.0       # px, the largest roster portrait
 const NAME_FRAC := 0.07       # the hero name's size as a fraction of the window height
 const NAME_MIN := 40          # px, the smallest hero name
 const ABILITY_PX := 50.0      # px, one ability tile (icon and key)
+const SQUAD_PX := 40.0        # px, a squadmate's portrait in the strip
 const LOCK_H := 52.0          # px, the Lock in button's height
 const LOG_H := 84.0           # px, the most the chat log grows to (it scrolls past that)
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad chip of whoever is picking: a warm gold card
@@ -359,6 +360,13 @@ func _tile(ak: String, px: float) -> PanelContainer:
 	card.set_meta("arch", ak)
 	return card
 
+## A squadmate who hasn't picked yet: a dim square where their portrait goes.
+func _empty_face() -> Control:
+	var p := PanelContainer.new()
+	p.add_theme_stylebox_override("panel", UI.frame(UI.WELL, UI.R_SMALL, UI.LINE))
+	p.custom_minimum_size = Vector2(SQUAD_PX, SQUAD_PX)
+	return p
+
 func _hover_on(ak: String) -> void:
 	_hover = ak
 	_show_hero()
@@ -376,9 +384,10 @@ func _fill_squad() -> void:
 	for m in pm.squad:
 		var ak: String = m["arch"]
 		var chip := UI.card(PICKING_FILL if m == now else Color(UI.CARD, 0.85), 8, 6)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		var h := UI.hbox(8)
 		chip.add_child(h)
-		h.add_child(ClassCard.portrait(ak, 40.0) if Arch.exists(ak) else UI.label("?", 20))
+		h.add_child(ClassCard.portrait(ak, SQUAD_PX) if Arch.exists(ak) else _empty_face())
 		var v := UI.vbox(0)
 		h.add_child(v)
 		var you: bool = m["you"]
