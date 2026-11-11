@@ -20,15 +20,14 @@ const EXEMPT := {"thrumbird": "flyer", "selenfin": "flyer (fins)", "zephyrak": "
 ## Ratchet: gaits that slide more than MAX_SLIDE at some size and speed even at the best rate BokiRig picks, with
 ## the most they may slide: the planted paw's speed is uneven (a sine swing from the hip), and at match speeds the
 ## step is too short even at BokiRig.MAX_CADENCE. Ceilings only come down: lower or drop a row when a clip is
-## re-keyed (docs/DEBT.md).
+## re-keyed or planted (tools/boki/plant_gait.py, docs/DEBT.md).
 const OVER := {
 	"burrlet walk": 0.35, "burrlet run": 0.75, "cairnback walk": 0.35, "cairnback run": 0.75, "cindle run": 0.60,
 	"glintmole walk": 0.35, "glintmole run": 0.70, "hivara walk": 0.30, "hivara run": 0.70, "kestrike walk": 0.45,
-	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick walk": 0.75,
-	"lodestick run": 0.90, "marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade walk": 0.65,
-	"mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75, "pebbit walk": 0.35, "pebbit run": 0.65,
-	"puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80, "wisplet walk": 0.35, "wisplet run": 0.85,
-	"zapple walk": 0.60, "zapple run": 0.75, "caecilith walk": 0.65, "caecilith run": 0.90,
+	"kestrike run": 0.90, "kindlewren walk": 0.35, "kindlewren run": 0.90, "lodestick run": 0.90,
+	"marchleaf walk": 0.50, "marchleaf run": 0.60, "mossgrade run": 0.70, "nettlynx walk": 0.30, "nettlynx run": 0.75,
+	"pebbit walk": 0.35, "pebbit run": 0.65, "puddlet run": 0.70, "rimeshrew walk": 0.30, "rimeshrew run": 0.80,
+	"wisplet walk": 0.35, "wisplet run": 0.85, "zapple run": 0.35, "caecilith walk": 0.65, "caecilith run": 0.90,
 }
 const SAMPLES := 48           # poses per loop
 const PLANTED := 0.5          # a foot in the lowest this fraction of its lift, moving back, is on the ground
