@@ -556,3 +556,9 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - **Solos are back** (supersedes "No duo or solo extraction" above for solos only): 20 hunters (20 solos, bots fill). Trios stay 10 squads x 3 = 30 hunters.
 - **Map size follows player count:** solos play a compressed map; trios get a bigger map allowance. Every map starts with part of it already inside the Blight/zone (play space starts smaller than the full map); solos start with a smaller play space than trios.
 - **Incubator does not hatch instantly.** Coordinator call: an egg takes 20 minutes of play time (garden or matches, not wall-clock while closed) to hatch, visible as progress on the egg itself, no pop-ups. Tunable in data. The Chao-style garden core (0.24.5) may restyle this; the slow hatch stays.
+
+## Owner 2026-11-11: drop = squad mini-rockets (replaces the drop ship jump-out)
+- Each squad rides one **mini rocket** down from high up (higher than today). The **squad leader steers** it; default for everyone else is do nothing and land together.
+- Any hunter can **disconnect early**: then they free-fall (slower than the rocket, still fast) and can **pull the glider whenever they want** to travel further in the air. If nobody does anything, the rocket hits the ground and the squad lands there.
+- Camera during the fall: Fortnite-style skydive view (behind/above the falling hunter, looking down at the map), not the current view.
+- No health bars while aboard; no gold ring or big effect on exit. Solos ride a one-seat rocket.
