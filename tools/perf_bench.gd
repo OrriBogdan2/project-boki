@@ -7,6 +7,7 @@ extends RefCounted
 ##   timeout 1200 xvfb-run -a godot --rendering-driver opengl3 --audio-driver Dummy -- --perf-bench
 ##   [--bench-secs=60] [--bench-farm=20] [--bench-out=/path/frames.csv] [--quality=medium]
 ##   [--bench-view=2560x1440]  (GPU runs: the window size, so render scale and fill cost show)
+##   [--bench-merge]  (every Hunter wears a Fusion from the first frame: Heavy Star, Stormwing, Prism Shell in turn)
 ## Software GL makes wall time mostly raster time: compare script ms, draws, tris and nodes between runs.
 
 const DT := 1.0 / 60.0
@@ -16,6 +17,7 @@ const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
 
 var main: Node
 var secs := 60.0
+var merge_all := false
 var farm_secs := 20.0
 var out_path := ""
 var rows := PackedStringArray()
@@ -37,6 +39,7 @@ func setup(main_node: Node) -> void:
 		if a.begins_with("--bench-secs="): secs = float(a.substr(13))
 		if a.begins_with("--bench-farm="): farm_secs = float(a.substr(13))
 		if a.begins_with("--bench-out="): out_path = a.substr(12)
+		if a == "--bench-merge": merge_all = true
 		if a.begins_with("--bench-view="):
 			var wh := a.substr(13).split("x")
 			view = Vector2i(int(wh[0]), int(wh[1]))
@@ -88,6 +91,8 @@ func _match() -> Array:
 	var last := Time.get_ticks_usec()
 	var fought := false
 	var P: Hunter = m.player
+	if merge_all:
+		_merge_all(m)
 	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
 	while is_instance_valid(m) and m.time < secs:
 		P.hp = P.max_hp
@@ -116,6 +121,23 @@ func _match() -> Array:
 	_meshes()
 	Match.prof_on = false
 	return fl
+
+## Every Hunter with a Boki fuses (the species picks the form), and the transformations play out before the run is timed.
+func _merge_all(m: Match) -> void:
+	var species := ["pebbit", "zephyrak", "puddlet"]
+	var n := 0
+	for h in m.hunters:
+		if h.kin == null:
+			continue
+		h.kin.species = species[n % species.size()]
+		h.kin.stow()
+		h.ult = 1.0
+		h.slot_lv["ult"] = 1
+		if KinMerge.press(h):
+			n += 1
+	for i in 60:
+		m.step(DT)
+	print("BENCH fusions live: %d of %d hunters" % [n, m.hunters.size()])
 
 ## Two rivals and a monster pack around the player, so the last part of the run is a fight.
 func _bring_fight(m: Match) -> void:
