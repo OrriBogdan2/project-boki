@@ -1,6 +1,6 @@
-"""Relaxes the skin weights of a shipped Hero .glb in place (tools/art1/skin_relax.py on the .glb's own clips), so no clip
-tears the skin, without a re-bake: only JOINTS_0, WEIGHTS_0 and ripped triangles' indices change, in place; every other
-byte of the file stays as it was.
+"""Relaxes the skin weights of a shipped Hero .glb in place (tools/art1/skin_relax.py on the .glb's own clips), so no
+clip tears the skin, without a re-bake: only JOINTS_0, WEIGHTS_0 and ripped triangles' indices change, in place;
+every other byte of the file stays as it was.
 The clips are sampled from the .glb (the same maths as the game's skin and tools/stretch_check.gd). Vertices that the
 seams split (one per UV island) are welded first, so both sides of a seam get the same weights.
 Each mesh first loses the deeper limb bones off its torso and other limbs (skin_relax.limbs_apart), then the
@@ -66,7 +66,8 @@ def sample(times, values, mode, path, t):
 
 
 def poses(j, bin_, skin):
-    """[(clip, skinning matrices [joint, 4, 4])] every SAMPLE s of every clip: joint's global pose times its inverse bind."""
+    """[(clip, skinning matrices [joint, 4, 4])] every SAMPLE s of every clip (the joint's global pose times its inverse
+    bind), and each node's parent."""
     nodes = j["nodes"]
     parent = [-1] * len(nodes)
     for i, nd in enumerate(nodes):
@@ -83,7 +84,8 @@ def poses(j, bin_, skin):
             times = accessor(j, bin_, smp["input"])[0][:, 0].astype(float)
             vals = accessor(j, bin_, smp["output"])[0].astype(float)
             if ch["target"]["path"] in ("translation", "rotation", "scale"):
-                chans.append((ch["target"]["node"], ch["target"]["path"], times, vals, smp.get("interpolation", "LINEAR")))
+                mode = smp.get("interpolation", "LINEAR")
+                chans.append((ch["target"]["node"], ch["target"]["path"], times, vals, mode))
         end = max(c[2][-1] for c in chans)
         for t in sorted(set(np.arange(0.0, end, SAMPLE).tolist()) | {end}):
             trs = [dict(r) for r in rest]
@@ -100,7 +102,8 @@ def poses(j, bin_, skin):
 
 
 def skinned(j, bin_):
-    """Every skinned mesh's primitives: {mesh: [{pos, joints, weights, offsets and strides of JOINTS_0 and WEIGHTS_0, idx}]}."""
+    """Every skinned mesh's primitives: {mesh: [{pos, joints, weights, offsets and strides of JOINTS_0 and
+    WEIGHTS_0, idx and its offset}]}."""
     out = {}
     for m in j["meshes"]:
         for pr in m["primitives"]:
@@ -112,8 +115,10 @@ def skinned(j, bin_):
             wt, wt_at, wt_st = accessor(j, bin_, at["WEIGHTS_0"])
             assert j["accessors"][at["WEIGHTS_0"]]["componentType"] == 5126, "float weights only"
             idx, idx_at, _ = accessor(j, bin_, pr["indices"])
-            out.setdefault(m["name"], []).append({"pos": accessor(j, bin_, at["POSITION"])[0].astype(float), "joints": jo.astype(int), "weights": wt.astype(float),
-                        "jo": (jo_at, jo_st, jo.dtype), "wt": (wt_at, wt_st), "idx": idx[:, 0], "idx_at": idx_at})
+            pos = accessor(j, bin_, at["POSITION"])[0].astype(float)
+            out.setdefault(m["name"], []).append({"pos": pos, "joints": jo.astype(int), "weights": wt.astype(float),
+                                                  "jo": (jo_at, jo_st, jo.dtype), "wt": (wt_at, wt_st),
+                                                  "idx": idx[:, 0], "idx_at": idx_at})
     return out
 
 
@@ -122,7 +127,8 @@ def weld(prims, bones):
     (rest [v, 3], weights [v, bone], each primitive's map to them)."""
     allpos = np.concatenate([p["pos"] for p in prims])
     dense = np.zeros((len(allpos), bones))
-    np.put_along_axis(dense, np.concatenate([p["joints"] for p in prims]), np.concatenate([p["weights"] for p in prims]), axis=1)
+    joints = np.concatenate([p["joints"] for p in prims])
+    np.put_along_axis(dense, joints, np.concatenate([p["weights"] for p in prims]), axis=1)
     key = np.c_[np.round(allpos / WELD), np.round(dense / WELD_WEIGHT)].astype(np.int64)
     _, first, inv = np.unique(key, axis=0, return_index=True, return_inverse=True)
     inv = inv.ravel()
