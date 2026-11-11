@@ -20,8 +20,8 @@ static func request(path: String) -> void:
 	_reads[path] = true
 
 ## Queues `path` to read on a loader thread once the reads queued before it are done: one at a time, a frame
-## apart. A loader thread's read hands the GL driver its textures and meshes to upload on the main thread, so a
-## match's ~36 .glb reads at once landed in one frame of the map build (M5 GL 785-889 ms, item 33).
+## apart. With a match's ~32 .glb reads out at once, the main thread's build stalled until they were all done and
+## the GL driver uploaded their textures and meshes in one frame (M5 GL 592 ms, item 33).
 static func read_ahead(path: String) -> void:
 	if _reads.has(path) or path in _queue:
 		return
