@@ -123,7 +123,7 @@ func _pin_audit(m: Match, P: Hunter, T: Hunter, T2: Hunter, K: ArcherKit, home: 
 	P.inp["sec_hold"] = false
 	step(m, 0.6)
 	ok("audit pin: the Heavy Shot stops on the first foe (data: one target, a knockback; no pierce)",
-		dmg(T) > 10.0 and dmg(T2) == 0.0, "%.0f / %.0f" % [dmg(T), dmg(T2)])
+		dmg(T) >= float(pd["dmg"][0]) and dmg(T2) == 0.0, "%.1f / %.1f" % [dmg(T), dmg(T2)])
 
 # ------------------------------------------------------------------ Sparkle: the finger bolts
 func vireo() -> void:

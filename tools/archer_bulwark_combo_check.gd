@@ -259,12 +259,12 @@ func _archer_combos() -> void:
 	P.inp["sec_hold"] = false
 	m.step(DT)
 	step(m, 0.3)
+	var pd: Dictionary = K.rmb_def()["pin"]
 	ok(
 		"combo archer: Heavy Shot > wall = pin 1.2s + wall hit",
-		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) >= 35.0 and K.anim_id == "arc_heavy",
-		"pins %d stun %.2f took %.0f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
+		K.pins >= pn0 + 1 and T.stun_t > 0.7 and dmg(T) > float(pd["dmg"][1]) and K.anim_id == "arc_heavy",
+		"pins %d stun %.2f took %.1f anim %s" % [K.pins - pn0, T.stun_t, dmg(T), K.anim_id]
 	)
-	var pd: Dictionary = K.rmb_def()["pin"]
 	var want := float(pd["dmg"][1]) * (1.0 + 173.0 / 35.0)
 	ok(
 		"parity lace: wall pin pays 173 extra on the 35 shot (source ratio 4.94x), not our old 0.4x",
@@ -363,8 +363,9 @@ func _archer_combos() -> void:
 	step(m, 0.3)
 	ok(
 		"combo archer: RMB hold looses the Heavy Shot on one charge and a 16 s cooldown",
-		dmg(T) >= 14.0 and K.rmb_charges() == 1 and K.ch_rmb < 1.0 and absf(float(K.cd["rmb"]) - 16.0) < 0.6,
-		"took %.0f max charges %d charges %.1f cd %.1f" % [dmg(T), K.rmb_charges(), K.ch_rmb, float(K.cd["rmb"])]
+		dmg(T) >= float(K.rmb_def()["pin"]["dmg"][0]) and K.rmb_charges() == 1 and K.ch_rmb < 1.0
+			and absf(float(K.cd["rmb"]) - 16.0) < 0.6,
+		"took %.1f max charges %d charges %.1f cd %.1f" % [dmg(T), K.rmb_charges(), K.ch_rmb, float(K.cd["rmb"])]
 	)
 	ok("archer anim: the Heavy Shot plays arc_heavy", K.anim_id == "arc_heavy", K.anim_id)
 	# ranks: the cooldown drops 3 s a rank (16 -> 13 -> 10) and rank 3 adds 3 m of range

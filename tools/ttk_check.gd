@@ -38,12 +38,23 @@ const HEROES := [
 	["thief", "Shiv", "hold", true, [160.0, 0.45, 16.0], {"rmb": [46.0, 0.5, 13.0, 4.0, 1, 0]}],
 	["ostra", "Void", "hold", true, [263.0, 0.6, 0.0], {
 		"rmb": [277.0, 0.4, 10.0, 3.0, 1, 0], "e": [365.0, 0.2, 10.0, 2.0, 1, 0]}],
-	["archer", "Myth", "draw", false, [], {}],
-	["tender", "Elluna", "hold", false, [], {}],
+	["archer", "Myth", "draw", false, [], {
+		"rmb": [35.0, 0.2, 16.0, 6.0, 1, 0], "e": [61.0 * HIT_S, 0.3, 15.0, 4.0, 1, 0]}],
+	["tender", "Elluna", "hold", false, [], {"rmb": [49.0, 0.4, 11.5, 3.0, 1, 0]}],
 	["dolm", "Tetra", "tap", false, [], {}],
-	["dredge", "Kingpin", "hold", false, [], {}],
-	["rimewright", "Celeste", "hold", false, [], {}],
+	["dredge", "Kingpin", "hold", false, [], {"e": [264.0, 0.4, 12.0, 5.0, 1, 0]}],
+	["rimewright", "Celeste", "hold", false, [], {"rmb": [346.0, 0.547, 12.0, 3.5, 2, 0]}],
 ]
+
+## The share table watches one cast this long (s): a damage-a-second source number (Rain of Arrows) is
+## counted over the same window, and Meeko's Burrseed shows its sourced hit, not the burst 2 s after it sticks.
+const HIT_S := 2.0
+const RMB_HOLD := {"archer": 1.1}      # hero -> s its RMB is held before the release (Heavy Shot at full draw)
+
+## Ults the share table lists (never in a combo): hero -> source damage of one cast. our_hit casts it, then
+## waits ULT_WAIT s for a held ult to go off (Rimelock cracks open at 3.5 s; Starpiercer's three shots).
+const ULT_HITS := {"rimewright": 155.0, "archer": 326.0 + 326.0 + 422.0}
+const ULT_WAIT := 4.5
 
 ## Owner decisions that explain an outlier row: hero -> "DECISIONS date: what" (none cover a whole row yet).
 const OVERRIDES := {}
@@ -148,11 +159,23 @@ func our_hit(arch: String, slot: String) -> float:
 	var m: Match = f[0]
 	var P: Hunter = f[1]
 	var T: Hunter = f[2]
-	_abilities(P, [slot])
+	var wait := HIT_S
+	var hold: float = RMB_HOLD.get(arch, 0.0) if slot == "rmb" else 0.0
+	if slot == "x":
+		P.slot_lv["ult"] = 1
+		P.ak.cast_ult()
+		wait = ULT_WAIT
+	elif hold > 0.0:
+		P.inp["sec_hold"] = true
+		P.ak.press_rmb()
+	else:
+		_abilities(P, [slot])
 	var t := 0.0
-	while t < 2.0:
+	while t < wait:
 		if slot == "e":
 			_abilities(P, [slot])      # (the recast that sets a planted E off)
+		P.inp["sec_hold"] = t < hold
+		P.inp["fire"] = P.ak.ult_running()      # an ult that empowers the next shots (Starpiercer) fires them
 		_tick(m, P, T, f[3])
 		t += DT
 	var share := (OUR_HP - T.hp) / OUR_HP
@@ -199,7 +222,7 @@ func run(main_node: Node) -> void:
 	var bad := 0
 	for hero in HEROES:
 		for combo in [false, true]:
-			if combo and hero[5].is_empty():
+			if combo and (hero[5].is_empty() or hero[4].is_empty()):      # no source LMB: no combo row
 				continue
 			for rank in [1, 3]:
 				var ours: float = await our_ttk(hero, combo, rank)
@@ -215,13 +238,22 @@ func run(main_node: Node) -> void:
 		for slot in hero[5]:
 			var src_share: float = float(hero[5][slot][0]) / _src_hp(hero)
 			var ours_share: float = await our_hit(hero[0], slot)
-			hits.append([hero[0], hero[1], slot, ours_share, src_share])
-			print("TTK hit %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
-				hero[0], slot, ours_share, src_share, ours_share / src_share])
+			_add_hit(hero, slot, ours_share, src_share)
+	for id in ULT_HITS:
+		var ult_hero: Array = HEROES.filter(func(h): return h[0] == id)[0]
+		_add_hit(ult_hero, "x", await our_hit(id, "x"), float(ULT_HITS[id]) / _src_hp(ult_hero))
 	if "--write" in OS.get_cmdline_user_args():
 		_write()
 	print("TTK CHECK DONE, rows: %d, failures: %d" % [rows.size(), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## One share-of-target row: printed and kept for the table, flagged "out" outside the bar (not a failure).
+func _add_hit(hero: Array, slot: String, ours_share: float, src_share: float) -> void:
+	var ratio := ours_share / src_share
+	var flag := "ok" if ratio >= RATIO_LO and ratio <= RATIO_HI else "out"
+	hits.append([hero[0], hero[1], slot, ours_share, src_share, flag])
+	print("TTK hit %-3s %-11s %-4s ours %.3f of the target, source %.3f, ratio %.2f" % [
+		flag, hero[0], slot, ours_share, src_share, ratio])
 
 const TABLE_MARK := "<!-- ttk:table -->"      # docs/TTK.md keeps its tables between two of these
 
@@ -232,10 +264,10 @@ func _write() -> void:
 	for r in rows:
 		lines.append("| %s (%s) | %s | %s | %s | %s | %s |" % [
 			r["hero"], r["name"], r["label"], _fmt(r["ours"]), _fmt(r["src"]), _ratio_text(r["ratio"]), r["state"]])
-	lines.append_array(["", "| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source |"])
-	lines.append("|---|---|---|---|---|")
+	lines.append_array(["", "| Hunter (source) | Cast | Ours (share of target) | Source | Ours / source | Bar |"])
+	lines.append("|---|---|---|---|---|---|")
 	for h in hits:
-		lines.append("| %s (%s) | %s | %.3f | %.3f | %.2f |" % [h[0], h[1], h[2], h[3], h[4], h[3] / h[4]])
+		lines.append("| %s (%s) | %s | %.3f | %.3f | %.2f | %s |" % [h[0], h[1], h[2], h[3], h[4], h[3] / h[4], h[5]])
 	var path := "res://docs/TTK.md"
 	var parts := FileAccess.get_file_as_string(path).split(TABLE_MARK)
 	var f := FileAccess.open(path, FileAccess.WRITE)
