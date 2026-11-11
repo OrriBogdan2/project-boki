@@ -462,6 +462,7 @@ func load_from(p: String) -> void:
 			return
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
 	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
+	FarmTutorial.migrate(parsed)      # an old mid-tutorial save restarts on the garden's four steps
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]

@@ -174,12 +174,10 @@ static func pin_menu(h: Node, rec: Dictionary, reopen: Callable) -> OptionButton
 		if m == "rest": Work.set_rest(rec, true)
 		else: Work.set_pin(rec, m)
 		_drop(h, rec)
-		if m != "" and m != "rest": FarmTaskGuide.picked(h, rec, m)
 		Save.save_game()
 		reopen.call())
 	opt.tooltip_text = "Pin it to one kind of job, or keep it to resting"
 	opt.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	FarmTaskGuide.mark_dropdown(opt, rec)
 	return opt
 
 static func _drop(h: Node, rec: Dictionary) -> void:

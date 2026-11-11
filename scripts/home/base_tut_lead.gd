@@ -7,7 +7,7 @@ extends RefCounted
 
 ## Where the active Boki leads now: INF when no base step is up or k is not your active Boki.
 static func target(h, k: Dictionary) -> Vector3:
-	if not FarmTutorial.base() or k["rec"] != Save.active_kin() or not h.visit.is_empty():
+	if k["rec"] != Save.active_kin() or not h.visit.is_empty():
 		return Vector3.INF
 	var id := FarmTutorial.current()
 	if id == "toy" and FarmTutorial.stage(id) == "watch":

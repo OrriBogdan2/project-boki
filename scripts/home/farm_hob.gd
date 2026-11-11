@@ -1,9 +1,9 @@
 class_name FarmHob
 extends RefCounted
 ## Hob Brackenridge in the world (home.gd owns one): a person (HobModel) who waits by the market stall and
-## walks over to work at the house while it goes up. On the first arrival the camera swings over to him while
-## he waves and calls you over, and his name shows over him until you have talked. Walk up and press interact
-## and he talks face to face (HobTalk: the farm tutorial, blueprints from FarmBuilder, and the second Mask).
+## walks over to work at the house while it goes up. His name shows over him until you have talked.
+## Walk up and press interact
+## and he talks face to face (HobTalk: the tutorial step you are on, blueprints from FarmBuilder, and the second Mask).
 ## A "!" floats over him while he has something for you. Holding the same interact key hammers a house or
 ## building going up, beat after beat, when the tutorial option player_swing is on; your Boki nearby come and
 ## help, and the materials are spent as it goes (FarmSites).
@@ -110,12 +110,11 @@ func _walk(dt: float) -> void:
 	else:
 		node.face_to = Vector3.INF
 
-## Until you have met him, and while he has the second Mask for you, he calls you over now and then.
+## While he has the second Mask for you, he calls you over now and then.
 func _call_out(dt: float) -> void:
 	call_t -= dt
 	var talk: Dictionary = rules()["talk"]
-	var met := bool(FarmBuilder.state().get("met", false))
-	var line := "" if met or FarmTutorial.base() else String(talk["call"])      # in the base your Boki calls you
+	var line := ""
 	if chat.offer_due():
 		line = String(talk["call_offer"])
 	if call_t > 0.0 or chat.busy() or line == "":
@@ -179,7 +178,6 @@ func _land_swing() -> bool:
 	if e.is_empty() or not FarmSites.has_site(e):
 		return false
 	FarmSites.player_swing(h.hw, e)
-	FarmTutorial.event("swing")
 	h._refresh_top()
 	e = FarmSites.entry(site_u)
 	if e.is_empty() or not FarmSites.has_site(e):

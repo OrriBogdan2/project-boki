@@ -216,7 +216,7 @@ func _tutorial_match():
 func _farm_tutorial(home) -> void:
 	_begin("farm tutorial")
 	home._close_panel()
-	ok(FarmTutorial.active() and FarmTutorial.current() == "hob", "the farm tutorial starts by calling you to Hob")
+	ok(FarmTutorial.active() and FarmTutorial.current() == "meet", "the garden tutorial starts by meeting your Boki")
 	ok(is_instance_valid(home.guide.hint_box), "its first prompt is on screen")
 	var gems := int(Save.d["gems"])
 	var steps := 0
@@ -230,30 +230,16 @@ func _farm_tutorial(home) -> void:
 		ok(FarmTutorial.hint_text(cur) != "", "'%s' tells you what to do" % cur)
 		_do_step(cur)
 	ok(bool(FarmTutorial.state()["done"]) and not FarmTutorial.state()["skipped"], "every step can be done in turn")
-	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "the axe and the pickaxe were handed over")
 	ok(int(Save.d["gems"]) >= gems + int(FarmTutorial.option("end_gems")), "the reward at the end is paid")
 	home.guide._poll()
 	ok(not is_instance_valid(home.guide.hint_box), "and the prompts are gone")
 
 ## Does what the player would for one step: the game's own hook where there is one, else its mark.
 func _do_step(id: String) -> void:
-	var events := {"hob": "hob", "hammer": "swing", "task": "task", "expedition": "portal",
-			"buy": "buy", "sell": "sell"}
-	if id == "house":
-		ok(main.current.guide.place_house(), "the house can be placed on the farm")
-		_build_house()
+	var events := {"meet": "meet", "toy": "play", "out": "portal"}
 	if events.has(id):
 		FarmTutorial.event(String(events[id]))
 	FarmTutorial.mark(id)
-
-## The materials the house takes and every swing of labour: what chopping, mining and hammering add up to.
-func _build_house() -> void:
-	var cost := FarmSites.build_cost("house")
-	Work.add_mat("wood", int(cost["wood"]))
-	Work.add_mat("stone", int(cost["stone"]))
-	var house := FarmHob.house_entry()
-	ok(FarmSites.add_swing(house, int(house["site"]["need"])), "its labour can all be done: the house stands")
-	main.current._sync_fixtures()
 
 # ------------------------------------------------------------------ 5. the second Relic
 func _second_relic(home) -> void:
@@ -360,12 +346,9 @@ func _skip_paths() -> void:
 	var tut: Dictionary = Save.d["tutorial"]
 	ok(bool(tut.get("match", false)) and int(Save.d.get("matches", 0)) == 0, "the match tutorial is done, not played")
 	ok(FarmTutorial.active(), "the farm tutorial still starts")
-	var skippable := bool(FarmTutorial.option("skippable"))
-	var buttons: int = home.guide.skip_row.get_child_count()
-	ok(buttons == (1 if skippable else 0), "its Skip button follows the 'skippable' option (%s)" % skippable)
+	ok(home.guide.skip_row.get_child_count() == 1, "its Skip button is on screen")
 	var gems := int(Save.d["gems"])
 	home.guide.skip()
-	ok(not FarmTutorial.active() and FarmSites.is_site(FarmHob.house_entry()), "skipping leaves the house to build")
-	ok(HomeGather.has_tool("axe") and HomeGather.has_tool("pickaxe"), "and the axe and the pickaxe")
+	ok(not FarmTutorial.active() and FarmTutorial.toy_spot().x != INF, "skipping leaves a toy down")
 	ok(int(Save.d["gems"]) >= gems, "nothing was taken")
 	_end()
