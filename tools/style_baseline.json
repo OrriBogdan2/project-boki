@@ -214,22 +214,6 @@
 "long_line": 17,
 "semicolon": 2
 },
-"scripts/feel/feel_config.gd": {
-"long_line": 2
-},
-"scripts/feel/feel_test_world.gd": {
-"long_line": 1,
-"shadow": 2
-},
-"scripts/feel/hunter_controller.gd": {
-"long_line": 1,
-"shadow": 1
-},
-"scripts/feel/top_down_camera.gd": {
-"long_line": 1,
-"semicolon": 6,
-"shadow": 1
-},
 "scripts/home/econ_models.gd": {
 "long_line": 17,
 "nested_ternary": 1,
