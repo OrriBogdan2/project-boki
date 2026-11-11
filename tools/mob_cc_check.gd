@@ -33,7 +33,7 @@ const CASES := [
 	["ostra", "Nightwell stun, pull", "x", 6.0, 2.0, 0, "pull"],
 	["rimewright", "Rink Wall push", "e", 4.0, 1.5, 0, "pull"],
 	["rimewright", "Rimelock stun", "x", 4.0, 4.2, 0, "knock"],
-	["tender", "Burrseed root", "rmb", 5.0, 2.6, 0, "knock"],
+	["tender", "Burrseed root", "rmb", 5.0, 3.6, 0, "knock"],
 	["thief", "Bola Grounded, slow", "rmb", 5.0, 1.5, 0, "knock"],
 ]
 
