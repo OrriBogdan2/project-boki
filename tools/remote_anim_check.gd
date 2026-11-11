@@ -140,6 +140,8 @@ func _first_k(rows: Array, move_name: String) -> float:
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:
 	var P := m.player
 	var what := "%s %s%s" % [arch, key, " held" if held else ""]
+	if cut:
+		what = "%s %s cut" % [arch, key]
 	P.reclass(Arch.weight(arch), arch)
 	P.unlock_all()
 	P.lvl = 6
@@ -200,6 +202,8 @@ func _rocks(kind: int) -> void:
 func _press(key: String, held: bool) -> void:
 	var P := m.player
 	var secs := HOLD if held else DT
+	if cut:
+		secs = CUT_AT
 	var flick := P.pos + Vector3(6.0, 0, 4.0)
 	match key:
 		"lmb": P.inp["fire"] = true
@@ -216,6 +220,9 @@ func _press(key: String, held: bool) -> void:
 		t += DT
 		if key != "lmb" or not held: P.inp["fire"] = false
 		P.inp["sec"] = false
+	if cut:
+		MergeAugment.drop_class_holds(P)
+		P.ak.drop_holds()
 	for k in ["fire", "sec_hold", "dash_down", "sig", "ult"]:
 		P.inp[k] = false
 	if key == "e": _aim(P.pos + Vector3(6.0, 0, 0))
