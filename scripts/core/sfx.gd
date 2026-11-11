@@ -22,7 +22,8 @@ const CUES := ["knock_confirm", "elim_confirm"]
 ## Sounds that only exist as several takes (monster voices, little pops); one is picked at random.
 const VOICES := ["v_skitter", "v_spitter", "v_brute", "v_bomber", "v_sentinel", "v_glimmer", "v_warden", "die_small", "die_big",
 	"step_grass", "step_stone", "step_snow", "step_wood",
-	"step_sand_light", "step_sand_medium", "step_sand_heavy", "step_water_light", "step_water_medium", "step_water_heavy",
+	"step_sand_light", "step_sand_medium", "step_sand_heavy",
+	"step_water_light", "step_water_medium", "step_water_heavy",
 	"step_metal_light", "step_metal_medium", "step_metal_heavy"]
 ## The shortest gap before the same sound can play again, so a crowd doesn't machine-gun it.
 const MIN_GAP := {"break_wood": 40, "break_clay": 40, "break_metal": 40, "fuse_hiss": 80,

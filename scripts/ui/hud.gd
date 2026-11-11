@@ -2615,13 +2615,6 @@ func _build_loot() -> void:
 		v.add_child(list)
 	for it in items:
 		var itc: Dictionary = it
-		var gear_it := InvText.box_gear(b, it)
-		if not gear_it.is_empty():
-			tip.attach(rp, func(): return InvText.compare(p, gear_it))
-		var verb := "Take"
-		if it["key"] == "gear": verb = "Swap"
-		elif not fit: verb = "Full"
-		elif it["key"] == "pack" and it.get("full", false): verb = "Swap"
 		var take_it := func():
 			if loot_open == null or not m.player:
 				return
@@ -2630,6 +2623,9 @@ func _build_loot() -> void:
 			elif (loot_open as Dictionary).get("empty", false): close_loot()
 			else: _build_loot()
 		var rp := LootHold.box_row(it, LootFull.fits(p, it, b), take_it)
+		var gear_it := InvText.box_gear(b, it)
+		if not gear_it.is_empty():
+			tip.attach(rp, func(): return InvText.compare(p, gear_it))
 		_row_click(rp, take_it)
 		list.add_child(rp)
 	var foot := UI.hbox(8); v.add_child(foot)
