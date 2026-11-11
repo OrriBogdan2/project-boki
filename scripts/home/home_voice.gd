@@ -9,6 +9,7 @@ const MAX_VOICES := 3       # Boki voices sounding at once
 const VOICE_MS := 1400      # ms a cue is counted as sounding (the takes are 0.5-1.4 s)
 const SELF_GAP_MS := 1200   # ms before the same Boki may speak again (a feed also pets: one chirp)
 const SULK_DB := -9.0       # dB: a sulk is quieter than a chirp
+const URGENT_BELOW := 18.0  # need points under which a want is urgent: the moment it falls there, one sulk
 
 static var _until: Array[int] = []        # when each sounding voice ends (ms)
 static var _last := {}                    # uid -> when that Boki last spoke (ms)
@@ -33,7 +34,7 @@ static func say(rec: Dictionary, what: String, pos, vol_db := -8.0, pitch_var :=
 
 ## Called each frame for every Boki at home with its want ("" for none): a need falling to urgent is one sulk.
 static func sulk_edge(k: Dictionary, want: String) -> void:
-	var urgent := want != "" and Care.need(k["rec"], want) < KinWants.URGENT_BELOW
+	var urgent := want != "" and Care.need(k["rec"], want) < URGENT_BELOW
 	if urgent and not k.get("sulking", false):
 		say(k["rec"], "unsure", k["pos"], SULK_DB)
 	k["sulking"] = urgent
