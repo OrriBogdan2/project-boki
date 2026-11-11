@@ -11,6 +11,8 @@ extends RefCounted
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
 ##   8. dash_air per Hunter and the no-charge tick
+##   9. every lair boss move has its own cue, no shared fallback: wake, phase, stagger, fall, defeat, and per attack a
+##      wind-up and a strike (the thrown ones also a landing); boss.gd names no shared sound of its own
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -39,6 +41,7 @@ func run(main: Node) -> void:
 	_dash_air()
 	_fallback()
 	_ult_cues()
+	_boss_moves()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -217,3 +220,20 @@ func _data(path: String) -> PackedByteArray:
 			return b.slice(i + 8, i + 8 + chunk)
 		i += 8 + chunk + (chunk & 1)
 	return PackedByteArray()
+
+## 9. Each boss move has a cue in the boss set, and boss.gd plays only BossSfx cues.
+func _boss_moves() -> void:
+	var boss: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boss.json"))["sounds"]
+	var missing := []
+	for kind in BossAnim.ATTACKS:
+		var cues := ["wake", "phase", "stagger", "fall", "defeat"]
+		for atk in BossAnim.ATTACKS[kind]:
+			cues += [atk + "_wind", atk + "_hit"]
+			if atk in ["boulders", "lob"]:
+				cues.append(atk + "_land")
+		for c in cues:
+			if not boss.has("boss_%s_%s" % [kind, c]):
+				missing.append("%s %s" % [kind, c])
+	ok(missing.is_empty(), "every boss move has its own cue (missing %s)" % [missing])
+	var own := FileAccess.get_file_as_string("res://scripts/match/boss.gd")
+	ok(not own.contains("m.sfx("), "boss.gd plays no shared sound: its moves go through BossSfx")
