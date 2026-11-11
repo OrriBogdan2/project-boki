@@ -13,6 +13,7 @@ Build mode (farm) and decorate mode (house) were two different bars. Rotating wa
 - `BuildMenu`: click a placed piece for Move, Rotate, Store (and Colour where it has one). X over a piece stores it at once.
 - `Placement`: the held piece eases to each quarter turn; a placed piece's Rotate spins it; the camera eases to a build view (`CamRig.top`) and back; the piece in the way is lit.
 - Blocked spots read "Blocked by: <piece>" (farm and house) or "Keep the doorway clear".
+- Room to walk (11-11): a building (house, station, lot, trough) keeps one open tile round its footprint free of anything solid, and no prop or fence goes inside that ring (`BuildClearance`); nothing may shut in a patch of ground you could walk to (`HomeBuild.keeps_paths`). The red ghost's cursor tag gives the reason. `StuckGuard` moves you or a Boki found inside something solid or in shut-in ground to the nearest reachable open tile within 1.5 s. Check: `--build-room-check`.
 - Placing one thing leaves build mode with a "Placed! <Build key> to build more" toast. Lines and brushes (fences, paths, water, clearing) stay in their tool; holding Shift keeps the same piece in hand.
 - The house starts empty. The journal and gramophone are ordinary pieces (`RoomPieces`, Data.FURN); every piece can be moved or stored, only the door and walls are fixed.
 

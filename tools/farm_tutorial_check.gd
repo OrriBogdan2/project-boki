@@ -61,6 +61,7 @@ func run(m: Node, mode := "") -> void:
 	_tracker_rules()
 	await _world()
 	await _spotlight()
+	await _build_spotlight()
 	await _farm2()
 	await _base_mode()
 	await _base_tutorial()
@@ -504,7 +505,7 @@ func _spotlight() -> void:
 	for st in FarmTutorial.steps():
 		by_id[st["id"]] = st
 	ok(FarmTutorial.stage("task") == "go" and by_id["buy"]["spot"]["bar"] == {"hub": "shop"}
-			and by_id["house"]["spot"]["place"] == {"hub": "build"}, "the Market bar and build menu steps too")
+			and by_id["house"]["spot"]["place"]["hub"] == "build", "the Market bar and build menu steps too")
 	var spots_named := FarmTutorial.steps().filter(func(st): return st.has("spot")).all(func(st):
 		return (st["spot"] as Dictionary).keys().all(func(k): return (st["hints"] as Dictionary).has(k)))
 	ok(spots_named, "every spot is on a stage the step really has")
@@ -544,6 +545,76 @@ func _spotlight() -> void:
 	home.queue_free()
 	await main.get_tree().process_frame
 	FarmSpotlight.reset()
+
+## The house and trough steps: the Build button lights first, then (build mode open) the Buildings tab, then the
+## House or trough tile, with the same spotlight; taking the piece puts it away.
+func _build_spotlight() -> void:
+	FarmSpotlight.reset()
+	Save.d = _new_save()
+	HomeLayout.ensure(Save.d)
+	_stats()
+	for id in ["hob", "axe", "chop", "stone"]:
+		FarmTutorial.mark(id)
+	var home = await _ready_home()
+	ok(FarmTutorial.current() == "house" and FarmTutorial.stage("house") == "place", "the house step is up to place")
+	await _lights_build_tile(home, "house", "House")
+	ok(home.guide.place_house(), "the house goes down")
+	for id in ["house", "hammer", "task"]:
+		FarmTutorial.mark(id)
+	FarmTutorial.detect()
+	ok(FarmTutorial.current() == "feed" and FarmTutorial.stage("feed") == "place",
+			"the trough step is up to place (%s)" % FarmTutorial.current())
+	await _lights_build_tile(home, "feeder_trough", "trough")
+	home.queue_free()
+	await main.get_tree().process_frame
+	FarmSpotlight.reset()
+
+func _lights_build_tile(home, entry: String, what: String) -> void:
+	var hb: HomeBuild = home.hb
+	home.guide.tick(0.6)
+	await main.get_tree().process_frame
+	ok(FarmSpotlight.showing() and _lit(home.hub_btns["build"]), "%s step: the Build button is lit" % what)
+	hb.toggle()
+	hb.cat = "Garden"
+	hb._build_bar()
+	await main.get_tree().process_frame
+	home.guide.tick(0.6)
+	await main.get_tree().process_frame
+	var tab: Control = null
+	for b in hb.bar.find_children("*", "Button", true, false):
+		if b.get_meta("tab", "") == "Buildings" and not b.is_queued_for_deletion():
+			tab = b
+	ok(FarmSpotlight.showing() and FarmSpotlight.in_beat() and _lit(tab),
+			"%s step, build mode on another tab: the Buildings tab gets the spotlight beat" % what)
+	hb.cat = "Buildings"
+	hb._build_bar()
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	var tile: Control = null
+	for t in hb.bar._tiles.get_children():
+		if t.get_meta("entry", "") == entry and not t.is_queued_for_deletion():
+			tile = t
+	ok(FarmSpotlight.showing() and _lit(tile), "%s step, Buildings tab: the %s tile is lit" % [what, what])
+	_pick_entry(hb, entry)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(not FarmSpotlight.showing(), "%s in hand: the spotlight is put away" % what)
+	hb._drop_held()
+	hb.toggle()
+
+func _pick_entry(hb: HomeBuild, entry: String) -> void:
+	if entry.begins_with("feeder_"):
+		hb.take_feeder(entry.trim_prefix("feeder_"))
+	else:
+		hb.take(entry)
+	hb._build_bar()
+
+## Is the spotlight's first cut-out round this control?
+func _lit(c: Control) -> bool:
+	if c == null or not FarmSpotlight.showing() or FarmSpotlight._node._holes.is_empty():
+		return false
+	var hole: Rect2 = FarmSpotlight._node._holes[0]
+	return hole.get_center().distance_to(c.get_global_rect().get_center()) < 2.0
 
 ## The open Boki page: "Not set" in orange, Feed not the filled button, then Done once a job is picked.
 func _page_rules(home) -> void:

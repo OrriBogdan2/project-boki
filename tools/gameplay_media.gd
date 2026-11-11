@@ -13,6 +13,9 @@ extends RefCounted
 ##   7 show ring     the Show Ring (show_ring.gd) from the end of the Look: three presses in the gold, a call at each
 ##                   lure (the walk cut between them), the judges' reveal and the crowd, then the result
 ##   8 relay cup     the Relay Cup (base_relay.gd): a great hand-off, a missed one, both teams home
+##   9 farm build    room to walk (BuildClearance, StuckGuard): the tutorial lights the House tile, a house against a
+##                   fence goes red with the reason, fits with a tile between, a pillar that would shut a Boki in is
+##                   refused, a Boki shut in anyway steps out, the trough's Fill it up
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -26,6 +29,7 @@ const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer tha
 const GAME_ZOOM := 0.55          # the home camera's zoom for clips 6-8
 const LURE_LEAD := 1.5           # s of the Show Ring walk kept before each lure (clip 7 cuts the rest)
 const JUDGE_HOLD := 4.0          # s of the judges' cards clip 7 keeps before the result
+const FARM_ZOOM := 0.7           # the home camera's zoom for clip 9
 
 var main: Node
 var m: Match
@@ -71,6 +75,7 @@ func run(main_node: Node) -> void:
 		6: await _echo(secs)
 		7: await _show(secs)
 		8: await _relay(secs)
+		9: await _farm_build()
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -426,3 +431,91 @@ func _relay(secs: float) -> void:
 		if (r.grades.is_empty() and off < TimingBar.GREAT) or (r.grades.size() == 1 and off > TimingBar.GOOD * 2.0):
 			_press(rc)
 	await _film(secs, each, func(): return rc.run == null)
+
+
+# ------------------------------------------------------------------ clip 9: room to walk on the farm
+## A new farm on the tutorial's house step, the layout from --build-room-check: a fence, and a fence ring round a
+## corner with one way in. Each beat holds for a moment of real home ticks.
+func _farm_build() -> void:
+	var room = load("res://tools/build_room_check.gd").new()
+	var d := Save.fresh()
+	var k := Save.new_kin("zapple", "Pip")
+	k["starter"] = true
+	d["roster"].append(k)
+	d["active"] = k["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true}
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	for id in ["hob", "axe", "chop", "stone"]:
+		FarmTutorial.mark(id)
+	var home = await main._hb_home()
+	while home.panel_host == null:
+		await main.get_tree().process_frame
+	home._close_panel()
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)
+	var hb: HomeBuild = home.hb
+	var o: Vector2i = room.open_area(hb)
+	room.clear_area(hb, o)
+	for z in range(3, 8):
+		room.put(hb, "fence", o + Vector2i(9, z))
+	var pocket := o + Vector2i(13, 5)
+	for dz in range(-1, 2):
+		for dx in range(-1, 2):
+			if Vector2i(dx, dz) != Vector2i.ZERO and Vector2i(dx, dz) != Vector2i(0, 1):
+				room.put(hb, "fence", pocket + Vector2i(dx, dz))
+	hb.apply(false)
+	var kin: Dictionary = home.kins[0]
+	kin.erase("indoors")
+	home.ppos = Vector3(o.x + 8.0, 0, o.y + 10.0)
+	home.player.position = home.ppos
+	home.cam.zoom = FARM_ZOOM
+	home.cam.zoom_to = FARM_ZOOM
+	home.cam.snap(home.ppos)
+	_mark("start")
+	hb.toggle()
+	await _farm_hold(home, 2.0)
+	hb.cat = "Buildings"
+	hb._build_bar()
+	await _farm_hold(home, 2.0)
+	hb.take("house")
+	await _farm_aim(home, Vector2(o.x + 6.5, o.y + 5.5), 2.5)
+	await _farm_aim(home, Vector2(o.x + 5.5, o.y + 5.5), 1.5)
+	hb.place_held()
+	await _farm_hold(home, 1.0)
+	hb.toggle()
+	hb.held = {"kind": "deco", "id": "pillar", "r": 0, "from": -1}
+	hb._make_ghost()
+	_farm_kin_at(kin, pocket)
+	await _farm_aim(home, Vector2(pocket.x + 0.5, pocket.y + 1.5), 2.5)
+	hb._drop_held()
+	hb.toggle()
+	room.put(hb, "pillar", pocket + Vector2i(0, 1))
+	hb.apply(false)
+	_farm_kin_at(kin, pocket)
+	_still()
+	await _farm_hold(home, 2.0)
+	var f := {"id": "f9", "kind": "trough", "x": o.x + 11.5, "z": o.y + 9.5, "food": [], "auto": true}
+	Save.d["feeders"].append(f)
+	home.hecon.open_feeder(f)
+	await _farm_hold(home, 2.0)
+
+func _farm_kin_at(k: Dictionary, t: Vector2i) -> void:
+	k["pos"] = Vector3(t.x + 0.5, 0, t.y + 0.5)
+	k["goal"] = Vector3.INF
+	(k["node"] as Node3D).position = k["pos"]
+
+## Holds the ghost (and the mouse, for the cursor tag) over world point at for secs.
+func _farm_aim(home, at: Vector2, secs: float) -> void:
+	home.hb.debug_m = at
+	await _farm_hold(home, secs)
+
+func _farm_hold(home, secs: float) -> void:
+	var t := 0.0
+	while t < secs:
+		if home.hb.debug_m != Vector2.INF:
+			var p := Vector3(home.hb.debug_m.x, 0, home.hb.debug_m.y)
+			main.get_viewport().warp_mouse(home.cam.unproject_position(p))
+		await main.get_tree().process_frame
+		t += FRAME
+		frame += 1
