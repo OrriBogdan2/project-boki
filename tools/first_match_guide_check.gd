@@ -1,9 +1,12 @@
 extends RefCounted
-## --first-match-guide-check: the "what to do next" line in a save's first two Extractions.
-##   1. the save flag: only real Extractions count, two get the guide, the third does not, old saves migrate
+## --first-match-guide-check: the "what to do next" line in a save's first three Extractions.
+##   1. the save flag: only real Extractions count, three get the guide, the fourth does not, old saves migrate
 ##   2. a walk through the triggers: land, rank, send, chest, a squad, the Blight, an exit; each line shows
 ##      once, one at a time, clears on its trigger or its time, and never touches the player's input
-##   3. every line fits the banner lane in at most two lines at 1280x720
+##   3. the camp lines: while the drop is planned one mid-region Small Camp is picked and "Pick a camp and ping
+##      it" shows alone; after landing "Clear the camp to level up" points at the nearest live camp until
+##      your squad's first clear, then never again
+##   4. every line fits the banner lane in at most two lines at 1280x720
 var bad := 0
 var m: Match
 var main: Node
@@ -28,16 +31,17 @@ func _save_flag() -> void:
 	ok(skipped and int(Save.d["first_guide"]) == 0, "tutorial, duel and training get no guide and do not count")
 	var first := FirstMatchGuide.for_match(null, o)
 	var second := FirstMatchGuide.for_match(null, o)
-	ok(first != null and second != null, "the first two Extractions get the guide")
 	var third := FirstMatchGuide.for_match(null, o)
-	ok(third == null and int(Save.d["first_guide"]) == 2, "the third does not; the flag stays at 2")
+	ok(first != null and second != null and third != null, "the first three Extractions get the guide")
+	var fourth := FirstMatchGuide.for_match(null, o)
+	ok(fourth == null and int(Save.d["first_guide"]) == 3, "the fourth does not; the flag stays at 3")
 	var old := {"matches": 5}
 	FirstMatchGuide.migrate(old)
 	var young := {"matches": 1}
 	FirstMatchGuide.migrate(young)
 	var kept := {"matches": 5, "first_guide": 0}
 	FirstMatchGuide.migrate(kept)
-	ok(int(old["first_guide"]) == 2 and int(young["first_guide"]) == 1, "an old save skips it; one match in: one more")
+	ok(int(old["first_guide"]) == 3 and int(young["first_guide"]) == 1, "an old save skips it; one match in: one more")
 	ok(int(kept["first_guide"]) == 0, "the field is never overwritten")
 	ok(int(Save.fresh()["first_guide"]) == 0, "a new save starts at 0")
 
@@ -68,6 +72,7 @@ func _walk() -> void:
 	if m.chests.is_empty():
 		m.chests.append({"open": false, "pos": p.pos, "prog": 0.0})
 	var move0: Vector2 = p.inp["move"]
+	_camp_lines(p)
 	p.dropping = true
 	_tick(0.2)
 	ok(g.id == "land" and g.line.begins_with("Pick a landing spot"), "dropping: pick a landing spot (%s)" % g.line)
@@ -127,6 +132,42 @@ func _walk() -> void:
 	m.step(Match.DT)
 	ok(g.line != "" or g.shown.size() > 0, "Match.step ticks the guide")
 	_fit()
+
+func _camp_lines(p: Hunter) -> void:
+	var D: DropSquad = m.skydrop
+	ok(D != null and m.camps != null, "the match has a planned drop and camps")
+	D.planning = true
+	_tick(0.2)
+	var pick: Dictionary = g.target()
+	var rid := ""
+	if not pick.is_empty() and int(pick["region"]) >= 0:
+		rid = String(m.world.regions[int(pick["region"])]["id"])
+	var small: bool = Camps.size_def(int(pick.get("size", 0)))["id"] == "small"
+	var mid: Array = FirstMatchGuide.rules()["mid_regions"]
+	ok(small and mid.has(rid), "planning: a mid region's Small Camp is picked (%s)" % rid)
+	ok(g.id == "plan" and g.line == "Pick a camp and ping it", "planning: the one prompt (%s)" % g.line)
+	var first_pick: int = int(pick["id"])
+	g.m.camps.camps[first_pick]["state"] = Camps.State.CLEARED
+	ok(g.target().is_empty() or int(g.target()["id"]) != first_pick, "a camp that is not live is no longer pointed at")
+	g.m.camps.camps[first_pick]["state"] = Camps.State.LIVE
+	D.planning = false
+	_tick(0.2)
+	ok(g.line == "", "landed: the plan line clears")
+	p.pos = Vector3(pick["pos"]) + Vector3(20, 0, 0)
+	_tick(1.6)
+	ok(g.id == "camp" and g.line == "Clear the camp to level up", "after landing: clear the camp (%s)" % g.line)
+	ok(int(g.target()["id"]) == int(m.camps.nearest_live(p.pos, INF)["id"]), "it points at the nearest live camp")
+	m.camps.cleared.emit(0, p.team + 1)
+	ok(not g._cleared and g.id == "camp", "a rival squad's clear does not end it")
+	m.camps.cleared.emit(0, p.team)
+	_tick(0.2)
+	ok(g.line == "" and g._cleared, "your squad's first clear ends it")
+	_tick(5.0)
+	ok(g.id != "camp", "and it never comes back")
+	g.shown.clear()
+	g.id = ""
+	g.line = ""
+	g._gap = 0.0
 
 func _fit() -> void:
 	var strip := TutorialStrip.rect(Vector2(1280, 720))

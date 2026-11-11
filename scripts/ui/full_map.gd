@@ -194,6 +194,7 @@ func draw(sz: Vector2) -> void:
 	_ship(c)
 	_wave_ships(c)
 	_pings(c, team)
+	if m.guide: m.guide.map_pulse(self)
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)

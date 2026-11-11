@@ -39,7 +39,7 @@ var meteors: Array = []     # {at, t, tele}
 var glimmer_done := false
 # ---- tutorial
 var tut: Tutorial = null    # the first-match tutorial (scripts/match/tutorial.gd)
-var guide: FirstMatchGuide = null   # "what to do next" in a save's first two Extractions
+var guide: FirstMatchGuide = null   # "what to do next" in a save's first three Extractions
 var exits: Exits = null     # the outpost uplinks (see Exits; the Heart is the other way out)
 var lairs: Lairs = null     # boss lairs: sealed arenas, their bosses and Rare Eggs (see Lairs)
 var truce: Truce = null     # emotes and truces between squads (see Truce)
