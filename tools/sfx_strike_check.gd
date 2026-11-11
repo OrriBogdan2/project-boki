@@ -20,7 +20,9 @@ const WIND := ["wind", "aim", "draw", "charge", "tell", "summon", "place", "coun
 	"shield_up", "pilot", "spin", "leap", "prime"]
 ## arch -> move -> [the sound fixed to play from its own event, that event: "strike", "hit" or "rise" (a Stone Row's
 ## first rock up)]
-const FIXED := {"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"]}}
+const FIXED := {
+	"bulwark": {"lmb": ["bjorn_throw", "strike"]}, "dolm": {"e": ["br_raise", "rise"], "lmb": ["br_throw", "strike"]}
+}
 
 var A
 var bad := 0

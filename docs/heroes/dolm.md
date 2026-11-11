@@ -59,7 +59,7 @@ the ult is 10 fps (0.1 s). Every move below is within that resolution (or an own
 
 | Move | Source | Ours before (start / hit / end) | Ours after | Status |
 |---|---|---|---|---|
-| Boulder tap `breah_throw` | side hurl, no long wind-up; 1 a 2-3 frames (0.6 s) [0108] | shot leaves 0.0, cock 0.07, fling 0.13, settled 0.24 / 0.55 | same | matches (the fling sits inside the 0.1 s blend, half a frame) |
+| Boulder tap `breah_throw` | side hurl, no long wind-up, out within one 0.25 s frame; 1 a 2-3 frames (0.6 s) [0108] | shot left on the tap (+17 ms), the clip's hand fastest at 100 ms: the rock flew 83 ms before the arm came through | the boulder leaves 0.08 s after the tap (`lmb.boulder.release`), on the clip's strike (+0 ms, `--sfx-strike-check`); cadence 0.6 s and the cooldown start on the tap as before | fixed 11-11 (kit-side; the clip is unchanged) |
 | Held punch `breah_wind` | gauntlet drawn back at the hold start; release about 0.75 s later [0118-0121] | pose from the tap time (0.28 s), full by 0.38; held from 0.24 of the clip; full charge 0.9 | same | matches (one frame) |
 | Punch release `breah_punch` | straight drive, a step of about 0.5 bh [0121] | drives at 0.05 / 0.12 over / 0.6; step 0.6 m, rate 0.7 s | same | matches |
 | Held slam `breah_crouch` | crouch, fists glowing; charge about 1.0-1.5 s | crouch at 0.08, held from 0.16; full charge 0.45 s | same | owner item 61 (shorter charge) |

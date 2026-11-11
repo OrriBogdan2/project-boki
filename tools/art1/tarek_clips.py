@@ -391,7 +391,8 @@ C.bake("death", 1.6, [(0, LOOSE), (0.16, m(LOOSE, pos=(0, -0.05, -0.1), hips=(14
                       (0.65, m(DOWNED, e="in")), (1.25, m(SIDE, e="in")), (1.42, m(SIDE, pos=(0.62, 0.0, 0.25))), (1.6, SIDE)])
 
 # ---------------------------------------------------------------------- the kit (times: KMovesStone's beats)
-# LMB tap, the boulder (0.55): twisted away, the right fist cocked out behind (0.05), hurled long (0.15, the boulder leaves at 0.13), through (0.26)
+# LMB tap, the boulder (0.55): twisted away, the right fist cocked out behind (0.05), hurled long (0.15), through (0.26); as played
+# (blend in 0.1 s) the hand is fastest 0.08 s in, where the boulder leaves (lmb.boulder.release)
 COCK = m(STANCE, pos=(0.02, -0.06, -0.16), hips=(-6, 8, -38), head=(4, -6, 40), hr=hand(0.3, -0.34, -0.3), hl=lhand(0.1, 0.38, -0.3), lip=-0.3, jaw=0.1)
 FLUNG = m(STANCE, pos=(-0.02, 0.1, -0.12), hips=(-20, -6, 34), head=(12, 0, -28), hr=hand(-0.06, 0.66, -0.08), hl=lhand(0.2, -0.22, -0.4), er=(0.7, -0.7, 0.1), lip=0.5, jaw=0.5, fing_r=0.05, thumb_r=0.1,
           fr=(AX + 0.12, -0.3, AZ), fl=(-AX - 0.1, 0.32, AZ), fra=-30.0)

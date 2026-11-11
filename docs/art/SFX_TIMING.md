@@ -17,6 +17,7 @@ Does each Hero's own fire / cast / impact sound land on what it belongs to? Meas
 |---|---|---|---|---|---|
 | Albert (bulwark) | LMB hammer throw | bjorn_throw | -67 ms (at the press) | +17 ms | plays when the hammer leaves his hand (`THROW_WIND`, the clip's release), not on the press |
 | Tenzo (dolm) | E Stone Row | br_raise | own `m.later(tell)` timer | +0 ms on the first rock up | played by the first rock that rises; the separate timer is gone, so no sound when no rock rose |
+| Tenzo (dolm) | LMB boulder | br_throw (and the boulder) | @17 ms, strike 100, -83 ms (11-11, on main + ext/w0246-anim; 150 / -67 before that line's hand re-time) | @100 ms on the strike at 100, +0 ms; hit 83 -> 183 | the boulder itself leaves on the clip's whip, `lmb.boulder.release` 0.08 s after the tap (source: out within one 0.25 s frame); clip, damage and cooldown unchanged (ext/anim-tenzo-boulder-sync) |
 
 ## Over 50 ms, left as they are
 
@@ -30,7 +31,6 @@ kit's release time, not in the sound. Listed for the animation pass.
 | Meeko (tender) | E Hearthlight | tend_hearth @0 | 133 (hearth) | - | -133 | hearth and its light appear on the press; the lantern lift peaks later |
 | Motley (ostra) | E Brimseed | os_seed @0 | 100 (seed) | - | -100 | the seed is planted at the aim on the press; the throw gesture follows |
 | Tenzo (dolm) | E Stone Row | br_crack @0 | 100 (e_row) | - | -100 | the ground-crack tell starts on the press; the hands hit the ground at 100 |
-| Tenzo (dolm) | LMB boulder | br_throw @17 | 150 (lmb_throw) | 83 | -67 | the boulder spawns on the press and hits before the arm comes through (clip late) |
 | Meeko (tender) | LMB ember | tend_ember @0 | 83 (shot_r) | 67 | -67 | ember spawns on the press; the arm is straight at `THRUST_T` 0.08 s |
 | Neve (rimewright) | LMB dart | rime_shard @0 | 67 (dart_l) | 100 | -67 | dart spawns on the press |
 | Neve (rimewright) | RMB held lance | rime_lance @600 | 83 (spear_aim) | 667 | -67 | the lance flies 67 ms to the zone; its spear clip strikes ~0.58 s (the aim clip's twitch is picked as the strike), so on the clip it is within 20 ms |

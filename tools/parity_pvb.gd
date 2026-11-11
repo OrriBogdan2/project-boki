@@ -228,7 +228,8 @@ func breah() -> void:
 		t += DT
 		if K.boulders > b0 + times.size():
 			times.append(t)
-			speed = (shot_of(m, last_sid(m, P)).get("vel", Vector2.ZERO) as Vector2).length()
+		var sh := shot_of(m, last_sid(m, P))      # (the boulder leaves the hand `release` after the tap)
+		if not sh.is_empty(): speed = (sh.get("vel", Vector2.ZERO) as Vector2).length()
 	P.inp["fire"] = false
 	var gap := float(times[1]) - float(times[0]) if times.size() >= 2 else 0.0
 	ok("parity breah: tapped, a boulder every 0.6s (card 0.6s; footage 1 per 2-3 frames)", absf(gap - 0.6) < 0.05,

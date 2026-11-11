@@ -75,7 +75,15 @@ func _breah() -> void:
 	step(m, 0.08, func(): P.inp["fire"] = true)
 	P.inp["fire"] = false
 	m.step(DT)
+	# the tap is known on the release; the boulder leaves the hand on the throw clip's whip, `release` later
+	var at_tap := m.shots.filter(func(s): return s["by"] == P).size()
+	step(m, float(K.d["lmb"]["boulder"]["release"]))
 	var bshot: Array = m.shots.filter(func(s): return s["by"] == P)
+	ok(
+		"lmb: the boulder leaves the hand on the throw's whip (release 0.08s after the tap), not on the tap",
+		at_tap == 0 and bshot.size() == 1 and absf(float(K.d["lmb"]["boulder"]["release"]) - 0.08) < 0.001,
+		"on the tap %d, then %d" % [at_tap, bshot.size()]
+	)
 	var blen := float(bshot[0]["life"]) * (bshot[0]["vel"] as Vector2).length() if not bshot.is_empty() else 0.0
 	ok(
 		"lmb: tap = boulder (one Match shot, molten skin)",
