@@ -829,9 +829,8 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 70.0      # item 163: a high start, a long readable glide down
+const SHIP_Y := 100.0     # m: the skyship's height, where the squad rockets launch from
 const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship in frame (item 163)
-const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
 const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
@@ -880,34 +879,16 @@ func plan_jump(h: Hunter, at: Vector3) -> void:
 	var k := clampf(Vector2(at.x - a.x, at.z - a.z).dot(ab) / ab.length_squared(), 0.04, 0.97)
 	h.ai["jump_at"] = clampf(st + k * float(s["dur"]) - 2.2 + randf_range(-0.5, 0.5), maxf(st + 0.6, time + 0.2), st + float(s["ride"]) - 0.5)
 
-## Off the ship. A squadmate waiting on the drop leader can't jump by themselves (force: they're
-## jumping with the leader, or the ship has reached the end of its run).
+## Off the ship: the drop leader launches the squad's rocket. A squadmate waiting on the leader can't
+## launch by themselves (force: a bot's planned launch, or the ship has reached the end of its run).
 func ship_jump(h: Hunter, force := false) -> void:
-	if not h.riding:
+	if not h.riding or h.rocket != null:
 		return
-	if not force and skydrop and skydrop.waits(h):
+	if not force and skydrop.waits(h):
 		if h == player and hud:
-			hud.toast_small("%s leads the drop  ·  %s to go solo" % [skydrop.leader(h.team).pname, Settings.key_cap("separate")], Color("ffd27a"))
+			hud.toast_small("%s leads the drop" % skydrop.leader(h.team).pname, Color("ffd27a"))
 		return
-	h.riding = false
-	var off := Vector3(rng.randf_range(-0.8, 0.8), 0, rng.randf_range(-0.8, 0.8))
-	var hs := ship_of(h)
-	h.teleport(ship_pos_of(hs) + Vector3(0, -1.5, 0) + off)
-	h.dropping = true
-	h.diving = true
-	h.drop_from = Vector2(h.pos.x, h.pos.z)
-	h.gliding = true
-	h.glide_k = 1.0
-	h.grounded = false
-	DropLaunch.start(h, hs["dir"])      # the squad's rocket launch (item 163)
-	if h == player:
-		sfx("whoosh", null, -2.0)
-		if hud and not force:
-			hud.toast("Launch!  ·  your glider opens in a moment, then steer your own way down", Color("cfeaff"))
-		elif hud:
-			hud.toast("Launching with your squad  ·  %s to break away early" % Settings.key_cap("separate"), Color("cfeaff"))
-	if skydrop and skydrop.is_lead(h):
-		skydrop.on_lead_jump(h)
+	skydrop.launch(h if force or skydrop.is_lead(h) else skydrop.leader(h.team))
 
 func _update_ship(dt: float) -> void:
 	_update_one_ship(ship, dt)
@@ -924,24 +905,17 @@ func _update_one_ship(s: Dictionary, dt: float) -> void:
 		(n.get_node(pn) as Node3D).rotation.z += dt * 14.0
 	var done := time >= st + float(s["ride"])
 	for h in hunters:
-		if h.riding and not is_same(ship_of(h), s):
+		if h.riding and (h.rocket != null or not is_same(ship_of(h), s)):
 			continue
 		if h.riding and h.remote and is_host and time > st + float(s["ride"]) + 6.0:
 			# someone who dropped connection aboard: stop counting them as still in the match
 			h.riding = false
 			eliminate(h, null, "left", true)
 			continue
-		if not h.riding or h.remote:
+		if not h.riding or h.remote or h.rocket != null:
 			continue
 		var auto: bool = h.ctrl == "bot" or opts.get("autoplay", false)
-		var lead: Hunter = skydrop.leader(h.team) if skydrop else null
-		if lead and lead != h and lead.remote and not h.drop_solo and not lead.riding and lead.dropping:
-			# online: the leader jumped on their own machine; join them
-			ship_jump(h, true)
-			h.drop_follow = lead
-			h.drop_slot = skydrop._free_slot(lead)
-			continue
-		if skydrop and skydrop.waits(h):
+		if skydrop.waits(h):
 			continue          # jumps with the leader
 		if done or (auto and time >= float(h.ai.get("jump_at", 0.0))):
 			ship_jump(h, done)
@@ -1444,7 +1418,7 @@ func _update_rings(dt: float) -> void:
 	if player and not player.out and int(time * 4.0) % 4 == 0:
 		for rg in air_rings:
 			if player.pos.distance_to(rg["pos"]) < 9.0:
-				_tip("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
+				tip_once("rings", "Glowing rings in the air between islands: jump off the edge, glide (press %s again and hold) and fly through them for a burst of speed. Fast gliders barely sink." % Settings.key_cap("jump"))
 				break
 	for rg in air_rings:
 		# rings stand straight up facing along the route; they don't spin
@@ -2432,7 +2406,7 @@ func on_wild_dazed(k: Kin) -> void:
 func on_stag_open(mb: Mob) -> void:
 	if player and not player.out and player.flat_dist(mb) < 14.0:
 		sfx("warn", mb.pos, -10.0, 1.5)
-		_tip("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
+		tip_once("stagger", "A purple ring means %s can be staggered. Hit it with an ability (%s, %s or %s) for a big hit, a long stun and your cooldown back." % [mb.md["name"], Settings.key_cap("signature"), Settings.key_cap("ultimate"), Settings.key_cap("gear1")])
 
 ## Someone landed an ability in a stagger window. Runs where the monster lives (the host online).
 var stag_n := 0
@@ -3221,7 +3195,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
-	if player and player.riding:
+	if player and player.riding and player.rocket == null:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
 		var ps := ship_of(player)
@@ -3236,39 +3210,25 @@ func _process(delta: float) -> void:
 		# item 163: the whole ship in frame (hull, balloon, props) with the squad aboard (follow aims ~4 m under)
 		var fp := ship_pos_of(ps) + sd * 3.0
 		cam.follow(Vector3(fp.x, ship_pos_of(ps).y + 7.0, fp.z), delta, false)
-	elif player and DropLaunch.locked(player):
-		# the launch: chasing the squad down its heading, the ship receding overhead (item 163)
-		var hd := Vector2(player.vel.x, player.vel.z)
-		if hd.length() > 0.5:
-			cam.yaw_to = atan2(-hd.x, -hd.y)
-		cam.chase_to = 1.0
-		cam.top_to = 0.0
-		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
-		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
+	elif player and (player.rocket != null or player.dropping):
+		cam.skydive(player.render_pos(alpha), skydrop.drop_yaw(player), player_altitude(), delta)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
 		cam.yaw_to = 0.0
-		if player.dropping:
-			# the drop: looking down over your shoulder, pulled back while you're high up
-			var gy: float = world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else 0.0
-			var hk := clampf((player.pos.y - gy) / SHIP_Y, 0.0, 1.0)
-			cam.zoom_to = lerpf(1.05, 1.7, hk)
-			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
-		else:
-			# high in the air or out over the abyss the camera pulls back so you can see where you'll land
-			# the camera only eases back while gliding, so jumps and falls never change the framing
-			# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
-			cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
-			if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
-			if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
-			cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
-			# high up, the camera pulls back with your altitude so you can still read the ground
-			var alt := player_altitude()
-			if alt > 4.0:
-				cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
-			cam.top_to = 0.0
+		# high in the air or out over the abyss the camera pulls back so you can see where you'll land
+		# the camera only eases back while gliding, so jumps and falls never change the framing
+		# sneaking (Ctrl) pulls the camera well back for a wide look around [Supervive]
+		cam.zoom_to = 1.25 if player.gliding else (1.45 if player.crouch and player.grounded else 1.0)
+		if train.has("_sizes"): cam.zoom_to = 0.5     # (--size-demo screenshots)
+		if has_meta("zoom_hold"): cam.zoom_to = float(get_meta("zoom_hold"))     # (--arena-demo screenshots)
+		cam.zoom_to *= cam.user_zoom        # (1 outside the practice areas)
+		# high up, the camera pulls back with your altitude so you can still read the ground
+		var alt := player_altitude()
+		if alt > 4.0:
+			cam.zoom_to *= 1.0 + clampf((alt - 4.0) / 24.0, 0.0, 0.7)
+		cam.top_to = 0.0
 		cam.lead_vel = cam_lead_vel()
-		cam.follow(player.render_pos(alpha), delta, not player.dropping)
+		cam.follow(player.render_pos(alpha), delta)
 	elif player and (player.downed or player.out):
 		# death camera: frame you and whoever got you
 		var foc := player.prev.lerp(player.pos, alpha)
@@ -3326,11 +3286,8 @@ func _gather_input() -> void:
 	# dropping in without steering over the abyss: drift toward the nearest island so letting go
 	# of the keys never drops you into the void
 	if player.dropping and mv.length() < 0.1 and world.is_void(player.pos.x, player.pos.z):
-		var best := Vector3.INF; var bd := 1e9
-		for sp in world.spawns + world.portal_spots:
-			var d := Vector2(sp.x - player.pos.x, sp.z - player.pos.z).length()
-			if d < bd: bd = d; best = sp
-		if best != Vector3.INF and bd > 0.8:
+		var best := DropRocket.island_near(world, player.pos)
+		if Vector2(best.x - player.pos.x, best.z - player.pos.z).length() > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
 	player.inp["aim"] = _mouse_aim()
 	player.inp["aim_ray"] = cam.mouse_ray()
@@ -3429,7 +3386,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("pass_lead") and skydrop.pass_lead(player):
 			get_viewport().set_input_as_handled()
 			return
-		if event.is_action_pressed("separate") and skydrop.separate(player):
+		if event.is_action_pressed("separate") and skydrop.detach(player):
 			get_viewport().set_input_as_handled()
 			return
 	if event.is_action_pressed("menu") and hud and (hud.swap_open() or hud.pack_open()):
@@ -5475,9 +5432,9 @@ func _net_ev(x, from: String) -> void:
 			var lh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
 			var lt: Hunter = ents_by_id.get(String(x[2]), null) as Hunter
 			if skydrop and lh and lt: skydrop.pass_lead(lh, lt, true)
-		"dsep":
-			var sh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
-			if skydrop and sh: skydrop.separate(sh, true)
+		"rkt":
+			var rh: Hunter = ents_by_id.get(String(x[1]), null) as Hunter
+			if skydrop and rh: skydrop.launch(rh, true)
 		"ext":
 			who = ents_by_id.get(String(x[1]), null)
 			if who is Hunter and not who.extracted:
@@ -5668,9 +5625,6 @@ func _demo_open(dist: float, avoid_mobs: bool) -> Vector3:
 				bd = dd; best = Vector3(q.x, gy, q.z)
 	return best
 
-func _tip(key: String, text: String) -> void:
-	tip_once(key, text)
-
 ## A first-time hint: shows `text` the first time `key` comes up in this save; true if it showed.
 func tip_once(key: String, text: String) -> bool:
 	var seen: Dictionary = Save.d["tutorial"]
@@ -5688,17 +5642,17 @@ func _tips() -> void:
 		return
 	if player.dropping or opts.get("tutorial", false) or opts.get("arena", false):
 		return
-	_tip("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
+	tip_once("move", "Hold left click to shoot  ·  Shift dashes  ·  jump, then Space again to glide")
 	if _tip_t > 14.0:
 		if player.ak:
-			_tip("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
+			tip_once("ability", "%s sends your Boki (hold: orders)  ·  full bond: %s fuses" % [Settings.key_cap("throw"), Settings.key_cap("ultimate")])
 		else:
-			_tip("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
+			tip_once("ability", "%s: your Boki's ability  ·  full bond: %s" % [Settings.key_cap("signature"), Settings.key_cap("ultimate")])
 	if player.ult >= 1.0 and player.kin:
 		var ud := KinMerge.def_for(player.kin)
-		if ud and player.ak == null: _tip("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+		if ud and player.ak == null: tip_once("ult", "Bond full  ·  %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 		elif ud and int(player.slot_lv.get("ult", 0)) > 0:
-			_tip("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
+			tip_once("ult", "Bond full  ·  your next %s fuses: %s" % [Settings.key_cap("ultimate"), ud.display_name])
 	CarryHints.swap(self)
 	var k: Kin = player.kin
 	if k == null:
@@ -5709,17 +5663,18 @@ func _tips() -> void:
 			if player.flat_dist(f) < 9.0:
 				near_foe = true; break
 		if near_foe:
-			_tip("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
+			tip_once("throw", "%s sends %s: its hit stuns, and stunned foes take crits" % [Settings.key_cap("throw"), k.rec.get("name", "your Boki")])
 	if k.state == "active":
 		var a1 := k.runner.def_of("k1")
 		var a2 := k.runner.def_of("k2")
-		_tip("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
+		tip_once("skill", "Stun a foe with %s's %s, then shoot it: combo" % [k.rec.get("name", "your Boki"), a1.display_name if a1 else "ability"])
 	if not interact.is_empty() and interact["kind"] == "catch":
-		_tip("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % Settings.key_cap("interact"))
+		var scan := Settings.key_cap("interact")
+		tip_once("catch", "Hold %s to scan  ·  4s, rivals hear it  ·  extract to keep it" % scan)
 	if exits and not interact.is_empty() and interact["kind"] == "exit":
-		_tip("exit_uplink", "Start the uplink, hold the yard, then take the lift")
+		tip_once("exit_uplink", "Start the uplink, hold the yard, then take the lift")
 	if player.downed:
-		_tip("down", "Down  ·  a trusting Boki may pick you up")
+		tip_once("down", "Down  ·  a trusting Boki may pick you up")
 
 # ------------------------------------------------------------------ aim indicators
 # ---- ability previews: hold E, R or Q to see the reach and where it lands
