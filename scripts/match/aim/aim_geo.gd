@@ -92,7 +92,7 @@ func ring(ctr: Vector2, r: float, w: float, col: Color, a0 := 0.0, a1 := TAU, co
 	for i in segs:
 		var t0 := lerpf(a0, a1, float(i) / segs); var t1 := lerpf(a0, a1, float(i + 1) / segs)
 		var e0 := Vector2(cos(t0), sin(t0)); var e1 := Vector2(cos(t1), sin(t1))
-		quad(ctr + e0 * ri, ctr + e1 * ri, ctr + e1 * ro, ctr + e0 * ro, col_in, col)
+		quad(ctr + e0 * ri, ctr + e0 * ro, ctr + e1 * ro, ctr + e1 * ri, col_in, col)
 
 ## A filled annulus sector between radii r0 and r1, angles a0..a1 (discs, cones, wall bands).
 func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color, c1 := Color(0, 0, 0, -1)) -> void:
@@ -108,7 +108,7 @@ func sector(ctr: Vector2, r0: float, r1: float, a0: float, a1: float, c0: Color,
 			if ra < 0.001:
 				tri(ctr, ctr + e0 * rb, ctr + e1 * rb, cb)
 			else:
-				quad(ctr + e0 * ra, ctr + e1 * ra, ctr + e1 * rb, ctr + e0 * rb, ca, cb)
+				quad(ctr + e0 * ra, ctr + e0 * rb, ctr + e1 * rb, ctr + e1 * ra, ca, cb)
 
 func disc(ctr: Vector2, r: float, col: Color, col_edge := Color(0, 0, 0, -1)) -> void:
 	sector(ctr, 0.0, r, 0.0, TAU, col, col if col_edge.a < 0.0 else col_edge)
