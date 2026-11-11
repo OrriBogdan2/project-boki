@@ -52,7 +52,7 @@ opaque, so a recipe needs fewer, smaller puffs than a soft smoke did.
 
 Who includes it: the data looks here (`hero_vfx.gdshader`, `hero_vfx_mote.gdshader`, ring layer `"p": "ring"`), the
 kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle / Vex, `KitShaders` Hem / Breaker,
-`care_disc` / `care_glow` Pip / Claire, `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
+`care_disc` / `care_glow` / `care_ice` Pip / Claire, `cel_tint` (`KitLooks.shade_mat`: the flat two-tone tints of Tarek's and Ostra's looks and the seed's ring), `molten_rock` Tarek's hard cel cracks, `void_glass` Ostra's banded rim) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
 tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) draw `cel_ring()`. A new effect shader
 includes the file and runs its cover and glow through `cel_cover()` / `cel_glow()` last.
 
