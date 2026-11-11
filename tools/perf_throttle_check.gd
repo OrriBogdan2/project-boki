@@ -73,6 +73,7 @@ func _far_bots() -> void:
 		return
 	b.teleport(m.player.pos + Vector3(SimLod.FAR_M + 15.0, 0, 0))
 	b.grounded = true
+	b.gliding = false      # the monster phase may have left it gliding: never calm
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
 	var every := SimLod.EVERY
