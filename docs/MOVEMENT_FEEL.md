@@ -370,6 +370,22 @@ The full table of every movement quantity against the source is [MOVEMENT_PARITY
 - **Sneak speed** is one row (`sneak_speed` 0.5, the source's multiplier). It was 0.55, a constant in `hunter.gd` and another in `home.gd`.
 
 `--move-rate-check` (`tools/move_rate_check.gd`) runs real frame loops at 30, 60 and 144 fps, in a match and on the farm, and fails if run speed, the first second's distance, the stop slide, the jump's apex and airtime, the dash, the coyote window or the jump buffer differ from the 60 fps value by more than a step's worth. It prints one `MRATE` line per measure and ends with `MOVE RATE CHECK DONE, failures: N`.
+## Launch arcs: Spring pad and updrafts (`--launch-arc-check`)
+Parity pass (DECISIONS 2026-11-07). Sources: supervive_physics.md, SOURCE_UTILITIES.md (wiki Jump_Pad, Deployable_Fan, Gliding), briefs/hero-ref (no pad or updraft use on camera: bjorn, dredge, linwick, ostra, tamsin and venator all list it as missing). The source gives no launch speed or apex, so those rows stay ours and are marked [?]. Pad = the belt's Spring pad (`content/utility/jump_pad.json`, `UtilityUse.pad_launch`); updraft = the map's rising-air columns (`World.updrafts`).
+
+| | Source | Ours (measured) | Tag |
+|---|---|---|---|
+| Pad launch speed | not published or decoded | 17 m/s up (`UtilityUse.PAD_VY`) | [?] |
+| Pad apex | not published | 9.7 m at 1.15 s, back to pad height after ~2.3 s | [?] (gravity [game data] 14.7) |
+| Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`PAD_MIN_HV`; toward your aim if you stood still) | [?] floor |
+| Dash into the pad | keeps the forward momentum, plus a small boost | **was: the dash held you level and ran over the pad, no launch.** Now the pad ends the dash and keeps its speed (10.5 of 10.7 m/s), 1.6x the walk-on's travel | [wiki] fixed; boost size [?], not added |
+| WASD in the arc | AirControl 0.015, FallingLateralFriction 0.375 | the one model, `HunterMove.air_steer`: keys reversed the whole arc take 2.3 m/s off, sideways keys drift 1.3 m; a walk-on carries 9.5 m | [game data] match |
+| Glider after a pad | you open it to slow the fall, as after any launch (wiki Gliding) | stays shut; a second press opens it the same frame | [wiki] match (DECISIONS allows a pad auto-glide; the source has none, so none) |
+| Updraft lift | updrafts act on gliders (GlideUpdraftMinZVel exists, value not decoded) | gliders only: 8 m/s climb in 0.18 s, 9 m/s, thrown 2.8 m past the column's top; a fall with no glider gets no lift | [?] speed, match on gliders-only |
+| Updraft heat | currents stop glider heat (wiki wind tunnels) | 0 heat in the column; gliding across keeps 5 m/s | [wiki] match |
+| Glider in an updraft | not published | never opens on its own (DECISIONS allows an updraft auto-glide; the lair escape updraft uses it) | [?] |
+
+Not changed, needs the source: the dash boost size, pad arm delay / lifetime / stack (SOURCE_UTILITIES proposes 2 s, 30 s or 10 s after first use, stack 2), and the map's own island pads (`World.pads`), which fly a scripted arc to a set landing with no steering and have no source counterpart.
 
 ## Not touched
 
