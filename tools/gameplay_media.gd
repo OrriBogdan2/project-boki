@@ -8,6 +8,7 @@ extends RefCounted
 ##   2 Boki combat   a Boki fighting beside its Hunter against wild monsters
 ##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
+##   5 tumble        a Tumble on the Boki base (base_tumble.gd): tells, picks that read them, presses in the gold
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -16,6 +17,8 @@ const SEED := 5                  # the demo map's roll (Dusk Isles)
 const FIGHT_GAP := 7.0           # m between the two squads at the start
 const BOARD_LEFT := 6.5          # s of the skiff's boarding window left when the clip starts
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
+const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
+const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer than the usual 1.0)
 
 var main: Node
 var m: Match
@@ -57,6 +60,7 @@ func run(main_node: Node) -> void:
 		2: await _boki_combat(secs)
 		3: await _extraction(secs)
 		4: await _hatch(secs)
+		5: await _tumble(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -276,6 +280,61 @@ func _hatch(secs: float) -> void:
 	var t := 0.0
 	while t < secs:
 		await main.get_tree().process_frame
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## Two rested Boki on a fresh base; the clip opens as the first tell shows. The scripted player picks the move
+## that beats the tell a moment after it, and presses as the marker crosses the gold.
+func _tumble(secs: float) -> void:
+	FarmUnlocks.rules()["base_mode"] = true
+	var d := Save.fresh()
+	for i in 2:
+		var k := Save.new_kin(["cindle", "puddlet"][i], ["Ember", "Ripple"][i], 11 + i)
+		k["level"] = 6
+		k["stats"] = {"power": [42, 18][i], "guard": [20, 38][i], "speed": [30, 34][i], "focus": [36, 22][i]}
+		k["needs"]["energy"] = 95.0
+		d["roster"].append(k)
+	d["active"] = d["roster"][0]["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	d["layout"] = HomeLayout.fresh()
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	var home = await main._hb_home()
+	while not is_instance_valid(home.root_ui):
+		await main.get_tree().process_frame
+	home._close_panel()
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)
+	var tb: BaseTumble = home.htumble
+	for e in home.kins:
+		e.erase("indoors")
+	home.ppos = tb.ring.position + Vector3(0.0, 0.0, TUMBLE_STAND)
+	home.player.position = home.ppos
+	home.cam.zoom = TUMBLE_ZOOM
+	home.cam.zoom_to = TUMBLE_ZOOM
+	home.cam.snap(home.ppos)
+	tb.use()
+	tb.run.left = FRAME
+	still_at = secs * 0.55
+	_mark("start")
+	var t := 0.0
+	var picked_at := -1.0
+	while t < secs and tb.run != null:
+		await main.get_tree().process_frame
+		var r := tb.run
+		if r != null and r.state == "pick" and r.pick == "":
+			picked_at = t if picked_at < 0.0 else picked_at
+			if t - picked_at > 0.7:
+				tb._choose(BaseTumble.rules()["moves"].keys().find(BaseTumble.counter(r.tell)))
+				picked_at = -1.0
+		elif r != null and r.state == "resolve" and r.grade == "" and absf(tb.bar.m - tb.bar.zone) < TimingBar.GREAT:
+			var ev := InputEventAction.new()
+			ev.action = "interact"
+			ev.pressed = true
+			tb.input(ev)
 		if still_at >= 0.0 and t >= still_at:
 			_still()
 			still_at = -1.0
