@@ -2,7 +2,27 @@ class_name TutorialDrive
 extends RefCounted
 ## Test driver: plays the tutorial course by itself so the whole flow can be checked headless
 ## (--tutorial --tut-test, and the teammate check).
+## Human pace (`human` on, --tutorial-pace-check): the same course played as a first-time player does: each new line
+## of text is read before the first input, shots miss at a set rate, walking is at run speed (no sprint, no teleport).
 
+const READ_WPS := 3.5      # words/s a new player reads at (about 210 words a minute)
+const REACT_S := 0.45      # s from the end of reading to the first input
+const MISS_RATE := 0.3     # share of 0.5 s aim windows that land MISS_OFF to the side
+const MISS_OFF := 3.0      # m a missed aim is off the target
+const MISS_WINDOW := 0.5   # s one aim roll holds
+
+const KEYS := ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw"]      # the action inputs
+
+static var human := false
+static var reading_t := 0.0      # s of reading and reacting still to go before the next input
+static var idle := false         # this frame the player did nothing (no stick, no key, no Boki command)
+static var reading := false      # and the idle frame was reading text
+static var _acted := false
+static var _read_line := ""
+static var _miss := false
+static var _rng := RandomNumberGenerator.new()
+static var beats := {}           # human pace: step -> {id, secs, read, idle, worst (longest wait, not reading)}
+static var _wait_run := 0.0
 static var last_step := -1
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
@@ -15,9 +35,14 @@ static func drive(m: Match) -> void:
 		print("TUT step ", tu.step, " ", tu.id(), " t=", snapped(m.time, 0.1), " mobs=", live)
 		last_step = tu.step
 	var p := m.player
-	for k in ["fire", "glide", "interact", "crouch", "sec", "sig", "jump", "dash", "throw"]:
+	for k in KEYS:
 		p.inp[k] = false
 	p.inp["move"] = Vector2.ZERO
+	_acted = false
+	if human:
+		_log(tu)
+	if human and _read(tu):
+		return
 	still_t = still_t + Match.DT if p.pos.distance_to(last_pos) < 0.02 else 0.0
 	last_pos = p.pos
 	var goto := func(at: Vector3, r := 0.5):
@@ -58,8 +83,10 @@ static func drive(m: Match) -> void:
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)
+				_acted = true
 		"rank":
 			p.level_slot("kin")
+			_acted = true
 		"key":
 			for pk in m.pickups:
 				if pk["kind"] == "ckey":
@@ -67,6 +94,7 @@ static func drive(m: Match) -> void:
 		"orders":
 			if fmod(m.time, 1.0) < Match.DT:
 				KinCommand.order(p, "guard" if p.kin and p.kin.cmd != "guard" else "follow")
+				_acted = true
 		"chest":
 			goto.call(tu.stop("chest"), 0.4)
 			p.inp["interact"] = true
@@ -79,6 +107,38 @@ static func drive(m: Match) -> void:
 			p.inp["jump"] = true       # a ledge in the way: jump it, as a player would
 	if still_t > 1.5 and go != Vector2.ZERO and sid != "crouch":
 		p.inp["jump"] = true       # (stuck against something: hop, but never on the lookout: it is climbed plainly)
+	idle = not _acted and go == Vector2.ZERO and not KEYS.any(func(k): return p.inp[k])
+
+## One frame of the step's row: seconds in it, idle, reading, and the longest wait that was not reading.
+static func _log(tu: Tutorial) -> void:
+	if tu.step < 0:
+		return
+	if not beats.has(tu.step):
+		_wait_run = 0.0
+	var row: Dictionary = beats.get_or_add(tu.step,
+			{"id": tu.id(), "secs": 0.0, "read": 0.0, "idle": 0.0, "worst": 0.0})
+	row["secs"] += Match.DT
+	row["read"] += Match.DT if reading else 0.0
+	row["idle"] += Match.DT if idle else 0.0
+	_wait_run = _wait_run + Match.DT if idle and not reading else 0.0
+	row["worst"] = maxf(row["worst"], _wait_run)
+
+## Reads the step's line when it is new; true while the player is still reading (no input this frame).
+static func _read(tu: Tutorial) -> bool:
+	var line := tu.text + " " + tu.detail
+	if tu.text != "" and line != _read_line:
+		_read_line = line
+		reading_t += line.split(" ", false).size() / READ_WPS + REACT_S
+	reading = reading_t > 0.0
+	reading_t = maxf(0.0, reading_t - Match.DT)
+	idle = reading
+	return reading
+
+## Where the aim goes: on the monster, or in human pace sometimes MISS_OFF to the side of it.
+static func _aim_at(m: Match, at: Vector3) -> Vector3:
+	if human and fmod(m.time, MISS_WINDOW) < Match.DT:
+		_miss = _rng.randf() < MISS_RATE
+	return at + Vector3(MISS_OFF if human and _miss else 0.0, 0.9, 0)
 
 static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	var p := m.player
@@ -93,15 +153,17 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		_rmb(m, tu)
 	if best == null:
 		return
-	p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
+	p.inp["aim"] = _aim_at(m, best.pos)
 	var melee: bool = p.wpn.get("melee", false)
 	if p.flat_dist(best) > (1.6 if melee else 3.0): goto.call(best.pos)
 	if sid in ["shoot", "fight"]: p.inp["fire"] = _fire_key(m)
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
 		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
+		_acted = true
 	elif sid == "fight" and p.kin and p.kin.state in ["shoulder", "active"]:
 		p.kin.throw_to(best.pos)
+		_acted = true
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.
@@ -158,7 +220,7 @@ static func _outpost(m: Match, tu: Tutorial, goto: Callable) -> void:
 					bd = p.flat_dist(mb)
 					best = mb
 			if best and p.flat_dist(best) < 8.0:
-				p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
+				p.inp["aim"] = _aim_at(m, best.pos)
 				p.inp["fire"] = true
 		"extract":
 			goto.call(c)
