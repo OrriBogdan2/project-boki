@@ -154,6 +154,7 @@ func _carry(model: Node3D, sync: Node, out: String) -> void:
 	ball.mesh = SphereMesh.new()
 	ball.scale = Vector3.ONE * (0.15 if heart else 0.3)
 	holder.add_child(ball)
+	(sync.get("clips") as WardenClips).force = {}      # (the state plays, not the clip the shots forced)
 	var state := {"vel": Vector3(0, 0, -3.6), "face": 0.0, "grounded": true}
 	if heart:
 		state["heart"] = true
