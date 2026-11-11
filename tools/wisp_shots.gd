@@ -20,7 +20,8 @@ const STRIP_DT := 0.05     # s between strip frames
 const FALL_CELLS := 13     # the knock to +0.6 s: the fall (the puff at HunterWisp.FALL_T) and the pop-in
 const RISE_CELLS := 11     # the revive to +0.5 s: the rise and the hero settling
 const CELL := 240          # px: a strip frame in the sheet
-const CROP := 0.3          # of the screen height: the square cropped round the hero for a strip frame
+const CROP := 0.5          # of the screen height: the square cropped round the hero for a strip frame
+const STRIP_ZOOM := 0.6    # the camera in closer for the strips, so the pose reads
 
 var main: Node
 var m: Match
@@ -82,6 +83,8 @@ func _review() -> void:
 func _strip(id: String) -> void:
 	P.reclass(Arch.weight(id), id)
 	P.hp = P.max_hp
+	m.cam.zoom_to = STRIP_ZOOM
+	m.cam.zoom = STRIP_ZOOM
 	await _go(0.6)
 	var foe: Hunter = m.hunters.filter(func(x): return x.team != P.team)[0]
 	var sheet := Image.create(CELL * FALL_CELLS, CELL * 2, false, Image.FORMAT_RGB8)
@@ -101,12 +104,15 @@ func _strip(id: String) -> void:
 			STRIP_DT * (FALL_CELLS - 1), HunterWisp.FALL_T, STRIP_DT * (RISE_CELLS - 1)]
 	lines.append("%s: %s, every %.2f s: %s" % [file, id, STRIP_DT, rows])
 
-## The frame on screen now, cropped round the hero's middle, into the sheet at column i of row.
+## The frame on screen now, cropped round the hero's middle (through the model: it leans to the camera), into the
+## sheet at column i of row.
 func _cell(sheet: Image, i: int, row: int) -> void:
 	var img := main.get_viewport().get_texture().get_image()
 	img.convert(Image.FORMAT_RGB8)
 	var side := int(img.get_height() * CROP)
-	var at := main.get_viewport().get_camera_3d().unproject_position(P.position + Vector3(0, 0.6, 0))
+	var vp := main.get_viewport()
+	var at := vp.get_camera_3d().unproject_position(P.model.to_global(Vector3(0, 0.7, 0))) * Vector2(img.get_size()) \
+			/ vp.get_visible_rect().size
 	var crop := img.get_region(Rect2i(int(at.x) - side / 2, int(at.y) - side / 2, side, side))
 	crop.resize(CELL, CELL, Image.INTERPOLATE_LANCZOS)
 	sheet.blit_rect(crop, Rect2i(0, 0, CELL, CELL), Vector2i(i * CELL, row * CELL))
@@ -126,7 +132,7 @@ func _setup() -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var spot := m.world.random_ground()
+	var spot := _flat_spot()
 	P.teleport(spot)
 	var away := m.world.random_ground()
 	for k in 500:
@@ -136,6 +142,18 @@ func _setup() -> void:
 	for h in m.hunters:
 		if h != P:
 			h.teleport(m.world.free_spot_near(away, [], 1.0, 0.4, 8.0))
+
+## Ground flat for 3 m round and 6 m toward the camera, so no bank hides the hero (seed 77's first spot sits behind
+## one).
+func _flat_spot() -> Vector3:
+	for k in 300:
+		var at := m.world.random_ground()
+		var flat := true
+		for d in [Vector2(3, 0), Vector2(-3, 0), Vector2(0, -3), Vector2(0, 3), Vector2(0, 6)]:
+			flat = flat and absf(m.world.ground_at(at.x + d.x, at.z + d.y) - at.y) < 0.15
+		if flat:
+			return at
+	return m.world.random_ground()
 
 func _go(secs: float, drift := Vector3.ZERO) -> void:
 	for i in roundi(secs / DT):
