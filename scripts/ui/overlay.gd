@@ -187,6 +187,7 @@ func back() -> void:
 			"saves": open_saves()
 			"inventory": open_inventory()
 			"dex": open_dex(dex_open)
+			"bowl": open_bowl()
 			_: close()
 	else:
 		close()
@@ -626,6 +627,11 @@ func open_dex(spk: String) -> void:
 	else:
 		DexView.detail(v, spk, get_tree(), open_dex)
 
+## The Mixing Bowl, from the Items tab (a sub-page of the inventory).
+func open_bowl() -> void:
+	var v := _page("bowl", "Mixing Bowl", 760, true)
+	MixingBowl.fill(v, open_bowl)
+
 func open_inventory() -> void:
 	var v := _page("inventory", "Inventory", 760)
 	UI.hold(v, INV_H)          # every tab the same size: switching tabs never resizes the panel
@@ -669,6 +675,9 @@ func open_inventory() -> void:
 				var held := int(Save.d["items"].get(id, 0))
 				if held > 0:
 					cell.call(GardenItems.item_name(id), "×%d" % held, GardenItems.bag_hint(id), UI.GOLD)
+			if FarmUnlocks.base_mode():
+				cell.call("Mixing Bowl", "", "Mix spare bites, snacks and buns into new items.", UI.GOLD,
+						"Open", open_bowl)
 			var tr: String = Save.d.get("treat", "")
 			if tr != "":
 				cell.call("Treat ready", "", "Your partner eats it before the next expedition.", Color("f2c84a"))

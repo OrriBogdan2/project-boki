@@ -229,6 +229,7 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	_row(parent, "Food", food_short(rec), UI.INK, null, "tonic")
 	var toy := FavToy.of(rec)
 	if toy != "": _row(parent, "Fav toy", String(HomeLayout.CATALOG[toy]["name"]), UI.INK, null, toy)
+	PrizeBoard.add_ribbons(parent, rec)
 
 ## Where it came from (Save.register), one short line each.
 static func history(rec: Dictionary, parent: Control) -> void:

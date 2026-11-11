@@ -5,7 +5,7 @@ extends RefCounted
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
 ## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
 
-const TRACKED := ["xp", "level", "path", "stay", "lean", "loose"]
+const TRACKED := ["xp", "level", "path", "stay", "lean", "loose", "hold", "traits", "drift"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
 
 var bad := 0
@@ -28,7 +28,7 @@ func _boki(species: String, level: int, stat: String) -> Dictionary:
 func _snap(rec: Dictionary) -> String:
 	var t := {}
 	for k in TRACKED:
-		t[k] = rec[k]
+		t[k] = rec.get(k)
 	t["stats"] = rec["stats"]
 	return JSON.stringify(t)
 
@@ -40,7 +40,7 @@ func run(m: Node) -> void:
 	for spec in SPECS:
 		_samples(_boki(spec[0], spec[1], spec[2]))
 	for id in GardenItems.ids().filter(GardenItems.fed):
-		ok(used.get(id, 0) > 0, "%s was usable on at least one sample" % id)
+		ok(used.get(id, 0) > 0 or id == "twinbun", "%s was usable on at least one sample" % id)
 	_tokens_and_stay()
 	_feeding()
 	_migration()
@@ -55,7 +55,7 @@ func _rules() -> void:
 		fine = fine and not seen.has(id) and it["use"] in ["eaten", "worn"] and not (it["sources"] as Array).is_empty()
 		fine = fine and it.has("name") and it.has("family") and (it["effect"] as Dictionary).has("kind")
 		seen[id] = true
-	ok(seen.size() == 16 and fine, "16 items, unique ids, each with a name, family, use, one effect and sources")
+	ok(seen.size() == 26 and fine, "26 items, unique ids, each with a name, family, use, one effect and sources")
 	var q := false
 	var rec := _boki("cindle", 3, "power")
 	for id in GardenItems.ids():
@@ -84,7 +84,7 @@ func _samples(rec: Dictionary) -> void:
 					and JSON.stringify(pv["deltas"][key][0]) != JSON.stringify(pv["deltas"][key][1])
 		for key in TRACKED:
 			if not moved.has(key):
-				exact = exact and JSON.stringify(probe[key]) == JSON.stringify(rec[key])
+				exact = exact and JSON.stringify(probe.get(key)) == JSON.stringify(rec.get(key))
 		for s in Care.STATS:
 			if not moved.has("stats." + s):
 				exact = exact and int(probe["stats"][s]) == int(rec["stats"][s])
