@@ -9,7 +9,7 @@ extends RefCounted
 
 const BAR_W := 318.0       # px: health / armour width
 const HP_H := 16.0         # px: the health bar
-const AR_H := 5.0          # px: the armour strip under it
+const AR_H := 5.0          # px: the armour strip above it
 const LVL_POP := 0.35      # s: the level coin's pop
 
 static func draw(H, sz: Vector2, p: Hunter) -> void:
@@ -46,13 +46,9 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		var tn := String(Hunter.ARMOR_TIERS[p.armor_tier][0]).to_upper()
 		var tw := HudStyle.BIG.get_string_size(tn, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
 		HudStyle.text(c, Vector2(x0 + w - aw - 8 - tw, y0), tn, 10, Color(p.armor_col(), 0.75))
-	# health: thick, segmented, the chip and flash shared with your overhead plate
-	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
-	H._rounded(hr.grow(2.0), HudStyle.SHADE, 4)
-	var flash: float = H.plates.flash_of(p) * 0.6
-	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, H._chip_of(p, frac), HudPlate.shield_frac(p), flash)
-	# under it: the merged form's shell while merged, else armour (with its own trail as it drops)
-	var ar := Rect2(Vector2(x0, hr.end.y + 3), Vector2(w, AR_H))
+	# armour on top (the merged form's shell while merged; its own trail as it drops), health thick and segmented under it
+	var ar := Rect2(Vector2(x0, y0 + 6), Vector2(w, AR_H))
+	var hr := Rect2(Vector2(x0, ar.end.y + 3), Vector2(w, HP_H))
 	var shv := MergeShell.view(p)
 	if shv.y > 0.0 and not p.merge_st.is_empty():
 		var fcol: Color = (p.merge_st["form"] as Dictionary)["glow"]
@@ -67,13 +63,16 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 			c.draw_rect(ar.grow(1.0), HudStyle.SHADE)
 			HudStyle.strip(c, ar, H.armor_lerp, HudStyle.CHIP)
 			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), p.armor_col())
-	# progress to the next armour tier: a hairline under the armour strip in the next tier's colour
+	# progress to the next armour tier: a hairline above the armour strip in the next tier's colour
 	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
-		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w, 1)), Color(0, 0, 0, 0.35))
-		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
+		c.draw_rect(Rect2(Vector2(x0, ar.position.y - 3), Vector2(w, 1)), Color(0, 0, 0, 0.35))
+		c.draw_rect(Rect2(Vector2(x0, ar.position.y - 3), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
+	H._rounded(hr.grow(2.0), HudStyle.SHADE, 4)
+	var flash: float = H.plates.flash_of(p) * 0.6
+	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, H._chip_of(p, frac), HudPlate.shield_frac(p), flash)
 	if p.ak and p.ak.has_meter():
-		H._draw_res_bar(x0, ar.end.y + 4, w, p)
+		H._draw_res_bar(x0, hr.end.y + 4, w, p)
 	_hidden_tag(H, sz, p)
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.

@@ -1288,20 +1288,11 @@ func _draw_weapon(sz: Vector2, p: Hunter) -> void:
 		var aw := big.get_string_size(str(p.ammo), HORIZONTAL_ALIGNMENT_LEFT, -1, 28).x
 		_text(r.position + Vector2(84 + aw, 52), "/ %d" % mag, 14, MUTED, big)
 	# the row of small slots above the weapon card
-	var s := 44.0; var gap := 8.0
+	var s := 44.0
 	var y := r.position.y - s - 22.0
-	var x := r.end.x - s
-	var k: Kin = p.kin
-	# 1 2 3: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
-	x = BeltHud.draw(self, p, x, y)
+	# 1 2 3 4: the utility belt (tonic, armor kit and gadgets: BeltHud); Q V C: the gloves and the Boki (GripHud)
+	BeltHud.draw(self, p, r.end.x - s, y)
 	GripHud.draw(self, p, r)
-	# C: throw / recall your kin
-	if k:
-		var kc: Color = Data.KIN[k.species]["color"]
-		var out_now: bool = k.state in ["active", "flying", "returning"]
-		var can_throw: bool = (k.state == "shoulder" and k.throw_cd <= 0.0) or out_now
-		_ab_slot("throw", Rect2(Vector2(x, y), Vector2(s, s)), "recall" if out_now else "throw", Settings.key_cap("throw"), kc, k.throw_cd / 1.0 if k.throw_cd > 0.0 else 0.0, k.throw_cd, can_throw)
-		x -= s + gap
 	# what you're carrying home, as a counter
 	var seeds := 0
 	for sd in p.seeds: seeds += int(p.seeds[sd])
@@ -1423,9 +1414,9 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 		match lbl:
 			"ALIVE":
 				var frac := clampf(h.hp / h.max_hp, 0.0, 1.0)
-				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 29), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(HudStyle.ALLY, frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
 				if h.max_armor > 0.5:
-					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
+					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 28), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
+				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 32), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(HudStyle.ALLY, frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
 				if _has_status(h):
 					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
 			"WISP":
