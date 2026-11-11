@@ -6,8 +6,9 @@ extends RefCounted
 ## a charge spent, a cast, a dash or jump under way, a draw or wind-up started), and "vis", the first frame
 ## something shows on screen (a shot or node spawned, the hunter's rendered position moving, the cast or
 ## kit-move pose, a swing, the bow draw, the muzzle flash). Frame 0 is the frame of the press.
-## Beside them, from the press, the first frame of each change the source footage can show: "pose" (a bone of
-## the model as drawn, past the idle's own drift), "shot" (a shot spawned) and "move" (the hunter displaced).
+## Beside them, from the press, the first frame of each change the source footage can show: "pose" (a body
+## bone as the model's driver drew it, past the idle's own drift), "shot" (a shot spawned) and "move" (the hunter
+## displaced).
 ## Taps are 33 ms (2 frames at 60 Hz, 5 at 144). An RMB with a hold variant (archetype rmb "hold") and a
 ## sword with a charge (weapon "charge_time") go off on the release by design: those are stamped from the
 ## release, and the press-to-first-sign frame is printed beside them. A key whose tap shows nothing by design
@@ -284,13 +285,12 @@ func _prep(hero: String, key: String, dt: float) -> void:
 		if main.get_tree().get_node_count() > nodes:
 			noisy = true
 		await main.get_tree().process_frame
-		var was := pose_last
-		var posing := _posing(dt)
-		if was.size() == pose_last.size():
-			for b in was.size():
-				pose_drift[b] = maxf(pose_drift[b], was[b].distance_to(pose_last[b]))
+		var pts := _pose_pts()
+		if pts.size() == pose_last.size():
+			for b in pts.size():
+				pose_drift[b] = maxf(pose_drift[b], pts[b].distance_to(pose_last[b]))
+		pose_last = pts
 		unrest = _quiet()
-		if unrest == "" and posing: unrest = "posing"
 		km_last = P.anim.km.duplicate()
 	pose_rest = pose_last
 
