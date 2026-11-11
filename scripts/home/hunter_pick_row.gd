@@ -22,7 +22,8 @@ static func add(home: Node, parent: Control) -> String:
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
 	for a in Arch.ids():
-		grid.add_child(_card(home, String(a), cur))
+		var card := _card(home, String(a), cur)
+		grid.add_child(card if a == cur else ExpeditionFirst.fold(card))
 	parent.add_child(grid)
 	return cur
 
