@@ -76,6 +76,7 @@ func run(m: Node) -> void:
 		await tree.process_frame
 	var hatch: bool = main.current != pr and main.current.get_script().resource_path.ends_with("hatch.gd")
 	ok(hatch, "the prologue ends on the hatch")
+	await _skips(tree)
 	if dir != "":
 		var f := FileAccess.open(dir.path_join("captions.txt"), FileAccess.WRITE)
 		for c in caps:
@@ -84,6 +85,35 @@ func run(m: Node) -> void:
 	print("PROLOGUE done, %d failed" % bad)
 	RenderingServer.render_loop_enabled = true
 	tree.quit(1 if bad else 0)
+
+## The first press of a key or a pad button skips it all in a blink, and once seen a new game goes past it.
+func _skips(tree: SceneTree) -> void:
+	var key := InputEventKey.new()
+	key.keycode = KEY_X
+	key.pressed = true
+	var pad := InputEventJoypadButton.new()
+	pad.button_index = JOY_BUTTON_A
+	pad.pressed = true
+	for ev: InputEvent in [key, pad]:
+		Save.d["tutorial"]["prologue"] = false
+		await main.show_screen("prologue", {"then": "hatch"})
+		var pr = main.current
+		for i in 3:
+			await tree.process_frame
+		var t0 := Time.get_ticks_msec()
+		pr._unhandled_input(ev)
+		while main.current == pr and Time.get_ticks_msec() - t0 < 3000:
+			await tree.process_frame
+		var took := Time.get_ticks_msec() - t0
+		ok(main.current != pr and took <= 400, "one %s press skips to the hatch (%d ms)" % [ev.get_class(), took])
+	ok(bool(Save.d["tutorial"]["prologue"]), "a skip is remembered")
+	await main.show_screen("prologue", {"then": "hatch"})
+	var again = main.current
+	for i in 10:
+		if main.current != again:
+			break
+		await tree.process_frame
+	ok(main.current != again, "the next new game skips it by default")
 
 ## Steps through the slides, taking the strip frames and watching THE RELICS's framing every frame.
 func _play(pr, tree: SceneTree) -> void:

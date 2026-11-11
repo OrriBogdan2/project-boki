@@ -31,8 +31,8 @@ The launcher starts the game with `-- --server=host:port --token=<discord token>
 ## Messages
 
 **Lobby (relay `k` field):** `hello` (version, token, name) -> `welcome` or `deny` (with a reason);
-`pres` (your presence), `peers` (who's online), `emit` / `msg` (lobby topics, e.g. `start` from the
-lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `pong`.
+`pres` (your presence), `peers` (who's online), `emit` / `msg` (lobby topics: `start` from the
+lobby; in the pre-match lobby `loaded`, `pick` `{arch, final}` and `chat`), `join` / `leave` (a match room), `memit` (a match message), `ping` / `pong`.
 
 **Match topics:**
 
@@ -43,6 +43,13 @@ lobby), `join` / `leave` (a match room), `memit` (a match message), `ping` / `po
 | `ev` | Anyone | Events: `fx` (ring, bolt, cone), `kst` (kit status), `hex`, `knock`, `out`, `catch` / `caught`, `chest`, and more |
 
 Messages are chunked to stay under about 3.6 KB (`Net._chunks`).
+
+**Drawing other players' Hunters** (`scripts/match/net_smooth.gd`, decision 0039): each remote Hunter keeps
+its last six snapshots on its owner's clock (the `st` header) and is drawn 0.15 s behind the quickest
+arrival, on a Hermite curve between the two snapshots around that moment. Past the newest it runs on its
+last velocity for at most 0.25 s. A move faster than 40 m/s between two snapshots is a teleport and is drawn
+as one jump. `--remote-smooth-check` measures it over a relay with 80 ms ping, 20 ms jitter and 2% loss.
+Boki and monsters still chase their newest snapshot (`Ent.net_follow`).
 
 ## Net.VERSION
 
