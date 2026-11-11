@@ -41,9 +41,19 @@ hot, char), `near` (dropped past LOD_NEAR). Sounds: `n`, `db`, `other` (extra dB
 `pitch_k`, `var`, `delay`, `at`, `when` / `unless`.
 
 ## The cel look
-Surface looks draw heat in `CEL_BANDS` flat steps with one-pixel hard edges (`hard()` / `cel()` in
-`shaders/hero_vfx.gdshader`); smoke is a lumpy puff in two flat tones, lit from screen up-left, eaten away by noise.
-Both sample `art/vfx/noise.png` (r billows, g fbm, b cell walls), baked by `python3 tools/gen_vfx_noise.py`.
+Every effect in the game shares one cel pass, `shaders/cel.gdshaderinc`: `hard()` (a one-pixel anti-aliased edge),
+`cel()` (heat in `CEL_BANDS` flat steps), `cel_cover()` / `cel_glow()` (a soft cover or additive glow turned into flat
+steps with edges ragged by the noise) and `cel_ring()` (the shockwave ring: a hard band with a hot lead edge that
+breaks up as it spends). They sample `art/vfx/noise.png` (r billows, g fbm, b cell walls, baked by
+`python3 tools/gen_vfx_noise.py`) through the `vfx_noise` shader global in project.godot, so no material wires it.
+Smoke is a lumpy puff in two flat tones (`c` lit from screen up-left, `c3` shaded), eaten away by noise; it is near
+opaque, so a recipe needs fewer, smaller puffs than a soft smoke did.
+
+Who includes it: the data looks here (`hero_vfx.gdshader`, `hero_vfx_mote.gdshader`, ring layer `"p": "ring"`), the
+kit shaders (`ld_fx` Ashwick / Dredge, `dj_fx` Kael / Sable, `vv_fx` Sparkle / Vex, `KitShaders` Hem / Breaker,
+`care_disc` / `care_glow` Pip / Claire) and the shared hit effects in `Fx` (`impact`, `spark`, `fx_dot` dust in two
+tones, `swoosh`). The ring modes of `ld_fx` (11), `dj_fx` (4) and `vv_fx` (2) draw `cel_ring()`. A new effect shader
+includes the file and runs its cover and glow through `cel_cover()` / `cel_glow()` last.
 
 ## FX anchors
 `"anchors"` in the data names points on the Hero. Each resolves in order: `nodes` (empties on the .glb, e.g.
