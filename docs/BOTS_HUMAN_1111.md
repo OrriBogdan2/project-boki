@@ -125,7 +125,7 @@ t=82 kn1ghtowl knocked by sk8rboi_: low 4.9 s (backing off 1.0 s), heals left 4,
 3. Easy squads: one bot should break off to bring a mate back once the rival squad is down a hunter.
 4. More squads heading for a way out in the last third of the match.
 5. Kiting, ability timing and loot choice need their own probe rows.
-6. One medium run in twelve still had a squad apart 22% of the time (see The check).
+6. Three medium runs in fourteen still had a squad apart 14% to 22% of the time (see The check).
 7. The `assist` facing twitch the sanity probe flagged (see Other checks).
 8. Not duplicated here, in flight elsewhere: dodging (ext/combat-bot-dodge-rebased), ring and downed play
    (ext/combat-bots-ring, ext/combat-bots-downed), Boki summons (ext/bot-boki-summon).
@@ -139,10 +139,11 @@ the run short.
 
 One expedition is a noisy sample, so the limits only catch the behaviour going away, not a small slide. The
 heal limit is the one that tells old from new on a single run: the new behaviour measured 0.03 to 0.58 on
-twelve medium runs, the old 0.42 to 0.95 on eight (five of them over the limit). Squad apart measured 0.00 to
-0.08 on eleven new runs and 0.22 on one (old: 0.05 to 0.31), so that limit sits wide at 0.30. That one run was
-not looked into; a bot shut in a lair away from its squad would produce it. For a real comparison run several
-seeds both ways with `--bh-measure` as above.
+fourteen medium runs, the old 0.42 to 0.95 on eight (five of them over the limit). Squad apart measured 0.00
+to 0.08 on eleven new runs and 0.14, 0.21 and 0.22 on three (old: 0.05 to 0.31), so that limit sits wide at
+0.30 and one run cannot tell old from new on it. Those three runs were not looked into; a bot shut in a lair
+away from its squad would produce them. For a real comparison run several seeds both ways with `--bh-measure`
+as above.
 
 ## Other checks, and one twitch
 
