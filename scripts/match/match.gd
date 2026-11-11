@@ -1840,6 +1840,7 @@ func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 				BokiChatter.say(self, player.kin, "kill")
 	else:
 		add_feed("%s went down" % h.pname)
+	KinGuardian.on_down(h)
 	sfx("knock", h.pos, 0.0)
 	HeroSfx.voice(self, h, "down")
 	fx.burst(h.pos + Vector3(0, 0.8, 0), Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()], 24, 5.0, 0.6)
