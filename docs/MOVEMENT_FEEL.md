@@ -410,7 +410,8 @@ The source has no ramp time: a Slow or a speed boost moves the speed cap at once
 ## Jump pads and updrafts (`PadFlight`, `--pad-check`; decision 0024)
 - **A pad is a throw, not a rail:** 17 m/s up [est] under the source's 14.7 m/s² (apex 9.8 m at 1.16 s), aimed
   so the arc alone would come down on the pad's landing and clearing a higher landing's lip by 2 m. The keys
-  barely steer the rise (`air_control` 0.015, the data's value). Map pads and the pocket Spring pad share it.
+  steer the rise as they steer the same throw with no pad (`Loco.air_step`: the owner's strong WASD air control
+  of 11-08, which replaced the data's `air_control` 0.015). Map pads and the pocket Spring pad share it.
 - **The glider opens by itself at the apex** (DECISIONS: the exception to "a held Space never opens the glider"),
   keeps the launch's speed and steers as any glide. A hands-off glide (or a bot) is carried onto the landing and
   folded over it, as a lair's escape updraft does; a fresh glide press makes it your own glide.

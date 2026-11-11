@@ -1,16 +1,16 @@
 extends RefCounted
 ## --pad-check: jump pads and updrafts (PadFlight; DECISIONS: pad and updraft auto-glides). For every hunter
 ## off a map pad aimed at another island: the rise is a ballistic throw to HunterMove.pad_vy's apex in its time,
-## the keys barely steer it, the glider is shut on the way up and opens by itself at the apex with no
-## glide input, steers from then on, and a hands-off flight is set down near the landing. Once: a pocket
-## pad's launch opens the glider the same way, and a hunter falling into an updraft has the glider opened
-## for them and climbs at HunterMove.updraft_vy.
+## the keys steer it as they steer the same throw with no pad (Loco.air_step), the glider is shut on the way up
+## and opens by itself at the apex with no glide input, steers from then on, and a hands-off flight is set down
+## near the landing. Once: a pocket pad's launch opens the glider the same way, and a hunter falling into an
+## updraft has the glider opened for them and climbs at HunterMove.updraft_vy.
 
 const MIN_GAP := 12.0       # m at least to the landing on another island
 const MAX_GAP := 46.0       # m at most (the map's pads start at 46 m; the training map's islands are closer)
 const APEX_TOL := 0.5       # m off pad_vy^2 / 2g
 const APEX_T_TOL := 0.1     # s off pad_vy / g
-const RISE_DRIFT := 0.6     # m sideways a held key may move you during the rise (HunterMove.air_control)
+const RISE_TOL := 0.3       # m the rise's sideways drift may differ from a plain throw's (a step of launch timing)
 const OPEN_WAIT := 0.3      # s after the apex the glider has to open in
 const STEER_V := 2.0        # m/s sideways a held key must reach within a second of the glider opening
 const LAND_R := 4.0         # m from the landing a hands-off flight must come down within
@@ -69,7 +69,8 @@ func _landing(m: Match, at: Vector3) -> Vector3:
 ## Stands the hunter on a map pad aimed at `land` and flies it with `move` held and no glide input.
 ## Returns apex (m over the pad), apex_t (s), rise_drift (m sideways at the apex), glided_in_rise,
 ## open_after (s from apex to the glider opening, INF if never), steer_v (sideways m/s a second after
-## the open), end (flat m from the landing when grounded again, INF if still flying).
+## the open), end (flat m from the landing when grounded again, INF if still flying), v0 (the throw's
+## velocity) and side (the sideways axis).
 func _flight(m: Match, land: Vector3, move: Vector2) -> Dictionary:
 	var h: Hunter = m.player
 	var start := h.pos
@@ -77,7 +78,7 @@ func _flight(m: Match, land: Vector3, move: Vector2) -> Dictionary:
 	m.world.pads.append({"pos": start, "land": land, "from": 0, "to": 0, "cd": 0.0})
 	var r := {
 		"apex": 0.0, "apex_t": -1.0, "rise_drift": 0.0, "glided_in_rise": false,
-		"open_after": INF, "steer_v": 0.0, "end": INF,
+		"open_after": INF, "steer_v": 0.0, "end": INF, "v0": Vector3.INF, "side": side,
 	}
 	var t := 0.0
 	var open_t := -1.0
@@ -90,6 +91,8 @@ func _flight(m: Match, land: Vector3, move: Vector2) -> Dictionary:
 		if h.pad_flight.is_empty() and r["apex_t"] < 0.0 and t > 0.5:
 			break                                   # never launched
 		t += Match.DT
+		if not (r["v0"] as Vector3).is_finite() and not h.pad_flight.is_empty():
+			r["v0"] = h.vel
 		r["apex"] = maxf(r["apex"], h.pos.y - start.y)
 		if r["apex_t"] < 0.0:
 			if h.gliding:
@@ -136,10 +139,26 @@ func _pad_flights(m: Match, arch: String, land: Vector3) -> void:
 	ok(float(r["end"]) <= LAND_R, "%s: hands-off flight set down %.1f m from the landing" % [arch, r["end"]])
 	_reset(m, pad)
 	r = _flight(m, land, Vector2(1, 0))
-	ok(float(r["rise_drift"]) <= RISE_DRIFT and float(r["steer_v"]) >= STEER_V,
-		"%s: a held side key moves you %.2f m in the rise, then steers the glide at %.1f m/s"
-		% [arch, r["rise_drift"], r["steer_v"]])
 	_reset(m, pad)
+	var plain := _plain_drift(m, pad, r)
+	ok(absf(float(r["rise_drift"]) - plain) <= RISE_TOL and float(r["steer_v"]) >= STEER_V,
+		"%s: a held side key moves you %.2f m in the rise (the same throw with no pad: %.2f m), then steers"
+		% [arch, r["rise_drift"], plain] + " the glide at %.1f m/s" % r["steer_v"])
+	_reset(m, pad)
+
+## The flight `r`'s throw from `at` with no pad flight, the side key held as long as its rise: the sideways m it
+## moves. A pad's rise is a plain airborne body (the owner's strong WASD air control, 11-08).
+func _plain_drift(m: Match, at: Vector3, r: Dictionary) -> float:
+	var h: Hunter = m.player
+	var side: Vector2 = r["side"]
+	h.teleport(at)
+	h.vel = r["v0"]
+	h.grounded = false
+	for i in int(round(float(r["apex_t"]) / Match.DT)):
+		h.inp["move"] = side
+		m.step(Match.DT)
+	h.inp["move"] = Vector2.ZERO
+	return absf(Vector2(h.pos.x - at.x, h.pos.z - at.z).dot(side))
 
 ## A pocket pad throws you up the same way and the glider opens by itself at the apex.
 func _pocket(m: Match) -> void:
