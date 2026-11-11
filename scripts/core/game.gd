@@ -62,12 +62,12 @@ func _setup_input() -> void:
 	_key("up", [KEY_W, KEY_UP]); _key("down", [KEY_S, KEY_DOWN])
 	_key("left", [KEY_A, KEY_LEFT]); _key("right", [KEY_D, KEY_RIGHT])
 	_key("fire", [], MOUSE_BUTTON_LEFT)
-	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
-	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
+	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your hunter's right-click ability (its variants: tap, hold, air...)
+	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the hunter's ability, Shift the hunter's
 	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
-	_key("signature", [KEY_E])                # the archetype's utility (E)
+	_key("signature", [KEY_E])                # the hunter's utility (E)
 	_key("kin_skill", [])                     # a kin's second ability: retired from the kit (data kept)
 	_key("interact", [KEY_F])                 # catch, open, pick up, finish a downed enemy (Supervive: F)
 	_key("util2", [KEY_2])                    # utility belt slot 2 (an armor kit to start)
@@ -95,7 +95,7 @@ func _setup_input() -> void:
 	_key("talk", [KEY_T])                     # at home: talk to a kin
 	_key("details", [KEY_C])                  # at home: a kin's details
 	_key("whistle", [KEY_H])                  # at home: whistle, and your kin come running
-	_key("hero", [KEY_J])                     # at home: change hero (class and archetype) right there
+	_key("hero", [KEY_J])                     # at home: change your Relic (class and hunter) right there
 	_key("inventory", [KEY_I])                # your things
 	_key("build", [KEY_B])                    # at home: build mode (lay out the island); indoors: decorate
 	_key("rotate", [KEY_R])                   # build mode: turn what you're holding
