@@ -133,7 +133,9 @@ static func _elim_start(h: Hunter, st: Dictionary) -> void:
 	var spec: Dictionary = (st["look"] as Dictionary)["snuff"]
 	var by := h.last_hit_by
 	st["kcol"] = SideColor.of(h.m, by) if by != null and is_instance_valid(by) and by != h else _team_col(h)
-	st["box"] = Life.box_of(h.m, h)
+	var box := Life.box_of(h.m, h)
+	# only this death's box: a remote copy may not have it yet, the abyss keeps none
+	st["box"] = box if not box.is_empty() and Life.soul_here(h.m, box) else {}
 	st["mode"] = ELIM
 	st["t"] = 0.0
 	Sfx.loop_stop(hum_key(h))
@@ -244,9 +246,9 @@ static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
 	if h.model:
 		h.model.scale = base * Vector3(grow * (1.0 + squash * 0.5), grow * (1.0 - squash), grow * (1.0 + squash * 0.5))
 
-## The hit (the Wisp is knocked up, its heart flashes in the killer's colour; the rim keeps the team colour),
-## then the fall: the Wisp dims and drops into the deathbox as the box grows in. It only ever scales evenly, so the
-## round outline holds to the end.
+## The hit (the Wisp is knocked up, its heart takes the killer's colour; the rim keeps the team colour), then
+## the fall: the Wisp dims and drops into the deathbox as the box grows in. It only ever scales evenly, so
+## the round outline holds to the end.
 static func _pose_elim(h: Hunter, st: Dictionary) -> void:
 	var node := st["node"] as Node3D
 	var look: Dictionary = st["look"]
@@ -256,7 +258,7 @@ static func _pose_elim(h: Hunter, st: Dictionary) -> void:
 	var mat := node.get_meta("mat") as ShaderMaterial
 	mat.set_shader_parameter("core_col", st["kcol"] if hit else heart)
 	var fall := clampf((k - ELIM_HIT) / (1.0 - ELIM_HIT), 0.0, 1.0)
-	_set_glow(node, 1.0 + FLASH_BOOST * (1.0 - k / ELIM_HIT) if hit else 1.0, lerpf(1.0, ELIM_DIM, fall))
+	_set_glow(node, 1.0, lerpf(1.0, ELIM_DIM, fall))
 	var box := st["box"] as Dictionary
 	var floor_y := 0.0
 	if box.has("pos"):

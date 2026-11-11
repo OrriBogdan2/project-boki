@@ -19,7 +19,7 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   longer picked (the files stay).
 - Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
   scales from 0.6 to full with a small squash. Death or a bleed-out plays the elimination beat (the
-  look's `snuff`, 0.6 s, one `elim` state): the hit (the white heart flashes in the killer's side colour,
+  look's `snuff`, 0.6 s, one `elim` state): the hit (the Wisp is knocked up, its white heart takes the killer's side colour,
   `last_hit_by`, the hunter's own when unknown; the rim keeps the team colour), the fall (the Wisp dims and
   drops into the deathbox as the box grows in, scaling evenly so it stays round), then the Wisp's pop (a
   small ring and puff, no explosion). After it the machine sits in `gone`, so the hero's death clip never
