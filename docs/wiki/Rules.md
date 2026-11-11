@@ -155,7 +155,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 
 | Setting | Value |
 |---|---|
-| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. |
+| _doc | Monster camps (scripts/match/camps.gd, docs/decisions/0048-camps-and-xp.md). kind_size: a map camp spot's layout kind -> its size. sizes, smallest first (the hot zone and a comeback are the next one up): name (player text), n monsters, big (the one big monster: the region's version of it), armor (the bundle's armor), orb (chance 0..1 of a perk orb, source 'camp'), gear (if set: one gear piece, this many rarity steps over the region's), big_rar (rarity steps over its roll for the big one). small: the small kinds when a camp has no region table. A camp's XP is the sum of its monsters (content/rules/xp.json). back_s: a cleared camp comes back once, this long after its clear (s), if no Hunter is within back_clear_r (m) and the spot is safe for back_safe_s (s); none after back_until_s (match s). max_mobs: camp monsters alive at once. spread (m): how far monsters stand from the camp's centre. guard_size: the size whose camps guard a rare Boki (the map's spawn_points.rare_kin.guarded says how many): it floats free at the camp's centre when the camp is cleared (scripts/match/spawn_plan.gd). |
 | kind_size | {"light": "small", "normal": "camp", "heavy": "great", "chief": "chief"} |
 | sizes | [{"id": "small", "name": "Small Camp", "n": 2, "armor": 25, "orb": 0.0}, {"id": "camp", "name": "Camp", "n": 3, "big": "sentinel", "armor": 50, "orb": 0.5}, {"id": "great", "name": "Great Camp", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 0}, {"id": "chief", "name": "Camp Chief", "n": 4, "big": "brute", "armor": 50, "orb": 1.0, "gear": 1, "big_rar": 1}] |
 | small | ["skitter", "spitter", "bomber"] |
@@ -165,6 +165,7 @@ Branching evolution lines whose two finals are alternate forms of ONE Field Book
 | back_until_s | 420 |
 | max_mobs | 85 |
 | spread | 1.8 |
+| guard_size | great |
 
 ## capture (`content/rules/capture.json`)
 

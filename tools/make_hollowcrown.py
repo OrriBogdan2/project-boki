@@ -399,7 +399,8 @@ outposts = [[190, 26, 1], [26, 186, 1], [92, 178, 1], [188, 193, 1], [30, 108, 1
 hatches = [[124, 92], [100, 36], [36, 82], [182, 98], [118, 158], [166, 132], [124, 186], [92, 120]]
 
 spawn_points = {
-    "rare_kin": dict(pick=[5, 5], points=[[30, 30, "Larkhollow"], [192, 22, "Highwatch"], [192, 190, "Duskmoor"],
+    # guarded: that many of the picks sit in Great Camps instead (scripts/match/spawn_plan.gd)
+    "rare_kin": dict(pick=[5, 5], guarded=2, points=[[30, 30, "Larkhollow"], [192, 22, "Highwatch"], [192, 190, "Duskmoor"],
                                           [20, 182, "Saltmere"], [94, 176, "Nest Glade"], [82, 50, "Rimefield"],
                                           [32, 104, "Forge Yard"], [186, 124, "Stormbreak"]]),
     "vault": dict(pick=[3, 3], points=[[128, 46, "Frostgate Keep"], [42, 70, "The Kilns"], [178, 116, "Shrine Table"],
