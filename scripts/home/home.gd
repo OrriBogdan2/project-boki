@@ -3090,6 +3090,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 			c2.add_child(l)
 		else:
 			c2.add_child(UI.para(String(ln[0]), 12, ln[1]))
+	HazardCounter.add_row(c2, String(rec["species"]))
 
 ## A sub-page of the card: everything the kin does in a match, in full. Back returns to the card.
 func _open_kin_match(rec: Dictionary) -> void:

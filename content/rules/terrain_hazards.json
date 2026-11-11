@@ -1,5 +1,5 @@
 {
-	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). look: the surface shader (shaders/terrain_hazard.gdshader).",
+	"desc": "Terrain hazard areas on an authored map (TerrainHazards, docs/decisions/0060-terrain-hazards.md). The map lists each area's outline (content/maps/<id>.json, islands[].hazard_areas); this file says what the ground does to a hunter standing on it and which Boki walks it safely. counter: an active Boki whose type (theme) or species is listed protects its hunter (a downed Boki doesn't). hint: the Boki says so when one is near (near_m metres, looked for every every_s seconds, the same kind again after again_s). icon: the menu icon the home cards show beside its \"Walks <noun> safely\" line. look: the surface shader (shaders/terrain_hazard.gdshader).",
 	"hint": {
 		"near_m": 8.0,
 		"every_s": 0.5,
@@ -7,6 +7,7 @@
 	},
 	"kinds": {
 		"lava": {
+			"icon": "fireball",
 			"name": "Lava Field",
 			"noun": "the lava",
 			"hurts": "burning",
@@ -28,6 +29,7 @@
 			}
 		},
 		"deep_water": {
+			"icon": "wave",
 			"name": "Deep Water",
 			"noun": "deep water",
 			"hurts": "slow, weak hits, short of breath",
@@ -52,6 +54,7 @@
 			}
 		},
 		"ice": {
+			"icon": "gem",
 			"name": "Ice Sheet",
 			"noun": "the ice",
 			"hurts": "no footing",
@@ -72,6 +75,7 @@
 			}
 		},
 		"static": {
+			"icon": "shock",
 			"name": "Static Flats",
 			"noun": "the static",
 			"hurts": "shocks",
@@ -95,6 +99,7 @@
 			}
 		},
 		"bramble": {
+			"icon": "thornwake",
 			"name": "Bramble",
 			"noun": "the thorns",
 			"hurts": "slow, scratches",

@@ -313,6 +313,7 @@ func run(m: Node) -> void:
 	H.queue_free()
 	# ---------------------------------------------------------------- 9. the carry pick (CarryPick)
 	_carry_pick()
+	_hazard_counter()
 	var roster: Array = (Save.d["roster"] as Array).filter(func(r): return not r.has("ransom"))
 	Save.d["roster"] = roster
 	Save.d["active"] = roster[0]["uid"]
@@ -326,9 +327,39 @@ func run(m: Node) -> void:
 	var heads := func(w: String) -> bool: return texts.any(func(t): return String(t).begins_with(w))
 	ok(heads.call("Carry: "), "the portal's Boki cards show a carry passive line")
 	ok(heads.call("Lead") and heads.call("Second"), "the portal has a lead card and a second card")
+	var any_counter := func(r) -> bool: return not HazardCounter.kinds_of(String(r["species"])).is_empty()
+	var counters: bool = Save.d["roster"].any(any_counter)
+	var walks: bool = texts.any(func(t): return String(t).begins_with("Walks "))
+	ok(walks == counters, "the portal cards say what a Boki walks safely, only if it counters one")
 	P.queue_free()
 	print("KINBOX DONE failures: %d" % bad)
 	main.get_tree().quit()
+
+## The hazard line is read from terrain_hazards.json and shows only for a Boki that counters one.
+func _hazard_counter() -> void:
+	var kinds: Dictionary = TerrainHazards.rules()["kinds"]
+	var lava := ""
+	for kind in kinds:
+		var C: Dictionary = kinds[kind]["counter"]
+		var spk := String(C["kin"][0]) if not C["kin"].is_empty() else ""
+		for sp in Data.KIN:
+			if spk == "" and String(Data.KIN[sp].get("theme", "")) in C["themes"]:
+				spk = String(sp)
+		if kind == "lava":
+			lava = spk
+		var said := HazardCounter.line(spk)
+		var noun := String(kinds[kind]["noun"])
+		ok(HazardCounter.kinds_of(spk).has(kind) and said.contains(noun), "%s: %s '%s'" % [kind, spk, said])
+	ok(HazardCounter.line("cairnback") == "", "a Boki that counters nothing gets no line")
+	var two := HazardCounter.line("lilybara")
+	ok(two == "Walks deep water and the thorns safely", "two hazards: " + two)
+	var col := VBoxContainer.new()
+	HazardCounter.add_row(col, "cairnback")
+	ok(col.get_child_count() == 0, "no row for a Boki that counters nothing")
+	HazardCounter.add_row(col, lava)
+	var texts := col.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
+	ok(texts == [HazardCounter.line(lava)], "a row with the line and its icon for a Boki that does")
+	col.free()
 
 ## The pick's rules without any screen: lead and second, one Boki goes with one, equal passives count once, old saves.
 func _carry_pick() -> void:
