@@ -596,3 +596,6 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - One shared movement profile for all modes; falling never converts into horizontal momentum (owner 11-11).
 - Tutorial objective banner: very visible (glow/pulse), slim top strip, never blocks the screen (owner 11-11).
 - Hatched Boki show the M/F sex mark and he/she text, never 'it' (owner 11-11).
+- Mask-equip animation lasts ~5 s with readable text (owner 11-11).
+- Building placement keeps walkable clearance; no trapped Boki. Near water = auto-water + growth bonus; away = water it yourself. All farm blocks climbable (owner 11-11).
+- Pick-one panels: one click on the card takes it (owner 11-11).
