@@ -1822,9 +1822,10 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	c.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.02, 0.02, 0.18))
 	_ctext(Vector2(sz.x * 0.5, sz.y * 0.32), "You're down", 34, BAD, big)
 	var left := p.down_hp / Data.MATCH["down_hp"] * Life.R["bleed_out"]
-	var who := "You're a wisp: %ds left. A teammate or your Boki standing on you brings you back. Enemies can stomp or execute you." % int(ceil(left))
+	var solo := SoloWords.solo(m.opts)
+	var who := "You're a wisp: %ds left. %s standing on you brings you back. Enemies can stomp or execute you." % [int(ceil(left)), "Your Boki" if solo else "A teammate or your Boki"]
 	if p.kin and p.kin.state == "downed":
-		who = "You're a wisp: %ds left, and your Boki is down. Only a teammate standing on you can bring you back." % int(ceil(left))
+		who = "You're a wisp: %ds left, and your Boki is down. %s" % [int(ceil(left)), "Nothing can bring you back here." if solo else "Only a teammate standing on you can bring you back."]
 	var stomped: bool = p.get_meta("stomped", false)
 	if stomped:
 		var sts: Array = p.get_meta("stompers", [])
@@ -1854,7 +1855,7 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if left_line != "":
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
-	if not b.is_empty() and Life.soul_here(m, b):
+	if not b.is_empty() and Life.soul_here(m, b) and not SoloWords.solo(m.opts):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
 	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
 	var mate := m.spectating()
