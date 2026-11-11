@@ -906,3 +906,6 @@ READY: pixel sprites for all 259 Boki in briefs/boki-art/pixel/<FileId>.png (80p
 ### 11-11 21:34 ET ART -> COORD
 - Tiltster and Rimink: lighter, flatter finish (owner note). New card, sheet, portrait and hero for both; hashes refreshed.
 - An independent recheck of every turnaround changed 11-10 (270 sheets) passed 260. New sheets now live: Malletary, Blastopuff, Voltmink, Lunowl, Barokit, plus the female sheets for Lunowl and Hourachnid. Meteorab is still being redone. Only sheet hashes moved for these.
+
+### 11-11 21:35 ET ART -> COORD
+READY: Meteorab turnaround replaced (sheet hash only). New pixel sprites for Tiltster and Rimink to match their lighter cards: pixel/Tiltster.png, pixel/Rimink.png. The 11-11 to-do list is done; sheet_audit shows 0 behind.
