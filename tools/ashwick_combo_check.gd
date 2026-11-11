@@ -34,6 +34,41 @@ func run(main_node: Node) -> void:
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
+## Cinder Shot's look the step it leaves (backlog 7 of docs/VFX_QUALITY.md): drawn at its hit size, in her fire
+## (no violet or pink), leaving her palm, then on its hitbox once DRAWN_FADE has run.
+func _orb(m: Match, K: AshwickKit) -> void:
+	var fx := LDFx.of(m)
+	var rd: Dictionary = fx.riders[-1] if not fx.riders.is_empty() else {}
+	ok("cinder: the shot rides its own orb look", not rd.is_empty() and String(rd["kind"]) == "cinder")
+	if rd.is_empty():
+		return
+	var orb: Node3D = rd["node"]
+	var sd: Dictionary = rd["sd"]
+	var glow := (orb.get_node("Halo") as Node3D).scale.x
+	var body := (orb.get_node("Head") as Node3D).scale.x
+	ok(
+		"cinder: the orb is drawn at its hit radius (%.2f m), the body inside its glow" % float(sd["r"]),
+		absf(glow - float(sd["r"]) * LDFx.ORB_GLOW_K) < 0.001 and body < glow, "glow %.3f body %.3f" % [glow, body]
+	)
+	var off_hue: Array = []
+	for part in ["Halo", "Head", "Trail"]:
+		var mt := (orb.get_node(part) as MeshInstance3D).material_override as ShaderMaterial
+		for key in ["color", "color2"]:
+			var c: Color = mt.get_shader_parameter(key)
+			if c.s >= 0.35 and c.h > 0.15 and c.h < 0.98:      # pale tints and smoke are free
+				off_hue.append("%s.%s #%s" % [part, key, c.to_html(false)])
+	ok("cinder: the orb is drawn in her fire, no violet or pink", off_hue.is_empty(), str(off_hue))
+	ok(
+		"cinder: the orb is drawn leaving her palm",
+		orb.global_position.distance_to(K.tip()) < 0.35, "%.2f m off" % orb.global_position.distance_to(K.tip())
+	)
+	ak.step(m, LDFx.DRAWN_FADE + 0.02)
+	fx._process(0.0)
+	ok(
+		"cinder: then the orb is drawn on its hitbox",
+		orb.global_position.distance_to(sd["pos"]) < 0.01, "%.3f m off" % orb.global_position.distance_to(sd["pos"])
+	)
+
 ## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
 ## keeps burning through a jump.
 func _lance_combos() -> void:
@@ -394,6 +429,8 @@ func _all() -> void:
 		"width %.2f" % float(lane.get("width", 0.0))
 	)
 	P.inp["sec_hold"] = false
+	ak.step(m, ak.DT)
+	_orb(m, K)
 	ak.step(m, 1.0)
 	var e1: Array = K.bolt_ends[-1] if not K.bolt_ends.is_empty() else [Vector3.ZERO, false]
 	var near_d := Vector2((e1[0] as Vector3).x - home.x, (e1[0] as Vector3).z - home.z).length()
