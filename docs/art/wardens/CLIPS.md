@@ -20,9 +20,14 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `kmoves`: kit move id -> {clip, `hold_from` (a held move loops from there), `upper` (torso only: the legs keep running), `heading` (the root turns to his velocity, so the lean follows where he goes)}.
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
+- `turn`: {`dur` s, `lift` rad}, the step of turning on the spot (TurnStep, WardenTurn). Standing, the legs stay put
+  while the aim swings and the upper body leads; past ~86° the foot on the side of the turn steps round, pivoting on
+  the other (planted by aiming its thigh), then the other follows. Moving, a shot, a cast or a kit move cancels it.
+  Heavy Heroes take a slower, lower step. No feet (`rig_root`): no step. `--turn-step-check`, `--turn-shots`.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
 channels), built in code from the file. A node's output feeds one input only. `--clip-check` asserts budget, clips,
 timings, weapon on the bone, FX on the blade and hand-overs. `--clip-shots` shoots them in the game's renderer.
+`--turn-step-check` asserts the planted feet slide under 3 cm through a 180° turn on the spot.
