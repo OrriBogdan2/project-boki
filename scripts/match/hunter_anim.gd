@@ -18,7 +18,7 @@ extends RefCounted
 ##   moves      class dodges (light phase lunge, medium combat roll, heavy shoulder charge), the
 ##              glide (with the cloth streaming), skydiving, mantles and ledge pulls, crouching
 ##   combat     the hands sit on the weapon's grips (elbows solved each frame), weapon aim poses and
-##              relaxed carries, recoil per gun, reloads, melee swing arcs per combo step, casting,
+##              relaxed carries, recoil per gun, melee swing arcs per combo step, casting,
 ##              flinches toward the hit, stun wobble, revive kneel, stomps, the base
 ##              channel, tonics, and the emote wheel (wave, thumbs up, laugh, point, flag, bow)
 ##   cloth      skirt, cape, scarf and tail on springs that follow through
@@ -26,7 +26,7 @@ extends RefCounted
 ## update() takes a state dictionary; every key is optional:
 ##   vel (Vector3) face (yaw) grounded gliding diving rolling dash_dir (Vector2, world) dash_kind
 ##   ("phase" "roll" "charge" "lunge" "skate"; from the class when left out) crouch (0..1) ledge
-##   mantle (0..1, -1 when not) reload (0..1, -1) drink (0..1, -1) stomp (0..1, -1) recoil (0..1)
+##   mantle (0..1, -1 when not) drink (0..1, -1) stomp (0..1, -1) recoil (0..1)
 ##   flash (0..1) fired (seconds since the last shot) wid (weapon id) swing_n (counts swings)
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
 ##   cast (seconds since an ability went off) cast_slot hit_t (seconds since a hit) hit_dir
@@ -125,12 +125,10 @@ var knee_r: Node3D
 var head: Node3D
 var aim: Node3D
 var gun: Node3D
-var mag: Node3D
 var spin: Node3D               # a 3D Warden's spinning barrels (WardenGlb.WEAPON_SPIN), turned while firing
 var spin_v := 0.0              # their turn rate (rad/s)
 const SPIN_MAX := 30.0         # rad/s while firing
 const SPIN_EASE := 4.0         # how fast they spin up and wind down (1/s)
-var mag_base := Vector3.ZERO
 var sentinel := 0             # a part of the weapon in hand (instance id): once it's gone the weapon was swapped
 var offhand: Node3D           # twin blades: the reversed dagger, carried by the left hand
 var arm_l: Node3D             # shoulder pivots, elbows, hands
@@ -294,6 +292,8 @@ var tl_x := 0.0
 var tl_xv := 0.0
 var torso_yaw_prev := 0.0
 var hip_y := 0.42              # the torso's rest height on the legs (longer legs set it higher: Models.hunter)
+var gait: EmptyGait = null     # the Empty's planted-foot legs on the move (scripts/match/empty_gait.gd)
+var legs_sway := 0.12          # rad: the hips' yaw with the stride (none for the Empty: its feet are solved in place)
 
 func _init(m: Node3D) -> void:
 	model = m
@@ -329,6 +329,9 @@ func _init(m: Node3D) -> void:
 	st = (STANCE.get(cls, STANCE["medium"]) as Dictionary).duplicate()
 	var stance := String(m.get_meta("stance", arch))      # the Empty's own stance by sex (Unmasked)
 	st.merge(WardenStance.gait(stance), true)
+	if arch == "unmasked":
+		gait = EmptyGait.new(legs, st)
+		legs_sway = 0.0
 	ws = WardenStance.new(stance)
 	rng = int(m.get_meta("anim_seed", m.get_instance_id())) & 0x7fffffff
 	seed_ph = _rand() * TAU
@@ -373,7 +376,6 @@ func _setup_weapon(w: String) -> void:
 		"rubble_fists": hold = "fist"
 		_: hold = w if HOLDS.has(w) else "_gun"
 	hd = HOLDS[hold]
-	mag = null
 	sentinel = 0
 	if offhand and is_instance_valid(offhand):
 		offhand.queue_free()
@@ -383,9 +385,7 @@ func _setup_weapon(w: String) -> void:
 	gun_scl = gun.scale.x
 	spin = gun.find_child(WardenGlb.WEAPON_SPIN, true, false) as Node3D
 	for ch in gun.get_children():
-		if ch.name == "Mag":
-			mag = ch; mag_base = mag.position
-		elif sentinel == 0 and ch.name != "Muzzle" and not ch.is_queued_for_deletion():
+		if sentinel == 0 and ch.name != "Muzzle" and not ch.is_queued_for_deletion():
 			sentinel = ch.get_instance_id()
 	if hold == "fist" and aim:
 		offhand = gun.duplicate()      # the second gauntlet, on the left fist
@@ -753,6 +753,17 @@ func update(dt: float, s: Dictionary) -> void:
 			hl += shuffle_lift * 0.35; kl -= shuffle_lift * 0.7
 		else:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
+	# the Empty: each foot planted where it landed, moving or standing, over these legs
+	if gait != null:
+		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
+		hl = gait.hl
+		hr = gait.hr
+		kl = gait.kl
+		kr = gait.kr
+		wl = gait.wl
+		wr = gait.wr
+		ph = gait.ph
+		stepped = gait.landed
 	# crouch, landing, slam: knees bend, hips drop
 	var bend := maxf(crouch_k * 0.75, land_k * 0.85) + slam_k * 0.5
 	hl += bend * 0.62; hr += bend * 0.5
@@ -826,7 +837,7 @@ func update(dt: float, s: Dictionary) -> void:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
 	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01:
+	if act_k > 0.01 and act_kind != "carry" and act_kind != "pack":
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -1006,9 +1017,11 @@ func update(dt: float, s: Dictionary) -> void:
 	var dl2 := (THIGH * cos(hl) + SHIN * cos(hl + kl)) * cos(wl)
 	var dr2 := (THIGH * cos(hr) + SHIN * cos(hr + kr)) * cos(wr)
 	var leg_ref := LEG
-	if arch == "unmasked":      # the Empty's soles, not a point foot, meet the ground
-		dl2 = FootPlant.reach(hl, kl, wl)
-		dr2 = FootPlant.reach(hr, kr, wr)
+	if gait != null:      # the Empty's soles, not a point foot, meet the ground; its planted feet carry the hips
+		var sole_l := FootPlant.reach(hl, kl, wl)
+		var sole_r := FootPlant.reach(hr, kr, wr)
+		dl2 = gait.hip_reach(sole_l, sole_r, maxf(sole_l, sole_r))
+		dr2 = dl2
 		leg_ref = FootPlant.HIP
 	var drop := (leg_ref - maxf(dl2, dr2)) * legs.scale.y * (1.0 - air_k) * (1.0 - glide_k) * (1.0 - dive_k) * (1.0 if roll_t < 0.0 else 0.0)
 	var off := Vector3(wk * 0.028 * still, -drop + bounce * 0.008, 0.0) + ws.hip
@@ -1036,7 +1049,7 @@ func update(dt: float, s: Dictionary) -> void:
 	rb = Basis(Vector3.BACK, sin(ph) * 0.03 * r1) * rb
 	rig.basis = rb * Basis.from_scale(scl)
 	rig.position = rpivot - rb * rpivot + off
-	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - dive_k) + sin(ph) * 0.12 * r1 * back
+	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - dive_k) + sin(ph) * legs_sway * r1 * back
 	leg_l.rotation = Vector3(hl, 0, wl)
 	leg_r.rotation = Vector3(hr, 0, wr)
 	if knee_l: knee_l.rotation.x = kl
@@ -1329,36 +1342,6 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 		var lock := lerpf(0.5, 0.95, aim_k) * (1.0 - carry_k) * (1.0 - float(km.get("wf", 0.0)))
 		lp = -pitch * lock
 		ly = -yaw * lock
-		# reloads
-		if reload >= 0.0:
-			var r := clampf(reload, 0.0, 1.0)
-			var rk := smoothstep(0.0, 0.12, r) * (1.0 - smoothstep(0.85, 1.0, r))
-			match hold:
-				"shotgun":
-					# shells, one at a time: the gun tips over and the hand feeds them in
-					ap += rk * -0.25; ar -= rk * 0.7; ay += rk * 0.25
-					var cyc := fmod(r * 3.0, 1.0)
-					arm_l_t = Vector3(0.18 * (1.0 - absf(cyc * 2.0 - 1.0)), -0.2 * (1.0 - absf(cyc * 2.0 - 1.0)), 0.1) * rk
-				"minigun":
-					# heave the drum: the gun drops, rises, and slams back
-					ap += rk * (-0.35 + sin(r * PI * 2.0) * 0.15)
-					gpos.y -= rk * 0.06 * sin(r * PI)
-				"sniper":
-					ap += rk * 0.35; ar -= rk * 0.25
-					var bolt := smoothstep(0.55, 0.65, r) * (1.0 - smoothstep(0.75, 0.85, r))
-					arm_l_t = Vector3(0.05, 0.08, 0.16) * bolt
-				_:
-					# tip the gun over and drop the magazine, reach down for a new one, slap it in
-					ap += -rk * 0.5; ar -= rk * 0.6; ay += rk * 0.3
-					var slap := smoothstep(0.62, 0.68, r) * (1.0 - smoothstep(0.68, 0.8, r))
-					ap += slap * 0.25
-			_reload_mag(r)
-			var reach := smoothstep(0.12, 0.3, reload) * (1.0 - smoothstep(0.42, 0.62, reload))
-			if hold in ["rifle", "smg", "burst_rifle", "_gun"]:
-				free_l = maxf(free_l, reach)
-		elif mag and is_instance_valid(mag) and not mag.visible:
-			mag.visible = true
-			mag.position = mag_base
 		# the shotgun's pump after each shot
 		if hold == "shotgun" and pump_t < 0.35:
 			var pk := sin(clampf(pump_t / 0.35, 0.0, 1.0) * PI)
@@ -1681,11 +1664,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
 ##   feed, pat, toss, cheer   the garden moves (HunterVerbs)
+##   carry, pack   a Boki held against the chest, or on the back (home): both keep the walk cycle
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
-	if not grounded or spd > 2.2 or float(s.get("stomp", -1.0)) >= 0.0:
+	var carrying := want == "carry" or want == "pack"
+	if not grounded or (spd > 2.2 and not carrying) or s.get("downed", false) or float(s.get("stomp", -1.0)) >= 0.0:
 		want = ""
 	if want != "" and want != act_kind:
 		act_kind = want
@@ -1736,6 +1721,7 @@ func _act_pitch() -> float:
 		"lever": return -0.15 - 0.15 * (0.5 - 0.5 * cos(act_t * 2.6))
 		"windup": return -0.15 * smoothstep(0.0, 0.6, act_t)
 		"beacon": return -0.12
+		"pack": return 0.22
 	return 0.0
 
 ## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
@@ -1781,6 +1767,10 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
 		"offer":
 			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
+		"carry":
+			return [sh_l + Vector3(0.12, -0.36, -0.34), sh_r + Vector3(-0.12, -0.36, -0.34), 1.0]
+		"pack":
+			return [sh_l + Vector3(0.1, -0.46, 0.14), sh_r + Vector3(-0.1, -0.46, 0.14), 1.0]
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.
@@ -1846,21 +1836,6 @@ func _ik(piv: Node3D, elbow: Node3D, s: Vector3, tgt: Vector3, pole: Vector3) ->
 	var b2 := Basis(n, y2, n.cross(y2))
 	piv.transform = Transform3D(b1, s)
 	elbow.basis = b1.transposed() * b2
-
-## The magazine drops out and goes back in during a reload.
-func _reload_mag(r: float) -> void:
-	if mag == null or not is_instance_valid(mag):
-		return
-	if r < 0.2:
-		mag.visible = true
-		mag.position = mag_base + Vector3(0, -r / 0.2 * 0.35, 0)
-	elif r < 0.5:
-		mag.visible = false
-	elif r < 0.66:
-		mag.visible = true
-		mag.position = mag_base + Vector3(0, -(1.0 - (r - 0.5) / 0.16) * 0.3, 0)
-	else:
-		mag.position = mag_base
 
 # ==================================================================== fidgets
 ## Picks a fidget now and then while standing still: each class and race has its own.

@@ -2,8 +2,6 @@
  "_doc": "Box revives and revive beacons (docs/decisions/0018-box-revive-and-beacons.md; scripts/match/box_revive.gd, beacons.gd). Seconds and metres.",
  "box_revive_s": 7.5,
  "_box_revive_s": "hold interact at a teammate's deathbox this long to bring them back (owner: a 7-8 s exposed channel)",
- "box_diminish": [1.0, 0.75, 0.58, 0.47],
- "_box_diminish": "channel speed for the 1st, 2nd, 3rd, 4th+ box revive of the same Hunter in a match (the source's revive curve)",
  "beacon_s": 4.0,
  "_beacon_s": "stand on a beacon this long to bring back every dead teammate (owner: a short channel)",
  "beacon_hear_m": 120.0,
