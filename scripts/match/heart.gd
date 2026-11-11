@@ -22,6 +22,7 @@ const GATE_COL := Color("ff9aa8")
 const SYNC_S := 3.0
 const BEAM_H := 46.0
 const NEAR_LABEL := 7.0
+const TIDE_STAGES := 11          # the source's death circle has stages 0-10; our one close is split into as many
 
 static var _rules := {}
 
@@ -57,6 +58,16 @@ static func tide_out(m: Match, p: Vector3) -> float:
 		return 0.0
 	return clampf((Vector2(p.x - m.heart.site.x, p.z - m.heart.site.z).length() - tr) / 40.0, 0.0, 1.0)
 
+## The ring's radius at the end of the current stage: where it closes to next (tide_r0 before the
+## tide starts, so the drop map shows the first ring).
+static func next_r(m: Match) -> float:
+	if m.heart == null:
+		return 0.0
+	var st := tide_stage(m)
+	if st < 0:
+		return r("tide_r0")
+	return lerpf(r("tide_r0"), r("tide_r1"), float(st + 1) / TIDE_STAGES)
+
 ## Added to the Blight's strength out in the tide.
 static func tide_boost(m: Match, p: Vector3) -> float:
 	return r("tide_boost") * tide_out(m, p) if m.heart else 0.0
@@ -64,6 +75,26 @@ static func tide_boost(m: Match, p: Vector3) -> float:
 ## Extra Skitter spawn heat per second for a squad out in the tide.
 static func tide_heat(m: Match, p: Vector3) -> float:
 	return r("tide_heat") * tide_out(m, p) if m.heart else 0.0
+
+## The source's death-circle stage now: the close split into TIDE_STAGES equal stages, the last one
+## holding once the ring is closed (-1 before the tide starts).
+static func tide_stage(m: Match) -> int:
+	var t := (m.sess_time() - r("tide_start_s")) / r("tide_close_s")
+	if m.heart == null or t < 0.0:
+		return -1
+	return mini(int(t * TIDE_STAGES), TIDE_STAGES - 1)
+
+## Flat damage a tide tick deals at this stage, in our Hunter health (tide_dmg keys, linear between).
+static func tide_dmg(stage: int) -> float:
+	var keys: Array = rules()["tide_dmg"]
+	var v := float(keys[-1][1])
+	for i in range(1, keys.size()):
+		if stage <= int(keys[i][0]):
+			var a: Array = keys[i - 1]
+			var b: Array = keys[i]
+			v = lerpf(float(a[1]), float(b[1]), float(stage - int(a[0])) / float(int(b[0]) - int(a[0])))
+			break
+	return v * float(Data.CLASSES["medium"]["hp"]) / r("tide_src_hp")
 
 # ------------------------------------------------------------------ state
 var m: Match
@@ -79,6 +110,9 @@ var drops := 0
 var events: Array = []         # every state change, for the check
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
 var _sync_t := 0.0
+var _tide_t := 0.0             # seconds since the last tide tick
+var hit_t := -99.0             # match time the tide last hurt the local player (the HUD's red pulse)
+var wall: BlightWall
 var _rng := RandomNumberGenerator.new()
 var _root: Node3D
 var _spark: Node3D
@@ -152,8 +186,30 @@ func tick(dt: float) -> void:
 			charge = minf(charge + dt, r("charge_s"))
 		elif state == "cooling":
 			cool = maxf(cool - dt, 0.0)
+	_tide_tick(dt)
 	_apply_carrier()
 	_update_nodes()
+
+## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
+## damage ("heat"): armor doesn't take it and it doesn't drain a glider.
+func _tide_tick(dt: float) -> void:
+	var st := tide_stage(m)
+	if st < 0:
+		return
+	_tide_t += dt
+	if _tide_t < r("tide_tick_s"):
+		return
+	_tide_t -= r("tide_tick_s")
+	var tr := tide_r(m)
+	var d := tide_dmg(st)
+	for h in m.hunters:
+		if h.remote or h.downed or h.out or h.extracted:
+			continue
+		if Vector2(h.pos.x - site.x, h.pos.z - site.z).length() > tr:
+			h.hurt(d, null, {"src": "heat", "tags": ["tide"]})
+			if h == m.player:
+				hit_t = m.time
+				Sfx.play("thump", null, -8.0, 0.0, 0.7)
 
 ## The slow and the reveal on whoever holds it (each game sets it on the Hunters it plays).
 func _apply_carrier() -> void:
@@ -350,6 +406,7 @@ func _build() -> void:
 	_root = Node3D.new()
 	_root.name = "Heart"
 	m.add_child(_root)
+	wall = BlightWall.new(_root)
 	# the Heart: smooth crimson glass on a pale stone plinth, a soft pink-red halo
 	var h := Node3D.new()
 	h.position = site
@@ -404,6 +461,7 @@ func _build() -> void:
 func _update_nodes() -> void:
 	if _root == null:
 		return
+	wall.update(site, tide_r(m), m.player.pos if m.player else site)
 	var f := clampf(charge / r("charge_s"), 0.0, 1.0)
 	var t := Time.get_ticks_msec() / 1000.0
 	var pulse := 0.5 + 0.5 * sin(t * 3.0)

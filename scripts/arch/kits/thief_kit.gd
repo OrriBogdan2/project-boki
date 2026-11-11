@@ -9,7 +9,7 @@ extends ArchKit
 ##   to 8 shown, no cap): each makes your bolts on them stronger. A knock or an assist heals you.
 ## - X, Encore (ThiefUlt, level 6): a ring grows round her, then for 2s blades fly at every foe inside it,
 ##   harder from the outer band, refreshing every Mark; the Vault comes back. The Boki Merge has its own key.
-## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (3.5x, 2 Marks,
+## - Dash, Vault: a short cartwheel (a longer one from a jump); the next bolt is empowered (2.34x, 2 Marks,
 ##   no Shred), shown by a gold glint in the throwing hand that flares as she lands, and landing it gives the
 ##   Vault back with no cap (the payoff: T4, pay_cashin, RESET at her hand); a chain runs a routine of flips and
 ##   keeps fast Shift presses (ThiefChain). No ring or burst on the dash itself.
@@ -36,10 +36,6 @@ const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
-## The ground Cartwheel's speed over its run (time share, speed as a share of its average): a quick burst
-## that peaks near 0.15s and runs down into the hasted run by the landing (the sheet's measured curve).
-const VAULT_CURVE := [[0.0, 0.4], [0.3, 1.9], [1.0, 0.55]]
-const VAULT_MEAN := 1.2025         # the mean of VAULT_CURVE, so the distance stays the data's
 const TRAIL_EVERY := 0.035         # s between two of her after-images on a dash
 const GLINT_POP_S := 0.22          # s the glint's flare takes to settle as the empowered bolt forms
 const GLINT_NET_EVERY := 1.1       # s between two glint pings online viewers get while it's empowered
@@ -441,7 +437,8 @@ func on_dash(use_ex: bool) -> bool:
 		h.vel.y = maxf(h.vel.y, 0.0)
 	else:
 		var dist := float(dd["air_dist"] if air else dd["dist"])
-		travel(dist, float(dd["air_time"] if air else dd["time"]), {"invuln": float(dd["invuln"]), "phase": 0.3})
+		var tt := float(dd["air_time"] if air else dd["time"])
+		travel(dist, tt, {"invuln": float(dd["invuln"]), "phase": 0.3, "curved": not air})
 	vault = {"t": 0.0, "dur": h.roll_t, "speed": h.roll_speed, "air": air}
 	_vaulted(air, _empowers(use_ex))
 	return true
@@ -453,7 +450,8 @@ func _empowers(use_ex: bool) -> bool:
 		return false
 	return String(DashFlow.row_of(id, "lmb", not h.grounded)["variant"]) == "empowered"
 
-## The Cartwheel's speed curve on the ground; from the air it holds its speed and ends where she lands.
+## The Cartwheel's run: on the ground its speed is ArchKit's fitted curve (content/rules/dash_feel.json "thief");
+## from the air it holds its speed and ends where she lands.
 func _tick_vault(dt: float) -> void:
 	if vault.is_empty():
 		return
@@ -462,11 +460,8 @@ func _tick_vault(dt: float) -> void:
 	if u >= 1.0 or h.roll_t <= 0.0:
 		_vault_over()
 		return
-	if bool(vault["air"]):
-		if h.grounded and float(vault["t"]) > 0.12:
-			h.roll_t = 0.0
-		return
-	h.roll_speed = float(vault["speed"]) * HunterMove.dash_k(VAULT_CURVE, u) / VAULT_MEAN
+	if bool(vault["air"]) and h.grounded and float(vault["t"]) > 0.12:
+		h.roll_t = 0.0
 
 ## The air cartwheel holds its carried pose until she touches down (the dash can run out first), then lands in
 ## a low crouch.
@@ -550,6 +545,12 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		return
 	add_mark(t, 1)
 
+## The Vault is back, every charge and the long dash too (an empowered hit, Encore, a Knife in a foe at rank 3).
+func vault_back() -> void:
+	h.dashes = h.max_dashes()
+	h.ex_cd = 0.0
+	DashReset.cue(h)
+
 ## The empowered bolt landed: two Marks (the owner's faster stacking), and the Vault comes back on the spot, from a
 ## jump too (its damage was on the bolt itself). Weight without a blast: a blue blade flash on them and the reset
 ## snap on her.
@@ -558,10 +559,8 @@ func _primed_hit(t: Ent) -> void:
 	if marks_on(t) > 0:
 		ComboMark.payoff(m, h, t)
 	add_mark(t, int(dash_def()["prime_marks"]), true)
-	h.dashes = h.max_dashes()
-	h.ex_cd = 0.0
+	vault_back()
 	chain.on_reset()
-	DashReset.cue(h)
 	_reset_fx(t)
 	m.later(0.06, func(): if is_instance_valid(h): play("thf_reset"))
 
@@ -698,13 +697,12 @@ func _end_bola(at: Vector3) -> void:
 	fx().unplace("bola%d" % h.get_instance_id())
 	m.fx.burst(at, col_of(rmb_def()), 5, 2.0, 0.25, 6.0, 0.6)
 
-## The Bola wraps its first foe: its stage (damage), Grounded and slowed, a Mark, the binding rings.
+## The Bola wraps its first foe: its stage (damage), Grounded and slowed, the binding rings.
 func _wrap(f: Ent) -> void:
 	var stg: StageSpec = bola["stg"]
 	KinExec.apply_foe(stg.effects, f, cx("rmb", "bola", f.pos, {"at": f.pos}), f.pos, stg)
 	if not is_instance_valid(f) or f.dead: return
 	KitStatus.apply(f, "gnd", _ground_t())
-	add_mark(f, 1, true)
 	wrapped[f.get_instance_id()] = [f, _ground_t()]
 	m.sfx("dj_bola_wrap", f.pos, -3.0, 1.0)
 
@@ -734,7 +732,6 @@ func _tangle(f, other: Ent) -> void:
 	var both: Array = [other]
 	if f != null and is_instance_valid(f) and not (f as Ent).dead: both.append(f)
 	for t in both: _stun_hit(t)
-	add_mark(other, 1, true)
 	if rank("sec") >= 3 and both.size() == 2:
 		var pool := marks_on(both[0]) + marks_on(both[1])
 		for t in both: set_marks(t, pool)
@@ -790,6 +787,9 @@ func combo_marks(out: Array) -> void:
 			var dur := float(res_def().get("dur", 4.0))
 			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
 
+func recast_at() -> Vector3:
+	return ground(knife["pos"]) if not knife.is_empty() else Vector3.INF
+
 func cast_e() -> bool:
 	play("thf_knife")
 	m.later(0.12, func():               # spun into a side-arm throw, released on the key pose
@@ -808,7 +808,6 @@ func _throw_knife() -> void:
 	run(stg, cx("e", "shadow_knife", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if knife.is_empty() and is_instance_valid(f) and not f.dead:
-				add_mark(f, 1, true)
 				_stick(f, f.pos),
 		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			if knife.is_empty() and e == null: _stick_ground(at, _why == "wall", land)}))
@@ -842,8 +841,7 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if rank("kin") >= 3:
 		cd["e"] = float(cd["e"]) * (1.0 - float(ed["refund_foe"] if f else ed["refund_wall"]))
 	if f and rank("kin") >= 3:
-		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
-		DashReset.cue(h)
+		vault_back()                        # Shadow Knife rank 3: a knife in a foe gives the Vault back
 	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
 	net_ring(at, 0.8, col_of(ed))

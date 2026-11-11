@@ -1,0 +1,7 @@
+{
+  "_doc": "Matchmaker regions for online play (OnlineSession). The client picks the one whose /health answers fastest, or the Settings override.",
+  "regions": [
+    {"id": "eu", "name": "Europe", "url": "http://2.31.98.197:8080"},
+    {"id": "us", "name": "North America", "url": "http://5.161.241.179:8080"}
+  ]
+}

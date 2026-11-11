@@ -189,7 +189,7 @@ func _shield_push() -> void:
 		var q := Geometry2D.get_closest_point_to_segment(p, a, b)
 		var reach: float = f.r + Verbs.WALL_TH + PUSH_REACH
 		var key: int = f.get_instance_id()
-		var in_front: bool = (p - q).dot(n) > 0.0 and absf(f.pos.y - float(wall["y"])) < 2.2
+		var in_front: bool = (p - q).dot(n) > 0.0 and AimMode.in_reach(float(wall["y"]), f.pos.y)
 		var gap_ok: bool = m.time - float(pushed_at.get(key, -9.0)) >= float(sd.get("push_gap", 0.6))
 		if in_front and p.distance_to(q) < reach and gap_ok:
 			pushed_at[key] = m.time
@@ -261,6 +261,15 @@ func has_ult() -> bool: return true
 func _start_ult() -> bool:
 	_drop_holds()
 	return ult.cast()
+
+## The hammer is out and not yet on its way back: LMB calls it (lie_t 0 = it lies there for good).
+func recast_left() -> float:
+	if mace.is_empty() or String(mace["st"]) == "back":
+		return 0.0
+	var lie := float(lmb_def().get("lie_t", 0.0))
+	return INF if lie <= 0.0 else maxf(0.0, lie - float(mace["t"]))
+
+func recast_slot() -> String: return "primary"
 
 func ult_running() -> bool:
 	return ult.phase != ""
@@ -484,7 +493,7 @@ func _smash() -> void:
 		_carry(dv, k)
 	fx.slam(dv, k)
 	m.fx.dust(h.pos + Vector3(dv.x, 0, dv.y) * 1.6, 8 + int(10 * k))
-	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"]), 2.2):
+	for f in foes_in(h.pos + Vector3(dv.x, 0, dv.y) * 1.2, float(md["smash_reach"])):
 		_impact_trail(f, dv, k)
 		if perfect:
 			Feel.hitstop(m, h, f, dmg, {"melee": true, "heavy": true, "payoff": true})
@@ -567,6 +576,13 @@ func recast_now(slot_id: String) -> void:
 		_recall()
 	else:
 		super(slot_id)
+
+## LMB again calls the hammer back, from the recall lockout on. It waits wherever it lies (left INF) unless the
+## data gives it a lie_t, after which it comes back by itself.
+	if mace.is_empty() or String(mace["st"]) == "back" or m.time - throw_at < float(md.get("recall_lock", 0.25)):
+	if lie <= 0.0:
+		return {"slot": "lmb", "left": INF}
+	return {"slot": "lmb", "left": lie - (float(mace["t"]) if String(mace["st"]) == "ground" else 0.0)}
 
 func _recall() -> void:
 	play("bul_recall")
@@ -655,6 +671,15 @@ func _catch(quiet := false) -> void:
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), HeroVfx.pal(h.arch, "deep"), 8, 2.5, 0.25)
 	m.fx.flash(h.pos + Vector3(0, 1.0, 0), HeroVfx.pal(h.arch, "hot"), 0.5, 0.06)
 
+## The recall: while the hammer is out (flying or lying) a press on the attack key calls it back, no time limit.
+func recast_at() -> Vector3:
+	if mace.is_empty() or String(mace["st"]) in ["wind", "back"]:
+		return Vector3.INF
+	return ground(mace["pos"])
+
+func recast_key() -> String: return "fire"
+func recast_left() -> float: return -1.0
+
 # ------------------------------------------------------------------ RMB: Shield (hold to block)
 ## The shield is a block, not a charge (the Crushing Blow on LMB is the Bulwark's charge).
 func rmb_charge_full() -> float:
@@ -671,10 +696,15 @@ func press_rmb() -> void:
 	rmb_t = 0.0
 	rmb_ctx = {"air": not h.grounded or h.gliding, "e": in_e(), "full": full_ready()}
 	cancel_hold()
+	if _can_raise():
+		play("bul_guard")           # the arm comes up on the press, the aegis 0.1 s into the hold
 
 func rmb_hold_tick(t: float) -> void:
-	if t >= float(rmb_def()["hold"]) and wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0:
+	if t >= float(rmb_def()["hold"]) and _can_raise():
 		_raise()
+
+func _can_raise() -> bool:
+	return wall.is_empty() and lock_t <= 0.0 and shield_hp > 5.0
 
 func _raise() -> void:
 	var sd: Dictionary = rmb_def()["shield"]
@@ -682,7 +712,8 @@ func _raise() -> void:
 	wall = m.verbs.add_wall(h, h.pos + Vector3(d.x, 0, d.y) * 1.0, d, {"length": float(sd["len"]), "hp": shield_hp, "time": 99.0, "follow": true, "dist": 0.95, "block": "enemy", "color": rmb_def().get("col", "#9ad8ff")}, 1.0)
 	h.mel_hold = 0.0
 	last_variant = "air" if rmb_ctx.get("air", false) else "hold"
-	play("bul_guard")
+	if anim_id != "bul_guard":
+		play("bul_guard")
 	m.sfx("bjorn_shield_up", h.pos, -4.0)
 	m.sfx("bulwark_hull_creak", h.pos, -7.0)      # the prow's old timbers take the strain
 	fx.aegis_rise(h.pos + Vector3(d.x, 0, d.y) * 1.2)
@@ -719,6 +750,8 @@ func _lower() -> void:
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
 	_lower()
+	if anim_id == "bul_guard":
+		anim_id = ""                # a tap: the arm goes back down with no aegis
 	last_variant = "air" if c.get("air", false) and was_up else ("hold" if was_up else "tap")
 
 ## Guard at 50: the Shield Charge ends in a Shield Slam, a short cone that knocks back hard and stuns.
@@ -797,7 +830,7 @@ func on_dash(use_ex: bool) -> bool:
 	var dist2 := float(dd["whirl"]) + (1.0 if rank("dash") >= 3 else 0.0)
 	var t2 := dist2 / float(dd["whirl_speed"])
 	var wd := dash_dir()
-	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd})
+	travel(dist2, t2, {"invuln": 0.1, "trail": "dust", "dir": wd, "curved": true})
 	t2 *= float(dash_feel()["time"])          # the spin lands when the (feel-scaled) dash arrives
 	st["last_dash"] = "whirl"
 	play("bul_whirl")
@@ -941,7 +974,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if int(h.slot_lv["sec"]) > 0:
 		var shot_at: bool = m.time - h.hurt_at < 0.6 and dist > 3.0
-		if shot_at and lock_t <= 0.0 and shield_hp > 30.0:
+		# (a shield against only half the shots: the hammer needs the aegis down)
+		if shot_at and lock_t <= 0.0 and shield_hp > 30.0 and randf() < 0.5:
 			# raise the shield toward whoever is shooting
 			h.inp["aim"] = tgt.pos
 			if not rmb_down: h.inp["sec"] = true

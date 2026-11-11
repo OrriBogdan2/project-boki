@@ -59,6 +59,7 @@ var guide: FarmGuide = null        # the Goals card and the farm tutorial on scr
 var toys: HomeToys = null        # the base's balls, posts and tubs, played with on their own (home_toys.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var race: BaseRace = null     # the Dash start post by the Training post (base_race.gd)
+var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
 var hbm: HomeBlackMarket = null    # Old Pell's Black Market (home_black_market.gd)
@@ -167,6 +168,7 @@ func _ready() -> void:
 	hg = HomeGather.new(self)
 	hw = HomeWork.new(self)
 	toys = HomeToys.new(self)
+	if visit.is_empty() and FarmUnlocks.base_mode(): life = BaseLife.new(self)
 	if visit.is_empty():
 		hob = FarmHob.new(self)
 		guide = FarmGuide.new(self)
@@ -1337,6 +1339,7 @@ func _move_kin(d: float) -> void:
 	whistle_cd = maxf(0.0, whistle_cd - d)
 	talk_cd = maxf(0.0, talk_cd - d)
 	_separate_kin(d)
+	if life: life.step(d)
 	for k in kins:
 		if k.get("busy", false):
 			continue
@@ -1365,7 +1368,7 @@ func _move_kin(d: float) -> void:
 				if arrived:
 					k["hold_t"] = 1.4; k["joy_t"] = 0.9; k["t"] = randf_range(2.5, 4.0)
 					_emote(k, "♥" if float(k["rec"]["trust"]) > 55.0 else "♪")
-					Sfx.play("kin_happy", k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
+					Sfx.play(KinVoice.cue(k["rec"]["species"], "happy"), k["pos"], -10.0, 0.15, Unique.voice(k["rec"]))
 					if k.has("welcome"): _say(k, BokiLines.say(k["rec"], "greet"))
 				k.erase("welcome")
 		var pos: Vector3 = k["pos"]
@@ -1389,7 +1392,7 @@ func _move_kin(d: float) -> void:
 				k["t"] = randf_range(1.5, 3.0)
 				if k["chase_t"] > 0.0:
 					_emote(k, "♪"); _emote(other, "!")
-					Sfx.play("kin_happy", other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
+					Sfx.play(KinVoice.cue(other["rec"]["species"], "happy"), other["pos"], -14.0, 0.15, 1.2 * Unique.voice(other["rec"]))
 					if not other.get("busy", false) and randf() < 0.7:
 						other["chase"] = k; other["chase_t"] = 4.0
 				k["goal"] = world.random_ground(maxi(here, 0))
@@ -1409,6 +1412,8 @@ func _move_kin(d: float) -> void:
 				pass
 			elif hw and hw.pick(k):
 				pass      # off to a job it's suited to
+			elif life:
+				life.choose(k)      # the base: it lives its own life (BaseLife)
 			elif night and randf() < 0.6:
 				if here == world.island_of(spots["house"].x, spots["house"].z) and randf() < 0.45:
 					# some sleep indoors
@@ -1823,7 +1828,7 @@ func _whistle() -> void:
 			k.erase("nap_go"); k.erase("nap_go_t"); k.erase("going_in")
 			k["called_t"] = 7.0
 			_emote(k, "!")
-			Sfx.play("kin_alert", k["pos"], -12.0, 0.15, Unique.voice(k["rec"]))
+			Sfx.play(KinVoice.cue(k["rec"]["species"], "alert"), k["pos"], -12.0, 0.15, Unique.voice(k["rec"]))
 			if world.island_of(k["pos"].x, k["pos"].z) != my_isle and my_isle >= 0:
 				_start_leap(k, ppos + slot))
 	if not inside.is_empty():
@@ -2841,13 +2846,14 @@ func _pet_kin(k: Dictionary) -> void:
 		k["pet_ok"] = now_s + 20.0
 		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
+	_care_trust(rec, "pet")
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
 	verbs.play("pat")
 	_face(k["pos"])
 	_emote(k, "♥", true)
 	fx.burst(k["pos"] + Vector3(0, 0.9, 0), Color("ff8fb0"), 12, 1.8)
-	Sfx.play("kin_happy", null, -4.0, 0.12, Unique.voice(rec))
+	Sfx.play(KinVoice.cue(rec["species"], "happy"), null, -4.0, 0.12, Unique.voice(rec))
 	if Care.care_day(rec, "petted"):
 		Save.remember(rec, "petted", "got a long scratch behind the ears", 1.5)
 		Save.save_game()
@@ -3400,7 +3406,9 @@ func _open_expedition() -> void:
 	# the way out: practice on the left, go on the right
 	var fl := UI.footer_left(v)
 	fl.add_child(UI.ghost("Training Grounds", _start_training, 0, "knock"))
-	if Net.available():
+	if OnlineSession.configured():
+		fl.add_child(UI.ghost("Play online", func(): Game.goto("online", {"mode": "trio"}), 0, "bond"))
+	elif Net.available():
 		fl.add_child(UI.ghost("Play online", func(): Game.goto("lobby", {"cls": Data.class_of_save(), "tier": exp_tier}), 0, "bond"))
 	var start_b := UI.footer_primary(v, "Start expedition", _confirm_start, 250, "portal")
 	start_b.grab_focus.call_deferred()
@@ -3745,6 +3753,11 @@ func _build_bridge_now(k: String) -> void:
 		building_now = false
 		_spawn_kin()
 		_toast("%s is open" % Data.ISLES[k]["name"]))
+
+## Trust from petting or its habit food (Care.trust_up): one plain line says why.
+func _care_trust(rec: Dictionary, kind: String, food := "") -> void:
+	var line := Care.trust_up(rec, kind, Time.get_unix_time_from_system(), food)
+	if line != "": _toast(line)
 
 func _toast(txt: String) -> void:
 	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
@@ -4135,7 +4148,7 @@ func _update_bubbles(d: float) -> void:
 			if rl != "":
 				_say(k, rl)
 				_emote(k, "♥" if float(rec["trust"]) > 55.0 else "!")
-				Sfx.play("kin_happy", k["pos"], -8.0, 0.15, Unique.voice(rec))
+				Sfx.play(KinVoice.cue(rec["species"], "happy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
 				Save.save_game()
 		if visit.is_empty() and float(k["hi_cd"]) <= 0.0 and panel_open == "" and not chat_open and train.is_empty() and not k.get("busy", false):
 			if Vector2(ppos.x - k["pos"].x, ppos.z - k["pos"].z).length() < 2.0:
@@ -4180,6 +4193,7 @@ func _care_step(k: Dictionary, d: float) -> void:
 		if float(k["z_t"]) <= 0.0:
 			k["z_t"] = 2.2
 			_emote(k, "z")
+			Sfx.play("boki_sleep", pos, -10.0, 0.1, Unique.voice(rec))
 		k["slept"] = float(k.get("slept", 0.0)) + d
 		if float(k["nap_t"]) <= 0.0:
 			Care.change(rec, "energy", 40.0 * clampf(float(k["slept"]) / 30.0, 0.0, 1.0))
@@ -4295,6 +4309,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Evo.AFF[leaned]["tint"], 18, 2.4, 0.5)
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
 		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Evo.AFF[leaned]["name"], pct])
+	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
@@ -4377,6 +4392,7 @@ func _care_nap(rec: Dictionary) -> void:
 		k["nap_t"] = 30.0
 		k["slept"] = 0.0
 	_say(k, BokiLines.say(rec, "nap"))
+	Sfx.play(KinVoice.cue(rec["species"], "sleepy"), k["pos"], -8.0, 0.15, Unique.voice(rec))
 
 # ---- training: a timing game at the yard; three rounds, each a little faster
 func _start_drill(rec: Dictionary, stat: String) -> void:
@@ -5166,7 +5182,7 @@ func _separate_kin(d: float) -> void:
 			if j == i: continue
 			var b: Dictionary = act[j]
 			var diff := ap - Vector2(b["pos"].x, b["pos"].z)
-			var need := _kin_r(a) + _kin_r(b)
+			var need := (_kin_r(a) + _kin_r(b)) * (life.pile(a, b) if life else 1.0)
 			var dl := diff.length()
 			if dl < need:
 				if dl < 0.001: diff = Vector2.from_angle(float(i) * 2.4); dl = 0.001

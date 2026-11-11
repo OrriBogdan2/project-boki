@@ -24,8 +24,10 @@ var flash_t := 0.0
 var freeze_t := 0.0         # visual hit-pause
 var burn_t := 0.0
 var burn_dps := 0.0
+var burn_acc := 0.0         # s since the last burn tick
 var burn_by: Ent = null
 var dot_tick_at := -1.0     # Match time of the last burn tick (the body pulses on it, DotLook)
+const BURN_EVERY := 0.5     # s between burn ticks (footage: Ignite ticks about every 0.5 s)
 var slow_t := 0.0
 var root_t := 0.0
 var stun_t := 0.0
@@ -326,15 +328,19 @@ func tick_status(dt: float) -> void:
 	if blight_t > 0.0: blight_t -= dt
 	if burn_t > 0.0 and not dead:
 		burn_t -= dt
-		var ticked := int(burn_t * 4.0) != int((burn_t + dt) * 4.0)
-		if ticked:
+		burn_acc += dt
+		if burn_acc >= BURN_EVERY - 0.0001 or (burn_t <= 0.0 and burn_acc >= BURN_EVERY * 0.5):
+			var lump := burn_dps * minf(burn_acc, BURN_EVERY)      # a tick lands as one hit and the number shows it
+			# a burn ends on its last whole tick (half a tick or more still lands)
+			burn_acc = maxf(burn_acc - BURN_EVERY, 0.0) if burn_t > 0.0 else 0.0
 			dot_tick_at = m.time
-		if not remote:
-			hp -= burn_dps * dt
-			if ticked:
-				m.fx.number(pos + Vector3(0, 1.4, 0), burn_dps * 0.25, DotLook.COL, false)
-			if hp <= 0.0:
-				_on_zero(burn_by, {"src": "burn"})
+			if not remote:
+				hp -= lump
+				m.fx.number(pos + Vector3(0, 1.4, 0), lump, DotLook.COL, false)
+				if hp <= 0.0:
+					_on_zero(burn_by, {"src": "burn"})
+	else:
+		burn_acc = 0.0      # a cleansed or spent burn forgets its half tick
 
 ## Proxies glide toward the last position their owner reported.
 func net_follow(dt: float) -> void:

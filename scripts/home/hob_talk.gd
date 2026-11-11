@@ -58,7 +58,9 @@ func start() -> void:
 	box = TalkBox.open(h, FarmBuilder.full_name(), HobModel.portrait(TalkBox.FACE_PX))
 	box.line_shown.connect(_on_line)
 	box.closed.connect(_closed)
-	if offer_due():
+	if offer_due() and TryRelic.back_to != "":
+		_show_offer()      # (back from a Try: straight to the card)
+	elif offer_due():
 		box.say(_offer_lines(), _show_offer)
 	elif first and FarmTutorial.active():
 		box.say(rules()["intro"], box.close)
@@ -199,6 +201,16 @@ func tick(dt: float) -> void:
 			if talking():
 				hob.node.pose = "talk"
 	_intro(dt)
+	_resume_try()
+
+## Back home from a Relic's Try: talk to him again at once, so the card is where you left it.
+func _resume_try() -> void:
+	if TryRelic.back_to == "" or busy() or hob.h.panel_open != "":
+		return
+	if offer_due():
+		start()
+	else:
+		TryRelic.back_to = ""
 
 ## The first arrival: once the screen is clear, he waves and calls you over (the camera stays put).
 func _intro(dt: float) -> void:

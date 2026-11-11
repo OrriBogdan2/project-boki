@@ -4,6 +4,8 @@ extends RefCounted
 ## squad nothing (no heal or shield). --tender-combo-check and --rimewright-combo-check also run each
 ## hero's combos (tools/care_combo_check.gd). Mode: "all" | "tender" | "rimewright". Prints SUPPORT PASS/FAIL.
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -76,6 +78,11 @@ func down(m: Match, A: Hunter) -> void:
 	A.ctrl = "idle"
 	A.down_hp = 60.0
 
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
+
 func run(mn: Node, md := "all") -> void:
 	main = mn
 	mode = md
@@ -89,15 +96,21 @@ func run(mn: Node, md := "all") -> void:
 	if mode in ["all", "tender"]:
 		await _tender_support()
 		await _ranks("tender")
+		await _ally("tender")
 		await combos.tender()
+		await _combo_tag("tender")
 		await ults.tender()
+		await _abyss("tender")
 	if mode in ["all", "rimewright"]:
 		await _rime_support()
 		await _ranks("rimewright")
+		await _ally("rimewright")
 		await combos.rimewright()
+		await _combo_tag("rimewright")
 		await ults.rimewright()
 		await anims.rimewright()
 		await ults.burst_cap()
+		await _abyss("rimewright")
 	print("SUPPORT DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -140,6 +153,22 @@ func _ranks(arch: String) -> void:
 				and up[1][4] == 1.0 and up[2][4] == 1.0, str(up))
 	await _free(m)
 
+## The shared overhead combo tag checks (tools/combo_mark_check.gd) for this kit.
+func _combo_tag(arch: String) -> void:
+	var ac = load("res://tools/archetype_check.gd").new()
+	ac.main = main
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ac, arch)
+
+## The "over the abyss" rows (tools/abyss_cast.gd).
+func _abyss(who: String) -> void:
+	var ab = load("res://tools/abyss_cast.gd").new()
+	ab.main = main
+	if who == "tender":
+		await ab.tender()
+		await ab.rimewright()
+	n += ab.n
+	fails += ab.fails
+
 func _free(m: Match) -> void:
 	m.queue_free()
 	await main.get_tree().process_frame
@@ -160,11 +189,11 @@ func _tender_support() -> void:
 	ok("Hearthlight: heals an ally in the ring", mid > h0 + 3.0, "%.1f -> %.1f" % [h0, mid])
 	step(m, 1.6)
 	ok("Hearthlight: flares at the end", not K.in_e() and A.hp > mid + 10.0, "-> %.1f" % A.hp)
-	# --- self heal is a third
+	# --- parity: no self-heal factor, she is healed like any ally (the source gives none)
 	P.hp = P.max_hp * 0.4; var p0 := P.hp; A.hp = A.max_hp
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false; step(m, 3.0)
-	ok("Hearthlight: heals you at a third", P.hp > p0 and (P.hp - p0) < 22.0, "+%.1f" % (P.hp - p0))
+	ok("Hearthlight: heals you in full, like an ally", (P.hp - p0) > 22.0, "+%.1f" % (P.hp - p0))
 	# --- a stun does not put it out (only the ultimate's channel breaks on a stun)
 	K.cd["e"] = 0.0
 	P.inp["sig"] = true; step(m, 0.05); P.inp["sig"] = false

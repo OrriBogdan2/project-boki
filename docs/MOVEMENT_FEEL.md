@@ -38,6 +38,11 @@ Nothing here comes from SUPERVIVE's files.
   - Drop dive speed.
   - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump keeps the glider open, so **no variable jump height** was added.
   - Coyote time or buffer values. These use FeelConfig's 0.1s / 0.12s.
+  - Whether jump height is variable. Nothing suggests SUPERVIVE has it, and holding jump is already the glide input, so **no variable jump height** was added.
+  - Coyote time or buffer values. The game files name JumpCooldown and AirJumpPressDuration but their values are
+    in the encrypted code, bCanWalkOffLedges is false there (no walk-off, so no coyote window to copy), and the
+    reference footage is 5 fps (0.2 s a frame, coarser than either window). Ours stay: `Hunter.COYOTE` 0.12 s and
+    `Hunter.JUMP_BUFFER` 0.12 s (7 steps each), checked by the four jump-forgiveness rows below.
 
 ## Targets and results
 
@@ -65,6 +70,10 @@ Nothing here comes from SUPERVIVE's files.
 | dash_curve_dist / dash_curve_exit_run (distance against the kit's, hand-over / run) | n/a | 1.00–1.01x / 0.31–1.0x | 0.95–1.05x / <= 1.05x | the curve's mean is 1; the skid falls through run speed |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
+| coyote_frames (latest press after walking off a rim) | 7 | 7 | >= 7 | `Hunter.COYOTE` 0.12s; source has no walk-off |
+| jump_buffer_frames (earliest press before landing) | 6 | 7 | >= 7 | `Hunter.JUMP_BUFFER` 0.12s; source silent |
+| jump_buffer_dash_frames (the press lands inside an air dash that ends 4 steps before the landing) | n/a | 7 | >= 7 | the same buffer, held across the dash end |
+| dash_jump_eaten (ground-dash frames whose jump press does not jump) | n/a | 0 | <= 0 | a press on any frame jumps out of the dash |
 | freefall_1s_depth | 6.37m | 7.20m | 6.8–8m | [game data] 14.7 m/s² capped at 12 m/s ([footage] ~8m) |
 | glide_open_press_frames (second press) | 1 | 1 | <= 1 | [guide] |
 | glide_open_hold_s (scripted input only: a player's Space held from the jump never opens it, glide_press_only) | 0.150s | 0.117s | <= 0.12s | tap/hold split |
@@ -300,6 +309,85 @@ source contradicts it and no owner note covers it. Data keys: the weapon's `fire
 Open, not built (suggestions): Sable may slow more while firing (0.7-0.75 if a straight-run clip confirms it);
 Neve's dead `fire_slow` 0.9 on hoar_fan could go; Kael's Searing Wave charge (0.55) and Tenzo's punch hold have no
 source number either way.
+
+## Aiming across terraces (`Match._mouse_aim`, `AimMode.ray_ground`, `--aimkit-check`)
+The source (top-down shooter, supervive_kits/physics [D]): shots travel at the shooter's height; ground casts snap to the surface under the cursor. Ours: with a foe under the cursor (52 px, within 3 tiers) the aim is that foe and shots climb or dip to its height (`aim_y`, at most `AIM_DY_MAX` 2.6 m, passing their own cliff); otherwise the aim is the ground under the cursor. Terraces are 0.8 m (one tier), the muzzle 0.95 m, the camera pitch 66 deg (1 m of height moves the cursor's ground 0.45 m). Before = the old cut at chest height nudged twice by the ground there; measured by the `tier_up` / `tier_down` shots of `--aimkit-check --shots-dir` on the tier-0 map, the rest computed.
+
+| Case | Skillshot (before -> now) | Ground cast (before -> now) |
+|---|---|---|
+| Same tier, open ground | flat, at your height (= source) | landed 0.42 m short of the cursor's ground (toward the camera) -> at it |
+| Foe one tier up on a ledge, cursor on them | climbs to them over their cliff and hits (ours, not the source's flat shot; kept) | at their feet on the ledge (= source) |
+| Foe one tier down, cursor on them | dips to them and hits (kept) | at their feet below (= source) |
+| No foe, cursor just past a lip | `aim_y` of the wrong tier past a lip facing the camera (0.00 instead of 0.80; one tier still clears the muzzle, two would fly into the face) -> the tier under the cursor | behind the lip you stand on: on the upper tier 0.80 m short (wrong tier) -> on the lower tier at the cursor (0.01 m) |
+| Cliff 4+ tiers away (past the old 3-tier cut) | flat into the cliff face (= source; `AIM_DY_MAX` keeps it) | cut at your chest: ~1.0 m past the cursor -> at the cursor |
+
+Fixed (worst case: a cast on the wrong tier): with no foe under the cursor the aim is the first ground the cursor's ray meets, `AimMode.ray_ground`, the walk Vireo's ult landing already did (moved there, so both share it). A ray striking a cliff face takes that cliff's top at its lip; ground hidden behind a lip is never picked; over the abyss the aim stays on your own height. Asserts: the 8 `tier:` checks in `--aimkit-check`.
+
+## Edge knocks against the source (`--abyss-check` section 8; PARITY FIRST, decisions 2026-11-07)
+
+Asked: what the source does when a Hunter is knocked off an island. Evidence read: `supervive_physics.md` (Abyss rows), `supervive_kits.md`, the wiki notes in `docs/SUPERVIVE_FEEL.md`, the hero-ref sheets (Kael, Grimble, Breah, Motley). **The source data answers almost none of it.** The footage sheets show only that an Air Slam or a dunk over the abyss ends in a KNOCK callout (juggernaut.md 0291-0292, breah.md 0989). So most rows below are [est] ours, kept as they are and measured; only the last fix changes behaviour.
+
+| Question | Source | Ours (measured) | Verdict |
+|---|---|---|---|
+| Glider open at once off a knock, mid-knock or after? At what heat? | Nothing published (`bAllowsMantlingFromAbyss` true; hits on a glider drain heat, wiki). | A shove over 4 m/s shuts the glider for 0.4 s (`kb_t`); the longest knock is 0.35 s, so a held glide opens 0.42 s in, after the knock. A shove of 2.5 to 4 m/s opens it mid-knock (0.12 s). Heat never gates it: an overheated glider opens the same. | [est] kept; asserted for hard knocks at 0% and 100% heat. |
+| Overheated glider out of the abyss | Owner decision: lifts at half strength while it burns. | Peak lift 6.1 vs 11.5 m/s from 7 m, 8.7 vs 16.7 from 12 m (0.53x, 0.52x); back at the lip in 1.2 to 1.6 s. | Matches; now asserted (it had no check). |
+| Ledge grab or mantle while knocked | `bAllowsMantlingFromAbyss` true; no knock rule. | A knocked Hunter catches a rim from below; only a launch over 8 m/s within 0.3 s of the knock waits, and a stun, root or a fresh knock ends a rise. | [est] kept (section 2). |
+| Kill credit after a knock-off | Not published. | The last attacker keeps the abyss kill for 4.0 s after a hard knock (`Match.on_fell`, `kb_t`), then the fall is nobody's. | [est] kept. Gap, not changed: Grimble's reel, Motley's Trade and a soft shove (under 4 m/s) never start the 4 s, so a fall after them credits nobody. Fixing it needs the tow and the swap to carry the caster over Net (`Net.VERSION`). |
+| Walking or being shoved off | Source `bCanWalkOffLedges` false; owner: always allowed. | A person is never blocked. **Fixed:** a bot's edge guard held a bot at the rim after a 2.5 to 5.8 m/s shove, so the knock-off failed on bots only. The guard now ignores a knock (`knock_t`) and 0.6 s after a hard one. | Asserted: 4.5 m/s at the rim carries player and bot over. |
+| Grimble's arm | Pierces terrain, pulls the first target, which is STUNNED all the pull; Grimble is GROUNDED. | Stun kept on the foe through the reel (so no glider), dragged over rocks and cliffs, the abyss takes it. Hover over the abyss while the arm flies is an owner ask (items 31, 75). | Matches. |
+| Kael's chain | Attaches to a foe or wall; recast pulls him about 5 bh in 0.4 s. | A dash toward the anchor: it ends over the abyss like any dash and the glider and lift take over. | Matches. |
+| Motley's Trade | Swaps a foe and Motley. | Owner override: hover-swap over the abyss. Foes land at Motley's spot, so a swap from over the abyss drops them. | Matches. |
+
+Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
+
+## Input latency: press to first motion or shot (`--input-latency-check`)
+Source feel is instant: the first frame of motion, or the shot, follows the press. `tools/input_latency_check.gd` presses LMB, RMB, E, dash and jump for every Hunter through the real input path (Input actions, `Match._process`: gather, pending input, the step, the render). It holds each press for 6 ticks (a quick 0.1 s tap) and records the first tick on which the Hunter's velocity, its animation state (what `HunterAnim` is told: the kit move, the cast, the shot, the swing, the dodge, leaving the ground) or a projectile of theirs changes. Tick 0 is the step run in the frame of the press. Target: tick 0 or 1, unless a sourced wind-up applies (the check's `WINDUP` table cites it).
+
+| Hunter | LMB | RMB | E | Dash | Jump |
+|---|---|---|---|---|---|
+| Vex | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Kael | 0 anim | 6 anim (release) | 0 anim, shot | 0 anim | 0 vel, anim |
+| Cinder | 0 anim | 1 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Meeko | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Tenzo | 0 anim | 6 anim (release) | 0 anim | 0 anim | 0 vel, anim |
+| Lace | 0 anim | 0 anim (was none) | 0 anim, shot | 0 vel, anim | 0 vel, anim |
+| Grimble | 0 vel, anim, shot | 0 anim, shot | 0 anim | 0 vel, anim | 0 vel, anim |
+| Neve | 0 anim, shot | 1 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Motley | 0 anim, shot | 1 anim | 0 anim | 0 anim | 0 vel, anim |
+| Mossy | 0 anim | 0 anim (was none) | 0 anim | 0 vel, anim | 0 vel, anim |
+| Sparkle | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Sable | 0 anim, shot | 0 anim | 0 anim | 0 anim | 0 vel, anim |
+
+No double buffering: a press is gathered, queued and applied in the same frame's step, and the local Hunter is drawn at the present. What was later, and what changed:
+- **Lace RMB (Heavy Shot): an animation gate.** The draw pose waited for the 0.15 s tap guard, so a tap showed nothing and a hold showed nothing for 9 ticks. The draw clip now starts on the press. It already ran on the hold's clock, so the full-draw key still lands at full charge. A tap still looses nothing and costs nothing, and its release puts the bow down.
+- **Mossy RMB (Aegis): an animation gate.** The guard pose waited for the aegis, 0.1 s into the hold. The arm now comes up on the press. The aegis still rises 0.1 s in (source: 0.2 s, docs/heroes/bulwark.md), and a tap lowers the arm again.
+- **A cleared kit move froze its pose.** When a kit cleared its move (a cancelled draw, the lowered aegis), `Hunter.anim_s` kept the old move with its clock stopped, so the body held that frame. The move now ends.
+- **Kael and Tenzo RMB: tap/hold splits, kept.** The press can't show which one it is until the release (the tap) or the hold threshold, so both act on the tap's release (tick 6 here, tick 0 from the release). Tenzo's is owner item 61 ("a tap shows nothing, it lands on the release"). Alternative not built: start Kael's Finishing Slam wind-up on the press, which would bring its strike up to 0.3 s earlier (a balance change).
+- **Cinder, Neve and Motley RMB: tick 1** (within target). The aim pose starts on the kit's first hold tick, which runs the step after the press.
+
+## Snag audit (`--snag-check`, decision 0022)
+
+12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
+
+## Knock distance: one knock moves every Hunter the same (`--move-feel-check`, `knock_*`)
+
+Source: every Hunter has Mass 100 in the game data (briefs/supervive-data/PHYSICS_PARITY.md, row "Mass"), so a knock moves every Hunter the same distance. supervive_kits.md gives no knock distances (its tooltips say "Knockback" with no number), and no footage measures a knock per Hunter, so the only sourced rule is "equal". Ours used to divide every knock by a per-class `mass` (light 0.85, medium 1.0, heavy 1.35, `Data.CLASSES`). That field and the division in `Hunter.impulse` are gone. No owner note keeps per-class mass (DECISIONS.md has none). Hunters now use `Ent.mass()` 1.0 like every default body; Boki, mobs and bosses keep their own mass.
+
+| Hunter | Class | Mass before | Mass now |
+|---|---|---|---|
+| Lace, Sparkle, Neve, Sable | light | 0.85 | none (the source's 100 for all) |
+| Tenzo, Vex, Motley, Meeko | medium | 1.0 | none |
+| Cinder, Albert, Grimble, Kael | heavy | 1.35 | none |
+
+Measured slide on flat ground, no input, 1.5 s after the knock, through `Displace.knock` / `Displace.spike` (the synced path). The knock speed is the kit's data number:
+
+| Reference knock (data) | Light before | Medium before | Heavy before | Every class now |
+|---|---|---|---|---|
+| Kael Finishing Slam, push 6 (juggernaut.json `rmb.slam.push`) | 1.97 m | 1.63 m | 0.93 m | 1.63 m |
+| Albert Shield Charge, shove 11 (bulwark.json `dash.charge_kb`) | 5.08 m | 3.93 m | 2.43 m | 3.93 m |
+| Grimble Anchor Drop (a downward spike -16 m/s, Grounded) | 0 m | 0 m | 0 m | 0 m |
+
+The check asserts each distance (Kael 1.55-1.70 m, Albert 3.85-4.00 m: our numbers, since the source has none) and that light, medium and heavy are within 0.01 m of each other (`knock_class_spread_m`), and that no class carries `mass`. The Net message is unchanged (`["disp", "kb", ...]` still sends the raw knock), so `Net.VERSION` stays. A pre-change client would still divide knocks on its own Hunter by class mass.
 
 ## Not touched
 

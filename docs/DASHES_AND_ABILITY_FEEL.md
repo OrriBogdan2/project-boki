@@ -10,7 +10,7 @@ telegraphs, hitstop, shake, sound and colour rules without writing any of them.
 
 It follows the archetype model in `docs/ARCHETYPES.md`:
 
-- the **weight class** (light, medium, heavy) sets dash **charges, recharge, air dash and mass**;
+- the **weight class** (light, medium, heavy) sets dash **charges, recharge and air dash** (no mass: every Hunter takes a knock the same, docs/MOVEMENT_FEEL.md);
 - the **archetype** (Thief, Archer, Mage, Gunslinger, Juggernaut, Bulwark) sets the dash's **shape
   and input**;
 - the **kin** adds nothing: dodge riders are retired (§3.4).
@@ -170,7 +170,7 @@ resets that only work if the payoff lands (Shiv, Shrike level 4).
 
 ### 3.1 Model
 
-- **Weight class (core data, `Data.CLASSES`)** sets charges, recharge, air (ex) dash and mass. Knock
+- **Weight class (core data, `Data.CLASSES`)** sets charges, recharge and air (ex) dash. Knock
   refunds one charge, as today.
 - **Archetype (core data)** sets the dash shape. Dashes stay core code (KIN_GRAMMAR: "class dodges
   are core"), described in a small shape vocabulary:

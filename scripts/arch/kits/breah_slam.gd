@@ -190,7 +190,7 @@ func slam(c: float, at_feet: bool) -> void:
 	var dmg := lerpf(float(s["dmg"][0]), float(s["dmg"][1]), c) * k.power("sec")
 	k.vfx("slam", at, h.aim_dir(), {"r": r, "k": c})    # a cracked crater, a wall out to the hit edge, rock debris
 	var gained := false
-	for f in k.foes_in(at, r, 3.2):
+	for f in k.foes_in(at, r):
 		var away := Vector2(f.pos.x - at.x, f.pos.z - at.z)
 		away = away.normalized() if away.length() > 0.05 else h.aim_dir()
 		var in_core: bool = Vector2(f.pos.x - at.x, f.pos.z - at.z).length() <= cr + f.r

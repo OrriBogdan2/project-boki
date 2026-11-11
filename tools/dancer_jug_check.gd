@@ -10,6 +10,7 @@ const ZFEEL := preload("res://tools/zedran_feel_check.gd")   # Kael's chain, RMB
 const DFEEL := preload("res://tools/dancer_feel_check.gd")   # Sable's Cartwheel, empowered bolt and reset (item 7)
 const DPARITY := preload("res://tools/dancer_parity_check.gd")   # her LMB against the source (the parity pass)
 const DTIMING := preload("res://tools/dancer_timing_check.gd")   # her animation timing against the source
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const DLOOP := preload("res://tools/dancer_loop_check.gd")   # the Vault loop and the Bola's slow (item 53)
 var A: AKCheck
 
@@ -123,6 +124,15 @@ func thief(a) -> void:
 	A.ok("dancer passive: Marks have no cap (22 after 20 more), eight diamonds show",
 			K.marks_on(T) == 22 and K.res_text() == "22" and K.pip_count() == 8 and K.res_frac() == 1.0, K.res_text())
 	A.ok("dancer passive: 22 Marks make a bolt 3.2x", absf(K.outgoing(T, 10.0, {"src": "shot"}) - 32.0) < 0.01)
+	# source shape (data: Shiv +16 on a 160 bolt per Arcslinger hit, stacking; footage: flat steps, no cap in 8 hits).
+	# Duration and decay are in neither source: 4s refreshed is an assumption.
+	K.set_marks(T, 1)
+	var step1 := K.outgoing(T, 160.0, {"src": "shot"}) - 160.0
+	K.set_marks(T, 20)
+	var step20 := (K.outgoing(T, 160.0, {"src": "shot"}) - 160.0) / 20.0
+	A.ok("dancer passive: a flat +16 a stack on a 160 bolt (the data's), the 1st and the 20th alike, uncapped, 4s",
+			absf(step1 - 16.0) < 0.01 and absf(step20 - 16.0) < 0.01 and float(K.res_def()["dur"]) == 4.0,
+			"first %.1f twentieth %.1f" % [step1, step20])
 	# Vault ranks: empowered +20% at rank 2 and again at rank 3, the speed boost half again as big at rank 3
 	var vault_ranks: Array = []
 	for rk in [1, 2, 3]:
@@ -374,6 +384,7 @@ func thief(a) -> void:
 	await A.done(m)
 	await _growth()
 	await ULT.new().dancer(A)
+	await _ally_rows("thief")
 
 
 ## Rings in Sable's own colours alive now (the shared team-colour dash ring is Hunter's, not hers).
@@ -391,7 +402,7 @@ func _dancer_dash_moves(K: ThiefKit) -> void:
 	var dd: Dictionary = Arch.def("thief")["dash"]
 	var feel_t := float(K.dash_feel()["time"])
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, KMovesStone.MOVES, MergeMoves.MOVES,
-			KMovesCare.MOVES, KMovesPinBjorn.MOVES]
+			KMovesCare.MOVES, KMovesPin.MOVES, KMovesBjorn.MOVES]
 	var own := true
 	for mv in ThiefKit.CARTWHEELS:
 		own = own and KMovesDJ.MOVES.has(mv) and others.all(func(t): return not (t as Dictionary).has(mv))
@@ -601,7 +612,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut passive: no bonus below full", absf(K.outgoing(T, 100.0, {}) - 100.0) < 0.1)
 	K.gain_rage(100.0)
 	A.ok("juggernaut passive: full = Enraged (+15%)",
-			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED",
+			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED"
+			and absf(K.enraged_t - 6.0) < 0.1,   # 6 s is ours [?]: the data's "Empowered" has no duration
 			"%.1f" % K.outgoing(T, 100.0, {}))
 	K.cd["e"] = 10.0
 	P.dashes = 0.0
@@ -675,6 +687,8 @@ func juggernaut(a) -> void:
 			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
 			and is_equal_approx(float(lane.get("deg", 0.0)), float(sl["angle"])),
 			str(lane))
+	A.ok("juggernaut footage gap 4: the Slam's strike lane is magenta (0154-0158)",
+			lane.get("col", Color.BLACK) == JuggernautKit.SLASH_OUT, str(lane.get("col", "")))
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
@@ -691,6 +705,8 @@ func juggernaut(a) -> void:
 	m.step(A.DT)
 	A.ok("juggernaut RMB ready: the wounded (under 35%) are outlined red",
 			AimKit.shown(P, "exec%d" % T.get_instance_id()))
+	A.ok("juggernaut footage gap 4: the execute outline is red (0154)",
+			AimKit.entry(P, "exec%d" % T.get_instance_id()).get("col", Color.BLACK) == JuggernautKit.EXEC_RED)
 	A.tap(m, P)
 	A.step(m, 0.7)
 	A.ok("juggernaut RMB tap: +50% under 35%, no sweet spot up close",
@@ -727,6 +743,7 @@ func juggernaut(a) -> void:
 	A.step(m, 0.5, func(): P.inp["sec_hold"] = true)
 	var ln: Dictionary = AimKit.entry(P, "rmb")
 	var k_mid := float(ln.get("fill", -1.0))
+	var col_mid: Color = ln.get("col", Color.BLACK)
 	A.ok("juggernaut RMB hold: the lane grows with the charge (and the wind-up pose plays)",
 			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
 			and not K.lunge_full,
@@ -742,12 +759,20 @@ func juggernaut(a) -> void:
 			K.lunge_full and float(AimKit.entry(P, "rmb").get("fill", 0.0)) >= 1.0
 			and float(AimKit.reticle(P)["flare"]) > 0.0,
 			"full %s" % K.lunge_full)
+	var col_full: Color = AimKit.entry(P, "rmb").get("col", Color.BLACK)
+	A.ok("juggernaut footage gap 2: the Lunge lane is red while charging, magenta at full (0126)",
+			col_mid == JuggernautKit.LUNGE_RED and col_full == JuggernautKit.LUNGE_FULL,
+			"%s -> %s" % [col_mid, col_full])
+	var hits0 := int(HeroVfx.of(m).plays.get("lunge_hit", 0))
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
 	A.step(m, 0.5)
 	A.ok("juggernaut RMB hold: release flings you forward into them",
 			K.last_variant == "hold" and A.dmg(T) >= 18.0 and P.flat_dist(home) > 3.5,
 			"took %.0f moved %.1f" % [A.dmg(T), P.flat_dist(home)])
+	var hits := int(HeroVfx.of(m).plays.get("lunge_hit", 0)) - hits0
+	A.ok("juggernaut footage gap 2: the Lunge contact plays its burst and slash once (0127)", hits == 1,
+			"plays +%d" % hits)
 	A.step(m, 3.2)
 	P.teleport(home)
 	A.fresh(T)
@@ -956,6 +981,8 @@ func juggernaut(a) -> void:
 	DashReset.takedown(P, T)
 	A.ok("juggernaut passive: the takedown reset adds its own 5% of his health, once, on top of the knock heal",
 			absf(P.hp - (100.0 + P.max_hp * DashReset.HEAL)) < 0.5, "hp %.1f of %.1f" % [P.hp, P.max_hp])
+	A.ok("juggernaut footage gap 10: a knock shows the red KO star, Kael's green heal column, a red tint (0454)",
+			_knock_look(m, P, T), "hud flash %s" % [m.hud.flash_col if m.hud else "none"])
 	# audit (data: "knocking an enemy resets Volcanic Rebuke"): a plain body hit then a knock resets it too
 	A.step(m, 1.0)
 	T.downed = false
@@ -981,6 +1008,27 @@ func juggernaut(a) -> void:
 	await A.done(m)
 	await ZFEEL.new().run(A)
 	await ULT.new().zedran(A)
+	await _ally_rows("juggernaut")
+
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero. (Kael's Warchain
+## passing a teammate to hook the foe behind is the "jug chain" row.)
+func _ally_rows(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(A.main, arch)
+	A.ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
+
+
+## Kael's knock feedback live now: the red star over the knocked foe, the green heal column on him and,
+## for the local player, the red screen tint.
+func _knock_look(m: Match, P: Hunter, T: Hunter) -> bool:
+	var star := false
+	var pillar := false
+	for e in DJFx.of(m).live:
+		var at: Vector3 = (e["node"] as Node3D).global_position
+		star = star or (e["kind"] == "star" and Vector2(at.x - T.pos.x, at.z - T.pos.z).length() < 0.5)
+		pillar = pillar or (e["kind"] == "pillar" and Vector2(at.x - P.pos.x, at.z - P.pos.z).length() < 0.5)
+	var tint: bool = m.hud != null and m.hud.flash_col.r > 0.9 and m.hud.flash_col.g < 0.2
+	return star and pillar and tint
 
 
 # ------------------------------------------------------------------ cross-ability combinations (--kit-combo-check)
@@ -1031,6 +1079,9 @@ func combos(a) -> void:
 	A.ok("combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits)",
 			K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0,
 			"spins %d variant %s" % [K.spins, K.last_variant])
+	A.ok("combo jug: the spin's Anti-Heal lasts 5s (wiki: Scorching Spin) and cuts healing 60%",
+			T.blight_t > 4.5 and T.blight_t <= 5.0 and is_equal_approx(T.blight_k, 0.6),
+			"blight %.2f k %.2f" % [T.blight_t, T.blight_k])
 	# E, then RMB held and let go while attached: Chain Lunge along it
 	A.step(m, 1.0)
 	hook.call()
@@ -1216,11 +1267,14 @@ func combos(a) -> void:
 	T2.teleport(home + Vector3(0, 0, 9.0))
 	A.aim_at(P, T.pos)
 	P.dashes = 0.0
+	P.ex_cd = 5.0
 	TK.cd["e"] = 0.0
 	P.ak.use_e()
 	A.step(m, 0.35)
-	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset + refund",
-			P.dashes >= 0.99 and float(TK.cd["e"]) < 10.0, "dashes %.2f e cd %.1f" % [P.dashes, float(TK.cd["e"])])
+	A.ok("combo dancer: Knife in a foe (Knife rank 3) = Vault reset (the long dash too) + refund",
+			P.dashes >= 0.99 and P.ex_cd <= 0.0 and float(TK.cd["e"]) < 10.0,
+			"dashes %.2f ex_cd %.1f e cd %.1f" % [P.dashes, P.ex_cd, float(TK.cd["e"])])
+	A.ok("combo dancer: a Knife in a foe adds no Mark (only bolts stack)", TK.marks_on(T) == 0, "%d" % TK.marks_on(T))
 	P.ak.use_e()
 	A.step(m, 0.05)
 	A.ok("combo dancer: Knife > E = step to them", P.flat_dist(T) < 1.8)
@@ -1237,8 +1291,8 @@ func combos(a) -> void:
 	TK.cd["rmb"] = 0.0
 	A.tap(m, P)
 	A.step(m, 0.9)
-	A.ok("combo dancer: Bola on two (rank 3) = pooled Marks",
-			TK.bola_pairs >= 1 and TK.marks_on(T) >= 4 and TK.marks_on(T) == TK.marks_on(T2),
+	A.ok("combo dancer: Bola on two (rank 3) = pooled Marks, the Bola adding none of its own",
+			TK.bola_pairs >= 1 and TK.marks_on(T) == 3 and TK.marks_on(T) == TK.marks_on(T2),
 			"T %d T2 %d" % [TK.marks_on(T), TK.marks_on(T2)])
 	A.ok("combo dancer: Bola > Grounded = no dash", KitStatus.grounded(T) and _dash_blocked(T))
 	A.step(m, 2.0)

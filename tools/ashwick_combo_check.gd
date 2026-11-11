@@ -9,6 +9,7 @@ extends RefCounted
 ## and the X ult, Flue Flight (tools/ashwick_ult_check.gd); and the source's animation beats (the lance pilot, the ram's
 ## squash on the hit frame, the jet lift-off, the run cadence).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const CARE := preload("res://tools/care_combo_check.gd")      # the shared dash-move rules (own ids, tail)
 
 var main: Node
@@ -29,12 +30,19 @@ func run(main_node: Node) -> void:
 	await _lance_combos()
 	await _growth()
 	_timing()
+	await _ally()
+	await load("res://tools/combo_mark_check.gd").new().run(ok, ak, "ashwick")
 	await load("res://tools/ashwick_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "ashwick")
 	ok("item 51: every slot casts mid-jump, holds through moves, a jump or Shift moves him out of it in 0.1s",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("ASHCHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally() -> void:
+	var bad: Array = await ALLY.sweep(main, "ashwick")
+	ok("ashwick ally: no slot hurts, stuns, roots or slows a teammate", bad.is_empty(), "; ".join(bad))
 
 ## Item 51: the lance held through a ram goes out and roars again the step it ends (no pilot, no relight gap), and
 ## keeps burning through a jump.
@@ -346,7 +354,8 @@ func _all() -> void:
 		"burning %d burn_t %.1f ignitions %d" % [K.burning(T), T.burn_t, K.ignitions]
 	)
 	ak.step(m, 0.02)
-	ok("burn stage: one flame pip over a foe Ablaze", K.pips_on(T) == 1, "pips %d" % K.pips_on(T))
+	ok("burn stage: a rival Ablaze gets the tag's 1 of 2 pips, no world pips", int(K.combo_read(T).get("n", 0)) == 1
+			and K.pips_on(T) == 0, "tag %s pips %d" % [K.combo_read(T), K.pips_on(T)])
 	ak.step(m, 2.6, aim_t)
 	ok(
 		"lance: kept on a burning foe it Flashes over (level 2)", K.burning(T) == 2 and K.upgrades >= 1,
@@ -354,8 +363,8 @@ func _all() -> void:
 	)
 	ak.step(m, 0.02)
 	ok(
-		"burn stage: three flame pips and a glow over a Flashover",
-		K.pips_on(T) == 3 and K.fx.shown("pipg%d" % T.get_instance_id()), "pips %d" % K.pips_on(T)
+		"burn stage: a rival in Flashover gets the tag's 2 of 2 pips, no world pips",
+		int(K.combo_read(T).get("n", 0)) == 2 and K.pips_on(T) == 0, "tag %s pips %d" % [K.combo_read(T), K.pips_on(T)]
 	)
 	# +25% on a burning foe (the burn's own ticks held off so only the hose counts)
 	reset.call()
@@ -649,6 +658,12 @@ func _all() -> void:
 		"cloak: damage, Char, Anti-Heal and a shield",
 		K.blasts == bl0 + 1 and ak.dmg(T) >= 6.0 and K.char_of(T) >= 15.0 and T.blight_t > 0.0 and P.shield > 5.0,
 		"dmg %.0f char %.0f blight %.1f shield %.1f" % [ak.dmg(T), K.char_of(T), T.blight_t, P.shield]
+	)
+	ok(
+		"cloak: Anti-Heal 3s and a shield of 6.4% + 5.1% per foe hit of max health, 3s (wiki: Heat Shield)",
+		T.blight_t > 2.0 and T.blight_t <= 3.0 and absf(P.shield - P.max_hp * 0.115) < 0.5
+			and P.shield_t > 1.5 and P.shield_t <= 3.0,
+		"blight %.1f shield %.2f of %.2f t %.1f" % [T.blight_t, P.shield, P.max_hp * 0.115, P.shield_t]
 	)
 	ok(
 		"cloak: foes in sight are dragged toward you", P.flat_dist(T) < 2.6 and K.pulled >= 1,

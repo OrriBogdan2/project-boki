@@ -223,16 +223,17 @@ func _arena() -> void:
 		"dummy label shows DPS", String((A.dummies[0]["label"] as Label3D).text).begins_with("DPS"),
 		String((A.dummies[0]["label"] as Label3D).text)
 	)
-	# a real Bola lands on a dummy: Grounded, a Mark; SMG hits on it stack Marks (the pips)
+	# a real Bola lands on a dummy: Grounded (no Mark of its own); SMG hits on it stack Marks (the pips)
 	P.teleport(D.pos + Vector3(0, 0, 4.0)); P.inp["aim"] = D.pos + Vector3(0, 0.9, 0); P.inp["aim_y"] = D.pos.y
 	P.ak.cd["rmb"] = 0.0; P.ak.ch_rmb = 1.0
 	var tot0 := float(A.dummies[0]["total"])
+	var marks0 := (P.ak as ThiefKit).marks_on(D)
 	P.inp["sec_hold"] = false; P.ak.press_rmb()
 	step(m, 0.75)          # (the Bola's flight)
 	var tk := P.ak as ThiefKit
-	ok("thief Bola hits a dummy, Grounds and Marks it", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) >= 1,
-		"total %.0f marks %d" % [float(A.dummies[0]["total"]), tk.marks_on(D)])
-	(P.ak as ThiefKit).add_mark(D, 4, true)
+	ok("thief Bola hits a dummy, no Mark", float(A.dummies[0]["total"]) > tot0 and tk.marks_on(D) == marks0,
+		"total %.0f marks %d (was %d)" % [float(A.dummies[0]["total"]), tk.marks_on(D), marks0])
+	tk.add_mark(D, 5, true)
 	step(m, 0.05)
 	ok("five Marks: diamonds over the dummy", tk.pips.size() >= 1 and tk.marks_on(D) >= 5,
 		"marks %d pips %d" % [tk.marks_on(D), tk.pips.size()])
@@ -432,6 +433,27 @@ func _arena() -> void:
 	await main.get_tree().process_frame
 	printerr("ARENACHECK (next frame)")
 
+## The Esc menu's Practice page (PracticeRanks): Max all, Pick your max, Reset.
+func _practice_ranks(P: Hunter) -> void:
+	PracticeRanks.max_all(P)
+	var maxed := true
+	for s in Hunter.SLOTS:
+		maxed = maxed and int(P.slot_lv[s]) == int(Hunter.SLOT_MAX[s])
+	ok("practice ranks: Max all puts every slot at its max rank", maxed, str(P.slot_lv))
+	var cd_k := P.rank_cd_k("sec")
+	ok("practice ranks: max rank shortens the cooldown", is_equal_approx(cd_k, 0.8), str(cd_k))
+	PracticeRanks.pick_max(P, "dash")
+	ok(
+		"practice ranks: Pick your max maxes that slot only (ult stays open)",
+		int(P.slot_lv["dash"]) == 3 and int(P.slot_lv["sec"]) == 1 and int(P.slot_lv["kin"]) == 1
+			and int(P.slot_lv["ult"]) == 1, str(P.slot_lv)
+	)
+	PracticeRanks.reset(P)
+	var rank1 := true
+	for s in Hunter.SLOTS:
+		rank1 = rank1 and int(P.slot_lv[s]) == 1
+	ok("practice ranks: Reset restores rank 1 everywhere", rank1 and P.skill_pts == 0, str(P.slot_lv))
+
 func _training() -> void:
 	var m := Match.new()
 	main.add_child(m)
@@ -445,6 +467,7 @@ func _training() -> void:
 		m.arena != null and m.arena.dummies.size() == 6 and m.duel_pad != Vector3.INF
 			and m.duel_pad.distance_to(Arena.WING) < Arena.WING_R + 2.0
 	)
+	await _duel_ring(m)
 	ok("training: ult open from the start", int(P.slot_lv["ult"]) >= 1)
 	m.arena.set_arch("thief")
 	ok("training: archetype swap", P.arch == "thief")
@@ -458,6 +481,7 @@ func _training() -> void:
 	var dsh := P.dashes
 	P.do_dash()
 	ok("training: dash", P.dashes < dsh or P.roll_t > 0.0)
+	_practice_ranks(P)
 	m.queue_free()
 	await main.get_tree().process_frame
 
@@ -510,3 +534,52 @@ func _loadout() -> void:
 	)
 	var src := FileAccess.get_file_as_string("res://scripts/home/home.gd")
 	ok("expedition panel shows no ability strip", not src.contains("KitCard.strip("))
+
+## The duel ring's choices (opened where interact on the pad opens them): Fight a bot always, Find a duel
+## when a matchmaker is configured, searching with Cancel while queued, the refusal text on an error.
+func _duel_ring(m: Match) -> void:
+	var ring := DuelRing.open(m)
+	ok("duel ring: opens and pauses the match", ring.layer != null and m.paused)
+	var texts := _texts(ring.layer)
+	ok("duel ring: Fight a bot is offered", "Fight a bot" in texts)
+	ok("duel ring: no friend duel button (no 1v1 invite exists)", not ("Fight a friend" in texts))
+	var online := OnlineSession.configured()
+	ok("duel ring: Find a duel only with a matchmaker", ("Find a duel" in texts) == online, str(online))
+	if online:
+		var session := OnlineSession.get_session()
+		session.state = "queue"
+		session.place = 3
+		session.changed.emit()
+		texts = _texts(ring.layer)
+		ok("duel ring: searching shows the place and Cancel",
+			texts.any(func(t): return t.contains("number 3")) and "Cancel search" in texts)
+		ok("duel ring: no choices while searching", not ("Fight a bot" in texts))
+		session.state = "error"
+		session.message = "No matchmaking server answered."
+		session.changed.emit()
+		texts = _texts(ring.layer)
+		ok("duel ring: an error shows its text beside the choices",
+			"No matchmaking server answered." in texts and "Fight a bot" in texts)
+		session.state = "idle"
+	ring.close()
+	await main.get_tree().process_frame
+	ok("duel ring: Back gives the match back", not m.paused and not is_instance_valid(ring.layer))
+	# the pad drops open()'s return: the ring must outlive that and its Back button still work
+	var lay: CanvasLayer = DuelRing.open(m).layer
+	await main.get_tree().process_frame
+	var back: Button = null
+	for b in lay.find_children("*", "Button", true, false):
+		if b.name == "Close":
+			back = b
+	ok("duel ring: kept alive by its layer", lay.has_meta("ring") and back != null)
+	if back:
+		back.pressed.emit()
+	await main.get_tree().process_frame
+	ok("duel ring: Back works when open()'s return was dropped", not m.paused and not is_instance_valid(lay))
+
+func _texts(node: Node) -> Array:
+	var out: Array = []
+	for c in node.find_children("*", "", true, false):
+		if c is Label or c is Button:
+			out.append(String(c.text))
+	return out

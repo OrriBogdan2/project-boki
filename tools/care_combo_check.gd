@@ -817,6 +817,7 @@ func tender() -> void:
 	ok(
 			"mm LMB: the ember flies its full range past the cursor",
 			AimMode.mode_of(P) == AimMode.MAX and reach > float(P.wpn["range"]) - 0.3, "reach %.1f" % reach)
+	ok("mm LMB: the ember's range is 13 m (footage 7 to 8 bh at 1.8 m)", absf(float(P.wpn["range"]) - 13.0) < 0.01)
 	ok(
 			"mm LMB: each ember has its comet look, a swirl at the hand and the flick move",
 			K.stats["swirls"] >= 1 and K.lk().skins.size() >= 1 and K.anim_id in ["mm_shot_r", "mm_shot_l"],
@@ -846,6 +847,11 @@ func tender() -> void:
 			"+%.0f%%" % (ramp * 100.0))
 	# --- the idle crook: the next ember is Empowered (longer, its own bigger flick)
 	step(m, 1.3)
+	var res: Dictionary = Arch.def("tender")["resource"]
+	ok(
+			"mm LMB: Empowered adds nothing the source doesn't name (no range or refund rider)",
+			P.shot_range_k == 1.0 and not res.has("emp_range") and not res.has("emp_refund"),
+			"range_k %.2f" % P.shot_range_k)
 	var e0: int = K.stats["emp"]
 	P.ammo = int(P.wpn["mag"])
 	P.reload_t = 0.0
@@ -853,7 +859,7 @@ func tender() -> void:
 	step(m, 0.05)
 	P.inp["fire"] = false
 	ok(
-			"mm LMB: after a pause the next ember is Empowered (40% further, its own move)",
+			"mm LMB: after a pause the next ember is Empowered (its own move)",
 			K.stats["emp"] > e0 and K.anim_id == "mm_shot_emp", "emp %d anim %s" % [K.stats["emp"], K.anim_id])
 	step(m, 0.6)
 	# --- Burrseed (item 118): a press, a fixed wind-up, the throw by itself on the aim of that moment
@@ -901,6 +907,12 @@ func tender() -> void:
 			absf(tt - wind) <= 0.05 and K.anim_id == "mm_seed" and not K.seed_aim
 				and not AimKit.shown(P, "rmb"),
 			"%.2f %s" % [tt, K.anim_id])
+	var seed_shot: Dictionary = _mine(m, P)[-1]
+	var seed_v := (seed_shot["vel"] as Vector2).length()
+	ok(
+			"mm RMB: the seed leaves at 36 m/s and flies a fixed 15.3 m lane (source ~20 body heights/s)",
+			absf(seed_v - 36.0) < 0.1 and absf(float(seed_shot["life0"]) * seed_v - 15.3) < 0.1,
+			"%.1f m/s, %.1f m" % [seed_v, float(seed_shot["life0"]) * seed_v])
 	var t_stick := -1.0
 	var ts := 0.0
 	while ts < 0.5 and t_stick < 0.0:
@@ -946,6 +958,14 @@ func tender() -> void:
 	ok(
 			"mm E: lit on her, a 2.6 m ring (1.4 bh) and the raise-the-lantern move",
 			K.in_e() and absf(K.hearth_r() - 2.6) < 0.01 and K.anim_id == "mm_hearth" and K.lk().showing("hearth"))
+	# parity: the source gives no self-heal factor, so she is healed by the full tick (no self_k rider)
+	var ed: Dictionary = Arch.def("tender")["passive"]
+	P.hp = P.max_hp * 0.5
+	var hp0 := P.hp
+	K._pulse(P.pos, 2.0)
+	ok(
+			"mm E: the ring heals her for the full tick, no self-heal factor in the data",
+			not ed.has("self_k") and absf(P.hp - hp0 - 2.0 * K.heal_k()) < 0.01, "healed %.2f" % (P.hp - hp0))
 	var cur := P.pos + Vector3(6.0, 0, 0)
 	sc.aim_at(P, cur)
 	step(m, 0.2)
@@ -1464,6 +1484,17 @@ func rimewright() -> void:
 	ok(
 			"tm passive: Chill lasts 4s and a new hit refreshes it",
 			float(K.d["passive"]["chill_t"]) == 4.0 and lasts_3 and refreshed and not K.chilled(T))
+	# --- the Shatter is damage only (data): no slow, no fresh Chill; numbers as the data/footage ratios
+	var pd: Dictionary = Arch.def("rimewright")["passive"]
+	T2.slow_t = 0.0
+	T2.hp = T2.max_hp
+	K.splinter(T2.pos, float(pd["splinter_dmg"]), float(pd["splinter_r"]))
+			"tm passive (data): Shatter 37 in 3m after 0.4s, 8 darts -> 60; no slow and no Chill from it",
+			float(pd["splinter_dmg"]) == 37.0 and float(pd["splinter_r"]) == 3.0
+			and float(pd["splinter_delay"]) == 0.4 and float(pd["fan_splinter"]) == 60.0
+			and int(pd["fan_hits"]) == 8 and T2.hp < T2.max_hp
+			and T2.slow_t <= 0.3 and not K.chilled(T2),   # 0.28: the big-hit stagger
+			"slow_t %.2f chilled %s" % [T2.slow_t, str(K.chilled(T2))])
 	await _free(m)
 	# --- Skate: darts fly straight and thick at normal damage; she carries on over a ledge; the stride move loops
 	r = sc.setup("rimewright", 6.0)
@@ -1624,6 +1655,24 @@ func rimewright() -> void:
 			"tm RMB: it detonates 1.8 s after landing: the big hit and a slow, no root (the data has none)",
 			absf(since - float(ld["delay"])) < 0.05 and hb - T.hp > 50.0 and T.root_t <= 0.0 and T.slow_t > 0.0,
 			"at %.2f s, %.0f damage, root %.2f" % [since, hb - T.hp, T.root_t])
+	await _free(m)
+	# --- Interrupts (rimewright.md): knocked in the Rink Wall's tell, no wall rises
+	r = sc.setup("rimewright", 30.0)
+	m = r[0]
+	P = r[1]
+	K = P.ak
+	sc.aim_at(P, P.pos + Vector3(7.0, 0, 0))
+	step(m, 0.05)
+	P.inp["sig"] = true
+	step(m, 0.05)
+	P.inp["sig"] = false
+	var telling := not K.wall_cast.is_empty()
+	P.downed = true            # set directly: a real knock of the lone player ends the training team
+	P.down_hp = 60.0           # a wisp with no down health is finished at once
+	step(m, 0.4)
+	ok("tm E: knocked in the tell, no wall rises", telling and K.wall_cast.is_empty() and K.wall.is_empty(),
+			"tell %s cast %s wall %s" % [telling, K.wall_cast.is_empty(), K.wall.is_empty()])
+	P.downed = false
 	await _free(m)
 	# --- Rink Wall: a 0.2 s tell, narrow just ahead, widening as it slides, stops at the cursor
 	r = sc.setup("rimewright", 30.0)

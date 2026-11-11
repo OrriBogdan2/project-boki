@@ -1,5 +1,8 @@
 {
 	"doc": "Tenzo's hand-keyed clips (art/wardens/tarek/tarek.glb) and which game state plays which (scripts/heroes/warden_clips.gd). His weapon is his fists: the rock bracers and hands are skinned in the body, the Gun node follows the right fist (blade).",
+	"springs": {
+		"spring_locs": {"pull": [0.3, 0.12], "damp": 0.72, "limit": 0.6, "limit_in": 0.0}
+	},
 	"skinned_weapon": true,
 	"legs_rigid": true,
 	"extra_bones": {
@@ -33,16 +36,21 @@
 		"walk_speed": 2.2,
 		"run_speed": 5.0, "stride": [1.5, 1.2], "foot_mps": [1.51, 5.16], "arm_swing": {"L": 0.5, "R": 0.5}
 	},
+	"free_arm": {"lmb_throw": "L", "lmb_punch": "L"},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
 	"air": {
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "dive"
+		"dive": "dive",
+		"dive_tilt": 50.0,
+		"glide_tilt": 0.0
 	},
 	"land": {
 		"clip": "land",
-		"dur": 0.42,
+		"dur": 0.27,
+		"moving": 0.13,
+		"rate": 1.6,
 		"min_fall": 0.5
 	},
 	"kmoves": {
@@ -89,7 +97,8 @@
 			"turn_max": 3.2
 		},
 		"breah_raise": {
-			"clip": "e_row"
+			"clip": "e_row",
+			"upper": "moving"
 		},
 		"breah_sense": {
 			"clip": "sense"

@@ -23,6 +23,7 @@ const TYPES := {
 	"sound": {"name": "Sound", "col": Color("6fb6ff")},
 	"flying": {"name": "Flying", "col": Color("6fe0cf")},
 }
+const SILHOUETTE := Color(0.05, 0.06, 0.1, 0.92)       # a Boki you haven't met, drawn as a dark shape
 const TILE := Vector2(106, 132)
 const PORTRAIT := 70.0
 
@@ -34,6 +35,16 @@ static func type_name(t: String) -> String:
 
 static func type_col(t: String) -> Color:
 	return TYPES.get(t, {}).get("col", Color("a9b0bf"))
+
+## The type pill: the type's icon and "<Name> type", in its colour.
+static func type_chip(t: String) -> PanelContainer:
+	var chip := PanelContainer.new()
+	var fill := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
+	chip.add_theme_stylebox_override("panel", fill)
+	var h := UI.hbox(6); chip.add_child(h)
+	h.add_child(TypeIcon.new(t, 18.0))
+	h.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
+	return chip
 
 ## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
 ## forms of a branching line share one.
@@ -105,7 +116,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		var pv := KinPortrait.view({"species": spk, "level": 5}, tree, PORTRAIT)
 		pv.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		if not is_caught:
-			pv.modulate = Color(0.05, 0.06, 0.1, 0.92)      # seen, not caught: a dark silhouette
+			pv.modulate = SILHOUETTE      # seen, not caught: a dark silhouette
 		holder.add_child(pv)
 		if is_caught and bool(entry(spk).get("shimmer", false)):
 			var sp := Sparkle.new()
@@ -164,7 +175,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	else:
 		var dc := CenterContainer.new(); stage.add_child(dc)
 		var d := KinPortrait.view({"species": spk}, tree, 160)
-		if not is_caught: d.modulate = Color(0.05, 0.06, 0.1, 0.92)
+		if not is_caught: d.modulate = SILHOUETTE
 		dc.add_child(d)
 	var info := UI.vbox(7)
 	info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -175,13 +186,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 	info.add_child(nrow)
 	var trow := UI.hbox(8)
 	var t := type_of(spk)
-	var tchip := PanelContainer.new()
-	var chip_box := UI.frame(Color(type_col(t), 0.14), UI.R_PILL, Color(0, 0, 0, 0), 0, 8, 3, 0.0)
-	tchip.add_theme_stylebox_override("panel", chip_box)
-	var th := UI.hbox(6); tchip.add_child(th)
-	th.add_child(TypeIcon.new(t, 18.0))
-	th.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
-	trow.add_child(tchip)
+	trow.add_child(type_chip(t))
 	trow.add_child(UI.tag("Caught" if is_caught else "Seen", UI.GOOD if is_caught else UI.MUTED))
 	if FieldBook.both_forms(spk):
 		trow.add_child(UI.tag("★ Both forms", UI.GOLD))
@@ -202,6 +207,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		_fact(info, "dance", "Quirk", BokiQuirks.quirk(spk))
 	if BokiQuirks.sex_note(spk) != "":
 		_fact(info, "egg", "Sexes", BokiQuirks.sex_note(spk))
+	info.add_child(summon_row(spk))
 	# the forms you've found, as small portraits
 	var forms: Array = e.get("forms", [])
 	var fl := UI.vbox(4)
@@ -212,7 +218,7 @@ static func detail(v: VBoxContainer, spk: String, tree: SceneTree, pick: Callabl
 		var fc := UI.vbox(2)
 		fc.custom_minimum_size.x = 64
 		var fp := KinPortrait.view(_form_rec(spk, String(fname)), tree, 46.0)
-		if not is_caught: fp.modulate = Color(0.05, 0.06, 0.1, 0.92)
+		if not is_caught: fp.modulate = SILHOUETTE
 		var fcc := CenterContainer.new(); fcc.add_child(fp)
 		fc.add_child(fcc)
 		var fn := UI.label(String(fname), 11, UI.MUTED)
@@ -266,6 +272,21 @@ static func _fact(parent: Control, icon: String, k: String, val: String) -> void
 	vl.custom_minimum_size.x = 200
 	r.add_child(vl)
 	parent.add_child(r)
+
+## "Summon 12 s / rest 45 s": the species' window and cooldown (KinSummon.times, the one table the summon
+## itself reads), a ring icon and the Burst / Steady tag.
+static func summon_text(spk: String) -> String:
+	var t := KinSummon.times(KinLib.kin(spk))
+	return "Summon %d s / rest %d s" % [int(t.x), int(t.y)]
+
+static func summon_row(spk: String) -> Control:
+	var r := UI.hbox(8)
+	r.add_child(UI.IconDot.new("ring", type_col(type_of(spk)), 15.0))
+	var l := UI.label(summon_text(spk), UI.T_SMALL, UI.INK)
+	l.name = "SummonText"
+	r.add_child(l)
+	r.add_child(UI.tag(KinSummon.tag(KinSummon.times(KinLib.kin(spk)).x), UI.MUTED))
+	return r
 
 ## One or two lines about the species (its flavour text, cut at the second sentence).
 static func _field_note(spk: String) -> String:

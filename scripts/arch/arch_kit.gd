@@ -26,6 +26,7 @@ const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (D
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
 var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
+var recast_heard := {"slot": "", "left": 0.0, "recast_open": 0, "recast_tick": 0}   # RecastSound: the last window and the plays
 var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
@@ -155,6 +156,9 @@ func recast_now(slot_id: String) -> void:
 	match slot_id:
 		"e": use_e()
 		"x": cast_ult()
+## The open recast window, {} when none: {slot: e|x|dash|lmb, left: s until it closes (INF: it waits)}.
+## RecastSound reads it; the base reports E while it's up and e_recastable().
+		return {"slot": "e", "left": e_t}
 func gate_inputs() -> void: pass                    # a kit drops the presses it locks out
 func locks_glide() -> bool: return false            # a move AirLimits can't see from the shared state (a dive)
 func on_dash(_ex: bool) -> bool: return false        # true = the archetype handled the dash
@@ -236,6 +240,8 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	if not curved.is_empty(): _tick_curve(dt)
 	_tells(dt)
+	if h.is_local():
+		RecastMarker.sync(self)
 	_tick_charge(dt)
 	_tick_recast(dt)
 
@@ -256,6 +262,7 @@ func _tick_recast(dt: float) -> void:
 
 func buffer_recast(slot_id: String) -> void:
 	recast_buf[slot_id] = RECAST_BUFFER
+		RecastSound.track(self)
 
 func held(which: String) -> bool:
 	match which:
@@ -273,7 +280,7 @@ func aim_lock() -> Vector2: return Vector2.ZERO
 func no_glide() -> bool: return false
 
 func busy() -> bool:
-	return h.downed or h.out or h.dropping or h.riding or h.stun_t > 0.0 or Hex.active(h)
+	return h.downed or h.out or h.dropping or h.riding or CcLockout.blocks(h, "abil") or Hex.active(h)
 
 # ------------------------------------------------------------------ RMB router
 ## The RMB press. Priority when several apply (§3.3): resource full > during R > during E >
@@ -404,7 +411,6 @@ func _fuse_start(bond: bool) -> void:
 	var T := float(fuse["T"])
 	h.cast_at = m.time; h.cast_slot = "ult"
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), String(rd.get("name", "")).to_upper(), col, true)
-	tele_circle(h.pos, 2.4, col, T)
 	m.fx.ring(h.pos, 0.8, Color(col, 0.9), T)
 	m.sfx("charge", h.pos, 0.0 if h.is_local() else -2.0, 0.55)
 	m.sfx("skill", h.pos, -3.0, 0.6)
@@ -436,6 +442,7 @@ func _tick_fuse(dt: float) -> void:
 		return
 	# energy gathers inward, faster and brighter toward the end
 	var k := 1.0 - float(fuse["t"]) / maxf(0.01, float(fuse["T"]))
+	AimKit.circle(h, "fuse", {"self": true, "r": 2.4, "all": true, "col": col, "fill": k})
 	fuse["fx"] = float(fuse["fx"]) - dt
 	if float(fuse["fx"]) <= 0.0:
 		fuse["fx"] = 0.05
@@ -668,7 +675,7 @@ func run_own(st_: StageSpec, c: Dictionary) -> void:
 func aim() -> Vector3:
 	return h.inp.get("aim", h.pos)
 
-func foes_in(at: Vector3, r: float, dy := 2.2) -> Array:
+func foes_in(at: Vector3, r: float, dy := AimMode.REACH_Y) -> Array:
 	var out: Array = []
 	for f in m.foes_of(h.team):
 		if f.hittable() and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < dy:
@@ -696,31 +703,6 @@ static func behind(t: Ent, attacker: Ent, rear_deg := 120.0) -> bool:
 func ground(p: Vector3) -> Vector3:
 	var g: float = m.world.ground_at(p.x, p.z)
 	return Vector3(p.x, g if g > World.VOID + 1.0 else p.y, p.z)
-
-## A filling ground circle everyone sees; enemies get the hostile rim. Returns the node.
-func tele_circle(at: Vector3, r: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_circle(at, r, Color(c, 0.9))
-	var tw := tele.create_tween()
-	tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-	tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
-
-## A filling lane (dash arrows, beams, charge lines).
-func tele_lane(at: Vector3, dir: Vector2, length: float, width: float, col: Color, t: float) -> Node3D:
-	var c := col
-	var p = m.get("player")
-	if p != null and int(p.team) != h.team:
-		c = col.lerp(Feel.RIM_ENEMY, 0.45)
-	var tele: Node3D = m.fx.telegraph_rect(at, dir, length, width, Color(c, 0.9))
-	if t > 0.0:
-		var tw := tele.create_tween()
-		tw.tween_method(func(k: float): if is_instance_valid(tele): m.fx.telegraph_progress(tele, k), 0.0, 1.0, t)
-		tw.tween_callback(func(): if is_instance_valid(tele): m.fx.end_telegraph(tele))
-	return tele
 
 ## The out-of-combat clock: building or spending the resource keeps it from decaying.
 func touch_res(wait := -1.0) -> void:
@@ -764,7 +746,7 @@ func slot_info(slot: String) -> Dictionary:
 				if (sd.get("variants", {}) as Dictionary).has(v):
 					lines.append("%s: %s" % [{"tap": "Tap", "hold": "Hold", "air": "In the air", "during_e": "With E", "full": "Resource full"}[v], sd["variants"][v]])
 			out.merge({"name": String(sd.get("name", "")), "short": String(sd.get("short", "")), "icon": String(sd.get("icon", "")), "col": col_of(sd), "desc": "\n".join(lines),
-				"cd": float(cd["rmb"]) if ch_rmb < 1.0 else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(),
+				"cd": float(cd["rmb"]) if ch_rmb < float(rmb_charges()) else 0.0, "cd_max": float(sd.get("cooldown", 6.0)) * cd_k("sec"), "charges": int(floor(ch_rmb)), "max_charges": rmb_charges(), "charge_f": rmb_charge_f(),
 				"verb": "rmb", "ready": ch_rmb >= 1.0 and fire_ok_rmb(), "variant": last_variant, "full": full_ready()}, true)
 		"k1", "e", "kin":
 			var sd := e_def()
@@ -786,7 +768,22 @@ func slot_info(slot: String) -> Dictionary:
 				"cd": owed * h.dash_regen() if h.dashes < dmax - 0.001 else 0.0, "cd_max": h.dash_regen(), "charges": maxi(0, int(floor(h.dashes))), "max_charges": int(dmax), "verb": "dash", "ready": h.dashes >= 1.0, "full": dash_payoff_ready()}, true)
 	return out
 
+## The RMB's charges as a fraction: the whole ones plus how far the next one has recharged (the HUD's pip fill).
+func rmb_charge_f() -> float:
+	if ch_rmb >= float(rmb_charges()):
+		return ch_rmb
+	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")), 0.0, 1.0)
+
 func e_recastable() -> bool: return false
+## The world marker of an open recast (RecastMarker, caster only): where the thing you will trigger sits
+## (Vector3.INF = no recast open), the action whose key it shows, and the seconds the window has left (< 0 = no limit).
+func recast_at() -> Vector3: return Vector3.INF
+func recast_key() -> String: return "signature"
+func recast_left() -> float: return e_t
+## The open recast (RecastCue's "<KEY> AGAIN"): s left in it, 0 when none open, INF when it has no time limit.
+## Kits whose recast is not E's override both; recast_slot() is the HUD slot id: k1 (E), x, dash, sec or primary.
+func recast_left() -> float: return e_t if e_t > 0.0 and e_recastable() else 0.0
+func recast_slot() -> String: return "k1"
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start
@@ -916,8 +913,7 @@ func e_payoff_ready() -> bool: return false
 
 ## Frees what this kit hung on the hunter (Hunter.set_arch calls it before swapping kits).
 func teardown() -> void:
-	var ring: Node3D = chg.get("ring")
-	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	AimKit.hide(h, "charge_ring")
 	chg = {}
 	for n in self_nodes:
 		if is_instance_valid(n): (n as Node).queue_free()
@@ -1135,16 +1131,11 @@ func _tick_charge(dt: float) -> void:
 		var rc := col
 		var p = m.get("player")
 		if p != null and int(p.team) != h.team: rc = col.lerp(Feel.RIM_ENEMY, 0.45)
-		var ring: Node3D = m.fx.telegraph_circle(h.pos, 1.15 * float(h.cdat.get("scale", 1.0)), Color(rc, 0.9))
-		chg["ring"] = ring
 		if charge_orb():
 			chg["glow"] = _charge_ball(col)
 		net_ring(h.pos, 0.8, rc)            # remote players: "they're winding something up"
 	chg["k"] = k
-	var ring2: Node3D = chg.get("ring")
-	if ring2 and is_instance_valid(ring2):
-		ring2.global_position = h.pos + Vector3(0, 0.07, 0)
-		m.fx.telegraph_progress(ring2, k)
+	AimKit.circle(h, "charge_ring", {"self": true, "r": 1.15 * float(h.cdat.get("scale", 1.0)), "all": true, "col": col, "fill": k})
 	var g2: Node3D = chg.get("glow")
 	if g2 and is_instance_valid(g2):
 		var d := h.aim_dir()
@@ -1178,8 +1169,7 @@ func _charge_full_tick(col: Color) -> void:
 func _charge_release() -> void:
 	var k := float(chg.get("k", 0.0))
 	charge_last = k
-	var ring: Node3D = chg.get("ring")
-	if ring and is_instance_valid(ring): m.fx.end_telegraph(ring)
+	AimKit.hide(h, "charge_ring")
 	var g: Node3D = chg.get("glow")
 	if g and is_instance_valid(g):
 		self_nodes.erase(g)

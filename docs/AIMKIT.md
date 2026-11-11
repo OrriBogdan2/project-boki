@@ -37,6 +37,7 @@ Helpers for kit-driven shots and placements:
 var d := AimMode.dist(h, 12.0)                  # cursor distance clamped to [1.5, 12]
 var d2 := AimMode.dist(h, 12.0, AimMode.MAX)    # 12
 var at := AimMode.point(h, 9.0)                 # the ground point at the cursor, clamped to 9 m
+var g := AimMode.ray_ground(world, ray, h.pos.y)  # the first ground a cursor ray meets (Match._mouse_aim)
 var md := AimMode.mode_of(h)                    # what the next shot will do (does not consume)
 m.spawn_shot(h, start, dir * spd, dmg, AimMode.dist(h, rng) / spd, size, col, extra)
 ```
@@ -70,6 +71,9 @@ Common params (every shape):
 
 Directions are flat `Vector2(x, z)`, the same as `h.aim_dir()`. Points are `Vector3`. Every shape sits
 on the ground under its anchor and follows terraces and stairs, but never climbs a wall or drops into a pit.
+
+### Ring: just the rim
+`AimKit.ring(h, id, {"at": p, "r": 0.9, "col": c})` draws a circle's rim with no fill, for a marker that must not read as an area (RecastMarker).
 
 ### Lane: fixed, growing, narrowing
 ```gdscript
@@ -274,3 +278,4 @@ minimum travel** (`AimMode.place`). Shots keep the 1.5 m `MIN_D` so a point-blan
 Left alone, for the owner: Albert's throw range (9 m against 12.6 m seen), Lace's 2 m arc floor and Neve's
 1.5 m spear floor (our minimums, source unknown), and the Tenzo boulder, Kael hook and Sable dagger rules the
 footage never settles. `ArchKit.aim_at` (a second cursor clamp nothing called) is gone.
+- **The old helpers.** `ArchKit.tele_circle`/`tele_lane` are deleted; use AimKit (`fuse` and `charge_ring` in ArchKit are examples).

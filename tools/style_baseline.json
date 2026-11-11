@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 28,
+"long_line": 31,
 "nested_ternary": 2,
 "semicolon": 9
 },
@@ -32,7 +32,7 @@
 "semicolon": 2
 },
 "scripts/arch/kits/archer_kit.gd": {
-"long_line": 12,
+"long_line": 13,
 "semicolon": 1,
 "shadow": 1
 },
@@ -186,7 +186,7 @@
 "semicolon": 4
 },
 "scripts/core/sfx.gd": {
-"long_line": 5,
+"long_line": 7,
 "semicolon": 3,
 "shadow": 3
 },
@@ -494,7 +494,7 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 23,
+"long_line": 24,
 "semicolon": 43
 },
 "scripts/match/exits.gd": {
@@ -555,7 +555,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 38,
-"long_line": 95,
+"long_line": 96,
 "nested_ternary": 19,
 "semicolon": 53,
 "shadow": 4
@@ -616,6 +616,10 @@
 "scripts/match/kin_strike.gd": {
 "long_line": 4
 },
+"scripts/match/kin_voice.gd": {
+"long_line": 21,
+"semicolon": 2
+},
 "scripts/match/kin_wheel.gd": {
 "semicolon": 1
 },
@@ -634,10 +638,10 @@
 "semicolon": 3
 },
 "scripts/match/match.gd": {
-"history_comment": 3,
-"long_line": 221,
-"nested_ternary": 18,
-"semicolon": 145,
+"history_comment": 4,
+"long_line": 222,
+"nested_ternary": 19,
+"semicolon": 146,
 "shadow": 9
 },
 "scripts/match/merge_look.gd": {
@@ -663,7 +667,7 @@
 "shadow": 1
 },
 "scripts/match/models.gd": {
-"long_line": 281,
+"long_line": 282,
 "nested_ternary": 12,
 "semicolon": 276,
 "shadow": 3
@@ -809,7 +813,7 @@
 "long_line": 2
 },
 "scripts/ui/hatch.gd": {
-"long_line": 29,
+"long_line": 30,
 "nested_ternary": 2,
 "semicolon": 66
 },
@@ -827,7 +831,7 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 190,
+"long_line": 191,
 "nested_ternary": 39,
 "semicolon": 52,
 "shadow": 2
@@ -913,7 +917,7 @@
 "scripts/ui/title.gd": {
 "long_line": 21,
 "nested_ternary": 2,
-"semicolon": 39
+"semicolon": 40
 },
 "scripts/ui/ui.gd": {
 "long_line": 25,
@@ -973,6 +977,10 @@
 "long_line": 8,
 "semicolon": 11
 },
+"tools/biome_check.gd": {
+"long_line": 3,
+"semicolon": 1
+},
 "tools/blight_check.gd": {
 "long_line": 15,
 "semicolon": 25
@@ -994,7 +1002,7 @@
 "semicolon": 1
 },
 "tools/check_registry.gd": {
-"long_line": 1
+"long_line": 61
 },
 "tools/dredge_combo_check.gd": {
 "long_line": 2,
@@ -1071,7 +1079,7 @@
 "semicolon": 3
 },
 "tools/kill_reset_check.gd": {
-"long_line": 7,
+"long_line": 8,
 "semicolon": 6
 },
 "tools/kin_regen_check.gd": {
@@ -1113,7 +1121,7 @@
 },
 "tools/move_feel_check.gd": {
 "history_comment": 1,
-"long_line": 32,
+"long_line": 34,
 "semicolon": 67
 },
 "tools/music_leave_check.gd": {
@@ -1129,6 +1137,10 @@
 },
 "tools/pack_ui_check.gd": {
 "long_line": 15,
+"semicolon": 7
+},
+"tools/perch_check.gd": {
+"long_line": 2,
 "semicolon": 7
 },
 "tools/perkorb_check.gd": {
@@ -1152,6 +1164,12 @@
 "long_line": 11,
 "semicolon": 25,
 "shadow": 1
+},
+"tools/rig_shots.gd": {
+"long_line": 1
+},
+"tools/rig_standard_check.gd": {
+"long_line": 1
 },
 "tools/rolling_check.gd": {
 "history_comment": 1,

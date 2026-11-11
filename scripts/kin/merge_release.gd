@@ -5,6 +5,7 @@ extends RefCounted
 ## you pumped for a short rest (Kin.land_pumped). A merge that just times out has none of this.
 ## Numbers: content/rules/merge_forms.json `release_rest_s` and `afterglow`.
 
+const GLOW_COLUMN := 2.2          # m: the soft gold column when the afterglow starts
 const SPARK_EVERY := 0.4          # s: between sparkles on a hunter with the afterglow
 
 static func rules() -> Dictionary:
@@ -27,8 +28,8 @@ static func afterglow(h: Hunter) -> void:
 	h.shield_t = maxf(h.shield_t, secs)
 	h.set_meta("afterglow_t", secs)
 	var col := Color("ffd84a")
-	h.m.fx.ring(h.pos, 2.4, col, 0.45)
-	h.m.fx.burst(h.pos + Vector3(0, 1.1, 0), col, 20, 4.0)
+	h.set_meta("afterglow_type", MergeXform.type_of(h, {}))
+	KinTypeFx.fusion(h.m.fx, String(h.get_meta("afterglow_type")), h.pos, col, GLOW_COLUMN)
 	if h.is_local():
 		h.m.fx.word(h.pos + Vector3(0, 2.6, 0), "AFTERGLOW", col, true)
 		h.m.sfx("unlock", h.pos, -3.0, 1.35)
@@ -41,4 +42,4 @@ static func tick(h: Hunter, dt: float) -> void:
 	var left := maxf(0.0, t - dt)
 	h.set_meta("afterglow_t", left)
 	if fmod(t, SPARK_EVERY) < fmod(left + dt, SPARK_EVERY) - 0.0001 or left == 0.0:
-		h.m.fx.burst(h.pos + Vector3(0, 0.9, 0), Color("ffd84a"), 4, 2.0)
+		KinTypeFx.fusion(h.m.fx, String(h.get_meta("afterglow_type", "")), h.pos, Color("ffd84a"), 0.1)

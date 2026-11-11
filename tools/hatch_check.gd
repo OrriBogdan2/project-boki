@@ -113,11 +113,93 @@ func run(m: Node) -> void:
 	while not named["go"] and Time.get_ticks_msec() - t0 < 3000:
 		await tree.process_frame
 	ok(named["go"], "Name it hands over to naming")
+	await _egg_cards(tree)
+	await _creator_rows(tree)
 	await _first_mask(tree)
 	print("HATCH CHECK DONE, failures: %d" % bad)
 	tree.quit()
 
-# ---------------------------------------------------------------- 3. the first Relic
+# ---------------------------------------------------------------- 3. the egg pick: who is in each egg
+func _card_text(card: Node, node_name: String) -> String:
+	var n: Node = card.find_child(node_name, true, false)
+	if n is Label: return (n as Label).text
+	return " ".join(n.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)) if n else ""
+
+func _egg_cards(tree: SceneTree) -> void:
+	tree.root.size = Vector2i(1280, 720)
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	Save.d["look"] = Unmasked.default_look()
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	hx._looks_good()
+	var secret: String = hx.egg_defs[3]["species"]
+	ok(hx.stage == "pick" and secret != "mystery" and Data.KIN.has(secret),
+		"the mystery egg's species is rolled when the pick opens (%s)" % secret)
+	var cards: Array = hx.bottom.get_child(0).get_children()
+	ok(cards.size() == 4, "four egg cards, each with its Boki's name line (%d)" % cards.size())
+	for i in mini(cards.size(), 4):
+		var sp: String = hx.egg_defs[i]["species"]
+		var type_line := "%s type" % DexView.type_name(DexView.type_of(sp))
+		var card: Node = cards[i]
+		var pic: CanvasItem = card.find_child("Picture", true, false)
+		var all_text := " ".join(card.find_children("*", "Label", true, false).map(func(l): return (l as Label).text))
+		ok(_card_text(card, "TypeChip") == type_line, "card %d shows its type '%s'" % [i, type_line])
+		if i < 3:
+			var boki_name := String(Data.KIN[sp]["name"])
+			ok(_card_text(card, "BokiName") == boki_name, "starter card %d shows its Boki's name (%s)" % [i, sp])
+			ok(pic != null and pic.modulate.get_luminance() > 0.5, "starter card %d's picture is in full colour" % i)
+		else:
+			var secret_name := String(Data.KIN[sp]["name"])
+			var shown_name := _card_text(card, "BokiName")
+			ok(shown_name == "???" and not all_text.contains(secret_name), "the mystery card has no name")
+			ok(pic != null and pic.modulate.is_equal_approx(DexView.SILHOUETTE), "the mystery card shows a silhouette")
+	hx._pick(3)
+	hx._pick(3)
+	ok(hx.stage == "warm" and hx.egg_defs[3]["species"] == secret and (hx.eggs[3]["egg"] as EggHatch).species == secret,
+		"the egg that hatches is the species the card showed (%s)" % secret)
+	hx.queue_free()
+	await tree.process_frame
+
+# ---------------------------------------------------------------- 4. the creator
+## A new player sees Sex, Shroud colour and Glow; "More looks..." opens the other rows; the menu's creator has them all.
+func _creator_rows(tree: SceneTree) -> void:
+	Save.d = Save.fresh()
+	Save.d["tutorial"] = {"intro": true}
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	ok(hx.stage == "create", "a new game opens the creator (stage %s)" % hx.stage)
+	var shown := func(): return Unmasked.ROWS.filter(func(r): return _texts(hx.create_box).has(r[1]))
+	var first: Array = Unmasked.FIRST_ROWS.map(func(r): return Unmasked.ROWS[r])
+	ok(shown.call() == first and first.size() == 3, "first it shows 3 rows: body, colour, glow")
+	var more := _find_button(hx.create_box, "More looks...")
+	ok(more != null, "with a More looks... button")
+	if more == null:
+		hx.queue_free()
+		return
+	more.pressed.emit()
+	for i in 4: await tree.process_frame
+	ok(shown.call() == Unmasked.ROWS and _find_button(hx.create_box, "More looks...") == null,
+		"it opens all %d rows and the button goes" % Unmasked.ROWS.size())
+	hx.queue_free()
+	await tree.process_frame
+	var menu = load("res://scripts/ui/hatch.gd").new()
+	menu.edit_only = true
+	main.add_child(menu)
+	for i in 4: await tree.process_frame
+	ok(Unmasked.ROWS.all(func(r): return _texts(menu.create_box).has(r[1])), "the menu's creator has every row")
+	menu.queue_free()
+	await tree.process_frame
+
+func _find_button(n: Node, text: String) -> Button:
+	for b in n.find_children("*", "Button", true, false):
+		if (b as Button).text == text:
+			return b
+	return null
+
+# ---------------------------------------------------------------- 5. the first Relic
 func _first_mask(tree: SceneTree) -> void:
 	tree.root.size = Vector2i(1280, 720)      # (the smallest screen we lay out for; 1920x1080 scales to it)
 	Save.d = Save.fresh()

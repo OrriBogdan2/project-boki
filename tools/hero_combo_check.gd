@@ -10,6 +10,7 @@ var fails := 0
 var n := 0
 const DT := 1.0 / 60.0
 const MTIME := preload("res://tools/mage_anim_time_check.gd")        # Sparkle's move timing against the footage frames
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
 const VPARITY := preload("res://tools/venator_parity_check.gd")   # Vex against the source (the parity pass)
 const VTIME := preload("res://tools/vex_anim_time_check.gd")        # her move timing against the footage frames
 
@@ -26,6 +27,7 @@ func run(main_node: Node, who: String) -> void:
 	if who == "mage":
 		await _mage()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "mage")
+		await _knocked_holds()
 		await _growth()
 		await ults.mage()
 		MTIME.new(self).run()
@@ -35,12 +37,24 @@ func run(main_node: Node, who: String) -> void:
 		await parity.vireo()
 		n += parity.n
 		fails += parity.fails
+		await _ally("mage")
 	else:
 		await _gunslinger()
 		await load("res://tools/combo_mark_check.gd").new().run(ok, ac, "gunslinger")
 		await ults.gunslinger()
+		await _ally("gunslinger")
+		var abyss = load("res://tools/abyss_cast.gd").new()
+		abyss.main = main
+		await abyss.gunslinger()
+		n += abyss.n
+		fails += abyss.fails
 	print("HCHECK DONE %s, %d checks, failures: %d" % [who, n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 func _wall(m: Match, p: Vector3) -> void:
 	var W = m.world
@@ -157,6 +171,11 @@ func _mage() -> void:
 			K.live(T) and int(mk.get("n", 0)) == 4 and grows,
 			"%d -> %d" % [sparks_1, sparks_4])
 	ok("Static: the marker sits above the HP bar", high >= K._top(T) + 0.45, "%.2f m" % high)
+	P.hp = P.max_hp * 0.5
+	K.on_knock(T, true)
+	ok("Static (data: 4 stacks, no knock heal): cap 4, a knock heals nothing, the card says none",
+			int(K.res_def()["max"]) == 4 and P.hp <= P.max_hp * 0.5 + 1.0
+			and not String(K.d["passive"]["desc"]).contains("heals you"), "hp %.1f" % P.hp)
 	# 3. Wirerun: the charge is spent on the press, the lane + end ring grow with the hold (not the cursor)
 	K.sparks.clear()
 	ac.fresh(T)
@@ -635,6 +654,38 @@ func _mage() -> void:
 			"took %.0f -> %.0f dashes %.1f" % [took0, ac.dmg(T), P.dashes])
 	await ac.done(m)
 	fails += ac.fails
+
+## Interrupts (docs/heroes/mage.md): knocked mid Storm Rod hold she throws nothing; knocked in the Kitefall crouch
+## she never takes off. (The check sets `downed` itself: a real knock of the lone player ends the training team.)
+func _knocked_holds() -> void:
+	var r: Array = ac.setup("mage", 5.0, "", true)
+	var m: Match = r[0]
+	var P: Hunter = r[1]
+	var T: Hunter = r[2]
+	var K: MageKit = P.ak
+	ac.aim_at(P, T.pos)
+	K.cd["rmb"] = 0.0
+	K.ch_rmb = 1.0
+	P.inp["sec_hold"] = true
+	K.press_rmb()
+	ac.step(m, 0.6, func(): P.inp["sec_hold"] = true)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 1.2)
+	ok("knocked mid Storm Rod hold: no throw, no damage, the charge kept",
+			not K.rmb_down and ac.dmg(T) == 0.0 and K.ch_rmb == 1.0, "took %.0f charges %.0f" % [ac.dmg(T), K.ch_rmb])
+	P.downed = false
+	P.inp["sec_hold"] = false
+	P.lvl = int(Hunter.ULT_AT[0])
+	var y0 := P.pos.y
+	var pressed := HunterKeys.ult_pressed(P)
+	P.downed = true
+	P.down_hp = 60.0          # a wisp with no down health is finished at once
+	ac.step(m, 0.8)
+	ok("knocked in the Kitefall crouch: no take-off", pressed and not K.ult.running() and P.pos.y < y0 + 0.5,
+			"pressed %s running %s y +%.1f" % [pressed, K.ult.running(), P.pos.y - y0])
+	P.downed = false
+	await ac.done(m)
 
 # ------------------------------------------------------------------ Vex
 ## Items 144 and 144b: the Longneedle's aim locks at the press and turns at a capped rate, so a flick across the

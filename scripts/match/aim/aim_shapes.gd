@@ -16,6 +16,7 @@ static func build(g: AimGeo, e: Dictionary) -> void:
 		"vee": _vee(g, e)
 		"cone": _cone(g, e)
 		"circle": _circle(g, e)
+		"ring": g.ring(e["at"], float(e["r"]), _lw(e), _rim(e))
 		"arc_wall": _arc_wall(g, e)
 		"swap": _swap(g, e)
 		"line": _line(g, e)

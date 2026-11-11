@@ -11,6 +11,7 @@ var skytrain: SkyTrain = null   # the loop train, on maps that have one
 var fx: Fx
 var cam: CamRig
 var hud: Node = null
+var recap: DeathRecap = null    # the down/death card (scripts/ui/death_recap.gd)
 var env: WorldEnvironment
 var hunters: Array = []
 var kins: Array = []
@@ -102,7 +103,9 @@ func _run_later() -> void:
 		if float(it[0]) <= time: due.append(it)
 	for it in due:
 		_later.erase(it)
-		(it[1] as Callable).call()
+		var cb: Callable = it[1]
+		if cb.is_valid():      # (a bound object freed since is skipped, not called)
+			cb.call()
 var _bond_cb: Callable
 var _combo_cb: Callable
 var player_lost: Array = []  # your kin left behind when you went down: {uid, kin, holder}
@@ -344,6 +347,8 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	recap = DeathRecap.new(self)         # the down/death card and the spectate cycle
+	add_child(recap)
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -1128,7 +1133,7 @@ func _spawn_breakables() -> void:
 				pad.position = dq
 				add_child(pad)
 				var lbl := Label3D.new()
-				lbl.text = "DUEL ROOM\n%s to enter" % Settings.key_cap("interact")
+				lbl.text = "DUEL RING\n%s to enter" % Settings.key_cap("interact")
 				lbl.font = UI.big; lbl.font_size = 40; lbl.pixel_size = 0.01; lbl.outline_size = 12
 				lbl.modulate = Color("ffb0a0"); lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
 				# drawn after every other see-through thing (pad glow, pickup beams), so nothing covers it
@@ -1142,6 +1147,7 @@ func _spawn_breakables() -> void:
 		var wsp: Vector3 = world.weapon_spots[i]
 		var gg := GearDrops.roll_gear(wr, 1 if tier >= 2 else 0, 0, -1, biomes.slot_lean_at(wsp) if biomes else {})
 		spawn_gear(String(gg["id"]), int(gg["rar"]), wsp, "ws%d" % i, false)
+	LootGlow.stand_in(self)
 
 func _add_break(kind_s: String, at: Vector3) -> void:
 	var n := Models.breakable(kind_s)
@@ -1228,7 +1234,7 @@ func _take_gear(h: Hunter, wp: Dictionary, from_net := false) -> void:
 		var ba := randf() * TAU
 		spawn_gear(String(old["id"]), int(old["rar"]), Vector3(h.pos.x + cos(ba) * 0.9, h.ground(), h.pos.z + sin(ba) * 0.9))
 	var col: Color = Data.RARITY[clampi(int(wp["rar"]), 0, Data.RARITY.size() - 1)]["color"]
-	sfx("pickup", h.pos, 0.0, 0.9)
+	sfx(PickupSfx.of_gear(String(wp["gear"])), h.pos, 0.0, 0.9)
 	fx.ring(h.pos, 1.4, col, 0.35)
 	if h == player and hud:
 		hud.toast(Loot.name_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))) + "  ·  " + Loot.sub_of(Loot.gear(String(wp["gear"]), int(wp["rar"]))), col)
@@ -1573,11 +1579,11 @@ func local_player() -> Hunter:
 	return player
 
 ## Where the mouse points, at the right height: on a foe under the cursor at that foe's height,
-## otherwise on the ground under the cursor. Aiming on your own height made shots at someone a
-## terrace above (or below) drift sideways past them, because the camera looks down at an angle.
-func _mouse_aim() -> Vector3:
+## otherwise on the first ground the cursor's ray meets (AimMode.ray_ground; your own height over the
+## abyss). Aiming on your own height made shots at someone a terrace above (or below) drift sideways past
+## them, because the camera looks down at an angle.
+func _mouse_aim(mp: Vector2) -> Vector3:
 	var base_y := player.pos.y + 0.95
-	var mp := get_viewport().get_mouse_position()
 	var best: Ent = null
 	var bd := 52.0
 	for e in foes_of(player.team):
@@ -1591,18 +1597,14 @@ func _mouse_aim() -> Vector3:
 		if d < bd:
 			bd = d; best = e
 	if best:
-		var q := cam.mouse_on_plane(best.hit_y() + 0.95)
+		var q := cam.screen_on_plane(mp, best.hit_y() + 0.95)
 		aim_y = best.hit_y()
 		return Vector3(q.x, base_y, q.z)
-	aim_y = player.pos.y
-	var p := cam.mouse_on_plane(base_y)
-	for _i in 2:
-		var g := world.ground_at(p.x, p.z)
-		if g <= World.VOID + 1.0 or absf(g - player.pos.y) > World.LEVEL * 3.0:
-			break
-		p = cam.mouse_on_plane(g + 0.95)
-		aim_y = g
-	return Vector3(p.x, base_y, p.z)
+	var g := AimMode.ray_ground(world, [cam.project_ray_origin(mp), cam.project_ray_normal(mp)], player.pos.y)
+	aim_y = g.y if g != Vector3.INF else player.pos.y
+	if g == Vector3.INF:
+		g = cam.screen_on_plane(mp, base_y)
+	return Vector3(g.x, base_y, g.z)
 
 ## How much grip the ground has here (ice patches in a frost region make it slippery).
 func ground_grip(p: Vector3) -> float:
@@ -1760,7 +1762,7 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
+			credit.gain_xp(d * LevelGrowth.xp("per_dmg_hunter" if target is Hunter else "per_dmg_monster"))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
@@ -1797,11 +1799,12 @@ func cancel_abilities(h: Hunter) -> void:
 	h.mel_hold = 0.0
 	h.strike_at_end = {}
 
-func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
+func knock(h: Hunter, by: Ent, o: Dictionary) -> void:
 	if h.downed or h.out:
 		return
 	cancel_abilities(h)
 	h.downed = true
+	JuggernautKit.mark_box(h, o, time)      # a Riposte knock goes on to the deathbox
 	h.downs += 1
 	KinTrack.drop_carried(self, h, h.pos)
 	if by is Blight: kstat["bl_knock"] = int(kstat.get("bl_knock", 0)) + 1      # (tests: what the Blight did)
@@ -1826,7 +1829,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
-			credit.gain_xp(90.0)
+			credit.gain_xp(LevelGrowth.xp("knock"))
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
@@ -2188,7 +2191,7 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
-	if credit == player:
+	if player and credit == player:   # a dedicated server has no player
 		if tut: tut.kills += 1
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
@@ -2493,7 +2496,7 @@ const VIEW_COS := 0.6          # about 106 degrees wide
 const NEAR_SENSE := 3.2
 
 func can_see(team_i: int, target: Hunter) -> bool:
-	if target.team == team_i or target.downed:
+	if target.team == team_i or target.downed or ArcherKit.sensed_by(self, team_i, target):
 		return true
 	return sees(team_i, target.pos, target.crouch, target.reveal_t > 0.0)
 
@@ -2670,7 +2673,7 @@ func _collect(h: Hunter, p: Dictionary) -> void:
 				sfx("unlock", null, -6.0, 1.2)
 		_: if UtilityBelt.is_item(String(p["kind"])): UtilityBelt.pickup(h, String(p["kind"]), int(p["v"]))
 	if h == player:
-		sfx("pickup", null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
+		sfx(PickupSfx.of_kind(String(p["kind"])), null, -8.0, 1.0 + minf(0.4, h.gems * 0.004))
 		if p["kind"] == "seed":
 			hud.toast("+%d %s seed" % [p["v"], Data.CROPS[p["key"]]["name"]], Data.CROPS[p["key"]]["color"])
 
@@ -2796,8 +2799,9 @@ func _update_shots(dt: float) -> void:
 			if not bh.is_empty():
 				if not s["x"].get("cos", false) and not s["x"].has("boom") and not s["x"].get("mob", false):
 					brk.hit(bh, s["by"])
-				_shot_end(s, p, null)
-				hit = true; break
+				if not sx.get("pierce_break", false):       # (Starpiercer smashes props and flies on)
+					_shot_end(s, p, null)
+					hit = true; break
 			for e in _shot_targets(s):
 				if Vector2(e.pos.x - p.x, e.pos.z - p.z).length() < e.r + s["r"] + HIT_SLACK and (shot_height_ok(e, p.y) or shot_from_above_ok(s, e, p.y)):
 					if sx.has("hitset"):
@@ -2916,6 +2920,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
 	# that stopped it
 	var fxx: Dictionary = s["x"]
+	if why == "wall" and is_instance_valid(s["by"]): Juice.wall(self, at, s["by"])
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
 		(fxx["kx"] as Callable).call(s, at, e, why if not (e != null and fxx.has("hitset")) else "end")
@@ -3259,7 +3264,7 @@ func _gather_input() -> void:
 			if d < bd: bd = d; best = sp
 		if best != Vector3.INF and bd > 0.8:
 			player.inp["move"] = Vector2(best.x - player.pos.x, best.z - player.pos.z).normalized()
-	player.inp["aim"] = _mouse_aim()
+	player.inp["aim"] = _mouse_aim(get_viewport().get_mouse_position())
 	player.inp["aim_ray"] = cam.mouse_ray()
 	player.inp["aim_y"] = aim_y      # the height of whatever you're pointing at (shots climb or dip to it)
 	# a bow draw in hand ignores the mouse drifting over a panel: only the button coming up looses it
@@ -3952,11 +3957,15 @@ func _separate() -> void:
 			var b: Ent = bodies[j]
 			if absf(a.pos.y - b.pos.y) > 1.0:
 				continue
+			# Hunters pass through each other as the source's do (hunter_move.json hunter_push 0)
+			var share := HunterMove.hunter_push if a is Hunter and b is Hunter else 1.0
+			if share <= 0.0:
+				continue
 			var d := Vector2(b.pos.x - a.pos.x, b.pos.z - a.pos.z)
 			var mind := a.r + b.r
 			var l := d.length()
 			if l < mind and l > 0.0001:
-				var push := d / l * (mind - l) * 0.5
+				var push := d / l * (mind - l) * 0.5 * share
 				var own := b is Kin and (b as Kin).owner_h == a      # your own Boki steps aside, never shoves you
 				var wa := 0.0 if own else 1.0 / a.mass(); var wb := 1.0 / b.mass()
 				var tot := wa + wb
@@ -4421,7 +4430,7 @@ func _update_training(dt: float) -> void:
 		return
 	if duel_pad != Vector3.INF and player.flat_dist(duel_pad) < 1.3 and not player.downed:
 		if Input.is_action_just_pressed("interact") and not paused:
-			Game.start_match(duel_opts())
+			DuelRing.open(self)
 			return
 	train_t += dt
 	if player.downed and train_t > 2.0:
@@ -4907,12 +4916,17 @@ func _watch_death() -> void:
 
 ## The teammate the camera follows while you're dead, or null.
 func spectating() -> Hunter:
-	if player == null or not player.out or player.gone or time - float(player.get_meta("died_at", time)) < 2.5:
-		return null
-	for x in hunters:
-		if x.team == player.team and x != player and not x.out and not x.extracted:
-			return x
-	return null
+	return recap.watched()
+
+## Online: the match server called the result (OnlineSession) or the line to it dropped (Net).
+func net_over(won: bool, why := "server") -> void:
+	if over or result.get("ending", false) or player == null:
+		return
+	result = {"extracted": won, "why": why}
+	_end_soon(1.0)
+
+func net_lost() -> void:
+	net_over(false, "lost")
 
 ## Leave while dead and waiting on your team.
 func give_up() -> void:

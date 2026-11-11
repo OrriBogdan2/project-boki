@@ -17,7 +17,6 @@ const VOID_COL := Color("b06bff")
 const PINK := Color("ff4fd8")
 const SEA := Color("2ee6c0")               # the signature: Snap, Brimseed and Nightwell (content/vfx/ostra.json)
 const DEEP := Color("0b5a50")              # their deep teal: the seed's and the dome's filling accent
-const GROUND_HAZARDS := ["hazard", "lava", "spore", "toxic", "molten"]
 const ORB_FULL_COL := Color("efd4ff")      # the orb's shot colour at full charge (what other games draw)
 const GLOW_COL := Color("8a3dff")          # the charge glow at his hand, starting...
 const GLOW_FULL_COL := Color("d070ff")     # ...and at full charge
@@ -88,6 +87,9 @@ func recast_window() -> Dictionary:
 		w["at"] = seed["pos"]
 		w["armed"] = float(seed["t"]) >= float(e_def()["min_recast"])
 	return w
+func recast_at() -> Vector3: return seed["pos"] if not seed.is_empty() else Vector3.INF
+## The recast opens once the seed may pop (a press inside min_recast is swallowed).
+	return super() if not seed.is_empty() and float(seed["t"]) >= float(e_def()["min_recast"]) else {}
 
 func _hand(up := 1.15) -> Vector3:
 	var d := h.aim_dir()
@@ -118,10 +120,14 @@ func on_deal(t: Ent, dmg: float, _o: Dictionary) -> void:
 ## He floats: the ground hazards (lava vents and their pools, spore pods, puddles, the pit's pull) never
 ## touch him. A sky strike (the lightning rod) still does.
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
-	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in GROUND_HAZARDS):
+	if not o.get("sky", false) and (o.get("tags", []) as Array).any(func(t): return t in float_tags()):
 		hazards_dodged += 1
 		return [0.0, o]
 	return [dmg, o]
+
+## The damage tags of ground hazards he floats over (passive.float_tags): the data's "avoids ground hazards".
+func float_tags() -> Array:
+	return (d["passive"] as Dictionary)["float_tags"]
 
 func hovering() -> bool:
 	return not swap.is_empty()
@@ -533,11 +539,18 @@ func _snap_hit(s: Dictionary, at: Vector3, e: Ent) -> void:
 	m.sfx("os_snap_hit", at, -2.0, 1.0)
 
 # ------------------------------------------------------------------ E: Brimseed
+## Where a ground cast (the seed, the well) starts: his feet, or the floor under him in a jump, a fall or a
+## glide. The source gives Void's E and R no ground-only rule (Tetra's wall has one), so height changes nothing.
+func cast_from() -> Vector3:
+	var g: float = m.world.ground_at(h.pos.x, h.pos.z)
+	return h.pos if h.grounded or g <= World.VOID + 1.0 else Vector3(h.pos.x, g, h.pos.z)
+
 func cast_e() -> bool:
 	var ed := e_def()
-	var pw := HeroZones.walk(m, h.pos, aim(), float(ed["reach"]))
+	var from := cast_from()
+	var pw := HeroZones.walk(m, from, aim(), float(ed["reach"]))
 	var p: Vector3 = pw["pos"]
-	if not pw["ok"] or not HeroZones.fits(m, p, h.pos.y, false):
+	if not pw["ok"] or not HeroZones.fits(m, p, from.y, false):
 		seed_denied += 1
 		if h.is_local() and m.hud: m.hud.toast_small("No ground to plant on", col_of(ed))
 		return false
@@ -550,7 +563,8 @@ func cast_e() -> bool:
 		"pos": p, "t": 0.0, "grow": grow, "rmax": rmax, "sid": sid, "vis": vis, "burn": 0.0, "from": _hand(),
 		"col": null
 	}
-	e_t = grow + float(ed["hold_full"])
+	# no timer: the source lists none, so the recast window stays open until he pops it or goes down
+	e_t = INF
 	play("ostra_seed")
 	m.sfx("os_seed", p, -3.0, 1.0)
 	m.later(float(ed["drop"]), func(): vfx("seed_plant", p))
@@ -594,12 +608,6 @@ func _tick_seed(dt: float) -> void:
 			for f in foes_in(seed["pos"], seed_radius()):
 				f.hurt(float(ed["burn"]) * float(ed["burn_every"]) * power("kin"), h, {"src": "abil", "ab": "e"})
 	if h.downed:
-		_pop(false)
-
-## The source detonates only on the recast: a seed left at full size this long (e.hold_full) fizzles out
-## with no damage, so it can't be parked forever.
-func _e_end() -> void:
-	if not seed.is_empty():
 		_pop(false)
 
 ## E again pops it, from 0.3s after the plant (a press before that is eaten, so a double tap can't
@@ -674,6 +682,8 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 		return
 	if int(
 		h.slot_lv["dash"]
-	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los and randf() < 0.15:
-		h.inp["aim"] = tgt.pos
+	) > 0 and h.dashes >= 1.0 and swap.is_empty() and dist > 6.0 and dist < 11.0 and los \
+			and (tgt.stun_t > 0.0 or randf() < 0.15):
+		# it lands swap_time() later: lead them
+		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * swap_time()
 		h.inp["dash"] = true

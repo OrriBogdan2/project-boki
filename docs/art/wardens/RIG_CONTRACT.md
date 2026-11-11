@@ -76,6 +76,9 @@ each is the next one's parent, and the last is the tip (no skin of its own; its 
 loader (`WardenGlb.Springs`, run by Sync after the contract bones) swings every chain as a damped rope in world
 space, pulled back toward the shape it has riding its parent rigidly (firmer at the root than at the tip), so it
 trails behind a run, swings out of a turn and settles. Nothing in the kit moves or the checks depends on them.
+A Hero's `content/rules/warden_anim/<art>.json` may tune its chains by name start in a `"springs"` block (`pull` at
+root and tip, `damp`, a bend `limit` and a tighter `limit_in` toward the body), gated by `--spring-settle-check`
+(docs/art/secondary_motion/README.md).
 `tools/meshy/warden_parts.py` builds Vex r3b's two braids this way; `fit_warden.py`'s `hair_springs` puts a scan's own
 fused hair on such chains (Tarek's locs: the vertices of the hair slot in a box handed from the head to the chain by
 how far down it they hang).

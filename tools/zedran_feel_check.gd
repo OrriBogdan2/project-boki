@@ -19,6 +19,7 @@ func run(a) -> void:
 	await parity_lmb()
 	await parity_rmb()
 	await load("res://tools/kael_accuracy_check.gd").new().run(A)
+	await load("res://tools/kael_anim_check.gd").new().run(A)
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(A.main, "juggernaut")
 	A.ok("jug item 51: every slot casts mid-jump, holds through a jump and a dash and lets go in the air, and a "
 			+ "jump or Shift moves him out of it in 0.1s (or its row's exception)",
@@ -531,7 +532,7 @@ func dash_moves() -> void:
 	A.ok("jug dash moves: his own ground and air dashes (jug_dash, jug_exdash), nobody else's table has them",
 			ground == "jug_dash" and air == "jug_exdash" and KMovesDJ.MOVES.has(ground) and KMovesDJ.MOVES.has(air)
 			and not HunterAnim.KMOVES.has(ground) and not HunterAnim.KMOVES.has(air)
-			and not KMovesPair.MOVES.has(air) and not KMovesPinBjorn.MOVES.has(air),
+			and not KMovesPair.MOVES.has(air) and not KMovesPin.MOVES.has(air) and not KMovesBjorn.MOVES.has(air),
 			"%s / %s" % [ground, air])
 	A.ok("jug dash moves: each fits its dash (keys cover the move, recovery at most 0.45s past it)",
 			g_len >= g_dash and g_len <= g_dash + 0.45 and a_len >= a_dash and a_len <= a_dash + 0.45,

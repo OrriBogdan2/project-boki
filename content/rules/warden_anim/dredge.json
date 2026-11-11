@@ -50,11 +50,15 @@
 		"rise": "jump",
 		"fall": "fall",
 		"glide": "glide",
-		"dive": "pounce"
+		"dive": "pounce",
+		"dive_at": 0.36,
+		"dive_tilt": 90.0
 	},
 	"land": {
 		"clip": "land",
-		"dur": 0.4,
+		"dur": 0.27,
+		"moving": 0.13,
+		"rate": 1.5,
 		"min_fall": 0.25
 	},
 	"kmoves": {

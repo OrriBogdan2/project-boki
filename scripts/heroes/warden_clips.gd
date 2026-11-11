@@ -7,8 +7,9 @@ extends RefCounted
 ## clip can never drift from the hit it shows. States the data lists as "procedural" (ledges, stomps) blend back to the
 ## retargeted rig, and so does any Hero model played by something that feeds no state (galleries, portraits).
 ##
-## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a BlendSpace1D of fall
-## and rise, or the glide) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
+## The tree: loco (BlendSpace2D: idle at the centre, a walk ring, a run ring) > air (Blend2 onto a Blend2 of fall
+## and rise, or the glide, or the dive: a plunge's own clip, data "air.dive", held at "dive_at" s when the clip is a
+## one-shot) > upper (Blend2 filtered to the torso and arms: moves that keep the legs running) > full
 ## (Blend2: moves that own the body). The action, and the upper-body move, are each two seekable channels crossfaded,
 ## so one move hands to the next without a pop (item 32).
 ##
@@ -58,6 +59,8 @@ var act_w := 0.0             # how much the action owns the body
 var up_w := 0.0              # how much it owns the upper body only
 var air_w := 0.0
 var glide_w := 0.0
+var dive_w := 0.0
+var tilt: WardenAirTilt      # the whole body pitched and banked in the air
 var proc_w := 1.0            # how much of the procedural rig is shown
 var rise_w := 0.0
 var loco_pos := Vector2.ZERO
@@ -151,10 +154,11 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.root_node = tree.get_path_to(glb)
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
+	tilt = WardenAirTilt.new(glb, sk, d["air"])
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
-	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	free_arm = WardenFreeArm.new(sk, lib, String(d.get("free_pose", d["loco"]["idle"])), d.get("free_arm", {}))
 	_setup_out()
 	return true
 
@@ -205,7 +209,7 @@ func _is_loop(nm: String) -> bool:
 	var cr: Dictionary = d.get("crouch", {})
 	if cr.has("idle") and (nm == cr["idle"] or nm in (cr["walk"] as Dictionary).values()):
 		return true
-	return nm in ["fall", "glide", "stun"]
+	return nm in ["fall", "glide", "dive", "stun"]
 
 func _anim(nm: String) -> AnimationNodeAnimation:
 	var n := AnimationNodeAnimation.new()
@@ -232,14 +236,24 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("stance_w", 0, "loco_rate")
 	t.connect_node("stance_w", 1, "stance")
 	var ai: Dictionary = d["air"]
-	var space := AnimationNodeBlendSpace1D.new()
-	space.add_blend_point(_anim(String(ai["fall"])), 0.0)
-	space.add_blend_point(_anim(String(ai["rise"])), 1.0)
-	t.add_node("air_pose", space)
+	# (the rise plays once per jump: seeked to its start at take-off, else it stays frozen on its last frame)
+	t.add_node("rise", _anim(String(ai["rise"])))
+	t.add_node("rise_seek", AnimationNodeTimeSeek.new())
+	t.connect_node("rise_seek", 0, "rise")
+	t.add_node("fall", _anim(String(ai["fall"])))
+	t.add_node("air_pose", AnimationNodeBlend2.new())
+	t.connect_node("air_pose", 0, "fall")
+	t.connect_node("air_pose", 1, "rise_seek")
 	t.add_node("glide", _anim(String(ai["glide"])))
+	t.add_node("dive", _anim(String(ai.get("dive", ai["glide"]))))
+	t.add_node("dive_at", AnimationNodeTimeSeek.new())
+	t.connect_node("dive_at", 0, "dive")
+	t.add_node("dive_w", AnimationNodeBlend2.new())
+	t.connect_node("dive_w", 0, "glide")
+	t.connect_node("dive_w", 1, "dive_at")
 	t.add_node("glide_w", AnimationNodeBlend2.new())
 	t.connect_node("glide_w", 0, "air_pose")
-	t.connect_node("glide_w", 1, "glide")
+	t.connect_node("glide_w", 1, "dive_w")
 	t.add_node("air", AnimationNodeBlend2.new())
 	t.connect_node("air", 0, _build_crouch(t) if d.has("crouch") else "stance_w")
 	t.connect_node("air", 1, "glide_w")
@@ -333,8 +347,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if moves.has(km):
 		var mv: Dictionary = moves[km]
 		# ("lead": the cock is skipped, so the hit pose lands on the kit's hit; "speed": the clip runs this much
-		# slower or faster than the kit's beat, until the model is re-keyed)
+		# slower or faster than the kit's beat, until the model is re-keyed; under zero the first frame holds that long)
 		var tt := float(s.get("kmove_t", 0.0)) * float(mv.get("speed", 1.0)) + float(mv.get("lead", 0.0))
+		tt = maxf(tt, 0.0)
 		# ("alt": every other play of the move takes this clip: Motley's orbs, hand after hand)
 		if km != alt_km or tt < alt_t:
 			alt_on = not alt_on
@@ -381,8 +396,13 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			return {"clip": clip, "t": et, "upper": moving or clip.begins_with(WardenGestures.PREFIX)}
 	land_t += dt
 	var ld: Dictionary = d.get("land", {})
-	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
-		return {"clip": ld["clip"], "t": land_t}
+	# ("moving": how long the landing owns the body while he runs on, so the legs are back on the run before the
+	# standing absorb would end; "rate": the clip's speed, a quicker absorb from the same keys)
+	var vel: Vector3 = s.get("vel", Vector3.ZERO)
+	var moving := Vector2(vel.x, vel.z).length() >= STILL
+	var hold := float(ld.get("moving", ld.get("dur", 0.0))) if moving else float(ld.get("dur", 0.0))
+	if land_t < hold and bool(s.get("grounded", true)):
+		return {"clip": ld["clip"], "t": land_t * float(ld.get("rate", 1.0))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	if hit < float(hd.get("dur", 0.0)):
@@ -419,14 +439,17 @@ func step(dt: float) -> void:
 			var ch := "a" if chan == 0 else "b"
 			_node("anim_" + ch).animation = clip
 			_p("seek_%s/seek_request" % ch, maxf(tt, 0.0))
+			if act_w <= 0.0:
+				xf = float(chan)      # (none of the last whole-body move shows: no fade from its stale pose)
 		var live := "a" if chan == 0 else "b"
 		if tt >= 0.0:
 			_p("seek_%s/seek_request" % live, tt)
 			_p("rate_%s/scale" % live, 0.0)
 		else:
 			_p("rate_%s/scale" % live, 1.0)
+		var fade := float(want.get("fade", FADE))
 		act_w = move_toward(act_w, 1.0, dt / fade)
-		up_w = move_toward(up_w, 0.0, dt / FADE)
+		up_w = move_toward(up_w, 0.0, dt / fade)     # (an upper move hands over as this one comes in)
 	else:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
@@ -444,10 +467,11 @@ func step(dt: float) -> void:
 	tree.advance(dt)
 	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	tilt.step(s, dt)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_out(dt)
-	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
+	free_arm.apply(dt, "" if proc else String(want.get("clip", "")), float(want.get("t", 0.0)))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward
 ## his velocity on top of the clip, so the clip's lean follows it. "turn_max" lifts the limit (a dash clip that
@@ -500,14 +524,20 @@ func _loco(s: Dictionary, dt: float) -> void:
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)
 	_p("stance_w/blend_amount", stance_w)
 	var grounded := bool(s.get("grounded", true))
-	var gliding := bool(s.get("gliding", false)) or bool(s.get("diving", false))
+	var diving := bool(s.get("diving", false))
 	air_w = move_toward(air_w, 0.0 if grounded else 1.0, dt / AIR_FADE)
-	glide_w = move_toward(glide_w, 1.0 if gliding else 0.0, dt / AIR_FADE)
+	glide_w = move_toward(glide_w, 1.0 if diving or bool(s.get("gliding", false)) else 0.0, dt / AIR_FADE)
+	dive_w = move_toward(dive_w, 1.0 if diving else 0.0, dt / AIR_FADE)
 	rise_w = move_toward(rise_w, 1.0 if vel.y > 0.5 else 0.0, dt / AIR_FADE)
 	_p("air/blend_amount", air_w)
 	_p("glide_w/blend_amount", glide_w)
-	_p("air_pose/blend_position", rise_w)
+	_p("dive_w/blend_amount", dive_w)
+	if d["air"].has("dive_at"):
+		_p("dive_at/seek_request", float(d["air"]["dive_at"]))
+	_p("air_pose/blend_amount", rise_w)
 	if not grounded:
+		if not was_air:
+			_p("rise_seek/seek_request", 0.0)
 		air_t += dt
 	elif was_air:
 		if air_t >= float((d.get("land", {}) as Dictionary).get("min_fall", 0.0)):

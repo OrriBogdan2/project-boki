@@ -78,6 +78,13 @@ func add_chill(t: Ent) -> void:
 	if fresh:
 		vfx("chill", t.pos)
 
+## The Chill on `t`, for the ComboMark tag (one state, no stacks); the ring is the Chill left.
+func combo_read(t: Ent) -> Dictionary:
+	if not chilled(t):
+		return {}
+	return {"icon": "frost", "n": 1, "max": 1, "left": float(chill[t.get_instance_id()]["left"]),
+			"total": float(d["passive"].get("chill_t", 4.0))}
+
 func fan_on(t: Ent) -> int:
 	if t == null or not is_instance_valid(t): return 0
 	return int((fan_hits.get(t.get_instance_id(), {}) as Dictionary).get("n", 0))
@@ -104,9 +111,10 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 		var at := t.pos
 		var delay := float(pd.get("splinter_delay", 0.4))
 		lk().burst("shell", at, {"dur": delay + 0.05})     # the frost shell closes over them: the tell
+		var tid := t.get_instance_id()      # (a lambda that captured the foe errors if it is freed by then)
 		m.later(
 				delay,
-				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), t))
+				func(): splinter(at, float(pd["splinter_dmg"]), float(pd["splinter_r"]), instance_from_id(tid) as Ent))
 		chill.erase(t.get_instance_id())
 		return
 	add_chill(t)
@@ -124,13 +132,18 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			lk().burst("shell", t.pos, {"dur": SHELL_T + 0.05, "ent": t})
 			m.sfx("rimewright_chime", t.pos, -3.0, 1.0)
 			var at := t.pos
-			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), float(pd["splinter_r"]) * 0.8, t))
+			var tid := t.get_instance_id()
+			var fan_r := float(pd["splinter_r"]) * 0.8
+			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
-## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
+## Shatter: a starburst of ice spikes round the foe and damage to everyone near (data: damage only; no slow, no
+## fresh Chill: those were ours-only riders, cut 2026-11-07).
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
+	if skip != null and is_instance_valid(skip):
+		ComboMark.payoff(m, h, skip)     # the Chill payoff: the Shattered foe flashes
 	lk().burst("spikes", at, {"r": r, "dur": 0.7})
 	vfx("shatter", at)
 	play_soft("tm_shatter")
@@ -140,9 +153,7 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 		f.hurt(
 				dmg * power("passive"), h,
 				{
-					"src": "splinter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "splinter"],
-					"payoff": true})
-		add_chill(f)
+					"src": "splinter", "ab": "passive", "tags": ["passive", "splinter"], "payoff": true})
 
 func _tick(dt: float) -> void:
 	for key in chill.keys():
@@ -720,6 +731,10 @@ func cast_e() -> bool:
 func _tick_wall_cast(dt: float) -> void:
 	if wall_cast.is_empty():
 		return
+	if h.downed:
+		wall_cast = {}                 # knocked in the tell: no wall (docs/heroes/rimewright.md "Interrupts")
+		AimKit.hide(h, "e")
+		return
 	wall_cast["t"] = float(wall_cast["t"]) - dt
 	if float(wall_cast["t"]) <= 0.0:
 		var wc := wall_cast
@@ -857,7 +872,7 @@ func _tick_wall(dt: float) -> void:
 ## Displace pushes it at the wall's speed until the wall stops (a player online, on their own game).
 func _carry(w: Dictionary, dir: Vector2, speed: float) -> void:
 	for f in m.foes_of(h.team):
-		if f.dead or absf(f.pos.y - float(w["y"])) > 2.0 or carried.has(f.get_instance_id()):
+		if f.dead or not AimMode.in_reach(float(w["y"]), f.pos.y) or carried.has(f.get_instance_id()):
 			continue
 		var p2 := Vector2(f.pos.x, f.pos.z)
 		var off := p2 - Geometry2D.get_closest_point_to_segment(p2, w["a"], w["b"])
@@ -908,6 +923,28 @@ func icb() -> IceBody:
 
 func ult_running() -> bool:
 	return not rime.is_empty()
+
+## E again stops the sliding wall (it stops by itself at the end of its slide); X again in Rimelock's last
+## `late` seconds cracks it open early (any earlier X only breaks the shell, so that is no recast).
+func recast_window() -> Dictionary:
+	if e_recastable():
+		return {"slot": "e", "left": float(wall["slide_t"]) - float(wall["t"])}
+	if not rime.is_empty():
+		var xd := x_def()
+		var left := float(xd["hold"]) - float(rime["t"])
+		if left <= float(xd["late"]):
+			return {"slot": "x", "left": left}
+	return {}
+
+
+## Rimelock is open until it cracks (X ends it early or late); else the Rink Wall's slide (E).
+func recast_left() -> float:
+	if rime.is_empty():
+		return super.recast_left()
+	return maxf(0.0, float(x_def()["hold"]) - float(rime["t"]))
+
+
+func recast_slot() -> String: return "x" if not rime.is_empty() else "k1"
 
 
 func cast_ult() -> bool: return HeroUlt.press(self, _start_rime)
@@ -1117,6 +1154,7 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.0 and dist > 3.0 and tgt is Hunter:
 		h.inp["aim"] = tgt.pos + Vector3(tgt.vel.x, 0, tgt.vel.z) * 0.6 + Vector3(0, 0.9, 0)
 		h.inp["sec"] = true
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + 0.15      # held past the tap, then released
 	if (int(h.slot_lv["kin"]) > 0
 			and float(cd["e"]) <= 0.0
 			and dist < 9.0

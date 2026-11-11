@@ -97,6 +97,15 @@ func combo_marks(out: Array) -> void:
 			var n := int(sp["n"])
 			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
 
+## X again in the hang brings her down at the cursor (she comes down by herself when the hover runs out).
+func recast_window() -> Dictionary:
+	if ult.phase() != MageUlt.AIR:
+		return {}
+	return {"slot": "x", "left": float(ult.data()["hover"]) - float(ult.leap["t"])}
+
+func recast_left() -> float: return ult.recast_left()
+func recast_slot() -> String: return "x"
+
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:
@@ -375,7 +384,7 @@ func on_dash(_use_ex: bool) -> bool:
 		return true         # Kitefall's flight is its own move (content/dash_flow/mage.json); its crouch combines
 	if not wire.is_empty() or run_t > 0.0:
 		return true
-	if KitStatus.grounded(h) or h.root_t > 0.0:
+	if CcLockout.blocks(h, "dash"):
 		h._ab_feedback("dash", "deny")
 		return true
 	# Shift is only ever the Wirerun, never a plain tumble. No class dodge and no long air dash for her, on
@@ -421,7 +430,7 @@ func _tick_wire(dt: float) -> void:
 	var dd := dash_def()
 	wire["t"] = float(wire["t"]) + dt
 	var t := float(wire["t"])
-	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
+	if h.downed or CcLockout.blocks(h, "dash"):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
 		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds
@@ -616,7 +625,7 @@ func fire_rmb(c: Dictionary) -> void:
 	if rod != null and is_instance_valid(rod):
 		rod.visible = false
 	var sd := rmb_def()
-	if not spend_rmb():
+	if h.downed or not spend_rmb():          # knocked mid-hold: nothing thrown (mage.md "Interrupts")
 		return
 	var held_t := float(c["t"])
 	var min_t := float(sd["min_t"])
@@ -835,4 +844,5 @@ func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and los and dist < 12.5 and randf() < 0.4:
 		h.inp["aim"] = aimp
 		h.inp["sec"] = true
-		bot_hold["rmb"] = (0.6 + randf() * 0.5) if dist > 5.0 else 0.0
+		var full := dist > 5.0 or randf() < 0.5          # a full-hold Rod, or a quick tap
+		bot_hold["rmb"] = float(rmb_def()["hold"]) + randf() * 0.1 if full else 0.0

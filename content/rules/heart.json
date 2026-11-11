@@ -23,6 +23,12 @@
  "tide_r1": 34.0,
  "tide_boost": 0.55,
  "_tide_boost": "added to the Blight's strength outside the tide ring (so they hit harder and are tougher there), scaled by how far out",
+ "tide_dmg": [[0, 3.0], [1, 6.0], [2, 50.0], [10, 450.0]],
+ "_tide_dmg": "outside the ring a standing Hunter takes this flat damage each tick, by stage: the source's death circle curve (stage, damage at source health), linear between its keys. The close is split into the source's 11 stages (0-10), equal in length; the last one holds once the ring is closed",
+ "tide_src_hp": 1290.0,
+ "_tide_src_hp": "the source's base health for a medium Hunter: the curve is scaled by our medium health over this, so a stage takes as long to kill as there",
+ "tide_tick_s": 1.0,
+ "_tide_tick_s": "seconds between tide hits (the source gives a per-stage value and no rate: read as per second)",
  "tide_heat": 0.06,
  "_tide_heat": "extra Skitter spawn heat per second for a squad outside the ring: the Blight comes for squads that stay away",
  "reward": {

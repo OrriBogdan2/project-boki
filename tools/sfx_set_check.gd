@@ -12,6 +12,10 @@ extends RefCounted
 ##      every sound under "loops" repeats seamlessly (no fade at either end, the seam no bigger than a step)
 ##   7. every Hunter's ultimate has a positional cast cue (<arch>_ult_cue, with a reach past hearing range)
 ##      and the two team tags carry as far; HeroUlt.press plays it and the match plays it for other players' casts
+##   7. every hit class (HitClass) names a sound of the "targets" set that exists and fits under a weapon hit
+##   7. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
+##   7. boki_voices: every rigged species (art/kin/*) has all five moods with two takes, KinVoice.cue picks them,
+##      an unknown species falls back to the generic cues, and no two species share a happy take
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -38,8 +42,18 @@ func run(main: Node) -> void:
 	print("SFXSET %d sound sets" % sets)
 	_fallback()
 	_ult_cues()
+	_boki_cues()
+	_pickups()
+	_hit_targets()
+	_ambience()
+	_wisp_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The ambience beds the match (AmbBeds) and the title ask for each have their loop file.
+func _ambience() -> void:
+	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
+		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
@@ -68,6 +82,30 @@ func _check_set(path: String) -> void:
 		_check_hunter(group, d)
 	if group == "mob":
 		_check_mobs(sounds)
+	if group == "boki_voices":
+		_boki_voices(d["sounds"])
+
+## 7. A voice set per rigged species: five moods, two takes each, picked by KinVoice.cue, generic fallback.
+func _boki_voices(sounds: Dictionary) -> void:
+	var gaps := []
+	var same := []
+	var seen := {}
+	for sp in DirAccess.get_directories_at("res://art/kin"):
+		for mood in KinVoice.GENERIC_CUE:
+			var want := "bk_%s_%s" % [sp, mood]
+			if not sounds.has(want) or _takes(want).size() != 2 or KinVoice.cue(sp, mood) != want:
+				gaps.append(want)
+		var sig := hash(_data("res://audio/bk_%s_happy.wav" % sp))
+		if seen.has(sig):
+			same.append("%s = %s" % [sp, seen[sig]])
+		seen[sig] = sp
+	var what := "boki_voices: %d species, 5 moods, 2 takes (gaps %s)" % [seen.size(), gaps]
+	ok(gaps.is_empty() and not seen.is_empty(), what)
+	ok(same.is_empty(), "boki_voices: every species sounds different (same %s)" % [same])
+	var fell := []
+	for mood in KinVoice.GENERIC_CUE:
+		fell.append(KinVoice.cue("no_such_species", mood))
+	ok(fell == KinVoice.GENERIC_CUE.values(), "boki_voices: an unknown species falls back (%s)" % [fell])
 
 func _check_hunter(arch: String, d: Dictionary) -> void:
 	var sounds: Dictionary = d["sounds"]
@@ -172,6 +210,57 @@ func _ult_cues() -> void:
 	ok(wired, "HeroUlt.press plays and sends the cue; the match plays others'")
 	ok(cue.count("m.sfx(") == 2 and cue.count(", DB)") == 2, "ally and rival tags play at the one level")
 
+## 7. Each target class has its own short layer (Juice plays HitClass.SOUND[class] under the weapon's hit).
+func _hit_targets() -> void:
+	var set_d = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/targets.json"))
+	var sounds: Dictionary = set_d.get("sounds", {}) if set_d is Dictionary else {}
+	var names := HitClass.SOUND.values()
+	var missing := names.filter(func(n): return not sounds.has(n) or not Sfx.ensure(n))
+	var all := names.size() == HitClass.WALL + 1 and missing.is_empty()
+	ok(all, "hit targets: all %d classes have a sound (missing %s)" % [names.size(), missing])
+	var long := []
+	for n in names:
+		for t in _takes(n):
+			if _data(t).size() / 2 > 0.25 * 44100:
+				long.append(t.get_file())
+	ok(long.is_empty(), "hit targets: every take is under 0.25 s, a layer not a hit (long: %s)" % [long])
+
+## 7. The Boki wisp cues (KinSummon): a chirp for every body size, higher for a smaller one, and the
+## bloom, shrink, ready and grab cues, all in the boki set.
+func _wisp_cues() -> void:
+	var boki: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/sfx/boki.json"))["sounds"]
+	var sizes := {}
+	for row in (KinSummon.rules()["table"] as Dictionary).values():
+		for size in row:
+			sizes[size] = true
+	var missing := []
+	for size in sizes:
+		var ks := KinSpec.new()
+		ks.size = size
+		if not boki.has(KinSummon.chirp_name(ks)):
+			missing.append(size)
+	for cue in ["wisp_bloom", "wisp_shrink", "wisp_ready", "wisp_grab"]:
+		if not boki.has(cue):
+			missing.append(cue)
+	var what := "wisp cues: a chirp per body size, bloom, shrink, ready, grab (missing %s)"
+	ok(missing.is_empty() and sizes.size() == 3, what % [missing])
+	var pitch := []
+	for size in ["small", "medium", "large"]:
+		pitch.append(_zero_crossings(_data("res://audio/wisp_chirp_%s.wav" % size)))
+	var order := "wisp chirps rise as the body gets smaller (zero crossings %s)"
+	ok(pitch[0] > pitch[1] and pitch[1] > pitch[2], order % [pitch])
+
+## Sign changes in a wav's samples: a cheap stand-in for its pitch.
+func _zero_crossings(data: PackedByteArray) -> int:
+	var n := 0
+	var prev := 0
+	for k in data.size() / 2:
+		var v := data.decode_s16(k * 2)
+		if (v < 0) != (prev < 0):
+			n += 1
+		prev = v
+	return n
+
 ## 5. A Hunter without its own set plays the shared sounds.
 func _fallback() -> void:
 	var h := Hunter.new()
@@ -179,6 +268,41 @@ func _fallback() -> void:
 	var got := [HeroSfx.of(h, "dash", "dash"), HeroSfx.of(h, "hurt", "")]
 	h.free()
 	ok(got == ["dash", ""], "no set: the shared dash, and no voice line (%s)" % [got])
+
+## Each Boki cue is played by the code for its event (kin_downed, the fuse flow, home eat and sleep).
+func _boki_cues() -> void:
+	var wired := {"boki_downed": "scripts/match/kin_downed.gd", "boki_revive": "scripts/match/kin_downed.gd",
+		"boki_fuse": "scripts/match/kin.gd", "boki_unfuse": "scripts/match/kin.gd",
+		"boki_eat": "scripts/home/home_econ.gd", "boki_sleep": "scripts/home/home.gd"}
+	for cue in wired:
+		var src := FileAccess.get_file_as_string("res://" + String(wired[cue]))
+		ok(src.contains('"%s"' % cue), "%s is played from %s" % [cue, wired[cue]])
+
+## 7. Pickups by item category (content/rules/pickup_sfx.json): every category, gear kind, treasure, belt
+## item and ground kind maps to a sound that exists, and the key cue is kept.
+func _pickups() -> void:
+	var r: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(PickupSfx.RULES))
+	var cats: Dictionary = r["cues"]
+	var cues := cats.values()
+	for c in (r["gear_kind"] as Array) + [r["valuable"], r["belt"]] + (r["kinds"] as Dictionary).values():
+		ok(cats.has(c), "pickup category %s has a cue" % c)
+	var kinds := Gear.SLOT_NAMES.size()
+	ok((r["gear_kind"] as Array).size() == kinds, "a pickup category for each of the %d gear kinds" % kinds)
+	var silent := cues.filter(func(s): return not Sfx.ensure(String(s)))
+	ok(silent.is_empty(), "every pickup category has its sound file (missing %s)" % [silent])
+	ok(Sfx.ensure("key_get"), "the key cue key_get is kept")
+	var wrong := []
+	for gid in Gear.ALL:
+		if not cues.has(PickupSfx.of_gear(String(gid))):
+			wrong.append(gid)
+	for vid in Loot.VALUABLES:
+		if not cues.has(PickupSfx.of(Loot.valuable(String(vid)))):
+			wrong.append(vid)
+	for iid in UtilityBelt.ALL:
+		if not cues.has(PickupSfx.of_kind(String(iid))):
+			wrong.append(iid)
+	ok(wrong.is_empty(), "every gear piece, treasure and belt item has a cue (%s)" % [wrong])
+	ok(Sfx.ensure("use_tonic") and Sfx.ensure("use_armor_kit"), "tonic drink and armour-kit repair have own sounds")
 
 func _takes(sname: String) -> Array:
 	var out := []

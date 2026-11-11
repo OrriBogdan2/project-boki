@@ -48,9 +48,7 @@
 		"dur": 4.0,
 		"per_stack": 0.72,
 		"refund": 0.2,
-		"emp_refund": 0.4,
 		"emp_idle": 1.0,
-		"emp_range": 1.4,
 		"falloff": 0.5,
 		"col": "#ffb347"
 	},
@@ -95,8 +93,8 @@
 		"wind_move": 0.5,
 		"wind_lane": 6.0,
 		"seed": {
-			"speed": 30.0,
-			"range": 14.0,
+			"speed": 36.0,
+			"range": 15.3,
 			"hit_r": 0.7,
 			"dmg": 9.0,
 			"delay": 0.7,
@@ -106,7 +104,7 @@
 			"root": 1.1
 		},
 		"variants": {
-			"tap": "Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (30 m/s) sticks to the first foe it hits (9 damage) and a leaf disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled."
+			"tap": "Press: a fixed 1s wind-up at half speed, with a short dotted lane along your aim. Then she throws by herself, at the cursor as the wind-up ends, so flick it onto the target; holding does nothing. A fast seed (36 m/s, 15.3m) sticks to the first foe it hits (9 damage) and a leaf disc the size of the burst shows under them at once, filling. 0.7s later it bursts: 32 damage and root 1.1s to them and every foe within 2.2m (4.4m at rank 3), and each is Kindled."
 		},
 		"sockets": {
 			"hit": "add",
@@ -127,13 +125,12 @@
 		"every": 0.5,
 		"over": 10.0,
 		"burst": 22.0,
-		"self_k": 0.33,
 		"wisp_k": 5.0,
 		"reach": 9.0,
 		"toss_speed": 45.0,
 		"latch_r": 1.0,
 		"boost": 0.5,
-		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you at a third, and a downed teammate five times over.",
+		"desc": "A 2.6m ring of warm light round you for 2.5s: it heals teammates inside 10 over its life, then blooms to heal them 22 more (a soft glow, not a blast). Press E again to throw it to the cursor (up to 9m, it lands almost at once and widens to 2.9m): for 1s its healing is 50% stronger, and it latches onto the first teammate it passes. It heals you like a teammate, and a downed teammate five times over.",
 		"sockets": {
 			"guard": "add",
 			"util": "add"
@@ -180,5 +177,13 @@
 		"land_r": 0.9,
 		"self_when_solo": true,
 		"desc": "Cast it with the cursor on a teammate within 12.6m (7 body heights; the ring and a line show when it is ready): a tether of light heals them 7 a second for 5s while you keep walking (and casting). A gold ring round you shows the tether's reach. At the end a downed teammate is pulled to your side and stood back up; while they are down the tether's healing goes to you instead. It breaks if you are knocked or stunned, or the teammate leaves the ring. With no teammate in the match it lights on you."
+	},
+	"src": {
+		"lmb": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

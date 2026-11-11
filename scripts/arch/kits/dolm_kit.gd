@@ -255,16 +255,15 @@ func dive_speed() -> float:
 		return 0.0
 	return float(slam_def()["glide_dive_speed" if dive_glide else "dive_speed"])
 
-## Tremor Sense: sneaking shows a narrow cone ahead that widens the longer you sneak, and the foes in
-## it through walls and fog.
+## Tremor Sense: sneaking shows a narrow cone ahead that widens and lengthens the longer you sneak, and
+## the foes in it through walls and fog.
 func _tick_sight(dt: float) -> void:
 	if h.crouch and not h.downed:
 		sneak_t += dt
 		if h.is_local():
-			var pd: Dictionary = d["passive"]
 			AimKit.cone(
 				h, "sight",
-				{"len": float(pd["len"]), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
+				{"len": sight_len(), "deg": sight_deg(), "inner": 0.5, "alpha": 0.7, "col": Color("d8ecff")}
 			)
 			sight_t -= dt
 			if sight_t <= 0.0:
@@ -274,9 +273,16 @@ func _tick_sight(dt: float) -> void:
 		sight_t = 0.0
 		sneak_t = 0.0
 
+## The cone's current angle (degrees) and length (m): both grow from start to end over `grow` seconds of sneaking.
 func sight_deg() -> float:
+	return _sight_grow("deg")
+
+func sight_len() -> float:
+	return _sight_grow("len")
+
+func _sight_grow(key: String) -> float:
 	var pd: Dictionary = d["passive"]
-	return lerpf(float(pd["deg"][0]), float(pd["deg"][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
+	return lerpf(float(pd[key][0]), float(pd[key][1]), clampf(sneak_t / float(pd["grow"]), 0.0, 1.0))
 
 ## A Boki merge cancels the air Quakefall's dive, the Quake Fist's charge, the charge leap and
 ## Rock Hop (AimKit's telegraphs go with them through drop_holds).
@@ -295,11 +301,11 @@ func _drop_holds() -> void:
 func stonesight() -> int:
 	var dir := h.aim_dir()
 	var n := 0
-	var pd: Dictionary = d["passive"]
+	var reach := sight_len()
 	for o in m.hunters:
 		if o.team == h.team or not is_instance_valid(o) or o.dead or o.downed: continue
 		var to := Vector2(o.pos.x - h.pos.x, o.pos.z - h.pos.z)
-		if to.length() > float(pd["len"]) or to.length() < 0.1: continue
+		if to.length() > reach or to.length() < 0.1: continue
 		if dir.angle_to(to) > deg_to_rad(sight_deg() * 0.5): continue
 		m.fx.ring(o.pos, 0.9, Color("3a7cff"), 0.55)
 		m.fx.ring(o.pos, 0.5, Color("d8ecff"), 0.4)
@@ -343,6 +349,7 @@ func lmb_override(held: bool, dt: float) -> bool:
 	if h.ctrl != "local":
 		# a bot: punches up close, throws boulders from range
 		if held and h.fire_cd <= 0.0:
+			h.fire_cd = float(lmb_def()["boulder"]["rate"])
 			var tg := _bot_target()
 			if tg and h.flat_dist(tg) < 3.0: _punch(0.6)
 			else: _boulder()
@@ -352,6 +359,8 @@ func lmb_override(held: bool, dt: float) -> bool:
 			if h.fire_cd > 0.0:
 				return true
 			lmb_t = 0.0
+			# the cooldown starts on the press, not the release (patch 2.01)
+			h.fire_cd = float(lmb_def()["boulder"]["rate"])
 		lmb_t += dt
 		if lmb_t > float(ld["tap"]):
 			var k := punch_k()
@@ -388,7 +397,6 @@ func _boulder() -> void:
 	var bd: Dictionary = lmb_def()["boulder"]
 	lmb_t = -1.0
 	h.mel_hold = 0.0
-	h.fire_cd = float(bd["rate"])
 	h.idle_fire = 0.0
 	boulders += 1
 	play("breah_throw")
@@ -432,7 +440,6 @@ func _punch(k: float) -> void:
 	var pd: Dictionary = lmb_def()["punch"]
 	lmb_t = -1.0
 	h.mel_hold = 0.0
-	h.fire_cd = float(pd["rate"])
 	h.idle_fire = 0.0
 	punches += 1
 	play("breah_punch")
@@ -443,8 +450,8 @@ func _punch(k: float) -> void:
 	var stepv := HunterMove.slide_speed(float(pd["step"])) * (float(pd["air_k"]) if not h.grounded else 1.0)
 	h.vel.x = dir.x * stepv
 	h.vel.z = dir.y * stepv
-	var dmg: float = lerpf(float(pd["dmg"][0]), float(pd["dmg"][1]), k) * m.dmg_mult(h)
-	var kb := lerpf(float(pd["kb"][0]), float(pd["kb"][1]), k)
+	var dmg: float = float(pd["dmg"]) * m.dmg_mult(h)
+	var kb := float(pd["kb"])
 	var fp := h.pos + Vector3(dir.x * 1.3, 1.0, dir.y * 1.3)
 	m.fx.burst(fp, Color("8f9cb8"), int(8 + 10 * k), 4.0 + 4.0 * k, 0.3, 4.0, 1.0, Vector3(dir.x, 0.1, dir.y), 40.0)
 	m.fx.spark(fp, Vector3(dir.x, 0.05, dir.y), COBALT, int(8 + 8 * k), 9.0 + 6.0 * k, 22.0, 0.22, 2.0, 1.2)
@@ -536,6 +543,12 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 func extra_dashes() -> float:
 	return 1.0 if rank("dash") >= 3 else 0.0
 
+## Shift again inside a chain is the next hop (each hop opens a fresh window; none after the last).
+func recast_window() -> Dictionary:
+	if not hop.chaining() or int(hop.st["n"]) >= int(hop.dd()["hops"]):
+		return {}
+	return {"slot": "dash", "left": hop.left()}
+
 ## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
 ## RecastCue: Shift again chains the next hop (a press in the air waits for the rock).
@@ -583,6 +596,10 @@ func fires_in_dash() -> bool:
 ## The hops turn her along the chain; only the air dash keeps the weapon on the cursor.
 func aims_in_dash() -> bool:
 	return not hop.chaining() and super.aims_in_dash()
+
+## The next hop is open while the chain has a hop to give (Shift again).
+func recast_left() -> float: return hop.left() if hop.chaining() and hop.hops_left() > 0 else 0.0
+func recast_slot() -> String: return "dash"
 
 ## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:
@@ -695,11 +712,14 @@ func _raise_feel() -> void:
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
-	if HeroUlt.ready(self) and dist > 3.0 and dist < 9.0 and los and randf() < 0.1:
+	if HeroUlt.ready(self) and dist > 3.0 and dist < float(x_def()["range"]) and los:
 		h.inp["aim"] = tgt.pos
 		HunterKeys.ult_pressed(h)
 		return
-	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 4.0 and dist < 9.0 and los and randf() < 0.25:
+	# Stone Row: the rocks rise 3.4 m ahead and never into a body or over an abyss, so the bot asks row_spots first
+	if int(h.slot_lv["kin"]) > 0 and float(cd["e"]) <= 0.0 and dist > 3.0 and dist < 10.0 and los and randf() < 0.5 \
+			and not row_spots(h.dir_to(tgt)).is_empty():
+		h.inp["aim"] = tgt.pos
 		h.inp["sig"] = true
 		return
 	if int(h.slot_lv["sec"]) > 0 and rmb_ready() and dist < 3.4 and los:

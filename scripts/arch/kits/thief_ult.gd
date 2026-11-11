@@ -59,8 +59,7 @@ func start() -> void:
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
 	k.net_ring(h.pos, float(d["reach"]), RING_COL)
-	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
-	DashReset.cue(h)
+	k.vault_back()                        # the source's info card: it resets the cartwheel
 
 ## The cast ends (its time ran out, a merge, a knock): nothing more flies.
 func drop() -> void:
@@ -157,7 +156,8 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 	k.m.spawn_shot(h, from, dv.normalized() * BLADE_SPEED, 0.0, dist / BLADE_SPEED, 0.08, RING_COL, {"cos": true})
 	if k.m.shots.size() > n0:
 		k.fx().ride(k.m.shots[-1], "blade", RIM_COL if rim else RING_COL, HIT_COL, BLADE_TRAIL, BLADE_WIDTH)
-	k.m.later(dist / BLADE_SPEED, func(): _hit(f, rim))
+	var fid := f.get_instance_id()      # (a lambda that captured a foe freed by then errors when it runs)
+	k.m.later(dist / BLADE_SPEED, func(): _hit(instance_from_id(fid) as Ent, rim))
 
 ## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
 ## and the bond for a rival hunter.

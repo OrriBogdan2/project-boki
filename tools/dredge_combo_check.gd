@@ -5,6 +5,8 @@ extends RefCounted
 ## passive, the back hit, the barge's turn lock after the Anchor, the rank-3 specials, and the X ult,
 ## Brass Broadside (tools/dredge_ult_check.gd).
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 var main: Node
 var fails := 0
 var n := 0
@@ -27,12 +29,23 @@ func run(main_node: Node) -> void:
 	await _parity_gun()
 	await load("res://tools/dredge_timing_check.gd").new(ak, ok).run()
 	await _ranks()
+	await _ally("dredge")
+	var abyss = load("res://tools/abyss_cast.gd").new()
+	abyss.main = main
+	await abyss.dredge()
+	n += abyss.n
+	fails += abyss.fails
 	await load("res://tools/dredge_ult_check.gd").new(ak, ok).run()
 	var rows_bad: int = await load("res://tools/dash_flow_check.gd").new().check_hero(main, "dredge")
 	ok("item 51: every slot casts mid-jump and a jump or Shift moves him out of it in 0.1s (or its row's exception)",
 			rows_bad == 0, "%d failures" % rows_bad)
 	print("DREDGECHECK DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
 
 ## Item 31 (CastHold): from the throw until the miss or the end of the reel he keeps his height mid-air (no
 ## fall); while the hook flies out he walks at 15-25% of his walk; gravity is back once it ends.
@@ -408,6 +421,11 @@ func _all() -> void:
 		"len %.1f, %.1f deg off the real fan" % [float(cone.get("len", 0.0)), off]
 	)
 	ok("gun: fire held, the lines breathe back in between shots", narrowed >= 5.0, "closed %.1f deg" % narrowed)
+	ok(
+		"gun: the fan rests at 20 degrees and blooms to 30 at most (footage 20 rested, 30 firing)",
+		absf(float(P.wpn["fan_deg"]) - 20.0) < 0.01
+		and absf(float(P.wpn["fan_deg"]) + float(P.wpn["bloom_max_deg"]) - 30.0) < 0.01
+	)
 	ok("gun: each shot rocks the body back (dr_shot)", K.anim_id == "dr_shot")
 	var col: Color = cone.get("col", Color.BLACK)
 	ok(
@@ -508,9 +526,9 @@ func _all() -> void:
 		"anchors at 0.3s %d (dmg %.0f), moved %.1f m" % [early, early_dmg, P.flat_dist(at0)]
 	)
 	ok(
-		"combo: reel > Anchor Drop = damage, stun, Grounded",
-		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and KitStatus.grounded(T) and T.stun_t > 0.8,
-		"anchors %d took %.0f stun %.2f" % [K.anchors, ak.dmg(T) - hp0, T.stun_t]
+		"combo: reel > Anchor Drop = damage and stun, the foe is not Grounded (the source E is slam, stun, dunk)",
+		K.anchors == 1 and ak.dmg(T) - hp0 >= 20.0 and not KitStatus.grounded(T) and T.stun_t > 0.8,
+		"anchors %d took %.0f stun %.2f gnd %s" % [K.anchors, ak.dmg(T) - hp0, T.stun_t, KitStatus.grounded(T)]
 	)
 	ok("anchor: the stunned foe shows a stun spiral", K.fx.shown("spiral%d" % T.get_instance_id()))
 	ok("anchor: E cooldown set", float(K.cd["e"]) > 5.0)
@@ -874,15 +892,16 @@ func _all() -> void:
 		absf(P.ex_cd - 12.5) < 0.01 and absf(cd_r[1] - 10.5) < 0.01 and absf(cd_r[2] - 8.5) < 0.01 and air_spent < 0.01,
 		"ex_cd %.2f ranks %s charge spent %.2f" % [P.ex_cd, str(cd_r), air_spent]
 	)
-	# --- Salvage: knocks stack, +2.5% health each, a knock heals, losing one when downed
+	# --- Salvage: knocks stack, +2.5% health each, no knock heal (the data has none), losing one when downed
 	reset.call()
 	P.slot_lv["kin"] = 1
 	var mh0 := P.max_hp
 	P.hp = P.max_hp * 0.5
 	K.on_knock(T, true)
 	ok(
-		"passive: a knock = 1 stack, +2.5% health, a heal",
-		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp > mh0 * 0.5 + mh0 * 0.15,
+		"passive: a knock = 1 stack, +2.5% health, no knock heal",
+		K.res == 1.0 and absf(P.max_hp - mh0 * 1.025) < 0.5 and P.hp <= mh0 * 0.5 + mh0 * 0.03 + 0.5
+		and not K.res_def().has("heal_knock"),
 		"res %.0f maxhp %.1f hp %.1f" % [K.res, P.max_hp, P.hp]
 	)
 	# ours-only heal (the data's Feed the Beast gives max health only): 16% on top of the stack's +2.5%
@@ -894,7 +913,7 @@ func _all() -> void:
 		absf(P.hp - (hp1 + P.max_hp * 0.05)) < 0.5, "hp %.1f -> %.1f" % [hp1, P.hp])
 	hp1 = P.hp
 	K.on_knock(T, false)
-	ok("passive: an assist stacks but does not heal", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
+	ok("passive: a second knock stacks again", K.res == 2.0 and P.hp <= hp1 + P.max_hp * 0.03 + 0.5)
 	for i in 12: K.on_knock(T, false)
 	ok(
 		"passive: capped at 10 stacks (+25%)", K.res == 10.0 and absf(P.max_hp - mh0 * 1.25) < 0.5,

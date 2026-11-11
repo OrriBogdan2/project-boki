@@ -233,6 +233,7 @@ func open_pause(where: String) -> void:
 	var practice: Practice = Practice.of(psc) if psc is Match else null
 	if practice:
 		item.call("Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+		item.call("Practice ranks", "plus", func(): open_practice(practice.m.player))
 	if where != "match":
 		item.call("Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 	if where == "home" and Game.main:
@@ -301,6 +302,9 @@ func open_controls() -> void:
 	UI.footer(v).add_child(UI.with_key(UI.primary("Done", back, 120), "Esc"))
 
 # ------------------------------------------------------------------ settings
+func open_practice(h: Hunter) -> void:
+	PracticeRanks.fill(_page("practice", "Practice", 440), h, func(): open_practice(h))
+
 func open_settings() -> void:
 	_show_settings()
 
@@ -347,6 +351,12 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 	var wisp_hint := "In expeditions your Boki rides as a little wisp at your shoulder, its carry bonus always on. " \
 		+ "Off: it walks beside you"
 	_toggle(v, "Boki ride as wisps (prototype)", "boki_wisps", wisp_hint)
+	if OnlineSession.configured():
+		_group(v, "Online")
+		var regions := [["auto", "Nearest"]]
+		for r in OnlineSession.regions():
+			regions.append([String(r["id"]), String(r.get("name", r["id"]))])
+		_choice(v, "Server region", "region", regions, Callable(), "Nearest: whichever server answers fastest")
 	if admin_allowed():
 		_group(v, "Admin")
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")

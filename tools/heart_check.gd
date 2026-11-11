@@ -85,7 +85,20 @@ func run(main: Node) -> void:
 		"BlightDir reads the tide (%.2f vs %.2f at the same spot)" % [with_tide, without])
 	ok(Heart.tide_heat(m, far) > 0.0 and Heart.tide_heat(m, H.site) == 0.0,
 		"squads outside the ring heat the Blight sooner")
+	# ---- the wall in the world and the next ring on the maps
+	m.step(Match.DT)
+	ok(H.wall.wall.visible and is_equal_approx(H.wall.wall.scale.x, Heart.tide_r(m)),
+		"the Blight wall stands on the ring (%.0f m)" % H.wall.wall.scale.x)
+	ok(Heart.next_r(m) < Heart.tide_r(m) and Heart.next_r(m) > float(rl["tide_r1"]),
+		"the next ring is smaller than the ring now (%.0f m)" % Heart.next_r(m))
+	var embers := H.wall.embers
+	var rich := float(Settings.q("fx")) > BlightWall.RICH_FX
+	ok((embers != null) == rich and (embers == null or embers.amount <= BlightWall.EMBERS),
+		"embers only on presets that can afford them, inside the budget")
 	m.time = 0.0
+	m.step(Match.DT)
+	ok(not H.wall.wall.visible and is_equal_approx(Heart.next_r(m), float(rl["tide_r0"])),
+		"before the tide: no wall, and the first ring is the next ring")
 	# ---- charging
 	ok(H.state == "charging", "a Heartspark starts charging")
 	_run(m, float(rl["charge_s"]) * 0.5)

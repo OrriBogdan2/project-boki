@@ -8,6 +8,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	await _breah()
 	await _ranks()
+	await _ally("dolm")
 	var ult_check = load("res://tools/breah_ult_check.gd").new()
 	await ult_check.ult(main)
 	n += ult_check.n
@@ -162,8 +163,23 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.4)
 	ok(
-		"lmb: hold + release = punch, knocks back", K.punches == 1 and dmg(T) >= 20.0 and T.pos.x - home.x > 3.0,
+		"lmb: hold + release = punch, knocks back (the data's 199 vs the 169 boulder = 10.6, no charge scaling)",
+		K.punches == 1 and typeof(pd["dmg"]) == TYPE_FLOAT and T.pos.x - home.x > 3.0
+		and absf(dmg(T) - float(pd["dmg"]) * m.dmg_mult(P)) < 0.6,
 		"punches %d took %.1f dx %.1f" % [K.punches, dmg(T), T.pos.x - home.x]
+	)
+	var full_dmg := dmg(T)
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.inp["fire"] = true
+	step(m, 0.4, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.3)
+	ok(
+		"lmb: a short hold hits as hard as a full one (no charge scaling on damage or knockback)",
+		K.punches == 2 and absf(dmg(T) - full_dmg) < 0.1 and T.pos.x - home.x > 3.0,
+		"short %.1f full %.1f dx %.1f" % [dmg(T), full_dmg, T.pos.x - home.x]
 	)
 	ok("lmb: the punch steps her forward about half a body", P.pos.x - x0 > 0.35, "step %.2f" % (P.pos.x - x0))
 	ok("lmb: the lane is gone after the punch", not AimKit.shown(P, "punch"))
@@ -350,6 +366,12 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	var first := K.launches - l0
+	var recovery := P.fire_cd
+	ok(
+		"cancel: the punch's recovery is the card's 0.6 s, the boulder's",
+		recovery > 0.5 and recovery <= 0.6 and float(ld["punch"]["rate"]) == float(ld["boulder"]["rate"]),
+		"fire_cd %.2f punch %.2f boulder %.2f" % [recovery, float(ld["punch"]["rate"]), float(ld["boulder"]["rate"])]
+	)
 	step(m, 0.3)
 	ok(
 		"combo: a punch along a row launches every rock in a stream",
@@ -647,6 +669,23 @@ func _breah() -> void:
 		"data: a punch with no rock of yours in the lane gives no shield",
 		K.guard_punches == gp0 and K.shield_stacks == 0 and P.shield < 0.5, "shield %.1f" % P.shield
 	)
+	# the Quake Punch cooldown starts on the press (patch 2.01), so a long hold leaves none after the release
+	reset.call()
+	T.teleport(home + Vector3(2.4, 0, 0))
+	aim_at(P, T.pos)
+	P.fire_cd = 0.0
+	var pun0 := K.punches
+	P.inp["fire"] = true
+	step(m, 0.05, func(): P.inp["fire"] = true)
+	var cd_on_press := P.fire_cd
+	step(m, 0.9, func(): P.inp["fire"] = true)
+	P.inp["fire"] = false
+	step(m, 0.05)
+	ok(
+		"cooldown: the punch's cooldown starts on the press, none left after a long hold",
+		cd_on_press > 0.4 and K.punches == pun0 + 1 and P.fire_cd <= 0.001,
+		"press %.2f after %.2f punches %d" % [cd_on_press, P.fire_cd, K.punches - pun0]
+	)
 	# ---- Rock Hop (item 111): the rocks, the chain, the crash, the rock rolling on
 	await _leap(m, P, T, home, K, reset)
 	# item 183: a charge in the air is the same Rock Hop as on the ground (its clip, its charge, its reach)
@@ -723,12 +762,41 @@ func _breah() -> void:
 	var c1 := AimKit.entry(P, "sight")
 	step(m, 2.1, func(): P.inp["crouch"] = true)
 	var c2 := AimKit.entry(P, "sight")
-	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and float(c1.get("len", 0.0)) >= 15.0)
+	var pdef: Dictionary = K.d["passive"]
+	var mid_t := 0.5 * float(pdef["grow"])
+	var len_a := float(c1.get("len", 0.0))
+	var len_end := float(c2.get("len", 0.0))
+	ok("passive: sneaking shows a pale cone ahead", AimKit.shown(P, "sight") and len_a >= 15.0)
 	ok(
 		"passive: the cone widens 25 -> 40 degrees over 2s of sneaking",
 		float(c1.get("deg", 0.0)) < 28.0 and absf(float(c2.get("deg", 0.0)) - 40.0) < 0.5,
 		"%.1f -> %.1f" % [float(c1.get("deg", 0)), float(c2.get("deg", 0))]
 	)
+	ok(
+		"passive: the cone is 18m long at the start and 25m (10-14 bh at 1.8m) at the end of the grow",
+		float(pdef["len"][0]) == 18.0 and float(pdef["len"][1]) == 25.0 and len_a < 19.5
+			and absf(len_end - 25.0) < 0.05,
+		"%.2f -> %.2f" % [len_a, len_end]
+	)
+	K.sneak_t = 0.0
+	var lens: Array[float] = []
+	for i in 5:
+		K.sneak_t = mid_t * 2.0 * float(i) / 4.0
+		lens.append(K.sight_len())
+	var steady := true
+	for i in range(1, lens.size()):
+		steady = steady and absf((lens[i] - lens[i - 1]) - (lens[1] - lens[0])) < 0.001 and lens[i] > lens[i - 1]
+	ok("passive: the length grows steadily with the hold", steady, str(lens))
+	T.teleport(P.pos + Vector3(21.5, 0, 0))
+	K.sneak_t = 0.0
+	var seen_early := K.stonesight()
+	K.sneak_t = 2.0 * mid_t
+	var seen_late := K.stonesight()
+	ok(
+		"passive: a foe 21.5m out is past the cone at the start of the grow and inside it at the end",
+		seen_early == 0 and seen_late == 1, "early %d late %d" % [seen_early, seen_late]
+	)
+	T.teleport(home + Vector3(8.0, 0, 0))
 	var s_front := K.stonesight()
 	T.teleport(home + Vector3(-8.0, 0, 0))
 	var s_back := K.stonesight()
@@ -991,7 +1059,7 @@ func _first_hop_reach(m: Match, P: Hunter, air: bool) -> float:
 func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:
 	var ids := ["breah_hop", "breah_exdash"]
 	var others := [HunterAnim.KMOVES, KMovesPair.MOVES, KMovesVV.MOVES, MergeMoves.MOVES, KMovesCare.MOVES,
-		KMovesPinBjorn.MOVES, KMovesDJ.MOVES]
+		KMovesPin.MOVES, KMovesBjorn.MOVES, KMovesDJ.MOVES]
 	ok(
 		"item 35: her ground and air dash moves are two distinct ids, hers alone (KMovesStone, no other table)",
 		ids[0] != ids[1] and ids.all(func(id): return KMovesStone.MOVES.has(id) and String(id).begins_with("breah_"))

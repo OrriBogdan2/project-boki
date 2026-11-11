@@ -3,6 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## heroes, scripted one by one, asserting the variant that fires (docs/heroes/archer.md, docs/heroes/bulwark.md).
 ## Also asserts each ability plays its own kit move (HunterAnim.KMOVES). Prints AKCHECK lines like --archetype-check.
 
+const ALLY := preload("res://tools/ally_probe.gd")      # a teammate dummy and the friendly-fire sweep
+
 func run(main_node: Node) -> void:
 	main = main_node
 	# (a RefCounted that is only awaiting is freed with its last holder, and the run silently stops)
@@ -19,18 +21,28 @@ func run(main_node: Node) -> void:
 	launch.main = main_node
 	var atime = load("res://tools/bjorn_anim_time_check.gd").new()
 	atime.main = main_node
+	if both:
+		load("res://tools/damage_ratio_check.gd").run(self)
 	if both or "--archer-combo-check" in args:
 		await _archer_combos()
+		await _ally("archer")
 		await ult.pin()
 		await own.pin()
 		await tall.tall()
 	if both or "--bulwark-combo-check" in args:
 		await _bulwark_combos()
+		await _ally("bulwark")
+		await _aegis_covers()
 		await _growth()
 		await ult.bjorn()
 		await own.bjorn()
 		await launch.bjorn()
 		await atime.anim_time()
+		var abyss = load("res://tools/abyss_cast.gd").new()
+		abyss.main = main_node
+		await abyss.bulwark()
+		n += abyss.n
+		fails += abyss.fails
 	n += ult.n + own.n + launch.n + tall.n + atime.n
 	fails += ult.fails + own.fails + launch.fails + tall.fails + atime.fails
 	print("AKCHECK DONE, %d checks, failures: %d" % [n, fails])
@@ -56,6 +68,45 @@ func _clear_wall(m: Match, at: Vector3, lv: int, dx0: int) -> void:
 		for dx in range(0, 3):
 			wl[W.idx(int(at.x) + dx0 + dx, int(at.z) + dz)] = lv
 	W.level = wl
+
+## Hawk Sense: the half-health line, the 22m range, the 0.4s linger, and seen through a wall and behind her.
+func _hawk_sense(m: Match, P: Hunter, T: Hunter, lv: int) -> void:
+	var rd := (P.ak as ArcherKit).res_def()
+	var cut := float(rd["sense_hp"])
+	var reach := float(rd["sense_r"])
+	var linger := float(rd["sense_linger"])
+	ok("combo archer: Hawk Sense numbers (half health, 22m, 0.4s)",
+		cut == 0.5 and reach == 22.0 and linger == 0.4, "%.2f %.1f %.2f" % [cut, reach, linger])
+	fresh(T)
+	var spot := T.pos
+	var away := Vector3(T.pos.x - P.pos.x, 0.0, T.pos.z - P.pos.z).normalized()
+	T.hp = T.max_hp * (cut + 0.02)
+	step(m, 0.4)
+	var healthy := ArcherKit.sensed_by(m, P.team, T)
+	T.hp = T.max_hp * (cut - 0.02)
+	step(m, 0.4)
+	ok("combo archer: Hawk Sense threshold (sensed just under half health, not just over)",
+		not healthy and ArcherKit.sensed_by(m, P.team, T), "over %s" % healthy)
+	ok("combo archer: Hawk Sense is her team's, not the rival's", not ArcherKit.sensed_by(m, T.team, T))
+	T.pos = P.pos + away * (reach + 1.0)
+	step(m, 0.5)
+	var far := ArcherKit.sensed_by(m, P.team, T)
+	T.pos = P.pos + away * (reach - 1.0)
+	step(m, 0.4)
+	ok("combo archer: Hawk Sense range (21m sensed, 23m not)",
+		not far and ArcherKit.sensed_by(m, P.team, T), "23m %s" % far)
+	T.pos = spot
+	_wall_at(m, P.pos, lv, 2)
+	aim_at(P, P.pos - away)
+	step(m, 0.4)
+	ok("combo archer: Hawk Sense sees through a wall and behind her", m.can_see(P.team, T))
+	T.hp = T.max_hp
+	step(m, 0.05)
+	var held := ArcherKit.sensed_by(m, P.team, T)
+	step(m, linger)
+	ok("combo archer: Hawk Sense expiry (held for a moment after a heal, gone within 0.4s)",
+		held and not ArcherKit.sensed_by(m, P.team, T) and not m.can_see(P.team, T), "held %s" % held)
+	_clear_wall(m, P.pos, lv, 2)
 
 ## The shot of ours most recently skinned by Hem's look: how far it will fly (life * speed), or -1.
 func _shot_reach(m: Match, P: Hunter) -> float:
@@ -339,6 +390,16 @@ func _archer_combos() -> void:
 		dmg(T) >= 5.0 and T.blight_t > 0.0 and dmg(T2) == 0.0 and K.fx.panels[0].visible,
 		"on arc %.0f inside %.0f" % [dmg(T), dmg(T2)]
 	)
+	# DoT parity (data: Rain of Arrows 61 dmg/s on a 1,100 HP Myth; ours on 124 HP): whole ticks, every 0.5 s
+	var hail: Dictionary = K.e_def()
+	var share := float(hail["dmg"]) / float(hail["every"]) / float(Data.CLASSES["light"]["hp"])
+	var ticks: float = dmg(T) / float(hail["dmg"])
+	ok(
+		"pin E DoT parity: 6.1% of Myth's HP a second (61 of 1,100), 0.5 s ticks, whole hits",
+		absf(share - 61.0 / 1100.0) < 0.003 and float(hail["every"]) == 0.5
+		and absf(ticks - roundf(ticks)) < 0.01 and ticks > 2.9,
+		"share %.4f ticks %.2f" % [share, ticks]
+	)
 	# small mechanic (wiki): a Heavy Shot knocking a foe that burns in the wall Cremates it
 	var cr0 := K.cremations
 	K.ch_rmb = 2.0
@@ -462,20 +523,7 @@ func _archer_combos() -> void:
 	step(m, 0.1)
 	ok("combo archer: knock > a dash charge back, no kit heal", T2.downed and P.dashes >= 0.99
 		and not K.res_def().has("knock_heal"), "dashes %.2f" % P.dashes)
-	# Hawk Sense: a rival under half health is seen through cover
-	fresh(T)
-	T.hp = T.max_hp
-	T.reveal_t = 0.0
-	step(m, 0.5)
-	var healthy_seen := T.reveal_t > 0.0
-	T.hp = T.max_hp * 0.4
-	step(m, 0.5)
-	ok(
-		"combo archer: Hawk Sense shows only the injured",
-		not healthy_seen and T.reveal_t > 0.0,
-		"healthy %s injured %.2f" % [healthy_seen, T.reveal_t]
-	)
-	T.hp = T.max_hp
+	_hawk_sense(m, P, T, lv)
 	# Spirit Walk: the roll plays pin_roll; then she walks through a rock column that stops anyone else
 	var W: World = m.world
 	var bx := int(home.x) + 3
@@ -776,6 +824,32 @@ func _growth() -> void:
 		d1 > 4.0 and absf(d10 / d1 - (1.0 + LevelGrowth.ap_pct(10))) < 0.01,
 		"L1 %.2f L10 %.2f" % [d1, d10]
 	)
+
+## Teammates (the ally-effects parity pass): friendly fire is off for every slot of the hero.
+func _ally(arch: String) -> void:
+	var bad: Array = await ALLY.sweep(main, arch)
+	ok("%s ally: no slot hurts, stuns, roots or slows a teammate" % arch, bad.is_empty(), "; ".join(bad))
+
+## Brightshield blocks everything from the front (data), so a teammate behind the raised aegis takes no shot
+## a foe fires at them; with the aegis down the same shot lands.
+func _aegis_covers() -> void:
+	var taken := []
+	for raised in [false, true]:
+		var r := setup("bulwark", 9.0)
+		var m: Match = r[0]
+		var P: Hunter = r[1]
+		var mate := ALLY.spawn(m, P, r[4] + Vector3(0.4, 0, 0.7))
+		aim_at(P, r[2].pos)
+		if raised:
+			P.inp["sec_hold"] = true
+			P.ak.press_rmb()
+			step(m, 0.4, func(): P.inp["sec_hold"] = true)
+		m.spawn_shot(r[2], mate.pos + Vector3(6.0, 1.0, 0), Vector2(-30.0, 0), 40.0, 1.0, 0.2, Color.RED)
+		step(m, 0.8, func(): P.inp["sec_hold"] = raised)
+		taken.append(dmg(mate))
+		await done(m)
+	ok("bjorn ally: a teammate behind the raised aegis takes the shot a foe fires at them",
+			taken[0] >= 39.0 and taken[1] == 0.0, "aegis down %.0f raised %.0f" % [taken[0], taken[1]])
 
 func _bulwark_combos() -> void:
 	var r := setup("bulwark", 2.2)
