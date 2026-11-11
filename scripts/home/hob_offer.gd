@@ -53,13 +53,16 @@ func build() -> Control:
 		var card := _card(String(ids[i]), i)
 		cards.append(card)
 		row.add_child(card)
+	var under := UI.hbox(14)      # the clip, and "Not now" beside it (a row of its own runs off a 720p screen)
+	under.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_child(under)
 	preview = CenterContainer.new()
 	preview.custom_minimum_size.y = CLIP.y + 48.0
-	v.add_child(preview)
+	under.add_child(preview)
 	if later.is_valid():
 		var not_now := UI.ghost(String(rules["offer_later"]), later, 160)
-		not_now.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-		v.add_child(not_now)
+		not_now.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		under.add_child(not_now)
 	root = v
 	opened_ms = Time.get_ticks_msec()
 	for id in ids:
