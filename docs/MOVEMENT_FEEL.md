@@ -45,6 +45,8 @@ Nothing here comes from SUPERVIVE's files.
     in the encrypted code, bCanWalkOffLedges is false there (no walk-off, so no coyote window to copy), and the
     reference footage is 5 fps (0.2 s a frame, coarser than either window). Ours stay: `Hunter.COYOTE` 0.12 s and
     `Hunter.JUMP_BUFFER` 0.12 s (7 steps each), checked by the four jump-forgiveness rows below.
+  - Whether jump height is variable, and whether there is a re-jump delay. The game data names JumpMaxHoldTime, JumpCooldown, JumpApexTime and a JumpDecel spring, but their values are not decoded (supervive_physics.md), and the 5 fps footage shows no tap next to a held jump, no two jumps in a row and no jump just past a ledge (Nov 9 re-check of briefs/hero-ref). Holding jump is already the glide input, so ours keeps **a fixed jump height and no re-jump delay**.
+  - Coyote time or buffer values. The source can't walk off an edge at all (bCanWalkOffLedges false), so it needs no coyote time; ours can (owner), so it uses FeelConfig's 0.12s for both (`coyote`, `jump_buffer` in content/rules/hunter_move.json).
 
 ## Targets and results
 
@@ -78,6 +80,9 @@ Nothing here comes from SUPERVIVE's files.
 | dash_curve_<hero>_peak_u / _peak_k (gunslinger, juggernaut, archer: where the speed peaks, peak / mean) | flat | 0.11 / 1.86, 0.29 / 1.74, 0.44 / 1.86 | the fit ± ~0.08 / ± ~0.1 | [footage] docs/SUPERVIVE_FEEL.md "Dash speed curves" |
 | dash_curve_dist / dash_curve_exit_run (distance against the kit's, hand-over / run) | n/a | 1.00–1.01x / 0.31–1.0x | 0.95–1.05x / <= 1.05x | the curve's mean is 1; the skid falls through run speed |
 | coyote_frames | 7 | 7 | >= 6 | FeelConfig 0.1s |
+| jump_hold_dv (tap vs Space held, 0.1s in) | n/a | 0 m/s | <= 0.01 | JumpMaxHoldTime undecoded: fixed height |
+| rejump_frames (press the step after landing) | n/a | 1 | <= 1 | JumpCooldown undecoded: no delay |
+| coyote_frames | 7 | 7 | 6-8 | FeelConfig 0.12s; a later press doesn't jump |
 | jump_buffer_frames | 6 | 7 | >= 7 | FeelConfig 0.12s |
 | coyote_frames (latest press after walking off a rim) | 7 | 7 | >= 7 | `Hunter.COYOTE` 0.12s; source has no walk-off |
 | jump_buffer_frames (earliest press before landing) | 6 | 7 | >= 7 | `Hunter.JUMP_BUFFER` 0.12s; source silent |

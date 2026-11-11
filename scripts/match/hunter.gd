@@ -9,7 +9,8 @@ const H_GRAV := 14.7             # m/s^2 [game data] DefaultGravityZ -1470 uu/s^
 # measured by --move-feel-check. Snappy first: input acts the step it arrives, falls hit the
 # footage depth, the glider opens and steers at once and keeps the momentum you bring into it.
 # m/s: [game data] JumpZVelocity is 7.5 (1.9m up); ours stops ~1.5m up so jump + mantle still tops
-# out under four terraces (the wall kick's job) on our 0.8m terraces
+# out under four terraces (the wall kick's job) on our 0.8m terraces. Fixed height and no re-jump delay
+# (JumpMaxHoldTime / JumpCooldown undecoded); coyote and buffer times are in HunterMove
 const JUMP_V := 6.8
 const SPIRIT_CLIMB := 14.0       # m/s a Spirit Walk rises up a ledge face (Phase Walk goes through raised terrain)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)

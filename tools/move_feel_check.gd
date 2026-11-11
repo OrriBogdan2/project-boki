@@ -82,6 +82,8 @@ const T := {
 	"slow_end_0p3s":           ["~", [0.99, 1.01], "x", "[game data] and holds there"],
 	"haste_land_0p1s":         ["~", [0.99, 1.01], "x", "[game data] a haste lands as a Slow ends: MaxAcceleration"],
 	"haste_end_0p1s":          ["~", [0.99, 1.01], "x", "[game data] and ends as a Slow lands: the walking brake"],
+	"jump_hold_dv":            ["<=", 0.01, "m/s", "JumpMaxHoldTime undecoded: a hold rises like a tap"],
+	"rejump_frames":           ["<=", 1.0, "frames", "JumpCooldown undecoded: no re-jump delay"],
 	"freefall_1s_depth":       ["~", [6.8, 8.0], "m", "[game data] gravity 1470 uu/s2, cap 1200 uu/s: 7.1m"],
 	"abyss_fall_vy_deep":      ["~", [10.0, 10.8], "m/s", "[game data] AbyssFallSlowSpeedLimit 12 to 10 m/s"],
 	"abyss_fall_t":            [">=", 1.8, "s", "[game data] off the lip to AbyssHeight (17.5m) in ~2s"],
@@ -474,6 +476,30 @@ func _jump() -> void:
 	rec("jump_apex", apex)
 	rec("jump_speed_vs_source", v0 / SOURCE_JUMP_V)
 	rec("jump_airtime", air)
+	# a tap against a held jump (Space down from the press on), 6 steps in, before the hold opens the glider
+	var vy := [0.0, 0.0]
+	for hold in 2:
+		_reset(flat)
+		P.inp["jump"] = true
+		for i in 6:
+			P.inp["glide"] = hold == 1
+			m.step(DT)
+		vy[hold] = P.vel.y
+	rec("jump_hold_dv", absf(vy[1] - vy[0]))
+	# two quick jumps: press again the step after the first one lands
+	_reset(flat)
+	P.inp["jump"] = true
+	for i in 120:
+		m.step(DT)
+		if P.grounded and i > 2: break
+	var again := -1
+	for i in 10:
+		P.inp["jump"] = i == 0
+		m.step(DT)
+		if P.vel.y > 0.0:
+			again = i + 1
+			break
+	rec("rejump_frames", again)
 	_air_control()
 	# coyote time: step off over open air (the walk-off path sets coyote), press jump k frames later
 	var best := 0
