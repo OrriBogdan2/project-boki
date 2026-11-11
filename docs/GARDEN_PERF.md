@@ -58,3 +58,21 @@ outline; a GPU adds shadow passes on top). Before = e7f172aa9 (ports only), afte
 What is left: nine Boki are about 30 passes each (~270 of a zone: animated pivots, each with an outline), world
 far scenery about 50 (six Flora styles of far rocks, kept for the look), and in the hub the incubator, burrow and
 nest, built outside the layout path (not merged here).
+
+GPU, `--perf-bench --bench-secs=5 --bench-farm=10 --bench-zone=all`, draws / frame ms, before (e7f172aa9) -> after
+(aaccf1179). M5 Medium: jobq 20261111-090814-15113 -> 20261111-090939-17282; pc-MRROBOTO Low (RTX 4070 SUPER,
+gl_compatibility): 20261111-090952-22488 -> 20261111-091010-11716.
+
+| part | M5 Medium before | M5 Medium after | MRROBOTO Low before | MRROBOTO Low after |
+|---|---|---|---|---|
+| hub | 595 / 8.6 | 495 / 8.7 | 577 / 7.0 | 470 / 7.0 |
+| Bramblebank | 458 / 15.9 | 349 / 16.6 | 458 / 7.0 | 342 / 7.0 |
+| Glasswater | 316 / 18.0 | 255 / 11.5 | 283 / 7.0 | 265 / 7.0 |
+| Cinderstep | 385 / 17.4 | 294 / 17.7 | 315 / 7.0 | 257 / 7.0 |
+| Hushwood | 357 / 17.2 | 326 / 16.4 | 325 / 7.0 | 301 / 7.0 |
+| Kitewind Ridge | 469 / 17.6 | 301 / 17.3 | 434 / 7.0 | 256 / 7.0 |
+
+Every zone is now under 350 draws on both machines; the ratchet keeps only what is still over: the hub (M5 520,
+Low 370 held from rp1-0, which MRROBOTO's 470 is past: a different machine, not loosened) and the M5 frame of
+Cinderstep and Ridge (17-18 ms at a 640x360 window, near the 60 Hz line on both sides of the fixes, so the frame is
+not draw-bound there). Objects, nodes, emitters and base_life are within budget everywhere.
