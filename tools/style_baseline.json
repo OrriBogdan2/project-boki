@@ -98,7 +98,7 @@
 "semicolon": 9
 },
 "scripts/core/data.gd": {
-"long_line": 54
+"long_line": 52
 },
 "scripts/core/econ.gd": {
 "long_line": 10,
@@ -252,9 +252,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 207,
+"long_line": 204,
 "nested_ternary": 28,
-"semicolon": 244,
+"semicolon": 243,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -388,9 +388,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 385,
+"long_line": 380,
 "nested_ternary": 7,
-"semicolon": 404,
+"semicolon": 401,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -463,8 +463,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 24,
-"nested_ternary": 1,
+"long_line": 23,
 "semicolon": 49
 },
 "scripts/match/bot_kin.gd": {
@@ -634,7 +633,7 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 219,
+"long_line": 212,
 "nested_ternary": 19,
 "semicolon": 142,
 "shadow": 7
@@ -703,13 +702,6 @@
 "semicolon": 5,
 "shadow": 1
 },
-"scripts/match/rolling.gd": {
-"history_comment": 1,
-"long_line": 13,
-"nested_ternary": 1,
-"semicolon": 19,
-"shadow": 1
-},
 "scripts/match/ruin_walls.gd": {
 "long_line": 19,
 "nested_ternary": 1,
@@ -738,8 +730,8 @@
 "semicolon": 86
 },
 "scripts/match/train_route.gd": {
-"long_line": 3,
-"semicolon": 6,
+"long_line": 2,
+"semicolon": 5,
 "shadow": 1
 },
 "scripts/match/truce.gd": {
@@ -750,15 +742,10 @@
 "scripts/match/weapon_ups.gd": {
 "long_line": 1
 },
-"scripts/match/wide_layout.gd": {
-"long_line": 7,
-"semicolon": 3,
-"shadow": 1
-},
 "scripts/match/world.gd": {
 "long_line": 78,
 "nested_ternary": 9,
-"semicolon": 174,
+"semicolon": 172,
 "shadow": 2
 },
 "scripts/server/relay.gd": {
@@ -799,9 +786,9 @@
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 36,
+"long_line": 34,
 "nested_ternary": 4,
-"semicolon": 10,
+"semicolon": 8,
 "shadow": 1
 },
 "scripts/ui/gear_panel.gd": {
@@ -823,8 +810,8 @@
 "scripts/ui/hud.gd": {
 "history_comment": 2,
 "long_line": 185,
-"nested_ternary": 37,
-"semicolon": 45,
+"nested_ternary": 35,
+"semicolon": 43,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -862,8 +849,8 @@
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 26,
-"semicolon": 10,
+"long_line": 25,
+"semicolon": 9,
 "shadow": 2
 },
 "scripts/ui/lobby.gd": {
@@ -900,10 +887,6 @@
 "nested_ternary": 1,
 "semicolon": 8,
 "shadow": 1
-},
-"scripts/ui/session_row.gd": {
-"long_line": 4,
-"semicolon": 1
 },
 "scripts/ui/title.gd": {
 "long_line": 21,
@@ -1145,16 +1128,6 @@
 "semicolon": 25,
 "shadow": 1
 },
-"tools/rolling_check.gd": {
-"history_comment": 1,
-"long_line": 44,
-"semicolon": 18
-},
-"tools/rolling_sim.gd": {
-"long_line": 25,
-"nested_ternary": 2,
-"semicolon": 7
-},
 "tools/shot_vertical_check.gd": {
 "long_line": 4,
 "semicolon": 12
@@ -1181,7 +1154,7 @@
 "semicolon": 1
 },
 "tools/train_check.gd": {
-"long_line": 11,
+"long_line": 10,
 "semicolon": 7
 },
 "tools/unique_check.gd": {
