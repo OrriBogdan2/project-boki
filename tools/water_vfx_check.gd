@@ -5,13 +5,14 @@ extends RefCounted
 ## restart of a pooled emitter (no node made, no ring or burst decal); the pool stays within its droplet
 ## budget, Albert's splash is bigger than Vex's, and on Low nothing is made or shown.
 ## --shots-dir=<dir>: also films each Hunter crossing the stream (frames <hero>_NNN.png, real frames
-## with the game running; GPU).
+## with the game running, the camera close in; GPU).
 
 const HEROES := ["gunslinger", "bulwark"]      # Vex, Albert
 const STREAM_X := 40         # the stream's west tile column (it is two tiles wide)
 const STREAM_Z := Vector2i(29, 41)      # its first and last tile row
 const DT := 1.0 / 60.0
 const FILM_FPS := 60.0       # frames kept per second of play (a fast GPU renders many more)
+const FILM_ZOOM := 0.55      # the home camera as close as the wheel takes it (droplets read at this range)
 
 var bad := 0
 var shot := ""
@@ -190,12 +191,14 @@ func _low(main: Node) -> void:
 
 ## The film: the game running at half speed (so a dash gets frames while each one is read back), the
 ## Hunter crosses the stream from the west bank into it, runs along it, dashes, jumps and lands in it, and
-## climbs out the east bank. FILM_FPS frames a second of play kept at half size, saved at the end.
+## climbs out the east bank. FILM_FPS frames a second of play kept at 3/4 size, saved at the end.
 func _film(main: Node, hm, hero: String) -> void:
 	var tree := main.get_tree()
 	if main.fade: main.fade.reveal(0.05)      # (the loading card over a new home)
 	await tree.create_timer(0.3).timeout
 	_put(hm, Vector3(STREAM_X - 1.2, 0, STREAM_Z.y + 0.5))
+	hm.cam.zoom_to = FILM_ZOOM
+	hm.cam.zoom = FILM_ZOOM
 	hm.cam.snap(hm.ppos)
 	# [direction, seconds of play, key pressed at its start]
 	var plan := [[Vector2(0.8, -0.6), 0.6, ""], [Vector2(0, -1), 0.7, ""], [Vector2(0, -1), 0.35, "dash"],
@@ -220,7 +223,7 @@ func _film(main: Node, hm, hero: String) -> void:
 				ok(false, "%s film: no frame to read back (not a GPU run?)" % hero)
 				Engine.time_scale = 1.0
 				return
-			img.resize(img.get_width() / 2, img.get_height() / 2, Image.INTERPOLATE_BILINEAR)
+			img.resize(img.get_width() * 3 / 4, img.get_height() * 3 / 4, Image.INTERPOLATE_BILINEAR)
 			frames.append(img)
 	Engine.time_scale = 1.0
 	_press(Vector2.ZERO)
