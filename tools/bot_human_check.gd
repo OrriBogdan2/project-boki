@@ -22,7 +22,7 @@ const EP_HP := 0.5              # health share under which a fight has "turned" 
 const MIN_SAMPLES := 2000       # squad samples per expedition under which there is too little to judge
 
 ## Limits the fixed behaviours must stay inside (medium bots, the default run).
-const MAX_APART := 0.3          # share of samples with no teammate within APART_M (three runs in fourteen: 0.14 to 0.22)
+const MAX_APART := 0.3          # share of samples with no teammate within APART_M (3 runs in 14: 0.14 to 0.22)
 const MAX_CALM_UNHEALED := 0.7  # share of calm, hurt samples with a heal in the belt and no drink started
                                 # (0.03 to 0.58 measured on fourteen runs; the old behaviour 0.42 to 0.95)
 const MIN_ASSIST := 0.6         # share of near teammates that join a squadmate's fight (0.74 to 0.91 measured)
