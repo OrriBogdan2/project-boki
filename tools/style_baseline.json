@@ -77,7 +77,7 @@
 "semicolon": 1
 },
 "scripts/combat/verbs.gd": {
-"long_line": 29,
+"long_line": 28,
 "nested_ternary": 1,
 "semicolon": 11,
 "shadow": 1
@@ -259,7 +259,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -553,7 +553,7 @@
 },
 "scripts/match/hunter.gd": {
 "history_comment": 24,
-"long_line": 91,
+"long_line": 89,
 "nested_ternary": 14,
 "semicolon": 48,
 "shadow": 4
@@ -650,9 +650,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 216,
+"long_line": 215,
 "nested_ternary": 18,
-"semicolon": 141,
+"semicolon": 140,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {

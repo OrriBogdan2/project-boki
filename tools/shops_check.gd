@@ -201,7 +201,7 @@ func _items(m: Match) -> void:
 	for id in UtilityBelt.stock_ids():
 		h.pos = _vendor_of(m, "gear")["pos"]
 		bot.reveal_t = 0.0
-		var needs_air: bool = UtilityBelt.def(id).get("float", false)      # Cloud Raft: open air only (--utility-parity-check)
+		var needs_air: bool = UtilityBelt.def(id).get("float", false)      # Cloud Raft: --utility-parity-check
 		if not _fresh(h, id) and id != "revive_ember" and not needs_air:
 			smoke.append(id)
 		UtilityUse.tick(h, 30.0)
