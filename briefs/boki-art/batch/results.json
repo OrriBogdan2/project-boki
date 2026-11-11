@@ -111520,5 +111520,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_olmlet_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_oarter",
+    "name": "Oarter (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_oarter_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_parasolth",
+    "name": "Parasolth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_parasolth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_orbitle",
+    "name": "Orbitle (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_orbitle_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_palloth",
+    "name": "Palloth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_palloth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pagodito",
+    "name": "Pagodito (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pagodito_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_parrywhal",
+    "name": "Parrywhal (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_parrywhal_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pagoguana",
+    "name": "Pagoguana (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pagoguana_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pavonazar",
+    "name": "Pavonazar (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pavonazar_1.jpg",
+    "ok": true
   }
 ]
