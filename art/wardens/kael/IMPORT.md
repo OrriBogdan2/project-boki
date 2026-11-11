@@ -47,3 +47,9 @@ files in ~/meshy/kael_v2/ (never in git; `build.sh` there reruns everything). Ru
   kept (anchor_head_top, anchor_chest, anchor_arm_*), no anchor_blade_tip (weapon_muzzle is the tip). 12.6k triangles
   in all (body 11.7k, sword 0.9k).
 - `kael.glb.import`: `generate_lods=false` (LODs would eat the thin cards), `force_disable_compression=true`.
+
+**Anim slice3 (11-11), no change:** walk_f/run_f candidates retargeted from Meshy library actions (rig walk, rig run,
+action 510; Meshy API output on the paid plan, commercial use under Meshy's terms), each held to Kael's hunched lean
+(hips -22/-23 deg) with the arms carried from the current clips, planted at 2.2 / 4.6 m/s. The blind Fable 5.2 judge kept
+the current clips: walk 4.00 vs 3.00 / 2.83, run 4.00 vs 3.00 / 3.00 (the candidates' stride reads narrow and light).
+The judge noted that the current walk's sword tip may dip to the ground line. Idle is left to the pilot4 idle job.

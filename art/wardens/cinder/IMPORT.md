@@ -19,3 +19,8 @@ Added: the spined tail (9 spring bones, `cinder_pieces.py`), hair cards with emb
 (`flame-jet`, for Flue Flight). The seams are the emission map, white-yellow core to orange; `PipStars.pulse` brightens it while she casts.
 The flame on the tail is not mesh: `smoke` and `bloom` on `anchor_tail_tip` in warden_look.json. `weapon_muzzle` is her right palm, the dominant one (the kit's
 fire point); `weapon_muzzle_l` is her left palm; `anchor_tank`, `anchor_vial_*` and `anchor_gun_mid` stay as contract names only. Her fire stream keeps the rules' NOZZLE.
+
+**Anim slice3 (11-11), no change:** idle candidates retargeted from Meshy library actions 338, 335, 249 and 12 (Meshy API
+on her pilot3 rig task, paid plan, commercial use under Meshy's terms), with the tail carried from the current idle. The
+blind Fable 5.2 judge kept the current idle at 4.33; the candidates scored 3.17, 3.00, 2.83 and 2.00 (squats, kneels and
+a taunt read timid, not menacing). walk/run were not retried: they lost in ext/anim-pilot-loops-cm and already plant at loco speed.

@@ -18,3 +18,8 @@ thread hem, on the skirt chains, and the smoke at her hair's ends (dark root to 
 Proportions against the sheet: the head is fitted at 1:1 (hem_source.py `HEAD_K`; pass 2 had 1.06). Her belt sits about 8 cm under the sheet's because the
 shared rig's shoulders do too (shoulder to belt matches, 0.40 m); lifting it would shorten the corset, so it stays with the rig. Skin under the shoulder mask
 is plain porcelain (the scan painted its own mask there, class 0.9 in `class_bake`).
+
+**walk_f / run_f (anim pilot, 11-11):** rebuilt on the v2 rig by retargeting Meshy animation-library actions (her pilot2 Meshy
+rig task), loops rebuilt, sole planted at loco speed. Blind Fable 5.2 judge (pilot1 rubric): walk 4.17 vs 3.67 current,
+run 4.17 vs 3.67. Licence: Meshy API output on the paid plan, commercial use allowed under Meshy's terms. Idle unchanged
+(owned by the pilot4 idle job).
