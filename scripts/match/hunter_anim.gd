@@ -216,9 +216,7 @@ var legs_yaw := 0.0
 var face_prev := 0.0
 var face_rate := 0.0
 var arm_k := 1.0               # the arms' length against the standard (archetype body "arms", Models.hunter)
-var lag := 0.0                 # how far the feet are behind the body turning on the spot
-var shuffle_t := -1.0
-var shuffle_side := 1.0
+var spot: TurnStep            # turning on the spot: the feet stay, then step round
 var weight := 1.0              # contrapposto: which leg holds the weight (-1 left, 1 right)
 var weight_to := 1.0
 var weight_t := 5.0
@@ -340,6 +338,8 @@ func _init(m: Node3D) -> void:
 	glance_t = 1.0 + _rand() * 3.0
 	fidget_wait = 3.5 + _rand() * 5.0
 	face_prev = m.rotation.y
+	spot = TurnStep.new(arch)
+	m.set_meta(TurnStep.META, spot)
 	if aim:
 		gun = aim.get_node_or_null("Gun")
 	_setup_weapon(String(m.get_meta("wid", "")))
@@ -697,25 +697,9 @@ func update(dt: float, s: Dictionary) -> void:
 		else:
 			back = _ease(back, 1.0, 12.0, dt)
 		want_yaw = -clampf(rel, -1.15, 1.15)
-	# turning on the spot: the feet stay put until the body has turned far enough, then shuffle round
-	if still > 0.5 and grounded and not downed:
-		lag = clampf(lag - dface, -1.4, 1.4)
-		if shuffle_t < 0.0 and absf(lag) > 0.6:
-			shuffle_t = 0.0
-			shuffle_side = signf(lag)
-	else:
-		lag = _ease(lag, 0.0, 10.0, dt)
-	var shuffle_lift := 0.0
-	if shuffle_t >= 0.0:
-		shuffle_t += dt
-		var sp2 := shuffle_t / 0.3
-		lag = lerpf(lag, 0.0, minf(1.0, dt * 14.0))
-		shuffle_lift = sin(clampf(sp2, 0.0, 1.0) * PI)
-		if sp2 >= 1.0:
-			shuffle_t = -1.0
-			if absf(lag) > 0.3:
-				shuffle_t = 0.0     # still behind: another step
-				shuffle_side = -shuffle_side
+	var busy := spd >= WardenClips.STILL or fired < 0.25 or float(s.get("cast", 99.0)) < 0.6 \
+			or String(s.get("kmove", "")) != "" or String(s.get("emote", "")) != ""
+	spot.tick(dt, face, dface, grounded and not downed and not rolling and not stun and crouch_k < 0.5, busy)
 	legs_yaw = lerp_angle(legs_yaw, want_yaw, kd)
 	# ---------------------------------------------------------------- contrapposto and fidgets
 	weight_t -= dt
@@ -751,12 +735,9 @@ func update(dt: float, s: Dictionary) -> void:
 	kr -= idle_w * (knee0 + free_r * 0.3 + bounce * 0.06)
 	var wl := -width * (1.0 - 0.4 * r1) - free_l * 0.04
 	var wr := width * (1.0 - 0.4 * r1) + free_r * 0.04
-	# shuffling round on the spot
-	if shuffle_lift > 0.0:
-		if shuffle_side > 0.0:
-			hl += shuffle_lift * 0.35; kl -= shuffle_lift * 0.7
-		else:
-			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
+	# stepping round on the spot
+	hl += spot.lift(0); kl -= spot.lift(0) * 2.0
+	hr += spot.lift(1); kr -= spot.lift(1) * 2.0
 	# crouch, landing, slam: knees bend, hips drop
 	var bend := maxf(crouch_k * 0.75, land_k * 0.85) + slam_k * 0.5
 	hl += bend * 0.62; hr += bend * 0.5
@@ -1053,7 +1034,8 @@ func update(dt: float, s: Dictionary) -> void:
 	rb = Basis(Vector3.BACK, sin(ph) * 0.03 * r1 * (1.0 - down_k)) * rb
 	rig.basis = rb * Basis.from_scale(scl)
 	rig.position = rpivot - rb * rpivot + off
-	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) + sin(ph) * 0.12 * r1 * back
+	legs.rotation.y = (legs_yaw + spot.lag) * (1.0 - glide_k) * (1.0 - down_k) * (1.0 - dive_k) \
+			+ sin(ph) * 0.12 * r1 * back
 	leg_l.rotation = Vector3(hl, 0, wl)
 	leg_r.rotation = Vector3(hr, 0, wr)
 	if knee_l: knee_l.rotation.x = kl

@@ -119,6 +119,7 @@
 			"dur": 0.4
 		}
 	},
+	"turn": {"dur": 0.34, "lift": 0.36},
 	"procedural": [
 		"ledge",
 		"mantle",
