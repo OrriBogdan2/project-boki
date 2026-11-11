@@ -1,11 +1,11 @@
 extends "res://tools/vv_shots.gd"
-## --combo-mark-shots --shots-dir=<dir>: the overhead combo tag on a rival for Sable, Vex and Sparkle, one
-## strip per kit (fresh, half the time left, the payoff frame, gone), cropped round the target's plate in a
-## live Arena match (the Sparkle/Vex shot rig, tools/vv_shots.gd: title fade lifted, camera driven). Needs a
-## renderer (jobq submit --needs gpu).
+## --combo-mark-shots --shots-dir=<dir>: the overhead combo tag on a rival for Sable, Vex, Sparkle, Cinder,
+## Neve and Meeko, one strip per kit (fresh, half the time left, the payoff frame, gone), cropped round
+## the target's plate in a live Arena match (the Sparkle/Vex shot rig, tools/vv_shots.gd: title fade lifted,
+## camera driven). Needs a renderer (jobq submit --needs gpu).
 
 const PLATE_CROP := Vector2i(220, 190)   # px round the target's plate (scaled 2x)
-const ARCHES := ["thief", "gunslinger", "mage"]
+const ARCHES := ["thief", "gunslinger", "mage", "ashwick", "rimewright", "tender"]
 
 var tool: RefCounted
 
