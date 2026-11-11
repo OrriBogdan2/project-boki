@@ -4,7 +4,7 @@ extends RefCounted
 ## sinks into it, walks slower, leaves a ripple and a splash going in and shakes off coming out. With base_mode
 ## on, Water, Ice and Crystal Boki paddle (a free roaming one lingers in the water playing the splash clip, and
 ## gains joy), Fire Boki hurry out to the nearest dry ground, and everyone else wades through.
-## k["wade"] = {in, rip, stay, out, shake}. home.gd calls speed() for the walk and step() after each move.
+## k["wade"] = {in, rip, stay, out, shake_t}. home.gd calls speed() for the walk and step() after each move.
 ## Missing clips (anim lane): "wade" (a slow knee-high walk loop) and "shake" (a shake-off); until then the walk
 ## simply slows and the shake is a quick wobble of the Body node.
 
@@ -39,7 +39,7 @@ func speed(k: Dictionary, pos: Vector3) -> float:
 
 ## One Boki in (or leaving) the water this frame: the sink, ripples, the splash, the shake, and what its kind does.
 func step(k: Dictionary, pos: Vector3, n: Node3D, d: float) -> void:
-	var w: Dictionary = k.get("wade", {"in": false, "rip": 0.0, "stay": 0.0, "out": false, "shake": 0.0})
+	var w: Dictionary = k.get("wade", {"in": false, "rip": 0.0, "stay": 0.0, "out": false, "shake_t": 0.0})
 	k["wade"] = w
 	var dep: int = h.water.depth(pos.x, pos.z)
 	if dep > 0:
@@ -75,7 +75,7 @@ func _leave(k: Dictionary, w: Dictionary, pos: Vector3) -> void:
 		(k["node"] as Node3D).remove_meta("kact_wade")
 		(k["node"] as Node3D).set_meta("kact", "")
 	if FarmUnlocks.base_mode():
-		w["shake"] = float(rules()["shake_secs"])
+		w["shake_t"] = float(rules()["shake_secs"])
 		Sfx.play("drip", pos, -10.0)
 		h.fx.burst(pos + Vector3(0, 0.5, 0), Color("cfeaff"), 8, 1.8, 0.4)
 
@@ -110,9 +110,9 @@ func _shake(w: Dictionary, n: Node3D, d: float) -> void:
 	var body := n.get_node_or_null("Body") as Node3D
 	if body == null:
 		return
-	if float(w["shake"]) > 0.0:
-		w["shake"] = float(w["shake"]) - d
-		body.rotation.z = sin(float(w["shake"]) * 50.0) * WOBBLE * clampf(float(w["shake"]) * 3.0, 0.0, 1.0)
+	if float(w["shake_t"]) > 0.0:
+		w["shake_t"] = float(w["shake_t"]) - d
+		body.rotation.z = sin(float(w["shake_t"]) * 50.0) * WOBBLE * clampf(float(w["shake_t"]) * 3.0, 0.0, 1.0)
 	elif body.rotation.z != 0.0:
 		body.rotation.z = 0.0
 
