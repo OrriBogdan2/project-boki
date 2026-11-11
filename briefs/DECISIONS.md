@@ -562,3 +562,8 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Any hunter can **disconnect early**: then they free-fall (slower than the rocket, still fast) and can **pull the glider whenever they want** to travel further in the air. If nobody does anything, the rocket hits the ground and the squad lands there.
 - Camera during the fall: Fortnite-style skydive view (behind/above the falling hunter, looking down at the map), not the current view.
 - No health bars while aboard; no gold ring or big effect on exit. Solos ride a one-seat rocket.
+
+## Owner 2026-11-11: stomping (finishing a wisp)
+- Stomp = an uncancellable finisher animation. Stomper and wisp are locked in place for its duration; the stomper can be attacked and cannot move or act.
+- Only ways out: the animation finishes (wisp dies), or the stomper is stunned/hard-CC'd, which cancels it and the wisp survives.
+- Each hunter has its own default stomp animation; unique stomps are a cosmetic you can buy (cosmetic slot, same timing as the default).
