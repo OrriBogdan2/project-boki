@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -996,10 +996,6 @@
 "long_line": 35,
 "semicolon": 19
 },
-"tools/farm_hob_shots.gd": {
-"long_line": 7,
-"semicolon": 2
-},
 "tools/farm_start_check.gd": {
 "long_line": 49,
 "nested_ternary": 6,
@@ -1007,7 +1003,7 @@
 },
 "tools/farm_tutorial_check.gd": {
 "history_comment": 1,
-"long_line": 21,
+"long_line": 11,
 "semicolon": 2
 },
 "tools/farmbuild_check.gd": {

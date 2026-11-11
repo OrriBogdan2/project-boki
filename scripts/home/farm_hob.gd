@@ -115,7 +115,7 @@ func _call_out(dt: float) -> void:
 	call_t -= dt
 	var talk: Dictionary = rules()["talk"]
 	var met := bool(FarmBuilder.state().get("met", false))
-	var line := "" if met or FarmTutorial.base() else String(talk["call"])      # in the base your Boki calls you
+	var line := "" if met or FarmTutorial.active() else String(talk["call"])      # (your Boki calls you then)
 	if chat.offer_due():
 		line = String(talk["call_offer"])
 	if call_t > 0.0 or chat.busy() or line == "":
@@ -179,7 +179,6 @@ func _land_swing() -> bool:
 	if e.is_empty() or not FarmSites.has_site(e):
 		return false
 	FarmSites.player_swing(h.hw, e)
-	FarmTutorial.event("swing")
 	h._refresh_top()
 	e = FarmSites.entry(site_u)
 	if e.is_empty() or not FarmSites.has_site(e):

@@ -56,3 +56,6 @@ The build menu showed the whole catalogue, locked items greyed out ("everyone ha
 - **The job step**: the Boki button is not ringed, because it opens the Burrow list and not the page; clicking the Boki (or the Details key) does. The job dropdown's first line is now **Not set** (orange); an unset Boki still takes the best job it can find, nothing about that changed.
 - **After the pick**: a toast, a green "Done!" tick on the tutorial goal line, and on the Boki page **Done** is the one filled, ringed button. Feed is a plain button until the trough step is done, then the filled one again (`FarmTaskGuide.care_footer`).
 - Checks: `--farm-tutorial-check` (spotlight appears once, holds clicks only in the beat, fades, "Not set", footer) and `--farm-spot-shots=<dir>` (screenshots).
+
+## Update 2026-11-11: garden tutorial
+The twelve steps (axe, chop, stone, house, hammer, job, feed, crop, buy, sell, Hob, expedition) are gone: nobody gathers or builds at home (DECISIONS 2026-11-09). The tutorial is the four garden steps in `farm_tutorial.json`: meet your Boki, feed it, place a toy and watch it play, head out or stay, with a Skip always shown that puts a toy down and hands over the food. `base_mode` ships on. The `--farm-hob-shots` and `--farm-spot-shots` tools are removed with the guides they photographed.

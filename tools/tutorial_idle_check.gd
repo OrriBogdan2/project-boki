@@ -127,18 +127,12 @@ func _farm_course() -> void:
 		await main.get_tree().process_frame
 	home._close_panel()
 	var g: FarmGuide = home.guide
-	ok(FarmTutorial.active() and g != null, "the farm tutorial is running on a new save")
+	ok(FarmTutorial.active() and g != null, "the home tutorial is running on a new save")
 	print("IDLE farm | step.stage | hint | marker | note")
 	var last := FarmTutorial.steps().size() - 1
 	while FarmTutorial.done_count() < last and FarmTutorial.current() != "":
 		var id := FarmTutorial.current()
 		_idle_farm(g, id)
-		if id == "house":
-			ok(g.place_house(), "the house goes down as a site")
-			home._sync_fixtures()
-			_idle_farm(g, id)      # (the site is up: its "wait" hint)
-		elif id == "hammer":
-			FarmSites.finish(FarmHob.house_entry())      # (built, so the steps that wait for it open)
 		FarmTutorial.mark(id)
 	home.queue_free()
 	await main.get_tree().process_frame
