@@ -119,9 +119,10 @@ var rain_next := randf() < 0.45     # what the coming weather turn brings, known
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
-	if zone == GardenZones.HUB: visit = HubLayout.island()
-	GardenZones.here = zone
-	ZoneLayout.enter(zone)
+	if VisitZones.has(visit): visit = VisitZones.view(visit, zone)
+	elif zone == GardenZones.HUB: visit = HubLayout.island()
+	GardenZones.here = "" if _visiting() else zone
+	ZoneLayout.enter(GardenZones.here)
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
@@ -411,7 +412,7 @@ func _ready_rest() -> void:
 		var pot := Models.cauldron(); pot.position = spots["pot"]; add_child(pot)
 		var stall := StallModels.build(Stalls.level()); stall.position = spots["stall"]; stall.rotation.y = PI * 0.5; add_child(stall)
 	var portal := Models.portal(UI.TEAL); portal.position = spots["portal"]; add_child(portal)
-	if FarmUnlocks.base_mode() and not _visiting():
+	if VisitZones.has(visit) or (FarmUnlocks.base_mode() and not _visiting()):
 		hway = HubWaystone.new(self)
 		hway.place()
 	if not _visiting():
@@ -4098,20 +4099,18 @@ func _setup_care() -> void:
 		hinc.build()
 	if not visit.is_empty():
 		_refresh_nest()
+		if HubLayout.is_hub(visit): ZoneAway.card(self)      # the hub: nobody lives there; the card covers every zone
 		return
 	# the time you were away: needs drift, kin eat from the feeders, and hungry ones may starve
 	KinWelcome.start(self, KinWelcome.away_secs())      # and they run over to say hello
-	hecon.away = Econ.catch_up_all()
+	hecon.away = Econ.catch_up_all(GardenZones.current())      # this zone only: the others when you reach them
 	# nobody is left with no Boki: a stray turns up (Lifeline; the toast is in home_notices.gd)
 	var floor_ev := Lifeline.check()
 	if hecon.away.any(func(e): return e["kind"] == "died") or not floor_ev.is_empty():
 		_spawn_kin()
 	HomeNotices.toast_stray(self, floor_ev)
 	HomeNotices.show_migration(self)       # the one-time list of what the equal-footing save update converted
-	# what Boki assigned to stations made while you were away (Work.catch_up)
-	var away_lines: Array = Work.catch_up() + CareJournal.arrival()
-	if not away_lines.is_empty():
-		_show_when_free(away_lines)      # the one "While you were away" card (the work and the journal)
+	ZoneAway.card(self)      # the one "While you were away" card: the stations' work and every zone's journal
 	GardenWishes.arrive(self)
 	Care.dex_sync()
 	_refresh_nest()

@@ -29,22 +29,27 @@ func _init(home) -> void:
 func here() -> String:
 	return h.zone if h.zone != "" else GardenZones.start()
 
+## Is zone `id` open: in your garden, or in the friend's you are visiting?
+func is_open(id: String) -> bool:
+	return VisitZones.is_open(h.visit, id) if VisitZones.has(h.visit) else GardenZones.is_open(id)
+
 func place() -> void:
 	if here() == GardenZones.HUB:
 		var stones: Array = []
 		for id in GardenZones.ids():
-			var lit := GardenZones.is_open(id)
+			var lit := is_open(id)
 			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": lit,
-				"keys": {} if lit else GardenZones.keys_for(id)})
+				"keys": {} if lit or VisitZones.has(h.visit) else GardenZones.keys_for(id)})
 		node = FarmModels.waystone(stones)
 		node.position = HUB_AT
-		board = FarmModels.games_board()
-		board.position = HubLayout.BOARD_AT
-		board.rotation.y = -PI * 0.5
-		h.add_child(board)
-		var wall := BaseShowcase.build(HubLayout.BOARD_AT + HubLayout.WALL_OFF, Save.d.get("showcase", []))
-		wall.rotation.y = board.rotation.y
-		h.add_child(wall)
+		if not VisitZones.has(h.visit):
+			board = FarmModels.games_board()
+			board.position = HubLayout.BOARD_AT
+			board.rotation.y = -PI * 0.5
+			h.add_child(board)
+			var wall := BaseShowcase.build(HubLayout.BOARD_AT + HubLayout.WALL_OFF, Save.d.get("showcase", []))
+			wall.rotation.y = board.rotation.y
+			h.add_child(wall)
 		HubHorizon.place(h, HUB_AT)
 	else:
 		node = FarmModels.return_pad(String(GardenZones.info(here()).get("colour", "c9c2b2")))
@@ -92,6 +97,8 @@ func label() -> String:
 func use() -> void:
 	if aim == "board":
 		ZoneCards.board(h)
+	elif VisitZones.has(h.visit):
+		VisitZones.pick(h)
 	else:
 		ZoneCards.open(h, here())
 
@@ -99,7 +106,7 @@ func use() -> void:
 func hop(id: String) -> bool:
 	if hopping != "" or id == here():
 		return false
-	if id != GardenZones.HUB and not GardenZones.is_open(id):
+	if id != GardenZones.HUB and not is_open(id):
 		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id).get("name", id))
 		return false
 	hopping = id
@@ -111,7 +118,10 @@ func hop(id: String) -> bool:
 	return true
 
 func _go() -> void:
-	Game.goto("home", {"zone": hopping})
+	var opts := {"zone": hopping}
+	if VisitZones.has(h.visit):
+		opts.merge({"visit": h.visit["all"], "visit_id": h.visit_id})      # a friend's garden: still theirs
+	Game.goto("home", opts)
 
 # ------------------------------------------------------------------ moving a Boki to another zone
 ## Sends `k` to zone `id`: it walks to the pad (k["zone_go"]; BaseLife leaves it alone meanwhile).

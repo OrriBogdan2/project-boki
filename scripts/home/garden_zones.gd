@@ -46,7 +46,10 @@ static func migrate(data: Dictionary) -> void:
 static func landing(opts: Dictionary) -> String:
 	if opts.has("zone"):
 		return String(opts["zone"])
-	if not (opts.get("visit", {}) as Dictionary).is_empty() or not FarmUnlocks.base_mode():
+	var visiting: Dictionary = opts.get("visit", {})
+	if not visiting.is_empty():
+		return HUB if VisitZones.has(visiting) else ""
+	if not FarmUnlocks.base_mode():
 		return ""
 	if opts.has("spawn"):
 		return here
@@ -69,10 +72,14 @@ static func current() -> String:
 static func is_partner(rec: Dictionary) -> bool:
 	return String(rec.get("uid", "")) == str(Save.d.get("active", ""))
 
+## Does `rec` walk zone `id`: it lives there, or it is your partner (which is in every zone)?
+static func walks_in(rec: Dictionary, id: String) -> bool:
+	return zone_of(rec) == id or is_partner(rec)
+
 ## Who walks the zone you are in: its residents, your partner wherever it lives and a wild visitor (GardenVisitor).
 static func out_here() -> Array:
 	var z := current()
-	var out := KinBox.farm().filter(func(r): return zone_of(r) == z or is_partner(r))
+	var out := KinBox.farm().filter(func(r): return walks_in(r, z))
 	var wild := GardenVisitor.in_zone(z)
 	if not wild.is_empty():
 		out.append(wild)
