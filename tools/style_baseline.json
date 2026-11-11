@@ -634,9 +634,9 @@
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 219,
+"long_line": 218,
 "nested_ternary": 19,
-"semicolon": 142,
+"semicolon": 141,
 "shadow": 7
 },
 "scripts/match/merge_look.gd": {

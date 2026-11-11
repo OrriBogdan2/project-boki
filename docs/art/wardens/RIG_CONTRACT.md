@@ -100,6 +100,16 @@ picks it for the session (comma-separated for several), and a Settings `warden_m
 that Warden picks it in the save; with neither, or with the file missing, the Warden's own `<art>.glb` loads.
 Whichever design the owner picks ships as `<art>/<art>.glb`.
 
+### Belt item moves
+Every belt item (content/utility, `move`) has one body beat, as long as its cast time (`UtilityPose`): `throw`, `place`,
+`read`, `raise` (the item held high overhead: banner, whistle, ember, skyfall call) and `drink` (the "drink" state). A
+channelled item (drink, repair) lasts its `channel.time`; the rest name `cast`, from the source where it gives one
+(Cloud Raft 0.3 s, Pilfer Pouch 1.5 s, Thorn Wall 2 s; docs/SOURCE_UTILITIES.md), ours otherwise. A throw, place, read
+or raise sets the state's `util` (0..1) and `util_move`; the rig poses the free left hand (and a place kneels when
+standing; on the move the legs keep the gait), and WardenClips hands the arms back to the rig while `util` runs, so a
+.glb that follows these bones needs no clip for them. `--utility-pose-check` and `--utility-pose-shots` (`<move>/` and
+`<move>_run/` strips).
+
 ## Nodes the game keeps from the procedural rig (do not model these into the body)
 - `Rig/Torso/Aim/Gun` and its children: the held weapon (`Models.gun_parts`, `PinBjornWeapons`), its `Muzzle`
   (shots leave from it), `Mag` (reload anim), Bjorn's `Hammer` pivot (meta `hammer_pivot`; BjornFx finds the

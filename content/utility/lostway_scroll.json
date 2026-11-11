@@ -1,0 +1,25 @@
+{
+ "id": "lostway_scroll",
+ "name": "Lostway Scroll",
+ "short": "Lostway",
+ "icon": "recall",
+ "col": "f0e0a0",
+ "use": "drink",
+ "cd": 3.0,
+ "max": 1,
+ "bring": [
+  0,
+  1,
+  1
+ ],
+ "price": 60,
+ "desc": "Read it for 4s: you are carried to a random spot on the map. A hit spills it.",
+ "warp": true,
+ "channel": {
+  "time": 4.0,
+  "move": 0.45,
+  "heal": 0.0,
+  "src": "move 0.45 = the shared drink slow these items had before per-item channel data. See docs/CONSUMABLES.md"
+ },
+ "move": "read"
+}
