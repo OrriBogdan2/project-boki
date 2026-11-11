@@ -6,6 +6,9 @@ extends RefCounted
 ##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
 ##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
 ##      hunter and the Boki are never under the banner
+##      every new step chimes once; the banner glows bright on a new step, settles to a steady glow,
+##      flares again on a stall's pulse, and its glow never reaches the middle; a key the line names is
+##      a key cap in it
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
 ##   4. the panel counter, the right click taught from its kit data, the Boki step's words
 ##   5. the course: every stop is walkable from the one before it on its island, and the lookout takes a
@@ -41,6 +44,10 @@ func _lanes() -> void:
 		var tall_end := b.position.y + b.size.y * TutorialHud.DETAIL_K
 		var top_fifth := "%s: the panel with its second line stays in the top fifth (%.0f)" % [tag, tall_end]
 		ok(tall_end <= sz.y * 0.2 + 0.5, top_fifth)
+		var grow := 1.0 + TutorialHud.POP_K + TutorialHud.FLARE_K      # (panel_rect scales about its centre)
+		var half := b.size.y * TutorialHud.DETAIL_K * 0.5
+		var glow_end := b.position.y + half * (1.0 + grow) + b.size.y * grow * TutorialHud.HALO
+		ok(glow_end < sz.y * 0.25, "%s: its glow at its biggest stays out of the middle (%.0f)" % [tag, glow_end])
 		var centre := Rect2(sz * Vector2(0.3, 0.25), sz * Vector2(0.4, 0.45))
 		var names: Array = ln.keys()
 		var clash := ""
@@ -83,11 +90,18 @@ func _course() -> void:
 	var under := 0
 	var texts := {}
 	var counters := {}
+	var entered := 0
+	var chimes := 0
+	var bright := 0
 	while t < 600.0 and not m.player.extracted:
 		TutorialDrive.drive(m)
+		Sfx.last_played.erase("ui_step")
 		m.step(Match.DT)
 		t += Match.DT
+		chimes += int(Sfx.last_played.has("ui_step"))
 		if tu.step != last:
+			entered += 1
+			bright += int(TutorialHud.glow(tu) > 0.9)
 			if last >= 0:
 				worst = maxf(worst, step_t)
 			last = tu.step
@@ -108,6 +122,10 @@ func _course() -> void:
 			shown_after += 1
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
+	var heard := "(%d chimes, %d steps)" % [chimes, entered]
+	ok(Sfx.streams.is_empty() or abs(chimes - entered) <= 1, "every new step chimes once " + heard)
+	ok(bright == entered, "every new step's banner starts at full glow (%d of %d)" % [bright, entered])
+	_glow(tu)
 	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
 	var waited := "(%d asked, %d shown)" % [asked, shown_after]
@@ -127,6 +145,34 @@ func _course() -> void:
 		ok(line.to_lower().contains("hold") == hold, "and its words say so ('%s')" % line)
 	var tl := String(texts.get("gkey", "")).to_lower()
 	ok(tl.begins_with("send"), "the Boki step says to send it ('%s')" % tl)
+
+## The glow: steady once settled, flaring on a stall's pulse; a line's key is a key cap in it.
+func _glow(tu: Tutorial) -> void:
+	tu.card_t = TutorialHud.GLOW_T + 1.0
+	tu.nag_t = 0.0
+	var rest := TutorialHud.glow(tu)
+	var lo := TutorialHud.REST_GLOW - TutorialHud.BREATHE - 0.01
+	var steady := rest >= lo and rest <= TutorialHud.REST_GLOW + TutorialHud.BREATHE + 0.01
+	ok(steady, "a settled banner keeps its steady glow (%.2f)" % rest)
+	tu.nag_t = Tutorial.NAG_PULSE_T
+	var flare := TutorialHud.glow(tu)
+	tu.nag_t = Tutorial.NAG_PULSE_T - TutorialHud.FLARE_T * 0.6
+	var fading := TutorialHud._flare(tu)
+	tu.nag_t = Tutorial.NAG_PULSE_T - TutorialHud.FLARE_T * 1.01
+	var again := TutorialHud._flare(tu)
+	ok(flare > 0.99 and fading < 0.2 and again > 0.95, "a stall flares it, fades, flares again (%.2f %.2f %.2f)"
+		% [flare, fading, again])
+	tu.nag_t = 0.0
+	var jump := Settings.key_cap("jump")
+	tu.text = "Jump, press %s again to glide" % jump
+	tu.key_cap = ""
+	var runs := TutorialHud.parts(tu)
+	var in_line: bool = runs.size() == 3 and runs[1] == [jump, true] and runs[2] == ["again to glide", false]
+	ok(in_line, "a key the line names is a key cap in it (%s)" % str(runs))
+	tu.text = "Dash across the gap"
+	tu.key_cap = Settings.key_cap("dash")
+	runs = TutorialHud.parts(tu)
+	ok(runs.size() == 2 and runs[0] == [tu.key_cap, true], "the step's key cap leads a line that doesn't name it")
 
 ## The marker's pin or arrow: a spot at your feet or ahead in view shows its pin, one behind you the arrow.
 func _marker() -> void:

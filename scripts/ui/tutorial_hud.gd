@@ -2,10 +2,12 @@ class_name TutorialHud
 extends RefCounted
 ## What the tutorial shows on screen (the beam is Tutorial, the pin and edge arrow Hud._draw_waypoint).
 ## Everything has its own lane so nothing overlaps: the short first-time intro card (the one thing that
-## pauses play), the step panel pinned at the top-centre for the whole step (it pops in for each new
-## step, and carries an arrow and the distance while the target is off screen or under the hunter), a
-## quiet check beside it, and the message lane in the top-right. Nothing sits in the middle or the
-## bottom of the screen, where the hunter, the Boki and the hotbar are. While a new panel is fresh
+## pauses play), the step panel pinned at the top-centre for the whole step (it slides in with a bright
+## glow and a chime for each new step, settles to a steady breathing glow, flares again after a stall,
+## shows its keys as key caps in the line, and carries an arrow and the distance while the target is
+## off screen or under the hunter), a quiet check beside it, and the message lane in the top-right.
+## Nothing sits in the middle or the bottom of the screen, where the hunter, the Boki and the hotbar
+## are, and the glow stays in the top strip. While a new panel is fresh
 ## (Tutorial.card_up) other popups (messages, Boki bubbles, the scout hint) wait.
 
 const MINT := Color("8fe3c8")
@@ -14,11 +16,26 @@ const BAR_W := 0.35         # of the screen width: the widest the panel gets
 const BAR_H := 0.085        # of the screen height: the panel's height (one line)
 const POP_T := 0.25         # s the panel takes to drop and pop in
 const POP_K := 0.12         # how much bigger than its size the panel starts as it pops in
-const GLOW_T := 0.8         # s the bright edge of a new panel takes to settle
+const GLOW_T := 1.2         # s the bright glow of a new panel takes to settle to the steady one
+const REST_GLOW := 0.45     # the steady glow (0..1) a settled panel keeps, so it never goes quiet
+const BREATHE := 0.08       # how far the steady glow breathes up and down
+const BREATHE_HZ := 0.5     # breaths a second
+const FLARE_T := 0.8        # s per flare of a stall's re-pulse (Tutorial.NAG_PULSE_T holds three)
+const FLARE_K := 0.05       # how much bigger the panel swells at the top of a flare
+const HALO := 0.35          # of the panel's row height: how far the glow spreads at its brightest
+const LIT := Color(0.07, 0.17, 0.15, 0.96)   # the panel's fill at full glow (still dark under the words)
+const KEY_FACE := Color(0.95, 0.97, 1.0)
+const KEY_LIP := Color(0.55, 0.62, 0.7)
+const KEY_INK := Color(0.05, 0.07, 0.11)
+## The actions a step's line can name (Tutorial._fill's %J %G %E %T %Q): shown as key caps in the line.
+const LINE_KEYS := ["jump", "glide", "signature", "throw", "gear1"]
 const PANEL := Color(0.03, 0.04, 0.07, 0.94)
 const DETAIL_K := 1.9       # a panel with a second line is this much taller
 
 static var _ring_at := Rect2()      # the pick ring's slot, as last drawn
+static var _frame_box: StyleBoxFlat  # the panel's own box (its glow changes every frame, so it isn't cached per colour)
+static var _parts_of := ""          # the line and key cap _parts was split for
+static var _parts: Array = []       # the line as [text, is_key] runs
 
 ## The lanes: the panel, the check mark and the message column (Rect2 each), for a screen size.
 static func lanes(sz: Vector2) -> Dictionary:
@@ -37,7 +54,7 @@ static func panel_rect(sz: Vector2, tu: Tutorial) -> Rect2:
 	var r: Rect2 = lanes(sz)["banner"]
 	r.size.y *= DETAIL_K if tu.detail != "" else 1.0
 	var k := clampf(tu.card_t / POP_T, 0.0, 1.0)
-	var s := 1.0 + POP_K * sin(k * PI)       # (grows a touch past its size and settles back)
+	var s := 1.0 + POP_K * sin(k * PI) + FLARE_K * _flare(tu)     # (grows a touch past its size and settles back)
 	var drop := (1.0 - pow(1.0 - k, 3.0)) * (r.end.y + 4.0) - (r.end.y + 4.0)
 	return Rect2(r.get_center() + Vector2(0, drop) - r.size * s * 0.5, r.size * s)
 
@@ -59,17 +76,40 @@ static func draw(h, sz: Vector2) -> void:
 	if tu.done_t > 0.0:
 		_check(h, lanes(sz)["check"], tu.done_t / Tutorial.DONE_T)
 
-## The step's line with its key cap on the left, and on the right the counter and, while the target's
+## How bright the panel's glow is (0..1): full on a new step, settling over GLOW_T to the steady breathing
+## REST_GLOW, and flaring again while a stall pulses it (Tutorial.nag_t).
+static func glow(tu: Tutorial) -> float:
+	var g := REST_GLOW + BREATHE * sin(Time.get_ticks_msec() / 1000.0 * TAU * BREATHE_HZ)
+	g = maxf(g, 1.0 - clampf(tu.card_t / GLOW_T, 0.0, 1.0))
+	return maxf(g, _flare(tu))
+
+## A stall's re-pulse: three flares, each bright at once and fading over FLARE_T.
+static func _flare(tu: Tutorial) -> float:
+	if tu.nag_t <= 0.0:
+		return 0.0
+	return pow(1.0 - fposmod(Tutorial.NAG_PULSE_T - tu.nag_t, FLARE_T) / FLARE_T, 2.0)
+
+## The panel: dark under the words, a mint edge going white and a soft halo spreading as it glows.
+static func _frame(h, r: Rect2, row: float, g: float) -> void:
+	if _frame_box == null:
+		_frame_box = StyleBoxFlat.new()
+		_frame_box.set_corner_radius_all(14)
+		_frame_box.anti_aliasing = true
+	var lift := clampf((g - REST_GLOW) / (1.0 - REST_GLOW), 0.0, 1.0)
+	_frame_box.bg_color = PANEL.lerp(LIT, lift)
+	_frame_box.border_color = Color(MINT.lerp(Color.WHITE, 0.6 * lift), 0.6 + 0.4 * g)
+	_frame_box.set_border_width_all(int(2.0 + 3.0 * g))
+	_frame_box.shadow_color = Color(MINT, 0.2 + 0.55 * g)
+	_frame_box.shadow_size = int(row * HALO * (0.35 + 0.65 * g))
+	h.c.draw_style_box(_frame_box, r)
+
+## The step's line (its keys as key caps in it), and on the right the counter and, while the target's
 ## pin isn't on screen, an arrow pointing the way with the distance.
 static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
-	var glow := 1.0 - clampf(tu.card_t / GLOW_T, 0.0, 1.0)
-	if tu.nag_t > 0.0:
-		glow = maxf(glow, 0.5 + 0.5 * sin(Time.get_ticks_msec() / 1000.0 * 8.0))
-	h._rounded(r, PANEL, 14, Color(MINT, 0.45 + 0.55 * glow), int(2.0 + 2.0 * glow))
 	var row := r.size.y / (DETAIL_K if tu.detail != "" else 1.0)     # the first line's height
+	_frame(h, r, row, glow(tu))
 	var mid := r.position.y + row * 0.5
 	var px := int(row * 0.46)
-	var left := r.position.x + 14.0
 	var right: float = r.end.x - 14.0
 	var n := tu.progress_text()
 	if n != "":
@@ -78,19 +118,65 @@ static func _bar(h, r: Rect2, tu: Tutorial, dir: Vector2) -> void:
 		right -= n_w + 12.0
 	if dir != Vector2.ZERO:
 		right = _arrow(h, Vector2(right, mid), row, dir, tu) - 10.0
-	if tu.key_cap != "":
-		var key_w: float = h.big.get_string_size(tu.key_cap, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
-		var cap_w := maxf(row * 0.7, key_w + 20.0)
-		var cr := Rect2(Vector2(left, mid - row * 0.3), Vector2(cap_w, row * 0.6))
-		h._panel(cr, Color(0.93, 0.95, 0.98), 10)
-		h._ctext(cr.get_center() + Vector2(0, px * 0.36), tu.key_cap, px, Color(0.06, 0.08, 0.12), h.big)
-		left += cap_w + 14.0
-	var tpx := px
-	while tpx > 16 and h.big.get_string_size(tu.text, HORIZONTAL_ALIGNMENT_LEFT, -1, tpx).x > right - left:
-		tpx -= 1
-	h._text(Vector2(left, mid + tpx * 0.36), tu.text, tpx, GOLD, h.big)
+	_line(h, r.position.x + 14.0, right, mid, px, tu)
 	if tu.detail != "":
 		_detail(h, r, row, tu.detail)
+
+## The line as runs of words and keys: a key the line names (or the step's key cap) is a run of its own;
+## the step's key cap goes in front when the line doesn't name it. Split again only when the line changes.
+static func parts(tu: Tutorial) -> Array:
+	if _parts_of == tu.text + "|" + tu.key_cap:
+		return _parts
+	_parts_of = tu.text + "|" + tu.key_cap
+	var keys: Array = LINE_KEYS.map(func(a): return Settings.key_cap(a))
+	if tu.key_cap != "":
+		keys.append(tu.key_cap)
+	_parts = []
+	var words := ""
+	var named := false
+	for w in tu.text.split(" "):
+		var core := w.rstrip(",.:;!?")
+		if core != "" and core in keys:
+			named = named or core == tu.key_cap
+			if words != "":
+				_parts.append([words, false])
+			_parts.append([core, true])
+			words = w.substr(core.length())
+		else:
+			words += (" " if words != "" else "") + w
+	if words.strip_edges() != "":
+		_parts.append([words, false])
+	if tu.key_cap != "" and not named:
+		_parts.push_front([tu.key_cap, true])
+	return _parts
+
+## The line's runs from `left`, shrunk to fit before `right`, gold words and light key caps.
+static func _line(h, left: float, right: float, mid: float, px: int, tu: Tutorial) -> void:
+	var runs := parts(tu)
+	var tpx := px
+	while tpx > int(px * 0.62) and _runs_w(h, runs, tpx) > right - left:
+		tpx -= 1
+	var x := left
+	for run in runs:
+		if run[1]:
+			var cw := _cap_w(h, run[0], tpx)
+			var cr := Rect2(Vector2(x, mid - tpx * 0.68), Vector2(cw, tpx * 1.3))
+			h._panel(Rect2(cr.position + Vector2(0, 3), cr.size), KEY_LIP, 8)
+			h._panel(cr, KEY_FACE, 8)
+			h._ctext(cr.get_center() + Vector2(0, tpx * 0.34), run[0], tpx, KEY_INK, h.big)
+			x += cw + tpx * 0.3
+		else:
+			h._text(Vector2(x, mid + tpx * 0.36), run[0], tpx, GOLD, h.big)
+			x += TextCache.width(h.big, run[0], tpx) + tpx * 0.3
+
+static func _cap_w(h, key: String, px: int) -> float:
+	return maxf(px * 1.4, TextCache.width(h.big, key, px) + px * 0.6)
+
+static func _runs_w(h, runs: Array, px: int) -> float:
+	var w := 0.0
+	for run in runs:
+		w += (_cap_w(h, run[0], px) if run[1] else TextCache.width(h.big, run[0], px)) + px * 0.3
+	return w - px * 0.3
 
 ## The way-to-go arrow ending at `end` (right edge, row middle) with the distance before it; returns
 ## the x where it starts, so the line fits beside it.

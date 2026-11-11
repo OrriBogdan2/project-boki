@@ -4,6 +4,9 @@ extends RefCounted
 ## the drop, the landing, and each beat after it: the point, every forced pick (its gold ring), each camp
 ## and the move it teaches, the wall kick, the lookout, the glove, the fuse, the ranks and the way out.
 ## Files are <dir>/<WxH>_NN_<what>.png.
+## --banner-reel (with --tut-from=<step>): instead, the step after the landing filmed at 30 fps from its
+## slide-in through REEL_S of standing still (so its banner settles, then flares on the stall), as
+## <dir>/reel_NNNN.png for ffmpeg.
 
 var main: Node
 var m: Match
@@ -12,6 +15,7 @@ var n := 0
 
 const WATCHED := ["points", "pick_sec", "sec", "shoot", "pick_dash", "dash", "wallkick", "crouch", "gkey",
 		"pick_kin", "kin", "glove", "hook", "pick_ult", "ult", "ranks", "wayout", "uplink"]
+const REEL_S := 11.0      # s of the banner reel: the slide-in, the settle and the stall's re-pulse at NAG_T
 const GUARD := 24000      # ticks of 2 sim steps (800 s): the slow steps wait ~170 s, so 6000 was too few
 
 func run(main_node: Node) -> void:
@@ -31,6 +35,9 @@ func run(main_node: Node) -> void:
 	await _frames(30)
 	await _shot("intro_late")
 	m.tut.ack()
+	if "--banner-reel" in OS.get_cmdline_user_args():
+		await _reel()
+		return
 	var seen := {}
 	var times := [0.4, 1.2, 2.5]
 	var guard := 0
@@ -53,6 +60,22 @@ func run(main_node: Node) -> void:
 		if guard % 4 == 0:
 			await _frames(1)
 	print("TUTHUDSHOTS %d in %s" % [n, dir])
+	main.get_tree().quit(0)
+
+func _reel() -> void:
+	while m.tut.step < 1 or m.tut.card_t > 0.05:       # (drive the landing; tut-from skips to the step)
+		TutorialDrive.drive(m)
+		m.step(Match.DT)
+	var f := 0
+	while m.tut.t < REEL_S:
+		for i in 2:
+			m.step(Match.DT)
+		m.cam.snap(m.player.pos)
+		await _frames(1)
+		await RenderingServer.frame_post_draw
+		f += 1
+		main.get_viewport().get_texture().get_image().save_png(dir.path_join("reel_%04d.png" % f))
+	print("TUTHUDSHOTS reel %d frames in %s" % [f, dir])
 	main.get_tree().quit(0)
 
 func _frames(k: int) -> void:
