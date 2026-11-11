@@ -9,10 +9,9 @@ extends RefCounted
 
 ## Extra rarity steps for everything found in the hot zone (chests, drops, bosses).
 const RARITY := 1
-## Chance (0..1) a bot squad leader with no human ping heads for the hot zone, if no other squad is.
+## Chance (0..1) a bot squad leader with no human ping heads for the hot zone, if no other squad has
+## pinged it (BotCamps.pick).
 const BOT_PICK := 0.35
-## How near (m) another squad must be to the hot zone's landing for a bot leader to look elsewhere.
-const CROWD_R := 25.0
 const COL := Color("ff8a3a")
 
 var w: World = null
@@ -61,10 +60,6 @@ func rarity_bonus(p: Vector3) -> int:
 	if ri < 0:
 		return 0
 	return int(w.regions[ri].get("loot", {}).get("rarity_bonus", 0)) + (RARITY if ri == hot else 0)
-
-## Where a bot squad heading for the hot zone lands: near the middle of its main island.
-func landing() -> Vector3:
-	return w.free_spot_near(zone[0]["c"], [], 1.0, 0.5, 12.0) if not zone.is_empty() else Vector3.INF
 
 ## The hot zone on the drop map / full map (FullMap.draw).
 func full_map(fm, kk: float) -> void:

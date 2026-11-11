@@ -104,23 +104,16 @@ func tick_plan(dt: float) -> void:
 		plan_t = 0.0
 		_depart()
 
-## A bot's choice of where to land: the leader picks the squad's spot (its landing island, now and then
-## a vault close to it); anyone else suggests somewhere near the leader's pick.
+## A bot's choice of where to land: the leader picks the squad's spot (a person's ping, else a camp,
+## else its landing island); anyone else suggests somewhere near the leader's pick.
 func _bot_plan_ping(h: Hunter) -> void:
 	var at: Vector3 = h.ai.get("land", h.pos)
 	if is_lead(h):
-		var human := _human_ping(h.team)
-		if human != Vector3.INF:
-			at = human
-		elif m.biomes and randf() < HotZone.BOT_PICK and _hot_free(h):
-			at = m.biomes.hot.landing()
-		elif m.spawn_plan and randf() < 0.3:
-			var bd := 60.0
-			for c in m.spawn_plan.active_of("vault"):
-				var d := Vector2((c["pos"] as Vector3).x - at.x, (c["pos"] as Vector3).z - at.z).length()
-				if Bot.crowd_at(m, h, c["pos"], 25.0) > 0:
-					continue      # (another squad is already going there: no pile-up on the vault)
-				if d < bd: bd = d; at = c["pos"]
+		var pick := _human_ping(h.team)
+		if pick == Vector3.INF:
+			pick = BotCamps.pick(m, h)      # no person's ping: a camp (BotCamps)
+		if pick != Vector3.INF:
+			at = pick
 	else:
 		var lp := _ping_of(leader(h.team))
 		if lp != Vector3.INF:
@@ -128,11 +121,6 @@ func _bot_plan_ping(h: Hunter) -> void:
 	m.squad_ping(h, at)
 	if is_lead(h):
 		_set_land(h, at)
-
-## The hot zone has a landing and no other squad is already heading there.
-func _hot_free(h: Hunter) -> bool:
-	var at: Vector3 = m.biomes.hot.landing()
-	return at != Vector3.INF and Bot.crowd_at(m, h, at, HotZone.CROWD_R) == 0
 
 func _depart() -> void:
 	events.append("depart")

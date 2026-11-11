@@ -197,6 +197,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 				a["nolos_t"] = 0.0
 				a["ignore"] = {"e": tgt, "until": m.time + 4.0}
 				a["tgt"] = null
+		var held := BotCamps.hold(m, h, tgt)       # a rival near a prize monster: save the burst
+		if held: inp["fire"] = false
 		var abil := float(df.get("abil", 0.7))
 		BotKin.fight(m, h, tgt, d, abil)       # throw, C, recall
 		# holding our uplink's yard: fight from in it, don't chase the waves out (an empty yard drains)
@@ -216,7 +218,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 		a["hurt_hp"] = h.hp
 		# abilities: easier bots only look for a chance every so often
 		a["abil_t"] = float(a.get("abil_t", 0.0)) - dt
-		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0:
+		if a["abil_t"] <= 0.0 and a["react_t"] <= 0.0 and not held:
 			a["abil_t"] = randf_range(0.4, 1.0) * (1.0 + (1.0 - abil) * 4.0)
 			if MergeKit.is_live(h):
 				MergeKit.bot_use(h)       # merged: the ultimate when foes are in range or the window is closing (its hero kit plays as usual below)
@@ -675,6 +677,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
+		reach *= BotCamps.reach_k(m, h, o, provoked)      # (by the level gap: avoid, press, or a camp first)
 		var bounty: bool = m.rolling != null and o.has_meta("bounty")
 		if bounty: reach += 5.0        # (a rolling session: a hunter with a bounty on them is worth going after)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
@@ -683,6 +686,8 @@ func _choose(m: Match, h: Hunter) -> void:
 			continue
 		var s: float = 20.0 - d + (6.0 if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
 		if s > bs: bs = s; best = o
+	if best == null:
+		best = BotCamps.steal(m, h)       # a prize monster in its kill window: try for the last hit
 	if best == null:
 		for mb in m.mobs:
 			if mb.dead or mb == ign_e or (mb is Shrubling and (mb as Shrubling).ss == "disguised"): continue
@@ -697,6 +702,7 @@ func _choose(m: Match, h: Hunter) -> void:
 				if h.hp < h.max_hp * 0.3 and h.tonics <= 0 and d > 2.5:
 					continue
 			if d < reach and absf(mb.pos.y - h.pos.y) < 2.0 and m.world.los(h.pos, mb.pos, h.pos.y + 0.95):
+				if BotCamps.leaving(m, h, mb): continue      # (its camp is about to go under the Blight)
 				var s := 10.0 - d
 				if mb.tgt == h: s += 5.0
 				if s > bs: bs = s; best = mb
@@ -784,6 +790,10 @@ func _choose(m: Match, h: Hunter) -> void:
 			if h.base_t > 0.0: h.cancel_base()      # (a base channel would hold us still, then carry us off to a mate and drop the ping)
 		else:
 			a.erase("ping_goal")
+	# the squad's camps (its region's, smallest first, till farm_until_s; then one in reach while at or under the pace)
+	if goal == Vector3.INF and not holding_yard:
+		goal = BotCamps.goal(m, h)
+		if goal != Vector3.INF: gk = "camp"
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
 	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has

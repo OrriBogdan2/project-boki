@@ -83,11 +83,10 @@ func _hot(main: Node) -> void:
 		var c: Vector3 = hz.zone[0]["c"]
 		var own := int(m.world.regions[hz.hot].get("loot", {}).get("rarity_bonus", 0))
 		ok(hz.rarity_bonus(c) == own + HotZone.RARITY, "seed %d: hot zone loot rolls a step better" % s)
-		ok(hz.region_at(hz.landing()) == hz.hot, "seed %d: the bots' landing is in the hot zone" % s)
 		m.free()
 	ok(picked.size() >= 3, "the hot zone varies between matches (%d regions)" % picked.size())
 
-## Bot squads weigh the hot zone when they plan the drop, and never two squads into it.
+## Bot squads weigh the hot zone when they plan the drop (BotCamps.pick), and never two squads into it.
 func _bots(main: Node) -> void:
 	var into := 0
 	for s in SEEDS:
@@ -100,10 +99,9 @@ func _bots(main: Node) -> void:
 		var squads := 0
 		for t in m.skydrop.leads:
 			var l: Hunter = m.skydrop.leader(int(t))
-			if l and l.ctrl == "bot" and hz.region_at(l.ai.get("land", Vector3.INF)) == hz.hot \
-					and l.ai.get("land", Vector3.INF).distance_to(hz.landing()) < 14.0:
+			if l and l.ctrl == "bot" and hz.region_at(l.ai.get("land", Vector3.INF)) == hz.hot:
 				squads += 1
-		ok(squads <= 1, "seed %d: at most one bot squad heads for the hot zone's landing (%d)" % [s, squads])
+		ok(squads <= 1, "seed %d: at most one bot squad heads for the hot zone (%d)" % [s, squads])
 		into += squads
 		m.free()
 	ok(into >= 2, "bot squads pick the hot zone over %d matches (%d times)" % [SEEDS.size(), into])

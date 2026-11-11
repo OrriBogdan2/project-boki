@@ -12,6 +12,7 @@ extends RefCounted
 ##   XpRules.line(h) -> String, XpRules.log_hunters(m, tag)   the results line and the match log
 ##   XpRules.knock_xp(victim) -> float   what knocking this Hunter pays
 ##   XpRules.kill_xp(mb) -> float   what killing this monster pays (0 for a lair boss: Lairs pays it)
+##   XpRules.pace_level(t) -> int   the level a squad that plays camps and objectives well has at match second t
 
 const MARKS: Array[float] = [120.0, 240.0, 315.0, 480.0, 600.0]     # s: when each Hunter's level goes to the match log
 # camp monsters, other monsters, bosses and the Watcher, knocks
@@ -117,6 +118,12 @@ static func log_hunters(m, tag: String) -> void:
 			bits.append("%s=%d/%d" % [src, count(h, src), int(float(t.get(src, {}).get("xp", 0.0)))])
 		print("XPLOG %s %s team=%d lvl=%d %s camps=%d stole=%d robbed=%d" % [
 			tag, h.pname, h.team, h.lvl, " ".join(bits), t["camps"], t["stole"], t["robbed"]])
+
+static func pace_level(t: float) -> int:
+	var lv := 0
+	for from_s in rules()["pace"]["from_s"]:
+		if t >= float(from_s): lv += 1
+	return maxi(lv, 1)
 
 static func knock_xp(victim: Hunter) -> float:
 	var k: Dictionary = rules()["knock"]

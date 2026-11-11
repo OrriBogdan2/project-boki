@@ -1,7 +1,9 @@
 {
- "_doc": "Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd.",
+ "_doc": "Level XP (scripts/match/xp_rules.gd, docs/decisions/0048-camps-and-xp.md). XP is a kill reward: nothing over time, nothing for damage (damage to Hunters only builds armor). share_r (m): the last hit's squadmates, alive or downed, this close to the killer get the same XP in full. knock: base + per_level x the victim's level. camp_mob: a camp monster's XP by kind (a camp's XP is the sum of its monsters; chief is the Camp Chief's Brute). stray: any other monster (the Blight's, wanderers, lair guards); lair bosses pay through lairs.gd. steal: prize, the monsters whose last hit is called out (a Camp Chief is a brute); window (0..1 of health), their kill window. pace: from_s[i], the match second the pace level becomes i + 1 (the level a squad that plays camps and objectives well has then).",
  "share_r": 30.0,
  "knock": {"base": 40, "per_level": 15},
  "camp_mob": {"skitter": 30, "bomber": 30, "spitter": 30, "sentinel": 50, "brute": 100, "chief": 170},
- "stray": 8
+ "stray": 8,
+ "steal": {"prize": ["brute", "glimmer", "warden", "colossus", "serpent", "brood"], "window": 0.25},
+ "pace": {"from_s": [0, 45, 105, 165, 240, 315, 400, 490, 600]}
 }
