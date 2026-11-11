@@ -49,9 +49,10 @@ static func text(e: Dictionary) -> String:
 		s += ": %s lean up" % Lean.face(lean)["name"]
 	return s
 
-## The card lines for arriving home: every Boki's lines newer than the last arrival ("Pip: ate ..."),
-## oldest first, then the away gifts and any egg ready. Moves the mark to now.
-static func arrival() -> Array:
+## The card lines for arriving home: `work` (what the stations made), every Boki's lines newer than the
+## last arrival ("Pip: ate ..."), oldest first, then the away gifts and any egg ready.
+## With two zones open the lines sit under their zone's name (ZoneAway). Moves the mark to now.
+static func arrival(work: Array = []) -> Array:
 	var now := Time.get_unix_time_from_system()
 	var since := float(Save.d.get("away_seen", 0.0))
 	Save.d["away_seen"] = now
@@ -59,9 +60,9 @@ static func arrival() -> Array:
 	for rec in Save.d["roster"]:
 		for e in rec.get("journal", []):
 			if float(e["t"]) > since:
-				found.append([float(e["t"]), "%s: %s" % [rec["name"], text(e)]])
+				found.append([float(e["t"]), GardenZones.zone_of(rec), "%s: %s" % [rec["name"], text(e)]])
 	found.sort_custom(func(a, b): return a[0] < b[0])
-	var out: Array = found.map(func(f): return f[1])
+	var out := ZoneAway.grouped(work, found)
 	out.append_array(GardenAway.arrive(since, now))
 	for egg in Incubator.ready_eggs():
 		out.append("A %s is ready to hatch" % Incubator.egg_name(egg))

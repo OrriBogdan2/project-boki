@@ -8,6 +8,31 @@ const FORBIDDEN := ["lost", "starv", "sick"]
 
 var fails := 0
 
+## Two zones open: the card groups lines under each zone, and arriving in one zone catches only its Boki up.
+func _zones_part() -> void:
+	Save.d["zones"] = {"bramblebank": {"open": true}, "glasswater": {"open": true}}
+	var pip := Save.new_kin("zapple", "Pip")
+	var gil := Save.new_kin("zapple", "Gil")
+	gil["zone"] = "glasswater"
+	Save.d["roster"] = [pip, gil]
+	Save.d["active"] = ""
+	CareJournal.arrival()
+	CareJournal.note(pip, "won the Dash")
+	CareJournal.note(gil, "splashed in a pool")
+	var card := CareJournal.arrival(["3 wood from the saw"])
+	ok(card == ["Bramblebank", "  3 wood from the saw", "  Pip: won the Dash",
+			"Glasswater Shallows", "  Gil: splashed in a pool"],
+		"with two zones open the card groups its lines by zone")
+	Save.d["zones"].erase("glasswater")
+	CareJournal.note(gil, "napped")
+	ok(CareJournal.arrival() == ["Gil: napped"], "with one zone open the card is flat, as before")
+	var long_ago := Time.get_unix_time_from_system() - 3600.0
+	pip["needs_t"] = long_ago
+	gil["needs_t"] = long_ago
+	Econ.catch_up_all("glasswater")
+	ok(float(gil["needs_t"]) > long_ago + 3000.0 and float(pip["needs_t"]) == long_ago,
+		"arriving in a zone catches up only its Boki")
+
 func ok(cond: bool, what: String) -> void:
 	print("JOURNAL %s %s" % ["ok  " if cond else "FAIL", what])
 	if not cond:
@@ -57,5 +82,6 @@ func run(m: Node) -> void:
 	var shown := box.find_children("*", "Label", true, false).map(func(l): return (l as Label).text)
 	ok(shown.size() > CareJournal.KEEP, "the Boki card shows its journal")
 	box.free()
+	_zones_part()
 	print("JOURNAL DONE, failures: %d" % fails)
 	m.get_tree().quit(1 if fails > 0 else 0)

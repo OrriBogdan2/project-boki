@@ -16,6 +16,7 @@ func ok(cond: bool, what: String) -> void:
 class Host extends Node:
 	var panel_open := ""
 	var building_now := false
+	var panel_host := Control.new()      # the queue waits for it (a home builds it late)
 
 func run(m: Node) -> void:
 	main = m
