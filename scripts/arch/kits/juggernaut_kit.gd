@@ -216,9 +216,10 @@ func lunge_charging() -> bool:
 	var held := rmb_down and rmb_t > float(rmb_def()["hold"])
 	return held and not rmb_ctx.get("air", false) and not rmb_ctx.get("e", false)
 
-## The Lunge charging or flinging: the Warchain never holds him back then: it breaks past its length.
+## RMB held (from the press, so a tap on its way too) or the Lunge flinging: the Warchain never holds him back
+## then (it breaks past its length) and shows no pull arc.
 func lunging() -> bool:
-	return lunge_charging() or not lunge.is_empty()
+	return rmb_down or not lunge.is_empty()
 
 ## A knock (ours, or one we helped with): ours heals a share of the knocked hunter's health; either
 ## way, if the Finishing Slam hit them in the last 2s the Gilded Riposte is ready again (the data: "knocking an
@@ -642,10 +643,11 @@ func press_rmb() -> void:
 func smash_running() -> bool:
 	return not slam_w.is_empty() or not lunge.is_empty() or meteor.running()
 
-## A Smash winding up, flinging or in the air: E's pull on a hooked chain waits for it, then goes at once (the
-## Meteor Drop's recovery doesn't hold it: the pull ends the recovery, as a jump or a dash does).
+## The Slam winding up or a Lunge flinging: E's pull on a hooked chain waits for it, then goes at once. The
+## Meteor Drop never holds it: in the air the pull carries the drop (owner 11-11: E > jump RMB > E moves it mid-air),
+## and in the recovery the pull ends it, as a jump or a dash does.
 func _pull_waits() -> bool:
-	return not slam_w.is_empty() or not lunge.is_empty() or meteor.airborne()
+	return not slam_w.is_empty() or not lunge.is_empty()
 
 ## Presses kept while a heavy move ran go off once it's done, if they're recent enough.
 func _flush_buffer() -> void:

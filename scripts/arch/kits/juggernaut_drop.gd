@@ -4,11 +4,11 @@ extends RefCounted
 ## spec 11-10. Only from the air (he must already be jumping or falling; on the ground RMB is the Finishing Slam or
 ## the Lunge). Press: his drift stops, a beat of hang with the blade hauled overhead (`hang`, <= 0.1s), then a fast
 ## straight drop to the ground under him (no dive across, no leap, no extra height). The hit is a small circle
-## centred where he lands, no aim offset (move, Shift or pull there first), shown to everyone from
-## the press: everyone in it
-## is knocked down and anyone airborne is spiked to the ground (Displace.spike); a crack, a shock ring, cel dust
-## and debris, a shake for those nearby and a deep boom. Then a recovery rising from the crouch. Owned by
-## JuggernautKit.
+## centred where he lands, no aim offset: he gets there first by moving or Shift, or mid-drop by Shift or E on a
+## hooked Warchain (owner 11-11, E > jump RMB > E), which carry him and the drop then falls from where they leave him.
+## Shown to everyone from the press: everyone in it is knocked down and anyone airborne is spiked to the ground
+## (Displace.spike); a crack, a shock ring, cel dust and debris, a shake for those nearby and a deep boom. Then a
+## recovery rising from the crouch. Owned by JuggernautKit.
 
 const PURPLE := Color("b06aff")       # the hit circle (the damage area)
 const CORE := Color("ff5ad8")         # its centre ring: the stun area
@@ -105,8 +105,8 @@ func tick(dt: float) -> void:
 				last_recover = t
 				phase = ""
 
-## The wind-up: held where he is (gravity cancelled), the blade going up. An air dash in it carries him on, and
-## the drop then falls from wherever that left him.
+## The wind-up: held where he is (gravity cancelled), the blade going up. An air dash or a Warchain pull in it
+## carries him on, the circle following straight under him, and the drop then falls from wherever that left him.
 func _tick_hang(dt: float) -> void:
 	var h := k.h
 	var hang := float(data()["hang"])
@@ -125,9 +125,15 @@ func _tick_hang(dt: float) -> void:
 		dive_t = clampf((from.y - land.y) / float(dd["dive_speed"]), float(dd["dive_t"][0]), float(dd["dive_t"][1]))
 		k.vfx("drop_dive", h.pos, dir)
 
-## The drop: straight down, accelerating (seen all the way, not a teleport), flame streaks rising off him.
+## The drop: straight down, accelerating (seen all the way, not a teleport), flame streaks rising off him. A pull
+## that takes him mid-drop puts it back to the end of the hang: it falls again from where the pull leaves him.
 func _tick_dive() -> void:
 	var h := k.h
+	if h.roll_t > 0.0:
+		phase = "hang"
+		phases.append("hang")
+		t = float(data()["hang"])
+		return
 	var u := clampf(t / dive_t, 0.0, 1.0)
 	h.vel = Vector3.ZERO
 	h.teleport(Vector3(from.x, lerpf(from.y, land.y, u * u), from.z))

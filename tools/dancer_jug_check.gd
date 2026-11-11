@@ -1095,6 +1095,23 @@ func combos(a) -> void:
 	ed["tether_max"] = most
 	A.ok("combo jug: E > hold RMB walking off: the chain breaks at its length, he is never held",
 			not K.warchain.hooked() and x0 - P.pos.x > 2.0, "walked %.2f chain %s" % [x0 - P.pos.x, K.warchain.state])
+	# ... from the press on, before the hold counts as a charge: at its length it breaks, it never holds him there
+	A.step(m, 1.5)
+	hook.call()
+	ed["tether_max"] = P.flat_dist(T) + 0.2
+	x0 = P.pos.x
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	A.step(m, 0.25, func():
+		P.inp["sec_hold"] = true
+		P.inp["move"] = Vector2(-1, 0))
+	var not_charge := K.rmb_down and not K.lunge_charging()
+	var kept_on := K.warchain.hooked()
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec_hold"] = false
+	ed["tether_max"] = most
+	A.ok("combo jug: E > RMB down 0.25s (not yet a charge) walking off: the chain breaks at its length, never holds",
+			not_charge and not kept_on and x0 - P.pos.x > 0.8, "walked %.2f chain kept %s" % [x0 - P.pos.x, kept_on])
 	var hp0 := 0.0
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	A.step(m, 1.0)

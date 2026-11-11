@@ -171,19 +171,25 @@ func vertical_slam() -> void:
 	P.grounded = false
 	P.vel = Vector3.ZERO
 	A.aim_at(P, home + Vector3(4.0, 0, 0))
+	var press_at := P.pos
 	K.press_rmb()
 	var t := 0.0
 	var drift := 0.0
 	var top := Vector3.ZERO
 	while D.phase != "recover" and t < 2.0:
+		P.inp["move"] = Vector2(1, 0)          # W toward the cursor all the way down
 		m.step(A.DT)
 		t += A.DT
 		if D.phase == "dive":
 			if top == Vector3.ZERO:
 				top = P.pos
 			drift = maxf(drift, Vector2(P.pos.x - D.land.x, P.pos.z - D.land.z).length())
+	P.inp["move"] = Vector2.ZERO
+	var off := Vector2(D.last_drop.x - press_at.x, D.last_drop.z - press_at.z).length()
 	A.ok("jug 113.6: the slam comes straight down onto the spot (no sideways travel in the dive)",
 			top != Vector3.ZERO and drift < 0.15 and D.drops == 1, "%.2f m off the spot in the dive" % drift)
+	A.ok("jug owner 11-11: W held, cursor ahead: it lands straight under the press, no steering or drift",
+			D.drops == 1 and off < 0.15 and D.last_hit == D.last_drop, "%.2f m from under the press" % off)
 	await A.done(m)
 
 # ------------------------------------------------------------------ 7: E > R > the pull through the ult
@@ -341,8 +347,10 @@ func slam_combo() -> void:
 			"exit %s hauls %d foe %.0f > %.0f at %.1f m" % [W.exits, K.haul_slams, hp0, T.hp, P.flat_dist(T)])
 	await A.done(m)
 
-## E's pull on a hooked chain pressed while a Smash runs (the air slam's hang, the Finishing Slam's wind-up) is
-## kept and goes the moment it lands, never lost and never fighting the slam's own movement.
+## Owner 11-11, E > jump RMB > E: E on a hooked chain pressed in the Meteor Drop (its hang, or its dive) pulls him at
+## once, the drop riding the pull with its circle straight under him; it then falls straight down from where the
+## pull leaves him, beside the foe, who is knocked down. In the Finishing Slam's wind-up E still waits for the strike
+## (owner 11-10), then goes at once.
 func pull_waits() -> void:
 	var g := _rig()
 	var m: Match = g["m"]
@@ -352,25 +360,43 @@ func pull_waits() -> void:
 	var home: Vector3 = g["home"]
 	var W := K.warchain
 	var D := K.meteor
-	T.teleport(home + Vector3(7.0, 0, 0))
-	A.fresh(T)
-	A.aim_at(P, T.pos)
-	K.use_e()
-	A.step(m, 0.45)
-	_air(m, P, 0.25)
-	var press_at := P.pos
-	K.press_rmb()
-	m.step(A.DT)
-	K.use_e()
-	var waited := W.hooked() and D.phase == "hang"
-	_until(m, func(): return D.phase != "hang" and D.phase != "dive", 1.0)
-	var under := Vector2(D.last_drop.x - press_at.x, D.last_drop.z - press_at.z).length()
-	m.step(A.DT)
-	A.ok("jug E in the air slam: the pull waits for the landing, then goes at once",
-			waited and D.drops == 1 and under < 0.15 and W.pulling(),
-			"waited %s %.2f m off, %s" % [waited, under, W.state])
-	_until(m, func(): return W.state != "pulling", 1.5)
-	A.ok("jug E in the air slam: the pull then arrives", W.exits == "arrived", W.exits)
+	for at in ["hang", "dive"]:
+		_fresh(m, P, K, home)
+		T.teleport(home + Vector3(7.0, 0, 0))
+		A.fresh(T)
+		A.aim_at(P, T.pos)
+		K.use_e()
+		A.step(m, 0.45)
+		_air(m, P, 0.25)
+		var press_at := P.pos
+		var drops0 := D.drops
+		K.press_rmb()
+		_until(m, func(): return D.phase == at, 0.5)
+		var pressed_in := D.phase
+		var hp0 := T.hp
+		K.use_e()
+		m.step(A.DT)
+		var carried := W.pulling() and D.phase == "hang" and K.anim_id == "jug_meteor"
+		var low := 9.0                  # m: his lowest height over the ground while the pull carries the drop
+		var off := 0.0                  # m: the farthest the drop's circle sat from straight under him
+		var t := 0.0
+		while W.pulling() and t < 1.5:
+			t += A.DT
+			var was := Vector2(P.pos.x, P.pos.z)       # (the circle is drawn before the step moves him)
+			m.step(A.DT)
+			low = minf(low, P.pos.y - home.y)
+			var c: Vector2 = AimKit.entry(P, "drop").get("at", Vector2.INF)
+			off = maxf(off, c.distance_to(was))
+		A.ok("jug E > jump RMB > E (E in the %s): the pull goes at once, carrying the drop through the air" % at,
+				pressed_in == at and carried and W.exits == "arrived" and low > 0.3 and off < 0.05,
+				"in %s carried %s exit %s lowest %.2f m circle %.2f m off" % [pressed_in, carried, W.exits, low, off])
+		_until(m, func(): return D.phase == "recover", 1.0)
+		var moved := Vector2(D.last_drop.x - press_at.x, D.last_drop.z - press_at.z).length()
+		var down := Vector2(D.last_drop.x - W.last_arrival.x, D.last_drop.z - W.last_arrival.z).length()
+		A.ok("jug E > jump RMB > E (E in the %s): it falls straight down where the pull left him, knocking the foe down" % at,
+				D.drops == drops0 + 1 and moved > 3.0 and down < 0.15 and D.last_hit == D.last_drop and hp0 - T.hp >= 18.0
+				and T.stun_t > 0.0,
+				"moved %.1f m, %.2f m off the arrival, foe took %.0f stun %.2f" % [moved, down, hp0 - T.hp, T.stun_t])
 	_fresh(m, P, K, home)
 	A.fresh(T)
 	A.aim_at(P, T.pos)
