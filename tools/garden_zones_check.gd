@@ -20,6 +20,10 @@ extends RefCounted
 ## opens its cards. Thrive (step 8): a Boki leaning toward the zone's types (or with its trait over 0.6)
 ## loses joy at half speed and trains +25% at the zone's toys; one that doesn't loses joy as before;
 ## the zone's daily trait pull stops at 0.8 (calm Glasswater pulls temper down to 0.2).
+## opens its cards. Unlock (step 6): no Wayseed, a Wayseed but no lean, and both: only both wake the zone,
+## the Wayseed is used up and the Boki that leaned becomes the founder (it lives there, with a memory and a
+## journal line, and the stone lights); lairs of a matching biome hold a Wayseed only for a locked zone; the
+## trader holds one weekly Wayseed, never for an open zone.
 
 const WAIT_S := 30.0      # s to wait for a home to finish building before failing
 const SHOT_ZOOM := 1.5    # camera zoom for the hub shot (0.8 close .. 1.6 wide)
@@ -42,6 +46,7 @@ func run(m: Node) -> void:
 	await _cinderstep_part(m)
 	await _reload_part(m)
 	_thrive_part()
+	await _unlock_part(m)
 	print("ZONES %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	m.get_tree().quit(0 if bad == 0 else 1)
 
@@ -483,3 +488,64 @@ func _train_pull_part(rec: Dictionary, other: Dictionary) -> void:
 	var temper := float(away["traits"]["temper"])
 	BaseDrift.day([away])
 	ok(is_equal_approx(float(away["traits"]["temper"]), temper), "a Boki from another zone is not pulled")
+## The Waystone in the hub with the Boki on the base: Ash leans Fire, so Cinderstep is the zone to wake.
+func _unlock_part(m: Node) -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	_new_save()
+	Game.goto("home", {"zone": GardenZones.HUB})
+	var hub = await _arrived(m, Game.main.current)
+	ok(hub != null, "the hub loads for the unlock")
+	if hub == null:
+		return
+	var ash: Dictionary = Save.d["roster"][1]
+	var key := float(GardenZones.rules()["lean_key"])
+	var stone: Node = hub.hway.node.get_node("Stone2")
+	var marks: bool = hub.hway.node.has_node("Key2_0") and hub.hway.node.has_node("Key2_1")
+	ok(not stone.get_meta("open") and marks, "the locked Cinderstep stone shows its two keys")
+	ok(not GardenZones.attune("cinderstep")["ok"], "no Wayseed and no lean: Cinderstep stays asleep")
+	ash["lean"] = {"fire": key}
+	hub.hway.attune("cinderstep")
+	ok(not GardenZones.is_open("cinderstep"), "a lean but no Wayseed does not wake it")
+	ash["lean"] = {"fire": key - 1.0}
+	Save.add_item(GardenZones.wayseed("cinderstep"), 1)
+	hub.hway.attune("cinderstep")
+	ok(not GardenZones.is_open("cinderstep") and int(Save.d["items"][GardenZones.wayseed("cinderstep")]) == 1,
+		"a Wayseed and a lean just under 12 does not wake it, and keeps the seed")
+	ash["lean"] = {"fire": key}
+	hub.hway.attune("cinderstep")
+	ok(GardenZones.is_open("cinderstep") and _seeds("cinderstep") == 0, "both keys wake Cinderstep, the seed is used")
+	ok(GardenZones.founder("cinderstep") == ash and GardenZones.zone_of(ash) == "cinderstep", "Ash is the founder")
+	ok(ash["memory"].any(func(e): return "the day I woke Cinderstep" in String(e["text"])), "it remembers the day")
+	ok(ash["journal"].any(func(e): return CareJournal.text(e) == "woke Cinderstep"), "its journal says so")
+	ok(hub.hway.node.get_node("Stone2").get_meta("open") and hub.hway.node.has_node("Cap2"), "its stone is lit")
+	ok(not GardenZones.attune("cinderstep")["ok"], "an open zone cannot be woken again")
+	var lines: Array = ZoneCards._open_lines("cinderstep").map(func(l): return (l as Label).text)
+	ok(lines.has("Woken by Ash"), "its card names the founder")
+	_lair_and_trader_part()
+	Content.rules("farm_build")["base_mode"] = false
+
+func _lair_and_trader_part() -> void:
+	ok(GardenZones.seed_zone_for("ember") == "" and GardenZones.seed_zone_for("frost") == "glasswater"
+		and GardenZones.seed_zone_for("gloom") == "hushwood" and GardenZones.seed_zone_for("meadow") == "",
+		"a lair's Wayseed is for a locked zone of its biome: not Cinderstep (open), not the meadow")
+	var seed_item := Loot.valuable(GardenZones.wayseed("ridge"))
+	ok(Loot.is_wayseed(seed_item) and Loot.keepable(seed_item), "a Wayseed is carried home")
+	Econ._store(seed_item)
+	ok(_seeds("ridge") == 1 and not Save.d["valuables"].has("wayseed_ridge"), "it comes home as a bag item")
+	Save.d["gems"] = 5000
+	var held: Array = BlackMarket.stock().filter(func(e): return BlackMarket.is_seed(String(e["key"])))
+	ok(held.size() == 1 and not GardenZones.is_open(BlackMarket.id_of(String(held[0]["key"]))),
+		"the trader holds one Wayseed, for a zone still locked")
+	var zone := BlackMarket.id_of(String(held[0]["key"]))
+	ok(BlackMarket.buy(String(held[0]["id"]))["ok"] and _seeds(zone) >= 1, "buying it puts the Wayseed in the bag")
+	ok(not _trader_has_seed(), "no second Wayseed the same week")
+	Save.d["market"]["black"]["seed_week"] = -1
+	for id in GardenZones.ids():
+		Save.d["zones"][id] = {"open": true}
+	ok(not _trader_has_seed(), "with every zone open the trader holds no Wayseed")
+
+func _seeds(zone: String) -> int:
+	return int(Save.d["items"].get(GardenZones.wayseed(zone), 0))
+
+func _trader_has_seed() -> bool:
+	return BlackMarket.stock().any(func(e): return BlackMarket.is_seed(String(e["key"])))

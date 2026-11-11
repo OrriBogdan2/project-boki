@@ -33,7 +33,9 @@ func place() -> void:
 	if here() == GardenZones.HUB:
 		var stones: Array = []
 		for id in GardenZones.ids():
-			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": GardenZones.is_open(id)})
+			var lit := GardenZones.is_open(id)
+			stones.append({"colour": String(GardenZones.info(id)["colour"]), "open": lit,
+				"keys": {} if lit else GardenZones.keys_for(id)})
 		node = FarmModels.waystone(stones)
 		node.position = HUB_AT
 		board = FarmModels.games_board()
@@ -50,6 +52,22 @@ func place() -> void:
 	node.name = "Waystone"
 	h.add_child(node)
 	pad = {"pos": node.position}
+
+## Wakes a locked zone with both keys: the Boki plants the Wayseed, the stone lights up (toast, sound, burst).
+func attune(id: String) -> void:
+	var r := GardenZones.attune(id)
+	if not r["ok"]:
+		h._toast(String(r["why"]))
+		return
+	h._close_panel()
+	var z := GardenZones.info(id)
+	h.fx.burst(node.position + Vector3(0, 0.8, 0), Color(String(z["colour"])), 30, 3.0, 0.8, -1.0)
+	Sfx.play("unlock")
+	if here() == GardenZones.HUB:
+		node.queue_free()
+		place()
+	Save.save_game()
+	h._toast("%s planted the Wayseed: %s is awake" % [r["founder"]["name"], z["name"]])
 
 ## Where you stand after a hop: on the pad, or just south of the Waystone. Elsewhere: where you'd be.
 func arrive_at(p: Vector3) -> Vector3:
