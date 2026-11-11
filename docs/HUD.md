@@ -113,3 +113,6 @@ Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, J
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
 badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+
+## Key text
+Every key named in tutorial steps, Boki hints, first-time hints, Training Grounds rows and farm tutorial lines comes from `Settings.key_cap` (tokens: `%E %S %T %F %R %J %G` in `TutorialText`/`Tutorial`, `{interact} {build} {details}` in `FarmTutorial.fill`); no letter or mouse-button name is written into the text. `--key-text-check` rebinds every action to an unusual key and fails on any default key or mouse-button name left in those lines.
