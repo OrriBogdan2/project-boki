@@ -206,14 +206,14 @@ func carrying() -> Array:
 	return CareUtil.carried_of(m, h)
 
 func can_pick() -> bool:
-	return lock_t <= 0.0 and h.stun_t <= 0.0 and h.root_t <= 0.0 and not busy() and not Hex.active(h)
+	return lock_t <= 0.0 and h.stun_t <= 0.0 and not busy()
 
 func _tick_carry(dt: float) -> void:
 	var pd: Dictionary = d["passive"]
 	var cs := carrying()
 	if not cs.is_empty():
 		carry_t += dt
-		# the source's triggers: a stun, or damage (on_take); a root or hex holds
+		# the source's triggers: a stun, or damage (on_take); a root, hex, slow or heal holds
 		if h.stun_t > 0.0:
 			drop_all(true)
 			return
@@ -237,7 +237,7 @@ func _tick_carry(dt: float) -> void:
 			break
 		pick_up(o)
 
-## Taking damage drops whoever you carry, with the lock.
+## Any damage drops whoever you carry, with the lock (data: "too much damage", no figure; the shield is cut).
 func on_take(_by: Ent, dmg: float, _o: Dictionary) -> void:
 	if dmg > 0.0 and not carrying().is_empty():
 		drop_all(true)

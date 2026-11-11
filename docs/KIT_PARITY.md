@@ -150,6 +150,8 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | R | Channel on ally/Wisp; revive and pull; cancels on stun, knock, range; 60 s [D] | Tether 5 s, range 12.6, cd 46 | match in shape; 0.77x cd |
 | Dash | Ground 7 s, air 14 s, separate [D] | 7 s and 14 s, 3.6 m/.2 s (F) and 13.3 m/.95 s (F), off the dash feel, air steer (owner) | match |
 | Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | differ: shield ours. Drop lockout built (lock 4 s); which hits drop not traced |
+| Dash | Ground 7 s, air 14 s, separate [D] | 7 s and 14 s, raw 4.2/.174 and 13.3/.95, air steer (owner) | match |
+| Passive | Carry Wisps; damage or stun drops, 4 s lockout [D] | Carry up to 2 + Carrier shield (ours) | match: shield cut (owner 11-07). Drops on any damage (shot, DoT) or a stun, 4 s lock; root, slow, knock-back, heal hold them (traced and asserted, "mm carry" rows); "too much damage" has no figure [est] |
 | Anim | Footage poses | 16 moves, all on `pip.glb` (45) | match on coverage |
 | LMB | Ramp per hit; idle shot Empowered [D] | Rate .4, Empowered +40% range (ours) | match; range bonus ours |
 | RMB | Shot, delayed Root, 11.5 s [D] | Burrseed: wind-up 1.0, seed delay .7, root 1.1, range 14, cd 10.5 | differ `[?]` motion; pending `ext/meeko-rmb-verify` eba7147eb (checked vs footage: press to seed ~0.36 s, root 1.1 s match; cd 10.5 vs 11.5 and tap vs hold-aim stay open) |
