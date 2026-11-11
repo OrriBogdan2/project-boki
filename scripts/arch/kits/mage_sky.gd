@@ -123,8 +123,7 @@ func _strike(s: Dictionary) -> void:
 	for f in kit.foes_in(at, float(ed["radius"])):
 		kit.add_spark(f, int(ed.get("stacks", 1)))
 		_slide(f, dir, ed)
-		if f is Hunter:
-			KitStatus.apply(f, "gnd", float(ed["grounded"]))
+		KitStatus.apply(f, "gnd", float(ed["grounded"]))
 		kit.fx().shackle(f, MageKit.TEAL, MageKit.PINK, float(ed["grounded"]))
 	for o in kit.m.hunters:       # rival Wisps (downed hunters) are launched too; no Static, no Grounded
 		if o.team != kit.h.team and o.downed and o.hittable() and not CareUtil.is_carried(o) \

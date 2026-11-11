@@ -213,8 +213,8 @@ func _raise(p: Vector3, along: Vector2) -> void:
 ## A rock never rises inside a body: whoever stands on the line is moved to the side they were on.
 func _shove_off_line(p: Vector3, along: Vector2, across: Vector2) -> void:
 	var half_len := float(k.rock_def()["len"]) * 0.5
-	for e in k.m.hunters:
-		if e.dead or absf(e.pos.y - p.y) > 1.5:
+	for e in k.m.hunters + k.m.mobs:
+		if not is_instance_valid(e) or e.dead or absf(e.pos.y - p.y) > 1.5:
 			continue
 		var to := Vector2(e.pos.x - p.x, e.pos.z - p.z)
 		var side_off := to.dot(across)
