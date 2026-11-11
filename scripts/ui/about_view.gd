@@ -227,6 +227,7 @@ static func looks(rec: Dictionary, parent: Control) -> void:
 	var bm := birth_short(rec)
 	if bm != "": _row(parent, "Birthmark", bm, UI.INK, null, "burst")
 	_row(parent, "Food", food_short(rec), UI.INK, null, "tonic")
+	PrizeBoard.add_ribbons(parent, rec)
 
 ## Where it came from (Save.register), one short line each.
 static func history(rec: Dictionary, parent: Control) -> void:

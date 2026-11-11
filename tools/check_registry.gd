@@ -11,6 +11,8 @@ const CHECKS := {
 	"--chore-check": ["res://tools/chore_check.gd", "chore_check", null],      # GARDEN.md section 4 Chore
 	"--garden-items-check": ["res://tools/garden_items_check.gd", "garden_items_check", null],      # GARDEN_MODERN.md 1
 	"--nest-items-check": ["res://tools/nest_items_check.gd", "nest_items_check", null],      # GARDEN_MODERN 1.2
+	"--garden-prizes-check": ["res://tools/garden_prizes_check.gd", "garden_prizes_check", null],
+	"--garden-recipes-check": ["res://tools/garden_recipes_check.gd", "garden_recipes_check", null],      # Mixing Bowl
 	"--base-life-check": ["res://tools/base_life_check.gd", "base_life_check", null],      # GARDEN.md 9.2
 	"--stat-budget-check": ["res://tools/stat_budget_check.gd", "stat_budget_check", null],      # decision 0022
 	"--raising-check": ["res://tools/raising_check.gd", "raising_check", null],      # the home raising loop
@@ -167,6 +169,7 @@ const CHECKS := {
 	"--garden-visitor-check": ["res://tools/garden_visitor_check.gd", "garden_visitor_check", null],
 	"--volley-check": ["res://tools/volley_check.gd", "volley_check", null],      # Spark Volley, GARDEN.md 5.4
 	"--showcase-check": ["res://tools/showcase_check.gd", "showcase_check", null],      # the Dash's showcase wall
+	"--glint-fishing-check": ["res://tools/glint_fishing_check.gd", "glint_fishing_check", null],      # 4.2 game 4
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--prologue-check": ["res://tools/prologue_check.gd", "prologue_check", null],      # also --shots-dir=<dir>
 	"--economy-floor-check": ["res://tools/economy_floor_check.gd", "economy_floor_check", null],      # never stuck

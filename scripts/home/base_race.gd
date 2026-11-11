@@ -221,7 +221,9 @@ static func settle(run: Run) -> Dictionary:
 	var backed_won: bool = order[0] == run.backed
 	var gems := int(R["gems_win"]) if backed_won else int(R["gems_ran"])
 	Save.d["gems"] = int(Save.d["gems"]) + gems
-	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won}
+	var mine: Dictionary = run.recs[run.backed]
+	var prize := GardenPrizes.settle("dash", mine, GardenPrizes.strongest(run.recs, mine), backed_won)
+	return {"win": win, "lose": lose, "gems": gems, "backed_won": backed_won, "prize": prize}
 
 ## Pays out a solo training lap (grades: three of great/good/miss). Returns the Speed gained.
 static func settle_solo(rec: Dictionary, grades: Array) -> int:
@@ -521,7 +523,7 @@ func _race_card(res: Dictionary) -> void:
 		["%s: pinned to the showcase wall" % run.tw.get("name", "Dash"), UI.MUTED],
 		["%s is beaming (+joy, +trust)" % win["name"], UI.INK],
 		["%s sulks: \"came last in the Dash, behind %s\"" % [lose["name"], win["name"]], UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], UI.GOLD]])
+		["+%d gems%s" % [res["gems"], why], UI.GOLD]] + GardenPrizes.rows(res["prize"]))
 
 func _solo_card(gained: int) -> void:
 	var speed := int(solo_rec["stats"]["speed"])
