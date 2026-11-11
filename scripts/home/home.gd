@@ -75,6 +75,7 @@ var guide: FarmGuide = null        # the Goals card and the farm tutorial on scr
 var toys: HomeToys = null        # the base's balls, posts and tubs, played with on their own (home_toys.gd)
 var hw: HomeWork = null            # kin at work: jobs, stations and the Job Board (home_work.gd, Work)
 var life: BaseLife = null          # base_mode only: each Boki's own life and bonds (base_life.gd)
+var nap_sound := BokiNapSfx.new()     # the napping Boki breathe and yawn (boki_nap_sfx.gd)
 var stat_glint: StatGlint = null   # the glint over a Boki whose stats rise (stat_glint.gd)
 var hinc: HomeIncubator = null     # the Incubator by the Nesting Nook, where Rare Eggs hatch (home_incubator.gd, Incubator)
 var hmk: HomeMarket = null         # the market stall's panel (home_market.gd)
@@ -1404,6 +1405,7 @@ func _move_kin(d: float) -> void:
 	talk_cd = maxf(0.0, talk_cd - d)
 	_separate_kin(d)
 	if life: life.step(d)
+	nap_sound.step(kins, d)
 	for k in kins:
 		if k.get("busy", false):
 			continue
