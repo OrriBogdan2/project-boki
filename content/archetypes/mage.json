@@ -10,6 +10,7 @@
 	"model_glow": {"core": "#ff3fb4"},
 	"color": "#ff5ab4",
 	"fantasy": "The storm-kite runner. Points and crackles bolts from her fingertip until a foe is fully charged, then runs straight through them as a streak of lightning and comes out with the dash back.",
+	"howto": ["Play: mid-range lightning; stack Static, then run through.", "Combo: 3 bolts plus {secondary}, then {dash} through them.", "Avoid: dashing through a foe under 4 Static."],
 	"silhouette": "the copper rod mast and kite pennant on the back",
 	"card": {
 		"role_word": "Skirmisher",

@@ -90,6 +90,7 @@ func _card(id: String, i: int) -> PanelContainer:
 	role.custom_minimum_size.x = CARD_W - 24.0
 	role.set_meta("mask_role", id)
 	v.add_child(role)
+	v.add_child(ClassCard.howto_box(id, CARD_W - 24.0, 12))
 	return card
 
 ## Puts the focus on the i-th Mask: its card lights up and its clip plays under the cards.
