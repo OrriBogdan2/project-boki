@@ -11,10 +11,14 @@ Meshy raw files stay in ~/meshy/breaker_v2 (not in git); the measured scan joint
     blender -b --factory-startup --python tools/art1/breaker_scan.py -- SCAN.glb art/wardens/src/breaker_rig.json WORK RETOPO.glb
     BOKI_ART_REFS=<briefs>/art-refs blender -b --factory-startup --python tools/art1/breaker_art1.py -- WORK   # sculpt, mesh, atlas, skin
     blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend art/wardens/breaker/breaker.glb
+    blender -b --factory-startup --python tools/art1/breaker_gait.py -- art/wardens/breaker/breaker.glb WORK/breaker_gait.glb  # walk_f, run_f
+    python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb WORK/breaker_gait.glb walk_f,run_f
     godot --headless --path . --import
 
 - **Files:** tools/art1/sculpt_kit.py (hero-independent), breaker_sculpt.py (shapes), breaker_paint.py (paint), breaker_art1.py (mesh, UVs,
-  armature, rigid weights), anim_kit.py (keys -> IK -> baked clips), breaker_anims.py (clips), art1_render.py (Cycles review).
+  armature, rigid weights), anim_kit.py (keys -> IK -> baked clips), breaker_anims.py (clips), breaker_gait.py (walk_f and run_f: a
+  generated stride with the soles locked to the floor at 2.0 and 4.8 m/s, 2.7 and 3.2 steps/s, hammer carried clear of the floor),
+  art1_render.py (Cycles review).
 - **Body:** content/archetypes/bulwark.json body: legs 0.46, torso 1.06, shoulder 1.15, build 1.4, head 0.3, size 2.0: the rig's arms are a
   fixed length, so the art's proportions need a 1.03 m neutral body; size 2.0 keeps the helmet's top at 1.5x a medium hunter. The masts stand over
   that (1.9x). The hit radius stays 0.46 (docs/HITBOX_SIZE.md): the hull is no longer a ball (owner 11-08): `hull_scale` in breaker_scan.py tapers it, 0.55x wide at the waist to 1.0x at the shoulders, 0.7x front to back, for a hammer-bruiser V.
