@@ -32,3 +32,13 @@ The form ultimates and the release have no hand-keyed clip in any hero's `.glb`:
 
 Two heroes show something other than `hit_*` in the hit window, merged and unmerged alike: Kibo's landing clip
 (`dash_land`, the dash before it) and Ravyl's `spirit` move. That is their own order of states, not the merge.
+
+## The live clip player (`--merge-anim-check`, `--merge-reel`)
+
+`--fusion-states-check` asks the clip picker; `--merge-anim-check` reads what the Hero's AnimationTree carries the
+body with after each step (full-body clip, upper-body clip, the rig, air, glide, loco) for idle, walk, run, jump,
+glide, LMB, RMB, Shift and E, merged into each form and again after the merge ends, against the same Hero unmerged
+(13 Hunters; Gil, with no clips, through the rig), and that the bones move under the walk. On v0.24.4 (origin/main
+88b06b9e7) it fails 162 rows: merged, every Hunter's LMB, RMB, Shift and E played no clip (the body stayed on its
+legs) and Cinder's and Grimble's jump clips were lost, all from the stale `mf_xform` above. 0 with this pass.
+`--merge-reel --reel-hero=<arch> [--reel-boki=<species>]` renders the same moves at the match camera (jobq GPU).

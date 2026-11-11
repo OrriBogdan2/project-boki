@@ -44,7 +44,8 @@ func _p_merge() -> void:
 
 func _p_walk() -> void:
 	var walk := func(t: float) -> void:
-		P.inp["move"] = Vector2(0.4 if t < 1.4 else 1.0, 0.0) if t < 2.6 else Vector2.ZERO
+		var pace := 0.4 if t < 1.4 else 1.0        # walk, then run
+		P.inp["move"] = Vector2(pace, 0.0) if t < 2.6 else Vector2.ZERO
 	await _seg("Merged: walk, then run", 3.0, walk, FAR)
 
 func _p_air() -> void:

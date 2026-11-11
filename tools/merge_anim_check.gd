@@ -1,6 +1,6 @@
 extends RefCounted
-## --merge-anim-check: what a Hero's AnimationTree really plays while merged (owner 11-11: "animations while merged
-## need to be fixed"). Each Hero runs the same moves unmerged, merged into each form, and again after the merge ends:
+## --merge-anim-check: what a Hero's AnimationTree really plays while merged into a Boki (KinMerge). Each Hero runs
+## the same moves unmerged, merged into each form, and again after the merge ends:
 ## idle, walk, run, jump, glide, LMB, RMB, dash (Shift), E. Read off the Hero's own clip player after it stepped
 ## (WardenClips: which channel carries the body and what clip is on it), plus that the bones move under the walk.
 ## Merged and after must show exactly what unmerged shows (its first and second pass). Never touches the save.
@@ -44,12 +44,16 @@ func run(main: Node) -> void:
 			for st in STATES:
 				ok(got[st] == base[st], "%s as %s, %s: plays %s, unmerged %s" % [hero, id, st, got[st], base[st]])
 				var was: String = base["after"][st]
-				ok(got["after"][st] == was, "%s after %s, %s: plays %s, unmerged %s" % [hero, id, st, got["after"][st], was])
+				var now: String = got["after"][st]
+				ok(now == was, "%s after %s, %s: plays %s, unmerged %s" % [hero, id, st, now, was])
 			if got["clips"]:
-				ok(float(got["walk_turn"]) >= MOVING_BONES, "%s as %s: the bones move under the walk (%.3f rad)" % [hero, id, got["walk_turn"]])
+				var turn := float(got["walk_turn"])
+				ok(turn >= MOVING_BONES, "%s as %s: the bones move under the walk (%.3f rad)" % [hero, id, turn])
 			var xf_want := "clip " if got["clips"] else "rig mf_xform"
 			ok(got["xform"].begins_with(xf_want), "%s as %s: the transformation plays (%s)" % [hero, id, got["xform"]])
-			ok(got["scale_after"].is_equal_approx(base["scale"]), "%s after %s: model scale back (%s, was %s)" % [hero, id, got["scale_after"], base["scale"]])
+			var back: Vector3 = got["scale_after"]
+			var was_k: Vector3 = base["scale"]
+			ok(back.is_equal_approx(was_k), "%s after %s: model scale back (%s, was %s)" % [hero, id, back, was_k])
 	print("MERGEANIM DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -186,7 +190,8 @@ func _clips(P: Hunter) -> WardenClips:
 	return sync.get("clips") if sync else null
 
 ## What the clip player carries the body with after this frame's step: "rig <move>" (handed to the retargeted rig),
-## "clip <name>" (a full-body move), "upper <name>" (a move over running legs), "flinch", "glide", "air", "loco <idle|move>".
+## "clip <name>" (a full-body move), "upper <name>" (a move over running legs), "flinch", "glide", "air",
+## "loco <idle|move>".
 func _shown(P: Hunter) -> String:
 	var c := _clips(P)
 	if c == null:
