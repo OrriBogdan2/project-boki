@@ -27,6 +27,14 @@
    "Now shoot them down"
   ],
   [
+   "wisp",
+   "%s rides with you as a wisp"
+  ],
+  [
+   "summon",
+   "Tap %C to summon %s"
+  ],
+  [
    "pick_dash",
    "Level 2: unlock %A"
   ],
@@ -83,6 +91,10 @@
    "Spend your spare points"
   ],
   [
+   "steal",
+   "Round wisp: a Hunter. Critter wisp: a Boki"
+  ],
+  [
    "wayout",
    "Few ways out: reach the outpost"
   ],
@@ -117,12 +129,18 @@
   "ranks": "Ranks make an ability stronger: %R, or click a gold +.",
   "wayout": "A match has few ways out; this one is at the outpost.",
   "uplink": "Stay in the circle, or the capture slips back.",
-  "defend": "Stay in the circle, or the capture slips back."
+  "defend": "Stay in the circle, or the capture slips back.",
+  "wisp": "While it rides, its carry power is yours. %P.",
+  "summon": "Summoned, %s fights for a few seconds, then turns back into a wisp and rests. Its ring fills until you can summon it again. Tap %C while it is out to call it back early.",
+  "steal": "A downed Hunter's Boki wisp breaks loose. Steal it: it rides with you at half power and gives you one summon. It goes home after the match, and nothing of yours is lost."
  },
  "alt": {
   "sec_hold": "Tap, then hold, to use %A",
   "shoot_draw": "Hold to draw, let go to loose",
-  "shoot_melee": "Step in and swing at them"
+  "shoot_melee": "Step in and swing at them",
+  "summon_out": "%s fights for a few seconds",
+  "summon_rest": "%s rests: summon again when its ring fills",
+  "steal_grab": "Hold %F on its Boki wisp to steal it"
  },
  "retry": {
   "default": "Back at your last stop. Try again",
@@ -156,7 +174,8 @@
   "wayout": "Uplink",
   "uplink": "Uplink",
   "defend": "Outpost",
-  "extract": "Lift"
+  "extract": "Lift",
+  "steal": "Boki wisp"
  },
  "camps": {
   "sec": {
@@ -172,6 +191,13 @@
     "skitter"
    ],
    "to": 3
+  },
+  "summon": {
+   "foes": [
+    "skitter",
+    "skitter"
+   ],
+   "to": 0
   },
   "kin": {
    "foes": [
