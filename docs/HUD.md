@@ -129,6 +129,7 @@ open `Match.arena_opts(<your Hunter>)` (the farm through `Home._start_training`;
 | Gear rack (three gloves, two armours, boots on the floor) | island | dropped: the loadout has every glove, and its six loot labels crowded the start |
 | Fast ult / E / Boki recharge, tonic refill, wild monsters | island | dropped: cooldowns-off (O) and the dummies cover them |
 | "Try everything" checklist, banner "Nothing can hurt you here · Esc to leave" | island | dropped: the KitDrill banner teaches the kit, the tutorial the moves |
-| Start toast, 3D key sign, top key line, top-right meter, bottom bar (Relics, Loadout, Bench, Leave), HUD "Your kit" panel | both | one `TrainingPanel`; Bench is a switch in the loadout; J still opens the hero picker; K is the kit |
+| Start toast, 3D key sign, top key line, top-right meter, toggle toasts, bottom bar (Relics, Loadout, Bench, Leave), HUD "Your kit" panel | both | one `TrainingPanel` (top right); Bench is a switch in the loadout header; J still opens the hero picker; K is the kit card |
 
 Check: `--arena-check` section "one ground".
+Shots: [docs/shots/training-merge-1111/](shots/training-merge-1111) (before left, after right).

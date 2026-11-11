@@ -373,7 +373,7 @@ func _one_ground() -> void:
 	A.cycle_bot()
 	var cd_txt: String = A.panel.states["cd"].text
 	var bot_txt: String = A.panel.states["bot"].text
-	var shown := cd_txt == "off" and bot_txt == Arena.BOT_NAMES[A.bot_mode]
+	var shown: bool = cd_txt == "off" and bot_txt == Arena.BOT_NAMES[A.bot_mode]
 	ok("one ground: the rows show the toggles", shown, cd_txt + " " + bot_txt)
 	m.hud.guide_hidden = false
 	A.tick(DT)
