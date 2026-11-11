@@ -11,6 +11,7 @@ const DT := 0.25             # s per farm step (the machines tick at 10 Hz insid
 const NIGHT_AT := 480.0      # s: the last two minutes are night
 const ARRIVE_AT := 20.0      # s: the fourth Boki comes out
 const LONGEST := 90.0        # s: no state but Nap may last longer
+const LET_GO_MS := 1500      # ms of real time a woken Boki's breathing loop may take to stop
 
 var bad := 0
 var main: Node
@@ -75,12 +76,19 @@ func _nap_sounds(home) -> void:
 		if Sfx.last_played.has(BokiNapSfx.YAWN):
 			break
 	ok(Sfx.last_played.has(BokiNapSfx.YAWN), "a Boki waking at dawn yawns")
-	await main.get_tree().create_timer(0.4).timeout
+	# Sfx.loop_hold lets go HOLD_MS of real time after the last hold; give the frames up to LET_GO_MS to run it
+	var t0 := Time.get_ticks_msec()
+	var left := _awake_breaths(home)
+	while not left.is_empty() and Time.get_ticks_msec() - t0 < LET_GO_MS:
+		await main.get_tree().process_frame
+		left = _awake_breaths(home)
+	ok(left.is_empty(), "an awake Boki's breath lets go within %d ms (%d still on)" % [LET_GO_MS, left.size()])
+
+## The breathing loops still on for Boki that are awake.
+func _awake_breaths(home) -> Array:
 	var awake: Array = home.kins.filter(func(k): return float(k.get("nap_t", 0.0)) <= 0.0) \
 		.map(func(k): return "nap:" + String(k["rec"]["uid"]))
-	var left := Sfx.loops.keys().filter(func(key): return key in awake)
-	ok(not awake.is_empty() and left.is_empty(),
-		"an awake Boki's breath lets go (%d of %d still on)" % [left.size(), awake.size()])
+	return Sfx.loops.keys().filter(func(key): return key in awake)
 
 func run(m: Node) -> void:
 	main = m
