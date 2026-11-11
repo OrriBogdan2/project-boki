@@ -108,3 +108,11 @@ and -29249 (after), from `--boki-anim-shots --boki=lodestick,mossgrade,cairnback
 | zephyrak | EXEMPT: serpent, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 0.9 |
 | glomwort | EXEMPT: blob, no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.1 |
 | gloamshell | EXEMPT: blob (snail foot), no stepping feet; keeps the shared 1.5 / 2.9 rate | | | | | 1.3 |
+
+Naps: every garden nap (the home sets `kstate` "sleep" while `nap_t` runs, alone or in a friends' pile) plays three
+moves from `KinNap` (`scripts/match/kin_nap.gd`), shared by both bodies. Settle: it lies down over 0.6 s (the rig
+crossfades into its sleep clip that long; `KinPuppet` curls up by `lie`). Asleep: a breath every 3.6 s (`KinPuppet`;
+the rig keeps its clip's breathing) and an ear flick every 3-8 s (`KinPuppet`'s ears; on the rig the root ear bones the
+sleep clip keys, so the flick never builds up). Wake: up in 0.4 s, then a stretch long and low, front down, done by
+1.1 s. A bigger Boki (scale times the root of its mass) does all of it slower (x0.85 to x1.4). Checks:
+`--boki-nap-check`; `--boki-nap-shots --shots-dir=<dir>` (GPU: two Boki, awake, settling, asleep, stretching).

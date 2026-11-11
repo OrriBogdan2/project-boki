@@ -147,6 +147,7 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
+const EAR_TWITCH := 0.3       # rad an ear flicks asleep
 const OWN_BODY := ["chop", "mine", "carry", "tend"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
@@ -203,6 +204,9 @@ var _rng := RandomNumberGenerator.new()
 var _coat: ShaderMaterial
 var _shadow: MeshInstance3D
 var _flinch := KinFlinch.new()
+var _nap: KinNap
+var _skel: Skeleton3D
+var _ears := PackedInt32Array()     # ear bones the sleep clip keys, twitched on top of it asleep
 static var _shadow_mat: StandardMaterial3D
 
 ## True when this species has a rigged model.
@@ -220,6 +224,7 @@ static func fetch_common() -> void:
 				and ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 			BackgroundWork.request(p)
 
+static var _ear_bones := {}    # species -> its ear bones keyed in the sleep clip
 static var _scenes := {}       # path -> PackedScene, kept so a species' next build doesn't read it again
 static func _scene(kin_id: String) -> PackedScene:
 	var p := PATH % [kin_id, kin_id]
@@ -267,6 +272,11 @@ func _ready() -> void:
 		player.get_animation(n).loop_mode = Animation.LOOP_LINEAR
 	_pos_prev = root.global_position if root.is_inside_tree() else Vector3.ZERO
 	_flinch.plan = String(KinPuppet.BODY.get(species, "blob"))
+	_nap = KinNap.new(species)
+	_skel = skeleton()
+	if not _ear_bones.has(species):
+		_ear_bones[species] = _keyed_ears()
+	_ears = _ear_bones[species]
 	_copy_coat()
 	set_clip("idle")
 
@@ -304,14 +314,17 @@ func _process(dt: float) -> void:
 	_keep_flex()
 	_track_speed(dt)
 	_pick_clip(dt)
+	_nap.update(root, clip == "sleep", dt)
+	_twitch_ears()
 	_face_step(dt)
 
 ## KinPuppet squashes and leans Flex for primitive bodies; here the clips do that, so only its width roll and
 ## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
-	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
+	flex.rotation = _flinch.rot - Vector3(_nap.bow, 0, 0)
+	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall * (1.0 - _nap.low),
+			lerpf(1.0, girth, 0.5) * _flinch.wide * (1.0 + _nap.long))
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
 	if clip in OWN_BODY:
@@ -342,7 +355,10 @@ func _pick_clip(dt: float) -> void:
 		_start_shot("attack")
 	_shot_left -= dt
 	var want := _state_clip()
-	set_clip(want)
+	var fade := FADE
+	if (want == "sleep") != (clip == "sleep"):
+		fade = _nap.fade(want == "sleep")      # lies down over the nap's settle, gets up slower than a blend
+	set_clip(want, fade)
 	player.speed_scale = 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
@@ -350,6 +366,30 @@ func _pick_clip(dt: float) -> void:
 	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
 			* model.global_basis.z.length())
 	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+
+## The root ear bones the sleep clip keys (ear, ear1.L, not ear2.L down the same ear nor an ear_glow): the clip
+## sets them every frame, so a twitch on top never builds up.
+func _keyed_ears() -> PackedInt32Array:
+	var out := PackedInt32Array()
+	var anim := player.get_animation("sleep")
+	for i in anim.get_track_count():
+		var bone := _skel.find_bone(String(anim.track_get_path(i).get_concatenated_subnames()))
+		if bone >= 0 and anim.track_get_type(i) == Animation.TYPE_ROTATION_3D and _is_ear(bone) \
+				and not _is_ear(_skel.get_bone_parent(bone)):
+			out.append(bone)
+	return out
+
+func _is_ear(bone: int) -> bool:
+	var bone_name := _skel.get_bone_name(bone) if bone >= 0 else ""
+	return bone_name.begins_with("ear") and not bone_name.begins_with("ear_")
+
+## Asleep, an ear flicks now and then (KinNap.twitch), on top of the clip's pose.
+func _twitch_ears() -> void:
+	if _nap.twitch <= 0.0:
+		return
+	var turn := Quaternion(Vector3.BACK, sin(_nap.twitch * TAU) * EAR_TWITCH)
+	for b in _ears:
+		_skel.set_bone_pose_rotation(b, _skel.get_bone_pose_rotation(b) * turn)
 
 func _start_shot(which: String) -> void:
 	_shot = which
