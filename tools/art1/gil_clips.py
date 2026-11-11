@@ -84,7 +84,10 @@ if arm.animation_data:
 REST = {b.name: b.head_local.copy() for b in arm.data.bones}
 AX, AZ = float(REST["foot.R"].x), float(REST["foot.R"].z)
 SX, SZ = float(REST["upper_arm.R"].x), float(REST["upper_arm.R"].z)
+arm.data.pose_position = "REST"      # (a rerun's import leaves a clip's pose on the hand: read the bill at rest)
+bpy.context.view_layer.update()
 BLADE = bpy.data.objects["weapon_muzzle"].matrix_world.translation - REST["hand.R"]
+arm.data.pose_position = "POSE"
 C = A.Clips(arm, blade=BLADE)
 
 
@@ -399,7 +402,7 @@ def crouch_life(t, p):
 
 def sneak(T, dx, dy):
     """The gait low and on tiptoe; the hands stay up where he put them, a small pump only."""
-    g = gait(T, 0.4 * (0.6 if dx else 1.0), 0.06, 0.56, dx, dy, -24.0 if dy >= 0 else -16.0, 0.008, 0.0,
+    g = gait(T, 0.5 * (0.6 if dx else 1.0), 0.06, 0.56, dx, dy, -24.0 if dy >= 0 else -16.0, 0.008, 0.0,
              waddle=0.6, turn=-dx * 16.0, sink=0.1)
 
     def f(t, p):
@@ -416,7 +419,7 @@ def sneak(T, dx, dy):
 
 
 C.bake("crouch_idle", CROUCH_T, [(0, CROUCH), (CROUCH_T, {})], over=crouch_life, loop=True)
-CROUCH_STEP = 0.4              # s a sneak cycle: stride 0.4 m over 0.56 of it, about the crouch speed (2.42 m/s at 0.55)
+CROUCH_STEP = 0.4              # s a sneak cycle; its planted foot runs about 2.0 m/s (the map's crouch speed)
 for nm, (dx, dy) in DIRS.items():
     C.bake("crouch_" + nm, CROUCH_STEP, [(0, CROUCH), (CROUCH_STEP, {})], loop=True, over=sneak(CROUCH_STEP, dx, dy))
 C.bake("crouch_in", 0.3, [(0, LOOSE), (0.12, m(CROUCH_DIP, e="out")), (0.3, CROUCH)])
@@ -528,8 +531,9 @@ C.bake("toss", 0.4, [(0, LOOSE), (0.04, m(TOSS_COCK, e="out")), (0.1, m(TOSS, e=
        over=lambda t, p: add(p, "wl", (0, 0, 30.0 * bump(t, 0.18, 0.4, 9.0) * cyc(t, 8, 0.4))))
 
 # Riptide (e): he winds the other way, then twirls on his toes, the swordfish out at arm's length, the free hand out
-# for balance, his head thrown back and the tail flying; a turn every SPIN_REV, held for as long as the kit spins
-SPIN_IN, SPIN_REV = 4 / 30, 0.4  # s: the wind-up, then one full turn (the loop the map holds from SPIN_IN)
+# for balance, his head thrown back and the tail flying; a turn every SPIN_REV through the longest spin (gil.json e
+# spin_t 2 s: the kit lets the spout go at the latest then, and a spin cut short by a stun ends on every screen)
+SPIN_IN, SPIN_REV, SPIN_TURNS = 4 / 30, 0.4, 5     # s: the wind-up, one full turn; the turns
 SPIN_WIND = m(GUARD, pos=(0.0, 0.0, -0.06), hips=(-6, 0, -40), head=(4, 0, 30), hr=hand(0.1, -0.1, -0.12),
               br=(0.4, -0.8, 0.0), hl=lhand(0.1, 0.12, 0.0))
 TWIRL = m(LOOSE, pos=(0.0, 0.0, 0.0), hips=(6, -6, 0), head=(14, 0, 0), tail=(28, 0, 0),
@@ -564,7 +568,7 @@ def twirl(t, p):
     turned(p, 360.0 * u)
 
 
-SPIN_END = SPIN_IN + SPIN_REV
+SPIN_END = SPIN_IN + SPIN_REV * SPIN_TURNS
 C.bake("spin", SPIN_END, [(0, LOOSE), (0.08, m(SPIN_WIND, e="out")), (SPIN_IN, m(TWIRL, e="in")), (SPIN_END, TWIRL)],
        over=twirl)
 
