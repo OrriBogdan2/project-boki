@@ -132,7 +132,7 @@ Owner: "it's like 0.2-0.5 too slow, check Elluna"; and nothing should start at h
 | Press to root, foe at 8 m | about 3.3 s | | about 2.9 s |
 | At her feet during the wind-up | a 1.4 m violet and gold ring for the whole wind-up | nothing at her feet; a flare at the hand on the cast frame | nothing; the lane and the hand's gathering stars stay |
 
-0.6 s takes 0.4 s off (inside the owner's 0.2-0.5) and sits at the top of the source's cast range. Alternatives not taken: 0.45 s (the source median) or 0.35 s (ext/meeko-rmb-orbit-1108, never merged). The model's `seed_aim` clip (1.0 s long) plays over the wind-up (`"fit": 0.6` in content/rules/warden_anim/pip.json). Asserted in `--tender-combo-check`: "mm RMB: not a hold ..., the wind-up is 0.5-0.65 s ...", "mm RMB: nothing drawn at her feet during the wind-up (owner 11-11)".
+0.6 s takes 0.4 s off (inside the owner's 0.2-0.5) and sits at the top of the source's cast range. Alternatives not taken: 0.45 s (the source median) or 0.35 s (ext/meeko-rmb-orbit-1108, never merged). The model's `seed_aim` clip (1.0 s long) plays over the wind-up (`"fit": 0.6` in content/rules/warden_anim/pip.json). Asserted in `--tender-combo-check`: "mm RMB: not a hold ..., the wind-up is 0.5-0.65 s ...", "mm RMB: nothing drawn at her feet during the wind-up".
 
 ## Combinations
 | Interaction | Implemented in | Check (`--tender-combo-check` unless noted) |

@@ -332,7 +332,7 @@ func _tick_glide(dt: float) -> void:
 
 # ------------------------------------------------------------------ RMB: Burrseed
 ## Owner item 118: a press starts a fixed wind-up (`windup`) that nothing extends: she slows
-## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet (owner 11-11). The seed then
+## (`wind_move`) and a short dotted lane follows the aim; nothing is drawn at her feet. The seed then
 ## goes by itself, along the aim of that moment: you flick it onto the target. Not a hold, not a
 ## charge; letting go does nothing. A stun, a Hex or going down loses the throw, not the charge.
 func rmb_charge_full() -> float: return 0.0

@@ -867,7 +867,7 @@ func tender() -> void:
 	var wind := float(K.rmb_def()["windup"])
 	var glb_fit := float(WardenClips.data("pip")["kmoves"]["mm_seed_aim"].get("fit", 0.0))
 	ok(
-			"mm RMB: not a hold (no hold data), the wind-up is 0.5-0.65 s (owner 11-11: 0.2-0.5 s off the old 1 s; "
+			"mm RMB: not a hold (no hold data), the wind-up is 0.5-0.65 s (the owner asked 0.2-0.5 s off 1 s; "
 			+ "the source's casts run 0.1-0.65 s), its clip and the model's clip as long",
 			not K.rmb_def().has("hold") and wind >= 0.5 and wind <= 0.65
 			and absf(KMovesCare.length("mm_seed_aim") - wind) < 0.01
@@ -890,7 +890,7 @@ func tender() -> void:
 				String(lane.get("kind", "")), float(lane.get("len", 0.0)), K.anim_id, K.move_k()])
 	ok("mm RMB: nothing leaves during the wind-up", _mine(m, P).size() == n0 and K.ch_rmb >= 1.0)
 	ok(
-			"mm RMB: nothing drawn at her feet during the wind-up (owner 11-11)",
+			"mm RMB: nothing drawn at her feet during the wind-up",
 			not K.lk().live.any(func(b): return P.flat_dist(b["at"]) < 1.0))
 	# letting go early changes nothing; the flick onto him at the very end is what counts
 	P.inp["sec"] = false
