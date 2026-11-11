@@ -671,7 +671,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		var d := h.flat_dist(o)
 		# early on bots farm monsters and only fight hunters who come close or shoot them
 		var provoked: bool = h.last_hit_by == o or (o is Hunter and h.last_hit_by == o.kin)
-		if (not provoked and fresh(m, o)) or m.demo_shielded(o):
+		if (not provoked and (fresh(m, o) or BotCamps.camping(m))) or m.demo_shielded(o):
 			continue
 		var reach := (13.0 if m.time > 100.0 or provoked else 8.0) * float((a.get("diff", {}) as Dictionary).get("aggro", 1.0))
 		if provoked: reach = maxf(reach, 10.0)
@@ -767,6 +767,12 @@ func _choose(m: Match, h: Hunter) -> void:
 		var og := PerkOrbs.bot_goal(m, h, cur)
 		if og != Vector3.INF:
 			goal = og; gk = "orb"
+	# the early game is camps (BotCamps): clear our region's, then a camp that came back while we're low
+	if goal == Vector3.INF:
+		var camp_goal := BotCamps.goal(m, h)
+		if not camp_goal.is_empty():
+			goal = camp_goal[0]
+			gk = "camp"
 	# someone asked us to follow them (a Follow me emote from a teammate or truce partner)
 	if goal == Vector3.INF and a.has("follow"):
 		var fw: Dictionary = a["follow"]
@@ -785,7 +791,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		else:
 			a.erase("ping_goal")
 	# boss lairs: a dropped Rare Egg, or (bolder bots) a lair to open and its boss to fight
-	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard:
+	if goal == Vector3.INF and m.lairs and not m.lairs.list.is_empty() and not holding_yard and not BotCamps.camping(m):
 		# heading home, as far as lairs go: late in the match, carrying a Rare Egg, or a bot that has
 		# decided to leave once the match is far enough along. (The random "leave" roll below can
 		# fire in the first minute; it used to cancel every lair plan right away, though the exits

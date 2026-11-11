@@ -9,10 +9,8 @@ extends RefCounted
 
 ## Extra rarity steps for everything found in the hot zone (chests, drops, bosses).
 const RARITY := 1
-## Chance (0..1) a bot squad leader with no human ping heads for the hot zone, if no other squad is.
+## Chance (0..1) a bot squad leader with no human ping heads for the hot zone, if no other squad has pinged it.
 const BOT_PICK := 0.35
-## How near (m) another squad must be to the hot zone's landing for a bot leader to look elsewhere.
-const CROWD_R := 25.0
 const COL := Color("ff8a3a")
 
 var w: World = null
