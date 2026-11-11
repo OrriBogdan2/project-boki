@@ -17,7 +17,7 @@ static func steps() -> Array:
 
 const KEYS := {"land": "move", "move": "move", "dash": "dash", "exdash": "dash", "crouch": "crouch",
 	"pickup": "interact", "shoot": "fire", "sig": "signature", "utility": "secondary", "throw": "throw",
-	"orders": "throw", "chest": "interact", "uplink": "interact", "gkey": "throw"}
+	"orders": "throw", "key": "interact", "chest": "interact", "uplink": "interact", "gkey": "throw"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"land": "land", "move": "move", "dash": "dash", "exdash": "exdash", "glide": "glide",
 	"crouch": "crouch", "pickup": "yard"}
@@ -184,7 +184,7 @@ func update(dt: float) -> void:
 	nag_t = maxf(0.0, nag_t - dt)
 	spot_t = maxf(0.0, spot_t - dt)
 	if m.hud:
-		m.hud.msgs.hold = card_up()      # messages wait while the banner is up
+		m.hud.msgs.hold = card_shown()      # messages wait while any card is on screen
 	var sid := id()
 	var done := _is_done(sid, dt)
 	_quicken(p, dt)
@@ -393,7 +393,6 @@ func _is_done(sid: String, dt: float) -> bool:
 			if crouch_t >= CROUCH_HOLD:
 				spot_t = SPOT_T
 				m.ping(stop("chest"), Color("dfe8f2"))
-				if m.hud: m.hud.toast("Chest spotted across the bridge", MINT)
 				return true
 			return false
 		"pickup": return ground_item().is_empty()
@@ -683,6 +682,10 @@ func scout_hint() -> String:
 		return ""
 	var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 	return "Hold %s to crouch and scout ahead" % Settings.key_cap("crouch") if d > FAR_SCOUT else ""
+
+## A tutorial card is on screen (the intro, or a step's panel): the one what-to-do, so no toast or world prompt shows.
+func card_shown() -> bool:
+	return intro or (step >= 0 and step < steps().size())
 
 ## The banner is up (the first CARD_T of a step): other popups wait their turn.
 func card_up() -> bool:

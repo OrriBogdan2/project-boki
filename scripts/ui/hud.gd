@@ -1771,6 +1771,7 @@ func _draw_perks(sz: Vector2, p: Hunter) -> void:
 func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 	var it := m.interact
 	var y := sz.y - 222.0
+	var quiet := m.tut != null and m.tut.card_shown()
 	if not it.is_empty():
 		var prog := 0.0
 		match it["kind"]:
@@ -1785,12 +1786,13 @@ func _draw_prompt(sz: Vector2, p: Hunter) -> void:
 			"lair": prog = float(it["rune"]["prog"]) if it.has("rune") else 0.0
 		var s: String = it["label"]
 		var w := body.get_string_size(s, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
-		_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
-		_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
+		if not quiet:      # (a tutorial card is the one prompt: only the bar stays)
+			_panel(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y - 22), Vector2(w + 32, 32)))
+			_ctext(Vector2(sz.x * 0.5, y), s, 16, it.get("col", GOLD))
 		if prog > 0.0:
 			_bar(Rect2(Vector2(sz.x * 0.5 - w * 0.5 - 16, y + 12), Vector2(w + 32, 4)), prog, GOLD)
 	var st: Dictionary = m.exits.status_for(p) if m.exits else {}
-	if not st.is_empty():
+	if not st.is_empty() and not quiet:
 		_ctext(Vector2(sz.x * 0.5, sz.y * 0.2), String(st["text"]), 24, st["col"], big)
 		_bar(Rect2(Vector2(sz.x * 0.5 - 140, sz.y * 0.2 + 12), Vector2(280, 8)), clampf(float(st["prog"]), 0.0, 1.0), st["col"])
 

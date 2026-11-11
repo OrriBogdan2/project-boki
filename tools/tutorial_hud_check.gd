@@ -3,9 +3,10 @@ extends RefCounted
 ##   1. the lanes at 1280x720 and 1920x1080: the step panel is at most 35% of the width and 10% of the
 ##      height and, even with its second line, stays in the top fifth; no two lanes (panel, check,
 ##      toasts, intro) intersect, none sits in the middle
-##   2. a scripted run of the whole course (the driver, with a Boki): while the banner is up no toast is
-##      showing (one fired at each step start waits and then shows) and no Boki bubble is up; the
-##      hunter and the Boki are never under the banner
+##   2. a scripted run of the whole course (the driver, with a Boki): while a card is on screen no toast
+##      shows (one fired at each step start is held) and while it is fresh no Boki bubble is up; every
+##      frame at most one tip card and one prompt (toast or world label) is visible; a new step's card
+##      starts invisible and fades in; the hunter and the Boki are never under the banner
 ##   3. the marker: a target ahead shows its pin, one behind the camera or under the hunter gets the arrow
 ##   4. the panel counter, the right click taught from its kit data, the Boki step by its state
 ##   5. the lookout: every course stop is climbable from the one before it with plain movement
@@ -80,6 +81,10 @@ func _course() -> void:
 	var shown_after := 0
 	var asked := 0
 	var under := 0
+	var cards_max := 0
+	var prompts_max := 0
+	var fade_start := 1.0
+	var held_world := 0
 	var texts := {}
 	var counters := {}
 	while t < 600.0 and not m.player.extracted:
@@ -91,6 +96,7 @@ func _course() -> void:
 				worst = maxf(worst, step_t)
 			last = tu.step
 			step_t = 0.0
+			fade_start = minf(fade_start, TutorialHud.fade(tu))
 			if m.hud and not m.player.extracted:
 				m.hud.toast("check %d" % last, Color.WHITE)
 				asked += 1
@@ -99,18 +105,27 @@ func _course() -> void:
 		step_t += Match.DT
 		if m.hud == null:
 			continue
-		if tu.card_up():
+		var label := not m.interact.is_empty()      # (Hud draws the world label only with no card up)
+		var cards := int(tu.card_shown()) + int(m.guide != null and m.guide.line != "")
+		cards_max = maxi(cards_max, cards)
+		prompts_max = maxi(prompts_max, m.hud.msgs.texts().size() + int(label and not tu.card_shown()))
+		held_world += int(label and tu.card_shown())
+		if tu.card_shown():
 			toast_in_card += m.hud.msgs.texts().size()
+		if tu.card_up():
 			bubble_in_card += m.bubbles.size()
 			under += _under_banner()
 		elif not m.hud.msgs.texts().is_empty():
 			shown_after += 1
 			m.hud.msgs.clear()
 	ok(m.player.extracted, "the course still finishes")
-	ok(toast_in_card == 0, "no toast shows while a banner is up (%d seen)" % toast_in_card)
+	ok(toast_in_card == 0, "no toast shows while a card is on screen (%d seen)" % toast_in_card)
+	ok(cards_max == 1, "one tip card on screen at a time, through the whole course (most in one frame: %d)" % cards_max)
+	ok(prompts_max <= 1, "at most one prompt (toast or world label) in any frame (most: %d)" % prompts_max)
+	ok(fade_start == 0.0, "a new step's card starts invisible and fades in on the same spot (%.2f)" % fade_start)
 	ok(bubble_in_card == 0, "no Boki bubble shows while a banner is up (%d seen)" % bubble_in_card)
-	var waited := "(%d asked, %d shown)" % [asked, shown_after]
-	ok(asked > 0 and shown_after > 0, "a toast fired during a banner waits and shows after it " + waited)
+	var waited := "(%d asked, %d shown, %d frames with a world prompt held)" % [asked, shown_after, held_world]
+	ok(asked > 0 and shown_after == 0, "a toast fired during a card is held, not shown late " + waited)
 	ok(under == 0, "the hunter and the Boki are never under the banner (%d frames)" % under)
 	ok(worst < 45.0, "no step took more than 45s of plain play (%.0fs)" % worst)
 	var wide := texts.values().filter(func(x): return String(x).length() > 34)
