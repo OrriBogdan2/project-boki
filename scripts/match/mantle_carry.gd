@@ -7,8 +7,8 @@ extends RefCounted
 ##    wall never pull you up it.
 ##  - Over the lip you leave at KEEP of the speed you came in with (SV MiniMantleXYSpeedTargetCoefficient
 ##    0.6), never above it, and never under the usual mantle launch (HunterMove.mantle_launch). Nor ever
-##    above EXIT_K of your run speed, whatever you came in with or along the face (owner 11-11: a dash or a
-##    launch glancing off a ledge used to keep its speed over the top and fling you off it). For
+##    above EXIT_K of your run speed, whatever you came in with or along the face: a dash or a launch
+##    glancing off a ledge doesn't fling you off the top. For
 ##    MINI_S after it (SV MiniMantlePostLaunchDuration) that speed is held while you're still in the air
 ##    and your keys don't pull back, so air drag doesn't take it straight back off you.
 ## The speed you came in with is a decaying peak (carry_v), so the wall that stopped you a step

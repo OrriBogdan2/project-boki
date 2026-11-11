@@ -3,8 +3,8 @@ extends RefCounted
 ## 15 fps: <dir>/<case>/f000.png... for a running jump into a two-terrace face (jump), a jump and air dash
 ## into one (dash), a fall below an island rim heading back in (abyss) and a launch glancing into a one-terrace
 ## face at FLING_DEG off it at FLING_SPEED (fling: owner bug 11-11, --mantle-fling-check). The faces and the
-## other approaches are --cliff-mantle-check's. Prints "MCLIP <case> topped|missed in <speed> lip <speed>". Needs a renderer
-## (jobq --needs gpu). Never touches the save.
+## other approaches are --cliff-mantle-check's. Prints "MCLIP <case> topped|missed in <speed> lip <speed>".
+## Needs a renderer (jobq --needs gpu). Never touches the save.
 
 const STEPS_PER_FRAME := 4       # 60 Hz steps per 15 fps frame
 const CLIP_S := 1.6

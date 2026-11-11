@@ -1,11 +1,12 @@
 extends RefCounted
-## --mantle-fling-check (owner bug 11-11: "hit an edge at a certain angle, you mantle and maintain momentum and go
-## flying off"). A sweep of approaches into a long straight ledge, one and two terraces high: running jumps,
-## ground and air dashes, glides, and flying in fast (a knock or a launch carrying you), each from straight
-## in to 80 degrees off the face. For every approach that tops the ledge it follows the next EXIT_S seconds
-## and asserts the fastest you go is at most MantleCarry.exit_cap (a little forward flow, never a launch),
-## and that you never jump further than the speed you're going (no push out of the wall).
-## Prints "MFLING ok|FAIL ..." lines, the worst approaches, and "MFLING DONE, failures: N". Never touches the save.
+## --mantle-fling-check: hit an edge at a glancing angle and you mantle, but never keep your momentum and go
+## flying off it (the owner's 11-11 bug). A sweep of approaches into a long straight ledge, one and two
+## terraces high: running jumps, ground and air dashes, glides, and flying in fast (a knock or a launch
+## carrying you), each from straight in to 80 degrees off the face. For every approach that tops the ledge
+## it follows the next EXIT_S seconds and asserts the fastest you go is at most MantleCarry.exit_cap (a
+## little forward flow, never a launch), and that you never jump further than the speed you're going (no
+## push out of the wall). Prints "MFLING ok|FAIL ..." lines, the worst approaches, and "MFLING DONE,
+## failures: N". Never touches the save.
 
 const DT := Match.DT
 const ANGLES := [0.0, 20.0, 40.0, 55.0, 65.0, 75.0, 80.0]     # degrees off straight into the face
@@ -47,7 +48,8 @@ func run(main: Node) -> void:
 					for s in speeds:
 						var r := _try(wall, mode, ang * side, s)
 						if not r.is_empty():
-							r["what"] = "%dT %s %+.0fdeg %s" % [rise, mode, ang * side, ("%.0fm/s" % s) if s > 0.0 else ""]
+							var spd := ("%.0fm/s" % s) if s > 0.0 else ""
+							r["what"] = "%dT %s %+.0fdeg %s" % [rise, mode, ang * side, spd]
 							rows.append(r)
 	_report()
 	main.get_tree().quit()
@@ -64,12 +66,14 @@ func _report() -> void:
 			worst = r
 		if r["vmax"] > cap + 0.05:
 			fast += 1
-			print("MFLING over cap: %s in %.1f -> exit %.1f m/s, %.1fm before landing" % [r["what"], r["vin"], r["vmax"], r["flown"]])
+			print("MFLING over cap: %s in %.1f -> exit %.1f m/s, %.1fm before landing" % [
+				r["what"], r["vin"], r["vmax"], r["flown"]])
 		if r["jump"] > 0.0:
 			pushed += 1
 			print("MFLING pushed: %s %.2fm in one step" % [r["what"], r["jump"]])
-	print("MFLING %d topped approaches; fastest exit %.1f m/s (%s, in at %.1f), cap %.1f; longest flight %.1fm" % [
-		rows.size(), worst.get("vmax", 0.0), worst.get("what", "-"), worst.get("vin", 0.0), cap, flown])
+	var what := "%s, in at %.1f" % [worst.get("what", "-"), worst.get("vin", 0.0)]
+	print("MFLING %d topped approaches; fastest exit %.1f m/s (%s), cap %.1f; longest flight %.1fm" % [
+		rows.size(), worst.get("vmax", 0.0), what, cap, flown])
 	ok(rows.size() >= 80, "most approaches top the ledge (%d)" % rows.size())
 	ok(fast == 0, "no exit faster than %.1f m/s, from any angle or speed (%d over)" % [cap, fast])
 	ok(pushed == 0, "never moved further in a step than your speed carries you (%d pushed)" % pushed)
@@ -122,7 +126,8 @@ func _carve(rise: int) -> Dictionary:
 		for dz in range(-WALL_HALF, WALL_HALF + 1):
 			for dx in range(1, 4):
 				w.level[w.idx(x0 + dx, z0 + dz)] = lv + rise
-		return {"face": Vector2(x0 + 1.0, z0 + 0.5), "n": Vector2(1, 0), "low": lv * World.LEVEL, "top": (lv + rise) * World.LEVEL}
+		return {"face": Vector2(x0 + 1.0, z0 + 0.5), "n": Vector2(1, 0),
+				"low": lv * World.LEVEL, "top": (lv + rise) * World.LEVEL}
 	return {}
 
 func _reset(at: Vector3, v: Vector3, grounded: bool) -> void:
@@ -135,7 +140,8 @@ func _reset(at: Vector3, v: Vector3, grounded: bool) -> void:
 	h.pad = {}
 	h.grap = {}
 	h.lfloat = {}
-	for k in ["grap_cd", "mantle_cd", "roll_t", "knock_t", "fly_t", "stun_t", "dash_buf", "coyote", "jump_buf", "ex_cd"]:
+	for k in ["grap_cd", "mantle_cd", "roll_t", "knock_t", "fly_t", "stun_t",
+			"dash_buf", "coyote", "jump_buf", "ex_cd"]:
 		h.set(k, 0.0)
 	h.kb_t = -9.0
 	h.gliding = false
@@ -147,9 +153,9 @@ func _reset(at: Vector3, v: Vector3, grounded: bool) -> void:
 		h.inp[k] = false
 	h.inp["move"] = Vector2.ZERO
 
-## One approach `ang` degrees off straight in. Empty if it never topped; else {vin, vmax, flown, jump}: the speed
-## as you caught the ledge, the fastest from the hand-back over EXIT_S, how far you went before landing, and the
-## biggest step beyond what your speed carries (a push out of the wall).
+## One approach `ang` degrees off straight in. Empty if it never topped; else {vin, vmax, flown, jump}: the
+## speed as you caught the ledge, the fastest from the hand-back over EXIT_S, how far you went before landing,
+## and the biggest step beyond what your speed carries (a push out of the wall).
 func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dictionary:
 	var n: Vector2 = wall["n"]
 	var face: Vector2 = wall["face"]
@@ -157,7 +163,11 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 	var mv := n.rotated(deg_to_rad(ang))
 	# where you'd meet the face, and how long before that the approach starts
 	var lead := {"run_jump": 0.45, "dash": 0.5, "jump_dash": 0.55, "glide": 0.5, "fly": 0.12}[mode] as float
-	var speed := {"run_jump": h.base_speed, "dash": h.base_speed, "jump_dash": h.base_speed, "glide": Hunter.GLIDE_SPEED, "fly": fly_speed}[mode] as float
+	var speed := h.base_speed
+	if mode == "glide":
+		speed = Hunter.GLIDE_SPEED
+	elif mode == "fly":
+		speed = fly_speed
 	var hit := face - n * (h.r + 0.05)
 	var st := hit - mv * speed * lead
 	if mode == "fly":
@@ -178,8 +188,10 @@ func _try(wall: Dictionary, mode: String, ang: float, fly_speed: float) -> Dicti
 	var from := Vector2.ZERO
 	while t < 2.5:
 		h.inp["move"] = mv
-		h.inp["jump"] = (mode == "run_jump" and absf(t - 0.2) < DT * 0.5) or (mode == "jump_dash" and t < DT * 0.5)
-		h.inp["dash"] = (mode == "dash" and absf(t - 0.25) < DT * 0.5) or (mode == "jump_dash" and absf(t - 0.15) < DT * 0.5)
+		var jump_at: float = {"run_jump": 0.2, "jump_dash": 0.0}.get(mode, -1.0)
+		var dash_at: float = {"dash": 0.25, "jump_dash": 0.15}.get(mode, -1.0)
+		h.inp["jump"] = absf(t - jump_at) < DT * 0.5
+		h.inp["dash"] = absf(t - dash_at) < DT * 0.5
 		var p0 := Vector2(h.pos.x, h.pos.z)
 		var v0 := Vector2(h.vel.x, h.vel.z).length()
 		m.step(DT)
