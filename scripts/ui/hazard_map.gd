@@ -77,9 +77,9 @@ static func key(hud, m: Match, map_rect: Rect2) -> void:
 		var sw := Rect2(Vector2(x, y - 6.0), Vector2(12.0, 12.0))
 		hud.c.draw_rect(sw, fill(k).lightened(0.15))
 		hud.c.draw_rect(sw, edge(k), false, 1.5)
-		var name := String(TerrainHazards.kind_def(k)["name"])
-		hud._text(Vector2(x + 18.0, y + 4.0), name, 11, Color("d8dcf0"))
-		x += 18.0 + TextCache.width(hud.body, name, 11) + KEY_GAP
+		var label := String(TerrainHazards.kind_def(k)["name"])
+		hud._text(Vector2(x + 18.0, y + 4.0), label, 11, Color("d8dcf0"))
+		x += 18.0 + TextCache.width(hud.body, label, 11) + KEY_GAP
 	if shield:
 		Icons.draw(hud.c, "brightshield", Vector2(x + 6.0, y), 13.0, SAFE)
 		hud._text(Vector2(x + 20.0, y + 4.0), note, 11, SAFE)

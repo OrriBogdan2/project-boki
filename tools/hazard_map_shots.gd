@@ -24,7 +24,8 @@ func run(main_node: Node) -> void:
 	await main.get_tree().process_frame
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true, "demo_kin": "cindowary"})
+	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 5, "no_drop": true,
+		"demo_kin": "cindowary"})
 	m.set_process(false)
 	P = m.player
 	for mb in m.mobs:

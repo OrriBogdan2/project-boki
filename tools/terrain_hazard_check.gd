@@ -11,8 +11,8 @@ extends RefCounted
 ## plus the HUD's underfoot reading, the Boki's hint near one (risk or safe, naming it), and bots: they
 ## keep off a hazard their Boki can't handle (a path round the lava) and walk through one it can.
 ## and the maps: HazardMap shows each area (minimap on a hold or once one is near, full map always) in its kind's
-## colours from the rules, and paints without error round and square. Steps the real match at Match.DT; never touches the save. Prints "TERRAIN ..." lines and
-## "TERRAIN CHECK DONE, N checks, failures: F".
+## colours from the rules, and paints without error round and square. Steps the real match at Match.DT;
+## never touches the save. Prints "TERRAIN ..." lines and "TERRAIN CHECK DONE, N checks, failures: F".
 
 const COUNTER := {"lava": "cindowary", "deep_water": "lilybara", "ice": "floenatee", "static": "kestrike",
 	"bramble": "heatherhorn"}
@@ -261,7 +261,8 @@ func _map() -> void:
 		var to_screen := func(p3: Vector3) -> Vector2: return Vector2(p3.x, p3.z) * 2.0
 		var inner := Rect2(Vector2.ZERO, Vector2(m.world.w, m.world.h) * 2.0)
 		HazardMap.draw(c, m, to_screen, inner, Vector3.ZERO, HazardMap.FULL_SHIELD)
-		HazardMap.draw(c, m, to_screen, inner, Vector3(inner.size.x * 0.5, inner.size.y * 0.5, 300.0), HazardMap.MM_SHIELD)
+		var disc := Vector3(inner.size.x * 0.5, inner.size.y * 0.5, 300.0)
+		HazardMap.draw(c, m, to_screen, inner, disc, HazardMap.MM_SHIELD)
 		painted += 1)
 	c.queue_redraw()
 	await main.get_tree().process_frame
