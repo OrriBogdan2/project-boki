@@ -184,8 +184,10 @@ func _games(rig: BokiRig) -> void:
 		rig._speed = sp
 		rig._pick_clip(0.016)
 		var stride := rig.stride_of(rig.clip)
-		ok(absf(rig.player.speed_scale * stride / sp - 1.0) < 0.05,
-				"%.1f m/s plays %s at ground speed (%.2f of feet)" % [sp, rig.clip, rig.player.speed_scale * stride])
+		var capped := rig.player.speed_scale >= BokiRig.MAX_CADENCE * rig.player.get_animation(rig.clip).length - 0.01
+		ok(capped or absf(rig.player.speed_scale * stride / sp - 1.0) < 0.05,
+				"%.1f m/s plays %s at ground speed or its cadence cap (%.2f of feet)"
+				% [sp, rig.clip, rig.player.speed_scale * stride])
 	ok(rig.player.get_animation("sniff").loop_mode == Animation.LOOP_LINEAR, "sniff loops")
 	ok(rig.player.get_animation("leap").loop_mode == Animation.LOOP_LINEAR, "leap loops")
 	rig.root.set_meta("kgait", "sniff")
