@@ -9,9 +9,10 @@ const WAIT := 4.0              # s the first step gets to open its window (Rimel
 
 ## [hero, slot]: each recast kit, from a fresh setup with the target 6m east; _first() takes the first step.
 const CASES := [["thief", "e"], ["tender", "e"], ["ostra", "e"], ["rimewright", "e"], ["rimewright", "x"],
-	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"]]
+	["juggernaut", "e"], ["mage", "x"], ["ashwick", "x"], ["bulwark", "lmb"], ["dolm", "dash"], ["gil", "e"]]
 
-func _first(m: Match, P: Hunter, slot: String) -> void:
+## The first step of `slot` (also the shots' way in: tools/recast_cue_shots.gd).
+static func first(m: Match, P: Hunter, slot: String) -> void:
 	match slot:
 		"e": P.ak.use_e()
 		"x": P.ak.cast_ult()
@@ -48,7 +49,7 @@ func _window(hero: String, slot: String) -> void:
 	var m: Match = s[0]
 	var P: Hunter = s[1]
 	aim_at(P, (s[2] as Hunter).pos)
-	_first(m, P, slot)
+	first(m, P, slot)
 	var w := _open(m, P, slot)
 	var at = w.get("at")
 	var timed := not w.is_empty() and float(w["left"]) > 0.0 and float(w["total"]) > 0.0
