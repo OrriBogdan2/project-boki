@@ -167,8 +167,6 @@ static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
-	if m.fx:
-		m.fx.stomp.hold_box(b["owner"], n)      # a stomped Wisp still collapsing there: the box waits (StompFx)
 	_mark_owner(m, b)
 	m.boxes.append(b)
 

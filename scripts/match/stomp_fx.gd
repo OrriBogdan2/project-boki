@@ -26,12 +26,13 @@ const POP_S := 0.18            # s the held death box takes to pop up after the 
 const FADE_S := 0.15            # s a ring takes to fade when the stomp ends any other way
 const LIFT := 0.07              # m above the feet, over the team ring
 
-var _slots: Array = []          # {"ring", "shards", "o": wisp, "s": stomper, "mode", "t", "r": radius now, "box"}
+var _slots: Array = []          # {"ring", "shards", "o": wisp, "s": stomper, "mode", "t", "r": radius, "box"}
 
 func _init() -> void:
 	name = "StompFx"
 	for i in POOL:
-var _slots: Array = []          # {"ring", "shards", "o": wisp, "s": stomper, "mode", "t", "r": radius, "box"}
+		var slot := {"ring": _make_ring(1.0), "shards": [], "o": null, "s": null, "mode": "", "t": 0.0, "r": 0.0,
+			"box": null}
 		for k in SHARDS:
 			slot["shards"].append(_make_ring(SHARD_ARC))
 		_slots.append(slot)
@@ -81,16 +82,6 @@ func release(o: Hunter, why: String) -> void:
 				o.m.sfx("armor_break", o.pos, -12.0, 1.5)
 		_:
 			slot["mode"] = "fade"
-
-## Life put o's death box (node box) where o's Wisp is still collapsing from a finished stomp: keep the
-## box down until the collapse is over, so it never hides it. False when o isn't collapsing under a ring.
-func hold_box(o: Hunter, box: Node3D) -> bool:
-	var slot := _slot_for(o)
-	if slot.is_empty() or slot["mode"] != "close":
-		return false
-	slot["box"] = box
-	box.scale = Vector3.ONE * 0.01
-	return true
 
 ## How hard the wisp o is pressed down right now, 0..1: a hold that grows over the stomp and a squash
 ## at each slam that eases off. 0 when nobody is stomping it. HunterWisp squashes the Wisp by it.
@@ -152,6 +143,8 @@ func _pose_close(slot: Dictionary, o: Hunter) -> void:
 		_pose_end(slot, o, CLOSE_S, RING_TO * 0.1)
 	else:
 		(slot["ring"] as MeshInstance3D).visible = false
+	if slot["box"] == null and t < CLOSE_S:
+		slot["box"] = _box_of(o)      # Life drops it on the kill step (another game: the "box" event)
 	var box: Variant = slot["box"]
 	if is_instance_valid(box):
 		var k := clampf((t - CLOSE_S) / POP_S, 0.0, 1.0)
@@ -185,6 +178,13 @@ func _pose_shatter(slot: Dictionary, o: Hunter) -> void:
 		mat.set_shader_parameter("color", Color(COLOR.lerp(Color.WHITE, 0.4 * (1.0 - k)), 1.0 - k * k))
 	if k >= 1.0:
 		_hide(slot)
+
+## The node of o's death box, null while it has none (Life.drop_box / mirror_box put it in m.boxes).
+func _box_of(o: Hunter) -> Variant:
+	for b in o.m.boxes:
+		if b["owner"] == o and is_instance_valid(b["node"]):
+			return b["node"]
+	return null
 
 func _place(mi: MeshInstance3D, o: Hunter, radius: float) -> void:
 	mi.position = o.position + Vector3(0, LIFT, 0)
