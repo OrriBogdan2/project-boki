@@ -69,7 +69,7 @@ static func lean_of(rec: Dictionary) -> String:
 	return top.to_lower()
 
 ## How much a Boki fancies a toy: its trait for that toy, and double the lean the toy is made for.
-func weight(rec: Dictionary, toy_id: String) -> float:
+static func weight(rec: Dictionary, toy_id: String) -> float:
 	var R := rules()
 	var def: Dictionary = R["toys"][toy_id]
 	var w := 1.0 + float(R["trait_weight"]) * float(rec["traits"].get(String(def["trait"]), 0.5))
