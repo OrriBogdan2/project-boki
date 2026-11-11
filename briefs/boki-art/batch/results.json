@@ -113158,5 +113158,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/opt_soakybara_c_bk_1.jpg",
     "ok": true
+  },
+  {
+    "id": "opt_geysirbara_d_bk",
+    "name": "Geysirbara (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_geysirbara_d_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_soakybara_a_bk",
+    "name": "Soakybara (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_soakybara_a_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_soakybara_c_bk",
+    "name": "Soakybara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_soakybara_c_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_geysirbara_a_bk",
+    "name": "Geysirbara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_geysirbara_a_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_geysirbara_b_bk",
+    "name": "Geysirbara (owner note: design change, V2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/opt_geysirbara_b_bk_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_geysirbara_d_bk",
+    "name": "Geysirbara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_geysirbara_d_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_soakybara_b_bk",
+    "name": "Soakybara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_soakybara_b_bk_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "opt_geysirbara_c_bk",
+    "name": "Geysirbara (owner note: design change, V2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/opt_geysirbara_c_bk_2.jpg",
+    "ok": true
   }
 ]
