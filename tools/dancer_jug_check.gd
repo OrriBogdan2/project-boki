@@ -848,12 +848,13 @@ func juggernaut(a) -> void:
 			K.tips >= 1 and A.dmg(T) >= 14.0 and P.dashes < 2.5,
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
 	A.ok("juggernaut dash: the tip does not stun into a wall", T.wallstun <= 0.0, "wallstun %.2f" % T.wallstun)
-	# footage gap 6: the source's Quick Dash runs ~2 bh (3.6 m) in ~0.2 s [F]; set as-is, off the global dash feel
+	# footage gap 6 (the source's Quick Dash ~2 bh, 3.6 m in ~0.2 s [F]) stays open: the owner's feel wins
+	# (item 113.8: 4.5 m / 0.17 s on the x0.85 / x1.15 dash feel, held by --move-feel-check)
 	var rd: Dictionary = K.dash_def()
 	var feel: Dictionary = K.dash_feel()
-	A.ok("juggernaut footage gap 6: Rampage 3.6 m in 0.2 s, off the global dash feel",
-			is_equal_approx(float(rd["dist"]), 3.6) and is_equal_approx(float(rd["time"]), 0.2)
-			and is_equal_approx(float(feel["dist"]), 1.0) and is_equal_approx(float(feel["time"]), 1.0),
+	A.ok("juggernaut Rampage: 4.5 m in 0.17 s on the owner's x0.85 / x1.15 dash feel (item 113.8)",
+			is_equal_approx(float(rd["dist"]), 4.5) and is_equal_approx(float(rd["time"]), 0.17)
+			and is_equal_approx(float(feel["dist"]), 0.85) and is_equal_approx(float(feel["time"]), 1.15),
 			"dist %.1f time %.2f feel %s" % [float(rd["dist"]), float(rd["time"]), str(feel)])
 	A.step(m, 1.0)
 	P.teleport(home)
