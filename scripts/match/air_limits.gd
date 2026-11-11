@@ -4,6 +4,7 @@ extends RefCounted
 ## - The opening drop (skyship or tutorial) is steering only: the glide heading and the dive. No dash, jump,
 ##   ability, glove, belt item, weapon or Boki throw until you land; the HUD greys the slots meanwhile. Space
 ##   only deploys the canopy out of the dive, and crouch held folds it back into the dive (DropFeel.tick_canopy).
+##   Crouch held to the ground is a Hard Landing, which keeps attacks and abilities off a moment longer.
 ## - The glider never opens during an ability or attack animation (a wind-up, a hold, a cast, a dash, a kit
 ##   move's recovery). Held glide opens it the moment the animation ends, with the speed it left you, so the
 ##   momentum carries into the glide. A move that travels (a dash, a Lunge) ends with its travel, and a kit's
@@ -22,6 +23,7 @@ static func drop_locked(h: Hunter) -> bool:
 
 ## Drops this step's presses while the drop lasts (before any of them is read).
 static func gate_drop(h: Hunter) -> void:
+	HardLanding.gate(h)              # just down from a Hard Landing: no attack or ability yet
 	if not drop_locked(h):
 		return
 	DropLaunch.gate(h)               # item 163: locked into the squad launch, no keys at all

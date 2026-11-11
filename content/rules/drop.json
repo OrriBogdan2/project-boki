@@ -24,6 +24,13 @@
 		"doc": "The soft landing: dust particles and the model's squash. No ring (a ground ring means gameplay).",
 		"dust": 14, "squash": 0.45
 	},
+	"hard_landing": {
+		"doc": "A Hard Landing (opening drop only): the dive key held through the last 10 m keeps the canopy shut and you hit the ground at dive speed. Every monster within radius m (not lair bosses, Hunters or Boki) takes damage from you and is stunned stun_s; you move slow_k slower and cannot attack or use abilities for lock_s. The boom carries hear_m and pings rivals' minimaps inside that. Yours only: the camera dips dip_m and springs back over dip_s, with hitstop_s of hit-stop. The ring is drawn at radius for ring_s; dust particles, chunks of chunk_mat (breakables.json debris), a crack crack_m across for crack_s. The reticle shows the hint below hint_h m in the dive. Bots land hard bot_chance of the time when their spot is within bot_camp_m of a live camp.",
+		"radius": 6.0, "damage": 30.0, "stun_s": 1.5, "lock_s": 0.4, "slow_k": 0.5,
+		"hear_m": 60.0, "dip_m": 0.5, "dip_s": 0.22, "hitstop_s": 0.06,
+		"ring_s": 0.35, "dust": 36, "chunks": 6, "chunk_mat": "clay", "crack_m": 2.0, "crack_s": 4.0, "squash": 0.6,
+		"hint_h": 30.0, "bot_chance": 0.5, "bot_camp_m": 8.0
+	},
 	"view": {
 		"doc": "The local player's dive view: the field of view widens by widen_deg over widen_s and the camera tips tilt_deg further down; both ease back over back_s when the canopy opens.",
 		"widen_deg": 10.0, "widen_s": 0.4, "tilt_deg": 12.0, "back_s": 0.5

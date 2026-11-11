@@ -2,6 +2,7 @@ class_name DropReticle
 extends Node3D
 ## Where you will land if you keep steering as you are: a team-coloured ring on the ground with a soft
 ## pulse and a beam up to you, red with a warning over the void. Squadmates still dropping show smaller.
+## Low in the dive it carries one line: the dive key held to the ground is a Hard Landing.
 
 const RADIUS := 3.0           # m, your ring
 const MATE_RADIUS := 1.5      # m, a squadmate's
@@ -10,6 +11,9 @@ const STEP := 0.1             # s, projection step
 const MAX_STEPS := 260        # 26 s: the whole glide down from the ship under the canopy
 const PULSE_HZ := 0.8
 const RED := Color(1.0, 0.25, 0.2)
+const VOID_TEXT := "OVER THE VOID"
+const HARD_TEXT := "Hold dive: Hard Landing"
+const TAG_UP := 2.2           # m the line floats over the ring
 
 var ring: MeshInstance3D
 var beam: MeshInstance3D
@@ -40,13 +44,14 @@ static func project(h: Hunter, mv: Vector2) -> Dictionary:
 	var p := h.pos
 	var vy := h.vel.y
 	var diving := h.diving
+	var shut := DropFeel.holds_shut(h)      # the dive key is down: no canopy, a Hard Landing
 	for i in MAX_STEPS:
 		var void_here := w.is_void(p.x, p.z)
 		var gy: float = World.VOID if void_here else w.ground_at(p.x, p.z)
 		var above := p.y - (0.0 if void_here else gy)
 		if above <= 0.0:
 			return {"at": Vector3(p.x, 0.0 if void_here else gy, p.z), "void": void_here}
-		if diving and DropFeel.low(w, p):
+		if diving and not shut and DropFeel.low(w, p):
 			diving = false
 			vy = maxf(vy, DropFeel.pop_vy)      # the canopy catches
 		hv = DropFeel.steer(hv, mv, diving, STEP)
@@ -76,12 +81,10 @@ func _build() -> void:
 	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(beam)
 	tag = Label3D.new()
-	tag.text = "OVER THE VOID"
 	tag.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	tag.no_depth_test = true
 	tag.font_size = 64
 	tag.pixel_size = 0.012
-	tag.modulate = RED
 	add_child(tag)
 
 func _update(h: Hunter, delta: float) -> void:
@@ -92,8 +95,11 @@ func _update(h: Hunter, delta: float) -> void:
 	var col: Color = RED if over_void else Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
 	var pulse := 1.0 + 0.07 * sin(t * TAU * PULSE_HZ)
 	_place(at, RADIUS * pulse, col, h.pos.y, 1.0)
-	tag.visible = over_void
-	tag.position = Vector3(0, 2.2, 0)
+	var hint := h.diving and h.pos.y - at.y < float(HardLanding.rules["hint_h"])
+	tag.visible = over_void or hint
+	tag.text = VOID_TEXT if over_void else HARD_TEXT
+	tag.modulate = RED if over_void else Color.WHITE
+	tag.global_position = at + Vector3(0, TAG_UP, 0)
 	var k := 0
 	for o in h.m.hunters:
 		if o == h or o.team != h.team or not o.dropping or o.out:

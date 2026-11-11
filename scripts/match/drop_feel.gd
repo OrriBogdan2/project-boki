@@ -52,12 +52,12 @@ static func steer(hv: Vector2, mv: Vector2, diving: bool, dt: float) -> Vector2:
 static func top_speed(diving: bool) -> float:
 	return dive_speed if diving else canopy_speed
 
-## The next fall speed: the dive's or the canopy's sink, and a flare over the last few metres.
+## The next fall speed: the dive's or the canopy's sink, and the canopy's flare over the last few metres.
 static func fall_vy(vy: float, diving: bool, above: float, dt: float) -> float:
 	var sink := dive_fall if diving else canopy_fall
 	var rate: float = (_dive if diving else _canopy)["vy_rate"]
 	var goal := -sink
-	if above < _flare["height"] and sink > _flare["fall"]:
+	if not diving and above < _flare["height"] and sink > _flare["fall"]:
 		goal = -lerpf(_flare["fall"], sink, clampf(above / _flare["height"], 0.0, 1.0))
 		rate = maxf(rate, _flare["rate"])
 	return lerpf(vy, goal, 1.0 - exp(-rate * dt))
@@ -70,19 +70,27 @@ static func low(w: World, p: Vector3) -> bool:
 
 ## Every step of a dropping Hunter: dive or canopy. Under the canopy, holding crouch folds it into the
 ## dive and letting go opens it again. The dive a drop starts in (the launch, a drop with no ship) needs
-## no key and lasts until the canopy opens. It always opens near the ground, and a follower in formation
-## does what their leader does.
+## no key and lasts until the canopy opens. It opens near the ground unless your own dive key holds it
+## shut, and a follower in formation does what their leader does.
 static func tick_canopy(h: Hunter) -> void:
 	var is_low := low(h.m.world, h.pos)
 	var held: bool = h.drop_follow.diving if h.drop_follow != null else bool(h.inp.get("crouch", false))
 	if not h.diving:
 		h.dive_hold = held and not is_low and not h.grounded
 		h.diving = h.dive_hold
-	elif is_low or (not held and (h.dive_hold or h.drop_follow != null)):
+	elif (is_low and not holds_shut(h)) or (not held and (h.dive_hold or h.drop_follow != null)):
 		h._deploy()
 
-## Touchdown: dust, a squash and a thud. No ring (a ground ring means gameplay), no self-shake (item 50).
+## Your own dive key held over ground: the canopy stays shut below open_h too, for a Hard Landing.
+static func holds_shut(h: Hunter) -> bool:
+	return h.drop_follow == null and bool(h.inp.get("crouch", false)) and not h.m.world.is_void(h.pos.x, h.pos.z)
+
+## Touchdown. The dive held to the ground is a Hard Landing; any other is soft: dust, a squash and a thud,
+## no ring (a ground ring means gameplay), no self-shake (item 50).
 static func land(m: Match, h: Hunter) -> void:
+	if h.diving and holds_shut(h):
+		HardLanding.land(m, h)
+		return
 	m.fx.dust(h.pos, int(_land["dust"]))
 	m.sfx("land", h.pos, -2.0, 0.8)
 	h.squash = _land["squash"]

@@ -175,7 +175,7 @@ var glide_dive := GlideDive.new()      # the glider's plunge while crouch is hel
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
-var land_t := 0.0
+var land_t := 0.0             # s left of a Hard Landing's lock: no attack, no ability (HardLanding)
 var ghost_t := 0.0
 var step_t := 0.0
 var gliding := false
@@ -2279,14 +2279,13 @@ func _physics(dt: float) -> void:
 			var was_drop := dropping     # (movefeel) the drop's own landing has its feedback (Match.on_drop_landed)
 			if dropping:
 				dropping = false
+				m.on_drop_landed(self)      # (reads `diving`: the dive held to the ground is a Hard Landing)
 				diving = false
-				m.on_drop_landed(self)
 			if shot_down:
 				GlideSpike.land(self)
-			if fv < -11.0 or cur > spd * 1.3:
+			if (fv < -11.0 or cur > spd * 1.3) and land_t <= 0.0:
 				m.fx.dust(pos, 6)
 				squash = 0.15
-				land_t = 0.2
 				m.sfx("land", pos, -10.0)
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
@@ -2294,11 +2293,10 @@ func _physics(dt: float) -> void:
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
 				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
-			if fv < -17.0:
-				# a long drop lands hard: a thud, a puff of dust and a short stagger
+			if fv < -17.0 and land_t <= 0.0:
+				# a long fall lands hard: a puff of dust and a deeper squash
 				m.fx.dust(pos, 12)
 				squash = 0.25
-				land_t = 0.32
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V

@@ -19,6 +19,9 @@ var target: Node3D = null
 var shake_amp := 0.0          # a shake in progress (see Shake: only big hits on you)
 var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
+var dip_depth := 0.0          # m: how far a heavy landing dropped the view (dip)
+var dip_secs := 1.0           # s: how long that dip takes to spring back
+var dip_left := 0.0           # s left of it
 var zoom := 1.0
 var zoom_to := 1.0
 var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
@@ -118,6 +121,13 @@ func snap(p: Vector3) -> void:
 ## A brief pull-back that eases in fast and settles over ~0.6s (speed bursts).
 func pull_back(a: float) -> void:
 	pull = maxf(pull, a)
+
+## A heavy landing (a Hard Landing): the view drops `depth` metres at once and springs back over `secs`.
+## Straight down and up again, no shake (item 50).
+func dip(depth: float, secs: float) -> void:
+	dip_depth = depth
+	dip_secs = secs
+	dip_left = secs
 
 ## No-op: camera punches are gone (item 50). Kept only so the reserved merge files, which still call it, compile.
 func punch(_a: float) -> void:
@@ -221,6 +231,7 @@ func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 		shake_left = maxf(0.0, shake_left - delta)
 		if shake_left <= 0.0:
 			shake_amp = 0.0
+	dip_left = maxf(0.0, dip_left - delta)
 	_apply(shake)
 	Sfx.listener = focus
 
@@ -238,7 +249,8 @@ func _apply(shake: Vector3) -> void:
 	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)
 	# (camcal) aim at the body rather than the feet, so you sit a touch low on screen [footage];
 	# faded out toward the bird's-eye and ship views
-	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c), 0)
+	var sunk := dip_depth * pow(dip_left / dip_secs, 2.0)      # fast out of the bottom, settling at the top
+	var aim := focus + Vector3(0, rise * (1.0 - k) * (1.0 - c) - sunk, 0)
 	position = aim + back * d + shake
 	look_at(aim + shake, Vector3.UP if p < deg_to_rad(85.0) else Vector3(0, 0, -1).rotated(Vector3.UP, yaw + Record.orbit_yaw))
 

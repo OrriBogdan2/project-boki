@@ -79,8 +79,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			land = best
 			to = Vector2(land.x - h.pos.x, land.z - h.pos.z)
 		inp["move"] = to.normalized() if to.length() > 0.6 else Vector2.ZERO
-		# the spot is close enough below to reach in the dive: hold it (DropFeel.tick_canopy)
-		inp["crouch"] = to.length() < (h.pos.y - DropFeel.open_h) * DropFeel.dive_speed / DropFeel.dive_fall
+		inp["crouch"] = DropSquad.bot_dive(m, h, to)
 		return
 	# the sky train's horn: off the rails before it gets here
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:

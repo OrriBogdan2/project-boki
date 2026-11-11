@@ -977,9 +977,9 @@ func spawn_mob(kk: String, at: Vector3) -> Mob:
 	ents_by_id[mb.nid] = mb
 	return mb
 
-## Gunfire and explosions you can't see show up on the minimap as sound pings.
+## Gunfire and explosions you can't see show up on the minimap as sound pings, from up to `reach` metres.
 var sound_pings: Array = []    # {pos, t, kind, key}
-func note_sound(by, at: Vector3, kind: String) -> void:
+func note_sound(by, at: Vector3, kind: String, reach := 48.0) -> void:
 	if blight:
 		blight.noise(at, kind, by)       # the Blight hunts by noise
 	if player == null or player.out:
@@ -987,7 +987,7 @@ func note_sound(by, at: Vector3, kind: String) -> void:
 	if by is Ent and (by as Ent).team == player.team:
 		return
 	var d := Vector2(at.x - player.pos.x, at.z - player.pos.z).length()
-	if d > 48.0 or (by is Hunter and not (by as Hunter).unseen and d < 20.0):
+	if d > reach or (by is Hunter and not (by as Hunter).unseen and d < 20.0):
 		return
 	var key: String = (by as Ent).nid if by is Ent else str(at.snapped(Vector3(4, 4, 4)))
 	for sp in sound_pings:
@@ -5518,6 +5518,7 @@ func _net_ev(x, from: String) -> void:
 				if String(x[2]) == "tune" and Data.PERKS.has(String(x[7])): spawn_tune(String(x[7]), wat, String(x[1]), false)
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
 		"campclr": Camps.show_clear(self, int(x[1]), int(x[2]), int(x[3]))
+		HardLanding.NET_EVENT: HardLanding.on_net(self, x)
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
 		"wtake":

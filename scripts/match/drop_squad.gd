@@ -325,6 +325,22 @@ func tick(dt: float) -> void:
 				f.ai["retarget"] = true
 				separate(f)
 
+## A bot's dive key this step, `to` being the flat way to its landing spot: held while the spot is close
+## enough below to reach in the dive (DropFeel.tick_canopy), let go where the canopy opens. A bot that has
+## chosen a Hard Landing holds it to the ground instead. It chooses once, hint_h above its spot: bot_chance
+## of the time when a live camp is within bot_camp_m of the spot.
+static func bot_dive(m: Match, h: Hunter, to: Vector2) -> bool:
+	var hard: Dictionary = HardLanding.rules
+	var spot: Vector3 = h.ai.get("land", h.pos)
+	var above := h.pos.y - m.world.ground_at(spot.x, spot.z)
+	if not h.ai.has("hard") and above < float(hard["hint_h"]):
+		var camp := m.camps != null and not m.camps.nearest_live(spot, hard["bot_camp_m"]).is_empty()
+		h.ai["hard"] = camp and randf() < float(hard["bot_chance"])
+	var flat_per_m := DropFeel.dive_speed / DropFeel.dive_fall      # flat metres a dive covers per metre it falls
+	if h.ai.get("hard", false):
+		return to.length() < above * flat_per_m + HardLanding.radius * 0.5
+	return not DropFeel.low(m.world, h.pos) and to.length() < (h.pos.y - DropFeel.open_h) * flat_per_m
+
 func _near_land(around: Vector3, f: Hunter) -> Vector3:
 	var a := randf() * TAU
 	var q := around + Vector3(cos(a), 0, sin(a)) * randf_range(5.0, 9.0)
