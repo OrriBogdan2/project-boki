@@ -138,7 +138,6 @@ func set_hold(kind: String, dur := 0.15) -> void:
 
 func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
-var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
 var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
@@ -347,6 +346,7 @@ func _chase_mod(mv: Vector2) -> float:
 	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
 	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
 	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
+	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
 	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
@@ -474,7 +474,8 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if ctrl == "local" and Game.god:
 		return 0.0
 	reveal_t = maxf(reveal_t, 1.0)
-	hurt_at = m.time
+	# (a hot glider or the tide never breaks a channel)
+	hurt_at = hurt_at if opts.get("src", "") == "heat" else m.time
 	if base_t > 0.0 and dmg > 0.0:
 		cancel_base("you took damage")
 	if opts.has("wallstun"):
@@ -1777,7 +1778,7 @@ func _kin_riders(extra: Dictionary) -> void:
 			extra["fx_hit"] = [{"type": "chain", "count": int(os["chain"]), "first": 5.0, "dmg": float(wpn["dmg"]) * 0.5, "color": KinRules.cat_color("damage").to_html(false), "skip_here": true}]
 			extra["fx_ctx"] = {"slot": "ult", "ability": "merge"}
 
-func heal(n: float) -> void:
+func heal(n: float, tint := Color.TRANSPARENT) -> void:
 	if downed or out:
 		return
 	if remote:
@@ -1787,8 +1788,7 @@ func heal(n: float) -> void:
 		n *= 1.0 - blight_k   # blighted: healing barely takes
 	var before := hp
 	hp = minf(max_hp, hp + n)
-	if hp - before > 1.0:
-		m.fx.number(pos + Vector3(0, 1.6, 0), hp - before, Color("8ff0a0"), false, "+")
+	ReceiverCue.heal(self, hp - before, tint)
 
 ## Drinking a tonic and repairing with an armor kit take a moment: you slow down, lower your gun and
 ## are open to hits (CONSUME_VULN). Dashing, getting stunned or going down spills it (you keep the item).
@@ -2250,12 +2250,13 @@ func _physics(dt: float) -> void:
 			wall_touch_t = 0.2
 			wall_n = Vector2(-signf(pre_v.x) if b1 > 0.0 else 0.0, -signf(pre_v.y) if b2 > 0.0 else 0.0).normalized() if (b1 > 0.0 or b2 > 0.0) else block_n
 			wall_moves.hit(self, pre_v, blk)
-		if m.time - kb_t < 0.6 and pre_v.length() > 8.0 and wslam_t <= 0.0 and not remote:
+		var flung: bool = m.time - kb_t < 0.6 and pre_v.length() > 8.0
+		if flung and wslam_t <= 0.0 and not remote and KnockWall.tall(m, self, blk):
 			wslam_t = 1.2
 			var st := maxf(0.9, wallstun)
 			wallstun = 0.0
 			stun_t = maxf(stun_t, st)
-			m.on_wall_slam(self)
+			m.on_wall_slam(self, pre_v.normalized())
 			hurt(10.0, last_hit_by, {"src": "wall"})
 	if grounded:
 		wall_moves.land()
@@ -2768,7 +2769,7 @@ var level_ups := 0          # how many times this run the local level-up moment 
 var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 
 func gain_xp(x: float) -> void:
-	if lvl >= XP_TO.size() or x <= 0.0:
+	if lvl >= XP_TO.size() or x <= 0.0 or not TutorialCamps.xp_ok(self):
 		return
 	if m and m.rolling:
 		x = m.rolling.scale_xp(self, x)      # catch-up XP below the session's median level (Rolling.xp_mult)
@@ -2800,6 +2801,8 @@ func xp_frac() -> float:
 
 func can_level(slot: String) -> bool:
 	if skill_pts <= 0 or not SLOT_MAX.has(slot) or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX[slot]):
+		return false
+	if not TutorialCamps.lets_level(self, slot):
 		return false
 	if slot == "ult":
 		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
@@ -2859,7 +2862,7 @@ func _gate(key: String, slot: String, fb: String) -> void:
 		if slot == "ult" and skill_pts > 0:
 			m.hud.toast("Ultimate unlocks at level %d" % int(ULT_AT[0]), Color("a2a8bb"))
 		else:
-			m.hud.toast("Locked  ·  earn a skill point to unlock it", Color("a2a8bb"))
+			m.hud.toast(TutorialCamps.locked_text(self), Color("a2a8bb"))
 
 var base_armor := 50.0
 ## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters

@@ -1,0 +1,10 @@
+{
+ "group": "pickups",
+ "name": "Pickups and belt use",
+ "script": "tools/gen_sfx_pickups.py",
+ "sounds": {
+  "pickup_armor": "ui", "pickup_weapon": "ui", "pickup_gem": "ui", "pickup_consumable": "ui", "pickup_generic": "ui",
+  "use_tonic": "cast", "use_armor_kit": "cast"
+ },
+ "signature": []
+}

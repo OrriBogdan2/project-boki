@@ -56,6 +56,15 @@ static func box_color(b: Dictionary) -> Color:
 		if box_value(b) >= int(t[0]): col = t[1]
 	return col
 
+## The rarity tier of the best piece of gear or valuable in a box (what its glow shows).
+static func box_rarity(b: Dictionary) -> int:
+	var best := 0
+	for g in b.get("gear", []):
+		best = maxi(best, int(g["rar"]))
+	for it in b.get("pack", []):
+		best = maxi(best, Loot.rar_of(it))
+	return best
+
 ## Is anyone on this team still in the fight (standing or a wisp)?
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
@@ -208,9 +217,8 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	KinTrack.drop_carried(m, h, at)       # a Boki you were carrying home drops for its owner
 	var b := {"owner": h, "team": h.team, "pos": at, "gems": h.gems, "seeds": h.seeds.duplicate(), "caught": h.caught.duplicate(true),
 		"belt": UtilityBelt.clear(h), "soul_until": m.time + R["soul_time"], "prog": {}, "node": null, "empty": false,
-		"gear": [], "pack": h.pack.duplicate(true), "keys": h.rift_keys, "chest_keys": h.chest_keys}
+		"gear": [], "pack": h.pack.duplicate(true), "chest_keys": h.chest_keys}
 	h.pack = []
-	h.rift_keys = 0
 	h.chest_keys = 0
 	Backpacks.into_box(h, b)
 	# the gear you wear goes in the box too (Supervive: the box holds everything); your weapon stays with you
@@ -228,7 +236,7 @@ static func drop_box(m: Match, h: Hunter, why: String) -> Dictionary:
 	return b
 
 static func _place_box(m: Match, b: Dictionary, at: Vector3) -> void:
-	var n := Models.deathbox(box_color(b))
+	var n := Models.deathbox(box_color(b), box_rarity(b))
 	n.position = at
 	m.add_child(n)
 	b["node"] = n
@@ -295,8 +303,6 @@ static func box_items(m: Match, h: Hunter, b: Dictionary) -> Array:
 	for i in (b.get("belt", []) as Array).size():
 		var st: Dictionary = b["belt"][i]
 		out.append({"key": "belt", "i": i, "id": String(st["id"]), "name": "%d %s" % [int(st["n"]), UtilityBelt.name_of(String(st["id"])).to_lower()], "sub": "Utility", "icon": UtilityBelt.icon_of(String(st["id"])), "col": UtilityBelt.col_of(String(st["id"])), "upgrade": UtilityBelt.has_room(h, String(st["id"]))})
-	if int(b.get("keys", 0)) > 0:
-		out.append({"key": "keys", "name": "%d Rift Key%s" % [int(b["keys"]), "" if int(b["keys"]) == 1 else "s"], "sub": "Opens a rift hatch", "icon": "gem", "col": ExitModels.HATCH, "upgrade": true})
 	if int(b.get("chest_keys", 0)) > 0:
 		var n_keys := int(b["chest_keys"])
 		var key_label := "%d key%s" % [n_keys, "" if n_keys == 1 else "s"]
@@ -355,8 +361,6 @@ static func take_item(m: Match, h: Hunter, b: Dictionary, it: Dictionary) -> voi
 				if int(st["n"]) <= 0:
 					(b["belt"] as Array).remove_at(bi)
 				break
-		"keys":
-			b["keys"] = int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 		"backpack":
 			Backpacks.take_from_box(m, h, b)
 		"chest_keys":
@@ -399,7 +403,7 @@ static func smart_loot(m: Match, h: Hunter, b: Dictionary) -> int:
 
 static func _settle_box(b: Dictionary) -> void:
 	b["empty"] = int(b["gems"]) <= 0 and (b["seeds"] as Dictionary).is_empty() and (b["caught"] as Array).is_empty() \
-		and (b.get("belt", []) as Array).is_empty() and int(b.get("keys", 0)) <= 0 and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
+		and (b.get("belt", []) as Array).is_empty() and int(b.get("chest_keys", 0)) <= 0 and (b.get("gear", []) as Array).is_empty() \
 		and (b.get("pack", []) as Array).is_empty() \
 		and int(b.get("backpack", Backpacks.POUCH)) <= Backpacks.POUCH
 	_refresh_box(b)
@@ -450,13 +454,11 @@ static func loot_box(m: Match, h: Hunter, b: Dictionary) -> void:
 		st["n"] = int(st["n"]) - UtilityBelt.grant(h, String(st["id"]), int(st["n"]))
 		if int(st["n"]) > 0: belt_left.append(st)
 	b["belt"] = belt_left
-	var rift_left := int(b.get("keys", 0)) - BeltKeys.give(h, "rift_key", int(b.get("keys", 0)))
 	var box_keys := int(b.get("chest_keys", 0))
 	var keys_left := box_keys - BeltKeys.give(h, "chest_key", box_keys)
 	var got := int(b["gems"])
 	b["gems"] = 0
 	b["seeds"] = {}
-	b["keys"] = rift_left
 	b["chest_keys"] = keys_left
 	_settle_box(b)
 	m.sfx("pickup", b["pos"], -2.0, 0.9)

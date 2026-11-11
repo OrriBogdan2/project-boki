@@ -3,7 +3,8 @@ extends RefCounted
 ## The farm tutorial's "give your Boki a job" step, made hard to miss: a pulsing outline and arrow on the
 ## page's job dropdown (the Boki button on the bar is FarmSpotlight's), the best job named in the hint, a
 ## confirmation on picking one, and a Boki page that points at the one next thing: Done, not Feed.
-## FarmTutorial/FarmGuide/WorkView/Home call in here.
+## FarmTutorial/FarmGuide/WorkView/Home call in here. Retired with base_mode on (the base tutorial has no job
+## step); delete with the farm steps (docs/DEBT.md).
 
 const GOLD := Color("f2c84a")
 const PULSE := "TutPulse"
