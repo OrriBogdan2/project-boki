@@ -41,11 +41,11 @@ func run(main: Node) -> void:
 	d["classes"] = ClassUnlock.legacy()
 	Save.d = d
 	var o := Match.duel_opts()
-	o["autoplay"] = true
 	m = Match.new()
 	main.add_child(m)
 	await m.start(o)
 	m.set_process(false)
+	m.truce = null       # (two bot squads may agree a truce and stop fighting: a human has to accept one)
 	CombatBus.hit_landed.connect(_on_hit)
 	var f: FileAccess = FileAccess.open(out_path, FileAccess.WRITE) if out_path != "" else null
 	var rows: Array = []
@@ -54,7 +54,7 @@ func run(main: Node) -> void:
 	for a in roster:
 		for b in roster:
 			for i in n:
-				var r := _fight(String(a), String(b), diff, hash([a, b, i]))
+				var r := _fight(String(a), String(b), diff, hash([a, b, i]), i % 2 == 1)
 				steps += int(r["steps"])
 				rows.append(r)
 				if f: f.store_line(JSON.stringify(r))
@@ -67,42 +67,56 @@ func run(main: Node) -> void:
 	print("DUELSIM %d fights in %d s" % [rows.size(), (Time.get_ticks_msec() - t_wall) / 1000])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
-## One fight: the player (on autopilot) as a, the sparring bot as b, both at the same difficulty.
-func _fight(a: String, b: String, diff: String, sd: int) -> Dictionary:
+## One fight: a fresh bot as a (made here) against the Duel room's sparring bot as b (also fresh), both
+## made the same way and at the same difficulty. The player sits out (an idle local hunter, set out
+## of the match): reusing it as a fighter kept its facing, armour tier and statuses between fights.
+func _fight(a: String, b: String, diff: String, sd: int, swap: bool) -> Dictionary:
 	seed(sd)
 	m.rng.seed = sd
-	var P := m.player
-	P.lvl = 1      # (knocks gave the last fight's winner XP: levels add health, power and ranks)
-	P.xp = 0.0
-	P.remove_meta("growth_lvl")
-	P.reclass(Arch.weight(a), a)
 	m.duel.arch = b
 	m.duel.diff = diff
-	m.duel.spawn_bot()        # a fresh bot, and both back to their marks at full health
+	m.duel.spawn_bot()
 	var B := m.duel.bot
+	var A := m.make_hunter(m.next_id("sim"), 2, Arch.weight(a), "Sim %s" % a, "bot", m.bot_kin_record(), m.duel.home_at,
+		{"arch": a, "weapon": Arch.signature(a), "perk": ""}, {})
+	m.player.out = true
+	m.player.teleport(m.duel.home_at + Vector3(0, -50, 0))
 	var mind: Dictionary = Data.BOT_DIFF[diff].duplicate()
 	mind["dmg"] = 1.0         # (the game scales only a bot's damage, never the player's: the kits at face value)
-	for h in [P, B]:
+	for h in [A, B]:
 		_drop_boki(h)
-		for s in Hunter.SLOTS: h.slot_lv[s] = 1
-		h.skill_pts = 0
+		h.unlock_all()
+		h.belt = UtilityBelt.empty()      # no tonics or armour kits on either side
+		h.refresh_gear()
 		h.ai = m.bot_brain.new_mind(m.rng, float(mind["skill"]), mind)
 		h.hp = h.max_hp
 		h.armor = h.max_armor
+		h.inv_t = 0.6
 		prev_cd[h] = _cds(h)
-	if OS.has_environment("SWAPT"): P.teleport(m.duel.bot_at); B.teleport(m.duel.home_at)
-	fight = {P: {}, B: {}, "cast": {P: "other", B: "other"}}
+	A.teleport(m.duel.bot_at if swap else m.duel.home_at)
+	B.teleport(m.duel.home_at if swap else m.duel.bot_at)
+	for pair in [[A, B], [B, A]]:
+		var h: Hunter = pair[0]
+		var to: Vector3 = pair[1].pos
+		h.face = atan2(-(to.x - h.pos.x), -(to.z - h.pos.z))     # both start facing each other
+		h.inp["aim"] = to
+	fight = {A: {}, B: {}, "cast": {A: "other", B: "other"}}
 	var t := 0.0
 	var steps := 0
-	while t < FIGHT_S and not P.downed and not B.downed:
+	while t < FIGHT_S and not A.downed and not B.downed:
 		m.step(DT)
 		t += DT
 		steps += 1
-		for h in [P, B]:
+		for h in [A, B]:
+			h.reveal_t = maxf(h.reveal_t, 0.3)      # (as the Duel room does: both always know where the other is)
 			_watch_casts(h)
-	var win := "a" if B.downed else ("b" if P.downed else "draw")
-	return {"a": a, "b": b, "seed": sd, "win": win, "t": snappedf(t, 0.01), "steps": steps,
-		"hp": [P.max_hp + P.max_armor, B.max_hp + B.max_armor], "dmg_a": fight[P], "dmg_b": fight[B]}
+	var win := "a" if B.downed else ("b" if A.downed else "draw")
+	var row := {"a": a, "b": b, "seed": sd, "swap": swap, "win": win, "t": snappedf(t, 0.01), "steps": steps,
+		"hp": [A.max_hp, B.max_hp], "dmg_a": fight[A], "dmg_b": fight[B]}
+	m.hunters.erase(A)
+	prev_cd.erase(A)
+	A.queue_free()
+	return row
 
 ## Kits only: the Boki goes (its random species, level and owner bonuses would tilt the pairing).
 func _drop_boki(h: Hunter) -> void:
@@ -146,7 +160,7 @@ func _slot(h: Hunter, tags: Array) -> String:
 
 # ---- the report
 func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
-	var wins := {}; var games := {}; var ttk := {}; var share := {}; var cell := {}; var draws := 0
+	var wins := {}; var games := {}; var ttk := {}; var share := {}; var cell := {}; var draws := 0; var a_won := 0
 	for a in roster:
 		wins[a] = 0.0; games[a] = 0; ttk[a] = []; share[a] = {}
 	for r in rows:
@@ -154,6 +168,7 @@ func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
 		var key := "%s|%s" % [a, b]
 		cell[key] = float(cell.get(key, 0.0)) + (1.0 if r["win"] == "a" else (0.5 if r["win"] == "draw" else 0.0))
 		if r["win"] == "draw": draws += 1
+		if r["win"] == "a": a_won += 1
 		for side in [[a, "a", r["dmg_a"]], [b, "b", r["dmg_b"]]]:
 			var h := String(side[0])
 			games[h] = int(games[h]) + 1
@@ -164,14 +179,16 @@ func _report(rows: Array, roster: Array, diff: String, n: int) -> void:
 				wins[h] = float(wins[h]) + 0.5
 			for s in side[2]:
 				share[h][s] = float(share[h].get(s, 0.0)) + float(side[2][s])
-	print("DUELSIM %d fights, %s bots, %d per pairing, %d draws" % [rows.size(), diff, n, draws])
+	print("DUELSIM %d fights, %s bots, %d per pairing, %d draws; side bias: the player's side won %d%% of decided fights" % [rows.size(), diff, n, draws,
+		roundi(100.0 * a_won / maxi(rows.size() - draws, 1))])
+	# row beats column, both ways round (a|b and b|a): the side bias cancels
 	var head := "DUELSIM row-vs-col   "
 	for b in roster: head += " %5s" % String(b).substr(0, 5)
 	print(head)
 	for a in roster:
 		var line := "DUELSIM %-12s" % a
 		for b in roster:
-			line += " %5.2f" % (float(cell.get("%s|%s" % [a, b], 0.0)) / n)
+			line += " %5.2f" % ((float(cell.get("%s|%s" % [a, b], 0.0)) + n - float(cell.get("%s|%s" % [b, a], 0.0))) / (2.0 * n))
 		print(line)
 	for a in roster:
 		var tot := 0.0
