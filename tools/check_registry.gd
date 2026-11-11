@@ -55,6 +55,7 @@ const CHECKS := {
 	"--safe-area-shots": ["res://tools/safe_area_check.gd", "safe_area_check", "shots"],
 	"--overflow-check": ["res://tools/overflow_check.gd", "overflow_check", "check"],      # garden panels at 150% text
 	"--overflow-shots": ["res://tools/overflow_check.gd", "overflow_check", "shots"],      # GPU, --shots-dir=
+	"--map-names-check": ["res://tools/map_names_check.gd", "map_names_check", null],     # full map names: no overprint
 	"--kin-indoors-check": ["res://tools/kin_indoors_check.gd", "kin_indoors_check", null],
 	"--water-vfx-check": ["res://tools/water_vfx_check.gd", "water_vfx_check", null],      # splash, spray, wake
 	"--boki-cries-check": ["res://tools/boki_cries_check.gd", "boki_cries_check", null],      # audio/cries
