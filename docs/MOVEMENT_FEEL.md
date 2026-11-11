@@ -331,6 +331,31 @@ Asked: what the source does when a Hunter is knocked off an island. Evidence rea
 
 Open for the owner, not built: a hit on a balloon (a glider under the lip) spikes it in the wiki notes, ours spikes only when the heat runs out (`Hunter.hurt`); and the 4 s credit window above.
 
+## Input latency: press to first motion or shot (`--input-latency-check`)
+Source feel is instant: the first frame of motion, or the shot, follows the press. `tools/input_latency_check.gd` presses LMB, RMB, E, dash and jump for every Hunter through the real input path (Input actions, `Match._process`: gather, pending input, the step, the render). It holds each press for 6 ticks (a quick 0.1 s tap) and records the first tick on which the Hunter's velocity, its animation state (what `HunterAnim` is told: the kit move, the cast, the shot, the swing, the dodge, leaving the ground) or a projectile of theirs changes. Tick 0 is the step run in the frame of the press. Target: tick 0 or 1, unless a sourced wind-up applies (the check's `WINDUP` table cites it).
+
+| Hunter | LMB | RMB | E | Dash | Jump |
+|---|---|---|---|---|---|
+| Vex | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Kael | 0 anim | 6 anim (release) | 0 anim, shot | 0 anim | 0 vel, anim |
+| Cinder | 0 anim | 1 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Meeko | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Tenzo | 0 anim | 6 anim (release) | 0 anim | 0 anim | 0 vel, anim |
+| Lace | 0 anim | 0 anim (was none) | 0 anim, shot | 0 vel, anim | 0 vel, anim |
+| Grimble | 0 vel, anim, shot | 0 anim, shot | 0 anim | 0 vel, anim | 0 vel, anim |
+| Neve | 0 anim, shot | 1 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Motley | 0 anim, shot | 1 anim | 0 anim | 0 anim | 0 vel, anim |
+| Mossy | 0 anim | 0 anim (was none) | 0 anim | 0 vel, anim | 0 vel, anim |
+| Sparkle | 0 anim, shot | 0 anim | 0 anim | 0 vel, anim | 0 vel, anim |
+| Sable | 0 anim, shot | 0 anim | 0 anim | 0 anim | 0 vel, anim |
+
+No double buffering: a press is gathered, queued and applied in the same frame's step, and the local Hunter is drawn at the present. What was later, and what changed:
+- **Lace RMB (Heavy Shot): an animation gate.** The draw pose waited for the 0.15 s tap guard, so a tap showed nothing and a hold showed nothing for 9 ticks. The draw clip now starts on the press. It already ran on the hold's clock, so the full-draw key still lands at full charge. A tap still looses nothing and costs nothing, and its release puts the bow down.
+- **Mossy RMB (Aegis): an animation gate.** The guard pose waited for the aegis, 0.1 s into the hold. The arm now comes up on the press. The aegis still rises 0.1 s in (source: 0.2 s, docs/heroes/bulwark.md), and a tap lowers the arm again.
+- **A cleared kit move froze its pose.** When a kit cleared its move (a cancelled draw, the lowered aegis), `Hunter.anim_s` kept the old move with its clock stopped, so the body held that frame. The move now ends.
+- **Kael and Tenzo RMB: tap/hold splits, kept.** The press can't show which one it is until the release (the tap) or the hold threshold, so both act on the tap's release (tick 6 here, tick 0 from the release). Tenzo's is owner item 61 ("a tap shows nothing, it lands on the release"). Alternative not built: start Kael's Finishing Slam wind-up on the press, which would bring its strike up to 0.3 s earlier (a balance change).
+- **Cinder, Neve and Motley RMB: tick 1** (within target). The aim pose starts on the kit's first hold tick, which runs the step after the press.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.

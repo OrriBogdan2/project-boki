@@ -304,6 +304,7 @@ const CHECKS := {
 	"--camera-fast-shots": ["res://tools/camera_fast_check.gd", "camera_fast_check", "shots"],      # --shots-dir= (GPU)
 	"--demo-quick-check": ["res://tools/demo_quick_check.gd", "demo_quick_check", null],      # quick starts
 	"--sparkle-dash-check": ["res://tools/sparkle_dash_check.gd", "sparkle_dash_check", null],  # Wirerun, no carry
+	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],      # press -> first motion or shot
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
