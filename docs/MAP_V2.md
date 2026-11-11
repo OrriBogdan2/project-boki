@@ -32,27 +32,25 @@ cliff wall, tower cluster, walled maze) and **how you get in** (one long bridge;
 ```
  z   0         100        200        300        400        500   x
   0 +-------------------------------------------------------------+
-    |                ____FROSTGATE (sniping shelf, lv 10)___       |
-    |   HIGHWATCH  _/   Rimefield (lv 4) - uplink A        \_Gaol |
-    |   towers lv  ~~Rime Stair                    Gaol Walk~[EYRIE]|
-100 |   6/9/11/14     |          Gate Span (35 m)               |  |
-    |   (lighthouse)  |               |                  Eyrie Stair
-    |      |        __|_______  [ THE CROWN ]  ~ ~ glide ~ ~ CINDER |
-200 |   Watch Neck   |       |=Lark  citadel:   bailey 4      STEPS |
-    |  LARKHOLLOW    |  open |  Span keep 8,                  cliff |
-    |  open plains,  |  flank|        Throne 12 (Heart)       tiers |
-    |  rolling swells (lv 0/1)           |  Shard Stair     2/6/10 |
-300 |      |                       . . [n] . . . the HOLLOW   /14  |
-    |  Thorn Gate                [w]--[ STORMBREAK ]--[e]   uplink B|
-    |  THORNWOOD  ===Shard Walk===   shrine table     \     Sunken |
-    |  dense forest, Bramble Rise     [s]               \   Forge  |
-400 |  (Thornhive lair)               |                DUSKMOOR    |
-    |      \___ Salt Walk   SALTMERE (lagoon, lv 0,    ruin maze   |
-    |                       rim + causeway lv 2)        (lv 2)     |
-500 |                                                               |
+    |               [====== FROSTGATE: bare ice shelf, lv 10 =====]|
+    |  HIGHWATCH   Rime  Rimefield (lv 4): uplink A   Keep  Gaol   |
+    |  towers lv   Stair          |                   Walk [EYRIE] |
+100 |  6/9/11/14                  | Gate Span (36 m)    Gaol rock |
+    |  (Lantern)                  |                         |      |
+    |     || Watch Neck     [ THE CROWN ]                Eyrie Stair
+200 |  LARKHOLLOW  =Lark Span= walled citadel  ~Ember Leap~ CINDER |
+    |  open plain,  (30 m)    bailey 4 / keep 8 /         STEPS:   |
+    |  uplink B               Throne 12 (Heart)           cliff    |
+    |     ||  Thorn Gate,        \ Shard Stair            tiers    |
+300 |     ||  Bramble Neck   [Thorn Shard] [Crown Shard]  2/6/10/14 |
+    |  THORNWOOD  =Shard Walk=      [STORMBREAK]--[Ember Shard] Forge|
+    |  dense forest,   the Hollow   Shrine Table  ~Slag Leap~      |
+400 |  Bramble Rise    (void)  [Salt Shard]       DUSKMOOR maze    |
+    |  (Thornhive)                 |  Shard Rise   Moor Chapel lv 4 |
+    |        \=Salt Walk= SALTMERE lagoon (lv 0) =Moor Walk=       |
+500 |                     rim + causeway lv 2                       |
     +-------------------------------------------------------------+
 ```
-
 ## Regions: fight type first
 
 | Region | Fight type (on purpose) | Why a squad goes there | Skyline landmark | Palette / biome | Terrain language | Ways in (chokepoints) |
@@ -68,19 +66,25 @@ cliff wall, tower cluster, walled maze) and **how you get in** (one long bridge;
 | **Cinder Steps** | **Vertical cliff fights + lava edges** | gloves (×1.6), the Sunken Forge lair at the cliff foot, the Kilns on the crest | forge chimney | ember (rust/red) | four cliff tiers climbing east (lv 2 → 6 → 10 → 14) to a sheer east rim, two flights between each tier; slag pools at the cliff feet (tagged lava for hazards) | Eyrie Stair (N, from the Gaol), Slag Steps (S, from Duskmoor); Ember Leap glide from the Crown, nothing else |
 
 ## Scale
-- **540 m a side** (was 305; 1.77x per side). Land ~2.3x the 0.24.4 map. The final number is the largest
-  one the GPU bench holds (see "Perf" below); SIZE is still the one constant (`scale_layout()`).
-- **Density:** 30 hunters (10 trios) stay. More land per squad is the point of the order, so the map
-  makes up for it with more of everything to find: chests, camps and landings scale with land
-  (~0.8x the old per-m² density), and every tile of land is within 40 m of something to take
-  (`check_interest`: chest, camp, landing, weapon, shrine, lair, outpost or a train stop). At 4.55 m/s that is
-  at most ~18 s between two points of interest on foot: no >25 s empty run.
-- **Travel:** the sky train loop runs round the whole map with a stop in every region (12 m/s, ~2 runs' worth);
-  bridges are short (≤ 40 m) and the glide gaps are glide-sized. The train check keeps "every leg rides
-  faster than running it".
+- **540 m a side** (was 305; 1.77x per side, 3.1x the square). **Land 138,200 m²: 4.0x** the 0.24.4 map
+  (34,700 m²; it used 37 % of its square, this one 47 %). SIZE is still the one constant (`scale_layout()`).
+  Per region (m²): Cinder 25.6k, Lark 20.5k, Crown 19.6k (with its Gaol), Thornwood 19.5k, Frostgate 17.6k,
+  Highwatch 14.7k, Duskmoor 8.6k, Saltmere 7.5k, Stormbreak 4.5k (five shards).
+- **Density:** 30 hunters (10 trios) stay, so there is ~4x the land per squad: that is the point of the
+  order, and the Blight ring (and ext/br-zone's phases) pulls them together. What there is to find:
+  60 chests (was 39), 26 camps (19), 53 landings (38), 76 breakables (40), 285 trees in Thornwood,
+  107 ruin wall pieces in Duskmoor. Chests per m² are lower than before on purpose: the bonus-key economy
+  (`--keys-check`, 20-30 % bonus keys over locked chests) is set by camps' elites against chests, so
+  7 filler chests became 2 heavy camps. Every tile of land is within 40 m of something to take
+  (`check_interest`: chest, camp, landing, weapon, shrine, lair, outpost or a train stop); worst per region
+  25-40 m. At 4.55 m/s that is at most ~18 s between two points of interest on foot: no >25 s empty run.
+- **Travel:** the sky train loop (1.67 km, 9 halts, one in every region, a lap ~265 s) runs round the map
+  and through the Hollow; every leg rides faster than running it (by 4-32 s; `check_train`). Bridges
+  are 12-38 m; glides (Ember Leap, Slag Leap, Bramble Leap) for bots across the bigger gaps.
 - **Ways Out (the Heart's ring):** `ways_scale` = SIZE / 216 = 2.5; all land is inside the ring's first
-  radius (325 m) round the Heart, both lairs and uplinks are inside it when they open, and the Heart Gate
-  has ground at 60 m (checked by the generator).
+  radius (325 m; farthest land 320 m) round the Heart, the three lairs and two uplinks are inside it when
+  they open, and the Heart Gate has 45 degrees of ground at 60 m, SE of the Throne (checked by the generator
+  and `--ways-out-map-check`).
 
 ## Hooks for the parallel branches (data only, in each `regions[]` entry)
 - `fight`: the fight type id (`siege`, `snipe`, `towers`, `open`, `forest`, `causeway`, `chokepoint`, `maze`, `cliffs`).

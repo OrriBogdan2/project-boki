@@ -17,13 +17,13 @@ is wide joined land, the east broken high ground. Each region is a different fig
 
          [Highwatch]   [=========== Frostgate shelf ===========]   [Stormcrown
           towers        Rimefield (uplink A)                       Gaol]
-             |                     | Gate Span                       |
+             ||                    | Gate Span                       |
         [Larkhollow]=Lark Span=[ THE CROWN ]  ~ Ember Leap ~   [Cinder Steps]
-         open plains             citadel                         cliff tiers
-             |                     | Shard Stair                  (uplink B,
-        [Thornwood]==Shard Walk==[n][w][STORMBREAK][e]==Moor==   Sunken Forge)
-         forest                       [s]              [Duskmoor] /Slag Steps
-              \\==Salt Walk==[ Saltmere lagoon ]==Moor Walk==  maze
+         open plains (uplink B)   citadel                        cliff tiers,
+             ||                     \\ Shard Stair                Sunken Forge
+        [Thornwood]==Shard Walk==[Thorn sh.][STORMBREAK][Ember sh.]   |Slag Steps
+         forest                [Salt sh.]  [Crown sh.]  \\==[Duskmoor] maze
+              \\==Salt Walk==[ Saltmere lagoon ]==Moor Walk==//
 
 FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +):
   hand (+)            true: nothing is placed by dice. No auto stairs, no random rocks, no random
