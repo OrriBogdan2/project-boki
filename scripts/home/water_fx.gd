@@ -66,11 +66,13 @@ func set_body(k: float) -> void:
 	for p in pools["splash"]:
 		p.emission_ring_radius = 0.32 * k
 		p.emission_ring_inner_radius = 0.2 * k
+	var n_spray := maxi(3, roundi(SPRAY_N * k * q))
+	var n_wake := maxi(2, roundi(WAKE_N * k * q))
 	for p in pools["spray"]:
-		p.amount = maxi(3, roundi(SPRAY_N * k * q))
+		if p.amount != n_spray: p.amount = n_spray
 		p.emission_sphere_radius = 0.22 * k
 	for p in pools["wake"]:
-		p.amount = maxi(2, roundi(WAKE_N * k * q))
+		if p.amount != n_wake: p.amount = n_wake
 		p.emission_sphere_radius = 0.12 * k
 
 ## Droplets in a splash: more for a harder fall (hard 0..1) and a bigger Hunter.
