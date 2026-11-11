@@ -48,8 +48,8 @@ own commits, 70f3b1989; its ext/mc-20261110-0630 merge and the registry fix that
   dash refill).
 
 ## Suite (headless, one Godot at a time, LP_NUM_THREADS=2, against ext/release-integ-0245 92df78ce4)
-`--check` passes, as do the 12 new checks (armour-hint, evolve-moment, move-drills, tips, tut-first-capture,
-tut-first-evolve, tutorial-resume, tutorial-skip, words, xp-hint, plus kit-drill's signature drills) and the
+`--check` passes, as do the 10 new checks (armour-hint, evolve-moment, move-drills, tips, tut-first-capture,
+tut-first-evolve, tutorial-resume, tutorial-skip, words, xp-hint; kit-drill also runs the signature drills) and the
 touched ones: tutorial-hud/fight/idle, farm-tutorial, prematch, hob, tumble, echo-steps, keys and hero-title.
 Red here and on 0245: `--title-check` (the same 8 rows: headless title scene) and `--hob-check`'s script
 error at hob_check.gd:193 (guide.tracker is null). `--tutorial-fight-check` is flaky on the kick row (0245:
