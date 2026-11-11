@@ -48,7 +48,7 @@ func _held() -> bool:
 func tick(dt: float) -> void:
 	var ed := kit.e_def()
 	var r := float(ed["radius"])
-	if kit.anim_id == "mage_e" and kit.m.time - kit.anim_at > SKY_HOLD_AT:
+	if kit.anim_id == "mage_e" and not kit.strikes.is_empty() and kit.m.time - kit.anim_at > SKY_HOLD_AT:
 		kit.anim_at = kit.m.time - SKY_HOLD_AT      # drag + count outlast the 1.4 s clip: the arm stays up
 	for i in kit.strikes.size():
 		var s: Dictionary = kit.strikes[i]
