@@ -142,7 +142,8 @@ func _world() -> void:
 	ok(home.panel_open == "Breeding" and FirstBreed.seen(), "arriving opens the card, and it is marked seen")
 	var texts := _texts(home.panel_host)
 	var says := func(head: String) -> bool: return texts.any(func(t): return t.begins_with(head))
-	ok(says.call("Two Grown Boki") and says.call("The egg will be") and texts.any(func(t): return t.contains("Pair them")),
+	var pair_btn: bool = texts.any(func(t): return t.contains("Pair them"))
+	ok(says.call("Two Grown Boki") and says.call("The egg will be") and pair_btn,
 			"the card: the one-line explanation, the preview, a Pair them button")
 	_press(home.panel_host, "Pair them")
 	await main.get_tree().process_frame
