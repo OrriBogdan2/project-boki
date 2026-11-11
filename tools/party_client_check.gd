@@ -43,7 +43,7 @@ func run(main_node: Node) -> void:
 func _client() -> Party:
 	var party := Party.new()
 	party.mm = NetMatchmaker.new()
-	party.mm.transport = _fake
+	party.mm.transport = fake
 	return party
 
 func _addresses() -> void:
@@ -149,12 +149,12 @@ func _drop(secret: String) -> void:
 	for m in party["members"]:
 		m["ready"] = false
 
-func _fake(method: String, path: String, member: String, body: Dictionary) -> Dictionary:
+func fake(method: String, path: String, member: String, body: Dictionary) -> Dictionary:
 	paths.append(path)
 	secret_in_path = secret_in_path or (member != "" and path.contains(member))
 	var parts := path.trim_prefix("/").split("/")
 	if parts[0] == "queue":
-		return _fake_queue(method, parts, body)
+		return fake_queue(method, parts, body)
 	if method == "POST" and parts.size() == 1:
 		return _new_party(body)
 	var party: Dictionary = parties.get(parts[1], {})
@@ -211,7 +211,7 @@ func _view(party: Dictionary, me: Dictionary) -> Dictionary:
 		out["ticket"] = "tk-" + me["id"].trim_prefix("sec-")
 	return out
 
-func _fake_queue(method: String, parts: PackedStringArray, body: Dictionary) -> Dictionary:
+func fake_queue(method: String, parts: PackedStringArray, body: Dictionary) -> Dictionary:
 	if method == "POST":
 		return {"status": 200, "ticket": "t-solo"}
 	if method == "DELETE":
