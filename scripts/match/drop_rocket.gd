@@ -24,6 +24,8 @@ const TRAIL_W := 0.45          # m, the exhaust trail's width at the nozzle: a t
 const TRAIL_S := 0.7           # s a point of the trail lasts: ~17 m of it at the full dive, past the skydive view
 const TRAIL_OFF := "very_low"  # the quality preset with no exhaust trail
 const NOZZLE_Y := 2.4          # m along the model's +Y (its tail): where the trail leaves, inside the flame
+const BODY_R := 0.75           # m, the body's radius
+const EXIT_SIDE := 1.2         # m from its axis to a jump-out's puff: beside the body, not hidden in it
 
 var m: Match
 var team := 0
@@ -76,7 +78,7 @@ func tick(dt: float) -> void:
 				continue
 			h.rocket = null
 			if h.remote and not h.out and h.dropping:
-				m.fx.puff(pos)
+				m.fx.puff(exit_at())
 			elif h.remote and not h.out:
 				landed = true
 	if riders.is_empty():
@@ -156,7 +158,7 @@ static func island_near(w: World, p: Vector3) -> Vector3:
 func detach(h: Hunter, dive := true) -> bool:
 	if not riders.has(h):
 		return false
-	m.fx.puff(pos)
+	m.fx.puff(exit_at())
 	if m.skydrop.is_lead(h) and riders.size() > 1:
 		m.skydrop.pass_lead(h, riders[1] if riders[0] == h else riders[0])
 	riders.erase(h)
@@ -175,6 +177,10 @@ func detach(h: Hunter, dive := true) -> bool:
 	if h == m.player:
 		m.sfx("whoosh", null, -4.0, 1.2)
 	return true
+
+## Where a jump-out's puff shows: beside the body, right of the launch heading (the skydive view's right).
+func exit_at() -> Vector3:
+	return pos + Vector3(cos(yaw), 0.0, -sin(yaw)) * EXIT_SIDE
 
 ## The rocket hits: dust settles round it (it is not a bomb: no blast, no ring) and the squad steps out around it,
 ## on open ground.
@@ -226,12 +232,12 @@ func project() -> Dictionary:
 static func _model(col: Color) -> Node3D:
 	var root := Node3D.new()
 	var body := CylinderMesh.new()
-	body.top_radius = 0.75
-	body.bottom_radius = 0.75
+	body.top_radius = BODY_R
+	body.bottom_radius = BODY_R
 	body.height = 2.6
 	_part(root, body, Color("e9edf2"), Vector3.ZERO)
 	var nose := CylinderMesh.new()
-	nose.top_radius = 0.75
+	nose.top_radius = BODY_R
 	nose.bottom_radius = 0.0
 	nose.height = 1.2
 	_part(root, nose, col, Vector3(0, -1.9, 0))

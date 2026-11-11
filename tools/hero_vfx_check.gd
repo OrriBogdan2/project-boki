@@ -13,6 +13,8 @@ const ROCKET_AT := 6.0         # s into the ship's run when the squad launches: 
 const ROCKET_SEED := 4242
 const ROCKET_RIDE := 1.5       # s ridden before the trail is measured: past the rocket's speed-up
 const ROCKET_TRAIL_M := 10.0   # m of trail at least behind the dive by then, so it reaches up the skydive view
+const ROCKET_ALONE_M := 3.0    # m over the ground from where only the rocket steps (the landing's count is its own)
+const ROCKET_CAP_S := 20.0     # s a ride may take at most
 const SETTLE_TOP_V := 5.0      # m/s: the landing dust is never faster than this (it settles, it does not blast)
 const STREAK_PILE := 40        # streaks asked for at once: the pool still caps them
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
@@ -457,16 +459,17 @@ func _rocket_out(m: Match, r: DropRocket) -> void:
 	var mates: Array = r.riders.filter(func(x: Hunter): return x != m.player)
 	var radial0 := m.fx.radial
 	var puff: CPUParticles3D = m.fx.bursts[m.fx.bi]
-	var at := r.pos
+	var at := r.exit_at()
 	m.skydrop.detach(mates[0])
-	ok(puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01,
-			"jumping out leaves a small puff where they let go (%d dots)" % puff.amount)
+	var beside := Vector2(at.x - r.pos.x, at.z - r.pos.z).length()
+	ok(puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01 and beside > DropRocket.BODY_R,
+			"jumping out leaves a small puff where they let go, beside the body (%d dots)" % puff.amount)
 	var far: Hunter = mates[1]
 	far.remote = true
 	far.riding = false
 	far.dropping = true
 	puff = m.fx.bursts[m.fx.bi]
-	at = r.pos
+	at = r.exit_at()
 	r.tick(Match.DT)
 	far.remote = false
 	ok(not r.riders.has(far) and puff.color == Fx.AIR and puff.global_position.distance_to(at) < 0.01,
@@ -476,14 +479,15 @@ func _rocket_out(m: Match, r: DropRocket) -> void:
 ## The rocket comes down: dust settles round it, low and slow, and no ring or burst from it or the riders'
 ## touchdowns. Returns the dust's dots.
 func _rocket_land(m: Match, V: HeroVfx, r: DropRocket) -> int:
-	var added := -1
-	for i in int(20.0 / Match.DT):
-		var radial0 := m.fx.radial
+	var t := 0.0
+	while t < ROCKET_CAP_S and r.pos.y - m.world.ground_at(r.pos.x, r.pos.z) > ROCKET_ALONE_M:
 		_ride(m, V, Match.DT)
-		if r.done:
-			added = m.fx.radial - radial0
-			break
-	ok(added == 0, "the landing adds no ring or burst, nor do the riders' touchdowns")
+		t += Match.DT
+	var radial0 := m.fx.radial
+	while t < ROCKET_CAP_S and not r.done:
+		r.tick(Match.DT)          # (the rocket alone: no one else's touchdown lands in the count)
+		t += Match.DT
+	ok(r.done and m.fx.radial == radial0, "the landing adds no ring or burst, nor do the riders' touchdowns")
 	var dust := _settles(m.fx).filter(func(p: CPUParticles3D): return m.player.flat_dist(p.global_position) < 8.0)
 	ok(dust.size() == 1, "dust settles where it lands, round the squad that stepped out")
 	if dust.size() != 1:
@@ -494,9 +498,9 @@ func _rocket_land(m: Match, V: HeroVfx, r: DropRocket) -> int:
 			"low and slow, sinking back: not a blast (%.1f m/s, %d dots)" % [p.initial_velocity_max, p.amount])
 	return p.amount
 
-## Fx's dust emitters running a landing's settle (dust that outlives a step's puff).
+## Fx's dust emitters running a landing's settle.
 func _settles(fx: Fx) -> Array:
-	return fx.bursts.filter(func(p: CPUParticles3D): return p.color == Fx.DUST and p.lifetime > 1.0 and p.emitting)
+	return fx.bursts.filter(func(p: CPUParticles3D): return p.color == Fx.HEAVY_DUST and p.emitting)
 
 ## A streak keeps a point a step, not a frame, so it is as long at 30 fps as at 144; a later one reuses a pooled
 ## ribbon; a pile of them stays within the pool.

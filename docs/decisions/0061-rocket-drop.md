@@ -19,3 +19,4 @@ Option 2. The skyship, the planning phase and the leader stay; the launch replac
 - Online: the leader's machine (the host for a bot) flies the rocket; others follow the leader's synced position. Launch is the new `"rkt"` event (replaces `"dsep"`); jump-out and the glider ride the existing hunter flags. Net.VERSION bumped.
 - Camera: `Cam.skydive` (behind the launch heading, ~50 degree pitch) for the rocket, the free fall and the glide; it turns back north-up in the last 8 m.
 - No save change.
+- Looks (owner 11-11, ext/vfx-rocket-drop): a thin exhaust trail in the squad colour (`HeroVfx.streak`, ribbon pool, off at Very Low), a small air puff where a Hunter jumps out (`Fx.puff`) and dust settling where it lands (`Fx.settle`), both on Fx's dust pool; no ring or burst on jump-out, impact or the riders' touchdowns (DECISIONS: no rings on landings). Every machine plays them: an observer's copy reads the riders' flags (jumped out: puff; landed with it: dust).
