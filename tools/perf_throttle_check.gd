@@ -73,6 +73,8 @@ func _far_bots() -> void:
 		return
 	b.teleport(m.player.pos + Vector3(SimLod.FAR_M + 15.0, 0, 0))
 	b.grounded = true
+	b.gliding = false       # (a roaming bot can be mid-glide over a gap when it's moved: not calm, and random)
+	b.ai.erase("cross")
 	b.ai["tgt"] = null
 	b.ai["goal_kind"] = "roam"
 	var every := SimLod.EVERY

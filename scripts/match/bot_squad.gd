@@ -10,6 +10,7 @@ const REGROUP_DONE := 8.0        # m: back with the lead (the gap keeps it from 
 const ASSIST_R := 24.0           # m: a squadmate's rival this close is worth joining (times aggro)
 const FOCUS := 8.0               # target score (metres of distance) for a squadmate's rival, at full skill
 const HIT_RECENT := 4.0          # s: a squadmate hit this recently is still being shot at
+const KEEP := 8.0                # m: a lead this close to where we already head hasn't moved enough to re-aim
 const SIDE := 2.5                # m: where a follower stands beside where its lead is going
 
 ## The one the rest keep to: the person in the squad, else its drop leader, else the first one up.
@@ -34,7 +35,9 @@ static func regroup(m: Match, h: Hunter, cur_kind: String) -> Vector3:
 	if l == null or l == h:
 		return Vector3.INF
 	var r := REGROUP_DONE if cur_kind == "regroup" else REGROUP_R
-	return l.pos if h.flat_dist(l) > r else Vector3.INF
+	if h.flat_dist(l) <= r:
+		return Vector3.INF
+	return _steady(h, "regroup", l.pos)
 
 ## A follower heads home when its (bot) lead has decided to: squads leave together.
 static func lead_leaving(m: Match, h: Hunter) -> bool:
@@ -62,4 +65,14 @@ static func tag_along(m: Match, h: Hunter) -> Vector3:
 		g = l.pos
 	var ang := float(hash(h.nid) % 6) / 6.0 * TAU
 	var q := g + Vector3(cos(ang), 0, sin(ang)) * SIDE
-	return g if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z) else q
+	if m.world.is_void(q.x, q.z) or m.world.is_block(q.x, q.z):
+		q = g
+	return _steady(h, "tag", q)
+
+## The goal we already head to while the new one is within KEEP of it: a lead walking about doesn't
+## re-aim (and re-plan the path and gap crossings of) the bots following it every think.
+static func _steady(h: Hunter, kind: String, p: Vector3) -> Vector3:
+	var cur: Vector3 = h.ai["goal"]
+	if String(h.ai["goal_kind"]) == kind and cur != Vector3.INF and Vector2(cur.x - p.x, cur.z - p.z).length() < KEEP:
+		return cur
+	return p

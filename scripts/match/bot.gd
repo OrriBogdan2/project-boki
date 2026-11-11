@@ -264,7 +264,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever"]:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "heart", "lair_camp"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "heart", "lair_camp", "tag"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -860,7 +860,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			if d < bd: bd = d; goal = p["pos"]; gk = "loot"
 	if goal == Vector3.INF:
 		goal = BotSquad.tag_along(m, h)        # a follower goes where its lead goes
-		if goal != Vector3.INF: gk = "roam"
+		if goal != Vector3.INF: gk = "tag"
 	if goal == Vector3.INF:
 		# roam toward monsters or another island (the lead, or a bot on its own)
 		if a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:

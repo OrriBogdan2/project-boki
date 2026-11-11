@@ -3,11 +3,13 @@ extends RefCounted
 ## hunter a bot) run headless, watching what the bots do the way a good player would judge them. Prints a
 ## line for every hunter that goes down (how long it fought on under 30% health, whether it backed off,
 ## what it still had on its belt, how far its squad was) and a summary: belt use in and out of fights,
-## squad focus fire, spread, and how many got out. Evidence for docs/BOTS_HUMAN_1111.md; asserts nothing.
+## squad focus fire, spread, retreats (and how many of them still went down), and how many got out.
+## Evidence for docs/BOTS_HUMAN_1111.md; asserts nothing.
 ## Never touches the save.
 
 const LOW := 0.3                 # health fraction a good player stops trading at
 const SAMPLE := 0.5              # s between focus and spread samples
+const RT_WINDOW := 10.0          # s: a down this soon after backing off counts as a retreat that failed
 const FIGHT_ITEMS := ["tonic", "medkit", "smoke", "shield_cell", "stim"]
 
 var seen := {}                   # hunter -> its record
@@ -27,8 +29,9 @@ func run(main: Node) -> void:
 	m.start(o)
 	m.set_process(false)
 	for h in m.hunters:
-		seen[h] = {"low_fight": 0.0, "low_back": 0.0, "last_low": -99.0, "belt": _belt(h), "was_down": false}
-	var tot := {"downs": 0, "low_downs": 0, "unused_downs": 0, "alone_downs": 0, "use_fight": 0, "use_calm": 0,
+		seen[h] = {"low_fight": 0.0, "low_back": 0.0, "last_low": -99.0, "belt": _belt(h), "was_down": false,
+			"was_rt": false, "rt_at": -99.0}
+	var tot := {"retreats": 0, "retreat_downs": 0, "downs": 0, "low_downs": 0, "unused_downs": 0, "alone_downs": 0, "use_fight": 0, "use_calm": 0,
 		"focus_same": 0, "focus_n": 0, "spread": 0.0, "spread_n": 0}
 	var since := 0.0
 	print("BOTWATCH seed %d diff %s" % [m.seed_val, m.bot_diff])
@@ -44,6 +47,8 @@ func run(main: Node) -> void:
 	var left := m.hunters.filter(func(x): return not x.out and not x.extracted).size()
 	print("BOTWATCH summary t=%d downs=%d fought_low=%d (%.0f%%) unused_belt=%d alone=%d" % [m.time, tot["downs"],
 		tot["low_downs"], 100.0 * tot["low_downs"] / maxf(1, tot["downs"]), tot["unused_downs"], tot["alone_downs"]])
+	print("BOTWATCH retreats=%d, downed within %ds of one=%d" % [
+		tot["retreats"], RT_WINDOW, tot["retreat_downs"]])
 	print(("BOTWATCH belt uses in fights=%d calm=%d | focus same target %.0f%% of %d | squad spread %.1f m"
 		+ " | out=%d extracted=%d still in=%d") % [
 		tot["use_fight"], tot["use_calm"], 100.0 * tot["focus_same"] / maxf(1, tot["focus_n"]), tot["focus_n"],
@@ -68,7 +73,13 @@ func _watch(m: Match, h: Hunter, tot: Dictionary) -> void:
 		if used > 0:
 			tot["use_fight" if fighting else "use_calm"] += used
 	r["belt"] = now
+	var rt := BotRetreat.on(m, h)
+	if rt and not r["was_rt"]:
+		tot["retreats"] += 1
+		r["rt_at"] = m.time
+	r["was_rt"] = rt
 	if h.downed and not r["was_down"]:
+		if m.time - float(r["rt_at"]) < RT_WINDOW: tot["retreat_downs"] += 1
 		_down(m, h, r, tot)
 	r["was_down"] = h.downed
 	if not h.downed and m.time - float(r["last_low"]) > 10.0:
