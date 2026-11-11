@@ -209,3 +209,13 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Storm Rod (Voltaic Spear) | Data: a spear, damage and knockback on the first enemy hit. Footage briefs/hero-ref/vireo.md:27: flies to max range and stops on the first enemy hit. | Stops on the first foe (hunter, Boki or monster), passes allies, ends on walls. Matches. |
 | E Skycall (Lightning Strike) | Data: a strike at the target location. | Hits the cursor point, over walls and bodies; no shot. Matches. |
 | Shift Wirerun (Surge) | Data: 153 to enemies passed through. | Hits every foe it passes (two in a line), passes allies. Matches (`Wirerun hits every foe it passes`). |
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB Storm Rod | [F] nearly instant, a 200 px streak reaches the dummy within a frame; max range (about 7.5 bh, 13.5 m), first foe | 55 m/s, 13 m (0.24 s at max); first foe | matches |
+| E Skycall, flung orb | [F] one orb thrown about 6 bh | 6 m, 0.3 s | kept [O] (items 71/74, was 11 m) |
+| E Skycall, slide | [F] about 4 bh (7.2 m) over about 1 s | 3.4 m over 1.1 s | not a projectile (a displacement), unchanged; asserted at 3.4 in `--hero-combo-check`; open |

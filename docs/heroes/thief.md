@@ -264,3 +264,12 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Bola (Trickshot) | Footage briefs/hero-ref/dancer.md:26, :99: grounds the first target, flies on, a second target makes both stunned, bounces off terrain. Wiki: flies on past a destructible. | Grounds the first foe (hunter, Boki or monster), flies on and tangles a second; passes allies; bounces off a wall; a crate counts as a catch. Matches (`dancer RMB: Bola grounds the first, flies on, tangles two`). |
 | E Shadow Knife (Phantom Dagger) | Footage dancer.md:28: sticks in the first enemy (and slows it) or lands at the end of its path. | Sticks in the first foe, passes allies, lands on a wall or at its range. Matches. |
 | X Encore (Death Blossom) | Footage: a ring round her, blades at each foe inside. | A ring; no shot. Matches. |
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+|---|---|---|---|
+| RMB Bola | [F] about 30 bh/s (54 m/s); a 5.5-6 bh (10.8 m) lane; flies on past the first foe; bounces off a wall | **was 30 m/s** (0.36 s for the lane); now 54 m/s (0.2 s); 7 m + 3.8 m, bounces once | fixed; `dancer Bola speed` |
+| E Shadow Knife | [F] about 25 bh/s (45 m/s); lands at the cursor or end of range (9 bh seen) | 40 m/s, 14 m (0.35 s at max); lands at the cursor | matches (0.04 s) |

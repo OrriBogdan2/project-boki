@@ -225,3 +225,11 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Ice Spear (Cryo Spear) | Data and footage briefs/hero-ref/tamsin.md:51: lands at the cursor, then a slow zone and a delayed blast. Whether a foe in the path stops it is not shown. | Not determinable: flies to the cursor, lands early on the first foe (hunter, Boki or monster) or wall, passes allies. Kept. |
 | E Rink Wall (Frozen Barricade) | Data and footage: a sliding wall that blocks shots and shoves foes. | Placed wall: see the placed-walls job. |
 | X Rimelock (Chilling Finale) | Data: a zone round her. | An area round her; no shot. Matches. |
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+| RMB Ice Spear | [F] crosses about 5 bh (9 m) in 0.2 s or less (45 m/s+); lands at the cursor; owner: it emerges from her and the travel time grows with distance | 18 m/s, 12 m max (0.67 s); no arc; lands at the cursor (a foe in the way stops it) | kept slower on purpose [O] (DECISIONS: travel grows with distance, push not throw) |
+| E Rink Wall | [F] about 6 h (10.8 m) in 2.4 s, 2.5 h/s (4.5 m/s); slides to the cursor | 4.5 m/s, 4.5-16.2 m of travel (+50% [O]); stops at the cursor | matches (speed); the +50% reach is [O] |

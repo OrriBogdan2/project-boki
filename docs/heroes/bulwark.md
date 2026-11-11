@@ -270,3 +270,12 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | X Faultline (Abyssalbreaker) | Data: a fissure that stuns the targets it strikes, then erupts. Footage: not shown. Terrain: not shown. | A 16 m lane that strikes every foe on it (hunters, Boki, monsters), passes allies and walls (not determinable, kept). |
 | E Mending Ground (Regen Field) | Data: a healing zone at the hammer. | A zone; no shot. Matches. |
 | Shift 360 Smash / Shield Charge (Spin Dash, Shield Bash) | Data: a dash with a knock round you; the bash knocks enemies back. Pass or stop on a foe: not shown. | Not determinable: the Smash is a swing round him, the Charge shoves the foes in front of it. Kept. |
+
+## Projectile table (parity pass: ability speeds B)
+
+Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D] game data, [O] owner. A row matches when our time over the full range is within 0.1 s of the source's. `Stops at cursor`: whether it ends where the cursor is.
+
+| Ability | Source | Ours | Verdict |
+| LMB hammer, out | [F] 5-7 h (9-12.6 m) in 0.2-0.4 s; lands at the cursor | 24 m/s, 9 m max (0.38 s); lands at the cursor, 2.5 m minimum | matches (inside the band) |
+| LMB hammer, recall | [F] about 0.2-0.4 s | 34 m/s (0.26 s at 9 m) | matches |
+| X Faultline | [F] the fissure races the 8-9 bh lane in 0.4 s (f31-f35, 10 fps), about 40 m/s; fixed length, not clamped to the cursor | 16 m lane; **was a 0.2 s strike race with the streak drawn for 0.8 s** (20 m/s); now 0.4 s (40 m/s), streak the same, cells erupt after it | fixed; `bjorn ult race` |
