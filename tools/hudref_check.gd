@@ -9,7 +9,8 @@ extends RefCounted
 ##   7. a press on cooldown raises one deny (PressDeny: pulse + tick, throttled); a press DashFlow buffers raises none
 ##   8. a teammate going down stays quiet: one faint line by their squad row that goes after
 ##      MateAlerts.LINE_S
-##   9. a solos match (one hunter a squad) shows no squad UI: no squad row or Boki icon, no base badge, no
+##   9. a solos match (one hunter a squad) shows no squad UI: no squad row or Boki icon, no base badge, no beacons,
+##      no 'Your squad placed' result, no squad-only keys in Settings, no
 ##      map squad panel, the plain ping-free map hint and no squad words on the dead/wisp or uplink lines
 ## Runs the --hudref-demo=plates scene headless (real frames, the real HUD) and reads what
 ## HudPlate.shown / Hud.slot_text say was drawn. Never touches the save.
@@ -331,6 +332,19 @@ func _solos() -> void:
 		"solos: no squad row, Boki icon, level chip or squad watch on the left")
 	ok(_spot(hud, "vitals") and not _spot(hud, "base"),
 		"solos: the vitals block is there, the base-to-a-teammate badge is not")
+	ok(m.beacons.is_empty(), "solos: no revive beacons stand (on the map, minimap or legend)")
+	var place := WaysResult.placing(m.hunters, P.team, m.time)
+	var how := WaysResult.how_line(place)
+	var hid := WaysResult.hid_line(place.merged({"hid": true}))
+	ok(place.get("solo", false) and how.begins_with("You placed") and not hid.contains("squad"),
+		"solos: the results line reads '%s' (no squad words)" % how.strip_edges())
+	var keys: Array = []
+	for g in Overlay.control_groups(true):
+		keys.append_array(g[1])
+	var squad_keys: Array = Overlay.SQUAD_KEYS.filter(func(k): return keys.has(k))
+	ok(squad_keys.is_empty() and keys.has("map") and keys.has("scores"),
+		"solos: Settings lists no squad-only key (ping, pass lead, separate, base), still map and scores %s"
+		% str(squad_keys))
 	var rivals: Array = m.hunters.filter(func(x): return x != P)
 	m.knock(rivals[0], P, {})
 	await hud.panels.draw
@@ -343,6 +357,12 @@ func _solos() -> void:
 	await hud.panels.draw
 	ok(fm.side_rows == 2 and TeamBoki.levels.has(rivals[1].nid) and _spot(hud, "base"),
 		"a squadmate joins: the map's squad panel (%d rows), their row and the base badge show" % fm.side_rows)
+	var all_keys: Array = []
+	for g in Overlay.control_groups(false):
+		all_keys.append_array(g[1])
+	var trio_how := WaysResult.how_line({"place": 2, "squads": 9})
+	ok(Overlay.SQUAD_KEYS.all(func(k): return all_keys.has(k)) and trio_how.begins_with("Your squad"),
+		"trios: Settings lists the squad keys and the results line says 'Your squad'")
 	fm.close()
 	m.queue_free()
 	await main.get_tree().process_frame

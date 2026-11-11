@@ -328,6 +328,23 @@ func _tab_gameplay(v: VBoxContainer) -> void:
 		_toggle(v, "Pre-match lobby", "lobby_enabled", "The 30 s lobby before each expedition. Off: plain loading")
 		_toggle(v, "Mod mode", "mod_mode", "Everything unlocked, free building and bridges, god mode, spawn Boki (F1)")
 
+## Keys that only do something with a squadmate: not listed while you play a solos match.
+const SQUAD_KEYS := ["base", "ping", "pass_lead", "separate"]
+
+## The controls list's groups, [title, [action ids]]; `solo` (a solos match) drops SQUAD_KEYS.
+static func control_groups(solo: bool) -> Array:
+	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
+		["Fighting", [
+			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
+			"util1", "util2", "util3", "util4", "base",
+		] + KinKeys.ids()],
+		["Map" if solo else "Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
+		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
+	if solo:
+		for g in groups:
+			g[1] = (g[1] as Array).filter(func(an): return not SQUAD_KEYS.has(an))
+	return groups
+
 func _tab_controls(v: VBoxContainer) -> void:
 	_group(v, "How keys behave")
 	_toggle(v, "Quick cast", "cast_on_press", "Abilities fire the moment you press them. Off: hold to aim, release to cast")
@@ -336,17 +353,15 @@ func _tab_controls(v: VBoxContainer) -> void:
 	var readout_tip := "Speeds, movement state, cap and drag on screen (%s)" % Settings.key_cap("move_readout")
 	_toggle(v, "Movement readout", "move_readout", readout_tip)
 	UI.subtitle(v, "Two keys per action: click one, then press the new key or mouse button (Esc cancels, x clears it).")
-	var groups := [["Moving", ["up", "down", "left", "right", "jump", "glide", "dash", "crouch"]],
-		["Fighting", [
-			"fire", "secondary", "gear1", "gear2", "signature", "throw", "hunter_ult", "ultimate",
-			"util1", "util2", "util3", "util4", "base",
-		] + KinKeys.ids()],
-		["Squad and map", ["ping", "map", "scores", "emote", "pass_lead", "separate"]],
-		["At home", ["interact", "play", "talk", "details", "inventory", "hero"]]]
+	var psc = Game.main.screen_node() if Game.main else null
+	var solo: bool = psc is Match and (psc as Match).player != null and not Life.has_mates(psc, (psc as Match).player)
+	var groups := control_groups(solo)
 	var named := {}
 	for a in Settings.ACTIONS:
 		named[String(a[0])] = String(a[1])
 	var shown := {}
+	for an in (SQUAD_KEYS if solo else []):
+		shown[an] = true      # solos: the squad-only keys are not listed (they stay bound for trios)
 	for g in groups:
 		_group(v, String(g[0]))
 		for an in g[1]:

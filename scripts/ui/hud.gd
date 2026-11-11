@@ -1857,9 +1857,9 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	if left_line != "":
 		y0 = sz.y * 0.58
 		_ctext(Vector2(sz.x * 0.5, y0 - 64), left_line, 20, GOLD, big)
-	if not b.is_empty() and Life.soul_here(m, b):
+	if not b.is_empty() and Life.soul_here(m, b) and Life.has_mates(m, p):
 		lines.append("A teammate can bring you back at your deathbox: %ds left." % int(ceil(float(b["soul_until"]) - m.time)))
-	lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
+	if Life.has_mates(m, p): lines.append("Or at any revive beacon (the green pillars), with nothing you carried." if m.beacons.any(func(x): return not x["used"]) else "No revive beacons left.")
 	var mate := m.spectating()
 	if mate:
 		lines.append("Watching %s." % mate.pname)
