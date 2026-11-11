@@ -67,7 +67,8 @@ static func _unlocks() -> Array:
 		return out
 	for id in Arch.ids():
 		var hid := String(id)
-		if ClassUnlock.status(hid) == "open":
+		# a starter that waits for the first expedition has no challenge text, so no row
+		if ClassUnlock.status(hid) == "open" or ClassUnlock.challenge_text(hid) == "":
 			continue
 		var prog := ClassUnlock.challenge_progress(hid)
 		out.append(_row(ClassUnlock.challenge_text(hid), prog, "unlock", ClassUnlock.can_unlock(hid)))

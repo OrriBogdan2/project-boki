@@ -7,7 +7,6 @@ extends "res://tools/new_player_flow_check.gd"
 ## them is a gap: each 10 s window with no guidance is listed, and a gap of GAP_FAIL_S or more fails.
 ## Never touches the real save.
 
-const SIM_S := 900.0      # s of garden time played (15 minutes)
 const STEP_S := 0.05      # s of garden time per step
 const WINDOW_S := 10.0      # s: a window with no guidance at all is logged
 const REACT_S := 8.0      # s a player takes to do what a prompt says
@@ -16,7 +15,9 @@ const GAP_FAIL_S := 20.0      # s with no guidance that fails the check
 ## Goals rows that need a match are no guidance for a player who stays home.
 const HOME_SOURCES := ["first_day", "garden", "milestone", "level"]
 
+var sim_s := 900.0      # s of garden time played (15 minutes)
 var home
+var clock := 0.0      # s of garden time played so far
 var log_rows: Array = []      # one text row per 10 s window with no guidance
 var gap_s := 0.0      # s since guidance was last on screen
 var worst_gap := 0.0
@@ -35,10 +36,14 @@ func run(m: Node) -> void:
 	print("G15 gaps: worst %.1f s, %d windows without guidance" % [worst_gap, empty_windows])
 	for r in log_rows:
 		print("G15 no guidance " + String(r))
-	ok(_is_screen("home.gd") and int(Save.d.get("matches", 0)) == 0, "the 15 minutes never left the garden for a match")
-	ok(worst_gap < GAP_FAIL_S, "never %.0f s without a prompt, goal or target (worst %.1f s)" % [GAP_FAIL_S, worst_gap])
+	_verdicts()
 	print("G15 DONE, failures: %d" % bad)
 	tree.quit(1 if bad > 0 else 0)
+
+func _verdicts() -> void:
+	ok(_is_screen("home.gd") and int(Save.d.get("matches", 0)) == 0, "the play never left the garden for a match")
+	var what := "never %.0f s without a prompt, goal or target (worst %.1f s)"
+	ok(worst_gap < GAP_FAIL_S, what % [GAP_FAIL_S, worst_gap])
 
 ## A new player who skips the match tutorial on the naming card: eggs, name, first Relic, garden.
 func _skip_to_garden() -> void:
@@ -85,9 +90,10 @@ func _play() -> void:
 	var next_look := 0.0
 	var last_kinds := ""
 	var next_act := REACT_S
-	while t < SIM_S:
+	while t < sim_s:
 		home._process(STEP_S)
 		t += STEP_S
+		clock = t
 		if t < next_look:
 			continue
 		next_look += 1.0
