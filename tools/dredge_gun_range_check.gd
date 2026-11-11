@@ -40,7 +40,7 @@ func run() -> void:
 		ak.fresh(T)
 		T.teleport(home + Vector3(d, 0, 0))
 		T.face = FACE_TOWARD
-		P.wbloom = 0.0
+		P.wbloom = 0.001      # a burst's follow-up volley: the fan at rest (the opening volley is aimed, aimed_first)
 		P.fire_cd = 0.0
 		ak.aim_at(P, T.pos)
 		P.inp["fire"] = true

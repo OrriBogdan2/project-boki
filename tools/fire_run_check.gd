@@ -51,6 +51,11 @@ func _hunter(id: String) -> void:
 	var P: Hunter = r[1]
 	var home: Vector3 = r[4]
 	(r[2] as Hunter).teleport(home + Vector3(0, 0, 30.0))
+	if P.model.get_node("Warden/Sync").get("clips") == null:
+		print("FIRERUN %-10s no hand-keyed clips on its rig (generic poses): nothing to layer" % id)
+		A.done(m)
+		await A.main.get_tree().process_frame
+		return
 	_run(m, P, WARM_S, "")
 	var fr := _run(m, P, RUN_S, "")
 	var band := _band(fr)
