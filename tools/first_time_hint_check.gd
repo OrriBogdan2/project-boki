@@ -48,8 +48,8 @@ func _data() -> void:
 	var long := all.filter(func(id): return FirstTimeHint.text(String(id)).length() > LINE_MAX)
 	ok(long.is_empty(), "every line fits one toast (%s)" % str(long))
 	var hlong := heart.filter(func(id): return FirstTimeHint.text(String(id)).length() > HEART_LINE_MAX)
-	ok(heart == ["spark", "carry"] and hlong.is_empty() and heart.all(func(id): return when.has(id)),
-			"the Heartspark has its two lines, each saying when it shows (%s)" % str(hlong))
+	ok(heart.has("spark") and heart.has("carry") and hlong.is_empty() and heart.all(func(id): return when.has(id)),
+			"the Heart lines (Heartspark, Ways Out seats) each say when they show (%s)" % str(hlong))
 	var raw := (all + heart).filter(func(id): return FirstTimeHint.text(String(id)).contains("{"))
 	ok(raw.is_empty(), "every placeholder is filled (%s)" % str(raw))
 	var key := FirstTimeHint.text("key")

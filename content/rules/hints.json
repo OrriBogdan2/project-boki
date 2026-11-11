@@ -1,5 +1,5 @@
 {
- "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match and heart (the Heartspark's two lines, not part of the old tutorials, so the v11 -> v12 migration leaves them): shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v11 -> v12 migration).",
+ "doc": "One-time hints (FirstTimeHint): a single line shown the first time a thing matters, then never again on that save (Save.d.tutorial.hints). They took over the tutorial steps that were cut (owner, Nov 8: shorter tutorials). {action} shows that action's key ({dash}, {crouch}, {interact}...), {rank} the rank-up keys, {boki} the active Boki's name. match and heart (the Heartspark's lines and the Ways Out seats', not part of the old tutorials, so the v11 -> v12 migration leaves them): shown in a match by MatchHints; farm: on the farm by FarmHints. fight_quiet_s: no hint in the first seconds of a fight; one hint line on screen at a time (the next waits for the lane); sight_m: an outpost this close means no go-to-exit hint. A save that had finished the old tutorials sees none of its part (the v11 -> v12 migration).",
  "match": {
   "exdash": "Too far? Jump, then press {dash} in mid-air",
   "crouch": "Hold {crouch} to crouch and see farther",
@@ -25,7 +25,8 @@
   "carry": "Everyone can see you. Reach a Heart Gate.",
   "lair_out": "Beat the Sealed Lair: the winners fly out",
   "uplink_out": "Hold an Uplink to be lifted out: one squad, once",
-  "final_out": "One squad leaves at the end with the big reward"
+  "final_out": "One squad leaves at the end with the big reward",
+ "seat_grace": "Your squad took a seat. Anyone not in it has {late_s} s to reach it or loses loot"
  },
  "when": {
   "exdash": "you are in the air over the void",
@@ -43,6 +44,7 @@
   "lair_out": "the Sealed Lair seat has opened (heart.json quest lair_open_s)",
   "uplink_out": "the Uplink seat has opened (heart.json quest uplink_open_s)",
   "final_out": "the Heart final seat has opened",
+ "seat_grace": "your squad takes a Ways Out seat (OneSeat): shown to the one who boards and the one left behind",
   "stone": "the house is marked out and short of stone",
   "hammer": "the house is marked out",
   "task": "the house stands and no Boki has a job",

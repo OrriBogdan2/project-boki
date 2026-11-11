@@ -7,7 +7,8 @@ extends RefCounted
 ##   3. never more than one hint line on screen
 ##   4. the Heartspark's two lines (charged, carried) show once each, in that order
 ##   5. the Lair, Uplink and final seats each tell how they let a squad out, once, when they open (not before)
-##   6. after a save round-trip, a second expedition shows none of them again
+##   6. the squad's first seat tells the 20 s grace, once
+##   7. after a save round-trip, a second expedition shows none of them again
 ## and prints a table: hint, trigger, result.
 
 const MOMENT_S := 1.2         # s a hint may take to show after its moment starts
@@ -164,6 +165,12 @@ func _seats() -> void:
 	_check("uplink_out-early", "just before the Uplink seat opens", _moment(func(): _pin = up - 5.0, 3.0), "")
 	_check("uplink_out", "the Uplink seat opens", _moment(func(): _pin = up + 1.0), "uplink_out")
 	_check("final_out", "the final seat opens", _moment(func(): m.heart.state = Heart.S.FINAL, 3.0), "final_out")
+	_check("seat_grace", "the squad takes a seat", _moment(_take_seat), "seat_grace")
+
+## The player's squad takes a seat; the grace clock is dropped so the run goes on.
+func _take_seat() -> void:
+	m.exits.one_seat.taken("heart_early", p.team, "the Gate", Color.WHITE, p.pos, func(_h): return false)
+	m.exits.one_seat.late.clear()
 
 func _charged() -> void:
 	m.heart.charge = Heart.r("charge_s")
