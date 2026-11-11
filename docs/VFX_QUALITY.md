@@ -77,7 +77,7 @@ sound. Scored from the `vfxq-before-*` strips (main d255acbee); sound is scored 
 
 | # | Hunter | arch | R | S | L | T | Sc | C | Snd | total | main problem (from the strip) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | Tenzo | dolm | 2 | 2 | 1 | 2 | 3 | 1 | 3 | 14 | E telegraph is opaque orange discs; X is a thin red line and ring; everything red/orange (now cobalt on this branch); `breah_*` draws flat rings with no debris |
+| 1 | Tenzo | dolm | 3 | 3 | 3 | 3 | 3 | 4 | 3 | 22 | re-scored 11-11 from `--hero-vfx-reel` strips (ext/vfx-tenzo-data, job 20261111-161652-13415; was 14): all effects on `content/vfx/dolm.json` in cobalt, translucent lit-rim telegraphs, rock chunks and dust on every rise, burst and landing, crack and debris on Quakefall; left: the Basalt Spine cast line is still thin and the rock bodies stay orange-brown (`rock_look`) |
 | 2 | Motley | ostra | 2 | 2 | 1 | 2 | 2 | 2 | 3 | 14 | E and X are huge opaque indigo domes over the target; LMB hit is tiny; indigo vs teal signature |
 | 3 | Vex | gunslinger | 1 | 2 | 2 | 2 | 3 | 1 | 4 | 15 | LMB and held LMB show almost no tracer or muzzle flash; RMB crescents are pink; E/X are opaque brown scorch discs |
 | 4 | Grimble | dredge | 3 | 2 | 2 | 2 | 3 | 1 | 3 | 16 | pink pellets, teal E fan, orange RMB fan, purple hook chain: four colours, none gold; flat fans with no leading edge |
