@@ -49,7 +49,7 @@ static func _glove(hud, p: Hunter, i: int, r: Rect2) -> void:
 	var rar_frame := HudStyle.box(Color(0, 0, 0, 0), HudStyle.SLOT_RAD + 2, Color(rar_col(g), 0.95), 2)
 	hud.c.draw_style_box(rar_frame, r.grow(2.0))
 	if not active:
-		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 8, Color(HudStyle.INK, 0.6))
+		HudStyle.ctext(hud.c, Vector2(r.get_center().x, r.end.y + 4), "PASSIVE", 10, Color(HudStyle.INK, 0.6))
 
 ## The Merge box: your Boki. Also used by nothing else; the overhead row has its own small version.
 static func boki(hud, p: Hunter, r: Rect2) -> void:

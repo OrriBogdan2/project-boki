@@ -128,12 +128,12 @@ static func plate_frame(c: CanvasItem, r: Rect2, edge: Color, flash := 0.0) -> v
 ## An ability or item slot's frame. `state`: "ready" (edge in the slot colour, a faint top gloss),
 ## "cooling" (a dim coral edge), "off" (barely there: locked, empty, or can't be used now).
 static func slot_frame(c: CanvasItem, r: Rect2, col: Color, state := "ready") -> void:
-	var edge := Color(0.75, 0.6, 1.0, 0.16)
+	var edge := Color(INK, 0.16)      # idle: a faint cream rim (the menus' hairline, a touch stronger over the world)
 	if state == "ready":
 		edge = col
 	elif state == "cooling":
 		edge = Color(COOLING, 0.55)
-	c.draw_style_box(box(Color(0.07, 0.045, 0.11, 0.92), SLOT_RAD, edge, 2), r)
+	c.draw_style_box(box(Color(UI.NIGHT, 0.92), SLOT_RAD, edge, 2), r)
 	if state == "ready":
 		var gloss := Rect2(r.position + Vector2(3, 3), Vector2(r.size.x - 6, r.size.y * 0.42))
 		c.draw_style_box(box(Color(col, 0.10), SLOT_RAD - 3, Color(0, 0, 0, 0), 0), gloss)

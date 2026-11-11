@@ -96,7 +96,7 @@ static func rest_card(H, k: Kin, pc: Vector2, rr: float) -> void:
 		return
 	H.c.draw_circle(pc, rr - 4, Color(0, 0, 0, 0.5))
 	H._ctext(pc + Vector2(0, 5), "%d" % int(ceil(k.rest_t)), 14, H.INK, H.big)
-	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 9, Color(H.INK, 0.8), H.big)
+	H._ctext(pc + Vector2(0, rr + 14), "RESTING", 10, Color(H.INK, 0.8), H.big)
 
 ## A progress ring that follows the slot's outline (a rounded square), from the top centre clockwise.
 static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
@@ -153,7 +153,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 	if in_form:
 		H._rounded(cr, Color(0.04, 0.04, 0.06, 0.72), 8)          # (the Boki is part of you)
 	if down or in_form:
-		H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), "DOWN" if down else "FUSED", 8, DOWN_COL if down else Color(H.INK, 0.5), H.big)
+		H._ctext(Vector2(cr.get_center().x, cr.position.y - 5), "DOWN" if down else "FUSED", 10, DOWN_COL if down else Color(H.INK, 0.5), H.big)
 	x += 50.0
 	var gr := Rect2(Vector2(x, y + s - 34.0), Vector2(34, 34))
 	var out := k.state in ["active", "flying", "returning", "flying_home"]
@@ -181,7 +181,7 @@ static func cg_slots(H, p: Hunter, x: float, y: float, s: float) -> float:
 		mode_col = DOWN_COL
 	elif in_form or carry_off:
 		mode_col = Color(H.INK, 0.45)
-	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 8, mode_col, H.big)
+	H._ctext(Vector2(gr.get_center().x, gr.position.y - 5), mode, 10, mode_col, H.big)
 	if KinWheel.is_open(p):
 		wheel(H, p)
 	return x + 42.0
