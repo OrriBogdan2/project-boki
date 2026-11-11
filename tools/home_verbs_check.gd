@@ -15,7 +15,7 @@ const LIFT := 0.3         # m: how far a hand goes above or below its rest for "
 const HOLD := {"pat": 0.7, "feed": 0.58, "cheer": 0.45}      # s: the middle of each move's hold
 ## Boki stand-ins: [height, width] m, the smallest and the biggest Boki (Models.kin: 0.5 to 1.23 m tall).
 const BOKI := {"small": Vector2(0.5, 0.8), "big": Vector2(1.25, 0.8)}
-const TOUCH_CM := 8.0     # cm: the hand this near the Boki's surface (its head, its mouth; a head out of reach: its face)
+const TOUCH_CM := 8.0     # cm: the hand this near the Boki's surface (head, mouth; a head out of reach: face)
 const DEEPER_CM := 8.0    # cm: feeding, the hips this much lower for the small Boki than the big one
 const HIGHER_CM := 40.0   # cm: petting, the hand this much higher on the big Boki's head than the small one's
 const PLANT_Y := 0.012    # m: a sole point is on the floor while this near it (as --home-gait-check)
@@ -121,7 +121,8 @@ func _empty_reach() -> void:
 			hand["%s.%s" % [verb, size]] = got["hand"]
 			print("HOMEVERBS %s %s Boki: hand %.1f cm off at %.2f m, hips %.2f m, feet slid %.2f cm"
 					% [verb, size, got["off_cm"], got["hand"], got["hip"], got["feet_cm"]])
-			ok(got["off_cm"] <= TOUCH_CM, "%s, %s Boki: the hand touches it (%.1f cm off)" % [verb, size, got["off_cm"]])
+			ok(got["off_cm"] <= TOUCH_CM, "%s, %s Boki: the hand touches it (%.1f cm off)"
+					% [verb, size, got["off_cm"]])
 			ok(got["feet_cm"] <= FEET_CM, "%s, %s Boki: the feet stay planted (%.2f cm)" % [verb, size, got["feet_cm"]])
 		boki.free()
 	var deeper: float = 100.0 * (hips["feed.big"] - hips["feed.small"])
@@ -133,13 +134,13 @@ func _empty_reach() -> void:
 	holder.free()
 
 ## A box the size of a Boki, at its hold spot in front of the body (which faces -z).
-func _stand_in(holder: Node3D, size: Vector2) -> Node3D:
+func _stand_in(holder: Node3D, hw: Vector2) -> Node3D:
 	var n := Node3D.new()
 	var mi := MeshInstance3D.new()
 	var box := BoxMesh.new()
-	box.size = Vector3(size.y, size.x, size.y)
+	box.size = Vector3(hw.y, hw.x, hw.y)
 	mi.mesh = box
-	mi.position.y = size.x * 0.5
+	mi.position.y = hw.x * 0.5
 	n.add_child(mi)
 	holder.add_child(n)
 	n.position = HomeVerbs.hold_spot(Vector3.ZERO, Vector3.FORWARD, n)
