@@ -40,6 +40,8 @@ func place() -> void:
 	node.name = "Waystone"
 	h.add_child(node)
 	pad = {"pos": node.position}
+	if h.zone != "" and here() != GardenZones.HUB:
+		Sfx.play("garden_arrive_" + here())     # the landing chime, tuned to the zone's bed
 
 ## Where you stand after a hop: on the pad, or just south of the Waystone. Elsewhere: where you'd be.
 func arrive_at(p: Vector3) -> Vector3:
@@ -63,6 +65,7 @@ func hop(id: String) -> bool:
 	if hopping != "" or id == here():
 		return false
 	if id != GardenZones.HUB and not GardenZones.is_open(id):
+		Sfx.play("garden_locked")
 		h._toast("%s is still asleep: it needs both keys" % GardenZones.info(id).get("name", id))
 		return false
 	hopping = id

@@ -53,6 +53,9 @@ func _bed_part() -> void:
 ## The hop and the wake sounds exist, the hop is as long as the light-up, and waking a zone plays once.
 func _cue_part() -> void:
 	ok(Sfx.ensure("garden_hop") and Sfx.ensure("garden_wake"), "the hop and wake sounds exist")
+	var arrivals := GardenZones.ids().filter(func(z: String) -> bool: return not Sfx.ensure("garden_arrive_" + z))
+	ok(arrivals.is_empty() and Sfx.ensure("garden_locked"),
+		"a landing chime for every zone and the locked knock exist (missing: %s)" % [arrivals])
 	var len_s := (load("res://audio/garden_hop.wav") as AudioStream).get_length()
 	var fade := float(GardenZones.rules()["hop_fade_s"])
 	ok(len_s >= fade - 0.05 and len_s <= fade + 0.3,
@@ -78,9 +81,13 @@ func _travel_part(m: Node) -> void:
 	ok(hub != null and hub.ambience.levels.has(HomeAmbience.zone_bed(GardenZones.HUB)), "the hub plays its own bed")
 	if hub == null:
 		return
+	Sfx.last_played.erase("garden_locked")
+	ok(not hub.hway.hop("ridge") and Sfx.last_played.has("garden_locked"), "a locked zone is refused with the knock")
 	Sfx.last_played.erase("garden_hop")
+	Sfx.last_played.erase("garden_arrive_bramblebank")
 	ok(hub.hway.hop("bramblebank") and Sfx.last_played.has("garden_hop"), "the Waystone hop plays its sound")
 	var bb = await _arrived(m, hub)
+	ok(Sfx.last_played.has("garden_arrive_bramblebank"), "landing in Bramblebank plays its chime")
 	var bed := HomeAmbience.zone_bed("bramblebank")
 	var hub_bed := HomeAmbience.zone_bed(GardenZones.HUB)
 	ok(bb != null and bb.ambience.levels.has(bed) and not bb.ambience.levels.has(hub_bed),
