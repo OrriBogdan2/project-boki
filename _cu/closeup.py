@@ -32,6 +32,12 @@ for job in spec:
         band = P[(P[:, 2] > mn.z + 0.55 * hh) & (P[:, 2] < mn.z + 0.95 * hh)]
         frames[nm] = dict(cx=float(np.median(band[:, 0])), cy=float(np.median(band[:, 1])), z0=mn.z, h=hh)
     F = frames[nm]
+    import numpy as np
+    Pw = []
+    for o in meshes:
+        n_ = len(o.data.vertices); c_ = np.empty(n_ * 3, np.float32); o.data.vertices.foreach_get("co", c_); c_ = c_.reshape(n_, 3)
+        M_ = np.array(o.matrix_world); Pw.append(c_ @ M_[:3, :3].T + M_[:3, 3])
+    Pw = np.concatenate(Pw)
     pivot = bpy.data.objects.new("PIV", None); sc.collection.objects.link(pivot); root.parent = pivot
     bpy.context.view_layer.update()
     H = F["h"]
@@ -54,7 +60,13 @@ for job in spec:
     def shoot(view, tag):
         fz = job.get("face_z", 0.92); fs = job.get("face_s", 0.14)
         dx = job.get("dx", 0.0) if view in ("face", "face34") else job.get("up_dx", 0.0) if view == "upper" else 0.0
-        root.location = -Vector((F["cx"] + dx * F["h"], F["cy"], F["z0"]))
+        px_, py_ = F["cx"] + dx * F["h"], F["cy"]
+        if view in ("face", "face34") and job.get("auto_pivot"):
+            hh = F["h"]
+            m = (abs(Pw[:, 2] - (F["z0"] + fz * hh)) < 0.04 * hh) & (abs(Pw[:, 0] - px_) < 0.07 * hh)
+            if m.sum() > 50:
+                px_, py_ = float(np.median(Pw[m, 0])), float(np.median(Pw[m, 1]))
+        root.location = -Vector((px_, py_, F["z0"]))
         if view in ("face", "face34"):
             lens, cz, span = 85, F["h"] * fz, H * fs
         elif view == "upper":
