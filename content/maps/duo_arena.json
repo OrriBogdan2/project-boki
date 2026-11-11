@@ -1,0 +1,22 @@
+{
+ "id": "duo_arena",
+ "name": "The Sparring Ring",
+ "size": 40,
+ "seed": 47,
+ "notes": "The 2v2 tutorial's ring (scripts/match/duo_tutorial.gd): one round floor with an unbroken ruin wall two tiles thick all the way round (no gates, no ledges, no void inside it), four 2x2 stone blocks for cover and two patches of tall grass. Everyone is placed by the tutorial; nothing else spawns on it.",
+ "islands": [
+  {"id": "ring", "name": "The Sparring Ring", "role": "grove", "region": 0, "poi": [20, 20], "noise": 0.03, "biome": "meadow", "danger": 0, "no_rocks": true,
+   "shapes": [{"circle": [20, 20], "r": 16.5, "lv": 0}],
+   "sheer": [],
+   "walls": [{"ring": [20, 20], "r": 12.4, "gates": 0}, {"ring": [20, 20], "r": 13.2, "gates": 0}],
+   "rocks": [[14, 14, 15, 15], [25, 14, 26, 15], [14, 25, 15, 26], [25, 25, 26, 26]],
+   "bush": [[11, 20, 1.5], [29, 20, 1.5]]}
+ ],
+ "bridges": [],
+ "winds": [],
+ "pads": [],
+ "updrafts": [],
+ "outposts": [],
+ "chokepoints": [],
+ "glides": []
+}
