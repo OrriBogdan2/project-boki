@@ -458,6 +458,22 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Fiv
 | close_at | 0.4 |
 | lines | [["land", "Pick a landing spot: steer your glide to an island", 20.0], ["chest", "Loot a chest: stand next to it and hold %F", 25.0], ["rank", "Rank up %N: press %R", 20.0], ["send", "Send %s at a monster: tap %T", 20.0], ["squad", "Another squad is close: fight them, or slip away quietly", 12.0], ["blight", "The Blight is closing in: time to wrap up", 12.0], ["exit", "Go to an exit and hold %F to leave", 40.0]] |
 
+## garden_trust (`content/rules/garden_trust.json`)
+
+Trust from care at the base (Care.trust_up). Petting, its habit food and winning together each raise trust by a named amount, shown to the player as one plain line. Trust stays 0 to 100 and nothing here lowers it. A habit (rec.habit.food) is picked when a Boki hatches, from its element (the species theme).
+
+| Setting | Value |
+|---|---|
+| pet | 1 |
+| food | 2 |
+| win | 3 |
+| cooldown_h | 1 |
+| hour_s | 12.5 |
+| say | {"pet": "%s loved the scratches: trust up", "food": "%s loves %s: trust up", "win": "%s won with you: trust up"} |
+| default_food | kibble |
+| food_by_element | {"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap", "lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint", "spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"} |
+| _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
+
 ## gear (`content/rules/gear.json`)
 
 

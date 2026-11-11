@@ -2846,6 +2846,7 @@ func _pet_kin(k: Dictionary) -> void:
 		k["pet_ok"] = now_s + 20.0
 		Care.change(rec, "joy", 12.0 if loves_pet else 5.0)
 	if loves_pet and Care.discover(rec, "play"): _toast("%s loves scratches" % rec["name"])
+	_care_trust(rec, "pet")
 	k["hold_t"] = 1.0
 	k["joy_t"] = 0.9
 	verbs.play("pat")
@@ -3751,6 +3752,11 @@ func _build_bridge_now(k: String) -> void:
 		_spawn_kin()
 		_toast("%s is open" % Data.ISLES[k]["name"]))
 
+## Trust from petting or its habit food (Care.trust_up): one plain line says why.
+func _care_trust(rec: Dictionary, kind: String, food := "") -> void:
+	var line := Care.trust_up(rec, kind, Time.get_unix_time_from_system(), food)
+	if line != "": _toast(line)
+
 func _toast(txt: String) -> void:
 	UI.toast(root_ui, txt, UI.GOLD, 100.0 + (52.0 if guide and guide.hint_visible() else 0.0))
 
@@ -4301,6 +4307,7 @@ func _after_feed(k: Dictionary, f: String, res: Dictionary) -> void:
 		fx.burst(k["pos"] + Vector3(0, 0.5, 0), Evo.AFF[leaned]["tint"], 18, 2.4, 0.5)
 		var pct := int(100.0 * float(rec["lean"][leaned]) / Evo.LEAN_FULL)
 		_toast("%s leans %s: its colour shifts (%d%%)" % [nm, Evo.AFF[leaned]["name"], pct])
+	if f == String(rec["habit"]["food"]): _care_trust(rec, "food", f)
 	if res["love"]:
 		k["joy_t"] = 1.2
 		_emote(k, "♥")
