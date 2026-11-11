@@ -5,6 +5,7 @@ extends RefCounted
 ## lights each cradle's ember pebbles as its egg warms, shows unbought cradles behind an iron grate,
 ## glows brighter (and sparks) while an Ember kin or Ember Coals warm it, and wobbles ready eggs.
 ## home.gd calls build(), tick(d), refresh(), prompt() and nearest_ready().
+## A ready egg says so by its look alone, with no message (DECISIONS 2026-11-11).
 
 var h                                   # the Home screen
 var node: Node3D = null
@@ -133,7 +134,6 @@ func tick(d: float) -> void:
 			if ready_ids.has(id): continue
 			ready_ids[id] = true
 			h.fx.burst(slot_pos(int(e.get("slot", 0))) + Vector3(0, 0.4, 0), Color("ffd36a"), 18, 2.4)
-			h._toast("A %s in the Incubator is ready to hatch!" % Incubator.egg_name(e))
 
 ## The ready egg nearest to p ({} if none).
 func nearest_ready(p: Vector3) -> Dictionary:
