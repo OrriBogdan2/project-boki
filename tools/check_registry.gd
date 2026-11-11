@@ -350,6 +350,7 @@ const CHECKS := {
 	"--summon-death-check": ["res://tools/summon_death_check.gd", "summon_death_check", null],
 	# Q8 carry passive stacking
 	"--passive-stack-check": ["res://tools/passive_stack_check.gd", "passive_stack_check", null],
+	"--summon-share-check": ["res://tools/summon_share_check.gd", "summon_share_check", null],    # decision 0043
 	"--wisp-shots": ["res://tools/wisp_shots.gd", "wisp_shots", null],      # --shots-dir=<dir>
 	# the summon lane and leash
 	"--summon-leash-check": ["res://tools/summon_leash_check.gd", "summon_leash_check", null],
