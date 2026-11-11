@@ -174,6 +174,8 @@ Heals, shields, knock heals and Anti-Heal are tabulated in [HEAL_PARITY.md](HEAL
 | R | Vortex stun + pull, 70 s [D] | Tell 1.0, 3.5 s, pull 12, cd 70 | match; ~1 s lock (owner) |
 | Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift 35% (owner 11-08 +17%; source gives no drift), moves foes and allies (counters both) | match |
 | Passive | Damage Empowers; floats [D] | Swollen variants | match; floating `[?]` |
+| Dash | Lob, swap all units, ~9.5 s [D] | 1.8 s lob, drift 30%, moves foes and allies (counters both) | match |
+| Passive | Damage Empowers; floats [D] | Swollen variants | match; float = no footsteps + ground hazards pass him [D] (wiki: water/sand, none on our maps); no gap hover, slower fall or landing change in any source, so none built |
 | Anim | Footage poses | 14 moves, all on `ostra.glb` (45) | match on coverage |
 | E | Bomb grows, reactivate, up to 3.5x [D] | Brimseed: grows 6.5 s, 12.5 dmg up to **3.5x**, fizzles 10 s (ours), cd 10 vs 8 | match; peak closed `5b9a528d2`; fizzle ours |
 | R | Vortex stun + pull, 70 s [D] | Nightwell: tell 1.0, 3.5 s, r 3.6, pull 12, cd 70 | match; ~1 s lock (owner) |
