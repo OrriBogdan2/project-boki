@@ -25,12 +25,14 @@ func _new_save() -> Array:
 		var rec := Save.new_kin(spec[0], spec[1])
 		rec["trust"] = spec[2]
 		rec["traits"]["bravery"] = spec[3]
+		rec["uid"] = "b_check_" + spec[1]      # Home._personality hashes the uid into the Boki's pace
 		recs.append(rec)
 	recs[0]["starter"] = true
 	d["roster"] = recs
 	d["active"] = recs[0]["uid"]
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
+	HomeLayout.new_fs(d, 5)      # one island every run (a new save rolls its own)
 	HomeLayout.ensure(d)
 	return recs
 
@@ -81,6 +83,8 @@ func run(main: Node) -> void:
 	rules["base_mode"] = true
 	_new_save()
 	var home = await main._hb_home()
+	seed(5)      # after the sliced build: how many frames it takes (and the randf they spend) varies with load
+	home.world.rng.seed = 5
 	ok(home.life != null, "base_mode on: the farm runs BaseLife")
 	home.day_t = 0.4
 	home.ppos = home.spots["portal"] + Vector3(0, 0, -4.5)
