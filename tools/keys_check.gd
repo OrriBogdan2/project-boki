@@ -554,13 +554,15 @@ func _break_of(m: Match, kind_s: String) -> Dictionary:
 			return b
 	return {}
 
-## Never for sale: no content table besides the key rules themselves lists a chest key.
+## Never for sale: no content table besides the key rules themselves lists a chest key, and no vendor
+## stocks one (shops.json names it only in its "never" list).
 func _never_sold() -> void:
 	var listed: Array = []
 	for f in DirAccess.get_files_at("res://content/rules"):
-		if not String(f).ends_with(".json") or f in ["keys.json", "chest_keys.json"]:
+		if not String(f).ends_with(".json") or f in ["keys.json", "chest_keys.json", "shops.json"]:
 			continue
 		var txt := FileAccess.get_file_as_string("res://content/rules/" + f)
 		if txt.contains("\"ckey\"") or txt.contains("chest_key"):
 			listed.append(f)
+	listed.append_array(ShopStock.all_entries().filter(func(e): return String(e).contains("key")))
 	ok("keys are never sold in shops", listed.is_empty(), ", ".join(listed))
