@@ -410,6 +410,9 @@ func _ready() -> void:
 	if "--nook-check" in args:
 		load("res://tools/nook_check.gd").new().run(self)      # Nesting Nook gate and breeding: friend gate, head start, habits
 		return
+	if "--incubator-shots" in args:
+		load("res://tools/incubator_shots.gd").new().run(self)      # the egg stages, as film frames
+		return
 	if "--incubator-check" in args:
 		var icc = load("res://tools/incubator_check.gd").new()      # Rare Eggs on the Incubator by the Nook
 		set_meta("incubator_check", icc)
