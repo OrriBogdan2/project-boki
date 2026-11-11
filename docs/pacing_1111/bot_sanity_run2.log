@@ -1,0 +1,6 @@
+SANITY seed 3: 0 flagged windows over 150s
+SANITY FLAG seed 5 t=141 pepper_jack (bot): 22 facing flips | goal=roam tgt=<null> cross=true gl=false gr=true pos=(153.8, 1.6, 210.2) turn=8.6 flips=22 jumps=0 dashes=0 ring=0.0
+SANITY seed 5: 1 flagged windows over 150s
+SANITY seed 9: 0 flagged windows over 150s
+SANITY worst window: turn 21.1 rad, flips 22, jumps 2, dashes 3, ring 1.6s
+SANITY done, failures: 1
