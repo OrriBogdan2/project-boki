@@ -112,3 +112,6 @@ level 4). 0245 red, green here: race, garden-zones. NEW-RED:
   bar), `--homecoming-check` (Moss slowed round Ash by 0245's KinAvoid ties with Crag) and `--home-hatch-check` (one
   watcher sent when KinWelcome has the others), both new. Likely cause for chore: HomeVoice gates voices on wall-clock
   ms, so the count of Sfx pitch randf calls shifts the seeded stream.
+  Fixed on ext/farm-w0246-flakes: each new save rolled its own island (HomeLayout.new_fs) and its Boki random uids
+  (Home._personality pace); seeds sat before the sliced farm build. Two game bugs found there: a led Boki never
+  caught up (HomeCarry LEAD_CATCH) and a Boki saying hello was never asked to watch the egg (HomeHatchWatch).

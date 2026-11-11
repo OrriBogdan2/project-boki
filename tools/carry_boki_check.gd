@@ -35,7 +35,7 @@ func _kin(species: String, nm: String, bravery: float, temper: float, trust: flo
 	rec["traits"]["bravery"] = bravery
 	rec["traits"]["temper"] = temper
 	rec["trust"] = trust
-	rec["uid"] = "b_check_" + nm      # Home._personality hashes the uid into the Boki's pace: a random one moved the lead row
+	rec["uid"] = "b_check_" + nm      # Home._personality hashes the uid into the Boki's pace
 	Save.d["roster"].append(rec)
 	return rec
 
