@@ -74,6 +74,8 @@ Hero live in `tools/art1/` (Kael is the pilot).
 - `procedural`: state keys that hand back to the rig (ledges, mantles, bases; stomp and drink for a Hero with no clip). A kit move with no clip does too.
 - `states.stomp`, `states.drink` (shared actions, item: parity): the clip name; the clip is the game's phase 0..1 (Hunter state `stomp` = time in `Life.R.stomp_cycle`, `drink` = over `Hunter.DRINK_TIME`) laid over its length, so the stomp clip is 0.7 s with the slam at 0.49 s (the kit's hit at 0.7 of the cycle) and the drink clip is 1.1 s, an upper-body one (the legs keep walking). `states.reviving`'s clip is a loop. Motley, Albert, Sparkle and Sable have all three (`tools/art1/*_clips.py` `stomp`, `revive`, `drink`); a Hunter with no clip keeps the procedural pose.
 - `procedural`: state keys that hand back to the rig (ledges, mantles; `stomp` and `drink` for a Hunter with no clip). A kit move with no clip does too. `--action-shots --warden=<id> --state=stomp|revive|drink --shots-dir=<dir>` renders the three (`--variant=proc` the rig's pose).
+- No wall clip: a wall kick or bounce keeps the air's rise or fall, and `WardenWall` (`scripts/heroes/warden_wall.gd`) plants
+  the nearer foot on the wall over it, for every Hero (docs/art/WALL_POSE_AUDIT.md).
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek

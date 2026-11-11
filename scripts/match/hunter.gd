@@ -3058,6 +3058,7 @@ func _anim_state(stretch: float) -> void:
 		s["kmove"] = ak.anim_id                # the kit's own full-body move (HunterAnim.KMOVES)
 		s["kmove_t"] = m.time - ak.anim_at
 	if ak and ak.face_locked(): s["statue"] = true       # frozen: no idle sway, glance or fidget
+	wall_moves.anim_state(self, s)
 	MergeKit.anim_state(self, s)
 	KinDowned.anim_state(self, s)
 	KinSummon.anim_state(self, s)
