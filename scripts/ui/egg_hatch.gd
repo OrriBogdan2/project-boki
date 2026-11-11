@@ -36,6 +36,7 @@ var crack_mat: ShaderMaterial
 var col := Color.WHITE
 var kin_node: Node3D
 var running := false
+var beat: Tween                # what plays now: the egg's own beat, then the Boki's hop out
 var shell_col := Color(0, 0, 0, 0)     # set to override the species colours
 var look_at_pos := Vector3.INF         # who it imprints on (default: the camera, i.e. you)
 var spot_col := Color(0, 0, 0, 0)
@@ -132,11 +133,22 @@ func _sfx(n: String, vol := 0.0, pitch := 1.0) -> void:
 	Sfx.play(n, null, vol, 0.08, pitch)
 
 # ------------------------------------------------------------------ the hatch
+## Jumps to the end of the beat: the shell open, the Boki out and facing you (popped and done fire).
+func skip() -> void:
+	if not running or not beat.is_valid():
+		return
+	if kin_node == null:
+		beat.kill()
+		body.rotation.z = 0.0
+		_pop()
+	beat.custom_step(60.0)
+
 func start() -> void:
 	if running:
 		return
 	running = true
-	var tw := create_tween()
+	beat = create_tween()
+	var tw := beat
 	# 1: two curious wiggles
 	for dir in [1.0, -1.0]:
 		tw.tween_callback(_sfx.bind("hover", -8.0, 0.8 + 0.2 * dir))
@@ -285,7 +297,8 @@ func _pop() -> void:
 	var ks := kin_scale
 	kin_node.scale = Vector3.ONE * 0.8 * ks
 	var out := global_position + Vector3(0.0, 0.0, hop_out) * k * 1.3
-	var kt := create_tween()
+	beat = create_tween()
+	var kt := beat
 	# 0.0: pops up, stretching, out of the cup and onto the ground
 	kt.tween_callback(_sfx.bind("jump", -10.0, 1.6))
 	kt.tween_property(kin_node, "scale", Vector3(0.95, 1.12, 0.95) * ks, 0.12).set_trans(Tween.TRANS_SINE)
