@@ -230,7 +230,7 @@ static func press(h, i: int) -> void:
 		return
 	var s: Dictionary = h.belt[i]
 	var fb: String = KEYS[i]
-	if s.is_empty() or h.downed or h.out or h.riding:
+	if s.is_empty() or h.downed or h.out or h.riding or CcLockout.blocks(h, "item"):
 		_feedback(h, fb, "deny")
 		return
 	if h.drink_t > 0.0 or h.kit_t > 0.0:

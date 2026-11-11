@@ -1,11 +1,11 @@
 class_name KitStatus
 extends RefCounted
 ## Statuses the archetype kits put on a body that a plain hit can't carry over the network (kits2):
-##   gnd  Grounded (the Thief's Bola): no dash, jump or glide; the hunter's legs show the tangled cords
+##   gnd  Grounded (the Thief's Bola): no dash, jump or glide (CcLockout); the legs show the tangled cords
 ##   blt  Blight (the Juggernaut's Warchain, Sable's Encore rim): healing on the body is cut
 ##   vul  Shred (the Thief's Primed shot): the body takes `k` more damage
-##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
-##        source's Daze is only a damage window); stars over the head
+##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder, and it locks the
+##        body like a stun (CcLockout, the source's "Ghost's version of stun"; no slow); stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.

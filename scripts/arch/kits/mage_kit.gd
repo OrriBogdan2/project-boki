@@ -384,7 +384,7 @@ func on_dash(_use_ex: bool) -> bool:
 		return true         # Kitefall's flight is its own move (content/dash_flow/mage.json); its crouch combines
 	if not wire.is_empty() or run_t > 0.0:
 		return true
-	if KitStatus.grounded(h) or h.root_t > 0.0:
+	if CcLockout.blocks(h, "dash"):
 		h._ab_feedback("dash", "deny")
 		return true
 	# Shift is only ever the Wirerun, never a plain tumble. No class dodge and no long air dash for her, on
@@ -430,7 +430,7 @@ func _tick_wire(dt: float) -> void:
 	var dd := dash_def()
 	wire["t"] = float(wire["t"]) + dt
 	var t := float(wire["t"])
-	if h.downed or h.stun_t > 0.0 or h.root_t > 0.0 or KitStatus.grounded(h):
+	if h.downed or CcLockout.blocks(h, "dash"):
 		_end_wire(false)                # the charge was spent on the press: cut, it's gone
 		return
 	# no control of your own while you hold it: the keys do nothing, momentum drifts you, height holds

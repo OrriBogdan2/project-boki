@@ -271,6 +271,17 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | care_day_s | 300 |
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
 
+## cc_lockouts (`content/rules/cc_lockouts.json`)
+
+What each crowd-control status forbids a Hunter (CcLockout, scripts/combat/cc_lockout.gd; table and sources in docs/COMBAT.md). Acts: move (walk and air control), dash (Shift), lmb (weapon), abil (RMB, E, R), travel (an ability that moves the caster), jump, glide, crouch, item (a belt item: drink, repair kit). Slow, knock-up, Static and Chill forbid nothing, so they have no row.
+
+| Setting | Value |
+|---|---|
+| stun | ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"] |
+| daze | ["move", "dash", "lmb", "abil", "travel", "jump", "glide", "crouch", "item"] |
+| root | ["move", "dash", "travel", "jump", "glide"] |
+| gnd | ["dash", "travel", "jump", "glide"] |
+
 ## chest_keys (`content/rules/chest_keys.json`)
 
 
