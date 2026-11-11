@@ -83,12 +83,13 @@ func _host_up() -> Hunter:
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	return G
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
+	return G if G != null and G.net_t >= 0.0 else null
 
 func _host() -> void:
 	var G := await _host_up()

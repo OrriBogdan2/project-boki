@@ -15,7 +15,7 @@ const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match
 const REPLY_S := 30.0        # s for the guest to answer, on its clock (CheckClock: a busy box starves it)
 const SEED := 4242
-const KEYS := 1              # rift keys the guest carries into its first death (the belt holds one)
+const KEYS := 1              # chest keys the guest carries into its first death (the belt holds one)
 
 var main: Node
 var bad := 0
@@ -73,12 +73,13 @@ func _host() -> void:
 	Net.lobby_emit("rn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + other, null)
-	var t1 := Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t1 < START_S * 1000.0:
+	var t1 := CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t1 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + other, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	if G == null:
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
+	if G == null or G.net_t < 0.0:
 		return _finish()
 	await _box_case(G)
 	await _beacon_case(G)
@@ -206,7 +207,7 @@ func _on_msg(topic: String, data, _from: String) -> void:
 		"done": stop = true
 		"die":
 			if m and m.player:
-				m.player.rift_keys = KEYS
+				m.player.chest_keys = KEYS
 				m.eliminate(m.player, null, "test")
 			_say()
 		"gone":
@@ -220,7 +221,7 @@ func _say() -> void:
 	var P := m.player
 	var b := Life.box_of(m, P)
 	Net.lobby_emit("rn_r", {
-		"out": P.out, "gone": P.gone, "hp": P.hp, "max": P.max_hp, "sick": P.sick_t, "keys": P.rift_keys,
+		"out": P.out, "gone": P.gone, "hp": P.hp, "max": P.max_hp, "sick": P.sick_t, "keys": P.chest_keys,
 		"pos": [P.pos.x, P.pos.y, P.pos.z], "boxes": m.boxes.size(), "ended": m.result.get("ending", false),
 		"box": [b["pos"].x, b["pos"].y, b["pos"].z] if not b.is_empty() else [0, 0, 0],
 		"beacons": m.beacons.size(), "b0": [m.beacons[0]["pos"].x, m.beacons[0]["pos"].y, m.beacons[0]["pos"].z],

@@ -143,12 +143,13 @@ func _host() -> void:
 	Net.lobby_emit("dn", {"c": "start", "d": d})
 	await _build(d)
 	var G: Hunter = m.ents_by_id.get("P" + peer_id, null)
-	t0 = Time.get_ticks_msec()
-	while (G == null or G.net_t < 0.0) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
+	t0 = CheckClock.own_msec(guest_pid)
+	while ((G == null or G.net_t < 0.0) and CheckClock.own_msec(guest_pid) - t0 < START_S * 1000.0
+			and OS.is_process_running(guest_pid)):
 		await _run(0.2)
 		G = m.ents_by_id.get("P" + peer_id, null)
-	ok(G != null and G.remote, "the guest's hunter is here, driven by the guest's game")
-	if G == null:
+	ok(G != null and G.remote and G.net_t >= 0.0, "the guest's hunter is here, driven by the guest's game")
+	if G == null or G.net_t < 0.0:
 		await _finish()
 		return
 	var B: Hunter = m.make_hunter("B", 1, "medium", "Bot", "idle", {}, home + BOT_AT, {"arch": "none"})
