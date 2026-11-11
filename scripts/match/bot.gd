@@ -82,6 +82,8 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 	if m.skytrain and m.skytrain.eta(h) < SkyTrain.HORN_LEAD + 0.5:
 		inp["move"] = m.skytrain.step_off_dir(h)
 		return
+	if BotStomp.rescue(m, h):
+		return       # a teammate is being stomped: our stun on the stomper before anything else
 	if a["think"] <= 0.0:
 		a["think"] = randf_range(0.12, 0.3) / (0.6 + a["skill"]) * SimLod.think_k(m, h)
 		_choose(m, h)
@@ -163,9 +165,9 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			a["strafe"] = -a["strafe"]
 		move += Vector2(-to.y, to.x) * a["strafe"] * 0.8
 		if finishing:
-			# walk onto the wisp to stomp it, and finish it
+			# walk onto the wisp to stomp it, and finish it (not with a rival close enough to punish it)
 			move = to if d > 0.7 else Vector2.ZERO
-			inp["interact"] = d < 1.5
+			inp["interact"] = d < 1.5 and BotStomp.safe(m, h, tgt as Hunter)
 		# aim with lead and some error that shrinks with skill
 		var lead: Vector2 = Vector2(tgt.vel.x, tgt.vel.z) * (d / float(h.wpn["speed"])) * a["skill"]
 		# the aim drifts smoothly around the target instead of jittering shot to shot
@@ -705,7 +707,8 @@ func _choose(m: Match, h: Hunter) -> void:
 	# finish off downed rivals before their kin or team picks them up
 	if best == null:
 		for o in m.hunters:
-			if o.team != h.team and o.downed and not o.out and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)):
+			if o.team != h.team and o.downed and not o.out and h.flat_dist(o) < 11.0 and m.world.los(h.pos, o.pos, h.pos.y + 0.95) and not (m.truce and m.truce.holds(h, o)) \
+					and BotStomp.safe(m, h, o):
 				best = o; break
 	# angry wild kin also count
 	if best == null:

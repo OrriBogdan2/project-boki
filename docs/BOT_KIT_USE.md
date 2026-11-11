@@ -63,3 +63,13 @@ Never used: Kael's perfect release (1 of 14 holds) and the Warchain pull (1 reel
 - **Neve** (`rimewright_kit.gd`): the bot schedules the freeze 0.15 to 0.45 s into the wall's slide (its decision tick, 0.9 to 2.2 s, never landed inside the slide of 1 s or less).
 - **Lace** (`archer_kit.gd`): presses the ultimate at 4 to 14 m.
 - Unchanged and already fine: Tenzo's Rock Hop recasts (21), Cinder's E pull (34), every Hunter's dash and glide. Meeko's ultimate heals a teammate, so the duel has none and the check skips it.
+
+## Stomps (BotStomp, scripts/match/bot_stomp.gd)
+
+A stomp is a 3 s finisher that can't be cancelled; the stomper can be hit, and a stun or hard knock on it breaks the stomp and the wisp lives (DECISIONS 2026-11-11 "stomping", decision 0061). Bots play by that. The rules live in `BotStomp`, wired into `Bot.think` and `Bot._choose`, and the numbers are in `content/rules/bot_stomp.json`:
+
+- **Stomp only when safe.** A bot goes for a downed rival, and holds interact on it, only when no enemy Hunter on its feet is within `punish_r` (14 m, the reach of the longest stun in the kits: Lace's Heavy Shot pin) of the wisp.
+- **Break a stomp on a teammate first.** When a teammate is being stomped and the bot's breaker (`breakers`: the input key and the reach it presses from) is ready, the bot does nothing else. It walks into reach, presses the breaker on the stomper and keeps aiming at the stomper for 1 s while the move winds up and flies. It goes up to `rescue_r` (25 m) to do this.
+- Breakers: Motley's Shard Snap (RMB tap, from 11 m) and Tenzo's Quakefall (RMB tap, from 3 m). A root doesn't break a stomp (`Stomp.breaks`), so Meeko's Burrseed isn't used. Holds, slow wind-ups and Grimble's Anchor Drop are left out (docs/DEBT.md).
+
+Check: `--stomp-check` rows 7. A lone bot stomps the downed rival. A bot with two rivals standing 10 m off (inside `punish_r`, outside the reach at which a bot picks a fight early in a match) doesn't. A bot with each listed breaker ready breaks the stomp on its teammate within 1 s (Motley about 0.65 s, Tenzo 0.03 s), and the wisp lives.
