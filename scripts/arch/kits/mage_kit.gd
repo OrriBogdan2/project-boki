@@ -92,10 +92,10 @@ func combo_marks(out: Array) -> void:
 	super(out)
 	var rd := res_def()
 	for key in sparks:
-		var sp: Dictionary = sparks[key]
-		if is_instance_valid(sp["e"]):
-			var n := int(sp["n"])
-			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
+		var f = sparks[key]     # untyped first: a freed foe can't be assigned to a typed var
+		if is_instance_valid(f):
+			var n := spark_n(f)
+			out.append(RecastCue.mark(f, n, Stacks.left(f, "static"), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
 
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).

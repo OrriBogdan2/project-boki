@@ -165,7 +165,7 @@
 		"dash": "picking up a teammate refreshes your long air dash",
 		"kin": "the thrown light's healing boost is 100% instead of 50%"
 	},
-	"rank2": {"ult": "Rank 2: Hearth Call cooldown 46s -> 41.4s. The Merge lasts 30% longer.", 
+	"rank2": {"ult": "Rank 2: Hearth Call cooldown 46s -> 41.4s. The Fusion lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 10.5s -> 9.5s, damage +15%.",
 		"dash": "Rank 2: recharge 7s -> 6s per charge.",
 		"kin": "Rank 2: cooldown 11s -> 9.9s, healing +15%."

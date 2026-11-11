@@ -713,14 +713,14 @@ func combo_marks(out: Array) -> void:
 	super(out)
 	var ttl := float(rd()["expire"])
 	for key in chars:
-		var c: Dictionary = chars[key]
-		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
+		var f = chars[key]     # untyped first: a freed foe can't be assigned to a typed var
+		if not is_instance_valid(f) or (f as Ent).dead:
 			continue
-		var lvl := burning(c["e"])
-		var left: float = ttl - (m.time - float(c["t"]))
+		var lvl := burning(f)
+		var left := Stacks.left(f, "char")
 		if left > 0.0 or lvl > 0:
 			var label := "ABLAZE" if lvl > 0 else "CHAR"
-			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
+			out.append(RecastCue.mark(f, int(char_of(f)), left, ttl, label, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

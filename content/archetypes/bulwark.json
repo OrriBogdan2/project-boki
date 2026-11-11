@@ -211,7 +211,7 @@
 		"kin": "Mending Ground's cooldown drops to 8s and it heals 50% more in all"
 	},
 	"rank2": {
-		"ult": "Rank 2: Faultline cooldown 40s -> 36s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Merge lasts 30% longer.",
+		"ult": "Rank 2: Faultline cooldown 40s -> 36s, first-strike damage 4 -> 4.8, damage 18 -> 21.6. The Fusion lasts 30% longer.",
 		"sec": "Rank 2: shield HP +25% (160 -> 200).",
 		"dash": "Rank 2: recharge 8s -> 6.5s per charge; the Shield Charge cooldown 6s -> 4.5s.",
 		"kin": "Rank 2: healing +25% (burst 18 -> 22)."

@@ -35,7 +35,7 @@
 	"rank_dmg": {"sec": [1, 1.25, 1.5], "dash": [1, 1, 1], "kin": [1, 1.25, 1.5]},
 	"rank_shield": {"kin": [1, 1.25, 1.8]},
 	"rank3": {"dash": "+4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s", "sec": "a second charge", "kin": "the shield is 80% bigger in all"},
-	"rank2": {"ult": "Rank 2: Flue Flight cooldown 36s -> 24s. The Merge lasts 30% longer.", "sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.25s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.9s, damage and shield +25%."},
+	"rank2": {"ult": "Rank 2: Flue Flight cooldown 36s -> 24s. The Fusion lasts 30% longer.", "sec": "Rank 2: cooldown 7s -> 5.8s, damage +25%.", "dash": "Rank 2: recharge 9s -> 8.25s per charge.", "kin": "Rank 2: cooldown 10.5s -> 8.9s, damage and shield +25%."},
 	"rank_next": {"ult": "Rank 3: Flue Flight cooldown 36s -> 24s, trail damage 4.5 -> 5.62.", "sec": "Rank 3: cooldown 7s -> 4.7s, damage +50%; a second charge.", "dash": "Rank 3: recharge 9s -> 7.5s per charge, +4.3 damage; a hit gives +16% speed and a shield of 11.6% health for 2s.", "kin": "Rank 3: cooldown 10.5s -> 7.3s, damage +50% and shield +80% (the last rank adds 30% of the shield on top of the 50%)."},
 	"tells": {"half": "embers drift off a foe at half Char; one flame over a foe Ablaze", "full": "three flames and a glow over a foe that Flashed over", "dash_spent": "dash pips dark"}
 }

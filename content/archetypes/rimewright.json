@@ -154,7 +154,7 @@
 		"dash": "a Skate over the Abyss lays ice underfoot that holds for 5s",
 		"kin": "the wall is 40 points tougher"
 	},
-	"rank2": {"ult": "Rank 2: Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Merge lasts 30% longer.", 
+	"rank2": {"ult": "Rank 2: Rimelock cooldown 80s -> 70s, damage 40 -> 56. The Fusion lasts 30% longer.", 
 		"sec": "Rank 2: cooldown 10.2s -> 9.2s, damage +15%.",
 		"dash": "Rank 2: recharge 13s -> 11s.",
 		"kin": "Rank 2: cooldown 17s -> 15.3s, wall strength +15%."
