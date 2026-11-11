@@ -2,8 +2,8 @@ class_name BokiRig
 extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
-## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## already reads, plus "kwork" (chop, mine, carry), "kact" (eat, pet, win, sulk, push, bat) and "kgait" (sniff, leap:
+## the gait it moves in, instead of the walk or run), and plays the face on top of whatever the body does.
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -135,6 +135,10 @@ const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
 const RUN_SPEED := 2.2        # m/s: from here it gallops (a walk clip sped up past MAX_CADENCE blurs)
 const MAX_CADENCE := 6.0      # step cycles/s a gait may be sped up to: small animals gallop at 6-8, past it blurs
+## The gait clips and the STRIDE entry (0 walk, 1 run) their baked cadence covers, so the feet stay on the ground;
+## sniff and leap ride on walk and run (BokiHomeClips.GAME_BASE).
+const GAIT_STRIDE := {"walk": 0, "carry": 0, "sniff": 0, "run": 1, "leap": 1}
+const LEAP_PITCH := 0.8       # how much of the climb angle (rise over run) a leaping Boki's nose follows
 const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
@@ -148,8 +152,8 @@ const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
 const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
-	"rush", "brace", "dodge", "stonehop", "spin"]
-const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
+	"rush", "brace", "dodge", "stonehop", "spin", "sniff", "leap", "bat"]
+const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend", "sulk", "push"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
 ## Blend shapes each expression pushes.
@@ -168,12 +172,13 @@ const FACES := {
 ## The clip's own expression, or a list of [from, expression] beats over its length (0..1).
 const CLIP_FACE := {
 	"run": "cheer", "hop": "happy", "attack": "angry", "ability": "angry", "sleep": "asleep", "pet": "bliss",
-	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus",
+	"chop": "focus", "mine": "focus", "carry": "cheer", "tend": "focus", "win": "happy", "sulk": "sad", "push": "focus",
 	"eat": [[0.0, "chew"], [0.16, "cheer"], [0.33, "chew"], [0.5, "cheer"], [0.66, "chew"], [0.83, "cheer"]],
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
 	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
+	"sniff": "focus", "leap": "cheer", "bat": "cheer",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
@@ -196,6 +201,7 @@ var _face_name := "neutral"
 var _flex_y := 0.0
 var _pos_prev := Vector3.ZERO
 var _speed := 0.0
+var _rise := 0.0               # m/s up, eased: what pitches a leap
 var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
@@ -327,18 +333,23 @@ func _keep_flex() -> void:
 		var held := root.get_node_or_null("Held") as Node3D
 		if held:
 			held.position = FRAME[species]["carry"]
-	model.position.y = -body.position.y if clip == "hop" else 0.0       # the clip does the hopping, not home
+	model.position.y = -body.position.y if clip in ["hop", "bat"] else 0.0       # the clip does the hopping, not home
 	if _shadow:
 		_shadow.global_position.y = root.global_position.y + SHADOW_LIFT
 	var cam := get_viewport().get_camera_3d() as CamRig
 	if cam:
 		model.global_basis = cam.char_lean() * flex.global_basis      # toward the camera, like the Hunters: faces read
+	if clip == "leap":
+		# nose up on the way up, then down
+		model.rotate_object_local(Vector3.RIGHT, atan2(_rise, maxf(_speed, 1.0)) * LEAP_PITCH)
 
 func _track_speed(dt: float) -> void:
 	var gp := root.global_position
-	var v := (gp - _pos_prev).length() / dt
+	var step := gp - _pos_prev
 	_pos_prev = gp
-	_speed = lerpf(_speed, v, 1.0 - exp(-10.0 * dt))
+	var k := 1.0 - exp(-10.0 * dt)
+	_speed = lerpf(_speed, Vector2(step.x, step.z).length() / dt, k)
+	_rise = lerpf(_rise, step.y / dt, k)
 
 func _pick_clip(dt: float) -> void:
 	var p: int = root.get_meta("pulse", 0)
@@ -356,12 +367,13 @@ func _pick_clip(dt: float) -> void:
 	var want := _state_clip()
 	set_clip(want)
 	player.speed_scale = 1.0
-	if want != "run" and want != "walk" and want != "carry":
+	if not GAIT_STRIDE.has(want):
 		return
-	# the world scale: a size roll's bigger Boki takes longer steps
-	var stride: float = ((STRIDE.get(species, [1.5, 2.9]) as Array)[1 if want == "run" else 0]
-			* model.global_basis.z.length())
-	player.speed_scale = clampf(_speed / stride, 0.6, MAX_CADENCE * player.get_animation(want).length)
+	player.speed_scale = clampf(_speed / stride_of(want), 0.6, MAX_CADENCE * player.get_animation(want).length)
+
+## The m/s a gait clip covers at speed 1; the world scale: a size roll's bigger Boki takes longer steps.
+func stride_of(gait: String) -> float:
+	return float((STRIDE.get(species, [1.5, 2.9]) as Array)[GAIT_STRIDE[gait]]) * model.global_basis.z.length()
 
 func _start_shot(which: String) -> void:
 	_shot = which
@@ -374,10 +386,13 @@ func _state_clip() -> String:
 	if work != "":
 		return work
 	var act := String(root.get_meta("kact", ""))
-	if act != "":
+	if act != "" and not (act == "win" and clip == "win" and not player.is_playing()):       # a win plays once
 		return act
 	if _shot_left > 0.0:
 		return _shot
+	var gait := String(root.get_meta("kgait", ""))
+	if gait != "" and _speed >= WALK_SPEED:
+		return gait
 	if root.get_meta("happy", false):
 		return "hop"
 	if _speed >= RUN_SPEED:

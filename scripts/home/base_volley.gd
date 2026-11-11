@@ -26,6 +26,7 @@ const HALF := 1.5                            # m from the log to each player
 const ARC := 1.0                             # m the seed rises on a normal hit
 const SPIKE_ARC := 0.35                      # m the seed rises on a spike
 const SEED_R := 0.1                          # m, the seed's radius
+const BAT_LEAD := 0.35                      # s the swing starts before the seed arrives, and stays on after the hit
 const REACH := 1.8                           # m from the log to start a match
 
 static func rules() -> Dictionary:
@@ -187,6 +188,7 @@ var pair: Array = []           # the home's kin entries: a, b
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var held: Array = []           # the winner and the loser, kept on the spot until the card goes
 
 func _init(home) -> void:
 	h = home
@@ -248,6 +250,7 @@ func label() -> String:
 	return "Play Spark Volley (back %s)" % Save.active_kin().get("name", "your partner")
 
 func use() -> void:
+	h.hrace.release()
 	var ks: Array = h.hrace.entrants()
 	if ks.size() < 2:
 		h._toast("Spark Volley needs two rested Boki out on the base")
@@ -287,6 +290,9 @@ func tick(d: float) -> void:
 		card_t -= d
 		if card_t <= 0.0 and is_instance_valid(card):
 			card.queue_free()
+		if card_t <= 0.0:
+			BaseRace.let_go(held)
+			held = []
 	if run == null:
 		return
 	var points: int = run.score[0] + run.score[1]
@@ -315,7 +321,19 @@ func _place() -> void:
 		n.position = p
 		n.rotation.y = atan2(0.0, -side)
 		pair[i]["pos"] = p
+		BaseRace.act(pair[i], "bat" if _batting(i) else "")
 	seed_node.position = _seed_at()
+
+## True while side i hops and bats: the hit it is about to make, and the one it just made.
+func _batting(side: int) -> bool:
+	match run.state:
+		Run.S.SERVE:
+			return side == run.server and run.state_t >= float(rules()["serve_s"]) - BAT_LEAD
+		Run.S.FLIGHT:
+			if side == run.to:
+				return run.fly_t <= BAT_LEAD
+			return run.fly_total - run.fly_t <= BAT_LEAD
+	return false
 
 ## m along the court from the log toward a side (side 0 is on -z), k of the way to the player.
 static func _side_z(side: int, k: float) -> float:
@@ -337,9 +355,11 @@ func _end(finished: bool) -> void:
 	for k in pair:
 		k["busy"] = false
 		k["t"] = 1.5
+		BaseRace.act(k, "")
 	bar.close()
 	seed_node.visible = false
 	if finished:
+		held = BaseRace.hold(h, res)
 		_card(res, h.hrace.pin(res["win"], "volley"))
 		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)

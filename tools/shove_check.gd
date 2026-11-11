@@ -165,11 +165,18 @@ func _on_base() -> void:
 			k.erase("indoors")
 		sh.use()
 		ok(sh.run != null and sh.pair.size() == 2, "on: a bout starts with two Boki")
+		var duo: Array = sh.pair.duplicate()
+		ok(duo.all(func(k): return k["node"].get_meta("kact", "") == "push"), "on: both Boki push")
 		var t := 0.0
 		while sh.run != null and t < float(BaseShove.rules()["max_s"]) + 5.0:
 			sh.tick(0.1)
 			t += 0.1
 		ok(sh.run == null and is_instance_valid(sh.card), "on: the bout ends with a result card (%.1f s)" % t)
+		var acts: Array = duo.map(func(k): return k["node"].get_meta("kact", ""))
+		ok(acts.has("win") and acts.has("sulk") and duo.all(func(k): return k["busy"]),
+				"on: the winner shows it and the loser sulks, both held")
+		sh.tick(float(BaseShove.rules()["card_s"]) + 0.1)
+		ok(duo.all(func(k): return not k["busy"] and k["node"].get_meta("kact", "") == ""), "on: both are let go")
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
