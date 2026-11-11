@@ -5,10 +5,10 @@ extends "res://tools/vv_shots.gd"
 ## as the statuses go on and one a second later (the rings shrunk), plate_status_<when>.png, and a 2x crop of each
 ## rival's plate and row side by side, plate_status_close_<when>.png.
 
-const CROP := Vector2i(300, 96)          # px round a plate and its row, from LEFT_OF/ABOVE the plate's anchor
-const LEFT_OF := 80                      # px of the crop left of the anchor (the row runs right of the plate)
-const ABOVE := 40                        # px of the crop above the anchor (the name or status word)
-const SPOTS := [Vector3(6, 0, -3), Vector3(9, 0, 0.5), Vector3(6, 0, 3.5)]   # m from home: the three rivals
+const CROP := Vector2i(300, 72)          # px round a plate and its row, from LEFT_OF/ABOVE the plate's anchor
+const LEFT_OF := 70                      # px of the crop left of the anchor (the row runs right of the plate)
+const ABOVE := 28                        # px of the crop above the anchor (the name or status word)
+const SPOTS := [Vector3(6, 0, -1.5), Vector3(10, 0, 1.0), Vector3(6, 0, 3.8)]   # m from home, under the arena card
 const NAMES := ["Brask", "Ivo", "Wren"]
 
 var rivals: Array = []
@@ -73,7 +73,8 @@ func _grab(when: String) -> void:
 
 func _plate_crop(img: Image, r: Hunter) -> Image:
 	var cam := main.get_viewport().get_camera_3d()
-	var sp := cam.unproject_position(r.position + Vector3(0, HudPlate.plate_offset(r), 0))
+	var anchor := r.position + m.cam.char_lean() * Vector3(0, HudPlate.plate_offset(r), 0)   # as Hud._head
+	var sp := cam.unproject_position(anchor)
 	var x := clampi(int(sp.x) - LEFT_OF, 0, img.get_width() - CROP.x)
 	var y := clampi(int(sp.y) - ABOVE, 0, img.get_height() - CROP.y)
 	var crop := img.get_region(Rect2i(Vector2i(x, y), CROP))
