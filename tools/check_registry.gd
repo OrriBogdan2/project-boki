@@ -222,6 +222,7 @@ const CHECKS := {
 	"--build-hold-shots": ["res://tools/build_hold_shots.gd", "build_hold_shots", null],
 	"--build-hold-check": ["res://tools/build_hold_check.gd", "build_hold_check", null],
 	"--farm-tutorial-check": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
+	"--farm-climb-check": ["res://tools/farm_climb_check.gd", "farm_climb_check", null],      # farm ridges climb
 	"--farm-spot-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	"--farm-hob-shots": ["res://tools/farm_tutorial_check.gd", "farm_tutorial_check", null],
 	# fresh save to first run

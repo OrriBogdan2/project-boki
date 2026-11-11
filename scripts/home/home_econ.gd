@@ -470,7 +470,7 @@ func open_feeder(f: Dictionary) -> void:
 	UI.footer(v).add_child(fill_b)
 	UI.with_key(fill_b, "Enter")
 	(v.get_meta("shell") as Control).set_meta("primary", fill_b)
-	if fd["auto"]:
+	if Econ.self_fills(f):
 		var on: bool = f.get("auto", true)
 		var ab := CheckButton.new()
 		ab.text = "Refills itself from your pantry"

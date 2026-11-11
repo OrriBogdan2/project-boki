@@ -171,7 +171,7 @@ func _round2() -> void:
 	_look(Vector3(line[3].x + 0.5, 0, line[3].y + 0.5), Vector3(0, 0, 3), 1.2)
 	await main.get_tree().create_timer(0.5).timeout
 	home.hb.tick(0.0)
-	await _shot("09_near_water_preview", "Placing a crop patch within 2 tiles of the channel: 'Near water: waters itself' in green", true)
+	await _shot("09_near_water_preview", "Placing a crop patch within 2 tiles of the channel: a water drop and '+growth'", true)
 	home.hb.debug_m = Vector2.INF
 	home.hb.toggle()
 	# 11 / 12 / 13. the market steps
