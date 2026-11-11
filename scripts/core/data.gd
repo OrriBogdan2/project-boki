@@ -246,13 +246,14 @@ const MOBS := {
 		"r": 0.4, "gems": 6, "color": Color("5f9a46"), "attack": "none", "mimic": true},
 	"warden": {"name": "The Watcher", "hp": 820.0, "speed": 3.3, "dmg": 30.0, "range": 2.8, "windup": 0.95, "cd": 2.1,
 		"r": 1.3, "gems": 30, "color": Color("5a4a7a"), "attack": "slam", "slam_r": 3.3, "stag": true},
-	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin
+	# lair bosses (scripts/match/boss.gd runs them; Lairs wakes them): each drops a Rare Egg of its own kin,
+	# and one whose kin is of an Ink's type ("ink") gives that Ink to its killer (Goods.on_result)
 	"colossus": {"name": "The Stone Colossus", "hp": 1500.0, "speed": 2.5, "dmg": 26.0, "range": 3.2, "windup": 1.1, "cd": 1.9,
 		"r": 1.6, "gems": 40, "color": Color("7d7468"), "attack": "boss", "slam_r": 3.8, "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "cairnback", "enrage": 75.0},
 	"serpent": {"name": "Stormcoil, the Sky Serpent", "hp": 1250.0, "speed": 5.2, "dmg": 22.0, "range": 10.0, "windup": 0.95, "cd": 1.5,
 		"r": 1.15, "gems": 40, "color": Color("3f86b8"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
-		"egg": "zephyrak", "enrage": 75.0},
+		"egg": "zephyrak", "enrage": 75.0, "ink": "wyrm"},
 	"brood": {"name": "The Brood Mother", "hp": 1350.0, "speed": 2.3, "dmg": 18.0, "range": 9.0, "windup": 1.0, "cd": 1.7,
 		"r": 1.55, "gems": 40, "color": Color("8a9a3a"), "attack": "boss", "stag": true, "stag_k": 0.04, "boss": true,
 		"egg": "hivara", "enrage": 75.0},
@@ -339,7 +340,7 @@ func pick_seed(r: RandomNumberGenerator = null) -> String:
 	return CROPS.keys()[0]
 
 const KIN_NAMES := Names.KIN      # ~2,200 names: see scripts/core/names.gd
-const BOT_NAMES := Names.BOT      # ~2,000 handles
+const BOT_NAMES := Names.BOT      # ~180 gamer tags
 
 ## A kin's name until you give it one: its species' name, as in a field guide.
 func default_kin_name(species: String) -> String:
@@ -352,15 +353,15 @@ func kin_title(kname: String, species_name: String) -> String:
 ## Expedition tiers: deeper islands are harder and richer, and in the Hollow your partner can be lost.
 const TIERS := [
 	{"name": "The Meadow", "desc": "Gentle islands. Your Boki are always safe here: lose your loot, never your Boki.",
-		"mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
+		"depth": 1, "mob": 1.0, "loot": 1.0, "kin_lvl": [1, 3], "unlock": 0, "lives": 1,
 		"biome": {"top": Color("5f8d45"), "top2": Color("4a7538"), "side": Color("8b6d52"), "deep": Color("3a3140"), "leaf": Color("5a9a4f")},
 		"sky": Color("10131f"), "ambient": Color("b9c4e6"), "sun": Color("fff1dc"), "clouds": [Color(0.06, 0.07, 0.13), Color(0.22, 0.24, 0.38)]},
 	{"name": "Dusk Isles", "desc": "Tougher monsters, more loot, rarer Boki. Your Boki is always safe here: it goes home with you if you fall.",
-		"mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
+		"depth": 2, "mob": 1.45, "loot": 1.75, "kin_lvl": [2, 5], "unlock": 2, "lives": 1,
 		"biome": {"top": Color("56688a"), "top2": Color("465576"), "side": Color("6d5a74"), "deep": Color("2a2440"), "leaf": Color("8a6fb8")},
 		"sky": Color("150f22"), "ambient": Color("c9b4e6"), "sun": Color("ffc9a8"), "clouds": [Color(0.09, 0.05, 0.14), Color(0.32, 0.2, 0.4)]},
 	{"name": "The Hollow", "desc": "Brutal and rich. If you fall your Boki drops dazed beside your deathbox and guards it. Get revived and run into it to pick it up, or a rival can scan it and take it (knock it out, then hold the interact key).",
-		"mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
+		"depth": 3, "mob": 2.0, "loot": 2.75, "kin_lvl": [4, 8], "unlock": 5, "lives": 1,
 		"biome": {"top": Color("4f6b5e"), "top2": Color("3d5650"), "side": Color("5a4a44"), "deep": Color("1e1a22"), "leaf": Color("c25a4a")},
 		"sky": Color("0d0b10"), "ambient": Color("d0a0a0"), "sun": Color("ffb090"), "clouds": [Color(0.07, 0.03, 0.04), Color(0.3, 0.12, 0.12)]},
 ]

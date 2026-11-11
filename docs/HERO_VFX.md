@@ -6,6 +6,7 @@ moment in its kit, and sounds. Check: `--hero-vfx-check` (every data file agains
 palette: `--hero-vfx-gallery --shots-dir=<dir> [--reel-hero=<arch>]` plays every move side by side (no Hero: one of every
 layer kind). Approval sheets and the reel: `--hero-vfx-reel` (the tool's header has the movie-writer command); a Hero's
 scripted parts go in `tools/vfx_reel/<arch>.gd`, otherwise the generic set plays.
+The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs/parity_reel/`) are `tools/parity_reel.gd`.
 
 ## From a kit
 - `vfx("move", at, dir, {...})` (ArchKit): a moment. Sounds and layers come from the recipe; online it goes to other
@@ -46,6 +47,15 @@ the aim), with `hand` r / l between them for a point that rides a hand bone. So 
 the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_hand`, `anchor_feet` when present, Lace
 `anchor_nock`, `anchor_bow_root`, `weapon_muzzle`, `halo_bow_top`, `halo_bow_low`.
 
+## Cloth ends
+A top-level `"scarf"` block hangs two cloth tails off the Hero (Claire: the frost-scarf ends from the back of her neck
+wrap). `scripts/match/hero_scarf.gd` runs them for every Hero on the map: each tail is an 8-point rope pinned beside the
+`at` anchor (`gap` m either side along her shoulders) and drawn as one lit, two-sided ribbon mesh
+(`shaders/scarf_ribbon.gdshader`: `c` at the knot fading into `c2` toward a cut point). At rest a tail hangs `len` m down,
+a little `back` and out (`splay`); moving, the air's drag streams it back against the motion and it flutters harder the
+faster she goes. Keys: `at`, `gap`, `len`, `w` m wide, `back`, `splay`, `c`, `c2`. A wearer keeps its pair of meshes; a
+gone one's pair goes back to the pool, and one drawn while the match loads compiles the shader. Off at the Low preset, past `LOD_FAR` and while the Hero is hidden.
+
 ## Rules
 - **Colour:** looks stay in the Hero's palette. The you / ally / enemy language is the telegraphs' and outlines' job: lanes
   and discs are AimKit's and are not drawn here. An ally's effects draw at `ALLY_K`.
@@ -56,3 +66,13 @@ the empties; Kael reads `anchor_blade_tip`, `anchor_blade_mid`, `anchor_chain_ha
   running, so their shaders compile with the match's other stand-ins. A new layer kind must be added to `POOL`.
 - **Sound:** everything is a one-shot through `Sfx.play`, so nothing can outlive a match. The sound files and their loudness
   standard are docs/AUDIO.md's (content/sfx/<arch>.json); a recipe only says which to play and how loud.
+
+## Shot floor (LMB projectiles)
+Every LMB projectile (not a swing, decoy, mob shot or ability, which have their own tells) carries `ShotFloor`'s
+beacon: a hot white core at least `MIN_CORE_PX` (6 px) across at 720p (9 px at 1080p) with the default camera, sized
+at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.far_depth`), inside a side-coded rim
+(foe's shots red-orange, your side's cool and softer), drawn over particles (render priority) on its own render layer
+(`ShotFloor.LAYER`). The shot keeps its own look and Hunter ability colour. It is visual only: the hit radius
+`s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
+the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
+exactly that size and measures its own look, the core and the rim in pixels across the flight line.

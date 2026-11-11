@@ -8,15 +8,15 @@ extends Node
 ## lineage, edition). A small append-only event log (d["log"], LOG_CAP) keeps what happened to whom.
 ## See docs/BOKI_IDENTITY.md.
 
-const VERSION := 12
+const VERSION := 14
 const MAX_MEMORY := 40
 const SLOTS := 6
 const LOG_CAP := 200
 ## Upgrades, oldest first: MIGRATIONS[n] turns a version-n save into version n + 1.
 const MIGRATIONS := {1: "_migrate_1_to_2", 2: "_migrate_2_to_3", 3: "_migrate_3_to_4", 4: "_migrate_4_to_5",
 		5: "_migrate_5_to_6", 6: "_migrate_6_to_7", 7: "_migrate_7_to_8",
-		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11",
-		11: "_migrate_11_to_12"}
+		8: "_migrate_8_to_9", 9: "_migrate_9_to_10", 10: "_migrate_10_to_11", 11: "_migrate_11_to_12",
+		12: "_migrate_12_to_13", 13: "_migrate_13_to_14"}
 
 var d: Dictionary = {}
 var slot := 1                 # which save file is in play
@@ -74,6 +74,7 @@ func fresh() -> Dictionary:
 		"classes": ClassUnlock.fresh(),   # which Hunters are open, the creation pick, challenges and mastery
 		"active": "",
 		"roster": [],
+		"tools": ["axe", "pickaxe"],   # a new farm starts with both (HomeGather); the Market sells them to older saves
 		"seeds": {"tidebloom": 2, "emberberry": 1},
 		"crops": {},
 		"items": {"tonic": 1},
@@ -85,6 +86,7 @@ func fresh() -> Dictionary:
 		"settings": {"volume": 0.8, "cam_lead": 1.0},
 		"tutorial": {},
 		"farm_builder": 1,    # Hob and the farm tutorial are known to this save (FarmBuilder.migrate)
+		"first_guide": 0,     # Extractions that have had the first-match guide (FirstMatchGuide.migrate)
 		"buildings": [],
 		"music": [],
 		"guild_perks": [],
@@ -144,6 +146,7 @@ func new_kin(species: String, kname := "", seed := -1) -> Dictionary:
 		"dna": Unique.roll(seed if seed >= 0 else Unique.fresh_seed()),
 		"edition": null,      # reserved for limited editions (see docs/BOKI_IDENTITY.md)
 	}
+	BokiQuirks.set_sex(rec)
 	Care.ensure(rec)
 	return rec
 
@@ -292,8 +295,17 @@ func _migrate_9_to_10(data: Dictionary) -> void:
 func _migrate_10_to_11(data: Dictionary) -> void:
 	HouseSave.migrate(data)
 
-## v11 -> v12: base life. Every Boki starts with no friends or rivals: rec["bonds"] = {} (BaseLife).
+## v11 -> v12: evolution by species (Evo, docs/decisions/0024). Levels and forms are kept, levels
+## stop at the cap, and each Boki keeps its old form name.
 func _migrate_11_to_12(data: Dictionary) -> void:
+	Evo.migrate(data)
+
+## v12 -> v13: the cut tutorials' steps are one-time hints; a save past a tutorial has had them (FirstTimeHint).
+func _migrate_12_to_13(data: Dictionary) -> void:
+	FirstTimeHint.migrate(data)
+
+## v13 -> v14: base life. Every Boki starts with no friends or rivals: rec["bonds"] = {} (BaseLife).
+func _migrate_13_to_14(data: Dictionary) -> void:
 	for r in data.get("roster", []):
 		if not r.has("bonds"):
 			r["bonds"] = {}
@@ -444,12 +456,14 @@ func load_from(p: String) -> void:
 		if not migrate(parsed):
 			return
 	Care.migrate_habits(parsed)      # a record without a habit gets one: holds at any save version
+	FirstMatchGuide.migrate(parsed)      # keyed by its own field too
 	FarmBuilder.migrate(parsed)      # keyed by its own field: holds if another branch also took v8
 	for k in parsed:
 		d[k] = parsed[k]
 	Unmasked.migrate(d)      # an old detailed look becomes the closest Unmasked
 	# JSON numbers come back as floats; plots and roster are fine with that.
 	register_all()
+	Evo.catch_up(d.get("roster", []))     # Boki that were waiting for their next form's art
 
 var no_write := _tool_run()   # headless checks play with a save without touching the real file
 
@@ -457,7 +471,9 @@ var no_write := _tool_run()   # headless checks play with a save without touchin
 ## from the very first frame (other autoloads may save while starting up).
 static func _tool_run() -> bool:
 	for a in OS.get_cmdline_user_args():
-		if a == "--no-save" or a == "--archetype-check" or String(a).begins_with("--shot="):
+		if a == "--no-save" or a == "--archetype-check":
+			return true
+		if String(a).begins_with("--shot=") or String(a).begins_with("--demo="):
 			return true
 	return false
 var newer := false            # the slot holds a save from a newer game: never overwrite it
