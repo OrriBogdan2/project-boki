@@ -121,7 +121,7 @@ static var _neutral := {}       # Warden id -> the rig rest of its model in the 
 static var _scenes := {}
 static var _ink: ShaderMaterial  # the painted atlas's ink shell (INK_WIDTH), shared
 static var _gloss_m: ShaderMaterial
-static var _measuring := false  # building that neutral model: no .glb on it
+static var _measuring := false  # building a procedural model alone (procedural()): no .glb on it
 static var _variants = null     # art name -> the design variant the command line picks (variant())
 static var _look = null         # content/rules/warden_look.json, read once (look())
 const LOOK_PATH := "res://content/rules/warden_look.json"
@@ -599,12 +599,17 @@ static func neutral_rest(arch: String) -> Dictionary:
 
 ## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
 static func measure_rest(arch: String) -> Dictionary:
-	_measuring = true
-	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
-	_measuring = false
+	var m := procedural(arch, PlayerLook.neutral())
 	var rest: Dictionary = m.get_meta("rig_rest")
 	m.free()
 	return rest
+
+## The Warden's procedural model in `appearance`, never dressed in its .glb (so the file need not be read yet).
+static func procedural(arch: String, appearance: Dictionary) -> Node3D:
+	_measuring = true
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", appearance, arch)
+	_measuring = false
+	return m
 
 ## Hides the procedural body's meshes, leaving the KEEP pieces.
 static func _hide_body(n: Node) -> void:

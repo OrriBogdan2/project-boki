@@ -646,6 +646,8 @@ func _ready_rest() -> void:
 			kn.scale *= 1.3
 			add_child(kn)
 	await _slice()
+	PreviewBuild.warm()      # (under the wipe: the next Mask screen's first preview won't stall)
+	await _slice()
 	_build_ui()
 	_refresh_top()
 	if guide: guide.build_ui()

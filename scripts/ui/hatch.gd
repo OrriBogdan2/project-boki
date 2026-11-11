@@ -104,6 +104,7 @@ func _ready() -> void:
 		holder.add_child(egg)
 		eggs.append({"holder": holder, "egg": egg, "base": holder.position, "data": d})
 	_build_ui()
+	PreviewBuild.warm()      # the starter pick's three, while the scene is still covered
 	cam_from = Vector3(-9, 7.5, 16); cam.position = cam_from
 	cam_to = Vector3(-3.5, 4.2, 9.0)
 	if edit_only:
