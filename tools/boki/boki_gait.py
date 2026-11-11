@@ -14,6 +14,8 @@ MATCH = 1.0        # how much of the stance speed the paw keeps as it leaves and
 CARRY = 5          # how soon a swing's paw loses the stance speed: a higher power keeps it nearer the ground
 CLIP_SCALE = 0.95  # boki_rig.CLIP_SCALE (that module needs Blender): the clips' offsets in the build's metres
 SNAP = 1.0 / 3.0   # the lift's shape: under 1 the paw is up off the ground (past half its lift) within a frame or two
+REACH = 0.97       # of the leg's length: a paw aimed further from the hip is aimed this far instead, along the same
+                   # line (a short leg under a body that is up in the air tucks rather than whirls round the hip)
 
 
 def _rot(rx, ry, rz):
@@ -80,11 +82,28 @@ def planted(body, bones, legs, duty, reach, lift, drop=0.0, steps=1, guess=(0.0,
         for foot, ph, setter, *back in legs:
             aim_back, up = path((t * steps - ph) % 1.0, duty, reach, lift)
             rest = np.array(bones[foot][0], float)
-            aim = (rest[1] + up, rest[2] + aim_back + sum(back))
-            ab = solve(bones, pose, foot, np.array(aim), setter, guess)
+            aim = np.array((rest[1] + up, rest[2] + aim_back + sum(back)))
+            if hasattr(setter, "hip"):
+                aim = within(bones, pose, setter.hip, foot, aim)
+            ab = solve(bones, pose, foot, aim, setter, guess)
             setter(pose, ab[0], ab[1])
         return pose
     return clip
+
+
+def within(bones, pose, hip, foot, aim):
+    """`aim` (model space: up, back), pulled in toward the hip to REACH of the leg's length if it is past that. For a
+    leg that swings in that plane (two_bone's, which names its `hip`); a leg splayed out to the side reaches further."""
+    at = where(bones, pose, hip)[1:]
+    long = 0.0
+    bone = foot
+    while bone != hip:
+        parent = bones[bone][2]
+        long += float(np.linalg.norm(np.array(bones[bone][0], float) - np.array(bones[parent][0], float)))
+        bone = parent
+    off = aim - at
+    far = float(np.linalg.norm(off))
+    return aim if far <= REACH * long else at + off * (REACH * long / far)
 
 
 def two_bone(leg1, leg2, paw, fold):
@@ -94,6 +113,7 @@ def two_bone(leg1, leg2, paw, fold):
         pose[leg1] = (a, 0.0, 0.0)
         pose[leg2] = (fold * b, 0.0, 0.0)
         pose[paw] = (-a - fold * b, 0.0, 0.0)
+    put.hip = leg1
     return put
 
 
