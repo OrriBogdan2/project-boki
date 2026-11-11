@@ -93,7 +93,7 @@
 "semicolon": 1
 },
 "scripts/core/care.gd": {
-"long_line": 12,
+"long_line": 11,
 "nested_ternary": 4,
 "semicolon": 9
 },
@@ -210,7 +210,7 @@
 "semicolon": 7
 },
 "scripts/core/work.gd": {
-"long_line": 17,
+"long_line": 12,
 "semicolon": 2
 },
 "scripts/feel/feel_config.gd": {
@@ -252,7 +252,7 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 193,
 "nested_ternary": 27,
 "semicolon": 243,
 "shadow": 3
@@ -851,9 +851,9 @@
 "shadow": 2
 },
 "scripts/ui/kinbox_view.gd": {
-"long_line": 16,
-"nested_ternary": 4,
-"semicolon": 30,
+"long_line": 12,
+"nested_ternary": 3,
+"semicolon": 29,
 "shadow": 1
 },
 "scripts/ui/kit_card.gd": {
@@ -917,7 +917,7 @@
 "shadow": 9
 },
 "scripts/ui/work_view.gd": {
-"long_line": 19,
+"long_line": 16,
 "nested_ternary": 4,
 "semicolon": 9,
 "shadow": 3

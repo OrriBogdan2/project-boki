@@ -25,7 +25,33 @@ label or button; "tips" = controls with a tooltip / their total words. Cut = one
 
 | Screen | Cut | Words before -> after | Tips before | Tips after |
 |---|---|---|---|---|
-TABLE
+| soul shrine | yes | 93 -> 84 | 6 / 27 | 3 / 5 |
+| shrine lot | yes | 55 -> 51 | 2 / 10 | 1 / 2 |
+| graveyard |  | 48 | 1 / 2 | 1 / 2 |
+| grave | yes | 95 -> 66 | 2 / 12 | 1 / 2 |
+| armory | yes | 45 -> 44 | 6 / 45 | 5 / 29 |
+| expedition | yes | 258 -> 233 | 24 / 186 | 21 / 140 |
+| kin page | yes | 93 -> 80 | 9 / 98 | 9 / 58 |
+| feed |  | 17 | 1 / 2 | 1 / 2 |
+| train | yes | 78 -> 68 | 1 / 2 | 1 / 2 |
+| wear |  | 20 | 1 / 2 | 1 / 2 |
+| job board | yes | 165 -> 87 | 29 / 322 | 11 / 69 |
+| welcome |  | 35 | 1 / 2 | 1 / 2 |
+| kitchen |  | 24 | 1 / 2 | 1 / 2 |
+| challenges | yes | 116 -> 112 | 33 / 143 | 33 / 143 |
+| hall |  | 39 | 1 / 2 | 1 / 2 |
+| music | yes | 77 -> 18 | 1 / 2 | 11 / 47 |
+| ferry |  | 25 | 1 / 2 | 1 / 2 |
+| house |  | 40 | 1 / 2 | 1 / 2 |
+| burrow | yes | 159 -> 73 | 63 / 445 | 30 / 163 |
+| nook | yes | 163 -> 71 | 13 / 243 | 13 / 57 |
+| market | yes | 117 -> 91 | 12 / 143 | 12 / 84 |
+| black market | yes | 51 -> 39 | 2 / 4 | 2 / 4 |
+| hunters | yes | 199 -> 191 | 19 / 363 | 15 / 99 |
+| settings |  | 118 | 7 / 9 | 7 / 9 |
+| pause |  | 33 | 1 / 2 | 1 / 2 |
+| inventory |  | 30 | 2 / 3 | 2 / 3 |
+| results |  | 51 -> 50 | 0 / 0 | 0 / 0 |
 
 Not in the table: the in-match HUD and fight pop-ups (UI_STYLE section 6 budget, ui-pro-1111), the item hover
 cards in a match (InvText already shows only the numbers that change), the pre-match lobby (its card tooltip lost
