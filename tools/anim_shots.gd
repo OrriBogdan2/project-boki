@@ -2,12 +2,13 @@ extends "res://tools/clip_shots.gd"
 ## --anim-shots --shots-dir=<dir> [--wardens=a,b] [--frames=8] [--size=240]: every Hunter's walk, run, idle and two
 ## attacks at the match camera (--close: a side view at hip height, to read the arms and feet), for the animation
 ## audit (docs/art/ANIM_QUALITY_AUDIT.md) and its before/after strips.
-## <dir>/<id>/<strip>/fNNN.png, strips walk, run (the game's own locomotion hand-off at WALK_MPS and RUN_MPS, seen
-## from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the keyed clip,
-## forced).
+## <dir>/<id>/<strip>/fNNN.png, strips walk, jog, run (the game's own locomotion hand-off at WALK_MPS, JOG_MPS and
+## RUN_MPS, seen from the side with a scrolling floor, so a sliding foot slides against it), idle and atk1, atk2 (the
+## keyed clip, forced).
 ## Needs a renderer.
 
 const WALK_MPS := 2.2      # m/s: an analog-stick walk
+const JOG_MPS := 3.4       # m/s: between the walk and run rings, where the two clips blend
 const RUN_MPS := 4.65      # m/s: full stick, content/rules/hunter_move.json
 const LOCO_FPS := 10.0     # frames/s of the walk and run strips
 const WARM_S := 1.0        # s of locomotion before the strip starts, so the blend has settled
@@ -92,6 +93,7 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	if close:
 		_close_cam(WardenGlb.skeleton(model.get_node("Warden")))
 	await _loco(model, sync, dir.path_join("walk"), WALK_MPS, frames)
+	await _loco(model, sync, dir.path_join("jog"), JOG_MPS, frames)
 	await _loco(model, sync, dir.path_join("run"), RUN_MPS, frames)
 	var lc: Dictionary = clips.d["loco"]
 	await _keyed(model, sync, clips, dir.path_join("idle"), String(lc["idle"]), frames)

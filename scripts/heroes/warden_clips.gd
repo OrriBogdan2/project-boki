@@ -140,7 +140,9 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.tree_root = _build()
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
-	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
+	var lc: Dictionary = d["loco"]
+	gait = WardenGait.new(sk, lc.get("arm_swing", {}), lib.get_animation(String(lc["walk"]["f"])).length,
+			lib.get_animation(String(lc["run"]["f"])).length)
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
@@ -199,16 +201,28 @@ func _anim(nm: String) -> AnimationNodeAnimation:
 	n.animation = nm
 	return n
 
+## Where the walk ring sits in the loco space (the run ring is at 1): its "walk_speed" over its "run_speed".
+func _walk_ring() -> float:
+	var lc: Dictionary = d["loco"]
+	return float(lc.get("walk_speed", 2.2)) / float(lc.get("run_speed", 4.6))
+
 func _build() -> AnimationNodeBlendTree:
 	var lc: Dictionary = d["loco"]
 	var bs := AnimationNodeBlendSpace2D.new()
 	bs.min_space = Vector2(-1, -1)
 	bs.max_space = Vector2(1, 1)
 	bs.blend_mode = AnimationNodeBlendSpace2D.BLEND_MODE_INTERPOLATED
+	bs.sync = true     # (a clip out of the blend keeps stepping, so it comes back in step)
 	bs.add_blend_point(_anim(String(lc["idle"])), Vector2.ZERO)
 	var dirs := {"f": Vector2(0, 1), "b": Vector2(0, -1), "l": Vector2(-1, 0), "r": Vector2(1, 0)}
 	for k in dirs:
-		bs.add_blend_point(_anim(String(lc["walk"][k])), dirs[k] * 0.45)
+		# (the walk plays stretched to its run's cycle: the two blend in step, the rate restores its own cadence)
+		var walk := _anim(String(lc["walk"][k]))
+		walk.use_custom_timeline = true
+		walk.timeline_length = lib.get_animation(String(lc["run"][k])).length
+		walk.stretch_time_scale = true
+		walk.loop_mode = Animation.LOOP_LINEAR
+		bs.add_blend_point(walk, dirs[k] * _walk_ring())
 		bs.add_blend_point(_anim(String(lc["run"][k])), dirs[k])
 	var t := AnimationNodeBlendTree.new()
 	t.add_node("loco", bs)
@@ -495,7 +509,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var goal := Vector2(dir.dot(rt), dir.dot(fw)) * k
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * 12.0))
 	_p("loco/blend_position", loco_pos)
-	var rate := gait.plan(spd, lc)
+	var ring := _walk_ring()
+	var rate := gait.plan(spd, lc, clampf((loco_pos.length() - ring) / (1.0 - ring), 0.0, 1.0))
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
 	still_t = still_t + dt if spd < STILL and act_w <= 0.0 else 0.0
 	stance_w = move_toward(stance_w, 1.0 if still_t > float(lc.get("stance_after", 6.0)) else 0.0, dt / 0.5)

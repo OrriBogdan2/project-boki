@@ -17,11 +17,13 @@ const PLANT_BAND := 0.3      # a foot is planted in the lowest 30 % of its own h
 const T_ELEV := 1.05         # rad (60 deg): an arm raised this far from hanging...
 const SIDEWAYS := 1.0        # ...and pointing more sideways than forward is a T-pose
 const ATTACKS := preload("res://tools/anim_shots.gd").ATTACKS
-## The gate (every Hunter whose clips move the legs): at full stick a planted foot slides at most this share of the
-## speed, and the arms swing against their legs at least this much (-1: with, +1: against; reach-weighted).
+## The gate (every Hunter whose clips move the legs): at the jog (mid-blend) and at full stick a planted foot slides at
+## most this share of the speed, and the arms swing against their legs at least this much at full stick (-1: with,
+## +1: against; reach-weighted).
 const MAX_SLIDE := 0.25
 const MIN_COUNTER := 0.3
 const NO_LEGS := ["ostra", "rimewright"]     # their clips hover and skate, the legs do not move: a backlog item each
+const JOG_OPEN := ["tender"]     # the clips' stride caps the jog too (RATE_MAX): the "stride cap" backlog item
 const POINTS := ["hips", "head", "hand.L", "hand.R", "foot.L", "foot.R"]
 
 var bad := 0
@@ -85,19 +87,22 @@ func _hero(main: Node, id: String) -> void:
 	row["weapon_hand"] = weapon
 	rows[id] = row
 	var top: Dictionary = live[str(SPEEDS[2])]
-	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d" % [id, hgt,
-			top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"], top["bob_cm"],
-			top["peaks"]])
+	var jog: Dictionary = live[str(SPEEDS[1])]
+	print("AUDIT %-10s H %.2f run: slide %.2f m/s (%d%%) clip %.2f m/s arms %.2f bob %.1f cm peaks %d; jog: slide %d%%" % [
+			id, hgt, top["slide"], round(100.0 * top["slide"] / SPEEDS[2]), top["clip_speed"], top["counter"],
+			top["bob_cm"], top["peaks"], round(100.0 * jog["slide"] / SPEEDS[1])])
 	if not id in NO_LEGS:
-		_gate(id, top)
+		_gate(id, live)
 	m.free()
 
-func _gate(id: String, top: Dictionary) -> void:
-	var share: float = top["slide"] / SPEEDS[2]
-	if share > MAX_SLIDE:
-		print("FAIL %s: feet slide %d%% of the run speed (limit %d%%)" % [id, round(100.0 * share),
-				round(100.0 * MAX_SLIDE)])
-		bad += 1
+func _gate(id: String, live: Dictionary) -> void:
+	for s in [SPEEDS[2]] if id in JOG_OPEN else [SPEEDS[1], SPEEDS[2]]:
+		var share: float = live[str(s)]["slide"] / s
+		if share > MAX_SLIDE:
+			print("FAIL %s: feet slide %d%% of the speed at %.2f m/s (limit %d%%)" % [id, round(100.0 * share), s,
+					round(100.0 * MAX_SLIDE)])
+			bad += 1
+	var top: Dictionary = live[str(SPEEDS[2])]
 	if top["counter"] < MIN_COUNTER:
 		print("FAIL %s: arms swing with their leg (%.2f, wanted at least %.2f)" % [id, top["counter"], MIN_COUNTER])
 		bad += 1
