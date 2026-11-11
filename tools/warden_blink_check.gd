@@ -51,6 +51,9 @@ func _scan() -> void:
 		for bi in sk.get_bone_count():
 			if sk.get_bone_name(bi).begins_with("lid"):
 				lids.append(sk.get_bone_name(bi))
+		if not lids.is_empty():
+			var n := _lid_verts(glb, sk)
+			print("BLINK %s: lids skin %d vertices%s" % [art_name, n, "" if n > 0 else " (moves nothing: art lane)"])
 		glb.free()
 		var cfg: Dictionary = WardenClips.data(art_name).get("blink", {})
 		var named: Array = (cfg.get("turn", {}) as Dictionary).keys() + (cfg.get("move", {}) as Dictionary).keys()
@@ -60,6 +63,29 @@ func _scan() -> void:
 		if lids.is_empty():
 			none.append(art_name)
 	print("BLINK no lids (docs/art/wardens/BLINK.md): ", ", ".join(none))
+
+## How many vertex weights of the .glb's skinned meshes ride a lid bone: 0 means the lids move no mesh.
+static func _lid_verts(glb: Node3D, sk: Skeleton3D) -> int:
+	var n := 0
+	for node in glb.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.skin == null:
+			continue
+		var lid := PackedByteArray()
+		lid.resize(mi.skin.get_bind_count())
+		for b in mi.skin.get_bind_count():
+			var bi := mi.skin.get_bind_bone(b)
+			if bi < 0:
+				bi = sk.find_bone(mi.skin.get_bind_name(b))
+			lid[b] = 1 if bi >= 0 and sk.get_bone_name(bi).begins_with("lid") else 0
+		for si in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(si)
+			var bones := arr[Mesh.ARRAY_BONES] as PackedInt32Array
+			var weights := arr[Mesh.ARRAY_WEIGHTS] as PackedFloat32Array
+			for i in bones.size():
+				if weights[i] > 0.05 and lid[bones[i]] == 1:
+					n += 1
+	return n
 
 func _model(id: String) -> Node3D:
 	var m := Models.hunter(Arch.weight(id), Data.TEAM_COLORS[0], Arch.signature(id), "", PlayerLook.neutral(), id)
