@@ -235,7 +235,7 @@ func _hv(h: Hunter) -> Vector2:
 	return Vector2(h.vel.x, h.vel.z)
 
 func _clear_inp() -> void:
-	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
+	for k in ["sec", "sig", "ult", "util1", "util2", "util3", "util4", "gear1", "gear2", "glide", "glide_btn", "glide_press_only", "jump", "dash", "fire", "crouch", "throw", "reload", "skill", "swap"]:
 		P.inp[k] = false
 	P.inp["move"] = Vector2.ZERO
 
@@ -642,6 +642,7 @@ func _glide() -> void:
 	rec("glide_press_held_s", held)
 	# hold Space from the jump press: never a glide (the hold only keeps an open glider open)
 	_reset(flat)
+	P.inp["glide_press_only"] = true      # as a player's keys are (Match._gather_input)
 	P.inp["jump"] = true
 	var opened := false
 	for i in 120:
@@ -653,6 +654,7 @@ func _glide() -> void:
 	var kit_was := P.arch
 	P.set_arch("bulwark")
 	_reset(flat)
+	P.inp["glide_press_only"] = true
 	P.inp["jump"] = true
 	opened = false
 	for i in 120:
