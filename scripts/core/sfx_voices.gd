@@ -37,15 +37,15 @@ static func priority(sname: String, dist: float, far_m: float) -> int:
 
 ## The voice to give up for a new sound of priority `prio` on `bus`: the lowest priority that is not above
 ## the new one, then the quietest, then the oldest. -1 when every voice there matters more (the new
-## sound is dropped). `prios`, `born` (start time, ms) and `players` are the pool's parallel arrays.
-static func victim(players: Array[AudioStreamPlayer], prios: PackedInt32Array, born: PackedInt64Array,
-		bus: String, prio: int) -> int:
+## sound is dropped). `prios`, `born` (start time, ms) and `voices` (Sfx.voice_all: plain and placed
+## players, which share these fields) are the pool's parallel arrays.
+static func victim(voices: Array, prios: PackedInt32Array, born: PackedInt64Array, bus: String, prio: int) -> int:
 	var best := -1
-	for i in players.size():
-		var p := players[i]
+	for i in voices.size():
+		var p = voices[i]
 		if not p.playing or p.bus != bus or prios[i] > prio or prios[i] >= KEEP:
 			continue
-		if best < 0 or _cheaper(prios[i], p.volume_db, born[i], prios[best], players[best].volume_db, born[best]):
+		if best < 0 or _cheaper(prios[i], p.volume_db, born[i], prios[best], voices[best].volume_db, born[best]):
 			best = i
 	return best
 
