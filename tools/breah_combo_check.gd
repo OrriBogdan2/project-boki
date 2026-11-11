@@ -387,11 +387,10 @@ func _breah() -> void:
 		"charge %.2f" % K.dive_k
 	)
 	P.inp["sec_hold"] = false
+	var V := HeroVfx.of(m)
+	var quakes0 := int(V.plays.get("quakefall", 0))
 	var hop := _hop(m, P, K)
-	var looks := KitLooks.of(m)
-	var slam_looks := ["burst", "shard", "crater"].all(
-		func(kind): return looks.timed.any(func(e): return e["kind"] == kind)
-	)
+	var slam_looks := int(V.plays.get("quakefall", 0)) == quakes0 + 1 and _showing(V, "scorch") and _showing(V, "chunk")
 	step(m, 0.3)
 	ok(
 		"rmb: the hop's slam lands once, at the foe it hopped to", K.slams == 1 and K.slam.hops == 1 and hop["x"] > hx,
@@ -417,8 +416,8 @@ func _breah() -> void:
 		"stun %.2f" % T.stun_t
 	)
 	ok(
-		"rmb: a molten starburst, rock chips flying, and the dark red crater lingering about 1s",
-		slam_looks and looks.timed.any(func(e): return e["kind"] == "crater")
+		"rmb: the slam's eruption, stone chunks flying, and the cracked ground still lingering 0.3s on",
+		slam_looks and _showing(V, "scorch")
 	)
 	var d_full := dmg(T)
 	reset.call()
@@ -983,10 +982,12 @@ func _dash_moves(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, rese
 				K.anim_id == "breah_exdash" and String(P.anim_s.get("dash_kind", "")) == "kit",
 				"anim %s kind %s roll %.2f" % [K.anim_id, str(P.anim_s.get("dash_kind")), P.roll_t]
 			)
-		var seen: Array = m.fx.rings.duplicate() + KitLooks.of(m).timed.duplicate()
+		var V := HeroVfx.of(m)
+		var seen: Array = m.fx.rings.duplicate() + V.live.duplicate()
 		var blasts := [0]
 		step(m, 0.9, func():
-			for e in m.fx.rings + KitLooks.of(m).timed.filter(func(e): return e["kind"] in ["burst", "crater"]):
+			var ground_looks := V.live.filter(func(e): return _blast_kind(V, e["node"]))
+			for e in m.fx.rings + ground_looks:
 				if not seen.any(func(o): return is_same(o, e)):
 					seen.append(e)
 					blasts[0] += 1)
@@ -1016,6 +1017,18 @@ func _chain(m: Match, P: Hunter, K: DolmKit, aims: Array) -> Array:
 		m.step(DT)
 	seen.append(P.pos)
 	return seen
+
+
+## Whether a HeroVfx look of `kind` (a layer kind: "scorch", "chunk"...) is showing now.
+func _showing(V: HeroVfx, kind: String) -> bool:
+	return (V.pools.get(kind, []) as Array).any(func(n): return (n as Node3D).visible)
+
+## A HeroVfx look that reads as a ground ring or a blast: a scorch, a swirl, a flare or a wall of flame.
+func _blast_kind(V: HeroVfx, node: Node3D) -> bool:
+	for kind in ["scorch", "vortex", "flare", "skirt"]:
+		if (V.pools.get(kind, []) as Array).has(node):
+			return true
+	return false
 
 ## Rock Hop: 2-3 steerable hops off rocks he raises.
 func _leap(m: Match, P: Hunter, T: Hunter, home: Vector3, K: DolmKit, reset: Callable) -> void:

@@ -118,7 +118,7 @@ static func rock(
 	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	if is_instance_valid(old):
 		old.queue_free()
-	RockLook.rise_fx(m, at)
+	RockLook.rumble(m, at)
 	if send and by != null and (m.net_on or capture) and not by.remote:
 		var ev := [
 			"zone", "rock", by.nid, rid, m._r(at.x), m._r(at.y), m._r(at.z), snappedf(dir.x, 0.001),
