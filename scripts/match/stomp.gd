@@ -36,6 +36,7 @@ static func start(m: Match, h: Hunter, o: Hunter, style_id := "") -> void:
 	o.set_meta("stomped_by", h)
 	Life.trace(m, "stomp start %s on %s" % [h.pname, o.pname])
 	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
+	StompSfx.commit(m, h)
 	if o == m.player and m.hud:
 		m.hud.toast("%s is stomping you! Only a stun on them saves you" % h.pname, Color("ff6a5a"))
 	if m.net_on and not h.remote:
@@ -53,10 +54,10 @@ static func end(m: Match, h: Hunter, why: String) -> void:
 		m.net_event(["stomp", h.nid, o.nid if is_instance_valid(o) else "", why])
 	if why == "broken":
 		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
-		m.sfx("whoosh", h.pos, -6.0, 1.3)
+		StompSfx.crack(m, h)
 	elif why == "done" and is_instance_valid(o) and o.downed and not o.out:
 		m.fx.burst(o.pos + Vector3(0, 0.8, 0), Color("ff6a5a"), 20, 4.0, 0.5, -3.0)
-		m.sfx("crit", o.pos, -2.0, 0.7)
+		StompSfx.snuff(m, o)
 		if not o.remote:
 			m.eliminate(o, h, "executed")
 
@@ -100,7 +101,7 @@ static func _pin(h: Hunter, at: Vector3) -> void:
 static func _slam(m: Match, h: Hunter, o: Hunter) -> void:
 	m.fx.dust(h.pos, 10)
 	m.fx.ring(h.pos + Vector3(0, 0.05, 0), 1.2, Color(1, 0.8, 0.7, 0.6), 0.25)
-	m.sfx("thump", h.pos, -2.0, 0.85)
+	StompSfx.strike(m, h)
 	if is_instance_valid(o):
 		m.fx.burst(o.pos + Vector3(0, 0.5, 0), Color("ff6a5a"), 10, 3.0, 0.5, -4.0)
 

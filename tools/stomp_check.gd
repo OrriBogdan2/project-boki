@@ -10,6 +10,9 @@ extends RefCounted
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
+##  7. Sounds (StompSfx), counted at the spot in this game, the stomper's and the wisp's alike: one
+##     commit, one strike per beat, the wisp's hum straining while pinned, a snuff on "done" and a
+##     crack on "broken" (never both); a strike's pitch falls and its body grows from light to heavy.
 ## Never touches the save.
 
 var bad := 0
@@ -55,6 +58,16 @@ func _setup(at: Vector3) -> void:
 	_spot(W, at)
 	_spot(foe, at + Vector3(0.6, 0, 0))
 	m.knock(W, foe, {})
+	Sfx.listener = at
+	Sfx.last_played.clear()
+	Sfx.recent.clear()
+
+## Whether `sname` played since the last ask; forgets it, so the next one counts on its own.
+func _heard(sname: String) -> bool:
+	var was := Sfx.last_played.has(sname)
+	Sfx.last_played.erase(sname)
+	Sfx.recent.erase(sname)
+	return was
 
 ## Hold interact until the stomp commits; the seconds it took.
 func _commit() -> float:
@@ -86,6 +99,7 @@ func run(main: Node) -> void:
 	_check_finish(home + Vector3(-6, 0, 0))
 	_check_net(home + Vector3(0, 0, 6))
 	_check_styles()
+	_check_weights()
 	print("STOMP CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -121,6 +135,7 @@ func _check_stun(at: Vector3) -> void:
 	foe.hurt(5.0, m.player, {"stun": 0.6})
 	_run(Match.DT)
 	ok(foe.stomp.is_empty(), "a stun cancels the stomp")
+	ok(_heard("stomp_crack") and not _heard("stomp_snuff"), "the break cracks (no snuff)")
 	ok(W.downed and not W.out and not W.has_meta("stomped_by"), "the wisp survives the cancelled stomp and is let go")
 	_spot(foe, at + Vector3(30, 0, 0))
 	var w0 := W.pos
@@ -132,10 +147,20 @@ func _check_stun(at: Vector3) -> void:
 func _check_finish(at: Vector3) -> void:
 	_setup(at)
 	_commit()
+	ok(_heard("stomp_commit"), "the commit plays its sound")
 	var t0 := m.time
+	var strikes := 0
+	var strain := 0.0
 	while not W.out and m.time - t0 < Stomp.TIME + 1.0:
 		_run(Match.DT)
+		if _heard("stomp_strike"): strikes += 1
+		HunterWisp.tick(W, Match.DT)      # the hum is held from the render pass, which the check doesn't run
+		if Sfx.loop_on(HunterWisp.hum_key(W)):
+			strain = maxf(strain, (Sfx.loops[HunterWisp.hum_key(W)]["p"] as AudioStreamPlayer).pitch_scale)
 	var took := m.time - t0
+	ok(strikes == Stomp.BEATS, "a strike per beat (%d of %d)" % [strikes, Stomp.BEATS])
+	ok(strain > 1.3, "the pinned wisp's hum strains (pitch up to %.2f)" % strain)
+	ok(_heard("stomp_snuff") and not _heard("stomp_crack"), "the finish snuffs (no crack)")
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "left alone the stomp executes the wisp")
 	ok(absf(took - Stomp.TIME) <= 0.05, "at %.2fs (Stomp.TIME %.1fs)" % [took, Stomp.TIME])
 	ok(foe.stomp.is_empty(), "and the stomper is free again")
@@ -158,6 +183,7 @@ func _check_net(at: Vector3) -> void:
 	# another game's stomper on this game's wisp
 	foe.remote = true
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "go", "thunder_stomp"])
+	ok(_heard("stomp_commit"), "the wisp's game hears another game's commit")
 	var w0 := W.pos
 	for i in 20:
 		W.inp["move"] = Vector2(1, 0)
@@ -168,10 +194,13 @@ func _check_net(at: Vector3) -> void:
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "broken"])
 	ok(foe.stomp.is_empty() and W.downed and not W.out and not W.has_meta("stomped_by"),
 		"a \"broken\" lets it go alive")
+	ok(_heard("stomp_crack"), "...with the crack")
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "go", ""])
-	_run(0.5)
+	_run(1.0)
+	ok(_heard("stomp_strike"), "another game's stomp strikes here on its beat")
 	Stomp.net_in(m, ["stomp", foe.nid, W.nid, "done"])
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "a \"done\" executes this game's wisp")
+	ok(_heard("stomp_snuff"), "...with the snuff")
 	foe.remote = false
 
 func _check_styles() -> void:
@@ -197,3 +226,24 @@ func _check_styles() -> void:
 	var a := StompLook.legs(StompLook.style("thunder_stomp"), 0.4)
 	var b := StompLook.legs(StompLook.style(StompLook.default_for("archer")), 0.4)
 	ok(a.distance_to(b) > 0.2, "styles pose differently mid-lift")
+
+## Every weight class has a strike row; lighter Hunters strike higher, and only medium and heavy ones
+## carry the body sound under it.
+func _check_weights() -> void:
+	var rows: Dictionary = StompLook.rules()["sound"]["strike"]
+	var unrowed := Arch.ids().filter(func(id): return not rows.has(Arch.weight(id)))
+	ok(unrowed.is_empty(), "every Hunter's weight class has a strike row (missing %s)" % [unrowed])
+	var pitch := func(w): return float(rows[w]["pitch"])
+	ok(pitch.call("light") > pitch.call("medium") and pitch.call("medium") > pitch.call("heavy"),
+		"strike pitch falls light > medium > heavy")
+	var arch0 := foe.arch
+	Sfx.listener = foe.pos
+	for w in ["light", "medium", "heavy"]:
+		foe.arch = Arch.ids().filter(func(id): return Arch.weight(id) == w)[0]
+		_heard("stomp_strike")
+		_heard(String(rows["body"]))
+		StompSfx.strike(m, foe)
+		var body := _heard(String(rows["body"]))
+		ok(_heard("stomp_strike") and body == rows[w].has("body_db"),
+			"a %s Hunter's strike (%s, body %s)" % [w, foe.arch, body])
+	foe.arch = arch0

@@ -183,13 +183,14 @@ static func _pose_body(h: Hunter, st: Dictionary, dt: float) -> void:
 		body.basis = Basis.IDENTITY
 
 ## The quiet hum, held each frame so it stops on its own if the Wisp goes away any other way; a Wisp
-## nobody can see keeps quiet.
+## nobody can see keeps quiet. Pinned under a stomp it strains (StompSfx.strain).
 static func _hum(h: Hunter, st: Dictionary) -> void:
 	if not h.visible:
 		Sfx.loop_stop(hum_key(h))
 		return
 	var hum: Dictionary = (st["look"] as Dictionary)["hum"]
-	Sfx.loop_hold(hum_key(h), String(hum["sfx"]), h.pos, float(hum["db"]))
+	var strain := StompSfx.strain(h)
+	Sfx.loop_hold(hum_key(h), String(hum["sfx"]), h.pos, float(hum["db"]) + strain.x, strain.y)
 
 static func _pose_out(h: Hunter, st: Dictionary, dt: float) -> void:
 	var look: Dictionary = st["look"]
