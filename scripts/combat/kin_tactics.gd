@@ -96,6 +96,8 @@ func think_abilities(dt: float) -> void:
 	think_t = 0.35 + randf() * 0.25
 	if k.runner == null or k.owner_h == null or k.owner_h.out or k.owner_h.downed:
 		return
+	if k.owner_h.riding or k.owner_h.dropping:
+		return     # nothing fires on the ship or the way down (an Echolocate ping drew a big gold ring at the jump)
 	_low_hp()
 	for slot in ["k2", "k1"]:
 		if not k.runner.is_ready(slot) or not k.slot_open(slot):
