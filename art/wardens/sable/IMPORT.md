@@ -1,20 +1,32 @@
 # Sable (thief): import note
 
-## v95 swap, appeal3 body b with the bug eyes (2026-11-10, ext/sable-appeal-b): the current sable.glb
+## v95 swap, appeal4 cand_2 (2026-11-11, ext/sable-appeal4): the current sable.glb
 
-The mesh is the owner's pick (11-10): Sable's v95 master, appeal3 body variant b with the owner-ordered moth/bug eyes
-(solid grey eyes, one catchlight), `~/meshy/v95/Sable/r2/appeal3/cand_b_bugeye.glb` (pick.txt beside it; one mesh, face included).
+Owner 11-10 ("looks kind of boyish, maybe bigger breasts and hair showing"). The mesh is the worker's pick of three candidates (the owner has not
+picked): `~/meshy/v95/Sable/r2/appeal4/cand_2.glb` (pick.txt and cmp_fem.png beside it), the appeal3 body b with the bug eyes
+(`cand_b_bugeye.glb`) plus: bust +2.2 cm forward, waist -7 % width, hips +3.5 %, shoulders softer and narrower, the braid re-pathed forward over her
+right shoulder onto the chest, and a sly face painted into the base colour (lashes and liner, lopsided open smirk). Same vertices
+and UVs as the bug-eye master. The portrait and splash eyes (v2) are not touched.
+
+Eyes (owner correction 11-11: she is part moth, solid grey/black moth eyes as on the v2 portrait/splash, not cand_2's violet irises with
+round pupils): `~/meshy/v95/Sable/r2/appeal4/cand_2_motheye.glb` is cand_2 with only the two eye openings repainted in its base colour
+(`appeal4/tools/eye_moth.py`: a dark orb, a soft bounce low, a sheen and one crisp catchlight where cand_2's was; lashes, liner and lids
+kept). The swap reused the cand_2 bake's mesh and UVs and re-baked just the changed texels (`appeal4/tools/eye_rebake.py`, then
+`atlas_repack.py`), so the fit, weights and slots match the cand_2 swap (one eye triangle moved hair -> skin). The spec's master
+is the moth-eye glb; a fresh WORK reproduces it. Candidates 1 (milder) and 3 (widest grin, bigger bust) are
+drop-ins: change `master` in the spec.
 `tools/art1/v95_swap.py` put it on her own skeleton, 47 clips and anchors with `art/wardens/src/sable_v95.json`
 (docs/art/wardens/V95_SWAP.md):
 
     blender -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/sable_v95.json WORK art/wardens/sable/sable.glb
+    python3 tools/art1/sable_wings.py art/wardens/sable/sable.glb      # the moth wings (docs/SABLE_WINGS.md), after every swap
 
-13k triangles, one embedded 2048 atlas (Godot extracts it to `sable_atlas.jpg`), no normal map (`sable_normal.jpg` dropped).
-The pistols are fused to her hands in the master: rigid on hand.R / hand.L. The long ears, braid, coat tails and tail feathers
-are weighted by bone heat and the head box. Slots by colour and box (first match wins): metal (pistols), hair, fur (ears, tail
-feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trousers). Shots: docs/shots/sable-appeal-b/.
-Lost against the v2 build below: the antenna, braid, wing and coat-tail spring chains stay in the rig but carry no mesh, the
-hip knives, the procedural pistols and the wing alpha cards.
+13k triangles, one embedded 2048 atlas (Godot extracts it to `sable_atlas.jpg`), no normal map. The pistols are fused to her hands in the
+master: rigid on hand.R / hand.L. The long ears, braid, coat tails and tail feathers are weighted by bone heat and the head box (the braid now
+hangs on the chest, so it rides the head/hips rigidly). Slots by colour and box (first match wins): metal (pistols), hair, fur (ears, tail
+feathers), skin (head), glow (gem), leather (boots, belts), cloth (coat, trousers). Shots: docs/shots/sable-appeal4/.
+Lost against the v2 build below: the antenna, braid and coat-tail spring chains stay in the rig but carry no mesh, the hip knives and the
+procedural pistols. The wing chains and cards are put back by `sable_wings.py`.
 
 ## Previous build: v2 (2026-11-06)
 
