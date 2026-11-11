@@ -344,14 +344,18 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	var xp := 40 + (40 if won else 0) + int(r.get("knocks", 0)) * 10
 	if not lead: xp = int(xp * 0.7)
 	if treat == "treat_xp": xp = int(xp * 1.5)
+	gain_xp(k, xp, out)
+	if lead:
+		out["trust_delta"] = float(k["trust"]) - before
+
+## XP for a kin from a run or from the farm (GardenXp): every level up may bring a form or a mutation.
+func gain_xp(k: Dictionary, xp: int, out: Dictionary) -> void:
 	k["xp"] = int(k.get("xp", 0)) + xp
 	while int(k["xp"]) >= 100 * int(k["level"]):
 		k["xp"] = int(k["xp"]) - 100 * int(k["level"])
 		k["level"] = int(k["level"]) + 1
 		out["levelup"] = true
 		_evolve(k, out)
-	if lead:
-		out["trust_delta"] = float(k["trust"]) - before
 
 ## A level up can bring a new form or a mutation. The home island plays it when you get back.
 func _evolve(k: Dictionary, out: Dictionary) -> void:

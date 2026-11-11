@@ -523,6 +523,22 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 | food_by_element | {"ember": "emberberry", "frost": "tidebloom", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "sunroot", "gravity": "sunroot", "titan": "sunroot", "shadow": "glowcap", "lunar": "glowcap", "venom": "glowcap", "echo": "mindmint", "prism": "mindmint", "spore": "mindmint", "swarm": "sweetbun", "tempest": "tonicbrew"} |
 | _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
 
+## garden_xp (`content/rules/garden_xp.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | Kin XP earned on the farm, so the game is playable without expeditions (DECISIONS 2026-11-09; docs/GARDEN.md Pace). scripts/home/garden_xp.gd reads it; the level table is 100 XP x level (Game.gain_xp). An expedition gives 40 (+40 on a win, +10 a knock). feed/pet/fetch are per action (love = the favourite food, or the favourite play); drill is per training point. The pace assumptions are what tools/garden_pace_check.gd models. |
+| feed | 2 |
+| feed_love | 5 |
+| pet | 1 |
+| pet_love | 2 |
+| fetch | 3 |
+| fetch_love | 6 |
+| drill_per_point | 1 |
+| pace | {"run_min": 12, "home_gap_min": 3, "win_rate": 0.5, "knocks": 1.0, "max_ratio": 2.0} |
+
 ## gear (`content/rules/gear.json`)
 
 
