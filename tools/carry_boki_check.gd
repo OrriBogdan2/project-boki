@@ -48,8 +48,25 @@ func _entry(rec: Dictionary) -> Dictionary:
 func _put(rec: Dictionary) -> Dictionary:
 	var k: Dictionary = _entry(rec)
 	k["pos"] = home.ppos + Vector3(0.0, 0.0, -1.0)
+	k["vel"] = Vector3.ZERO      # held still before the lead starts, as it is when you take hold of it
 	(k["node"] as Node3D).position = k["pos"]
 	return k
+
+## Near the start, ground where the walk's circle (centre 2.25 m to your right) and the Boki's lane beside it are
+## clear of tiles it would have to path round, so the lead is tested on its pace and not on a tree.
+func _open_ground() -> Vector3:
+	var start := Vector3(38.0, 0.0, 30.0)
+	for r in [0.0, 2.0, 4.0, 6.0]:
+		for a in 8:
+			var at: Vector3 = start + Vector3(cos(a * TAU / 8.0), 0.0, sin(a * TAU / 8.0)) * r
+			var mid := Vector2(at.x + 2.25, at.z)
+			var clear: bool = not home.world.is_void(mid.x, mid.y)
+			for b in 16:
+				var from := mid + Vector2.from_angle(b * TAU / 16.0) * 2.25
+				clear = clear and home.hb.clear_line(from, mid + Vector2.from_angle((b + 1) * TAU / 16.0) * 2.25, 1.3)
+			if clear:
+				return at
+	return start
 
 func _walk(k: Dictionary, secs: float) -> float:
 	var far := 0.0
@@ -191,11 +208,16 @@ func _trust(brave: Dictionary, wary: Dictionary) -> void:
 
 func _lead(rec: Dictionary) -> void:
 	var c: HomeCarry = home.carry
+	home.ppos = _open_ground()
 	var k := _put(rec)
+	k["pers"]["speed"] = 0.6      # the plodding end of a kind's own pace (home.gd _personality): a lead ignores it
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
 	var far := _walk(k, 4.0)
 	ok(far < 3.0, "it follows beside you as you walk (%.2f m behind at most)" % far)
+	var pace := float(k["led"])
+	var top: float = home.SPEED * HomeCarry.SPEED_K * float(Content.rules("home_lead")["top_k"])
+	ok(pace >= BokiRig.RUN_SPEED and pace <= top + 0.01, "its pace (%.1f m/s) is a run, up to %.1f" % [pace, top])
 	c.press_hold(k)
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
 

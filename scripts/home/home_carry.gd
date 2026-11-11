@@ -20,7 +20,7 @@ const TIMID := 0.4            # bravery below this clings
 const GRUMPY := 0.62          # temper above this squirms free
 const CARRY_SCALE := 0.7      # a carried Boki is shown this share of its size, so it fits the arms
 const DROP_DIST := 0.9        # m in front of you where it is set down
-const LEAD_SLOT := 0.9        # m to your right where a led Boki walks
+const LEAD_SLOT := 0.9        # m to your right where a led Boki walks (how it paces: content/rules/home_lead.json)
 const LEAD_MAX := 10.0        # m away at which a led Boki is let go
 
 var h                         # the Home screen
@@ -31,6 +31,7 @@ var paid := false             # today's trust already counted for this carry
 var pending := {}             # the Boki the key is held on, waiting to pass HOLD_S
 var held := 0.0               # s the key has been held on it
 var base_scale := Vector3.ONE
+var _p0 := Vector3.ZERO       # where you stood last frame, to read your own speed while leading
 
 func _init(home) -> void:
 	h = home
@@ -107,7 +108,8 @@ func press_hold(who: Dictionary) -> void:
 	who.erase("called_t")
 	who.erase("going_in")
 	if mode == "lead":
-		who["led"] = true
+		who["led"] = BokiRig.RUN_SPEED
+		_p0 = h.ppos
 		h._emote(who, "♥", true)
 		return
 	who["busy"] = true
@@ -149,7 +151,7 @@ func _step(d: float) -> void:
 	t += d
 	var rec: Dictionary = k["rec"]
 	if mode == "lead":
-		_lead()
+		_lead(d)
 		return
 	var feel := temper_of(rec)
 	if feel == "grumpy" and t >= SQUIRM_S:
@@ -200,14 +202,21 @@ func _squirm_free() -> void:
 	h._emote(who, "!", true)
 	Sfx.play("thump", who["pos"], -12.0, 0.1, 1.3)
 
-## A big Boki follows beside you; far behind, it's let go.
-func _lead() -> void:
+## A big Boki follows beside you at your pace, quicker while it is behind its slot; far behind, it's let go.
+## k["led"] is its walking speed (m/s): at least where its walk clip hands over to a run, at most top_k times yours.
+func _lead(d: float) -> void:
 	var dist := Vector2(k["pos"].x - h.ppos.x, k["pos"].z - h.ppos.z).length()
 	if dist > LEAD_MAX:
 		h._emote(k, "?", true)
 		_let_go(k, k["pos"])
 		return
+	var R := Content.rules("home_lead")
+	var mine := Vector2(h.ppos.x - _p0.x, h.ppos.z - _p0.z).length() / maxf(d, 0.001)
+	_p0 = h.ppos
+	var back := mine * float(R["back_s"])
+	var lag := maxf(dist - Vector2(LEAD_SLOT, back).length(), 0.0)
+	k["led"] = maxf(mine, BokiRig.RUN_SPEED) * minf(1.0 + float(R["catch_gain"]) * lag, float(R["top_k"]))
 	var side := Vector3(-_forward().z, 0.0, _forward().x)
-	k["goal"] = h.ppos + side * LEAD_SLOT - _forward() * 0.3
+	k["goal"] = h.ppos + side * LEAD_SLOT - _forward() * back
 	k["t"] = 1.0
 	k["hold_t"] = 0.0
