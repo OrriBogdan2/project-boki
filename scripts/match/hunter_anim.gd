@@ -252,6 +252,8 @@ var land_rate := 4.0
 const LAND_HOP_V := 4.0        # m/s down at touchdown: slower (a kerb, a step down of ~0.5 m) plays no landing at all
 const LAND_DROP_V := 8.5       # m/s: a terrace drop (2.5 m+) or a jump off a ledge gets the deep crouch; a plain jump
                                # lands at JUMP_V 6.8, the hop's small dip (the source: briefs/hero-ref, DECISIONS 11-07)
+const LAND_DIVE_V := 17.0      # m/s: a glide dive's plunge (it still lands ~25 m/s after the canopy's catch) or a long
+                               # drop: the drop's crouch, slower and heavier
 var roll_t := -1.0             # landing roll / combat roll clock
 var roll_dur := 0.35
 var roll_ax := Vector3.RIGHT
@@ -524,9 +526,11 @@ static func _spring(x: float, v: float, want: float, k: float, damp: float, dt: 
 	return Vector2(x, v)
 
 ## What a touchdown plays, by the fall speed (m/s down): 0 nothing, 1 the hop's small dip, 2 the deep crouch of a
-## terrace drop. A glide's end is the deep one too, at any speed: the canopy's slow sink still reads as a long way down.
-## Shared with a Hero's clips (WardenClips), so both layers land the same way.
+## terrace drop, 3 the dive's heavier crouch. A glide's end is the deep one too, at any speed: the canopy's slow sink
+## still reads as a long way down. Shared with a Hero's clips (WardenClips), so both layers land the same way.
 static func land_tier(fall_v: float, from_glide: bool) -> int:
+	if fall_v >= LAND_DIVE_V:
+		return 3
 	if from_glide or fall_v >= LAND_DROP_V:
 		return 2
 	return 1 if fall_v >= LAND_HOP_V else 0
@@ -622,11 +626,12 @@ func update(dt: float, s: Dictionary) -> void:
 	if just_landed:
 		var fall_v := -vy_prev
 		var tier := land_tier(fall_v, glide_k > 0.5)
-		# the hop: a small dip, gone in ~0.1 s; the drop or a glide's end: a deep crouch, up again in ~0.3 s
+		# the hop: a small dip, gone in ~0.1 s; the drop or a glide's end: a deep crouch, up again in ~0.3 s; the
+		# dive: the full crouch, up in ~0.4 s
 		var hard := 0.35 if tier == 1 else clampf(fall_v / 14.0, 0.7, 1.0)
 		land_k = maxf(land_k, hard) if tier > 0 else land_k
-		land_rate = (3.5 if tier < 2 else 3.0) * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
-		if trick == "ball" or (cls == "heavy" and tier == 2):
+		land_rate = [3.5, 3.5, 3.0, 2.5][tier] * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
+		if trick == "ball" or (cls == "heavy" and tier >= 2):
 			slam_k = 1.0
 			slammed = true
 			land_k = 1.0

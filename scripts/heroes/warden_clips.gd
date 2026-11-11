@@ -27,6 +27,8 @@ const EXTRACT_T := 0.7       # s: a Hunter's leave moment on extracting (dip, th
 const EXTRACT_DIP := 0.3     # s of it spent in the crouch dip (the shortest dip clip is 0.30 s)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action (a move's "fade" overrides it)
 const FADE_LOCO := 0.16      # s: an action back to the legs
+const DIVE_SLOW := 0.8       # the dive's touchdown (HunterAnim.land_tier 3) plays the drop's crouch at this share
+                             # of its rate over the same hold: lower for longer, a heavier settle from the same keys
 const AIR_FADE := 0.12
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
 const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
@@ -72,6 +74,7 @@ var act_w := 0.0             # how much the action owns the body
 var act_out := FADE_LOCO     # s the action takes to let go of the body (longer after a lock-in pose)
 var up_w := 0.0              # how much it owns the upper body only
 var flinch_w := 0.0          # how much of the hit clip's flinch (its pose less its first frame) rides on the upper body
+var run_land_w := 0.0        # how much of a running landing's absorb (the land clip less the idle) rides the run
 var air_w := 0.0
 var glide_w := 0.0
 var dive_w := 0.0
@@ -84,7 +87,7 @@ var stance_w := 0.0
 var was_air := false
 var was_glide := false
 var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
-var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
+var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop", the dive's slowed drop), picked at touchdown
 var land_t := 99.0
 var mantle_t := 99.0          # s since a ledge rise ended (the clip's vault plays on in real time)
 var mantle_seen := 0.0       # how far up the face the last rise got
@@ -185,6 +188,8 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.root_node = tree.get_path_to(glb)
 	tree.add_animation_library("", lib)
 	tree.tree_root = _build()
+	if d.has("land"):
+		_p("land_delta/sub_amount", 1.0)     # (a Sub2 subtracts nothing until told to)
 	tilt = WardenAirTilt.new(glb, sk, d["air"])
 	tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 	tree.active = true
@@ -318,7 +323,7 @@ func _build() -> AnimationNodeBlendTree:
 	t.connect_node("upper", 1, "act_u")
 	_build_flinch(t)
 	t.add_node("full", AnimationNodeBlend2.new())
-	t.connect_node("full", 0, "flinch")
+	t.connect_node("full", 0, _build_run_land(t) if d.has("land") else "flinch")
 	t.connect_node("full", 1, "act")
 	t.connect_node("output", 0, "full")
 	return t
@@ -342,6 +347,21 @@ func _build_flinch(t: AnimationNodeBlendTree) -> void:
 	t.add_node("flinch", add)
 	t.connect_node("flinch", 0, "upper")
 	t.connect_node("flinch", 1, "flinch_delta")
+
+## The running landing's layer over the flinch: the land clip less the idle's first frame, added over the whole body
+## (the Rig's drop, the legs' bend, the arms' give), so the run under it keeps its stride from the first frame.
+func _build_run_land(t: AnimationNodeBlendTree) -> String:
+	for nm in ["land", "land0"]:
+		t.add_node("anim_" + nm, _anim(String(d["land"]["clip"] if nm == "land" else d["loco"]["idle"])))
+		t.add_node("seek_" + nm, AnimationNodeTimeSeek.new())
+		t.connect_node("seek_" + nm, 0, "anim_" + nm)
+	t.add_node("land_delta", AnimationNodeSub2.new())
+	t.connect_node("land_delta", 0, "seek_land")
+	t.connect_node("land_delta", 1, "seek_land0")
+	t.add_node("run_land", AnimationNodeAdd2.new())
+	t.connect_node("run_land", 0, "flinch")
+	t.connect_node("run_land", 1, "land_delta")
+	return "run_land"
 
 ## The crouch layer over stance_w: its own BlendSpace2D (idle at the centre, the sneak ring), the dip's seek channel.
 func _build_crouch(t: AnimationNodeBlendTree) -> String:
@@ -464,14 +484,17 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 	if gest != "" and call_t < lib.get_animation(gest).length:
 		return {"clip": gest, "t": call_t, "upper": true}      # the summon call: arms only, legs and aim carry on
 	land_t += dt
-	# (the tier HunterAnim.land_tier picked at touchdown: "moving": how long the landing owns the body while he runs
-	# on, so the legs are back on the run before the standing absorb would end; "rate": the clip's speed, a quicker
-	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full crouch)
+	# (the tier HunterAnim.land_tier picked at touchdown: "dur": how long the land clip owns the body standing;
+	# "moving": how long its absorb rides the run (_build_run_land: the clip less the idle, added over the whole
+	# body), so the legs keep the run's stride from the first frame he moves; "rate": the clip's speed, a quicker
+	# absorb from the same keys; "w": how much of the land pose shows, the hop's small dip from the drop's full
+	# crouch. A move, a dash or a cast, is picked above and cuts it the frame it starts)
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var moving := Vector2(vel.x, vel.z).length() >= STILL
 	var hold := float(land.get("moving", land.get("dur", 0.0))) if moving else float(land.get("dur", 0.0))
 	if land_t < hold and bool(s.get("grounded", true)):
-		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0))}
+		return {"clip": d["land"]["clip"], "t": land_t * float(land.get("rate", 1.0)), "w": float(land.get("w", 1.0)),
+				"run_land": moving}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
 	if hit < float(hd.get("dur", 0.0)):
@@ -584,7 +607,12 @@ func step(dt: float) -> void:
 		_p("seek_hit/seek_request", float(want["t"]))
 		_p("seek_hit0/seek_request", 0.0)
 	flinch_w = move_toward(flinch_w, 1.0 if flinching else 0.0, dt / FADE)
-	if flinching:
+	var run_land := not proc and bool(want.get("run_land", false))
+	if run_land:
+		_p("seek_land/seek_request", float(want["t"]))
+		_p("seek_land0/seek_request", 0.0)
+	run_land_w = move_toward(run_land_w, float(want.get("w", 1.0)) if run_land else 0.0, dt / FADE)
+	if flinching or run_land:
 		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 	elif not proc and bool(want.get("upper", false)):
@@ -627,6 +655,8 @@ func step(dt: float) -> void:
 	_p("act_u/blend_amount", xf_u)
 	_p("upper/blend_amount", up_w)
 	_p("flinch/add_amount", flinch_w)
+	if d.has("land"):
+		_p("run_land/add_amount", run_land_w)
 	_p("full/blend_amount", act_w)
 	_loco(s, dt)
 	if d.has("crouch"):
@@ -776,7 +806,10 @@ func _loco(s: Dictionary, dt: float) -> void:
 		var tier := HunterAnim.land_tier(-vy_prev, was_glide)
 		if tier > 0 and d.has("land"):
 			land_t = 0.0
-			land = d["land"]["drop" if tier == 2 else "hop"]
+			land = d["land"]["hop" if tier == 1 else "drop"]
+			if tier == 3:
+				land = land.duplicate()
+				land["rate"] = float(land.get("rate", 1.0)) * DIVE_SLOW
 	was_air = not grounded
 	was_glide = gliding
 	vy_prev = vel.y

@@ -35,9 +35,11 @@ Hero live in `tools/art1/` (Kael is the pilot).
   sets less (Tarek's and Breaker's dive 50, Hem's 35, Ostra's 12 on top of the rig's own tip). Strips: `--glide-shots`.
 - `air`, `land`: rise, fall, glide; one landing `clip` timed two ways by the fall speed (`HunterAnim.land_tier`: under
   4 m/s, a kerb, nothing plays; a plain jump's 6.8 m/s is the `hop`; 8.5 m/s up, a terrace drop, or any glide's end, is
-  the `drop`). Each tier: `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body
-  standing, `moving` s while he runs on (default `dur`), `rate` times the clip's speed (default 1). The source is up and
-  moving ~0.15 s after any touchdown, so `moving` stays near 0.1. `--clip-check` measures the jump, the drop, a glide's
+  the `drop`; 17 m/s up, a glide dive's plunge, plays the `drop` at 0.8 of its rate, `WardenClips.DIVE_SLOW`). Each tier:
+  `w`, how much of the land pose shows (the hop's small dip, default 1), `dur` s it owns the body standing, `moving` s
+  its absorb rides the run (default `dur`): the clip less the idle's first frame added over the whole body, so the legs
+  keep the run's stride from the first frame; `rate` times the clip's speed (default 1). The source is up and moving
+  ~0.15 s after any touchdown, so `moving` stays near 0.1. A move (a dash, a cast) is picked over the landing. `--clip-check` measures the jump, the drop, a glide's
   end and a kerb through the clips (take-off, apex, dip, legs back, recovery: the JL rows); `--jump-land-shots --way=`
   films them at the match camera (docs/art/anim_audit/LANDING_WEIGHT.md).
 - `mantle` {`clip`, `rise`}: a ledge climb (Vex, Kael, Cinder, Meeko; tools/art1/mantlekit.py shares the poses, each Hero's clips file gives the personality). The first `rise` share of the clip is the climb and its time is how far up the face he is (the state's `mantle` 0..1, `hunter.gd _rise_k`), so the motion can't lag the body whatever the height; once over the lip the rest (the vault, the landing) plays in real time. A Hero without the key keeps `mantle` in `procedural` and the rig plays the reach and push. `ledge` (the grapple) stays procedural for everyone.

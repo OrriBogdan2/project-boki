@@ -33,8 +33,8 @@ const JL_AGAIN_DEG := 3.0      # deg: the second jump's rise pose may differ fro
 const JL_HOP_DIP_M := 0.015    # m: the hips drop at least this far off a plain jump (the source's small dip)
 const JL_DIP_M := 0.03         # m: and at least this far off a terrace drop or a glide's end, the deep crouch...
 const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same stance
-const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
-                               # moving ~0.15 s after any touchdown: the landing never holds the run)
+const JL_FREE_S := 0.0         # s: running, the land clip never owns the legs: its absorb rides the run on the upper
+                               # layer and the legs are the run's from the first frame (the landing never holds the run)
 const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
@@ -257,7 +257,7 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 ## The ways down, running and standing (tools/jump_land_check.gd), printed as "JL" rows. The jump: the take-off and
 ## the apex read (the pose turns), every jump reads like the first (the rise clip starts over). Every way: the landing
 ## dips at once (the hop a little, the drop and the glide's end deeper: HunterAnim.land_tier; Motley's hips ride his
-## spring: no dip to read), a kerb plays no landing, running the legs are back within JL_FREE_S, and the body is back
+## spring: no dip to read), a kerb plays no landing, running the legs never leave the run, and the body is back
 ## within the data's promise: "moving" (or "dur") plus the loco fade, never longer than JL_BACK_MAX.
 func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var jl := preload("res://tools/jump_land_check.gd")
