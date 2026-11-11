@@ -4,9 +4,11 @@ extends RefCounted
 ## one), it wears its own colours (the shiny palette when it shimmers) with its glow on the rim, and the idle
 ## bounce moves and squashes it. The Model Room's ten (tests/kin_gallery.gd WISP_ROOM) all build and stay
 ## under the particle budget. The summon pop (BokiWispPop) bursts and folds for every species, plain and
-## shiny: about 0.25 s, soft light only, eyes open last and close first. Prints PASS/FAIL.
+## shiny: about 0.25 s, soft light only, eyes open last and close first. In a match, four wisps on one hunter read
+## apart by their carry slot (tools/carry_wisps_check.gd). Prints PASS/FAIL.
 
 const Gallery := preload("res://tests/kin_gallery.gd")
+const CarrySlots := preload("res://tools/carry_wisps_check.gd")
 const PARTICLE_BUDGET := 300   # sparkles alive for ten wisps (DECISIONS 2026-11-09)
 
 const COLOUR_STEP := 1.0 / 255.0   # vertex colours are stored 8 bits a channel
@@ -20,6 +22,7 @@ func run(main: Node) -> void:
 		_pop(String(id), {})
 		_pop(String(id), {"shimmer": true})
 	_room()
+	bad += CarrySlots.new().run(main)
 	print("BOKIWISP %s (%d fail)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 

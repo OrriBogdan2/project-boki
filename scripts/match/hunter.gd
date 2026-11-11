@@ -3109,6 +3109,7 @@ func render(delta: float, alpha: float) -> void:
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
+	CarryWisps.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
 	if out and has_meta("fling"):

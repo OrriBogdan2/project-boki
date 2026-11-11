@@ -36,3 +36,15 @@ the Hunters screen (`WispPick`, under the glider), saved in `Save.d["look"]["bok
 fills the defaults). Only your own Boki wear them; nothing is synced (no Net bump), others see the defaults.
 Alternative noted: per-Boki picks in the Boki record; left until the line is sold per species.
 `--wisp-cosmetic-check` covers it; `--kin-gallery --kin-wisps --kin-cosmetics` shows them.
+
+## Carry slots (DECISIONS 2026-11-11 "carry 2 in, 1 extra out")
+Up to four wisps on one Hunter (lead, second, one carry-out claim, stolen) must read apart at match zoom.
+`CarryWisps` keeps each Boki's critter shape and colours and changes only what reads from the top-down camera:
+the lead is full size and brightest (shader `bright`) with its rim in its type colour; the second is smaller and
+dimmer, across the orbit and a little lower (it shows as a wisp now instead of hiding in the satchel); a stolen
+wisp rides between them with its rim in the thief's side colour; the carry-out claim (a `Hunter.caught` record,
+no Kin) hangs small behind the belt on a thin tether, past the orbit. Cost: every body and tether uses the one
+`BokiWispLook` material (instance uniforms only), the tethers share one unit cylinder, no lights. Instance
+uniforms are set when a slot changes, not every frame. Alternative noted: a bag shape round the carry-out
+wisp instead of the tether; the tether reads better from the top and costs one thin mesh.
+`--boki-wisp-check` covers it (tools/carry_wisps_check.gd); `--carry-wisp-shots --shots-dir=` takes shots.

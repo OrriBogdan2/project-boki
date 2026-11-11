@@ -69,28 +69,26 @@ static func ride(k: Kin, dt: float) -> bool:
 	k.prev = k.pos
 	return true
 
-## Its look on screen: orbiting its hunter at shoulder height, facing along the orbit, hopping. True when it drew.
+## Its look on screen: orbiting its hunter at shoulder height on its carry slot (CarryWisps: the lead, the second
+## in the satchel, a stolen one), facing along the orbit, hopping. True when it drew.
 static func render(k: Kin) -> bool:
 	if k.summon:
 		k.summon.render()
 	if k.wisp and KinSteal.loose(k) and k.model:
+		CarryWisps.plain(k)
 		KinSteal.render(k)
 		return true
 	var o := k.owner_h
-	if not k.wisp or k.state != "shoulder" or o == null or o.model == null:
+	if CarryWisps.role(k) == "" or o.model == null:
 		return false
 	if k.ring:
 		k.ring.visible = false
 	var sh := o.model.get_node_or_null("Rig/Torso/Shoulder") as Node3D
 	var y := sh.global_position.y if sh else o.position.y + SHOULDER_Y
-	var orbit: Dictionary = BokiWispCosmetics.worn(o)["orbit"]
-	var a: float = TAU * (k.m.time * orbit["hz"] + float(k.model.get_meta("phase", 0.0)))
-	k.global_position = orbit_spot(orbit, a, o.position, y)
+	CarryWisps.place(k, o, y, BokiWispCosmetics.worn(o)["orbit"])      # its carry slot's spot and look
 	if k.summon and k.summon.fly > 0.0:
 		k.global_position = k.summon.streak(k.global_position)
 		k.m.fx.burst(k.global_position, k.sp.get("glow", k.sp["color"]), 1, 0.4)
-	k.model.rotation.y = atan2(sin(a), -cos(a))
-	k.model.scale = Vector3.ONE
 	BokiWispLook.pose(k.model, k.m.time)
 	return true
 

@@ -356,6 +356,7 @@ const CHECKS := {
 	# the summon lane and leash
 	"--summon-leash-check": ["res://tools/summon_leash_check.gd", "summon_leash_check", null],
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
+	"--carry-wisp-shots": ["res://tools/carry_wisps_check.gd", "carry_wisp_shots", "shots"],      # GPU, --shots-dir=
 	# Boki wisp trail, sparkle, orbit
 	"--wisp-cosmetic-check": ["res://tools/wisp_cosmetic_check.gd", "wisp_cosmetic_check", null],
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
