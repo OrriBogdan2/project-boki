@@ -37,7 +37,7 @@ var why := ""                   # why a piece can't go where it was tried
 var blocker := -1               # index of the piece in the way
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	R = Data.ROOMS.get(room, Data.ROOMS["house"])
 	W = int(R["w"]); D = int(R["d"])
 	_build_env()
@@ -213,7 +213,7 @@ func _blocked(x: float, z: float) -> bool:
 
 # ------------------------------------------------------------------ kin
 func _spawn_kin() -> void:
-	var roster: Array = (visit.get("roster", []) if not visit.is_empty() else KinBox.farm())    # kin in the Kin Burrow stay asleep there
+	var roster: Array = (visit.get("roster", []) if not visit.is_empty() else GardenZones.out_here())    # Burrow and other zones' Boki stay put
 	var active: String = (visit.get("active", "") if not visit.is_empty() else Save.d.get("active", ""))
 	var here: Array = []
 	for rec in roster:
