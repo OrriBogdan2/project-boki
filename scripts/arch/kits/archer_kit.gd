@@ -323,7 +323,7 @@ func _pin(a: Vector3, k: float) -> void:
 			vfx("cremate", f.pos, dir)
 			m.fx.word(f.pos + Vector3(0, 2.4, 0), "CREMATED", Color("8ac8ff"), false)
 		# driven into terrain within 3m: pinned (a stun)
-		if KnockWall.behind(m, f, dir, float(pd["wall"])):
+		if KnockWall.hit(m, f, dir, float(pd["wall"]), h):
 			pins += 1
 			fx.stake(at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
 			vfx("heavy_pin", at + Vector3(dir.x, 0, dir.y) * 0.9, dir)
