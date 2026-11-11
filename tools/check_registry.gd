@@ -143,6 +143,7 @@ const CHECKS := {
 	# --shots-dir=<dir> (GPU)
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
+	"--tips-check": ["res://tools/tips_check.gd", "tips_check", null],      # context tips
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],

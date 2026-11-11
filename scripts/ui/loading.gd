@@ -6,44 +6,11 @@ extends CanvasLayer
 
 signal shown
 
-const TIPS := [
-	"Press Space again in the air (or Mouse 5) and hold to glide. You can open your glider off any booster too.",
-	"Hits don't knock you out of a glide, but they drain your glider twice as fast. Run it dry and you're spiked: you drop like a stone.",
-	"Knocked off an edge? Touch the island's side and you float back up onto it.",
-	"Exits open partway through. Stand inside one to fly home with everything you carry.",
-	"Your Boki key (or middle mouse) sends your Boki out. It stuns what it hits; press again to call it back.",
-	"Left and right click both belong to your weapon: every weapon has its own right-click ability. Try them in Training.",
-	"You only see what's in front of you. Rivals behind you or past a wall stay hidden, and so do you.",
-	"Tall grass hides you from anyone outside it. Shooting gives you away for a moment.",
-	"Sneak (Ctrl): you move slower and quieter, and you see further.",
-	"Get knocked into a wall and you're stunned. Do it to them first.",
-	"Shots go exactly where you aim. Fast guns sway in the same small pattern every time, and firing slows your step.",
-	"Jump at a wall in the air to kick off it. Light hunters get two kicks.",
-	"One hit breaks a crate, pot or barrel. A red powder keg lights a fuse, then blows: get clear.",
-	"Weapons you find out here are stronger than your own, but only for this expedition.",
-	"Health and armor don't come back on their own. 1 drinks a tonic, 2 repairs your armor with a kit. You take more damage while you do either.",
-	"Fight alongside your Boki to fill the bond meter, then your Fuse key calls its bond ultimate.",
-	"Every Boki has a different ability, and it uses it by itself. Q fires the active glove you found out here.",
-	"Your Boki stuns or roots a foe? Shoot it right away for a combo.",
-	"In a squad, B bases you to the teammate nearest your cursor: 3s standing still, broken by any hit, and you arrive weakened for 3s.",
-	"Gloves drop from chests, vaults and bosses. One active glove (Q) and one passive glove at a time; a new one replaces the old.",
-	"Go down for good and the Boki you brought are left behind. Old Pell's Black Market sells back the ones nobody claims.",
-	"A rival took your Boki? You'll sense it when they're nearby. Take it back.",
-	"Knock a wild Boki out, then hold the use key beside it to scan it. Your box holds three capsules.",
-	"Jump off the skyship over an island nobody else picked. Space opens your glider early for a longer, slower last stretch.",
-	"Falling all the way into the abyss is death. Glide (press Space again in the air, or Mouse 5, and hold) below the edge to catch an updraft back up, or touch the cliff to climb onto it.",
-	"A teammate is down? Stand on their wisp to bring them back. Stand on an enemy's to stomp it, or hold F to finish them.",
-	"Dash through a shot at the last moment and you take nothing.",
-	"Shrines on the islands give a short power-up. Stand by one and hold F.",
-	"The Blight hunts by noise and light. Gunfire, blasts, opened chests and dashing draw it in; sneaking doesn't.",
-	"A Watcher's light sweeps the ground. Stay in it and it shrieks, and the Blight nearby comes running. Crouch to stay out of its reach.",
-	"The Blight starts weak and grows the longer your squad is out, the deeper you go, and at night.",
-]
 ## A line of the world's story shown under the tip (our own words; the canon is briefs/LORE_MASKS.md).
 const LORE := [
-	"Everyone born since the Hollowing is born without a face. We call ourselves the Empty.",
+	"Everyone born since the Sundering is born without a face. We call ourselves the Empty.",
 	"A Mask holds the soul of a Hunter who stood against the Wyrm. Wear one and you remember what a self feels like.",
-	"Malgrave the Beloved never aged, and never forgot her vault. Under the Crown, it was always the Wyrm.",
+	"The Tyrant never aged, and never forgot the hoard. Under the Crown, it was always the Wyrm.",
 	"The Blight is the Wyrm's blood. It sours stone, grass and sky, and it follows whoever is loudest.",
 	"A thief once reached the Wyrmheart. Whatever she wished for, the whole land is still paying for it.",
 	"People once dug up Masks to smash them. Now they dig for the same relics to be whole again.",
@@ -53,10 +20,6 @@ const LORE := [
 	"Bring home what you carry. Out here, only what reaches the farm is truly yours.",
 ]
 ## What's being worked on, set by whoever builds the match (Main.show_screen, Match): shown by the spinner.
-const FADE_IN_T := 0.15     # s the screen takes to fade in before the build starts
-const FADE_OUT_T := 0.2     # s it takes to fade out when there is no ink to cover it
-const COVER_T := 0.1        # s the ink takes to cover it once the match is ready
-const REVEAL_T := 0.2       # s the ink takes to sweep off the match (the match is already running)
 const STAGES := {"map": "Building the map", "spawn": "Spawning", "graphics": "Preparing graphics", "ready": "Ready"}
 
 var c: Control
@@ -118,8 +81,7 @@ func setup(opts: Dictionary) -> void:
 			map_id = WideLayout.MAP
 		map_name = String(World.load_layout(map_id).get("name", ""))
 		party = Prematch.squad_of(opts, String(opts.get("arch", Arch.of_save())))
-	var tips: Array = TIPS if opts.get("blight", true) else Array(TIPS).filter(func(x): return not String(x).contains("Blight"))
-	tip = tips[randi() % tips.size()]
+	tip = TipPick.for_loading(opts.get("blight", true))
 	lore = LORE[randi() % LORE.size()]
 	var r := RandomNumberGenerator.new(); r.seed = hash(title) + tier
 	for i in 9:
@@ -141,29 +103,36 @@ func setup(opts: Dictionary) -> void:
 func _process(delta: float) -> void:
 	t += delta
 	if leaving:
-		fade = maxf(0.0, fade - delta / FADE_OUT_T)
+		fade = maxf(0.0, fade - delta * 2.2)
 		if fade <= 0.0:
 			queue_free()
 	else:
 		var was := fade
-		fade = minf(1.0, fade + delta / FADE_IN_T)
+		fade = minf(1.0, fade + delta * 3.5)
 		if was < 1.0 and fade >= 1.0:
 			shown.emit()
 	prog = move_toward(prog, want, delta * maxf(0.9, (want - prog) * 6.0))
 	c.queue_redraw()
 
-## The match is built and drawn: the bar fills at once and the screen goes, with nothing to wait out
-## (playtest 11-09: players were held on a full bar). The ink covers it, then sweeps off the match.
+## Move the bar to a stage (0..1) and wait until it gets there.
+func step(frac: float) -> void:
+	want = maxf(want, frac)
+	while prog < want - 0.01 and is_inside_tree():
+		await get_tree().process_frame
+
 func finish() -> void:
-	want = 1.0
-	prog = 1.0
-	# gone before the map shows: fading this out over the planning map blended the two, so the
-	# screen's ink sweeps over first, this goes, and the ink sweeps off the map
+	await step(1.0)
+	var hold := 0.35
+	while hold > 0.0 and is_inside_tree():
+		hold -= get_process_delta_time()
+		await get_tree().process_frame
+	# gone before the map shows: fading this out over the planning map blended the two for half a
+	# second, so the screen's ink sweeps over first, this goes, and the ink sweeps off the map
 	var sf: ScreenFade = Game.main.get("fade") if Game.main else null
 	if sf and is_inside_tree() and not sf.covered:
-		await sf.cover(COVER_T)
+		await sf.cover(0.22)
 		queue_free()
-		sf.reveal(REVEAL_T)
+		sf.reveal(0.4)
 		return
 	leaving = true
 
@@ -256,7 +225,7 @@ func _squad_row(p: Vector2, a: float) -> void:
 ## The tip's glass card at a fade step (cached: drawn every frame while loading).
 func _glass(alpha: float) -> UiFrame:
 	if not _glass_at.has(alpha):
-		var g := UI.frame(Color(UI.NIGHT, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
+		var g := UI.frame(Color(0.05, 0.045, 0.07, alpha * 0.72), 14, Color(1, 1, 1, alpha * 0.07), 1, 0.0, 0.0, alpha * 0.04)
 		_glass_at[alpha] = g
 	return _glass_at[alpha]
 
