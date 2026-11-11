@@ -278,7 +278,7 @@ func _dress_volley() -> void:
 		if sd.get("by") != h or String((sd["x"] as Dictionary).get("pg", "")) != key:
 			continue
 		fx.ride(sd, "slug", SLUG_COL, SLUG_CORE, 0.9, 0.2, func(at: Vector3, expired: bool):
-			if expired: fx.dot(at, SLUG_REST, 0.26))
+			if expired: fx.dot(at, SLUG_REST, 0.18))
 
 func _tick_looks(dt: float) -> void:
 	if not tells_visible():

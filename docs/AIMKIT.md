@@ -110,7 +110,7 @@ Params: `from`, `dir`, `len` (to the cursor, clamped 1.5-20), `k`, `open` (degre
 # Vex wall cone: from the stuck point back out, everyone sees it for the fuse
 AimKit.cone(h, "wallcone", {"from": stick, "dir": back, "len": 6.0, "deg": 100.0, "fill": fuse_k, "all": true, "dur": 0.8})
 # Grimble Buckshot: just the two edge lines
-AimKit.cone(h, "spread", {"len": 6.3, "deg": 7.0 + h.wbloom, "edges": true, "follow": true, "ease": 35.0})
+AimKit.cone(h, "spread", {"len": 6.3, "deg": 10.0 + h.wbloom, "edges": true, "follow": true, "ease": 35.0})
 ```
 Params: `from`, `dir`, `len` (4), `deg` (60), `inner` (0.3 m), `edges`, `fill`, `ease` (1/s, 0 = off: the drawn width
 glides toward `deg` each drawn frame, exponentially, so a changing spread never steps or snaps).
