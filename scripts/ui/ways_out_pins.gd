@@ -14,17 +14,17 @@ const WALL_M := 70.0       # m: the Blight's wall closer than this gets its bar
 const BADGE_R := 12.0      # px, a pin's badge
 const BEAM_W := 5.0        # px, the beam over an open or used seat's badge...
 const BEAM_H := 24.0       # ...and its height
-const GAP := 44.0          # px: a pin that would sit on an earlier one moves along the edge by this
+const TOP := 0.30          # of the screen height: pins stay under the message lane at the top centre
 const FS := 17             # px, a pin's line
 
-static var _placed := PackedVector2Array()    # where this frame's pins sit (for _place)
+static var _boxes: Array[Rect2] = []    # this frame's pins with their lines (for _place)
 
 static func draw(hud) -> void:
 	var m: Match = hud.m
 	var p: Hunter = m.player
 	if m.heart == null or m.heart.site == Vector3.INF or p == null or p.out or p.extracted:
 		return
-	_placed.clear()
+	_boxes.clear()
 	var c: Control = hud.c
 	var at := WaysOutMap.sites(m)
 	var sd := WaysOutHud.seats(m)
@@ -32,7 +32,8 @@ static func draw(hud) -> void:
 		var dir := seat_dir(m, c.size, i, sd, at[i])
 		if dir == Vector2.ZERO:
 			continue
-		var e := _place(c.size, dir)
+		var txt := "%s  %d m" % [WaysOutMap.word(i, sd[i]), int(p.flat_dist(at[i]))]
+		var e := _place(c.size, dir, TextCache.width(HudStyle.BIG, txt, FS))
 		var col := WaysOutMap.color_of(sd[i])
 		WaysOutMap.badge(c, e, BADGE_R, i, sd[i], m.time)
 		if int(sd[i]["st"]) != WaysOutHud.St.LOCKED:
@@ -41,16 +42,17 @@ static func draw(hud) -> void:
 		var back := tip - dir * 8.0
 		var wing := Vector2(-dir.y, dir.x) * 6.0
 		c.draw_colored_polygon(PackedVector2Array([tip, back + wing, back - wing]), col)
-		_label(c, e, dir, "%s  %d m" % [WaysOutMap.word(i, sd[i]), int(p.flat_dist(at[i]))], col)
+		_label(c, e, dir, txt, col)
 	var wd := wall_dir(m, c.size)
 	if wd != Vector2.ZERO:
 		var gap := wall_gap(m)
-		var e := _place(c.size, wd)
+		var txt := "Blight  %d m" % int(gap)
+		var e := _place(c.size, wd, TextCache.width(HudStyle.BIG, txt, FS))
 		var side := Vector2(-wd.y, wd.x)
 		var w := lerpf(4.0, 12.0, 1.0 - gap / WALL_M)
 		c.draw_line(e - side * 36.0, e + side * 36.0, Color(0, 0, 0, 0.6), w + 4.0)
 		c.draw_line(e - side * 34.0, e + side * 34.0, HeartHud.TIDE_COL, w)
-		_label(c, e, wd, "Blight  %d m" % int(gap), HeartHud.NEXT_COL)
+		_label(c, e, wd, txt, HeartHud.NEXT_COL)
 
 ## The screen direction of seat `i`'s pin, or ZERO for none: the seat is gone (taken, lost), on screen, locked and
 ## farther than REACH_M, or it is the Heart ring still locked while the Gate is to be had. `sd` is WaysOutHud.seats.
@@ -87,14 +89,30 @@ static func _beam(c: Control, e: Vector2, col: Color) -> void:
 	c.draw_rect(r.grow(2.0), Color(0, 0, 0, 0.6))
 	c.draw_rect(r, col)
 
-## Where a pin sits: the arrow box's edge toward `dir`, moved along the edge off the pins already drawn.
-static func _place(sz: Vector2, dir: Vector2) -> Vector2:
+## Where a pin with a `w` px line sits: on the arrow box's edge toward `dir`, under the message lane, slid along the
+## edge past the pins already drawn so no two overlap.
+static func _place(sz: Vector2, dir: Vector2, w: float) -> Vector2:
 	var e := MarkerDir.edge_point(sz, dir)
-	for q in _placed:
-		if e.distance_to(q) < GAP:
-			e += Vector2(-dir.y, dir.x) * GAP
-	_placed.append(e)
+	e.y = maxf(e.y, sz.y * TOP)
+	for b in _boxes:
+		var r := _box(e, dir, w)
+		if not r.intersects(b):
+			continue
+		if absf(dir.x) > absf(dir.y):
+			e.y += b.end.y - r.position.y + 4.0
+		else:
+			e.x += b.end.x - r.position.x + 4.0
+	_boxes.append(_box(e, dir, w))
 	return e
+
+## The screen box a pin takes: its beam, badge and line (laid out as _label lays it).
+static func _box(e: Vector2, dir: Vector2, w: float) -> Rect2:
+	var top := e.y - BADGE_R - 3.0 - BEAM_H
+	if absf(dir.x) > absf(dir.y):
+		var x := e.x - BADGE_R if dir.x < 0.0 else e.x - BADGE_R - 8.0 - w
+		return Rect2(x, top, BADGE_R * 2.0 + 8.0 + w, e.y + BADGE_R - top)
+	var hw := maxf(w * 0.5, BADGE_R)
+	return Rect2(e.x - hw, top, hw * 2.0, e.y + BADGE_R + 24.0 - top)
 
 ## A pin's line: beside its badge on the screen side at the left and right edges, under it at the top and bottom
 ## (the beam stands over it).

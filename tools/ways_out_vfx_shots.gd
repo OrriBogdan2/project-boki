@@ -1,11 +1,12 @@
 extends RefCounted
 ## --ways-out-vfx-shots --shots-dir=<dir> [--quality=low|high]: does every Ways Out state read at the match camera
-## (decision 0051 "Seat looks")? Rows: the Heart locked (its Heartspark charging), unlocked (the spark out, the Gate
-## open) and its early seat used; the Sealed Lair and the Uplink raced by a rival squad and won; the Uplink open;
-## the Blight's edge. Columns: the player 8 m (the seat in frame), 20, 40 and 60 m from the seat (from the wall in
-## the Blight row), the seat ahead and to the right where the ground allows, the match camera (style, zoom, no
-## lean), two rivals fighting at the player's side. Writes <row>_<m>.jpg and sheet_<preset>.jpg (every frame,
-## captioned in the frame). Needs a renderer (jobq submit --needs gpu).
+## (decision 0051 "Seat looks")? Rows, in match order (the seats' machines only move forward): the Sealed Lair raced
+## by a rival squad and won; the Heart locked (its Heartspark charging), unlocked (the spark out, the Gate open) and
+## its early seat used; the Uplink open, raced and won; the Blight's edge. Columns: the player 8 m (the seat in
+## frame), 20, 40 and 60 m from the seat (from the wall in the Blight row), the seat ahead and to the right where the
+## ground allows, the match camera (style, zoom, no lean), two rivals fighting at the player's side. Writes
+## <row>_<m>.jpg and sheet_<preset>.jpg (every frame, captioned in the frame). Needs a renderer (jobq submit --needs
+## gpu).
 
 const DISTS := [8.0, 20.0, 40.0, 60.0]    # m from the player to the seat (to the wall: the Blight row)
 const SETTLE := 40                         # frames each shot runs before the grab
@@ -68,16 +69,12 @@ func run(main_node: Node) -> void:
 		X["state"] = "closed"
 		X["team"] = RIVAL
 		X["taken"] = true
-	await _row("heart_locked", "Heart locked (charging)", 270.0, H.site, heart_locked, false)
-	await _row("heart_unlocked", "Heart unlocked (spark out, Gate open)", 330.0, H.site, heart_open, false)
-	await _row("heart_early_used", "Heart early seat used", 420.0, H.site, heart_used, false)
-	H.early_team = -1
-	H.charge = 0.0
-	H._force(Heart.S.ASLEEP, "shots")      # (the Heart as it is at the quest rows' times: asleep at 3:00-4:00...)
 	user.teleport(m.world.free_spot_near(L["c"], [], 1.0, 0.45, 6.0))
 	await _row("lair_racing", "Sealed Lair raced (rival)", 180.0, L["c"], lair_racing)
 	await _row("lair_won", "Sealed Lair won (rival)", 240.0, L["c"], lair_won)
-	heart_open.call()      # (...its Heartspark out at 6:30-7:30)
+	await _row("heart_locked", "Heart locked (charging)", 270.0, H.site, heart_locked, false)
+	await _row("heart_unlocked", "Heart unlocked (spark out, Gate open)", 330.0, H.site, heart_open, false)
+	await _row("heart_early_used", "Heart early seat used", 350.0, H.site, heart_used, false)
 	await _row("uplink_open", "Uplink open", 390.0, X["pos"], uplink_open)
 	await _row("uplink_racing", "Uplink raced (rival)", 400.0, X["pos"], uplink_racing)
 	await _row("uplink_won", "Uplink won (rival)", 450.0, X["pos"], uplink_won)
@@ -142,7 +139,8 @@ func _blight_row() -> void:
 	var at := Vector3.INF
 	for rs in range(40, 8, -2):
 		for i in 12:
-			var a := Vector3(sin(deg_to_rad(35.0 + 30.0 * i)), 0, -cos(deg_to_rad(35.0 + 30.0 * i)))
+			var b := deg_to_rad(35.0 + 30.0 * i)
+			var a := Vector3(sin(b), 0, -cos(b))
 			var g := site + a * rs
 			var wall := site + a * (rs + 10.0)
 			if not m.world.is_void(g.x, g.z) and not m.world.is_void(wall.x, wall.z):
@@ -183,7 +181,7 @@ func _shoot(id: String, word: String, d: float) -> void:
 		h.ctrl = "bot"
 		h.hp = h.max_hp
 	cap.text = "%s  ·  %d m  ·  %s" % [word, int(round(d)), Settings.quality()]
-	for f in SETTLE:
+	for _f in SETTLE:
 		_clock()
 		if pin.is_valid():
 			pin.call()
