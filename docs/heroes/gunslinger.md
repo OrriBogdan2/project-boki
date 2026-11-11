@@ -232,7 +232,7 @@ Asserts named are in `--gunslinger-combo-check` (tools/hero_combo_check.gd, tool
 | 8 | Longneedle line narrows; muzzle orb | closed | 04648e2a0: `_tick_needle` `width_to` 12%; orb and flare in `_fire_needle`. Assert `Longneedle: the line narrows over the cast (18m)` |
 | 9 | Cooldowns | open | Rank 1 RMB 6.5, Shift 8.5, E 11.5; footage (level 9) 5.4 / 7.5 / 10; data (level 1) 9 / 11.5 / 12. Which level "source values" means is the owner's call (DECISIONS 11-07 default 1.0x) |
 | 10 | Slide identity | afterimage closed; ring owner override | 596288ff1 `_tick_echo` afterimages. Rings cut by DECISIONS "no bursts, rings or discs on dashes" and 1d5cdfd46. Assert `Vex audit: no ground ring, disc or column on a slide ...` |
-| 11 | Dazed reads for the whole window | in flight | KitStatus `rat` on main; ext/combo-marks-a b7353ee3a adds the overhead Daze tag with a time ring |
+| 11 | Dazed reads for the whole window | closed | KitStatus `rat`; the Daze in the foe's plate status row with a time ring, in her colour for her (`--plate-status-check`) |
 | 12 | Grenade throw animation | owner override; in flight | Item 112: no throw, a cannon kick. Assert `Vex item 112: no throw pose ...`. ext/vex-coin-palm-1108 (owner 11-08): a coin flick from the cyborg hand |
 | 13 | Mini Nuke | closed | 96831d533: Cinderfall, her ultimate (`gunslinger_ult.gd`) |
 | 14 | Mana | no change | The sheet's own call: our kits have no mana |

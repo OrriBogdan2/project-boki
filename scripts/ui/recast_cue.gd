@@ -5,7 +5,8 @@ extends RefCounted
 ## mark/stack/Daze through ArchKit.combo_marks(); this module turns them into one visual language:
 ##   the ability slot pulses, shows a big "<KEY> AGAIN" and a shrinking timer ring, and "EXPIRED" if it ran out;
 ##   a world marker with the same key sits on the thing the recast triggers (the seed, the knife, the hammer);
-##   a foe you marked shows a badge (what it is, a ring for the time left) that flashes when the payoff lands;
+##   a foe carrying your mark shows it in its plate's status row (HudPlate.row: the icon, a ring for the time left),
+##   and a burst goes off on it when the payoff lands;
 ##   sounds: a chime as the window opens, ticks before it closes, a low click when it runs out.
 ## Only the local player's own cues show (track runs for the local hunter); key names come from the live InputMap.
 
@@ -14,9 +15,7 @@ const WARN := 0.6              # s left when the ring turns hot and the ticks st
 const TICKS := [0.6, 0.4, 0.2] # s left at which a closing tick plays
 const EXPIRED_T := 0.9         # s "EXPIRED" stays on the slot
 const RAN_OUT := 0.12          # s: a window that vanished with less than this left ran out (more: it was used)
-const POP_T := 0.45            # s the payoff flash on a foe's badge lasts
-const BADGE_GAP := 72.0        # px between two badges on one foe
-const BADGE_UP := 5.3          # m above the foe's feet: clear over its nameplate and HP bar (they draw later)
+const POP_T := 0.45            # s the payoff burst on a foe lasts
 const PILL_PAD := 7.0           # px of dark backdrop either side of the slot's big text
 const HOT := Color("ff5a4a")
 const DIM := Color(0.6, 0.6, 0.66)
@@ -55,7 +54,7 @@ static func track(k: ArchKit, dt: float) -> void:
 		pop["t"] = float(pop["t"]) - dt
 		if float(pop["t"]) <= 0.0: cue["pop"] = {}
 
-## The payoff landed on `victim`: its badge bursts (ArchKit.payoff_fx and the payoffs that don't go through it).
+## The payoff landed on `victim`: a burst goes off on it (ArchKit.payoff_fx and the payoffs that don't go through it).
 static func payoff(k: ArchKit, victim: Ent) -> void:
 	if victim != null and k.h.is_local():
 		k.cue["pop"] = {"e": victim, "t": POP_T}
@@ -64,9 +63,10 @@ static func payoff(k: ArchKit, victim: Ent) -> void:
 static func window(slot_id: String, left: float, total: float, at: Vector3, armed := true, auto := false) -> Dictionary:
 	return {"slot": slot_id, "left": left, "total": total, "at": at, "armed": armed, "auto": auto}
 
-## A foe's badge entry as kits report it (ArchKit.combo_marks): n = the count shown (0: none), ready = gold.
-static func mark(e: Ent, n: int, left: float, total: float, label: String, ready: bool) -> Dictionary:
-	return {"e": e, "n": n, "left": left, "total": total, "label": label, "ready": ready}
+## A mark on a foe as kits report it (ArchKit.combo_marks), for its plate's status row: `icon` an Icons id, n = the
+## stack count shown (0: none), ready = the payoff is ready (a gold rim).
+static func mark(e: Ent, n: int, left: float, total: float, icon: String, ready: bool) -> Dictionary:
+	return {"e": e, "n": n, "left": left, "total": total, "icon": icon, "ready": ready}
 
 static func slot_col(k: ArchKit, slot: String) -> Color:
 	match slot:
@@ -118,7 +118,7 @@ static func _label(H: Node, base: Vector2, text: String, fs: int, col: Color) ->
 	(H.c as Control).draw_rect(box, Color(0.03, 0.03, 0.05, 0.8 * col.a))
 	H._ctext(base, text, fs, col, H.big)
 
-## In the world: the marker on what the open recast triggers, and a badge over every foe carrying your combo state.
+## In the world: the marker on what the open recast triggers, and the burst on a foe the payoff just landed on.
 static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 	if p == null or p.ak == null or cam == null:
 		return
@@ -127,14 +127,6 @@ static func world(H: Node, cam: Camera3D, p: Hunter) -> void:
 	if not w.is_empty() and not cam.is_position_behind(w["at"]):
 		_marker(H, cam.unproject_position(w["at"] + Vector3(0, 1.1, 0)), w, cue.get("col", Color.WHITE))
 	var pop: Dictionary = cue.get("pop", {})
-	var seen := {}                 # foe -> badges already drawn on it (a second one sits beside the first)
-	for mk in cue.get("marks", []):
-		var e: Ent = mk["e"]
-		if is_instance_valid(e) and e.visible and not cam.is_position_behind(e.position):
-			var n := int(seen.get(e, 0))
-			seen[e] = n + 1
-			var sp := cam.unproject_position(e.position + Vector3(0, BADGE_UP, 0)) + Vector2(BADGE_GAP * n, 0)
-			_badge(H, sp, mk, p.ak.res_col())
 	if not pop.is_empty() and is_instance_valid(pop["e"]) and not cam.is_position_behind((pop["e"] as Ent).position):
 		var k := 1.0 - float(pop["t"]) / POP_T
 		var sp := cam.unproject_position((pop["e"] as Ent).position + Vector3(0, 1.4, 0))
@@ -154,19 +146,3 @@ static func _marker(H: Node, sp: Vector2, w: Dictionary, col: Color) -> void:
 	H._ctext(sp + Vector2(0, 6.0), key, 17 if key.length() <= 2 else 11, Color.WHITE, H.big)
 	var word := "AGAIN" if bool(w.get("armed", true)) else "WAIT"
 	_label(H, sp + Vector2(0, 36.0), word, 12, col.lerp(Color.WHITE, 0.4))
-
-## A foe's combo badge: the count (or a dot) in the kit's colour, a ring for the time left, the name and seconds
-## over it; gold and pulsing once the payoff is ready.
-static func _badge(H: Node, sp: Vector2, mk: Dictionary, col: Color) -> void:
-	var c: Control = H.c
-	var ready := bool(mk.get("ready", false))
-	var tint := Color("ffd23f") if ready else col
-	var r := 16.0 + (2.0 * sin(float(Time.get_ticks_msec()) * 0.014) if ready else 0.0)
-	c.draw_circle(sp, r + 3.0, Color(0.03, 0.03, 0.05, 0.9))
-	c.draw_circle(sp, r - 2.0, Color(tint, 0.85))
-	H._arc(sp, r + 1.5, clampf(float(mk["left"]) / maxf(0.05, float(mk["total"])), 0.0, 1.0), Color.WHITE, 3.0)
-	var n := int(mk.get("n", 0))
-	if n > 0:
-		H._ctext(sp + Vector2(0, 6.0), str(n), 17, Color(0.05, 0.05, 0.08), H.big)
-	var txt := "%s %.1f" % [String(mk["label"]), float(mk["left"])]
-	_label(H, sp + Vector2(0, -r - 8.0), txt, 13, tint.lerp(Color.WHITE, 0.3))

@@ -130,13 +130,6 @@ func add_mark(t: Ent, n := 1, force := false) -> void:
 	_pip_pop(t, c)
 	_on_marks(t, had, c)
 
-func combo_read(t: Ent) -> Dictionary:
-	var n := marks_on(t)
-	if n <= 0:
-		return {}
-	return {"icon": "gem", "n": n, "max": pip_count(), "left": float((t.get_meta("marks") as Dictionary)[h.nid][1]),
-			"total": float(res_def()["dur"])}
-
 ## Filling the diamonds over the target chimes. Marks have no cap, so they keep climbing past it.
 func _on_marks(t: Ent, had: int, c: int) -> void:
 	if had < pip_count() and c >= pip_count():
@@ -791,7 +784,7 @@ func combo_marks(out: Array) -> void:
 		var e: Array = mk.get(h.nid, [0, 0.0])
 		if int(e[0]) > 0 and float(e[1]) > 0.0:
 			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
+			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "gem", primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")

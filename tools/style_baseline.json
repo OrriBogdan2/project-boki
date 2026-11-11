@@ -823,8 +823,8 @@
 "scripts/ui/hud.gd": {
 "history_comment": 2,
 "long_line": 185,
-"nested_ternary": 37,
-"semicolon": 45,
+"nested_ternary": 35,
+"semicolon": 44,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {

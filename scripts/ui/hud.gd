@@ -341,7 +341,7 @@ func _draw_world_labels() -> void:
 	_draw_lair_labels()
 	_draw_truce_marks()
 	_draw_wisp_rings()
-	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the payoff burst
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
@@ -463,11 +463,13 @@ func _draw_world_labels() -> void:
 			else:
 				_ctext(sp + Vector2(0, -10), "Wild %s" % Data.KIN[k.species]["name"], 16, Color("bfe9ff"), big)
 				_bar(Rect2(sp + Vector2(-24, -2), Vector2(48, 5)), k.hp / k.max_hp, Color("bfe9ff"))
+				_status_row(sp + Vector2(0, 17), k)
 		elif k.state == "downed" and k.owner_h and m.player and k.team == m.player.team:
 			BokiHud.downed_label(self, k, sp)
 		elif k.hp < k.max_hp:
 			_bar(Rect2(sp + Vector2(-22, 0), Vector2(44, 5)), k.hp / k.max_hp, SideColor.of(m, k))
 			c.draw_rect(Rect2(sp + Vector2(-22, 0), Vector2(44 * k.hp / k.max_hp, 5)), Color(KinRegen.MOTE_COL, KinRegen.pulse(k, m.time)))
+			_status_row(sp + Vector2(0, 17), k)
 
 func _draw_bubbles() -> void:
 	if m.tut and m.tut.card_up():
@@ -1456,8 +1458,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 				HudStyle.seg_bar(c, Rect2(Vector2(tx, r.position.y + 29), Vector2(tw, 8)), h.hp, h.max_hp, HudStyle.hp_fill(HudStyle.ALLY, frac, m.time), _chip_of(h, frac), HudPlate.shield_frac(h), plates.flash_of(h))
 				if h.max_armor > 0.5:
 					HudStyle.strip(c, Rect2(Vector2(tx, r.position.y + 38), Vector2(tw, 3)), h.armor / h.max_armor, h.armor_col())
-				if _has_status(h):
-					_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
+				_status_row(Vector2(tx + tw * 0.5, r.position.y + 52), h)
 			"WISP":
 				var left := _bleed_left(h)
 				var stp: bool = h.get_meta("stomped", false)
@@ -1474,10 +1475,6 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 				_text(Vector2(tx, r.position.y + 42), "ELIMINATED", 13, MUTED, big)
 		y += 66
 	_draw_squad_markers(sz, p)
-
-func _has_status(e: Ent) -> bool:
-	return e.stun_t > 0.0 or e.root_t > 0.0 or e.slow_t > 0.0 or e.burn_t > 0.0 or e.guard_t > 0.0 \
-		or (e is Hunter and ((e as Hunter).shield > 0.0 or (e as Hunter).weak_t > 0.0))
 
 func _chip_of(e: Ent, frac: float) -> float:
 	return plates.chip_of(e, frac, get_process_delta_time())
@@ -1502,19 +1499,10 @@ func _nameplate(sp: Vector2, h: Hunter) -> void:
 		# a bounty: a target over the plate and what knocking them is worth
 		bounty_marker(c, Vector2(sp.x, sp.y - 34), 1.15)
 		_ctext(Vector2(sp.x, sp.y - 48), "BOUNTY  ·  LV %d" % h.lvl, 11, Color("ffb64a"), big)
-	if not h.downed:
-		ComboMark.draw(c, Vector2(sp.x, sp.y - 34), m.player, h, m.time)
 
-## Little icons for what's happening to someone: stunned, rooted, slowed, burning, shielded, braced.
+## The status row (HudPlate.row) centred on `at`: under monster and Boki bars, and on the squad rows.
 func _status_row(at: Vector2, e: Ent) -> void:
-	var icons: Array = HudPlate.statuses(e)
-	var x := at.x - icons.size() * 8.0 + 8.0
-	for ic in icons:
-		c.draw_circle(Vector2(x, at.y), 7.0, Color(0.03, 0.03, 0.05, 0.85))
-		Icons.draw(c, String(ic[0]), Vector2(x, at.y), 4.2, ic[1])
-		if float(ic[3]) > 0.0:
-			_ctext(Vector2(x, at.y + 17), "%.1f" % float(ic[3]), 10, ic[1], big)
-		x += 16.0
+	HudPlate.draw_row(c, at, plates.row(m.player, e, HudPlate.statuses(e)), true)
 
 ## Teammates you can't see on screen get an arrow at the screen edge (with distance, coloured by
 ## how they're doing; a dead teammate's deathbox in their squad colour while their soul can still be saved).

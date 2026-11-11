@@ -50,7 +50,7 @@ var needle := {}               # Longneedle's charge: {t, dir (the turn-capped a
 var knocked := {}
 var direct_hits := 0           # Burr Charges that struck a foe (tests)
 var rattles := 0               # Burr Charges that blew (tests)
-var daze_for := {}             # foe id -> s of the Daze she last put on them (RecastCue's ring)
+var daze_for := {}             # foe id -> s of the Daze she last put on them (the status row's ring)
 var dazed_hits := 0            # rifle rounds on a Dazed foe (tests)
 var skewers := 0               # Longneedle payoffs
 var needle_hits := 0
@@ -181,13 +181,6 @@ func fire_ok() -> bool:
 func add_fever(n := 1) -> void:
 	res = minf(res_max(), res + float(n))
 	touch_res(float(res_def()["wait"]))
-
-func combo_read(t: Ent) -> Dictionary:
-	if not KitStatus.rattled(t):
-		return {}
-	var bd := rmb_def()["burr"] as Dictionary
-	return {"icon": "concussion", "n": 0, "max": 0, "left": KitStatus.rattled_left(t),
-			"total": float(bd["cone_rattle"]) + float(bd["wall_daze"])}
 
 ## Dazed foes take +90% from the rifle: a crit-style big gold number, and the string's decay pauses.
 func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
@@ -578,7 +571,8 @@ func _confirm_hit(victim: Ent, at: Vector3) -> void:
 		m.hud.hitmarker(true)
 		m.sfx("crit", at, -2.0, 0.8)
 
-## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
+## Dazed foes, for their plates' status row (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival
+## SKEWERS). The Daze icon, so it takes the place of the plain Daze everyone sees.
 func combo_marks(out: Array) -> void:
 	super(out)
 	for key in daze_for.keys():
@@ -587,7 +581,7 @@ func combo_marks(out: Array) -> void:
 		if left <= 0.0:
 			daze_for.erase(key)
 		elif not f.dead:
-			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), "DAZED", true))
+			out.append(RecastCue.mark(f, 0, left, maxf(left, float(daze_for[key])), "burst", true))
 
 ## Dazed: the foe takes more from the rifle and Longneedle (rattle_k in the data) and is slowed.
 func daze(foe: Ent, seconds: float) -> void:

@@ -8,7 +8,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 |---|---|
 | `hud_panels.gd` (`HudPanels`, one on `hud.panels`) | nothing of its own: the fixed panels (top bar, boss bar, kill feed, minimap, vitals, ability / weapon slots, gear, Boki card, squad, perks) draw on this canvas under `hud.c`, at most 20 times a second (item 94); world-anchored and mouse-following parts stay on `hud.c`, every frame. `hover_spots` fill here |
 | `hud_style.gd` (`HudStyle`) | colour roles, fonts, sizes, and the primitives: `seg_bar`, `strip`, `plate_frame`, `slot_frame`, `key_pill`, `count_badge`, `text` / `ctext`, `dmg_col` |
-| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, status icons to the right, downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
+| `hud_plate.gd` (`HudPlate`, one on `hud.plates`) | overhead plates: level coin, name or status word, health in 25-point segments, armour strip under it, shield past the end of health, chip (holds 0.4 s, then drains), hit flash, armour crack, the status row to the right (`row`, `draw_row`: also under monster and Boki bars and on the squad rows), downed plate and knock burst; `chip_of()` also feeds mob, boss and squad bars |
 | `team_boki.gd` (`TeamBoki`, drawn by `hud_panels.gd` right after `Hud._draw_squad`) | the squad rows' extras: a level chip on the portrait's lower-left (gold once the ultimate is open, the plate's own chip), and the teammate's small Boki icon with a thin health bar, tinted when it is down, resting or its owner is a wisp. The rest of a row (portrait, name, armour strip over segmented health, status icons, distance, KNOCKED / DEAD / EXTRACTED states) is `Hud._draw_squad`. A teammate's ult cooldown is not synced, so there is no ready marker. Check: `--hudref-check` |
 | `hud_vitals.gd` (`HudVitals`) | bottom-left block: portrait, level coin with XP ring, big health number, thick segmented bar, armour strip, shell, resource bar |
 | `hud_slot.gd` (`HudSlot`) | every ability / item slot (`hud._ab_slot`, `hud._skill_slot` delegate here): frame by state, clipped cooldown sweep, big countdown, charge pips, key pill, rank pips, lock |
@@ -19,7 +19,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `train_map.gd` (`TrainMap`, one on `hud.train_map`) | the sky train on both maps, one draw path (`draw`): the loop as a thin gold line, a small square per halt (named on the full map), the train as a chevron with its cars, and 'Next train: 0:24' at the halt nearest you (`SkyTrain.halt_eta`). On the minimap it is the `train` detail kind and shows by itself only while the loop is within 34 m of you. `--train-map-check` asserts halts, marker and countdown; `--train-map-shots` takes the shots (docs/train_map_shots/, on the 2x Hollow Crown) |
 | `outpost_glyph.gd` | an outpost on the minimap and full map: footing, mast, banner in the holder's colour, beacon filling with the charge |
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
-| `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
+| `combo_mark.gd` (`ComboMark`) | the payoff of a combo state: `ComboMark.payoff()` (called by a kit when its payoff lands) flashes the body white and plays the combo sound. The state itself is a mark in the foe's plate status row. Check: `--plate-status-check` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
@@ -36,11 +36,19 @@ Rules of the look:
 - Space kept free for other widgets: under each plate from `sp.y + HudStyle.PLATE_ICON_ROW` (loadout
   icons), and the right half of the bottom bar.
 
-- Crowd control on the plate: one status row (`HudPlate.statuses`, drawn by `icon_row` on hunter plates and
-  `Hud._status_row` on monsters) with one icon per kind, in order: stun, root, Ground, Daze, Slow, then burn,
-  weakened, shield, guard. Stun/root/slow read `Ent.stun_t/root_t/slow_t`; Ground and Daze read `KitStatus`
-  (`grounded_left`, `rattled_left`). Each shows its time left, shrinking, in the icon's colour; no icons, no row.
-  A remote body keeps the Net `kst` time (`KitStatus._note_remote`). Check: `--clarity-check` section 4.
+- The status row on the plate (DECISIONS 2026-11-08): one row shared by every source, built by `HudPlate.row(viewer, e,
+  HudPlate.statuses(e))` and drawn by `draw_row`, to the right of a hunter's plate, centred under your own, under
+  monster and Boki bars and on the squad rows. Sources: crowd control for everyone (stun, root, Ground, Daze, Slow; then
+  burn, weakened, shield, guard), and the viewer's own marks (`ArchKit.combo_marks` through RecastCue: Sable's Marks,
+  Vex's Daze, Sparkle's Sparks, Cinder's Char/Ablaze, Kael's Slam, Neve's Chill and Fan, Boki combo setups). Order:
+  what stops them (stun, root, Ground), your marks, then the rest; at most `ROW_MAX` (4). A mark drawn with a status's
+  icon takes its place (Vex's Daze, Ablaze over the plain burn). Each is a 21 px disc with its icon and a ring that
+  empties with the time left (whole and faint for a status with no clock), the stack count at the lower right, a gold
+  rim when a mark's payoff is ready; a mark is in the kit's colour. A crowd-control ring runs over the most time left
+  seen since it went on (`_ring_total`). It moves and hides with the plate, so nothing past `LabelCull.FAR_M`. Never
+  dash charges on a rival's plate (DECISIONS 2026-11-06). Stun/root/slow read `Ent.stun_t/root_t/slow_t`; Ground and
+  Daze read `KitStatus`; a remote body keeps the Net `kst` time (`KitStatus._note_remote`). Checks:
+  `--plate-status-check`, `--clarity-check` section 4; shots: `--plate-status-shots` (720p, GPU).
 
 Check: `--hudref-check` (segments follow max health, the chip holds then drains, armour and shield are
 drawn, the downed plate and status words show, cooldown text appears).
@@ -94,22 +102,21 @@ no kit draws its own recast HUD.
 - **Reporting (pull).** `ArchKit.recast_window()` returns `RecastCue.window(slot, left, total, at, armed, auto)`
   while a recast is open: `slot` is `e`, `x`, `dash` or `lmb`; `at` is what the recast triggers (the seed, the
   knife, the hammer, the landing spot); `armed` false shows WAIT (a minimum hold); `auto` means the window fires by
-  itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total, label,
-  ready)` for every foe carrying the kit's mark, stack or Daze. `_tick_recast` runs `RecastCue.track` for the
+  itself at the end (no EXPIRED). `ArchKit.combo_marks(out)` appends `RecastCue.mark(foe, n, left, total, icon,
+  ready)` for every foe carrying the kit's mark, stack or Daze (shown in that foe's plate status row). `_tick_recast` runs `RecastCue.track` for the
   local hunter only.
 - **Slot.** The slot pulses in the ability colour (`slot_col`), a timer ring empties (red under `WARN` = 0.6 s),
   and a big "<KEY> AGAIN" sits over it on a dark pill; the key is `Settings.key_cap` of the live InputMap action.
   A window that ran out (not used, not `auto`) shows EXPIRED for 0.9 s.
-- **World.** A marker with the key and a ring over `at`. A badge over each marked foe (count, ring for the time
-  left, name and seconds, gold when the payoff is ready), and a white burst on the foe when the payoff lands
-  (`RecastCue.payoff`, called from `ArchKit.payoff_fx` and the payoffs that bypass it).
+- **World.** A marker with the key and a ring over `at`. A marked foe shows the mark in its plate's status row (see
+  the plate section above), and a white burst goes off on the foe when the payoff lands (`RecastCue.payoff`, called
+  from `ArchKit.payoff_fx` and the payoffs that bypass it).
 - **Sound.** A chime when the window opens, ticks at 0.6/0.4/0.2 s left, a low click on EXPIRED.
 - **Buffer.** A press up to `ArchKit.RECAST_BUFFER` (0.15 s) before the recast is allowed is kept in `recast_buf`
   and replayed through `recast_now(slot)` (Ostra's seed, Rimewright's wall, Bulwark's recall, the E lead).
 
 Kits reporting: Thief knife (E), Tender hearth (E), Ostra seed (E), Rimewright wall (E) and Rimelock (X),
-Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Badges:
-Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
+Juggernaut chain (E), Mage Kitefall (X), Ashwick flight (X), Bulwark hammer (LMB), Dolm hops (Shift). Marks: Thief Marks, Mage Sparks, Gunslinger Daze, Rimewright Chill/Fan, Ashwick Char, Juggernaut slam.
 
 Checks: `--recast-cue-check` (each kit reports its window and the cue carries it, EXPIRED, the buffer, the
-badges); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).
+marks); `--recast-cue-shots --shots-dir=<dir>` (screenshots, run on a GPU through jobq).

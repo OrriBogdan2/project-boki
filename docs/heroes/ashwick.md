@@ -107,7 +107,7 @@ so nothing was built. In flight means extra polish on an unmerged branch; the ro
 | 1 | the stream lags like a hose, narrow to wide | closed | `ashwick_hose.gd` (b1aa67fe3); "lance: a sweep bends the stream", "lance: narrow at the nozzle ..." |
 | 2 | the ram stops on the first foe | closed | b1aa67fe3, 90c71388b; "ram: stops on the first foe and shoves it hard" |
 | 3 | dash identity: flame skull, head first | closed; in flight | flame skull and `as_leap` (b1aa67fe3), "ram: the flame skull wraps his front"; ext/anim-time-cinder adds the squash on the hit frame |
-| 4 | two burn stages, stream bonus on a burning foe, stage tell | closed; in flight | pips 1690a4072, +25% / +40% 90c71388b, "burn stage: ..." and "lance: +25% ..." rows; ext/combo-marks-b adds a ComboMark tag |
+| 4 | two burn stages, stream bonus on a burning foe, stage tell | closed; in flight | pips 1690a4072, +25% / +40% 90c71388b, "burn stage: ..." and "lance: +25% ..." rows; Char/Ablaze in the foe's plate status row, `--plate-status-check` |
 | 5 | Cinder Shot lane and range | closed lane and fizzle; owner override range | lane and fizzle "cinder: holding shows the aim lane ...", "cinder: a miss ... fizzles"; always 14 m: OWNER_REVIEW_1103 item 19 (8aa49aa5b) |
 | 6 | Furnace Cloak timing tell | owner override telegraph; closed swirl | instant, no 0.2 s ring: OWNER_REVIEW_1103 item 11; the swirling shield is drawn while it holds ("cloak: the swirling fire shield shows while it holds") |
 | 7 | two dash charges chain within 0.4 s | closed | "ram: toward the cursor, two charges chain" (1690a4072) |

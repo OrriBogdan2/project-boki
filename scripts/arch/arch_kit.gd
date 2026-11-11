@@ -140,15 +140,16 @@ func recast_window() -> Dictionary:
 		return RecastCue.window("e", e_t, float(e_def().get("time", e_t)), e_recast_at())
 	return {}
 func e_recast_at() -> Vector3: return h.pos           # where E's recast acts (the knife, the seed, the ring)
-## The foes carrying this kit's mark/stack/Daze, for RecastCue's badge: appends {e, n, left, total, label, ready}.
-## The base reports the Boki combo setups (Combos) this hunter or its Boki put on a foe.
+## The foes carrying this kit's mark/stack/Daze, for their plates' status row (HudPlate.row): appends
+## RecastCue.mark(foe, n, left, total, icon, ready). The base reports the Boki combo setups (Combos) this hunter or
+## its Boki put on a foe.
 func combo_marks(out: Array) -> void:
 	for f in m.foes_of(h.team):
 		for id in f.marks:
 			var mk: Dictionary = f.marks[id]
 			var left := float(mk["until"]) - float(m.time)
 			if mk["owner"] == h and left > 0.0:
-				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), "COMBO", true))
+				out.append(RecastCue.mark(f, 0, left, float(mk["window"]), "bond", true))
 ## A recast press from the buffer (RecastCue's ~0.15s): the slot's own press again.
 func recast_now(slot_id: String) -> void:
 	match slot_id:
@@ -901,10 +902,6 @@ func fire_ok_rmb() -> bool: return true
 var self_nodes: Array = []     # nodes this kit hangs on the hunter (freed by teardown on an archetype swap)
 var spips := {}                # the kit's own pips over the hunter's head (Chambers, Guard steps)
 var _pulse_t := 0.0
-
-## The combo state this kit has on `t`, for the overhead tag (ComboMark): {} or {icon, n, max, left, total}, plus
-## an optional lift (px up) when the kit already draws its own marker there.
-func combo_read(_t: Ent) -> Dictionary: return {}
 
 ## The crosshair label while the kit's payoff is armed ("" = none).
 func ready_label() -> String: return ""
