@@ -63,6 +63,7 @@ var cast_left := 0.0
 var cast_pan := Vector3.ZERO  # the framing at cast_k 1, taking over from the cursor pan
 
 var style_id := ""
+var dive_tilt := 0.0          # rad the view tips further down in the drop's dive (dive_view)
 ## Multiplies the distance on top of zoom: the home keeps its own wider framing with any style (see
 ## Home._apply_cam_settings); 1 everywhere in a match.
 var dist_mul := 1.0
@@ -80,6 +81,12 @@ func use_style(id: String) -> void:
 	dist = float(st["dist"])
 	fov = float(st["fov"])
 	rise = float(st.get("rise", 0.0))
+
+## The drop's dive view (DropView): `widen` degrees more field of view than the style's, tipped `tilt`
+## degrees further down. (0, 0) is the usual view.
+func dive_view(widen: float, tilt: float) -> void:
+	fov = float(STYLES.get(style_id, STYLES["supervive"])["fov"]) + widen
+	dive_tilt = deg_to_rad(tilt)
 
 ## The Settings camera (style and follow), wherever there's a CamRig: a match, the farm, the
 ## Training Grounds. Cheap enough to call every frame.
@@ -225,7 +232,7 @@ func _apply(shake: Vector3) -> void:
 	var c := chase * chase * (3.0 - 2.0 * chase)
 	# pitch: the style's angle, tipped toward straight down for a bird's-eye view, or low behind
 	# the skyship for the ride
-	var p := lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c)
+	var p := minf(lerpf(lerpf(pitch, deg_to_rad(88.0), k), deg_to_rad(30.0), c) + dive_tilt, deg_to_rad(88.0))
 	var d := dist * dist_mul * z * (1.0 + 0.15 * k)
 	# (Record.orbit_yaw: recording mode's slow orbit round the player, with the HUD hidden)
 	var back := Vector3(0, sin(p), cos(p)).rotated(Vector3.UP, yaw + Record.orbit_yaw)

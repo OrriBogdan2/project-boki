@@ -2,13 +2,16 @@ extends RefCounted
 ## --drop-launch-check: owner item 163, the squad's rocket launch off the skyship (DropLaunch).
 ##  1. The squad leaves together: every member who jumps with the leader stays in formation (within
 ##     FORMATION_M) for the whole lock.
-##  2. Keys are ignored for DropLaunch.LOCK_S: steering, jump (the glider), dash. Still diving, still flying the
+##  2. Keys are ignored for DropFeel.lock_s: steering, jump (the glider), dash. Still diving, still flying the
 ##     launch's heading.
-##  3. Separate is refused before SEPARATE_AFTER_S.
-##  4. When the lock ends everyone breaks off on their own and their glider opens.
-##  5. A Separate after SEPARATE_AFTER_S breaks that member off at once, glider open.
+##  3. Separate is refused before DropFeel.separate_after_s.
+##  4. When the lock ends everyone breaks off on their own and their glider opens (a bot may fold it again at
+##     once to dive for its spot: a dive it holds, decision 0049).
+##  5. A Separate after separate_after_s breaks that member off at once, glider open.
+##  6. The launch carries the squad CARRY_M along the ship's heading (decision 0049).
 
 const FORMATION_M := 9.0         # m: the widest drop slot and some slack
+const CARRY_M := [40.0, 50.0]    # m the launch carries you before the lock ends
 const HEADING_DOT := 0.95        # the launch keeps the ship's heading this closely, whatever the keys say
 
 var bad := 0
@@ -61,35 +64,43 @@ func _locked_flight() -> void:
 	var off_heading := 1.0
 	var acted := false
 	var refused := true
+	var from := l.pos
+	var carry := 0.0
 	var t := 0.0
-	while t < DropLaunch.LOCK_S - 0.05:
+	while t < DropFeel.lock_s - 0.05:
 		P.inp["move"] = Vector2(-head.y, head.x)       # hard sideways
 		P.inp["jump"] = int(t / Match.DT) % 6 == 0
 		P.inp["dash"] = int(t / Match.DT) % 9 == 0
 		m.step(Match.DT)
 		t += Match.DT
+		carry = Vector2(l.pos.x - from.x, l.pos.z - from.z).length()
 		for h: Hunter in squad:
 			spread = maxf(spread, h.flat_dist(l))
 		var hv := Vector2(P.vel.x, P.vel.z)
 		if hv.length() > 1.0:
 			off_heading = minf(off_heading, hv.normalized().dot(head))
 		acted = acted or not P.diving or P.roll_t > 0.0
-		if t < DropLaunch.SEPARATE_AFTER_S - 0.1:
+		if t < DropFeel.separate_after_s - 0.1:
 			for h: Hunter in squad:
 				if h != l and m.skydrop.separate(h):
 					refused = false
 	ok(spread <= FORMATION_M, "the squad stays together through the launch (widest %.1f m)" % spread)
 	ok(not acted, "keys do nothing in the launch: still diving, no dash")
 	ok(off_heading >= HEADING_DOT, "steering does nothing: it flies the ship's heading (dot %.3f)" % off_heading)
-	ok(refused, "Separate is refused in the first %.1f s" % DropLaunch.SEPARATE_AFTER_S)
+	ok(refused, "Separate is refused in the first %.1f s" % DropFeel.separate_after_s)
 	_clear(P)
 	for i in 12:
+		var launching := l.launch_at >= 0.0
 		m.step(Match.DT)
+		if launching:
+			carry = Vector2(l.pos.x - from.x, l.pos.z - from.z).length()
+	var carried := "the launch carries the squad %.1f m (%.0f to %.0f)" % [carry, CARRY_M[0], CARRY_M[1]]
+	ok(carry >= CARRY_M[0] and carry <= CARRY_M[1], carried)
 	var opened := true
 	var solo := true
 	for h: Hunter in squad:
 		if h.dropping:
-			opened = opened and not h.diving and h.launch_at < 0.0
+			opened = opened and (not h.diving or h.dive_hold) and h.launch_at < 0.0
 			solo = solo and (h == l or h.drop_solo)
 	ok(opened, "the lock over, every member's glider opens")
 	ok(solo, "the lock over, everyone breaks off on their own")
@@ -106,12 +117,12 @@ func _early_separate() -> void:
 	ok(f != null, "a follower to break off")
 	if f == null:
 		return
-	for i in int((DropLaunch.SEPARATE_AFTER_S + 0.1) / Match.DT):
+	for i in int((DropFeel.separate_after_s + 0.1) / Match.DT):
 		m.step(Match.DT)
-	ok(m.skydrop.separate(f), "Separate works after %.1f s" % DropLaunch.SEPARATE_AFTER_S)
+	ok(m.skydrop.separate(f), "Separate works after %.1f s" % DropFeel.separate_after_s)
 	m.step(Match.DT)
 	m.step(Match.DT)
-	ok(not DropLaunch.locked(f) and not f.diving, "a Separate breaks you off at once, glider open")
+	ok(not DropLaunch.locked(f) and (not f.diving or f.dive_hold), "a Separate breaks you off at once, glider open")
 
 func _clear(h: Hunter) -> void:
 	for k in ["jump", "dash", "glide", "glide_btn"]:

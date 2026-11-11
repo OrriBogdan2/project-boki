@@ -2,7 +2,7 @@ class_name DropSquad
 extends RefCounted
 ## How a squad comes down together, after SUPERVIVE's drop.
 ##
-## A match on the big map opens with a short planning phase (PLAN_T seconds) while the skyship waits at
+## A match on the big map opens with a short planning phase (DropFeel.plan_s seconds) while the skyship waits at
 ## the edge of the map: the full map is up, and everyone can ping where they want to land. Bots ping
 ## too. Then the ship sets off.
 ##
@@ -13,7 +13,6 @@ extends RefCounted
 ## leader can separate (Z) to jump or steer on their own. Bots follow the leader by default and some
 ## break off near the ground to land a little apart.
 
-const PLAN_T := 8.0
 const FOLLOW_GAIN := 5.0      # 1/s: how hard a follower closes the gap to its slot
 ## Formation slots behind the leader: (to the side, behind), in metres, turned with the leader's heading.
 const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector2(-5.0, 4.4), Vector2(5.0, 4.4)]
@@ -21,7 +20,7 @@ const SLOTS := [Vector2(-2.6, 2.2), Vector2(2.6, 2.2), Vector2(0.0, 4.6), Vector
 var m: Match
 var planning := false
 var plan_t := 0.0
-var plan_len := PLAN_T
+var plan_len := DropFeel.plan_s
 var leads := {}               # team -> Hunter
 var heading := {}             # team -> Vector2, the leader's smoothed heading on the drop
 var _bot_ping := {}           # hunter nid -> plan time left when it pings
@@ -55,7 +54,7 @@ func setup() -> void:
 	var o: Dictionary = m.opts
 	if m.big and not m.ship.is_empty() and not o.get("no_plan", false) and not o.get("tutorial", false) and not o.get("training", false) and not o.get("duel", false):
 		planning = true
-		plan_len = float(o.get("plan_t", PLAN_T))
+		plan_len = float(o.get("plan_t", DropFeel.plan_s))
 		plan_t = plan_len
 		for h in m.hunters:
 			if h.ctrl == "bot" and not h.remote and (h.riding or m.rolling == null):
