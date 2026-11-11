@@ -8,8 +8,8 @@ extends RefCounted
 ##   6. the line shows only for the dead and the watching, and says the count and the nearest seat
 ##   7. the dashed next Blight ring: the first ring before the tide, then where it will be tide_next_s on
 ##   8. the real HUD and the full map draw all of it (frames run with the Hud on, map open, player dead)
-##   9. pins from afar in the play view (WaysOutPins): a seat off screen within reach points at it, none on screen,
-##      none for taken or lost seats or past reach, the locked Heart ring waits for the Gate; the Blight's bar;
+##   9. pins from afar in the play view (WaysOutPins): a seat off screen points at it, none on screen, none for
+##      taken or lost seats or locked ones past reach, the locked Heart ring waits for the Gate; the Blight's bar;
 ##      only the Sealed Lair's own fight puts its seat in use
 ## Never touches the save.
 
@@ -212,7 +212,12 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 	var far := _stand(m, at[2], WaysOutPins.REACH_M + 15.0)
 	if far != Vector3.INF:
 		_put(m, far)
-		ok(WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO, "past REACH_M: no pin (the minimap's arrow)")
+		ok(WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) != Vector2.ZERO, "past REACH_M an open seat still has its pin")
+		m.time = float(q["uplink_open_s"]) - 20.0 - m.sess_t0
+		var locked := WaysOutHud.seats(m)
+		ok(WaysOutPins.seat_dir(m, sz, 2, locked, at[2]) == Vector2.ZERO, "past REACH_M a locked one has none")
+		m.time = float(q["uplink_open_s"]) + 10.0 - m.sess_t0
+		sd = WaysOutHud.seats(m)
 	_put(m, spot)
 	m.exits.seats.uplink.ref["taken"] = true
 	m.exits.seats.uplink.ref["state"] = "spent"
