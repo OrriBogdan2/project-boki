@@ -11,6 +11,8 @@ const DT := 0.25             # s per farm step
 const HATCH_S := 600.0       # s of home hatch time the egg starts with (home.gd _start_egg)
 const GLUM_JOY := 25.0       # Bur's joy at the start: glum, but one cheer lifts it out of it
 
+const CHORE_WORDS := ["minded the egg", "cheered up", "fetched the ball"]      # BaseChore's journal lines
+
 var bad := 0
 var main: Node
 
@@ -38,19 +40,37 @@ func _new_save() -> Dictionary:
 	HomeLayout.ensure(d)
 	return d
 
+## A ground spot with flat open ground from 7 m west to 11 m east of it (the Nook, the post, the toy and the ball
+## BaseChore drops 4.5 m past it): a toy over a ledge or in water left Mole no ball it could reach.
+func _flat_row(world) -> Vector3:
+	for _t in 200:
+		var c: Vector3 = world.random_ground(0)
+		var flat := true
+		for dx in range(-7, 12):
+			var x := c.x + dx
+			flat = flat and world.kind[world.idx(int(x), int(c.z))] == world.T_GROUND \
+				and world.island_of(x, c.z) == 0 and absf(world.ground_at(x, c.z) - c.y) < 0.1
+		if flat:
+			return c
+	return world.random_ground(0)
+
+func _chore_line(e: Dictionary) -> bool:
+	return CHORE_WORDS.any(func(w): return String(e.get("words", "")).begins_with(w))
+
 func _lines(rec: Dictionary, words: String) -> int:
 	return (rec.get("journal", []) as Array).filter(func(e): return String(e["words"]).begins_with(words)).size()
 
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
-	seed(7)
 	Content.rules("farm_build")["base_mode"] = true
 	var d := _new_save()
 	var home = await main._hb_home()
+	seed(7)      # after the sliced build: how many frames it takes (and the randf they spend) varies with load
+	home.world.rng.seed = 7
 	home.day_t = 0.4
 	home.ppos = Vector3(-500, 0, -500)
-	var center: Vector3 = home.world.random_ground(0)
+	var center := _flat_row(home.world)
 	d["layout"]["deco"].append({"id": "training_post", "u": 990001, "px": center.x + 3.0, "pz": center.z})
 	d["layout"]["deco"].append({"id": "nesting_nook", "u": 990002, "px": center.x - 6.0, "pz": center.z})
 	home._sync_fixtures()
@@ -78,8 +98,8 @@ func run(m: Node) -> void:
 			var kind := BaseChore.label(k)
 			var who := String(k["rec"]["name"])
 			var fsm: Fsm = k["life"]
-			# a chore's lines only: StatCause's (a toy's stat gain) carry a "stat"
-			var lines: Array = k["rec"].get("journal", []).filter(func(e): return not e.has("stat"))
+			# a chore's lines only: not StatCause's (a toy's stat gain) nor BaseTag's ("played tag with Bur")
+			var lines: Array = k["rec"].get("journal", []).filter(_chore_line)
 			if not lines.is_empty() and not is_same(lines.back(), last_line.get(who, null)):
 				writes[who] = int(writes.get(who, 0)) + 1
 				last_line[who] = lines.back()
