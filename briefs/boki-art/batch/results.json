@@ -111632,5 +111632,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_pipewurm_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_pocketpus",
+    "name": "Pocketpus (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pocketpus_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pipwom",
+    "name": "Pipwom (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pipwom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_polyshroom",
+    "name": "Polyshroom (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_polyshroom_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pinster",
+    "name": "Pinster (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pinster_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pipeworth",
+    "name": "Pipeworth (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pipeworth_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_postroo",
+    "name": "Postroo (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_postroo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_prismander",
+    "name": "Prismander (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_prismander_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_proofhop",
+    "name": "Proofhop (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_proofhop_1.jpg",
+    "ok": true
   }
 ]
