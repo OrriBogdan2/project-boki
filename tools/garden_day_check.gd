@@ -7,7 +7,9 @@ extends RefCounted
 ## meant to rest), fell out of the zone, never played at a toy, or (unless nocturnal) missed a night's nap; a
 ## toy nobody used; the zone's game that does not finish a match; or a part over GARDEN.md 10.6's budget as far
 ## as a headless run can read it: nodes, emitting particle systems, and the script cost of a frame and of a
-## 10 Hz base-life step (draws, objects and the GPU frame are --perf-bench --bench-zone=all).
+## 10 Hz base-life step (draws, objects and the GPU frame are --perf-bench --bench-zone=all). Bramblebank's day
+## starts with a toy you place among the residents (GARDEN.md 4, BaseLife.new_toy): they gather and chatter, the
+## most curious plays at it first and each keeps the day it arrived.
 ## `--day-zone=<id>` runs one zone (or "hub"). Never touches the real save.
 
 const NavCheck := preload("res://tools/garden_nav_check.gd")
@@ -27,6 +29,9 @@ const DAY_START := 0.3         # the farm clock at the start (morning)
 const ZONES := ["", "glasswater", "cinderstep", "hushwood", "ridge", "hub"]      # "" is the start zone, Bramblebank
 const RESIDENTS := 6           # Boki living in the zone for the day
 const MATCH_MAX := 180.0       # s a zone game's match may take before it counts as hung
+const NEW_TOY := "toy_dig"     # the toy you place at the start of Bramblebank's day
+const CURIOUS := 3             # the resident made the most curious (not the first in the list)
+const TRY_MAX := 12.0          # s from placing the toy to the most curious playing at it
 
 var bad := 0
 var main: Node
@@ -90,13 +95,11 @@ func _day(zone: String) -> void:
 	home.day_t = DAY_START
 	var wall := Time.get_ticks_msec()
 	var t := 0.0
+	if zone == "":
+		_new_toy(label)
 	while t < DAY_SECS:
-		home.day_t = fmod(home.day_t + DT / home.DAY_LEN, 1.0)
-		home._move_kin(DT)
-		home._care_tick(DT)
-		home.hsp.tick(DT)
 		t += DT
-		_watch(label, t)
+		_advance(label, t)
 		if int(t / DT) % FRAME_EVERY == 0:
 			await main.get_tree().process_frame      # deferred frees and timers (the puffs) run
 	var secs := float(Time.get_ticks_msec() - wall) / 1000.0
@@ -109,6 +112,77 @@ func _day(zone: String) -> void:
 	FarmUnlocks.rules()["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## One DT of the farm: its clock, the Boki, their care and the snack patch.
+func _advance(label: String, t: float) -> void:
+	home.day_t = fmod(home.day_t + DT / home.DAY_LEN, 1.0)
+	home._move_kin(DT)
+	home._care_tick(DT)
+	home.hsp.tick(DT)
+	_watch(label, t)
+
+## You place a toy with every resident within a few metres, free and roaming; CURIOUS is the most curious.
+## Checks they come to look, the gather lasts new_toy.gather s and is chatty, CURIOUS plays at it before anyone
+## else, and each looker keeps the day in its memory.
+func _new_toy(label: String) -> void:
+	var spot: Vector3 = HomeLayout.LANDING + Vector3(0, 0, 7.0)
+	var taken: Array = [spot]
+	for i in home.kins.size():
+		var k: Dictionary = home.kins[i]
+		var p: Vector3 = home.world.free_spot_near(spot + Vector3(cos(i * 1.05), 0, sin(i * 1.05)) * 4.0, taken, 1.3)
+		taken.append(p)
+		k["pos"] = p
+		(k["node"] as Node3D).position = p
+		k["goal"] = Vector3.INF
+		for key in ["busy", "indoors", "nap_t", "job", "chase", "fetch", "bath", "going_in", "called_t", "play"]:
+			k.erase(key)
+		k["hold_t"] = 0.0
+		k["say_t"] = 0.0
+		k["rec"]["needs"]["food"] = 100.0
+		k["rec"]["needs"]["energy"] = 100.0
+		k["rec"]["traits"]["curiosity"] = 0.95 if i == CURIOUS else 0.2 + 0.1 * i
+		var m: Fsm = home.life.machine(k)
+		if not m.is_in(BaseLife.S.ROAM):
+			m.go(BaseLife.S.ROAM, "check")
+	var curious: Dictionary = home.kins[CURIOUS]
+	var was: Array = home.toys.toys().map(func(t): return int(t["u"]))
+	var inv: Dictionary = home.hb.L()["inv"]
+	inv[NEW_TOY] = int(inv.get(NEW_TOY, 0)) + 1
+	ok(home.guide._place(NEW_TOY, spot), "%s: you place a %s among the residents" % [label, NEW_TOY])
+	var new: Array = home.toys.toys().filter(func(t): return not was.has(int(t["u"])))
+	var u: int = new[0]["u"] if not new.is_empty() else -1
+	var lookers: Array = home.kins.filter(func(k): return (k["life"] as Fsm).is_in(BaseLife.S.REACT))
+	ok(lookers.size() >= 3 and lookers.has(curious) and int(curious.get("life_toy", -1)) == u,
+			"%s: %d of %d come to look; the most curious will try it" % [label, lookers.size(), home.kins.size()])
+	var first := {}
+	var try_t := -1.0
+	var spoke := {}        # uid -> true: a looker that said a line
+	var t := 0.0
+	while t < TRY_MAX and try_t < 0.0:
+		t += DT
+		_advance(label, t)
+		for k in lookers:
+			if float(k.get("say_t", 0.0)) > 0.0:
+				spoke[k["rec"]["uid"]] = true
+		for k in home.kins:
+			var play: Variant = k.get("play")
+			if first.is_empty() and play is Dictionary and int(play["u"]) == u:
+				first = k
+		var cp: Variant = curious.get("play")
+		if cp is Dictionary and int(cp["u"]) == u and cp["phase"] == "play":
+			try_t = t
+	var G: Array = home.life.R["new_toy"]["gather"]
+	ok(is_same(first, curious), "%s: the most curious, %s, goes to it first (%s)"
+			% [label, curious["rec"]["name"], first.get("rec", {}).get("name", "nobody")])
+	ok(try_t >= float(G[0]) and try_t <= TRY_MAX, "%s: it plays at it %.1f s after a %.0f-%.0f s gather"
+			% [label, try_t, G[0], G[1]])
+	ok(spoke.size() >= 1, "%s: the lookers chatter (%d spoke)" % [label, spoke.size()])
+	var stuck: Array = lookers.filter(func(k): return (k["life"] as Fsm).is_in(BaseLife.S.REACT))
+	ok(stuck.is_empty() and home.panel_open == "", "%s: the gather is over and nothing opened on you" % label)
+	for k in lookers:
+		var mem: Array = k["rec"]["memory"].map(func(e): return String(e["text"]))
+		var want := "first to try the dig patch" if is_same(k, curious) else "the day the dig patch arrived"
+		ok(mem.any(func(x): return x.contains(want)), "%s: %s remembers '%s'" % [label, k["rec"]["name"], want])
 
 ## The zone's toys and the snack patch. A zone with a build brings its own (garden_zones.json deco); a zone
 ## without one gets the base demo's three toys and the patch round the landing.

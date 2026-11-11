@@ -4,7 +4,8 @@ extends RefCounted
 ## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, or a
 ## snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
-## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
+## another Boki, stares at a rival or comes to look at a newcomer or a toy you just placed (the most curious
+## one plays at it first, and each looker keeps the day in its memory). A retired mentor (Mentor) only strolls slowly
 ## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
 ## walks, plays, squabbles and shares); the machine asks it when bored or curious and shows Play while it owns
 ## the Boki, so there is one toy system. Tag and napping together build friendship,
@@ -28,7 +29,7 @@ const TABLE := {
 	S.PLAY: [S.ROAM, S.NAP, S.WATCH, S.REACT],
 	S.PLAY_WITH: [S.ROAM, S.NAP, S.REACT],
 	S.WATCH: [S.ROAM, S.NAP, S.REACT],
-	S.REACT: [S.ROAM, S.NAP, S.WATCH],
+	S.REACT: [S.ROAM, S.NAP, S.WATCH, S.PLAY],
 	S.CHORE: [S.ROAM, S.NAP, S.REACT],
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
@@ -45,6 +46,7 @@ var _acc := 0.0
 var _day_t := -1.0         # the farm's day clock at the last tick (a drop means a new day)
 var _seen := {}            # uid -> true: every Boki this base has met (a new uid is an arrival)
 var _asked := {}           # uid -> true: already asked to move to another zone since the base loaded
+var _trying := {}          # toy uid -> the Boki that tries a new toy first (nobody else picks it till then, saved)
 var whistle: BaseWhistle   # the whistle: your partner comes, hold for the nearest other Boki
 
 func _init(home) -> void:
@@ -97,6 +99,7 @@ func machine(k: Dictionary) -> Fsm:
 			BaseDuo.woke(k))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
+		m.on_exit(S.REACT, func(_to: int) -> void: _done_looking(k))
 		k["life"] = m
 	return k["life"]
 
@@ -305,8 +308,16 @@ func _look_tick(k: Dictionary, m: Fsm) -> void:
 	var cap := float(R["max"]["watch" if m.is_in(S.WATCH) else "react"])
 	if h.hway and is_same(at, h.hway.pad):
 		cap = float(k["life_for"])      # an ask at the pad waits its whole time
-	if m.since >= minf(float(k["life_for"]), cap):
-		m.go(S.ROAM, "looked")
+	if k.has("life_say") and to.length() <= 2.0 and FarmChatter.react(h, k, "look_toy"):
+		k.erase("life_say")      # one line each, when it is its turn to talk (one voice at a time)
+	if m.since < minf(float(k["life_for"]), cap):
+		return
+	if k.has("life_toy"):
+		h.toys.take(k, int(k["life_toy"]))
+		if m.go(S.PLAY, "tries it first"):
+			return
+		k.erase("play")
+	m.go(S.ROAM, "looked")
 
 # ------------------------------------------------------------------ entering states
 func _nap(k: Dictionary, why: String) -> void:
@@ -410,7 +421,57 @@ func _arrived(k: Dictionary) -> void:
 			o["t"] = float(o["life_for"])
 			h._emote(o, "!")
 
+## You placed toy `u` (home_build.gd): the free Boki near it gather for a few seconds and chatter, then the most
+## curious one plays at it first. Each keeps "the day it arrived" in its memory.
+func new_toy(u: int) -> void:
+	var toy := {}
+	for t in h.toys.toys():
+		if int(t["u"]) == u:
+			toy = t
+	if toy.is_empty():
+		return
+	var N: Dictionary = R["new_toy"]
+	var near := _near(toy, false, float(N["near"])).filter(
+			func(o): return (o["life"] as Fsm).is_in(S.ROAM) and not o.has("play"))
+	near.sort_custom(func(a, b): return _trait(a, "curiosity") > _trait(b, "curiosity"))
+	var secs := randf_range(N["gather"][0], N["gather"][1])
+	var what := String(HomeLayout.CATALOG[String(toy["id"])]["name"]).to_lower()
+	for o in near:
+		if not machine(o).go(S.REACT, "new toy"):
+			continue
+		o["life_at"] = toy
+		o["life_for"] = secs
+		o["life_say"] = true
+		o["t"] = secs
+		h._emote(o, "♪")
+		if _trying.has(u):
+			Save.remember(o["rec"], "look", "was there the day the %s arrived" % what)
+			continue
+		_trying[u] = o
+		o["life_toy"] = u
+		Save.remember(o["rec"], "look", "was first to try the %s, the day it arrived" % what)
+
+## True while new toy `u` waits for another Boki's first try: it is still looking or walking over (HomeToys.pick
+## passes the toy by). Once it plays, gives up or leaves the base, the toy is anyone's.
+func saved(u: int, k: Dictionary) -> bool:
+	var o: Variant = _trying.get(u)
+	if o == null or is_same(o, k):
+		return false
+	var p: Variant = o.get("play")
+	var walking: bool = p is Dictionary and int(p["u"]) == u and p["phase"] == "go"
+	if (walking or o.has("life_toy")) and h.kins.any(func(x): return is_same(x, o)):
+		return true
+	_trying.erase(u)
+	return false
+
+func _done_looking(k: Dictionary) -> void:
+	k.erase("life_say")
+	k.erase("life_toy")
+
 # ------------------------------------------------------------------ helpers
+static func _trait(k: Dictionary, key: String) -> float:
+	return float(k["rec"]["traits"].get(key, 0.5))
+
 ## Not asleep time: night is for napping, except for nocturnal Boki.
 func _awake(k: Dictionary) -> bool:
 	return not night or nocturnal(k["rec"])
@@ -424,10 +485,12 @@ static func _taken(k: Dictionary) -> bool:
 static func _dist(a: Dictionary, b: Dictionary) -> float:
 	return Vector2(a["pos"].x - b["pos"].x, a["pos"].z - b["pos"].z).length()
 
-## Other Boki within R.near on its island that the farm isn't driving (`asleep_ok`: napping ones count too).
-func _near(k: Dictionary, asleep_ok := false) -> Array:
+## Other Boki within `r` m (R.near if 0) on its island that the farm isn't driving (`asleep_ok`: napping ones
+## count too). `k` may be any {pos} (a toy).
+func _near(k: Dictionary, asleep_ok := false, r := 0.0) -> Array:
 	var here: int = h.world.island_of(k["pos"].x, k["pos"].z)
-	return h.kins.filter(func(o): return o != k and o.has("life") and not _taken(o) and _dist(k, o) < float(R["near"]) \
+	var reach := r if r > 0.0 else float(R["near"])
+	return h.kins.filter(func(o): return o != k and o.has("life") and not _taken(o) and _dist(k, o) < reach \
 		and (asleep_ok or not (o["life"] as Fsm).is_in(S.NAP)) and h.world.island_of(o["pos"].x, o["pos"].z) == here)
 
 ## Who it would like to play tag with: a free Boki, weighted toward the ones it gets on with; never a rival.
