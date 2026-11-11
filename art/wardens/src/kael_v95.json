@@ -29,7 +29,7 @@
   "knee.L": [-0.15, 0.02, 0.53],
   "ankle.L": [-0.165, -0.03, 0.1]
  },
- "relax": {"CUTS": 0},
+ "relax": {"CUTS": 0, "MAX_ITER": 400, "RINGS": 4},
  "past_wrist": {"R": "hand.R", "L": "hand.L"},
  "spread": "rig",
  "smooth": 12,
