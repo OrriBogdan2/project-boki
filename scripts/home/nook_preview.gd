@@ -3,6 +3,7 @@ class_name NookPreview
 ## theirs would be, read from Care.breed's own inputs. It adds no rules of its own.
 
 const PIC_PX := 56.0     # px, each possible baby's picture on the card
+const SWATCH_PX := 12.0   # px, a parent's colour swatch
 ## the note on an unstable mix (Care.unstable_mix: clashing elements or tempers)
 const UNSTABLE_NOTE := "An unstable mix: their elements or tempers clash. It hatches glum and needs care for a day."
 
@@ -13,7 +14,14 @@ static func facts(a: Dictionary, b: Dictionary) -> Dictionary:
 	if b["species"] != a["species"]: kinds.append(String(b["species"]))
 	var lean := Care.head_start(a, b)
 	return {"species": kinds, "lean": lean, "lean_from": "" if lean.is_empty() else String(Care.stronger(a, b)["name"]),
-		"look": Unique.blend_center(a, b), "unstable": Care.unstable_mix(a, b)}
+		"look": Unique.blend_center(a, b), "unstable": Care.unstable_mix(a, b), "odds": odds()}
+
+## The chances Care.breed and Unique.inherit give an egg, per trait: each stat from one parent (each)
+## or fresh, the coat from one parent (each) or fresh, and the species when the parents differ.
+static func odds() -> Dictionary:
+	var stat_from := float(Care.IV_INHERIT) / float(Care.IV_KEYS.size()) * 0.5
+	return {"species": 0.5, "stat_parent": stat_from, "stat_fresh": 1.0 - 2.0 * stat_from,
+		"coat_parent": Unique.COAT_TAKE, "coat_fresh": 1.0 - 2.0 * Unique.COAT_TAKE}
 
 ## The card: each possible baby in the blended look, its size and coats, the lean head start, the
 ## unstable note, and why the pair can't have an egg yet (if so).
@@ -32,7 +40,7 @@ static func card(a: Dictionary, b: Dictionary, tree: SceneTree) -> PanelContaine
 		var pic := KinPortrait.view(look, tree, PIC_PX)
 		pic.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		pv.add_child(pic)
-		var odds := "" if kinds.size() == 1 else " (1 in 2)"
+		var odds := "" if kinds.size() == 1 else " (%s)" % _pct(f["odds"]["species"])
 		var l := UI.label(String(Data.KIN[sp]["name"]) + odds, UI.T_SMALL, UI.INK)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		pv.add_child(l)
@@ -43,8 +51,17 @@ static func card(a: Dictionary, b: Dictionary, tree: SceneTree) -> PanelContaine
 	v.add_child(UI.kv("Size", Unique.size_tag({"dna": f["look"]})))
 	v.add_child(UI.kv("Coat", coats))
 	v.add_child(UI.kv("Head start", _lean_text(f)))
+	v.add_child(UI.kv("Shimmer", Shiny.odds_text(Shiny.egg_chance(a, b))))
 	if f["unstable"]:
 		v.add_child(UI.para(UNSTABLE_NOTE, UI.T_SMALL, UI.GOLD))
+	v.add_child(UI.section("What each can pass on", UI.FAINT.lightened(0.2)))
+	v.add_child(parents(a, b))
+	var o: Dictionary = f["odds"]
+	var line := "Each stat: %s from %s, %s from %s, %s fresh. Coat: %s each, %s new. Colour lands between theirs."
+	var stat := _pct(o["stat_parent"])
+	var coat := _pct(o["coat_parent"])
+	line = line % [stat, a["name"], stat, b["name"], _pct(o["stat_fresh"]), coat, _pct(o["coat_fresh"])]
+	v.add_child(UI.para(line, UI.T_SMALL, UI.MUTED))
 	var why := NookRules.pair_why(a, b)
 	if why != "": v.add_child(UI.para(why, UI.T_SMALL, UI.BAD))
 	return c
@@ -56,3 +73,49 @@ static func _lean_text(f: Dictionary) -> String:
 	var parts: Array = []
 	for el in lean: parts.append("%s %s" % [el, String.num(float(lean[el]), 1)])
 	return "%s (from %s)" % [", ".join(parts), f["lean_from"]]
+
+## The two parents side by side: lean (the stronger one's carries over), colour and coat, and the
+## judge's band for each stat (any stat may come from either one).
+static func parents(a: Dictionary, b: Dictionary) -> GridContainer:
+	var g := GridContainer.new()
+	g.columns = 3
+	g.add_theme_constant_override("h_separation", 10)
+	g.add_theme_constant_override("v_separation", 3)
+	var giver := Care.stronger(a, b) if Care.lean_total(Care.stronger(a, b)) > 0.0 else {}
+	g.add_child(UI.label("", UI.T_SMALL, UI.MUTED))
+	for r in [a, b]: g.add_child(UI.label(String(r["name"]), UI.T_SMALL, UI.INK))
+	g.add_child(UI.label("Lean", UI.T_SMALL, UI.MUTED))
+	for r in [a, b]:
+		var passes: bool = not giver.is_empty() and giver["uid"] == r["uid"]
+		var word := lean_word(r) + (" (passes)" if passes else "")
+		g.add_child(UI.label(word, UI.T_SMALL, UI.GOOD if passes else UI.INK))
+	g.add_child(UI.label("Colour", UI.T_SMALL, UI.MUTED))
+	for r in [a, b]: g.add_child(_colour(r))
+	for k in Care.IV_KEYS:
+		g.add_child(UI.label(String(Care.IVS[k]["name"]), UI.T_SMALL, UI.MUTED))
+		for r in [a, b]:
+			var n := Care.iv(r, k)
+			g.add_child(UI.label(Care.iv_word(n), UI.T_SMALL, IvView.word_col(n)))
+	return g
+
+## "ember 6" (its strongest element), or "none" with no lean yet.
+static func lean_word(rec: Dictionary) -> String:
+	var lean: Dictionary = rec.get("lean", {})
+	if lean.is_empty(): return "none"
+	var top: String = lean.keys().reduce(func(x, y): return x if float(lean[x]) >= float(lean[y]) else y)
+	return "%s %s" % [top, String.num(float(lean[top]), 1)]
+
+## A swatch of its own body colour and the name of its coat.
+static func _colour(rec: Dictionary) -> HBoxContainer:
+	var h := UI.hbox(4)
+	var sw := ColorRect.new()
+	sw.color = Unique.tint(Shiny.body(rec), Unique.of(rec))
+	sw.custom_minimum_size = Vector2(SWATCH_PX, SWATCH_PX)
+	sw.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(sw)
+	h.add_child(UI.label(Unique.mark_name(rec), UI.T_SMALL, UI.INK))
+	return h
+
+## 0.3 -> "30%".
+static func _pct(p: float) -> String:
+	return "%d%%" % int(round(p * 100.0))

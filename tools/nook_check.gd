@@ -108,3 +108,33 @@ func _preview(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
 	var c := NookPreview.card(a, b, null)
 	ok(c.get_child_count() == 1, "the preview card builds")
 	c.free()
+	_parents(a, b, rng)
+
+## The per-parent rows and the odds line against the rules they quote: each stat from one parent and
+## each coat from one parent as often as the card says (within 6 points over 600 eggs).
+func _parents(a: Dictionary, b: Dictionary, rng: RandomNumberGenerator) -> void:
+	var g := NookPreview.parents(a, b)
+	var cells := 3 * (3 + Care.IV_KEYS.size())
+	ok(g.get_child_count() == cells, "the parents grid has a row for lean, colour and each stat")
+	g.free()
+	var word := NookPreview.lean_word(a)
+	ok(word.begins_with("ember"), "a parent's lean names its strongest element (%s)" % word)
+	var o := NookPreview.odds()
+	var from_a := 0
+	var coat_a := 0
+	var n := 600
+	Unique.ensure(a)
+	Unique.ensure(b)
+	var da := Unique.of(a)
+	var db := Unique.of(b)
+	da["mark"] = "spots"
+	db["mark"] = "stripes"
+	for i in n:
+		from_a += (Care.inherit_ivs(a, b, rng)["from"] as Dictionary).values().count(0)
+		if String(Unique.inherit(a, b, 1000 + i)["mark"]) == "spots": coat_a += 1
+	var stat_share := float(from_a) / float(n * Care.IV_KEYS.size())
+	var said := float(o["stat_parent"])
+	ok(absf(stat_share - said) < 0.06, "a stat from one parent %.2f (card %.2f)" % [stat_share, said])
+	var coat_share := float(coat_a) / float(n)
+	said = float(o["coat_parent"])
+	ok(absf(coat_share - said) < 0.08, "a coat from one parent %.2f (card %.2f)" % [coat_share, said])

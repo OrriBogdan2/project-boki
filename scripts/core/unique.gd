@@ -51,6 +51,7 @@ const SAT_MAX := 0.15
 const VAL_SD := 0.05
 const VAL_MAX := 0.13
 const VOICE_SD := 0.07
+const COAT_TAKE := 0.45        # a parent's chance to pass on its coat pattern, colour and eyes (the rest roll fresh)
 const VOICE_MIN := 0.82
 const VOICE_MAX := 1.2
 const FAV_FILL := 1.15         # a favourite food fills this much more (Care.feed)
@@ -200,8 +201,8 @@ static func inherit(a: Dictionary, b: Dictionary, child_seed: int) -> Dictionary
 	d["voice"] = _r4(clampf((float(da["voice"]) + float(db["voice"])) * 0.5 + r.randfn(0.0, VOICE_SD * 0.6), VOICE_MIN, VOICE_MAX))
 	for k in ["mark", "mark_col", "eye"]:
 		var x := r.randf()
-		if x < 0.45: d[k] = da[k]
-		elif x < 0.9: d[k] = db[k]
+		if x < COAT_TAKE: d[k] = da[k]
+		elif x < 2.0 * COAT_TAKE: d[k] = db[k]
 	for k in ["ears", "tailv"]:
 		var x := r.randf()
 		if x < 0.4: d[k] = da[k]
