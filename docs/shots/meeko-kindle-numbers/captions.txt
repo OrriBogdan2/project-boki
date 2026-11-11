@@ -1,0 +1,6 @@
+plain_1.png: 0.5 s of held LMB, Kindle 1 on the target
+plain_2.png: 1.3 s of held LMB, Kindle 3 on the target
+plain_3.png: 2.2 s of held LMB, Kindle 5 on the target
+warm_1.png: 0.5 s of held LMB, Kindle 1 on the target
+warm_2.png: 1.3 s of held LMB, Kindle 3 on the target
+warm_3.png: 2.2 s of held LMB, Kindle 5 on the target
