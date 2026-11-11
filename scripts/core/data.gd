@@ -142,6 +142,16 @@ const PERKS := {
 	"brand_storm": {"name": "Storm Brand", "desc": "Every 4th hit arcs to 2 more foes.", "icon": "chain", "col": Color("fff27a"), "max": 1, "wup": {"brand": "storm"}},
 	"brand_venom": {"name": "Venom Brand", "desc": "Your hits poison and slow.", "icon": "burst", "col": Color("9aff6a"), "max": 1, "wup": {"brand": "venom"}},
 	"brand_void": {"name": "Hollow Brand", "desc": "Your hits heal you for 8% of the damage.", "icon": "shadowstep", "col": Color("b08aff"), "max": 1, "wup": {"brand": "void"}},
+	# hazard wards, sold in shops only (content/rules/shops.json): "ward" is the biome hazard kind
+	# that can't touch you (BiomeRun.warded)
+	"ember_walk": {"name": "Emberwalk", "desc": "Lava vents and their pools don't burn you.", "icon": "fireball",
+		"col": Color("ff8a3a"), "max": 1, "ward": "lava_vent"},
+	"sure_foot": {"name": "Sure Foot", "desc": "Ice doesn't make you slide.", "icon": "fortify",
+		"col": Color("bff0ff"), "max": 1, "ward": "ice_patch"},
+	"grounded": {"name": "Grounded", "desc": "Storm rods' lightning can't strike you.", "icon": "chain",
+		"col": Color("fff27a"), "max": 1, "ward": "lightning_rod"},
+	"spore_mask": {"name": "Spore Mask", "desc": "Spore pods don't hurt or slow you.", "icon": "gust",
+		"col": Color("c06ad0"), "max": 1, "ward": "spore_pod"},
 }
 
 ## Bot hunter difficulty. "auto" (the default) picks one from the run tier and how experienced you

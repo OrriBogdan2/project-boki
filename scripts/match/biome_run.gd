@@ -438,12 +438,23 @@ func _add_hazard(kind: String, p: Vector3) -> void:
 			n.add_child(rim)
 	hazards.append(hz)
 
-## How much grip the ground has at p (1 normal, low on ice), for the hunter's footing.
-func grip(p: Vector3) -> float:
+## How much grip the ground has at p (1 normal, low on ice), for the hunter's footing (h: who stands there).
+func grip(p: Vector3, h = null) -> float:
+	if h != null and warded(h, "ice_patch"):
+		return 1.0
 	for hz in hazards:
 		if hz["kind"] == "ice_patch" and Vector2(p.x - hz["pos"].x, p.z - hz["pos"].z).length() < float(hz["r"]) and absf(p.y - hz["pos"].y) < 0.3:
 			return 0.12
 	return 1.0
+
+## Does one of this body's perks keep this hazard kind off it (Data.PERKS "ward": the shop wards)?
+static func warded(body, kind: String) -> bool:
+	if not body is Hunter:
+		return false
+	for id in body.perks:
+		if String(Data.PERKS[id].get("ward", "")) == kind:
+			return true
+	return false
 
 func _near_hunter(p: Vector3, d: float) -> Hunter:
 	var best: Hunter = null; var bd := d
@@ -455,9 +466,11 @@ func _near_hunter(p: Vector3, d: float) -> Hunter:
 
 ## Hazards run on every game, each on its own clock: a game only hurts, pulls or slows the bodies it owns, so
 ## a player online is hit once (by their own game), not once per game.
-func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary) -> void:
+func _hit_area(at: Vector3, r: float, dmg: float, o: Dictionary, ward: String) -> void:
 	for f in m.foes_of(-3):
-		if not f.remote and Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
+		if f.remote or warded(f, ward):
+			continue
+		if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < r + f.r and absf(f.pos.y - at.y) < 1.8:
 			var oo := o.duplicate(); oo["tags"] = ["mut", "hazard"]; oo["src"] = "hazard"
 			f.hurt(dmg * float(m.T.get("mob", 1.0)), null, oo)
 
@@ -487,7 +500,7 @@ func _tick_hazards(dt: float) -> void:
 						_zap(p + Vector3(0, 3.3, 0), at2 + Vector3(0, 0.3, 0))
 						m.fx.burst(at2 + Vector3(0, 0.4, 0), Color("fff9c0"), 30, 7.0, 0.35, 2.0, 1.2)
 						m.sfx("boom", at2, -4.0, 1.5)
-						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true})
+						_hit_area(at2, 1.8, 14.0, {"stun": 0.4, "sky": true}, "lightning_rod")
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"lava_vent":
 				hz["t"] = float(hz["t"]) - dt
@@ -503,8 +516,8 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("ff9a3a"), 34, 7.5, 0.7, 9.0, 1.4)
 						m.sfx("boom", p, -4.0, 0.8)
-						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0})
-						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
+						_hit_area(p, 2.2, 10.0, {"burn": 3.0, "kb": Vector2.ZERO, "lift": 5.0}, "lava_vent")
+						m.fields.add(hz_ent, p, {"radius": 1.6, "color": "#ff7a3a", "time": 2.5, "every": 0.5, "dmg": 2.0, "burn": 2.0, "own": true, "ward": "lava_vent"}, {"slot": "lava", "ability": "lava"}, float(m.T.get("mob", 1.0)))
 						if core: core.scale = Vector3.ONE
 						hz["phase"] = "idle"; hz["t"] = rng.randf_range(5.0, 8.0)
 			"spore_pod":
@@ -523,7 +536,7 @@ func _tick_hazards(dt: float) -> void:
 						m.fx.end_telegraph(hz["tele"]); hz["tele"] = null
 						m.fx.burst(p + Vector3(0, 0.6, 0), Color("d88aff"), 28, 4.0, 0.8, -1.0, 1.4)
 						m.sfx("thump", p, -4.0, 0.7)
-						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
+						m.fields.add(hz_ent, p, {"radius": 2.6, "color": "#b06ad0", "time": 4.0, "every": 0.5, "dmg": 3.0, "slow": 0.6, "own": true, "ward": "spore_pod"}, {"slot": "spore", "ability": "spore"}, float(m.T.get("mob", 1.0)))
 						if pod: pod.visible = false
 						hz["phase"] = "spent"; hz["t"] = 14.0
 				else:

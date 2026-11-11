@@ -1562,9 +1562,9 @@ func _mouse_aim() -> Vector3:
 		aim_y = g
 	return Vector3(p.x, base_y, p.z)
 
-## How much grip the ground has here (ice patches in a frost region make it slippery).
-func ground_grip(p: Vector3) -> float:
-	return biomes.grip(p) if biomes else 1.0
+## How much grip the ground has here for h (ice patches in a frost region make it slippery).
+func ground_grip(p: Vector3, h: Hunter = null) -> float:
+	return biomes.grip(p, h) if biomes else 1.0
 
 ## wilds: wild Boki count (every hit does, BokiHit); target picking and danger sensing pass false.
 func foes_of(team: int, wilds := true) -> Array:

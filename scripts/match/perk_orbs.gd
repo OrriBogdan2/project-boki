@@ -61,6 +61,8 @@ static func roll(rng: RandomNumberGenerator, source: String, h = null, exclude :
 			if not Data.PERKS.has(id) or exclude.has(id) or (h != null and not h.perk_open(id)):
 				continue
 			var w := float(lean.get(k, 1.0)) * float(wts.get(id, 1.0))
+			if w <= 0.0:
+				continue        # weight 0: never from an orb (the shop-only hazard wards)
 			ids.append(id); ws.append(w); tot += w
 	if ids.is_empty():
 		return ""

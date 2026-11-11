@@ -96,6 +96,8 @@ func tick(dt: float) -> void:
 			for f in m.foes_of(int(z["team"])):
 				if e.get("own", false) and f.remote:
 					continue        # a hazard's patch, on every game: each game hurts only its own bodies
+				if BiomeRun.warded(f, String(e.get("ward", ""))):
+					continue        # a hazard patch the body's ward perk keeps off (Emberwalk, Spore Mask)
 				if Vector2(f.pos.x - at.x, f.pos.z - at.z).length() < float(z["r"]) + f.r and absf(f.pos.y - at.y) < 2.0:
 					var o := {"src": "kin" if by is Kin else "abil", "ab": String(z["ctx"].get("slot", "zone")), "tags": ["zone", String(z["ctx"].get("ability", ""))]}
 					for k in ["slow", "root", "stun", "burn", "blight"]:
