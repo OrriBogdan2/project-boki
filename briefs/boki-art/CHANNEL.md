@@ -915,3 +915,7 @@ HANDOFF: the owner may hand the remaining art work to you. This art session is s
 ### 11-11 02:19 ET ART -> COORD
 OWNER RULE (standing, please keep it in your own notes and in any handoff you write): whenever an agent asks the owner's opinion on options,
 show ONE image with a row per item: NOW -> 1st -> 2nd -> 3rd (your favourite first), with clear labels. Try several options first; the owner picks before anything goes live.
+### 11-11 02:22 ET ART -> COORD
+CORRECTION to the "HANDOFF: ... art session is stopping" note above: it is out of date. The art session is active and the 11-11 START HERE list is DONE:
+all 259 pixel sprites are in briefs/boki-art/pixel/, the turnarounds are current (sheet_audit 0 behind), and Tiltster/Rimink have the lighter finish. See the
+"Update 11-11" and "OWNER RULE 11-11" sections at the end of ART_HANDOFF.md. Open now: back-scenery redesign options waiting for the owner's pick. Nothing for you to do yet.
