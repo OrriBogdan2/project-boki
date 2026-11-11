@@ -1,7 +1,7 @@
 extends RefCounted
 ## --grounds-shots --shots-dir=<dir> [--perf-secs=4]: the Training Area (the --arena map) on a real GPU
 ## (jobq submit --needs gpu): a top-down overview, ground-level shots at the start, in the Training Room, on
-## each sky perch and in the Movement Fields (lane, tier steps, cliff, glide jump-off), and frame-time numbers
+## each sky perch, on the time-trial course and in the Movement Fields (lane, tier steps, cliff, glide jump-off), and frame-time numbers
 ## at the start, on a perch and in the fields (GROUNDSPERF lines: wall ms, GPU ms, CPU ms, draws, tris,
 ## objects, nodes). Also runs on the old Arena for the before number (no stations then).
 ## Software GL is no judge of any of this: only read the numbers from a real GPU.
@@ -54,6 +54,12 @@ func run(main_node: Node) -> void:
 			if s["kind"] == "arch":
 				await _perf("perch")
 		await _fields()
+		var T: TimeTrial = G.trial
+		P.teleport(T.start + (T.start - T.gates[0].at).normalized() * 3.0)      # behind the start arch
+		await _ground("trial_start")
+		P.teleport(T.pad_land)      # on the glide tower, the course below
+		await _ground("trial_tower")
+		await _perf("trial")
 	print("GROUNDSSHOTS %d in %s" % [n, dir])
 	main.get_tree().quit(0)
 

@@ -188,6 +188,7 @@ const CHECKS := {
 	"--summon-station-check": ["res://tools/summon_station_check.gd", "summon_station_check", null],
 	"--grounds-shots": ["res://tools/grounds_shots.gd", "grounds_shots", null],      # --shots-dir=<dir>, GPU only
 	"--parity-bench-check": ["res://tools/parity_bench_check.gd", "parity_bench_check", null],
+	"--time-trial-check": ["res://tools/time_trial_check.gd", "time_trial_check", null],      # the Grounds course
 	"--support-check": ["res://tools/support_check.gd", "support_check", "all"],
 	"--care-ult-check": ["res://tools/support_check.gd", "support_check", "tender"],      # Meeko's ult
 	"--tender-combo-check": ["res://tools/support_check.gd", "support_check", "tender"],
