@@ -465,7 +465,7 @@ func _start(o: Dictionary) -> void:
 	Practice.attach(self)      # the practice areas' bottom bar, J hero picker and wheel zoom
 	await _stage("build.hud")
 	_build_aim()
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
 	Bridge.kin_lines_for_match(self)
 	await _stage("build.finish")
 	set_process(true)
@@ -3384,7 +3384,7 @@ func on_menu_opened() -> void:
 func _on_menu_closed() -> void:
 	paused = false
 	if not over:
-		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+		CursorMode.aim()
 
 func step(dt: float) -> void:
 	if over:
@@ -5009,7 +5009,7 @@ func _finish() -> void:
 		if h.extracted and h != player:
 			placed += 0
 	r["placed"] = placed
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	if net_on:
 		Net.end_match()
 	Game.finish_match(r)

@@ -48,7 +48,7 @@ const WEAPONS := {"thief": "arc_bolts", "archer": "longbow", "mage": "coilcaster
 
 func _ready() -> void:
 	DemoQuick.restore()                 # back from a quick start: the real save again
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
 	Sfx.play_ambience("title")          # its own slow drone, not the match wind

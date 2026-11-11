@@ -18,7 +18,7 @@ static func open(match_node: Match) -> DuelRing:
 
 func _build() -> void:
 	m.paused = true
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	layer = CanvasLayer.new()
 	layer.layer = 40
 	layer.set_meta("ring", self)  # the pad drops open()'s return; the layer keeps the ring alive
@@ -49,7 +49,7 @@ func close() -> void:
 		session.cancel()
 	layer.queue_free()
 	m.paused = false
-	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	CursorMode.aim()
 
 ## The match is going away (back to the game, or into the duel found): stop listening to the line.
 func _unhook() -> void:

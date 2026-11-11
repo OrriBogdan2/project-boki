@@ -79,7 +79,7 @@ var chapter_lbl: Label
 var pips: HBoxContainer
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_music("title")
 	Sfx.play_ambience("home")
 	rng.seed = 77

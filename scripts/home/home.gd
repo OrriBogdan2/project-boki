@@ -108,7 +108,7 @@ var rain_next := randf() < 0.45     # what the coming weather turn brings, known
 
 func _ready() -> void:
 	if Game.modding(): Game.apply_mod()
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	CursorMode.menu()
 	Sfx.play_ambience("home")
 	Sfx.new_track.connect(_on_new_track)
 	var dbg := OS.get_cmdline_user_args()
