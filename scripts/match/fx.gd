@@ -3,6 +3,9 @@ extends Node3D
 ## Pooled visual effects: particle bursts, damage numbers, ground rings, attack telegraphs, lightning.
 
 const TELEGRAPH: Shader = preload("res://shaders/telegraph.gdshader")
+const RING_BURST: Shader = preload("res://shaders/ring_burst.gdshader")
+## cel_ring's band stops at this share of its quad's half width, so the quad is scaled up to reach a burst's radius
+const RING_REACH := 0.9
 ## a word that would land on another stacks this far above it (m along the camera's up), at most this
 ## many times
 const WORD_STEP := 0.62
@@ -371,15 +374,17 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	if own_look:
 		return
 	radial += 1
+	var m := ShaderMaterial.new()
+	m.shader = RING_BURST
+	m.set_shader_parameter("color", col)
+	m.set_shader_parameter("seed", fposmod(at.x * 3.1 + at.z * 1.7, 1.0))
 	var mi := MeshInstance3D.new()
 	mi.mesh = Models.flat_quad(2.0)
-	mi.material_override = Models.ring_mat(col, 0.12)
-	mi.material_override.set_shader_parameter("wash", 1.0)
-	mi.material_override.set_shader_parameter("halo", 1.0)
+	mi.material_override = m
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(mi)
 	mi.global_position = at + Vector3(0, 0.08, 0)
-	mi.scale = Vector3.ONE * 0.1
+	mi.scale = Vector3.ONE * radius / RING_REACH
 	rings.append({"node": mi, "t": 0.0, "dur": dur, "r": radius, "col": col})
 
 ## A melee swing: a bright crescent sweeping the arc in front of you, gone in a blink.
@@ -528,8 +533,10 @@ func _process(delta: float) -> void:
 		rg["t"] += delta
 		var k: float = rg["t"] / rg["dur"]
 		var mi: MeshInstance3D = rg["node"]
-		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
-		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
+		var rm: ShaderMaterial = mi.material_override
+		rm.set_shader_parameter("go", 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
+		rm.set_shader_parameter("spent", minf(k, 1.0))
+		rm.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
 		if k >= 1.0:
 			mi.queue_free(); rings.erase(rg)
 	for f in flashes.duplicate():
