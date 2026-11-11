@@ -189,10 +189,10 @@ func _juggernaut_slam() -> void:
 	await _reset(3.2)
 	var K: JuggernautKit = P.ak
 	var slam := func(t: float):
-		if _at(t, 0.1):
+		if _at(t, 0.1) or _at(t, 2.4):
 			K.press_rmb()
 		_aim(T.pos)
-	await _go(2.5, slam, _sheet("slam",
+	await _go(4.6, slam, _sheet("slam",
 			"RMB tap, Finishing Thrust: the blade levels as the strip fills, a short lunge, the thrust "
 			+ "burns a straight strip, sweet spot on the dummy at its tip, the strip cools",
 			[0.2, 0.4, 0.5, 0.54, 0.6, 0.7, 0.9, 1.3, 2.0]), 1.5)

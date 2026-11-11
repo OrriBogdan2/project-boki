@@ -193,7 +193,8 @@ static func tick(A: Arena, dt: float) -> void:
 				at_t = 1.45
 			else:
 				if _at(t, dt, 1.2):
-					P.teleport(H2.pos - Vector3(H2.pos.x - P.pos.x, 0, H2.pos.z - P.pos.z).normalized() * 2.5)
+					# back to the Thrust's far tip, its sweet spot
+					P.teleport(H2.pos - Vector3(H2.pos.x - P.pos.x, 0, H2.pos.z - P.pos.z).normalized() * 3.4)
 				if _at(t, dt, 1.25):
 					P.hp = P.max_hp * 0.6
 					P.ak.ch_rmb = 1.0
