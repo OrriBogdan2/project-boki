@@ -1002,10 +1002,13 @@ func _no_path(m: Match, h: Hunter) -> void:
 		a["banned"] = bans
 		a.erase("nopath")
 
+const STEP_MAX := 1.7     # m: the highest rise from one tile to the next a bot walks up (higher is a cliff)
+
 func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 	var d := b - a
 	var n := int(d.length() / 0.4) + 1
 	var side := Vector2(-d.y, d.x).normalized() * 0.32
+	var y := m.world.ground_at(a.x, a.y)
 	for k in range(1, n + 1):
 		var p := a + d * (float(k) / n)
 		if m.world.is_block(p.x, p.y) or m.world.is_block(p.x + side.x, p.y + side.y) or m.world.is_block(p.x - side.x, p.y - side.y):
@@ -1014,6 +1017,11 @@ func _clear_line(m: Match, a: Vector2, b: Vector2) -> bool:
 		# turned the bot aside every frame and it shuffled on the spot instead of taking the way round
 		if m.world.is_void(p.x, p.y):
 			return false
+		# and so does a cliff up: straight at high ground, a bot ran into its foot and never took the stairs
+		var py := m.world.ground_at(p.x, p.y)
+		if py - y > STEP_MAX:
+			return false
+		y = py
 	return true
 
 ## Breadth-first search over walkable tiles (a window around the trip), returning tile centres.
@@ -1039,7 +1047,7 @@ func _grid_path(m: Match, a: Vector2i, b: Vector2i) -> Array:
 			var i := W.idx(nx.x, nx.y)
 			if W.kind[i] != World.T_GROUND:
 				continue
-			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > 1.7:
+			if absf(W.ground_at(nx.x + 0.5, nx.y + 0.5) - W.ground_at(cur.x + 0.5, cur.y + 0.5)) > STEP_MAX:
 				continue
 			prev[nx] = cur
 			q.append(nx)
