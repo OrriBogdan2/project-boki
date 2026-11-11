@@ -1,4 +1,4 @@
-# 0022: Which hits spike a glider
+# 0075: Which hits spike a glider
 
 - **Status:** accepted
 - **Date:** 2026-11-09

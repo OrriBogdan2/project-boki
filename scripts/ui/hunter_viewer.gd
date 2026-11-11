@@ -1,6 +1,6 @@
 class_name HunterViewer
 extends PanelContainer
-## The Hunter viewer (docs/decisions/0005): one Relic, shown rather than described. On top its face, name
+## The Hunter viewer (docs/decisions/0066): one Relic, shown rather than described. On top its face, name
 ## and title and what it brings (health, dashes, weapon). Below, the real model on a slow turntable in its
 ## own SubViewport (it powers up while you hold to unlock it: HoldUnlock drives power() and burst()), and
 ## beside it every ability shown working in its own clip (AbilityClip: the ability used on a dummy, with

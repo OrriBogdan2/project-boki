@@ -14,7 +14,7 @@ measured with `--move-feel-check` and `--cliff-mantle-check` before and after:
 | Ground accel / stop | 47-54 m/s²; brake 22.2 + 2/s | same (0020) | same |
 | Gravity / fall cap | 14.7 m/s²; 12 -> 10 m/s abyss | same | same |
 | Jump | 7.5 m/s | 6.8 m/s (terraces, 0020) | same |
-| Air control | 0.015 | strong (owner 11-08, 0022) | same |
+| Air control | 0.015 | strong (owner 11-08, 0071) | same |
 | Knockback vs mass | Mass 100 and Knockback 1.0 for all 12 | mass 1.0 for all (same ratio); 0.12-0.35 s of 6 m/s² no-control [?] | same, then the source brake |
 | Walk while firing | not in the data [?]; Shiv footage 0.68-0.76x, unsettled | weapon fire_slow 0.5-1.0 (default 0.8) | same |
 | Dash end lag | DashCurves not decoded | hand-over at run speed; 3 of 12 curves fitted | same |

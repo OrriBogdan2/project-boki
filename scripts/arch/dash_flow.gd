@@ -6,7 +6,7 @@ extends RefCounted
 ## The same file's combo rows (docs/decisions/0015-combo-flow.md) cover jumps and holds: a press mid-jump, a jump
 ## or Shift out of an ability, and a hold carried through a dash, a jump or a mantle; a missing one combines.
 ## A press that crowd control still forbids, made in its last BUFFER_S, is held the same way and goes on the first
-## step the CC allows it (docs/decisions/0022-cc-exit-buffer.md).
+## step the CC allows it (docs/decisions/0076-cc-exit-buffer.md).
 
 const BUFFER_S := 0.15      # s: a held press waits at most this long past a dash's end; one this near a CC's end waits
 const SLOTS := ["lmb", "rmb", "e", "x", "q"]

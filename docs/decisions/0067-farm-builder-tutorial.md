@@ -1,4 +1,4 @@
-# 0011: Hob the builder, the guided farm tutorial and the Goals card
+# 0067: Hob the builder, the guided farm tutorial and the Goals card
 
 - **Status:** accepted (owner answers of Nov 2 20:40 ET and the Nov 3 04:55 UTC ask); the six tutorial questions use the stated defaults, kept as data
 - **Date:** 2026-11-03

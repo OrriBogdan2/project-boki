@@ -1,6 +1,6 @@
 class_name HoldUnlock
 extends VBoxContainer
-## Hold to unlock a Hunter (docs/decisions/0005). Press and hold the button (mouse, or Enter / Space
+## Hold to unlock a Hunter (docs/decisions/0066). Press and hold the button (mouse, or Enter / Space
 ## while it has focus): a bar slides out under it and fills over hold_s (content/rules/class_unlock.json)
 ## while the viewer's Hunter powers up (HunterViewer.power) with a rising hum. Let go early and it
 ## cancels: the bar drains and slides back, nothing changes. At full the Hunter unlocks

@@ -1,4 +1,4 @@
-# 0022: Ultimate ranks
+# 0073: Ultimate ranks
 
 - **Status:** proposed (spec only, no code)
 - **Date:** 2026-11-09

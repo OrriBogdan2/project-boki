@@ -3,7 +3,7 @@
 The rule: a Boki never moves, steers, stops, swaps, teleports, launches or roots its own hunter, and never
 takes over the controls. Boki act on foes, the world and the hunter's stats (heal, shield, buff). The one
 exception is the obvious abyss rescue (Moonlift). Owner 11-08: "make sure the boki changes to not interfere
-with ur gameplay (only buff/aid it)". Decision note: [0022](decisions/0022-boki-never-move-you.md).
+with ur gameplay (only buff/aid it)". Decision note: [0072](decisions/0072-boki-never-move-you.md).
 
 Re-audited on main d255acbee: every kin_v2 species (50), abilities_v2 (16), merges_v2 (9), merge_forms (3),
 evolution_v2 (10), the throw, carry styles and passives, and the Boki body itself. The starting point was the

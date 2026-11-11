@@ -1,5 +1,5 @@
 extends "res://tools/abyss_check.gd"
-## --air-control-check (playtest 11-08 items 4-9, docs/decisions/0022): the ONE movement model (Loco).
+## --air-control-check (playtest 11-08 items 4-9, docs/decisions/0071): the ONE movement model (Loco).
 ##   item 5: WASD in the air accelerates onto what you carry, counter-steer turns a backward drift forward fast,
 ##           along the keys you never pass the run cap, speed over it bleeds (never clipped), knocks carry
 ##   item 9: glide speed over cruise bleeds back within ~2 s, faster above a hunter's carry cap (Lace lowest)

@@ -1,6 +1,6 @@
 class_name HomeClasses
 extends RefCounted
-## The Hunters screen on the farm (J or the Hunters button; docs/decisions/0005). On the left every
+## The Hunters screen on the farm (J or the Hunters button; docs/decisions/0066). On the left every
 ## Hunter as a small tile: open, ready to unlock, in progress or locked, with its challenge's progress;
 ## under the tiles the picked Hunter's mastery goals and your glider. On the right the Hunter viewer
 ## (HunterViewer) and what you can do with it: play it, hold to unlock it (HoldUnlock, then the reveal),

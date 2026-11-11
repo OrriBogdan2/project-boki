@@ -1,6 +1,6 @@
 class_name FarmBuilder
 extends RefCounted
-## Hob Brackenridge's blueprints (content/rules/farm_builder.json, docs/decisions/0011-farm-builder-tutorial.md).
+## Hob Brackenridge's blueprints (content/rules/farm_builder.json, docs/decisions/0067-farm-builder-tutorial.md).
 ## Everything in farm_build.json "unlock" opens by farm level or milestone, but only becomes buildable
 ## once Hob has drawn it up (you talk to him). What he has drawn lives on the layout:
 ##   layout["hob"] = {given: [ids], told: how many pending blueprints the player was told about, met: talked once}

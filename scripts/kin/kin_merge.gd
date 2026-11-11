@@ -16,7 +16,7 @@ extends RefCounted
 ##   - it ends when time runs out, with the ultimate, early if you're knocked or the Boki is lost. Time out or
 ##     a broken shell: the Boki pops out beside you in Follow (not downed), no burst, no afterglow, a spent window of
 ##     KinParts.MERGE_SPENT_TIME. The ultimate (a release): the hunter gets the afterglow and the Boki lands beside you
-##     pumped and rests release_rest_s (MergeRelease, docs/decisions/0004). Then the spent window, or the rest if longer.
+##     pumped and rests release_rest_s (MergeRelease, docs/decisions/0064). Then the spent window, or the rest if longer.
 ##   - while merged the total damage bonus from stats is at most merge_forms.json damage_cap (cap_damage).
 ## No tiers: a form is identical for everyone (only its shield and speed baseline follow your weight class).
 ## State lives on the hunter: Hunter.merge_st {def, t, T, k, giant, pulse, form, surge, phase, xt, kit, contact, from, shell, shell_max} and merge_cd.

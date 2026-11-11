@@ -1,4 +1,4 @@
-# 0022: Presses at the end of a crowd control
+# 0076: Presses at the end of a crowd control
 
 - **Status:** accepted
 - **Date:** 2026-11-10

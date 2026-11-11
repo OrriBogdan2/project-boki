@@ -1,5 +1,5 @@
 extends RefCounted
-## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0019-prematch-lobby.md).
+## --prematch-check: the pre-match lobby (Prematch, PrematchView, docs/decisions/0069-prematch-lobby.md).
 ## Turns: offline you pick first, then bot mates instantly, each squad's Hunters unique, a run-out turn
 ## gets a random untaken one, then the lock; online picking waits for the whole lobby to load, teammates'
 ## picks only count on their turn, a lost or gone teammate is picked for. Also the admin toggle (Settings

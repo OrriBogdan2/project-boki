@@ -1,4 +1,4 @@
-# 0016: The Unmasked (the player's own character)
+# 0068: The Unmasked (the player's own character)
 
 - **Status:** accepted (heroes in a match wait for the owner's warden-models / mask-look sign-off)
 - **Date:** 2026-11-04

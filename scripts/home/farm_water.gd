@@ -1,6 +1,6 @@
 class_name FarmWater
 extends RefCounted
-## Crops by the water (docs/decisions/0011-farm-builder-tutorial.md). A crop patch within REACH tiles of
+## Crops by the water (docs/decisions/0067-farm-builder-tutorial.md). A crop patch within REACH tiles of
 ## water (a pond, a river you painted, or the wild water the island came with: all of them live in
 ## layout["water"]) waters itself: its plots are tended without you or the rain. Build mode says
 ## "near water" in green over the patch you are placing, and the tutorial's crop step points at the water.

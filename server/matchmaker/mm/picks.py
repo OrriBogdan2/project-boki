@@ -1,4 +1,4 @@
-"""A match's Hunter picks, held by the matchmaker (docs/decisions/0019-prematch-lobby.md; the game's
+"""A match's Hunter picks, held by the matchmaker (docs/decisions/0069-prematch-lobby.md; the game's
 Prematch runs the same rules). Picking starts once every human slot has joined its game server (or
 LOAD_WAIT_S passed); then each team picks in its own turn order, all teams at once, TURN_S seconds a
 turn. No two on a team may play the same Hunter; the enemy may mirror. A bot slot picks the moment

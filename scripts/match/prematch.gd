@@ -1,6 +1,6 @@
 class_name Prematch
 extends RefCounted
-## The pre-match lobby's rules (docs/decisions/0019-prematch-lobby.md): before an expedition everyone
+## The pre-match lobby's rules (docs/decisions/0069-prematch-lobby.md): before an expedition everyone
 ## loads in, then each squad picks its Hunters in turn (TURN seconds each, no two on a squad alike),
 ## then the picks lock and the match loads. The screen is PrematchView; the loading screen shows the
 ## same squad (squad_of). Settings > lobby_enabled (an admin setting) skips all of it.

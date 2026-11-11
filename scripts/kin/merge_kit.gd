@@ -1,6 +1,6 @@
 class_name MergeKit
 extends RefCounted
-## The ultimate of a merge (docs/decisions/0003, 0004). Created with the merge (KinMerge.cast), live once the
+## The ultimate of a merge (docs/decisions/0003, 0064). Created with the merge (KinMerge.cast), live once the
 ## transformation ends. Your own LMB, RMB, E and Shift stay yours (their augments are MergeAugment's); this is only
 ## R again: after a short lock (content/rules/merge_forms.json ult_lock_s) it fires the form's ultimate, a timeline of
 ## `beats` (ops and Effects) after a tell, which ends the merge and drains the Boki. A Boki without a form file has a

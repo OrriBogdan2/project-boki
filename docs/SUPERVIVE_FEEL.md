@@ -10,7 +10,7 @@ The owner read these straight from the installed game (config files, curve table
 |---|---|---|---|
 | Gravity | -1470 uu/s² | -14.7 m/s² | **Yes**: `Hunter.H_GRAV`, one gravity up and down (match and home) |
 | Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Partly: 6.8 m/s (1.5 m, 0.9 s in the air), so jump + mantle stays under our 4-terrace walls (the wall kick tops those) |
-| Air control | 0.015 | almost no steering mid-jump | **No, owner ruling 11-08**: strong WASD air control (`Loco.air_step`, `content/rules/tuning.json` air), decision 0022 |
+| Air control | 0.015 | almost no steering mid-jump | **No, owner ruling 11-08**: strong WASD air control (`Loco.air_step`, `content/rules/tuning.json` air), decision 0071 |
 | Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |
 | Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
