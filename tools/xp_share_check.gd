@@ -1,6 +1,6 @@
 extends RefCounted
 ## --xp-share-check: a monster's XP goes to the Hunter who lands the last hit and to their squadmates
-## within KillXp.SHARE_R of the kill, nothing for damage alone. A squad that deals 95% of a lair boss
+## within XpRules' share_r of the killer, nothing for damage alone. A squad that deals 95% of a lair boss
 ## and loses the last hit to a rival gets no XP; the kill's other rewards (stat and gear) go to the
 ## killer too, so the rival squad takes both. Never touches the save.
 
@@ -62,8 +62,9 @@ func run(main: Node) -> void:
 	for h in foes:
 		_spot(h, m.world.spawns[-1])
 	# ---- 1. a monster: last hit and squadmates in range
-	var want := 10.0 * KillXp.XP_PER_HP
-	ok(is_equal_approx(KillXp.SHARE_R, 30.0), "the share radius is 30 m")
+	var want := float(XpRules.rules()["stray"])
+	var boss_xp := float(XpRules.rules()["boss"])
+	ok(is_equal_approx(float(XpRules.rules()["share_r"]), 30.0), "the share radius is 30 m")
 	_spot(P, spot)
 	_spot(C, spot + Vector3(25, 0, 0))
 	_kill(spot, [[P, 10.0]])
@@ -120,8 +121,8 @@ func run(main: Node) -> void:
 	_zero_xp()      # (nothing steps between here and the kill)
 	b.hurt(b.hp + b.max_hp, P, {"src": "shot"})
 	ok(b.dead, "squad B's last hit kills it")
-	ok(is_equal_approx(P.xp, KillXp.BOSS_XP) and is_equal_approx(C.xp, KillXp.BOSS_XP),
-		"squad B gets the boss's %d XP (%.2f, %.2f)" % [int(KillXp.BOSS_XP), P.xp, C.xp])
+	ok(is_equal_approx(P.xp, boss_xp) and is_equal_approx(C.xp, boss_xp),
+		"squad B gets the boss's %d XP (%.2f, %.2f)" % [int(boss_xp), P.xp, C.xp])
 	ok(Q.xp == 0.0 and Q2.xp == 0.0,
 		"squad A, with 95%% of the damage, gets none (%.2f, %.2f)" % [Q.xp, Q2.xp])
 	ok(int(P.stats.get("bosses", 0)) == 1 and int(Q.stats.get("bosses", 0)) == 0,

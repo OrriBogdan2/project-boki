@@ -7,7 +7,7 @@ extends RefCounted
 ## Public API:
 ##   XpRules.pay_squad(m, by, xp)   pays xp to the killer (a Boki's kill is its Hunter's) and squad in range
 ##   XpRules.knock_xp(victim) -> float   what knocking this Hunter pays
-##   XpRules.kill_xp(mb) -> float   what killing this monster pays (0 for a lair boss: Lairs pays it)
+##   XpRules.kill_xp(mb) -> float   what killing this monster pays
 
 static var _rules: Dictionary = {}
 
@@ -33,7 +33,7 @@ static func knock_xp(victim: Hunter) -> float:
 
 static func kill_xp(mb: Mob) -> float:
 	if mb is Boss:
-		return 0.0
+		return float(rules()["boss"])
 	if mb.has_meta("camp"):
 		var kind := "chief" if mb.has_meta("chief") else mb.mkind
 		return float(rules()["camp_mob"].get(kind, rules()["stray"]))
