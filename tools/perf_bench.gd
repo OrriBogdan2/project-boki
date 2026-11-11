@@ -120,6 +120,7 @@ func _match() -> Array:
 			fought = true
 		var t0 := Time.get_ticks_usec()
 		m.step(DT)
+		m.acc -= DT      # _process steps on its own clock: without this every frame ran two steps
 		m._process(DT)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
