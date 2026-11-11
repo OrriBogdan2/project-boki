@@ -12,6 +12,7 @@ DAMP = 1e-4        # keeps a step small where the leg is straight (m^2)
 MAX_STEP = 0.2     # rad per pass: past the leg's reach the paw goes as near as it can instead of flailing
 MATCH = 1.0        # how much of the stance speed the paw keeps as it leaves and meets the ground (0..1)
 CARRY = 5          # how soon a swing's paw loses the stance speed: a higher power keeps it nearer the ground
+CLIP_SCALE = 0.95  # boki_rig.CLIP_SCALE (that module needs Blender): the clips' offsets in the build's metres
 SNAP = 1.0 / 3.0   # the lift's shape: under 1 the paw is up off the ground (past half its lift) within a frame or two
 
 
@@ -33,7 +34,7 @@ def where(bones, pose, bone):
         q = _rot(*((0, 0, 0) if rot == "on" else rot))
         at = q @ ((at - head) * pose.get(bone + "_sc", 1.0)) + head
         if parent is None or bone == "hips":
-            at = at + np.array(pose.get(bone + "_at", (0, 0, 0)), float) * 0.95      # boki_rig.CLIP_SCALE
+            at = at + np.array(pose.get(bone + "_at", (0, 0, 0)), float) * CLIP_SCALE
         bone = parent
     return at
 
@@ -50,7 +51,7 @@ def path(u, duty, reach, lift):
 
 
 def solve(bones, pose, foot, aim, setter, guess):
-    """The leg's two angles (a, b) that put `foot` at `aim` (model space: back and up); setter(pose, a, b) adds
+    """The leg's two angles (a, b) that put `foot` at `aim` (model space: back and up); setter(pose, a, b) sets
     them. Damped least squares from `guess`, which picks the knee's side."""
     ab = np.array(guess, float)
 
@@ -86,18 +87,17 @@ def planted(body, bones, legs, duty, reach, lift, drop=0.0, steps=1, guess=(0.0,
     return clip
 
 
-def two_bone(leg1, leg2, paw, fold=1.0):
+def two_bone(leg1, leg2, paw, fold):
     """A setter for a leg of two bones swung about x: `a` from the hip, `b` bends the knee to its `fold` side
-    (1 or -1); the paw (None if there is none) stays level with the ground."""
+    (1 or -1); the paw stays level with the ground."""
     def put(pose, a, b):
         pose[leg1] = (a, 0.0, 0.0)
         pose[leg2] = (fold * b, 0.0, 0.0)
-        if paw:
-            pose[paw] = (-a - fold * b, 0.0, 0.0)
+        pose[paw] = (-a - fold * b, 0.0, 0.0)
     return put
 
 
-def four_legs(front, hind, right=0.05):
+def four_legs(front, hind, right):
     """The legs of the shared four-legged rig (fleg1/fleg2/fpaw, hleg1/hleg2/hpaw) for planted: the forepaws step
     at phase `front`, the hind feet at `hind`, each right one `right` after its left; wrists fold back, hocks
     forward."""
