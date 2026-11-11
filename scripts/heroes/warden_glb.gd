@@ -927,6 +927,7 @@ class Sync extends Node:
 	var rigid_legs := {}        # bone index -> true: legs retargeted without the Legs node's shear (retarget_rigid)
 	var orbits := Orbits.new()    # the orbit_ props (seeing-stones) circling their bone
 	var sway: WardenSway          # a body that lags on its spring, tumbling props (WardenSway), or null
+	var head_look: WardenLookAt   # the head turns to the aim ahead of the body (WardenLookAt)
 	var clips: WardenClips        # a Hero's hand-keyed clips, or null: the bones follow the rig (BONES)
 	var blade_root: Node3D        # a skinned weapon's FX points (item 76b), riding its bone
 	var blade_tip: Node3D
@@ -953,6 +954,7 @@ class Sync extends Node:
 				continue
 			links.append([bi, nd, (rest[b] as Transform3D).affine_inverse(), skel.get_bone_global_rest(bi)])
 		links.sort_custom(func(a, c): return int(a[0]) < int(c[0]))     # parents before children
+		head_look = WardenLookAt.make(model, skeleton)
 		springs.setup(skel)
 		orbits.setup(skel)      # (the glTF import hangs a node riding a bone on a BoneAttachment3D under it)
 
@@ -1011,6 +1013,7 @@ class Sync extends Node:
 		else:
 			apply()
 			apply_blade()
+		head_look.step(dt, clips)
 		springs.fold = float(root.get_meta(WING_FOLD, 0.0))
 		springs.step(dt)
 		apply_blade()       # (again: a weapon that hangs on a chain, Pip's lantern, moved with the springs)
