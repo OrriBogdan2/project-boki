@@ -14,6 +14,7 @@ var bi := 0
 var nums: Array = []          # {node, t, vel}
 var num_pool: Array[Label3D] = []
 var rings: Array = []         # {node, t, dur, r}
+var ring_pool: Array[MeshInstance3D] = []      # finished rings, hidden: the next ring() reuses one (a fight makes dozens)
 var teles: Array = []
 var flashes: Array = []
 var particle_mat: StandardMaterial3D
@@ -243,6 +244,7 @@ func dash_trail(h) -> void:
 	dust(h.pos, 7)
 
 var ghosts: Array = []
+var ghost_pool: Array[MeshInstance3D] = []     # finished after-images, hidden: the next ghost() reuses one
 const GLOW_DUR := 0.5      # s: a body glow's life
 const GLOW_RISE := 1.4     # m/s: how fast it drifts up
 var _ghost_mesh: Mesh
@@ -251,11 +253,15 @@ var _ghost_mesh: Mesh
 func ghost(at: Vector3, yaw: float, col: Color, scl: float) -> void:
 	if _ghost_mesh == null:
 		_ghost_mesh = Models.capsule(0.3, 1.25)
-	var mi := MeshInstance3D.new()
-	mi.mesh = _ghost_mesh
-	mi.material_override = Models.glow_mat(Color(col, 0.55))
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	var mi: MeshInstance3D = ghost_pool.pop_back() if not ghost_pool.is_empty() else null
+	if mi == null:
+		mi = MeshInstance3D.new()
+		mi.mesh = _ghost_mesh
+		mi.material_override = Models.glow_mat(col)
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+	mi.material_override.set_shader_parameter("color", Color(col, 0.55))
+	mi.visible = true
 	mi.global_position = at + Vector3(0, 0.7 * scl, 0)
 	mi.rotation.y = yaw
 	mi.scale = Vector3(1.0, 1.0, 1.3) * scl
@@ -371,13 +377,17 @@ func ring(at: Vector3, radius: float, col: Color, dur := 0.35) -> void:
 	if own_look:
 		return
 	radial += 1
-	var mi := MeshInstance3D.new()
-	mi.mesh = Models.flat_quad(2.0)
-	mi.material_override = Models.ring_mat(col, 0.12)
-	mi.material_override.set_shader_parameter("wash", 1.0)
-	mi.material_override.set_shader_parameter("halo", 1.0)
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	add_child(mi)
+	var mi: MeshInstance3D = ring_pool.pop_back() if not ring_pool.is_empty() else null
+	if mi == null:
+		mi = MeshInstance3D.new()
+		mi.mesh = Models.flat_quad(2.0)
+		mi.material_override = Models.ring_mat(col, 0.12)
+		mi.material_override.set_shader_parameter("wash", 1.0)
+		mi.material_override.set_shader_parameter("halo", 1.0)
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		add_child(mi)
+	mi.material_override.set_shader_parameter("color", col)
+	mi.visible = true
 	mi.global_position = at + Vector3(0, 0.08, 0)
 	mi.scale = Vector3.ONE * 0.1
 	rings.append({"node": mi, "t": 0.0, "dur": dur, "r": radius, "col": col})
@@ -531,7 +541,7 @@ func _process(delta: float) -> void:
 		mi.scale = Vector3.ONE * lerpf(0.2, rg["r"], 1.0 - pow(1.0 - minf(k, 1.0), 3.0))
 		mi.material_override.set_shader_parameter("color", Color(rg["col"], clampf(1.0 - k * k, 0.0, 1.0)))
 		if k >= 1.0:
-			mi.queue_free(); rings.erase(rg)
+			mi.visible = false; ring_pool.append(mi); rings.erase(rg)
 	for f in flashes.duplicate():
 		f["t"] += delta
 		var mi: MeshInstance3D = f["node"]
@@ -548,4 +558,4 @@ func _process(delta: float) -> void:
 		gm.material_override.set_shader_parameter("color", Color(g["col"], 0.55 * (1.0 - k)))
 		gm.scale *= 1.0 - delta * 1.5
 		if k >= 1.0:
-			gm.queue_free(); ghosts.erase(g)
+			gm.visible = false; ghost_pool.append(gm); ghosts.erase(g)
