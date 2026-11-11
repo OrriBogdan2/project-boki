@@ -3,7 +3,8 @@ extends Node
 ## A Boki species drawn from a rigged model (art/kin/<species>/<species>.glb, tools/boki/build_boki.py) instead of
 ## KinModels' primitives. This node lives beside the model: it picks the body clip from the metas KinPuppet
 ## already reads, plus "kwork" (chop, mine, carry) and "kact" (eat, pet), and plays the face on top of whatever
-## the body does.
+## the body does. A downed Boki (kstate "faint") settles into the nap clip at DOWN_SPEED with its eyes shut and
+## springs up with a GETUP_S hop on revive: no clip of its own is baked (docs/art/kin/RIGGED_BOKI.md).
 ## A meta "face" (happy, sad, sleepy, angry) overrides the clip's expression. See docs/art/kin/RIGGED_BOKI.md.
 
 const PATH := "res://art/kin/%s/%s.glb"
@@ -130,6 +131,8 @@ const STRIDE := {
 	"nettlynx": [0.54, 1.07],
 	"thrumbird": [1.50, 2.90],
 }
+const DOWN_SPEED := 0.6       # x: the nap clip's pace while knocked out, a slow breath
+const GETUP_S := 0.3          # s: the hop it springs up with when a downed Boki comes round
 const FADE := 0.14            # s between body clips
 const FACE_RATE := 14.0       # 1/s the expression eases at
 const WALK_SPEED := 0.5       # m/s: below this it stands
@@ -200,6 +203,7 @@ var _pulse := 0
 var _shot_left := 0.0
 var _shot := ""
 var _asleep := false
+var _down := false             # kstate faint: knocked out, in the nap clip with its eyes shut
 var _blink_t := 2.0
 var _blink := 0.0
 var _look_t := 1.0
@@ -348,14 +352,19 @@ func _pick_clip(dt: float) -> void:
 	if String(root.get_meta("kstate", "")) == "attack":
 		_start_shot("attack")
 	_shot_left -= dt
-	var asleep := String(root.get_meta("kstate", "")) == "sleep"
+	var ks := String(root.get_meta("kstate", ""))
+	var asleep := ks in ["sleep", "faint"]
 	if asleep != _asleep:
-		_asleep = asleep
-		if _speed < WALK_SPEED:
+		if _down and not asleep:
+			_shot = "hop"
+			_shot_left = GETUP_S
+		elif _speed < WALK_SPEED or ks == "faint":
 			_start_shot("settle" if asleep else "wake")
+		_asleep = asleep
+	_down = ks == "faint"
 	var want := _state_clip()
 	set_clip(want)
-	player.speed_scale = 1.0
+	player.speed_scale = DOWN_SPEED if _down else 1.0
 	if want != "run" and want != "walk" and want != "carry":
 		return
 	# the world scale: a size roll's bigger Boki takes longer steps
@@ -368,7 +377,7 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
-	if String(root.get_meta("kstate", "")) == "sleep":
+	if _asleep:
 		return _shot if _shot == "settle" and _shot_left > 0.0 else "nap"
 	var work := String(root.get_meta("kwork", ""))
 	if work != "":
@@ -388,6 +397,8 @@ func _clip_face() -> String:
 	var over := String(root.get_meta("face", ""))
 	if over != "":
 		return over
+	if _down:
+		return "asleep"
 	if root.get_meta("dazed", false):
 		return "sad"
 	var cf: Variant = CLIP_FACE.get(clip, "")

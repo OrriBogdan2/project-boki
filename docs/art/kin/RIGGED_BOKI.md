@@ -31,7 +31,7 @@ script, so a change to a shape, colour or clip is an edit and a rebuild:
 Clips: idle, walk, run, attack, ability, hop, sleep, eat, pet, chop, mine, carry, tend.
 Home and garden-game clips (settle, nap, wake, munch, nudge, climb, splash, rush, brace, dodge, stonehop, spin) are not baked: `BokiHomeClips` builds them when the rig
 loads, from the species' own idle and sleep with `BokiHomePoses` deltas by body plan (quad, bird, legless) and a small
-`TWEAK` table per species. `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
+`TWEAK` table per species. `kstate` faint (a downed Boki) does the same at 0.6x with the eyes shut and springs up with the `hop` clip for 0.3 s on revive (`--kin-downed-check`). `kstate` sleep settles down, naps (curled, slow breathing) and wakes with a stretch; the
 `kact` meta munch (at a feeder) and nudge, climb, splash (the ball, post and tub, toys.json `clip`) play the rest.
 Tumble's moves play `kact` rush (coil, then lunge), brace (squat, shiver) and dodge (sway, hop aside), each as long as
 `impact_s`; Echo Steps plays stonehop (one `hop_s` hop, legs tucked) and spin (`EchoSteps.spin_s()`). `--boki-rig-check`
