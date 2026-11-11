@@ -4,13 +4,15 @@ extends RefCounted
 ## coin ringed by XP, then to its right your health as a big number over a thick segmented bar
 ## (same segments and chip as your overhead plate), armour as a strip under it with its number and
 ## tier, shields past the end of health, the merged form's shell, and the archetype resource under
-## that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## that, and the Boon of the Hunt's tile with its timer right of the bars while you hold it. The
+## ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, armor_lerp, hover_spots); this file only draws.
 
 const BAR_W := 318.0       # px: health / armour width
 const HP_H := 16.0         # px: the health bar
 const AR_H := 5.0          # px: the armour strip under it
 const LVL_POP := 0.35      # s: the level coin's pop
+const BOON_TILE := 22.0     # px: the Boon of the Hunt tile right of the bars
 
 static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var c: CanvasItem = H.c
@@ -74,7 +76,14 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		c.draw_rect(Rect2(Vector2(x0, ar.end.y + 2), Vector2(w * p.armor_frac(), 1)), Color(nxt, 0.9))
 	if p.ak and p.ak.has_meter():
 		H._draw_res_bar(x0, ar.end.y + 4, w, p)
+	_boon(H, Vector2(x0 + w + 10.0, hr.get_center().y), p)
 	_hidden_tag(H, sz, p)
+
+## Boon of the Hunt (HuntBoon): one buff tile, its seconds left under it.
+static func _boon(H, at: Vector2, p: Hunter) -> void:
+	var t := HuntBoon.left(p)
+	if t > 0.0:
+		HudPlate.icon_row(H.c, at, [[HuntBoon.ICON, HuntBoon.COL, "", t]], BOON_TILE)
 
 ## HIDDEN / CROUCHED / SPOTTED over the middle of the bar when you're in grass or crouching.
 static func _hidden_tag(H, sz: Vector2, p: Hunter) -> void:

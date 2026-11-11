@@ -121,6 +121,7 @@ var _net_seen_rec := {}
 var _rev_out := {}
 var _net_rev_t := 0.0
 var _finish_now := false
+var camps: Camps = null       # the monster camps: sizes, clears, rewards, comebacks (scripts/match/camps.gd)
 var rolling: Rolling = null     # a rolling 30-minute session (opts "rolling"): waves, join-in-progress, late-joiner levels (scripts/match/rolling.gd)
 var sess_t0 := 0.0              # session time when this match's clock started (rolling: when your wave set off; else 0)
 var ships: Array = []           # the other drop waves' skyships (rolling sessions); `ship` is your own
@@ -353,7 +354,8 @@ func _start(o: Dictionary) -> void:
 	if tut: tut.setup()
 	await _stage("build.hunters")
 	if not opts.get("tutorial", false) and not opts.get("duel", false) and not opts.get("arena", false):
-		await _spawn_mobs()        # the tutorial brings its own monsters, one step at a time
+		camps = Camps.new(self)       # (the tutorial brings its own monsters)
+		await camps.spawn_all()
 	await _stage("build.mobs")
 	if not opts.get("duel", false) and not opts.get("arena", false):
 		await _spawn_chests()
@@ -825,10 +827,6 @@ func _start_drop(h: Hunter, at: Vector3) -> void:
 	h.ai["land"] = at
 
 # ---- the skyship
-const SHIP_Y := 70.0      # item 163: a high start, a long readable glide down
-const RIDE_CAM_DIST := 44.0  # m back from the ship on the ride: the whole ship in frame (item 163)
-const LAUNCH_CAM_DIST := 26.0  # m back from the squad in the launch
-const SHIP_SPEED := 11.0
 var big := false
 var ship := {}
 var biomes: BiomeRun = null     # biome regions on an authored map (spawn tables, rarity, mutations, traps)
@@ -839,11 +837,12 @@ func _setup_ship() -> void:
 		if ship.is_empty(): ship = rolling.new_ship(0.0)
 		return
 	var ang := rng.randf() * TAU
-	var c := Vector3(world.w / 2.0 + rng.randf_range(-10, 10), SHIP_Y, world.h / 2.0 + rng.randf_range(-10, 10))
+	var c := Vector3(world.w / 2.0 + rng.randf_range(-10, 10), 0, world.h / 2.0 + rng.randf_range(-10, 10))
+	c.y = DropFeel.ship_height
 	var dir := Vector3(cos(ang), 0, sin(ang))
 	var half := world.w * 0.6
 	# "ride" is the last moment to jump: still over the islands on the far side
-	ship = {"a": c - dir * half, "b": c + dir * half, "dur": 2.0 * half / SHIP_SPEED, "ride": (half + 34.0) / SHIP_SPEED, "dir": dir}
+	ship = {"a": c - dir * half, "b": c + dir * half, "dur": 2.0 * half / DropFeel.ship_speed, "ride": (half + 34.0) / DropFeel.ship_speed, "dir": dir}
 	var n := Models.skyship()
 	n.rotation.y = atan2(-dir.x, -dir.z)
 	add_child(n)
@@ -967,43 +966,6 @@ func _apply_treat(k: Kin) -> void:
 		"treat_power": k.power *= 1.25
 		"treat_hardy": k.max_hp *= 1.4; k.hp = k.max_hp
 		"treat_calm": k.trust = minf(100.0, k.trust + 12.0)
-
-func _spawn_mobs() -> void:
-	if net_on and not is_host:
-		return
-	for c in world.camp_spots:
-		await _slice()
-		var p: Vector3 = c["pos"]
-		var comp: Array
-		match String(c.get("kind", "normal")):
-			"heavy": comp = ["brute", "spitter", "skitter", "sentinel"]
-			"light":
-				var lr := rng.randf()
-				comp = ["skitter", "skitter"] if lr < 0.4 else (["spitter", "skitter"] if lr < 0.7 else ["bomber", "skitter"])
-			_:
-				var nr := rng.randf()
-				if nr < 0.15 * tier + 0.2:
-					comp = ["brute", "skitter", "bomber"]
-				elif nr < 0.5:
-					comp = ["skitter", "bomber", "spitter"]
-				elif nr < 0.75:
-					comp = ["sentinel", "skitter", "skitter"]
-				else:
-					comp = ["spitter", "skitter", "bomber"]
-		# a camp in a biome region spawns from that region's table instead
-		var bcomp: Array = biomes.camp_comp(c) if biomes else []
-		if not bcomp.is_empty(): comp = bcomp
-		var made: Array = []
-		for kk in comp:
-			var q := p
-			for _t in 20:
-				var cand := p + Vector3(rng.randf_range(-1.8, 1.8), 0, rng.randf_range(-1.8, 1.8))
-				if not world.is_void(cand.x, cand.z) and not world.is_block(cand.x, cand.z):
-					q = Vector3(cand.x, world.ground_at(cand.x, cand.z), cand.z); break
-			var smb := spawn_mob(kk, q)
-			if biomes: biomes.dress(smb)
-			made.append(smb)
-		if rolling: rolling.note_camp(p, comp, made)     # (cleared camps come back in a rolling session)
 
 func spawn_mob(kk: String, at: Vector3) -> Mob:
 	at = _clear_spot(at)
@@ -1628,7 +1590,7 @@ func foes_of(team: int, wilds := true) -> Array:
 func dmg_mult(h: Hunter) -> float:
 	if h == null: return 1.0
 	var bot_k := float((h.ai.get("diff", {}) as Dictionary).get("dmg", 1.0)) if h.ctrl == "bot" and h != player else 1.0
-	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0)
+	return bot_k * (0.5 if h.weak_t > 0.0 else 1.0) * (1.25 if h.bless_t > 0.0 else 1.0) * (1.0 + h.gear_stat("dmg")) * (Life.R["sickness_dmg"] if h.sick_t > 0.0 else 1.0) * HuntBoon.dmg_k(h)
 
 func sfx(n: String, p = null, vol := 0.0, pitch := 1.0) -> void:
 	Sfx.play(n, p, vol, 0.07, pitch)
@@ -1760,7 +1722,6 @@ func on_damage(target: Ent, by: Ent, d: float, o: Dictionary) -> void:
 		if not credit.remote and target.team != credit.team and src != "burn":
 			Bond.add(credit, d / 320.0)        # (the merge meter: overcharge and the Bond IV apply there)
 		if not credit.remote and target.team != credit.team and not (target is Hunter and (target as Hunter).downed):
-			credit.gain_xp(d * (0.6 if target is Hunter else 0.35))
 			var lv: int = credit.armor_gain(d * (1.0 if target is Hunter else 0.33))
 			if lv >= 0:
 				_armor_up(credit)
@@ -1815,6 +1776,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 	var credit: Ent = by
 	if by is Kin and by.owner_h:
 		credit = by.owner_h
+	HuntBoon.on_knock(self, h, credit)
 	if h == player:
 		# getting knocked hits hard: slow time, flash red, pull the camera in
 		_slow(0.55, 0.3)
@@ -1827,7 +1789,7 @@ func knock(h: Hunter, by: Ent, _o: Dictionary) -> void:
 		if not credit.downed and credit.team != h.team:
 			DashReset.takedown(credit, h)
 			if credit.armor_gain(Hunter.ARMOR_KNOCK_XP) >= 0: _armor_up(credit)
-			credit.gain_xp(90.0)
+			XpRules.pay_squad(self, credit, XpRules.knock_xp(h))
 		add_feed("%s knocked %s" % [credit.pname, h.pname])
 		if credit.kin and credit.kin.comp and credit.kin.state != "downed":
 			credit.kin.comp.on_knock(h.pos)
@@ -2185,11 +2147,13 @@ func S_dev_god() -> bool:
 	return bool(opts.get("god", false)) or bool(opts.get("tutorial", false)) or bool(opts.get("training", false)) or Game.god
 
 func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
-	if net_on:
-		net_event(["mobdead", mb.nid, by.nid if by else ""])
-	var credit: Ent = by
-	if by is Kin and by.owner_h:
-		credit = by.owner_h
+	var credit: Ent = by.owner_h if by is Kin and by.owner_h else by
+	var xp := XpRules.kill_xp(mb) if credit is Hunter else 0.0      # (each game pays its own Hunters: XpRules)
+	if net_on: net_event(["mobdead", mb.nid, by.nid if by else "", xp])
+	XpRules.pay_squad(self, credit, xp)
+	HuntBoon.on_kill(self, mb, credit)
+	var own := not Camps.is_camp(mb)       # a camp's monsters drop nothing of their own: the camp pays one bundle
+	if camps: camps.on_mob_dead(mb, credit, xp)
 	if credit == player:
 		player.add_stat("mobs")
 	if biomes: biomes.on_mob_dead(mb)
@@ -2204,16 +2168,16 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 		# the gems come as one pile (DropMerge)
 		var gn := int(mb.md["gems"])
 		DropMerge.gems(self, mb.pos + Vector3(0, 0.6, 0), gn, int(round(3 * float(T["loot"]))))
-		if mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
+		if own and mb.md.get("stag", false) and not (mb is Boss) and rng.randf() < 0.6:
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
 		# guards, the Warden, the Glimmerkin and the Blight drop gear and weapon tunings (content/rules/gear.json)
-		GearDrops.run_table(self, mb.mkind, mb.pos + Vector3(0, 0, 0.4), rng, {"h": credit if credit is Hunter else null, "bonus": biomes.rarity_bonus_at(mb.pos) if biomes else 0})
+		if own: GearDrops.run_table(self, mb.mkind, mb.pos + Vector3(0, 0, 0.4), rng, {"h": credit if credit is Hunter else null, "bonus": biomes.rarity_bonus_at(mb.pos) if biomes else 0})
 		if mb.mkind == "warden":
 			# the Warden guards the best things: treasure, maybe a Soul Ember
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 2)), mb.pos + Vector3(0, 0, -0.9))
 			if rng.randf() < 0.5:
 				spawn_val(Loot.valuable("soul_ember"), mb.pos + Vector3(0.9, 0, -0.6))
-		elif mb.mkind == "brute" and rng.randf() < 0.25:
+		elif mb.mkind == "brute" and own and rng.randf() < 0.25:
 			spawn_val(Loot.valuable(Loot.roll_valuable(rng, 0 if tier == 0 else 1)), mb.pos + Vector3(0, 0, -0.8))
 		if mb.mkind == "glimmer":
 			if credit is Hunter: add_feed("%s caught the Glimmerkin's treasure" % credit.pname)
@@ -2221,13 +2185,13 @@ func on_mob_dead(mb: Mob, by: Ent, _o: Dictionary) -> void:
 			# a Warden's lamp holds something worth the risk: armor, often a tonic
 			drop("armor", mb.pos + Vector3(0, 0.6, 0), 25)
 			if rng.randf() < 0.4: drop("tonic", mb.pos + Vector3(0.4, 0.6, 0), 1)
-		if rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight or mb is Boss else 0.12)):
+		if own and rng.randf() < (0.35 if mb.mkind == "brute" else (0.0 if mb is Blight or mb is Boss else 0.12)):
 			drop("seed", mb.pos + Vector3(0, 0.6, 0), 1, Data.pick_seed())
 		# a Rift Key: always from the Warden, sometimes from an elite (one that can be staggered, or a rare one)
 		if exits and not exits.list.is_empty() and (mb.mkind == "warden" or ((mb.md.get("stag", false) or mb.rarity >= 3) and mb.mkind != "glimmer" and rng.randf() < 0.06)):
 			exits.drop_key(mb.pos)
 	# the big ones are worth a perk to whoever brought them down
-	if mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
+	if own and mb.mkind in ["warden", "brute"] and credit is Hunter and not (credit as Hunter).remote and (mb.mkind == "warden" or rng.randf() < 0.5):
 		PerkOrbs.drop(self, "boss" if mb.mkind == "warden" else "brute", mb.pos, 0, credit as Hunter)      # the Warden: a fan of three
 	if credit == player and player.kin and randf() < 0.15:
 		BokiChatter.say(self, player.kin, "kill")
@@ -3227,6 +3191,7 @@ func _process(delta: float) -> void:
 		cam_style = sty
 		cam.use_style(sty)
 	cam.lead_vel = Vector3.ZERO      # (movefeel) only a live glide leans the view (set below)
+	DropView.tick(self, delta)       # your way down: the dive view, the cloud sheet, wind streaks
 	if player and player.riding:
 		# aboard the skyship: a low view from just behind and above it, looking ahead along its
 		# course over the islands, like riding the bus in a battle royale
@@ -3235,7 +3200,7 @@ func _process(delta: float) -> void:
 		cam.yaw_to = atan2(-sd.x, -sd.z)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
-		cam.zoom_to = RIDE_CAM_DIST / cam.dist
+		cam.zoom_to = DropFeel.ride_cam_dist / cam.dist
 		if time < 0.5:
 			# boarding: start already behind the ship rather than swinging through it
 			cam.chase = 1.0; cam.yaw = cam.yaw_to; cam.zoom = cam.zoom_to
@@ -3249,7 +3214,7 @@ func _process(delta: float) -> void:
 			cam.yaw_to = atan2(-hd.x, -hd.y)
 		cam.chase_to = 1.0
 		cam.top_to = 0.0
-		cam.zoom_to = LAUNCH_CAM_DIST / cam.dist
+		cam.zoom_to = DropFeel.launch_cam_dist / cam.dist
 		cam.follow(player.pos + Vector3(0, 4.0, 0), delta, false)
 	elif player and not player.out and not player.downed:
 		cam.chase_to = 0.0
@@ -3257,7 +3222,7 @@ func _process(delta: float) -> void:
 		if player.dropping:
 			# the drop: looking down over your shoulder, pulled back while you're high up
 			var gy: float = world.ground_at(player.pos.x, player.pos.z) if not world.is_void(player.pos.x, player.pos.z) else 0.0
-			var hk := clampf((player.pos.y - gy) / SHIP_Y, 0.0, 1.0)
+			var hk := clampf((player.pos.y - gy) / DropFeel.ship_height, 0.0, 1.0)
 			cam.zoom_to = lerpf(1.05, 1.7, hk)
 			cam.top_to = clampf(hk * 0.7, 0.0, 0.6)
 		else:
@@ -3932,6 +3897,7 @@ func step(dt: float) -> void:
 		_update_ship(dt)
 	for s in ships:
 		_update_one_ship(s, dt)
+	if camps: camps.tick(dt)
 	if rolling:
 		rolling.tick(dt)
 		if opts.has("rolling_demo"): rolling.demo(String(opts["rolling_demo"]))
@@ -4904,7 +4870,7 @@ func on_mob_escaped(mb: Mob) -> void:
 	mb.dead = true
 	mb._cancel_tele()
 	fx.burst(mb.pos + Vector3(0, 0.6, 0), Color("fff4c0"), 24, 4.0, 0.7, -4.0)
-	if net_on: net_event(["mobdead", mb.nid, ""])
+	if net_on: net_event(["mobdead", mb.nid, "", 0])
 	if player and player.flat_dist(mb) < 25.0:
 		add_feed("The Glimmerkin got away")
 
@@ -5417,10 +5383,12 @@ func _net_ev(x, from: String) -> void:
 			if who is Hunter and not who.downed:
 				var by: Ent = ents_by_id.get(String(x[2]), null)
 				who.downed = true
+				HuntBoon.on_knock(self, who, by)
 				sfx("knock", who.pos, 0.0)
 				HeroSfx.voice(self, who, "down")
 				add_feed("%s knocked %s" % [by.pname, who.pname] if by is Hunter else "%s went down" % who.pname)
 				if by is Hunter: DashReset.takedown(by, who)       # refreshes the hunters this game owns
+				if by is Hunter and by.team != who.team: XpRules.pay_squad(self, by, XpRules.knock_xp(who))
 				if by == player:
 					player.knocks += 1
 					_reward_moment(who.pos)
@@ -5510,6 +5478,8 @@ func _net_ev(x, from: String) -> void:
 				who._cancel_tele()
 				fx.burst(who.pos + Vector3(0, 0.6, 0), who.md["color"], 22, 5.0, 0.6)
 				sfx("kill", who.pos, -6.0, 1.3)
+				if x.size() > 3: XpRules.pay_squad(self, ents_by_id.get(String(x[2]), null), float(x[3]))
+				HuntBoon.on_kill(self, who, ents_by_id.get(String(x[2]), null))
 		"drop":
 			if not is_host:
 				drop(String(x[2]), Vector3(x[5], x[6], x[7]), int(x[3]), String(x[4]), String(x[1]), Vector3(x[8], x[9], x[10]))
@@ -5551,6 +5521,7 @@ func _net_ev(x, from: String) -> void:
 				var wat := Vector3(x[4], x[5], x[6])
 				if String(x[2]) == "tune" and Data.PERKS.has(String(x[7])): spawn_tune(String(x[7]), wat, String(x[1]), false)
 				elif String(x[2]) == "gear" and Gear.ALL.has(String(x[7])): spawn_gear(String(x[7]), int(x[3]), wat, String(x[1]), false)
+		"campclr": Camps.show_clear(self, int(x[1]), int(x[2]), int(x[3]))
 		"odrop", "otake":
 			PerkOrbs.on_net(self, x)
 		"wtake":

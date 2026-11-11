@@ -3,8 +3,8 @@ extends RefCounted
 ## Overhead plates (one per hunter): the name or a status word, the run level on a coin, health in
 ## fixed-size segments with armour as a thin strip under it and shields as a pale fill past the end
 ## of health, a chip that holds then drains after a hit, a white flash on the frame when struck, an
-## armour-break crack, status icons to the right, and a downed plate with a
-## knock burst. Hud owns one of these (hud.plates) and calls draw() / draw_self() per hunter; the
+## armour-break crack, status icons to the right, a gold trim on a Boon of the Hunt holder, and a
+## downed plate with a knock burst. Hud owns one of these (hud.plates) and calls draw() / draw_self() per hunter; the
 ## same chip tracker feeds the mob and boss bars and the squad list (chip_of).
 ## Look and sizes: HudStyle. Layout around the anchor `sp` (the point over the head):
 ##   name / status word ............ sp.y - 7
@@ -25,7 +25,7 @@ var st := {}
 var now := 0.0
 var _prune_at := 0.0
 ## What the last draw showed for each nid (checks and tools read this): {segs, armor, shield,
-## downed, word, chip}
+## downed, word, chip, boon}
 var shown := {}
 
 ## How high over this hunter's feet their plate sits: the archetype's optional `plate_offset` (in its
@@ -149,6 +149,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	var ch := chip_of(h, frac, dt)
 	var fl := flash_of(h)
 	HudStyle.plate_frame(c, frame, Color(role, 0.55), fl)
+	var boon := boon_trim(c, frame, h)
 	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
 	HudStyle.seg_bar(c, hr, h.hp, h.max_hp, HudStyle.hp_fill(role, frac, H.m.time), ch, shield_frac(h), fl * 0.6)
 	var has_ar := _armor(c, h, Rect2(Vector2(x0, hr.end.y + 1.0), Vector2(w, HudStyle.PLATE_AR_H)), s)
@@ -173,7 +174,7 @@ func draw(H, sp: Vector2, h: Hunter, show_name: bool) -> void:
 	if h.ak and h.ak.tell != "":
 		_resource_tell(c, H.m.time, Vector2(x0 + w + 5.0, frame.position.y - 3.0), h)
 	shown[h.nid] = {"segs": HudStyle.seg_count(h.max_hp), "armor": has_ar, "shield": h.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "chip": ch, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"]), "boon": boon}
 
 ## An archetype's resource tell, readable from the other side: a glow at half, bright and quick at full.
 static func _resource_tell(c: CanvasItem, time: float, at: Vector2, h: Hunter) -> void:
@@ -197,6 +198,7 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 	var ch := chip_of(p, frac, dt)
 	var fl := flash_of(p)
 	HudStyle.plate_frame(c, frame, Color(HudStyle.SELF, 0.5), fl)
+	var boon := boon_trim(c, frame, p)
 	var hr := Rect2(Vector2(x0, sp.y + HudStyle.PLATE_PAD), Vector2(w, HudStyle.PLATE_HP_H))
 	var fill := HudStyle.hp_fill(HudStyle.SELF, frac, H.m.time)
 	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, fill, ch, shield_frac(p), fl * 0.6)
@@ -212,7 +214,15 @@ func draw_self(H, sp: Vector2, p: Hunter) -> void:
 		if word != "":
 			HudStyle.ctext(c, Vector2(sp.x, sp.y - 6), word, 12, sts[0][1])
 	shown[p.nid] = {"segs": HudStyle.seg_count(p.max_hp), "armor": has_ar, "shield": p.shield > 0.0, "downed": false,
-		"word": word, "chip": ch, "lvl": p.lvl, "lvl_pop": float(s["lvl_pop"])}
+		"word": word, "chip": ch, "lvl": p.lvl, "lvl_pop": float(s["lvl_pop"]), "boon": boon}
+
+## A gold trim round the plate of a Hunter holding the Boon of the Hunt (HuntBoon), for every squad
+## to see. Returns whether it's drawn.
+static func boon_trim(c: CanvasItem, frame: Rect2, h: Hunter) -> bool:
+	if HuntBoon.left(h) <= 0.0:
+		return false
+	c.draw_rect(frame.grow(1.5), HuntBoon.COL, false, 1.5)
+	return true
 
 static func _frame_rect(x0: float, y: float, w: float) -> Rect2:
 	var pad := HudStyle.PLATE_PAD

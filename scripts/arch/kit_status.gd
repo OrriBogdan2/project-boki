@@ -7,6 +7,7 @@ extends RefCounted
 ##   rat  Dazed (Vex's Burr Charge; "Rattled" in code): her rifle and Longneedle hit harder (no slow: the
 ##        source's Daze is only a damage window); stars over the head
 ##   dsr  Disoriented (Ostra's Trade): slowed by `k`; a SLOWED word and a teal ring
+##   bon  Boon of the Hunt (HuntBoon, not a kit's): its holder's own game grants it and tells every game
 ## The game that owns the body runs the rules; the caster's game sends the Net event
 ## ["kst", nid, kind, seconds, k] for a remote body (Net.VERSION 0.7.0), every game shows it.
 
@@ -68,10 +69,15 @@ static func apply(e: Ent, kind: String, secs: float, k := 0.0, send := true, toa
 			e.vuln_k = maxf(e.vuln_k if e.vuln_t > 0.0 else 0.0, k)
 			e.vuln_t = maxf(e.vuln_t, secs)
 			_show(e, kind, secs)
+		"bon":
+			e.set_meta("bon_until", maxf(float(e.get_meta("bon_until", 0.0)), float(m.time) + secs))
+			if send and m.get("net_on"):
+				m.net_event(["kst", e.nid, kind, snappedf(secs, 0.01), 0.0])
+			_show(e, kind, secs)
 
 ## A remote body's own game runs the rule, so here only the time left is kept, for the plate's timer.
 static func _note_remote(e: Ent, kind: String, secs: float) -> void:
-	if kind == "gnd" or kind == "rat":
+	if kind in ["gnd", "rat", "bon"]:
 		var key := kind + "_until"
 		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
 	elif kind == "dsr":
@@ -126,6 +132,9 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 		"vul":
 			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
+		"bon":
+			m.fx.word(e.pos + Vector3(0, 2.6, 0), "BOON OF THE HUNT", HuntBoon.COL, false)
+			m.fx.ring(e.pos, 1.4, HuntBoon.COL, 0.35)
 
 ## A Net "kst" event: the body's own game runs the rule.
 static func from_net(m: Node, x: Array) -> void:
