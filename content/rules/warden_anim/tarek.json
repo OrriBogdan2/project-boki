@@ -109,6 +109,11 @@
 			"hold_from": 0.22
 		}
 	},
+	"cc": {
+		"stun": {"hz": 0.8, "pose": {"hips": [4, 0, 0], "head": [6, 0, 14]}, "sway": {"hips": [2, 3, 4], "head": [4, 6, 6]}},
+		"root": {"hz": 1.2, "pose": {"hips": [10, 0, 0], "head": [0, 0, 10], "upper_arm.L": [-16, 0, 10], "upper_arm.R": [12, 0, -6]}, "sway": {"hips": [3, 8, 0], "upper_arm.L": [6, 0, 6]}},
+		"gnd": {"hz": 0.45, "pose": {"hips": [20, 0, 0], "head": [-4, 0, 12], "upper_arm.L": [-28, 0, 6], "upper_arm.R": [-6, 0, -10]}, "sway": {"hips": [1.5, 0, 1]}}
+	},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",

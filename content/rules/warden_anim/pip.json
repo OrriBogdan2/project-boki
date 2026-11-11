@@ -31,6 +31,11 @@
 		"mm_call": {"clip": "call", "lead": 0.08, "upper": true}, "mm_call_hold": {"clip": "call_hold", "hold_from": 0.0, "upper": true}, "mm_call_end": {"clip": "call_end", "upper": true},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"cc": {
+		"stun": {"hz": 1.0, "pose": {"hips": [6, 0, 0], "head": [10, 0, 8]}, "sway": {"hips": [3, 4, 6], "head": [8, 10, 14]}},
+		"root": {"hz": 2.2, "pose": {"hips": [12, 0, 0], "head": [8, 0, 0], "upper_arm.L": [-10, 0, 22], "upper_arm.R": [-10, 0, -22]}, "sway": {"hips": [3, 4, 4], "upper_arm.L": [12, 0, 8], "upper_arm.R": [12, 0, 8]}},
+		"gnd": {"hz": 0.6, "pose": {"hips": [18, 0, 0], "head": [16, 0, 0], "upper_arm.L": [-12, 0, -4], "upper_arm.R": [-12, 0, 4]}, "sway": {"hips": [1.5, 0, 1.5]}}
+	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["mm_shot_r", 0.3], ["mm_shot_l", 0.3], ["mm_shot_r", 0.3], ["mm_skip", 0.24], ["mm_shot_emp", 0.4], ["mm_seed_aim", 1.0], ["mm_seed", 0.4], ["mm_shot_l", 0.3], ["mm_hearth", 0.62], ["mm_toss", 0.4], ["mm_shot_r", 0.4], ["mm_pickup", 0.5], ["mm_shot_l", 0.42]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],

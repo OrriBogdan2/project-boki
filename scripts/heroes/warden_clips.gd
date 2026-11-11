@@ -71,6 +71,7 @@ var head_turn := 0.0         # rad the root is turned toward his heading
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
+var cc: WardenCc             # a stun, a root or Grounded shows on the body (scripts/heroes/warden_cc.gd)
 var out_w := 0.0             # the "weapon_out" data: how far the free-arm pose lies over the clips
 var out_pose: Array = []     # [bone index, rotation]: the free arm, sampled once from its clip
 var weapon_bi := -1          # "weapon_bone": the bone a thrown weapon hides on
@@ -142,6 +143,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	tree.active = true
 	gait = WardenGait.new(sk, (d["loco"] as Dictionary).get("arm_swing", {}))
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
+	cc = WardenCc.new(model, sk, d.get("cc", {}))
 	_setup_out()
 	return true
 
@@ -429,7 +431,9 @@ func step(dt: float) -> void:
 		act_w = move_toward(act_w, 1.0, dt / float(want.get("fade", FADE)))
 		up_w = move_toward(up_w, 0.0, dt / FADE)
 	else:
-		act_w = move_toward(act_w, 0.0, dt / FADE_LOCO)
+		# (the stun clip lets go as fast as it took hold: the stun is over, he moves at once)
+		var back := FADE if cur == String((d.get("states", {}) as Dictionary).get("stun", "")) else FADE_LOCO
+		act_w = move_toward(act_w, 0.0, dt / back)
 		up_w = move_toward(up_w, 0.0, dt / FADE_LOCO)
 		if act_w <= 0.0 and up_w <= 0.0:
 			cur = ""
@@ -444,8 +448,9 @@ func step(dt: float) -> void:
 	if d.has("crouch"):
 		_crouch(s, dt)
 	tree.advance(dt)
-	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_w) * (1.0 if _moving(s) else 0.0)
+	var loco_k := (1.0 - act_w) * (1.0 - air_w) * (1.0 - crouch_shown()) * (1.0 if _moving(s) else 0.0)
 	gait.apply(dt, loco_k, loco_k * (1.0 - up_w))
+	cc.apply(dt, s, 1.0 - proc_w)
 	var legs := bool(want.get("legs_heading", false))
 	_turn_to_heading(s, want, legs, dt)
 	_out(dt)
@@ -516,6 +521,10 @@ func _loco(s: Dictionary, dt: float) -> void:
 		air_t = 0.0
 	was_air = not grounded
 
+## How much the crouch layer owns the body: the state's crouch, or Grounded's (WardenCc, no dip: it is on in 0.1 s).
+func crouch_shown() -> float:
+	return maxf(crouch_w, cc.weight("gnd")) if d.has("crouch") else crouch_w
+
 ## The crouch layer: the dip plays as the state turns, the weight eases, the sneak ring follows the velocity.
 func _crouch(s: Dictionary, dt: float) -> void:
 	var cr: Dictionary = d["crouch"]
@@ -553,7 +562,7 @@ func _crouch(s: Dictionary, dt: float) -> void:
 		crouch_seek = minf(crouch_seek + dt, maxf(length - 0.001, 0.0))
 	if one_w > 0.0:
 		_p("crouch_dip/seek_request", crouch_seek)
-	_p("crouch_w/blend_amount", crouch_w)
+	_p("crouch_w/blend_amount", crouch_shown())
 	_p("crouch_one/blend_amount", one_w)
 	var face := float(s.get("face", 0.0))
 	var fw := Vector2(-sin(face), -cos(face))

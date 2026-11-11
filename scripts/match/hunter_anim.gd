@@ -30,7 +30,8 @@ extends RefCounted
 ##   flash (0..1) fired (seconds since the last shot) wid (weapon id) swing_n (counts swings)
 ##   combo (combo step of that swing, -1 for a charged attack) charge (0..1 holding a charge)
 ##   cast (seconds since an ability went off) cast_slot hit_t (seconds since a hit) hit_dir
-##   (Vector2, world, from the attacker) stun reviving base (0..1, -1) emote (id) emote_t (seconds)
+##   (Vector2, world, from the attacker) stun root gnd (rooted, Grounded: WardenCc shows them on the clips)
+##   reviving base (0..1, -1) emote (id) emote_t (seconds)
 ##   air_h (height above the ground, enables the long-jump tricks) squash (0..1) stretch
 ##   kin_on_shoulder
 ## Out: stepped (a foot came down this frame) slammed (a heavy landing hit the ground) flipping.

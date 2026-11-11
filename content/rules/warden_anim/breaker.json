@@ -127,6 +127,11 @@
 			"clip": "fuse"
 		}
 	},
+	"cc": {
+		"stun": {"hz": 0.7, "pose": {"hips": [6, 0, 0], "head": [10, 0, 0]}, "sway": {"hips": [3, 2, 5], "head": [4, 4, 6]}},
+		"root": {"hz": 1.0, "pose": {"hips": [14, 0, 0], "upper_arm.L": [18, 0, 6], "upper_arm.R": [18, 0, -6]}, "sway": {"hips": [5, 4, 0], "upper_arm.L": [6, 0, 0], "upper_arm.R": [6, 0, 0]}},
+		"gnd": {"hz": 0.4, "pose": {"hips": [10, 0, 0], "head": [-6, 0, 0], "upper_arm.L": [-10, 0, 10], "upper_arm.R": [-10, 0, -10]}, "sway": {"hips": [1.5, 0, 1]}}
+	},
 	"states": {
 		"downed": "downed",
 		"reviving": "revive",

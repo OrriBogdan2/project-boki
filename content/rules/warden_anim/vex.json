@@ -24,6 +24,11 @@
 		"gunslinger_knock": {"clip": "knock", "upper": "moving"},
 		"mf_xform": {"clip": "fusion"}
 	},
+	"cc": {
+		"stun": {"hz": 0.9, "pose": {"hips": [6, 0, -6], "head": [8, 0, -6]}, "sway": {"hips": [3, 3, 4], "head": [5, 8, 8]}},
+		"root": {"hz": 1.5, "pose": {"hips": [14, -10, 0], "upper_arm.R": [20, 0, -6]}, "sway": {"hips": [4, 10, 0], "upper_arm.R": [8, 0, 0]}},
+		"gnd": {"hz": 0.5, "pose": {"hips": [14, 0, 0], "head": [-10, 0, 0], "upper_arm.L": [-8, 0, 12], "upper_arm.R": [-14, 0, -4]}, "sway": {"hips": [1.5, 0, 1]}}
+	},
 	"states": {"downed": "downed", "reviving": "revive", "dead": "death", "dead_t": 1.5, "stun": "stun", "emote": "emote", "hit": {"front": "hit_f", "back": "hit_b", "dur": 0.42}},
 	"flow": [["gunslinger_lmb", 0.25], ["gunslinger_lmb", 0.12], ["gunslinger_dash", 0.5], ["gunslinger_lmb", 0.25], ["gunslinger_rmb", 0.4], ["gunslinger_e", 1.0], ["gunslinger_knock", 0.5], ["gunslinger_x", 0.5]],
 	"procedural": ["ledge", "mantle", "stomp", "base", "drink"],

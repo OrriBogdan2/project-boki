@@ -1,11 +1,13 @@
 extends RefCounted
 ## --clip-live-check: Kael's clips through the real match code: a Match, its Hunters, the kit's own keys and the render
 ## path (Hunter.render, HunterAnim, Sync). Re-equipping leaves one weapon drawn; the Warchain's throw and haul play
-## clips and the haul's lean goes where he is heading, not along the chain; a knock-out plays the death clip on screen,
+## clips and the haul's lean goes where he is heading, not along the chain; a real stun, root and Grounded each show
+## on the body while they run and let go 0.1 s after (WardenCc); a knock-out plays the death clip on screen,
 ## then he is gone.
 ## Never touches the save.
 
 const DT := 1.0 / 60.0
+const CC_SECS := 0.5           # s each effect is put on him
 const LEAN_OFF := 0.5          # rad: how far the haul's lean may sit off his heading
 
 var A
@@ -95,6 +97,7 @@ func run(main: Node) -> void:
 	ok(reel_frames > 0 and lean_worst <= LEAN_OFF, "the haul leans on his heading (worst %.2f rad, %d frames)"
 			% [lean_worst, reel_frames])
 	print("LIVE heading up to %.2f rad off the chain" % off_chain)
+	_cc(m, P, T)
 	# a knock-out
 	K.warchain.state = "ready"
 	P.lives = 1
@@ -114,3 +117,39 @@ func run(main: Node) -> void:
 	ok(not P.visible, "after the clip he is gone")
 	print("CLIP_LIVE_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The effects through the match code (Ent.hurt, KitStatus): the anim state names each, its look shows while it runs
+## and is gone 0.1 s (and a frame) after.
+func _cc(m: Match, P: Hunter, T: Hunter) -> void:
+	_calm(P)
+	for st in WardenCc.STATES:
+		for f in 30:
+			_frame(m, [P])
+		if st == "gnd":
+			KitStatus.apply(P, "gnd", CC_SECS)
+		else:
+			P.hurt(1.0, T, {st: CC_SECS})
+		var on_frames := 0
+		var clip_seen := false
+		var after := -1
+		var n := int((CC_SECS + 0.4) / DT)
+		for f in n:
+			_frame(m, [P])
+			var running := bool(P.anim_s.get(st, false))
+			var w := _clips(P).cc.weight(st)
+			if running and w >= 1.0:
+				on_frames += 1
+			clip_seen = clip_seen or _clips(P).cur == "stun"
+			if not running and after < 0:
+				after = 0
+			elif after >= 0:
+				after += 1
+				if after == int(WardenClips.FADE / DT) + 2:
+					ok(w <= 0.0, "live %s: gone 0.1 s after it ends (w %.2f)" % [st, w])
+		ok(on_frames >= int((CC_SECS - 0.15) / DT), "live %s: shows while it runs (%d frames)" % [st, on_frames])
+		if st == "stun":
+			ok(clip_seen, "live stun: plays the stun clip under the sway")
+
+func _calm(P: Hunter) -> void:
+	(P.ak as JuggernautKit).warchain.state = "ready"
+	P.inp["move"] = Vector2.ZERO
