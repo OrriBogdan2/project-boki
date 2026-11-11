@@ -335,9 +335,10 @@ func slam_combo() -> void:
 	var hp0 := T.hp
 	_until(m, func(): return W.state != "pulling", 1.5)
 	P.inp["sec_hold"] = false
-	A.ok("jug combo: the pull reaches the foe (no jump-out from the earlier jump) and the Haul Slam lands",
-			W.exits == "arrived" and K.haul_slams == 1 and T.hp < hp0 and T.stun_t > 0.0 and P.flat_dist(T) < 2.5,
-			"exit %s hauls %d foe %.0f > %.0f at %.1f m" % [W.exits, K.haul_slams, hp0, T.hp, P.flat_dist(T)])
+	A.ok("jug combo: the pull reaches the foe (no jump-out from the earlier jump) and the Haul Slam lands (no stun)",
+			W.exits == "arrived" and K.haul_slams == 1 and T.hp < hp0 and T.stun_t <= 0.0 and P.flat_dist(T) < 2.5,
+			"exit %s hauls %d foe %.0f > %.0f at %.1f m stun %.2f" % [W.exits, K.haul_slams, hp0, T.hp,
+					P.flat_dist(T), T.stun_t])
 	await A.done(m)
 
 ## E's pull on a hooked chain pressed while a Smash runs (the air slam's hang, the Finishing Slam's wind-up) is
