@@ -27,17 +27,17 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 |---|---|---|---|---|
 | Vex | RMB range, cone, lane | 10.5, 6 m at 100, 0.72 | 5-6 bh (9-10.8), 3.5 bh at 100, 0.4 bh | match |
 | Vex | E range, beam width | 18, 1.8 | 10+ bh (18+), beam 0.5 bh (0.9) | range match; width differs (owner item 68 widened it) |
-| Vex | R range, disc | 14, 3.4 | clamp not seen, 1.8-2 bh (3.2-3.6) | disc match; range [?] |
-| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3), a lane not a cone | match; angle [?] |
+| Vex | R range, disc | 14, 3.4 | in range at 5 bh (9) on the dummy (ult f29-f30), empty-ground cast 0226-0228 with no clamp; max not reached (venator.md R), 1.8-2 bh (3.2-3.6) | disc match; range not determinable: no cast hits the clamp, 14 is above the 9 m floor |
+| Kael | RMB slam reach, angle | 4.0, 70 | 2.4 bh (4.3, 0158), a short magenta lane not a cone (0157) | reach match; angle not determinable: 0157 is one wind-up frame with the lane width unmeasured, and the only hit (0158) is a dummy dead ahead, so no edge shows |
 | Kael | RMB lunge length | 4.5 to 7.5 | 5 flat (4.1-5.8) | differ (owner: release flings far) |
 | Kael | RMB air slam disc, reach | **2.2** (was 2.6), 5 | 1.2 bh (2.16), cursor to ~5 | **fixed** |
 | Kael | RMB chain spin radius | **2.2** (was 2.6) | 1.2 bh (2.16) | **fixed** |
-| Kael | E range, tether max | 13, 24 | 7 bh (12.6), max not seen | range match; tether [?] (owner Warchain note) |
+| Kael | E range, tether max | 13, 24 | 7 bh (12.6, 0303-0305), tether held ~5-6 bh (~10 m) for ~2.5 s and let go by 0320 with no limit (0306-0316) | range match; tether not determinable: no frame stretches it to a limit, and the data, the wiki and the owner Warchain note (DECISIONS: 'up to a max') give no number; 24 stays the owner's to set |
 | Kael | R strip | 3.6 x 1.8 | 1.5-2 bh x 1 bh (2.7-3.6 x 1.8) | match |
-| Lace | RMB range | 14 | grows with the charge, max not seen | [?] |
-| Lace | E arc, reach | 120, 9 | 120, cursor seen to 6 bh (10.8) | arc match; reach [?] |
-| Lace | R range, width | 18, 0.5 | not in the footage | [?] |
-| Cinder | RMB range | 14 | clamp not seen (6.5 bh = 11.7 reached) | [?] |
+| Lace | RMB range | 14 (to 16.8 at full charge) | the 2 bh gold bar (0494) is the hold telegraph, not the range; the one hit (0270-0273) is a near dummy | not determinable: no miss or far shot shows where the arrow stops |
+| Lace | E arc, reach | 120, **10.8** (was 9) | 120, wall centred on the cursor at 4.5 bh (0457) and 6 bh (10.8, 0498) | arc match; **fixed** to the 0498 floor (9 m could not place that wall; the cap itself is not seen) |
+| Lace | R range, width | 18, 0.5 | 'about 1.5x normal range', the beam runs off past the target (ult f48, f62; pin.md R 0570), width 'thick', unmeasured | ratio match (18 = 1.5 x the 12 m Empowered); range and width not determinable: the beam end is off screen and no width was read |
+| Cinder | RMB range | 14 | a miss ended on the cursor at 6.5 bh (11.7, 0133, gone by 0135); one sample | not determinable: that end is the cursor, not the clamp; 14 is above the 11.7 m floor |
 | Cinder | E radius | 4.5 | 2.5 bh (4.5) | match |
 | Cinder | R carpet, ring, flight | 1.8, 2.2, 22.7 | 1 bh, 1.2 bh, 16-18 | width, ring match; flight longer (owner item 20) |
 | Meeko | RMB range, burst | 14, 2.2 | 8-9 bh (14.4-16.2), disc 1.2 bh (2.2; flare 1.8 bh = 3.2) | match; flare [?] |
@@ -65,7 +65,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Sable | E range | 14 | landed at 9 bh (16.2), max not seen | [?] |
 | Sable | R ring | 5.4 (rim band outer 25%) | 3 bh (5.4); the first sheet's 3.5 bh is superseded | match |
 
-Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+Slice rows re-read 2026-11-11 from the per-frame measures in the hero-ref sheets (the frame folders were not on hand to re-measure): Lace E reach is set to the farthest wall seen, and the other six stay as they are because no frame shows the clamp or edge (each row says why). Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
 
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
