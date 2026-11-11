@@ -1114,6 +1114,7 @@ func render(delta: float, alpha: float) -> void:
 		body.position.y = sin(m.time * 6.0) * 0.04
 		body.rotation.x = 0.0
 		return
+	var on_you := state == "shoulder" and not beside
 	model.set_meta("kstate", _puppet_state())
 	# body language (KinPuppet): growl, point, whine, cheer...
 	var pose_now: String = comp.pose if comp else ""
