@@ -68,3 +68,8 @@ forward day by day on the real GardenZones, BlackMarket, Evo.eat and Lairs rule 
 player the second on day 12 and the third after day 28. A new save starts with 60 gems and the
 garden brings about 20 a day plus 10 per extra open zone; the day-3 target depends on that (price 110
 sits between day 2 and day 3 of income), so retune the price if those change.
+
+Hub hints (GARDEN.md 10): the hub shows three first-time hints through the message lane (`HubHints`, rules in
+`garden_zones.json` "hub_hints"): the Waystone ring, the nest corner and a sleeping zone's two keys, one at a
+time, once per save in `Save.d["tutorial"]["hub_hints"]` (an existing free-form dict, so no migration).
+The garden tutorial's closing Waystone hint stays its own. `--hub-hints-check` covers it.

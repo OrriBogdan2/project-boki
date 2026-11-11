@@ -28,6 +28,20 @@
 		"zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]
 	},
 	"pace_doc": "The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1].",
+	"hub_hints": {
+		"start_s": 1.5,
+		"start_s_doc": "Seconds after you arrive in the hub before its first hint can show.",
+		"gap_s": 8.0,
+		"gap_s_doc": "Seconds between two hub hints: one at a time, each longer than its 6 s on screen.",
+		"near_m": 6.0,
+		"near_m_doc": "Metres from the place a hint is about (the Waystone, the nest corner) at which it shows.",
+		"list": [
+			{"id": "waystone", "at": "waystone", "text": "The Waystone: step on the ring and press {interact} to travel."},
+			{"id": "nest", "at": "nest", "text": "The nest corner: pair two Boki here, hatch eggs and pass on gifts."},
+			{"id": "keys", "at": "waystone", "needs": "waystone", "locked": true, "text": "A dark stone needs two keys: a Wayseed and a Boki leaning its way. Its card shows both."}
+		],
+		"list_doc": "First-time hints, in order, each once per save (Save.d tutorial hub_hints): id, at (waystone or nest), needs (a hint seen first), locked (only while a zone sleeps), text."
+	},
 	"zones": {
 		"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"},
 		"glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"],
