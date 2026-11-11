@@ -7,10 +7,10 @@ the kits' effects can find their anchors, and gameplay stays per class. The load
 (`WardenGlb`); `--warden-glb-check` asserts the contract's tables and the fallback.
 
 ## How the game uses it
-Models.hunter still builds the procedural hunter: the node rig HunterAnim poses, the weapon, the glider, the hit
+Models.hunter still builds the procedural hunter's node rig HunterAnim poses, the weapon, the glider, the hit
 ring and the MantleLook sizes. When the Warden's .glb exists and the player hasn't set it to procedural
-(Settings > Video > Warden models, per Warden), `WardenGlb.dress` hides that hunter's body meshes, adds the .glb
-and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
+(Settings > Video > Warden models, per Warden), it builds no procedural body on that rig (`HunterBody`, only for
+the procedural model), `WardenGlb.dress` adds the .glb and every frame puts each bone where its rig node has moved from its rest in the Warden's neutral look
 (`WardenGlb.BONES`, `WardenGlb.retarget`), so the kit moves retarget once for every Warden and MantleLook's
 sliders reshape the 3D model too. The .glb never needs to know about the animation code: it needs the bones
 below, in this rest pose, at this scale. A .glb whose armature doesn't match (`WardenSkeleton.mismatches`: names,
