@@ -58,7 +58,7 @@ the two share); the first `--stretch-check` here read a stale import of Vex with
 vex.glb does not have (cheer 7.77, give, pet), so its table is not used.
 
 Close-ups (GPU, `--anim-shots --close`: run and the first attack, side view at hip height), before and after:
-docs/shots/stretch-starters/.
+jobq 20261111-143449-00831 (before, main glbs) and 20261111-150613-07773 (after, c0cbf72da), queued behind ~130 GPU jobs when this was written: copy their out/ to docs/shots/stretch-starters/{before,after}/.
 
 ### hem (archer): worst 10.36 -> 6.62, clips over 5.3: 33 -> 17 of 48
 
