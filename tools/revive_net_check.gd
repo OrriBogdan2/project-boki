@@ -36,6 +36,7 @@ func run(main_node: Node) -> void:
 	main = main_node
 	Save.no_write = true
 	Engine.max_fps = 60
+	RenderingServer.render_loop_enabled = false   # not looked at; slow frames stretch game time
 	var guest := false
 	for a in OS.get_cmdline_user_args():
 		if a == "--revive-net-check=guest": guest = true
