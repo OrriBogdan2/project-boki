@@ -1,5 +1,6 @@
 """Vespyx's skeleton and the clips that are its own: pincers, and tools in the tail."""
 import boki_clips
+import boki_react
 import vespyx
 from boki_clips import LOOK_UP, add, ear_pose, s, seq, tail_wave, TAU
 from boki_clips import SHARED, idle
@@ -191,4 +192,5 @@ CLIPS.update({
     "chop": (1.1, True, chop),
     "mine": (1.0, True, mine),
 })
+CLIPS.update(boki_react.react())
 HIDE_AT = {"prop_berry": (0, -0.09, 0.40)}
