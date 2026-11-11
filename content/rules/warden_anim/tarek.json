@@ -93,7 +93,8 @@
 			"clip": "lmb_punch",
 			"air_legs": true,
 			"fade": 0.05,
-			"upper": "moving"
+			"upper": "moving",
+			"strike": ["hand.R", "lmb/punch/len", "start"]
 		},
 		"breah_crouch": {
 			"fade": 0.05,
@@ -107,7 +108,8 @@
 		},
 		"breah_slam": {
 			"fade": 0.05,
-			"clip": "rmb_slam"
+			"clip": "rmb_slam",
+			"strike": ["fist", "rmb/slam/reach", "ground"]
 		},
 		"breah_dive": {
 			"clip": "rmb_dive",

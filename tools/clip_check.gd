@@ -6,9 +6,11 @@ extends RefCounted
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); each walk and run ring's
 ## loops are one length, so the blended diagonals stay in step; a move whose strike snaps inside the blend-in is at full
 ## weight on its key; each emote of the wheel has its own clip (a gesture or a .glb clip) that ends within the bubble
-## and plays on the right layer. Never touches the save.
+## and plays on the right layer; each strike's weapon tip or fist lands on the kit's hit area
+## (tools/strike_reach_check.gd). Never touches the save.
 
 const PondWalk := preload("res://tools/pond_walk.gd")
+const StrikeReach := preload("res://tools/strike_reach_check.gd")
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
 	"mage": "ryzz", "dolm": "tarek", "rimewright": "claire", "dredge": "dredge", "bulwark": "breaker",
@@ -136,6 +138,9 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	await _carry(id, m, sync, clips, dd)
 	await _pond(id, m, sync, clips)
 	_recoil(id, m, sync, clips, dd)
+	var reach := StrikeReach.new()
+	await reach.hero(id, m, sync, dd, holder.get_tree())
+	bad += reach.bad
 	m.free()
 	await _flinch(id)
 

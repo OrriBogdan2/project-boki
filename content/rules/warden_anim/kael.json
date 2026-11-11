@@ -63,12 +63,14 @@
 		"jug_slash_r": {
 			"clip": "slash_r",
 			"air_legs": true,
-			"fade": 0.05
+			"fade": 0.05,
+			"strike": ["tip", "lmb/reach", "edge"]
 		},
 		"jug_slash_l": {
 			"clip": "slash_l",
 			"air_legs": true,
-			"fade": 0.05
+			"fade": 0.05,
+			"strike": ["tip", "lmb/reach", "edge"]
 		},
 		"jug_wave_wind": {
 			"clip": "wave_wind",
@@ -83,7 +85,8 @@
 			"lead": 0.05
 		},
 		"jug_slam": {
-			"clip": "slam"
+			"clip": "slam",
+			"strike": ["tip", "rmb/slam/radius", "ground"]
 		},
 		"jug_lunge_wind": {
 			"clip": "lunge_wind",
@@ -148,7 +151,8 @@
 		"jug_riposte": {
 			"fade": 0.05,
 			"clip": "riposte",
-			"lead": -0.08
+			"lead": -0.08,
+			"strike": ["tip", "x/len", "edge"]
 		},
 		"jug_roar": {
 			"clip": "roar",

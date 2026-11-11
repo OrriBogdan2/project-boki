@@ -83,7 +83,8 @@
 		"dr_anchor": {
 			"clip": "anchor",
 			"upper": "moving",
-			"air_legs": true
+			"air_legs": true,
+			"strike": ["fist", "e/radius", "ground"]
 		},
 		"dr_dive": {
 			"clip": "dive",
@@ -91,7 +92,8 @@
 			"fade": 0.05
 		},
 		"dr_quake": {
-			"clip": "quake"
+			"clip": "quake",
+			"strike": ["fist", "e/quake_r", "ground"]
 		},
 		"dr_lunge": {
 			"clip": "lunge",

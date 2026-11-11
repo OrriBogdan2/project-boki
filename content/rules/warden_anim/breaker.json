@@ -87,7 +87,8 @@
 		"bul_smash": {
 			"clip": "lmb_slam",
 			"air_legs": true,
-			"fade": 0.05
+			"fade": 0.05,
+			"strike": ["tip", "lmb/smash_reach", "edge"]
 		},
 		"bul_launch": {
 			"fade": 0.05,
@@ -110,7 +111,8 @@
 			"upper": true
 		},
 		"bul_whirl": {
-			"clip": "shift_whirl"
+			"clip": "shift_whirl",
+			"strike": ["tip", "dash/whirl", "edge"]
 		},
 		"bul_charge": {
 			"fade": 0.05,

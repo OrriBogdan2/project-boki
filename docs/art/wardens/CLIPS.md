@@ -105,3 +105,16 @@ While you carry your downed Boki (pose id `rs_carry`, KinDowned) the legs stay o
 
 ## The Heartspark carry (WardenCarry.hold_mote)
 While you hold the Heartspark (`Heart.carrying`, state key `heart`) `WardenClips._heart` lays a second, lighter layer over the same contract bones: only the off arm (side `"heart_hand"`, default L; Lace's bow is in her left, so hers is R) lifts to the rescue carry's cradle height and holds the mote at the chest, and the Heart's spark rides that hand (`heart_mote` model meta, drawn at half size; a Hero without the layer keeps the spark floating over the head). The legs, torso and main arm stay on the clips, so the run plays and LMB fires and casts as usual; while a clip plays (a shot, a cast, a hit, Lace's draw) or the rescue carry owns both arms, the layer fades out and it eases back in on plain locomotion. It drops when the Heart is dropped, handed on, or the carrier is knocked, out or extracted. Everything is in arm lengths of the Hero's own skeleton (and the same `"carry_fwd"` for broad bodies), so one layer fits all 12 heights. `--carry-pose-check` asserts it per Hero in a real match; `--clip-shots --warden=<id> --clips=idle --carry --heart` renders the strip; docs/art/anim_audit/heartspark_carry.jpg (Lace, Kael, Albert, Meeko; the blue ball is the held mote).
+## Strike reach (`--strike-reach-check`, also run by `--clip-check`)
+A keyed strike carries `"strike": [point, reach, rule]` on its `kmoves` entry: the point that lands (`tip` = the skinned
+weapon's `weapon_muzzle`, a bone, `fist` = the lower hand, `front` = the body's leading point), the kit's reach as a path
+into the archetype data (`lmb/reach`; `ram` = hit_r + the Soot Ram's touch) and the rule: `edge` (a cut, ring or strip: the
+point's furthest reach lands within 15% of the area's edge), `ground` (a slam: where it lands lowest it is inside the area
+ahead), `start` (a punch that starts a lane), `throw` (the hand leads at the release). The kits' reaches are the source's
+in metres (PARITY FIRST); the fix for a short strike is the clip or the weapon, never the reach. Strikes known short at
+the owner's heights sit in the check's `OPEN` table with the reason and a docs/DEBT.md line: Kael's cuts and cleave (his
+arm folds and the sword is the splash's 0.61 of his height: straight out he reaches 2.6 m of the 3.1 m cut) and Albert's
+whirl (3.2 m straight out, 3.5 m ring). Albert's smash was fixed in the clip with no Blender
+(`tools/art1/glb_bone_turn.py`: a bone turned about a model-frame axis over a window of the clip): his arm pitched up 36
+degrees at the impact, so the hammer head lands 2.45 m out on the ground instead of 1.7 m out and 0.6 m under it
+(`--strike-reach-check --reach-trace` prints the head's path frame by frame; before/after strips still to render on a GPU).
