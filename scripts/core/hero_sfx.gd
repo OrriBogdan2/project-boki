@@ -2,8 +2,9 @@ class_name HeroSfx
 extends RefCounted
 ## A Hunter's own version of a shared sound: "<arch>_<kind>" (gunslinger_dash, archer_hurt,
 ## bulwark_step_wood) when its sound branch made one, else the shared fallback. Kinds the game asks
-## for: dash, dash_air, hurt, down, death and step_<surface> (grass, stone, wood, snow). Answers are cached per
-## name, so footsteps stay cheap. The sound sets are listed in content/sfx/<arch>.json (docs/AUDIO.md).
+## for: dash, dash_air, hurt, down, death, step_<surface> (grass, stone, wood, snow), pickup and recast_open /
+## recast_tick (RecastCue). Answers are cached per name, so footsteps stay cheap. The sound sets are listed in
+## content/sfx/<arch>.json (docs/AUDIO.md).
 
 static var _has := {}          # sound name -> whether audio/ has it
 
