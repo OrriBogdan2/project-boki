@@ -9,7 +9,7 @@ extends RefCounted
 
 const MAX_LIFE := 2.2          # s a look may linger (no long-lived noise)
 const MAX_FLARE := 4.0         # m across, the largest burst (no screen-filling flashes)
-const MAX_VORTEX := 4.5        # m radius, the largest ground swirl
+const MAX_VORTEX := 4.5        # m radius, the largest ground swirl or shockwave ring
 ## The kit scripts whose vfx("move") / hold(h, "move") / trail(h, "move", ...) / play(h, "move") calls each Hero's
 ## data must answer.
 const KIT_FILES := {
@@ -100,7 +100,7 @@ func _recipes(arch: String) -> void:
 					bad_col.append(layer[key])
 			var big := float(layer.get("size", 0.0)) if layer.get("size", 0.0) is float else 0.0
 			var flare_big: bool = layer["p"] == "flare" and big > MAX_FLARE
-			var vortex_big: bool = layer["p"] == "vortex" and big > MAX_VORTEX
+			var vortex_big: bool = layer["p"] in ["vortex", "ring"] and big > MAX_VORTEX
 			var life := float(layer.get("life", 0.0))
 			if layer["p"] == "ribbon" and layer.has("tail"):
 				life = minf(life, HeroVfx.TRAIL_MAX)     # a projectile trail runs as long as its shot, capped

@@ -155,10 +155,20 @@ func _hatch() -> void:
 	_press(hx, "Head out together")
 	await _relic(hx)
 
-## The first Relic: it drifts in, is put on, its page is read, and "Into the portal" goes on.
+## Vex's card on the starter pick (HobOffer), or null before it shows.
+func _vex_card(hx) -> Control:
+	for c in hx.ui.find_children("*", "PanelContainer", true, false):
+		if String(c.get_meta("mask_card", "")) == "gunslinger":
+			return c
+	return null
+
+## The first Relic: the starter pick, then it drifts in, is put on, its page is read, and "Into the portal" goes on.
 func _relic(hx) -> void:
 	_begin("first Relic")
-	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "naming leads into the first Relic")
+	await _wait(func(): return hx.stage == "mask" and _vex_card(hx) != null, "naming leads into the starter pick")
+	_vex_card(hx).mouse_entered.emit()      # (Vex in focus: the Take button takes him, as the tutorial always did)
+	_press(hx, "Take Vex")
+	await _wait(func(): return _child_of(hx, "MaskMoment") != null, "the pick leads into the first Relic")
 	var moment := _child_of(hx, "MaskMoment") as MaskMoment
 	await _wait(func(): return moment.phase == "wait", "the Relic waits by your face")
 	moment._unhandled_input(_key("interact"))

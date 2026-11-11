@@ -779,6 +779,7 @@ func show_screen(screen: String, opts: Dictionary) -> void:
 				var tier_i := clampi(int(opts.get("tier", 0)), 0, Data.TIERS.size() - 1)
 				Sfx.prefetch(["music_hollow" if tier_i >= 2 else "music_match", "amb_match"])
 				Match.prefetch([Match.HUD_SCRIPT])
+				WardenGlb.fetch_all()
 				ld = load("res://scripts/ui/loading.gd").new()
 				ld.setup(opts)
 				add_child(ld)
@@ -3975,4 +3976,6 @@ func _hb_home():
 	current = hm
 	await get_tree().process_frame
 	await get_tree().process_frame
+	while hm.building:      # a farm built under a still-covered fade comes in slices: wait for all of it
+		await get_tree().process_frame
 	return hm

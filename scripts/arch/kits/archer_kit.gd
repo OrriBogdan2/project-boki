@@ -36,6 +36,13 @@ func _setup() -> void:
 	self_nodes.append(ult)
 	spirit = PinSpirit.new(self)
 
+## Swapped off her mid Phase Walk (Training Grounds, a hero swap): the walk ends with her kit, else
+## Hunter.spirit_t would never tick down and the next hunter would ghost through terrain for good.
+func teardown() -> void:
+	if spirit:
+		spirit.end("merge")
+	super()
+
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	if t != null and t.team != h.team and String(o.get("src", "")) == "shot" and not o.has("ab"):
 		_arrow_hit(t)
@@ -178,12 +185,6 @@ func on_dash(use_ex: bool) -> bool:
 	CombatBus.ability_used.emit(h, "spirit_walk", "dodge")
 	spirit.start()
 	return true
-
-## A kit swap (a practice reclass) in the middle of a Spirit Walk ends the walk: Hunter.spirit_t is this
-## kit's to clear, and left set it walks the next kit through walls for good.
-func teardown() -> void:
-	spirit.end("swap")
-	super()
 
 ## While walking as a spirit she moves quicker; at rank 3 inside something she starts faster still and
 ## that fades with the walk. A draw right after a perfect release slows her less (wiki: perfect shots ease

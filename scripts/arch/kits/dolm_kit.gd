@@ -565,7 +565,7 @@ func on_dash(use_ex: bool) -> bool:
 		travel(
 			float(h.cdat.get("ex_dist", 4.6)), float(h.cdat.get("ex_time", 0.2)), {"invuln": 0.1, "trail": "dust"}
 		)
-		m.sfx("dolm_dash", h.pos, -4.0, 1.0)
+		m.sfx(HeroSfx.dash_name(h), h.pos, -4.0, 1.0)
 		return true
 	if in_dash() or not spend_dash(false):
 		return true

@@ -1054,6 +1054,7 @@ func kin_element() -> String:
 	return String(Data.KIN.get((kin as Kin).species, {}).get("type", ""))
 
 var roll_speed := DASH_SPEED
+var dash_rest := Vector2.ZERO  # metres: the dash's own last moment, riding on the step that hands it over
 var wedged_t := 0.0
 
 ## World.occupy, with the sky train in it: on a car's deck you walk freely (the deck is your floor,
@@ -1131,7 +1132,7 @@ func dash_with(e: Dictionary) -> void:
 	dodged = false
 	fly_t = 0.0
 	if wpn.get("bloom_dash_reset", false): wbloom = 0.0
-	m.sfx(HeroSfx.of(self, "dash", "dash"), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
+	m.sfx(HeroSfx.dash_name(self), pos, -4.0, 0.8 if not shove.is_empty() else 1.0)
 	if not (ak and ak.own_dash_trail()):
 		m.fx.dash_trail(self)          # the shared puff and ring; a kit with its own trail draws no ring
 
@@ -1820,6 +1821,9 @@ func launch_to(target: Vector3, t: float) -> void:
 
 # ------------------------------------------------------------------ simulation
 func sim(dt: float) -> void:
+	if dt <= 0.0:
+		prev = pos                  # a far, calm bot's off step (SimLod)
+		return
 	Hex.tick(self, dt)
 	prev = pos
 	if out or extracted:
@@ -2061,9 +2065,10 @@ func _physics(dt: float) -> void:
 			_shove_along()
 		if not dash_pass.is_empty():
 			_pass_along()
-		if roll_t <= 0.0:
-			if grounded:
-				hv = HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+		if roll_t <= 0.0 and grounded:
+			var run_v := HunterMove.dash_exit(hv, spd)     # no hard stop: the run carries on (in the air, air drag)
+			dash_rest = HunterMove.dash_rest(hv, run_v, roll_t + dt)
+			hv = run_v
 	elif fly_t > 0.0:
 		fly_t -= dt
 	elif knock_t > 0.0:
@@ -2168,7 +2173,8 @@ func _physics(dt: float) -> void:
 	# it overlaps, and the part of your speed going into it is dropped (no bounce, no catch on a
 	# corner); the axis moves below then only meet terrain, edges and walls.
 	StoneStand.mover = self         # (rocks: only their caster climbs them)
-	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt)
+	var tgt := Vector2(pos.x + vel.x * dt, pos.z + vel.z * dt) + dash_rest
+	dash_rest = Vector2.ZERO
 	var po: Vector2 = tgt if spirit_t > 0.0 else m.world.push_out_blocks(tgt.x, tgt.y, r, pos.y)
 	var block_n := Vector2.ZERO     # out of the rock you met this step (its face's normal)
 	var rock_b := 0.0               # ...and its top, standing in for occupy()'s answer below

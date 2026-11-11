@@ -66,6 +66,7 @@ comment that says more. Line counts are rough sizes, to warn you before you open
 | `gear.gd` | Gloves (loaded from `content/gloves`) |
 | `biome_run.gd` | Regional monsters and hazards on authored maps |
 | `sky_train.gd` | The sky train |
+| `train_halts.gd`, `train_lamp.gd` | The sky train's halt beacons and pier glow; its headlight, beam and trail |
 | `arena.gd`, `duel.gd` | The Arena's practice tools; the duel room |
 | `cam.gd` | The match camera |
 | `fx.gd`, `juice.gd`, `abyss_fx.gd` | Pooled effects; hit feel; the abyss tint |
