@@ -126,6 +126,12 @@ func _static_styles(src: Dictionary) -> void:
 			own_theme.append(path)
 	ok("no hand-made panel styles outside the style module", stray.is_empty(), str(stray))
 	ok("no screen sets its own theme (UI.install covers all)", own_theme.is_empty(), str(own_theme))
+	var dim_heads: Array = []
+	for path in src:
+		for line in String(src[path]).split("\n"):
+			if line.contains("UI.section(") and line.contains(".lerp("):
+				dim_heads.append(path)
+	ok("section headers stay pink (no tint blended toward grey)", dim_heads.is_empty(), str(dim_heads))
 
 func _theme_boxes() -> Dictionary:
 	var out := {}

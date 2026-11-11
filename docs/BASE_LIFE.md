@@ -15,7 +15,7 @@ check: `--base-life-check`.
 - Bonds: `rec["bonds"] = {uid: -1..1}`, the same both ways (`BaseLife.add_bond`). Tag catches and napping side by
   side raise it; a squabble (two hot tempers meeting at a toy or in tag, or a rival at the toy) lowers it. Friends
   (`friend_at`) greet with a heart and walk over to a napping friend to pile up; rivals (`rival_at`) stare and huff.
-  Old saves get an empty map per Boki in the v11 -> v12 save migration (`Save._migrate_11_to_12`).
+  Old saves get an empty map per Boki in the v12 -> v13 save migration (`Save._migrate_12_to_13`).
 - Night: every Boki naps till dawn except `Work.NOCTURNAL` species.
 - Readout: `BaseLife.readout()` (state, seconds in it, refusals, last transition, bonds per Boki, printed by the
   check). Each machine registers in `Fsm.live` as `boki:<name>`, so the F7 FsmReadout lists them once ext/fsm-m1

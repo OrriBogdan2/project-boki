@@ -10,7 +10,7 @@ const DIR := "res://art/wardens"
 ## Each Warden's art name, as in docs/art/gen/wardens/<name>_turnaround.png: the folder and file its .glb has.
 const ART := {"bulwark": "breaker", "archer": "hem", "juggernaut": "kael", "gunslinger": "vex", "ostra": "ostra",
 	"mage": "ryzz", "dolm": "tarek", "thief": "sable", "rimewright": "claire", "ashwick": "cinder",
-	"tender": "pip", "dredge": "dredge"}
+	"tender": "pip", "dredge": "dredge", "gil": "gil"}
 ## Armature bone -> the rig node it follows (paths under the model root).
 const BONES := {
 	"root": "Rig",
@@ -127,6 +127,12 @@ static var _look = null         # content/rules/warden_look.json, read once (loo
 const LOOK_PATH := "res://content/rules/warden_look.json"
 const HALO := preload("res://shaders/warden_halo.gdshader")
 
+## Starts reading every Warden model a match may dress a Hunter in (as the loading screen comes up): the first
+## load of each was 200-450 ms on the main thread, a dozen of them in a 40-hunter build.
+static func fetch_all() -> void:
+	for a in Arch.ORDER:
+		fetch(a)
+
 static func path(arch: String) -> String:
 	var nm := art(arch)
 	return "%s/%s/%s.glb" % [DIR, nm, nm]
@@ -195,18 +201,11 @@ static func anchor(root: Node3D, anchor_name: String) -> Node3D:
 static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	root.set_meta("glb", false)
 	root.set_meta("rig_rest", WardenSkeleton.rig_rest(root))
-	if _measuring or not uses_model(arch):
+	if not will_dress(arch):
 		return
 	var rest := neutral_rest(arch)
-	var scene := _scene(arch)
-	var glb: Node3D = scene.instantiate() as Node3D if scene else null
+	var glb := _scene(arch).instantiate() as Node3D
 	var skel := skeleton(glb)
-	var bad: Array = WardenSkeleton.mismatches(skel, rest, extra_bones(arch)) if skel else ["no armature"]
-	if not bad.is_empty():
-		push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [path(arch), str(bad)])
-		if glb:
-			glb.free()
-		return
 	_hide_body(root)
 	glb.name = "Warden"
 	root.add_child(glb)
@@ -233,6 +232,28 @@ static func dress(root: Node3D, arch: String, lk: Dictionary) -> void:
 	_halos(root, glb, look(art(arch)))      # (after the weapon is in the hands: a halo can ride the weapon)
 	_smoke(root, look(art(arch)))
 	_bloom(root, glb, look(art(arch)))
+
+## Whether a build of this Warden is drawn from its .glb (Models.hunter then drops the procedural body's
+## loose parts instead of merging meshes nobody sees). The rig check runs once per model file.
+static func will_dress(arch: String) -> bool:
+	return not _measuring and uses_model(arch) and misfits(arch).is_empty()
+
+static var _misfits := {}      # .glb path -> the bones that don't fit the rig ([] when it fits)
+static func misfits(arch: String) -> Array:
+	var p := path(arch)
+	if not _misfits.has(p):
+		var scene := _scene(arch)
+		var glb: Node3D = scene.instantiate() as Node3D if scene else null
+		var skel := skeleton(glb)
+		var bad: Array = ["no armature"]
+		if skel:
+			bad = WardenSkeleton.mismatches(skel, neutral_rest(arch), extra_bones(arch))
+		_misfits[p] = bad
+		if glb:
+			glb.free()
+		if not bad.is_empty():
+			push_warning("WardenGlb: %s does not fit the rig (%s); keeping the procedural model" % [p, str(bad)])
+	return _misfits[p]
 
 ## Small pieces the match camera only sees as speckle (warden_look "far_hide": node names, Tarek's beads and fist
 ## shards) are drawn only up to FAR_HIDE_D from the camera; close-ups keep them.
@@ -513,10 +534,23 @@ static func extra_skeleton(root: Node3D) -> Skeleton3D:
 ## Starts reading a Warden's .glb on a loader thread, so the build that needs it later doesn't wait on the disk.
 static func fetch(arch: String) -> void:
 	var p := path(arch)
-	if not uses_model(arch) or _scenes.has(p):
+	if not uses_model(arch) or _scenes.has(p) or not BackgroundWork.can_read_ahead():
 		return
 	if ResourceLoader.load_threaded_get_status(p) == ResourceLoader.THREAD_LOAD_INVALID_RESOURCE:
 		BackgroundWork.request(p)
+
+## Starts reading the .glb files a match's build dresses (your Warden and your dealt squadmates', opts "mates"),
+## so they load on a loader thread while the world builds instead of in build.hunters. A match with rival
+## squads (bots or other players) reads every Warden's: 30 Hunters use nearly all of them, and each read
+## on the main thread was 10-120 ms of build.hunters.
+static func fetch_for(opts: Dictionary) -> void:
+	fetch(String(opts.get("arch", Save.d.get("arch", ""))))
+	for mt in opts.get("mates", []):
+		fetch(String((mt as Dictionary).get("arch", "")))
+	var solo := ["tutorial", "duel", "arena"].any(func(k): return opts.get(k, false))
+	if not solo and int(opts.get("teams", 4)) > 1:
+		for a in Arch.ids():
+			fetch(String(a))
 
 ## Whether a Warden's model can be built without waiting on the disk (fetch() starts the read when it hasn't).
 static func fetched(arch: String) -> bool:
@@ -556,16 +590,21 @@ static func _skinned_weapon(root: Node3D) -> void:
 		mag.mesh = null
 		mag.visible = false
 
-## The rig rest of the Warden's model in the neutral look (built once a session).
+## The rig rest of the Warden's model in the neutral look: baked (WardenRest), else measured once a session.
 static func neutral_rest(arch: String) -> Dictionary:
 	if not _neutral.has(arch):
-		_measuring = true
-		var look := PlayerLook.neutral()
-		var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", look, arch)
-		_measuring = false
-		_neutral[arch] = m.get_meta("rig_rest")
-		m.free()
+		var baked := WardenRest.baked(arch)
+		_neutral[arch] = baked if not baked.is_empty() else measure_rest(arch)
 	return _neutral[arch]
+
+## Builds the Warden's procedural model in the neutral look to read its rig rest (what WardenRest bakes).
+static func measure_rest(arch: String) -> Dictionary:
+	_measuring = true
+	var m := Models.hunter(Arch.weight(arch), Data.TEAM_COLORS[0], Arch.signature(arch), "", PlayerLook.neutral(), arch)
+	_measuring = false
+	var rest: Dictionary = m.get_meta("rig_rest")
+	m.free()
+	return rest
 
 ## Hides the procedural body's meshes, leaving the KEEP pieces.
 static func _hide_body(n: Node) -> void:

@@ -1,6 +1,6 @@
 extends RefCounted
 ## --garden-zones-check (briefs/design/GARDEN.md 10.7 steps 2, 4 and 5): the zones on the save, travel
-## by the Waystone and moving Boki between zones. Save: a v12 save upgrades with only the start zone
+## by the Waystone and moving Boki between zones. Save: a v13 save upgrades with only the start zone
 ## open and every Boki living in it; a new save has the same. Keys: a locked zone's two keys tick when
 ## you have them. Travel (with base_mode on, through the real Game.goto and ink wipe): the hub shows
 ## only your partner and the Waystone; a hop to a locked zone is refused and its card lists both keys;
@@ -35,11 +35,11 @@ func run(m: Node) -> void:
 func _save_part() -> void:
 	var start := GardenZones.start()
 	var old := Save.fresh()
-	old["v"] = 12
+	old["v"] = 13
 	old.erase("zones")
 	old["roster"] = [{"uid": "o1", "species": "zapple", "name": "Old", "traits": {}, "trust": 35.0, "bonds": {}},
 		{"uid": "o2", "species": "cindle", "name": "Ash", "traits": {}, "trust": 35.0, "bonds": {}}]
-	ok(Save.migrate(old) and int(old["v"]) == Save.VERSION, "a v12 save upgrades to v%d" % Save.VERSION)
+	ok(Save.migrate(old) and int(old["v"]) == Save.VERSION, "a v13 save upgrades to v%d" % Save.VERSION)
 	var zones: Dictionary = old["zones"]
 	ok(zones.keys() == [start] and bool(zones[start]["open"]), "only %s is open" % start)
 	ok(old["roster"].all(func(r): return r.get("zone") == start), "every Boki lives in %s" % start)

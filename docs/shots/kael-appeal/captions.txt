@@ -1,0 +1,8 @@
+turnaround_game.png: juggernaut at the match camera (pitch 66, 23 m, fov 32), front, 3/4, side, back, 3/4 back; true pixels, then x3
+turnaround_close.png: juggernaut close, front, 3/4, side, back, 3/4 back
+front_34.png: juggernaut full length, front and three-quarter (as the sheet's two views)
+back_34.png: juggernaut full length, back and three-quarter back
+closeup.png: juggernaut head and shoulders, three-quarter front
+closeup_front.png: juggernaut head and shoulders, from the front
+poses_game.png: juggernaut at the match camera in idle, run, attack, cast, ult (true pixels, then x3)
+moves_close_1.png: juggernaut, left to right: run, run, other foot
