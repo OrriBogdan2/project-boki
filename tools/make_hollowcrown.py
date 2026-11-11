@@ -289,7 +289,7 @@ HAZARD_AREAS = {
     "cinder": [dict(kind="lava", poly=[(48, 101), (54, 100), (60, 101), (62, 105), (58, 108), (51, 107), (47, 105)]),
                dict(kind="lava", poly=[(25, 90), (30, 89), (31, 94), (28, 97), (25, 96)])],
     "frostgate": [dict(kind="ice", poly=[(107, 46), (113, 45), (115, 49), (112, 54), (107, 53)])],
-    "saltmere": [dict(kind="deep_water", poly=[(24.5, 169), (29, 167), (30.5, 170), (30.5, 176), (25, 177), (24.5, 173)])],
+    "saltmere": [dict(kind="deep_water", poly=[(24.5, 169), (29, 167), (30.5, 170), (30.5, 174), (25, 174.5), (24.5, 172)])],
     "storm": [dict(kind="static", poly=[(178, 134), (184, 134), (186, 137), (182, 140), (178, 139)])],
     "thorn": [dict(kind="bramble", poly=[(106, 160), (111, 159), (113, 163), (110, 166), (105, 165)])],
 }
@@ -691,6 +691,12 @@ def hazard_cells(A):
     xs = [p[0] for p in A["poly"]]; zs = [p[1] for p in A["poly"]]
     return [(x, z) for z in range(int(min(zs)), int(max(zs)) + 1) for x in range(int(min(xs)), int(max(xs)) + 1)
             if shape_d({"poly": A["poly"]}, x + 0.5, z + 0.5) < 1.0]
+
+GRASSY_HAZARDS = ("bramble",)      # hazard kinds tall grass still grows in
+
+def bare_cells(d):
+    """An island's tiles where no grass grows: its hazard areas but the grassy ones."""
+    return {q for A in d.get("hazard_areas", []) if A["kind"] not in GRASSY_HAZARDS for q in hazard_cells(A)}
 
 def check_hazards(lv, owner, stairs):
     """Each hazard area sits on one terrace of its own island, off stairs and bridges, clear of spots, exits,
@@ -1107,17 +1113,24 @@ def place_cover(lv, owner, stairs):
                         C.plant(iid, P[0], P[1], kind); progressed = True; break
             if not progressed: break
         carry[d["biome"]] = max(0.0, want - have())
-        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]]
+        # no grass on lava, water, ice or static: their clumps go (the roll above stays as it was; the
+        # bramble keeps its grass, a thicket you can hide in at the price of the thorns)
+        wet = bare_cells(d)
+        d["bush"] = [[round(c[0], 1), round(c[1], 1), c[2]] for p in C.patches if p["island"] == iid for c in p["clumps"]
+                     if not wet & _disc(c[0], c[1], c[2])]
     return C
 
 def cover_report(C, lv, owner):
     T = _targets()
     ground = {}; bush = {}
     for d in islands:
+        # the ground grass can grow on (not the bare hazard areas), and the grass left on it
+        wet = bare_cells(d)
+        kept = set().union(*[_disc(c[0], c[1], c[2]) for c in d.get("bush", [])])
         for q in INISLE[d["id"]]:
-            if q in C.solid or q in C.stairs: continue
+            if q in C.solid or q in C.stairs or q in wet: continue
             ground[d["biome"]] = ground.get(d["biome"], 0) + 1
-            if q in C.bush: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
+            if q in C.bush and q in kept: bush[d["biome"]] = bush.get(d["biome"], 0) + 1
     rows = []
     for b in ("bloom", "meadow", "gloom", "storm", "ember", "frost"):
         share = bush.get(b, 0) / max(1, ground.get(b, 1))

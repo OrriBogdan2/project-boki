@@ -59,7 +59,7 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | Larkhollow | landing | Meadow | quiet | 48 | The Hollow |
 | Highwatch | landing | Frost | quiet | 3 | The Lookout |
 | Duskmoor | landing | Storm | quiet | 16 | Moor Chapel |
-| Saltmere | landing | Bloom | quiet | 32 | Salt River |
+| Saltmere | landing | Bloom | quiet | 28 | Salt River |
 
 ### Boss lairs
 
