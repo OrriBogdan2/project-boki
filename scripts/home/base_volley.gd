@@ -355,5 +355,6 @@ func _card(res: Dictionary, pinned: bool) -> void:
 		["%s wins Spark Volley, %d to %d!" % [win["name"], res["score"][0], res["score"][1]], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		["%s sulks: \"lost Spark Volley to %s\"" % [lose["name"], win["name"]], 14, UI.MUTED],
-		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]] + BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
+		["+%d gems%s" % [res["gems"], why], 14, UI.GOLD]]
+		+ BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
 	card_t = float(rules()["card_s"])

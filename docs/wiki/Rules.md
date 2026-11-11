@@ -60,6 +60,21 @@ Trait drift (GARDEN.md section 3, lever 3; scripts/home/base_drift.gd): with far
 | words | {"bravery": ["braver", "shyer"], "loyalty": ["more loyal", "more independent"], "temper": ["hotter-tempered", "calmer"], "curiosity": ["more curious", "more settled"]} |
 | words_doc | per trait: [line when it rises, line when it falls], written as 'is getting <word>' in the Boki's journal. |
 
+## base_duo (`content/rules/base_duo.json`)
+
+Duo bonus for friends (GARDEN_MODERN.md section 5 rank 4, scripts/home/base_duo.gd): two Boki whose bond is at least friend_at do better together. Joy is a 0-100 need, pace a multiplier, times are seconds.
+
+| Setting | Value |
+|---|---|
+| friend_at | 0.6 |
+| friend_at_doc | bond (-1..1, rec['bonds']) at or above which a pair is a duo; below it no bonus. |
+| nap_joy | 6 |
+| nap_joy_doc | extra joy a Boki gets on waking from a nap it spent beside a duo friend (a nap alone gives +4 in home.gd). |
+| nap_min_s | 8 |
+| nap_min_s_doc | s beside the friend, asleep, for the nap to count as shared. |
+| handoff_pace | 1.06 |
+| handoff_pace_doc | Dash: a runner that starts a new stretch with a duo friend alongside (within base_race friend_near) hands off cleanly and runs it at this times the pace. |
+
 ## base_echo (`content/rules/base_echo.json`)
 
 Echo Steps, a call-and-answer dance on four humming stones (briefs/design/GARDEN_MODERN.md section 4.2, game 2; scripts/home/echo_steps.gd). Only with farm_build.json base_mode on. The lead hops a pattern across the stones on the beat and you answer it with W, A, S, D; in the last round you lead and the rival copies. Hits and streaks score. Solo (the stones lead) with one rested Boki out, against the next rested Boki with two. Units: beats at bpm, milliseconds for the hit window, seconds otherwise; joy and trust are 0-100 points.
@@ -222,11 +237,33 @@ The Dash, the Boki base's first minigame (briefs/design/GARDEN.md 5.1, scripts/h
 | result_doc | The last one home and the winner grow apart by rival_step; two non-rivals home within close_s of each other grow closer by friend_step. |
 | train | {"great": 2, "good": 1, "dojo": 1, "happy_at": 60.0, "happy_mult": 1.25, "min_food": 12.0, "food": 6.0, "joy_great": 4.0, "joy_else": -2.0} |
 | train_doc | The Training post's solo lap (base_race.gd solo): Speed points per cheer grade (a miss is 0), +dojo per cheer that was not a miss with a Dojo built, x happy_mult at joy >= happy_at; the Boki needs min_food Full to start and spends food and the race's energy; joy moves by joy_great with any great cheer, else joy_else. Capped by level (Care.stat_cap). |
-| twists | [{"id": "sprint", "name": "Sprint week", "note": "Straights are quicker", "mult": {"straight": 1.3}}, {"id": "mud", "name": "Mud week", "note": "The climb is heavy going", "mult": {"climb": 0.8}}, {"id": "high_tide", "name": "High tide", "note": "The water runs deep and slow", "mult": {"water": 0.75}}, {"id": "gusty", "name": "Gusty week", "note": "Jumps carry further", "mult": {"jump": 1.3}}, {"id": "wild", "name": "Wild week", "note": "Anyone can win: wobble doubles", "wobble": 0.2}] |
-| twists_doc | This week's rule, picked by the real week number (unix days / 7) mod the list, no server. 'mult' multiplies everyone's pace on that stretch kind; 'wobble' replaces the usual wobble. |
+| twists | [{"id": "sprint", "game": "dash", "name": "Sprint week", "note": "Straights are quicker", "mult": {"straight": 1.3}}, {"id": "night_seek", "game": "seek", "name": "Night Seek", "note": "The hunt is after dark", "night": true}, {"id": "seven_up", "game": "volley", "name": "Seven-up", "note": "First to 7 points", "to_win": 7}, {"id": "mud", "game": "dash", "name": "Mud week", "note": "The climb is heavy going", "mult": {"climb": 0.8}}, {"id": "high_tide", "game": "dash", "name": "High tide", "note": "The water runs deep and slow", "mult": {"water": 0.75}}, {"id": "two_streams", "game": "dash", "name": "Two streams", "note": "A second water stretch", "swap": {"at": 3, "kind": "water", "mult": 0.7}}, {"id": "gusty", "game": "dash", "name": "Gusty week", "note": "Jumps carry further", "mult": {"jump": 1.3}}, {"id": "wild", "game": "dash", "name": "Wild week", "note": "Anyone can win: wobble doubles", "wobble": 0.2}] |
+| twists_doc | The weekly event: one format a week, picked by the real week number (unix days / 7) mod the list, no server, shown on the race post and pinned with the winner's photo to the showcase wall. 'game' is the minigame it tweaks (dash, seek, volley); other games play as usual that week. Tweaks: 'mult' multiplies everyone's Dash pace on that stretch kind; 'wobble' replaces the Dash wobble; 'swap' {at, kind, mult} changes one Dash stretch; 'night' forces the Seek's night rule; 'to_win' replaces the Volley's points to win. |
 | week_s | 604800 |
 | card_s | 6 |
 | card_s_doc | s the result card stays up. |
+
+## base_relay (`content/rules/base_relay.json`)
+
+Relay Cup (briefs/design/GARDEN_MODERN.md 4.2 game 5, scripts/home/base_relay.gd): three of your Boki against a visiting team of three on the Dash loop (base_race.json stretches and pace). Each runs one leg and hands the baton on at a mark; your two hand-offs are the Dash's cheer press on the timing bar. Prizes and the cup: garden_prizes.json 'relay'. Units: seconds; joy is 0-100 points, bonds -1..1.
+
+| Setting | Value |
+|---|---|
+| legs | [[0], [1], [2, 3]] |
+| legs_doc | Which base_race.json stretches each leg runs, in order: the straight, the water, the climb (with the jump to the line). A Boki is put on the leg it runs best relative to its team. |
+| handoff | {"great": 0.0, "good": 0.25, "miss": 0.6} |
+| handoff_doc | s the next runner loses taking the baton, by your press's grade (no press before the mark is a miss). |
+| fumble | 0.3 |
+| fumble_doc | s more when the two runners are rivals (base_race rival_at) and the press was not great. |
+| rival_grades | {"great": 3, "good": 5, "miss": 2} |
+| rival_grades_doc | Weights the visiting team's hand-off grade is rolled from. |
+| rival_team | Bramble Runners |
+| rival_team_doc | The visiting team's name on the card. Each of its Boki matches one of yours in species and has that Boki's stats times the cup round's min_ratio (garden_prizes.json cup.rounds), so the cup counts every win. |
+| close_step | 0.05 |
+| close_step_doc | A great or duo hand-off brings the two runners this much closer (rec bonds). |
+| gems_win | 8 |
+| gems_ran | 2 |
+| gems_doc | Gems to you when your team wins, or for any other relay. |
 
 ## base_rival (`content/rules/base_rival.json`)
 
@@ -554,6 +591,8 @@ Raising a Boki at home (scripts/core/care.gd). natural_death: false means neglec
 | sulky_doc | base_mode only (GARDEN.md section 2): needs bottom out here, sulky, and the starve clock never builds, so a Boki left alone is never weak or sick. It gets hungry and glum, and feeds itself from a bowl or a snack (BaseFeed). Off base_mode the starve stages apply. |
 | care_day_s | 300 |
 | care_day_s_doc | Seconds before the same kind of care (petting, fetch, a meal, a chat, training) builds trust again: one farm day (home.gd DAY_LEN). Before 11-09 it was once per expedition, so a Boki raised only at home stopped growing closer. |
+| stat_budget | {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]], "loose_rate": 2, "expedition_stat_points": 25} |
+| stat_budget_doc | Caps and diminishing gains for the four stats (StatBudget, decision 0022). A stat's cap is min(cap_max, cap_base + cap_per_level x level); the four together stop at total_cap. bands: [last point of the band, share of each gain that counts]. loose_rate: points a respec set loose come back this many a gain, ignoring bands. expedition_stat_points: match_mods reads at most this many points of each stat; minigames read all. |
 
 ## chest_keys (`content/rules/chest_keys.json`)
 
@@ -705,7 +744,7 @@ The guided farm tutorial (state: Save.d.tutorial.ft = {did, done, skipped}). Sho
 | start_food | {"kibble": 3} |
 | build_wait_s | 30 |
 | steps | [{"id": "axe", "needs": ["hob"], "title": "Get an axe", "hints": {"go": "Here, take this axe. Trees give wood, and wood builds things."}, "world": {"go": ""}, "gives_tool": "axe"}, {"id": "chop", "needs": ["axe"], "title": "Chop trees for the house", "hints": {"go": "Walk up to a tree and hold {interact} to chop. The house takes {house_cost}: keep chopping and mining until the bar at the top shows it."}, "world": {"go": "Chop a tree"}}, {"id": "stone", "needs": ["chop"], "title": "Mine rocks for the house", "hints": {"go": "Rocks give stone. Take this pickaxe and hold {interact} at a rock."}, "world": {"go": "Mine this rock"}, "gives_tool": "pickaxe", "gets": "stone"}, {"id": "house", "needs": ["chop", "stone"], "title": "Place your house", "hints": {"place": "Now for a house. Press {build}, choose House, then click the marked spot. Marking it out is free. The {house_cost} are spent while it goes up.", "wait": "Hold {interact} at the house to hammer. Your Boki come to help, and it uses up the wood and stone as it goes."}, "world": {"place": "Your house goes here", "wait": "Building..."}}, {"id": "hammer", "needs": ["house"], "title": "Swing a hammer", "hints": {"go": "Hold {interact} at the house to take up a hammer and build."}, "world": {"go": "Help build"}}, {"id": "task", "needs": ["house"], "title": "Give your Boki a job", "hints": {"go": "Click {boki}, or press {details} next to it, to open its page. Or press 2 (Boki on the bar below) for all your Boki.", "page": "Pick a job here: try '{job}'. Or assign it at a work station."}, "world": {"go": "Your Boki"}, "after_built": true}, {"id": "feed", "needs": ["house"], "title": "Feed your Boki", "hints": {"place": "A hungry Boki is a slow Boki. Press {build} and set the trough down", "fill": "Press {interact} at the trough to fill it from your pantry."}, "world": {"place": "", "fill": "Fill the trough"}}, {"id": "crop", "needs": ["house"], "title": "Grow a crop", "hints": {"patch": "Crops grow in patches. Press {build} and place a patch by the water. The water keeps it wet for you.", "patch_dry": "Crops grow in patches. Press {build} and place one. Away from water, you water it yourself.", "plant": "Press {interact} at the patch to plant a seed.", "water": "Press {interact} at the patch to water it.", "grow": "Your seed is growing. Ripe in {secs}s. Wait by the patch, then pick it ({interact}).", "pick": "It's ripe! Press {interact} to pick it."}, "world": {"patch": "Place the patch by the water", "patch_dry": "", "plant": "Plant a seed", "water": "Water it", "grow": "Growing", "pick": "Pick it"}, "waits": ["grow"]}, {"id": "buy", "needs": ["house"], "title": "Buy a seed", "hints": {"stall": "Go to the market stall and press {interact}. Open the Seeds tab and buy one seed.", "bar": "Click Market on the bar below. Open the Seeds tab and buy one seed."}, "world": {"stall": "Market stall", "bar": ""}}, {"id": "sell", "needs": ["crop", "buy"], "title": "Sell a crop", "hints": {"stall": "Back at the stall, press {interact}. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals.", "bar": "Click Market on the bar below. Open the Sell tab and sell your crop. Gems come from selling, expeditions and Goals."}, "world": {"stall": "Sell here", "bar": ""}}, {"id": "hob", "needs": [], "title": "Meet the builder", "hints": {"go": "Hob is calling you over at the market stall: walk up and press {interact}."}, "world": {"go": "Talk to Hob"}}, {"id": "expedition", "needs_all": true, "title": "Head out", "hints": {"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."}, "world": {"go": "Portal"}}] |
-| base | {"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it.", "start_food": {"emberberry": 3}, "skip_toy": "toy_ball", "near": 3.0, "steps": [{"id": "meet", "title": "Meet your Boki", "hints": {"go": "This is your Boki. Walk up and say hello."}, "world": {"go": "Your Boki"}}, {"id": "eat", "needs": ["meet"], "title": "Feed it", "hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."}, "world": {"go": "Feed your Boki"}}, {"id": "toy", "needs": ["eat"], "title": "Place a toy", "hints": {"place": "Press {build}, open Base and set a toy down.", "watch": "Watch your Boki go and play with it."}, "world": {"place": "", "watch": "Toy"}}, {"id": "out", "needs": ["toy"], "title": "Head out or stay", "hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing."}, "world": {"go": "Portal"}}]} |
+| base | {"doc": "The Boki base's tutorial (GARDEN.md section 8; only while farm_build.json base_mode is on, then it replaces 'steps'): meet your Boki, feed it and watch it change, place a toy and watch it play, head out or stay. One banner line each, a Skip that leaves a toy placed and food in hand. start_food: a typed food, so the feed step shows the lean change. skip_toy: the toy put down on a skip. near: tiles from your Boki that count as meeting it.", "start_food": {"emberberry": 3}, "skip_toy": "toy_ball", "near": 3.0, "steps": [{"id": "meet", "title": "Meet your Boki", "hints": {"go": "This is your Boki. Walk up and say hello."}, "world": {"go": "Your Boki"}}, {"id": "eat", "needs": ["meet"], "title": "Feed it", "hints": {"go": "Click your Boki (or press {details} next to it), choose Feed and give it the {food}: watch its colour change."}, "world": {"go": "Feed your Boki"}}, {"id": "toy", "needs": ["eat"], "title": "Place a toy", "hints": {"place": "Press {build}, open Base and set a toy down.", "watch": "Watch your Boki go and play with it."}, "world": {"place": "", "watch": "Toy"}}, {"id": "out", "needs": ["toy"], "title": "Head out or stay", "hints": {"go": "Press {interact} at the portal to head out, or press Stay to keep playing. Later, the Waystone in your hub wakes the next zone."}, "world": {"go": "Portal"}}]} |
 | skip_ask | Skip the tutorial? |
 | done_toast | Tutorial done! +{gems} gems |
 | skip_label | Skip tutorial |
@@ -726,6 +765,41 @@ The garden's daily hooks (scripts/home/garden_wishes.gd, scripts/home/garden_awa
 | wishes | {"count": 3, "count_doc": "Wishes picked each garden day, one card.", "needs": ["food", "energy", "clean", "joy"], "needs_doc": "The needs a wish can be for (the same four KinWants shows as thought bubbles).", "pick_below": 60.0, "pick_below_doc": "A Boki is only picked for a need that is under this (0 to 100), so a wish always has something to do.", "wish_to": 80.0, "wish_to_doc": "The wish is granted when that need is back at or above this (0 to 100), however it got there: you, a toy, a feeder.", "trust": 2.0, "trust_doc": "Trust points (0 to 100) the Boki gains when its wish is granted.", "item": "kibble", "item_n": 1, "item_doc": "The small item a granted wish puts in the pantry (Save.d items).", "bonus_gems": 6, "bonus_doc": "Gems for all the wishes of the day (the Sunsap of GARDEN_MODERN.md 1.2 stands in until the item engine is merged).", "ask": {"food": "%s is hungry for a meal", "energy": "%s would love a nap", "clean": "%s wants a wash", "joy": "%s wants some fun"}} |
 | away | {"gift_every_h": 2.0, "gift_every_h_doc": "Hours away for each small gift a Boki saves you (a snack of its leading lean).", "gift_max": 3, "gift_max_doc": "Most gifts on one return (so 6 hours away fills it).", "toy_rate": 0.25, "toy_rate_doc": "Share of the at-home training speed toys keep while you are away.", "toy_cycle_s": 90.0, "toy_cycle_s_doc": "Seconds one stat point takes at a toy while you are home (play time plus the walk to it).", "toy_cap": 3, "toy_cap_doc": "Most stat points one Boki trains on one return, never past its level cap.", "patch_overflow_max": 3, "patch_overflow_max_doc": "Most extra snack-patch batches (beyond the one that waits on the patch) that go to the feeder bowl on one return."} |
 
+## garden_items (`content/rules/garden_items.json`)
+
+Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.md section 1). They live in the garden bag (Save.d items), are fed from a Boki's feed menu, and always show their exact effect (no 'Effect: ?' rule). Effects: stat = +n to one Care.STATS stat up to its cap; xp = +n xp (levels and forms follow); token = a worn path token for the aff (rec.path, at most max_tokens, take_off returns it to the bag); stay = worn Stayleaf (rec.stay); rinse = clear rec.lean; loose = up to n points out of the Boki's highest stat into rec.loose; stat_all = +n to all four stats (up to the level cap); sweet = the picked type among types jumps to share of Evo.LEAN_FULL and holds (rec.hold, hold_days garden days, no fade from other meals); trait = a trait moves by (signed), counted in base_drift week_cap (rec.drift.moved); twin = shared by two Boki: trait by on each and bond between them. sources are where the item comes from; this file does not drop them. aura = a worn look, one at a time (rec.aura; its aura block is drawn by GardenAura, scripts/home/garden_aura.gd). Nest items (scripts/core/nest_items.gd) are placed in the Nesting Nook with a pair and used up when the egg is laid: nest gifts = n more inborn gifts from the parents per Thread (at most max Threads); species = the baby is the species of the parent wearing it; habit = the baby takes that parent's habit and strongest trait exactly. down = trust +trust and a memory line (one drops at every hatch).
+
+| Setting | Value |
+|---|---|
+| pip | 6 |
+| pip_doc | Affinity points one worn path token adds to its path when a form is chosen (Evo.leading); the same as one meal of that path's food. |
+| max_tokens | 3 |
+| max_tokens_doc | Path tokens worn at once on one Boki. |
+| verbs | {"eaten": "ate", "worn": "put on"} |
+| verbs_doc | Journal verb by use; an item's own verb wins. |
+| items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "glowmoss_sprig", "name": "Glowmoss Sprig", "family": "look", "use": "worn", "effect": {"kind": "aura", "text": "slow glow motes drift round it at night (looks only)"}, "aura": {"colour": "#9dffb0", "amount": 6, "life": 2.6, "rise": 0.12, "size": 0.03, "night_only": true}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}, {"id": "heirloom_thread", "name": "Heirloom Thread", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "gifts", "n": 1, "max": 2}, "sources": ["Soul Shrine mentor gift", "Crown prize (rare)"]}, {"id": "likeness_locket", "name": "Likeness Locket", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "species"}, "sources": ["Show Ring cup"]}, {"id": "lullaby_shell", "name": "Lullaby Shell", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "habit"}, "sources": ["Glint Fishing (rare)"]}, {"id": "hatchling_down", "name": "Hatchling Down", "family": "nest", "use": "eaten", "effect": {"kind": "down", "trust": 3}, "sources": ["every hatch"]}, {"id": "fourfold_bun", "name": "Fourfold Bun", "family": "stat", "use": "eaten", "effect": {"kind": "stat_all", "n": 1}, "sources": ["Mixing Bowl: any two different bites"]}, {"id": "bramble_honey", "name": "Bramble Honey", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["grass", "bug", "spore"], "share": 0.5, "hold_days": 7}, "sources": ["Bramblebank golden ripening", "Mixing Bowl: 3 snacks of one type"]}, {"id": "glassdew", "name": "Glassdew", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["water", "ice", "crystal"], "share": 0.5, "hold_days": 7}, "sources": ["Glasswater ripening", "Glint Fishing", "Mixing Bowl: 3 snacks of one type"]}, {"id": "cinderbrittle", "name": "Cinderbrittle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["fire", "rock", "steel", "dragon"], "share": 0.5, "hold_days": 7}, "sources": ["Cinderstep ripening", "Tumble cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "hush_truffle", "name": "Hush Truffle", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["dark", "psychic", "poison"], "share": 0.5, "hold_days": 7}, "sources": ["Hushwood ripening", "Lantern Match", "Mixing Bowl: 3 snacks of one type"]}, {"id": "windfloss", "name": "Windfloss", "family": "lean", "use": "eaten", "effect": {"kind": "sweet", "types": ["flying", "electric", "fairy", "sound"], "share": 0.5, "hold_days": 7}, "sources": ["Kitewind ripening", "Echo Steps cup", "Mixing Bowl: 3 snacks of one type"]}, {"id": "dare_pepper", "name": "Dare Pepper", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "bravery", "by": 0.04}, "sources": ["Cinderstep patch"]}, {"id": "lullwort_tea", "name": "Lullwort Tea", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "temper", "by": -0.04}, "sources": ["Glasswater patch"]}, {"id": "peekbox", "name": "Peekbox", "family": "personality", "use": "eaten", "effect": {"kind": "trait", "trait": "curiosity", "by": 0.04}, "sources": ["Hushwood patch", "Lantern Match"]}, {"id": "twinbun", "name": "Twinbun", "family": "personality", "use": "eaten", "effect": {"kind": "twin", "trait": "loyalty", "by": 0.04, "bond": 0.1}, "sources": ["Bramblebank patch", "Mixing Bowl: 2 sweet buns"]}] |
+
+## garden_prizes (`content/rules/garden_prizes.json`)
+
+Garden minigame prizes and weekly cups (scripts/home/garden_prizes.gd; briefs/design/GARDEN_MODERN.md section 4.4). Each game has a weighted prize table (one roll for the backed Boki's win), a guaranteed first-win-of-the-day item, and a cup of three wins in a row against stronger rivals (cup.rounds). Winning the last round (Crown) gives the game's Cup Ribbon to the winning Boki (rec.ribbons) and the cup prize; one Crown per game per week per Boki. Table entries: kind item = a shaping item id in garden_items.json (banked in Save.d items), kind snack = a Data.CROPS food (banked in Save.d crops).
+
+| Setting | Value |
+|---|---|
+| day_s | 86400 |
+| day_doc | Seconds in a garden day: the first-win item comes once per day per game. |
+| week_s | 604800 |
+| week_doc | Seconds in a cup week: a Boki's Crown for a game counts once per week. |
+| cup | {"rounds": [{"name": "Sprout", "min_ratio": 0.9}, {"name": "Bloom", "min_ratio": 1.0}, {"name": "Crown", "min_ratio": 1.1}], "rounds_doc": "In order. A win counts for a round when the beaten Boki's stat total is at least min_ratio times the winner's; a win over a weaker rival changes nothing; a loss ends the run. The last round is the Crown."} |
+| games | {"dash": {"name": "The Dash", "first": "zipseed", "ribbon": "Dash Cup Ribbon", "colour": "#f2c84a", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "shove": {"name": "Stump Shove", "first": "thumpnut", "ribbon": "Stump Shove Cup Ribbon", "colour": "#d9604a", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "thumpnut", "w": 35}, {"kind": "item", "id": "shellbark_chew", "w": 25}, {"kind": "snack", "id": "emberberry", "w": 20}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "zipseed", "w": 10}]}, "seek": {"name": "Seek", "first": "hushpearl", "ribbon": "Seek Cup Ribbon", "colour": "#8a6ad0", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "hushpearl", "w": 40}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "puffcorn", "w": 10}, {"kind": "item", "id": "thumpnut", "w": 10}]}, "volley": {"name": "Spark Volley", "first": "hushpearl", "ribbon": "Spark Volley Cup Ribbon", "colour": "#5ab8f0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "hushpearl", "w": 30}, {"kind": "item", "id": "zipseed", "w": 25}, {"kind": "snack", "id": "tidebloom", "w": 25}, {"kind": "item", "id": "sunsap", "w": 10}, {"kind": "item", "id": "shellbark_chew", "w": 10}]}, "show": {"name": "Show Ring", "first": "sunsap", "ribbon": "Show Ring Cup Ribbon", "colour": "#f08ac0", "cup_prize": "keepstone", "table": [{"kind": "item", "id": "sunsap", "w": 30}, {"kind": "snack", "id": "sunroot", "w": 25}, {"kind": "item", "id": "unwind_tea", "w": 20}, {"kind": "item", "id": "rinse_melon", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}, "relay": {"name": "Relay Cup", "first": "zipseed", "ribbon": "Relay Cup Ribbon", "colour": "#4ad6b0", "cup_prize": "galeribbon", "table": [{"kind": "item", "id": "zipseed", "w": 40}, {"kind": "snack", "id": "puffcorn", "w": 30}, {"kind": "item", "id": "sunsap", "w": 15}, {"kind": "snack", "id": "tidebloom", "w": 15}]}, "lantern": {"name": "Lantern Match", "first": "hush_truffle", "ribbon": "Lantern Match Cup Ribbon", "colour": "#b48cff", "cup_prize": "puzzlenut", "table": [{"kind": "item", "id": "peekbox", "w": 35}, {"kind": "item", "id": "hush_truffle", "w": 25}, {"kind": "item", "id": "glowmoss_sprig", "w": 15}, {"kind": "snack", "id": "glowcap", "w": 15}, {"kind": "item", "id": "hushpearl", "w": 10}]}} |
+
+## garden_recipes (`content/rules/garden_recipes.json`)
+
+The Mixing Bowl's six recipes (scripts/core/garden_recipes.gd, screen scripts/ui/mixing_bowl.gd; GARDEN_MODERN.md 1.4). All are listed from the start and none can fail: the bowl shows what it will take and what comes out before you confirm. need.kind: different = n different items out of 'of' (one each); snack_type = n snacks (Save.d crops) that all share one lean type out of 'types' (Lean.key_of); same = n of one item. gives is a garden_items id; n how many come out.
+
+| Setting | Value |
+|---|---|
+| recipes | [{"id": "fourfold_bun", "gives": "fourfold_bun", "n": 1, "need": {"kind": "different", "of": ["thumpnut", "shellbark_chew", "zipseed", "hushpearl"], "n": 2}}, {"id": "bramble_honey", "gives": "bramble_honey", "n": 1, "need": {"kind": "snack_type", "types": ["grass", "bug", "spore"], "n": 3}}, {"id": "glassdew", "gives": "glassdew", "n": 1, "need": {"kind": "snack_type", "types": ["water", "ice", "crystal"], "n": 3}}, {"id": "cinderbrittle", "gives": "cinderbrittle", "n": 1, "need": {"kind": "snack_type", "types": ["fire", "rock", "steel", "dragon"], "n": 3}}, {"id": "hush_truffle", "gives": "hush_truffle", "n": 1, "need": {"kind": "snack_type", "types": ["dark", "psychic", "poison"], "n": 3}}, {"id": "windfloss", "gives": "windfloss", "n": 1, "need": {"kind": "snack_type", "types": ["flying", "electric", "fairy", "sound"], "n": 3}}, {"id": "twinbun", "gives": "twinbun", "n": 1, "need": {"kind": "same", "item": "sweetbun", "n": 2}}] |
+
 ## garden_seasons (`content/rules/garden_seasons.json`)
 
 Garden seasons (scripts/home/garden_seasons.gd; briefs/design/GARDEN_MODERN.md section 5 rank 9). Every few weeks one zone is in season, in list order, counted on the weekly-event clock (BaseRace.week_now, the device clock the save uses; no server). While in season: the zone's game plays its season twist (unless this week's weekly format is already for that game), the snack patch grows the season's snack on top of its four, and that game's Crown also gives the season's keepsake (rec.keepsakes, once a season per Boki).
@@ -738,6 +812,67 @@ Garden seasons (scripts/home/garden_seasons.gd; briefs/design/GARDEN_MODERN.md s
 | seasons_doc | In rotation order. zone: GARDEN.md 10.2 zone id; game: the game that zone hosts (a garden_prizes.json game id); twist: an id in base_race.json twists or in twists below; snack: a Data.CROPS id the patch does not already grow; keepsake: what the season's Crown adds. |
 | twists | [{"id": "hot_ledge", "game": "shove", "name": "Hot ledge", "note": "The stump rocks harder: footing slips", "wobble": 0.95}] |
 | twists_doc | Season-only twists, in the same shape as base_race.json twists. wobble: Stump Shove's per-side push roll (base_shove.json wobble, +- fraction). |
+
+## garden_sim (`content/rules/garden_sim.json`)
+
+Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/design/GARDEN_MODERN_BALANCE.md). The sim reads the live rules where they exist (care.json stat_budget, garden_prizes.json, garden_items.json, evo_paths.json) and falls back to the copies under fallback, taken from the READY branches ext/garden-stat-budget 7d1acb8c6, ext/garden-prizes-cups 9f2fdb16f and ext/garden-path-meter c1275d53a. Garden XP (GARDEN_MODERN 2.5) is not built anywhere yet, so garden_xp is the brief's numbers. Everything marked assume is a sim guess, not a game rule.
+
+| Setting | Value |
+|---|---|
+| days | 30 |
+| seeds | 200 |
+| seeds_doc | Runs per player; the report gives medians (days) and means (per-day rates). |
+| first_evo_level | 8 |
+| first_evo_level_doc | The first real form swap: Echolop's final (evo_paths.json zapple level 8). Also reported: level 4 (today's Evo.on_level form step) and 16 (the other branching finals). |
+| report_levels | [4, 8, 16] |
+| grind_days | 14 |
+| grind_doc | Flag: a 5-minute player needs more than this many days to the first evolution. |
+| trivial_days | 3 |
+| trivial_doc | Flag: the 240 budget is full inside this many days. |
+| xp_curve | {"per_level": 100, "flat_from": null} |
+| xp_curve_doc | XP from level n to n + 1: per_level x n, and per_level x flat_from from level flat_from on (null: never). Today game.gd _after_match: 100 x n, no flat part. |
+| garden_xp | {"play": 8, "win": 15, "first_win": 45, "care_first": 3, "care_kinds": 3, "wish": 3, "sunsap": 40} |
+| garden_xp_doc | GARDEN_MODERN 2.5, not built: a played minigame 8, a win 15 (instead of 8), the first win of the day in a game 45 (three times a win); first care of each of care_kinds kinds a day 3; a granted wish 3 (section 5 rank 1); Sunsap 40. |
+| expedition | {"xp_base": 40, "xp_win": 40, "xp_knock": 10, "win_p": 0.5, "knocks": 1.0, "run_min": 10, "wayseed_p": 0.25, "gems": 40} |
+| expedition_doc | game.gd _after_match for the lead Boki: 40 + 40 on a win + 10 a knock. assume: half the runs won, one knock a run, 10 minutes a run, a Wayseed for a locked zone in a quarter of the runs (garden-wayseed: once a run, matching lair only), 40 gems a run. |
+| time | {"arrive": 1.0, "care": 1.0, "wish": 0.5, "game": 1.5, "cup_round": 1.5} |
+| time_doc | assume, minutes: read the away card and pick the patches; the three first cares; grant one wish; one minigame with walking; one cup round. |
+| skill | 0.1 |
+| slope | 1.5 |
+| rival_spread | 0.15 |
+| win_doc | assume: win chance = 0.5 + skill + slope x (1 - rival ratio), clamped 0.1..0.9. Daily rivals are the player's stat for that game times 1 +- rival_spread; cup rivals use garden_prizes cup min_ratio. |
+| game_stats | {"dash": ["speed"], "shove": ["power", "guard"], "seek": ["focus"], "volley": ["focus", "speed"]} |
+| zones | {"bramblebank": {"game": "dash", "golden": ["keepstone", "shellbark_chew", "bramble_honey", "twinbun", "stayleaf"]}, "cinderstep": {"game": "shove", "golden": ["thumpnut", "bristlethorn", "cinderbrittle", "dare_pepper"]}, "glasswater": {"game": "volley", "golden": ["glassdew", "rinse_melon", "lullwort_tea"]}, "hushwood": {"game": "seek", "golden": ["puzzlenut", "hush_truffle", "glowmoss_sprig", "peekbox"]}} |
+| zones_doc | Garden zones with a built game (garden_zones.json); golden = the zone items of the brief's catalogue (section 1.2) a golden ripening can add. Bramblebank is open from the start. |
+| patch_min | 8 |
+| golden_p | 0.1667 |
+| patch_doc | snack_patch.json grow_secs 480 = 8 min; one batch waits while away, so a day gives 1 + minutes / 8 ripenings a zone. Brief 1.1: 1 ripening in 6 adds one zone item. |
+| wishes | 3 |
+| wish_items | {"unwind_tea": 0.1} |
+| wish_doc | Section 5 rank 1: three wishes a day; a granted wish gives a small item (assume: Unwind Tea 1 in 10, else a plain snack); all three give a Sunsap. |
+| away_gifts | 3 |
+| away_items | {"sunsap": 0.25} |
+| away_points | 3 |
+| away_doc | Section 5 rank 3, not built: three gifts after 8 h away (assume: a Sunsap 1 in 4, else a plain snack); toys train at a quarter rate while away, at most away_points a Boki. |
+| trader_days | 7 |
+| trader_items | ["stayleaf", "rinse_melon", "unwind_tea"] |
+| wayseed_price | 300 |
+| home_gems_day | 30 |
+| gems_win | 6 |
+| trader_doc | market.json black_market wayseed_price 300 every wayseed_days 7; otherwise the weekly shaping item. assume: 30 gems a day from home selling; base_race gems_win 6 a minigame win. |
+| toy_per_min | 0.4 |
+| toy_doc | assume: one toy play (toys.json stat_gain 1, play_secs 8-12 plus the walk and the joy_below wait) every 2.5 minutes you are there. |
+| toys | ["speed", "power", "focus", "guard", "focus"] |
+| toys_doc | toys.json: ball, post, tub, stone, dig: the stat each trains; a Boki picks one at random. |
+| line | burrlet |
+| line_doc | The path meter tracked: Sporcupine to Amanitusk (Power) or Ringrove (Guard), both ends in reach of the built games. |
+| families_extra | {"bramble_honey": "lean", "cinderbrittle": "lean", "glassdew": "lean", "hush_truffle": "lean", "twinbun": "personality", "dare_pepper": "personality", "lullwort_tea": "personality", "peekbox": "personality", "glowmoss_sprig": "looks", "cup_ribbon": "looks"} |
+| families_extra_doc | Families of catalogue items not yet in garden_items.json (brief 1.2). |
+| players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
+| players_doc | minutes = garden minutes a day; runs = expeditions a day (the tracked Boki leads); plan = wears only tokens toward its chosen end and feeds that end's bites. home5 is the worst case of the 5-minute flag. All shaping items go to one tracked Boki (an upper bound: a real player spreads them). |
+| proposal | {"xp_curve.per_level": 50, "xp_curve.flat_from": 20, "garden_xp.play": 3, "garden_xp.win": 5, "garden_xp.first_win": 60, "garden_xp.care_first": 5} |
+| proposal_doc | The changed numbers the balance brief proposes (dotted keys into this file); --write reports the sim with and without them. |
+| fallback | {"stat_budget": {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]]}, "cup": [0.9, 1.0, 1.1], "games": {"dash": {"first": "zipseed", "cup_prize": "galeribbon", "table": {"zipseed": 40, "snack": 35, "sunsap": 15, "shellbark_chew": 10}}, "shove": {"first": "thumpnut", "cup_prize": "keepstone", "table": {"thumpnut": 35, "shellbark_chew": 25, "snack": 20, "sunsap": 10, "zipseed": 10}}, "seek": {"first": "hushpearl", "cup_prize": "puzzlenut", "table": {"hushpearl": 40, "snack": 35, "sunsap": 15, "thumpnut": 10}}, "volley": {"first": "hushpearl", "cup_prize": "galeribbon", "table": {"hushpearl": 30, "zipseed": 25, "snack": 25, "sunsap": 10, "shellbark_chew": 10}}}, "items": {"thumpnut": ["stat", "power", 3], "shellbark_chew": ["stat", "guard", 3], "zipseed": ["stat", "speed", 3], "hushpearl": ["stat", "focus", 3], "sunsap": ["stat", "xp", 40], "bristlethorn": ["path", "fierce", 0], "keepstone": ["path", "steadfast", 0], "puzzlenut": ["path", "curious", 0], "galeribbon": ["path", "swift", 0], "stayleaf": ["path", "stay", 0], "rinse_melon": ["lean", "rinse", 0], "unwind_tea": ["respec", "loose", 20]}, "line": {"level": 16, "ends": [{"name": "Amanitusk", "path": "fierce", "stat": "power", "sports": ["tumble"]}, {"name": "Ringrove", "path": "steadfast", "stat": "guard", "sports": ["shove"]}], "pips": {"stat_lead": 3, "tokens_max": 3, "ribbons_max": 2, "care_toy": 1}}} |
 
 ## garden_trust (`content/rules/garden_trust.json`)
 
@@ -755,6 +890,25 @@ Trust from care at the base (Care.trust_up). Petting, its habit food and winning
 | food_by_element | {"ember": "emberberry", "frost": "frostdrop", "bloom": "puffcorn", "storm": "tonicbrew", "stone": "pebblenut", "gravity": "ironcrisp", "titan": "scalepepper", "shadow": "duskplum", "lunar": "mindmint", "venom": "pricklepear", "echo": "chimebun", "prism": "geodecandy", "spore": "glowcap", "swarm": "sapjelly", "tempest": "tonicbrew"} |
 | _units | pet, food, win: trust points (0 to 100). cooldown_h: in-game hours between two raises of one kind on one Boki. hour_s: real seconds in one in-game hour (the home day is 300 s, so 300 / 24). |
 
+## garden_visitor (`content/rules/garden_visitor.json`)
+
+Wild visitors (briefs/design/GARDEN_MODERN.md section 5 rank 6; scripts/home/garden_visitor.gd). While you are in a zone, every check_s seconds of farm time and with no visitor and none due to wait, a wild Boki may wander in: one of the common species that has a rigged model, whose theme is in the zone's group, when the zone has a toy it likes (toys.json likes) and at least residents of the group living there. It stays one garden day (care.json care_day_s), plays your games as one more Boki, and eats only what you hand it. feeds meals of its favourite make it leave an egg (or, with room in the zone, ask to stay as a new Boki). Save.d visitor = {rec, zone, t, fed, notes, next}, a lazy key with no save bump.
+
+| Setting | Value |
+|---|---|
+| check_s | 60 |
+| check_s_doc | Seconds of farm time between looks at whether a visitor comes. |
+| chance | 0.3 |
+| chance_doc | Chance a look brings a visitor when the zone suits one: about one every three minutes in a zone that does. |
+| residents | 2 |
+| residents_doc | Residents of the visitor's type group a zone needs. |
+| feeds | 3 |
+| feeds_doc | Favourite meals it takes before it leaves an egg or asks to stay. |
+| gap_s | 300 |
+| gap_s_doc | Seconds after one leaves before the next may come (one garden day). |
+| groups | {"bramblebank": ["bloom", "swarm", "spore"], "glasswater": ["prism", "frost"], "cinderstep": ["ember", "stone", "titan", "gravity"], "hushwood": ["shadow", "lunar", "venom"], "ridge": ["storm", "tempest", "echo"]} |
+| groups_doc | Species themes (content/kin_v2 theme) that live in each zone, from the types in garden_zones.json and the toy likes in toys.json. |
+
 ## garden_zones (`content/rules/garden_zones.json`)
 
 The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zones.gd, docs/decisions/0022-garden-zones.md). Save.d zones = {id: {open}}, rec zone = the Boki's home zone. zones: name, colour (its stone's glow and card), types (lean.json types; the 18 split five ways), trait (Care trait it matches), game (what its card says is played there) and wayseed_from (where the card says the Wayseed comes from). A zone with a build has its own island (scripts/home/zone_layout.gd, zone_dress.gd): theme (a HomeLayout.THEMES id), seed and sk (the fs island), deco [id, tile x, tile z, quarter turns], shallow [x0, z0, x1, z1] tiles of the channel (only Glasswater has one), clear [x0, z0, x1, z1] tiles kept free of the wild trees and rocks (they are the costliest draws; the scatter dresses the zone instead), scatter (seed, a count per kind: crystal, reed, pebble, terrace, crack; shore = tiles the crystals and reeds crowd the channel).
@@ -763,6 +917,8 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 |---|---|
 | start | bramblebank |
 | start_doc | The zone open from the start and the home of every Boki in an older save. |
+| wayseed_chance | 0.05 |
+| wayseed_chance_doc | Chance that the first lair pile of a run in a matching biome holds the Wayseed (rolled once a run; Lairs). |
 | lean_key | 12 |
 | lean_key_doc | Lean points (of Evo.LEAN_FULL 24) a Boki needs in one of a zone's types to wake it: about two meals. |
 | hop_fade_s | 0.5 |
@@ -775,10 +931,17 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | ask_chance_doc | Chance, each time a Boki that would thrive elsewhere picks what to do, that it goes to wait at the return pad (once per load). |
 | ask_s | 25 |
 | ask_s_doc | Seconds it waits at the pad with its bubble before it gives up and wanders off. |
-| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "game": "Spark Volley", "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek"}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track"}} |
+| thrive | {"trait_over": 0.6, "joy_rate": 0.5, "train_bonus": 0.25} |
+| thrive_doc | A Boki in a zone thrives when its strongest lean is one of the zone's types or the zone's matching trait is over trait_over (0..1). It then loses joy at joy_rate of the usual speed and the toys there train train_bonus more (a share of a stat point, as a chance). Nothing is taken from one that does not thrive. |
+| trait_pull | {"per_day": 0.01, "stop_at": 0.8} |
+| trait_pull_doc | Each in-game day a resident of the zone you are in moves its matching trait per_day toward the zone's way and never past stop_at (0..1). A zone with trait_low pulls the trait down toward 1 - stop_at (Glasswater: calm), and thrives on a low trait. |
+| pace | {"seeds": 200, "days": 16, "runs_a_day": 3, "run_lair_p": 0.5, "run_gems": 40, "garden_gems": 20, "zone_gems": 10, "biomes": ["meadow", "bloom", "frost", "ember", "storm", "gloom"], "meals": 2, "zone2_day": {"runner": 2, "garden": 3}, "all_open_days": [10, 14]} |
+| pace_doc | The play model of --garden-unlock-pace-check (tools/garden_unlock_pace_check.gd), assumptions not game rules: seeds = players simulated per kind (each starts at a different point of the trader's week); days = how far each is played; runs_a_day = expeditions a runner does (none on day 1, the tutorial day); run_lair_p = chance a run drops a lair pile in a random biome of biomes (the real Lairs rule then decides the Wayseed); run_gems = gems a run brings; garden_gems = gems a day of garden games brings with only the first zone, zone_gems = more for each further open zone (its game pays too); the garden-only player gets only those; both start with the 60 of a new save; meals = snacks a day fed toward the zone it is working on. Targets: the median player has a second zone open by zone2_day (runner, garden-only) and the fifth by day all_open_days[0]..[1]. |
+| zones | {"bramblebank": {"name": "Bramblebank", "colour": "7fc45a", "types": ["normal", "grass", "bug", "spore"], "trait": "loyalty", "game": "The Dash"}, "glasswater": {"name": "Glasswater Shallows", "colour": "6fd0e8", "types": ["water", "ice", "crystal"], "trait": "temper", "trait_low": true, "game": "Spark Volley", "lair_biomes": ["frost"], "build": {"theme": "glasswater", "seed": 3307, "sk": 0.9, "deco": [["toy_tub", 34, 37, 0], ["snack_patch", 43, 37, 0]], "shallow": [31, 30, 46, 32], "clear": [20, 22, 58, 48], "scatter": {"seed": 11, "crystal": 36, "reed": 60, "pebble": 50, "shore": 1.5}}}, "cinderstep": {"name": "Cinderstep", "colour": "e07a3a", "types": ["fire", "rock", "steel", "dragon"], "trait": "temper", "game": "Stump Shove", "lair_biomes": ["ember"], "build": {"theme": "cinderstep", "seed": 4417, "sk": 0.85, "deco": [["toy_stone", 41, 33, 0], ["toy_post", 33, 38, 0], ["snack_patch", 43, 38, 0]], "clear": [12, 14, 66, 58], "scatter": {"seed": 23, "terrace": 16, "crack": 44}}}, "hushwood": {"name": "Hushwood", "colour": "9a7ae0", "types": ["dark", "psychic", "poison"], "trait": "curiosity", "game": "Seek", "lair_biomes": ["bloom", "gloom"]}, "ridge": {"name": "Kitewind Ridge", "colour": "f2d45a", "types": ["flying", "electric", "fairy", "sound"], "trait": "bravery", "game": "The Dash, ridge track", "lair_biomes": ["storm"]}} |
+| lair_biomes_doc | A zone's Wayseed drops from a lair whose biome (Lairs, World.biome_at) is listed here: the boss's pile holds one, at most one a run, and only for a zone still locked. The start zone has none (its Wayseed never exists). |
 | budget | {"draws": 350, "objects": 800, "nodes": 3000, "emitters": 12, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 1.5} |
 | budget_hub | {"draws": 200, "objects": 500, "nodes": 2000, "emitters": 6, "frame_ms": 16.7, "frame_ms_low": 33.0, "base_life_ms": 0.5} |
-| ratchet | {"medium": {"hub": {"draws": 720, "objects": 720, "frame_ms": 16.7}, "zone_bramblebank": {"draws": 770, "objects": 770, "frame_ms": 16.7}, "zone_glasswater": {"draws": 395, "objects": 420, "frame_ms": 16.7}, "zone_cinderstep": {"draws": 540, "objects": 550, "frame_ms": 19.5}}, "low": {"hub": {"draws": 370, "objects": 370}}} |
+| ratchet | {"medium": {"hub": {"draws": 720, "objects": 720, "frame_ms": 16.7}, "zone_bramblebank": {"draws": 770, "objects": 770, "frame_ms": 16.7}, "zone_glasswater": {"draws": 395, "objects": 420, "frame_ms": 16.7}, "zone_cinderstep": {"draws": 540, "objects": 550, "frame_ms": 19.5}}, "low": {"hub": {"draws": 370, "objects": 560}}} |
 | ratchet_doc | Where a part is still over its target, the numbers it was measured at (M5 at Medium, rp1-0 at Low, docs/GARDEN_PERF.md): --perf-bench fails past these, so no zone gets worse while the targets are worked toward. Delete an entry when its part meets the target; never raise one. |
 | budget_doc | What one loaded zone may cost (GARDEN.md 10.6): draw calls, objects, nodes, emitting particle systems and a frame in ms on the M5 at Medium. --perf-bench --bench-zone=all prints each against these. frame_ms is the M5 at Medium, frame_ms_low the rp1-0 at Low (the lowest preset); base_life_ms is one 10 Hz step with 9 Boki out. budget_hub is the hub column. |
 | wayseed_from | a lair of a matching type on a run, or the Drift Trader once a week |
@@ -796,6 +959,69 @@ The garden's hub and zones (briefs/design/GARDEN.md 10; scripts/home/garden_zone
 | tables | {"ground": [{"kind": "gear", "chance": 1.0}], "cache": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}], "crate": [{"kind": "gear", "chance": 0.12}, {"kind": "tune", "chance": 0.08}], "brute": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.3}], "sentinel": [{"kind": "gear", "chance": 0.4}, {"kind": "tune", "chance": 0.2}], "warden": [{"kind": "gear", "chance": 1.0, "bonus": 2, "min_rar": 2}, {"kind": "tune", "chance": 1.0, "brand": true}], "glimmer": [{"kind": "gear", "chance": 1.0, "bonus": 1, "min_rar": 2}, {"kind": "tune", "chance": 0.7}], "bl_skitter": [{"kind": "tune", "chance": 0.07}, {"kind": "gear", "chance": 0.05}], "bl_warden": [{"kind": "gear", "chance": 0.55, "bonus": 1}, {"kind": "tune", "chance": 0.7}], "boss": [{"kind": "gear", "chance": 1.0, "min_rar": 3, "legendary": 0.3}, {"kind": "tune", "chance": 1.0, "brand": true}], "chest": [{"kind": "gear", "chance": 0.9, "bonus": 1}, {"kind": "gear", "chance": 0.3}, {"kind": "tune", "chance": 0.55}]} |
 | bot_start | {"easy": {"slots": 0, "bonus": 0}, "medium": {"slots": 1, "bonus": 0}, "hard": {"slots": 3, "bonus": 0}, "expert": {"slots": 3, "bonus": 1}} |
 | extract_mats | [{"wood": 1}, {"wood": 1}, {"wood": 1, "stone": 1}, {"stone": 2, "scrap": 1}, {"stone": 3, "scrap": 3}] |
+
+## glint_fishing (`content/rules/glint_fishing.json`)
+
+Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fishing.gd). Solo with your partner on a rock in a zone that has a spot. Five casts: hold interact to swing the cast out and back, release on a glint, wait, press when your Boki's ears go up, then hold and release to keep the line's tension in the band until the glint is landed. Units: seconds, metres, tension 0-1, stats 0-100 points, joy and trust 0-100.
+
+| Setting | Value |
+|---|---|
+| casts | 5 |
+| spots | {"glasswater": {"at": [48.5, 31.5], "toward": [-1.0, 0.0], "sign": [48.6, 33.4]}} |
+| spots_doc | A zone's rock (GardenZones.here): at = where your Boki stands, tiles; toward = the cast direction over the water (garden_zones.json build.shallow); sign = the post listing what is biting today. |
+| glints | 3 |
+| glints_doc | Glints on the water for each cast, each with its catch rolled before you aim. |
+| near_m | 1.5 |
+| far_m | 7 |
+| spread_m | 0.5 |
+| spread_doc | A glint sits up to this far to either side of the cast line (only the distance out counts for the cast). |
+| swing_s | 1.4 |
+| swing_doc | Seconds of holding for the cast to swing from near_m to far_m; it swings back and forth while you hold. |
+| aim_m | 0.6 |
+| aim_doc | A cast that lands this close to a glint takes it; further from every glint it plops into empty water and the cast is spent. |
+| wait_s | [3.0, 7.0] |
+| wait_doc | Seconds from the cast landing to the bite (a uniform roll). |
+| warn_s | [0.3, 0.8] |
+| warn_doc | Seconds the ears are up before the bite: at Focus 0 and at Focus 100 (linear). A press before the ears go up spooks the glint. |
+| late_s | 0.25 |
+| late_doc | Seconds after the bite the hook still sets; later and it got away. |
+| band | [0.1, 0.22] |
+| band_doc | Half the width of the good tension band (centred on 0.5) at Power 0 and at Power 100 (linear). |
+| rise | 0.9 |
+| fall | 0.7 |
+| rise_doc | Tension per second while you hold (rise) and while you let go (fall). |
+| pull | 0.55 |
+| pull_doc | Tension per second the glint drags at its strongest: a swell that changes pace, plus a jolt now and then. |
+| pull_s | [1.2, 2.4] |
+| pull_s_doc | Seconds per swell of the pull (a roll each swell). |
+| jolt | 0.25 |
+| jolt_doc | Chance per swell of a jolt: the tension jumps by pull times 0.4 at once. |
+| rare_pull | 1.35 |
+| rare_pull_doc | A rare glint pulls this many times harder. |
+| land_s | 6 |
+| land_doc | Seconds inside the band to land it. |
+| slip_s | 1.5 |
+| slip_doc | Seconds outside the band in a row before the line slips and the glint is gone. |
+| show_s | 1.6 |
+| show_doc | Seconds the landed or lost glint shows before the next cast. |
+| max_s | 180 |
+| max_doc | A session still going after this many seconds ends after the cast in hand. |
+| rare | 0.15 |
+| rare_doc | Chance a glint is rare (it glows gold and pays from the rare list). |
+| water_rare | 2 |
+| water_rare_doc | A Boki whose leading lean is Water (Evo.lean) sees rare glints this many times as often. |
+| sign_n | 3 |
+| sign_doc | How many of the common catches bite each garden day; the day number picks them (the same all day). |
+| day_s | 86400 |
+| common | [{"kind": "snack", "id": "tidebloom", "w": 30}, {"kind": "snack", "id": "frostdrop", "w": 25}, {"kind": "snack", "id": "geodecandy", "w": 20}, {"kind": "item", "id": "glassdew", "w": 15}, {"kind": "item", "id": "rinse_melon", "w": 10}] |
+| rare_list | [{"kind": "item", "id": "hushpearl", "w": 6}, {"kind": "item", "id": "mistbloom", "w": 3}, {"kind": "item", "id": "lullaby_shell", "w": 1}] |
+| lists_doc | What glints pay, banked like a garden prize (GardenPrizes.bank): kind item = a garden_items.json id, kind snack = a Data.CROPS food. An entry whose item is not in the catalog yet is left out (it never bites). |
+| energy | 8 |
+| joy | 2 |
+| joy_doc | Joy your Boki gets for each glint landed. |
+| trust | 1 |
+| trust_doc | Trust for the session when at least one glint was landed. |
+| card_s | 6 |
 
 ## hunter_move (`content/rules/hunter_move.json`)
 
@@ -859,6 +1085,43 @@ How personality traits shape a kin's fighting. aggression, loyalty and caution a
 | recall_cooldown | 1 |
 | swap_cooldown | 3 |
 
+## lantern_match (`content/rules/lantern_match.json`)
+
+Lantern Match, a memory game (briefs/design/GARDEN_MODERN.md section 4.2 game 6, scripts/home/lantern_match.gd). Only with farm_build.json base_mode on. Twelve glowcaps in a ring flash in pairs, then go dark; open two at a time to find the pairs. Your Boki sniffs every so often and points at the partner of the last cap you opened, if it saw that cap. Solo against the clock, or turn by turn against a Boki. Units: seconds, probabilities 0-1, joy and trust are 0-100 points.
+
+| Setting | Value |
+|---|---|
+| colours | ["#ffd166", "#7ee0ff", "#c69cff", "#8cf0a0", "#ff8fb1", "#ffa65c"] |
+| colours_doc | One glow colour per pair; the ring holds two caps of each (so 12 caps). |
+| flash_s | 0.6 |
+| flash_doc | When a ring is dealt each pair glows for flash_s seconds in turn, then all go dark; the clock waits while it flashes. |
+| time_s | 90 |
+| time_doc | The clock in seconds. Versus: whoever holds more pairs when it runs out (or the ring is cleared) wins; a tie is a draw. |
+| solo_goal | 18 |
+| solo_doc | Solo: a cleared ring deals a fresh one (and flashes again); find solo_goal pairs before the clock runs out to win. |
+| reveal_s | 0.9 |
+| reveal_doc | Two caps that do not match stay lit this long, then go dark. In versus the turn then passes; a match keeps the turn. |
+| sniff_s | 6 |
+| sniff_per_focus | 0.02 |
+| sniff_curiosity | 1 |
+| sniff_doc | Seconds between your Boki's sniffs: sniff_s / ((1 + Focus points * sniff_per_focus) * (1 + (curiosity - 0.5) * sniff_curiosity)), at least sniff_min. 50 Focus sniffs twice as often; a fully curious Boki half as often again. |
+| sniff_min | 1 |
+| see | 0.4 |
+| see_per_focus | 0.008 |
+| see_doc | Chance your Boki notices a pair while it flashes: see + Focus points * see_per_focus, at most 1. Every cap opened in play it always sees. |
+| foe_mem | 0.45 |
+| foe_mem_per_focus | 0.008 |
+| foe_mem_doc | Versus: the chance the rival Boki remembers a cap it has seen (in the flash or opened by anyone): foe_mem + its Focus points * foe_mem_per_focus, at most 0.95. |
+| foe_s | 0.8 |
+| foe_doc | Seconds the rival Boki takes before each cap it opens. |
+| energy | 6 |
+| win_joy | 10 |
+| win_trust | 3 |
+| lose_joy | -6 |
+| gems | 4 |
+| gems_doc | Gems to you when a game ends (win or not). |
+| card_s | 6 |
+
 ## lean (`content/rules/lean.json`)
 
 Food lean by type (scripts/core/lean.gd, active when base_mode is on). types: the 18 Boki types (DECISIONS 2026-11-08 22:29): name, tint (the colour its meals lean a Boki to) and part (the grown part its lean earns at the next form, one of KinParts.EVO_PARTS; some types share a part, the tint tells them apart). Normal has no tint: plain food never leans. foods: every food (Data.CROPS and Care.FOODS) and its type.
@@ -913,8 +1176,8 @@ The market (docs/decisions/0013-market.md). Gems are counts. Fees and taxes are 
 | transfer_doc | Handing a Boki straight to a named player: a flat fee (destroyed), one per week per sender, and the receiver has to accept. |
 | auction | {"hours": [12, 24, 48], "snipe_s": 60, "extend_s": 120, "max_open": 3, "npc_lots": 3, "npc_bid_k": 0.8, "npc_lot_start": 1.0, "npc_lot_cap": 1.3} |
 | auction_doc | A bid with less than snipe_s left pushes the end out to extend_s from now. NPC bidders (offline) bid on your lots up to npc_bid_k x reference, never on friends-only lots. NPC lots open at npc_lot_start x reference and NPC rivals bid them up to npc_lot_cap x. |
-| black_market | {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5} |
-| black_market_doc | Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches. |
+| black_market | {"stock": 4, "price_lo": 2.0, "price_hi": 2.6, "egg_price": 420, "egg_chance": 0.5, "wayseed_price": 110, "wayseed_days": 3} |
+| black_market_doc | Old Pell's rare stock: a daily rotation of rare and epic goods at price_lo..price_hi x reference, and now and then a Rare Egg. A gem sink. Never keys, shards or anything found only in matches. wayseed_price: once every wayseed_days he also holds one Wayseed (GARDEN.md 10.3) for a zone that is still locked, never for an open one. |
 | rarity | {"common": {"name": "Common", "restock": 0.9, "col": "c8cdd8"}, "uncommon": {"name": "Uncommon", "restock": 0.6, "col": "6fd86a"}, "rare": {"name": "Rare", "restock": 0.3, "col": "5ab0f0"}, "epic": {"name": "Epic", "restock": 0.12, "col": "c08cff"}} |
 | rarity_doc | restock: the chance an NPC stall carries a good on a given day. |
 | goods | {"silk_fibre": {"name": "Silk fibre", "kind": "material", "rarity": "uncommon", "ref": 18, "icon": "seed", "col": "f3eee2", "desc": "Fine fibre from a wild silk bush. Weavers pay well for it."}, "heartwood": {"name": "Heartwood", "kind": "material", "rarity": "rare", "ref": 45, "icon": "dash", "col": "8a4a2a", "desc": "The red core of a very old tree. Hard as stone, light as pine."}, "starstone": {"name": "Starstone", "kind": "material", "rarity": "epic", "ref": 110, "icon": "fortify", "col": "9ab8ff", "desc": "A stone with a faint glow inside, from the deep isles."}, "colossus_horn": {"name": "Colossus horn", "kind": "trophy", "rarity": "rare", "ref": 70, "icon": "fortify", "col": "b9a07a", "desc": "Taken from a Colossus in its lair. Proof you stood your ground."}, "serpent_scale": {"name": "Serpent scale", "kind": "trophy", "rarity": "rare", "ref": 70, "icon": "dash", "col": "5ad0b0", "desc": "A scale the size of a shield, from a sky Serpent."}, "brood_crown": {"name": "Brood crown", "kind": "trophy", "rarity": "epic", "ref": 130, "icon": "gem", "col": "e0b04a", "desc": "The crest of a Brood queen. Few hunters have one."}, "dye_rose": {"name": "Rose dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "ff7aa8", "desc": "Recolours what a Boki wears."}, "dye_sky": {"name": "Sky dye", "kind": "dye", "rarity": "common", "ref": 15, "icon": "paw", "col": "5ab8f0", "desc": "Recolours what a Boki wears."}, "dye_moss": {"name": "Moss dye", "kind": "dye", "rarity": "uncommon", "ref": 25, "icon": "paw", "col": "6fbf5a", "desc": "Recolours what a Boki wears."}, "dye_gold": {"name": "Gilt dye", "kind": "dye", "rarity": "rare", "ref": 60, "icon": "paw", "col": "f2c84a", "desc": "Recolours what a Boki wears, in shining gold."}, "dye_night": {"name": "Nightfall dye", "kind": "dye", "rarity": "epic", "ref": 120, "icon": "paw", "col": "3a3a6a", "desc": "Recolours what a Boki wears, deep as the night sky."}} |
@@ -1015,6 +1278,59 @@ How a merge looks and plays (docs/decisions/0003). Forms with a kit live in cont
 | tolerance_db | 3 |
 | cats | {"fire": -17.0, "impact": -16.0, "heavy_fire": -15.5, "heavy_impact": -14.5, "cast": -18.0, "signature": -17.0, "dash": -20.0, "step": -23.0, "grunt": -18.0, "loop": -21.0, "boki": -19.0, "ui": -22.0} |
 | _cats | heavy_fire / heavy_impact: a damage carry's weapon and hits (Vex's gatling, Kael's greatsword, Grimble's blunderbuss, Albert's hammer), a little louder than the lighter Hunters; fire: a weapon shot or swing; impact: something landing; cast: an ability starting; signature: a Hunter's recognisable sound; step: footsteps (many per second, so quietest); grunt: hurt/downed/death, wordless; loop: held sounds; boki: Boki voices and moves; ui: menus and HUD |
+
+## show_ring (`content/rules/show_ring.json`)
+
+Show Ring, a judged show on a small stage near the Training post (briefs/design/GARDEN_MODERN.md 4.2 game 3, scripts/home/show_ring.gd). Only with farm_build.json base_mode on. Two rested Boki show: the one you back and a rival. Three rounds of up to 10 points each: Look (how it has been raised), Trick (three timed presses, the trick picked by its best stat) and Bond (it walks to you past a snack, a toy and the rival; you call as it passes each). Three judges post a taste for the week; each judge whose taste the Boki fits adds taste_bonus. Every score is worked out from the records and the presses only, so the same Boki and presses always score the same. Units: seconds, points, needs and trust 0-100, traits 0-1.
+
+| Setting | Value |
+|---|---|
+| look | {"joy": 2.0, "clean": 2.0, "lean": 2.0, "parts": 2.0, "aura": 1.0, "keepsakes": 1.0} |
+| look_doc | Most points each part of Look gives (10 in all). joy and clean: in proportion to the need. lean: full points at a full lean ('in full colour'), half at half a lean or more. parts: one point a grown part level (rec.muts). aura: worn (rec.aura set). keepsakes: one point a Cup Ribbon kind held (rec.ribbons). |
+| half_lean | 0.5 |
+| half_lean_doc | Lean strength (Evo.lean, 0..1) that earns half the lean points. |
+| tricks | {"power": {"name": "Log Lift", "line": "hoists a log three times"}, "guard": {"name": "Statue Stand", "line": "freezes in three proud poses"}, "speed": {"name": "Whirl Hop", "line": "spins through three quick hops"}, "focus": {"name": "Pebble Balance", "line": "balances three pebbles on its nose"}} |
+| tricks_doc | The trick a Boki shows, by its highest trained stat (Care.STATS order on a tie). |
+| press | {"great": 3.0, "good": 2.0, "miss": 0.0} |
+| press_doc | Trick points a timed press grades to; three presses, so 9 at most. |
+| stat_per_point | 0.02 |
+| stat_doc | Trick points a point of the trick's stat adds, up to 1 (50 points of it). |
+| trick_s | 25 |
+| trick_doc | Seconds for the three presses; presses not made by then are misses. |
+| lures | [{"id": "snack", "name": "a snack", "at": 0.25, "pull": 0.8}, {"id": "toy", "name": "a toy", "at": 0.5, "pull": 0.7}, {"id": "rival", "name": "its rival", "at": 0.75, "pull": 0.6}] |
+| lures_doc | What it walks past, in order. at: share of the walk where it is level with the lure. pull: how far it strays (0..1) with no trust, no loyalty and no call. |
+| trust_shrink | 0.5 |
+| loyal_shrink | 0.4 |
+| shrink_doc | Trust 100 takes trust_shrink off every pull, loyalty 1 takes loyal_shrink (shares of the pull, added). |
+| call | {"great": 0.0, "good": 0.4, "miss": 1.0} |
+| call_doc | Share of the pull left after your call for each lure. |
+| call_great | 0.3 |
+| call_good | 0.7 |
+| call_window_doc | Seconds from the moment it is level with a lure: a call this close is great, then good; later or never is a miss. |
+| walk_s | 42 |
+| walk_m | 8 |
+| walk_doc | The Bond walk: seconds and metres from the stage to you. |
+| look_s | 30 |
+| judge_s | 24 |
+| rounds_doc | Seconds the Look parade and the judging take; with the trick and the walk the show runs about 2 minutes. |
+| rival_press | {"great": 40, "good": 15} |
+| rival_doc | The rival's handler: each of its trick presses is great at this many points of its trick stat, good at this many, else a miss; its calls are good. |
+| judges | ["Old Bramwell", "Auntie Fennick", "Ludo Pebble"] |
+| judges_doc | Judges' names when you have no retired mentors to sit on the bench (mentors go first). |
+| tastes | [{"kind": "lean", "id": "grass", "text": "a Grass lean"}, {"kind": "trait", "id": "curiosity", "text": "a curious Boki"}, {"kind": "lean", "id": "water", "text": "a Water lean"}, {"kind": "trait", "id": "loyalty", "text": "a loyal Boki"}, {"kind": "lean", "id": "fire", "text": "a Fire lean"}, {"kind": "trait", "id": "bravery", "text": "a brave Boki"}, {"kind": "lean", "id": "electric", "text": "an Electric lean"}, {"kind": "trait", "id": "temper", "text": "a fiery Boki"}] |
+| tastes_doc | What the judges like. Each week the three judges take three tastes in a row from this list (week number times three). lean: its lean is that type at half_lean or more. trait: that trait is taste_trait or more. |
+| taste_trait | 0.6 |
+| taste_bonus | 1 |
+| min_energy | 20 |
+| energy | 6 |
+| energy_doc | A Boki needs min_energy to show and spends this much. |
+| win_joy | 12 |
+| win_trust | 3 |
+| lose_joy | -6 |
+| gems_win | 5 |
+| gems_ran | 1 |
+| gems_doc | Gems to you when your backed Boki wins, or for any other show. |
+| card_s | 8 |
 
 ## snack_patch (`content/rules/snack_patch.json`)
 

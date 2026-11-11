@@ -322,4 +322,5 @@ func _card(res: Dictionary, pinned: bool) -> void:
 		["%s sniffs out the scent!" % win["name"], 18, UI.ACCENT_HI],
 		["%s is beaming (+joy, +trust)" % win["name"], 14, UI.INK],
 		[(sulk % lose["name"]) + ": \"lost the Seek to %s\"" % win["name"], 14, UI.MUTED],
-		["+%d gems" % res["gems"], 14, UI.GOLD]] + BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))
+		["+%d gems" % res["gems"], 14, UI.GOLD]]
+		+ BaseRace.pin_rows(pinned) + GardenPrizes.rows(res["prize"], 14))

@@ -253,7 +253,7 @@
 "scripts/home/home.gd": {
 "history_comment": 1,
 "long_line": 206,
-"nested_ternary": 27,
+"nested_ternary": 26,
 "semicolon": 243,
 "shadow": 3
 },
