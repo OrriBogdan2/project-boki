@@ -1,11 +1,18 @@
-# Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 3 (2026-11-10)
+# Cinder (ashwick): import note, v95 swap of Cinder appeal4, bust candidate 5 (2026-11-11)
 
-`cinder.glb`: Cinder v95 r2 appeal4 `cand_3.glb` (one mesh), swapped
+`cinder.glb`: Cinder v95 r2 appeal4 `cand_5.glb` (one mesh), swapped
 onto ashwick's own skeleton, clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
 `art/wardens/src/cinder_v95.json`. Raw files in ~/meshy/v95/Cinder/r2/appeal4 (never in git); the spec reads
-`cinder_v95_bust3_body.glb`, which is `cand_3.glb` without its tail (unrigged in the master): the game's own tail stays.
+`cinder_v95_bust5_body.glb`, which is `cand_5.glb` without its tail (unrigged in the master): the game's own tail stays.
 
-`cand_3.glb` is the owner's earlier pick (appeal3 `cand_b.glb`, body variant b with the appeal3 face; in game at 51ec101a8) after the
+`cand_5.glb` (11-11) redoes candidate 3's bust after the owner's note that it juts out like a cone in side view (and "all the girls a
+bit curvier, tighter waist, not weird from the side"). Candidate 3 scaled the bust radially, so the apex moved most. Candidate 5
+displaces each breast as a dome instead: zero slope where it meets the chest wall (no shelf), volume spread over the whole breast,
+a fuller lower curve with a small drop, and the apex lower and softer (38.1 cm forward vs 38.8). Waist about 9% narrower at its
+narrowest, hips +4.5%. Same vertices and UVs, so the shell and lava seams ride it (triangle area p95 1.51x). Candidate 3's
+painted face is kept. Sheet: ~/art-review/cinder-bust-round-1111/cmp_bust_round.png; candidate 4 is the perkier alternative.
+
+`cand_3.glb` (previous in-game, 47415fdfe) was the owner's earlier pick (appeal3 `cand_b.glb`, body variant b with the appeal3 face; in game at 51ec101a8) after the
 owner's 11-10 evening note ("bust should be bigger", "both big and seductive"): a fuller rounded bust (apex 6.5 cm further forward,
 10.4 cm past the underbust instead of 3.9), waist 1.5 cm narrower, hips 1.9 cm wider, and half-lidded eyes, smoky liner, one raised
 brow and fuller lips painted into the appeal3 face. Same vertices and UVs as `cand_b.glb`. Numbers, the milder candidates 1 and 2
@@ -37,7 +44,10 @@ Shots on the game rig (`--warden-shots`): docs/shots/cinder-bust/ (front_34, tur
 poses_game, moves_close_1/2, back_34, turnaround_game): no tearing at the mouth or elsewhere, and no arm crossing the bigger bust in
 idle, run or the moves (the chest rides `hips` rigidly, so it cannot tear).
 
-Checks: `--cinder-art-check` 0 fails; `--warden-glb-check` 183 checks, 0 failed (13.7k tris); `--warden-model-check`
+Checks (11-11, candidate 5): `--cinder-art-check` 0 fails; `--warden-glb-check` PASS; `--warden-model-check` PASS;
+`--stretch-check --wardens=ashwick` flags all 41 clips as before, worst 5.83x (lance_stoke; idle 2.17x), the same as candidate 3's.
+Shots on the game rig: docs/shots/cinder-bust/ (re-rendered for candidate 5).
+Earlier, candidate 3: `--cinder-art-check` 0 fails; `--warden-glb-check` 183 checks, 0 failed (13.7k tris); `--warden-model-check`
 passes with ashwick's `height_3d` re-measured to 1.15 (the new horns stand lower than v2's). `--stretch-check` (new,
 `tools/stretch_check.gd`, the same maths as `tools/art1/skin_relax.py`) still flags every ashwick clip past 1.3x, worst 5.9x
 (lance_stoke; idle 2.2x; 6.8x and 2.3x with body b); the old build was worse on every clip (worst 19.4x, idle 5.8x, run 11.9x), from the same rig's hips,
