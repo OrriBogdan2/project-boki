@@ -21,14 +21,14 @@
 	},
 	"hold": {
 		"lmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:33-47): the draw is a hold; she walks slowly while drawing and keeps moving (f111-116, frames 0111-0116); no Shift or jump pressed inside a draw (the roll is seen only at 0388-0389, bare: pin.md:322-327). Open question pin.md:247 'whether you can shoot during it'. Air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:73,75,78 (Myth: Greenwood Bow, Phase Walk, the roll test) have nothing on a draw through a roll. Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:33-47): the draw is a hold; she walks slowly while drawing and keeps moving (f111-116, frames 0111-0116); no Shift or jump pressed inside a draw (the roll is seen only at 0388-0389, bare: pin.md:322-327). Open question pin.md:247 'whether you can shoot during it'. Air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:73,75,78 (Myth: Greenwood Bow, Phase Walk, the roll test) have nothing on a draw through a roll. Air: the only airborne push in the clip is 0051-0053, a hop-sized 2 s push, not a clean air dash (pin.md:330-331). Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:33-47): the draw is a hold; she walks slowly while drawing and keeps moving (f111-116, frames 0111-0116); no Shift or jump pressed inside a draw (the roll is seen only at 0388-0389, bare: pin.md:322-327). Open question pin.md:247 'whether you can shoot during it'. Air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:73,75,78 (Myth: Greenwood Bow, Phase Walk, the roll test) have nothing on a draw through a roll. Kept: the hold carries through (owner item 51)."}
 		},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:91-110): the Impaling Shot is a hold-charge at the bow (0270, 0273, 0494; frames 0264-0269); no Shift or jump pressed inside the charge. Roll bare (pin.md:322-327, frames 0388-0389); air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:74,75,78 (Myth: Heartpiercer, Phase Walk, the roll test) have nothing on a charge through a roll. Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:91-110): the Impaling Shot is a hold-charge at the bow (0270, 0273, 0494; frames 0264-0269); no Shift or jump pressed inside the charge. Roll bare (pin.md:322-327, frames 0388-0389); air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:74,75,78 (Myth: Heartpiercer, Phase Walk, the roll test) have nothing on a charge through a roll. Air: the only airborne push in the clip is 0051-0053, a hop-sized 2 s push, not a clean air dash (pin.md:330-331). Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/pin.md:91-110): the Impaling Shot is a hold-charge at the bow (0270, 0273, 0494; frames 0264-0269); no Shift or jump pressed inside the charge. Roll bare (pin.md:322-327, frames 0388-0389); air dash and jump not shown (pin.md:330-334). Data: briefs/supervive-data/supervive_kits.md:74,75,78 (Myth: Heartpiercer, Phase Walk, the roll test) have nothing on a charge through a roll. Kept: the hold carries through (owner item 51)."}
 		}
 	}
 }

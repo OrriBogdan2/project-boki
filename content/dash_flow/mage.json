@@ -24,9 +24,9 @@
 	},
 	"hold": {
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/vireo.md:80-94): the Lightning Spear is a hold (press 0043, 0057, 0078, throw 1.2 s later, frames 0044-0048); she stood still through every hold, and Surge was never pressed inside one (the spear is thrown first, then the dash: vireo.md:211-219, frames 0105, 0133-0135, 0161-0171). Open question vireo.md:386 'can she move while holding the spear or Surge'. Ground dash only from the ground (vireo.md:460-470). Data: briefs/supervive-data/supervive_kits.md:66-67 (Joule: Voltaic Spear, Surge) have nothing on a spear hold through a dash. Kept: the hold carries through (owner item 51)."},
+			"air": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/vireo.md:80-94): the Lightning Spear is a hold (press 0043, 0057, 0078, throw 1.2 s later, frames 0044-0048); she stood still through every hold, and Surge was never pressed inside one (the spear is thrown first, then the dash: vireo.md:211-219, frames 0105, 0133-0135, 0161-0171). Open question vireo.md:386 'can she move while holding the spear or Surge'. Air Surge not shown (vireo.md:472-473, 503). Data: briefs/supervive-data/supervive_kits.md:66-67 (Joule: Voltaic Spear, Surge) have nothing on a spear hold through a dash. Kept: the hold carries through (owner item 51)."},
+			"jump": {"mode": "keep", "source": "Not determinable. Footage (briefs/hero-ref/vireo.md:80-94): the Lightning Spear is a hold (press 0043, 0057, 0078, throw 1.2 s later, frames 0044-0048); she stood still through every hold, and Surge was never pressed inside one (the spear is thrown first, then the dash: vireo.md:211-219, frames 0105, 0133-0135, 0161-0171). Open question vireo.md:386 'can she move while holding the spear or Surge'. Jump not shown (vireo.md:475-476, 503). Data: briefs/supervive-data/supervive_kits.md:66-67 (Joule: Voltaic Spear, Surge) have nothing on a spear hold through a dash. Kept: the hold carries through (owner item 51)."}
 		}
 	}
 }
