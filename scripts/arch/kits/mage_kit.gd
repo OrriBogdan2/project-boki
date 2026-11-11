@@ -306,7 +306,7 @@ func _tick_lmb() -> void:
 	var shoulder := h.position + Vector3(0, 1.25, 0) + Vector3(-d.y, 0, d.x) * (-0.2 if left else 0.2)
 	fx().smear(shoulder, shoulder + Vector3(d.x, 0, d.y) * 0.9, TEAL, PINK, 0.3, 0.12)
 	m.later(0.06, _fingertip.bind(left))
-	fx().ride(sd, "bolt", TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
+	fx().ride(sd, TEAL, PINK, 1.25, 0.6, _bolt_end.bind(h.pos))
 
 ## The finger-gun release: arcs flung out of the pointing fingertip and a star on it.
 func _fingertip(left: bool) -> void:
@@ -663,7 +663,7 @@ func _coil(k: float) -> void:
 			_coil_hit(f, dir, k)}))
 	var a := h.position + Vector3(dir.x * 0.6, 1.5, dir.y * 0.6)
 	if shots.size() > n0 and shots[-1]["by"] == h:
-		fx().ride(shots[-1], "bolt", TEAL, PINK, 3.2, 0.7, func(at: Vector3, _v: Vector2): _rod_end(at))
+		fx().ride(shots[-1], TEAL, PINK, 3.2, 0.7, func(at: Vector3, _v: Vector2): _rod_end(at))
 	else:
 		fx().arc(a, a + Vector3(dir.x, 0, dir.y) * rng, TEAL, PINK, 0.7, 0.2)
 	m.fx.flash(a, PINK, 0.9, 0.08)
