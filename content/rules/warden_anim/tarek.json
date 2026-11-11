@@ -22,16 +22,25 @@
 			"f": "walk_f",
 			"b": "walk_b",
 			"l": "walk_l",
-			"r": "walk_r"
+			"r": "walk_r",
+			"fl": "walk_fl",
+			"fr": "walk_fr",
+			"bl": "walk_bl",
+			"br": "walk_br"
 		},
 		"run": {
 			"f": "run_f",
 			"b": "run_b",
 			"l": "run_l",
-			"r": "run_r"
+			"r": "run_r",
+			"fl": "run_fl",
+			"fr": "run_fr",
+			"bl": "run_bl",
+			"br": "run_br"
 		},
 		"walk_speed": 2.2,
-		"run_speed": 5.0, "stride": [1.5, 1.2], "foot_mps": [1.51, 5.16], "arm_swing": {"L": 0.5, "R": 0.5}
+		"run_speed": 5.0, "foot_mps": [2.2, 5.0], "arm_swing": {"L": 0.5, "R": 0.5},
+		"in_step": true
 	},
 	"crouch": {"idle": "crouch_idle", "walk": {"f": "crouch_f", "b": "crouch_b", "l": "crouch_l", "r": "crouch_r"}, "in": "crouch_in", "out": "crouch_out", "speed": 1.16},
 	"air": {
@@ -113,7 +122,7 @@
 		"downed": "downed",
 		"reviving": "revive",
 		"dead": "death",
-		"dead_t": 1.6,
+		"dead_t": 2.6,
 		"stun": "stun",
 		"emote": "emote_toss",
 		"hit": {
