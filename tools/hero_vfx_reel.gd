@@ -210,8 +210,8 @@ func _juggernaut_lunge() -> void:
 			P.inp["sec_hold"] = false
 		_aim(T.pos)
 	await _go(2.8, lunge, _sheet("lunge",
-			"RMB hold, Lunge: charging with the blade over his head (nothing ahead), full flash at the blade, the fling "
-			+ "with its mesh trails, the impact, the scorched line",
+			"RMB hold, Lunge: charging with the blade over his head (nothing ahead), full flash at the blade, "
+			+ "the fling with its mesh trails, the impact, the scorched line",
 			[0.5, 0.9, 1.2, 1.32, 1.4, 1.48, 1.6, 1.9, 2.6]), 3.0)
 	await _go(GAP)
 
