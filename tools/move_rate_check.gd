@@ -8,14 +8,16 @@ extends "res://tools/move_feel_check.gd"
 ## graces (coyote: the latest press after the ground goes that still jumps; buffer: the earliest press before
 ## a landing that still jumps). Every number has to agree with its 60 fps value, and the graces with their
 ## data rows (content/rules/hunter_move.json). The town has no dash and the room neither dash nor jump. On the
-## farm, in the town and in the room the drawn facing, through a reversal, never turns faster than the match's
-## turn rate (a facing that snaps once per step shows as one frame turning a whole step at 144 fps).
+## farm, in the town and in the room the drawn facing, through a half turn, never turns faster than the match's
+## turn rate (a facing that snaps once per step shows as one frame turning a whole step at 144 fps), and the
+## body is drawn at the present, not a step behind.
 ## Prints "MRATE <match|farm> <key> 30=.. 60=.. 144=.. ok|FAIL" and "MOVE RATE CHECK DONE, failures: N".
 
 const RATES := [30, 60, 144]
 const GRACE_STEPS := 12      # press delays tried for each jump grace, one sim step apart (to 0.2 s)
 const DROP_M := 1.0          # m: the buffer trial's fall (every press in its last 0.2 s counts as "about to land")
 const LIFT_M := 3.0          # m: how far the coyote trial's ground drops away
+const PRESENT_M := 0.005     # m: how far the drawn body may sit from the present (a step behind is about 0.076)
 ## key: [allowed difference from the 60 fps value, unit]. A drawn frame holds 2 steps at 30 fps, so whatever
 ## is read "after N seconds of frames" may be a step or two of running apart; the arcs themselves are exact.
 const TOL := {
@@ -200,8 +202,25 @@ func _graces(fps: int) -> void:
 	_put("coyote", fps, coyote)
 	_put("buffer", fps, buffer)
 
-## A walk reversed, frame by frame: the drawn facing turns (the mouse, where there is one, limits how far) and no frame
-## turns it by more than the match's turn rate allows in that frame (as drawn: not a whole step at once).
+## A steady run, frame by frame: the body is drawn at the present (the last step carried on by the time since,
+## as the match draws its own Hunter), never a step behind (that is a step of added input delay).
+func _present(fps: int, where: String) -> void:
+	var delta := 1.0 / fps
+	_stand()
+	await _frames(0.1, delta)
+	Input.action_press("right")
+	await _frames(0.6, delta)
+	var worst := 0.0
+	for i in int(round(0.4 / delta)):
+		await _frame(delta)
+		worst = maxf(worst, absf(hm.mover.lag.x - hm.pvel.x * hm.mover.acc))
+	Input.action_release("right")
+	_ok(worst < PRESENT_M, "%s drawn at the present at %d fps: worst %.4f m off" % [where, fps, worst])
+
+## A half turn, frame by frame: the drawn facing turns and no frame turns it by more than the match's turn rate
+## allows in that frame (as drawn: not a whole step at once). The room's facing follows the walk, so the walk is
+## reversed; the farm's and the town's follow the mouse (inside the window even headless), so the view is also
+## turned half around the avatar.
 func _facing(fps: int, where: String) -> void:
 	var delta := 1.0 / fps
 	_stand()
@@ -210,6 +229,11 @@ func _facing(fps: int, where: String) -> void:
 	await _frames(0.4, delta)
 	Input.action_release("left")
 	Input.action_press("right")
+	var view: Transform3D = hm.cam.global_transform
+	if kind != "room":
+		var half := Basis(Vector3.UP, PI)
+		var pivot: Vector3 = hm.player.global_position
+		hm.cam.global_transform = Transform3D(half, pivot - half * pivot) * view
 	var last: float = hm.mover.yaw
 	var turned := 0.0
 	var worst := 0.0
@@ -223,6 +247,8 @@ func _facing(fps: int, where: String) -> void:
 		if kind == "town" or kind == "room":
 			shown = shown and absf(angle_difference(hm.player.rotation.y, hm.mover.yaw)) < 0.01
 	Input.action_release("right")
+	if kind != "room":
+		hm.cam.global_transform = view
 	var cap := HunterMove.turn_rate * delta * 1.05
 	var line := "%s facing at %d fps: turned %.0f deg," % [where, fps, rad_to_deg(turned)]
 	line += " worst frame %.1f deg" % rad_to_deg(worst)
@@ -248,6 +274,7 @@ func _trials(where: String) -> void:
 		if kind == "match" or kind == "farm":
 			await _dash(fps)
 		if kind != "match":
+			await _present(fps, where)
 			await _facing(fps, where)
 	for key in TOL:
 		if not got.has(key):

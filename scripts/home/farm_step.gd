@@ -2,9 +2,10 @@ class_name FarmStep
 extends RefCounted
 ## The farm avatar's clock (docs/decisions/0048): it moves in the match's fixed steps (Match.DT) whatever the
 ## display's frame rate, so a jump, a dash and a stop measure the same at 30, 60 and 144 fps and the same as in
-## a match. Key presses are latched for exactly one step, the body is shown between its last two steps, and the
-## pose plays once a frame at the frame's own pace, and the facing is blended between steps the same way (a
-## step calls face()). Town and interior walk with walk(). It also holds the jump's two grace timers, the match's
+## a match. Key presses are latched for exactly one step, the body is drawn at the present (carried on from
+## its last step by the time since, like the match's own Hunter: no step of added input delay), the pose plays
+## once a frame at the frame's own pace, and the facing is blended between the last two steps (a step calls
+## face()). Town and interior walk with walk(). It also holds the jump's two grace timers, the match's
 ## numbers (content/rules/hunter_move.json: coyote_s, jump_buffer_s).
 
 enum Jump { NONE, JUMP, GLIDE }
@@ -15,7 +16,7 @@ const SNAP_M := 2.0      # m in one step: a teleport or a respawn, shown at once
 var acc := 0.0           # s of frame time not stepped yet
 var coyote := 0.0        # s left in which a jump still counts as off the ground it just walked off
 var jump_buf := 0.0      # s left in which a jump pressed just before a landing still jumps
-## How far the shown body trails the stepped one (m), for whatever frames the avatar (the camera).
+## How far the shown body leads the stepped one (m), for whatever frames the avatar (the camera).
 var lag := Vector3.ZERO
 ## The drawn facing (rad): the stepped facing blended between the last two steps.
 var yaw := 0.0
@@ -34,7 +35,7 @@ var _anim: HunterAnim = null
 var _pose := {}
 
 ## One frame: runs `step` once per Match.DT of `delta` (the caller caps delta, so a hitch never spirals), then
-## shows `body` between its last two steps and plays the pose.
+## draws `body` at the present and plays the pose.
 func run(delta: float, body: Node3D, step: Callable) -> void:
 	for a in PRESSES:
 		if Input.is_action_just_pressed(a):
@@ -63,7 +64,7 @@ func run(delta: float, body: Node3D, step: Callable) -> void:
 		if _from.distance_to(_to) > SNAP_M:
 			_from = _to
 	_stepping = false
-	_shown = _from.lerp(_to, acc / Match.DT)
+	_shown = _to + (_to - _from) * (acc / Match.DT)      # at the present, as Hunter.render_pos draws a match
 	lag = _shown - _to
 	body.position = _shown
 	yaw = lerp_angle(_yaw_from, _yaw_to, acc / Match.DT)
