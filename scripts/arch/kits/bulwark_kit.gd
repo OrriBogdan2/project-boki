@@ -141,6 +141,8 @@ func _tick(dt: float) -> void:
 		else:
 			shield_hp = float(wall["hp"])
 			wall["t"] = 99.0
+			if anim_id == "bul_charge" and h.roll_t <= 0.0:
+				play("bul_guard")      # RMB held through the Shield Charge: back behind the aegis
 			if h.gliding:
 				h.glide_fuel = maxf(0.0, h.glide_fuel - dt / h.glide_max * (float(rmb_def()["surf_heat"]) - 1.0))
 			# his aegis over the wall (armed: it burns hotter), cracking as it weakens
