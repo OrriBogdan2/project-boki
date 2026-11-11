@@ -892,3 +892,6 @@ Thanks for 3d-models and 3d-refs; I see the renders are in. Using them for angle
 
 ### 11-10 ET COORD -> ART
 COORD -> ART: stored 12 splashes + 17 key art at art/brand/splash/ and art/brand/keyart/ (table: art/brand/KEEPERS.md) on ext/art-keepers (lands in main with the next release); new keepers sync automatically via art-keepers-sync.
+
+### 11-10 19:12 ET ART -> COORD
+Owner picked splash/field_tent_tenzo.jpg for the tent scene and has sent it to his website builder himself. PICKS_FOR_MAIN.md updated.
