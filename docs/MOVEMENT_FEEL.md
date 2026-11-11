@@ -249,7 +249,14 @@ DECISIONS 11-07 "Movement and combat feel": wall kick and wall bounce for everyo
 
 **Open (not fixed, no source or owner line decides it):** Claire's rink skate (E held, X): the skate steers her at the wall head-on (hit within 16 degrees of the normal), so an angled bounce never shows. In `COMMITS` of the check until someone decides the skate should rebound. The case would need her skate heading to come from the keys, not the aim.
 
-**Suggestion (not built, parity):** a run is 4.4-4.9 m/s, so a plain run-and-jump bounces only when it meets the wall between 20 and about 26-35 degrees off the normal (`BOUNCE_MIN_INTO` 4 m/s and `BOUNCE_HEAD_ON_DEG` 20 are our estimates, no source number). Tenzo's and Claire's runs didn't bounce at 25 degrees (they are slowest in the air). If the source bounces off a walking jump, drop `BOUNCE_MIN_INTO` to about 3 m/s.
+**Wall bounce gates: no source number (checked 2026-11-11).** `WallMoves.BOUNCE_MIN_INTO` (4 m/s into the wall) and `BOUNCE_HEAD_ON_DEG` (20 degrees off the normal) stay our estimates. The source's movement data (briefs/supervive-data/supervive_physics.md) has no wall bounce field: its only wall setting is bCanWallJump, the tall-ledge climb for Myth and Brall. briefs/hero-ref has no wall-kick or wall-bounce clip, and the footage pass in ext/wall-bounce-walk found no run- or walk-jump bounce with a speed or angle you could measure. A run is 4.4-4.9 m/s, so a plain run-and-jump bounces between 20 and about 26-35 degrees off the normal. The `runin@` rows in `--wallmove-check` measure Tenzo and Neve, the two slowest in the air:
+
+| Run in | Tenzo (run 4.65) | Neve (run 4.45) |
+|---|---|---|
+| 25 degrees | 4.21 m/s into the wall: bounces | 4.03 m/s: bounces |
+| 40 degrees | 3.56 m/s: stops | 3.41 m/s: stops |
+
+A row fails when the bounce disagrees with the two gates. Neve's 25-degree hit clears `BOUNCE_MIN_INTO` by only 0.03 m/s, so any cut to her run speed ends that bounce. If source footage ever shows a walking jump bouncing, drop `BOUNCE_MIN_INTO` to about 3 m/s.
 
 ## Physics pass: SUPERVIVE's game data (`physics76`)
 
