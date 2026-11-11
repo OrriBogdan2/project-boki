@@ -43,6 +43,7 @@ const FORE := 0.235
 const REACH := UPPER + FORE
 const WEAPON_SLACK := 0.02     # m: the trigger hand may sit this far off its grip before the weapon is pulled to it
 const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go about the hips
+const RISE_TUCK := 0.5         # rad a Hero's clips tip forward rising up a ledge (FEEL): he leans over the lip, one arc
 const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
@@ -184,6 +185,7 @@ var glide_k := 0.0
 var dive_k := 0.0
 var crouch_k := 0.0
 var ledge_k := 0.0
+var rise_k := 0.0               # 0..1: rising up a ledge (the ledge rise, s.ledge_rise)
 var stomp_k := 0.0
 var revive_k := 0.0
 var act_k := 0.0            # holding interact: the pose for what's being worked (see _act_legs)
@@ -555,6 +557,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var ledge: bool = s.get("ledge", false)
 	var mant := float(s.get("mantle", -1.0))
 	ledge_k = _ease(ledge_k, 1.0 if ledge or mant >= 0.0 else 0.0, 14.0, dt)
+	rise_k = _ease(rise_k, 1.0 if s.get("ledge_rise", false) else 0.0, 10.0, dt)
 	var st_ph := float(s.get("stomp", -1.0))
 	stomp_k = _ease(stomp_k, 1.0 if st_ph >= 0.0 else 0.0, 16.0, dt)
 	revive_k = _ease(revive_k, 1.0 if s.get("reviving", false) and grounded and spd < 1.5 else 0.0, 8.0, dt)
@@ -587,7 +590,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var vdir := atan2(hv.x, hv.y)
 	var turn := wrapf(vdir - vdir_prev, -PI, PI) / dt if spd > 1.5 else 0.0
 	vdir_prev = vdir
-	bank = _ease(bank, clampf(turn * spd * 0.012, -0.3, 0.3) * r1, 6.0, dt)
+	bank = _ease(bank, clampf(turn * spd * 0.012, -0.3, 0.3) * maxf(r1, glide_k), 12.0, dt)     # (on the run and under the glider)
 	face_rate = lerpf(face_rate, wrapf(face - face_prev, -PI, PI) / dt, 1.0 - exp(-14.0 * dt))
 	var dface := wrapf(face - face_prev, -PI, PI)
 	face_prev = face
@@ -595,7 +598,7 @@ func update(dt: float, s: Dictionary) -> void:
 	var just_landed := grounded and not was_grounded
 	if just_landed:
 		var fall_v := -vy_prev
-		var hard := clampf(fall_v / 14.0 + air_t * 0.35, 0.0, 1.2)
+		var hard := clampf(fall_v / 14.0 + air_t * 0.35 * (1.0 - glide_k), 0.0, 1.2)     # (the glider sets you down soft)
 		land_k = clampf(maxf(land_k, hard), 0.0, 1.0) if fall_v > 2.5 or air_t > 0.45 else land_k
 		land_rate = lerpf(5.0, 2.2, clampf(hard, 0.0, 1.0)) * (0.8 if cls == "heavy" else (1.25 if cls == "light" else 1.0))
 		if trick == "ball" or (cls == "heavy" and (fall_v > 8.5 or air_t > 0.85)):
@@ -621,7 +624,7 @@ func update(dt: float, s: Dictionary) -> void:
 	was_grounded = grounded
 	vy_prev = vy
 	land_k = maxf(0.0, land_k - dt * land_rate)
-	model.set_meta(WardenClips.FEEL, Vector2(land_k, acc_lean if grounded else 0.0))     # (a Hero's clips lay these on)
+	model.set_meta(WardenClips.FEEL, Vector3(land_k, (acc_lean if grounded else 0.0) + rise_k * RISE_TUCK, bank))     # (a Hero's clips lay these on)
 	slam_k = maxf(0.0, slam_k - dt * 1.8)
 	# a long enough jump (we know the height left from air_h) gets the class's trick
 	if not grounded and trick == "" and not trick_done and not gliding and not diving and not rolling and air_t > 0.06 and s.has("air_h"):

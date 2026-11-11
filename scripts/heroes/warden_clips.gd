@@ -18,10 +18,12 @@ extends RefCounted
 
 const DIR := "res://content/rules/warden_anim/"
 const STATE := "anim_state"
-const FEEL := "anim_feel"     # root meta from HunterAnim: Vector2(landing 0..1, run-start/stop lean, rad)
+const FEEL := "anim_feel"     # root meta from HunterAnim: Vector3(landing 0..1, lean forward rad, bank rad)
 const LAND_SQUASH := 0.1     # how far a hard landing flattens him (share of his height; widens by 0.6 of that)
-const LEAN_K := 0.5          # of HunterAnim's torso lean, tipped from the feet over the clips
-const LEAN_RATE := 12.0      # 1/s: how fast that lean follows
+const LEAN_K := 0.7          # of HunterAnim's torso lean, tipped from the feet over the clips
+const LEAN_RATE := 12.0      # 1/s: how fast that lean (and the bank) follows
+const BANK_K := 1.0          # of HunterAnim's bank into a turn, rolled from the feet over the clips
+const SQUASH_IN := 25.0      # 1/s: a landing's squash comes on over ~4 frames (at once, the head drops in one: a pop)
 const DEATH_T := "clip_death_t"   # root meta: s the death clip keeps a knocked-out Hero on screen (0: not at all)
 const FADE := 0.1            # s: one clip into the next, and into or out of an action
 const FADE_LOCO := 0.16      # s: an action back to the legs
@@ -73,6 +75,8 @@ var last_emote := ""
 var legs_was := false        # the turn on now is a legs_heading one
 var head_turn := 0.0         # rad the root is turned toward his heading
 var lean := 0.0              # rad the root is tipped forward (FEEL)
+var bank := 0.0              # rad the root is rolled into a turn (FEEL)
+var squash := 0.0            # the landing squash laid on now (FEEL), share of his height
 var force := {}              # a tool's pick ({clip, t}): skips the state (tools/clip_shots.gd)
 var gait: WardenGait         # the stride and arm swing laid over the walk and run (scripts/heroes/warden_gait.gd)
 var free_arm: WardenFreeArm  # the arm a move leaves unused hangs loose (scripts/heroes/warden_free_arm.gd)
@@ -374,7 +378,8 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": st["emote"], "t": float(s.get("emote_t", 0.0))}
 	land_t += dt
 	var ld: Dictionary = d.get("land", {})
-	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)):
+	# (landing on the run, the legs keep running: the root's squash (FEEL) takes the landing, not a planted clip)
+	if land_t < float(ld.get("dur", 0.0)) and bool(s.get("grounded", true)) and not _moving(s):
 		return {"clip": ld["clip"], "t": land_t}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
@@ -459,23 +464,28 @@ func step(dt: float) -> void:
 	_out(dt)
 	free_arm.apply(dt, "" if proc else String(want.get("clip", "")))
 
-## HunterAnim's landing squash and its lean into starting and stopping (meta FEEL), laid on the root bone over what
-## the clips show (WardenGlb, after the blend with the rig, which has its own; `squash` false: the root rides the Rig,
-## which already squashes). The root sits at the feet, so the body flattens and tips over them. Visual only.
-func feel(dt: float, squash: bool) -> void:
-	var f: Vector2 = root.get_meta(FEEL, Vector2.ZERO)
-	lean = lerpf(lean, f.y * LEAN_K, 1.0 - exp(-LEAN_RATE * dt))
+## HunterAnim's landing squash, its lean into starting, stopping and up a ledge, and its bank into a turn (meta FEEL),
+## laid on the root bone over what the clips show (WardenGlb, after the blend with the rig, which has its own; `on_feet`
+## false: the root rides the Rig, which already squashes). The root sits at the feet, so the body flattens, tips and
+## rolls over them. Visual only.
+func feel(dt: float, on_feet: bool) -> void:
+	var f: Vector3 = root.get_meta(FEEL, Vector3.ZERO)
+	var ease := 1.0 - exp(-LEAN_RATE * dt)
+	lean = lerpf(lean, f.y * LEAN_K, ease)
+	bank = lerpf(bank, f.z * BANK_K, ease)
 	var bi := WardenSkeleton.find(skel, "root")
 	var k := 1.0 - proc_w
-	var sq := f.x * LAND_SQUASH * k if squash else 0.0
-	if bi < 0 or (sq < 0.001 and absf(lean * k) < 0.001):
+	var sq_to := f.x * LAND_SQUASH * k if on_feet else 0.0
+	squash = sq_to if sq_to < squash else lerpf(squash, sq_to, 1.0 - exp(-SQUASH_IN * dt))     # (it springs back as HunterAnim lets go)
+	var sq := squash
+	if bi < 0 or (sq < 0.001 and absf(lean * k) < 0.001 and absf(bank * k) < 0.001):
 		return
-	# (in the skeleton's space: his up and right, whichever way the .glb was built)
+	# (in the skeleton's space: his up, right and forward, whichever way the .glb was built)
 	var inv := skel.global_basis.inverse()
 	var up := (inv * root.global_basis.y).normalized()
 	var flat := Basis.from_scale(Vector3.ONE * (1.0 + sq * 0.6))
 	var squashed := Basis(flat.x - up * up.x * sq * 1.6, flat.y - up * up.y * sq * 1.6, flat.z - up * up.z * sq * 1.6)
-	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * k)
+	var tip := Basis((inv * root.global_basis.x).normalized(), -lean * k) * Basis((inv * root.global_basis.z).normalized(), bank * k)
 	skel.set_bone_global_pose(bi, Transform3D(tip * squashed, Vector3.ZERO) * skel.get_bone_global_pose(bi))
 
 ## A move keyed "heading" leans where he is going, not where he faces (the Warchain's haul): the root turns toward

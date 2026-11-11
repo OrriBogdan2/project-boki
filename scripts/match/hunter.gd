@@ -3031,6 +3031,7 @@ func _anim_state(stretch: float) -> void:
 	s["dead"] = out
 	s["dead_t"] = m.time - float(get_meta("died_at", m.time)) if out else 0.0
 	s["ledge"] = grap.size() > 0
+	s["ledge_rise"] = not lfloat.is_empty()
 	var mk := -1.0
 	if pad.has("face"):
 		mk = clampf(float(pad["t"]) / maxf(0.01, float(pad["dur"])), 0.0, 1.0)
