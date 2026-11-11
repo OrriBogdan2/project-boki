@@ -212,8 +212,9 @@ func press_rmb() -> void:
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
 
 func rmb_hold_tick(t: float) -> void:
-	if t > float(rmb_def()["hold"]) and not pin_aim:
-		# the Heavy Shot's draw: the needle on the bow, an orchid bar growing from it (its own creak)
+	if not pin_aim:
+		# the Heavy Shot's draw, from the press (the source's charge shows at once; the hold threshold only decides
+		# whether the release looses): the needle on the bow, an orchid bar growing from it (its own creak)
 		play("arc_heavy_wind")
 		anim_at = m.time - t          # on the hold's clock: the clip's full-draw key (1.1) lands with "full" (1.1)
 		pin_aim = true
@@ -275,7 +276,8 @@ func fire_rmb(c: Dictionary) -> void:
 	_drop_tele()
 	last_variant = String(c["variant"])
 	if not c.get("hold", false):
-		return                     # a tap before the draw starts looses nothing and costs nothing
+		anim_id = ""               # a tap looses nothing and costs nothing: the draw it started is put away
+		return
 	if not spend_rmb(): return
 	var pd: Dictionary = rmb_def()["pin"]
 	play("arc_heavy")
