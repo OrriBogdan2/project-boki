@@ -66,7 +66,8 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 		if p.max_armor > 0.5:
 			c.draw_rect(ar.grow(1.0), HudStyle.SHADE)
 			HudStyle.strip(c, ar, H.armor_lerp, HudStyle.CHIP)
-			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), p.armor_col())
+			var acol: Color = p.armor_col().lerp(Color.WHITE, H.plates.armor_flash_of(p))
+			c.draw_rect(Rect2(ar.position, Vector2(ar.size.x * af, ar.size.y)), acol)
 	# progress to the next armour tier: a hairline under the armour strip in the next tier's colour
 	if p.armor_tier < Hunter.ARMOR_TIERS.size() - 1:
 		var nxt: Color = Hunter.ARMOR_TIERS[p.armor_tier + 1][1]
