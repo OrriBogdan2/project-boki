@@ -64,3 +64,13 @@ finishing squad alone (and their downed in the yard), then it is "closed"; a cha
 Not done here: late joiners get the seat state only on its next change; the HUD strip, the map marks and the bots'
 seat plans are the later tasks. Checks: --lair-lock-check section 5, --extract-check section 3d
 (tools/uplink_seat_check.gd).
+
+## Results (spec task 5)
+`WaysResult` (scripts/match/ways_result.gd) owns the results lines: `how` (lair, heart_early, uplink, heart_final) for a
+squad that left, `place`/`squads` for one that did not (`Match._finish`; replaces the dead `placed` stub). A squad's place
+is 1 + the squads still in or already gone when its last Hunter went out; the islands falling on everyone is a tie; a
+squad with a Hunter out the door has a seat, not a place. Placement pay (`heart.json` "place": 5 gems per squad below,
+max 40) goes through `Game.apply_result` into `gems`. `KinLoss.resolve`: "nobody took it, or its taker is out" is now
+`home` (was `ransom`); results show one line per Boki, "came home" or "held by <name>". No save-shape change, no Net change.
+The skiff and hatch lines are gone from the screen (task 3 deletes those exits). Open: `Ransom.lose`'s non-rival branch
+is no longer reached from a match.

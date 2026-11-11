@@ -55,9 +55,12 @@ func show_result(r: Dictionary) -> void:
 	head.add_child(kr)
 	head.add_child(UI.label(HeroTitle.label(String(Save.d.get("name", "Hunter")), Arch.of_save()), UI.T_BODY, UI.MUTED))
 	head.add_child(UI.title("You made it out" if won else _lost_title(r.get("why", "")), 46, UI.INK))
-	var how_line := String({"uplink": "Rode the lift out of %s. "}.get(String(r.get("how", "")), ""))
-	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
-	head.add_child(UI.para((how_line + "Everything you carried is yours now.") if won else "Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
+	var tail := "Everything you carried is yours now." if won else "Everything you carried stays out in the islands."
+	head.add_child(UI.para(WaysResult.how_line(r) + tail, UI.T_BODY, UI.MUTED))
+	if int(s.get("place_gems", 0)) > 0:
+		head.add_child(UI.label("Placement pay: %d gems" % int(s["place_gems"]), UI.T_BODY, UI.GOLD, UI.semi))
+	if won and s.has("heart"):
+		head.add_child(UI.label(WaysResult.reward_line(s["heart"]), UI.T_BODY, UI.GOLD, UI.semi))
 	v.add_child(head)
 	# the four numbers that matter, big and counting up, on one strip; the rest in a quiet line
 	var secs := int(r.get("time", 0))
@@ -143,16 +146,7 @@ func show_result(r: Dictionary) -> void:
 		var lv := UI.vbox(6); lc.add_child(lv)
 		lv.add_child(UI.section("Left behind", Color("ffb0a0")))
 		for ln in lost_news:
-			var kk: Dictionary = ln["kin"]
-			var txt := ""
-			var col := UI.BAD
-			match String(ln["fate"]):
-				"squad": txt = "%s was carried home by your squadmate %s." % [kk["name"], ln["holder"]]; col = UI.GOOD
-				"home": txt = "%s found its own way home. It trusts you that much." % kk["name"]; col = UI.GOOD
-				"rival": txt = "%s was taken home by %s. Make them an offer at the Black Market, or find them out there and take it back." % [kk["name"], ln["holder"]]
-				_: txt = "Nobody came for %s. It's waiting at the Black Market on your farm." % kk["name"]; col = Color("ffd58a")
-			var l := UI.label(txt, 15, col); l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			lv.add_child(l)
+			lv.add_child(UI.label(WaysResult.boki_line(ln), 15, UI.BAD if String(ln["fate"]) == "rival" else UI.GOOD))
 		v.add_child(lc)
 	for nw in s.get("ransom_news", []):
 		v.add_child(_note(String(nw), Color("ffd58a")))
