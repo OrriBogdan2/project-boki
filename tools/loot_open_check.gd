@@ -192,8 +192,12 @@ func _lid_box(box: Node3D) -> AABB:
 
 func _strip(main: Node, out: String) -> void:
 	DirAccess.make_dir_recursive_absolute(out)
-	if main.get("fade") != null:
-		main.fade.reveal(0.01)
+	# the boot cover (logo) and any screen are 2D over the world: off, or the strip shoots the splash
+	for c in main.get_children():
+		if c is CanvasLayer:
+			(c as CanvasLayer).visible = false
+		elif c is CanvasItem:
+			(c as CanvasItem).visible = false
 	main.get_window().size = SHOT
 	var env := WorldEnvironment.new()
 	env.environment = Look.environment({"top": Color("2a4a8a"), "mid": Color("6a8ad0"), "horizon": Color("ffd2a8"),
