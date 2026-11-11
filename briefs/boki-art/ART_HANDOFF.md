@@ -170,3 +170,11 @@ Everything queued has rendered. Nothing is running. To do, in order:
 4. Independent recheck (subagent) of every turnaround changed on 11-10 against its card.
 5. Owner still owes: Bokidex link image pick (options in `og/`, my order egg_A, storm_A, aurora_A). When he picks, tell main; main adds logo + "Meet the Boki." on the dark left side.
 Owner prefs that matter most: short plain messages; always show 1st/2nd/3rd; pick and push without asking; keep a high bar; every splash/key art keeper goes to `splash/` or `og/` with a CHANNEL.md note telling main to store it; hunters must match their master sheet in `briefs/art-refs/<hero>_v2/` (Sable: solid black eyes, four moth wings; Lace: no face mask, mask on left shoulder; Albert: round plank hull body, not a knight); Boki in splashes are painted in the same 3D-looking finish as the hunters; 3D model renders are in `3d-refs/`. Never push to main.
+
+### Update 11-11 (later the same day): the "START HERE" list above is DONE
+1. Pixel sprites: all 259 in `pixel/<FileId>.png` (tool: `tools/pixel_sprite.py Name[:stem[:holes]]`, `--sheet out.jpg` for a contact sheet). Redos used `px9b_*` (chunky prompt) and `px9c_*`. Glaivyx/Ringrove were missing because of the old name DROP rule, not a filename difference.
+2. Turnarounds Kingpinguin, Maracoil, Pavonazar replaced; `sheet_audit.py` shows 0 behind.
+3. Tiltster and Rimink: lighter card, sheet, portrait and hero (`rv_*_light2_2`, `v2s_/v2p_*_lt_2`).
+4. Recheck of 270 sheets: 260 passed. Replaced Malletary, Meteorab, Blastopuff, Voltmink, Lunowl, Barokit, Lunowl_female, Hourachnid_female. Left as is (minor): Murmuron (faint smear under the views), Murmuron_female (wings folded on the sheet, spread on the card).
+5. Bokidex link image: owner says handled.
+Note: `promote_female.py` re-cuts the female hero even when the portrait is `-`; restore `cutout_v2/<Name>_female.png` and its hero hash if you only changed the sheet.
