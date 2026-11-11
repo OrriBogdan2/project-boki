@@ -473,8 +473,8 @@ func _throws_in(m: Match, P: Hunter, K: BulwarkKit, secs: float) -> int:
 	step(m, 1.0)
 	return K.throws - t0 if prev or true else 0
 
-## #29: the raised aegis is bigger and plated. Owner 11-11: touching it pushes nobody; only LMB with it up (the
-## boop) shoves the foes in front of it.
+## #29: the raised aegis is bigger and plated. Touching it pushes nobody; only LMB with it up (the boop) shoves
+## the foes in front of it.
 func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3) -> void:
 	P.teleport(home)
 	P.vel = Vector3.ZERO
@@ -492,7 +492,7 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	step(m, 0.95, rmb_at.bind(P, home + Vector3(5.0, 0, 0)))
-	ok("bjorn shield: a foe touching the raised wall is not pushed (owner 11-11)",
+	ok("bjorn shield: a foe touching the raised wall is not pushed",
 		not K.wall.is_empty() and absf(T.pos.x - x0) < 0.05 and K.boop.boops == 0,
 		"moved %.2f boops %d" % [T.pos.x - x0, K.boop.boops])
 	ok("bjorn shield: no push chevron in front of the raised wall", not AimKit.shown(P, "aegis_push"))
@@ -515,7 +515,8 @@ func _bjorn_shield(m: Match, P: Hunter, T: Hunter, K: BulwarkKit, home: Vector3)
 	ok("bjorn boop: it shoves the foe in front back its push distance, no damage",
 		K.boop.booped >= 1 and moved >= float(bd["push"]) - 0.1 and T.hp == T.max_hp,
 		"booped %d moved %.2f hp %.0f/%.0f" % [K.boop.booped, moved, T.hp, T.max_hp])
-	ok("bjorn boop: behind the aegis LMB never throws or swings", K.throws == throws0 and K.lmb_t < 0.0 and not K.wall.is_empty())
+	ok("bjorn boop: behind the aegis LMB never throws or swings",
+		K.throws == throws0 and K.lmb_t < 0.0 and not K.wall.is_empty())
 	P.inp["sec_hold"] = false
 	step(m, 0.4)
 	ok("bjorn shield: lowered, the wall is gone", not K.fx.aegis.visible)

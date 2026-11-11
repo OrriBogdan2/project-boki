@@ -236,7 +236,7 @@ func _all() -> void:
 	reset.call()
 	var pilot := "pilot%d" % P.get_instance_id()
 	ak.step(m, 0.3)
-	ok("lance: idle, no pilot flame in her palm (owner 11-11: it read as a stray blue orb)", not K.fx.shown(pilot))
+	ok("lance: idle, no pilot flame in her palm", not K.fx.shown(pilot))
 	ak.step(m, 0.15, func(): P.inp["fire"] = true; ak.aim_at(P, T.pos))
 	var pilot_col: Color = (K.fx.placed[pilot]["node"] as Node3D).material_override.get_shader_parameter("color") \
 		if K.fx.shown(pilot) else Color.BLACK

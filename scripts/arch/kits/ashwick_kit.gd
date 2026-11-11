@@ -239,9 +239,10 @@ func _tick(dt: float) -> void:
 func _tick_tells(dt: float) -> void:
 	var vis := tells_visible()
 	var flamer_up: bool = anim_id == "as_cloak" and m.time - anim_at < CLOAK_POSE_T      # swung up on its strap
-	# the pilot shows only in the lance's spool-up (owner 11-11: idle in her palm it read as a stray blue orb);
-	# Flue Flight never spools (the lance is out), so the pilot is out with it
-	if vis and was_held and spool < float(lmbd()["spool"]) and not h.downed and not KinMerge.active(h) and not flamer_up:
+	# the pilot shows only in the lance's spool-up (idle in her bare palm it reads as a stray orb); Flue Flight
+	# never spools (the lance is out), so the pilot is out with it
+	var spooling := was_held and spool < float(lmbd()["spool"])
+	if vis and spooling and not h.downed and not KinMerge.active(h) and not flamer_up:
 		var fl := 0.85 + 0.15 * sin(m.time * 37.0)
 		fx.place("pilot%d" % h.get_instance_id(), "pilot", tip(), PILOT_COL, PILOT_CORE, 0.88 * fl)
 	else:

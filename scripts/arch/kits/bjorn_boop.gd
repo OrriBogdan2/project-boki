@@ -1,7 +1,7 @@
 class_name BjornBoop
 extends RefCounted
 ## LMB behind the raised aegis (docs/heroes/bulwark.md): a short punchy shield thrust, the "boop", and the only
-## way the aegis moves foes (owner 11-11: walking into it pushes nobody). The aegis draws back ("shield.boop.wind"
+## way the aegis moves foes (walking into it pushes nobody). The aegis draws back ("shield.boop.wind"
 ## s), snaps out "thrust" m ("snap" s) and settles home ("settle" s); at the snap, foes within "reach" m in front
 ## of it are shoved "push" m with a pop and a clank. No damage: it makes room. The thrust moves the aegis wall
 ## itself (Verbs reads a following wall's "dist" each step), so the block and the look move together.
