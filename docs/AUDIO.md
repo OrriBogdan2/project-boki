@@ -47,6 +47,11 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - They play on the **SFX** bus (compressor, a little room, limiter; far ones via **SFXFar**). A match's sounds are torn down with the match (item 103, `Sfx.reset_scene_audio` stops keyed loops and pool voices on the match leaving the tree), so every held sound must be a keyed loop and stopped by its owner too.
 - New sounds load on first play (`Sfx._lazy`, takes included); no edit to `Sfx.NAMES` is needed.
 
+## Menu sounds (`Ui.button`, `UiSfx`)
+- Buttons get theirs from `Ui.button`: `click`, `ui_confirm` on a screen's main button, `ui_back` on a label that goes back, `ui_tab` on every `Ui.tabs` / `shell_tabs` tab, `hover` when pointed at.
+- Every other control gets its sound from `UiSfx`, hooked once on the tree, so no screen wires its own: a slider ticks `hover`, higher the further along it sits, at most once per 55 ms of dragging; a toggle plays `click`, higher turning on than off; a dropdown plays `ui_tab`; a drag of one of our things (the inventory, the Boki box) plays `pickup` as it lifts and `click` when a slot takes it, nothing when let go anywhere else.
+- `--sfx-set-check` walks Settings, the inventory and the Field Book and fails any control that stays silent; `--inventory-check` drags with the mouse.
+
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
 

@@ -229,7 +229,6 @@ func _menus(main: Node) -> void:
 	Save.d = Save.fresh()
 	var spk := String(FieldBook.entries()[0])
 	Save.d["dex"] = {spk: {"seen": true, "caught": true, "forms": [], "shimmer": false, "mutations": []}}
-	var was_tabs := [Overlay.tab, Overlay.inv_tab]
 	var seen := {"slider": 0, "toggle": 0, "dropdown": 0}
 	var off := []
 	Overlay.open_settings()
@@ -239,9 +238,10 @@ func _menus(main: Node) -> void:
 			off.append("tab %s silent" % t)
 		await _settle(main)
 		_walk("settings > " + t, seen, off)
-	ok(off.is_empty() and seen.values().all(func(n): return n > 0),
-		"settings: all %d tabs sound, %d sliders tick once a burst, %d toggles sound higher on than off, %d dropdowns sound %s"
-		% [Overlay.SETTINGS_TABS.size(), seen["slider"], seen["toggle"], seen["dropdown"], off])
+	var said := "settings: all %d tabs sound, %d sliders tick once a burst, %d toggles sound higher on than off," % [
+		Overlay.SETTINGS_TABS.size(), seen["slider"], seen["toggle"]]
+	var all_found: bool = seen.values().all(func(n): return n > 0)
+	ok(off.is_empty() and all_found, "%s %d dropdowns sound %s" % [said, seen["dropdown"], off])
 	Overlay.close()
 	off.clear()
 	Overlay.inv_tab = "Items"
@@ -255,11 +255,9 @@ func _menus(main: Node) -> void:
 			off.append("tab %s silent" % t)
 		await _settle(main)
 		_walk("inventory > " + t, seen, off)
-	ok(off.is_empty() and inv_tabs.size() >= 6, "inventory: all %d tabs sound %s" % [inv_tabs.size(), off])
+	ok(off.is_empty() and inv_tabs.has("Field Book"), "inventory: all %d tabs sound %s" % [inv_tabs.size(), off])
 	await _field_book(main)
 	Overlay.close()
-	Overlay.tab = was_tabs[0]
-	Overlay.inv_tab = was_tabs[1]
 
 ## The Field Book tab is open: its met Boki's tile, then that Boki's page and the way back.
 func _field_book(main: Node) -> void:

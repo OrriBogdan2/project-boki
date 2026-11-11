@@ -115,8 +115,10 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 		"a drag picks the vest up with a sound and, let go off the window, puts it back silently %s" % [kept])
 	lp = await _reopen(main, m)
 	var slot: Control = lp._worn_tiles[2]
-	var worn := await _drag(main, lp._pack_rows[0], vp.get_final_transform() * (slot.get_global_transform_with_canvas() * (slot.size * 0.5)))
-	ok(worn == [true, true] and p.gear[2]["id"] == "vest" and p.pack.any(func(it): return it.get("id", "") == "quilted_coat"),
+	var slot_mid := vp.get_final_transform() * (slot.get_global_transform_with_canvas() * (slot.size * 0.5))
+	var worn := await _drag(main, lp._pack_rows[0], slot_mid)
+	var swapped := p.pack.any(func(it): return it.get("id", "") == "quilted_coat")
+	ok(worn == [true, true] and p.gear[2]["id"] == "vest" and swapped,
 		"dragged onto the armor slot it sounds picked up and set down, and the drop wears it %s" % [worn])
 	lp = await _reopen(main, m)
 	lp._hover = {"kind": "worn", "i": 2}
