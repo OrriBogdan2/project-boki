@@ -531,3 +531,29 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB hold Lunge (Fiery Lunge) | Data: charge and release a dash attack. Footage briefs/hero-ref/juggernaut.md:64: 'stops at the target' with a white burst. | Flings him into the first foe and stops there; nothing behind it is hit; a miss doubles the cooldown. Matches (`the charged Lunge into the first foe`). |
 | E Warchain (Feysteel Chain) | Data: a tether that attaches to enemies or walls. Footage juggernaut.md:96: a skillshot, about 7 bh. | The hook stops on the first foe (hunter, Boki or monster) or a wall and holds there; it passes allies. Matches. |
 | Shift Rampage (Flame Step) | Data: a dash attack in the facing direction. Footage (0387, 0401): one hit on the dummy; whether it stops or passes is not shown. | Not determinable: it shoves the foes it meets and the tip hits at its end. Kept. |
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB Searing Wave (hold to charge) | stun | [?] Brall data and footage silent | the charge is dropped, no wave (unless a dash row keeps it) | [?] |
+| LMB Searing Wave | knock, root | [?] | ignored | [?] |
+| RMB Finishing Slam (0.6 s wind-up) | stun (and Hex, down) | [?] | cancelled, no strike, the cooldown stays spent (`_tick_slam`) | [?] |
+| RMB Finishing Slam | knock, root | [?] | ignored, the strike lands | [?] |
+| RMB Lunge (hold) | stun | [?] | the hold is let go: the Lunge goes (shared rule) | [?] |
+| RMB Lunge (hold) | knock, root | [?] | ignored, the charge goes on | [?] |
+| RMB air, Meteor Drop (hang, then dive) | stun (and down, merge) | [?] | in the air it stops, no slam, its cooldown stays spent (`JuggernautDrop.tick`) | [?] |
+| RMB air, Meteor Drop | knock, root | [?] | ignored | [?] |
+| Shift Rampage (crouch before the drive) | stun (and down) | [?] | no drive, the charge stays spent (`_tick_crouch`) | [?] |
+| E Warchain throw / hooked tether | stun | [W] a stun breaks it; the cooldown starts when it breaks | breaks (CHAIN BROKE), the cooldown starts (`JuggernautChain.snap`) | match |
+| E Warchain throw | root (and Grounded) | [W] no throw while rooted or Grounded | the press is refused | match |
+| E Warchain hooked tether | knock, root | [?] | the tether holds | [?] |
+| E recast, the pull | stun, root, knock (and down) | [?] | the pull stops where he is (`_tick_pull`, `pull`) | [?] |
+| X Gilded Riposte, the guard | stun, knock, root | [D] Volcanic Rebuke: Invulnerable | no damage and no crowd control | match |
+| X Gilded Riposte, the cleave | stun, knock, root | [?] | ignored, only going down ends it | [?] |

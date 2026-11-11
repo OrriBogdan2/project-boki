@@ -345,3 +345,21 @@ PARITY FIRST (owner decision 2026-11-07): the source decides, owner notes overri
 | RMB Heavy Shot (Heartpiercer) | Data: an arrow that knocks back; a foe that hits terrain is stunned. Footage briefs/hero-ref/pin.md:95: it hits the first target. | Stops on the first foe (hunter, Boki or monster), passes allies, stops on terrain (the wall pin). Matches (`the Heavy Shot stops on the first foe`). |
 | E Hail Wall (Rain of Arrows) | Data and footage (pin.md:127): an arc of falling arrows at the cursor distance that hurts what stands in it. | An area at the cursor: no body or wall between her and it stops it. Matches. |
 | X Starpiercer (Primal Forces) | Data and card (pin.md:251): the shots pierce enemies and have 'destruction damage'; the audit note above says the source pierces destructibles. Footage (f48): long piercing beams. Terrain: not shown. | Pierces every foe (hunters, Boki, monsters), passes allies, smashes breakable props (crates, pots, kegs) and flies on (FIXED here: a prop used to end it; asserted `pin ult prop` in `--archer-combo-check`). Stops on walls and terrain: not determinable, kept. |
+
+## Interrupt rules (crowd control on holds, channels, tethers and recasts; Nov 9 parity pass A)
+Sources by precedence: [O] owner, [D] tooltip data (`briefs/supervive-data/supervive_kits.md`), [W] wiki as cited above,
+[F] footage (`briefs/hero-ref/`). [?] = none of them settles it; ours stays and nothing is guessed. Kinds: stun
+(`Ent.stun_t`), knock = a knockback (`Hunter.knock_t`, `Displace.knock`), root (`Ent.root_t`); "down" = knocked out
+(the source's "knocked"). Shared rules (all kits): `ArchKit.busy()` refuses every E press (recasts too) and a fresh X cast while stunned;
+a stun during an RMB hold lets go of it (`ArchKit.tick`, the move goes as if released); `Hunter.can_fire()` is false
+while stunned, a knock or a root never blocks it. Cooldowns are spent when the move starts.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| LMB bow draw (hold, release) | stun | [?] Myth data and pin footage silent | the draw is cancelled, no arrow (`Hunter._trigger_bow`) | [?] |
+| LMB bow draw | knock, root | [?] | ignored, the draw goes on | [?] |
+| RMB Heavy Shot (hold, release) | stun | [?] | the hold is let go: past 0.15 s the shot goes (shared rule) | [?] |
+| RMB Heavy Shot | knock, root | [?] | ignored | [?] |
+| Shift Spirit Walk (2.8 s) | damage | [W] taking damage ends it | ends ("hit", `on_take`) | match |
+| Shift Spirit Walk | stun, knock, root with no damage | [?] | not checked: it runs on | [?] |
+| X Virideth's window (3 shots, 6 s) | stun, knock, root | [?] | the window runs on; a stun only stops the shots while it lasts | [?] |
