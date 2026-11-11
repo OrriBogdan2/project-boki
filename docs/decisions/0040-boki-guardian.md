@@ -29,6 +29,8 @@ while it is not striking or moving, turns to its target (or the nearest foe with
 its normal attack clip, and ends with the summon's own shrink into the wisp. `--guardian-stance-check` (a species
 per body plan) and `--guardian-stance-shots` (GPU strips for quad, biped, flyer) cover it. Online, only the
 owner's game turns it; a remote copy shows the snapshot's heading.
+The stance replaces the companion's guard/whine poses over the downed owner; with no foe near at all it
+still nudges the Hunter up (the revive), and a foe inside 3 m is fought (Kin._wisp_threat).
 
 ## Consequences
 - Net.VERSION 0.29.0: kin snapshot index 28 = the guardian flag (KinNet).

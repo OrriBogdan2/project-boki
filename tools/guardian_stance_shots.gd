@@ -42,10 +42,11 @@ func _strip(plan: String, species: String) -> void:
 	p.down_hp = 1e6
 	await _go(0.12)
 	_take(species + "_1_burst", "%s (%s): bursts out of the wisp already facing the threat" % [species, plan])
-	_foe_to(Vector3(40.0, 0, 0))
+	_foe_to(Vector3(6.0, 0, 0))
 	k.target = null
+	k.revive_wait = 99.0      # hold off its revive nudge (Kin._consider_revive) so the stance is what shows
 	await _go(1.2)
-	_take(species + "_2_stance", "%s: nothing near, a low, wide, alert stance by the Hunter Wisp" % species)
+	_take(species + "_2_stance", "%s: a threat watched at 6 m, a low, wide, alert stance by the Hunter Wisp" % species)
 	_foe_to(Vector3(-4.0, 0, 0))
 	await _go(0.25)
 	_take(species + "_3_turn", "%s: the threat moved to its other side, it has turned to face it" % species)
@@ -65,7 +66,7 @@ func _setup(species: String) -> void:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	await m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "demo_kin": species,
+	await m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true, "demo_kin": species,
 		"boki_wisps": true})
 	m.set_process(false)
 	p = m.player
@@ -82,6 +83,7 @@ func _setup(species: String) -> void:
 		await fade.reveal(0.01)
 	p.teleport(m.world.random_ground())
 	m.cam.zoom_to = ZOOM
+	main.get_viewport().warp_mouse(Vector2(4, 4))   # no hover card over the Boki
 	m.cam.zoom = ZOOM
 	await _go(0.4)
 
@@ -94,9 +96,11 @@ func _go(secs: float) -> void:
 	while t < secs:
 		m.step(DT)
 		t += DT
-		m.cam.snap(p.pos + Vector3(0, 0.6, 0))
+		var at := k.pos.lerp(foe.pos, 0.35) if k.flat_dist(foe) < 10.0 else k.pos   # the Boki, and what it faces
+		m.cam.snap(at + Vector3(0, 0.6, 0))
 		for h in m.hunters:
 			h.render(DT, 1.0)
+		k.render(DT, 1.0)
 		await main.get_tree().process_frame
 
 func _take(file: String, caption: String) -> void:

@@ -63,6 +63,7 @@ static func track(k: Kin, dt: float) -> void:
 		k.face = lerp_angle(k.face, yaw_to(k, t.pos), minf(1.0, dt * TURN_RATE))
 
 ## Standing guard (not striking, not travelling): the pose meta KinPuppet and BokiRig read.
+## It wins over the companion's own guard/whine poses over a downed owner (Kin.render).
 static func holding(k: Kin) -> bool:
 	var still := Vector2(k.vel.x, k.vel.z).length() < STILL_SPEED
 	return k.summon != null and k.summon.guardian and k.lunge_t <= 0.0 and still

@@ -41,7 +41,7 @@ func _start(species: String) -> void:
 		m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 2, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true, "demo_kin": species,
+	m.start({"teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 79, "no_drop": true, "demo_kin": species,
 		"boki_wisps": true})
 	m.set_process(false)
 	for mb in m.mobs:
@@ -91,10 +91,12 @@ func _facing(plan: String) -> void:
 	var leash := float(KinGuardian.rules()["leash"])
 	ok(worst < leash + LEASH_SLACK, "%s: it stays on the %.0f m leash (%.1f m at most)" % [plan, leash, worst])
 
-## Nothing near: it holds the stance, low and wide on Flex; revived it goes back to its normal pose.
+## A threat it watches but cannot reach yet (Kin._wisp_threat fights inside 3 m; with nothing at all near it
+## nudges the Hunter up instead): it holds the stance, low and wide on Flex; a plain summon has its normal pose.
 func _standing(plan: String) -> void:
-	_foe_to(Vector3(40.0, 0, 0))
+	_foe_to(Vector3(6.0, 0, 0))
 	k.target = null
+	k.revive_wait = 99.0      # hold off its revive nudge (Kin._consider_revive) so the stance is what shows
 	_frames(1.0)
 	ok(k.model.get_meta("pose") == "stance", "%s: standing guard, the pose is stance" % plan)
 	var flex := k.model.get_node("Body/Flex") as Node3D
