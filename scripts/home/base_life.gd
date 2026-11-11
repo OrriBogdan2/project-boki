@@ -11,16 +11,17 @@ extends RefCounted
 ## them has a Boki, its machine waits. home.gd asks choose() when a free Boki's think timer runs out, after its
 ## care and job picks; step() moves every machine on at 10 Hz. Tuning: content/rules/base_life.json.
 
-enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT }
-const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React"]
+enum S { ROAM, EAT, NAP, PLAY, PLAY_WITH, WATCH, REACT, CHORE }
+const NAMES := ["Roam", "Eat", "Nap", "Play", "PlayWith", "Watch", "React", "Chore"]
 const TABLE := {
-	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT],
+	S.ROAM: [S.EAT, S.NAP, S.PLAY, S.PLAY_WITH, S.WATCH, S.REACT, S.CHORE],
 	S.EAT: [S.ROAM, S.NAP],
 	S.NAP: [S.ROAM],
 	S.PLAY: [S.ROAM, S.NAP, S.WATCH, S.REACT],
 	S.PLAY_WITH: [S.ROAM, S.NAP, S.REACT],
 	S.WATCH: [S.ROAM, S.NAP, S.REACT],
 	S.REACT: [S.ROAM, S.NAP, S.WATCH],
+	S.CHORE: [S.ROAM, S.NAP, S.REACT],
 }
 const STEP := 0.1          # s: the machines tick at 10 Hz, not every frame
 const TOY_SCAN := 2.0      # s between looks at the layout for placed toys
@@ -71,10 +72,12 @@ func machine(k: Dictionary) -> Fsm:
 		var m := Fsm.new(PackedStringArray(NAMES), TABLE, S.ROAM, "boki:" + String(k["rec"]["name"]))
 		m.guard(S.PLAY, func(_from: int) -> bool: return not toys.is_empty())
 		m.guard(S.PLAY_WITH, func(_from: int) -> bool: return _awake(k))
+		m.guard(S.CHORE, func(_from: int) -> bool: return k.has("life_chore"))
 		m.guard_from(S.NAP, S.ROAM, func() -> bool: return float(k.get("nap_t", 0.0)) <= 0.0)
 		m.on_enter(S.ROAM, func(_from: int) -> void: k["t"] = 0.0)
 		m.on_exit(S.PLAY_WITH, func(_to: int) -> void: k.erase("life_it"))
 		m.on_exit(S.NAP, func(_to: int) -> void: k.erase("life_pile"))
+		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
 		k["life"] = m
 	return k["life"]
 
@@ -118,7 +121,8 @@ func readout() -> String:
 		for o in h.kins:
 			if o != k:
 				bonds.append("%s %+.2f" % [o["rec"]["name"], bond(k["rec"], o["rec"])])
-		lines.append("%s %s %.0fs ref %d | %s | %s" % [k["rec"]["name"], m.state_name(), m.since, m.refused, last,
+		var state := (m.state_name() + " " + BaseChore.label(k)).strip_edges()
+		lines.append("%s %s %.0fs ref %d | %s | %s" % [k["rec"]["name"], state, m.since, m.refused, last,
 			", ".join(bonds)])
 	return "\n".join(lines)
 
@@ -148,6 +152,8 @@ func choose(k: Dictionary) -> void:
 		if bond(rec, o["rec"]) <= float(R["rival_at"]) and randf() < 0.3 + float(traits.get("temper", 0.5)) * 0.5:
 			_watch(k, o, "rival")
 			return
+	if randf() < float(R["chore_chance"]) and _chore(k):
+		return
 	var mate := _mate(k, near)
 	if not mate.is_empty() and (bored or randf() < float(pers.get("social", 0.22)) + bond(rec, mate["rec"]) * 0.5):
 		_tag(k, mate)
@@ -190,6 +196,8 @@ func _tick(k: Dictionary, dt: float) -> void:
 			_tag_tick(k, m)
 		S.WATCH, S.REACT:
 			_look_tick(k, m)
+		S.CHORE:
+			BaseChore.tick(self, k, m, dt)
 
 func _nap_tick(k: Dictionary, m: Fsm, dt: float) -> void:
 	var nap := float(k.get("nap_t", 0.0))
@@ -297,6 +305,18 @@ func _play(k: Dictionary, toy: Vector3) -> void:
 		else:
 			add_bond(k["rec"], o["rec"], float(R["bond_share"]))
 		return
+
+## Starts the chore its knacks give it (BaseChore), if one can run now.
+func _chore(k: Dictionary) -> bool:
+	var kind := BaseChore.pick(self, k)
+	if kind == "":
+		return false
+	BaseChore.begin(self, k, kind)
+	k["t"] = float(R["max"]["chore"])
+	if machine(k).go(S.CHORE, kind):
+		return true
+	BaseChore.end(k)
+	return false
 
 func _tag(k: Dictionary, o: Dictionary) -> void:
 	var m := machine(k)
