@@ -22,9 +22,14 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    master's cursed left arm) and `move_bones` (such a bone's rest moved,
    its clips' translation keys corrected so they end where they did). The budget: `tris` + the kept parts +
    skin_relax's caps <= 15k (RIG_CONTRACT.md).
+   Face detail: `tex` (atlas size, 2048 default; 4096 for a close-up Warden), `head_uv` (the head islands' scale
+   against the body's: the face island is about 250 px of a 2048 atlas at 2.0, about 850 px of a 4096 one at 4.0)
+   and `cage`/`ray` (the bake's cage and ray distance in metres, 0.008/0.03 default; 0.02/0.06 closes the bake
+   misses, black blobs, on a head that is far from the low mesh). Sparkle uses 4096, 4.0, 0.02, 0.06.
 3. **Swap**: `blender -b --factory-startup --python tools/art1/v95_swap.py -- SPEC WORK OUT_GLB`. The first run
    bakes (bake_warden.py's low mesh, UVs and Cycles bake, ~10 min) into WORK/bake.blend and copies the game .glb
-   to WORK/game.glb; later runs start from those, so a spec change re-fits in ~15 min. WORK/fit.blend is the
+   to WORK/game.glb (the game .glb must be the one from BEFORE any swap: a swapped one has its move_bones and
+   anchors applied twice, e.g. the gum bubble ends up on the nose); later runs start from those, so a spec change re-fits in ~15 min. WORK/fit.blend is the
    model before skin_relax, for looking at the weights. It fits the low mesh
    onto the rig (grimble_source.py's segment method), weights it (bone heat on the body bones, on a rig copy whose
    hips bone reaches the neck), detaches and caps, slots it, moves the anchors, runs skin_relax (no edge past 1.3x
@@ -33,7 +38,7 @@ v95 Hunters follow the same three steps. Blender runs on hetzner (`jobq submit -
    `--warden-glb-check`, `--warden-model-check`, `--stretch-check --wardens=<id>` and `--warden-shots
    --wardens=<id>` (before and after: `xvfb-run`, `LP_NUM_THREADS=2`).
 
-## Status (2026-11-10): Grimble NOT swapped yet
+## Status (2026-11-10): Ryzz and Vex swapped (ext/sparkle-underbust2, specs ryzz_v95.json, vex_v95.json); Grimble NOT swapped yet
 The tools run end to end on Grimble (`art/wardens/src/grimble_v95.json`, 8 rounds; renders in docs/shots/grimble-v95/):
 the master has no extra hand and its slime arm and gauntlet are right (master_v95_grid_front.jpg), the skeleton,
 inverse binds and all 40 clips round-trip unchanged, but the result is not shippable (attempt8_*.jpg), so
