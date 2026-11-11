@@ -671,8 +671,6 @@ const PAIRS := [
 		2.5,
 		"Gap 3 (perfect release): the frame after letting go on the stage"
 	],
-	["gap4_heavy_hit", "archer", "heavy", 1.45, 3.0, "Gap 4 (Heavy Shot): the hit burst on the dummy in the open"],
-	["gap5_heavy_pin_impact", "archer", "heavy_pin", 1.5, 3.0, "Gap 5 (Heavy Shot): the hit and the wall pin burst"],
 	["gap1_throw_cursor", "bulwark", "throw", 1.4, 3.0, "Gap 1 (aim): the hammer thrown with the cursor at 6 m"],
 	["gap2_slam_numbers", "bulwark", "slam", 1.95, 2.5, "Gap 2 (numbers) and 4 (swing VFX): a full swing on the dummy"],
 	["gap3_hold_glint", "bulwark", "spin", 1.25, 1.5, "Gap 3 (hold): the swing held 0.9 s"],
