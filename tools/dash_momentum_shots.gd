@@ -9,9 +9,9 @@ const EVERY := 2             # sim steps (60 Hz) per frame: 30 fps
 const TAKE_S := 2.0          # s filmed per take
 const POSTS := 12            # lane posts, one every POST_GAP m along +x
 const POST_GAP := 2.0
-const CAM_AT := Vector3(9.0, 0.0, 0.0)        # m from the start: the middle of the lane
-const CAM_FROM := Vector3(0.0, 15.0, 14.0)    # m off that middle: high and to the south, the lane across the frame
-const CAM_FOV := 50.0
+const CAM_AT := Vector3(8.0, 0.0, 0.0)        # m from the start: the middle of the lane
+const CAM_FROM := Vector3(0.0, 8.0, 9.0)      # m off that middle: high and to the south, the lane across the frame
+const CAM_FOV := 60.0
 const TAKES := ["ground", "jump", "jump_ex", "dash_jump"]
 
 var tree: SceneTree
@@ -30,7 +30,8 @@ func run(main: Node) -> void:
 	main.get_viewport().size = Vector2i(960, 540)
 	var flow = load("res://tools/dash_flow_check.gd").new()
 	var m: Match = flow._match(main, hero)
-	m.hud.visible = false
+	for layer in main.get_tree().root.find_children("*", "CanvasLayer", true, false):
+		(layer as CanvasLayer).visible = false        # the HUD, the drill card: the lane only
 	var h: Hunter = m.player
 	var home := h.pos
 	_lane(m, home)
@@ -49,8 +50,18 @@ func run(main: Node) -> void:
 	print("DASHMOM_SHOTS_DONE")
 	tree.quit()
 
-## Posts along the lane, so the distance reads in the frame.
+## A floor under the flattened patch (the check flattens the data only) and posts along the lane, so the distance
+## reads in the frame.
 func _lane(m: Match, home: Vector3) -> void:
+	var floor_mi := MeshInstance3D.new()
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(48, 48)
+	floor_mi.mesh = plane
+	var floor_mat := StandardMaterial3D.new()
+	floor_mat.albedo_color = Color("5d7a46")
+	floor_mi.material_override = floor_mat
+	m.add_child(floor_mi)
+	floor_mi.global_position = home + Vector3(0, 0.01, 0)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = Color("f2e6c8")
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
