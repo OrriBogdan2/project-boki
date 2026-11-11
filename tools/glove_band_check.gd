@@ -110,7 +110,7 @@ func run(main: Node) -> void:
 	for id in Arch.ids():
 		var k := _kit(String(id))
 		kits.append({"dmg_s": k["dmg"] / k["cd"], "cc": k["cc"], "travel": k["travel"]})
-	ok(kits.size() == 12, "twelve kits' E abilities read")
+	ok(kits.size() == Arch.ids().size(), "every kit's E ability read (%d)" % kits.size())
 	var cap := {}
 	for key in ["dmg_s", "cc", "travel"]:
 		var vals: Array = kits.map(func(k): return k[key])

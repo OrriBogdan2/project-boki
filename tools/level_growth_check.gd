@@ -14,6 +14,7 @@ const HP := {1: 1.0, 5: 1.24, 10: 1.54}        # max health: 1 + 0.06 x (level -
 const DMG_SLOT := {
 	"gunslinger": "kin", "juggernaut": "sec", "ashwick": "dash", "tender": "sec", "dolm": "dash", "archer": "sec",
 	"dredge": "sec", "rimewright": "sec", "mage": "dash", "bulwark": "dash", "thief": "kin", "ostra": "sec",
+	"gil": "dash",
 }
 ## Hunters whose heal or shield is the kit's own (others heal and shield through Effects' ability path).
 const KIT_HEAL := ["tender", "bulwark"]
