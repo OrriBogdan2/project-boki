@@ -8,7 +8,7 @@ and the hand-keyed clips in `WardenClips`):
 | Tier | Fall speed at touchdown | What it is | Clips (`content/rules/warden_anim/<art>.json` `land`) |
 |---|---|---|---|
 | none | under 4.0 m/s | a kerb, a step down of ~0.5 m | nothing plays, the run goes on |
-| hop | 4.0 m/s up (a plain jump lands at `JUMP_V` 6.8) | the small dip | the land clip at `w` 0.5 (heavy 0.6, Breaker 0.8, Sable 0.75), quicker (`rate` 1.4-1.5), 0.08-0.1 s on the run, 0.2-0.24 s standing |
+| hop | 4.0 m/s up (a plain jump lands at `JUMP_V` 6.8) | the small dip | the land clip at `w` 0.5 (heavy 0.6, Sable 0.75), quicker (`rate` 1.4-1.5), 0.08-0.1 s on the run, 0.2-0.24 s standing |
 | drop | 8.5 m/s up (a 2.5 m+ drop, a jump off a 1 m ledge), or any glide's end | the deep crouch | the full land clip at its own pace (`rate` 0.9-1.2), 0.12-0.13 s on the run, 0.33-0.4 s standing |
 
 The poses stay each Hunter's own land clip: the tiers only change how much of it shows and for how long. The glide's end
@@ -29,7 +29,7 @@ promise (never over 0.6 s).
 | Kael | 0.074 / 0.153 | 0.158 / 0.275 | 0.159 / 0.294 | 0.07 / 0.17 | 0.33 / 0.57 | none |
 | Lace | 0.026 / 0.054 | 0.073 / 0.123 | 0.073 / 0.123 | 0.00 / 0.17 | 0.30 / 0.47 | none |
 | Cinder | 0.018 / 0.077 | 0.095 / 0.155 | 0.081 / 0.162 | 0.07 / 0.17 | 0.33 / 0.57 | none |
-| Breaker | 0.017 / 0.031 | 0.031 / 0.057 | 0.031 / 0.048 | 0.07 / 0.17 | 0.37 / 0.57 | none |
+| Breaker | 0.044 / 0.054 | 0.084 / 0.108 | 0.084 / 0.099 | 0.07 / 0.17 | 0.33 / 0.57 | none |
 | Kibo | 0.149 / 0.155 | 0.337 / 0.373 | 0.336 / 0.371 | 0.00 / 0.17 | 0.30 / 0.57 | none |
 | Grimble | 0.045 / 0.149 | 0.147 / 0.241 | 0.149 / 0.262 | 0.07 / 0.17 | 0.33 / 0.57 | none |
 | Ryzz | 0.018 / 0.051 | 0.069 / 0.131 | 0.068 / 0.139 | 0.00 / 0.17 | 0.30 / 0.47 | none |
@@ -47,6 +47,16 @@ on the run and Kibo 0.27 m (jump_land_run_after.jpg is that state), and eight Hu
 - `landing_drop_run.jpg`, `landing_drop_still.jpg`: the 3 m terrace drop, touchdown to +15 frames.
 - `landing_glide_run.jpg`, `landing_glide_still.jpg`: a glide's end at the canopy's sink.
 
-Open: Breaker's land clip is shallow (0.031 m on the run at full weight), so his drop barely reads deeper than his hop;
-a deeper absorb wants new keys in tools/art1 (not this change: the poses stay the art's). Sable's land clip rises
-before it sinks, so her hop plays at the clip's own pace with 0.75 of the pose.
+Sable's land clip rises before it sinks, so her hop plays at the clip's own pace with 0.75 of the pose.
+
+## Albert's drop (ext/anim-albert-land, Nov 11)
+
+The table above is skeleton metres, and the rigs are built at their own sizes (Albert's hips sit 0.19 m up his skeleton,
+Kael's 0.86 m), so the JL rows now also print `world`: the dip on screen. A heavy's drop must read at least as deep there
+as the medium Hunters' median, per stance (`--clip-check`, `JL_HEAVY_K`). Albert's old land clip (0.06 m down at the
+first frame, eased straight back) dipped 0.078 / 0.135 m on screen (run / still), under the mediums' 0.110 / 0.192.
+His new one (tools/art1/breaker_anims.py, his own pose, timed to the source's weight): the hull comes down 0.1 m on
+splayed stubs and bottoms out at 0.08 s, the drum hand and the helmet arrive late (0.14 s), a 0.012 m bob at 0.3 s, then
+carrying at 0.44 s. Now 0.198 / 0.256 m on screen; the hop at the heavies' `w` 0.6 dips 0.105 / 0.128 m. Strips:
+`albert_land_{drop,jump}_{run,still}_{before,after}.jpg`. Open: Cinder (ashwick) reads 0.094 / 0.182 m, under the
+mediums, reported as open in `JL_HEAVY_OPEN` (docs/DEBT.md).

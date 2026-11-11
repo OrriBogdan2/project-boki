@@ -11,6 +11,9 @@ Meshy raw files stay in ~/meshy/breaker_v2 (not in git); the measured scan joint
     blender -b --factory-startup --python tools/art1/breaker_scan.py -- SCAN.glb art/wardens/src/breaker_rig.json WORK RETOPO.glb
     BOKI_ART_REFS=<briefs>/art-refs blender -b --factory-startup --python tools/art1/breaker_art1.py -- WORK   # sculpt, mesh, atlas, skin
     blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend art/wardens/breaker/breaker.glb
+    # with no WORK/breaker_art1.blend: re-bake the clips on the shipped .glb's armature and take back only the ones you changed
+    blender -b --factory-startup --python tools/art1/glb_rebake.py -- art/wardens/breaker/breaker.glb tools/art1/breaker_anims.py WORK/re.blend WORK/re.glb
+    python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb WORK/re.glb land
     godot --headless --path . --import
 
 - **Files:** tools/art1/sculpt_kit.py (hero-independent), breaker_sculpt.py (shapes), breaker_paint.py (paint), breaker_art1.py (mesh, UVs,

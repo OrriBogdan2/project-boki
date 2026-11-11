@@ -25,8 +25,8 @@ const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
 const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
-const JL_HEAVY_K := 1.0        # a heavy's drop crouch, on screen, is at least this many times the medium Hunters' median
-## Heavies whose land clip is still shallower than that (docs/DEBT.md): "<id>" -> what. Each land rework removes its entry.
+const JL_HEAVY_K := 1.0        # a heavy's drop crouch on screen is at least this times the mediums' median
+## Heavies whose land clip is still shallower (docs/DEBT.md): "<id>" -> what. Each land rework removes its entry.
 const JL_HEAVY_OPEN := {
 	"ashwick": "Cinder's drop 0.094 / 0.182 m on screen (run / still), the mediums' median 0.110 / 0.192",
 }
@@ -220,9 +220,9 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 			var r: Dictionary = jl.measure(m, sync, clips, running, way)
 			var tag := "%s %s" % [way, "run" if running else "still"]
 			var world_dip: float = r["dip"] * on_screen
-			print("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f world=%.3f dip_t=%.2f legs=%.2f back=%.2f held=%.2f settle=%.2f"
-					% [id, tag, r["off"], r["again"], r["apex"], r["dip"], world_dip, r["dip_t"], r["legs"], r["back"],
-					r["held"], r["settle"]])
+			print(("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f world=%.3f dip_t=%.2f legs=%.2f back=%.2f"
+					+ " held=%.2f settle=%.2f") % [id, tag, r["off"], r["again"], r["apex"], r["dip"], world_dip,
+					r["dip_t"], r["legs"], r["back"], r["held"], r["settle"]])
 			if way == "drop" and not dd.has("sway"):
 				drop_dips.get_or_add(id, {})["run" if running else "still"] = -world_dip
 			if way == "jump":
