@@ -18,6 +18,7 @@ var perfects: int:
 var pin_aim := false           # the Heavy Shot is being held (the needle on the bow and its growing bar show)
 var needle: PinNeedle          # the Heavy Shot's needle while it's held
 var heavy_full_cued := false   # this Heavy Shot hold already played its full-draw cue
+var lmb_was := false           # LMB was held last frame (a fresh press drops a held Heavy Shot)
 var sense_t := 0.0
 var pins := 0                  # wall pins landed (tests)
 var heavy_kicks := 0           # Heavy Shot releases that kicked the screen (tests)
@@ -110,9 +111,26 @@ func has_ult() -> bool: return true
 func ult_running() -> bool:
 	return ult.active()
 
-## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb).
+## While Starpiercer is up the bow is the ult's: nock, then a beam (PinUlt.lmb). Otherwise one bow holds one
+## arrow: a fresh LMB press drops a held Heavy Shot with no shot, and the bow rests while RMB holds one.
 func lmb_override(held: bool, dt: float) -> bool:
-	return ult.lmb(held, dt)
+	var pressed := held and not lmb_was
+	lmb_was = held
+	if ult.lmb(held, dt):
+		return true
+	if pressed and rmb_down:
+		rmb_down = false
+		_drop_tele()
+		if anim_id == "arc_heavy_wind":
+			anim_id = ""
+	return rmb_down
+
+## A bow draw under way ends with no arrow (a Heavy Shot or Starpiercer press takes the bow).
+func drop_draw() -> void:
+	h.draw_t = -1.0
+	draw.drop()
+	if anim_id in ["arc_draw", "arc_over"]:
+		anim_id = ""
 
 ## Hunter.trigger scales the bow's draw by this (the quick draw after a perfect release).
 func draw_rate() -> float:
@@ -200,13 +218,16 @@ func move_k() -> float:
 	return k
 
 # ------------------------------------------------------------------ RMB: Heavy Shot
-## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant.
+## The press always starts a draw (in the air too): the Heavy Shot has no tap and no air variant. It drops a
+## bow draw under way with no arrow (one bow; the newer press wins, as with Starpiercer).
 func press_rmb() -> void:
 	if busy():
 		h._ab_feedback("sec", "deny")
 		return
 	if rmb_down:
 		return
+	if h.draw_t >= 0.0:
+		drop_draw()
 	rmb_down = true
 	rmb_t = 0.0
 	rmb_ctx = {"air": false, "e": in_e(), "r": false, "full": full_ready()}
