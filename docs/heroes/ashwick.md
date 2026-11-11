@@ -91,7 +91,7 @@ this branch, (b) fixed now, (c) not applicable or we disagree. Checks are `--ash
 | Air poof | ok | (c) | owner-requested |
 | E cooldown | ok | (c) | fine |
 | E pose length | LOW | (b) | CLOAK_POSE_T 0.25 s (item 11's 0.15-0.25 s) |
-| X cooldown | LOW | (b) | 36 s (the data's 45 s at the kit's 0.8x). "ult cast: its own cooldown starts (36s ...)" |
+| X cooldown | LOW | (b) | 45 s, the data's (docs/BALANCE_1111.md; was 36 s, 0.8x). "ult cast: its own cooldown starts (36s ...)" |
 | X casting in flight | MED | (b) | only E works mid-flight (owner item 66 decision: no lance, Cinder Shot, Shift, gloves or items). "ult: the Cinder Shot goes mid-flight ...", "ult 66: ..." |
 | X lift-off ring | LOW | (b) | the ember puffs and wave stay (footage f25); the AimKit disc shown to everyone is gone (it hit nothing). "ult cast: lifts off in its ember puffs, no aim disc" |
 | X aim / recast | ok | (c) | matches |

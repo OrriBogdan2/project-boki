@@ -15,11 +15,11 @@ Palette: ember orange, bronze and hot white. Payoff word: SKEWERED.
 ## Scaling
 Our Medium has 145 HP against roughly 1.4k to 1.6k, about 1/10. Rifle 6 per round, decaying to half
 over a 10-round string; on a Dazed foe +90% (the source reads about 1.9x) with no decay. Grenade cone 16,
-Longneedle 36. Cooldowns follow the source ratio 5.4 : 7.5 : 10 at our pace 6.5 : 8.5 : 11.5. Cinderfall: the source's impact read 931 on a
+Longneedle 36. Cooldowns are the source's 9 : 11.5 : 12 (docs/BALANCE_1111.md; were 6.5 : 8.5 : 11.5, "our pace"). Cinderfall: the source's impact read 931 on a
 centred dummy (620 + 50%), about 62 at our scale; ours is 24 (36 in the centre) so that the ult straight into
 a merge cannot one-shot a full-health Light even at level 10 (growth +35%). The patch is 3 every 0.5 s for 3 s (the source's 144 a tick is
-about 14, held lower for the same cap) and slows 30%. Its cooldown follows the source's 37.5 s at our pace,
-42 s. Ranges use
+about 14, held lower for the same cap) and slows 30%. Its cooldown is the source's tooltip
+55 s (was 42 s). Ranges use
 1 bh = 1.8 m: rifle 11 m, grenade lane 10.5 m (about 6 bh), cone 6 m (3.5 bh), Longneedle 18 m (10 bh),
 slide tap 4.6 m and hold 7 m.
 
@@ -31,7 +31,7 @@ The shared step (cooldown -10%, damage +15%, dash recharge 15% faster a rank) no
 |---|---|---|---|
 | RMB Burr Charge | -1.5s cooldown x2, tier IV: resets on a knock | 5.85s / 5.2s, reset on a knock | 5.4s / 4.3s, reset on a knock at 3 |
 | Space Slipstep | -1.5s recharge x2, tier IV: +25% speed 2s after a slide | 7.65s / 6.0s, speed burst at 3 | 7.4s / 6.3s, +25% speed 2s at 3 |
-| E Longneedle | +20% damage x2, tier IV: 30% shave per hunter | cooldown 10.35s / 9.2s, damage +15% / +30%, shave at 3 | cooldown 11.5s flat, damage +20% / +40%, 30% shave per hunter at 3 |
+| E Longneedle | +20% damage x2, tier IV: 30% shave per hunter | cooldown 10.35s / 9.2s, damage +15% / +30%, shave at 3 | cooldown 12s flat, damage +20% / +40%, 30% shave per hunter at 3 |
 
 ## Audit (Nov 3 23:40)
 
@@ -50,8 +50,8 @@ done on this branch, (b) fixed now, (c) not applicable or disagree, with the sou
 | Dazed's 35% slow (MED) | (b) | Removed from KitStatus "rat": the data's Daze is only extra rifle and Railgun damage. Assert `Vex audit: Dazed is a damage window only` |
 | Dash-flow sources and into_dash rows (MED) | (a) / (b) | Sources: 731ca7b9, from the dash-buffering finding. into_dash: all "fire" (item 51: every move combos with Shift), measured: Shift in the Longneedle charge slides and the beam fires; Shift right after the tapped Burr Charge slides at once. Assert `Vex audit: Shift in the Longneedle charge ...`. Jump rows: DashFlow has no jump rows; jumping already keeps every hold |
 | Wall slam: Dazed longer (LOW) | (b) | `wall_daze` 0.6s on top of the cone's 1.4s (data: "Dazed longer and Stunned"). Assert `RMB wall slam: the walled foe is Dazed longer` |
-| RMB cooldown and damage (LOW) | (c) | 6.5s follows the footage (5.4s at level 9) at our pace; the data's 9s is level 1. Owner pacing call, unchanged |
-| Shift cooldown (LOW) | (c) | 8.5s sits between the data (11.5) and the footage (7.5) |
+| RMB cooldown and damage (LOW) | (a) | 9s, the data's (BALANCE_1111, DECISIONS 2026-11-07 cooldowns at source values) |
+| Shift cooldown (LOW) | (a) | 11.5s, the data's (BALANCE_1111) |
 | Air dash barrel roll; LMB during it (LOW) | (b) | `fires_in_dash` reads the dash's LMB row (fire), so the rifle keeps going through the air roll too. The roll itself is ours (the source never shows an air dash). Assert `Vex audit: the rifle fires through her air roll` |
 | Dash -> E (LOW) | (c) | Kept "fire" (item 51); the footage's braced stand is the plain cast |
 | Passive, E numbers, X (-) | (c) | Match the data |
