@@ -30,8 +30,8 @@ Verdict: **ok** = the shape and size match the hit and the source. **note** = a 
 | Sparkle | E | at the cursor, then an arrow lane for the pull | `e%d` rim + `e_drag` lane | rim = `radius` 1.5; drag arrow 4 m vs `slide_dist` 3.4 | rim at the cursor | note: the arrow is 0.6 m long |
 | Sparkle | R | gold range ring, crown at the cursor | `x_ring` + `x_aim` | ring 14.4 = `range`; crown `radius` ×0.5 | yes, inside the ring | ok |
 | Kael | LMB | melee cone; hold = blast to max | hold: `lmb` lane grows | `wave_range` 7→14, `wave_size` ×2 | fixed | ok |
-| Kael | RMB tap | slam lane in the aim | `slam` lane 4.3 × 0.72 | hit is the same lane (`slam.len`, `slam.width`) | n/a | ok (parity-kael-slam-lane: cone → lane) |
-| Kael | RMB hold / air | lane / circle at the cursor | `rmb` lane grows; `drop_aim` circle | fling `dist` × feel; `drop.radius` 2.6 | drop clamped 5 m | ok |
+| Kael | RMB tap | slam lane, locked at the press | `slam` lane 4.3 × 0.72 | hit is the same lane (`slam.len`, `slam.width`) | n/a | ok (parity-kael-slam-lane: cone → lane; owner 11-11: locked, planted) |
+| Kael | RMB hold / air | hold: nothing (owner 11-11); air: circle under him | `drop_aim` circle | `drop.radius` 2.4, centred under him | n/a | ok |
 | Kael | E | skillshot hook; no lane | none; plain line 3.4 m (greatsword) | chain `range` 13 | n/a | note: plain line short (106b) |
 | Kael | R | self, forward strike rectangle | `ult` lane | `len` 3.6 × `width` 1.8 | fixed | ok |
 | Lace | LMB | lands at the cursor (clamped); two lines → one | `draw_rest` / `draw` lines, **plus the plain line** | longbow `range` 12 | yes | **FIXED** (own line only) |

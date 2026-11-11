@@ -55,9 +55,6 @@
 			"fx": [{"p": "flare", "y": 1.1, "size": 3.0, "size_k": 0.45, "life": 0.28, "c": "red", "c2": "hot"},
 				{"p": "sweep", "y": 1.0, "size": 2.0, "arc": 120, "yaw": 90, "life": 0.24, "c": "magenta", "c2": "hot"},
 				{"p": "ember", "y": 1.0, "way": "fwd", "n": 26, "speed": 10.0, "spread": 0.4, "grav": 9.0, "life": 0.45, "size": 0.06, "stretch": 0.05}]},
-		"chain_lunge": {"sfx": [{"n": "juggernaut_chain_rattle", "db": -1}, {"n": "charge", "db": -2, "pitch": 1.1}],
-			"fx": [{"p": "scorch", "shape": "lane", "len": "len", "w": "w", "life": 0.9, "c": "gold", "c2": "gold_hot"},
-				{"p": "ribbon", "at": "chest", "life": 0.4, "tail": 0.26, "size": 0.75, "c": "main", "c2": "gold_hot"}]},
 
 		"drop_tell": {"sfx": [{"n": "jug_drop", "db": -2, "pitch": 0.85}]},
 		"drop_gather": {"fx": [{"p": "ember", "at": "chest", "shape": "gather", "radius": 1.4, "n": 30, "speed": 5.0, "drag": 0.0, "curl": 0.2, "life": 0.26, "size": 0.06, "c": "pink", "c2": "hot"}]},

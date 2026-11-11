@@ -352,7 +352,8 @@ static func _cone(st: StageSpec, cx: Dictionary) -> void:
 	var col := _color(st, cx)
 	# a kit's strike lane (cx "lane_w", m): the wedge becomes a strip that wide over the same reach
 	var lane_w := float(cx.get("lane_w", 0.0))
-	m.fx.cone(from, dir, r, col)
+	if lane_w <= 0.0:
+		m.fx.cone(from, dir, r, col)        # (a lane's kit draws its own strip: never a wedge flash over it)
 	m.sfx("whoosh", from, -4.0, 0.9)
 	var foes: Array = []
 	for f in m.foes_of(int(cx["team"])):

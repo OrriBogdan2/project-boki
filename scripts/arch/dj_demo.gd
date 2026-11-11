@@ -33,7 +33,6 @@ const ANIM := {
 	"jug_exdash": ["juggernaut", "greatsword", [0.5, 0.54, 0.62, 0.72, 0.9]],
 	"jug_pull": ["juggernaut", "greatsword", [0.82, 0.92, 1.0, 1.08, 1.16, 1.32]],
 	"jug_chain": ["juggernaut", "greatsword", [0.52, 0.58, 0.66, 0.92, 0.98, 1.2]],
-	"jug_chainlunge": ["juggernaut", "greatsword", [1.0, 1.4, 1.62, 1.68, 1.78, 2.1]],
 	"jug_haul": ["juggernaut", "greatsword", [1.0, 1.24, 1.32, 1.42, 1.52, 1.9]],
 	"jug_spin": ["juggernaut", "greatsword", [0.86, 0.9, 0.95, 1.0, 1.07, 1.2]],
 	"jug_roar": ["juggernaut", "greatsword", [0.5, 0.56, 0.64, 0.8, 1.1, 1.5]],
@@ -180,15 +179,6 @@ static func trigger(P: Hunter, D: Hunter, mv: String, t: float, dt: float) -> vo
 				K.cd["e"] = 0.0
 				K.use_e()
 			if at(t, dt, 0.9): K.use_e()
-		"jug_chainlunge":
-			if at(t, dt, 0.5):
-				K.cd["e"] = 0.0
-				K.use_e()
-			if at(t, dt, 0.8):
-				K.ch_rmb = 1.0
-				K.cd["rmb"] = 0.0
-				K.bot_hold["rmb"] = 0.85
-				K.press_rmb()
 		"jug_haul":
 			if at(t, dt, 0.5):
 				K.cd["e"] = 0.0

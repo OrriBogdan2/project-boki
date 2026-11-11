@@ -278,6 +278,9 @@ func _tick_hooked(dt: float) -> void:
 	var most := float(data()["tether_max"])
 	var stretch := Vector2(anchor.x - h.pos.x, anchor.z - h.pos.z).length() / most
 	if stretch > 1.0:
+		if k.lunging():
+			snap()                  # never a lock while the Smash is held or flinging him: it breaks
+			return
 		_hold_taut(most)
 		stretch = 1.0
 	_draw_hooked(stretch)

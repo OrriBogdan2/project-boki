@@ -35,15 +35,15 @@ func meteor() -> void:
 	var K: JuggernautKit = P.ak
 	var dd: Dictionary = K.rmb_def()["drop"]
 	var D := K.meteor
-	# from about a jump's height, facing +x: straight down; T at the hit centre (just ahead), T2 just outside the core
+	# from about a jump's height, facing +x: straight down; the hit centred under him, T beside him in
+	# the core, T2 just outside the core
 	P.teleport(home + Vector3(0, 1.8, 0))
 	P.grounded = false
 	P.vel = Vector3.ZERO
 	A.fresh(T)
 	A.fresh(T2)
-	var ahead := float(dd["ahead"])
-	T.teleport(home + Vector3(ahead, 0, 0))
-	T2.teleport(home + Vector3(ahead, 0, float(dd["core"]) + T2.r + 0.4))
+	T.teleport(home + Vector3(1.0, 0, 0))
+	T2.teleport(home + Vector3(0, 0, float(dd["core"]) + T2.r + 0.4))
 	A.aim_at(P, home + Vector3(9.0, 0, 0))
 	var y0 := P.pos.y
 	P.ak.press_rmb()
@@ -77,8 +77,8 @@ func meteor() -> void:
 			D.last_air <= 0.3, "%.2fs" % D.last_air)
 	var land_from := Vector2(D.last_drop.x - home.x, D.last_drop.z - home.z).length()
 	var hit_off := D.last_hit - D.last_drop
-	A.ok("jug meteor: it lands straight under the press, the hit centred just ahead in his facing",
-			land_from < 0.05 and absf(hit_off.x - ahead) < 0.01 and absf(hit_off.z) < 0.01,
+	A.ok("jug meteor: it lands straight under the press, the hit centred there, no aim offset",
+			land_from < 0.05 and absf(hit_off.x) < 0.01 and absf(hit_off.z) < 0.01,
 			"%.2fm out, hit +%.2f" % [land_from, hit_off.x])
 	A.ok("jug meteor: the shock ring is the hit circle; the core stunned, just outside the core knocked down shorter",
 			absf(D.last_shock_r - float(dd["radius"])) < 0.001 and T.stun_t > float(dd["down"]) + 0.1
@@ -465,11 +465,11 @@ func rmb_rows() -> void:
 	A.ok("jug RMB row: hooked + charging + E = Haul Slam on arrival; a press in that pull adds nothing",
 			K.haul_slams == hauls0 + 1 and K.spins == spins0,
 			"hauls %d spins %d" % [K.haul_slams - hauls0, K.spins - spins0])
-	# the Lunge charging, then E: the throw keeps the charge, the release runs down the chain
+	# the Lunge charging, then E: the throw keeps the charge, the release is a plain Lunge (never
+	# pulled down the chain), the chain kept
 	_settle(m, P, K, home)
 	A.fresh(T)
 	ready_smash.call()
-	var cl0 := K.chain_lunges
 	A.aim_at(P, T.pos)
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
@@ -479,8 +479,9 @@ func rmb_rows() -> void:
 	var charging := K.rmb_down and W.hooked()
 	P.inp["sec_hold"] = false
 	A.step(m, 0.4)
-	A.ok("jug RMB row: the Lunge charging + E = the throw keeps the charge; released hooked = Chain Lunge",
-			charging and K.chain_lunges == cl0 + 1 and A.dmg(T) > 15.0, "charging %s" % charging)
+	A.ok("jug RMB row: the Lunge charging + E = the throw keeps the charge; released hooked = a plain Lunge",
+			charging and K.last_variant == "hold" and A.dmg(T) > 13.0 and W.hooked(),
+			"charging %s variant %s chain %s" % [charging, K.last_variant, W.state])
 	# a slash pressed in the pull is not lost: it swings when the pull ends
 	_settle(m, P, K, home)
 	T.teleport(home + Vector3(6.0, 0, 0))

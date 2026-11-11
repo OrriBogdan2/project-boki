@@ -671,6 +671,30 @@ func juggernaut(a) -> void:
 			winding and early <= 0.0 and A.dmg(T) >= 24.0 and K.last_variant == "tap", "took %.0f" % A.dmg(T))
 	A.ok("juggernaut RMB: the Slam marks the foe it hits for the Riposte reset",
 			K.sweet_spots == 1 and K.slam_hit.has(T.get_instance_id()), "spots %d" % K.sweet_spots)
+	# owner 11-11: tapped east, then the cursor swung north and the stick pushed north through the wind-up: he stays
+	# planted facing east, the lane stays east, and the strike lands on the lane it showed (T east, not north)
+	A.step(m, 2.1)
+	P.teleport(home)
+	A.fresh(T)
+	T.teleport(home + Vector3(2.0, 0, 0))        # (short of the sweet spot: the next rows count it)
+	A.aim_at(P, T.pos)
+	K.ch_rmb = 1.0
+	K.cd["rmb"] = 0.0
+	A.tap(m, P)
+	var swing := func():
+		A.aim_at(P, home + Vector3(0, 0, -6.0))
+		P.inp["move"] = Vector2(0, -1)
+	A.step(m, 0.3, swing)
+	var locked_lane: Dictionary = AimKit.entry(P, "slam")
+	var lane_dir: Vector2 = locked_lane.get("dir", Vector2.ZERO)
+	var facing := Vector2(-sin(P.face), -cos(P.face))
+	var planted := P.flat_dist(home) < 0.05 and K.move_k() == 0.0
+	A.step(m, 0.4, swing)
+	P.inp["move"] = Vector2.ZERO
+	A.ok("juggernaut RMB tap: the lane locks at the press, he stays planted facing it, it hits what it showed",
+			lane_dir.dot(Vector2(1, 0)) > 0.99 and facing.dot(Vector2(1, 0)) > 0.97 and planted
+			and A.dmg(T) >= 24.0,
+			"lane %s facing %s planted %s took %.0f" % [lane_dir, facing, planted, A.dmg(T)])
 	P.teleport(home)
 	A.fresh(T)
 	T.teleport(home + Vector3(1.2, 0, 0))
@@ -731,22 +755,22 @@ func juggernaut(a) -> void:
 	P.inp["sec_hold"] = true
 	P.ak.press_rmb()
 	A.step(m, 0.5, func(): P.inp["sec_hold"] = true)
-	var ln: Dictionary = AimKit.entry(P, "rmb")
-	var k_mid := float(ln.get("fill", -1.0))
-	A.ok("juggernaut RMB hold: the lane grows with the charge (and the wind-up pose plays)",
-			AimKit.shown(P, "rmb") and k_mid > 0.2 and k_mid < 1.0 and K.anim_id == "jug_lunge_wind"
-			and not K.lunge_full,
-			"k %.2f anim %s" % [k_mid, K.anim_id])
-	A.ok("juggernaut RMB hold: lane = contact width (body + %.1f m a side), drawn = hit" % K.LUNGE_REACH,
-			is_equal_approx(float(ln.get("width", 0.0)), 2.0 * (P.r + K.LUNGE_REACH))
-			and is_equal_approx(K.lunge_w(), 2.0 * (P.r + K.LUNGE_REACH)), "%.2f" % float(ln.get("width", 0.0)))
+	var orb: Node3D = K.chg.get("glow")
+	var hold_pose: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(
+			"res://content/rules/warden_anim/kael.json"))["kmoves"]["jug_lunge_wind"]
+	A.ok("juggernaut RMB hold: nothing ahead of him (no lane, no cursor ring, no charge orb)",
+			not AimKit.shown(P, "rmb") and float(AimKit.reticle(P)["charge"]) < 0.0
+			and (orb == null or not orb.visible) and K.anim_id == "jug_lunge_wind" and not K.lunge_full,
+			"lane %s cursor %.2f anim %s" % [AimKit.shown(P, "rmb"), AimKit.reticle(P)["charge"], K.anim_id])
+	A.ok("juggernaut RMB hold: the blade held over his head, the legs walking under it",
+			hold_pose["clip"] == "haul_wind" and bool(hold_pose.get("upper", false))
+			and (KMovesDJ.MOVES["jug_lunge_wind"]["keys"][-1][1]["blade"] as Vector3).y > 2.0, str(hold_pose))
 	P.do_jump()
 	m.step(A.DT)
 	A.ok("juggernaut RMB hold: you can jump while holding", P.vel.y > 0.5 and K.rmb_down, "vy %.1f" % P.vel.y)
 	A.step(m, 0.35, func(): P.inp["sec_hold"] = true)
-	A.ok("juggernaut RMB hold: full charge flashes (lane full, the cursor flare)",
-			K.lunge_full and float(AimKit.entry(P, "rmb").get("fill", 0.0)) >= 1.0
-			and float(AimKit.reticle(P)["flare"]) > 0.0,
+	A.ok("juggernaut RMB hold: full charge flashes on the blade, still nothing at the cursor",
+			K.lunge_full and not AimKit.shown(P, "rmb") and float(AimKit.reticle(P)["charge"]) < 0.0,
 			"full %s" % K.lunge_full)
 	P.inp["sec_hold"] = false
 	m.step(A.DT)
@@ -767,9 +791,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut RMB hold: a miss doubles the cooldown, the fling goes far",
 			float(K.cd["rmb"]) > 3.0 and P.flat_dist(home) > far - 0.4,
 			"cd %.1f moved %.1f" % [float(K.cd["rmb"]), P.flat_dist(home)])
-	# air: the down slam, its hit circle just ahead of where he lands; it slows, the centre takes more and is stunned
+	# air: the down slam, its hit circle centred where he lands, whatever the aim; the centre takes more and is stunned
 	var dd: Dictionary = K.rmb_def()["drop"]
-	var ahead := float(dd["ahead"])
 	K.ch_rmb = 1.0
 	K.cd["rmb"] = 0.0
 	P.teleport(T.pos + Vector3(-1.0, 3.0, 0))
@@ -779,8 +802,8 @@ func juggernaut(a) -> void:
 	m.step(A.DT)
 	var aim_at: Vector2 = AimKit.entry(P, "drop_aim").get("at", Vector2.ZERO) \
 			if AimKit.shown(P, "drop_aim") else Vector2.ZERO
-	A.ok("juggernaut air: the hit circle shows under him, just ahead, while the drop is ready",
-			aim_at.distance_to(Vector2(P.pos.x + ahead, P.pos.z)) < 0.1, "circle at %s" % aim_at)
+	A.ok("juggernaut air: the hit circle shows straight under him (not toward the aim) while the drop is ready",
+			aim_at.distance_to(Vector2(P.pos.x, P.pos.z)) < 0.05, "circle at %s" % aim_at)
 	var x0 := P.pos.x
 	P.ak.press_rmb()
 	var disc := AimKit.shown(P, "drop") and bool(AimKit.entry(P, "drop").get("all", false))
@@ -789,8 +812,8 @@ func juggernaut(a) -> void:
 			and is_equal_approx(float(AimKit.entry(P, "drop_core").get("r", 0.0)), float(dd["core"])))
 	A.step(m, 0.6)
 	var off := absf(K.meteor.last_drop.x - x0)
-	A.ok("juggernaut RMB air: the down slam lands under him, its hit circle just ahead (everyone sees it)",
-			disc and K.meteor.drops == 1 and off < 0.05 and absf(K.meteor.last_hit.x - x0 - ahead) < 0.01,
+	A.ok("juggernaut RMB air: the down slam lands under him, its hit circle centred there (everyone sees it)",
+			disc and K.meteor.drops == 1 and off < 0.05 and absf(K.meteor.last_hit.x - x0) < 0.01,
 			"landed %.2f off, hit at +%.2f" % [off, K.meteor.last_hit.x - x0])
 	A.ok("juggernaut RMB air: Meteor Drop knocks down, the centre takes more",
 			K.last_variant == "air" and A.dmg(T) >= 24.0 and T.stun_t > 0.0,
@@ -806,13 +829,13 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut Meteor Drop: while its slot rests an air press is the ground Smash (a Slam), not a second drop",
 			K.meteor.drops == 1 and K.last_variant == "tap" and not K.slam_w.is_empty(),
 			"drops %d variant %s" % [K.meteor.drops, K.last_variant])
-	# the hit sits ahead, not round his feet: T 2.6m behind him (inside a circle round him) is not touched
+	# the hit sits under him, whatever the aim: T 3m ahead in the aim (inside the old 0.8m-ahead circle) is untouched
 	A.step(m, 1.5)
 	K.cd["air"] = 0.0
 	K.ch_rmb = 0.0
 	K.cd["rmb"] = 2.0
 	A.fresh(T)
-	P.teleport(T.pos + Vector3(2.6, 3.0, 0))
+	P.teleport(T.pos + Vector3(-3.0, 3.0, 0))
 	P.grounded = false
 	A.aim_at(P, T.pos + Vector3(9.0, 0, 0))
 	P.ak.press_rmb()
@@ -820,7 +843,8 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut Meteor Drop: it fires with the Smash resting (usable right after a ground Smash)",
 			K.meteor.drops == 2 and K.ch_rmb < 1.0 and float(K.cd["air"]) > 6.0,
 			"drops %d air cd %.2f" % [K.meteor.drops, float(K.cd["air"])])
-	A.ok("juggernaut Meteor Drop: a foe 2.6m behind him is outside the hit circle", A.dmg(T) <= 0.0,
+	A.ok("juggernaut Meteor Drop: the aim never pushes it out (a foe 3m ahead in the aim is outside the circle)",
+			A.dmg(T) <= 0.0,
 			"took %.0f" % A.dmg(T))
 	# on the ground RMB is never the drop: no cast, its slot untouched
 	K.cd["air"] = 0.0
@@ -1032,16 +1056,44 @@ func combos(a) -> void:
 	A.ok("combo jug: E > E > RMB tap = Cinder Spin (it blights who it hits)",
 			K.spins == 1 and K.last_variant == "during_e" and T.blight_t > 0.0,
 			"spins %d variant %s" % [K.spins, K.last_variant])
-	# E, then RMB held and let go while attached: Chain Lunge along it
+	# owner 11-11: E attached, RMB held while walking away, let go 20 degrees off the chain: nothing drags him toward
+	# it, the Lunge goes along the aim (never snapped down the chain), the chain stays on
 	A.step(m, 1.0)
 	hook.call()
-	var hp0 := A.dmg(T)
-	A.hold(m, P, 0.95)
-	A.step(m, 0.4)
-	A.ok("combo jug: E > hold RMB = Chain Lunge",
-			K.chain_lunges == 1 and K.warchain.state != "hooked" and A.dmg(T) - hp0 >= 18.0 and T.stun_t > 0.0
-			and P.flat_dist(T) < 3.4,
-			"lunges %d dist %.1f took %.0f" % [K.chain_lunges, P.flat_dist(T), A.dmg(T) - hp0])
+	var x0 := P.pos.x
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	A.step(m, 0.5, func():
+		P.inp["sec_hold"] = true
+		P.inp["move"] = Vector2(-1, 0))
+	P.inp["move"] = Vector2.ZERO
+	var walked := x0 - P.pos.x
+	var aim20 := Vector2(1, 0).rotated(deg_to_rad(20.0))
+	A.aim_at(P, P.pos + Vector3(aim20.x, 0, aim20.y) * 6.0)
+	P.inp["sec_hold"] = false
+	m.step(A.DT)
+	var lunge_dir: Vector2 = K.lunge.get("dir", Vector2.ZERO)
+	A.ok("combo jug: E > hold RMB: no pull toward the chain, the Lunge goes where he aims, the chain kept",
+			walked > 1.0 and lunge_dir.dot(aim20) > 0.99 and K.warchain.hooked(),
+			"walked back %.2f lunge %s chain %s" % [walked, lunge_dir, K.warchain.state])
+	# ... and no lock: past the chain's length with RMB held it breaks instead of holding him (shortened to 7 m here)
+	A.step(m, 1.5)
+	hook.call()
+	var ed: Dictionary = K.e_def()
+	var most := float(ed["tether_max"])
+	ed["tether_max"] = 7.0
+	x0 = P.pos.x
+	P.inp["sec_hold"] = true
+	P.ak.press_rmb()
+	A.step(m, 1.0, func():
+		P.inp["sec_hold"] = true
+		P.inp["move"] = Vector2(-1, 0))
+	P.inp["move"] = Vector2.ZERO
+	P.inp["sec_hold"] = false
+	ed["tether_max"] = most
+	A.ok("combo jug: E > hold RMB walking off: the chain breaks at its length, he is never held",
+			not K.warchain.hooked() and x0 - P.pos.x > 2.0, "walked %.2f chain %s" % [x0 - P.pos.x, K.warchain.state])
+	var hp0 := 0.0
 	# E, hold RMB, then E while still holding: pulled in, Haul Slam on arrival
 	A.step(m, 1.0)
 	hook.call()
@@ -1053,7 +1105,7 @@ func combos(a) -> void:
 	P.inp["sec_hold"] = false
 	A.step(m, 0.45)
 	A.ok("combo jug: E > hold RMB > E = Haul Slam on arrival",
-			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0 and K.chain_lunges == 1,
+			K.haul_slams == 1 and A.dmg(T) - hp0 >= 16.0 and T.stun_t > 0.0,
 			"slams %d took %.0f stun %.2f" % [K.haul_slams, A.dmg(T) - hp0, T.stun_t])
 	# E, E, then RMB pressed (and held) in the pull: the Cinder Spin goes on the press, no Haul Slam
 	A.step(m, 1.0)

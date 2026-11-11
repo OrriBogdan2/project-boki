@@ -1,8 +1,9 @@
 extends RefCounted
-## Owner item 113, Kael's accuracy pass against the source: no accidental glider (2), the blade forward in the
-## Lunge's hold (3), the Searing Wave a side swing (4), E free of RMB's direction (5), the Meteor Drop straight
-## down (6), E > R > the pull through the ult (7), the short dash hit (8); the owner's 11-10 playtest: the air
-## slam spikes and knocks down, and the combo E > air RMB > jump > RMB > E > Haul Slam chains with no dropped press.
+## Owner item 113, Kael's accuracy pass against the source: no accidental glider (2), the blade over his head in
+## the Lunge's hold (3, as the owner asked 11-11), the Searing Wave a side swing (4), E free of RMB's direction (5),
+## the Meteor Drop straight down (6), E > R > the pull through the ult (7), the short dash hit (8); the owner's
+## 11-10 playtest: the air slam spikes and knocks down, and the combo E > air RMB > jump > RMB > E > Haul Slam
+## chains with no dropped press.
 ## Runs inside --juggernaut-combo-check (tools/zedran_feel_check.gd). A is tools/archetype_check.gd.
 
 const AKCheck := preload("res://tools/archetype_check.gd")
@@ -95,8 +96,8 @@ func no_glide() -> void:
 func poses() -> void:
 	var hold: Array = KMovesDJ.MOVES["jug_lunge_wind"]["keys"]
 	var held: Vector3 = hold[-1][1]["blade"]
-	A.ok("jug 113.3: the Lunge's held blade points forward (level, on the aim), not overhead",
-			absf(held.x) < 0.2 and held.y < 0.5, str(held))
+	A.ok("jug 11-11 (over 113.3): the Lunge's held blade is up over his head",
+			absf(held.x) < 0.2 and held.y > 2.0, str(held))
 	var wave: Array = KMovesDJ.MOVES["jug_wave"]["keys"]
 	var top := -9.0
 	for key in wave:
@@ -386,7 +387,7 @@ func pull_waits() -> void:
 
 # ------------------------------------------------------------------ RMB held: the aim stays his
 ## Holds RMB aimed north, turns the cursor east mid-hold and lets go: he faces east and the Lunge goes east,
-## free and with the Warchain hooked to a foe in the north (only a hold aimed down the chain is a Chain Lunge).
+## free and with the Warchain hooked to a foe in the north: never pulled down the chain.
 func rmb_steer() -> void:
 	var g := _rig()
 	var m: Match = g["m"]
@@ -404,7 +405,6 @@ func rmb_steer() -> void:
 			K.use_e()
 			A.step(m, 0.3)
 		var on_chain := K.warchain.hooked()
-		var lunges := K.chain_lunges
 		held.call()
 		K.press_rmb()
 		A.step(m, 0.4, held)
@@ -417,6 +417,6 @@ func rmb_steer() -> void:
 		A.ok("jug rmb steer (%s): re-aimed east mid-hold, he faces east and the Lunge goes east" % (
 				"chain hooked north" if hooked else "free"),
 				on_chain == hooked and facing.dot(Vector2(1, 0)) > 0.97 and dir.dot(Vector2(1, 0)) > 0.97
-				and K.chain_lunges == lunges,
-				"hooked %s facing %s lunge %s chain lunges %d" % [on_chain, facing, dir, K.chain_lunges - lunges])
+				and K.warchain.hooked() == hooked,
+				"hooked %s facing %s lunge %s" % [on_chain, facing, dir])
 	await A.done(m)

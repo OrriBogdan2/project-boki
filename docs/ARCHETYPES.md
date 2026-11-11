@@ -1089,7 +1089,7 @@ pose, sound and VFX.
 | Hero | Sequence | Result | Source |
 |---|---|---|---|
 | Juggernaut | E (hooked) -> E (pull) -> RMB tap | **Cinder Spin**: 2.2m spin, 18, blight 4s; a full-body double spin, orange slash rings, a whirr and blast | wiki |
-| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | **Chain Lunge**: the Lunge runs along the chain to its end (x1.25, a 0.35 stun, RUN THROUGH); the chain hand hauls back, gold chain flash, a tether snap and a rising charge; the chain is spent | owner |
+| Juggernaut | E (hooked or anchored) -> hold RMB -> let go | a plain **Lunge** along the aim, the chain kept (owner 11-11: the Chain Lunge down the chain is gone, it read as a magnet; past the chain's length the hold breaks it) | owner |
 | Juggernaut | E -> hold RMB -> E while holding | **Haul Slam**: pulled in with the charge, a crash where you arrive (2.8m, 16 -> 30 by charge, stun 0.25 -> 0.6); the blade cocked high through the pull, then the drop; gold ring, dust, slam and boom | owner |
 | Juggernaut | E -> E (pull) -> hold RMB | **Haul Slam** on arrival (or at once if the pull is over) | owner |
 | Juggernaut | E attached -> RMB tap | the normal **Finishing Slam** (wound up, aimed) | wiki |
