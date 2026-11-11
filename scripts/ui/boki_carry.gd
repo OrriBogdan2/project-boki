@@ -1,14 +1,15 @@
 class_name BokiCarry
 extends RefCounted
-## The rest of what you carry, in the right-side Boki box's column (DECISIONS 2026-11-11 "carry 2 in, 1 extra out",
-## Boki HUD): above the lead box, nearest first, one row each and only while it is in use:
+## The rest of what you carry, beside the right-side Boki box (DECISIONS 2026-11-11 "carry 2 in, 1 extra out", Boki
+## HUD): a column left of the gloves, up from the boxes' bottom (nothing fits under the box, and above it sits the
+## belt), nearest first, one row each and only while it is in use:
 ##   second   your second Boki (Hunter.kin2): portrait, health, its carry passive's icon, and the swap key
 ##            (Settings.key_cap "swap_kin") with a ring that fills while the swap cools down
 ##   carry    the carry-out slot (Hunter.caught): the Boki you claimed, riding home. An empty outline while you
 ##            scan one; STOLEN when a rival took it from your deathbox (KinPair.robbed)
 ## The wisps you stole (BokiHud.stolen_wisps) stack above these. `shown` is what the last draw put on screen.
 
-const ROW_W := BokiHud.STOLEN_W      # px: a row is as wide and as high as a stolen wisp's, right edge on the box's
+const ROW_W := BokiHud.STOLEN_W      # px: a row is as wide and as high as a stolen wisp's
 const ROW_H := BokiHud.STOLEN_H
 const ROW_GAP := 3.0       # px between rows
 const ICON_PX := BokiHud.STOLEN_ICON      # px: the critter's side
@@ -48,20 +49,19 @@ static func _stat(k: Kin) -> String:
 		return ""
 	return String(k.ks.carry_passives[0]["stat"])
 
-## Draws the rows above the box `r` (clear of its chip); returns the height they took, for the stolen rows above.
-static func draw(H, p: Hunter, r: Rect2) -> float:
+## Draws the rows up from `bottom`, right edge at `right`; returns the height they took, for the stolen rows above.
+static func draw(H, p: Hunter, right: float, bottom: float) -> float:
 	shown.clear()
-	var y := r.position.y - BokiHud.STOLEN_LIFT
-	var y0 := y
+	var y := bottom
 	for row in rows(p):
-		var box := Rect2(Vector2(r.end.x - ROW_W, y - ROW_H), Vector2(ROW_W, ROW_H))
+		var box := Rect2(Vector2(right - ROW_W, y - ROW_H), Vector2(ROW_W, ROW_H))
 		if String(row["kind"]) == "second":
 			_second(H, p, row, box)
 		else:
 			_carry(H, row, box)
 		shown.append({"kind": row["kind"], "state": row["state"], "rect": box, "key": Settings.key_cap("swap_kin")})
 		y -= ROW_H + ROW_GAP
-	return y0 - y
+	return bottom - y
 
 ## The critter's portrait (or its colours when the render is not there) with a ring, centred on `at`.
 static func icon(H, rec: Dictionary, col: Color, ring: Color, at: Vector2) -> void:

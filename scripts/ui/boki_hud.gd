@@ -191,13 +191,12 @@ static func summon_ring(H, p: Hunter, r: Rect2) -> void:
 	if tag != "" and not KinMerge.active(p):
 		chip(H, r, tag, HudStyle.MUTED if tag == "RESTING" else col)
 
-## The wisps you stole (KinSteal), one row each above the Boki box, up to the carry limit: the critter in its own
+## The wisps you stole (KinSteal), one row each in the column left of the Boki box (BokiCarry), up to the carry limit: the critter in its own
 ## colours inside a thief-side ring, its carry passive at the share it gives (passive_k), and its one summon:
 ## the summon key while ready, "OUT 4s" while it fights for you, "USED" once spent. Nothing when you carry none.
 const STOLEN_W := 168.0      # px: a row's width, right edge on the box's right edge
 const STOLEN_H := 24.0       # px: a row's height
 const STOLEN_ICON := 18.0    # px: the critter's side
-const STOLEN_LIFT := 30.0    # px: the lowest row's bottom above the box (clear of the chip at CHIP_LIFT)
 
 ## What the last draw put on screen: one {"name", "passive", "state"} per row.
 static var stolen_shown: Array = []
@@ -221,14 +220,14 @@ static func stolen_rows(h: Hunter) -> Array:
 				"passive": passive})
 	return out
 
-static func stolen_wisps(H, p: Hunter, r: Rect2, above := 0.0) -> void:
+static func stolen_wisps(H, p: Hunter, right: float, bottom: float) -> void:
 	stolen_shown.clear()
-	var y := r.position.y - STOLEN_LIFT - above
+	var y := bottom
 	for row in stolen_rows(p):
 		var k: Kin = row["kin"]
 		var glow: Color = k.sp.get("glow", k.sp["color"])
 		var st := String(row["state"])
-		var box := Rect2(Vector2(r.end.x - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
+		var box := Rect2(Vector2(right - STOLEN_W, y - STOLEN_H), Vector2(STOLEN_W, STOLEN_H))
 		H._rounded(box, Color(0.03, 0.03, 0.05, 0.85), 8, Color(glow, 0.7), 1)
 		var at := box.position + Vector2(STOLEN_H * 0.5, STOLEN_H * 0.5)
 		BokiCarry.icon(H, k.rec, k.sp["color"], SideColor.ally(), at)
