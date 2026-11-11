@@ -1,6 +1,9 @@
 extends Control
 ## After a match: what you brought home, what your kin thinks, and the way back to the farm.
 
+const CAM_FROM := Vector3(4.6, 2.6, 8.4)     # m: the camera and what it looks at; the island sits left of the card
+const CAM_AT := Vector3(3.3, 0.6, 0)
+
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
@@ -282,6 +285,9 @@ func _note(txt: String, col: Color) -> Label:
 var shown_at := 0
 ## Enter, Space or Esc also takes you home, so you can never get stuck on this screen.
 func _unhandled_input(e: InputEvent) -> void:
+	if zoom.wheel(e):
+		get_viewport().set_input_as_handled()
+		return
 	if Time.get_ticks_msec() - shown_at < 900:
 		return
 	if e.is_action_pressed("ui_accept") or e.is_action_pressed("menu") or e.is_action_pressed("jump"):
@@ -325,14 +331,25 @@ func _stage(r: Dictionary, s: Dictionary) -> void:
 		kin_node.position = Vector3(0.75, 0, 0.6); kin_node.rotation.y = PI + 0.9
 		kin_node.set_meta("happy", true)
 		w3.add_child(kin_node)
-	var cam := Camera3D.new(); cam.fov = 40
-	# the island sits left of the results card
-	cam.position = Vector3(4.6, 2.6, 8.4)
+	cam = Camera3D.new(); cam.fov = 40
 	w3.add_child(cam)
-	cam.look_at(Vector3(3.3, 0.6, 0))
+	_aim_cam()
+
+## The island sits left of the results card; the wheel (or the pad) moves the camera in and out along its line.
+func _aim_cam() -> void:
+	cam.position = CAM_AT + (CAM_FROM - CAM_AT) * zoom.k
+	cam.look_at(CAM_AT)
+	_cam_k = zoom.k
+
+var cam: Camera3D
+var zoom := ViewZoom.new()
+var _cam_k := 1.0
 
 func _process(dt: float) -> void:
 	t += dt
+	zoom.tick(dt)
+	if cam and not is_equal_approx(zoom.k, _cam_k):
+		_aim_cam()
 	if h_anim:
 		var vy := 0.0
 		if won_k:

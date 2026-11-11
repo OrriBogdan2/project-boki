@@ -21,7 +21,7 @@ var shake_left := 0.0
 var shake_total := 0.0        # seconds of shake run so far (the shake check reads it)
 var zoom := 1.0
 var zoom_to := 1.0
-var user_zoom := 1.0           # the mouse wheel in the practice areas (Practice); multiplies the match's own zoom
+var user_zoom := 1.0           # the mouse wheel (CamWheel); multiplies the match's own zoom
 var lead := 1.0
 var pull := 0.0               # (movefeel) a quick pull-back (a dash into a glide), a dash into a glide
 var top := 0.0                # 0 = the usual angle, 1 = looking straight down (the opening drop)
