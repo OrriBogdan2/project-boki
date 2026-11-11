@@ -21,6 +21,7 @@ const LURE_SIDE := 0.9                        # m from the walk line to each lur
 const STRAY_S := 1.2                          # s either side of a lure over which it veers toward it
 const ROUND_MAX := 10.0                       # points a round gives at most
 const TRICK_PRESSES := 3
+const TOTAL_DELAY := 0.9                      # s after the Bond score that both totals pop
 
 static func rules() -> Dictionary:
 	return Content.rules("show_ring")
@@ -280,6 +281,7 @@ var walk_to := Vector3.ZERO
 var bar: TimingBar = null
 var card: Control = null
 var card_t := 0.0
+var cue: GardenCues.PopCue = null   # each round's score popping over the Boki while a show runs
 
 func _init(home) -> void:
 	h = home
@@ -351,6 +353,7 @@ func use() -> void:
 	var week := GardenPrizes.week_of(Time.get_unix_time_from_system())
 	run = Run.new([pair[0]["rec"], pair[1]["rec"]], back, week)
 	board.text = board_text(week)
+	cue = GardenCues.PopCue.new(h)
 	_enter()
 	Sfx.play("garden_start", stage.position, BaseRace.GARDEN_DB)
 
@@ -371,7 +374,7 @@ func input(event: InputEvent) -> bool:
 		run.press_trick(r)
 		_cheer(r)
 		if not run.can_trick():
-			_after_step()
+			_after_step(Run.Phase.TRICK)
 	elif run.phase == Run.Phase.BOND:
 		var i := run.call_out()
 		if i >= 0:
@@ -392,15 +395,33 @@ func tick(d: float) -> void:
 		return
 	var was := run.phase
 	run.step(d)
+	cue.step(d)
 	if run.phase != was:
-		_after_step()
+		_after_step(was)
 		return
 	if run.phase == Run.Phase.TRICK:
 		bar.step(d)
 	_place_pair(d)
 
-## After the round changes: set up the next one, or end the show.
-func _after_step() -> void:
+## The judges' score for the round that just ended pops over your Boki; after the walk both totals follow.
+func _pop(ended: Run.Phase) -> void:
+	var shown: Dictionary = run.recs[run.backed]
+	var at: Vector3 = pair[run.backed]["pos"]
+	var col := GardenCues.type_colour(shown)
+	match ended:
+		Run.Phase.LOOK:
+			cue.pop(at, "Look %.1f" % sum(look(shown)), col)
+		Run.Phase.TRICK:
+			cue.pop(at, "Trick %.1f" % trick(shown, run.grades), col)
+		Run.Phase.BOND:
+			cue.pop(at, "Bond %.1f" % bond(shown, run.calls), col)
+			var s := run.scores()
+			for i in 2:
+				cue.pop(pair[i]["pos"], "%.1f" % float(s[i]["total"]), GardenCues.type_colour(run.recs[i]), TOTAL_DELAY)
+
+## After the round `ended`: its score pops, then the next round is set up or the show ends.
+func _after_step(ended: Run.Phase) -> void:
+	_pop(ended)
 	if run.over():
 		_end(true)
 	else:
@@ -548,6 +569,8 @@ func _end(finished: bool) -> void:
 	if bar != null:
 		bar.close()
 	_clear_lures()
+	cue.clear()
+	cue = null
 	if is_instance_valid(card):
 		card.queue_free()
 	if finished:

@@ -202,6 +202,7 @@ var mine: Array = []           # your three kin entries, in leg order
 var visitors: Array = []       # the visiting team's {rec, node} entries, in leg order
 var anchor := {}               # your Boki the prize and cup go to: your partner when it runs
 var bar: TimingBar = null
+var cue: GardenCues.BatonCue = null   # each team's glowing baton while a relay runs
 
 func _init(dash: BaseRace) -> void:
 	race = dash
@@ -272,6 +273,7 @@ func use() -> void:
 		var n := Models.kin(String(rec["species"]), rec)
 		h.add_child(n)
 		visitors.append({"rec": rec, "node": n})
+	cue = GardenCues.BatonCue.new(h)
 	bar = TimingBar.new()
 	bar.open(h.root_ui, "Press %s before each mark to hand off" % Settings.key_cap("interact"))
 	_bar_label("")
@@ -306,6 +308,7 @@ func tick(d: float) -> void:
 	run.step(d)
 	bar.step(d)
 	_place_runners()
+	_baton_cue(d)
 	if run.over():
 		_end(true)
 
@@ -333,6 +336,16 @@ func _place_runners() -> void:
 			n.rotation.y = race.heading(s)
 			ents[i]["pos"] = p
 
+## Each team's baton over its runner, blinking while the runner takes it; a burst where it changes hands.
+func _baton_cue(d: float) -> void:
+	cue.step(d)
+	for team in 2:
+		var ents: Array = mine if team == 0 else visitors
+		var leg := int(run.leg[team])
+		var lost: Array = run.lost[team]
+		cue.update(team, ents[leg]["pos"], leg, GardenCues.type_colour(ents[leg]["rec"]), float(run.wait[team]) > 0.0,
+				lost.is_empty() or float(lost[-1]) == 0.0)
+
 func _end(finished: bool) -> void:
 	var res := {}
 	if finished:
@@ -343,6 +356,8 @@ func _end(finished: bool) -> void:
 	for v in visitors:
 		v["node"].queue_free()
 	bar.close()
+	cue.clear()
+	cue = null
 	if finished:
 		_card(res)
 		var k: Dictionary = h._kin_entry(anchor)

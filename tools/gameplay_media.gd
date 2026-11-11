@@ -1,5 +1,5 @@
 extends RefCounted
-## --gameplay-media --media-clip=<1-4> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
+## --gameplay-media --media-clip=<1-7> --shots-dir=<dir> [--media-secs=<s>] [--media-size=1920x1080]: scripted,
 ## seeded gameplay for the website clips and stills (HUD on, recording mode "clean" so no debug text). It runs the
 ## scene again as a child Godot under the movie writer at a fixed 30 fps, which writes <dir>/clip<N>.avi and a still
 ## from the scene's best moment (<dir>/clip<N>.png). Run it on a GPU worker (jobq), then cut and encode the AVI with
@@ -9,6 +9,8 @@ extends RefCounted
 ##   3 extraction    the squad boards the skiff and leaves as the boarding timer ends
 ##   4 hatch         an egg hatching and the Boki finding you (EggHatch, then KinReveal)
 ##   5 tumble        a Tumble on the Boki base (base_tumble.gd): tells, picks that read them, presses in the gold
+##   6 relay         a Relay Cup (base_relay.gd): the batons, a clean hand-off and a fumbled one
+##   7 show          a Show Ring (show_ring.gd), cut to the end of each round: the judges' scores popping
 ## Never writes the save. The names come from the Hunters' own archetype data (Vex, Kael, Cinder ...).
 
 const STEP := 1.0 / 60.0         # s per match step; two steps make one 30 fps video frame
@@ -19,6 +21,10 @@ const BOARD_LEFT := 6.5          # s of the skiff's boarding window left when th
 const ASSIST_EVERY := 2.4        # s between a Hunter's scripted ability presses (the bots use few on their own)
 const TUMBLE_STAND := 2.2        # m south of the Tumble ring the player watches from
 const TUMBLE_ZOOM := 0.4         # the home camera's zoom for clip 5 (closer than the usual 1.0)
+const GARDEN_ZOOM := 0.6         # the home camera's zoom for clips 6 and 7
+const LOOK_LEFT := 3.0           # s of the Show Ring's Look round clip 7 keeps
+const WALK_FROM := 7.0           # s into the Bond walk clip 7 cuts to (the first lure is at 10.5 s)
+const CALL_EARLY := 0.1          # s before a lure clip 7's handler calls
 
 var main: Node
 var m: Match
@@ -61,6 +67,8 @@ func run(main_node: Node) -> void:
 		3: await _extraction(secs)
 		4: await _hatch(secs)
 		5: await _tumble(secs)
+		6: await _relay(secs)
+		7: await _show(secs)
 	print("MEDIA_DONE clip=%d frames=%d movie_frame=%d" % [clip, frame, Engine.get_frames_drawn()])
 	main.get_tree().quit(0)
 
@@ -338,5 +346,94 @@ func _tumble(secs: float) -> void:
 		if still_at >= 0.0 and t >= still_at:
 			_still()
 			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## A fresh base with three rested Boki of three types out, the player hidden at `at` and the camera on it.
+func _garden(at: Callable) -> Node:
+	FarmUnlocks.rules()["base_mode"] = true
+	var d := Save.fresh()
+	for i in 3:
+		var k := Save.new_kin(["cindle", "puddlet", "zapple"][i], ["Ember", "Ripple", "Pip"][i], 21 + i)
+		k["level"] = 6
+		k["needs"]["energy"] = 95.0
+		d["roster"].append(k)
+	d["active"] = d["roster"][0]["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true, "day1_done": true}
+	d["layout"] = HomeLayout.fresh()
+	Save.d = d
+	HomeLayout.ensure(Save.d)
+	var home = await main._hb_home()
+	while not is_instance_valid(home.root_ui):
+		await main.get_tree().process_frame
+	home._close_panel()
+	if main.get("fade") != null:
+		await main.fade.reveal(0.01)
+	for e in home.kins:
+		e.erase("indoors")
+	home.ppos = at.call(home)
+	home.player.position = home.ppos
+	home.player.visible = false
+	home.cam.zoom = GARDEN_ZOOM
+	home.cam.zoom_to = GARDEN_ZOOM
+	home.cam.snap(home.ppos)
+	return home
+
+func _press(game) -> void:
+	var ev := InputEventAction.new()
+	ev.action = "interact"
+	ev.pressed = true
+	game.input(ev)
+
+## The camera on the middle of the Dash loop; the first hand-off pressed in the gold, the second left to fumble.
+func _relay(secs: float) -> void:
+	var home = await _garden(func(h): return (h.hrace.track_at(0, 0.0, 0.0) + h.hrace.track_at(2, 0.0, 0.0)) * 0.5)
+	var rl: BaseRelay = home.hrace.relay
+	rl.use()
+	still_at = secs * 0.4
+	_mark("start")
+	var t := 0.0
+	while t < secs:
+		await main.get_tree().process_frame
+		if rl.run != null and rl.run.can_press() and rl.run.grades.is_empty() \
+				and absf(rl.bar.m - rl.bar.zone) < TimingBar.GREAT:
+			_press(rl)
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = -1.0
+		t += FRAME
+		frame += 1
+
+## The camera on the stage; each round cut to its end (the Look's last seconds, the Bond walk from just before
+## the first lure), the tricks pressed in the gold and each lure called as it passes.
+func _show(secs: float) -> void:
+	var home = await _garden(func(h): return h.hshow.stage.position)
+	var sr: ShowRing = home.hshow
+	sr.use()
+	var R := ShowRing.rules()
+	sr.run.t = float(R["look_s"]) - LOOK_LEFT
+	still_at = -1.0
+	_mark("start")
+	var t := 0.0
+	var walking := false
+	while t < secs and sr.run != null:
+		await main.get_tree().process_frame
+		var r := sr.run
+		if r == null:
+			break
+		if r.phase == ShowRing.Run.Phase.TRICK and r.can_trick() and absf(sr.bar.m - sr.bar.zone) < TimingBar.GREAT:
+			_press(sr)
+		elif r.phase == ShowRing.Run.Phase.BOND:
+			if not walking:
+				walking = true
+				r.t = WALK_FROM
+			for i in r.calls.size():
+				if r.calls[i] == "" and absf(r.t + CALL_EARLY - r.lure_t(i)) < FRAME:
+					_press(sr)
+		elif r.phase == ShowRing.Run.Phase.JUDGE and still_at < 0.0:
+			still_at = t + 1.2
+		if still_at >= 0.0 and t >= still_at:
+			_still()
+			still_at = INF
 		t += FRAME
 		frame += 1
