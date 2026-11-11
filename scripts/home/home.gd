@@ -1056,8 +1056,6 @@ var dash_slot: HomeDashSlot = null  # the dash slot on screen, the match bar's o
 var safe_at := Vector3(38.0, 0, 34.5)
 var glider_node: MeshInstance3D = null
 const HOME_ZOOM := 1.2         # the camera on arriving home: midway between close (0.8) and the widest the wheel goes (1.6)
-const MANTLE := 1.5            # ledges this far above your feet pop you up when you jump at them
-const MANTLE_ABYSS := 3.5   # falling past an island's side, you catch its edge from this far below (pinned: the expedition reach grew to 4.5 in movefeel)
 const FALL_RESPAWN := -40.0    # (a backstop: the abyss takes you a few metres under the island, World.abyss_floor)
 ## (movefeel) The Settings camera at home too, so you can try it here: the style's angle and lens and
 ## your follow mode. The farm keeps its own wider framing (the same ground across as the old home
@@ -1091,11 +1089,14 @@ func _exit_tree() -> void:
 ## your hunter there. Presentation only (the farm has no hitboxes; a match's Boki keep their size).
 const FARM_BOKI_SCALE := 1.7
 
-var climb := {}                # (unused since the ledge float; kept for anything that clears it)
-## Floating up a ledge, as in a match (Hunter._ledge_float): {lip, n (into the wall), t, at, g0}.
-## You keep steering the whole way; steering away, a dash or the glider lets go.
+## Rising up a ledge: the match's own rise (LedgeRise, as Hunter.lfloat). You keep steering the whole
+## way; steering away, a dash or the glider lets go.
 var lfl := {}
-var _mv := Vector2.ZERO
+var carry := MantleCarry.new()   # the speed you fly into a ledge with comes over the top
+var last_gy := 0.0             # the height you last stood at (a terrace you hop down never floats you back up)
+var air_t := 0.0               # s in the air (a terrace above where you stood counts after GlideLift.LEDGE_AIR_T)
+var ledge_cd := 0.0            # s before the next catch (Hunter.LEDGE_CD)
+var wall_hit := Vector2.ZERO   # this step's speed into a wall that stopped you (a shove over the void catches)
 
 ## Your class's dodge with the match's numbers: its charges and recharge (Hunter.max_dashes and
 ## dash_regen at rank 1), and the class's long dash (ex_dist, ex_time, ex_cd; Hunter.EX_DASH_CD).
@@ -1164,9 +1165,6 @@ func _ground_h(x: float, z: float) -> float:
 	return world.ground_at(x, z)
 
 func _move_player(d: float) -> void:
-	if not climb.is_empty():
-		_climb_step(d)
-		return
 	var mv := Vector2.ZERO
 	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
 	if can_act:
@@ -1193,7 +1191,6 @@ func _move_player(d: float) -> void:
 	if can_act and Input.is_action_just_pressed("dash") and dash_t <= 0.0 and not water.swimming:
 		if not try_dash(mv, air) and dash_slot:
 			dash_slot.deny()
-	_mv = mv
 	var hv := Vector2(pvel.x, pvel.z)
 	# the match hunter's movement (Loco, HunterMove) at this hero's run speed and accel: it feels the same here
 	var row := HunterMove.of(String(Save.d.get("arch", "")))
@@ -1204,23 +1201,31 @@ func _move_player(d: float) -> void:
 		if dash_t <= 0.0 and not air: hv = HunterMove.dash_exit(hv, run)
 	elif gliding:
 		hv = Loco.glide_step(hv, mv * Hunter.GLIDE_SPEED, Hunter.GLIDE_SPEED, Loco.glide_carry(String(Save.d.get("arch", ""))), d)
+	elif not lfl.is_empty():
+		hv = Loco.ledge_step(hv, mv, run, d)
 	elif air:
 		hv = Loco.air_step(hv, mv, run, d)
 	elif mv.length() > 0.001:
 		hv = Loco.accel_to(hv, mv * run * (CROUCH_SPEED if crouching else 1.0), float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
 	else:
 		hv = HunterMove.brake(hv, 1.0, d)
+	hv = carry.step(hv, mv, not air, not lfl.is_empty(), d)
 	# the island's edge doesn't hold you: walk off it and you fall (glide back, or the abyss returns you)
 	var guard := false
 	var p0 := ppos
 	var nx := ppos.x + hv.x * d
 	var ox := world.occupy(nx, ppos.z, 0.38, py, guard)
+	wall_hit = Vector2.ZERO
 	if ox == 0.0: ppos.x = nx
-	elif not _mantle(nx, ppos.z, ox, air): hv.x = 0.0
+	else:
+		wall_hit.x = hv.x
+		hv.x = 0.0
 	var nz := ppos.z + hv.y * d
 	var oz := world.occupy(ppos.x, nz, 0.38, py, guard)
 	if oz == 0.0: ppos.z = nz
-	elif not _mantle(ppos.x, nz, oz, air): hv.y = 0.0
+	else:
+		wall_hit.y = hv.y
+		hv.y = 0.0
 	pvel = Vector3(hv.x, 0, hv.y)
 	# caught on a corner: slip around it. Boxed in on every side: step out to open ground.
 	if not air and mv.length() > 0.3 and Vector2(ppos.x - p0.x, ppos.z - p0.z).length() < SPEED * d * 0.3:
@@ -1263,7 +1268,7 @@ func _move_player(d: float) -> void:
 		elif gliding and not holding:
 			gliding = false
 	if air:
-		if not lfl.is_empty() and _ledge_float(d, mv):
+		if not lfl.is_empty() and _ledge_rise(d, mv, run, jump_now):
 			pass
 		elif gliding and gh <= World.VOID + 1.0 and py < _abyss_lip() - 0.5:
 			# below an island's lip over the abyss the glider pulls you up, harder the deeper you are
@@ -1290,6 +1295,7 @@ func _move_player(d: float) -> void:
 		gliding = false
 		if gh > World.VOID + 1.0 and world.kind[world.idx(int(floor(ppos.x)), int(floor(ppos.z)))] == World.T_GROUND:
 			safe_at = ppos
+	_try_ledge_grab(d, mv, py > gh + 0.001 or pvy > 0.0)
 	var st := Loco.S.DASHING if dash_t > 0.0 else (Loco.S.GLIDING if gliding else (Loco.S.AIRBORNE if air else Loco.S.GROUNDED))
 	loco.go(Loco.S.MANTLING if not lfl.is_empty() else st)
 	loco.tick(d)
@@ -1493,112 +1499,67 @@ func _move_kin(d: float) -> void:
 			lbl.visible = k["emote_t"] > 0.0
 			lbl.position.y = 1.15 + (1.6 - k["emote_t"]) * 0.2
 
-## Jumping at a ledge a little above you pops you up onto it (and from below, an island's rim).
-## (x, z) is where you were moving to; `top` is the height of the ledge your body bumped into.
-## You land on top of the ledge, just past its lip; the move is done here (ppos set) when it works.
-func _mantle(x: float, z: float, top: float, air: bool) -> bool:
-	if not air or top <= 0.0:
-		return false
-	var reach := MANTLE_ABYSS if py < -0.2 else MANTLE
-	if top - py > reach:
-		return false
-	# touching an island's rim with your side, from below: there's no ground under (x, z)
-	var side := not world.is_block(x, z) and _ground_h(x, z) <= World.VOID + 1.0
-	if world.is_sheer(int(floor(x)), int(floor(z))) and py < top - 0.6:
-		return false      # a smooth sheer rim has nothing to hold: you slide down it
-	# the spot on top: step on from where you were heading until the ground there is the ledge
-	var dv := Vector2(x - ppos.x, z - ppos.z)
-	if dv.length() < 0.0001:
-		return false
-	dv = dv.normalized()
-	var to := Vector3.INF
-	for k in 17:
-		var q := Vector2(x, z) + dv * (0.1 * k)
-		var g := _ground_h(q.x, q.y)
-		if world.is_block(q.x, q.y) or g <= World.VOID + 1.0 or g < top - 0.05 or g - py > reach:
-			continue
-		if world.occupy(q.x, q.y, 0.38, g, false) != 0.0:
-			continue
-		to = Vector3(q.x, g, q.y)
-		break
-	if to == Vector3.INF:
-		return false
-	# (ledge float) only when your keys push into it; no snap, no fixed climb: you float up the
-	# face and keep steering (see _ledge_float)
-	var n := Vector2(signf(x - ppos.x), 0.0) if absf(x - ppos.x) > absf(z - ppos.z) else Vector2(0.0, signf(z - ppos.z))
-	if _mv.length() < 0.3 or _mv.normalized().dot(n) < Hunter.LRISE_PUSH or not lfl.is_empty():
-		return false
-	lfl = {"lip": to.y, "n": n, "t": 0.0, "at": Vector2(ppos.x, ppos.z), "g0": Input.is_action_pressed("jump") or Input.is_action_pressed("glide")}
+## Your body's radius against ledges: your hero's in a match (Arch.hit_r).
+func _body_r() -> float:
+	return Arch.hit_r(String(Save.d.get("arch", "")), Data.CLASSES[Data.class_of_save()])
+
+## Catching a ledge in the air, as a match hunter does (Hunter._try_ledge_grab, LedgeRise.find):
+## below a lip, against its face, your keys (or a shove, or momentum) into it. Walking never catches one.
+func _try_ledge_grab(d: float, mv: Vector2, air: bool) -> void:
+	ledge_cd = maxf(0.0, ledge_cd - d)
+	air_t = air_t + d if air else 0.0
+	if not air:
+		last_gy = py
+	if not air or not lfl.is_empty() or ledge_cd > 0.0 or py < last_gy - 14.0:
+		return
+	var void_here := world.is_void(ppos.x, ppos.z)
+	var push := LedgeRise.push_dir(mv, void_here or gliding, wall_hit, carry)
+	if push == Vector2.ZERO:
+		return
+	var body := Vector3(ppos.x, py, ppos.z)
+	var tall := bool(HunterMove.of(String(Save.d.get("arch", ""))).get("climb_tall", false))
+	var r := _body_r()
+	var best := LedgeRise.find(world, body, r, push, Vector2(pvel.x, pvel.z), carry, false, void_here, last_gy,
+		gliding or air_t > GlideLift.LEDGE_AIR_T, r + 0.4, Hunter.MANTLE_REACH + (Hunter.TALL_CLIMB_EXTRA if tall else 0.0))
+	if best.is_empty():
+		return
+	lfl = LedgeRise.begin(best, body, push, Input.is_action_pressed("glide"), mv.length() < 0.3, carry.v, false)
+	ledge_cd = Hunter.LEDGE_CD
 	gliding = false
 	dash_t = 0.0
-	if to.y - py > 0.6 or side:
-		Sfx.play("grab", null, -8.0, 0.1, 1.2)
-		if fx: fx.burst(ppos + Vector3(0, py + 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
-	return false
+	Sfx.play("grab", null, -8.0, 0.1, 1.2)
+	if fx and (float(best["gz"]) - py > 0.6 or void_here):
+		fx.burst(body + Vector3(0, 0.6, 0), Color("cfeaff"), 6, 2.0, 0.3, 0.0)
 
-## One step of rising up a ledge (the match's Hunter._ledge_rise): sets pvy while it lasts and
-## returns true; false once it's over (moved off the face, dashed, glided, or timed out). A jump
-## near the top (Hunter.LRISE_WINDOW) flings you higher and faster toward your keys.
-func _ledge_float(d: float, mv: Vector2) -> bool:
-	lfl["t"] = float(lfl["t"]) + d
-	var n: Vector2 = lfl["n"]
+## One step of rising up a ledge (LedgeRise, as Hunter._ledge_rise): sets pvy and returns true while
+## it lasts; false once it lets go (off the face, a dash, a fresh glide press, timed out). A jump on
+## the way up flings you, hardest in the window near the top (LedgeRise.fling).
+func _ledge_rise(d: float, mv: Vector2, run: float, jump: bool) -> bool:
+	var body := Vector3(ppos.x, py, ppos.z)
 	var glide_now := Input.is_action_pressed("glide")
-	var off := (Vector2(ppos.x, ppos.z) - (lfl["at"] as Vector2)).dot(-n) > Hunter.LRISE_OFF
-	if off or gliding or dash_t > 0.0 or float(lfl["t"]) > 1.2 or Vector2(ppos.x, ppos.z).distance_to(lfl["at"]) > 2.0 			or (glide_now and Input.is_action_just_pressed("glide")):
+	if not glide_now:
+		lfl["g0"] = false
+	if LedgeRise.lets_go(lfl, world, body, _body_r(), d) or gliding or dash_t > 0.0 or (glide_now and not bool(lfl["g0"])):
 		lfl = {}
 		return false
-	var left: float = float(lfl["lip"]) + 0.12 - py
-	var dir: Vector2 = mv.normalized() if mv.length() > 0.3 else n
-	if Input.is_action_just_pressed("jump") and panel_open == "":
-		# the fling: strong in the window near the top, weaker before it
-		var timed := left <= Hunter.LRISE_WINDOW
+	if jump:
+		var v := LedgeRise.fling(lfl, py, Vector2(pvel.x, pvel.z), mv, run)
+		Sfx.play("whoosh" if bool(lfl["win"]) else "jump", null, -8.0, 0.1, 1.3)
 		lfl = {}
-		var hv := Vector2(pvel.x, pvel.z)
-		var spd := Hunter.FLING_SPEED if timed else SPEED
-		if hv.dot(dir) < spd: hv += dir * (spd - hv.dot(dir))
-		pvel = Vector3(hv.x, 0, hv.y)
-		pvy = sqrt(2.0 * GRAV * (maxf(0.0, left) + (Hunter.FLING_HEIGHT if timed else Hunter.FLING_EARLY_HEIGHT)))
-		Sfx.play("whoosh" if timed else "jump", null, -8.0, 0.1, 1.3)
+		pvel = Vector3(v.x, 0, v.z)
+		pvy = v.y
 		return true
+	var left := LedgeRise.left(lfl, world, body, _body_r())
 	if left <= 0.0:
+		var hv := LedgeRise.pop(lfl, Vector2(pvel.x, pvel.z), mv, run, carry)
 		lfl = {}
-		pvy = Hunter.LRISE_POP
-		if mv.length() > 0.3:
-			var hv := Vector2(pvel.x, pvel.z)
-			if hv.dot(dir) < SPEED * 0.9: hv += dir * (SPEED * 0.9 - hv.dot(dir))
-			if mv.normalized().dot(n) > 0.15 and hv.dot(n) < SPEED * 0.6: hv += n * (SPEED * 0.6 - hv.dot(n))
-			pvel = Vector3(hv.x, 0, hv.y)
-	else:
-		pvy = HunterMove.rise_vy(pvy, left, 1.0, Hunter.LRISE_SPEED, d)
+		pvel = Vector3(hv.x, 0, hv.y)
+		pvy = LedgeRise.POP
+		return true
+	if LedgeRise.window_opens(lfl, left):
+		Sfx.play("click", null, -8.0, 0.1, 1.6)      # the fling window opens: a tick, so the timing reads
+	pvy = LedgeRise.rise_vy(lfl, pvy, left, d)
 	return true
-
-## The pull-up over a rim (the match's mantle): straight up the face, then forward over the lip.
-func _climb_step(d: float) -> void:
-	climb["t"] = float(climb["t"]) + d
-	var k := clampf(float(climb["t"]) / float(climb["dur"]), 0.0, 1.0)
-	var a: Vector3 = climb["from"]; var b: Vector3 = climb["to"]
-	var sp: float = climb["split"]; var lip: float = climb["lip"]
-	var p: Vector3
-	if k < sp:
-		var u := k / maxf(0.001, sp)
-		p = Vector3(a.x, lerpf(a.y, lip, 1.0 - (1.0 - u) * (1.0 - u)), a.z)
-	else:
-		var u2 := (k - sp) / maxf(0.001, 1.0 - sp)
-		var e2 := u2 * u2 * (3.0 - 2.0 * u2)
-		p = Vector3(lerpf(a.x, b.x, e2), lerpf(lip, b.y, e2) + 0.22 * sin(u2 * PI), lerpf(a.z, b.z, e2))
-	ppos = Vector3(p.x, 0, p.z)
-	py = p.y
-	pvel = Vector3.ZERO
-	player.position = ppos + Vector3(0, py, 0)
-	if p_anim == null or p_anim.model != player:
-		p_anim = HunterAnim.new(player)
-	p_anim.update(d, {"vel": Vector3.ZERO, "face": pface, "grounded": false, "gliding": false, "mantle": k, "fired": 99.0})
-	if k >= 1.0:
-		climb = {}
-		py = b.y
-		pvy = 0.0
-		Sfx.play("land", null, -12.0)
-		if fx: fx.dust(ppos, 3)
 
 ## Under island level over the abyss the view goes magenta, as in a match (AbyssFx), deeper toward
 ## the point of no return.
@@ -1607,7 +1568,7 @@ var abyss_fx: CanvasLayer = null
 var abyss_k := 0.0
 func _abyss_tint(d: float) -> void:
 	var want := 0.0
-	if world.is_void(ppos.x, ppos.z) and climb.is_empty() and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
+	if world.is_void(ppos.x, ppos.z) and pvy <= ABYSS_FX.RISE_OFF:     # (rising back up: no tint)
 		var top := _abyss_lip() - 0.5
 		var kill: float = world.abyss_floor(ppos.x, ppos.z) - Hunter.ABYSS_EXTRA - (Hunter.ABYSS_GLIDE_ROOM if gliding else 0.0)
 		want = ABYSS_FX.danger_depth(top - py, top - kill)
@@ -1629,8 +1590,8 @@ func _abyss_lip() -> float:
 
 ## Dropped into the sky: the wind carries you back to where you last stood. No harm done.
 func _respawn_safe() -> void:
-	climb = {}
 	lfl = {}
+	carry.forget()
 	ppos = safe_at
 	py = _ground_h(ppos.x, ppos.z)
 	if py <= World.VOID + 1.0: py = 0.0

@@ -354,7 +354,7 @@ func _home_lift(hm, e: Dictionary) -> void:
 	var DT := 1.0 / 60.0
 	var rows: Array = []
 	for dp in LIFT_DEPTHS:
-		hm.climb = {}; if "lfl" in hm: hm.lfl = {}
+		hm.lfl = {}
 		hm.ppos = Vector3(e["ex"] + dir.x * 4.0, 0, e["ez"] + dir.y * 4.0)
 		hm.py = top - dp; hm.pvy = -4.0; hm.pvel = Vector3.ZERO; hm.dash_t = 0.0
 		hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dir.x, 0, dir.y) * 3.0
@@ -403,9 +403,9 @@ func _home(main: Node) -> void:
 		for depth in [1.0, 2.2, 4.5]:
 			for dash in [false, true]:
 				n += 1
-				hm.climb = {}
+				hm.lfl = {}
 				hm.ppos = Vector3(e["ex"] + dir.x * 0.8, 0, e["ez"] + dir.y * 0.8)
-				hm.py = top - depth; hm.pvy = -2.0; hm.pvel = Vector3.ZERO; hm.gliding = false; hm.dash_t = 0.0
+				hm.py = top - depth; hm.pvy = -2.0; hm.pvel = Vector3.ZERO; hm.gliding = false; hm.dash_t = 0.0; hm.last_gy = top
 				hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dir.x, 0, dir.y) * 3.0
 				if dash: hm.start_dash(-dir, Hunter.DASH_SPEED, Hunter.DASH_TIME)
 				var low: float = hm.py; var did_climb := false; var back := false
@@ -413,13 +413,13 @@ func _home(main: Node) -> void:
 					_press(-dir)
 					var before: Vector3 = hm.ppos
 					hm._move_player(DT)
-					if not hm.climb.is_empty() or not hm.lfl.is_empty(): did_climb = true
+					if not hm.lfl.is_empty(): did_climb = true
 					if hm.ppos.distance_to(hm.safe_at) < 0.01 and before.distance_to(hm.safe_at) > 0.5:
 						back = true; break
 					low = minf(low, hm.py)
-					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.climb.is_empty() and hm.lfl.is_empty():
+					if not hm.world.is_void(hm.ppos.x, hm.ppos.z) and hm.world.ground_at(hm.ppos.x, hm.ppos.z) > hm.py + 0.3 and hm.lfl.is_empty():
 						inside = maxf(inside, hm.world.ground_at(hm.ppos.x, hm.ppos.z) - hm.py)
-					if did_climb and hm.climb.is_empty() and hm.lfl.is_empty() and hm.pvy == 0.0 and absf(hm.py - top) < 0.05: break
+					if did_climb and hm.lfl.is_empty() and hm.pvy == 0.0 and absf(hm.py - top) < 0.05: break
 				_press(Vector2.ZERO)
 				if depth < 3.6:
 					if did_climb and absf(hm.py - top) < 0.05 and not hm.world.is_void(hm.ppos.x, hm.ppos.z): climbed += 1
@@ -439,7 +439,7 @@ func _home(main: Node) -> void:
 	var hw := 0
 	for e in edges.slice(0, 4):
 		var dw: Vector2 = e["dir"]
-		hm.lfl = {}; hm.climb = {}; hm.gliding = false; hm.dash_t = 0.0; hm.pvy = 0.0; hm.pvel = Vector3.ZERO
+		hm.lfl = {}; hm.gliding = false; hm.dash_t = 0.0; hm.pvy = 0.0; hm.pvel = Vector3.ZERO
 		hm.ppos = Vector3(e["ex"] - dw.x * 1.2, 0, e["ez"] - dw.y * 1.2); hm.py = e["top"]
 		hm.safe_at = Vector3(e["at"].x, 0, e["at"].z) - Vector3(dw.x, 0, dw.y) * 3.0
 		for i in 120:

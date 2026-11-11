@@ -222,8 +222,7 @@ func _reset(at: Vector3, grounded: bool) -> void:
 	h.diving = false
 	h.last_gy = at.y
 	h.air_t = 0.0 if grounded else 0.3
-	h.carry_v = 0.0
-	h.carry_mini = {}
+	h.carry.forget()
 	h.dashes = h.max_dashes()
 	for k in ["glide", "glide_btn", "jump", "dash", "fire", "sig", "sec", "ult"]:
 		h.inp[k] = false

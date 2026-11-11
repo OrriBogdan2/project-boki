@@ -156,14 +156,14 @@ Other checks:
   - Unconfirmed: what SUPERVIVE's feathering exactly does. Public pages don't describe it. These numbers are ours, to be checked against the owner's Nidhogg reference video.
 - **Jump out of a dash** (`Loco.dash_jump_keep`, tuning.json `dash.jump_keep`, 0.75): the dash ends and the jump carries 75% of its speed, the rest is air drag's; the farm does the same (it used to keep the whole dash, the match 55%: a one-step 45% stop). A Shift's speed is `Loco.dash_hv` in both places (the per-hunter ease too).
 - **Dash into glide** (owner 11-08, `Hunter._dash_into_glide`, docs/decisions/0022): a fresh glide press (second Space, or the glide button) at any moment of an air Shift dash ends the dash that step and the glide carries the dash's velocity exactly. No handoff boost: the glide's drag (`Loco.glide_step`) bleeds it back toward cruise within ~1.5 s, faster above the hunter's `glide_carry` cap (content/rules/tuning.json). A kit's rush or special movement (`move_kind` other than "dash") is not cancelled; `--air-control-check` tries every Hunter's own air Shift and FLAGS the ones a press doesn't cancel (Motley's). A kit that ends its dash with a stop skips it when the glide took over (Vex's air slide). The boost trail and whoosh still play when the glide starts well above cruise.
-- **Ledge rise** (replaces the scripted mantle; `Hunter._ledge_rise`, `_ledge_fling`, `lfloat`). This follows the owner's description of SUPERVIVE.
+- **Ledge rise** (replaces the scripted mantle; `LedgeRise`, called by `Hunter._try_ledge_grab`, `_ledge_rise`, `_ledge_fling` and the farm's `Home._try_ledge_grab`, `_ledge_rise`). This follows the owner's description of SUPERVIVE.
   - When it starts: you're below a ledge in the air and your keys push into it (within about 60 degrees of straight in; over the abyss below a lip, about 78 degrees). You gain upward momentum and float up the face. No climb animation sets your position.
   - Steering: your keys steer the whole way (ordinary air steering). Nothing holds you to the face except the wall itself.
   - Letting go: moving 0.9m out from the face, a dash, a fresh glide press, a stun or a knock ends the rise.
   - Over the top with no jump: a small pop (3.2 m/s), carried toward your keys.
   - The fling window: the last 0.6m below the top (about 0.12s), shown with a click and a ring. A jump in it flings you to 0.9m over the top at 7.5 m/s toward your keys, with a whoosh. A jump earlier gives a weak fling (just over the top, at run speed).
   - Never grabs you: walking, jumping along a wall, glancing it, or standing next to it with no keys. Gliding past a lip doesn't grab you either unless you steer into it.
-  - Home uses the same rise (`Home._ledge_float`).
+  - Home uses the same rise: the same code and numbers (see "One ledge rise for the farm and the match").
   - A deliberate pull still lands you on top: `Hunter.launch_to` to higher ground (an archer's Grapple onto a ledge, a leap up a cliff) flies a sure arc.
 - **Wall catch over the abyss:** below an island's lip, a wall 0.75m from your side catches you (elsewhere 0.4m), except near a sheer cliff. The abyss catch reach is 4.5m below the lip (was 3.5m). A sheer cliff right in front of you has nothing to hold, and its neighbours don't catch you through it.
 - **Rocks, trees and walls are walls** (item 151): a jump into one never lifts you over it (the old rock hop did, and dropped you into one-tile holes inside rock clumps). The generator never leaves ground sealed in by blockers (BlockPrune.fill_pockets), so nothing can land you in a hole you can't walk out of. Terrain ledges are the ledge rise's.
@@ -300,6 +300,26 @@ source number either way.
 ## Dash streak: the same ribbon on every dash (`DashStreak`, `--dash-streak-check`; owner bug 181)
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
+
+## One ledge rise for the farm and the match (`--mantle-check`, decision 0022)
+
+The farm had its own ledge system (`Home._mantle`, `_ledge_float`): it caught a ledge only when the body bumped the wall, with its own reach (1.5 m, 3.5 m over the abyss against the match's 4.5 m), a fixed 1.2 s timeout and air steering on the way up. Now both call `LedgeRise` (scripts/match/ledge_rise.gd): the catch (`find`, the match's tile scan, abyss reach and sheer rules), the rise (`HunterMove.rise_vy`), the pop and `MantleCarry`'s exit, and the fling. Steering on the way up is `Loco.ledge_step` with tuning.json `ledge` (was `Hunter.AIR_ACCEL`/`AIR_DECEL`/`AIR_OVERSPEED`). The farm body uses its hero's match radius for ledges (`Arch.hit_r`). Walking never catches a ledge, so walking off one still drops you (`--mantle-check` asserts it at a 1.6 m ledge and an island's rim).
+
+Measured by `tools/ledge_parity.gd` on the same carved ledges in the expedition's world and the farm's (the same hero, a jump at run speed from 1.2 m out, keys held in; reach = the deepest under the lip you catch it from, hanging against the face). `--mantle-check` asserts home equals match row by row.
+
+| Ledge | Measure | Match | Home before | Home after |
+|---|---|---|---|---|
+| 0.8 m wall | reach / jump to on top / peak over / speed onto it | 0.7 m / 0.77 s / 0.72 m / 4.6 m/s (jumped clean over) | 0.7 / 0.77 / 0.72 / 4.6 | same as match |
+| 1.6 m wall | reach | 1.4 m | 1.4 m | 1.4 m |
+| 1.6 m wall | caught under the lip / rise (catch to over) / on top | 0.69 m / 0.25 s / 0.90 s | 0.34 m / 0.15 s / 0.90 s | 0.69 m / 0.25 s / 0.90 s |
+| 1.6 m wall | peak over / speed onto it | 0.41 m / 4.6 m/s | 0.41 / 4.6 | 0.41 / 4.6 |
+| 2.4 m wall | caught under / rise / on top | 1.49 m / 0.28 s / 0.90 s | 1.14 m / 0.47 s / 1.22 s | 1.49 m / 0.28 s / 0.90 s |
+| 2.4 m wall | peak over / speed onto it | 0.38 m / 3.3 m/s | 0.40 / 4.3 | 0.38 / 3.3 |
+| island rim over the void | reach | 4.4 m | 3.4 m | 4.4 m |
+
+"Home before" was measured from a standstill (the old farm had no run-up path in the tool); the match's standstill numbers then were 0.50 m / 0.20 s / 0.90 s on the 1.6 m wall and 1.30 m / 0.52 s / 1.22 s on the 2.4 m one, so the farm caught about 0.16 m later (it waited for the body to touch the wall). From a run the two are equal to the step.
+
+What still differs, outside the ledge model: the farm has no glider feathering (`glide_off_t`), so a terrace above where you stood counts after 0.5 s in the air or while gliding only; it has no knocks, so the hard-launch gate never applies; a fling fires in the farm's own step (the match's on the jump press before its step). The farm's anti-snag corner slip (`Home._move_player`) nudges the body when it moves under 30% of a step, which includes the first step of a walk from a standstill: a 3 cm head start the match doesn't give (the reason the table runs from a run).
 
 ## Not touched
 

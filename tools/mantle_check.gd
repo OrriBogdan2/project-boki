@@ -1,7 +1,7 @@
 extends RefCounted
 ## --mantle-check: ledges you mean to climb, you climb; ledges you don't, never grab you.
-## The ledge float (Hunter._ledge_float): touching the side of ground above you in the air while your
-## keys push into it floats you up the face, and you keep steering the whole time.
+## The ledge rise (LedgeRise, Hunter._ledge_rise): touching the side of ground above you in the air
+## while your keys push into it floats you up the face, and you keep steering the whole time.
 ##   1. Below an island's rim over the void, pushing back in: you float up and land on top, without
 ##      ever being inside the cliff (also as a downed wisp).
 ##   2. Jumping at a wall two terraces high while pushing into it: you end up on top.
@@ -12,6 +12,8 @@ extends RefCounted
 ##   6. The fling: a jump in the window near the top flings you higher and further than a jump before
 ##      it or no jump at all.
 ##   5. Sheer cliffs (authored maps) never catch you.
+##   7. Home and match climb the same ledges alike (tools/ledge_parity.gd): grab reach, rise time and
+##      the float over the top are equal, and walking off a farm ledge still drops you.
 ## Counts fixed simulation steps; never touches the save. Prints "MCHECK ok|FAIL ..." lines and
 ## "MCHECK DONE, failures: N".
 
@@ -27,6 +29,7 @@ func ok(cond: bool, msg: String) -> void:
 	if not cond: bad += 1
 
 func run(main: Node) -> void:
+	main.set_meta("mantle_check", self)     # (kept alive across the farm's awaits)
 	Save.no_write = true
 	m = Match.new()
 	main.add_child(m)
@@ -54,6 +57,7 @@ func run(main: Node) -> void:
 	_steering(walls)
 	_fling(walls)
 	_sheer()
+	await _home_parity(main)
 	print("MCHECK DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -347,3 +351,38 @@ func _sheer() -> void:
 					print("MCHECK   sheer caught: sheer tile (%.1f, %.1f) dir %s, rose from tile %s, hunter at %s, %.2fm under the top" % [gx, gz, str(dir), str(lt), str(h.pos.snapped(Vector3(0.01, 0.01, 0.01))), top - h.pos.y])
 				break
 	ok(s_caught == 0, "sheer cliffs: caught %d of %d falling past (should be 0)" % [s_caught, s_tried])
+
+# ---------------------------------------------------------------- 7. the farm climbs like the match
+func _home_parity(main: Node) -> void:
+	var par = load("res://tools/ledge_parity.gd").new()
+	var arch := h.arch
+	var cls := h.cls
+	var mrows: Dictionary = await par.measure(h, null, w)
+	m.queue_free()
+	Save.d = Save.fresh()
+	Save.d["arch"] = arch
+	Save.d["cls"] = cls
+	var pk := Save.new_kin("zapple", "Pip")
+	Save.d["roster"].append(pk)
+	Save.d["active"] = pk["uid"]
+	Save.d["tutorial"]["home"] = true
+	Save.d["tutorial"]["day1_done"] = true
+	Econ.ensure()
+	var hm = load("res://scripts/home/home.gd").new()
+	main.add_child(hm)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	hm.set_process(false)
+	var hrows: Dictionary = await par.measure(null, hm, hm.world)
+	ok(not mrows.is_empty() and mrows.size() == hrows.size(),
+		"a flat test site in both worlds (%d ledges each)" % mrows.size())
+	for k in mrows:
+		var a: Dictionary = mrows[k]
+		var b: Dictionary = hrows.get(k, {})
+		var same := a.size() == b.size()
+		for f in a:
+			if not b.has(f) or absf(float(a[f]) - float(b[f])) > (0.05 if f == "v_top" else 0.021):
+				same = false
+		ok(same, "home climbs the %s like the match: %s vs %s" % [k, str(b), str(a)])
+	ok(par.walks_off(), "home: walking off a 1.6m ledge or an island's rim drops you (no float back up)")
+	hm.queue_free()

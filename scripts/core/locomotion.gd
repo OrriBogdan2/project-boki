@@ -36,6 +36,9 @@ static var glide_catch := 0.0
 static var glide_max := 0.0
 static var carry_drag := 0.0
 static var dash_jump_keep := 0.0
+static var ledge_accel := 0.0
+static var ledge_decel := 0.0
+static var ledge_overspeed := 0.0
 static var _mtime := 0
 static var _loaded := load_tuning()
 
@@ -65,6 +68,10 @@ static func load_tuning() -> bool:
 	glide_max = g["max"]
 	carry_drag = T["glide_carry"]["carry_drag"]
 	dash_jump_keep = T["dash"]["jump_keep"]
+	var l: Dictionary = T["ledge"]
+	ledge_accel = l["accel"]
+	ledge_decel = l["decel"]
+	ledge_overspeed = l["overspeed"]
 	return true
 
 ## Re-reads the file if it changed on disk (the readout calls this every poll_s while open).
@@ -107,6 +114,11 @@ static func accel_to(cur: Vector2, wish: Vector2, accel: float, decel: float, ov
 	if d.length_squared() < 0.0001:
 		d = wd
 	return d.normalized() * ns
+
+## One step of steering while rising up a ledge face (LedgeRise): toward the keys at ledge_accel, run
+## speed `cap`; no keys, you mostly stop.
+static func ledge_step(hv: Vector2, keys: Vector2, cap: float, dt: float) -> Vector2:
+	return accel_to(hv, keys * cap, ledge_accel, ledge_decel, ledge_overspeed, dt)
 
 ## One air step: strong WASD air control, as SUPERVIVE (DECISIONS 11-08). Never overwrites what you carry: the keys
 ## (length <= 1) add air_accel toward where they point. The part of your speed against them brakes at
