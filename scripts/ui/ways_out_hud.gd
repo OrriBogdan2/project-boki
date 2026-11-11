@@ -13,6 +13,7 @@ const SQUADS_W := 112.0
 const TOP_Y := 8.0
 const PIP_R := 7.0
 const LOST_COL := Color("8a3a4a")    # a seat the Blight took: the tide's crimson, dimmed
+const SHOW_BEFORE_S := 60.0    # s: the strip appears this long before the first seat opens (nothing to act on earlier)
 const STATE_WORD := ["", "OPEN", "IN USE", "TAKEN", "LOST"]
 
 static var _seats: Array = [{}, {}, {}, {}]    # reused every frame: name, st, t (seconds to open/shut or -1), team
@@ -113,6 +114,12 @@ static func draw(hud) -> void:
 		return
 	var c: Control = hud.c
 	var sd := seats(m)
+	var mid := Vector2(c.size.x * 0.5, TOP_Y + CELL.y + 20.0)
+	if _soonest_s(sd) <= SHOW_BEFORE_S:
+		_strip(c, sd, m)
+	WaysOutMap.draw_line(hud, mid)
+
+static func _strip(c: Control, sd: Array, m: Match) -> void:
 	var w := CELL.x * 4.0 + SQUADS_W
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
 	c.draw_style_box(HudStyle.box(HudStyle.SHADE, 8, Color(1, 1, 1, 0.14), 1), r)
@@ -122,7 +129,13 @@ static func draw(hud) -> void:
 	c.draw_line(Vector2(sx, r.position.y + 7), Vector2(sx, r.end.y - 7), Color(1, 1, 1, 0.14), 1.0)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
-	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+
+## Seconds until the first seat opens; 0 once any seat is open, in use or taken.
+static func _soonest_s(sd: Array) -> float:
+	var soon := INF
+	for s in sd:
+		soon = minf(soon, float(s["t"]) if int(s["st"]) == St.LOCKED else 0.0)
+	return soon
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]
