@@ -796,7 +796,8 @@ func parity_rmb() -> void:
 	var on_flash: Dictionary = runs[K.rmb_charge_full() + 0.05]
 	var off_flash: Dictionary = runs[K.rmb_charge_full() + 0.5]
 	A.ok("jug parity rmb: let go after 5s, it flings him the full-charge distance (as a release just after full)",
-			absf(float(long_hold["dist"]) - float(off_flash["dist"])) < 0.3 and float(off_flash["dist"]) > 5.0,
+			absf(float(long_hold["dist"]) - float(off_flash["dist"])) < 0.3
+				and float(off_flash["dist"]) > float(K.rmb_def()["lunge"]["dist"][1]) * float(K.dash_feel()["dist"]),
 			"%.1f m against %.1f" % [float(long_hold["dist"]), float(off_flash["dist"])])
 	A.ok("jug parity rmb: let go on the flash it flings him ~20% further than just outside it",
 			on_flash["perfect"] and not off_flash["perfect"]
