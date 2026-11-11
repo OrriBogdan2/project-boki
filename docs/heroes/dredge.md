@@ -317,3 +317,30 @@ Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D
 | RMB Abyssal Hand, arm | [F] 5 bh in 0.4 s (about 22 m/s); max 6-7 bh (10.8-12.6 m); no arc; flies on to the first foe, through terrain | 26 m/s, 11.5 m (0.44 s at max); no arc; first foe, pierces terrain | matches (within 0.1 s) |
 | RMB Abyssal Hand, reel | [F] about 5 bh/s (9 m/s), about 1 s (0124-0129) | **was 11 m/s** (0.8 s for 9 m); now 9 m/s, up to 3 s | fixed; `reel: the foe comes in at about 9 m/s` |
 | X Brass Broadside, slugs | [F] 6 orbs a wave reach the fan edge (3-3.5 bh, 5.4-6.3 m) in about 0.2 s; fixed range | 29.5 m/s, 5.9 m (0.2 s); stops at the fan edge, not the cursor | matches |
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB hook in flight | any | [?] | flies on (already thrown) | [?] |
+| RMB reel | stun | [?] [F] "whether the reel can be cancelled... the video only shows standing still" | reel ends, foe let go, cooldown spent | [?] |
+| RMB reel | knockback, root | [?] | no check: the reel goes on | [?] |
+| RMB reel | Grounded | [F] he is GROUNDED himself while reeling (`0127`) | KitStatus `gnd` on him for the reel | match |
+| RMB reel | knocked | ends | ends (`_tick_pull`) | match (cooldown [?]) |
+| E Anchor Drop wind-up | stun | [?] | cancelled, no slam, cooldown spent | [?] |
+| E wind-up | knockback, root, Grounded | [?] | no check: the slam lands | [?] |
+| E wind-up | knocked | ends | cancelled | match |
+| E air smash (falling) | stun | [?] | the dive ends, he falls plain | [?] |
+| E air smash | knocked | ends | ends | match |
+| X Brass Broadside charge and waves | stun | [?] | stops; before the first wave the cooldown is cut to `x.stop_cd` (ours), after it the waves left are lost | [?] |
+| X charge and waves | knockback, root | [?] | no check: goes on | [?] |
+| X charge and waves | knocked | ends | stops | match (cooldown [?]) |

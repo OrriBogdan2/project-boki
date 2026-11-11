@@ -274,3 +274,26 @@ Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D
 |---|---|---|---|
 | RMB Bola | [F] about 30 bh/s (54 m/s); a 5.5-6 bh (10.8 m) lane; flies on past the first foe; bounces off a wall | **was 30 m/s** (0.36 s for the lane); now 54 m/s (0.2 s); 7 m + 3.8 m, bounces once | fixed; `dancer Bola speed` |
 | E Shadow Knife | [F] about 25 bh/s (45 m/s); lands at the cursor or end of range (9 bh seen) | 40 m/s, 14 m (0.35 s at max); lands at the cursor | matches (0.04 s) |
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB Bola wind-up (0.4-0.6 s lane, [F] `0100`) | stun | [?] ([F] open question 1: hold or fixed cast) | cancelled, charge spent | [?] |
+| RMB wind-up | knocked | ends | cancelled | match (cooldown [?]) |
+| RMB wind-up | knockback, root, Grounded | [?] | no check: the Bola goes | [?] |
+| E Shadow Knife throw (0.12 s to the release) | stun, knocked | [?] / ends | no throw, cooldown spent | [?] / match |
+| E recast, and the forced return when it runs out | stun | [?] ([D] "after 6s ... MUST teleport back") | the recast is denied while stunned; stunned at the time-out the dagger is gone with no blink | [?] |
+| E recast and return | knocked | ends | no blink | match |
+| E recast | root, Grounded | [?] ([D] Ground = no jumping/dashing up; a blink is not named) | the blink goes | [?] |
+| X Encore ring | stun | [?] | the blades keep flying | [?] |
+| X Encore ring | knocked | ends | ends | match |

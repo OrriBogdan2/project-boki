@@ -291,3 +291,27 @@ Source: [F] footage (briefs/hero-ref, 5 fps, a frame is 0.2 s, 1 bh = 1.8 m), [D
 | RMB Shard Snap | [F] a 1.5 h bundle crosses about 6 h (10.8 m) in 0.2 s (about 54 m/s); straight, to the first foe | 29.5 m/s, 13 m (0.44 s at max); straight, first foe | kept slower [O] (item 40: the cast is +40%, so it reads) |
 | Shift Lantern Trade | [F] a high lob to the cursor, 1.8 s (card 2 s; 1.25 s Swollen); stops at the cursor | 1.8 s (1.25 s Swollen), up to 12 m, 4.5 m peak; lands at the cursor | matches |
 | E Brimseed | [F] a small orb drops on the cursor spot | 9 m reach, drops in 0.25 s at the cursor | matches |
+
+## Interrupts (crowd control on wind-ups, holds, channels and recasts; parity pass Nov 9)
+What each kind of crowd control does to a move that is still running. Kinds: stun, knockback (shoves and pulls),
+root, Grounded, and knocked (downed, a Wisp). Sources: [D] the tooltip data (briefs/supervive-data), [F] the
+5 fps footage sheet. The data states one interrupt rule in the whole roster (the support's channelled ult ends if
+she is stunned, knocked or moves too far), and the footage never shows this Hunter crowd-controlled mid-move, so
+most rows stay [?]. Settled: a knocked Hunter is a Wisp (the data's hook scoops up Wisps, the healer's burst
+resurrects them), so whatever has not yet left the hand ends; whether its cooldown is spent stays [?].
+Invulnerable moves ignore crowd control from hits ([D]/[F] say so per row). "Ours" reads the kit code;
+stun, root and Grounded arrive through `Ent.hurt` opts or `KitStatus`, knockback through `Hunter.impulse`
+(`knock_t`), a knock through `Match.knock` (`downed`); none reaches a kit by itself, each kit checks.
+
+| Slot | CC kind | Source | Ours | Verdict |
+|---|---|---|---|---|
+| RMB Shard Snap wind-up (0.2 s, [F] `0115`) | stun | [?] | cancelled, charge spent | [?] |
+| RMB wind-up | knocked | ends | cancelled | match (cooldown [?]) |
+| RMB wind-up | knockback, root | [?] | no check: the shards go | [?] |
+| Shift Lantern Trade aim (hold) | stun, knocked | [?] / ends | the aim ends with no cast, the dash not spent | [?] / match |
+| Shift Trade lob in flight | stun, knocked | [?] / ends | called off, nobody swaps, the dash stays spent | [?] / match (cooldown [?]) |
+| Shift aim and lob | knockback, root | [?] | no check | [?] |
+| E Brimseed (planted, recast to pop) | stun | [?] | it keeps growing; the recast is denied while stunned | [?] |
+| E Brimseed | knocked | [?] (a planted bomb, not in the hand) | fizzles with no damage | [?] |
+| X Nightwell cast lock | stun, knockback, knocked | [?] | frees him; the well goes on (placed) | [?] |
+| X Nightwell | root | [?] | no check | [?] |
