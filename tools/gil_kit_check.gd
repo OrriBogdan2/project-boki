@@ -22,6 +22,7 @@ func run(main_node: Node) -> void:
 	_data()
 	_bag()
 	_fencer()
+	_tide()
 	_vials()
 	_hold_and_air()
 	_beach()
@@ -43,6 +44,8 @@ func _reset(dist := 6.0) -> void:
 	K.beach_at.clear()
 	K.spin_t = -1.0
 	K.swim_t = 0.0
+	K.tide = {}
+	K.combo_n = 0
 	P.teleport(home)
 	P.vel = Vector3.ZERO
 	P.grounded = true
@@ -108,18 +111,51 @@ func _bag() -> void:
 func _fencer() -> void:
 	_reset(3.2)
 	var x0 := P.pos.x
-	var top := {"n": 0, "slow": 0.0}
-	P.inp["fire"] = true
+	var top := {"n": 0, "slow": 0.0, "t": 0.0, "pose": false}
+	var thrusts := int(HeroVfx.of(m).plays.get("thrust", 0))
 	step(m, 1.1, func():
-		P.inp["fire"] = true
+		top["t"] += DT
+		P.inp["fire"] = fmod(top["t"], 0.12) < 0.05      # clicking (holding is the Tide Lunge)
+		top["pose"] = top["pose"] or K.anim_id == "gil_thrust_1"
 		top["slow"] = maxf(top["slow"], T.slow_t)
 		top["n"] = K.combo_n)
 	P.inp["fire"] = false
+	ok("Fencer: a thrust plays its own thrust pose and look (no slash arc)",
+		top["pose"] and int(HeroVfx.of(m).plays.get("thrust", 0)) > thrusts)
 	ok("Fencer: a three-hit chain lands on the dummy", int(top["n"]) >= 3 and dmg(T) >= 20.0,
 		"swings %d dmg %.1f" % [top["n"], dmg(T)])
 	ok("Fencer: each swing steps him forward", P.pos.x - x0 > 0.8, "moved %.2f" % (P.pos.x - x0))
 	ok("Fencer: the third, longer thrust slows (30% for 0.5 s)", top["slow"] > 0.2 and top["slow"] <= 0.55,
 		"slow_t %.2f" % top["slow"])
+
+## Held LMB: the Tide Lunge. A short click is one thrust; held, he slows and draws back, and on release drives
+## down the line hitting everyone on it; a full charge soaks them (a splash mark toward Beached).
+func _tide() -> void:
+	_reset(3.0)
+	P.inp["fire"] = true
+	step(m, 0.1)
+	P.inp["fire"] = false
+	step(m, 0.4)
+	ok("Tide Lunge: a click is one thrust, no lunge", K.combo_n == 1 and K.lmb_t < 0.0 and K.tide.is_empty(),
+		"thrusts %d" % K.combo_n)
+	_reset(4.0)
+	var x0 := P.pos.x
+	P.inp["fire"] = true
+	step(m, 1.2, func(): P.inp["fire"] = true)
+	ok("Tide Lunge: held, he charges it (slowed, drawn back), full by 0.8 s",
+		K.lmb_t >= 0.0 and K.tide_k() >= 1.0 and K.move_k() < 1.0 and K.anim_id == "gil_tide_wind",
+		"k %.2f anim %s" % [K.tide_k(), K.anim_id])
+	var before := dmg(T)
+	P.inp["fire"] = false
+	step(m, 0.5)
+	var td: Dictionary = K.lmb_def()["tide"]
+	ok("Tide Lunge: let go, he drives about 5 m down the line", P.pos.x - x0 > 4.0 and P.pos.x - x0 < 7.5,
+		"%.2f m" % (P.pos.x - x0))
+	ok("Tide Lunge: full charge hits the foe on the line for 22", dmg(T) - before >= float(td["dmg"][1]) * 0.9,
+		"%.1f" % (dmg(T) - before))
+	ok("Tide Lunge: full charge soaks (one splash mark)", K.marks_on(T) == 1, "%d" % K.marks_on(T))
+	ok("Tide Lunge: the release plays its pose and look",
+		int(HeroVfx.of(m).plays.get("tide_lunge", 0)) > 0 and int(HeroVfx.of(m).plays.get("tide_hit", 0)) > 0)
 
 func _vials() -> void:
 	var want := {"thunder": "stun", "slime": "slow", "fire": "burn", "zeep": "lift"}

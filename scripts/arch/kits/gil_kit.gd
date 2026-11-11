@@ -24,6 +24,11 @@ var wave := {}                      # the Tidal Wave under way
 var untarget_t := 0.0
 var glow_t := 0.0
 var aim_t := 0.0
+var lmb_t := -1.0                  # s the Tide Lunge has been charging (-1: not)
+var lmb_was := false
+var lmb_buf := 0.0                 # s a click still waits to thrust
+var press_at := -9.0               # when the attack key went down
+var tide := {}                     # the Tide Lunge under way: {left, dir, hit, full, dmg}
 
 func _setup() -> void:
 	rng.seed = hash("gil_bag_%d" % h.get_instance_id())
@@ -69,12 +74,39 @@ func slot_info(slot: String) -> Dictionary:
 		out["next"] = next_vial()
 	return out
 
-# ------------------------------------------------------------------ LMB: Fencer
-func lmb_override(held: bool, _dt: float) -> bool:
+# ------------------------------------------------------------------ LMB: Fencer / Tide Lunge
+const THRUSTS := ["gil_thrust_1", "gil_thrust_2", "gil_lunge"]   # KMovesGil, one per chain step
+const BUFFER := 0.2             # s a click during a thrust's recovery waits to thrust next
+
+## Each click thrusts (no auto-repeat for a player: holding is the Tide Lunge). Kept held past lmb.tide.after
+## the press, he draws back into the Tide Lunge and lets it go on release. Bots keep the held chain.
+func lmb_override(held: bool, dt: float) -> bool:
 	if h.wid != "swordfish" or KinMerge.active(h):
+		_drop_tide()
 		return false
-	if not held or h.fire_cd > 0.0 or not h.can_fire():
+	var pressed := held and not lmb_was
+	lmb_was = held
+	if lmb_t >= 0.0:
+		if not h.can_fire(): _drop_tide()
+		elif held: _tide_tick(dt)
+		else: _tide_lunge()
 		return true
+	if pressed:
+		lmb_buf = BUFFER
+		press_at = m.time
+	lmb_buf -= dt
+	var bot := h.ctrl != "local"
+	if not h.can_fire():
+		return true
+	if h.fire_cd <= 0.0 and (lmb_buf > 0.0 or (bot and held)):
+		lmb_buf = 0.0
+		_thrust()
+	elif held and not bot and m.time - press_at >= float(lmb_def()["tide"]["after"]):
+		lmb_t = 0.0
+		play("gil_tide_wind")
+	return true
+
+func _thrust() -> void:
 	var ld := lmb_def()
 	if m.time - combo_at > float(ld["chain_reset"]): combo_n = 0
 	var i := combo_n % 3
@@ -83,13 +115,80 @@ func lmb_override(held: bool, _dt: float) -> bool:
 	h.combo_i = i + 1
 	h._lunge(float(ld["step"][i]))
 	if i == 2: third_until = m.time + 0.3
-	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2})
+	h._strike(float(ld["dmg"][i]), float(ld["reach"][i]), float(ld["arc"][i]), float(ld["kb"]), {"heavy": i == 2, "own_look": true})
 	h.fire_cd = float(ld["rate"]) * (1.5 if i == 2 else 1.0)
-	return true
+	play(THRUSTS[i])
+	var o := {"len": float(ld["reach"][i])}
+	if i == 2: vfx("lunge", h.pos, h.aim_dir(), o)
+	else: vfx("thrust", h.pos, h.aim_dir(), o)
+
+func tide_k() -> float:
+	var td: Dictionary = lmb_def()["tide"]
+	return clampf(lmb_t / float(td["full"]), 0.0, 1.0)
+
+## Charging: slowed, the point drawn back, water gathering on the bill; the lane shows how far he will go.
+func _tide_tick(dt: float) -> void:
+	var was := tide_k()
+	lmb_t += dt
+	var k := tide_k()
+	var td: Dictionary = lmb_def()["tide"]
+	AimKit.lane(h, "lmb", {"len": float(td["dist"][1]) + float(td["reach"]), "len0": float(td["dist"][0]) + float(td["reach"]),
+			"width": float(td["w"]), "k": k, "fill": k, "col": col_of(lmb_def()), "col_full": res_col()})
+	AimKit.charge(h, k, {"col": col_of(lmb_def()), "col2": res_col()})
+	HeroVfx.of(m).hold(h, "tide_charge", k)
+	if k >= 1.0 and was < 1.0:
+		vfx("tide_full", h.pos)
+
+## Let go: he drives down the lane behind the point; everyone along it is hit once as he passes.
+func _tide_lunge() -> void:
+	var td: Dictionary = lmb_def()["tide"]
+	var k := tide_k()
+	var full := k >= 1.0
+	lmb_t = -1.0
+	var dir := h.aim_dir()
+	var dist := lerpf(float(td["dist"][0]), float(td["dist"][1]), k)
+	var t := float(td["time"])
+	Effects.run([{"type": "dash", "speed": dist / t, "time": t, "dir": dir, "invuln": 0.0}], h,
+			{"slot": "primary", "ability": "tide_lunge", "level": 1})
+	tide = {"left": t + 0.05, "dir": dir, "hit": {}, "full": full,
+			"dmg": lerpf(float(td["dmg"][0]), float(td["dmg"][1]), k)}
+	h.fire_cd = float(td["cd"])
+	combo_n = 0
+	play("gil_tide_lunge")
+	vfx("tide_lunge", h.pos, dir, {"len": dist + float(td["reach"]), "full": full, "k": k})
+	CombatBus.ability_used.emit(h, "tide_lunge", "primary")
+
+func _tick_tide(dt: float) -> void:
+	tide["left"] = float(tide["left"]) - dt
+	var td: Dictionary = lmb_def()["tide"]
+	var dir: Vector2 = tide["dir"]
+	var tip := h.pos + Vector3(dir.x, 0, dir.y) * float(td["reach"]) * 0.5
+	for f in foes_in(tip, float(td["reach"]) * 0.5 + float(td["w"]) * 0.5, 2.5):
+		var key: int = f.get_instance_id()
+		if tide["hit"].has(key): continue
+		tide["hit"][key] = true
+		var o := {"kb": dir * float(td["kb"]), "src": "abil", "ab": "primary", "tags": ["primary", "tide"]}
+		f.hurt(float(tide["dmg"]), h, o)
+		vfx("tide_hit", f.pos, dir, {"full": tide["full"]})
+		if tide["full"]:
+			_mark(f, String(td["mark"]), col_of(lmb_def()))
+	if float(tide["left"]) <= 0.0:
+		tide = {}
+
+func _drop_tide() -> void:
+	lmb_t = -1.0
+	lmb_was = false
+	if anim_id == "gil_tide_wind": anim_id = ""
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
-	# the swing's rays reach on_deal as "shot" hits (Gil's only shots; the vials are "abil")
-	if String(o.get("src", "")) == "shot" and m.time < third_until and t != null and not t.dead:
+	# the thrust's rays reach on_deal as "shot" hits (Gil's only shots; the vials are "abil"), once a foe a thrust
+	if String(o.get("src", "")) != "shot" or t == null:
+		return
+	if m.time >= third_until:
+		vfx("thrust_hit", t.pos, h.aim_dir())
+	else:
+		vfx("lunge_hit", t.pos, h.aim_dir())
+	if m.time < third_until and not t.dead:
 		var ld := lmb_def()
 		var slow := {"slow": float(ld["slow_t"]), "slow_k": float(ld["slow"]), "src": "abil", "ab": "primary"}
 		slow["tags"] = ["primary", "lunge"]
@@ -251,7 +350,9 @@ func _e_end() -> void:
 		_release_spout()
 
 func move_k() -> float:
-	return float(e_def().get("move_k", 0.7)) if spin_t >= 0.0 else 1.0
+	if spin_t >= 0.0:
+		return float(e_def().get("move_k", 0.7))
+	return float(lmb_def()["tide"]["walk_k"]) if lmb_t >= 0.0 else 1.0
 
 func _spin_k() -> float:
 	return clampf(spin_t / float(e_def()["spin_t"]), 0.0, 1.0)
@@ -376,6 +477,8 @@ func _tick(dt: float) -> void:
 	_end_stale_hold()
 	if spin_t >= 0.0:
 		_tick_spin(dt)
+	if not tide.is_empty():
+		_tick_tide(dt)
 	_tick_lines(spouts, dt)
 	if not wave.is_empty():
 		var one := [wave]
@@ -395,6 +498,7 @@ func _tick(dt: float) -> void:
 
 func _drop_holds() -> void:
 	spin_t = -1.0
+	_drop_tide()
 	_end_stale_hold()
 
 ## The held poses (under the ground, spinning, on the wave) stay on until their move replaces them; one whose
