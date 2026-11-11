@@ -6,12 +6,13 @@ extends RefCounted
 ## Getting in:
 ##  - Breaking the gate down (every shipped lair: LairBreach). A Gate Seal of stone is braced across the
 ##    gate; it only gives way to sustained damage, cracking in stages that each call guards and ring out.
-##  - The dial (a lair whose entry lists "dial"; no shipped map does since the breach). A ring dial on a stone lectern at the gate, a needle sweeping round it and
-##    a few lit arcs. Press interact (or click, or the pad's A) as the needle passes through each arc;
-##    light them all and that lock opens. Each gate has three or four locks, and each lock's arcs are
-##    smaller and its needle faster. A miss resets the lock you're on and rings a loud chime: it pings
-##    you to everyone nearby, shows you through grass for a moment, and calls up a few guards.
-##    Everyone near can see the dial turning over the lectern and who's working it.
+##  - The dial (a lair whose entry lists "dial": no shipped map's since the breach). A ring dial on a
+##    stone lectern at the gate, a needle sweeping round it and a few lit arcs. Press interact (or
+##    click, or the pad's A) as the needle passes through each arc; light them all and that lock opens.
+##    Each gate has three or four locks, and each lock's arcs are smaller and its needle faster. A miss
+##    resets the lock you're on and rings a loud chime: it pings you to everyone nearby, shows you
+##    through grass for a moment, and calls up a few guards. Everyone near can see the dial turning over
+##    the lectern and who's working it.
 ##  - Rune pylons (Stormcrown Eyrie). Hold interact at three pylons round the lair to light them; each
 ##    one lit brings guards and knocks a share off the Gate Seal (or, with no seal, all three open it).
 ##  - Ward stones (the Thornhive). Three ward stones stand round it; hitting one calls its guards out,
@@ -91,7 +92,8 @@ func _add(D: Dictionary) -> void:
 	var dial := c + Vector3(out.x, 0, out.y) * (hf + 2.6)
 	dial = Vector3(dial.x, w.ground_at(dial.x, dial.z), dial.z) if not w.is_void(dial.x, dial.z) else gate_c + Vector3(out.x, 0, out.y) * 1.6
 	var L := {"i": list.size(), "id": D["id"], "name": D["name"], "boss": String(D["boss"]), "c": c, "half": hf, "out": out,
-		"gate_tiles": D["gate_tiles"], "gate_c": gate_c, "dial": dial, "entry": D.get("entry", ["breach"]), "state": "dormant",
+		"gate_tiles": D["gate_tiles"], "gate_c": gate_c, "dial": dial, "entry": D.get("entry", ["breach"]),
+		"state": "dormant",
 		"locks": int(LOCKS.get(String(D["boss"]), 3)), "lock": 0, "targets": [], "needle": randf() * TAU, "dir": 1.0, "active": false,
 		"user": null, "jam": 0.0, "grace": 0.0, "fails": 0, "boss_mob": null, "adds": [], "guards": [], "runes": [], "wards": [],
 		"gate_k": 0.0, "opened_by": "", "woke_at": -1.0, "bot_ti": -1, "bot_roll": false, "bot_wait": 0.0, "egg_wp": null, "egg_told": false}
@@ -334,7 +336,7 @@ func interact_for(h: Hunter) -> Dictionary:
 			or (L["runes"] as Array).any(func(rn): return h.flat_dist(rn["pos"]) < 1.7)
 		if wait != "" and near:
 			return {"kind": "lair", "what": "wait", "lair": L, "col": color_of(L), "label": wait}
-		var bp := breach.prompt(L, h) if L.has("seal_at") else {}
+		var bp := breach.prompt(L, h)
 		if not bp.is_empty():
 			return bp
 		if h.flat_dist(L["dial"]) < DIAL_R and absf(h.pos.y - float(L["dial"].y)) < 1.5 and (L["entry"] as Array).has("dial"):
@@ -380,9 +382,7 @@ func _light_rune(L: Dictionary, rn: Dictionary, h: Hunter) -> void:
 	loud(L, rn["pos"], h, "A rune flares at %s" % L["name"])
 	call_guards(L, rn["pos"], 2)
 	var lit: int = (L["runes"] as Array).filter(func(x): return x["lit"]).size()
-	if breach.weaken(L, h):
-		pass
-	elif lit >= (L["runes"] as Array).size():
+	if not breach.weaken(L, h) and lit >= (L["runes"] as Array).size():
 		open(L, h, "runes")
 	elif h == m.player and m.hud:
 		m.hud.toast("Rune %d of %d lit" % [lit, (L["runes"] as Array).size()], color_of(L))
@@ -580,7 +580,8 @@ func open(L: Dictionary, by: Hunter, how: String) -> void:
 	m.sfx("boom", L["gate_c"], 0.0, 0.5)
 	m.fx.burst(L["gate_c"] + Vector3(0, 1.5, 0), color_of(L), 40, 6.0, 0.7, 4.0, 1.4)
 	m.fx.ring(L["c"], float(L["half"]) + 1.0, color_of(L), 0.8)
-	var how_s: String = {"breach": "broke down the gate of", "dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
+	var how_s: String = {"breach": "broke down the gate of",
+		"dial": "cracked the lock of", "runes": "lit the runes of", "wards": "broke the wards of"}.get(how, "opened")
 	m.add_feed("%s %s %s" % [by.pname if by else "Someone", how_s, L["name"]])
 	if m.player and not m.player.out:
 		m.ping(L["gate_c"], color_of(L))
@@ -683,9 +684,7 @@ func on_mob_dead(mb: Mob, credit: Ent) -> void:
 		m.sfx("boom", mb.pos, 2.0, 0.8)
 		m.fx.burst(mb.pos + Vector3(0, 1.5, 0), Color("8fd8ff"), 30, 6.0, 0.6, 3.0)
 		var hb: Hunter = credit if credit is Hunter else null
-		if breach.weaken(L, hb):
-			pass
-		elif left == 0:
+		if not breach.weaken(L, hb) and left == 0:
 			open(L, hb, "wards")
 		elif hb == m.player and m.hud:
 			m.hud.toast("Ward broken  ·  %d left" % left, color_of(L))
@@ -697,7 +696,7 @@ func seat_wait(L: Dictionary) -> String:
 ## A ward stone was hit for the first time: its guards come out. (A Gate Seal's hits go to LairBreach.)
 func on_ward_hit(mb: Mob, by: Ent) -> void:
 	if mb.mkind == "gate":
-		breach.on_hit(list[int(mb.get_meta("lair"))])
+		if mb.has_meta("lair"): breach.on_hit(list[int(mb.get_meta("lair"))])
 		return
 	if mb.has_meta("woke"):
 		return

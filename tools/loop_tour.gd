@@ -588,7 +588,8 @@ func _lair(m) -> void:
 		LS = m.lairs.list.filter(func(L): return L["state"] == "sealed" and L.has("seal_at"))
 		if not LS.is_empty(): m.lairs.activate(LS[0])
 	if LS.is_empty():
-		note_bad("no sealed lair with a Gate Seal"); return
+		note_bad("no sealed lair with a Gate Seal")
+		return
 	var L: Dictionary = LS[0]
 	print("TOUR lair %s (%s)" % [L["name"], L["boss"]])
 	var at: Vector3 = LairBreach.stand(L)

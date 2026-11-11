@@ -33,7 +33,10 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_breach", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
+# goals where standing there is progress (an uplink charging, a dial, a seal), not being stuck
+const WAIT_GOALS := ["yard", "beacon", "lair_dial", "lair_breach", "lair_lever", "lair_camp"]
+const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_breach", "lair_fight", "lair_camp", "lair_lever", "box",
+	"beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
@@ -870,7 +873,7 @@ func _choose(m: Match, h: Hunter) -> void:
 		a["goal_since"] = m.time
 	elif goal != Vector3.INF:
 		var d := h.flat_dist(goal)
-		if d < 2.0 and String(a.get("goal_kind", "")) in ["yard", "beacon", "lair_dial", "lair_breach", "lair_lever", "lair_camp"]:
+		if d < 2.0 and String(a.get("goal_kind", "")) in WAIT_GOALS:
 			a["goal_since"] = m.time      # there and waiting (charging an uplink, working a dial) is fine
 		if d < float(a.get("goal_best", 1e9)) - 0.5:
 			a["goal_best"] = d

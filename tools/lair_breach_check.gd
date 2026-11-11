@@ -4,11 +4,11 @@ extends RefCounted
 ## and counts down on the label. Walking away keeps the cracks (it knits back only after
 ## LairBreach.MEND_IDLE s, and never past its last crack). A lit rune knocks a share off it instead of
 ## opening the gate. Breaking it opens the gate. Then bots break seals down on their own, timed: one bot
-## alone (must take real commitment, far longer than the dial's ~20 s) and a squad of three (much faster).
-## Never touches the save.
+## alone (real commitment, far longer than the dial's 6.5 s pressed perfectly) and a squad of three (much
+## faster). Never touches the save.
 
-const SOLO_MIN := 45.0          # s: a lone bot must take at least this long (the dial takes ~15-25 s)
-const SOLO_MAX := 200.0         # s: ... and still get in
+const SOLO_MIN := 45.0          # s: a lone bot must take at least this long (a perfect dial took 6.5 s)
+const SOLO_MAX := 240.0         # s: ... and still get in (it fights the guards each crack calls, too)
 const SQUAD_K := 0.6            # a squad of three takes at most this share of the lone bot's time
 
 var bad := 0
@@ -25,13 +25,21 @@ func _run(sec: float) -> void:
 		for h in keep:
 			h.hp = h.max_hp
 			if h.downed: m.revive_hunter(h, h)
-		m.step(Match.DT); t += Match.DT
+		m.step(Match.DT)
+		t += Match.DT
 
 func _spot(h: Hunter, at: Vector3) -> void:
-	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z)); h.vel = Vector3.ZERO
+	h.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
+	h.vel = Vector3.ZERO
+
+func _gate_is(L: Dictionary, tile: int) -> bool:
+	return (L["gate_tiles"] as Array).all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == tile)
 
 func _clear_guards(L: Dictionary) -> void:
-	for g in L["guards"]: if is_instance_valid(g) and not g.dead: g.dead = true; g.visible = false
+	for g in L["guards"]:
+		if is_instance_valid(g) and not g.dead:
+			g.dead = true
+			g.visible = false
 
 ## Bots in `crew` go and break `L`'s seal from a few metres off; returns seconds from the first hit
 ## to the gate opening (-1 if it didn't open within `limit`).
@@ -49,11 +57,15 @@ func _bots_break(L: Dictionary, crew: Array, limit: float) -> float:
 	var t0 := -1.0
 	var t := 0.0
 	while t < limit and L["state"] == "sealed":
-		_run(0.25); t += 0.25
+		_run(0.25)
+		t += 0.25
 		if t0 < 0.0 and seal.hp < seal.max_hp: t0 = m.time
-	print("BREACH  %s: %.0f%% broken after %.0f s, crew %s" % [L["name"], LairBreach.done_k(seal) * 100.0, t,
-		str(crew.map(func(h): return "%s goal %s tgt %s %.1fm" % [h.pname, h.ai.get("goal_kind", ""), str(h.ai.get("tgt").mkind if h.ai.get("tgt") is Mob else h.ai.get("tgt")), h.flat_dist(seal)]))])
-	for h in crew: h.ctrl = "idle"; h.inp["move"] = Vector2.ZERO; h.inp["fire"] = false
+	print("BREACH  %s: %.0f%% broken after %.0f s, crew goals %s" % [L["name"], LairBreach.done_k(seal) * 100.0, t,
+		str(crew.map(func(h): return h.ai.get("goal_kind", "")))])
+	for h in crew:
+		h.ctrl = "idle"
+		h.inp["move"] = Vector2.ZERO
+		h.inp["fire"] = false
 	return m.time - t0 if L["state"] == "open" and t0 >= 0.0 else -1.0
 
 func run(main: Node) -> void:
@@ -63,7 +75,7 @@ func run(main: Node) -> void:
 	Econ.ensure()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true})
+	m.start({"teams": 2, "squad": 3, "tier": 0, "length": 1e9, "seed": 21, "no_drop": true, "blight": false})
 	m.set_process(false)
 	var P: Hunter = m.player
 	for h in m.hunters:
@@ -86,9 +98,11 @@ func run(main: Node) -> void:
 	gw.free()
 	ok(maps_ok, "Skyreach, Hollowcrown and generated maps all break their gates down (no dial)")
 	var seals: Array = m.lairs.list.map(func(L): return m.lairs.breach.seal_of(L))
-	ok(seals.all(func(s): return s != null and s.mkind == "gate") and m.lairs.list.all(func(L): return L["nodes"]["dial"] == null),
-		"each of the %d lairs has its Gate Seal at the gate (%s health at tier 0) and no dial lectern" % [seals.size(), str(seals.map(func(s): return int(s.max_hp)))])
-	# ---------------------------------------------------------------- 2. a crack: blocks fall, guards come, the label counts
+	var no_dial: bool = m.lairs.list.all(func(L): return L["nodes"]["dial"] == null)
+	ok(seals.all(func(s): return s != null and s.mkind == "gate") and no_dial,
+		"each of the %d lairs has its Gate Seal at the gate (%s health at tier 0) and no dial lectern"
+		% [seals.size(), str(seals.map(func(s): return int(s.max_hp)))])
+	# -------------------------------------------------- 2. a crack: blocks fall, guards come, the label counts
 	var F: Dictionary = by_boss["colossus"]
 	var seal: Mob = m.lairs.breach.seal_of(F)
 	_clear_guards(F)
@@ -102,47 +116,54 @@ func run(main: Node) -> void:
 	_run(0.1)
 	var slab: Node3D = seal.model.get_node("Slab")
 	var lbl: Label3D = F["nodes"]["label"]
-	ok(int(F["seal_stage"]) == 1 and slab.get_node("Crack1").visible and not slab.get_node("B30").visible and not slab.get_node("Crack2").visible,
+	var cracked: bool = slab.get_node("Crack1").visible and not slab.get_node("Crack2").visible
+	ok(int(F["seal_stage"]) == 1 and cracked and not slab.get_node("B30").visible,
 		"30%% down: the first crack opens and its block falls (stage %d)" % int(F["seal_stage"]))
-	ok(m.lairs._guards_alive(F) >= g0 + LairBreach.STAGE_GUARDS, "the crack calls guards (%d -> %d)" % [g0, m.lairs._guards_alive(F)])
+	var g1: int = m.lairs._guards_alive(F)
+	ok(g1 >= g0 + LairBreach.STAGE_GUARDS, "the crack calls guards (%d -> %d)" % [g0, g1])
 	ok(lbl.text.contains("30%"), "the label counts it: \"%s\"" % lbl.text.replace("\n", " / "))
-	ok(F["state"] == "sealed" and F["gate_tiles"].all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == World.T_BLOCK), "the gate stays shut")
-	# ---------------------------------------------------------------- 3. walk away: nothing resets; the mend stops at the crack
+	ok(F["state"] == "sealed" and _gate_is(F, World.T_BLOCK), "the gate stays shut")
+	# -------------------------------------------------- 3. walk away: nothing resets; the mend stops at the crack
 	_clear_guards(F)
 	_spot(P, F["c"] + Vector3(F["out"].x, 0, F["out"].y) * 30.0)
 	var hp0 := seal.hp
 	_run(LairBreach.MEND_IDLE - 2.0)
-	ok(is_equal_approx(seal.hp, hp0), "away %d s: the seal hasn't healed (%.0f of %.0f)" % [int(LairBreach.MEND_IDLE - 2.0), seal.hp, seal.max_hp])
+	ok(is_equal_approx(seal.hp, hp0),
+		"away %d s: the seal hasn't healed (%.0f of %.0f)" % [int(LairBreach.MEND_IDLE - 2.0), seal.hp, seal.max_hp])
 	_run(40.0)
 	var cap := seal.max_hp * (1.0 - 1.0 / LairBreach.STAGES)
 	ok(seal.hp > hp0 and seal.hp <= cap and int(F["seal_stage"]) == 1 and slab.get_node("Crack1").visible,
-		"left alone it knits back only to its last crack (%.0f%% broken, floor %.0f%%)" % [LairBreach.done_k(seal) * 100.0, 100.0 / LairBreach.STAGES])
-	# ---------------------------------------------------------------- 4. a lit rune knocks a share off instead of opening the gate
+		"left alone it knits back only to its last crack (%.0f%% broken, floor %.0f%%)"
+		% [LairBreach.done_k(seal) * 100.0, 100.0 / LairBreach.STAGES])
+	# -------------------------------------------------- 4. lit runes knock shares off instead of opening the gate
 	var E: Dictionary = by_boss["serpent"]
 	var es: Mob = m.lairs.breach.seal_of(E)
 	_clear_guards(E)
 	for rn in E["runes"]: m.lairs._light_rune(E, rn, P)
 	_run(0.1)
 	ok(E["state"] == "sealed" and absf(LairBreach.done_k(es) - LairBreach.SHARE * E["runes"].size()) < 0.02,
-		"all %d runes lit: the Eyrie's seal %.0f%% down, the gate still shut" % [E["runes"].size(), LairBreach.done_k(es) * 100.0])
+		"all %d runes lit: the Eyrie's seal %.0f%% down, the gate still shut"
+		% [E["runes"].size(), LairBreach.done_k(es) * 100.0])
 	_clear_guards(E)
 	es.hp = es.max_hp
 	# ---------------------------------------------------------------- 5. the last crack breaks it and the gate opens
 	_spot(P, LairBreach.stand(F))
 	seal.hurt(seal.hp + 1.0, P, {"src": "shot"})
 	_run(0.2)
-	ok(F["state"] == "open" and seal.dead and F["gate_tiles"].all(func(q): return m.world.kind[m.world.idx(q.x, q.y)] == World.T_GROUND),
+	ok(F["state"] == "open" and seal.dead and _gate_is(F, World.T_GROUND),
 		"broken: the gate is %s and walkable" % F["state"])
 	_clear_guards(F)
-	# ---------------------------------------------------------------- 6. bots break seals down; a squad much faster than one
+	# -------------------------------------------------- 6. bots break seals down; a squad much faster than one
 	var mates: Array = m.hunters.filter(func(x): return x.team == P.team and x != P)
 	var rivals: Array = m.hunters.filter(func(x): return x.team != P.team)
 	_spot(P, F["c"])      # (out of the way: inside the open lair)
-	var solo := _bots_break(by_boss["brood"], [mates[0]], 260.0)
+	var solo := _bots_break(by_boss["brood"], [mates[0]], 300.0)
 	var squad := _bots_break(E, rivals.slice(0, 3), 160.0)
 	print("BREACH times: one bot %.1f s, three bots %.1f s (tier 0; seal %d health)" % [solo, squad, int(es.max_hp)])
-	ok(solo >= SOLO_MIN and solo <= SOLO_MAX, "one bot alone breaks the Thornhive's seal in %.0f s (%d-%d)" % [solo, int(SOLO_MIN), int(SOLO_MAX)])
-	ok(squad > 0.0 and squad <= solo * SQUAD_K, "three bots break the Eyrie's in %.0f s (at most %.0f%% of one bot's)" % [squad, SQUAD_K * 100.0])
+	ok(solo >= SOLO_MIN and solo <= SOLO_MAX,
+		"one bot alone breaks the Thornhive's seal in %.0f s (%d-%d)" % [solo, int(SOLO_MIN), int(SOLO_MAX)])
+	ok(squad > 0.0 and squad <= solo * SQUAD_K,
+		"three bots break the Eyrie's in %.0f s (at most %.0f%% of one bot's)" % [squad, SQUAD_K * 100.0])
 	m.over = true
 	print("BREACH ", "PASS" if bad == 0 else "FAIL (%d)" % bad)
 	main.get_tree().quit()

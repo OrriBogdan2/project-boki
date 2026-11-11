@@ -10,8 +10,8 @@ extends RefCounted
 ## gate opens (Lairs.open). On lairs that also have runes or ward stones, each one lit or broken knocks
 ## SHARE off the seal instead of opening the gate outright.
 ##
-## Time to get in at tier 1 (the seal's 2000 health, Data.MOBS "gate"; LairBreachCheck measures it):
-## one bot ~70 s of steady fire, three ~25 s, against the dial's 15-25 s.
+## Time to get in at tier 0 (the seal's 2000 health, Data.MOBS "gate"; --lair-breach-check times it):
+## one bot ~2 min, fighting the guards each crack calls; three bots ~20 s. (The dial: 6.5 s pressed perfectly.)
 
 const STAGES := 4               # cracks at 25%, 50% and 75% of the way; the fourth breaks it
 const MEND_IDLE := 15.0         # s without a hit before the seal starts to knit back
@@ -49,13 +49,13 @@ func spawn(L: Dictionary) -> void:
 	L["seal"] = mb
 	L["seal_hit_at"] = m.time
 
-## The live seal of a lair (null when it's broken or not here yet). A client finds it among the
-## monsters the host sent, by where it stands.
+## The live seal of a lair (null when it's broken, not here yet or the lair has none). A client finds
+## it among the monsters the host sent, by where it stands.
 func seal_of(L: Dictionary) -> Mob:
 	var mb = L.get("seal")
 	if mb != null and is_instance_valid(mb) and not (mb as Mob).dead:
 		return mb
-	if not m.net_on or m.is_host or m.time < float(L.get("seal_look", 0.0)):
+	if not L.has("seal_at") or not m.net_on or m.is_host or m.time < float(L.get("seal_look", 0.0)):
 		return null
 	L["seal_look"] = m.time + LOOK_T
 	for o in m.mobs:
@@ -101,7 +101,9 @@ func tick(L: Dictionary, dt: float) -> void:
 	mb.face = atan2(out.x, out.y)      # (its slab's -z toward the bars)
 	if not mb.remote:
 		# a wall: knocks and pulls don't move it
-		mb.pos = L["seal_at"]; mb.prev = mb.pos; mb.vel = Vector3.ZERO
+		mb.pos = L["seal_at"]
+		mb.prev = mb.pos
+		mb.vel = Vector3.ZERO
 		_mend(L, mb, dt)
 	var was := int(L.get("seal_stage", 0))
 	var now := stage_of(mb)

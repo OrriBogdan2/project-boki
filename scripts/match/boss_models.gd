@@ -313,8 +313,13 @@ const SEAL_H := 2.9          # m tall, up to the lintel
 const SEAL_Z := -0.55        # m from the monster's spot to the slab's middle, toward the bars
 static func gate_seal() -> Node3D:
 	var root := Node3D.new()
-	var body := Node3D.new(); body.name = "Body"; root.add_child(body)
-	var slab := Node3D.new(); slab.name = "Slab"; slab.position.z = SEAL_Z; root.add_child(slab)
+	var body := Node3D.new()
+	body.name = "Body"
+	root.add_child(body)
+	var slab := Node3D.new()
+	slab.name = "Slab"
+	slab.position.z = SEAL_Z
+	root.add_child(slab)
 	var stones: Array = []
 	for k in 3:
 		stones.append(Models.toon(Color("8e8898").lightened(-0.08 + k * 0.07)))
@@ -322,31 +327,40 @@ static func gate_seal() -> Node3D:
 	var crack := Models.toon(Color("2a2630"), false)
 	var core := Models.glow_mat(Color(1.0, 0.85, 0.55, 0.9))
 	var sigil := Models.toon(Color("ffd36a"), false, 1.3)
-	var bw := SEAL_W / 3.0; var bh := SEAL_H / 4.0
-	var rr := RandomNumberGenerator.new(); rr.seed = 11
+	var bw := SEAL_W / 3.0
+	var bh := SEAL_H / 4.0
+	var rr := RandomNumberGenerator.new()
+	rr.seed = 11
 	for row in 4:
 		for col in 3:
 			var at := Vector3(-SEAL_W * 0.5 + bw * (col + 0.5), bh * (row + 0.5), rr.randf_range(-0.03, 0.03))
 			Models.part(slab, Models.box(bw - 0.05, bh - 0.05, 0.42), stones[rr.randi() % 3], at, Vector3.ONE,
 				Vector3(0, 0, rr.randf_range(-0.03, 0.03)), "B%d%d" % [row, col])
-	var glow := Models.part(slab, Models.box(SEAL_W - 0.2, SEAL_H - 0.2, 0.05), core, Vector3(0, SEAL_H * 0.5, -0.16), Vector3.ONE, Vector3.ZERO, "Core")
+	var glow := Models.part(slab, Models.box(SEAL_W - 0.2, SEAL_H - 0.2, 0.05), core, Vector3(0, SEAL_H * 0.5, -0.16),
+		Vector3.ONE, Vector3.ZERO, "Core")
 	glow.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	for y in [0.75, 2.2]:
-		Models.part(slab, Models.box(SEAL_W + 0.1, 0.16, 0.08), iron, Vector3(0, y, 0.24), Vector3.ONE, Vector3.ZERO, "Band%d" % int(y))
-	var sg := Models.part(slab, Models.box(0.55, 0.55, 0.04), sigil, Vector3(0, 1.5, 0.25), Vector3.ONE, Vector3(0, 0, PI / 4), "Sigil")
+		Models.part(slab, Models.box(SEAL_W + 0.1, 0.16, 0.08), iron, Vector3(0, y, 0.24), Vector3.ONE, Vector3.ZERO,
+			"Band%d" % int(y))
+	var sg := Models.part(slab, Models.box(0.55, 0.55, 0.04), sigil, Vector3(0, 1.5, 0.25), Vector3.ONE,
+		Vector3(0, 0, PI / 4), "Sigil")
 	sg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	# hairline cracks, each stage's set zig-zagging out from where its blocks will fall
 	var paths := [[Vector2(-1.1, 2.7), Vector2(-0.7, 2.2), Vector2(-0.85, 1.7), Vector2(-0.4, 1.3)],
 		[Vector2(1.2, 2.5), Vector2(0.6, 1.9), Vector2(0.75, 1.3), Vector2(0.2, 0.9), Vector2(0.35, 0.4)],
 		[Vector2(-1.3, 0.5), Vector2(-0.6, 0.9), Vector2(-0.2, 0.6), Vector2(0.4, 1.1), Vector2(1.3, 0.7)]]
 	for i in 3:
-		var g := Node3D.new(); g.name = "Crack%d" % (i + 1); g.visible = false; slab.add_child(g)
+		var g := Node3D.new()
+		g.name = "Crack%d" % (i + 1)
+		g.visible = false
+		slab.add_child(g)
 		var pts: Array = paths[i]
 		for j in pts.size() - 1:
-			var a: Vector2 = pts[j]; var b: Vector2 = pts[j + 1]
+			var a: Vector2 = pts[j]
+			var b: Vector2 = pts[j + 1]
 			var mid := (a + b) * 0.5
-			Models.part(g, Models.box(a.distance_to(b) + 0.05, 0.06, 0.03), crack, Vector3(mid.x, mid.y, 0.23), Vector3.ONE,
-				Vector3(0, 0, (b - a).angle()))
+			Models.part(g, Models.box(a.distance_to(b) + 0.05, 0.06, 0.03), crack, Vector3(mid.x, mid.y, 0.23),
+				Vector3.ONE, Vector3(0, 0, (b - a).angle()))
 	root.set_meta("mats", stones + [iron, sigil])
 	return root
 

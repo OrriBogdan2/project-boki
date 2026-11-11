@@ -2787,7 +2787,7 @@ func _place_lairs() -> void:
 		var gate := ("e" if to_mid.x > 0 else "w") if absf(to_mid.x) > absf(to_mid.y) else ("s" if to_mid.y > 0 else "n")
 		var boss: String = Data.BOSSES[(b0 + lair_defs.size()) % Data.BOSSES.size()]
 		var nm: String = {"colossus": "The Sunken Forge", "serpent": "Stormcrown Eyrie", "brood": "The Thornhive"}.get(boss, "Boss Lair")
-		var entry: Array = {"colossus": ["breach"], "serpent": ["breach", "runes"], "brood": ["breach", "wards"]}.get(boss, ["breach"])
+		var entry: Array = {"serpent": ["breach", "runes"], "brood": ["breach", "wards"]}.get(boss, ["breach"])
 		_stamp_lair({"id": "lair%d" % lair_defs.size(), "name": nm, "boss": boss, "at": [best.x, best.y], "half": hf, "gate": gate, "entry": entry}, ii)
 		used.append(ii)
 	_clear_lair_spots()
