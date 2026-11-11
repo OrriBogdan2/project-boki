@@ -1299,6 +1299,8 @@ static func merge_static(node: Node3D, discard := false) -> void:
 	for ch in node.get_children():
 		if not (ch is MeshInstance3D) or ch.get_child_count() > 0 or not String(ch.name).begins_with("@"):
 			continue
+		if not ch.visible:
+			continue
 		var mi: MeshInstance3D = ch
 		var mat: Material = mi.material_override
 		if mat == null or mi.mesh == null:
