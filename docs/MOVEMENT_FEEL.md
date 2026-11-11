@@ -229,6 +229,23 @@ Tunables are in `content/rules/hunter_move.json` (`physics`), read by `HunterMov
 - **No glider during an ability or attack animation:** a hold (Kael's Lunge charge, Breaker's spin, Lisette's draw), a cast, a dash or a kit move still inside its keys keeps the glider shut. Glide held opens it the moment the move ends, with its speed. A move that travels ends with its travel, and a kit's Shift moves count as the dash, so Shift into a glide still opens the step the dash ends. Tarek's Quakefall runs to its landing (no glide-out mid-move), except over the abyss. An open glider is never folded by this rule.
 - **Free fall:** a fall never gives more dashes than the ground does (the charges plus the long dash). Each hero's air dash itself is item 183's audit.
 
+## Launch arcs: Spring pad and updrafts (`--launch-arc-check`)
+Parity pass (DECISIONS 2026-11-07). Sources: supervive_physics.md, SOURCE_UTILITIES.md (wiki Jump_Pad, Deployable_Fan, Gliding), briefs/hero-ref (no pad or updraft use on camera: bjorn, dredge, linwick, ostra, tamsin and venator all list it as missing). The source gives no launch speed or apex, so those rows stay ours and are marked [?]. Pad = the belt's Spring pad (`content/utility/jump_pad.json`, `UtilityUse.pad_launch`); updraft = the map's rising-air columns (`World.updrafts`).
+
+| | Source | Ours (measured) | Tag |
+|---|---|---|---|
+| Pad launch speed | not published or decoded | 17 m/s up (`UtilityUse.PAD_VY`) | [?] |
+| Pad apex | not published | 9.7 m at 1.15 s, back to pad height after ~2.3 s | [?] (gravity [game data] 14.7) |
+| Pad sideways speed | launches whatever walks onto it | what you brought, at least 6 m/s (`PAD_MIN_HV`; toward your aim if you stood still) | [?] floor |
+| Dash into the pad | keeps the forward momentum, plus a small boost | **was: the dash held you level and ran over the pad, no launch.** Now the pad ends the dash and keeps its speed (10.5 of 10.7 m/s), 1.6x the walk-on's travel | [wiki] fixed; boost size [?], not added |
+| WASD in the arc | AirControl 0.015, FallingLateralFriction 0.375 | the one model, `HunterMove.air_steer`: keys reversed the whole arc take 2.3 m/s off, sideways keys drift 1.3 m; a walk-on carries 9.5 m | [game data] match |
+| Glider after a pad | you open it to slow the fall, as after any launch (wiki Gliding) | stays shut; a second press opens it the same frame | [wiki] match (DECISIONS allows a pad auto-glide; the source has none, so none) |
+| Updraft lift | updrafts act on gliders (GlideUpdraftMinZVel exists, value not decoded) | gliders only: 8 m/s climb in 0.18 s, 9 m/s, thrown 2.8 m past the column's top; a fall with no glider gets no lift | [?] speed, match on gliders-only |
+| Updraft heat | currents stop glider heat (wiki wind tunnels) | 0 heat in the column; gliding across keeps 5 m/s | [wiki] match |
+| Glider in an updraft | not published | never opens on its own (DECISIONS allows an updraft auto-glide; the lair escape updraft uses it) | [?] |
+
+Not changed, needs the source: the dash boost size, pad arm delay / lifetime / stack (SOURCE_UTILITIES proposes 2 s, 30 s or 10 s after first use, stack 2), and the map's own island pads (`World.pads`), which fly a scripted arc to a set landing with no steering and have no source counterpart.
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
