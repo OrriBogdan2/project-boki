@@ -203,8 +203,8 @@ func close() -> void:
 	Sfx.play("ui_close", null, -14.0)
 	closed.emit()
 
-## The Esc menu: Resume on top, then the few things a new player wants (Settings, Controls, Practice),
-## the rest folded under More, and leaving at the bottom.
+## The Esc menu (DECISIONS 2026-11-08): four buttons, Resume, Settings, More and Leave. Everything else,
+## practice included, sits on the More page. --pause-menu-check holds the count and the reach.
 func open_pause(where: String) -> void:
 	ctx = where
 	Sfx.play("ui_open", null, -10.0)
@@ -213,18 +213,9 @@ func open_pause(where: String) -> void:
 	var v := _page("pause", "Paused" if where == "match" else "Menu", 440)
 	UI.subtitle(v, {"match": "The expedition waits while you're here", "home": "Your island", "town": "In town", "interior": "At home"}.get(where, ""))
 	var res: Button = _menu_item(v, "Resume", "next", close, "Esc", "Primary")
-	var psc = Game.main.screen_node() if where == "match" and Game.main else null
-	var practice: Practice = Practice.of(psc) if psc is Match else null
-	if practice:
-		_menu_item(v, "Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
-	if where == "home" and Game.main:
-		_menu_item(v, "Training Grounds", "jump", func():
-			close()
-			Game.main.screen_node()._start_training())
 	_menu_item(v, "Settings", "gear", func():
 		if tab == "Controls": tab = "Gameplay"
 		open_settings())
-	_menu_item(v, "Controls", "dash", func(): tab = "Controls"; open_settings())
 	_menu_item(v, "More", "satchel", open_more)
 	v.add_child(UI.spacer(2))
 	if where == "match":
@@ -234,7 +225,7 @@ func open_pause(where: String) -> void:
 			close()
 			Practice.leave(m, tut)
 		if tut:
-			_menu_item(v, "Leave the Training Grounds" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
+			_menu_item(v, "Leave" if m.opts.get("training", false) else "Skip the tutorial", "back", leave)
 		else:
 			var lb: Button = _menu_item(v, "Leave match", "back", func():
 				UI.confirm(root, "Leave the match?", "You lose everything you carry, and any Boki you brought is left behind.", "Leave", leave), "", "Danger")
@@ -254,9 +245,19 @@ func _menu_item(v: VBoxContainer, txt: String, icon: String, cb: Callable, key :
 	v.add_child(b)
 	return b
 
-## The Esc menu's second page: what's used less often. Back returns to the menu.
+## The Esc menu's second page: practice first (where it applies), then what's used less often.
+## Back and Esc return to the menu.
 func open_more() -> void:
 	var v := _page("more", "More", 440)
+	var scr = Game.main.screen_node() if Game.main else null
+	var practice: Practice = Practice.of(scr) if ctx == "match" and scr is Match else null
+	if practice:
+		_menu_item(v, "Change Hunter", "swap", func(): close(); PracticeHero.open(practice), Settings.key_cap("hero"))
+	if ctx == "home" and scr and scr.has_method("_start_training"):
+		_menu_item(v, "Training Grounds", "jump", func():
+			close()
+			scr._start_training())
+	_menu_item(v, "Controls", "dash", func(): tab = "Controls"; open_settings())
 	if ctx != "match":
 		_menu_item(v, "Inventory", "bag", open_inventory, Settings.key_cap("inventory"))
 		_menu_item(v, "Save files", "satchel", open_saves)
@@ -264,16 +265,15 @@ func open_more() -> void:
 		_menu_item(v, "Change your look", "swap", func():
 			close()
 			Game.goto("hatch", {"create": true}))
-	var scr = Game.main.screen_node() if Game.main else null
 	if scr and scr.has_method("unstick"):
 		_menu_item(v, "I'm stuck", "jump", func():
 			close()
 			scr.unstick()
 			Sfx.play("whoosh"))
 	if admin_allowed():
-		_menu_item(v, "Admin tools  (F1)", "gear", open_admin)
+		_menu_item(v, "Admin tools", "gear", open_admin, "F1")
 	if not OS.has_feature("web"):
-		_menu_item(v, "Save and quit the game", "close", func():
+		_menu_item(v, "Quit game", "close", func():
 			Save.save_game()
 			RateCard.gate(root, get_tree().quit))
 

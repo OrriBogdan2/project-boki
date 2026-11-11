@@ -219,9 +219,10 @@ func run(m: Node) -> void:
 	var was: Node = main.get("current")
 	main.set("current", home)
 	Overlay.open_pause("home")
+	Overlay.open_more()
 	await main.get_tree().process_frame
 	var btns: Array = Overlay.host.find_children("*", "Button", true, false)
-	ok(btns.any(func(b): return (b as Button).text.contains("Training Grounds")), "the Esc menu has Grounds")
+	ok(btns.any(func(b): return (b as Button).text.contains("Training Grounds")), "Esc > More has Grounds")
 	Overlay.close()
 	main.set("current", was)
 	var cl := -1

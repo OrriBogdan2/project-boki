@@ -206,7 +206,9 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
 - New home panels: `var v := _new_panel("Kin Box", 900)` then fill `v` with the helpers above.
 
 ## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
-Up front: Resume, Change Hunter (practice) or Training Grounds (garden), Settings, Controls, More, and
-Leave (Leave match / Save and leave). More holds the rest: Inventory, Save files, Change your look,
-I'm stuck, Admin tools, Save and quit. More is a page on the same panel stack; Back and Esc return to
-the menu. `--uipolish-check` asserts the front-page button count and what sits under More.
+Four buttons up front: Resume, Settings, More and Leave (Leave match / Leave / Skip the tutorial / Save
+and leave). More holds the rest: Change Hunter or Training Grounds (practice, where it applies), Controls,
+Inventory, Save files, Change your look, I'm stuck, Admin tools, Quit game. More is a page on the same
+panel stack; Back and Esc return to the menu. Labels are one plain line. `--pause-menu-check` holds the
+count (4 or fewer), that every old action is reachable, and the fit inside the title-safe margin at
+720p, 1080p and ultrawide.
