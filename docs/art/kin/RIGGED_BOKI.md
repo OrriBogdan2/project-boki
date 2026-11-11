@@ -85,7 +85,7 @@ since: wisplet (its idle's keys already matched; the hitch was that frame), kind
 crouch, so the take-off, the walk and run's loop point, has no break in speed; the legs swing on one wave) and
 thrumbird (its stroll hangs nearly as it hovers, pitch 0.06 against the idle's 0.14, so the crossfade no longer
 swings the head 0.2 m: pop 8.1 → 2.5; only the run dives). The 18 other glbs are in `SEAM_OVER` until rebuilt.
-Strips at the garden camera, a frame each 1/30 s (`--boki-anim-shots --seam=`): `docs/art/kin/boki_gait/
+Strips at the garden camera, a frame each 1/30 s (`--boki-anim-shots --seam=`, xvfb + opengl3: the GPU queue was full): `docs/art/kin/boki_gait/
 <id>_<clip>_before.png` and `_after.png` for thrumbird setoff, wisplet idle and kindlewren walk.
 
 Slide at scale 1, before (origin/main: speed over 1.5 / 2.9 m/s, at most 1.6x, run from 3.2 m/s) → after (measured
