@@ -28,11 +28,13 @@ static func channel_fill(p: Hunter, id: String) -> float:
 		return 1.0 - p.kit_t / maxf(0.01, p.kit_len)
 	return 0.0
 
-## Draws the filled slots (an empty one stays hidden, so a new player sees no belt) with the last at
-## the right edge `x`, top at `y`. Returns the x where the next slot to the left starts.
+## Draws the slots with the last at the right edge `x`, top at `y`. Returns the x where the
+## next slot to the left starts.
 static func draw(hud, p: Hunter, x: float, y: float) -> float:
 	var c: Control = hud.c
 	for k in range(UtilityBelt.SLOTS - 1, -1, -1):
+		var r := Rect2(Vector2(x, y), Vector2(SLOT, SLOT))
+		var key: String = UtilityBelt.KEYS[k]
 		var s: Dictionary = p.belt[k]
 		if s.is_empty():
 			hud.hover_spots.append([r, key])

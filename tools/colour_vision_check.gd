@@ -91,7 +91,7 @@ func _palettes() -> void:
 	for id in SideColor.ORDER:
 		var p: Dictionary = SideColor.PALETTES[id]
 		var sides := [p["you"], p["ally"], p["foe"]]
-		var distinct := sides[0] != sides[1] and sides[1] != sides[2] and sides[0] != sides[2]
+		var distinct: bool = sides[0] != sides[1] and sides[1] != sides[2] and sides[0] != sides[2]
 		ok("%s: you, squad and rivals differ" % id, distinct)
 		ok("%s: the squad colours avoid the rivals'" % id,
 			(p["mates"] as Array).all(func(c): return _apart(c, p["foe"]) > MIN_APART))

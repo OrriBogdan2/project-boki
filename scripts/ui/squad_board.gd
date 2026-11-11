@@ -44,7 +44,7 @@ static func snapshot(m: Match) -> Dictionary:
 		squads.append({"team": t, "mine": t == mine, "alive": live, "pips": pips})
 	var crew: Array = []
 	for h: Hunter in by_team.get(mine, []):
-		crew.append({"name": HeroTitle.of_hunter(h), "lvl": h.lvl, "knocks": h.knocks, "pip": pip_of(h),
+		crew.append({"name": h.pname, "lvl": h.lvl, "knocks": h.knocks, "pip": pip_of(h),
 			"boki": String(Data.KIN[h.kin.species]["name"]) if h.kin else "", "me": h == m.player})
 	return {"total": teams.size(), "left": left, "squads": squads, "crew": crew, "ways": ways_text(m)}
 
