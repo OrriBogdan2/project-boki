@@ -165,7 +165,9 @@ HUDDLE = {
     "FL": (-0.125, 0.14, A + 0.03), "FR": (0.135, -0.12, A + 0.04), "FLy": -0.16, "FRy": 0.12, "FLp": 0.4, "FRp": 0.5,
     "brow": -0.95, "lid": -0.1, "jaw": 0.0, "ear": 0.72, "earR": 0.0, "earL": 0.0, "fing": 0.85, "skirt": 0.3, "wing": -0.1, "wfl": 0.02, "wfq": 2.0, "wb": -0.75,
 }
-TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "stride": 0.16, "lift": 0.03, "toe": 0.4, "share": 0.6, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 0.38, "toe_out": 0.12}
+# The tiptoe: long, careful steps, each foot lifted high and set down (lift), so her planted feet keep up with the crouch speed
+# (2.5 m/s, at most WardenClips.CROUCH_RATE_MAX): a 0.25 m reach centred under the crouched hip (y), the knee never locked.
+TIPTOE = {"ankle": A, "foot": 0.07, "width": 0.115, "y": -0.035, "stride": 0.25, "lift": 0.08, "toe": 0.4, "share": 0.5, "sway": 0.018, "bob": 0.009, "twist": 0.06, "T": 13 / 30, "toe_out": 0.12}
 
 
 def huddle(u):
