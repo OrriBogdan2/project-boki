@@ -192,7 +192,8 @@ func steady(m: Match, how: String) -> Dictionary:
 
 func run(main: Node) -> void:
 	Save.no_write = true
-	Save.d["tutorial"][KitDrill.SAVE_KEY] = true      # the drill's top bar sits under the 15 m north cursor and owns the mouse
+	# the kit drill's bar sits under the 15 m north cursor and owns the mouse: seen, it never shows
+	Save.d["tutorial"][KitDrill.SAVE_KEY] = true
 	for arch in STEADY:
 		for how in ["dash", "knock"]:
 			var m := _match(main, arch)
