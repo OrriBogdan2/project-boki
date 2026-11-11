@@ -508,25 +508,30 @@ func clear_bind(action: String, slot: int) -> void:
 	sl[slot] = ""
 	_set_slots(action, sl)
 
-## Other rebindable actions already using this key or button: [[action, slot], ...].
-func conflicts(ev: InputEvent, except := "") -> Array:
-	var s := ev_code(ev)
+## Actions already on this key or button code: [[action, slot], ...].
+func holders(code: String, except := "") -> Array:
 	var out: Array = []
-	if s == "":
+	if code == "":
 		return out
 	for a in ACTIONS:
 		if a[0] == except: continue
 		var sl := slots(a[0])
 		for i in 2:
-			if sl[i] == s and not _shared_ok(a[0], except): out.append([a[0], i])
+			if sl[i] == code: out.append([a[0], i])
 	return out
 
-## Pairs of actions that share keys on purpose (they never apply in the same place: at home vs in a match).
-const SHARED_OK := [["build", "base"], ["rotate", "hunter_ult"], ["play", "gear2"], ["store", "ultimate"]]
-func _shared_ok(a: String, b: String) -> bool:
-	for p in SHARED_OK:
-		if (p[0] == a and p[1] == b) or (p[0] == b and p[1] == a): return true
-	return false
+## Actions that only run at home (the garden) and ones that only run in a match.
+const HOME_ONLY := ["play", "talk", "details", "build", "rotate", "store"]
+const MATCH_ONLY := ["gear2", "base", "hunter_ult", "ultimate", "emote", "pass_lead", "separate"]
+
+## Two actions may share a key only when they never run in the same place: one at home, the other in a match.
+func can_share(a: String, b: String) -> bool:
+	return (a in HOME_ONLY and b in MATCH_ONLY) or (a in MATCH_ONLY and b in HOME_ONLY)
+
+## Other rebindable actions that would clash with this key or button: [[action, slot], ...] (the
+## ones that run somewhere else don't count).
+func conflicts(ev: InputEvent, except := "") -> Array:
+	return holders(ev_code(ev), except).filter(func(h): return not can_share(h[0], except))
 
 ## Gives `action` this key in `slot`, and the action that had it (other, other_slot) gets what
 ## `action` had there.

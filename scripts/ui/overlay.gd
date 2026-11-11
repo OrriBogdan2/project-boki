@@ -17,6 +17,7 @@ var stack: Array = []           # pages to go back to with Esc
 var tab := "Gameplay"
 var listening := ""             # an action waiting for its new key
 var listening_slot := 0         # ...in which slot (0 primary, 1 secondary)
+var bind_hot: Array = []        # [action, slot] pairs shown red while a clash waits for Swap or Keep both
 var listen_lbl: Label = null
 var delete_armed := -1
 
@@ -496,6 +497,11 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 	var r := _row(v, what)
 	r.custom_minimum_size.y = 34
 	var sl := Settings.slots(an)
+	var red: Array = [[an, 0] in bind_hot, [an, 1] in bind_hot]
+	for slot in 2:
+		if Settings.holders(sl[slot], an).any(func(h): return not Settings.can_share(h[0], an)): red[slot] = true
+	if red[0] or red[1]:
+		((r.get_child(0) as Control).get_child(0) as Label).add_theme_color_override("font_color", UI.BAD)
 	for slot in 2:
 		var cell := UI.hbox(2)
 		cell.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -504,6 +510,7 @@ func _bind_row(v: VBoxContainer, an: String, what: String) -> void:
 		b.tooltip_text = ("Main key" if slot == 0 else "Second key") + ": click, then press a key or mouse button"
 		if code == "" and slot == 1:
 			b.modulate = Color(1, 1, 1, 0.55)
+		if red[slot] and code != "": b.add_theme_color_override("font_color", UI.BAD)
 		b.pressed.connect(func():
 			listening = an
 			listening_slot = slot
@@ -585,29 +592,39 @@ func _finish_rebind(ev: InputEvent) -> void:
 	var an := listening; var slot := listening_slot
 	listening = ""
 	Sfx.play("click")
-	var cf: Array = Settings.conflicts(ev, an)
-	if cf.is_empty():
+	var code := Settings.ev_code(ev)
+	var held: Array = Settings.holders(code, an)
+	if held.is_empty():
 		Settings.rebind(an, ev, slot)
 		_show_settings()
 		return
-	# already someone else's key: say whose, and offer to swap (they get what this slot had)
+	# already someone else's key: both rows go red, and you pick: swap (they get what this slot had),
+	# or keep both when none of them ever runs in the same place as this action (garden vs match)
 	var named := {}
 	for a in Settings.ACTIONS: named[String(a[0])] = String(a[1])
-	var other: String = cf[0][0]; var oslot: int = cf[0][1]
+	var other: String = held[0][0]; var oslot: int = held[0][1]
+	var may_share: bool = Settings.conflicts(ev, an).is_empty()
 	var mine: String = Settings.slots(an)[slot]
-	var key_txt := Settings.code_text(Settings.ev_code(ev))
 	var oname := "\"%s\"" % named.get(other, other)
-	var txt := "%s is already the key for %s.\nSwap them (%s gets %s), or use it for both?" % [key_txt, oname, oname, Settings.code_text(mine) if mine != "" else "no key"]
+	var gets: String = Settings.code_text(mine) if mine != "" else "no key"
+	var txt := "%s is already the key for %s.\nSwap them (%s gets %s)" % [Settings.code_text(code), oname, oname, gets]
+	if may_share:
+		txt += ", or keep both: they never run in the same place."
+	else:
+		txt += ". They run in the same place, so pick another key or swap."
+	bind_hot = [[an, slot]] + held
 	_show_settings()
 	var layer := UI.confirm(root, "Key already in use", txt, "Swap", func():
-		Settings.swap_bind(an, slot, ev, other, oslot)
-		_show_settings(), false)
+		Settings.swap_bind(an, slot, ev, other, oslot), false)
+	layer.tree_exited.connect(func():
+		bind_hot = []
+		if is_inside_tree(): _show_settings())
 	set_meta("bind_conflict", layer)
+	if not may_share: return
 	var row: Node = layer.find_children("*", "HBoxContainer", true, false).back()
-	var both := UI.ghost("Use for both", func():
+	var both := UI.ghost("Keep both", func():
 		layer.queue_free()
-		Settings.rebind(an, ev, slot)
-		_show_settings())
+		Settings.rebind(an, ev, slot))
 	row.add_child(both)
 	row.move_child(both, 1)
 
