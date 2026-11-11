@@ -2384,3 +2384,9 @@ for _k,_d in (('ball',"a huge heavy penguin whose whole round body is a polished
               ('storm',"a sleek streamlined speed penguin built to slide, glossy navy back with a white-and-red marbled swirl like a bowling ball, a sharp keel of hard ice-blue scales along its belly for sliding, a red stripe over its eyes like a racing mask."),
               ('strike',"a broad champion penguin with a thick white chest, its dark back carrying a pattern of ten white pin-shaped markings arranged in the bowling triangle, a short red crest, heavy powerful flippers and feet, mid-throw stance as if hurling itself down a lane.")):
     ON_CHANGE('Kingpinguin',_C%'Kingpinguin','final','tough',False,False,_d+_PG,runs=2,tag='_x'+_k)
+
+# 11-11 OWNER: Pipguin = bowling-ball body (on_kingpinguin_xball_2), Rollguin stays the house-style slider (on_rollguin_pena_2) with set v2s_rollguin_pen_1 / v2p_rollguin_pen_3.
+# Sprites: Rollguin px9e_2, Bullsfrog/Scopeleon/Filefin px9e_1. Pipguin set + sprite:
+V2SHEET_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg',_GC,_GN); SPECS[-1]['id']='v2s_kingpinguin_ball'; SPECS[-1]['runs']=4; SPECS[-1]['prompt']+=_NOGHOST+" No ground line or floor under the views."
+V2PORT_NEW('Kingpinguin','briefs/boki-art/cards/Kingpinguin.jpg','final','tough',_GC,_GN,False,False,"curled into its ball shape mid-roll, head tucked, flippers in, about to strike"); SPECS[-1]['id']='v2p_kingpinguin_ball'
+SPECS.append({'id':'px9e_kingpinguin','name':'Kingpinguin (pixel sprite 80, ball body)','refs':['briefs/boki-art/cards/Kingpinguin.jpg'],'runs':2,'aspect':'1:1','size':'1K','prompt':_PX8})
