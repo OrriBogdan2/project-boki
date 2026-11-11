@@ -2254,3 +2254,19 @@ OPT('Crofthollow','final','tough',False,True,_C%'Crofthollow',[
  "no cottage, no tree, no hill and no grass on its back. Its horns have grown long and curved into two great sickle blades, dark iron-grey with bright edges, and a ridge of stiff straw-coloured bristles runs down its spine like a threshing comb. Standing broad and planted.",
  "no cottage, no tree, no hill and no grass on its back. Its horns curl forward into two heavy pitchfork-like tines on each side, and its shaggy coat is braided at the shoulders like bound wheat sheaves, golden at the tips. Its hooves are big and hammer-heavy."])
 for _s in SPECS[_n0:]: _s['id']+='_bk'
+
+# 11-11 OWNER: Soakybara line too, "something water related so they keep their name and water abilities". No pool, rocks or mound on the back.
+# OWNER RULE (11-11): always try a bunch of options and show 1st/2nd/3rd; he picks before anything goes live. 4 directions x 2 runs.
+_SK=[('Soakybara','mid','cute',[
+  "no pool and no stones on its back. Its fur is sleek and water-soaked, with a pattern of pale turquoise ripple rings on its back and sides, and a few soft puffs of warm steam rising off it. Calm, half-closed happy eyes, floating chin-deep feeling.",
+  "no pool and no stones on its back. A smooth blowhole-like vent sits on top of its head and lets out a small fountain of clear water that arcs back over it like a shower. Fur warm brown, belly paler, webbed paws.",
+  "no pool and no stones on its back. Its webbed paws and a broad flat paddle tail like a beaver's are pale turquoise, and its back has a soft row of rounded fin-like ridges like ripples. A happy swimmer.",
+  "no pool and no stones on its back. It is wrapped in its own big round bubble of clear water that it floats inside, only its head and paws poking out, little air bubbles around it. Fur warm brown."]),
+ ('Geysirbara','final','tough',[
+  "no rock mound, no moss and no volcano on its back. A big round blowhole vent grows on its back like a whale's, firing a tall straight jet of white water and steam straight up. Broad heavy capybara, warm brown fur, braced on four legs.",
+  "no rock mound, no moss and no volcano on its back. Its thick fur is sleek and soaked, with hot-spring turquoise ripple-ring markings on its back, and steam pours off its shoulders in thick rolling clouds. Huge, calm and heavy.",
+  "no rock mound, no moss and no volcano on its back. A row of three short smooth vents runs down its spine, each puffing a small plume of steam, and its webbed feet and broad paddle tail are turquoise. Powerful swimmer build.",
+  "no rock mound, no moss and no volcano on its back. Its mouth and cheeks puff up to spray a strong water jet like a fire hose, the water drawn as clean flat shapes; deep chest, webbed feet, warm brown fur with paler belly."])]
+for _n,_st,_ar,_ops in _SK:
+    for _k,_d in zip('abcd',_ops):
+        ON_CHANGE(_n,_C%_n,_st,_ar,False,True,_d,runs=2,tag='_'+_k); SPECS[-1]['id']='opt_'+_n.lower()+'_'+_k+'_bk'
