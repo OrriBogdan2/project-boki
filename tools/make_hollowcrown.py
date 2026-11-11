@@ -876,6 +876,7 @@ class Cover:
                         if _seg_dist(x + 0.5, z + 0.5, a, b) < LANE_HALF: self.lane_tiles.add((x, z))
         self.hard |= self.lane_tiles
         self.bush = {}          # tile -> patch id
+        self.grown = {}         # island -> its grass tiles, each once (gap_ok lets a patch cover another)
         self.patches = []
 
     def void_ok(self, x, z):
@@ -935,6 +936,7 @@ class Cover:
 
     def plant(self, iid, clumps, tiles, why):
         pid = len(self.patches)
+        self.grown[iid] = self.grown.get(iid, 0) + len(tiles - self.bush.keys())
         for q in tiles: self.bush[q] = pid
         self.patches.append(dict(island=iid, clumps=clumps, tiles=tiles, why=why))
 
@@ -972,7 +974,7 @@ def place_cover(lv, owner, stairs):
         rng = random.Random("%d:%s" % (COVER_SEED, iid))
         want = budget[iid] + carry.get(d["biome"], 0.0)
         if want <= 0: d["bush"] = []; continue
-        have = lambda: sum(len(p["tiles"]) for p in C.patches if p["island"] == iid)
+        have = lambda: C.grown.get(iid, 0)
         anchors = {"exit": [], "chest": [], "camp": [], "bridge": [], "flank": [], "cliff": [], "pillar": []}
         ring = lambda c, r0, r1, k: [(c[0] + math.cos(a) * rr, c[1] + math.sin(a) * rr)
                                      for rr in [rng.uniform(r0, r1) for _ in range(k)] for a in [rng.uniform(0, math.tau)]]
