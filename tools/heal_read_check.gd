@@ -296,9 +296,11 @@ func _until_healed(m: Match, h: Hunter, secs: float) -> bool:
 	return false
 
 ## In shots mode: the frames at STRIP_AT from now, cropped round `h`, side by side in heal_read_<file>.png.
+## One step is drawn first: a heal called outside a step (the flare) has no frame of its own yet.
 func _strip(m: Match, h: Hunter, file: String) -> void:
 	if dir == "":
 		return
+	await _step(m, h)
 	var shots: Array[Image] = []
 	var t := 0.0
 	for at in STRIP_AT:
