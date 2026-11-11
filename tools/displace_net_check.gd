@@ -19,6 +19,8 @@ const TOL := 0.5             # m: the player's own game puts it within this of w
 const VIEW_TOL := 0.4        # m: and the host's copy of it follows to within this
 const SEED := 4242
 const PARK := Vector3(0, 0, -9.0)   # m from home: where the guest waits while the bot takes its turn
+const MAX_STEPS := 6         # match steps a frame at most, as Match._process (a slower frame loses the time)
+const MAX_LAG := 0.1         # s of real time one frame may owe the match clock, as Match._process caps a frame
 
 var main: Node
 var bad := 0
@@ -36,6 +38,8 @@ var watch: Ent = null         # the first tow on this body, as the host's mirror
 var seen := {}
 var tag := "DISPNET"         # the prefix of every line (the remote-anim check reuses this host/guest harness)
 var guest_flag := "--displace-net-check=guest"
+var owed := 0.0              # s of real time not yet stepped (_steps)
+var last_us := 0             # when _steps last ran (Time.get_ticks_usec)
 
 func ok(cond: bool, what: String, info := "") -> void:
 	n += 1
@@ -396,7 +400,7 @@ func _guest() -> void:
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
 	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
-		await _run(DT)
+		await _run(0.1)
 	main.get_tree().quit(0)
 
 func _on_msg(topic: String, data, _from: String) -> void:
@@ -493,18 +497,35 @@ func _fresh(T: Hunter) -> void:
 	T.set_meta("marks", {})
 	T.set_meta("gnd_until", 0.0)
 
-## Runs the match `secs` in real time (one step a frame at 60 fps), with no monsters about.
+## Runs the match `secs` of its clock in real time, with no monsters about. Each frame steps as many times as
+## the real time since the last frame owes (_steps), so a starved game keeps the other game's pace.
 func _run(secs: float) -> void:
 	var t := 0.0
 	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
-		m.step(DT)
-		t += DT
-		if watch and seen.is_empty(): seen = m.displace.towing(watch)
-		var sb: Ent = stun_on if stun_on else m.player
-		if sb: stun_max = maxf(stun_max, sb.stun_t)
+		for i in _steps(secs - t):
+			for mb in m.mobs: mb.queue_free()
+			m.mobs.clear()
+			m.step(DT)
+			t += DT
+			_stepped()
 		await main.get_tree().process_frame
+
+## How many steps this frame owes the match clock, at most `left` s of them. One step a frame would run a
+## game drawn at 11 fps (xvfb at load) at a fifth of real time against a headless one at 60, and the two games'
+## timers (a down's bleed-out, a burn) would run out at different real times.
+func _steps(left: float) -> int:
+	var now := Time.get_ticks_usec()
+	if last_us > 0: owed = minf(owed + (now - last_us) / 1e6, MAX_LAG)
+	last_us = now
+	var k := mini(mini(int(owed / DT), MAX_STEPS), ceili(left / DT - 0.001))
+	owed -= k * DT
+	return k
+
+## After each match step: the host's mirror of the watched tow, and the longest stun seen.
+func _stepped() -> void:
+	if watch and seen.is_empty(): seen = m.displace.towing(watch)
+	var sb: Ent = stun_on if stun_on else m.player
+	if sb: stun_max = maxf(stun_max, sb.stun_t)
 
 ## A lightning rod's strike (BiomeRun._hit_area) at `at` on this game. Hazards run on every game.
 func _strike(at: Vector3) -> void:

@@ -87,15 +87,8 @@ func _sample() -> void:
 	for h in m.hunters:
 		lines.append("%.3f,%s,%.3f,%.3f,%.3f" % [now, h.nid, h.pos.x, h.pos.y, h.pos.z])
 
-func _run(secs: float) -> void:
-	var t := 0.0
-	while t < secs - 0.0001:
-		for mb in m.mobs: mb.queue_free()
-		m.mobs.clear()
-		m.step(DT)
-		t += DT
-		_sample()
-		await main.get_tree().process_frame
+func _stepped() -> void:
+	_sample()
 
 func _on_msg(topic: String, data, from: String) -> void:
 	if topic == "dn" and typeof(data) == TYPE_DICTIONARY:
