@@ -67,14 +67,16 @@ func _wardens() -> void:
 		var w: Dictionary = wardens[a]
 		var race := Models.RACES.map(func(r): return String(r["id"])).find(String(w["race"]))
 		var named := race >= 0 and Models.LOOK_FACES.has(w["face"]) and Models.LOOK_DETAILS.has(w["detail"])
-		if not named or not Models.hair_styles(race).has(w["hair"]) or not w["gender"] in ["female", "male", "robot"]:
+		if not named or not Models.hair_styles(race).has(w["hair"]):
 			bad_names.append(a)
-	ok(bad_names.is_empty(), "every Warden's folk, face, hair, markings and gender are real names (%s)"
-			% str(bad_names))
-	# one home for the base character's gender once the archetypes carry it (ext/class-titles)
-	var disagree := Arch.ids().filter(func(a):
-		return Arch.def(a).has("gender") and String(Arch.def(a)["gender"]) != String(wardens.get(a, {}).get("gender")))
-	ok(disagree.is_empty(), "the Warden's gender is the base character's (%s)" % str(disagree))
+	ok(bad_names.is_empty(), "every Warden's folk, face, hair and markings are real names (%s)" % str(bad_names))
+	# one home for the base character's gender: the archetype JSON, never the Warden block
+	var two_homes := wardens.keys().filter(func(a): return (wardens[a] as Dictionary).has("gender"))
+	var wrong := Arch.ids().filter(func(a):
+		return (not String(Arch.def(a).get("gender")) in ["female", "male"]
+			or MantleLook.warden(a)["gender"] != String(Arch.def(a)["gender"])))
+	ok(two_homes.is_empty() and wrong.is_empty(), "the Warden's gender is the archetype's, kept only there (%s %s)"
+			% [str(two_homes), str(wrong)])
 
 # ---------------------------------------------------------------- 2. sliders stay in the clamp
 func _clamps() -> void:
