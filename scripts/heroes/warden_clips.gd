@@ -362,7 +362,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"proc": true}     # a move this Hero has no clip for: the rig plays it, with the procedural pose
 	var act: Dictionary = d.get("act", {})
 	var act_clip := String(act.get(String(s.get("act", "")), ""))
-	if lib.has_animation(act_clip):      # else the procedural verb (appeal glbs await their garden clips)
+	if lib.has_animation(act_clip):      # else the procedural verb (a glb without the clip)
 		return {"clip": act_clip, "t": minf(float(s.get("act_t", 0.0)), lib.get_animation(act_clip).length - 0.001)}
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
