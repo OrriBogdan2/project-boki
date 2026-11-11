@@ -101,8 +101,8 @@ linked from PR #14; Kael's X pair (`before_juggernaut_r.png`, `after_juggernaut_
 Gil (owner playtest 11-11, branch ext/gil-rework-1111): moved from `Fx` dots and rings to `content/vfx/gil.json`
 and keyed poses (`scripts/match/kmoves_gil.gd`) on every move: thrust streaks and hit splashes, the Tide Lunge
 (held LMB), the dive under the ground with a wake and the surfacing burst, one break look per potion, the Riptide
-sweep and spout, the wave's wake and crest. Not yet scored here; the before/after game-camera reels are in the READY
-post. Left: his own sound set (the recipes reuse shared sounds).
+sweep and spout, the wave's wake and crest. Scored 11-11 in the re-score table below; the rework's game-camera clips
+are in `docs/parity_reel/gil_rework/`. Left: his own sound set (the recipes reuse shared sounds).
 
 ## Scorecard: before (11-08) and re-score (11-09)
 Rubric as above: each axis 1-5, R readability, S shape, L layering, T timing, Sc scale, C colour, Snd sound (sound is
@@ -136,6 +136,22 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Neve | rimewright | 26 | 4 | 4 | 3 | 3 | 3 | 4 | 4 | **25** | X Rimelock: the whole screen goes cyan; dash path is flat grey tiles |
 | Kael | juggernaut | 27 | 4 | 4 | 4 | 4 | 5 | 4 | 3 | **28** | Smash lunge telegraph: a flat magenta box, off his crimson |
 | Cinder | ashwick | 28 | 4 | 4 | 4 | 4 | 5 | 4 | 4 | **29** | RMB Ignite orb: blue-violet and magenta, not flame |
+| Gil | gil | - | 4 | 3 | 4 | 4 | 4 | 4 | 3 | **26** | RMB Air and Super Zeep breaks: opaque smoke puffs over the target; held RMB: the landing ring re-fires every 0.1 s |
+
+**Gil (11-11, ext/vfx-gil-bar)**, the 13th Hunter, by the same rubric from his own reel (`tools/vfx_reel/gil.gd`: the
+generic LMB, hold and dash, Thunder held, the other four potions tapped onto one dummy, one Slime puddle to its end,
+Riptide sent off as a spout, the wave followed down its line) on main + 0.24.5 + ext/gil-rework-1111 (all his looks
+are his own data, so no other READY VFX branch is needed). Strip: `docs/art/vfx_rescore/gil.jpg`, before this branch,
+as scored (a local xvfb render, software GL, green ground: the GPU queue was 110 jobs deep; GPU reels jobq
+20261111-221944-22972 before, 20261111-220920-10712 after). He scored 25 (T 3): every move reads, the water body is sea blue with foam cores, the lanes and circles
+match their hitboxes, and his weakest look was the RMB Slime puddle. It slowed for 4 s but was drawn as a 2.2 s
+fire-crack decal and then only an `Fx` ring re-fired every 0.25 s in a hard-coded green: a strobe with nothing inside.
+Now `GilKit._add_puddle` draws one zone on the shared ring shader for exactly its slow: Gil's lit rim (`Arch.color`)
+on `puddle_r` over a faint inside in the slime's own colour (clear at the centre, 0.24 alpha by the rim), a 3-frame
+white flare as it lands, an ease-out fade over its last 0.4 s. The break swaps the crack decal for goo bubbles across
+the radius. T 3 -> 4: **26**. Before/after, the puddle and bag parts: `docs/art/vfx_rescore/gil_slime.jpg` (before
+left, after right). The puddle is drawn by the kit, so it shows on the caster's game only, like the other kit-drawn
+zones (docs/DEBT.md).
 
 Reading it: every Hunter now sits at 23-29 (the 11-08 spread was 14-28), and the old worst four (Tenzo, Motley, Vex,
 Grimble) gained 9-10 each. The per-hero branches claimed a little more for their own hero (Vex 26, Lace 27, Sparkle 26,
@@ -157,3 +173,5 @@ Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a
 8. Meeko, Sable, Grimble: zones as a lit rim over a faint inside (X root field, Encore/E, E/RMB wedges).
 9. Lace tap shots and Sparkle LMB: thicker trails.
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
+11. Gil: Air and Super Zeep breaks as see-through smoke, not opaque puffs over the target; the held RMB's landing
+    ring as one circle that follows the cursor (it re-fires every 0.1 s).
