@@ -1,11 +1,8 @@
 class_name CamRig
 extends Camera3D
-## Supervive-style camera: high, far and narrow, leaning toward the cursor so you see where you aim.
+## Supervive-style camera: high, far and narrow, centred on you. Only the Standard and Dynamic follow
+## presets lean toward the cursor; the footage shows none (camera.json "follow").
 
-const HEIGHT := 27.0
-const BACK := 17.5
-const LEAD_X := 4.2
-const LEAD_Z := 5.4
 ## The numbers (Settings "Camera" presets, "Camera follow" cursor lean, the edge kept) are in content/rules/camera.json.
 ## The Supervive preset is measured from the source's footage: docs/MOVEMENT_FEEL.md, "Camera calibration" and
 ## "Camera framing vs the source".
@@ -33,9 +30,9 @@ var yaw := 0.0                # turned around the focus (0 = looking north); onl
 var yaw_to := 0.0
 var chase := 0.0              # 0 = the usual angle, 1 = low behind-the-ship view
 var chase_to := 0.0
-## Cursor panning: [deadzone, maxzone, pan distance, camera speed, quadratic easing]. Supervive (the default)
-## leans toward the cursor in proportion to how far it is from YOU, past a deadzone, eased, and capped so you
-## never leave the screen (lean_to). Locked stays centred on you.
+## Cursor panning, from Supervive's camera presets (content/rules/camera.json "follow"): [deadzone, maxzone, pan
+## distance m, ease 1/s, quadratic easing], the zones as shares of the half screen. Supervive (the default) stays
+## centred on you wherever the cursor is (docs/MOVEMENT_FEEL.md "Camera lead"); locked too.
 static var FOLLOW: Dictionary = RULES["follow"]
 var follow_mode := "supervive"
 var pan := Vector3.ZERO
@@ -149,46 +146,32 @@ func rumble(amp: float, secs: float) -> void:
 	shake_amp = maxf(shake_amp, amp)
 	shake_left = maxf(shake_left, minf(secs, Shake.MAX_SECS))
 
-## The Supervive cursor lean for a cursor `rel` metres from you on the ground: a share of the distance past the
-## deadzone, capped, and never more than the screen has room for along that way (you stay EDGE inside it).
-func lean_to(rel: Vector3) -> Vector3:
-	var fm: Array = FOLLOW["supervive"]
-	var l := rel.length()
-	if l <= float(fm[0]):
+## The view's lean for a cursor at `at` (viewport px) with the current follow preset, in world metres.
+func cursor_pan(at: Vector2) -> Vector3:
+	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
+	if float(fm[2]) <= 0.0:
 		return Vector3.ZERO
-	var dir := rel / l
-	var amt := minf((l - float(fm[0])) * float(fm[1]), float(fm[2]) * maxf(1.0, zoom)) * lead
-	return dir * maxf(0.0, minf(amt, _cast_room(Vector2(dir.x, dir.z), 0.0)))
+	var half := get_viewport().get_visible_rect().size * 0.5
+	var rel := (at - half) / half       # -1..1 on each axis
+	var l := rel.length()
+	if l <= float(fm[0]) or float(fm[1]) <= float(fm[0]):
+		return Vector3.ZERO
+	var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
+	if fm[4]:
+		f *= f
+	return Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
 
 func follow(p: Vector3, delta: float, mouse_lead := true) -> void:
 	# recording mode (Record): softer follow, a slower lean, no zoom pops, much less shake
 	var rr: Array = Record.cam_rates()
-	var lean_k := float(rr[2])
-	var want_pan := Vector3.ZERO
 	var fm: Array = FOLLOW.get(follow_mode, FOLLOW["supervive"])
-	if follow_mode == "supervive" and mouse_lead:
-		# where the cursor points on the ground at your height, relative to you
-		var cur := mouse_on_plane(p.y)
-		want_pan = lean_to(Vector3(cur.x - p.x, 0, cur.z - p.z))
-		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	elif mouse_lead and float(fm[2]) > 0.0:
-		var vp := get_viewport()
-		var sz := vp.get_visible_rect().size
-		var half := sz * 0.5
-		var rel := (vp.get_mouse_position() - half) / half       # -1..1 on each axis
-		var l := rel.length()
-		if l > float(fm[0]) and float(fm[1]) > float(fm[0]):
-			var f := clampf((l - float(fm[0])) / (float(fm[1]) - float(fm[0])), 0.0, 1.0)
-			if fm[4]: f *= f
-			want_pan = Vector3(rel.x / l, 0, rel.y / l).rotated(Vector3.UP, yaw) * f * float(fm[2]) * lead
-	if follow_mode == "supervive" and mouse_lead:
-		pass        # (eased above)
-	elif not mouse_lead or float(fm[3]) <= 0.0:
-		pan = want_pan if mouse_lead else pan.lerp(Vector3.ZERO, minf(1.0, delta * 6.0))
-	else:
-		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * lean_k * delta))
-	if follow_mode == "dynamic" and mouse_lead and not Record.clean():
+	var want_pan := cursor_pan(get_viewport().get_mouse_position()) if mouse_lead else Vector3.ZERO
+	if not mouse_lead:
+		pan = pan.lerp(Vector3.ZERO, minf(1.0, delta * 6.0))
+	elif float(fm[3]) <= 0.0 or (follow_mode == "dynamic" and not Record.clean()):
 		pan = want_pan
+	else:
+		pan = pan.lerp(want_pan, 1.0 - exp(-float(fm[3]) * float(rr[2]) * delta))
 	# the focus sits a little below you (so the ground reads), but never more than 4m below, so even
 	# far up in the sky you stay on screen
 	var want := Vector3(p.x, maxf(p.y * 0.6, p.y - 4.0), p.z)
