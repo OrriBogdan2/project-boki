@@ -290,7 +290,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 6 | Hem's Heavy Shot wall payoff ~0.4x vs ~5x | Raise wall_dmg, drop .4 floor | archer.json | S |
 | 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
 | 8 | Hem's Phase Walk stops at raised walls | Passable ledge faces | pin_spirit.gd, map height | L |
-| 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them | content/dash_flow/*.json | S |
+| 9 | Dash→LMB buffers on 6 kits (Hem, Bjorn, Zedran, Cinder, Ryzz, Tarek air), and Zedran, Bjorn and Cinder keep `cancel` rows; item 51 says combine | Flip rows to `fire`, source them. The `keep`/`cancel` rows were read against the hero-ref sheets: no frame shows a mid-dash cast, so none flip; see item 20 | content/dash_flow/*.json | S |
 | 10 | Cooldown pace is uneven: 0.48x to 1.0x of data | One rule per kit | content/archetypes/*.json | S, owner |
 | 11 | Done: Cinder is off the dash feel (3.4 m/.33 s, poof 6.8 m/.28 s); Grimble's air barge is scaled once (measured 3.7 m/.2 s) | none | asserted in --move-feel-check | done |
 | 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
@@ -311,11 +311,12 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 
 | Hero | Rows `[?]` |
 |---|---|
-| Hem (`archer`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
+| Hem (`archer`) | `dash.ground.q`, `dash.air.q` (2, `fire`; Q is ours, no source exists) |
 | Ryzz (`mage`) | `hold.rmb.{ground,air,jump}` (3, `keep`); `dash.ground.q`, `dash.air.q` (2, `fire`, ours) |
-| Tarek (`dolm`) | `hold.lmb.{ground,air,jump}`, `hold.rmb.{ground,air,jump}` (6, `keep`) |
 
 Also still `[?]` and already marked "Not determinable" in their own `source`: Hem dash.ground.lmb, dash.air.{lmb,rmb,e,x}; Ryzz dash.{ground,air}.{lmb,rmb,e,x}. Other heroes carry further `keep` rows without a source (Cinder 3, Zedran 3, Bjorn 1, Claire 3, Pip 3, one each of Cinder and Grimble `dash.ground.lmb` "Not determinable"): same `[?]`.
+
+**Keep and cancel rows checked against the hero-ref sheets (ext/feel-dashflow-rows).** Every `keep`/`cancel` row of Zedran (`juggernaut`), Cinder (`ashwick`), Bjorn (`bulwark`), Hem (`archer`) and Tarek (`dolm`) was read against briefs/hero-ref (juggernaut.md, linwick.md, bjorn.md, pin.md, breah.md) for a cast during or right after the dash. No frame shows a cast going off while the dash runs on, so no row flips to `fire`; the ult `cancel` rows stay backed by planted footage (Zedran f33-f38 and 0437, Bjorn f25-f31). One row gains a footage source: Tarek `hold.rmb.jump` `keep` (card 0240, 0938-0958: jumping while charging leaps her forward with the circle), asserted in `--dolm-combo-check`. The rest now say "Not determinable" in their `source` with the frames checked: Zedran `hold.lmb.jump`, `hold.rmb.*`, `into_dash.e`, the air `rmb`/`x` cancels; Cinder `hold.rmb.*`, `hold.lmb.{air,jump}`, the `x` cancels; Bjorn `hold.lmb.jump`, `dash.air.x`; Hem `hold.{lmb,rmb}.*`; Tarek `hold.lmb.*`, `hold.rmb.{ground,air}`. They keep their modes (a hold row has no `fire`; `keep` is its combine).
 
 ## Health
 

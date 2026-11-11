@@ -21,14 +21,14 @@
 	},
 	"hold": {
 		"lmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: no draw held through the Spirit Walk roll; the sheet leaves shooting during it open. Sheet briefs/hero-ref/pin.md, frames checked: draws 0102-0124, 0161-0170, 0209-0214, 0252-0256 (she walks while drawing, f111-116), roll f350 and 0388-0392. Ours: the default, the draw carries through the roll."},
+			"air": {"mode": "keep", "source": "Not determinable: no clean air dash (0051-0053 may be a hop); draws 0102-0124, 0161-0170 checked. Ours: the default, the draw carries through the air dash."},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump in the footage (sheet section 6); draws 0102-0124, 0161-0170, 0209-0214 checked. Ours: the default, the draw carries through the jump."}
 		},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: the Impaling Shot charge (0264-0273, 0494-0498) is never held through the roll (f350, 0388-0392). Ours: the default, the charge carries through the roll."},
+			"air": {"mode": "keep", "source": "Not determinable: no clean air dash (0051-0053 may be a hop); Impaling charge 0264-0273, 0494-0498 checked. Ours: the default."},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump in the footage (sheet section 6); Impaling charge 0264-0273, 0494-0498 checked. Ours: the default."}
 		}
 	}
 }

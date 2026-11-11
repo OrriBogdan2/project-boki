@@ -25,14 +25,14 @@
 	},
 	"hold": {
 		"lmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: the tip 'Punch to Extend Dash/RMB' (0938-0958) shows a held punch inside the RMB charge, not a wound-up punch carried into Landslide. Sheet briefs/hero-ref/breah.md, frames checked: punch holds 0117-0124, 0128-0150, Landslide 0513-0548. Ours: the default, the wind-up carries through the hop."},
+			"air": {"mode": "keep", "source": "Not determinable: the guide has one Landslide and no air variant; punch holds 0117-0124, 0128-0150 checked. Ours: the default."},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump with a held punch (0117-0150, 0938-0958 checked). Ours: the default, the wind-up carries through the jump."}
 		},
 		"rmb": {
-			"ground": {"mode": "keep"},
-			"air": {"mode": "keep"},
-			"jump": {"mode": "keep"}
+			"ground": {"mode": "keep", "source": "Not determinable: the 'Dash -> RMB Dunk Combo' (0965-1010) is Landslide then the charge, not a charge carried into Landslide; charges 0253-0259, 0265-0269, 0315-0321 and Landslide 0513-0548 checked. Ours: the default, the charge and its circle ride the hop (into_dash.rmb)."},
+			"air": {"mode": "keep", "source": "Not determinable: the guide has no air Landslide; charges 0253-0321 checked. Ours: the default."},
+			"jump": {"mode": "keep", "source": "Footage: jumping while charging leaps her forward and the circle comes with her (card 0240 'jump-while-charging leap'; tip 'Punch to Extend Dash/RMB' 0938-0958, briefs/hero-ref/breah.md). The charge outlives the jump: keep."}
 		}
 	}
 }

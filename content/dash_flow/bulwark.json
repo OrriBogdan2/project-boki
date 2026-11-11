@@ -12,7 +12,7 @@
 			"lmb": {"mode": "buffer", "source": "footage section 5: no air dash shown; as the ground dash, the hammer goes when the shove ends"},
 			"rmb": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
 			"e": {"mode": "fire", "source": "no air dash in the footage; as the ground dash"},
-			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is"},
+			"x": {"mode": "cancel", "source": "no air dash in the footage; as the ground dash, the slam plants him where he is; not determinable: no air dash or jump in the footage (briefs/hero-ref/bjorn.md sections 5 and 6; Smash 0365-0382, ult f25-f31 checked)"},
 			"q": {"mode": "fire", "source": "gloves are our own (no source)"}
 		}
 	},
@@ -27,7 +27,7 @@
 		"lmb": {
 			"ground": {"mode": "keep", "source": "Owner item 51 (supersedes item 30 and the wiki's Spin Dash ending the Hammer Smash): the swing keeps charging through the short plain dash and swings on the release, in the dash or after it"},
 			"air": {"mode": "keep", "source": "Owner item 51: the swing keeps charging through the air dash (the lumber); let go in it, it swings there and he keeps the lumber's momentum (a perfect one launches him on from where he is)"},
-			"jump": {"mode": "keep"},
+			"jump": {"mode": "keep", "source": "Not determinable: no jump in the footage (briefs/hero-ref/bjorn.md section 6); in the holds (0101-0110, 0116-0128, 0132-0149, 0160-0172) he stays in place. Ours: the default, the charge carries through the jump."},
 			"mantle": {"mode": "cancel", "reason": "owner item 30: a mantle ends the held Crushing Blow (item 51 keeps that)", "source": "Owner item 30; the source has no mantle rule."}
 		}
 	}
