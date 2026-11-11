@@ -239,9 +239,9 @@ spawn_points = {
     "vault": dict(pick=[2, 2], points=[[128, 50, "Frostkeep"], [94, 168, "Bloomwild"], [56, 132, "Ember Quarry"], [168, 104, "Stormreach"], [178, 40, "Gullcrest"]]),
     "cache": dict(pick=[4, 4], points=[[104, 20, "Skyport"], [112, 197, "Dawnrest"], [18, 104, "Ironfall"], [198, 112, "Fernway"], [54, 50, "Lantern Hollow"],
                                        [162, 50, "Gullcrest"], [38, 166, "Mossmere"], [166, 178, "Stillwater"], [152, 92, "Static Field"], [58, 114, "Ember Quarry"]]),
-    # boss lairs: each point is a lair's centre (they're all built into the map; the roll decides which are
-    # live this match, the others stay dormant ruins with their gate rusted shut)
-    "boss": dict(pick=[2, 3], points=[[54, 86, "The Sunken Forge"], [162, 84, "Stormcrown Eyrie"], [128, 162, "The Thornhive"]]),
+    # boss lairs: each point is a lair's centre. All three are live every match: the seed picks one as the
+    # Sealed Lair (the only way out by lair), the other two are prize lairs (kill XP and drops, no exit)
+    "boss": dict(pick=[3, 3], points=[[54, 86, "The Sunken Forge"], [162, 84, "Stormcrown Eyrie"], [128, 162, "The Thornhive"]]),
 }
 chokepoints = ["North Span", "Frost Steps", "Bramble Bridge", "Thorn Walk", "Quarry Causeway", "Storm Causeway", "Wind Gap"]
 
