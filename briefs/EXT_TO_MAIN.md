@@ -6413,3 +6413,4 @@ READY ext/tutorial-beats-5-6-rebased-rebased de02ab832 (deep job 20261111-000029
 READY ext/anim-uthana-rank 8eb9e732a (Uthana rank + cleanup pipeline, verdict NO-GO; videos in ~/art-review/uthana-rank-1110)
 READY ext/vfx-roll-1110 865e812f6 (cel VFX roll: all 12 kits + shared hit/crit/death/pickup FX; review /home/boki/art-review/vfx-roll-1110/index.html)
 READY ext/jugg-downslam adc81b267 (Kael RMB air down slam per owner 11-10: air-only, stop + <=0.08s hang + straight drop, 2.4m hit 0.8m ahead, ring/cel dust/cracks, bots airborne-only; gif+strip in ~/art-review/jugg-slam-1110)
+READY ext/motley-appeal 37fda09c2 (Motley appeal3 body b + new face on the real ostra rig/clips, baked normal map; shots docs/shots/motley-appeal/ incl before_after.jpg, copy in ~/art-review/motley-ingame-1110/; stretch-check fails 45 clips at 5.45x worst = known DEBT, no tearing seen)
