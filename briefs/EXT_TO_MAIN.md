@@ -6812,3 +6812,4 @@ READY ext/balance-sim-1111 16be1a05d (0.24.7: --duel-sim 12x12 bot duels + tools
 READY ext/ui-plain-words-menus 4a4b79567 (plain words on Results, Expedition panel, Relics page; table in UI_FIRST15.md)
 READY ext/anim-lace-release-snap a6d014b1b (archer release snap: 0.04 s blend-in for tap/loose/super, clip-check asserts blend over within 0.05 s of spawn, before/after strip)
 READY ext/ui-stale-text-pass 3d1678156 (stale player-facing text: README/wiki controls, revive, shimmer, renderer; evo form roots + 3 rare species; Data.MATCH dead keys; loading tips via key_cap; dead doc paths; DEBT line dropped)
+READY ext/slice-ranges-source 1fbc35948 (KIT_PARITY: Vex R range, Cinder RMB range, Kael slam angle marked Not determinable with frames checked; no data change)
