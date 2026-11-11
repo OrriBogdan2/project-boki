@@ -718,6 +718,10 @@ func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
 func gate_inputs() -> void: jet.lock_inputs()
 
 # ------------------------------------------------------------------ bots
+## The Torch Lance only reaches its stream's length: a bot walks in to it before holding LMB.
+func bot_reach() -> float: return float(lmbd()["range"]) - 0.4
+
+
 func bot_use(tgt: Ent, dist: float, los: bool) -> void:
 	if tgt == null:
 		return
