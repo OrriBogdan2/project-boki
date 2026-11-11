@@ -30,6 +30,8 @@ short/slight, average, tall/sturdy; female average), the tool moving the model a
 
 "Before" is the same tool on origin/main's legs (slide there is a contact that is really a skating foot). Strips:
 docs/art/home_gait/ (before, after; eight shots half a second apart at 5 m/s past floor posts every half metre).
+Feet: docs/art/home_gait/feet_extremes.jpg (`--empty-shots --only=feet`, GPU): the smallest woman, the tallest
+sturdiest woman and the tallest sturdiest man standing, then three shots across a step of their 2.2 m/s walk.
 
 ## What the gait does
 
