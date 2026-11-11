@@ -7,6 +7,7 @@
 	"weight": "medium",
 	"color": "#3a7cff",
 	"fantasy": "The quarry-hand. Raises stone out of the ground, climbs it, then punches it into you.",
+	"howto": ["Play: close-range stone; raise rocks, then punch them.", "Combo: {signature} raises a row, then punch along it.", "Avoid: punching with no rocks up; set a row first."],
 	"silhouette": "the huge stone left arm, the stone gauntlet and the three floating eye stones",
 	"model_glow": {"core": "#5ce6b8", "edge": "#2fc2b4"},
 	"card": {
