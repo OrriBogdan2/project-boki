@@ -4,7 +4,8 @@ extends RefCounted
 ## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg pick, then the black
 ## mystery egg picked; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
-## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default).
+## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default;
+## add --crouch for them crouch-walking at the farm's crouched full stick).
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
@@ -17,10 +18,12 @@ const LOOKS := {
 }
 
 const GAIT_SHOTS := 8        # frames of the gait strip
+const CROUCH_MPS := 2.75     # m/s: the farm's full stick crouched (home.gd SPEED x CROUCH_SPEED)
 const GAIT_EVERY := 4        # frames (60 fps) between its shots: 8 x 4 = half a second, about two strides
 
 var dir := ""
 var only := ""
+var crouch := 0.0            # 1 with --crouch: the gait strip crouch-walks
 var main: Node
 
 func run(main_node: Node) -> void:
@@ -30,6 +33,8 @@ func run(main_node: Node) -> void:
 			dir = String(a).substr(12)
 		elif String(a).begins_with("--only="):
 			only = String(a).substr(7)
+		elif a == "--crouch":
+			crouch = 1.0
 	DirAccess.make_dir_recursive_absolute(dir)
 	Save.no_write = true
 	var tree := main.get_tree()
@@ -207,7 +212,7 @@ func _feet(tree: SceneTree) -> void:
 
 ## The gait strip: short/slight, average and tall/sturdy bodies running at the farm's full stick from the side past
 ## floor posts every half metre (a planted foot holds against them, a sliding one skates), GAIT_SHOTS shots
-## GAIT_EVERY frames apart from the moment the lead body enters the frame.
+## GAIT_EVERY frames apart from the moment the lead body enters the frame. Crouched, at CROUCH_MPS.
 func _gait(tree: SceneTree) -> void:
 	_fresh()
 	var stage := Node3D.new()
@@ -250,12 +255,13 @@ func _gait(tree: SceneTree) -> void:
 		stage.add_child(m)
 		models.append(m)
 		anims.append(HunterAnim.new(m))
-	var vel := Vector3(5.0, 0, 0)
+	var vel := Vector3(CROUCH_MPS if crouch > 0.0 else 5.0, 0, 0)
 	var shot := 0
 	for i in 200:
 		for j in anims.size():
 			(models[j] as Node3D).position += vel / 60.0
-			(anims[j] as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
+			var st := {"fired": 99.0, "face": -PI * 0.5, "vel": vel, "crouch": crouch}
+			(anims[j] as HunterAnim).update(1.0 / 60.0, st)
 		await tree.process_frame
 		if (models[0] as Node3D).position.x >= -1.5 and (i % GAIT_EVERY) == 0 and shot < GAIT_SHOTS:
 			await _shot(tree, "gait_%02d" % shot, 0.0)

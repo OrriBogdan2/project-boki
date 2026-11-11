@@ -2,7 +2,8 @@ extends RefCounted
 ## --home-gait-check: the Empty (the player body at home, Models.hunter walked by HunterAnim + EmptyGait) at three
 ## body presets (short and slight, average, tall and sturdy) and the female average. Per body: at the farm's walk and
 ## full stick, every planted sole point stays within SLIDE_CM of where it came down (step by step, the worst one),
-## the steps a second, no sole point under the floor, the hip bob; a turn at a run holds the same bar; after a stop
+## the steps a second, no sole point under the floor, the hip bob; a turn at a run and a crouched walk (hips down by
+## at least CROUCH_CM) hold the same bar; after a stop
 ## the feet settle within SETTLE_S; turning on the spot pops no point more than POP_CM a frame and standing feet
 ## creep under CREEP_CM. Never touches the save. Add --json=<file> for the rows.
 
@@ -10,6 +11,8 @@ const DT := 1.0 / 60.0
 const WARM_S := 1.2           # s: the run-up before a sample (the gait's first steps settle into step)
 const SAMPLE_S := 2.4
 const SPEEDS := [2.2, 5.0]    # m/s: a walk on a half stick, the farm's full stick (home.gd SPEED)
+const CROUCH_MPS := 2.75     # m/s: the full stick crouched (home.gd SPEED x CROUCH_SPEED)
+const CROUCH_CM := 3.0        # cm: crouched, the hips ride at least this much lower than at the walk
 const TURN_RUN := 1.5         # rad/s: a run bending round a corner
 const TURN_RATE := 6.0        # rad/s: a quick turn on the spot
 const TURN_S := 2.0
@@ -63,6 +66,7 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	for s in SPEEDS:
 		row["gait_%.1f" % s] = _gait(m, an, float(s), 0.0)
 	row["turn_run"] = _gait(m, an, float(SPEEDS[1]), TURN_RUN)
+	row["crouch"] = _gait(m, an, CROUCH_MPS, 0.0, 1.0)
 	row["stop"] = _stop(m, an)
 	row["turn"] = _turn(m, an)
 	row["idle"] = _idle(m, an)
@@ -70,18 +74,23 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	print("GAIT %-14s hip %.2f m | walk slide %.1f cm %.1f steps/s | run slide %.1f cm %.1f steps/s bob %.1f cm | "
 			% [id, row["hip_m"], row["gait_2.2"]["slide_cm"], row["gait_2.2"]["steps_hz"],
 			row["gait_5.0"]["slide_cm"], row["gait_5.0"]["steps_hz"], row["gait_5.0"]["bob_cm"]]
-			+ "turning run slide %.1f cm | stop %.2f s | turn pop %.1f cm | idle creep %.1f cm"
-			% [row["turn_run"]["slide_cm"], row["stop"]["settle_s"], row["turn"]["pop_cm"], row["idle"]["creep_cm"]])
+			+ "turning run slide %.1f cm | crouch slide %.1f cm hips %.2f m | "
+			% [row["turn_run"]["slide_cm"], row["crouch"]["slide_cm"], row["crouch"]["hips_m"]]
+			+ "stop %.2f s | turn pop %.1f cm | idle creep %.1f cm"
+			% [row["stop"]["settle_s"], row["turn"]["pop_cm"], row["idle"]["creep_cm"]])
 	_gate(id, row)
 	m.free()
 
 func _gate(id: String, row: Dictionary) -> void:
-	for key in ["gait_2.2", "gait_5.0", "turn_run"]:
+	for key in ["gait_2.2", "gait_5.0", "turn_run", "crouch"]:
 		var g: Dictionary = row[key]
 		ok(g["slide_cm"] <= SLIDE_CM, "%s %s: planted feet stay within %.0f cm a step (worst %.1f cm, %d steps)"
 				% [id, key, SLIDE_CM, g["slide_cm"], g["steps"]])
 		ok(g["sink_cm"] <= SINK_CM, "%s %s: no sole point under the floor (worst %.1f cm)" % [id, key, g["sink_cm"]])
 		ok(g["steps"] >= 4, "%s %s: the legs step (%d steps in %.1f s)" % [id, key, g["steps"], SAMPLE_S])
+	var crouch_cm := 100.0 * (float(row["gait_2.2"]["hips_m"]) - float(row["crouch"]["hips_m"]))
+	ok(crouch_cm >= CROUCH_CM, "%s: crouched, the hips ride %.1f cm lower than at the walk (at least %.0f)"
+			% [id, crouch_cm, CROUCH_CM])
 	ok(row["stop"]["settle_s"] <= SETTLE_S, "%s: feet still %.2f s after a stop (limit %.1f)"
 			% [id, row["stop"]["settle_s"], SETTLE_S])
 	ok(row["turn"]["pop_cm"] <= POP_CM, "%s: turning on the spot jumps %.1f cm a frame at most (limit %.0f)"
@@ -90,8 +99,8 @@ func _gate(id: String, row: Dictionary) -> void:
 			% [id, row["idle"]["creep_cm"], CREEP_CM])
 
 ## The state HunterAnim reads; the body faces `face` and the tool moves the model as the farm would.
-func _state(vel: Vector3, face: float) -> Dictionary:
-	return {"vel": vel, "face": face, "grounded": true, "fired": 99.0}
+func _state(vel: Vector3, face: float, crouch: float) -> Dictionary:
+	return {"vel": vel, "face": face, "grounded": true, "fired": 99.0, "crouch": crouch}
 
 ## World positions of the six sole points (three a boot), the hips and the head.
 func _read(m: Node3D) -> Dictionary:
@@ -104,37 +113,42 @@ func _read(m: Node3D) -> Dictionary:
 	out["head"] = (m.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
 	return out
 
-## Runs `secs` of the animation with the body moving at speed `s` and turning at `yaw_rate`; frames if `keep`.
-func _run_for(m: Node3D, an: HunterAnim, secs: float, s: float, yaw_rate: float, keep: bool) -> Array:
+## Runs `secs` of the animation with the body moving at speed `s` and turning at `yaw_rate`, crouched by `crouch`
+## (0..1); frames if `keep`.
+func _run_for(m: Node3D, an: HunterAnim, secs: float, s: float, yaw_rate: float, keep: bool,
+		crouch := 0.0) -> Array:
 	var fr: Array = []
 	for _k in int(secs / DT):
 		var face := m.rotation.y + yaw_rate * DT
 		var vel := Vector3(-sin(face), 0.0, -cos(face)) * s
 		m.rotation.y = face
 		m.position += vel * DT
-		an.update(DT, _state(vel, face))
+		an.update(DT, _state(vel, face, crouch))
 		if keep:
 			fr.append(_read(m))
 	return fr
 
-## A steady run at `s` (bending round at `yaw_rate`): the slide of every planted sole point, steps a second,
-## the deepest a sole point sinks, the hip bob.
-func _gait(m: Node3D, an: HunterAnim, s: float, yaw_rate: float) -> Dictionary:
+## A steady run at `s` (bending round at `yaw_rate`, crouched by `crouch`): the slide of every planted sole point,
+## steps a second, the deepest a sole point sinks, the hip bob and mean height.
+func _gait(m: Node3D, an: HunterAnim, s: float, yaw_rate: float, crouch := 0.0) -> Dictionary:
 	_run_for(m, an, 1.0, 0.0, 0.0, false)
-	_run_for(m, an, WARM_S, s, yaw_rate, false)
-	var fr := _run_for(m, an, SAMPLE_S, s, yaw_rate, true)
+	_run_for(m, an, WARM_S, s, yaw_rate, false, crouch)
+	var fr := _run_for(m, an, SAMPLE_S, s, yaw_rate, true, crouch)
 	var out := _slide(fr)
 	out["steps_hz"] = float(out["steps"]) / SAMPLE_S
 	var lo := INF
 	var hi := -INF
 	var sink := 0.0
+	var mean := 0.0
 	for f in fr:
+		mean += (f["hips"] as Vector3).y / fr.size()
 		lo = minf(lo, (f["hips"] as Vector3).y)
 		hi = maxf(hi, (f["hips"] as Vector3).y)
 		for key in f:
 			if String(key).begins_with("sole."):
 				sink = maxf(sink, -(f[key] as Vector3).y)
 	out["bob_cm"] = 100.0 * (hi - lo)
+	out["hips_m"] = mean
 	out["sink_cm"] = 100.0 * sink
 	return out
 
