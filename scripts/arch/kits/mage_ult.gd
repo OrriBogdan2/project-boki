@@ -67,8 +67,8 @@ func cast() -> bool:
 	leap["fire_free"] = not bool(h.inp.get("fire", false))
 	casts += 1
 	kit.play("mage_x")
-	# the range ring snaps out round her at once; a bolt drops onto her as she gathers
-	kit.vfx("x", from, null, {"r": float(data()["range"])})
+	# a bolt drops onto her as she gathers (the range ring shows from this step on)
+	kit.vfx("x", from)
 	kit.m.sfx("vv_ult_rise", h.pos, -2.0)
 	return true
 
@@ -111,6 +111,7 @@ func tick(dt: float) -> void:
 				_hold_still()
 				if t >= float(xd["windup"]):
 					_take_off()
+			_range_ring()                 # (after a take-off: where she launched from)
 		RISE:
 			_hold_air(smoothstep(0.0, 1.0, t / float(xd["rise"])))
 			_aim_tick()
@@ -179,11 +180,9 @@ func _untouchable(secs: float) -> void:
 ## abyss), and the climb starts at her height, so nothing snaps.
 func _take_off() -> void:
 	var h := kit.h
-	var r := float(data()["range"])
 	var was: Vector3 = leap["from"]
 	if Vector2(h.pos.x - was.x, h.pos.z - was.z).length() > 0.5 and not kit.m.world.is_void(h.pos.x, h.pos.z):
 		leap["from"] = kit.ground(h.pos)
-		kit.vfx("x_move", leap["from"], null, {"r": r})
 	var from: Vector3 = leap["from"]
 	leap["base"] = h.pos.y
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
@@ -235,16 +234,19 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The pink range ring (everyone sees where she can come down) on a dark band, and the gold crown at the cursor
-## (her own).
+## The pink range ring round the take-off: everyone sees where she can come down, from the press on.
+func _range_ring() -> void:
+	var ring := {"at": leap["from"], "r": float(data()["range"]), "ticks": true, "col": MageKit.PINK}
+	ring.merge({"col2": MageKit.PINK, "all": true, "lw": 0.1})
+	AimKit.circle(kit.h, "x_ring", ring)
+
+## Up there: the range ring on a dark band (once she is off the ground, the spot is fixed) and the gold crown at
+## the cursor (her own).
 func _aim_tick() -> void:
 	var h := kit.h
-	var from: Vector3 = leap["from"]
-	var r := float(data()["range"])
+	_range_ring()
+	HeroVfx.of(kit.m).hold(h, "x_ring", 0.0, {"at": leap["from"], "r": float(data()["range"])})
 	leap["land"] = land_point()
-	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
-	AimKit.circle(h, "x_ring", ring)
-	HeroVfx.of(kit.m).hold(h, "x_ring", 0.0, {"at": from, "r": r})
 	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
 	crown.merge({"col": MageKit.DEEP_GOLD, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)

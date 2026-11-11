@@ -152,11 +152,7 @@
 		]},
 
 		"x": {"fx": [
-			{"p": "ring", "size": "r", "life": 0.3, "c": "core", "c2": "hot", "c3": "deep"},
 			{"p": "bolt", "y": 7.0, "to": "here", "to_y": 0.3, "jag": 0.5, "size": 0.7, "life": 0.2, "c": "main", "c2": "hot", "c3": "deep"}
-		]},
-		"x_move": {"fx": [
-			{"p": "ring", "size": "r", "life": 0.3, "c": "core", "c2": "hot", "c3": "deep"}
 		]},
 		"x_air": {"fx": [
 			{"p": "smoke", "y": 0.1, "n": 6, "way": "up", "speed": 2.2, "spread": 0.9, "grav": 2.0, "life": 0.45, "size": 0.16,

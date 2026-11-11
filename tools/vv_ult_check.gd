@@ -57,6 +57,13 @@ func mage() -> void:
 			U.casts == 1 and int(P.used.get("x", 0)) == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])),
 			"casts %d cd %.1f" % [U.casts, float(K.cd["x"])])
 	ok("Kitefall: the crouch first (mage_x)", U.phase() == MageUlt.CROUCH and K.anim_id == "mage_x")
+	m.step(ac.DT)
+	var burst := 0
+	for e: Dictionary in HeroVfx.of(m).live:
+		if (e["s0"] as Vector3).x > 2.0 * float(xd["radius"]) + 0.01:
+			burst += 1
+	ok("Kitefall press (footage): the range ring shows at once, no range-wide burst (no screen flash)",
+			AimKit.shown(P, "x_ring") and burst == 0, "%d range-wide looks" % burst)
 	ac.step(m, 0.6, func(): ac.aim_at(P, T.pos))
 	# up there: high, invulnerable, the ring for everyone, the crown at the cursor, nothing else works
 	var hanging := U.phase() == MageUlt.AIR and P.pos.y > home.y + 3.5
@@ -347,9 +354,11 @@ func _mage_shift(m: Match, P: Hunter, K: MageKit, home: Vector3) -> void:
 		t += hc.DT
 		crouched_again = crouched_again or (K.run_t <= 0.0 and K.anim_id == "mage_x")
 	var from: Vector3 = U.leap.get("from", home)
+	var ring_at: Vector2 = AimKit.entry(P, "x_ring").get("at", Vector2.ZERO)
 	ok("Kitefall + Shift (item 51): the Wirerun goes from the crouch, then she launches where it took her",
 			went and crouched_again and U.phase() == MageUlt.RISE and hc._flat(from, home) > 2.0
-			and hc._flat(P.pos, from) < 0.3 and AimKit.entry(P, "x_ring").get("at", from) == from,
+			and hc._flat(P.pos, from) < 0.3
+			and ring_at.distance_to(Vector2(from.x, from.z)) < 0.01,
 			"went %s crouch %s %s from %.1f m out" % [went, crouched_again, U.phase(), hc._flat(from, home)])
 	var xd := K.x_def()
 	ac.step(m, float(xd["rise"]) + float(xd["hover"]) + float(xd["drop"]) + 0.1)
