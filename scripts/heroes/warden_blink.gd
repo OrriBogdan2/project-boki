@@ -27,7 +27,7 @@ static var _tex: ImageTexture
 var skel: Skeleton3D
 var head := -1
 var unbind := Transform3D.IDENTITY # the head's bind pose, undone: bind space -> the head's current pose
-var size := Vector2.ZERO           # m, one eye
+var eye_size := Vector2.ZERO       # m, one eye
 var lids: Array = []               # a Decal per eye
 var eyes: Array = []               # each eye's middle, bind space (m)
 var shut_k := 0.0                  # 0 open .. 1 closed, the last pose
@@ -46,7 +46,7 @@ static func make(sk: Skeleton3D, art_name: String) -> WardenBlink:
 	b.skel = sk
 	b.head = WardenSkeleton.find(sk, "head")
 	b.unbind = sk.get_bone_global_rest(b.head).affine_inverse()
-	b.size = Vector2(float(cfg["size"][0]), float(cfg["size"][1]))
+	b.eye_size = Vector2(float(cfg["size"][0]), float(cfg["size"][1]))
 	for e in cfg["eyes"]:
 		b.eyes.append(Vector3(float(e[0]), float(e[1]), float(e[2])))
 		var d := Decal.new()
@@ -137,7 +137,7 @@ func pose(k: float) -> void:
 		d.visible = k > 0.0
 		if not d.visible:
 			continue
-		var top: Vector3 = eyes[i] + Vector3(0.0, size.y * 0.5, 0.0)
+		var top: Vector3 = eyes[i] + Vector3(0.0, eye_size.y * 0.5, 0.0)
 		# (a Decal projects along its -Y: here into the face, +Z)
-		d.transform = on_head * Transform3D(FACING, top - Vector3(0.0, size.y * k * 0.5, 0.0))
-		d.size = Vector3(size.x, DEPTH, size.y * k)
+		d.transform = on_head * Transform3D(FACING, top - Vector3(0.0, eye_size.y * k * 0.5, 0.0))
+		d.size = Vector3(eye_size.x, DEPTH, eye_size.y * k)

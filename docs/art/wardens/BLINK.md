@@ -1,41 +1,50 @@
-# Eyelid blink (close-ups)
+# Close-up blink
 
-`scripts/heroes/warden_blink.gd` (WardenBlink) blinks a Hero's lid bones in close-ups: hero select, the Model Room,
-the relic put-on. Every 2-6 s (random) a Timer wakes it; if the camera is within `WardenGlb.FAR_HIDE_D` (13 m, the
-far-camera distance) of the head, the lids close over the clip's pose for 0.15 s (0.04 down, 0.04 shut, 0.07 up),
-one blink in five a double. Past that distance (every match camera) it never blinks and runs nothing per frame.
-The closed pose is data (`blink` in `content/rules/warden_anim/<art>.json`, see [CLIPS.md](CLIPS.md)): the deepest
-the art's own clips shut each lid. `--warden-blink-check` holds both and prints how many vertices each rig's lids
-skin; `--warden-blink-shots --shots-dir=<dir>` draws an open | closed close-up per Hero.
+`scripts/heroes/warden_blink.gd` (WardenBlink) blinks a Hero in close-ups: hero select, the Model Room, the relic
+put-on. Every 2-6 s (random) a Timer wakes it; if the camera is within `WardenGlb.FAR_HIDE_D` (13 m, the far-camera
+distance) of the head, the lids come down for 0.15 s (0.04 down, 0.04 shut, 0.07 up), one blink in five a double.
+Past that distance (every match camera) it never blinks, runs nothing per frame and draws nothing.
 
-No .glb has blink blend shapes (no morph targets on any Warden); lids are bones.
+## How a lid is drawn
+No .glb has blink blend shapes (no morph targets on any Warden), and on today's models no lid bone skins a single
+vertex: the appeal3 swaps (Lace, Meeko, Cinder, Sparkle, ...) paint the eyes into the skin atlas, and Lace's v2
+modelled lids (35 vertices each on lid.R/L, 91c6905ba) went with her appeal3 swap 5feab5daf. Posing the lid bones moved
+nothing (job 20261111-123509-a1: 8 open/closed pairs, 0 pixels differ).
 
-## Today the blink moves no mesh (2026-11-11)
-The appeal3 swaps (Lace, Meeko, Cinder, Sparkle, ...) paint the eyes into the skin atlas and weight nothing to the lid
-bones, so every lid bone below skins **0 vertices**: the bones close on time, the eyes stay open. Lace's v2 build had
-modelled lids (35 vertices each on lid.R/L, 91c6905ba); her appeal3 swap 5feab5daf dropped them. The blink data
-stays, so a blink shows as soon as a mesh weights lids to these bones (or gets a closed-eye shape).
+So each lid is a Decal: a skin-coloured ellipse with a dark lash rim at its bottom, projected 3 cm deep onto a painted
+eye, riding the head bone. It hangs from the top of the eye and grows down to cover it, then goes back up; it is
+hidden between blinks. Decals need the Forward+ renderer (desktop); on the compatibility renderer (web, mobile) the
+eyes stay open.
 
-## Hunters with lid bones (blink on, nothing visible yet)
-| Art | Hero (id) | Lid bones | Closed (from its clips) |
+The data is `blink` in `content/rules/warden_anim/<art>.json` (see [CLIPS.md](CLIPS.md)): `eyes`, each eye's middle
+on the face, and `size`, one eye, in the model's bind space (m, the face looks along -Z); `skin`, the lid's colour (the
+atlas's skin beside the eye). To place them, `--warden-blink-shots --shots-dir=<dir>` draws a straight-on close-up of
+each Hero, open | closed (`blink_<art>.png`), and prints the frame: its middle in bind space and how many metres its
+height covers; the image's right is the model's -X. `--warden-blink-check` holds the timing, the far camera and the
+lid count.
+
+## Hunters with lid bones (all blink)
+| Art | Hero (id) | Lid bones | Eyes |
 |---|---|---|---|
-| hem | Lace (archer) | lid.R, lid.L | turn 0.92 rad on Y (mirrored) |
-| claire | Neve (rimewright) | lid.R, lid.L | turn -0.82 rad on X |
-| ryzz | Sparkle (mage) | lid.R, lid.L | turn -0.82 rad on X |
-| sable | Sable (thief) | lid.R, lid.L | turn -0.82 rad on X |
-| cinder | Cinder (ashwick) | lid.R, lid.L | turn 1.30 rad on X |
-| pip | Meeko (tender) | lid.R, lid.L | slide 0.05 m along the bone |
-| vex | Vex (gunslinger) | lid.L only | turn -1.05 rad on X |
-| dredge | Grimble (dredge) | lid (one eye) | turn -0.95 rad on Y |
+| hem | Lace (archer) | lid.R, lid.L | 2 |
+| claire | Neve (rimewright) | lid.R, lid.L | 2 |
+| ryzz | Sparkle (mage) | lid.R, lid.L | 2 |
+| sable | Sable (thief) | lid.R, lid.L | 2 |
+| cinder | Cinder (ashwick) | lid.R, lid.L | 2 |
+| pip | Meeko (tender) | lid.R, lid.L | 2 |
+| vex | Vex (gunslinger) | lid.L only | 2 |
+| dredge | Grimble (dredge) | lid (one eye) | 1 |
 
 ## For the art lane
-- **Lids that move nothing** (all eight above): weight eyelid geometry (or a closed-eye blend shape) to the lid
-  bones. Vex has no right lid bone at all; Grimble's single `lid` covers his one eye.
-- **No lids at all**: no eyelid bones and no blend shapes, so they stare in close-ups until they get `lid.R`/`lid.L`
-  under `head` keyed in their clips; then add a `blink` block and the check covers them.
+- **Modelled lids**: weight eyelid geometry (or a closed-eye blend shape) to the lid bones above, then drop that Hero's
+  `blink` block; the decal is a stand-in for lids the meshes do not have.
+- **No lids at all**: no eyelid bones and no blend shapes, so they stare in close-ups.
   - **breaker** (Albert, bulwark): a glass face; WardenMood's face shader already blinks on a fixed 3.7 s beat.
   - **kael** (Kael, juggernaut)
   - **tarek** (Tenzo, dolm)
   - **gil** (Gil, gil)
   - **ostra** (Motley, ostra): `x_boxlid` is the box's lid, not an eyelid.
+
+  Where their eyes are painted on the atlas, a `blink` block (eyes placed from the shots) gives them the same decal
+  blink with no art; not done here (the blink was scoped to Hunters with lid bones).
 - Meeko's sun and cloud companions already blink through their mood atlas (`blink_cell`, WardenMood).

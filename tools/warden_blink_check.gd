@@ -105,7 +105,7 @@ func _hero(id: String) -> void:
 			blink._process(DT)
 			frames += 1
 			var all_shut := blink.shut_k >= 1.0 and _lids_shown(blink) == want \
-					and blink.lids.all(func(d): return is_equal_approx((d as Decal).size.z, blink.size.y))
+					and blink.lids.all(func(d): return is_equal_approx((d as Decal).size.z, blink.eye_size.y))
 			if all_shut and not was_shut:
 				shut += 1
 			was_shut = all_shut

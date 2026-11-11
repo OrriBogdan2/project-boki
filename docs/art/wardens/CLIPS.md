@@ -25,7 +25,7 @@ Hero live in `tools/art1/` (Kael is the pilot).
   The clip is seeked to the kit's own `kmove_t`, so it can't drift from the hit. Clip length = the table's last key.
 - `states`: downed, reviving, dead, stun, emote, hit {front, back, dur}.
 - `procedural`: state keys that hand back to the rig (ledges, stomps...). A kit move with no clip does too.
-- `blink`: the lids' closed pose off their rest, `turn` {bone: axis x angle, rad} or `move` {bone: m}, in the bone's own frame. WardenBlink closes them over the clip every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
+- `blink`: the close-up blink's lids (decals over the painted eyes): `eyes` [[x, y, z], ...] each eye's middle on the face and `size` [w, h] an eye, in the model's bind space (m); `skin` the lid's colour. WardenBlink brings them down every 2-6 s in close-ups only ([BLINK.md](BLINK.md)).
 
 ## The tree
 loco (BlendSpace2D) > stance > crouch > air > `upper` (filtered Blend2, one seek channel) > `full` (Blend2 onto two crossfaded seek
