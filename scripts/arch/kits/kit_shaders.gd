@@ -286,7 +286,7 @@ void fragment() {
 	col = mix(col, vec3(1.0, 0.55, 0.08), sigil * 0.9);
 	col = mix(col, vec3(1.0, 0.42, 0.12), armed * 0.3 + crack * 0.6);
 """ + _TAIL
-		# the screen tint while Spirit Walk carries you through something: a dark blue wash, darker at the edges
+		# the screen tint while Spirit Walk runs: a wash of the walker's shade (the kit's colour), darker at the edges
 		"tint":
 			return """shader_type canvas_item;
 uniform vec4 color : source_color = vec4(0.04, 0.08, 0.3, 1.0);
