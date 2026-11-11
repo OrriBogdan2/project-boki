@@ -76,7 +76,7 @@ Every Moosh Moosh row of briefs/specs/kit-audit/cinder_dredge_moosh.md section 3
 | X: unit-targeted, an aim line onto the ally first | footage f19-f24 | yes | yes (a tap; the line and ring show while the cursor is on a teammate) | "mm X: with the cursor on a teammate, the 7 bh reach ring and a line onto them" |
 
 ## Footage gaps, Nov 9 re-check
-The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main d255acbee. Closed rows cite the code or commit (e87df2c59 is the fidelity pass that built most of them). Nothing was built in this pass: the one row that is not closed (9, numbers) lives in `tender_kit.gd`, which ext/meeko-rmb-motion, ext/meeko-ult-cancels, ext/meeko-carry-drop and ext/meeko-rmb-orbit-1108 all change, and its assert would go in `care_combo_check.gd`, also in flight.
+The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main d255acbee. Closed rows cite the code or commit (e87df2c59 is the fidelity pass that built most of them). Row 9 (the numbers) was closed on ext/meeko-gap9, stacked on this branch; rows 1-8 and 10 needed no build.
 
 | # | Gap | State on main | Where |
 |---|---|---|---|
@@ -88,9 +88,18 @@ The 11 ranked rows of `briefs/hero-ref/mooshmoosh.md` section 4, marked on main 
 | 6 | Hearthlight cast and thrown look | closed | `cast_e` lantern plus and rising rays (`lk().burst("plus", ...)`), thrown disc `fill` 1.8, amber to teal rim, brighter than the carried ring (`_hearth_node`) |
 | 7 | Cooldowns | closed (data wins) | Burrseed 10.5 s, Hearthlight 11 s, dashes 7 / 14 s: the tooltip data over the blurry card (see the dash table's precedence); "mm RMB: Burrseed 10.5 s", "mm dashes: Elluna's cooldowns". Suggestion only: the footage card reads about 7.2 s for Bound by Fate |
 | 8 | Crook cast swirl | closed | a swirl, flash and sparks at the casting hand per ember (`_dress_ember`, `stats["swirls"]`); "mm LMB: each ember has its comet look, a swirl at the hand and the flick move" |
-| 9 | Ramp readability | partly open | closed: the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`) and "KINDLED" at 5. Open: damage numbers do not tint with the stacks (the shared `HudStyle.dmg_col` path in match.gd); the sheet itself calls it optional, so it is a suggestion, and the kit hook would sit in `tender_kit.gd` (in flight) |
+| 9 | Ramp readability | closed (footage; ext/meeko-gap9) | the foot glow warms violet to ember per Kindle stack (the `"kin%d"` look in `_tick_look`), "KINDLED" at 5, and the damage number is yellow (`HudStyle.CRIT`) on an ember into a foe at full Kindle, white before (`TenderKit.number_col`, the `ArchKit.number_col` hook, 2 wiring lines in `Match.on_damage`); `mm passive: the damage number is yellow at the plateau ...`. Numbers: see the table below |
 | 10 | Dash direction | closed | `on_dash` steers by `h.roll_dir` (movement); "mm Shift: Relay Step goes where you move" |
 | 11 | Sound | n/a | no audio in the footage |
+
+Row 9 numbers (source order: owner note > game data > footage; no owner note covers them, and the tooltip data (`supervive_kits.md`, Elluna) gives the ramp no figure, so the footage decides):
+
+| Number | Source | Old | New | Assert |
+|---|---|---|---|---|
+| Ramp at the plateau | footage 64 -> 93 (f84-f98): x1.453 | `per_stack` 0.72 x 5 / 8 = +45% (check window 38-52%) | unchanged, 8 -> 11.6; the check window is now +/-3 points round the footage's +45.3% | `mm passive: Kindle ramps embers +45% at 5 stacks (footage 64 -> 93)` |
+| Damage number colour | footage f98: 93 is yellow, the earlier hits white | white at every stack | yellow at full Kindle (5 stacks, the plateau), white below; the brief's "warm yellow at 3+" was a suggestion, the footage shows yellow only on the 93 | `mm passive: the damage number is yellow at the plateau, white before it (footage)` |
+
+Not changed, to note: the footage reads the plateau after 4 hits (64, 66, 84, 93, 93); ours needs 5 stacks (6 hits). One dummy and five hits do not fix a curve, so the 5-stack cap stays.
 
 ## Assumptions
 Where the footage and the wiki are silent, this is the most likely behaviour, and each is easy to change in `content/archetypes/tender.json`:
