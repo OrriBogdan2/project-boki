@@ -18,7 +18,10 @@ The hero vanishes in a quick pop and a Wisp takes their place; a revive pops the
   `downed = false` to HunterAnim, so the hero never plays the crawl; the per-hero `downed` clips are no
   longer picked (the files stay).
 - Pop-in (0.25 s): flash, ring, puff, sound. Pop-out on revive (0.3 s): the Wisp brightens and the hero
-  scales from 0.6 to full with a small squash. Death or a bleed-out snuffs the Wisp with a spark burst.
+  scales from 0.6 to full with a small squash. A bleed-out snuffs the Wisp with a spark burst. A finished
+  stomp collapses it instead (0.45 s, `collapse`: the white core gutters out, it shrinks into the ground, a
+  small puff; no burst and no kill column); a stomp presses it flat on each slam and a broken one lets it
+  bob free (`free`). See StompFx in docs/decisions/0061-stomp-lock.md.
 - The look is data: `content/rules/wisp_looks.json`, built by `WispLook` (scripts/match/wisp_look.gd)
   procedurally. The id is `Save.d["look"]["wisp"]`, the same pattern as glider skins; unknown ids give
   `default`.
