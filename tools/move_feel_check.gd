@@ -235,6 +235,7 @@ func run(main: Node) -> void:
 	_camera()
 	_screen_scale()
 	_e2e()
+	load("res://tools/dash_refill_check.gd").run(self)
 	_standing_dash()          # last: it swaps the kit and model the framing rows measure
 	print("MOVE FEEL CHECK DONE, failures: ", bad)
 	main.get_tree().quit()
