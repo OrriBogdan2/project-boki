@@ -204,7 +204,9 @@ func _offer() -> void:
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
 			"then the farm again: no reveal pops up")
 	ok(not hob.chat.offer_due() and not hob.node.mark.visible, "and no more offer")
-	ok(home.guide.tracker.visible and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
+	# (the farm tutorial has no Goals card at all: FarmGuide builds it after day one)
+	var tracker_back: bool = home.guide.tracker.visible if home.guide.tracker != null else FarmTutorial.active()
+	ok(tracker_back and home.guide.hint_box.visible and hob.node.tag.modulate.a == 1.0,
 			"and the Goals card and the goal line are back")
 
 func _later_and_legacy() -> void:

@@ -55,7 +55,8 @@ func _raise() -> void:
 	ok(_gap(_tint(m2), fire) < _gap(_tint(m1), fire) and _marks(m2) > _marks(m1),
 		"more tint and more marks (%d, then %d)" % [_marks(m1), _marks(m2)])
 	ok(_parts(m2).is_empty(), "but no part before a form")
-	rec["level"] = int(Evo.rules()["lines"]["puddlet"]["level"])      # its line's form level (evolve.json)
+	rec["species"] = "mothlet"     # (a level line whose form has art: mothlet -> wisplet, evolve.json)
+	rec["level"] = int(Evo.rules()["lines"]["mothlet"]["level"])
 	var ev := Evo.on_level(rec)
 	var m3 := Models.kin("puddlet", rec)
 	var said := Evo.describe(ev, rec)

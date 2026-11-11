@@ -69,8 +69,10 @@ func run(main_node: Node) -> void:
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
 	await main.get_tree().create_timer(SETTLE).timeout
-	var farm_beds := Sfx.amb_layers.keys().filter(func(n): return not n in ["abyss", "ruins"]
-			and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).playing).size()      # HomeAmbience's own beds
+	var farm_beds := 0      # HomeAmbience's own beds, still up on the farm
+	for n in Sfx.amb_layers:
+		if not n in ["abyss", "ruins"] and (Sfx.amb_layers[n]["p"] as AudioStreamPlayer).playing:
+			farm_beds += 1
 	var left := Sfx.match_voices() - farm_beds
 	ok(left == 0, "after the fades nothing the match started is playing (%d, %d farm beds)" % [left, farm_beds])
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])

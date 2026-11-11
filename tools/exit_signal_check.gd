@@ -102,7 +102,7 @@ func run(main_node: Node) -> void:
 			"all %d exits have a sky beam and a ground zone" % m.exits.list.size())
 	ok(particles_in_signal == 0, "the beam adds no particle emitters")
 	var up: Dictionary = m.exits.of_kind("outpost")[0]
-	var zone_r := ((up["node"] as Node3D).get_node("Zone") as MeshInstance3D).mesh.size.x / 2.0
+	var zone_r: float = ((up["node"] as Node3D).get_node("Zone") as MeshInstance3D).mesh.size.x / 2.0
 	ok(is_equal_approx(zone_r, Exits.OUTPOST_R), "the zone is as wide as the game's yard radius (%.1f m)" % zone_r)
 	# ---------------------------------------------------------------- an uplink
 	var un := up["node"] as Node3D
