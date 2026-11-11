@@ -87,7 +87,6 @@ func _setup() -> void:
 
 func res_text() -> String: return "%d" % int(res)
 func res_frac() -> float: return clampf(res / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "SALVAGE" if res >= res_max() else ""
 func rd() -> Dictionary: return res_def()
 
 ## Is this hunter a Dredge reeling someone in? (Hunter.do_dash: Grounded doesn't stop the barge then.)
@@ -122,8 +121,7 @@ func add_stack(n: int) -> void:
 		return
 	_apply_hp()
 	if n > 0:
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "SALVAGE %d" % int(res), res_col(), res >= res_max())
-		m.sfx("dredge_coin_jingle", h.pos, -4.0, 1.0)        # (no ground ring: the word, his coins and the flex)
+		m.sfx("dredge_coin_jingle", h.pos, -4.0, 1.0)        # (no ground ring: his coins and the flex)
 		if pull.is_empty() and wind <= 0.0 and dive.is_empty(): play("dr_flex")
 
 func _apply_hp() -> void:
@@ -147,7 +145,6 @@ func outgoing(t: Ent, dmg: float, o: Dictionary) -> float:
 		if m.time - _stab_at > 1.2:
 			_stab_at = m.time
 			backstabs += 1
-			m.fx.word(t.pos + Vector3(0, 2.2, 0), "BEHIND", res_col(), false)
 		return dmg * (1.0 + float(rd()["back_k"]))
 	return dmg
 
@@ -354,15 +351,14 @@ func _launch_hook() -> void:
 	run(stg, cx("rmb", "abyssal_hand", aim(), {
 		"on_foe": func(f: Ent, _c: Dictionary):
 			if pull.is_empty() and is_instance_valid(f) and not f.dead: _grab(f),
-		"on_shot_end": func(at: Vector3, why: String, e: Ent):
+		"on_shot_end": func(at: Vector3, _why: String, e: Ent):
 			flying = false
 			hook_sd = {}
 			if pull.is_empty():
 				hook_hold = null          # a miss: gravity is back the moment it ends
 			if e == null and pull.is_empty():
 				_snap_back(at)
-				fx.orb(at, ARM_COL, BONE, 0.6, 0.15)
-				m.fx.word(at + Vector3(0, 1.2, 0), "SNAGGED" if why == "wall" else "MISS", Color("c0b0a0"), false)}))
+				fx.orb(at, ARM_COL, BONE, 0.6, 0.15)}))
 	if m.shots.size() > n0:
 		hook_sd = m.shots[-1]
 		# the hook pierces terrain: rocks, props and cliff faces
@@ -386,7 +382,6 @@ func _tick_hook() -> void:
 		if o.downed:
 			if not scoop.has(o):
 				scoop.append(o)
-				m.fx.word(o.pos + Vector3(0, 1.6, 0), "SCOOPED", ARM_COL, false)
 		elif o.team == h.team and pull.is_empty():
 			hook_sd["life"] = 0.0
 			_grab(o, true)
@@ -429,7 +424,6 @@ func _grab(f: Ent, ally := false) -> void:
 	var rdf := rmb_def()
 	if f.mass() >= 6.0:
 		hook_hold = null
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "TOO HEAVY", Color("c0b0a0"), false)
 		return
 	grapples += 1
 	if rank("sec") >= 3 and not ally:
@@ -452,18 +446,10 @@ func _grab(f: Ent, ally := false) -> void:
 	# still works
 	KitStatus.apply(h, "gnd", float(rdf["pull_max"]), 0.0, true, "reeling: no jump or glide (the barge still works)")
 	st["self_gnd"] = true
-	m.fx.word(
-		f.pos + Vector3(0, 2.4, 0), _grab_word(wisp, ally), col_of(rdf), true
-	)
 	fx.orb(f.pos + Vector3(0, 1.0, 0), ARM_COL, BRASS_HOT, 1.1, 0.15)
 	m.sfx("dr_grab", f.pos, -1.0, 1.0)
 	m.sfx("dr_reel", h.pos, -5.0, 1.0)
 	play("dr_reel")
-
-func _grab_word(wisp: bool, ally: bool) -> String:
-	if wisp:
-		return "SCOOPED"
-	return "HOLD ON" if ally else "HOOKED"
 
 ## The reel: the body is hauled toward wherever Dredge is now, with weight (it carries its sideways speed and
 ## eases into the new heading), so walking sideways while reeling swings it round you (the source's physics
@@ -488,7 +474,6 @@ func _tick_pull(_dt: float) -> void:
 		"arrived": _end_pull(true)
 		"walled":
 			snags += 1
-			m.fx.word(fe.pos + Vector3(0, 2.2, 0), "WALLED", Color("c0b0a0"), false)
 			_end_pull(false)
 		"": pass
 		_: _end_pull(false)
@@ -526,9 +511,8 @@ func _end_pull(arrived: bool) -> void:
 		arrivals += 1
 		var rdf := rmb_def()
 		if ally:
-			if not wisp: m.fx.word((f as Ent).pos + Vector3(0, 2.4, 0), "SAVED", col_of(rdf), true)
 			return
-		payoff_fx((f as Ent).pos, "HAULED", col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
+		payoff_fx((f as Ent).pos, col_of(rdf), "dredge_coin_jingle", h.aim_dir(), f)
 
 # ------------------------------------------------------------------ E: Anchor Drop
 func cast_e() -> bool:
@@ -651,7 +635,6 @@ func _slammed(f: Ent, stun: float, amt: float) -> void:
 	KitStatus.apply(f, "gnd", float(ed["gnd_t"]), 0.0, true, "anchored: no dash, jump or glide")
 	Feel.hitstop(m, h, f, 30.0, {"melee": true, "heavy": true})
 	stunned.append({"e": f, "until": m.time + stun})
-	m.fx.word(f.pos + Vector3(0, 2.3, 0), "ANCHORED", col_of(ed), false)
 
 ## In the air: smash straight down, the anchor falling with you; the landing ring shows where you'll hit.
 func _start_dive(height: float) -> void:

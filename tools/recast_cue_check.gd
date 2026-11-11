@@ -2,8 +2,9 @@ extends "res://tools/archetype_check.gd"
 ## --recast-cue-check: every two-step ability reports its open recast to RecastCue (DECISIONS 2026-11-08 "two-step
 ## abilities must be obvious and in your face"): after the first step the kit's recast_window() names the slot,
 ## a time left and a total, the world spot for the marker, and the local hunter's cue state carries it (so the slot
-## pulse, "<KEY> AGAIN", the ring and the marker draw). Then: a window that runs out leaves "EXPIRED", an early
-## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges.
+## pulse, the timer ring and the closing flash draw; no words or key letters, docs/UI_DECLUTTER.md). Then: a window
+## that runs out darkens the slot, an early press is buffered (~0.15s) into the window, and the marks/stacks/Daze
+## reach ComboMark (combo_read) with a time left.
 
 const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
 
@@ -29,6 +30,7 @@ func run(main_node: Node) -> void:
 	await _expired()
 	await _buffered()
 	await _badges()
+	await _no_words()
 	print("RECASTCUE DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -56,12 +58,11 @@ func _window(hero: String, slot: String) -> void:
 	ok("%s %s: reports its recast window" % [hero, slot], timed and placed, str(w))
 	m.step(DT)
 	var cw: Dictionary = P.ak.cue.get("w", {})
-	var key := RecastCue.key_of(slot)
-	ok("%s %s: the local cue carries it (slot, AGAIN key)" % [hero, slot],
-			String(cw.get("slot", "")) == slot and key != "", "cue %s key %s" % [cw.get("slot", "-"), key])
+	ok("%s %s: the local cue carries it (slot, time left)" % [hero, slot],
+			String(cw.get("slot", "")) == slot and float(cw.get("left", 0.0)) > 0.0, str(cw))
 	await done(m)
 
-## Ostra's seed left alone: the window runs out and the E slot shows EXPIRED (never closes silently).
+## Ostra's seed left alone: the window runs out and the E slot goes dark (never closes silently).
 func _expired() -> void:
 	var s := setup("ostra", 6.0)
 	var m: Match = s[0]
@@ -70,7 +71,7 @@ func _expired() -> void:
 	P.ak.use_e()
 	_open(m, P, "e")
 	step(m, P.ak.e_t + 0.3)
-	ok("ostra e: an unused window shows EXPIRED", String(P.ak.cue.get("exp_slot", "")) == "e"
+	ok("ostra e: an unused window darkens the slot", String(P.ak.cue.get("exp_slot", "")) == "e"
 			and float(P.ak.cue.get("exp_t", 0.0)) > 0.0, str(P.ak.cue.get("exp_slot", "")))
 	await done(m)
 
@@ -93,7 +94,7 @@ func _buffered() -> void:
 	ok("ostra e: an early press is buffered into the window", held and popped, "held %s popped %s" % [held, popped])
 	await done(m)
 
-## Marks/stacks/Daze reach the badge list with a time left: Thief Marks, Vex's Daze, Sparkle's Sparks.
+## Marks/stacks/Daze reach ComboMark with a time left: Thief Marks, Vex's Daze, Sparkle's Sparks.
 func _badges() -> void:
 	for hero in ["thief", "gunslinger", "mage"]:
 		var s := setup(hero, 6.0)
@@ -105,7 +106,27 @@ func _badges() -> void:
 			"gunslinger": (P.ak as GunslingerKit).daze(T, 2.0)
 			"mage": (P.ak as MageKit).sparks[T.get_instance_id()] = {"e": T, "n": 2, "t": 3.0}
 		m.step(DT)
-		var marks: Array = P.ak.cue.get("marks", [])
-		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
-		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
+		var rd := P.ak.combo_read(T)
+		var timed := not rd.is_empty() and float(rd["left"]) > 0.0 and float(rd["total"]) > 0.0
+		ok("%s: the foe's tag shows its mark and time left" % hero, timed, str(rd))
 		await done(m)
+
+## A busy Sable fight (bolts, Marks, the dagger stuck in a foe and its window running out) floats numbers only:
+## no callout words over anyone (docs/UI_DECLUTTER.md).
+func _no_words() -> void:
+	var s := setup("thief", 6.0)
+	var m: Match = s[0]
+	var P: Hunter = s[1]
+	var T: Hunter = s[2]
+	aim_at(P, T.pos)
+	for i in 4:
+		tap(m, P)
+		step(m, 0.3)
+	P.ak.use_e()
+	step(m, float(P.ak.e_def().get("time", 3.0)) + 0.5)
+	var plain := RegEx.create_from_string("^[+-]?[0-9]+$")
+	var words: Array = m.fx.nums.map(func(nm): return String(nm["node"].text)).filter(
+			func(t): return plain.search(t) == null)
+	ok("thief fight: only numbers float, no words", words.is_empty() and dmg(T) > 0.0, str(words))
+	await done(m)
+

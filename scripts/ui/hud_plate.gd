@@ -300,7 +300,7 @@ func _downed(H, c: CanvasItem, sp: Vector2, h: Hunter, frame: Rect2, s: Dictiona
 	shown[h.nid] = {"segs": HudStyle.seg_count(dmax), "armor": false, "shield": false, "downed": true,
 		"word": line, "chip": 0.0, "lvl": h.lvl, "lvl_pop": float(s["lvl_pop"])}
 
-## The knock burst: rays flung outward from a ring, and the word popping in big then settling.
+## The knock burst: rays flung outward from a ring (no word: the plate itself shows the fall).
 static func _burst(c: CanvasItem, at: Vector2, t: float, col: Color) -> void:
 	if t <= 0.0:
 		return
@@ -316,5 +316,3 @@ static func _burst(c: CanvasItem, at: Vector2, t: float, col: Color) -> void:
 		pts.append(at + d * (r0 + 8.0 + 6.0 * float(i % 2)))
 	c.draw_multiline(pts, Color(col, a), 3.0)
 	c.draw_arc(at, 8.0 + 20.0 * ez, 0, TAU, 28, Color(Color.WHITE, 0.6 * a), 2.0, true)
-	var sc := 1.0 + 0.6 * (1.0 - minf(1.0, k * 5.0))
-	HudStyle.ctext(c, at + Vector2(0, 8.0 * sc), "DOWN", int(22.0 * sc), Color(Color.WHITE.lerp(col, 0.35), a), 6)

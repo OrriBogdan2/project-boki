@@ -87,8 +87,6 @@ func press_ult() -> bool:
 	h.cast_at = m.time
 	h.cast_slot = "ult"
 	h.used["r"] = int(h.used.get("r", 0)) + 1
-	var col: Color = form["glow"]
-	m.fx.word(h.pos + Vector3(0, 3.0, 0), String(r["name"]).to_upper(), col, true)
 	m.sfx("charge", h.pos, 0.0, 0.6)
 	m.sfx("warn", h.pos, -4.0, 0.7)
 	play("mf_ult")

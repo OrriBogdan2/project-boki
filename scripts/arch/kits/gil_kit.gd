@@ -181,11 +181,8 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 		beach_at[key] = m.time + float(pd.get("cd", 8.0))
 		f.hurt(0.1, h, {"stun": float(pd.get("stun", 0.75)), "src": "abil", "ab": "passive",
 			"tags": ["passive", "beached"]})
-		m.fx.word(f.pos + Vector3(0, 2.4, 0), "BEACHED!", res_col(), true)
 		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
 		m.sfx("unlock", f.pos, -4.0, 0.7)
-	else:
-		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 
 ## Different marks on a foe right now (tests and the HUD).
 func marks_on(f: Ent) -> int:

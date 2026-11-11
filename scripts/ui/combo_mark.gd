@@ -46,4 +46,3 @@ static func draw(c: Control, at: Vector2, viewer: Hunter, e: Ent, time: float) -
 		var p := at + Vector2((i - (pips - 1) * 0.5) * PIP_GAP, -R - 7.0)
 		c.draw_circle(p, PIP_R + 1.0, Color(0, 0, 0, 0.7))
 		c.draw_circle(p, PIP_R, col if i < lit else Color(1, 1, 1, 0.2))
-	HudStyle.ctext(c, at + Vector2(R + 16.0, 4.0), "%.1f" % float(d["left"]), 11, ring_col)

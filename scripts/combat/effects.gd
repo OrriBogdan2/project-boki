@@ -320,7 +320,6 @@ static func _one(e: Dictionary, caster: Node, ctx: Dictionary) -> void:
 						dmg *= 1.0 + float(e["spike"].get("dmg", 0.5))
 						o["stun"] = maxf(float(o.get("stun", 0.0)), float(e["spike"].get("stun", 0.8)))
 						o.erase("lift")
-						m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", col, true)
 						m.displace.spike(f, -16.0, caster)
 					f.hurt(dmg, caster, o)
 		"cone":
@@ -662,7 +661,6 @@ static func _yank(e: Dictionary, caster: Node, ctx: Dictionary, m: Node) -> void
 			for kk in ["stun", "slow", "burn", "root"]:
 				if e.has(kk): o[kk] = float(e[kk])
 			v.hurt(maxf(0.1, float(e.get("dmg", 0.0)) * _power(caster, ctx)), caster, o)
-		m.fx.word(v.pos + Vector3(0, 2.0, 0), "HOOKED", col, false)
 	if not victims.is_empty():
 		m.sfx("grab", anchor.pos, -1.0, 1.1)
 

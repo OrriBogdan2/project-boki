@@ -518,7 +518,7 @@ func _mage() -> void:
 	ac.step(m, 0.1)
 	ok("small: Wirerun ignores projectiles while it runs (phase)", P.phase_t > 0.0 or K.last_dash_kind == "wire")
 	var words: Array = m.fx.nums.map(func(n): return n["node"].text)
-	ok("Wirerun: the INVULNERABLE word shows on the run (source)", "INVULNERABLE" in words)
+	ok("Wirerun: no INVULNERABLE word floats over the run (docs/UI_DECLUTTER.md)", not "INVULNERABLE" in words)
 	ac.step(m, 0.6)
 	ok("small: Wirerun hits every foe it passes (two in a line), about 1.7 bolts each (data: Surge 153 / Jolt 90)",
 			ac.dmg(T) >= 18.0 and ac.dmg(T2) >= 18.0,

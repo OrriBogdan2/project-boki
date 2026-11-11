@@ -130,7 +130,6 @@ static func start_stomp(m: Match, h: Hunter, o: Hunter) -> void:
 	h.stomp = {"o": o, "t": 0.0, "hits": 0}
 	h.finish_t = 0.0
 	trace(m, "stomp start %s on %s" % [h.pname, o.pname])
-	m.fx.word(h.pos + Vector3(0, 2.3, 0), "STOMP", Color("ff8a6a"), false)
 	if o == m.player and m.hud:
 		m.hud.toast("%s is stomping you! Drift away or get help" % h.pname, Color("ff6a5a"))
 
@@ -140,7 +139,6 @@ static func end_stomp(m: Match, h: Hunter, why: String) -> void:
 	trace(m, "stomp end %s (%s)" % [h.pname, why])
 	h.stomp = {}
 	if why == "broken":
-		m.fx.word(h.pos + Vector3(0, 2.3, 0), "INTERRUPTED", Color("cfeaff"), false)
 		m.sfx("whoosh", h.pos, -6.0, 1.3)
 
 static func tick_stomps(m: Match, dt: float) -> void:

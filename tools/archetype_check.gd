@@ -357,7 +357,7 @@ func _archer() -> void:
 	P.inp["fire"] = true; m.step(DT); P.inp["fire"] = false
 	step(m, 0.5)
 	ok("archer: an arrow into a pinned foe is a plain tap (no Deadeye)",
-		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.ready_label() == "", "dealt %.0f" % (dmg(T) - dd0))
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0, "dealt %.0f" % (dmg(T) - dd0))
 	# Spirit Walk: a dodge roll, then walking through a rock column (terrain still blocks)
 	P.teleport(home); P.vel = Vector3.ZERO; P.dashes = P.max_dashes()
 	P.inp["move"] = Vector2(0, 1)
@@ -555,7 +555,7 @@ func _bulwark() -> void:
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.res = 60.0; K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark resource full: Shield Slam armed", K.full_ready() and K.ready_label() != "")
+	ok("bulwark resource full: Shield Slam armed", K.full_ready())
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)

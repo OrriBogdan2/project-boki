@@ -43,7 +43,6 @@ static func drop_keys(m: Match, at: Vector3, n: int) -> void:
 		var pop := Vector3(randf_range(-1.2, 1.2), randf_range(4.5, 6.0), randf_range(-1.2, 1.2))
 		m.drop("ckey", at, 1, "", "", pop)
 	m.fx.burst(at, KeyModels.BRASS, 12, 3.5, 0.5)
-	m.fx.word(at + Vector3(0, 0.6, 0), "KEY" if n == 1 else "%d KEYS" % n, KeyModels.BRASS, false)
 
 # ------------------------------------------------------------------ Net: the monster snapshot extra
 ## Appended to a non-Blight monster's snapshot: [carries a key, the Shrubling's state index (-1 for others)].

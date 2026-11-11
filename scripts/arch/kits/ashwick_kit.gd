@@ -75,7 +75,6 @@ func rd() -> Dictionary: return res_def()
 func lmbd() -> Dictionary: return d.get("lmb", {})
 func res_text() -> String: return "%d" % int(_best_char())
 func res_frac() -> float: return clampf(_best_char() / res_max(), 0.0, 1.0)
-func ready_label() -> String: return "FLASHOVER" if not ignites.is_empty() else ""
 
 func _setup() -> void:
 	fx = LDFx.of(m)
@@ -157,15 +156,13 @@ func _ignite(f: Ent, lvl: int, was: int) -> void:
 		_flashover_fx(f)
 		_stoke_pose()
 	elif was == 0:
-		m.fx.word(f.pos + Vector3(0, 2.3, 0), "ABLAZE", res_col(), false)
 		vfx("ablaze", f.pos)
 		m.sfx("as_ignite", f.pos, -3.0, 1.0)
 
-## The Flashover payoff: the word, a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
+## The Flashover payoff: a column of fire on the foe (content/vfx "flashover"), the blaze and the HUD
 ## flash; the shared payoff's rings stay out of Cinder's fire.
 func _flashover_fx(f: Ent) -> void:
 	var col := Color("ffe0a0")
-	m.fx.word(f.pos + Vector3(0, 2.7, 0), "FLASHOVER", col, true)
 	vfx("flashover", f.pos)
 	m.sfx("lw_blaze", f.pos, 0.0, 1.0)
 	m.sfx("crit", f.pos, -7.0, 0.85)
@@ -190,8 +187,7 @@ func on_knock(t: Hunter, mine: bool) -> void:
 	if float(cd["e"]) > 0.0:
 		cd["e"] = 0.0
 		resets += 1
-		m.fx.word(h.pos + Vector3(0, 2.8, 0), "CLOAK READY", col_of(e_def()), true)
-		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the word and the sound)
+		m.sfx("ab_ready", h.pos, -2.0, 0.8)           # (no ring on a reset: the sound)
 		if h.is_local(): h._ab_feedback("k1", "ready")
 
 # ------------------------------------------------------------------ tick
@@ -501,7 +497,6 @@ func _cinder_hit(f: Ent) -> void:
 			if o != f and is_instance_valid(o) and not o.dead and sees_from(f.pos, o):
 				_ignite(o, cur, burning(o))
 				vfx("shot_spread", f.pos, null, {"to": o.pos + Vector3(0, 1.0, 0)})
-		m.fx.word(f.pos + Vector3(0, 2.5, 0), "SPREAD", col_of(rdf), true)
 	else:
 		stoke(f)
 
@@ -639,7 +634,6 @@ func _ram_reward() -> void:
 	boost_until = m.time + float(dd["rank3_boost_t"])
 	h.shield = maxf(h.shield, h.max_hp * float(dd["rank3_shield"]))
 	h.shield_t = maxf(h.shield_t, float(dd["rank3_shield_t"]))
-	m.fx.word(h.pos + Vector3(0, 2.8, 0), "SPEED + SHIELD", col_of(dd), true)
 
 # ------------------------------------------------------------------ E: Furnace Cloak
 ## The press: the blast goes off at once round Cinder (never at the cursor), with a quick arms-out flare
@@ -697,19 +691,6 @@ func recast_window() -> Dictionary:
 	var t := float(x_def()["time"])
 	return RecastCue.window("x", float(jet.flight["t"]), t, h.pos, true, true)
 
-## RecastCue's badge: Char on each foe; gold once it's Ablaze, where the next ignite is the Flashover.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var ttl := float(rd()["expire"])
-	for key in chars:
-		var c: Dictionary = chars[key]
-		if not is_instance_valid(c["e"]) or (c["e"] as Ent).dead:
-			continue
-		var lvl := burning(c["e"])
-		var left: float = ttl - (m.time - float(c["t"]))
-		if left > 0.0 or lvl > 0:
-			var label := "ABLAZE" if lvl > 0 else "CHAR"
-			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()

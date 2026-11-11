@@ -52,14 +52,12 @@ static func start(h: Hunter, i: int, id: String) -> bool:
 			h.drink_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("pickup", h.pos, -6.0, 0.7)
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"repair":
 			h._fold_for_action()
 			h.kit_t = channel(id, "time")
 			h.vuln_fx_t = 0.0
 			m.sfx("build", h.pos, -6.0, 1.3)
-			m.fx.word(h.pos + Vector3(0, 2.3, 0), "VULNERABLE", Color("ff6a4a"))
 			return true
 		"mend":
 			h.heal(MEND_HP)

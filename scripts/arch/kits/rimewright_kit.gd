@@ -130,7 +130,6 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 ## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
-	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
 	m.sfx("rime_splinter", at, 0.0, 1.0)
 	lk().burst("spikes", at, {"r": SHATTER_R, "dur": 0.7})
 	vfx("shatter", at)
@@ -770,21 +769,6 @@ func recast_window() -> Dictionary:
 			return RecastCue.window("x", left, float(xd["late"]), rime["at"], true, true)
 	return {}
 
-## RecastCue's badges: Chill (a knock on it Shatters) and the Fan stacks toward the burst.
-func combo_marks(out: Array) -> void:
-	super(out)
-	var pd: Dictionary = d["passive"]
-	for key in chill:
-		var c: Dictionary = chill[key]
-		if is_instance_valid(c["t"]):
-			out.append(RecastCue.mark(c["t"], 0, float(c["left"]), float(pd.get("chill_t", 4.0)), "CHILL", true))
-	for key in fan_hits:
-		var f: Dictionary = fan_hits[key]
-		if is_instance_valid(f["t"]):
-			var n := int(f["n"])
-			var full := n >= int(pd.get("fan_hits", 8)) - 1
-			out.append(RecastCue.mark(f["t"], n, float(f["left"]), FAN_HOLD, "FAN", full))
-
 func e_recast() -> bool:
 	if not wall_cast.is_empty():
 		buffer_recast("e")
@@ -933,7 +917,6 @@ func _start_rime() -> bool:
 	_rime_hold_body()
 	play("tm_rime" if carry.is_empty() else "tm_rime_carry")
 	m.sfx("rime_lock", h.pos, 0.0, 1.0)
-	m.fx.word(h.pos + Vector3(0, 3.0, 0), "RIMELOCK", col_of(x_def()), true)
 	vfx("rime")
 	return true
 
@@ -1008,7 +991,6 @@ func _rime_no_glide() -> void:
 	var glide_now := bool(h.inp.get("glide", false))
 	if glide_now and not glide_held and not h.grounded:
 		h._ab_feedback("x", "deny")
-		m.fx.word(h.pos + Vector3(0, 2.6, 0), "NO GLIDE", Color("bff7ef"), false)
 	glide_held = glide_now
 
 

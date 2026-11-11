@@ -181,11 +181,9 @@ static func hit(m: Match, target: Ent, by: Ent, d: float, o: Dictionary) -> void
 	if stun > 0.0:
 		fx.ring(head, 0.7, Color("fff27a"), 0.35)
 		fx.spark(head, Vector3.UP, Color("fff6b0"), 10, 4.0, 180.0, 0.35, 0.0, 0.8)
-		fx.word(head + Vector3(0, 0.3, 0), "STUNNED", Color("fff27a"), false)
 	elif root > 0.0:
 		fx.ring(target.pos, 1.0, Color("ffb04a"), 0.5)
 		fx.ring(target.pos, 0.6, Color("ffb04a"), 0.6)
-		fx.word(head + Vector3(0, 0.3, 0), "ROOTED", Color("ffb04a"), false)
 	elif slow > 0.0:
 		fx.burst(target.pos + Vector3(0, 0.8, 0), Color("bff0ff"), 10, 2.0, 0.5, -1.0, 1.0)
 		fx.ring(target.pos, 0.9, Color("bff0ff", 0.8), 0.3)

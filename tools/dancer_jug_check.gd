@@ -191,10 +191,10 @@ func thief(a) -> void:
 			(gold.get("col", Color.WHITE) as Color).is_equal_approx(ThiefKit.EMP_LINE)
 			and float(gold.get("lw", 0.0)) >= 0.09
 			and float(gold.get("hot", 1.0)) == 0.0 and AimKit.shown(P, "aim_glow"))
-	A.ok("dancer HUD: EMPOWERED label + dash dot",
-			K.ready_label().begins_with("EMPOWERED") and P.slot_info("dash").get("full", false)
+	A.ok("dancer HUD: empowered dash dot",
+			K.primed_t > 0.0 and P.slot_info("dash").get("full", false)
 			and not P.slot_info("sec").get("full", false),
-			K.ready_label())
+			str(K.primed_t))
 	A.fresh(T)
 	A.aim_at(P, T.pos)
 	P.fire_cd = 0.0
@@ -587,7 +587,7 @@ func juggernaut(a) -> void:
 	A.ok("juggernaut passive: no bonus below full", absf(K.outgoing(T, 100.0, {}) - 100.0) < 0.1)
 	K.gain_rage(100.0)
 	A.ok("juggernaut passive: full = Enraged (+15%)",
-			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1 and K.ready_label() == "ENRAGED",
+			K.enraged_t > 0.0 and absf(K.outgoing(T, 100.0, {}) - 115.0) < 0.1,
 			"%.1f" % K.outgoing(T, 100.0, {}))
 	K.cd["e"] = 10.0
 	P.dashes = 0.0

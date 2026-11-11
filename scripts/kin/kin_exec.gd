@@ -778,7 +778,6 @@ static func apply_foe(effs: Array, f: Ent, cx: Dictionary, center: Vector3, st: 
 		if float(spike.params["stun"]) > 0.0:
 			o["stun"] = maxf(float(o.get("stun", 0.0)), float(spike.params["stun"]))
 		o.erase("lift")
-		m.fx.word(f.pos + Vector3(0, 2.0, 0), "SPIKED", KinRules.cat_color("control"), true)
 		f.vel.y = -16.0
 	# a hook's yank goes first (then the hit, so its stun lands on the way in)
 	for e in post:
@@ -828,7 +827,6 @@ static func _post(e: PartSpec, f: Ent, cx: Dictionary, center: Vector3, k: float
 				var dest := _ground(m, Vector3(p2.x, anchor.y, p2.y), anchor.y)
 				m.verbs.yank(f, dest, clampf(rel.length() / maxf(4.0, float(pr["strength"])), 0.14, 0.42), 0.8)
 				m.fx.bolt(anchor + Vector3(0, 1.0, 0), f.pos + Vector3(0, 0.9, 0), KinRules.cat_color("control"))
-				m.fx.word(f.pos + Vector3(0, 2.0, 0), "HOOKED", KinRules.cat_color("control"), false)
 				m.sfx("grab", anchor, -1.0, 1.1)
 			elif rel.length() > 0.4:
 				var r := maxf(1.0, float(cx.get("_radius", 4.0)))

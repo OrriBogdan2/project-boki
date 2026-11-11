@@ -341,7 +341,7 @@ func _draw_world_labels() -> void:
 	_draw_lair_labels()
 	_draw_truce_marks()
 	_draw_wisp_rings()
-	RecastCue.world(self, cam, m.player)      # two-step abilities: the recast marker and the combo badges on foes
+	RecastCue.world(self, cam, m.player)      # two-step abilities: the closing flash and the payoff burst
 	for h in m.hunters:
 		if h == m.player or h.out or h.extracted or not h.model or not (h.model.visible or HunterWisp.hides(h)) or h.unseen:
 			continue
@@ -385,10 +385,10 @@ func _draw_world_labels() -> void:
 			continue
 		LabelCull.mark(mb)
 		if mb.stagger_t > 0.0:
-			_ctext(sp + Vector2(0, -12), "STAGGERED", 18, Color("fff27a"), big)
-		elif mb.stag_open > 0.0:
-			var a := 0.75 + 0.25 * sin(m.time * 12.0)
-			_ctext(sp + Vector2(0, -12), "STAGGERABLE", 17, Color(0.85, 0.6, 1.0, a), big)
+			c.draw_arc(sp + Vector2(0, -16), 9.0, 0, TAU, 20, Color("fff27a"), 3.0, true)
+		elif mb.stag_open > 0.0:       # a pulsing purple ring: hit it with an ability now (no word)
+			var pulse := 9.0 + 2.0 * sin(m.time * 12.0)
+			c.draw_arc(sp + Vector2(0, -16), pulse, 0, TAU, 20, Color(0.85, 0.6, 1.0), 3.0, true)
 		# compact bar; rare and mutated monsters (mb.rarity, mb.mutations) wear a tinted frame and
 		# little icons for their mutations, and always show their bar
 		var rare: bool = int(mb.rarity) > 0 or not mb.mutations.is_empty()
@@ -1808,11 +1808,6 @@ func _draw_crosshair(p: Hunter) -> void:
 		c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76, 24, Color(0, 0, 0, 0.35), 3.0, true)
 		if rf > 0.0:
 			c.draw_arc(mp, Reticle.RES_R, PI * 1.62, PI * 1.62 + PI * 0.76 * rf, 24, Color(rc, 0.95 if p.ak.tell == "full" else 0.7), 3.0 if p.ak.tell == "full" else 2.0, true)
-		# the payoff is armed (DEADEYE, FLASHPOINT, CALLED SHOT, SLAM): a pulsing word under the arc
-		var rl := p.ak.ready_label()
-		if rl != "":
-			var pk := 0.5 + 0.5 * sin(m.time * 9.0)
-			_ctext(mp + Vector2(0, Reticle.RES_R + 16.0), rl, 13, Color(rc.lightened(0.2), 0.75 + 0.25 * pk), big)
 	# aiming at a truce partner: a reminder before you break it
 	if m.truce and not m.truce.pacts.is_empty():
 		var ph: Hunter = m.truce.partner_at(p.inp["aim"], p.team)
@@ -1947,25 +1942,22 @@ func _draw_overhead(p: Hunter) -> void:
 		_ctext(sp + Vector2(-w * 0.5 - 30, 8), "%dm" % int(round(alt)), 13, Color("bfe6ff"), big)
 		c.draw_colored_polygon(PackedVector2Array([sp + Vector2(-w * 0.5 - 30, -10), sp + Vector2(-w * 0.5 - 35, -3), sp + Vector2(-w * 0.5 - 25, -3)]), Color("bfe6ff"))
 	if p.reload_t > 0.0:
-		# reloading: a filling ring beside your head, and the word under your bars
+		# reloading: a filling ring beside your head
 		var rf := 1.0 - p.reload_t / float(p.wpn["reload"])
 		var rc := sp + Vector2(w * 0.5 + 16, 4)
 		c.draw_circle(rc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		c.draw_arc(rc, 8.0, 0, TAU, 24, Color(1, 1, 1, 0.15), 3.0, true)
 		_arc(rc, 8.0, rf, Color("ffe7a8"), 3.0)
-		_ctext(sp + Vector2(0, 33), "RELOADING", 11, Color("ffe7a8"), big)
 	if p.drink_t > 0.0:
 		var df := 1.0 - p.drink_t / UtilityUse.channel("tonic", "time")
 		var dc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(dc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(dc, 8.0, df, Color("8ff0a0"), 3.0)
-		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "DRINKING", 11, Color("8ff0a0"), big)
 	if p.kit_t > 0.0:
 		var kf := 1.0 - p.kit_t / UtilityUse.channel("armor_kit", "time")
 		var kc := sp + Vector2(-w * 0.5 - 16, 4)
 		c.draw_circle(kc, 11.0, Color(0.04, 0.04, 0.06, 0.75))
 		_arc(kc, 8.0, kf, ARMOR_COL, 3.0)
-		_ctext(sp + Vector2(0, 33 if p.reload_t <= 0.0 else 46), "REPAIRING", 11, ARMOR_COL, big)
 
 # ------------------------------------------------------------------ hover tips
 ## Point at anything on the bottom bar (abilities, health, weapon, kin) to see what it is.

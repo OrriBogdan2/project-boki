@@ -328,7 +328,7 @@ func _num_size(v: float, crit: bool) -> int:
 	var k := clampf(log(maxf(v, 1.0)) / log(10.0) - 1.0, 0.0, 1.0)     # 10 -> 0, 100 -> 1
 	return int(lerpf(36.0, 46.0, k)) + (8 if crit else 0)
 
-## A short word that floats up (COMBO, an ability's name, BOND READY).
+## A short word that floats up: farm gains and costs only (fights show no callout words, docs/UI_DECLUTTER.md).
 func word(at: Vector3, txt: String, col: Color, big := false) -> void:
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)

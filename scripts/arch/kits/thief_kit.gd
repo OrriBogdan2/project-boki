@@ -240,9 +240,6 @@ func res_text() -> String:
 func dash_payoff_ready() -> bool:
 	return primed_t > 0.0
 
-func ready_label() -> String:
-	return "EMPOWERED  ·  land it to reset Vault" if primed_t > 0.0 else ""
-
 func _tick(dt: float) -> void:
 	haste_t = maxf(0.0, haste_t - dt)
 	if primed_t > 0.0:
@@ -573,7 +570,6 @@ func _reset_fx(t: Ent) -> void:
 	m.fx.flash(at, Color("e8f6ff"), 1.0, 0.08)
 	var at_hand := hand_pos(hand == 1)
 	fx().star(at_hand, Color.WHITE, 1.4, 0.28, GHOST)
-	m.fx.word(at_hand + Vector3(0, 0.7, 0), "RESET", GHOST, false)
 	m.sfx("pay_cashin", at, -2.0, 1.0)
 	net_bolt(at, at + Vector3(0, 1.4, 0), EMP_BLUE)
 	RecastCue.payoff(self, t)
@@ -582,16 +578,12 @@ func _reset_fx(t: Ent) -> void:
 ## A rival we hit was knocked (or we assisted): a heal, a crimson star on them, a green pillar on us.
 func on_knock(t: Hunter, mine: bool) -> void:
 	var rd := res_def()
-	var hp0 := h.hp
 	h.heal(h.max_hp * float(rd.get("heal_knock", 0.15) if mine else rd.get("heal_assist", 0.25)))
-	var got := h.hp - hp0
 	if is_instance_valid(t):
 		fx().star(t.pos + Vector3(0, 1.2, 0), KNOCK_STAR, 3.0 if mine else 2.0, 0.55, Color(1, 0.9, 0.9))
 		clear_marks(t)
 	fx().pillar(h.pos, Color("5ae07a"), 3.4, 0.6, 0.7)
 	play("thf_flourish")
-	var who: String = "TAKEN" if mine else "ASSIST"
-	m.fx.word(h.pos + Vector3(0, 2.6, 0), "+%d" % int(round(got)) if got >= 1.0 else who, Color("7fe08a"), true)
 	m.sfx("dj_heal", h.pos, -4.0, 1.0)
 
 # ------------------------------------------------------------------ RMB: Bola
@@ -763,7 +755,6 @@ func _tangle(f, other: Ent) -> void:
 	m.fx.bolt(a + Vector3(0, 0.6, 0), other.pos + Vector3(0, 0.6, 0), col)
 	m.fx.bolt(a + Vector3(0, 1.0, 0), other.pos + Vector3(0, 1.0, 0), col.lightened(0.3))
 	var mid := (a + other.pos) * 0.5
-	m.fx.word(mid + Vector3(0, 2.6, 0), "TANGLED", col, true)
 	for t in both: fx().star((t as Ent).pos + Vector3(0, 1.4, 0), Color("ff9be8"), 1.2, 0.3)
 	m.sfx("thief_bola_stun", mid, -2.0, 1.0)
 	net_bolt(a + Vector3(0, 0.8, 0), other.pos + Vector3(0, 0.8, 0), col)
@@ -775,23 +766,13 @@ func in_e() -> bool:
 func e_recastable() -> bool:
 	return not knife.is_empty()
 
-## RecastCue: the knife is the marker; it steps you there by itself when it runs out (no "EXPIRED").
+## RecastCue: the knife flashes as it closes; it steps you there by itself when it runs out (the slot never goes dark).
 func recast_window() -> Dictionary:
 	var w := super()
 	if not w.is_empty():
 		w["at"] = knife.get("pos", h.pos)
 		w["auto"] = true
 	return w
-
-## RecastCue's badge: your Marks on each foe; gold while the empowered bolt is ready to cash them in.
-func combo_marks(out: Array) -> void:
-	super(out)
-	for f in m.foes_of(h.team):
-		var mk: Dictionary = f.get_meta("marks", {}) if f.has_meta("marks") else {}
-		var e: Array = mk.get(h.nid, [0, 0.0])
-		if int(e[0]) > 0 and float(e[1]) > 0.0:
-			var dur := float(res_def().get("dur", 4.0))
-			out.append(RecastCue.mark(f, int(e[0]), float(e[1]), dur, "MARKS", primed_t > 0.0))
 
 func cast_e() -> bool:
 	play("thf_knife")
