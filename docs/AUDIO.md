@@ -42,6 +42,7 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 - Boki sounds: `boki_*` (and the existing `kin_*` / `k_*` names); UI: `ui_*` (and the existing `click`, `hover`...).
 - Boki sounds: `boki_*` (and the existing `kin_*` names; `k_<type>` is a Boki's cast cue, one per standard type, picked by `KinLib.cue_of`); UI: `ui_*` (and the existing `click`, `hover`...).
 - Boki sounds: `boki_*` (and the existing `kin_*` names); a Boki ability cast plays `k_<type>` for its type (18, one per `KinParts.THEMES` entry, made in `tools/gen_sfx_boki.py`; `--sfx-set-check` fails if one has no file); UI: `ui_*` (and the existing `click`, `hover`...).
+- Species voices: `bk_<species>_<mood>` for every rigged species (`art/kin/*`), moods happy, alert, unsure, sleepy, hurt, 2 takes each (set `content/sfx/boki_voices.json`, made by `gen_sfx_boki.py`). Pitch comes from the species' weight, the texture from its type (crackle Fire/storm, burble Water/venom, rustle Grass/spore/swarm, chime Crystal/moon/sound, else plain), the 3-note motif is its signature. Play them with `KinVoice.cue(species, mood)`: it falls back to `kin_happy` / `kin_alert` / `kin_unsure` / `boki_sleep` / `kinhit` for a species with no set. A new species adds its row to `SPECIES_VOICE` and regenerates; `--sfx-set-check` fails if a rigged species lacks a mood.
 
 ## Sound sets (`content/sfx/<group>.json`)
 ```json
