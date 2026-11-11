@@ -2,7 +2,7 @@ extends RefCounted
 ## --inv-shots --shots-dir=<dir>: the in-match inventory at whatever resolution the window has (run
 ## under xvfb with a renderer, --resolution WxH). inv_pack: the backpack window with a full loadout;
 ## inv_loot: a deathbox with gear beside it; inv_tip: the compare tooltip on a hovered backpack piece
-## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the height.
+## (only when the window is a LoadoutPanel). --shots-size=WxH resizes the window first. Files carry the window size.
 
 var main: Node
 var captions: Array = []
@@ -29,7 +29,8 @@ func run(main_node: Node) -> void:
 	dress(p)
 	m.hud.toggle_pack()
 	await _frames(8)
-	var tag := "%dp" % int(main.get_viewport().get_visible_rect().size.y)
+	var win := main.get_window().size
+	var tag := "%dx%d" % [win.x, win.y]      # the real window: the UI scales, so the canvas height says 720 at 1440
 	await _shot("inv_pack_" + tag, "Backpack window with a full loadout")
 	var found: Array = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)
 	if not found.is_empty():

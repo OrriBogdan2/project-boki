@@ -2584,9 +2584,7 @@ func _build_loot() -> void:
 			if got > 0 or (loot_open as Dictionary).get("empty", false):
 				close_loot(), 200)
 	foot.add_child(sm)
-	var hint := UI.label("Best first: hands, then your backpack", 12, MUTED)
-	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	foot.add_child(hint)
+	sm.tooltip_text = "Best first: hands, then your backpack"
 	pc.custom_minimum_size.x = 430
 	add_child(pc)
 	loot_panel = pc
@@ -2763,9 +2761,6 @@ func _build_pack() -> void:
 	var sl := LoadoutPanel.fill(m, pc, v, func(): _build_pack())
 	if loot_open == null and not p.caught.is_empty():
 		CaptureHud.pack_section(self, v, p, func(): _build_pack())       # the capsules in your box, with Release
-	var hint := UI.para(LoadoutPanel.HINT, 12)
-	hint.custom_minimum_size.x = LootHold.WIDTH - 28.0
-	v.add_child(hint)
 	add_child(pc)
 	pack_panel = pc
 	_fit_panel(pc, sl[0], sl[1])

@@ -100,11 +100,16 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 		keys.append(Settings.key_cap(k))
 	ok(keys.all(func(k): return caps.has(k)), "every glove and utility slot shows its key: %s" % [keys])
 	ok(caps.has("Armor") and caps.has("Boots") and caps.has("Glove"), "the other slots are named")
+	ok(caps.has("x2") and caps.has(UtilityBelt.name_of("medkit")), "a belt stack: plain name, its count apart")
 	var lp: LoadoutPanel = pc.find_children("*", "LoadoutPanel", true, false)[0]
 	lp.hover_demo("pack", 0)
 	await _frames(main, 2)
 	var tip: InvTip = pc.find_children("*", "InvTip", true, false)[0]
 	ok(_texts(tip).has("+28 armor") and _texts(tip).has("-22 health"), "pointing at the vest shows the compare card")
+	var card: Control = tip.get_child(0)
+	ok(view.encloses(card.get_global_rect()), "the compare card stays on screen")
+	await _full_pack(main, m, p)
+	lp = m.hud.pack_panel.find_children("*", "LoadoutPanel", true, false)[0]
 	var armor_drag := {"inv": "pack", "i": 0}
 	ok(lp._can_drop_worn(Vector2.ZERO, armor_drag, 2) and not lp._can_drop_worn(Vector2.ZERO, armor_drag, 0),
 		"dragging armor: it can drop on the armor slot, not on a glove")
@@ -124,6 +129,28 @@ func _window(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	m.hud.close_pack()
 	await _beside(main, m, p, q)
 
+## A full pack (6 of 6) at 720p: every line shows without scrolling, one line each, inside the window.
+func _full_pack(main: Node, m: Match, p: Hunter) -> void:
+	var keep := p.pack.duplicate()
+	p.pack = [Loot.gear("vest", 3), Loot.gear("blink", 2), Loot.gear("windstep_boots", 1), Loot.valuable("kin_idol"),
+		Loot.valuable("sky_pearl"), Loot.valuable("old_coin")]
+	var was := main.get_window().size
+	main.get_window().size = Vector2i(1280, 720)
+	var lp := await _reopen(main, m)
+	await _frames(main, 3)
+	print("INVENTORY full pack in view %s" % [m.hud.pack_panel.get_viewport_rect()])
+	var win: Rect2 = m.hud.pack_panel.get_global_rect()
+	var sc: ScrollContainer = m.hud.pack_panel.find_children("*", "ScrollContainer", true, false)[0]
+	var shown := sc.get_global_rect()
+	var rows: Array = lp._pack_rows
+	ok(rows.size() == 6 and rows.all(func(r): return shown.encloses((r as Control).get_global_rect().grow(-1.0))),
+		"a full pack: all 6 lines show without scrolling (list %s)" % [shown])
+	ok(rows.all(func(r): return (r as Control).size.y <= LoadoutPanel.ROW_H + 1.0), "each pack line is one line high")
+	ok(win.encloses(shown) and m.hud.pack_panel.get_viewport_rect().encloses(win), "the list and window stay on screen")
+	p.pack = keep
+	main.get_window().size = was
+	await _reopen(main, m)
+
 func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	var bx: Dictionary = load("res://tools/loot_full_check.gd").make_box(q, p.pos, [Loot.valuable("old_coin")])
 	bx["gear"] = [{"id": "skylark_boots", "rar": 2}]
@@ -134,6 +161,10 @@ func _beside(main: Node, m: Match, p: Hunter, q: Hunter) -> void:
 	var inv: PanelContainer = m.hud.pack_panel
 	ok(m.hud.pack_open() and loot.get_global_rect().end.x <= inv.get_global_rect().position.x + 1.0,
 		"looting: your inventory opens at the right, the box side by side to its left")
+	var inside := loot.get_global_rect().grow(1.0)
+	var out := loot.find_children("*", "Control", true, false).filter(func(c):
+		return (c as Control).is_visible_in_tree() and not inside.encloses((c as Control).get_global_rect()))
+	ok(out.is_empty(), "nothing in the deathbox window runs past its edge (%d out)" % out.size())
 	m.hud.close_loot()
 	ok(not m.hud.pack_open(), "closing the box closes it again")
 
