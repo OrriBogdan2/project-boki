@@ -57,7 +57,7 @@ func run(main: Node) -> void:
 		var win := main.get_window().size
 		var path := dir.path_join("%dx%d_%s.png" % [win.x, win.y, m[0]])
 		main.get_viewport().get_texture().get_image().save_png(path)
-		var bad := outside(view, Rect2(Vector2.ZERO, Vector2(win)))
+		var bad := outside(view, view.get_viewport_rect())      # (UI scale: the logical rect, not the window)
 		print("PREMATCHSHOT %s outside the safe area: %d %s" % [path, bad.size(), bad.slice(0, 3)])
 	var lo: Dictionary = view.pm.launch_opts()
 	view.queue_free()

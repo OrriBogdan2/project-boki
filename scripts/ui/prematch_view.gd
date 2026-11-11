@@ -19,6 +19,7 @@ const TILE_MAX := 100.0       # px, the largest roster portrait
 const NAME_FRAC := 0.07       # the hero name's size as a fraction of the window height
 const NAME_MIN := 40          # px, the smallest hero name
 const ABILITY_PX := 50.0      # px, one ability tile (icon and key)
+const LOCK_H := 52.0          # px, the Lock in button's height
 const LOG_H := 84.0           # px, the most the chat log grows to (it scrolls past that)
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad chip of whoever is picking: a warm gold card
 const SHADE := Color(0.05, 0.035, 0.08)         # the dark the splash fades into under the roster and the text
@@ -102,7 +103,7 @@ func _ready() -> void:
 	grid.add_theme_constant_override("v_separation", 8)
 	right.add_child(grid)
 	lock_btn = UI.primary("Lock in", _lock_in)
-	lock_btn.custom_minimum_size.y = 52
+	lock_btn.custom_minimum_size.y = LOCK_H
 	right.add_child(lock_btn)
 	_talk(false)
 	_fit_safe_area()
