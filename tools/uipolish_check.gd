@@ -186,6 +186,17 @@ func _screens() -> void:
 	await main.get_tree().process_frame
 	var off_menu := _off_look(Overlay.root, ours)
 	ok("Esc menu: every box is the menu look", off_menu.is_empty(), str(off_menu))
+	var front: Array = _shown_buttons()
+	ok("Esc menu (garden): 6 buttons up front (%d)" % front.size(), front.size() == 6)
+	Overlay.open_more()
+	await main.get_tree().process_frame
+	var more_btns: Array = _shown_buttons()
+	var under_more := ["Inventory", "Save files", "Save and quit"]
+	ok("Esc menu: Inventory, Save files and Save and quit are under More",
+		under_more.all(func(t): return more_btns.any(func(x): return x.contains(t))))
+	Overlay.back()
+	await main.get_tree().process_frame
+	ok("Esc menu: Back from More returns to the menu", Overlay.page == "pause")
 	var layer := UI.confirm(Overlay.root, "Leave?", "A test question.", "Leave", func(): pass)
 	await main.get_tree().process_frame
 	var with_badge := layer.find_children("*", "PanelContainer", true, false).size() >= 2
@@ -224,3 +235,8 @@ func _screens() -> void:
 	for i in 30:
 		await main.get_tree().process_frame
 	ok("farm: every box is the menu look", _off_look(home, ours).is_empty(), str(_off_look(home, ours)))
+
+## The labels of the buttons showing in the open menu (the panel's icon-only close button has none).
+func _shown_buttons() -> Array:
+	var texts: Array = Overlay.host.find_children("*", "Button", true, false).map(func(b): return (b as Button).text)
+	return texts.filter(func(t): return t != "")

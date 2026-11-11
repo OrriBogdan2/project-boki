@@ -204,3 +204,9 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
   instead of the partner's card. Hide the bar with `hub.visible = false` while a mode (build mode)
   owns the bottom of the screen.
 - New home panels: `var v := _new_panel("Kin Box", 900)` then fill `v` with the helpers above.
+
+## The Esc menu (DECISIONS 2026-11-08, "UI is too much for a new player")
+Up front: Resume, Change Hunter (practice) or Training Grounds (garden), Settings, Controls, More, and
+Leave (Leave match / Save and leave). More holds the rest: Inventory, Save files, Change your look,
+I'm stuck, Admin tools, Save and quit. More is a page on the same panel stack; Back and Esc return to
+the menu. `--uipolish-check` asserts the front-page button count and what sits under More.

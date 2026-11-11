@@ -94,6 +94,9 @@ func _area(main: Node, m: Match, area: String) -> void:
 	await tree.process_frame
 	var labels: Array = Overlay.host.find_children("*", "Button", true, false).map(func(b): return String((b as Button).text))
 	ok(labels.any(func(t): return t.contains("Change Hunter")), "%s: the Esc menu has Change Hunter" % area)
+	labels = labels.filter(func(t): return t != "")
+	ok(labels.size() == 6 and labels.has("More"),
+		"%s: the Esc menu is 6 buttons with More (%d)" % [area, labels.size()])
 	Overlay.close()
 	main.set("current", was)
 	await tree.process_frame
