@@ -40,6 +40,19 @@ func tick(dt: float) -> void:
 		if _due(String(id), p, r):
 			FirstTimeHint.show(id, _say)
 			return      # one at a time
+	if KinMerge.can_cast(p):
+		FirstTimeHint.show("fuse", _say)
+
+## Your Fuse just ended: the first time, one line on the rest timer (a surge or a lost Boki has none).
+func fuse_ended() -> void:
+	FirstTimeHint.mark("fuse")
+	var k: Kin = m.player.kin if m.player != null else null
+	if m.hud != null and k != null and k.rest_t > 0.0:
+		FirstTimeHint.show("fuse_rest", _say)
+
+func _say(line: String) -> void:
+	_last = line
+	m.hud.toast(line, COL)
 
 func _say(line: String) -> void:
 	_last = line
@@ -61,7 +74,7 @@ func _due(id: String, p: Hunter, r: Dictionary) -> bool:
 		"goexit": return m.time >= float(r["goexit_s"]) and not _outpost(p, "", float(r["sight_m"]))
 		"tide": return m.heart != null and Heart.tide_stage(m) >= 0
 		"heartspark": return m.heart != null and m.heart.state == "charging"
-		"hotzone": return m.hot != null and m.skydrop != null and m.skydrop.planning
+		"hotzone": return _hot_zone() and m.skydrop != null and m.skydrop.planning
 	return false
 
 ## The last hint is still on the lane, or something waits behind it (a hint never stacks on another).
@@ -74,6 +87,10 @@ func _hint_up() -> bool:
 ## A foe is close or has picked you out.
 func _fight_on(p: Hunter, dist: float) -> bool:
 	return m.mobs.any(func(mb): return not mb.dead and (p.flat_dist(mb) < dist or mb.tgt == p))
+
+## This match picked a hot drop zone (BiomeRun's HotZone; a map with no regions has none).
+func _hot_zone() -> bool:
+	return m.biomes != null and m.biomes.hot != null and m.biomes.hot.hot >= 0
 
 ## An outpost of the given state is within `dist` ("" = any); an idle one counts once it can be started,
 ## a charging one only if it is yours.

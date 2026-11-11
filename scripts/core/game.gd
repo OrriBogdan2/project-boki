@@ -64,7 +64,7 @@ func _setup_input() -> void:
 	_key("fire", [], MOUSE_BUTTON_LEFT)
 	_key("secondary", [], MOUSE_BUTTON_RIGHT) # your archetype's right-click ability (its variants: tap, hold, air...)
 	# match keys (docs/ARCHETYPES.md): LMB weapon, RMB the archetype's ability, Shift the archetype's
-	# dash, Space jump and glide (Mouse 5 glides too), Q your active glove, E the archetype's utility,
+	# dash, Space jump and glide, Q your active glove, E the archetype's utility,
 	# R the hunter's ultimate, X Fuse with your Boki (a full bond meter), G send out / call back your Boki
 	# (hold G for the order wheel; the Boki casts its own ability), middle mouse ping, 1-4 the belt, F interact.
 	_key("signature", [KEY_E])                # the archetype's utility (E)
@@ -77,13 +77,17 @@ func _setup_input() -> void:
 	_key("gear2", [KEY_V])                    # glove 2 (V; in a match only, so it shares V with "play" at home)
 	_key("crouch", [KEY_CTRL])                # sneak: slower, quieter, and you see further
 	_key("throw", [KEY_G])                    # send your kin out to fight on its own, or recall it
+	_key("summon", [KEY_C])                   # Boki wisps: your wisp out as the full Boki (KinSummon)
 	_key("ping", [], MOUSE_BUTTON_MIDDLE)     # ping for your squad: the spot, enemy or loot at the cursor (PingInput)
+	_key("ping", [], MOUSE_BUTTON_XBUTTON1)   # Mouse 4 pings too
+	_key("kin_attack", [KEY_K])               # Boki order: attack my target (the Chase order)
+	_key("kin_return", [KEY_N])               # Boki order: come back to me (the Return order)
+	_key("kin_hold", [KEY_L])                 # Boki order: hold this position (the Guard order)
 	_key("base", [KEY_B])                     # base to a teammate: a 3s channel (squads only)
 	_key("swap_kin", [])                      # one kin per expedition now; kept so old code paths compile
-	_key("dash", [KEY_SHIFT])
+	_key("dash", [KEY_SHIFT], MOUSE_BUTTON_XBUTTON2)     # Mouse 5 (the front side button) dashes too
 	_key("jump", [KEY_SPACE])
-	_key("glide", [], MOUSE_BUTTON_XBUTTON2)  # hold Mouse 5 (the front side button) in the air to glide, like holding Space; never jumps
-	_key("glide", [], MOUSE_BUTTON_XBUTTON1)  # Mouse 4 glides too (not advertised)
+	_key("glide", [])                         # a spare glide button, unbound: holding jump in the air glides
 	_key("hunter_ult", [KEY_R])               # the hunter's own ultimate (level 6, see ArchKit.cast_ult)
 	_key("ultimate", [KEY_X])                 # Fuse with your Boki (level 6, a full bond meter); X again releases
 	_key("util1", [KEY_1])                    # utility belt slot 1 (a tonic to start)
@@ -103,6 +107,7 @@ func _setup_input() -> void:
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
+	_key("move_readout", [KEY_F7])            # the movement readout (speeds, state) for tuning
 	_key("separate", [KEY_Z])                 # riding in / dropping behind the leader: break away and drop solo
 
 func goto(screen: String, opts := {}) -> void:
@@ -212,7 +217,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	# time passes for kin already lost: prices drift, unclaimed ones get sold, rivals ask for theirs back
 	out["ransom_news"] = Ransom.tick(r.get("rivals", []))
 	# the market turns over while you're out (offline), and what you found comes home
-	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)))
+	out["market_news"] = MarketSave.tick(won, int(ms.get("bosses", 0)), null, ms)
 	out["exchange_fills"] = Exchange.tick()
 	# going down leaves your kin behind; where they end up was settled in the match
 	var lost_news: Array = []
@@ -265,9 +270,9 @@ func apply_result(r: Dictionary) -> Dictionary:
 			hk["trust"] = clampf(float(hk["trust"]) + rest, 0.0, 100.0)
 		if Save.has_building("dojo"):
 			hk["xp"] = int(hk.get("xp", 0)) + 40
-			while int(hk["xp"]) >= 100 * int(hk["level"]):
+			while int(hk["level"]) < Evo.cap() and int(hk["xp"]) >= 100 * int(hk["level"]):
 				hk["xp"] = int(hk["xp"]) - 100 * int(hk["level"])
-				hk["level"] = int(hk["level"]) + 1
+				Evo.level_up(hk)
 				_evolve(hk, out)
 	# records for the trophy hall
 	var stt: Dictionary = d["stats"]
@@ -295,6 +300,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 			if int(p["stage"]) == grow:
 				out["crops_ready"] += 1
 	out["class_unlock"] = ClassUnlock.after_match(r)     # Hunter challenges and mastery
+	Unmasked.migrate(Save.d)       # a mastery level reached shows on you at home (MasteryLook)
 	# the floor: nobody is left with no Boki and no way to play (Lifeline)
 	out["floor"] = Lifeline.check()
 	Save.save_game()
@@ -344,9 +350,9 @@ func _kin_after(k: Dictionary, run: Dictionary, won: bool, r: Dictionary, treat:
 	if not lead: xp = int(xp * 0.7)
 	if treat == "treat_xp": xp = int(xp * 1.5)
 	k["xp"] = int(k.get("xp", 0)) + xp
-	while int(k["xp"]) >= 100 * int(k["level"]):
+	while int(k["level"]) < Evo.cap() and int(k["xp"]) >= 100 * int(k["level"]):
 		k["xp"] = int(k["xp"]) - 100 * int(k["level"])
-		k["level"] = int(k["level"]) + 1
+		Evo.level_up(k)
 		out["levelup"] = true
 		_evolve(k, out)
 	if lead:
@@ -358,7 +364,7 @@ func _evolve(k: Dictionary, out: Dictionary) -> void:
 	if ev.is_empty():
 		return
 	ev["text"] = Evo.describe(ev, k)
-	if ev["kind"] == "form": Care.dex_mark(k["species"], "form", String(ev["to"]))
+	if ev["kind"] == "form": Care.dex_mark(k["species"], "caught")      # it evolved into a new species
 	Save.log_event("evolved", k, {"kind": String(ev["kind"]), "to": String(ev.get("to", ev.get("part", "")))})
 	if not k.has("pending_evo"):
 		k["pending_evo"] = []

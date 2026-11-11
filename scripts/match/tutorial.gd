@@ -1,7 +1,7 @@
 class_name Tutorial
 extends RefCounted
 ## The first-match tutorial: a short scripted course on content/maps/tutorial.json (its "course" table
-## holds each stop), eight steps (decision 0023: what the cut steps taught is
+## holds each stop), ten steps (decision 0023: what the cut steps taught is
 ## MatchHints now). Match owns one of these as `tut` and calls update() every step.
 ## The steps, their words and the headless driver (TutorialDrive) live here and next door, not in Match.
 ## What the player sees is drawn by TutorialHud: a small banner at the top for each new step that
@@ -14,23 +14,24 @@ static func steps() -> Array:
 	return Content.rules("tutorial")["steps"]
 
 const KEYS := {"move": "move", "dash": "dash", "glide": "glide", "shoot": "fire", "sig": "signature",
-	"throw": "throw", "chest": "interact"}
+	"throw": "throw", "grab": "interact", "chest": "interact"}
 ## Which course stop a finished step leaves you at (a fall puts you back there).
 const STOP_AFTER := {"move": "move", "dash": "glide"}
 const PADS := ["dash", "glide"]      # course stops left from a glowing pad on one island, landed on the next
+const FOE_STEPS := ["shoot", "sig", "throw", "fight", "rival"]     # the marker is the nearest monster
 const WALK_LEAD := ["move", "chest", "extract"]
 
 const CARD_T := 1.5        # s the top banner stays up before it settles into the pill
-const NAG_T := 15.0        # s without progress before the pill pulses and the Boki says it once more
+const NAG_T := 8.0         # s without progress before the pill pulses and the Boki says it again
 const INTRO_T := 2.0       # s the first-time intro card stays up (any key closes it sooner)
 const DONE_T := 0.9        # s of the step-done sting
-const DASH_WAIT_T := 40.0  # s on the dash isle before the glide half starts without a dash seen
 const FAR_SCOUT := 38.0    # m: a target this far off gets "crouch to scout ahead"
 const MINT := Color(0.56, 0.89, 0.78)
 
 var m: Match
 var step := -1
-var leg := 0                 # the dash step's half: 0 dash to the isle, 1 glide on to the range
+var leg := 0                 # the gap step's half: 0 dash to the isle, 1 glide on to the range
+var falls := 0               # falls into the void in this step (two bring the plain help line)
 var intro := true            # the "Training run" card: the first time only, until a key or INTRO_T
 var intro_t := 0.0
 var text := ""               # this step's one line, on the banner and the pill
@@ -46,16 +47,15 @@ var nag_t := 0.0             # s the pill pulses (after a stall)
 var wait := 0.0
 var down_t := 0.0
 var kills := 0               # monsters you or your Boki beat
-var flag := false
 var moved := 0.0
 var stall_t := 0.0           # s since the last progress
+var stall_got := 0            # got at the last look: a hit or a cast is progress too
 var best_d := 1e9            # closest you've been to this step's target
 var target := Vector3.INF    # where the marker points (INF for none)
 var label := ""
 var last_stop := Vector3.INF # where a fall puts you back
 var used0 := {}
 var throws0 := 0
-var hits := 0                # your weapon hits on a monster this step
 var recalled := false        # the Boki came back (it started out)
 var need_back := false
 var fight_n := 0
@@ -63,6 +63,7 @@ var _course: Dictionary = {}
 var _beams: Array = []
 var _pads: Array = []
 var pell: TutorialGuide
+var rival: TutorialRival       # beats 7 and 8: the rival Hunter, its wisps and the grab
 var skip_btn: Button = null    # the Skip button (TutorialHud.add_skip), once the Hud is there
 
 func _init(match_node: Match) -> void:
@@ -70,6 +71,7 @@ func _init(match_node: Match) -> void:
 	intro = not match_node.opts.get("tut_test", false) and not Save.d["tutorial"].get("tut_intro", false)
 	_course = World.load_layout("tutorial").get("course", {})
 	pell = TutorialGuide.new(self)
+	rival = TutorialRival.new(self)
 
 # ------------------------------------------------------------------ the course
 ## A course stop's ground position (INF when the stop isn't in the table). key: "at" or "pad".
@@ -183,6 +185,7 @@ func update(dt: float) -> void:
 	_point(sid)
 	_stall(dt)
 	_props()
+	rival.tick(dt)
 	pell.tick(dt)
 	if p.kin and p.kin.comp:
 		p.kin.comp.tut(stop_id(), goal(sid))
@@ -207,7 +210,6 @@ func _finish(sid: String) -> void:
 	_enter()
 
 func _sting() -> void:
-	flag = false
 	wait = 0.6
 	done_t = DONE_T
 	m.sfx("unlock", null, -9.0)
@@ -260,11 +262,14 @@ func _enter() -> void:
 		m.hud.msgs.clear()
 		m.hud.msgs.hold = true
 	stall_t = 0.0
+	nag_t = 0.0
+	flash_t = 0.0
 	best_d = 1e9
 	got = 0
 	got_seen = 0
+	falls = 0
+	stall_got = 0
 	_refresh(p)
-	hits = 0
 	recalled = false
 	need_back = false
 	used0 = p.used.duplicate()
@@ -283,22 +288,31 @@ func _enter() -> void:
 			var left := _live_foes()      # (one may be left from the Boki step: it joins the fight)
 			_foes((["skitter", "spitter", "skitter"] as Array).slice(mini(left, 3)), true)
 			fight_n = _live_foes()
+		"rival":
+			rival.start()
 		"chest":
 			if p.chest_keys == 0:
 				KeyChest.give(p, 1)      # (the key is handed over: finding one is a hint now)
 			FirstTimeHint.mark("key")
+			_open_lift()      # (the chest can be skipped: the lift ends the course either way)
 			m.ping(stop("chest"), Color("dfe8f2"))
 			for mb in m.mobs:
 				if not mb.dead:
 					mb.dead = true
 					mb.visible = false
 		"extract":
+			_open_lift()
 			var o := outpost()
 			if not o.is_empty():
-				m.exits.open_now(o, p.team)      # (the uplink and its defence are hints now: the lift is open)
 				m.ping(o["pos"], ExitModels.UPLINK)
 	_words()
 	pell.begin(sid)
+
+## The lift is open from the chest on (the uplink and its defence are hints now).
+func _open_lift() -> void:
+	var o := outpost()
+	if not o.is_empty():
+		m.exits.open_now(o, m.player.team)
 
 ## Brings monsters in near the player for a step (only if none are left, unless topping up).
 func _foes(kinds: Array, top_up := false) -> void:
@@ -361,15 +375,13 @@ func _is_done(sid: String) -> bool:
 			return moved > 3.0 and near.call(2.2)
 		"dash":
 			if leg == 0:
-				flag = flag or p.roll_t > 0.0
-				if near.call(4.0) and (flag or t > DASH_WAIT_T):
+				if near.call(4.0):
 					_next_leg()
 				return false
-			flag = flag or p.gliding
-			return flag and near.call(5.0)
+			return near.call(5.0)
 		"shoot":
 			_keep_foe("skitter")
-			got = hits
+			got = kills
 			return got >= need
 		"sig":
 			_keep_foe("skitter")
@@ -377,8 +389,10 @@ func _is_done(sid: String) -> bool:
 			return got >= need
 		"throw":
 			_keep_foe("spitter")
-			return p.kin == null or p.kin.state == "downed" or _throw_done()
+			return p.kin == null or _throw_done()
 		"fight": return kills >= fight_n and not m.mobs.any(func(x): return not x.dead)
+		"rival": return rival.knocked()
+		"grab": return rival.grabbed()
 		"chest": return m.chests.any(func(c): return c.get("tut", false) and c["open"])
 	return false      # (extract: the match ends when you step into the light)
 
@@ -422,6 +436,8 @@ func goal(sid: String) -> Vector3:
 					bd = m.player.flat_dist(mb)
 					best = mb
 			return best.pos if best else stop("yard")
+		"rival": return rival.hunter_at()
+		"grab": return rival.boki_at()
 		"chest":
 			for c in m.chests:
 				if c.get("tut", false):
@@ -439,16 +455,12 @@ func _lead_goal(sid: String) -> Vector3:
 		return goal(sid)
 	return Vector3.INF
 
-## The marker: from the first frame of a destination step to its last. A fight step only gets one
-## once the monsters are some way off.
+## The marker: from the first frame of a destination step to its last, monsters close by or not.
 func _point(sid: String) -> void:
 	target = Vector3.INF
 	label = ""
 	var at := goal(sid)
 	if at == Vector3.INF or m.player.out:
-		return
-	var foe_step := sid in ["shoot", "sig", "throw", "fight"]
-	if foe_step and Vector2(at.x - m.player.pos.x, at.z - m.player.pos.z).length() <= 6.0:
 		return
 	target = at
 	label = String(Content.rules("tutorial")["labels"].get(stop_id(), "Monster"))
@@ -457,7 +469,10 @@ func _point(sid: String) -> void:
 ## more. No card comes back and nothing pauses.
 func _stall(dt: float) -> void:
 	stall_t += dt
-	if target != Vector3.INF:
+	if got != stall_got:
+		stall_got = got
+		stall_t = 0.0
+	if target != Vector3.INF and id() not in FOE_STEPS:      # (a monster walking up to you is not progress)
 		var d := Vector2(target.x - m.player.pos.x, target.z - m.player.pos.z).length()
 		if d < best_d - 1.0:
 			best_d = d
@@ -490,6 +505,10 @@ func _props() -> void:
 		(pd["disc"] as Node3D).scale = Vector3.ONE * (pulse if on else 1.0)
 		(pd["label"] as Node3D).visible = on
 
+## Beams standing in the world right now (--tutorial-idle-check).
+func beams_on() -> int:
+	return _beams.filter(func(b: MeshInstance3D): return b.visible).size()
+
 func _make_beam() -> MeshInstance3D:
 	var n := MeshInstance3D.new()
 	var cyl := CylinderMesh.new()
@@ -514,8 +533,10 @@ func _words() -> void:
 	var sid := id()
 	var line := String(steps()[step][1])
 	var alt: Dictionary = Content.rules("tutorial")["alt"]
-	if sid == "dash" and leg == 1:
-		line = String(alt["glide"])
+	if sid == "move" and m.player.dropping:
+		line = String(alt["land"])
+	elif sid == "dash" and falls >= 2:
+		line = String(alt["gap_help"])
 	elif sid == "throw" and not recalled and (need_back or throw_recalls()):
 		line = String(alt["throw_back"])
 	elif sid == "throw" and need_back:
@@ -572,12 +593,9 @@ func card_up() -> bool:
 # ------------------------------------------------------------------ the fall, and the key press
 ## Where a fall into the void puts you back: the last stop you reached.
 func respawn() -> Vector3:
+	falls += 1
 	_refresh(m.player)          # (a fall is a retry: every move is ready for it)
 	return last_stop if last_stop != Vector3.INF else stop("land")
-
-## A weapon hit of yours on a monster (Match).
-func on_hit() -> void:
-	hits += 1
 
 ## The match waits: for the first-time intro card, or while Pell talks (TutorialGuide.TALK_MAX_S at most).
 func holding() -> bool:

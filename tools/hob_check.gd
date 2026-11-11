@@ -13,7 +13,8 @@ extends RefCounted
 ##      her (and nothing else) and the short Mask moment plays; no reveal pops up after it
 ##   5. "Not now" keeps the offer; a save that already owns a second Mask is never offered one
 ## With --shots-dir=<dir> (a renderer): hob_1_calls_you_over, hob_2_waves, hob_3_dialogue_box,
-## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks, hob_7_mask_moment, hob_8_mask_name.
+## hob_4_points_at_stall, hob_5_offer_line, hob_6_three_masks,
+## hob_6b_signature, hob_6c_dash, hob_7_mask_moment, hob_8_mask_name.
 
 const SECOND := ["juggernaut", "ashwick", "tender"]    # owner order, class_unlock.json second_picks
 
@@ -106,8 +107,8 @@ func _first_arrival() -> void:
 			and box.text.text == String(intro[0]["text"]), "his portrait, his name and his first line")
 	var talk_at: Vector3 = hob.chat.frame(home.ppos)
 	var drawn_m := talk_at.distance_to(home.ppos)
-	ok(is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM) and drawn_m <= 1.2,
-			"one gentle framing for the talk (zoom %.2f, focus %.1f m from you)" % [home.cam.zoom_to, drawn_m])
+	ok(is_equal_approx(home.cam.zoom_to, zoom0) and drawn_m <= 1.2,
+			"one gentle framing for the talk (zoom kept at %.2f, focus %.1f m from you)" % [home.cam.zoom_to, drawn_m])
 	await _shot("hob_3_dialogue_box", 0.9)
 	for i in 4:      # (each line: one click finishes typing it, the next moves on)
 		box.advance()
@@ -117,23 +118,23 @@ func _first_arrival() -> void:
 			"line by line; on the stall line he points at it")
 	await main.get_tree().create_timer(0.5).timeout
 	await _shot("hob_4_points_at_stall", 0.1)
-	ok(hob.chat.frame(home.ppos).is_equal_approx(talk_at) and is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM),
-			"the camera does not move for a stall he can point at from here")
-	hob.chat.show_at = home.ppos + Vector3(HobTalk.SHOW_FAR_M + 8.0, 0, 0)
+	ok(not hob.chat.show_far and hob.chat.frame(home.ppos).is_equal_approx(talk_at)
+			and is_equal_approx(home.cam.zoom_to, zoom0), "the camera does not move for a stall that is on screen")
+	var off: Vector3 = home.ppos + Vector3(60.0, 0, 0)      # (well off screen)
+	hob.chat._on_line(0, {"text": "", "at": off})
 	hob.chat.show_t = 1.2
 	var far_at: Vector3 = hob.chat.frame(home.ppos)
-	ok(far_at.x > talk_at.x + 2.0 and far_at.x < hob.chat.show_at.x - 4.0
-			and is_equal_approx(home.cam.zoom_to, HobTalk.TALK_ZOOM),
-			"only a far-off show drifts it, part of the way, with no zoom change")
-	hob.chat.show_t = -1.0
+	ok(hob.chat.show_far and far_at.x > talk_at.x + 2.0 and far_at.x < off.x - 4.0
+			and is_equal_approx(home.cam.zoom_to, zoom0),
+			"only an off-screen show drifts it, part of the way, with no zoom change")
 	for i in intro.size() * 2:
 		if hob.chat.talking():
 			box.advance()
 	await _frames(3)
 	ok(not hob.chat.talking() and home.panel_open == "" and FirstTimeHint.seen("hob") and not hob.node.tag.visible,
 			"after the last line: met, his name tag gone")
-	ok(FarmTutorial.current() == "chop" and is_equal_approx(home.cam.zoom_to, home.HOME_ZOOM),
-			"the goal is still chopping (you start with the axe), and the camera eased back")
+	ok(FarmTutorial.current() == "chop" and is_equal_approx(home.cam.zoom_to, zoom0),
+			"the goal is still chopping (you start with the axe), and the zoom is still yours")
 	await _frames(40)
 	hob.talk()
 	await _frames(2)
@@ -191,7 +192,15 @@ func _offer() -> void:
 	await _frames(2)
 	var clips := box.find_children("*", "AbilityClip", true, false).filter(
 			func(c): return not c.is_queued_for_deletion())
-	ok(clips.size() == 1 and (clips[0] as AbilityClip).id == "tender", "one clip plays: the Relic in focus (Meeko)")
+	var slots: Array = clips.map(func(c): return (c as AbilityClip).slot)
+	ok(slots == ["lmb", "e", "dash"] and clips.all(func(c): return (c as AbilityClip).id == "tender"),
+			"the Relic in focus (Meeko) loops its attack, healing ring and dash (%s)" % str(slots))
+	ok(clips.filter(func(c): return (c as AbilityClip).visible).size() == 1, "one clip shows at a time")
+	offer.show_clip(2)
+	var dash: AbilityClip = clips[2]
+	ok(dash.visible and not (clips[0] as AbilityClip).visible and dash.t == 0.0,
+			"the reel moves on to the dash, from its start")
+	offer.show_clip(0)
 	var marker_off: bool = not is_instance_valid(home.guide.marker) or not home.guide.marker.visible
 	ok(not home.guide.tracker.visible and marker_off and not home.guide.hint_box.visible
 			and hob.node.mark.modulate.a == 0.0, "the Goals card, the goal line and the world prompts step aside")
@@ -200,6 +209,10 @@ func _offer() -> void:
 	ok(screen.size == Vector2(1280, 720) and screen.encloses(pick_rect),
 			"the pick fits a 1280x720 screen (%s)" % pick_rect)
 	await _shot("hob_6_three_masks", 1.6)
+	offer.show_clip(1)
+	await _shot("hob_6b_signature", 1.2)
+	offer.show_clip(2)
+	await _shot("hob_6c_dash", 1.0)
 	offer.pick("tender")
 	ok(ClassUnlock.open_ids() == ["gunslinger", "tender"] and not ClassUnlock.second_pending(),
 			"taking Meeko opens her and nothing else (%s)" % str(ClassUnlock.open_ids()))

@@ -15,7 +15,7 @@ static func open(host: Control, at: Vector2, title: String, entries: Array, colo
 	menu.gui_input.connect(func(ev: InputEvent):
 		if ev is InputEventMouseButton and ev.pressed:
 			menu.close())
-	var card := UI.card(Color(0.07, 0.08, 0.12, 0.96), 10, 12)
+	var card := UI.card(Color(UI.NIGHT, 0.96), 10, 12)
 	UI.set_card_border(card, Color(1, 1, 1, 0.14), 1)
 	var col := UI.vbox(6)
 	card.add_child(col)

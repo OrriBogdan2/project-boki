@@ -68,7 +68,7 @@ func run(main: Node) -> void:
 	ok(Heart.tide_r(m) == 0.0, "no tide before it starts")
 	m.time = 5000.0
 	ok(is_equal_approx(Heart.tide_r(m), float(rl["tide_r1"])), "the tide has closed to its smallest ring")
-	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * 0.5 - m.sess_t0
+	m.time = float(rl["tide_start_s"]) + float(rl["tide_close_s"]) * 0.5
 	var half := Heart.tide_r(m)
 	ok(half < float(rl["tide_r0"]) and half > float(rl["tide_r1"]),
 		"halfway the ring is between its two sizes (%.0f m)" % half)

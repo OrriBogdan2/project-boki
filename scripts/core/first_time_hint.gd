@@ -2,14 +2,15 @@ class_name FirstTimeHint
 extends RefCounted
 ## One-time contextual hints: one short line the first time something matters (a chest key in hand, a
 ## skill point, a house short of stone), then never again on that save. They took over the tutorial
-## steps that were cut. The words are content/rules/hints.json ("match", "event" and "farm" groups); which ones
+## steps that were cut, and the first Fuse. The words are content/rules/hints.json ("match", "event",
+## "farm" and "bond" groups); which ones
 ## a save has had is Save.d.tutorial.hints {id: true}. Callers decide when (MatchHints, FarmHints) and
 ## how to show it (a match toast, a farm toast); this only makes sure it happens once and words it.
 
 static func rules() -> Dictionary:
 	return Content.rules("hints")
 
-## Every hint id of a group ("match" or "farm").
+## Every hint id of a group ("match", "farm" or "bond").
 static func ids(group: String) -> Array:
 	return (rules().get(group, {}) as Dictionary).keys()
 
@@ -31,13 +32,13 @@ static func mark(id: String) -> void:
 ## The hint's line with the player's own keys and Boki name ("" for an unknown id).
 static func text(id: String) -> String:
 	var raw := ""
-	for g in ["match", "event", "farm"]:
+	for g in ["match", "event", "farm", "bond"]:
 		raw = String((rules()[g] as Dictionary).get(id, raw))
 	if raw.contains("{rank}"):
 		raw = raw.replace("{rank}", TutorialText.rank_combo())
 	if raw.contains("{boki}"):
 		raw = raw.replace("{boki}", String(Save.active_kin().get("name", "your Boki")))
-	for action in ["dash", "crouch", "interact", "throw", "secondary", "build"]:
+	for action in ["dash", "crouch", "interact", "throw", "secondary", "build", "ultimate"]:
 		raw = raw.replace("{%s}" % action, Settings.key_cap(action))
 	return raw
 
@@ -52,7 +53,7 @@ static func show(id: String, toast: Callable) -> bool:
 	toast.call(line)
 	return true
 
-## Save v11 -> v12: a save that finished (or skipped) a tutorial already met what that tutorial's cut
+## Save v12 -> v13: a save that finished (or skipped) a tutorial already met what that tutorial's cut
 ## steps taught, so it gets none of their hints; a save still in the farm tutorial keeps them.
 static func migrate(data: Dictionary) -> void:
 	var tut: Dictionary = data.get("tutorial", {})
@@ -60,7 +61,8 @@ static func migrate(data: Dictionary) -> void:
 	var ft = tut.get("ft")
 	var ft_done: bool = typeof(ft) == TYPE_DICTIONARY and bool(ft.get("done", false))
 	var farm_over: bool = bool(tut.get("day1_done", false)) or ft_done
-	for group in [["match", bool(tut.get("match", false))], ["farm", farm_over]]:
+	var bond_known: bool = bool(tut.get("ult", false))      # the old bond-full tip showed only on a full bond
+	for group in [["match", bool(tut.get("match", false))], ["farm", farm_over], ["bond", bond_known]]:
 		if group[1]:
 			for id in ids(String(group[0])):
 				seen[id] = true

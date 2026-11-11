@@ -5,7 +5,8 @@ extends RefCounted
 ## (stone, hammer, a job, the Market, Hob) is a one-time hint now (FarmHints, FirstTimeHint).
 ## State is Save.d.tutorial.ft:
 ##   did      step id -> true for the steps done
-##   done / skipped   finished, or skipped (a skip still gets the house, the starter food and the end gems)
+##   done / skipped   finished, or skipped (a skip still gets the house, the starter food and the end gems;
+##                    the axe and pickaxe come with a new save)
 ##   gift     the starter food was handed out
 ## Old saves never see it: the v8 migration marks them done, and so does tutorial.day1_done (the flag
 ## every test save and the new-game shortcuts already set).
