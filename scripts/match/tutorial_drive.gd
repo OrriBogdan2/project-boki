@@ -4,11 +4,6 @@ extends RefCounted
 ## (--tutorial --tut-test, and the teammate check).
 
 static var last_step := -1
-const DRAW_CYCLE := 1.2     # s per bow shot: held for DRAW_HOLD, then let go
-const DRAW_HOLD := 0.8      # s of draw (the longbow's first mark is 0.6s)
-const SWING_CYCLE := 0.45   # s per melee swing: a tap of SWING_TAP
-const SWING_TAP := 0.1      # s (a tap shorter than the weapon's charge time)
-
 static var still_t := 0.0     # s the player has stood in one place while walking
 static var last_pos := Vector3.INF
 
@@ -99,22 +94,26 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 	if best == null:
 		return
 	p.inp["aim"] = best.pos + Vector3(0, 0.9, 0)
-	if p.flat_dist(best) > 3.0: goto.call(best.pos)
-	if sid in ["shoot", "fight"]: p.inp["fire"] = _attack_down(m)
+	var melee: bool = p.wpn.get("melee", false)
+	if p.flat_dist(best) > (1.6 if melee else 3.0): goto.call(best.pos)
+	if sid in ["shoot", "fight"]: p.inp["fire"] = _fire_key(m)
 	if sid in ["sig", "fight"]: p.inp["sig"] = int(m.time * 2.0) % 2 == 0
 	if sid == "throw" and fmod(m.time, 1.5) < Match.DT and p.kin:
 		KinCommand.tap(p)       # a tap calls it back when it is out, a tap sends it when it is beside you
 	elif sid == "fight" and p.kin and p.kin.state in ["shoulder", "active"]:
 		p.kin.throw_to(best.pos)
 
-## The attack key as that weapon is played: held for a gun, held to the draw and let go for a bow, tapped
-## for a melee combo (a held swing would charge a wave instead).
-static func _attack_down(m: Match) -> bool:
+## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
+## tapped (a hold would charge it), a gun is held.
+static func _fire_key(m: Match) -> bool:
 	var p := m.player
-	if p.wpn.has("draw"):
-		return fmod(m.time, DRAW_CYCLE) < DRAW_HOLD
+	var st: Array = p.wpn.get("draw", [])
+	if not st.is_empty():
+		return p.draw_t < float((st[0] as Array)[0]) + 0.05
+	if p.wpn.has("charge_time"):
+		return fmod(m.time, 0.6) < 0.1      # a charged blade acts on release: tap it
 	if p.wpn.get("melee", false):
-		return fmod(m.time, SWING_CYCLE) < SWING_TAP
+		return fmod(m.time, 0.5) < 0.1
 	return true
 
 ## Right click: taps, and a hold after them when the kit has a hold variant.
