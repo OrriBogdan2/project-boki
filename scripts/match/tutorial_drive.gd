@@ -95,25 +95,25 @@ static func _fight(m: Match, tu: Tutorial, goto: Callable) -> void:
 		reach = 9.0
 	if p.flat_dist(best) > reach: goto.call(best.pos)
 	match sid:
-		"shoot": p.inp["fire"] = _fire_key(m)
+		"shoot": p.inp["fire"] = fire_key(m)
 		"gkey":
 			if fmod(m.time, 1.5) < Match.DT and p.kin:
 				KinCommand.tap(p)       # a tap sends it when it is beside you, a tap calls it back when it is out
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 		"kin":
 			p.inp["sig"] = int(m.time * 2.0) % 2 == 0
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 		"hook":
 			p.inp["gear1"] = not tu.flag and p.flat_dist(best) < 9.5 and int(m.time * 10.0) % 2 == 0
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 		"ult":
 			p.inp["ult"] = not tu.flag and int(m.time * 10.0) % 2 == 0
-			p.inp["fire"] = tu.flag and _fire_key(m)
+			p.inp["fire"] = tu.flag and fire_key(m)
 			p.inp["sig"] = tu.flag and int(m.time * 2.0) % 2 == 0
 
 ## The attack key as a player works each weapon: a bow is drawn to its first stage then let go, a blade is
 ## tapped (a hold would charge it), a gun is held.
-static func _fire_key(m: Match) -> bool:
+static func fire_key(m: Match) -> bool:
 	var p := m.player
 	var st: Array = p.wpn.get("draw", [])
 	if not st.is_empty():
