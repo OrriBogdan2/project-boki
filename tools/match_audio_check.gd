@@ -54,6 +54,9 @@ func run(main_node: Node) -> void:
 	Sfx.loop_start("boxhum_check", "revive_hum", P.pos)       # (as a deathbox revive does, keyed)
 	ok(Sfx.match_voices() >= 2, "setup: the match has several voices going (%d)" % Sfx.match_voices())
 	_ult_cues(m, P)
+	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
+	m.music_dir.beds.tick(m, P)
+	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()

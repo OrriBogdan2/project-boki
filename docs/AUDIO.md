@@ -1,6 +1,6 @@
 # Audio: sound sets, loudness and buses
 
-How the game's sound effects are made, named, levelled and played. Music and ambience are in `tools/compose.py` and `tools/gen_ambience.py`.
+How the game's sound effects are made, named, levelled and played. Music is in `tools/compose.py`; ambience beds in `tools/gen_ambience.py` (below).
 
 ## Making sounds
 - Sounds are **synthesised in code** (numpy/scipy, `pip install numpy scipy`), one script per group: `tools/gen_sfx_<group>.py` (e.g. `gen_sfx_vex.py`, `gen_sfx_boki.py`, `gen_sfx_ui.py`). Each one imports `tools/sfx_lib.py`, calls `S.reseed(<its own seed>)` and writes `audio/<name>.wav` (44.1 kHz mono 16-bit). Then `godot --headless --import`.
@@ -61,3 +61,14 @@ Every sound is levelled to its **category** by `S.save_cat` / `S.takes_cat` (tab
 
 ## Ultimate cast cues
 You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.press`, which calls `UltCue.cast`: the Hunter's own `<arch>_ult_cue` at its position plus a team tag, `ult_tag_ally` (bright, rising) for your team or `ult_tag_foe` (low, falling) for a rival, both at the same level (the colour tells them apart, never loudness). They carry 60 m (`reach` in `content/sfx/ult_cues.json`, falling off with distance, muffled past 9 m) and play on the match's pool voices. Kits only run in their owner's game, so the cast also sends `["fx", "ucast", nid]` and the other games play it. Sounds: `tools/gen_sfx_ult_cues.py` (own seed; re-rolls nothing else). `--sfx-set-check` asserts a cue and reach per Hunter with an ultimate; `--match-audio-check` the ally/rival tag and the range.
+
+## Ambience beds
+`Sfx.play_ambience` holds one main bed (`amb_match` wind in a match, `amb_title` on the title, `amb_home` on the farm); `Sfx.amb_layer` fades extra beds by place, 4 times a second (`MusicDir` -> `AmbBeds`, no allocation per tick). `tools/gen_ambience.py` writes them (seamless stereo Ogg loops, original synthesis; `amb_rain` is from `gen_music.py`):
+
+| bed | plays when |
+|---|---|
+| `amb_abyss`, `amb_ruins` | near a void edge or gliding; among walls (`MusicDir`) |
+| `amb_meadow`, `amb_cliffs` | on meadow/bloom islands; on frost/ember/storm/gloom rock. Nine samples round you vote, so the bed fades over the last metres of its island |
+| `amb_water` | on the shore islands (`AmbBeds.WATER_ISLANDS`: Saltmere), over that island's own bed |
+| `amb_gust`, `amb_rain` | the raid condition (`AmbBeds.GUST` / `RAIN`): ash storm is all gust, dusk and fog bring rain |
+| `amb_blight` | a low rumble that follows `BlightDir.level` where you stand (up toward the core, up with the session's age) and climbs in the last 90 s before the islands fall |

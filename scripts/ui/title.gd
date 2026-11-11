@@ -51,7 +51,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	Sfx.play_music("title")
 	Feedback.flush(self)                # a rating that could not be sent last time
-	Sfx.play_ambience("match")          # the wind
+	Sfx.play_ambience("title")          # its own slow drone, not the match wind
 	rng.seed = 2026
 	low = Settings.lite()
 	fx_k = float(Settings.q("fx"))
