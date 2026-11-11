@@ -2,7 +2,7 @@ extends RefCounted
 ## --action-shots --warden=<id> --shots-dir=<dir> [--state=stomp|revive|drink|all] [--variant=new|proc] [--size=480]
 ## [--fov=30] [--grab=n,n]: a Hunter doing one of the three shared actions, driven through the game state (HunterAnim,
 ## then WardenClips) as Hunter hands it over: stomp (three Life.R stomp_cycles, the slam at 0.7 of each), revive
-## (the kneel loop, 2 s) and drink (Hunter.DRINK_TIME): <dir>/<variant>/<state>/f000.png... at 15 fps.
+## (the kneel loop, 2 s) and drink (UtilityUse.channel("tonic", "time")): <dir>/<variant>/<state>/f000.png... at 15 fps.
 ## new: the clips. proc: the rig's procedural pose retargeted on this model. Needs a renderer.
 
 const DT := 1.0 / 30.0
@@ -57,7 +57,7 @@ func run(main: Node) -> void:
 	cam.position = Vector3(0, cy + 0.3, dist)
 	cam.look_at(Vector3(0, cy, 0))
 	var cycle: float = Life.R["stomp_cycle"]
-	var lens := {"stomp": cycle * 3.0, "revive": 2.0, "drink": Hunter.DRINK_TIME}
+	var lens := {"stomp": cycle * 3.0, "revive": 2.0, "drink": UtilityUse.channel("tonic", "time")}
 	for st in lens:
 		if which != "all" and which != st:
 			continue
@@ -71,7 +71,7 @@ func run(main: Node) -> void:
 			match st:
 				"stomp": s["stomp"] = fmod(t, cycle) / cycle
 				"revive": s["reviving"] = true
-				"drink": s["drink"] = t / Hunter.DRINK_TIME
+				"drink": s["drink"] = t / UtilityUse.channel("tonic", "time")
 			anim.update(DT, s)
 			sync.call("_process", DT)
 			t += DT

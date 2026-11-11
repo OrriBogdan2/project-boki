@@ -401,7 +401,7 @@ func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	for k in ["stomp", "drink"]:
 		if not st.has(k):
 			continue
-		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else Hunter.DRINK_TIME
+		var want := float(Life.R["stomp_cycle"]) if k == "stomp" else UtilityUse.channel("tonic", "time")
 		var dur := clips.lib.get_animation(String(st[k])).length
 		ok(absf(dur - want) <= 0.034, "%s: its %s clip lasts the game's %.2f s" % [id, k, want])
 

@@ -190,7 +190,7 @@ func _finishers() -> void:
 		var lib: AnimationLibrary = clips.lib
 		var sts: Dictionary = cfg["states"]
 		var proc: Array = cfg.get("procedural", [])
-		for k in [["stomp", float(Life.R["stomp_cycle"])], ["drink", Hunter.DRINK_TIME]]:
+		for k in [["stomp", float(Life.R["stomp_cycle"])], ["drink", UtilityUse.channel("tonic", "time")]]:
 			var nm := String(sts.get(k[0], ""))
 			var has := nm != "" and lib.has_animation(nm)
 			ok(has and not k[0] in proc, "%s: a %s clip, off the procedural list" % [art_name, k[0]])
