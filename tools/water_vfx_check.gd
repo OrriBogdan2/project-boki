@@ -35,7 +35,7 @@ func run(main: Node) -> void:
 	if shot != "": DirAccess.make_dir_recursive_absolute(shot)
 	Save.no_write = true
 	var q0 = Settings.v.get("quality")
-	Settings.v["quality"] = "medium"      # (a headless run would guess Low, where the water shows nothing)
+	Settings.v["quality"] = "high"      # (the most droplets; a headless run would guess Low, where nothing shows)
 	var sizes := {}
 	var splash_n := {}
 	for hero in HEROES:
@@ -148,6 +148,7 @@ func _events(hm, tree: SceneTree, hero: String) -> Dictionary:
 	ok(nodes == all and _pooled(w, "splash", nodes),
 		"%s: the splash is a pooled emitter (%d emitters, none made for it)" % [hero, nodes])
 	var splash_n: int = w.pools["splash"][0].amount
+	var body_k := w.body_k
 	# run along the stream: a wake
 	_put(hm, Vector3(in_x, 0, STREAM_Z.y - 0.5))
 	var c0 := _counts(hm)
@@ -172,9 +173,10 @@ func _events(hm, tree: SceneTree, hero: String) -> Dictionary:
 	c = _counts(hm)
 	ok(c["splash"] - c0["splash"] == 1 and _pooled(w, "splash", nodes),
 		"%s: landing in it splashes once, from the pool" % hero)
+	w.set_body(WaterFx.SIZE_MAX)      # (the biggest any Hunter's splash grows)
 	ok(w.capacity() <= WaterFx.BUDGET and w.get_child_count() == all,
-		"%s: the pool holds %d droplets at most (budget %d), %d emitters" % [hero, w.capacity(), WaterFx.BUDGET, all])
-	return {"body_k": w.body_k, "splash_n": splash_n}
+		"%s: at most %d droplets on High (budget %d), %d emitters" % [hero, w.capacity(), WaterFx.BUDGET, all])
+	return {"body_k": body_k, "splash_n": splash_n}
 
 ## On Low no pool is made: nothing spawns from any event.
 func _low(main: Node) -> void:

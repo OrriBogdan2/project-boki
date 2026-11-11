@@ -6,14 +6,15 @@ extends Node3D
 ## (size_of), and on the Low preset no pool is made and nothing shows.
 
 const POOL := {"splash": 2, "spray": 6, "wake": 4}     # emitters per kind, made once (the oldest is reused)
-const SPLASH_N := 16         # droplets in a splash for a size-1 Hunter (a hard fall adds up to as many again)
-const SPRAY_N := 7           # droplets per spray puff for a size-1 Hunter
-const WAKE_N := 4            # droplets per wake puff for a size-1 Hunter
+const SPLASH_N := 22         # droplets in a splash for a size-1 Hunter (a hard fall adds up to as many again)
+const SPRAY_N := 9           # droplets per spray puff for a size-1 Hunter
+const WAKE_N := 5            # droplets per wake puff for a size-1 Hunter
 const SPRAY_DT := 0.045      # s between spray puffs along a dash
-const WAKE_DT := 0.11        # s between wake puffs while running
+const WAKE_DT := 0.09        # s between wake puffs while running
 const WAKE_MIN_SPEED := 1.5  # m/s: slower wading leaves no wake
-const BUDGET := 160          # droplets the whole pool can hold at once (the check holds it to this)
-const COL := Color(0.9, 0.97, 1.0, 0.9)
+const SIZE_MAX := 1.3        # the biggest Hunter's splash grows to (so the pool stays in BUDGET)
+const BUDGET := 220          # droplets the whole pool can hold at once on High (the check holds it to this)
+const COL := Color(1, 1, 1, 0.95)      # white: it reads on the pale water
 
 var pools := {"splash": [], "spray": [], "wake": []}     # kind -> its emitters
 var next := {"splash": 0, "spray": 0, "wake": 0}         # kind -> the emitter the next puff reuses
@@ -26,18 +27,19 @@ var wake_t := 0.0
 ## feet), so a bigger Hunter throws a bigger splash.
 static func size_of(arch: String, cls: String) -> float:
 	var cdat: Dictionary = Data.CLASSES[cls]
-	return Arch.hit_r(arch, cdat) / float(Data.CLASSES["medium"]["hit_r"])
+	return minf(SIZE_MAX, Arch.hit_r(arch, cdat) / float(Data.CLASSES["medium"]["hit_r"]))
 
 func _ready() -> void:
 	if Settings.quality() == "low":
 		return
 	var dot := QuadMesh.new()
-	dot.size = Vector2(0.15, 0.15)
+	dot.size = Vector2(0.22, 0.22)
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/fx_dot.gdshader")
 	var ramp := Gradient.new()
 	ramp.set_color(0, Color(1, 1, 1, 1))
 	ramp.set_color(1, Color(1, 1, 1, 0))
+	ramp.add_point(0.6, Color(1, 1, 1, 0.9))      # (held, then a quick fade)
 	for kind in POOL:
 		for i in int(POOL[kind]):
 			var p := CPUParticles3D.new()
@@ -64,13 +66,13 @@ func set_body(k: float) -> void:
 	body_k = k
 	var q := float(Settings.q("fx"))
 	for p in pools["splash"]:
-		p.emission_ring_radius = 0.32 * k
-		p.emission_ring_inner_radius = 0.2 * k
+		p.emission_ring_radius = 0.42 * k
+		p.emission_ring_inner_radius = 0.28 * k
 	var n_spray := maxi(3, roundi(SPRAY_N * k * q))
 	var n_wake := maxi(2, roundi(WAKE_N * k * q))
 	for p in pools["spray"]:
 		if p.amount != n_spray: p.amount = n_spray
-		p.emission_sphere_radius = 0.22 * k
+		p.emission_sphere_radius = 0.3 * k
 	for p in pools["wake"]:
 		if p.amount != n_wake: p.amount = n_wake
 		p.emission_sphere_radius = 0.12 * k
@@ -92,7 +94,7 @@ func splash(at: Vector3, hard: float) -> void:
 	if p == null: return
 	var na := _splash_n(hard)
 	if p.amount != na: p.amount = na
-	_fire(p, at, Vector3.UP, 28.0, (2.4 + hard * 2.2) * sqrt(body_k), 0.55, 12.0)
+	_fire(p, at, Vector3.UP, 30.0, (3.0 + hard * 2.2) * sqrt(body_k), 0.6, 12.0)
 
 ## Each step in shallow water on the ground: a spray along a dash, a wake while running.
 func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:
@@ -104,7 +106,7 @@ func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:
 			spray_t = SPRAY_DT
 			var p := _take("spray")
 			if p:
-				_fire(p, at, (Vector3.UP + back * 0.5).normalized(), 50.0, 3.4 * sqrt(body_k), 0.42, 11.0)
+				_fire(p, at, (Vector3.UP + back * 0.5).normalized(), 60.0, 3.6 * sqrt(body_k), 0.45, 11.0)
 		return
 	spray_t = 0.0
 	if spd < WAKE_MIN_SPEED:
@@ -116,7 +118,7 @@ func move(at: Vector3, vel: Vector2, dashing: bool, d: float) -> void:
 		var p := _take("wake")
 		if p:
 			var dir := (Vector3.UP * 0.8 + back).normalized()
-			_fire(p, at + back * 0.2 * body_k, dir, 38.0, 1.7 * sqrt(body_k), 0.32, 9.0)
+			_fire(p, at + back * 0.2 * body_k, dir, 45.0, 1.6 * sqrt(body_k), 0.4, 7.0)
 
 func _take(kind: String) -> CPUParticles3D:
 	var pool: Array = pools[kind]
