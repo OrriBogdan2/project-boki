@@ -269,13 +269,42 @@ func body_glow(at: Vector3, col: Color) -> void:
 	g["dur"] = GLOW_DUR
 	g["rise"] = GLOW_RISE
 
-func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void:
-	if v < 0.5 or (prefix == "" and not Settings.get_v("damage_numbers")):
+## The one read for a heal, whatever gave it (docs/DASHES_AND_ABILITY_FEEL.md 5.1, sustain): a soft
+## green-gold glow that rises over the healed Hunter and moves with them, a few motes rising off them
+## (they keep the read on bright ground, where the additive glow fades), and a green "+N" heal number.
+## While their glow is still up, more heals only add to the number, so fast heals (a tether's ticks,
+## lifesteal on every bullet) pulse instead of stacking. A Hunter you can't see shows nothing.
+func healed(h: Hunter, n: float) -> void:
+	if n <= 0.0 or h.unseen or not h.visible:
+		return
+	number(h.pos + Vector3(0, HEAL_NUM_Y, 0), n, HudStyle.HEAL, false, "+", Num.HEAL)
+	var id := h.get_instance_id()
+	for g in ghosts:
+		if int(g.get("on", 0)) == id:
+			return
+	var col := Feel.cat_color("sustain")
+	body_glow(h.global_position, col)
+	var glow: Dictionary = ghosts[ghosts.size() - 1]
+	glow["on"] = id
+	(glow["node"] as Node3D).reparent(h)
+	_emit(h.global_position + Vector3(0, 0.25, 0), col, HEAL_MOTES, 2.6, GLOW_DUR, -4.0, 1.3, Vector3.UP, 20.0)
+
+## What a floating number counts. A number adds up only with its own kind on a target, so a heal never
+## joins a damage number (or a Daze bonus) on the same body.
+enum Num { HIT, HEAL }
+const NUM_MIN := 0.5          # a number under this would read 0: such a hit shows nothing, such a heal waits
+const HEAL_NUM_Y := 2.1       # m over the feet: heal numbers sit above the damage numbers (1.5 m)
+const HEAL_MOTES := 16        # motes in a heal's rise, before the particle quality scales them
+
+func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "", kind := Num.HIT) -> void:
+	if v <= 0.0 or (kind == Num.HIT and (v < NUM_MIN or not Settings.get_v("damage_numbers"))):
 		return
 	# rapid hits on the same target (a minigun, an SMG, pellets, a burn ticking) add up on one
-	# number that sits on it and grows with each hit, then floats off once the hits stop
+	# number that sits on it and grows with each hit, then floats off once the hits stop; heals
+	# add up the same way on their own number
 	for n in nums:
-		if n.has("val") and float(n["last"]) < MERGE_T and String(n["pre"]) == prefix and (n["base"] as Vector3).distance_to(at) < 1.6:
+		var same: bool = n.has("val") and int(n["kind"]) == kind and String(n["pre"]) == prefix
+		if same and float(n["last"]) < MERGE_T and (n["base"] as Vector3).distance_to(at) < 1.6:
 			n["val"] = float(n["val"]) + v
 			n["last"] = 0.0
 			n["base"] = at
@@ -291,6 +320,7 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 			ln.font_size = _num_size(float(n["val"]), bool(n.get("crit", false)))
 			ln.modulate.a = 1.0
 			ln.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
+			ln.visible = float(n["val"]) >= NUM_MIN
 			return
 	var l: Label3D = num_pool.pop_front()
 	num_pool.append(l)
@@ -303,9 +333,10 @@ func number(at: Vector3, v: float, col: Color, crit: bool, prefix := "") -> void
 	l.font_size = _num_size(v, crit)
 	var off := Vector3(rng.randf_range(-0.35, 0.35), 0, rng.randf_range(-0.2, 0.2))
 	l.global_position = at + off
-	l.visible = true
+	l.visible = v >= NUM_MIN       # a sliver of a heal (lifesteal on a light hit) shows once more adds up
 	l.scale = Vector3.ONE * (CRIT_POP if crit else HIT_POP)
-	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v, "pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit})
+	nums.append({"node": l, "t": 0.0, "last": 0.0, "vel": Vector3(rng.randf_range(-0.5, 0.5), 2.6, 0), "val": v,
+		"pre": prefix, "base": at, "off": off, "hits": 1, "crit": crit, "kind": kind})
 
 ## How long a number keeps taking hits after the last one, and how long it lingers on the target.
 const MERGE_T := 0.45
@@ -541,6 +572,9 @@ func _process(delta: float) -> void:
 		if f["t"] >= f["dur"]:
 			mi.visible = false; flashes.erase(f)
 	for g in ghosts.duplicate():
+		if not is_instance_valid(g["node"]):
+			ghosts.erase(g)         # a heal glow goes with the Hunter it rides on
+			continue
 		g["t"] += delta
 		var k: float = g["t"] / float(g["dur"])
 		var gm: MeshInstance3D = g["node"]
