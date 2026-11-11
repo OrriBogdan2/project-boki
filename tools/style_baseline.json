@@ -982,6 +982,9 @@
 "semicolon": 15,
 "shadow": 1
 },
+"tools/camp_layout_check.gd": {
+"long_line": 1
+},
 "tools/camps_check.gd": {
 "long_line": 21
 },
