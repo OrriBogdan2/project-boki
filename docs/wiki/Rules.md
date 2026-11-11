@@ -626,6 +626,67 @@ Shaping items (scripts/core/garden_items.gd; design briefs/design/GARDEN_MODERN.
 | verbs_doc | Journal verb by use; an item's own verb wins. |
 | items | [{"id": "thumpnut", "name": "Thumpnut", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "power", "n": 3}, "sources": ["Cinderstep patch", "Stump Shove prize", "Tumble prize"]}, {"id": "shellbark_chew", "name": "Shellbark Chew", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "guard", "n": 3}, "sources": ["Bramblebank dig patch", "Stump Shove prize"]}, {"id": "zipseed", "name": "Zipseed", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "speed", "n": 3}, "sources": ["Kitewind patch", "Dash prize", "Relay prize"]}, {"id": "hushpearl", "name": "Hushpearl", "family": "stat", "use": "eaten", "effect": {"kind": "stat", "stat": "focus", "n": 3}, "sources": ["Glint Fishing", "Seek prize", "Spark Volley prize"]}, {"id": "sunsap", "name": "Sunsap", "family": "stat", "use": "eaten", "effect": {"kind": "xp", "n": 40}, "sources": ["today's wishes", "first win of the day", "away gift"]}, {"id": "bristlethorn", "name": "Bristlethorn", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "fierce"}, "sources": ["Tumble cup", "Cinderstep patch"]}, {"id": "keepstone", "name": "Keepstone", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "steadfast"}, "sources": ["Stump Shove cup", "Bramblebank dig patch"]}, {"id": "puzzlenut", "name": "Puzzlenut", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "curious"}, "sources": ["Echo Steps cup", "Seek cup", "Hushwood patch"]}, {"id": "galeribbon", "name": "Galeribbon", "family": "path", "use": "worn", "effect": {"kind": "token", "aff": "swift"}, "sources": ["Dash cup", "Relay cup", "Kitewind patch"]}, {"id": "stayleaf", "name": "Stayleaf", "family": "path", "use": "worn", "effect": {"kind": "stay"}, "sources": ["Bramblebank nap tree", "Drift Trader"]}, {"id": "rinse_melon", "name": "Rinse Melon", "family": "lean", "use": "eaten", "effect": {"kind": "rinse"}, "sources": ["Glasswater patch", "Drift Trader"]}, {"id": "unwind_tea", "name": "Unwind Tea", "family": "respec", "use": "eaten", "effect": {"kind": "loose", "n": 20}, "sources": ["Drift Trader", "today's wishes"], "verb": "drank"}, {"id": "heirloom_thread", "name": "Heirloom Thread", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "gifts", "n": 1, "max": 2}, "sources": ["Soul Shrine mentor gift", "Crown prize (rare)"]}, {"id": "likeness_locket", "name": "Likeness Locket", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "species"}, "sources": ["Show Ring cup"]}, {"id": "lullaby_shell", "name": "Lullaby Shell", "family": "nest", "use": "worn", "effect": {"kind": "nest", "nest": "habit"}, "sources": ["Glint Fishing (rare)"]}, {"id": "hatchling_down", "name": "Hatchling Down", "family": "nest", "use": "eaten", "effect": {"kind": "down", "trust": 3}, "sources": ["every hatch"]}] |
 
+## garden_sim (`content/rules/garden_sim.json`)
+
+Inputs for tools/garden_sim.py, the headless 30-day garden balance sim (briefs/design/GARDEN_MODERN_BALANCE.md). The sim reads the live rules where they exist (care.json stat_budget, garden_prizes.json, garden_items.json, evo_paths.json) and falls back to the copies under fallback, taken from the READY branches ext/garden-stat-budget 7d1acb8c6, ext/garden-prizes-cups 9f2fdb16f and ext/garden-path-meter c1275d53a. Garden XP (GARDEN_MODERN 2.5) is not built anywhere yet, so garden_xp is the brief's numbers. Everything marked assume is a sim guess, not a game rule.
+
+| Setting | Value |
+|---|---|
+| days | 30 |
+| seeds | 200 |
+| seeds_doc | Runs per player; the report gives medians (days) and means (per-day rates). |
+| first_evo_level | 8 |
+| first_evo_level_doc | The first real form swap: Echolop's final (evo_paths.json zapple level 8). Also reported: level 4 (today's Evo.on_level form step) and 16 (the other branching finals). |
+| report_levels | [4, 8, 16] |
+| grind_days | 14 |
+| grind_doc | Flag: a 5-minute player needs more than this many days to the first evolution. |
+| trivial_days | 3 |
+| trivial_doc | Flag: the 240 budget is full inside this many days. |
+| xp_curve | {"per_level": 100, "flat_from": null} |
+| xp_curve_doc | XP from level n to n + 1: per_level x n, and per_level x flat_from from level flat_from on (null: never). Today game.gd _after_match: 100 x n, no flat part. |
+| garden_xp | {"play": 8, "win": 15, "first_win": 45, "care_first": 3, "care_kinds": 3, "wish": 3, "sunsap": 40} |
+| garden_xp_doc | GARDEN_MODERN 2.5, not built: a played minigame 8, a win 15 (instead of 8), the first win of the day in a game 45 (three times a win); first care of each of care_kinds kinds a day 3; a granted wish 3 (section 5 rank 1); Sunsap 40. |
+| expedition | {"xp_base": 40, "xp_win": 40, "xp_knock": 10, "win_p": 0.5, "knocks": 1.0, "run_min": 10, "wayseed_p": 0.25, "gems": 40} |
+| expedition_doc | game.gd _after_match for the lead Boki: 40 + 40 on a win + 10 a knock. assume: half the runs won, one knock a run, 10 minutes a run, a Wayseed for a locked zone in a quarter of the runs (garden-wayseed: once a run, matching lair only), 40 gems a run. |
+| time | {"arrive": 1.0, "care": 1.0, "wish": 0.5, "game": 1.5, "cup_round": 1.5} |
+| time_doc | assume, minutes: read the away card and pick the patches; the three first cares; grant one wish; one minigame with walking; one cup round. |
+| skill | 0.1 |
+| slope | 1.5 |
+| rival_spread | 0.15 |
+| win_doc | assume: win chance = 0.5 + skill + slope x (1 - rival ratio), clamped 0.1..0.9. Daily rivals are the player's stat for that game times 1 +- rival_spread; cup rivals use garden_prizes cup min_ratio. |
+| game_stats | {"dash": ["speed"], "shove": ["power", "guard"], "seek": ["focus"], "volley": ["focus", "speed"]} |
+| zones | {"bramblebank": {"game": "dash", "golden": ["keepstone", "shellbark_chew", "bramble_honey", "twinbun", "stayleaf"]}, "cinderstep": {"game": "shove", "golden": ["thumpnut", "bristlethorn", "cinderbrittle", "dare_pepper"]}, "glasswater": {"game": "volley", "golden": ["glassdew", "rinse_melon", "lullwort_tea"]}, "hushwood": {"game": "seek", "golden": ["puzzlenut", "hush_truffle", "glowmoss_sprig", "peekbox"]}} |
+| zones_doc | Garden zones with a built game (garden_zones.json); golden = the zone items of the brief's catalogue (section 1.2) a golden ripening can add. Bramblebank is open from the start. |
+| patch_min | 8 |
+| golden_p | 0.1667 |
+| patch_doc | snack_patch.json grow_secs 480 = 8 min; one batch waits while away, so a day gives 1 + minutes / 8 ripenings a zone. Brief 1.1: 1 ripening in 6 adds one zone item. |
+| wishes | 3 |
+| wish_items | {"unwind_tea": 0.1} |
+| wish_doc | Section 5 rank 1: three wishes a day; a granted wish gives a small item (assume: Unwind Tea 1 in 10, else a plain snack); all three give a Sunsap. |
+| away_gifts | 3 |
+| away_items | {"sunsap": 0.25} |
+| away_points | 3 |
+| away_doc | Section 5 rank 3, not built: three gifts after 8 h away (assume: a Sunsap 1 in 4, else a plain snack); toys train at a quarter rate while away, at most away_points a Boki. |
+| trader_days | 7 |
+| trader_items | ["stayleaf", "rinse_melon", "unwind_tea"] |
+| wayseed_price | 300 |
+| home_gems_day | 30 |
+| gems_win | 6 |
+| trader_doc | market.json black_market wayseed_price 300 every wayseed_days 7; otherwise the weekly shaping item. assume: 30 gems a day from home selling; base_race gems_win 6 a minigame win. |
+| toy_per_min | 0.4 |
+| toy_doc | assume: one toy play (toys.json stat_gain 1, play_secs 8-12 plus the walk and the joy_below wait) every 2.5 minutes you are there. |
+| toys | ["speed", "power", "focus", "guard", "focus"] |
+| toys_doc | toys.json: ball, post, tub, stone, dig: the stat each trains; a Boki picks one at random. |
+| line | burrlet |
+| line_doc | The path meter tracked: Sporcupine to Amanitusk (Power) or Ringrove (Guard), both ends in reach of the built games. |
+| families_extra | {"bramble_honey": "lean", "cinderbrittle": "lean", "glassdew": "lean", "hush_truffle": "lean", "twinbun": "personality", "dare_pepper": "personality", "lullwort_tea": "personality", "peekbox": "personality", "glowmoss_sprig": "looks", "cup_ribbon": "looks"} |
+| families_extra_doc | Families of catalogue items not yet in garden_items.json (brief 1.2). |
+| players | {"casual5": {"name": "5 min a day (+1 run)", "minutes": 5, "runs": 1, "plan": false}, "keen30": {"name": "30 min a day (+2 runs)", "minutes": 30, "runs": 2, "plan": true}, "home30": {"name": "home only, 30 min", "minutes": 30, "runs": 0, "plan": true}, "home5": {"name": "home only, 5 min", "minutes": 5, "runs": 0, "plan": false}} |
+| players_doc | minutes = garden minutes a day; runs = expeditions a day (the tracked Boki leads); plan = wears only tokens toward its chosen end and feeds that end's bites. home5 is the worst case of the 5-minute flag. All shaping items go to one tracked Boki (an upper bound: a real player spreads them). |
+| proposal | {"xp_curve.per_level": 50, "xp_curve.flat_from": 20, "garden_xp.play": 3, "garden_xp.win": 5, "garden_xp.first_win": 60, "garden_xp.care_first": 5} |
+| proposal_doc | The changed numbers the balance brief proposes (dotted keys into this file); --write reports the sim with and without them. |
+| fallback | {"stat_budget": {"cap_base": 12, "cap_per_level": 6, "cap_max": 100, "total_cap": 240, "bands": [[50, 1.0], [80, 0.5], [100, 0.25]]}, "cup": [0.9, 1.0, 1.1], "games": {"dash": {"first": "zipseed", "cup_prize": "galeribbon", "table": {"zipseed": 40, "snack": 35, "sunsap": 15, "shellbark_chew": 10}}, "shove": {"first": "thumpnut", "cup_prize": "keepstone", "table": {"thumpnut": 35, "shellbark_chew": 25, "snack": 20, "sunsap": 10, "zipseed": 10}}, "seek": {"first": "hushpearl", "cup_prize": "puzzlenut", "table": {"hushpearl": 40, "snack": 35, "sunsap": 15, "thumpnut": 10}}, "volley": {"first": "hushpearl", "cup_prize": "galeribbon", "table": {"hushpearl": 30, "zipseed": 25, "snack": 25, "sunsap": 10, "shellbark_chew": 10}}}, "items": {"thumpnut": ["stat", "power", 3], "shellbark_chew": ["stat", "guard", 3], "zipseed": ["stat", "speed", 3], "hushpearl": ["stat", "focus", 3], "sunsap": ["stat", "xp", 40], "bristlethorn": ["path", "fierce", 0], "keepstone": ["path", "steadfast", 0], "puzzlenut": ["path", "curious", 0], "galeribbon": ["path", "swift", 0], "stayleaf": ["path", "stay", 0], "rinse_melon": ["lean", "rinse", 0], "unwind_tea": ["respec", "loose", 20]}, "line": {"level": 16, "ends": [{"name": "Amanitusk", "path": "fierce", "stat": "power", "sports": ["tumble"]}, {"name": "Ringrove", "path": "steadfast", "stat": "guard", "sports": ["shove"]}], "pips": {"stat_lead": 3, "tokens_max": 3, "ribbons_max": 2, "care_toy": 1}}} |
+
 ## garden_trust (`content/rules/garden_trust.json`)
 
 Trust from care at the base (Care.trust_up). Petting, its habit food and winning together each raise trust by a named amount, shown to the player as one plain line. Trust stays 0 to 100 and nothing here lowers it. A habit (rec.habit.food) is picked when a Boki hatches, from its element (the species theme).
