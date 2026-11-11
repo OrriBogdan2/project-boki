@@ -283,6 +283,13 @@ def cloak_shield():
                at(S.rattle(0.25, 60, 2500, 6000, 0.5, 0.08) * 0.35, 0.12))
 
 
+# ------------------------------------------------------------------ kit cues (the Hunter's own, in place of the shared ab_ready)
+def ready():
+    """A knocked-down ember flaring back up: a short warm rising sweep, a hiss of heat and a few sparks."""
+    sw = lpf(S.sweep(200, 520, 0.3, 'saw'), 1600) * env(N(0.3), 0.06, 0.12)
+    return mix(sw * 0.7, S.hiss(0.3, 1500, 5000, 0.03, 0.1) * 0.4, at(S.rattle(0.18, 50, 2500, 7000, 0.5, 0.06) * 0.4, 0.1))
+
+
 def build():
     S.save_cat('lw_pilot', pilot(), 'cast')
     S.takes_cat('lw_roar', roar, 3, 'fire')
@@ -307,6 +314,7 @@ def build():
     S.save_cat('ashwick_death', death(), 'grunt')
     S.save_cat('ashwick_flashover', flashover_pop(), 'impact')
     S.save_cat('ashwick_cloak_shield', cloak_shield(), 'cast')
+    S.save_cat('ashwick_ready', ready(), 'cast')
 
 
 if __name__ == '__main__':

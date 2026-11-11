@@ -312,6 +312,11 @@ def shadowstep():
     return mix(swish(0.2, 700, 3200, 2.5), at(lpf(noise(0.08), 900) * env(N(0.08), 0.004, 0.025) * 0.5, 0.15))
 
 
+def ready():
+    """A flintlock cocked and primed again: a dry click into two small silver bells."""
+    return mix(click(0.004, 3000, 9000) * 0.6, at(bell(2600, 0.4, 0.15), 0.03), at(bell(3900, 0.3, 0.1) * 0.6, 0.09))
+
+
 def build():
     takes('dj_bolt', bolt, 3, 'fire')
     save('thief_flintlock_crack', flintlock_crack(0), 'signature')
@@ -339,6 +344,7 @@ def build():
     save('thief_reset_chime', reset_chime(), 'cast')
     save('thief_bola_ricochet', bola_ricochet(), 'impact')
     save('thief_shadowstep', shadowstep(), 'cast')
+    save('thief_ready', ready(), 'cast')
 
 
 if __name__ == '__main__':

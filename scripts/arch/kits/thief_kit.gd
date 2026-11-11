@@ -523,7 +523,7 @@ func _vaulted(air: bool, empower: bool) -> void:
 		net_ring(hand_pos(hand == 0), 0.25, EMP_LINE)
 		m.sfx("thief_cock", h.pos, -6.0 if h.is_local() else -10.0, 1.0))
 	if not was:
-		m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
+		m.sfx("thief_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 		if h.is_local(): h._ab_feedback("dash", "ready")
 
 # ------------------------------------------------------------------ passive hooks

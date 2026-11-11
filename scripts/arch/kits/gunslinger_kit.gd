@@ -576,7 +576,7 @@ func _confirm_hit(victim: Ent, at: Vector3) -> void:
 	m.fx.ring(victim.pos + Vector3(0, 0.1, 0), victim.r + 0.9, HOT, 0.3)
 	if h == m.player and m.hud:
 		m.hud.hitmarker(true)
-		m.sfx("crit", at, -2.0, 0.8)
+		m.sfx("gunslinger_crit", at, -2.0, 0.8)
 
 ## RecastCue's badge: Dazed foes (her rifle and Longneedle hit harder; a Longneedle on a Dazed rival SKEWERS).
 func combo_marks(out: Array) -> void:
@@ -772,9 +772,8 @@ func _fire_needle() -> void:
 			if rat:
 				skewers += 1
 				# the word rides up the screen, clear of the damage number on the body
-				payoff_fx(f.pos, "", EMBER, "", h.dir_to(f), f)
+				payoff_fx(f.pos, "", EMBER, "gunslinger_skewer", h.dir_to(f), f)
 				m.fx.word(f.pos + Vector3(0, 2.7, 0) + fx().screen_up() * 1.3, "SKEWERED", EMBER, true)
-				m.sfx("gunslinger_skewer", f.pos, 0.0)
 	if hits > 0:
 		var maxcd := float(ed["cooldown"]) * cd_k("kin")
 		var cut := float(ed["shave"])

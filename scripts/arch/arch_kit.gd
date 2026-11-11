@@ -971,12 +971,13 @@ func net_pulse(dt: float, on: bool, r := 1.1) -> void:
 		_pulse_t = 1.1
 		net_ring(h.pos, r, res_col())
 
-## The payoff becoming armed: a word over the hunter, the body glow, the ready ping (the owner's slot pings too).
-func armed_fx(word: String, slot := "sec") -> void:
+## The payoff becoming armed: a word over the hunter, the body glow, the kit's own ready sound
+## (the owner's slot pings too).
+func armed_fx(word: String, slot: String, snd: String) -> void:
 	var rc := res_col()
 	if word != "": m.fx.word(h.pos + Vector3(0, 2.5, 0), word, rc, false)
 	m.fx.body_glow(h.pos, rc)
-	m.sfx("ab_ready", h.pos, -4.0 if h.is_local() else -7.0, 1.0)
+	m.sfx(snd, h.pos, -4.0 if h.is_local() else -7.0, 1.0)
 	if h.is_local() and slot != "": h._ab_feedback(slot, "ready")
 
 ## A payoff landing (Deadeye, Flashpoint, Called Shot, Shield Slam): the named word, a double ring, a
@@ -991,8 +992,7 @@ func payoff_fx(at: Vector3, word: String, col: Color, snd: String, dir := Vector
 		m.fx.ring(at, 1.0, Color(1, 1, 1, 0.9), 0.2)
 	m.fx.burst(at + Vector3(0, 1.1, 0), col, 36, 7.5, 0.65, 8.0, 1.3)
 	m.fx.flash(at + Vector3(0, 1.0, 0), col.lightened(0.4), 1.3, 0.1)
-	if snd != "": m.sfx(snd, at, 0.0, 1.0)
-	m.sfx("crit", at, -7.0, 0.85)
+	m.sfx(snd, at, 0.0, 1.0)
 	if h.is_local():
 		if m.hud: m.hud.flash(col, 0.12)
 	RecastCue.payoff(self, victim)

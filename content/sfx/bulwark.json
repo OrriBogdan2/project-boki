@@ -33,7 +33,8 @@
 		"bulwark_down": "grunt",
 		"bulwark_death": "grunt",
 		"bulwark_ready": "cast",
-		"bulwark_interrupt": "impact"
+		"bulwark_interrupt": "impact",
+		"bulwark_crush": "impact"
 	},
 	"signature": ["bulwark_hammer_clang", "bulwark_hull_creak"],
 	"kit_files": ["bjorn_ult.gd"],
