@@ -825,8 +825,8 @@ func update(dt: float, s: Dictionary) -> void:
 	if revive_k > 0.01:
 		hl = lerpf(hl, 1.35, revive_k); kl = lerpf(kl, -1.45, revive_k)
 		hr = lerpf(hr, -0.15, revive_k); kr = lerpf(kr, -1.9, revive_k)
-	# holding interact: kneel, squat, brace or stand to it (see _act_legs)
-	if act_k > 0.01:
+	# holding interact: kneel, squat, brace or stand to it (see _act_legs); a carry keeps walking
+	if act_k > 0.01 and act_kind != "carry":
 		var al := _act_legs()
 		hl = lerpf(hl, al.x, act_k); kl = lerpf(kl, al.y, act_k)
 		hr = lerpf(hr, al.z, act_k); kr = lerpf(kr, al.w, act_k)
@@ -1681,11 +1681,13 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 ##   rune     both palms on the stone
 ##   offer    down on one knee, both hands held out together at the chest (the prologue's relic)
 ##   feed, pat, toss, cheer   the garden moves (HunterVerbs)
+##   lift, carry, set    a Boki at home: scooped up from a squat, held at the chest while you walk, put down again
 ##   chop, mine, build   a tool swing (HunterTool): the weapon put away, the tool in both hands (one for the hammer)
 const ACT_KNEEL := ["scan", "revive", "key", "loot", "offer"]
+const CARRY_BEAT := 0.4        # s: the lift and the set-down each take this long (squat, hands rising or falling)
 func _act_tick(dt: float, s: Dictionary, grounded: bool, spd: float) -> void:
 	var want := String(s.get("act", ""))
-	if not grounded or spd > 2.2 or float(s.get("stomp", -1.0)) >= 0.0:
+	if not grounded or (spd > 2.2 and want != "carry") or float(s.get("stomp", -1.0)) >= 0.0:
 		want = ""
 	if want != "" and want != act_kind:
 		act_kind = want
@@ -1716,6 +1718,11 @@ func _act_legs() -> Vector4:
 			return Vector4(0.15, -0.35, 1.25 * up, -1.5 * up - 0.1)
 		"shrine":
 			return Vector4(0.25, -0.35, 0.25, -0.35)
+		"lift", "set":
+			var squat := _carry_squat()
+			var sh := lerpf(0.15, 0.95, squat)
+			var el := lerpf(-0.3, -1.4, squat)
+			return Vector4(sh, el, sh, el)
 	return Vector4(0.12 + w * 0.02, -0.22, 0.12 - w * 0.02, -0.22)
 
 ## How far forward the body leans into the hold (negative leans back).
@@ -1736,7 +1743,14 @@ func _act_pitch() -> float:
 		"lever": return -0.15 - 0.15 * (0.5 - 0.5 * cos(act_t * 2.6))
 		"windup": return -0.15 * smoothstep(0.0, 0.6, act_t)
 		"beacon": return -0.12
+		"lift", "set": return 0.35 * _carry_squat()
+		"carry": return -0.12
 	return 0.0
+
+## 1 = down in the squat, 0 = standing: the lift rises out of it, the set-down goes into it.
+func _carry_squat() -> float:
+	var u := smoothstep(0.0, 1.0, act_t / CARRY_BEAT)
+	return 1.0 - u if act_kind == "lift" else u
 
 ## Where the hands go: [left hand, right hand, how much the right hand lets go of the weapon].
 func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
@@ -1781,6 +1795,11 @@ func _act_hands(sh_l: Vector3, sh_r: Vector3) -> Array:
 			return [sh_l + Vector3(0.12, -0.06, -0.42), sh_r + Vector3(-0.12, -0.06, -0.42), 1.0]
 		"offer":
 			return [sh_l + Vector3(0.1, -0.1, -0.36), sh_r + Vector3(-0.1, -0.1, -0.36), 1.0]
+		"lift", "set":
+			var low := -0.2 - 0.3 * _carry_squat()
+			return [sh_l + Vector3(0.1, low, -0.36), sh_r + Vector3(-0.1, low, -0.36), 1.0]
+		"carry":
+			return [sh_l + Vector3(0.12, -0.2, -0.4), sh_r + Vector3(-0.12, -0.2, -0.4), 1.0]
 	return [sh_l, sh_r, 0.0]
 
 ## A support hand that can't reach its grip slides back along the weapon toward the trigger hand.

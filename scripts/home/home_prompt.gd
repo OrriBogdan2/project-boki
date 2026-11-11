@@ -8,6 +8,7 @@ static func item(h: Node, it: Dictionary) -> Dictionary:
 		return _visiting(h, it)
 	match it["kind"]:
 		"ferry": return {"verb": "Ride", "who": "Ferry"}
+		"set_down": return {"verb": "Set down", "who": h.carry.kin["rec"]["name"]}
 		"plot": return _plot(h, it)
 		"pot": return {"verb": "Cook"}
 		"rack": return {"verb": "Open", "who": "Glider skins"}

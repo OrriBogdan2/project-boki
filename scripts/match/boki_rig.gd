@@ -139,6 +139,8 @@ const INK_WIDTH := 0.0011     # the outline per metre of camera distance
 const INK_FAR_THIN := 0.5
 ## Softer than the Hunters' painted look (WardenGlb.PAINTED): fur, not armour, and no wash-out at the match zoom.
 const COAT_LOOK := {"far_lift": 0.12, "fres": 0.55, "top_light": 0.45, "rim_amount": 0.25}
+## Held in someone's arms ("kstate" "carried"): the idle clip, nose tipped up against the chest.
+const CARRIED_TILT := 0.5
 const EYE_VALUE := 0.86       # iris brightness: the eye is the first thing read on a small face
 ## Godot's LODs are cut from the rest pose, where the lids lie folded: they would drop the rows that cover the eye.
 const FACE_LOD_BIAS := 1000.0
@@ -310,7 +312,7 @@ func _process(dt: float) -> void:
 ## the jolt of a hit (KinFlinch) stay.
 func _keep_flex() -> void:
 	var girth := float(root.get_meta("girth", 1.0))
-	flex.rotation = _flinch.rot
+	flex.rotation = _flinch.rot + Vector3(CARRIED_TILT if root.get_meta("kstate", "") == "carried" else 0.0, 0.0, 0.0)
 	flex.scale = Vector3(girth * _flinch.wide, _flinch.tall, lerpf(1.0, girth, 0.5) * _flinch.wide)
 	flex.position = Vector3(0, _flex_y, 0) + _flinch.shove
 	var body := flex.get_parent() as Node3D
@@ -356,6 +358,8 @@ func _start_shot(which: String) -> void:
 	_shot_left = player.get_animation(which).length
 
 func _state_clip() -> String:
+	if String(root.get_meta("kstate", "")) == "carried":
+		return "idle"
 	if String(root.get_meta("kstate", "")) == "sleep":
 		return "sleep"
 	var work := String(root.get_meta("kwork", ""))

@@ -34,6 +34,7 @@ var rack_pick := ""
 var whistle_cd := 0.0
 var talk_cd := 0.0          # kin take turns talking: one ambient line at a time
 var whistle_player: AudioStreamPlayer
+var carry := KinCarry.new()    # lifting a Boki and setting it down
 var kins: Array = []           # {rec, node, pos, vel, goal, t, emote, emote_t, hop}
 var spots := {}                # name -> Vector3
 var plots: Array = []          # nodes, index matches Save plots
@@ -1314,6 +1315,8 @@ func _move_player(d: float) -> void:
 		p_anim = HunterAnim.new(player)
 	var ps := {"vel": Vector3(hv.x, pvy if air else 0.0, hv.y), "face": pface, "grounded": not air, "gliding": gliding or water.k > 0.5, "rolling": dash_t > 0.0, "dash_dir": dash_v, "crouch": p_crouch_k}
 	ps.merge(verbs.step(d))
+	var held := carry.pose()        # lifting, carrying or setting a Boki down beats a garden move
+	if held != "": ps["act"] = held
 	ps.merge(tw.anim_state())      # the Empty carries no class weapon at home; a tool only while working
 	if air and not gliding and gh > World.VOID + 1.0:
 		ps["air_h"] = clampf(py - gh, 0.0, 30.0)
@@ -1330,6 +1333,7 @@ func _move_kin(d: float) -> void:
 	whistle_cd = maxf(0.0, whistle_cd - d)
 	talk_cd = maxf(0.0, talk_cd - d)
 	_separate_kin(d)
+	carry.step(self, d)
 	for k in kins:
 		if k.get("busy", false):
 			continue
@@ -2008,7 +2012,7 @@ func _find_interact() -> void:
 		var d := p2.distance_to(sg)
 		if d < 2.4 and d < bd + 0.4: bd = d; best = {"kind": "bridge", "isle": k}
 	for k in kins:
-		if k.has("indoors"): continue
+		if k.has("indoors") or carry.holds(k): continue
 		var d := p2.distance_to(Vector2(k["pos"].x, k["pos"].z))
 		if d < bd: bd = d; best = {"kind": "kin", "k": k}
 	if visit.is_empty() and is_instance_valid(burrow_node):
@@ -2035,6 +2039,8 @@ func _find_interact() -> void:
 			var sc := HomeLayout.deco_center(s["e"])
 			var sd := p2.distance_to(Vector2(sc.x, sc.z))
 			if sd < 1.7 and (best.is_empty() or sd < bd): bd = sd; best = {"kind": "station", "id": s["id"], "e": s["e"]}
+	if carry.state == KinCarry.S.CARRIED:
+		best = {"kind": "set_down"}
 	interact = best
 	if panel_open != "" or best.is_empty() or building_now or chat_open or not train.is_empty() or (hb and hb.active):
 		prompt.visible = false
@@ -2124,6 +2130,7 @@ func _use(it: Dictionary) -> void:
 		"portal": _open_expedition()
 		"house": Game.goto("interior", {"room": "house"})
 		"kin": _kin_act(it["k"])
+		"set_down": carry.set_down(self)
 		"egg":
 			if _egg_ready():
 				_hatch_nest_egg()
@@ -2741,7 +2748,8 @@ func _kin_act(k: Dictionary) -> void:
 		"nap": _care_nap(rec)
 		"bath": _care_bath(rec)
 		"brush": _care_brush(rec)
-		_: _pet_kin(k)
+		"pet": _pet_kin(k)
+		_: carry.lift(self, k)
 
 func _pet_kin(k: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
