@@ -7,7 +7,6 @@ extends RefCounted
 ## the wisp prototype's job. Every wisp is one mesh on one shared material plus TRAIL_AMOUNT sparkles.
 
 const SHADER := preload("res://shaders/boki_wisp.gdshader")
-const DOT_SHADER := preload("res://shaders/fx_dot.gdshader")      # the soft round dots Fx bursts use
 const BODY_RADIUS := 0.15     # m; the head-and-body blob, about a third of a Boki's height
 const EYE_COL := Color("1c1a26")
 const TRAIL_AMOUNT := 24      # sparkles alive per wisp: ten wisps stay under 300
@@ -105,7 +104,6 @@ const BODY_FEATURES := {
 }
 
 static var _body_mat: ShaderMaterial
-static var _dot_mat: ShaderMaterial
 static var _unit_arrays := {}
 
 ## The wisp of a species: a node with "Body" (the critter mesh) and "Trail" (its sparkles). rec is the
@@ -233,10 +231,7 @@ static func _trail(col: Color) -> CPUParticles3D:
 	var quad := QuadMesh.new()
 	quad.size = Vector2.ONE
 	p.mesh = quad
-	if _dot_mat == null:
-		_dot_mat = ShaderMaterial.new()
-		_dot_mat.shader = DOT_SHADER
-	p.material_override = _dot_mat
+	p.material_override = FxDot.material()
 	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	return p
 
