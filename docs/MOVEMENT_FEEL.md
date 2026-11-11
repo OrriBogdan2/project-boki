@@ -116,6 +116,10 @@ Nothing here comes from SUPERVIVE's files.
 | cam_lag_m (camera behind you at a run) | 0.65m | 0.00m | <= 0.40m | [footage] centred: the follow is locked across |
 | cam_settle_t (after a stop) | 0.35s | 0.15s | <= 0.35s | |
 | cam_glide_lead_m | -0.67m (trailing) | +0.92m | >= 0.4m | lead in glide |
+| cam_glide_zoom_05 (zoom 0.5 s after the glider opens / before) | 1.18x | 1.18x | 1.12–1.25x | [spec] +15..25% boom in the air |
+| cam_dive_zoom_hold (lowest zoom in a plunge / zoom at its start) | 0.85x (closed in) | 1.00x | >= 0.98x | the view stays open so you see where you'll land |
+| cam_dive_land_view (ground under a plunge, screens below centre) | 0.18 | 0.18 | <= 0.3 | |
+| cam_land_step / cam_land_left_05 (zoom-out lost in landing's first step / left at +0.5 s) | 0.04 / 0.29 | 0.04 / 0.29 | <= 0.1 / <= 0.35 | eases back, no pop; no lens change or shake (asserted) |
 | view_across_m (Supervive preset, 16:9) | 28.0m | 23.5m (movefeel 23.0m) | 22–25m | camcal: ~17 hunter silhouettes across, as in gameplay frames |
 | hunter_screen_pct (medium hunter, feet to head) | 5.4% | ~7% (movefeel 7.6%) | 6.4–7.6% | camcal: its silhouette ~10.5% of the height, as in gameplay frames |
 | hunter_feet_below_pct (feet below screen centre) | 0% | ~4% | 1.5–5% | camcal: the view aims at the body |
@@ -148,6 +152,7 @@ Other checks:
   - The glider opens falling at least 0.85 m/s ([game data] GlideStartFallSpeedMin, `Loco.glide_start`, match and farm): a rising jump is cut at the open, no float-up, and the jump pad's own 2 m/s cap went with it. The canopy then catches a fall at 60 m/s² (ours: the source's matching fastest-fall clamp is locked; [guide] it opens "instantly").
   - Space opens the glider after 0.1s (a tap is a jump). The glide button (Mouse 5) opens it at once (`inp.glide_btn`, local input only).
   - **Dive** (`GlideDive`, `HunterMove.dive_*`, all [game data]): hold crouch (Ctrl) under an open glider and the canopy folds into a plunge toward 32.5 m/s at 35 m/s², the keys steering at a quarter of their glide force. Let go, come within 3.5 m of the ground (or the island's lip over the abyss) or hold for 10 s and the glide catches you again; the drop you pull out of becomes speed, capped at the glide's 15 m/s max. The key is ours: the source names no dive input, and Space is the glider itself. The folded pose is local-only (the dive isn't in the net snapshot).
+  - **Dive camera** (`CamRig.air_zoom`): the plunge holds the view at least as open as it was, where height alone would close it in as you drop (1.82 → 1.70 mid-plunge before). Landing eases back as from any glide (2.5/s; 1.65 → 1.18 at +0.5 s → 1.01 at +1.5 s). Strip: `--glide-cam-shots`.
   - The abyss lift's brake zone rises at 3.5 m/s per metre left (was 2). Updrafts grab at 45 m/s² (was 30).
 - **Heat** (owner, Nov 2: "lasts too long, not punishing enough"): a level glide overheats after 9s (was 14). Hits heat it 3x (was 2x). An overheated glider burns ~3.5% of max health a second in 20-damage ticks, flies at 0.5x speed and sinks at 5 m/s.
 - **Feathering** [est] (tap the glider on and off instead of holding it). Constants: `FEATHER_*`, `lift_t`, `glide_off_t`.
