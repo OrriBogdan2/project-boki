@@ -301,6 +301,10 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## Snag audit (`--snag-check`, decision 0022)
+
+12 Hunters x 50 seeded paths (run, dash, glide, on The Hollow Crown); a stall is horizontal speed under half the wanted speed for over 0.15 s with the keys held, grounded for runs, gliding for glides, in a dash for dashes, and no wall straight on that a perfect slide could not pass at half speed (a prop whose top is over the feet by `World.STEP`, or terrain over mantle reach). Slowed by design (stun, ledge rise, a kit pace under 1, e.g. Motley's Trade in flight) is not counted. Before: 32 stalls (top spots: prop row at (116.8, 5.6, 90.4), a glide into a terrace face at (50.0, 3.7, 61.7), a run at a wall corner at (167.7, 1.6, 128.3), a glide that sank into a prop row at (123.9, 4.0, 165.6), a drop past a lip into the cliff column at (97.1, 3.2, 100.0)). After: 2 (a Tenzo and a Meeko glide, (41.7, 3.4, 62.0) terrace face 1.4 m up and (116.2, 5.6, 125.8) prop corner).
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
