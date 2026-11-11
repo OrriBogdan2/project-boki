@@ -502,9 +502,6 @@ func recast_window() -> Dictionary:
 		w["auto"] = true
 	return w
 
-func recast_at() -> Vector3:
-	return hearth_center() if e_recastable() else Vector3.INF
-
 ## E again: the light is thrown to the cursor (clamped to its reach) almost at once.
 func e_recast() -> bool:
 	if hearth.is_empty() or hearth.get("tossed", false):

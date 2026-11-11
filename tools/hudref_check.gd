@@ -275,6 +275,7 @@ func _check_deny(P: Hunter) -> void:
 ## 7. Empty gear slots and belt slots stay hidden: only filled ones are drawn; holding the info key shows all
 ## the gear slots and one plain line per item.
 func _check_gear_reveal(P: Hunter) -> void:
+	var hud = P.m.hud
 	P.gear = Gear.empty_slots()
 	P.belt = UtilityBelt.empty()
 	await hud.panels.draw
@@ -303,6 +304,7 @@ func _check_gear_reveal(P: Hunter) -> void:
 ## 7. HurtWash: nothing above its threshold, stronger as health runs out; a hit from your left (through
 ## Hud.hurt_from, the real path) weights the left edge, and a second later the wash is even again.
 func _check_wash(P: Hunter) -> void:
+	var hud = P.m.hud
 	var hp_was := P.hp
 	P.hp = P.max_hp * 0.5
 	var above := HurtWash.strength(P)

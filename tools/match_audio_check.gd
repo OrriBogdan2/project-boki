@@ -136,6 +136,7 @@ func _footsteps(m: Match, P: Hunter) -> void:
 		if h.team != P.team and e == null: e = h
 	ok(e != null and _cam(m) != null, "setup: an enemy Hunter and a camera to hear from")
 	if e == null:
+		return
 	var reach := float(MoveSfx.rules()["step_reach_m"])
 	e.unseen = false
 	e.crouch = false

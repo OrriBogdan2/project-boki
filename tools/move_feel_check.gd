@@ -353,7 +353,7 @@ func _knock() -> void:
 			if REF_KNOCKS[key] > 0.0:
 				m.displace.knock(P, Vector2(float(REF_KNOCKS[key]), 0.0))
 			else:
-				m.displace.spike(P, ANCHOR_SPIKE)
+				m.displace.spike(P, ANCHOR_SPIKE, null)
 			_steps(90)
 			var d := P.pos.x - x0
 			print("MFEEL knock %s on %s: %.3f m" % [key, c, d])

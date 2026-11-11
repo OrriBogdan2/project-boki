@@ -97,9 +97,6 @@ func combo_marks(out: Array) -> void:
 			var n := int(sp["n"])
 			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
 
-func recast_left() -> float: return ult.recast_left()
-func recast_slot() -> String: return "x"
-
 ## Kitefall holds her from the crouch to the strike: no other key works until she lands (in the crouch Shift and
 ## a jump still do).
 func busy() -> bool:

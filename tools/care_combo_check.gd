@@ -1489,6 +1489,7 @@ func rimewright() -> void:
 	T2.slow_t = 0.0
 	T2.hp = T2.max_hp
 	K.splinter(T2.pos, float(pd["splinter_dmg"]), float(pd["splinter_r"]))
+	ok(
 			"tm passive (data): Shatter 37 in 3m after 0.4s, 8 darts -> 60; no slow and no Chill from it",
 			float(pd["splinter_dmg"]) == 37.0 and float(pd["splinter_r"]) == 3.0
 			and float(pd["splinter_delay"]) == 0.4 and float(pd["fan_splinter"]) == 60.0
