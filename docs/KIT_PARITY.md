@@ -235,6 +235,8 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | R | Barrage, edge bonus, resets dash, 50 s [D] | Encore r 2.3-5.4, rim band, 10 shots, cd 24 | match; **0.48x cd** |
 | Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, air 8.4 m/.95 s (F), off the dash feel, prime 2.34x, cd 4.5 | match |
 | Passive | +16 per hit stacking; heal on knock [D] | Marks; empowered Shred (ours) | differ: Shred ours `[?]` |
+| Dash | Dash, empower 2.34x, reset on hit, ~5 s [D] | 4.5 m/.48 s, prime 2.34x, cd 4.5, excluded from dash_feel; reset on the empowered hit, Encore, Knife in a foe at rank 3 (`vault_back`: charges and long dash) | match |
+| Passive | +16 per hit stacking; heal on knock [D] | Marks: flat 10% of the bolt per LMB hit (16 on 160), no cap, 4 s (assumed); empowered hit 2 (owner); Bola and dagger add none | match; duration and decay unsourced; Shred gone |
 | Anim | Footage poses | 17 moves, all on `sable.glb` (47) | match on coverage |
 
 ## Crowd control: every stun, root, Ground, slow, Daze and knock effect (main d255acbee, 2026-11-09)
