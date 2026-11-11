@@ -11,6 +11,6 @@ static func _blast(h: Hunter, at: Vector3, radius: float, dmg: float, kb: float,
 	m.note_sound(h, at, "boom")
 	for f in m.foes_of(h.team):
 		var rel := Vector2(f.pos.x - at.x, f.pos.z - at.z)
-		if rel.length() < radius + f.r and absf(f.pos.y - at.y) < 2.0:
+		if rel.length() < radius + f.r and AimMode.in_reach(at.y, f.pos.y):
 			var dir := rel.normalized() if rel.length() > 0.05 else Vector2(1, 0)
 			f.hurt(dmg * m.dmg_mult(h), h, {"kb": dir * kb, "lift": lift, "src": "abil", "ab": ab})
