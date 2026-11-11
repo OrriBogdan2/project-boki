@@ -130,3 +130,20 @@ static func leaner(id: String) -> Dictionary:
 ## The two keys of a locked zone: {"seed": have the Wayseed, "lean": have a Boki leaning toward it}.
 static func keys_for(id: String) -> Dictionary:
 	return {"seed": int(Save.d.get("items", {}).get(wayseed(id), 0)) > 0, "lean": not leaner(id).is_empty()}
+
+## How far a Boki matches the zone's trait, 0..1 (a calm zone, trait_low, matches a low trait).
+static func trait_match(rec: Dictionary, zone: Dictionary) -> float:
+	var v := float(rec.get("traits", {}).get(zone["trait"], 0.5))
+	return 1.0 - v if zone.get("trait_low", false) else v
+
+## Does `rec` thrive in the zone you are in (GARDEN.md 10.2)? Only on the base; never in the hub.
+static func thrives(rec: Dictionary) -> bool:
+	var zone := info(here)
+	if zone.is_empty() or not FarmUnlocks.base_mode():
+		return false
+	return zone["types"].has(Evo.lean(rec)[0]) or trait_match(rec, zone) > float(rules()["thrive"]["trait_over"])
+
+## Stat points a toy gives `rec`: `base`, and now and then one more while it thrives.
+static func train_gain(rec: Dictionary, base: int) -> int:
+	var more := thrives(rec) and randf() < float(rules()["thrive"]["train_bonus"])
+	return base + (1 if more else 0)

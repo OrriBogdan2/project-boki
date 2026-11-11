@@ -215,7 +215,7 @@ func _finish(k: Dictionary, t: Dictionary) -> void:
 	var rec: Dictionary = k["rec"]
 	var def: Dictionary = R["toys"][t["id"]]
 	var stat := String(def["stat"])
-	var gained := Care.add_stat(rec, stat, int(R["stat_gain"]))
+	var gained := Care.add_stat(rec, stat, GardenZones.train_gain(rec, int(R["stat_gain"])))
 	FavToy.log_play(rec, String(t["id"]), float(k["play"]["secs"]))
 	Care.change(rec, "joy", float(R["joy_gain"]))
 	if randf() < float(def.get("snack", 0.0)):
