@@ -111576,5 +111576,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_pavonazar_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_pebblamb",
+    "name": "Pebblamb (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pebblamb_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pawnfry",
+    "name": "Pawnfry (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pawnfry_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pickadactyl",
+    "name": "Pickadactyl (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pickadactyl_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pharoheron",
+    "name": "Pharoheron (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pharoheron_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pillaroo",
+    "name": "Pillaroo (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pillaroo_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_phonodrake",
+    "name": "Phonodrake (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_phonodrake_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pinguin",
+    "name": "Pinguin (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pinguin_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_pipewurm",
+    "name": "Pipewurm (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_pipewurm_1.jpg",
+    "ok": true
   }
 ]
