@@ -15,6 +15,7 @@ extends RefCounted
 ## snapshot carries it. Prints PASS/FAIL.
 
 const DT := 1.0 / 60.0
+const WALK := Vector3(0.05, 0, 0)   # m _frames moves you each step, after the step (the Boki wisp check)
 
 var bad := 0
 var m: Match
@@ -232,7 +233,7 @@ func _boki_wisps() -> void:
 	ok(HunterWisp.node_of(p) == null, "...and it is not a Hunter Wisp (round = Hunter, critter = Boki)")
 	k.think_t = 5.0
 	var searches := k.path_searches
-	_frames(0.5, Vector3(0.05, 0, 0))
+	_frames(0.5, WALK)
 	ok(k.think_t == 5.0 and k.path_searches == searches, "...its AI does not tick (no thinking, no paths)")
 	var lag := k.pos.distance_to(p.pos + Vector3(0, 1.5, 0))
 	ok(k.state == "shoulder" and lag < 0.06, "...it rides along as you move (%.2f m behind)" % lag)
@@ -243,7 +244,8 @@ func _boki_wisps() -> void:
 	var flat := Vector2(k.global_position.x - p.position.x, k.global_position.z - p.position.z).length()
 	var high := k.global_position.y - p.position.y
 	var radius: float = BokiWispCosmetics.worn(p)["orbit"]["radius"]
-	var orbit: bool = absf(flat - radius) < 0.05 and high > 1.0 and high < 2.0
+	# (it follows the body its last step saw, WispFollow, and _frames moved you one WALK after that step)
+	var orbit: bool = absf(flat - radius) < 0.05 + WALK.length() and high > 1.0 and high < 2.0
 	ok(orbit, "...orbiting at shoulder height (%.2f m out, %.2f m up)" % [flat, high])
 	var other: Kin = owned.filter(func(x: Kin): return x != k)[0]
 	var snap := KinNet.kin_extra(k)

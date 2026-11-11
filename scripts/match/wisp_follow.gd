@@ -83,6 +83,10 @@ func step(angle: float, world: World, now: float, dt: float) -> void:
 func drawn(shoulder_y: float, world: World, alpha: float) -> Vector3:
 	shoulder = shoulder_y - h.position.y
 	if not has_shoulder:
+		var lift := Vector3(0, shoulder - rise, 0)     # the height it guessed until now gives way to theirs
+		at += lift
+		last_at += lift
+		goal += lift
 		rise = shoulder
 		has_shoulder = true
 	if stamp < 0.0:
