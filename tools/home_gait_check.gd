@@ -74,8 +74,10 @@ func _body(main: Node, sex: int, h: int, b: int) -> void:
 	print("GAIT %-14s hip %.2f m | walk slide %.1f cm %.1f steps/s | run slide %.1f cm %.1f steps/s bob %.1f cm | "
 			% [id, row["hip_m"], row["gait_2.2"]["slide_cm"], row["gait_2.2"]["steps_hz"],
 			row["gait_5.0"]["slide_cm"], row["gait_5.0"]["steps_hz"], row["gait_5.0"]["bob_cm"]]
-			+ "turning run slide %.1f cm | crouch slide %.1f cm hips %.2f m | stop %.2f s | turn pop %.1f cm | idle creep %.1f cm"
-			% [row["turn_run"]["slide_cm"], row["crouch"]["slide_cm"], row["crouch"]["hips_m"], row["stop"]["settle_s"], row["turn"]["pop_cm"], row["idle"]["creep_cm"]])
+			+ "turning run slide %.1f cm | crouch slide %.1f cm hips %.2f m | "
+			% [row["turn_run"]["slide_cm"], row["crouch"]["slide_cm"], row["crouch"]["hips_m"]]
+			+ "stop %.2f s | turn pop %.1f cm | idle creep %.1f cm"
+			% [row["stop"]["settle_s"], row["turn"]["pop_cm"], row["idle"]["creep_cm"]])
 	_gate(id, row)
 	m.free()
 
@@ -124,11 +126,6 @@ func _run_for(m: Node3D, an: HunterAnim, secs: float, s: float, yaw_rate: float,
 		an.update(DT, _state(vel, face, crouch))
 		if keep:
 			fr.append(_read(m))
-			if crouch > 0.0 and fr.size() % 3 == 0 and fr.size() < 40 and an.gait.left.planted:
-				var f: Dictionary = fr[-1]
-				var lg := m.get_node("Rig/Legs/LegL") as Node3D
-				var kn := m.get_node("Rig/Legs/LegL/Knee") as Node3D
-				print("DBF %s toe %.3f pivot y %.3f rot %s knee %s pose %s gk %.2f" % [m.name, f["sole.L2"].y, lg.global_position.y, lg.rotation, kn.rotation, an.gait.left.pose, an.gait.gait_k])
 	return fr
 
 ## A steady run at `s` (bending round at `yaw_rate`, crouched by `crouch`): the slide of every planted sole point,
