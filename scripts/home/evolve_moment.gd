@@ -97,8 +97,8 @@ func start() -> void:
 	fresh.visible = false
 	host.add_child(fresh)
 	old.set_meta("kstate", "sleep")        # the old form curls up: its own sleep clip
-	_set_wash(old, wash)
-	_set_wash(fresh, wash)
+	set_wash(old, wash)
+	set_wash(fresh, wash)
 	light.light_color = col
 	light.omni_range = 3.5
 	light.light_energy = 0.0
@@ -145,13 +145,13 @@ func finish() -> void:
 	step(LENGTH)
 	fresh.remove_meta("kact")
 	fresh.remove_meta("face")
-	_set_wash(fresh, null)
+	set_wash(fresh, null)
 	fresh.scale = grown
 	light.queue_free()
 	old.queue_free()
 
-func _set_wash(n: Node, mat: Material) -> void:
+static func set_wash(n: Node, mat: Material) -> void:
 	if n is MeshInstance3D:
 		(n as MeshInstance3D).material_overlay = mat
 	for c in n.get_children():
-		_set_wash(c, mat)
+		set_wash(c, mat)
