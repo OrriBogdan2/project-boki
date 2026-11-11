@@ -648,18 +648,23 @@ func juggernaut(a) -> void:
 	var sl: Dictionary = K.rmb_def()["slam"]
 	var mv: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://content/vfx/juggernaut.json"))["moves"]
 	var lm: Dictionary = K.d["lmb"]
-	A.ok("juggernaut move art: slash arc %.0f, slam cone %.0f, true sizes" % [lm["arc"], sl["angle"]],
+	var scorch: Dictionary = mv["slam_hit"]["fx"][0]
+	var slam_lane_only: bool = mv["slam_hit"]["fx"].all(func(l): return not l.has("arc") and not l.has("size_x"))
+	A.ok("juggernaut move art: slash arc %.0f, slam scorch a %.2f m lane, true sizes" % [lm["arc"], sl["width"]],
 			is_equal_approx(float(mv["slash"]["fx"][0]["arc"]), float(lm["arc"]))
-			and is_equal_approx(float(mv["slam_hit"]["fx"][0]["arc"]), float(sl["angle"]))
-			and is_equal_approx(float(_fx(mv["slam_hit"], "sweep")["arc"]), float(sl["angle"]))
+			and scorch["p"] == "scorch" and scorch["shape"] == "lane" and scorch["len"] == "len"
+			and is_equal_approx(float(scorch["w"]), float(sl["width"])) and slam_lane_only
 			and not mv["slash"]["fx"][0].has("size_x") and not mv["drop_hit"]["fx"][0].has("size_x")
 			and not mv["drop_hit"]["fx"][1].has("size_x")
 			and not mv["dash_go"]["fx"].any(func(l): return l["p"] == "scorch"),
 			"")
-	A.ok("juggernaut RMB tap: strike cone drawn = hit (%.1f m, %.0f deg)" % [sl["radius"], sl["angle"]],
-			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "cone"
-			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["radius"]))
-			and is_equal_approx(float(lane.get("deg", 0.0)), float(sl["angle"])),
+	# Brall's Execution Slam is a lane, not a cone (hero-ref 0157: 0.4 bh wide, parallel sides; reach 2.4 bh)
+	A.ok("juggernaut RMB tap: strike lane drawn = hit (%.1f x %.2f m, no taper)" % [sl["len"], sl["width"]],
+			AimKit.shown(P, "slam") and bool(lane.get("all", false)) and String(lane.get("kind", "")) == "lane"
+			and is_equal_approx(float(lane.get("len", 0.0)), float(sl["len"]))
+			and is_equal_approx(float(lane.get("width", 0.0)), float(sl["width"]))
+			and is_equal_approx(float(lane.get("width_end", 0.0)), float(sl["width"]))
+			and absf(float(sl["len"]) - 4.3) < 0.05 and absf(float(sl["width"]) - 0.72) < 0.1,
 			str(lane))
 	A.step(m, 0.4)
 	A.ok("juggernaut RMB tap: Finishing Slam winds up, then lands",
@@ -683,6 +688,21 @@ func juggernaut(a) -> void:
 			hp0 - T.hp >= 36.0 and K.sweet_spots == 1, "dealt %.0f spots %d" % [hp0 - T.hp, K.sweet_spots])
 	A.ok("juggernaut RMB: short cooldown (2s)",
 			float(K.cd["rmb"]) <= 2.0 and float(K.cd["rmb"]) > 1.0, "%.2f" % float(K.cd["rmb"]))
+	# the lane's shape: a foe the old 70-degree cone took (3 m out, 1.4 m aside) is missed; one at the tip is hit
+	A.step(m, 2.1)
+	var lane_hits: Array = []
+	for spot: Vector3 in [Vector3(3.0, 0, 1.4), Vector3(float(sl["len"]) - 0.1, 0, 0.3)]:
+		P.teleport(home)
+		A.fresh(T)
+		T.teleport(home + spot)
+		A.aim_at(P, home + Vector3(3.0, 0, 0))
+		K.ch_rmb = 1.0
+		K.cd["rmb"] = 0.0
+		A.tap(m, P)
+		A.step(m, 0.7)
+		lane_hits.append(A.dmg(T))
+	A.ok("juggernaut RMB tap: the Slam hits a lane, not a cone (aside %.0f, tip %.0f)" % lane_hits,
+			lane_hits[0] <= 0.0 and lane_hits[1] >= 24.0)
 	# the Lunge charge walks at rmb.lunge.walk_k of the run: the footage's Heavy Attack hold runs slower than
 	# his plain runs (briefs/hero-ref/juggernaut.md, locomotion; docs/MOVEMENT_FEEL.md)
 	A.step(m, 1.0)
