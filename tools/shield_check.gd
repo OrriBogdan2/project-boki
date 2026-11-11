@@ -3,7 +3,8 @@ extends RefCounted
 ## shield, an ally area, a Boki's Refraction and Mass Guard, the Bulwark's raised aegis, a Fuse release,
 ## the owner shield a Boki gives) is applied to a Hunter standing in front of a rival; after it settles
 ## every body mesh that was visible is still visible, the Hunter is still targetable and still seen by
-## the rival, and the shield rim (ShieldLook) is on. With --shots-dir=<dir> (run under xvfb with a
+## the rival, the shield rim (ShieldLook) is on, and your vitals' shield strip (ShieldStrip) leads with
+## that source's icon. With --shots-dir=<dir> (run under xvfb with a
 ## renderer) it also writes one crop per source. Never touches the save.
 
 const DT := 1.0 / 60.0
@@ -60,6 +61,10 @@ func run(main: Node) -> void:
 		"Boki owner shield": func(): P.kin_shield = 16.0,
 		"Bulwark aegis": func(): _aegis(P),
 	}
+	# the icon the vitals strip leads with; Mass Guard is a plate in front of you (a wall), no pool on you
+	var icons := {"ability shield": ShieldSrc.ITEM, "ally area": ShieldSrc.HEAL, "Boki Refraction": ShieldSrc.BOKI,
+		"Boki Mass Guard": "none", "Fuse release": ShieldSrc.FUSE, "Boki owner shield": ShieldSrc.BOKI,
+		"Bulwark aegis": ShieldSrc.ITEM}
 	for src in sources:
 		P.shield = 0.0
 		P.shield_t = 0.0
@@ -76,12 +81,16 @@ func run(main: Node) -> void:
 		ok(not ShieldLook.occludes(m, P), "%s: nothing opaque of the shield stands between camera and body" % src)
 		if P.shield > 0.0:
 			ok(ShieldLook.shown(P), "%s: the shield rim is on" % src)
+		var pools := ShieldStrip.pools(P)
+		var lead := String(pools[0][1]) if not pools.is_empty() else "none"
+		ok(lead == icons[src], "%s: the vitals strip shows it, icon %s (wanted %s)" % [src, lead, icons[src]])
 		await _shot(main, m, P, src)
 		_clear(m, P)
 	P.shield = 0.0
 	P.kin_shield = 0.0
 	await _settle(main, m, P, 0.2)
 	ok(not ShieldLook.shown(P), "no shield: the rim is off")
+	ok(ShieldStrip.pools(P).is_empty(), "no shield: no strip")
 	print("SHIELDCHECK done, %d failures" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 

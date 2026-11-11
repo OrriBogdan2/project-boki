@@ -585,9 +585,11 @@ func _breah() -> void:
 	P.inp["fire"] = false
 	step(m, 0.3)
 	ok(
-		"data: punching your own rocks gives a Molten Guard shield (one stack of 18 per punch, rank 1)",
-		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2,
-		"punches %d stacks %d shield %.1f swept %d" % [K.guard_punches - gp0, K.shield_stacks, P.shield, K.last_sweep]
+		"data: punching your own rocks gives a Molten Guard shield (one 18 stack a punch, rank 1), named",
+		K.guard_punches == gp0 + 1 and K.shield_stacks == 1 and absf(P.shield - 18.0) < 0.5 and K.last_sweep >= 2
+			and P.shield_src == ShieldSrc.MOLTEN,
+		"punches %d stacks %d shield %.1f swept %d src %s" % [K.guard_punches - gp0, K.shield_stacks, P.shield,
+			K.last_sweep, P.shield_src]
 	)
 	reset.call()
 	P.shield = 0.0

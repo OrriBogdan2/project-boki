@@ -3,8 +3,8 @@ extends RefCounted
 ## The bottom-left vitals block: your portrait framed in your class colour with the run level on a
 ## coin ringed by XP, then to its right your health as a big number over a thick segmented bar
 ## (same segments and chip as your overhead plate), armour as a strip under it with its number and
-## tier, shields past the end of health, the merged form's shell, and the archetype resource under
-## that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
+## tier, your shield as a strip over the top of health (ShieldStrip), the merged form's shell, and the
+## archetype resource under that. The ability row sits below the bars (Hud._draw_abilities). Look: HudStyle.
 ## Hud keeps the state that checks read (lvl_pop, armor_lerp, hover_spots); this file only draws.
 
 const BAR_W := 318.0       # px: health / armour width
@@ -38,7 +38,8 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var hp_txt := str(int(ceil(p.hp)))
 	HudStyle.text(c, Vector2(x0, y0 + 1), hp_txt, 26, HudStyle.INK if frac >= 0.3 else hp_col)
 	var hw := HudStyle.BIG.get_string_size(hp_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
-	HudStyle.text(c, Vector2(x0 + hw + 4, y0 + 1), "/ %d" % int(p.max_hp), 14, HudStyle.MUTED)
+	var max_txt := "/ %d" % int(p.max_hp)
+	HudStyle.text(c, Vector2(x0 + hw + 4, y0 + 1), max_txt, 14, HudStyle.MUTED)
 	if p.armor > 0.5:
 		var at := "%d" % int(ceil(p.armor))
 		var aw := HudStyle.BIG.get_string_size(at, HORIZONTAL_ALIGNMENT_LEFT, -1, 15).x
@@ -50,7 +51,9 @@ static func draw(H, sz: Vector2, p: Hunter) -> void:
 	var hr := Rect2(Vector2(x0, y0 + 6), Vector2(w, HP_H))
 	H._rounded(hr.grow(2.0), HudStyle.SHADE, 4)
 	var flash: float = H.plates.flash_of(p) * 0.6
-	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, H._chip_of(p, frac), HudPlate.shield_frac(p), flash)
+	HudStyle.seg_bar(c, hr, p.hp, p.max_hp, hp_col, H._chip_of(p, frac), 0.0, flash)
+	var mw := HudStyle.BIG.get_string_size(max_txt, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
+	ShieldStrip.draw(c, hr, p, x0 + hw + 4 + mw + 12, y0 + 1)
 	# under it: the merged form's shell while merged, else armour (with its own trail as it drops)
 	var ar := Rect2(Vector2(x0, hr.end.y + 3), Vector2(w, AR_H))
 	var shv := MergeShell.view(p)
