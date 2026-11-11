@@ -106,7 +106,8 @@ func _tokens_and_stay() -> void:
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
 	rec["level"] = int(Evo.rules()["lines"]["cindle"]["level"])      # its line's form level (evolve.json)
-	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level %d grows a form" % rec["level"])
+	ok(not Evo.on_level(rec.duplicate(true)).is_empty(),
+			"level %d changes it (a form, or a part while the form has no art)" % rec["level"])
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
