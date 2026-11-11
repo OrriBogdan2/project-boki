@@ -1229,10 +1229,8 @@ func _bulwark_combos() -> void:
 				and not K.d.has("resource") and not K.d["rmb"].has("slam") and not K.has_meter(),
 		"cd %.2f" % float(K.cd["rmb"])
 	)
-	ok("bulwark vfx: the Shield Charge and Slam play their looks, the slam fan at the cone's angle",
-		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
-		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
-		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
+	ok("bulwark vfx: the Shield Charge plays its look (no Shield Slam since the parity cut)",
+		int(hv.plays.get("charge_go", 0)) >= 1, "plays %s" % hv.plays.get("charge_go"))
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
