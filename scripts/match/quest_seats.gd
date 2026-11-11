@@ -250,6 +250,12 @@ func uplink_wait(x: Dictionary) -> String:
 		return "The Uplink has shut"
 	return ""
 
+## The admin menu's "exits ready now" (Exits.admin_ready; the loop tour uses it too): a LOCKED Uplink
+## opens now, with its outpost's open_at.
+func open_now(x: Dictionary) -> void:
+	if uplink and is_same(x, uplink.ref) and uplink.state == QuestSeat.S.LOCKED:
+		uplink.open_s = minf(uplink.open_s, m.sess_time())
+
 ## The uplink may be started: in its window and not taken or shut (by the clock, so a client's mirror
 ## a moment behind the host doesn't refuse a start the host allowed).
 func may_start(x: Dictionary) -> bool:

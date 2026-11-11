@@ -702,13 +702,12 @@ func _lair(m) -> void:
 
 func _extract(m) -> void:
 	var P: Hunter = m.player
-	var ups: Array = m.exits.of_kind("outpost")
-	if ups.is_empty():
+	# the outpost the uplink runs on (the others are dark in Limited Ways Out), opened now the way the
+	# admin menu's "exits ready now" does it: its open_at and the Uplink seat's window together
+	var best: Dictionary = m.exits.uplink_x()
+	if best.is_empty():
 		note_bad("no uplinks"); return
-	var best: Dictionary = ups[0]
-	for x in ups:
-		if P.flat_dist(x["pos"]) < P.flat_dist(best["pos"]): best = x
-	best["open_at"] = 0.0
+	m.exits.admin_ready()
 	var cp: Vector3 = best["pos"]
 	var at: Vector3 = m.world.free_spot_near(cp + Vector3(1.2, 0, 0.6), [], 0.6, 0.4, 3.0)
 	P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
@@ -719,7 +718,14 @@ func _extract(m) -> void:
 	await mwait(2.0)
 	Input.action_release("interact")
 	print("TOUR uplink state %s" % best["state"])
-	if best["state"] != "charging": note_bad("the uplink didn't start (%s, '%s')" % [best["state"], String(m.interact.get("label", ""))])
+	if best["state"] != "charging":
+		# no lift will open: say why and stop here rather than wait out the match for the results
+		var seat: QuestSeat = m.exits.seats.uplink if m.exits.seats else null
+		var seat_st: String = QuestSeat.S.keys()[seat.state] if seat else "-"
+		var label := String(m.interact.get("label", ""))
+		note_bad("the uplink didn't start (%s, startable %s, seat %s, %.1fm from the mast, '%s'): extraction skipped"
+			% [best["state"], m.exits.startable(best), seat_st, P.flat_dist(cp), label])
+		return
 	var i := 0
 	var ticks := 0
 	var w0 := Time.get_ticks_msec()
@@ -738,6 +744,10 @@ func _extract(m) -> void:
 		if not m.exits.in_yard(best, P):
 			P.teleport(Vector3(at.x, m.world.ground_at(at.x, at.z), at.z))
 	print("TOUR uplink now %s" % best["state"])
+	if is_instance_valid(m) and not m.over and best["state"] != "open":
+		var prog := float(best["prog"])
+		note_bad("the uplink never opened its lift (%s, prog %.2f): extraction skipped" % [best["state"], prog])
+		return
 	await shot("uplink_open")
 	# step into the light
 	await mwait(1.0)
