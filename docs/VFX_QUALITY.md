@@ -212,3 +212,7 @@ Not rings, left as they are: Albert's swing and slam crescents (`bulwark.json` `
 arcs; ext/vfx-albert-ivory-arcs already recolours them) and Meeko's violet Burrseed discs.
 
 GPU strips (jobq rp1/pc, `--hero-vfx-reel`): docs/shots/vfx-gold-ground-rings/ (Hearthlight, the 360 Smash, Mending Ground).
+Albert (bulwark), ext/vfx-albert-ivory-arcs: the LMB swing crescent, the Shield Slam fan and the held-swing whirl trail are
+his ivory (`#fff0b0`, pale gold `#e8c96a`), no longer Kael's orange. The before/after strip is
+`docs/art/vfx_rescore/bulwark_arcs_before_after.jpg` (jobq 20261111-213523-28011 before, 215537-24801 after, match zoom).
+On the scorecard of ext/vfx-rescore his row moves 24 to 25 (C 3 to 4); the aegis plates still render orange-red.
