@@ -2617,8 +2617,6 @@ func _update_pickups(dt: float) -> void:
 					continue
 				if p["kind"] == "ckey" and not KeyChest.has_room(h):
 					continue      # a full key stack leaves the key on the ground, glinting
-				if p["kind"] == "key" and h.rift_keys >= BeltKeys.cap("rift_key"):
-					continue      # one Rift Key at a time (BeltKeys); the next waits on the ground
 				if PickupReach.near(self, h, pos, "walk") and UtilityBelt.can_take(h, String(p["kind"])):
 					v = PickupReach.pull(h, pos)
 					if PickupReach.grabbed(h, pos):
