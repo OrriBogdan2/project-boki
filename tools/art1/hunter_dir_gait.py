@@ -14,7 +14,10 @@ shin's tail) and turns with the shin. On a Hunter whose walk_f/run_f still lean 
 foot_mps pair as the speeds, so every direction gets the forward loop's rate and stride in game.
 A direction written "b+" keeps the shipped loop instead (restride): only its feet are pushed along the move until a
 planted sole travels at the loco speed, for a hand-keyed loop whose look wins but whose feet slide.
-  blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED
+  blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- SRC.glb OUT.glb WALK_SPEED RUN_SPEED [DIRS WALK_S RUN_S SIZE CYCLES TURN]
+SIZE: game metres per model metre (Albert's breaker.glb is 2.0); the metre constants below are game metres.
+CYCLES: WALK,RUN left + right pairs a loop (Albert's 14 cm legs walk 2,1: a half-length step in the forward loop's time).
+TURN: deg, the pelvis's most turn into the move (Albert 55: a side run his legs can reach).
   python3 tools/art1/glb_add_clips.py SRC.glb OUT.glb walk_b,walk_l,...,run_br
 (glb_add_clips matches by prefix: "run_b" also replaces run_bl/run_br, so add the b clips before the diagonals.)"""
 import math
@@ -27,17 +30,19 @@ from mathutils import Matrix, Vector
 SRC, OUT, WALK, RUN, *MORE = sys.argv[sys.argv.index("--") + 1:]
 BUILD = [d for d in (MORE[0] if MORE else "b,l,r,fl,fr,bl,br").split(",") if d]   # directions to rebuild ("b+": restride); "" measures
 LENGTH = {"walk": float(MORE[1]) if len(MORE) > 1 else 0.0, "run": float(MORE[2]) if len(MORE) > 2 else 0.0}   # s, 0 = the f loop's
-SPEED = {"walk": float(WALK), "run": float(RUN)}   # game m/s (warden_anim loco); the model is in game metres
+CYCLES = dict(zip(("walk", "run"), map(int, (MORE[4] if len(MORE) > 4 else "1,1").split(","))))   # pairs a loop, in step
+SIZE = float(MORE[3]) if len(MORE) > 3 else 1.0    # game metres per model metre: every length below is in model metres
+SPEED = {"walk": float(WALK) / SIZE, "run": float(RUN) / SIZE}   # warden_anim loco, game m/s
 FPS = 48            # keys per second
-CONTACT = 0.012     # m: a sole vert this close to the floor is planted
-TURN = 40.0         # deg: the most the pelvis turns into the move, the chest stays on the source clip's facing
-WIDEN = 0.035       # m: each foot steps this much wider in a side step
+CONTACT = 0.012 / SIZE   # m: a sole vert this close to the floor is planted
+TURN = float(MORE[5]) if len(MORE) > 5 else 40.0   # deg: the most the pelvis turns into the move, the chest keeps the source's
+WIDEN = 0.035 / SIZE   # m: each foot steps this much wider in a side step
 ROLL = 4.0          # deg: the pelvis rolls onto the planted foot (the weight shift)
-SWAY = 0.018        # m: and the pelvis rides over it
+SWAY = 0.018 / SIZE    # m: and the pelvis rides over it
 REACH = 0.8        # leg lengths: the most a stance sole travels (a longer step is flown: a shorter stance, not a crouch)
 SWING = 0.2        # leg lengths: the highest a swing sole lifts
 SWING_V = 0.9      # x stance speed: how fast a sole still travels back as it leaves and as it meets the floor (no scoot near it)
-DIP_OK = 0.025     # m: the most the pelvis may dip under the forward loop's height at the same phase; past it the stance shortens
+DIP_OK = 0.025 / SIZE  # m: the most the pelvis may dip under the forward loop's height at the same phase; past it the stance shortens
 DUTY_STEP = 0.88   # x: the stance share each retry keeps (a longer flight, not a crouch)
 DUTY_MIN = 0.14    # the shortest stance share tried
 MISS_OK = 0.01      # m: the most a re-strided planted ankle may fall short of its place (past it the stretch backs off)
@@ -45,17 +50,18 @@ PIVOT_MAX = 65.0   # deg: how far a sole may pivot on its heel or toe to stay in
 TOE_UP, HEEL_UP = 10.0, 30.0   # deg: the sole's pitch at the strike and at the push (mirrored walking backwards)
 DIRS = {"f": Vector((0, 1, 0)), "b": Vector((0, -1, 0)), "l": Vector((-1, 0, 0)), "r": Vector((1, 0, 0))}
 DIRS.update({a + b: (DIRS[a] + DIRS[b]).normalized() for a in "fb" for b in "lr"})
-FOOT_UP = 0.02      # m: a rig without foot bones (Kael): the foot is the shin's verts up to this over the ankle
+FOOT_UP = 0.02 / SIZE  # m: a rig without foot bones (Kael): the foot is the shin's verts up to this over the ankle
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.render.fps = FPS
 bpy.ops.import_scene.gltf(filepath=SRC)
 arm = next(o for o in bpy.data.objects if o.type == "ARMATURE")
-HAS_FOOT = "foot.L" in arm.data.bones     # (no foot bone: the foot is skinned to the shin and turns with it)
-LEGS = ("thigh", "shin", "foot") if HAS_FOOT else ("thigh", "shin")
+FOOT_BONE = "x_foot" if "x_foot.L" in arm.data.bones else "foot"   # (Albert's feet are x_ bones: the game leaves them to his clips)
+HAS_FOOT = FOOT_BONE + ".L" in arm.data.bones     # (no foot bone: the foot is skinned to the shin and turns with it)
+LEGS = ("thigh", "shin", FOOT_BONE) if HAS_FOOT else ("thigh", "shin")
 LEG_BONES = ["%s.%s" % (n, s) for n in LEGS for s in "LR"]
-FOOT_GROUP = "foot" if HAS_FOOT else "shin"
+FOOT_GROUP = FOOT_BONE if HAS_FOOT else "shin"
 body = max((o for o in bpy.data.objects if o.type == "MESH" and FOOT_GROUP + ".L" in o.vertex_groups),
            key=lambda o: len(o.data.vertices))
 layer = bpy.context.view_layer
@@ -89,12 +95,12 @@ def verts(idx):
 
 def ankle_rest(side):
     """The ankle at rest: the foot bone's head, or the shin's tail on a rig without feet."""
-    b = arm.data.bones["foot." + side] if HAS_FOOT else arm.data.bones["shin." + side]
+    b = arm.data.bones[FOOT_BONE + "." + side] if HAS_FOOT else arm.data.bones["shin." + side]
     return (b.head_local if HAS_FOOT else b.tail_local).copy()
 
 
 def ankle_now(side):
-    return PB["foot." + side].head.copy() if HAS_FOOT else PB["shin." + side].tail.copy()
+    return PB[FOOT_BONE + "." + side].head.copy() if HAS_FOOT else PB["shin." + side].tail.copy()
 
 
 def foot_idx(side):
@@ -116,7 +122,7 @@ layer.update()
 SOLE = {}           # per side: the ankle's rest place, the heel and toe ends of the sole from it (m, along y), its height
 for s in "LR":
     co = verts(FOOT[s])
-    low = co[co[:, 2] < co[:, 2].min() + 0.012]
+    low = co[co[:, 2] < co[:, 2].min() + CONTACT]
     ankle = ankle_rest(s)
     SOLE[s] = (ankle.copy(), float(low[:, 1].min() - ankle.y), float(low[:, 1].max() - ankle.y), float(ankle.z - co[:, 2].min()))
 
@@ -203,7 +209,8 @@ class Gait:
     def __init__(self, gait, k, fwd, scale=1.0):
         self.speed = SPEED[gait]
         self.n, self.floor = round(LENGTH[gait] * FPS) or fwd["n"], fwd["floor"]
-        self.period = self.n / FPS
+        self.cycles = CYCLES[gait]
+        self.period = self.n / FPS / self.cycles
         self.duty = max(DUTY_MIN, scale * min(fwd["duty"], REACH * LEG / (self.speed * self.period)))
         self.shift = round(fwd["strike"] * self.n / fwd["n"])   # the right strike falls on the forward loop's key
         self.d = DIRS[k]
@@ -217,8 +224,8 @@ class Gait:
         a = fwd["keys"][fwd["strike"]]["ankle"]["R"].y
         b = fwd["keys"][fwd["lift_at"]]["ankle"]["R"].y
         hips = float(np.mean([key["hc"].y for key in fwd["keys"]]))
-        self.lean = Vector((0, min(max(0.5 * (a + b) - hips, -0.04), 0.04), 0))   # the stance's middle ahead of the hips
-        self.lift = min(max(fwd["swing"], 0.04), SWING * LEG)
+        self.lean = Vector((0, min(max(0.5 * (a + b) - hips, -0.04 / SIZE), 0.04 / SIZE), 0))   # the stance's middle ahead of the hips
+        self.lift = min(max(fwd["swing"], 0.04 / SIZE), SWING * LEG)
         hz = np.array([key["hc"].z for key in fwd["keys"]])
         self.fwd_hip = lambda ph: float(np.interp((fwd["strike"] + ph * fwd["n"]) % fwd["n"], np.arange(fwd["n"] + 1),
                                                   np.append(hz, hz[0])))   # the forward loop's hip height at phase ph
@@ -241,7 +248,7 @@ class Gait:
         m0 = m1 = -SWING_V * span                            # (a Hermite pass: it leaves and meets the floor near the stance speed)
         h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
         x = h[0] * (front - self.travel) + h[1] * m0 + h[2] * front + h[3] * m1
-        side_out = self.face.to_3x3() @ Vector((sgn * 0.012 * math.sin(s * math.pi), 0, 0))
+        side_out = self.face.to_3x3() @ Vector((sgn * 0.012 / SIZE * math.sin(s * math.pi), 0, 0))
         pitch = roll * (-HEEL_UP + (HEEL_UP + TOE_UP) * smooth(0.08, 0.92, s))
         lift = Vector((0, 0, self.lift * math.sin(s ** 0.75 * math.pi) ** 0.9))
         return home + self.lean + self.d * x + side_out + lift + off * (1 - smooth(0.0, 0.6, s)), pitch, False
@@ -333,7 +340,7 @@ def bake(name, g, src, last_try=True):
     for lap in range(5):     # lap 0 hands each swing its start; laps 1-3 dip the pelvis where a step outreaches the leg
         keys, soles, miss = [], [], np.zeros(g.n)
         for k in range(g.n):
-            miss[k] = pose(g, src, (k - g.shift) % g.n / g.n, feet, drop[k])
+            miss[k] = pose(g, src, (k - g.shift) % g.n / g.n * g.cycles % 1.0, feet, drop[k])
             keys.append({pb.name: (pb.location.copy(), pb.rotation_quaternion.copy(), pb.scale.copy()) for pb in PB})
             soles.append({s: (feet[s]["planted"], feet[s]["co"].copy()) for s in "LR"})
         if lap in (1, 2, 3) and miss.max() > 0.003:
