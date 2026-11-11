@@ -4,6 +4,8 @@ extends RefCounted
 ##   2. the player lands the last hit: exactly one line in the lane; their own kill says nothing
 ##   3. an ordinary monster nobody carried a key on says nothing even when contested
 ##   4. a contested key carrier shows the key mark
+##   5. the steal cues (StealSfx): a prize monster cries in its own voice kind once, as it crosses a quarter of its
+##      health; an ordinary one never does; a reel lands one thud; the stealer hears steal_won, the loser steal_lost
 ## With --shots-dir=<dir> (a real renderer) it also saves what each squad reads over the fight as a PNG.
 ## Never touches the save.
 
@@ -52,6 +54,7 @@ func run(main_node: Node) -> void:
 	KeyCarry.mark(skit)
 	var keyed := StealCall.line(skit, me, me.team, true)
 	ok(keyed.get("icon", "") == "key", "a key carrier's line has the key mark")
+	_sounds(m, me, rival)
 	await _shots(m, warden)
 	m.queue_free()
 	print("STEAL DONE, failures: ", bad)
@@ -64,6 +67,38 @@ func _fight(m: Match, kind: String, first: Hunter, frac: float, last: Hunter) ->
 	if last != first:
 		mb.hurt(mb.max_hp * (1.0 - frac) * 0.5, last)
 	return mb
+
+## Item 5. Reads Sfx.last_played; each cue's gap is cleared first, so a repeat would show.
+func _sounds(m: Match, me: Hunter, rival: Hunter) -> void:
+	Sfx.listener = me.pos
+	var mb: Mob = m.spawn_mob("warden", me.pos + Vector3(8, 0, 0))
+	var cry := StealSfx.cry_name(mb)
+	ok(cry == "steal_cry_warden", "a warden cries in its own voice (%s)" % cry)
+	mb.hurt(mb.max_hp * 0.7, rival)
+	ok(not _heard(mb, cry), "no cry above a quarter of its health")
+	mb.hurt(mb.max_hp * 0.1, me)
+	ok(_heard(mb, cry), "the cry plays as it crosses a quarter")
+	mb.hurt(mb.max_hp * 0.05, me)
+	ok(not _heard(mb, cry), "...once: a later hit under the line is quiet")
+	mb.stagger_t = 2.0
+	ok(_heard(mb, "steal_reel"), "its reel lands a heavy thud")
+	ok(not _heard(mb, "steal_reel"), "...once a reel")
+	var skit: Mob = m.spawn_mob("skitter", me.pos + Vector3(4, 0, 0))
+	skit.hurt(skit.max_hp * 0.9, me)
+	ok(not _heard(skit, StealSfx.cry_name(skit)), "an ordinary monster does not cry")
+	var sides := {"steal_won": _fight(m, "warden", rival, 0.7, me), "steal_lost": _fight(m, "warden", me, 0.7, rival)}
+	for sname in sides:
+		Sfx.last_played.erase("steal_won")
+		Sfx.last_played.erase("steal_lost")
+		StealCall.on_dead(m, sides[sname], me if sname == "steal_won" else rival)
+		var heard := sides.keys().filter(func(k): return Sfx.last_played.has(k))
+		ok(heard == [sname], "a stolen kill: the player's squad hears %s (heard %s)" % [sname, heard])
+
+## Ticks `mb` as its frame would; true when `sname` started (its gap cleared first).
+func _heard(mb: Mob, sname: String) -> bool:
+	Sfx.last_played.erase(sname)
+	StealSfx.tick(mb)
+	return Sfx.last_played.has(sname)
 
 ## How many lines of the lane are steal callouts (a kill's own toasts may sit beside them).
 func _steal_lines(lane: MsgLane) -> int:
