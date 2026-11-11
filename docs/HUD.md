@@ -21,6 +21,7 @@ in their own files and share one look, `HudStyle`. Reference study and gap list:
 | `msg_lane.gd` (`MsgLane`, one on `hud.msgs`) | every short message (`toast`, `toast_small`, `tip`, `level_up`; the farm's `UI.toast` too): cards stacked down one column under the timer, never overlapping, repeats merged ("x3"), at most 3 at once (2 in a fight), the most important first, short lives (2 s at most in a fight); world labels under a card fade back (`yield_label`). Check: `--msg-queue-check` |
 | `combo_mark.gd` (`ComboMark`) | the tag over a rival's plate that carries your combo state: icon, stack pips and a shrinking time ring in your ability colour, shown only to the hunter whose kit applied it (Sable's Marks, Vex's Daze, Sparkle's Static). It reads `ArchKit.combo_read(foe)` from the kit's own status timers; a kit calls `ComboMark.payoff()` when its payoff lands (white body flash, tag flash, sound). Checks: each kit's combo check (`tools/combo_mark_check.gd`); shots: `--combo-mark-shots` |
 | `mate_alerts.gd` (`MateAlerts`, one on `hud.mates`) | a teammate down, back up, eliminated or their soul lost: a knocked mark on their squad row's portrait, one faint line beside the row (1.5 s), a sound. Check: `--hudref-check` |
+| `knock_feed.gd` (`KnockFeed`, drawn by `hud_panels.gd` from `Match.feed`) | the kill feed, its own lane at the top right under the counters: a knock row is the knocker's name and face, the icon of the ability that landed it (the slot icon on the knocker's own bar, the weapon's for a plain hit, the Boki's ability; `knock` with nobody to credit), the knocked Hunter's face and name, a squad-colour bar at each end, and an outline in your side's colour when your squad is in it; other lines stay text plates. Up to 4 rows, 5 s each then a 0.5 s fade, none wider than 300 px (long names cut, long lines wrapped). Faces are the painted portraits, cut on a worker. Checks: `--knock-feed-check`, `--knock-feed-shots` |
 | `hudref_demo.gd` | `--hudref-demo=plates|fight|busy` screenshot scenes |
 
 Rules of the look:
@@ -70,7 +71,7 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
 | "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
 | Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
-| Kill feed | top right, 13 px plates | 6 s, 5 lines | unchanged: edge-anchored |
+| Kill feed (`KnockFeed`) | top right, its own lane under the counters, rows at most 300 px | 5 s and a 0.5 s fade, 4 rows | edge-anchored; knocks read as faces and an icon, not sentences |
 | Stomp line ("Standing on X") | was a boxed 15 px sentence under the crosshair | while standing on a wisp | a short 13 px line, no box |
 | Level-up gold wash | full screen at 16% | ~0.3 s | unchanged (brief; `--level-hud-check` holds it); the line goes through the lane |
 | Kill / knock flashes (`Juice.kill`, you knocked) | full screen, 14-30% | 0.2-0.3 s | unchanged: brief, and about you |
@@ -88,10 +89,11 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 - The match HUD's panels tag their draws (`SafeArea.begin`, in `HudPanels`) and `Hud._panel`/`_rounded` record
   the rects (`SafeArea.note`) only while a check records. The prematch pick keeps its own, wider title-safe
   margin (4% of the height) for the countdown banner.
-- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, kill feed and
-  toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
+- `--safe-area-check` (headless): the match HUD (dropping and on the ground, with a squad, a Boki, a full kill feed
+  of knock rows and lines, and toasts), the pick, pause, results, farm HUD and expedition panel at 1280x720, 1920x1080, 2560x1440,
   2560x1080 and 1024x640: every group inside the margin, no two overlapping. `--safe-area-shots --size=WxH
-  --shots-dir=<dir>` takes the same screens with a real renderer.
+  --shots-dir=<dir>` takes the same screens with a real renderer. `--knock-feed-check` holds the kill feed's lane
+  to the same rule at the five sizes with its longest rows and the two widest message cards up.
 - The Ways Out widgets are checked the same way (`SafeArea.note_as` tags the ones drawn outside the panel pass), in
   eight states: strip locked, Heart unlocked, quest exit racing (its status line under the message lane), your
   uplink far off (edge marker), the last way out (alive, and dead with the "Ways out left" line), the Gate prompt,

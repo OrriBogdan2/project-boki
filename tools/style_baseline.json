@@ -260,7 +260,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -823,8 +823,8 @@
 "scripts/ui/hud.gd": {
 "history_comment": 2,
 "long_line": 174,
-"nested_ternary": 33,
-"semicolon": 43,
+"nested_ternary": 32,
+"semicolon": 41,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
