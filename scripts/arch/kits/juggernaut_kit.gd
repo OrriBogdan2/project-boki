@@ -244,7 +244,7 @@ func _reset_riposte() -> void:
 	HeroUlt.reset(self)
 	slam_resets += 1
 	m.fx.word(h.pos + Vector3(0, 2.8, 0), "RIPOSTE READY", col_of(x_def()), true)      # no ring on a reset
-	m.sfx("ab_ready", h.pos, -2.0, 0.8)
+	ResetCue.play(h, "juggernaut_slam_knock")
 
 # ------------------------------------------------------------------ X: Gilded Riposte (JuggernautUlt)
 ## X (main's HunterKeys gate: level 6; HeroUlt.press: its own cooldown in cd["x"], the cast id).
