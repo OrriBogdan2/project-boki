@@ -1,9 +1,9 @@
 extends RefCounted
 ## Vex's parity pass and audit fixes (docs/heroes/gunslinger.md, "Parity pass"), run inside --gunslinger-combo-check
 ## (tools/hero_combo_check.gd): the rifle's cadence, how its rounds track the cursor while she walks, the 30-round
-## drum that refills whenever the trigger rests, the one Shift charge, the firing brackets, the shouldered recoil
-## pose, and the Burr Charge fired from the cannon's launcher (item 112), a tap she walks through, and the
-## Longneedle's wide beam, pushed-out view and aim (item 68).
+## drum that refills whenever the trigger rests, the string's damage decay and its thinning tracer, the one Shift
+## charge, the firing brackets, the shouldered recoil pose, and the Burr Charge fired from the cannon's launcher
+## (item 112), a tap she walks through, and the Longneedle's wide beam, pushed-out view and aim (item 68).
 const ROUND_GAP := 0.12      # s between rounds held
 const MAG := 30              # rounds in the drum (game data: a 30-round magazine)
 const REFILL_DRY := 1.3      # s from running dry to the next round, the trigger held (0.35s rest + 30 at 40/s)
@@ -22,6 +22,7 @@ func run(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3) -> voi
 	_tracking(m, P, home)
 	_dash_aim(m, P, K, home)
 	_drum(m, P, K, home)
+	_string_fades(m, P, home)
 	_shift_charges(P)
 	_brackets(m, P, home)
 	_rifle_pose()
@@ -493,6 +494,53 @@ func _into_dash(m: Match, P: Hunter, K: GunslingerKit, T: Hunter, home: Vector3)
 	C.ok("Vex audit: Shift in the Longneedle charge slides and the beam fires; after a Burr Charge she slides at once",
 			e_ok and rmb_ok and rows, "E %s RMB %s rows %s" % [e_ok, rmb_ok, rows])
 	C.ac.step(m, 1.5)
+
+## The source's rifle: the first 10 rounds of a string hit harder; ours decays to 50% over them and holds there.
+## Each round carries its share of full damage (sus_k) and its tracer is drawn that much thinner, back to full
+## size after a pause.
+func _string_fades(m: Match, P: Hunter, home: Vector3) -> void:
+	P.teleport(home)
+	C.ac.step(m, 0.6)
+	P.ammo = MAG
+	P.fire_cd = 0.0
+	C.ac.aim_at(P, home + Vector3(6.0, 0, 0))
+	var vfx := VVFx.of(m)
+	var rec := {"n": P.shot_n, "k": [], "w": [], "sd": {}}
+	var fire := func():
+		P.inp["fire"] = true
+		for r in vfx.riders:           # (the kit dresses a round on the step after it leaves)
+			if r["sd"] == rec["sd"]:
+				(rec["w"] as Array).append(float(r["width"]))
+				rec["sd"] = {}
+		if P.shot_n > int(rec["n"]):
+			rec["n"] = P.shot_n
+			rec["sd"] = C._last_shot(m, P)
+			(rec["k"] as Array).append(float((rec["sd"]["x"] as Dictionary)["sus_k"]))
+	C.ac.step(m, 1.6, fire)
+	P.inp["fire"] = false
+	var ks: Array = rec["k"]
+	var ws: Array = rec["w"]
+	var steady := ks.size() >= 12 and absf(float(ks[0]) - 1.0) < 0.001 and absf(float(ks[10]) - 0.5) < 0.001
+	for i in range(1, ks.size()):
+		steady = steady and float(ks[i]) <= float(ks[i - 1]) + 0.0001
+	C.ok("Vex LMB: damage decays over the first 10 rounds to 50% and holds there", steady,
+			"%d rounds, first %.2f, 11th %.2f, last %.2f" % [ks.size(), ks[0], ks[10], ks[-1]] if ks.size() > 10 else
+			"%d rounds" % ks.size())
+	C.ok("Vex LMB: the tracer thins as the string decays", ws.size() >= 11 and float(ws[-1]) < float(ws[0]) * 0.5
+			and float(ws[5]) < float(ws[0]), "%d tracers" % ws.size())
+	C.ac.step(m, 0.6)
+	rec["k"] = []
+	rec["w"] = []
+	rec["sd"] = {}
+	rec["n"] = P.shot_n
+	P.fire_cd = 0.0
+	C.ac.step(m, 0.3, fire)
+	P.inp["fire"] = false
+	var again: Array = rec["k"]
+	var wide: Array = rec["w"]
+	C.ok("Vex LMB: after a pause the string starts over, full damage and a full-size tracer",
+			again.size() >= 1 and float(again[0]) == 1.0 and wide.size() >= 1 and ws.size() >= 1
+			and absf(float(wide[0]) - float(ws[0])) < 0.001)
 
 ## The source's Combat Slide is one charge: her own dash.charges, even over a two-charge class dodge, and a
 ## Second Wind still adds one.

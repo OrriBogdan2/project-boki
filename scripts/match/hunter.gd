@@ -1535,10 +1535,10 @@ func _emit_shot() -> void:
 	if wpn.has("nth"):
 		nth_n += 1
 		if nth_n % int(wpn["nth"][0]) == 0: dmg *= 1.0 + float(wpn["nth"][1])
-	if wpn.has("sustain_loss"):
-		dmg *= 1.0 - float(wpn["sustain_loss"]) * minf(1.0, float(sus_n) / float(wpn.get("sustain_rounds", 10)))
+	var sus_k := 1.0 - float(wpn.get("sustain_loss", 0.0)) * minf(1.0, sus_n / float(wpn.get("sustain_rounds", 10)))
+	dmg *= sus_k      # the string's decay; the round carries its share of full damage (a kit sizes its look by it)
 	sus_n += 1
-	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0))}
+	var extra := {"kb": wpn["kb"], "tracer": float(wpn.get("tracer", 1.0)), "sus_k": sus_k}
 	extra.merge(wpn.get("shot_x", {}), true)      # a weapon's own shot rules (Tether Lantern: through terrain)
 	if wpn.has("decel"):
 		# slugs slow down and stop at the weapon's range: v^2 = 2 a d

@@ -41,6 +41,7 @@ const TUBE_BELL := "launcher_muzzle" # on the swinging launcher: over and forwar
 const TUBE_SWING := 0.1              # s from the press to the bell coming forward
 const BRACKET_R := 1.25              # m: the firing brackets either side of her (footage: about 0.7 bh)
 const BRACKET_DEG := 56.0            # each bracket's arc
+const FADED_LOOK := 0.4              # share of full size a round reads at once the string has decayed to its floor
 const SPIN_REST := 0.5               # s without a round before the next string winds the barrels up again
 
 var slide := {}                # {t, held, dir} while a Slipstep runs
@@ -230,7 +231,8 @@ func _on_knock(t: Ent) -> void:
 	play("gunslinger_knock")
 
 # ------------------------------------------------------------------ LMB: the rifle's rounds
-## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick.
+## Each round: a hot ember needle with a cooling tail, a bronze star at the muzzle, the shoulder kick; the needle,
+## the star and the impact thin as the string's damage decays (_faded_look).
 func _tick_lmb() -> void:
 	if h.shot_n == last_shot:
 		return
@@ -242,8 +244,9 @@ func _tick_lmb() -> void:
 	for i in range(shots.size() - 1, -1, -1):
 		var sd: Dictionary = shots[i]
 		if sd["by"] == h and not (sd["x"] as Dictionary).has("src"):
-			fx().ride(sd, "tracer", EMBER, HOT, 2.6, 0.18, _round_end)
-			fx().star(sd["pos"], BRONZE, HOT, 0.75, 0.06)
+			var look := _faded_look(sd)
+			fx().ride(sd, "tracer", EMBER, HOT, 2.6 * look, 0.18 * look, _round_end.bind(look))
+			fx().star(sd["pos"], BRONZE, HOT, 0.75 * look, 0.06)
 			break
 	if anim_id == "" or anim_id == "gunslinger_lmb" or m.time - anim_at > 1.2:
 		play("gunslinger_lmb")
@@ -281,9 +284,18 @@ func _tick_mag(dt: float) -> void:
 	refill_part -= float(add)
 	h.ammo = mini(mag, h.ammo + add)
 
-func _round_end(at: Vector3, vel: Vector2) -> void:
+func _round_end(at: Vector3, vel: Vector2, look: float) -> void:
 	var d := Vector3(-vel.x, 0.4, -vel.y).normalized() if vel.length() > 0.1 else Vector3.UP
-	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7)
+	m.fx.spark(at, d, EMBER, 3, 5.0, 50.0, 0.14, 8.0, 0.7 * look)
+
+## How big this round's tracer, muzzle flash and impact read: 1 at full damage, FADED_LOOK at the rifle's
+## sustained floor (the rounds after the first ten), so a long string visibly thins and a pause makes it full again.
+func _faded_look(sd: Dictionary) -> float:
+	var loss := float(h.wpn.get("sustain_loss", 0.0))
+	if loss <= 0.0:
+		return 1.0
+	var faded := clampf((1.0 - float((sd["x"] as Dictionary).get("sus_k", 1.0))) / loss, 0.0, 1.0)
+	return lerpf(1.0, FADED_LOOK, faded)
 
 # ------------------------------------------------------------------ dash: Slipstep
 func on_dash(use_ex: bool) -> bool:
