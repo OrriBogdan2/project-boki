@@ -567,7 +567,6 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Stomp = an uncancellable finisher animation. Stomper and wisp are locked in place for its duration; the stomper can be attacked and cannot move or act.
 - Only ways out: the animation finishes (wisp dies), or the stomper is stunned/hard-CC'd, which cancels it and the wisp survives.
 - Each hunter has its own default stomp animation; unique stomps are a cosmetic you can buy (cosmetic slot, same timing as the default).
-||||||| parent of 7cf7c291d0 (DECISIONS: shrinking BR zone + Boki-countered region hazards (owner 11-11))
 
 ## 2026-11-11 owner: shrinking zone + map hazards (coord)
 - **Shrinking zone (battle-royale style)**: every match picks a part of the Hollow Crown (seeded, same for all) and the playable area closes toward it in phases (telegraphed on the map/minimap, damage outside, Boki/kin warn). It replaces "timer runs out -> all islands fall at once"; exits stay, the last ones sit inside the final zone. Works on the 2x map (shipped 0.24.4).
