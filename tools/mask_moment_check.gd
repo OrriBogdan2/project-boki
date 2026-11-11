@@ -1,11 +1,12 @@
 extends RefCounted
 ## --mask-moment-check: putting on a Mask is a short cinematic (item 83; MaskBeat, content/rules/mask_moment.json).
-##   1. the data: every Hunter has a whisper and a sting key, the sounds exist, the full beat runs 8-12 s (owner
-##      11-11: the first 4-6 s cut was too fast to read)
+##   1. the data: every Hunter has a whisper and a sting key, the sounds exist, the full beat runs 12-15 s with a
+##      4.5-5.5 s grey panel of the fallen Hunter, so it reads (asked for 11-11: 'like 5 s, not 1 s')
 ##   2. the first time, played through: build-up (the camera eases in, music ducked), the Mask rises to the face,
-##      black on contact, the memory frames of the fallen Hunter with the whisper, the snap back (impact, ripple,
-##      the Hunter's model in place), the name and title, the scene's camera back; it can't be skipped. The whisper
-##      and the name each stay on screen at least MaskBeat.read_s (2.5 s, or 60 ms a character)
+##      black on contact, the panel (the fallen Hunter's face, a flash cut to their pose held with the whisper),
+##      the snap back (impact, ripple, the Hunter's model in place), the name and title, the scene's camera back;
+##      it can't be skipped. The whisper and the name each stay on screen at least MaskBeat.read_s (3 s, or 60 ms
+##      a character)
 ##   3. the next time a press moves on one beat and holding it skips to the end (DECISIONS 11-11: click = next,
 ##      hold = skip); the farm's short cut keeps the body you had
 ## With --shots-dir=<dir>: mask_beat_1_buildup, _2_rise, _3_black, _4_memory, _5_reveal (a renderer is needed).
@@ -51,9 +52,11 @@ func _data() -> void:
 	var total := float(full["build_s"]) + float(full["rise_s"]) + float(full["black_s"]) + float(full["reveal_s"])
 	for s in full["memory_s"]:
 		total += float(s)
-	ok(total >= 8.0 and total <= 12.0 and float(full["black_s"]) >= 0.9 and float(full["black_s"]) <= 1.2,
+	var panel := float((full["memory_s"] as Array).reduce(func(a, b): return a + float(b), 0.0))
+	ok(total >= 12.0 and total <= 15.0 and float(full["black_s"]) >= 0.5 and float(full["black_s"]) <= 1.0,
 			"the full beat runs %.1f s with %.2f s of black" % [total, float(full["black_s"])])
-	ok((full["memory_s"] as Array).size() in [2, 3], "two or three memory frames")
+	ok(panel >= 4.5 and panel <= 5.5 and (full["memory_s"] as Array).size() == 2,
+			"the panel runs %.1f s: the face, then the pose held" % panel)
 
 ## A stage: a lit floor, a camera, and you (the Empty) facing it with Vex's Mask hovering beside your face.
 func _stage() -> Array:
@@ -87,8 +90,9 @@ func _first_time() -> void:
 	var t0 := Time.get_ticks_msec()
 	var beat := MaskBeat.play(parts[1], parts[0], func(b): got[0] = b)
 	var planned := _planned_s(beat)
-	# s: [the beat's own (the frames' deltas), the longest frame, the whisper on screen, the name on screen]
-	var clock := [0.0, 0.0, 0.0, 0.0]
+	var panel_s := float(beat._memory_lens.reduce(func(a, b): return a + float(b), 0.0))
+	# s: [the beat's own (the frames' deltas), the longest frame, the whisper on screen, the name on screen, the panel]
+	var clock := [0.0, 0.0, 0.0, 0.0, 0.0]
 	var tick := func():
 		var dt := main.get_process_delta_time()
 		clock[0] += dt
@@ -97,6 +101,8 @@ func _first_time() -> void:
 			clock[2] += dt
 		if is_instance_valid(beat) and beat.name_box != null and is_instance_valid(beat.name_box):
 			clock[3] += dt
+		if is_instance_valid(beat) and beat.phase == "memory":
+			clock[4] += dt
 	tree.process_frame.connect(tick)
 	await tree.process_frame
 	ok(not MaskBeat.seen() and beat.skip_hint == null and beat.cam.current, "the first time: no skip, its own camera")
@@ -116,8 +122,12 @@ func _first_time() -> void:
 	await _shot(tree, "mask_beat_3_black")
 	await _until(tree, beat, "memory")
 	await tree.create_timer(0.12).timeout
-	ok(beat.memory.visible and beat.memory.texture != null and beat.whisper_line.text != "",
-			"a memory of the fallen Hunter in the black, and her whisper: \"%s\"" % beat.whisper_line.text)
+	var face := beat.memory.texture
+	ok(beat.memory.visible and face != null and beat.memory.modulate.a < 0.5,
+			"the panel: the fallen Hunter's face comes up out of the black")
+	await tree.create_timer(float(beat._memory_lens[0])).timeout
+	ok(beat.memory.texture != face and beat.whisper_line.text != "" and beat.memory.scale.x > 1.0,
+			"a cut to her pose, pushing in, and her whisper: \"%s\"" % beat.whisper_line.text)
 	await _shot(tree, "mask_beat_4_memory")
 	await _until(tree, beat, "reveal")
 	ok(beat.black.color.a == 0.0 and beat._ripple != null, "the snap back: the world again, a ripple of light")
@@ -132,8 +142,10 @@ func _first_time() -> void:
 	var whisper := String(Content.rules(MaskBeat.RULES)["whispers"]["gunslinger"])
 	var title := HunterViewer.display_name("gunslinger")
 	for line in [[whisper, clock[2]], [title, clock[3]]]:      # (to a frame: a phase ends on one)
-		ok(float(line[1]) >= MaskBeat.read_s(line[0]) - float(clock[1]) and MaskBeat.read_s(line[0]) >= 2.5,
+		ok(float(line[1]) >= MaskBeat.read_s(line[0]) - float(clock[1]) and MaskBeat.read_s(line[0]) >= 3.0,
 				"\"%s\" stays up %.2f s (reading time %.2f s)" % [line[0], line[1], MaskBeat.read_s(line[0])])
+	ok(absf(float(clock[4]) - panel_s) <= 0.3 + 2.0 * float(clock[1]),
+			"the panel was up %.2f s of the %.2f s planned" % [clock[4], panel_s])
 	ok(got[0] != null and String((got[0] as Node3D).get_meta("arch", "")) == "gunslinger",
 			"done hands back Vex's model, standing where you stood")
 	if shots == "":      # (a phase ends on a frame: a slow rasterizer stretches each by up to one frame)
