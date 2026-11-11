@@ -92,7 +92,7 @@
  ],
  "detail": {
   "gkey": "%T is your Boki button. Tap it to send %s at a monster. Tap again to call it back. Hold it to give orders.",
-  "rank": "Every level gives you a skill point (see the gold + by your level). Press %R to rank up %N. Your ultimate unlocks at level %U.",
+  "rank": "Press %R to upgrade %N with your new point (the gold + by your level).",
   "sig": "%X",
   "shoot_draw": "Hold the button to draw the bow, let go to loose. A longer draw hits harder.",
   "shoot_melee": "Walk up close and tap to swing. Hold to charge a wave.",
