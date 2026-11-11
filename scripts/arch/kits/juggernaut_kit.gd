@@ -750,11 +750,6 @@ func _tap_strike() -> void:
 	h._ab_feedback("sec", "cast")
 	_start_slam(float(tn["tap_dmg_k"]), float(tn["tap_range_k"]), float(tn["tap_windup_s"]))
 
-## Aim within kael.chain_lunge_deg of the chain: the charged release runs down it; any other yaw is a free Lunge.
-func _along_chain() -> bool:
-	var to := warchain.to_anchor()
-	return absf(rad_to_deg(h.aim_dir().angle_to(to))) <= float(Tuning.of("kael")["chain_lunge_deg"])
-
 func _tick_slam(dt: float) -> void:
 	slam_w["t"] = float(slam_w["t"]) - dt
 	if h.stun_t > 0.0 or h.downed or Hex.active(h):
@@ -762,7 +757,7 @@ func _tick_slam(dt: float) -> void:
 		return
 	# the short magenta strike lane ahead of him, filling as the wind-up runs (everyone sees it)
 	var sl: Dictionary = rmb_def()["slam"]
-	var wk := 1.0 - clampf(float(slam_w["t"]) / float(rmb_def()["windup"]), 0.0, 1.0)
+	var wk := 1.0 - clampf(float(slam_w["t"]) / float(slam_w["t0"]), 0.0, 1.0)
 	var pin: Vector2 = slam_w["dir"] if slam_w.get("pinned", false) else Vector2.ZERO
 	var cone := {"len": float(sl["radius"]), "deg": float(sl["angle"]), "inner": 0.0, "fill": wk, "col": SLASH_OUT,
 			"all": true}
