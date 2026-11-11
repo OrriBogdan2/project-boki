@@ -33,6 +33,7 @@ const SEE_R := 26.0           # bots weigh peace with squads this close that the
 const OFFER_SQUADS := 7.0     # squads in a 20-hunter match: with more, each waits longer between weighing offers,
                               # so a step weighs as many (each look is members x hunters x line of sight)
 const BUBBLE_T := 2.6
+const HOLD_MAX := 20.0        # s a bot's offer waits for a calm moment, then it is dropped
 
 var m: Match
 var shown: Array = []         # emote bubbles {h, id, t}
@@ -40,6 +41,8 @@ var offers := {}              # to_team -> {from, to, by, until}
 var pacts := {}               # "a:b" -> {a, b, until, dmg: {from_team: amount}}
 var marked := {}              # hunter nid -> until (betrayers)
 var _cool := {}               # "a:b" -> time a new offer between them is allowed
+var _fight := {}              # team -> last time it dealt or took a hit
+var _held := {}               # to_team -> {from, by, since}: a bot's offer waiting for both squads to calm
 var _think := {}              # team -> next bot check
 var _answers: Array = []      # bot replies due {team, at, offer}
 var events: Array = []        # what happened, for tests
@@ -128,11 +131,36 @@ func _offer(h: Hunter) -> void:
 		return
 	if allied(h.team, to):
 		return
+	if h.ctrl == "bot" and not m.net_on:
+		_cool["%d>%d" % [h.team, to]] = m.time + 25.0
+		if not (_mine(to) and m.guide):     # (never in the first-match guide: no held key asked for then)
+			_held[to] = {"from": h.team, "by": h, "since": m.time}
+		return
+	_post(h, to)
+
+## Seconds since this squad last dealt or took a hit.
+func _quiet(team: int) -> float:
+	return m.time - float(_fight.get(team, -1e9))
+
+## A bot's held offer goes out once both squads have been calm, or is dropped when it has waited too long.
+func _release_held() -> void:
+	var calm := float(Content.rules("truce")["calm_s"])
+	for to in _held.keys():
+		var o: Dictionary = _held[to]
+		var by: Hunter = o["by"]
+		var from := int(o["from"])
+		if m.time - float(o["since"]) > HOLD_MAX or by.out or by.extracted or by.downed or allied(from, to) or offers.has(to):
+			_held.erase(to)
+		elif _quiet(from) >= calm and _quiet(to) >= calm:
+			_held.erase(to)
+			_post(by, to)
+
+func _post(h: Hunter, to: int) -> void:
 	offers[to] = {"from": h.team, "to": to, "by": h, "until": m.time + OFFER_T}
 	_cool["%d>%d" % [h.team, to]] = m.time + 25.0
 	events.append("offer %d->%d" % [h.team, to])
 	if _mine(to) and m.hud and not m.player.out:
-		m.hud.toast("%s offers a truce! Hold %s and pick Deal to accept" % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
+		m.hud.toast("%s offers a truce. Hold %s and pick Deal." % [h.pname, Settings.key_cap("emote")], Color("f4f1e6"))
 	elif _mine(h.team) and m.hud:
 		m.hud.toast_small("Truce offered to %s" % squad_name(to), Color("f4f1e6"))
 	# a bot squad answers in a moment (one with a living player in it waits for the player)
@@ -183,6 +211,9 @@ func end(k: String, why: String) -> void:
 ## Every hit in the match comes through here (Match.on_damage). A real attack on a truce partner
 ## (more than a stray splash) breaks the truce and marks whoever did it.
 func on_damage(target: Ent, by: Ent, d: float) -> void:
+	if d > 0.0 and by != null:
+		_fight[target.team] = m.time
+		_fight[by.team] = m.time
 	if pacts.is_empty() or by == null or d <= 0.0:
 		return
 	var credit: Ent = by
@@ -223,6 +254,7 @@ func tick(dt: float) -> void:
 		if float(s["t"]) > BUBBLE_T: shown.erase(s)
 	for t in offers.keys():
 		if m.time > float(offers[t]["until"]): offers.erase(t)
+	_release_held()
 	for k in pacts.keys():
 		var p: Dictionary = pacts[k]
 		var a := int(p["a"]); var b := int(p["b"])
@@ -305,7 +337,7 @@ func _bot_offers() -> void:
 		var near := _near_squads(team)
 		for other in near:
 			var o := int(other)
-			if allied(team, o) or offers.has(o) or offers.has(team) or m.time < float(_cool.get("%d>%d" % [team, o], 0.0)):
+			if allied(team, o) or offers.has(o) or offers.has(team) or _held.has(o) or _held.has(team) or m.time < float(_cool.get("%d>%d" % [team, o], 0.0)):
 				continue
 			var p := clampf(_peace_score(team, o, near), 0.0, 0.85)
 			if randf() < p * 0.5:

@@ -652,6 +652,15 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | join_weight_doc | A toy someone is already playing with is this many times likelier, so a second Boki tends to join in. |
 | toys | {"toy_ball": {"stat": "speed", "trait": "loyalty", "likes": [], "doc": "chase and nudge; a fine thing to share"}, "toy_post": {"stat": "power", "trait": "bravery", "likes": ["flying", "rock", "storm", "tempest", "stone", "titan", "gravity"], "doc": "climbed by Flying and Rock leans (species themes storm, tempest, stone, titan, gravity today)"}, "toy_tub": {"stat": "focus", "trait": "curiosity", "likes": ["water", "ice", "prism", "frost"], "doc": "splashed by Water and Ice leans (species themes prism, frost today)"}} |
 
+## truce (`content/rules/truce.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| doc | Truce offers (scripts/match/truce.gd). calm_s: seconds with no hit dealt or taken by either squad before a bot's offer is shown (a held key asked for mid-fight is a bad time). |
+| calm_s | 4 |
+
 ## tuning (`content/rules/tuning.json`)
 
 
