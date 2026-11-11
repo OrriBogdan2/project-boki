@@ -226,7 +226,8 @@ func _boki_wisps() -> void:
 	var p: Hunter = m.player
 	var k: Kin = p.kin
 	var owned: Array = m.kins.filter(func(x: Kin): return x.owner_h != null)
-	var all_wisps: bool = owned.all(func(x: Kin): return x.wisp and x.state == "shoulder")
+	var riding := func(x: Kin) -> bool: return x.state == "shoulder" or (x == x.owner_h.kin2 and x.state == "bench")
+	var all_wisps: bool = owned.all(func(x: Kin): return x.wisp and riding.call(x))      # (a second waits benched)
 	ok(all_wisps and k.model.name == "BokiWisp", "Boki wisps on: every Boki rides as a critter wisp")
 	ok(k.carried() and p.kin_carry_on(), "...carried by order, so its carry passives are on")
 	ok(HunterWisp.node_of(p) == null, "...and it is not a Hunter Wisp (round = Hunter, critter = Boki)")

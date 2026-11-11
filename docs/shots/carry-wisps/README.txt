@@ -1,0 +1,1 @@
+carry_wisps_*: --carry-wisp-shots, xvfb opengl3 1920x1080 on rpc3 (jobq gpu could not copy the tree to hetzner). One hunter with all four: lead (big, bright, type-colour rim), second (small, dim, across the orbit), stolen (thief's side colour rim, green = you), carry-out (small, behind the belt on a white tether). *_close: 320 px round the hunter, 2x.

@@ -8,7 +8,7 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const APART := 0.45      # m: the least top-down gap between any two of one hunter's wisps
-const CROP := 360        # px square round the hunter for the close shot
+const CROP := 320        # px square round the screen middle (the hunter) for the close shot
 
 var bad := 0
 var m: Match
@@ -46,6 +46,8 @@ func shots(main: Node) -> void:
 	if fade != null:
 		await fade.reveal(0.01)
 	_four()
+	_alone()
+	main.get_viewport().warp_mouse(Vector2(40, main.get_viewport().get_visible_rect().size.y * 0.5))      # aim left
 	for i in 3:
 		var t := 0.0
 		while t < 0.4 + i * 0.37:
@@ -55,10 +57,7 @@ func shots(main: Node) -> void:
 			await main.get_tree().process_frame
 		var img := main.get_viewport().get_texture().get_image()
 		img.save_png(dir.path_join("carry_wisps_%d.png" % i))
-		var at: Vector2 = main.get_viewport().get_camera_3d().unproject_position(p.position + Vector3(0, 1.2, 0))
-		var r := Rect2i(Vector2i(at) - Vector2i(CROP, CROP) / 2, Vector2i(CROP, CROP)).intersection(
-			Rect2i(Vector2i.ZERO, img.get_size()))
-		var crop := img.get_region(r)
+		var crop := img.get_region(Rect2i(img.get_size() / 2 - Vector2i(CROP, CROP) / 2, Vector2i(CROP, CROP)))
 		crop.resize(CROP * 2, CROP * 2)
 		crop.save_png(dir.path_join("carry_wisps_%d_close.png" % i))
 	print("BOKIWISP carry shots in %s" % dir)
@@ -75,6 +74,15 @@ func _setup(main: Node, wisps: bool) -> void:
 	for h in m.hunters:
 		h.ctrl = "idle" if h != p else h.ctrl
 		h.inp["move"] = Vector2.ZERO
+
+## The shots' hunter stands well away from the others, so nobody else's wisps or plates cover the four.
+func _alone() -> void:
+	var spot := m.world.random_ground()
+	for i in 200:
+		if m.hunters.all(func(h: Hunter): return h == p or h.pos.distance_to(spot) > 25.0):
+			break
+		spot = m.world.random_ground()
+	p.teleport(spot)
 
 ## The player carries a lead, a second, a claimed Boki and a rival's stolen wisp. [lead, second, stolen Kin].
 func _four() -> Array:
