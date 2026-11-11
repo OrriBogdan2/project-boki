@@ -38,8 +38,8 @@ const WARDENS := {
 	# (Grimble: the head at his old height; the v95 hoard rides lower on his back than the v2 pile)
 	"dredge": {"hit_r": 0.452, "height": 1.48, "height_3d": 1.5, "width": [1.3, 2.4], "moves": "dr_"},
 	# (Pip's tall fox ears stand over her head; her fairy wings and tail span wider than her body)
-	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears, the locked design's taller ears)
-	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.76, "width": [0.5, 1.5], "moves": "mm_"},
+	# (Pip: body size 0.68, item 108; v2 model: 0.76 with the ears; the appeal3 v95 swap's ears stand lower: 0.71)
+	"tender": {"hit_r": 0.34, "height": 0.6, "height_3d": 0.71, "width": [0.5, 1.5], "moves": "mm_"},
 	# (Gil: heights from the fitted rig, body.legs 1.03; the 3D top is the floppy hat. No keyed moves
 	# yet, so "moves" is "" and the rig's generic poses play)
 	"gil": {"hit_r": 0.38, "height": 0.794, "height_3d": 0.956, "width": [0.5, 1.5], "moves": ""},
