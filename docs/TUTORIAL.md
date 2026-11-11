@@ -132,7 +132,9 @@ on "there is a skiff to take" (the known skiff red, `docs/GATE_0245.md`), so no 
    `ranks` and the three gap steps are the obvious merges.
 2. No visible Skip on the match tutorial panel: it is only in the pause menu ("Skip the tutorial") and on the naming card.
 3. Done: `kin` and `ult` no longer nag and take 1 to 7 s (section 2, the slowest three).
-4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro.
+4. `glove` stalled for the whole 900 s course in 2 of 9 runs (not seen on the repeat); it needs a seeded repro. Seen again on the slowest-three branch (1 of 3 baseline timing runs, 2 of 8 fight-check starter runs after; the same
+   in both), and a trace caught the bot walking off the bridge into the void on the way to the glove. Separately, `--tutorial-fight-check`
+   sometimes reports "missing kick": the bot can reach the lookout without a wall kick (2 of 8 runs).
 5. Taking a second Relic from Hob (juggernaut) and then starting an expedition played as the saved pick of the tutorial Relic
    (`gunslinger`): the flow check's own `Arch.of_save()` says it, unverified by hand.
 6. The farm tutorial is 11 steps and 219 words (decision: 4 to 5); take `ext/tut-garden-no-gather`.
