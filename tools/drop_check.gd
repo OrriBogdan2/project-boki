@@ -15,6 +15,7 @@ extends RefCounted
 ##      SOFT_RELEASE_M is a soft landing; HARD_SHARE of BOT_DROPS seeded bot drops onto a live camp land hard;
 ##      BURST landings in a second stay under PARTICLE_CAP particles and, where a quiet second does, FRAME_MS a frame
 ##   6. no chests before the match proper: all hidden on the ship and the drop, all shown once you land
+##      (normal matches: the tutorial course has no chest)
 const DIVE_S := [6.5, 7.5]
 const CANOPY_S := [21.0, 23.0]
 const CANOPY_REACH_M := 190.0
@@ -535,10 +536,8 @@ func run(mn: Node) -> void:
 		ok(why == "", "normal match, steer %s: your Boki rides with you and is untouched for 12 s" % str(steer))
 		_chests_wait("normal match, steer %s" % str(steer), hid)
 	_start({"tutorial": true, "teams": 1, "length": 1500.0})
-	var thid := _hidden_chests()
 	var tw := _watch_boki(12.0)
 	print("  tutorial ", tw)
 	ok(tw == "", "tutorial: your Boki rides with you and is untouched for 12 s")
-	_chests_wait("tutorial", thid)
 	print("DROP DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
