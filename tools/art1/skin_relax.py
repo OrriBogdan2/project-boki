@@ -3,9 +3,8 @@ Evaluates linear-blend skinning in numpy for every action of the armature (the s
 edges that stretch past LIMIT, and blends the weights of their vertices toward their neighbours'. Edges that weights alone cannot
 save (a hook that leaves the wrist, a crouch that pulls the belly apart) are then cut: their triangles go, each hole is closed again
 with a flat cap on its own side (cut()), and the edges the caps add are checked the same way. Compression is not stretch.
-Use: skin_relax.relax(arm) from a clips script, before the export. Blender only (bpy, numpy)."""
-import bmesh
-import bpy
+Use: skin_relax.relax(arm) from a clips script, before the export (Blender: bpy, numpy). relax_skin() and Skin.of() are numpy
+only, for a shipped .glb (tools/art1/glb_relax.py), so bpy and bmesh are imported only where Blender is needed."""
 import numpy as np
 
 LIMIT = 1.22         # x rest length: the target, under the game's 1.3 check (tools/stretch_check.gd)
@@ -22,6 +21,7 @@ MAX_INFL = 4         # bones per vertex the glTF exporter keeps
 
 def pose_matrices(arm):
     """The skinning matrices [bone, 4, 4] (rest to pose, armature space) of every sampled frame, with the action's name."""
+    import bpy
     inv = [b.matrix_local.inverted() for b in arm.data.bones]
     out = []
     keep = arm.animation_data.action
@@ -61,6 +61,15 @@ class Skin:
         ln = np.linalg.norm(self.rest[ed[:, 0]] - self.rest[ed[:, 1]], axis=1)
         self.edges, self.len = ed[ln >= MIN_EDGE], ln[ln >= MIN_EDGE]
 
+    @classmethod
+    def of(cls, rest, w, edges):
+        """A Skin from arrays (no Blender object): rest [vertex, 3], weights [vertex, bone], edges [n, 2]."""
+        s = cls.__new__(cls)
+        s.ob, s.groups, s.rest, s.w = None, [], rest, w
+        ln = np.linalg.norm(rest[edges[:, 0]] - rest[edges[:, 1]], axis=1)
+        s.edges, s.len = edges[ln >= MIN_EDGE], ln[ln >= MIN_EDGE]
+        return s
+
     def stretch(self, poses):
         """Worst ratio of each edge over all poses [edge], and each pose's worst ratio [pose]."""
         top = np.argsort(-self.w, axis=1)[:, :MAX_INFL]
@@ -99,6 +108,11 @@ class Skin:
         np.put_along_axis(w, top, 0.0, axis=1)
         self.w[pick] = w / np.maximum(w.sum(1, keepdims=True), 1e-9)
 
+    def keep_apart(self, apart):
+        """Drops, from every vertex, the bones `apart` (limbs_apart()) forbids next to its main bone."""
+        self.w[apart[self.w.argmax(1)]] = 0.0
+        self.w /= np.maximum(self.w.sum(1, keepdims=True), 1e-9)
+
     def store(self):
         """Write the weights back to the vertex groups."""
         for g, bi in self.groups:
@@ -110,6 +124,7 @@ class Skin:
 def cut(s, poses, arm):
     """Deletes the triangles on edges still over CUT_LIMIT and caps each hole (no new vertices: the weights stay as they are).
     Up to CUTS rounds; the last one only deletes. Returns the Skin of the cut mesh."""
+    import bmesh
     for rnd in range(CUTS):
         worst, _ = s.stretch(poses)
         bad = {tuple(sorted(e)) for e in s.edges[worst > CUT_LIMIT].tolist()}
@@ -137,32 +152,54 @@ def cut(s, poses, arm):
     return s
 
 
+def limbs_apart(names, parent):
+    """[bone, bone] mask: True where the second bone may not weight a vertex whose main bone is the first. A limb is an
+    upper_arm.* or thigh.* bone and every bone under it; a limb's deeper bones (forearm, hand, props, shin, foot) stay off the
+    torso and off the other limbs (heat weights bleed a hanging hand into the thigh beside it). The limb roots may blend
+    with anything (shoulder, hip and crotch). parent: each bone's parent index, -1 for none."""
+    limb = []
+    for i in range(len(names)):
+        j = i
+        while j >= 0 and not names[j].startswith(("upper_arm.", "thigh.")):
+            j = parent[j]
+        limb.append(j)
+    limb = np.array(limb)
+    deep = (limb >= 0) & (limb != np.arange(len(names)))
+    return deep[None, :] & (limb[None, :] != limb[:, None])
+
+
+def relax_skin(s, poses, name):
+    """Blends the weights of `s` until no edge stretches past LIMIT in any pose or MAX_ITER passes; prints before and after."""
+    before, per = s.stretch(poses)
+    first, bad0 = max(per), int((before > LIMIT).sum())
+    live = poses
+    for it in range(MAX_ITER):
+        if it % 8 == 0:        # every few passes, look at every pose again; in between, only at those that were over
+            before, per = s.stretch(poses)
+            live = [p for p, r in zip(poses, per) if r > LIMIT] or poses
+        bad = before > LIMIT
+        if not bad.any():
+            if live is poses:
+                break
+            live = poses
+            before, per = s.stretch(poses)
+            continue
+        s.relax_once(bad)
+        before, per = s.stretch(live)
+    before, per = s.stretch(poses)
+    print("relax %s: edges over 1.3: %d, over 2: %d, over 5: %d" % (name, (before > 1.3).sum(), (before > 2).sum(), (before > 5).sum()))
+    print("relax %-14s verts %5d edges over %.2f: %d -> %d after %d passes, worst %.2f -> %.2f"
+          % (name, len(s.w), LIMIT, bad0, int((before > LIMIT).sum()), it, first, max(per)), flush=True)
+
+
 def relax(arm):
     """Relaxes every mesh skinned to `arm`; prints the worst stretch per action before and after. Returns the edges left over."""
+    import bpy
     poses = pose_matrices(arm)
     skins = [Skin(o, arm) for o in bpy.data.objects if o.type == "MESH" and any(m.type == "ARMATURE" and m.object == arm for m in o.modifiers)]
     left = 0
     for s in skins:
-        before, per = s.stretch(poses)
-        first, bad0 = max(per), int((before > LIMIT).sum())
-        live = poses
-        for it in range(MAX_ITER):
-            if it % 8 == 0:        # every few passes, look at every pose again; in between, only at those that were over
-                before, per = s.stretch(poses)
-                live = [p for p, r in zip(poses, per) if r > LIMIT] or poses
-            bad = before > LIMIT
-            if not bad.any():
-                if live is poses:
-                    break
-                live = poses
-                before, per = s.stretch(poses)
-                continue
-            s.relax_once(bad)
-            before, per = s.stretch(live)
-        before, per = s.stretch(poses)
-        print("relax %s: edges over 1.3: %d, over 2: %d, over 5: %d" % (s.ob.name, (before > 1.3).sum(), (before > 2).sum(), (before > 5).sum()))
-        print("relax %-14s verts %5d edges over %.2f: %d -> %d after %d passes, worst %.2f -> %.2f"
-              % (s.ob.name, len(s.w), LIMIT, bad0, int((before > LIMIT).sum()), it, first, max(per)), flush=True)
+        relax_skin(s, poses, s.ob.name)
         s.store()
         s = cut(s, poses, arm)
         before, per = s.stretch(poses)
