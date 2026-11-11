@@ -100,8 +100,8 @@ func rebuild() -> void:
 			continue                    # an aim reticle: only its own player sees it
 		if e["all"] and me != null and int((e["h"] as Hunter).team) != int(me.team):
 			e = e.duplicate()
-			e["col"] = (e["col"] as Color).lerp(Feel.RIM_ENEMY, 0.45)     # a foe's telegraph reads hostile
-			e["col2"] = (e["col2"] as Color).lerp(Feel.RIM_ENEMY, 0.3)
+			e["col"] = (e["col"] as Color).lerp(SideColor.rim(), 0.45)     # a foe's telegraph reads hostile
+			e["col2"] = (e["col2"] as Color).lerp(SideColor.rim(), 0.3)
 		AimShapes.build(geo, e)
 		built += 1
 	if geo.v.is_empty():

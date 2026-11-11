@@ -359,8 +359,7 @@ func _tick(dt: float) -> void:
 			pd["tick"] = 0.25
 			m.fx.ring(pd["at"], float(pd["r"]), Color("#7be05a", 0.5), 0.26)
 			for f in foes_in(pd["at"], float(pd["r"])):
-				f.slow_k = maxf(f.slow_k, float(pd["k"])) if f.slow_t > 0.0 else float(pd["k"])
-				f.slow_t = maxf(f.slow_t, 0.35)
+				f.add_slow(0.35, float(pd["k"]))
 		if float(pd["left"]) <= 0.0:
 			puddles.erase(pd)
 	if swim_t > 0.0:
