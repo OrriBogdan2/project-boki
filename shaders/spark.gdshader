@@ -5,6 +5,7 @@ shader_type spatial;
 render_mode unshaded, shadows_disabled, depth_draw_never, blend_add, cull_disabled, fog_disabled;
 uniform float length_k = 5.0;     // streak length in particle widths
 uniform float heat = 1.6;         // brightness (above 1 feeds the glow)
+#include "res://shaders/cel.gdshaderinc"
 void vertex() {
 	vec3 p = MODEL_MATRIX[3].xyz;
 	vec3 ay = MODEL_MATRIX[1].xyz;
@@ -21,7 +22,8 @@ void fragment() {
 	float along = 1.0 - UV.y;           // 1 at the head
 	float body = (1.0 - across * across) * smoothstep(0.0, 0.85, along);
 	float core = (1.0 - smoothstep(0.0, 0.35, across)) * smoothstep(0.55, 1.0, along);
-	vec3 c = mix(COLOR.rgb, vec3(1.0), core * 0.8);
+	body = cel_cover(body, UV * 0.5);     // a hard-edged cel streak with a hard white core
+	vec3 c = mix(COLOR.rgb, vec3(1.0), hard(core - 0.5) * 0.8);
 	ALBEDO = c * body * COLOR.a * heat;
 	ALPHA = 1.0;
 }
