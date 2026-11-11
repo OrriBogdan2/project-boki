@@ -1,10 +1,10 @@
 class_name TrainingPanel
 extends RefCounted
-## The Training Grounds's one controls panel (top left, under the bars): every practice key with its state
+## The Training Grounds's one controls panel (top right): every practice key with its state
 ## and your damage numbers. Each row is also a button. H folds it to a single "H Controls" chip and back
 ## (the HUD's guide_hidden). Built and ticked by Arena.
 
-const POS := Vector2(16, 112)    # px from the top left: under the HUD's top-left bars
+const MARGIN := 16               # px from the top right corner (the minimap has the top left)
 const WIDTH := 236.0             # px
 const ROW_H := 26.0              # px, one row
 
@@ -18,9 +18,10 @@ func _init(arena: Arena, layer: CanvasLayer) -> void:
 	a = arena
 	panel = UI.glass(10, 12)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	panel.position = POS
 	panel.custom_minimum_size = Vector2(WIDTH, 0)
 	layer.add_child(panel)
+	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, MARGIN)
+	panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	var v := UI.vbox(2)
 	panel.add_child(v)
 	var hd := UI.hbox(6)
@@ -34,12 +35,13 @@ func _init(arena: Arena, layer: CanvasLayer) -> void:
 	dps = UI.label("", UI.T_SMALL, UI.MUTED)
 	v.add_child(dps)
 	chip = UI.glass(6, 10)
-	chip.position = POS
 	var cr := UI.hbox(6)
 	cr.add_child(UI.keycap("H", 11))
 	cr.add_child(UI.label("Controls", UI.T_SMALL, UI.MUTED))
 	chip.add_child(cr)
 	layer.add_child(chip)
+	chip.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT, Control.PRESET_MODE_MINSIZE, MARGIN)
+	chip.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	if a.m.hud:
 		a.m.hud.ui_extra.append(panel)       # the mouse is over UI here: no shooting, the pointer shows
 	refresh()
@@ -48,7 +50,7 @@ func _init(arena: Arena, layer: CanvasLayer) -> void:
 func rows() -> Array:
 	return [
 		["card", "K", "Kit card", a.toggle_card],
-		["menu", "L", "Loadout and dummies", a.open_menu],
+		["menu", "L", "Loadout and bot", a.open_menu],
 		["swap", "2-9", "Quick Hunter swap", a.open_menu],
 		["reset", "Bksp", "Reset", a.reset],
 		["bot", "N", "Sparring bot", a.cycle_bot],
