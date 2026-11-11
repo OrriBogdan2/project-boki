@@ -310,7 +310,7 @@ func _far_step(dt: float) -> float:
 	_far_dt += dt
 	var near_me := pos.distance_squared_to(me.pos) <= FAR_M * FAR_M
 	near_me = near_me or (tgt != null and tgt.flat_dist(me) <= FAR_M)
-	if not near_me and (int(m.time / Match.DT) + get_instance_id()) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
+	if not near_me and (int(m.time / Match.DT) + hash(nid)) % FAR_EVERY != 0 and _far_dt < dt * FAR_EVERY:
 		return 0.0
 	var out := _far_dt
 	_far_dt = 0.0
