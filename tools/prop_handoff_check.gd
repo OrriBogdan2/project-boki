@@ -107,7 +107,7 @@ func _grimble() -> void:
 	var rows := trace(m, 1.0,
 			func(): return [not bool(P.model.get_meta(WardenGlb.CHAIN_OUT, false)),
 					int(not K.hook_sd.is_empty() or K.snap_t > 0.0 or not K.pull.is_empty())])
-	judge("Grimble hook", rows, 0.14, DredgeKit.THROW_SKIP, true)
+	judge("Grimble hook", rows, 0.14, 0.0, true)     # (dr_throw plays from its start through the 0.2 s coil-back)
 	m.queue_free()
 
 func _kael() -> void:
