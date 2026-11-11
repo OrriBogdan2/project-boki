@@ -12,8 +12,10 @@ extends "res://tools/hitch_check.gd"
 
 const VIEW := Vector2i(1920, 1080)
 const HITCH_MS := 33.0         # ms: a frame past two vsyncs at 60 Hz is a visible hitch
+const LAND_WAIT_S := 12.0      # s on the ground at most waiting for the last bots to land before the fight
 const FIGHT_S := 15.0          # s of game time with all 30 hunters on top of you
 const EXTRACT_S := 25.0        # s the uplink and the lift may take before the run gives up
+const CHARGE_S := 6.0          # s the uplink charges (monster waves, a contested yard) before its lift opens
 const AFTER_S := 3.0           # s run on after you rode the lift (the results coming up)
 const FIGHT_R := Vector2(5.0, 14.0)      # m: the ring the other hunters are put on
 const PHASES := ["ride", "drop", "land", "fight", "extract"]
@@ -75,7 +77,8 @@ func _next_phase() -> void:
 			if phase_t >= 1.0 and not _pack_done:
 				_pack_done = true
 				_bring_pack()
-			if phase_t >= 3.0:
+			var up := m.hunters.any(func(h): return h.riding or h.dropping)
+			if phase_t >= 3.0 and (not up or phase_t >= LAND_WAIT_S):
 				_set_phase("fight")
 				_bring_hunters()
 		"fight":
@@ -83,6 +86,8 @@ func _next_phase() -> void:
 				_set_phase("extract")
 				_start_uplink()
 		"extract":
+			if phase_t >= CHARGE_S and String(_uplink.get("state", "")) == "charging":
+				_uplink["prog"] = 1.0      # a brawl round the yard contests it: the lift opens anyway
 			if not P.extracted:
 				P.hp = P.max_hp
 				var at: Vector3 = _uplink.get("pos", P.pos)
@@ -116,7 +121,7 @@ func _bring_hunters() -> void:
 func _census() -> void:
 	var by := {}
 	for n in get_tree().root.find_children("*", "", true, false):
-		if not n.is_processing() and not n.is_physics_processing(): continue
+		if not n.is_processing() and not n.is_physics_processing() and not n.is_processing_internal(): continue
 		var sc: Script = n.get_script()
 		var k: String = sc.resource_path.get_file() if sc and sc.resource_path != "" else n.get_class()
 		by[k] = int(by.get(k, 0)) + 1
