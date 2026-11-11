@@ -9,7 +9,10 @@ State machine in `scripts/match/heart.gd`: `charging -> ready -> carried -> cool
 
 1. **Tide.** From 15 s the Blight's tide ring closes on the Heart (130 m -> 34 m over 240 s). Outside it the Blight is
    stronger (`BlightDir.level`/`level_here`) and Skitters come sooner (`_spawn_tick` heat). There was no closing zone
-   before, so this is the "Blight closes toward the Heart".
+   before, so this is the "Blight closes toward the Heart". A Hunter standing outside it also takes the source's
+   death-circle damage (`Heart.tide_dmg`, parity 2026-11-09): the close is split into the source's 11 stages (0-10,
+   ~22 s each, the last holding once closed), each a flat hit every 1 s of 3/6/50/100/.../450 source health scaled by
+   our medium health over theirs (145/1290), so a stage kills as fast as there (medium: 430 s, 215 s, 26 s ... 3 s).
 2. **Charge.** 75 s, visible to everyone: map marker with a charge ring, world beam, waypoint.
 3. **Take it.** Hold interact (F) 1.5 s within 2.2 m. The carrier is slowed 15% (`heart_slow` meta, read in
    `Hunter._chase_mod`) and revealed on every map. Down or death drops it where they fell.
@@ -25,7 +28,8 @@ Clients only predict timers. `Net.VERSION` 0.25.0.
 
 ## Alternatives not taken
 - Block the carrier from normal exits (kept exits unchanged instead; the spark drops).
-- A hard-damage closing zone (the tide only buffs the Blight; no new damage rule).
+- The tide without damage (the prototype's first cut; parity with the source's death circle added it).
+- The source's raw values against our ~9x smaller health (stage 2 would kill in 3 s instead of 26 s).
 
 ## Known gaps
 Bots ignore the Heart. Online path is implemented but untested with real peers. `--heart-demo[=ready|carry|gate|cool|charging]`
