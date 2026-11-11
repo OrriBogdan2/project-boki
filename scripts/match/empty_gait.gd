@@ -31,8 +31,7 @@ const OFF_RATE := 6.0        # /s: and let go when the body leaves the ground
 const MOVE_RATE := 10.0      # /s: how fast the hips go from their standing height to the gait's, and back
 const STAND_Z := 0.06        # m: standing, the heel settles this far behind the hip (the hip over the sole)
 const STAND_STEP := 0.25     # s: a standing re-step (the body turned too far for a planted foot)
-const REFIT_STEPS := 4       # Newton steps that fit the knee to a leg with its own z scale
-const REFIT_EPS := 0.001     # rad: the knee step the Newton slope is read over
+const FIT_STEPS := 24        # bisection steps that fit the knee of a leg with its own z scale (2e-7 rad)
 
 ## One leg's state: planted on its world anchor, or swinging to its landing pose.
 class Leg:
@@ -176,7 +175,7 @@ func _start(xf: Transform3D, inv: Transform3D, moving: bool) -> void:
 func _plant(leg: Leg, xf: Transform3D) -> void:
 	var low := _lowest(leg, leg.pose)
 	leg.contact = low[0]
-	var heel_ground := Vector3(low[1].x, 0.0, low[1].z - _ahead(leg, low[0]))
+	var heel_ground := Vector3(low[1].x, 0.0, low[1].z - ((SOLE[low[0]] as Vector3).z - HEEL_Z))
 	leg.anchor = xf * heel_ground
 	leg.planted = true
 	leg.landed_at = _clock
@@ -211,9 +210,18 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 ## True when the leg cannot stretch from the hip at `hip_h` to its contact sole point's ground spot (`a` the
 ## heel's, in the legs' space).
 func _too_far(leg: Leg, a: Vector3, hip_h: float) -> bool:
-	var sole: Vector3 = SOLE[leg.contact]
-	var hip_to_ground := Vector3(a.x - leg.pivot.x, hip_h, a.z + _ahead(leg, leg.contact)).length()
-	return hip_to_ground > FootPlant.KNEE + sole.length() - REACH_MARGIN
+	var hip_to_ground := Vector3(a.x - leg.pivot.x, hip_h, a.z + (SOLE[leg.contact] as Vector3).z - HEEL_Z).length()
+	return hip_to_ground > _stretch(leg, leg.contact) - REACH_MARGIN
+
+## The knee at which the leg is longest to a sole point: the thigh and the boot's own line one straight line
+## (the knee never bends forward, so the heel's stops at 0).
+func _straight(sole: Vector3) -> float:
+	return minf(wrapf(PI - atan2(sole.z, sole.y), -PI, PI), 0.0)
+
+## The longest the leg gets to sole point `contact`.
+func _stretch(leg: Leg, contact: int) -> float:
+	var sole: Vector3 = SOLE[contact]
+	return FootPlant.at(sole, _straight(sole), leg.zk).length()
 
 ## A leg leaves the ground for a swing of `dur` seconds.
 func _lift(leg: Leg, dur: float, inv: Transform3D) -> void:
@@ -269,41 +277,31 @@ func _lowest(leg: Leg, pose: Vector3) -> Array:
 			low = p
 	return [best, low]
 
-## How far ahead of the heel's ground point sole point `contact` lies on the flat ground, in the legs' space.
-func _ahead(leg: Leg, contact: int) -> float:
-	return ((SOLE[contact] as Vector3).z - HEEL_Z) * leg.zk
-
 ## The hip, knee and leg-out angles that put sole point `contact` on its ground point (`target` is the heel's,
-## each sole point lies flat ahead of it) with the hip `hip_h` above it. Closed form for this rig: the knee bends
-## about the thigh's own axis, so thigh and boot are one planar chain whose length sets the knee (bent back, the
-## knee ahead of the hip-to-sole line); the leg-out angle tips that chain onto the point's side, the hip swings it
-## to the point. Out of reach, the leg points at it. A leg with its own z scale (the woman's) is no longer one
-## planar chain of two lengths: the closed form is the first guess and a few Newton steps fit the knee.
+## each sole point lies flat ahead of it) with the hip `hip_h` above it. The knee bends about the thigh's own axis,
+## so thigh and boot are one planar chain, bent back, and its length sets the knee (bisected: the leg node may have
+## its own z scale, a woman's 0.9, which shortens the boot's length along z); the leg-out angle tips that chain onto
+## the point's side, the hip swings it to the point. Out of reach, the leg points at it.
 func _solve(leg: Leg, contact: int, target: Vector3, hip_h: float) -> Vector3:
 	var sole: Vector3 = SOLE[contact]
-	var to := Vector3(target.x - leg.pivot.x, -hip_h, target.z + _ahead(leg, contact))
-	var l1 := FootPlant.KNEE
-	var l2 := sole.length()
-	var bend := acos(clampf((l1 * l1 + l2 * l2 - to.length_squared()) / (2.0 * l1 * l2), -1.0, 1.0))
-	var sole_dir := atan2(sole.z, sole.y)
-	var knee := minf(wrapf(bend - sole_dir, -PI, PI), wrapf(-bend - sole_dir, -PI, PI))
-	knee = minf(knee, 0.0)
-	if leg.zk != 1.0:
-		knee = _refit(leg.zk, sole, knee, to.length_squared())
+	var to := Vector3(target.x - leg.pivot.x, -hip_h, target.z + sole.z - HEEL_Z)
+	var knee := _fit_knee(leg.zk, sole, to.length_squared())
 	var chain := FootPlant.at(sole, knee, leg.zk)
 	var out := asin(clampf(-to.x / chain.y, -1.0, 1.0))
 	var hip := wrapf(atan2(to.z, to.y) - atan2(chain.z, chain.y * cos(out)), -PI, PI)
 	return Vector3(hip, knee, out)
 
-## The knee at which a leg of z scale `zk` has its sole point `sole` the squared distance `d2` from the hip (the
-## stretched leg is as far as it goes: nearer than that, the closed form's knee is moved to it).
-func _refit(zk: float, sole: Vector3, knee: float, d2: float) -> float:
-	if d2 >= FootPlant.at(sole, 0.0, zk).length_squared():
-		return 0.0
-	for _i in REFIT_STEPS:
-		var slope := (FootPlant.at(sole, knee + REFIT_EPS, zk).length_squared()
-			- FootPlant.at(sole, knee - REFIT_EPS, zk).length_squared()) / (2.0 * REFIT_EPS)
-		if absf(slope) < REFIT_EPS:
-			break
-		knee = clampf(knee - (FootPlant.at(sole, knee, zk).length_squared() - d2) / slope, -PI, 0.0)
-	return knee
+## The knee at which a leg of z scale `zk` has its sole point `sole` the squared distance `d2` from the hip:
+## between the folded boot and the straight leg the distance only grows. Out of reach, the straight leg.
+func _fit_knee(zk: float, sole: Vector3, d2: float) -> float:
+	var hi := _straight(sole)
+	if d2 >= FootPlant.at(sole, hi, zk).length_squared():
+		return hi
+	var lo := -PI
+	for _i in FIT_STEPS:
+		var mid := 0.5 * (lo + hi)
+		if FootPlant.at(sole, mid, zk).length_squared() > d2:
+			hi = mid
+		else:
+			lo = mid
+	return 0.5 * (lo + hi)
