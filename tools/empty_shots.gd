@@ -1,8 +1,8 @@
 extends RefCounted
 ## --empty-shots --shots-dir=<dir>: review screenshots of the Empty creator (Male / Female, three heights,
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
-## --only=creator|viewer|mask|shroud|feet|farm|eggs to take one group (eggs: the egg pick, then the black
-## mystery egg picked; shroud: the creator from front, side and back,
+## --only=creator|viewer|mask|shroud|feet|farm|eggs to take one group (eggs: the egg pick, hovering the
+## black mystery egg and leaving it, then picking it and starting its hatch; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
 ## farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check --shots-dir=.
 
@@ -76,10 +76,25 @@ func _eggs(tree: SceneTree) -> void:
 	await tree.process_frame
 	hx._looks_good()
 	await _shot(tree, "hatch_eggs", 2.5)
+	var basket: Vector3 = (hx.eggs[3]["holder"] as Node3D).global_position + Vector3(0, 0.45, 0)
+	_mouse_to(hx.cam.unproject_position(basket))
+	await _shot(tree, "hatch_mystery_hover", 0.6)
+	_mouse_to(Vector2(40, 40))
+	await _shot(tree, "hatch_mystery_left", 0.6)
 	hx._pick(3)
 	await _shot(tree, "hatch_mystery_picked", 1.2)
+	hx._pick(3)
+	await _shot(tree, "hatch_mystery_used", 0.6)
 	hx.queue_free()
 	await tree.process_frame
+
+## The pointer to `p` on screen: the real one (a windowed run) and the viewport's (headless).
+func _mouse_to(p: Vector2) -> void:
+	main.get_viewport().warp_mouse(p)
+	var e := InputEventMouseMotion.new()
+	e.position = p
+	e.global_position = p
+	Input.parse_input_event(e)
 
 func _viewer(tree: SceneTree) -> void:
 	_fresh()
