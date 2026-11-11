@@ -4,7 +4,8 @@ extends RefCounted
 ## timings are the kit's); the kit's time seeks the clip; through all clips the skinned weapon stays on its bone and the
 ## Gun and Muzzle lie on the blade you see (item 76b); only one weapon is drawn; moves hand over with no pop; the idle
 ## and stance loops close with no pop and run long enough to breathe (docs/art/IDLE_AUDIT.md); a move whose strike
-## snaps inside the blend-in is at full weight on its key. Never touches the save.
+## snaps inside the blend-in is at full weight on its key; each emote of the wheel has its own clip (a gesture or a
+## .glb clip) that ends within the bubble and plays on the right layer. Never touches the save.
 
 const TRI_BUDGET := 15000
 const OWN_MODELS := {"archer": "hem", "thief": "sable", "tender": "pip", "gunslinger": "vex", "ashwick": "cinder",
@@ -96,6 +97,7 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_timings(id, dd, clips)
 	_standing(id, dd, clips)
 	_jump_land(id, m, sync, clips, dd)
+	_emotes(id, dd, clips)
 	# one weapon: the procedural pieces are hidden
 	sync.call("_keep_one_weapon")     # (the first frame takes what the build added last: a Mag)
 	var shown := 0
@@ -138,6 +140,7 @@ func _named(dd: Dictionary) -> Array:
 		out.append_array((cr["walk"] as Dictionary).values())
 	out.append_array((dd.get("air", {}) as Dictionary).values())
 	out.append_array((dd.get("act", {}) as Dictionary).values())
+	out.append_array((dd.get("emotes", {}) as Dictionary).values())
 	for k in dd.get("states", {}):
 		var v = dd["states"][k]
 		if v is String:
@@ -224,6 +227,48 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 		ok(r["back"] > 0.0 and r["back"] <= minf(promise, JL_BACK_MAX),
 				"%s %s: the body is back %.2f s after touchdown (data %.2f, max %.2f)"
 				% [id, way, r["back"], promise, JL_BACK_MAX])
+## The emote wheel (Truce.EMOTES): every emote names a different clip of this Hunter that ends before its bubble does.
+## A "g_" gesture keys only bones of the data's "upper" list and always plays on the upper layer; a .glb clip does when
+## he moves and owns the body when he stands. Once the clip has ended nothing of it plays.
+func _emotes(id: String, dd: Dictionary, clips: WardenClips) -> void:
+	var map: Dictionary = dd.get("emotes", {})
+	var seen := {}
+	var bad: Array = []
+	for e in Truce.EMOTES:
+		var clip := String(map.get(e["id"], ""))
+		if not clips.lib.has_animation(clip) or clips.lib.get_animation(clip).length > Truce.BUBBLE_T:
+			bad.append(e["id"])
+		seen[clip] = true
+	var n := Truce.EMOTES.size()
+	ok(bad.is_empty() and seen.size() == n, "%s: %d wheel emotes, %d clips, within %.1f s (bad %s)"
+			% [id, n, seen.size(), Truce.BUBBLE_T, str(bad)])
+	var wrong: Array = []
+	for e in Truce.EMOTES:
+		var clip := String(map.get(e["id"], ""))
+		var anim := clips.lib.get_animation(clip)
+		var upper := not clip.begins_with(WardenGestures.PREFIX) or _keys_upper(anim, dd)
+		if not _emote_plays(clips, String(e["id"]), clip) or not upper:
+			wrong.append(e["id"])
+	ok(wrong.is_empty(), "%s: emotes play upper-body moving, full-body standing, then end (wrong %s)"
+			% [id, str(wrong)])
+
+## The state's emote picks this clip: standing on its own layer, moving on the upper one, and not after its end.
+func _emote_plays(clips: WardenClips, emote: String, clip: String) -> bool:
+	var s := {"emote": emote, "emote_t": 0.3, "vel": Vector3.ZERO}
+	var gesture := clip.begins_with(WardenGestures.PREFIX)
+	var still := clips._pick(s, 0.0)
+	s["vel"] = Vector3(0, 0, -4)
+	var moving := clips._pick(s, 0.0)
+	s["emote_t"] = clips.lib.get_animation(clip).length + 0.01
+	return still.get("clip", "") == clip and bool(still.get("upper", false)) == gesture \
+			and bool(moving.get("upper", false)) and clips._pick(s, 0.0).get("clip", "") != clip
+
+## A gesture (it keys only a few bones) moves nothing outside the upper layer's bones.
+func _keys_upper(anim: Animation, dd: Dictionary) -> bool:
+	for t in anim.get_track_count():
+		if anim.track_get_path(t).get_concatenated_subnames() not in dd.get("upper", []):
+			return false
+	return true
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
