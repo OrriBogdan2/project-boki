@@ -103,11 +103,13 @@ const T := {
 	"ledge_fling_gain":        [">=", 1.5, "x", "[est] timed fling distance vs no jump: a well-timed one is clearly rewarding"],
 	"ledge_window_s":          [">=", 0.08, "s", "[est] the fling window lasts long enough to hit on purpose (~5+ steps)"],
 	"updraft_rise_t":          ["<=", 0.30, "s", "[est] updrafts feel powerful: 8 m/s climb within 0.3s"],
-	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] punchy skydive: 90% of dive speed"],
-	"drop_dive_steer_t":       ["<=", 0.30, "s", "[est] responsive steering in the dive: 90% of commanded speed"],
+	"drop_dive_vy_t":          ["<=", 0.40, "s", "[est] the skydive reaches its fall speed: 90% of DIVE_FALL"],
+	"drop_dive_steer_t":       ["~", [0.9, 1.3], "s",
+		"[game data] GlideDiveXYForceMultiplier: a quarter of the glide's force, 90% of the glide speed"],
 	"drop_deploy_frames":      ["<=", 1.0, "frames", "press jump: glider opens the same step"],
 	"drop_deploy_settle_t":    ["<=", 0.30, "s", "[est] canopy catch to drop sink rate"],
-	"drop_glide_steer_t":      ["<=", 0.30, "s", "[est] responsive steering under the canopy"],
+	"drop_glide_steer_t":      ["<=", 0.35, "s",
+		"[game data] GlideTargetXYForce 162,500 / 100 kg: 90% of the glide speed"],
 	"drop_land_dead_frames":   ["<=", 1.0, "frames", "no input dead time on landing"],
 	"land_dead_frames":        ["<=", 1.0, "frames", "no input dead time on landing"],
 	"land_squash":             [">=", 0.05, "", "brief squash on a landing that reads"],
@@ -699,7 +701,6 @@ func _plain_dash() -> void:
 	for airborne in [false, true]:
 		_reset(flat + Vector3(0, 2.0 if airborne else 0.0, 0), not airborne)
 		m.fields.clear()      # (a Boki's patch sparkles on its own clock)
-		P.xp = 0.0            # (the long glide-dive rows feed the xp trickle: no level-up ring mid-dash)
 		var radial0: int = m.fx.radial
 		P.inp["move"] = Vector2(1, 0)
 		P.inp["dash"] = true
@@ -976,10 +977,16 @@ func _wall2() -> Dictionary:
 					var hs: Vector2i = hi + side * sd
 					for k in range(0, 3):
 						var hk: Vector2i = hs + d * k
-						if not w.inb(hk.x, hk.y) or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 or w.sheer.has(w.idx(hk.x, hk.y)): good = false
+						if not w.inb(hk.x, hk.y) \
+								or w.kind[w.idx(hk.x, hk.y)] != World.T_GROUND \
+								or int(w.level[w.idx(hk.x, hk.y)]) != l0 + 2 \
+								or w.sheer.has(w.idx(hk.x, hk.y)): good = false
 					for back in range(0, 4):
 						var lb: Vector2i = Vector2i(x, z) + side * sd - d * back
-						if not w.inb(lb.x, lb.y) or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND or int(w.level[w.idx(lb.x, lb.y)]) != l0 or w.stairs.has(w.idx(lb.x, lb.y)): good = false
+						if not w.inb(lb.x, lb.y) \
+								or w.kind[w.idx(lb.x, lb.y)] != World.T_GROUND \
+								or int(w.level[w.idx(lb.x, lb.y)]) != l0 \
+								or w.stairs.has(w.idx(lb.x, lb.y)): good = false
 				if not good: continue
 				var n := Vector2(d)
 				var face := Vector2(hi.x + 0.5, hi.y + 0.5) - n * 0.5
@@ -1048,11 +1055,11 @@ func _drop() -> void:
 	P.dropping = true; P.diving = true; P.gliding = true; P.glide_k = 1.0
 	P.vel = Vector3.ZERO
 	var tvy := -1.0; var tst := -1.0
-	for i in 60:
+	for i in 90:
 		P.inp["move"] = Vector2(1, 0)
 		m.step(DT)
 		if tvy < 0.0 and -P.vel.y >= 0.9 * Hunter.DIVE_FALL: tvy = (i + 1) * DT
-		if tst < 0.0 and P.vel.x >= 0.9 * Hunter.DIVE_SPEED: tst = (i + 1) * DT
+		if tst < 0.0 and P.vel.x >= 0.9 * Hunter.GLIDE_SPEED: tst = (i + 1) * DT
 		if not P.diving: break
 	rec("drop_dive_vy_t", tvy if tvy > 0.0 else 9.0)
 	rec("drop_dive_steer_t", tst if tst > 0.0 else 9.0)
@@ -1075,7 +1082,7 @@ func _drop() -> void:
 	for i in 60:
 		P.inp["move"] = Vector2(0, 1)
 		m.step(DT)
-		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.DROP_SPEED: tg = (i + 1) * DT
+		if tg < 0.0 and P.vel.z >= 0.9 * Hunter.GLIDE_SPEED: tg = (i + 1) * DT
 	rec("drop_glide_steer_t", tg if tg > 0.0 else 9.0)
 	# land and move off straight away
 	_reset(flat + Vector3(0, 3.0, 0), false)
