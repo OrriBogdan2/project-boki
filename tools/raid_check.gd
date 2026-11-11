@@ -147,7 +147,7 @@ func _kit(main: Node) -> void:
 	P.inp["util2"] = true
 	m.step(Match.DT)
 	var k0 := P.kit_t
-	for i in int((Hunter.KIT_TIME + 0.2) / Match.DT): m.step(Match.DT)
+	for i in int((UtilityUse.channel("armor_kit", "time") + 0.2) / Match.DT): m.step(Match.DT)
 	print("RAID repair: started %.2f, stun %.2f roll %.2f glide %s grounded %s" % [k0, P.stun_t, P.roll_t, P.gliding, P.grounded])
 	ok(P.armor_kits == 1 and P.armor >= P.max_armor - 0.5, "an uninterrupted repair uses a kit and fills armor (kits %d, armor %.0f/%.0f)" % [P.armor_kits, P.armor, P.max_armor])
 	# the HUD has a slot for it with its key

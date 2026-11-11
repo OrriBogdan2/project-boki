@@ -106,7 +106,7 @@ static func _stat(rec: Dictionary, s: String, n: int) -> Dictionary:
 static func _xp(rec: Dictionary, n: int) -> Dictionary:
 	var lv := int(rec["level"])
 	var xp := int(rec["xp"]) + n
-	while xp >= Game.xp_need(lv):
+	while lv < Evo.cap() and xp >= Game.xp_need(lv):
 		xp -= Game.xp_need(lv)
 		lv += 1
 	var d := {"xp": [int(rec["xp"]), xp]}

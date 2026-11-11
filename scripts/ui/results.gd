@@ -67,7 +67,8 @@ func show_result(r: Dictionary) -> void:
 	v.add_child(strip)
 	var det := UI.vbox(6)      # what is behind the Details toggle
 	det.visible = false
-	det.add_child(_small_stats(r, String(Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]["name"])))
+	var td: Dictionary = Data.TIERS[clampi(Game.last_tier, 0, Data.TIERS.size() - 1)]
+	det.add_child(_small_stats(r, "%s · Depth %d" % [String(td["name"]), int(td["depth"])]))
 	if won:
 		var chips: Array = []
 		if int(s["gems"]) > 0:

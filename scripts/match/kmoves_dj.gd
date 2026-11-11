@@ -352,7 +352,7 @@ const MOVES := {
 	# ---------------------------------------------------------------- per-hero base dash (the long air dash)
 	# the air Cartwheel (sheet: 0129-0134, 303.8-304.5s): a tucked flick, the star turned over sideways (0.08 to
 	# 0.34), then carried flat and stretched on its speed, legs split and arms swept back, held until she lands
-	# (ThiefKit plays thf_land then); the whole air dash runs up to 1.09s, the keys end at 0.5
+	# (ThiefKit plays thf_land then); the keys end with the 0.48s dash (the ground Cartwheel's, item 183)
 	"thf_exdash": {"hold": true, "swing": 2, "keys": [
 		[0.0, {}],
 		[0.05, {"sq": 0.28, "lift": -0.04, "p": 0.25, "lw": 1.0, "legs": [1.1, -1.6, 0.9, -1.4],
@@ -361,7 +361,7 @@ const MOVES := {
 				"fl": Vector3(-0.58, 0.3, 0.0), "hw": 1.0, "fr": Vector3(0.58, 0.3, 0.0), "rw": 1.0}],
 		[0.34, {"fz": -6.283, "sq": -0.2, "lift": 0.22, "lw": 1.0, "legs": [1.25, -0.05, -1.25, -0.05],
 				"fl": Vector3(-0.58, 0.3, 0.0), "hw": 1.0, "fr": Vector3(0.58, 0.3, 0.0), "rw": 1.0}],
-		[0.5, {"fz": -6.283, "p": -0.75, "sq": -0.22, "lift": 0.12, "lw": 1.0, "legs": [1.0, -0.2, -1.0, -0.35],
+		[0.48, {"fz": -6.283, "p": -0.75, "sq": -0.22, "lift": 0.12, "lw": 1.0, "legs": [1.0, -0.2, -1.0, -0.35],
 				"fl": Vector3(-0.45, -0.05, 0.4), "hw": 1.0, "fr": Vector3(0.45, -0.05, 0.4), "rw": 1.0}]]},
 	# touching down from the air Cartwheel (sheet 6: a low crouch held ~0.1s, up in ~0.05s, no dust)
 	"thf_land": {"keys": [

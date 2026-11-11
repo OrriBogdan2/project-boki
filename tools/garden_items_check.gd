@@ -3,7 +3,7 @@ extends RefCounted
 ## For every item on three sample Boki, preview() changes nothing, apply() does exactly the deltas preview
 ## named (and nothing else), writes one journal line, and an item that can't be used changes nothing. Also:
 ## the three-token limit, take_off back to the bag, Stayleaf stops forms, tokens steer the form, feeding
-## through Care.feed, and an old v12 save gaining the new fields. Never touches the real save.
+## through Care.feed, and an old v13 save gaining the new fields. Never touches the real save.
 
 const TRACKED := ["xp", "level", "path", "stay", "lean", "loose"]
 const SPECS := [["cindle", 1, "power"], ["zapple", 5, "focus"], ["burrlet", 12, "guard"]]
@@ -106,11 +106,15 @@ func _tokens_and_stay() -> void:
 			"taking one off frees the slot and returns it to the bag")
 	ok(not GardenItems.take_off(rec, "keepstone"), "taking off what it doesn't wear does nothing")
 	rec["level"] = 4
+	var lines: Dictionary = Evo.rules()["lines"]
+	var line: Dictionary = lines["cindle"]
+	lines["cindle"] = {"level": 4, "into": [{"id": "pebbit"}]}      # a line whose next form has art (vespox has none)
 	ok(not Evo.on_level(rec.duplicate(true)).is_empty(), "level 4 grows a form")
 	GardenItems.apply(rec, "stayleaf")
 	ok(Evo.on_level(rec).is_empty(), "with a Stayleaf worn it does not evolve")
 	var off := GardenItems.take_off(rec, "stayleaf")
 	ok(off and not rec["stay"] and not Evo.on_level(rec).is_empty(), "taken off, it evolves again")
+	lines["cindle"] = line
 
 func _feeding() -> void:
 	var rec := _boki("zapple", 3, "speed")
@@ -128,6 +132,6 @@ func _migration() -> void:
 	var old := Save.new_kin("cindle", "Old")
 	for f in ["path", "stay", "loose"]:
 		old.erase(f)
-	var data := {"v": 12, "roster": [old]}
+	var data := {"v": 13, "roster": [old]}
 	var moved := Save.migrate(data) and int(data["v"]) == Save.VERSION
-	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == 0, "a v12 save gains path, stay, loose")
+	ok(moved and old["path"] == [] and old["stay"] == false and old["loose"] == 0, "a v13 save gains path, stay, loose")
