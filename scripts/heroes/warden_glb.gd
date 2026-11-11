@@ -1264,7 +1264,9 @@ class Springs:
 				var to := (inv * pts[j + 1] - a).normalized()
 				var c := from.dot(to)
 				var q := Quaternion.IDENTITY
-				if c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
+				if from.is_zero_approx() or to.is_zero_approx():
+					pass      # two joints on one point (a teleport, a floor clamp): no turn, and no zero-vector error
+				elif c <= -0.999:      # (a chain flipped end for end: Quaternion(from, to) has no answer there)
 					var side := Vector3.RIGHT if absf(from.x) < 0.9 else Vector3.FORWARD
 					q = Quaternion(from.cross(side).normalized(), PI)
 				elif c < 0.99999:
