@@ -188,13 +188,13 @@ func _companions() -> void:
 		ok(bone == "pauldron.L", "tender: %s rides the sun" % a)
 	m.free()
 
-## Item 137: the hammer on the sheet is 0.79 of his height (breaker_FINAL_sheet, breaker_weapons), neutral size both.
+## Item 137: the hammer mesh was 0.79 of the old Albert; the appeal3 master is 1.2x taller, so 0.66 of him.
 func _hammer_scale(w: Node, sk: Skeleton3D) -> void:
 	var box := (w.find_child("hammer", true, false) as MeshInstance3D).get_aabb()
 	var top := (w.find_child("anchor_head_top", true, false) as Node3D)
 	var h := sk.get_bone_global_rest(WardenSkeleton.find(sk, "head")).origin.y + top.position.y
 	var k := box.size[box.get_longest_axis_index()] / maxf(h, 0.01)
-	ok(absf(k - 0.79) <= 0.06, "breaker: the hammer is %.2f of his height (sheet 0.79)" % k)
+	ok(absf(k - 0.66) <= 0.06, "breaker: the hammer is %.2f of his height (want 0.66)" % k)
 
 ## The porthole's moods and the fish: cosmetic, off the state and the kit's pokes.
 func _mood(m: Node3D, sync: WardenGlb.Sync, sk: Skeleton3D) -> void:
