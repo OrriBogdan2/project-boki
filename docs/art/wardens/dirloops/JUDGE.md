@@ -96,3 +96,28 @@ Cost: the stance gets short where the forward hip is tall and the step long. Tar
 cycle (a bounding side step); Vex walk_r 0.23 (a light, springy walk). Fix for both (ours, not built): a shorter stride
 at loco speed needs a faster cadence, i.e. a shorter loop, which breaks the ring's one length; the alternative is
 a lower, longer-legged forward walk (the forward loop sets the band).
+
+## Albert and Neve (2026-11-11, ext/anim-dirloops-albert-neve)
+
+Their pilot walk_f/run_f (ext/anim-pilot-albert-neve c70b0f6a2) kept; walk and run b, l, r, fl, fr, bl, br re-baked by
+`tools/art1/hunter_dir_gait.py` on main's models (Albert v2, Neve appeal) in step with them: each ring one length
+(Albert walk 0.750 s, run 0.625 s; Neve walk 0.646 s, run 0.604 s), right strike on the forward loop's key,
+`loco.in_step`, diagonals on the ring. Albert's walk_f/run_f were baked again by `breaker_gait.py` on the v2 hull
+(sole 2.01 / 4.80 m/s). Neve's skate clips (skate*, tm_skate) untouched.
+
+Albert needs three inputs the Hunters don't: SIZE 2.0 (his GLB is half game size), CYCLES 2,1 and TURN 55. His legs
+are 14 cm (model) and walk_f covers 0.75 m a pair: one pair a loop leaves a 0.15 stance share (a hop). Two pairs in
+walk_f's 0.75 s halve the step (stance 0.27-0.30); every second strike still lands on walk_f's. The run keeps one pair
+(31 keys can't hold two). At TURN 40 run_l planted at 1.63 vs 2.4 m/s with a 13 cm (game) dip, run_r half its keys
+off speed; at 55 both hold.
+
+| loops | planted sole vs loco, median (keys within 5%) | stance share | pelvis vs forward band (clip-check) |
+|---|---|---|---|
+| Albert walk b / l, r / fl, fr / bl, br | 2.0 m/s (100 / 57, 71 / 71 / 80%) | 0.30 / 0.30 / 0.27 / 0.30 | 0.016 m under, 0.003 over |
+| Albert run b / l, r / fl, fr / bl, br | 4.8 m/s (71 / 100 / 100 / 80%) | 0.14 | 0 |
+| Neve walk x7 | 2.2 m/s (100%) | 0.40 | worst 0.003 m under |
+| Neve run x7 | 4.6 m/s (100%) | 0.20 | worst 0.001 m under |
+
+Was (current, one length each, no diagonals): Albert walk b/l/r 0.5 s, sole 1.13-1.22 vs 1.0 model m/s, hip 2 cm over
+walk_f's; run b/l/r 0.375 s, 2.8 vs 2.4; Neve walk b/l/r 1.5 s and run b/l/r 1.0 s, soles 0.2-0.6 m/s against
+2.2 / 4.6 (her old skate strokes, stance 0.6-0.94).

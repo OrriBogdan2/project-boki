@@ -13,12 +13,15 @@ Meshy raw files stay in ~/meshy/breaker_v2 (not in git); the measured scan joint
     blender -b WORK/breaker_art1.blend --python tools/art1/breaker_anims.py -- WORK/breaker_anims.blend art/wardens/breaker/breaker.glb
     blender -b --factory-startup --python tools/art1/breaker_gait.py -- art/wardens/breaker/breaker.glb WORK/breaker_gait.glb  # walk_f, run_f
     python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb WORK/breaker_gait.glb walk_f,run_f
+    blender -b --factory-startup --python tools/art1/hunter_dir_gait.py -- art/wardens/breaker/breaker.glb WORK/breaker_dir.glb 2.0 4.8 b,l,r,fl,fr,bl,br 0 0 2.0 2,1 55
+    python3 tools/art1/glb_add_clips.py art/wardens/breaker/breaker.glb WORK/breaker_dir.glb walk_b,walk_l,walk_r,walk_fl,walk_fr,walk_bl,walk_br,run_b,run_l,run_r,run_fl,run_fr,run_bl,run_br
     godot --headless --path . --import
 
 - **Files:** tools/art1/sculpt_kit.py (hero-independent), breaker_sculpt.py (shapes), breaker_paint.py (paint), breaker_art1.py (mesh, UVs,
   armature, rigid weights), anim_kit.py (keys -> IK -> baked clips), breaker_anims.py (clips), breaker_gait.py (walk_f and run_f: a
   generated stride with the soles locked to the floor at 2.0 and 4.8 m/s, 2.7 and 3.2 steps/s, hammer carried clear of the floor),
-  art1_render.py (Cycles review).
+  hunter_dir_gait.py (walk/run b, l, r and diagonals in step with walk_f/run_f; the walks take two steps a
+  side in walk_f's time, his legs can't reach one; docs/art/wardens/dirloops/JUDGE.md), art1_render.py (Cycles review).
 - **Body:** content/archetypes/bulwark.json body: legs 0.46, torso 1.06, shoulder 1.15, build 1.4, head 0.3, size 2.0: the rig's arms are a
   fixed length, so the art's proportions need a 1.03 m neutral body; size 2.0 keeps the helmet's top at 1.5x a medium hunter. The masts stand over
   that (1.9x). The hit radius stays 0.46 (docs/HITBOX_SIZE.md): the hull is no longer a ball (owner 11-08): `hull_scale` in breaker_scan.py tapers it, 0.55x wide at the waist to 1.0x at the shoulders, 0.7x front to back, for a hammer-bruiser V.
