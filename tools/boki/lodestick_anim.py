@@ -4,7 +4,7 @@ import math
 
 import boki_clips
 import lodestick
-from boki_clips import add, c, s, seq
+from boki_clips import add, bound_air, c, s, seq, stance
 from lodestick import LEGS, SIDES, leg_pts, mir, v3
 
 LOOK_UP = 0.3      # the face tips up toward the high cameras
@@ -128,8 +128,34 @@ def walk(t):
     return gait(t, 0.26, 0.28, 0.1, 0.0)
 
 
+RUN_W = 0.125      # share of the run cycle a tripod is on the ground: a short push, then a bound
+RUN_REACH = 0.2    # m a foot sweeps back along the body while it is down
+RUN_HOP = 0.05     # m the body rises between touch-downs
+
+
+def arc(pre, sweep):
+    """The hip angle (rad, forward) that puts the foot `sweep` (+1 front, -1 back) of RUN_REACH along the body: it
+    swings on an arc round the hip, so an even sweep takes an uneven angle."""
+    _, hip, _, foot = next(l for l in LEGS if l[0] == pre)
+    dx, dz = foot[0] - hip[0], foot[2] - hip[2]
+    near = math.hypot(dx, dz)
+    far = 0.98 * near - RUN_REACH / 2        # a foot reaches only as far as the leg is long
+    z = max(-far, min(far, dz)) - sweep * RUN_REACH / 2
+    return math.acos(z / near) - math.atan2(dx, dz)
+
+
 def run(t):
-    return gait(t, 0.36, 0.34, 0.03, 0.02)
+    """A bound: each tripod pushes back hard along the ground for a beat, and the twig body is in the air between."""
+    p = {}
+    sway(p, t, 0.03)
+    at(p, y=-0.02 + RUN_HOP * bound_air(t, RUN_W))
+    for (pre, sd), ph in TRIPOD.items():
+        sweep, up = stance(t, ph, RUN_W)
+        leg(p, pre, sd, arc(pre, sweep), 0.34 * up, 0.2 * up)
+    look(p)
+    feelers(p, t, 0.1, back=0.23, rate=2)
+    tail(p, t, 0.05)
+    return p
 
 
 def attack(t):
@@ -279,7 +305,7 @@ def tend(t):
     return p
 
 
-CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (0.5, True, run), "hop": (1.0, True, hop),
+CLIPS = {"idle": (4.0, True, idle), "walk": (1.0, True, walk), "run": (16 / 30, True, run), "hop": (1.0, True, hop),
          "pet": (2.4, True, pet), "carry": (1.1, True, carry), "tend": (1.3, True, tend),
          "attack": (0.8, False, attack), "ability": (1.6, False, ability), "sleep": (3.6, True, sleep),
          "eat": (2.0, True, eat), "chop": (1.1, True, chop), "mine": (1.0, True, mine)}

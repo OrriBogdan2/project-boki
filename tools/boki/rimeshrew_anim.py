@@ -1,7 +1,8 @@
 """Rimeshrew's skeleton and the clips that are its own: everything a little quicker and twitchier than the others."""
 import boki_clips
 import rimeshrew
-from boki_clips import SHARED, add, bite, chop_mouth, ear_pose, eat_ground, mine_mouth, s, seq, tail_wave
+from boki_clips import (SHARED, add, bite, bound_air, chop_mouth, drop, ear_pose, eat_ground, hang_swing, mine_mouth, s,
+                        seq, stance, tail_wave)
 from rimeshrew import SIDES, TAIL_PTS
 
 boki_clips.TAIL_N = 5
@@ -38,6 +39,26 @@ def _bones():
 
 
 BONES = _bones()
+
+
+RUN_HOP = 0.04     # m the body rises between touch-downs
+RUN_REACH = 0.18   # m a paw sweeps back along the ground while it is down
+LEG = 0.122        # m from hip to ankle
+
+
+def run(t):
+    """The shared gallop's body, but each diagonal pair pushes off along the ground in turn and it hops between."""
+    p = boki_clips.run(t)
+    drop(p, "fleg", "hleg", "fpaw", "hpaw")
+    p["root_at"] = (0, RUN_HOP * bound_air(t), 0)
+    for pair, ph in ((("fleg.L", "hleg.R"), 0.0), (("fleg.R", "hleg.L"), 0.5)):
+        sweep, up = stance(t, ph)
+        swing = hang_swing(sweep, LEG, RUN_REACH)
+        for leg in pair:
+            add(p, leg.replace("leg", "leg1"), rx=swing)
+            add(p, leg.replace("leg", "leg2"), rx=(-1 if leg[0] == "f" else 1) * up)
+            add(p, leg.replace("leg", "paw"), rx=-0.5 * swing)
+    return p
 
 
 def twitch(fn, amp=1.0):
@@ -100,6 +121,7 @@ def squeak(t):
 
 CLIPS = {name: (secs * 0.85, loop, twitch(fn)) for name, (secs, loop, fn) in SHARED.items()}
 CLIPS.update({
+    "run": (16 / 30, True, twitch(run)),
     "attack": (0.7, False, squeak),
     "ability": (1.4, False, ability),
     "sleep": (3.0, True, curl),
