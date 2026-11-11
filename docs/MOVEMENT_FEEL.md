@@ -49,7 +49,7 @@ Nothing here comes from SUPERVIVE's files.
 | ground_stop_dist | 0.10m | 0.31m | 0.2–0.5m | [game data] SV slides ~0.38–0.49m |
 | ground_reverse_t (180 degrees) | 0.150s | 0.117s | <= 0.12s | [spec] crisp |
 | ground_turn90_t | 0.100s | 0.083s | <= 0.09s | [spec] crisp |
-| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | same | class data | KINFALL_CLASSES |
+| speed light / medium / heavy | 5.2 / 5.0 / 4.73 | 5.28 (each weight's first hunter; 5.16-5.63 across all) | 5.1-5.7 | [game data] MoveSpeed x `body_scale` 1.16 (decision 0061); the same in an expedition, the Training Grounds and on the farm (`--move-speed-check`) |
 | jump_input_frames | 1 | 1 | <= 1 | |
 | jump_apex | 1.28m | 1.52m | 1.2–1.6m | [game data] 1.9m, held under 1.6 for the terrace grammar |
 | jump_speed_vs_source (lift-off 6.8 m/s over 7.5) | n/a | 0.87 | 0.85–1.0 | [game data] JumpZVelocity 750 uu/s; the gap is the terrace call, plus one step of gravity |

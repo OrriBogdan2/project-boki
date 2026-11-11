@@ -196,6 +196,12 @@ def block(name, key, body):
 ARCH = content("archetypes")
 ARCH_ORDER = gd_const("arch/arch.gd", "ORDER") or sorted(ARCH)
 CLASSES = gd_const("core/data.gd", "CLASSES") or {}
+MOVE = load_json(os.path.join(ROOT, "content", "rules", "hunter_move.json"))
+
+
+def walk_speed(aid):
+    """A hunter's walk in m/s, as HunterMove.speed: its row (or the default) times body_scale."""
+    return round(MOVE.get(aid, MOVE["default"])["speed"] * MOVE["body_scale"], 2)
 WEAPONS = content("weapons")
 ABIL1 = content("hunter_abilities")
 KIN2 = content("kin_v2")
@@ -307,7 +313,7 @@ def gen_classes():
         block(class_page_name(aid) + ".md", "profile", class_profile(d))
         b = []
         b.append(table(["", ""], [
-            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(cs.get("speed", "?")), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
+            ["Body", "%s health, %s m/s, %s dash charge%s" % (num(cs.get("hp", "?")), num(walk_speed(aid)), num(cs.get("dashes", "?")), "" if cs.get("dashes") == 1 else "s")],
             ["Signature weapon", wname(d["signature"] if "signature" in d else d["weapons"][0]) + " (the only weapon this hunter carries; it grows through upgrades, never swaps)"],
             ["Fantasy", d.get("fantasy", "")],
             ["Silhouette", d.get("silhouette", "")],

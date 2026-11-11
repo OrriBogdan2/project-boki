@@ -12,7 +12,7 @@ The owner read these straight from the installed game (config files, curve table
 | Jump velocity | 750 uu/s | 7.5 m/s (~1.9 m jump, apex ~0.51 s) | Partly: 6.8 m/s (1.5 m, 0.9 s in the air), so jump + mantle stays under our 4-terrace walls (the wall kick tops those) |
 | Air control | 0.015 | almost no steering mid-jump | **No, owner ruling 11-08**: strong WASD air control (`Loco.air_step`, `content/rules/tuning.json` air), decision 0022 |
 | Falling lateral friction | 0.375 | | **Yes**: `physics.air_friction`, a jump keeps its run-up |
-| Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s | **Yes**: `content/rules/hunter_move.json` |
+| Run speed per hunter | 445-485 uu/s | 4.45-4.85 m/s; ours x1.16 = 5.16-5.63 m/s | **Yes**: `content/rules/hunter_move.json`, at `body_scale` 1.16 (our 2.04 m hunter over the source's 1.76 m: the same body heights per second, decision 0061) |
 | Acceleration per hunter | 4700-5400 uu/s² | 47-54 m/s² | **Yes**: `HunterMove` (Oath, Kingpin 47; Tetra 50; others 54) |
 | Braking (no input) | 2220 uu/s², GroundFriction 1.0 (x2 braking factor) | 22.2 m/s², 2/s | **Yes**: `physics.brake`, `physics.ground_friction`: a let-go from a run stops in ~0.17 s, ~0.3 m. Speed over a run (a kit step, a knock) sheds under the same brake, keys held or not, as UE does (`HunterMove.brake_rate`): a 10 m/s shove slides ~1.4 m (decision 0026) |
 | Dash end | no hard stop (DashCurves not decoded; three heroes fitted from footage, below) | | **Yes**: a dash hands over at no more than run speed (`physics.dash_exit_run`), then the walk, brake or air carry; Ghost, Brall and Myth slow through their fitted curve first |
