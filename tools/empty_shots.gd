@@ -3,7 +3,7 @@ extends RefCounted
 ## builds, hollow styles), the Relics viewer and the first-Relic moment (xvfb with a renderer). Add
 ## --only=creator|viewer|mask|shroud|feet|gait|farm|eggs to take one group (eggs: the egg pick, then the black
 ## mystery egg picked; shroud: the creator from front, side and back,
-## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
+## the aura levels and shroud styles; feet: the soles of three extreme bodies, standing and walking;
 ## farm: the Empty at home from every side and above; gait: three bodies running past floor posts, not run by default).
 
 const LOOKS := {
@@ -16,6 +16,9 @@ const LOOKS := {
 	"void_crescent_gold": {"hollow": 3, "glow": 4, "ghost": 1, "colour": 7},
 }
 
+## [sex, height, build] of the feet strip: the smallest woman, the tallest sturdiest woman (the body whose feet stood
+## highest) and the tallest sturdiest man.
+const FEET_BODIES := [[0, 0, 0], [0, 2, 2], [1, 2, 2]]
 const GAIT_SHOTS := 8        # frames of the gait strip
 const GAIT_EVERY := 4        # frames (60 fps) between its shots: 8 x 4 = half a second, about two strides
 
@@ -162,7 +165,7 @@ func _shroud(tree: SceneTree) -> void:
 	hx.queue_free()
 	await tree.process_frame
 
-## The soles on a floor at the shortest and tallest height, standing and mid-stride, close and low.
+## The soles on a floor of the three FEET_BODIES, standing and mid-stride, close and low.
 func _feet(tree: SceneTree) -> void:
 	_fresh()
 	var stage := Node3D.new()
@@ -186,11 +189,13 @@ func _feet(tree: SceneTree) -> void:
 	cam.make_current()
 	var models := []
 	var anims := []
-	for h in [0, 2]:
-		var look := Unmasked.clean({"unmasked": true, "height": h, "build": h})
+	for k in FEET_BODIES.size():
+		var body: Array = FEET_BODIES[k]
+		var look := Unmasked.clean({"unmasked": true, "gender": body[0], "height": body[1], "build": body[2],
+			"shroud": 1})
 		var m := Models.hunter("medium", Data.TEAM_COLORS[0], "", "", look)
 		m.get_node("Rig/Torso/Aim/Gun").free()
-		m.position = Vector3(-0.55 + 1.1 * (h / 2), 0, 0)
+		m.position = Vector3(-1.0 + 1.0 * k, 0, 0)
 		m.rotation.y = -PI * 0.5
 		stage.add_child(m)
 		models.append(m)
@@ -201,7 +206,7 @@ func _feet(tree: SceneTree) -> void:
 			for a in anims:
 				(a as HunterAnim).update(1.0 / 60.0, {"fired": 99.0, "face": -PI * 0.5, "vel": vel})
 			await tree.process_frame
-		await _shot(tree, "feet_%s_short_tall" % ("idle" if step == 0 else "walking"), 0.0)
+		await _shot(tree, "feet_%s_extremes" % ("idle" if step == 0 else "walking"), 0.0)
 	stage.queue_free()
 	await tree.process_frame
 

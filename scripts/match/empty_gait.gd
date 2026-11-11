@@ -15,7 +15,6 @@ extends RefCounted
 ##   the body rises onto the toe to push off and comes down again in the air); swing: how high the swinging foot's
 ##   arc goes (it kicks up fast behind, so the leg can reach it as the body moves on).
 
-const THIGH := Vector3(0.0, -FootPlant.KNEE, 0.0)
 const SOLE: Array = FootPlant.SOLE
 const HEEL_Z: float = (FootPlant.SOLE[0] as Vector3).z
 const REACH_MARGIN := 0.01   # m: a ground point nearer than this to the leg's full stretch ends the stance early
@@ -32,11 +31,14 @@ const OFF_RATE := 6.0        # /s: and let go when the body leaves the ground
 const MOVE_RATE := 10.0      # /s: how fast the hips go from their standing height to the gait's, and back
 const STAND_Z := 0.06        # m: standing, the heel settles this far behind the hip (the hip over the sole)
 const STAND_STEP := 0.25     # s: a standing re-step (the body turned too far for a planted foot)
+const REFIT_STEPS := 4       # Newton steps that fit the knee to a leg with its own z scale
+const REFIT_EPS := 0.001     # rad: the knee step the Newton slope is read over
 
 ## One leg's state: planted on its world anchor, or swinging to its landing pose.
 class Leg:
 	var pivot: Vector3           # the hip joint in the legs' space
 	var side := 1.0              # -1 left, 1 right: which way the foot splays
+	var zk := 1.0                # the leg node's z scale (a woman's legs are 0.9): the boot is that much shorter
 	var planted := false
 	var anchor := Vector3.ZERO   # world: the heel's ground point (the other sole points lie flat ahead of it)
 	var pose := Vector3.ZERO     # hip x, knee x, leg-out z (rad)
@@ -78,6 +80,8 @@ func _init(legs_node: Node3D, gait: Dictionary) -> void:
 	left.pivot = (legs.get_node("LegL") as Node3D).position
 	right.pivot = (legs.get_node("LegR") as Node3D).position
 	left.side = -1.0
+	left.zk = (legs.get_node("LegL") as Node3D).scale.z
+	right.zk = (legs.get_node("LegR") as Node3D).scale.z
 	_step = gait.get("step", _step)
 	_stance = float(gait.get("stance", _stance))
 	_strike = float(gait.get("strike", _strike))
@@ -172,7 +176,7 @@ func _start(xf: Transform3D, inv: Transform3D, moving: bool) -> void:
 func _plant(leg: Leg, xf: Transform3D) -> void:
 	var low := _lowest(leg, leg.pose)
 	leg.contact = low[0]
-	var heel_ground := Vector3(low[1].x, 0.0, low[1].z - ((SOLE[low[0]] as Vector3).z - HEEL_Z))
+	var heel_ground := Vector3(low[1].x, 0.0, low[1].z - _ahead(leg, low[0]))
 	leg.anchor = xf * heel_ground
 	leg.planted = true
 	leg.landed_at = _clock
@@ -208,7 +212,7 @@ func _stance_frame(leg: Leg, inv: Transform3D, dir: float, step_len: float, spd:
 ## heel's, in the legs' space).
 func _too_far(leg: Leg, a: Vector3, hip_h: float) -> bool:
 	var sole: Vector3 = SOLE[leg.contact]
-	var hip_to_ground := Vector3(a.x - leg.pivot.x, hip_h, a.z + sole.z - HEEL_Z).length()
+	var hip_to_ground := Vector3(a.x - leg.pivot.x, hip_h, a.z + _ahead(leg, leg.contact)).length()
 	return hip_to_ground > FootPlant.KNEE + sole.length() - REACH_MARGIN
 
 ## A leg leaves the ground for a swing of `dur` seconds.
@@ -256,31 +260,50 @@ func _swing_frame(leg: Leg, dt: float, dir: float, xf: Transform3D, inv: Transfo
 ## The boot's lowest sole point for a pose: [index into SOLE, its position in the legs' space].
 func _lowest(leg: Leg, pose: Vector3) -> Array:
 	var hip := Basis.from_euler(Vector3(pose.x, 0.0, pose.z))
-	var shin := Basis(Vector3.RIGHT, pose.y)
 	var best := 0
 	var low := Vector3.ZERO
 	for i in SOLE.size():
-		var p: Vector3 = leg.pivot + hip * (THIGH + shin * (SOLE[i] as Vector3))
+		var p: Vector3 = leg.pivot + hip * FootPlant.at(SOLE[i], pose.y, leg.zk)
 		if i == 0 or p.y < low.y:
 			best = i
 			low = p
 	return [best, low]
 
+## How far ahead of the heel's ground point sole point `contact` lies on the flat ground, in the legs' space.
+func _ahead(leg: Leg, contact: int) -> float:
+	return ((SOLE[contact] as Vector3).z - HEEL_Z) * leg.zk
+
 ## The hip, knee and leg-out angles that put sole point `contact` on its ground point (`target` is the heel's,
 ## each sole point lies flat ahead of it) with the hip `hip_h` above it. Closed form for this rig: the knee bends
 ## about the thigh's own axis, so thigh and boot are one planar chain whose length sets the knee (bent back, the
 ## knee ahead of the hip-to-sole line); the leg-out angle tips that chain onto the point's side, the hip swings it
-## to the point. Out of reach, the leg points at it.
+## to the point. Out of reach, the leg points at it. A leg with its own z scale (the woman's) is no longer one
+## planar chain of two lengths: the closed form is the first guess and a few Newton steps fit the knee.
 func _solve(leg: Leg, contact: int, target: Vector3, hip_h: float) -> Vector3:
 	var sole: Vector3 = SOLE[contact]
-	var to := Vector3(target.x - leg.pivot.x, -hip_h, target.z + sole.z - HEEL_Z)
+	var to := Vector3(target.x - leg.pivot.x, -hip_h, target.z + _ahead(leg, contact))
 	var l1 := FootPlant.KNEE
 	var l2 := sole.length()
 	var bend := acos(clampf((l1 * l1 + l2 * l2 - to.length_squared()) / (2.0 * l1 * l2), -1.0, 1.0))
 	var sole_dir := atan2(sole.z, sole.y)
 	var knee := minf(wrapf(bend - sole_dir, -PI, PI), wrapf(-bend - sole_dir, -PI, PI))
 	knee = minf(knee, 0.0)
-	var chain := THIGH + Basis(Vector3.RIGHT, knee) * sole
+	if leg.zk != 1.0:
+		knee = _refit(leg.zk, sole, knee, to.length_squared())
+	var chain := FootPlant.at(sole, knee, leg.zk)
 	var out := asin(clampf(-to.x / chain.y, -1.0, 1.0))
 	var hip := wrapf(atan2(to.z, to.y) - atan2(chain.z, chain.y * cos(out)), -PI, PI)
 	return Vector3(hip, knee, out)
+
+## The knee at which a leg of z scale `zk` has its sole point `sole` the squared distance `d2` from the hip (the
+## stretched leg is as far as it goes: nearer than that, the closed form's knee is moved to it).
+func _refit(zk: float, sole: Vector3, knee: float, d2: float) -> float:
+	if d2 >= FootPlant.at(sole, 0.0, zk).length_squared():
+		return 0.0
+	for _i in REFIT_STEPS:
+		var slope := (FootPlant.at(sole, knee + REFIT_EPS, zk).length_squared()
+			- FootPlant.at(sole, knee - REFIT_EPS, zk).length_squared()) / (2.0 * REFIT_EPS)
+		if absf(slope) < REFIT_EPS:
+			break
+		knee = clampf(knee - (FootPlant.at(sole, knee, zk).length_squared() - d2) / slope, -PI, 0.0)
+	return knee

@@ -39,6 +39,10 @@ second apart at 5 m/s past floor posts every half metre).
   leg-out angles are solved (closed form: thigh and boot are one planar chain about the thigh's axis) so the sole
   point on the ground stays on it while the hips pass over. The boot rolls heel, mid, toe as the hips move on and
   the leg cannot reach with the earlier point.
+  A leg node with its own z scale (a woman's legs are 0.9, Unmasked._shape) is no longer that planar chain: the
+  solve reads the scale (`FootPlant.at`), fits the knee to it with a few Newton steps from the closed form, and
+  the sole's length on the ground and the hip drop (`FootPlant.reach`) use it too. Before this, every woman's
+  standing feet were 2.1 to 2.8 cm high (--unmasked-check, rows for the four worst).
 - **Hips**: at the rig's size 0.43 m at the strike, 0.445 m flat-footed (by 30 % of the stance), 0.485 m from the
   push-off (70 %) on: the body rises onto the toe because there is no ankle, and comes down again in the air.
 - **Swing**: the lowest sole point (the toe as it leaves, the heel as it lands) travels in the body's frame from
