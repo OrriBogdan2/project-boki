@@ -19,6 +19,7 @@ extends RefCounted
 ##   7. every ambience loop the match and the title ask for (AmbBeds.BEDS, "title", ...) has its file
 ##   7. every belt item but the keys has its own row in content/rules/belt_sfx.json (cues named for the item,
 ##      files on disk, a channelled item also loop/end/cancel) and utility_use.gd plays no stock cue
+##   7. every Boki species' type has its cast cue k_<type> (KinLib.cue_of), and the six old k_ names are gone
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -60,6 +61,21 @@ func run(main: Node) -> void:
 func _ambience() -> void:
 	for bed in AmbBeds.BEDS + ["title", "match", "abyss", "ruins"]:
 		ok(ResourceLoader.exists("res://audio/amb_%s.ogg" % bed), "ambience bed amb_%s.ogg" % bed)
+	_boki_cues()
+	print("SFXSET DONE, failures: %d" % bad)
+	main.get_tree().quit(1 if bad > 0 else 0)
+
+func _boki_cues() -> void:
+	var missing := []
+	for id in KinLib.kin_ids():
+		var cue := KinLib.cue_of(String(KinLib.species(id).get("type", "")))
+		if _takes(cue).is_empty() and not missing.has(cue):
+			missing.append(cue)
+	ok(missing.is_empty(), "every Boki type has a cast cue file %s" % str(missing))
+	var types := {}
+	for theme in KinLib.TYPE_OF_THEME:
+		types[KinLib.TYPE_OF_THEME[theme]] = true
+	ok(types.size() == KinLib.TYPE_OF_THEME.size(), "each theme maps to its own type (%d)" % types.size())
 
 func _check_set(path: String) -> void:
 	var d = JSON.parse_string(FileAccess.get_file_as_string(path))
