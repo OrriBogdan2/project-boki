@@ -4,7 +4,8 @@ extends RefCounted
 ## the ground, roaming or fighting something as far off, thinks and simulates every SimLod.EVERY steps (the
 ## skipped time added in); a near one, one fighting near the player or just hit by them, every step; its
 ## Boki steps with it. A calm one past SimLod.THINK_FAR_M picks goals SimLod.THINK_FAR_K times less often;
-## a bot aboard the sky ship picks nothing.
+## a bot aboard the sky ship picks nothing. A bot in a fight re-tests its line of sight to the same target
+## every Bot.LOS_RECHECK_S (a new target at once).
 ## Shadows (ShadowPolicy): no mesh smaller than the preset's caster size casts (Hunters and each Boki's
 ## body excepted), effects never do, Hunters and walls do. World labels (LabelCull, TextCache): a plate
 ## off screen or past LabelCull.FAR_M isn't laid out, an on-screen one is, and a label's text is shaped
@@ -28,6 +29,7 @@ func run(main_node: Node) -> void:
 	_mob_naps()
 	_far_bots()
 	_far_mobs()
+	_bot_los()
 	_shadows()
 	await _plates()
 	print("PERFTHROTTLE DONE, failures: %d" % fails)
@@ -62,6 +64,31 @@ func _mob_naps() -> void:
 		k.pos = m.player.pos
 	_step(1.5)
 	ok(mb.st != "idle" or mb.pos != at, "a Hunter walking up wakes it (%s)" % mb.st)
+
+func _bot_los() -> void:
+	var b: Hunter = null
+	for h in m.hunters:
+		if h.ctrl == "bot":
+			b = h
+	ok(b != null, "setup: a bot for the line-of-sight cache")
+	if b == null:
+		return
+	var brain: Bot = m.bot_brain
+	var first := brain.los_to(m, b, m.player, Match.DT)
+	var real := first == brain.can_hit(m, b, m.player)
+	ok(b.ai["los_tgt"] == m.player and real, "a bot's first look at a target is a real line-of-sight test")
+	b.ai["los"] = not first
+	var trusted := brain.los_to(m, b, m.player, Match.DT) == (not first)
+	ok(trusted, "within %.1f s it trusts its last look" % Bot.LOS_RECHECK_S)
+	var mb: Mob = m.mobs[0]
+	var fresh := brain.los_to(m, b, mb, Match.DT)
+	ok(b.ai["los_tgt"] == mb and fresh == brain.can_hit(m, b, mb), "a new target is looked at at once")
+	b.ai["los"] = not fresh
+	var again := fresh
+	for i in int(Bot.LOS_RECHECK_S / Match.DT) + 1:
+		again = brain.los_to(m, b, mb, Match.DT)
+	var looked := again == brain.can_hit(m, b, mb)
+	ok(looked, "after %.1f s on the same target it looks again" % Bot.LOS_RECHECK_S)
 
 func _far_bots() -> void:
 	var b: Hunter = null

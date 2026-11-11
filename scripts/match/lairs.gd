@@ -31,6 +31,8 @@ extends RefCounted
 ## few seconds, plus a strong weapon, a glove, treasure and XP.
 
 const DIAL_R := 1.8            # reach to work the dial
+const SEALED_STATES := ["sealed", "dormant"]      # lair states whose walls put bodies back out
+const SEAL_KIN_STATES := ["active", "flying", "returning", "wild", "dazed"]   # a Boki out in the world, not on a shoulder
 const LOCKS := {"colossus": 4, "serpent": 3, "brood": 3}
 const SPEEDS := [1.7, 2.25, 2.8, 3.4]      # the needle's speed per lock (radians a second)
 const WIDTHS := [0.95, 0.74, 0.58, 0.46]   # each lit arc's width per lock (radians)
@@ -1052,29 +1054,33 @@ static func clock(t: float) -> String:
 
 ## While a lair is sealed, its ward keeps everything out: walking, gliding or being thrown in bounces.
 func _tick_seal(L: Dictionary, dt: float) -> void:
-	if not L["state"] in ["sealed", "dormant"]:
+	if not L["state"] in SEALED_STATES:
 		return
-	var bodies: Array = []
 	for h in m.hunters:
-		if not h.out and not h.extracted and not h.riding: bodies.append(h)
+		if not h.out and not h.extracted and not h.riding: _seal_body(L, h)
 	for k in m.kins:
-		if not k.dead and k.state in ["active", "flying", "returning", "wild", "dazed"]: bodies.append(k)
+		if not k.dead and k.state in SEAL_KIN_STATES: _seal_body(L, k)
 	for mb in m.mobs:
-		if not mb.dead and not (mb is Boss): bodies.append(mb)
-	for e in bodies:
-		if not inside(L, e.pos, 0.25):
-			continue
-		# hunters still dropping in from the skyship, and anyone flying high over the walls, pass over;
-		# whoever comes down inside (or walks, glides or is thrown in low) is put back out
-		if e is Hunter and (e as Hunter).dropping:
-			continue
-		if not e.grounded and e.pos.y > float(L["c"].y) + 3.6:
-			continue
-		_push_out(L, e)
-		if e == m.player and m.hud and m.time - float(_told.get("seal", -9.0)) > 3.0:
-			_told["seal"] = m.time
-			m.hud.toast(("%s is sealed. Open its gate first" if L["state"] == "sealed" else "%s lies dormant this time. Its gate is rusted shut") % L["name"], color_of(L))
-			m.sfx("shield", e.pos, -4.0, 1.4)
+		if not mb.dead and not (mb is Boss): _seal_body(L, mb)
+
+## A body found inside a sealed lair's walls is put back out. Hunters still dropping in from the
+## skyship, and anyone flying high over the walls, pass over; whoever comes down inside (or walks,
+## glides or is thrown in low) is put back out.
+func _seal_body(L: Dictionary, e: Ent) -> void:
+	if not inside(L, e.pos, 0.25):
+		return
+	if e is Hunter and (e as Hunter).dropping:
+		return
+	if not e.grounded and e.pos.y > float(L["c"].y) + 3.6:
+		return
+	_push_out(L, e)
+	if e == m.player and m.hud and m.time - float(_told.get("seal", -9.0)) > 3.0:
+		_told["seal"] = m.time
+		var line := "%s is sealed. Open its gate first"
+		if L["state"] != "sealed":
+			line = "%s lies dormant this time. Its gate is rusted shut"
+		m.hud.toast(line % L["name"], color_of(L))
+		m.sfx("shield", e.pos, -4.0, 1.4)
 
 ## Puts someone just outside a lair's walls, out the nearest side (or by the dial), set down still.
 func _push_out(L: Dictionary, e: Ent) -> void:
