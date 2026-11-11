@@ -109,7 +109,7 @@ static func _clock(t: float) -> String:
 # ------------------------------------------------------------------ the strip
 static func draw(hud) -> void:
 	var m: Match = hud.m
-	if m.heart == null or m.heart.site == Vector3.INF:
+	if m.heart == null or m.heart.site == Vector3.INF or not HudGroups.ways_out_shown(m):
 		return
 	var c: Control = hud.c
 	var sd := seats(m)

@@ -1103,6 +1103,20 @@ Glint Fishing (briefs/design/GARDEN_MODERN.md 4.2 game 4; scripts/home/glint_fis
 | bots | {"_doc": "bot squad plans (spec task 7, bot.gd), picked per squad by the match seed", "plans": {"raider": 0.3, "runner": 0.3, "holder": 0.2, "stayer": 0.2}, "raider_at_s": 150.0, "runner_at_s": 315.0, "holder_at_s": 390.0, "runner_rival_r": 15.0, "_runner_rival_r": "a runner takes the spark only with no rival this close", "seat_delay_s": 30.0, "_seat_delay_s": "bots start a seat this long after it opens", "early_seats_cap_per_bot_squads": 3, "early_seats_cap_max": 2, "_early_seats_cap": "bot squads take at most min(early_seats_cap_max, bot_squads / early_seats_cap_per_bot_squads) of the three early seats"} |
 | demo_charge | 1 |
 
+## hud_groups (`content/rules/hud_groups.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | How many separately placed HUD blocks a new player scans at once (DECISIONS 2026-11-08: about 5) and when the 0.24.5 newcomers appear. Counted by scripts/ui/hud_groups.gd, asserted by --hud-groups-check. |
+| budget | 5 |
+| _budget | groups; the owner's number for a new player |
+| ways_out_lead_s | 30 |
+| _ways_out_lead_s | the Ways Out strip stays away until a seat is this many seconds from opening (or already open, in use, taken or lost); before that its four countdowns tell a new player nothing to act on |
+| always | ["minimap", "clock", "counters", "vitals", "abilities", "glider", "belt", "slots", "weapon"] |
+| _always | blocks the match HUD draws from the first second (docs/UI_FIRST15.md section 1); the rest come and go (see HudGroups.on_screen) |
+
 ## hunter_move (`content/rules/hunter_move.json`)
 
 
