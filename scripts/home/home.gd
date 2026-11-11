@@ -665,7 +665,7 @@ func _ready_rest() -> void:
 		hecon.show_away()
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
-		pass
+		ClanBase.draw(self, world, kins, visit.get("clan_base", {}))
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
@@ -2416,6 +2416,9 @@ func open_build() -> void:
 func _refresh_top() -> void:
 	if not visit.is_empty():
 		topbar.text = "Visiting %s's island   ·   Pet their Boki, leave a gift at the house   ·   The portal takes you home" % String(visit.get("name", "a friend")).substr(0, 16)
+		if visit.has("clan_base"):
+			var hint := "Every member has a corner   ·   The portal takes you home"
+			topbar.text = "%s's clan base   ·   %s" % [visit["name"], hint]
 		topbar.visible = true
 		return
 	topbar.visible = false
@@ -3829,7 +3832,8 @@ func _use_visiting(it: Dictionary) -> void:
 				_emote(it["k"], "♥")
 				return
 			petted[rec["uid"]] = true
-			Social.send_gift(visit_id, "pet", String(rec["uid"]))
+			# a clan base's Boki each have their own owner
+			Social.send_gift(String(rec.get("owner", visit_id)), "pet", String(rec["uid"]))
 			_emote(it["k"], "♥")
 			Sfx.play("kin_happy")
 			_toast("%s will remember your visit" % rec["name"])
