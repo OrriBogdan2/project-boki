@@ -168,3 +168,19 @@ taken are handled by the game that did it; the other games are not told (no Net 
 - [W-x] wiki pages, `https://supervive.wiki.gg/wiki/<Page>` (raw wikitext read Nov 8 2026): Consumables, Powers, Shops, World_objects, Anywhere_But_Here, Vive_Brew, Portable_Armor_Repair, Hypervive, Pocket_UAV, Jump_Pad, Emergency_Platform_(Power), Deployable_Fan, Two-Way_Teleporter_(Power), Most_Wanted, Mobile_Respawn_Beacon, Tactical_Nuke_(Power), Mass_Heist, Basecamp, Ethereal_Smoke, EMP_Grenade, Death_Circle_Grenade, Scan_Grenade, Spike_Wall, Prophet's_Potion, Vive_Packs, Gold_Key, Evil_Key, Tome_of_Knowledge, Codex_of_Mass_Enlightenment, Little_Cook_(Power), Chonker_Cannon, Snowball_(Power), Present!_(Power), Tree_Costume_(Power), Money_Tree_Seeds, The_Breach, Hot_Zone, Vaults, Supply_Drops, Train, Skysharks.
 - [P-x] official patch notes, `https://store.steampowered.com/news/app/1283700/view/<id>`: Oct24 = 6931694080291999956 (Oct 10 2024); Jan8 = 1788311418987033; Jan22 = 1789580505277155; Feb5 = 1790848102589412; Feb19 = 1792116353164260; Apr2 = 1795917897275785; May28 = 1800991756261724; 1.0 = 1806064758588867 (Jul 23 2025 rundown); 1.01 = 1807332909521300; 1.02 = 1808601382394244; 0828 = 1809235871570202 (dev blog); 1.03 = 1809869179984309; 1.04 = 1811138915342384; 1.05 = 1811772772426214; S2 = 1814309641394166 (Oct 22 2025); 2.02 = 1816849002006271; 2.03 = 1818118366168887; 2.0x = the "Death Circle now blocks all healing" fix (2.0x notes, exact patch [?]).
 - [S-sunset] 1819386365085433 (Dec 17 2025). [S-data] docs/SUPERVIVE_DATA.md and /home/boki/briefs/supervive-data.
+
+## Verified Nov 11 (ext/combat-utility-verify)
+
+Every item re-read against the rows above; `--shops-check` has one row per item (stack, numbers, the one shop that sells it). HP scale: source median ~1030, ours 124-193, so source number / 7.2. **[?]** = the source gave no figure.
+
+Fixed here: Blight Flask 25 s -> 40 s (15 + 10 + 15 [W-DeathCircle]); Skyfall 150 -> 690 damage (5,000 / 7.2, ends any hunter [W-Nuke]); Toss Satchel 60% -> 68% over 5 s (140 HP/s x 5 / 1030 [W-VivePacks]); Thorn Wall stack 5 -> 10 [W-SpikeWall].
+
+Matches: Deep Draught 5 s full heal, stack 1; Spring pad 2 s arm / 30 s / 10 s after use, stack 2; Cloud Raft 0.3 s cast, 30 s; Gust Fan 60 s, 2 charges; Twin Gate 8 s, stack 2; Warp Seed stack 3; Lostway 4 s, stack 1; Shatter 0.3 s, slow 2 s; Lantern 60 s, stack 4; Omen 1 s / 30 s; Banner 120 s, one per squad; Pilfer takes 50%; Hawk stack 2.
+
+Left different on purpose or not built (the owner's rule or a missing system; not changed here):
+- Tonic heals 40%, stack 5, Armor kit stack 4: the Equal rules (`--equal-check`) pin these; the source is ~30% (304 HP), 1 s, stack 8 [W-ViveBrew][W-PAR]. Owner's call.
+- Hearth Lamp revives in 4 s (content/rules/revive.json, owner) vs the source's 6 s + 12 s sickness [P-1.0].
+- Skyfall hits foes only (source also hurts allies and beacons) and has no 720/s ground fire; Shatter shreds 60% of armor (source 1,600 points: armor scale [?]).
+- Twin Gate swaps by itself at 8 s (source: second press). Bounty Banner has no knock-while-carrying rule and kills do not shorten the timer. Pilfer is instant (source 1.5 s channel). Thorn Wall has no self-root (2 s). Blight Flask does not block healing. Fan HP, lantern pickup, satchel air bounce: not built.
+- Cooldowns: the source publishes none for consumables [?]; ours are 2-3 s between uses. Warp Seed timer, Cloud Raft stack, Hawk duration, Skyfall/Pilfer/Lamp stacks [?].
+- Shop stock is fixed: `--shops-check` reads every shop's `sells` and asserts each item sits in exactly one shop (staples in all).

@@ -13,12 +13,12 @@
   2
  ],
  "price": 45,
- "desc": "Toss a health pack that lies for 30s. Whoever grabs it heals for 60% of their health over 5s; grab it in mid-air and it throws you up.",
+ "desc": "Toss a health pack that lies for 30s. Whoever grabs it heals for 68% of their health over 5s; grab it in mid-air and it throws you up.",
  "field": "pack",
  "range": 6.0,
  "time": 30.0,
  "r": 1.4,
- "heal": 0.6,
+ "heal": 0.68,
  "hold": 5.0,
  "bounce": 14.0,
  "src": "docs/SOURCE_UTILITIES.md: a pickup in the air also bounces the picker up"

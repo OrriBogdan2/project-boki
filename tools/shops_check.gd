@@ -32,6 +32,7 @@ func run(main_node: Node) -> void:
 	await _vendors(m)
 	_buying(m)
 	_items(m)
+	_source_rows()
 	_legend(m)
 	await _bot(m)
 	await _online()
@@ -299,6 +300,60 @@ func _items(m: Match) -> void:
 	UtilityMore._pack_tick(m, h.pos, z, UtilityBelt.def("toss_satchel"), done)
 	ok("a Toss Satchel heals whoever grabs it, once", h.hp > before and done[0] and float(z["t"]) == 0.0)
 	m.fields.clear()
+
+# ------------------------------------------------------------------ item by item against the source
+# One row per belt item: stack (the source's charges), the numbers docs/SOURCE_UTILITIES.md gives, and
+# the one shop that sells it (section 3). "?" in the doc = the source gave no figure; those keys are
+# not asserted. Paths reach into "effects" (e.g. "effects.0.time").
+const SOURCE := {
+	"tonic": ["", 5, {}],                                                # Equal rules keep 40%, 5 (source 30%, 8)
+	"armor_kit": ["", 4, {}],                                            # source stack 8 [W-PAR]; Equal rules keep 4
+	"deep_draught": ["armor", 1, {"time": 5.0, "heal": 1.0}],            # full heal after 5s [W-Hypervive]
+	"hearth_lamp": ["armor", 1, {}],                                     # owner: 4s revive (source 6s + sickness)
+	"jump_pad": ["move", 2, {"arm": 2.0, "life": 30.0, "after": 10.0}],  # [W-JumpPad][P-S2]
+	"cloud_raft": ["move", 2, {"effects.0.time": 30.0, "effects.0.delay": 0.3}],   # [W-EmPlatform][P-1.03]
+	"gust_fan": ["move", 2, {"life": 60.0}],                             # 60s, 2 charges [W-Fan]
+	"twin_gate": ["move", 2, {"time": 8.0}],                             # reactivate after 8s [W-2Way]
+	"warp_seed": ["move", 3, {}],                                        # stack 3 [P-S2]; timer [?]
+	"lostway_scroll": ["move", 1, {"time": 4.0}],                        # 4s channel, stack 1 [W-ABH]
+	"smoke": ["gear", 3, {}],                                            # ours: a fixed cloud, not Ethereal Smoke
+	"shatter_charge": ["gear", 3, {"effects.0.delay": 0.3, "effects.0.slow": 2.0}],  # [W-EMP]
+	"thorn_wall": ["gear", 10, {}],                                      # stack 10 [W-SpikeWall]
+	"blight_flask": ["gear", 2, {"effects.0.time": 40.0}],               # 15 + 10 + 15 s [W-DeathCircle]
+	"skyfall_charge": ["gear", 1, {"effects.0.time": 5.0, "effects.1.delay": 5.0}],   # 5s fuse [W-Nuke]
+	"pilfer_pouch": ["gear", 1, {"take": 0.5}],                          # steals 50% [W-MassHeist]
+	"scanner": ["perks", 2, {}],                                         # ours: Seeker flare, 26 tiles
+	"lookout_lantern": ["perks", 4, {"time": 60.0}],                     # 60s, stack 4 [W-ScanGren]
+	"hawk_whistle": ["perks", 2, {}],                                    # stack 2 [W-PocketUAV]; duration [?]
+	"omen_draught": ["perks", 2, {"time": 1.0, "omen": 30.0}],           # 1s channel, 30s [W-Prophet]
+	"bounty_banner": ["perks", 1, {"time": 120.0}],                      # 2 min, one per team [W-MostWanted]
+	"toss_satchel": ["perks", 2, {"time": 30.0, "hold": 5.0, "heal": 0.68}],   # 140 HP/s x 5s [W-VivePacks]
+	"medkit": ["armor", 3, {}], "shield_cell": ["armor", 3, {}], "stim": ["move", 3, {}],   # ours only
+	"chest_key": ["", 0, {}], "rift_key": ["", 1, {}], "revive_ember": ["", 1, {}],       # never sold
+}
+
+func _path(d: Variant, path: String) -> Variant:
+	for k in path.split("."):
+		d = d[int(k)] if d is Array else d.get(k)
+	return d
+
+func _source_rows() -> void:
+	ok("the table covers every belt item", SOURCE.keys().size() == UtilityBelt.ids().size())
+	for id in SOURCE:
+		var row: Array = SOURCE[id]
+		var d := UtilityBelt.def(id)
+		var bad: Array = []
+		if row[1] > 0 and UtilityBelt.max_of(id) != row[1]: bad.append("stack %d" % UtilityBelt.max_of(id))
+		for k in row[2]:
+			if not is_equal_approx(float(_path(d, k)), float(row[2][k])): bad.append(k)
+		var shop := ""
+		for t in ShopStock.rules()["themes"]:
+			if ShopStock.rules()["themes"][t]["sells"].has(id): shop = String(t)
+		if id in ["tonic", "armor_kit"]:
+			shop = ""
+		elif shop != row[0]:
+			bad.append("shop " + shop)
+		ok("%s matches the source rows" % id, bad.is_empty(), str(bad))
 
 # ------------------------------------------------------------------ legend
 func _legend(m: Match) -> void:
