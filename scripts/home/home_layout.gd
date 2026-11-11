@@ -90,6 +90,8 @@ const CATALOG := {
 		"desc": "Fire Boki love to bask on it. Trains Guard."},
 	"toy_vent": {"name": "Updraft vent", "cat": "Base", "gems": 22, "toy": true,
 		"desc": "Flying, Electric, Fairy and Sound Boki love to hover on its rising air. Trains Speed."},
+	"feed_bowl": {"name": "Feeding bowl", "cat": "Base", "gems": 12,
+		"desc": "Drop a snack in: hungry Boki nearby come. Bold ones push in, timid ones wait."},
 	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
 		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.

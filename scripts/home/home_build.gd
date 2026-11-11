@@ -433,6 +433,8 @@ func _make_base(e: Dictionary) -> Node3D:
 	var n: Node3D = null
 	if HomeLayout.CATALOG.get(id, {}).has("toy"):
 		return FarmModels.toy(id)
+	if id == FeedBowl.ID:
+		return FeedBowl.model(e)
 	if HomeLayout.CATALOG.get(id, {}).has("work"):
 		n = WorkModels.station(id, e, rng)       # a work station (scripts/home/work_models.gd)
 	if HomeLayout.CATALOG.get(id, {}).has("fixture"):

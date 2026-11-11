@@ -1,8 +1,8 @@
 class_name BaseLife
 extends RefCounted
 ## Base life (briefs/design/GARDEN.md section 4), on only with farm_build.json base_mode: each farm Boki lives on
-## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, or a
-## snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
+## its own through one explicit state machine (Fsm, briefs/STATE_MACHINES.md). It roams, eats (at a feeder, a
+## feeding bowl, or a snack from the patch or the pantry when it is hungry and no feeder has food: BaseFeed), naps
 ## (friends in a pile; night is nap time unless it is nocturnal, Work.NOCTURNAL), plays at a toy, plays tag with
 ## another Boki, stares at a rival or comes to look at a newcomer. A retired mentor (Mentor) only strolls slowly
 ## near the Soul Shrine (MENTOR), eats and naps, joining the piles. The toys are HomeToys' (k["play"]: it picks,
@@ -109,7 +109,7 @@ func machine(k: Dictionary) -> Fsm:
 			BaseDuo.woke(k))
 		m.on_exit(S.ASK, func(_to: int) -> void: k.erase("life_ask"))
 		m.on_exit(S.CHORE, func(_to: int) -> void: BaseChore.end(k))
-		m.on_exit(S.EAT, func(_to: int) -> void: k.erase("life_eat"))
+		m.on_exit(S.EAT, func(_to: int) -> void: FeedBowl.end(k))
 		k["life"] = m
 	return k["life"]
 

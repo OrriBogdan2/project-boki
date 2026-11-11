@@ -25,9 +25,15 @@ check: `--base-life-check`.
   HomeToys owns the Boki (so the history never says Roam while a Boki plays). A squabble at a toy adds
   `bond_squabble`, sharing one `bond_share` (base_life.json). `BaseLife.toy_spots()` lists the toys for chores.
 - Feeding itself (GARDEN.md section 2, `scripts/home/base_feed.gd`): a hungry Boki (food under `Econ.HUNGRY_AT`)
-  goes to a feeder with food first (HomeEcon), else picks the ripe snack patch and eats one snack (the rest go to
-  the pantry), else fetches a snack from the pantry (Save.d crops) at the house door or the landing. The walk is
-  the Eat state (k["life_eat"]); the meal is `Care.feed`, so the journal and lean see it.
+  goes to a feeder with food first (HomeEcon), then a feeding bowl you filled, else picks the ripe snack patch and
+  eats one snack (the rest go to the pantry), else fetches a snack from the pantry (Save.d crops) at the house door
+  or the landing. The walk is the Eat state (k["life_eat"]); every meal is `BaseFeed.meal` (`Care.feed`, the lean
+  through `Evo.eat`), so the journal and lean see it.
+- Feeding bowl (`feed_bowl`, the Base tab, `scripts/home/feed_bowl.gd`): walk up and drop a pantry snack in (3 at
+  most, kept on the piece as `snacks`); hungry Boki within 9 m come. It is a place of the Eat state, not a machine
+  of its own: k["life_eat"] carries `from: "bowl"` and a phase, go (to a 2 m ring), wait, huff (a rival,
+  base_life.json `rival_at`, already there: a stare-down and a `huff` line), eat (one at a time). Bold and hungry
+  Boki go first; a timid one (bravery under 0.4) waits for every bolder one. `--feed-check` covers it.
 - Sulky, never sick (care.json `sulky`, `Care.sulky()`): on base_mode every need bottoms out at its floor in both
   `Care.tick` and `Care.change`, and the starve clock never builds (`starve_step`, `starve_stage`, `starve_cap`),
   so a Boki left alone gets hungry and glum and feeds itself, never weak or sick.
