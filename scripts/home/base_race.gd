@@ -346,6 +346,7 @@ func _show_card(res: Dictionary) -> void:
 		col.add_child(UI.label("%d.  %s   %s" % [i + 1, order[i]["name"], mood], 15, UI.INK if i == 0 else UI.MUTED))
 	col.add_child(UI.label("+%d gems" % int(res["gems"]), 15, UI.ACCENT))
 	col.add_child(UI.para(String(res["memory"]), 12, UI.FAINT))
+	PanelClose.attach(c, _close_card)
 	h.root_ui.add_child(c)
 	UI.pop_in(c)
 	card = c

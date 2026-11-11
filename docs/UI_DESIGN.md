@@ -94,7 +94,8 @@ What made the menus feel blocky, samey and hard to get through:
    `rarity_col(r)`. Never use ACCENT for decoration.
 6. **Same shell everywhere.** Title (+subtitle) top left, extras (chips, tags) and a close X top
    right, tabs under the title, body, footer actions bottom right with the primary last and an Enter
-   keycap on it. Esc always closes or goes back.
+   keycap on it. Esc always closes or goes back, the top panel only; a right click outside closes it
+   too, and the game never sees that press (`PanelClose`, attached by `scroll_panel` and `confirm`).
 7. **Tabs, not long lists.** Group options into tabs (`shell_tabs`) and groups (`section`). Tabs are a
    segmented control, visibly different from buttons.
 8. **Sensible defaults.** The panel opens with the primary focused (or the first control), the last
@@ -115,7 +116,8 @@ What made the menus feel blocky, samey and hard to get through:
   Pressing the same number again closes that panel. Hidden while a panel is open and when visiting.
 - **Prompts**: walking up to anything shows a glass pill with keycaps for what you can do (F use; for
   a kin, F pet, V fetch, T talk, C details).
-- **Panels** open over a blurred, dimmed farm; clicking the dimmed area or pressing Esc closes them;
+- **Panels** open over a blurred, dimmed farm; clicking the dimmed area, a right click outside or Esc
+  closes them;
   Enter presses the panel's primary when nothing else has focus.
 
 ## 4. Helper API (`scripts/ui/ui.gd`, class `UI`)
@@ -193,7 +195,10 @@ UI.footer_primary(v, "Buy", buy, 160, "gem")      # primary + Enter keycap; UI.p
 - Prefer `scroll = true` for panels whose content is mostly cards or previews (it only scrolls when
   the window is too short); the paged body suits lists of rows.
 - `confirm(host, head, text, yes_text, on_yes, dangerous=true)` - a small modal over `host` with a
-  warning badge, Cancel and a danger (or primary) button; Esc cancels it.
+  warning badge, Cancel and a danger (or primary) button; Esc or a right click outside cancels it.
+- `PanelClose.attach(panel, close_cb)` - the closing rule for a hand-built card (the Dash's result):
+  Esc and a right click outside call `close_cb` while it's the top panel, and the press is let go of
+  so the match doesn't also cast or fire with it. `--uipolish-check` section 5 drives it.
 - `backdrop()` + `show_backdrop(rect, on)` - the blurred, dimmed layer behind modals
   (`shaders/ui_backdrop.gdshader`).
 - `pop_in(control, delay)` - the open animation. `focus_first(control)` - focus the first button.
