@@ -12,6 +12,7 @@ var fx: Fx
 var cam: CamRig
 var hud: Node = null
 var recap: DeathRecap = null    # the down/death card (scripts/ui/death_recap.gd)
+var spectate := Spectate.new(self)     # who you watch once you're out
 var env: WorldEnvironment
 var hunters: Array = []
 var kins: Array = []
@@ -340,7 +341,7 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
-	recap = DeathRecap.new(self)         # the down/death card and the spectate cycle
+	recap = DeathRecap.new(self)         # the down/death card
 	add_child(recap)
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
@@ -3429,6 +3430,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		hud.open_map(false)
 		get_viewport().set_input_as_handled()
 		return
+	if spectate.input(event):
+		get_viewport().set_input_as_handled()
+		return
 	if skydrop and player and not player.out and not paused:
 		if event.is_action_pressed("pass_lead") and skydrop.pass_lead(player):
 			get_viewport().set_input_as_handled()
@@ -4985,7 +4989,7 @@ func _watch_death() -> void:
 
 ## The teammate the camera follows while you're dead, or null.
 func spectating() -> Hunter:
-	return recap.watched()
+	return spectate.current()
 
 ## Leave while dead and waiting on your team.
 func give_up() -> void:
