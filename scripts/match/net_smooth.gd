@@ -3,7 +3,8 @@ extends RefCounted
 ## A remote Hunter's snapshot buffer. The body is drawn DELAY behind its owner's clock, on a smooth
 ## curve between the two snapshots around that moment (cubic Hermite through their positions and
 ## velocities), so late, jittered or lost snapshots don't make it stutter or overshoot. A move between
-## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump.
+## two snapshots faster than SNAP_SPEED (a teleport, a displace's blink) is drawn as one jump. A move its
+## owner scripts too fast for the snapshots (Kitefall's fall) comes as a cast event and is drawn by play().
 ## Times are the owner's match time from the "st" header; `off` is our match time minus theirs plus the
 ## line's delay, taken from the quickest recent arrival.
 
@@ -19,6 +20,9 @@ var ps := PackedVector3Array()
 var vs := PackedVector3Array()
 var off := 0.0
 var jumped := false         # a teleport came in: the next follow snaps instead of sweeping
+var play_t := 0.0           # owner s: a scripted move starts here...
+var play_len := 0.0         # ... and lasts this long (0: none)
+var play_path := Callable() # u (0 to 1 of the move) -> where the body is
 
 func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 	var gap := now - t_owner
@@ -46,6 +50,12 @@ func push(t_owner: float, now: float, p: Vector3, v: Vector3) -> void:
 ## Moves the body to where it is drawn at our match time `now`.
 func follow(e: Ent, now: float) -> void:
 	var rt := now - off - DELAY
+	if play_len > 0.0 and rt >= play_t:
+		if rt < play_t + play_len:
+			e.pos = play_path.call((rt - play_t) / play_len)
+			e.vel = Vector3.ZERO
+			return
+		play_len = 0.0
 	var n := ts.size()
 	if rt <= ts[0]:
 		e.pos = ps[0]
@@ -66,6 +76,25 @@ func follow(e: Ent, now: float) -> void:
 	if jumped:
 		e.prev = e.pos
 		jumped = false
+
+## A move its owner scripts (a cast event): from owner time t0 for `secs` the body is drawn along path(u), u 0 to 1
+## of the move, instead of between the snapshots (10 a second show a 0.2 s fall of 5 m as a teleport). The
+## snapshots inside it are dropped and the move's ends stand in for them, so the curve joins the snapshots.
+func play(t0: float, secs: float, path: Callable) -> void:
+	var keep: Array = [[t0, path.call(0.0), Vector3.ZERO], [t0 + secs, path.call(1.0), Vector3.ZERO]]
+	for i in ts.size():
+		if ts[i] < t0 or ts[i] > t0 + secs:
+			keep.append([ts[i], ps[i], vs[i]])
+	keep.sort_custom(func(x: Array, y: Array) -> bool: return x[0] < y[0])
+	_clear()
+	for s: Array in keep.slice(-KEEP):
+		ts.append(s[0])
+		ps.append(s[1])
+		vs.append(s[2])
+	jumped = false
+	play_t = t0
+	play_len = secs
+	play_path = path
 
 func _clear() -> void:
 	ts.clear()

@@ -15,6 +15,7 @@ const MOVE_MIN := 0.8        # m: a move shorter than this missed (its row is fl
 const END_TOL := 0.75        # m: a view ends this close to the offline end and to the mover's own end (Kael: 0.56)
 const DOUBLE := 1.5          # a path or displacement this many times the offline one is a double move
 const SNAP := 4.0            # m in one frame on the mover's own game: no move here is that fast (Ent.net_follow's jump)
+const KITE_STEP := 1.25      # m in one frame on the other game for Kitefall: its own game's fall steps 1.07 m at most
 const BOT_AT := Vector3(-6.0, 0, 9.0)   # m from home: where the bot waits
 
 var role := ""
@@ -160,7 +161,8 @@ func _host() -> void:
 	await _move("Motley swap dash", "ostra", Vector3(8, 0, 0), _ostra, 2.2, G, B, ["guest", "self"], {"tp": true})
 	await _move("Meeko Hearth Call pull", "tender", Vector3(8, 0, 0), _meeko, 5.4, G, B, ["guest"],
 		{"mates": true, "tp": true})
-	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self", "guest"])
+	await _move("Sparkle Kitefall launch and crash", "mage", Vector3(6, 0, 0), _sparkle, 4.8, G, B, ["self", "guest"],
+		{"other_step": KITE_STEP})
 	await _move("Knock into a wall", "mage", Vector3(4, 0, 2), _knock, 1.4, G, B, ["guest"])
 	await _finish()
 
@@ -191,7 +193,7 @@ func _move(
 	await _run(settle + SETTLE_VIEW)
 	var on_b := Time.get_unix_time_from_system()
 	rows.append({"name": name, "who": who, "off": [off_a, off_b], "on": [on_a, on_b], "tp": opt.has("tp"),
-		"note": "a teleport" if opt.has("tp") else note})
+		"note": "a teleport" if opt.has("tp") else note, "other_step": float(opt.get("other_step", INF))})
 	if opt.has("mates"): await _mate(G, false)
 	P.teleport(home)
 	await _place(G, home + PARK)
@@ -314,6 +316,9 @@ func _report() -> void:
 			var tag: String = "%s, %s" % [r["name"], w]
 			ok(d_ref > MOVE_MIN and d_own > MOVE_MIN, "%s: moved (%.1f m online, %.1f offline)" % [tag, d_own, d_ref])
 			ok(own["max"] < SNAP or r["tp"], "%s: no snap on its own game (step %.2f m)" % [tag, own["max"]])
+			if r["other_step"] < INF:
+				var smooth := "%s: smooth on the other game (step %.2f m)" % [tag, other["max"]]
+				ok(other["max"] < r["other_step"], smooth)
 			var ends := "%s: the ends agree (%.2f offline, %.2f other)" % [tag, e_own, e_oth]
 			ok(e_own < END_TOL and e_oth < END_TOL, ends)
 			ok(ratio < DOUBLE and lratio < DOUBLE, "%s: no double move (x%.2f, path x%.2f)" % [tag, ratio, lratio])

@@ -49,6 +49,9 @@ its last six snapshots on its owner's clock (the `st` header) and is drawn 0.15 
 arrival, on a Hermite curve between the two snapshots around that moment. Past the newest it runs on its
 last velocity for at most 0.25 s. A move faster than 40 m/s between two snapshots is a teleport and is drawn
 as one jump. `--remote-smooth-check` measures it over a relay with 80 ms ping, 20 ms jitter and 2% loss.
+A move its owner scripts faster than that and too short for the snapshots (Sparkle's 0.2 s Kitefall fall) comes
+as a cast event (`["fx", "fall", ...]`, Net 0.24.5) and `NetSmooth.play` draws that stretch of the owner's clock
+along the same curve (docs/ONLINE_FEEL.md).
 Boki and monsters still chase their newest snapshot (`Ent.net_follow`).
 
 ## Net.VERSION

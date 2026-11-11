@@ -25,3 +25,11 @@ snap, because a jittered snapshot often arrives after it is needed. Option 3 is 
 `scripts/match/net_smooth.gd` (NetSmooth), 3 lines in `Ent.net_follow`, 3 in `Match._net_apply`. Hunters
 only; Boki and monsters keep the old chase. No wire change, so no Net.VERSION bump. Remote Hunters are hit
 where they are drawn, now ~75 ms further behind their owner. Check: `--remote-smooth-check`.
+
+## Addendum, 2026-11-11: scripted moves too fast for the snapshots
+Kitefall's fall (5 m or more in 0.2 s, no velocity) crossed 40 m/s between two snapshots and was drawn as a
+teleport, a 4-5.7 m step (`--online-displace-check`). Options: the fall's velocity in the snapshot (the hunter
+step integrates `h.vel` after the kit, a double move on the own game; and still a guess between two points), or
+a cast event. Chosen: the event `["fx", "fall", nid, owner time, from, to, secs]` (Net 0.24.5);
+`NetSmooth.play` draws that stretch of the owner's clock along `MageUlt.fall_point` and drops the snapshots
+inside it. Other scripted moves can use `play` the same way if one shows the same step.

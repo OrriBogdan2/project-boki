@@ -283,6 +283,30 @@ func _slam() -> void:
 	AimKit.circle(kit.h, "x_land", mark)
 	kit.fx().ring(land, float(data()["radius"]), MageKit.PINK, MageKit.TEAL, 0.15)
 	kit.net_ring(land, float(data()["radius"]), MageKit.PINK)
+	_net_fall()
+
+## Other games draw her from 10 snapshots a second, which show the 0.2 s fall as one jump of metres: they get
+## the fall itself (["fx", "fall", nid, owner time, from xyz, to xyz, secs]) and draw it in net_in().
+func _net_fall() -> void:
+	var m := kit.m
+	if not m.net_on or kit.h.remote:
+		return
+	var a: Vector3 = leap["high"]
+	var b: Vector3 = leap["land"]
+	m.net_fx(["fall", kit.h.nid, m.time, m._r(a.x), m._r(a.y), m._r(a.z), m._r(b.x), m._r(b.y), m._r(b.z),
+		float(data()["drop"])])
+
+## Another game's Sparkle came down: her copy here is drawn along the same fall (NetSmooth.play).
+static func net_in(m: Match, x: Array) -> void:
+	var h: Variant = m.ents_by_id.get(String(x[2]), null)
+	if not (h is Hunter) or (h as Hunter).net_buf == null:
+		return
+	var path := fall_point.bind(Vector3(x[4], x[5], x[6]), Vector3(x[7], x[8], x[9]))
+	(h as Hunter).net_buf.play(float(x[3]), float(x[10]), path)
+
+## Where the fall is, u (0 to 1) of the way down: it speeds up all the way to the ground.
+static func fall_point(u: float, a: Vector3, b: Vector3) -> Vector3:
+	return a.lerp(b, u * u)
 
 ## Coming down: a streak of lightning from where she hung onto the marker (the body hides in it).
 func _fall_tick(u: float) -> void:
@@ -291,7 +315,7 @@ func _fall_tick(u: float) -> void:
 	var b: Vector3 = leap["land"]
 	h.vel = Vector3.ZERO
 	h.inp["move"] = Vector2.ZERO
-	h.pos = a.lerp(b, u * u)
+	h.pos = fall_point(u, a, b)
 	_untouchable(0.1)
 	if h.model:
 		h.model.visible = u < 0.3
