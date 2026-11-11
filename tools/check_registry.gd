@@ -783,6 +783,8 @@ const CHECKS := {
 	"--wisp-clarity-shots": ["res://tools/wisp_clarity_shots.gd", "wisp_clarity_shots", null],  # --shots-dir=<dir>
 	"--kin-wisp-form-check": ["res://tools/kin_wisp_form_check.gd", "kin_wisp_form_check", null],  # downed: Boki wisps
 	"--guardian-rule-check": ["res://tools/guardian_rule_check.gd", "guardian_rule_check", null],  # team out rule
+	# the Training Grounds' Summon pad; --shots-dir= (GPU) saves the card
+	"--summon-pad-check": ["res://tools/summon_pad_check.gd", "summon_pad_check", null],
 	"--summon-check": ["res://tools/summon_check.gd", "summon_check", null],  # Boki summon (C), kill rules, leash, net
 	"--summon-ring-check": ["res://tools/summon_ring_check.gd", "summon_ring_check", null],  # time-left ring
 	"--summon-leash-check": ["res://tools/summon_check.gd", "summon_check", null],  # (same check: the leash rows)
