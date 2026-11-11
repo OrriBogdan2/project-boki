@@ -53,6 +53,7 @@ func run(main: Node) -> void:
 
 ## One round: `a` stands on the player's mark, `b` on the bot's; both are bots on the same mind.
 func _round(main: Node, a: String, b: String, sd: int, diff: String, cap: float) -> void:
+	seed(hash([a, b, sd]))          # (kit bots roll the global randf: a round replays exactly)
 	var o := Match.duel_opts()
 	o.merge({"autoplay": true, "seed": sd, "arch": a, "cls": Arch.weight(a)}, true)
 	var m := Match.new()
@@ -76,9 +77,16 @@ func _round(main: Node, a: String, b: String, sd: int, diff: String, cap: float)
 	_hits.clear()
 	var cb_hit := func(by, t, d, tags): _on_hit(fighters, by, t, float(d), tags)
 	CombatBus.hit_landed.connect(cb_hit)
+	var burn := [0.0, 0.0]          # burn ticks take health directly (Ent), outside CombatBus: summed here
 	while m.time < cap and not (m.player.downed or m.duel.bot.downed):
+		for side in 2:
+			var f: Hunter = fighters[1 - side]
+			if f.burn_t > 0.0 and f.burn_by == fighters[side]:
+				burn[side] += f.burn_dps * minf(Match.DT, f.burn_t)
 		m.step(Match.DT)
 	CombatBus.hit_landed.disconnect(cb_hit)
+	for side in 2:
+		if burn[side] > 0.0: _hits.append([side, "burn", snappedf(burn[side], 0.1), snappedf(m.time, 0.01)])
 	var win := -1
 	if m.duel.bot.downed and not m.player.downed: win = 0
 	elif m.player.downed and not m.duel.bot.downed: win = 1
