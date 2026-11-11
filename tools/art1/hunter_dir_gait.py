@@ -30,6 +30,7 @@ ROLL = 4.0          # deg: the pelvis rolls onto the planted foot (the weight sh
 SWAY = 0.018        # m: and the pelvis rides over it
 REACH = 0.8        # leg lengths: the most a stance sole travels (a longer step is flown: a shorter stance, not a crouch)
 SWING = 0.2        # leg lengths: the highest a swing sole lifts
+SWING_V = 0.9      # x stance speed: how fast a sole still travels back as it leaves and as it meets the floor (no scoot near it)
 DIP_OK = 0.025     # m: the most the pelvis may dip under the forward loop's height at the same phase; past it the stance shortens
 DUTY_STEP = 0.88   # x: the stance share each retry keeps (a longer flight, not a crouch)
 DUTY_MIN = 0.14    # the shortest stance share tried
@@ -208,7 +209,7 @@ class Gait:
             return home + self.lean + self.d * (front - self.travel * u) + off, pitch, True
         s = (ph - self.duty) / (1 - self.duty)
         span = self.speed * (1 - self.duty) * self.period
-        m0, m1 = -0.3 * span, -0.6 * span                    # (a Hermite pass: it leaves the floor folding up, meets it near speed)
+        m0 = m1 = -SWING_V * span                            # (a Hermite pass: it leaves and meets the floor near the stance speed)
         h = (2 * s ** 3 - 3 * s * s + 1, s ** 3 - 2 * s * s + s, -2 * s ** 3 + 3 * s * s, s ** 3 - s * s)
         x = h[0] * (front - self.travel) + h[1] * m0 + h[2] * front + h[3] * m1
         side_out = self.face.to_3x3() @ Vector((sgn * 0.012 * math.sin(s * math.pi), 0, 0))
