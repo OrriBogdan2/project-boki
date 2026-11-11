@@ -66,6 +66,7 @@ No weapon is ever found or swapped: every hunter carries one signature weapon. I
 | Boki Idol | 58 | A little carved Boki. Collectors pay a lot. |
 | Crown Shard | 105 | A piece of an old crown. Worth a fortune. |
 | Soul Ember | 140 | A warm, glowing ember. The Soul Shrine needs one to raise it, and one for every Boki it brings back. |
+| Ink | 60 | A vial of Ink for Boki that evolve by it. |
 | Rare Egg | 400 | A boss's egg, big and glowing gold. Carry it home and it hatches into a rare Boki. |
 
 ## Run perks
