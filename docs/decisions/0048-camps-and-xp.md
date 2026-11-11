@@ -21,3 +21,11 @@ Levels came from standing still (1.2 XP/s) and from stray damage (0.35 per damag
 - Rolling loses CAMP_RESPAWN, `camps`, `note_camp` and `_camp_respawns`. Its "picked over" start calls `Camps.picked_over`.
 - New check `--camps-check`. `--rolling-check` drops its camp-respawn rows (the comeback is asserted in `--camps-check`).
 - Left to the levels task: the new XP curve, the pace and gap bonuses, rarity multipliers, the XP bar, and the 300 last-hit boss pay.
+
+## Camps on the maps (ext/early-camps-map-ui)
+- The 28 camps are one `SpawnPlan` category, "camp": announced, no roll, one candidate per `Camps.list()` entry, live from 0:00. The marker is a campfire with 1, 2 or 3 flames (Small Camp, Camp, Great Camp) and a crown over the fire for a Camp Chief (`scripts/ui/camp_map.gd`); a Camp's size follows its camp, so a hot-zone camp and a returned camp show one size up.
+- Cleared and returning states are per squad. A squad sees a camp as cleared (dim) or returning (dim, with a ring that fills until `back_t`) only if one of its hunters has been within 60 m (`SpawnPlan.NEAR_R`) since the clear; every other squad still sees it live. The note resets whenever the camp is live again.
+- The drop map labels each region "N camps: to level L" (`CampMap.region_line`, from `Camps.region_xp`'s sizes and `Hunter.XP_TO`), the hot zone "HOT: bigger camps, better loot", and the legend has "Camps: clear them to level up". The minimap draws the same markers inside its range (`MapDetail.GROUND_R` = 34 m on the ground, the whole map while riding or dropping).
+- `CampSmoke` (`scripts/match/camp_smoke.gd`) puts one unshaded billboard quad per camp in the sky (1/2/3 strands, orange in the hot zone; no particles, no lights), visible within 160 m during the local player's drop and freed 5 s after landing.
+- First-match guide: "Pick a camp and ping it" while planning (a Small Camp in a middle region pulses on the drop map), "Clear the camp to level up" after landing (a waypoint to the nearest live camp) until the squad's first clear. The guide now runs for the first three Extractions (`matches` 2 -> 3).
+- Check: `--camp-map-check`. Not done here: net clients have no camp list (`Camps.spawn_all` returns early for non-hosts), so they see no camp markers or smoke (docs/DEBT.md).
