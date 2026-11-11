@@ -114,6 +114,18 @@ Source = the hero sheet (briefs/hero-ref) and supervive_kits.md; the footage is 
 | RMB lowered | Not shown | Free the step it drops | n/a |
 | E cast (column 1 s, then zone) | Green column falls on the planted hammer; body not described | Free at full speed, faces the cursor | unmeasured, no data to change |
 
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+|---|---|---|---|
+| LMB hammer | the throw as on the ground; a held charge carries through a jump and swings in the air with no step (owner #51) | no shot, glider stays open | owner #51; gap for the glide |
+| RMB Aegis | the guard goes up in the air as on the ground | the guard goes up, glider stays open | [D] Oath: no air rule |
+| Shift | the air version: the lumbering shove (`bul_lumber`), the class long dash | the glider folds for the shove; a held glide key reopens it as it ends | [D] Oath: only Spin Dash, no air slot; footage shows no air dash (kept) |
+| E Mending Ground | the same cast | the same cast, glider stays open | [D] Oath: no air rule |
+| X Faultline | the same wind-up and slam where he is | the same, glider stays open; after the slam or a 360 spin a 0.3 s glider lock | [D] Oath: no air rule; wiki patch 05.02.25 (wind-down frames) |
+
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
 - The perfect window starts at full charge and lasts 0.18 s (owner default); held past it the swing is a normal one; nothing goes off until he lets go (the sheet shows a 2.6 s hold). Let go in the air, a normal swing takes no step (he keeps his speed) and a perfect one still launches him (owner #51: "pair it together").
