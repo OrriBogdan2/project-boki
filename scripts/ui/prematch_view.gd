@@ -31,6 +31,7 @@ var chat_hint: Label
 var talk_btn: Button
 const PICKING_FILL := Color(0.36, 0.3, 0.14)    # the squad row of whoever is picking: a warm gold card
 var _shown_turn := -2       # the turn the hunters and squad were last drawn for
+var _tick_sec := -1         # the whole second of your turn countdown last ticked
 
 const COLUMNS := 4          # Hunter cards per row
 const CARD_MIN_W := 200.0   # px, a card's least width (portrait, name, role word)
@@ -155,6 +156,7 @@ func _tick_label() -> void:
 		_fill_squad()
 		if pm.locked:
 			chat_in.release_focus()
+	_tick_sound()
 	var m := pm.picker()
 	var s := int(ceil(maxf(pm.turn_left, 0.0)))
 	timer_label.text = "" if m.is_empty() else "0:%02d" % s
@@ -200,6 +202,13 @@ func _fit_safe_area() -> void:
 		_pad.add_theme_constant_override("margin_" + side, m)
 	timer_label.add_theme_font_size_override("font_size", clampi(int(win.y * DIGITS_FRAC), DIGITS_MIN, TIMER_SIZE))
 
+## One tick per second of your own turn's last UiSfx.TICK_FROM seconds.
+func _tick_sound() -> void:
+	var sec := int(ceil(pm.turn_left))
+	if sec != _tick_sec and pm.my_turn() and sec >= 1 and sec <= UiSfx.TICK_FROM:
+		UiSfx.lobby_tick(sec)
+	_tick_sec = sec
+
 func _unhandled_key_input(e: InputEvent) -> void:
 	if not e is InputEventKey or e.echo or chat_in.has_focus() or pm.locked:
 		return
@@ -226,7 +235,7 @@ func _fill_hunters() -> void:
 func _tile(ak: String) -> PanelContainer:
 	var open := ClassUnlock.is_open(ak)
 	var mate := pm.taken_by(ak) if ak != pm.pick else ""
-	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak))
+	var card := UI.tile_card(ak == pm.pick, func(): _choose(ak), 10, Arch.color(ak), "")
 	card.custom_minimum_size = Vector2(CARD_MIN_W, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var row := UI.hbox(10)
@@ -255,10 +264,13 @@ func _tile(ak: String) -> PanelContainer:
 	return card
 
 func _choose(ak: String) -> void:
-	if pm.choose(ak):
-		_fill_hunters()
-		_fill_squad()
-		_announce_pick(false)
+	if not pm.choose(ak):
+		UiSfx.error()
+		return
+	UiSfx.lobby_pick()
+	_fill_hunters()
+	_fill_squad()
+	_announce_pick(false)
 
 ## Your squad in pick order; whoever is picking is outlined.
 func _fill_squad() -> void:
@@ -313,6 +325,7 @@ func _announce_loaded() -> void:
 		Net.lobby_emit("loaded", {})
 
 func _on_turn_done(i: int) -> void:
+	UiSfx.lobby_lock(String(pm.squad[i]["arch"]), pm.squad[i]["you"])
 	if pm.squad[i]["you"]:
 		_announce_pick(true)
 

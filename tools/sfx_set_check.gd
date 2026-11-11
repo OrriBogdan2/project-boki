@@ -25,6 +25,7 @@ extends RefCounted
 ##      an unknown species falls back to the generic cues, and no two species share a happy take
 ##  16. the Boki downed/revive/fuse/unfuse/eat/sleep cues are played from their event code
 ##   7. every Fusion type and form names a cue with a boki_fuse_<cue> sound; the end, tired and evolve cues exist
+##  17. every sound named in UiSfx (menus, pickup, capture, extraction) has its file
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -63,6 +64,7 @@ func run(main: Node) -> void:
 	_boki_wired()
 	_fusion_cues()
 	_gloves()
+	_ui_cues()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -431,6 +433,18 @@ func _glove_names(node, names: Dictionary) -> void:
 	elif node is Array:
 		for v in node:
 			_glove_names(v, names)
+## 6. Every sound UiSfx plays by name has a file, so a typo never plays silence.
+func _ui_cues() -> void:
+	var src := FileAccess.get_file_as_string("res://scripts/ui/ui_sfx.gd")
+	var re := RegEx.create_from_string('"([a-z_]+)"')
+	var names := {}
+	for hit in re.search_all(src):
+		names[hit.get_string(1)] = true
+	var missing := []
+	for n in names:
+		if _takes(String(n)).is_empty():
+			missing.append(n)
+	ok(names.size() >= 8 and missing.is_empty(), "UiSfx: %d cues all have a file %s" % [names.size(), missing])
 
 func _takes(sname: String) -> Array:
 	var out := []
