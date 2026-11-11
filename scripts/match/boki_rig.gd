@@ -400,7 +400,7 @@ func _clip_face() -> String:
 		return over
 	if String(root.get_meta("kstate", "")) == "faint":
 		return "asleep"
-	if _hit_k > 0.3:
+	if _flinch.jolt > 0.3:
 		return "sad"
 	if root.get_meta("dazed", false):
 		return "sad"

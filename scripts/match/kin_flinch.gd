@@ -30,6 +30,7 @@ var rot := Vector3.ZERO        # Flex rotation to add (rad)
 var shove := Vector3.ZERO      # Flex offset to add (m, Flex space)
 var wide := 1.0                # Flex width factor
 var tall := 1.0                # Flex height factor
+var jolt := 0.0                # how hard it is jolted now (0 at rest; BokiRig shows a sad face over 0.3)
 var _n := 0                    # the "hit" count already taken up
 var _amp := 0.0                # strength of the current jolt
 var _x := 0.0                  # 1 at the hit, springs to 0
@@ -72,6 +73,7 @@ func _start(root: Node3D, h: Dictionary) -> void:
 func _pose() -> void:
 	var p: Dictionary = PLAN.get(plan, PLAN["blob"])
 	var s := _amp * _x
+	jolt = absf(s)
 	rot = Vector3(s * float(p["pitch"]) * _push.y, s * float(p["yaw"]) * _push.x, -s * float(p["roll"]) * _push.x)
 	shove = Vector3(_push.x * float(p["shove"]), float(p["lift"]), _push.y * float(p["shove"])) * s
 	tall = 1.0 - s * float(p["squash"])
