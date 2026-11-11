@@ -1064,6 +1064,7 @@ func _process(delta: float) -> void:
 	if hb: hb.tick(d)
 	if hg: hg.tick(d)
 	if hsp: hsp.tick(d)
+	GardenWishes.tick(self, d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
 	_apply_cam_settings()
@@ -4110,6 +4111,7 @@ func _setup_care() -> void:
 	var away_lines: Array = Work.catch_up() + CareJournal.arrival()
 	if not away_lines.is_empty():
 		_show_when_free(away_lines)      # the one "While you were away" card (the work and the journal)
+	GardenWishes.arrive(self)
 	Care.dex_sync()
 	_refresh_nest()
 
