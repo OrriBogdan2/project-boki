@@ -40,6 +40,7 @@ var card_box: Control
 var warmth := 0.0
 var warm_bar: Control
 var hover := -1
+var plays := {}      # egg index -> its "how it plays" label on the pick row
 var auto_warm := false        # test hook: hold the warmth on by itself
 var t := 0.0
 var hatch_t := 0.0
@@ -122,7 +123,7 @@ func _ready() -> void:
 			var i := int(a.substr(13))
 			if not Save.d.has("look"): Save.d["look"] = Unmasked.default_look()
 			_end_intro()
-			_pick(i); _pick(i)
+			_pick(i)
 			auto_warm = true
 
 ## A starter egg's nest, without the eggs it comes with.
@@ -496,22 +497,23 @@ func _rebuild_preview() -> void:
 	add_child(preview)
 	preview_anim = HunterAnim.new(preview)
 
+## The egg cards. Hovering or focusing a card (or its egg) shows how that egg plays; one click or Enter takes it.
 func _show_pick() -> void:
 	_clear_bottom()
+	plays.clear()
 	var row := UI.hbox(14)
+	var first: Control
 	for i in egg_defs.size():
 		var d: Dictionary = egg_defs[i]
 		var mystery: bool = d.get("mystery", false)
 		if mystery and not mystery_found:
 			continue
-		var card := UI.card(UI.CARD, 12, 14)
+		var ii := i
+		var card := UI.tile_card(false, func(): _pick(ii), 14)
 		card.custom_minimum_size = Vector2(228, 0)
-		# every egg card the same size, with its button on the same line at the bottom
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		card.size_flags_stretch_ratio = 1.0
 		card.size_flags_vertical = Control.SIZE_FILL
-		if i == chosen:
-			UI.set_card_border(card, UI.ACCENT)
 		var v := UI.vbox(6); card.add_child(v)
 		var hr := UI.hbox(8)
 		var ecol: Color = Color("c4bcd6") if mystery else Data.KIN[d["species"]]["color"]
@@ -525,31 +527,30 @@ func _show_pick() -> void:
 		dl.custom_minimum_size.x = 200
 		dl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(dl)
-		if i == chosen:
-			var pl := UI.label(d["play"], 13, UI.INK)
-			pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			v.add_child(pl)
-		var ii := i
-		v.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		var push := Control.new()
-		push.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		v.add_child(push)
-		var pb: Button = (UI.primary if i == chosen else UI.button).call("This one" if i != chosen else "Hatch it", func(): _pick(ii))
-		pb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		v.add_child(pb)
+		var pl := UI.label(d["play"], 13, UI.INK)
+		pl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		pl.modulate.a = 0.0      # (it keeps its room, so the cards never jump)
+		v.add_child(pl)
+		plays[i] = pl
+		card.mouse_entered.connect(_show_play.bind(i))
+		card.focus_entered.connect(_show_play.bind(i))
+		first = first if first else card
 		row.add_child(card)
 	bottom.add_child(row)
+	first.call_deferred("grab_focus")      # (the arrow keys move along the cards, Enter takes the one in focus)
+
+## Shows how the i-th egg plays and hides the others' line.
+func _show_play(i: int) -> void:
+	for j in plays:
+		(plays[j] as Control).modulate.a = 1.0 if j == i else 0.0
 
 func _pick(i: int) -> void:
 	if stage != "pick":
 		return
-	if chosen == i:
-		_start_hatch()
-		return
 	chosen = i
 	mystery_found = mystery_found or egg_defs[i].get("mystery", false)
 	Sfx.play("click")
-	_show_pick()
+	_start_hatch()
 
 ## Hatching by knocks: each tap is a gentle knock on the shell, and something knocks back. The
 ## egg rocks a little more each time, a new crack opens, the camera leans in, and the knocks from
@@ -643,7 +644,9 @@ func _process(delta: float) -> void:
 		var hv := _egg_under_mouse()
 		if hv != hover:
 			hover = hv
-			if hover >= 0: Sfx.play("hover", null, -12.0)
+			if hover >= 0:
+				Sfx.play("hover", null, -12.0)
+				_show_play(hover)
 			if hover >= 0 and egg_defs[hover].get("mystery", false) and not mystery_found:
 				mystery_found = true
 				_show_pick()

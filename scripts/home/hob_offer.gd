@@ -4,13 +4,15 @@ extends RefCounted
 ## Kael, Cinder and Meeko minus one already taken) and the first-Relic pick (Hatch: Lace, Kael or Vex), side by
 ## side, each with its portrait, name and title and a
 ## one-line role, and under them one ability clip of the Mask in focus (only that one plays: the cards are
-## painted portraits, so the pick never stalls). Hover or click a card to look at it; "Take" picks it,
+## painted portraits, so the pick never stalls). Hover a card to look at it; one click on it (or Enter / the
+## pad's A on the card in focus) takes it, though not in the first OPEN_GUARD_S after the panel opens;
 ## `choose` opens it (ClassUnlock.choose_second or choose_starters) and `done` carries on (HobTalk plays the short
 ## Mask moment). "Not now" lets it wait, when there is a `later` to call (the first pick has none).
 
 const CARD_W := 230.0          # px
 const FACE_PX := 110.0
 const CLIP := Vector2(300, 130)      # px: the focused Mask's ability clip
+const OPEN_GUARD_S := 0.3      # s: a click this soon after the panel opens is ignored (a misclick)
 
 var rules: Dictionary          # the farm builder's "talk" lines (title, roles, button text)
 var title_key: String
@@ -21,7 +23,7 @@ var ids: Array = []
 var focus_i := 0
 var cards: Array = []          # PanelContainer per id
 var preview: Control           # holds the focused Mask's clip
-var take_button: Button
+var opened_ms := 0             # Time.get_ticks_msec() when the panel was built
 var root: Control
 
 func _init(offer_ids: Array, talk_rules: Dictionary, title: String, make_pick: Callable, on_done: Callable,
@@ -33,7 +35,7 @@ func _init(offer_ids: Array, talk_rules: Dictionary, title: String, make_pick: C
 	done = on_done
 	later = on_later
 
-## The pick: the three cards, the focused Mask's clip, Take and Not now.
+## The pick: the three cards, the focused Mask's clip and Not now.
 func build() -> Control:
 	var v := UI.vbox(12)
 	v.set_meta("mask_offer", true)
@@ -50,18 +52,16 @@ func build() -> Control:
 	preview = CenterContainer.new()
 	preview.custom_minimum_size.y = CLIP.y + 48.0
 	v.add_child(preview)
-	var btns := UI.hbox(12)
-	btns.alignment = BoxContainer.ALIGNMENT_CENTER
 	if later.is_valid():
-		btns.add_child(UI.ghost(String(rules["offer_later"]), later, 160))
-	take_button = UI.primary("", func(): pick(String(ids[focus_i])), 260)
-	btns.add_child(take_button)
-	v.add_child(btns)
+		var not_now := UI.ghost(String(rules["offer_later"]), later, 160)
+		not_now.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		v.add_child(not_now)
 	root = v
-	take_button.call_deferred("grab_focus")      # (Enter takes the Relic in focus)
+	opened_ms = Time.get_ticks_msec()
 	for id in ids:
 		WardenGlb.fetch(String(id))      # (their models, read off the main thread before a clip needs one)
 	focus(0)
+	cards[0].call_deferred("grab_focus")      # (Enter or the pad's A takes the Relic in focus)
 	return v
 
 func _card(id: String, i: int) -> PanelContainer:
@@ -70,10 +70,16 @@ func _card(id: String, i: int) -> PanelContainer:
 	card.custom_minimum_size.x = CARD_W
 	card.set_meta("mask_card", id)
 	card.mouse_filter = Control.MOUSE_FILTER_STOP
-	card.mouse_entered.connect(func(): focus(i))
+	card.focus_mode = Control.FOCUS_ALL
+	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	card.mouse_entered.connect(card.grab_focus)
+	card.focus_entered.connect(func(): if i != focus_i: focus(i))      # (build() already shows the first)
 	card.gui_input.connect(func(ev):
-		if ev is InputEventMouseButton and ev.pressed and ev.double_click:
-			pick(id))
+		var click: bool = ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT
+		if click or ev.is_action_pressed("ui_accept"):
+			card.accept_event()
+			if Time.get_ticks_msec() - opened_ms >= OPEN_GUARD_S * 1000.0:
+				pick(id))
 	var v := UI.vbox(6)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(v)
@@ -105,7 +111,6 @@ func focus(i: int) -> void:
 	for c in preview.get_children():
 		c.queue_free()
 	preview.add_child(AbilityClip.make(id, String(preview_slot(id)), CLIP))
-	take_button.text = String(rules["offer_take"]).replace("{name}", HeroTitle.base_name(id))
 
 ## The ability a Mask's preview shows: the first of its "clip" block's "preview", else its attack.
 static func preview_slot(hunter_id: String) -> String:

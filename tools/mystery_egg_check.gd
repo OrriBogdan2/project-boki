@@ -90,9 +90,12 @@ func _scene(main: Node) -> void:
 	var in_basket := holder.get_children().any(func(c): return c is MysteryEgg)
 	ok(in_basket and egg.shell_col.get_luminance() < 0.15, "it's a black egg in a basket")
 	ok(_cards(hx) == 3, "its card is hidden until you find it (%d cards)" % _cards(hx))
-	hx._pick(m)
+	hx.mystery_found = true      # (hovering the black egg finds it)
+	hx._show_pick()
 	await tree.process_frame
-	ok(_cards(hx) == 4 and hx.chosen == m, "clicking the black egg picks it and shows its card")
+	ok(_cards(hx) == 4, "hovering the black egg shows its card")
+	hx._pick(m)
+	ok(hx.chosen == m and hx.stage == "warm", "one click on the black egg takes it")
 	hx.egg_defs[m]["rec"]["mutations"] = ["giant"]
 	hx.kin_node = Models.kin(hx.egg_defs[m]["species"], {"level": 1})
 	hx.add_child(hx.kin_node)
