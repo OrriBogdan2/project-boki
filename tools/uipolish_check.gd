@@ -94,6 +94,8 @@ func _migration() -> void:
 	for k in Settings.REMOVED:
 		cf.set_value("s", k, true)
 	cf.set_value("s", "music", 0.42)
+	if cf.has_section_key("s", "ambience"):
+		cf.erase_section_key("s", "ambience")      # a file from before the Ambience slider
 	cf.save(Settings.PATH)
 	var fresh: Node = load("res://scripts/core/settings.gd").new()
 	main.add_child(fresh)
@@ -105,12 +107,28 @@ func _migration() -> void:
 	ok("an old settings file drops the removed keys on start", left.is_empty(), str(left))
 	var kept := is_equal_approx(float(after.get_value("s", "music", 0.0)), 0.42)
 	ok("...and keeps the others", kept and is_equal_approx(float(fresh.get_v("music")), 0.42))
+	ok("...and a missing volume starts at its default", fresh.get_v("ambience") == Settings.DEFAULTS["ambience"])
 	main.remove_child(fresh)
 	fresh.free()
 	if had:
 		keep.save(Settings.PATH)
 	else:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(Settings.PATH))
+
+## Settings > Audio has one slider per bus the mix ends in (SFXFar feeds SFX), and letting go of
+## each plays the sample through its own bus.
+func _audio_tab() -> void:
+	var mains: Array = []
+	for i in AudioServer.bus_count:
+		if i == 0 or AudioServer.get_bus_send(i) == "Master":
+			mains.append(AudioServer.get_bus_name(i))
+	var sampled: Array = []
+	for sl: HSlider in Overlay.root.find_children("*", "HSlider", true, false):
+		sl.drag_ended.emit(false)
+		sampled.append(String(Sfx.sample_voice.bus) if Sfx.sample_voice else "")
+	mains.sort()
+	sampled.sort()
+	ok("settings > Audio: one slider per bus, each samples its own", sampled == mains, "%s %s" % [sampled, mains])
 
 # ------------------------------------------------------------------ 3, 4: the look
 func _static_styles(src: Dictionary) -> void:
@@ -181,6 +199,8 @@ func _screens() -> void:
 		await main.get_tree().process_frame
 		var off := _off_look(Overlay.root, ours)
 		ok("settings > %s: every box is the menu look" % t, off.is_empty(), str(off))
+		if t == "Audio":
+			_audio_tab()
 	Overlay.close()
 	Overlay.open_pause("home")
 	await main.get_tree().process_frame
