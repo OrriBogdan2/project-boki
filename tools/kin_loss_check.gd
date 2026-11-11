@@ -304,6 +304,7 @@ func run(main_node: Node) -> void:
 	_review_fixes()
 	_client_captor()
 	_review2()
+	_carry_out_slot()
 	print("KINLOSS DONE, failures: ", bad)
 	main.get_tree().quit()
 
@@ -619,6 +620,12 @@ func _review_fixes() -> void:
 	Life.box_of(m, P)["empty"] = true
 	Life.box_of(m, P)["soul_until"] = 0.0
 	F.ctrl = "bot"
+	for wk in m.kins.duplicate():
+		if wk != g and wk.owner_h == null:      # (no other wild Boki for the bot to scan first)
+			wk.dead = true
+			m.kins.erase(wk)
+			m.ents_by_id.erase(wk.nid)
+			wk.queue_free()
 	F.teleport(g.pos + Vector3(3.0, 0, 0))
 	var t := 0.0
 	while t < 40.0 and not g.dead:
@@ -703,3 +710,34 @@ func _review_fixes() -> void:
 		"2. a freshly made guard also gets a slot id (%s)" % (g3.nid if g3 else "none")
 	)
 	F.remote = false
+
+## 11. the carry-out slot (DECISIONS 2026-11-11 "1 extra out"): a downed hunter's claimed Boki spills with the
+## deathbox and a rival takes it like any wisp; slots and the 4-wisp cap hold for the taker.
+func _carry_out_slot() -> void:
+	_fresh(2)
+	var cap := int(Capture.rules()["wisp_cap"])
+	var claimed := Save.new_kin("puddlet", "Claimed")
+	P.caught.append(claimed.duplicate(true))
+	var bx := _die()
+	ok((bx["caught"] as Array).size() == 1 and P.caught.is_empty(), "11. a downed hunter's carry-out Boki spills")
+	ok(F.kin != null and F.kin2 != null, "11. the rival brought two Boki (bots always do)")
+	Life.loot_box(m, F, bx)
+	var slots := Capture.slots(F)
+	ok(F.caught.size() == 1 and slots == [1, 0], "11. a rival takes it into their carry-out slot (%s)" % str(slots))
+	ok((bx["caught"] as Array).is_empty(), "11. ...and the box is empty of it")
+	bx["caught"] = [Save.new_kin("cindle", "Second")]
+	bx["empty"] = false
+	Life.loot_box(m, F, bx)
+	ok(F.caught.size() == 1 and (bx["caught"] as Array).size() == 1, "11. slot full: the next claim stays in the box")
+	var stolen := Save.new_kin("zapple", "Taken")
+	stolen["lost_from"] = "Someone"
+	ok(Capture.room(F, stolen), "11. a stolen Boki still has its own slot")
+	F.caught.append(stolen)
+	ok(Capture.wisps(F) <= cap, "11. never more than %d wisps (%d)" % [cap, Capture.wisps(F)])
+	var more := Save.new_kin("cindle", "More")
+	more["lost_from"] = "Another"
+	ok(not Capture.room(F, more) and not Capture.room(F), "11. lead, second, carry-out, stolen: nothing fits")
+	var mate := Capture.mate_with_room(m, P, claimed)
+	ok(mate == G, "11. a full slot points at the teammate with room (%s)" % (G.pname if G else "none"))
+	G.caught.append(claimed.duplicate(true))
+	ok(Capture.mate_with_room(m, P, claimed) == null, "11. ...at nobody once the mate is full too (no pool)")
