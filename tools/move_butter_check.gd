@@ -51,7 +51,7 @@ var shots := ""
 var csv_path := ""
 var frame := 0
 var main: Node
-var trace := PackedStringArray(["t,phase,speed,heading_deg,lean_deg,bank_deg,act_w,air_w,clip,y,vy,mantling,grounded"])
+var trace := PackedStringArray(["t,phase,speed,heading_deg,lean_deg,bank_deg,act_w,air_w,clip,y,vy,mantling,grounded,pop_m,cam_acc"])
 var t := 0.0
 var phase := ""
 var res := {}
@@ -63,6 +63,7 @@ var pop := 0.0
 var slide := 0.0
 var cam_p: Array = []           # the last three camera focus points
 var cam_jerk := 0.0
+var cam_wait := 0              # frames after a teleport the camera is still settling from its snap (not measured)
 var lean_now := 0.0             # this frame's forward tip (deg) and side tip (deg, + toward the right)
 var bank_now := 0.0
 
@@ -187,8 +188,8 @@ func _frame(mv: Vector2, jump := false, glide := false) -> void:
 func _measure() -> void:
 	# the head against the feet, in the model's frame (the camera's lean toward it is the model's own basis)
 	var hp := (P.model.global_transform.affine_inverse() * (skel.global_transform * skel.get_bone_global_pose(head).origin))
-	if last_head != Vector3.INF:
-		pop = maxf(pop, hp.distance_to(last_head))
+	var pop_now := hp.distance_to(last_head) if last_head != Vector3.INF else 0.0
+	pop = maxf(pop, pop_now)
 	last_head = hp
 	var tall := maxf(0.5, hp.y)
 	# (the model faces -Z: forward is -z, right is +x)
@@ -202,10 +203,14 @@ func _measure() -> void:
 		slide += DT
 	cam_p.append(m.cam.focus)
 	if cam_p.size() > 3: cam_p.pop_front()
+	var cam_acc := 0.0
 	if cam_p.size() == 3:
-		cam_jerk = maxf(cam_jerk, ((cam_p[2] - cam_p[1]) - (cam_p[1] - cam_p[0])).length() / (DT * DT))
-	trace.append("%.3f,%s,%.3f,%.1f,%.2f,%.2f,%.2f,%.2f,%s,%.2f,%.2f,%d,%d" % [t, phase, spd, rad_to_deg(atan2(P.vel.z, P.vel.x)),
-			lean_now, bank_now, clips.act_w, clips.air_w, clips.cur, P.pos.y, P.vel.y, int(P.mantling()), int(P.grounded)])
+		cam_acc = ((cam_p[2] - cam_p[1]) - (cam_p[1] - cam_p[0])).length() / (DT * DT)
+	cam_wait -= 1
+	if cam_wait < 0:
+		cam_jerk = maxf(cam_jerk, cam_acc)
+	trace.append("%.3f,%s,%.3f,%.1f,%.2f,%.2f,%.2f,%.2f,%s,%.2f,%.2f,%d,%d,%.3f,%.1f" % [t, phase, spd, rad_to_deg(atan2(P.vel.z, P.vel.x)),
+			lean_now, bank_now, clips.act_w, clips.air_w, clips.cur, P.pos.y, P.vel.y, int(P.mantling()), int(P.grounded), pop_now, cam_acc])
 
 ## Stands the player at p, the camera on him (and its history cleared, so the jump isn't a jerk).
 func _put(p: Vector3) -> void:
@@ -213,6 +218,7 @@ func _put(p: Vector3) -> void:
 	P.vel = Vector3.ZERO
 	m.cam.snap(P.pos)
 	cam_p.clear()
+	cam_wait = 10
 	last_head = Vector3.INF
 
 ## Mean of `f` (lean or bank) over n frames of a given input.
