@@ -52,3 +52,16 @@ Boki's record, its zone, arrival time, favourite meals given, away-card notes an
 arrival); an older save simply lacks it and no version changes. The visitor is not on the roster: it joins
 the zone's kins through `GardenZones.out_here()` for one garden day, and only becomes a roster Boki (or
 leaves an egg) after three favourite meals. Suit data: `content/rules/garden_visitor.json`.
+
+## Unlock pace (GARDEN.md 10.3)
+GARDEN.md gives no day targets, so these are set here: a runner (3 expeditions a day from day 2) opens
+the second zone on day 2 and a garden-only player (no extraction, gems only from garden games) on day 3;
+all five are open by about day 10 to 14 for both (medians). `--garden-unlock-pace-check` plays both
+forward day by day on the real GardenZones, BlackMarket, Evo.eat and Lairs rule and fails outside these
+(model assumptions: the `pace` block of `garden_zones.json`). Tuned data only: Drift Trader Wayseed
+300 gems / 7 days -> 110 / 3 days (`market.json`), lair Wayseed chance 1.0 -> 0.05 a run
+(`wayseed_chance`). Lean is not the bottleneck (two meals of a zone's snack, 9 lean a meal, `lean_key`
+12), so it stays. Before the tuning the runner reached the fifth zone on day 6 and a garden-only
+player the second on day 12 and the third after day 28. A new save starts with 60 gems and the
+garden brings about 20 a day plus 10 per extra open zone; the day-3 target depends on that (price 110
+sits between day 2 and day 3 of income), so retune the price if those change.

@@ -114,9 +114,18 @@ static func wants(rec: Dictionary) -> String:
 			return id
 	return ""
 
-## The bag item that is a zone's first key (GARDEN.md 10.3; the item itself comes with the unlock step).
+## The bag item that is a zone's first key (Loot.VALUABLES names it on a run, Econ banks it as an item).
 static func wayseed(id: String) -> String:
 	return "wayseed_" + id
+
+## The still-locked zone whose Wayseed a lair in this biome holds, or "" (base mode only).
+static func seed_zone_for(biome: String) -> String:
+	if not FarmUnlocks.base_mode():
+		return ""
+	for id in ids():
+		if not is_open(id) and info(id).get("lair_biomes", []).has(biome):
+			return id
+	return ""
 
 ## A Boki out on the base that leans far enough toward the zone to wake it (the second key), or {}.
 static func leaner(id: String) -> Dictionary:
@@ -147,3 +156,22 @@ static func thrives(rec: Dictionary) -> bool:
 static func train_gain(rec: Dictionary, base: int) -> int:
 	var more := thrives(rec) and randf() < float(rules()["thrive"]["train_bonus"])
 	return base + (1 if more else 0)
+
+## Both keys in hand: plants the Wayseed and wakes the zone. The Boki that leans toward it becomes its
+## founder: it moves in, remembers the day and writes it in its journal. {"ok", "why", "founder"}.
+static func attune(id: String) -> Dictionary:
+	var keys := keys_for(id)
+	if is_open(id) or not (keys["seed"] and keys["lean"]):
+		return {"ok": false, "why": "%s needs both keys" % info(id).get("name", id)}
+	var rec := leaner(id)
+	var nm: String = info(id)["name"]
+	Save.add_item(wayseed(id), -1)
+	Save.d["zones"][id] = {"open": true, "founder": rec["uid"]}
+	rec["zone"] = id
+	Save.remember(rec, "zone", "the day I woke " + nm)
+	CareJournal.note(rec, "woke " + nm)
+	return {"ok": true, "why": "", "founder": rec}
+
+## The Boki that woke the zone, or {} (the start zone, or one that has left).
+static func founder(id: String) -> Dictionary:
+	return Save.kin(String(Save.d.get("zones", {}).get(id, {}).get("founder", "")))

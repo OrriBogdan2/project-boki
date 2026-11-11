@@ -54,6 +54,7 @@ const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood
 
 var m: Match
 var list: Array = []
+var wayseed_given := false     # a lair's pile holds a Wayseed at most once a run (GARDEN.md 10.3)
 var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
 var _prev := {}                # hunter nid -> was interact held last tick
 var _told := {}
@@ -689,6 +690,11 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
 	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
 		m.exits.drop_key(at + Vector3(0, 0, 1.1))
+	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
+	if zone != "" and not wayseed_given:
+		wayseed_given = true
+		if m.rng.randf() < float(GardenZones.rules()["wayseed_chance"]):
+			m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
 	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)
