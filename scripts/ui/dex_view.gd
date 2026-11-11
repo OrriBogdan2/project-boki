@@ -48,8 +48,14 @@ static func type_chip(t: String) -> PanelContainer:
 	h.add_child(UI.label("%s type" % type_name(t), UI.T_SMALL, UI.INK, UI.semi))
 	return chip
 
-## Its number in the Field Book: the order entries are listed in (Data.KIN: the starters first); both
-## forms of a branching line share one.
+## Legendary tiers, lowest first: the order legendaries close the Field Book in (docs/decisions/0002).
+const TIERS := ["minor", "boss", "ultra", "blight"]
+
+static func tier_of(spk: String) -> String:
+	return String(Data.KIN.get(spk, {}).get("legendary_tier", ""))
+
+## Its number in the Field Book: the order entries are listed in (FieldBook.entries: the starters first, the
+## legendaries last by tier); both forms of a branching line share one.
 static func number(spk: String) -> int:
 	return FieldBook.entries().find(FieldBook.entry_key(spk)) + 1
 
@@ -64,26 +70,21 @@ static func entry(spk: String) -> Dictionary:
 static func counts() -> Vector2i:
 	return Vector2i(FieldBook.seen_count(), FieldBook.caught_count())
 
-## The grid, under a "Seen N · Caught N" line. on_open(species) opens a tile's page.
+## [seen, caught] per type id, over the species of that type.
+static func type_counts() -> Dictionary:
+	var out := {}
+	for spk in Data.KIN:
+		var c: Vector2i = out.get(type_of(spk), Vector2i.ZERO)
+		c.x += int(seen(spk) or caught(spk))
+		c.y += int(caught(spk))
+		out[type_of(spk)] = c
+	return out
+
+## The grid, under the filter bar (DexFilter: Seen N · Caught N, status, types). on_open(species) opens a tile's page.
 static func grid(v: VBoxContainer, tree: SceneTree, on_open: Callable) -> void:
 	Care.dex_sync()
 	demo()
-	var c := counts()
-	var head := UI.hbox(14)
-	head.add_child(UI.chip("eye", "Seen %d" % c.x, UI.INK))
-	head.add_child(UI.chip("paw", "Caught %d" % c.y, UI.INK))
-	var hint := UI.label("Field notes on every Boki you've met. Click one to read its page.", UI.T_SMALL, UI.MUTED)
-	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	hint.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	head.add_child(hint)
-	v.add_child(head)
-	var g := GridContainer.new()
-	g.columns = 6
-	g.add_theme_constant_override("h_separation", 10); g.add_theme_constant_override("v_separation", 10)
-	v.add_child(g)
-	for key in FieldBook.entries():
-		g.add_child(tile(key, tree, on_open))
+	v.add_child(DexFilter.Browser.new(tree, on_open))
 
 ## One numbered tile, for an entry: it shows the form you own (or have seen) and opens that form's page.
 static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
@@ -106,6 +107,8 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 	nl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(nl)
 	if is_seen:
+		if tier_of(spk) != "":
+			top.add_child(UI.label(tier_of(spk).capitalize(), 10, UI.MUTED, UI.semi))
 		top.add_child(TypeIcon.new(type_of(spk), 16.0))
 	col.add_child(top)
 	var pic := CenterContainer.new()
