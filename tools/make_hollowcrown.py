@@ -212,7 +212,7 @@ islands = [
          rocks=rocks((178, 15, 180, 16), (190, 14, 191, 15)),
          landings=[[180, 36], [196, 30], [172, 28]],
          chests=[[185, 15], [198, 34]], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
-         wardens=[[182, 19]],
+         wardens=[[192, 19]],
          areas=[[184, 15, "The Lookout"]]),
     # Duskmoor: the ruined chapel on a raised floor (lv 2), its broken walls the cover, with the stone
     # ring beside it as the landmark. Relics turn up in the ruins.
@@ -281,11 +281,11 @@ CAMPS = {
     "crown": [[99, 94, "heavy"], [104, 129, "heavy"], [133, 104, "heavy"], [126, 128, "normal"]],
     "frostgate": [[117, 57, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
     "cinder": [[60, 109, "heavy"], [42, 122, "normal"], [41, 96, "light"]],
-    "storm": [[157, 118, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
+    "storm": [[157, 117, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
     "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
-    "lark": [[40, 42, "normal"], [49, 21, "light"], [27, 22, "light"]],
+    "lark": [[40, 42, "normal"], [50, 20, "light"], [27, 22, "light"]],
     "saltmere": [[41, 178, "normal"], [16, 172, "light"], [31, 201, "light"]],
-    "highwatch": [[174, 37, "normal"], [200, 38, "light"], [180, 13, "light"]],
+    "highwatch": [[174, 37, "normal"], [200, 38, "light"], [181, 14, "light"]],
     "duskmoor": [[175, 173, "normal"], [172, 195, "light"], [197, 169, "light"]],
 }
 for _iid, _camps in CAMPS.items(): BY[_iid]["camps"] = _camps
