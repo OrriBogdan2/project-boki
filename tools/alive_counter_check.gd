@@ -42,6 +42,7 @@ func run(main: Node) -> void:
 	ok(AliveCounter.shows_squads(m), "a squad match shows both counters")
 	if shots != "":
 		DirAccess.make_dir_recursive_absolute(shots)
+		await main.fade.reveal(0.01)
 		for i in 20:
 			await main.get_tree().process_frame
 		main.get_viewport().get_texture().get_image().save_png(shots.path_join("alive_squads.png"))
