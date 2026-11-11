@@ -62,6 +62,8 @@ func _measure(m: Match, kind: String) -> Dictionary:
 	h.inp["dash"] = true
 	_tap(m, "jump")
 	h.inp["dash"] = false
+	if h.ak.flow.jump_waits:
+		m.step(Match.DT)        # the dash's wind-up held the jump a step (decision 0010): the step it goes
 	return _what_now(m, spent - h.dashes > 0.5, h.roll_speed)
 
 func _steps(m: Match, n: int) -> void:

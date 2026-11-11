@@ -94,13 +94,15 @@ func _press_trial(m: Match, slot: String, in_air: bool, full: int) -> String:
 		return "first"            # R goes off on the key, before the step that starts the dash
 	var dash_n := 0
 	var dash_from := -1
+	var ended := false          # Shift's dash ran out: a dash after it is the press's own move (Gil's Tidal Wave)
 	for i in WATCH:
 		m.step(Match.DT)
 		hunter.inp["fire"] = false
-		var dashing := hunter.ak.in_dash()
+		var dashing := hunter.ak.in_dash() and not ended
 		if dashing:
 			dash_n += 1
 			dash_from = i if dash_from < 0 else dash_from
+		ended = ended or (dash_from >= 0 and not dashing)
 		if not _went_off(before, slot):
 			continue
 		var started := dash_from >= 0 or hunter.dash_at > dash_was
@@ -115,7 +117,7 @@ func _press_trial(m: Match, slot: String, in_air: bool, full: int) -> String:
 	return "lost"
 
 ## Space with Shift on one step (`after`: Space the step after Shift): how high the hunter rose and how
-## many steps the dash ran.
+## many steps the dash ran (shown as "jump|flat <steps> <rise>").
 func _jump_trial(m: Match, in_air: bool, after: bool) -> Dictionary:
 	_ready_up(m)
 	if in_air:
@@ -133,7 +135,7 @@ func _jump_trial(m: Match, in_air: bool, after: bool) -> Dictionary:
 	return {"rise": top - y0, "dash": dash_n}
 
 func _jump_str(r: Dictionary) -> String:
-	return "%s %d" % ["jump" if float(r["rise"]) > RISE_TOL else "flat", int(r["dash"])]
+	return "%s %d %.2f m" % ["jump" if float(r["rise"]) > RISE_TOL else "flat", int(r["dash"]), float(r["rise"])]
 
 func _shift() -> void:
 	hunter.inp["move"] = Vector2(0, -1)

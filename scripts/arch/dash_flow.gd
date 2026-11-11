@@ -94,7 +94,7 @@ func route(dt: float) -> void:
 	if _frozen_tap:
 		h.inp["fire"] = true
 		_frozen_tap = false
-	_after_shift(dashing)
+	_after_shift()
 	var fire_down := bool(h.inp.get("fire", false))
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
@@ -110,11 +110,11 @@ func route(dt: float) -> void:
 		if h.inp.get(key, false) and _press(slot) == "buffer":
 			h.inp[key] = false
 
-## R from the keyboard and a jump go after this step's Shift. A dash that hasn't shown yet (a wind-up, like the
-## Wirerun's charge) makes them wait a step, as if pressed just after Shift.
-func _after_shift(dashing: bool) -> void:
+## R from the keyboard and a jump go after this step's Shift. A dash still winding up (the Wirerun's charge, the
+## Rock Hop's crouch: ArchKit.dash_winding) makes them wait a step, as if pressed just after Shift.
+func _after_shift() -> void:
 	var h := kit.h
-	if bool(h.inp.get("dash", false)) and not dashing:
+	if bool(h.inp.get("dash", false)) and kit.dash_winding():
 		if h.inp.get("jump", false):
 			jump_waits = true
 			h.inp["jump"] = false

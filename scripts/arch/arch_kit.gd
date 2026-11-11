@@ -921,6 +921,9 @@ func aims_in_dash() -> bool: return fires_in_dash()
 func in_dash() -> bool: return h.roll_t > 0.0 and h.move_kind == "dash"
 ## s left in that dash (0 when not in one); a kit that overrides in_dash() overrides this too.
 func dash_left() -> float: return h.roll_t if in_dash() else 0.0
+## The dash this step's Shift set off is still winding up (not shown yet, like the Wirerun's charge): a jump or R
+## pressed with it waits a step (DashFlow, decision 0010). A kit whose dash counts from a wind-up overrides this.
+func dash_winding() -> bool: return not in_dash()
 ## The vertical speed a dash in the air holds while it runs (0: it holds the height); a skate sinks gently.
 func dash_vy(_dt: float) -> float: return 0.0
 

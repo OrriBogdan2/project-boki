@@ -158,6 +158,12 @@ func _match(main: Node, hero: String) -> Match:
 			world.walls.erase(i)
 			world.props.erase(i)
 			world.stairs.erase(i)
+	# rising air and pads near the flat open the glider or throw the hunter by themselves (decision 0024): not here
+	var away := func(d: Dictionary) -> bool:
+		var p: Vector3 = d["pos"]
+		return absf(p.x - cx) > 26.0 or absf(p.z - cz) > 26.0
+	world.updrafts = world.updrafts.filter(away)
+	world.pads = world.pads.filter(away)
 	hunter.teleport(Vector3(cx + 0.5, level * World.LEVEL, cz + 0.5))
 	hunter.set_arch(hero)
 	hunter.unlock_all()
