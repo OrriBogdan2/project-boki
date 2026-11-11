@@ -231,6 +231,7 @@ const CHECKS := {
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
+	"--tutorial-retry-check": ["res://tools/tutorial_retry_check.gd", "tutorial_retry_check", null],  # fall: again
 	# the first two Extractions' guide
 	"--first-match-guide-check": ["res://tools/first_match_guide_check.gd", "first_match_guide_check", null],
 	# the first-time capture hint
