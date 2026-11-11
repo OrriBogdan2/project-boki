@@ -41,7 +41,8 @@ drawn, the downed plate and status words show, cooldown text appears).
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
 ## Tab squad board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
-The source shows no scoreboard: only a squads-left counter, your squad's list and "SQUAD ELIMINATED" cards. So the Tab-hold board follows
-that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
-levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
-Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
+Holding Tab shows the number of squads left, then one row per hunter in your squad, yours first and lit: portrait, Alive / Downed /
+Out / Got away, kills / deaths / assists, damage, the four worn gear pieces and the Boki (form, level, evolutions, state). Rival
+squads show nothing but that count: no rows, names, stats or alive state (owner, 11-11; research in docs/TAB_BOARD_PARITY.md).
+Last line: Ways Out (your exit's state, else how many are open; the last-squad rush note). It reads Match, Hunter and Exits only.
+Assists are counted by ArchKit's 5 s knock window (`Hunter.assists`). Void & Masks look (black-violet panel, teal edge, magenta count).

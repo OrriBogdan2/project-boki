@@ -805,6 +805,7 @@ func _tick_knocks() -> void:
 			var by = (t as Hunter).last_hit_by
 			if by is Kin and (by as Kin).owner_h: by = (by as Kin).owner_h
 			knocks_seen += 1
+			if by != h: h.assists += 1
 			on_knock(t, by == h)
 		elif m.time - float(e[1]) > 5.0:
 			touched.erase(key)

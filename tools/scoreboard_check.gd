@@ -1,9 +1,9 @@
 extends RefCounted
-## --scoreboard-check: the Tab squad board (SquadBoard) fills right in a 30-Hunter match. Ten squads
-## of three start with 10 / 10 left; after two knocks the knocked show as downed (still 10 left);
-## after a squad is wiped the count drops to 9 and that row is all out. Your squad's block lists
-## levels, knocks and Boki, rivals have no names on the board, and the old Tab table is gone.
-## Never touches the save.
+## --scoreboard-check: the Tab squad board (SquadBoard) in a 30-Hunter match. Ten squads of three
+## start with 10 left; the board lists only your squad (you first): a mate's hit plus your knock is
+## an assist for them, your finish a kill for you, a death for the mate, the gear you wear and each
+## Boki. Rival squads give nothing away (no rows, names or alive state); a squad wipe drops the count
+## to 9. Never touches the save.
 
 var bad := 0
 
@@ -25,37 +25,36 @@ func run(main: Node) -> void:
 		h.lives = 1
 	var P: Hunter = m.player
 	var s := SquadBoard.snapshot(m)
-	ok(m.hunters.size() == 30 and s["left"] == 10 and s["total"] == 10, "30 hunters: 10 / 10 squads")
-	ok(s["squads"].all(func(q): return _count(q, SquadBoard.Pip.ALIVE) == 3), "every squad shows three alive pips")
-	var mine_rows: Array = s["squads"].filter(func(q): return q["mine"])
-	ok(mine_rows.size() == 1 and s["crew"].size() == 3, "one row is yours, with your three hunters listed")
-	# two knocks: a rival and a mate
+	ok(m.hunters.size() == 30 and s["left"] == 10, "30 hunters: 10 squads left")
+	ok(s["crew"].size() == 3 and s["crew"][0]["me"], "your three hunters are listed, yours first")
+	ok(s["crew"].all(func(e): return e["h"].team == P.team), "only your squad has rows")
+	ok(not s.has("squads") and not s.has("total"), "rival squads have no rows, names or alive state")
 	var foes: Array = m.hunters.filter(func(x): return x.team != P.team)
 	var mate: Hunter = m.hunters.filter(func(x): return x.team == P.team and x != P)[0]
-	P.knocks = 1
-	P.lvl = 4
+	# the mate chips a rival, you knock it: an assist for the mate
+	ok(mate.ak != null, "the mate has a kit that sees knocks")
+	mate.ak.note_hit(foes[0])
+	foes[0].last_hit_by = P
 	m.knock(foes[0], P, {})
-	m.knock(mate, foes[1], {})
+	mate.ak._tick_knocks()
+	m.eliminate(foes[0], P, "finished")
+	m.eliminate(mate, foes[1], "finished")
+	P.gear[0] = {"id": Gear.ids_for(0)[0], "rar": 2}
+	P.dmg_done = 321.0
 	s = SquadBoard.snapshot(m)
-	var foe_row: Dictionary = s["squads"].filter(func(q): return q["team"] == foes[0].team)[0]
-	var my_row: Dictionary = s["squads"].filter(func(q): return q["mine"])[0]
-	var down := _count(foe_row, SquadBoard.Pip.DOWNED)
-	ok(down == 1 and _count(foe_row, SquadBoard.Pip.OUT) == 0, "a knocked rival: one downed pip")
-	ok(_count(my_row, SquadBoard.Pip.DOWNED) == 1 and s["left"] == 10, "your mate is downed too; still 10 left")
-	var me: Dictionary = s["crew"].filter(func(e): return e["me"])[0]
-	ok(me["knocks"] == 2 and me["lvl"] == 4, "your row reads level %d, %d knocks" % [me["lvl"], me["knocks"]])
+	var me: Dictionary = s["crew"][0]
+	var mrow: Dictionary = s["crew"].filter(func(e): return e["h"] == mate)[0]
+	ok(me["k"] == 1 and me["dmg"] == 321, "your row: 1 kill, 321 damage (%d, %d)" % [me["k"], me["dmg"]])
+	ok(mrow["a"] == 1 and mrow["d"] == 1, "the mate: 1 assist, 1 death (%d, %d)" % [mrow["a"], mrow["d"]])
+	ok(mrow["pip"] == SquadBoard.Pip.OUT and me["pip"] == SquadBoard.Pip.ALIVE, "the mate shows out, you alive")
+	ok(me["gear"].size() == Gear.SLOTS.size() and me["gear"][0]["rar"] == 2, "your worn gear is listed with rarity")
 	var crew_kin: Array = m.hunters.filter(func(x): return x.team == P.team and x.kin != null)
-	var shown: Array = s["crew"].filter(func(e): return e["boki"] != "")
-	ok(shown.size() == crew_kin.size(), "your squad lists a Boki for each hunter that has one (%d)" % shown.size())
-	# a squad wipe: finish the knocked rival's whole squad
+	var shown: Array = s["crew"].filter(func(e): return not e["boki"].is_empty() and e["boki"]["lvl"] >= 1)
+	ok(shown.size() == crew_kin.size(), "a Boki with its level for each hunter that has one (%d)" % shown.size())
 	for h in m.hunters.filter(func(x): return x.team == foes[0].team):
 		m.eliminate(h, P, "finished")
 	s = SquadBoard.snapshot(m)
-	foe_row = s["squads"].filter(func(q): return q["team"] == foes[0].team)[0]
-	ok(s["left"] == 9 and s["total"] == 10, "a squad wipe: 9 / 10 left (%d / %d)" % [s["left"], s["total"]])
-	ok(_count(foe_row, SquadBoard.Pip.OUT) == 3 and not foe_row["alive"], "the wiped squad is three out pips")
-	ok(s["squads"].all(func(q): return not q.has("name")), "squad rows carry no names; only yours is listed below")
+	ok(s["left"] == 9, "a squad wipe: 9 left (%d)" % s["left"])
 	ok(String(s["ways"]) != "" or m.exits.list.is_empty(), "the Ways Out line is filled (%s)" % s["ways"])
-	ok(FileAccess.get_file_as_string("res://scripts/ui/hud.gd").find("_draw_scores") < 0, "the old Tab table is gone")
 	print("SCOREBOARD CHECK DONE, failures: ", bad)
 	main.get_tree().quit()

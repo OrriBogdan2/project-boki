@@ -1,57 +1,68 @@
 class_name SquadBoard
 extends RefCounted
-## The board you see while Tab is held: how many squads are left out of the start, every squad as a
-## row of pips (alive, downed, out), and your own squad's levels, knocks and Boki. Rivals stay
-## anonymous ("Squad 4"): the source shows no one's name outside your own squad. Read only: it reads
-## Match, Hunter and Exits and tracks nothing of its own. HUD wiring is one call in Hud._draw.
-## Look: Void & Masks (briefs/UI_STYLE.md), kept compact and static over the game.
+## The board you see while Tab is held: how many squads are left, then one row per hunter in YOUR squad
+## (yours first and lit): portrait, state, kills / deaths / assists, damage, the four gear pieces worn
+## and their Boki (form, level, evolutions, state). Other squads show nothing but that count: no names,
+## stats or who is still up (docs/TAB_BOARD_PARITY.md). Read only: it reads Match, Hunter and Exits and
+## tracks nothing of its own. HUD wiring is one call in Hud._draw. Look: Void & Masks (briefs/UI_STYLE.md).
 
 enum Pip { ALIVE, DOWNED, OUT, SAFE }
 
 const VOID := Color(0.12, 0.08, 0.19, 0.92)      # black-violet panel
-const STRIP := Color(0.17, 0.11, 0.26, 0.95)     # a row of the board
-const TEAL := Color("3fe0d0")                    # edge, alive pips, your squad
+const STRIP := Color(0.17, 0.11, 0.26, 0.95)     # a hunter's row
+const TEAL := Color("3fe0d0")                    # edge, your row, alive
 const MAGENTA := Color("ff3fd0")                 # edge, the headline number
 const AMBER := Color("ffb36a")                   # downed
 const DIM := Color("5a5170")                     # out
 const MINT := Color("8fe3c8")                    # got away
-const PIP_R := 6.0       # px radius of one pip
-const PIP_GAP := 18.0    # px between pip centres
-const ROW_H := 30.0      # px per squad row
-const MINE_H := 24.0     # px per hunter line in your squad's block
-const W := 620.0         # px board width
-const COLS := 2          # squad rows are laid out in this many columns
+const STATE_WORDS := ["Alive", "Downed", "Out", "Got away"]   # by Pip
+const ROW_H := 62.0      # px per hunter row
+const PORT := 46.0       # px portrait side
+const GEAR := 24.0       # px gear cell side
+const W := 700.0         # px board width
+const COL_K := 230.0     # px from the left edge: the K / D / A column
+const COL_DMG := 330.0   # px: damage
+const COL_GEAR := 392.0  # px: the four gear cells
+const COL_BOKI := 512.0  # px: the Boki
 
 ## Everything the board shows, as plain data (the check reads this too).
 static func snapshot(m: Match) -> Dictionary:
-	var teams: Array = []
-	var by_team := {}
+	var teams := {}
 	for h: Hunter in m.hunters:
-		if not by_team.has(h.team):
-			by_team[h.team] = []
-			teams.append(h.team)
-		by_team[h.team].append(h)
-	teams.sort()
-	var mine: int = m.player.team if m.player else -1
-	var squads: Array = []
+		teams[h.team] = true
 	var left := 0
 	for t in teams:
-		var pips: Array = []
-		for h: Hunter in by_team[t]:
-			pips.append(pip_of(h))
-		var live: bool = Life.team_alive(m, t)
-		left += int(live)
-		squads.append({"team": t, "mine": t == mine, "alive": live, "pips": pips})
+		left += int(Life.team_alive(m, t))
+	var mine: int = m.player.team if m.player else -1
 	var crew: Array = []
-	for h: Hunter in by_team.get(mine, []):
-		crew.append({"name": HeroTitle.of_hunter(h), "lvl": h.lvl, "knocks": h.knocks, "pip": pip_of(h),
-			"boki": String(Data.KIN[h.kin.species]["name"]) if h.kin else "", "me": h == m.player})
-	return {"total": teams.size(), "left": left, "squads": squads, "crew": crew, "ways": ways_text(m)}
+	for h: Hunter in m.hunters:
+		if h.team != mine:
+			continue
+		var gear: Array = []
+		for g: Dictionary in h.gear:
+			gear.append({} if g.is_empty() else {"id": String(g["id"]), "rar": int(g["rar"])})
+		var e := {"h": h, "name": HeroTitle.of_hunter(h), "me": h == m.player, "pip": pip_of(h),
+			"k": h.kills, "d": h.deaths, "a": h.assists, "dmg": int(h.dmg_done), "gear": gear, "boki": boki_of(h)}
+		if e["me"]: crew.push_front(e)
+		else: crew.append(e)
+	return {"left": left, "crew": crew, "ways": ways_text(m)}
 
 static func pip_of(h: Hunter) -> int:
 	if h.extracted: return Pip.SAFE
 	if h.out: return Pip.OUT
 	return Pip.DOWNED if h.downed else Pip.ALIVE
+
+## A hunter's active Boki as {name, lvl, evo, state}; empty when they have none.
+static func boki_of(h: Hunter) -> Dictionary:
+	if h.kin == null:
+		return {}
+	var k: Kin = h.kin
+	var state := "Up"
+	if k.dead: state = "Out"
+	elif k.state in ["downed", "reviving"]: state = "Down"
+	elif k.state == "bench": state = "Resting"
+	return {"name": Evo.form_name(k.rec), "lvl": int(k.rec.get("level", 1)),
+		"evo": (k.rec.get("forms", []) as Array).size(), "state": state}
 
 ## The Ways Out line: the exit your squad has going, else how many can be started now.
 static func ways_text(m: Match) -> String:
@@ -75,50 +86,52 @@ static func pip_col(p: int) -> Color:
 		Pip.SAFE: return MINT
 	return DIM
 
-static func _pip(c: CanvasItem, at: Vector2, p: int) -> void:
-	if p == Pip.ALIVE or p == Pip.DOWNED:
-		c.draw_circle(at, PIP_R, pip_col(p))
-	else:
-		c.draw_arc(at, PIP_R - 1.0, 0.0, TAU, 16, pip_col(p), 2.0, true)
-		if p == Pip.OUT:
-			c.draw_line(at + Vector2(-3, -3), at + Vector2(3, 3), DIM, 2.0)
-
-## Draws the board centred on the screen. `hud` is the HUD, for its panel and text helpers.
+## Draws the board centred on the screen. `hud` is the HUD, for its panel, portrait and text helpers.
 static func draw(hud, sz: Vector2) -> void:
 	var s := snapshot(hud.m)
-	var c: CanvasItem = hud.c
-	var rows := ceili(float(s["squads"].size()) / COLS)
-	var h: float = 76.0 + rows * ROW_H + 30.0 + s["crew"].size() * MINE_H + (26.0 if s["ways"] != "" else 0.0)
+	var h: float = 92.0 + s["crew"].size() * ROW_H + (26.0 if s["ways"] != "" else 0.0)
 	var r := Rect2(Vector2((sz.x - W) * 0.5, sz.y * 0.14), Vector2(W, h))
 	hud._rounded(r, VOID, 14, Color(TEAL, 0.55), 2)
-	c.draw_line(r.position + Vector2(14, 2), r.position + Vector2(W * 0.5, 2), Color(MAGENTA, 0.8), 3.0)
+	hud.c.draw_line(r.position + Vector2(14, 2), r.position + Vector2(W * 0.5, 2), Color(MAGENTA, 0.8), 3.0)
 	hud._text(r.position + Vector2(20, 36), "SQUADS LEFT", 16, HudStyle.MUTED, hud.big)
-	hud._text(r.position + Vector2(168, 40), "%d / %d" % [s["left"], s["total"]], 28, MAGENTA, hud.big)
-	var colw := (W - 40.0) / COLS
-	for i in s["squads"].size():
-		var q: Dictionary = s["squads"][i]
-		var at := r.position + Vector2(20.0 + (i / rows) * colw, 62.0 + (i % rows) * ROW_H)
-		var rr := Rect2(at, Vector2(colw - 10.0, ROW_H - 4.0))
-		var edge := Color(TEAL, 0.8) if q["mine"] else Color(0, 0, 0, 0)
-		hud._rounded(rr, STRIP, 6, edge, 1)
-		var tag := "You" if q["mine"] else "Squad %d" % (int(q["team"]) + 1)
-		var ink := TEAL if q["mine"] else DIM
-		if q["alive"] and not q["mine"]: ink = HudStyle.INK
-		hud._text(rr.position + Vector2(10, 19), tag, 14, ink, hud.big)
-		var n: int = q["pips"].size()
-		for j in n:
-			_pip(c, Vector2(rr.end.x - 20.0 - (n - 1 - j) * PIP_GAP, rr.get_center().y), q["pips"][j])
-	var y := r.position.y + 62.0 + rows * ROW_H + 18.0
-	hud._text(Vector2(r.position.x + 20, y), "YOUR SQUAD", 13, TEAL, hud.big)
-	hud._text(Vector2(r.position.x + 330, y), "LV", 12, HudStyle.MUTED, hud.big)
-	hud._text(Vector2(r.position.x + 380, y), "KNOCKS", 12, HudStyle.MUTED, hud.big)
-	hud._text(Vector2(r.position.x + 460, y), "BOKI", 12, HudStyle.MUTED, hud.big)
-	for e in s["crew"]:
-		y += MINE_H
-		_pip(c, Vector2(r.position.x + 28, y - 5), e["pip"])
-		hud._text(Vector2(r.position.x + 44, y), e["name"], 15, HudStyle.GOLD if e["me"] else HudStyle.INK, hud.big)
-		hud._text(Vector2(r.position.x + 330, y), str(e["lvl"]), 15, HudStyle.GOLD, hud.big)
-		hud._text(Vector2(r.position.x + 392, y), str(e["knocks"]), 15)
-		hud._text(Vector2(r.position.x + 460, y), e["boki"], 14, HudStyle.MUTED)
+	hud._text(r.position + Vector2(168, 40), str(s["left"]), 28, MAGENTA, hud.big)
+	var head_y := r.position.y + 70.0
+	hud._text(Vector2(r.position.x + COL_K, head_y), "K / D / A", 12, HudStyle.MUTED, hud.big)
+	hud._text(Vector2(r.position.x + COL_DMG, head_y), "DMG", 12, HudStyle.MUTED, hud.big)
+	hud._text(Vector2(r.position.x + COL_GEAR, head_y), "GEAR", 12, HudStyle.MUTED, hud.big)
+	hud._text(Vector2(r.position.x + COL_BOKI, head_y), "BOKI", 12, HudStyle.MUTED, hud.big)
+	for i in s["crew"].size():
+		_row(hud, Rect2(r.position + Vector2(14, 80.0 + i * ROW_H), Vector2(W - 28.0, ROW_H - 6.0)), s["crew"][i])
 	if s["ways"] != "":
 		hud._text(Vector2(r.position.x + 20, r.end.y - 14), "WAYS OUT  " + s["ways"], 13, MINT, hud.big)
+
+static func _row(hud, rr: Rect2, e: Dictionary) -> void:
+	var pip: int = e["pip"]
+	if e["me"]: hud._rounded(rr, STRIP, 8, Color(TEAL, 0.9), 2)
+	else: hud._rounded(rr, STRIP, 8)
+	var port := Rect2(rr.position + Vector2(5, (rr.size.y - PORT) * 0.5), Vector2(PORT, PORT))
+	var look: String = ["", "down", "out", ""][pip]
+	hud._draw_portrait(port, e["h"], look, pip_col(pip))
+	var x := rr.position.x
+	var mid := rr.position.y + rr.size.y * 0.5
+	hud._text(Vector2(x + 62, mid - 3), e["name"], 15, HudStyle.GOLD if e["me"] else HudStyle.INK, hud.big)
+	hud._text(Vector2(x + 62, mid + 15), STATE_WORDS[pip], 12, pip_col(pip), hud.big)
+	hud._text(Vector2(x + COL_K - 14, mid + 6), "%d / %d / %d" % [e["k"], e["d"], e["a"]], 16, HudStyle.INK, hud.big)
+	hud._text(Vector2(x + COL_DMG - 14, mid + 6), str(e["dmg"]), 15, HudStyle.MUTED)
+	for j in e["gear"].size():
+		var cell := Rect2(Vector2(x + COL_GEAR - 14 + j * (GEAR + 4), mid - GEAR * 0.5), Vector2(GEAR, GEAR))
+		var g: Dictionary = e["gear"][j]
+		if g.is_empty() or not Gear.ALL.has(g["id"]):
+			hud._rounded(cell, Color(0, 0, 0, 0.35), 5, Color(1, 1, 1, 0.1), 1)
+			continue
+		var rc: Color = Data.RARITY[clampi(g["rar"], 0, Data.RARITY.size() - 1)]["color"]
+		hud._rounded(cell, Color(0, 0, 0, 0.55), 5, rc, 1)
+		Icons.draw(hud.c, Gear.icon_of(g["id"]), cell.get_center(), GEAR * 0.3, Gear.ALL[g["id"]]["col"])
+	var b: Dictionary = e["boki"]
+	if b.is_empty():
+		hud._text(Vector2(x + COL_BOKI - 14, mid + 6), "no Boki", 13, DIM)
+		return
+	hud._text(Vector2(x + COL_BOKI - 14, mid - 3), b["name"], 14, HudStyle.INK, hud.big)
+	var evo := "  ·  evo %d" % b["evo"] if b["evo"] > 0 else ""
+	var ink: Color = {"Down": AMBER, "Out": DIM}.get(b["state"], HudStyle.MUTED)
+	hud._text(Vector2(x + COL_BOKI - 14, mid + 15), "Lv %d%s  ·  %s" % [b["lvl"], evo, b["state"]], 12, ink)
