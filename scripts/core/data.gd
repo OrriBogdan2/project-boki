@@ -419,8 +419,6 @@ const BUILDINGS := {
 }
 
 const MATCH := {
-	"length": 360.0,       # seconds until the islands fall
-	"portal_open": 150.0,  # first exit portals open this many seconds in
 	"extract_time": 4.0,   # seconds standing in an exit's circle to leave; a hit from another hunter resets it
 	"revive_time": 3.0,
 	"kin_revive_time": 5.0,

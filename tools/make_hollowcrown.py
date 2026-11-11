@@ -11,7 +11,7 @@ preview: python3 tools/make_hollowcrown.py --preview out.png. Never edit the JSO
 Layout (drawn on the 216 DESIGN grid; scale_layout() spreads it over SIZE x SIZE tiles = metres, so
 the map is ~2x the land at SIZE 305; north up, heights in terraces of 0.8 m):
 
-                  [Highwatch]           outer isles: lv 0, quiet landings, docks / uplinks
+                  [Highwatch]           outer isles: lv 0, quiet landings
      [Larkhollow]   [  Frostgate  ]--   mid ring:    lv 2, one raised plateau each (lv 6)
           |          ||  Gate Span  [Stormcrown Gaol]   core: lv 4, the Throne at lv 8
      [Cinder ]   [ THE CROWN ]=====/
@@ -51,11 +51,13 @@ FORMAT (what World.generate_authored reads; keys beyond Skyreach's are marked +)
     areas (+)         [[x,z,"Name"]] named places inside an island (map labels)
   bridges             {name, a, b, from, to, r}; ends at different heights get a flight (+)
   glides              [a, b] or (+) {a, b, take:[x,z], land:[x,z], name}: glide routes for bots
-  pads, updrafts, winds, docks, outposts, hatches, lairs, spawn_points: as Skyreach
+  pads, updrafts, winds, heart (the Heart site [x, z]), outposts, lairs, spawn_points: as Skyreach
+  ways_scale (+)     the Ways Out radii and bands over the 216 m design (SIZE / DESIGN; tools/ways_out_sites.py)
   train (+)           {cars, speed, dwell, pier_below, path:[[x,z],...] (a closed winding loop, splined
                       from TRAIN_WAY), stations:[[x,z]] (points on the path), names}: the sky train
 """
 import json, math, os, random, sys
+import ways_out_sites
 
 SIZE = 305          # the map's side in tiles (= metres): the one number to change to grow the map
 DESIGN = 216        # the grid every coordinate below is written on; scale_layout() maps it onto SIZE
@@ -99,7 +101,6 @@ islands = [
          rocks=rocks((86, 90, 87, 91), (130, 88, 131, 89), (85, 126, 86, 127), (129, 126, 130, 127)),
          landings=[],
          chests=[[108, 108], [84, 108], [132, 108]],
-         camps=[[94, 88, "heavy"], [122, 128, "heavy"]],
          breakables=[[126, 88, "barrel"], [127, 88, "crate"], [89, 128, "pot"], [90, 128, "crate"]],
          wardens=[[114, 94], [98, 124], [108, 110]],
          traps=[[96, 96], [120, 120]]),
@@ -108,13 +109,13 @@ islands = [
          shapes=[poly([(146, 56), (164, 52), (172, 60), (170, 78), (158, 85), (146, 79), (142, 66)], 4)],
          sheer=[[200, 260]],
          rocks=rocks((149, 79, 151, 79)),
-         chests=[[164, 79]], camps=[], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
+         chests=[[164, 79]], breakables=[[150, 78, "pot"], [151, 79, "pot"]],
          wardens=[[160, 81]], traps=[]),
     dict(id="gaol_sw", name="Ashen Gaol", role="camp", region=0, biome="ember", danger=2, poi=[56, 162], noise=0.05, landmark="",
          shapes=[poly([(48, 138), (62, 133), (74, 139), (77, 156), (68, 166), (52, 164), (44, 152)], 4)],
          sheer=[[20, 80]],
          rocks=rocks((72, 158, 72, 160)),
-         chests=[[62, 161]], camps=[], breakables=[[51, 140, "keg"], [52, 140, "crate"]],
+         chests=[[62, 161]], breakables=[[51, 140, "keg"], [52, 140, "crate"]],
          wardens=[[74, 146]], traps=[]),
     # ---- FROSTGATE (north): a long frozen ridge. The Keep (lv 6, walled) on its east end looks straight
     # down the Gate Span into the Crown; reach it by the West Stair or the narrow South Stair. The open
@@ -128,7 +129,6 @@ islands = [
          rocks=rocks((84, 38, 85, 39), (96, 50, 98, 50), (102, 32, 103, 32), (102, 33, 102, 34), (88, 56, 90, 56)),
          landings=[[84, 32]],
          chests=[[128, 41], [76, 44]],
-         camps=[[92, 44, "light"], [131, 44, "normal"]],
          breakables=[[106, 26, "crate"], [107, 26, "barrel"], [122, 62, "pot"]],
          weapons=[[104, 56]],
          wardens=[[104, 48], [126, 52]],
@@ -145,7 +145,6 @@ islands = [
          crates=[[50, 104], [51, 104], [50, 105]],
          landings=[[38, 120], [58, 66]],
          chests=[[46, 70], [52, 118]],
-         camps=[[46, 76, "normal"], [42, 100, "light"]],
          breakables=[[60, 68, "keg"], [33, 90, "crate"], [34, 90, "crate"], [52, 124, "pot"]],
          weapons=[[38, 108]],
          wardens=[[56, 92], [40, 66]],
@@ -162,7 +161,6 @@ islands = [
                      (158, 112, 158, 115), (190, 106, 190, 109), (160, 132, 162, 132)),
          landings=[[186, 100], [176, 140]],
          chests=[[172, 108], [184, 132]],
-         camps=[[180, 112, "normal"], [162, 104, "light"]],
          breakables=[[170, 96, "crate"], [171, 96, "pot"], [158, 128, "barrel"]],
          weapons=[[190, 126]],
          wardens=[[172, 132], [170, 122]],
@@ -170,7 +168,7 @@ islands = [
          shrine=[174, 118]),
     # ---- THORNWOOD (south): a low bramble wood full of tall grass and blossom trees, the Boki nest in
     # its west glade and the Thornhive lair at its east end on Bramble Rise (lv 4, stairs from the
-    # wood), with an uplink outpost by the nest.
+    # wood).
     dict(id="thorn", name="Thornwood", role="nest", region=4, biome="bloom", danger=1, poi=[96, 170], noise=0.06,
          shapes=[poly([(84, 154), (104, 150), (126, 152), (142, 158), (147, 172), (137, 186), (112, 192), (90, 188), (78, 174)], 2),
                  poly([(126, 160), (140, 162), (144, 172), (136, 182), (124, 176), (122, 166)], 4)],
@@ -180,7 +178,6 @@ islands = [
          rocks=rocks((108, 172, 109, 173)),
          landings=[[86, 168]],
          chests=[[100, 166], [114, 176], [134, 172]],
-         camps=[[98, 160, "light"]],
          wild=[[94, 172], [97, 168]],
          breakables=[[82, 172, "pot"], [83, 173, "pot"], [138, 160, "crate"]],
          weapons=[[106, 186]],
@@ -199,14 +196,13 @@ islands = [
                  poly([(21, 34), (25, 33), (28, 36), (34, 39), (32, 41), (22, 40), (19, 37)], 2)],
          sheer=[[90, 150]],
          landings=[[34, 30], [50, 28], [14, 26]],
-         chests=[[28, 26], [42, 40]],
-         camps=[], breakables=[[30, 22, "crate"], [31, 22, "keg"]],
+         chests=[[28, 26], [42, 40]], breakables=[[30, 22, "crate"], [31, 22, "keg"]],
          wild=[[30, 30], [36, 26], [34, 34]],
          wardens=[],
          areas=[[32, 28, "The Hollow"]]),
     # Highwatch: the Lookout, a cliff shelf (lv 4) on the north coast, one stair up from the yard. It
     # looks over the Gaol and the Watch Road; boulders on top are the only cover. The lighthouse
-    # beside it is the landmark, the uplink in the yard the way out.
+    # beside it is the landmark.
     dict(id="highwatch", name="Highwatch", role="landing", region=6, biome="frost", danger=0, poi=[184, 22], noise=0.08,
          landmark="lighthouse",
          shapes=[poly([(170, 12), (192, 10), (204, 22), (202, 40), (186, 46), (172, 38), (166, 24)], 0),
@@ -215,12 +211,11 @@ islands = [
          ramps=[ramp(182, 26, "n", 3, 0, 4)],
          rocks=rocks((178, 15, 180, 16), (190, 14, 191, 15)),
          landings=[[180, 36], [196, 30], [172, 28]],
-         chests=[[185, 15], [198, 34]],
-         camps=[], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
-         wardens=[[182, 19]],
+         chests=[[185, 15], [198, 34]], breakables=[[184, 40, "crate"], [185, 40, "pot"]],
+         wardens=[[192, 19]],
          areas=[[184, 15, "The Lookout"]]),
     # Duskmoor: the ruined chapel on a raised floor (lv 2), its broken walls the cover, with the stone
-    # ring beside it as the landmark. Relics turn up in the ruins; the skiff dock is the way out.
+    # ring beside it as the landmark. Relics turn up in the ruins.
     dict(id="duskmoor", name="Duskmoor", role="landing", region=7, biome="storm", danger=0, poi=[188, 184], noise=0.08,
          landmark="menhirs",
          shapes=[poly([(176, 168), (196, 164), (206, 178), (202, 198), (184, 206), (170, 196), (168, 180)], 0),
@@ -232,13 +227,12 @@ islands = [
                 dict(line=[173, 188, 173, 191]), dict(line=[198, 168, 201, 168])],
          rocks=rocks((190, 186, 191, 187)),
          landings=[[176, 176], [200, 192], [186, 200]],
-         chests=[[190, 182], [192, 170]],
-         camps=[[178, 194, "light"]], breakables=[[200, 184, "keg"], [200, 185, "crate"]],
+         chests=[[190, 182], [192, 170]], breakables=[[200, 184, "keg"], [200, 185, "crate"]],
          wardens=[[188, 172]],
          areas=[[189, 184, "Moor Chapel"]]),
     # Saltmere: a dry salt river winds north to south between two raised banks (lv 2). The riverbed is
     # a sunken lane with salt caches along it; the banks look down into it. The salt obelisk is the
-    # landmark, the uplink at the river's bend the way out.
+    # landmark.
     dict(id="saltmere", name="Saltmere", role="landing", region=8, biome="bloom", danger=0, poi=[26, 186], noise=0.08,
          landmark="obelisk",
          shapes=[poly([(14, 170), (30, 164), (44, 172), (46, 190), (34, 204), (16, 202), (8, 186)], 0),
@@ -247,8 +241,7 @@ islands = [
          sheer=[[150, 210]],
          ramps=[ramp(23, 180, "w", 3, 0, 2), ramp(30, 192, "e", 3, 0, 2)],
          landings=[[14, 190], [38, 178], [28, 198]],
-         chests=[[14, 182], [26, 196], [36, 180]],
-         camps=[], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
+         chests=[[14, 182], [26, 196], [36, 180]], breakables=[[18, 176, "pot"], [19, 176, "pot"]],
          wardens=[],
          areas=[[27, 184, "Salt River"]]),
 ]
@@ -259,26 +252,44 @@ BY = {d["id"]: d for d in islands}
 # landings and exits per square metre stay about where the 216 m map had them. Every pick fills ground
 # that scaling opened up: a far corner, the other side of a plateau, the stretch between two landmarks.
 MORE = {
-    "crown": dict(chests=[[98, 89], [118, 128]], camps=[[86, 118, "heavy"]],
+    "crown": dict(chests=[[98, 89], [118, 128]],
                   breakables=[[132, 96, "crate"], [133, 96, "pot"]], wardens=[[90, 98]], traps=[[108, 128]]),
     "gaol_ne": dict(chests=[[147, 62]]),
     "gaol_sw": dict(chests=[[48, 150]]),
-    "frostgate": dict(chests=[[94, 30], [100, 62]], camps=[[80, 48, "heavy"]], landings=[[110, 28], [118, 62], [74, 46]],
-                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]]),
-    "cinder": dict(chests=[[30, 100], [46, 93]], camps=[[34, 110, "heavy"]], landings=[[28, 84], [54, 112], [36, 116]],
+    "frostgate": dict(chests=[[94, 30], [100, 62]], landings=[[110, 28], [118, 62], [74, 46]],
+                      breakables=[[78, 52, "crate"], [79, 52, "pot"]], weapons=[[120, 60]], wardens=[[120, 27]],
+                      rocks=[[111, 45, 112, 45]]),   # the heavy camp's cover
+    "cinder": dict(chests=[[30, 100], [46, 93]], landings=[[28, 84], [54, 112], [36, 116]],
                    breakables=[[46, 123, "barrel"]], wardens=[[62, 94]], traps=[[30, 80]]),
-    "storm": dict(chests=[[190, 110], [160, 136]], camps=[[160, 116, "heavy"]], landings=[[158, 104], [190, 120], [166, 94]],
+    "storm": dict(chests=[[190, 110], [160, 136]], landings=[[158, 104], [190, 120], [166, 94]],
                   breakables=[[188, 106, "crate"], [189, 106, "keg"]]),
-    "thorn": dict(chests=[[88, 184], [132, 184]], camps=[[116, 158, "heavy"]], landings=[[96, 186], [138, 166], [90, 160]],
+    "thorn": dict(chests=[[88, 184], [132, 184]], landings=[[96, 186], [138, 166], [90, 160]],
                   wild=[[90, 176]], breakables=[[124, 154, "crate"], [125, 154, "pot"]], wardens=[[130, 158]]),
-    "lark": dict(chests=[[44, 18]], camps=[[40, 20, "normal"]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
-    "highwatch": dict(chests=[[172, 30]], camps=[[194, 16, "normal"]], landings=[[200, 34], [186, 28]],
-                      breakables=[[200, 32, "keg"]]),
-    "duskmoor": dict(chests=[[194, 192]], camps=[[200, 176, "normal"]], landings=[[176, 172], [176, 200]]),
-    "saltmere": dict(chests=[[20, 196]], camps=[[36, 192, "normal"]], landings=[[14, 180], [40, 180]]),
+    "lark": dict(chests=[[44, 18]], landings=[[48, 26], [28, 14]], breakables=[[22, 18, "pot"]]),
+    "highwatch": dict(chests=[[172, 30]], landings=[[200, 34], [186, 28]],
+                      breakables=[[200, 32, "keg"]], rocks=[[177, 33, 178, 33], [196, 41, 197, 41]]),   # the yard camps' cover
+    "duskmoor": dict(chests=[[194, 192]], landings=[[176, 172], [176, 200]], rocks=[[178, 177, 179, 177]]),  # camp cover
+    "saltmere": dict(chests=[[20, 196]], landings=[[14, 180], [40, 180]]),
 }
 for _iid, _more in MORE.items():
     for _k, _pts in _more.items(): BY[_iid].setdefault(_k, []).extend(_pts)
+
+# The 28 monster camps (docs/MAP_2X.md, --camp-layout-check), the first choice of a match: which camps to land on.
+# Rim isles: 2 light + 1 normal. Mid regions: 1 light + 1 normal + 1 heavy. The Crown: 1 normal + 3 heavy. The Gaols
+# are lairs and hold none. A region's biggest camp is its nearest to the map centre (it pulls squads inward);
+# camps of a region stand 30-70 m apart, 14 m off a train halt and 20 m off a lair gate, vault and way-out seat.
+CAMPS = {
+    "crown": [[99, 94, "heavy"], [104, 129, "heavy"], [133, 104, "heavy"], [126, 128, "normal"]],
+    "frostgate": [[108, 42, "heavy"], [85, 42, "normal"], [131, 27, "light"]],
+    "cinder": [[53, 81, "heavy"], [42, 122, "normal"], [33, 100, "light"]],
+    "storm": [[157, 117, "heavy"], [166, 95, "normal"], [186, 134, "light"]],
+    "thorn": [[91, 156, "heavy"], [137, 172, "normal"], [104, 186, "light"]],
+    "lark": [[40, 42, "normal"], [50, 20, "light"], [27, 22, "light"]],
+    "saltmere": [[41, 178, "normal"], [16, 172, "light"], [31, 201, "light"]],
+    "highwatch": [[174, 37, "normal"], [200, 38, "light"], [181, 14, "light"]],
+    "duskmoor": [[175, 173, "normal"], [172, 195, "light"], [197, 169, "light"]],
+}
+for _iid, _camps in CAMPS.items(): BY[_iid]["camps"] = _camps
 
 # One line each in docs/MAP_REGIONS.md. "loot" leans chests on top of the biome's lean (BiomeRun):
 # slot weights multiply, rarity steps add. Every region can be the match's hot drop zone (HotZone).
@@ -286,21 +297,21 @@ regions = [
     dict(id="crown", name="The Crown", biome="gloom", islands=["crown", "gaol_ne", "gaol_sw"],
          purpose="The vault on the Throne, two boss Gaols and the richest chests, under the most Blight."),
     dict(id="frostgate", name="Frostgate", biome="frost", islands=["frostgate"], loot={"slots": {"armor": 1.6}},
-         purpose="The best armor on the map, and the Keep's high ground over the Gate Span."),
+         purpose="The best armor on the map, the Keep's high ground over the Gate Span, an uplink outpost on the south edge."),
     dict(id="cinder", name="Cinder Steps", biome="ember", islands=["cinder"], loot={"slots": {"glove": 1.6}},
-         purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on."),
+         purpose="Forge country: gloves and weapon tunings from the Kilns, a camp to level on, an uplink outpost on the east rim."),
     dict(id="storm", name="Stormbreak", biome="storm", islands=["storm"],
          purpose="The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim."),
     dict(id="thorn", name="Thornwood", biome="bloom", islands=["thorn"],
-         purpose="The Boki nest and the Thornhive lair; tall-grass ambushes and an uplink by the nest."),
+         purpose="The Boki nest and the Thornhive lair; tall-grass ambushes."),
     dict(id="lark", name="Larkhollow", biome="meadow", islands=["lark"],
-         purpose="Wild Boki graze in the Hollow; a calm place to catch one, with a skiff dock out."),
+         purpose="Wild Boki graze in the Hollow; a calm place to catch one."),
     dict(id="highwatch", name="Highwatch", biome="frost", islands=["highwatch"], loot={"slots": {"boots": 1.8}},
-         purpose="The Lookout over the Gaol and the Watch Road, boots, and an uplink out."),
+         purpose="The Lookout over the Gaol and the Watch Road, and boots."),
     dict(id="duskmoor", name="Duskmoor", biome="storm", islands=["duskmoor"], loot={"slots": {"passive": 2.0}},
-         purpose="Relics in the Moor Chapel ruins, and a skiff dock out."),
+         purpose="Relics in the Moor Chapel ruins."),
     dict(id="saltmere", name="Saltmere", biome="bloom", islands=["saltmere"],
-         purpose="Salt caches along the dry river, the outer ring's most chests, and an uplink out."),
+         purpose="Salt caches along the dry river, the outer ring's most chests."),
 ]
 
 # ------------------------------------------------------------------ geometry helpers
@@ -384,11 +395,10 @@ lairs = [
     dict(id="forge", name="The Sunken Forge", boss="colossus", island="gaol_sw", at=[60, 150], half=7, gate="e", entry=["dial"]),
     dict(id="hive", name="The Thornhive", boss="brood", island="thorn", at=[127, 172], half=7, gate="w", entry=["dial", "wards"]),
 ]
-# exits: skiff docks on the quiet NW/SE isles (pointing out to open sky), walled uplink outposts on
-# the NE/SW isles and in Thornwood (each a short run from a boss lair), rift hatches in the ring.
-docks = [[15, 30, -1, 0], [201, 184, 1, 0], [11, 190, -1, 0], [96, 27, 0, -1]]
-outposts = [[190, 26, 1], [26, 186, 1], [92, 178, 1], [188, 193, 1], [30, 108, 1]]
-hatches = [[124, 92], [100, 36], [36, 82], [182, 98], [118, 158], [166, 132], [124, 186], [92, 120]]
+# exits: two walled uplink outposts 42-50 m (design grid; 59-71 m on the map) from the Heart
+# (tools/ways_out_sites.py has the rule).
+outposts = [[112, 59, 1], [59, 104, 1]]   # Frostgate's south edge and Cinder's east rim, 49 m (design) from the Throne
+heart = [108, 108]                        # the Heart site: the Throne (Limited Ways Out; the Gate stands 24 m (design) from it)
 
 spawn_points = {
     "rare_kin": dict(pick=[5, 5], points=[[30, 30, "Larkhollow"], [192, 22, "Highwatch"], [192, 190, "Duskmoor"],
@@ -475,8 +485,8 @@ def scale_layout():
     for G in glides:
         G["take"] = sc_pt(G["take"]); G["land"] = sc_pt(G["land"])
     for L in lairs: L["at"] = sc_pt(L["at"])
-    for lst in (docks, outposts, hatches):
-        lst[:] = [sc_pt(e) for e in lst]
+    outposts[:] = [sc_pt(e) for e in outposts]
+    heart[:] = sc_pt(heart)
     for sp in spawn_points.values(): sp["points"] = [sc_pt(p) for p in sp["points"]]
     bridges[:] = [bridge(n, a, b, sc_pt(p0), sc_pt(p1), r) for n, a, b, p0, p1, r in BRIDGES]
 
@@ -657,12 +667,16 @@ def check(lv, owner, stairs):
     # Warden posts keep clear of camps and exits (9 m) and landings (8 m), as the Blight wants
     camps = [c for d in islands for c in d.get("camps", [])]
     lands = [c for d in islands for c in d.get("landings", [])]
-    exits = [e[:2] for e in docks + outposts + hatches]
+    exits = [e[:2] for e in outposts]
     for d in islands:
         for wp in d.get("wardens", []):
             for lst, r, what in ((camps, 9, "camp"), (exits, 9, "exit"), (lands, 8, "landing")):
                 for q in lst:
                     if math.hypot(wp[0] - q[0], wp[1] - q[1]) < r: probs.append("warden %s too close to %s %s" % (wp, what, q[:2]))
+    on_ground = lambda x, z: (int(x), int(z)) in lv and (int(x), int(z)) not in stairs
+    sites, arc = ways_out_sites.check(heart, outposts, lairs, on_ground, scale=K)
+    probs += sites
+    print("heart gate: %d degrees of seeded angle are clear (%s)" % (len(arc), "%d..%d" % (arc[0], arc[-1]) if arc else "none"))
     for B in bridges:
         assert owner.get((int(B["from"][0]), int(B["from"][1]))) == B["a"], B
     return probs
@@ -705,8 +719,6 @@ def preview(path, lv, owner, stairs):
         dr.rectangle([(cx - h) * S, (cz - h) * S, (cx + h + 1) * S, (cz + h + 1) * S], outline=(255, 80, 60), width=2)
     for o in outposts:
         dr.rectangle([o[0] * S - 6, o[1] * S - 6, o[0] * S + 6, o[1] * S + 6], outline=(120, 255, 200), width=2)
-    for o in docks:
-        dr.rectangle([o[0] * S - 5, o[1] * S - 5, o[0] * S + 5, o[1] * S + 5], outline=(120, 200, 255), width=2)
     for G in glides:
         dr.line([G["take"][0] * S, G["take"][1] * S, G["land"][0] * S, G["land"][1] * S], fill=(255, 255, 120), width=1)
     P = train["path"]
@@ -745,7 +757,7 @@ COVER = {   # share of the biome's ground (inside the keys.json range), clump ra
 }
 LANE_HALF = 1.7         # a lane keeps this much clear on each side of its centre line
 LANDING_R = 5.5         # squads come down inside this circle: no cover
-EXIT_R = {"dock": 3.5, "outpost": 5.5, "hatch": 3.5}
+EXIT_R = 5.5            # an outpost yard keeps this clear
 SIGHT_R = 13.0          # a patch this close, in a clear line, is "in sight" of a way out
 
 def _targets():
@@ -796,8 +808,7 @@ def ramp_tiles(R):
 def _landmarks(d):
     """The places on an island a lane runs between."""
     pts = [tuple(p[:2]) for k in ("landings", "chests", "camps") for p in d.get(k, [])]
-    for ek in (docks, outposts, hatches):
-        pts += [tuple(e[:2]) for e in ek if (int(e[0]), int(e[1])) in INISLE[d["id"]]]
+    pts += [tuple(e[:2]) for e in outposts if (int(e[0]), int(e[1])) in INISLE[d["id"]]]
     for R in d.get("ramps", []):
         dx, dz = DIRS[R["dir"]]
         pts.append((R["at"][0] - dx * 5, R["at"][1] - dz * 5))
@@ -846,8 +857,7 @@ class Cover:
             h = L["half"]
             for z in range(L["at"][1] - h - 2, L["at"][1] + h + 3):
                 for x in range(L["at"][0] - h - 2, L["at"][0] + h + 3): self.hard.add((x, z))
-        for ek, kind in ((docks, "dock"), (outposts, "outpost"), (hatches, "hatch")):
-            for e in ek: self.hard |= _disc_r(e[0] + 0.5, e[1] + 0.5, EXIT_R[kind])
+        for e in outposts: self.hard |= _disc_r(e[0] + 0.5, e[1] + 0.5, EXIT_R)
         for (x, z), l in lv.items():
             if l == -2:
                 for dx in range(-2, 3):
@@ -966,9 +976,8 @@ def place_cover(lv, owner, stairs):
         ring = lambda c, r0, r1, k: [(c[0] + math.cos(a) * rr, c[1] + math.sin(a) * rr)
                                      for rr in [rng.uniform(r0, r1) for _ in range(k)] for a in [rng.uniform(0, math.tau)]]
         if d["biome"] in BUSH_BIOMES:
-            for ek in (docks, outposts, hatches):
-                for e in ek:
-                    if (int(e[0]), int(e[1])) in INISLE[iid]: anchors["exit"].append(((e[0] + 0.5, e[1] + 0.5), None))
+            for e in outposts:
+                if (int(e[0]), int(e[1])) in INISLE[iid]: anchors["exit"].append(((e[0] + 0.5, e[1] + 0.5), None))
         rm = sum(cfg["r"]) / 2.0            # a clump this big, plus what must stay clear of it
         for p in d.get("chests", []): anchors["chest"] += [(q, None) for q in ring((p[0] + 0.5, p[1] + 0.5), 2.5 + rm, 4.0 + rm, 24)]
         for p in d.get("camps", []): anchors["camp"] += [(q, None) for q in ring((p[0] + 0.5, p[1] + 0.5), 4.4 + rm, 6.4 + rm, 24)]
@@ -1087,7 +1096,7 @@ def main():
                      "plateau reached by stairs, and four quiet outer isles with the exits. Nothing is placed by dice "
                      "except what the match rolls: which spawn points, lairs and camps are live, loot, the Blight, weather.",
                regions=regions, islands=islands, bridges=bridges, glides=glides, pads=[], updrafts=[],
-               winds=[], train=train, docks=docks, outposts=outposts, hatches=hatches, lairs=lairs, spawn_points=spawn_points)
+               winds=[], train=train, heart=heart, ways_scale=round(K, 3), outposts=outposts, lairs=lairs, spawn_points=spawn_points)
     path = os.path.join(os.path.dirname(__file__), "..", "content", "maps", "hollowcrown.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=1)

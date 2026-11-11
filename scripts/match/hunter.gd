@@ -48,16 +48,6 @@ const FLOAT_SPEED := 12.0
 const GLIDE_FALL := 1.7
 const GLIDE_SPEED := 5.0       # [game data] MaxGlide 500 uu/s (item 163: "too fast and controllable"; was 6.5)
 const GLIDE_TIME := 9.0        # (owner: "lasts too long, not punishing enough") was 14s of level glide before the heat ring turns hot
-# The opening drop, battle-royale style: a fast skydive you steer freely, then the glider opens by
-# itself near the ground (or earlier on jump) for a slower, floatier last stretch.
-const DIVE_FALL := 13.0        # [est] a punchy skydive (was 11)
-const DIVE_SPEED := 14.0       # m/s, top flat speed in the dive (DropFeel)
-const DROP_FALL := 4.2
-const DROP_SPEED := 8.0        # m/s, top flat speed under the open glider
-const DIVE_VY_RATE := 7.0      # the dive reaches its fall speed in ~0.3s (was 4)
-const DROP_VY_RATE := 9.0      # the canopy settles to its sink in ~0.2s after it opens (was 4)
-const DEPLOY_POP := -1.6       # the canopy catching: your fall checks to this, then settles to DROP_FALL
-const DEPLOY_H := 8.0         # the glider opens by itself this high above the ground
 ## Armor, as in Supervive: it takes a flat share off every hit (ARMOR_DR) for as long as it has
 ## durability left; what gets through hurts your health and wears the durability down by the same
 ## amount. Neither comes back on its own: tonics heal and armor kits repair (the utility belt, 1 to 4).
@@ -138,7 +128,6 @@ func set_hold(kind: String, dur := 0.15) -> void:
 
 func holding() -> String:
 	return hold_kind if m.time < hold_until else ""
-var rift_keys := 0               # Rift Keys carried: each opens a rift hatch once (see Exits); they go in your deathbox
 var chest_keys := 0              # chest keys carried: each opens one chest (KeyChest); they go in your deathbox
 var kin: Ent = null             # the active kin: its abilities are on Q and V, its ultimate on R
 var kin2: Ent = null            # the benched kin, swapped in with X
@@ -185,7 +174,7 @@ var glide_dive := GlideDive.new()      # the glider's plunge while crouch is hel
 var glider_snd := GliderSfx.new()      # its open, wind, dive, overheat and fold sounds
 var wslam_t := 0.0
 var wallstun := 0.0           # how long the next wall slam stuns (Haymaker makes it longer)
-var land_t := 0.0
+var land_t := 0.0             # s left of a Hard Landing's lock: no attack, no ability (HardLanding)
 var ghost_t := 0.0
 var step_t := 0.0
 var gliding := false
@@ -231,6 +220,7 @@ var swap_hold := false
 var dash_at := -9.0           # when the last dash started, for perfect dodges
 var jump_at := -9.0           # when you last jumped off the ground (AirLimits: a move from before it is over)
 var launch_at := -1.0         # when the skyship launch started (DropLaunch), -1 once it is over
+var dive_hold := false        # this dive is the held one (DropFeel.tick_canopy): letting go of crouch opens the canopy
 var dodged := false        # F has to be let go between weapon swaps
 var lives := 1                # comes back this many times minus one before it's really out
 var arch := ""                # the archetype (docs/ARCHETYPES.md); "" = the old class kit (weapon RMB, class dodge)
@@ -347,6 +337,7 @@ func _chase_mod(mv: Vector2) -> float:
 	# the archetype kit's own pace (a Lance charging, Avalanche, a raised tower shield) and short
 	# move-speed boosts (a Sigil): kept here so the movement code itself stays untouched
 	k *= (ak.pace() if ak else 1.0) * (1.0 + buff("move_speed"))
+	k *= 1.0 - float(get_meta("heart_slow", 0.0))     # carrying the Heartspark (Heart.carrier_slow)
 	if Hex.active(self): k *= Hex.SPEED_K      # a hexed critter scurries
 	if chase and not chase.out and not chase.extracted and mv.length() > 0.1 and mv.normalized().dot(dir_to(chase)) > 0.5:
 		k *= 1.18
@@ -474,7 +465,7 @@ func _mitigate(dmg: float, by: Ent, opts: Dictionary) -> float:
 	if ctrl == "local" and Game.god:
 		return 0.0
 	reveal_t = maxf(reveal_t, 1.0)
-	hurt_at = m.time
+	hurt_at = hurt_at if opts.get("src", "") == "heat" else m.time      # a hot glider or the tide never breaks a channel
 	if base_t > 0.0 and dmg > 0.0:
 		cancel_base("you took damage")
 	if opts.has("wallstun"):
@@ -1918,8 +1909,6 @@ func sim(dt: float) -> void:
 	# gloves need no point: Gloves
 	for gk in [["dash", "dash", "dash"], ["sec", "sec", "sec"], ["sig", "kin", "k1"], ["ult", "ult", "r"]]:
 		_gate(gk[0], gk[1], gk[2])
-	if not downed and not dropping and not out:
-		gain_xp(dt * 1.2)       # a slow trickle, so a careful run still levels
 	_tick_base(dt)
 	if base_t > 0.0:
 		inp["fire"] = false        # channeling: no attacks while you base
@@ -2086,11 +2075,11 @@ func _physics(dt: float) -> void:
 		# drifts on when you let go of the keys
 		var gs := (GLIDE_SPEED * 0.5 if glide_fuel <= 0.001 else GLIDE_SPEED) * (1.0 + gear_stat("glide_speed"))
 		var carry := Loco.glide_carry(arch) * (1.0 + gear_stat("glide_speed"))
-		if loco.since > 0.0:     # the step the glider opens keeps your velocity exactly (item 8)
+		if loco.since > 0.0 and not dropping:     # the step the glider opens keeps your velocity exactly (item 8)
 			hv = glide_dive.steer(hv, mv * gs, gs, dt) if glide_dive.on else Loco.glide_step(hv, mv * gs, gs, carry, dt)
 		if dropping:
 			# the drop goes where you point and stops when you let go: no fixed heading to circle on
-			gs = DIVE_SPEED if diving else DROP_SPEED
+			gs = DropFeel.top_speed(diving)
 			if not DropLaunch.locked(self):
 				hv = DropFeel.steer(Vector2(vel.x, vel.z), mv, diving, dt)     # (the launch flies its arc)
 			if drop_follow != null and m.skydrop:
@@ -2141,9 +2130,9 @@ func _physics(dt: float) -> void:
 		vel.y = abyss_lift_vy(vel.y, lip_y - pos.y, dt, 1.0 if glide_fuel > 0.001 else 0.5)
 		glide_lift.hang_t = GlideLift.HANG_T
 	elif gliding:
-		var sink := (DIVE_FALL if diving else DROP_FALL) if dropping else (5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length()))
+		var sink := 5.0 if glide_fuel <= 0.001 else glide_fall(Vector2(vel.x, vel.z).length())
 		if dropping:
-			vel.y = DropFeel.fall_vy(vel.y, sink, DIVE_VY_RATE if diving else DROP_VY_RATE, pos.y - ground(), dt)
+			vel.y = DropFeel.fall_vy(vel.y, diving, pos.y - ground(), dt)
 			if drop_follow != null and m.skydrop:
 				vel.y = m.skydrop.follow_vy(self)
 		elif glide_dive.on:
@@ -2293,14 +2282,13 @@ func _physics(dt: float) -> void:
 			var was_drop := dropping     # (movefeel) the drop's own landing has its feedback (Match.on_drop_landed)
 			if dropping:
 				dropping = false
+				m.on_drop_landed(self)      # (reads `diving`: the dive held to the ground is a Hard Landing)
 				diving = false
-				m.on_drop_landed(self)
 			if shot_down:
 				GlideSpike.land(self)
-			if fv < -11.0 or cur > spd * 1.3:
+			if (fv < -11.0 or cur > spd * 1.3) and land_t <= 0.0:
 				m.fx.dust(pos, 6)
 				squash = 0.15
-				land_t = 0.2
 				m.sfx("land", pos, -10.0)
 			elif fv < -4.0 and not was_drop:
 				# (movefeel) every real landing reads: a brief squash by how fast you came down, a puff
@@ -2308,11 +2296,10 @@ func _physics(dt: float) -> void:
 				squash = maxf(squash, clampf(-fv / 60.0, 0.07, 0.16))
 				m.fx.dust(pos, 2 if fv > -8.0 else 4)
 				m.sfx("land", pos, (-16.0 if fv > -8.0 else -12.0) + (0.0 if is_local() else -6.0))
-			if fv < -17.0:
-				# a long drop lands hard: a thud, a puff of dust and a short stagger
+			if fv < -17.0 and land_t <= 0.0:
+				# a long fall lands hard: a puff of dust and a deeper squash
 				m.fx.dust(pos, 12)
 				squash = 0.25
-				land_t = 0.32
 			if jump_buf > 0.0:
 				jump_buf = 0.0
 				vel.y = JUMP_V
@@ -2391,8 +2378,8 @@ func _deploy() -> void:
 		return
 	diving = false
 	glide_k = 0.0
-	# (movefeel) the canopy bites: your fall checks hard (DEPLOY_POP), then settles to the drop's sink
-	vel.y = maxf(vel.y, DEPLOY_POP)
+	# (movefeel) the canopy bites: your fall checks hard, then settles to the canopy's sink
+	vel.y = maxf(vel.y, DropFeel.pop_vy)
 	m.sfx("glide", pos, -2.0)
 	_glider_sfx("open")
 
@@ -2425,11 +2412,7 @@ func _update_glide(dt: float) -> void:
 	if dropping:
 		# the opening drop: the glider stays open until you land, or until you sink below the islands
 		gliding = not grounded
-		if diving:
-			var void_below: bool = m.world.is_void(pos.x, pos.z)
-			var above: float = pos.y - (World.VOID if void_below else m.world.ground_at(pos.x, pos.z))
-			if (not void_below and above < DEPLOY_H) or (void_below and pos.y < 7.0) or (drop_follow != null and not drop_follow.diving):
-				_deploy()
+		DropFeel.tick_canopy(self)       # dive or canopy (crouch held dives; it opens by itself near the ground)
 		if pos.y < -1.5:
 			dropping = false
 			diving = false
@@ -2768,7 +2751,7 @@ var level_ups := 0          # how many times this run the local level-up moment 
 var slot_lv := {"sec": 0, "dash": 0, "kin": 0, "ult": 0}
 
 func gain_xp(x: float) -> void:
-	if lvl >= XP_TO.size() or x <= 0.0:
+	if lvl >= XP_TO.size() or x <= 0.0 or not TutorialCamps.xp_ok(self):
 		return
 	if m and m.rolling:
 		x = m.rolling.scale_xp(self, x)      # catch-up XP below the session's median level (Rolling.xp_mult)
@@ -2800,6 +2783,8 @@ func xp_frac() -> float:
 
 func can_level(slot: String) -> bool:
 	if skill_pts <= 0 or not SLOT_MAX.has(slot) or int(slot_lv.get(slot, 0)) >= int(SLOT_MAX[slot]):
+		return false
+	if not TutorialCamps.lets_level(self, slot):
 		return false
 	if slot == "ult":
 		return lvl >= int(ULT_AT[mini(int(slot_lv["ult"]), ULT_AT.size() - 1)])
@@ -2859,7 +2844,7 @@ func _gate(key: String, slot: String, fb: String) -> void:
 		if slot == "ult" and skill_pts > 0:
 			m.hud.toast("Ultimate unlocks at level %d" % int(ULT_AT[0]), Color("a2a8bb"))
 		else:
-			m.hud.toast("Locked  ·  earn a skill point to unlock it", Color("a2a8bb"))
+			m.hud.toast(TutorialCamps.locked_text(self), Color("a2a8bb"))
 
 var base_armor := 50.0
 ## Armor evolves through a run, like Supervive's: damage you deal to rival hunters fills it (monsters
@@ -3148,6 +3133,7 @@ func render(delta: float, alpha: float) -> void:
 		update_lip()
 	_render_weapon_fx(delta)
 	DropReticle.tick(self, delta)
+	DropFeel.ribbon(self)
 	var rig: Node3D = model.get_node("Rig")
 	var torso: Node3D = rig.get_node("Torso")
 	if anim == null or anim.model != model:
