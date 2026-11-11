@@ -38,6 +38,12 @@ the swapped ones, rest rotation drift none), which also adds the `x_breath` leaf
 the sword point at the idle's first frame (0.8 cm under the ground, as before). `anchor_head_top` and `anchor_chest`
 move onto the new mesh (the spec's `anchors`).
 
+Chain Lunge removed (owner 11-11, ext/kael-chainlunge-cleanup): the `chainlunge` clip is dropped from the glb, 51 clips
+left, with `python3 tools/art1/glb_add_clips.py --drop art/wardens/kael/kael.glb chainlunge` (no Blender; the source rig
+/home/boki/art1kael/build/kael.blend is not needed to remove a clip). The drop also compacts the buffer: the old file
+carried about 5.9k accessors nothing pointed at (left by earlier swaps), so it went from 6.7 MB to 3.7 MB; every mesh,
+skin, image and the other clips are byte-identical. kael_clips.py no longer keys it, so a re-bake does not bring it back.
+
 `kael.glb.import`: unchanged (`generate_lods=false`, `force_disable_compression=true`).
 
 Shots on the game rig (`--warden-shots`): docs/shots/kael-appeal/.

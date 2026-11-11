@@ -38,7 +38,7 @@ every knock.
 | Gilded Riposte while they unload on you | Every hit blocked (two at most) makes the cleave 20% harder |
 | Warchain in, then the Riposte | Dive in, eat their answer in the guard, cleave back |
 | Warchain hooked, pull (E), then tap RMB during the pull | **Cinder Spin**: a spin around you that blights |
-| Warchain attached, hold RMB and let go | **Chain Lunge** along the chain: harder, with a short stun |
+| Warchain attached, hold RMB and let go | A plain Lunge along your aim, the chain kept (nothing pulls you down it); past the chain's length it breaks |
 | Warchain, hold RMB, then E while holding (or pull, then hold) | **Haul Slam** where you arrive, stronger the longer you charged |
 | A held Lunge that hits nothing | Smash's cooldown doubles |
 | Rooted or Grounded | You can't throw the chain; a stun on you breaks it |

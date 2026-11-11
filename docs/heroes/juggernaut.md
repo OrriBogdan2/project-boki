@@ -371,7 +371,7 @@ the upward cleave, settled by 0.45s),
 `jug_lunge_wind` (held: sunk deep, blade dragged behind, coiled) / `jug_lunge`, `jug_meteor` (held: the hang's
 gather and turn, then the dive) / `jug_meteor_land` (the crouch onto the knees and the 0.5s rise), `jug_dash`,
 `jug_exdash` (his air dash: a hurled shoulder charge, knees tucked, blade trailing; no ground mark), `jug_chain` / `jug_reel`, `jug_spin`,
-`jug_chainlunge`, `jug_haul_wind` / `jug_haulslam`, `jug_roar` (Enraged). Strips: `--arena-demo=anim_<move>`
+`jug_haul_wind` / `jug_haulslam`, `jug_roar` (Enraged). Strips: `--arena-demo=anim_<move>`
 (scripts/arch/dj_demo.gd).
 
 ## Look and sound (all ours)

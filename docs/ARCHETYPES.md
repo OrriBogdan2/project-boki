@@ -1118,7 +1118,7 @@ free hands, the greatsword's arc and whole-body turns (flips, spins). Juggernaut
 alternate (no heavier third, as Brall's), `jug_wave` (the raised charge carving down into a lunge),
 `jug_slam` (0.5s rearing wind-up, the crash on the hit), `jug_lunge_wind` / `jug_lunge`, `jug_meteor`,
 `jug_dash` (shoulder-down, the tip thrust at the end), `jug_chain` / `jug_reel`, `jug_spin`,
-`jug_chainlunge`, `jug_haul_wind` / `jug_haulslam` (`jug_doom` went with the R; the rank-3 crash
+`jug_haul_wind` / `jug_haulslam` (`jug_doom` went with the R; the rank-3 crash
 uses `jug_slam`). Thief: SMG recoil and the twin blades' arcs as before, `thf_vault_f/b/l/r` (a tucked flip by
 the dash's direction), `thf_primed`, `thf_bola` (whirled, then slung: the Bola leaves the hand 0.14s
 in), `thf_knife` (cocked by the ear; the knife leaves 0.12s in), `thf_arrive`, `thf_volley` (0.7s, the

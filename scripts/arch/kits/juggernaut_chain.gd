@@ -160,13 +160,6 @@ func snap(word := "CHAIN BROKE") -> void:
 	target = null
 	k.fx().unchain(_fx_id())
 
-## The Chain Lunge ran down it: the chain is used up and its cooldown starts.
-func spend() -> void:
-	state = "ready"
-	target = null
-	k.start_e_cd()
-	k.fx().unchain(_fx_id())
-
 func _fx_id() -> String:
 	return "war%d" % k.h.get_instance_id()
 
