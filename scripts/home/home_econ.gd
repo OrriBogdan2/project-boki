@@ -164,6 +164,12 @@ func find(p2: Vector2, bd: float) -> Dictionary:
 		var fp := _fpos(f)
 		var dd := p2.distance_to(Vector2(fp.x, fp.z))
 		if dd < 1.7 and dd < bd: bd = dd; best = {"kind": "feeder", "f": f}
+	for e in FeedBowl.bowls(h):
+		var bp := FeedBowl.at(e)
+		var bowl_d := p2.distance_to(Vector2(bp.x, bp.z))
+		if bowl_d < FeedBowl.PICK_R and bowl_d < bd:
+			bd = bowl_d
+			best = {"kind": "bowl", "e": e}
 	for g in gnodes:
 		var gp: Vector3 = (g as Node3D).position
 		var dd := p2.distance_to(Vector2(gp.x, gp.z + 0.6))
@@ -181,6 +187,7 @@ func label(it: Dictionary) -> String:
 		"feeder":
 			var f: Dictionary = it["f"]
 			return "%s  ·  %d/%d meals" % [Econ.fdef(f)["name"], Econ.fill(f), int(Econ.fdef(f)["cap"])]
+		"bowl": return FeedBowl.label(it["e"])
 		"grave": return "Visit %s's grave" % it["g"]["name"]
 		"graveyard": return "The graveyard  ·  %d resting" % Econ.graves().size()
 	return ""
@@ -189,6 +196,7 @@ func use(it: Dictionary) -> void:
 	match String(it["kind"]):
 		"place": place()
 		"feeder": open_feeder(it["f"])
+		"bowl": FeedBowl.drop(h, it["e"])
 		"grave": open_grave(it["g"])
 		"graveyard": open_graveyard()
 
