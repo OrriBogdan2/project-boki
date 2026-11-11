@@ -21,6 +21,7 @@ boot_splash/show_image=true
 boot_splash/minimum_display_time=0
 
 [autoload]
+CheckWatchdog="*res://tools/check_watchdog.gd"
 Data="*res://scripts/core/data.gd"
 Save="*res://scripts/core/save.gd"
 Sfx="*res://scripts/core/sfx.gd"
