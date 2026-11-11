@@ -73,7 +73,7 @@ func _walk(k: Dictionary, secs: float) -> float:
 	var far := 0.0
 	for i in int(secs / STEP):
 		var turn := float(i) * STEP * 2.0      # a small circle, so the island never runs out
-		var step: Vector3 = Vector3(sin(turn), 0.0, cos(turn)) * home.SPEED * home.carry.speed_mul() * STEP
+		var step: Vector3 = Vector3(sin(turn), 0.0, cos(turn)) * home.walk_speed() * home.carry.speed_mul() * STEP
 		# props stop you as they stop a Boki
 		if home.world.occupy(home.ppos.x + step.x, home.ppos.z, PLAYER_R, 0.0, true) == 0.0:
 			home.ppos.x += step.x

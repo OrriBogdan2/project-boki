@@ -291,7 +291,6 @@ func init_hunter(match_node: Node, id: String, team_id: int, class_id: String, n
 	UtilityBelt.issue(self)
 	pack_cap = Equal.base_pack()
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
-	base_speed = cdat["speed"]
 	runner = AbilityRunner.new(self)
 	ak = ArchKit.make(self, arch) if arch != "" else null
 	HunterMove.apply(self)
@@ -329,7 +328,6 @@ func reclass(c: String, a: String, w := "") -> void:
 	LevelGrowth.reset(self)      # your levels' health comes along to the new class
 	max_armor = float(ARMOR_TIERS[armor_tier][4]); armor = max_armor
 	glide_max = GLIDE_TIME * float(cdat.get("glide_cap", 1.0))
-	base_speed = cdat["speed"]
 	dodge_def = Content.class_dodge(cls)
 	arch = Arch.fix(a, cls)
 	r = Arch.hit_r(arch, cdat)
