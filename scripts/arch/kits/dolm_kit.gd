@@ -543,12 +543,6 @@ func _lunge(dist: float, t: float, dir: Vector2) -> void:
 func extra_dashes() -> float:
 	return 1.0 if rank("dash") >= 3 else 0.0
 
-## Shift again inside a chain is the next hop (each hop opens a fresh window; none after the last).
-func recast_window() -> Dictionary:
-	if not hop.chaining() or int(hop.st["n"]) >= int(hop.dd()["hops"]):
-		return {}
-	return {"slot": "dash", "left": hop.left()}
-
 ## Shift on the ground starts a Rock Hop chain (breah_hop.gd); a press inside a chain is its next hop, wherever
 ## he is. In the air it is his long dash.
 ## RecastCue: Shift again chains the next hop (a press in the air waits for the rock).
@@ -596,10 +590,6 @@ func fires_in_dash() -> bool:
 ## The hops turn her along the chain; only the air dash keeps the weapon on the cursor.
 func aims_in_dash() -> bool:
 	return not hop.chaining() and super.aims_in_dash()
-
-## The next hop is open while the chain has a hop to give (Shift again).
-func recast_left() -> float: return hop.left() if hop.chaining() and hop.hops_left() > 0 else 0.0
-func recast_slot() -> String: return "dash"
 
 ## The chain's time left if nobody presses again (the shared dash's otherwise).
 func dash_left() -> float:

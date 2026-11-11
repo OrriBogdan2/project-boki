@@ -26,7 +26,6 @@ const RECAST_BUFFER := 0.15    # s an early recast press waits for its window (D
 const RECAST_LEAD := 0.5       # s after a cast in which a cooldown-denied E counts as an early recast (buffered; the buzz only if none opens)
 var recast_buf := {}           # slot -> s an early recast press still waits
 var cue := {}                  # RecastCue's state for the local hunter (the open window, expiry, the marks shown)
-var recast_heard := {"slot": "", "left": 0.0, "recast_open": 0, "recast_tick": 0}   # RecastSound: the last window and the plays
 var r_t := 0.0                 # R's window left
 var bonded := false            # the R running now was bonded
 var dash_t := -1.0             # how long Shift has been held for a hold dash (-1: not holding)
@@ -237,8 +236,6 @@ func tick(dt: float) -> void:
 	_tick(dt)
 	if not curved.is_empty(): _tick_curve(dt)
 	_tells(dt)
-	if h.is_local():
-		RecastMarker.sync(self)
 	_tick_charge(dt)
 	_tick_recast(dt)
 
@@ -772,15 +769,6 @@ func rmb_charge_f() -> float:
 	return ch_rmb + clampf(1.0 - float(cd["rmb"]) / maxf(0.01, float(rmb_def().get("cooldown", 6.0)) * cd_k("sec")), 0.0, 1.0)
 
 func e_recastable() -> bool: return false
-## The world marker of an open recast (RecastMarker, caster only): where the thing you will trigger sits
-## (Vector3.INF = no recast open), the action whose key it shows, and the seconds the window has left (< 0 = no limit).
-func recast_at() -> Vector3: return Vector3.INF
-func recast_key() -> String: return "signature"
-func recast_left() -> float: return e_t
-## The open recast (RecastCue's "<KEY> AGAIN"): s left in it, 0 when none open, INF when it has no time limit.
-## Kits whose recast is not E's override both; recast_slot() is the HUD slot id: k1 (E), x, dash, sec or primary.
-func recast_left() -> float: return e_t if e_t > 0.0 and e_recastable() else 0.0
-func recast_slot() -> String: return "k1"
 ## E fires on the key's press (a self-centred blast, e.on_press in data), never through the hold-to-aim preview.
 func e_on_press() -> bool: return bool(e_def().get("on_press", false))
 var anim_id := ""              # the kit move playing on the hunter (HunterAnim.KMOVES), its start

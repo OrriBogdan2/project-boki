@@ -976,7 +976,6 @@ func in_e() -> bool:
 func e_recastable() -> bool:
 	return warchain.hooked()
 
-## E again while the hook holds pulls you in.
 ## E: throw the chain, or pull yourself along it (JuggernautChain.press).
 ## RecastCue: E again while the hook holds pulls you in; the marker sits on what it bit.
 func recast_window() -> Dictionary:

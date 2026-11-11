@@ -74,6 +74,3 @@ You hear an ultimate before you see it. Every Hunter's X goes through `HeroUlt.p
 | `amb_water` | on the shore islands (`AmbBeds.WATER_ISLANDS`: Saltmere), over that island's own bed |
 | `amb_gust`, `amb_rain` | the raid condition (`AmbBeds.GUST` / `RAIN`): ash storm is all gust, dusk and fog bring rain |
 | `amb_blight` | a low rumble that follows `BlightDir.level` where you stand (up toward the core, up with the session's age) and climbs in the last 90 s before the islands fall |
-
-## Recast cue sounds
-Every Hunter's recasts sound the same (DECISIONS 2026-11-08, two-step abilities): `RecastSound` (`scripts/arch/recast_sound.gd`) reads `ArchKit.recast_window()` (`{slot, left}`) each step for the local hunter only and plays `recast_open` as a window opens and `recast_tick` 0.5s before it closes (`tools/gen_sfx_ui.py`, at the ui loudness). They are UI sounds (no position, so only the caster hears them), pitched per slot (`RecastSound.PITCH`) so an E and an X window differ. A window that waits for you (Bulwark's hammer) never ticks. `--recast-sound-check` asserts one chime and one tick per window for every recast kit.

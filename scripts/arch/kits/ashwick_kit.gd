@@ -724,8 +724,6 @@ func _cloak_blast() -> void:
 func cast_ult() -> bool: return HeroUlt.press(self, jet.start)
 func has_ult() -> bool: return true
 func ult_recast() -> bool: return jet.recast()
-func recast_left() -> float: return jet.left()
-func recast_slot() -> String: return "x"
 func ult_running() -> bool: return jet.running()
 ## RecastCue: X again lands the flight early, where you are (it lands by itself when it runs out).
 func recast_window() -> Dictionary:
@@ -747,8 +745,6 @@ func combo_marks(out: Array) -> void:
 		if left > 0.0 or lvl > 0:
 			var label := "ABLAZE" if lvl > 0 else "CHAR"
 			out.append(RecastCue.mark(c["e"], int(c["n"]), maxf(0.0, left), ttl, label, lvl == 1))
-## X again lands the flight early (it lands by itself when it runs out).
-	return {"slot": "x", "left": float(jet.flight["t"])} if jet.running() else {}
 ## In the flight (a roll) only E works (item 66: AshwickJet.lock_inputs).
 func fires_in_dash() -> bool: return jet.running() or super.fires_in_dash()
 func aims_in_dash() -> bool: return not jet.running() and super.aims_in_dash()
