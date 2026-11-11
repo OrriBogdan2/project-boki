@@ -3121,7 +3121,7 @@ func _open_kin(rec: Dictionary) -> void:
 	UI.title_icon(v, UI.sex_icon(rec, 22.0))
 	UI.subtitle(v, "Level %d  ·  %s Boki  ·  %s  ·  %s nature" % [int(rec["level"]), String(sp["type"]).capitalize(), Care.stage_name(rec), Care.nature(rec)])
 	var hx := UI.head_extra(v)
-	hx.add_child(VoidPortrait.of(rec, get_tree(), 84.0))
+	hx.add_child(VoidPortrait.of(rec, get_tree(), 128.0))
 	if partner: hx.add_child(UI.tag("Partner", UI.ACCENT))
 	elif Match.TWO_KIN and rec["uid"] == Save.d.get("active2", ""): hx.add_child(UI.tag("Second", UI.TEAL))
 	if rec.get("farmhand", false): hx.add_child(UI.tag("Farmhand", UI.GOOD))

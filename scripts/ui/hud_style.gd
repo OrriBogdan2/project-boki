@@ -170,6 +170,17 @@ static func dmg_col(crit: bool, armor_hit: bool, on_you: bool, on_your_kin: bool
 
 # style boxes are made once per look and reused (dozens of frames are drawn every frame)
 static var _boxes := {}
+static var _torn: UiTorn
+
+## The torn void panel with its neon edge, for the few big boxes the HUD puts over the world (the
+## tutorial's intro card). One shape per rect, cached by the box, so it draws as cheaply as a flat one.
+static func torn_panel(c: CanvasItem, r: Rect2) -> void:
+	if _torn == null:
+		_torn = UiTorn.make(SHADE, 6.0, 1.0, 1.0)
+		_torn.glow_w = 1.8
+		_torn.shadow = 30
+	c.draw_style_box(_torn, r)
+
 ## A cached rounded style box (bg, corner radius, border colour and width): for widgets drawing their own shapes.
 static func box(bg: Color, rad: int, border: Color, bw: int) -> StyleBoxFlat:
 	var key := [bg, rad, border, bw]
