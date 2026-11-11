@@ -323,7 +323,8 @@ func _rig_pace() -> void:
 	ok(not syncs.is_empty(), "the match has Warden rigs (%d)" % syncs.size())
 	if syncs.is_empty():
 		return
-	ok(syncs.all(func(sy): return sy.pace.every == (RigPace.EVERY if RigPace.dear() else 1)), "each rig's pace fits the driver")
+	var want := RigPace.EVERY if RigPace.dear() else 1
+	ok(syncs.all(func(sy): return sy.pace.every == want), "each rig's pace fits the driver")
 	var sy: WardenGlb.Sync = syncs[0]
 	sy.set_process(false)
 	sy.pace.every = RigPace.EVERY
@@ -344,5 +345,5 @@ func _rig_pace() -> void:
 		if sy.pace.held == 0.0:
 			posed += 1
 	ok(posed == RigPace.EVERY * 2, "the one at the camera's focus every frame (%d)" % posed)
-	sy.pace.every = RigPace.EVERY if RigPace.dear() else 1
+	sy.pace.every = want
 	sy.set_process(true)
