@@ -9,7 +9,7 @@ extends "res://tools/displace_net_check.gd"
 ## Once both games are up they run in lockstep, not on the wall clock: the host steps one DT, tells the guest,
 ## and goes on when the guest has stepped too; the guest also holds a step until the host's latest snapshot is in,
 ## so a cast takes as many frames as it needs and no real time, and times in the log are step counts (the same
-## on a slow box). --remote-anim-check=archer,mage runs only those kits; "stomp" and "skydive" are the rows of
+## on a slow box). --remote-anim-check=archer,mage runs only those kits; "stomp", "skydive" and "ride" are the rows of
 ## RemoteAnimStomp.
 
 const LAG_TOL := 0.3         # s: one snapshot (0.1 s) plus the frames both games need to show it
@@ -41,7 +41,7 @@ var owed := 0                # guest: steps the host asked for and this game has
 var acks := 0                # host: steps the guest has taken
 var snap_t := 0.0            # host: its match time at its last snapshot; guest: the same, from the step message
 var sampled := -1            # the step _sample last looked at
-var kits: Array = ARCHS + ["stomp", "skydive"]
+var kits: Array = ARCHS + ["stomp", "skydive", "ride"]
 
 func _init() -> void:
 	tag = "RANIM"
@@ -109,6 +109,8 @@ func _host() -> void:
 		await RemoteAnimStomp.host(self, G)
 	if "skydive" in kits:
 		await RemoteAnimStomp.skydive(self, G)
+	if "ride" in kits:
+		await RemoteAnimStomp.ride(self, G)
 	_finish()
 
 func _cast(G: Hunter, arch: String, key: String, held: bool) -> void:

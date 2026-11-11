@@ -16,7 +16,8 @@ extends RefCounted
 ##              flip (front, back or side by direction) and a landing roll, a medium a corkscrew
 ##              spin, a heavy a cannonball and a ground slam; landings squash by how far you fell
 ##   moves      class dodges (light phase lunge, medium combat roll, heavy shoulder charge), the
-##              glide (with the cloth streaming), skydiving, mantles and ledge pulls, crouching
+##              glide (with the cloth streaming), skydiving, standing on the squad rocket's peg, mantles and ledge
+##              pulls, crouching
 ##   combat     the hands sit on the weapon's grips (elbows solved each frame), weapon aim poses and
 ##              relaxed carries, recoil per gun, reloads, melee swing arcs per combo step, casting,
 ##              flinches toward the hit, stun wobble, revive kneel, stomps, the base
@@ -24,7 +25,7 @@ extends RefCounted
 ##   cloth      skirt, cape, scarf and tail on springs that follow through
 ##
 ## update() takes a state dictionary; every key is optional:
-##   vel (Vector3) face (yaw) grounded gliding diving rolling dash_dir (Vector2, world) dash_kind
+##   vel (Vector3) face (yaw) grounded gliding diving ride rolling dash_dir (Vector2, world) dash_kind
 ##   ("phase" "roll" "charge" "lunge" "skate"; from the class when left out) crouch (0..1) ledge
 ##   mantle (0..1, -1 when not) reload (0..1, -1) drink (0..1, -1) stomp (0..1, -1) recoil (0..1)
 ##   flash (0..1) fired (seconds since the last shot) wid (weapon id) swing_n (counts swings)
@@ -46,6 +47,7 @@ const BODY_C := Vector3(0, 0.62, 0)      # whole-body turns (flips, rolls) go ab
 const G_UP := Hunter.H_GRAV                # for guessing how long a jump stays up
 const FLIP_MIN := 0.8                     # total airtime that earns a trick
 const AIM_Y := 0.5                        # Aim sits this high on the torso
+const RIDE_GRIP := 0.3                   # riding: the hands sit this share of the way from the middle to the shoulders
 const GROUND_CLEAR := 0.05                # no part of a weapon ever goes nearer the ground than this (m)
 
 ## How each class stands and moves.
@@ -182,6 +184,7 @@ var run_k := 0.0
 var air_k := 0.0
 var glide_k := 0.0
 var dive_k := 0.0
+var ride_k := 0.0            # standing on a peg of the squad rocket, hands on its bar (DropRocket)
 var crouch_k := 0.0
 var ledge_k := 0.0
 var stomp_k := 0.0
@@ -533,7 +536,7 @@ func update(dt: float, s: Dictionary) -> void:
 	_update_km(String(s.get("kmove", "")), float(s.get("kmove_t", 99.0)), dt)
 	var vel: Vector3 = s.get("vel", Vector3.ZERO)
 	var face: float = s.get("face", model.rotation.y)
-	var grounded: bool = s.get("grounded", true)
+	var grounded: bool = s.get("grounded", true) and not s.get("ride", false)      # (on a peg, not on the ground)
 	var gliding: bool = s.get("gliding", false)
 	var diving: bool = s.get("diving", false)
 	var rolling: bool = s.get("rolling", false)
@@ -553,7 +556,8 @@ func update(dt: float, s: Dictionary) -> void:
 	var moving := grounded and spd > 0.4
 	run_k = _ease(run_k, clampf(spd / 5.5, 0.0, 1.35) if moving else 0.0, 9.0, dt)
 	var r1 := minf(run_k, 1.0)
-	air_k = _ease(air_k, 0.0 if grounded or gliding or diving else 1.0, 14.0, dt)
+	ride_k = _ease(ride_k, 1.0 if s.get("ride", false) else 0.0, 8.0, dt)
+	air_k = _ease(air_k, 0.0 if grounded or gliding or diving or ride_k > 0.01 else 1.0, 14.0, dt)
 	glide_k = _ease(glide_k, 1.0 if gliding and not diving else 0.0, 7.0, dt)
 	dive_k = _ease(dive_k, 1.0 if diving else 0.0, 6.0, dt)
 	crouch_k = _ease(crouch_k, float(s.get("crouch", 0.0)), 12.0, dt)
@@ -809,6 +813,13 @@ func update(dt: float, s: Dictionary) -> void:
 	# skydiving: legs bent back and spread
 	hl = lerpf(hl, -0.15, dive_k); kl = lerpf(kl, -1.1, dive_k); wl = lerpf(wl, -0.3, dive_k)
 	hr = lerpf(hr, -0.15, dive_k); kr = lerpf(kr, -1.1, dive_k); wr = lerpf(wr, 0.3, dive_k)
+	# riding the rocket: braced on the peg, knees bent, the feet a little apart and level (both on the peg)
+	hl = lerpf(hl, 0.74, ride_k)
+	kl = lerpf(kl, -1.5, ride_k)
+	wl = lerpf(wl, -0.1, ride_k)
+	hr = lerpf(hr, 0.74, ride_k)
+	kr = lerpf(kr, -1.5, ride_k)
+	wr = lerpf(wr, 0.1, ride_k)
 	# dodges
 	if dash_k > 0.01:
 		var dhl := 0.0; var dkl := 0.0; var dhr := 0.0; var dkr := 0.0
@@ -900,6 +911,10 @@ func update(dt: float, s: Dictionary) -> void:
 				pitch = lerpf(pitch, -0.35, dash_k); yaw = lerpf(yaw, 0.35, dash_k)
 	# skydive: chest down (the rig tips), back arched, head up
 	pitch = lerpf(pitch, 0.3, dive_k)
+	# riding the rocket: chest to the hull, shoulders square, the wind's buffet the only sway
+	pitch = lerpf(pitch, -0.2 + sin(t * 2.3 + seed_ph) * 0.03, ride_k)
+	yaw = lerpf(yaw, 0.0, ride_k)
+	roll = lerpf(roll, sin(t * 1.7 + seed_ph) * 0.03, ride_k)
 	# stun: the upper body sways in circles
 	if stun_k > 0.01:
 		pitch += stun_k * (sin(t * 3.1) * 0.12 - 0.12)
@@ -1046,7 +1061,7 @@ func update(dt: float, s: Dictionary) -> void:
 		off.y += still * (0.012 + sin(t * 1.4 + seed_ph) * 0.008)       # light on its feet, half floating
 	elif arch == "dolm":
 		off.y -= absf(cos(ph)) * 0.03 * r1         # wide, grounded stomps
-	off.y += KMovesStone.hover(arch, t)
+	off.y += KMovesStone.hover(arch, t) * (1.0 - ride_k)      # (her feet stand on the peg)
 	off.y += base_k * (0.04 + sin(t * 2.0) * 0.015) * smoothstep(0.0, 0.3, base_p)
 	off.y -= revive_k * 0.02
 	off.y += st_body.z          # a stomp style's hop
@@ -1059,7 +1074,8 @@ func update(dt: float, s: Dictionary) -> void:
 	rb = Basis(Vector3.BACK, sin(ph) * 0.03 * r1) * rb
 	rig.basis = rb * Basis.from_scale(scl)
 	rig.position = rpivot - rb * rpivot + off
-	legs.rotation.y = (legs_yaw + lag) * (1.0 - glide_k) * (1.0 - dive_k) + sin(ph) * legs_sway * r1 * back
+	var legs_free := (1.0 - glide_k) * (1.0 - dive_k) * (1.0 - ride_k)
+	legs.rotation.y = (legs_yaw + lag) * legs_free + sin(ph) * legs_sway * r1 * back
 	leg_l.rotation = Vector3(hl, 0, wl)
 	leg_r.rotation = Vector3(hr, 0, wr)
 	if knee_l: knee_l.rotation.x = kl
@@ -1304,7 +1320,7 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	aim_k = _ease(aim_k, want_aim, 14.0 if want_aim > aim_k else 3.0, dt)
 	var want_carry := 1.0 if r1 > 0.55 and aim_k < 0.3 and grounded and hold != "minigun" else 0.0
 	carry_k = _ease(carry_k, want_carry, 6.0, dt)
-	var stow := maxf(maxf(glide_k, dive_k), maxf(emote_k * (0.0 if emote_id == "" else 1.0), 0.0))
+	var stow := maxf(maxf(glide_k, maxf(dive_k, ride_k)), emote_k * (0.0 if emote_id == "" else 1.0))
 	stow = maxf(stow, stow_k)
 	var st_look := StompLook.style(String(s.get("stomp_style", "")))
 	if StompLook.two_handed(st_look):
@@ -1568,6 +1584,10 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if dive_k > 0.01:
 		fl = fl.lerp(sh_l + Vector3(-0.32, 0.12, -0.22), dive_k)
 		fr = fr.lerp(sh_r + Vector3(0.32, 0.12, -0.22), dive_k)
+	# riding the rocket: both hands on the bar close together ahead of the chest, elbows out and down
+	if ride_k > 0.01:
+		fl = fl.lerp(Vector3(sh_l.x * RIDE_GRIP, sh_l.y - 0.1, sh_l.z - DropRocket.REACH), ride_k)
+		fr = fr.lerp(Vector3(sh_r.x * RIDE_GRIP, sh_r.y - 0.1, sh_r.z - DropRocket.REACH), ride_k)
 	# ledge and mantle: reaching up, then pushing down on the lip
 	if ledge_k > 0.01:
 		var mk := float(s.get("mantle", -1.0))
@@ -1662,8 +1682,8 @@ func _upper(dt: float, s: Dictionary, vel: Vector3, r1: float, still: float, pit
 	if hold == "palm":
 		free_r = 1.0
 	free_l = maxf(free_l, 1.0 - gun_vis)
-	if glide_k > 0.01 or dive_k > 0.01:
-		free_r = maxf(free_r, maxf(glide_k, dive_k))
+	if glide_k > 0.01 or dive_k > 0.01 or ride_k > 0.01:
+		free_r = maxf(free_r, maxf(maxf(glide_k, dive_k), ride_k))
 	if tuck_k > 0.0:
 		fr = fr.lerp(knee_hug_r, tuck_k)
 		free_r = maxf(free_r, tuck_k * (1.0 if not melee else 0.0))
@@ -2093,7 +2113,7 @@ func _flag(k: float) -> void:
 ## when you fall, flutter in a glide, and swing with the hips and turns.
 func _cloth(dt: float, vel: Vector3, spd: float, mf: float, ms: float, yaw: float, r1: float) -> void:
 	var fall := clampf(-vel.y / 9.0, -1.0, 1.0) * (1.0 - glide_k)
-	var wind := clampf(spd / 6.0, 0.0, 1.6) + glide_k * 1.0 + dive_k * 1.4
+	var wind := clampf(spd / 6.0, 0.0, 1.6) + glide_k * 1.0 + dive_k * 1.4 + ride_k * 1.2
 	var flut := sin(t * 13.0 + seed_ph) * 0.5 + sin(t * 21.0 + seed_ph * 2.0) * 0.3
 	var turn := wrapf(yaw - torso_yaw_prev, -PI, PI) / dt
 	torso_yaw_prev = yaw

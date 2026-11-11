@@ -3013,6 +3013,7 @@ func _anim_state(stretch: float) -> void:
 	s["grounded"] = grounded and pad.is_empty()
 	s["gliding"] = gliding and not plunging()
 	s["diving"] = plunging()
+	s["ride"] = riding and rocket != null
 	s["rolling"] = roll_t > 0.0
 	s["dash_dir"] = roll_dir
 	s["dash_kind"] = _dash_anim_kind()
@@ -3112,12 +3113,13 @@ func render(delta: float, alpha: float) -> void:
 	if absf(step_vis) > 0.001:
 		position.y += step_vis
 		step_vis = lerpf(step_vis, 0.0, 1.0 - exp(-16.0 * delta))
-	visible = (not out or WardenClips.dying(self)) and not extracted and not riding and not unseen
+	visible = (not out or WardenClips.dying(self)) and not extracted and (not riding or rocket != null) and not unseen
 	if not model:
 		return
 	HunterWisp.tick(self, delta)
 	if m.cam: model.basis = m.cam.char_basis(face, model.scale)     # leaned toward the camera (CamRig.char_lean)
 	else: model.rotation.y = face
+	if riding and rocket != null: rocket.seat(self, alpha)
 	if out and has_meta("fling"):
 		# hit by the sky train: the body is flung tumbling through the air for a moment, then gone
 		var fl: Dictionary = get_meta("fling")

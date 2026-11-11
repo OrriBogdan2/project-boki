@@ -5,6 +5,9 @@ extends RefCounted
 ##  3. Jumping out and opening the glider at once goes further than jumping out and free-falling.
 ##  4. Nobody lands in a wall, under the ground or on top of a squadmate (several launches, steered ones too).
 ##  5. A bot leader flies the rocket to its landing spot (within BOT_SPOT_M).
+##  6. Every one of the 12 Hunters rides it standing on a peg with both hands on the bar: no T-pose (the hands within
+##     RideProbe.GRIP_M of the bar, hands close together), the feet on the peg and never inside the hull,
+##     and no pop (a pose step over RIDE_POP_M, or over BLEND_POP_M while it eases in). Measured in the rocket's frame.
 
 const TOGETHER_M := 4.0          # m: the widest gap between two squadmates who rode it down
 const FAST_FALL := 8.0           # m/s: a free fall is still at least this fast
@@ -12,6 +15,9 @@ const BOT_SPOT_M := 8.0          # m from a bot leader's landing spot
 const LAUNCHES := [2.0, 6.0, 10.0, 14.0]      # s into the ship's run, for check 4
 const STEER_S := 1.5             # s the leader holds the keys in check 4
 const STEERS := [Vector2.ZERO, Vector2(1, 0), Vector2(0, -1), Vector2(-0.7, 0.7)]
+const RIDE_POP_M := 0.03         # m: the most a hand or foot moves between two frames once the pose has settled
+const BLEND_POP_M := 0.3         # m: the same while the pose eases in on the launch or out on the jump
+const RIDE_S := 1.2              # s measured once the pose has settled (it eases in over about 0.5 s)
 
 var bad := 0
 var main: Node
@@ -147,6 +153,61 @@ func _bot_leader() -> void:
 	ok(gap <= TOGETHER_M, "with the bot leading, the squad still lands together (%.1f m)" % gap)
 	_clean_landing("bot leader")
 
+## One match step and one engine frame, every hunter posed as the game's render does (a .glb Hero's skeleton follows).
+func _frame() -> void:
+	m.step(Match.DT)
+	for h in m.hunters:
+		h.render(Match.DT, 1.0)
+	await main.get_tree().process_frame
+
+## Check 6: each Hunter's ride, from the launch, through the settled pose, to the jump-out.
+func _ride_pose(arch: String) -> void:
+	await _start(6.0)
+	var P := m.player
+	P.reclass(Arch.weight(arch), arch)
+	for i in 3:
+		await _frame()      # (the new model is dressed and posed first)
+	m.ship_jump(P)
+	var r: DropRocket = P.rocket
+	var worst := {"grip": 0.0, "hull": 9.0, "peg": 0.0, "pop": 0.0, "blend": 0.0, "len": 0.0, "up": 1.0}
+	var prev: Array = []
+	var t := 0.0
+	var bar_hit := false
+	while t < 0.6 + RIDE_S and P.rocket == r:
+		await _frame()
+		t += Match.DT
+		var now := RideProbe.limbs(P, r)
+		var settled := t > 0.6
+		if not prev.is_empty() and t > 2.5 * Match.DT:      # (the first frame is the rider's first on show)
+			for i in 4:
+				var step: float = (now[i] as Vector3).distance_to(prev[i])
+				var kind := "pop" if settled else "blend"
+				worst[kind] = maxf(worst[kind], step)
+
+		prev = now
+		if not settled:
+			continue
+		var fit := RideProbe.fit(P, r)
+		worst["grip"] = maxf(worst["grip"], fit["grip"])
+		worst["hull"] = minf(worst["hull"], fit["hull"])
+		worst["peg"] = maxf(worst["peg"], fit["peg"])
+		worst["len"] = maxf(worst["len"], fit["len"])
+		worst["up"] = fit["up"]
+		bar_hit = true
+	var w: Dictionary = worst
+	var fmt := " (%s: grip %.2f m, bar %.2f body sizes long, %.2f m up, hull gap %.2f m, peg %.2f m,"
+	var out := (fmt + " pop %.3f / blend %.3f m)") % [
+		arch, w["grip"], w["len"], w["up"], w["hull"], w["peg"], w["pop"], w["blend"]]
+	var shown: bool = bar_hit and P.visible and P.anim.ride_k > 0.99
+	ok(shown, "%s rides the rocket on show, the pose fully in%s" % [arch, out])
+	var bar_ok: bool = w["grip"] <= RideProbe.GRIP_M and w["len"] <= RideProbe.BAR_LEN_MAX
+	bar_ok = bar_ok and w["up"] >= RideProbe.BAR_UP.x and w["up"] <= RideProbe.BAR_UP.y
+	ok(bar_ok, "%s holds the bar with both hands, no T-pose%s" % [arch, out])
+	var feet_ok: bool = w["hull"] >= -RideProbe.HULL_SLACK_M and w["peg"] <= RideProbe.PEG_M
+	ok(feet_ok, "%s's feet stand on the peg, none through the hull%s" % [arch, out])
+	var smooth: bool = w["pop"] <= RIDE_POP_M and w["blend"] <= BLEND_POP_M
+	ok(smooth, "%s's ride pose has no pop in it or on the way in%s" % [arch, out])
+
 func run(mn: Node) -> void:
 	main = mn
 	Save.no_write = true
@@ -155,6 +216,8 @@ func run(mn: Node) -> void:
 	await _glide_further()
 	await _no_clipping()
 	await _bot_leader()
+	for arch in Arch.ORDER:
+		await _ride_pose(arch)
 	if m:
 		m.queue_free()
 	print("ROCKET DONE, failures: %d" % bad)

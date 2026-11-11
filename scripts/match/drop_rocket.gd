@@ -17,6 +17,12 @@ const VOID_EJECT_Y := 7.0      # m: still over the abyss at island level, everyo
 const SEAT_GAP := 1.3          # m between the squad as it steps out where the rocket hit
 const BOT_LEAD_T := 0.5        # s: a bot leader aims to be over its spot this long before the rocket hits
 const STEP := 0.1              # s, projection step for the landing marker
+const SEATS := 3               # pegs round the hull: one for each of a squad
+const HULL_R := 0.75           # m: the body's radius
+const SEAT_Y := -0.7           # m along the body from its middle (local +Y is the tail): the pegs' height
+const GRIP_R := 0.9            # m from the axis: the grab bar over each peg
+const BAR_PAD := 0.12          # m: the bar runs this much wider than the hands that hold it
+const REACH := 0.3             # rig units: how far ahead of the shoulder the ride pose holds the hands (HunterAnim)
 
 var m: Match
 var team := 0
@@ -24,6 +30,10 @@ var pos := Vector3.ZERO
 var vel := Vector3.ZERO
 var yaw := 0.0                 # the launch heading: the skydive camera sits behind it (Cam.skydive)
 var riders: Array = []         # Hunters aboard
+var seats := {}                # Hunter -> its peg (0..2); a seat stays with its rider when another jumps out
+var seat0 := 0.0               # peg 0's angle round the hull: on the skydive camera's side once the nose dips
+var bars := {}                 # Hunter -> its bar (a node), sized to that rider's hands
+var prev := Vector3.ZERO       # last step's position (the node is drawn between the two)
 var safe := Vector3.INF        # where it flies with no keys held: a bot leader's spot, or an island off the abyss
 var node: Node3D
 var done := false
@@ -37,19 +47,25 @@ static func launch(match_node: Match, l: Hunter) -> DropRocket:
 	r.pos = match_node.ship_pos_of(s) + Vector3(0, -2.0, 0)
 	r.vel = Vector3(dir.x, 0.0, dir.z) * SPEED * 0.6
 	r.yaw = atan2(-dir.x, -dir.z)
+	r.seat0 = atan2(-dir.x, -dir.z)
+	r.prev = r.pos
 	for h in match_node.hunters:
 		if h.team == l.team and h.riding and h.rocket == null and is_same(match_node.ship_of(h), s):
+			r.seats[h] = mini(r.riders.size(), SEATS - 1)
 			r.riders.append(h)
 			h.rocket = r
 			if not h.remote:
 				h.teleport(r.pos)
-	r.node = _model(Data.TEAM_COLORS[l.team % Data.TEAM_COLORS.size()])
+	r.node = _model(Data.TEAM_COLORS[l.team % Data.TEAM_COLORS.size()], r.seat0, r.riders.size())
+	for h in r.riders:
+		r.bars[h] = r.node.get_node("Bar%d" % r.seats[h])
 	match_node.add_child(r.node)
-	r._place_node()
+	r.place(1.0)
 	return r
 
 ## One step: the leader's machine flies it, everyone else follows the leader; it ends on the ground.
 func tick(dt: float) -> void:
+	prev = pos
 	for h in riders.duplicate():
 		if not is_instance_valid(h) or h.out or (h.remote and not h.riding):
 			riders.erase(h)      # (left, or jumped out on their own machine: the flags say so)
@@ -70,7 +86,7 @@ func tick(dt: float) -> void:
 	for h in riders:
 		if not h.remote:
 			h.vel = vel
-	_place_node()
+	place(1.0)
 
 func _fly(dt: float) -> void:
 	var w: World = m.world
@@ -175,10 +191,61 @@ func _end() -> void:
 	if is_instance_valid(node):
 		node.queue_free()
 
-func _place_node() -> void:
-	node.position = pos
+## Draw the body between its last two steps, nose along its course. A rider's render calls it before seating itself.
+func place(alpha: float) -> void:
+	node.position = prev.lerp(pos, alpha)
 	var d := vel.normalized() if vel.length() > 0.5 else Vector3.DOWN
 	node.basis = Basis(Quaternion(Vector3.DOWN, d))
+
+## A rider's render: the hull drawn for this frame and the rider standing on its peg.
+func seat(h: Hunter, alpha: float) -> void:
+	place(alpha)
+	if h.anim == null:      # (its first frame: not posed yet)
+		h.position = seat_of(h).origin
+		return
+	var hands := _hands(h)
+	var t := seat_of(h, hands.z)
+	h.position = t.origin
+	h.model.basis = t.basis.scaled_local(h.model.scale)
+	_fit_bar(h, hands)
+
+## What the rider's hands do, in world metres on the model's own axes (last frame's pose): x the gap between them,
+## y their height over the feet, z how far ahead of the feet they hold, w their middle's offset to the right.
+func _hands(h: Hunter) -> Vector4:
+	var a := h.anim
+	var l: Vector3 = h.model.to_local(seen_at(h, "hand.L", a.hand_l))
+	var r: Vector3 = h.model.to_local(seen_at(h, "hand.R", a.hand_r))
+	var mid := (l + r) * 0.5
+	var s := h.model.scale
+	return Vector4(absf(l.x - r.x) * s.x, mid.y * s.y, -mid.z * s.z, mid.x * s.x)
+
+## Where the player sees `bone` of a rider (world): the skinned hero's own bone, else `node`'s point `at`.
+static func seen_at(h: Hunter, bone: String, node: Node3D, at := Vector3.ZERO) -> Vector3:
+	var sk := h.model.find_child("Skeleton3D", true, false) as Skeleton3D
+	var bi := WardenSkeleton.find(sk, bone) if sk != null else -1
+	if bi < 0:
+		return node.global_transform * at
+	return sk.global_transform * sk.get_bone_global_pose(bi).origin
+
+## The rider's bar sits where its hands are: its height, its length (the gap plus BAR_PAD), its two posts at the ends.
+func _fit_bar(h: Hunter, hands: Vector4) -> void:
+	var bar: Node3D = bars[h]
+	bar.position.y = SEAT_Y + hands.y
+	var half := hands.x * 0.5 + BAR_PAD * 0.5
+	var rod := bar.get_node("Len") as Node3D
+	rod.scale.x = half * 2.0
+	rod.position.x = hands.w
+	for i in 2:
+		(bar.get_node("Post%d" % i) as Node3D).position.x = hands.w + half * (1.0 if i == 0 else -1.0)
+
+## Where a rider stands: its feet on its peg, facing the hull, the body along the rocket (world frame).
+func seat_of(h: Hunter, hands_z := REACH) -> Transform3D:
+	var a := seat0 + TAU * float(seats.get(h, 0)) / SEATS
+	var out := GRIP_R + REACH * h.model.scale.z
+	if h.anim != null:
+		out = GRIP_R + lerpf(REACH * h.model.scale.z, hands_z, h.anim.ride_k)
+	var b := node.basis * Basis(Vector3.UP, a)
+	return Transform3D(b, node.position + node.basis * Vector3(sin(a) * out, SEAT_Y, cos(a) * out))
 
 ## Where it hits if it keeps its course: {"at", "void"} (the landing marker everyone aboard sees).
 func project() -> Dictionary:
@@ -193,32 +260,56 @@ func project() -> Dictionary:
 		p += v * STEP
 	return {"at": Vector3(p.x, 0.0, p.z), "void": true}
 
-## A small rocket, nose along its local -Y (it dives nose first): a body, a nose cone, three fins and a flame.
-static func _model(col: Color) -> Node3D:
+## A small rocket, nose along its local -Y (it dives nose first): a body, a nose cone, three fins, a flame, and for
+## each of `n` riders a peg with a grab bar over it (pegs start at angle `a0` round the hull, the fins sit between).
+static func _model(col: Color, a0: float, n: int) -> Node3D:
 	var root := Node3D.new()
 	var body := CylinderMesh.new()
-	body.top_radius = 0.75
-	body.bottom_radius = 0.75
-	body.height = 2.6
+	body.top_radius = HULL_R
+	body.bottom_radius = HULL_R
+	body.height = 3.4
 	_part(root, body, Color("e9edf2"), Vector3.ZERO)
 	var nose := CylinderMesh.new()
-	nose.top_radius = 0.75
+	nose.top_radius = HULL_R
 	nose.bottom_radius = 0.0
-	nose.height = 1.2
-	_part(root, nose, col, Vector3(0, -1.9, 0))
-	for i in 3:
-		var fin := _part(root, BoxMesh.new(), col, Vector3(0, 1.1, 0))
+	nose.height = 1.4
+	_part(root, nose, col, Vector3(0, -2.4, 0))
+	for i in SEATS:
+		var a := a0 + TAU * (i + 0.5) / SEATS
+		var fin := _part(root, BoxMesh.new(), col, Vector3.ZERO)
 		fin.scale = Vector3(0.12, 0.9, 1.0)
-		fin.rotation.y = TAU * i / 3.0
-		fin.position = Vector3(sin(fin.rotation.y), 0, cos(fin.rotation.y)) * 0.85 + Vector3(0, 1.1, 0)
+		fin.rotation.y = a
+		fin.position = Vector3(sin(a), 1.2, cos(a)) * 0.85
+	for i in n:
+		_seat(root, i, a0 + TAU * i / SEATS, col)
 	var flame := CylinderMesh.new()
 	flame.top_radius = 0.0
 	flame.bottom_radius = 0.55
 	flame.height = 1.6
-	var f := _part(root, flame, Color("ffb347"), Vector3(0, 2.2, 0))
+	var f := _part(root, flame, Color("ffb347"), Vector3(0, 2.5, 0))
 	(f.material_override as StandardMaterial3D).emission_enabled = true
 	(f.material_override as StandardMaterial3D).emission = Color("ff8a2a")
 	return root
+
+## A peg to stand on and a bar on two posts to hold, at angle `a` round the hull. The bar's height and length follow the
+## rider's hands (`_fit_bar`); they start at a medium rider's.
+static func _seat(root: Node3D, i: int, a: float, col: Color) -> void:
+	var radial := Vector3(sin(a), 0, cos(a))
+	var peg := _part(root, BoxMesh.new(), Color("3b4350"), radial * (HULL_R + 0.3) + Vector3(0, SEAT_Y - 0.04, 0))
+	peg.scale = Vector3(0.5, 0.08, 0.7)
+	peg.rotation.y = a
+	var bar := Node3D.new()
+	bar.name = "Bar%d" % i
+	bar.position = radial * GRIP_R + Vector3(0, SEAT_Y + 0.9, 0)
+	bar.rotation.y = a
+	root.add_child(bar)
+	var rod := _part(bar, BoxMesh.new(), col, Vector3.ZERO)
+	rod.name = "Len"
+	rod.scale = Vector3(0.5, 0.06, 0.06)
+	for k in 2:
+		var post := _part(bar, BoxMesh.new(), col, Vector3(0.2, 0, -(GRIP_R - HULL_R) * 0.5))
+		post.name = "Post%d" % k
+		post.scale = Vector3(0.05, 0.05, GRIP_R - HULL_R)
 
 static func _part(root: Node3D, mesh: Mesh, col: Color, at: Vector3) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()

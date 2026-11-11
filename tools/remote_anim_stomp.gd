@@ -19,6 +19,9 @@ static func look(c: RemoteAnimCheck) -> Dictionary:
 		out.merge({"down": B.downed, "out": B.out, "by": B.has_meta("stomped_by") and B.get_meta("stomped_by") == S,
 			"lies": HunterWisp.hides(B), "bat": [B.pos.x, B.pos.y, B.pos.z]})
 	out.merge({"dive": S.diving, "dive_s": S.anim_s.get("diving", false), "dk": S.anim.dive_k})
+	out.merge({"on": S.rocket != null, "ride_s": S.anim_s.get("ride", false), "rk": S.anim.ride_k, "vis": S.visible})
+	if S.rocket != null:
+		out["fit"] = RideProbe.fit(S, S.rocket)
 	return out
 
 static func host(c: RemoteAnimCheck, G: Hunter) -> void:
@@ -80,7 +83,6 @@ static func _see(c: RemoteAnimCheck, secs: float) -> Dictionary:
 	return c.replies[0].get("look", {}) if not c.replies.is_empty() else {}
 
 ## The skydive (the rocket's free fall and the opening drop use it): the guest's copy of a hunter diving plays it.
-## The poses aboard the rocket do not exist yet: its riders are hidden (Hunter.visible), see docs/DEBT.md.
 static func skydive(c: RemoteAnimCheck, G: Hunter) -> void:
 	var P := c.m.player
 	c._kit("archer")
@@ -98,5 +100,36 @@ static func skydive(c: RemoteAnimCheck, G: Hunter) -> void:
 	c.ok(not seen["dive"] and seen["dk"] < 0.5,
 		"skydive: and stops when the glider opens (k %.2f)" % seen["dk"], str(seen))
 	P.dropping = false
+	P.gliding = false
+	P.teleport(c.home)
+
+## The rocket ride: the host's hunter launches aboard the squad rocket and the guest's copy shows it standing on its
+## peg with both hands on the bar (the pose the host plays, from the "rkt" event and the riding flag), then plays the
+## skydive when it jumps out.
+static func ride(c: RemoteAnimCheck, G: Hunter) -> void:
+	var P := c.m.player
+	c._kit("archer")
+	await c._place(G, c.home + RemoteAnimCheck.PARK)
+	var high: Vector3 = c.home + Vector3(0, 90.0, 0)
+	P.teleport(high)
+	P.riding = true
+	await _see(c, 0.4)      # (the launch seats whoever the guest already sees aboard)
+	c.m.skydrop.launch(P)
+	var r: DropRocket = P.rocket
+	r.pos = high
+	r.prev = high
+	var seen := await _see(c, SEE_S)
+	c.ok(seen["on"] and seen["ride_s"] and seen["vis"] and seen["rk"] > 0.9,
+		"ride: the guest's copy of a rider shows on the rocket in the ride pose (k %.2f)" % seen["rk"], str(seen))
+	var fit: Dictionary = seen.get("fit", {})
+	c.ok(not fit.is_empty() and fit["grip"] <= RideProbe.GRIP_M and fit["len"] <= RideProbe.BAR_LEN_MAX
+		and fit["hull"] >= -RideProbe.HULL_SLACK_M,
+		"ride: its hands are on the bar, close together, its feet outside the hull", str(fit))
+	r.detach(P)
+	seen = await _see(c, SEE_S)
+	c.ok(not seen["on"] and seen["dive"] and seen["rk"] < 0.1,
+		"ride: jumping out takes the copy off the rocket into the skydive (ride k %.2f)" % seen["rk"], str(seen))
+	P.dropping = false
+	P.diving = false
 	P.gliding = false
 	P.teleport(c.home)
