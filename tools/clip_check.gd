@@ -236,9 +236,10 @@ func _pelvis(id: String, gait: String, ring: Dictionary, clips: WardenClips) -> 
 				under = lo - y[i]
 				at = i
 			over = maxf(over, y[i] - hi)
-		ok(under <= HIP_TOL and over <= HIP_TOL, "%s: %s_%s pelvis within %s_f's height at the same phase: %.3f m under "
-				% [id, gait, k, gait, maxf(under, 0.0)] + "(at %.2f), %.3f m over (tolerance %.2f)"
-				% [float(at) / HIP_N, maxf(over, 0.0), HIP_TOL])
+		var what := "%s: %s_%s pelvis within %s_f's height at the same phase: " % [id, gait, k, gait]
+		what += "%.3f m under (at %.2f), %.3f m over (tolerance %.2f)" % [
+				maxf(under, 0.0), float(at) / HIP_N, maxf(over, 0.0), HIP_TOL]
+		ok(under <= HIP_TOL and over <= HIP_TOL, what)
 
 ## The hips bone's height (skeleton space) at HIP_N even phases of a loop, through the root's keys.
 func _hip_curve(clips: WardenClips, anim: Animation) -> PackedFloat32Array:

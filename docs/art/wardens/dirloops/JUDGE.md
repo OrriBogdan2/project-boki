@@ -73,3 +73,26 @@ Pass = no rubric point under 3. Judged from the measures above and the sheets (s
   whole ring (f too) or a lower `walk_speed` would let every walk plant both feet.
 - **Walk to run blend**: the two rings have different lengths, so feet drift while the speed blends between them.
   As before; `in_step` only keeps one ring in time.
+
+## Third pass: pelvis held to the forward loop (2026-11-11, ext/anim-dirloops-pelvis)
+
+The hip no longer rides a set share of leg length (`RIDE`) less a dip: each key takes the forward loop's hip height
+at the same phase. Where a stride end can't reach the floor from there, the stance shortens (`DUTY_STEP`, more of
+the step flown) until the dip is under `DIP_OK` 0.025 m. Re-baked on main's models (Tarek v2, Vex appeal3 body b).
+`--clip-check` now holds every loop of an `in_step` ring to the forward loop's hip band at the same phase (lowest
+to highest within 1/16 cycle, give or take 0.03 m), so the dip can't come back.
+
+| loops | pelvis under forward at the same phase, worst (2nd pass -> now) | duty | planted sole vs loco |
+|---|---|---|---|
+| Tarek walk b,l,r / fl,fr / bl,br | 0.08 / 0.12 / 0.10 m -> 0.010 / 0.016 / 0.013 | 0.27-0.30 / 0.39 / 0.27 | 2.20, 100% within 5% |
+| Tarek run b,l,r / fl,fr / bl,br | 0.04-0.08 / 0.05 / 0 m -> 0.001-0.022 / 0.019 / 0.001 | 0.26, l/r 0.16-0.18 / 0.20 / 0.26 | 5.00, 100% |
+| Vex walk b,l,r / fl,fr / bl,br | 0.03-0.08 / 0.07 / 0.045 m -> 0.023 / 0 / 0.024 | 0.23-0.26 / 0.30 / 0.26-0.30 | 2.10, 100% |
+| Vex run all | 0.035 under, b/l/r 0.085 over -> 0.002 | 0.28 | 4.55, 100% |
+
+Worst ankle miss 0.0025 m; every ring one length (clip-check). Strip, game renderer, side view, 8 phase-aligned frames
+a loop, forward on top: `pelvis/<id>_walk_strip.jpg`, `pelvis/<id>_run_strip.jpg`.
+
+Cost: the stance gets short where the forward hip is tall and the step long. Tarek run_l/r stance 0.16-0.18 of the
+cycle (a bounding side step); Vex walk_r 0.23 (a light, springy walk). Fix for both (ours, not built): a shorter stride
+at loco speed needs a faster cadence, i.e. a shorter loop, which breaks the ring's one length; the alternative is
+a lower, longer-legged forward walk (the forward loop sets the band).
