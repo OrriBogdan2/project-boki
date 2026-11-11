@@ -30,6 +30,8 @@ var kit: ArchKit
 var held := {}              # slot -> seconds it has waited since the dash ended, or since its press at a CC's end
 var landing := {}           # slot -> true: pressed mid-jump, its jump row holds it for the landing
 var air := false            # the dash running now set off in the air
+var x_pressed := false      # R from the keyboard, waiting for this step's Shift (HunterKeys.press)
+var jump_waits := false     # a jump on Shift's step, waiting a step for the dash's wind-up
 var _was_dashing := false
 var _fire_was := false
 var _replaying := false
@@ -83,14 +85,16 @@ static func _combo_row(given: Dictionary, mode: String) -> Dictionary:
 func row(slot: String) -> Dictionary:
 	return row_of(kit.id, slot, air)
 
-## Each step, before Hunter.tick reads its presses: routes the presses made during a dash by the rows and lets the
-## held ones go once the dash is over.
+## Each step, after Shift and before Hunter.tick reads its other presses: routes the presses made during a dash by
+## the rows and lets the held ones go once the dash is over. A press on Shift's own step comes after the dash, as
+## in the source, so it meets the 'dash then X' row.
 func route(dt: float) -> void:
 	var h := kit.h
 	var dashing := _sync()
 	if _frozen_tap:
 		h.inp["fire"] = true
 		_frozen_tap = false
+	_after_shift(dashing)
 	var fire_down := bool(h.inp.get("fire", false))
 	var fire_pressed := fire_down and not _fire_was
 	_fire_was = fire_down
@@ -105,6 +109,23 @@ func route(dt: float) -> void:
 		var key: String = KEY_OF[slot]
 		if h.inp.get(key, false) and _press(slot) == "buffer":
 			h.inp[key] = false
+
+## R from the keyboard and a jump go after this step's Shift. A dash that hasn't shown yet (a wind-up, like the
+## Wirerun's charge) makes them wait a step, as if pressed just after Shift.
+func _after_shift(dashing: bool) -> void:
+	var h := kit.h
+	if bool(h.inp.get("dash", false)) and not dashing:
+		if h.inp.get("jump", false):
+			jump_waits = true
+			h.inp["jump"] = false
+		return
+	if jump_waits:
+		jump_waits = false
+		h.inp["jump"] = true
+	if x_pressed:
+		x_pressed = false
+		HunterKeys.ult_pressed(h)
+		h.inp["dash"] = false      # this step's Shift went to the dash: the R after it doesn't read it again
 
 ## X during a dash (HunterKeys.ult_pressed asks first): true when the press is held for the dash's end, or
 ## mid-jump for the landing.

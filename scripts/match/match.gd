@@ -3334,7 +3334,7 @@ func _gather_input() -> void:
 		if PanelInput.pressed(self, a[0]):
 			pending_input[a[1]] = true
 	if Input.is_action_just_pressed("hunter_ult") and player and not paused:
-		HunterKeys.ult_pressed(player)
+		HunterKeys.press(player)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if tut and tut.intro and event.is_pressed() and not event.is_echo() and not event.is_action_pressed("menu") and (event is InputEventKey or event is InputEventMouseButton or event is InputEventJoypadButton):

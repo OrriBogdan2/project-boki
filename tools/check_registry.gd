@@ -139,6 +139,7 @@ const CHECKS := {
 	"--hitstop-input-check": ["res://tools/hitstop_input_check.gd", "hitstop_input_check", null],      # a tap inside a hit-stop goes when it ends
 	"--air-cast-check": ["res://tools/air_cast_check.gd", "air_cast_check", null],      # cast at a jump's top: momentum per slot
 	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],      # Space in a dash, Shift in a jump
+	"--same-frame-check": ["res://tools/same_frame_check.gd", "same_frame_check", null],      # two presses, one step
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185
 	"--wirerun-dist-check": ["res://tools/wirerun_dist_check.gd", "wirerun_dist_check", null],      # Sparkle 11-10
