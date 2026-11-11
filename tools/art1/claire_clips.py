@@ -262,21 +262,21 @@ def clips():
         for tag, hd in (("f", 0), ("b", 180), ("l", 90), ("r", -90)):
             out.append(FnClip("%s_%s" % (nm, tag), T, gait(sk, hd, stroke * (0.8 if tag in "lr" else 1.0), lift)))
 
-    # LMB (tm_dart_*: 0.03 cock, 0.07 flick, 0.16): the spear's tip dips and flicks a dart off it; then the left hand's turn, a little wrist flick off the palm, like tossing snow
+    # LMB (tm_dart_*: the flick at 0, on the kit's throw, then the settle to 0.16): the spear's tip flicks a dart off it; then the left hand's turn, a little wrist flick off the palm, like tossing snow
     f0 = {"G": (0.2, 0.22, 1.13), "BE": spr(0, 38, (-0.2, -0.55, -0.8)), "tor": (0.04, -0.14, 0.03), "hed": (0.04, 0.14, 0.0), "brow": 0.1, "lid": 0.12}
     f1 = dict(f0, G=(0.17, 0.33, 1.15), BE=spr(0, 16, (-0.15, -0.5, -0.85)), tor=(0.08, 0.1, 0.0), hed=(0.0, -0.08, 0), smile=0.3)
-    out.append(C("dart_r", 0.16, [(0.0, END), (0.03, f0, "out"), (0.07, f1, "out"), (0.16, dict(f0, G=(0.21, 0.24, 1.1), BE=spr(1, 50, (-0.25, -0.75, -0.6))))]))
+    out.append(C("dart_r", 0.16, [(0.0, f1), (0.16, dict(f0, G=(0.21, 0.24, 1.1), BE=spr(1, 50, (-0.25, -0.75, -0.6))))]))
     l0 = {"LP": (-0.2, 0.14, 1.2), "LH": (0.8, 0, 0.0), "fing": 0.35, "tor": (0.04, 0.16, -0.03), "hed": (0.04, -0.12, 0.0), "brow": 0.05}
     l1 = dict(l0, LP=(-0.14, 0.42, 1.2), LH=(-0.55, 0, 0), fing=0.0, tor=(0.09, -0.14, 0), hed=(0.0, 0.1, 0.0))
-    out.append(C("dart_l", 0.16, [(0.0, END), (0.03, l0, "out"), (0.07, l1, "out"), (0.16, dict(l0, LP=(-0.22, 0.2, 1.1), LH=(0.3, 0, 0)))]))
-    # the large darts: both hands on the shaft, drawn back to the hip and swept forward, the whole body following through
+    out.append(C("dart_l", 0.16, [(0.0, l1), (0.16, dict(l0, LP=(-0.22, 0.2, 1.1), LH=(0.3, 0, 0)))]))
+    # the large darts (tm_dart_heavy: the sling at 0, 0.18): both hands on the shaft swept forward, the whole body following through
     h0 = {"G": (0.2, 0.2, 1.0), "BE": spr(10, 30, (-0.1, -0.6, -0.8)), "Lw": 1.0, "tor": (0.02, -0.34, 0.0), "prt": (0.06, -0.14, 0.0), "pel": (0, -0.03, -0.05), "brow": 0.2}
     h1 = dict(h0, G=(0.1, 0.48, 1.12), BE=spr(-1, 8, (0.1, -0.5, -0.85)), tor=(0.14, 0.24, 0), prt=(0.1, 0.1, 0), pel=(0, 0.06, -0.06), smile=0.2)
-    out.append(C("dart_heavy", 0.18, [(0.0, END), (0.04, h0, "out"), (0.08, h1, "out"), (0.18, dict(h1, G=(0.14, 0.38, 1.08), BE=spr(2, 22, (0.0, -0.55, -0.83))))]))
-    # LMB while skating (tm_beam): both hands level the spear straight ahead along the line, the head steady behind it
+    out.append(C("dart_heavy", 0.18, [(0.0, h1), (0.18, dict(h1, G=(0.14, 0.38, 1.08), BE=spr(2, 22, (0.0, -0.55, -0.83))))]))
+    # LMB while skating (tm_beam: the thrust at 0, 0.22): both hands level the spear straight ahead along the line, the head steady behind it
     b0 = {"G": (0.2, 0.2, 1.06), "BE": spr(1, 3, (-0.1, -0.5, -0.86)), "Lw": 1.0, "tor": (0.14, 0.0, 0.0), "hed": (-0.06, 0.0, 0), "brow": 0.3, "lid": 0.1}
     b1 = dict(b0, G=(0.19, 0.28, 1.07))
-    out.append(C("beam", 0.22, [(0.0, b0), (0.04, dict(b0, G=(0.2, 0.16, 1.06)), "out"), (0.08, b1, "out"), (0.14, dict(b1, G=(0.195, 0.25, 1.065))), (0.22, b0)]))
+    out.append(C("beam", 0.22, [(0.0, b1), (0.09, dict(b1, G=(0.195, 0.25, 1.065))), (0.22, b0)]))
 
     # RMB held (tm_spear_aim, 0.12): the spear drawn level between her hands at her chest, weight on the back blade, the head down and looking along it; a slow breath while it's held
     ai = dict(AIM_G, G=(0.055, 0.36, 1.13), tor=(0.03, 0.06, 0.0), prt=(-0.04, 0.04, 0), pel=(0, -0.035, -0.05), hed=(0.06, -0.02, 0), FR=(0.095, -0.08, A_Z), FL=(-0.08, 0.14, A_Z), FRy=-0.3, FLy=0.1, brow=0.15, lid=0.2, smile=0.25, skirt=-0.1)
@@ -285,14 +285,14 @@ def clips():
     lo = dict(ai, G=(0.055, 0.30, 1.1), pel=(0, -0.06, -0.075))
     pu = dict(AIM_G, G=(0.055, 0.62, 1.15), BE=spr(0, 1, (0.1, -0.5, -0.86)), prt=(0.26, 0.0, 0), tor=(0.16, 0.0, 0), hed=(-0.3, 0, 0), pel=(0, 0.14, -0.1), FR=(0.1, -0.3, A_Z), FL=(-0.08, 0.24, A_Z), FRy=-0.45, FLy=0.05, skirt=0.5, brow=0.2, lid=0.08, smile=0.3)
     out.append(C("spear", 0.55, [(0.0, ai), (0.05, lo, "out"), (0.1, pu, "out"), (0.28, dict(pu, pel=(0, 0.11, -0.09), G=(0.055, 0.57, 1.14), skirt=0.2)), (0.55, END)]))
-    # E (tm_wall: 0.1-0.2 the tell, 0.27 out, 0.42 held, 0.7): a dip, the spear lifted; then its butt driven down into the ice while the left palm presses out at the wall
+    # E (tm_wall: 0.08-0.14 the tell, 0.2 out with the eruption, 0.37 held, 0.7): a dip, the spear lifted; then its butt driven down into the ice while the left palm presses out at the wall
     wl0 = {"pel": (0, -0.02, -0.11), "prt": (0.12, 0.1, 0), "tor": (0.14, 0, 0), "hed": (0.02, 0, 0), "G": (0.24, 0.26, 1.18), "BE": spr(0, 86, (-0.3, -0.9, -0.2)), "LP": (-0.24, 0.0, 0.96), "LH": (0.3, 0, 0), "fing": 0.5, "brow": 0.2, "FR": (0.12, 0.1, A_Z), "FL": (-0.1, -0.06, A_Z), "skirt": -0.15}
     wl1 = dict(wl0, pel=(0, 0.09, -0.15), prt=(0.28, -0.05, 0), tor=(0.12, 0.05, 0), hed=(-0.28, 0, 0), G=(0.24, 0.4, 0.95), LP=(-0.2, 0.58, 1.02), LH=(-1.1, 0, 0), fing=0.0, FR=(0.12, 0.2, A_Z), FL=(-0.1, -0.22, A_Z), skirt=0.5, smile=0.3, lid=0.1)
-    out.append(C("wall", 0.7, [(0.0, END), (0.1, wl0), (0.2, dict(wl0, pel=(0, -0.03, -0.13))), (0.27, wl1, "out"), (0.42, dict(wl1, pel=(0, 0.08, -0.14))), (0.7, END)]))
-    # E again (tm_freeze: 0.07 knee up, 0.13 stamp, 0.42): the toe pick tapped into the ice, a small closing of the left hand
+    out.append(C("wall", 0.7, [(0.0, END), (0.08, wl0), (0.14, dict(wl0, pel=(0, -0.03, -0.13))), (0.2, wl1, "out"), (0.37, dict(wl1, pel=(0, 0.08, -0.14))), (0.7, END)]))
+    # E again (tm_freeze: the stamp at 0, on the freeze, 0.42): the toe pick tapped into the ice, a small closing of the left hand
     fz0 = {"pel": (0, 0, 0.0), "tor": (-0.03, 0.05, 0), "FL": (-0.08, 0.1, A_Z + 0.13), "FLp": 0.5, "LP": (-0.2, 0.2, 1.16), "LH": (-0.2, 0, 0), "fing": 0.3, "smile": 0.3}
     fz1 = dict(fz0, pel=(0, 0.03, -0.09), tor=(0.12, 0, 0), hed=(0.2, 0, 0), FL=(-0.09, 0.2, A_Z - 0.01), FLp=0.0, LP=(-0.2, 0.16, 0.98), fing=1.0, skirt=0.3)
-    out.append(C("freeze", 0.42, [(0.0, END), (0.07, fz0, "out"), (0.13, fz1, "out"), (0.42, END)]))
+    out.append(C("freeze", 0.42, [(0.0, fz1), (0.42, END)]))
 
     # Shift, the Skate. Go (tm_skate_go, 0.16): the knee sinks and the back blade drives out; a distinct push-off
     sg0 = {"pel": (0, -0.04, -0.12), "prt": (0.3, 0, 0), "tor": (0.16, -0.1, 0), "hed": (-0.26, 0, 0), "FR": (0.1, -0.26, A_Z), "FL": (-0.08, 0.14, A_Z), "FRy": -0.75, "FLy": 0.05, "LP": (-0.36, 0.0, 1.0), "LH": (0.3, 0, 0), "skirt": -0.3, "smile": 0.7, "lid": 0.1}
@@ -321,8 +321,8 @@ def clips():
     # passive (tm_shatter, 0.45): the spear's butt taps the ice once: a soft full stop
     sh0 = {"G": (0.27, 0.16, 1.12), "tor": (-0.03, 0, 0), "hed": (-0.04, 0.05, 0), "lid": 0.1, "smile": 0.4}
     out.append(C("shatter", 0.45, [(0.0, END), (0.06, sh0), (0.13, dict(sh0, G=(0.27, 0.16, 0.96), tor=(0.06, 0, 0), hed=(0.14, 0, 0)), "out"), (0.24, dict(sh0, G=(0.27, 0.16, 0.98), tor=(0.04, 0, 0), hed=(0.1, 0, 0))), (0.45, END)]))
-    # the detonation (tm_clench, 0.34): the left hand closes, a small gesture to her chest
-    out.append(C("clench", 0.34, [(0.0, END), (0.05, {"LP": (-0.2, 0.2, 1.12), "LH": (-0.2, 0, 0), "fing": 0.1}), (0.1, {"LP": (-0.14, 0.2, 1.16), "LH": (-0.3, 0, 0.2), "fing": 1.0, "tor": (0.05, 0, 0), "brow": 0.25}, "out"), (0.34, END)]))
+    # the detonation (tm_clench: closed at 0, on the burst, 0.34): the left hand closes, a small gesture to her chest
+    out.append(C("clench", 0.34, [(0.0, {"LP": (-0.14, 0.2, 1.16), "LH": (-0.3, 0, 0.2), "fing": 1.0, "tor": (0.05, 0, 0), "brow": 0.25}), (0.34, END)]))
 
     # X, Rimelock (tm_rime, 0.2): she folds in, both hands to the spear before her heart, eyes closing: a statue at prayer, not a crouch
     still = dict(PRAY, pel=(0.0, 0.0, -0.04), prt=(0.04, 0, 0), tor=(0.05, 0, 0), hed=(0.26, 0, 0), LP=(-0.1, 0.2, 1.2), fing=1.0, lid=0.95, brow=-0.35, smile=0.3,

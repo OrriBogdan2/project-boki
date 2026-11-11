@@ -1,17 +1,19 @@
 extends RefCounted
 ## Claire's (rimewright) animation timing, measured in game against the source footage
 ## (briefs/hero-ref/tamsin.md, one frame 0.2 s; the ult strip 0.1 s) and docs/heroes/rimewright.md "Animation timing":
-## when the kit's hit or release happens after a move starts, and whether the hand-keyed clip (claire.json, "lead")
-## shows its hit pose on that same frame. Runs on tools/support_check.gd's setup (--rimewright-combo-check).
+## when the kit's hit or release happens after a move starts, and whether the hand-keyed clip shows its hit pose
+## on that same frame (--clip-check finds each pose in claire.glb at HIT_KEY). Runs on tools/support_check.gd's
+## setup (--rimewright-combo-check).
 
 const DT := 1.0 / 60.0
 const TOL := 0.03          # s: two frames at 60 fps
 const SOURCE_FRAME := 0.2  # s: the footage's resolution (tamsin.md)
-## The clip's hit pose (s into the clip; tools/art1/claire_clips.py): the flick, the sling, the thrust, the palms
-## fully out, the shove, the stamp, the clench.
+## The clip's hit pose (s into the clip; tools/art1/claire_clips.py) and the hand that makes it: the flick, the sling,
+## the thrust, the palms fully out, the shove, the stamp, the clench.
 const HIT_KEY := {
-	"tm_dart_r": 0.07, "tm_dart_l": 0.07, "tm_dart_heavy": 0.08, "tm_beam": 0.08, "tm_spear": 0.1,
-	"tm_wall": 0.27, "tm_freeze": 0.13, "tm_clench": 0.1}
+	"tm_dart_r": [0.0, "hand.R"], "tm_dart_l": [0.0, "hand.L"], "tm_dart_heavy": [0.0, "hand.R"],
+	"tm_beam": [0.0, "hand.R"], "tm_spear": [0.1, "hand.R"], "tm_wall": [0.2, "hand.L"], "tm_freeze": [0.0, "hand.L"],
+	"tm_clench": [0.0, "hand.L"]}
 
 var sc        # the SupportCheck running us
 
@@ -33,10 +35,9 @@ func _event(m: Match, K: RimewrightKit, id: String, done: Callable, cap := 2.0) 
 		t += DT
 	return _into(m, K, id) if done.call() else 99.0
 
-## The pose lag (s) of `id`'s hit pose behind the kit's hit at `event` s into the move, with the clip's "lead".
+## The pose lag (s) of `id`'s hit pose behind the kit's hit at `event` s into the move.
 func _lag(id: String, event: float) -> float:
-	var lead := float(WardenClips.data("claire")["kmoves"][id].get("lead", 0.0))
-	return float(HIT_KEY[id]) - lead - event
+	return float(HIT_KEY[id][0]) - event
 
 func _line(id: String, event: float, what: String) -> void:
 	var lag := _lag(id, event)
@@ -75,6 +76,9 @@ func _spear() -> void:
 	var K: RimewrightKit = P.ak
 	sc.aim_at(P, P.pos + Vector3(6.0, 0, 0))
 	step(m, 0.05)
+	var gather := float(WardenClips.data("claire")["kmoves"]["tm_spear_aim"]["hold_from"])
+	ok("anim spear: the held spear is full size as her palms gather it (%.2f s)" % gather,
+		absf(RimewrightKit.SPEAR_FORM_T - gather) <= TOL, "%.2f s" % RimewrightKit.SPEAR_FORM_T)
 	P.inp["sec"] = true
 	P.inp["sec_hold"] = true
 	step(m, 0.3)

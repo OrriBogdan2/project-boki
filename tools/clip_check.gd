@@ -17,6 +17,9 @@ const POP := 0.16              # of the Hero's height: how much further a frame 
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
 const STAND_MIN := 2.0         # s: an idle or stance shorter than this reads as a jitter, not a breath
+const HIT_NEAR_M := 0.01      # m: the hit pose is the first frame the hand comes this close to its farthest
+## Neve's hit poses: {kmove: [s into the clip, the hand]}, the times her anim rows hold the kit's hits to.
+const RIME_HITS: Dictionary = preload("res://tools/rimewright_anim_check.gd").HIT_KEY
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -102,6 +105,8 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 	_sliders(id, sync)
 	_sway(id, m, sync, dd)
 	await _on_blade(id, m, sync, clips)
+	if id == "rimewright":
+		await _hit_poses(id, m, sync, clips, dd)
 	# "bone_scale" (item 137): the size holds over every clip that keys the bone
 	for nm in dd.get("bone_scale", {}):
 		var sk := WardenGlb.skeleton(m.get_node("Warden"))
@@ -237,6 +242,39 @@ func _on_blade(id: String, m: Node3D, sync: Node, clips: WardenClips) -> void:
 	clips.force = {}
 	ok(far <= FX_ON_BLADE, "%s: the Muzzle stays on the visible tip in %d frames (worst %.3f m)" % [id, n, far])
 	ok(drift <= 0.02, "%s: the blade never leaves the hand (worst drift %.3f m)" % [id, drift])
+
+## Each hit clip shows its hit pose at its RIME_HITS time: the frame where the hand that strikes is farthest from where
+## the clip leaves it (one frame of slack: the clips are baked at 30 fps).
+func _hit_poses(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var worst := 0.0
+	var where := ""
+	for km in RIME_HITS:
+		var clip := String(dd["kmoves"][km]["clip"])
+		var bone := sk.find_bone(String(RIME_HITS[km][1]))
+		var length := clips.lib.get_animation(clip).length
+		clips.force = {"clip": clip, "t": 0.0}
+		for k in 10:
+			sync.call("_process", DT)
+		var path: Array[Vector3] = []
+		for i in int(ceil(length / DT)) + 1:
+			clips.force = {"clip": clip, "t": minf(i * DT, length - 0.001)}
+			sync.call("_process", DT)
+			await holder.get_tree().process_frame
+			path.append(sk.get_bone_global_pose(bone).origin)
+		var far := 0.0
+		for p in path:
+			far = maxf(far, p.distance_to(path[-1]))
+		var at := 0
+		while path[at].distance_to(path[-1]) < far - HIT_NEAR_M:
+			at += 1
+		var off := absf(at * DT - float(RIME_HITS[km][0]))
+		if off >= worst:
+			worst = off
+			where = "%s: pose at %.2f s, hit at %.2f s" % [km, at * DT, float(RIME_HITS[km][0])]
+	clips.force = {}
+	ok(worst <= DT + 0.001,
+			"%s: each hit clip shows its hit pose on the hit (worst %.3f s off, %s)" % [id, worst, where])
 
 ## The clips keep rotations only on the contract bones, so MantleLook's sliders (bone offsets) stay on under them; and
 ## the death state has its time on screen.

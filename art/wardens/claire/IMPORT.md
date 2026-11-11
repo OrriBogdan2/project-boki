@@ -31,3 +31,8 @@ fail is tender's hit flash, the same on the base), --warden-model-check 157/157.
 Stretch check: all 49 clips over 1.3 (worst 6.61 revive, idle 6.01, run_f 3.15), almost all
 in `hips`; before the braid fix: worst 8.01, idle 6.35, run_f 5.72. The relax runs with CUTS 0 (no holes), as Lace, Sparkle and Meeko, so a stretched
 edge stays rather than a hole; it is not reworked here.
+
+Clip re-key (2026-11-11, docs/heroes/rimewright.md "Animation timing"): `dart_r`, `dart_l`, `dart_heavy`, `beam`, `wall`,
+`freeze` and `clench` re-baked from `~/meshy/claire_v2/stage/c/claire.blend` (hetzner) by `tools/art1/claire_clips.py` with
+those names as its third argument, then put into this file by `python3 tools/art1/glb_add_clips.py claire.glb claire_rk.glb
+dart_r,dart_l,dart_heavy,beam,wall,freeze,clench` (no re-swap: same skeleton; a control clip, `shatter`, came out bit-equal).
