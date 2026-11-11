@@ -23,14 +23,21 @@ static func face(key: String) -> Dictionary:
 		return Evo.AFF[key]
 	return {"name": t["name"], "tint": Color(String(t["tint"]))}
 
-## Flecks of the lean's colour over the head; more as the lean grows (strength 0..1).
-static func mark(flex: Node3D, key: String, strength: float) -> void:
+## How many flecks of its lean show over a Boki's head: one from its first leaning meal up to "marks" at full
+## lean, none with no lean or base_mode off. HomeChimes chimes when this rises.
+static func flecks(rec: Dictionary) -> int:
+	var ln := Evo.lean(rec)
+	if not on() or String(ln[0]) == "":
+		return 0
+	return clampi(ceili(float(ln[1]) * int(rules()["marks"])), 1, int(rules()["marks"]))
+
+## `n` flecks of the lean's colour over the head (flecks()).
+static func mark(flex: Node3D, key: String, n: int) -> void:
 	var rig := flex.get_node_or_null("BokiRig") as BokiRig
 	var fr: Dictionary = BokiRig.FRAME.get(rig.species, {}) if rig else {}
 	var top := float(fr.get("top", 0.72))
 	var head_z: float = (fr["head"] as Vector3).z if fr.has("head") else -0.2
 	var mat := Models.toon(face(key)["tint"], false, 0.9)
-	var n := clampi(ceili(strength * int(rules()["marks"])), 1, int(rules()["marks"]))
 	for i in n:
 		var a := (float(i) - (n - 1) * 0.5) * 0.8
 		var at := Vector3(sin(a) * 0.2, top + 0.05 + 0.02 * cos(a), head_z * 0.5)
