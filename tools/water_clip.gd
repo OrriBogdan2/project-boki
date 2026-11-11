@@ -5,7 +5,8 @@ extends RefCounted
 ## worker (jobq --needs gpu). The beats, printed as "MEDIA_WATER <s> <what>" with the water sounds heard:
 ## walk in from the sand and run across (the wading loop rises with speed), stand still (it stops), a dash
 ## (spray), a jump by each weight class (light, medium, heavy splash), the Boki leaps in and charges, and out
-## onto the sand again. (--media-child: the scene alone, no recording.) Never touches the save.
+## onto the sand again. Music and ambience are muted. (--media-child: the scene alone, no recording.)
+## Never touches the save.
 
 const POOL := Vector2(21.5, 191.5)     # the tide pool's middle tile (content/maps/hollowcrown.json)
 const SHORE_Z := 181.5                 # a sand tile 4.5 m north of the pool's edge
@@ -47,6 +48,8 @@ func run(mn: Node) -> void:
 		await main.fade.reveal(0.01)       # the boot splash stays up when a tool starts the match by hand
 	if m.hud:
 		m.hud.visible = false
+	for bus in ["Music", "Ambience"]:
+		AudioServer.set_bus_mute(AudioServer.get_bus_index(bus), true)     # only the movement sounds
 	h = m.player
 	for mb in m.mobs:
 		mb.queue_free()
