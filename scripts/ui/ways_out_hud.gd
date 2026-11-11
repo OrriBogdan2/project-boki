@@ -3,8 +3,8 @@ extends RefCounted
 ## The Ways Out strip (briefs/specs/LIMITED_WAY_OUTS.md section 9), top centre: four pips (Lair, Heart, Uplink,
 ## Final), each locked with a countdown, open, in use (the squad's colour), taken (struck through) or lost to
 ## the Blight, and "Squads left" beside them. Plus the carrier's Heart Gate prompt.
-## Reads the match only: the Heart's state for the two Heart seats, the lairs and outposts for the quest seats
-## (their schedule is content/rules/heart.json "quest"). Drawn with HudStyle on the Hud's canvas.
+## Reads the match only: the Heart's state for the two Heart seats, the QuestSeat machines for who is on or took a
+## quest seat, their schedule (content/rules/heart.json "quest") for the rest. Drawn with HudStyle on the Hud's canvas.
 
 enum St {LOCKED, OPEN, USE, TAKEN, LOST}
 const NAMES := ["LAIR", "HEART", "UPLINK", "FINAL"]
@@ -21,10 +21,10 @@ static var _seats: Array = [{}, {}, {}, {}]    # reused every frame: name, st, t
 static func seats(m: Match) -> Array:
 	var now := m.sess_time()
 	var q: Dictionary = Heart.rules()["quest"]
-	_quest(0, now, q["lair_open_s"], q["lair_shut_s"], _lair_team(m, "flown"), _lair_team(m, "sealed_in"))
+	var qs: QuestSeats = m.exits.seats if m.exits else null
+	_quest(0, now, q["lair_open_s"], q["lair_shut_s"], qs.lair if qs else null)
 	_heart_early(m)
-	var live := _uplink_team(m, "charging", "open")
-	_quest(2, now, q["uplink_open_s"], q["uplink_shut_s"], _uplink_team(m, "spent"), live)
+	_quest(2, now, q["uplink_open_s"], q["uplink_shut_s"], qs.uplink if qs else null)
 	_heart_final(m, now)
 	return _seats
 
@@ -35,11 +35,12 @@ static func _seat(i: int, st: int, t: float, team: int) -> void:
 	d["t"] = t
 	d["team"] = team
 
-static func _quest(i: int, now: float, open_s: float, shut_s: float, taken: int, using: int) -> void:
-	if taken >= 0:
-		_seat(i, St.TAKEN, -1.0, taken)
-	elif using >= 0:
-		_seat(i, St.USE, -1.0, using)
+## A quest seat: taken or in use as its QuestSeat says (with the squad), else locked, open or lost by its window.
+static func _quest(i: int, now: float, open_s: float, shut_s: float, s: QuestSeat) -> void:
+	if s and s.state == QuestSeat.S.TAKEN:
+		_seat(i, St.TAKEN, -1.0, s.team)
+	elif s and s.state == QuestSeat.S.IN_USE:
+		_seat(i, St.USE, -1.0, s.team)
 	elif now < open_s:
 		_seat(i, St.LOCKED, open_s - now, -1)
 	elif now < shut_s:
@@ -71,24 +72,6 @@ static func _heart_final(m: Match, now: float) -> void:
 			_seat(3, St.USE if ht.final_team >= 0 and ht.final_prog > 0.0 else St.OPEN, -1.0, ht.final_team)
 		_:
 			_seat(3, St.LOCKED, Heart.r("final_s") - now, -1)
-
-## The squad of the first hunter listed under `key` on the Sealed Lair ("flown": left by the updraft, "sealed_in":
-## fighting). Other lairs are no way out.
-static func _lair_team(m: Match, key: String) -> int:
-	var qs: QuestSeats = m.exits.seats if m.exits else null
-	if qs == null or qs.lair == null:
-		return -1
-	var who: Array = qs.lair.ref.get(key, [])
-	return (who[0] as Hunter).team if not who.is_empty() else -1
-
-## The squad of the first outpost in one of these states.
-static func _uplink_team(m: Match, a: String, b := "") -> int:
-	if m.exits == null:
-		return -1
-	for x in m.exits.list:
-		if x["kind"] == "outpost" and (x["state"] == a or x["state"] == b):
-			return int(x.get("team", -1))
-	return -1
 
 ## Squads with at least one Hunter still in the match.
 static func squads_left(m: Match) -> int:

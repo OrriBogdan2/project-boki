@@ -63,7 +63,9 @@ func run(main_node: Node) -> void:
 		X["team"] = RIVAL
 		X["prog"] = 0.6
 	var uplink_won := func():
-		X["state"] = "spent"
+		if m.exits.seats.uplink.state != QuestSeat.S.TAKEN:
+			m.exits.seats.uplink._force(QuestSeat.S.TAKEN, "shots", RIVAL)      # (the lift ridden)
+		X["state"] = "closed"
 		X["team"] = RIVAL
 		X["taken"] = true
 	await _row("heart_locked", "Heart locked (charging)", 270.0, H.site, heart_locked, false)

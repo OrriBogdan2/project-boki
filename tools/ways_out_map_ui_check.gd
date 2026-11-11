@@ -219,15 +219,12 @@ func _pins(main: Node, m: Match, at: Array[Vector3]) -> void:
 		m.time = float(q["uplink_open_s"]) + 10.0 - m.sess_t0
 		sd = WaysOutHud.seats(m)
 	_put(m, spot)
-	m.exits.seats.uplink.ref["taken"] = true
-	m.exits.seats.uplink.ref["state"] = "spent"
-	m.exits.seats.uplink.ref["team"] = 1
+	var up: QuestSeat = m.exits.seats.uplink
+	up._force(QuestSeat.S.TAKEN, "test", 1)
 	sd = WaysOutHud.seats(m)
 	ok(int(sd[2]["st"]) == WaysOutHud.St.TAKEN and WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO,
 		"a taken seat gets no pin")
-	m.exits.seats.uplink.ref["state"] = "idle"
-	m.exits.seats.uplink.ref["team"] = -1
-	m.exits.seats.uplink.ref.erase("taken")
+	up._force(QuestSeat.S.OPEN, "test")
 	m.time = float(q["uplink_shut_s"]) + 5.0 - m.sess_t0
 	sd = WaysOutHud.seats(m)
 	ok(int(sd[2]["st"]) == WaysOutHud.St.LOST and WaysOutPins.seat_dir(m, sz, 2, sd, at[2]) == Vector2.ZERO,
