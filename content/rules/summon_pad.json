@@ -1,0 +1,6 @@
+{
+	"_doc": "The Training Grounds' Boki summon pad (scripts/match/summon_pad.gd). offset: [x, z] metres from where you start, among the practice dummies so even the shyest Boki's chase (kin_ai.json chase_base) reaches one; r: metres, how close you stand to be on it; species: the practice Boki the interact key brings in turn, three different summon windows (boki_summon.json role x size).",
+	"offset": [2.5, -1.5],
+	"r": 1.6,
+	"species": ["kestrike", "cindowary", "moonloris"]
+}

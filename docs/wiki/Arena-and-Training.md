@@ -28,6 +28,13 @@ edge and float back up.
 Open the Training Grounds from the portal's "Training Grounds" button or the farm's Esc menu. Your whole kit works there
 against dummies, with ledges and boosters, and leaving it puts you back on the farm.
 
+Among the dummies is the **Summon pad**. Stand on it and a card explains Boki wisps: your Boki rides
+with you as a little critter-shaped glow, while a downed Hunter's wisp is round. It also shows your
+Summon key and how long the pad's Boki stays out and rests. Interact brings the next of three
+practice Boki, each with its own timing: Kestrike (out 7 s, rests 55 s), Cindowary (12 s, 70 s) and
+Moonloris (18 s, 85 s). Summon it at the dummies and press Summon again to send it back early. The
+ring round the Boki box on the HUD drains while it is out and refills while it rests.
+
 A pad there takes you to the **duel room**: you against one sparring bot on an empty island. Pick its
 Hunter, weapon, glove, difficulty and behaviour (fight, dodge only, stand still), reset whenever you
 like, and watch your numbers: damage dealt and taken, how many of your shots land, how many of its

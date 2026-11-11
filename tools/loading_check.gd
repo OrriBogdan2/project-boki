@@ -39,7 +39,8 @@ func _hunters() -> void:
 		var tex: Texture2D = ld.splash
 		var loads: bool = ld.splash_path != "" and tex != null and tex.get_width() > 0
 		ok(loads, "%s: its splash loads (%s)" % [ak, ld.splash_path])
-		var listed: bool = (TipPick.rules()["tips"] as Array).any(func(x): return TipPick.render(String(x["text"])) == ld.tip)
+		var tips: Array = TipPick.rules()["tips"]
+		var listed := tips.any(func(x): return TipPick.render(String(x["text"])) == ld.tip)
 		ok(ld.tip != "" and listed, "%s: a tip from the tip set (tips.json)" % ak)
 		ok(ld.map_name != "", "%s: the map's name (%s)" % [ak, ld.map_name])
 		ld.free()

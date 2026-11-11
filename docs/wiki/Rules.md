@@ -1536,6 +1536,17 @@ Snacks for the nine types that had none (GARDEN_MODERN 8; Sound is chimebun in C
 | price | 16 |
 | foods | {"frostdrop": {"name": "Frost drop", "type": "ice", "desc": "A drop of cold that stays cold."}, "pebblenut": {"name": "Pebble nut", "type": "rock", "desc": "Hard shell, sweet middle."}, "scalepepper": {"name": "Scale pepper", "type": "dragon", "desc": "Hot enough to make a Boki roar."}, "duskplum": {"name": "Dusk plum", "type": "dark", "desc": "Ripens after the sun is gone."}, "pricklepear": {"name": "Prickle pear", "type": "poison", "desc": "Sharp outside, tangy in."}, "sapjelly": {"name": "Sap jelly", "type": "bug", "desc": "Sticky, sweet, buzzing."}, "ironcrisp": {"name": "Iron crisp", "type": "steel", "desc": "Snaps loud and shines."}, "geodecandy": {"name": "Geode candy", "type": "crystal", "desc": "Sparkles when it cracks."}} |
 
+## summon_pad (`content/rules/summon_pad.json`)
+
+
+
+| Setting | Value |
+|---|---|
+| _doc | The Training Grounds' Boki summon pad (scripts/match/summon_pad.gd). offset: [x, z] metres from where you start, among the practice dummies so even the shyest Boki's chase (kin_ai.json chase_base) reaches one; r: metres, how close you stand to be on it; species: the practice Boki the interact key brings in turn, three different summon windows (boki_summon.json role x size). |
+| offset | [2.5, -1.5] |
+| r | 1.6 |
+| species | ["kestrike", "cindowary", "moonloris"] |
+
 ## tips (`content/rules/tips.json`)
 
 

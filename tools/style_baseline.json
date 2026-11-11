@@ -259,7 +259,7 @@
 "scripts/home/home_build.gd": {
 "long_line": 55,
 "nested_ternary": 2,
-"semicolon": 73,
+"semicolon": 70,
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
@@ -878,7 +878,7 @@
 "semicolon": 4
 },
 "scripts/ui/loading.gd": {
-"long_line": 20,
+"long_line": 9,
 "semicolon": 7,
 "shadow": 2
 },
