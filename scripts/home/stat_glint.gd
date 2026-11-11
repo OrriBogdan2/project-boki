@@ -34,7 +34,7 @@ func _process(dt: float) -> void:
 		return
 	for g in glints:
 		g["t"] = float(g["t"]) + dt
-	glints = glints.filter(func(g): return float(g["t"]) < LIFE)
+	glints = glints.filter(func(g): return float(g["t"]) < LIFE and is_instance_valid(g["k"]["node"]))
 	queue_redraw()      # (also the frame the last one ends, to clear it)
 
 ## Fires for each stat that rose since the last frame. The first sight of a Boki only takes note.
@@ -85,11 +85,11 @@ func _draw() -> void:
 		if cam.is_position_behind(at):
 			continue
 		var alpha := 1.0 - clampf((u - FADE_FROM) / (1.0 - FADE_FROM), 0.0, 1.0)
-		var size := ICON_PX * minf(1.0, float(g["t"]) / POP_S)
+		var px := ICON_PX * minf(1.0, float(g["t"]) / POP_S)
 		var stats: Array = g["stats"]
 		var left := cam.unproject_position(at) - Vector2(GAP_PX * (stats.size() - 1) * 0.5, 0)
 		for i in stats.size():
 			var col: Color = Care.STATS[stats[i]]["col"]
 			var p := left + Vector2(GAP_PX * i, 0)
-			draw_circle(p, size * 1.25, Color(col, 0.25 * alpha))
-			Icons.draw(self, ICON[stats[i]], p, size, Color(col.lightened(0.25), alpha))
+			draw_circle(p, px * 1.25, Color(col, 0.25 * alpha))
+			Icons.draw(self, ICON[stats[i]], p, px, Color(col.lightened(0.25), alpha))
