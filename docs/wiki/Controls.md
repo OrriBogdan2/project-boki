@@ -96,6 +96,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | X / Delete | Put a piece away (build mode) | `store` | yes |
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
+| L | Map legend and ways out (first 3 matches) | `map_info` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |

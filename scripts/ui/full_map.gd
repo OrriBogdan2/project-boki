@@ -16,6 +16,7 @@ const SEA := Color(0.05, 0.07, 0.13, 0.96)
 var hud            # the Hud that draws it
 var m: Match
 var is_open := false
+var info := false              # the legend key pressed: the quiet map (PlanQuiet) shows everything
 var auto := false              # opened by the planning phase (closes when the ship sets off)
 var zoom := 1.0
 var center := Vector2.ZERO     # the world point (x, z) at the middle of the map
@@ -35,6 +36,7 @@ func open(by_plan := false) -> void:
 	is_open = true
 	Sfx.play("ui_open", null, -8.0)
 	auto = by_plan
+	info = false
 	zoom = 1.0
 	zoom_to = 1.0
 	center = Vector2(m.world.w, m.world.h) * 0.5
@@ -99,6 +101,9 @@ func _ease_zoom() -> void:
 func input(ev: InputEvent) -> bool:
 	if not is_open:
 		return false
+	if ev.is_action_pressed("map_info"):
+		info = not info
+		return true
 	if ev is InputEventMouseButton:
 		var mb := ev as InputEventMouseButton
 		if mb.pressed and mb.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
@@ -195,8 +200,12 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
-	_legend(c, sz, team)
-	_side(c, sz)
+	if PlanQuiet.on(self):
+		_roster.clear()
+		PlanQuiet.draw(self, sz)
+	else:
+		_legend(c, sz, team)
+		_side(c, sz)
 	_cursor(c)
 
 ## Shrines: a small pale-green obelisk, dimmed once someone has used it.

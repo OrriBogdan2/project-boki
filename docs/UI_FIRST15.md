@@ -87,7 +87,7 @@ Retired terms (Warden, Mantle, Bearer, Merge, Unmasked) were not seen on any fir
 1. **Tutorial HUD in steps:** show minimap + vitals first; add ability row when "dash"/"shoot" steps start, Boki tiles at the G step, belt at the loot step, weapon panel at the shoot step; hide Q/V/X and the glider strip until used. Target: at most 5 at any time.
 2. **One prompt:** when a tip card shows, hold toasts and world prompts; remove the faded copy under the tip card.
 3. **First expedition HUD:** same rule; hide counters, clock/status strip and Truce chip until needed.
-4. **Plan your drop:** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
+4. **Plan your drop (done, ext/ui-drop-plan-first: `PlanQuiet`, matches 1-3 show map, timer, hot zone and the jump key; L brings the legend and Ways out back):** first match only needs map, the timer and "Space to jump"; move the legend and the "Ways out" list behind a key.
 5. **Expedition panel and Relics page:** first visit shows the picked Relic, the one open Where choice and Start; fold the locked Relics, Match modes and the three mode links. The Relics tile grid needs a layout where full names fit.
 6. **Creator and name card:** fewer rows on the first pass (Sex, Height, Build, colour; the rest under "More").
 7. **Safe area:** decide the margin (see section 3) and apply it in `HudStyle`, not per panel.

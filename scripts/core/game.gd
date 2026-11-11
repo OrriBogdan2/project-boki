@@ -102,6 +102,7 @@ func _setup_input() -> void:
 	_key("store", [KEY_X, KEY_DELETE])        # build mode: put the piece away
 	_key("emote", [KEY_Y])                    # in a match: hold for the emote wheel (truce, deal, no...)
 	_key("map", [KEY_M])                      # in a match: the full map (ping it with the mouse)
+	_key("map_info", [KEY_L])                 # the full map: the legend and the ways out (hidden for a new player)
 	_key("pass_lead", [KEY_P])                # riding in / dropping: pass the drop lead to a squadmate
 	_key("record", [KEY_F10])                 # recording mode (Record): clean HUD, then no HUD
 	_key("record_orbit", [KEY_F9])            # recording mode, HUD hidden: slow camera orbit
