@@ -49,33 +49,34 @@ const REMOVED := ["dash_hold", "kin_auto", "hud_opacity", "shake"]
 ##   of scatter and props (x)  ·  shadow_k: shadow distance (x)  ·  splits: shadow cascades  ·  atlas: sun
 ##   shadow map size  ·  soft: soft-shadow filter quality  ·  ssao, glow: the desktop renderer's ambient
 ##   occlusion and bloom  ·  clouds: drifting cloud layers  ·  shafts: light shafts  ·  fx: particle amount
-##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)
+##   (x)  ·  volfog: volumetric fog  ·  light_m: lamps and glows fade out this far from the camera (m, 0: their own)  ·  occlusion: cliffs and big
+##   rocks hide what's behind them from the renderer (Occluders)
 const QUALITY := {
 	"very_low": {"name": "Very Low", "msaa": 0, "shadows": false, "px": 540,
 		"scale": 0.5, "fxaa": false, "steps": 2, "unlit": true,
 		"lod": 8.0, "grass": 0.15, "draw": 0.45,
 		"shadow_k": 0.6, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true},
+		"shafts": false, "fx": 0.25, "volfog": false, "light_m": 40.0, "anim_lod": true, "occlusion": false},
 	"low": {"name": "Low", "msaa": 0, "shadows": true, "px": 900,
 		"scale": 0.77, "fxaa": true, "steps": 2, "unlit": false,
 		"lod": 4.0, "grass": 0.4, "draw": 0.6,
 		"shadow_k": 0.45, "splits": 1, "atlas": 1024, "soft": 0, "ssao": false, "glow": false, "clouds": 0,
-		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true},
+		"shafts": false, "fx": 0.45, "volfog": false, "light_m": 50.0, "anim_lod": true, "occlusion": false},
 	"medium": {"name": "Medium", "msaa": 0, "shadows": true, "px": 1080,
 		"scale": 1.0, "fxaa": true, "steps": 4, "unlit": false,
 		"lod": 2.0, "grass": 0.7, "draw": 0.8,
 		"shadow_k": 0.6, "splits": 2, "atlas": 2048, "soft": 1, "ssao": false, "glow": true, "clouds": 1,
-		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true},
+		"shafts": true, "fx": 0.7, "volfog": false, "light_m": 70.0, "anim_lod": true, "occlusion": true},
 	"high": {"name": "High", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 1.0, "grass": 1.0, "draw": 1.0,
 		"shadow_k": 1.0, "splits": 4, "atlas": 4096, "soft": 3, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": true, "occlusion": true},
 	"ultra": {"name": "Ultra", "msaa": 4, "shadows": true, "px": 0,
 		"scale": 1.0, "fxaa": false, "steps": 8, "unlit": false,
 		"lod": 0.5, "grass": 1.0, "draw": 1.6,
 		"shadow_k": 1.35, "splits": 4, "atlas": 4096, "soft": 4, "ssao": true, "glow": true, "clouds": 2,
-		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false},
+		"shafts": true, "fx": 1.0, "volfog": true, "light_m": 0.0, "anim_lod": false, "occlusion": true},
 }
 const QUALITY_ORDER := ["very_low", "low", "medium", "high", "ultra"]
 
@@ -438,6 +439,7 @@ func _apply_quality() -> void:
 	root.mesh_lod_threshold = float(Q["lod"])
 	root.debug_draw = Viewport.DEBUG_DRAW_UNSHADED if bool(Q["unlit"]) else Viewport.DEBUG_DRAW_DISABLED
 	Engine.max_physics_steps_per_frame = int(Q["steps"])
+	root.use_occlusion_culling = bool(Q["occlusion"])
 	RenderingServer.directional_soft_shadow_filter_set_quality(int(Q["soft"]))
 	RenderingServer.directional_shadow_atlas_set_size(int(Q["atlas"]), true)
 	for n in root.find_children("*", "Light3D", true, false):
