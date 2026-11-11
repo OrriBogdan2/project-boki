@@ -47,6 +47,8 @@ func run(main: Node) -> void:
 	note.position = Vector2(24, 20)
 	note.add_theme_font_size_override("font_size", 28)
 	layer.add_child(note)
+	if main.fade:
+		await main.fade.reveal(0.01)     # the boot splash stays up when a tool starts a screen by hand
 	await _relics(main)
 	await _match(main)
 	print("WHEELSHOTS DONE")
