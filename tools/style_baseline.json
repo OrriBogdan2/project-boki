@@ -9,7 +9,7 @@
 "semicolon": 12
 },
 "scripts/arch/arch_kit.gd": {
-"long_line": 26,
+"long_line": 28,
 "nested_ternary": 2,
 "semicolon": 6
 },
@@ -388,9 +388,9 @@
 "long_line": 7
 },
 "scripts/main.gd": {
-"long_line": 385,
+"long_line": 366,
 "nested_ternary": 7,
-"semicolon": 404,
+"semicolon": 381,
 "shadow": 3
 },
 "scripts/match/abilities.gd": {
@@ -463,7 +463,7 @@
 "semicolon": 64
 },
 "scripts/match/bot.gd": {
-"long_line": 24,
+"long_line": 23,
 "nested_ternary": 1,
 "semicolon": 49
 },
@@ -493,13 +493,13 @@
 "semicolon": 5
 },
 "scripts/match/exit_models.gd": {
-"long_line": 23,
-"semicolon": 39
+"long_line": 7,
+"semicolon": 9
 },
 "scripts/match/exits.gd": {
-"long_line": 30,
+"long_line": 10,
 "nested_ternary": 1,
-"semicolon": 20
+"semicolon": 13
 },
 "scripts/match/flora.gd": {
 "long_line": 59,
@@ -553,9 +553,9 @@
 "shadow": 1
 },
 "scripts/match/hunter.gd": {
-"history_comment": 27,
-"long_line": 92,
-"nested_ternary": 15,
+"history_comment": 24,
+"long_line": 91,
+"nested_ternary": 14,
 "semicolon": 47,
 "shadow": 4
 },
@@ -629,12 +629,12 @@
 "semicolon": 25
 },
 "scripts/match/life.gd": {
-"long_line": 13,
+"long_line": 12,
 "semicolon": 3
 },
 "scripts/match/match.gd": {
 "history_comment": 4,
-"long_line": 218,
+"long_line": 216,
 "nested_ternary": 18,
 "semicolon": 141,
 "shadow": 7
@@ -756,7 +756,7 @@
 "shadow": 1
 },
 "scripts/match/world.gd": {
-"long_line": 78,
+"long_line": 77,
 "nested_ternary": 9,
 "semicolon": 172,
 "shadow": 2
@@ -799,7 +799,7 @@
 "semicolon": 13
 },
 "scripts/ui/full_map.gd": {
-"long_line": 36,
+"long_line": 34,
 "nested_ternary": 4,
 "semicolon": 10,
 "shadow": 1
@@ -822,9 +822,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 185,
-"nested_ternary": 35,
-"semicolon": 44,
+"long_line": 173,
+"nested_ternary": 33,
+"semicolon": 43,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {
@@ -890,9 +890,9 @@
 "long_line": 1
 },
 "scripts/ui/results.gd": {
-"long_line": 26,
+"long_line": 22,
 "nested_ternary": 6,
-"semicolon": 43,
+"semicolon": 39,
 "shadow": 1
 },
 "scripts/ui/scenery.gd": {
