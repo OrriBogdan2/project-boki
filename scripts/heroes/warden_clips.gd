@@ -394,8 +394,7 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 		return {"clip": ld["clip"], "t": land_t * float(ld.get("rate", 1.0))}
 	var hit := float(s.get("hit_t", 99.0))
 	var hd: Dictionary = st.get("hit", {})
-	# (a chip hit is only WardenFlinch's lean over the body; the hit clip is a stagger's)
-	if hit < float(hd.get("dur", 0.0)) and float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH:
+	if hit < float(hd.get("dur", 0.0)):
 		var dir: Vector2 = s.get("hit_dir", Vector2.ZERO)
 		var fw := Vector2(sin(float(s.get("face", 0.0))), cos(float(s.get("face", 0.0))))
 		var heavy := float(s.get("hit_k", 1.0)) >= Oomph.HEAVY_FLINCH
