@@ -200,7 +200,7 @@
 		["jug_slam", 0.8]
 	],
 	"emotes": {"truce": "g_flag", "accept": "g_pump", "follow": "g_beckon", "thanks": "g_nod", "wave": "g_wave", "laugh": "g_laugh", "gg": "roar", "refuse": "g_cross"},
-	"procedural": ["ledge", "mantle", "base", "wade", "swim"],
+	"procedural": ["ledge", "base", "wade", "swim"],
 	"upper": [
 		"hips",
 		"head",
@@ -231,5 +231,6 @@
 		}
 	},
 	"summon_call": "g_call_raise_r",
-	"free_arm": {"slam": "L", "meteor": "L"}
+	"free_arm": {"slam": "L", "meteor": "L"},
+	"mantle": {"clip": "mantle", "rise": 0.421}
 }

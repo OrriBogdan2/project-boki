@@ -14,6 +14,8 @@ const WARM_S := 1.0        # s of locomotion before the strip starts, so the ble
 const SIDE_YAW := -PI / 2.0     # facing screen right
 const POST_SPACING := 0.5       # m between floor posts
 const POST_COUNT := 14
+const MANTLE_DEEP := 1.4        # m: the face a rise climbs (tools/art1/mantlekit.py DEEP)
+const MANTLE_SOLE := 0.12       # m: how far over the lip the body ends (mantlekit.py SOLE)
 const DT := 1.0 / 30.0
 const CLOSE_REF_H := 1.1        # m: the Hunter height the --close camera is framed for; a taller one pulls it back
 
@@ -98,6 +100,8 @@ func _hunter(id: String, dir: String, frames: int) -> void:
 	var atk: Array = ATTACKS[id]
 	for i in 2:
 		await _keyed(model, sync, clips, dir.path_join("atk%d" % (i + 1)), String(atk[i]), frames)
+	if clips.d.has("mantle"):
+		await _mantle(model, sync, clips, dir.path_join("mantle"), frames)
 	model.queue_free()
 
 ## The side view at the Hunter's own scale: the head's height over CLOSE_REF_H scales the camera out and up.
@@ -136,3 +140,28 @@ func _keyed(model: Node3D, sync: Node, clips: WardenClips, dir: String, clip: St
 		sync.call("_process", DT)
 		await _grab(dir.path_join("f%03d.png" % i))
 	clips.force = {}
+
+## A ledge rise through the game's own state: half the frames climb the face (the state's mantle 0..1), the rest are the
+## vault in real time. The lip is a block whose top comes down past the Hunter as in the game (mantlekit.py `surface`).
+func _mantle(model: Node3D, sync: Node, clips: WardenClips, dir: String, frames: int) -> void:
+	DirAccess.make_dir_recursive_absolute(dir)
+	var lip := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(1.0, 3.0, 2.0)
+	lip.mesh = box
+	lip.material_override = Models.toon(Color("55606a"), false)
+	holder.add_child(lip)
+	var md: Dictionary = clips.d["mantle"]
+	var length := clips.lib.get_animation(String(md["clip"])).length
+	var climb := frames / 2
+	var tail_steps := maxi(1, int(round(length * (1.0 - float(md["rise"])) / float(frames - climb) / DT)))
+	for i in frames:
+		var k := float(i) / (climb - 1) if i < climb else 1.0
+		lip.position = Vector3(0.38 + 0.5, MANTLE_DEEP * (1.0 - k) - MANTLE_SOLE - 1.5, 0.0)
+		var up: float = k if i < climb else -1.0
+		model.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": SIDE_YAW, "grounded": false, "mantle": up})
+		for j in (3 if i < climb else tail_steps):
+			sync.call("_process", DT)
+		await _grab(dir.path_join("f%03d.png" % i))
+	model.set_meta(WardenClips.STATE, {})
+	lip.queue_free()

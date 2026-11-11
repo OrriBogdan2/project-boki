@@ -30,6 +30,8 @@ const FADE_LOCO := 0.16      # s: an action back to the legs
 const AIR_FADE := 0.12
 const LOCKIN_FADE := 0.2     # s: the idle into a lock-in pose that starts mid-clip ("fade" in its data overrides)
 const LOCKIN_SETTLE := 0.35  # s: a lock-in pose, ended mid-clip, eases back into the idle ("settle" overrides)
+const MANTLE_FADE := 0.05    # s: into a ledge rise (a low ledge is over in ~0.1 s)
+const MANTLE_DONE := 0.8     # a rise that got this far up the face went over the lip (its vault plays out)
 const STILL := 0.25          # m/s: below this he is standing
 const WEAPON_OUT := "weapon_out"   # root meta: the kit has the skinned weapon out of the hand (Breaker's thrown hammer)
 const PHASE := "clip_phase"   # root meta 0..1: a kit's own loop phase; a hold move's loop follows it, not the clock
@@ -83,6 +85,8 @@ var was_glide := false
 var vy_prev := 0.0           # last step's vertical speed: the one he hits the ground with
 var land: Dictionary = {}    # the "land" tier in play ("hop" or "drop"), picked at touchdown
 var land_t := 99.0
+var mantle_t := 99.0          # s since a ledge rise ended (the clip's vault plays on in real time)
+var mantle_seen := 0.0       # how far up the face the last rise got
 var hit_seen := 99.0
 var last_emote := ""
 var upper_move := false      # the move is an upper-body one (keyed "upper"), even standing: the aim lead stays on
@@ -420,6 +424,9 @@ func _pick(s: Dictionary, dt: float) -> Dictionary:
 			# the phase is the clip's time (the slam stays on the game's beat); a drink is the upper body only
 			var dur := lib.get_animation(String(st[k])).length
 			return {"clip": st[k], "t": ph * dur, "upper": k == "drink"}
+	var ma := _mantle(s, dt)
+	if not ma.is_empty():
+		return ma
 	if bool(s.get("reviving", false)) and st.has("reviving"):
 		return {"clip": st["reviving"], "t": -1.0}
 	# (a stomp / a drink runs on the game's clock: the clip is as long as the cycle / the drink, seeked by its phase)
@@ -527,6 +534,7 @@ func _move_clip(km: String, mv: Dictionary, s: Dictionary) -> Dictionary:
 ## An air-started move is over once he lands or opens the glider: the clip fades into the land or glide pose.
 static func _air_over(s: Dictionary) -> bool:
 	return bool(s.get("grounded", true)) or bool(s.get("gliding", false))
+
 ## The lobby's lock-in pose (data "lockin": clip, from, dur, rate, fade, settle): `t` s into it, a window of an
 ## existing clip.
 func _lockin_at(t: float) -> Dictionary:
@@ -540,6 +548,25 @@ func _lockin_at(t: float) -> Dictionary:
 ## How long a Hero's lock-in pose runs (s); 0 for one that has none.
 static func lockin_dur(art_name: String) -> float:
 	return float(data(art_name).get("lockin", {}).get("dur", 0.0))
+
+## The data's "mantle" ({clip, rise: the share of the clip the climb covers}): the climb's time is how far up the face
+## the hunter is, so the motion can't lag the body; once over the lip the rest of the clip (the vault, the landing)
+## runs in real time.
+func _mantle(s: Dictionary, dt: float) -> Dictionary:
+	var md: Dictionary = d.get("mantle", {})
+	if md.is_empty():
+		return {}
+	var length := lib.get_animation(String(md["clip"])).length - 0.001
+	var rise := float(s.get("mantle", -1.0))
+	if rise >= 0.0:
+		mantle_seen = rise
+		mantle_t = 0.0
+		return {"clip": md["clip"], "t": rise * length * float(md["rise"]), "fade": MANTLE_FADE}
+	if mantle_seen >= MANTLE_DONE and mantle_t < length * (1.0 - float(md["rise"])):
+		mantle_t += dt
+		return {"clip": md["clip"], "t": length * float(md["rise"]) + mantle_t, "fade": MANTLE_FADE}
+	mantle_seen = 0.0
+	return {}
 
 func step(dt: float) -> void:
 	var s: Dictionary = root.get_meta(STATE, {})
