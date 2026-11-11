@@ -110568,5 +110568,61 @@
     "run": 1,
     "file": "briefs/boki-art/batch/out/px9_aurostag_1.jpg",
     "ok": true
+  },
+  {
+    "id": "px9_canopony",
+    "name": "Canopony (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_canopony_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_cairnback",
+    "name": "Cairnback (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_cairnback_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_bullsfrog",
+    "name": "Bullsfrog (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_bullsfrog_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_canvastross",
+    "name": "Canvastross (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_canvastross_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_bulwartoad",
+    "name": "Bulwartoad (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_bulwartoad_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_carpenjaw",
+    "name": "Carpenjaw (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_carpenjaw_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_calderoise",
+    "name": "Calderoise (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_calderoise_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "px9_checkmare",
+    "name": "Checkmare (pixel sprite 80)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/px9_checkmare_1.jpg",
+    "ok": true
   }
 ]
