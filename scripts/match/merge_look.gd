@@ -122,7 +122,8 @@ func build() -> void:
 	rec = dressed[1]
 
 ## The silhouette parts on `model`'s torso, in a box scaled by the form's part_k (bigger and bolder than the hunter:
-## the silhouette reads from above), or under `fallback` for a model without a rig. Returns [box or null, record].
+## the silhouette reads from above) and moved by its part_y (m: the scale is about the hips, so tall parts ride up),
+## or under `fallback` for a model without a rig. Returns [box or null, record].
 static func dress(model: Node3D, form: Dictionary, fallback: Node3D) -> Array:
 	var torso: Node3D = model.get_node_or_null("Rig/Torso") if model else null
 	if torso == null:
@@ -133,6 +134,7 @@ static func dress(model: Node3D, form: Dictionary, fallback: Node3D) -> Array:
 	var box := Node3D.new()
 	box.name = PARTS_NAME
 	box.scale = Vector3.ONE * float(form.get("part_k", 1.0))
+	box.position.y = float(form.get("part_y", 0.0))
 	torso.add_child(box)
 	return [box, MergeParts.build(box, form, Vector3.ZERO)]
 

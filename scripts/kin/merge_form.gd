@@ -32,7 +32,7 @@ static func kit_form(id: String, dur := 0.0) -> Dictionary:
 	var lk: Dictionary = fd["look"]
 	return {"id": id, "kit": true, "name": String(fd["name"]), "type": "kit", "color": Color(String(pal["body"])), "glow": Color(String(pal["glow"])),
 		"accent": Color(String(pal.get("accent", pal["glow"]))), "parts": lk["parts"], "style": "kit", "word": String(fd["name"]).to_upper(), "haste": float((fd["aug"].get("stats", {}) as Dictionary).get("cooldown", 0.0)),
-		"aug": fd["aug"], "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "part_k": float(lk.get("part_k", 1.7)), "dur": dur, "surge": false, "def": fd}
+		"aug": fd["aug"], "size": float(lk["scale"]), "ring": float(lk.get("ring", 3.0)), "part_k": float(lk.get("part_k", 1.7)), "part_y": float(lk.get("part_y", 0.0)), "dur": dur, "surge": false, "def": fd}
 
 ## The stat-style look of a Boki with no form yet, from its type.
 static func fallback_form(ty: String, col: Color, glow: Color) -> Dictionary:

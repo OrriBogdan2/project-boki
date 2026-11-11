@@ -5,7 +5,8 @@ extends RefCounted
 ## (topdown_<form>.png) and topdown_all.png stacks them; the draw numbers print as FUSIONTOPDOWN lines.
 ## --fusion-topdown-check (headless): every hero wears the Stormwing, and a depth raster down the match camera
 ## (CamRig's default pitch, no renderer needed) measures how much of the wings the hero's own body and hat hide,
-## facing up, across and down the screen at both ends of the wing beat. Prints FUSIONTOPDOWN ok/FAIL lines.
+## facing up, across and down the screen at both ends of the wing beat, and that the wings start at the head and
+## the halo just over it (the form's part_y). Prints FUSIONTOPDOWN ok/FAIL lines.
 
 const DT := 1.0 / 60.0
 const FORMS := [["pebbit", "titan"], ["zephyrak", "stormwing"], ["puddlet", "tidal_shell"]]
@@ -14,7 +15,9 @@ const ZOOM := 1.4
 const SPACING := 3.2          # m between the wearer and the remote copy
 const CELL := 0.03            # m: one depth-raster cell (about a pixel of a hunter at the match zoom)
 const SHOWN_MIN := 0.9        # of the wings' cells in front of the body, every view (wings at the neck: ~0.83)
-const AREA_MIN := 0.7         # wing cells per body cell, every view: they carry the silhouette (Bulwark: 0.73)
+const AREA_MIN := 0.7         # wing cells per body cell, every view: they carry the silhouette (Tender: 0.92)
+const ROOT_MAX := 0.0         # m the wing roots may sit over the head top (0.25-0.79 with no part_y: they float)
+const HALO_MAX := 1.0         # m from the head top up to the halo, clear of the hat (1.39-1.78 with no part_y)
 
 func run(main: Node, mode := "shots") -> void:
 	if mode == "check":
@@ -112,8 +115,12 @@ func _check(main: Node) -> void:
 		if sync:
 			sync.orbits.pivots.clear()
 		mdl.scale = Vector3.ONE * float(form["size"])
-		var rec: Dictionary = MergeLook.dress(mdl, form, mdl)[1]
+		var dressed := MergeLook.dress(mdl, form, mdl)
+		var rec: Dictionary = dressed[1]
 		await main.get_tree().process_frame
+		var top := _top(mdl, dressed[0])
+		var root: float = (rec["wings"][0] as Node3D).global_position.y - top
+		var halo: float = (rec["halo"] as Node3D).global_position.y - top
 		var low := 1.0
 		var area := INF
 		for face in [0.0, PI * 0.5, PI]:
@@ -125,12 +132,25 @@ func _check(main: Node) -> void:
 				area = minf(area, v.y)
 		worst = minf(worst, low)
 		var good := low >= SHOWN_MIN and area >= AREA_MIN
+		good = good and root <= ROOT_MAX and halo > 0.0 and halo <= HALO_MAX
 		bad += 0 if good else 1
 		print("FUSIONTOPDOWN %s %s: at least %d%% of the Stormwing wings in front of the body, %.2f wing/body cells"
-			% ["ok  " if good else "FAIL", a, int(low * 100.0), area])
+			% ["ok  " if good else "FAIL", a, int(low * 100.0), area]
+			+ ", root %+.2f m and halo %+.2f m from the head top" % [root, halo])
 		mdl.queue_free()
 	print("FUSIONTOPDOWN DONE worst %d%%, failures: %d" % [int(worst * 100.0), bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
+
+## The highest point of the hunter's own meshes (hat included), m.
+func _top(mdl: Node3D, parts: Node3D) -> float:
+	var top := 0.0
+	for mi: MeshInstance3D in mdl.find_children("*", "MeshInstance3D", true, false):
+		var skip := mi.has_meta("halo") or mi.has_meta("glb_hidden")
+		if mi.mesh == null or not mi.is_visible_in_tree() or skip or parts.is_ancestor_of(mi):
+			continue
+		var bb := mi.global_transform * mi.get_aabb()
+		top = maxf(top, bb.end.y)
+	return top
 
 ## A depth raster of every mesh under `mdl`: (the share of the wings' cells that are nearest the camera,
 ## the wings' cells per cell the rest of the hunter shows).
