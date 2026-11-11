@@ -817,8 +817,6 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	# a paraglider canopy that unfolds above the pack: an arched wing in stripes, with lines down to the harness
 	var glider := Node3D.new(); glider.name = "Glider"; glider.position = Vector3(0, 0.62, 0.12); glider.visible = false
 	torso.add_child(glider)
-	var canopy := MeshInstance3D.new()
-	canopy.name = "Canopy"
 	var gskin := String(lk["glider"])
 	glider.set_meta("skin", gskin)
 	var gtrail := Gliders.trail(gskin, team_col, hero_col)
@@ -829,6 +827,7 @@ static func _hunter(cls: String, team_col: Color, weapon: String, outfit := "", 
 	for pc in [[Gliders.paint(gset[0], gskin, team_col, hero_col), vtoon_outlined()],
 			[gset[1], toon(Color("5a4636"), false)]]:
 		var gmi := MeshInstance3D.new()
+		gmi.name = "Lines" if glider.has_node("Canopy") else "Canopy"      # the sheet first: GliderHeat tints it
 		gmi.mesh = pc[0]
 		gmi.material_override = pc[1]
 		ShadowPolicy.judge(gmi)
