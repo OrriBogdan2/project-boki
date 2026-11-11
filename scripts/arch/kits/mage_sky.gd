@@ -58,9 +58,9 @@ func tick(dt: float) -> void:
 			drag.merge({"col": MageKit.PINK, "col2": MageKit.PINK})
 			AimKit.lane(kit.h, "e_drag", drag)
 		var k := 1.0 - float(s["t"]) / float(ed["delay"]) if counting else 0.0
-		# a copper ticked rim with the pink chevron on it pointing the drag (the dark disc is content/vfx/mage.json's)
+		# a pink ticked rim with the chevron on it pointing the drag (the dark disc is content/vfx/mage.json's)
 		var rim := {"at": at, "r": r, "ticks": true, "pointer": s["dir"], "all": true}
-		rim.merge({"col": MageKit.COPPER, "col2": MageKit.DEEP_GOLD, "fill": k})
+		rim.merge({"col": MageKit.PINK, "col2": MageKit.DEEP_GOLD, "fill": k})
 		AimKit.circle(kit.h, "e%d" % i, rim)
 		_chevron(at, s["dir"] as Vector2, r)
 	for s in kit.strikes.duplicate():
@@ -80,7 +80,8 @@ func _commit(s: Dictionary, ed: Dictionary, r: float) -> void:
 	s["dir"] = drag_dir(at)
 	s["phase"] = "count"
 	s["t"] = float(ed["delay"])
-	kit.vfx("e_count", at, null, {"r": r, "t": float(ed["delay"]) + 0.1, "t2": float(ed["delay"])})
+	# the dark disc is full until the strike and fades after it; the gold pillar narrows onto it until then
+	kit.vfx("e_count", at, null, {"r": r, "t": float(ed["delay"]) / HeroVfx.HELD_LIFE, "t2": float(ed["delay"])})
 	AimKit.hide(kit.h, "e_drag")
 	kit.m.sfx("vv_sky_count", at, -4.0)
 

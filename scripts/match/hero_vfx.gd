@@ -17,7 +17,7 @@ const MODES := {"sweep": 0, "scorch": 1, "skirt": 2, "flare": 3, "ribbon": 4, "t
 	"ring": 8}
 const LOOKS := {"ember": 0, "smoke": 1, "chunk": 2, "shard": 3, "card": 4, "coin": 5, "star": 6, "drop": 7}
 const SHAPES := {"ball": 0, "line": 1, "disc": 2, "gather": 3, "arc": 4}
-const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2}
+const SCORCH_SHAPES := {"disc": 0, "lane": 1, "cone": 2, "pool": 3}
 const POOL := {"sweep": 10, "scorch": 10, "skirt": 8, "flare": 14, "ribbon": 10, "thread": 18, "bolt": 12, "vortex": 4,
 	"ring": 6, "ember": 12, "smoke": 6, "chunk": 4, "shard": 6, "card": 4, "coin": 4, "star": 6, "drop": 6}
 const AMOUNT := {"ember": 48, "smoke": 14, "chunk": 18, "shard": 24, "card": 12, "coin": 24, "star": 24, "drop": 32}
@@ -28,6 +28,7 @@ const LOD_FAR := 34.0          # m: nothing is drawn beyond this
 const LOD_MID_K := 0.5         # share of the particles between the two
 const ALLY_K := 0.6            # an ally's effects, so yours and the enemy's stay on top
 const HOLD_LINGER := 0.15      # s a hold outlives its last ask
+const HELD_LIFE := 0.85        # share of its life a held surface waits at (a pool's fade starts here)
 const RIBBON_SAMPLES := 18     # points a mesh trail keeps
 const RIBBON_WAVES := 11.0     # rad along a trail's "wave" (a thread trailing in the air)
 const ARC_SEGS := 24           # segments of a sweep's arc mesh
@@ -402,7 +403,7 @@ func _prewarm_strip(mesh: ImmediateMesh) -> void:
 		mesh.surface_add_vertex(Vector3(float(i), 0.0, float(i % 2)) * 0.01)
 	mesh.surface_end()
 
-func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> void:
+func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vector2, o: Dictionary) -> Dictionary:
 	var mi: MeshInstance3D = _take(kind, _surface_node.bind(kind))
 	var mt: ShaderMaterial = mi.material_override
 	var yaw := atan2(dir.x, dir.y) + deg_to_rad(float(layer.get("yaw", 0.0)))
@@ -421,6 +422,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 			var sh := String(layer.get("shape", "disc"))
 			mt.set_shader_parameter("shape", SCORCH_SHAPES[sh])
 			mt.set_shader_parameter("stitch", bool(layer.get("stitch", false)))
+			mt.set_shader_parameter("band", float(layer.get("band", 1.0)))
 			if sh == "lane":
 				var ln := _num(layer, "len", o, 4.0)
 				var w := _num(layer, "w", o, 1.5)
@@ -460,6 +462,7 @@ func _surface(kind: String, layer: Dictionary, h: Hunter, p: Vector3, dir: Vecto
 		e["on"] = o["on"]
 		e["off"] = p - (o["on"] as Node3D).global_position
 	live.append(e)
+	return e
 
 func _paint(mt: ShaderMaterial, layer: Dictionary, h: Hunter) -> void:
 	mt.set_shader_parameter("col", _pal(h, layer.get("c"), "main"))
@@ -624,7 +627,8 @@ func shell(h: Hunter, move: String) -> MeshInstance3D:
 
 # ------------------------------------------------------------------ holds
 ## Something that lasts while the kit keeps asking, once per tick: a blade heating, a body burning. It follows its
-## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended.
+## anchors, and it stops by itself within HOLD_LINGER when the asks stop, whichever way the move ended. A surface
+## layer (a cast's dark ring) waits at HELD_LIFE of its life while asked, then runs out the rest.
 func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 	var key := "%d/%s" % [h.get_instance_id(), move]
 	if holds.has(key):
@@ -646,6 +650,10 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		if lod < 1.0 and bool(layer.get("near", false)):
 			continue
 		var kind := String(layer["p"])
+		if MODES.has(kind):
+			var e := _surface(kind, layer, h, _where(layer, h, o.get("at", h.pos), aim, o), aim, o)
+			layers.append({"node": e["node"], "layer": layer, "n": 0, "surface": e})
+			continue
 		if kind == "string":
 			if not _model_has(h, String(layer.get("skip_if", ""))):
 				layers.append({"node": _string_node(layer, h), "layer": layer, "n": 0})
@@ -674,7 +682,10 @@ func _tick_holds() -> void:
 		var hunter: Hunter = h
 		var aim := hunter.aim_dir()
 		for lay: Dictionary in e["layers"]:
-			if lay["node"] is GPUParticles3D:
+			if lay.has("surface"):
+				var s: Dictionary = lay["surface"]
+				s["t"] = minf(float(s["t"]), float(s["dur"]) * HELD_LIFE)
+			elif lay["node"] is GPUParticles3D:
 				var node := lay["node"] as GPUParticles3D
 				var base: Vector3 = hunter.pos if e["at"] == null else e["at"]
 				node.global_position = _where(lay["layer"], hunter, base, aim)
@@ -699,7 +710,7 @@ func _end_hold(e: Dictionary) -> void:
 		if node is GPUParticles3D:
 			(node as GPUParticles3D).emitting = false
 			motes.append({"node": node, "t": 0.0, "dur": (node as GPUParticles3D).lifetime * 1.1, "n": lay["n"]})
-		else:
+		elif not lay.has("surface"):          # (a surface runs out the rest of its life)
 			node.visible = false
 
 ## A thin glowing line through named anchors (a bowstring): a mesh trail node drawn fresh from them each frame.

@@ -13,7 +13,8 @@ The parity reels (`--parity-reel`, one MP4 per Hunter with the keys shown, `docs
   games as the `["fx", "hvfx", ...]` event, since they don't run the kit. Set `"net": false` on a recipe to keep it local.
 - `HeroVfx.of(m).hold(h, "move", k)`: something that lasts while the kit asks every tick (a blade heating). It follows its
   anchors and turns with the aim (a hose sweeping), and stops by itself when the asks stop, whichever way the move
-  ended. Particle layers only, and local.
+  ended. Local. Particle layers, `string`, and surface layers: a surface (a cast's dark ring) stays at 85% of its
+  `life` while asked and runs out the rest when the asks stop.
 - `HeroVfx.of(m).trail(h, "move", node)`: the move's `ribbon` layers follow a projectile's node (a shot's mesh) until it
   is hidden or freed, at most `TRAIL_MAX` s. For tracers, needles, thrown charges. The recipe's `"end"` names a move
   played where the trail stopped, facing the way it flew (Sparkle's bolt splinters).
@@ -27,7 +28,7 @@ named by a layer's `"when"` / `"unless"`; `"on"`, a body that the move's ground 
 | layer `p` | what | key fields |
 |---|---|---|
 | `sweep` | an arc of flame, burning away | `size`, `arc` deg, `tilt`, `yaw`, `flip` |
-| `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches | `shape` disc / lane / cone, `size` or `len` + `w`, `arc` |
+| `scorch` | the ground burning, fissures cooling; with `"stitch": true` a lane is a seam of cross-stitches; `pool` is a still dark disc in `c3` under a cast (no fire), dark at once, gone in its last 15% | `shape` disc / lane / cone / pool, `size` or `len` + `w`, `arc`, `band` (pool: share of the radius in from the edge, 1 = all) |
 | `skirt` | a wall of flame growing out | `size`, `from`, `tall`, `arc` (share of the circle) |
 | `flare` | a ragged burst facing the camera | `size`, `grow` |
 | `ribbon` | a mesh trail following an anchor, or the kit's `o.follow` node with `"follow": true` | `at`, `life`, `tail` s, `size` width, `wave` m of sideways drift (a thread) |

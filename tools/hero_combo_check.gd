@@ -51,6 +51,34 @@ func _unwall(m: Match, p: Vector3) -> void:
 func _flat(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
+## HeroVfx's live surface looks centred on `at`: {mode, shape, band, size (the quad's x), tall, dur, col, col3}.
+func _looks_at(m: Match, at: Vector3) -> Array:
+	var out := []
+	for e: Dictionary in HeroVfx.of(m).live:
+		var mt: ShaderMaterial = e["mat"]
+		if _flat((e["node"] as Node3D).global_position, at) > 0.1:
+			continue
+		var look := {"mode": _param(mt, "mode", -1), "shape": _param(mt, "shape", 0), "band": _param(mt, "band", 1.0)}
+		look.merge({"dur": float(e["dur"])})
+		look.merge({"size": (e["s0"] as Vector3).x, "tall": (e["s0"] as Vector3).y})
+		look.merge({"col": mt.get_shader_parameter("col"), "col3": mt.get_shader_parameter("col3")})
+		out.append(look)
+	return out
+
+## A shader parameter, or `unset` when the look never set it.
+func _param(mt: ShaderMaterial, key: String, unset: Variant) -> Variant:
+	var v: Variant = mt.get_shader_parameter(key)
+	return unset if v == null else v
+
+## A dark pool (scorch "pool") of radius r among `looks`, `band` of its radius wide (1: a disc).
+func _pool(looks: Array, r: float, band := 1.0) -> Dictionary:
+	for l: Dictionary in looks:
+		if l["mode"] == HeroVfx.MODES["scorch"] and l["shape"] == HeroVfx.SCORCH_SHAPES["pool"] \
+				and absf(float(l["size"]) - 2.0 * r) < 0.01 and absf(float(l["band"]) - band) < 0.01 \
+				and (l["col3"] as Color).v < 0.35:
+			return l
+	return {}
+
 func _fire(m: Match, P: Hunter) -> void:
 	P.fire_cd = 0.0
 	P.inp["fire"] = true
@@ -395,6 +423,7 @@ func _mage() -> void:
 	ac.step(m, 0.2)
 	K.cd["e"] = 0.0
 	ac.aim_at(P, T.pos)
+	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
 	P.inp["e_down"] = true
 	P.ak.use_e()
 	ok("Skycall: the circle drops at the cursor", not K.strikes.is_empty() and _flat(K.strikes[0]["at"], T.pos) < 0.3)
@@ -408,6 +437,20 @@ func _mage() -> void:
 	P.inp["e_down"] = false
 	m.step(ac.DT)
 	ok("Skycall: the release commits the drag and starts the countdown", String(K.strikes[0]["phase"]) == "count")
+	var sky := _looks_at(m, K.strikes[0]["at"])
+	var sky_r := float(K.e_def()["radius"])
+	var delay := float(K.e_def()["delay"])
+	var disc := _pool(sky, sky_r)
+	var pillars := 0
+	for l: Dictionary in sky:
+		var gold := (l["col"] as Color).r > 0.9 and (l["col"] as Color).b < 0.4
+		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and gold:
+			pillars += 1
+	ce = AimKit.entry(P, "e0")
+	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short gold pillar, the chevron",
+			not disc.is_empty() and absf(float(disc["dur"]) * HeroVfx.HELD_LIFE - delay) < 0.01
+			and pillars == 1 and (ce.get("pointer", Vector2.ZERO) as Vector2).x < -0.9,
+			"disc %s pillars %d" % [disc.get("dur", "none"), pillars])
 	ac.step(m, 0.75)
 	ok("Skycall: nothing lands before the 0.8s countdown", ac.dmg(T) < 0.5)
 	var tx0 := T.pos.x

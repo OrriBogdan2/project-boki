@@ -3,11 +3,11 @@ extends RefCounted
 ## Sparkle's ultimate, Kitefall (X). docs/heroes/mage.md has the numbers and the research notes.
 ##
 ## Press: a short crouch (a Shift or a jump in it combines: she launches from where it takes her), then she
-## launches straight up and hangs there invulnerable while a pink range ring and its dark interior show round
-## the take-off spot and the camera pulls back. Press again (X or the attack key) to come down as a bolt at the
-## cursor, clamped inside the ring; with no second press she comes down there by herself when the hover runs
-## out. The strike hurts, knocks back and adds Static to everyone round the landing spot, and pink lightning
-## crackles at her feet for a moment after.
+## launches straight up and hangs there invulnerable while a pink range ring on a dark band shows round the
+## take-off spot, a gold crown at the cursor, and the camera pulls back. Press again (X or the attack key) to
+## come down as a bolt at the cursor, clamped inside the ring; with no second press she comes down there by
+## herself when the hover runs out. The strike hurts, knocks back and adds Static to everyone round the landing
+## spot, and pink lightning crackles at her feet for a moment after.
 
 const CROUCH := "crouch"
 const RISE := "rise"
@@ -189,8 +189,7 @@ func _take_off() -> void:
 	leap["top"] = maxf(from.y + float(data()["height"]), h.pos.y)
 	_next(RISE)
 	kit.play("mage_x_air")
-	var hover := float(data()["rise"]) + float(data()["hover"]) + float(data()["drop"])
-	kit.vfx("x_air", from, null, {"r": r, "len": float(data()["height"]), "t": hover})
+	kit.vfx("x_air", from, null, {"len": float(data()["height"])})
 	kit.m.fx.word(h.pos + Vector3(0, 2.6, 0), "INVULNERABLE", MageKit.PINK, false)
 	kit.m.sfx("vv_ult_hum", h.pos, -6.0)
 	_untouchable(0.2)
@@ -236,8 +235,8 @@ func land_point() -> Vector3:
 			return kit.ground(p)
 	return from
 
-## The range ring with its gold rim (everyone sees where she can come down), the dark inside, and the gold
-## crown at the cursor (her own).
+## The pink range ring (everyone sees where she can come down) on a dark band, and the gold crown at the cursor
+## (her own).
 func _aim_tick() -> void:
 	var h := kit.h
 	var from: Vector3 = leap["from"]
@@ -245,8 +244,9 @@ func _aim_tick() -> void:
 	leap["land"] = land_point()
 	var ring := {"at": from, "r": r, "ticks": true, "col": MageKit.PINK, "col2": MageKit.PINK, "all": true, "lw": 0.1}
 	AimKit.circle(h, "x_ring", ring)
+	HeroVfx.of(kit.m).hold(h, "x_ring", 0.0, {"at": from, "r": r})
 	var crown := {"at": leap["land"], "r": float(data()["radius"]) * 0.5, "ticks": true, "star": true}
-	crown.merge({"col": MageKit.PINK, "col2": MageKit.TEAL, "hot": 0.5, "lw": 0.09})
+	crown.merge({"col": MageKit.DEEP_GOLD, "col2": MageKit.PINK, "hot": 0.5, "lw": 0.09})
 	AimKit.circle(h, "x_aim", crown)
 
 ## Gold crackle along the rim and round her body while she hangs.
@@ -343,9 +343,11 @@ func _share_static(f: Ent, shared: int, source: Ent) -> void:
 	var chest := Vector3(0, 1.0, 0)
 	kit.vfx("x_spread", source.position + chest, null, {"to": f.position + chest})
 
-## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks.
+## A pillar of gold light slams onto the spot out of the sky, a shock ring and a spray of sparks; the storm field
+## spreads over the whole ring.
 func _strike_fx(at: Vector3, r: float) -> void:
 	kit.vfx("x_strike", at, null, {"r": r})
+	kit.vfx("x_field", leap["from"], null, {"r": float(data()["range"])})
 	kit.m.sfx("vv_ult_slam", at, 1.0)
 	Shake.incoming_big(kit.m, at, 0.6, kit.h)
 

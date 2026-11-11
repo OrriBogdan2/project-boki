@@ -51,6 +51,7 @@ func mage() -> void:
 	T.teleport(home + Vector3(6, 0, 0))
 	T2.teleport(home + Vector3(6.5, 0, 1.2))
 	ac.aim_at(P, T.pos)
+	Sfx.listener = P.pos               # (the looks are drawn near the camera's focus)
 	ok("Kitefall: the press goes off", HunterKeys.ult_pressed(P))
 	ok("Kitefall: one press is one cast, its own cooldown starts",
 			U.casts == 1 and int(P.used.get("x", 0)) == 1 and is_equal_approx(float(K.cd["x"]), float(xd["cooldown"])),
@@ -68,6 +69,14 @@ func mage() -> void:
 			"r %.1f" % float(ring.get("r", 0.0)))
 	ok("Kitefall: the crown reticle sits at the cursor", AimKit.shown(P, "x_aim")
 			and Vector2(T.pos.x, T.pos.z).distance_to(AimKit.entry(P, "x_aim")["at"] as Vector2) < 0.6)
+	var from: Vector3 = U.leap["from"]
+	var range_r := float(xd["range"])
+	var hang: Array = hc._looks_at(m, from)
+	var wide: Array = hang.filter(func(l): return l["mode"] == HeroVfx.MODES["scorch"] and float(l["size"]) > range_r)
+	ok("Kitefall look (footage): a dark ring band on the range edge, a gold crown at the cursor, no storm field yet",
+			not hc._pool(hang, range_r, 0.1).is_empty() and wide.size() == 1
+			and AimKit.entry(P, "x_aim").get("col") == MageKit.DEEP_GOLD,
+			"%d range-wide looks (the band only)" % wide.size())
 	var hp0 := P.hp
 	P.hurt(40.0, T, {"src": "abil", "ab": "k1"})
 	ok("Kitefall: invulnerable in the air", P.hp == hp0)
@@ -93,6 +102,12 @@ func mage() -> void:
 	ok("Kitefall: the landing marker shows for everyone",
 			AimKit.shown(P, "x_land") and bool(AimKit.entry(P, "x_land").get("all", false)))
 	ac.step(m, float(xd["drop"]) + 0.05)
+	var storm := 0
+	for l: Dictionary in hc._looks_at(m, from):
+		var ring_wide := absf(float(l["size"]) - 2.0 * range_r) < 0.01
+		if l["mode"] == HeroVfx.MODES["scorch"] and l["shape"] == HeroVfx.SCORCH_SHAPES["disc"] and ring_wide:
+			storm += 1
+	ok("Kitefall: the storm field spreads over the ring once she lands", storm == 1, str(storm))
 	var want := float(xd["dmg"]) * K.ult.power()
 	ok("Kitefall: she lands on the spot and the strike hits both foes",
 			hc._flat(P.pos, t_at) < 0.8 and U.last.get("hits", 0) == 2
