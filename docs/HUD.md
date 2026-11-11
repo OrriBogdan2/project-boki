@@ -39,3 +39,9 @@ drawn, the downed plate and status words show, cooldown text appears).
 - A box thing that doesn't fit (a backpack thing that isn't worth more than your worst, a full belt, keys, or capsule box) gets a red outline in the loot window. Clicking it moves nothing, plays a short rattle and, for a backpack thing, opens the hold window (`LootHold`) left of the box: your backpack, the clicked thing held in red, Swap (yours goes into the box) and Drop (yours goes on the ground). Belt, key and capsule rows only show "Belt full" / "Box full".
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
+
+## Tab squad board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
+The source shows no scoreboard: only a squads-left counter, your squad's list and "SQUAD ELIMINATED" cards. So the Tab-hold board follows
+that: squads left out of the start, each squad as a row of alive / downed / out pips (rivals anonymous, "Squad N", never named), your squad's
+levels, knocks and Boki, and one Ways Out line (your exit's state, else how many are open; the last-squad rush note). It reads Match,
+Hunter and Exits only; it tracks nothing. Void & Masks look (black-violet panel, teal edge, magenta count).
