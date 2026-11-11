@@ -13,8 +13,8 @@ var re := RegEx.create_from_string(WORD)
 func run(main: Node) -> void:
 	_walk("res://scripts", ".gd")
 	_walk("res://content", ".json")
-	var name := String(World.load_layout("arena").get("name", ""))
-	_ok(name == "Training Grounds", "the practice map is named Training Grounds (%s)" % name)
+	var map_name := String(World.load_layout("arena").get("name", ""))
+	_ok(map_name == "Training Grounds", "the practice map is named Training Grounds (%s)" % map_name)
 	print("TGTEXT %s (%d failures)" % ["PASS" if bad == 0 else "FAIL", bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
 
