@@ -421,7 +421,11 @@ func _owners() -> void:
 	var scene: Node = main.current
 	for n in scene.find_children("*", "GeometryInstance3D", true, false):
 		var gi := n as GeometryInstance3D
-		var mesh: Mesh = gi.mesh if gi is MeshInstance3D else (gi.multimesh.mesh if gi is MultiMeshInstance3D and gi.multimesh else null)
+		var mesh: Mesh = null
+		if gi is MeshInstance3D:
+			mesh = gi.mesh
+		elif gi is MultiMeshInstance3D and gi.multimesh:
+			mesh = gi.multimesh.mesh
 		if mesh == null or not gi.is_visible_in_tree():
 			continue
 		var passes := 0

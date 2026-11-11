@@ -2,7 +2,8 @@ class_name ZoneDress
 extends RefCounted
 ## What a built zone (ZoneLayout) puts on its ground besides the layout's own things: the shallows
 ## (one translucent sheet over the channel the tiles say, if it has one) and a scatter: Flora crystal
-## stacks, reeds, pebbles, mushrooms (they glow on a gloom island), ferns and flowers, and the plain slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
+## stacks, reeds, pebbles, mushrooms (they glow on a gloom island), ferns and flowers, and the plain
+## slabs of KINDS_BOX (stepped stone terraces, glowing cracks).
 ## The scatter is MultiMesh, one batch per kind and shape, and every instance of a kind shares one
 ## cached Flora material (no per-prop materials), so a zone's whole scatter costs about a dozen draw calls.
 ## Purely visual: nothing here blocks or is walked into. Data: the zone's "build" in
