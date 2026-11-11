@@ -11,7 +11,8 @@ short match or an evening off finished it. Progress was only six pebbles beside 
 
 ## Options
 1. Raise HEAT_NEED and TRIPS. Away time and two quick matches still finish it.
-2. One clock of play seconds: garden time (the home tick) and match time (`Game.apply_result` hands the match's
+2. One clock of play seconds: garden time (the home tick, also while visiting a friend's garden, at the plain
+   pace) and match time (`Game.apply_result` hands the match's
    seconds to `Incubator.tick`), no expedition count, no catch-up for time with the game closed.
 
 ## Decision
@@ -23,4 +24,4 @@ load and eggs already in cradles start again at 0. No `Save.VERSION` bump (idemp
 
 ## Affects
 `incubator.gd` (TRIPS, HEAT_NEED, AWAY_CAP, `trips`, `catch_up` removed), `home_incubator.gd`, `egg_stages.gd`,
-`game.gd` (one line), the Nook Incubator tab text, `--incubator-check`.
+`game.gd` and `home.gd` (one line each), the Nook Incubator tab text, `--incubator-check`, `--garden-zones-check` (visit row).

@@ -1098,6 +1098,7 @@ func _process(delta: float) -> void:
 	GardenWishes.tick(self, d)
 	if hw: hw.tick(d)
 	if hinc: hinc.tick(d)
+	else: Incubator.tick(d)      # visiting a friend, your eggs still warm at the plain pace
 	_apply_cam_settings()
 	var focus := Vector3(ppos.x, minf(py, 0.0), ppos.z)
 	cam.follow(hob.chat.frame(focus) if hob else focus, d, panel_open == "" and train.is_empty())
