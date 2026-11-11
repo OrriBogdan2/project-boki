@@ -279,6 +279,7 @@ var run: Run = null
 var runners: Array = []        # the home's kin entries, in run order
 var bar: TimingBar = null
 var solo_rec := {}             # the Boki on a solo training lap ({} in a race)
+var practice := false          # the one first-time practice lap: ends at the first press, no gain, no cost
 var cheers: Array = []         # the grades of your presses this lap
 var card: Control = null
 var card_t := 0.0
@@ -395,10 +396,25 @@ func entrants() -> Array:
 
 func use() -> void:
 	var ks := entrants()
-	if ks.size() < 2:
+	if not ks.is_empty() and _offer():
+		_practice(ks[0])
+	elif ks.size() < 2:
 		h._toast("The Dash needs two rested Boki out on the base")
 		return
-	_begin(ks)
+	else:
+		_begin(ks)
+
+func _offer() -> bool:
+	return Settings.get_v("tips") and not Record.clean() and not Save.d["tutorial"].get("first_race", false)
+
+## The first time a race opens: one solo lap that stops at the first press, so the bar is learned in a few
+## seconds. Offered once per save (Save.d.tutorial.first_race; old saves are offered it once, no migration).
+func _practice(k: Dictionary) -> void:
+	Save.d["tutorial"]["first_race"] = true
+	practice = true
+	_begin([k])
+	var keys := [Settings.key_cap("interact"), Settings.key_cap("menu")]
+	bar.lbl.text = "Practice: press %s when the marker is in the gold  ·  %s skips" % keys
 
 ## The Training post: your Boki runs the loop alone while you cheer at the three marks.
 func solo(rec: Dictionary) -> void:
@@ -458,6 +474,9 @@ func input(event: InputEvent) -> bool:
 			h.verbs.play("cheer")       # your Hunter's cheer clip (warden_anim "act")
 		h._emote(runners[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 		_bar_label("  " + {"great": "★", "good": "●", "miss": "✕"}[r])
+		if practice:
+			h._toast("That's a cheer: gold is great, orange is good. Now the real race")
+			_end(false)
 	return true
 
 func tick(d: float) -> void:
@@ -523,6 +542,7 @@ func _lift(kind: String, f: float) -> float:
 	return 0.0
 
 func _end(finished: bool) -> void:
+	finished = finished and not practice      # a practice lap never pays out
 	var res := {}
 	if finished and solo_rec.is_empty():
 		res = settle(run)
@@ -543,6 +563,7 @@ func _end(finished: bool) -> void:
 	run = null
 	runners = []
 	solo_rec = {}
+	practice = false
 
 ## A win in this week's event game goes on the showcase wall with a snapshot of the winner.
 ## Shared with Seek and Spark Volley. False when this week's format is another game's.
