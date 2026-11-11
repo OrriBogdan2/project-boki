@@ -123,7 +123,7 @@ static func tile(key: String, tree: SceneTree, on_open: Callable) -> Control:
 		pic.add_child(q)
 	var name_l := UI.label(String(Data.KIN[spk]["name"]) if is_seen else "???", UI.T_SMALL, UI.INK if is_caught else UI.MUTED, UI.semi)
 	name_l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	FitLabel.shrink(name_l)
 	col.add_child(name_l)
 	return t
 

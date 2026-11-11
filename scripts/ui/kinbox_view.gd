@@ -317,8 +317,7 @@ func _cell(rec: Dictionary, where: String, slot: int) -> Control:
 	sxi.position = Vector2(0, 13)
 	stack.add_child(sxi)
 	var nm := UI.label(String(rec["name"]), 11, sp["color"].lerp(UI.INK, 0.55))
-	nm.autowrap_mode = TextServer.AUTOWRAP_OFF
-	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	FitLabel.shrink(nm, 6)
 	nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	nm.position = Vector2(-2, 53)
 	nm.size = Vector2(CELL.x - 4, 16)

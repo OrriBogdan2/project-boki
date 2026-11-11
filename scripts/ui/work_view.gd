@@ -143,8 +143,7 @@ static func card_section(h: Node, rec: Dictionary, parent: VBoxContainer, reopen
 	if rec.get("overworked", false): line = "Overworked: let it rest"
 	var row := UI.hbox(8)
 	var dl := UI.label(line, 12, Color("ffb0a0") if rec.get("overworked", false) else UI.MUTED)
-	dl.autowrap_mode = TextServer.AUTOWRAP_OFF
-	dl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	FitLabel.shrink(dl)
 	dl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(dl)
 	row.add_child(pin_menu(h, rec, reopen))

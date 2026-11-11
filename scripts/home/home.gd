@@ -3082,9 +3082,7 @@ func _kin_match_rows(rec: Dictionary, c2: Control, compact: bool) -> void:
 	for ln in lines:
 		if compact:
 			var l := UI.label(String(ln[0]), 12, ln[1])
-			l.autowrap_mode = TextServer.AUTOWRAP_OFF
-			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-			l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+			FitLabel.shrink(l)
 			l.tooltip_text = String(ln[0])
 			l.mouse_filter = Control.MOUSE_FILTER_PASS
 			c2.add_child(l)

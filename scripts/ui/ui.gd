@@ -847,7 +847,6 @@ static func scroll_panel(title_txt: String, width: float, on_close: Callable, cl
 	var t := title(title_txt, T_TITLE, DARK_INK)
 	t.add_theme_stylebox_override("normal", title_tab())       # a parchment tab pinned to the panel
 	t.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	t.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	tcol.add_child(t)
 	var sub := label("", T_SMALL + 1, MUTED)
 	sub.visible = false
@@ -927,6 +926,7 @@ static func subtitle(body: Control, txt: String) -> void:
 	if p == null: return
 	var s: Label = p.get_meta("sub")
 	s.text = txt
+	s.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART      # (the label is made empty, so label() left wrapping off)
 	s.visible = txt != ""
 
 ## The panel title's parchment tab (UI_STYLE.md): a torn cream strip with two nails, dark ink on it.

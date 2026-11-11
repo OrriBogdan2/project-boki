@@ -99,6 +99,12 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
   elides (`text_overrun_behavior = TRIM_ELLIPSIS`) or wraps; it never shrinks below the chosen size.
   A new text-drawing call takes its size through `UI.fs` (or `TextCache`), never a bare number.
 
+- `--overflow-check` (headless): every garden panel (Nesting Nook tabs, Burrow, a Boki card's tabs, feed, wishes,
+  zone cards, games board, item pages) at Text size 150% in 1280x720: no clipped, trimmed or overlapping label,
+  nothing past the margin. A new garden panel gets a line in `_panels()` and `_open()` of `tools/overflow_check.gd`.
+  `--overflow-shots --shots-dir=<dir>` takes them with a renderer. A one-line name that may not fit uses
+  `FitLabel.shrink` (smaller text down to a floor, then an ellipsis); a sentence wraps.
+
 ## Looting with a full inventory
 
 - Smart loot (`LootFull.smart`) takes only what fits and reports it: "Took 1 of 3, inventory full", "Inventory full, took nothing", or "Nothing here beats what you've got".
