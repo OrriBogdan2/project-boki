@@ -109,8 +109,36 @@ func _hero(main: Node, id: String, art_name: String) -> void:
 		ok(absf(sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).y - want) < 0.001,
 				"%s: %s holds its size %.2f over the clips" % [id, nm, want])
 	await _handover(id, m, sync, clips, dd)
+	_feel(id, m, sync, clips, bool(dd.get("rig_root", false)))
 	m.free()
 	await _flinch(id)
+
+## HunterAnim's FEEL over the clips: a landing flattens him, a run start tips him forward over his feet, and both
+## leave nothing behind once they're over (the root's size isn't keyed, so it must not build up). A root on the Rig
+## ("rig_root") takes the Rig's own squash, which HunterAnim drives (not running here): only the lean is his.
+func _feel(id: String, m: Node3D, sync: Node, clips: WardenClips, on_rig: bool) -> void:
+	var sk := WardenGlb.skeleton(m.get_node("Warden"))
+	var head := WardenSkeleton.find(sk, "head")
+	var at := func() -> Vector3:
+		return m.global_transform.affine_inverse() * (sk.global_transform * sk.get_bone_global_pose(head).origin)
+	m.set_meta(WardenClips.STATE, {"vel": Vector3.ZERO, "face": 0.0, "grounded": true})
+	clips.force = {"clip": String((clips.d["loco"] as Dictionary)["idle"]), "t": 0.5}
+	var settle := func(feel: Vector2, frames: int) -> Vector3:
+		m.set_meta(WardenClips.FEEL, feel)
+		for k in frames:
+			sync.call("_process", DT)
+		return at.call()
+	var rest: Vector3 = settle.call(Vector2.ZERO, 12)
+	var landed: Vector3 = settle.call(Vector2(1.0, 0.0), 1)
+	var drop := (rest.y - landed.y) / rest.y
+	ok(on_rig or (drop > WardenClips.LAND_SQUASH * 0.7 and drop < WardenClips.LAND_SQUASH * 1.3),
+			"%s: a hard landing flattens him %.0f%% (head %.2f -> %.2f m)" % [id, drop * 100.0, rest.y, landed.y])
+	var leaned: Vector3 = settle.call(Vector2(0.0, 0.2), 30)
+	ok(rest.z - leaned.z > 0.05, "%s: a run start tips his head forward (%.3f m)" % [id, rest.z - leaned.z])
+	var back: Vector3 = settle.call(Vector2.ZERO, 60)
+	ok(back.distance_to(rest) < 0.005, "%s: and he stands back as he was (%.4f m off)" % [id, back.distance_to(rest)])
+	m.remove_meta(WardenClips.FEEL)
+	clips.force = {}
 
 func _named(dd: Dictionary) -> Array:
 	var out: Array = []
