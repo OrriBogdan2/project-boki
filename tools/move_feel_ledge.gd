@@ -8,6 +8,8 @@ extends RefCounted
 
 const DT := 1.0 / 60.0
 const EXIT_MIN := 0.75         # x run speed: the least a dash may leave you in the air (the old barge plant left 0.65)
+## A fitted dash curve (decision 0025: Vex, Kael, Lace) bleeds off through run speed by design, so for those the
+## least is the lower of EXIT_MIN and the curve's own end (u = 1): only a cut on top of the curve fails.
 const AIR_WAIT := 24           # steps (0.4 s): Grimble's barges go "a beat apart" (dash gap)
 const RUNS := [
 	["gunslinger", "tap", 0.8], ["gunslinger", "hold", 2.5], ["juggernaut", "tap", 0.8], ["ashwick", "tap", 0.8],
@@ -50,6 +52,7 @@ func run() -> void:
 func _ready_at(id: String, at: Vector3) -> void:
 	for wl in c.m.verbs.walls.duplicate():
 		c.m.verbs._break_wall(wl)      # (the last run's rocks)
+	P.spirit_t = 0.0      # (Lace's tap is a Spirit Walk: a kit swap mid-walk would carry it into the next rows)
 	if P.arch != id:
 		P.reclass(Arch.weight(id), id, Arch.signature(id))
 	c._reset(at)
@@ -65,7 +68,7 @@ func _dashing() -> bool:
 func _run(id: String, mode: String, at: Vector3, air_press: bool) -> Dictionary:
 	_ready_at(id, at)
 	var o := {"lip_v": 0.0, "hover": 0, "end": -1, "end_air": false, "exit_v": 0.0, "glide": -1, "pose": 0,
-			"air_crash": 0, "air_dash": false, "air_wait": -1, "landed": false}
+			"air_crash": 0, "air_dash": false, "air_wait": -1, "landed": false, "tail_v": 0.0}
 	var off := false
 	var was := false
 	for i in 150:
@@ -80,6 +83,9 @@ func _run(id: String, mode: String, at: Vector3, air_press: bool) -> Dictionary:
 		var crashes := (P.ak as DolmKit).leap_lands if P.ak is DolmKit else 0
 		c.m.step(DT)
 		var now := _dashing()
+		var cv: Dictionary = P.ak.curved
+		if now and not cv.is_empty():
+			o["tail_v"] = float(cv["speed"]) * HunterMove.dash_k(cv["curve"], 1.0) * Loco.dash_speed(id)
 		if not off and not P.grounded and P.pos.x > edge_x:
 			off = true
 			o["lip_v"] = v0
@@ -114,6 +120,7 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 		c.ok(bool(o["landed"]), "ledge_dash %s: the Trade takes him down below the edge" % what)
 		return
 	var exit_k := float(o["exit_v"]) / P.base_speed
+	var least_k := EXIT_MIN if float(o["tail_v"]) <= 0.0 else minf(EXIT_MIN, float(o["tail_v"]) / P.base_speed)
 	if id == "dolm":
 		# Rock Hop is a chain of hops (arcs, not a slide): it must leave the terrace at speed, never crash in the
 		# air (the crash and the next hop wait for the ground below) and come down there
@@ -121,12 +128,12 @@ func _row(id: String, mode: String, back: float, at: Vector3) -> void:
 			"ledge_dash %s: lip %.1f m/s, crashes in the air %d, lands below %s" % [
 			what, float(o["lip_v"]), int(o["air_crash"]), str(o["landed"])])
 		return
-	var ok := bool(o["landed"]) and int(o["hover"]) <= 1 and bool(o["end_air"]) and exit_k >= EXIT_MIN \
+	var ok := bool(o["landed"]) and int(o["hover"]) <= 1 and bool(o["end_air"]) and exit_k >= least_k \
 			and int(o["glide"]) >= 0 and int(o["glide"]) <= 2 and int(o["pose"]) == 0
 	var air := _run(id, mode, at, true)
 	ok = ok and bool(air["air_dash"])
-	var fmt := "ledge_dash %s: lip %.1f m/s, held height %d steps, ends in the air %s at %.2fx run, " \
+	var fmt := "ledge_dash %s: lip %.1f m/s, held height %d steps, ends in the air %s at %.2fx run (least %.2fx), " \
 			+ "glider in %d steps, ground pose after %d, air dash %s (%d steps)"
 	c.ok(ok, fmt % [
-		what, float(o["lip_v"]), int(o["hover"]), str(o["end_air"]), exit_k, int(o["glide"]), int(o["pose"]),
+		what, float(o["lip_v"]), int(o["hover"]), str(o["end_air"]), exit_k, least_k, int(o["glide"]), int(o["pose"]),
 		str(air["air_dash"]), int(air["air_wait"])])

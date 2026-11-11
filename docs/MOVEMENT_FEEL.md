@@ -280,7 +280,8 @@ its own course (distance and speed curve) but falls as it goes: the height hold 
 It ends in the air with the shared dash exit, the kit's ground pose for it stops there, and the glider and the air
 dash are free at once (a kit's own gap between dashes still applies: Grimble's barges go a beat apart).
 `--move-feel-check` dashes every kit off a 3.2 m terrace (tools/move_feel_ledge.gd; Vex held, Grimble's three barges and
-Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed, glider within 2 steps,
+Tenzo's Rock Hop chain too): held height at most 1 step, the exit at least 0.75x run speed (or the end of the dash's
+own fitted curve if lower: Vex, Kael and Lace bleed off through run speed, decision 0025), glider within 2 steps,
 no ground pose after the end, an air dash on the next press, and no Rock Hop crash in the air. Motley's Trade (a lob,
 no travel of his own) must set him down below the edge.
 
