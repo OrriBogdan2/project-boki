@@ -1,5 +1,11 @@
 {
 	"doc": "Dash -> ability rows (DashFlow, docs/decisions/0010-dash-ability-flow.md). dash.<ground|air>.<lmb|rmb|e|x|q>: {mode: fire (mid-dash) | buffer (to the dash's end; the default for a missing row) | cancel (ends the dash), carry: dash momentum kept into it, variant: a dash-variant name the kit reads, source: what the source hero does}. into_dash.<slot>: the same for Shift pressed during that ability's wind-up or recovery. kit_owns: the dashes (ground, air) the kit runs in its own state, out of DashFlow's sight until it overrides ArchKit.in_dash(). Combo rows (docs/decisions/0015-combo-flow.md): jump.<slot> (a press mid-jump: fire | buffer to the landing), into_jump.<slot> (a jump in the ability's wind-up or recovery: fire | cancel | buffer | lock; into_dash takes the same modes and an optional air sub-row), hold.<slot>.<ground|air|jump|mantle> (a held slot through that move: keep | cancel). A missing row combines; any other row is an exception and carries a reason and a source.",
+	"air_cast": {
+		"lmb": {"h": "keep", "v": "fall", "source": "Gil is our own Hunter: no source kit or footage. Rows measured on 0.24.5 when the air-cast check met him (MERGE_0246_FEEL.md)", "verdict": "[?]"},
+		"rmb": {"h": "keep", "v": "fall", "source": "Gil is our own Hunter: no source kit or footage. Rows measured on 0.24.5 when the air-cast check met him (MERGE_0246_FEEL.md)", "verdict": "[?]"},
+		"e": {"h": "slow", "v": "fall", "ours": "the cast slows the walk a moment, and the air speed with it", "source": "Gil is our own Hunter: no source kit or footage. Rows measured on 0.24.5 when the air-cast check met him (MERGE_0246_FEEL.md)", "verdict": "[?]"},
+		"x": {"h": "push", "v": "hover", "ours": "the ult drives him on and holds the height", "source": "Gil is our own Hunter: no source kit or footage. Rows measured on 0.24.5 when the air-cast check met him (MERGE_0246_FEEL.md)", "verdict": "[?]"}
+	},
 	"into_dash": {
 		"e": {
 			"mode": "lock",

@@ -97,8 +97,8 @@
 	"air_cast": {
 		"lmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:113); no cast from the air in the footage (hero-ref/ostra.md)", "verdict": "[?]"},
 		"rmb": {"h": "keep", "v": "fall", "source": "Data silent on the air (supervive_kits.md:114); no cast from the air in the footage (hero-ref/ostra.md)", "verdict": "[?]"},
-		"e": {"cast": "no", "h": "keep", "v": "fall", "source": "Data: plant a bomb (supervive_kits.md:116), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air", "verdict": "[?]"},
-		"x": {"cast": "no", "h": "keep", "v": "fall", "source": "Data: a vortex (supervive_kits.md:117), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air", "verdict": "[?]"}
+		"e": {"h": "keep", "v": "fall", "source": "Data: plant a bomb (supervive_kits.md:116), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air; ours casts it (data has no ground-only rule, as glide.e) (MERGE_0246_FEEL.md)", "verdict": "[?]"},
+		"x": {"h": "slow", "v": "fall", "ours": "the cast slows the walk (the kit's move_k), and the air speed with it", "source": "Data: a vortex (supervive_kits.md:117), no ground-only rule; the air not shown (hero-ref/ostra.md:317). ext/air-cast-b casts it from the air; ours casts it (data has no ground-only rule, as glide.x). 0.24.5 air model (Loco.air_step, strong WASD air control, owner 11-08): a cast that slows the walk (the kit's move_k) caps the air speed too, so the jump's speed bleeds toward it (MERGE_0246_FEEL.md)", "verdict": "[?]"}
 	},
 	"dash_jump": {
 		"ground": {"ours": "ignore", "source": "Data: no jump-in-dash rule; the jump and air-dash tunables (JumpOffJumpZFactor, AirDashSpeedMultiplier) are C++ defaults still locked (supervive_physics.md:95, :108-109). Footage (Void): no jump shown (ostra.md:285).", "verdict": "[?]"},
