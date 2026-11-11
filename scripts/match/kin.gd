@@ -927,16 +927,16 @@ func _hop_on() -> void:
 	fly = {}
 	pos = owner_h.pos + Vector3(0, 1.5, 0)
 
-func go_down(fell := false) -> void:
+func go_down(fell := false, by: Ent = null) -> void:
 	_end_merge("downed")
-	if summon and summon.knocked():
+	if summon and summon.killed(by):
 		return
 	KinDowned.begin(self, fell)
 	if owner_h:
 		note("fainted", "went down in a fight" if not fell else "fell off the island", -0.5)
 	m.on_kin_down(self)
 
-func _on_zero(_by: Ent, _opts: Dictionary) -> void:
+func _on_zero(by: Ent, _opts: Dictionary) -> void:
 	if state in ["dazed", "downed"]:
 		hp = maxf(hp, 1.0)
 		return
@@ -944,7 +944,7 @@ func _on_zero(_by: Ent, _opts: Dictionary) -> void:
 		hp = 1.0
 		_daze()
 		return
-	go_down()
+	go_down(false, by)
 
 func fall_out() -> void:
 	if is_wild():
@@ -1062,6 +1062,8 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		angry_at = by
 	elif is_wild() and by and by is Kin and by.owner_h:
 		angry_at = by.owner_h
+	if summon and d > 0.0:
+		summon.note_hit(by)
 	if shield > 0.0 and d > 0.0:
 		var soak := minf(shield, d)
 		shield -= soak
