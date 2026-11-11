@@ -22,6 +22,7 @@ var player: Node3D
 var ppos := Vector3.ZERO
 var pvel := Vector3.ZERO
 var spawn := ""             # set when coming back out of a building: start at its door
+var play_hub := false       # opened from the title's "Play with your Boki": start on the minigame picker (MinigameHub)
 var py := 0.0               # height of a jump
 var farm_t := 0.0
 var pvy := 0.0
@@ -59,6 +60,10 @@ var hshove: BaseShove = null     # the Stump Shove's stump (base_shove.gd), base
 var hseek: BaseSeek = null       # Seek's scent basket (base_seek.gd), base_mode only
 var hvolley: BaseVolley = null   # Spark Volley's log (base_volley.gd), base_mode only
 var hfish: GlintFishing = null   # Glint Fishing's rock (glint_fishing.gd), base_mode only
+var htumble: BaseTumble = null   # Tumble's ring by the stump (base_tumble.gd), base_mode only
+var hecho: EchoSteps = null      # Echo Steps' four stones (echo_steps.gd), base_mode only
+var hshow: ShowRing = null       # the Show Ring's stage (show_ring.gd), base_mode only
+var games: Array = []            # the base minigames above: each places, ticks, finds and takes input
 var hecon: HomeEcon = null       # the armory, feeders, starving, graveyard and Soul Shrine (home_econ.gd)
 var water := HomeWater.new(self)      # the ponds you wade and swim in (home_water.gd)
 var carry := HomeCarry.new(self)      # lifting and leading a Boki (home_carry.gd)
@@ -173,6 +178,11 @@ func _ready() -> void:
 		hseek = BaseSeek.new(self)
 		hvolley = BaseVolley.new(self)
 		hfish = GlintFishing.new(self)
+		htumble = BaseTumble.new(self)
+		hecho = EchoSteps.new(self)
+		hshow = ShowRing.new(self)
+		# in this order: Tumble's ring needs the stump placed
+		games = [hrace, hshove, hseek, hvolley, htumble, hecho, hshow, hfish]
 	hmk = HomeMarket.new(self, _spawn_kin)
 	hbm = HomeBlackMarket.new(self)
 	if visit.is_empty():
@@ -314,10 +324,7 @@ func _sync_fixtures() -> void:
 		hinc.refresh()
 	if hecon and visit.is_empty():
 		hecon.move_graveyard()
-	if hrace: hrace.place()
-	if hshove: hshove.place()
-	if hseek: hseek.place()
-	if hvolley: hvolley.place()
+	for g in games: g.place()
 	if is_instance_valid(nest): nest.position = NEST_AT
 	var cap: int = int(Save.d["plot_cap"]) if visit.is_empty() else (_d()["plots"] as Array).size()
 	if str(_plot_spots(cap)) != _fx_sig:
@@ -358,11 +365,7 @@ func _fs_arrivals() -> bool:
 func _ready_rest() -> void:
 	var dbg := OS.get_cmdline_user_args()
 	_fixture_spots()
-	if hrace: hrace.place()
-	if hshove: hshove.place()
-	if hseek: hseek.place()
-	if hvolley: hvolley.place()
-	if hfish: hfish.place()
+	for g in games: g.place()
 	# a few trees around the rim of every island, kept away from paths, lots and bridges
 	world.add_trees_on_rim(54)
 	var keep_clear: Array = [[36, 34, 40, 44], [42, 28, 50, 40], [41, 20, 47, 26], [22, 28, 28, 32], [46, 26, 62, 30], [27, 23, 31, 30], [32, 41, 36, 47]]
@@ -710,6 +713,8 @@ func _ready_rest() -> void:
 		ClassReveal.maybe_show(self)     # a Hunter unlock that became ready: a toast (ClassUnlock)
 	if not visit.is_empty():
 		pass
+	elif play_hub:
+		MinigameHub.open(self)
 	elif hb.needs_making():
 		hb.open_make_home()
 	elif not Save.d["tutorial"].get("home", false):
@@ -1072,11 +1077,7 @@ func _process(delta: float) -> void:
 	if key_row and visit.is_empty(): key_row.tick()
 	_care_tick(d)
 	if hecon: hecon.tick(d)
-	if hrace: hrace.tick(d)
-	if hshove: hshove.tick(d)
-	if hseek: hseek.tick(d)
-	if hvolley: hvolley.tick(d)
-	if hfish: hfish.tick(d)
+	for g in games: g.tick(d)
 	_update_bubbles(d)
 	_train_process(d)
 	if hb: hb.tick(d)
@@ -1229,7 +1230,8 @@ func _move_player(d: float) -> void:
 		_climb_step(d)
 		return
 	var mv := Vector2.ZERO
-	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty()
+	var can_act := panel_open == "" and not Overlay.is_open() and not chat_open and train.is_empty() \
+			and not (hecho and hecho.run)
 	if can_act:
 		mv = Vector2(Input.get_axis("left", "right"), Input.get_axis("up", "down"))
 		if mv.length() > 1.0: mv = mv.normalized()
@@ -2091,11 +2093,8 @@ func _find_interact() -> void:
 		best = {"kind": "incubator"}
 	if p2.distance_to(Vector2(YARD_AT.x, YARD_AT.z)) < 1.6 and best.is_empty():
 		best = {"kind": "yard"}
-	if hrace and best.is_empty(): best = hrace.find(p2)
-	if hshove and best.is_empty(): best = hshove.find(p2)
-	if hseek and best.is_empty(): best = hseek.find(p2)
-	if hvolley and best.is_empty(): best = hvolley.find(p2)
-	if hfish and best.is_empty(): best = hfish.find(p2)
+	for g in games:
+		if best.is_empty(): best = g.find(p2)
 	if hway and best.is_empty(): best = hway.find(p2)
 	if hecon:
 		var hb: Dictionary = hecon.find(p2, bd if not best.is_empty() else 9.0)
@@ -2245,10 +2244,14 @@ func _label_for(it: Dictionary) -> String:
 		"yard": return "Train your partner"
 		"race": return hrace.label()
 		"waystone": return hway.label()
+		"fishing": return hfish.label()
+		"relay": return hrace.relay.label()
 		"shove": return hshove.label()
 		"seek": return hseek.label()
 		"volley": return hvolley.label()
-		"fishing": return hfish.label()
+		"tumble": return htumble.label()
+		"echo": return hecho.label()
+		"show": return hshow.label()
 		"nook": return "Pair two Boki for an egg"
 		"incubator": return hinc.prompt()
 		"burrow": return "Open the Boki Burrow (%d asleep inside)" % KinBox.boxed().size()
@@ -2285,9 +2288,13 @@ func _use(it: Dictionary) -> void:
 			if not ak.is_empty(): _open_train(ak)
 		"nook": _open_nook()
 		"race": hrace.use()
+		"relay": hrace.relay.use()
 		"shove": hshove.use()
 		"seek": hseek.use()
 		"volley": hvolley.use()
+		"tumble": htumble.use()
+		"echo": hecho.use()
+		"show": hshow.use()
 		"fishing": hfish.use()
 		"waystone": hway.use()
 		"incubator":
@@ -2316,8 +2323,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		hb.toggle()
 		get_viewport().set_input_as_handled()
 		return
-	if (hrace and hrace.input(event)) or (hshove and hshove.input(event)) or (hseek and hseek.input(event)) \
-			or (hvolley and hvolley.input(event)) or (hfish and hfish.input(event)):
+	if games.any(func(g): return g.input(event)):
 		get_viewport().set_input_as_handled()
 		return
 	if not train.is_empty():

@@ -110,6 +110,7 @@ static func settle(run: Run) -> Dictionary:
 		Care.change(rec, "energy", -float(R["energy"]))
 	Care.change(win, "joy", float(R["win_joy"]))
 	Care.change(lose, "joy", float(R["lose_joy"]))
+	MinigameHub.record("shove", String(win["name"]))     # best Boki on the title's picker
 	Save.remember(win, "shove", "shoved %s off the stump" % lose["name"], float(R["win_trust"]))
 	Save.remember(lose, "shove", "lost the Stump Shove to %s" % win["name"])
 	var backed_won: bool = run.recs[run.backed] == win
@@ -193,7 +194,7 @@ func use() -> void:
 	bar.lbl.text = "Shove with %s" % run.recs[run.backed]["name"]
 	_place_pair()
 	creaked = false
-	Sfx.play("garden_start", stump.position, BaseRace.GARDEN_DB)
+	GardenSfx.countdown(h, stump.position)
 
 ## A press: true when the bout took it.
 func input(event: InputEvent) -> bool:
@@ -207,8 +208,7 @@ func input(event: InputEvent) -> bool:
 	if run.can_shove():
 		var r := bar.press()
 		run.shove(r)
-		Sfx.play("garden_miss" if r == "miss" else "garden_cheer", stump.position, BaseRace.GARDEN_DB,
-				0.04, 1.2 if r == "great" else 1.0)
+		GardenSfx.crowd(r, stump.position)
 		bar.close()
 		h._emote(pair[run.backed], {"great": "★", "good": "♪", "miss": "?"}[r], true)
 	return true
@@ -231,10 +231,10 @@ func tick(d: float) -> void:
 ## The strain loop while they push (louder and higher the nearer the stump is to going), one creak as it first leans.
 func _hear_strain() -> void:
 	var lean := absf(run.balance)
-	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, BaseRace.GARDEN_DB, 0.9 + 0.3 * lean)
+	Sfx.loop_hold("shove_strain", "garden_strain", stump.position, GardenSfx.DB, 0.9 + 0.3 * lean)
 	if lean >= CREAK_AT and not creaked:
 		creaked = true
-		Sfx.play("garden_creak", stump.position, BaseRace.GARDEN_DB)
+		GardenSfx.cue("garden_creak", stump.position)
 
 ## The pair slide along the push and the stump leans toward whoever is losing.
 func _place_pair() -> void:
@@ -260,9 +260,9 @@ func _end(finished: bool) -> void:
 	Sfx.loop_stop("shove_strain")
 	if finished:
 		if absf(run.balance) >= 1.0:
-			Sfx.play("garden_thud", stump.position, BaseRace.GARDEN_DB)
+			GardenSfx.cue("garden_thud", stump.position)
 		_card(res)
-		BaseRace.result_sounds(h, res)
+		GardenSfx.result(h, res)
 		h._emote(h._kin_entry(res["win"]), "♥", true)
 		h._emote(h._kin_entry(res["lose"]), "…", true)
 		Save.save_game()
