@@ -132,6 +132,9 @@ static func _circle(g: AimGeo, e: Dictionary) -> void:
 	var band := float(e["band"])
 	if band > 0.0:
 		g.disc(ctr, r, _fill(e, 0.2))               # a thin ring, its outer edge on r, a faint tint inside
+		var glow := float(e["glow"])
+		if glow > 0.0:                              # a lit band from r * glow, brightening toward the edge
+			g.sector(ctr, r * glow, r - band, 0.0, TAU, _fill(e, 0.0), _fill(e, 1.8))
 		g.ring(ctr, r - band * 0.5, band, _rim(e))
 	else:
 		g.disc(ctr, r, _fill(e, 0.5), _fill(e, 1.2))

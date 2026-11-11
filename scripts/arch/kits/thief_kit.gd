@@ -31,7 +31,8 @@ const KNOCK_STAR := Color("ff2a48")
 const EMP_LINE := Color("ffc23a")      # the aim line while the next bolt is empowered
 const AIM_LILAC := Color("d8c8ff")     # ... and otherwise
 const BOLT_TAIL := Color("ff8a2a")     # the bolt's short orange flame tail
-const KNIFE_VIOLET := Color("b07aff")  # the dagger's arrival circle
+const KNIFE_VIOLET := Color("9a5cff")  # the dagger's arrival circle: her violet
+const KNIFE_R := 1.6               # m: the arrival circle's radius (she lands inside it)
 const BOLA_HOT := Color("ffb02a")      # the Bola's lane front and inner binding ring
 const BOLA_CORD := Color("b06aff")     # its violet lightning cord
 const EMP_RANGE_K := 1.12          # the empowered bolt flies 12% further (the source: 850 -> 950 units)
@@ -850,11 +851,11 @@ func _stick(f: Ent, at: Vector3, on_wall := {}) -> void:
 	if f and rank("kin") >= 3:
 		h.dashes = h.max_dashes()           # Shadow Knife rank 3: a knife in a foe gives the Vault back
 		DashReset.cue(h)
-	fx().star(at + Vector3(0, 1.0 if f else 0.3, 0), Color("ffcf5a"), 0.8, 0.2)
+	vfx("knife_stick", ground(at), null, {"r": KNIFE_R})
 	m.sfx("thief_knife_stick", at, -6.0, 1.0)
-	net_ring(at, 0.8, col_of(ed))
 
-## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the white arrival circle.
+## The stuck dagger (a pooled look, everyone sees it) and, on your screen, the arrival circle: a lit violet rim
+## over a faint inside, glints rising off its edge.
 func _tick_knife() -> void:
 	if knife.is_empty():
 		return
@@ -873,7 +874,9 @@ func _tick_knife() -> void:
 	if tells_visible() or f != null or knife.has("wall"):
 		fx().place("knife%d" % h.get_instance_id(), "dagger", at + Vector3(0, up, 0), dv * 0.01,
 				col_of(e_def()), Color("ffcf5a"), 0.2, 0.2)
-	AimKit.circle(h, "knife", {"at": at, "r": 1.6, "col": KNIFE_VIOLET, "ticks": true, "alpha": 1.0})
+	AimKit.circle(h, "knife", {"at": at, "r": KNIFE_R, "band": 0.1, "glow": 0.55, "col": KNIFE_VIOLET, "ticks": true})
+	if h.is_local():
+		HeroVfx.of(m).hold(h, "knife_mark", 0.0, {"at": ground(at), "r": KNIFE_R})
 
 ## Out from a barrier's face (the way the Vector2 of its a -> b turns a quarter).
 func _wall_out(w: Dictionary) -> Vector2:
@@ -958,7 +961,7 @@ func _blink(to: Vector3) -> void:
 	h.vel = Vector3.ZERO
 	h.gliding = false
 	blinks += 1
-	fx().puff(to + Vector3(0, 0.9, 0), GHOST, 1.2, 0.3)
+	vfx("blink", to, null, {"r": KNIFE_R})
 	m.sfx("dj_blink", to, -3.0, 1.0)
 	net_bolt(from + Vector3(0, 0.9, 0), to + Vector3(0, 0.9, 0), GHOST)
 

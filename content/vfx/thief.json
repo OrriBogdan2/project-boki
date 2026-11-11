@@ -1,0 +1,44 @@
+{
+	"palette": {"main": "9a5cff", "hot": "e4d2ff", "deep": "5a2ad0", "char": "1c0a38", "white": "ffffff"},
+	"moves": {
+		"encore": {
+			"fx": [{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.7, "c": "main", "c2": "hot", "c3": "deep"},
+				{"p": "flare", "y": 1.0, "size": 1.5, "life": 0.2, "c": "main", "c2": "white"},
+				{"p": "star", "shape": "arc", "arc": 360, "radius": "r", "w": 0.3, "delay": 0.38, "n": 22, "speed": 1.4,
+					"spread": 0.35, "grav": -0.6, "life": 0.55, "size": 0.1, "c": "hot", "c2": "white"},
+				{"p": "shard", "shape": "arc", "arc": 360, "radius": "r", "w": 0.3, "delay": 0.38, "n": 14, "speed": 2.6,
+					"spread": 0.5, "grav": 7.0, "life": 0.5, "size": 0.07, "c": "main", "c2": "hot", "near": true}]},
+		"encore_edge": {
+			"fx": [{"p": "star", "shape": "arc", "arc": 360, "radius": "r", "w": 0.2, "n": 18, "speed": 0.5,
+					"spread": 0.3, "grav": -0.8, "life": 0.45, "size": 0.07, "c": "hot", "c2": "white"},
+				{"p": "ember", "shape": "arc", "arc": 360, "radius": "r", "w": 0.2, "n": 16, "speed": 1.8, "spread": 0.6,
+					"grav": 3.0, "life": 0.35, "size": 0.035, "stretch": 0.05, "c": "main", "c2": "hot", "near": true}]},
+		"encore_hit": {"net": false,
+			"fx": [{"p": "flare", "size": 1.0, "life": 0.16, "c": "main", "c2": "hot", "unless": "rim"},
+				{"p": "star", "n": 4, "speed": 3.0, "spread": 1.0, "grav": 3.0, "life": 0.35, "size": 0.07, "c": "hot",
+					"c2": "white", "unless": "rim"},
+				{"p": "sweep", "size": 1.2, "arc": 150, "tilt": 62, "life": 0.24, "c": "main", "c2": "white", "when": "rim"},
+				{"p": "flare", "size": 2.0, "life": 0.22, "c": "main", "c2": "white", "when": "rim"},
+				{"p": "shard", "n": 10, "speed": 4.5, "spread": 1.0, "grav": 7.0, "life": 0.45, "size": 0.08, "c": "main",
+					"c2": "hot", "when": "rim"},
+				{"p": "star", "n": 8, "speed": 4.0, "spread": 1.0, "grav": 2.0, "life": 0.45, "size": 0.09, "c": "hot",
+					"c2": "white", "when": "rim"}]},
+
+		"knife_stick": {
+			"fx": [{"p": "ring", "size": "r", "size_x": 1.11, "life": 0.45, "c": "main", "c2": "hot", "c3": "deep"},
+				{"p": "flare", "y": 0.5, "size": 1.2, "life": 0.2, "c": "main", "c2": "hot"},
+				{"p": "star", "y": 0.5, "n": 8, "speed": 3.5, "spread": 1.0, "grav": 3.0, "life": 0.45, "size": 0.08,
+					"c": "hot", "c2": "white"}]},
+		"knife_mark": {
+			"fx": [{"p": "star", "shape": "arc", "arc": 360, "radius": "r", "w": 0.15, "n": 8, "speed": 0.4,
+					"spread": 0.3, "grav": -0.6, "life": 0.5, "size": 0.06, "c": "hot", "c2": "white"}]},
+		"blink": {
+			"fx": [{"p": "flare", "y": 0.9, "size": 2.0, "life": 0.24, "c": "main", "c2": "white"},
+				{"p": "star", "y": 0.9, "n": 12, "speed": 5.0, "spread": 1.0, "grav": 2.0, "life": 0.45, "size": 0.09,
+					"c": "hot", "c2": "white"},
+				{"p": "shard", "shape": "arc", "arc": 360, "radius": "r", "w": 0.2, "n": 10, "speed": 2.2, "spread": 0.5,
+					"grav": 6.0, "life": 0.45, "size": 0.06, "c": "main", "c2": "hot", "near": true},
+				{"p": "smoke", "y": 0.4, "n": 4, "speed": 0.8, "spread": 0.9, "grav": -0.6, "life": 0.6, "size": 0.5,
+					"c": "deep", "c3": "char", "near": true}]}
+	}
+}

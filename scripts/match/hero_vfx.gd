@@ -652,6 +652,7 @@ func hold(h: Hunter, move: String, k := 0.0, extra := {}) -> void:
 		holds[key]["last"] = m.time
 		holds[key]["k"] = k
 		holds[key]["to"] = extra.get("to")
+		holds[key]["at"] = extra.get("at")
 		return
 	var rec := _rec(h, move)
 	var lod := lod_at(h.pos)

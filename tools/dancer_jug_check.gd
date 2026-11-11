@@ -304,11 +304,17 @@ func thief(a) -> void:
 			and Vector2((K.knife["pos"] as Vector3).x - kspot.x, (K.knife["pos"] as Vector3).z - kspot.z).length() < 1.0
 			and AimKit.shown(P, "knife"),
 		"%s vs %s" % [str(K.knife.get("pos", Vector3.ZERO)), str(kspot)])
+	var kc: Dictionary = AimKit.entry(P, "knife")
+	var V := HeroVfx.of(m)
+	A.ok("dancer E: the circle is a lit violet rim (#9a5cff) on its radius over a faint inside, glints on its edge",
+			float(kc["band"]) > 0.0 and float(kc["glow"]) > 0.0 and absf(float(kc["r"]) - ThiefKit.KNIFE_R) < 0.01
+			and (kc["col"] as Color).to_html(false) == "9a5cff" and int(V.plays.get("knife_stick", 0)) > 0
+			and int(V.plays.get("knife_mark", 0)) > 0, "band %.2f glow %.2f" % [float(kc["band"]), float(kc["glow"])])
 	P.ak.use_e()
 	m.step(A.DT)
-	A.ok("dancer E recast: a blink to it with an afterimage chain",
+	A.ok("dancer E recast: a blink to it with an afterimage chain, her arrival burst as she lands",
 			K.blinks == 1 and Vector2(P.pos.x - kspot.x, P.pos.z - kspot.z).length() < 1.2
-			and (DJFx.of(m).free_pools.get("ghost", []) as Array).size() >= 5,
+			and (DJFx.of(m).free_pools.get("ghost", []) as Array).size() >= 5 and int(V.plays.get("blink", 0)) > 0,
 			"blinks %d" % K.blinks)
 	# ... into a foe: it sticks (slows), recast steps behind them; left alone it steps you there after 6s
 	A.fresh(T)

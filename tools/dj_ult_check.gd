@@ -70,6 +70,11 @@ func dancer(a) -> void:
 	A.ok("dancer X: the area is a thin ring (a band under 0.5m, no disc fill) whose outer edge is the blades' reach",
 			float(thin["band"]) > 0.0 and float(thin["band"]) < 0.5 and float(thin["fill"]) <= 0.0
 			and float(thin["r"]) == U.radius(), "band %.2f r %.3f radius %.3f" % [thin["band"], thin["r"], U.radius()])
+	A.ok("dancer X: the outer band (past rim, the outer 25%) glows in her violet #9a5cff toward that edge",
+			float(thin["glow"]) == float(d["rim"]) and float(d["rim"]) == 0.75
+			and (thin["col"] as Color).to_html(false) == "9a5cff", "glow %.2f" % float(thin["glow"]))
+	var V := HeroVfx.of(m)
+	A.ok("dancer X: the cast plays her ring-opening recipe (content/vfx/thief.json)", int(V.plays.get("encore", 0)) > 0)
 	var beat := {"at": [], "n": U.beat, "pulse": 0.0, "danced": true}
 	A.step(m, 1.9, func():
 		if U.beat > int(beat["n"]):
@@ -95,6 +100,9 @@ func dancer(a) -> void:
 			U.rim_blades == 10 and A.dmg(T) > A.dmg(T2) * 1.3 and T.blight_t > 4.0 and T2.blight_t <= 0.0,
 			"rim %.0f inner %.0f blight %.1f" % [A.dmg(T), A.dmg(T2), T.blight_t])
 	var total := float(d["dmg"]) * float(d["shots"])
+	A.ok("dancer X: glints and sparks ride the ring's edge (a HeroVfx hold), every blade plays her hit look",
+			int(V.plays.get("encore_edge", 0)) > 0 and int(V.plays.get("encore_hit", 0)) >= 20,
+			"edge %d hits %d" % [int(V.plays.get("encore_edge", 0)), int(V.plays.get("encore_hit", 0))])
 	A.ok("dancer X: the faster blades keep the old totals (40 inside, 60 from the outer band)", total == 40.0
 			and (float(d["dmg"]) + float(d["rim_dmg"])) * float(d["shots"]) == 60.0, "%.0f" % total)
 	A.ok("dancer X small mechanic: every blade refreshes her Marks", K.marks_on(T) >= 2

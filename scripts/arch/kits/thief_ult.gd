@@ -10,10 +10,10 @@ extends RefCounted
 ## the cast counts, a hit, a knock or a kill), never the cast alone. Owned by ThiefKit (cast_ult, _tick,
 ## _drop_holds).
 
-const RING_COL := Color("c9a0ff")      # the ring and the blades: her violet (the source's is cyan)
-const RIM_COL := Color("ffd25a")       # the outer band, where blades hit harder
+const RING_COL := Color("9a5cff")      # the ring's glow and the blades: her violet (the source's is cyan)
+const RIM_COL := Color("e4d2ff")       # the outer band's line and its blades (they hit harder): her violet, run hot
 const BLADE_TIP := Color("fff2c0")
-const HIT_COL := Color("e070ff")       # the flash a blade leaves on what it hits: her violet, run hot
+const HIT_COL := Color("e070ff")       # a thrown blade's hot head: her violet, run hot
 const BLADE_SPEED := 30.0              # m/s: the cosmetic blade's flight (the hit lands when it arrives)
 const ORBITERS := 3                    # blades circling her while it runs
 const ORBIT_R := 0.9                   # m
@@ -58,7 +58,7 @@ func start() -> void:
 	k.m.fx.word(h.pos + Vector3(0, 2.7, 0), String(d["short"]).to_upper(), RING_COL, false)
 	k.m.sfx("dj_encore", h.pos, -2.0 if h.is_local() else -5.0, 1.0)
 	k.m.later(float(d["grow"]), func(): if running(): k.m.sfx("dj_encore_whirr", h.pos, -6.0, 1.0))
-	k.net_ring(h.pos, float(d["reach"]), RING_COL)
+	k.vfx("encore", h.pos, null, {"r": float(d["reach"])})
 	h.dashes = h.max_dashes()             # the source's info card: it resets the cartwheel
 	DashReset.cue(h)
 
@@ -87,6 +87,8 @@ func tick(dt: float) -> void:
 		_volley(d)
 	_draw_ring(d)
 	_orbit(d)
+	if float(st["t"]) >= float(d["grow"]):     # glints and sparks riding the ring's edge (content/vfx/thief.json)
+		HeroVfx.of(k.m).hold(h, "encore_edge", 0.0, {"r": radius()})
 	if int(st["n"]) <= 0 and float(st["t"]) >= float(d["grow"]) + float(d["time"]):
 		drop()                             # a plain fade: no final burst
 
@@ -101,12 +103,13 @@ func _keep_dancing(d: Dictionary) -> void:
 		k.anim_id = DANCE
 		k.anim_at = k.m.time - into
 
-## The ring everyone sees: a thin line that grows out from her, then rides with her, its outer edge exactly the
-## radius the blades reach; a finer line marks the outer band. It brightens on every beat.
+## The ring everyone sees: a thin lit line that grows out from her, then rides with her, its outer edge exactly the
+## radius the blades reach; the outer band (past `rim`) glows violet toward it over a faint inside, and a finer
+## line marks where the band starts. It brightens on every beat.
 func _draw_ring(d: Dictionary) -> void:
 	var r := radius()
-	AimKit.circle(k.h, "ult", {"self": true, "r": r, "band": RING_W, "col": RING_COL, "col2": RIM_COL, "all": true,
-			"alpha": 1.2 + 0.8 * pulse})
+	AimKit.circle(k.h, "ult", {"self": true, "r": r, "band": RING_W, "glow": float(d["rim"]), "col": RING_COL,
+			"col2": RIM_COL, "all": true, "alpha": 1.2 + 0.8 * pulse})
 	AimKit.circle(k.h, "ult_rim", {"self": true, "r": r * float(d["rim"]), "band": RING_W * 0.4,
 			"col": Color(RIM_COL, 0.7), "all": true, "alpha": 0.7})
 
@@ -159,8 +162,8 @@ func _blade(f: Ent, rim: bool, right: bool) -> void:
 		k.fx().ride(k.m.shots[-1], "blade", RIM_COL if rim else RING_COL, HIT_COL, BLADE_TRAIL, BLADE_WIDTH)
 	k.m.later(dist / BLADE_SPEED, func(): _hit(f, rim))
 
-## A blade arrives: its damage (more from the outer band, which also blights), a red flash, Marks refreshed,
-## and the bond for a rival hunter.
+## A blade arrives: its damage (more from the outer band, which also blights), her hit look (a slash, a white
+## flare and violet shards from the band: the payoff), Marks refreshed, and the bond for a rival hunter.
 func _hit(f: Ent, rim: bool) -> void:
 	var h := k.h
 	if not is_instance_valid(h) or not is_instance_valid(f) or f.dead or not f.hittable():
@@ -175,13 +178,13 @@ func _hit(f: Ent, rim: bool) -> void:
 	if dealt <= 0.0:
 		return
 	blades += 1
+	var way := Vector2(f.pos.x - h.pos.x, f.pos.z - h.pos.z).normalized()
+	k.vfx("encore_hit", f.pos + Vector3(0, 1.0, 0), way, {"rim": rim})
 	if rim:
 		rim_blades += 1
-		k.fx().puff(f.pos + Vector3(0, 1.0, 0), RIM_COL, 0.8, 0.3, HIT_COL)
 		if not was_blighted:
 			# once, as the blight lands (above the damage numbers, so they don't overprint)
 			k.m.fx.word(f.pos + Vector3(0, 3.0, 0), "BLIGHT", Color("b08aff"), false)
-	k.fx().star(f.pos + Vector3(0, 1.0, 0), HIT_COL, 0.8 if rim else 0.55, 0.16)
 	k.m.sfx("dj_encore_hit", f.pos, -10.0, randf_range(0.9, 1.15) * (0.85 if rim else 1.0))
 	k.refresh_marks()
 	HeroUlt.landed(k, f)
