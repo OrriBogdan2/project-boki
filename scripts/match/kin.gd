@@ -81,6 +81,7 @@ var st_kos := 0
 var st_throws := 0
 var st_skills := 0
 var cd_mult := 1.0
+var carry_k := 1.0                 # carry passives x this: how well it was raised (RunPayoff)
 var runner: KinRunner = null      # its two abilities (k1 = E, k2 = auto)
 var ks: KinSpec = null            # its species in the grammar (content/kin_v2)
 var grow := 0.0                   # level growth, capped by the expedition tier (KinRules.level_growth)
@@ -132,6 +133,7 @@ func init_kin(match_node: Node, id: String, species_id: String, record: Dictiona
 		cd_mult *= float(cm["cd"])
 		power *= float(cm["skill"])
 		mood = float(cm["mood"])
+		carry_k = RunPayoff.carry_mult(rec)
 		# IVS (inborn stats, Care.iv_mult): at most +10% health / +10% damage / +5% speed at 31,
 		# on top of the kin's final stats (budget points + level growth + mutations + care).
 		# The only match-side use besides the bond meter (Bond.add).
