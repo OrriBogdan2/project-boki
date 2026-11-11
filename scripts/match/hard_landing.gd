@@ -21,8 +21,7 @@ static func land(m: Match, h: Hunter) -> void:
 		if hits(h, mb):
 			mb.hurt(rules["damage"], h, {"stun": rules["stun_s"], "src": "hard_landing"})
 	h.land_t = rules["lock_s"]
-	h.slow_k = maxf(h.slow_k, rules["slow_k"]) if h.slow_t > 0.0 else float(rules["slow_k"])
-	h.slow_t = maxf(h.slow_t, rules["lock_s"])
+	h.add_slow(float(rules["lock_s"]), float(rules["slow_k"]))
 	h.squash = rules["squash"]
 	if h == m.player and h.ctrl == "local":
 		m.cam.dip(rules["dip_m"], rules["dip_s"])

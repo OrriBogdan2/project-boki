@@ -74,7 +74,7 @@ static func _note_remote(e: Ent, kind: String, secs: float) -> void:
 		var key := kind + "_until"
 		e.set_meta(key, maxf(float(e.get_meta(key, 0.0)), float(e.m.time) + secs))
 	elif kind == "dsr":
-		e.slow_t = maxf(e.slow_t, secs)
+		e.add_slow(secs)
 
 ## What everyone sees: Grounded wraps cords round the legs for its length; Shred cracks a red ring.
 static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
