@@ -443,11 +443,11 @@ func _mage() -> void:
 	var disc := _pool(sky, sky_r)
 	var pillars := 0
 	for l: Dictionary in sky:
-		var gold := (l["col"] as Color).r > 0.9 and (l["col"] as Color).b < 0.4
-		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and gold:
+		var pink := (l["col"] as Color).r > 0.9 and (l["col"] as Color).b > 0.6     # pink-white, not the footage's gold
+		if l["mode"] == HeroVfx.MODES["skirt"] and float(l["tall"]) <= 4.0 and pink:
 			pillars += 1
 	ce = AimKit.entry(P, "e0")
-	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short gold pillar, the chevron",
+	ok("Skycall look (footage): a dark disc on its radius (full to the strike), a short pink-white pillar, the chevron",
 			not disc.is_empty() and absf(float(disc["dur"]) * HeroVfx.HELD_LIFE - delay) < 0.01
 			and pillars == 1 and (ce.get("pointer", Vector2.ZERO) as Vector2).x < -0.9,
 			"disc %s pillars %d" % [disc.get("dur", "none"), pillars])
