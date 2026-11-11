@@ -112,6 +112,7 @@ static func draw(hud) -> void:
 	if m.heart == null or m.heart.site == Vector3.INF:
 		return
 	var c: Control = hud.c
+	var back := HudScale.begin(hud, "ways_strip", c.size)      # (drawn in the minimap's bar, hangs from the top centre)
 	var sd := seats(m)
 	var w := CELL.x * 4.0 + SQUADS_W
 	var r := Rect2(Vector2(c.size.x * 0.5 - w * 0.5, TOP_Y), Vector2(w, CELL.y))
@@ -124,6 +125,7 @@ static func draw(hud) -> void:
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 16), "Squads left", 11, HudStyle.MUTED, 3)
 	HudStyle.ctext(c, Vector2(sx + SQUADS_W * 0.5, r.position.y + 34), str(squads_left(m)), 15, HudStyle.INK, 3)
 	WaysOutMap.draw_line(hud, Vector2(c.size.x * 0.5, r.end.y + 20.0))
+	HudScale.begin(hud, back, c.size)
 
 static func _cell(c: Control, r: Rect2, s: Dictionary, now: float) -> void:
 	var st: int = s["st"]

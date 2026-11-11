@@ -41,8 +41,8 @@ const UNDER_MSG_A := 0.2     # how much of an edge marker shows while a message 
 ## Where the edge arrow for screen direction `d` is anchored: the edge of the play area round the middle.
 static func edge_point(sz: Vector2, d: Vector2) -> Vector2:
 	var mid := Vector2(sz.x * 0.5, sz.y * 0.47)
-	var hx := (mid.x - EDGE_LEFT) if d.x < 0.0 else (sz.x - EDGE_SIDE - mid.x)
-	var hy := sz.y * (EDGE_UP if d.y < 0.0 else EDGE_DOWN)
+	var hx := (mid.x - HudScale.from_edge(EDGE_LEFT)) if d.x < 0.0 else (sz.x - EDGE_SIDE - mid.x)
+	var hy := sz.y * (EDGE_UP if d.y < 0.0 else EDGE_DOWN / HudScale.up())
 	return mid + d * minf(hx / maxf(0.001, absf(d.x)), hy / maxf(0.001, absf(d.y)))
 
 ## The box of the label (`w` px wide) behind an edge arrow, kept inside the screen's safe margin.

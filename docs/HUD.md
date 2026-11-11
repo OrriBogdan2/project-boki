@@ -79,6 +79,23 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Exit / lair progress, interact prompts | centre-top 24 px, under the crosshair 16 px | while channelling or in reach | unchanged: only while you act on them |
 | Hurt direction arcs | round the middle | 1.2 s | unchanged: they are the combat read |
 
+## HUD size
+
+- Settings > Accessibility > Interface size has "HUD size" beside it (`hud_scale`, 80-130%, default 100%, held to
+  that range when settings load, so saves from before it load at 100%). It scales the match HUD only
+  (`HudScale`); the menus follow Interface size.
+- Each panel group (`SafeArea.begin` in `HudPanels`) is drawn scaled about the corner or edge it hangs from
+  (`HudScale.ANCHOR`), so it stays on its margin and grows inward; groups with one anchor scale together and
+  keep their spacing. Hover spots and the registry's rects follow the scale. A widget that hangs from somewhere
+  else inside a group (the Ways Out strip, the hidden tag) starts its own with `HudScale.begin` and hands back.
+- Growing never takes a corner into the one on its side under or over it: the factor steps down to what the last
+  pass's extents leave room for, never below 100% (on 720p the left column, minimap + squad over the kin card
+  and bars, tops out near 125%, and the big drop map holds it at 100%).
+- What sits clear of the panels gives way by the growth (`HudScale.from_edge`): the message lane's top, the edge
+  markers' left limit and bottom reach, the Blight line.
+- `--hudref-check` section 9 and `--safe-area-check --hud-scale=<0.8..1.3>`: no group off screen or overlapping at 80%,
+  100% and 130% (the former at 1280x720 and 2560x1080, dropping and on the ground).
+
 ## Safe area
 
 - `SafeArea.MARGIN` (12 logical px) is kept clear on every side. The interface is laid out in logical pixels

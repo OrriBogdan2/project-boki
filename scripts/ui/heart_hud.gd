@@ -61,7 +61,7 @@ static func _outside(hud, m: Match, ht: Heart) -> void:
 		hud.c.draw_rect(box, Color(TINT_COL, a), false, minf(sz.x, sz.y) * 0.03)
 	var per_s := Heart.tide_dmg(maxi(Heart.tide_stage(m), 0)) / Heart.r("tide_tick_s")
 	var line := "IN THE BLIGHT  ·  -%d HP/s  ·  get inside the ring" % int(per_s)
-	var at := Vector2(sz.x * 0.5, sz.y * 0.8)
+	var at := Vector2(sz.x * 0.5, HudScale.from_bottom(sz.y * 0.8, sz))      # (clear of the bottom row, grown)
 	var lw := TextCache.width(hud.big, line, 18)
 	SafeArea.note_as("blight_line", Rect2(at + Vector2(-lw * 0.5, -16.0), Vector2(lw, 22.0)))
 	hud._ctext(at, line, 18, Color(1.0, 0.45 + 0.2 * hit, 0.5), hud.big)

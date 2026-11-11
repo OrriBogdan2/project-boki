@@ -24,14 +24,17 @@ static func begin(group_name: String) -> void:
 	group = group_name
 
 static func note(r: Rect2) -> void:
+	if group != "":
+		HudScale.grow(r)
 	note_as(group, r)
 
 ## `r` under a group of its own: for widgets drawn outside the panel pass (the Ways Out strip, markers, prompts).
+## It is recorded where it ends up: under the HUD size scale of the group being drawn (none outside the panel pass).
 static func note_as(group_name: String, r: Rect2) -> void:
 	if recording and group_name != "":
 		if not seen.has(group_name):
 			seen[group_name] = []
-		seen[group_name].append(r)
+		seen[group_name].append(HudScale.xf * r)
 
 ## The groups (name -> Array of Rect2) found under `root`: its visible controls, looking inside any that fill the
 ## screen (a full-rect backdrop or container) for the real ones.

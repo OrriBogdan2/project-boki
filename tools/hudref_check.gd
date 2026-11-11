@@ -203,6 +203,7 @@ func run(main_node: Node) -> void:
 	ok(hud.hover_spots.any(func(x): return String(x[1]) == "vitals"), "the bottom-left vitals block is drawn")
 	await _check_keys(P)
 	_check_deny(P)
+	await _hud_size(m)
 	_done()
 
 ## 6. Every key cap on the ability bar comes from Settings.key_cap; the Merge shows the Merge key once (on the
@@ -304,6 +305,65 @@ func _mate_down(m: Match, hud, P: Hunter) -> void:
 	hud.mates.track(hud, P, MateAlerts.LINE_S)
 	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
 		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
+
+## 9. HUD size (Settings hud_scale, HudScale): at 80% and 130%, on a 1280x720 and a 2560x1080 window, every HUD
+## group is inside the safe margin and no two overlap (SafeArea), and the group really scales with the setting.
+const HUD_SIZES := [Vector2i(1280, 720), Vector2i(2560, 1080)]
+const HUD_STEPS := [0.8, 1.0, 1.3]
+
+func _hud_size(demo: Match) -> void:
+	var keep: float = Settings.get_v("hud_scale")
+	ok(Settings.DEFAULTS["hud_scale"] == 1.0, "HUD size defaults to 100%")
+	Settings.v["hud_scale"] = 5.0
+	ok(is_equal_approx(HudScale.setting(), HudScale.MAX), "a saved value past the range is held to 130%")
+	Settings.v["hud_scale"] = 0.1
+	ok(is_equal_approx(HudScale.setting(), HudScale.MIN), "... and one under it to 80%")
+	demo.queue_free()      # (a plain squad match: the demo's own banners and pop-ins are not the HUD under test)
+	var m := Match.new()
+	main.add_child(m)
+	await m.start({"teams": 4, "squad": 3, "tier": 0, "length": 1500.0, "seed": 7, "demo_kin": "cindle"})
+	m.set_process(false)
+	var hud = m.hud
+	for line in ["Kael knocked Ryzz down", "Team 3 is out", "Ember revived Pip"]:
+		m.feed.append({"text": line, "t": 0.0})
+	hud.toast("Picked up a long-range rifle", Color.WHITE)
+	hud.toast("Armor cracked: it held one more hit", Color.WHITE)
+	for win: Vector2i in HUD_SIZES:
+		main.get_tree().root.size = win
+		await main.get_tree().process_frame
+		var sz: Vector2 = main.get_tree().root.get_visible_rect().size
+		for state in ["dropping", "on the ground"]:      # (the minimap is the big drop map first)
+			m.player.riding = state == "dropping"
+			m.player.dropping = m.player.riding
+			var widths := {}
+			var tag := "%dx%d %s" % [win.x, win.y, state]
+			for step: float in HUD_STEPS:
+				Settings.v["hud_scale"] = step
+				for i in 3:      # (the growth cap reads the pass before: let it settle)
+					hud.panels.queue_redraw()
+					await main.get_tree().process_frame
+				SafeArea.seen.clear()
+				SafeArea.recording = true
+				for i in 4:
+					hud.panels.queue_redraw()
+					await main.get_tree().process_frame
+				SafeArea.recording = false
+				var groups := SafeArea.seen.duplicate()
+				groups["toasts"] = hud.msgs.rects()
+				var found := SafeArea.problems(groups, sz)
+				ok(groups.size() > 8 and found.is_empty(), "%s at %d%%: %d groups in the margin, no overlap %s"
+					% [tag, int(step * 100.0), groups.size(), found.slice(0, 3)])
+				var box := Rect2()
+				for r: Rect2 in groups.get("minimap", []):
+					box = r if box.size == Vector2.ZERO else box.merge(r)
+				widths[step] = box.size.x
+			ok(widths[0.8] < widths[1.0] and widths[1.0] <= widths[1.3],
+				"%s: the minimap shrinks at 80%% and never at 130%% (%s)" % [tag, str(widths)])
+			ok(is_equal_approx(widths[0.8] / widths[1.0], 0.8), "%s: 80%% draws it at 0.8 of its size" % tag)
+			if state == "on the ground":      # (the left column holds back to what fits above the bottom block)
+				ok(widths[1.3] > widths[1.0] * 1.15, "%s: 130%% draws the minimap clearly bigger" % tag)
+	Settings.v["hud_scale"] = keep
+	main.get_tree().root.size = Vector2i(1280, 720)
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)
