@@ -86,7 +86,7 @@ var one_w := 0.0             # how much of the layer the dip owns
 var crouch_pos := Vector2.ZERO
 var carry_w := 0.0           # how far the rescue carry layer (WardenCarry) is over the body
 var stowed := false          # "carry_stow" bones are put away
-var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is modelled into a "carry_drop" hand
+var drop: Array = []         # WardenCarry.held: the body meshes whose weapon is in a "carry_drop" hand or surface
 
 ## The Hero's file, {} when it has none.
 static func data(art_name: String) -> Dictionary:
@@ -135,7 +135,7 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
 					and not bone_name in d.get("offset_bones", []):
 				a.remove_track(i)
-	drop = WardenCarry.held(sk, d.get("carry_drop", []))
+	drop = WardenCarry.held(sk, d.get("carry_drop", []), d.get("carry_drop_surfaces", []))
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)

@@ -13,6 +13,8 @@ const DT := 1.0 / 30.0
 const FLINCH_LEGS_M := 0.002   # m: a chip hit on the run may move the legs this far off the unhit run
 const FLINCH_ARMS_M := 0.01    # m: and must move the hand at least this far (the flinch shows)
 const FX_ON_BLADE := 0.05      # m: the Muzzle may sit this far off the visible tip
+const NO_STRIDE_M := 0.05      # m: a shin swinging less than this does not step (Motley hovers: his legs hang, 0.024 m)
+const HAND_PIECE_M := 0.25     # m: while carrying, a shown piece on one hand alone may reach this far (a hand, not a weapon)
 const POP := 0.16              # of the Hero's height: how much further a frame may move the hand than the clip does
 const SEAM_DEG := 1.0          # a standing loop's last key may turn a bone this far from its first
 const SEAM_M := 0.01           # and move it this far
@@ -415,13 +417,18 @@ func _carry(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionar
 	for nm in dd.get("carry_stow", []):
 		held = maxf(held, sk.get_bone_pose_scale(WardenSkeleton.find(sk, String(nm))).x)
 	ok(held < 0.01, "%s: the weapon bones the data stows are put away (%.3f)" % [id, held])
-	if not (dd.get("carry_drop", []) as Array).is_empty():
+	if not (dd.get("carry_drop", []) + dd.get("carry_drop_surfaces", []) as Array).is_empty():
 		var bare := not clips.drop.is_empty()
 		for h in clips.drop:
 			bare = bare and h[0].mesh == h[2] and _tris(h[2]) < _tris(h[1])
 		ok(bare, "%s: the weapon modelled into the hand leaves the shown mesh" % id)
-	ok(plain < 0.02 or stride >= plain * 0.75,
-			"%s: the legs keep stepping under it (%.2f m of stride, %.2f m without)" % [id, stride, plain])
+	for gone in dd.get("carry_drop_surfaces", []):
+		ok(_surface_tris(clips.drop, String(gone)) <= 1, "%s: the fused weapon (%s) is hidden" % [id, gone])
+	var loose := _hand_piece(sk)
+	ok(loose <= HAND_PIECE_M, "%s: no weapon rides a hand into the Boki (longest piece on a hand alone %.2f m, limit %.2f)"
+			% [id, loose, HAND_PIECE_M])
+	ok(plain < NO_STRIDE_M or stride >= plain * 0.75,
+			"%s: the legs keep stepping under it (%.3f m of stride, %.3f m without)" % [id, stride, plain])
 	s["kmove"] = "rs_done"
 	for k in 20:
 		sync.call("_process", DT)
@@ -453,6 +460,37 @@ func _clear(sk: Skeleton3D, socket: Vector3, height: float) -> float:
 				if absf(v.y - at.y) < 0.06 * height and absf(v.x - at.x) < 0.1 * height:
 					front = minf(front, v.z)
 	return front - at.z if front != INF else 1.0
+
+## The furthest any piece of the shown skinned meshes that rides one hand alone reaches from it (m; 0: none). Read
+## off the meshes, not the data, so a weapon skinned into a hand the data forgot shows here.
+func _hand_piece(sk: Skeleton3D) -> float:
+	var most := 0.0
+	for n in sk.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if mi.skin == null or not mi.visible or not mi.mesh is ArrayMesh:
+			continue
+		var head := WardenCarry.hand_heads(mi.skin, sk, ["hand.L", "hand.R"])
+		for si in mi.mesh.get_surface_count():
+			var arrays: Array = mi.mesh.surface_get_arrays(si)
+			if arrays[Mesh.ARRAY_BONES] == null:
+				continue
+			var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var piece := WardenCarry.pieces(idx, arrays[Mesh.ARRAY_VERTEX])
+			var reach := WardenCarry.on_hands(arrays, head, piece)
+			for t in range(0, idx.size(), 3):   # (only what a triangle draws: a stripped mesh keeps the weapon's
+				if idx[t] != idx[t + 1]:        # vertices, and an emptied surface one degenerate triangle)
+					most = maxf(most, float(reach.get(piece[idx[t]], 0.0)))
+	return most
+
+## The most triangles a shown mesh still draws on the named surface (an emptied one keeps a single degenerate one).
+func _surface_tris(held: Array, surface: String) -> int:
+	var most := 0
+	for h in held:
+		var shown := (h[0] as MeshInstance3D).mesh
+		for si in shown.get_surface_count():
+			if shown.surface_get_name(si) == surface:
+				most = maxi(most, shown.surface_get_array_index_len(si) / 3)
+	return most
 
 ## A mesh's triangle count.
 func _tris(m: Mesh) -> int:

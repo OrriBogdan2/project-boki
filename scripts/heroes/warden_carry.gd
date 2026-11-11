@@ -3,8 +3,8 @@ extends RefCounted
 ## The rescue carry on a Hero's .glb (KinDowned, pose id "rs_carry"): one upper-body layer over whatever the legs play
 ## (the walk and run clips at the carry's 90% speed). Both arms come in to cradle the Boki at a chest socket, the
 ## torso leans back a little under the weight, and the weapon bones the Hero's data names ("carry_stow") are put away
-## where the hands are needed; a weapon modelled straight into a hand ("carry_drop": the hands) leaves the shown mesh
-## for the carry (held, hold). Two-bone arm IK on the contract bones (RIG_CONTRACT), so one layer fits all 12 bodies;
+## where the hands are needed; a weapon modelled straight into a hand ("carry_drop": the hands; "carry_drop_surfaces":
+## a weapon fused into the hand by blended weights, named by its surface) leaves the shown mesh for the carry (held, hold). Two-bone arm IK on the contract bones (RIG_CONTRACT), so one layer fits all 12 bodies;
 ## no clip is authored for it. The socket (world position) is left on the model for KinDowned.scoop_pose.
 
 const MOVE := "rs_carry"           # HunterAnim pose id (KinDowned.rescue_pose) that carries; "rs_done" eases it out
@@ -110,11 +110,11 @@ static func stow(skel: Skeleton3D, bones: Array, w: float) -> void:
 		if bi >= 0:
 			skel.set_bone_pose_scale(bi, Vector3.ONE * lerpf(1.0, STOW_SCALE, clampf(w * 2.0, 0.0, 1.0)))
 
-## The skinned meshes on this skeleton whose weapon is modelled into one of `hands`: [[MeshInstance3D, its mesh, the
-## mesh without that weapon]]. The bare copy is built once a session per mesh.
-static func held(skel: Skeleton3D, hands: Array) -> Array:
+## The skinned meshes on this skeleton whose weapon is modelled into one of `hands` or is one of `surfaces` (by name):
+## [[MeshInstance3D, its mesh, the mesh without that weapon]]. The bare copy is built once a session per mesh.
+static func held(skel: Skeleton3D, hands: Array, surfaces: Array = []) -> Array:
 	var out: Array = []
-	if hands.is_empty():
+	if hands.is_empty() and surfaces.is_empty():
 		return out
 	for n in skel.find_children("*", "MeshInstance3D", true, false):
 		var mi := n as MeshInstance3D
@@ -122,7 +122,7 @@ static func held(skel: Skeleton3D, hands: Array) -> Array:
 		if m == null or mi.skin == null:
 			continue
 		if not _bare.has(m):
-			_bare[m] = _strip(m, mi.skin, skel, hands)
+			_bare[m] = _strip(m, mi.skin, skel, hands, surfaces)
 		if _bare[m] != m:
 			out.append([mi, m, _bare[m]])
 	return out
@@ -132,21 +132,16 @@ static func hold(meshes: Array, on: bool) -> void:
 	for h in meshes:
 		(h[0] as MeshInstance3D).mesh = h[2] if on else h[1]
 
-## A copy of m without its hand-held pieces (m itself when it has none): same vertices, same surfaces, fewer triangles.
-static func _strip(m: ArrayMesh, skin: Skin, skel: Skeleton3D, hands: Array) -> ArrayMesh:
-	var head := {}      # skin bind index of a listed hand -> the hand's head in mesh space
-	for b in skin.get_bind_count():
-		var nm := skin.get_bind_name(b)
-		var bone := skel.find_bone(nm) if nm != &"" else skin.get_bind_bone(b)
-		for h in hands:
-			if bone >= 0 and bone == WardenSkeleton.find(skel, String(h)):
-				head[b] = skin.get_bind_pose(b).affine_inverse().origin
+## A copy of m without its hand-held pieces and the named surfaces' triangles (m itself when it has none): same
+## vertices, same surfaces, fewer triangles.
+static func _strip(m: ArrayMesh, skin: Skin, skel: Skeleton3D, hands: Array, surfaces: Array) -> ArrayMesh:
+	var head := hand_heads(skin, skel, hands)
 	var out := ArrayMesh.new()
 	var dropped := false
 	for si in m.get_surface_count():
 		var arrays := m.surface_get_arrays(si)
 		if arrays[Mesh.ARRAY_INDEX] != null and arrays[Mesh.ARRAY_BONES] != null:
-			var tris := _keep(arrays, head)
+			var tris := PackedInt32Array() if m.surface_get_name(si) in surfaces else _keep(arrays, head)
 			dropped = dropped or tris.size() < (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size()
 			arrays[Mesh.ARRAY_INDEX] = tris if not tris.is_empty() else PackedInt32Array([0, 0, 0])
 		var flags := m.surface_get_format(si) & KEEP_FLAGS
@@ -155,17 +150,37 @@ static func _strip(m: ArrayMesh, skin: Skin, skel: Skeleton3D, hands: Array) -> 
 		out.surface_set_name(si, m.surface_get_name(si))
 	return out if dropped else m
 
-## The surface's triangles minus each piece (vertices joined by a triangle or a shared point) that rides one of the
-## hands alone and reaches past HAND_REACH from it.
+## The skin bind index of each named hand -> the hand's head in mesh space.
+static func hand_heads(skin: Skin, skel: Skeleton3D, hands: Array) -> Dictionary:
+	var head := {}
+	for b in skin.get_bind_count():
+		var nm := skin.get_bind_name(b)
+		var bone := skel.find_bone(nm) if nm != &"" else skin.get_bind_bone(b)
+		for h in hands:
+			if bone >= 0 and bone == WardenSkeleton.find(skel, String(h)):
+				head[b] = skin.get_bind_pose(b).affine_inverse().origin
+	return head
+
+## The surface's triangles minus each piece that rides one of the hands alone and reaches past HAND_REACH from it.
 static func _keep(arrays: Array, head: Dictionary) -> PackedInt32Array:
 	var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+	var piece := pieces(idx, arrays[Mesh.ARRAY_VERTEX])
+	var reach := on_hands(arrays, head, piece)
+	var out := PackedInt32Array()
+	for t in range(0, idx.size(), 3):
+		if float(reach.get(piece[idx[t]], 0.0)) <= HAND_REACH:
+			out.append_array([idx[t], idx[t + 1], idx[t + 2]])
+	return out
+
+## The pieces of a surface that ride the hands in `head` (hand_heads) alone, each -> how far it reaches from its hand
+## (m). A piece with a vertex on anything else is part of the body.
+static func on_hands(arrays: Array, head: Dictionary, piece: Array[int]) -> Dictionary:
 	var pos: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 	var bones: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
 	var wts: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
 	var per := bones.size() / pos.size()
-	var piece: Array[int] = _pieces(idx, pos)
-	var tied := {}      # piece -> true: a vertex of it moves with something other than a listed hand
-	var far := {}       # piece -> true: a vertex of it lies past HAND_REACH from its hand
+	var tied := {}
+	var reach := {}
 	for v in pos.size():
 		var on := -1
 		for k in per:
@@ -173,18 +188,15 @@ static func _keep(arrays: Array, head: Dictionary) -> PackedInt32Array:
 				on = bones[v * per + k]
 		if on < 0:
 			tied[piece[v]] = true
-		elif pos[v].distance_to(head[on]) > HAND_REACH:
-			far[piece[v]] = true
-	var out := PackedInt32Array()
-	for t in range(0, idx.size(), 3):
-		var p := piece[idx[t]]
-		if not far.has(p) or tied.has(p):
-			out.append_array([idx[t], idx[t + 1], idx[t + 2]])
-	return out
+		else:
+			reach[piece[v]] = maxf(float(reach.get(piece[v], 0.0)), pos[v].distance_to(head[on]))
+	for p in tied:
+		reach.erase(p)
+	return reach
 
 ## Each vertex's piece (union-find over the triangles' edges and over vertices at the same point: a UV seam splits
 ## the vertices, not the piece).
-static func _pieces(idx: PackedInt32Array, pos: PackedVector3Array) -> Array[int]:
+static func pieces(idx: PackedInt32Array, pos: PackedVector3Array) -> Array[int]:
 	var up: Array[int] = []       # (an Array, not a packed one: _join writes into it)
 	up.assign(range(pos.size()))
 	var at := {}
