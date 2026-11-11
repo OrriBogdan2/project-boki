@@ -49,8 +49,7 @@ func _napping(main: Node) -> void:
 	_ok(not m.mobs.is_empty(), "napping: the map has camps")
 	if not m.mobs.is_empty():
 		var mb: Mob = m.mobs[0]
-		mb.st = "idle"
-		mb.tgt = null
+		mb.calm("check")
 		mb.grounded = true
 		var far := mb.pos + Vector3(Mob.NAP_M * 4.0, 0, 0)
 		for e in m.hunters:

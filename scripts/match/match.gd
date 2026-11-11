@@ -4805,8 +4805,7 @@ func _update_events() -> void:
 		return
 	warden_done = true
 	if not net_on or is_host:
-		var w := spawn_mob("warden", world.heart_spot + Vector3(0, 0, 1.5))
-		w.st = "idle"
+		spawn_mob("warden", world.heart_spot + Vector3(0, 0, 1.5))
 		if opts.get("watch_heart", false) and player:
 			var wp := world.heart_spot + Vector3(0, 0, 5.0)
 			player.teleport(Vector3(wp.x, world.ground_at(wp.x, wp.z), wp.z))
@@ -5344,11 +5343,8 @@ func _net_apply(e: Ent, it: Array, t_owner := -1.0) -> void:
 		"m":
 			var mb: Mob = e
 			mb.face = it[5]; mb.hp = it[6]; mb.max_hp = it[7]
-			var st: int = int(it[8])
-			if st >= 0 and st < MOB_STATES.size():
-				mb.st = MOB_STATES[st]
+			mb.follow(int(it[8]), it[12])
 			mb.atk_dir = Vector2(it[10], it[11])
-			mb.st_t = it[12]
 			mb.net_vel = Vector3(it[13], 0, it[14])
 			if it.size() > 16:
 				mb.stag_open = float(it[15]); mb.stagger_t = float(it[16])

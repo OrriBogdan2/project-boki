@@ -454,7 +454,8 @@ func demo(mode: String) -> void:
 				var a := PI * 0.75 + float(i) * 0.4
 				var q := m.world.free_spot_near(P.pos + Vector3(cos(a), 0, sin(a)) * 4.5, [P.pos], 0.8, 0.4, 4.0)
 				var s := spawn("bl_skitter", Vector3(q.x, m.world.ground_at(q.x, q.z), q.z), 0.3)
-				s.tgt = P; s.st = "chase"; s.cd = 9.0
+				s.aggro(P, "demo")
+				s.cd = 9.0
 				sk.append(s)
 			_demo["skitters"] = sk
 	P.inp["move"] = Vector2.ZERO

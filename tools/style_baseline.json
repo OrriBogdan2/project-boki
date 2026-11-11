@@ -437,7 +437,7 @@
 "scripts/match/blight.gd": {
 "long_line": 5,
 "nested_ternary": 2,
-"semicolon": 27
+"semicolon": 18
 },
 "scripts/match/blight_dir.gd": {
 "long_line": 5,
@@ -621,7 +621,7 @@
 "scripts/match/lairs.gd": {
 "long_line": 49,
 "nested_ternary": 9,
-"semicolon": 28
+"semicolon": 27
 },
 "scripts/match/landmarks.gd": {
 "long_line": 23,
@@ -654,7 +654,7 @@
 "scripts/match/mob.gd": {
 "long_line": 12,
 "nested_ternary": 1,
-"semicolon": 19
+"semicolon": 11
 },
 "scripts/match/mob_models.gd": {
 "long_line": 38,
@@ -970,7 +970,7 @@
 },
 "tools/blight_check.gd": {
 "long_line": 15,
-"semicolon": 25
+"semicolon": 24
 },
 "tools/boki_follow_check.gd": {
 "long_line": 33,

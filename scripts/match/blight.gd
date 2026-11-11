@@ -19,6 +19,8 @@ const CONE_LEN := 9.0             # a Warden's light
 const CONE_HALF := 0.42           # half the cone's angle (about 24 degrees each side)
 const SPOT_TIME := 0.75           # seconds in the light before a Warden shrieks (longer early on)
 const SHRIEK_CD := 14.0
+const LUNGE_REC_S := 0.5          # s a Skitter stands after its lunge
+const BOLT_REC_S := 0.6           # s a Watcher stands after its bolt
 
 var dir: BlightDir = null
 var lvl := 0.1                    # 0 weakest .. 1 full strength (up to BlightDir.LVL_MAX)
@@ -140,23 +142,24 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	if remote:
-		st_t -= dt
+		_net_left -= dt
 		net_follow(dt)
 		_net_telegraph()
 		return
 	cd -= dt
-	st_t -= dt
+	fsm.tick(dt)
 	shriek_cd -= dt
 	var spd: float = float(md["speed"]) * speed_k() * slow_mult(0.55)
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
-		if stun_t > 0.0 and st == "windup":
-			_cancel_tele(); st = "recover"; st_t = 0.4
+	_stun_check()
+	if fsm.is_in(S.NOTICE):
+		_go(S.CHASE, "noticed")
 	var wish := Vector2.ZERO
-	match st:
-		"idle", "chase":
+	match fsm.state:
+		S.IDLE, S.CHASE:
 			wish = _warden_think(dt, spd) if mkind == "bl_warden" else _skitter_think(dt, spd)
-		"windup":
+		S.WINDUP:
 			if tgt and is_instance_valid(tgt) and md["attack"] in ["lunge", "spit"]:
 				if st_t > float(md["windup"]) * 0.4:
 					atk_dir = atk_dir.slerp(dir_to(tgt), dt * 4.0)
@@ -168,7 +171,7 @@ func sim(dt: float) -> void:
 				cone_a = atan2(atk_dir.x, atk_dir.y)
 			if st_t <= 0.0:
 				_strike()
-		"lunge":
+		S.ATTACK:      # a lunge (the Watcher's bolt recovers at once)
 			vel.x = atk_dir.x * 11.0; vel.z = atk_dir.y * 11.0
 			for e in m.foes_of(team):
 				if lunge_hit.has(e.nid): continue
@@ -176,12 +179,14 @@ func sim(dt: float) -> void:
 					lunge_hit[e.nid] = true
 					e.hurt(float(md["dmg"]) * dmg_mult, self, {"kb": atk_dir * 3.0, "src": "mob", "tags": ["blight"]})
 			if st_t <= 0.0:
-				st = "recover"; st_t = 0.5
+				_go(S.RECOVER, "lunged", LUNGE_REC_S)
 				vel.x *= 0.2; vel.z *= 0.2
-		"recover":
+		S.RECOVER:
 			if st_t <= 0.0:
-				st = "chase"
-	if st != "lunge":
+				_go(S.CHASE, "recovered")
+		S.STUNNED:
+			_stunned()
+	if not fsm.is_in(S.ATTACK):
 		var hv := Vector2(vel.x, vel.z)
 		var k := 10.0 if hv.length() <= spd * 1.3 else 2.5
 		hv += (wish - hv) * (1.0 - exp(-k * dt))
@@ -192,12 +197,12 @@ func sim(dt: float) -> void:
 	var pre_v := Vector2(vel.x, vel.z).length()
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
-		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
+		stun_t = maxf(stun_t, WALL_HOLD)
+		_stun("wall", WALL_HOLD)
 		m.on_wall_slam(self)
 		hurt(8.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
-	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
+	var look := atk_dir if fsm.is_in(S.WINDUP) or fsm.is_in(S.ATTACK) else Vector2(vel.x, vel.z)
 	if mkind == "bl_warden" and st != "windup":
 		look = Vector2(sin(cone_a), cos(cone_a))
 	if look.length() > 0.2:
@@ -206,12 +211,13 @@ func sim(dt: float) -> void:
 func _skitter_think(dt: float, spd: float) -> Vector2:
 	var wish := Vector2.ZERO
 	sense_t -= dt
-	if st == "idle":
+	if fsm.is_in(S.IDLE):
 		if sense_t <= 0.0:
 			sense_t = 0.2
 			var t := _sense()
 			if t:
-				tgt = t; st = "chase"; lost_t = 0.0; chase_from = pos; heard = Vector3.INF
+				aggro(t, "sensed")
+				lost_t = 0.0; chase_from = pos; heard = Vector3.INF
 				m.sfx("v_skitter", pos, -10.0, randf_range(0.55, 0.7))
 				return wish
 		if heard != Vector3.INF:
@@ -234,7 +240,7 @@ func _skitter_think(dt: float, spd: float) -> Vector2:
 	if not _still_has(tgt):
 		tgt = null
 	if tgt == null:
-		st = "idle"; engaged = false
+		calm("lost")
 		return wish
 	if sense_t <= 0.0:
 		sense_t = 0.25
@@ -243,7 +249,7 @@ func _skitter_think(dt: float, spd: float) -> Vector2:
 	if lost_t > GIVE_UP or flat_dist(tgt) > 16.0 or flat_dist(chase_from) > LEASH:
 		# lost you: go and sniff round where you were last
 		heard = tgt.pos; heard_t = 0.0
-		tgt = null; st = "idle"; engaged = false
+		calm("gave up")
 		return wish
 	var d := flat_dist(tgt)
 	if not engaged:
@@ -263,7 +269,7 @@ func _skitter_think(dt: float, spd: float) -> Vector2:
 func _warden_think(dt: float, spd: float) -> Vector2:
 	var wish := Vector2.ZERO
 	sense_t -= dt
-	if st == "idle":
+	if fsm.is_in(S.IDLE):
 		# patrol a little round its post, the light sweeping side to side
 		if heard != Vector3.INF:
 			heard_t += dt
@@ -287,7 +293,8 @@ func _warden_think(dt: float, spd: float) -> Vector2:
 				spot += 0.1 / spot_time()
 				if spot >= 1.0:
 					shriek(seen)
-					tgt = seen; st = "chase"; lost_t = 0.0
+					aggro(seen, "spotted")
+					lost_t = 0.0
 			else:
 				spot = maxf(0.0, spot - 0.1 / 1.6)
 		return wish
@@ -295,7 +302,8 @@ func _warden_think(dt: float, spd: float) -> Vector2:
 	if not _still_has(tgt):
 		tgt = null
 	if tgt == null:
-		st = "idle"; spot = 0.0
+		calm("lost")
+		spot = 0.0
 		return wish
 	cone_a = lerp_angle(cone_a, atan2(tgt.pos.x - pos.x, tgt.pos.z - pos.z), minf(1.0, dt * 3.0))
 	if sense_t <= 0.0:
@@ -305,7 +313,8 @@ func _warden_think(dt: float, spd: float) -> Vector2:
 		_light_up()
 	if lost_t > 5.0 or flat_dist(tgt) > 15.0 or flat_dist(post) > 8.0:
 		heard = tgt.pos; heard_t = 0.0
-		tgt = null; st = "idle"; spot = 0.0
+		calm("gave up")
+		spot = 0.0
 		return dir_to(post) * spd if flat_dist(post) > 2.0 else wish
 	var d := flat_dist(tgt)
 	if d < 4.0:
@@ -386,7 +395,8 @@ func _strike() -> void:
 		return
 	_cancel_tele()
 	cd = float(md["cd"]) * randf_range(0.85, 1.15)
-	st = "recover"; st_t = 0.6
+	_go(S.ATTACK, "tell full")
+	_go(S.RECOVER, "bolt", BOLT_REC_S)
 	# an ember bolt from the lamp
 	var o := pos + Vector3(atk_dir.x * 0.7, 2.0, atk_dir.y * 0.7)
 	m.spawn_shot(self, o, atk_dir * 9.0, float(md["dmg"]) * dmg_mult, 10.0 / 9.0, 0.34, BlightModels.EMBER_HOT, {"mob": true, "kb": 2.0, "burn": 1.0 if lvl > 0.6 else 0.0})

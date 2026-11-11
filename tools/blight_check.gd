@@ -189,7 +189,7 @@ func _noise_and_fights(main: Node) -> void:
 	P.crouch = false
 	P.hp = P.max_hp; P.armor = P.max_armor
 	near_s.teleport(P.pos + Vector3(3.5, 0, 0))
-	near_s.tgt = P; near_s.st = "chase"
+	near_s.aggro(P, "check")
 	ok(P.lvl <= 1, "the hunter is level %d" % P.lvl)
 	var t := 0.0
 	while t < 8.0 and not near_s.dead:
@@ -205,7 +205,7 @@ func _noise_and_fights(main: Node) -> void:
 	# fleeing: an early Skitter can't keep up with a running hunter and gives up
 	P.hp = P.max_hp; P.armor = P.max_armor
 	var runner := B.spawn("bl_skitter", _open_spot(m, P.pos + Vector3(2.5, 0, 0), 3.0), l)
-	runner.tgt = P; runner.st = "chase"; runner.chase_from = runner.pos
+	runner.aggro(P, "check"); runner.chase_from = runner.pos
 	# run along open ground away from it
 	var away := (Vector2(P.pos.x, P.pos.z) - Vector2(runner.pos.x, runner.pos.z)).normalized()
 	t = 0.0
@@ -227,7 +227,7 @@ func _noise_and_fights(main: Node) -> void:
 	# a fresh one stands in: this tests the burrowing, not where the chase went)
 	if runner.dead:
 		runner = B.spawn("bl_skitter", _open_spot(m, P.pos + Vector3(2.5, 0, 0), 3.0), l)
-	runner.tgt = null; runner.st = "idle"; runner.heard = Vector3.INF
+	runner.calm("check"); runner.heard = Vector3.INF
 	runner.idle_t = 25.0
 	P.teleport(_open_spot(m, P.pos + Vector3(0, 0, 0)))
 	var far_spot := _open_spot(m, m.world.spawns[-1], 10.0)
@@ -297,7 +297,7 @@ func _warden(main: Node) -> void:
 	# crouching just past the shortened reach: not spotted
 	for b in B.alive():
 		if b != W: (b as Blight).burrow()
-	W.st = "idle"; W.tgt = null; W.spot = 0.0; W.shriek_cd = 0.0
+	W.calm("check"); W.spot = 0.0; W.shriek_cd = 0.0
 	var sh1 := B.shrieks
 	var side := Vector2(P.pos.x - W.pos.x, P.pos.z - W.pos.z).normalized()
 	var cpos := W.pos + Vector3(side.x, 0, side.y) * (W.cone_len() * 0.8)

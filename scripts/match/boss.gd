@@ -12,17 +12,41 @@ extends Mob
 ##                   circles, coils up and discharges; a lightning storm on each phase change
 ##   Brood Mother    spits fans of acid, lobs acid that leaves burning puddles, lays egg sacs that
 ##                   hatch into adds, burrows and bursts up under you; a brood of adds on each phase
+##
+## It runs on Mob's machine (Mob.S) with its own table: IDLE asleep (dormant), NOTICE woken this step (Lairs
+## calls wake), CHASE closing on its target between attacks, WINDUP an attack's tell up to its first blow
+## (atk_hit), ATTACK while the attack's steps run, RECOVER after the last until the attack ends, STUNNED (a stun
+## or stagger cuts the attack, tells and all), RETURN nobody to fight: back to the middle; IDLE again when Lairs
+## lays it down (fall_asleep). Each attack's timeline still runs on atk_t; the machine says which part it is in.
+const BOSS_TABLE := {
+	S.IDLE: [S.NOTICE],
+	S.NOTICE: [S.CHASE, S.STUNNED, S.IDLE],
+	S.CHASE: [S.WINDUP, S.STUNNED, S.RETURN, S.IDLE],
+	S.WINDUP: [S.ATTACK, S.STUNNED, S.CHASE, S.IDLE],
+	S.ATTACK: [S.RECOVER, S.STUNNED, S.CHASE, S.IDLE],
+	S.RECOVER: [S.CHASE, S.STUNNED, S.IDLE],
+	S.STUNNED: [S.CHASE, S.IDLE],
+	S.RETURN: [S.CHASE, S.WINDUP, S.STUNNED, S.IDLE],      # WINDUP: the phase roar
+}
+const WAKE_CD := 1.6         # s from waking to its first attack
+const BURROW_HIT := 2.1      # s into a burrow the Brood Mother bursts up under you (its tell fills then)
 
 var lair: Dictionary = {}
-var dormant := true
+var dormant: bool:           # asleep in its lair (IDLE); Lairs wakes it (wake) and lays it down (fall_asleep)
+	get:
+		return fsm.is_in(S.IDLE)
+	set(_v):
+		push_error("Boss.dormant is read-only: the machine owns it (wake, fall_asleep)")
 var phase := 0
 var invul_t := 0.0
 var awake_t := 0.0
 var empty_t := 0.0
 var enraged := false
-var atk := ""
-var atk_t := 0.0
-var atk_end := 0.0
+var atk := ""                # the attack under way (WINDUP, ATTACK, RECOVER), "" otherwise
+var atk_t := 0.0             # s into it
+var atk_end := 0.0           # s it lasts
+var atk_hit := 0.0           # s into it its first blow lands: WINDUP until then
+var atk_last := 0.0          # s into it its last step runs: ATTACK until then, RECOVER after
 var steps: Array = []        # {t, f: Callable, done} for the attack under way
 var next_cd := 2.0
 var teles: Array = []        # {n, t, dur}: telegraphs filling on match time
@@ -45,13 +69,45 @@ func init_boss(match_node: Node, id: String, k: String, at: Vector3, tier_k: flo
 	init_mob(match_node, id, k, at, tier_k)
 	md = md.duplicate()          # per-boss tuning (the windup the model scrubs to, and so on)
 	lair = L
-	st = "idle"
 	orbit = 1.0 if randf() < 0.5 else -1.0
 	if stag_ring:
 		stag_ring.mesh = Models.flat_quad(r * 2.0 + 2.4)
 
 func mass() -> float:
 	return 80.0
+
+func _table() -> Dictionary:
+	return BOSS_TABLE
+
+## Only asleep is calm: a boss with nobody to fight (RETURN) is still stunned out of it.
+func is_calm() -> bool:
+	return fsm.is_in(S.IDLE)
+
+## The snapshot's state (a boss's proxy is a plain Mob): idle asleep, a wind-up while a slam, throw, spit or roar
+## is under way, a chase otherwise.
+func _look() -> String:
+	if fsm.is_in(S.IDLE):
+		return "idle"
+	return "windup" if anim_kind in ["slam", "throw", "spit", "roar"] else "chase"
+
+## Someone walked into its open lair (or hit it there): it wakes, its first attack WAKE_CD s off (Lairs.wake).
+func wake(why: String) -> void:
+	awake_t = 0.0
+	next_cd = WAKE_CD
+	_go(S.NOTICE, why)
+
+## The lair emptied, its party fell or its seal failed: back to sleep in the middle, healed (Lairs.reset_boss).
+func fall_asleep(why: String) -> void:
+	_cut()
+	phase = 0
+	enraged = false
+	awake_t = 0.0
+	tgt = null
+	stag_open = 0.0
+	pos = Vector3(float(lair["c"].x), pos.y, float(lair["c"].z))
+	prev = pos
+	hp = max_hp      # it heals up while it sleeps
+	_go(S.IDLE, why)
 
 func col() -> Color:
 	return COL.get(mkind, Color("ff6a4a"))
@@ -82,6 +138,7 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 
 func _on_zero(by: Ent, opts: Dictionary) -> void:
 	_clear_attack()
+	_end_teles(false)
 	for hz in hazards: _free(hz.get("n"))
 	for f in flying: _free(f.get("n"))
 	for wv in waves: _free(wv.get("n"))
@@ -190,13 +247,16 @@ func sim(dt: float) -> void:
 	if remote:
 		net_follow(dt)
 		return
-	if dormant:
+	fsm.tick(dt)
+	if fsm.is_in(S.IDLE):
 		# asleep: breathing, healing back to full, waiting
 		hp = minf(max_hp, hp + max_hp * 0.08 * dt)
 		vel = Vector3.ZERO
 		anim_kind = ""
 		body_vertical(dt)
 		return
+	if fsm.is_in(S.NOTICE):
+		_go(S.CHASE, "woke")
 	awake_t += dt
 	if invul_t > 0.0: invul_t -= dt
 	if md.get("stag", false):
@@ -222,27 +282,25 @@ func sim(dt: float) -> void:
 	cd -= dt
 	next_cd -= dt
 	var spd: float = float(md["speed"]) * (1.25 if enraged else 1.0) * slow_mult(0.55)
-	var wish := Vector2.ZERO
-	if stun_t > 0.0 or stagger_t > 0.0:
-		if atk != "" and stagger_t > 0.0: _clear_attack()
+	if stun_t > 0.0:
 		spd = 0.0
-	elif atk != "":
-		atk_t += dt
-		for s in steps:
-			if not s["done"] and atk_t >= float(s["t"]):
-				s["done"] = true
-				(s["f"] as Callable).call()
-				if dead or atk == "": break
-		if atk != "" and atk_t >= atk_end:
-			_end_attack()
-		wish = _attack_move(spd)
-	elif tgt:
-		wish = _roam(spd)
-		if next_cd <= 0.0:
-			_choose_attack()
-	else:
-		wish = dir_to(centre()) * spd * 0.5 if flat_dist(centre()) > 1.5 else Vector2.ZERO
-	st = "windup" if anim_kind in ["slam", "throw", "spit", "roar"] else "chase"
+	_stun_check(0.0)
+	var wish := Vector2.ZERO
+	match fsm.state:
+		S.WINDUP, S.ATTACK, S.RECOVER:
+			_attack_step(dt)
+			wish = _attack_move(spd)
+		S.CHASE, S.RETURN:
+			if tgt:
+				if fsm.is_in(S.RETURN): _go(S.CHASE, "target")
+				wish = _roam(spd)
+				if next_cd <= 0.0:
+					_choose_attack()
+			else:
+				if fsm.is_in(S.CHASE): _go(S.RETURN, "nobody")
+				wish = dir_to(centre()) * spd * 0.5 if flat_dist(centre()) > 1.5 else Vector2.ZERO
+		S.STUNNED:
+			_stunned()
 	if dash_t > 0.0:
 		dash_t -= dt
 		vel.x = dash_v.x; vel.z = dash_v.y
@@ -283,6 +341,22 @@ func _roam(spd: float) -> Vector2:
 			return (side + to * clampf((d - rad) * 0.5, -1.0, 1.0)).normalized() * spd
 	return Vector2.ZERO
 
+## The attack under way on its own clock: WINDUP up to its first blow, ATTACK while its steps run, RECOVER after
+## the last until it ends, then CHASE.
+func _attack_step(dt: float) -> void:
+	atk_t += dt
+	if fsm.is_in(S.WINDUP) and atk_t >= atk_hit:
+		_go(S.ATTACK, atk)
+	for s in steps:
+		if not s["done"] and atk_t >= float(s["t"]):
+			s["done"] = true
+			(s["f"] as Callable).call()
+			if dead or atk == "": return
+	if fsm.is_in(S.ATTACK) and atk_t >= atk_last:
+		_go(S.RECOVER, atk)
+	if atk_t >= atk_end:
+		_end_attack()
+
 func _attack_move(spd: float) -> Vector2:
 	if mkind == "serpent" and atk == "storm" and tgt:
 		return Vector2(-dir_to(tgt).y, dir_to(tgt).x) * orbit * spd * 0.6
@@ -291,28 +365,50 @@ func _attack_move(spd: float) -> Vector2:
 	return Vector2.ZERO
 
 # ------------------------------------------------------------------ attacks
-func _begin(name: String, length: float, anim := "") -> void:
-	atk = name; atk_t = 0.0; atk_end = length; steps = []
+## Starts an attack `length` s long whose first blow lands `hit` s in (its wind-up, the tell before it): WINDUP.
+func _begin(name: String, length: float, anim: String, hit: float) -> void:
+	_go(S.WINDUP, name)
+	atk = name; atk_t = 0.0; atk_end = length; atk_hit = hit; atk_last = hit; steps = []
 	anim_kind = anim; anim_k = 0.0
 	m.sfx("v_warden", pos, -2.0, {"colossus": 0.6, "serpent": 1.35, "brood": 0.9}.get(mkind, 1.0))
 
 func _at(t: float, f: Callable) -> void:
 	steps.append({"t": t, "f": f, "done": false})
+	atk_last = maxf(atk_last, t)
 
 func _end_attack() -> void:
 	atk = ""
 	anim_kind = ""
 	next_cd = float(md["cd"]) * cd_k() * randf_range(0.85, 1.15)
+	_go(S.CHASE, "done")
 
+## Cuts the attack under way (a phase change, a check bringing her up from a burrow): back to CHASE.
 func _clear_attack() -> void:
-	for t in teles:
-		if t["n"] != null and is_instance_valid(t["n"]): m.fx.end_telegraph(t["n"])
-	teles.clear()
+	var was := attacking()
+	_cut()
+	if was:
+		_go(S.CHASE, "cut")
+
+## An attack is under way (WINDUP, ATTACK or RECOVER).
+func attacking() -> bool:
+	return fsm.is_in(S.WINDUP) or fsm.is_in(S.ATTACK) or fsm.is_in(S.RECOVER)
+
+## Cuts the attack under way (a stun or stagger, a phase change, sleep, death): its tells go out with its steps,
+## except those of boulders and globs already thrown (they still land where they show). Up from a burrow.
+func _cut() -> void:
+	_end_teles(true)
 	steps.clear()
 	atk = ""
 	anim_kind = ""
 	dash_t = 0.0
 	if buried: _surface()
+
+## Puts out its telegraphs; `keep_thrown` keeps those of boulders and globs in the air.
+func _end_teles(keep_thrown: bool) -> void:
+	for t in teles:
+		if not (keep_thrown and t.has("thrown")) and is_instance_valid(t["n"]):
+			m.fx.end_telegraph(t["n"])
+	teles = teles.filter(func(t): return keep_thrown and t.has("thrown"))
 
 func _choose_attack() -> void:
 	var opts: Array = []
@@ -349,7 +445,7 @@ func _atk_slam() -> void:
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var at := clamp_in(pos + Vector3(d.x, 0, d.y) * 1.2, 0.5)
 	at.y = centre().y
-	_begin("slam", w + 0.6, "slam")
+	_begin("slam", w + 0.6, "slam", w)
 	_tele_c(at, float(md["slam_r"]), Color("ff4a3a"), w)
 	# the purple stagger window opens on every slam
 	if stagger_t <= 0.0:
@@ -393,7 +489,7 @@ func _tick_waves(dt: float) -> void:
 func _atk_boulders() -> void:
 	var w := 0.85
 	md["windup"] = w
-	_begin("boulders", w + 1.6, "throw")
+	_begin("boulders", w + 1.6, "throw", w)
 	var n := 1 + phase
 	var picks: Array = foes_inside()
 	picks.shuffle()
@@ -403,10 +499,13 @@ func _atk_boulders() -> void:
 		var to := clamp_in(aim + Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)) * (0.6 * i), 0.4)
 		to.y = centre().y
 		var delay := w + i * 0.25
-		_tele_c(to, 1.9, Color("ff6a3a"), delay + 1.0)
-		_at(delay, func(): _throw(to, 1.0, 1.9, 20.0, Color("9c968a"), "boulder"))
+		var tn := _tele_c(to, 1.9, Color("ff6a3a"), delay + 1.0)
+		_at(delay, func(): _throw(to, 1.0, 1.9, 20.0, Color("9c968a"), "boulder", tn))
 
-func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String) -> void:
+## Throws a boulder or glob at `to`; its landing tell `tele` now stays up even if the attack is cut.
+func _throw(to: Vector3, dur: float, rad: float, base: float, c: Color, what: String, tele: Node3D) -> void:
+	for t in teles:
+		if t["n"] == tele: t["thrown"] = true
 	var n := Node3D.new()
 	if what == "boulder":
 		Models.part(n, Models.sphere(0.55, 7), Models.toon(c), Vector3.ZERO, Vector3(1.1, 0.9, 1.0))
@@ -442,7 +541,7 @@ func _tick_flying(dt: float) -> void:
 func _atk_fissure() -> void:
 	var w := _wind() * 0.9
 	md["windup"] = w
-	_begin("fissure", w + 0.5, "slam")
+	_begin("fissure", w + 0.5, "slam", w)
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var a := Vector3(pos.x, centre().y, pos.z)
 	_tele_r(a, d, 12.0, 2.4, Color("ff4a3a"), w)
@@ -460,7 +559,7 @@ func _atk_dash() -> void:
 	var w := _wind()
 	md["windup"] = w
 	var n := 1 + phase
-	_begin("dash", n * (w + 0.55) + 0.2, "dash")
+	_begin("dash", n * (w + 0.55) + 0.2, "dash", w)
 	for i in n:
 		var t0 := i * (w + 0.55)
 		_at(t0, func():
@@ -494,7 +593,7 @@ func _dash_hits() -> void:
 func _atk_storm() -> void:
 	var w := 1.1 * (0.85 if enraged else 1.0)
 	md["windup"] = w
-	_begin("storm", w + 0.5, "roar")
+	_begin("storm", w + 0.5, "roar", w)
 	var spots: Array = []
 	for f in foes_inside():
 		spots.append(clamp_in(f.pos + Vector3(f.vel.x, 0, f.vel.z) * 0.5, 0.5))
@@ -517,7 +616,7 @@ func _atk_storm() -> void:
 func _atk_static() -> void:
 	var w := 1.5 * (0.85 if enraged else 1.0)
 	md["windup"] = w
-	_begin("static", w + 0.6, "roar")
+	_begin("static", w + 0.6, "roar", w)
 	var at := Vector3(pos.x, centre().y, pos.z)
 	_tele_c(at, 4.8, Color("7fe8ff"), w)
 	_at(w, func():
@@ -534,7 +633,7 @@ func _atk_static() -> void:
 func _atk_spit() -> void:
 	var w := _wind() * 0.85
 	md["windup"] = w
-	_begin("spit", w + 0.5, "spit")
+	_begin("spit", w + 0.5, "spit", w)
 	var d := dir_to(tgt) if tgt else Vector2(0, 1)
 	var n := 3 + phase
 	var a := Vector3(pos.x, centre().y, pos.z)
@@ -551,7 +650,7 @@ func _atk_spit() -> void:
 func _atk_lob() -> void:
 	var w := 0.7
 	md["windup"] = w
-	_begin("lob", w + 1.4, "spit")
+	_begin("lob", w + 1.4, "spit", w)
 	var picks: Array = foes_inside()
 	picks.shuffle()
 	var n := 2 + phase
@@ -559,8 +658,8 @@ func _atk_lob() -> void:
 		var f: Ent = picks[i % picks.size()] if not picks.is_empty() else tgt
 		var to := clamp_in((pos if f == null else f.pos) + Vector3(randf_range(-1.2, 1.2), 0, randf_range(-1.2, 1.2)) * (0.5 + i * 0.4), 0.6)
 		to.y = centre().y
-		_tele_c(to, 2.1, Color("b6ff6a"), w + i * 0.2 + 0.9)
-		_at(w + i * 0.2, func(): _throw(to, 0.9, 2.1, 0.0, Color("b6ff6a"), "glob"))
+		var tn := _tele_c(to, 2.1, Color("b6ff6a"), w + i * 0.2 + 0.9)
+		_at(w + i * 0.2, func(): _throw(to, 0.9, 2.1, 0.0, Color("b6ff6a"), "glob", tn))
 
 ## A puddle of acid: burns and slows anyone standing in it for a few seconds.
 func _puddle(at: Vector3, rad: float, life: float) -> void:
@@ -598,7 +697,7 @@ func _tick_hazards(_dt: float) -> void:
 func _atk_brood() -> void:
 	var w := 1.0
 	md["windup"] = w
-	_begin("brood", w + 2.4, "roar")
+	_begin("brood", w + 2.4, "roar", w)
 	var n := 2 + phase
 	for i in n:
 		var a := TAU * i / n + randf() * 0.6
@@ -619,7 +718,7 @@ func _atk_brood() -> void:
 			m.lairs.spawn_add(lair, ["skitter", "skitter", "bomber", "spitter"][randi() % (2 + mini(phase, 2))], at))
 
 func _atk_burrow() -> void:
-	_begin("burrow", 3.6, "burrow")
+	_begin("burrow", 3.6, "burrow", BURROW_HIT)
 	_at(0.4, func():
 		buried = true
 		m.fx.dust(pos, 20)
@@ -630,7 +729,7 @@ func _atk_burrow() -> void:
 		to.y = centre().y
 		mark["at"] = to
 		_tele_c(to, 3.0, Color("ff4a3a"), 1.6))
-	_at(2.1, func():
+	_at(BURROW_HIT, func():
 		var at: Vector3 = mark["at"]
 		pos = Vector3(at.x, pos.y, at.z); prev = pos
 		_surface()
@@ -657,7 +756,9 @@ func _phase_up(p: int) -> void:
 		if flat_dist(f) < 5.5:
 			f.hurt(dmg(6.0), self, {"kb": dir_to(f) * 11.0, "lift": 4.0, "src": "mob"})
 	m.lairs.on_boss_phase(self, p)
-	_begin("phase", 2.4, "roar")
+	if not fsm.can(S.WINDUP):
+		return       # stunned: the roar and the shove, but no rockfall
+	_begin("phase", 2.4, "roar", 0.0)      # (the shove has landed already)
 	var c: Vector3 = centre()
 	var hf := float(lair.get("half", 7)) - 2.0
 	match mkind:

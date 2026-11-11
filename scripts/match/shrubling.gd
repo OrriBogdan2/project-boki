@@ -103,7 +103,6 @@ func sim(dt: float) -> void:
 	if remote:
 		net_follow(dt)
 		return
-	st = "idle"
 	var sr: Dictionary = KeyRun.rules()["shrubling"]
 	ss_t -= dt
 	var wish := Vector2.ZERO
@@ -129,6 +128,10 @@ func sim(dt: float) -> void:
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
 	_move(dt, wish * spd, spd)
+
+## It runs on its own states (ss): a hit only marks who did it, the Mob machine stays IDLE.
+func aggro(t: Ent, _why: String) -> void:
+	tgt = t
 
 func _set_state(s: String) -> void:
 	ss = s

@@ -485,8 +485,7 @@ func _call_guards(L: Dictionary, at: Vector3, n: int) -> void:
 			p = at + Vector3(L["out"].x, 0, L["out"].y) * 2.5
 		var g := m.spawn_mob(String(pool[randi() % pool.size()]), Vector3(p.x, m.world.ground_at(p.x, p.z), p.z))
 		g.camp = at
-		g.st = "chase"
-		g.tgt = L["user"] if L["user"] != null else null
+		g.aggro(L["user"], "chime")
 		m.fx.burst(g.pos + Vector3(0, 0.5, 0), Color("c9a0ff"), 14, 3.0, 0.5, -2.0)
 		L["guards"].append(g)
 
@@ -575,10 +574,7 @@ func wake(L: Dictionary, by: Ent) -> void:
 	var b: Boss = boss_of(L)
 	if b == null or not is_instance_valid(b) or b.dead or not b.dormant:
 		return
-	b.dormant = false
-	b.awake_t = 0.0
-	b.next_cd = 1.6
-	b.st = "chase"
+	b.wake("lair")
 	L["state"] = "awake"
 	L["woke_at"] = m.time
 	var lbl: Label3D = L["nodes"]["label"]
@@ -608,16 +604,7 @@ func _music(on: bool) -> void:
 ## The lair emptied: the boss settles back to sleep in the middle and heals up.
 func reset_boss(b: Boss) -> void:
 	var L: Dictionary = b.lair
-	b._clear_attack()
-	b.dormant = true
-	b.phase = 0
-	b.enraged = false
-	b.awake_t = 0.0
-	b.tgt = null
-	b.st = "idle"
-	b.stag_open = 0.0
-	b.pos = Vector3(float(L["c"].x), b.pos.y, float(L["c"].z)); b.prev = b.pos
-	b.hp = b.max_hp      # it heals up while it sleeps
+	b.fall_asleep("lair reset")
 	for a in L["adds"]:
 		if is_instance_valid(a) and not a.dead: a.dead = true; a.visible = false
 	L["adds"] = []
@@ -646,9 +633,8 @@ func spawn_add(L: Dictionary, kind: String, at: Vector3) -> void:
 		return
 	var a := m.spawn_mob(kind, at)
 	a.camp = L["c"]
-	a.st = "chase"
 	var b: Boss = boss_of(L)
-	if b and is_instance_valid(b): a.tgt = b.tgt
+	a.aggro(b.tgt if b and is_instance_valid(b) else null, "brood")
 	L["adds"].append(a)
 
 ## Every monster death passes through here: bosses, ward stones, guards.

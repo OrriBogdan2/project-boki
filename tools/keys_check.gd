@@ -496,7 +496,7 @@ func _sources() -> void:
 		var mb := _mob_of(m, kind_s)
 		var k0 := m.keys.bonus_given
 		if mb is Boss:
-			(mb as Boss).dormant = false
+			(mb as Boss).wake("check")
 		for hit in 12:
 			if mb == null or mb.dead:
 				break

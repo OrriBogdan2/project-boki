@@ -2,10 +2,58 @@ class_name Mob
 extends Ent
 ## Monsters. Each attack is telegraphed on the ground before it lands.
 
+## The monster's one state (Fsm, docs/decisions/0061-mob-boss-state-machines.md). Only Mob and its subclasses move
+## it, through _go() and _stun(); other files ask with aggro() and calm(). Each state, and what leaves it:
+##   IDLE     calm by its camp, ambling and looking round; a sighting or a hit -> NOTICE
+##   NOTICE   has just picked its target (this step); CHASE from the next
+##   CHASE    goes for the target or hangs back waiting its turn; in reach and off cooldown -> WINDUP;
+##            nobody left -> RETURN (away from its camp) or IDLE
+##   WINDUP   the tell: its telegraph fills over md.windup s (data), then ATTACK; a stunned one can't start one
+##   ATTACK   the blow: a lunge dashes LUNGE_S, the other attacks land at once; then RECOVER
+##   RECOVER  stands after the blow (LUNGE_REC, RECOVER_S), then CHASE
+##   STUNNED  a stun, stagger or wall slam cut what it was doing (a wind-up's tell goes out, a lunge stops);
+##            CHASE once the stun is over and `span` has run
+##   RETURN   lost the fight away from its camp: ambles home as IDLE does, and can notice again; IDLE once home
+## A calm one (IDLE, RETURN) stands still while stunned; the hit that stunned it wakes it, STUNNED from the next step.
+enum S {IDLE, NOTICE, CHASE, WINDUP, ATTACK, RECOVER, STUNNED, RETURN}
+const NAMES: PackedStringArray = ["idle", "notice", "chase", "windup", "attack", "recover", "stunned", "return"]
+const TABLE := {
+	S.IDLE: [S.NOTICE],
+	S.NOTICE: [S.CHASE, S.STUNNED],
+	S.CHASE: [S.WINDUP, S.STUNNED, S.RETURN, S.IDLE],
+	S.WINDUP: [S.ATTACK, S.STUNNED],
+	S.ATTACK: [S.RECOVER, S.STUNNED],
+	S.RECOVER: [S.CHASE, S.STUNNED],
+	S.STUNNED: [S.CHASE],
+	S.RETURN: [S.IDLE, S.NOTICE],
+}
+## Each state as the snapshot (Match.MOB_STATES) and the looks name it: NOTICE shows as the chase, ATTACK as the
+## lunge, STUNNED as a recovery (as a cut wind-up always did), RETURN as idle. The Net shape does not change.
+const LOOKS: PackedStringArray = ["idle", "chase", "chase", "windup", "lunge", "recover", "recover", "idle"]
+const LUNGE_S := 0.2          # s a lunge dashes
+const LUNGE_REC := 0.45       # s it stands after a lunge
+const RECOVER_S := {"spit": 0.5, "volley": 0.6, "slam": 0.8}      # s it stands after the other blows
+const CUT_HOLD := 0.4         # s a stun that cuts a wind-up holds it, at the least
+const WALL_HOLD := 1.0        # s stunned by a knock into a wall or rock
+const AMBLE_M := 3.0          # m from its camp it ambles while calm; a RETURN is home inside this
+static var watched: WeakRef = null      # the monster the local player last hit: the F7 readout shows its machine
+
 var mkind := "skitter"
 var md: Dictionary = {}
-var st := "idle"            # idle | chase | windup | lunge | recover
-var st_t := 0.0
+var fsm: Fsm                  # its state (S, TABLE), made in init_mob
+var span := 0.0               # s the current timed state lasts; fsm.since counts up to it
+var st: String:               # the state as LOOKS names it: the machine's here, the host's snapshot on a proxy
+	get:
+		return _net_st if remote else _look()
+	set(_v):
+		push_error("Mob.st is read-only: the machine owns it (aggro, calm)")
+var st_t: float:              # s left in the timed state (the wind-up's fill, the lunge, a recovery or a stun)
+	get:
+		return _net_left if remote else maxf(0.0, span - fsm.since)
+	set(_v):
+		push_error("Mob.st_t is read-only: the machine owns it")
+var _net_st := "idle"         # a proxy's state and the time left in it, from the host's snapshot (follow)
+var _net_left := 0.0
 var tgt: Ent = null
 var camp := Vector3.ZERO
 var atk_dir := Vector2.ZERO
@@ -31,6 +79,8 @@ var stag_stars: Node3D = null           # a treasure kin slips away if nobody hu
 
 func init_mob(match_node: Node, id: String, k: String, at: Vector3, tier := 1.0) -> void:
 	setup(match_node, id)
+	fsm = Fsm.new(NAMES, _table(), S.IDLE)
+	fsm.guard(S.WINDUP, func(_from: int) -> bool: return stun_t <= 0.0)      # a stunned monster can't wind up
 	kind = "mob"
 	team = -2
 	mkind = k
@@ -91,9 +141,9 @@ func hurt(d: float, by: Ent, opts := {}) -> float:
 		if by is Kin and by.state != "active" and by.owner_h:
 			real = by.owner_h
 		if tgt == null or randf() < 0.4:
-			tgt = real
-			if st == "idle":
-				st = "chase"
+			aggro(real, "hit")
+		if real == m.player and not remote:
+			watched = weakref(self)
 	return dealt
 
 func _stagger(by: Ent, opts: Dictionary) -> void:
@@ -101,9 +151,82 @@ func _stagger(by: Ent, opts: Dictionary) -> void:
 	stun_t = maxf(stun_t, stagger_t)
 	stag_open = 0.0
 	stag_next = randf_range(10.0, 14.0)
-	_cancel_tele()
-	st = "recover"; st_t = stagger_t
+	_stun("stagger", stagger_t)
 	m.on_stagger(self, by, String(opts.get("ab", "")))
+
+# ------------------------------------------------------------------ the machine
+func _table() -> Dictionary:
+	return TABLE
+
+## Moves the machine (nothing else does) and times the new state: `dur` s for a timed one.
+func _go(to: int, why: String, dur := 0.0) -> bool:
+	if not fsm.go(to, why):
+		return false
+	span = dur
+	return true
+
+## Calm: not fighting (IDLE, RETURN). A calm monster stands still under a stun instead of leaving its state.
+func is_calm() -> bool:
+	return fsm.is_in(S.IDLE) or fsm.is_in(S.RETURN)
+
+## Wakes it on `t` (a sighting, a hit, a lair or an outpost calling it in): NOTICE, then CHASE from the next step.
+## One already fighting just turns on `t`.
+func aggro(t: Ent, why: String) -> void:
+	tgt = t
+	if is_calm() and not remote:
+		_go(S.NOTICE, why)
+
+## Drops the fight where it stands: no target, IDLE (Blight losing its prey, a check's reset).
+func calm(why: String) -> void:
+	tgt = null
+	engaged = false
+	_go(S.IDLE, why)
+
+## Its fight is over (nobody left to chase): RETURN when it is away from its camp, else IDLE.
+func _lose_fight(why: String) -> void:
+	_go(S.RETURN if flat_dist(camp) > AMBLE_M else S.IDLE, why)
+
+## Stuns it out of whatever it was doing (a calm one just stands still): the wind-up or blow under way is cut.
+## STUNNED for `min_hold` s at the least, or what was left of its recovery when that is longer.
+func _stun(why: String, min_hold: float) -> void:
+	if is_calm():
+		return
+	var left := st_t if fsm.is_in(S.RECOVER) or fsm.is_in(S.STUNNED) else 0.0
+	_cut()
+	if fsm.go(S.STUNNED, why):
+		span = fsm.since + maxf(min_hold, left)
+
+## A stun cuts the wind-up (its tell goes out) or the lunge (it skids to a stop, as at a lunge's end).
+func _cut() -> void:
+	_cancel_tele()
+	if fsm.is_in(S.ATTACK):
+		vel.x *= 0.2
+		vel.z *= 0.2
+
+## Each step, before the state's own: a fresh stun on a fighting monster stuns it (a cut wind-up holds
+## `cut_hold` s at the least).
+func _stun_check(cut_hold := CUT_HOLD) -> void:
+	if stun_t > 0.0 and not fsm.is_in(S.STUNNED):
+		_stun("stun", cut_hold if fsm.is_in(S.WINDUP) else 0.0)
+
+## STUNNED's step: back to the chase once the stun is over and its span has run.
+func _stunned() -> void:
+	if stun_t <= 0.0 and fsm.since >= span:
+		_go(S.CHASE, "came to")
+
+func _look() -> String:
+	return LOOKS[fsm.state]
+
+## A proxy takes the host's state (a Match.MOB_STATES index) and the time left in it from a snapshot.
+func follow(look_i: int, left: float) -> void:
+	if look_i >= 0 and look_i < Match.MOB_STATES.size():
+		_net_st = Match.MOB_STATES[look_i]
+	_net_left = left
+
+## One line for the F7 readout and the checks: its kind, state and time in it, refusals, the last transitions.
+func readout() -> String:
+	var refused := ("  refused %d" % fsm.refused) if fsm.refused > 0 else ""
+	return "%s %s %.2fs%s  %s" % [mkind, fsm.state_name(), fsm.since, refused, " |".join(fsm.history.slice(-3))]
 
 ## Opens and closes stagger windows. Runs on whoever owns the monster.
 func _tick_stagger(dt: float) -> void:
@@ -113,7 +236,7 @@ func _tick_stagger(dt: float) -> void:
 	if stag_open > 0.0:
 		stag_open -= dt
 		return
-	if st == "idle":
+	if is_calm():
 		return
 	stag_next -= dt
 	if stag_next <= 0.0:
@@ -139,7 +262,7 @@ func _engaged_on(t: Ent) -> int:
 	return n
 
 func _find_target() -> Ent:
-	var best: Ent = null; var bd := 7.5 if st == "idle" else 11.0
+	var best: Ent = null; var bd := 7.5 if is_calm() else 11.0
 	for h in m.hunters:
 		if not h.targetable() or m.demo_shielded(h):
 			continue
@@ -162,7 +285,7 @@ func sim(dt: float) -> void:
 		return
 	tick_status(dt)
 	if remote:
-		st_t -= dt
+		_net_left -= dt
 		net_follow(dt)
 		_net_telegraph()
 		return
@@ -172,7 +295,7 @@ func sim(dt: float) -> void:
 	if _napping(dt):
 		return
 	cd -= dt
-	st_t -= dt
+	fsm.tick(dt)
 	if md.get("stag", false):
 		_tick_stagger(dt)
 	if md.get("flee", false):
@@ -183,35 +306,39 @@ func sim(dt: float) -> void:
 	var spd: float = md["speed"] * slow_mult(0.55)
 	if root_t > 0.0 or stun_t > 0.0:
 		spd = 0.0
-		if stun_t > 0.0 and st == "windup":
-			# a stun interrupts the attack
-			_cancel_tele(); st = "recover"; st_t = 0.4
+	_stun_check()
+	if fsm.is_in(S.NOTICE):
+		_go(S.CHASE, "noticed")
 	var wish := Vector2.ZERO
-	match st:
-		"idle":
+	match fsm.state:
+		S.IDLE, S.RETURN:
 			if randf() < dt * 2.0:
 				tgt = _find_target()
 				if tgt:
-					st = "chase"
+					_go(S.NOTICE, "saw")
+			if fsm.is_in(S.RETURN) and flat_dist(camp) <= AMBLE_M:
+				_go(S.IDLE, "home")
 			if wander == Vector3.INF or flat_dist(wander) < 0.4 or randf() < dt * 0.2:
 				var a := randf() * TAU
-				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, 3.0)
+				var q := camp + Vector3(cos(a), 0, sin(a)) * randf_range(0.5, AMBLE_M)
 				if not m.world.is_void(q.x, q.z) and not m.world.is_block(q.x, q.z):
 					wander = q
 			if wander != Vector3.INF:
 				wish = dir_to(wander) * spd * 0.3
-		"chase":
+		S.CHASE:
 			if tgt == null or tgt.dead or not tgt.hittable() or (tgt is Hunter and not tgt.targetable()) or m.demo_shielded(tgt) or flat_dist(camp) > 13.0:
 				tgt = _find_target()
 				engaged = false
 				if tgt == null:
-					st = "idle"
+					_lose_fight("lost")
 					wish = dir_to(camp) * spd
 			if tgt and md.get("flee", false):
 				# treasure kin run from whoever is closest, zig-zagging a little
 				var away := -dir_to(tgt)
 				wish = away.rotated(sin(m.time * 3.0 + float(nid.hash() % 7)) * 0.7) * spd
-				if flat_dist(tgt) > 12.0: tgt = null; st = "idle"
+				if flat_dist(tgt) > 12.0:
+					tgt = null
+					_lose_fight("got away")
 			elif tgt:
 				var d := flat_dist(tgt)
 				if not engaged:
@@ -230,7 +357,7 @@ func sim(dt: float) -> void:
 					wish = -dir_to(tgt) * spd
 				if engaged and d <= md["range"] + tgt.r and cd <= 0.0 and m.world.los(pos, tgt.pos, pos.y + 0.8) and not m.opts.get("training", false):
 					_begin_attack()
-		"windup":
+		S.WINDUP:
 			if tgt and md["attack"] in ["lunge", "spit", "volley"]:
 				# track the target a little during the windup, then commit
 				if st_t > float(md["windup"]) * 0.4:
@@ -241,7 +368,7 @@ func sim(dt: float) -> void:
 				m.fx.telegraph_progress(tele, 1.0 - st_t / float(md["windup"]))
 			if st_t <= 0.0:
 				_strike()
-		"lunge":
+		S.ATTACK:      # only a lunge stays past the step it struck in
 			vel.x = atk_dir.x * 12.0; vel.z = atk_dir.y * 12.0
 			for e in m.foes_of(team):
 				if lunge_hit.has(e.nid): continue
@@ -249,12 +376,14 @@ func sim(dt: float) -> void:
 					lunge_hit[e.nid] = true
 					e.hurt(md["dmg"] * dmg_mult, self, {"kb": atk_dir * 4.0, "src": "mob"})
 			if st_t <= 0.0:
-				st = "recover"; st_t = 0.45
+				_go(S.RECOVER, "lunged", LUNGE_REC)
 				vel.x *= 0.2; vel.z *= 0.2
-		"recover":
+		S.RECOVER:
 			if st_t <= 0.0:
-				st = "chase"
-	if st != "lunge":
+				_go(S.CHASE, "recovered")
+		S.STUNNED:
+			_stunned()
+	if not fsm.is_in(S.ATTACK):
 		var hv := Vector2(vel.x, vel.z)
 		var k := 10.0 if hv.length() <= spd * 1.3 else 2.5
 		hv += (wish - hv) * (1.0 - exp(-k * dt))
@@ -266,12 +395,12 @@ func sim(dt: float) -> void:
 	if slide(dt) and m.time - kb_time < 0.6 and pre_v > 7.5 and mass() < 10.0:
 		# knocked into a wall or rock: stunned
 		kb_time = -9.0
-		stun_t = maxf(stun_t, 1.0)
-		if st == "windup": _cancel_tele(); st = "recover"; st_t = 1.0
+		stun_t = maxf(stun_t, WALL_HOLD)
+		_stun("wall", WALL_HOLD)
 		m.on_wall_slam(self)
 		hurt(10.0, last_hit_by, {"src": "wall"})
 	body_vertical(dt)
-	var look := atk_dir if st in ["windup", "lunge"] else Vector2(vel.x, vel.z)
+	var look := atk_dir if fsm.is_in(S.WINDUP) or fsm.is_in(S.ATTACK) else Vector2(vel.x, vel.z)
 	if look.length() > 0.2:
 		face = lerp_angle(face, atan2(-look.x, -look.y), minf(1.0, dt * 10.0))
 
@@ -285,7 +414,7 @@ const NAP_CHECK := 0.5       # s between its looks around, asleep or awake
 var _nap := 0.0              # s to its next look around
 var _asleep := false
 func _napping(dt: float) -> bool:
-	if st != "idle" or not grounded or tgt != null or md.get("flee", false):
+	if not is_calm() or not grounded or tgt != null or md.get("flee", false):
 		_nap = 0.0
 		_asleep = false
 		return false
@@ -327,8 +456,8 @@ func _anyone_near() -> bool:
 	return false
 
 func _begin_attack() -> void:
-	st = "windup"
-	st_t = md["windup"]
+	if not _go(S.WINDUP, "in reach", float(md["windup"])):
+		return
 	atk_dir = dir_to(tgt)
 	match md["attack"]:
 		"lunge":
@@ -349,18 +478,21 @@ func _begin_attack() -> void:
 	# each kind has its own call as it winds up, instead of the same alarm for everyone
 	m.sfx("v_" + mkind, pos, -9.0 if mkind != "warden" else -3.0, randf_range(0.9, 1.12))
 
+## The wind-up ran out: ATTACK. A lunge dashes on (sim); every other blow lands now and it recovers at once.
 func _strike() -> void:
 	_cancel_tele()
 	cd = md["cd"] * randf_range(0.85, 1.15)
-	match md["attack"]:
+	var kind := String(md["attack"])
+	_go(S.ATTACK, "tell full", LUNGE_S)
+	if kind != "lunge" and kind != "fuse":
+		_go(S.RECOVER, kind, float(RECOVER_S.get(kind, 0.0)))
+	match kind:
 		"lunge":
-			st = "lunge"; st_t = 0.2; lunge_hit = {}
+			lunge_hit = {}
 		"spit":
-			st = "recover"; st_t = 0.5
 			m.spawn_shot(self, pos + Vector3(atk_dir.x * 0.6, 0.8, atk_dir.y * 0.6), atk_dir * 8.5, md["dmg"] * dmg_mult, 8.5 / 8.5, 0.32, Color("b6ff6a"), {"mob": true, "kb": 2.0})
 			m.sfx("k_spore", pos, -8.0, 1.25)      # a wet spit
 		"volley":
-			st = "recover"; st_t = 0.6
 			for k in [-0.2, 0.0, 0.2]:
 				var d := atk_dir.rotated(k)
 				m.spawn_shot(self, pos + Vector3(d.x * 0.6, 1.0, d.y * 0.6), d * 9.5, md["dmg"] * dmg_mult, 10.5 / 9.5, 0.28, Color("8ae8ff"), {"mob": true, "kb": 2.5})
@@ -380,7 +512,6 @@ func _strike() -> void:
 			_on_zero(null, {"self": true})
 			return
 		"slam":
-			st = "recover"; st_t = 0.8
 			m.fx.ring(atk_at, float(md.get("slam_r", 2.3)), Color("ffb090"), 0.3)
 			m.net_fx(["ring", m._r(atk_at.x), m._r(atk_at.y), m._r(atk_at.z), float(md.get("slam_r", 2.3)), "ffb090"])
 			m.fx.dust(atk_at, 16)

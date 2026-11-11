@@ -401,12 +401,10 @@ func _waves(x: Dictionary, dt: float) -> void:
 		if m.biomes: m.biomes.dress(mb)
 		mb.set_meta("exit", int(x["i"]))
 		mb.camp = focus          # they press in on the outpost
-		mb.st = "chase"
 		var best: Hunter = null; var bd := 16.0
 		for h in m.hunters:
 			if h.targetable() and mb.flat_dist(h) < bd: bd = mb.flat_dist(h); best = h
-		mb.tgt = best
-		if best == null: mb.st = "idle"
+		if best: mb.aggro(best, "outpost")
 		m.fx.burst(at + Vector3(0, 0.4, 0), Color("ff9a6a"), 12, 3.0, 0.5)
 		m.fx.dust(at, 6)
 		spawned += 1
