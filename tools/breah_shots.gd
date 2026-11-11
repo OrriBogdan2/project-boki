@@ -184,8 +184,8 @@ func _breah_spine() -> void:
 			at_ridge],
 		[0.42, "full", "spine_rising", "Basalt Spine rising centre-out: real rocks (Stone Row's own), one rock deep",
 			at_ridge],
-		[0.9, "full", "spine_up", "Basalt Spine up: a ridge of punchable rocks across the aim, one rock deep, no land;"
-			+ " it stops at the island's edge (lower right)", at_ridge],
+		[0.9, "full", "spine_up", "Basalt Spine up: 21m of punchable rocks across the aim, one rock deep, no land;"
+			+ " over the abyss they stand as ground", at_ridge],
 	]
 	await _go(1.0, Callable(), marks)
 

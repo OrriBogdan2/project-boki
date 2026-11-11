@@ -45,7 +45,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Meeko | R range | 12.6 | tether ring 7 bh (12.6) | match |
 | Tenzo | RMB radius, core | 4.5 (3.82 tap), 0.9-1.8 | 2.5 bh (4.5), 0.5-1 bh | match |
 | Tenzo | E ahead, span | 3.4, 5 | 2 bh (3.6), 3 bh (5.4) | match |
-| Tenzo | R ridge length, cast range | 12, 11 | 10-12 bh (18-21.6), - | differ ~40%, kept: f2b60dc70 narrowed it 19.8 to 12 on purpose, no DECISIONS line either way; [?] |
+| Tenzo | R ridge length, cast range | **21** (was 12), 11 | 12 bh (21.6): reticle 359 px at ~30 px/bh (f0579), raised ridge 388 px (f0590), cast range not seen | **fixed** (PARITY FIRST: f2b60dc70's narrowing had no DECISIONS line); 15 rocks keep the 1.5 m spacing; locked in kit_parity.json |
 | Grimble | RMB range | 11.5 | 6-7 bh (10.8-12.6) | match |
 | Grimble | E depth, angle | 3.0, 110 | 1.5 bh deep x 2 bh wide (2.7 x 3.6) | within footage error [?] |
 | Grimble | R fan, depth | 105, 5.9 | 100-110, 3.3 bh (5.9) | match |
@@ -65,7 +65,7 @@ Source = `briefs/supervive-data/supervive_kits.md` (the tooltips carry no range 
 | Sable | E range | 14 | landed at 9 bh (16.2), max not seen | [?] |
 | Sable | R ring | 5.4 (rim band outer 25%) | 3 bh (5.4); the first sheet's 3.5 bh is superseded | match |
 
-Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Tenzo ridge (deliberate narrowing, source 10-12 bh), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
+Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner item 68), Cinder flight (owner item 20), Sparkle Skycall circle (deliberate). Ideas of ours stay out of the build.
 
 ## Vex (`gunslinger`, source Ghost) · slice Warden
 
@@ -142,7 +142,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | RMB | Hold slam, centre stun, jump to leap, 11 s [D] | hold .2, cd 11, glide slam built | match |
 | Q | none | glove | ours |
 | E | Three rocks, allies hop by jumping, ~12.5 s [D] | Rock wall, cd 12.5; **no ally hop** | missing: ally hop (gap 14) |
-| R | Tap wall, hold drag angle, Slows, 45 s [D] | 9 rocks, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
+| R | Tap wall, hold drag angle, Slows, 45 s [D] | 15 rocks over 21 m, drag, cd 45, slow data present | differ (owner item 15 said rocks only) |
 | Dash | Landslide: dash, launches rock, ~12 s [D] | Rock Hop: 3 hops of 2.8 m/.26 s raw ×.85/×1.15 = 2.4 m/.3 s, cd 12 | differ (owner item 111) |
 | Passive | Punching rocks grants Shield [D] | Built; charge scaling ours | match |
 | Anim | Footage poses | 17 moves, all on `tarek.glb` (48) | match on coverage |
