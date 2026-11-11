@@ -25,6 +25,11 @@ const JL_DEEPER := 1.25        # ...which is this many times the hop's dip, same
 const JL_FREE_S := 0.2         # s: running, the land clip owns the legs at most this long (the source is up and
                                # moving ~0.15 s after any touchdown: the landing never holds the run)
 const JL_BACK_MAX := 0.6       # s: the longest a landing may own the body standing (dur 0.4 + the loco fade)
+const JL_HEAVY_K := 1.0        # a heavy's drop crouch, on screen, is at least this many times the medium Hunters' median
+## Heavies whose land clip is still shallower than that (docs/DEBT.md): "<id>" -> what. Each land rework removes its entry.
+const JL_HEAVY_OPEN := {
+	"ashwick": "Cinder's drop 0.094 / 0.182 m on screen (run / still), the mediums' median 0.110 / 0.192",
+}
 ## Standing loops docs/art/IDLE_AUDIT.md found open: "<id>:<clip>" -> what. Each idle rework removes its entries.
 const STAND_OPEN := {
 	"bulwark:idle": "head seam 4.2 deg (breathe() at half rate)",
@@ -35,6 +40,7 @@ const STAND_OPEN := {
 
 var bad := 0
 var holder: Node3D
+var drop_dips := {}            # id -> {"run": m, "still": m}: the drop's dip on screen (world metres), for _weight_dips
 
 func ok(cond: bool, what: String) -> void:
 	print("CLIP %s %s" % ["ok  " if cond else "FAIL", what])
@@ -55,6 +61,7 @@ func run(main: Node) -> void:
 		n += 1
 		await _hero(main, String(id), art_name)
 	ok(n > 0, "at least one Hero has clips (%d)" % n)
+	_weight_dips()
 	print("CLIP_CHECK_DONE, failures: ", bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -205,14 +212,19 @@ func _standing(id: String, dd: Dictionary, clips: WardenClips) -> void:
 func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictionary) -> void:
 	var jl := preload("res://tools/jump_land_check.gd")
 	var ld: Dictionary = dd.get("land", {})
+	# (skeleton metres to world metres: the rigs are built at their own sizes and scaled to the Hunter's body)
+	var on_screen := WardenGlb.skeleton(m.get_node("Warden")).global_basis.get_scale().y
 	for running: bool in [true, false]:
 		var hop_dip := 0.0
 		for way: String in ["jump", "drop", "glide", "kerb"]:
 			var r: Dictionary = jl.measure(m, sync, clips, running, way)
 			var tag := "%s %s" % [way, "run" if running else "still"]
-			print("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f dip_t=%.2f legs=%.2f back=%.2f held=%.2f settle=%.2f"
-					% [id, tag, r["off"], r["again"], r["apex"], r["dip"], r["dip_t"], r["legs"], r["back"], r["held"],
-					r["settle"]])
+			var world_dip: float = r["dip"] * on_screen
+			print("JL %s %s off=%.1f again=%.1f apex=%.1f dip=%.3f world=%.3f dip_t=%.2f legs=%.2f back=%.2f held=%.2f settle=%.2f"
+					% [id, tag, r["off"], r["again"], r["apex"], r["dip"], world_dip, r["dip_t"], r["legs"], r["back"],
+					r["held"], r["settle"]])
+			if way == "drop" and not dd.has("sway"):
+				drop_dips.get_or_add(id, {})["run" if running else "still"] = -world_dip
 			if way == "jump":
 				ok(r["off"] >= JL_READ_DEG and r["apex"] >= JL_READ_DEG,
 						"%s %s: take-off (%.0f deg) and apex (%.0f deg) read" % [id, tag, r["off"], r["apex"]])
@@ -237,6 +249,29 @@ func _jump_land(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dicti
 			if running:
 				ok(r["legs"] <= JL_FREE_S, "%s %s: the legs are the run's again by %.2f s (max %.2f), no hold"
 						% [id, tag, r["legs"], JL_FREE_S])
+
+## The drop by weight class: a heavy's deep crouch reads at least as deep on screen as a medium Hunter's (the median of
+## the mediums, per stance), so the heaviest bodies land the heaviest.
+func _weight_dips() -> void:
+	for stance: String in ["run", "still"]:
+		var mediums: Array = []
+		for id: String in drop_dips:
+			if Arch.weight(id) == "medium":
+				mediums.append(float(drop_dips[id][stance]))
+		if mediums.is_empty():
+			continue
+		mediums.sort()
+		var median: float = mediums[int(mediums.size() / 2.0)]
+		for id: String in drop_dips:
+			if Arch.weight(id) == "heavy":
+				var dip := float(drop_dips[id][stance])
+				var deep_enough := dip >= median * JL_HEAVY_K
+				if JL_HEAVY_OPEN.has(id):
+					var stale := " (now passes: drop it from JL_HEAVY_OPEN)" if deep_enough else ""
+					print("CLIP open %s drop %s: %s%s" % [id, stance, JL_HEAVY_OPEN[id], stale])
+					continue
+				ok(deep_enough, "%s drop %s: the heavy's crouch is %.3f m on screen (mediums' median %.3f)"
+						% [id, stance, dip, median])
 
 func _timings(id: String, dd: Dictionary, clips: WardenClips) -> void:
 	var worst := 0.0
