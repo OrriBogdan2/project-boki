@@ -1,7 +1,8 @@
 """Rimeshrew's skeleton and the clips that are its own: everything a little quicker and twitchier than the others."""
 import boki_clips
 import rimeshrew
-from boki_clips import SHARED, add, bite, chop_mouth, ear_pose, eat_ground, mine_mouth, s, seq, tail_wave
+from boki_clips import SHARED, add, bite, chop_mouth, ear_pose, eat_ground, mine_mouth, run, s, seq, tail_wave, walk
+from boki_gait import four_legs, planted
 from rimeshrew import SIDES, TAIL_PTS
 
 boki_clips.TAIL_N = 5
@@ -100,6 +101,10 @@ def squeak(t):
 
 CLIPS = {name: (secs * 0.85, loop, twitch(fn)) for name, (secs, loop, fn) in SHARED.items()}
 CLIPS.update({
+    "walk": (0.6, True, planted(twitch(walk), BONES, four_legs(0.0, 0.5, 0.5), duty=0.4, reach=0.14, lift=0.04,
+                                drop=0.01)),
+    "run": (0.75, True, planted(twitch(run), BONES, four_legs(0.0, 0.5, 0.0), duty=0.14, reach=0.16, lift=0.07,
+                                drop=0.04)),
     "attack": (0.7, False, squeak),
     "ability": (1.4, False, ability),
     "sleep": (3.0, True, curl),
