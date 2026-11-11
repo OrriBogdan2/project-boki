@@ -163,9 +163,13 @@ func _vials() -> void:
 		_reset(6.0)
 		K.bag.append(v)
 		var x0 := T.pos.x
+		var looks := int(HeroVfx.of(m).plays.get("shatter_" + v, 0))
 		tap(m, P)
+		var thrown := K.anim_id == "gil_throw"
 		var top := _land()
 		var hit := dmg(T) > 0.0
+		ok("%s: the toss pose, and the bottle breaks in its own look" % v,
+			thrown and int(HeroVfx.of(m).plays.get("shatter_" + v, 0)) == looks + 1)
 		match v:
 			"thunder": ok("Thunder: damage and a stun in the centre", hit and top["stun"] >= 0.4,
 				"dmg %.1f stun %.2f" % [dmg(T), top["stun"]])
@@ -263,7 +267,7 @@ func _swim() -> void:
 func _riptide() -> void:
 	_reset(1.6)
 	K.use_e()
-	ok("Riptide: E starts the spin", K.spin_t >= 0.0)
+	ok("Riptide: E starts the spin (the spin pose)", K.spin_t >= 0.0 and K.anim_id == "gil_spin")
 	step(m, 1.0)
 	var spin_dmg := dmg(T)
 	ok("Riptide: the spin hurts foes around him", spin_dmg > 0.0, "%.1f" % spin_dmg)
@@ -271,6 +275,8 @@ func _riptide() -> void:
 	K.use_e()
 	step(m, 0.3)
 	K.e_recast()
+	ok("Riptide recast: the spin stops on the spout thrust, the spout's look plays",
+		K.anim_id == "gil_spout" and int(HeroVfx.of(m).plays.get("spout", 0)) > 0)
 	var w_short: float = K.spouts[0]["w"] if not K.spouts.is_empty() else 0.0
 	var top := {"stun": 0.0}
 	step(m, 1.2, func(): top["stun"] = maxf(top["stun"], T.stun_t))
@@ -294,8 +300,9 @@ func _wave() -> void:
 	P.lvl = 6
 	ok("Tidal Wave: casts", K.cast_ult())
 	m.step(DT)
-	ok("Tidal Wave: Gil is untargetable while he surfs",
-		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0)
+	ok("Tidal Wave: Gil is untargetable while he surfs (the surf pose, the wave's look)",
+		K.untarget_t > 0.0 and float(K.incoming(T, 50.0, {})[0]) == 0.0 and K.anim_id == "gil_surf"
+		and int(HeroVfx.of(m).plays.get("wave", 0)) > 0)
 	var top := {"stun": 0.0, "slow": 0.0, "k": 0.0}
 	step(m, 1.2, func():
 		top["stun"] = maxf(top["stun"], T.stun_t)
@@ -305,7 +312,7 @@ func _wave() -> void:
 		top["stun"] >= 0.9 and top["slow"] >= 2.5 and absf(top["k"] - 0.5) < 0.05,
 		"stun %.2f slow %.2f k %.2f" % [top["stun"], top["slow"], top["k"]])
 	ok("Tidal Wave: lands with a shield and is hittable again",
-		P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
+		K.anim_id != "gil_surf" and int(HeroVfx.of(m).plays.get("wave_land", 0)) > 0 and P.shield > 0.0 and K.untarget_t <= 0.0 and float(K.incoming(T, 10.0, {})[0]) == 10.0,
 		"shield %.1f" % P.shield)
 	ok("Tidal Wave: 90 s cooldown after the cast", float(K.cd["x"]) > 85.0, "%.1f" % float(K.cd["x"]))
 	_wave_way(Vector2(-1, 0))
