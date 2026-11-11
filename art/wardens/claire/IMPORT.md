@@ -30,4 +30,6 @@ face close-ups, idle/run/attack/cast/ult at the match camera, run close). Checks
 fail is tender's hit flash, the same on the base), --warden-model-check 157/157.
 Stretch check: all 49 clips over 1.3 (worst 6.61 revive, idle 6.01, run_f 3.15), almost all
 in `hips`; before the braid fix: worst 8.01, idle 6.35, run_f 5.72. The relax runs with CUTS 0 (no holes), as Lace, Sparkle and Meeko, so a stretched
-edge stays rather than a hole; it is not reworked here.
+edge stays rather than a hole. Then relaxed in place (weights only, clips untouched), the spec's `relax` (800 passes, 2 rings):
+`blender -b --factory-startup --python tools/art1/glb_relax.py -- art/wardens/claire/claire.glb art/wardens/src/claire_v95.json`.
+Worst 4.44x (crouch_f), held there by stretch_check's `CEILING`; most of what is left is the hem welded to the right boot.

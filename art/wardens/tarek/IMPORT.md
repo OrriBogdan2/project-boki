@@ -16,5 +16,8 @@ Rebuild (Blender under ulimit -v 12000000; raw files in ~/meshy/tarek_v2):
     blender -b --factory-startup --python tools/art1/tarek_scan.py -- ~/meshy/tarek_v2/fit.blend WORK
     blender -b WORK/tarek.blend --python tools/art1/tarek_clips.py -- WORK/tarek_anims.blend art/wardens/tarek/tarek.glb
 
+tarek_clips.py relaxes the skin before the export (skin_relax, `RELAX`: weights only, 800 passes, 2 rings). The shipped tarek.glb got the
+same in place (`blender -b --factory-startup --python tools/art1/glb_relax.py -- art/wardens/tarek/tarek.glb '{"MAX_ITER": 800, "RINGS": 2}'`;
+WORK/tarek.blend was not at hand): worst stretch 34.1x to 4.51x (the locs had welded to the stone arm), held by stretch_check's `CEILING`.
 tarek_clipcheck.py measures arms into the chest across the clips. In game: --clip-shots (--true-cam, --ground=<hex>), --clip-check,
 --rig-standard-check. Kit FX read `weapon_muzzle`, `anchor_wrist_R`, `anchor_fist_L/R`, `anchor_gauntlet_L/R`, `anchor_stones_<i>`.

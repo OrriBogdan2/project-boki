@@ -26,6 +26,8 @@ and `ostra_wisp.jpg` are gone with the meshes that used them; the cards and fan 
 - **No weapon (item 136):** the void orb is gone. `anchor_orb`, `anchor_hand_r` (right palm), `anchor_hand_l`, `anchor_cards` (left palm), `weapon_muzzle` (right fingertips, an FX
   point the Gun follows). The fan of cards on `x_fan` is the deck. The flurry's card is `void_card.png`, built by `scripts/heroes/void_card.gd`.
 - **Cards:** `orbit_cards`, `orbit_cardsb` on the hips, tumbled by WardenSway (`sway` in content/rules/warden_anim/ostra.json), some burnt or torn.
+- **Stretch:** relaxed in place after the swap (tools/art1/glb_relax.py with ostra_v95.json, weights only): worst 5.45x to 5.14x
+  (land), held there by stretch_check's `CEILING`. Left: armpit and neck blends, the hands, his left hand welded to the coat.
 - **Clips:** `tools/art1/ostra_clips.py` (keys), `ostra_pose.py` (hands by target, two-bone IK, fingers, face, box), `ostra_anim.py` (30 fps from frame 0).
 - Imports: `animation/fps=30`, `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures `compress/mode=2`,
   high quality, mipmaps (S1's budget).

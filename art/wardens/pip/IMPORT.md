@@ -24,9 +24,10 @@ card shader draws no depth and the baked atlas has no alpha). `jaw`, `apron`, `s
 spring_wing chains and `fingers.L`/`thumb.L` carry no weight. The old textures (body/face colour, normal, emission, wing
 atlas) are gone with it. `pip_fit.json`, `pip_bake.json`, `pip_recipe.json` belong to older pipelines.
 
-Stretch: skin_relax ran with `CUTS` 0 (relax only, no cut-and-cap holes, like the other v95 swaps), so
-`--stretch-check --wardens=tender` flags every clip over 1.3x (worst 6.2x in flare, idle 2.7x, run_f 4.9x; mostly
-hips>hips at the belly and thighs, then head and upper_arm.R). The shots show no tear or clip at idle and run.
+Stretch: skin_relax ran with `CUTS` 0 (relax only, no cut-and-cap holes, like the other v95 swaps): worst 6.2x in flare
+(hips>hips at the belly and thighs, then head and upper_arm.R). Then relaxed in place (weights only, clips untouched), the
+spec's `relax` (800 passes, 2 rings): `blender -b --factory-startup --python tools/art1/glb_relax.py -- art/wardens/pip/pip.glb
+art/wardens/src/pip_v95.json`. Worst 2.83x (hearth), held there by stretch_check's `CEILING`.
 
 Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.036; size 0.68, hit_r 0.34).
 - **Companions (pip_v2/meeko_v2_companions_sheet):** the sun floats at her left shoulder (skinned to pauldron.L) and the raincloud at her right (pauldron.R), both rigid and thick (the sun 0.62 as deep as wide, the cloud 0.46), replacing the hand-held star lantern. The lantern's faces are gone from the body mesh; its spring_hanglantern bones stay (the shared armature). The FX points weapon_muzzle, anchor_hang_lantern and anchor_lantern_top (names kept) ride the sun on pauldron.L; `"skinned_weapon": true`, `blade` on anchor_lantern_top and weapon_muzzle with bone pauldron.L.

@@ -70,6 +70,12 @@ What it took: the torso's fit capsule (0.30 m) swallows a thin hero's arms and h
 hand.R weights, the arms on the hips), and bone heat does not recover them; arm regions (`in_segs` round each
 upper arm and forearm, a box past each wrist for the hand) put them back. A per-spec segment radius in the tool would
 be the cleaner fix. warden_model_check's `height_3d` for ostra is 1.2 (the cap's points flop out to the sides).
-Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders.
+Stretch: worst 4.1x to 5.5x per clip, Grimble's range (docs/DEBT.md), no tearing in the renders; one more default relax in place
+(tools/art1/glb_relax.py with ostra_v95.json) took it to 5.14x (longer ones made his worst edge worse).
+
+## Relaxing a swapped .glb in place
+`tools/art1/glb_relax.py -- <hero.glb> <spec.json>` reruns skin_relax with the spec's `relax` on the shipped .glb (vertices welded by
+position) and writes back only the joints and weights, so the clips stay byte for byte. Meeko and Neve: 800 passes, 2 rings
+(`relax` in their specs). Each relaxed Hero's worst goes into stretch_check's `CEILING`.
 Left: the coat tails ride the hips (the old sway is gone); the void tail is painted cloth, not the void shader; the
 wisp springs stay in the rig, unweighted.
