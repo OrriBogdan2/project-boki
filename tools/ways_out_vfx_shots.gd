@@ -69,9 +69,13 @@ func run(main_node: Node) -> void:
 	await _row("heart_locked", "Heart locked (charging)", 270.0, H.site, heart_locked, false)
 	await _row("heart_unlocked", "Heart unlocked (spark out, Gate open)", 330.0, H.site, heart_open, false)
 	await _row("heart_early_used", "Heart early seat used", 420.0, H.site, heart_used, false)
+	H.early_team = -1
+	H.charge = 0.0
+	H._force(Heart.S.ASLEEP, "shots")      # (the Heart as it is at the quest rows' times: asleep at 3:00-4:00...)
 	user.teleport(m.world.free_spot_near(L["c"], [], 1.0, 0.45, 6.0))
 	await _row("lair_racing", "Sealed Lair raced (rival)", 180.0, L["c"], lair_racing)
 	await _row("lair_won", "Sealed Lair won (rival)", 240.0, L["c"], lair_won)
+	heart_open.call()      # (...its Heartspark out at 6:30-7:30)
 	await _row("uplink_open", "Uplink open", 390.0, X["pos"], uplink_open)
 	await _row("uplink_racing", "Uplink raced (rival)", 400.0, X["pos"], uplink_racing)
 	await _row("uplink_won", "Uplink won (rival)", 450.0, X["pos"], uplink_won)
