@@ -877,6 +877,7 @@ func _farm2() -> void:
 func _ripe_gate() -> void:
 	var home = await _home(1)
 	var L := HomeLayout.of(Save.d)
+	(L["water"] as Dictionary).clear()      # (a dry patch: the island's wild water would water it itself)
 	_add_house(L)
 	(L["deco"] as Array).append({"u": HomeLayout._next_uid(L), "id": "crop_patch", "x": 44, "z": 30, "r": 0})
 	home._build_plots()
@@ -917,6 +918,8 @@ func _ripe_gate() -> void:
 			"ripe: now 'Pick it' shows, banner and marker, and the bar goes ('%s')" % hint)
 	plot_lbl = home._label_for({"kind": "plot", "arr": "plots", "i": 0})
 	ok(plot_lbl.begins_with("Harvest"), "and the patch says Harvest ('%s')" % plot_lbl)
+	home.queue_free()
+	await main.get_tree().process_frame
 
 func _note_label(hb) -> Label3D:
 	for c in hb.ghost_cells.get_children():
