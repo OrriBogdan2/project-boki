@@ -508,7 +508,7 @@
 "shadow": 1
 },
 "scripts/match/fx.gd": {
-"long_line": 12,
+"long_line": 10,
 "nested_ternary": 1,
 "semicolon": 25,
 "shadow": 2
