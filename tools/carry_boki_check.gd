@@ -6,6 +6,12 @@ extends RefCounted
 ## Never touches the real save.
 
 const STEP := 0.1
+const RNG_SEED := 3          # the global rolls and the farm-start island
+## m: the led Boki's farthest from you in the walk. It starts 1 m in front and you walk off the other way, so the peak
+## is its catch-up from a stand at its own pace (4.4 m/s x 0.94-1.06 from its uid; you 4.5), 0.8 s in: 3.17 m here,
+## then 0.5-2.4 m. Random uids and islands gave 2.91, 3.03, 3.25 m, so a 3.0 m bar fell inside that spread. A led
+## Boki at the wander pace (2.4 m/s) peaks at 3.58 m: the bar sits between the two.
+const LEAD_FAR := 3.4
 var bad := 0
 var main: Node
 var home
@@ -25,7 +31,8 @@ func _species_of_weight(lo: float, hi: float) -> String:
 
 ## An average-sized one, so its weight is its species' weight.
 func _plain(species: String, nm: String) -> Dictionary:
-	var rec := Save.new_kin(species, nm)
+	var rec := Save.new_kin(species, nm, nm.hash() & 0x7fffffff)      # a fixed Unique roll: the same body every run
+	rec["uid"] = "carry_%s" % nm      # the uid sets a share of its pace (home.gd _personality) and its likes
 	Unique.of(rec)["size"] = 0.0
 	Unique.of(rec)["girth"] = 1.0
 	return rec
@@ -65,9 +72,11 @@ func _walk(k: Dictionary, secs: float) -> float:
 func run(m: Node) -> void:
 	main = m
 	Save.no_write = true
+	seed(RNG_SEED)
 	var d := Save.fresh()
 	d["tutorial"] = {"hatched": true, "intro": true}
 	Save.d = d
+	HomeLayout.new_fs(d, RNG_SEED)      # a fixed farm-start island: a random one moved what the walk runs into
 	var small := "zapple"
 	var mid := _species_of_weight(HomeCarry.ARMS_KG * 1.3, HomeCarry.BACK_KG * 0.9)
 	var big := _species_of_weight(HomeCarry.BACK_KG * 1.3, 1000.0)
@@ -80,6 +89,7 @@ func run(m: Node) -> void:
 	HomeLayout.ensure(d)
 	home = await main._hb_home()
 	home.set_process(false)      # the check drives the frames itself
+	seed(RNG_SEED)      # again: the home used up a different number of rolls in the real frames it took to build
 	_sizes(mid, big)
 	home.ppos = Vector3(38.0, 0.0, 30.0)
 	home.pface = 0.0
@@ -195,7 +205,7 @@ func _lead(rec: Dictionary) -> void:
 	c.press_hold(k)
 	ok(c.mode == "lead" and not k.get("busy", false) and k.has("led"), "a big one stays on the ground and is led")
 	var far := _walk(k, 4.0)
-	ok(far < 3.0, "it follows beside you as you walk (%.2f m behind at most)" % far)
+	ok(far < LEAD_FAR, "it follows beside you as you walk (%.2f m behind at most)" % far)
 	c.press_hold(k)
 	ok(c.k.is_empty() and not k.has("led"), "holding again lets it go")
 
