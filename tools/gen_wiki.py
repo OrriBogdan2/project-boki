@@ -375,7 +375,7 @@ def gen_boki():
     stats_names = {"kin_hp": "Health", "kin_damage": "Damage", "kin_speed": "Speed", "owner_max_hp": "Your max health", "owner_shield": "Your shield"}
     bosses = gd_const("core/data.gd", "MOBS") or {}
     egg_of = {v.get("egg"): v.get("name") for v in bosses.values() if isinstance(v, dict) and v.get("egg")}
-    starters = gd_const("ui/hatch.gd", "STARTERS") or []
+    starters = gd_const("home/garden_hatch.gd", "STARTERS") or []
     work_el = gd_const("core/work.gd", "ELEMENTS") or {}
     work_fb = gd_const("core/work.gd", "FALLBACK") or {}
     themes = {}

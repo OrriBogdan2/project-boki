@@ -229,7 +229,7 @@
 			"needs_all": true,
 			"title": "Head out",
 			"hints": {
-				"go": "This Relic is the mask of a fallen Hunter. Put it on, and their soul becomes yours. Press {interact} at the portal to start your first expedition."
+				"go": "Press {interact} at the portal to start your first expedition. If you have no Relic yet, you choose your first one there."
 			},
 			"world": {
 				"go": "Portal"
