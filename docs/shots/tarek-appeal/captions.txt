@@ -1,0 +1,7 @@
+turnaround_game.jpg: tarek (dolm) at the match camera (pitch 66, 23 m, fov 32), front, 3/4, side, back, 3/4 back; true pixels, then x3
+front_34.jpg: tarek (dolm) full length, front and three-quarter (as the sheet's two views)
+back_34.jpg: tarek (dolm) full length, back and three-quarter back
+closeup.jpg: tarek (dolm) head and shoulders, three-quarter front
+closeup_front.jpg: tarek (dolm) head and shoulders, from the front
+poses_game.jpg: tarek (dolm) at the match camera in idle, run, attack, cast, ult (true pixels, then x3)
+run_close.jpg: tarek (dolm), left to right: run, run, other foot, punch, throw
