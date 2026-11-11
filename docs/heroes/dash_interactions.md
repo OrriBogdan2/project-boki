@@ -83,7 +83,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | gunslinger | air dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | gunslinger | LMB -> dash | Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88). | the dash goes, the ability keeps running |
 | gunslinger | RMB -> dash | Not shown in the data or footage. Ours: the Burr Charge is a tap (owner, sync89), already thrown, so Shift slides at once. | the dash goes, the ability keeps running |
-| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. | the dash goes, the ability keeps running |
+| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. Shift in the 0.6s recovery after the beam (e.recover_s, the footage's shove and ~0.4s recovery) slides at once and ends it. | the dash goes, the ability keeps running |
 | gunslinger | ult (X) -> dash | Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once. | the dash goes, the ability keeps running |
 | gunslinger | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
 | gunslinger | jump -> LMB |  | fires mid-jump (default) |
