@@ -50,7 +50,7 @@ const FALLBACK := {
 	"zephyrak": {"spark": 4, "tide": 2, "haul": 2},
 }
 ## A guess from the combat type, for a species with no work list at all.
-const BY_TYPE := {"venom": "ember", "prism": "tide", "spore": "bloom", "echo": "spark", "gravity": "stone", "lunar": "frost"}
+const BY_TYPE := {"poison": "ember", "crystal": "tide", "spore": "bloom", "sound": "spark", "psychic": "stone", "fairy": "frost"}
 
 ## Rare mutations sharpen a knack (+1, or a new one at level 1).
 const MUT_BONUS := {"giant": "haul", "tiny": "forage", "crystal": "stone", "glowing": "spark", "twintail": "haul", "albino": "frost", "melanistic": "ember"}

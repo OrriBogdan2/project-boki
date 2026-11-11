@@ -57,6 +57,35 @@ func run(main_node: Node) -> void:
 	other.pos = P.pos + Vector3(8, 0, 0)
 	await _glider(other, "another player's")
 	other.remote = false
+	# the weather bed (AmbBeds) is up, and the end-of-match fade below takes it away with the rest
+	m.music_dir.beds.tick(m, P)
+	ok(Sfx.amb_layers.has("gust"), "the match's weather bed starts (amb layers: %s)" % str(Sfx.amb_layers.keys()))
+	_belt_items(m, P)
+	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
+	# going down muffles the world bus (a low-pass and a duck, 0.3 s ramp); a revive lifts it
+	m.player.hp = 1.0                    # the low-health line: the milder filter, the heartbeat stays clear
+	m.player.armor = 0.0
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
+	var low := Sfx.muffle_state()
+	ok(low.fx and is_equal_approx(low.db, Sfx.LOW_HP_DB) and is_equal_approx(low.hz, Sfx.LOW_HP_HZ),
+		"under 25%% health: a mild low-pass and duck (%s)" % low)
+	ok(Sfx._bus_for(null, "heartbeat" in Sfx.CLEAR) != "SFXWorld", "...and the heartbeat skips the world bus")
+	m.player.hp = m.player.max_hp
+	m.player.armor = m.player.max_armor
+	await _muffle_step(m, true)
+	var dull := Sfx.muffle_state()
+	ok(dull.fx and is_equal_approx(dull.db, Sfx.MUFFLE_DB) and is_equal_approx(dull.hz, Sfx.MUFFLE_HZ),
+		"downed: the world bus is low-passed and ducked (%s)" % dull)
+	var bus := AudioServer.get_bus_index("SFXWorld")
+	ok(Sfx._bus_for(null, true) != "SFXWorld" and Sfx._bus_for(null, false) == "SFXWorld",
+		"the Wisp hum, pings and Boki voices skip the world bus")
+	await _muffle_step(m, false)
+	var clear := Sfx.muffle_state()
+	ok(not clear.fx and is_zero_approx(clear.db) and is_equal_approx(clear.hz, Sfx.MUFFLE_OPEN_HZ),
+		"revived: the muffle is off again (%s)" % clear)
+	await _muffle_step(m, true)
+	ok(Sfx.muffle_state().fx and bus >= 0, "downed again: muffled")
 	# extract mid-channel and go home
 	m.result = {"extracted": true, "why": "extract"}
 	m._finish()
@@ -68,6 +97,8 @@ func run(main_node: Node) -> void:
 			await main.get_tree().process_frame
 	ok(_on_farm(), "back on the farm (%s)" % main.current)
 	ok(not Sfx.loop_on(key) and not Sfx.loop_on("boxhum_check"), "no keyed match loop is left")
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
+	ok(not Sfx.muffle_state().fx, "leaving the match while downed turns the muffle off")
 	await main.get_tree().create_timer(SETTLE).timeout
 	ok(Sfx.match_voices() == 0, "after the fades nothing the match started is playing (%d)" % Sfx.match_voices())
 	print("MATCHAUDIO DONE, %d checks, failures: %d" % [n, fails])
@@ -167,6 +198,46 @@ func _once(g: GliderSfx, h: Hunter, cue: String, what: String) -> void:
 	Sfx.last_played.erase(cue)
 	g.tick(h)
 	ok(first and not Sfx.last_played.has(cue), what)
+## Every belt item makes its own start cue at the user; the tonic and the armour kit loop while they channel and
+## then play their end cue, or the cancel cue when spilt (BeltSfx, content/rules/belt_sfx.json).
+func _belt_items(m: Match, P: Hunter) -> void:
+	Sfx.listener = P.pos
+	for id in BeltSfx.items():
+		var start := BeltSfx.cue(id, "start")
+		Sfx.last_played.erase(start)
+		UtilityBelt.set_slot(P, 0, id, 3, 0)
+		UtilityUse.start(P, 0, id)
+		ok(Sfx.last_played.has(start), "belt %s: heard at its start cue %s" % [id, start])
+		if not BeltSfx.cue(id, "loop").is_empty():
+			_belt_channel(m, P, id)
+		_step(m, 0.3)
+		P.drink_t = 0.0
+		P.kit_t = 0.0
+		Sfx.loop_stop(BeltSfx.loop_key(P, id))
+
+func _belt_channel(m: Match, P: Hunter, id: String) -> void:
+	var key := BeltSfx.loop_key(P, id)
+	_step(m, 0.1)
+	ok(Sfx.loop_on(key), "belt %s: loops while it channels" % id)
+	Sfx.last_played.erase(BeltSfx.cue(id, "end"))
+	_step(m, UtilityUse.channel(id, "time") + 0.1)
+	ok(not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "end")), "belt %s: ends with its end cue" % id)
+	UtilityBelt.set_slot(P, 0, id, 3, 0)
+	P.hp = 20.0
+	P.armor = 0.0
+	UtilityUse.start(P, 0, id)
+	_step(m, 0.1)
+	Sfx.last_played.erase(BeltSfx.cue(id, "cancel"))
+	P.stun_t = 1.0
+	_step(m, 0.1)
+	var spilt := not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "cancel"))
+	ok(spilt, "belt %s: a spill plays its cancel cue" % id)
+	P.stun_t = 0.0
+## Downs (or revives) the player and lets the match's audio director and the ramp run.
+func _muffle_step(m: Match, down: bool) -> void:
+	m.player.downed = down
+	m.music_dir.tick(m, 0.0)
+	await main.get_tree().create_timer(Sfx.MUFFLE_S + 0.2).timeout
 
 func _step(m: Match, secs: float) -> void:
 	var t := 0.0

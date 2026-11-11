@@ -47,6 +47,7 @@ var skydrop: DropSquad = null  # the planning phase before the ship sets off, dr
 var spawn_plan: SpawnPlan = null   # which of the map's candidate spawns are live this match (see SpawnPlan)
 var time := 0.0
 var acc := 0.0
+var flyby := Flyby.new()     # rival shots passing close sound (see Flyby)
 var player: Hunter = null
 var over := false
 var result := {}
@@ -300,6 +301,7 @@ func _start(o: Dictionary) -> void:
 	world.biome = T["biome"].duplicate()
 	world.clouds = T["clouds"]
 	add_child(world)
+	Sfx.occlusion.world = world
 	# real expeditions are on a hand-made map, and so is the tutorial (a small calm one); training keeps a generated one
 	var layout := {}
 	# --procgen (or opts.procedural): the old island generator instead, as a fallback
@@ -339,6 +341,7 @@ func _start(o: Dictionary) -> void:
 	CombatBus.hit_landed.connect(_bond_cb)
 	CombatBus.status_applied.connect(_combo_cb)
 	add_child(HunterFeats.new(self))      # the feats Hunter challenges count
+	add_child(StatusSfx.new(self))        # status cues and loops
 	cam = CamRig.new(); cam.name = "Cam"; add_child(cam)
 	cam.lead = float(Settings.get_v("cam_lead"))
 	cam_style = String(Settings.get_v("cam_style"))
@@ -1295,7 +1298,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 	if gd.has("effects"):
 		# newer gloves are built from the same effect blocks as abilities, scaled by rarity
 		Effects.run(Gear.effects_of(gid, int(g.get("rar", 1))), h, {"slot": "gear", "ability": gid, "level": 1})
-		sfx("skill", h.pos, -4.0, 1.0)
+		Gear.cast_sfx(self, gid, h.pos, "skill", -4.0, 1.0)
 		return
 	match gid:
 		"gust_fan":
@@ -1306,7 +1309,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.shot_down = false
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.35)
 			fx.burst(h.pos + Vector3(0, 0.4, 0), col, 20, 5.0, 0.5, -2.0, 1.0)
-			sfx("glide", h.pos, 0.0, 1.5)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 1.5)
 		"platform":
 			var tiles: Array = []
 			var y := h.pos.y - 0.1
@@ -1330,7 +1333,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 				h.vel.y = 0.0
 			h.glide_fuel = 1.0
 			h.shot_down = false
-			sfx("shield", h.pos, 0.0, 0.8)
+			Gear.cast_sfx(self, gid, h.pos, "shield", 0.0, 0.8)
 		"shock":
 			Abil._blast(h, h.pos, 3.4, 12.0, 13.0, col, 5.0, "gear")
 		"rocket":
@@ -1343,7 +1346,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			h.glide_fuel = minf(1.0, h.glide_fuel + 0.5)
 			fx.burst(h.pos + Vector3(0, 0.2, 0), col, 26, 6.0, 0.5, -1.0, 1.2, Vector3.DOWN, 30.0)
-			sfx("glide", h.pos, 0.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "glide", 0.0, 0.7)
 		"skyhook":
 			# hook a point toward the cursor and swing up to it: onto a ledge above you if there is
 			# one there, otherwise straight up into the air
@@ -1358,7 +1361,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.launch_to(to, 0.55)
 			h.glide_cd = 0.0
 			fx.bolt(h.pos + Vector3(0, 1.2, 0), to, Color(col, 0.9))
-			sfx("throw", h.pos, -2.0, 0.7)
+			Gear.cast_sfx(self, gid, h.pos, "throw", -2.0, 0.7)
 		"hover":
 			# a second jump in the air (or a big hop on the ground) and the glider ready right after
 			h.vel.y = maxf(h.vel.y, 11.0)
@@ -1367,7 +1370,7 @@ func use_gear(h: Hunter, slot: int) -> void:
 			h.roll_t = 0.0
 			fx.ring(h.pos, 1.2, col, 0.3)
 			fx.burst(h.pos, col, 14, 3.0, 0.4, 2.0, 1.0, Vector3.DOWN, 50.0)
-			sfx("jump", h.pos, -2.0, 1.3)
+			Gear.cast_sfx(self, gid, h.pos, "jump", -2.0, 1.3)
 
 func _update_gear_fx(dt: float) -> void:
 	for gp in gpads.duplicate():
@@ -1861,12 +1864,9 @@ func freeze_frame(t: float) -> void:
 
 ## Armor went up a tier: a coloured ring for everyone to see, and a callout for you.
 func _armor_up(h: Hunter) -> void:
-	var col := h.armor_col()
-	fx.ring(h.pos, 2.4, Color(col, 0.9), 0.45)
-	fx.burst(h.pos + Vector3(0, 1.0, 0), col, 14, 3.5, 0.5)
-	if h == player:
-		sfx("revive", null, -6.0)
-		if hud: hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), col)
+	Juice.armor_up(self, h)
+	if h == player and hud:
+		hud.toast("Armor upgraded  ·  %s" % String(Hunter.ARMOR_TIERS[h.armor_tier][0]), h.armor_col())
 
 func _reward_moment(at: Vector3) -> void:
 	_slow(0.22, 0.35)
@@ -2916,6 +2916,7 @@ func _shot_end(s: Dictionary, at: Vector3, e: Ent, why := "") -> void:
 	# data-driven abilities: effects that go off where the shot ends, on what it hit, or on the wall
 	# that stopped it
 	var fxx: Dictionary = s["x"]
+	if why == "wall" and is_instance_valid(s["by"]): Juice.wall(self, at, s["by"])
 	if fxx.get("kx") is Callable and not fxx.get("cos", false):
 		# a kin grammar shot (KinExec): it applies its own effects and followups
 		(fxx["kx"] as Callable).call(s, at, e, why if not (e != null and fxx.has("hitset")) else "end")
@@ -3917,6 +3918,7 @@ func step(dt: float) -> void:
 	_prof("separate")
 	_update_rings(dt)
 	_update_shots(dt)
+	flyby.tick(self)
 	_prof("shots")
 	_update_pickups(dt)
 	BeltKeys.tick(self)      # a full belt beside a key: the swap prompt (bots make room)

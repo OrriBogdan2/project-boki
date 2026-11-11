@@ -368,7 +368,7 @@ func shriek(at_h: Ent) -> void:
 func shriek_fx() -> void:
 	shriek_t = m.time
 	m.sfx("v_warden", pos, 2.0, 1.75)
-	m.sfx("k_echo", pos, -2.0, 0.6)
+	m.sfx("k_sound", pos, -2.0, 0.6)
 	m.fx.ring(pos, 6.0, Color("ff5a2a"), 0.6)
 	m.fx.ring(pos, 10.0, Color("ff8a4a"), 0.9)
 	m.fx.burst(pos + Vector3(0, 2.0, 0), BlightModels.EMBER, 26, 5.0, 0.7, -2.0)
@@ -390,7 +390,7 @@ func _strike() -> void:
 	# an ember bolt from the lamp
 	var o := pos + Vector3(atk_dir.x * 0.7, 2.0, atk_dir.y * 0.7)
 	m.spawn_shot(self, o, atk_dir * 9.0, float(md["dmg"]) * dmg_mult, 10.0 / 9.0, 0.34, BlightModels.EMBER_HOT, {"mob": true, "kb": 2.0, "burn": 1.0 if lvl > 0.6 else 0.0})
-	m.sfx("k_venom", pos, -6.0, 0.7)
+	m.sfx("k_poison", pos, -6.0, 0.7)
 
 ## Burrows away quietly (BlightDir despawns idle Blight far from everyone).
 func burrow() -> void:

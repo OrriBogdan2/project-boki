@@ -83,10 +83,14 @@ const CHECKS := {
 	"--quality-check": ["res://tools/quality_check.gd", "quality_check", null],      # graphics presets
 	"--clutter-check": ["res://tools/clutter_check.gd", "clutter_check", null],
 	"--match-audio-check": ["res://tools/match_audio_check.gd", "match_audio_check", null],      # item 103
+	"--flyby-check": ["res://tools/flyby_check.gd", "flyby_check", null],
+	"--sfx-occlusion-check": ["res://tools/sfx_occlusion_check.gd", "sfx_occlusion_check", null],      # sounds behind terrain
 	"--hunter-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],
 	"--class-unlock-check": ["res://tools/class_unlock_check.gd", "class_unlock_check", null],      # (the old name)
 	"--shot-vertical-check": ["res://tools/shot_vertical_check.gd", "shot_vertical_check", null],
 	"--minigame-hub-check": ["res://tools/minigame_hub_check.gd", "minigame_hub_check", null],  # title
+	"--kin-type-fx-check": ["res://tools/kin_type_fx_check.gd", "kin_type_fx_check", null],      # 18 type accents
+	"--kin-type-sheet": ["res://tools/kin_type_sheet.gd", "kin_type_sheet", null],      # --shots-dir=<dir>
 	"--kin-regen-check": ["res://tools/kin_regen_check.gd", "kin_regen_check", null],
 	# Bokidex quirks, sex ratios
 	"--boki-quirks-check": ["res://tools/boki_quirks_check.gd", "boki_quirks_check", null],
@@ -96,6 +100,7 @@ const CHECKS := {
 	# level-up / ready: one body glow, no ring
 	"--level-vfx-check": ["res://tools/level_vfx_check.gd", "level_vfx_check", null],
 	"--results-ways-check": ["res://tools/results_ways_check.gd", "results_ways_check", null],      # 0051 results
+	"--knock-sfx-check": ["res://tools/knock_sfx_check.gd", "knock_sfx_check", null],      # squad knock / finish cues
 	"--kill-reset-check": ["res://tools/kill_reset_check.gd", "kill_reset_check", null],
 	"--dash-dir-check": ["res://tools/dash_dir_check.gd", "dash_dir_check", null],
 	# two-step abilities report their window
@@ -107,11 +112,14 @@ const CHECKS := {
 	"--boki-moves-shots": ["res://tools/boki_moves_shots.gd", "boki_moves_shots", null],      # --shots-dir=<dir>
 	"--rank-ui-check": ["res://tools/rank_ui_check.gd", "rank_ui_check", null],      # choose what to rank: + and pips
 	"--rank-ui-shots": ["res://tools/rank_ui_shots.gd", "rank_ui_shots", null],      # --shots-dir=<dir>
+	"--armor-break-sfx-check": ["res://tools/armor_break_sfx_check.gd", "armor_break_sfx_check", null],      # armour-break cues
 	"--sfx-set-check": ["res://tools/sfx_set_check.gd", "sfx_set_check", null],      # sound sets, loudness
+	"--status-sfx-check": ["res://tools/status_sfx_check.gd", "status_sfx_check", null],      # status cues and loops
 	"--outpost-look-shots": ["res://tools/outpost_look_shots.gd", "outpost_look_shots", null],
 	"--outpost-look-check": ["res://tools/outpost_look_check.gd", "outpost_look_check", null],
 	"--exit-signal-check": ["res://tools/exit_signal_check.gd", "exit_signal_check", null],
 	"--exit-signal-shots": ["res://tools/exit_signal_shots.gd", "exit_signal_shots", null],
+	"--ready-cue-check": ["res://tools/ready_cue_check.gd", "ready_cue_check", null],      # key tools back: quiet cues
 	"--dash-slot-check": ["res://tools/dash_slot_check.gd", "dash_slot_check", null],
 	"--reticle-check": ["res://tools/reticle_check.gd", "reticle_check", null],
 	"--ping-check": ["res://tools/ping_check.gd", "ping_check", null],
@@ -130,6 +138,8 @@ const CHECKS := {
 	# golden Hunter movement traces (--update)
 	"--feel-golden-check": ["res://tools/feel_golden_check.gd", "feel_golden_check", null],
 	"--air-limits-check": ["res://tools/air_limits_check.gd", "air_limits_check", null],      # items 162, 162b
+	"--hit-class-check": ["res://tools/hit_class_check.gd", "hit_class_check", null],      # hit looks by target
+	"--hit-class-shots": ["res://tools/hit_class_shots.gd", "hit_class_shots", null],      # --shots-dir=<dir>, needs a renderer
 	"--layout-check": ["res://tools/layout_check.gd", "layout_check", null],      # item 151
 	"--drop-launch-check": ["res://tools/drop_launch_check.gd", "drop_launch_check", null],      # item 163
 	"--ride-shots": ["res://tools/ride_shots.gd", "ride_shots", null],      # item 163 camera (GPU)
@@ -269,6 +279,7 @@ const CHECKS := {
 	"--home-verbs-check": ["res://tools/home_verbs_check.gd", "home_verbs_check", null],
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],  # news at home
+	"--legendary-check": ["res://tools/legendary_check.gd", "legendary_check", null],      # legendary Boki
 	"--boki-lines-check": ["res://tools/boki_lines_check.gd", "boki_lines_check", null],      # Boki talk (item 105)
 	"--boki-talk-shots": ["res://tools/boki_talk_shots.gd", "boki_talk_shots", null],      # --shots-dir=<dir>
 	"--build-ui-check": ["res://tools/build_ui_check.gd", "build_ui_check", null],      # also --build-ui-shots=<dir>

@@ -10,6 +10,8 @@ signal ability_used(caster: Node, ability_id: String, slot: String)
 signal status_applied(target: Node, status: String, by: Node, duration: float)
 ## A dash came straight back for the local hunter and the reset cue played (source: "takedown" or "hero").
 signal dash_reset_cue(hunter: Node, source: String)
+## A key tool of the local hunter came back and its quiet cue played: hunter, sound (ReadyCues.CUE_OF).
+signal ready_cue(hunter: Node, cue: String)
 ## Something other than plain fighting (a hero's ultimate) added to the bond meter: hunter, share of the bar, reason.
 signal bond_gained(hunter: Node, amount: float, reason: String)
 signal kin_thrown(kin: Node, owner: Node)
