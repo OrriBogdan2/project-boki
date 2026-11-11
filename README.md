@@ -160,7 +160,7 @@ godot --headless --path . -- --unique-check          # every kin its own: rolls,
 godot --headless --path . -- --economy-floor-check   # never stuck: strays, the Drift Pens, the Exchange, saves
 ```
 
-Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through the loading screen, the drop and the landing, prints the worst frames with what each spent its time on, and fails on a stalled frame or on a shader compiled after the loading screen (thresholds in `tools/hitch_check.gd`). Use a fresh user data dir so the shader cache starts cold:
+Frame hitches need a renderer: `--hitch-check` plays a seeded expedition through the loading screen, the drop and the landing, prints the worst frames with what each spent its time on, and fails on a stalled frame or on a shader compiled after the loading screen (thresholds in `tools/hitch_check.gd`). It is advisory: a fail exits 0 unless `--timing-strict` is given (docs/CHECKS_TIMING.md). Use a fresh user data dir so the shader cache starts cold:
 
 ```
 XDG_DATA_HOME=/tmp/cold xvfb-run -a godot --path . --rendering-driver opengl3 -- --hitch-check
