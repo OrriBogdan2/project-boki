@@ -381,6 +381,7 @@ const CHECKS := {
 	"--lmb-spam-check": ["res://tools/lmb_spam_check.gd", "lmb_spam_check", null],      # mashing LMB never beats holding
 	"--input-latency-check": ["res://tools/input_latency_check.gd", "input_latency_check", null],      # press -> first motion or shot
 	"--step-up-check": ["res://tools/step_up_check.gd", "step_up_check", null],      # lips up to the step height
+	"--train-ride-check": ["res://tools/train_ride_check.gd", "train_ride_check", null],      # leaving and landing on the moving cars
 }
 
 ## Runs the registered check named in args, if any (a flag also matches --flag=value).
