@@ -1388,7 +1388,7 @@ func _tick_weapon(dt: float) -> void:
 	if not strike_at_end.is_empty():
 		if roll_t > 0.0 and not downed and stun_t <= 0.0:
 			# the lunge curves to follow your aim
-			roll_dir = roll_dir.slerp(aim_dir(), minf(1.0, dt * 6.0)).normalized()
+			roll_dir = roll_dir.slerp(aim_dir(), 1.0 - exp(-6.32 * dt)).normalized()     # (10% a 60 Hz step)
 		else:
 			var st: Dictionary = strike_at_end
 			strike_at_end = {}
@@ -2184,7 +2184,7 @@ func _physics(dt: float) -> void:
 	elif roll_t > 0.0 and not grounded and not dropping and not roll_falls:
 		vel.y = ak.dash_vy(dt) if ak else 0.0          # an air dash holds your height (a skate sinks)
 	elif not grounded:
-		vel.y = maxf(vel.y - H_GRAV * dt, -HunterMove.fall_cap(self))
+		HunterMove.fall(self, dt)
 	# a person walks straight off an island's edge and falls (then the glider and the abyss rules
 	# take over); only bots keep an edge guard, so walking can't carry one into the abyss by accident
 	var guard := ctrl == "bot" and grounded and roll_t <= 0.0 and hv.length() <= spd * 1.25

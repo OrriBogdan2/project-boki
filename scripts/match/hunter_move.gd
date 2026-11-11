@@ -167,6 +167,14 @@ static func slide_speed(dist: float, to_speed := 0.0) -> float:
 			hi = mid
 	return hi
 
+## Gravity for a step in the air, capped at fall_cap. The step moves at its mean vertical speed (the half of
+## the speed change the position integration in Hunter._physics misses is added here), so a jump's apex and
+## a fall's depth are the same at any step size.
+static func fall(h: Hunter, dt: float) -> void:
+	var vy := maxf(h.vel.y - Hunter.H_GRAV * dt, -fall_cap(h))
+	h.pos.y += 0.5 * (h.vel.y - vy) * dt
+	h.vel.y = vy
+
 ## The fastest this hunter falls (m/s): fall_max, easing to abyss_fall_max as it sinks from
 ## abyss_slow_from to abyss_slow_to metres under an island's lip over the abyss (time to recover). A kit's
 ## plunge (ArchKit.dive_speed, like Breah's air Quakefall) outruns it.
