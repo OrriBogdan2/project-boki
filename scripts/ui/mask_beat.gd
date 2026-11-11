@@ -9,10 +9,11 @@ extends Node
 ##   5. the snap back: a deep impact, a ripple of light and a small camera push (no shake); with `swap` you stand
 ##      as the Hunter (Unmasked.blend) in a brief pose; their name and title on screen
 ##   6. the music comes back under a sting in the Hunter's key
-## It plays through its own camera (the scene's own is current again after). Once a player has seen one
-## (Save.d.tutorial.mask_seen) interact or Esc skips it. `done` gets the body standing there at the end: the
-## Hunter's model with `swap`, else the body you had (on the farm you stay yourself). `short` is the quicker
-## cut for a later Mask.
+## It plays through its own camera (the scene's own is current again after). Its text (the whisper, the name)
+## stays up for at least read_s. A click (or interact) moves on to the next beat; once a player has seen one
+## (Save.d.tutorial.mask_seen), holding it for HOLD_SKIP_S or Esc skips the rest. `done` gets the body standing
+## there at the end: the Hunter's model with `swap`, else the body you had (on the farm you stay yourself).
+## `short` is the quicker cut for a later Mask.
 ##
 ##   MaskBeat.play(relic, you, func(body): ..., true)
 
@@ -27,6 +28,9 @@ const POSE_S := 0.6            # s: the Hunter's cast pose (HunterAnim's "ult" c
 const NAME_IN_S := 0.35        # s after the snap that the name comes in
 const STING_AT_S := 0.25       # s after the snap that the sting starts
 const HAND_BACK_S := 0.5       # s at the end that the camera eases back to the scene's own
+const READ_MIN_S := 2.5        # s: the least a line of the beat's text (whisper, name) stays on screen
+const READ_PER_CHAR_S := 0.06  # s per character, for a line too long to read in READ_MIN_S
+const HOLD_SKIP_S := 1.0       # s of holding a click or interact that skips the rest (DECISIONS 11-11)
 const SOUNDS := {               # our own (tools/gen_mask_sfx.py), loaded with the script so the beat starts at once
 	"mask_swell": preload("res://audio/mask_swell.wav"),
 	"mask_heart": preload("res://audio/mask_heart.wav"),
@@ -51,6 +55,10 @@ var whisper_line: Label
 var name_box: Control
 var skip_hint: Control
 var _times: Dictionary
+var _memory_lens: Array        # s per memory frame: the rules' lengths, stretched so the whisper can be read
+var _reveal_s := 0.0           # s of the reveal: the rules' length, or long enough to read the name
+var _held_at := -1.0           # s (on _clock) the current click or interact went down; -1 when none is held
+var _clock := 0.0              # s since the beat began
 var _rules: Dictionary
 var _was_cam: Camera3D
 var _from: Transform3D         # the scene camera where the beat took over
@@ -88,6 +96,10 @@ static func seen() -> bool:
 func _ready() -> void:
 	_rules = Content.rules(RULES)
 	_times = _rules["short" if short else "full"]
+	var lens: Array = _times["memory_s"]
+	var stretch := maxf(1.0, read_s(_whisper()) / float(lens.reduce(func(a, b): return a + float(b), 0.0)))
+	_memory_lens = lens.map(func(s): return float(s) * stretch)
+	_reveal_s = maxf(float(_times["reveal_s"]), NAME_IN_S + read_s(HunterViewer.display_name(id)))
 	_head = (body.get_node("Rig/Torso/HeadPivot") as Node3D).global_position
 	_front = Vector3(-body.global_basis.z.x, 0.0, -body.global_basis.z.z).normalized()      # (the farm leans you)
 	_mask_from = mask.global_position
@@ -101,7 +113,19 @@ func _ready() -> void:
 	WardenGlb.fetch(id)
 	_swell = _player("mask_swell", -6.0)
 	_heart = _player("mask_heart", -2.0)
-	_swell.play()
+	var swell_lead := float(_times["build_s"]) + float(_times["rise_s"]) - _swell.stream.get_length()
+	get_tree().create_timer(maxf(0.0, swell_lead)).timeout.connect(_start_swell)      # (it peaks at contact)
+
+## How long a line of text has to stay on screen to be read.
+static func read_s(text: String) -> float:
+	return maxf(READ_MIN_S, READ_PER_CHAR_S * text.length())
+
+func _whisper() -> String:
+	return String((_rules["whispers"] as Dictionary).get(id, ""))
+
+func _start_swell() -> void:
+	if phase in ["build", "rise"]:
+		_swell.play()
 
 func _take_camera() -> void:
 	_was_cam = get_viewport().get_camera_3d()
@@ -143,7 +167,7 @@ func _build_ui() -> void:
 	ui.add_child(whisper_line)
 	if seen():
 		var key := Settings.key_cap("interact")
-		skip_hint = UI.label("%s  Skip" % key, 13, Color(1, 1, 1, 0.55))
+		skip_hint = UI.label("Click  Next   ·   Hold %s  Skip" % key, 13, Color(1, 1, 1, 0.55))
 		skip_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
 		skip_hint.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 		skip_hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -180,7 +204,7 @@ void fragment() {
 ## The world goes quiet: the music ducks for the whole beat, the ambience fades (its bus comes back at the end).
 func _quiet() -> void:
 	var total := float(_times["build_s"]) + float(_times["rise_s"]) + float(_times["black_s"])
-	for s in _times["memory_s"]:
+	for s in _memory_lens:
 		total += float(s)
 	Sfx.duck(total, float(_rules["music_duck_db"]))
 	var amb := AudioServer.get_bus_index("Ambience")
@@ -199,6 +223,12 @@ func _player(sound: String, db: float) -> AudioStreamPlayer:
 # ------------------------------------------------------------------ the beat
 func _process(dt: float) -> void:
 	t += dt
+	_clock += dt
+	if _held_at >= 0.0 and not _holding():
+		_held_at = -1.0
+	elif _held_at >= 0.0 and _clock - _held_at >= HOLD_SKIP_S and seen():
+		skip_now()
+		return
 	match phase:
 		"build":
 			_build_up(dt)
@@ -287,7 +317,7 @@ func _become_hunter() -> void:
 
 ## The fallen Hunter in the black: a few quick frames of their painted art, and their whisper.
 func _memories() -> void:
-	var lens: Array = _times["memory_s"]
+	var lens: Array = _memory_lens
 	var at := 0.0
 	var i := 0
 	while i < lens.size() and t >= at + float(lens[i]):
@@ -314,7 +344,7 @@ func _show_memory(i: int) -> void:
 	if i == 0:
 		var p := _player("mask_whisper", -4.0)
 		p.play()
-		whisper_line.text = String((_rules["whispers"] as Dictionary).get(id, ""))
+		whisper_line.text = _whisper()
 		create_tween().tween_property(whisper_line, "modulate:a", 0.85, 0.2)
 
 ## Back in the world, all at once: the impact, a flash and a ripple of light, the camera pushed in a little.
@@ -342,7 +372,7 @@ func _reveal(dt: float) -> void:
 	var punch := float(_rules["punch_fov"]) * (1.0 - smoothstep(0.0, 0.5, t))
 	cam.fov = _fov - punch
 	_ease_camera(float(_times["push_in"]) * lerpf(1.0, 0.7, smoothstep(0.0, 0.8, t)))
-	var back := smoothstep(float(_times["reveal_s"]) - HAND_BACK_S, float(_times["reveal_s"]), t)
+	var back := smoothstep(_reveal_s - HAND_BACK_S, _reveal_s, t)
 	if back > 0.0 and is_instance_valid(_was_cam):
 		cam.global_transform = cam.global_transform.interpolate_with(_was_cam.global_transform, back)
 	if _anim and is_instance_valid(body):
@@ -355,7 +385,7 @@ func _reveal(dt: float) -> void:
 		var sting := _player("mask_sting", -2.0)
 		sting.pitch_scale = pow(2.0, semis / 12.0)
 		sting.play()
-	if t >= float(_times["reveal_s"]):
+	if t >= _reveal_s:
 		_finish()
 
 ## "Vex, the Hired Gun" across the lower screen, in the Hunter's colour.
@@ -386,10 +416,32 @@ func _restore_ambience() -> void:
 		create_tween().tween_method(func(v: float): AudioServer.set_bus_volume_db(amb, v), from, _amb_db, 1.0)
 
 func _unhandled_input(event: InputEvent) -> void:
-	var skip := event.is_action_pressed("interact") or event.is_action_pressed("ui_cancel")
-	if skip and seen() and phase != "done":
+	if phase == "done":
+		return
+	var click: bool = event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT
+	if click or event.is_action_pressed("interact") or event.is_action_pressed("ui_accept"):
+		get_viewport().set_input_as_handled()
+		_held_at = _clock
+		next_beat()
+	elif event.is_action_pressed("ui_cancel") and seen():
 		get_viewport().set_input_as_handled()
 		skip_now()
+
+func _holding() -> bool:
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_action_pressed("interact") \
+			or Input.is_action_pressed("ui_accept")
+
+## A click: on to the next beat (the Mask's approach cuts to the black; a line of text goes early).
+func next_beat() -> void:
+	match phase:
+		"build", "rise":
+			_contact()
+		"black":
+			_next("memory")
+		"memory":
+			_snap_back()
+		"reveal":
+			_finish()
 
 ## Jumps to the end (the Hunter on, the scene's camera back).
 func skip_now() -> void:

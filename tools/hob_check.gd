@@ -195,9 +195,9 @@ func _offer() -> void:
 	ok(beats.size() == 1 and (beats[0] as MaskBeat).short and home.panel_open == HobTalk.TALK,
 			"the short Mask moment plays (you stand still)")
 	await _shot("hob_7_mask_moment", 1.0)
-	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 6.0)
+	await _wait(func(): return (beats[0] as MaskBeat).name_box != null, 10.0)
 	await _shot("hob_8_mask_name", 0.3)
-	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 10.0)
+	await _wait(func(): return home.find_children("*", "MaskBeat", true, false).is_empty(), 16.0)
 	await _frames(5)
 	ok(home.panel_open == "" and ClassUnlock.pending_reveal().is_empty()
 			and home.find_children("*", "ClassReveal", true, false).is_empty(),
