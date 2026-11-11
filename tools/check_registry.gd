@@ -161,6 +161,8 @@ const CHECKS := {
 	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
+	"--flinch-layer-check": ["res://tools/flinch_layer_check.gd", "flinch_layer_check", null],      # hit flinch over clips
+	"--flinch-layer-shots": ["res://tools/flinch_layer_shots.gd", "flinch_layer_shots", null],      # the strip (GPU)
 	"--clip-live-check": ["res://tools/clip_live_check.gd", "clip_live_check", null],      # clips in a real match
 	"--extract-board-check": ["res://tools/extract_board_check.gd", "extract_board_check", null],      # the leave beat
 	"--clip-live-sable-check": ["res://tools/clip_live_sable_check.gd", "clip_live_sable_check", null],
