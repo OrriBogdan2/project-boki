@@ -97,12 +97,6 @@ func combo_marks(out: Array) -> void:
 			var n := int(sp["n"])
 			out.append(RecastCue.mark(sp["e"], n, float(sp["t"]), float(rd["dur"]), "SPARKS", n >= int(rd["max"])))
 
-## X again in the hang brings her down at the cursor (she comes down by herself when the hover runs out).
-func recast_window() -> Dictionary:
-	if ult.phase() != MageUlt.AIR:
-		return {}
-	return {"slot": "x", "left": float(ult.data()["hover"]) - float(ult.leap["t"])}
-
 func recast_left() -> float: return ult.recast_left()
 func recast_slot() -> String: return "x"
 
