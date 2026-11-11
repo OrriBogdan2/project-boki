@@ -358,9 +358,9 @@ func _tick_swap(dt: float) -> void:
 	var p := cast_at.lerp(land, u) + Vector3(0, 1.2 + lift, 0)
 	KitLooks.of(m).hold_on("os_star", "star", h, p, TRADE_LOOK_K)
 	# a violet trail and dark void wisps off the lantern, and wisps curling off his hem while he hovers
-	m.fx.burst(p, Color(TRADE_COL, 0.8), 1, 0.8, 0.35, 0.0, 1.1 * TRADE_LOOK_K)
-	m.fx.burst(p, SMOKE, 1, 0.6, 0.6, -1.0, 1.6 * TRADE_LOOK_K)
-	m.fx.burst(from + Vector3(0, 0.3, 0), SMOKE, 1, 0.9, 0.6, -2.0, 1.4 * TRADE_LOOK_K)
+	m.fx.debris(p, Color(TRADE_COL, 0.8), 1, 0.8, 0.35, 0.0, 1.1 * TRADE_LOOK_K)
+	m.fx.debris(p, SMOKE, 1, 0.6, 0.6, -1.0, 1.6 * TRADE_LOOK_K)
+	m.fx.debris(from + Vector3(0, 0.3, 0), SMOKE, 1, 0.9, 0.6, -2.0, 1.4 * TRADE_LOOK_K)
 	var r := float(dd["radius"])
 	var ends := {"a": from, "b": land, "r": r, "fill": u, "all": true, "col": TRADE_COL, "col2": TRADE_EDGE}
 	AimKit.swap(h, "swap_fly", ends)

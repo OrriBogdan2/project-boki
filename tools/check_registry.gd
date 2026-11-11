@@ -165,6 +165,7 @@ const CHECKS := {
 	"--cam-framing-shots": ["res://tools/cam_framing_check.gd", "cam_framing_check", "shots"],
 	"--camera-frame-check": ["res://tools/camera_frame_check.gd", "camera_frame_check", "check"],
 	"--camera-frame-shots": ["res://tools/camera_frame_check.gd", "camera_frame_check", "shots"],
+	"--move-fx-check": ["res://tools/move_fx_check.gd", "move_fx_check", null],      # no ring/disc/burst on movement
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
