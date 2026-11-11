@@ -233,20 +233,20 @@ func _session(main: Node) -> void:
 		R._update_bounties()
 		ok(not rival.has_meta("bounty"), "no new bounty right after one is claimed (%.0f s cooldown)" % Rolling.BOUNTY_CD)
 		m.revive_hunter(rival, rival)
-	# ---- cleared camps come back
-	var cp_i := -1
-	for i in R.camps.size():
-		var cp: Dictionary = R.camps[i]
-		var near := m.hunters.any(func(h): return not h.out and not h.extracted and Vector2(h.pos.x - cp["pos"].x, h.pos.z - cp["pos"].z).length() < 24.0)
-		if not near: cp_i = i; break
-	ok(R.camps.size() > 0 and cp_i >= 0, "monster camps are tracked (%d)" % R.camps.size())
-	if cp_i >= 0:
-		var cp2: Dictionary = R.camps[cp_i]
-		for mb in cp2["mobs"]: mb.dead = true; mb.hp = 0.0
-		cp2["cleared_at"] = m.time - Rolling.CAMP_RESPAWN - 1.0
-		var n0 := int(R.stats["camp_respawns"])
-		R._camp_respawns()
-		ok(int(R.stats["camp_respawns"]) >= n0 + 1 and (cp2["mobs"] as Array).all(func(mb): return not mb.dead), "a cleared camp comes back after %d s with nobody near" % int(Rolling.CAMP_RESPAWN))
+	# ---- cleared camps come back (Camps keeps the timers; a rolling session refills unnamed camps too)
+	var live: Array = m.camps.list.filter(func(c): return c["up"] and float(c["respawn"]) > 0.0) if m.camps else []
+	ok(not live.is_empty(), "monster camps are tracked and come back (%d)" % live.size())
+	if not live.is_empty():
+		var cp2: Dictionary = live[0]
+		for mb in cp2["mobs"]:
+			mb.dead = true
+			mb.hp = 0.0
+		var n0 := m.camps.refills
+		m.camps.tick(Camps.PASS_T)
+		cp2["cleared_at"] = m.time - float(cp2["respawn"]) - 1.0
+		m.camps.tick(Camps.PASS_T)
+		var back: bool = m.camps.refills == n0 + 1 and (cp2["mobs"] as Array).all(func(mb): return not mb.dead)
+		ok(back, "a cleared camp comes back after its %d s" % int(cp2["respawn"]))
 	ok(R.next_meteor(0.0) < m.length and R.next_meteor(0.0) > 0.0, "meteor showers keep coming through the session (next at %s)" % Rolling.fmt(m.sess_t0 + R.next_meteor(0.0)))
 	# ---- no new squads in the last 8 minutes
 	var flying0 := m.ships.size()

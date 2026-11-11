@@ -327,6 +327,7 @@ const CHECKS := {
 	"--depth-cue-check": ["res://tools/depth_cue_check.gd", "depth_cue_check", null],
 	"--depth-shots": ["res://tools/depth_shots.gd", "depth_shots", null],      # --shots-dir=<dir> [--seed=N]
 	"--minimap-check": ["res://tools/minimap_check.gd", "minimap_check", null],      # MapDetail: default vs hold
+	"--camps-check": ["res://tools/camps_check.gd", "camps_check", null],      # Camps: fixed camps, boss wake times
 	"--train-map-check": ["res://tools/train_map_check.gd", "train_map_check", null],      # TrainMap
 	"--train-map-shots": ["res://tools/train_map_shots.gd", "train_map_shots", null],      # --shots-dir=<dir>
 	"--minimap-shots": ["res://tools/minimap_shots.gd", "minimap_shots", null],      # --shots-dir=<dir>
