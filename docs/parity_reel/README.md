@@ -29,10 +29,10 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 - Re-render one: `jobq submit --needs gpu --tree <tree> --out shots -- --parity-reel --shots-dir=shots
   --reel-hero=<id>`, then `ffmpeg -framerate 30 -i shots/frames/%05d.jpg -c:v libx264 -crf 30 -pix_fmt yuv420p
   <id>.mp4` (`tools/parity_reel.gd`, built on `tools/hero_vfx_reel.gd`; `--reel-only=<part>` plays one part).
-- The R segment of each MP4 is spliced from a second render of just that part (the first render pressed R through
-  the wrong key path); the timeline above is unchanged.
+- The R segment of the first six MP4s is spliced from a second render of just that part (the first render pressed R
+  through the wrong key path); the timeline above is unchanged. The four slice Wardens' reels are one render each.
 
-## Shared by all six
+## Shared by all ten
 
 - **Cooldown pace:** 0.48x to 1.0x of the source's, per kit (KIT_PARITY gap 10, still open, owner call). Numbers per
   Hunter below.
@@ -144,3 +144,105 @@ Still differs:
 Seen in the reel: the Brimseed is popped at 1.8 s by the reel's recast, so its full growth (the footage's
 room-sized violet globe) is not shown; the Nightwell tell is a pale-cyan disc where the footage's vortex is a
 violet swirl [F].
+
+# The four slice Wardens (main 88b06b9e7, 2026-11-11)
+
+Rendered from `ext/parity-reel-slice4` (main 88b06b9e7, docs only) with the command above. The MP4s here are the
+xvfb opengl3 render on rpc5 (same tool, camera and timeline); the GPU jobs 20261111-191900-30189 (Vex),
+-191911-32717 (Kael), -191919-05384 (Lace) and -191933-26636 (Cinder) were still queued (59 deep) when this was
+written. The lists start from `docs/KIT_PARITY.md` and `docs/heroes/<id>.md`, re-read against main's data; the
+footage was checked through the key-frame captions in `briefs/hero-ref/{venator,juggernaut,pin,linwick}.md`, since
+the frames themselves (`/home/claude/svvid`, `/home/claude/hero-ref`) are not on rpc5.
+
+**Owner-direct 11-11 branches not in main** (none of the four is merged, so these reels show the kits before them):
+- `ext/vex-rmb-1111` a796f3a38: the Burr Charge lane's end is a dud on the ground or in the air; only a wall cone.
+- `ext/kael-owner-1111` 4cb48148d: tap RMB is a locked 4.3 x 0.72 lane, no Chain Lunge, hold has no lane or ring,
+  Meteor Drop centred under him. Based on ext/release-integ-0245, not main.
+- `ext/lace-1111` cf1adae16: Heavy Shot from the bow mouth, no feet crescent, roll 3.375 m, crimson kit colours,
+  red laces for Hail Wall. Based on ext/release-integ-0245, not main.
+- `ext/albert-hold-cinder-orb` 4cf2f22b4: Cinder's cyan palm orb becomes a gold/white tell in the 0.2 s spool only.
+
+**Reel-tool suggestions** (all four reels): the Training Grounds now opens a kit drill, so its card ("1/5, Skip
+drill") sits under the reel title for the whole reel; and the 12 m dummy of the travel parts stands past the island
+rim, so both dash parts end with the Hunter sliding off into the void (pink fall screen). `tools/parity_reel.gd`
+could skip the drill and place the far dummy on the island.
+
+**KIT_PARITY rows now stale on main:** Kael's animation (gap 1) is closed: `kael.glb` has 49 clips and
+  `warden_anim/kael.json` exists. Lace's Focus/Deadeye (gap 5) is gone (Hawk Sense only), and her Heavy Shot wall
+  payoff (gap 6) is `wall_mult` 4.94. Lace and Cinder's dash to LMB rows are `fire` now; Kael's ground and air rows
+  still `buffer`.
+
+## Vex the Hired Gun (`gunslinger`, source Ghost)
+[gunslinger.mp4](gunslinger.mp4)
+
+Still differs:
+- RMB Burr Charge: a launcher shot on the press along a fixed 10.5 m lane, no hold lane, no throw (owner item
+  112); the source throws a sticky grenade along a held lane [F 0039]. On main a lane's end with no foe or wall
+  still sticks and blows the cone (the "always procs in the air" bug); `ext/vex-rmb-1111` makes it a dud.
+- Cooldowns at rank 1: RMB 6.5 s vs 9 [D] / 5.4 [F], Slipstep 8.5 vs 11.5 / 7.5, Longneedle 11.5 vs 12 / 10,
+  Cinderfall 42 vs 55 (gap 10, owner call).
+- Cinderfall's burn lasts 3 s; the footage's zone ticks about 4 s [F 0245].
+- The Coin Blast rename and coin look (DECISIONS 11-08) are not built.
+- Her light is ember orange (our palette); the source's is green and cyan with a purple slide trail [F 0118].
+
+Seen in the reel: the rifle hits the dummy from 7 m; RMB is a red tracer to the dummy, which reads DAZED with a gold
+pip; Longneedle is a long orange line through the rock and past the frame, like the footage's beam through terrain
+[F 0182] but thin, with none of its green-white thickness or smoke ring [F 0170]; Cinderfall shoots a light column
+up, then a ticked orange disc and a burning patch with SLOWED, the footage's beats [F 0197, 0203]; the slide shows
+a pale ring at her feet for a few frames at the start, which the owner's "no rings on dashes" rule (gunslinger.md row 10)
+says should not be there: worth a look.
+
+## Kael the Unbroken (`juggernaut`, source Brall)
+[juggernaut.mp4](juggernaut.mp4)
+
+Still differs:
+- RMB on main: the tap slam is a ring round him and the hold is the forward lunge pose with its lane; the
+  owner's 11-11 playtest (`ext/kael-owner-1111`) wants a locked lane strike, the hold with no lane or ring (blade
+  over the head), no Chain Lunge and the Meteor Drop circle under him.
+- Dash: 4.5 m raw, felt 3.8 m / 0.2 s with a 0.07 s dip, 2 charges, cd 10.4 vs 13 (owner 113.8); the source has 3
+  Quick Dash charges [F summary_screen].
+- Dash to LMB: ground and air rows `buffer` (gap 9, item 51 says combine).
+- Warchain: tether 24 m is ours; the source's throw is about 12.6 m and the leash is unknown `[?]`. Cd 12.8 vs 16.
+- Riposte: the kill reset is `[?]`; cd 36 vs 45. RMB cd 2.0 vs 2.5, air drop 7.2 vs 9.
+- His glow is white-hot (owner); the source's is hot red.
+
+Seen in the reel: the LMB hold lays a long gold lane to the dummy (the source shows a white arc round him [F
+0087]); the tap slam is an orange ring; the chain is a thin dotted line and the dummy reads CHAINED, where the
+footage's is a thick wavy orange chain [F 0304]; Riposte's guard shows a gold strike rectangle like the footage's
+[F 0435], but with no attacker the reel never shows the cleave or the green heal; the air dash puts a wide grey disc
+round him.
+
+## Lace the Red Stitch (`archer`, source Myth)
+[archer.mp4](archer.mp4)
+
+Still differs:
+- Heavy Shot: on main a magenta ring sits at her feet while she draws; `ext/lace-1111` starts the shot at the bow
+  mouth and drops the ring. Wall x4.94, 1.2 s stun. Her card says push 6 to 12 but the data's `push` is 8 to 12
+  (card text to fix).
+- Shift: a 3.0 m / 0.27 s roll, then Spirit Walk through rocks, trees and barriers; raised walls and ledge faces
+  are still on unmerged `ext/lace-phasewalk-verify` (gap 8). `ext/lace-1111` makes the roll 3.375 m.
+- Passive: Hawk Sense 22 m only; the source's tall-ledge climb is not built.
+- Her kit colours on main are violet/magenta; the owner's 11-11 crimson (d41e2e) is on `ext/lace-1111`.
+- 8 of her 17 dash flow rows are unsourced `[?]`.
+
+Seen in the reel: the draw's white line runs to the cursor ring like the footage [F 0102 to 0105]; Heavy Shot
+shoves the dummy most of the way to the rim, with no big white impact burst [F 0270, 0273]; Hail Wall is a pale
+curved band with violet panels at the cursor distance, the footage's curved arc [F 0457] but where the owner now
+wants red laces; R's shots are long violet lines past the dummy, like Supercharged running to max range [F 0168];
+the roll shows no dark-blue Spirit Walk tint [F 0360].
+
+## Cinder the Flame Queen (`ashwick`, source Felix)
+[ashwick.mp4](ashwick.mp4)
+
+Still differs:
+- The cyan pilot (#6fe8ff) burns in her palm all the time, idle too: a footage carry-over [F 0021, one frame
+  before the fire]; `ext/albert-hold-cinder-orb` shows it gold/white only in the 0.2 s spool-up.
+- Furnace Cloak (E): instant pull, r 4.5, 14 m/s, no 0.2 s arm-fling ring (owner item 11); cd 10.5 vs 13.
+- Cooldowns: Cinder Shot 7 vs 9, Flue Flight 36 vs 45 (0.78x to 0.8x).
+- During Flue Flight only E works (owner, Nov 5); the source allows more.
+
+Seen in the reel: the cyan orb is in her palm from the first frame; the hose is a narrow-then-billowing orange stream
+like the footage [F 0024]; the RMB aim is a white lane with an arrow tip and the bolt hits with FLASHOVER and an
+orange sunburst [F 0077]; the Cloak is a crackle of yellow sparks round her and the dummy, not the footage's
+swirling shield ring [F 0186]; Flue Flight lays a thick orange fire carpet and carries the dummy with her to the
+island rim, close to the footage's wide magma band [F 0226].
