@@ -1048,7 +1048,7 @@ func update(dt: float, s: Dictionary) -> void:
 	torso.scale = Vector3(1.0 - tb * 0.006, 1.0 + tb * 0.012, 1.0 - tb * 0.006)
 	# aiming across terraces: the spine takes its share (not in `pitch`: the gun rides it), the arms the rest in _upper
 	var aim_w := maxf(maxf(aim_k, cast_k), 0.0 if km.is_empty() else 1.0)
-	aim_w *= 1.0 - maxf(maxf(maxf(dash_k, glide_k), maxf(dive_k, down_k)), maxf(maxf(ledge_k, roll_k), tuck))
+	aim_w *= 1.0 - maxf(maxf(maxf(dash_k, glide_k), dive_k), maxf(maxf(ledge_k, roll_k), tuck))
 	aim_pitch = _ease(aim_pitch, float(s.get("aim_pitch", 0.0)) * aim_w, 10.0, dt)
 	model.set_meta(WardenAim.PITCH, aim_pitch)
 	torso.rotation = Vector3(pitch + dz + aim_pitch * AimPitch.SPINE, yaw, roll)
