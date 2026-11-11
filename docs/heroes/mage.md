@@ -12,10 +12,11 @@ coils at both wrists and a copper rod mast flying a pennant. Palette: teal and h
   (the ultimate's line is `card.x`; the kit card's last tile shows it on the hunter-ultimate key).
 
 ## Scaling
-Source health is roughly 8 to 10 times ours (Light = 124 HP). Ratios kept against the basic attack:
-bolt 12 every 0.648s (item 116; about 18.5 dps, unchanged from before); Storm Rod 18 to 30 (1.5 to 2.5 bolts; the
-source is about 4, held lower because the rod also stuns and leaves an orb); Skycall 20 (source 2.5
-bolts, ours 1.7); Wirerun pass 10, doubled through a full-Static foe, plus a Blowout of 16 + 18% of
+Damage is the source's share of the standard target (1285 source HP, 154 ours; docs/TTK.md, pinned in
+content/rules/kit_parity.json): bolt 9 every 0.648s (the cadence is owner items 70 and 116; 90 every 0.8 s is
+8.75% of the target a second, 9 every 0.648 s is 9.0%); Storm Rod 16 to 26.7 (Voltaic Spear 133, read as the
+uncharged throw; the full hold keeps our 5:3); Skycall 19.4 (Lightning Strike 162); Wirerun pass 18.3 (Surge 153),
+doubled through a full-Static foe, plus a Blowout of 16 + 18% of
 their health (about 5.7 bolts on a Light; the source detonation is about 9). Cooldowns follow the
 source ratio spear : Surge : javelin = 7 : 6.7 : 9.2, at our pace 8 : 8 : 10.5. Kitefall (the source's
 landing is 40 + 22%, seen at about 115, so about 1 bolt at our scale; it is held at 22, 1.8 bolts, because

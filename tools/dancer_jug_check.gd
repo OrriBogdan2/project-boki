@@ -252,7 +252,7 @@ func thief(a) -> void:
 	A.step(m, 0.6)
 	A.ok("dancer RMB: Bola grounds the first, flies on, tangles two (stun)",
 			K.bola_pairs == 1 and KitStatus.grounded(T) and KitStatus.grounded(T2) and T.stun_t > 0.0
-			and T2.stun_t > 0.0 and A.dmg(T) >= 15.0,
+			and T2.stun_t > 0.0 and A.dmg(T) >= 9.0,
 		"pairs %d grounded %s/%s stun %.2f/%.2f dmg %.0f" % [K.bola_pairs, KitStatus.grounded(T),
 				KitStatus.grounded(T2), T.stun_t, T2.stun_t, A.dmg(T)])
 	A.ok("dancer RMB: yellow binding rings on the Grounded (everyone sees them)",
