@@ -636,7 +636,7 @@ func _tick_outpost(x: Dictionary, dt: float) -> void:
 			var seat: bool = x.get("seat", false)      # the Uplink seat: its lift is the finishing squad's alone
 			var rode := false
 			for h in m.hunters:
-				var at_lift: bool = _live(h) and not h.remote and in_lift(x, h)
+				var at_lift: bool = _live(h) and not h.remote and in_lift(h, x)
 				if at_lift and (not seat or h.team == int(x["team"])):
 					m._extract(h, "uplink", x["name"])
 					rode = true
@@ -716,7 +716,7 @@ func _show_outpost(x: Dictionary, n: Node3D) -> void:
 	var charging: bool = x["state"] == "charging"
 	OutpostLook.rings(n, near or x["contested"], x["contested"], charging, float(x["prog"]))
 
-func in_lift(x: Dictionary, h: Hunter) -> bool:
+func in_lift(h: Hunter, x: Dictionary) -> bool:
 	var p: Vector3 = x["pos"]
 	return h.flat_dist(p) < LIFT_R and absf(h.pos.y - p.y) < 1.5
 

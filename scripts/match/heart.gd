@@ -345,7 +345,7 @@ func _leave(seat: String, team: int) -> void:
 	for h in m.hunters:
 		if h.team != team or h.remote or h.out or h.extracted:
 			continue
-		if at_seat(seat, h):
+		if at_seat(h, seat):
 			m._extract(h, seat, seat_name(seat))
 	if m.exits and m.exits.one_seat:
 		var at := site if seat == HOW_FINAL else gate
@@ -359,7 +359,7 @@ func seat_name(seat: String) -> String:
 	return "the Heart" if seat == HOW_FINAL else "Heart Gate"
 
 ## Is this Hunter in the seat: inside the ring, or within gate_take_r of the Gate.
-func at_seat(seat: String, h: Hunter) -> bool:
+func at_seat(h: Hunter, seat: String) -> bool:
 	return in_ring(h) if seat == HOW_FINAL else h.flat_dist(gate) <= r("gate_take_r")
 
 # ------------------------------------------------------------------ taking the spark, dropping it

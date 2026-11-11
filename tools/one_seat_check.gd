@@ -94,4 +94,30 @@ func check(main: Node, fresh: Callable, run: Callable, done: Callable) -> bool:
 	say(far.extracted and m.exits.seats.uplink.refused == 0, "they step in and ride it out")
 	done.call(m)
 	await main.get_tree().process_frame
+	# the Sealed Lair: the winners fly out, the third gets the same clock and leaves by the lair's updraft in time
+	m = fresh.call(3)
+	P = m.player
+	var lair_mates: Array = m.hunters.filter(func(h): return h.team == P.team and h != P)
+	far = lair_mates[1]
+	run.call(m, 0.1)
+	var K: QuestSeat = m.exits.seats.lair
+	say(K != null, "the match has a Sealed Lair seat (%d lairs)" % m.lairs.list.size())
+	if K == null:
+		done.call(m)
+		return ok
+	var L: Dictionary = K.ref
+	K.state = QuestSeat.S.TAKEN
+	K.team = P.team
+	K.out = true
+	P.teleport(L["up"])
+	lair_mates[0].teleport(L["up"])
+	far.teleport(L["up"] + Vector3(40.0, 0, 0))
+	m.exits.seats._apply(K)
+	say(P.extracted and lair_mates[0].extracted and not far.extracted and m.exits.one_seat.late.has(far),
+		"the Lair takes the two in it; the third is on the clock")
+	far.teleport(L["up"])
+	run.call(m, 0.3)
+	say(far.extracted and String(m.exits.one_seat.used.get(P.team, "")) == QuestSeats.HOW_LAIR, "they reach the updraft in time and leave by it")
+	done.call(m)
+	await main.get_tree().process_frame
 	return ok

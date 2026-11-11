@@ -205,12 +205,12 @@ func _apply(s: QuestSeat) -> void:
 func _leave_lair(s: QuestSeat) -> void:
 	var L: Dictionary = s.ref
 	for h in m.hunters:
-		if h.team == s.team and not h.remote and not h.out and not h.extracted and at_lair(L, h):
+		if h.team == s.team and not h.remote and not h.out and not h.extracted and at_lair(h, L):
 			m._extract(h, HOW_LAIR, String(L["name"]))
 	m.exits.one_seat.taken(HOW_LAIR, s.team, String(L["name"]), Lairs.color_of(L), L["up"], at_lair.bind(L))
 
 ## In the lair, on its updraft or just thrown out over the wall by it.
-func at_lair(L: Dictionary, h: Hunter) -> bool:
+func at_lair(h: Hunter, L: Dictionary) -> bool:
 	var gone: bool = (L.get("flown", []) as Array).has(h) or (L.get("escaped", []) as Array).has(h)
 	return gone or m.lairs.inside(L, h.pos, 0.5)
 
