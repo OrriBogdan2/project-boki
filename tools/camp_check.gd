@@ -34,7 +34,7 @@ func run(main: Node) -> void:
 	print("CAMP DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
-## [start, direction] of a straight run of open, level-ish ground, or [] if none was found.
+## [start, direction] of a straight run of open, level-ish, bush-free ground, or [] if none was found.
 func _clear_lane() -> Array:
 	var w := m.world
 	for _try in 200:
@@ -46,7 +46,8 @@ func _clear_lane() -> Array:
 			while clear and d <= RUN_M:
 				var p := Vector2(at.x, at.z) + dir * d
 				var level := absf(w.ground_at(p.x, p.y) - at.y) < 1.5
-				clear = level and not w.is_void(p.x, p.y) and not w.is_block(p.x, p.y)
+				var open := not w.is_void(p.x, p.y) and not w.is_block(p.x, p.y) and not w.in_bush(p.x, p.y)
+				clear = level and open      # (no bush: a Hunter in one is hidden from the monster)
 				d += 0.5
 			if clear: return [at, dir]
 	return []
