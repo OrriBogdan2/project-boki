@@ -1,7 +1,8 @@
 extends RefCounted
 ## --perf-bench, owner item 94: a fixed, repeatable load for before/after numbers. A 60 s busy
 ## expedition (6 Hunters in squads of 2 with their Boki, the ash storm, the Blight, outposts and a lair
-## on the map, a fight: two rivals and a monster pack brought to you), then a farm run, the base demo
+## on the map, a fight: two rivals and a monster pack brought to you), then the Heart's final (heart_final: 8
+## squads, 24 Hunters with their Boki, fighting in and around the Heart ring with the Blight close), a farm run, the base demo
 ## (BaseDemo plus two Boki: 6 Boki, toys, snacks, an egg) with a Dash run at BASE_RACE_AT, and a hub run. Every frame is
 ## logged; each part ends with summary lines and the costliest match step sections and meshes, and a
 ## frame over 100 ms and 3x the 30 before it names the nodes that entered the tree in it.
@@ -21,6 +22,12 @@ const SLOW_MS := 50.0               # ms: the DECISIONS 2026-11-08 ceiling for a
 const WARM_S := 3.0                 # s of the base part treated as warm-up
 const SECTION_FRAMES := 120         # frames the base part's step timing samples
 const MOBS := ["skitter", "brute", "spitter", "skitter", "bomber", "skitter"]
+const HEART_SQUADS := 8             # LIMITED_WAY_OUTS.md risk 3: up to 8 squads (24 Hunters) on the Heart's island
+const HEART_NEAR := 2.0             # m from the Heart: the nearest a squad stands (the ring is 6 m)
+const HEART_FAR := 14.0             # m from the Heart: the farthest, still well inside the last tide ring (34 m)
+const BLIGHT_AT := 22.0             # m from the Heart the Blight claws out: past the squads, inside the tide
+const HEART_BLIGHT := ["bl_skitter", "bl_skitter", "bl_warden", "bl_skitter", "bl_skitter", "bl_skitter",
+	"bl_warden", "bl_skitter"]
 
 const BOKI_OUT := 9              # GARDEN.md 10.6: 6 residents + partner + 2 visitors
 const VISITORS := ["zapple", "burrlet", "cindle"]   # species of the Boki past the nav sweep's six
@@ -43,6 +50,7 @@ var vp: RID
 func run(main_node: Node) -> void:
 	setup(main_node)
 	await _match()
+	await _heart_final()
 	await _farm("farm", {})
 	await _base()
 	await _farm("hub", {"zone": GardenZones.HUB})
@@ -70,6 +78,9 @@ func setup(main_node: Node) -> void:
 	main.get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 	vp = main.get_viewport().get_viewport_rid()
 	RenderingServer.viewport_set_measure_render_time(vp, true)
+	main.get_tree().node_added.connect(func(n: Node):
+		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
+		added[k] = int(added.get(k, 0)) + 1)
 	rows.append("part,frame,wall_ms,script_ms,process_ms,hud_ms,render_cpu_ms,gpu_ms,draws,tris,objects,nodes")
 
 func _finish() -> void:
@@ -83,9 +94,35 @@ func _finish() -> void:
 	main.get_tree().quit(1 if failed else 0)
 
 func _match() -> Array:
+	var m := await _start("match", {"teams": 3, "squad": 2, "total": 6, "seed": 4101})
+	return await _play(m, "match", [m.player], _bring_fight, FIGHT_AT)
+
+## LIMITED_WAY_OUTS.md risk 3: the final with HEART_SQUADS squads and their Boki in and around the Heart ring
+## (the tide closed to its last ring) and the Blight clawing out just past them.
+func _heart_final() -> void:
+	var m := await _start("heart_final", {"teams": HEART_SQUADS, "squad": 3, "total": HEART_SQUADS * 3,
+		"seed": 4102})
+	m.time = Heart.r("final_s")      # the ring opens on the Heart's next tick; the tide is at its last ring
+	var site := m.heart.site
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4102
+	for h: Hunter in m.hunters:
+		var a := TAU * (h.team + rng.randf_range(-0.15, 0.15)) / HEART_SQUADS
+		var d := rng.randf_range(HEART_NEAR, HEART_FAR)
+		h.teleport(m.world.free_spot_near(site + Vector3(cos(a), 0, sin(a)) * d, [site], 1.0, 0.45, 6.0))
+		if h.kin:
+			h.kin.teleport(h.pos + Vector3(1.0, 0, 0.7))
+	for i in HEART_BLIGHT.size():
+		var a := TAU * i / HEART_BLIGHT.size()
+		var at: Vector3 = m.world.free_spot_near(site + Vector3(cos(a), 0, sin(a)) * BLIGHT_AT, [], 1.0, 0.5, 8.0)
+		m.blight.spawn(HEART_BLIGHT[i], at, m.blight.level_here(at))
+	await _play(m, "heart_final", m.hunters, Callable(), 0.0)
+
+## Starts an expedition from the bench's base options plus `extra` and waits until it plays.
+func _start(part: String, extra: Dictionary) -> Match:
 	var o := Match.demo_opts()
-	o.merge({"teams": 3, "squad": 2, "total": 6, "raid": "ash", "blight": true, "no_drop": true, "god": true,
-		"autoplay": true, "demo_kin": "cindle", "seed": 4101}, true)
+	o.merge({"raid": "ash", "blight": true, "no_drop": true, "god": true, "autoplay": true, "demo_kin": "cindle"}, true)
+	o.merge(extra, true)
 	o.erase("demo_match")
 	o.erase("fresh_t")
 	Game.goto("match", o)
@@ -101,42 +138,47 @@ func _match() -> Array:
 		steps[mk[1]] = float(steps.get(mk[1], 0.0)) + float(mk[2])
 	var sk := steps.keys()
 	sk.sort_custom(func(a, b): return steps[a] > steps[b])
-	print("BENCH match build (ms): " + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
+	print("BENCH %s build (ms): " % part + ", ".join(sk.slice(0, 6).map(func(k): return "%s %.0f" % [k, steps[k]])))
 	_hook_hud(m)
-	main.get_tree().node_added.connect(func(n: Node):
-		var k := "%s:%s" % [n.get_class(), String(n.name).rstrip("0123456789@")]
-		added[k] = int(added.get(k, 0)) + 1)
+	return m
+
+## Steps the match by hand for `secs` of match time, logging every frame as `part`. Hunters in `keep` stay
+## at full health (the fight must not end the run: "god" stops nothing once a rival stomps you); `stage`
+## runs once at `stage_at` s of match time.
+func _play(m: Match, part: String, keep: Array, stage: Callable, stage_at: float) -> Array:
+	for h: Hunter in keep:
+		h.max_hp *= 20.0
 	Match.prof_on = true
 	Match.prof.clear()
 	var fl: Array = []
 	var last := Time.get_ticks_usec()
-	var fought := false
-	var P: Hunter = m.player
-	P.max_hp *= 20.0      # the fight must not end the run: "god" stops nothing once a rival stomps you
-	while is_instance_valid(m) and m.time < secs:
-		P.hp = P.max_hp
-		if not fought and m.time >= FIGHT_AT:
-			_bring_fight(m)
-			fought = true
+	var end := m.time + secs
+	var staged := not stage.is_valid()
+	while is_instance_valid(m) and m.time < end:
+		for h: Hunter in keep:
+			h.hp = h.max_hp
+		if not staged and m.time >= stage_at:
+			stage.call(m)
+			staged = true
 		var t0 := Time.get_ticks_usec()
 		m.step(DT)
 		m._process(DT)
 		var script_ms := (Time.get_ticks_usec() - t0) / 1000.0
 		await main.get_tree().process_frame
 		var now := Time.get_ticks_usec()
-		fl.append(_frame("match", fl.size(), (now - last) / 1000.0, script_ms))
+		fl.append(_frame(part, fl.size(), (now - last) / 1000.0, script_ms))
 		var wall: float = fl[-1]["wall"]
 		if fl.size() > 30 and wall > HITCH_MS and wall > 3.0 * _avg(fl.slice(-31, -1), "wall"):
 			print("BENCH hitch t=%.2f %.0f ms (script %.1f), new nodes: %s" % [m.time, wall, script_ms,
 				added])
 		added.clear()
 		last = now
-	_summary("match", fl)
+	_summary(part, fl)
 	_emitters()
 	var ks := Match.prof.keys()
 	ks.sort_custom(func(a, b): return Match.prof[a] > Match.prof[b])
 	var per := ks.slice(0, 10).map(func(k): return "%s %.2f" % [k, Match.prof[k] / 1000.0 / fl.size()])
-	print("BENCH match step sections (ms per frame): " + ", ".join(per))
+	print("BENCH %s step sections (ms per frame): " % part + ", ".join(per))
 	_meshes()
 	Match.prof_on = false
 	return fl
