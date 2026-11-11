@@ -760,7 +760,7 @@ func update(dt: float, s: Dictionary) -> void:
 			hr += shuffle_lift * 0.35; kr -= shuffle_lift * 0.7
 	# the Empty: each foot planted where it landed, moving or standing, over these legs
 	if gait != null:
-		gait.step(dt, grounded and not downed, moving, vel, [hl, hr, kl, kr, wl, wr])
+		gait.step(dt, grounded and not s.get("downed", false), moving, vel, [hl, hr, kl, kr, wl, wr])
 		hl = gait.hl
 		hr = gait.hr
 		kl = gait.kl
