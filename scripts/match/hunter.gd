@@ -15,7 +15,6 @@ const JUMP_V := 6.8
 const JUMP_BUFFER := 0.12        # a jump pressed this long before you land goes off as you land (FeelConfig)
 const GROUND_ACCEL := 90.0       # [spec] near-instant: top speed in ~0.055s (was 70)
 const GROUND_SHED := 110.0       # m/s^2, no keys: speed over a run (kit step, knock) sheds this fast
-const GROUND_OVERSPEED := 30.0   # how fast dash or pad speed bleeds off on the ground
 const AIR_ACCEL := 40.0          # a ledge rise steers crisply (a jump steers by HunterMove.air_steer)
 const AIR_DECEL := 9.0           # let go on a ledge rise and you mostly stop
 const AIR_OVERSPEED := 3.0       # but momentum above run speed (a dash, a pad) still carries
@@ -1530,7 +1529,8 @@ func _lunge(dist: float) -> void:
 	# while you're holding a direction)
 	var d2 := aim_dir()
 	var moving := (inp["move"] as Vector2).length() > 0.1
-	var want := sqrt(2.0 * (GROUND_OVERSPEED if moving else GROUND_SHED) * dist * k + (base_speed * base_speed if moving else 0.0))
+	var shed := HunterMove.cap_brake(base_speed, 1.0) if moving else GROUND_SHED
+	var want := sqrt(2.0 * shed * dist * k + (base_speed * base_speed if moving else 0.0))
 	var hv := Vector2(vel.x, vel.z)
 	var along := hv.dot(d2)
 	hv += d2 * (maxf(along, want) - along)
@@ -2217,11 +2217,12 @@ func _physics(dt: float) -> void:
 				in_current = true
 				vel.y = move_toward(vel.y, 9.0, 45.0 * dt)     # (movefeel) grabs you harder (was 30: 0.33s to climb)
 	else:
-		# near-instant on the ground (and in a kit's hover); a jump keeps its run-up
+		# the ground (and a kit's hover): up to the cap at ground_accel, down to it at the walking brake
+		# (a Slow lands, a haste ends, a pad's carry) [game data]; a jump keeps its run-up
 		if grounded or (ak != null and ak.hovering()):
 			var grip: float = m.ground_grip(pos)     # ice in a frost region: you skid instead of stopping
 			if (mv * spd).length() >= 0.001:
-				hv = accel2(hv, mv * spd, ground_accel * grip, 0.0, GROUND_OVERSPEED * grip, dt)
+				hv = accel2(hv, mv * spd, ground_accel * grip, 0.0, HunterMove.cap_brake(cur, grip), dt)
 			else:
 				hv = HunterMove.brake(hv, spd, grip, dt)
 		elif glide_off_t < FEATHER_KEEP and not dropping:

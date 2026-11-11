@@ -58,6 +58,12 @@ static func brake(hv: Vector2, run: float, grip: float, dt: float) -> Vector2:
 		return hv * (maxf(run, s - Hunter.GROUND_SHED * grip * dt) / s)
 	return (hv * maxf(0.0, 1.0 - ground_friction * grip * dt)).move_toward(Vector2.ZERO, brake_decel * grip * dt)
 
+## Shed rate (m/s^2) for speed over the cap while keys are held: UE's walking brake at this speed
+## (brake_decel plus ground_friction x speed), the one rule a Slow landing, a haste ending and a
+## pad's carry all follow. The cap itself steps at once; a 30% Slow on a run settles in ~0.05 s.
+static func cap_brake(speed: float, grip: float) -> float:
+	return (brake_decel + ground_friction * speed) * grip
+
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.
 static func dash_exit(dash_v: Vector2, run: float) -> Vector2:
