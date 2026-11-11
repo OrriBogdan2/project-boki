@@ -16,7 +16,8 @@ extends Node3D
 ##   spear      Shard Snap: a long bundle of dark violet crystal prisms with bright rims
 ## Lingering: aura (Ostra's Swollen sphere), burst and crater (Tarek's slam:
 ## a molten starburst, then a dark red cracked crater), shard (a rock chip flying off an impact), column (the
-## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), dark (the Snap's
+## grown seed's light), mote (a coloured glow at a hand: Tarek's fists, Ostra's charge), fist_charge (Tenzo's Quake
+## Fist hold: a cobalt glow on the gauntlet with stone chips drawn round it, growing with the charge), dark (the Snap's
 ## black wind-up orb), star (the Trade's lobbed, masked lantern).
 ## Colour and darkness are alpha-blended (shade_mat, the void glass); only small hot cores add light, so
 ## nothing washes out to white on bright grass.
@@ -35,8 +36,14 @@ const ORB_HELD_K := 0.5       # charge from which Motley's shot is the void orb,
 const ORB_SMOKE := Color(0.118, 0.078, 0.188, 0.8)   # the void orb's smoke (the UI's #1e1430)
 const ORB_EDGE := Color("ff3fd0")    # the void orb's magenta rim (the UI's Void & Masks neon)
 const SHARD_GRAV := 22.0      # m/s2: rock chips fall a little faster than bodies (they read as heavy)
+const CHIP_FAN := 0.9         # rad either side of a blow's direction its chips fly
 const SIGIL_SEGS := 16        # arc segments in Ostra's rune sigil ring
 const MASK_TILT := 0.58       # rad: the Trade lantern's mask tipped back toward the match camera (pitch 57 deg)
+const FIST_CHIPS := 7         # stone chips circling Tenzo's charging fist at full charge
+const FIST_HALO := Vector2(0.9, 2.6)     # x the halo's 0.2 m radius: as the hold starts, at full charge
+const FIST_ORBIT := Vector2(0.62, 0.34)  # m: the chips' circle round the fist, as the hold starts and at full
+const FIST_SPIN := Vector2(4.0, 11.0)    # rad/s the chips circle, the same
+const FIST_PULSE_HZ := 14.0   # rad/s: a full charge throbs, so "ready" reads apart from "nearly"
 
 var m: Node
 var pools := {}               # kind -> Array[Node3D] (hidden, free)
@@ -125,6 +132,8 @@ func _build(kind: String) -> Node3D:
 		"mote":
 			Models.part(n, Models.sphere(0.2, 12), shade_mat(Color(1, 1, 1, 0.85)), Vector3.ZERO).name = "Halo"
 			Models.part(n, Models.sphere(0.08, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
+		"fist_charge":
+			_build_fist_charge(n)
 		"dark":
 			Models.part(n, Models.sphere(0.22, 16), glass_mat(Color("0a0012"), Color("f2eaff"), 1.0, 1.0), Vector3.ZERO)
 		"star":
@@ -204,6 +213,17 @@ func _build_held_orb(n: Node3D) -> void:
 	hot.render_priority = 1      # always over the glass (same-node alpha sorting flickers in flight)
 	Models.part(orb, Models.sphere(0.09, 8), hot, Vector3(0, 0, -0.12)).name = "Hot"
 	_tail(orb, 0.3, 1.5, ORB_SMOKE)
+
+## Tenzo's Quake Fist charge: an alpha-blended halo round a small hot core and a ring of basalt chips (charge_fist
+## sizes, spins and tightens them).
+func _build_fist_charge(n: Node3D) -> void:
+	Models.part(n, Models.sphere(0.2, 14), shade_mat(Color(1, 1, 1, 0.6)), Vector3.ZERO).name = "Halo"
+	Models.part(n, Models.sphere(0.09, 10), Models.glow_mat(Color(1, 1, 1, 0.9)), Vector3.ZERO).name = "Core"
+	var orbit := Node3D.new()
+	orbit.name = "Orbit"
+	n.add_child(orbit)
+	for i in FIST_CHIPS:
+		Models.part(orbit, lump(0.075), rock_mat(0.35, vis_rng.randf() * 10.0), Vector3.ZERO, Vector3(1.0, 0.75, 1.2))
 
 ## A tapering tail of `col` behind a shot: `w` wide at the shot, `len_` long.
 func _tail(n: Node3D, w: float, len_: float, col: Color) -> void:
@@ -551,6 +571,29 @@ func hold_on(key: String, kind: String, ent: Node3D, at: Vector3, scl := 1.0, co
 		core.set_shader_parameter("color", Color(col.lightened(0.45), 0.9))
 	return n
 
+## Tenzo's charging fist at `at`, charge k 0..1 in `col` (refresh every step): the glow grows and brightens, more
+## chips join the ring as it tightens and spins faster, and a full charge throbs.
+func charge_fist(key: String, ent: Node3D, at: Vector3, k: float, col: Color) -> void:
+	var n := hold_on(key, "fist_charge", ent, at)
+	var t := float(m.time)
+	var throb := 1.0 + (0.12 * sin(t * FIST_PULSE_HZ) if k >= 1.0 else 0.0)
+	var halo := n.get_node("Halo") as MeshInstance3D
+	halo.scale = Vector3.ONE * lerpf(FIST_HALO.x, FIST_HALO.y, k) * throb
+	(halo.material_override as StandardMaterial3D).albedo_color = Color(col, 0.3 + 0.35 * k)
+	var core := n.get_node("Core") as MeshInstance3D
+	core.scale = Vector3.ONE * (1.0 + 1.2 * k) * throb
+	(core.material_override as ShaderMaterial).set_shader_parameter("color", Color(col.lightened(0.55), 0.95))
+	var r := lerpf(FIST_ORBIT.x, FIST_ORBIT.y, k)
+	var spin := t * lerpf(FIST_SPIN.x, FIST_SPIN.y, k)
+	var shown := 2 + int(round(k * (FIST_CHIPS - 2)))
+	var orbit := n.get_node("Orbit")
+	for i in FIST_CHIPS:
+		var chip := orbit.get_child(i) as Node3D
+		chip.visible = i < shown
+		var a := spin + TAU * i / FIST_CHIPS
+		chip.position = Vector3(cos(a) * r, 0.12 * sin(a * 2.0 + float(i)), sin(a) * r)
+		chip.rotation = Vector3(a * 1.3, a, 0.0)
+
 ## Ends a held effect now instead of after KEEP.
 func release(key: String) -> void:
 	if held.has(key):
@@ -569,10 +612,10 @@ func impact(at: Vector3, r: float, k: float, secs := 1.0) -> void:
 	m.fx.ring(at, r, Color(0.62, 0.47, 0.32, 0.95), 0.42)
 	m.fx.burst(at + Vector3(0, 0.25, 0), Color(0.66, 0.52, 0.38, 0.9), int(14 + 12 * k), 6.0, 0.5, 5.0, 1.8)
 
-## Rock chips thrown out from `at`.
-func chips(at: Vector3, count: int, k: float) -> void:
+## Rock chips thrown out from `at`: every way, or within CHIP_FAN of `dir` when it is set (a blow with a direction).
+func chips(at: Vector3, count: int, k: float, dir := Vector2.ZERO) -> void:
 	for i in count:
-		var a := vis_rng.randf() * TAU
+		var a := vis_rng.randf() * TAU if dir == Vector2.ZERO else dir.angle() + vis_rng.randf_range(-CHIP_FAN, CHIP_FAN)
 		var out := 3.0 + vis_rng.randf() * 4.0 * (0.6 + k)
 		var chip := _take("shard")
 		chip.global_position = at + Vector3(cos(a) * 0.4, 0.3, sin(a) * 0.4)

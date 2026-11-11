@@ -1,7 +1,7 @@
 class_name DolmImpact
 extends RefCounted
-## The weight of Tenzo's hits: one blue-white flash, a ground shock and a spray of chips, all sized by the
-## damage the hit deals. Laid on top of each hit's own fire and dust.
+## The weight of Tenzo's hits: one blue-white flash, a ground shock (hit only) and a spray of chips, all sized by
+## the damage the hit deals. Laid on top of each hit's own fire and dust.
 ## Tenzo's ability colour is blue (DECISIONS 2026-11-08).
 
 const BLUE := Color("4aa8ff")
@@ -19,11 +19,17 @@ static func weight(dmg: float) -> float:
 ## blow that goes every way (a slam).
 static func hit(m: Match, at: Vector3, dmg: float, dir := Vector2.ZERO) -> void:
 	var w := weight(dmg)
+	m.fx.ring(at, 1.0 + 3.0 * w, BLUE, 0.32)
+	m.fx.ring(at, 0.5 + 1.4 * w, CORE, 0.18)
+	blow(m, at, dmg, dir)
+
+## The hit without its ground shock: the flash and the spray, for a blow whose hit area is not a circle (the punch's
+## lane), where a ring would read as gameplay it is not (DECISIONS: a ground ring means gameplay).
+static func blow(m: Match, at: Vector3, dmg: float, dir := Vector2.ZERO) -> void:
+	var w := weight(dmg)
 	var up := at + Vector3(0, 0.5, 0)
 	m.fx.flash(up, CORE, 0.7 + 1.1 * w, 0.14)
 	m.fx.flash(up, BLUE, 1.1 + 1.8 * w, 0.2)
-	m.fx.ring(at, 1.0 + 3.0 * w, BLUE, 0.32)
-	m.fx.ring(at, 0.5 + 1.4 * w, CORE, 0.18)
 	var fwd := Vector3(dir.x, 0.35, dir.y) if dir != Vector2.ZERO else Vector3.UP
 	var spread := 55.0 if dir != Vector2.ZERO else 80.0
 	m.fx.spark(up, fwd, BLUE, int(8 + 14 * w), 7.0 + 5.0 * w, spread, 0.3, 9.0, 1.3)
