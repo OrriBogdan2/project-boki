@@ -56,7 +56,7 @@
 			"noun": "the ice",
 			"hurts": "no footing",
 			"effect": {
-				"grip": 0.12
+				"grip": 0.2
 			},
 			"counter": {
 				"themes": ["frost"],

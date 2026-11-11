@@ -17,3 +17,5 @@ Option 2 (`scripts/match/terrain_hazards.gd`, owned by BiomeRun). Values in `con
 
 ## Consequences
 New: terrain_hazards.gd, terrain_hazard.gdshader, ui/terrain_hud.gd, two BokiLines triggers, `--terrain-hazard-check`, `--terrain-hazard-reel`. Wiring: Match.ground_grip and Hunter pass the hunter (frost counter), Ent.hurt scales a deep-water wader's hits, HUD one call. No Net change (areas come from the map; each game applies them only to the bodies it owns, like the traps), no save change. Monsters and Boki ignore the areas (not asked for); the minimap doesn't draw them.
+
+**Ice grip (ext/feel-ice-sheet, 11-11):** measured against ground (docs/MOVEMENT_FEEL.md "On an Ice Sheet"), grip 0.12 left a 10 m/s knock sliding 12 m and a 90 degree turn at 0.78 s, so the ice grip is 0.20 (still under the 0.3 the check allows). Dashes keep their distance on ice; only what follows slides.

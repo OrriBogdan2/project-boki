@@ -227,6 +227,7 @@ func run(main: Node) -> void:
 	_dash_curves()
 	_plain_dash()
 	_kit_dashes()
+	load("res://tools/move_feel_ice.gd").new().run(self, flat)
 	_abyss_updraft()
 	_feather()
 	_ledge()

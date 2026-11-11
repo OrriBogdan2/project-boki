@@ -301,6 +301,20 @@ source number either way.
 
 With no ring, disc or burst on a dash (DECISIONS), some dashes read as a blink. Every Hunter's dash (ground, air, chained) now lays one pooled, flat ribbon in their ability colour from the body anchor (0.9 m up) along the path. It is 0.6 m wide, starts at 0.8 opacity and fades out in 0.2 s, so rivals read the line at match zoom. It sits under a kit's own dash look (Kael's Blazing Spirit, Grimble's junk roll, the flame, ink and blink trails) instead of replacing it: the source shows streaks and ribbons on top of the body look (Brall's flame streaks, the Combat Slide's ribbon trails). `--dash-streak-check` asserts it for all 12 Hunters; `--dash-streak-shots` renders the strips.
 
+## On an Ice Sheet (`--move-feel-check` "ice" rows, `tools/move_feel_ice.gd`; decision 0060)
+
+The same moves measured on bare ground, on an Ice Sheet with a plain Boki and with a frost one (a 24 m sheet over the flat spot, each run read until the hunter stands). Grip is the only knob (`content/rules/terrain_hazards.json` ice grip): it scales the run's acceleration, the keys' brake and the let-go brake (`HunterMove.brake`). A dash steers by its own speed, so its distance is the same everywhere; the slide starts after it. Numbers at grip 0.12 (as merged) and 0.20 (now):
+
+| move | ground / frost Boki | ice 0.12 | ice 0.20 |
+|---|---|---|---|
+| let-go from a run | 0.32 m, 0.18 s | 1.62 m, 1.05 s | 1.80 m, 0.85 s |
+| 90 degree turn | 0.12 s | 0.78 s (1.4 m on along the old line) | 0.53 s (1.3 m) |
+| 10 m/s knock, let go | 1.33 m, 0.32 s | 11.9 m, 2.7 s | 7.1 m, 1.6 s |
+| kit dash hand-over (run speed) slides | 0.3 m | 3.0-3.2 m | 1.8-1.9 m |
+| Bulwark 360 Smash (+6 m/s spin glide) | 1.5 m | 13.5 m | 8.0 m |
+
+The 0.12 stop reads shorter than the run speed would give (4.5 m/s from a standing start only reaches ~3 m/s in 0.5 s on ice) but the turn, the knock and Bulwark's spin were "no control at all" (a knock held you for 2.7 s, a spin dash carried 13 m); 0.20 keeps the ice 4-5x slicker than ground and halves those. Kits that stop on their own after the dash (Archer, Gunslinger, Mage, Tarek's hop) slide under 0.5 m either way. Ostra's Lantern Trade has no ground dash. The frost Boki's rows equal the ground's to the centimetre. Left alone: Bulwark's spin glide (kit code, DEBT).
+
 ## Not touched
 
 - Dash kits (the archetypes own them). Only the generic `glide_handoff()` hook was added, and `launch_to` was made sure for upward targets.
