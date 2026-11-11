@@ -94,3 +94,13 @@ check: `--base-life-check`.
   winning any game over its rival, or three days (`BaseLife` day wrap) with both at joy `good_joy` or more, settles
   it: bond back to 0. One journal line each way (CareJournal, on the marker). The grudge key is optional (read
   with `.get`, made on first use), so older saves load as they are and Save.VERSION stays 12.
+
+## Decor with a purpose (comfort tags)
+Every decoration in the build catalog has one comfort tag (`HomeLayout.CATALOG` `"comfort"`: cosy, bright, wild,
+quiet). A zone holding three of one tag (`content/rules/decor_comfort.json` `need`) gets that tag's named effect,
+shown in gold on its Waystone card (`ZoneCards.open_lines`). `DecorComfort` counts and caches the tags; each effect
+is one number read where it acts: Snug naps (cosy) restore joy while napping (`BaseLife._nap_tick`), Sunny patch
+(bright) ripens the snack patch faster (`SnackPatch.grow_secs`), Wild welcome (wild) raises the visitor chance
+(`GardenVisitor.chance`), Calm air (quiet) lowers the squabble chance (`BaseLife._clash`). A built zone counts its
+fixed pieces; every other zone counts the save's island. No scores: an effect is on or off. Check:
+`--decor-tags-check`.
