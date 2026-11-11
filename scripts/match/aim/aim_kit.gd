@@ -99,7 +99,8 @@ static func cone(h: Hunter, id: String, p := {}) -> void:
 
 ## A landing or area circle. p: at (the cursor point, clamped to `range`), range (1e9), self (true:
 ## around the hunter), r (1.35), fill (0..1 radial), ticks (4 cardinal), star (centre glint),
-## dashed, core (inner ring radius, m), pointer (a Vector2: a chevron on the rim pointing that way)
+## dashed, band (m: a thin ring of that width, its outer edge on r, instead of the disc),
+## core (inner ring radius, m), pointer (a Vector2: a chevron on the rim pointing that way)
 static func circle(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "circle", p)
 	_disc(h, e, p)
@@ -136,7 +137,7 @@ static func arc_wall(h: Hunter, id: String, p := {}) -> void:
 static func swap(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "swap", p)
 	var a: Vector3 = p.get("a", h.pos)
-	var b: Vector3 = p.get("b", AimMode.point(h, float(p.get("range", 1e9))))
+	var b: Vector3 = p.get("b", AimMode.place(h, float(p.get("range", 1e9))))
 	e["a"] = Vector2(a.x, a.z); e["b"] = Vector2(b.x, b.z); e["y"] = AimMode.ground(h.m, a).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	_put(h, id, e)
@@ -166,7 +167,7 @@ static func line(h: Hunter, id: String, p := {}) -> void:
 ## line turns end to end, 0 = straight) and bow (unit normal the middle bulges toward)
 static func span(h: Hunter, id: String, p := {}) -> void:
 	var e := _base(h, "span", p)
-	var at: Vector3 = p.get("at", AimMode.point(h, float(p.get("range", 1e9))))
+	var at: Vector3 = p.get("at", AimMode.place(h, float(p.get("range", 1e9))))
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	var ad := h.aim_dir()
 	var d: Vector2 = p.get("dir", Vector2(-ad.y, ad.x))
@@ -271,10 +272,11 @@ static func _disc(h: Hunter, e: Dictionary, p: Dictionary) -> void:
 	var at: Vector3
 	if p.has("at"): at = p["at"]
 	elif bool(p.get("self", false)): at = h.pos
-	else: at = AimMode.point(h, float(p.get("range", 1e9)))
+	else: at = AimMode.place(h, float(p.get("range", 1e9)))
 	e["at"] = Vector2(at.x, at.z); e["y"] = AimMode.ground(h.m, at).y
 	e["r"] = float(p.get("r", 1.35)); e["fill"] = float(p.get("fill", -1.0))
 	e["ticks"] = bool(p.get("ticks", false)); e["star"] = bool(p.get("star", false)); e["dashed"] = bool(p.get("dashed", false))
+	e["band"] = float(p.get("band", 0.0))
 	var pd: Vector2 = p.get("pointer", Vector2.ZERO)
 	e["pointer"] = pd.normalized() if pd.length() > 0.01 else Vector2.ZERO
 

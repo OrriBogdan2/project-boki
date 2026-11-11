@@ -55,9 +55,17 @@ def import_dense(path):
     return ob
 
 
-def base_image(ob):
+def base_image(ob, socket="Base Color"):
+    """The image feeding the first material's `socket` ("Emission Color": a Meshy master's emission map), through
+    any mix or factor nodes the glTF importer put between, or None."""
     bsdf = next(n for n in ob.data.materials[0].node_tree.nodes if n.type == "BSDF_PRINCIPLED")
-    return bsdf.inputs["Base Color"].links[0].from_node.image
+    todo = [l.from_node for l in bsdf.inputs[socket].links]
+    while todo:
+        n = todo.pop(0)
+        if n.type == "TEX_IMAGE":
+            return n.image
+        todo += [l.from_node for i in n.inputs for l in i.links]
+    return None
 
 
 def tris(ob):
@@ -284,15 +292,19 @@ def _islands(bm, lay):
     return out
 
 
-def bake_colour(high, low, size, cage, ray, margin_px):
-    """The dense mesh's base colour (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
-    src = base_image(high)
+def bake_colour(high, low, size, cage, ray, margin_px, src=None):
+    """The dense mesh's base colour, or its `src` image, (as emission, so nothing of the scene's light) onto the low mesh's UVs."""
+    src = src or base_image(high)
     for m in high.data.materials:
         nt = m.node_tree
-        tex = next(n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src)
-        tex.interpolation = "Cubic"
+        tex = next((n for n in nt.nodes if n.type == "TEX_IMAGE" and n.image == src), None)
         em = nt.nodes.new("ShaderNodeEmission")
-        nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+        if tex:
+            tex.interpolation = "Cubic"
+            nt.links.new(tex.outputs["Color"], em.inputs["Color"])
+        else:       # a flat-colour part (Claire's sheer skirt): its base colour, opaque
+            bsdf = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
+            em.inputs["Color"].default_value = bsdf.inputs["Base Color"].default_value
         out = next(n for n in nt.nodes if n.type == "OUTPUT_MATERIAL")
         nt.links.new(em.outputs[0], out.inputs["Surface"])
     img = bpy.data.images.new("baked", size, size, alpha=False)
@@ -352,4 +364,5 @@ def main():
         bpy.ops.wm.save_as_mainfile(filepath=os.path.expanduser(spec["blend"]))
 
 
-main()
+if __name__ == "__main__":
+    main()

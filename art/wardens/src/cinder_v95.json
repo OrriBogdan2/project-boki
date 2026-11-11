@@ -1,0 +1,276 @@
+{
+ "doc": "v95 swap spec (docs/art/wardens/V95_SWAP.md): Cinder's v95 master (appeal4 bust candidate 5, the 11-11 rounded redo of candidate 3: appeal3's cand_b with a full bust rounded in side view (dome displacement, apex lower and soft, fuller lower curve), a slightly narrower waist, a little more hip and half-lidded eyes painted into the appeal3 face, ~/meshy/v95/Cinder/r2/appeal4/cand_5.glb; its unrigged tail cut off: cinder_v95_bust5_body.glb, which keeps candidate 3's painted face) onto cinder.glb's (ashwick's) skeleton, clips and anchors. cinder.glb's own tail (its spring chain, flame tip and tail-tip anchor) and heel jets stay; the old hair cards go (the master's hair rides head and hips). The master's emission map (the lava seams) bakes to the game's emissive texture. Points in the fit frame (her front +Y, her right +X, soles on z 0, the master's metres; the master stands off centre, x 0.07, y 0.08), read on tools/art1/v95_grid.py's renders. The head and hips boxes meet at z 1.53, just under the neck joint and below her chin (z 1.565): a boundary at the lips (z 1.6) fitted and skinned the lower lip with the torso and tore it into spikes.",
+ "master": "~/meshy/v95/Cinder/r2/appeal4/cinder_v95_bust5_body.glb",
+ "game": "art/wardens/cinder/cinder.glb",
+ "tris": 13000,
+ "head": {
+  "centre": [
+   0.07,
+   0.13,
+   1.7
+  ],
+  "r": 0.17
+ },
+ "head_tris": 2600,
+ "head_uv": 2.0,
+ "tex": 2048,
+ "uv_margin": 0.002,
+ "emit": true,
+ "keep": [
+  "tail",
+  "spring_scarftail_tail_0",
+  "spring_scarftail_tail_1",
+  "spring_scarftail_tail_2",
+  "spring_scarftail_tail_3",
+  "spring_scarftail_tail_4",
+  "spring_scarftail_tail_5",
+  "spring_scarftail_tail_6",
+  "spring_scarftail_tail_7",
+  "spring_scarftail_tail_8",
+  "jet.0",
+  "jet.1"
+ ],
+ "joints": {
+  "pelvis": [
+   0.07,
+   0.07,
+   0.95
+  ],
+  "neck": [
+   0.07,
+   0.09,
+   1.55
+  ],
+  "crown": [
+   0.07,
+   0.14,
+   1.81
+  ],
+  "shoulder.R": [
+   0.235,
+   0.07,
+   1.41
+  ],
+  "elbow.R": [
+   0.36,
+   0.1,
+   1.2
+  ],
+  "wrist.R": [
+   0.4,
+   0.175,
+   0.98
+  ],
+  "shoulder.L": [
+   -0.095,
+   0.07,
+   1.41
+  ],
+  "elbow.L": [
+   -0.24,
+   0.1,
+   1.2
+  ],
+  "wrist.L": [
+   -0.285,
+   0.175,
+   0.98
+  ],
+  "hip.R": [
+   0.155,
+   0.09,
+   0.9
+  ],
+  "knee.R": [
+   0.209,
+   0.12,
+   0.56
+  ],
+  "ankle.R": [
+   0.22,
+   0.08,
+   0.13
+  ],
+  "hip.L": [
+   -0.015,
+   0.09,
+   0.9
+  ],
+  "knee.L": [
+   -0.057,
+   0.12,
+   0.56
+  ],
+  "ankle.L": [
+   -0.09,
+   0.08,
+   0.13
+  ]
+ },
+ "relax": {
+  "CUTS": 0
+ },
+ "past_wrist": {
+  "R": "hand.R",
+  "L": "hand.L"
+ },
+ "spread": "rig",
+ "smooth": 12,
+ "regions": [
+  {
+   "bone": "head",
+   "box": [
+    -0.2,
+    0.34,
+    -0.12,
+    0.35,
+    1.53,
+    9
+   ]
+  },
+  {
+   "bone": "hips",
+   "box": [
+    -0.3,
+    0.45,
+    -0.4,
+    0.4,
+    1.02,
+    1.53
+   ],
+   "except_segs": [
+    [
+     "upper_arm.R",
+     0.06
+    ],
+    [
+     "upper_arm.L",
+     0.06
+    ],
+    [
+     "forearm.R",
+     0.06
+    ],
+    [
+     "forearm.L",
+     0.06
+    ]
+   ]
+  }
+ ],
+ "slots": [
+  {
+   "slot": "metal",
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    1.785,
+    9
+   ],
+   "s": [
+    0,
+    0.4
+   ],
+   "v": [
+    0.3,
+    1
+   ]
+  },
+  {
+   "slot": "hair",
+   "v": [
+    0,
+    0.3
+   ],
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    1.55,
+    9
+   ]
+  },
+  {
+   "slot": "hair",
+   "v": [
+    0,
+    0.3
+   ],
+   "box": [
+    -9,
+    9,
+    -9,
+    -0.02,
+    0.95,
+    1.55
+   ]
+  },
+  {
+   "slot": "skin",
+   "box": [
+    -9,
+    9,
+    -9,
+    9,
+    1.5,
+    9
+   ]
+  },
+  {
+   "slot": "metal",
+   "v": [
+    0,
+    0.3
+   ]
+  },
+  {
+   "slot": "metal",
+   "h": [
+    0.0,
+    0.12
+   ],
+   "s": [
+    0.5,
+    1
+   ],
+   "v": [
+    0.6,
+    1
+   ]
+  },
+  {
+   "slot": "metal",
+   "h": [
+    0.95,
+    1.0
+   ],
+   "s": [
+    0.5,
+    1
+   ],
+   "v": [
+    0.6,
+    1
+   ]
+  }
+ ],
+ "slot_default": "skin",
+ "room": {
+  "*": 0.5
+ },
+ "anchors": {
+  "anchor_head_top": [
+   0.07,
+   0.14,
+   1.83
+  ],
+  "anchor_chest": [
+   0.07,
+   0.21,
+   1.38
+  ]
+ }
+}
