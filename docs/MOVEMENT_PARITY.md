@@ -133,5 +133,5 @@ The windows read one frame shorter at 30 fps only because a press can land on a 
 5. **Air control** (owner 11-08) and **no swoop** (owner 11-08) are rulings against the data; **walking off ledges** and **glider at any heat** too.
 6. **Unknown in the source**: glide sink and steering speeds, heat coefficients, jump hold, air-dash multipliers, knockback steering values, landing recovery, hit-stop, coyote and buffer. Footage frame counts could settle the first three.
 7. **Rail grinding** and the **mini mantle** are not modelled.
-8. The farm avatar's facing turns per step (not blended between steps); the interior and town movers still step on frame time.
+8. ~~The farm avatar's facing turns per step; the interior and town movers step on frame time.~~ Done (ext/feel-town-fixed-step, decision 0049): town and interior step on `FarmStep` with the match's rows, and the farm, town and interior blend the drawn facing between steps.
 9. `--feel-golden-check`: the traces carry shoves from mobs and wild Boki that walk into the Hunter (`Match._separate`), so `crouch_walk` does not replay identically run to run (3–5 of 13 differ in position, never in velocity), and clearing mobs before each script shifts 45 traces. It needs mobs and wild Boki cleared and one full re-record, together with the 72 drifts the RC already carries.

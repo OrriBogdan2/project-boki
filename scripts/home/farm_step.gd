@@ -3,7 +3,8 @@ extends RefCounted
 ## The farm avatar's clock (docs/decisions/0048): it moves in the match's fixed steps (Match.DT) whatever the
 ## display's frame rate, so a jump, a dash and a stop measure the same at 30, 60 and 144 fps and the same as in
 ## a match. Key presses are latched for exactly one step, the body is shown between its last two steps, and the
-## pose plays once a frame at the frame's own pace. It also holds the jump's two grace timers, the match's
+## pose plays once a frame at the frame's own pace, and the facing is blended between steps the same way (a
+## step calls face()). Town and interior walk with walk(). It also holds the jump's two grace timers, the match's
 ## numbers (content/rules/hunter_move.json: coyote_s, jump_buffer_s).
 
 enum Jump { NONE, JUMP, GLIDE }
@@ -16,11 +17,19 @@ var coyote := 0.0        # s left in which a jump still counts as off the ground
 var jump_buf := 0.0      # s left in which a jump pressed just before a landing still jumps
 ## How far the shown body trails the stepped one (m), for whatever frames the avatar (the camera).
 var lag := Vector3.ZERO
+## The drawn facing (rad): the stepped facing blended between the last two steps.
+var yaw := 0.0
 var _latched := {}       # press edges waiting for their step
 var _stepping := false
 var _from := Vector3.ZERO
 var _to := Vector3.ZERO
 var _shown := Vector3.ZERO
+var _basis_to := Basis.IDENTITY      # the body's orientation after the last step
+var _basis_shown := Basis.IDENTITY
+var _yaw := 0.0                  # the facing after the last step
+var _yaw_from := 0.0
+var _yaw_to := 0.0
+var _yaw_set := false
 var _anim: HunterAnim = null
 var _pose := {}
 
@@ -30,10 +39,15 @@ func run(delta: float, body: Node3D, step: Callable) -> void:
 	for a in PRESSES:
 		if Input.is_action_just_pressed(a):
 			_latched[a] = true
-	if body.position != _shown:      # something else moved the body since the last frame: no blend
+	if body.position != _shown or body.basis != _basis_shown:      # moved by something else: no blend
 		_from = body.position
 		_to = body.position
+		_basis_to = body.basis
+		_yaw_from = _yaw
+		_yaw_to = _yaw
+		_yaw_set = false      # the next step's facing starts from itself
 	body.position = _to
+	body.basis = _basis_to
 	acc += delta
 	_stepping = true
 	while acc >= Match.DT:
@@ -43,14 +57,35 @@ func run(delta: float, body: Node3D, step: Callable) -> void:
 		_latched.clear()
 		_from = _to
 		_to = body.position
+		_basis_to = body.basis
+		_yaw_from = _yaw_to
+		_yaw_to = _yaw
 		if _from.distance_to(_to) > SNAP_M:
 			_from = _to
 	_stepping = false
 	_shown = _from.lerp(_to, acc / Match.DT)
 	lag = _shown - _to
 	body.position = _shown
+	yaw = lerp_angle(_yaw_from, _yaw_to, acc / Match.DT)
+	body.basis = _basis_to * Basis(Vector3.UP, angle_difference(_yaw_to, yaw))
+	_basis_shown = body.basis
 	if _anim:
 		_play(delta)
+
+## The avatar's facing after this step (rad), for run() to blend between steps.
+func face(stepped: float) -> void:
+	_yaw = stepped
+	if not _yaw_set:      # the first step: nothing to blend from
+		_yaw_set = true
+		_yaw_to = stepped
+
+## Ground speed after a step: the match's run speed, acceleration and walking brake at this hero's row.
+func walk(hv: Vector2, keys: Vector2, d: float) -> Vector2:
+	var row := HunterMove.of(String(Save.d.get("arch", "")))
+	if keys.length() < 0.001:
+		return HunterMove.brake(hv, 1.0, d)
+	var wish: Vector2 = keys * float(row["speed"])
+	return Loco.accel_to(hv, wish, float(row["accel"]), 0.0, HunterMove.brake_rate(hv.length()), d)
 
 ## Whether `action` was pressed for this step. A press reaches exactly one step: not lost on a frame with no
 ## step (144 fps), not seen twice on a frame with two (30 fps).
