@@ -18,10 +18,12 @@ static func rules() -> Dictionary:
 	return _rules
 
 ## A Hunter's original Warden, ready for apply(): the picks as indexes, the palette as colours, and
-## the clamp and tint ranges with the Warden's own overrides folded in.
+## the clamp and tint ranges with the Warden's own overrides folded in. The gender is the base
+## character's, from its archetype JSON (its one home).
 static func warden(arch: String) -> Dictionary:
 	var all: Dictionary = rules()["wardens"]
-	var w: Dictionary = all.get(arch, all.get(FALLBACK_WARDEN, {}))
+	var id := arch if all.has(arch) else FALLBACK_WARDEN
+	var w: Dictionary = all.get(id, {})
 	var folk_ids := Models.RACES.map(func(r): return String(r["id"]))
 	var race := maxi(0, folk_ids.find(String(w.get("race", "human"))))
 	var clamps := {}
@@ -32,7 +34,7 @@ static func warden(arch: String) -> Dictionary:
 		var spec: Dictionary = (rules()["tint"][k] as Dictionary).duplicate()
 		spec.merge(w.get("tint", {}).get(k, {}), true)
 		tints[k] = spec
-	return {"gender": String(w.get("gender", "male")), "race": race,
+	return {"gender": String(Arch.def(id).get("gender", "male")), "race": race,
 		"face": maxi(0, Models.LOOK_FACES.find(String(w.get("face", "")))),
 		"hair": maxi(0, Models.hair_styles(race).find(String(w.get("hair", "")))),
 		"detail": maxi(0, Models.LOOK_DETAILS.find(String(w.get("detail", "None")))),
