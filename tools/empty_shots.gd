@@ -4,7 +4,8 @@ extends RefCounted
 ## --only=creator|viewer|mask|shroud|feet|farm|eggs to take one group (eggs: the egg pick, then the black
 ## mystery egg picked; shroud: the creator from front, side and back,
 ## the aura levels and shroud styles; feet: the soles at the shortest and tallest height, standing and walking;
-## farm: the Empty at home from every side and above). The second Relic, from Hob: --hob-check --shots-dir=.
+## farm: the Empty at home from every side and above; eggs: the egg pick, 1280x720).
+## The second Relic, from Hob: --hob-check --shots-dir=.
 
 const LOOKS := {
 	"creator_female": {"gender": 0},
@@ -126,6 +127,26 @@ func _mask(tree: SceneTree) -> void:
 	await _shot(tree, "mask_5_flash", 0.4)
 	await _shot(tree, "mask_6_you_as_vex", 0.6)
 	await _shot(tree, "mask_7_vex_intro", 2.2)
+	hx.queue_free()
+	await tree.process_frame
+
+func _eggs(tree: SceneTree) -> void:
+	_fresh()
+	Save.d["look"] = Unmasked.default_look()
+	tree.root.size = Vector2i(1280, 720)
+	var holder := Node.new()       # the portraits' home (the root is busy starting up)
+	holder.name = "KinPortraits"
+	tree.root.add_child.call_deferred(holder)
+	for i in 4: await tree.process_frame
+	var hx = load("res://scripts/ui/hatch.gd").new()
+	main.add_child(hx)
+	for i in 4: await tree.process_frame
+	hx._looks_good()
+	await _shot(tree, "eggs_pick_none", 2.5)
+	hx._pick(1)
+	await _shot(tree, "eggs_pick_starter", 0.6)
+	hx._pick(3)
+	await _shot(tree, "eggs_pick_mystery", 0.6)
 	hx.queue_free()
 	await tree.process_frame
 
