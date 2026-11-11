@@ -48,7 +48,7 @@ func _foe_state(P: Hunter, T: Hunter) -> void:
 ## The same frame from the target's side: it becomes the viewer (the HUD and AimKit follow Match.player) and the
 ## kit stops being the local one, then one step lets the kit's art follow.
 func _as_foe(m: Match, P: Hunter, T: Hunter, file: String) -> void:
-	P.ctrl = "bot"
+	P.ctrl = "idle"
 	T.ctrl = "local"
 	m.player = T
 	m.step(DT)

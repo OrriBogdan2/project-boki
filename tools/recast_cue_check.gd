@@ -3,7 +3,8 @@ extends "res://tools/archetype_check.gd"
 ## abilities must be obvious and in your face"): after the first step the kit's recast_window() names the slot,
 ## a time left and a total, the world spot for the marker, and the local hunter's cue state carries it (so the slot
 ## pulse, "<KEY> AGAIN", the ring and the marker draw). Then: a window that runs out leaves "EXPIRED", an early
-## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges.
+## press is buffered (~0.15s) into the window, and the marks/stacks/Daze reach the foe badges. Last the split: the
+## kit's own world copy of that state hides on the owner's screen (the badge carries it) and shows to everyone else.
 
 const WAIT := 4.0              # s the first step gets to open its window (Rimelock's late crack comes last)
 
@@ -30,6 +31,7 @@ func run(main_node: Node) -> void:
 	await _expired()
 	await _buffered()
 	await _badges()
+	await _split()
 	print("RECASTCUE DONE, %d checks, failures: %d" % [n, fails])
 	main.get_tree().quit(1 if fails > 0 else 0)
 
@@ -110,3 +112,40 @@ func _badges() -> void:
 		var mine := marks.filter(func(mk): return mk["e"] == T and float(mk["left"]) > 0.0 and float(mk["total"]) > 0.0)
 		ok("%s: the foe's badge shows its mark and time left" % hero, mine.size() == 1, str(mine))
 		await done(m)
+
+## On the owner's screen the badge carries the foe's state, so the kit's world copy of it hides there: Sable's Mark
+## pips, Sparkle's Static marker (its count and pips, the Live ring when full; the sparks on the body stay), Neve's
+## frost glow. Seen by anyone else (the same kit not local) the world art shows.
+func _split() -> void:
+	for hero in ["thief", "mage", "rimewright"]:
+		var s := setup(hero, 6.0)
+		var m: Match = s[0]
+		var P: Hunter = s[1]
+		var T: Hunter = s[2]
+		var key := T.get_instance_id()
+		match hero:
+			"thief": (P.ak as ThiefKit).add_mark(T, 3, true)
+			"mage": (P.ak as MageKit).sparks[key] = {"e": T, "n": int(P.ak.res_def()["max"]), "t": 3.0}
+			"rimewright": (P.ak as RimewrightKit).fan_hits[key] = {"t": T, "n": 5, "left": 3.0}
+		m.step(DT)
+		var badge := (P.ak.cue.get("marks", []) as Array).any(func(mk): return mk["e"] == T)
+		ok("%s: the owner reads the foe's badge, the kit's world copy hides" % hero, badge and not _world_art(m, P, T),
+				"badge %s art %s" % [badge, _world_art(m, P, T)])
+		P.ctrl = "idle"
+		m.step(DT)
+		ok("%s: anyone else sees the kit's world art on the foe" % hero, _world_art(m, P, T))
+		await done(m)
+
+## Whether the kit's own state art on T shows this step.
+func _world_art(m: Match, P: Hunter, T: Hunter) -> bool:
+	var key := T.get_instance_id()
+	match P.arch:
+		"thief":
+			var pip: Dictionary = (P.ak as ThiefKit).pips.get(key, {})
+			return not pip.is_empty() and (pip["node"] as Node3D).visible
+		"mage":
+			var mk: Dictionary = VVFx.of(m).markers.get("vs%d" % key, {})
+			return not mk.is_empty() and ((mk["node"] as Node3D).get_node("Pips") as Node3D).visible
+		"rimewright":
+			return P.ak.lk().showing("frost%d" % key)
+	return false
