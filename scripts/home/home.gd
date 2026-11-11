@@ -923,26 +923,30 @@ func _spawn_kin() -> void:
 	var ri := 0
 	var farm_kin := _farm_kin()          # kin asleep in the Kin Burrow stay there
 	for rec in farm_kin:
-		var n := Models.kin(rec["species"], rec)
-		add_child(n)
 		var isl: int = 0 if rec["uid"] == _d().get("active", "") else open_isles[ri % open_isles.size()]
 		ri += 1
 		# somewhere open, not wedged against a building and not on top of another kin
 		var taken: Array = kins.map(func(o): return o["pos"])
 		taken.append(ppos)
-		var at := world.free_spot_near(world.random_ground(isl), taken, 1.3)
-		n.position = at
-		var lbl := Label3D.new()
-		lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
-		lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
-		lbl.position.y = 1.25; lbl.visible = false
-		n.add_child(lbl)
-		var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
+		var kd := _add_kin(rec, world.free_spot_near(world.random_ground(isl), taken, 1.3))
 		var ri2: int = farm_kin.find(rec)
 		if isl == 0 and ri2 >= 0 and ri2 < 6:
 			kd["bed"] = Vector3(32.9 + (ri2 % 3) * 1.6, 0, 27.2 + (ri2 / 3) * 1.6)
-		kins.append(kd)
 	if hb and hb.astar: hb.assign_beds()
+
+## One Boki out on the island at a spot: its model, its emote bubble and its walking state.
+func _add_kin(rec: Dictionary, at: Vector3) -> Dictionary:
+	var n := Models.kin(rec["species"], rec)
+	add_child(n)
+	n.position = at
+	var lbl := Label3D.new()
+	lbl.font = UI.big; lbl.font_size = 48; lbl.pixel_size = 0.013; lbl.outline_size = 14
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED; lbl.no_depth_test = true
+	lbl.position.y = 1.25; lbl.visible = false
+	n.add_child(lbl)
+	var kd := {"rec": rec, "node": n, "pos": at, "vel": Vector3.ZERO, "goal": Vector3.INF, "t": randf() * 3.0, "emote": lbl, "emote_t": 0.0, "hop": randf() * 6.0, "pers": _personality(rec)}
+	kins.append(kd)
+	return kd
 
 # ------------------------------------------------------------------ loop
 ## Sun, sky, lamps and the occasional rain shower.
@@ -1443,6 +1447,7 @@ func _move_kin(d: float) -> void:
 			# being petted or talked to: it stays put and looks at you
 			k["hold_t"] = hold - d
 			k["goal"] = pos
+		if k.has("burrow_t") and BurrowSwap.step(self, k, d): continue      # through the Burrow door
 		var wish := Vector2.ZERO
 		var goal: Vector3 = k["goal"]
 		if goal != Vector3.INF:
@@ -2209,7 +2214,7 @@ func _use(it: Dictionary) -> void:
 		"incubator":
 			if Incubator.any_ready(): _hatch_incubator(String(hinc.nearest_ready(ppos).get("id", "")))
 			else: nook_tab = "Incubator"; _open_nook()
-		"burrow": _open_burrow()
+		"burrow": BurrowPanel.open(self)
 		"hob", "site": hob.use(it)
 		"feeder", "grave", "graveyard", "place": hecon.use(it)
 		"station":
