@@ -25,6 +25,7 @@ var bad := 0
 var main: Node
 var m: Match
 var P: Hunter
+var cast_at := Vector3.ZERO   # where P used the item: its field is the one nearest this
 var rival: Hunter
 var mate: Hunter
 var used: Array[Vector3] = []
@@ -142,6 +143,7 @@ func _item(id: String) -> void:
 	_before(id)
 	UtilityBelt.clear(P)
 	UtilityBelt.grant(P, id, 1)
+	cast_at = P.pos
 	ok(UtilityBelt.use_id(P, id), id + " is used")
 	await _steps(0.1)
 	for nm: String in LOOKS.get(id, []):
@@ -193,7 +195,7 @@ func _during(id: String, t: float) -> void:
 				P.grounded = true
 		"warp_seed", "toss_satchel":
 			if t < 0.3 and not m.fields.list.is_empty():
-				P.teleport(m.fields.list.back()["at"])
+				P.teleport(_own_field()["at"])
 
 func _steps(secs: float) -> void:
 	for i in int(round(secs / Match.DT)):
@@ -201,3 +203,11 @@ func _steps(secs: float) -> void:
 		P.inv_t = 1.0      # nothing on the map hurts the user: a drink ends only by finishing
 		m.step(Match.DT)
 	await main.get_tree().process_frame
+
+## The item's own field: the one nearest where it was used (a field from anything else may be newer).
+func _own_field() -> Dictionary:
+	var best: Dictionary = m.fields.list[0]
+	for z: Dictionary in m.fields.list:
+		if cast_at.distance_to(z["at"]) < cast_at.distance_to(best["at"]):
+			best = z
+	return best

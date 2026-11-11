@@ -19,6 +19,8 @@ does (Shatter Charge, Skyfall Charge).
 - **Checks:** `--utility-vfx-check` (every id has an entry and its moments; each item used for real plays every moment,
   its ground look is up while it works and gone after, worn marks end with the effect; "side" reads you / rival).
   `--utility-vfx-shots --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`): one shot of each item in use + captions.
+- **Readable at the match camera:** a `_hold` that marks a body runs at the Hero kits' density (about 20 motes over a
+  0.5-0.7 m disc, or a few 0.16 m stars); the first takes (3 to 8 motes of 5 cm) vanished at that distance.
 
 | id | area | does | ends | moments |
 |---|---|---|---|---|
