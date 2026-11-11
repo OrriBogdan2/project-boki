@@ -253,7 +253,8 @@ func _zones(main: Node) -> void:
 	var dm := (dome.get_child(0) as MeshInstance3D).material_override as ShaderMaterial
 	var dome_a := float(dm.get_shader_parameter("alpha")) * (float(dm.get_shader_parameter("body")) + 0.1)
 	ok(dome_a <= ZONE_CORE_A, "Motley's well dome: centre alpha at most %.2f, the rim carries it" % ZONE_CORE_A)
-	var hearth_a := TenderKit.HEARTH_FILL * 0.18 * 1.6 * 1.1     # care_disc: body * 1.6 at the centre, cel steps of 0.25
+	# care_disc: body * 1.6 at the centre, cel steps of 0.25
+	var hearth_a := TenderKit.HEARTH_FILL * 0.18 * 1.6 * 1.1
 	ok(roundf((hearth_a + 0.035) * 4.0) / 4.0 <= ZONE_CORE_A,
 			"Meeko's Hearthlight disc: centre alpha at most %.2f" % ZONE_CORE_A)
 	_meeko_field()
