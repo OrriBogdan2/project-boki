@@ -11,6 +11,9 @@ extends RefCounted
 ##   - the G flick wheel (hold G, move the mouse, release): Chase, Guard, Return, Follow
 ##   - a downed Boki is marked in the world (label, timer, scoop bar, an arrow at the screen edge) and
 ##     on the minimap and the full map
+##   - the Merge box tells the whole Fusion through fuse_view (the check reads the same view): the bond % while it
+##     fills, FUSE with the key lit when X is ready, TOO FAR / RESCUE when it cannot go, the form's ability and live
+##     key with the time-left ring while fused, then RESTING with the seconds on the box
 ## Kept out of hud.gd (a god file): hud.gd only calls these.
 
 const DOWN_COL := Color("ff7a6a")
@@ -39,9 +42,9 @@ static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 	var ulv := int(p.slot_lv["ult"])
 	var col: Color = ri["col"]
 	var merged := KinMerge.active(p)
-	var cd_left := float(ri["cd"])
 	# (while merged the unlock seconds go in the chip, not as a number over the icon)
-	H._skill_slot("ult", "r", ur, "bond", Settings.key_cap("ultimate"), col, 0.0, 0.0, bool(ri["ready"]))
+	var key := Settings.key_cap("ultimate")
+	H._skill_slot("ult", "r", ur, String(ri["icon"]), key, col, 0.0, 0.0, bool(ri["ready"]))
 	var ult_at := int(Hunter.ULT_AT[0])
 	if ulv <= 0:
 		if p.lvl < ult_at:
@@ -58,24 +61,62 @@ static func r_slot(H, p: Hunter, ur: Rect2) -> void:
 		H._ctext(tr.get_center() + Vector2(0, 4), str(int(Hunter.ULT_AT[1])), 10, H.MUTED, H.big)
 	if not merged:
 		return
-	var ml: Dictionary = p.merge_st
-	var left := clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0)
+	var v := fuse_view(p)
 	var ready_ult := bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult"
 	var pl := 0.5 + 0.5 * sin(H.m.time * 8.0)
-	_ring(H, ur.grow(RING_GROW), left, Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
-	var form_name := String((ml.get("form", {}) as Dictionary).get("name", "FUSED")).to_upper()
-	var chip := form_name
-	if ready_ult:
-		chip = String(ri.get("name", "ULT")).to_upper()
-	elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
-		chip = "ULT %.1fs" % cd_left
+	_ring(H, ur.grow(RING_GROW), float(v["ring"]), Color("fff4c0").lerp(col, pl * 0.6) if ready_ult else Color("fff4c0"), 4.0 if ready_ult else 3.0)
 	var wl := MergeAugment.warn_left(p)
 	if wl > 0.0:
 		# the last seconds of the window: the slot flashes and the chip counts down
 		var fl := 0.5 + 0.5 * sin(H.m.time * (10.0 + (3.0 - minf(wl, 3.0)) * 4.0))
 		H._rounded(ur.grow(RING_GROW + 2.0 + fl * 3.0), Color(col, 0.18 * fl), 14, Color(1.0, 0.4, 0.3, 0.5 + 0.5 * fl), 3)
-		chip = "ENDS %.1fs" % wl
-	_chip(H, ur, chip, Color(1.0, 0.5, 0.4) if wl > 0.0 else col)
+	chip(H, ur, String(v["tag"]), v["col"])
+
+## What the Merge box shows about the Fusion right now (the box and the check read it). {} while the Merge is
+## locked or there is no Boki. stage: "bond" (meter filling) | "ready" (X goes) | "blocked" (full but TOO FAR / RESCUE) |
+## "wait" (full, a spent window) | "active" (fused) | "rest" (the Boki rests after a Fusion).
+## tag: the chip over the box; secs: the rest seconds; ring: the time left 0..1; icon and key: the slot's.
+static func fuse_view(p: Hunter) -> Dictionary:
+	var k: Kin = p.kin
+	if k == null or not is_instance_valid(k):
+		return {}
+	var key := Settings.key_cap("ultimate")
+	var ri := p.slot_info("r")
+	if KinMerge.active(p):
+		var ml: Dictionary = p.merge_st
+		var tag := String((ml.get("form", {}) as Dictionary).get("name", "FUSED")).to_upper()
+		if bool(ri.get("ready", false)) and String(ri.get("plan", "")) == "ult":
+			tag = String(ri.get("name", "ULT")).to_upper()
+		elif String(ri.get("plan", "")) == "ult" and not bool(ri.get("ulting", false)):
+			tag = "ULT %.1fs" % float(ri["cd"])
+		var wl := MergeAugment.warn_left(p)
+		if wl > 0.0:
+			tag = "ENDS %.1fs" % wl
+		var col: Color = Color(1.0, 0.5, 0.4) if wl > 0.0 else ri["col"]
+		var ring := clampf(float(ml["t"]) / maxf(0.1, float(ml["T"])), 0.0, 1.0)
+		var icon := String(ri["icon"])
+		return {"stage": "active", "tag": tag, "col": col, "secs": 0.0, "icon": icon, "key": key, "ring": ring}
+	if int(p.slot_lv["ult"]) <= 0:
+		return {}
+	var v := {"stage": "wait", "tag": "", "col": HudStyle.INK, "secs": 0.0, "icon": "bond", "key": key, "ring": 0.0}
+	if k.resting():
+		v.merge({"stage": "rest", "tag": "RESTING", "secs": k.rest_t}, true)
+	elif p.ult < 1.0:
+		v.merge({"stage": "bond", "tag": "%d%%" % int(p.ult * 100.0), "col": HudStyle.MUTED}, true)
+	else:
+		match KinMerge.plan(p):
+			"merge", "leap", "surge": v.merge({"stage": "ready", "tag": "FUSE", "col": HudStyle.GOLD}, true)
+			"far": v.merge({"stage": "blocked", "tag": "TOO FAR", "col": DOWN_COL}, true)
+			"rescue": v.merge({"stage": "blocked", "tag": "RESCUE", "col": DOWN_COL}, true)
+	return v
+
+## The Merge box while it is not fused: the chip over it and, while the Boki rests, the seconds on it.
+static func box_state(H, r: Rect2, v: Dictionary) -> void:
+	if String(v["tag"]) != "":
+		chip(H, r, String(v["tag"]), v["col"])
+	if String(v["stage"]) == "rest":
+		H._rounded(r, Color(0.04, 0.04, 0.06, 0.72), 10)
+		H._ctext(r.get_center() + Vector2(0, 5), "%d" % int(ceil(float(v["secs"]))), 18, H.INK, H.big)
 
 ## A slot the Merge makes stronger: a ring and a small badge (the Boki's first letter) in the form's colour.
 ## slot: "lmb" | "rmb" | "e" | "dash". Nothing outside a live Merge.
@@ -132,8 +173,8 @@ static func _ring(H, r: Rect2, frac: float, col: Color, width: float) -> void:
 	if out.size() >= 2:
 		H.c.draw_polyline(out, col, width, true)
 
-## The one line of text over the Merge box while merged (the ultimate's name, its unlock seconds, the form), centred above it.
-static func _chip(H, ur: Rect2, text: String, col: Color) -> void:
+## The one line of text over the Merge box (FUSE, RESTING, the ultimate's name, the form), centred above it.
+static func chip(H, ur: Rect2, text: String, col: Color) -> void:
 	var tw: float = H.big.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x + 12.0
 	var btr := Rect2(Vector2(ur.get_center().x - tw * 0.5, ur.position.y - CHIP_LIFT), Vector2(tw, 14))
 	H._rounded(btr, Color(0.03, 0.03, 0.05, 0.95), 5, Color(col, 0.9), 1)

@@ -85,7 +85,12 @@ static func boki(hud, p: Hunter, r: Rect2) -> void:
 	if down:
 		hud.c.draw_style_box(HudStyle.box(Color(0.2, 0.2, 0.22, 0.55), HudStyle.SLOT_RAD, Color(0, 0, 0, 0), 0), r)
 		HudStyle.ctext(hud.c, ctr + Vector2(0, 5), "DOWN", 12, HudStyle.HURT)
-	HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, HudStyle.MUTED if down else tc)
+	var v := BokiHud.fuse_view(p)
+	BokiHud.box_state(hud, r, v)
+	var key_col := HudStyle.MUTED if down else tc
+	if v["stage"] == "ready":
+		key_col = HudStyle.GOLD          # (X is lit when the Fusion can go)
+	HudStyle.key_pill(hud.c, Vector2(ctr.x, r.end.y), key, key_col)
 
 ## The hover text for a glove box (hud ids "gear0", "gear1").
 static func tip(p: Hunter, i: int) -> Array:
