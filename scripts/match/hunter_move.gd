@@ -180,6 +180,14 @@ static func fall_cap(h: Hunter) -> float:
 	var k := clampf((h.lip_y - h.pos.y - abyss_slow_from) / (abyss_slow_to - abyss_slow_from), 0.0, 1.0)
 	return lerpf(fall_max, abyss_fall_max, k)
 
+## Gravity for one step in the air, capped at fall_cap. Hunter._physics moves a step at its end speed: at 60 Hz
+## that is the game's jump (apex 1.52 m). A step of another size adds back what it gains or loses on that, so a
+## jump or a fall keeps the 60 Hz arc at any step size, and a 60 Hz step is unchanged (decision 0022).
+static func fall(h: Hunter, dt: float) -> void:
+	var vy := maxf(h.vel.y - Hunter.H_GRAV * dt, -fall_cap(h))
+	h.pos.y += 0.5 * (h.vel.y - vy) * (dt - Match.DT)
+	h.vel.y = vy
+
 ## Vertical speed after one step up a ledge's face, `left` metres under its lip. Within Hunter.MANTLE_REACH it's the
 ## source's suction: gravity as in any jump, plus mantle_pull while you rise slower than mantle_vy_cap, so a
 ## jump's momentum carries you over and a slow arrival is lifted at the cap. Deeper (the abyss catch, ours) you

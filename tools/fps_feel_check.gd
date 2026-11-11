@@ -3,7 +3,8 @@ extends RefCounted
 ## 30 fps machine plays the game a 144 fps one does. For Vex, Kael, Albert and Sable: run 1 s, jump, a dash tap,
 ## a dash hold, a 2 s glide and a standard knock. Each measure must agree across the three steps within SPREAD
 ## and, where docs/SUPERVIVE_FEEL.md has a [game data] number for it, match that within SPREAD too:
-##   jump apex  Hunter.JUMP_V^2 / (2 Hunter.H_GRAV)  (gravity 1470 uu/s^2, our jump speed)
+##   jump apex  the 60 Hz jump's (gravity [game data] 1470 uu/s^2, our jump speed): a 60 Hz step moves at its end
+##              speed, the exact arc of a launch half a step's gravity under JUMP_V, 1.52 m (HunterMove.fall)
 ##   glide sink HunterMove.glide_pull_vy over the glide's second second, high over the ground (GlideDownwardForce)
 ## Dash and knock distances have no [game data] (dash curves not decoded): they are held to agreement only.
 ## Prints "FPSFEEL <hero> <measure> <dt30> <dt60> <dt144> ..." rows and "FPS FEEL CHECK DONE, failures: N".
@@ -25,7 +26,8 @@ func ok(cond: bool, what: String) -> void:
 func run(main: Node) -> void:
 	Save.no_write = true
 	Save.d = Save.fresh()
-	var apex_target := Hunter.JUMP_V * Hunter.JUMP_V / (2.0 * Hunter.H_GRAV)
+	var lift := Hunter.JUMP_V - 0.5 * Hunter.H_GRAV * Match.DT
+	var apex_target := lift * lift / (2.0 * Hunter.H_GRAV)
 	for arch: String in HEROES:
 		var rows := {}          # measure -> [value per step]
 		for dt: float in STEPS:
@@ -108,10 +110,12 @@ func _for(m: Match, seconds: float, dt: float) -> void:
 		m.player.inp["glide"] = glide
 		m.step(dt)
 
-## A standing hunter at p with full dashes, no keys.
+## A standing hunter at p with full dashes, no keys, no mobs (the map respawns them by the spawn, and a body
+## there shoves the hunter about a step-count-dependent amount).
 func _reset(h: Hunter, p: Vector3) -> void:
 	for i in 30:
 		h.m.step(Match.DT)          # (whatever ran before ends on the same clock every time)
+	_clear_mobs(h.m)
 	h.teleport(p)
 	h.vel = Vector3.ZERO
 	h.grounded = true
@@ -134,9 +138,7 @@ func _match(main: Node, arch: String) -> Match:
 	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 77, "no_drop": true,
 		"god": true, "cls": Arch.weight(arch), "arch": arch, "weapon": Arch.signature(arch)})
 	m.set_process(false)
-	for mob in m.mobs:
-		mob.queue_free()
-	m.mobs.clear()
+	_clear_mobs(m)
 	var h: Hunter = m.player
 	var w: World = m.world
 	var cx := int(floor(h.pos.x))
@@ -167,3 +169,8 @@ func _match(main: Node, arch: String) -> Match:
 	for i in 20:
 		m.step(Match.DT)
 	return m
+
+func _clear_mobs(m: Match) -> void:
+	for mob in m.mobs:
+		mob.queue_free()
+	m.mobs.clear()
