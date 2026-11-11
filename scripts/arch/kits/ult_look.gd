@@ -10,7 +10,7 @@ extends CareLook
 
 const FRINGE := 18            # crystals round the rink's edge
 const RINK_FILL := 0.3        # the rink's body (care_disc fill): alpha about 0.09 at its centre, 0.17 by the rim
-const RINK_FILL_CRACK := 0.1  # added at full crack (0.12 / 0.23); the lines and the lit rim carry the countdown, not the body
+const RINK_FILL_CRACK := 0.1  # added at full crack (0.12 / 0.23): the lines and lit rim carry the countdown
 
 
 func _build(kind: String) -> Node3D:
