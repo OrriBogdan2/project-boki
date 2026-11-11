@@ -1443,6 +1443,8 @@ The Boki base's playthings (GARDEN.md section 4; only while farm_build.json base
 | pick_chance | 0.5 |
 | play_secs | [8.0, 12.0] |
 | go_timeout | 20 |
+| stall_s | 8 |
+| stall_s_doc | Seconds on the way to a toy without getting STALL_GAIN m (home_toys.gd) nearer it before the Boki gives it up: boxed in by a Boki lying beside it, it would otherwise stand go_timeout s. |
 | joy_gain | 10 |
 | stat_gain | 1 |
 | max_players | 2 |

@@ -31,7 +31,8 @@ static func place(h) -> void:
 		return
 	for br in h.bridges.values():
 		for part in ["node", "sign", "label"]:
-			br[part].visible = false          # the side isles' bridge stubs and signs belong to Bramblebank
+			if br.has(part):      # a base farm retires the side isles: no sign or label was made
+				br[part].visible = false          # the side isles' bridge stubs and signs belong to Bramblebank
 	var B: Dictionary = GardenZones.info(h.zone)["build"]
 	var shallow := Rect2()
 	if B.has("shallow"):

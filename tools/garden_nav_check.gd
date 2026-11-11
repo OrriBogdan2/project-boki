@@ -12,10 +12,10 @@ const STUCK_SECS := 3.0        # s a Boki may want to move without getting anywh
 const PROGRESS := 0.12         # m moved in a step window that counts as progress
 const WANT_DIST := 0.5         # m: a goal farther than this is a wish to move
 const OVERLAP_K := 0.6         # of the two body radii: closer than this is overlapping
-const CAST := ["zapple", "puddlet", "cindle", "kilnbadger", "lodestick", "marchleaf"]
 const SEED := 5
 
 var zone := ""         # --nav-zone=: the zone to sweep ("" the start zone)
+var cast := ["zapple", "puddlet", "cindle", "kilnbadger", "lodestick", "marchleaf"]      # the Boki species
 var bad := 0
 var main: Node
 var home
@@ -33,8 +33,8 @@ func ok(cond: bool, what: String) -> void:
 func _save() -> void:
 	FarmUnlocks.rules()["base_mode"] = true
 	var d := Save.fresh()
-	for i in CAST.size():
-		var rec := Save.new_kin(CAST[i], "B%d" % i)
+	for i in cast.size():
+		var rec := Save.new_kin(cast[i], "B%d" % i)
 		Care.ensure(rec)
 		if zone != "":
 			rec["zone"] = zone
@@ -158,7 +158,7 @@ func run(m: Node) -> void:
 			zone = a.substr(11)
 	_save()
 	home = await _open_home()
-	ok(home.kins.size() == CAST.size() and home.life != null, "%d Boki on a base_mode farm" % home.kins.size())
+	ok(home.kins.size() == cast.size() and home.life != null, "%d Boki on a base_mode farm" % home.kins.size())
 	_stage()
 	var cases := 0
 	var t := 0.0
