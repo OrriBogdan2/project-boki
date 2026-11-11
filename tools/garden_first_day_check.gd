@@ -53,9 +53,11 @@ func _screens() -> void:
 		for zone in [""] + HudGroups.ZONES:
 			var scr: Dictionary = await gh.screen(day, zone)
 			var what := "day %d %s" % [day, zone if zone != "" else "hub"]
+			var groups := int(scr["groups"].size())
 			if day == 1:
-				ok(scr["groups"].size() <= HudGroups.DAY1_MAX, "%s: %d HUD groups (at most %d)" % [what, scr["groups"].size(), HudGroups.DAY1_MAX])
-			ok(scr["cards"].size() <= 1, "%s: %d arrival cards (%s)" % [what, scr["cards"].size(), ", ".join(scr["cards"])])
+				ok(groups <= HudGroups.DAY1_MAX, "%s: %d HUD groups (at most %d)" % [what, groups, HudGroups.DAY1_MAX])
+			var cards: Array = scr["cards"]
+			ok(cards.size() <= 1, "%s: %d arrival cards (%s)" % [what, cards.size(), ", ".join(cards)])
 
 func _list() -> void:
 	var ids := _ids()

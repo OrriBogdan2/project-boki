@@ -23,11 +23,11 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 
 func _process(delta: float) -> void:
-	var free: bool = home.panel_open == "" and not Overlay.is_open()
+	var room: bool = home.panel_open == "" and not Overlay.is_open()
 	var tut: Dictionary = Save.d["tutorial"]
-	if free and Input.is_action_just_pressed("dash"):
+	if room and Input.is_action_just_pressed("dash"):
 		tut[USED_KEY] = true
-	visible = free and (tut.get(USED_KEY, false) or not FarmUnlocks.base_mode())
+	visible = room and (tut.get(USED_KEY, false) or not FarmUnlocks.base_mode())
 	HudSlot.decay(self, delta)
 	if visible:
 		queue_redraw()

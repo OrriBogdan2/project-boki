@@ -1,14 +1,14 @@
 extends RefCounted
-## --garden-hud-groups [--shots-dir=<dir>]: the garden's screen on day 1 and day 5, in the hub and in two zones. For each of the
-## six screens it lists the HUD groups on show (a group = a separately placed block the player has to scan: a visible
-## child of the home's UI root, with a size) and prints them. Day 1 must stay at DAY1_MAX
-## (asserted by --garden-first-day-check); day 5 is printed. With --shots-dir it also grabs one picture each (needs a renderer: jobq --needs gpu).
-## Never touches the real save.
+## --garden-hud-groups [--shots-dir=<dir>]: the garden's screen on day 1 and day 5, in the hub and in two zones.
+## For each of the six screens it prints the cards that open on arrival and the HUD groups on show (a group = a
+## separately placed block the player has to scan: a visible child of the home's UI, with a size), then the signs
+## in view. Day 1 must stay at DAY1_MAX groups (asserted by --garden-first-day-check). With --shots-dir it also
+## grabs one picture each (needs a renderer: jobq --needs gpu). Never touches the real save.
 
 const ZONES := ["glasswater", "cinderstep"]       # the two zones shot besides the hub
 const CAST := ["zapple", "puddlet", "cindle", "kilnbadger"]
 const SETTLE := 40                                # frames for the arrival, the first toasts and the light
-const FULL_PX := 1200.0                           # px: a full-width block is the dim or the menu host, not a HUD group
+const FULL_PX := 1200.0                           # px: a full-width block is a dim or a host, not a group
 const DAY1_MAX := 5                               # HUD groups on a day-1 screen (DECISIONS 2026-11-08: about 5)
 const MAX_CARDS := 8                              # arrival cards followed before giving up
 const MIN_PX := 4.0                               # px: a block thinner than this is not a group
@@ -30,7 +30,7 @@ static func make_save(day: int, zone: String) -> void:
 			rec["zone"] = zone
 		if day > 1:
 			rec["level"] = 5 + i
-			Care.change(rec, "food" if i % 2 == 0 else "joy", -90.0)      # a hungry one, a bored one: today's wishes
+			Care.change(rec, "food" if i % 2 == 0 else "joy", -90.0)      # hungry, bored: today's wishes
 			for words in DAY5_JOURNAL.slice(0, i + 1):
 				CareJournal.note(rec, words, now - 3600.0)
 		d["roster"].append(rec)
@@ -41,7 +41,7 @@ static func make_save(day: int, zone: String) -> void:
 	if day == 1:
 		tut["chips_seen"] = {}      # a new save: the counters come when there is something to count
 	else:
-		tut.merge({"home": true, "day1_done": true})      # a farm save upgraded into the garden: it has seen every counter
+		tut.merge({"home": true, "day1_done": true})      # a farm save upgraded: it has seen every counter
 	d["gems"] = 40 if day == 1 else 600
 	if day > 1:
 		tut["gfd"]["paid"] = true
@@ -55,7 +55,7 @@ static func make_save(day: int, zone: String) -> void:
 		d["away_seen"] = now - 7200.0      # last here two hours ago: the arrival has a journal to read
 		GardenWishes.today(now)
 
-## The visible blocks of the home's UI (its root and the layer around it): a name from their first words, and the rect.
+## The visible blocks of the home's UI (its root and the layer around it): their first words and rect.
 static func groups_of(home: Node) -> Array:
 	var out: Array = []
 	for c in home.root_ui.get_children() + home.ui.get_children().filter(func(n): return n != home.root_ui):
@@ -69,7 +69,8 @@ static func groups_of(home: Node) -> Array:
 
 ## A short name for a block: its first words.
 static func _what(c: Control) -> String:
-	var found: Array = c.find_children("*", "Label", true, false).filter(func(l): return l.is_visible_in_tree() and l.text != "")
+	var found: Array = c.find_children("*", "Label", true, false).filter(
+			func(l): return l.is_visible_in_tree() and l.text != "")
 	if found.is_empty():
 		return "%s %s" % [c.get_class(), c.name]
 	return String((found[0] as Label).text).left(40).replace("\n", " / ")
@@ -98,6 +99,13 @@ func _arrival_cards(home: Node) -> Array:
 		await _frames(2)
 	return titles
 
+## The signs in the camera's view, one line each.
+func _signs(home: Node) -> void:
+	var cam := main.get_viewport().get_camera_3d()
+	for l in home.find_children("*", "Label3D", true, false):
+		if l.is_visible_in_tree() and l.text != "" and cam.is_position_in_frustum(l.global_position):
+			print("GARDENHUD   sign: %s" % String(l.text).left(50).replace("\n", " / "))
+
 ## One screen: its save, the home, a settle, the arrival cards, the group list, the picture. {groups, cards}.
 func screen(day: int, zone: String) -> Dictionary:
 	make_save(day, zone)
@@ -107,16 +115,13 @@ func screen(day: int, zone: String) -> Dictionary:
 	await _frames(SETTLE)
 	var cards := await _arrival_cards(home)
 	var groups := groups_of(home)
-	var name := "%s_day%d" % [zone if zone != "" else "hub", day]
-	print("GARDENHUD %s: %d groups, %d arrival cards before play: %s" % [name, groups.size(), cards.size(), ", ".join(cards)])
-	for l in home.find_children("*", "Label3D", true, false):
-		var cam := main.get_viewport().get_camera_3d()
-		if l.is_visible_in_tree() and l.text != "" and cam.is_position_in_frustum(l.global_position):
-			print("GARDENHUD   world: %s (%.0f m)" % [String(l.text).left(50).replace("\n", " / "), cam.global_position.distance_to(l.global_position)])
+	var tag := "%s_day%d" % [zone if zone != "" else "hub", day]
+	print("GARDENHUD %s: %d groups, %d arrival cards: %s" % [tag, groups.size(), cards.size(), ", ".join(cards)])
 	for g in groups:
 		print("GARDENHUD   %s" % g)
+	_signs(home)
 	if dir != "":
-		main.get_viewport().get_texture().get_image().save_jpg(dir.path_join(name + ".jpg"), 0.9)
+		main.get_viewport().get_texture().get_image().save_jpg(dir.path_join(tag + ".jpg"), 0.9)
 	home.queue_free()
 	await _frames(2)
 	return {"groups": groups, "cards": cards}
