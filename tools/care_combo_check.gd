@@ -4,6 +4,7 @@ extends RefCounted
 ## rimewright.md: where shots land, the telegraph shown while holding, the timings, the payoffs, the
 ## moves and sounds, merge-start hold drops. Runs on tools/support_check.gd's setup and report.
 
+const TTIME := preload("res://tools/tender_anim_time_check.gd")   # Meeko's move timing against the footage frames
 const MOVE_TAIL_MAX := 0.45    # s a dash move may run past its dash (the landing and settle)
 ## Each move's release beat in pip.glb (tools/art1/pip_clips.py: the push, arms up, thrust), s into the clip.
 const RELEASE_BEAT := {
@@ -907,6 +908,7 @@ func tender() -> void:
 	var A: Hunter = r[2]
 	var T: Hunter = r[3]
 	var K: TenderKit = P.ak
+	var home: Vector3 = r[4]
 	ok(
 			"mm: renamed Meeko, kit sounds load",
 			Arch.name_of("tender") == "The Dawnfox"
@@ -1180,6 +1182,7 @@ func tender() -> void:
 	step(m, 1.2)
 	ok("mm RMB: a stun in the wind-up loses the throw, not the charge",
 			not K.seed_aim and K.ch_rmb >= 1.0 and _mine(m, P).size() == n3)
+	TTIME.new(self).run(m, P, K, A, home)
 	await _free(m)
 	await growth()
 	await burr_ranks()
