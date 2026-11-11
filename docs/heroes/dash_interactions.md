@@ -346,16 +346,16 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | ostra | E -> jump |  | the move goes at once, the ability keeps running (default) |
 | ostra | ult (X) -> jump | Footage (ult f23-f33): Void is held in the cast for Black Hole's 1.0 s telegraph, then acts freely (f50). Ours: no jump during the dome (Hunter.do_jump refuses while ArchKit.cast_locked()); a jump after it opens goes at once. | **exception:** the move is refused while it runs (owner 18:20 (replacing item 16): Nightwell locks him in the cast for the 1.0 s dome only; once it opens he jumps at once) |
 | ostra | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
-| gil | ground dash -> LMB |  | buffered to the dash's end |
-| gil | ground dash -> RMB |  | buffered to the dash's end |
-| gil | ground dash -> E |  | buffered to the dash's end |
-| gil | ground dash -> ult (X) |  | buffered to the dash's end |
-| gil | ground dash -> Q glove |  | buffered to the dash's end |
-| gil | air dash -> LMB |  | buffered to the dash's end |
-| gil | air dash -> RMB |  | buffered to the dash's end |
-| gil | air dash -> E |  | buffered to the dash's end |
-| gil | air dash -> ult (X) |  | buffered to the dash's end |
-| gil | air dash -> Q glove |  | buffered to the dash's end |
+| gil | ground dash -> LMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | ground dash -> RMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | ground dash -> E | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | ground dash -> ult (X) | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | ground dash -> Q glove | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | air dash -> LMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | air dash -> RMB | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | air dash -> E | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | air dash -> ult (X) | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
+| gil | air dash -> Q glove | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | gil | LMB -> dash |  | the kit's own handling (no row yet) |
 | gil | RMB -> dash |  | the kit's own handling (no row yet) |
 | gil | E -> dash | Ours: Gil is our own Hunter (content/archetypes/gil.json), no source row. | **exception:** the dash is refused while it runs (Riptide is a planted spin that ends in the waterspout; Shift during it would drop the spout he is aiming. Recast E sends it early.) |
