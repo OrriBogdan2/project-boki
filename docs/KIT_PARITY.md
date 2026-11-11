@@ -257,24 +257,40 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 
 ## Felt dash per kit (gap 4)
 
-`content/rules/dash_feel.json` defaults to ×1 / ×1: a kit whose dash is the source's measured one runs it as-is. The owner's "slower and shorter" (×.85 distance, ×1.15 time) stays only where no source number exists; Ryzz gets the time part only (his lane is the owner's, item 70). Felt = raw × feel, measured in `--move-feel-check` (`felt dash` rows, ±5% / ±0.035 s) to the moment the dash ends: the step it ends in runs the dash for the time it had left, then the hand-over (on the ground the run, in the air the dash's speed carried on under drag, owner 11-08), and that tail isn't counted.
+`content/rules/dash_feel.json` defaults to ×1 / ×1: a move that is the source's measured one runs it as-is. The owner's "slower and shorter" (×.85 distance, ×1.15 time, DECISIONS Movement) stays on every Shift move with no source number. It is set per move, not per kit: a hunter's `dist`/`time` cover its moves, and its `moves` row (the name the kit passes to `ArchKit.travel` as `"feel"`) overrides one move. Sparkle gets the time part only on the lane (the owner's, item 70). A long dash (out of charges) runs the class's `ex_dist`/`ex_time` (light 5.0 m/.2 s, medium 4.6 m/.2 s, heavy 4.2 m/.21 s; ours, no source) times its move's feel (`Hunter.dash_with`). Felt = raw × feel, measured in `--move-feel-check` (`felt dash` rows for each plain dash, `felt move` rows for the unsourced moves on top; ±5% / ±0.035 s) to the moment the dash ends. The step it ends in runs the dash for the time it had left, then the hand-over (on the ground the run, in the air the dash's speed carried on under drag, owner 11-08). That tail isn't counted.
 
-| Kit | Raw ground | Raw air | Sourced | Feel | Felt ground | Felt air |
+| Hunter | Shift move | Raw | Source | Feel | Felt | Was (0.24.4) |
 |---|---|---|---|---|---|---|
-| Vex | 4.8 m/.45 s tap | 4.7 m/.33 s (2/3 hold, patch notes) | F tap | ×1 | 4.8 m/.45 s | 4.7 m/.33 s |
-| Zedran | 4.5 m/.17 s (+.07 dip) | class long dash | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.2 s | ×feel |
-| Hem | 3.0 m/.27 s roll | 5.0 m/.22 s flick (light long dash) | F roll | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | 5.0 m/.22 s |
-| Cinder | 3.4 m/.33 s | 6.8 m/.28 s | F | ×1 | 3.4 m/.33 s | 6.8 m/.28 s |
-| Pip | 3.6 m/.2 s | 13.3 m/.95 s glide | F | ×1 | 3.6 m/.2 s | 13.3 m/.95 s |
-| Tarek | 2.8 m/.26 s hop | class long dash | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | ×feel |
-| Grimble | 3.2 m/.16 s | 4.3 m/.16 s (×1.35) | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | 3.7 m/.18 s |
-| Claire | Skate 11.5 m/s, up to 1.6 s | same | F speed | none (not a travel) | as raw | as raw |
-| Ostra | lob 12 m, 1.8 s | same | F time | none (not a travel) | as raw | as raw |
-| Bjorn | 3.5 m/.17 s whirl | 4.2 m/.3 s lumber | F whirl | ×1 | 3.5 m/.17 s | 4.2 m/.3 s |
-| Ryzz | lane 5.6-9.75 m at 40 m/s | same | no (owner item 70, lane cut 11-10) | time ×1.15 | 5.6-9.75 m at ~35 m/s | same |
-| Sable | 4.5 m/.48 s | the ground one with a charge (item 183) | F | ×1 | 4.5 m/.48 s | 4.5 m/.48 s, then the air's drag |
+| Vex | Slipstep tap | 4.8 m/.45 s | F | ×1 | 4.8 m/.45 s | same |
+| Vex | Slipstep hold slide | 7 m/.55 s | F | none (not a travel) | as raw | same |
+| Vex | air tap slide | 4.7 m/.33 s (2/3 hold) | patch notes | ×1 | 4.7 m/.33 s | same |
+| Vex | long dash (out of charges) | 4.6 m/.2 s | no | ×.85/×1.15 | 3.9 m/.23 s | 4.6 m/.2 s |
+| Lace | Spirit Walk roll | 3.0 m/.27 s | F | ×1, speed ×0.7 (owner item 9) | 3.0 m/.39 s | same |
+| Lace | flick (out of charges) | 5.0 m/.2 s, speed ×0.7 | no | ×.85/×1.15 | 4.25 m/.33 s | 5.0 m/.29 s |
+| Cinder | Soot Ram | 3.4 m/.33 s | F | ×1 | 3.4 m/.33 s | same |
+| Cinder | air poof | 6.8 m/.28 s | F | ×1 | 6.8 m/.28 s | same |
+| Meeko | Relay Step hop | 3.6 m/.2 s | F | ×1 | 3.6 m/.2 s | same |
+| Meeko | air glide | 13.3 m/.95 s | F | ×1 | 13.3 m/.95 s | same |
+| Albert | 360 Smash dash | 3.5 m/.17 s (+1 m rank 3) | F | ×1 | 3.5 m/.17 s | same |
+| Albert | short dash (Crushing Blow wind-up) | 2.6 m at 20.5 m/s (.13 s) | no | ×.85/×1.15 | 2.2 m/.15 s | 2.6 m/.13 s |
+| Albert | Shield Charge | 4.2 m at 18 m/s (.23 s, +1 m rank 3) | no | ×.85/×1.15 | 3.6 m/.27 s | 4.2 m/.23 s |
+| Albert | lumber (out of charges) | 4.2 m/.21 s | no | ×.85/×1.15 | 3.6 m/.24 s | 4.2 m/.21 s |
+| Sable | Cartwheel (ground, or air with a charge, item 183) | 4.5 m/.48 s | F | ×1 | 4.5 m/.48 s | same |
+| Sable | long dash (out of charges) | 5.0 m/.2 s | no | ×.85/×1.15 | 4.25 m/.23 s in the air | 5.0 m/.2 s |
+| Gil | Ground Swim | 6 m/.4 s | ours (Gil's design, no source hero) | ×1 | 6 m/.4 s | same |
+| Gil | air long dash | 5.0 m/.2 s | no | ×.85/×1.15 | 4.25 m/.23 s | 5.0 m/.2 s |
+| Kael | Rampage | 4.5 m/.17 s (+.07 dip) | no (owner 113.8) | ×.85/×1.15 | 3.8 m/.27 s with the dip | same |
+| Kael | air long dash (out of charges) | 4.2 m/.21 s | no | ×.85/×1.15 | 3.6 m/.24 s | 4.2 m/.21 s |
+| Tenzo | Rock Hop | 2.8 m/.26 s hop | no (owner item 111) | ×.85/×1.15 | 2.4 m/.3 s | same |
+| Tenzo | long dash (out of charges) | 4.6 m/.2 s | no | ×.85/×1.15 | 3.9 m/.23 s | 4.6 m/.2 s |
+| Grimble | Barge | 3.2 m/.16 s | no (owner 23:40) | ×.85/×1.15 | 2.7 m/.18 s | same |
+| Grimble | air barge | 4.3 m/.16 s (×1.35) | no | ×.85/×1.15 | 3.7 m/.18 s | same |
+| Sparkle | Wirerun lane | 5.6-9.75 m at 40 m/s | no (owner item 70, lane cut 11-10) | time ×1.15 | 5.6-9.75 m at ~35 m/s | same |
+| Sparkle | long dash (out of charges) | 5.0 m/.2 s | no | ×.85/×1.15 | 4.25 m/.23 s | 5.0 m/.2 s |
+| Neve | Skate | 11.5 m/s, up to 1.6 s | F speed | none (not a travel) | as raw | same |
+| Motley | Lantern Trade | lob 12 m, 1.8 s | F time | none (not a travel) | as raw | same |
 
-On a ×1 kit every Shift move runs its raw numbers, including the moves with no source figure: Bjorn's Shield Charge (4.2 m at 18 m/s), his short dash during the wind-up and his lumber, Vex's long dash and Hem's flick are now about 18% longer and 13% quicker than before.
+Before this, every long dash ran the class's raw numbers whatever the hunter's feel was: `Hunter.dash_with` swapped them in and dropped the feel (Vex's kit 4.6 × 0.9 travel never ran either). The `felt move` rows check each "no" row that has a feel row above. Sable's long dash on the ground stops after about 0.13 s, because her Cartwheel treats a long dash as an air one and ends it on touching ground (`ThiefKit._tick_vault`). That cut is older than this table, so her row is measured in the air.
 
 ## The 20 biggest feel gaps, ranked
 
@@ -285,7 +301,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 1 | Zedran has no authored animation: `kael.glb` 0 clips, 20 moves procedural | Rig and author clips, add the map | art/wardens/kael, content/rules/warden_anim/kael.json | L |
 | 2 | Stopping is a hard stop for all 12: brake 110 vs 22.2 m/s² | Move brake to source, retune | content/rules/hunter_move.json, scripts/match/hunter.gd | M |
 | 3 | Air control 0.3 vs 0.015, 20x source | Lower it; keep owner-asked steer rows | hunter_move.json, hunter_move.gd | M |
-| 4 | Dashes stop dead: keep 15%/30% vs carry | Raise carry. **Scale part done:** the ×.85/×1.15 layer runs only on kits with no source dash (table below) | hunter.gd | M |
+| 4 | Dashes stop dead: keep 15%/30% vs carry | Raise carry. **Scale part done:** the ×.85/×1.15 layer runs on every Shift move with no source number, per move (table below) | hunter.gd | M |
 | 5 | Hem's invented Focus/Deadeye sits over the draw | Remove, or owner keeps it | archer_kit.gd, archer.json | M, owner |
 | 6 | Hem's Heavy Shot wall payoff ~0.4x vs ~5x | Raise wall_dmg, drop .4 floor | archer.json | S |
 | 7 | Hem's RMB .5 s dead zone before the draw reads | Match the footage start | archer.json, pin_needle.gd | S |
