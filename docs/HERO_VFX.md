@@ -86,3 +86,46 @@ at the farthest a shot can be in view (the floor under the top edge, `ShotFloor.
 `s["r"]` is never touched. `--shot-size-check` reads each kit's core radius in pixels at 720p and 1080p and asserts
 the hit radius is unchanged; `--shot-size-shots --shots-dir=<dir> --res=720|1080` (GPU) renders each kit's shot at
 exactly that size and measures its own look, the core and the rim in pixels across the flight line.
+
+## Boki type accents
+Boki casts (`Kin._cast`) are drawn by `KinExec` in the effect's category colour (`KinRules.CAT_COLORS`: damage
+orange, control violet, sustain green, utility gold), with the shape of the delivery (ring, cone, bolt, burst).
+**Audit (main d255acbee + the type rename):** no ability has a type-specific look. Cast and impact are the same for
+all 15 Boki types in play (50 species). The only per-type signal was the `k_<type>` cue, which has 6 sounds
+(`content/sfx/boki.json`, still under the old ids), so after the rename every Boki falls back to the generic `skill`
+sound. Ability `theme` fields do not match the species' type (a Fire Boki can carry a Steel ability), so a type's
+look cannot follow the ability.
+
+`KinTypeFx` (`scripts/match/kin_type_fx.gd`) fixes that: one cheap accent per type, played on **every cast by a Boki
+of that type** (active, auto and triggered casts; not while the Boki is out of the local player's sight). It sits at
+the Boki's feet and chest and uses the shared `Fx` pools only (dots, streaks, one ground ring), so it adds no node,
+no shader and no per-frame code. It does not recolour the effect itself, so colour keeps meaning the effect.
+Budget per cast: at most 10 dots, 8 streaks, 3 rings (before the quality preset's `fx` factor). `--kin-type-fx-check`
+asserts coverage of all 18 types, distinct colours and shapes, the budget and a real cast. Sheet:
+`--kin-type-sheet --shots-dir=<dir>` (GPU, `jobq submit --needs gpu`). Tuned on grass over GPU sheets 20261109-121559 (too faint),
+20261109-130430 (most read; Electric/Steel lost, Rock/Bug faint, so those four were enlarged/lengthened and Rock darkened).
+The sheet backdrop (glow zone, chests at top) hides Normal and Electric: judge those on open grass.
+
+| Type | Species | Colour | Accent | Before |
+|---|---|---|---|---|
+| Normal | 0 | cream | plain short puff | none |
+| Fire | 4 | orange | embers rise slowly | none |
+| Water | 0 | blue | droplets arc up and fall | none |
+| Grass | 4 | green | leaves drift down | none |
+| Spore | 3 | tan | big soft puffs float up | cue only |
+| Electric | 4 | yellow | thin fast zaps, all directions | none |
+| Ice | 4 | cyan | chunky shards fall | none |
+| Rock | 4 | brown | pebbles drop fast | none |
+| Psychic | 3 | violet | two slow ripples and rising motes | cue only |
+| Flying | 2 | sky white | wind streaks along the cast | none |
+| Dragon | 0 | indigo | embers and streaks rising | none |
+| Dark | 4 | deep violet | big slow smoke | none |
+| Poison | 3 | acid green | bubbles rise | cue only |
+| Bug | 4 | amber | many tiny dots, scattered | none |
+| Steel | 2 | silver | short thick glints along the cast | none |
+| Fairy | 3 | pink | small sparkles float up | cue only |
+| Crystal | 3 | teal | facets fan upward | cue only |
+| Sound | 3 | gold | three quick rings | cue only |
+
+Types that shared a look before: all of them (one category-coloured look). Types with no look of their own in the
+data: Normal, Water and Dragon have no species yet (accents ready). Merged forms (`KinMerge`) are not changed.
