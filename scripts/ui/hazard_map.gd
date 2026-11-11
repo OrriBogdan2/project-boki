@@ -7,6 +7,7 @@ extends RefCounted
 const NEAR_M := 20.0       # m: the minimap shows the hazards once you are this close to one (else on a hold)
 const FILL_A := 0.5        # fill opacity over the painted map
 const EDGE_A := 0.95       # outline opacity
+const CASING := Color(0.02, 0.03, 0.06, 0.55)    # the dark line under an outline, so it reads on any island colour
 const MM_SHIELD := 12.0    # px: the shield on the minimap
 const FULL_SHIELD := 16.0  # px: the shield on the full map
 const SAFE := Color("8fe3a0")
@@ -46,7 +47,8 @@ static func draw(c: Control, m: Match, to_screen: Callable, inner: Rect2, circ: 
 		for i in pts.size():
 			var b: Vector2 = pts[(i + 1) % pts.size()]
 			if _inside(pts[i], inner, circ) and _inside(b, inner, circ):
-				c.draw_line(pts[i], b, edge(kind), 1.5, true)
+				c.draw_line(pts[i], b, CASING, 3.5, true)
+				c.draw_line(pts[i], b, edge(kind), 1.8, true)
 		var mid: Vector2 = to_screen.call(a["centre"])
 		if m.player and _inside(mid, inner, circ) and tz.guards(m.player, kind):
 			c.draw_circle(mid, shield_px * 0.75, Color(0.03, 0.05, 0.08, 0.7))
