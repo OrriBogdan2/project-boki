@@ -2209,12 +2209,12 @@ func _physics(dt: float) -> void:
 	if b2 == 0.0: pos.z = nz
 	elif grounded and b2 > 0.0 and b2 - pos.y <= World.LEVEL + 0.05: step_up = maxf(step_up, b2)
 	elif b2 > 0.0 or b2 == -1.0: vel.z = 0.0 if b2 == -1.0 else vel.z * -0.1
-	if step_up > 0.0 and mv.length() > 0.3:
-		# walking into a single terrace steps you up it smoothly, no hop
+	if step_up > 0.0 and (mv.length() > 0.3 or roll_t > 0.0):
+		# walking or dashing into a single terrace steps you up it smoothly, no hop (a dash at its own speed)
 		step_vis -= step_up - pos.y
 		pos.y = step_up
 		prev.y = pos.y
-		var fw := mv.normalized() * spd * dt
+		var fw := (hv if roll_t > 0.0 else mv.normalized() * spd) * dt
 		if _occ(pos.x + fw.x, pos.z + fw.y, guard) == 0.0:
 			pos.x += fw.x; pos.z += fw.y
 	elif step_up == 0.0 and (b1 > 0.0 or b2 > 0.0) and hv.length() > 1.0:
@@ -2281,7 +2281,7 @@ func _physics(dt: float) -> void:
 		g = minf(g, pos.y + SPIRIT_CLIMB * dt)
 		grounded = true
 		vel.y = 0.0
-	if grounded and g < pos.y - 0.05:
+	if grounded and g < pos.y - 0.05 and not HunterMove.follows_floor(self, g, Vector2(pos.x - x0, pos.z - z0).length()):
 		grounded = false
 		vel.y = minf(vel.y, 0.0)
 		coyote = HunterMove.coyote_s

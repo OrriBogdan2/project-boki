@@ -34,6 +34,8 @@ static var dive_timeout: float = _phys["dive_timeout"]
 static var coyote_s: float = _phys["coyote_s"]
 static var jump_buffer_s: float = _phys["jump_buffer_s"]
 static var sneak_speed: float = _phys["sneak_speed"]
+static var floor_snap: float = _phys["floor_snap"]
+static var walkable_tan: float = tan(deg_to_rad(float(_phys["walkable_angle"])))
 
 static func _load() -> Dictionary:
 	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://content/rules/hunter_move.json"))
@@ -78,6 +80,17 @@ static func brake(hv: Vector2, grip: float, dt: float) -> Vector2:
 		if v.dot(hv) <= 0.0:
 			return Vector2.ZERO
 	return Vector2.ZERO if v.length() <= brake_stop_speed else v
+
+## [game data] A grounded hunter (walking or dashing) keeps to the floor where the ground under it drops
+## less than floor_snap this step, or less than a walkable slope falls over the `travel` metres it moved
+## (a ramp, stairs, the lip it was lifted onto), easing the model down. A bigger drop, and always a whole
+## tier, is a ledge: it leaves the ground. Nothing pulls down a body that is rising.
+static func follows_floor(h: Hunter, g: float, travel: float) -> bool:
+	var reach := minf(maxf(floor_snap, travel * walkable_tan), World.LEVEL - 0.05)
+	if h.vel.y > 0.0 or h.pos.y - g > reach:
+		return false
+	h.step_vis += h.pos.y - g
+	return true
 
 ## Velocity a dash leaves you with: no hard stop, it hands over at dash_exit_run of run speed (never
 ## faster than the dash), and the walk, brake or air carry takes it from there.

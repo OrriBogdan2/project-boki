@@ -107,6 +107,7 @@ const CHECKS := {
 	"--recast-cue-check": ["res://tools/recast_cue_check.gd", "recast_cue_check", null],
 	"--recast-cue-shots": ["res://tools/recast_cue_shots.gd", "recast_cue_shots", null],      # --shots-dir=<dir>
 	"--dash-dir-shots": ["res://tools/dash_dir_shots.gd", "dash_dir_shots", null],  # each Hunter dashes four ways (GPU)
+	"--dash-slope-check": ["res://tools/dash_slope_check.gd", "dash_slope_check", null],      # dash over ramps, a step, a crest
 	"--dash-aim-check": ["res://tools/dash_aim_check.gd", "dash_aim_check", null],
 	"--aim-near-check": ["res://tools/aim_near_check.gd", "aim_near_check", null],      # the cursor on or under your own body
 	"--press-latency-check": ["res://tools/press_latency_check.gd", "press_latency_check", null],      # key to picture, every hero
