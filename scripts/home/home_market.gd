@@ -39,6 +39,10 @@ func tabs() -> Array:
 	return TABS.filter(func(t): return int(t[1]) <= lv and not (no_exchange and t[0] == "Exchange")) \
 			.map(func(t): return String(t[0]))
 
+## The vendor's tabs: base_mode has no Seeds (the snack patch has none) and no Sell.
+static func vendor_tabs() -> Array:
+	return VENDOR_TABS.filter(func(t): return not (FarmUnlocks.base_mode() and t in ["Seeds", "Sell"]))
+
 ## --open=<name> from the home screen. Returns true if it was one of ours.
 func open_named(which: String) -> bool:
 	var base := which.get_slice(":", 0)
@@ -98,9 +102,7 @@ func _next_level(v: VBoxContainer) -> void:
 func _vendor(v: VBoxContainer) -> void:
 	UI.subtitle(v, "Goods for your Boki, your Hunter, the farm and the house")
 	var row := UI.hbox(6)
-	for t in VENDOR_TABS:
-		if t == "Sell" and FarmUnlocks.base_mode():
-			continue
+	for t in vendor_tabs():
 		var tt: String = t
 		row.add_child(UI.choice(tt, vendor_tab == tt, func(): vendor_tab = tt; open(), 0))
 	v.add_child(row)
@@ -151,7 +153,7 @@ func _boki_food() -> Array:
 	for f in Care.FOODS:
 		var fd: Dictionary = Care.FOODS[f]
 		var fk: String = f
-		var desc := "Boki eat this. Feed it from a Boki's card. " + String(fd["desc"])
+		var desc := "Boki eat this. Feed it from a Boki's card. " + FoodJournal.line(f)
 		goods.append(["food:" + f, fd["name"], desc, int(fd["price"]), Color("ffb36a"),
 			func(): Save.add_item(fk, 1), "have %d" % int(Save.d["items"].get(f, 0))])
 	return goods

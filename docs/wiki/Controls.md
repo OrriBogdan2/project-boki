@@ -88,7 +88,7 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | V | Play fetch with a Boki | `play` | yes |
 | T | Talk to a Boki | `talk` | yes |
 | C | A Boki's details | `details` | yes |
-| H | Whistle | `whistle` | no |
+| H | Whistle at home: your partner comes, hold for the nearest Boki | `whistle` | yes |
 | J | Relics: change your Relic (at home and in practice areas) | `hero` | yes |
 | I | Inventory | `inventory` | yes |
 | B | Build mode at home / decorate indoors | `build` | yes |
@@ -97,6 +97,12 @@ Default bindings, read from `Game._setup_input` (`scripts/core/game.gd`); names 
 | Y | Emote wheel (hold, in a match) | `emote` | yes |
 | M | Full map (click to ping) | `map` | yes |
 | P | Pass the drop lead | `pass_lead` | yes |
+| Z | Undo the last piece (build mode, with Ctrl) | `undo` | yes |
+| Shift | Hold to keep placing (build mode) | `keep_placing` | yes |
+| Alt | Hold with a slot key to level it | `level_mod` | yes |
+| K | Hunter kit card (hover a hunter) | `kit_card` | yes |
+| Enter / Kp | Press the open panel's main button | `confirm` | yes |
+| V | Push to talk (before a match) | `push_to_talk` | yes |
 | F10 | Recording mode (again: hide the HUD) | `record` | yes |
 | F9 | Recording: slow camera orbit | `record_orbit` | yes |
 | F7 | Movement readout (tuning) | `move_readout` | yes |

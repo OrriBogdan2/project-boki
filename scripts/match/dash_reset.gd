@@ -5,13 +5,11 @@ extends RefCounted
 ## get their dash (Shift) back: a one-charge dash refills, a multi-charge dash gains one charge, and the
 ## long-dash cooldown clears. Only the knocker heals a little. Mobs and bosses don't count, and a hero whose
 ## dash data says "knock_refresh": false is left out. Match.knock, eliminate and _lose_life call takedown();
-## Match.on_damage (and damage-free CC) calls note(). The hero-specific resets (a Sparkle blowout, a Vex
-## vault, a knife in a foe) call cue() so every "dash is back" gives the same feedback to the one who got
-## it: the reset sound (Sfx.play_reset_cue) and a pop on the HUD's Shift icon.
+## Match.on_damage (and damage-free CC) calls note(). The feedback is ResetCue's, the same as every
+## hero-specific reset: path "takedown" for the knocker, "assist" (softer) for a teammate.
 
 const HEAL := 0.05          # of max health, per takedown, knocker only (a knock and the kill that follows each give it)
 const ASSIST_WINDOW := 4.0  # s: how recent a teammate's hit or CC on the victim must be to count as an assist
-const ASSIST_SOFTER_DB := 6.0  # dB: how much quieter an assist's reset cue plays than the knocker's
 
 ## Hunter `by` (or its Boki) landed damage or crowd control on enemy hunter `target`: remember when.
 ## One dictionary write per landed hit; takedown() reads it.
@@ -38,14 +36,5 @@ static func _refresh(h: Hunter, source: String) -> bool:
 	var most := h.max_dashes()
 	h.dashes = most if most <= 1.0 else minf(most, h.dashes + 1.0)
 	h.ex_cd = 0.0
-	cue(h, source)
+	ResetCue.play(h, source)
 	return true
-
-## The dash came back for `h`: play the cue (softer for an assist) and pop the Shift icon (local hunter only).
-static func cue(h: Hunter, source := "hero") -> void:
-	if h == null or not h.is_local():
-		return
-	Sfx.play_reset_cue(Sfx.RESET_CUE_DB - (ASSIST_SOFTER_DB if source == "assist" else 0.0))
-	if h.m.hud:
-		h.m.hud.ability_feedback("dash", "reset")
-	CombatBus.dash_reset_cue.emit(h, source)
