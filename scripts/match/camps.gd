@@ -34,6 +34,13 @@ static func rules() -> Dictionary:
 static func size_def(i: int) -> Dictionary:
 	return rules()["sizes"][i]
 
+## The index of the size with this id ("small", "camp", "great", "chief").
+static func size_index(id: String) -> int:
+	for i in rules()["sizes"].size():
+		if rules()["sizes"][i]["id"] == id:
+			return i
+	return 1
+
 ## Whether a monster belongs to a camp (it then rolls no drops of its own).
 static func is_camp(mb: Mob) -> bool:
 	return mb.has_meta("camp")

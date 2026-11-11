@@ -6,6 +6,7 @@ extends RefCounted
 ## beacon, the nearest exit). The full map (FullMap) always shows everything. Team colours are kept.
 ## tools/minimap_check.gd counts these lists, so a new minimap icon has to pick a kind here.
 
+const GROUND_R := 34.0        # m: how far the on-the-ground minimap sees from you (riding or dropping: the whole map)
 const ICON_R := 5.5           # px: the one size rule, the outer radius of every minimap icon
 const DEFAULT := ["you", "squad", "boki", "exit", "blight", "ping"]
 const DETAIL := [
