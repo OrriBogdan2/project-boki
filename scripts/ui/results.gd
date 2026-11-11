@@ -43,14 +43,19 @@ func show_result(r: Dictionary) -> void:
 			sc.custom_minimum_size.y = minf(pad.get_combined_minimum_size().y, sc.get_viewport_rect().size.y - 200.0)
 	v.minimum_size_changed.connect(func(): fit.call_deferred())
 	sc.tree_entered.connect(func(): fit.call_deferred())
-	# header: one tag, and the outcome with the Hunter's name in it
+	# header: one tag, the outcome with the Hunter's name in it, then how you left
 	var tag := UI.tag("First expedition" if r.get("tutorial", false) and won else ("Extracted" if won else "Didn't make it"), UI.TEAL if won else Color("ff9a8a"))
 	var hunter := String(Save.d.get("name", "Hunter")).substr(0, 16)
 	var head := UI.vbox(6)
 	head.add_child(tag)
 	head.add_child(UI.title("%s made it out" % hunter if won else _lost_title(r.get("why", "")), 46, UI.INK))
-	if not won:
-		head.add_child(UI.para("Everything you carried stays out in the islands.", UI.T_BODY, UI.MUTED))
+	var hows := {"skiff": "Flew out on the skiff from %s.", "hatch": "Slipped out through a rift hatch.",
+		"uplink": "Rode the lift out of %s."}
+	var how_line := String(hows.get(String(r.get("how", "")), ""))
+	if how_line.contains("%s"): how_line = how_line % String(r.get("where", "the islands"))
+	var how := how_line if won else "Everything you carried stays out in the islands."
+	if how != "":
+		head.add_child(UI.para(how, UI.T_BODY, UI.MUTED))
 	v.add_child(head)
 	# the three numbers that matter, big and counting up, on one strip; the rest behind Details
 	var secs := int(r.get("time", 0))

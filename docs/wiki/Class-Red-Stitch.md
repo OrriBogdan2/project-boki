@@ -98,9 +98,9 @@ Rank 2 is the shared step (shorter cooldown, more damage); rank 3 adds the speci
 
 | Slot | Rank 2 | Rank 3 |
 |---|---|---|
-| RMB | cooldown 16s -> 13s, damage +15%. | cooldown 16s -> 10s, damage +30%; flies 3m farther and a wall stun gives a dash charge. |
-| Dash (Shift) | recharge 9.5s -> 8.1s per charge. | recharge 6s -> 4.2s; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
-| E | cooldown 15s -> 12.8s, damage +15%. | cooldown 9s -> 7.2s, damage +30%; the Hail Wall is 30% wider. |
+| RMB | cooldown 16s -> 13s, damage +20%. | cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge. |
+| Dash (Shift) | recharge 9.5s -> 8.5s per charge. | recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too. |
+| E | cooldown 15s -> 13s, damage +30%. | cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider. |
 
 **Suggested level-up order** (what bots follow): RMB > Dash (Shift) > E > RMB > E > RMB > Dash (Shift) > E.
 

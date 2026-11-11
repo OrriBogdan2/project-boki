@@ -8,7 +8,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
 | The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
-| The Hollow Crown | `content/maps/hollowcrown.json` | 216 x 216 | 12 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
+| The Hollow Crown | `content/maps/hollowcrown.json` | 305 x 305 | 11 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
 
@@ -35,32 +35,31 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 
 | Region | Biome | Purpose |
 |---|---|---|
-| The Crown | Gloom | Contested core: the vault on the Throne, two boss Gaols, the richest loot and the most Blight. Every route in is a bridge or a glide over open air. |
-| Frostgate | Frost | Northern ridge and Keep: high ground over the Gate Span, a camp to level on, Rimefield cover. |
-| Cinder Steps | Ember | Western forge country: the Kilns overlook the Crown's west face; the Ash Bridge to the Ashen Gaol. |
-| Stormbreak | Storm | Eastern tableland with the shrine on the Shrine Table; launch pad up to Shardfall. |
-| Thornwood | Bloom | Southern wood: tall grass ambushes, the Boki nest, the Thornhive lair and its uplink. |
-| Larkhollow | Meadow | Quiet NW landing with a skiff dock. |
-| Highwatch | Frost | Quiet NE landing with an uplink outpost. |
-| Duskmoor | Storm | Quiet SE landing with a skiff dock. |
-| Saltmere | Bloom | Quiet SW landing with an uplink outpost. |
+| The Crown | Gloom | The vault on the Throne, two boss Gaols and the richest chests, under the most Blight. |
+| Frostgate | Frost | The best armor on the map, and the Keep's high ground over the Gate Span. |
+| Cinder Steps | Ember | Forge country: gloves and weapon tunings from the Kilns, a camp to level on. |
+| Stormbreak | Storm | The shrine on the Shrine Table, boots, and Storm Halt (sky train) off its east rim. |
+| Thornwood | Bloom | The Boki nest and the Thornhive lair; tall-grass ambushes and an uplink by the nest. |
+| Larkhollow | Meadow | Wild Boki graze in the Hollow; a calm place to catch one, with a skiff dock out. |
+| Highwatch | Frost | The Lookout over the Gaol and the Watch Road, boots, and an uplink out. |
+| Duskmoor | Storm | Relics in the Moor Chapel ruins, and a skiff dock out. |
+| Saltmere | Bloom | Salt caches along the dry river, the outer ring's most chests, and an uplink out. |
 
 ### Islands
 
 | Island | Role | Biome | Danger | Tall grass clumps | Named spots |
 |---|---|---|---|---|---|
-| The Crown | heart | Gloom | dangerous | 27 |  |
-| Stormcrown Gaol | camp | Storm | dangerous | 4 |  |
-| Ashen Gaol | camp | Ember | dangerous | 6 |  |
-| Frostgate | camp | Frost | contested | 6 | Frostgate Keep, Rimefield |
-| Cinder Steps | camp | Ember | contested | 15 | The Kilns, Forge Yard |
-| Stormbreak | shrine | Storm | contested | 11 |  |
-| Thornwood | nest | Bloom | contested | 30 |  |
-| Larkhollow | landing | Meadow | quiet | 20 | Lark Stones |
-| Highwatch | landing | Frost | quiet | 3 |  |
-| Duskmoor | landing | Storm | quiet | 11 |  |
-| Saltmere | landing | Bloom | quiet | 16 |  |
-| Shardfall | perch | Gloom | dangerous | 0 |  |
+| The Crown | heart | Gloom | dangerous | 58 |  |
+| Stormcrown Gaol | camp | Storm | dangerous | 9 |  |
+| Ashen Gaol | camp | Ember | dangerous | 12 |  |
+| Frostgate | camp | Frost | contested | 9 | Frostgate Keep, Rimefield |
+| Cinder Steps | camp | Ember | contested | 30 | The Kilns, Forge Yard |
+| Stormbreak | shrine | Storm | contested | 26 |  |
+| Thornwood | nest | Bloom | contested | 61 | Bramble Rise |
+| Larkhollow | landing | Meadow | quiet | 48 | The Hollow |
+| Highwatch | landing | Frost | quiet | 3 | The Lookout |
+| Duskmoor | landing | Storm | quiet | 16 | Moor Chapel |
+| Saltmere | landing | Bloom | quiet | 32 | Salt River |
 
 ### Boss lairs
 
@@ -70,18 +69,18 @@ Hand-made expedition map (tools/make_hollowcrown.py; the format is described the
 | The Sunken Forge | Stone Colossus | Ashen Gaol | lock dial |
 | The Thornhive | Brood Mother | Thornwood | lock dial, three ward stones |
 
-**Exits:** 2 skiff docks, 3 uplink outposts, 5 rift hatches.
+**Exits:** 4 skiff docks, 5 uplink outposts, 8 rift hatches.
 
-**Getting around:** 9 bridges, 17 glide routes, 1 jump pads, 1 updrafts.
+**Getting around:** 9 bridges, 14 glide routes, a sky train with 10 stops (Lark Halt, Frost Halt, Watch Halt, Eyrie Halt, Storm Halt, Moor Halt, Bramble Halt, Salt Halt, Ash Halt, Cinder Halt).
 
 ### Rolled each match
 
 | What | Live per match | Candidate spots |
 |---|---|---|
-| Rare Boki | 3 | Larkhollow, Highwatch, Duskmoor, Saltmere, Nest Glade, Rimefield, Forge Yard, Stormbreak |
-| Vaults | 2 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
-| Item caches | 4 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol |
-| Live boss lairs | 2 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
+| Rare Boki | 5 | Larkhollow, Highwatch, Duskmoor, Saltmere, Nest Glade, Rimefield, Forge Yard, Stormbreak |
+| Vaults | 3 | Frostgate Keep, The Kilns, Shrine Table, Thornwood, The Crown |
+| Item caches | 7 | Larkhollow, Highwatch, Duskmoor, Saltmere, Frostgate, Cinder Steps, Stormbreak, Thornwood, The Crown, Stormcrown Gaol, Frostgate, Stormbreak, Thornwood, Cinder Steps |
+| Live boss lairs | 3 | Stormcrown Eyrie, The Sunken Forge, The Thornhive |
 
 
 ## Skyreach
