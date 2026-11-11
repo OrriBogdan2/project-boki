@@ -732,6 +732,7 @@ const KIT_DASH := {
 	"dolm": {"ground": [2.38, 0.299], "src": "owner item 111: hop 2.8 m / 0.26 s x0.85 / x1.15"},
 	# owner playtest 11-10 (754d177a0): the lane cut to 5.6-9.75 m, still at 40 m/s, so 5.6 / 40 x1.15
 	"mage": {"ground": [5.6, 0.161], "src": "owner 11-10: shortest lane 5.6 m at 40 m/s, time x1.15"},
+	"gil": {"ground": [6.0, 0.4], "air": [5.0, 0.2], "src": "ours: Ground Swim 6 m / 0.4 s, air the light long dash"},
 }
 const DASH_TOL := [0.05, 0.035]      # share of the distance, s: about a step either side (frame-quantised travel)
 

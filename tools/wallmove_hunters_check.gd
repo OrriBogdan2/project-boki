@@ -1,13 +1,11 @@
 extends RefCounted
 ## Per-Hunter wall kick and wall bounce (part of --wallmove-check; DECISIONS 11-07: wall kick and wall
-## bounce for everyone, every interaction chainable). Each of the 12 Hunters, in the Training Area's strip
+## bounce for everyone, every interaction chainable). Every Hunter (Arch.ORDER), in the Training Area's strip
 ## beside a tall wall, tries both moves from a run, from a jump, out of the dash, and in the air `PRESS_AT`
 ## seconds after each ability button (LMB, RMB, E, X, Shift; tapped and held). Prints "WHUNT <hunter> ..."
 ## lines and counts the cases that are blocked. docs/MOVEMENT_FEEL.md lists what is allowed to commit.
 
 const DT := Match.DT
-const HUNTERS := ["archer", "ashwick", "bulwark", "dolm", "dredge", "gunslinger", "juggernaut", "mage",
-		"ostra", "rimewright", "tender", "thief"]
 const KEYS := ["fire", "sec", "sig", "skill", "dash"]
 const PRESS_AT := [0.05, 0.2, 0.45, 0.8]   # s after the ability button
 const WALL_UPS := 20                # terraces: far taller than any hop or mantle
@@ -44,7 +42,7 @@ func run(main_node: Node, report: Callable) -> void:
 	main = main_node
 	ac = load("res://tools/archetype_check.gd").new()
 	ac.main = main
-	for a in HUNTERS:
+	for a in Arch.ORDER:
 		_hunter(a)
 		report.call(a, blocked.filter(func(c): return not _commits(a, c)))
 
