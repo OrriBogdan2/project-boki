@@ -16,6 +16,7 @@ var beach_at := {}                  # foe instance id -> time it can be Beached 
 var combo_n := 0
 var combo_at := -9.0
 var third_until := -9.0             # the third thrust's hits slow until then
+var hit_swing := -1                 # the swing whose hit sound played (one per thrust, however many foes)
 var swim_t := 0.0                   # Ground Swim under way
 var spin_t := -1.0                  # Riptide spin time (-1: not spinning)
 var spin_tick := 0.0
@@ -89,7 +90,12 @@ func lmb_override(held: bool, _dt: float) -> bool:
 
 func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 	# the swing's rays reach on_deal as "shot" hits (Gil's only shots; the vials are "abil")
-	if String(o.get("src", "")) == "shot" and m.time < third_until and t != null and not t.dead:
+	if String(o.get("src", "")) != "shot" or t == null:
+		return
+	if h.wid == "swordfish" and hit_swing != h.swing_n:
+		hit_swing = h.swing_n
+		m.sfx("gil_thrust_hit", t.pos, -3.0, 0.85 if m.time < third_until else 1.0)
+	if m.time < third_until and not t.dead:
 		var ld := lmb_def()
 		var slow := {"slow": float(ld["slow_t"]), "slow_k": float(ld["slow"]), "src": "abil", "ab": "primary"}
 		slow["tags"] = ["primary", "lunge"]
@@ -113,7 +119,7 @@ func fire_rmb(c: Dictionary) -> void:
 	last_variant = String(c.get("variant", "tap"))
 	tele_circle(at, float(vd["radius"]), col_of(vd), ft)
 	flying.append({"at": at, "from": h.pos + Vector3(0, 1.3, 0), "t": ft, "left": ft, "v": v})
-	m.sfx("throw", h.pos, -4.0, 1.15)
+	m.sfx("gil_toss", h.pos, -4.0, 1.0)
 
 func rmb_hold_tick(t: float) -> void:
 	# held past the tap: the landing circle follows the cursor, 50% further
@@ -133,8 +139,8 @@ func _shatter(it: Dictionary) -> void:
 	var col := col_of(vd)
 	m.fx.burst(at + Vector3(0, 0.4, 0), col, 18 if v != "zeep" else 34, 5.0, 0.5, 6.0)
 	m.fx.ring(at, r, col, 0.4)
-	var sound := "boom" if v in ["thunder", "zeep", "fire"] else "whoosh"
-	m.sfx(sound, at, -3.0, 1.2 if v != "zeep" else 0.8)
+	var pop := "gil_pop_" + v              # each bottle breaks its own way (content/sfx/gil.json)
+	m.sfx(pop, at, -3.0, 1.0)
 	var p := power("sec")
 	for f in foes_in(at, r, 3.0):
 		var o := {"src": "abil", "ab": "utility", "tags": ["utility", "gil_" + v]}
@@ -183,7 +189,7 @@ func _mark(f: Ent, mk: String, col: Color) -> void:
 			"tags": ["passive", "beached"]})
 		m.fx.word(f.pos + Vector3(0, 2.4, 0), "BEACHED!", res_col(), true)
 		m.fx.burst(f.pos + Vector3(0, 0.6, 0), res_col(), 20, 4.0, 0.6, 8.0)
-		m.sfx("unlock", f.pos, -4.0, 0.7)
+		m.sfx("gil_beached", f.pos, -2.0, 1.0)
 	else:
 		m.fx.word(f.pos + Vector3(0, 2.2, 0), "%d/%d" % [mini(n, 3), int(pd.get("need", 3))], col)
 
@@ -216,7 +222,7 @@ func _surface() -> void:
 	var dd := dash_def()
 	m.fx.ring(h.pos, float(dd["radius"]), col_of(dd), 0.4)
 	m.fx.burst(h.pos + Vector3(0, 0.3, 0), col_of(dd), 22, 5.0, 0.5, 10.0)
-	m.sfx("whoosh", h.pos, -3.0, 0.8)
+	m.sfx("gil_surface", h.pos, -3.0, 1.0)
 	for f in foes_in(h.pos, float(dd["radius"])):
 		var o := {"lift": float(dd["lift"]), "stun": float(dd["knockup"]), "dr": true, "src": "abil", "ab": "dodge"}
 		o["tags"] = ["dodge", "surface"]
@@ -233,6 +239,12 @@ func cast_e() -> bool:
 
 func e_recastable() -> bool:
 	return spin_t >= 0.0
+
+## The spin's window for RecastCue: the ring runs over the whole spin, and at its end the spout goes by itself.
+func recast_window() -> Dictionary:
+	if spin_t < 0.0:
+		return {}
+	return RecastCue.window("e", e_t, float(e_def()["spin_t"]), h.pos, true, true)
 
 func e_recast() -> bool:
 	if spin_t < 0.0:
@@ -261,7 +273,7 @@ func _tick_spin(dt: float) -> void:
 	var k := _spin_k()
 	var r := float(ed["spin_r"])
 	m.fx.slash(h.pos + Vector3(0, 0.8, 0), m.time * 12.0, TAU, r, col_of(ed), k > 0.6)
-	m.sfx("swipe", h.pos, -6.0, 0.9 + k * 0.7)
+	m.sfx("gil_spin", h.pos, -6.0, 0.9 + k * 0.4)
 	for f in foes_in(h.pos, r):
 		var dmg := lerpf(float(ed["tick"][0]), float(ed["tick"][1]), k) * power("kin")
 		f.hurt(dmg, h, {"src": "abil", "ab": "k1", "tags": ["k1", "riptide"]})
@@ -279,7 +291,7 @@ func _release_spout() -> void:
 	spouts.append({"p": Vector2(h.pos.x, h.pos.z), "y": h.pos.y, "dir": dir, "left": length, "w": w, "spd": spd,
 		"hit": {}, "lift": float(ed["lift"]), "stun": float(ed["knockup"]), "dmg": float(ed["dmg"]) * power("kin"),
 		"col": col_of(ed), "ab": "k1"})
-	m.sfx("whoosh", h.pos, -2.0, 0.7)
+	m.sfx("gil_spout", h.pos, -2.0, 1.15 - k * 0.25)
 
 ## Moves spouts and the wave down their lines; each foe is hit once.
 func _tick_lines(list: Array, dt: float) -> void:
@@ -327,7 +339,7 @@ func _start_wave() -> bool:
 		"dmg": float(xd["dmg"]) * power("ult"), "col": col_of(xd), "ab": "ult"}
 	var ctx := {"slot": "ult", "ability": "tidal_wave", "level": rank("ult")}
 	Effects.run([{"type": "dash", "speed": length / t, "time": t, "invuln": t}], h, ctx)
-	m.sfx("whoosh", h.pos, 0.0, 0.6)
+	m.sfx("gil_wave", h.pos, 0.0, 1.0)
 	return true
 
 func _land_wave() -> void:
@@ -336,6 +348,7 @@ func _land_wave() -> void:
 	h.shield_t = maxf(h.shield_t, float(xd["shield_t"]))
 	m.fx.ring(h.pos, 2.0, col_of(xd), 0.4)
 	m.fx.burst(h.pos + Vector3(0, 0.4, 0), col_of(xd), 24, 5.0, 0.5, 10.0)
+	m.sfx("gil_wave_land", h.pos, -2.0, 1.0)
 
 func incoming(_by: Ent, dmg: float, o: Dictionary) -> Array:
 	if untarget_t > 0.0:
