@@ -242,6 +242,7 @@ func _zones(main: Node) -> void:
 	var vm := (vex as MeshInstance3D).material_override as ShaderMaterial
 	ok(float(vm.get_shader_parameter("core_a")) <= ZONE_CORE_A and (vm.get_shader_parameter("color3") as Color).a > 0.0,
 			"Vex's scorch disc: centre alpha at most %.2f and a lit rim" % ZONE_CORE_A)
+	ok(is_equal_approx(vex.scale.x * VVFx.DISC_EDGE, 3.4), "Vex's scorch disc: its rim on the hitbox radius")
 	var looks := KitLooks.of(m)
 	var well := looks.hold_on("zone_well", "well", m, Vector3.ZERO, 4.5)
 	var fm := (well.get_node("Floor") as MeshInstance3D).material_override as ShaderMaterial
