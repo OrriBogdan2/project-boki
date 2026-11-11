@@ -4,7 +4,8 @@ extends RefCounted
 ## content/dash_flow/<id>.json says ("ours"); docs/heroes/dash_interactions.md shows the rows next to the source.
 ## Modes: cancel (the jump goes at once and ends the dash, keeping `carry` of its speed), both (the jump goes and
 ## the dash runs on), ignore (the dash runs on and the press is dropped), end (the dash ends, no jump), buffer (the
-## jump waits for the dash's end), dash (Shift: the air dash goes at once and ends the rise). Never touches the save.
+## jump waits for the dash's end), dash (Shift: the air dash goes at once and ends the rise), hop (Shift: the air dash
+## goes at once and climbs, like Dolm's Rock Hop). Never touches the save.
 
 const FLOW := preload("res://tools/dash_flow_check.gd")
 const CASES := ["ground", "air", "rise", "same"]
@@ -54,8 +55,9 @@ func _measure(m: Match, kind: String) -> Dictionary:
 			_tap(m, "jump")
 			_steps(m, RISE_STEPS - 1)
 			_tap(m, "dash")
-			var flat := h.ak.in_dash() and h.vel.y <= 0.0
-			return {"mode": "dash" if flat else "late", "carry": 0.0}
+			if not h.ak.in_dash():
+				return {"mode": "late", "carry": 0.0}
+			return {"mode": "dash" if h.vel.y <= 0.0 else "hop", "carry": 0.0}
 	var spent := h.dashes
 	h.inp["dash"] = true
 	_tap(m, "jump")

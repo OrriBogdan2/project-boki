@@ -809,7 +809,8 @@ func do_jump() -> void:
 		return
 	if roll_t > 0.0 and grounded and move_kind == "dash":
 		# jump out of a dash: the dash ends and the jump carries Loco.dash_jump_keep of its speed (the farm's too)
-		var keep := Vector2(vel.x, vel.z) * Loco.dash_jump_keep
+		var dash_v := Loco.dash_hv(roll_dir * roll_speed, arch) if inp["dash"] else Vector2(vel.x, vel.z)     # Shift's own step: not moved yet
+		var keep := dash_v * Loco.dash_jump_keep
 		roll_t = 0.0
 		vel.x = keep.x; vel.z = keep.y
 	if grounded or coyote > 0.0:
