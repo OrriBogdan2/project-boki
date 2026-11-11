@@ -150,7 +150,7 @@ r, rmb; Lace and Grimble add their own). Jobq GPU reels, all rc=0, no shader err
 | Vex | gunslinger | 15 | 4 | 3 | 3 | 3 | 4 | 4 | 4 | **25** | LMB / held LMB: the tracer is a thin faint line at match zoom (RMB beam and X burst are fine) |
 | Tenzo | dolm | 14 | 3 | 3 | 3 | 3 | 4 | 4 | 3 | **23** | LMB punch and its hold: a tiny ember, the hold shows next to nothing |
 | Motley | ostra | 14 | 3 | 4 | 4 | 3 | 3 | 4 | 3 | **24** | X: a near-black opaque disc over the target (breaks the zone rule, hides what it hits) |
-| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 4 | 4 | 3 | **27** | was 25 (E / X wedges flat pale sectors, slugs small): fixed on ext/vfx-grimble-wedges, see below. Left: sound (3) |
+| Grimble | dredge | 16 | 4 | 4 | 4 | 4 | 3 | 4 | 3 | **26** | was 25: the E / X wedges now have a lit front on the hit (ext/vfx-grimble-wedges, below). Left: LMB / X slugs still barely read at match zoom in the GPU reel (trail 0.34 m is not enough) |
 | Lace | archer | 16 | 4 | 3 | 4 | 3 | 4 | 4 | 3 | **25** | tap shots and misses: hair-thin trails (Heavy Shot and X read) |
 | Meeko | tender | 17 | 4 | 3 | 4 | 3 | 4 | 4 | 4 | **26** | X root field: a pale flat teal disc, only its centre burst is layered |
 | Sable | thief | 18 | 4 | 3 | 3 | 3 | 4 | 4 | 3 | **24** | X Encore and E: flat pale lavender wash over the area, no rim or debris |
@@ -169,7 +169,7 @@ Parity rule (DECISIONS: match the source's readability and polish, no explosions
 gameplay): no Hunter's dash plays an explosion in these strips. Ground rings worth a check against a hitbox: Vex's
 Shift (ring plus lane), Tenzo's X rings, Neve's dash path. Not checked against a hitbox here.
 
-### Grimble wedges (ext/vfx-grimble-wedges, 2026-11-11): 25 -> 27
+### Grimble wedges (ext/vfx-grimble-wedges, 2026-11-11): 25 -> 26
 The scorecard's "RMB wedge" is read as his X fan: his RMB is the Abyssal Hand (a reach, no wedge). HeroVfx gains a
 `wedge` ground look (docs/HERO_VFX.md): a soft inside (coverage 0.04 at the apex, 0.22 by the rim), a dark char line
 and a lit coin-gold rim on the exact edge, and a bright ragged front running out from him. Grimble's E wind-up holds
@@ -178,10 +178,12 @@ it away; the X charge holds one whose front is the charge fan's growing edge, so
 fires; each Broadside wave's front reaches the rim with the slugs (0.17 s, asserted against `x.range`, `MUZZLE` and
 `x.speed`). The wedges are the hit cones (`e.radius`/`e.angle`, `x.range`/`x.fan_deg`); hit shapes and shot sizes
 are unchanged. His AimKit tells drop from alpha 1.8 to 0.7 so their fill stays under 0.25 at the apex. Slug trails
-(LMB and X) are 0.34 m wide (was 0.16), tail 0.14 s. Timing 3 -> 4 (the front lands on the hit), scale 3 -> 4 (slugs
-read as gold streaks at match zoom). Scored from compat-renderer sheets (opengl3 under Xvfb, `--hero-vfx-reel
---reel-hero=dredge --reel-only=e|r|lmb`), in `/home/boki/gens/vfx-grimble-wedges/` (`before_dredge_{e,r}.png`,
-`after_dredge_{e,r,lmb}.png`); the Forward+ GPU reels are jobq `20261111-200805-02689` (after) and `20261111-203137-27774` (before), both still queued behind the GPU backlog when this was written.
+(LMB and X) are 0.34 m wide (was 0.16), tail 0.14 s. Timing 3 -> 4 (the front lands on the hit). Scale stays 3: in the GPU LMB
+sheet the long pale lines are the aim lines, and the slugs and their 0.34 m trails barely show at match zoom; the
+weapon's slug look comes from the shared shot look (Oomph.shot_look), so it is backlog item 9, not this branch. Scored from the Forward+ GPU reel (jobq `20261111-211018-30595`, `--hero-vfx-reel
+--reel-hero=dredge`, rc=0): sheets in `/home/boki/gens/vfx-grimble-wedges/gpu_after/` (`dredge_e.png`: the white front
+runs out over the wind-up and lands on the slam; `dredge_r.png`: the charge front sweeps to the rim, then the waves).
+The before reel (base `origin/ext/w0246-audio-vfx`) goes to `gpu_before/` (jobq `20261111-215953-21551`).
 
 ## Backlog (remaining fixes, from the table)
 1. Motley X: soften the black disc to a lit rim plus a soft inside (alpha 0.25 or less at the centre).
@@ -192,5 +194,5 @@ read as gold streaks at match zoom). Scored from compat-renderer sheets (opengl3
 6. Kael: crimson Smash telegraph instead of the flat magenta box.
 7. Cinder: flame-coloured Ignite orb.
 8. Meeko, Sable: zones as a lit rim over a faint inside (X root field, Encore/E). Grimble's wedges done (below).
-9. Lace tap shots and Sparkle LMB: thicker trails.
+9. Lace tap shots, Sparkle LMB and Grimble's slugs (LMB and X): thicker trails / a bigger drawn slug (hit size unchanged).
 10. Merge-time fixes: the `HeroVfx` mode 8 clash (`chain` vs `dome`) and the duplicate `shine` shader name.
