@@ -726,6 +726,12 @@ func _lower() -> void:
 	fx.aegis_hide()
 	if anim_id == "bul_guard": anim_id = ""
 
+## Stunned or downed holding the aegis (ArchKit._drop_rmb): it comes down and the guard pose ends, as on a let-go.
+func _rmb_dropped() -> void:
+	_lower()
+	if anim_id == "bul_guard":
+		anim_id = ""
+
 ## Letting go of the RMB only lowers the aegis: the Bash lives on Shift behind a raised shield (the Shield Charge).
 func fire_rmb(c: Dictionary) -> void:
 	var was_up := not wall.is_empty()
