@@ -90,7 +90,7 @@ to highest within 1/16 cycle, give or take 0.03 m), so the dip can't come back.
 | Vex run all | 0.035 under, b/l/r 0.085 over -> 0.002 | 0.28 | 4.55, 100% |
 
 Worst ankle miss 0.0025 m; every ring one length (clip-check). Strip, game renderer, side view, 8 phase-aligned frames
-a loop, forward on top: `pelvis/<id>_walk_strip.jpg`, `pelvis/<id>_run_strip.jpg`.
+a loop, forward on top: `pelvis/vex_walk_strip.jpg`, `pelvis/vex_run_strip.jpg` (Tarek's strip job was lost by the GPU worker 4 times, rc 125: still to render with `--clip-shots --warden=dolm --yaw=90`).
 
 Cost: the stance gets short where the forward hip is tall and the step long. Tarek run_l/r stance 0.16-0.18 of the
 cycle (a bounding side step); Vex walk_r 0.23 (a light, springy walk). Fix for both (ours, not built): a shorter stride
