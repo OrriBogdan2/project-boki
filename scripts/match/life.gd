@@ -66,14 +66,6 @@ static func box_rarity(b: Dictionary) -> int:
 	return best
 
 ## Is anyone on this team still in the fight (standing or a wisp)?
-## Speed factor for n people on one wisp: each adds less than the one before (R.crowd).
-static func crowd(n: int) -> float:
-	var curve: Array = R["crowd"]
-	var k := 0.0
-	for i in n:
-		k += float(curve[mini(i, curve.size() - 1)])
-	return k
-
 static func team_alive(m: Match, team: int) -> bool:
 	return m.hunters.any(func(x): return x.team == team and not x.out and not x.extracted)
 

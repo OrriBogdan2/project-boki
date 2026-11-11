@@ -864,12 +864,12 @@ func juggernaut(a) -> void:
 			"tips %d took %.0f dashes %.2f" % [K.tips, A.dmg(T), P.dashes])
 	A.ok("juggernaut dash: the tip does not stun into a wall", T.wallstun <= 0.0, "wallstun %.2f" % T.wallstun)
 	# footage gap 6: the source's Quick Dash runs ~2 bh (3.6 m) in ~0.2 s [F]; set as-is, off the global dash feel
-	var dd: Dictionary = K.dash_def()
+	var rd: Dictionary = K.dash_def()
 	var feel: Dictionary = K.dash_feel()
 	A.ok("juggernaut footage gap 6: Rampage 3.6 m in 0.2 s, off the global dash feel",
-			is_equal_approx(float(dd["dist"]), 3.6) and is_equal_approx(float(dd["time"]), 0.2)
+			is_equal_approx(float(rd["dist"]), 3.6) and is_equal_approx(float(rd["time"]), 0.2)
 			and is_equal_approx(float(feel["dist"]), 1.0) and is_equal_approx(float(feel["time"]), 1.0),
-			"dist %.1f time %.2f feel %s" % [float(dd["dist"]), float(dd["time"]), str(feel)])
+			"dist %.1f time %.2f feel %s" % [float(rd["dist"]), float(rd["time"]), str(feel)])
 	A.step(m, 1.0)
 	P.teleport(home)
 	T.teleport(home + Vector3(0, 0, 12.0))
