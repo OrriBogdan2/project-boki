@@ -1,7 +1,7 @@
 class_name Parentage
 ## Who a baby got what from (briefs/design/GARDEN.md section 6). Care.breed saves the gifts on the baby
-## (rec["gifts"]); the parents' uids are rec["lineage"]["parents"]. The hatch card lists the gifts in
-## words, and in base_mode a young Boki leans toward its parents (BaseLife).
+## (rec["gifts"]); the parents' uids are rec["lineage"]["parents"]. The hatch card marks each gift with its parent
+## (HatchParents), and in base_mode a young Boki leans toward its parents (BaseLife).
 
 const BOTH := -1     # a gift both parents share: the same kind, or a mutation each carried
 
@@ -21,24 +21,9 @@ static func gifts(a: Dictionary, b: Dictionary, baby: Dictionary, a_food: bool) 
 	if not muts.is_empty(): g["muts"] = muts
 	return g
 
-## The gifts in plain words, one per line ("" for a baby with none recorded: older or Rare Eggs).
-static func gift_text(baby: Dictionary) -> String:
-	var g: Dictionary = baby.get("gifts", {})
-	if g.is_empty() or not baby.has("parents"): return ""
-	var lines := PackedStringArray()
-	lines.append("Its kind comes from %s." % _who(baby, g["species"]))
-	if g.has("lean"): lines.append("Its lean comes from %s." % _who(baby, g["lean"]))
-	lines.append("Favourite food from %s, favourite play from %s." % [_who(baby, g["food"]), _who(baby, g["play"])])
-	for id in g.get("muts", {}):
-		lines.append("%s comes from %s." % [Mutations.name_of(id), _who(baby, g["muts"][id])])
-	return "\n".join(lines)
-
 ## The parent index for "it came from a" (0) or from b (1).
 static func _side(from_a: bool) -> int:
 	return 0 if from_a else 1
-
-static func _who(baby: Dictionary, i: int) -> String:
-	return "both parents" if i == BOTH else String(baby["parents"][i])
 
 ## True if `other` is a parent of the young Boki `rec` (a Boki that is Grown has left the nest).
 static func is_parent_of(other: Dictionary, rec: Dictionary) -> bool:
