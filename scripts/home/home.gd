@@ -4613,7 +4613,7 @@ func _finish_training() -> void:
 	var mult := 1.0
 	if Care.need(rec, "joy") >= 60.0: mult *= 1.25
 	if Care.need(rec, "energy") < 35.0: mult *= 0.7
-	var gained := Care.add_stat(rec, stat, int(round(pts * mult)))
+	var gained := StatCause.gain(rec, stat, int(round(pts * mult)), "drill")
 	Care.change(rec, "energy", -18.0)
 	Care.change(rec, "food", -6.0)
 	Care.change(rec, "joy", 4.0 if (train["results"] as Array).has("great") else -2.0)

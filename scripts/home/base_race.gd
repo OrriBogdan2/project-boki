@@ -261,7 +261,7 @@ static func settle_solo(rec: Dictionary, grades: Array) -> int:
 		if g != "miss":
 			pts += int(T[g]) + (int(T["dojo"]) if Save.has_building("dojo") else 0)
 	var mult := float(T["happy_mult"]) if Care.need(rec, "joy") >= float(T["happy_at"]) else 1.0
-	var gained := Care.add_stat(rec, "speed", int(round(pts * mult)))
+	var gained := StatCause.gain(rec, "speed", int(round(pts * mult)), "race")
 	Care.change(rec, "energy", -float(rules()["energy"]))
 	Care.change(rec, "food", -float(T["food"]))
 	Care.change(rec, "joy", float(T["joy_great"]) if grades.has("great") else float(T["joy_else"]))

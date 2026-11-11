@@ -275,6 +275,7 @@ const CHECKS := {
 	"--garden-audio-check": ["res://tools/garden_audio_check.gd", "garden_audio_check", null],  # GARDEN.md 10.2 sound
 	# --home-verbs-check also takes --home-verbs-shots=<dir>
 	"--home-verbs-check": ["res://tools/home_verbs_check.gd", "home_verbs_check", null],
+	"--stat-cause-check": ["res://tools/stat_cause_check.gd", "stat_cause_check", null],      # play trains a stat, the card says why
 	"--farmbuild": ["res://tools/farmbuild_check.gd", "farmbuild_check", null],      # also --farmbuild-shots=<dir>
 	"--come-look-check": ["res://tools/come_look_check.gd", "come_look_check", null],  # news at home
 	"--food-journal-check": ["res://tools/food_journal_check.gd", "food_journal_check", null],      # a food shows ? until fed once
