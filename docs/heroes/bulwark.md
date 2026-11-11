@@ -124,6 +124,16 @@ Source polish, our gold and ember look. Every look is a pooled HeroVfx layer ins
 | Shield Charge, Shield Slam | `charge_go`: a ribbon off the shield face and sparks along the dash (a flare on the shield when Guard is full); `slam`: a sweep over the cone's own 100 degrees (asserted equal to the data), grit off the shield | the cone, no ground ring |
 | Crushed (a foe into a wall) | `crush`: a ring of stars at the foe's head and a dust puff | the source's stars (1 s) |
 Spin Dash and Faultline: ext/vfx-albert-faultline (the ring at its hit radius, the lane and eruption).
+## In the air (parity pass `ext/air-cast-b`: what each slot does mid-jump, mid-fall and out of a glide)
+
+Measured by casting every slot at 2 m (rising from a jump), at 9 m (falling) and in an open glide, on a flat floor; the glider column is what the glider did over the next 0.6 s with the glide key held. The glider never *opens* during an ability animation (owner 162b; `--air-limits-check`) and an open one is never folded by that rule. Where the source is silent the slot works as on the ground (DECISIONS: the source decides these interactions; owner item 51). LMB while the glider is open fires nothing for every Hunter (`Hunter.can_fire`); the source does not document attacking while gliding (docs/WEAPON_FIRING_DATA.md, [gap]), so that is left as it is.
+
+| Slot | Mid-jump / mid-fall | Out of a glide | Source |
+| LMB hammer | the throw as on the ground; a held charge carries through a jump and swings in the air with no step (owner #51) | no shot, glider stays open | owner #51; gap for the glide |
+| RMB Aegis | the guard goes up in the air as on the ground | the guard goes up, glider stays open | [D] Oath: no air rule |
+| Shift | the air version: the lumbering shove (`bul_lumber`), the class long dash | the glider folds for the shove; a held glide key reopens it as it ends | [D] Oath: only Spin Dash, no air slot; footage shows no air dash (kept) |
+| E Mending Ground | the same cast | the same cast, glider stays open | [D] Oath: no air rule |
+| X Faultline | the same wind-up and slam where he is | the same, glider stays open; after the slam or a 360 spin a 0.3 s glider lock | [D] Oath: no air rule; wiki patch 05.02.25 (wind-down frames) |
 
 ## Assumptions (the footage is silent; the owner can correct these)
 - He can walk while spinning the hammer (55% speed), as before; the footage only shows him standing.
