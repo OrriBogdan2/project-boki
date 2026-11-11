@@ -26,11 +26,12 @@ func _on_hit(_a: Node, _t: Node, _amt: float, tags: Array) -> void:
 	for t in tags:
 		tags_seen[String(t)] = int(tags_seen.get(String(t), 0)) + 1
 
-func _fresh(species := "cindle") -> Match:
+func _fresh(species := "cindle", wisps := false) -> Match:
 	if m: m.queue_free()
 	m = Match.new()
 	main.add_child(m)
-	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242, "no_drop": true, "demo_kin": species, "weapon": "rifle", "cls": "medium"})
+	m.start({"training": true, "teams": 2, "squad": 1, "tier": 0, "length": 1e9, "seed": 4242,
+		"no_drop": true, "demo_kin": species, "weapon": "rifle", "cls": "medium", "boki_wisps": wisps})
 	m.set_process(false)
 	seed(4242)      # the Boki's random choices should not depend on how many rolls building the map took
 	for mb in m.mobs: mb.queue_free()
@@ -114,7 +115,8 @@ func run(mn: Node) -> void:
 	var only := ""
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--bokisys-only="): only = a.substr(15)
-	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge", "snap", "net"]:
+	for part in ["poll", "throw", "recall", "modes", "cast_c", "downed", "no_steal", "merge", "leap", "surge",
+			"wisp_merge", "snap", "net"]:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
 	CombatBus.hit_landed.disconnect(_on_hit)
@@ -625,6 +627,78 @@ func _kcmd() -> void:
 	ok(m.fx.radial == rings + 1, "...and a client plays the order moment (ring %d -> %d)" % [rings, m.fx.radial])
 
 # ------------------------------------------------------------------ 9. net
+# ---------------------------------------------------------------- 7. the merge with Boki as wisps (decision 0046)
+## R works from the wisp (the Boki leaps out of it into you), ends back in a wisp, and never touches the summon.
+func _wisp_merge() -> void:
+	for sp in ["cindle", "cairnback", "puddlet"]:
+		if not Data.KIN.has(sp):
+			continue
+		_fresh(sp, true)
+		var P := m.player
+		var k: Kin = P.kin
+		var s := k.summon
+		ok(k.wisp and k.state == "shoulder", "wisp merge (%s): the Boki rides as a wisp" % sp)
+		s.cd = 33.0
+		P.ult = 1.0
+		ok(KinMerge.plan(P) == "merge", "...R plans a merge from the wisp (plan '%s')" % KinMerge.plan(P))
+		ok(KinMerge.press(P) and KinMerge.active(P), "...and starts it, summon cooling down")
+		run_for(float(MergeForm.data()["xform_s"]) + 0.1)
+		ok(KinMerge.active(P) and String(P.merge_st["phase"]) == "live" and k.pos.distance_to(P.pos) < 3.0,
+			"...the form goes live on you")
+		k.render(Match.DT, 1.0)
+		ok(not k.wisp and k.model.name != "BokiWisp", "...the full Boki fuses, not the wisp (%s)" % k.model.name)
+		ok(s.cd > 32.0 and s.cd <= 33.0 and not s.out(), "...the summon cooldown only ran on (%.1f s)" % s.cd)
+		ok(not KinSummon.press(P) and KinMerge.active(P), "...Summon is refused while merged")
+		run_for(float(P.merge_st["T"]) + 1.0)
+		ok(not KinMerge.active(P), "...the merge ends")
+		run_for(KinSummon.SHRINK_S + 0.5)
+		ok(k.wisp and k.state == "shoulder" and k.model.name == "BokiWisp" and k.scale.is_equal_approx(Vector3.ONE),
+			"...and the Boki is a wisp again (state %s)" % k.state)
+		ok(s.cd > 0.0 and s.cd < 33.0 and not s.out(), "...the summon cooldown was left alone (%.1f s)" % s.cd)
+		s.cd = 0.0
+		ok(KinSummon.press(P) and not k.wisp, "...and it can be summoned after")
+	# ready summon, wisp: R leaves it ready
+	_fresh("cindle", true)
+	var Q := m.player
+	Q.ult = 1.0
+	KinMerge.press(Q)
+	run_for(float(Q.merge_st["T"]) + 1.5)
+	ok(Q.kin.summon.cd == 0.0 and Q.kin.wisp, "a merge from a ready wisp leaves it ready (%.1f s)" % Q.kin.summon.cd)
+	# summoned: R sends it leaping into you, merge, back to a wisp
+	_fresh("cindle", true)
+	Q = m.player
+	var kk: Kin = Q.kin
+	KinSummon.press(Q)
+	Q.ult = 1.0
+	ok(not kk.wisp and KinMerge.plan(Q) == "leap", "summoned merge: R plans a leap (plan '%s')" % KinMerge.plan(Q))
+	var left0 := kk.summon.left
+	ok(KinMerge.press(Q), "...R sends the Boki leaping")
+	var live := false
+	for i in 120:
+		m.step(Match.DT)
+		if KinMerge.active(Q) and String(Q.merge_st["phase"]) == "live":
+			live = true
+			break
+	ok(live, "...and the merge goes live")
+	ok(left0 > 0.0 and not kk.summon.out() and kk.summon.cd > kk.summon.cd_base - 2.0,
+		"...taken in: the window is over, the full cooldown runs (%.1f s)" % kk.summon.cd)
+	var cd_in := kk.summon.cd
+	run_for(float(Q.merge_st["T"]) + 1.0)
+	ok(not KinMerge.active(Q) and kk.state == "shoulder" and kk.wisp and not kk.summon.out(),
+		"...it ends with the Boki a wisp, not stuck out (state %s)" % kk.state)
+	ok(kk.summon.cd < cd_in and kk.summon.cd > cd_in - float(Q.merge_st.get("T", 12.0)) - 14.0,
+		"...and the cooldown only ran on, one cooldown (%.1f s)" % kk.summon.cd)
+	# the ultimate (a release) from a wisp: the Boki is a wisp again at once, no rest, summon cooldown as it was
+	_fresh("cindle", true)
+	Q = m.player
+	Q.kin.summon.cd = 20.0
+	Q.ult = 1.0
+	KinMerge.press(Q)
+	run_for(float(MergeForm.data()["xform_s"]) + 0.5)
+	KinMerge.end(Q, "ult")
+	ok(Q.kin.wisp and Q.kin.rest_t == 0.0 and Q.kin.summon.cd > 18.0 and Q.kin.summon.cd <= 20.0,
+		"wisp merge: the ultimate ends with a wisp, no rest (cooldown %.1f s)" % Q.kin.summon.cd)
+# ------------------------------------------------------------------ 8. net
 func _net() -> void:
 	ok(
 		Net.VERSION.naturalnocasecmp_to("0.11.0") >= 0,
