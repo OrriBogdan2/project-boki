@@ -47,7 +47,9 @@ func run(main: Node) -> void:
 	var st: SkyTrain = m.skytrain
 	ok(st != null, "the map has a sky train")
 	if st == null:
-		print("TRAIN CHECK DONE, failures: ", bad); main.get_tree().quit(); return
+		print("TRAIN CHECK DONE, failures: ", bad)
+		main.get_tree().quit()
+		return
 	# every stop's deck is level with its pier (the lowest ground 1.6-3 m off the track), so you step off
 	for s in m.world.train_route["stations"]:
 		var at: Vector3 = m.world.train_at(float(s))

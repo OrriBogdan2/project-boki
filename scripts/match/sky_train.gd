@@ -80,7 +80,8 @@ func setup(match_node: Node) -> void:
 	sounds = TrainSfx.new()
 	sounds.setup(self)
 	for i in cars_n:
-		cur.append(Transform3D()); old.append(Transform3D())
+		cur.append(Transform3D())
+		old.append(Transform3D())
 	_place(0.0)
 	old = cur.duplicate()
 	# the cars stand at their first stop from the start (not at the origin until the first tick), so
