@@ -593,3 +593,6 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - Kael LMB has no knockback.
 - Cutscenes/intro: click advances one beat, hold ~1 s skips all (owner 11-11).
 - Player creator: base body = featureless void silhouette with outline (non-anatomical); stronger M/F frames; layered outfits, every slot can be empty; much more customization (owner 11-11).
+- One shared movement profile for all modes; falling never converts into horizontal momentum (owner 11-11).
+- Tutorial objective banner: very visible (glow/pulse), slim top strip, never blocks the screen (owner 11-11).
+- Hatched Boki show the M/F sex mark and he/she text, never 'it' (owner 11-11).
