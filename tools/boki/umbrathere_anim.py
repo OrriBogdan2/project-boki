@@ -284,8 +284,76 @@ def tend(t):
     return p
 
 
+def win(t):
+    """Crouches with its arms low, heaves itself up with both claws flung overhead and the canopy snapping open, lands
+    heavily, then stands with its chest out, one claw pumping high and the open canopy twirling."""
+    p = {}
+    crouch = seq(t, [(0, 0), (0.15, 1), (0.25, 0), (1, 0)])
+    air = seq(t, [(0, 0), (0.2, 0), (0.36, 1), (0.5, 0), (1, 0)])
+    land = seq(t, [(0, 0), (0.5, 0), (0.56, 1), (0.68, 0), (1, 0)])
+    proud = seq(t, [(0, 0), (0.54, 0), (0.68, 1), (0.9, 1), (1, 0.7)])
+    squash = crouch + land
+    p["root_at"] = (0, 0.13 * air - 0.05 * crouch - 0.04 * land, 0)
+    p["root_sc"] = (1 + 0.1 * squash - 0.03 * air, 1 - 0.14 * squash + 0.07 * air, 1 + 0.05 * squash)
+    add(p, "hips", rx=-0.15 * crouch + 0.1 * proud)
+    add(p, "spine", rx=-0.1 * crouch + 0.12 * proud)
+    look(p, 1.0 + 0.6 * air + 0.5 * proud - 0.5 * crouch)
+    arm(p, "R", 1.0, -0.3 * crouch + 2.6 * air + (2.3 + 0.15 * s(t, 4)) * proud, 0.35 * air + 0.15 * proud,
+        0.2 * air + 0.3 * proud, 0.6 * proud)
+    arm(p, "L", -1.0, -0.3 * crouch + 2.6 * air + 0.2 * proud, 0.35 * (air + proud), 0.2 * air + 0.7 * proud, 0.3)
+    for sd, _ in SIDES:
+        leg(p, sd, 0.15 * squash, 0.3 * squash + 0.4 * air)
+    canopy(p, -0.1 * crouch + air + 0.7 * proud, 0.12 * proud * s(t, 3))
+    add(p, "canopy", ry=1.2 * seq(t, [(0, 0), (0.54, 0), (1, 1)]))
+    tail(p, t * 3, 0.06, up=0.4 * proud + 0.2 * air - 0.1 * crouch)
+    return p
+
+
+def sulk(t):
+    """Hunched and turned away under its umbrella pulled down like a hood, arms hanging to the ground; a sigh, a claw
+    scraping the dirt, one peek back from under the canopy's edge."""
+    p = {}
+    sigh = 0.5 + 0.5 * s(t, 1, -0.25)
+    peek = seq(t, [(0, 0), (0.5, 0), (0.58, 1), (0.72, 1), (0.8, 0), (1, 0)])
+    scrape = seq(t, [(0, 0), (0.18, 0), (0.24, 1), (0.31, 0), (0.37, 1), (0.44, 0), (1, 0)])
+    add(p, "root", ry=0.45 * (1 - 0.7 * peek))
+    p["root_at"] = (0, -0.03 - 0.006 * sigh, 0)
+    add(p, "hips", rx=-0.25 - 0.03 * sigh)
+    add(p, "spine", rx=-0.25 - 0.04 * sigh)
+    look(p, 0.1 + 0.6 * peek)
+    add(p, "neck", rx=-0.15, ry=0.3 * (1 - 1.4 * peek))
+    add(p, "head", rx=-0.2, ry=0.35 * (1 - 1.5 * peek))
+    arm(p, "L", -1.0, -0.05 + 0.04 * sigh, -0.02, 0.0, 0.05)
+    arm(p, "R", 1.0, -0.05 + 0.04 * sigh + 0.35 * scrape, -0.02, 0.1 * scrape, 0.05 + 0.5 * scrape)
+    for sd, _ in SIDES:
+        leg(p, sd, 0.08, 0.1)
+    canopy(p, -0.25 + 0.2 * peek, 0.03 * s(t, 1))
+    add(p, "canopy", rx=-0.3 - 0.03 * sigh + 0.15 * peek)
+    tail(p, t, 0.02, up=-0.3)
+    return p
+
+
+def push(t):
+    """Bent low into the load with both claws hooked on it, the legs driving one after the other, the canopy tipped
+    back out of the way and bouncing on every shove, the tail held out as a counterweight."""
+    p = {}
+    thrust = 0.5 + 0.5 * s(t, 1, -0.25)
+    p["root_at"] = (0, -0.03, -0.07 * thrust)
+    add(p, "hips", rx=-0.35 - 0.08 * thrust)
+    add(p, "spine", rx=-0.2 - 0.06 * thrust)
+    look(p, 1.6)
+    arms(p, 1.35 + 0.08 * thrust, 0.12, 0.35 - 0.1 * thrust, 0.7)
+    for sd, _ in SIDES:
+        dig = 0.5 + 0.5 * s(t, 1, -0.25 + (0.0 if sd == "L" else 0.5))
+        leg(p, sd, -0.35 - 0.12 * dig, 0.12 * (1 - dig))
+    canopy(p, -0.1)
+    add(p, "canopy", rx=0.3 + 0.08 * s(t, 1, -0.1))
+    tail(p, t, 0.03, up=0.25)
+    return p
+
+
 CLIPS = {"idle": (3.2, True, idle), "walk": (1.0, True, walk), "run": (0.6, True, run), "attack": (0.9, False, attack),
          "ability": (1.2, False, slam), "hop": (1.0, True, hop), "sleep": (3.6, True, sleep), "eat": (2.0, True, eat),
          "pet": (2.4, True, pet), "chop": (1.1, True, chop), "mine": (1.0, True, mine), "carry": (1.0, True, carry),
-         "tend": (1.4, True, tend)}
+         "tend": (1.4, True, tend), "win": (1.0, False, win), "sulk": (2.8, True, sulk), "push": (0.9, True, push)}
 HIDE_AT = {"prop_berry": (0, 0.2, 0.36)}

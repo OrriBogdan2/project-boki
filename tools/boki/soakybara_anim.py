@@ -2,6 +2,7 @@
 The pool on its back rides one `saddle` bone (a rider sits on its floor); the two lily pads at its neck sway a beat
 behind the head."""
 import boki_clips
+import boki_react
 import soakybara
 from boki_clips import SHARED, add, chop_mouth, ear_pose, eat_ground, mine_mouth, s, seq, tail_wave
 from soakybara import LEG_X, LEGS, PAD, SADDLE, SIDES, TAIL_PTS
@@ -126,3 +127,39 @@ CLIPS.update({
     "mine": (1.0, True, pads_follow(mine_mouth)),
 })
 HIDE_AT = {"prop_berry": (0, 0.2, 0.12)}
+
+
+def level_pool(p, slosh=0.0):
+    """Tips the saddle back against the body's pitch so the pool's water stays flat; `slosh` rocks it on top."""
+    pitch = sum(p.get(bn, (0, 0, 0))[0] for bn in ("root", "hips", "spine"))
+    add(p, "saddle", rx=-pitch + slosh)
+
+
+def _win(p, t, a):
+    """A heavy one: the pads flare on the way up, the pool sloshes after the landing and settles."""
+    air = seq(t, [(0, 0), (0.2, 0), (0.36, 1), (0.5, 0), (1, 0)])
+    wash = seq(t, [(0, 0), (0.54, 0), (0.58, 1), (0.95, 0), (1, 0)])
+    level_pool(p, 0.12 * wash * s(t, 5))
+    for sd, sx in SIDES:
+        add(p, "pad." + sd, rx=-0.3 * air, rz=sx * 0.3 * air)
+
+
+def _sulk(p, t, a):
+    """The pads hang over its face, the water rocking with each sigh."""
+    level_pool(p, 0.03 * s(t, 1, -0.25))
+    for sd, sx in SIDES:
+        add(p, "pad." + sd, rx=0.3 * a, rz=-sx * 0.15 * a)
+
+
+def _push(p, t, a):
+    """The tusk shove's stance: head down under the load, the pads pinned back, the pool held level."""
+    add(p, "neck", rx=-0.1)
+    add(p, "head", rx=-0.18 - 0.05 * a)
+    level_pool(p)
+    for sd, _ in SIDES:
+        add(p, "pad." + sd, rx=-0.3 - 0.05 * a)
+
+
+# A squat barrel: a low, heavy hop, a calm sulk, the whole weight in the shove.
+CLIPS.update({n: (sec, lp, pads_follow(fn)) for n, (sec, lp, fn) in boki_react.react(
+    hop=0.55, slump=0.9, brace=1.15, extra_win=_win, extra_sulk=_sulk, extra_push=_push).items()})

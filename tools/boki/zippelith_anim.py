@@ -213,10 +213,64 @@ def tend(t):
     return p
 
 
+def win(t):
+    """Coils down on itself, springs the whole column up off its tail with its face thrown back, lands in a squash,
+    then stands extra tall, swaying and grinning, the pull tag wagging fast."""
+    p = {}
+    crouch = seq(t, [(0, 0), (0.15, 1), (0.25, 0), (1, 0)])
+    air = seq(t, [(0, 0), (0.2, 0), (0.36, 1), (0.5, 0), (1, 0)])
+    land = seq(t, [(0, 0), (0.5, 0), (0.56, 1), (0.68, 0), (1, 0)])
+    proud = seq(t, [(0, 0), (0.54, 0), (0.68, 1), (0.9, 1), (1, 0.7)])
+    squash = crouch + land
+    lean(p, back=0.25 * air + 0.12 * proud - 0.15 * squash, curl=0.35 * squash)
+    sway(p, t, 0.05 * proud, waves=2, tail_amp=0.0)
+    for i, bone in enumerate(TAILS):
+        add(p, bone, ry=0.3 * crouch * (1 + 0.3 * i) + 0.25 * air * s(t, 3, -0.1 * i))
+    tail_lift(p, 0.5 * air)
+    add(p, TAILS[-1], rx=-0.2 * proud, ry=0.35 * proud * s(t, 6))
+    add(p, "head", rx=LOOK_UP * 0.5 + 0.3 * proud + 0.25 * air - 0.15 * squash, rz=0.12 * s(t, 3) * proud)
+    p["root_at"] = (0, 0.18 * air - 0.04 * crouch - 0.03 * land, 0)
+    p["root_sc"] = (1 + 0.1 * squash - 0.04 * air, 1 - 0.16 * squash + 0.1 * air + 0.03 * proud, 1 + 0.05 * squash)
+    return p
+
+
+def sulk(t):
+    """Wilts like a bent stalk, turned away with its head hung and its tail wrapped round in front of it; a sigh,
+    the tail tip lashing twice, one glance back over its shoulder."""
+    p = {}
+    sigh = 0.5 + 0.5 * s(t, 1, -0.25)
+    peek = seq(t, [(0, 0), (0.5, 0), (0.58, 1), (0.72, 1), (0.8, 0), (1, 0)])
+    lash = seq(t, [(0, 0), (0.2, 0), (0.26, 1), (0.33, 0), (0.4, 1), (0.47, 0), (1, 0)])
+    add(p, "root", ry=0.5 * (1 - 0.7 * peek))
+    lean(p, back=-0.35 - 0.05 * sigh, curl=0.45)
+    sway(p, t, 0.015, tail_amp=0.0)
+    add(p, "neck", ry=0.25 * (1 - 1.4 * peek))
+    add(p, "head", rx=-0.3 - 0.05 * sigh + 0.15 * peek, ry=0.35 * (1 - 1.5 * peek))
+    for i, bone in enumerate(TAILS):
+        add(p, bone, ry=0.22 + 0.03 * i + 0.04 * s(t, 1, -0.05 * i))
+    add(p, TAILS[-1], rx=-0.15 * lash, ry=0.4 * lash)
+    p["root_at"] = (0, -0.02 - 0.006 * sigh, 0)
+    p["root_sc"] = (1.03, 1 - 0.06 - 0.02 * sigh, 1.02)
+    return p
+
+
+def push(t):
+    """Bows the column low and leans its brow into the load; the flat tail sends an S back down itself on every
+    beat, driving the body forward."""
+    p = {}
+    thrust = 0.5 + 0.5 * s(t, 1, -0.25)
+    lean(p, back=-0.55 - 0.12 * thrust, curl=-0.1)
+    sway(p, t, 0.02, tail_amp=0.2)
+    add(p, "head", rx=0.25 - 0.05 * thrust)
+    p["root_at"] = (0, -0.02, -0.08 * thrust)
+    p["root_sc"] = (1 + 0.02 * thrust, 1 - 0.04 * thrust, 1 + 0.04 * thrust)
+    return p
+
+
 CLIPS = {
     "idle": (2.8, True, idle), "walk": (0.9, True, walk), "run": (0.55, True, run), "hop": (1.0, True, hop),
     "sleep": (3.4, True, sleep), "eat": (2.0, True, eat), "pet": (2.2, True, pet), "attack": (0.8, False, attack),
     "ability": (1.4, False, ability), "chop": (1.1, True, chop), "mine": (1.0, True, mine), "carry": (0.9, True, carry),
-    "tend": (1.3, True, tend),
+    "tend": (1.3, True, tend), "win": (1.0, False, win), "sulk": (2.8, True, sulk), "push": (0.9, True, push),
 }
 HIDE_AT = {"prop_berry": (0, 0.10, 0.28)}
