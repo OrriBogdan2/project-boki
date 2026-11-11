@@ -36,6 +36,8 @@ const CROUCH_ONE := 0.06     # s: the dip clip eases in and out of the layer
 const CROUCH_MOVING := 0.6   # how much of the dip plays over a sneak: the legs keep some of their stride
 const CROUCH_RATE_MAX := 1.8 # the sneak clip's fastest rate: a short stride quickens to keep its feet planted
 static var _data := {}       # art name -> its parsed file ({} when it has none)
+static var _trimmed := {}    # AnimationLibrary -> true once _trim() ran: every model of a .glb shares its clips
+static var _trim_lock := Mutex.new()     # (a preview model is built on a worker while other models play the clips)
 
 var root: Node3D
 var skel: Skeleton3D
@@ -119,20 +121,11 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	if names.is_empty():
 		return false
 	lib = player.get_animation_library(names[0])
-	var contract: Array = []
-	for b in WardenGlb.BONES:
-		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
-			contract.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
-	for nm in lib.get_animation_list():
-		var a := lib.get_animation(nm)
-		a.loop_mode = Animation.LOOP_LINEAR if _is_loop(String(nm)) else Animation.LOOP_NONE
-		# (rotations only on the contract bones: their offsets and scale are the player's sliders, Sync._look_pose)
-		for i in range(a.get_track_count() - 1, -1, -1):
-			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
-			# (data "offset_bones": a bone the clips do move and scale: Motley's hips ride his spring)
-			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
-					and not bone_name in d.get("offset_bones", []):
-				a.remove_track(i)
+	_trim_lock.lock()
+	if not _trimmed.has(lib):
+		_trim(sk)
+		_trimmed[lib] = true
+	_trim_lock.unlock()
 	tree = AnimationTree.new()
 	tree.name = "Clips"
 	glb.add_child(tree)
@@ -145,6 +138,24 @@ func _setup(model: Node3D, glb: Node3D, sk: Skeleton3D, dd: Dictionary, player: 
 	free_arm = WardenFreeArm.new(sk, lib, String(d["loco"]["idle"]), d.get("free_arm", {}))
 	_setup_out()
 	return true
+
+## Sets the shared clips' loop modes and keeps rotations only on the contract bones (their offsets and scale are the
+## player's sliders, Sync._look_pose). Once a .glb, before any model of it plays: a change to a clip another model is
+## playing, made from another thread, breaks that model's player.
+func _trim(sk: Skeleton3D) -> void:
+	var contract: Array = []
+	for b in WardenGlb.BONES:
+		if b != "root" and WardenSkeleton.find(sk, b) >= 0:
+			contract.append(sk.get_bone_name(WardenSkeleton.find(sk, b)))
+	for nm in lib.get_animation_list():
+		var a := lib.get_animation(nm)
+		a.loop_mode = Animation.LOOP_LINEAR if _is_loop(String(nm)) else Animation.LOOP_NONE
+		for i in range(a.get_track_count() - 1, -1, -1):
+			var bone_name := String(a.track_get_path(i).get_concatenated_subnames())
+			# (data "offset_bones": a bone the clips do move and scale: Motley's hips ride his spring)
+			if a.track_get_type(i) != Animation.TYPE_ROTATION_3D and bone_name in contract \
+					and not bone_name in d.get("offset_bones", []):
+				a.remove_track(i)
 
 ## "weapon_out": {"clip", "bones"}: an arm pose laid over everything while the weapon is out of the hand; "weapon_bone"
 ## scales to zero meanwhile. "bone_scale": {bone: size}: a skinned weapon's size against the sheet (item 137), the
