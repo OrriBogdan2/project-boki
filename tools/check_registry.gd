@@ -145,6 +145,7 @@ const CHECKS := {
 	"--keys-check": ["res://tools/keys_check.gd", "keys_check", null],
 	"--breakables-check": ["res://tools/breakables_check.gd", "breakables_check", null],
 	"--cover-check": ["res://tools/cover_check.gd", "cover_check", null],
+	"--mob-tell-check": ["res://tools/mob_tell_check.gd", "mob_tell_check", null],      # monster attack tells
 	"--aimkit-check": ["res://tools/aimkit_check.gd", "aimkit_check", null],
 	"--range-clamp-check": ["res://tools/range_clamp_check.gd", "range_clamp_check", null],      # cursor past max range
 	"--bot-dodge-check": ["res://tools/bot_dodge_check.gd", "bot_dodge_check", null],
