@@ -1435,6 +1435,7 @@ func _draw_squad(sz: Vector2, p: Hunter) -> void:
 				_text(Vector2(tx, r.position.y + 51), ("STOMPED  %ds" if stp else "KNOCKED  %ds") % int(ceil(left)), 13, Color("ff4a3a") if stp else Color("ff8a6a"), big)
 				if h.revive > 0.0:
 					_arc(Vector2(r.end.x - 16, r.position.y + 46), 8, h.revive, GOOD, 3.0)
+				StompState.draw_row(c, r, h, m.time)
 			"DEATHBOX":
 				_text(Vector2(tx, r.position.y + 37), "DEAD", 13, Color("ff6a5a"), big)
 				_text(Vector2(tx, r.position.y + 53), "Deathbox  %s" % String(st[3]), 12, Color("ffb0a0"))
@@ -1515,6 +1516,7 @@ func _draw_squad_markers(sz: Vector2, p: Hunter) -> void:
 		var e := ctr + d * t
 		var side := Vector2(-d.y, d.x)
 		c.draw_colored_polygon(PackedVector2Array([e + d * 16.0, e - d * 6.0 + side * 11.0, e - d * 6.0 - side * 11.0]), col)
+		StompState.draw_arrow(c, e, side, h, m.time)
 		var lbl := "%s %dm" % [h.pname.substr(0, 10), dist]
 		if String(st[0]) == "WISP": lbl = "%s DOWN %dm" % [h.pname.substr(0, 10), dist]
 		elif String(st[0]) == "DEATHBOX": lbl = "%s's box %s" % [h.pname.substr(0, 10), st[3]]
@@ -1829,7 +1831,9 @@ func _draw_downed(sz: Vector2, p: Hunter) -> void:
 	if p.kin and p.kin.state == "downed":
 		who = "You're a wisp: %ds left, and your Boki is down. Only a teammate standing on you can bring you back." % int(ceil(left))
 	var stomped: bool = p.get_meta("stomped", false)
-	if stomped:
+	if StompState.draw_wisp(c, m, p, sz):
+		who = StompState.WISP_LINE
+	elif stomped:
 		var sts: Array = p.get_meta("stompers", [])
 		who = "%s is on you! You're pinned and draining %.1fx faster. Drift away!" % [(sts[0] as Hunter).pname if not sts.is_empty() else "An enemy", Life.R["stomp_mult"]]
 		_edge_pulse(sz, Color(1.0, 0.1, 0.05), 0.35 + 0.3 * (0.5 + 0.5 * sin(m.time * 9.0)))

@@ -7,6 +7,7 @@ extends RefCounted
 ##  4. Left alone, the stomp kills the wisp at Stomp.TIME, not before.
 ##  5. Online: the stomper's game sends "go" and how it ended; a "go" from another game pins this
 ##     game's wisp, "broken" lets it go, "done" eliminates it here.
+##  5b. While it runs StompState tells the wisp and its squad the time left; a break or finish clears it.
 ##  6. Styles: every Hunter has its own default (owned, all different); the unlockable can't be worn
 ##     until bought with gems, then the local player stomps with it and bots keep their own; a save
 ##     with no stomp keys reads as "wearing your own".
@@ -118,8 +119,11 @@ func _check_stun(at: Vector3) -> void:
 	_setup(at)
 	_commit()
 	_run(1.0)
+	ok(StompState.of(W) == foe and absf(StompState.left(foe) - (Stomp.TIME - 1.0)) < 0.1,
+		"the wisp's and its squad's stomp timer shows %.1fs left" % StompState.left(foe))
 	foe.hurt(5.0, m.player, {"stun": 0.6})
 	_run(Match.DT)
+	ok(StompState.of(W) == null, "a stun clears the stomp timer at once")
 	ok(foe.stomp.is_empty(), "a stun cancels the stomp")
 	ok(W.downed and not W.out and not W.has_meta("stomped_by"), "the wisp survives the cancelled stomp and is let go")
 	_spot(foe, at + Vector3(30, 0, 0))
@@ -138,7 +142,7 @@ func _check_finish(at: Vector3) -> void:
 	var took := m.time - t0
 	ok(W.out and String(W.get_meta("died_why", "")) == "executed", "left alone the stomp executes the wisp")
 	ok(absf(took - Stomp.TIME) <= 0.05, "at %.2fs (Stomp.TIME %.1fs)" % [took, Stomp.TIME])
-	ok(foe.stomp.is_empty(), "and the stomper is free again")
+	ok(foe.stomp.is_empty() and StompState.of(W) == null, "and the stomper is free again, the timer gone")
 
 func _check_net(at: Vector3) -> void:
 	# the last wisp was executed (a knock now would wipe its team): the player stomps a rival instead

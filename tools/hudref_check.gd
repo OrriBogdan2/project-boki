@@ -304,6 +304,25 @@ func _mate_down(m: Match, hud, P: Hunter) -> void:
 	hud.mates.track(hud, P, MateAlerts.LINE_S)
 	ok(not hud.mates.lines.has(mate.nid) and mate.downed,
 		"after %.1fs the line is gone, they're still down" % MateAlerts.LINE_S)
+	# a stomp on a teammate: their row and arrow draw the stomp badge (real frames), gone with the stomp
+	Stomp.start(m, rivals[0], mate)
+	for pos in [P.pos + Vector3(8, 0, 0), P.pos + Vector3(300, 0, 0)]:        # the mate in view, then far off screen
+		mate.pos = pos
+		await main.get_tree().process_frame
+		await main.get_tree().process_frame
+		ok(StompState.of(mate) == rivals[0], "a stomp on a teammate: badge drawn (mate %.0f m off)" % mate.flat_dist(P))
+	Stomp.end(m, rivals[0], "broken")
+	ok(StompState.of(mate) == null, "the badge is gone the moment the stomp breaks")
+	# ... and on you: the wisp's ring timer and line (real frames), then you are let go and back up
+	m.knock(P, rivals[0], {})
+	Stomp.start(m, rivals[0], P)
+	await main.get_tree().process_frame
+	await main.get_tree().process_frame
+	ok(StompState.of(P) == rivals[0] and StompState.left(rivals[0]) > Stomp.TIME - 0.5,
+		"stomped as a wisp: the HUD draws the ring timer")
+	Stomp.end(m, rivals[0], "broken")
+	ok(StompState.of(P) == null, "the ring is gone the moment the stomp breaks")
+	m.revive_hunter(P, null)
 
 func _done() -> void:
 	print("HUDREF CHECK DONE, failures: ", bad)

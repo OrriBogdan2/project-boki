@@ -67,6 +67,7 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 | Pop-up | Where, size | How long | Now |
 |---|---|---|---|
 | Ally knocked | was a 300x70 card top centre, pulsing red, portrait, timer, arrow | was all the time they were down | **gone.** Knocked mark on their squad row (left, under the minimap), row outlined steadily (pulses only while stomped), one faint 13 px line beside the row ("down", 60% opacity), the edge arrow toward them (`_draw_squad_markers`, only while they're off screen), "Revive Nm" only within 9 m (`DownedMarks`) |
+| Stomp running (3 s) | nothing | n/a | **wisp:** a ring timer round their own wisp and one line, "Being stomped: a stun on the stomper saves you". **teammates:** their squad row (and off-screen arrow) flashes a stomp badge with the same timer. Stomper: nothing new. Gone the moment it breaks or finishes (`StompState`) |
 | Ally revived / eliminated / soul lost | was a 236x44 card top centre | was 2.6 s | **gone.** The same faint line by their row, 1.5 s |
 | "DOWN" knock burst over a downed hunter | 22-35 px word and rays over the plate | 1.1 s | rivals only now; a teammate's fall is the row's job |
 | Message lane (`toast`, `toast_small`, `level_up`: pickups, armour, combos, objectives, warnings) | top centre column from y 84, cards up to 45% wide, 15/17/20 px | 1.8 / 2.4 / 3.2 s, 3 at once | in a fight: 2 at once, 2 s each (a hint's own life aside); repeats already merge ("x3") |
