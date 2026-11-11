@@ -1,9 +1,9 @@
 class_name DuoTutorialDrive
 extends RefCounted
 ## Test driver: plays the 2v2 tutorial (DuoTutorial) as a player would, so the whole run can be checked
-## headless (--duo-tutorial-check), watched (--duo-tutorial --duo-test) and filmed (--gameplay-media clip 9). One plain move per beat:
-## walk to the guide, slide, hit the first rival, cast, slide out of shots, hit the marked rival, send
-## the Boki, knock out and scan the wild one, stand on the guide's wisp, merge, then fight.
+## headless (--duo-tutorial-check), watched (--duo-tutorial --duo-test) and filmed (--gameplay-media clip 9).
+## One plain move per beat: walk to the guide, slide, hit the first rival, cast, slide out of shots, hit
+## the marked rival, send the Boki, knock out and scan the wild one, stand on the guide's wisp, merge, fight.
 
 const KEYS := ["fire", "sec", "sig", "dash", "jump", "ult", "interact", "throw", "gear1", "gear2"]
 const REACH_MELEE := 1.6     # m a blade swings from

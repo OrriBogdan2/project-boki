@@ -62,3 +62,10 @@ the first beat passes itself. Runs take 55-85 s of match time.
 - **Put back in the ring** is a teleport (rare: a hard knock over the wall). A taller wall collision would hide it.
 - **Where it goes:** the prototype is its own launch flag. To ship, it replaces or follows the course in
   `tutorial.gd` (Orri's call); the title's Tutorial entry would point here.
+
+## Film
+`docs/shots/tutorial-2v2/duo_run.mp4`: the test driver playing Vex start to end card (68 s, 960x540, the match's
+own camera). Made with `--gameplay-media --media-clip=9 --media-secs=150`. The GPU queue was dropping jobs
+(rc=125), so this one is a software render on rpc5 (xvfb, opengl3). Things the film shows that still need work:
+the run's level-up banners (XP from hitting the rivals) talk over Meeko, and the camera sits off-centre on the
+player. A truce offer from the rivals was in the take; it's gone since (sparring rivals don't offer one).

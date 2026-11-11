@@ -8,6 +8,7 @@ Maps are JSON layouts in `content/maps/`. The expedition map in use is the one `
 | Map | File | Size | Islands | What it's for |
 |---|---|---|---|---|
 | The Arena | `content/maps/arena.json` | 52 x 52 | 2 | The practice arena. |
+| The Sparring Ring | `content/maps/duo_arena.json` | 40 x 40 | 1 | The 2v2 tutorial's ring (scripts/match/duo_tutorial.gd). |
 | The Hollow Crown | `content/maps/hollowcrown.json` | 305 x 305 | 11 | Hand-made expedition map (tools/make_hollowcrown.py; the format is described there). |
 | Skyreach | `content/maps/skyreach.json` | 216 x 216 | 17 | Hand-made expedition map. |
 | First Flight | `content/maps/tutorial.json` | 80 x 80 | 6 | The tutorial course, one island per skill. |
@@ -24,6 +25,18 @@ The practice arena: one round floor ringed by low ruin walls with four gates, fo
 | Bench | grove | Meadow | quiet | 0 |  |
 
 **Getting around:** 1 bridges.
+
+
+
+## The Sparring Ring
+
+The 2v2 tutorial's ring (scripts/match/duo_tutorial.gd): one round floor with an unbroken ruin wall two tiles thick all the way round (no gates, no ledges, no void inside it), four 2x2 stone blocks for cover and two patches of tall grass. Everyone is placed by the tutorial; nothing else spawns on it.
+
+### Islands
+
+| Island | Role | Biome | Danger | Tall grass clumps | Named spots |
+|---|---|---|---|---|---|
+| The Sparring Ring | grove | Meadow | quiet | 2 |  |
 
 
 

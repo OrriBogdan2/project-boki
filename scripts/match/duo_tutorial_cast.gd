@@ -74,6 +74,8 @@ func tick(dt: float) -> void:
 	_guide()
 	for h in [m.player, tu.guide] + tu.foes:
 		_keep_in(h)
+	if m.truce:
+		m.truce.offers.clear()      # (sparring partners don't offer a truce)
 
 ## The ring is closed: a hunter knocked into or over the wall lands back on the floor beside it.
 func _keep_in(h: Hunter) -> void:

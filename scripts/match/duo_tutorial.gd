@@ -15,7 +15,7 @@ const MEET_R := 3.0          # m from the guide that counts as "came over"
 const DANGER_R := 6.0        # m: a rival shot this close and coming at you makes a slide a dodge
 const MELEE_R := 2.6         # m: a rival this close makes a slide a dodge too
 const GAP_T := 2.2           # s between a beat's done line and the next beat
-const ULT_LVL := 6           # the level the ultimate unlocks at (Hunter.ULT_AT)
+const NAG_PULSE_T := 1.6     # s the tip pill pulses after a nag
 
 var m: Match
 var cfg: Dictionary
@@ -123,10 +123,10 @@ func tick(dt: float) -> void:
 		_done(_pick(cfg["skip"]))
 	elif stall_t >= float(cfg["nag_s"]):
 		stall_t = 0.0
-		nagging = 1.6
+		nagging = NAG_PULSE_T
 		say(String(cur()["nag"]))
 
-## The guide says a line (filled in with your keys and names), over her head and in the tip lane.
+## The guide says a line (filled in with your keys and names) in the bubble over her head.
 func say(txt: String) -> void:
 	line = fill(txt)
 	line_t = 0.0
@@ -165,7 +165,7 @@ func _next() -> void:
 		"capture":
 			wild = cast.spawn_wild()
 		"ult":
-			p.lvl = maxi(p.lvl, ULT_LVL)
+			p.lvl = maxi(p.lvl, int(Hunter.ULT_AT[0]))
 			p.ult = 1.0
 	say(String(cur()["say"]))
 
