@@ -9,9 +9,8 @@ extends RefCounted
 ##  3. The guest dies again: a revive beacon the host stands on brings it back at the beacon, full
 ##     health with resurrection sickness, and both games have the beacon used.
 ##  4. The guest dies a third time and is gone for good: the host's marker no longer takes a revive.
-## Lines: RVNET ok|FAIL <what>; the guest prints RVNET guest pid=<pid>.
+## Lines: RVNET ok|FAIL <what>.
 
-const GODOT := "/usr/local/bin/godot"
 const DT := 1.0 / 60.0
 const START_S := 240.0       # s for the guest to come up and build its match
 const SEED := 4242
@@ -48,7 +47,7 @@ func run(main_node: Node) -> void:
 
 # ------------------------------------------------------------------ the host
 func _host() -> void:
-	port = 7990 + OS.get_process_id() % 60
+	port = CheckChild.free_port(7990 + OS.get_process_id() % 60)
 	dir = ProjectSettings.globalize_path("user://revive_net")
 	DirAccess.make_dir_recursive_absolute(dir)
 	var relay := RelayServer.new()
@@ -56,16 +55,13 @@ func _host() -> void:
 	main.add_child(relay)
 	ok(relay.start(PackedStringArray(["--port=%d" % port])) == OK, "the relay listens on %d" % port)
 	ok(await _connect(), "the host is on the relay as %s" % Net.me)
-	var cmd := "cd '%s' && %s --headless -- --revive-net-check=guest --rn-port=%d > '%s' 2>&1" % [
-		ProjectSettings.globalize_path("res://"), GODOT, port, dir.path_join("guest.log")]
-	OS.create_process("/bin/sh", ["-c", cmd])
+	guest_pid = CheckChild.start("--revive-net-check=guest --rn-port=%d" % port, dir.path_join("guest.log"))
 	var other := ""
 	var t0 := Time.get_ticks_msec()
 	while other == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 		for id in Net.peers:
 			if String(id) != Net.me: other = String(id)
-		_read_pid()
 	ok(other != "", "the guest joins the relay", other)
 	if other == "":
 		return _finish()
@@ -159,21 +155,10 @@ func _hold(C: Hunter, B: Hunter, cap: float) -> float:
 func _finish() -> void:
 	Net.lobby_emit("rn", {"c": "done"})
 	await main.get_tree().create_timer(1.0).timeout
-	_read_pid()
 	if guest_pid > 0 and OS.is_process_running(guest_pid):
 		OS.kill(guest_pid)
 	print("RVNET DONE, %d checks, failures: %d" % [n, bad])
 	main.get_tree().quit(1 if bad > 0 else 0)
-
-func _read_pid() -> void:
-	if guest_pid > 0:
-		return
-	var p := dir.path_join("guest.log")
-	if not FileAccess.file_exists(p):
-		return
-	for line in FileAccess.get_file_as_string(p).split("\n"):
-		if line.begins_with("RVNET guest pid="):
-			guest_pid = int(line.get_slice("=", 1))
 
 ## Tells the guest to do `c`, lets both games run `secs`, and returns what the guest says back.
 func _say_do(c: String, secs: float) -> Dictionary:
@@ -195,7 +180,6 @@ func _reply() -> Dictionary:
 
 # ------------------------------------------------------------------ the guest
 func _guest() -> void:
-	print("RVNET guest pid=%d" % OS.get_process_id())
 	if not await _connect():
 		print("RVNET guest: no relay")
 		main.get_tree().quit(1)
@@ -203,7 +187,7 @@ func _guest() -> void:
 	var t0 := Time.get_ticks_msec()
 	while m == null and not stop and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.2).timeout
-	while m != null and not stop and Time.get_ticks_msec() - t0 < 600000:
+	while m != null and not stop:
 		await _run(DT)
 	main.get_tree().quit(0)
 

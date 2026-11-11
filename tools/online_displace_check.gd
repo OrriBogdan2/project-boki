@@ -107,29 +107,26 @@ func _on_msg(topic: String, data, from: String) -> void:
 	super._on_msg(topic, data, from)
 
 # ------------------------------------------------------------------ the host
-func _spawn(cmd: String) -> int:
-	return OS.create_process("/bin/sh", ["-c", "cd '%s' && exec %s" % [ProjectSettings.globalize_path("res://"), cmd]])
-
 func _host() -> void:
-	relay_port = 7930 + OS.get_process_id() % 60
+	relay_port = CheckChild.free_port(7860 + OS.get_process_id() % 60, PORT_GAP if delay_ms > 0 else 0)
 	port = relay_port + (PORT_GAP if delay_ms > 0 else 0)
 	dir = ProjectSettings.globalize_path(OD_DIR)
 	DirAccess.make_dir_recursive_absolute(dir)
 	for f in ["stop", "server.csv", "guest.csv", "host.csv", "server.ready"]:
 		DirAccess.remove_absolute(dir.path_join(f))
-	var common := "%s --headless -- --od-dir='%s' --od-port=%d --dn-port=%d --od-delay=%d" % [
-		GODOT, dir, relay_port, port, delay_ms]
-	pids.append(_spawn("%s --online-displace-check=server > '%s' 2>&1" % [common, dir.path_join("server.log")]))
+	var common := "--od-dir='%s' --od-port=%d --dn-port=%d --od-delay=%d" % [dir, relay_port, port, delay_ms]
+	pids.append(CheckChild.start(common + " --online-displace-check=server", dir.path_join("server.log")))
 	var t0 := Time.get_ticks_msec()
 	while not FileAccess.file_exists(dir.path_join("server.ready")) and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
 	ok(FileAccess.file_exists(dir.path_join("server.ready")), "the headless relay server listens on %d" % relay_port)
 	if delay_ms > 0:
-		pids.append(_spawn("python3 -I tools/udp_delay.py %d %d %d > '%s' 2>&1" % [
-			port, relay_port, delay_ms, dir.path_join("proxy.log")]))
+		pids.append(CheckChild.run("exec python3 -I '%s' %d %d %d" % [ProjectSettings.globalize_path(
+			"res://tools/udp_delay.py"), port, relay_port, delay_ms], dir.path_join("proxy.log")))
 		await main.get_tree().create_timer(0.5).timeout
 	ok(await _connect(), "the host is on the server as %s (%d ms each way)" % [Net.me, delay_ms])
-	pids.append(_spawn("%s --online-displace-check=guest > '%s' 2>&1" % [common, dir.path_join("guest.log")]))
+	guest_pid = CheckChild.start(common + " --online-displace-check=guest", dir.path_join("guest.log"))
+	pids.append(guest_pid)
 	t0 = Time.get_ticks_msec()
 	while peer_id == "" and Time.get_ticks_msec() - t0 < START_S * 1000.0:
 		await main.get_tree().create_timer(0.5).timeout
