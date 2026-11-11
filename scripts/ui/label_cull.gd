@@ -14,6 +14,8 @@ const RIDE_M := 5.0            # m (flat): aboard the sky ship a rival's plate d
 ## nid -> the frame its plate was last laid out (checks read it), and how many were skipped last frame
 static var laid := {}
 static var skipped := 0
+## Screen rects of the labels laid out so far this frame (claim)
+static var taken: Array[Rect2] = []
 
 ## Where to draw a label anchored at `wpos`, or Vector2.INF when it isn't worth laying out.
 static func at(H, wpos: Vector3, far := FAR_M) -> Vector2:
@@ -41,8 +43,23 @@ static func ride_skip(m: Match, h: Hunter) -> bool:
 static func mark(e: Ent) -> void:
 	laid[e.nid] = Engine.get_process_frames()
 
+## The de-overlap rule for world labels: label rect `r` steps up above any label already laid out
+## this frame that it would overlap, so labels side by side stay readable. Returns where it goes.
+static func claim(r: Rect2) -> Rect2:
+	for tries in 4:
+		var bumped := false
+		for o in taken:
+			if o.intersects(r):
+				bumped = true
+				r.position.y = o.position.y - r.size.y - 2.0
+		if not bumped:
+			break
+	taken.append(r)
+	return r
+
 ## Start of a frame's labels.
 static func begin() -> void:
 	skipped = 0
+	taken.clear()
 	if laid.size() > 512:
 		laid.clear()

@@ -415,10 +415,9 @@ func _draw_world_labels() -> void:
 			if ct > bfrac:
 				c.draw_rect(Rect2(br.position + Vector2(bw * bfrac, 0), Vector2(bw * (ct - bfrac), 6)), Color(1.0, 0.95, 0.88, 0.8))
 			_status_row(sp + Vector2(0, 16), mb)
-	# gear and tunings on the ground: name and rarity when you're close enough to care. Tags that would overlap one
-	# already drawn this frame step up above it, so a few drops side by side stay readable.
+	# gear and tunings on the ground: name and rarity when you're close enough to care, stepped clear of
+	# the labels already drawn (LabelCull.claim) so a few drops side by side stay readable
 	var pp: Vector3 = m.player.pos if m.player else cam.focus
-	var tags: Array = []
 	for wp in m.wpicks:
 		var wpos: Vector3 = wp["pos"]
 		if Vector2(wpos.x - pp.x, wpos.z - pp.z).length() > 7.0 or cam.is_position_behind(wpos):
@@ -430,17 +429,9 @@ func _draw_world_labels() -> void:
 		var it := {} if (is_gear or is_tune) else Pack.ground_item(wp)
 		var nm := String(Loot.name_of(Pack.ground_item(wp))) if is_gear else (String(Data.PERKS[String(wp["tune"])]["name"]) if is_tune else Loot.name_of(it))
 		var tw := TextCache.width(big, nm, 16) + 10.0
-		var tag := Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, 32.0 if (is_gear or is_tune) else 20.0))
-		for tries in 4:
-			var bumped := false
-			for o in tags:
-				if (o as Rect2).intersects(tag):
-					bumped = true
-					tag.position.y = (o as Rect2).position.y - tag.size.y - 2.0
-			if not bumped:
-				break
-		sp.y += tag.position.y - (sp.y - 16.0)
-		tags.append(tag)
+		var th := 32.0 if (is_gear or is_tune) else 20.0
+		var tag := LabelCull.claim(Rect2(sp + Vector2(-tw * 0.5, -16.0), Vector2(tw, th)))
+		sp.y = tag.position.y + 16.0
 		if is_gear:
 			# a piece of gear: its name, rarity and which slot it goes in
 			_ctext(sp, nm, 15, r["color"], big)
