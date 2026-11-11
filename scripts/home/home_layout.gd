@@ -25,18 +25,29 @@ const GAP := 3                       # tiles of sky kept between the main island
 const EXPAND := [[150, 4], [260, 8], [400, 14], [600, 22]]
 const EXPAND_MATS := [[0, 0], [16, 10], [30, 20], [50, 34]]
 
-## Ground colours for every home island. region is the world's region look (trees, rocks) to use.
+## Ground colours for every home island. region is the world's region look (trees, rocks) to use. A "zone"
+## theme belongs to a garden zone (briefs/design/GARDEN.md 10.2) and is not sold in the Island tab: style is
+## the flora set its scatter uses (Flora.STYLES) and track the Dash course there (base_race.json "tracks").
+## The region's ground colours win over the theme's unless own_ground.
 const THEMES := {
 	"meadow": {"name": "Meadow", "gems": 0, "region": 0},
 	"autumn": {"name": "Autumn", "gems": 120, "region": 1, "top": "b08a50", "top2": "94723f", "side": "8b5a3a", "leaf": "e0743a"},
 	"snow": {"name": "Snow", "gems": 160, "region": 2, "top": "d2e2ea", "top2": "aac6d6", "side": "7a8aa0", "deep": "2c3448", "leaf": "8ac8d8"},
 	"blossom": {"name": "Blossom", "gems": 200, "region": 4, "top": "7cbc6c", "top2": "5c9c5c", "side": "8b6d52", "leaf": "ff9ac8"},
+	# a zone's own ground (ZoneLayout): never for sale, it has no gems
+	"glasswater": {"name": "Glasswater", "zone": true, "region": 2, "top": "9ccfc4", "top2": "7db8b4",
+		"side": "5a7a8c", "deep": "24405a", "leaf": "6fd0e8"},
+	"cinderstep": {"name": "Cinderstep", "zone": true, "own_ground": true, "region": 1,
+		"top": "66625f", "top2": "56524f", "side": "4a3e3a", "deep": "261a1a", "leaf": "e07a3a"},
+	"ridge": {"name": "Kitewind Ridge", "gems": 0, "zone": true, "region": 0, "style": "storm", "track": "ridge",
+		"top": "9cba86", "top2": "7fa27a", "side": "7a7a90", "deep": "2a3552", "leaf": "7cc8b4"},
 }
 
 ## The build-mode catalog. cat: the bar's tab. gems / scrap: the price of one (one tile for lines and
 ## brushes). size: footprint in tiles before turning. block: kin and you walk around it. line: dragged
 ## out in a line that joins up (fences). brush: painted on tiles (path / clear / water). colour: you
-## pick its colour. light: glows at night. bed: kin sleep on it.
+## pick its colour. light: glows at night. bed: kin sleep on it. comfort: the decoration's comfort tag
+## (cosy, bright, wild or quiet; three of one tag in a zone switch on its effect, DecorComfort).
 const CATALOG := {
 	"fence": {"name": "Wood fence", "cat": "Fences", "gems": 3, "line": true, "block": true},
 	"picket": {"name": "Picket fence", "cat": "Fences", "gems": 4, "line": true, "block": true},
@@ -50,21 +61,24 @@ const CATALOG := {
 	"river": {"name": "River", "cat": "Paths", "gems": 2, "brush": "water", "block": true,
 		"desc": "Drag a narrow channel of water across the ground. A crop patch within 2 tiles of any water waters itself."},
 	"water": {"name": "Pond water", "cat": "Paths", "gems": 6, "brush": "water", "block": true},
-	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8},
-	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true},
-	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true},
-	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true},
-	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true},
-	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true},
-	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true},
-	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true},
-	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true},
-	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true},
-	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true},
-	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true},
-	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true},
-	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true},
-	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true},
+	"flowers": {"name": "Flower bed", "cat": "Garden", "gems": 8, "comfort": "bright"},
+	"snack_patch": {"name": "Snack patch", "cat": "Garden", "gems": 0, "size": [2, 2], "max": 1,
+		"desc": "Grows four element snacks every few minutes. Walk over it to pick them. For feeding only."},
+	"bush": {"name": "Bush", "cat": "Garden", "gems": 10, "block": true, "comfort": "wild"},
+	"tree": {"name": "Leafy tree", "cat": "Garden", "gems": 20, "block": true, "comfort": "wild"},
+	"pine": {"name": "Pine tree", "cat": "Garden", "gems": 20, "block": true, "comfort": "wild"},
+	"blossom_tree": {"name": "Blossom tree", "cat": "Garden", "gems": 30, "block": true, "comfort": "wild"},
+	"lantern": {"name": "Lantern", "cat": "Lights", "gems": 15, "light": true, "comfort": "bright"},
+	"lamp_post": {"name": "Lamp post", "cat": "Lights", "gems": 20, "light": true, "comfort": "bright"},
+	"bench": {"name": "Bench", "cat": "Furniture", "gems": 25, "size": [2, 1], "block": true, "comfort": "cosy"},
+	"kin_bed": {"name": "Boki bed", "cat": "Furniture", "gems": 15, "bed": true, "colour": true, "comfort": "cosy"},
+	"rug": {"name": "Picnic rug", "cat": "Furniture", "gems": 20, "size": [2, 2], "colour": true, "comfort": "cosy"},
+	"rug_long": {"name": "Long rug", "cat": "Furniture", "gems": 30, "size": [3, 2], "colour": true, "comfort": "cosy"},
+	"banner": {"name": "Banner", "cat": "Statues", "gems": 20, "colour": true, "comfort": "bright"},
+	"pillar": {"name": "Old pillar", "cat": "Statues", "gems": 40, "scrap": 2, "block": true, "comfort": "quiet"},
+	"kin_statue": {"name": "Boki statue", "cat": "Statues", "gems": 120, "scrap": 6, "block": true, "comfort": "quiet"},
+	"fountain": {"name": "Fountain", "cat": "Statues", "gems": 150, "scrap": 8, "size": [2, 2], "block": true,
+		"comfort": "quiet"},
 	# the Boki base's playthings (HomeToys, content/rules/toys.json); the Base tab shows only while base_mode is on
 	"toy_ball": {"name": "Play ball", "cat": "Base", "gems": 12, "toy": true,
 		"desc": "A ball to chase and nudge. Trains Speed. Boki share it."},
@@ -72,6 +86,12 @@ const CATALOG := {
 		"desc": "Flying and Rock Boki love to climb it. Trains Power."},
 	"toy_tub": {"name": "Splash tub", "cat": "Base", "gems": 25, "block": true, "toy": true,
 		"desc": "Water and Ice Boki love a splash. Trains Focus."},
+	"toy_stone": {"name": "Warm stone", "cat": "Base", "gems": 20, "block": true, "toy": true,
+		"desc": "Fire Boki love to bask on it. Trains Guard."},
+	"toy_vent": {"name": "Updraft vent", "cat": "Base", "gems": 22, "toy": true,
+		"desc": "Flying, Electric, Fairy and Sound Boki love to hover on its rising air. Trains Speed."},
+	"toy_dig": {"name": "Dig patch", "cat": "Base", "gems": 18, "toy": true,
+		"desc": "Grass and Bug Boki love to dig, and now and then turn up a snack. Trains Focus."},
 	# work stations (Work, HomeWork): kin with the right element come and work them on their own.
 	# work: the element. wood / stone: building materials (Save.d["mats"]) on top of the gems.
 	"job_board": {"name": "Job Board", "cat": "Work", "gems": 30, "block": true, "work": "board",
@@ -241,9 +261,12 @@ static func ensure(d: Dictionary) -> Dictionary:
 			(L["b"] as Dictionary).erase(b)
 			continue
 		be["x"] = int(be.get("x", 0)); be["z"] = int(be.get("z", 0)); be["r"] = int(be.get("r", 0)) % 4
-	return L
+	SnackPatch.grant(d)
+	return of(d)
 
 static func of(d: Dictionary) -> Dictionary:
+	if not ZoneLayout.live.is_empty() and is_same(d, Save.d):
+		return ZoneLayout.live        # a built zone's Home is open: its island stands in for the save's
 	var L = d.get("layout")
 	return L if typeof(L) == TYPE_DICTIONARY else fresh()
 
