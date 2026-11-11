@@ -45,8 +45,8 @@ var authored_stairs := {}   # tile index -> Vector2i: flights the layout placed 
 var warden_posts: Array = []   # {pos: Vector3, island: int}: where the layout lets Blight Wardens stand
 var trap_spots: Array = []     # {pos: Vector3, island: int}: where the layout puts its regions' traps
 var regions: Array = []        # the layout's named regions [{id, name, purpose, biome, islands}]
-## The ways out an authored layout places (see Exits): {kind: "dock" | "hatch" | "outpost", pos: Vector3,
-## out: Vector2 (a dock's way out over the abyss, optional), walled: bool}. Empty: Exits works them out.
+## The uplink outposts an authored layout places (see Exits): {kind: "outpost", at: Vector2, walled: bool}.
+## Empty: Exits works them out.
 var exit_defs: Array = []
 ## Boss lairs (see Lairs): walled arenas with one gate, each holding a boss and its Rare Egg.
 ## {id, name, boss, c: Vector2 (centre), half (tiles from the centre to the wall), gate ("n"/"s"/"e"/"w"),
@@ -146,11 +146,11 @@ func abyss_floor(x: float, z: float, last := INF) -> float:
 
 ## Can a body of radius r stand at (x,z) with feet at y?
 ## Returns 0 if free, the blocking height if a wall or rock is in the way, -1 if the edge guard stops it.
-## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and terrain don't block, only the edge guard does.
+## ghost: a Spirit Walk (Hunter.spirit_t): rocks, trees, barriers and faces taller than a step-up don't block.
 func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false) -> float:
 	var worst := 0.0
-	if not dyn_walls.is_empty() and not ghost:
-		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y)
+	if not dyn_walls.is_empty():
+		var wb: float = Verbs.wall_blocks(dyn_walls, x, z, r, y, "phase" if ghost else "body")
 		if wb > 0.0:
 			return wb
 	# rocks, trees and walls use a slimmer body than the terrain does, so you slide past their
@@ -164,13 +164,12 @@ func occupy(x: float, z: float, r: float, y: float, guard: bool, ghost := false)
 	# never reported as 0, which means "free": a ground-level island, top 0, blocks from below too.
 	# It used to read as open air, so bodies under the lip slid in under ground-level islands.)
 	var hit := false
-	if not ghost:
-		for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
-			var g := ground_at(x + o.x, z + o.y)
-			if g > y + STEP:
-				worst = maxf(worst, g)
-				hit = true
-	if hit:
+	for o in [Vector2(0, 0), Vector2(r, 0), Vector2(-r, 0), Vector2(0, r), Vector2(0, -r), Vector2(r, r) * 0.7, Vector2(-r, r) * 0.7, Vector2(r, -r) * 0.7, Vector2(-r, -r) * 0.7]:
+		var g := ground_at(x + o.x, z + o.y)
+		if g > y + STEP:
+			worst = maxf(worst, g)
+			hit = true
+	if hit and not (ghost and worst > y + LEVEL + 0.05):
 		return maxf(worst, WALL_MIN)
 	if guard:
 		# don't let a walking hunter step off into the abyss; dashes and knockback ignore this
@@ -2473,12 +2472,9 @@ func generate_authored(L: Dictionary, seed_val: int) -> void:
 		authored_portals.append(_v2(ap))
 	exit_defs.clear()
 	await _slice()
-	for ek in [["docks", "dock"], ["outposts", "outpost"], ["hatches", "hatch"]]:
-		await _slice()
-		for ap in L.get(ek[0], []):
-			authored_portals.append(_v2(ap))
-			exit_defs.append({"kind": ek[1], "at": _v2(ap), "out": Vector2(float(ap[2]), float(ap[3])) if (ap as Array).size() >= 4 else Vector2.ZERO,
-				"walled": (ap as Array).size() >= 3 and ek[1] == "outpost" and bool(ap[2])})
+	for ap in L.get("outposts", []):
+		authored_portals.append(_v2(ap))
+		exit_defs.append({"kind": "outpost", "at": _v2(ap), "walled": (ap as Array).size() >= 3 and bool(ap[2])})
 	await _slice()
 	if hand:
 		HandLayout.place_spots(self, defs)
