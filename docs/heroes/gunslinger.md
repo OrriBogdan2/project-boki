@@ -120,6 +120,8 @@ Clip re-keys for origin/ext/vex-v2-model (not done here: the GLB and tools/art1 
 | RMB Burr Charge | tap, fired from the cannon's launcher on the press (owner items: no hold, no throw) | max range, a fixed 10.5 m line along the aim | goes off on the first foe it strikes (22 damage, Dazed 1.4s, no cone); otherwise it flies the lane and sticks to a wall or the ground at the lane's end; a 6 m, 100° cone back toward you for 0.9s, then the blast on everyone in it: 16, a big shove along the cone, Dazed 1.4s; a hunter shoved into more terrain is stunned 0.7s | while held: a white lane with an arrow tip, foes inside it marked with a magenta ring; when stuck: the filling cone (everyone sees it); the blast front and a Dazed swirl | `gunslinger_rmb_hold` (low at the hip), `gunslinger_rmb` (a sidearm side toss) | `vn_cock`, `vn_throw`, `gunslinger_grenade_thunk`, `vn_blast` |
 | Shift Slipstep | tap / hold | where you move, not the aim | tap 4.8 m skid over 0.45 s (the source's, off the dash feel), hold 7 m slide that is owed 40% more cooldown (the kit-data pass: no refund for releasing early); you shoot through either; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
 | E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line locks to the press direction and turns toward the cursor at most `turn_deg_s` 90 deg/s (so a flick cannot drag it), and the beam goes exactly along it | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
+| Shift Slipstep | tap / hold | where you move, not the aim | tap 4.8 m skid, hold 7 m slide that is owed 40% more cooldown (the kit-data pass: no refund for releasing early); you shoot through either; an air tap slides 2/3 of the hold distance | none (a white ring and an ember afterimage at the start) | `gunslinger_dash` (feet first, leaning back, rifle up); with no charge in the air `gunslinger_dash_ex` | `vn_slide` |
+| E Longneedle | press, stand still 0.6s | direction, a fixed 18 m line through terrain; the line is locked to the cursor at the press and can only creep round toward it at 30 deg/s (`turn_deg_s`; 18 deg over the whole charge; owner 11-09: a strong yaw lock), and the beam goes exactly along the locked line (body, muzzle orb and camera view use it too) | a 1.8 m wide beam (0.9 m either side, was 0.5: item 68) through everything in line: 36, +20% on a Dazed foe, a Dazed hunter is Skewered (payoff); a hunter hit takes 20% off the cooldown (rank 3: 30% for every hunter hit); the recoil shoves you back a step | a wide bright line narrowing to a thin core over the cast (everyone sees it); cursor charge ring; muzzle orb, flat flare, smoke ring | `gunslinger_e` (brace, recoil overshoot, settle) | `vn_ion_charge`, `vn_ion_fire`, `hero_skewer` |
 | Passive Hot Streak | | | a knock gives Slipstep back (the takedown heal is DashReset's 5%, the kit adds none); an ability that lands lights Fever (one flat 6% lifesteal, 3.5s) | one pip over the bar; a column and ring on a knock | `gunslinger_knock` (rifle spun up) | `vn_stim` |
 | X Cinderfall (ultimate, level 6) | tap | at the cursor, clamped to 14 m; lands exactly there (no tracking) | the rifle snaps straight up and fires; 1.6 s later the shell lands: 24 to everyone within 3.4 m, +50% within 1.2 m of the centre; then the patch burns 3 s, 3 every 0.5 s and a 30% slow; she moves and shoots freely; 42 s cooldown | a 3.4 m ground disc with ticks that fills toward the impact, its hot red centre ring and a bronze rivet ring closing in (everyone sees all of it), a dark scorched disc, an ember light column; the shell (a big spiked charge) falls through the column for the last 0.8 s; impact: a white-hot column, ember shock rings, an ember spray, "DEAD CENTRE" on a centre hit; the patch: a scorched disc with a lit ember rim and flickering flames | `gunslinger_x` (rifle straight up, kick, back down by 0.6 s) | `vn_nuke_fire`, `vn_nuke_fall`, `vn_nuke_boom`, `vn_nuke_burn` |
 | R / T | | | the Boki Merge (the Boki system's key) | | | |
@@ -192,6 +194,22 @@ level-9 hunter).
 | Mini Nuke: +50% damage in the centre | [thebackdash hunter list](https://thebackdash.com) (older "arcane napalm" wording) | red-orange core (f41) | yes: "+50% in the centre" |
 | Mini Nuke: the zone lasts 3 s, damages each second and slows | thebackdash | ticks about every 0.5 s (f48 to f60) | yes: "the patch burns and slows", gone after 3 s |
 | The caster keeps moving after the cast | reference sheet | jump pad at f103 | yes: "Vex moves and can shoot while it falls" |
+
+## Move speed while casting (PARITY FIRST, Nov 9)
+Each row is the kit's walk multiplier on top of the hunter-wide ones (haste, slows, crouch 0.55,
+drinking 0.45; `Hunter._chase_mod` and `_fire_slow`), against the hero-ref footage. `match`: the
+footage shows the same thing; `CHANGED`: it clearly differed and the row is asserted; `[?]`: the
+footage can't settle the factor, ours is kept. Dashes and flights move the body themselves (n/a).
+
+| Slot | State | Ours (x walk) | Source footage (briefs/hero-ref/venator.md) | Verdict |
+|---|---|---|---|---|
+| LMB | held, firing | 1.0 (quill_rifle `fire_slow` 1.0) | walks while firing, no visible slow (0007-0023) | match |
+| LMB | after a shot | 1.0 | strafes and backpedals between bursts | match |
+| RMB | Burr Charge, press to throw | 1.0 | ~0.2 s commit, "he can walk" | match |
+| Shift | Slipstep (tap, held) | n/a | a slide | n/a |
+| E | Longneedle, 0.6 s charge | 0.0 (`e.self_slow` 1.0) | stands still through the 0.6 s cast bar | match |
+| E | after the beam | 1.0 | a 0.5 bh recoil shove, then the walk isn't measured | [?] |
+| X | Cinderfall, tap | 1.0 | free to move, takes a jump pad as it falls (f103) | match |
 
 ## Assumptions (the video is silent or the owner overrode it; the owner can correct these)
 - **Owner rule (1103 playtest):** a direct hit on a hunter hurts and Dazes them; the grenade no longer passes through people. A wall or the ground at the lane's end still gives the cone, which Dazes everyone in it. Dazed raises the rifle by 90% and Longneedle by 20% (the source's reference ratios).
@@ -273,3 +291,21 @@ Suggestion (not built): carry the burr cone length over the network so remote pl
 - Merge cleanup: `_drop_holds()` ends `needle` and `slide`. Cinderfall
   has no hold or channel (a tap, then the shell is out), so it adds nothing there.
 - Screenshots: `--vv-shots --shots-dir=<dir> --vv-hero=gunslinger`.
+
+## Moving while casting (RMB and E, parity pass 2026-11-09)
+
+Move factor = share of the run speed (`ArchKit.move_k`, times the shared `Hunter._chase_mod`). Facing follows the cursor in every
+row below (`Hunter` turns to `aim_dir()` at 20/s; no kit here sets `face_locked`) unless a row says otherwise. Evidence: the
+hero sheet (briefs/hero-ref, 5 fps frames, 0.2 s each), supervive_kits.md. Footage body displacement was read from the sheet's
+px/s notes; where the sheet has no measure it says "unmeasured" and nothing was changed.
+
+| Slot, phase | Source | Ours | Call |
+|---|---|---|---|
+| RMB Burr Charge, aim | held lane, he walks; no slow seen | a tap fires at once; no hold, no lane (owner item 112); 1.0 | match (owner) |
+| RMB, throw and after | about 0.2 s overhand, "he can walk" | no wind-up, no recovery lock; 1.0 | match |
+| E Longneedle, wind-up | 0.6 s cast bar standing still | 0.6 s (+0.03 s beat) at `self_slow` 1.0 = rooted; the line follows the cursor | match |
+| E, fire and recovery | about 0.5 bh recoil shove back, then free | `recoil` 6 shove (`h.impulse`), free the same step; 1.0 | match |
+| Facing | upper body on the cursor while casting | cursor throughout, also in the wind-up | match |
+
+Nothing to fix: both slots already follow the sheet. Asserted since the parity pass in `--gunslinger-combo-check`
+(`Vex parity E: ...`, `Vex audit: ...`).
