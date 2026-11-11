@@ -132,7 +132,7 @@ func _part_rmb() -> void:
 	await _go(2.4, cast, _sheet("rmb", "RMB at the dummy", [0.15, 0.25, 0.35, 0.5, 0.65, 0.8, 1.0, 1.4, 2.0]), 2.0)
 	await _go(GAP)
 
-## The dash pressed on the ground, then pressed at the top of a jump: the two looks side by side (owner 11-08 item 17).
+## The dash pressed on the ground, then pressed at the top of a jump: the two looks side by side.
 func _part_airdash() -> void:
 	await _reset(6.0)
 	var dash := func(t: float):

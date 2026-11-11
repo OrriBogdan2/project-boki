@@ -51,7 +51,7 @@ func plant(a: HunterAnim, w: World, dt: float, want: bool) -> void:
 	world = w
 	var body := a.model.global_position
 	ref = _ground(w, body, body.y)
-	weight = (1.0 - a.air_k) * (1.0 - a.glide_k) * (1.0 - a.down_k) * (1.0 - a.dive_k) * (1.0 - a.ledge_k)
+	weight = (1.0 - a.air_k) * (1.0 - a.glide_k) * (1.0 - a.dive_k) * (1.0 - a.ledge_k)
 	if a.roll_t >= 0.0 or absf(body.y - ref) > BODY_SLACK:
 		weight = 0.0
 	on = want
