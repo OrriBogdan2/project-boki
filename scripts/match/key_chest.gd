@@ -22,6 +22,35 @@ static func dress(node: Node3D) -> void:
 		tw.tween_property(fl, "position:y", 1.68, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 		tw.tween_property(fl, "position:y", 1.55, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
+## How many of `n` chests a match places (rules chest.keep).
+static func kept(n: int) -> int:
+	return roundi(n * float(ChestLoot.R()["keep"]))
+
+## The map's chest spots a match uses: kept() of them, dropping the most crowded first (the one with
+## the closest neighbour; of a pair, the later). No dice, so every client keeps the same chests.
+static func thin(spots: Array) -> Array:
+	var out := spots.duplicate()
+	var want := kept(spots.size())
+	while out.size() > want:
+		var drop := 0
+		var best := INF
+		for i in out.size():
+			for j in range(i + 1, out.size()):
+				var d: float = (out[i]["pos"] as Vector3).distance_squared_to(out[j]["pos"])
+				if d < best:
+					best = d
+					drop = j
+		out.remove_at(drop)
+	return out
+
+## No chests before the match proper starts: they're hidden while you ride the ship and drop in, and
+## show once you land. Only the view changes; they're built, warmed and counted as before.
+static func show_all(m: Match, on: bool) -> void:
+	for c in m.chests:
+		var n = c.get("node")
+		if n is Node3D and is_instance_valid(n):
+			(n as Node3D).visible = on
+
 ## What the interact prompt says and does beside chest `c` for hunter `h`.
 static func prompt(h: Hunter, c: Dictionary) -> Dictionary:
 	var k := Settings.key_cap("interact")
@@ -43,17 +72,14 @@ static func spend(h: Hunter, c: Dictionary) -> bool:
 static func cap() -> int:
 	return int(KeyRun.rules()["keys"]["cap"])
 
-## Keys of `kind` ("chest" or "rift") that `h` holds: what the utility belt shows.
-static func count(h: Hunter, kind: String) -> int:
-	return h.chest_keys if kind == "chest" else h.rift_keys
+## Keys of `kind` ("chest", the only kind) that `h` holds: what the utility belt shows.
+static func count(h: Hunter, _kind: String) -> int:
+	return h.chest_keys
 
 ## Removes up to `n` keys of `kind` from `h` and returns how many it took (the belt spends through this).
 static func take(h: Hunter, kind: String, n: int) -> int:
 	var taken := mini(n, count(h, kind))
-	if kind == "chest":
-		h.chest_keys -= taken
-	else:
-		h.rift_keys -= taken
+	h.chest_keys -= taken
 	return taken
 
 ## Adds up to `n` chest keys, never past the cap, and returns how many fit. The rest stay where they were.

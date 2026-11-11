@@ -124,8 +124,10 @@ func _contract(a: String) -> void:
 	var unskinned := 0
 	for mi in m.get_node("Warden").find_children("*", "MeshInstance3D", true, false):
 		var mesh := (mi as MeshInstance3D).mesh
-		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them)
-		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX)
+		# (props on an orbit ride their bone unskinned: WardenGlb.Orbits turns them; so do companions WardenCompanions
+		# cut out of the body, Meeko's sun and cloud)
+		var orbit := String(mi.get_parent().name).begins_with(WardenGlb.Orbits.PREFIX) \
+				or String(mi.name).begins_with(WardenCompanions.PREFIX)
 		if (mi as MeshInstance3D).skin == null and not orbit:
 			unskinned += 1
 		for si in mesh.get_surface_count():
@@ -270,8 +272,8 @@ func _shading(a: String) -> void:
 		for si in (mi as MeshInstance3D).mesh.get_surface_count():
 			surfaces += 1
 			var sm := (mi as MeshInstance3D).get_surface_override_material(si) as ShaderMaterial
-			if sm and sm.shader == WardenMood.FACE_SHADER:
-				continue        # (a face drawn on glass: no atlas, no toon)
+			if sm and sm.shader in [WardenMood.FACE_SHADER, WardenMood.ATLAS_SHADER]:
+				continue        # (a face drawn on glass or from the mood atlas: no toon surface)
 			var src := (mi as MeshInstance3D).mesh.surface_get_material(si) as BaseMaterial3D
 			var atlas := src != null and src.albedo_texture != null
 			if atlas:
@@ -287,7 +289,7 @@ func _shading(a: String) -> void:
 			if sm and sm.shader == WardenGlb.FLAME:
 				shows = true      # (fire: no paint of its own)
 			elif sm and atlas:
-				shows = bool(sm.get_shader_parameter("use_tex")) and sm.get_shader_parameter("albedo_tex") != null
+				shows = sm.get_shader_parameter("use_tex") == true and sm.get_shader_parameter("albedo_tex") != null
 			elif sm and src:
 				shows = (sm.get_shader_parameter("albedo") as Color).is_equal_approx(src.albedo_color)
 			# (the void slot is the starfield shader, the card slot its own: RIG_CONTRACT "Materials")

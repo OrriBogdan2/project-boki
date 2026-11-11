@@ -54,6 +54,7 @@ const SPRITE := {"colossus": Color("ffb04a"), "serpent": Color("7fe8ff"), "brood
 
 var m: Match
 var list: Array = []
+var wayseed_given := false     # a lair's pile holds a Wayseed at most once a run (GARDEN.md 10.3)
 var egg_pings: Array = []      # {pos, until, follow: Hunter or null, text}
 var _prev := {}                # hunter nid -> was interact held last tick
 var _told := {}
@@ -318,6 +319,11 @@ func interact_for(h: Hunter) -> Dictionary:
 	for L in list:
 		if L["state"] != "sealed":
 			continue
+		var wait := seat_wait(L)
+		var near: bool = h.flat_dist(L["dial"]) < DIAL_R \
+			or (L["runes"] as Array).any(func(rn): return h.flat_dist(rn["pos"]) < 1.7)
+		if wait != "" and near:
+			return {"kind": "lair", "what": "wait", "lair": L, "col": color_of(L), "label": wait}
 		if h.flat_dist(L["dial"]) < DIAL_R and absf(h.pos.y - float(L["dial"].y)) < 1.5 and (L["entry"] as Array).has("dial"):
 			var u = L["user"]
 			if is_same(u, h):
@@ -503,6 +509,8 @@ func _tick_dial(L: Dictionary, dt: float) -> void:
 			press(L, h)
 		return
 	# nobody on it: the first press from someone standing at the dial starts it
+	if seat_wait(L) != "":
+		return
 	for h in m.hunters:
 		if h.out or h.downed or h.extracted or h.dropping:
 			continue
@@ -540,6 +548,8 @@ func _bot_dial(L: Dictionary, h: Hunter, dt: float) -> void:
 # ------------------------------------------------------------------ opening, waking, clearing
 func open(L: Dictionary, by: Hunter, how: String) -> void:
 	if L["state"] != "sealed":
+		return
+	if m.exits and m.exits.seats and not m.exits.seats.lair_may_open(L, by, how):
 		return
 	L["state"] = "open"
 	L["user"] = null
@@ -657,6 +667,10 @@ func on_mob_dead(mb: Mob, credit: Ent) -> void:
 		elif hb == m.player and m.hud:
 			m.hud.toast("Ward broken  ·  %d left" % left, color_of(L))
 
+## Why the Sealed Lair's gate can't be worked now ("" for any other lair, or when it can): QuestSeats.
+func seat_wait(L: Dictionary) -> String:
+	return m.exits.seats.lair_wait(L) if m.exits and m.exits.seats else ""
+
 ## A ward stone was hit for the first time: its guards come out.
 func on_ward_hit(mb: Mob, by: Ent) -> void:
 	if mb.has_meta("woke"):
@@ -671,6 +685,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	var killer: Hunter = (credit as Kin).owner_h if credit is Kin and (credit as Kin).owner_h else (credit as Hunter if credit is Hunter else null)
 	L["state"] = "cleared"
 	L["cleared_by"] = killer.pname if killer else ""
+	L["won_by"] = killer.team if killer else -1      # (the Sealed Lair seat goes to this squad: QuestSeats)
 	# everyone's Boki who fought it cheers (and remembers it)
 	for hh in m.hunters:
 		if hh.kin and hh.kin.comp and not hh.out and (hh == killer or hh.flat_dist(b) < 22.0) and hh.kin.state != "downed":
@@ -681,14 +696,17 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 	else:
 		unlock(L)
 	# a small pile, all of it worth having (one Epic or Legendary piece of gear, a Brand upgrade for
-	# its killer's weapon, one treasure, sometimes a Rift Key), and the Rare Egg on its own spot a few steps away,
+	# its killer's weapon, one treasure), and the Rare Egg on its own spot a few steps away,
 	# under its own beam, so it's never lost in the pile
 	var at := _floor_spot(L, b.pos, 0.0)
 	# (1.6 m out: at 0.9 their names ran into each other)
 	GearDrops.run_table(m, "boss", at, m.rng, {"r": 1.6, "h": killer, "bonus": m.biomes.rarity_bonus_at(at) if m.biomes else 0})
 	m.spawn_val(Loot.valuable("crown_shard" if m.rng.randf() < 0.5 else "kin_idol"), at + Vector3(0, 0, -0.8))
-	if m.exits and not m.exits.list.is_empty() and m.rng.randf() < 0.5:
-		m.exits.drop_key(at + Vector3(0, 0, 1.1))
+	var zone := GardenZones.seed_zone_for(m.world.biome_at(at.x, at.z))
+	if zone != "" and not wayseed_given:
+		wayseed_given = true
+		if m.rng.randf() < float(GardenZones.rules()["wayseed_chance"]):
+			m.spawn_val(Loot.valuable(GardenZones.wayseed(zone)), at + Vector3(1.1, 0, 0.2))
 	# the egg: of the floor spots EGG_APART out from the pile, the one furthest from every pile item
 	var pile_at: Array = [at + Vector3(0, 0, -0.8), at + Vector3(0, 0, 1.1)]
 	for wp in m.wpicks:      # (the gear just dropped, and anything already lying on the lair's floor)
@@ -712,6 +730,7 @@ func _boss_dead(L: Dictionary, b: Boss, credit: Ent) -> void:
 		h.gain_xp(260.0 * share)
 	if killer and not killer.remote:
 		killer.add_stat("bosses")
+		if b.md.has("ink"): killer.add_stat("ink_" + String(b.md["ink"]))
 		PerkOrbs.drop(m, "boss", b.pos, 0, killer)      # a fan of three perk orbs
 	# the boss's brood scatters
 	for a in L["adds"]:
