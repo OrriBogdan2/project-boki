@@ -934,6 +934,9 @@ func _bulwark_combos() -> void:
 		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
 	ok("bjorn vfx: the swing's crescent and trail are his ivory, not Kael's orange", _off_ivory("swing").is_empty(),
 		str(_off_ivory("swing")))
+	var whirl_col: Color = (K.fx.orbit_trail.material_override as ShaderMaterial).get_shader_parameter("color")
+	ok("bjorn vfx: the held swing's whirl trail is his ivory too", whirl_col.is_equal_approx(Arch.color("bulwark")),
+		whirl_col.to_html(false))
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
