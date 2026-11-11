@@ -6,6 +6,7 @@ extends RefCounted
 
 const HOLD_T := 0.7      # s a hold runs before its ending (past every tap threshold, short of every auto-release)
 const STUN_T := 0.5      # s the stun lasts
+const DRAW_M := 10.0     # m to the dummy for the bow draw: a HOLD_T + 0.3 s draw is the Empowered stage
 
 ## Runs a hold for HOLD_T, applies the ending `ev` ("release" is none: the caller lets go next; "stun" | "down" |
 ## "key") and runs on 0.3 s with the input still down. `key` presses the other key for "key".
@@ -52,8 +53,9 @@ static func kael(A) -> void:
 			key["held"] and key["spent"], str(key))
 
 ## Lace's bow draw (LMB): whether she is still drawing after the ending, and what the dummy took once she let go.
+## The dummy stands inside the Empowered stage's reach (content/weapons/longbow.json: 12 m from her body, ShotOrigin).
 static func _draw(A, ev: String, which := "") -> Dictionary:
-	var r = A.setup("archer", 14.0)
+	var r = A.setup("archer", DRAW_M)
 	var m: Match = r[0]
 	var P: Hunter = r[1]
 	var T: Hunter = r[2]
