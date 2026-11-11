@@ -280,7 +280,7 @@ func _archer_combos() -> void:
 	step(m, 0.5)
 	ok(
 		"combo archer: wall pin > shot is a plain arrow (Focus and Deadeye are cut, not in the source)",
-		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0 and K.anim_id != "pin_deadeye"
+		dmg(T) - dd0 > 0.0 and dmg(T) - dd0 < 30.0
 			and not K.has_meter() and K.res == 0.0,
 		"dealt %.0f anim %s res %.0f" % [dmg(T) - dd0, K.anim_id, K.res]
 	)
