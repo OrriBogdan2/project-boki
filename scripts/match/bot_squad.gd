@@ -11,6 +11,7 @@ extends RefCounted
 const FAR_M := 28.0            # metres from the nearest squadmate where a bot with nothing pressing heads back
 const NEAR_M := 10.0           # ...and how close it comes before it goes back to its own errands
 const BASE_M := 55.0           # metres: further off than this, base to the squadmate instead of walking
+const GUARD_M := 6.0           # metres from a busy lead where a squadmate with nothing to do waits
 const CALM_S := 4.0            # seconds since the last hit before a bot stands still to base
 const ASSIST_BASE := 18.0      # metres from which the least skilled bot notices a squadmate's fight
 const ASSIST_SKILL := 22.0     # ...more per point of skill (an expert: about 38 m)
@@ -176,14 +177,24 @@ static func lead(m, h: Hunter) -> Hunter:
 		return human
 	return null if first == h else first
 
-## Where a bot with nothing to do roams: where its lead is going (a player: where they are), or INF
-## for the lead itself, which picks its own way.
-static func roam_to(m, h: Hunter) -> Vector3:
+## Where a bot with nothing to do roams: where its lead is roaming to, else to the lead, or INF for
+## the lead itself, which picks its own way. Next to a lead that is busy (looting, holding a spot, a
+## player standing) it waits on one spot: walking onto the lead, it was pushed back off every step
+## and turned on the spot for half a minute.
+static func roam_to(m, h: Hunter, a: Dictionary) -> Vector3:
 	var ld := lead(m, h)
 	if ld == null or not on(m):
+		a.erase("guard")
 		return Vector3.INF
-	var to: Vector3 = ld.ai.get("wander", Vector3.INF) if ld.ctrl == "bot" else Vector3.INF
-	return ld.pos if to == Vector3.INF else to
+	if ld.ctrl == "bot" and String(ld.ai.get("goal_kind", "")) == "roam":
+		a.erase("guard")
+		return ld.ai["goal"]
+	if h.flat_dist(ld) > GUARD_M:
+		a.erase("guard")
+		return ld.pos
+	if not a.has("guard"):
+		a["guard"] = h.pos
+	return a["guard"]
 
 ## Drifted off from the squad with nothing pressing: the squadmate to head back to (and base to
 ## them when they are islands away and it is calm), or INF. Holds until the bot is close again.

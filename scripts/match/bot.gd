@@ -262,7 +262,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever"]:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp", "roam"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -688,11 +688,13 @@ func _choose(m: Match, h: Hunter) -> void:
 			reach = maxf(reach, BotSquad.ASSIST_REACH)
 		if d > reach or absf(o.pos.y - h.pos.y) > 3.0:
 			continue
-		if not provoked and BotSquad.outnumbered(m, h, a, o, d):
-			continue      # alone against more: leave it (a rival who starts it is still fought)
+		if not provoked and o != a["tgt"] and BotSquad.outnumbered(m, h, a, o, d):
+			continue      # alone against more: don't start it (one already on is fought, BotRetreat backs out)
 		if not m.world.los(h.pos, o.pos, h.pos.y + 0.95) and d > 4.0:
 			continue
-		var s: float = 20.0 - d + (BotSquad.held(m, a) if o == a["tgt"] else 0.0) - o.hp * 0.03 + (5.0 if bounty else 0.0)
+		var s: float = 20.0 - d - o.hp * 0.03 + (5.0 if bounty else 0.0)
+		if o == a["tgt"]:
+			s += BotSquad.held(m, a)      # keep to the rival we are on
 		if o == called:
 			s += BotSquad.FOCUS      # shoot what the squad is shooting
 		if s > bs: bs = s; best = o
@@ -867,7 +869,7 @@ func _choose(m: Match, h: Hunter) -> void:
 			if d < bd: bd = d; goal = p["pos"]; gk = "loot"
 	if goal == Vector3.INF:
 		# roam toward monsters or another island (where the squad's lead roams, if that isn't us)
-		var lead_to := BotSquad.roam_to(m, h)
+		var lead_to := BotSquad.roam_to(m, h, a)
 		if lead_to != Vector3.INF:
 			a["wander"] = lead_to
 		elif a["wander"] == Vector3.INF or h.flat_dist(a["wander"]) < 2.0 or randf() < 0.02:
