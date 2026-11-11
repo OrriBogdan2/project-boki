@@ -7021,3 +7021,4 @@ READY ext/anim-sable-free-arm c0cc46d6e (Sable vault_r/vault_l: the arm away fro
 READY ext/sfx-training-grounds 0436b8e6dbfab31ec1c87fab6111796d1b4d3477 (Training Grounds sounds)
 READY ext/tut-lace-starter 91f8aed4d (Lace kit drill: archer.json clip lines for LMB draw (hold, let go on the gold flash), RMB Heavy Shot wall pin, Spirit Walk; clip.holds makes her LMB a hold step (KitDrill.how, +3 lines); --kit-drill-check walks a scripted Lace, a tap does not finish the draw, 0 fail; archer-combo 167/0, first-match-guide 0 fail, health --strict OK, gen_wiki --check OK; +28/-9)
 READY ext/ui-waysout-safe-area b21f7a2e2 (Ways Out HUD in the safe area)
+READY ext/tut-hot-zone-regions 0096e8f3e (hot zone line on region hot zones)
