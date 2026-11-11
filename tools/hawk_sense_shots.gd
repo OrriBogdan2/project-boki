@@ -1,11 +1,12 @@
 extends RefCounted
 ## --hawk-sense-shots: review screenshots of Lace's Hawk Sense (HawkSense) in a live match (xvfb with a
-## renderer), into --shots-dir=<dir>. A rival stands just behind one of the map's rocks, seen from Lace's camera
-## 6 m to the south: at full health they are hidden; under the health line they are revealed and their outline
-## in Lace's colour shows through the rock. Each as the full frame and a 3x crop round the rock. Never touches
-## the save.
+## renderer), into --shots-dir=<dir>. A rival stands just behind a boulder (the map's rock mesh, solid in the
+## map data), seen from Lace's camera 6 m to the south: at full health they are hidden; under the health line
+## they are revealed and their outline in Lace's colour shows through the rock. Each as the full frame and a
+## 3x crop round the rock. Never touches the save.
 
 const BACK := 6               # tiles south of the rock Lace stands (the camera looks north over her)
+const ROCK_SIZE := 1.6         # the boulder's scale (the map's run 0.8 to 2.2)
 const CROP := Vector2i(220, 160)   # px round the rock, scaled 3x
 
 var main: Node
@@ -37,6 +38,7 @@ func run(main_node: Node) -> void:
 	var rock := _rock_near(P.pos)
 	print("HAWKSHOTS rock at %s" % rock)
 	P.teleport(rock + Vector3(0, 0, BACK))
+	P.vel = Vector3.ZERO
 	foe.teleport(rock + Vector3(0, 0, -1.0))
 	foe.face = 0.0
 	P.inp["aim"] = rock + Vector3(0, 0.9, 0)
@@ -53,24 +55,22 @@ func run(main_node: Node) -> void:
 		crop.save_png(dir.path_join("hawk_%s_zoom.png" % label))
 	main.get_tree().quit(0)
 
-## The foot of the map's nearest rock with open ground on the same level a step north (where the rival hides)
-## and BACK tiles south (where Lace stands).
+## Puts a boulder on open ground north of `at` and returns its foot, with room on the same level a step behind
+## it and BACK tiles in front.
 func _rock_near(at: Vector3) -> Vector3:
 	var W: World = m.world
-	var best := at
-	var best_d := INF
-	for z in range(1, W.h - BACK - 1):
-		for x in W.w:
-			var i := W.idx(x, z)
-			var foot := Vector3(x + 0.5, W.level[i] * World.LEVEL, z + 0.5)
-			if W.kind[i] != World.T_BLOCK or W.props.has(i) or W.walls.has(i) or foot in W.tree_spots:
-				continue
-			if not (_open(foot + Vector3(0, 0, -1)) and _open(foot + Vector3(0, 0, BACK))):
-				continue
-			if foot.distance_to(at) < best_d:
-				best = foot
-				best_d = foot.distance_to(at)
-	return best
+	for dx in [0, 2, -2, 4, -4, 6, -6]:
+		var foot := Vector3(floorf(at.x) + dx + 0.5, at.y, floorf(at.z) - BACK + 0.5)
+		if range(-1, BACK + 1).all(func(dz): return _open(foot + Vector3(0, 0, dz))):
+			var i := W.idx(int(foot.x), int(foot.z))
+			var wk: PackedByteArray = W.kind
+			wk[i] = World.T_BLOCK
+			W.kind = wk
+			var rock := Flora.node("rock", W.style_at(i), 0, ROCK_SIZE)
+			rock.position = foot
+			W.add_child(rock)
+			return foot
+	return at + Vector3(0, 0, -BACK)
 
 func _open(p: Vector3) -> bool:
 	var i := m.world.idx(int(p.x), int(p.z))
