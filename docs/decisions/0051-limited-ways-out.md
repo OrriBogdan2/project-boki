@@ -92,6 +92,8 @@ in use, the word and the distance. The Heart ring's locked pin waits while the G
 ring's pin replaces the Heart's FINAL waypoint (the charging Heart keeps its own). The Blight's wall within 70 m gets
 a crimson bar on the edge toward it, heavier as it nears. Canvas draws only, the same at every preset. The maps' Lair
 and Uplink badges (and so the pins) now stand on QuestSeats' seeded Sealed Lair and Uplink (they stood on the first
-lair and the outpost farthest from it), and only the Sealed Lair's own fight puts its seat in use. Check:
---ways-out-map-ui-check section 9. Shots: --ways-out-vfx-shots, each state at 8, 20, 40 and 60 m at the match camera
-with a fight beside the player, per --quality (docs/shots/vfx-ways-out-read/).
+lair and the outpost farthest from it), and the strip takes a quest seat's squad (in use, taken) from its QuestSeat:
+only the Sealed Lair's own fight puts it in use, and a won Lair or a ridden Uplink stays taken (the lair's flown list
+empties once its winners land, a ridden Uplink seat goes to "closed"). Check: --ways-out-map-ui-check section 9.
+Shots: --ways-out-vfx-shots, each state at 8, 20, 40 and 60 m at the match camera with a fight beside the player, per
+--quality (docs/shots/vfx-ways-out-read/).
