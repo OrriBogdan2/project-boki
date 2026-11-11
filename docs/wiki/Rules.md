@@ -309,8 +309,8 @@ Tumble, a duel beside the Stump Shove's stump (briefs/design/GARDEN_MODERN.md 4.
 
 | Setting | Value |
 |---|---|
-| moves | {"rush": {"stat": "power", "beats": "dodge", "trait": "temper", "name": "Rush", "clip": "attack"}, "brace": {"stat": "guard", "beats": "rush", "trait": "loyalty", "name": "Brace", "clip": "idle"}, "dodge": {"stat": "speed", "beats": "brace", "trait": "curiosity", "name": "Dodge", "clip": "hop"}} |
-| moves_doc | Keys 1, 2, 3 in this order. Each move pushes with its stat and beats one other; 'trait' is the personality that leans a Boki toward it, 'clip' its rig clip (Brace adds the 'guard' pose). |
+| moves | {"rush": {"stat": "power", "beats": "dodge", "trait": "temper", "name": "Rush", "clip": "rush"}, "brace": {"stat": "guard", "beats": "rush", "trait": "loyalty", "name": "Brace", "clip": "brace"}, "dodge": {"stat": "speed", "beats": "brace", "trait": "curiosity", "name": "Dodge", "clip": "dodge"}} |
+| moves_doc | Keys 1, 2, 3 in this order. Each move pushes with its stat and beats one other; 'trait' is the personality that leans a Boki toward it, 'clip' its rig clip (BokiHomeClips, as long as impact_s; Brace adds the 'guard' pose for bodies without a rig). |
 | exchanges | 5 |
 | extra_max | 2 |
 | exchanges_doc | A bout is five exchanges; a dead level after five plays up to extra_max more, then goes to whoever won more exchanges (the rival on a full tie). |

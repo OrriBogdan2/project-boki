@@ -53,5 +53,5 @@ check: `--base-life-check`.
   The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
 - Looks (rigged Boki): `HomeToys.pose` sets the `kact` meta from what a Boki is doing: `munch` at a feeder, and the
-  toy's `clip` (toys.json: nudge, climb, splash) at a toy. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
+  toy's `clip` (toys.json: nudge, climb, splash) at a toy; Tumble's rush, brace and dodge and Echo Steps' stonehop and spin play on the same rigs. A napping Boki (`kstate` sleep) settles, naps and wakes (`scripts/match/boki_home_clips.gd`). A rigged Boki
   poses its own body, so the Body squash and toy bounce stay for the primitive ones only.

@@ -1,10 +1,12 @@
 class_name BokiHomeClips
 extends RefCounted
-## Runtime clips for a rigged Boki's life at home (no Blender): settle, nap, wake, munch, nudge, climb, splash.
+## Runtime clips for a rigged Boki's life at home (no Blender): settle, nap, wake, munch, nudge, climb, splash,
+## and the garden games' rush, brace, dodge (Tumble), stonehop, spin (Echo Steps), timed by their rules.
 ## Each is the species' baked idle (or sleep) with BokiHomePoses' deltas laid over it, sampled into a new Animation,
 ## so every Boki keeps its own rest shape and idle motion. Built once per species and shared.
 
-const NAMES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash"]
+const NAMES := ["settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
 const LOOPED := ["nap", "munch", "nudge", "climb", "splash"]
 const SETTLE_SECS := 1.5
 const WAKE_SECS := 1.7
@@ -37,6 +39,11 @@ static func _build(species: String, player: AnimationPlayer, skel: Skeleton3D) -
 	out["nap"] = _clip(skel, pose, "nap", sleep, null, sleep.length)
 	for n in ["munch", "nudge", "climb", "splash"]:
 		out[n] = _clip(skel, pose, n, idle, null, il, BokiHomePoses.cycles(n, il))
+	var impact := float(BaseTumble.rules()["impact_s"])
+	for n in ["rush", "brace", "dodge"]:
+		out[n] = _clip(skel, pose, n, idle, null, impact, BokiHomePoses.cycles(n, impact))
+	out["stonehop"] = _clip(skel, pose, "stonehop", idle, null, float(EchoSteps.rules()["hop_s"]))
+	out["spin"] = _clip(skel, pose, "spin", idle, null, EchoSteps.spin_s())
 	return out
 
 ## `a` is the base (and `b` what it turns into over the clip, for settle and wake).
@@ -97,7 +104,7 @@ static func _track(anim: Animation, skel: Skeleton3D, type: int, path: NodePath,
 				if b:
 					q = q.slerp(_rot(b, tb, at_b, rest.basis.get_rotation_quaternion()), w)
 				if delta != Vector3.ZERO:
-					q = Quaternion(pg.inverse() * Basis.from_euler(delta) * pg) * q
+					q = Quaternion((pg.inverse() * Basis.from_euler(delta) * pg).orthonormalized()) * q
 				anim.rotation_track_insert_key(idx, t, q)
 			POS:
 				var v := _vec(a, ta, t, rest.origin, POS)

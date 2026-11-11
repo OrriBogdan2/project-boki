@@ -117,7 +117,8 @@ const FACE_LOD_BIAS := 1000.0
 const SHADOW_SIZE := Vector2(0.5, 0.86)
 const SHADOW_ALPHA := 0.42
 const SHADOW_LIFT := 0.012
-const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash"]
+const OWN_BODY := ["chop", "mine", "carry", "tend", "settle", "nap", "wake", "munch", "nudge", "climb", "splash",
+	"rush", "brace", "dodge", "stonehop", "spin"]
 const LOOPED := ["idle", "walk", "run", "hop", "sleep", "eat", "pet", "chop", "mine", "carry", "tend"]
 ## Home's job kinds that have their own clip.
 const WORK_KINDS := {"chop": "chop", "ore": "mine", "carry": "carry"}
@@ -142,6 +143,7 @@ const CLIP_FACE := {
 	"settle": [[0.0, "sleepy"], [0.6, "asleep"]], "nap": "asleep",
 	"wake": [[0.0, "asleep"], [0.2, "sleepy"], [0.7, "cheer"]],
 	"munch": "chew", "nudge": "cheer", "climb": "focus", "splash": "happy",
+	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
 const POSE_FACE := {"growl": "angry", "guard": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy"}
