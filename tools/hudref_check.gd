@@ -232,7 +232,7 @@ func _check_callout(m: Match, P: Hunter, hud) -> void:
 	var names: Array = callout.lines.map(func(e): return e["name"])
 	ok(names[0] == foes[0].pname.left(KnockCallout.NAME_MAX) and names[2] == foes[2].pname.left(KnockCallout.NAME_MAX),
 		"each line carries its victim's name")
-	ok(callout.lines[0]["col"] == KnockCallout.KNOCK_COL and callout.lines[2]["col"] == HudStyle.FOE,
+	ok(callout.lines[0]["col"] == KnockCallout.KNOCK_COL and callout.lines[2]["col"] == SideColor.foe(),
 		"knocked is the pink-magenta accent, eliminated the rival red")
 	callout.tick(KnockCallout.LIFE * 0.5)
 	ok(callout.lines.size() == 3, "still up half way through")

@@ -237,7 +237,7 @@ static func stolen_wisps(H, p: Hunter, r: Rect2) -> void:
 		else:
 			H.c.draw_circle(at, STOLEN_ICON * 0.5, Color(glow, 0.6))
 			H.c.draw_circle(at, STOLEN_ICON * 0.5 - 2.0, k.sp["color"])
-		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, HudStyle.ALLY, 2.0, true)
+		H.c.draw_arc(at, STOLEN_ICON * 0.5 + 2.0, 0.0, TAU, 24, SideColor.ally(), 2.0, true)
 		HudStyle.text(H.c, box.position + Vector2(STOLEN_H + 2.0, 16.0), String(row["passive"]), 11, HudStyle.INK, 3)
 		if st == "ready":
 			HudStyle.key_pill(H.c, Vector2(box.end.x - 16.0, box.get_center().y), Settings.key_cap("summon"), glow)
