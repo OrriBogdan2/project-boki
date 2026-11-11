@@ -83,8 +83,8 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | gunslinger | air dash -> Q glove | Gloves are ours; no source. Keep the row. Kept: it goes mid-dash (owner item 51: any ability casts mid-dash where the source is silent). | fires mid-dash |
 | gunslinger | LMB -> dash | Footage 0149-0151: the rifle keeps firing as the slide starts and through it (briefs/hero-ref/venator.md:88). | the dash goes, the ability keeps running |
 | gunslinger | RMB -> dash | Not shown in the data or footage. Ours: the Burr Charge is a tap (owner, sync89), already thrown, so Shift slides at once. | the dash goes, the ability keeps running |
-| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. | the dash goes, the ability keeps running |
-| gunslinger | ult (X) -> dash | Not shown. Ours: Cinderfall is a tap; the shell is already out, so Shift slides at once. | the dash goes, the ability keeps running |
+| gunslinger | E -> dash | Not shown (the footage casts the Ion Cannon braced and still, 0.6s). Ours (owner item 51, no cancels): Shift in the 0.6s charge slides and the beam still fires at its end, from where she is. After the beam she is held 0.6s (GunslingerKit.E_RECOVER, briefs/hero-ref/venator.md E 4: shove then ~0.4s recovery): a Shift in its last 0.15s goes as it ends. | the dash goes, the ability keeps running |
+| gunslinger | ult (X) -> dash | Footage briefs/hero-ref/venator.md R 4: raised 561.8-562.0 s, fired 562.2-562.4 s, 'About 0.8 s committed, with no move seen'. | **exception:** the dash is refused while it runs (The source's commit: the rifle raised, fired and lowered with no move; she is held 0.76s from the tap (GunslingerUlt.COMMIT) and a Shift in its last 0.15s goes as it ends (DashFlow.cc_left).) |
 | gunslinger | Q glove -> dash | Not in the source; the glove keeps running. | the dash goes, the ability keeps running |
 | gunslinger | jump -> LMB |  | fires mid-jump (default) |
 | gunslinger | jump -> RMB |  | fires mid-jump (default) |
@@ -94,7 +94,7 @@ The jump, hold and move-out-of-an-ability rows are owner item 51 (docs/decisions
 | gunslinger | LMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | gunslinger | RMB -> jump |  | the move goes at once, the ability keeps running (default) |
 | gunslinger | E -> jump |  | the move goes at once, the ability keeps running (default) |
-| gunslinger | ult (X) -> jump |  | the move goes at once, the ability keeps running (default) |
+| gunslinger | ult (X) -> jump | Footage briefs/hero-ref/venator.md R 4: 'About 0.8 s committed, with no move seen'. | **exception:** the move is refused while it runs (The source's commit, as into_dash x: held 0.76s from the tap; a jump in its last 0.15s goes as it ends.) |
 | gunslinger | Q glove -> jump |  | the move goes at once, the ability keeps running (default) |
 | bulwark | ground dash -> LMB | data: Spin Dash dashes forward and hits round him; footage 0371: one hammer spin on arrival. The hammer is busy in the spin, so a throw, recall or swing goes when the dash ends (no footage of the pair) | buffered to the dash's end |
 | bulwark | ground dash -> RMB | data: Brightshield is a 0.1 s hold, nothing locks it out in the Spin Dash: the aegis rises mid-dash (Shift with it already up is the Shield Bash, see RMB -> dash) | fires mid-dash |
