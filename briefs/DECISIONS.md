@@ -591,3 +591,4 @@ Every hunter has a Boki, so a 30-player expedition is about 60 animated characte
 - No sweet-spot callouts, floating callout words or keybind letters on world objects (e.g. no E on Sable's dagger). Timers may show as pure visual cues (flash or pulse).
 - Kael RMB is a straight-line thrust with a short forward lunge, not a cone.
 - Kael LMB has no knockback.
+- Cutscenes/intro: click advances one beat, hold ~1 s skips all (owner 11-11).
