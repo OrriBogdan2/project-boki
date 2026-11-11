@@ -112423,5 +112423,47 @@
     "run": 3,
     "file": "briefs/boki-art/batch/out/px9b_barostorm_3.jpg",
     "ok": true
+  },
+  {
+    "id": "rv_rimink_light2",
+    "name": "Rimink (review: light2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_rimink_light2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rimink_light2",
+    "name": "Rimink (review: light2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_rimink_light2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_tiltster_light2",
+    "name": "Tiltster (review: light2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_tiltster_light2_1.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_tiltster_light2",
+    "name": "Tiltster (review: light2)",
+    "run": 2,
+    "file": "briefs/boki-art/batch/out/rv_tiltster_light2_2.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_tiltster_light2",
+    "name": "Tiltster (review: light2)",
+    "run": 3,
+    "file": "briefs/boki-art/batch/out/rv_tiltster_light2_3.jpg",
+    "ok": true
+  },
+  {
+    "id": "rv_rimink_light2",
+    "name": "Rimink (review: light2)",
+    "run": 1,
+    "file": "briefs/boki-art/batch/out/rv_rimink_light2_1.jpg",
+    "ok": true
   }
 ]
