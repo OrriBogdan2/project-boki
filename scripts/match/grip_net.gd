@@ -4,7 +4,7 @@ extends RefCounted
 ## after KinNet's fields (Net.VERSION 0.16.1): both gloves as "id:rar" ("" for none), each glove's
 ## cooldown left (s), and the bond meter (0..1, full = a Merge is ready).
 
-const AT := ArchKit.NET_MOVE_AT + 2     # after KinNet.hunter_extra (5 fields) and ArchKit.net_move (2)
+const AT := KitMoveNet.AT + 2     # after KinNet.hunter_extra (5 fields) and KitMoveNet.extra (2)
 const N := 5
 
 static func hunter_extra(h: Hunter) -> Array:

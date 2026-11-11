@@ -833,6 +833,7 @@ func retime(at: float) -> void:
 ## Plays one of the kit's full-body moves on the hunter (anticipation, key pose, recovery).
 func play(move: String) -> void:
 	anim_id = move
+	anim_n += 1
 	anim_at = m.time
 
 ## A hold clip: it starts HOLD_POSE_T into the hold (key down `t` s), never on the press, and not again while it plays.
