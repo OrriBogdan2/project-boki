@@ -143,6 +143,7 @@ const CHECKS := {
 	"--dash-jump-check": ["res://tools/dash_jump_check.gd", "dash_jump_check", null],      # Space in a dash, Shift in a jump
 	"--same-frame-check": ["res://tools/same_frame_check.gd", "same_frame_check", null],      # two presses, one step
 	"--airdash-glide-check": ["res://tools/airdash_glide_check.gd", "airdash_glide_check", null],
+	"--pad-check": ["res://tools/pad_check.gd", "pad_check", null],      # jump pads and updrafts (PadFlight)
 	"--boki-dash-check": ["res://tools/boki_dash_check.gd", "boki_dash_check", null],      # item 185
 	"--wirerun-dist-check": ["res://tools/wirerun_dist_check.gd", "wirerun_dist_check", null],      # Sparkle 11-10
 	"--boki-agency-check": ["res://tools/boki_agency_check.gd", "boki_agency_check", null],      # item 184b

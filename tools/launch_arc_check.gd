@@ -14,10 +14,10 @@ const DT := 1.0 / 60.0
 
 ## key -> [op, target, unit, note]. Ops: "<=", ">=", "~" (target [lo, hi]).
 const T := {
-	"pad_vy":              ["~", [16.9, 17.1], "m/s", "[?] no source number: ours, UtilityUse.PAD_VY"],
-	"pad_apex_m":          ["~", [9.0, 10.5], "m", "[?] PAD_VY^2 / 2g at [game data] gravity 14.7"],
-	"pad_apex_t":          ["~", [1.05, 1.25], "s", "PAD_VY / g"],
-	"pad_walk_hv":         ["~", [5.9, 6.1], "m/s", "[?] a walk-on leaves at the PAD_MIN_HV floor"],
+	"pad_vy":              ["~", [16.9, 17.1], "m/s", "[?] no source number: ours, hunter_move.json pad_vy"],
+	"pad_apex_m":          ["~", [9.0, 10.5], "m", "[?] pad_vy^2 / 2g at [game data] gravity 14.7"],
+	"pad_apex_t":          ["~", [1.05, 1.25], "s", "pad_vy / g"],
+	"pad_walk_hv":         ["~", [5.9, 6.1], "m/s", "[?] a walk-on leaves at the PadFlight.POCKET_RUN floor"],
 	"pad_still_hv":        ["~", [5.9, 6.1], "m/s", "[?] standing on it: the floor, toward your aim"],
 	"pad_walk_travel_m":   ["~", [8.5, 10.5], "m", "to pad height: [game data] FallingLateralFriction 0.375/s"],
 	"pad_dash_carry":      [">=", 0.97, "x", "[wiki] a dash into a pad keeps its momentum (off / into)"],

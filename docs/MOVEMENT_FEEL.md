@@ -409,6 +409,16 @@ The source has no ramp time: a Slow or a speed boost moves the speed cap at once
 | slow_end_0p1s / 0p3s | 1.00 / 1.00 | 0.99–1.01 | [game data] MaxAcceleration: ~0.03 s |
 | haste_land_0p1s (over the hasted run) | 1.00 | 0.99–1.01 | [game data] as a Slow ends |
 | haste_end_0p1s (over the plain run) | 1.00 | 0.99–1.01 | [game data] as a Slow lands |
+## Jump pads and updrafts (`PadFlight`, `--pad-check`; decision 0024)
+- **A pad is a throw, not a rail:** 17 m/s up [est] under the source's 14.7 m/s² (apex 9.8 m at 1.16 s), aimed
+  so the arc alone would come down on the pad's landing and clearing a higher landing's lip by 2 m. The keys
+  barely steer the rise (`air_control` 0.015, the data's value). Map pads and the pocket Spring pad share it.
+- **The glider opens by itself at the apex** (DECISIONS: the exception to "a held Space never opens the glider"),
+  keeps the launch's speed and steers as any glide. A hands-off glide (or a bot) is carried onto the landing and
+  folded over it, as a lair's escape updraft does; a fresh glide press makes it your own glide.
+- **Updrafts open the glider too:** falling into rising air with the glider shut opens it and holds the climb at
+  `updraft_vy` 9 m/s [est] (GlideUpdraftMinZVel: the data names it among the locked defaults, not its value).
+- Sources: no pad numbers in the data; the one footage pad take (Ghost's ult clip, f103) shows no arc. All [est].
 
 ## Air limits: the drop and the glider during moves (`AirLimits`, `--air-limits-check`; items 162, 162b)
 - **The opening drop is steering only:** heading and the dive. Shift, jump, LMB, RMB, E, R, gloves, belt items and the Boki throw do nothing until you land, and the HUD greys those slots. Space only deploys the canopy out of the dive. This replaces the old rule that an ability or heal pressed mid-drop broke out of it.
