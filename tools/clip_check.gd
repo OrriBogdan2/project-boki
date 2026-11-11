@@ -453,13 +453,19 @@ func _run_hit(id: String, hit_t: float, hit_k: float, speed: float) -> Array:
 	var hand := m.get_node(String(WardenGlb.BONES["hand.R"])) as Node3D
 	var out: Array = []
 	var t := 0.0
+	var ri := WardenSkeleton.find(sk, "root")
 	while t < 1.0:
 		s["hit_t"] = t if hit_t < 1.0 else 99.0
 		sync.call("_process", DT)
 		await holder.get_tree().process_frame
+		# (data "rig_root": the root rides the Rig's hover and lifts, which run on the tree's own clock; the legs are
+		# read from it, so only what the clips do to them counts: Motley's legs hang off his root)
+		var on_rig := Transform3D.IDENTITY
+		if bool(clips.d.get("rig_root", false)) and ri >= 0:
+			on_rig = sk.get_bone_global_pose(ri).affine_inverse()
 		var legs := 0.0
 		for b in ["thigh.L", "thigh.R", "shin.L", "shin.R"]:
-			var o := sk.get_bone_global_pose(WardenSkeleton.find(sk, b)).origin
+			var o := (on_rig * sk.get_bone_global_pose(WardenSkeleton.find(sk, b))).origin
 			legs += o.x * 1.0 + o.y * 3.0 + o.z * 7.0
 		out.append({"legs": legs, "hand": hand.global_position, "act": clips.act_w})
 		t += DT
