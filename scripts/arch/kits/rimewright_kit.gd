@@ -129,7 +129,8 @@ func on_deal(t: Ent, _dmg: float, o: Dictionary) -> void:
 			var fan_r := float(pd["splinter_r"]) * 0.8
 			m.later(SHELL_T, func(): splinter(at, float(pd["fan_splinter"]), fan_r, instance_from_id(tid) as Ent))
 
-## Shatter: a starburst of ice spikes round the foe, damage and more Chill to everyone near.
+## Shatter: a starburst of ice spikes round the foe and damage to everyone near (data: damage only; no slow, no
+## fresh Chill: those were ours-only riders, cut 2026-11-07).
 func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 	splinter_log += 1
 	m.fx.word(at + Vector3(0, 2.7, 0), "SHATTER", res_col(), true)
@@ -143,9 +144,7 @@ func splinter(at: Vector3, dmg: float, r: float, skip: Ent = null) -> void:
 		f.hurt(
 				dmg * power("passive"), h,
 				{
-					"src": "splinter", "ab": "passive", "slow": 1.2, "slow_k": 0.3, "tags": ["passive", "splinter"],
-					"payoff": true})
-		add_chill(f)
+					"src": "splinter", "ab": "passive", "tags": ["passive", "splinter"], "payoff": true})
 
 func _tick(dt: float) -> void:
 	for key in chill.keys():
