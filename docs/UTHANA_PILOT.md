@@ -14,7 +14,7 @@ Pilot of Uthana (uthana.com) text-to-motion on two Boki hunters, with a hard cap
 - Downloads are at 30 fps, in two forms: motion-only (`/motion/animation/...`) and with mesh (`/motion/file/...`). PAYG has no download cap.
 - Godot 4.6 import:
   - The GLB with mesh imports as `Armature/Skeleton3D` with our exact bones (31 on Albert) and an AnimationPlayer.
-  - The motion-only GLB imports as a node tree, and Godot renames `thigh.L` to `thigh_L`. `tools/render.gd::_remap_anim` maps the tracks back to `Armature/Skeleton3D:<bone>` and restores `.L`/`.R`. After that, the clips play on our skeleton.
+  - The motion-only GLB imports as a node tree, and Godot renames `thigh.L` to `thigh_L`. `tools/anim/uthana_clean.gd::load_motion` (was `tools/render.gd::_remap_anim`) maps the tracks back to `Armature/Skeleton3D:<bone>` and restores `.L`/`.R`. After that, the clips play on our skeleton.
   - Root motion is translation on `root`.
 - Looping:
   - `create_looped_motion` on our characters fails with "Parent is not root index" (no charge).
@@ -59,4 +59,4 @@ Not feasible. Uploading nettlynx (a quadruped kin) was rejected for free with `c
 
 ## Notes and deviations
 - **Auto-recharge is ON** (it tops up when the balance drops below $10). The owner's note says it is off. The cap kept the balance above $14.60, so it never triggered. I left the setting unchanged.
-- **Godot queue was jammed:** all 14 slots were held by stale processes from other jobs. Renders ran `/opt/godot/godot-bin` directly under `nice`, xvfb-run and the gl_compatibility renderer (`tools/render.sh`), in a temp project at `/tmp/uthp`. `jobq` wasn't used because the renders are CPU frames.
+- **Godot queue was jammed:** all 14 slots were held by stale processes from other jobs. Renders ran `/opt/godot/godot-bin` directly under `nice`, xvfb-run and the gl_compatibility renderer (now `tools/anim/uthana_view.sh`), in a temp project at `/tmp/uthp`. `jobq` wasn't used because the renders are CPU frames.
