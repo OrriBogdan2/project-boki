@@ -3,7 +3,7 @@ extends RefCounted
 ## and 0051). Never touches the save.
 ##   1. the site and Gate, the Blight's tide and its wall, the Heart asleep until wake_s, the Heartspark
 ##      charging, taking it, the carrier's slow and reveal, dropping on down, the Gate only for the carrier, the
-##      minor bundle, no second Heartspark, a carrier leaving by skiff drops it, the major bundle at home, "ht"
+##      minor bundle, no second Heartspark, a carrier leaving by uplink drops it, the major bundle at home, "ht"
 ##      requests.
 ##   2. the Gate takes the carrier's squad within gate_take_r (a downed mate too), not a mate farther off.
 ##   3. the final seat: a squad alone fills the ring, a standing rival stalls it, an empty ring drains, full
@@ -228,10 +228,10 @@ func _early_seat(main: Node) -> void:
 	_put(m, p, H.gate)
 	it = H.interact_for(p)
 	ok(String(it.get("act", "")) == "leave", "the Gate offers the carrier a way out")
-	# ---- skiff/uplink unchanged: a non-carrier leaves as before, a carrier leaving by skiff drops it
+	# ---- uplink unchanged: a non-carrier leaves as before, a carrier leaving by uplink drops it
 	var c1 := rival
-	m._extract(c1, "skiff", "test")
-	ok(c1.extracted and H.carrier == p, "a rival leaving by skiff is unchanged and the carrier keeps it")
+	m._extract(c1, "uplink", "test")
+	ok(c1.extracted and H.carrier == p, "a rival leaving by uplink is unchanged and the carrier keeps it")
 	# ---- leaving through the Gate
 	_hold_f(m, p, float(rl["gate_hold_s"]) * 0.4)
 	ok(not p.extracted, "a short hold at the Gate isn't enough")
@@ -263,10 +263,10 @@ func _early_seat(main: Node) -> void:
 	_put(m3, q, H3.site + Vector3(1, 0, 1))
 	H3._pick(q)
 	ok(H3.carrier == q, "(setup) q carries")
-	m3._extract(q, "skiff", "test")
+	m3._extract(q, "uplink", "test")
 	ok(H3.state == Heart.S.READY and H3.carrier == null and H3.early_team < 0,
-		"a carrier leaving by skiff leaves the Heartspark behind, no reward")
-	ok(m3.result.get("heart", {}).is_empty(), "...and the skiff result has no Heart bundle")
+		"a carrier leaving by uplink leaves the Heartspark behind, no reward")
+	ok(m3.result.get("heart", {}).is_empty(), "...and the uplink result has no Heart bundle")
 	# ---- the home half (the major bundle: egg and materials)
 	var major: Dictionary = H3.pay(m3.hunters[1], Heart.HOW_FINAL)
 	var egg_sp := String(major["egg"].get("sp", ""))
@@ -468,6 +468,8 @@ func _net(main: Node) -> void:
 	for mm in [host, cli]:
 		for h in mm.hunters:
 			_far(mm, h)
+			h.max_hp = 5000.0     # the charge runs 75 s with them parked at random spots
+			h.hp = 5000.0
 	_charged(host)
 	cli.time = host.time
 	var p: Hunter = host.player

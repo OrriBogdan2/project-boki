@@ -37,3 +37,10 @@ outposts; the 305 m Hollow Crown also carries `"ways_scale": 1.412` (SIZE / 216)
 gate_dist and the map bands (heart.json "map"), never times. Heart.setup puts the Heart on that site and seeds the
 Gate angle among spots gate_clear from both outposts. tools/ways_out_sites.py (both generators) and
 --ways-out-map-check enforce the bands from the same heart.json numbers.
+
+Task 3 (open extraction gone): skiff docks, rift hatches and Rift Keys are deleted from the code, the maps and
+both generators; `Exits` is uplink outposts only and `MATCH.portal_open` is gone. Net.VERSION 0.24.5 (0.25.3 on the branch) (the exit
+list and its "xc" index are outposts only; no "key" pickup). Save: the v5 migration that refunds market Rift Keys
+as gems stays; a live h.rift_keys never reached the save. Outposts stay as they are (the tutorial's uplink step)
+until task 4 reworks them; alternative considered: switch off non-tutorial outposts now. --extract-check keeps
+only its uplink sections.

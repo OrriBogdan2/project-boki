@@ -278,7 +278,7 @@ func _best_callout() -> Dictionary:
 		var best_x: Dictionary = {}
 		var bxd := 1e9
 		for x in m.exits.list:
-			var usable: bool = m.exits.callable(x) or m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
+			var usable: bool = m.exits.startable(x) or (String(x["state"]) == "open" and int(x.get("team", -1)) == o.team)
 			if usable and o.flat_dist(x["pos"]) < bxd:
 				bxd = o.flat_dist(x["pos"]); best_x = x
 		if not best_x.is_empty():
@@ -457,7 +457,7 @@ func _almost_home() -> void:
 	if noted.has("almost_home") or m.exits == null:
 		return
 	var x: Dictionary = m.exits.active_for(h().team)
-	if x.is_empty() or not String(x["state"]) in ["open", "boarding"] or h().flat_dist(x["pos"]) > 7.0:
+	if x.is_empty() or String(x["state"]) != "open" or h().flat_dist(x["pos"]) > 7.0:
 		return
 	noted["almost_home"] = true
 	cheer_cd = 3.0

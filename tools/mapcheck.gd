@@ -88,7 +88,7 @@ func run_authored(id: String, seeds: Array) -> void:
 						seen2[nx] = true; q2.append(nx)
 			if ground.size() - seen2.size() > 2: probs.append("%s: %d tiles walled off" % [w.islands[ii].get("id", ii), ground.size() - seen2.size()])
 		var n_ex := 0
-		for ek in ["portals", "docks", "outposts", "hatches"]: n_ex += (L.get(ek, []) as Array).size()
+		for ek in ["portals", "outposts"]: n_ex += (L.get(ek, []) as Array).size()
 		if w.portal_spots.size() != n_ex: probs.append("exits %d of %d" % [w.portal_spots.size(), n_ex])
 		# the Heart site (tools/ways_out_sites.py checks its bands and the Blight ring rule when the map is generated)
 		if L.has("heart"):
