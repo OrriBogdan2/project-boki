@@ -65,7 +65,9 @@ func setup(match_node: Match) -> void:
 			"outpost": _add_outpost(d, tut)
 	# docks close one by one late in the match: the order goes round the map, and one stays open
 	var docks := list.filter(func(x): return x["kind"] == "dock")
-	if docks.size() > 1:
+	if m.zone:
+		m.zone.time_docks(docks)     # with a closing zone, they close as its edge passes them
+	elif docks.size() > 1:
 		var keep: int = m.rng.randi_range(0, docks.size() - 1)
 		var fr := [0.62, 0.74, 0.86, 0.9, 0.93]
 		if m.rolling: fr = [0.84, 0.89, 0.93, 0.95]     # a rolling session: the docks close in its last few minutes
