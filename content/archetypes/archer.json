@@ -163,5 +163,13 @@
 	"rank_next": {"sec": "Rank 3: cooldown 16s -> 10s, damage +40%; flies 3m farther and a wall stun gives a dash charge.", "kin": "Rank 3: cooldown 15s -> 9s, damage +60%; the Hail Wall is 30% wider.", "dash": "Rank 3: recharge 9.5s -> 7.5s per charge; Spirit Walk lasts 0.5s longer, is 33% faster inside something (fading), allies within 6m walk too."},
 	"tells": {
 		"dash_spent": "a green spirit shell over her while it lasts; dash pip dark"
+	},
+	"src": {
+		"lmb": "[D] [F] (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] ours (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] [O] (owner question open) (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }

@@ -207,5 +207,13 @@
 	"rank_next": {"sec": "Rank 3: shield HP +50% (240); regen 20 -> 30 per second, back up in 1.4s and 2s when broken.", "kin": "Rank 3: cooldown 12s -> 8s, healing +50% in all.", "dash": "Rank 3: recharge 8s -> 5s; the Shield Charge cooldown 6s -> 3s; a 360 Smash that hits refunds it; both dashes go 1m further."},
 	"tells": {
 		"dash_spent": "dash pips dark"
+	},
+	"src": {
+		"lmb": "[D] [O] (owner) (cd/dmg/range/timing: KIT_PARITY row)",
+		"rmb": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"e": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"x": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"dash": "[D] (cd/dmg/range/timing: KIT_PARITY row)",
+		"passive": "[D] [O] (owner question open) (cd/dmg/range/timing: KIT_PARITY row)"
 	}
 }
