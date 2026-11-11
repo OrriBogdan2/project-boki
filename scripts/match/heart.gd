@@ -108,6 +108,7 @@ var spark_pos := Vector3.ZERO  # where a ready Heartspark floats (the Heart, or 
 var deliveries := 0
 var drops := 0
 var events: Array = []         # every state change, for the check
+var audio: HeartSfx            # the hum, stings, heartbeat and gate cues
 var _hold := {}                # nid -> seconds of interact held on the spark / the gate
 var _sync_t := 0.0
 var _tide_t := 0.0             # seconds since the last tide tick
@@ -125,6 +126,7 @@ var _gate_beam: MeshInstance3D
 
 func _init(match_node: Match) -> void:
 	m = match_node
+	audio = HeartSfx.new(self)
 
 func host() -> bool:
 	return not m.net_on or m.is_host
@@ -189,6 +191,7 @@ func tick(dt: float) -> void:
 	_tide_tick(dt)
 	_apply_carrier()
 	_update_nodes()
+	audio.update()
 
 ## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
 ## damage ("heat"): armor doesn't take it and it doesn't drain a glider.
@@ -245,7 +248,6 @@ func _pick(h: Hunter) -> void:
 	carrier = h
 	_enter("carried")
 	m.add_feed("%s took the Heartspark" % h.pname)
-	m.sfx("ping", h.pos, 0.0, 0.6)
 	m.fx.burst(h.pos + Vector3(0, 1.0, 0), COL, 24, 4.0, 0.7, -3.0)
 
 func _drop(at: Vector3) -> void:
