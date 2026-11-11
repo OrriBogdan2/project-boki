@@ -141,6 +141,7 @@ func apply_result(r: Dictionary) -> Dictionary:
 	var d := Save.d
 	var out := {"gems": 0, "seeds": {}, "caught": [], "kin_lines": [], "levelup": false, "crops_ready": 0}
 	d["matches"] = int(d["matches"]) + 1
+	Incubator.tick(float(r.get("time", 0.0)))      # a match is play time for the eggs too
 	var won: bool = r.get("extracted", false)
 	# lifetime counts for challenges
 	var ms: Dictionary = r.get("stats", {})
