@@ -541,7 +541,8 @@ func _handover(id: String, m: Node3D, sync: Node, clips: WardenClips, dd: Dictio
 		var t := 0.0
 		var last_p := hand.global_position
 		while t < float(st[1]):
-			clips.force = {"clip": clip, "t": clampf(t * rate + lead, 0.0, clips.lib.get_animation(clip).length - 0.001)}
+			var ct := clampf(t * rate + lead, 0.0, clips.lib.get_animation(clip).length - 0.001)
+			clips.force = {"clip": clip, "t": ct}
 			sync.call("_process", DT)
 			await holder.get_tree().process_frame
 			path.append(hand.global_position.distance_to(last_p))

@@ -2608,7 +2608,8 @@ func _try_ledge_grab(dt: float) -> void:
 	var dir_in := Vector2(float(best["ex"]) - pos.x, float(best["ez"]) - pos.z)
 	if dir_in.length() < 0.01:
 		dir_in = mv
-	lfloat = {"lip": float(best["gz"]), "y0": pos.y, "n": dir_in.normalized(), "t": 0.0, "g0": bool(inp.get("glide", false)),
+	lfloat = {"lip": float(best["gz"]), "y0": pos.y, "n": dir_in.normalized(), "t": 0.0,
+		"g0": bool(inp.get("glide", false)),
 		"shove": (inp["move"] as Vector2).length() < 0.3,     # thrown into the side with no keys: it carries you over
 		"kb0": kb_t,                                          # (a fresh knock ends the rise; the one that threw you here doesn't)
 		"at": Vector2(pos.x, pos.z), "downed": downed, "win": false, "tile": Vector2i(int(best["x"]), int(best["z"])),

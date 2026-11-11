@@ -179,8 +179,8 @@ const CLIP_FACE := {
 	"rush": "angry", "brace": "focus", "dodge": "cheer", "stonehop": "happy", "spin": "happy",
 }
 ## Match body language (KinPuppet's "pose" meta) that shows on the face.
-const POSE_FACE := {"growl": "angry", "guard": "focus", "stance": "focus", "whine": "sad", "nudge": "sad", "comfort": "happy",
-	"alert": "focus", "dazed": "sleepy", "scan": "sad"}
+const POSE_FACE := {"growl": "angry", "guard": "focus", "stance": "focus", "whine": "sad", "nudge": "sad",
+	"comfort": "happy", "alert": "focus", "dazed": "sleepy", "scan": "sad"}
 ## Pose layers: lean (rad, forward), squat (0..1 of its height, negative stands tall), sway (rad, side to side),
 ## shiver (rad); `clip` and `rate` replace the idle, walk and run clips and their speed (a lifted Boki kicks).
 const LAYER := {

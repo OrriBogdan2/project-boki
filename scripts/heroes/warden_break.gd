@@ -93,7 +93,7 @@ func _standing(s: Dictionary) -> bool:
 	if String(s.get("tool", "")) != "":
 		return false
 	for k in BUSY_FLAGS:
-		if bool(s.get(k, false)):
+		if s.get(k, false):      # (a flag, or "act": the home verb's name, "" when none)
 			return false
 	for k in BUSY_TIMERS:
 		if float(s.get(k, -1.0)) >= 0.0:

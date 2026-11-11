@@ -163,7 +163,8 @@ const CHECKS := {
 	# aim across terraces: the pose
 	"--aim-pitch-check": ["res://tools/aim_pitch_check.gd", "aim_pitch_check", null],
 	"--aim-pitch-shots": ["res://tools/aim_pitch_shots.gd", "aim_pitch_shots", null],      # the strip (GPU)
-	"--strike-reach-check": ["res://tools/strike_reach_check.gd", "strike_reach_check", null],      # weapon tip on the hit area
+	# weapon tip on the hit area
+	"--strike-reach-check": ["res://tools/strike_reach_check.gd", "strike_reach_check", null],
 	"--clip-check": ["res://tools/clip_check.gd", "clip_check", null],      # hand-keyed clips, weapon on the bone
 	"--home-gait-check": ["res://tools/home_gait_check.gd", "home_gait_check", null],      # the Empty's planted feet
 	"--aim-lead-check": ["res://tools/aim_lead_check.gd", "aim_lead_check", null],      # head and chest lead the cursor
@@ -230,9 +231,11 @@ const CHECKS := {
 	"--wild-boki-states-check": ["res://tools/wild_boki_states_check.gd", "wild_boki_states_check", null],
 	"--wild-boki-states-shots": ["res://tools/wild_boki_states_shots.gd", "wild_boki_states_shots", null],
 	"--dancer-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
-	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],        # Sable: the same check, her art name's twin
+	# Sable: the same check, her art name's twin
+	"--thief-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "thief"],
 	"--juggernaut-combo-check": ["res://tools/dancer_jug_check.gd", "dancer_jug_check", "juggernaut"],
-	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],      # Kael tap strike, live aim, tether, ult momentum
+	# Kael tap strike, live aim, tether, ult momentum
+	"--kael-tap-check": ["res://tools/kael_tap_check.gd", "kael_tap_check", null],
 	"--kael-tap-clip": ["res://tools/kael_tap_clip.gd", "kael_tap_clip", null],      # Kael tap/hold/ult clips (GPU)
 	"--vv-shots": ["res://tools/vv_shots.gd", "vv_shots", null],          # Sparkle / Vex screenshots
 	"--breah-shots": ["res://tools/breah_shots.gd", "breah_shots", null],          # Tarek review screenshots
@@ -263,7 +266,8 @@ const CHECKS := {
 	"--first15-shots": ["res://tools/first15_shots.gd", "first15_shots", null],      # --shots-dir=<dir> --size=WxH
 	# walking off a ledge is never gated
 	"--ledge-walk-check": ["res://tools/ledge_walk_check.gd", "ledge_walk_check", null],
-	"--wall-kick-pose-check": ["res://tools/wall_kick_pose_check.gd", "wall_kick_pose_check", null],      # every Hero's sole on the wall
+	# every Hero's sole on the wall
+	"--wall-kick-pose-check": ["res://tools/wall_kick_pose_check.gd", "wall_kick_pose_check", null],
 	"--tutorial-hud-shots": ["res://tools/tutorial_hud_shots.gd", "tutorial_hud_shots", null],      # --shots-dir=<dir>
 	"--tutorial-clean-check": ["res://tools/tutorial_clean_check.gd", "tutorial_clean_check", null],  # nothing random
 	# the first two Extractions' guide
@@ -359,7 +363,8 @@ const CHECKS := {
 	"--warden-clips-check": ["res://tools/warden_clips_check.gd", "warden_clips_check", null],
 	"--dead-kmoves-check": ["res://tools/dead_kmoves_check.gd", "dead_kmoves_check", null],
 	"--utility-pose-shots": ["res://tools/utility_pose_shots.gd", "utility_pose_shots", null],      # GPU strips
-	"--utility-pose-check": ["res://tools/utility_pose_check.gd", "utility_pose_check", null],      # belt items: a move as long as the cast
+	# belt items: a move as long as the cast
+	"--utility-pose-check": ["res://tools/utility_pose_check.gd", "utility_pose_check", null],
 	"--rig-standard-check": ["res://tools/rig_standard_check.gd", "rig_standard_check", null],
 	"--rig-shots": ["res://tools/rig_shots.gd", "rig_shots", null],
 	"--shroud-shots": ["res://tools/shroud_shots.gd", "shroud_shots", null],
@@ -373,7 +378,8 @@ const CHECKS := {
 	"--boki-wisp-check": ["res://tools/boki_wisp_check.gd", "boki_wisp_check", null],      # every species' Boki wisp
 	"--wisp-guardian-check": ["res://tools/wisp_guardian_check.gd", "wisp_guardian_check", null],   # decision 0040
 	"--guardian-stance-check": ["res://tools/guardian_stance_check.gd", "guardian_stance_check", null],
-	"--guardian-stance-shots": ["res://tools/guardian_stance_shots.gd", "guardian_stance_shots", null],      # --shots-dir=<dir>
+	# --shots-dir=<dir>
+	"--guardian-stance-shots": ["res://tools/guardian_stance_shots.gd", "guardian_stance_shots", null],
 	"--kin-gallery": ["res://tests/kin_gallery.gd", "kin_gallery", null],      # the Model Room; --kin-wisps etc.
 	"--garden-pace-check": ["res://tools/garden_pace_check.gd", "garden_pace_check", null],  # GARDEN.md Pace
 	"--box-revive-check": ["res://tools/box_revive_check.gd", "box_revive_check", null],      # docs/decisions/0018

@@ -748,7 +748,8 @@ func _loco(s: Dictionary, dt: float) -> void:
 	loco_pos = loco_pos.lerp(goal, 1.0 - exp(-dt * blend))
 	_p("loco/blend_position", loco_pos)
 	var rate := gait.plan(spd, lc)
-	# ("cadence": the run clip's rate over its planted feet, for a hero whose source scurries or plods; the walk keeps 1)
+	# ("cadence": the run clip's rate over its planted feet, for a hero whose source scurries or plods; the walk
+	# keeps 1)
 	var walk := float(lc.get("walk_speed", 2.2))
 	rate *= lerpf(1.0, float(lc.get("cadence", 1.0)), clampf((spd - walk) / maxf(run - walk, 0.1), 0.0, 1.0))
 	_p("loco_rate/scale", rate if spd >= STILL else 1.0)
