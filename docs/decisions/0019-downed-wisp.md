@@ -64,3 +64,30 @@ depth write at render priority -1, so telegraphs (priority 2) and the HUD plates
 sweeps the aim over 360 degrees for three camera styles; shots: `--wisp-clear-shots --shots-dir=<dir>` (GPU).
 `KinWisp.render` calls `place`, `alpha` and `apply` for each wisp, with the screen, your aim and the sparkle
 set built once a frame; `--wisp-check` asserts a match wisp rides on the side away from the aim.
+
+## Clarity pass and Boki riding the downed Hunter (owner 2026-11-11)
+Owner: "very confusing when someone wisps ... a big circle and unclear. Copy how Supervive does this ... their
+pets always come back to them and go into wisp form when they're downed".
+- **Marks (`DownedMarks`):** the always-on ground ring the size of the revive range is gone. A downed Hunter shows
+  a compact ring hugging their Wisp in their side colour (ally or rival): the bleed-out drains round it, revive
+  progress fills inside it, it flashes over the last 5 s and turns red and pulses while stomped. Only a teammate
+  within 9 m sees the revive reach on the ground (thin, filling as they revive) and one HUD line, "Step onto
+  <name>'s wisp to revive" (screen space: no words on world objects, owner 11-11). The squad's offscreen arrows
+  carry the same ring. The plate, squad frame and own-screen "You're down" stay as they were.
+- **Boki (`KinWispForm`, Kin state `wisp`, which replaces `reviving`):** when its Hunter is knocked every Boki of
+  theirs that is up zips back (blinks from beyond 14 m or when it can't walk there) and circles the Hunter Wisp as
+  its Boki wisp (`BokiWispLook`, round = Hunter, critter = Boki). It does not fight, cast or take orders and
+  can't be hit. It still pulls its Hunter up as the old kin revive did (same wait and `kin_revive_time`, bleed
+  paused meanwhile); a stomp stops the pull (as Supervive's stomp blocks self-revives). Revived: back on the
+  shoulder with its old order. Dead: `KinLoss` as before. A Boki that is down itself stays down (KinDowned).
+  The old guard (attacking whoever stood on the Wisp) is removed.
+- **Net:** `wisp` takes `reviving`'s slot in `Match.KIN_STATES`, so the snapshot shape is unchanged.
+- **Open (DECISIONS 2026-11-09):** wisp stealing on a knock is not built yet; when it is, it starts from the
+  Boki already riding the Hunter in this form.
+- Checks: `--kin-wisp-form-check`, `--clarity-check`. Frames: `--wisp-clarity-shots --shots-dir=<dir>`.
+
+### Wisp form x guardian summon (merge note)
+`KinWispForm.wants` skips a Boki whose summon window is open (`summon.left > 0`), so the guardian (decision 0040)
+keeps fighting over its downed Hunter; the stomper targeting main removed from `Kin._sim_active` stays only for a
+guardian summon (`_wisp_threat`). A Boki riding as a wisp by the boki_wisps setting never reaches KinWispForm
+(`KinWisp.ride` runs first), so it does not pull its Hunter up; `--wisp-guardian-check` covers the guardian.

@@ -13,6 +13,8 @@ extends RefCounted
 ##      during the scan all clean up (no beam, no hum, the Boki wakes up on its own timer)
 ##  7b. branching finals: one entry with two forms (caught/seen by either, both-forms star, totals, old saves)
 ##  11. looting a deathbox cannot push your box past its capacity
+##  12. sound: the hum rises; a catch plays its rarity chime and the call once, a cancel the snap once;
+##      the call carries half as far as gunfire
 
 var bad := 0
 var m: Match
@@ -97,7 +99,7 @@ func run(mn: Node) -> void:
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--capture-only="): only = a.substr(15)
 	var parts := ["gating", "flow", "interrupts", "mid_scan", "box", "loot", "own_kin"]
-	parts.append_array(["book", "branch_forms", "net", "bots", "bots_full"])
+	parts.append_array(["book", "branch_forms", "net", "bots", "bots_full", "sound"])
 	for part in parts:
 		if only == "" or only.split(",").has(part):
 			call("_" + part)
@@ -250,6 +252,8 @@ func _book() -> void:
 	Save.d["dex"] = {}
 	var k := wild("pebbit", false)
 	run_for(1.5)
+	P.inp["aim"] = k.pos            # in view: it wanders for 1.5 s and may end up behind her
+	run_for(0.1)
 	FieldBook.scan_sights(m)
 	var e: Dictionary = Care.dex_entry("pebbit")
 	ok(bool(e.get("seen", false)) and not bool(e.get("caught", false)), "a wild Boki in view is logged as seen, not caught")
@@ -438,3 +442,75 @@ func _bots_full() -> void:
 		if String(bot.ai.get("goal_kind", "")) == "catch": chose = true
 		if not Capture.state(bot).is_empty(): scanned = true
 	ok(not chose and not scanned and not k.dead, "a bot with a full box does not walk to a knocked-out Boki or scan it")
+
+# ------------------------------------------------------------------ 12. sound
+const CUES := ["scan_pop", "scan_pop_fine", "scan_pop_rare", "scan_call", "scan_fail"]
+
+func _cue_reset() -> void:
+	for c in CUES:
+		Sfx.recent.erase(c)
+		Sfx.last_played.erase(c)
+
+## How many times each cue started since _cue_reset (Sfx.recent keeps the starts of a sound inside its stacking window).
+func _cue_counts() -> Dictionary:
+	var out := {}
+	for c in CUES:
+		out[c] = (Sfx.recent.get(c, []) as Array).size()
+	return out
+
+## One scan to the end on a Boki whose record `edit` changes: the cue counts and the hum's pitch early and late.
+func _scan_through(edit: Callable) -> Dictionary:
+	_fresh()
+	var P := m.player
+	var rec := Save.new_kin("puddlet", "", 77)
+	edit.call(rec)
+	var at: Vector3 = P.pos + Vector3(2.0, 0, 0.0)
+	var k := m.spawn_wild(rec, Vector3(at.x, m.world.ground_at(at.x, at.z), at.z), true)
+	run_for(0.2)
+	Sfx.listener = P.pos
+	_cue_reset()
+	begin(P)
+	var scan_s := float(Capture.rules()["scan_s"])
+	run_for(0.5)
+	var hum := String(Capture.state(P).get("hum", ""))
+	var lo := (Sfx.loops[hum]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loops.has(hum) else 0.0
+	run_for(scan_s - 1.2)
+	var hi := (Sfx.loops[hum]["p"] as AudioStreamPlayer).pitch_scale if Sfx.loops.has(hum) else 0.0
+	run_for(2.0)
+	return {"cues": _cue_counts(), "lo": lo, "hi": hi, "caught": P.caught.size(), "k": k}
+
+## The counts a catch of this chime (or "" for none) should leave: the chime and the call once each, or only the snap.
+func _expect(chime: String, snap := 0) -> Dictionary:
+	var out := {}
+	for c in CUES:
+		out[c] = 1 if c == chime or (c == "scan_call" and chime != "") else 0
+	out["scan_fail"] = snap
+	return out
+
+func _sound() -> void:
+	var common := _scan_through(func(_r): pass)
+	var rise := "pitch %.2f then %.2f" % [common["lo"], common["hi"]]
+	ok(float(common["lo"]) > 0.0 and common["hi"] > common["lo"] + 0.2, "the scan hum rises with the fill (%s)" % rise)
+	ok(common["caught"] == 1 and common["cues"] == _expect("scan_pop"), "a common catch: chime and call once")
+	ok(Sfx._duck_tw != null and Sfx._duck_tw.is_valid(), "...and the music ducks under it")
+	var fine := _scan_through(func(r): r["mutations"] = ["giant"])
+	ok(fine["cues"] == _expect("scan_pop_fine"), "a mutated Boki: the fine chime once %s" % fine["cues"])
+	var rare := _scan_through(func(r): r["shimmer"] = true)
+	ok(rare["cues"] == _expect("scan_pop_rare"), "a shimmer Boki: the rare chime once %s" % rare["cues"])
+	_fresh()
+	var P := m.player
+	wild()
+	Sfx.listener = P.pos
+	_cue_reset()
+	begin(P)
+	run_for(1.0)
+	P.inp["dash"] = true
+	run_for(0.2)
+	P.inp["dash"] = false
+	run_for(0.5)
+	ok(P.caught.is_empty() and _cue_counts() == _expect("", 1), "a dash cancels the scan: the snap once, no chime")
+	var reach := float(Sfx.sound_reach.get("scan_call", 0.0))
+	ok(is_equal_approx(reach, Sfx.hear_range * 0.5), "the call carries half of gunfire's range (%.0f m)" % reach)
+	var near := Sfx._distance_db(Sfx.listener + Vector3(reach - 1.0, 0, 0), reach)
+	var far := Sfx._distance_db(Sfx.listener + Vector3(reach + 1.0, 0, 0), reach)
+	ok(not is_nan(near) and is_nan(far), "...heard just inside it, silent just outside it")
