@@ -263,7 +263,7 @@ func on_last_team() -> void:
 	if state != S.FINAL:
 		go(S.FINAL, "last squad")
 
-## Each game hits the Hunters it plays that stand outside the ring, once a tide tick. Environment
+## Each game hits the Hunters it plays that have landed and stand outside the ring, once a tide tick. Environment
 ## damage ("heat"): armor doesn't take it and it doesn't drain a glider.
 func _tide_tick(dt: float) -> void:
 	var st := tide_stage(m)
@@ -276,8 +276,8 @@ func _tide_tick(dt: float) -> void:
 	var tr := tide_r(m)
 	var d := tide_dmg(st)
 	for h in m.hunters:
-		if h.remote or h.downed or h.out or h.extracted:
-			continue
+		if h.remote or h.downed or h.out or h.extracted or h.riding or h.dropping:
+			continue      # (still on the ship or in the drop: the tide starts at your landing)
 		if Vector2(h.pos.x - site.x, h.pos.z - site.z).length() > tr:
 			h.hurt(d, null, {"src": "heat", "tags": ["tide"]})
 			if h == m.player:
