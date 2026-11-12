@@ -192,7 +192,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | Slot | Source | Ours | Verdict |
 |---|---|---|---|
 | LMB | Throw + recall; hold charged swing [D] | Tap whirl hold (owner), carry 1.5-1.8 m + perfect launch 4 m (owner #30, #49), cadence .45 on every press (recall too: TTK 1.16x), walks 55% vs stands | differ (owner) |
-| RMB | Hold shield, front block, Shift = bash 198 = 1.03x throw, 6 s [D] (supervive_kits.md:89-90) | hold .1, aegis, bash 12.4 (1.03x throw 12), cd 6 | match; routing `[?]` |
+| RMB | Hold shield, front block, Shift = bash 198 = 1.03x throw, 6 s [D] (supervive_kits.md:89-90) | hold .1, aegis, bash 12.4 (0.95x throw 13), cd 6 | match; routing `[?]` |
 | Q | none | glove | ours |
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun (31 = 0.16x throw), AoE series 396 = 2.06x, heavy Slow, 50 s [D] (supervive_kits.md:93) | 4 cells, strike 1.9 (.16x), eruption 24.8 (2.06x), stun .5, cd 40 | match; 0.8x cd |
