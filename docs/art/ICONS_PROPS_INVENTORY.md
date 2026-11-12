@@ -104,4 +104,26 @@ the game. Counts come from `content/` and `scripts/` on `main` at 53e2fe7f35.
 - **Props:** same cel-shaded toy look as the hunters: chunky proportions, soft bevels, two or three
   flat colours, one glowing accent that shows what the prop does.
 
-Samples and the full-pass plan were made outside the repo for review. Nothing is wired in yet.
+Samples and the full-pass plan were made outside the repo for review.
+
+## 5. Painted icons, full set (wired in 2026-11-12)
+
+The owner approved the style samples on 11-12. 126 painted icons now live in `art/icons/<id>.png`
+(128 px, imported with mipmaps so they stay smooth at 14-20 px). `Icons.draw` draws the painted icon when
+one exists, in its own colours (`col` gives the alpha; a near-black `col` gives the silhouette that
+unowned Field Book items use), and the vector glyph otherwise. `--icon-art-check` keeps the set complete.
+Contact sheet: `docs/shots/icons-full-1112/full_set.jpg`.
+
+| Group | Icon ids | Wired through |
+|---|---|---|
+| Hunter ability slots (52) | `<hunter>_<dash/rmb/e/x>` | `icon` in `content/archetypes/*.json`; the kit card's alias map is gone |
+| Weapons with no glyph (11) | the weapon id | weapon ids already were icon ids; the other 10 weapons keep their glyphs |
+| Statuses (9) | `status_<kind>` | `HudPlate.statuses` |
+| Combat marks (3) | `mark_static`, `mark_thief`, `mark_daze` | each kit's `combo_read` |
+| Boki abilities (16) | `boki_<ability id>` | `KinText.icon` (shape glyph stays as the fallback) |
+| Fusions (9) | `merge_<merge id>` | `KinText.merge_icon` (HUD Fusion slot, Boki moves list) |
+| Shaping items (26) | `garden_<item id>` | `ItemPages.icon_of` |
+
+Made with Meshy image-to-image (nano-banana-pro) and the approved Storm Rod and Burning samples as style
+references, since the 2D generator from the plan was not on the worker. Still open from the plan: hunter
+passives, gear, utility, pickup abilities, perks, elements, map pings, and the world props.
