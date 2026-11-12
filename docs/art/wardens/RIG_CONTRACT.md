@@ -117,7 +117,7 @@ Whichever design the owner picks ships as `<art>/<art>.glb`.
 Empties (glTF nodes without mesh) parented to the bone, named exactly, for effects that should start on the
 model rather than at a fixed offset. None is required today (kits use the hand bones, the Muzzle and the
 Hammer pivot); export these so FX can move onto them without another export:
-- `anchor_head_top` (bone `head`): nameplate, overhead tells (Bjorn's Guard pips, Pin's glint).
+- `anchor_head_top` (bone `head`): nameplate, overhead tells (Pin's glint).
 - `anchor_chest` (bone `hips`, at chest height): hit sparks, buffs.
 - `anchor_weapon_tip` (on the weapon mesh, if exported): trails.
 - Per hero: Bjorn `anchor_prow_crack` (the prow's glow), Zedran `anchor_fuller` (the blade's heat), Pin

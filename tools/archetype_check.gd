@@ -255,7 +255,7 @@ func _data() -> void:
 		for wid in Arch.weapons(a):
 			if Content.weapon(String(wid)) == null: bad.append("%s:%s" % [a, wid])
 		for k in ["dash", "rmb", "e", "resource", "order"]:
-			if not Arch.def(a).has(k) and not (a == "bulwark" and k == "resource"): bad.append("%s missing %s" % [a, k])
+			if not Arch.def(a).has(k): bad.append("%s missing %s" % [a, k])
 	ok("data: every kit complete, weapons exist", bad.is_empty(), str(bad))
 	ok("weapons: one signature weapon each", ids.all(func(x): return Arch.weapons(x).size() == 1 and Arch.signature(x) != "" and Arch.weapon_ok(x, Arch.signature(x))), str(ids.map(func(x): return Arch.signature(x))))
 	ok("weapons: Sable bolts / Lace bow / Sparkle coil / Mossy hammer and aegis", Arch.signature("thief") == "arc_bolts" and Arch.signature("archer") == "longbow" and Arch.signature("mage") == "coilcaster" and Arch.signature("bulwark") == "tower_shield")
@@ -558,7 +558,7 @@ func _bulwark() -> void:
 	step(m, 0.3)
 	ok("bulwark RMB tap: no Bash any more", K.last_variant == "tap" and absf(T.pos.x - x0) < 0.2 and dmg(T) <= 0.0 and K.ch_rmb >= 1.0, "pushed %.1f" % (T.pos.x - x0))
 	T.teleport(home + Vector3(1.8, 0, 0)); fresh(T); K.ch_rmb = 1.0; K.cd["rmb"] = 0.0; step(m, 1.0); fresh(T)
-	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_res() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
+	ok("bulwark: the source kit has no Guard meter and no Shield Slam; the Bash is on 6 s", not K.has_meter() and not K.d["rmb"].has("slam") and float(K.rmb_def()["cooldown"]) == 6.0)
 	# hold to block, let go: the aegis just comes down (the foe at its face got only the aegis's 2 m push, no Bash)
 	x0 = T.pos.x
 	hold(m, P, 0.5)

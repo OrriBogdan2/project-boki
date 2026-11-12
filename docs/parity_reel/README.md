@@ -116,8 +116,6 @@ storm field over the arena, where the footage zooms out to a dark ring with a go
 [bulwark.mp4](bulwark.mp4)
 
 Still differs:
-- The Guard meter and Shield Slam are ours and still on main (KIT_PARITY gap 15); `ext/parity-bulwark-guardcut`
-  b2e942eb4 removes them and is not merged.
 - LMB hold walks at 55% while charging, with a 1.5 to 1.8 m step and a 4 m perfect-release launch (owner items 30,
   49, 59); the source stands still [F].
 - Aegis: a 160 HP shield with Shield Charge on Shift; the source's is regenerating shield energy and the routing is

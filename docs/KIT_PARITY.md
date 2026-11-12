@@ -197,7 +197,7 @@ Left alone and why, for the owner: Kael lunge (owner), Vex needle width (owner i
 | E | Zone around hammer, burst, Wisps, 8 s @IV [D] | r 3.5, delay 1, 4 s, burst, cd 12/8 | match |
 | R | Fissure stun, AoE, heavy Slow, 50 s [D] | 4 cells, stun .5, cd 40 | match; 0.8x cd |
 | Dash | Spin Dash 8 s, knock [D] | Whirl 3.5 m/.17 s (F), off the dash feel, cd 8 | match |
-| Passive | Wall knock Stuns [D] | Built; **Guard meter, Shield Slam invented** | differ (gap 15); owner question open |
+| Passive | Wall knock Stuns [D] | Crushed stun built; the invented Guard meter and Shield Slam are **cut** (gap 15, owner 2026-11-07) | match |
 | Anim | Footage poses | 17 moves, all on `breaker.glb` (48) | match on coverage |
 
 ## Ryzz (`mage`, source Joule)
@@ -243,7 +243,7 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 | Grimble | Anchor stun 1.1 s (+0.1 s a rank, +0.2 s rank 3); the hook's foe is stunned the whole reel (0.2 s refreshed), Grimble Grounded while reeling, the foe Grounded 1 s after | Anchor stun 1.2 to 1.4 s [F]; +0.1 s and +0.2 s steps [D]; reeled foe stunned, caster Grounded [F] | match. Dredge gap 3 ("about a third", it was 0.45 s) is **closed**: 1.1 s is 80 to 90% of the read, inside footage error |
 | Claire | Ice Spear zone slow 35% and hit slow 35% 0.6 to 0.8 s; Rimelock stun 0.75 s with a slow that builds 15% +12%/s to 55%; Rink Wall touch slow 30% 1 s; splinter slow 30% 1.2 s | Spear "slow zone", Ice Crash "slowing zone, stuns after a delay", slow stacks up to 3.5 s [D,F]; stun not legible, dummy encased about 0.5 s | match in shape; numbers unsourced |
 | Ostra | Snap stun 0.8 to 1.8 s by flight; Nightwell stun and pull 3.5 s; full orb slow 10% 1.5 s | 0.8 to 1.8 s; 3.5 s; "slow 6% for 1.5 s" [F, card] | Snap and Nightwell match. **Open:** orb slow 10% (wiki, `docs/heroes/ostra.md`) against 6% on the card read; not changed, wiki outranks footage |
-| Albert | Crush (any knock into a wall): stun **1.0 s** (was 0.5), 8 damage; Shield Slam stun 0.6 s; full Crushing Blow stun 0.4 s | "Knocked into a wall, Stuns"; STUNNED label up about 1 s or more [F] | **fixed**: 0.5 to 1.0 s. Shield Slam and the blow's stun are ours (no source row) |
+| Albert | Crush (any knock into a wall): stun **1.0 s** (was 0.5), 8 damage; full Crushing Blow stun 0.4 s | "Knocked into a wall, Stuns"; STUNNED label up about 1 s or more [F] | **fixed**: 0.5 to 1.0 s. the blow's stun is ours (no source row); the Shield Slam is cut |
 | Ryzz | Storm Rod wall stun 0.8 s; Skycall Grounded 1.5 s | Stun on a wall or second target [D]; Grounded 1.5 s or more [F] | match |
 | Sable | Bola: first foe Grounded 1.5 s and slowed 30% (owner item 53); a pair stun 0.9 s; Shadow Knife slow 50% 2.5 s | Grounded, rings about 1.5 bh [F]; pair "Stunned", the label showed about 1.8 s [F]; knife "Slows" | match for Ground and slow; pair stun 0.9 vs 1.8 is noted in `docs/heroes/thief.md` as an owner pacing call, kept |
 
@@ -252,7 +252,7 @@ Read from `content/archetypes/*.json` and the kit code. Source = the card text i
 **Suggestions, not built (PARITY FIRST):**
 - Zedran: drop the fireblast slow (`lmb.wave_slow`), the Chain Lunge stun and the Haul Slam stun (`rmb.haul.stun`): the source has no CC on them. Removing the Haul stun changes a documented move, so it needs the owner.
 - Tarek: drop `rock.slow_*` and `dash.slow_t` (the source rocks shred armour, they do not slow).
-- Albert: the Shield Slam stun 0.6 s and the Crushing Blow stun 0.4 s have no source row.
+- Albert: the Crushing Blow stun 0.4 s has no source row.
 - Ostra: decide 10% (wiki) or 6% (card read) for the full orb slow. Sable: pair stun 0.9 or about 1.8 s.
 
 ## Felt dash per kit (gap 4)
@@ -296,7 +296,7 @@ Slice Wardens and LMB rank first (PRIORITIES step 2). Effort: S under a day, M a
 | 12 | Bjorn's cadence .48 vs .45; hold walks | Set .45; check hold | bulwark.json | S |
 | 13 | Grimble's air dash lacks its own 12.5 s slot | Add slot | dredge_kit.gd, dredge.json | M |
 | 14 | Tarek's allies can't hop his rocks | Add jump hop | dolm_kit.gd | M, owner |
-| 15 | Bjorn's Guard meter and Shield Slam are invented | Remove, or owner keeps | bulwark_kit.gd, bulwark.json | M, owner |
+| 15 | Done: Bjorn's Guard meter and Shield Slam are cut (owner, DECISIONS 2026-11-07); Shift behind the shield is the source's Shield Charge bash, Crushed wall stun kept | none | asserted in --archer-bulwark-combo-check, --kit-parity-check | done |
 | 16 | Claire's darts fly straight while skating | Owner answer, then home | rimewright_kit.gd | S, owner |
 | 17 | Ostra's bomb peaks 3x vs 3.5x | Set 3.5 | ostra.json | S |
 | 18 | Glide: steered accel, no -32.5 m/s dive | Add dive | hunter.gd | M |
