@@ -53,10 +53,13 @@ func knock(e: Ent, kb: Vector2, lift := -1.0) -> void:
 	else:
 		_send(["kb", e.nid, m._r(kb.x), m._r(kb.y), m._r(lift)])
 
-## Spiked down: it falls at least `vy` (a negative speed) fast.
-func spike(e: Ent, vy: float) -> void:
+## Spiked down: it falls at least `vy` (a negative speed) fast; a glider slammed hard enough is spiked
+## out of the air (GlideSpike.slam, on the game that owns the body) and `by` gets the credit here.
+func spike(e: Ent, vy: float, by: Ent) -> void:
+	if GlideSpike.spikes(e, vy):
+		GlideSpike.credit(by)
 	if not e.remote:
-		e.vel.y = minf(e.vel.y, vy)
+		GlideSpike.slam(e, vy)
 	else:
 		_send(["vy", e.nid, m._r(vy)])
 
@@ -81,6 +84,7 @@ func tow(e: Ent, by: Ent, p: Dictionary) -> Dictionary:
 	var rec := {"e": e, "by": by, "p": p, "left": float(p["dur"]), "t": 0.0, "v": Vector2.ZERO, "gone": 0.0,
 		"mirror": e.remote, "hauled": 0}
 	tows.append(rec)
+	if by: DashReset.note(e, by)      # being hauled is crowd control: it counts toward an assist
 	if e.remote:
 		_send(["tow", e.nid, by.nid if by else "", p])
 	elif p.get("unroll", false) and e is Hunter:
@@ -308,7 +312,7 @@ func net_in(x: Array) -> void:
 	match kind:
 		"tp": if x.size() >= 6: body.teleport(Vector3(x[3], x[4], x[5]))
 		"kb": if x.size() >= 6: body.impulse(Vector2(x[3], x[4]), float(x[5]))
-		"vy": if x.size() >= 4: body.vel.y = minf(body.vel.y, float(x[3]))
+		"vy": if x.size() >= 4: GlideSpike.slam(body, float(x[3]))
 		"yank": if x.size() >= 8: m.verbs.yank(body, Vector3(x[3], x[4], x[5]), float(x[6]), float(x[7]))
 		"stop":
 			var rs := towing(body)

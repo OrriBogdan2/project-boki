@@ -26,14 +26,20 @@ static func reset() -> void:
 static func active() -> bool:
 	return not types.is_empty() or status != "" or zone != ""
 
-## A species' one or two types.
+## An entry's types: one or two per form, every form of a branch pair counted.
 static func types_of(spk: String) -> Array:
-	var sp: Dictionary = Data.KIN.get(spk, {})
-	return [String(sp.get("type", "")), String(sp.get("type2", ""))].filter(func(t): return t != "")
+	var out: Array = []
+	for f in FieldBook.forms_of(spk):
+		var sp: Dictionary = Data.KIN.get(f, {})
+		for t in [String(sp.get("type", "")), String(sp.get("type2", ""))]:
+			if t != "" and not out.has(t):
+				out.append(t)
+	return out
 
-## Species you have right now, in the party, the garden or the Burrow.
+## An entry you have right now (any form), in the party, the garden or the Burrow.
 static func owned(spk: String) -> bool:
-	return (Save.d.get("roster", []) as Array).any(func(r): return String(r.get("species", "")) == spk)
+	var forms := FieldBook.forms_of(spk)
+	return (Save.d.get("roster", []) as Array).any(func(r): return forms.has(String(r.get("species", ""))))
 
 static func matches(spk: String) -> bool:
 	var mine := types_of(spk)
@@ -42,8 +48,8 @@ static func matches(spk: String) -> bool:
 	if zone != "" and not mine.any(func(t): return (zones().get(zone, {}).get("types", []) as Array).has(t)):
 		return false
 	match status:
-		"seen": return DexView.seen(spk) or DexView.caught(spk)
-		"caught": return DexView.caught(spk)
+		"seen": return FieldBook.entry_seen(spk)
+		"caught": return FieldBook.entry_caught(spk)
 		"owned": return owned(spk)
 	return true
 
