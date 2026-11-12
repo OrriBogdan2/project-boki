@@ -40,7 +40,7 @@ func _good_card(key: String, payload: Dictionary, sub: String, right: Control, w
 	card.tooltip_text = Goods.desc_of(key, payload)
 	var hr := UI.hbox(10)
 	card.add_child(hr)
-	var b := UI.badge(Goods.icon_of(key, payload), Goods.col_of(key, payload), 32.0, UI.R_CTRL)
+	var b := UI.badge(Goods.icon_of(key, payload), Goods.col_of(key, payload), 32.0)
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	hr.add_child(b)
 	var nv := UI.vbox(0)

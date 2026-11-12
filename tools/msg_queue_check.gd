@@ -4,7 +4,7 @@ extends RefCounted
 ##   2. a repeat merges into the line on show or waiting ("Ember  x3") instead of a second card
 ##   3. a waiting important line goes before a waiting small one; a small one that waits too long goes
 ##   4. while held (the tutorial banner) nothing new shows; it comes in when the hold lifts
-##   5. rows the host's own cards take (the ally alerts) leave fewer for messages, at least one
+##   5. in a fight fewer lines show (FIGHT_SHOWN) and none lives past FIGHT_LIFE unless it asked to
 ##   6. the match HUD's toast, toast_small, tip and level_up and the farm's UI.toast all use a lane
 ##   7. a world label under a card fades back
 ## Never touches the save.
@@ -28,7 +28,7 @@ func run(main_node: Node) -> void:
 	_merge(host)
 	_priority(host)
 	_hold(host)
-	_reserved(host)
+	_fight(host)
 	await _wiring()
 	_yield()
 	host.queue_free()
@@ -39,7 +39,7 @@ func _fresh(host: Control) -> MsgLane:
 	var lane := MsgLane.of(host)
 	lane.clear()
 	lane.hold = false
-	lane.reserved = 0
+	lane.fight = false
 	return lane
 
 # ------------------------------------------------------------------ 1. five at once
@@ -110,16 +110,21 @@ func _hold(host: Control) -> void:
 	lane.hold = false
 	ok(str(lane.texts()) == str(["check 1"]), "the hold lifts: it shows at once")
 
-# ------------------------------------------------------------------ 5. rows the host takes
-func _reserved(host: Control) -> void:
+# ------------------------------------------------------------------ 5. in a fight
+func _fight(host: Control) -> void:
 	var lane := _fresh(host)
-	lane.reserved = 2
+	lane.fight = true
 	for t in ["a", "b", "c"]:
-		lane.push(t, Color.WHITE)
-	ok(lane.texts().size() == 1, "two alert cards up: one message row left (%d)" % lane.texts().size())
-	lane.reserved = 5
-	lane.push("d", Color.WHITE)
-	ok(lane.texts().size() >= 1, "never fewer than one row")
+		lane.push(t, Color.WHITE, MsgLane.HIGH)
+	lane.push("hint", Color.WHITE, MsgLane.NORMAL, 6.0)
+	ok(lane.texts().size() == MsgLane.FIGHT_SHOWN,
+		"a fight: %d lines at most (%d)" % [MsgLane.FIGHT_SHOWN, lane.texts().size()])
+	lane._process(MsgLane.FIGHT_LIFE + 0.05)
+	ok(not lane.texts().has("a") and not lane.texts().has("b"), "a fight: lines go after %.1fs" % MsgLane.FIGHT_LIFE)
+	lane._process(MsgLane.FIGHT_LIFE + 0.05)
+	ok(lane.texts().has("hint"), "a fight: a hint keeps its own life (%s)" % str(lane.texts()))
+	lane.clear()
+	lane.fight = false
 
 # ------------------------------------------------------------------ 6. one lane everywhere
 func _wiring() -> void:
