@@ -347,11 +347,12 @@ func _place_glint(pv: Node3D) -> void:
 	KitShaders.param(glint, "white", 0.7 if hot else 0.25)
 
 # ------------------------------------------------------------------ the 360 Smash ring
-## The 360 Smash's spin ring: a red-gold band out to the spin's hit radius `r`, sweeping out to it with the hit.
+## The 360 Smash's spin ring: a red-gold band whose outer edge is the spin's hit radius `r` for all its life.
 func smash_ring(at: Vector3, r: float) -> void:
 	swirl.visible = true
 	swirl.global_position = at + Vector3(0, 0.3, 0)
 	swirl_r = r
+	swirl.scale = Vector3.ONE * r
 	swirl_t = SWIRL_T
 
 ## The dash's after-image: a gold chevron wake at his chest, pointing the way he faces (pooled, one every
@@ -430,7 +431,7 @@ func push_hint(w: Dictionary, n: Vector2, push: float, flash: bool) -> void:
 	var hot := clampf(push_flash / PUSH_FLASH_T, 0.0, 1.0)
 	AimKit.lane(h, "aegis_push", {
 		"from": Vector3(mid.x + n.x * 0.5, h.pos.y, mid.y + n.y * 0.5), "dir": n, "len": push,
-		"width": float(w["len"]) * 0.7, "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
+		"width": float(w["len"]), "chevrons": 2, "fill": fmod(t * 1.5, 1.0), "col": GOLD, "col2": AEGIS,
 		"alpha": 1.1 + 0.4 * (0.5 + 0.5 * sin(t * 7.0)) + hot, "hot": 0.3 + hot, "lw": 0.1, "all": true})
 
 # ------------------------------------------------------------------ Purify
@@ -511,7 +512,6 @@ func _tick_slam(delta: float) -> void:
 		var life := clampf(swirl_t / SWIRL_T, 0.0, 1.0)
 		swirl.rotation.y += delta * 12.0
 		KitShaders.param(swirl, "life", minf(1.0, life * 1.6))
-		swirl.scale = Vector3.ONE * swirl_r * lerpf(1.0, 0.8, life)
 		swirl.visible = swirl_t > 0.0
 
 ## The beacon stands along the camera's up so it reads as a vertical ray on screen wherever it is, and

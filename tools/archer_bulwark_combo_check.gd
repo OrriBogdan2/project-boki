@@ -892,6 +892,7 @@ func _bulwark_combos() -> void:
 	P.inp["fire"] = false
 	m.step(DT)
 	m.step(DT)
+	var cres_r := _last_sweep(HeroVfx.of(m))
 	var gcd := P.glide_cd
 	step(m, 0.32)
 	ok(
@@ -908,6 +909,8 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("swing", 0)) == 1
 		and is_equal_approx(sweep_arc.call("swing"), float(K.lmb_def()["smash_arc"])),
 		"plays %s arc %s" % [hv.plays.get("swing"), sweep_arc.call("swing")])
+	ok("bjorn telegraph: the crescent is drawn out to the blow's reach (the hit's radius)",
+		absf(cres_r - float(K.lmb_def()["smash_reach"])) < 0.01, "drawn %.2f" % cres_r)
 	ok(
 		"bjorn small: wind-down after the slam, no glider straight away (momentum kept)",
 		gcd >= 0.25,
@@ -930,8 +933,9 @@ func _bulwark_combos() -> void:
 		"mid %.0f spins %d took %.0f" % [mid, K.spins - sp0, dmg(T)]
 	)
 	var spin_r := float(K.dash_def().get("spin_r", 2.2))
-	ok("combo bjorn: the spin ring is drawn out to the hit radius",
-		absf(K.fx.swirl_r - spin_r) < 0.01, "%.2f" % K.fx.swirl_r)
+	ok("combo bjorn: the spin ring's outer edge is the hit radius all its life (no swell)",
+		absf(K.fx.swirl_r - spin_r) < 0.01 and absf(K.fx.swirl.scale.x - spin_r) < 0.01,
+		"%.2f scale %.2f" % [K.fx.swirl_r, K.fx.swirl.scale.x])
 	# the aegis: his own curved slab over the wall while raised
 	reset.call()
 	P.inp["sec_hold"] = true
@@ -1120,10 +1124,17 @@ func _bulwark_combos() -> void:
 	P.ak.press_rmb()
 	step(m, 0.3, func(): P.inp["sec_hold"] = true; K.res = maxf(K.res, 80.0))
 	guard_before = K.res
+	Sfx.listener = P.pos          # the camera on him: HeroVfx culls looks far from it, the fan would not be drawn
 	P.do_dash()
-	step(m, 0.5, func(): P.inp["sec_hold"] = true)
+	var fan := [-1.0]
+	var see_fan := func():
+		if fan[0] < 0.0 and int(hv.plays.get("slam", 0)) > 0:
+			fan[0] = _last_sweep(hv)
+	step(m, 0.5, func():
+		P.inp["sec_hold"] = true
+		see_fan.call())
 	P.inp["sec_hold"] = false
-	step(m, 0.2)
+	step(m, 0.2, see_fan)
 	ok(
 		"combo bulwark: Guard 50 + Shift behind the shield = Shield Slam, Guard spent",
 		K.shield_slams == slams_before + 1 and K.res <= guard_before - 49.0,
@@ -1133,6 +1144,8 @@ func _bulwark_combos() -> void:
 		int(hv.plays.get("charge_go", 0)) >= 1 and int(hv.plays.get("slam", 0)) == 1
 		and is_equal_approx(sweep_arc.call("slam"), float(K.rmb_def()["slam"]["angle"])),
 		"plays %s/%s" % [hv.plays.get("charge_go"), hv.plays.get("slam")])
+	ok("bulwark telegraph: the Shield Slam's fan is drawn out to the cone's radius",
+		absf(float(fan[0]) - float(K.rmb_def()["slam"]["radius"])) < 0.01, "drawn %.2f" % float(fan[0]))
 	# a part-charged blow into the wall Crushes too (any knock)
 	step(m, 1.0)
 	reset.call()
@@ -1354,3 +1367,11 @@ func _bulwark_combos() -> void:
 	step(m, 0.3)
 	ok("merge hold: bulwark's raised shield comes down with the merge (hit points kept)", K.wall.is_empty() and not K.rmb_down and K.shield_hp >= hp0 - 1.0 and not m.verbs.walls.any(func(w): return w.get("by") == P), "wall %s rmb_down %s hp %.0f -> %.0f" % [not K.wall.is_empty(), K.rmb_down, hp0, K.shield_hp])
 	await done(m)
+
+## The outer radius of the newest HeroVfx sweep (its arc mesh is 1 m out at scale 1), -1 if none is drawn.
+func _last_sweep(hv: HeroVfx) -> float:
+	var sweeps: Array = hv.pools.get("sweep", [])
+	for i in range(hv.live.size() - 1, -1, -1):
+		if hv.live[i]["node"] in sweeps:
+			return absf((hv.live[i]["s0"] as Vector3).y)
+	return -1.0

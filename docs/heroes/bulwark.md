@@ -204,6 +204,20 @@ Rank paths that do not fit our system: the data's four tiers fold into our three
 ## Scaling
 Heavy class (193 HP): throw 12 and recall 12; Crushing Blow 36-66 (3x and 5.5x the throw, the source's 3x and 5.6x); 360 Smash 24 (2x the throw); Slam 18; Crushed 8 + stun 0.5; Mending Ground 2 per 0.5 s for 4 s + a burst of 18; Faultline 4 strike + 18 eruption (40 s cooldown, about 3.6x the 360 Smash as in the source). Numbers follow the source's ratios, not its values.
 
+## Telegraphs (drawn = hit, ported from telegraph-audit-c onto the 0.24.5 tells)
+
+Rule (DECISIONS, movement rules): a ring, disc or burst on the ground means gameplay; its outer edge is the hit's size.
+Asserted in `--bulwark-combo-check` (`tools/archer_bulwark_combo_check.gd`; the chevron in `tools/pin_bjorn_owner_check.gd`).
+
+| Ability | Drawn | Hit (data) | Seen by | Now |
+|---|---|---|---|---|
+| Crushing Blow (LMB held) | HeroVfx `swing` sweep, 180 degrees, out to `lmb.smash_reach` 2.8 m | `_strike` fan, 2.8 m, `smash_arc` 180 | all | already true on 0.24.5; radius now asserted (the arc was) |
+| 360 Smash (Shift, Whirl) | the swirl band, outer edge `dash.spin_r` 2.2 m | 360 degree strike, 2.2 m | all | swept out from 1.76 m (0.8 x) to 2.2 m over its 0.45 s life, so it was drawn short of the hit as the hit landed; now 2.2 m all its life |
+| Shield (RMB held) | the double chevron, `shield.push` 2.0 m long and `shield.len` 4.2 m wide | foes touching the 4.2 m wall are shoved | all | the chevron was 0.7 x the wall (2.94 m); now the wall's width |
+| Shield Slam (Guard 50 + Shift) | HeroVfx `slam` fan, `rmb.slam.angle` 100 degrees, out to `slam.radius` 2.6 m | cone 2.6 m, 100 degrees | all | already true; radius now asserted (the arc was) |
+| Mending Ground (E) | circle at `e.radius` 2.3 m | 2.3 m zone | all | already true |
+| Faultline (X) | lane `x.width` 4.5 m | the cells' width | all | already true |
+
 ## Cross-ability interactions (combos)
 | Combination | Result | Check |
 |---|---|---|
