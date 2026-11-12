@@ -33,7 +33,7 @@ static func fresh(m: Match, o: Ent) -> bool:
 	return o is Hunter and ((o as Hunter).dropping or m.time - float(o.get_meta("landed_t", -99.0)) < float(m.opts.get("fresh_t", FRESH_T)))
 
 ## Goals a bot holds its ground for: it never bases away to a teammate from these.
-const STAY_GOALS := ["yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
+const STAY_GOALS := ["rv_wait", "yard", "lift", "lair_dial", "lair_fight", "lair_camp", "lair_lever", "box", "beacon"]
 const URGENT_GOALS := ["revive", "boki", "box", "beacon", "hum", "yard", "lift", "lair_fight", "lair_escape", "lair_lever", "lair_updraft"]
 
 ## Far, calm bots are stepped at 20 Hz by SimLod (think and sim together), not here.
@@ -260,7 +260,7 @@ func think(m: Match, h: Hunter, dt: float) -> void:
 			if h.flat_dist(goal) < 1.2 and a["goal_kind"] in ["chest", "catch", "revive", "box", "uplink", "lair_dial", "lair_lever"]:
 				inp["interact"] = not h.get_meta("box_broke", false)      # a broken box revive: let go, hold again
 				move = Vector2.ZERO
-			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["beacon", "yard", "lair_camp"]:
+			elif h.flat_dist(goal) < 1.0 and a["goal_kind"] in ["rv_wait", "beacon", "yard", "lair_camp"]:
 				move = Vector2.ZERO
 		BotKin.upkeep(h)
 		# far from the squad with nothing to fight: now and then, base to a teammate
@@ -726,8 +726,13 @@ func _choose(m: Match, h: Hunter) -> void:
 	var time_left := Rolling.bot_time_left(m, h)     # (a rolling session: this squad's own planned stay)
 	var goal := Vector3.INF; var gk := ""
 	for o in m.hunters:
-		if o != h and o.team == h.team and o.downed and not o.out and BotRescue.revive_ok(m, h, o):
-			goal = o.pos; gk = "revive"; break
+		if o != h and o.team == h.team and o.downed and not o.out:
+			if BotRescue.revive_ok(m, h, o):
+				goal = o.pos; gk = "revive"; break
+			goal = BotRescue.wait_spot(m, h, o)      # in an enemy area: wait at its rim, not off on a loot run
+			if goal != Vector3.INF:
+				gk = "rv_wait"
+				break
 	if goal == Vector3.INF:
 		goal = BotKin.rescue_goal(h)       # a downed Boki: run into it
 		if goal != Vector3.INF: gk = "boki"

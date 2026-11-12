@@ -2,11 +2,11 @@ extends RefCounted
 ## --bot-downed-check: bots play downed teammates like a fair player (scripts/match/bot_rescue.gd). Scripted
 ## 1v2 setups on open ground (a bot and a downed squadmate against two rivals):
 ##   1. calm: a rival far off, the bot revives the squadmate
-##   2. an enemy Well on the wisp: the bot stays outside it; once it is gone the bot revives
+##   2. an enemy Well on the wisp: the bot waits outside its rim; once it is gone the bot revives
 ##   3. under fire and low: the bot gives up the revive; healthy, it takes the shooter on first
 ##   4. a Meeko bot with a rival closing in carries the wisp away, then sets it down when calm and revives
 ##   5. a rival's wisp in sight: the bot finishes it
-##   6. grabbing loose Boki wisps after a down: not built yet (DECISIONS 11-09 stealing has no code), reported as SKIP
+##   6. grabbing loose Boki wisps after a down: KinSteal is on the held soul-link line, reported as SKIP until it lands
 ## Prints BOTDOWNED ok/FAIL.
 
 var bad := 0
@@ -67,7 +67,7 @@ func _fresh(home: Vector3, arch := "") -> void:
 		if h != mate and h != bot and h != foes[0] and h != foes[1]:
 			_put(h, _far(home))
 	if arch != "":
-		bot.set_arch(arch)
+		bot.reclass(Arch.weight(arch), arch)
 		bot.unlock_all()
 	for f in foes:
 		f.max_hp = 1e6
@@ -110,7 +110,7 @@ func run(mn: Node) -> void:
 	_under_fire(home)
 	_carry(home)
 	_finish_rival(home)
-	print("BOTDOWNED SKIP wisp steal: no Boki wisps in the source yet (DECISIONS 11-09), so no bot rule to check")
+	print("BOTDOWNED SKIP wisp steal: KinSteal (DECISIONS 11-09) is on the held soul-link line, its rows come with it")
 	_finish()
 
 func _calm(home: Vector3) -> void:
@@ -134,6 +134,7 @@ func _aoe(home: Vector3) -> void:
 	for z in m.zones.duplicate():
 		(z["node"] as Node).queue_free()
 		m.zones.erase(z)
+	ok(bot.flat_dist(home) < 12.0, "...and waits at its rim, not off on a loot run (%.1fm)" % bot.flat_dist(home))
 	t = _run(14.0, func(): return not mate.downed)
 	ok(not mate.downed, "enemy Well gone: the bot revives (%.1fs)" % t)
 

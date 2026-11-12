@@ -1,7 +1,7 @@
 class_name BotRescue
 extends RefCounted
 ## How bots play downed teammates the way a fair player does (Bot._revive_plan and Bot.think call in):
-## no revive inside an enemy area, give up when under fire and low, and a Meeko bot (TenderKit) that
+## no revive inside an enemy area (wait at its rim), give up when under fire and low, and a Meeko bot (TenderKit) that
 ## has shouldered a wisp walks it away from the fight and sets it down once it is calm.
 
 const AOE_MARGIN := 1.0       # m: stay this far outside an enemy area's rim
@@ -20,6 +20,25 @@ static func in_hostile_aoe(m: Match, h: Hunter, at: Vector3) -> bool:
 			if int(f["team"]) != h.team and _flat(at, f["at"]) < float(f["r"]) + AOE_MARGIN:
 				return true
 	return false
+
+## Where to wait for a downed squadmate `o` lying in an enemy area: just outside it on our side (INF when the
+## area is not why we can't go, or the squadmate is beyond RV_WAIT_R).
+const RV_WAIT_R := 30.0       # m: a squadmate further than this is not worth holding for
+const RV_WAIT_OUT := 1.5      # m: past the first spot outside the area (clear of its rim)
+static func wait_spot(m: Match, h: Hunter, o: Hunter) -> Vector3:
+	if CareUtil.is_carried(o) or float(h.ai.get("rv_off", -1.0)) > m.time or h.flat_dist(o) > RV_WAIT_R \
+			or not in_hostile_aoe(m, h, o.pos):
+		return Vector3.INF
+	var dir := o.dir_to(h)
+	if dir == Vector2.ZERO:
+		dir = Vector2.RIGHT
+	var step := Vector3(dir.x, 0.0, dir.y)
+	for i in 40:
+		var p := o.pos + step * (0.5 * i)
+		if not in_hostile_aoe(m, h, p):
+			p += step * RV_WAIT_OUT
+			return Vector3(p.x, m.world.ground_at(p.x, p.z), p.z)
+	return Vector3.INF
 
 ## The foe whose fire just hit this bot, or null.
 static func shooter(m: Match, h: Hunter) -> Hunter:
