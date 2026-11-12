@@ -25,7 +25,7 @@ const ARCHES := {
 	"dolm": {"cls": "medium"},
 	"ostra": {"cls": "medium"},
 }
-const ARCH_ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "ashwick", "tender", "dolm", "dredge", "rimewright", "mage", "thief", "ostra", "gil"]
+const ARCH_ORDER := ["archer", "juggernaut", "gunslinger", "bulwark", "rimewright", "ashwick", "dolm", "mage", "dredge", "tender", "thief", "ostra", "gil"]
 const ARCH_DEFAULT := {"light": "thief", "medium": "gunslinger", "heavy": "juggernaut"}
 
 ## Which archetype a hunter wears: asked for by name, else from the look, else the class default.
