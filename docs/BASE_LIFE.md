@@ -52,7 +52,8 @@ check: `--base-life-check`.
   are already `rec["lineage"]["parents"]`; old babies have no gifts: read with `.get`, no migration). A young (not
   yet Grown) Boki adds `parent_weight` to its liking for a parent when it picks whom to greet and whom to nap beside
   (`BaseLife.regard`), so a parent it fell out with still loses. The first time goes in its journal (kind "parent").
-  The hatch card (home.gd `_name_baby`, base_mode only) lists the gifts in words; `egg_hatch.gd` stays quiet.
+  The hatch card (home.gd `_name_baby`, every mode) shows both parents' portraits and marks each gift (kind and colour, lean, best inherited
+  stat, favourite food and play, mutations) with a dot for the parent it came from (`scripts/ui/hatch_parents.gd`); `egg_hatch.gd` stays quiet.
   Check: `--baby-parents-check`.
 - Family tab (GARDEN_MODERN 5 rank 8): the Boki card's Family tab (`scripts/ui/family_view.gd`) shows parents and
   grandparents (portrait, name, type), the mentor's gift (`rec["gift"]`) and the nest items used
