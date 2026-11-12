@@ -1,24 +1,37 @@
-# Pip / Meeko (tender; was Moosh Moosh / Burple): import note, ART-1 rebuild (2026-11-05, items 76b + 108), v2 model (2026-11-08)
+# Pip / Meeko (tender): import note, v95 swap of Meeko appeal3, body b (2026-11-10)
 
-`pip.glb`: head and body are Meshy scans fitted to the rig in Blender; arms, hands, eye domes and wings are scripted; the sun and raincloud companions are built by tools/art1/pip_companions.py. 14,811 triangles with the companions (S1's budget: 15k, weapon included).
-Materials: skin-fur, cloth-body, leather-body (the body's own 2048 colour, normal, emission), skin-face (the head's own 2048 colour, normal, emission), skin-hand, card-wing, cloth-sun, skin-cloud, ice-drop (flat colours), eyes-mood_sun / eyes-mood_cloud (the 2048x1024 face atlas, 4x2 cells).
+`pip.glb`: the owner's pick (11-10), Meeko v95 r2 appeal3 `cand_b.glb` (the appeal3 face; body widened 7% at the torso and
+hips), swapped onto Pip's own skeleton, 45 clips and anchors by `tools/art1/v95_swap.py` (docs/art/wardens/V95_SWAP.md) with
+`art/wardens/src/pip_v95.json`, then the sun and raincloud put back by `tools/art1/pip_companions.py`. Raw files in
+~/meshy/v95/Meeko/r2/appeal3 (never in git); the spec reads `meeko_v95_b_body.glb`: `cand_b.glb`'s body (`Mesh_0`) and its
+two back wings (`model_part0`, `model_part5`), without the master's own sun and cloud (the game's are pip_companions.py's).
 
-    # credits: 36 (image edits) + 40 (body) + 40 (head); requests and outputs in ~/meshy/meeko_v2
     B=~/tools/blender-4.5.15-linux-x64/blender
-    $B -b --factory-startup --python tools/art1/pip_head_scan.py -- ~/meshy/meeko_v2/head/glb.glb WORK 6000   # head: fit, decimate, bake
-    $B -b --factory-startup --python tools/art1/pip_source.py -- ~/meshy/meeko_v2/runA/glb.glb WORK 6200      # body: fit, arms and head cut, tail swung up, bake
-    tools/art1/pip_build.sh WORK            # pip_art1.py (assembly, atlas), pip_clips.py (posekit.py), pip_companions.py, copies, imports
+    $B -b --factory-startup --python tools/art1/v95_swap.py -- art/wardens/src/pip_v95.json WORK WORK/pip_swap.glb
+    $B -b --factory-startup --python tools/art1/pip_companions.py -- WORK/pip_swap.glb art/wardens/pip/pip.glb art/wardens/pip/pip_faces.png
 
-- **Meeko v2 (2026-11-08):** the owner's locked redesign (briefs/art-refs/pip_v2/meeko_v2_turnaround): capelet with a heart brooch, wicker satchel and a pouch on a strap, deeper magenta legs and hands, taller ears with the bandage, goggles with flowers, bigger eyes, constellations on the face and arms. Only the two scans changed; the rig, clips (45), sun and raincloud, FX points, scripted arms, hands, lids, wings and the lantern's hidden bones are as before. The capelet is body cloth; its back hem rides spring_capeback_0..3 (the old leaf mantle's chain, shorter); the apron bone stays in the rig with no weights. 116 credits (docs/art/wardens/PIPELINE.md "Meeko v2"). Her height with the ears is 0.76x a medium hunter (was 0.66; the body is 0.60 as before), warden_model_check's height_3d.
-- **Refs:** briefs/art-refs/pip_head.png (head scan, eye size), pip_turnaround.png edited with the wings out (body scan), pip_FINAL_sheet.png, pip_props.png. Portrait and splash stay on the portraits lane.
-- **Owner notes 11:40:** eyes are the scan's paint at pip_head.png's size (about 13% of the head's width). Scan beat the scripted head and body (both kept in git history, eff09bcc); scripted arms and hands stay because the rig hangs them where the A-pose scan cannot.
-- **Proportions (tender.json body):** legs 0.98, torso 1.02, shoulder 1.12, neck -0.036: rig fitted to the scan. size 0.68 and hit_r 0.34 (item 108) unchanged. Clips key the hands through posekit's `dz`.
+14,293 triangles: the body 13k (head 4.4k) on one 2048 atlas (Godot extracts it to `pip_atlas.jpg`), the companions 1.3k on
+flat colours and the 2048x1024 face atlas (`pip_faces.png`, unchanged). Materials: skin-atlas, skin-face-atlas (the head box:
+warden_look's `skin-face` look), cloth-atlas (the wings, the capelet), leather-atlas (satchel, strap, pouch), brass-atlas
+(the goggles), then cloth-sun, skin-cloud, ice-drop, eyes-mood_sun, eyes-mood_cloud.
+Weights: bone heat from the spec's joints; the tail rides `tail` whole, each wing `wing.R`/`wing.L` (their keyed flutter),
+the satchel and pouch `hips`, the head box `head`, the ear tips `ear.R`/`ear.L`. The arms stretch to the rig's arm length.
+
+Lost from the v2 build (scans plus scripted arms, hands, lids and wings: replaced, not merged): the lids (blinks no longer
+show; `lid` bones move nothing), the emission layers (the constellations are paint now; PipStars.pulse finds no emission
+and stays still), the normal maps, and the alpha-card wings (the master's wings are solid: the opaque cloth slot, since the
+card shader draws no depth and the baked atlas has no alpha). `jaw`, `apron`, `skirt`, the spring_tail, spring_capeback and
+spring_wing chains and `fingers.L`/`thumb.L` carry no weight. The old textures (body/face colour, normal, emission, wing
+atlas) are gone with it. `pip_fit.json`, `pip_bake.json`, `pip_recipe.json` belong to older pipelines.
+
+Stretch: skin_relax ran with `CUTS` 0 (relax only, no cut-and-cap holes, like the other v95 swaps), so
+`--stretch-check --wardens=tender` flags every clip over 1.3x (worst 6.2x in flare, idle 2.7x, run_f 4.9x; mostly
+hips>hips at the belly and thighs, then head and upper_arm.R). The shots show no tear or clip at idle and run.
+
+Rig unchanged (tender.json body: legs 0.98, torso 1.02, shoulder 1.12, neck -0.036; size 0.68, hit_r 0.34).
 - **Companions (pip_v2/meeko_v2_companions_sheet):** the sun floats at her left shoulder (skinned to pauldron.L) and the raincloud at her right (pauldron.R), both rigid and thick (the sun 0.62 as deep as wide, the cloud 0.46), replacing the hand-held star lantern. The lantern's faces are gone from the body mesh; its spring_hanglantern bones stay (the shared armature). The FX points weapon_muzzle, anchor_hang_lantern and anchor_lantern_top (names kept) ride the sun on pauldron.L; `"skinned_weapon": true`, `blade` on anchor_lantern_top and weapon_muzzle with bone pauldron.L.
+- **Orbit (runtime):** in the game the companions do not ride the pauldrons. At load scripts/heroes/warden_companions.gd cuts their surfaces (cloth-sun, skin-cloud, ice-drop, the two eyes-mood) out of the body mesh into one unskinned MeshInstance3D each, and every frame floats them round her on a mostly horizontal ellipse, 180 degrees apart, with a small Y bob at its own frequency and a slow ease behind her when she moves; the sun's FX points follow it. All numbers: content/rules/warden_anim/pip.json "companions". Checked by `--meeko-orbit-check`; frames by `--meeko-orbit-shots`. No re-bake: a rebuilt GLB with the same material names works unchanged.
   `pip_companions.py` edits the old glb in place (the clips, rig and body untouched; 30 fps, each clip's last key kept): `blender -b --factory-startup --python tools/art1/pip_companions.py -- <old pip.glb> art/wardens/pip/pip.glb <faces.png>`.
 - **Expressions:** 8 faces drawn into one atlas, a decal patch on each companion's front: the sun happy / laugh / grumpy / sleep, the cloud shy / happy / sleep / cry. The game swaps cells (shaders/warden_mood_atlas.gdshader, WardenMood `faces`), driven by warden_anim/pip.json "mood": calm (sun happy, cloud shy), happy on emotes and Meeko's own moves, grumpy / cry on a hit, asleep when downed, a blink to the sleep cell.
   FX points are empties: weapon_muzzle, anchor_hang_lantern, anchor_lantern_top, anchor_palm_L, anchor_flower, anchor_tail_tip, anchor_chest, anchor_head_top.
-- **Rig extras (warden_anim/pip.json):** lid (a skin dome slid out through the painted eye to shut it), ear, jaw, fingers.L, thumb.L, foot, wing (keyed flutter), apron; springs spring_tail, spring_capeback, spring_wingR/L.
-- **Wings:** alpha cards in a plane leaned to face up and back, so the 65 degree match camera never sees them edge-on; a little narrower from a low front camera than the sheet.
-- **Constellations:** gold marks in the emission layers (the head's masked from its paint, the body's drawn by pip_paint.py). `emit` in warden_look is the resting glow; PipStars.pulse lifts it on every heal tick from TenderKit.
 - **Imports:** pip.glb.import `remove_immutable_tracks=false`, `generate_lods=true`, `force_disable_compression=true`; textures VRAM compressed high quality, mipmapped, at most 2048. Normal maps through hero_toon `use_nrm` (from ext/art1-hem).
-- `pip_fit.json`, `pip_bake.json`, `pip_recipe.json` belong to the old pipeline and no longer build this model.
