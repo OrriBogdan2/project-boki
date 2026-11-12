@@ -9,9 +9,10 @@ extends RefCounted
 ## waits on WISP_DESIGN_OPEN.md.
 ## Online: the kin snapshot carries the flag (KinNet), so other games show the wisp too.
 
-const SHOULDER_Y := 1.45      # m above the hunter's feet when their rig has no shoulder bone
-const ORBIT_R := 0.6          # m from the hunter's middle
-const ORBIT_HZ := 0.35        # laps per second: quick enough to read as alive, slow enough to read as a shape
+const SHOULDER_Y := 1.45  # m above the hunter's feet when their rig has no shoulder bone
+const ORBIT_R := 0.6  # m from the hunter's middle
+const ORBIT_HZ := 0.35  # laps per second: quick enough to read as alive, slow enough to read as a shape
+
 
 ## Do this match's own Boki ride as wisps? The match opts win (a bench or check sets them), then the
 ## setting. Never in the tutorial: it teaches the walking Boki's orders.
@@ -21,21 +22,24 @@ static func mode(m: Node) -> bool:
 		return false
 	return bool((o as Dictionary).get("boki_wisps", Settings.get_v("boki_wisps")))
 
+
 ## Its model: the wisp look while a wisp, else the walking Boki.
 static func look(k: Kin) -> Node3D:
 	return BokiWispLook.build(k.species, k.rec) if k.wisp else Models.kin(k.species, k.rec)
+
 
 ## Turn it into a wisp or back (a snapshot, or a wisp left behind), swapping the model once.
 static func set_wisp(k: Kin, on: bool) -> void:
 	if k.wisp == on:
 		return
 	k.wisp = on
-	k.remove_meta("xr")        # (the walking model's x-ray shell is set up again on the new model)
+	k.remove_meta("xr")  # (the walking model's x-ray shell is set up again on the new model)
 	if k.model:
-		k.remove_child(k.model)       # (out of the tree now, so the new model keeps its name; set_model frees it)
+		k.remove_child(k.model)  # (out of the tree now, so the new model keeps its name; set_model frees it)
 	k.set_model(look(k))
 	if k.summon:
 		k.summon.popped(on)
+
 
 ## The step of a wisp's body. True when it handled it (the caller skips the walking state machine and the AI).
 static func ride(k: Kin, dt: float) -> bool:
@@ -44,7 +48,7 @@ static func ride(k: Kin, dt: float) -> bool:
 	if KinSteal.ride(k, dt):
 		return true
 	if k.owner_h == null or KinLoss.guarding(k) or k.state == "dazed":
-		set_wisp(k, false)          # left behind: the walking Boki's rules from here
+		set_wisp(k, false)  # left behind: the walking Boki's rules from here
 		return false
 	if k.state in ["away", "bench", "fused"]:
 		return false
@@ -55,6 +59,7 @@ static func ride(k: Kin, dt: float) -> bool:
 	k.pos = k.owner_h.pos + Vector3(0, 1.5, 0)
 	k.prev = k.pos
 	return true
+
 
 ## Its look on screen: orbiting its hunter at shoulder height, facing along the orbit, hopping. True when it drew.
 static func render(k: Kin) -> bool:
