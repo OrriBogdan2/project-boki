@@ -698,16 +698,17 @@ func parity_lmb() -> void:
 		P.fire_cd = 0.0
 		A.step(m, hold_t, func(): P.inp["fire"] = true)
 		var arc: Dictionary = AimKit.entry(P, "lmb")
+		var disc := AimKit.shown(P, "wave")         # the old 1.35 m charge disc on his body
 		var n0 := m.shots.size()
 		P.inp["fire"] = false
 		m.step(A.DT)
 		var sd: Dictionary = m.shots[-1] if m.shots.size() > n0 else {}
 		var speed := (sd.get("vel", Vector2.ZERO) as Vector2).length()
-		rows.append({"arc": arc, "speed": speed, "r": float(sd.get("r", 0.0)), "len": float(sd.get("life0", 0.0)) * speed})
+		rows.append({"arc": arc, "disc": disc, "speed": speed, "r": float(sd.get("r", 0.0)), "len": float(sd.get("life0", 0.0)) * speed})
 	var part: Dictionary = rows[0]["arc"]
 	var full: Dictionary = rows[1]["arc"]
-	A.ok("jug parity lmb hold: an arc round him, centred on the aim, as wide and as far out as the blade cuts",
-			full.get("kind") == "arc_wall" and is_equal_approx(float(full["deg"]), float(ld["arc"]))
+	A.ok("jug parity lmb hold: one arc round him, centred on the aim, as wide and as far out as the blade cuts",
+			full.get("kind") == "arc_wall" and not rows[0]["disc"] and not rows[1]["disc"] and is_equal_approx(float(full["deg"]), float(ld["arc"]))
 					and is_equal_approx(float(full["radius"]), float(ld["reach"]))
 					and (full["center"] as Vector2).distance_to(Vector2(P.pos.x, P.pos.z)) < 0.2
 					and (full["dir"] as Vector2).dot(P.aim_dir()) > 0.99,
