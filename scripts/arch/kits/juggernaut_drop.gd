@@ -176,8 +176,7 @@ func _hit(at: Vector3) -> void:
 		var extra := float(dd["dmg"]) * k.smash_k() * float(dd["core_k"]) * k.power("sec") if core else 1.0
 		var tag := "meteor_core" if core else "meteor_down"
 		f.hurt(extra, k.h, {"src": "abil", "ab": "utility", "tags": ["utility", tag],
-				"stun": float(dd["stun"] if core else dd["down"]), "dr": true})
-		k.m.fx.word(f.pos + Vector3(0, 2.3, 0), "CRUSHED" if core else "SLAMMED", k.res_col(), false)}))
+				"stun": float(dd["stun"] if core else dd["down"]), "dr": true})}))
 
 ## True when a body of radius `r` at `p` touches the stun core of a slam whose hit is centred at `at`.
 func stunned_at(p: Vector3, r: float, at: Vector3) -> bool:
