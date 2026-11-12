@@ -184,7 +184,7 @@ func draw(sz: Vector2) -> void:
 				if st != "":
 					hud._ctext(pv + Vector2(0, 17.0 * ek), st, 10, Exits.color_of(x) if m.exits.live(x) else MUTED, hud.big)
 	hud.mm_circ = saved
-	_spawns(c, team, kk)
+	_spawns(c, kk)
 	SpawnMarks.draw(hud, m, to_screen, func(p, r): return rect.grow(-r).has_point(p))
 	ReviveHud.full_map(self)
 	if m.biomes:
@@ -198,7 +198,7 @@ func draw(sz: Vector2) -> void:
 	_enemies(c, team)
 	_bounties(c, team)
 	_squad(c, team)
-	_legend(c, sz, team)
+	_legend(c, sz)
 	_side(c, sz)
 	_cursor(c)
 
@@ -311,7 +311,7 @@ func _name(txt: String, at: Vector2, size: int, col: Color, taken: Array, force 
 	hud._ctext(at, txt, size, col, hud.big)
 	return true
 
-func _spawns(c: Control, team: int, kk: float) -> void:
+func _spawns(c: Control, kk: float) -> void:
 	_hover = {}
 	var sp: SpawnPlan = m.spawn_plan
 	if sp == null:
@@ -323,17 +323,17 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		if not rect.grow(-6.0).has_point(pv):
 			continue
 		var def: Dictionary = sp.cats.get(cnd["cat"], {})
-		var st := sp.state_for(cnd, team)
+		var st := sp.state_for(cnd)
 		var col: Color = def.get("col", Color.WHITE)
 		marker(c, String(def.get("shape", "star")), pv, s, col, st)
 		if pv.distance_to(mp) < s + 4.0:
 			_hover = cnd
 	if not _hover.is_empty():
 		var def: Dictionary = sp.cats.get(_hover["cat"], {})
-		var st := sp.state_for(_hover, team)
+		var st := sp.state_for(_hover)
 		var line := String(def.get("name", "?"))
 		if String(_hover["name"]) != "": line += "  ·  " + String(_hover["name"])
-		var what: String = {"unknown": "Might be here: scout it to find out", "active": "Here this match", "empty": "Nothing here this match", "taken": "Already taken"}[st]
+		var what: String = {"active": "Here this match", "empty": "Nothing here this match", "taken": "Already taken"}[st]
 		var pv := to_screen(_hover["pos"])
 		var wv := maxf(hud.big.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x, hud.body.get_string_size(what, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) + 20.0
 		var r := Rect2(pv + Vector2(14, -42), Vector2(wv, 44))
@@ -342,13 +342,11 @@ func _spawns(c: Control, team: int, kk: float) -> void:
 		hud._text(r.position + Vector2(10, 19), line, 14, def.get("col", Color.WHITE), hud.big)
 		hud._text(r.position + Vector2(10, 36), what, 12, INK)
 
-## A spawn marker in one of its states: "unknown" (faint, with a ?), "active", "empty" (a cross),
-## "taken" (a tick). Shared with the legend.
+## A spawn marker in one of its states: "active", "empty" (a cross), "taken" (a tick). Shared with the legend.
 func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: String) -> void:
 	var a := 1.0
 	var ic := col
 	match st:
-		"unknown": a = 0.5; ic = Color(col, 0.55)
 		"empty": a = 0.4; ic = Color(0.6, 0.62, 0.68, 0.5)
 		"taken": a = 0.55; ic = Color(0.7, 0.72, 0.78, 0.7)
 	if st == "active":
@@ -358,8 +356,6 @@ func marker(c: Control, shape: String, pv: Vector2, s: float, col: Color, st: St
 	c.draw_arc(pv, s * 1.35, 0, TAU, 24, Color(ic, 0.9 if st == "active" else 0.45), 1.5, true)
 	icon(c, shape, pv, s * 0.78, ic)
 	match st:
-		"unknown":
-			hud._ctext(pv + Vector2(s * 1.15, -s * 0.55), "?", int(s * 1.5), Color(1, 1, 1, 0.85), hud.big)
 		"empty":
 			c.draw_line(pv + Vector2(-s, -s), pv + Vector2(s, s), Color(BAD, 0.75), 2.0)
 			c.draw_line(pv + Vector2(-s, s), pv + Vector2(s, -s), Color(BAD, 0.75), 2.0)
@@ -566,7 +562,7 @@ func _cursor(c: Control) -> void:
 		hud._text(mp + Vector2(14, 22), "%dm" % dist, 12, Color(INK, 0.8), hud.big)
 
 ## The legend, right of the map: every spawn category on this map and how much your squad knows.
-func _legend(c: Control, sz: Vector2, team: int) -> void:
+func _legend(c: Control, sz: Vector2) -> void:
 	var x0 := rect.end.x + 22.0
 	var wv := minf(SIDE_W, sz.x - x0 - 14.0)
 	if wv < 150.0:
@@ -574,7 +570,7 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 	var sp: SpawnPlan = m.spawn_plan
 	var cats: Array = sp.shown_cats() if sp else []
 	var rows := cats.size()
-	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 138))
+	var r := Rect2(Vector2(x0, rect.position.y), Vector2(wv, 66 + rows * 46 + 116))
 	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.88), 12)
 	hud._text(r.position + Vector2(14, 26), "THIS MATCH", 16, GOLD, hud.big)
 	hud._text(r.position + Vector2(14, 44), "Same map, same spawns, same timers", 11, MUTED)
@@ -583,22 +579,19 @@ func _legend(c: Control, sz: Vector2, team: int) -> void:
 		var def: Dictionary = sp.cats[cat]
 		var col: Color = def.get("col", Color.WHITE)
 		var all: Array = sp.of(cat)
-		var live := 0; var found := 0; var gone := 0
+		var live := 0; var gone := 0
 		for cnd in all:
 			if cnd["active"]: live += 1
-			var st := sp.state_for(cnd, team)
-			if st == "active": found += 1
-			elif st == "taken": gone += 1
-		var announce: bool = def.get("announce", false)
-		marker(c, String(def.get("shape", "star")), Vector2(r.position.x + 26, y), 8.0, col, "active" if announce or found > 0 else "unknown")
+			if sp.state_for(cnd) == "taken": gone += 1
+		marker(c, String(def.get("shape", "star")), Vector2(r.position.x + 26, y), 8.0, col, "active")
 		hud._text(Vector2(r.position.x + 48, y - 2), String(def.get("name", cat)), 15, col, hud.big)
-		var line := ("%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]) if announce else ("%d possible spots  ·  %d found" % [all.size(), found + gone])
+		var line := "%d here this match%s" % [live, ("  ·  %d taken" % gone) if gone > 0 else ""]
 		hud._text(Vector2(r.position.x + 48, y + 15), line, 11, INK)
 		y += 46.0
 	# what the marks mean
 	y += 4.0
 	c.draw_line(Vector2(r.position.x + 14, y - 14), Vector2(r.end.x - 14, y - 14), Color(1, 1, 1, 0.08), 1.0)
-	var keyrows := [["unknown", "Could be there: scout it"], ["active", "Here this match"], ["empty", "Empty this match"], ["taken", "Taken"]]
+	var keyrows := [["active", "Here this match"], ["empty", "Empty this match"], ["taken", "Taken"]]
 	for kr in keyrows:
 		marker(c, "star", Vector2(r.position.x + 26, y), 6.0, Color("d8d4ff"), String(kr[0]))
 		hud._text(Vector2(r.position.x + 48, y + 4), String(kr[1]), 12, INK)

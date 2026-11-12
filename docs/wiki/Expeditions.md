@@ -21,7 +21,6 @@ want to land (bots ping too). Then the skyship crosses the map.
   **P** passes the lead to a squadmate (or click a name on the map); **X** separates you to drop alone.
 - After jumping you glide down; a ring on the ground shows where you'd land. Anyone still aboard at
   the far side is dropped.
-- Flying low over a rolled spawn spot on the way down scouts it for your squad (see below).
 
 ## Moving around
 
@@ -76,11 +75,12 @@ heartbeat and a warning near the end. There's room to recover:
 
 ## What's on the map
 
-The layout of a map never changes. What's live is rolled each match:
+The layout of a map never changes, and neither do its spawns (docs/design/CLARITY_PASS.md):
 
-- **Big events** (vaults with a hoard, live boss lairs) are shown on the full map (M) from the start.
-- **Everything else** (rare Boki, item caches) shows as a faint "?" at every possible spot until your
-  squad gets eyes on it (or flies low over it on the drop). Then you see the real thing or an empty cross.
+- **The full map (M)** shows every spot from the start, as it is: live (vault hoards, the awake boss
+  lair, rare Boki, item caches), an empty cross, or a tick once taken. The same spots are live every match.
+- **Camps** always hold the same monsters. **Skitter nests** claw out a pack on a fixed timer; for the
+  last 6 seconds a ring marks the nest on the ground and a counting ring shows on the minimap and full map.
 - **Events:** a meteor shower about a quarter of the way in (the stars leave gems), the Warden waking
   in the middle, and halfway through a Glimmerkin that runs: bring it down before it gets away.
 - **Loot:** crates, pots and red barrels break when you shoot or dash through them (barrels explode).

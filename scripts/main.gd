@@ -3395,16 +3395,9 @@ func _drop_check() -> void:
 			if Vector2(k.home.x - cnd["pos"].x, k.home.z - cnd["pos"].z).length() < 3.0: at_dead += 1
 	print("DCHECK rare kin: %d spawned for %d live points (%d strays, %d at points not rolled)" % [rare.size(), live.size(), stray, at_dead])
 	if rare.size() != live.size() or stray > 0 or at_dead > 0: ok = false; print("DCHECK FAIL rare kin spawns")
-	# scouting: walk the player to an unrolled candidate and its state turns from "?" to empty
-	var hidden: Array = sp.cands.filter(func(cc): return not sp.cats[cc["cat"]].get("announce", false) and not cc["active"])
-	if not hidden.is_empty():
-		var hc: Dictionary = hidden[0]
-		var before := sp.state_for(hc, P.team)
-		if P.out or P.downed: Life.bring_back(m, P, hc["pos"], 1.0, false)      # (walking off an island is allowed now: the player may have gone over the edge during the checks above; same bring-back as the ground half)
-		P.teleport(hc["pos"] + Vector3(1.5, 0, 0))
-		for i in 30: m.step(Match.DT)
-		print("DCHECK scouting %s: %s -> %s" % [hc["id"], before, sp.state_for(hc, P.team)])
-		if before != "unknown" or sp.state_for(hc, P.team) != "empty": ok = false; print("DCHECK FAIL scouting")
+	# no scouting: an unrolled spot reads "empty" from the start, for everyone
+	var unrolled: Array = sp.cands.filter(func(cc): return not cc["active"])
+	if not unrolled.is_empty() and sp.state_for(unrolled[0]) != "empty": ok = false; print("DCHECK FAIL an unrolled spot isn't shown empty")
 	m.over = true
 	print("DCHECK ", "PASS" if ok else "FAIL")
 	get_tree().quit()

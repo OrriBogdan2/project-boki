@@ -707,11 +707,9 @@ func _draw_minimap(sz: Vector2) -> void:
 	HeartHud.minimap(self, inner, to_map, on_map)
 	WaysOutMap.minimap(self, inner, to_map, on_map)
 	if m.spawn_plan and full_map and m.player:
-		# this match's spawns your squad knows are there (vaults from the start; the rest once scouted)
+		# this match's live spawns (while you hold the map key: MapDetail)
 		for cnd in m.spawn_plan.cands:
-			if m.spawn_plan.state_for(cnd, m.player.team) != "active":
-				continue
-			if not MapDetail.shows("cache", hold, (cnd["known"] as Dictionary).has(m.player.team)):
+			if m.spawn_plan.state_for(cnd) != "active" or not MapDetail.shows("cache", hold):
 				continue
 			var cpv: Vector2 = to_map.call(cnd["pos"])
 			if on_map.call(cpv, 5.0):

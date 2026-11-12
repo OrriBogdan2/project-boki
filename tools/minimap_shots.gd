@@ -52,11 +52,6 @@ func _setup() -> void:
 	var fade = main.get("fade")
 	if fade != null:
 		await fade.reveal(0.01)
-	var n_k := 0
-	for cnd in m.spawn_plan.cands:
-		if cnd["cat"] in ["rare_kin", "cache"] and n_k < 6 and (n_k % 2 == 0 or cnd["active"]):
-			cnd["known"][P.team] = true
-			n_k += 1
 	var mate: Hunter = m.hunters.filter(func(h): return h.team == P.team and h != P)[0]
 	var rival: Hunter = m.hunters.filter(func(h): return h.team != P.team)[0]
 	mate.teleport(m.world.free_spot_near(P.pos + Vector3(12, 0, -6), [], 1.0, 0.5, 12.0))

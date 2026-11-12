@@ -3766,12 +3766,8 @@ func step(dt: float) -> void:
 		player.inp["glide"] = true
 		player.inp["move"] = Vector2(player.vel.x, player.vel.z).normalized()
 	if String(opts.get("map_demo", "")) == "mid" and player and hud and time > 0.6 and not has_meta("map_demo_done"):
-		# test: the map mid-match, with a few spawns scouted (found, empty and taken) and squad pings
+		# test: the map mid-match, with a vault taken and squad pings
 		set_meta("map_demo_done", true)
-		var n_k := 0
-		for cnd in (spawn_plan.cands if spawn_plan else []):
-			if cnd["cat"] in ["rare_kin", "cache"] and n_k < 6 and (n_k % 2 == 0 or cnd["active"]):
-				cnd["known"][player.team] = true; n_k += 1
 		for cnd in (spawn_plan.active_of("vault").slice(0, 1) if spawn_plan else []):
 			if cnd["ref"] is Dictionary: cnd["ref"]["open"] = true
 		for x in hunters:
@@ -4769,10 +4765,11 @@ func _update_events() -> void:
 	if opts.get("tutorial", false) or opts.get("training", false):
 		return
 	_update_meteors()
-	if not glimmer_done and time > at_sess(0.5) and (not net_on or is_host):
+	if spawn_table: spawn_table.lead_ins()
+	if not glimmer_done and time > at_sess(SpawnTable.GLIMMER_AT) and (not net_on or is_host):
 		glimmer_done = true
 		_spawn_glimmer()
-	if warden_done or time < at_sess(0.4) or world.heart_spot == Vector3.INF:
+	if warden_done or time < at_sess(SpawnTable.WARDEN_AT) or world.heart_spot == Vector3.INF:
 		return
 	warden_done = true
 	if not net_on or is_host:
@@ -4862,13 +4859,12 @@ func _announce(text: String, col: Color) -> void:
 	if hud and player and not player.out:
 		hud.toast(text, col)
 
-## A treasure kin appears on a random outer island and runs. Bring it down for a pile of gems
-## and a good weapon before it slips away.
+## A treasure kin appears at its spot on the map (SpawnTable.glimmer_spot) and runs. Bring it down for a
+## pile of gems and a good weapon before it slips away.
 func _spawn_glimmer() -> void:
-	if world.islands.size() < 2:
+	var at := spawn_table.glimmer_spot()
+	if at == Vector3.INF:
 		return
-	var ii := rng.randi_range(1, world.islands.size() - 1)
-	var at := world.random_ground(ii)
 	spawn_mob("glimmer", at)
 	ping(at, Color("ffd25a"))
 	_announce("A Glimmerkin appeared %s. Catch it before it escapes" % (direction_word(player.pos, at) if player else ""), Color("ffd25a"))

@@ -5,14 +5,9 @@ extends RefCounted
 ## a hoard, where the item caches lie, which boss lair is awake. The full map (M) shows every
 ## candidate of every category, so you can plan a drop around them.
 ##
-## What the map tells you (the SUPERVIVE way of doing it):
-##  - Big events ("announce" categories: vaults, boss lairs) are shown live from the start: the whole
-##    lobby knows where the hoards are, so they're worth fighting over and worth dropping on.
-##  - Everything else (rare kin, item caches) shows as a faint "?" at every possible spot. What's
-##    really there is revealed for your squad once one of you gets eyes on it (line of sight, or flying
-##    low over it on the drop): either the live marker, or a dim cross for an empty spot.
-##  - Whatever is taken (a vault opened, a rare kin caught or killed) shows as spent for everyone who
-##    knows the spot.
+## What the map tells you (the SUPERVIVE way of doing it): every spot of every category from the
+## start, as it really is (live, empty or taken), for everyone. The spots never move, so there is
+## nothing to scout: you plan your drop on what you see.
 ##
 ## Categories are a registry (CATS, plus register() for systems that bring their own): each has a
 ## name, an icon shape, a colour, how many candidates go live, and an optional spawner callback.
@@ -23,17 +18,15 @@ extends RefCounted
 ## taken_fn(cand) whether it's done, if one was registered with set_spawner).
 
 const CATS := {
-	"boss": {"name": "Boss lair", "shape": "skull", "col": Color("ff5a4a"), "announce": true, "pick": [1, 1], "order": 0},
-	"vault": {"name": "Vault", "shape": "vault", "col": Color("f2c84a"), "announce": true, "pick": [2, 2], "order": 1},
-	"rare_kin": {"name": "Rare Boki", "shape": "paw", "col": Color("ff9be8"), "announce": false, "pick": [3, 3], "order": 2},
-	"cache": {"name": "Item cache", "shape": "crate", "col": Color("8fd8ff"), "announce": false, "pick": [4, 4], "order": 3},
+	"boss": {"name": "Boss lair", "shape": "skull", "col": Color("ff5a4a"), "pick": [1, 1], "order": 0},
+	"vault": {"name": "Vault", "shape": "vault", "col": Color("f2c84a"), "pick": [2, 2], "order": 1},
+	"rare_kin": {"name": "Rare Boki", "shape": "paw", "col": Color("ff9be8"), "pick": [3, 3], "order": 2},
+	"cache": {"name": "Item cache", "shape": "crate", "col": Color("8fd8ff"), "pick": [4, 4], "order": 3},
 }
-const REVEAL_R := 9.0          # flat distance at which a hunter on the ground just knows what's there
-const DROP_REVEAL_R := 14.0    # ... and from the glider on the way down
 
 var m: Match
 var cats := {}                 # id -> def (CATS plus anything registered)
-var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, taken, known: {team: true}}
+var cands: Array = []          # {id, cat, i, pos: Vector3, name, active, ref, taken}
 var spawners := {}             # cat id -> Callable(plan, cand) -> handle
 var takers := {}               # cat id -> Callable(cand) -> bool (is it spent?)
 var rolled := false
@@ -44,9 +37,9 @@ func _init(match_node: Match) -> void:
 	for k in CATS:
 		cats[k] = (CATS[k] as Dictionary).duplicate()
 
-## A new category of spawn (or new settings for one): {name, shape, col, announce, pick: [min, max]}.
+## A new category of spawn (or new settings for one): {name, shape, col, pick: [min, max]}.
 func register(id: String, def: Dictionary) -> void:
-	var d: Dictionary = cats.get(id, {"name": id.capitalize(), "shape": "star", "col": Color.WHITE, "announce": false, "pick": [1, 1], "order": 9})
+	var d: Dictionary = cats.get(id, {"name": id.capitalize(), "shape": "star", "col": Color.WHITE, "pick": [1, 1], "order": 9})
 	d.merge(def, true)
 	cats[id] = d
 
@@ -56,7 +49,7 @@ func set_spawner(id: String, spawn_fn: Callable, taken_fn := Callable()) -> void
 		takers[id] = taken_fn
 
 func add_candidate(cat: String, pos: Vector3, name := "") -> Dictionary:
-	var c := {"id": "%s:%d" % [cat, cands.size()], "cat": cat, "i": count_of(cat), "pos": pos, "name": name, "active": false, "ref": null, "taken": false, "known": {}}
+	var c := {"id": "%s:%d" % [cat, cands.size()], "cat": cat, "i": count_of(cat), "pos": pos, "name": name, "active": false, "ref": null, "taken": false}
 	cands.append(c)
 	return c
 
@@ -218,7 +211,7 @@ func _spawn_rare(p: Vector3, idx: int, r: RandomNumberGenerator) -> Kin:
 	k.set_meta("rare", true)
 	return k
 
-# ------------------------------------------------------------------ what each squad knows
+# ------------------------------------------------------------------ what is spent
 func tick(dt: float) -> void:
 	_t -= dt
 	if _t > 0.0:
@@ -227,38 +220,6 @@ func tick(dt: float) -> void:
 	for c in cands:
 		if not c["taken"] and c["active"]:
 			c["taken"] = _is_taken(c)
-	var teams := {}                  # team -> its hunters on the ground (one pass, not one per spot)
-	for h in m.hunters:
-		if h.out or h.extracted or h.riding:
-			continue
-		if not teams.has(h.team): teams[h.team] = []
-		teams[h.team].append(h)
-	for c in cands:
-		var known: Dictionary = c["known"]
-		for t in teams:
-			if known.has(t):
-				continue
-			if _team_sees(int(t), teams[t], c["pos"]):
-				known[t] = true
-				if m.player and int(t) == m.player.team and m.hud and c["active"] and not c["taken"]:
-					var def: Dictionary = cats.get(c["cat"], {})
-					if not def.get("announce", false):
-						m.hud.toast_small("%s spotted%s" % [String(def.get("name", "Something")), (" at " + String(c["name"])) if String(c["name"]) != "" else ""], def.get("col", Color.WHITE))
-
-## Past this flat distance from every member a squad can't see a spot (Match.sees: view range, the
-## sneak bonus and generous sight gear), so the line-of-sight test is skipped. 40 solos on the 2x map
-## made spots x squads x hunters the biggest step spike.
-const SIGHT_BOUND_K := 1.25 * 1.5    # sneak range bonus x headroom for sight gear
-func _team_sees(team: int, members: Array, p: Vector3) -> bool:
-	var dmin := INF
-	for h: Hunter in members:
-		var d := Vector2(p.x - h.pos.x, p.z - h.pos.z).length()
-		if d < (DROP_REVEAL_R if h.dropping else REVEAL_R):
-			return true
-		dmin = minf(dmin, d)
-	if dmin > (Match.VIEW_RANGE + 2.0) * maxf(m.sight_k, 1.0) * SIGHT_BOUND_K:
-		return false
-	return m.sees(team, p + Vector3(0, 0.4, 0))
 
 func _is_taken(c: Dictionary) -> bool:
 	var fn: Callable = takers.get(String(c["cat"]), Callable())
@@ -276,12 +237,8 @@ func _is_taken(c: Dictionary) -> bool:
 		return true
 	return false
 
-## How a candidate looks to a squad: "unknown" (a faint ?), "active", "empty" or "taken".
-func state_for(c: Dictionary, team: int) -> String:
-	var def: Dictionary = cats.get(c["cat"], {})
-	var knows: bool = def.get("announce", false) or (c["known"] as Dictionary).has(team) or team < -1
-	if not knows:
-		return "unknown"
+## How a candidate looks on the maps: "active", "empty" or "taken" (the same for everyone).
+func state_for(c: Dictionary) -> String:
 	if not c["active"]:
 		return "empty"
 	return "taken" if c["taken"] else "active"
