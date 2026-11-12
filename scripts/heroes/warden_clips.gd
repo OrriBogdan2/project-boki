@@ -72,6 +72,7 @@ var move_w := 0.0            # how much the rings show over the idle (0..1 of wa
 var move_v := 0.0            # its rate (1/s)
 var run_w := 0.0             # how much the run ring shows over the walk ring
 var run_v := 0.0
+var run_goal := 0.0          # the run weight's goal (data "run_ramp" eases it, else it steps)
 var dir_pos := Vector2.ZERO  # the rings' blend position: the move off the facing (x his right, y forward)
 var dir_v := Vector2.ZERO
 var still_t := 0.0
@@ -586,7 +587,11 @@ func _loco(s: Dictionary, dt: float) -> void:
 	var w := _spring(move_w, move_v, minf(spd / walk, 1.0) if moving else 0.0, dt)
 	move_w = w[0]
 	move_v = w[1]
-	var r := _spring(run_w, run_v, 1.0 if on_run else 0.0, dt)
+	# (data "loco.run_ramp", 1/s: a step goal kicks the spring, and a ring pair far apart in pose pops hand and foot)
+	var ramp := float(lc.get("run_ramp", 0.0))
+	var goal := 1.0 if on_run else 0.0
+	run_goal = move_toward(run_goal, goal, ramp * dt) if ramp > 0.0 else goal
+	var r := _spring(run_w, run_v, run_goal, dt)
 	run_w = r[0]
 	run_v = r[1]
 	if move_w > 0.001:

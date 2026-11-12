@@ -21,11 +21,3 @@ bulwark strafe bl
 bulwark strafe fl
 bulwark aim_walk br
 bulwark aim_walk bl
-dredge run f
-dredge run r
-dredge run fl
-dredge sprint fr
-dredge sprint b
-dredge strafe fr
-mage run bl
-mage run l

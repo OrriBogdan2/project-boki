@@ -34,16 +34,16 @@ today's audit.
 | Cinder (ashwick) | 2 → 0 | 7 → 0 | 6 → 0 | 4 → 0 | 1 → 0 | 6 → 0 | 2 → 0 | 28 → 0 |
 | Albert (bulwark) | 2 → 1 | 8 → 2 | 1 → 2 | 7 → 7 | 3 → 5 | 2 → 3 | 2 → 2 | 25 → 22 |
 | Tenzo (dolm) | 0 → 0 | 6 → 0 | 5 → 0 | 7 → 0 | 1 → 0 | 5 → 0 | 0 → 0 | 24 → 0 |
-| Grimble (dredge) | 5 → 0 | 5 → 3 | 5 → 2 | 3 → 0 | 0 → 0 | 5 → 1 | 5 → 0 | 28 → 6 |
+| Grimble (dredge) | 5 → 0 | 5 → 0 | 5 → 0 | 3 → 0 | 0 → 0 | 5 → 0 | 5 → 0 | 28 → 0 |
 | Vex (gunslinger) | 4 → 0 | 6 → 0 | 5 → 0 | 4 → 0 | 0 → 0 | 5 → 0 | 3 → 0 | 27 → 0 |
 | Kael (juggernaut) | 1 → 0 | 6 → 0 | 5 → 0 | 3 → 0 | 1 → 0 | 4 → 0 | 2 → 0 | 22 → 0 |
-| Sparkle (mage) | 3 → 0 | 7 → 2 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 2 |
+| Sparkle (mage) | 3 → 0 | 7 → 0 | 4 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 22 → 0 |
 | Neve (rimewright) | 2 → 0 | 8 → 0 | 7 → 0 | 3 → 0 | 0 → 0 | 8 → 0 | 3 → 0 | 31 → 0 |
 | Meeko (tender) | 5 → 0 | 7 → 0 | 3 → 0 | 6 → 0 | 0 → 0 | 4 → 0 | 7 → 0 | 32 → 0 |
 | Sable (thief) | 3 → 0 | 4 → 0 | 2 → 0 | 3 → 0 | 0 → 0 | 2 → 0 | 3 → 0 | 17 → 0 |
-| **all 11** | 28 → 1 | 65 → 7 | 47 → 4 | 47 → 7 | 6 → 5 | 47 → 4 | 31 → 2 | **271 → 30** |
+| **all 11** | 28 → 1 | 65 → 2 | 47 → 2 | 47 → 7 | 6 → 5 | 47 → 3 | 31 → 2 | **271 → 22** |
 
-By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 20.
+By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 → 12.
 
 ## What was broken, what changed
 - **Starts and stops popped:** the idle, a walk ring at radius 0.45 and a run ring at 1 sat in one BlendSpace2D, so
@@ -71,10 +71,10 @@ By test, before → after: DIR 24 → 1, SKATE 77 → 0, SLIP 78 → 9, SNAP 92 
   copy gives his front crouch diagonals; his hammer arm is keyed near half a turn off its rest in crouch_b/l/r, and
   Godot 4.6 blends a bone's rotation as a turn off its rest (not off a RESET clip), so every crouch start and stop
   flips it; his run_fl/fr slip. Needs a hand-made sneak and his arm re-keyed or re-rested in the .glb.
-- Grimble run, sprint, strafe (6) and Sparkle run (2): a start or stop peaks 5-85 % over the snap bar while the walk and run
-  rings blend at different points of their strides and a run arm swings hard (Grimble's hook arm: 0.22 m/frame^2 in a
-  steady run). Running both rings on one phase (the run ring's clock at its length over the walk's) took Grimble to 2,
-  but turned Albert's arms with their legs in `--anim-audit` (his walk loop holds two strides): it needs each ring's
-  strides per loop in the data first.
+- Grimble run, sprint, strafe (6) and Sparkle run (2), fixed in ext/anim-loco-dir-grimble-sparkle: the run ring's weight
+  started its spring on a step goal, a kick that moved every point at once while the two rings' poses sat far apart
+  (loco `run_ramp` 8/s eases the goal: jumps 0.43-0.78 -> 0.06-0.33); and Grimble's run forearms swung ~180 deg from his
+  walk's, so the blend of the two flipped the way round it took (hand.L 0.6 m in a frame: tools/art1/arm_cap.py eases
+  the run forearm swing to 82 deg left, 72 deg right).
 - Vex's rebuilt run_f has a shorter stance than the old one, so its kept arm keys swung with the legs; `arm_swing`
   now drives both arms off the legs (0.5 each), as it did her right one.
