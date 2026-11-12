@@ -47,6 +47,7 @@ func run(m: Node) -> void:
 	_cup()
 	await _on_base("meadow")
 	await _on_base("ridge")
+	await _on_zone()
 	print("KITE DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -312,3 +313,39 @@ func _on_base(theme: String) -> void:
 	rules["base_mode"] = false
 	home.queue_free()
 	await main.get_tree().process_frame
+
+## Kitewind Ridge as a zone (ZoneLayout builds it from garden_zones.json): its Training post carries the stand.
+func _on_zone() -> void:
+	Content.rules("farm_build")["base_mode"] = true
+	var d := Save.fresh()
+	d["roster"].append(_kin(10))
+	d["active"] = d["roster"][0]["uid"]
+	d["tutorial"] = {"hatched": true, "intro": true, "home": true}
+	d["zones"]["ridge"] = {"open": true}
+	Save.d = d
+	HomeLayout.ensure(d)
+	Game.goto("home", {"zone": "ridge"})
+	var home = null
+	var t := 0.0
+	while t < 30.0 and home == null:
+		await main.get_tree().process_frame
+		t += main.get_process_delta_time()
+		var cur = Game.main.current
+		if is_instance_valid(cur) and cur.get("hkite") != null and cur.get("root_ui") != null \
+				and not Game.main.fade.covered:
+			home = cur
+	var kt: BaseKite = home.hkite if home != null else null
+	ok(kt != null and is_instance_valid(kt.stand), "ridge zone: the kite stand is up")
+	if kt != null and is_instance_valid(kt.stand):
+		var at := Vector2(kt.stand.position.x, kt.stand.position.z)
+		ok(kt.find(at) == {"kind": "kite"}, "ridge zone: the stand offers a flight")
+		for k in home.kins:
+			k.erase("indoors")
+			k["busy"] = false
+		kt.use()
+		var ft := 0.0
+		while kt.flying() and ft < MAX_S:
+			kt.tick(0.1)
+			ft += 0.1
+		ok(not kt.flying() and is_instance_valid(kt.card), "ridge zone: the lap lands on a result card (%.1f s)" % ft)
+	Content.rules("farm_build")["base_mode"] = false
