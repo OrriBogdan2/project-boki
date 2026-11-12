@@ -3,16 +3,17 @@ extends CareLook
 ## Pooled looks of the support pair's ultimates on X, on top of CareLook's (same pool, burst and keep):
 ##   Pip, Hearth Call: the lantern tether, a braid of warm lantern-gold light with two twisting strands.
 ##   Claire, Rimelock: the rink (a ragged sheet of ice whose cracks glow as it builds, a fringe of
-##   crystals on its edge), the light pillar of the crash and the ice block on each stunned foe. Her
-##   body is IceBody's while sealed.
+##   crystals on its edge), the light pillar and the long ice shards of the crash, and the ice block on
+##   each stunned foe. Her body is IceBody's while sealed.
 ## keep(key, "tether", from, {b, a, col}) (also the Burrseed's vine, tinted), keep(key, "rink", at, {r, crack, a}),
-## burst("pillar", at, {r, dur}), burst("block", at, {ent, dur}).
+## burst("pillar", at, {r, dur}), burst("lances", at, {r, dur}), burst("block", at, {ent, dur}).
 
 const FRINGE := 18            # crystals round the rink's edge
+const LANCES := 34            # long ice shards of the crash
 
 
 func _build(kind: String) -> Node3D:
-	if not kind in ["tether", "rink", "pillar", "block"]:
+	if not kind in ["tether", "rink", "pillar", "lances", "block"]:
 		return super._build(kind)
 	made += 1
 	var n := Node3D.new()
@@ -24,8 +25,10 @@ func _build(kind: String) -> Node3D:
 			_build_rink(n)
 		"pillar":
 			var col := Models.cyl(1.0, 1.0, 1.0, 16)
-			_off(Models.part(n, col, glow_mat(Color("bfeaff", 0.75), 1.0), Vector3(0, 0.5, 0)))
-			_off(Models.part(n, col, glow_mat(Color("dff6ff", 0.9), 1.0), Vector3(0, 0.5, 0), Vector3(0.35, 1, 0.35)))
+			_off(Models.part(n, col, glow_mat(Color("8ae6ff", 0.8), 1.0), Vector3(0, 0.5, 0)))
+			_off(Models.part(n, col, glow_mat(Color("f4ffff", 1.0), 1.0), Vector3(0, 0.5, 0), Vector3(0.4, 1, 0.4)))
+		"lances":
+			_build_lances(n)
 		"block":
 			_off(Models.part(n, Models.box(1.0, 2.0, 1.0), ice_mat(Color("bfeeff"), 0.55, 0.35), Vector3(0, 1.0, 0)))
 			var cap := _off(Models.part(
@@ -67,6 +70,17 @@ func _build_rink(n: Node3D) -> void:
 		c.rotation = Vector3(0.35 * cos(float(i) * 1.9), a, 0.45 * sin(a))
 
 
+## Long thin ice shards thrown out and up from the crash, each at its own angle and length.
+func _build_lances(n: Node3D) -> void:
+	for i in LANCES:
+		var yaw := float(i) * 2.399963                    # golden angle: an even, unpatterned spread
+		var pitch := deg_to_rad(18.0 + 52.0 * absf(sin(float(i) * 1.7)))
+		var mi := _off(Models.part(
+				n, Models.crystal(0.07, 1.0, 4), ice_mat(Color("8ae6ff"), 0.97, 0.3, Color("f4ffff")), Vector3.ZERO))
+		mi.set_meta("dir", Vector3(cos(yaw) * cos(pitch), sin(pitch), sin(yaw) * cos(pitch)))
+		mi.set_meta("ln", 0.55 + 0.45 * absf(sin(float(i) * 3.1)))
+
+
 # ------------------------------------------------------------------ timed one-offs
 func _style(e: Dictionary, k: float) -> void:
 	var n: Node3D = e["n"]
@@ -79,6 +93,21 @@ func _style(e: Dictionary, k: float) -> void:
 			n.scale = Vector3(r * (1.0 - 0.6 * k), 14.0, r * (1.0 - 0.6 * k))
 			n.position.y = (e["at"] as Vector3).y + (1.0 - fall) * 10.0
 			_tint(n, Color.WHITE, 1.0 - smoothstep(0.4, 1.0, k))
+		"lances":
+			# flung out fast and slowing, each shard pointing along its flight, then fading
+			var reach := float(p.get("r", 1.0))
+			var out := 1.0 - pow(1.0 - clampf(k * 1.6, 0.0, 1.0), 3.0)
+			var grow := clampf(k * 8.0, 0.0, 1.0)
+			n.scale = Vector3.ONE
+			for c in n.get_children():
+				var mi := c as MeshInstance3D
+				if mi == null: continue
+				var dv: Vector3 = mi.get_meta("dir")
+				var ln := float(mi.get_meta("ln"))
+				var long := reach * 0.7 * ln * grow
+				mi.position = dv * (reach * 0.6 * ln * out + long * 0.5) + Vector3(0, -3.0 * k * k, 0)
+				mi.basis = Basis(Quaternion(Vector3.UP, dv)).scaled(Vector3(1, long, 1))
+			_tint(n, Color.WHITE, 1.0 - smoothstep(0.5, 1.0, k))
 		"block":
 			n.scale = Vector3.ONE * lerpf(0.5, 1.0, _out_back(clampf(k * 8.0, 0.0, 1.0)))
 			_tint(n, Color.WHITE, 1.0 - smoothstep(0.85, 1.0, k))
@@ -131,7 +160,7 @@ func _place_rink(n: Node3D, p: Dictionary) -> void:
 		_disc(disc.get_parent() as Node3D, Color("7fd8ff"), Color("e8ffff"), float(p.get("a", 1.0)), 4.0, -1.0, 0.0)
 		var sm := disc.material_override as ShaderMaterial
 		sm.set_shader_parameter("crack", crack)
-		sm.set_shader_parameter("fill", 0.7 + 0.5 * crack)
+		sm.set_shader_parameter("fill", 0.3 + 0.4 * crack)
 	var fringe := n.get_node_or_null("Fringe") as Node3D
 	if fringe == null:
 		return

@@ -123,10 +123,10 @@ func _build(kind: String) -> Node3D:
 			# an ice dart: a long ice-blue four-sided crystal with dark teal edges, tip first, and a short
 			# pale frost streak
 			var dart_ice := ice_mat(Color("9af0ff"), 0.95, 0.15, Color("1f8a96"))
-			var c := _off(Models.part(n, Models.crystal(0.11, 0.8, 4), dart_ice, Vector3.ZERO))
+			var c := _off(Models.part(n, Models.crystal(0.1, 1.5, 4), dart_ice, Vector3.ZERO))
 			c.rotation = Vector3(-PI * 0.5, 0, PI * 0.25)
-			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("e8ffff", 0.9)), Vector3(0, 0, -0.34)))
-			_tail(n, 0.16, 1.1, Color("6fd8f0", 0.75))
+			_off(Models.part(n, Models.sphere(0.07, 8), orb_mat(Color("e8ffff", 0.9)), Vector3(0, 0, -0.64)))
+			_tail(n, 0.2, 2.4, Color("6fd8f0", 0.75))
 		"beam":
 			# the skating dart: a thick (0.3 m) straight lance of ice with a cyan core and a long streak
 			var lance_ice := ice_mat(Color("7fe6ff"), 0.95, 0.3, Color("1f8a96"))
