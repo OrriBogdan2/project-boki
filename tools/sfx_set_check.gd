@@ -18,6 +18,9 @@ extends RefCounted
 ##  10. the build and decorate cues (BuildSfx): pick, rotate, place by material, move, store and blocked exist;
 ##      the knock plays once per attempt (not again on the same spot); a pick-up inside a turn or a store is quiet;
 ##      the farm's build mode and the house's decorating play them
+##  11. a Boki's life cues (BokiLifeSfx): eating, dozing off, a Fusion and going down each have a cue; the takes
+##      rotate, never one twice running; one cue per Boki at a time; softer at home than in a match; HomeChimes
+##      voices a Boki dozing off; each event's code (yours and other players' in a match) plays its cue
 ## Reads the files only; never touches the save.
 
 const SURFACES := ["grass", "stone", "wood", "snow"]
@@ -49,6 +52,7 @@ func run(main: Node) -> void:
 	_garden_names()
 	_garden()
 	_build_cues()
+	_boki_life()
 	print("SFXSET DONE, failures: %d" % bad)
 	main.get_tree().quit(1 if bad > 0 else 0)
 
@@ -317,6 +321,104 @@ func _build_cues() -> void:
 			if not src.contains(needle):
 				wired.append("%s %s" % [f, needle])
 	ok(wired.is_empty(), "build cues: farm and house play them all (missing %s)" % [wired])
+
+## 11. Played by hand at the listener, each after Sfx's own repeat gap and stacking window.
+func _boki_life() -> void:
+	var cues := BokiLifeSfx.CUES
+	var missing := cues.keys().filter(func(event: String) -> bool: return not Sfx.ensure(cues[event]))
+	ok(cues.size() == 4 and missing.is_empty(), "boki life: eat, nap, fuse and down have their cues (missing %s)"
+			% [missing])
+	Sfx.rng.seed = 7
+	var repeats := []
+	var rotating := 0
+	for event in cues:
+		var takes: Variant = Sfx.streams.get(cues[event])
+		if not (takes is Array):
+			continue
+		rotating += 1
+		var used := {}
+		var prev: AudioStream = null
+		for i in 6:
+			_life_cue(_boki("take%s%d" % [event, i]), event)
+			var st := _last_voice().stream
+			if st == prev:
+				repeats.append(event)
+			used[st] = true
+			prev = st
+		if used.size() != (takes as Array).size():
+			repeats.append(event + " (a take never played)")
+	ok(rotating == 3 and repeats.is_empty(), "boki life: eat, nap and down rotate their takes (%s)" % [repeats])
+	_boki_life_cap()
+	_life_cue(_boki("home"), "down")
+	var home_db := _last_voice().volume_db
+	var kin := Kin.new()
+	kin.pos = Sfx.listener
+	_life_cue(kin, "down")
+	var match_db := _last_voice().volume_db
+	kin.free()
+	ok(home_db < match_db - 3.0, "boki life: softer at home (%.1f dB) than in a match (%.1f dB)" % [home_db, match_db])
+	var awake := _boki("nap_awake")
+	var asleep := _boki("nap_asleep")
+	asleep["nap_t"] = 20.0
+	var chimes := HomeChimes.new({"kins": [awake, asleep]})
+	var naps := int(BokiLifeSfx.heard.get("nap", 0))
+	chimes.tick(0.1)
+	awake["nap_t"] = 30.0
+	chimes.tick(0.1)
+	chimes.tick(0.1)
+	ok(int(BokiLifeSfx.heard.get("nap", 0)) == naps + 1,
+			"boki life: dozing off voices once (HomeChimes); not a Boki first seen asleep, nor one sleeping on")
+	_boki_life_wired()
+
+## One Boki voices one cue at a time; another Boki is not held up by it.
+func _boki_life_cap() -> void:
+	var a := _boki("cap_a")
+	var b := _boki("cap_b")
+	var was := _life_heard()
+	_life_cue(a, "eat")
+	BokiLifeSfx.at_home(a, "nap")
+	BokiLifeSfx.at_home(b, "nap")
+	var during := _life_heard() - was
+	var eat: Variant = Sfx.streams["boki_eat"]
+	OS.delay_msec(int(1000.0 * ((eat[0] if eat is Array else eat) as AudioStream).get_length()) + 50)
+	BokiLifeSfx.at_home(a, "nap")
+	ok(during == 2 and _life_heard() - was == 3, "boki life: a Boki's nap waits out its munch, another's does not, "
+			+ "and it voices again once its munch ends (%d, %d)" % [during, _life_heard() - was])
+
+## Each event's code plays its cue: the meals (a feeder, a snack, by hand), dozing off, a Fusion (yours and
+## another player's) and going down (yours, and another player's through the "down" event).
+func _boki_life_wired() -> void:
+	var sites := {"home/home_econ.gd": ["eat", 1], "home/base_feed.gd": ["eat", 1], "home/home.gd": ["eat", 1],
+			"home/home_chimes.gd": ["nap", 1], "match/merge_xform.gd": ["fuse", 2],
+			"match/kin_downed.gd": ["down", 1], "match/kin_net.gd": ["down", 1]}
+	var unwired := []
+	for f in sites:
+		var re := RegEx.create_from_string("BokiLifeSfx\\.(at_home|in_match)\\([^)]*\"%s\"\\)" % sites[f][0])
+		if re.search_all(FileAccess.get_file_as_string("res://scripts/" + f)).size() != int(sites[f][1]):
+			unwired.append(f)
+	ok(unwired.is_empty(), "boki life: every event plays its cue (unwired: %s)" % [unwired])
+
+## A Boki of the home (Home.kins) at the listener, with an even voice (pitch 1).
+func _boki(uid: String) -> Dictionary:
+	return {"rec": {"uid": uid, "dna": {"seed": 1, "voice": 1.0}}, "pos": Sfx.listener}
+
+## Plays `event` for a home entry or a match Boki once Sfx would not merge it into the last sound.
+func _life_cue(who: Variant, event: String) -> void:
+	OS.delay_msec(Sfx.STACK_MS + 10)
+	if who is Kin:
+		BokiLifeSfx.in_match(who as Kin, event)
+	else:
+		BokiLifeSfx.at_home(who as Dictionary, event)
+
+func _life_heard() -> int:
+	var n := 0
+	for event in BokiLifeSfx.heard:
+		n += int(BokiLifeSfx.heard[event])
+	return n
+
+## The pool voice Sfx started last (Sfx._voice leaves `next` one past it).
+func _last_voice() -> AudioStreamPlayer:
+	return Sfx.players[(Sfx.next + Sfx.POOL - 1) % Sfx.POOL]
 
 func _takes(sname: String) -> Array:
 	var out := []

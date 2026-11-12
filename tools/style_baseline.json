@@ -252,9 +252,9 @@
 },
 "scripts/home/home.gd": {
 "history_comment": 1,
-"long_line": 203,
+"long_line": 202,
 "nested_ternary": 27,
-"semicolon": 243,
+"semicolon": 242,
 "shadow": 3
 },
 "scripts/home/home_build.gd": {
@@ -264,9 +264,9 @@
 "shadow": 1
 },
 "scripts/home/home_econ.gd": {
-"long_line": 40,
+"long_line": 38,
 "nested_ternary": 5,
-"semicolon": 41,
+"semicolon": 38,
 "shadow": 1
 },
 "scripts/home/home_gather.gd": {
@@ -585,7 +585,6 @@
 },
 "scripts/match/kin_downed.gd": {
 "long_line": 7,
-"nested_ternary": 1,
 "semicolon": 1,
 "shadow": 1
 },
@@ -600,8 +599,7 @@
 "shadow": 1
 },
 "scripts/match/kin_net.gd": {
-"long_line": 12,
-"nested_ternary": 1
+"long_line": 11
 },
 "scripts/match/kin_path.gd": {
 "long_line": 2,
@@ -977,7 +975,7 @@
 "semicolon": 16
 },
 "tools/boki_system_check.gd": {
-"long_line": 33,
+"long_line": 32,
 "semicolon": 15,
 "shadow": 1
 },

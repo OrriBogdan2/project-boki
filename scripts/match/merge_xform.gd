@@ -24,6 +24,7 @@ static func begin(h: Hunter, form: Dictionary) -> void:
 	m.fx.ring(h.pos, 2.2, Color(col, 0.8), 0.45)
 	m.sfx("charge", h.pos, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), h.pos, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
+	BokiLifeSfx.in_match(h.kin as Kin, "fuse")
 	if h.is_local():
 		m.freeze_frame(HITSTOP)
 	var k := MergeKit.of(h)
@@ -167,6 +168,8 @@ static func on_event(m: Match, at: Vector3, form: Dictionary, h: Hunter) -> void
 	m.fx.ring(at, 2.2, Color(col, 0.8), 0.45)
 	m.sfx("charge", at, SOUND_RANGE_DB - 6.0, 0.8)
 	m.sfx(String(sn["xform"]), at, SOUND_RANGE_DB - 6.0, float(sn["pitch"]) * 0.8)
+	if h != null and h.kin is Kin and not form.get("surge", false):
+		BokiLifeSfx.in_match(h.kin as Kin, "fuse")
 
 ## The form appeared in a remote hunter's snapshot: the contact moment, here.
 static func on_remote_look(h: Hunter, form: Dictionary) -> void:

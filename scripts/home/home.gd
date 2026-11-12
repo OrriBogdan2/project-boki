@@ -4372,6 +4372,7 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 	GardenVisitor.fed(self, rec, res)
 	if res["ok"]:
 		GardenFirstDay.mark("feed", self)
+		BokiLifeSfx.at_home(k, "eat")
 		# taken out of the pantry now, so two quick feeds can't both use the last one
 		if Data.CROPS.has(f): Save.d["crops"][f] = int(Save.d["crops"][f]) - 1
 		else: Save.d["items"][f] = int(Save.d["items"][f]) - 1
@@ -4381,7 +4382,8 @@ func _care_feed(rec: Dictionary, f: String) -> void:
 		for i in 3:
 			tw.tween_property(body, "scale", Vector3(1.12, 0.86, 1.12), 0.14)
 			tw.tween_property(body, "scale", Vector3.ONE, 0.14)
-			tw.tween_callback(func(): fx.burst(fp, Care.food_col(f), 4, 1.2, 0.3); Sfx.play("pickup", fp, -16.0, 0.1, 1.4))
+			tw.tween_callback(fx.burst.bind(fp, Care.food_col(f), 4, 1.2, 0.3))
+			tw.tween_callback(Sfx.play.bind("pickup", fp, -16.0, 0.1, 1.4))
 		tw.tween_callback(func(): food.queue_free())
 	else:
 		# a sniff, then a firm no
