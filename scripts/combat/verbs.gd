@@ -364,7 +364,6 @@ func shot_check(s: Dictionary, p: Vector3) -> String:
 			var att = s["by"]
 			if float(mr["riposte"]) > 0.0 and is_instance_valid(att) and att is Ent:
 				(att as Ent).hurt(4.0, ent, {"stun": float(mr["riposte"]), "src": "abil", "ab": "parry", "kb": (att as Ent).dir_to(ent) * -5.0})
-				m.fx.word(att.pos + Vector3(0, 2.0, 0), "PARRIED", mr["col"], true)
 			m.fx.flash(p, mr["col"], 0.5, 0.08)
 			m.sfx("shield", p, 0.0, 1.8)
 			m.sfx("ab_parry", p, 0.0)
@@ -470,13 +469,11 @@ func tick(dt: float) -> void:
 			(t["kx_snap"] as Callable).call(a, b)
 			t["kx_end"] = null
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
-			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			_drop_tether(t)
 		elif d > float(t["max"]):
 			# stretched too far: it snaps, and the snap hurts
 			b.hurt(float(t["dmg"]), a, {"stun": float(t["stun"]), "src": "abil", "ab": "tether", "kb": b.dir_to(a) * 7.0, "lift": 2.0})
 			m.fx.bolt(a.pos + Vector3(0, 1.0, 0), b.pos + Vector3(0, 1.0, 0), t["col"])
-			m.fx.word(b.pos + Vector3(0, 2.0, 0), "SNAP", t["col"], true)
 			m.sfx("zap", b.pos, 0.0, 0.8)
 			m.sfx("ab_tether", b.pos, 0.0, 0.7)
 			m.fx.flash(b.pos + Vector3(0, 1.0, 0), Color(t["col"]).lerp(Color.WHITE, 0.4), 1.0, 0.14)
@@ -509,7 +506,6 @@ func tick(dt: float) -> void:
 				c3["target"] = f
 				if float(tr["reveal"]) > 0.0 and f is Hunter:
 					f.reveal_t = maxf(f.reveal_t, float(tr["reveal"]))
-				m.fx.word(at + Vector3(0, 1.6, 0), "TRAP", tr["col"], false)
 				m.sfx("click", at, 0.0, 1.7)       # the snap before it goes off
 				m.fx.flash(at + Vector3(0, 0.4, 0), Color(tr["col"]).lerp(Color.WHITE, 0.6), 0.8, 0.1)
 				if caster.dead:

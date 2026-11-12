@@ -328,7 +328,6 @@ static func land(hw, e: Dictionary, at: Vector3, who: String) -> void:
 	var up := is_upgrading(e)
 	var spent := settle(e)
 	if not spent.is_empty():
-		hw.h.fx.word(at + Vector3(0, 2.2, 0), "-" + cost_text(spent), Color("d8b07a"))
 		hw.h._refresh_top()
 	hw.h.fx.dust(at + Vector3(randf_range(-0.6, 0.6), 0.2, randf_range(-0.6, 0.6)), 6)
 	Sfx.play("build", at, -8.0, 0.15)

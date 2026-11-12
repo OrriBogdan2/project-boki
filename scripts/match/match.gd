@@ -2252,14 +2252,12 @@ func on_kin_up(k: Kin, rescued: bool) -> void:
 	KinNet.event(self, "scoop" if rescued else "round", k)
 
 # ------------------------------------------------------------------ kin combat events
-## A kin used an ability: its name pops up over it so you can read the fight.
-func on_kin_ability(k: Kin, def: AbilitySpec, auto: bool) -> void:
+## A kin used an ability: count it.
+func on_kin_ability(k: Kin, auto: bool) -> void:
 	kstat["kin_ab"] += 1
 	if auto: kstat["auto"] += 1
 	if k.owner_h == null or k.unseen:
 		return
-	if player and k.flat_dist(player) < 20.0:
-		fx.word(k.pos + Vector3(0, 1.3 + k.r, 0), def.display_name, KinText.color(def).lerp(Color.WHITE, 0.25), false)
 	if k.owner_h == player:
 		player.add_stat("kin_abilities")
 		if auto and hud and not train.has("_auto_told"):
@@ -2280,7 +2278,6 @@ func on_bond_ready(h: Hunter) -> void:
 	if h != player:
 		return
 	sfx("bond", null, -3.0)
-	fx.word(h.pos + Vector3(0, 2.3, 0), "BOND READY", Color("ffd23f"), true)
 	var ud := KinMerge.def_for(h.kin) if h.kin else null
 	if hud and ud:
 		hud.toast("Bond full!  %s: %s" % [Settings.key_cap("ultimate"), ud.display_name], Color("ffd23f"))
@@ -2303,7 +2300,6 @@ func on_merge_end(h: Hunter, why: String) -> void:
 func on_combo(target: Ent, own: Node, c: Dictionary) -> void:
 	kstat["combo"] += 1
 	var col := Color(String(c.get("color", "#ffd23f")))
-	fx.word(target.pos + Vector3(0, 1.9, 0), String(c.get("label", "COMBO")), col, true)
 	fx.ring(target.pos, 1.3, col, 0.3)
 	sfx("combo", target.pos, -2.0)
 	if own == player:

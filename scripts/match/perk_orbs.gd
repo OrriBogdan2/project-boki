@@ -257,7 +257,6 @@ static func grant(h, perk: String) -> bool:
 		m.fx.ring(h.pos, 1.6, pd["col"], 0.35)
 		m.fx.burst(h.pos + Vector3(0, 1.0, 0), pd["col"], 16, 3.2, 0.5, -2.0)
 		if h == m.player:
-			m.fx.word(h.pos + Vector3(0, 2.4, 0), String(pd["name"]).to_upper(), pd["col"], true)
 			if m.hud:
 				m.hud.toast("%s  ·  %s" % [pd["name"], pd["desc"]], pd["col"])
 	return true

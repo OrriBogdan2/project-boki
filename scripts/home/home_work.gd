@@ -882,11 +882,8 @@ func _out(at: Vector3, m: String, n: int, who: String, el: String) -> void:
 	produced(at, "+%d %s · %s" % [n, m, who], el, m)
 
 # ------------------------------------------------------------------ telling you
-## A station made something: a word floating up from it and a line in the work feed.
+## A station made something: the pickup sound and a line in the work feed.
 func produced(at: Vector3, text: String, el: String, _what: String) -> void:
-	if h.fx:
-		var w := text.split(" · ")[0]
-		h.fx.word(at + Vector3(0, 1.3, 0), w, Work.col_of(el).lightened(0.25))
 	Sfx.play("pickup", at, -14.0, 0.1, 1.3)
 	feed(text, Work.col_of(el), el)
 

@@ -112,7 +112,6 @@ static func _addon(h: Hunter, key: String) -> void:
 		elif h.runner != null and h.runner.slots.has("utility") and key == "rmb":
 			h.runner.slots["utility"]["cd"] = float(h.runner.slots["utility"]["cd"]) * k
 	var col: Color = form["glow"]
-	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(a.get("name", "")).to_upper(), col)
 	h.m.fx.ring(h.pos, 1.4, Color(col, 0.8), 0.3)
 	_announce(h, key, 1.4)
 
@@ -133,7 +132,6 @@ static func _dash(h: Hunter) -> void:
 		h.haste_t = maxf(h.haste_t, float(d["haste_s"]))
 		h.m.sfx("whoosh", h.pos, -4.0, 1.3)
 		return
-	h.m.fx.word(h.pos + Vector3(0, 2.6, 0), String(d.get("name", "")).to_upper(), col)
 	match kind:
 		"sweep":
 			h.m.sfx("zap", h.pos, -3.0, 1.5)

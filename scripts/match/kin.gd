@@ -428,7 +428,7 @@ func _cast(slot: String, p: Vector3, auto: bool, caster: Ent, pw: float, chain: 
 	# a glassy chime (prism), a swirl of wind (lunar), a low crackle of storm (echo)
 	var cue := "k_%s" % String(sp.get("type", ""))
 	m.sfx(cue if Sfx.has(cue) else "skill", pos, -2.0 if not auto else -7.0)
-	m.on_kin_ability(self, def, auto)
+	m.on_kin_ability(self, auto)
 
 ## An event trigger (KinParts.TRIGGERS): on_throw, on_hit, on_recall, on_bond_full, on_low_hp.
 ## Fires the kin's matching ability if it's unlocked and ready. An ability is never set off by its
