@@ -1,5 +1,5 @@
 {
-	"doc": "Albert's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd).",
+	"doc": "Albert's hand-keyed clips (art/wardens/breaker/breaker.glb) and which game state plays which (scripts/heroes/warden_clips.gd). walk_f and run_f are generated (tools/art1/breaker_gait.py): a long slow stride, planted soles match 2.0 and 4.8 m/s.",
 	"skinned_weapon": true,
 	"extra_bones": {
 		"x_weapon": "hand.R",
@@ -38,16 +38,25 @@
 			"f": "walk_f",
 			"b": "walk_b",
 			"l": "walk_l",
-			"r": "walk_r"
+			"r": "walk_r",
+			"fl": "walk_fl",
+			"fr": "walk_fr",
+			"bl": "walk_bl",
+			"br": "walk_br"
 		},
 		"run": {
 			"f": "run_f",
 			"b": "run_b",
 			"l": "run_l",
-			"r": "run_r"
+			"r": "run_r",
+			"fl": "run_fl",
+			"fr": "run_fr",
+			"bl": "run_bl",
+			"br": "run_br"
 		},
 		"walk_speed": 2.0,
-		"run_speed": 4.8, "stride": [1.35, 1.55], "foot_mps": [3.1, 7.4], "arm_swing": {"L": 0.5}
+		"run_speed": 4.8,
+		"foot_mps": [1.27, 4.50], "in_step": true, "arm_swing": {"L": 0.5}
 	},
 	"air": {
 		"rise": "jump",
@@ -203,10 +212,12 @@
 			"f": "crouch_f",
 			"b": "crouch_b",
 			"l": "crouch_l",
-			"r": "crouch_r"
+			"r": "crouch_r",
+			"bl": "crouch_bl",
+			"br": "crouch_br"
 		},
 		"in": "crouch_in",
 		"out": "crouch_out",
-		"speed": 2.42
+		"speed": 1.65
 	}
 }
