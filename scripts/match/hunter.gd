@@ -2706,9 +2706,7 @@ func _ledge_fling() -> void:
 	var hv := Vector2(vel.x, vel.z)
 	var timed: bool = lf.get("win", false)
 	var spd := FLING_SPEED if timed else base_speed
-	var along := hv.dot(d)
-	if along < spd:
-		hv += d * (spd - along)
+	hv = MantleCarry.fling(self, hv, d, spd)
 	vel.x = hv.x; vel.z = hv.y
 	# up speed to peak FLING_HEIGHT (or FLING_EARLY_HEIGHT) over the top from wherever you are on the face
 	var left := maxf(0.0, float(lf["lip"]) + 0.12 - pos.y)
