@@ -16,7 +16,7 @@ The rest (MORE_CUES) get a quiet loop while their use lasts and an end when it g
   jump_pad springy hum / sag    scanner sonar blips / falling blip   hawk_whistle wingbeats / a returning cry
   shield_cell shimmer / power-down   smoke hiss / thinning puff     stim heartbeat / a breath out
   medkit, pilfer_pouch (raccoon chitter), hearth_lamp, revive_ember, shatter_charge (glass burst): an end
-  rift_key, chest_key: a key turning (start) and a chime as it is spent (end); toss_satchel a warm hum
+  chest_key: a key turning (start) and a chime as it is spent (end); toss_satchel a warm hum
 """
 import numpy as np
 import sfx_lib as S
@@ -501,7 +501,6 @@ MORE_CUES = {
     'shield_cell': {'loop': shield_loop, 'end': shield_end}, 'smoke': {'loop': smoke_loop, 'end': smoke_end},
     'stim': {'loop': stim_loop, 'end': stim_end}, 'pilfer_pouch': {'end': pilfer_end},
     'hearth_lamp': {'end': lamp_end}, 'revive_ember': {'end': ember_end}, 'shatter_charge': {'end': shatter_end},
-    'rift_key': {'start': lambda i: key_start(1450), 'end': lambda i: key_end(1175)},
     'chest_key': {'start': lambda i: key_start(1900), 'end': lambda i: key_end(1568)},
     'toss_satchel': {'loop': satchel_loop},
 }

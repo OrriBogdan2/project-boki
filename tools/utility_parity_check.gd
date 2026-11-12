@@ -69,6 +69,7 @@ func _skyfall(m: Match, P: Hunter, foe: Hunter) -> void:
 	foe.inv_t = 0.0
 	P.belt = UtilityBelt.empty()
 	UtilityBelt.grant(P, "skyfall_charge", 1)
+	foe.ctrl = "idle"       # a bot would walk out of the aimed spot during the 5 s fuse
 	foe.teleport(P.pos + Vector3(6.0, 0, 0))
 	P.inp["aim"] = foe.pos
 	ok(UtilityBelt.use_id(P, "skyfall_charge"), "a Skyfall Charge is called")

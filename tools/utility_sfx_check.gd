@@ -107,7 +107,7 @@ func _drink(m: Match, P: Hunter, id: String) -> void:
 	UtilityBelt.set_slot(P, 0, id, 3, 0)
 	UtilityUse.start(P, 0, id)
 	Sfx.last_played.erase(BeltSfx.cue(id, "end"))
-	_step(m, float(UtilityBelt.def(id).get("time", 1.0)) + 0.3)
+	_step(m, UtilityUse.channel(id, "time") + 0.3)
 	ok(not Sfx.loop_on(key) and Sfx.last_played.has(BeltSfx.cue(id, "end")), "%s: finishing plays its end cue" % id)
 
 ## 3. The bed started by the use above is held, then ended by running its clock out.
