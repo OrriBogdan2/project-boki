@@ -6,6 +6,8 @@
   stomp_crush   the finish on the last slam: a deep crushing slam, a crunch and the wisp's light
                 squeezed out under the foot (a falling tone choked off)
   stomp_crack   CC breaks the stomp: a bright crack and a short rising ring as the wisp is let go
+  stomp_relief  the same break for the saved wisp's owner and squad: a soft rising two-note chime and an
+                exhale of air under it, "you're free" (plays with the crack, no position)
 The wisp's strain while pinned is its own hum (wisp_hum), bent by StompSfx.strain, not a file here.
 """
 import numpy as np
@@ -44,8 +46,16 @@ def crack_free():
     return hpf(mix(snap, glass, lift), 200)
 
 
+def relief():
+    lo = S.chime(523, 0.55, 0.22, partials=((1.0, 1.0), (2.0, 0.25)))
+    hi = at(S.chime(784, 0.6, 0.28, partials=((1.0, 1.0), (2.0, 0.25))), 0.11)
+    breath = at(lpf(noise(0.4), 1800) * env(N(0.4), 0.06, 0.2), 0.02) * 0.3
+    return mix(lo * 0.7, hi * 0.8, breath)
+
+
 S.save_cat('stomp_commit', commit(), 'cast')
 S.takes_cat('stomp_strike', strike, 3, 'heavy_impact')
 S.save_cat('stomp_crush', crush(), 'heavy_impact')
 S.save_cat('stomp_crack', crack_free(), 'impact')
+S.save_cat('stomp_relief', relief(), 'cast')
 print('stomp sounds written')

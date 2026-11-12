@@ -1,6 +1,6 @@
 {
 	"_doc": "Stomp styles (docs/decisions/0061-stomp-lock.md): how a Hunter's stomp on an enemy wisp looks. Every style keeps the same timing (Stomp.TIME, Stomp.BEATS); only the body changes. A style lists what it changes from 'base'. 'hunter' marks a Hunter's own default (always owned); a style with 'cost' is a cosmetic you buy with gems and wear in the 'stomp' slot (Save.d.look.stomp). foot: r | l | both (a two-footed jump) | alt (right, then left). lift and knee: hip and knee angles in radians at the top of the lift. hop: metres the body rises before the slam. lean: forward tilt in radians. twist: shoulder turn in radians at the top. crouch: 0..1 how low the standing leg sits. arms: out (left arm out for balance) | wide (both out) | up (both fists overhead, down with the slam) | fists (both fists hammer the ground) | hips (hands on hips) | weapon (the weapon stays aimed down).",
-	"sound": {"_doc": "What the stomp sounds like (StompSfx, set content/sfx/stomp.json): db is added to the sound's own level; pitch scales it. strike: one slam per beat, pitched and weighted by the stomper's weight class (content/archetypes weight), body the shared low sound layered under it (none for light); ramp_db the extra dB of the 1st, 2nd and 3rd slam, so each lands louder than the last. strain: the pinned wisp's own hum bends from pitch[0] to pitch[1] over the stomp, wobbling by wobble at wobble_hz, db louder. crush: the wisp dying under the last slam. crack: crowd control broke it; the saved wisp and its squad hear it wherever they are (no position), everyone else at the spot.",
+	"sound": {"_doc": "What the stomp sounds like (StompSfx, set content/sfx/stomp.json): db is added to the sound's own level; pitch scales it. strike: one slam per beat, pitched and weighted by the stomper's weight class (content/archetypes weight), body the shared low sound layered under it (none for light); ramp_db the extra dB of the 1st, 2nd and 3rd slam, so each lands louder than the last. strain: the pinned wisp's own hum bends from pitch[0] to pitch[1] over the stomp, wobbling by wobble at wobble_hz, db louder. crush: the wisp dying under the last slam. crack: crowd control broke it, heard at the stomper by everyone in reach (team-neutral). relief: the same break for the saved wisp's owner and squad, a chime with no position (they hear it wherever they are).",
 		"commit": {"sfx": "stomp_commit", "db": -3.0},
 		"strike": {"sfx": "stomp_strike", "body": "thump", "ramp_db": [-5.0, -2.5, 0.0],
 			"light": {"pitch": 1.3, "db": -6.0},
@@ -8,7 +8,8 @@
 			"heavy": {"pitch": 0.8, "db": -1.0, "body_db": -3.0}},
 		"strain": {"pitch": [1.1, 1.45], "wobble": 0.05, "wobble_hz": 7.0, "db": 5.0},
 		"crush": {"sfx": "stomp_crush", "db": 0.0},
-		"crack": {"sfx": "stomp_crack", "db": 0.0}},
+		"crack": {"sfx": "stomp_crack", "db": 0.0},
+		"relief": {"sfx": "stomp_relief", "db": 0.0}},
 	"base": {"foot": "r", "lift": 1.35, "knee": -1.6, "hop": 0.0, "lean": 0.12, "twist": 0.0, "crouch": 0.0, "arms": "out"},
 	"styles": {
 		"needle_heel": {"name": "Needle Heel", "hunter": "archer", "lift": 1.0, "knee": -1.2, "lean": 0.05, "arms": "hips"},

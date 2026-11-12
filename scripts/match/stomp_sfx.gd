@@ -2,7 +2,8 @@ class_name StompSfx
 extends RefCounted
 ## What a stomp sounds like (docs/AUDIO.md "Stomp sounds"): a commit at the hold, a strike per beat
 ## weighted by the stomper's weight class and louder each beat, the pinned wisp's own hum straining, a
-## crush when the last slam kills it and a bright crack when crowd control breaks it. Numbers in
+## crush when the last slam kills it, and when crowd control breaks it a bright crack at the stomper
+## (everyone in reach, whatever team) plus a relief chime for the saved wisp's owner and squad. Numbers in
 ## content/rules/stomps.json "sound". Stomp calls these from start, the beats and end, which run in
 ## every game (the stomper's own, the others through the "stomp" event), so everyone in range hears
 ## them at the spot, the wisp included.
@@ -10,7 +11,7 @@ extends RefCounted
 static func _spec(key: String) -> Dictionary:
 	return (StompLook.rules()["sound"] as Dictionary)[key]
 
-static func _cue(m: Match, key: String, at: Vector3) -> void:
+static func _cue(m: Match, key: String, at = null) -> void:
 	var s := _spec(key)
 	m.sfx(String(s["sfx"]), at, float(s["db"]))
 
@@ -32,12 +33,12 @@ static func strike(m: Match, h: Hunter, i: int) -> void:
 static func crush(m: Match, o: Hunter) -> void:
 	_cue(m, "crush", o.pos)
 
-## The stomp on o broke: the saved wisp and its squad hear it as their own cue wherever they are, the
-## rest at the stomper's spot.
+## The stomp on o broke: the crack sounds at the stomper's spot for everyone in reach, whatever team; the
+## saved wisp's owner and squad also get the relief chime wherever they are. At most two voices, once.
 static func crack(m: Match, h: Hunter, o: Hunter) -> void:
-	var saved := is_instance_valid(o) and m.player != null and o.team == m.player.team
-	var s := _spec("crack")
-	m.sfx(String(s["sfx"]), null if saved else h.pos, float(s["db"]))
+	_cue(m, "crack", h.pos)
+	if is_instance_valid(o) and m.player != null and o.team == m.player.team:
+		_cue(m, "relief")
 
 ## The pinned wisp's hum: Vector2(extra dB, pitch), rising and trembling over the stomp; (0, 1) when
 ## nobody is stomping it. HunterWisp holds the hum with it.
