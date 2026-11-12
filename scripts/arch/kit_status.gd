@@ -84,17 +84,12 @@ static func _show(e: Ent, kind: String, secs: float, toast := "") -> void:
 	match kind:
 		"gnd":
 			_look(e, "gnd", secs)
-			if toast == "":
-				m.fx.word(e.pos + Vector3(0, 2.0, 0), "GROUNDED", GROUND_COL, false)
 			if e == m.get("player") and m.hud and toast != "": m.hud.toast_small("GROUNDED  ·  " + toast, GROUND_COL)
 		"rat":
 			_look(e, "daze", secs)
-			m.fx.word(e.pos + Vector3(0, 3.3, 0), "DAZED", RATTLE_COL, false)     # clear above a STUNNED (2.2)
 		"dsr":
 			_look(e, "slow", secs)
-			m.fx.word(e.pos + Vector3(0, 2.1, 0), "SLOWED", Color("b8a8ff"), false)
 		"vul":
-			m.fx.word(e.pos + Vector3(0, 2.0, 0), "SHRED", Color("ff7a5a"), false)
 			m.fx.ring(e.pos, 0.9, Color("ff7a5a"), 0.25)
 
 ## The body look for what this game can't read off the body's own timers: a body another game owns, or one
