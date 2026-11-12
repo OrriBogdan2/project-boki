@@ -179,6 +179,8 @@ Base life (GARDEN.md section 4, scripts/home/base_life.gd): with farm_build.json
 | clash | 0.55 |
 | clash_doc | the summed temper above 1.0 at which two Boki that meet may squabble; higher tempers squabble more. |
 | whistle | {"hold_s": 0.5, "sulky_joy": 25.0, "shy_trust": 22.0, "look_s": 2.5, "slot_m": 1.5, "pace": [0.7, 1.3], "give_up_s": 9.0} |
+| hand | {"slot_m": 0.9, "arrive_m": 0.4, "shy_stop_m": 3.0, "shy_window_s": 60.0, "give_up_s": 6.0, "eat_s": 1.0, "done_s": 0.8, "trust": 2.0} |
+| hand_doc | feeding from your hand (scripts/home/base_hand_feed.gd): slot_m m from you where a Boki stops to eat, arrive_m m of slack on it; a shy Boki (trust under whistle.shy_trust) stops shy_stop_m m away the first time and comes the whole way when asked again within shy_window_s s; give_up_s s of walking before it drops the offer; eat_s s of eating at your hand, done_s s to enjoy it; trust points a hand-fed Boki gains. |
 | whistle_doc | the whistle (scripts/home/base_whistle.gd): hold_s s the key is held before the nearest other Boki is called as well as your partner; a Boki with joy need under sulky_joy or trust under shy_trust only looks over (look_s s) and stays; slot_m m from you where an answering Boki stops; pace is the run speed scale at no eagerness and at full eagerness (trust 60%, condition 40%), on the farm's 4.4 m/s call run; give_up_s s before an answer that has not arrived is dropped. |
 
 ## base_race (`content/rules/base_race.json`)
