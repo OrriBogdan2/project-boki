@@ -20,6 +20,11 @@ source. Order of trust: owner notes (briefs/DECISIONS.md) over the source game d
 | 0:32.0 | jump and hold Space: the glide, steering round | Space, WASD |
 | 0:37.1 | mantle | none (the catch is automatic) |
 
+- Kael's and Meeko's R parts set up their ultimate (`ext/parity-reel-dummies`): Kael starts at 60% hp and the dummy
+  stands 3 m off, inside the cleave's strip, and fires its own rifle at him once 0.4 s in (in the guard); Meeko's
+  part puts a downed ally dummy (a Training Grounds dummy on her team) 5 m off and aims R at it.
+  `juggernaut.mp4` and `tender.mp4` are re-rendered with it (xvfb opengl3 on rpc3, same tool and timeline: R still
+  at 0:17.5; GPU jobs 20261112-014915-17204 / -014932-30197 queued at the time).
 - The second press is the same for every Hunter. It does something only where the kit has a recast (Neve E and R,
   Motley E, Sable E, Sparkle R); elsewhere it just shows the next cast or nothing.
 - The Training Grounds has no terrace to run into, so the mantle part drops the Hunter just under an island rim,
@@ -211,8 +216,11 @@ Still differs:
 Seen in the reel: the LMB hold lays a long gold lane to the dummy (the source shows a white arc round him [F
 0087]); the tap slam is an orange ring; the chain is a thin dotted line and the dummy reads CHAINED, where the
 footage's is a thick wavy orange chain [F 0304]; Riposte's guard shows a gold strike rectangle like the footage's
-[F 0435], but with no attacker the reel never shows the cleave or the green heal; the air dash puts a wide grey disc
-round him.
+[F 0435]; the dummy's rifle shot lands in the guard and reads BLOCKED in gold (0:18.7, no damage); the cleave is an
+orange-gold arc up the strip into a gold impact cloud (0:19.1), where the footage's is a huge red vertical crescent
+and a white cloud [F 0430-0431, 0438-0439]; it hits the dummy for 52 and SLOWS it, and the heal shows as a green
++41 over him (116 to 158 hp, 0:19.2), with no green light-rain column (the footage's heal column is the knock heal
+[F 0455-0458], not the Retaliation's); the air dash puts a wide grey disc round him.
 
 ## Lace the Red Stitch (`archer`, source Myth)
 [archer.mp4](archer.mp4)
@@ -260,7 +268,7 @@ Still differs:
 - Hearthlight: cooldown 11 s vs 12 [D]; heals her at a third (ours); the throw latches onto the first teammate it
   passes (owner call), where the source's lands on the cursor and no latch was seen [F].
 - Hearth Call: cooldown 46 s vs 60 [D] (0.77x; the card reads 41.6); with no teammate in the match it lights on her
-  (ours), so the Training Grounds reel cannot show the tether or the pull.
+  (ours). The channel is 5 s where the footage's tether runs about 2.4 s [F 0249-0271].
 - Lantern Crook: Empowered shots reach 40% further (ours); the ramp per hit matches.
 - Relay Step: Elluna's numbers (3.6 m in 0.2 s, the air glide 13.3 m in 0.95 s, 7 s and 14 s): match; the glide's
   steering is the owner's. No refund for passing through a teammate (the footage card's Super dash has one).
@@ -272,7 +280,11 @@ Seen in the reel: the Crook's shots are small gold sparks with a Kindle glow, wh
 flying on past the cursor [F]; the Burrseed disc is violet like the footage's but wider for her size and ringed
 with thorns, and the root shows as a white swirl where the footage has a smaller disc and a purple beam [F]; the
 thrown Hearthlight is a pale disc with a teal rim, close to the footage's cyan disc, but the ring on her before the
-throw barely shows and there is no green plus on the summon [F]; Hearth Call shows only a faint ring on her.
+throw barely shows and there is no green plus on the summon [F]; Hearth Call on the downed ally: HEARTH CALL in
+green over her and a pale gold-white beam from her hand to the ally (0:18.3), which lies as a pale orb inside its
+cyan "Revive" ring, held for 5 s; the footage's beam is pink-gold with green plus sparkles on the ally [F 0249-0271],
+ours shows no plus sparkles there; at the end (0:23.3) a white burst plays where the ally lay and it stands up at her
+side in a gold ring, like the footage's ally appearing next to the hunter [F 0279].
 
 ## Tenzo the Stone Seer (`dolm`, source Tetra)
 [dolm.mp4](dolm.mp4)
