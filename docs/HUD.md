@@ -87,6 +87,12 @@ fight" is the player hit in the last `Hud.MSG_FIGHT_S` (4 s). Tutorial hints are
 - Chests drop their loot on the ground, so chest and ground items use the older swap window (`Hud.open_swap`), now with the same red outline and rattle. Box looting is local, so there is no Net change.
 - Checks: `--loot-full-check`; screenshots: `--loot-full-shots`.
 
+## Tab board (`scripts/ui/squad_board.gd`, `--scoreboard-check`)
+Holding Tab shows the squads-left count and YOUR squad only. Each hunter gets one strip, yours first with a teal outline and a gold name:
+portrait, name, alive / downed / out, kills / deaths / assists, damage, the four gear slots (`GearPanel.cell`) and the Boki (name, level
+and form, what it is doing). Rival squads show nothing but the count: no names, stats or alive state (owner 11-11; the source research
+is in docs/TAB_BOARD_PARITY.md). Assists are counted by `DashReset.takedown`. Void & Masks look (black-violet panel, teal edge, magenta count).
+
 ## Two-step abilities (RecastCue)
 
 DECISIONS 2026-11-08 "two-step abilities must be obvious and in your face". Kits report and `RecastCue` draws;

@@ -43,6 +43,7 @@ var squash := 0.0           # landing / hit squash for the model
 var remote := false         # driven by another player's game
 var last_hit_by: Ent = null
 var hit_by := {}            # enemy hunter instance id -> m.time of their last landed hit or CC here (DashReset assists)
+var assist_t := -1.0        # m.time of the last takedown here that counted assists: older hits don't count again
 var net_pos := Vector3.ZERO
 var net_vel := Vector3.ZERO
 var net_t := -1.0

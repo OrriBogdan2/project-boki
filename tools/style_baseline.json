@@ -822,9 +822,9 @@
 },
 "scripts/ui/hud.gd": {
 "history_comment": 2,
-"long_line": 174,
-"nested_ternary": 33,
-"semicolon": 43,
+"long_line": 172,
+"nested_ternary": 31,
+"semicolon": 41,
 "shadow": 2
 },
 "scripts/ui/hud_tip.gd": {

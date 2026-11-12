@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## In-match interface, drawn every frame: health, ability bar, kin card, timer, minimap, kill feed,
-## kin speech bubbles, callout pings, interaction prompts, crosshair and the scoreboard.
+## kin speech bubbles, callout pings, interaction prompts, crosshair and the Tab squad board (SquadBoard).
 
 var m: Match
 var c: Control
@@ -317,14 +317,14 @@ func _draw_all() -> void:
 			_draw_downed(sz, p)
 		elif p.out and not p.gone and not m.result.get("ending", false):
 			_draw_dead(sz, p)
-	if Input.is_action_pressed("scores"):
-		_draw_scores(sz)
 	if wheel_open:
 		_draw_wheel()
 	if p and not p.out and not p.extracted and not map_open():
 		_draw_hover_tip(sz, p)
 		if hover_id == "":
 			_draw_world_hover(sz, p)
+	if Input.is_action_pressed("scores"):
+		SquadBoard.draw(self, sz)
 	if map_open():
 		full_map.draw(sz)
 	elif m.skydrop and m.skydrop.planning and p:
@@ -1844,25 +1844,6 @@ func _draw_dead(sz: Vector2, p: Hunter) -> void:
 	_ctext(Vector2(sz.x * 0.5, y0), "You're dead", 30, BAD, big)
 	for i in lines.size():
 		_ctext(Vector2(sz.x * 0.5, y0 + 28 + i * 22), lines[i], 16, INK if i < 2 else MUTED)
-
-func _draw_scores(sz: Vector2) -> void:
-	var r := Rect2(Vector2(sz.x * 0.5 - 300, sz.y * 0.18), Vector2(600, 40 + m.hunters.size() * 28))
-	_panel(r, Color(0.05, 0.06, 0.09, 0.9), 14)
-	_text(r.position + Vector2(20, 30), "Hunter", 14, MUTED); _text(r.position + Vector2(260, 30), "Boki", 14, MUTED)
-	_text(r.position + Vector2(380, 30), "Knocks", 14, MUTED); _text(r.position + Vector2(450, 30), "Damage", 14, MUTED); _text(r.position + Vector2(530, 30), "State", 14, MUTED)
-	var hs := m.hunters.duplicate()
-	hs.sort_custom(func(a, b): return a.team < b.team)
-	var y := r.position.y + 58
-	for h in hs:
-		var tc: Color = Data.TEAM_COLORS[h.team % Data.TEAM_COLORS.size()]
-		c.draw_rect(Rect2(Vector2(r.position.x + 12, y - 14), Vector2(4, 18)), tc)
-		_text(Vector2(r.position.x + 22, y), h.pname, 15, INK if h != m.player else GOLD)
-		if h.kin: _text(Vector2(r.position.x + 260, y), Data.KIN[h.kin.species]["name"], 14, Data.KIN[h.kin.species]["color"])
-		_text(Vector2(r.position.x + 392, y), str(h.knocks), 15)
-		_text(Vector2(r.position.x + 456, y), str(int(h.dmg_done)), 15)
-		var st := "Out" if h.out else ("Extracted" if h.extracted else ("Down" if h.downed else "Alive"))
-		_text(Vector2(r.position.x + 530, y), st, 14, BAD if h.out else (Color("8fe3c8") if h.extracted else INK))
-		y += 28
 
 var abyss_cued := false
 var abyss_warned := false

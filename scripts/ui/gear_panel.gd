@@ -22,14 +22,8 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 		var r := cell_rect(sz, i)
 		var g: Dictionary = p.gear[i]
 		hud.hover_spots.append([r, "gslot:%d" % i])
-		if g.is_empty() or not Gear.ALL.has(String(g["id"])):
-			hud._rounded(r, Color(0.04, 0.05, 0.08, 0.62), 9, Color(1, 1, 1, 0.12), 1)
-			Icons.draw(hud.c, _empty_icon(i), r.get_center(), CELL * 0.26, Color(hud.MUTED, 0.45))
+		if not cell(hud, r, g, i):
 			continue
-		var rar := clampi(int(g["rar"]), 0, Data.RARITY.size() - 1)
-		var rc: Color = Data.RARITY[rar]["color"]
-		hud._rounded(r, Color(0.04, 0.05, 0.08, 0.9), 9, Color(rc, 0.85), 2)
-		Icons.draw(hud.c, Gear.icon_of(String(g["id"])), r.get_center(), CELL * 0.28, Gear.ALL[String(g["id"])]["col"])
 		if i < 2 and float(p.gear_cd[i]) > 0.0:
 			var f := Gloves.cd_frac(p, i)
 			hud.c.draw_rect(Rect2(r.position + Vector2(0, CELL * (1.0 - f)), Vector2(CELL, CELL * f)), Color(0, 0, 0, 0.5))
@@ -44,6 +38,19 @@ static func draw(hud, sz: Vector2, p: Hunter) -> void:
 		var r0 := cell_rect(sz, 0)
 		var right := cell_rect(sz, Gear.SLOTS.size() - 1).end.x
 		hud._text(Vector2(right - _ups_w, r0.position.y - 6.0), _ups_txt, 11, Color(hud.GOOD, 0.9), hud.body)
+
+## One gear slot `i` in rect `r`: the piece's icon in its rarity's edge, or the empty slot's faint icon.
+## False when the slot is empty. The Tab board (SquadBoard) draws your squad's gear with it too.
+static func cell(hud, r: Rect2, g: Dictionary, i: int) -> bool:
+	if g.is_empty() or not Gear.ALL.has(String(g["id"])):
+		hud._rounded(r, Color(0.04, 0.05, 0.08, 0.62), 9, Color(1, 1, 1, 0.12), 1)
+		Icons.draw(hud.c, _empty_icon(i), r.get_center(), r.size.x * 0.26, Color(hud.MUTED, 0.45))
+		return false
+	var rar := clampi(int(g["rar"]), 0, Data.RARITY.size() - 1)
+	var rc: Color = Data.RARITY[rar]["color"]
+	hud._rounded(r, Color(0.04, 0.05, 0.08, 0.9), 9, Color(rc, 0.85), 2)
+	Icons.draw(hud.c, Gear.icon_of(String(g["id"])), r.get_center(), r.size.x * 0.28, Gear.ALL[String(g["id"])]["col"])
+	return true
 
 static func _empty_icon(i: int) -> String:
 	return ["glove", "glove", "fortify", "dash"][i]
